@@ -1,0 +1,3 @@
+drivable
+alternative
+unknown

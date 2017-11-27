@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Labeling tool</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+<!-- Page Content -->
+<div class="container">
+
+    <!-- Heading -->
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Labeling tool
+                <small>version 1.0</small>
+            </h1>
+        </div>
+    </div>
+    <!-- /.row -->
+
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <form id="entry-form" action=/post>
+                <div class="form-group">
+                    <label for="project_name">Project Name:</label>
+                    <input type="text" class="form-control" style="width:300px" id="project_name" name="project_name">
+                </div>
+                <div class="form-group">
+                    <label for="image_list">Image List:</label>
+                    <input type="file" class="form-control" style="width:300px" id="image_list" name="image_list">
+                </div>
+                <div class="form-group">
+                    <label for="task_size">Task Size:</label>
+                    <input type="text" class="form-control" style="width:300px;" id="task_size" name="task_size">
+                </div>
+                <div class="form-group">
+                    <label for="label">Label:</label>
+                    <input type="file" class="form-control" style="width:300px;" id="label" name="label">
+                </div>
+                <div class="form-group">
+                    <label for="label_type">Label Type:</label>
+                    <input type="text" class="form-control" style="width:300px;" id="label_type" name="label_type">
+                </div>
+                <div class="form-group">
+                    <label for="vendor_id">Vendor ID:</label>
+                    <input type="text" class="form-control" style="width:300px;"
+                           id="vendor_id" name="vendor_id">
+                </div>
+                <button type="submit" id="enter_btn" class="btn btn-primary btn-md">Enter</button>
+                <a type="submit" id="go_to_dashboard" class="btn btn-default btn-md" target="_blank" href="">Go to
+                    Dashboard</a>
+            </form>
+        </div>
+    </div>
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <!--<div class="row">
+            <div class="col-lg-12">
+                <p>Copyright &copy; Your Website 2014</p>
+            </div>
+        </div>-->
+        <!-- /.row -->
+    </footer>
+
+</div>
+<!-- /.container -->
+
+<!-- Google Analytics -->
+<script src="../js/thirdparty/analytics.js"></script>
+
+<!-- jQuery -->
+<script src="../js/thirdparty/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../js/thirdparty/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var dashboard = $('#go_to_dashboard');
+        dashboard.hide();
+        $('#entry-form').submit(function (e) {
+            e.preventDefault();
+            var x = new XMLHttpRequest();
+            x.onreadystatechange = function () {
+                if (x.readyState === 4) {
+                    var num_assignments = x.response;
+                    var project_url = "/dashboard?project_name=" +
+                        $('#project_name').val() +
+                        "&num_assignments=" + num_assignments;
+                    dashboard.attr('href', project_url);
+                    dashboard.show();
+                }
+            };
+            x.open("POST", "/postAssignment");
+            x.send(new FormData(this))
+        })
+
+    });
+
+
+</script>
+
+</body>
+
+</html>
