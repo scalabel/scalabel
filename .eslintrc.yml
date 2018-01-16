@@ -1,0 +1,12 @@
+env:
+  browser: true
+  es6: true
+  jquery: true
+extends: ['eslint:recommended', 'google']
+rules:
+  linebreak-style:
+    - error
+    - unix
+  semi:
+    - error
+    - always

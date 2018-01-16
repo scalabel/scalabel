@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.5"
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y npm
+  - npm install -g eslint eslint-config-google
+install:
+  - pip install pycodestyle
+script:
+  - pycodestyle --show-source .
+  - eslint .
