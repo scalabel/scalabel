@@ -1,68 +1,65 @@
-(function () {
+(function() {
     // Global variables
-    var imageCanvas = '#image_canvas';
-    var ctx = $(imageCanvas)[0].getContext('2d');
+    let imageCanvas = '#image_canvas';
+    let ctx = $(imageCanvas)[0].getContext('2d');
 
 
-    var imageCanvasWidth = $(imageCanvas).css('width');
-    var imageCanvasHeight = $(imageCanvas).css('height');
+    let imageCanvasWidth = $(imageCanvas).css('width');
+    let imageCanvasHeight = $(imageCanvas).css('height');
 
-    var tag;
+    let tag;
 
     // BBoxLabeling Class
-    this.BBoxLabeling = (function () {
-
+    this.BBoxLabeling = (function() {
         function BBoxLabeling(options) {
-
             this.options = options;
             // Initialize main canvas
             this.image_canvas = $('#image_canvas');
-            //Load the image
+            // Load the image
             this.image_canvas.css({
-                "background-image": "url('" + this.options.url + "')"
+                'background-image': 'url(\'' + this.options.url + '\')',
             });
             return this.eventController();
-
         }
 
-        BBoxLabeling.prototype.replay = function () {
+        BBoxLabeling.prototype.replay = function() {
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-            var labels = image_list[current_index].labels;
-            tag = $("select#category_select").val();
+            let labels = image_list[current_index].labels;
+            tag = $('select#category_select').val();
             if (labels) {
-                tag = labels[0]
+                tag = labels[0];
             }
-            $("#weather_select").prop("selectedIndex",
+            $('#weather_select').prop('selectedIndex',
                 assignment.category.indexOf(tag));
             this.drawCaption();
         };
 
-        BBoxLabeling.prototype.updateImage = function (url) {
-            $("#image_id").val(current_index + 1);
+        BBoxLabeling.prototype.updateImage = function(url) {
+            $('#image_id').val(current_index + 1);
             this.options.url = url;
-            var source_image = new Image();
+            let source_image = new Image();
             source_image.src = url;
             this.image_canvas.css({
-                "background-image": "url('" + url + "')"
+                'background-image': 'url(\'' + url + '\')',
             });
             this.output_labels = [];
             this.output_tags = [];
         };
 
-        BBoxLabeling.prototype.submitLabels = function () {
-            this.output_tags = [tag]
+        BBoxLabeling.prototype.submitLabels = function() {
+            this.output_tags = [tag];
         };
 
-        BBoxLabeling.prototype.eventController = function () {
+        BBoxLabeling.prototype.eventController = function() {
             bboxLabeling = this;
-            $("#category_select").change(function () {
-                var cat_idx = $(this)[0].selectedIndex;
+            $('#category_select').change(function() {
+                let cat_idx = $(this)[0].selectedIndex;
                 tag = assignment.category[cat_idx];
                 bboxLabeling.drawCaption();
             });
 
-            $(document).on('keydown', function (e) {
-                switch(e.keyCode) {
+            $(document).on('keydown', function(e) {
+                switch (e.keyCode) {
                     // first row of keyboard "qwertyu"
                     case 81:
                         tag = assignment.category[0];
@@ -95,26 +92,21 @@
                         break;
                 }
                 bboxLabeling.drawCaption();
-
             });
-
-
         };
 
-        BBoxLabeling.prototype.drawCaption = function () {
+        BBoxLabeling.prototype.drawCaption = function() {
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-            if (typeof tag !== "undefined") {
-                ctx.font = "30px Arial";
-                ctx.fillStyle = "#829356";
+            if (typeof tag !== 'undefined') {
+                ctx.font = '30px Arial';
+                ctx.fillStyle = '#829356';
                 ctx.fillRect(10, 10, 230, 45);
-                ctx.fillStyle = "White";
+                ctx.fillStyle = 'White';
                 ctx.fillText(tag, 15, 40);
-                $("#category_select").prop("selectedIndex", assignment.category.indexOf(tag));
+                $('#category_select').prop('selectedIndex', assignment.category.indexOf(tag));
             }
         };
 
         return BBoxLabeling;
-
     })();
-
 }).call(this);
