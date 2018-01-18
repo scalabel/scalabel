@@ -53,8 +53,8 @@
         BBoxLabeling.prototype.eventController = function() {
             bboxLabeling = this;
             $('#category_select').change(function() {
-                let cat_idx = $(this)[0].selectedIndex;
-                tag = assignment.category[cat_idx];
+                let catIdx = $(this)[0].selectedIndex;
+                tag = assignment.category[catIdx];
                 bboxLabeling.drawCaption();
             });
 

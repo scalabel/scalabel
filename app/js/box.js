@@ -289,14 +289,14 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
             $('#category_select').change(function() {
                 if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
-                    let cat_idx = $(this)[0].selectedIndex;
-                    if (assignment.category[cat_idx] === 'traffic light') {
+                    let catIdx = $(this)[0].selectedIndex;
+                    if (assignment.category[catIdx] === 'traffic light') {
                         num_light = num_light + 1;
                     }
                     if (rect_dict[current_bbox.id].category === 'traffic light') {
                         num_light = num_light - 1;
                     }
-                    rect_dict[current_bbox.id].category = assignment.category[cat_idx];
+                    rect_dict[current_bbox.id].category = assignment.category[catIdx];
                     bboxLabeling.highlight(current_bbox);
                 }
             });
@@ -513,8 +513,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                         $('#toolbox').css('background-color', '#DCDCDC');
                     }
                     // Draw a new bbox
-                    let cat_idx = document.getElementById('category_select').selectedIndex;
-                    let cat = assignment.category[cat_idx];
+                    let catIdx = document.getElementById('category_select').selectedIndex;
+                    let cat = assignment.category[catIdx];
                     let occluded = $('[name=\'occluded-checkbox\']').prop('checked');
                     let truncated = $('[name=\'truncated-checkbox\']').prop('checked');
                     let color = $('input[type=\'radio\']:checked').attr('id');
