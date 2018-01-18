@@ -24,7 +24,7 @@
 
         BBoxLabeling.prototype.replay = function() {
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-            let labels = image_list[current_index].labels;
+            let labels = image_list[currentIndex].labels;
             tag = $('select#category_select').val();
             if (labels) {
                 tag = labels[0];
@@ -35,7 +35,7 @@
         };
 
         BBoxLabeling.prototype.updateImage = function(url) {
-            $('#image_id').val(current_index + 1);
+            $('#image_id').val(currentIndex + 1);
             this.options.url = url;
             let source_image = new Image();
             source_image.src = url;
@@ -84,11 +84,11 @@
                         break;
                     // go to previous
                     case 37:
-                        goToImage(current_index - 1);
+                        goToImage(currentIndex - 1);
                         break;
                     // go to next
                     case 39:
-                        goToImage(current_index + 1);
+                        goToImage(currentIndex + 1);
                         break;
                 }
                 bboxLabeling.drawCaption();
