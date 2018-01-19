@@ -37,8 +37,8 @@
         BBoxLabeling.prototype.updateImage = function(url) {
             $('#image_id').val(currentIndex + 1);
             this.options.url = url;
-            let source_image = new Image();
-            source_image.src = url;
+            let sourceImage = new Image();
+            sourceImage.src = url;
             this.image_canvas.css({
                 'background-image': 'url(\'' + url + '\')',
             });

@@ -186,23 +186,23 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
         BBoxLabeling.prototype.updateImage = function(url) {
             this.options.url = url;
-            let source_image = new Image();
-            source_image.src = url;
+            let sourceImage = new Image();
+            sourceImage.src = url;
             this.image_canvas.css({
                 'background-image': 'url(\'' + url + '\')',
             });
-            if (source_image.complete) {
-                main_canvas.width = source_image.width;
-                main_canvas.height = source_image.height;
-                hidden_canvas.width = source_image.width;
-                hidden_canvas.height = source_image.height;
+            if (sourceImage.complete) {
+                main_canvas.width = sourceImage.width;
+                main_canvas.height = sourceImage.height;
+                hidden_canvas.width = sourceImage.width;
+                hidden_canvas.height = sourceImage.height;
                 CanvasResize();
             } else {
-                source_image.onload = function() {
-                    main_canvas.width = source_image.width;
-                    main_canvas.height = source_image.height;
-                    hidden_canvas.width = source_image.width;
-                    hidden_canvas.height = source_image.height;
+                sourceImage.onload = function() {
+                    main_canvas.width = sourceImage.width;
+                    main_canvas.height = sourceImage.height;
+                    hidden_canvas.width = sourceImage.width;
+                    hidden_canvas.height = sourceImage.height;
                     CanvasResize();
                 };
             }
