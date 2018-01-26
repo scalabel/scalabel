@@ -720,7 +720,7 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
         };
 
         BBox.prototype.colors = function(id) {
-            let tableau_colors = [
+            let tableauColors = [
                 'rgb(31, 119, 180)',
                 'rgb(174, 199, 232)',
                 'rgb(255, 127, 14)',
@@ -741,7 +741,7 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                 'rgb(219, 219, 141)',
                 'rgb(23, 190, 207)',
                 'rgb(158, 218, 229)'];
-            return tableau_colors[id % 20];
+            return tableauColors[id % 20];
         };
 
         BBox.prototype.hidden_colors = function(id, handle_index) {
