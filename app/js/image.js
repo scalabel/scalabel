@@ -1,3 +1,7 @@
+/* global assignment:true bboxLabeling:true currentIndex:true
+ goToImage:true image_list:true
+*/
+
 (function() {
     // Global variables
     let imageCanvas = '#image_canvas';
@@ -11,6 +15,11 @@
 
     // BBoxLabeling Class
     this.BBoxLabeling = (function() {
+        /**
+        * Summary: To be completed.
+        * @param {type} options: Description.
+        * @return {type} Description.
+        */
         function BBoxLabeling(options) {
             this.options = options;
             // Initialize main canvas
@@ -103,7 +112,8 @@
                 ctx.fillRect(10, 10, 230, 45);
                 ctx.fillStyle = 'White';
                 ctx.fillText(tag, 15, 40);
-                $('#category_select').prop('selectedIndex', assignment.category.indexOf(tag));
+                $('#category_select').prop('selectedIndex',
+                                            assignment.category.indexOf(tag));
             }
         };
 
