@@ -144,8 +144,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
         }
 
         BBoxLabeling.prototype.replay = function() {
-            this.updateImage(image_list[currentIndex].url);
-            let labels = image_list[currentIndex].labels;
+            this.updateImage(imageList[currentIndex].url);
+            let labels = imageList[currentIndex].labels;
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
             ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
             if (labels) {
