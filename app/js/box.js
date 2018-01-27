@@ -1,6 +1,9 @@
+/* global numLight:true numBbox:true addEvent assignment:true
+*/
+
 (function() {
     // Global variables
-    let rect_dict = {};
+    let rectDict = {};
     let imageCanvas = '#image_canvas';
     let pickupCanvas = '#pickup_canvas';
     let ctx = $(imageCanvas)[0].getContext('2d');
@@ -14,7 +17,7 @@
     let imageCanvasWidth = $(imageCanvas).css('width');
     let imageCanvasHeight = $(imageCanvas).css('height');
     let state = 'free';
-    let hide_labels = false;
+    let hideLabels = false;
 
     let LINE_WIDTH = 2;
     let HIDDEN_LINE_WIDTH = 4;
@@ -174,7 +177,7 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                         }
 
                         rect.id = parseInt(label.id);
-                        rect_dict[rect.id] = rect;
+                        rectDict[rect.id] = rect;
 
                         rect.drawBox();
                         rect.drawHiddenBox();
@@ -206,13 +209,13 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                     CanvasResize();
                 };
             }
-            rect_dict = {};
+            rectDict = {};
         };
 
         BBoxLabeling.prototype.submitLabels = function() {
             this.output_labels = [];
-            for (let key in rect_dict) {
-                let rect = rect_dict[key];
+            for (let key in rectDict) {
+                let rect = rectDict[key];
                 let output = {
                     position: {
                         x1: parseFloat((Math.min(rect.x, rect.x + rect.w) / ratio).toFixed(6)),
@@ -233,7 +236,7 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
         };
 
         BBoxLabeling.prototype.clearAll = function() {
-            rect_dict = {};
+            rectDict = {};
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
             ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
             state = 'free';
@@ -241,17 +244,17 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
         BBoxLabeling.prototype.getSelectedBbox = function(mouse) {
             let pixelData = ghost_ctx.getImageData(mouse.x, mouse.y, 1, 1).data;
-            let current_handle;
-            let selected_bbox;
+            let currentHandle;
+            let selectedBbox;
             if (pixelData[0] !== 0 && pixelData[3] === 255) {
                 let rect_id = pixelData[0] - 1;
-                current_handle = pixelData[1] - 1;
-                selected_bbox = rect_dict[rect_id];
+                currentHandle = pixelData[1] - 1;
+                selectedBbox = rectDict[rect_id];
             } else {
-                current_handle = -1;
-                selected_bbox = -1;
+                currentHandle = -1;
+                selectedBbox = -1;
             }
-            return [current_handle, selected_bbox];
+            return [currentHandle, selectedBbox];
         };
 
         BBoxLabeling.prototype.highlight = function(bbox) {
@@ -260,9 +263,9 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
                 ctx.globalAlpha = 0.5;
                 ctx.setLineDash([]);
-                for (key in rect_dict) {
+                for (key in rectDict) {
                     if (key !== bbox.id.toString()) {
-                        let cur = rect_dict[key];
+                        let cur = rectDict[key];
                         cur.drawBox();
                         cur.drawTag();
                     }
@@ -281,70 +284,70 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
         BBoxLabeling.prototype.eventController = function() {
             let rect = -1;
-            let selected_bbox = -1;
-            let current_bbox = -1;
-            let current_handle = -1;
-            let previous_handle = -1;
+            let selectedBbox = -1;
+            let currentBbox = -1;
+            let currentHandle = -1;
+            let previousHandle = -1;
             let bboxLabeling = this;
 
             $('#category_select').change(function() {
-                if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
+                if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
                     let catIdx = $(this)[0].selectedIndex;
                     if (assignment.category[catIdx] === 'traffic light') {
-                        num_light = num_light + 1;
+                        numLight = numLight + 1;
                     }
-                    if (rect_dict[current_bbox.id].category === 'traffic light') {
-                        num_light = num_light - 1;
+                    if (rectDict[currentBbox.id].category === 'traffic light') {
+                        numLight = numLight - 1;
                     }
-                    rect_dict[current_bbox.id].category = assignment.category[catIdx];
-                    bboxLabeling.highlight(current_bbox);
+                    rectDict[currentBbox.id].category = assignment.category[catIdx];
+                    bboxLabeling.highlight(currentBbox);
                 }
             });
             $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch', function(event, state) {
-                if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
-                    rect_dict[current_bbox.id].occluded = $(this).prop('checked');
-                    bboxLabeling.highlight(current_bbox);
+                if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                    rectDict[currentBbox.id].occluded = $(this).prop('checked');
+                    bboxLabeling.highlight(currentBbox);
                 }
             });
 
             $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch', function(event, state) {
-                if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
-                    rect_dict[current_bbox.id].truncated = $(this).prop('checked');
-                    bboxLabeling.highlight(current_bbox);
+                if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                    rectDict[currentBbox.id].truncated = $(this).prop('checked');
+                    bboxLabeling.highlight(currentBbox);
                 }
             });
 
             $('#radios :input').change(function() {
-                if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
-                    rect_dict[current_bbox.id].traffic_light_color =
+                if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                    rectDict[currentBbox.id].traffic_light_color =
                         $('input[type=\'radio\']:checked').attr('id');
-                    bboxLabeling.highlight(current_bbox);
+                    bboxLabeling.highlight(currentBbox);
                 }
             });
 
             $(document).on('keydown', function(e) {
                 // keyboard shortcut for delete
                 if (e.which === 8 || e.which === 46) {
-                    if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
-                        current_bbox.removeBox();
+                    if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                        currentBbox.removeBox();
                     }
                     state = 'free';
                     $('#toolbox').css('background-color', '#DCDCDC');
-                    current_bbox = -1;
+                    currentBbox = -1;
                     rect = -1;
                 }
                 // keyboard shortcut for hiding labels
                 if (e.keyCode === 72) {
-                    if (!hide_labels) {
-                        hide_labels = true;
+                    if (!hideLabels) {
+                        hideLabels = true;
                     } else {
-                        hide_labels = false;
+                        hideLabels = false;
                     }
                     bboxLabeling.image_canvas.css('cursor', 'crosshair');
                     ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
                     ctx.setLineDash([]);
-                    for (let key in rect_dict) {
-                        let cur = rect_dict[key];
+                    for (let key in rectDict) {
+                        let cur = rectDict[key];
                         cur.drawBox();
                         cur.drawHiddenBox();
                         cur.drawTag();
@@ -352,30 +355,30 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                 }
                 // "A" key used for checking occluded box
                 if (e.keyCode === 65) {
-                    if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
+                    if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
                         $('[name=\'occluded-checkbox\']').trigger('click');
-                        rect_dict[current_bbox.id].occluded = $('[name=\'occluded-checkbox\']').prop('checked');
-                        bboxLabeling.highlight(current_bbox);
+                        rectDict[currentBbox.id].occluded = $('[name=\'occluded-checkbox\']').prop('checked');
+                        bboxLabeling.highlight(currentBbox);
                     }
                 }
 
                 // "E" key used for checking truncated box
                 if (e.keyCode === 83) {
-                    if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
+                    if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
                         $('[name=\'truncated-checkbox\']').trigger('click');
-                        rect_dict[current_bbox.id].truncated = $('[name=\'truncated-checkbox\']').prop('checked');
-                        bboxLabeling.highlight(current_bbox);
+                        rectDict[currentBbox.id].truncated = $('[name=\'truncated-checkbox\']').prop('checked');
+                        bboxLabeling.highlight(currentBbox);
                     }
                 }
             });
 
             $('#remove_btn').click(function() {
-                if (current_bbox !== -1 && typeof(current_bbox) !== 'undefined') {
-                    current_bbox.removeBox();
+                if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                    currentBbox.removeBox();
                 }
                 state = 'free';
                 $('#toolbox').css('background-color', '#DCDCDC');
-                current_bbox = -1;
+                currentBbox = -1;
                 rect = -1;
             });
 
@@ -399,17 +402,18 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
                 if (state === 'hover_resize' || state === 'select_resize') {
                     if (rect !== -1 && typeof(rect) !== 'undefined') {
-                        var mousePos = point(e.clientX - offsetLeft, e.clientY - offsetTop);
-                        if (current_handle >= 0 && current_handle <= 7) {
-                            drag_handle[current_handle](rect, mousePos);
+                        let mousePos = point(e.clientX - offsetLeft,
+                                                e.clientY - offsetTop);
+                        if (currentHandle >= 0 && currentHandle <= 7) {
+                            drag_handle[currentHandle](rect, mousePos);
                         }
                         ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
 
                         ctx.globalAlpha = 0.5;
                         ctx.setLineDash([]);
-                        for (key in rect_dict) {
+                        for (let key in rectDict) {
                             if (key !== rect.id.toString()) {
-                                var cur = rect_dict[key];
+                                let cur = rectDict[key];
                                 cur.drawBox();
                                 cur.drawTag();
                             }
@@ -417,42 +421,43 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                         ctx.globalAlpha = 1.0;
                         ctx.setLineDash([3]);
                         rect.drawBox();
-                        if (current_handle >= 0 && current_handle <= 7) {
+                        if (currentHandle >= 0 && currentHandle <= 7) {
                             ctx.setLineDash([]);
-                            rect.drawHandle(current_handle);
+                            rect.drawHandle(currentHandle);
                         }
                     }
                 } else if (state === 'draw') {
                     rect.update(e.clientX, e.clientY);
                 } else if (state === 'select') {
-                    bboxLabeling.highlight(current_bbox);
+                    bboxLabeling.highlight(currentBbox);
                 } else {
                     // hover on
-                    mousePos = point(e.clientX - offsetLeft, e.clientY - offsetTop);
-                    previous_handle = current_handle;
+                    mousePos = point(e.clientX - offsetLeft,
+                                        e.clientY - offsetTop);
+                    previousHandle = currentHandle;
 
-                    let return_value;
-                    return_value = bboxLabeling.getSelectedBbox(mousePos);
-                    current_handle = return_value[0];
-                    selected_bbox = return_value[1];
+                    let returnValue;
+                    returnValue = bboxLabeling.getSelectedBbox(mousePos);
+                    currentHandle = returnValue[0];
+                    selectedBbox = returnValue[1];
 
-                    if (selected_bbox !== -1 && typeof(selected_bbox) !== 'undefined') {
-                        if (current_handle >= 0 && current_handle <= 7) {
-                            let handlePos = bbox_handles[current_handle](selected_bbox);
+                    if (selectedBbox !== -1 && typeof(selectedBbox) !== 'undefined') {
+                        if (currentHandle >= 0 && currentHandle <= 7) {
+                            let handlePos = bbox_handles[currentHandle](selectedBbox);
                             if (dist(mousePos, handlePos) < HIDDEN_HANDLE_RADIUS - 2) {
-                                selected_bbox.drawHandle(current_handle);
+                                selectedBbox.drawHandle(currentHandle);
                             }
-                        } else if (current_handle === 8) {
+                        } else if (currentHandle === 8) {
                             bboxLabeling.image_canvas.css('cursor', 'pointer');
                         }
                     }
 
-                    if (current_handle !== previous_handle) {
+                    if (currentHandle !== previousHandle) {
                         bboxLabeling.image_canvas.css('cursor', 'crosshair');
                         ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
                         ctx.setLineDash([]);
-                        for (var key in rect_dict) {
-                            var cur = rect_dict[key];
+                        for (let key in rectDict) {
+                            let cur = rectDict[key];
                             cur.drawBox();
                             cur.drawHiddenBox();
                             cur.drawTag();
@@ -465,12 +470,12 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                 offsetLeft = main_canvas.getBoundingClientRect().left;
                 offsetTop = main_canvas.getBoundingClientRect().top;
                 let mousePos = point(e.clientX - offsetLeft, e.clientY - offsetTop);
-                let return_value;
-                return_value = bboxLabeling.getSelectedBbox(mousePos);
-                current_handle = return_value[0];
-                selected_bbox = return_value[1];
-                if (current_handle >= 0 && current_handle <= 7) {
-                    rect = selected_bbox;
+                let returnValue;
+                returnValue = bboxLabeling.getSelectedBbox(mousePos);
+                currentHandle = returnValue[0];
+                selectedBbox = returnValue[1];
+                if (currentHandle >= 0 && currentHandle <= 7) {
+                    rect = selectedBbox;
                     addEvent('resize bbox', rect.id, {
                         x1: parseFloat((Math.min(rect.x, rect.x + rect.w) / ratio).toFixed(6)),
                         y1: parseFloat((Math.min(rect.y, rect.y + rect.h) / ratio).toFixed(6)),
@@ -482,43 +487,50 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                     } else {
                         state = 'hover_resize';
                     }
-                } else if (current_handle === 8) {
-                    current_bbox = selected_bbox;
-                    rect = selected_bbox;
+                } else if (currentHandle === 8) {
+                    currentBbox = selectedBbox;
+                    rect = selectedBbox;
                     state = 'select';
-                    bboxLabeling.highlight(current_bbox);
+                    bboxLabeling.highlight(currentBbox);
                     $('#category_select').prop('selectedIndex',
-                        assignment.category.indexOf(rect_dict[current_bbox.id].category));
-                    if (typeof rect_dict[current_bbox.id].occluded !== 'undefined' &&
-                        typeof rect_dict[current_bbox.id].truncated !== 'undefined') {
-                        if ($('[name=\'occluded-checkbox\']').prop('checked') !==
-                            rect_dict[current_bbox.id].occluded) {
+                    assignment.category.indexOf(rectDict[currentBbox.id].category));
+                    if (typeof rectDict[currentBbox.id].occluded !== 'undefined'
+                        && typeof rectDict[currentBbox.id].truncated
+                                                            !== 'undefined') {
+                        if ($('[name=\'occluded-checkbox\']').prop('checked')
+                                      !== rectDict[currentBbox.id].occluded) {
                             $('[name=\'occluded-checkbox\']').trigger('click');
                         }
-                        if ($('[name=\'truncated-checkbox\']').prop('checked') !==
-                            rect_dict[current_bbox.id].truncated) {
+                        if ($('[name=\'truncated-checkbox\']').prop('checked')
+                                      !== rectDict[currentBbox.id].truncated) {
                             $('[name=\'truncated-checkbox\']').trigger('click');
                         }
                     }
-                    if (typeof rect_dict[current_bbox.id].traffic_light_color !== 'undefined') {
-                        $('input:radio[id=\'' + rect_dict[current_bbox.id].traffic_light_color + '\']').trigger('click');
+                    if (typeof rectDict[currentBbox.id].traffic_light_color
+                                                            !== 'undefined') {
+                        $('input:radio[id=\'' + rectDict[currentBbox.id].
+                                traffic_light_color + '\']').trigger('click');
                     }
                 } else {
                     // Unselect
                     if (state === 'select') {
                         state = 'free';
-                        current_bbox = -1;
+                        currentBbox = -1;
                         rect = -1;
                         bboxLabeling.image_canvas.css('cursor', 'crosshair');
                         $('#toolbox').css('background-color', '#DCDCDC');
                     }
                     // Draw a new bbox
-                    let catIdx = document.getElementById('category_select').selectedIndex;
+                    let catIdx = document.getElementById('category_select').
+                                                                selectedIndex;
                     let cat = assignment.category[catIdx];
-                    let occluded = $('[name=\'occluded-checkbox\']').prop('checked');
-                    let truncated = $('[name=\'truncated-checkbox\']').prop('checked');
+                    let occluded = $('[name=\'occluded-checkbox\']').
+                                                        prop('checked');
+                    let truncated = $('[name=\'truncated-checkbox\']').
+                                                        prop('checked');
                     let color = $('input[type=\'radio\']:checked').attr('id');
-                    rect = new BBox(cat, Object.keys(rect_dict).length, [occluded, truncated, color]);
+                    rect = new BBox(cat, Object.keys(rectDict).length,
+                                            [occluded, truncated, color]);
                     rect.start(e.clientX, e.clientY);
                     state = 'draw';
                 }
@@ -531,24 +543,29 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                     state = 'free';
                     $('#toolbox').css('background-color', '#DCDCDC');
                 } else {
-                    current_bbox = rect;
+                    currentBbox = rect;
                     state = 'select';
-                    bboxLabeling.highlight(current_bbox);
+                    bboxLabeling.highlight(currentBbox);
                     $('#category_select').prop('selectedIndex',
-                        assignment.category.indexOf(rect_dict[current_bbox.id].category));
+                        assignment.category.indexOf(
+                                            rectDict[currentBbox.id].category));
 
-                    if (typeof rect_dict[current_bbox.id].occluded !== 'undefined' &&
-                        typeof rect_dict[current_bbox.id].truncated !== 'undefined') {
-                        if ($('[name=\'occluded-checkbox\']').prop('checked') !==
-                            rect_dict[current_bbox.id].occluded) {
+                    if (typeof rectDict[currentBbox.id].occluded
+                                                        !== 'undefined'
+                        && typeof rectDict[currentBbox.id].truncated
+                                                        !== 'undefined') {
+                        if ($('[name=\'occluded-checkbox\']').prop('checked')
+                                       !== rectDict[currentBbox.id].occluded) {
                             $('[name=\'occluded-checkbox\']').trigger('click');
                         }
-                        if ($('[name=\'truncated-checkbox\']').prop('checked') !==
-                            rect_dict[current_bbox.id].truncated) {
+                        if ($('[name=\'truncated-checkbox\']').prop('checked')
+                                      !== rectDict[currentBbox.id].truncated) {
                             $('[name=\'truncated-checkbox\']').trigger('click');
                         }
-                        if (typeof rect_dict[current_bbox.id].traffic_light_color !== 'undefined') {
-                            $('input:radio[id=\'' + rect_dict[current_bbox.id].traffic_light_color + '\']').trigger('click');
+                        if (typeof rectDict[currentBbox.id].traffic_light_color
+                                                              !== 'undefined') {
+                            $('input:radio[id=\'' + rectDict[currentBbox.id].
+                                 traffic_light_color + '\']').trigger('click');
                         }
                     }
                 }
@@ -561,6 +578,12 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
     // BBox Class
     let BBox;
     BBox = (function() {
+        /**
+        * Summary: To be completed.
+        * @param {type} category: Description.
+        * @param {type} id: Description.
+        * @param {int} attribute: Description.
+        */
         function BBox(category, id, attribute) {
             this.x = 0;
             this.y = 0;
@@ -579,25 +602,32 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
             this.w = 0;
             this.h = 0;
             addEvent('draw bbox', this.id, {
-                x1: parseFloat((Math.min(this.x, this.x + this.w) / ratio).toFixed(6)),
-                y1: parseFloat((Math.min(this.y, this.y + this.h) / ratio).toFixed(6)),
-                x2: parseFloat((Math.max(this.x, this.x + this.w) / ratio).toFixed(6)),
-                y2: parseFloat((Math.max(this.y, this.y + this.h) / ratio).toFixed(6)),
+                x1: parseFloat((Math.min(this.x, this.x + this.w) / ratio).
+                                                                    toFixed(6)),
+                y1: parseFloat((Math.min(this.y, this.y + this.h) / ratio).
+                                                                    toFixed(6)),
+                x2: parseFloat((Math.max(this.x, this.x + this.w) / ratio).
+                                                                    toFixed(6)),
+                y2: parseFloat((Math.max(this.y, this.y + this.h) / ratio).
+                                                                    toFixed(6)),
             });
         };
 
         BBox.prototype.update = function(pageX, pageY) {
-            this.w = (pageX - main_canvas.getBoundingClientRect().left) - this.x;
+            this.w
+                = (pageX - main_canvas.getBoundingClientRect().left) - this.x;
             this.h = (pageY - main_canvas.getBoundingClientRect().top) - this.y;
 
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
 
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([]);
-            for (let key in rect_dict) {
-                let cur = rect_dict[key];
-                cur.drawBox();
-                cur.drawTag();
+            for (let key in rectDict) {
+                if (rectDict[key]) {
+                    let cur = rectDict[key];
+                    cur.drawBox();
+                    cur.drawTag();
+                }
             }
             ctx.globalAlpha = 1.0;
             ctx.setLineDash([3]);
@@ -606,62 +636,71 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
         BBox.prototype.finish = function() {
             addEvent('finish bbox', this.id, {
-                x1: parseFloat((Math.min(this.x, this.x + this.w) / ratio).toFixed(6)),
-                y1: parseFloat((Math.min(this.y, this.y + this.h) / ratio).toFixed(6)),
-                x2: parseFloat((Math.max(this.x, this.x + this.w) / ratio).toFixed(6)),
-                y2: parseFloat((Math.max(this.y, this.y + this.h) / ratio).toFixed(6)),
+                x1: parseFloat((Math.min(this.x, this.x + this.w) / ratio).
+                                                                toFixed(6)),
+                y1: parseFloat((Math.min(this.y, this.y + this.h) / ratio).
+                                                                toFixed(6)),
+                x2: parseFloat((Math.max(this.x, this.x + this.w) / ratio).
+                                                                toFixed(6)),
+                y2: parseFloat((Math.max(this.y, this.y + this.h) / ratio).
+                                                                toFixed(6)),
             });
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
             ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
 
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([]);
-            for (let key in rect_dict) {
-                let cur = rect_dict[key];
-                cur.drawBox();
-                cur.drawHiddenBox();
-                cur.drawTag();
+            for (let key in rectDict) {
+                if (rectDict[key]) {
+                    let cur = rectDict[key];
+                    cur.drawBox();
+                    cur.drawHiddenBox();
+                    cur.drawTag();
+                }
             }
             ctx.globalAlpha = 1.0;
             this.drawBox();
             this.drawHiddenBox();
             this.drawTag();
 
-            if (this.id === Object.keys(rect_dict).length) {
+            if (this.id === Object.keys(rectDict).length) {
                 if (this.category === 'traffic light') {
-                    num_light = num_light + 1;
+                    numLight = numLight + 1;
                 }
-                num_bbox = num_bbox + 1;
+                numBbox = numBbox + 1;
             }
-            $('#bbox_count').text(num_bbox);
-            $('#light_count').text(num_light);
+            $('#bbox_count').text(numBbox);
+            $('#light_count').text(numLight);
 
-            rect_dict[this.id] = this;
+            rectDict[this.id] = this;
         };
 
         BBox.prototype.drawTag = function() {
-            if (!hide_labels) {
-                if (this.category && Math.abs(this.w) > 7 && Math.abs(this.h) > 7) {
+            if (!hideLabels) {
+                if (this.category && Math.abs(this.w) > 7
+                                    && Math.abs(this.h) > 7) {
                     let x1 = Math.min(this.x, this.x + this.w);
                     let y1 = Math.min(this.y, this.y + this.h);
                     ctx.font = '11px Verdana';
-                    let tag_width = TAG_WIDTH;
+                    let tagWidth = TAG_WIDTH;
                     let words = this.category.split(' ');
                     let abbr = words[words.length - 1].substring(0, 3);
                     if (this.occluded) {
                         abbr += ',' + 'o';
-                        tag_width += 9;
+                        tagWidth += 9;
                     }
                     if (this.truncated) {
                         abbr += ',' + 't';
-                        tag_width += 9;
+                        tagWidth += 9;
                     }
-                    if (this.traffic_light_color && this.traffic_light_color !== 'none') {
+                    if (this.traffic_light_color
+                        && this.traffic_light_color !== 'none') {
                         abbr += ',' + this.traffic_light_color.substring(0, 1);
-                        tag_width += 9;
+                        tagWidth += 9;
                     }
                     ctx.fillStyle = this.colors(this.id);
-                    ctx.fillRect(x1 - 1, y1 - TAG_HEIGHT, tag_width, TAG_HEIGHT);
+                    ctx.fillRect(x1 - 1, y1 - TAG_HEIGHT, tagWidth,
+                                                            TAG_HEIGHT);
                     ctx.fillStyle = 'rgb(0, 0, 0)';
                     ctx.fillText(abbr, x1 + 1, y1 - 3);
                 }
@@ -685,11 +724,12 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
             ghost_ctx.strokeRect(this.x, this.y, this.w, this.h);
 
             // draw hidden tag
-            if (!hide_labels) {
+            if (!hideLabels) {
                 let x1 = Math.min(this.x, this.x + this.w);
                 let y1 = Math.min(this.y, this.y + this.h);
                 ghost_ctx.fillStyle = this.hidden_colors(this.id, 8);
-                ghost_ctx.fillRect(x1 - 1, y1 - TAG_HEIGHT, TAG_WIDTH, TAG_HEIGHT);
+                ghost_ctx.fillRect(x1 - 1, y1 - TAG_HEIGHT, TAG_WIDTH,
+                                                            TAG_HEIGHT);
             }
             // draws eight hidden handles
             for (let i = 0; i < 8; i++) {
@@ -714,7 +754,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
             let handlesSize = HIDDEN_HANDLE_RADIUS;
             let posHandle = bbox_handles[index](this);
             ghost_ctx.beginPath();
-            ghost_ctx.arc(posHandle.x, posHandle.y, handlesSize, 0, 2 * Math.PI);
+            ghost_ctx.arc(posHandle.x, posHandle.y, handlesSize, 0,
+                                                        2 * Math.PI);
             ghost_ctx.fillStyle = this.hidden_colors(this.id, index);
             ghost_ctx.fill();
         };
@@ -744,39 +785,45 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
             return tableauColors[id % 20];
         };
 
-        BBox.prototype.hidden_colors = function(id, handle_index) {
-            return 'rgb(' + (id + 1) + ',' + (handle_index + 1) + ',0)';
+        BBox.prototype.hidden_colors = function(id, handleIndex) {
+            return 'rgb(' + (id + 1) + ',' + (handleIndex + 1) + ',0)';
         };
 
         BBox.prototype.removeBox = function() {
             addEvent('remove bbox', this.id, {
-                x1: parseFloat((Math.min(this.x, this.x + this.w) / ratio).toFixed(6)),
-                y1: parseFloat((Math.min(this.y, this.y + this.h) / ratio).toFixed(6)),
-                x2: parseFloat((Math.max(this.x, this.x + this.w) / ratio).toFixed(6)),
-                y2: parseFloat((Math.max(this.y, this.y + this.h) / ratio).toFixed(6)),
+                x1: parseFloat((Math.min(this.x, this.x + this.w) / ratio).
+                                                                toFixed(6)),
+                y1: parseFloat((Math.min(this.y, this.y + this.h) / ratio).
+                                                                toFixed(6)),
+                x2: parseFloat((Math.max(this.x, this.x + this.w) / ratio).
+                                                                toFixed(6)),
+                y2: parseFloat((Math.max(this.y, this.y + this.h) / ratio).
+                                                                toFixed(6)),
             });
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
             ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-            let temp_dict = rect_dict;
-            rect_dict = {};
+            let tempDict = rectDict;
+            rectDict = {};
             let i = 0;
-            for (let key in temp_dict) {
-                let temp = temp_dict[key];
-                if (key !== this.id.toString()) {
-                    temp.id = i;
-                    rect_dict[i] = temp;
-                    temp.drawBox();
-                    temp.drawHiddenBox();
-                    temp.drawTag();
+            for (let key in tempDict) {
+                if (tempDict[key].hasOwnProperty('id')) {
+                    let temp = tempDict[key];
+                    if (key !== this.id.toString()) {
+                        temp.id = i;
+                        rectDict[i] = temp;
+                        temp.drawBox();
+                        temp.drawHiddenBox();
+                        temp.drawTag();
+                    }
+                    i++;
                 }
-                i++;
             }
             if (this.category === 'traffic light') {
-                num_light = num_light - 1;
+                numLight = numLight - 1;
             }
-            num_bbox = num_bbox - 1;
-            $('#bbox_count').text(num_bbox);
-            $('#light_count').text(num_light);
+            numBbox = numBbox - 1;
+            $('#bbox_count').text(numBbox);
+            $('#light_count').text(numLight);
         };
 
         return BBox;
