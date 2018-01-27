@@ -2,7 +2,6 @@
 */
 
 (function() {
-    // Global variables
     let rectDict = {};
     let imageCanvas = '#image_canvas';
     let pickupCanvas = '#pickup_canvas';
@@ -30,9 +29,11 @@
 
     function CanvasResize() {
         ratio = parseFloat(window.innerWidth / (1.35 * main_canvas.width));
-        if (parseFloat(window.innerHeight / (1.35 * main_canvas.height)) < ratio) {
-ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
-}
+        if (parseFloat(window.innerHeight
+                / (1.35 * main_canvas.height)) < ratio) {
+            ratio = parseFloat(window.innerHeight
+                / (1.35 * main_canvas.height));
+        }
         ratio = parseFloat(ratio.toFixed(6));
 
         main_canvas.width = Math.round(main_canvas.width * ratio);
@@ -47,8 +48,10 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
             let imageCanvasCssWidth = imageCanvasWidth;
             let imageCanvasCssHeight = imageCanvasHeight;
 
-            $(imageCanvas).attr('width', imageCanvasWidth * window.devicePixelRatio);
-            $(imageCanvas).attr('height', imageCanvasHeight * window.devicePixelRatio);
+            $(imageCanvas).attr('width', imageCanvasWidth
+                * window.devicePixelRatio);
+            $(imageCanvas).attr('height', imageCanvasHeight
+                * window.devicePixelRatio);
             $(imageCanvas).css('width', imageCanvasCssWidth);
             $(imageCanvas).css('height', imageCanvasCssHeight);
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -64,7 +67,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
     }
 
     function dist(p1, p2) {
-        return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+        return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x)
+            + (p2.y - p1.y) * (p2.y - p1.y));
     }
 
     let bbox_handles = [
@@ -158,10 +162,14 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                         let rect = new BBox(label.category, label.id,
                             [false, false, 'none']);
                         if (label.position) {
-                            rect.x = parseFloat((label.position.x1 * ratio).toFixed(6));
-                            rect.y = parseFloat((label.position.y1 * ratio).toFixed(6));
-                            rect.w = parseFloat(((label.position.x2 - label.position.x1) * ratio).toFixed(6));
-                            rect.h = parseFloat(((label.position.y2 - label.position.y1) * ratio).toFixed(6));
+                            rect.x = parseFloat((label.position.x1
+                                * ratio).toFixed(6));
+                            rect.y = parseFloat((label.position.y1
+                                * ratio).toFixed(6));
+                            rect.w = parseFloat(((label.position.x2
+                                - label.position.x1) * ratio).toFixed(6));
+                            rect.h = parseFloat(((label.position.y2
+                                - label.position.y1) * ratio).toFixed(6));
                         }
                         if (label.category) {
                             rect.category = label.category;
@@ -172,8 +180,10 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                         if (label.attribute && label.attribute.truncated) {
                             rect.truncated = label.attribute.truncated;
                         }
-                        if (label.attribute && label.attribute.traffic_light_color) {
-                            rect.traffic_light_color = label.attribute.traffic_light_color;
+                        if (label.attribute
+                            && label.attribute.traffic_light_color) {
+                            rect.traffic_light_color = label.attribute
+                                .traffic_light_color;
                         }
 
                         rect.id = parseInt(label.id);
@@ -218,10 +228,14 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                 let rect = rectDict[key];
                 let output = {
                     position: {
-                        x1: parseFloat((Math.min(rect.x, rect.x + rect.w) / ratio).toFixed(6)),
-                        y1: parseFloat((Math.min(rect.y, rect.y + rect.h) / ratio).toFixed(6)),
-                        x2: parseFloat((Math.max(rect.x, rect.x + rect.w) / ratio).toFixed(6)),
-                        y2: parseFloat((Math.max(rect.y, rect.y + rect.h) / ratio).toFixed(6)),
+                        x1: parseFloat((Math.min(rect.x, rect.x + rect.w)
+                            / ratio).toFixed(6)),
+                        y1: parseFloat((Math.min(rect.y, rect.y + rect.h)
+                            / ratio).toFixed(6)),
+                        x2: parseFloat((Math.max(rect.x, rect.x + rect.w)
+                            / ratio).toFixed(6)),
+                        y2: parseFloat((Math.max(rect.y, rect.y + rect.h)
+                            / ratio).toFixed(6)),
                     },
                     category: rect.category,
                     id: rect.id.toString(),
@@ -263,7 +277,7 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
                 ctx.globalAlpha = 0.5;
                 ctx.setLineDash([]);
-                for (key in rectDict) {
+                for (let key in rectDict) {
                     if (key !== bbox.id.toString()) {
                         let cur = rectDict[key];
                         cur.drawBox();
@@ -299,20 +313,25 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                     if (rectDict[currentBbox.id].category === 'traffic light') {
                         numLight = numLight - 1;
                     }
-                    rectDict[currentBbox.id].category = assignment.category[catIdx];
+                    rectDict[currentBbox.id].category
+                        = assignment.category[catIdx];
                     bboxLabeling.highlight(currentBbox);
                 }
             });
-            $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch', function(event, state) {
+            $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch'
+                , function(event, state) {
                 if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
                     rectDict[currentBbox.id].occluded = $(this).prop('checked');
                     bboxLabeling.highlight(currentBbox);
                 }
             });
 
-            $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch', function(event, state) {
-                if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
-                    rectDict[currentBbox.id].truncated = $(this).prop('checked');
+            $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch'
+                , function(event, state) {
+                if (currentBbox !== -1
+                    && typeof(currentBbox) !== 'undefined') {
+                    rectDict[currentBbox.id].truncated
+                        = $(this).prop('checked');
                     bboxLabeling.highlight(currentBbox);
                 }
             });
@@ -328,7 +347,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
             $(document).on('keydown', function(e) {
                 // keyboard shortcut for delete
                 if (e.which === 8 || e.which === 46) {
-                    if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                    if (currentBbox !== -1
+                        && typeof(currentBbox) !== 'undefined') {
                         currentBbox.removeBox();
                     }
                     state = 'free';
@@ -355,18 +375,23 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                 }
                 // "A" key used for checking occluded box
                 if (e.keyCode === 65) {
-                    if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                    if (currentBbox !== -1
+                        && typeof(currentBbox) !== 'undefined') {
                         $('[name=\'occluded-checkbox\']').trigger('click');
-                        rectDict[currentBbox.id].occluded = $('[name=\'occluded-checkbox\']').prop('checked');
+                        rectDict[currentBbox.id].occluded
+                            = $('[name=\'occluded-checkbox\']').prop('checked');
                         bboxLabeling.highlight(currentBbox);
                     }
                 }
 
                 // "E" key used for checking truncated box
                 if (e.keyCode === 83) {
-                    if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+                    if (currentBbox !== -1
+                        && typeof(currentBbox) !== 'undefined') {
                         $('[name=\'truncated-checkbox\']').trigger('click');
-                        rectDict[currentBbox.id].truncated = $('[name=\'truncated-checkbox\']').prop('checked');
+                        rectDict[currentBbox.id].truncated
+                            = $('[name=\'truncated-checkbox\']')
+                            .prop('checked');
                         bboxLabeling.highlight(currentBbox);
                     }
                 }
@@ -389,12 +414,14 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                 $('.hair').show();
                 let x = e.clientX;
                 let y = e.clientY;
-                cH.css('top', Math.max(y, main_canvas.getBoundingClientRect().top));
+                cH.css('top', Math.max(y,
+                    main_canvas.getBoundingClientRect().top));
                 cH.css('left', main_canvas.getBoundingClientRect().left);
                 cH.css('width', imageCanvasWidth);
 
                 cV.css('right', main_canvas.getBoundingClientRect().right);
-                cV.css('left', Math.max(x, main_canvas.getBoundingClientRect().left));
+                cV.css('left', Math.max(x,
+                    main_canvas.getBoundingClientRect().left));
                 cV.css('height', imageCanvasHeight);
 
                 offsetLeft = main_canvas.getBoundingClientRect().left;
@@ -407,7 +434,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                         if (currentHandle >= 0 && currentHandle <= 7) {
                             drag_handle[currentHandle](rect, mousePos);
                         }
-                        ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
+                        ctx.clearRect(0, 0
+                            , imageCanvasWidth, imageCanvasHeight);
 
                         ctx.globalAlpha = 0.5;
                         ctx.setLineDash([]);
@@ -441,10 +469,13 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                     currentHandle = returnValue[0];
                     selectedBbox = returnValue[1];
 
-                    if (selectedBbox !== -1 && typeof(selectedBbox) !== 'undefined') {
+                    if (selectedBbox !== -1
+                        && typeof(selectedBbox) !== 'undefined') {
                         if (currentHandle >= 0 && currentHandle <= 7) {
-                            let handlePos = bbox_handles[currentHandle](selectedBbox);
-                            if (dist(mousePos, handlePos) < HIDDEN_HANDLE_RADIUS - 2) {
+                            let handlePos
+                                = bbox_handles[currentHandle](selectedBbox);
+                            if (dist(mousePos, handlePos)
+                                < HIDDEN_HANDLE_RADIUS - 2) {
                                 selectedBbox.drawHandle(currentHandle);
                             }
                         } else if (currentHandle === 8) {
@@ -454,7 +485,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
 
                     if (currentHandle !== previousHandle) {
                         bboxLabeling.image_canvas.css('cursor', 'crosshair');
-                        ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
+                        ctx.clearRect(0, 0
+                            , imageCanvasWidth, imageCanvasHeight);
                         ctx.setLineDash([]);
                         for (let key in rectDict) {
                             let cur = rectDict[key];
@@ -469,7 +501,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
             $(document).on('mousedown', '#image_canvas', function(e) {
                 offsetLeft = main_canvas.getBoundingClientRect().left;
                 offsetTop = main_canvas.getBoundingClientRect().top;
-                let mousePos = point(e.clientX - offsetLeft, e.clientY - offsetTop);
+                let mousePos = point(e.clientX - offsetLeft
+                    , e.clientY - offsetTop);
                 let returnValue;
                 returnValue = bboxLabeling.getSelectedBbox(mousePos);
                 currentHandle = returnValue[0];
@@ -477,10 +510,14 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                 if (currentHandle >= 0 && currentHandle <= 7) {
                     rect = selectedBbox;
                     addEvent('resize bbox', rect.id, {
-                        x1: parseFloat((Math.min(rect.x, rect.x + rect.w) / ratio).toFixed(6)),
-                        y1: parseFloat((Math.min(rect.y, rect.y + rect.h) / ratio).toFixed(6)),
-                        x2: parseFloat((Math.max(rect.x, rect.x + rect.w) / ratio).toFixed(6)),
-                        y2: parseFloat((Math.max(rect.y, rect.y + rect.h) / ratio).toFixed(6)),
+                        x1: parseFloat((Math.min(rect.x, rect.x + rect.w)
+                            / ratio).toFixed(6)),
+                        y1: parseFloat((Math.min(rect.y, rect.y + rect.h)
+                            / ratio).toFixed(6)),
+                        x2: parseFloat((Math.max(rect.x, rect.x + rect.w)
+                            / ratio).toFixed(6)),
+                        y2: parseFloat((Math.max(rect.y, rect.y + rect.h)
+                            / ratio).toFixed(6))
                     });
                     if (state === 'select') {
                         state = 'select_resize';
@@ -493,7 +530,8 @@ ratio = parseFloat(window.innerHeight / (1.35 * main_canvas.height));
                     state = 'select';
                     bboxLabeling.highlight(currentBbox);
                     $('#category_select').prop('selectedIndex',
-                    assignment.category.indexOf(rectDict[currentBbox.id].category));
+                    assignment.category
+                        .indexOf(rectDict[currentBbox.id].category));
                     if (typeof rectDict[currentBbox.id].occluded !== 'undefined'
                         && typeof rectDict[currentBbox.id].truncated
                                                             !== 'undefined') {
