@@ -1,5 +1,6 @@
-/* global numLight:true numBbox:true addEvent assignment:true
+/*global numLight:true numBbox:true addEvent assignment:true imageList:true currentIndex:true mousePos:true
 */
+
 
 (function() {
     let rectDict = {};
@@ -319,7 +320,7 @@
                 }
             });
             $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch'
-                , function(event, state) {
+                , function(ignoredEvent, ignoredState) {
                 if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
                     rectDict[currentBbox.id].occluded = $(this).prop('checked');
                     bboxLabeling.highlight(currentBbox);
@@ -327,7 +328,7 @@
             });
 
             $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch'
-                , function(event, state) {
+                , function(ignoredEvent, ignoredState) {
                 if (currentBbox !== -1
                     && typeof(currentBbox) !== 'undefined') {
                     rectDict[currentBbox.id].truncated

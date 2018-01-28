@@ -10,3 +10,6 @@ rules:
   semi:
     - error
     - always
+  no-unused-vars: 
+    - error
+    - argsIgnorePattern: '[iI]gnored'
