@@ -1,7 +1,6 @@
 /*global numLight:true numBbox:true addEvent assignment:true imageList:true currentIndex:true mousePos:true
 */
 
-
 (function() {
     let rectDict = {};
     let imageCanvas = '#image_canvas';
