@@ -76,4 +76,5 @@ func main() {
 	http.HandleFunc("/requestInfo", requestInfoHandler)
 
 	http.ListenAndServe(":"+*port, nil)
+
 }
