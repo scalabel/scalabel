@@ -2,4 +2,4 @@
 .idea
 
 # don't upload macOS folder info
-.DS_STORE
+*.DS_Store
