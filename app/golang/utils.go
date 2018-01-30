@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"time"
 	"strconv"
+	"time"
 	"unicode/utf8"
 )
 
@@ -59,7 +59,7 @@ func (assignment *Task) GetLogPath() string {
 		assignment.AssignmentID,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, submitTime + ".json")
+	return path.Join(dir, submitTime+".json")
 }
 
 func recordTimestamp() int64 {
@@ -107,7 +107,7 @@ func GetResult(assignmentID string, projectName string) []byte {
 	assignmentPath := path.Join(GetProjPath(),
 		"Assignments",
 		projectName,
-		assignmentID + ".json",
+		assignmentID+".json",
 	)
 
 	result := Result{}
@@ -154,7 +154,7 @@ func GetFullResult(projectName string) []byte {
 		assignmentPath := path.Join(GetProjPath(),
 			"Assignments",
 			projectName,
-			filename + ".json",
+			filename+".json",
 		)
 
 		var existingPath string

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 // An annotation task to be completed by a user.
@@ -70,7 +70,6 @@ type Label struct {
 	Attribute interface{} `json:"attribute"`
 	Position  interface{} `json:"position"`
 }
-
 
 func parse(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

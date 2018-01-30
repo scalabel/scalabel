@@ -6,6 +6,3 @@
 
 # don't upload the data directory
 data/*
-
-# no executables
-main
