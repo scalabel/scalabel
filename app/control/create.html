@@ -101,14 +101,14 @@
             x.onreadystatechange = function () {
                 if (x.readyState === 4) {
                     var num_assignments = x.response;
-                    var project_url = "/dashboard?project_name=" +
+                    var project_url = "./dashboard?project_name=" +
                         $('#project_name').val() +
                         "&num_assignments=" + num_assignments;
                     dashboard.attr('href', project_url);
                     dashboard.show();
                 }
             };
-            x.open("POST", "/postAssignment");
+            x.open("POST", "./postAssignment");
             x.send(new FormData(this))
         })
 
