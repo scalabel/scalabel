@@ -19,68 +19,53 @@ func TestInit(t *testing.T) {
     if *port != expectedPort || *data_dir != expectedDataDir {
         t.Errorf("got %#v and %#v, wanted %#v and %#v",
         	*port, *data_dir, expectedPort, expectedDataDir)
+    } else {
+    	print("Passed TestInit!\n")
     }
+
 }
 
-func TestGetAssignmentPath(t *testing.T) {
+func TestGetPaths(t *testing.T) {
 	a := &Task{}
-	str := `{"AssignmentID": "0000", "ProjectName": "testA" }`
+	str := `{"AssignmentID": "0000", "ProjectName": "testPath",
+			"StartTime": 1517447292, "SubmitTime": 1517447292}`
 	err := json.Unmarshal([]byte(str), a)
-	expected := path.Join(*data_dir, "Assignments",
-		   a.ProjectName, a.AssignmentID + ".json")
+
+	expectedAssign := path.Join(*data_dir, "Assignments", a.ProjectName,
+												a.AssignmentID + ".json")
+	expectedSubmis := path.Join(*data_dir, "Submissions", a.ProjectName,
+						a.AssignmentID, formatTime(a.StartTime) + ".json")
+	expectedLatest := path.Join(*data_dir, "Submissions", a.ProjectName,
+											a.AssignmentID, "latest.json")
+	expectedLog := path.Join(*data_dir, "Log", a.ProjectName, a.AssignmentID,
+				 						formatTime(a.SubmitTime) + ".json")
 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if path := a.GetAssignmentPath(); path != expected {
-		t.Errorf("got %#v, wanted %#v", path, expected)
-	}
-}
 
-func TestGetSubmissionPath(t *testing.T) {
-	a := &Task{}
-	str := `{"AssignmentID": "0000", "ProjectName": "testS",
-							"StartTime": 1517447292 }`
-	err := json.Unmarshal([]byte(str), a)
-	expected := path.Join(*data_dir, "Submissions", a.ProjectName,
-				a.AssignmentID, formatTime(a.StartTime) + ".json")
-
-	if err != nil {
-		t.Fatal(err)
+	if path := a.GetAssignmentPath(); path != expectedAssign {
+		t.Errorf("got %#v, wanted %#v", path, expectedAssign)
+	} else {
+		print("Passed TestGetAssignmentPath!\n")
 	}
-	if path := a.GetSubmissionPath(); path != expected {
-		t.Errorf("got %#v, wanted %#v", path, expected)
-	}
-}
 
-func TestGetLatestSubmissionPath(t *testing.T) {
-	a := &Task{}
-	str := `{"AssignmentID": "0000", "ProjectName": "testL"}`
-	err := json.Unmarshal([]byte(str), a)
-	expected := path.Join(*data_dir, "Submissions", a.ProjectName,
-				a.AssignmentID, "latest.json")
-
-	if err != nil {
-		t.Fatal(err)
+	if path := a.GetSubmissionPath(); path != expectedSubmis {
+		t.Errorf("got %#v, wanted %#v", path, expectedSubmis)
+	} else {
+		print("Passed TestGetSubmissionPath!\n")
 	}
-	if path := a.GetLatestSubmissionPath(); path != expected {
-		t.Errorf("got %#v, wanted %#v", path, expected)
-	}
-}
 
-func TestGetLogPath(t *testing.T) {
-	a := &Task{}
-	str := `{"AssignmentID": "0000", "ProjectName": "testL",
-							"SubmitTime": 1517447292 }`
-	err := json.Unmarshal([]byte(str), a)
-	expected := path.Join(*data_dir, "Log", a.ProjectName,
-				a.AssignmentID, formatTime(a.SubmitTime) + ".json")
-
-	if err != nil {
-		t.Fatal(err)
+	if path := a.GetLatestSubmissionPath(); path != expectedLatest {
+		t.Errorf("got %#v, wanted %#v", path, expectedLatest)
+	} else {
+		print("Passed TestGetLatestSubmissionPath!\n")
 	}
-	if path := a.GetLogPath(); path != expected {
-		t.Errorf("got %#v, wanted %#v", path, expected)
+
+	if path := a.GetLogPath(); path != expectedLog {
+		t.Errorf("got %#v, wanted %#v", path, expectedLog)
+	} else {
+		print("Passed TestGetLogPath!\n")
 	}
 }
 
@@ -89,6 +74,8 @@ func TestMin(t *testing.T) {
 	min := Min(a, b)
 	if min != a {
 		t.Errorf("Min was incorrect, got: %d, want: %d.", min, a)
+	} else {
+		print("Passed TestMin!\n")
 	}
 }
 
@@ -129,10 +116,10 @@ func TestCreateHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
         t.Errorf("createHandler returned wrong status code:",
         	"got %v want %v", status, http.StatusOK)
-    }
-
-	if expected := "Labeling tool"; !strings.Contains(string(body), expected) {
+    } else if expected := "Labeling tool"; !strings.Contains(string(body), expected) {
 		t.Errorf("createHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestCreateHandler!\n")
 	}
 }
 
@@ -151,10 +138,10 @@ func TestDashboardHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
         t.Errorf("dashboardHandler returned wrong status code:",
         	"got %v want %v", status, http.StatusOK)
-    } 
-
-    if expected := "Project Dashboard"; !strings.Contains(string(body), expected) {
+    } else if expected := "Project Dashboard"; !strings.Contains(string(body), expected) {
 		t.Errorf("dashboardHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestDashboardHandler!\n")
 	}
 }
 
@@ -173,10 +160,10 @@ func TestBboxLabelingHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
         t.Errorf("bboxLabelingHandler returned wrong status code:",
         	"got %v want %v", status, http.StatusOK)
-    }
-
-    if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
+    } else if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
 		t.Errorf("bboxLabelingHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestBboxLabelingHandler!\n")
 	}
 }
 
@@ -195,10 +182,10 @@ func TestRoadLabelingHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
         t.Errorf("roadLabelingHandler returned wrong status code:",
         	"got %v want %v", status, http.StatusOK)
-    }
-
-    if expected := "Drivable Area Labeling Tool"; !strings.Contains(string(body), expected) {
+    } else if expected := "Drivable Area Labeling Tool"; !strings.Contains(string(body), expected) {
 		t.Errorf("roadLabelingHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestRoadLabelingHandler!\n")
 	}
 }
 
@@ -217,10 +204,10 @@ func TestSegLabelingHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
         t.Errorf("segLabelingHandler returned wrong status code:",
         	"got %v want %v", status, http.StatusOK)
-    }
-
-    if expected := "Segmentation Labeling Tool"; !strings.Contains(string(body), expected) {
+    } else if expected := "Segmentation Labeling Tool"; !strings.Contains(string(body), expected) {
 		t.Errorf("segLabelingHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestSegLabelingHandler!\n")
 	}
 }
 
@@ -239,10 +226,10 @@ func TestLaneLabelingHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
         t.Errorf("laneLabelingHandler returned wrong status code:",
         	"got %v want %v", status, http.StatusOK)
-    }
-
-    if expected := "Lane Edge Labeling Tool"; !strings.Contains(string(body), expected) {
+    } else if expected := "Lane Edge Labeling Tool"; !strings.Contains(string(body), expected) {
 		t.Errorf("laneLabelingHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestLaneLabelingHandler!\n")
 	}
 }
 
@@ -261,10 +248,10 @@ func TestImageLabelingHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
         t.Errorf("imageLabelingHandler returned wrong status code:",
         	"got %v want %v", status, http.StatusOK)
-    }
-
-    if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
+    } else if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
 		t.Errorf("imageLabelingHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestImageLabelingHandler!\n")
 	}
 }
 
