@@ -10,3 +10,4 @@ install:
 script:
   - pycodestyle --show-source .
   - eslint .
+  - go test
