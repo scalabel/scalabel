@@ -10,5 +10,4 @@ install:
 script:
   - pycodestyle --show-source .
   - eslint .
-  - go build -i -o ../../bin/sat ./app/golang
   - go test
