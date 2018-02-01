@@ -2,22 +2,33 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
+var (
+	travis = flag.Bool("travis", false, "")
+)
+
 func TestInit(t *testing.T) {
-	expectedDataDir, err := filepath.Abs("../../data")
+	if *travis {
+		expectedDataDir := "/home/travis/gopath/src/sat/data"
+	} else {
+		expectedDataDir, err := filepath.Abs("../../data")
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+
+	flag.BoolVar(travis, "t", false, "")
+	flag.Parse()
 
 	if port == nil {
 		t.Errorf("got no port")
@@ -107,6 +118,8 @@ func TestIndexHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("indexHandler returned wrong status code:",
 			"got %v want %v", status, http.StatusOK)
+	} else {
+		print("Passed TestIndexHandler!\n")
 	}
 }
 
@@ -126,6 +139,7 @@ func TestCreateHandler(t *testing.T) {
 		t.Errorf("createHandler returned wrong status code:",
 			"got %v want %v", status, http.StatusOK)
 	} else if expected := "Labeling tool"; !strings.Contains(string(body), expected) {
+		t.Fatal(string(body))
 		t.Errorf("createHandler does not contain expected content: %v", expected)
 	} else {
 		print("Passed TestCreateHandler!\n")
