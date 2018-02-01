@@ -16,6 +16,6 @@ for FILE in $FILES; do
     fi
 done
 
-go fmt "../app/golang/"
+go fmt "../app/golang/..."
 
 exit $RETURN
