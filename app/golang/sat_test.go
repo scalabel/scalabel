@@ -17,10 +17,12 @@ var (
 )
 
 func TestInit(t *testing.T) {
+	expectedDataDir := nil
+	err := nil
 	if *travis {
-		expectedDataDir := "/home/travis/gopath/src/sat/data"
+		expectedDataDir = "/home/travis/gopath/src/sat/data"
 	} else {
-		expectedDataDir, err := filepath.Abs("../../data")
+		expectedDataDir, err = filepath.Abs("../../data")
 	}
 	if err != nil {
 		t.Fatal(err)
