@@ -3,3 +3,6 @@
 
 # don't upload macOS folder info
 *.DS_Store
+
+# don't upload the data directory
+data/*

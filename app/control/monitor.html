@@ -12,7 +12,7 @@
     <title>Project Dashboard</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -92,13 +92,13 @@
 <!-- /.container -->
 
 <!-- Google Analytics -->
-<script src="../js/thirdparty/analytics.js"></script>
+<script src="./js/thirdparty/analytics.js"></script>
 
 <!-- jQuery -->
-<script src="../js/thirdparty/jquery.js"></script>
+<script src="./js/thirdparty/jquery.js"></script>
 
 <!-- Bootstrap Core JavaScript -->
-<script src="../js/thirdparty/bootstrap.min.js"></script>
+<script src="./js/thirdparty/bootstrap.min.js"></script>
 
 <script type="text/javascript">
 
@@ -150,14 +150,14 @@
                             num_labeled_images = assignment.numLabeledImages;
                             num_submissions = assignment.numSubmissions;
                             label_type = assignment.labelType;
-                            task_url =  "/" + label_type + "_labeling?" +
+                            task_url =  "./" + label_type + "_labeling?" +
                                 "task_id=" + assignment_id +
                                 "&project_name=" + project_name;
 
                             download_task_url += task_url + "\n";
 
                             result_url =
-                                "/result?" +
+                                "./result?" +
                                 "label_type=" + label_type +
                                 "&task_id=" + assignment_id +
                                 "&project_name=" + project_name;
@@ -196,7 +196,7 @@
                     "assignmentId": assignment_id,
                     "projectName": project_name
                 });
-                xhr.open("POST", "/requestInfo", false);
+                xhr.open("POST", "./requestInfo", false);
                 xhr.send(request);
             })();
 
@@ -212,7 +212,7 @@
         });
 
         $('#download_result').attr('href',
-            "/fullResult?" +
+            "./fullResult?" +
             "label_type=" + label_type +
             "&project_name=" + project_name);
 
