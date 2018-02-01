@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -17,8 +18,8 @@ var (
 )
 
 func TestInit(t *testing.T) {
-	expectedDataDir := nil
-	err := nil
+	var expectedDataDir string
+	var err error
 	if *travis {
 		expectedDataDir = "/home/travis/gopath/src/sat/data"
 	} else {
