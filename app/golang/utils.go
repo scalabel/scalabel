@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
@@ -15,6 +16,17 @@ import (
 func GetProjPath() string {
 	gopath := os.Getenv("GOPATH")
 	return gopath + "/src/sat" // TODO: move project name to config
+}
+
+// Function type for handlers
+type handler func(http.ResponseWriter, *http.Request)
+
+// MakeStandardHandler returns a function for handling static HTML
+func MakeStandardHandler(pagePath string) (handler) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		HTML, _ = ioutil.ReadFile(GetProjPath() + pagePath)
+		w.Write(HTML)
+	}
 }
 
 func (assignment *Task) GetAssignmentPath() string {

@@ -57,13 +57,22 @@ func main() {
 
 	// routes
 	http.HandleFunc("/", parse(indexHandler))
-	http.HandleFunc("/create", createHandler)
-	http.HandleFunc("/dashboard", dashboardHandler)
-	http.HandleFunc("/2d_bbox_labeling", bboxLabelingHandler)
-	http.HandleFunc("/2d_road_labeling", roadLabelingHandler)
-	http.HandleFunc("/2d_seg_labeling", segLabelingHandler)
-	http.HandleFunc("/2d_lane_labeling", laneLabelingHandler)
-	http.HandleFunc("/image_labeling", imageLabelingHandler)
+
+	// Simple static handlers can be generated with MakeStandardHandler
+	http.HandleFunc("/create",
+		MakeStandardHandler("/app/control/create.html"))
+	http.HandleFunc("/dashboard",
+		MakeStandardHandler("/app/control/monitor.html"))
+	http.HandleFunc("/2d_bbox_labeling",
+		MakeStandardHandler("/app/annotation/box.html"))
+	http.HandleFunc("/2d_road_labeling",
+		MakeStandardHandler("/app/annotation/road.html"))
+	http.HandleFunc("/2d_seg_labeling",
+		MakeStandardHandler("/app/annotation/seg.html"))
+	http.HandleFunc("/2d_lane_labeling",
+		MakeStandardHandler("/app/annotation/lane.html"))
+	http.HandleFunc("/image_labeling",
+		MakeStandardHandler("/app/annotation/image.html"))
 
 	http.HandleFunc("/result", readResultHandler)
 	http.HandleFunc("/fullResult", readFullResultHandler)
@@ -74,6 +83,9 @@ func main() {
 	http.HandleFunc("/requestAssignment", requestAssignmentHandler)
 	http.HandleFunc("/requestSubmission", requestSubmissionHandler)
 	http.HandleFunc("/requestInfo", requestInfoHandler)
+
+	http.HandleFunc("/vid_bbox_labeling",
+		MakeStandardHandler("/app/annotation/vid.html"))
 
 	http.ListenAndServe(":"+*port, nil)
 
