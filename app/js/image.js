@@ -1,5 +1,5 @@
 /* global assignment:true bboxLabeling:true currentIndex:true
- goToImage:true image_list:true
+ goToImage:true imageList:true
 */
 
 (function() {
@@ -33,7 +33,7 @@
 
         BBoxLabeling.prototype.replay = function() {
             ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-            let labels = image_list[currentIndex].labels;
+            let labels = imageList[currentIndex].labels;
             tag = $('select#category_select').val();
             if (labels) {
                 tag = labels[0];
