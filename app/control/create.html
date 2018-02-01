@@ -12,7 +12,7 @@
     <title>Labeling tool</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
 
 </head>
 
@@ -81,13 +81,13 @@
 <!-- /.container -->
 
 <!-- Google Analytics -->
-<script src="../js/thirdparty/analytics.js"></script>
+<script src="./js/thirdparty/analytics.js"></script>
 
 <!-- jQuery -->
-<script src="../js/thirdparty/jquery.js"></script>
+<script src="./js/thirdparty/jquery.js"></script>
 
 <!-- Bootstrap Core JavaScript -->
-<script src="../js/thirdparty/bootstrap.min.js"></script>
+<script src="./js/thirdparty/bootstrap.min.js"></script>
 
 <script type="text/javascript">
 
@@ -101,14 +101,14 @@
             x.onreadystatechange = function () {
                 if (x.readyState === 4) {
                     var num_assignments = x.response;
-                    var project_url = "/dashboard?project_name=" +
+                    var project_url = "./dashboard?project_name=" +
                         $('#project_name').val() +
                         "&num_assignments=" + num_assignments;
                     dashboard.attr('href', project_url);
                     dashboard.show();
                 }
             };
-            x.open("POST", "/postAssignment");
+            x.open("POST", "./postAssignment");
             x.send(new FormData(this))
         })
 
