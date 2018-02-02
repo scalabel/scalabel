@@ -86,41 +86,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(HTML)
 }
 
-func createHandler(w http.ResponseWriter, r *http.Request) {
-	HTML, _ = ioutil.ReadFile(GetProjPath() + "/app/control/create.html")
-	w.Write(HTML)
-}
-
-func dashboardHandler(w http.ResponseWriter, r *http.Request) {
-	HTML, _ = ioutil.ReadFile(GetProjPath() + "/app/control/monitor.html")
-	w.Write(HTML)
-}
-
-func bboxLabelingHandler(w http.ResponseWriter, r *http.Request) {
-	HTML, _ = ioutil.ReadFile(GetProjPath() + "/app/annotation/box.html")
-	w.Write(HTML)
-}
-
-func roadLabelingHandler(w http.ResponseWriter, r *http.Request) {
-	HTML, _ = ioutil.ReadFile(GetProjPath() + "/app/annotation/road.html")
-	w.Write(HTML)
-}
-
-func segLabelingHandler(w http.ResponseWriter, r *http.Request) {
-	HTML, _ = ioutil.ReadFile(GetProjPath() + "/app/annotation/seg.html")
-	w.Write(HTML)
-}
-
-func laneLabelingHandler(w http.ResponseWriter, r *http.Request) {
-	HTML, _ = ioutil.ReadFile(GetProjPath() + "/app/annotation/lane.html")
-	w.Write(HTML)
-}
-
-func imageLabelingHandler(w http.ResponseWriter, r *http.Request) {
-	HTML, _ = ioutil.ReadFile(GetProjPath() + "/app/annotation/image.html")
-	w.Write(HTML)
-}
-
 func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)
