@@ -86,16 +86,6 @@ func TestGetPaths(t *testing.T) {
 	}
 }
 
-func TestMin(t *testing.T) {
-	var a, b int = 1, 2
-	min := Min(a, b)
-	if min != a {
-		t.Errorf("Min was incorrect, got: %d, want: %d.", min, a)
-	} else {
-		print("Passed TestMin!\n")
-	}
-}
-
 func TestGetResult(t *testing.T) {
 }
 
