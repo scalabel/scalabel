@@ -6,3 +6,5 @@
 
 # don't upload the data directory
 data/*
+
+bin/
