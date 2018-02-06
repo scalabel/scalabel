@@ -1,4 +1,4 @@
-/*global numLight:true numBbox:true addEvent assignment:true imageList:true currentIndex:true mousePos:true
+/*global addEvent assignment:true imageList:true currentIndex:true mousePos:true
 */
 
 (function() {
@@ -17,6 +17,8 @@
     let imageCanvasHeight = $(imageCanvas).css('height');
     let state = 'free';
     let hideLabels = false;
+    let numLight = 0;
+    let numBbox = 0;
 
     let LINE_WIDTH = 2;
     let HIDDEN_LINE_WIDTH = 4;
