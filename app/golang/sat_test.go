@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
-	"path/filepath"
-	// "strings"
+	//"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +23,7 @@ func TestInit(t *testing.T) {
 	if *travis {
 		expectedDataDir = "/home/travis/gopath/src/sat/data"
 	} else {
-		expectedDataDir, err = filepath.Abs("../../data")
+		expectedDataDir = path.Join(GetProjPath(), "/data")
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -116,49 +116,49 @@ func TestIndexHandler(t *testing.T) {
 	}
 }
 
-// func TestCreateHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/create", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+func TestCreateHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/create", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(createHandler)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(MakeStandardHandler("/app/control/create.html"))
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+	handler.ServeHTTP(rr, req)
+	body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("createHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Labeling tool"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("createHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestCreateHandler!\n")
-// 	}
-// }
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("createHandler returned wrong status code:",
+			"got %v want %v", status, http.StatusOK)
+	} else if expected := "Labeling tool"; !strings.Contains(string(body), expected) {
+		t.Errorf("createHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestCreateHandler!\n")
+	}
+}
 
-// func TestDashboardHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/dashboard", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+func TestDashboardHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/dashboard", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(dashboardHandler)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(MakeStandardHandler("/app/control/monitor.html"))
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+	handler.ServeHTTP(rr, req)
+	body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("dashboardHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Project Dashboard"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("dashboardHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestDashboardHandler!\n")
-// 	}
-// }
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("dashboardHandler returned wrong status code:",
+			"got %v want %v", status, http.StatusOK)
+	} else if expected := "Project Dashboard"; !strings.Contains(string(body), expected) {
+		t.Errorf("dashboardHandler does not contain expected content: %v", expected)
+	} else {
+		print("Passed TestDashboardHandler!\n")
+	}
+}
 
 // func TestBboxLabelingHandler(t *testing.T) {
 // 	req, err := http.NewRequest("GET", "/2d_bbox_labeling", nil)
