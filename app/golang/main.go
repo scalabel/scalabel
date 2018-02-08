@@ -87,6 +87,6 @@ func main() {
 	http.HandleFunc("/vid_bbox_labeling",
 		MakeStandardHandler("/app/annotation/vid.html"))
 
-	http.ListenAndServe(":"+*port, nil)
+	log.Fatal(http.ListenAndServe(":"+*port, nil))
 
 }

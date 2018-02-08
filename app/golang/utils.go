@@ -9,13 +9,15 @@ import (
 	"strconv"
 	"time"
 	"unicode/utf8"
+	"log"
 )
 
 // GetProjPath returns the path of this go project. It assumes setup of the go
 // environment according to: https://golang.org/doc/code.html#Workspaces
 func GetProjPath() string {
-	gopath := os.Getenv("GOPATH")
-	return gopath + "/src/sat" // TODO: move project name to config
+	// gopath := os.Getenv("GOPATH")
+	// return gopath + "/src/sat" // TODO: move project name to config
+	return "./"
 }
 
 // Function type for handlers
@@ -24,7 +26,10 @@ type handler func(http.ResponseWriter, *http.Request)
 // MakeStandardHandler returns a function for handling static HTML
 func MakeStandardHandler(pagePath string) (handler) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		HTML, _ = ioutil.ReadFile(GetProjPath() + pagePath)
+		HTML, err := ioutil.ReadFile(GetProjPath() + pagePath)
+		if err != nil {
+			log.Fatal(err) // TODO: send stress signal
+		}
 		w.Write(HTML)
 	}
 }
@@ -37,7 +42,7 @@ func (assignment *Task) GetAssignmentPath() string {
 		assignment.ProjectName,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, filename+".json")
+	return path.Join(dir, filename + ".json")
 }
 
 func (assignment *Task) GetSubmissionPath() string {
@@ -49,7 +54,7 @@ func (assignment *Task) GetSubmissionPath() string {
 		assignment.AssignmentID,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, startTime+".json")
+	return path.Join(dir, startTime + ".json")
 }
 
 func (assignment *Task) GetLatestSubmissionPath() string {
@@ -71,7 +76,7 @@ func (assignment *Task) GetLogPath() string {
 		assignment.AssignmentID,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, submitTime+".json")
+	return path.Join(dir, submitTime + ".json")
 }
 
 func recordTimestamp() int64 {
