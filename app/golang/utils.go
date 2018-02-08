@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"go/build"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -15,7 +16,10 @@ import (
 // GetProjPath returns the path of this go project. It assumes setup of the go
 // environment according to: https://golang.org/doc/code.html#Workspaces
 func GetProjPath() string {
-	// gopath := os.Getenv("GOPATH")
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+        gopath = build.Default.GOPATH
+    }
 	// return gopath + "/src/sat" // TODO: move project name to config
 	return "./"
 }

@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
-	"path/filepath"
-	// "strings"
+	//"path/filepath"
+	//"strings"
 	"testing"
 )
 
@@ -23,7 +23,7 @@ func TestInit(t *testing.T) {
 	if *travis {
 		expectedDataDir = "/home/travis/gopath/src/sat/data"
 	} else {
-		expectedDataDir, err = filepath.Abs("../../data")
+		expectedDataDir = path.Join(GetProjPath(), "/data")
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -123,7 +123,7 @@ func TestIndexHandler(t *testing.T) {
 // 	}
 
 // 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(createHandler)
+// 	handler := http.HandlerFunc(MakeStandardHandler("/app/control/create.html"))
 
 // 	handler.ServeHTTP(rr, req)
 // 	body, _ := ioutil.ReadAll(rr.Result().Body)
@@ -145,7 +145,7 @@ func TestIndexHandler(t *testing.T) {
 // 	}
 
 // 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(dashboardHandler)
+// 	handler := http.HandlerFunc(MakeStandardHandler("/app/control/monitor.html"))
 
 // 	handler.ServeHTTP(rr, req)
 // 	body, _ := ioutil.ReadAll(rr.Result().Body)
