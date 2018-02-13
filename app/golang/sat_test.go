@@ -54,7 +54,7 @@ func TestGetPaths(t *testing.T) {
 		a.AssignmentID, formatTime(a.StartTime)+".json")
 	expectedLatest := path.Join(*dataDir, "Submissions", a.ProjectName,
 		a.AssignmentID, "latest.json")
-	expectedLog := path.Join(GetProjPath(), "Log", a.ProjectName, a.AssignmentID,
+	expectedLog := path.Join(*dataDir, "Log", a.ProjectName, a.AssignmentID,
 		formatTime(a.SubmitTime)+".json")
 
 	if err != nil {
