@@ -41,7 +41,7 @@ func MakeStandardHandler(pagePath string) (handler) {
 func (assignment *Task) GetAssignmentPath() string {
 	filename := assignment.AssignmentID
 	dir := path.Join(GetProjPath(),
-		"data",
+		*dataDir,
 		"Assignments",
 		assignment.ProjectName,
 	)
@@ -52,7 +52,7 @@ func (assignment *Task) GetAssignmentPath() string {
 func (assignment *Task) GetSubmissionPath() string {
 	startTime := formatTime(assignment.StartTime)
 	dir := path.Join(GetProjPath(),
-		"data",
+		*dataDir,
 		"Submissions",
 		assignment.ProjectName,
 		assignment.AssignmentID,
@@ -63,7 +63,7 @@ func (assignment *Task) GetSubmissionPath() string {
 
 func (assignment *Task) GetLatestSubmissionPath() string {
 	dir := path.Join(GetProjPath(),
-		"data",
+		*dataDir,
 		"Submissions",
 		assignment.ProjectName,
 		assignment.AssignmentID,
@@ -75,6 +75,7 @@ func (assignment *Task) GetLatestSubmissionPath() string {
 func (assignment *Task) GetLogPath() string {
 	submitTime := formatTime(assignment.SubmitTime)
 	dir := path.Join(GetProjPath(),
+		*dataDir,
 		"Log",
 		assignment.ProjectName,
 		assignment.AssignmentID,
@@ -120,12 +121,14 @@ func Min(x, y int) int {
 
 func GetResult(assignmentID string, projectName string) []byte {
 	submissionPath := path.Join(GetProjPath(),
+		*dataDir,
 		"Submissions",
 		projectName,
 		assignmentID,
 		"latest.json",
 	)
 	assignmentPath := path.Join(GetProjPath(),
+		*dataDir,
 		"Assignments",
 		projectName,
 		assignmentID+".json",
@@ -162,6 +165,7 @@ func GetResult(assignmentID string, projectName string) []byte {
 func GetFullResult(projectName string) []byte {
 	result := Result{}
 	dir := path.Join(GetProjPath(),
+		*dataDir,
 		"Submissions",
 		projectName,
 	)
@@ -169,10 +173,12 @@ func GetFullResult(projectName string) []byte {
 	for _, f := range files {
 		filename := f.Name()
 		submissionPath := path.Join(GetProjPath(),
+			dir,
 			filename,
 			"latest.json",
 		)
 		assignmentPath := path.Join(GetProjPath(),
+			*dataDir,
 			"Assignments",
 			projectName,
 			filename+".json",

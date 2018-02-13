@@ -176,10 +176,12 @@ func postSubmissionHandler(w http.ResponseWriter, r *http.Request) {
 
 	submissionPath := assignment.GetSubmissionPath()
 	taskJson, _ := json.MarshalIndent(assignment, "", "  ")
+
 	err = ioutil.WriteFile(submissionPath, taskJson, 0644)
 	if err != nil {
 		Error.Println("Failed to save submission file of",
-			assignment.ProjectName, assignment.AssignmentID)
+			assignment.ProjectName, assignment.AssignmentID,
+			"for Path:", submissionPath)
 	}
 
 	latestSubmissionPath := assignment.GetLatestSubmissionPath()
