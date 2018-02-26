@@ -1,4 +1,5 @@
-/*global addEvent assignment:true imageList:true currentIndex:true mousePos:true
+/*global addEvent sprintf pickColorPalette assignment:true imageList:true
+  currentIndex:true mousePos:true
 */
 
 (function() {
