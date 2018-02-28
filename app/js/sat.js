@@ -99,10 +99,10 @@ Sat.prototype.newLabelId = function() {
 };
 
 Sat.prototype.newLabel = function() {
-  let label = new this.LabelType(this.newLabelId(), this.currentItem);
+  let label = new this.LabelType(this.currentItem, this.newLabelId());
   this.labelIdMap[label.id] = label;
   this.labels.append(label);
-  this.currentItem.append(label);
+  this.currentItem.labels.append(label);
   return label;
 };
 
@@ -183,6 +183,16 @@ SatItem.prototype.fromJson = function(object) {
   this.index = object.index;
 };
 
+SatItem.prototype.getVisibleLabels = function() {
+  let labels = [];
+  for (let i = 0; i < this.labels.length; i++) {
+    if (this.labels[i].valid && this.labels[i].numChildren === 0) {
+      labels.push(this.labels[i]);
+    }
+  }
+  return labels;
+};
+
 /**
  * Base class for each targeted labeling Image.
  *
@@ -231,19 +241,31 @@ SatImage.prototype.loaded = function() {
  */
 function SatLabel(satItem, id = -1) {
   this.id = id;
+  this.name = null; // category or something else
+  this.attributes = [];
   this.satItem = satItem;
   this.parent = null;
   this.children = [];
+  this.numChildren = 0;
   this.valid = true;
 }
 
 SatLabel.prototype.delete = function() {
   this.valid = false;
+  if (this.parent !== null) {
+    this.parent.numChildren -= 1;
+    if (this.parent.numChildren === 0) this.parent.delete();
+  }
 };
 
 SatLabel.prototype.getRoot = function() {
   if (this.parent === null) return this;
   else return this.getRoot();
+};
+
+SatLabel.prototype.addChild = function(child) {
+  this.numChildren += 1;
+  this.children.push(child);
 };
 
 /**
@@ -269,7 +291,8 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * @return {{id: *}}
  */
 SatLabel.prototype.toJson = function() {
-  let object = {id: this.id, item: this.satItem.index};
+  let object = {id: this.id, item: this.satItem.index, name: this.name,
+                attributes: this.attributes};
   if (this.parent !== null) object['parent'] = this.parent.id;
   if (this.children.length > 0) {
     let childenIds = [];
@@ -287,6 +310,8 @@ SatLabel.prototype.toJson = function() {
  */
 SatLabel.prototype.fromJson = function(object) {
   this.id = object.id;
+  this.name = object.name;
+  this.attributes = object.attributes;
   let labelIdMap = this.satItem.sat.labelIdMap;
   if ('parent' in object) {
     this.parent = labelIdMap[object['parent']];
@@ -294,7 +319,7 @@ SatLabel.prototype.fromJson = function(object) {
   if ('children' in object) {
     let childrenIds = object['children'];
     for (let i = 0; i < childrenIds.length; i++) {
-      this.children.push(labelIdMap[childrenIds[i]]);
+      this.addChild(labelIdMap[childrenIds[i]]);
     }
   }
 };
