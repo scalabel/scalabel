@@ -1,5 +1,5 @@
 /* global addEvent assignment:true imageList:true
-  currentIndex:true mousePos:true Sat SatLabel
+  currentIndex:true mousePos:true SatImage SatLabel
 */
 
 (function() {
@@ -162,7 +162,7 @@
     * @return {type} Description.
     */
     function BBoxLabeling(options) {
-      Sat.call(this, options);
+      SatImage.call(this, options);
       // Initialize main canvas
       this.image_canvas = $('#image_canvas');
       // this.pickup_canvas = $('#pickup_canvas');

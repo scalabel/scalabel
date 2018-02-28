@@ -1,6 +1,6 @@
 /* global sprintf */
 
-/* exported Sat SatLabel */
+/* exported SatImage SatLabel */
 
 /*
  Utilities
@@ -64,19 +64,19 @@ function pickColorPalette(index) {
 }
 
 /**
- * Base class for all the labeling tools.
+ * Base class for each targeted labeling Image.
  *
  * To define a new tool:
  *
  * function NewTool() {
- *   Sat.call(this);
+ *   SatImage.call(this);
  * }
  *
- * NewTool.prototype = Object.create(Sat.prototype);
+ * NewTool.prototype = Object.create(SatImage.prototype);
  *
  * @param {type} options: tooling options
  */
-function Sat(options) {
+function SatImage(options) {
   this.options = options;
 }
 
