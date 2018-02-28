@@ -73,8 +73,8 @@ function Sat(itemType, labelType) {
   this.labels = []; // list of label objects
   this.lastLabelId = 0;
   this.currentItem = null;
-  this.itemType = itemType;
-  this.labelType = labelType;
+  this.ItemType = itemType;
+  this.LabelType = labelType;
   this.info = { // data to send back to the server
     items: [], // list of items [{url: ..., label: [...] ]
     events: [],
@@ -83,17 +83,22 @@ function Sat(itemType, labelType) {
   };
 }
 
+Sat.prototype.newItem = function(url) {
+  let item = new this.ItemType(this, this.items.length, url);
+  this.items.append(item);
+  return item;
+};
+
 Sat.prototype.newLabelId = function() {
   let newId = this.lastLabelId + 1;
   this.lastLabelId = newId;
   return newId;
 };
 
-
 Sat.prototype.newLabel = function() {
-  let T = this.labelType;
-  let label = new T(this.newLabelId(), this.currentItem);
+  let label = new this.LabelType(this.newLabelId(), this.currentItem);
   this.labels.append(label);
+  this.currentItem.append(label);
   return label;
 };
 
