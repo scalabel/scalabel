@@ -224,25 +224,17 @@
     BBoxLabeling.prototype.updateImage = function(url) {
       this.options.url = url;
       let sourceImage = new Image();
-      sourceImage.src = url;
-      this.image_canvas.css({
-        'background-image': 'url(\'' + url + '\')',
-      });
-      if (sourceImage.complete) {
+      sourceImage.onload = function() {
         mainCanvas.width = sourceImage.width;
         mainCanvas.height = sourceImage.height;
         hiddenCanvas.width = sourceImage.width;
         hiddenCanvas.height = sourceImage.height;
         canvasResize();
-      } else {
-        sourceImage.onload = function() {
-          mainCanvas.width = sourceImage.width;
-          mainCanvas.height = sourceImage.height;
-          hiddenCanvas.width = sourceImage.width;
-          hiddenCanvas.height = sourceImage.height;
-          canvasResize();
-        };
-      }
+      };
+      sourceImage.src = url;
+      this.image_canvas.css({
+        'background-image': 'url(\'' + url + '\')',
+      });
       rectDict = {};
     };
 
