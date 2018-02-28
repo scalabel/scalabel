@@ -65,25 +65,65 @@ function pickColorPalette(index) {
 
 /**
  * Base class for each labeling session/task
+ * @param {SatItem} itemType: item instantiation type
+ * @param {SatLabel} labelType: label instantiation type
  */
-function Sat() {
-  this.itemList = []; // a.k.a ImageList, but can be 3D model list
+function Sat(itemType, labelType) {
+  this.items = []; // a.k.a ImageList, but can be 3D model list
+  this.labels = []; // list of label objects
+  this.lastLabelId = 0;
   this.currentItem = null;
-  this.info = {
-    itemUrls: [],
-    labels: [],
+  this.itemType = itemType;
+  this.labelType = labelType;
+  this.info = { // data to send back to the server
+    items: [], // list of items [{url: ..., label: [...] ]
+    events: [],
     numLabeledItems: 0,
     userAgent: null,
   };
 }
 
+Sat.prototype.newLabelId = function() {
+  let newId = this.lastLabelId + 1;
+  this.lastLabelId = newId;
+  return newId;
+};
+
+
+Sat.prototype.newLabel = function() {
+  let T = this.labelType;
+  let label = new T(this.newLabelId(), this.currentItem);
+  this.labels.append(label);
+  return label;
+};
+
 /**
  * Base class for each labeling target, can be pointcloud or 2D image
  * @param {Sat} sat: context
+ * @param {number} index: index of this item in sat
+ * @param {string} url: url to load the item
  */
-function SatItem(sat) {
+function SatItem(sat, index, url) {
   this.sat = sat;
+  this.index = index;
+  this.url = url;
+  this.labels = [];
+  this.ready = false;
 }
+
+SatItem.prototype.previousItem = function() {
+  if (this.index === 0) {
+    return null;
+  }
+  return this.sat.items[this.index-1];
+};
+
+SatItem.prototype.nextItem = function() {
+  if (this.index < this.sat.items.length - 1) {
+    return null;
+  }
+  return this.sat.items[this.index+1];
+};
 
 
 /**
@@ -97,19 +137,20 @@ function SatItem(sat) {
  *
  * NewTool.prototype = Object.create(SatImage.prototype);
  *
- * @param {type} options: tooling options
+ * @param {Sat} sat: context
+ * @param {number} index: index of this item in sat
+ * @param {string} url: url to load the item
  */
-function SatImage(options) {
-  SatItem.call(this, null);
-  this.options = options;
-  this.index = 0;
+function SatImage(sat, index, url) {
+  SatItem.call(this, sat, index, url);
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
 
 
 /**
- * Base class for all the labeled objects.
+ * Base class for all the labeled objects. New label should be instantiated by
+ * Sat.newLabel()
  *
  * To define a new tool:
  *
@@ -125,6 +166,8 @@ SatImage.prototype = Object.create(SatItem.prototype);
 function SatLabel(id, satItem = null) {
   this.id = id;
   this.satItem = satItem;
+  this.parent = null;
+  this.children = [];
 }
 
 /**
@@ -143,4 +186,20 @@ SatLabel.prototype.color = function() {
 SatLabel.prototype.styleColor = function(alpha = 255) {
   let c = this.color();
   return sprintf('rgba(%d, %d, %d, %f)', c[0], c[1], c[2], alpha);
+};
+
+/**
+ * Return json object encoding the label information
+ * @return {{id: *}}
+ */
+SatLabel.prototype.toJson = function() {
+  return {id: this.id};
+};
+
+/**
+ * Load label information from json object
+ * @param {Object} object: object to parse
+ */
+SatLabel.prototype.fromJson = function(object) {
+  this.id = object.id;
 };

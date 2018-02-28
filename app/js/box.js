@@ -163,6 +163,7 @@
     */
     function BBoxLabeling(options) {
       SatImage.call(this, options);
+      this.options = options;
       // Initialize main canvas
       this.image_canvas = $('#image_canvas');
       // this.pickup_canvas = $('#pickup_canvas');
