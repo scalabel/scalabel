@@ -1,4 +1,4 @@
-/*global addEvent sprintf pickColorPalette assignment:true imageList:true
+/* global addEvent sprintf pickColorPalette assignment:true imageList:true
   currentIndex:true mousePos:true
 */
 
@@ -7,13 +7,13 @@
   let imageCanvas = '#image_canvas';
   let pickupCanvas = '#pickup_canvas';
   let ctx = $(imageCanvas)[0].getContext('2d');
-  let ghost_ctx = $(pickupCanvas)[0].getContext('2d');
+  let ghostCtx = $(pickupCanvas)[0].getContext('2d');
 
-  let main_canvas = document.getElementById('image_canvas');
-  let hidden_canvas = document.getElementById('pickup_canvas');
+  let mainCanvas = document.getElementById('image_canvas');
+  let hiddenCanvas = document.getElementById('pickup_canvas');
 
-  let offsetLeft = main_canvas.getBoundingClientRect().left;
-  let offsetTop = main_canvas.getBoundingClientRect().top;
+  let offsetLeft = mainCanvas.getBoundingClientRect().left;
+  let offsetTop = mainCanvas.getBoundingClientRect().top;
   let imageCanvasWidth = $(imageCanvas).css('width');
   let imageCanvasHeight = $(imageCanvas).css('height');
   let state = 'free';
@@ -30,19 +30,23 @@
 
   let ratio;
 
-  function CanvasResize() {
-    ratio = parseFloat(window.innerWidth / (1.35 * main_canvas.width));
+  /**
+  * Summary: To be completed.
+  *
+  */
+  function canvasResize() {
+    ratio = parseFloat(window.innerWidth / (1.35 * mainCanvas.width));
     if (parseFloat(window.innerHeight
-            / (1.35 * main_canvas.height)) < ratio) {
+            / (1.35 * mainCanvas.height)) < ratio) {
       ratio = parseFloat(window.innerHeight
-          / (1.35 * main_canvas.height));
+          / (1.35 * mainCanvas.height));
     }
     ratio = parseFloat(ratio.toFixed(6));
 
-    main_canvas.width = Math.round(main_canvas.width * ratio);
-    main_canvas.height = Math.round(main_canvas.height * ratio);
-    hidden_canvas.width = Math.round(hidden_canvas.width * ratio);
-    hidden_canvas.height = Math.round(hidden_canvas.height * ratio);
+    mainCanvas.width = Math.round(mainCanvas.width * ratio);
+    mainCanvas.height = Math.round(mainCanvas.height * ratio);
+    hiddenCanvas.width = Math.round(hiddenCanvas.width * ratio);
+    hiddenCanvas.height = Math.round(hiddenCanvas.height * ratio);
 
     imageCanvasWidth = $(imageCanvas).attr('width');
     imageCanvasHeight = $(imageCanvas).attr('height');
@@ -62,6 +66,12 @@
   }
 
   // Global functions
+  /**
+  * Summary: To be completed.
+  * @param {type} x: Description.
+  * @param {type} y: Description.
+  * @return {type} Description.
+  */
   function point(x, y) {
     return {
       x: x,
@@ -69,12 +79,18 @@
     };
   }
 
+  /**
+  * Summary: To be completed.
+  * @param {type} p1: Description.
+  * @param {type} p2: Description.
+  * @return {type} Description.
+  */
   function dist(p1, p2) {
     return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x)
         + (p2.y - p1.y) * (p2.y - p1.y));
   }
 
-  let bbox_handles = [
+  let bboxHandles = [
     function(rect) { // TOP_LEFT: 0
       return point(rect.x, rect.y);
     },
@@ -101,7 +117,7 @@
     },
   ];
 
-  let drag_handle = [
+  let dragHandle = [
     function(rect, mousePos) {
       rect.w = rect.w + rect.x - mousePos.x;
       rect.h = rect.h + rect.y - mousePos.y;
@@ -140,6 +156,11 @@
 
   // BBoxLabeling Class
   this.BBoxLabeling = (function() {
+    /**
+    * Summary: To be completed.
+    * @param {type} options: Description.
+    * @return {type} Description.
+    */
     function BBoxLabeling(options) {
       this.options = options;
       // Initialize main canvas
@@ -157,7 +178,7 @@
       this.updateImage(imageList[currentIndex].url);
       let labels = imageList[currentIndex].labels;
       ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-      ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
+      ghostCtx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
       if (labels) {
         for (let key in labels) {
           if (labels.hasOwnProperty(key)) {
@@ -207,18 +228,18 @@
         'background-image': 'url(\'' + url + '\')',
       });
       if (sourceImage.complete) {
-        main_canvas.width = sourceImage.width;
-        main_canvas.height = sourceImage.height;
-        hidden_canvas.width = sourceImage.width;
-        hidden_canvas.height = sourceImage.height;
-        CanvasResize();
+        mainCanvas.width = sourceImage.width;
+        mainCanvas.height = sourceImage.height;
+        hiddenCanvas.width = sourceImage.width;
+        hiddenCanvas.height = sourceImage.height;
+        canvasResize();
       } else {
         sourceImage.onload = function() {
-          main_canvas.width = sourceImage.width;
-          main_canvas.height = sourceImage.height;
-          hidden_canvas.width = sourceImage.width;
-          hidden_canvas.height = sourceImage.height;
-          CanvasResize();
+          mainCanvas.width = sourceImage.width;
+          mainCanvas.height = sourceImage.height;
+          hiddenCanvas.width = sourceImage.width;
+          hiddenCanvas.height = sourceImage.height;
+          canvasResize();
         };
       }
       rectDict = {};
@@ -227,45 +248,47 @@
     BBoxLabeling.prototype.submitLabels = function() {
       this.output_labels = [];
       for (let key in rectDict) {
-        let rect = rectDict[key];
-        let output = {
-          position: {
-            x1: parseFloat((Math.min(rect.x, rect.x + rect.w)
-                / ratio).toFixed(6)),
-            y1: parseFloat((Math.min(rect.y, rect.y + rect.h)
-                / ratio).toFixed(6)),
-            x2: parseFloat((Math.max(rect.x, rect.x + rect.w)
-                / ratio).toFixed(6)),
-            y2: parseFloat((Math.max(rect.y, rect.y + rect.h)
-                / ratio).toFixed(6)),
-          },
-          category: rect.category,
-          id: rect.id.toString(),
-          attribute: {
-            occluded: rect.occluded,
-            truncated: rect.truncated,
-            traffic_light_color: rect.traffic_light_color,
-          },
-        };
-        this.output_labels.push(output);
+        if (rectDict[key].hasOwnProperty('category')) {
+          let rect = rectDict[key];
+          let output = {
+            position: {
+              x1: parseFloat((Math.min(rect.x, rect.x + rect.w)
+                  / ratio).toFixed(6)),
+              y1: parseFloat((Math.min(rect.y, rect.y + rect.h)
+                  / ratio).toFixed(6)),
+              x2: parseFloat((Math.max(rect.x, rect.x + rect.w)
+                  / ratio).toFixed(6)),
+              y2: parseFloat((Math.max(rect.y, rect.y + rect.h)
+                  / ratio).toFixed(6)),
+            },
+            category: rect.category,
+            id: rect.id.toString(),
+            attribute: {
+              occluded: rect.occluded,
+              truncated: rect.truncated,
+              traffic_light_color: rect.traffic_light_color,
+            },
+          };
+          this.output_labels.push(output);
+        }
       }
     };
 
     BBoxLabeling.prototype.clearAll = function() {
       rectDict = {};
       ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-      ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
+      ghostCtx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
       state = 'free';
     };
 
     BBoxLabeling.prototype.getSelectedBbox = function(mouse) {
-      let pixelData = ghost_ctx.getImageData(mouse.x, mouse.y, 1, 1).data;
+      let pixelData = ghostCtx.getImageData(mouse.x, mouse.y, 1, 1).data;
       let currentHandle;
       let selectedBbox;
       if (pixelData[0] !== 0 && pixelData[3] === 255) {
-        let rect_id = pixelData[0] - 1;
+        let rectId = pixelData[0] - 1;
         currentHandle = pixelData[1] - 1;
-        selectedBbox = rectDict[rect_id];
+        selectedBbox = rectDict[rectId];
       } else {
         currentHandle = -1;
         selectedBbox = -1;
@@ -369,10 +392,12 @@
           ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
           ctx.setLineDash([]);
           for (let key in rectDict) {
-            let cur = rectDict[key];
-            cur.drawBox();
-            cur.drawHiddenBox();
-            cur.drawTag();
+            if (rectDict[key].hasOwnProperty('num')) {
+              let cur = rectDict[key];
+              cur.drawBox();
+              cur.drawHiddenBox();
+              cur.drawTag();
+            }
           }
         }
         // "A" key used for checking occluded box
@@ -410,30 +435,30 @@
 
       $(document).on('mousemove', '#image_canvas', function(e) {
         // Full-canvas crosshair mouse cursor
-        let cH = $('#crosshair-h'),
-            cV = $('#crosshair-v');
+        let cH = $('#crosshair-h');
+        let cV = $('#crosshair-v');
         $('.hair').show();
         let x = e.clientX;
         let y = e.clientY;
         cH.css('top', Math.max(y,
-            main_canvas.getBoundingClientRect().top));
-        cH.css('left', main_canvas.getBoundingClientRect().left);
+            mainCanvas.getBoundingClientRect().top));
+        cH.css('left', mainCanvas.getBoundingClientRect().left);
         cH.css('width', imageCanvasWidth);
 
-        cV.css('right', main_canvas.getBoundingClientRect().right);
+        cV.css('right', mainCanvas.getBoundingClientRect().right);
         cV.css('left', Math.max(x,
-            main_canvas.getBoundingClientRect().left));
+            mainCanvas.getBoundingClientRect().left));
         cV.css('height', imageCanvasHeight);
 
-        offsetLeft = main_canvas.getBoundingClientRect().left;
-        offsetTop = main_canvas.getBoundingClientRect().top;
+        offsetLeft = mainCanvas.getBoundingClientRect().left;
+        offsetTop = mainCanvas.getBoundingClientRect().top;
 
         if (state === 'hover_resize' || state === 'select_resize') {
           if (rect !== -1 && typeof(rect) !== 'undefined') {
             let mousePos = point(e.clientX - offsetLeft,
                 e.clientY - offsetTop);
             if (currentHandle >= 0 && currentHandle <= 7) {
-              drag_handle[currentHandle](rect, mousePos);
+              dragHandle[currentHandle](rect, mousePos);
             }
             ctx.clearRect(0, 0
                 , imageCanvasWidth, imageCanvasHeight);
@@ -474,7 +499,7 @@
               && typeof(selectedBbox) !== 'undefined') {
             if (currentHandle >= 0 && currentHandle <= 7) {
               let handlePos
-                  = bbox_handles[currentHandle](selectedBbox);
+                  = bboxHandles[currentHandle](selectedBbox);
               if (dist(mousePos, handlePos)
                   < HIDDEN_HANDLE_RADIUS - 2) {
                 selectedBbox.drawHandle(currentHandle);
@@ -490,18 +515,20 @@
                 , imageCanvasWidth, imageCanvasHeight);
             ctx.setLineDash([]);
             for (let key in rectDict) {
-              let cur = rectDict[key];
-              cur.drawBox();
-              cur.drawHiddenBox();
-              cur.drawTag();
+              if (rectDict[key].hasOwnProperty('num')) {
+                let cur = rectDict[key];
+                cur.drawBox();
+                cur.drawHiddenBox();
+                cur.drawTag();
+              }
             }
           }
         }
       });
 
       $(document).on('mousedown', '#image_canvas', function(e) {
-        offsetLeft = main_canvas.getBoundingClientRect().left;
-        offsetTop = main_canvas.getBoundingClientRect().top;
+        offsetLeft = mainCanvas.getBoundingClientRect().left;
+        offsetTop = mainCanvas.getBoundingClientRect().top;
         let mousePos = point(e.clientX - offsetLeft
             , e.clientY - offsetTop);
         let returnValue;
@@ -635,8 +662,8 @@
     }
 
     BBox.prototype.start = function(pageX, pageY) {
-      this.x = pageX - main_canvas.getBoundingClientRect().left;
-      this.y = pageY - main_canvas.getBoundingClientRect().top;
+      this.x = pageX - mainCanvas.getBoundingClientRect().left;
+      this.y = pageY - mainCanvas.getBoundingClientRect().top;
       this.w = 0;
       this.h = 0;
       addEvent('draw bbox', this.id, {
@@ -653,8 +680,8 @@
 
     BBox.prototype.update = function(pageX, pageY) {
       this.w
-          = (pageX - main_canvas.getBoundingClientRect().left) - this.x;
-      this.h = (pageY - main_canvas.getBoundingClientRect().top) - this.y;
+          = (pageX - mainCanvas.getBoundingClientRect().left) - this.x;
+      this.h = (pageY - mainCanvas.getBoundingClientRect().top) - this.y;
 
       ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
 
@@ -684,7 +711,7 @@
             toFixed(6)),
       });
       ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-      ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
+      ghostCtx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
 
       ctx.globalAlpha = 0.5;
       ctx.setLineDash([]);
@@ -757,16 +784,16 @@
 
     BBox.prototype.drawHiddenBox = function() {
       // draw hidden box frame
-      ghost_ctx.lineWidth = HIDDEN_LINE_WIDTH;
-      ghost_ctx.strokeStyle = this.hidden_colors(this.id, 8);
-      ghost_ctx.strokeRect(this.x, this.y, this.w, this.h);
+      ghostCtx.lineWidth = HIDDEN_LINE_WIDTH;
+      ghostCtx.strokeStyle = this.hidden_colors(this.id, 8);
+      ghostCtx.strokeRect(this.x, this.y, this.w, this.h);
 
       // draw hidden tag
       if (!hideLabels) {
         let x1 = Math.min(this.x, this.x + this.w);
         let y1 = Math.min(this.y, this.y + this.h);
-        ghost_ctx.fillStyle = this.hidden_colors(this.id, 8);
-        ghost_ctx.fillRect(x1 - 1, y1 - TAG_HEIGHT, TAG_WIDTH,
+        ghostCtx.fillStyle = this.hidden_colors(this.id, 8);
+        ghostCtx.fillRect(x1 - 1, y1 - TAG_HEIGHT, TAG_WIDTH,
             TAG_HEIGHT);
       }
       // draws eight hidden handles
@@ -777,7 +804,7 @@
 
     BBox.prototype.drawHandle = function(index) {
       let handlesSize = HANDLE_RADIUS;
-      let posHandle = bbox_handles[index](this);
+      let posHandle = bboxHandles[index](this);
       ctx.beginPath();
       ctx.arc(posHandle.x, posHandle.y, handlesSize, 0, 2 * Math.PI);
       ctx.fillStyle = this.colors(this.id);
@@ -790,12 +817,12 @@
 
     BBox.prototype.drawHiddenHandle = function(index) {
       let handlesSize = HIDDEN_HANDLE_RADIUS;
-      let posHandle = bbox_handles[index](this);
-      ghost_ctx.beginPath();
-      ghost_ctx.arc(posHandle.x, posHandle.y, handlesSize, 0,
+      let posHandle = bboxHandles[index](this);
+      ghostCtx.beginPath();
+      ghostCtx.arc(posHandle.x, posHandle.y, handlesSize, 0,
           2 * Math.PI);
-      ghost_ctx.fillStyle = this.hidden_colors(this.id, index);
-      ghost_ctx.fill();
+      ghostCtx.fillStyle = this.hidden_colors(this.id, index);
+      ghostCtx.fill();
     };
 
     BBox.prototype.colors = function(id) {
@@ -819,7 +846,7 @@
             toFixed(6)),
       });
       ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
-      ghost_ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
+      ghostCtx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
       let tempDict = rectDict;
       rectDict = {};
       let i = 0;
