@@ -1,5 +1,5 @@
-/* global addEvent sprintf pickColorPalette assignment:true imageList:true
-  currentIndex:true mousePos:true
+/* global addEvent assignment:true imageList:true
+  currentIndex:true mousePos:true Sat SatLabel
 */
 
 (function() {
@@ -162,7 +162,7 @@
     * @return {type} Description.
     */
     function BBoxLabeling(options) {
-      this.options = options;
+      Sat.call(this, options);
       // Initialize main canvas
       this.image_canvas = $('#image_canvas');
       // this.pickup_canvas = $('#pickup_canvas');
@@ -650,6 +650,7 @@
      * @param {int} attribute: Description.
      */
     function BBox(category, id, attribute) {
+      SatLabel.call(this, id);
       this.x = 0;
       this.y = 0;
       this.w = 0;
@@ -660,6 +661,8 @@
       this.traffic_light_color = attribute[2];
       this.id = id;
     }
+
+    BBox.prototype = Object.create(SatLabel.prototype);
 
     BBox.prototype.start = function(pageX, pageY) {
       this.x = pageX - mainCanvas.getBoundingClientRect().left;
@@ -763,7 +766,7 @@
             abbr += ',' + this.traffic_light_color.substring(0, 1);
             tagWidth += 9;
           }
-          ctx.fillStyle = this.colors(this.id);
+          ctx.fillStyle = this.styleColor();
           ctx.fillRect(x1 - 1, y1 - TAG_HEIGHT, tagWidth,
               TAG_HEIGHT);
           ctx.fillStyle = 'rgb(0, 0, 0)';
@@ -776,7 +779,7 @@
       if (Math.abs(this.w) <= 7 && Math.abs(this.h) <= 7) {
         ctx.strokeStyle = 'rgb(169, 169, 169)';
       } else {
-        ctx.strokeStyle = this.colors(this.id);
+        ctx.strokeStyle = this.styleColor();
       }
       ctx.lineWidth = LINE_WIDTH;
       ctx.strokeRect(this.x, this.y, this.w, this.h);
@@ -807,7 +810,7 @@
       let posHandle = bboxHandles[index](this);
       ctx.beginPath();
       ctx.arc(posHandle.x, posHandle.y, handlesSize, 0, 2 * Math.PI);
-      ctx.fillStyle = this.colors(this.id);
+      ctx.fillStyle = this.styleColor();
       ctx.fill();
 
       ctx.lineWidth = 1;
@@ -823,11 +826,6 @@
           2 * Math.PI);
       ghostCtx.fillStyle = this.hidden_colors(this.id, index);
       ghostCtx.fill();
-    };
-
-    BBox.prototype.colors = function(id) {
-      let c = pickColorPalette(id);
-      return sprintf('rgb(%d, %d, %d, %f)', c[0], c[1], c[2]);
     };
 
     BBox.prototype.hidden_colors = function(id, handleIndex) {

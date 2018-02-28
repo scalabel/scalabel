@@ -111,10 +111,7 @@ SatLabel.prototype.color = function() {
  * @param {number} alpha: color transparency
  * @return {[number,number,number]}
  */
-SatLabel.prototype.styleColor = function(alpha) {
-  if (alpha === undefined || alpha === null) {
-    alpha = 255;
-  }
+SatLabel.prototype.styleColor = function(alpha = 255) {
   let c = this.color();
   return sprintf('rgba(%d, %d, %d, %f)', c[0], c[1], c[2], alpha);
 };
