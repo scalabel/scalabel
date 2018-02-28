@@ -1,6 +1,6 @@
 /* global sprintf */
 
-/* exported SatImage SatLabel */
+/* exported Sat SatImage SatLabel */
 
 /*
  Utilities
@@ -64,6 +64,29 @@ function pickColorPalette(index) {
 }
 
 /**
+ * Base class for each labeling session/task
+ */
+function Sat() {
+  this.itemList = []; // a.k.a ImageList, but can be 3D model list
+  this.currentItem = null;
+  this.info = {
+    itemUrls: [],
+    labels: [],
+    numLabeledItems: 0,
+    userAgent: null,
+  };
+}
+
+/**
+ * Base class for each labeling target, can be pointcloud or 2D image
+ * @param {Sat} sat: context
+ */
+function SatItem(sat) {
+  this.sat = sat;
+}
+
+
+/**
  * Base class for each targeted labeling Image.
  *
  * To define a new tool:
@@ -77,8 +100,12 @@ function pickColorPalette(index) {
  * @param {type} options: tooling options
  */
 function SatImage(options) {
+  SatItem.call(this, null);
   this.options = options;
+  this.index = 0;
 }
+
+SatImage.prototype = Object.create(SatItem.prototype);
 
 
 /**
@@ -93,9 +120,11 @@ function SatImage(options) {
  * NewObject.prototype = Object.create(SatLabel.prototype);
  *
  * @param {number} id: label object identifier
+ * @param {SatItem} satItem: Item that this label appears
  */
-function SatLabel(id) {
+function SatLabel(id, satItem = null) {
   this.id = id;
+  this.satItem = satItem;
 }
 
 /**
