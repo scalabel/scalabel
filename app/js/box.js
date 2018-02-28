@@ -800,7 +800,7 @@
 
     BBox.prototype.colors = function(id) {
       let c = pickColorPalette(id);
-      return sprintf('rgb(%d %d %d %d)', c[0], c[1], c[2]);
+      return sprintf('rgb(%d, %d, %d, %f)', c[0], c[1], c[2]);
     };
 
     BBox.prototype.hidden_colors = function(id, handleIndex) {
