@@ -651,7 +651,7 @@
      * @param {int} attribute: Description.
      */
     function BBox(category, id, attribute) {
-      SatLabel.call(this, id);
+      SatLabel.call(this, null, id);
       this.x = 0;
       this.y = 0;
       this.w = 0;

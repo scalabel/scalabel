@@ -65,23 +65,26 @@ function pickColorPalette(index) {
 
 /**
  * Base class for each labeling session/task
- * @param {SatItem} itemType: item instantiation type
- * @param {SatLabel} labelType: label instantiation type
+ * @param {SatItem} ItemType: item instantiation type
+ * @param {SatLabel} LabelType: label instantiation type
  */
-function Sat(itemType, labelType) {
+function Sat(ItemType, LabelType) {
   this.items = []; // a.k.a ImageList, but can be 3D model list
   this.labels = []; // list of label objects
+  this.labelIdMap = {};
   this.lastLabelId = 0;
   this.currentItem = null;
-  this.ItemType = itemType;
-  this.LabelType = labelType;
-  this.info = { // data to send back to the server
-    items: [], // list of items [{url: ..., label: [...] ]
-    events: [],
-    numLabeledItems: 0,
-    userAgent: null,
-  };
+  this.ItemType = ItemType;
+  this.LabelType = LabelType;
+  this.events = [];
+  this.startTime = Date().now();
 }
+
+Sat.prototype.getIPAddress = function() {
+  $.getJSON('//ipinfo.io/json', function(data) {
+    this.ipAddress = data;
+  });
+};
 
 Sat.prototype.newItem = function(url) {
   let item = new this.ItemType(this, this.items.length, url);
@@ -97,24 +100,65 @@ Sat.prototype.newLabelId = function() {
 
 Sat.prototype.newLabel = function() {
   let label = new this.LabelType(this.newLabelId(), this.currentItem);
+  this.labelIdMap[label.id] = label;
   this.labels.append(label);
   this.currentItem.append(label);
   return label;
+};
+
+Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
+                                  position = null) {
+  this.events.push({
+    timestamp: Date.now(),
+    action: action,
+    itemIndex: itemIndex,
+    labelId: labelId,
+    position: position,
+  });
+};
+
+/**
+ * Information used for submission
+ * @return {{items: Array, labels: Array, events: *, userAgent: string}}
+ */
+Sat.prototype.getInfo = function() {
+  let self = this;
+  let items = [];
+  for (let i = 0; i < this.items.length; i++) {
+    items.push(this.items[i].toJSON());
+  }
+  let labels = [];
+  for (let i = 0; i < this.labels.length; i++) {
+    labels.push(this.labels[i].toJson());
+  }
+  return {
+    startTime: self.startTime,
+    items: items,
+    labels: labels,
+    events: self.events,
+    userAgent: navigator.userAgent,
+    ipAddress: self.ipAddress,
+  };
 };
 
 /**
  * Base class for each labeling target, can be pointcloud or 2D image
  * @param {Sat} sat: context
  * @param {number} index: index of this item in sat
- * @param {string} url: url to load the item
+ * @param {string | null} url: url to load the item
  */
-function SatItem(sat, index, url) {
+function SatItem(sat, index = -1, url = null) {
   this.sat = sat;
   this.index = index;
   this.url = url;
   this.labels = [];
   this.ready = false;
 }
+
+SatItem.prototype.loaded = function() {
+  this.ready = true;
+  this.sat.addEvent('loaded', this.index);
+};
 
 SatItem.prototype.previousItem = function() {
   if (this.index === 0) {
@@ -130,6 +174,14 @@ SatItem.prototype.nextItem = function() {
   return this.sat.items[this.index+1];
 };
 
+SatItem.prototype.toJson = function() {
+  return {url: this.url, index: this.index};
+};
+
+SatItem.prototype.fromJson = function(object) {
+  this.url = object.url;
+  this.index = object.index;
+};
 
 /**
  * Base class for each targeted labeling Image.
@@ -148,11 +200,20 @@ SatItem.prototype.nextItem = function() {
  */
 function SatImage(sat, index, url) {
   SatItem.call(this, sat, index, url);
+  this.image = new Image();
+  this.image.onload = function() {
+    this.loaded();
+  };
+  this.image.src = this.url;
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
 
-
+SatImage.prototype.loaded = function() {
+  // Call SatItem loaded
+  Object.getPrototypeOf(SatItem.prototype).loaded();
+  // Show the image here when the image is loaded.
+};
 /**
  * Base class for all the labeled objects. New label should be instantiated by
  * Sat.newLabel()
@@ -165,22 +226,32 @@ SatImage.prototype = Object.create(SatItem.prototype);
  *
  * NewObject.prototype = Object.create(SatLabel.prototype);
  *
- * @param {number} id: label object identifier
  * @param {SatItem} satItem: Item that this label appears
+ * @param {number | null} id: label object identifier
  */
-function SatLabel(id, satItem = null) {
+function SatLabel(satItem, id = -1) {
   this.id = id;
   this.satItem = satItem;
   this.parent = null;
   this.children = [];
+  this.valid = true;
 }
+
+SatLabel.prototype.delete = function() {
+  this.valid = false;
+};
+
+SatLabel.prototype.getRoot = function() {
+  if (this.parent === null) return this;
+  else return this.getRoot();
+};
 
 /**
  * Pick a color based on the label id
  * @return {(number|number|number)[]}
  */
 SatLabel.prototype.color = function() {
-  return pickColorPalette(this.id);
+  return pickColorPalette(this.getRoot().id);
 };
 
 /**
@@ -198,7 +269,16 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * @return {{id: *}}
  */
 SatLabel.prototype.toJson = function() {
-  return {id: this.id};
+  let object = {id: this.id, item: this.satItem.index};
+  if (this.parent !== null) object['parent'] = this.parent.id;
+  if (this.children.length > 0) {
+    let childenIds = [];
+    for (let i = 0; i < this.children.length; i++) {
+      childenIds.push(this.children[i].id);
+    }
+    object['children'] = childenIds;
+  }
+  return object;
 };
 
 /**
@@ -207,4 +287,14 @@ SatLabel.prototype.toJson = function() {
  */
 SatLabel.prototype.fromJson = function(object) {
   this.id = object.id;
+  let labelIdMap = this.satItem.sat.labelIdMap;
+  if ('parent' in object) {
+    this.parent = labelIdMap[object['parent']];
+  }
+  if ('children' in object) {
+    let childrenIds = object['children'];
+    for (let i = 0; i < childrenIds.length; i++) {
+      this.children.push(labelIdMap[childrenIds[i]]);
+    }
+  }
 };
