@@ -117,6 +117,21 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
   });
 };
 
+// TODO
+Sat.prototype.load = function () {
+
+};
+
+// TODO
+Sat.prototype.submit = function() {
+
+};
+
+// TODO
+Sat.prototype.gotoItem = function(index) {
+
+};
+
 /**
  * Information used for submission
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
@@ -227,6 +242,12 @@ SatImage.prototype.loaded = function() {
   Object.getPrototypeOf(SatItem.prototype).loaded();
   // Show the image here when the image is loaded.
 };
+
+// TODO
+SatImage.prototype.redraw = function() {
+
+};
+
 /**
  * Base class for all the labeled objects. New label should be instantiated by
  * Sat.newLabel()
