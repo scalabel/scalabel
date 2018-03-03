@@ -47,7 +47,7 @@ function blendColor(rgb, base, ratio) {
 
 /**
  * Pick color from the palette. Add additional shades and tints to increase
- * the color number.
+ * the color number. Results: https://jsfiddle.net/739397/e980vft0/
  * @param {[int]} index: palette index
  * @return {[number,number,number]}
  */
@@ -215,6 +215,9 @@ function SatImage(sat, index, url) {
     this.loaded();
   };
   this.image.src = this.url;
+
+  this.imageRatio = 0;
+
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
@@ -256,11 +259,15 @@ SatLabel.prototype.delete = function() {
     this.parent.numChildren -= 1;
     if (this.parent.numChildren === 0) this.parent.delete();
   }
+  for (let i = 0; i < this.children; i++) {
+    this.children[i].parent = null;
+    this.children[i].delete();
+  }
 };
 
 SatLabel.prototype.getRoot = function() {
   if (this.parent === null) return this;
-  else return this.getRoot();
+  else return this.parent.getRoot();
 };
 
 SatLabel.prototype.addChild = function(child) {
