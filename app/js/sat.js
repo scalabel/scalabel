@@ -118,7 +118,7 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
 };
 
 // TODO
-Sat.prototype.load = function () {
+Sat.prototype.load = function() {
 
 };
 
@@ -128,7 +128,7 @@ Sat.prototype.submit = function() {
 };
 
 // TODO
-Sat.prototype.gotoItem = function(index) {
+Sat.prototype.gotoItem = function() {
 
 };
 
@@ -234,7 +234,6 @@ function SatImage(sat, index, url) {
   this.image.src = this.url;
 
   this.imageRatio = 0;
-
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
