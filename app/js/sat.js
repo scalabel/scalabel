@@ -140,11 +140,13 @@ Sat.prototype.getInfo = function() {
   let self = this;
   let items = [];
   for (let i = 0; i < this.items.length; i++) {
-    items.push(this.items[i].toJSON());
+    items.push(this.items[i].toJson());
   }
   let labels = [];
   for (let i = 0; i < this.labels.length; i++) {
-    labels.push(this.labels[i].toJson());
+    if (this.labels[i].valid) {
+      labels.push(this.labels[i].toJson());
+    }
   }
   return {
     startTime: self.startTime,
