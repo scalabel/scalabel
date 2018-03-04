@@ -13,6 +13,8 @@ function Box2dImage(sat, index, url) {
   // TODO(Wenqi): Add more methods and variables
 }
 
+Box2dImage.prototype = Object.create(SatImage.prototype);
+
 /**
  * 2D box label
  * @param {Sat} sat: context
@@ -22,3 +24,5 @@ function Box2d(sat, id) {
   ImageLabel.call(this, sat, id);
   // TODO(Wenqi): Add more methods and variables
 }
+
+Box2d.prototype = Object.create(ImageLabel.prototype);

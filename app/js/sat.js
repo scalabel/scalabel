@@ -385,11 +385,11 @@ SatLabel.prototype.fromJson = function(object) {
  *
  * To define a new tool:
  *
- * function NewObject(id) {
- *   SatLabel.call(this, id);
+ * function NewObject(sat, id) {
+ *   ImageLabel.call(this, sat, id);
  * }
  *
- * NewObject.prototype = Object.create(SatLabel.prototype);
+ * NewObject.prototype = Object.create(ImageLabel.prototype);
  *
  * @param {Sat} sat: The labeling session
  * @param {number | null} id: label object identifier
