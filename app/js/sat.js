@@ -1,6 +1,6 @@
 /* global sprintf */
 
-/* exported Sat SatImage SatLabel */
+/* exported Sat SatImage SatLabel ImageLabel */
 
 /*
  Utilities
@@ -78,6 +78,8 @@ function Sat(ItemType, LabelType) {
   this.LabelType = LabelType;
   this.events = [];
   this.startTime = Date().now();
+  this.taskId = null;
+  this.projectName = null;
 }
 
 Sat.prototype.getIPAddress = function() {
@@ -341,6 +343,21 @@ SatLabel.prototype.toJson = function() {
   return object;
 };
 
+SatLabel.prototype.startChange = function() {
+};
+
+SatLabel.prototype.updateChange = function() {
+
+};
+
+SatLabel.prototype.finishChange = function() {
+
+};
+
+SatLabel.prototype.redraw = function() {
+
+};
+
 /**
  * Load label information from json object
  * @param {Object} object: object to parse
@@ -360,3 +377,23 @@ SatLabel.prototype.fromJson = function(object) {
     }
   }
 };
+
+
+/**
+ * Base class for all the labeled objects. New label should be instantiated by
+ * Sat.newLabel()
+ *
+ * To define a new tool:
+ *
+ * function NewObject(id) {
+ *   SatLabel.call(this, id);
+ * }
+ *
+ * NewObject.prototype = Object.create(SatLabel.prototype);
+ *
+ * @param {Sat} sat: The labeling session
+ * @param {number | null} id: label object identifier
+ */
+function ImageLabel(sat, id) {
+  SatLabel.call(this, sat, id);
+}
