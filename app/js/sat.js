@@ -99,7 +99,7 @@ Sat.prototype.newLabelId = function() {
 };
 
 Sat.prototype.newLabel = function() {
-  let label = new this.LabelType(this.currentItem, this.newLabelId());
+  let label = new this.LabelType(this, this.newLabelId());
   this.labelIdMap[label.id] = label;
   this.labels.append(label);
   this.currentItem.labels.append(label);
@@ -192,12 +192,21 @@ SatItem.prototype.nextItem = function() {
 };
 
 SatItem.prototype.toJson = function() {
-  return {url: this.url, index: this.index};
+  let labelIds = [];
+  for (let i = 0; i < this.labels.length; i++) {
+    if (this.labels[i].valid) {
+      labelIds.push(this.labels[i].id);
+    }
+  }
+  return {url: this.url, index: this.index, labels: labelIds};
 };
 
 SatItem.prototype.fromJson = function(object) {
   this.url = object.url;
   this.index = object.index;
+  for (let i = 0; i < object.labelIds.length; i++) {
+    this.labels.push(this.sat.labelIdMap[object.labelIds[i]]);
+  }
 };
 
 SatItem.prototype.getVisibleLabels = function() {
@@ -261,14 +270,14 @@ SatImage.prototype.redraw = function() {
  *
  * NewObject.prototype = Object.create(SatLabel.prototype);
  *
- * @param {SatItem} satItem: Item that this label appears
+ * @param {Sat} sat: The labeling session
  * @param {number | null} id: label object identifier
  */
-function SatLabel(satItem, id = -1) {
+function SatLabel(sat, id = -1) {
   this.id = id;
   this.name = null; // category or something else
   this.attributes = [];
-  this.satItem = satItem;
+  this.sat = sat;
   this.parent = null;
   this.children = [];
   this.numChildren = 0;
@@ -320,8 +329,7 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * @return {{id: *}}
  */
 SatLabel.prototype.toJson = function() {
-  let object = {id: this.id, item: this.satItem.index, name: this.name,
-                attributes: this.attributes};
+  let object = {id: this.id, name: this.name, attributes: this.attributes};
   if (this.parent !== null) object['parent'] = this.parent.id;
   if (this.children.length > 0) {
     let childenIds = [];
@@ -341,7 +349,7 @@ SatLabel.prototype.fromJson = function(object) {
   this.id = object.id;
   this.name = object.name;
   this.attributes = object.attributes;
-  let labelIdMap = this.satItem.sat.labelIdMap;
+  let labelIdMap = this.sat.labelIdMap;
   if ('parent' in object) {
     this.parent = labelIdMap[object['parent']];
   }
