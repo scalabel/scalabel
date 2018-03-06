@@ -20,8 +20,7 @@ func GetProjPath() string {
 	if gopath == "" {
         gopath = build.Default.GOPATH
     }
-	// return gopath + "/src/sat" // TODO: move project name to config
-	return "./"
+	return gopath + "/src/sat" // TODO: move project name to config
 }
 
 // Function type for handlers

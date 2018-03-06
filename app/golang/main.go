@@ -42,7 +42,7 @@ func Init(
 		log.Ldate|log.Ltime)
 
 	flag.StringVar(port, "s", "8686", "")
-	flag.StringVar(dataDir, "d", GetProjPath()+"/data", "")
+	flag.StringVar(dataDir, "d", "data", "")
 }
 
 var HTML []byte

@@ -77,7 +77,7 @@ function Sat(ItemType, LabelType) {
   this.ItemType = ItemType;
   this.LabelType = LabelType;
   this.events = [];
-  this.startTime = Date().now();
+  this.startTime = Date.now();
   this.taskId = null;
   this.projectName = null;
 }
