@@ -33,7 +33,7 @@ let COLOR_PALETTE = [
  * Summary: Get the IP address of the client
  * @return {string} client's IP
  */
-function getIPAddress() {
+function getIPAddress() { // eslint-disable-line 
   let reqData = null;
   $.getJSON('//freegeoip.net/json/?callback=?', function(data) {
     reqData = data;

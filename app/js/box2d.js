@@ -22,6 +22,18 @@ Box2dImage.prototype = Object.create(SatImage.prototype);
  */
 function Box2d(sat, id) {
   ImageLabel.call(this, sat, id);
+
+  // constants
+  this.LINE_WIDTH = 2;
+  this.OUTLINE_WIDTH = 1;
+  this.HANDLE_RADIUS = 4;
+  this.HIDDEN_LINE_WIDTH = 4;
+  this.HIDDEN_HANDLE_RADIUS = 7;
+  this.TAG_WIDTH = 25;
+  this.TAG_HEIGHT = 14;
+  this.MIN_BOX_SIZE = 15;
+  this.FADED_ALPHA = 0.5;
+
   // TODO(Wenqi): Add more methods and variables
 }
 
@@ -50,10 +62,11 @@ Box2d.prototype.redraw = function(canvas, hiddenCanvas, selectedBox, resizing,
   // draw visible elements
   self.drawBox(ctx, selectedBox, resizing);
   self.drawHandles(ctx, selectedBox, hoverBox, hoverHandle);
+  self.drawTag(ctx);
 
   // draw hidden elements
   self.drawHiddenBox(hiddenCtx, selectedBox);
-  self.drawHiddenHandles();
+  self.drawHiddenHandles(hiddenCtx, selectedBox, hoverBox, hoverHandle);
 };
 
 /**
@@ -66,9 +79,9 @@ Box2d.prototype.redraw = function(canvas, hiddenCanvas, selectedBox, resizing,
 Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
   let self = this;
   ctx.save(); // save the canvas context settings
-  if (selectedBox && selectedBox != this.id) {
+  if (selectedBox && selectedBox != self.id) {
     // if exists selected box and it's not this one, alpha this out
-    ctx.globalAlpha = FADED_ALPHA; // TODO: where is FADED_ALPHA?
+    ctx.globalAlpha = self.FADED_ALPHA;
   }
   if (resizing) {
     ctx.setLineDash([3]); // if box is being resized, use line dashes
@@ -79,7 +92,7 @@ Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
     // otherwise use regular color
     ctx.strokeStyle = self.color();
   }
-  ctx.lineWidth = LINE_WIDTH; // set line width TODO: where is LINE_WIDTH?
+  ctx.lineWidth = self.LINE_WIDTH; // set line width TODO: where is LINE_WIDTH?
   ctx.strokeRect(self.x1, self.y1, self.w, self.h); // draw the box
   ctx.restore(); // restore the canvas to saved settings
 };
@@ -122,13 +135,13 @@ Box2d.prototype.drawHandle = function(ctx, handleNo) {
   } else {
     ctx.fillStyle = self.color();
   }
-  ctx.lineWidth = LINE_WIDTH; // TODO: where is LINE_WIDTH?
+  ctx.lineWidth = self.LINE_WIDTH;
   ctx.beginPath();
-  ctx.arc(posHandle.x, posHandle.y, HANDLE_RADIUS, 0, 2 * Math.PI);
+  ctx.arc(posHandle.x, posHandle.y, self.HANDLE_RADIUS, 0, 2 * Math.PI);
   ctx.fill();
   if (!self.isSmall()) {
     ctx.fillStyle = 'white';
-    ctx.lineWidth = OUTLINE_WIDTH; // TODO: where is OUTLINE_WIDTH?
+    ctx.lineWidth = self.OUTLINE_WIDTH;
     ctx.stroke();
   }
   ctx.restore(); // restore the canvas to saved settings
@@ -146,11 +159,10 @@ Box2d.prototype.drawTag = function(ctx) {
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
     ctx.fillStyle = self.color();
-    ctx.fillRect(self.x1 + 1, self.y1 - TAG_HEIGHT, TAG_WIDTH, TAG_HEIGHT);
-    // TODO: define constants
+    ctx.fillRect(self.x1 + 1, self.y1 - self.TAG_HEIGHT, self.TAG_WIDTH,
+      self.TAG_HEIGHT);
     ctx.fillStyle = 'rgb(0, 0, 0)';
     ctx.fillText(abbr, self.x1 + 3, self.y1 - 3);
-    // TODO: define these as constants
     ctx.restore();
   }
 };
@@ -167,8 +179,7 @@ Box2d.prototype.drawHiddenBox = function(hiddenCtx, selectedBox) {
   if (!selectedBox || selectedBox === self.id) {
     hiddenCtx.save(); // save the canvas context settings
     hiddenCtx.strokeStyle = self.hiddenColor(8); // 8 represents the box itself
-    hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH;
-    // TODO: where is HIDDEN_LINE_WIDTH?
+    hiddenCtx.lineWidth = self.HIDDEN_LINE_WIDTH;
     hiddenCtx.strokeRect(self.x1, self.y1, self.w, self.h); // draw the box
     hiddenCtx.restore(); // restore the canvas to saved settings
   }
@@ -208,9 +219,10 @@ Box2d.prototype.drawHiddenHandle = function(hiddenCtx, handleNo) {
   hiddenCtx.save(); // save the canvas context settings
   let posHandle = self._getHandle(handleNo);
   hiddenCtx.fillStyle = self.hiddenColor(handleNo);
-  hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH; // TODO: where is HIDDEN_LINE_WIDTH?
+  hiddenCtx.lineWidth = self.HIDDEN_LINE_WIDTH;
   hiddenCtx.beginPath();
-  hiddenCtx.arc(posHandle.x, posHandle.y, HIDDEN_HANDLE_RADIUS, 0, 2 * Math.PI);
+  hiddenCtx.arc(posHandle.x, posHandle.y, self.HIDDEN_HANDLE_RADIUS, 0,
+    2 * Math.PI);
   hiddenCtx.fill();
   hiddenCtx.restore(); // restore the canvas to saved settings
 };
@@ -220,8 +232,7 @@ Box2d.prototype.drawHiddenHandle = function(hiddenCtx, handleNo) {
  * @return {boolean} - True if the box is too small.
  */
 Box2d.prototype.isSmall = function() {
-  return Math.min(this.w, this.h) < MIN_BOX_SIZE;
-  // TODO: where do final vars like MIN_BOX_SIZE go?
+  return Math.min(this.w, this.h) < self.MIN_BOX_SIZE;
   // TODO: define Box2d variables
 };
 
