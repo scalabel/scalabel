@@ -176,7 +176,6 @@
     }
 
     BBoxLabeling.prototype.replay = function() {
-      this.updateImage(imageList[currentIndex].url);
       let labels = imageList[currentIndex].labels;
       ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
       ghostCtx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
@@ -209,6 +208,9 @@
                 && label.attribute.traffic_light_color) {
               rect.traffic_light_color = label.attribute.traffic_light_color;
             }
+            if (label.customAttributes) {
+              rect.customAttributes = label.customAttributes;
+            }
 
             rect.id = parseInt(label.id);
             rectDict[rect.id] = rect;
@@ -223,6 +225,7 @@
 
     BBoxLabeling.prototype.updateImage = function(url) {
       this.options.url = url;
+      let bboxLabeling = this; 
       let sourceImage = new Image();
       sourceImage.onload = function() {
         mainCanvas.width = sourceImage.width;
@@ -230,6 +233,7 @@
         hiddenCanvas.width = sourceImage.width;
         hiddenCanvas.height = sourceImage.height;
         canvasResize();
+        bboxLabeling.replay();
       };
       sourceImage.src = url;
       this.image_canvas.css({
@@ -261,6 +265,7 @@
               truncated: rect.truncated,
               traffic_light_color: rect.traffic_light_color,
             },
+            customAttributes: rect.customAttributes
           };
           this.output_labels.push(output);
         }
@@ -321,6 +326,24 @@
       let currentHandle = -1;
       let previousHandle = -1;
       let bboxLabeling = this;
+
+      let attributeNames = [];
+      let attributes = assignment.attributes;
+      if (attributes) {
+        attributeNames = Object.keys(assignment.attributes);
+      }
+
+      attributeNames.forEach(function(a) {
+        $('#' + a + "_select").change(function(){
+          if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
+            let attrIdx = $(this)[0].selectedIndex;
+            let attributeOptions = assignment.attributes[a];
+            rectDict[currentBbox.id].customAttributes[a]
+                = attributeOptions[attrIdx];
+            bboxLabeling.highlight(currentBbox);
+          }
+        }); 
+      });
 
       $('#category_select').change(function() {
         if (currentBbox !== -1 && typeof(currentBbox) !== 'undefined') {
@@ -385,12 +408,12 @@
           ctx.clearRect(0, 0, imageCanvasWidth, imageCanvasHeight);
           ctx.setLineDash([]);
           for (let key in rectDict) {
-            if (rectDict[key].hasOwnProperty('num')) {
+            //if (rectDict[key].hasOwnProperty('num')) {
               let cur = rectDict[key];
               cur.drawBox();
               cur.drawHiddenBox();
               cur.drawTag();
-            }
+            //}
           }
         }
         // "A" key used for checking occluded box
@@ -493,8 +516,7 @@
             if (currentHandle >= 0 && currentHandle <= 7) {
               let handlePos
                   = bboxHandles[currentHandle](selectedBbox);
-              if (dist(mousePos, handlePos)
-                  < HIDDEN_HANDLE_RADIUS - 2) {
+              if (dist(mousePos, handlePos) < HIDDEN_HANDLE_RADIUS - 2) {
                 selectedBbox.drawHandle(currentHandle);
               }
             } else if (currentHandle === 8) {
@@ -508,12 +530,10 @@
                 , imageCanvasWidth, imageCanvasHeight);
             ctx.setLineDash([]);
             for (let key in rectDict) {
-              if (rectDict[key].hasOwnProperty('num')) {
-                let cur = rectDict[key];
-                cur.drawBox();
-                cur.drawHiddenBox();
-                cur.drawTag();
-              }
+              let cur = rectDict[key];
+              cur.drawBox();
+              cur.drawHiddenBox();
+              cur.drawTag();
             }
           }
         }
@@ -552,6 +572,11 @@
           bboxLabeling.highlight(currentBbox);
           $('#category_select').prop('selectedIndex',
               assignment.category.indexOf(rectDict[currentBbox.id].category));
+          attributeNames.forEach(function(a) {
+              let attributeOptions = assignment.attributes[a];
+              $('#' + a + "_select").prop('selectedIndex',
+                  attributeOptions.indexOf(rectDict[currentBbox.id].customAttributes[a]));
+          });
           if (typeof rectDict[currentBbox.id].occluded !== 'undefined'
               && typeof rectDict[currentBbox.id].truncated
               !== 'undefined') {
@@ -579,16 +604,22 @@
             $('#toolbox').css('background-color', '#DCDCDC');
           }
           // Draw a new bbox
-          let catIdx = document.getElementById('category_select').
-              selectedIndex;
+          let catIdx = $('#category_select')[0].selectedIndex;
           let cat = assignment.category[catIdx];
+          let customAttributes = {};
+          attributeNames.forEach(function(a) {
+            let attrIdx = $("#" + a + "_select")[0].selectedIndex;
+            let attributeOptions = assignment.attributes[a];
+            let attr = attributeOptions[attrIdx];
+            customAttributes[a] = attr;
+          });
           let occluded = $('[name=\'occluded-checkbox\']').
               prop('checked');
           let truncated = $('[name=\'truncated-checkbox\']').
               prop('checked');
           let color = $('input[type=\'radio\']:checked').attr('id');
           rect = new BBox(cat, Object.keys(rectDict).length,
-              [occluded, truncated, color]);
+              [occluded, truncated, color], customAttributes);
           rect.start(e.clientX, e.clientY);
           state = 'draw';
         }
@@ -607,7 +638,11 @@
           $('#category_select').prop('selectedIndex',
               assignment.category.indexOf(
                   rectDict[currentBbox.id].category));
-
+          attributeNames.forEach(function(a) {
+              let attributeOptions = assignment.attributes[a];
+              $('#' + a + "_select").prop('selectedIndex',
+                  attributeOptions.indexOf(rectDict[currentBbox.id].customAttributes[a]));
+          });
           if (typeof rectDict[currentBbox.id].occluded
               !== 'undefined'
               && typeof rectDict[currentBbox.id].truncated
@@ -634,15 +669,14 @@
   })();
 
   // BBox Class
-  let BBox;
-  BBox = (function() {
+  this.BBox = (function() {
     /**
      * Summary: To be completed.
      * @param {type} category: Description.
      * @param {type} id: Description.
      * @param {int} attribute: Description.
      */
-    function BBox(category, id, attribute) {
+    function BBox(category, id, attribute, customAttributes) {
       SatLabel.call(this, null, id);
       this.x = 0;
       this.y = 0;
@@ -652,6 +686,7 @@
       this.occluded = attribute[0];
       this.truncated = attribute[1];
       this.traffic_light_color = attribute[2];
+      this.customAttributes = customAttributes;
       this.id = id;
     }
 

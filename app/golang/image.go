@@ -15,6 +15,7 @@ type Task struct {
 	ProjectName        string        `json:"projectName"`
 	WorkerID           string        `json:"workerId"`
 	Category           []string      `json:"category"`
+	Attributes		   interface{}   `json:"attributes"`
 	LabelType          string        `json:"labelType"`
 	TaskSize           int           `json:"taskSize"`
 	Images             []ImageObject `json:"images"`
@@ -68,6 +69,7 @@ type Label struct {
 	Id        string      `json:"id"`
 	Category  string      `json:"category"`
 	Attribute interface{} `json:"attribute"`
+	CustomAttributes interface{} `json:"customAttributes"`
 	Position  interface{} `json:"position"`
 }
 
@@ -98,13 +100,25 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("image_list")
 	defer file.Close()
 	json.NewDecoder(file).Decode(&task)
-
+	
 	// Process label categories file
 	labelFile, _, err := r.FormFile("label")
 	var labels []string
 	scanner := bufio.NewScanner(labelFile)
 	for scanner.Scan() {
 		labels = append(labels, scanner.Text())
+	}
+
+	// Process attributes file
+	// This holds a map of strings to arbitrary data types.
+	var customAttributes map[string]interface{}
+	attributeFile, _, err := r.FormFile("custom_attributes")
+	if err != nil {
+		Error.Println("Failed to load the attribute file")
+	} else {
+		defer attributeFile.Close()
+		json.NewDecoder(attributeFile).Decode(&customAttributes)
+		Info.Println(customAttributes)
 	}
 
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
@@ -119,6 +133,7 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 			ProjectName:      r.FormValue("project_name"),
 			LabelType:        r.FormValue("label_type"),
 			Category:         labels,
+			Attributes:		  customAttributes,
 			VendorID:         r.FormValue("vendor_id"),
 			AssignmentID:     formatID(assignmentID),
 			WorkerID:         strconv.Itoa(assignmentID),
