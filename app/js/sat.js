@@ -125,17 +125,17 @@ Sat.prototype.load = function() {
   let x = new XMLHttpRequest();
   x.onreadystatechange = function() {
     if (x.readyState === 4) {
-      assignment = JSON.parse(x.response);
-      self.itemLocs = assignment.items;
+      let assignment = JSON.parse(x.response);
+      let itemLocs = assignment.items;
       self.currentItem = 0;
-      self.addEvent('start labeling', currentItem); // ??
+      self.addEvent('start labeling', self.currentItem); // ??
       // preload items
-      self.items = []
+      self.items = [];
       for (let i = 0; i < itemLocs.length; i++) {
         self.items.push(new self.ItemType(self, i, itemLocs[i]));
       }
     }
-  }
+  };
   // get params from url path
   let searchParams = new URLSearchParams(window.location.search);
   self.taskId = searchParams.get('task_id');
