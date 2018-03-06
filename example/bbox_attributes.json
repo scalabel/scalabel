@@ -1,0 +1,12 @@
+{
+  "color": [
+    "red",
+    "blue",
+    "yellow"
+  ],
+  "behavior": [
+    "walking",
+    "standing",
+    "running"
+  ]
+}
