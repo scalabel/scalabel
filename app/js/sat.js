@@ -30,6 +30,18 @@ let COLOR_PALETTE = [
 ];
 
 /**
+ * Summary: Get the IP address of the client
+ * @return {string} client's IP
+ */
+function getIPAddress() {
+  let reqData = null;
+  $.getJSON('//freegeoip.net/json/?callback=?', function(data) {
+    reqData = data;
+  });
+  return reqData.ip;
+}
+
+/**
  * Summary: Tune the shade or tint of rgb color
  * @param {[number,number,number]} rgb: input color
  * @param {[number,number,number]} base: base color (white or black)
