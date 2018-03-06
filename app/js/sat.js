@@ -30,18 +30,6 @@ let COLOR_PALETTE = [
 ];
 
 /**
- * Summary: Get the IP address of the client
- * @return {string} client's IP
- */
-function getIPAddress() { // eslint-disable-line 
-  let reqData = null;
-  $.getJSON('//freegeoip.net/json/?callback=?', function(data) {
-    reqData = data;
-  });
-  return reqData.ip;
-}
-
-/**
  * Summary: Tune the shade or tint of rgb color
  * @param {[number,number,number]} rgb: input color
  * @param {[number,number,number]} base: base color (white or black)
@@ -95,7 +83,7 @@ function Sat(ItemType, LabelType) {
 }
 
 Sat.prototype.getIPAddress = function() {
-  $.getJSON('//ipinfo.io/json', function(data) {
+  $.getJSON('//freegeoip.net/json/?callback=?', function(data) {
     this.ipAddress = data;
   });
 };
@@ -133,7 +121,33 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
 
 // TODO
 Sat.prototype.load = function() {
+  let self = this;
+  let x = new XMLHttpRequest();
+  x.onreadystatechange = function() {
+    if (x.readyState === 4) {
+      assignment = JSON.parse(x.response);
+      self.itemLocs = assignment.items;
+      self.currentItem = 0;
+      self.addEvent('start labeling', currentItem); // ??
+      // preload items
+      self.items = []
+      for (let i = 0; i < itemLocs.length; i++) {
+        self.items.push(new self.ItemType(self, i, itemLocs[i]));
+      }
+    }
+  }
+  // get params from url path
+  let searchParams = new URLSearchParams(window.location.search);
+  self.taskId = searchParams.get('task_id');
+  self.projectName = searchParams.get('project_name');
 
+  // ?
+  let request = JSON.stringify({
+    'assignmentId': self.taskId,
+    'projectName': self.projectName,
+  });
+  x.open('POST', './requestSubmission');
+  x.send(request);
 };
 
 // TODO
