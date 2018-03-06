@@ -53,13 +53,11 @@ Box2d.prototype.redraw = function(canvas, hiddenCanvas, selectedBox, resizing,
 
   // draw hidden elements
   self.drawHiddenBox(hiddenCtx, selectedBox);
-  self.drawHiddenHandles()
-
-}
+  self.drawHiddenHandles();
+};
 
 /**
  * Draw the box part of this bounding box.
- * @param {object} canvas - HTML canvas for visible objects.
  * @param {object} ctx - Canvas context.
  * @param {number} selectedBox - ID of the currently selected box, or null if
  *   no box selected.
@@ -76,7 +74,7 @@ Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
     ctx.setLineDash([3]); // if box is being resized, use line dashes
   }
   if (self.isSmall()) {
-    ctx.strokeStyle = 'rgb(169, 169, 169)' // if box is too small, gray it out
+    ctx.strokeStyle = 'rgb(169, 169, 169)'; // if box is too small, gray it out
   } else {
     // otherwise use regular color
     ctx.strokeStyle = self.color();
@@ -84,16 +82,20 @@ Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
   ctx.lineWidth = LINE_WIDTH; // set line width TODO: where is LINE_WIDTH?
   ctx.strokeRect(self.x1, self.y1, self.w, self.h); // draw the box
   ctx.restore(); // restore the canvas to saved settings
-}
+};
 
 /**
  * Draw the resize handles of this bounding box.
  * @param {object} ctx - Canvas context.
  * @param {number} selectedBox - ID of the currently selected box, or null if
  *   no box selected.
- * @param {number} hoverHandle - ID of the currently hovered handle, or null
+ * @param{number} hoverBox - ID of the currently hovered over box, or null if
+ *   no box hovered over.
+ * @param {number} hoverHandle - handle number of the currently hovered handle,
+ *   or null if no handle hovered.
  */
-Box2d.prototype.drawHandles = function(ctx, selectedBox, hoverBox, hoverHandle) {
+Box2d.prototype.drawHandles = function(ctx, selectedBox, hoverBox,
+  hoverHandle) {
   let self = this;
   if (selectedBox === self.id) {
     // if this box is selected, draw all its handles
@@ -104,7 +106,7 @@ Box2d.prototype.drawHandles = function(ctx, selectedBox, hoverBox, hoverHandle) 
     // else if no selection and a handle is hovered over, draw it
     self.drawHandle(ctx, hoverHandle);
   }
-}
+};
 
 /**
  * Draw a specified resize handle of this bounding box.
@@ -114,7 +116,7 @@ Box2d.prototype.drawHandles = function(ctx, selectedBox, hoverBox, hoverHandle) 
 Box2d.prototype.drawHandle = function(ctx, handleNo) {
   let self = this;
   ctx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo)
+  let posHandle = self._getHandle(handleNo);
   if (self.isSmall()) {
     ctx.fillStyle = 'rgb(169, 169, 169)';
   } else {
@@ -130,7 +132,7 @@ Box2d.prototype.drawHandle = function(ctx, handleNo) {
     ctx.stroke();
   }
   ctx.restore(); // restore the canvas to saved settings
-}
+};
 
 /**
  * Draw the label tag of this bounding box.
@@ -144,12 +146,14 @@ Box2d.prototype.drawTag = function(ctx) {
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
     ctx.fillStyle = self.color();
-    ctx.fillRect(self.x1 + 1, self.y1 - TAG_HEIGHT, TAG_WIDTH, TAG_HEIGHT); // TODO: define constants
+    ctx.fillRect(self.x1 + 1, self.y1 - TAG_HEIGHT, TAG_WIDTH, TAG_HEIGHT);
+    // TODO: define constants
     ctx.fillStyle = 'rgb(0, 0, 0)';
-    ctx.fillText(abbr, self.x1 + 3, self.y1 - 3); // TODO: define these as constants
+    ctx.fillText(abbr, self.x1 + 3, self.y1 - 3);
+    // TODO: define these as constants
     ctx.restore();
   }
-}
+};
 
 /**
  * Draw the box part of the hidden box.
@@ -163,20 +167,25 @@ Box2d.prototype.drawHiddenBox = function(hiddenCtx, selectedBox) {
   if (!selectedBox || selectedBox === self.id) {
     hiddenCtx.save(); // save the canvas context settings
     hiddenCtx.strokeStyle = self.hiddenColor(8); // 8 represents the box itself
-    hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH; // TODO: where is HIDDEN_LINE_WIDTH?
+    hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH;
+    // TODO: where is HIDDEN_LINE_WIDTH?
     hiddenCtx.strokeRect(self.x1, self.y1, self.w, self.h); // draw the box
     hiddenCtx.restore(); // restore the canvas to saved settings
   }
-}
+};
 
 /**
  * Draw the hidden resize handles of this bounding box.
  * @param {object} hiddenCtx - Hidden canvas context.
  * @param {number} selectedBox - ID of the currently selected box, or null if
  *   no box selected.
- * @param {number} hoverHandle - ID of the currently hovered handle, or null
+ * @param{number} hoverBox - ID of the currently hovered over box, or null if
+ *   no box hovered over.
+ * @param {number} hoverHandle - handle number of the currently hovered handle,
+ *   or null if no handle hovered.
  */
-Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox, hoverHandle) {
+Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox, hoverBox,
+ hoverHandle) {
   let self = this;
   if (selectedBox === self.id) {
     // if this box is selected, draw all its hidden handles
@@ -187,7 +196,7 @@ Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox, hoverHandle
     // else if no selection and a handle is hovered over, draw it
     self.drawHiddenHandle(hiddenCtx, hoverHandle);
   }
-}
+};
 
 /**
  * Draw a specified hidden resize handle of this bounding box.
@@ -197,14 +206,14 @@ Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox, hoverHandle
 Box2d.prototype.drawHiddenHandle = function(hiddenCtx, handleNo) {
   let self = this;
   hiddenCtx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo)
+  let posHandle = self._getHandle(handleNo);
   hiddenCtx.fillStyle = self.hiddenColor(handleNo);
   hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH; // TODO: where is HIDDEN_LINE_WIDTH?
   hiddenCtx.beginPath();
   hiddenCtx.arc(posHandle.x, posHandle.y, HIDDEN_HANDLE_RADIUS, 0, 2 * Math.PI);
   hiddenCtx.fill();
   hiddenCtx.restore(); // restore the canvas to saved settings
-}
+};
 
 /**
  * Get whether this bounding box is too small.
@@ -214,20 +223,25 @@ Box2d.prototype.isSmall = function() {
   return Math.min(this.w, this.h) < MIN_BOX_SIZE;
   // TODO: where do final vars like MIN_BOX_SIZE go?
   // TODO: define Box2d variables
-}
+};
 
-Box2d.prototype.hiddenColor = function(handle) {
-
-}
+/**
+ * Get the hidden color as rgb, which encodes the id and handle index.
+ * @param {number} handleNo - The handle number, ranges from 0 to 8.
+ * @return {string} - The hidden color rgb string.
+ */
+Box2d.prototype.hiddenColor = function(handleNo) {
+  return ['(rgb' + (this.id + 1), handleNo + 1, '0)'].join(',');
+};
 
 /**
  * Converts handle number to the central point of specified resize handle.
- * @param {number} - The number corresponding to 1 of 8 resize handles.
+ * @param {number} handleNo - The handle number, ranges from 0 to 8.
  * @return {object} - A struct with x and y of the handle's center.
  */
 Box2d.prototype._getHandle = function(handleNo) {
   let self = this;
-  switch(index) {
+  switch (handleNo) {
     case 0:
       return {x: self.x1, y: self.y1};
     case 1:
@@ -247,4 +261,4 @@ Box2d.prototype._getHandle = function(handleNo) {
     case 8:
       return; // this shouldn't happen (8 is for the box)
   }
-}
+};
