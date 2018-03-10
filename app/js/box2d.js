@@ -10,10 +10,49 @@
  */
 function Box2dImage(sat, index, url) {
   SatImage.call(this, sat, index, url);
+
+  this.imageCanvas = document.getElementById('image_canvas');
+  this.hiddenCanvas = document.getElementById('hidden_canvas');
+  this.mainCtx = this.imageCanvas.getContext('2d');
+  this.hiddenCtx = this.hiddenCanvas.getContext('2d');
+
   // TODO(Wenqi): Add more methods and variables
 }
 
 Box2dImage.prototype = Object.create(SatImage.prototype);
+
+/**
+ * TODO
+ */
+Box2dImage.prototype.redraw = function() {
+  // 
+  console.log(this);
+  let padBox = this.getPadding();
+  this.mainCtx.drawImage(this.image, 0, 0, this.image.width, this.image.height, padBox.x, padBox.y, padBox.w, padBox.h);
+}
+
+/**
+ * TODO
+ */
+Box2dImage.prototype.getPadding = function() {
+  // which dim is bigger compared to canvas
+  let xRatio = this.image.width / this.imageCanvas.width;
+  let yRatio = this.image.height / this.imageCanvas.height;
+  // use ratios to determine how to pad
+  let box = {x: 0, y: 0, w: 0, h: 0};
+  if (xRatio >= yRatio) {
+    box.x = 0;
+    box.y = 0.5 * (this.imageCanvas.height - this.imageCanvas.width * this.image.height / this.image.width);
+    box.w = this.imageCanvas.width;
+    box.h = this.imageCanvas.height - 2 * box.y;
+  } else {
+    box.x = 0.5 * (this.imageCanvas.width - this.imageCanvas.height * this.image.width / this.image.height);
+    box.y = 0;
+    box.w = this.imageCanvas.width - 2 * box.x;
+    box.h = this.imageCanvas.height;
+  }
+  return box;
+}
 
 /**
  * 2D box label

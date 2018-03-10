@@ -154,7 +154,7 @@ func GetResult(assignmentID string, projectName string) []byte {
 
 		task := Task{}
 		json.Unmarshal(taskJson, &task)
-		result.Images = task.Images
+		result.Items = task.Items
 	}
 	resultJson, _ := json.MarshalIndent(result, "", "  ")
 
@@ -201,8 +201,8 @@ func GetFullResult(projectName string) []byte {
 
 			task := Task{}
 			json.Unmarshal(resultJson, &task)
-			for i := 0; i < len(task.Images); i += 1 {
-				result.Images = append(result.Images, task.Images[i])
+			for i := 0; i < len(task.Items); i += 1 {
+				result.Items = append(result.Items, task.Items[i])
 			}
 		}
 

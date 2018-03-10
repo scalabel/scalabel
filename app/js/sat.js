@@ -127,12 +127,15 @@ Sat.prototype.load = function() {
     if (x.readyState === 4) {
       let assignment = JSON.parse(x.response);
       let itemLocs = assignment.items;
-      self.currentItem = 0;
+      self.currentItem = 0; // DOESN'T WORK
       self.addEvent('start labeling', self.currentItem); // ??
       // preload items
       self.items = [];
       for (let i = 0; i < itemLocs.length; i++) {
-        self.items.push(new self.ItemType(self, i, itemLocs[i]));
+        self.items.push(new self.ItemType(self, i, itemLocs[i].url));
+      }
+      self.items[self.currentItem].image.onload = function() {
+        self.items[self.currentItem].redraw();
       }
     }
   };
@@ -253,7 +256,7 @@ SatItem.prototype.getVisibleLabels = function() {
  * To define a new tool:
  *
  * function NewTool() {
- *   SatImage.call(this);
+ *   SatImage.call(this, sat, index, url);
  * }
  *
  * NewTool.prototype = Object.create(SatImage.prototype);
@@ -263,22 +266,24 @@ SatItem.prototype.getVisibleLabels = function() {
  * @param {string} url: url to load the item
  */
 function SatImage(sat, index, url) {
-  SatItem.call(this, sat, index, url);
-  this.image = new Image();
-  this.image.onload = function() {
-    this.loaded();
+  let self = this;
+  SatItem.call(self, sat, index, url);
+  self.image = new Image();
+  self.image.onload = function() {
+    self.loaded();
   };
-  this.image.src = this.url;
+  self.image.src = self.url;
 
-  this.imageRatio = 0;
+  self.imageRatio = 0;
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
 
 SatImage.prototype.loaded = function() {
   // Call SatItem loaded
-  Object.getPrototypeOf(SatItem.prototype).loaded();
-  // Show the image here when the image is loaded.
+  SatItem.prototype.loaded.call(this);
+  // Show the image here when the image is loaded. (Why here? Will show every image on load, which is not what we want, we want user to control top image)
+  
 };
 
 // TODO
