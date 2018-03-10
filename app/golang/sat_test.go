@@ -21,12 +21,12 @@ func TestInit(t *testing.T) {
 	//var expectedDataDir string
 	//var err error
 	//if *travis {
-	//	expectedDataDir = "/home/travis/gopath/src/sat/data"
+	//  expectedDataDir = "/home/travis/gopath/src/sat/data"
 	//} else {
-	//	expectedDataDir = path.Join(GetProjPath(), "/data")
+	//  expectedDataDir = path.Join(GetProjPath(), "/data")
 	//}
 	//if err != nil {
-	//	t.Fatal(err)
+	//  t.Fatal(err)
 	//}
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 
@@ -35,8 +35,8 @@ func TestInit(t *testing.T) {
 
 	if port == nil {
 		t.Errorf("got no port")
-	//} else if *dataDir != expectedDataDir {
-	//	t.Errorf("got %#v, wanted %#v", *dataDir, expectedDataDir)
+		//} else if *dataDir != expectedDataDir {
+		//  t.Errorf("got %#v, wanted %#v", *dataDir, expectedDataDir)
 	} else {
 		print("Passed TestInit!\n")
 	}
@@ -45,7 +45,7 @@ func TestInit(t *testing.T) {
 func TestGetPaths(t *testing.T) {
 	a := &Task{}
 	str := `{"AssignmentID": "0000", "ProjectName": "testPath",
-			"StartTime": 1517447292, "SubmitTime": 1517447292}`
+            "StartTime": 1517447292, "SubmitTime": 1517447292}`
 	err := json.Unmarshal([]byte(str), a)
 
 	expectedAssign := path.Join(*dataDir, "Assignments", a.ProjectName,
@@ -117,157 +117,157 @@ func TestIndexHandler(t *testing.T) {
 }
 
 // func TestCreateHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/create", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+//  req, err := http.NewRequest("GET", "/create", nil)
+//  if err != nil {
+//      t.Fatal(err)
+//  }
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(MakeStandardHandler("/app/control/create.html"))
+//  rr := httptest.NewRecorder()
+//  handler := http.HandlerFunc(MakeStandardHandler("/app/control/create.html"))
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+//  handler.ServeHTTP(rr, req)
+//  body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("createHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Labeling tool"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("createHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestCreateHandler!\n")
-// 	}
+//  if status := rr.Code; status != http.StatusOK {
+//      t.Errorf("createHandler returned wrong status code:",
+//          "got %v want %v", status, http.StatusOK)
+//  } else if expected := "Labeling tool"; !strings.Contains(string(body), expected) {
+//      t.Errorf("createHandler does not contain expected content: %v", expected)
+//  } else {
+//      print("Passed TestCreateHandler!\n")
+//  }
 // }
 
 // func TestDashboardHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/dashboard", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+//  req, err := http.NewRequest("GET", "/dashboard", nil)
+//  if err != nil {
+//      t.Fatal(err)
+//  }
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(MakeStandardHandler("/app/control/monitor.html"))
+//  rr := httptest.NewRecorder()
+//  handler := http.HandlerFunc(MakeStandardHandler("/app/control/monitor.html"))
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+//  handler.ServeHTTP(rr, req)
+//  body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("dashboardHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Project Dashboard"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("dashboardHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestDashboardHandler!\n")
-// 	}
+//  if status := rr.Code; status != http.StatusOK {
+//      t.Errorf("dashboardHandler returned wrong status code:",
+//          "got %v want %v", status, http.StatusOK)
+//  } else if expected := "Project Dashboard"; !strings.Contains(string(body), expected) {
+//      t.Errorf("dashboardHandler does not contain expected content: %v", expected)
+//  } else {
+//      print("Passed TestDashboardHandler!\n")
+//  }
 // }
 
 // func TestBboxLabelingHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/2d_bbox_labeling", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+//  req, err := http.NewRequest("GET", "/2d_bbox_labeling", nil)
+//  if err != nil {
+//      t.Fatal(err)
+//  }
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(bboxLabelingHandler)
+//  rr := httptest.NewRecorder()
+//  handler := http.HandlerFunc(bboxLabelingHandler)
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+//  handler.ServeHTTP(rr, req)
+//  body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("bboxLabelingHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("bboxLabelingHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestBboxLabelingHandler!\n")
-// 	}
+//  if status := rr.Code; status != http.StatusOK {
+//      t.Errorf("bboxLabelingHandler returned wrong status code:",
+//          "got %v want %v", status, http.StatusOK)
+//  } else if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
+//      t.Errorf("bboxLabelingHandler does not contain expected content: %v", expected)
+//  } else {
+//      print("Passed TestBboxLabelingHandler!\n")
+//  }
 // }
 
 // func TestRoadLabelingHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/2d_road_labeling", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+//  req, err := http.NewRequest("GET", "/2d_road_labeling", nil)
+//  if err != nil {
+//      t.Fatal(err)
+//  }
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(roadLabelingHandler)
+//  rr := httptest.NewRecorder()
+//  handler := http.HandlerFunc(roadLabelingHandler)
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+//  handler.ServeHTTP(rr, req)
+//  body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("roadLabelingHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Drivable Area Labeling Tool"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("roadLabelingHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestRoadLabelingHandler!\n")
-// 	}
+//  if status := rr.Code; status != http.StatusOK {
+//      t.Errorf("roadLabelingHandler returned wrong status code:",
+//          "got %v want %v", status, http.StatusOK)
+//  } else if expected := "Drivable Area Labeling Tool"; !strings.Contains(string(body), expected) {
+//      t.Errorf("roadLabelingHandler does not contain expected content: %v", expected)
+//  } else {
+//      print("Passed TestRoadLabelingHandler!\n")
+//  }
 // }
 
 // func TestSegLabelingHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/2d_seg_labeling", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+//  req, err := http.NewRequest("GET", "/2d_seg_labeling", nil)
+//  if err != nil {
+//      t.Fatal(err)
+//  }
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(segLabelingHandler)
+//  rr := httptest.NewRecorder()
+//  handler := http.HandlerFunc(segLabelingHandler)
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+//  handler.ServeHTTP(rr, req)
+//  body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("segLabelingHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Segmentation Labeling Tool"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("segLabelingHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestSegLabelingHandler!\n")
-// 	}
+//  if status := rr.Code; status != http.StatusOK {
+//      t.Errorf("segLabelingHandler returned wrong status code:",
+//          "got %v want %v", status, http.StatusOK)
+//  } else if expected := "Segmentation Labeling Tool"; !strings.Contains(string(body), expected) {
+//      t.Errorf("segLabelingHandler does not contain expected content: %v", expected)
+//  } else {
+//      print("Passed TestSegLabelingHandler!\n")
+//  }
 // }
 
 // func TestLaneLabelingHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/2d_lane_labeling", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+//  req, err := http.NewRequest("GET", "/2d_lane_labeling", nil)
+//  if err != nil {
+//      t.Fatal(err)
+//  }
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(laneLabelingHandler)
+//  rr := httptest.NewRecorder()
+//  handler := http.HandlerFunc(laneLabelingHandler)
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+//  handler.ServeHTTP(rr, req)
+//  body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("laneLabelingHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Lane Edge Labeling Tool"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("laneLabelingHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestLaneLabelingHandler!\n")
-// 	}
+//  if status := rr.Code; status != http.StatusOK {
+//      t.Errorf("laneLabelingHandler returned wrong status code:",
+//          "got %v want %v", status, http.StatusOK)
+//  } else if expected := "Lane Edge Labeling Tool"; !strings.Contains(string(body), expected) {
+//      t.Errorf("laneLabelingHandler does not contain expected content: %v", expected)
+//  } else {
+//      print("Passed TestLaneLabelingHandler!\n")
+//  }
 // }
 
 // func TestImageLabelingHandler(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/image_labeling", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+//  req, err := http.NewRequest("GET", "/image_labeling", nil)
+//  if err != nil {
+//      t.Fatal(err)
+//  }
 
-// 	rr := httptest.NewRecorder()
-// 	handler := http.HandlerFunc(imageLabelingHandler)
+//  rr := httptest.NewRecorder()
+//  handler := http.HandlerFunc(imageLabelingHandler)
 
-// 	handler.ServeHTTP(rr, req)
-// 	body, _ := ioutil.ReadAll(rr.Result().Body)
+//  handler.ServeHTTP(rr, req)
+//  body, _ := ioutil.ReadAll(rr.Result().Body)
 
-// 	if status := rr.Code; status != http.StatusOK {
-// 		t.Errorf("imageLabelingHandler returned wrong status code:",
-// 			"got %v want %v", status, http.StatusOK)
-// 	} else if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
-// 		t.Errorf("imageLabelingHandler does not contain expected content: %v", expected)
-// 	} else {
-// 		print("Passed TestImageLabelingHandler!\n")
-// 	}
+//  if status := rr.Code; status != http.StatusOK {
+//      t.Errorf("imageLabelingHandler returned wrong status code:",
+//          "got %v want %v", status, http.StatusOK)
+//  } else if expected := "Bounding box labeling tool"; !strings.Contains(string(body), expected) {
+//      t.Errorf("imageLabelingHandler does not contain expected content: %v", expected)
+//  } else {
+//      print("Passed TestImageLabelingHandler!\n")
+//  }
 // }
 
 func TestPostAssignmentHandler(t *testing.T) {

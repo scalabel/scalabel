@@ -15,7 +15,7 @@ type Task struct {
 	ProjectName        string        `json:"projectName"`
 	WorkerID           string        `json:"workerId"`
 	Category           []string      `json:"category"`
-	Attributes		   interface{}   `json:"attributes"`
+	Attributes         interface{}   `json:"attributes"`
 	LabelType          string        `json:"labelType"`
 	TaskSize           int           `json:"taskSize"`
 	Images             []ImageObject `json:"images"`
@@ -66,11 +66,11 @@ type ImageObject struct {
 
 // TODO: remove? Not used.
 type Label struct {
-	Id        string      `json:"id"`
-	Category  string      `json:"category"`
-	Attribute interface{} `json:"attribute"`
+	Id               string      `json:"id"`
+	Category         string      `json:"category"`
+	Attribute        interface{} `json:"attribute"`
 	CustomAttributes interface{} `json:"customAttributes"`
-	Position  interface{} `json:"position"`
+	Position         interface{} `json:"position"`
 }
 
 func parse(h http.HandlerFunc) http.HandlerFunc {
@@ -100,7 +100,7 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("image_list")
 	defer file.Close()
 	json.NewDecoder(file).Decode(&task)
-	
+
 	// Process label categories file
 	labelFile, _, err := r.FormFile("label")
 	var labels []string
@@ -133,7 +133,7 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 			ProjectName:      r.FormValue("project_name"),
 			LabelType:        r.FormValue("label_type"),
 			Category:         labels,
-			Attributes:		  customAttributes,
+			Attributes:       customAttributes,
 			VendorID:         r.FormValue("vendor_id"),
 			AssignmentID:     formatID(assignmentID),
 			WorkerID:         strconv.Itoa(assignmentID),

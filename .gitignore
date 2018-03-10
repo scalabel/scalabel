@@ -7,4 +7,8 @@
 # don't upload the data directory
 data/*
 
+# don't upload the server config, as it will vary.
+# (we still upload the example config)
+config.json
+
 bin/

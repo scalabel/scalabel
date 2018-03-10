@@ -1,8 +1,7 @@
 package main
 
 import (
-	"flag"
-	// "fmt"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,9 +14,14 @@ var (
 	Info    *log.Logger
 	Warning *log.Logger
 	Error   *log.Logger
-	port    = flag.String("port", "", "")
-	dataDir = flag.String("data_dir", "", "")
+	env     Env
 )
+
+// Environment details specified in config.json
+type Env struct {
+	Port    string `json:"port"`
+	DataDir string `json:"dataDir"`
+}
 
 func Init(
 	traceHandle io.Writer,
@@ -40,9 +44,6 @@ func Init(
 	Error = log.New(errorHandle,
 		"ERROR: ",
 		log.Ldate|log.Ltime)
-
-	flag.StringVar(port, "s", "8686", "")
-	flag.StringVar(dataDir, "d", GetProjPath()+"/data", "")
 }
 
 var HTML []byte
@@ -50,7 +51,14 @@ var mux *http.ServeMux
 
 func main() {
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-	flag.Parse()
+
+	// read config file
+	cfg, err := ioutil.ReadFile(GetProjPath() + "/config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.Unmarshal(cfg, &env)
+
 	// Mux for static files
 	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir(GetProjPath()+"/app")))
@@ -87,6 +95,6 @@ func main() {
 	http.HandleFunc("/vid_bbox_labeling",
 		MakeStandardHandler("/app/annotation/vid.html"))
 
-	log.Fatal(http.ListenAndServe(":"+*port, nil))
+	log.Fatal(http.ListenAndServe(":"+env.Port, nil))
 
 }

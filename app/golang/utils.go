@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"go/build"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
 	"time"
 	"unicode/utf8"
-	"log"
 )
 
 // GetProjPath returns the path of this go project. It assumes setup of the go
@@ -18,17 +18,16 @@ import (
 func GetProjPath() string {
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
-        gopath = build.Default.GOPATH
-    }
-	// return gopath + "/src/sat" // TODO: move project name to config
-	return "./"
+		gopath = build.Default.GOPATH
+	}
+	return gopath + "/src/sat" // TODO: move project name to config
 }
 
 // Function type for handlers
 type handler func(http.ResponseWriter, *http.Request)
 
 // MakeStandardHandler returns a function for handling static HTML
-func MakeStandardHandler(pagePath string) (handler) {
+func MakeStandardHandler(pagePath string) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		HTML, err := ioutil.ReadFile(GetProjPath() + pagePath)
 		if err != nil {
@@ -40,30 +39,30 @@ func MakeStandardHandler(pagePath string) (handler) {
 
 func (assignment *Task) GetAssignmentPath() string {
 	filename := assignment.AssignmentID
-	dir := path.Join(GetProjPath(),
-		*dataDir,
+	dir := path.Join(
+		env.DataDir,
 		"Assignments",
 		assignment.ProjectName,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, filename + ".json")
+	return path.Join(dir, filename+".json")
 }
 
 func (assignment *Task) GetSubmissionPath() string {
 	startTime := formatTime(assignment.StartTime)
-	dir := path.Join(GetProjPath(),
-		*dataDir,
+	dir := path.Join(
+		env.DataDir,
 		"Submissions",
 		assignment.ProjectName,
 		assignment.AssignmentID,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, startTime + ".json")
+	return path.Join(dir, startTime+".json")
 }
 
 func (assignment *Task) GetLatestSubmissionPath() string {
-	dir := path.Join(GetProjPath(),
-		*dataDir,
+	dir := path.Join(
+		env.DataDir,
 		"Submissions",
 		assignment.ProjectName,
 		assignment.AssignmentID,
@@ -74,14 +73,14 @@ func (assignment *Task) GetLatestSubmissionPath() string {
 
 func (assignment *Task) GetLogPath() string {
 	submitTime := formatTime(assignment.SubmitTime)
-	dir := path.Join(GetProjPath(),
-		*dataDir,
+	dir := path.Join(
+		env.DataDir,
 		"Log",
 		assignment.ProjectName,
 		assignment.AssignmentID,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, submitTime + ".json")
+	return path.Join(dir, submitTime+".json")
 }
 
 func recordTimestamp() int64 {
@@ -120,15 +119,15 @@ func Min(x, y int) int {
 }
 
 func GetResult(assignmentID string, projectName string) []byte {
-	submissionPath := path.Join(GetProjPath(),
-		*dataDir,
+	submissionPath := path.Join(
+		env.DataDir,
 		"Submissions",
 		projectName,
 		assignmentID,
 		"latest.json",
 	)
-	assignmentPath := path.Join(GetProjPath(),
-		*dataDir,
+	assignmentPath := path.Join(
+		env.DataDir,
 		"Assignments",
 		projectName,
 		assignmentID+".json",
@@ -164,21 +163,21 @@ func GetResult(assignmentID string, projectName string) []byte {
 
 func GetFullResult(projectName string) []byte {
 	result := Result{}
-	dir := path.Join(GetProjPath(),
-		*dataDir,
+	dir := path.Join(
+		env.DataDir,
 		"Submissions",
 		projectName,
 	)
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
 		filename := f.Name()
-		submissionPath := path.Join(GetProjPath(),
+		submissionPath := path.Join(
 			dir,
 			filename,
 			"latest.json",
 		)
-		assignmentPath := path.Join(GetProjPath(),
-			*dataDir,
+		assignmentPath := path.Join(
+			env.DataDir,
 			"Assignments",
 			projectName,
 			filename+".json",
