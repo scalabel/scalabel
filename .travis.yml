@@ -11,6 +11,7 @@ install:
 script:
   - pycodestyle --show-source .
   - eslint .
-  - go build -i -o bin/sat ./app/golang
+  - go build -i -o $GOPATH/bin/sat ./app/golang
   - cp example_config.yml config.yml
-  - go test ./... --travis
+  - go test ./... --travis --config _/home/travis/build/ucbdrive/sat/config.yml
+  
