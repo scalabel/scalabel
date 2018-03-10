@@ -9,6 +9,6 @@ data/*
 
 # don't upload the server config, as it will vary.
 # (we still upload the example config)
-config.json
+config.yml
 
 bin/

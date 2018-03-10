@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+
+    "gopkg.in/yaml.v2"
 )
 
 var (
@@ -19,8 +20,8 @@ var (
 
 // Environment details specified in config.json
 type Env struct {
-	Port    string `json:"port"`
-	DataDir string `json:"dataDir"`
+	Port    string `yaml:"port"`
+	DataDir string `yaml:"dataDir"`
 }
 
 func Init(
@@ -53,11 +54,14 @@ func main() {
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 
 	// read config file
-	cfg, err := ioutil.ReadFile(GetProjPath() + "/config.json")
+	cfg, err := ioutil.ReadFile(GetProjPath() + "/config.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
-	json.Unmarshal(cfg, &env)
+	err = yaml.Unmarshal(cfg, &env)
+    if err != nil {
+        log.Fatal(err)
+    }
 
 	// Mux for static files
 	mux = http.NewServeMux()
