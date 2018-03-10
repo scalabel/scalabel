@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-    "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -15,7 +15,6 @@ var (
 	Info    *log.Logger
 	Warning *log.Logger
 	Error   *log.Logger
-	env     Env
 )
 
 // Environment details specified in config.json
@@ -47,21 +46,28 @@ func Init(
 		log.Ldate|log.Ltime)
 }
 
-var HTML []byte
-var mux *http.ServeMux
-
-func main() {
-	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-
+func NewEnv() *Env {
+	env := new(Env)
 	// read config file
 	cfg, err := ioutil.ReadFile(GetProjPath() + "/config.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
 	err = yaml.Unmarshal(cfg, &env)
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
+	return env
+}
+
+var HTML []byte
+var mux *http.ServeMux
+var env Env
+
+func main() {
+	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+
+	env = *NewEnv()
 
 	// Mux for static files
 	mux = http.NewServeMux()
