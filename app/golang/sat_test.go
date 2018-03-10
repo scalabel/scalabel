@@ -33,7 +33,10 @@ func TestInit(t *testing.T) {
 	flag.BoolVar(travis, "t", false, "")
 	flag.Parse()
 
-	if port == nil {
+    var env Env
+    env = *NewEnv()
+
+	if env.Port == "" {
 		t.Errorf("got no port")
 		//} else if *dataDir != expectedDataDir {
 		//  t.Errorf("got %#v, wanted %#v", *dataDir, expectedDataDir)
@@ -48,13 +51,13 @@ func TestGetPaths(t *testing.T) {
             "StartTime": 1517447292, "SubmitTime": 1517447292}`
 	err := json.Unmarshal([]byte(str), a)
 
-	expectedAssign := path.Join(*dataDir, "Assignments", a.ProjectName,
+	expectedAssign := path.Join(env.DataDir, "Assignments", a.ProjectName,
 		a.AssignmentID+".json")
-	expectedSubmis := path.Join(*dataDir, "Submissions", a.ProjectName,
+	expectedSubmis := path.Join(env.DataDir, "Submissions", a.ProjectName,
 		a.AssignmentID, formatTime(a.StartTime)+".json")
-	expectedLatest := path.Join(*dataDir, "Submissions", a.ProjectName,
+	expectedLatest := path.Join(env.DataDir, "Submissions", a.ProjectName,
 		a.AssignmentID, "latest.json")
-	expectedLog := path.Join(*dataDir, "Log", a.ProjectName, a.AssignmentID,
+	expectedLog := path.Join(env.DataDir, "Log", a.ProjectName, a.AssignmentID,
 		formatTime(a.SubmitTime)+".json")
 
 	if err != nil {
