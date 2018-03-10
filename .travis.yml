@@ -13,5 +13,4 @@ script:
   - eslint .
   - go build -i -o $GOPATH/bin/sat ./app/golang
   - cp example_config.yml config.yml
-  - go test ./... --travis --config _/home/travis/build/ucbdrive/sat/config.yml
-  
+  - go test ./... --travis --config config.yml
