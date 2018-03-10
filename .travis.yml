@@ -7,6 +7,7 @@ before_install:
   - npm install -g eslint eslint-config-google
 install:
   - pip install pycodestyle
+  - go get gopkg.in/yaml.v2
 script:
   - pycodestyle --show-source .
   - eslint .
