@@ -33,8 +33,8 @@ func TestInit(t *testing.T) {
 	flag.BoolVar(travis, "t", false, "")
 	flag.Parse()
 
-    var env Env
-    env = *NewEnv()
+	var env Env
+	env = *NewEnv()
 
 	if env.Port == "" {
 		t.Errorf("got no port")

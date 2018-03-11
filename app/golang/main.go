@@ -1,7 +1,7 @@
 package main
 
 import (
-    "flag"
+	"flag"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,11 +12,11 @@ import (
 )
 
 var (
-	Trace   *log.Logger
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
-    configPath = flag.String("config", "", "")
+	Trace      *log.Logger
+	Info       *log.Logger
+	Warning    *log.Logger
+	Error      *log.Logger
+	configPath = flag.String("config", "", "")
 )
 
 // Environment details specified in config.json
@@ -47,12 +47,12 @@ func Init(
 		"ERROR: ",
 		log.Ldate|log.Ltime)
 
-    flag.StringVar(configPath, "s", "", "Path to config.yml")
-    flag.Parse()
+	flag.StringVar(configPath, "s", "", "Path to config.yml")
+	flag.Parse()
 
-    if(*configPath == "") {
-        log.Fatal("Must include --config flag with path to config.yml")
-    }
+	if *configPath == "" {
+		log.Fatal("Must include --config flag with path to config.yml")
+	}
 }
 
 func NewEnv() *Env {
