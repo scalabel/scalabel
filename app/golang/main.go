@@ -63,8 +63,6 @@ func main() {
 		MakeStandardHandler("/app/control/create.html"))
 	http.HandleFunc("/dashboard",
 		MakeStandardHandler("/app/control/monitor.html"))
-	http.HandleFunc("/2d_bbox_labeling",
-		MakeStandardHandler("/app/annotation/box.html"))
 	http.HandleFunc("/2d_road_labeling",
 		MakeStandardHandler("/app/annotation/road.html"))
 	http.HandleFunc("/2d_seg_labeling",
@@ -73,6 +71,8 @@ func main() {
 		MakeStandardHandler("/app/annotation/lane.html"))
 	http.HandleFunc("/image_labeling",
 		MakeStandardHandler("/app/annotation/image.html"))
+
+	http.HandleFunc("/2d_bbox_labeling", box2DLabelingHandler)
 
 	http.HandleFunc("/result", readResultHandler)
 	http.HandleFunc("/fullResult", readFullResultHandler)

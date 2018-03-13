@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,6 +24,19 @@ func parse(h http.HandlerFunc) http.HandlerFunc {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(HTML)
+}
+
+func box2DLabelingHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(GetProjPath() + "/app/annotation/box.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// get task name from the URL
+	projName := r.URL.Query()["project_name"][0]
+	taskName := r.URL.Query()["task_id"][0]
+
+	task := GetTask(projName, taskName)
+	tmpl.Execute(w, task)
 }
 
 func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,17 +69,17 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Initialize new assignment
 		assignment := Task{
-			ProjectName:      r.FormValue("project_name"),
-			LabelType:        r.FormValue("label_type"),
-			Category:         labels,
-			VendorID:         r.FormValue("vendor_id"),
-			AssignmentID:     formatID(assignmentID),
-			WorkerID:         strconv.Itoa(assignmentID),
-			NumLabeledItems:  0,
-			NumSubmissions:   0,
-			StartTime:        recordTimestamp(),
-			Items:            task.Items[i:Min(i+taskSize, size)],
-			TaskSize:         taskSize,
+			ProjectName:     r.FormValue("project_name"),
+			LabelType:       r.FormValue("label_type"),
+			Category:        labels,
+			VendorID:        r.FormValue("vendor_id"),
+			AssignmentID:    formatID(assignmentID),
+			WorkerID:        strconv.Itoa(assignmentID),
+			NumLabeledItems: 0,
+			NumSubmissions:  0,
+			StartTime:       recordTimestamp(),
+			Items:           task.Items[i:Min(i+taskSize, size)],
+			TaskSize:        taskSize,
 		}
 
 		assignmentID = assignmentID + 1

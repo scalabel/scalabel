@@ -127,16 +127,17 @@ Sat.prototype.load = function() {
     if (x.readyState === 4) {
       let assignment = JSON.parse(x.response);
       let itemLocs = assignment.items;
-      self.currentItem = 0; // DOESN'T WORK
       self.addEvent('start labeling', self.currentItem); // ??
       // preload items
       self.items = [];
       for (let i = 0; i < itemLocs.length; i++) {
         self.items.push(new self.ItemType(self, i, itemLocs[i].url));
       }
-      self.items[self.currentItem].image.onload = function() {
-        self.items[self.currentItem].redraw();
-      }
+      self.currentItem = self.items[0];
+      self.currentItem.makeActive();
+      self.currentItem.image.onload = function() {
+        self.currentItem.redraw();
+      };
     }
   };
   // get params from url path
@@ -159,8 +160,18 @@ Sat.prototype.submit = function() {
 };
 
 // TODO
-Sat.prototype.gotoItem = function() {
-
+Sat.prototype.gotoItem = function(index) {
+  //  TODO: save
+  // mod the index to wrap around the list
+  index = index % this.items.length;
+  // TODO: event?
+  this.currentItem.makeInactive();
+  this.currentItem = this.items[index];
+  this.currentItem.makeActive();
+  this.currentItem.onload = function() {
+    this.currentItem.redraw();
+  };
+  this.currentItem.redraw();
 };
 
 /**
@@ -282,8 +293,9 @@ SatImage.prototype = Object.create(SatItem.prototype);
 SatImage.prototype.loaded = function() {
   // Call SatItem loaded
   SatItem.prototype.loaded.call(this);
-  // Show the image here when the image is loaded. (Why here? Will show every image on load, which is not what we want, we want user to control top image)
-  
+  // TODO: Show the image here when the image is loaded.
+  // Sean: (Why here? Will show every image on load, which is not what we want,
+  // we want user to control top image)
 };
 
 // TODO
@@ -428,3 +440,5 @@ SatLabel.prototype.fromJson = function(object) {
 function ImageLabel(sat, id) {
   SatLabel.call(this, sat, id);
 }
+
+ImageLabel.prototype = Object.create(SatLabel.prototype);

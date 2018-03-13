@@ -1,24 +1,23 @@
 package main
 
-
 // An annotation task to be completed by a user.
 type Task struct {
-	AssignmentID       string        `json:"assignmentId"`
-	ProjectName        string        `json:"projectName"`
-	WorkerID           string        `json:"workerId"`
-	Category           []string      `json:"category"`
-	LabelType          string        `json:"labelType"`
-	TaskSize           int           `json:"taskSize"`
-	Items              []ItemObject  `json:"items"`
-	SubmitTime         int64         `json:"submitTime"`
-	NumSubmissions     int           `json:"numSubmissions"`
-	NumLabeledItems    int           `json:"numLabeledItems"`
-	NumDisplayedItems  int           `json:"numDisplayedItems"`
-	StartTime          int64         `json:"startTime"`
-	Events             []Event       `json:"events"`
-	VendorID           string        `json:"vendorId"`
-	IPAddress          interface{}   `json:"ipAddress"`
-	UserAgent          string        `json:"userAgent"`
+	AssignmentID      string       `json:"assignmentId"`
+	ProjectName       string       `json:"projectName"`
+	WorkerID          string       `json:"workerId"`
+	Category          []string     `json:"category"`
+	LabelType         string       `json:"labelType"`
+	TaskSize          int          `json:"taskSize"`
+	Items             []ItemObject `json:"items"`
+	SubmitTime        int64        `json:"submitTime"`
+	NumSubmissions    int          `json:"numSubmissions"`
+	NumLabeledItems   int          `json:"numLabeledItems"`
+	NumDisplayedItems int          `json:"numDisplayedItems"`
+	StartTime         int64        `json:"startTime"`
+	Events            []Event      `json:"events"`
+	VendorID          string       `json:"vendorId"`
+	IPAddress         interface{}  `json:"ipAddress"`
+	UserAgent         string       `json:"userAgent"`
 }
 
 // A result containing a list of items.
@@ -28,15 +27,15 @@ type Result struct {
 
 // Info pertaining to a task.
 type TaskInfo struct {
-	AssignmentID     string `json:"assignmentId"`
-	ProjectName      string `json:"projectName"`
-	WorkerID         string `json:"workerId"`
-	LabelType        string `json:"labelType"`
-	TaskSize         int    `json:"taskSize"`
-	SubmitTime       int64  `json:"submitTime"`
-	NumSubmissions   int    `json:"numSubmissions"`
-	NumLabeledItems  int    `json:"numLabeledItems"`
-	StartTime        int64  `json:"startTime"`
+	AssignmentID    string `json:"assignmentId"`
+	ProjectName     string `json:"projectName"`
+	WorkerID        string `json:"workerId"`
+	LabelType       string `json:"labelType"`
+	TaskSize        int    `json:"taskSize"`
+	SubmitTime      int64  `json:"submitTime"`
+	NumSubmissions  int    `json:"numSubmissions"`
+	NumLabeledItems int    `json:"numLabeledItems"`
+	StartTime       int64  `json:"startTime"`
 }
 
 // An event describing a user action.

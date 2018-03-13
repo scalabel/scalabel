@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"go/build"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
 	"time"
 	"unicode/utf8"
-	"log"
 )
 
 // GetProjPath returns the path of this go project. It assumes setup of the go
@@ -18,8 +18,8 @@ import (
 func GetProjPath() string {
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
-        gopath = build.Default.GOPATH
-    }
+		gopath = build.Default.GOPATH
+	}
 	return gopath + "/src/sat" // TODO: move project name to config
 }
 
@@ -27,7 +27,7 @@ func GetProjPath() string {
 type handler func(http.ResponseWriter, *http.Request)
 
 // MakeStandardHandler returns a function for handling static HTML
-func MakeStandardHandler(pagePath string) (handler) {
+func MakeStandardHandler(pagePath string) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		HTML, err := ioutil.ReadFile(GetProjPath() + pagePath)
 		if err != nil {
@@ -35,6 +35,21 @@ func MakeStandardHandler(pagePath string) (handler) {
 		}
 		w.Write(HTML)
 	}
+}
+
+func GetTask(projName string, taskName string) Task {
+	// TODO: account for projType directory structure
+	taskPath := path.Join(GetProjPath(),
+		"data",
+		"Assignments",
+		projName,
+		taskName+".json",
+	)
+	// TODO: error handling
+	fileContents, _ := ioutil.ReadFile(taskPath)
+	task := Task{}
+	json.Unmarshal(fileContents, &task)
+	return task
 }
 
 func (assignment *Task) GetAssignmentPath() string {
@@ -45,7 +60,7 @@ func (assignment *Task) GetAssignmentPath() string {
 		assignment.ProjectName,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, filename + ".json")
+	return path.Join(dir, filename+".json")
 }
 
 func (assignment *Task) GetSubmissionPath() string {
@@ -57,7 +72,7 @@ func (assignment *Task) GetSubmissionPath() string {
 		assignment.AssignmentID,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, startTime + ".json")
+	return path.Join(dir, startTime+".json")
 }
 
 func (assignment *Task) GetLatestSubmissionPath() string {
@@ -80,7 +95,7 @@ func (assignment *Task) GetLogPath() string {
 		assignment.AssignmentID,
 	)
 	os.MkdirAll(dir, 0777)
-	return path.Join(dir, submitTime + ".json")
+	return path.Join(dir, submitTime+".json")
 }
 
 func recordTimestamp() int64 {
