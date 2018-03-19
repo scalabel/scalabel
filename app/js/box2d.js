@@ -51,6 +51,9 @@ Box2dImage.prototype.makeActive = function() {
   document.onmouseup = function(e) {
     self._mouseup(e);
   };
+  $('#category_select').change(function() {
+    self._changeCat();
+  });
   $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch',
     function() {
     self._occlSwitch();
@@ -254,6 +257,17 @@ Box2dImage.prototype._mouseup = function(_) { // eslint-disable-line
     self.moveClickPos = null;
   }
   self.redraw();
+};
+
+/**
+ * Called when the selected category is changed.
+ */
+Box2dImage.prototype._changeCat = function() {
+  let self = this;
+  if (self.selBox) {
+    let selOpt = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+    self.selBox.category = selOpt;
+  }
 };
 
 /**
