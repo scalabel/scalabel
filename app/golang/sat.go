@@ -1,5 +1,11 @@
 package main
 
+// TODO
+type DashboardContents struct {
+	Tasks      []Task      `json:"tasks"`
+	VideoTasks []VideoTask `json:"videoTasks"`
+}
+
 // An annotation task to be completed by a user.
 type Task struct {
 	AssignmentID      string       `json:"assignmentId"`

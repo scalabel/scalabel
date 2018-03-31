@@ -73,11 +73,11 @@
 
             <form id="vid-form" action=/post>
                 <div class="form-group">
-                    <label for="project_name">Project Name:</label>
+                    <label for="video_project_name">Project Name:</label>
                     <input type="text" class="form-control" style="width:300px;" id="project_name" name="project_name">
                 </div>
                 <div class="form-group">
-                    <label for="task_name">Task Name:</label>
+                    <label for="video_task_name">Task Name:</label>
                     <input type="text" class="form-control" style="width:300px;" id="task_name" name="task_name">
                 </div>
                 <div class="form-group">
@@ -85,7 +85,7 @@
                     <input type="text" class="form-control" style="width:300px;" id="video_name" name="video_name">
                 </div>
                 <div class="form-group">
-                    <label for="object_categories">Object Categories:</label>
+                    <label for="video_object_categories">Object Categories:</label>
                     <input type="file" class="form-control" style="width:300px;" id="object_categories" name="object_categories">
                 </div>
                 <button type="submit" id="enter_btn" class="btn btn-primary btn-md">Enter</button>
@@ -152,12 +152,9 @@
                 if (x.readyState === 4) {
                     var num_assignments = x.response;
                     var project_url = "./dashboard?project_name=" +
-                        $('#project_name').val() +
-                        "&num_assignments=" + num_assignments;
+                        $('#project_name').val();
                     dashboard.attr('href', project_url);
-                    dashboard2.attr('href', project_url)
                     dashboard.show();
-                    dashboard2.show();
                 }
             };
             x.open("POST", "./postAssignment");
@@ -170,15 +167,12 @@
                 if (x.readyState === 4) {
                     var num_assignments = x.response;
                     var project_url = "./dashboard?project_name=" +
-                        $('#project_name').val() +
-                        "&num_assignments=" + num_assignments;
-                    dashboard.attr('href', project_url);
+                        $('#video_project_name').val();
                     dashboard2.attr('href', project_url)
-                    dashboard.show();
                     dashboard2.show();
                 }
             };
-            x.open("POST", "./postVideoTask");
+            x.open("POST", "./postVideoAssignment");
             x.send(new FormData(this));
         })
     });

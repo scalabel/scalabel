@@ -90,7 +90,7 @@ Sat.prototype.getIPAddress = function() {
 
 Sat.prototype.newItem = function(url) {
   let item = new this.ItemType(this, this.items.length, url);
-  this.items.append(item);
+  this.items.push(item);
   return item;
 };
 

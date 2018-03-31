@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -24,6 +25,21 @@ func parse(h http.HandlerFunc) http.HandlerFunc {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(HTML)
+}
+
+func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	// use template to insert assignment links
+	tmpl, err := template.ParseFiles(GetProjPath() + "/app/control/monitor.html")
+	if err != nil {
+		Error.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+	dbContents := DashboardContents{}
+	dbContents.Tasks = GetTasks()
+	dbContents.VideoTasks = GetVideoTasks()
+	fmt.Println(dbContents.VideoTasks)
+	tmpl.Execute(w, dbContents)
 }
 
 func box2DLabelingHandler(w http.ResponseWriter, r *http.Request) {
