@@ -4,7 +4,7 @@
  * Class for each video labeling session/task, uses SatImage items
  * @param {SatLabel} LabelType: label instantiation type
  */
-function VideoSat(LabelType) {
+function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
 
@@ -26,10 +26,11 @@ function VideoSat(LabelType) {
       frameString + '.jpg');
   }
 
-  self.currentItem = 0;
-  self.items[self.currentItem].setActive(true);
-  self.items[self.currentItem].image.onload = function() {
-    self.items[self.currentItem].redraw();};
+  self.currentFrame = 0;
+  self.currentItem = self.items[self.currentFrame];
+  self.currentItem.setActive(true);
+  self.currentItem.image.onload = function() {
+    self.currentItem.redraw();};
 
   self.playing = false;
   self.playButton.onclick = function() {self.clickPlayPause();};
@@ -37,9 +38,69 @@ function VideoSat(LabelType) {
   self.slider.oninput = function() {self.moveSlider();};
 }
 
-VideoSat.prototype = Object.create(Sat.prototype);
+SatVideo.prototype = Object.create(Sat.prototype);
 
-VideoSat.prototype.clickPlayPause = function(e) {
+SatVideo.prototype.newLabel = function(optionalAttributes) {
+  let self = this;
+  let labelId = self.newLabelId();
+  let label = new self.LabelType(self, labelId, optionalAttributes);
+  self.labelIdMap[label.id] = label;
+  self.labels.push(label);
+  for (let i = self.currentFrame; i < self.items.length; i++) {
+    let childLabel = new self.LabelType(self, labelId, optionalAttributes);
+    childLabel.parent = label;
+    self.items[i].labels.push(childLabel);
+    label.addChild(childLabel);
+  }
+  let currentFrameLabels = self.items[self.currentFrame].labels;
+  return currentFrameLabels[currentFrameLabels.length - 1];
+};
+
+// TODO: this needs to be agnostic of label type!!!
+// Right now it assumes SatImage is a Box2d
+SatVideo.prototype.interpolate = function(startSatLabel) {
+  let self = this;
+  startSatLabel.keyframe = true;
+
+  let priorKeyframe = null;
+  let nextKeyframe = null;
+  for (let i = 0; i < self.currentFrame; i++) {
+    if (startSatLabel.parent.children[i].keyframe) {
+      priorKeyframe = i;
+      break;
+    }
+  }
+  for (let i = self.currentFrame + 1; i < startSatLabel.parent.children.length; i++) {
+    if (startSatLabel.parent.children[i].keyframe) {
+      nextKeyframe = i;
+      break;
+    }
+  }
+  if (priorKeyframe !== null) {
+    // if there's an earlier keyframe, interpolate
+    for (let i = priorKeyframe; i < self.currentFrame; i++) {
+      let weight = i/(self.currentFrame);
+      // TODO: this is the part that makes too many assumptions (maybe)
+      startSatLabel.parent.children[i].weightAvg(startSatLabel.parent.children[priorKeyframe], startSatLabel, weight);
+    }
+  }
+  if (nextKeyframe !== null) {
+    // if there's a later keyframe, interpolate
+    for (let i = self.currentFrame + 1; i < nextKeyframe; i++) {
+      let weight = (i - self.currentFrame) / (nextKeyframe - self.currentFrame);
+      // TODO: this is the part that makes too many assumptions (maybe)
+      startSatLabel.parent.children[i].weightAvg(startSatLabel, startSatLabel.parent.children[nextKeyframe], weight);
+    }
+  } else {
+    // otherwise, just apply change to remaining items
+    for (let i = self.currentFrame + 1; i < startSatLabel.parent.children.length; i++) {
+      Object.assign(startSatLabel.parent.children[i], startSatLabel);
+      startSatLabel.parent.children[i].keyframe = false;
+    }
+  }
+}
+
+SatVideo.prototype.clickPlayPause = function(e) {
   let self = this;
 
   if (e) {
@@ -60,25 +121,43 @@ VideoSat.prototype.clickPlayPause = function(e) {
   }
 };
 
-VideoSat.prototype.nextFrame = function() {
+SatVideo.prototype.nextFrame = function() {
   let self = this;
-  if (self.currentItem < self.numFrames - 1) {
-    self.currentItem++;
-    self.slider.value = self.currentItem + 1;
-    self.frameCounter.innerHTML = self.currentItem + 1;
-    self.items[self.currentItem].setActive(true);
-    self.items[self.currentItem - 1].setActive(false);
-    self.items[self.currentItem].redraw();
+  if (self.currentFrame < self.numFrames - 1) {
+    self.currentFrame++;
+    self.currentItem = self.items[self.currentFrame];
+    self.slider.value = self.currentFrame + 1;
+    self.frameCounter.innerHTML = self.currentFrame + 1;
+    self.currentItem.setActive(true);
+    self.items[self.currentFrame - 1].setActive(false);
+    self.currentItem.redraw();
   } else {
     self.clickPlayPause();
   }
 };
 
-VideoSat.prototype.moveSlider = function() {
+SatVideo.prototype.gotoItem = function(index) {
+  let self = this;
+  if (index >= 0 && index < self.items.length) {
+    self.currentFrame = index;
+    self.currentItem.setActive(false);
+    self.currentItem = self.items[self.currentFrame];
+    self.currentItem.setActive(true);
+    self.currentItem.onload = function() {
+      self.currentItem.redraw();
+    }
+    self.currentItem.redraw();
+  }
+}
+
+SatVideo.prototype.moveSlider = function() {
   let self = this;
   let oldItem = self.currentItem;
-  self.currentItem = parseInt(self.slider.value) - 1;
-  self.items[self.currentItem].setActive(true);
-  self.items[oldItem].setActive(false);
-  self.frameCounter.innerHTML = self.currentItem + 1;
+  self.currentFrame = parseInt(self.slider.value) - 1;
+  self.currentItem = self.items[self.currentFrame];
+  self.currentItem.setActive(true);
+  if (oldItem) {
+    oldItem.setActive(false);
+  };
+  self.frameCounter.innerHTML = self.currentFrame + 1;
 };

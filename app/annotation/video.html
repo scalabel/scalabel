@@ -28,11 +28,11 @@
     <div class = "container">
 
         <!-- Heading -->
-        <div class="row p-0 m-0">
+        <div id="heading_row" class="row p-0 m-0">
             <div class="col-lg-12">
                 <h2 class="page-header">Bounding box labeling tool
                     <small>verson 1.1</small>
-<!--                     <a href="#" id="save_btn" style="position:absolute;right:15px;" class="btn btn-primary btn-primary">Save</a> -->
+                    <!-- <a href="#" id="save_btn" style="position:absolute;right:15px;" class="btn btn-primary btn-primary">Save</a> -->
                 </h2>
             </div>
         </div>
@@ -169,11 +169,12 @@
 
         $(document).ready(function () {
             const type = "bbox";
-            let videoSat = new VideoSat(Box2d);
+            let videoSat = new SatVideo(Box2d);
             // videoSat.load();
             // initialize the occluded/truncated switches with bootstrap
             $('[name=\'occluded-checkbox\']').bootstrapSwitch();
             $('[name=\'truncated-checkbox\']').bootstrapSwitch();
+
         });
 
     </script>

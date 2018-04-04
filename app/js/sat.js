@@ -100,11 +100,12 @@ Sat.prototype.newLabelId = function() {
   return newId;
 };
 
-Sat.prototype.newLabel = function() {
-  let label = new this.LabelType(this, this.newLabelId());
-  this.labelIdMap[label.id] = label;
-  this.labels.append(label);
-  this.currentItem.labels.append(label);
+Sat.prototype.newLabel = function(optionalAttributes) {
+  let self = this;
+  let label = new self.LabelType(self, self.newLabelId(), optionalAttributes);
+  self.labelIdMap[label.id] = label;
+  self.labels.push(label);
+  self.currentItem.labels.push(label);
   return label;
 };
 
@@ -394,7 +395,7 @@ SatImage.prototype.remove = function() {
  */
 SatImage.prototype._mousedown = function(e) {
   let self = this;
-  if (self._isWithinFrame(e) && self.state === 'free') {
+  if (/*self._isWithinFrame(e) &&*/ self.state === 'free') {
     let mousePos = self._getMousePos(e);
     [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
     // change checked traits on label selection
@@ -431,10 +432,7 @@ SatImage.prototype._mousedown = function(e) {
       let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
       let occl = self.occlCheckbox.checked;
       let trunc = self.truncCheckbox.checked;
-      self.lastLabelID += 1;
-      self.selectedLabel = new self.sat.LabelType(self.sat, self.lastLabelID,
-        cat, occl, trunc, mousePos);
-      self.labels.push(self.selectedLabel);
+      self.selectedLabel = self.sat.newLabel({category: cat, occl: occl, trunc: trunc, mousePos: mousePos});
       self.state = 'resize';
       self.currHandle = self.selectedLabel.INITIAL_HANDLE;
       self.resizeID = self.selectedLabel.id;
@@ -455,14 +453,14 @@ SatImage.prototype._mousemove = function(e) {
   // draw the crosshair
   let cH = $('#crosshair-h');
   let cV = $('#crosshair-v');
-  cH.css('top', Math.min(canvRect.y + self.padBox.y + self.padBox.h, Math.max(
-    e.clientY, canvRect.y + self.padBox.y)));
-  cH.css('left', canvRect.x + self.padBox.x);
-  cH.css('width', self.padBox.w);
-  cV.css('left', Math.min(canvRect.x + self.padBox.x + self.padBox.w, Math.max(
-    e.clientX, canvRect.x + self.padBox.x)));
-  cV.css('top', canvRect.y + self.padBox.y);
-  cV.css('height', self.padBox.h);
+  // cH.css('top', Math.min(canvRect.y + self.padBox.y + self.padBox.h, Math.max(
+  //   e.clientY, canvRect.y + self.padBox.y)));
+  // cH.css('left', canvRect.x + self.padBox.x);
+  // cH.css('width', self.padBox.w);
+  // cV.css('left', Math.min(canvRect.x + self.padBox.x + self.padBox.w, Math.max(
+  //   e.clientX, canvRect.x + self.padBox.x)));
+  // cV.css('top', canvRect.y + self.padBox.y);
+  // cV.css('height', self.padBox.h);
   if (self._isWithinFrame(e)) {
     $('.hair').show();
   } else {
@@ -656,7 +654,7 @@ SatImage.prototype._lightSwitch = function() {
  * @param {Sat} sat: The labeling session
  * @param {number | null} id: label object identifier
  */
-function SatLabel(sat, id = -1) {
+function SatLabel(sat, id = -1, optionalAttributes = null) {
   this.id = id;
   this.name = null; // category or something else
   this.attributes = [];
@@ -782,8 +780,8 @@ SatLabel.prototype.fromJson = function(object) {
  * @param {Sat} sat: The labeling session
  * @param {number | null} id: label object identifier
  */
-function ImageLabel(sat, id) {
-  SatLabel.call(this, sat, id);
+function ImageLabel(sat, id, optionalAttributes = null) {
+  SatLabel.call(this, sat, id, optionalAttributes);
 }
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
