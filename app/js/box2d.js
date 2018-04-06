@@ -5,11 +5,8 @@
  * 2D box label
  * @param {Sat} sat: context
  * @param {int} id: label id
- // TODO
- * @param {string} category: label category
- * @param {boolean} occl: Whether box is occluded
- * @param {boolean} trunc: Whether box is truncated
- * @param {object} mousePos: mouse position (x,y) on canvas
+ * @param {object} boxAttributes: attributes of the box, containing category,
+    occl/trunc, and mousePos
  */
 function Box2d(sat, id, boxAttributes) {
   ImageLabel.call(this, sat, id);
@@ -289,7 +286,7 @@ Box2d.prototype.resize = function(mousePos, currHandle, canvRect, padBox) {
     self.w += self.x - newX;
     self.x = newX;
   }
-  if(self.parent) {
+  if (self.parent) {
     self.sat.interpolate(self); // TODO
   }
 };
@@ -322,7 +319,11 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
 };
 
 /**
- * TODO
+ * Set this box to be the weighted average of the two provided boxes.
+ * @param {Box2d} startBox - The first box.
+ * @param {Box2d} endBox - The second box.
+ * @param {number} weight - The weight, b/w 0 and 1, higher corresponds to
+    closer to endBox.
  */
 Box2d.prototype.weightAvg = function(startBox, endBox, weight) {
   let self = this;
@@ -330,7 +331,7 @@ Box2d.prototype.weightAvg = function(startBox, endBox, weight) {
   self.y = startBox.y + weight*(endBox.y - startBox.y);
   self.w = startBox.w + weight*(endBox.w - startBox.w);
   self.h = startBox.h + weight*(endBox.h - startBox.h);
-}
+};
 
 /**
  * Get the current position of this box.
