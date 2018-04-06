@@ -47,7 +47,6 @@ func Init(
 		"ERROR: ",
 		log.Ldate|log.Ltime)
 
-<<<<<<< HEAD
 	flag.StringVar(configPath, "s", "", "Path to config.yml")
 	flag.Parse()
 
@@ -68,10 +67,6 @@ func NewEnv() *Env {
 		log.Fatal(err)
 	}
 	return env
-=======
-	flag.StringVar(port, "s", "8686", "")
-	flag.StringVar(dataDir, "d", "data", "")
->>>>>>> origin/refactor_base
 }
 
 var HTML []byte

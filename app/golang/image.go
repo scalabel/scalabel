@@ -97,20 +97,6 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Initialize new assignment
 		assignment := Task{
-<<<<<<< HEAD
-			ProjectName:      r.FormValue("project_name"),
-			LabelType:        r.FormValue("label_type"),
-			Category:         labels,
-			Attributes:       customAttributes,
-			VendorID:         r.FormValue("vendor_id"),
-			AssignmentID:     formatID(assignmentID),
-			WorkerID:         strconv.Itoa(assignmentID),
-			NumLabeledImages: 0,
-			NumSubmissions:   0,
-			StartTime:        recordTimestamp(),
-			Images:           task.Images[i:Min(i+taskSize, size)],
-			TaskSize:         taskSize,
-=======
 			ProjectName:     r.FormValue("project_name"),
 			LabelType:       r.FormValue("label_type"),
 			Category:        labels,
@@ -122,7 +108,6 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 			StartTime:       recordTimestamp(),
 			Items:           task.Items[i:Min(i+taskSize, size)],
 			TaskSize:        taskSize,
->>>>>>> origin/refactor_base
 		}
 
 		assignmentID = assignmentID + 1
