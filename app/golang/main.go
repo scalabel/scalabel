@@ -47,6 +47,7 @@ func Init(
 		"ERROR: ",
 		log.Ldate|log.Ltime)
 
+<<<<<<< HEAD
 	flag.StringVar(configPath, "s", "", "Path to config.yml")
 	flag.Parse()
 
@@ -67,6 +68,10 @@ func NewEnv() *Env {
 		log.Fatal(err)
 	}
 	return env
+=======
+	flag.StringVar(port, "s", "8686", "")
+	flag.StringVar(dataDir, "d", "data", "")
+>>>>>>> origin/refactor_base
 }
 
 var HTML []byte
@@ -82,16 +87,15 @@ func main() {
 	mux = http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir(GetProjPath()+"/app")))
 
+	// serve the frames directory
+	serveStaticDirectory("data", "frames")
+
 	// routes
 	http.HandleFunc("/", parse(indexHandler))
 
 	// Simple static handlers can be generated with MakeStandardHandler
 	http.HandleFunc("/create",
 		MakeStandardHandler("/app/control/create.html"))
-	http.HandleFunc("/dashboard",
-		MakeStandardHandler("/app/control/monitor.html"))
-	http.HandleFunc("/2d_bbox_labeling",
-		MakeStandardHandler("/app/annotation/box.html"))
 	http.HandleFunc("/2d_road_labeling",
 		MakeStandardHandler("/app/annotation/road.html"))
 	http.HandleFunc("/2d_seg_labeling",
@@ -101,6 +105,10 @@ func main() {
 	http.HandleFunc("/image_labeling",
 		MakeStandardHandler("/app/annotation/image.html"))
 
+	http.HandleFunc("/dashboard", dashboardHandler)
+
+	http.HandleFunc("/2d_bbox_labeling", box2DLabelingHandler)
+
 	http.HandleFunc("/result", readResultHandler)
 	http.HandleFunc("/fullResult", readFullResultHandler)
 
@@ -108,11 +116,11 @@ func main() {
 	http.HandleFunc("/postSubmission", postSubmissionHandler)
 	http.HandleFunc("/postLog", postLogHandler)
 	http.HandleFunc("/requestAssignment", requestAssignmentHandler)
-	http.HandleFunc("/requestSubmission", requestSubmissionHandler)
+	http.HandleFunc("./requestSubmission", requestSubmissionHandler)
 	http.HandleFunc("/requestInfo", requestInfoHandler)
 
-	http.HandleFunc("/vid_bbox_labeling",
-		MakeStandardHandler("/app/annotation/vid.html"))
+	http.HandleFunc("/postVideoAssignment", postVideoAssignmentHandler)
+	http.HandleFunc("/video_bbox_labeling", videoLabelingHandler)
 
 	log.Fatal(http.ListenAndServe(":"+env.Port, nil))
 

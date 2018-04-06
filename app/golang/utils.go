@@ -26,6 +26,17 @@ func GetProjPath() string {
 // Function type for handlers
 type handler func(http.ResponseWriter, *http.Request)
 
+// serveStaticDirectory serves a directory in the project located within the
+// parentFolder as that same directory name under the root of the web
+// directory.
+// TODO
+func serveStaticDirectory(parentFolder string, dir string) {
+	projPath := GetProjPath()
+	fileServer := http.FileServer(http.Dir(projPath + "/" + parentFolder + "/" + dir))
+	strippedHandler := http.StripPrefix("/"+dir+"/", fileServer)
+	http.Handle("/"+dir+"/", strippedHandler)
+}
+
 // MakeStandardHandler returns a function for handling static HTML
 func MakeStandardHandler(pagePath string) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +46,85 @@ func MakeStandardHandler(pagePath string) handler {
 		}
 		w.Write(HTML)
 	}
+}
+
+func GetTask(projName string, taskName string) Task {
+	// TODO: account for projType directory structure
+	taskPath := path.Join(GetProjPath(),
+		"data",
+		"Assignments",
+		projName,
+		taskName+".json",
+	)
+	// TODO: error handling
+	fileContents, _ := ioutil.ReadFile(taskPath)
+	task := Task{}
+	json.Unmarshal(fileContents, &task)
+	return task
+}
+
+// TODO
+func GetTasks() []Task {
+	dirPath := path.Join(GetProjPath(),
+		"data",
+		"Assignments",
+		"img",
+	)
+	// TODO: error handling
+	dirContents, _ := ioutil.ReadDir(dirPath)
+	tasks := []Task{}
+	for _, file := range dirContents {
+		fileContents, _ := ioutil.ReadFile(dirPath + file.Name())
+		t := Task{}
+		json.Unmarshal(fileContents, &t)
+		tasks = append(tasks, t)
+	}
+	return tasks
+}
+
+// TODO
+func GetVideoTask(projName string, taskName string) VideoTask {
+	// TODO: move "Assignments" to "Tasks"
+	projPath := path.Join(GetProjPath(),
+		"data",
+		"Assignments",
+		"video",
+		projName,
+	)
+	// TODO: error handling
+	fileContents, _ := ioutil.ReadFile(path.Join(projPath, taskName+".json"))
+	task := VideoTask{}
+	json.Unmarshal(fileContents, &task)
+	return task
+}
+
+// TODO
+func GetVideoTasks() []VideoTask {
+	dirPath := path.Join(GetProjPath(),
+		"data",
+		"Assignments",
+		"video",
+	)
+	// TODO: error handling
+	dirContents, _ := ioutil.ReadDir(dirPath)
+	tasks := []VideoTask{}
+	// loop through all the projects
+	for _, proj := range dirContents {
+		if !proj.IsDir() {
+			continue
+		}
+		projContents, _ := ioutil.ReadDir(path.Join(dirPath, proj.Name()))
+		for _, file := range projContents {
+			if file.Name()[0:1] == "." {
+				continue
+			}
+			fileContents, _ := ioutil.ReadFile(path.Join(dirPath, proj.Name(), file.Name()))
+			t := VideoTask{}
+			json.Unmarshal(fileContents, &t)
+			tasks = append(tasks, t)
+		}
+	}
+	return tasks
 }
 
 func (assignment *Task) GetAssignmentPath() string {
@@ -154,7 +244,7 @@ func GetResult(assignmentID string, projectName string) []byte {
 
 		task := Task{}
 		json.Unmarshal(taskJson, &task)
-		result.Images = task.Images
+		result.Items = task.Items
 	}
 	resultJson, _ := json.MarshalIndent(result, "", "  ")
 
@@ -201,8 +291,8 @@ func GetFullResult(projectName string) []byte {
 
 			task := Task{}
 			json.Unmarshal(resultJson, &task)
-			for i := 0; i < len(task.Images); i += 1 {
-				result.Images = append(result.Images, task.Images[i])
+			for i := 0; i < len(task.Items); i += 1 {
+				result.Items = append(result.Items, task.Items[i])
 			}
 		}
 

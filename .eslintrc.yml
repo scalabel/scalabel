@@ -13,3 +13,5 @@ rules:
   no-unused-vars: 
     - error
     - argsIgnorePattern: '[iI]gnored'
+  brace-style:
+    - 0

@@ -39,7 +39,9 @@ func TestInit(t *testing.T) {
 	if env.Port == "" {
 		t.Errorf("got no port")
 		//} else if *dataDir != expectedDataDir {
-		//  t.Errorf("got %#v, wanted %#v", *dataDir, expectedDataDir)
+
+		//	t.Errorf("got %#v, wanted %#v", *dataDir, expectedDataDir)
+
 	} else {
 		print("Passed TestInit!\n")
 	}

@@ -3,75 +3,14 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
+	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 )
-
-// An annotation task to be completed by a user.
-type Task struct {
-	AssignmentID       string        `json:"assignmentId"`
-	ProjectName        string        `json:"projectName"`
-	WorkerID           string        `json:"workerId"`
-	Category           []string      `json:"category"`
-	Attributes         interface{}   `json:"attributes"`
-	LabelType          string        `json:"labelType"`
-	TaskSize           int           `json:"taskSize"`
-	Images             []ImageObject `json:"images"`
-	SubmitTime         int64         `json:"submitTime"`
-	NumSubmissions     int           `json:"numSubmissions"`
-	NumLabeledImages   int           `json:"numLabeledImages"`
-	NumDisplayedImages int           `json:"numDisplayedImages"`
-	StartTime          int64         `json:"startTime"`
-	Events             []Event       `json:"events"`
-	VendorID           string        `json:"vendorId"`
-	IPAddress          interface{}   `json:"ipAddress"`
-	UserAgent          string        `json:"userAgent"`
-}
-
-// A result containing a list of images.
-type Result struct {
-	Images []ImageObject `json:"images"`
-}
-
-// Info pertaining to a task.
-type TaskInfo struct {
-	AssignmentID     string `json:"assignmentId"`
-	ProjectName      string `json:"projectName"`
-	WorkerID         string `json:"workerId"`
-	LabelType        string `json:"labelType"`
-	TaskSize         int    `json:"taskSize"`
-	SubmitTime       int64  `json:"submitTime"`
-	NumSubmissions   int    `json:"numSubmissions"`
-	NumLabeledImages int    `json:"numLabeledImages"`
-	StartTime        int64  `json:"startTime"`
-}
-
-// An event describing a user action.
-type Event struct {
-	Timestamp   int64       `json:"timestamp"`
-	Action      string      `json:"action"`
-	TargetIndex string      `json:"targetIndex"`
-	Position    interface{} `json:"position"`
-}
-
-// An image and associated metadata.
-type ImageObject struct {
-	Url         string   `json:"url"`
-	GroundTruth string   `json:"groundTruth"`
-	Labels      []Label  `json:"labels"`
-	Tags        []string `json:"tags"`
-}
-
-// TODO: remove? Not used.
-type Label struct {
-	Id               string      `json:"id"`
-	Category         string      `json:"category"`
-	Attribute        interface{} `json:"attribute"`
-	CustomAttributes interface{} `json:"customAttributes"`
-	Position         interface{} `json:"position"`
-}
 
 func parse(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -88,6 +27,34 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(HTML)
 }
 
+func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	// use template to insert assignment links
+	tmpl, err := template.ParseFiles(GetProjPath() + "/app/control/monitor.html")
+	if err != nil {
+		Error.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+	dbContents := DashboardContents{}
+	dbContents.Tasks = GetTasks()
+	dbContents.VideoTasks = GetVideoTasks()
+	fmt.Println(dbContents.VideoTasks)
+	tmpl.Execute(w, dbContents)
+}
+
+func box2DLabelingHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(GetProjPath() + "/app/annotation/box.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// get task name from the URL
+	projName := r.URL.Query()["project_name"][0]
+	taskName := r.URL.Query()["task_id"][0]
+
+	task := GetTask(projName, taskName)
+	tmpl.Execute(w, task)
+}
+
 func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)
@@ -97,7 +64,7 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	var task = Task{}
 	// Process image list file
 	r.ParseMultipartForm(32 << 20)
-	file, _, err := r.FormFile("image_list")
+	file, _, err := r.FormFile("item_list")
 	defer file.Close()
 	json.NewDecoder(file).Decode(&task)
 
@@ -124,12 +91,13 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
 	task.ProjectName = r.FormValue("project_name")
 
-	size := len(task.Images)
+	size := len(task.Items)
 	assignmentID := 0
 	for i := 0; i < size; i += taskSize {
 
 		// Initialize new assignment
 		assignment := Task{
+<<<<<<< HEAD
 			ProjectName:      r.FormValue("project_name"),
 			LabelType:        r.FormValue("label_type"),
 			Category:         labels,
@@ -142,6 +110,19 @@ func postAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 			StartTime:        recordTimestamp(),
 			Images:           task.Images[i:Min(i+taskSize, size)],
 			TaskSize:         taskSize,
+=======
+			ProjectName:     r.FormValue("project_name"),
+			LabelType:       r.FormValue("label_type"),
+			Category:        labels,
+			VendorID:        r.FormValue("vendor_id"),
+			AssignmentID:    formatID(assignmentID),
+			WorkerID:        strconv.Itoa(assignmentID),
+			NumLabeledItems: 0,
+			NumSubmissions:  0,
+			StartTime:       recordTimestamp(),
+			Items:           task.Items[i:Min(i+taskSize, size)],
+			TaskSize:        taskSize,
+>>>>>>> origin/refactor_base
 		}
 
 		assignmentID = assignmentID + 1
@@ -182,7 +163,7 @@ func postSubmissionHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println("Failed to parse submission JSON")
 	}
 
-	if assignment.NumLabeledImages == assignment.TaskSize {
+	if assignment.NumLabeledItems == assignment.TaskSize {
 		assignment.NumSubmissions = assignment.NumSubmissions + 1
 		Info.Println("Complete submission of",
 			assignment.ProjectName, assignment.AssignmentID)
@@ -227,7 +208,7 @@ func postLogHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println("Failed to parse log JSON")
 	}
 
-	if assignment.NumLabeledImages == assignment.TaskSize {
+	if assignment.NumLabeledItems == assignment.TaskSize {
 		assignment.NumSubmissions = assignment.NumSubmissions + 1
 	}
 

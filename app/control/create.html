@@ -11,8 +11,10 @@
 
     <title>Labeling tool</title>
 
-    <!-- Bootstrap Core CSS -->
+    <!-- Bootstrap CSS -->
     <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/bootstrap-switch.css" rel="stylesheet">
+    <link href="./css/bootstrap-toggle.min.css" rel="stylesheet">
 
 </head>
 
@@ -30,10 +32,15 @@
     </div>
     <!-- /.row -->
 
+    <div class="form-group">
+        <input id="img-or-vid" type="checkbox" checked data-toggle="toggle" data-on="Image" data-off="Video" data-onstyle="success" data-offstyle="info" onchange="toggleForm()">
+    </div>
+
     <!-- Content Row -->
     <div class="row">
         <div class="col-lg-12">
-            <form id="entry-form" action=/post>
+
+            <form id="img-form" action=/post>
                 <div class="form-group">
                     <label for="project_name">Project Name:</label>
                     <input type="text" class="form-control" style="width:300px" id="project_name" name="project_name">
@@ -67,6 +74,29 @@
                 <a type="submit" id="go_to_dashboard" class="btn btn-default btn-md" target="_blank" href="">Go to
                     Dashboard</a>
             </form>
+
+            <form id="vid-form" action=/post>
+                <div class="form-group">
+                    <label for="video_project_name">Project Name:</label>
+                    <input type="text" class="form-control" style="width:300px;" id="project_name" name="project_name">
+                </div>
+                <div class="form-group">
+                    <label for="video_task_name">Task Name:</label>
+                    <input type="text" class="form-control" style="width:300px;" id="task_name" name="task_name">
+                </div>
+                <div class="form-group">
+                    <label for="video_name">Video Name:</label>
+                    <input type="text" class="form-control" style="width:300px;" id="video_name" name="video_name">
+                </div>
+                <div class="form-group">
+                    <label for="video_object_categories">Object Categories:</label>
+                    <input type="file" class="form-control" style="width:300px;" id="object_categories" name="object_categories">
+                </div>
+                <button type="submit" id="enter_btn" class="btn btn-primary btn-md">Enter</button>
+                <a type="submit" id="go_to_dashboard2" class="btn btn-default btn-md" target="_blank" href="">Go to
+                    Dashboard</a>
+            </form>
+
         </div>
     </div>
     <hr>
@@ -90,32 +120,65 @@
 <!-- jQuery -->
 <script src="./js/thirdparty/jquery.js"></script>
 
-<!-- Bootstrap Core JavaScript -->
+<!-- Bootstrap JS -->
 <script src="./js/thirdparty/bootstrap.min.js"></script>
+<script src="./js/thirdparty/bootstrap-switch.js"></script>
+<script src="./js/thirdparty/bootstrap-toggle.min.js"></script>
+
 
 <script type="text/javascript">
+
+    // hide video form at first
+    $('#vid-form').hide();
+
+    // switch between image and video forms
+    function toggleForm() {
+
+        if($('#img-or-vid')[0].checked) {
+            $('#vid-form').hide();
+            $('#img-form').show();
+        } else {
+            $('#img-form').hide();
+            $('#vid-form').show();
+        }
+    };
 
     $(document).ready(function () {
 
         var dashboard = $('#go_to_dashboard');
+        var dashboard2 = $('#go_to_dashboard2');
         dashboard.hide();
-        $('#entry-form').submit(function (e) {
+        dashboard2.hide();
+        $('#img-form').submit(function (e) {
             e.preventDefault();
             var x = new XMLHttpRequest();
             x.onreadystatechange = function () {
                 if (x.readyState === 4) {
                     var num_assignments = x.response;
                     var project_url = "./dashboard?project_name=" +
-                        $('#project_name').val() +
-                        "&num_assignments=" + num_assignments;
+                        $('#project_name').val();
                     dashboard.attr('href', project_url);
                     dashboard.show();
                 }
             };
             x.open("POST", "./postAssignment");
-            x.send(new FormData(this))
+            x.send(new FormData(this));
         })
-
+        $('#vid-form').submit(function (e) {
+            e.preventDefault();
+            var x = new XMLHttpRequest();
+            x.onreadystatechange = function () {
+                if (x.readyState === 4) {
+                    var num_assignments = x.response;
+                    var project_url = "./dashboard?project_name=" +
+                        $('#video_project_name').val();
+                    dashboard2.attr('href', project_url)
+                    dashboard2.show();
+                }
+            };
+            x.open("POST", "./postVideoAssignment");
+            x.send(new FormData(this));
+        })
     });
 
 
