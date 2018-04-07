@@ -262,6 +262,19 @@ SatItem.prototype.getVisibleLabels = function() {
   return labels;
 };
 
+SatItem.prototype.deleteLabelById = function(labelId) {
+  let self = this;
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].id === labelId) {
+      self.labels.splice(i, 1);
+      if (self.selectedLabel && self.selectedLabel.id === labelId) {
+        self.selectedLabel = null;
+      }
+      return;
+    }
+  }
+};
+
 /**
  * Base class for each targeted labeling Image.
  *
@@ -338,20 +351,52 @@ SatImage.prototype.setActive = function(active) {
     });
     // TODO: Wenqi
     // traffic light color
-    $('#remove_btn').click(function() {
-      self.remove();
-    });
+    if ($('#end_btn').length) {
+      // if the end button exists (we have a sequence) then hook it up
+      $('#end_btn').click(function() {
+        if (self.selectedLabel) {
+          for (let i = self.index + 1; i < self.sat.items.length; i++) {
+            self.sat.items[i].deleteLabelById(self.selectedLabel.id);
+          }
+          self.deleteLabelById(self.selectedLabel.id);
+        }
+      });
+    }
+    if ($('#delete_btn').length) {
+      $('#delete_btn').click(function() {
+        if (self.selectedLabel) {
+          for (let i = 0; i < self.sat.items.length; i++) {
+            if (i !== self.index) {
+              self.sat.items[i].deleteLabelById(self.selectedLabel.id);
+            }
+          }
+          self.deleteLabelById(self.selectedLabel.id);
+        }
+      });
+    }
+    if ($('#remove_btn').length) {
+      $('#remove_btn').click(function() {
+        if (self.selectedLabel) {
+          self.deleteLabelById(self.selectedLabel.id);
+        }
+      });
+    }
   } else {
-    // TODO: do we need anything here?
+    if ($('#end_btn').length) {
+      $('#end_btn').off();
+    }
+    if ($('#delete_btn').length) {
+      $('#delete_btn').off();
+    }
+    if ($('#remove_btn').length) {
+      $('#remove_btn').off();
+    }
   }
 };
 
 SatImage.prototype.loaded = function() {
   // Call SatItem loaded
   SatItem.prototype.loaded.call(this);
-  // TODO: Show the image here when the image is loaded.
-  // Sean: (Why here? Will show every image on load, which is not what we want,
-  // we want user to control top image)
 };
 
 /**
@@ -373,23 +418,6 @@ SatImage.prototype.redraw = function() {
 };
 
 /**
- * Removes the currently selected item.
- */
-SatImage.prototype.remove = function() {
-  let self = this;
-  if (self.selectedLabel) {
-    for (let i = 0; i < self.labels.length; i++) {
-      if (self.labels[i].id === self.selectedLabel.id) {
-        self.labels.splice(i, 1);
-        self.selectedLabel = null;
-        self.redraw();
-        return;
-      }
-    }
-  }
-};
-
-/**
  * Called when this SatImage is active and the mouse is clicked.
  * @param {object} e: mouse event
  */
@@ -398,6 +426,19 @@ SatImage.prototype._mousedown = function(e) {
   if (self._isWithinFrame(e) && self.state === 'free') {
     let mousePos = self._getMousePos(e);
     [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
+    if (self.parent) {
+      self.parent.selectedLabel = self.selectedLabel;
+      self.parent.currHandle = self.currHandle;
+      for (let i = 0; i < self.parent.children.length; i++) {
+        for (let j = 0; j < self.parent.children[i].labels.length; j++) {
+          if (self.parent.children[i].labels[j].id === self.selectedLabel.id) {
+            self.parent.children[i].selectedLabel =
+              self.parent.children[i].labels[j];
+          }
+        }
+        self.parent.children[i].currHandle = self.currHandle;
+      }
+    }
     // change checked traits on label selection
     if (self.selectedLabel) {
       for (let i = 0; i < self.catSel.options.length; i++) {
@@ -510,7 +551,7 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
       }
       // remove the box if it's too small
       if (self.selectedLabel.isSmall()) {
-        self.remove();
+        self.selectedLabel.delete();
       }
     }
     self.state = 'free';

@@ -98,8 +98,8 @@ SatVideo.prototype.interpolate = function(startSatLabel) {
     // otherwise, just apply change to remaining items
     for (let i = self.currentFrame + 1;
       i < startSatLabel.parent.children.length; i++) {
-      Object.assign(startSatLabel.parent.children[i], startSatLabel);
-      startSatLabel.parent.children[i].keyframe = false;
+      startSatLabel.parent.children[i].weightAvg(
+        startSatLabel, startSatLabel, 0);
     }
   }
 };
@@ -132,8 +132,8 @@ SatVideo.prototype.nextFrame = function() {
     self.currentItem = self.items[self.currentFrame];
     self.slider.value = self.currentFrame + 1;
     self.frameCounter.innerHTML = self.currentFrame + 1;
-    self.currentItem.setActive(true);
     self.items[self.currentFrame - 1].setActive(false);
+    self.currentItem.setActive(true);
     self.currentItem.redraw();
   } else {
     self.clickPlayPause();
@@ -159,9 +159,9 @@ SatVideo.prototype.moveSlider = function() {
   let oldItem = self.currentItem;
   self.currentFrame = parseInt(self.slider.value) - 1;
   self.currentItem = self.items[self.currentFrame];
-  self.currentItem.setActive(true);
   if (oldItem) {
     oldItem.setActive(false);
   }
+  self.currentItem.setActive(true);
   self.frameCounter.innerHTML = self.currentFrame + 1;
 };
