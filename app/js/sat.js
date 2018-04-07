@@ -426,19 +426,6 @@ SatImage.prototype._mousedown = function(e) {
   if (self._isWithinFrame(e) && self.state === 'free') {
     let mousePos = self._getMousePos(e);
     [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
-    if (self.parent) {
-      self.parent.selectedLabel = self.selectedLabel;
-      self.parent.currHandle = self.currHandle;
-      for (let i = 0; i < self.parent.children.length; i++) {
-        for (let j = 0; j < self.parent.children[i].labels.length; j++) {
-          if (self.parent.children[i].labels[j].id === self.selectedLabel.id) {
-            self.parent.children[i].selectedLabel =
-              self.parent.children[i].labels[j];
-          }
-        }
-        self.parent.children[i].currHandle = self.currHandle;
-      }
-    }
     // change checked traits on label selection
     if (self.selectedLabel) {
       for (let i = 0; i < self.catSel.options.length; i++) {
@@ -558,6 +545,16 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
     self.resizeID = null;
     self.movePos = null;
     self.moveClickPos = null;
+  }
+  if (self.selectedLabel) {
+    for (let i = 0; i < self.sat.items.length; i++) {
+      for (let j = 0; j < self.sat.items[i].labels.length; j++) {
+        if (self.sat.items[i].labels[j].id === self.selectedLabel.id) {
+          self.sat.items[i].selectedLabel = self.sat.items[i].labels[j];
+          self.sat.items[i].currHandle = self.currHandle;
+        }
+      }
+    }
   }
   self.redraw();
 };
