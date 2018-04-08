@@ -156,7 +156,8 @@
                 if (x.readyState === 4) {
                     var num_assignments = x.response;
                     var project_url = "./dashboard?project_name=" +
-                        $('#project_name').val();
+                        $('#project_name').val() +
++                        "&num_assignments=" + num_assignments;
                     dashboard.attr('href', project_url);
                     dashboard.show();
                 }
