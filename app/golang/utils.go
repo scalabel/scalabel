@@ -56,6 +56,7 @@ func GetTask(projName string, taskName string) Task {
 		projName,
 		taskName+".json",
 	)
+
 	// TODO: error handling
 	fileContents, _ := ioutil.ReadFile(taskPath)
 	task := Task{}
