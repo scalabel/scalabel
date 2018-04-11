@@ -24,8 +24,8 @@ for vidfile in os.listdir("data/videos"):
 
     md = {}  # metadata
     md['bitrate'] = re.search("bitrate: ([0-9]* kb/s)", pout).group(1)
-    md['fps'] = re.search(", ([0-9]*\.?[0-9]*) fps,", pout).group(1) # noqa
-    md['tbr'] = re.search(", ([0-9]*\.?[0-9]*) tbr,", pout).group(1) # noqa
+    md['fps'] = re.search(", ([0-9]*\.?[0-9]*) fps,", pout).group(1)  # noqa
+    md['tbr'] = re.search(", ([0-9]*\.?[0-9]*) tbr,", pout).group(1)  # noqa
     md['tbn'] = re.search(", ([0-9]*) tbn,", pout).group(1)
     md['tbc'] = re.search(", ([0-9]*) tbc", pout).group(1)
     md['resolution'] = re.search(", ([0-9]{3,4}x[0-9]{3,4})", pout).group(1)
