@@ -46,12 +46,20 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
   let label = new self.LabelType(self, labelId, optionalAttributes);
   self.labelIdMap[label.id] = label;
   self.labels.push(label);
+  let previousLabel = null;
   for (let i = self.currentFrame; i < self.items.length; i++) {
+    let labelId = self.newLabelId();
     let childLabel = new self.LabelType(self, labelId, optionalAttributes);
     childLabel.parent = label;
     self.items[i].labels.push(childLabel);
     label.addChild(childLabel);
+    if (previousLabel) {
+      previousLabel.nextLabel = childLabel;
+    }
+    childLabel.previousLabel = previousLabel;
+    previousLabel = childLabel;
   }
+  previousLabel.nextLabel = null;
   let currentFrameLabels = self.items[self.currentFrame].labels;
   return currentFrameLabels[currentFrameLabels.length - 1];
 };
@@ -151,6 +159,8 @@ SatVideo.prototype.gotoItem = function(index) {
       self.currentItem.redraw();
     };
     self.currentItem.redraw();
+    self.slider.value = index;
+    self.frameCounter.innerHTML = index + 1;
   }
 };
 

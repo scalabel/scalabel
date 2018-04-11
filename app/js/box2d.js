@@ -46,9 +46,10 @@ Box2d.prototype = Object.create(ImageLabel.prototype);
  *   no box hovered over.
  * @param {number} hoverHandle - handle number of the currently hovered handle,
  *   or null if no handle hovered.
+ * @param {number} labelIndex - index of this label in this.sat.labels
  */
 Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
-  hoverBox, hoverHandle) {
+  hoverBox, hoverHandle, labelIndex) {
   let self = this;
 
   // go ahead and set context font
@@ -60,8 +61,8 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
   self.drawTag(mainCtx);
 
   // draw hidden elements
-  self.drawHiddenBox(hiddenCtx, selectedBox);
-  self.drawHiddenHandles(hiddenCtx, selectedBox);
+  self.drawHiddenBox(hiddenCtx, selectedBox, labelIndex);
+  self.drawHiddenHandles(hiddenCtx, selectedBox, labelIndex);
 };
 
 /**
@@ -182,14 +183,15 @@ Box2d.prototype.drawTag = function(ctx) {
  * @param {object} hiddenCtx - Hidden canvas context.
  * @param {number} selectedBox - ID of the currently selected box, or null if
  *   no box selected.
+ * @param {number} labelIndex - index of this label in this.sat.labels
  */
-Box2d.prototype.drawHiddenBox = function(hiddenCtx, selectedBox) {
+Box2d.prototype.drawHiddenBox = function(hiddenCtx, selectedBox, labelIndex) {
   // only draw if it is not the case that there is another selected box
   let self = this;
   if (!selectedBox || selectedBox.id === self.id) {
     hiddenCtx.save(); // save the canvas context settings
     // 0 represents the box itself
-    hiddenCtx.strokeStyle = self.hiddenStyleColor(0);
+    hiddenCtx.strokeStyle = self.hiddenStyleColor(labelIndex, 0);
     hiddenCtx.lineWidth = self.HIDDEN_LINE_WIDTH;
     hiddenCtx.strokeRect(self.x, self.y, self.w, self.h); // draw the box
     hiddenCtx.restore(); // restore the canvas to saved settings
@@ -201,13 +203,15 @@ Box2d.prototype.drawHiddenBox = function(hiddenCtx, selectedBox) {
  * @param {object} hiddenCtx - Hidden canvas context
  * @param {number} selectedBox - ID of the currently selected box, or null if
  *   no box selected
+ * @param {number} labelIndex - index of this label in this.sat.labels
  */
-Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox) {
+Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox,
+  labelIndex) {
   let self = this;
   if (!selectedBox || selectedBox.id === self.id) {
     // as long as there is not another box selected, draw all the hidden handles
     for (let handleNo = 1; handleNo <= 8; handleNo++) {
-      self.drawHiddenHandle(hiddenCtx, handleNo);
+      self.drawHiddenHandle(hiddenCtx, handleNo, labelIndex);
     }
   }
 };
@@ -216,12 +220,13 @@ Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox) {
  * Draw a specified hidden resize handle of this bounding box.
  * @param {object} hiddenCtx - Hidden canvas context.
  * @param {number} handleNo - The handle number, i.e. which handle to draw.
+ * @param {number} labelIndex - index of this label in this.sat.labels
  */
-Box2d.prototype.drawHiddenHandle = function(hiddenCtx, handleNo) {
+Box2d.prototype.drawHiddenHandle = function(hiddenCtx, handleNo, labelIndex) {
   let self = this;
   hiddenCtx.save(); // save the canvas context settings
   let posHandle = self._getHandle(handleNo);
-  hiddenCtx.fillStyle = self.hiddenStyleColor(handleNo);
+  hiddenCtx.fillStyle = self.hiddenStyleColor(labelIndex, handleNo);
   hiddenCtx.lineWidth = self.HIDDEN_LINE_WIDTH;
   hiddenCtx.beginPath();
   hiddenCtx.arc(posHandle.x, posHandle.y, self.HIDDEN_HANDLE_RADIUS, 0,
@@ -240,11 +245,13 @@ Box2d.prototype.isSmall = function() {
 
 /**
  * Get the hidden color as rgb, which encodes the id and handle index.
+ * @param {number} labelIndex - index of this label in this.sat.labels
  * @param {number} handleNo - The handle number, ranges from 0 to 8.
  * @return {string} - The hidden color rgb string.
  */
-Box2d.prototype.hiddenStyleColor = function(handleNo) {
-  return ['rgb(' + (this.id + 1), handleNo + 1, '0)'].join(',');
+Box2d.prototype.hiddenStyleColor = function(labelIndex, handleNo) {
+  return ['rgb(' + (Math.floor(labelIndex / 256)), labelIndex % 256,
+    (handleNo + 1) + ')'].join(',');
 };
 
 /**
