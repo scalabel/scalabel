@@ -111,7 +111,7 @@ func main() {
 	http.HandleFunc("/postSubmission", postSubmissionHandler)
 	http.HandleFunc("/postLog", postLogHandler)
 	http.HandleFunc("/requestAssignment", requestAssignmentHandler)
-	http.HandleFunc("./requestSubmission", requestSubmissionHandler)
+	http.HandleFunc("/requestSubmission", requestSubmissionHandler)
 	http.HandleFunc("/requestInfo", requestInfoHandler)
 
 	http.HandleFunc("/postVideoAssignment", postVideoAssignmentHandler)
