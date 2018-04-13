@@ -272,6 +272,7 @@ func requestSubmissionHandler(w http.ResponseWriter, r *http.Request) {
 		Info.Println("Loading assignment from latest submission of",
 			request.ProjectName, request.AssignmentID)
 	}
+
 	w.Write(requestJson)
 
 }

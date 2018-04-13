@@ -9,7 +9,7 @@ fi
 
 FILES=`git diff --name-only --diff-filter=ACMR | grep -E "\.(js)$"`
 for FILE in $FILES; do
-    $JSSTYLE $JSOPTIONS $FILE >&2 
+    $JSSTYLE $JSOPTIONS $FILE >&2
     if [ $? -ne 0 ]; then
         echo "[!] $FILE does not respect google code style." >&2
         RETURN=1
