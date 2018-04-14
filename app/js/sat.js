@@ -391,7 +391,7 @@ SatImage.prototype.setActive = function(active) {
       // if the end button exists (we have a sequence) then hook it up
       $('#end_btn').click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id, back = false);
+          self.deleteLabelById(self.selectedLabel.id, false);
           self.redraw();
         }
       });
