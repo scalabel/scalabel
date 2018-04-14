@@ -262,14 +262,14 @@ SatItem.prototype.getVisibleLabels = function() {
   return labels;
 };
 
-SatItem.prototype.deleteLabelById = function(labelId) {
+SatItem.prototype.deleteLabelById = function(labelId, back = true) {
   // TODO: refactor this ugly code
   let self = this;
   for (let i = 0; i < self.labels.length; i++) {
     if (self.labels[i].id === labelId) {
       let currentItem = self.previousItem();
       let currentLabel = self.labels[i].previousLabel;
-      while (currentItem) {
+      while (back && currentItem) {
         for (let j = 0; j < currentItem.labels.length; j++) {
           if (currentItem.labels[j].id === currentLabel.id) {
             currentItem.labels.splice(j, 1);
@@ -391,29 +391,24 @@ SatImage.prototype.setActive = function(active) {
       // if the end button exists (we have a sequence) then hook it up
       $('#end_btn').click(function() {
         if (self.selectedLabel) {
-          for (let i = self.index + 1; i < self.sat.items.length; i++) {
-            self.sat.items[i].deleteLabelById(self.selectedLabel.id);
-          }
-          self.deleteLabelById(self.selectedLabel.id);
+          self.deleteLabelById(self.selectedLabel.id, back = false);
+          self.redraw();
         }
       });
     }
     if ($('#delete_btn').length) {
       $('#delete_btn').click(function() {
         if (self.selectedLabel) {
-          for (let i = 0; i < self.sat.items.length; i++) {
-            if (i !== self.index) {
-              self.sat.items[i].deleteLabelById(self.selectedLabel.id);
-            }
-          }
           self.deleteLabelById(self.selectedLabel.id);
+          self.redraw();
         }
       });
     }
     if ($('#remove_btn').length) {
       $('#remove_btn').click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
+          self.selectedLabel.delete();
+          self.selectedLabel = null;
         }
       });
     }
@@ -577,7 +572,8 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
       }
       // remove the box if it's too small
       if (self.selectedLabel.isSmall()) {
-        self.deleteLabelById(self.selectedLabel.id);
+        self.selectedLabel.delete();
+        self.selectedLabel = null;
       }
     }
     self.state = 'free';
