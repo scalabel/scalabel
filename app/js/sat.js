@@ -228,7 +228,7 @@ SatItem.prototype.previousItem = function() {
 };
 
 SatItem.prototype.nextItem = function() {
-  if (this.index < this.sat.items.length - 1) {
+  if (this.index + 1 >= this.sat.items.length) {
     return null;
   }
   return this.sat.items[this.index+1];
@@ -262,13 +262,51 @@ SatItem.prototype.getVisibleLabels = function() {
   return labels;
 };
 
-SatItem.prototype.deleteLabelById = function(labelId) {
+SatItem.prototype.deleteLabelById = function(labelId, back = true) {
+  // TODO: refactor this ugly code
   let self = this;
   for (let i = 0; i < self.labels.length; i++) {
     if (self.labels[i].id === labelId) {
+      let currentItem = self.previousItem();
+      let currentLabel = self.labels[i].previousLabel;
+      while (back && currentItem) {
+        for (let j = 0; j < currentItem.labels.length; j++) {
+          if (currentItem.labels[j].id === currentLabel.id) {
+            currentItem.labels.splice(j, 1);
+            if (currentItem.selectedLabel &&
+              currentItem.selectedLabel.id === currentLabel.id) {
+              currentItem.selectedLabel = null;
+              currentItem.currHandle = null;
+            }
+          }
+        }
+        if (currentLabel) {
+          currentLabel = currentLabel.previousLabel;
+        }
+        currentItem = currentItem.previousItem();
+      }
+      currentItem = self.nextItem();
+      currentLabel = self.labels[i].nextLabel;
+      while (currentItem) {
+        for (let j = 0; j < currentItem.labels.length; j++) {
+          if (currentItem.labels[j].id === currentLabel.id) {
+            currentItem.labels.splice(j, 1);
+            if (currentItem.selectedLabel &&
+              currentItem.selectedLabel.id === currentLabel.id) {
+              currentItem.selectedLabel = null;
+              currentItem.currHandle = null;
+            }
+          }
+        }
+        if (currentLabel) {
+          currentLabel = currentLabel.nextLabel;
+        }
+        currentItem = currentItem.nextItem();
+      }
       self.labels.splice(i, 1);
       if (self.selectedLabel && self.selectedLabel.id === labelId) {
         self.selectedLabel = null;
+        self.currHandle = null;
       }
       return;
     }
@@ -298,8 +336,6 @@ function SatImage(sat, index, url) {
     self.loaded();
   };
   self.image.src = self.url;
-
-  self.imageRatio = 0;
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
@@ -355,33 +391,30 @@ SatImage.prototype.setActive = function(active) {
       // if the end button exists (we have a sequence) then hook it up
       $('#end_btn').click(function() {
         if (self.selectedLabel) {
-          for (let i = self.index + 1; i < self.sat.items.length; i++) {
-            self.sat.items[i].deleteLabelById(self.selectedLabel.id);
-          }
-          self.deleteLabelById(self.selectedLabel.id);
+          self.deleteLabelById(self.selectedLabel.id, false);
+          self.redraw();
         }
       });
     }
     if ($('#delete_btn').length) {
       $('#delete_btn').click(function() {
         if (self.selectedLabel) {
-          for (let i = 0; i < self.sat.items.length; i++) {
-            if (i !== self.index) {
-              self.sat.items[i].deleteLabelById(self.selectedLabel.id);
-            }
-          }
           self.deleteLabelById(self.selectedLabel.id);
+          self.redraw();
         }
       });
     }
     if ($('#remove_btn').length) {
       $('#remove_btn').click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
+          self.selectedLabel.delete();
+          self.selectedLabel = null;
         }
       });
     }
   } else {
+    // .click just adds a function to a list of functions that get executed,
+    // therefore we need to turn off the old functions
     if ($('#end_btn').length) {
       $('#end_btn').off();
     }
@@ -413,7 +446,8 @@ SatImage.prototype.redraw = function() {
     self.padBox.x, self.padBox.y, self.padBox.w, self.padBox.h);
   for (let i = 0; i < self.labels.length; i++) {
     self.labels[i].redraw(self.mainCtx, self.hiddenCtx, self.selectedLabel,
-      self.resizeID === self.labels[i].id, self.hoverLabel, self.hoverHandle);
+      self.resizeID === self.labels[i].id, self.hoverLabel,
+        self.hoverHandle, i);
   }
 };
 
@@ -450,7 +484,7 @@ SatImage.prototype._mousedown = function(e) {
       // if we have a resize handle
       self.state = 'resize';
       self.resizeID = self.selectedLabel.id;
-    } else if (self.currHandle === 0) {
+    } else if (self.currHandle === 0 && self.selectedLabel) {
       // if we have a move handle
       self.movePos = self.selectedLabel.getCurrentPosition();
       self.moveClickPos = mousePos;
@@ -539,6 +573,7 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
       // remove the box if it's too small
       if (self.selectedLabel.isSmall()) {
         self.selectedLabel.delete();
+        self.selectedLabel = null;
       }
     }
     self.state = 'free';
@@ -546,14 +581,28 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
     self.movePos = null;
     self.moveClickPos = null;
   }
-  if (self.selectedLabel) {
-    for (let i = 0; i < self.sat.items.length; i++) {
-      for (let j = 0; j < self.sat.items[i].labels.length; j++) {
-        if (self.sat.items[i].labels[j].id === self.selectedLabel.id) {
-          self.sat.items[i].selectedLabel = self.sat.items[i].labels[j];
-          self.sat.items[i].currHandle = self.currHandle;
-        }
+  // if parent label, make this the selected label in all other SatImages
+  if (self.selectedLabel && self.selectedLabel.parent) {
+    let currentItem = self.previousItem();
+    let currentLabel = self.selectedLabel.previousLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.previousLabel;
+        // TODO: make both be functions, not attributes
       }
+      currentItem = currentItem.previousItem();
+    }
+    currentItem = self.nextItem();
+    currentLabel = self.selectedLabel.nextLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.nextLabel;
+      }
+      currentItem = currentItem.nextItem();
     }
   }
   self.redraw();
@@ -626,15 +675,16 @@ SatImage.prototype._getLabelByID = function(labelID) {
  * @return {[ImageLabel, number]}: the box and handle (0-9) under the mouse
  */
 SatImage.prototype._getSelected = function(mousePos) {
+  let self = this;
   let pixelData = this.hiddenCtx.getImageData(mousePos.x,
     mousePos.y, 1, 1).data;
-  let selectedLabelID = null;
+  let selectedLabelIndex = null;
   let currHandle = null;
-  if (pixelData[0] !== 0 && pixelData[3] === 255) {
-    selectedLabelID = pixelData[0] - 1;
-    currHandle = pixelData[1] - 1;
+  if (pixelData[3] !== 0) {
+    selectedLabelIndex = pixelData[0] * 256 + pixelData[1];
+    currHandle = pixelData[2] - 1;
   }
-  return [this._getLabelByID(selectedLabelID), currHandle];
+  return [self.labels[selectedLabelIndex], currHandle];
 };
 
 /**
@@ -711,7 +761,7 @@ SatLabel.prototype.delete = function() {
     this.parent.numChildren -= 1;
     if (this.parent.numChildren === 0) this.parent.delete();
   }
-  for (let i = 0; i < this.children; i++) {
+  for (let i = 0; i < this.children.length; i++) {
     this.children[i].parent = null;
     this.children[i].delete();
   }
