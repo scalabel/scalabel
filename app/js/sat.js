@@ -480,7 +480,6 @@ SatImage.prototype._mousedown = function(e) {
       // traffic light color
     }
 
-    // **********************************************
     if (self.selectedLabel && self.currHandle > 0) {
       // if we have a resize handle
       self.state = 'resize';
@@ -501,7 +500,6 @@ SatImage.prototype._mousedown = function(e) {
       self.currHandle = self.selectedLabel.INITIAL_HANDLE;
       self.resizeID = self.selectedLabel.id;
     }
-    // **********************************************
   }
   self.redraw();
 };
@@ -534,7 +532,6 @@ SatImage.prototype._mousemove = function(e) {
 
   // needed for on-hover animations
   [self.hoverLabel, self.hoverHandle] = self._getSelected(mousePos);
-  // **********************************************
   // change the cursor appropriately
   if (self.state === 'resize') {
     self.imageCanvas.style.cursor = 'crosshair';
@@ -553,7 +550,6 @@ SatImage.prototype._mousemove = function(e) {
     self.selectedLabel.move(mousePos, self.movePos, self.moveClickPos,
       self.padBox);
   }
-  // **********************************************
   self.redraw();
 };
 
@@ -564,7 +560,6 @@ SatImage.prototype._mousemove = function(e) {
 SatImage.prototype._mouseup = function(_) { // eslint-disable-line
   let self = this;
   if (self.state !== 'free') {
-    // **********************************************
     if (self.state === 'resize') {
       // if we resized, we need to reorder ourselves
       if (self.selectedLabel.w < 0) {
@@ -581,7 +576,6 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
         self.selectedLabel = null;
       }
     }
-    // **********************************************
     self.state = 'free';
     self.resizeID = null;
     self.movePos = null;
