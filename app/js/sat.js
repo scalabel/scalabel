@@ -164,7 +164,7 @@ Sat.prototype.submit = function() {
 Sat.prototype.gotoItem = function(index) {
   //  TODO: save
   // mod the index to wrap around the list
-  index = (index + this.items.length) % this.items.length;
+  index = index % this.items.length;
   // TODO: event?
   this.currentItem.setActive(false);
   this.currentItem = this.items[index];
@@ -276,6 +276,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
             if (currentItem.selectedLabel &&
               currentItem.selectedLabel.id === currentLabel.id) {
               currentItem.selectedLabel = null;
+              currentItem.currHandle = null;
             }
           }
         }
@@ -293,6 +294,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
             if (currentItem.selectedLabel &&
               currentItem.selectedLabel.id === currentLabel.id) {
               currentItem.selectedLabel = null;
+              currentItem.currHandle = null;
             }
           }
         }
@@ -304,6 +306,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
       self.labels.splice(i, 1);
       if (self.selectedLabel && self.selectedLabel.id === labelId) {
         self.selectedLabel = null;
+        self.currHandle = null;
       }
       return;
     }
@@ -337,22 +340,31 @@ function SatImage(sat, index, url) {
 
 SatImage.prototype = Object.create(SatItem.prototype);
 
-SatImage.prototype.loaded = function() {
-  // Call SatItem loaded
-  SatItem.prototype.loaded.call(this);
-};
-
 /**
  * Set whether this SatImage is the active one in the sat instance.
  * @param {boolean} active: if this SatImage is active
  */
 SatImage.prototype.setActive = function(active) {
   let self = this;
+  self.active = active;
   if (active) {
-    // set up class-specific environment
-    self.sat.LabelType.setEnvironment(self.sat);
-
-    // global listeners
+    self.imageCanvas = document.getElementById('image_canvas');
+    self.hiddenCanvas = document.getElementById('hidden_canvas');
+    self.mainCtx = self.imageCanvas.getContext('2d');
+    self.hiddenCtx = self.hiddenCanvas.getContext('2d');
+    self.state = 'free';
+    self.lastLabelID = 0;
+    self.padBox = self._getPadding();
+    self.catSel = document.getElementById('category_select');
+    self.catSel.selectedIndex = 0;
+    self.occlCheckbox = document.getElementById('occluded_checkbox');
+    self.truncCheckbox = document.getElementById('truncated_checkbox');
+    document.getElementById('prev_btn').onclick = function() {
+      self.sat.gotoItem(self.index - 1);
+    };
+    document.getElementById('next_btn').onclick = function() {
+      self.sat.gotoItem(self.index + 1);
+    };
     document.onmousedown = function(e) {
       self._mousedown(e);
     };
@@ -362,30 +374,30 @@ SatImage.prototype.setActive = function(active) {
     document.onmouseup = function(e) {
       self._mouseup(e);
     };
-
-    // buttons
-    document.getElementById('prev_btn').onclick = function() {
-      console.log('prev');
-      self.sat.gotoItem(env.index - 1);
-    };
-    document.getElementById('next_btn').onclick = function() {
-      console.log('next');
-      self.sat.gotoItem(env.index + 1);
-    };
-
+    $('#category_select').change(function() {
+      self._changeCat();
+    });
+    $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch',
+    function() {
+      self._occlSwitch();
+    });
+    $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch',
+    function() {
+      self._truncSwitch();
+    });
+    // TODO: Wenqi
+    // traffic light color
     if ($('#end_btn').length) {
       // if the end button exists (we have a sequence) then hook it up
       $('#end_btn').click(function() {
-        console.log('end');
         if (self.selectedLabel) {
-          self.deleteLabelById(env.selectedLabel.id, false);
+          self.deleteLabelById(self.selectedLabel.id, false);
           self.redraw();
         }
       });
     }
     if ($('#delete_btn').length) {
       $('#delete_btn').click(function() {
-        console.log('delete');
         if (self.selectedLabel) {
           self.deleteLabelById(self.selectedLabel.id);
           self.redraw();
@@ -395,8 +407,8 @@ SatImage.prototype.setActive = function(active) {
     if ($('#remove_btn').length) {
       $('#remove_btn').click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
-          self.redraw();
+          self.selectedLabel.delete();
+          self.selectedLabel = null;
         }
       });
     }
@@ -404,19 +416,22 @@ SatImage.prototype.setActive = function(active) {
     // .click just adds a function to a list of functions that get executed,
     // therefore we need to turn off the old functions
     if ($('#end_btn').length) {
-      console.log('test');
-      // $('#end_btn').off();
+      $('#end_btn').off();
     }
-    // if ($('#delete_btn').length) {
-    //   $('#delete_btn').off();
-    // }
-    // if ($('#remove_btn').length) {
-    //   $('#remove_btn').off();
-    // }
+    if ($('#delete_btn').length) {
+      $('#delete_btn').off();
+    }
+    if ($('#remove_btn').length) {
+      $('#remove_btn').off();
+    }
   }
-
 };
-    
+
+SatImage.prototype.loaded = function() {
+  // Call SatItem loaded
+  SatItem.prototype.loaded.call(this);
+};
+
 /**
  * Redraws this SatImage and all labels.
  */
@@ -441,53 +456,52 @@ SatImage.prototype.redraw = function() {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousedown = function(e) {
-  
-  if (this._isWithinFrame(e)) {
-    let mousePos = this._getMousePos(e);
-    [this.selectedLabel, currHandle] = this._getSelected(mousePos);
-    if (this.selectedLabel) {
-      this.selectedLabel.setCurrHandle(currHandle);
-    }
+  let self = this;
+  if (self._isWithinFrame(e) && self.state === 'free') {
+    let mousePos = self._getMousePos(e);
+    [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
     // change checked traits on label selection
-    if (this.selectedLabel) {
-      // label specific handling of mousedown
-      this.selectedLabel._mousedown(e);
-
-    } else {
-      // otherwise, new label
-      this.selectedLabel = this.sat.newLabel({
-        category: this.catSel.options[this.catSel.selectedIndex].innerHTML, 
-        occl: this.occlCheckbox.checked,
-        trunc: this.truncCheckbox.checked, 
-        mousePos: mousePos
-      });
+    if (self.selectedLabel) {
+      for (let i = 0; i < self.catSel.options.length; i++) {
+        if (self.catSel.options[i].innerHTML === self.selectedLabel.name) {
+          self.catSel.selectedIndex = i;
+          break;
+        }
+      }
+      if ($('[name=\'occluded-checkbox\']').prop('checked') !==
+        self.selectedLabel.occl) {
+        $('[name=\'occluded-checkbox\']').trigger('click');
+      }
+      if ($('[name=\'truncated-checkbox\']').prop('checked') !==
+        self.selectedLabel.trunc) {
+        $('[name=\'truncated-checkbox\']').trigger('click');
+      }
+      // TODO: Wenqi
+      // traffic light color
     }
 
+    if (self.selectedLabel && self.currHandle > 0) {
+      // if we have a resize handle
+      self.state = 'resize';
+      self.resizeID = self.selectedLabel.id;
+    } else if (self.currHandle === 0 && self.selectedLabel) {
+      // if we have a move handle
+      self.movePos = self.selectedLabel.getCurrentPosition();
+      self.moveClickPos = mousePos;
+      self.state = 'move';
+    } else if (!self.selectedLabel) {
+      // otherwise, new label
+      let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+      let occl = self.occlCheckbox.checked;
+      let trunc = self.truncCheckbox.checked;
+      self.selectedLabel = self.sat.newLabel({category: cat, occl: occl,
+        trunc: trunc, mousePos: mousePos});
+      self.state = 'resize';
+      self.currHandle = self.selectedLabel.INITIAL_HANDLE;
+      self.resizeID = self.selectedLabel.id;
+    }
   }
-  this.redraw();
-};
-
-/**
- * Function to draw the crosshair
- * @param {object} e: mouse event
- */
-SatImage.prototype.drawCrossHair = function(e, canvRect, mousePos) {
-
-  let cH = $('#crosshair-h');
-  let cV = $('#crosshair-v');
-  cH.css('top', Math.min(canvRect.y + this.padBox.y + this.padBox.h, Math.max(
-    e.clientY, canvRect.y + this.padBox.y)));
-  cH.css('left', canvRect.x + this.padBox.x);
-  cH.css('width', this.padBox.w);
-  cV.css('left', Math.min(canvRect.x + this.padBox.x + this.padBox.w, Math.max(
-    e.clientX, canvRect.x + this.padBox.x)));
-  cV.css('top', canvRect.y + this.padBox.y);
-  cV.css('height', this.padBox.h);
-  if (this._isWithinFrame(e)) {
-    $('.hair').show();
-  } else {
-    $('.hair').hide();
-  }
+  self.redraw();
 };
 
 /**
@@ -495,57 +509,103 @@ SatImage.prototype.drawCrossHair = function(e, canvRect, mousePos) {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousemove = function(e) {
+  let self = this;
+  let canvRect = this.imageCanvas.getBoundingClientRect();
+  let mousePos = self._getMousePos(e);
 
-  if (this._isWithinFrame(e)) {
-    let canvRect = this.imageCanvas.getBoundingClientRect();
-    let mousePos = this._getMousePos(e);
-
-    if (this.sat.LabelType.useCrossHair) {
-      this.drawCrossHair(e, canvRect, mousePos);
-    }
-
-    // needed for on-hover animations
-    // this.hoverLabel = this._getSelected(mousePos);
-
-    // label specific handling of mousemove
-    if (this.selectedLabel) {
-      this.selectedLabel._mousemove(e);
-    }
-    // hover effect
-
-    [this.hoverLabel, this.hoverHandle] = this._getSelected(mousePos);
-    if (this.hoverLabel && this.hoverLabel != this.selectedLabel) {
-      this.hoverLabel.setCurrHandle(currHandle);
-      if (this.hoverHandle == 0) {
-        this.imageCanvas.style.cursor = 'move';
-      }
-    } else {
-
-      if (!this.selectedLabel) {
-        this.imageCanvas.style.cursor = 'crosshair';
-      }
-    }
-
-    this.redraw();
+  // draw the crosshair
+  let cH = $('#crosshair-h');
+  let cV = $('#crosshair-v');
+  cH.css('top', Math.min(canvRect.y + self.padBox.y + self.padBox.h, Math.max(
+    e.clientY, canvRect.y + self.padBox.y)));
+  cH.css('left', canvRect.x + self.padBox.x);
+  cH.css('width', self.padBox.w);
+  cV.css('left', Math.min(canvRect.x + self.padBox.x + self.padBox.w, Math.max(
+    e.clientX, canvRect.x + self.padBox.x)));
+  cV.css('top', canvRect.y + self.padBox.y);
+  cV.css('height', self.padBox.h);
+  if (self._isWithinFrame(e)) {
+    $('.hair').show();
+  } else {
+    $('.hair').hide();
   }
 
-};  
+  // needed for on-hover animations
+  [self.hoverLabel, self.hoverHandle] = self._getSelected(mousePos);
+  // change the cursor appropriately
+  if (self.state === 'resize') {
+    self.imageCanvas.style.cursor = 'crosshair';
+  } else if (self.state === 'move') {
+    self.imageCanvas.style.cursor = 'move';
+  } else if (self.hoverLabel && self.hoverHandle >= 0) {
+    self.imageCanvas.style.cursor = self.hoverLabel.getCursorStyle(
+      self.hoverHandle);
+  } else {
+    self.imageCanvas.style.cursor = 'crosshair';
+  }
+
+  if (self.state === 'resize') {
+    self.selectedLabel.resize(mousePos, self.currHandle, canvRect, self.padBox);
+  } else if (self.state === 'move') {
+    self.selectedLabel.move(mousePos, self.movePos, self.moveClickPos,
+      self.padBox);
+  }
+  self.redraw();
+};
 
 /**
  * Called when this SatImage is active and the mouse is released.
  * @param {object} _: mouse event (unused)
  */
 SatImage.prototype._mouseup = function(_) { // eslint-disable-line
-  
-  if (this.selectedLabel) {
-    // label specific handling of mouseup
-    this.selectedLabel._mouseup();
-    if (this.selectedLabel.isSmall()) {
-      this.deleteLabelById(this.selectedLabel.id);
+  let self = this;
+  if (self.state !== 'free') {
+    if (self.state === 'resize') {
+      // if we resized, we need to reorder ourselves
+      if (self.selectedLabel.w < 0) {
+        self.selectedLabel.x = self.selectedLabel.x + self.selectedLabel.w;
+        self.selectedLabel.w = -1 * self.selectedLabel.w;
+      }
+      if (self.selectedLabel.h < 0) {
+        self.selectedLabel.y = self.selectedLabel.y + self.selectedLabel.h;
+        self.selectedLabel.h = -1 * self.selectedLabel.h;
+      }
+      // remove the box if it's too small
+      if (self.selectedLabel.isSmall()) {
+        self.selectedLabel.delete();
+        self.selectedLabel = null;
+      }
+    }
+    self.state = 'free';
+    self.resizeID = null;
+    self.movePos = null;
+    self.moveClickPos = null;
+  }
+  // if parent label, make this the selected label in all other SatImages
+  if (self.selectedLabel && self.selectedLabel.parent) {
+    let currentItem = self.previousItem();
+    let currentLabel = self.selectedLabel.previousLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.previousLabel;
+        // TODO: make both be functions, not attributes
+      }
+      currentItem = currentItem.previousItem();
+    }
+    currentItem = self.nextItem();
+    currentLabel = self.selectedLabel.nextLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.nextLabel;
+      }
+      currentItem = currentItem.nextItem();
     }
   }
-  this.redraw();
-
+  self.redraw();
 };
 
 /**
@@ -615,7 +675,7 @@ SatImage.prototype._getLabelByID = function(labelID) {
  * @return {[ImageLabel, number]}: the box and handle (0-9) under the mouse
  */
 SatImage.prototype._getSelected = function(mousePos) {
-  
+  let self = this;
   let pixelData = this.hiddenCtx.getImageData(mousePos.x,
     mousePos.y, 1, 1).data;
   let selectedLabelIndex = null;
@@ -624,24 +684,49 @@ SatImage.prototype._getSelected = function(mousePos) {
     selectedLabelIndex = pixelData[0] * 256 + pixelData[1];
     currHandle = pixelData[2] - 1;
   }
-
-  let selectedLabel = this.labels[selectedLabelIndex];
-
-  return [selectedLabel, currHandle];
+  return [self.labels[selectedLabelIndex], currHandle];
 };
-
 
 /**
  * Called when the selected category is changed.
  */
 SatImage.prototype._changeCat = function() {
-  
-  if (this.selectedLabel) {
-    let option = this.catSel.options[this.catSel.selectedIndex].innerHTML;
-    this.selectedLabel.name = option;
-    this.redraw();
+  let self = this;
+  if (self.selectedLabel) {
+    let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+    self.selectedLabel.name = option;
+    self.redraw();
   }
 };
+
+/**
+ * Called when the occluded checkbox is toggled.
+ */
+SatImage.prototype._occlSwitch = function() {
+  let self = this;
+  if (self.selectedLabel) {
+    self.selectedLabel.occl = $('[name=\'occluded-checkbox\']').prop('checked');
+  }
+};
+
+/**
+ * Called when the truncated checkbox is toggled.
+ */
+SatImage.prototype._truncSwitch = function() {
+  let self = this;
+  if (self.selectedLabel) {
+    self.selectedLabel.trunc = $('[name=\'truncated-checkbox\']').prop(
+      'checked');
+  }
+};
+
+/**
+ * Called when the traffic light color choice is changed.
+ */
+SatImage.prototype._lightSwitch = function() {
+  // TODO: Wenqi
+};
+
 
 /**
  * Base class for all the labeled objects. New label should be instantiated by
@@ -668,8 +753,6 @@ function SatLabel(sat, id = -1, ignored = null) {
   this.children = [];
   this.numChildren = 0;
   this.valid = true;
-  this.useCrossHair = false;
-  this.currHandle = 0;
 }
 
 SatLabel.prototype.delete = function() {
@@ -683,10 +766,6 @@ SatLabel.prototype.delete = function() {
     this.children[i].delete();
   }
 };
-
-SatLabel.prototype.setCurrHandle = function(handle) {
-  this.currHandle = handle;
-}
 
 SatLabel.prototype.getRoot = function() {
   if (this.parent === null) return this;
@@ -794,35 +873,6 @@ SatLabel.prototype.fromJson = function(object) {
  */
 function ImageLabel(sat, id, optionalAttributes = null) {
   SatLabel.call(this, sat, id, optionalAttributes);
-  this.env = sat.currentItem;
 }
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
-
-/**
- * Draw a specified resize handle of this bounding box.
- * @param {object} ctx - Canvas context.
- * @param {number} handleNo - The handle number, i.e. which handle to draw.
- */
-ImageLabel.prototype.drawHandle = function(ctx, handleNo) {
-  let self = this;
-  ctx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo);
-  if (self.isSmall()) {
-    ctx.fillStyle = 'rgb(169, 169, 169)';
-  } else {
-    ctx.fillStyle = self.styleColor();
-  }
-  ctx.lineWidth = self.LINE_WIDTH;
-  if (posHandle) {
-    ctx.beginPath();
-    ctx.arc(posHandle.x, posHandle.y, self.HANDLE_RADIUS, 0, 2 * Math.PI);
-    ctx.fill();
-    if (!self.isSmall()) {
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = self.OUTLINE_WIDTH;
-      ctx.stroke();
-    }
-  }
-  ctx.restore(); // restore the canvas to saved settings
-};

@@ -31,78 +31,9 @@ function Box2d(sat, id, boxAttributes) {
   this.MIN_BOX_SIZE = 15;
   this.FADED_ALPHA = 0.5;
   this.INITIAL_HANDLE = 5; // for the bottom-right of the box
-
-  this.state = 'resize';
-  this.currHandle = this.INITIAL_HANDLE;
 }
 
 Box2d.prototype = Object.create(ImageLabel.prototype);
-
-Box2d.useCrossHair = true;
-
-Box2d.setEnvironment = function(sat) {
-
-  // names
-  env = sat.currentItem;
-  env.imageCanvas = document.getElementById('image_canvas');
-  env.hiddenCanvas = document.getElementById('hidden_canvas');
-  env.mainCtx = env.imageCanvas.getContext('2d');
-  env.hiddenCtx = env.hiddenCanvas.getContext('2d');
-
-  // toolbox
-  env.catSel = document.getElementById('category_select');
-  env.catSel.selectedIndex = 0;
-  env.occlCheckbox = document.getElementById('occluded_checkbox');
-  env.truncCheckbox = document.getElementById('truncated_checkbox');
-
-  $('#category_select').change(function() {
-    env._changeCat();
-  });
-  $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch',
-  function() {
-    env._occlSwitch();
-  });
-  $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch',
-  function() {
-    env._truncSwitch();
-  });
-
-  // TODO: Wenqi
-  // traffic light color
-
-  env.lastLabelID = 0;
-  env.padBox = env._getPadding();
-  
-}
-
-/**
- * Called when the occluded checkbox is toggled.
- */
-SatImage.prototype._occlSwitch = function() {
-  
-  if (this.selectedLabel) {
-    this.occl = $('[name=\'occluded-checkbox\']').prop('checked');
-  }
-};
-
-/**
- * Called when the truncated checkbox is toggled.
- */
-SatImage.prototype._truncSwitch = function() {
-  
-  if (this.selectedLabel) {
-    this.trunc = $('[name=\'truncated-checkbox\']').prop(
-      'checked');
-  }
-};
-
-/**
- * Called when the traffic light color choice is changed.
- */
-SatImage.prototype._lightSwitch = function() {
-  // TODO: Wenqi
-};
-
 
 /**
  * Draw this bounding box on the canvas.
@@ -126,15 +57,9 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
 
   // draw visible elements
   self.drawBox(mainCtx, selectedBox, resizing);
-  if (selectedBox && self.id === selectedBox.id) {
-    self.drawHandles(mainCtx, selectedBox, hoverBox, hoverHandle);
-    self.drawTag(mainCtx);
-  }
+  self.drawHandles(mainCtx, selectedBox, hoverBox, hoverHandle);
+  self.drawTag(mainCtx);
 
-  if (hoverBox && self.id === hoverBox.id) {
-    self.drawHandles(mainCtx, selectedBox, hoverBox, hoverHandle);
-  }
-  
   // draw hidden elements
   self.drawHiddenBox(hiddenCtx, selectedBox, labelIndex);
   self.drawHiddenHandles(hiddenCtx, selectedBox, labelIndex);
@@ -181,11 +106,44 @@ Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
 Box2d.prototype.drawHandles = function(ctx, selectedBox, hoverBox,
   hoverHandle) {
   let self = this;
-  
-  for (let handleNo = 1; handleNo <= 8; handleNo++) {
-    self.drawHandle(ctx, handleNo);
+  if (selectedBox && selectedBox.id === self.id) {
+    // if this box is selected, draw all its handles
+    for (let handleNo = 1; handleNo <= 8; handleNo++) {
+      self.drawHandle(ctx, handleNo);
+    }
+  } else if (!selectedBox && hoverBox && hoverBox.id === self.id
+    && hoverHandle > 0) {
+    // else if no selection and a handle is hovered over, draw it
+    self.drawHandle(ctx, hoverHandle);
   }
+};
 
+/**
+ * Draw a specified resize handle of this bounding box.
+ * @param {object} ctx - Canvas context.
+ * @param {number} handleNo - The handle number, i.e. which handle to draw.
+ */
+Box2d.prototype.drawHandle = function(ctx, handleNo) {
+  let self = this;
+  ctx.save(); // save the canvas context settings
+  let posHandle = self._getHandle(handleNo);
+  if (self.isSmall()) {
+    ctx.fillStyle = 'rgb(169, 169, 169)';
+  } else {
+    ctx.fillStyle = self.styleColor();
+  }
+  ctx.lineWidth = self.LINE_WIDTH;
+  if (posHandle) {
+    ctx.beginPath();
+    ctx.arc(posHandle.x, posHandle.y, self.HANDLE_RADIUS, 0, 2 * Math.PI);
+    ctx.fill();
+    if (!self.isSmall()) {
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = self.OUTLINE_WIDTH;
+      ctx.stroke();
+    }
+  }
+  ctx.restore(); // restore the canvas to saved settings
 };
 
 /**
@@ -200,11 +158,11 @@ Box2d.prototype.drawTag = function(ctx) {
     let tw = self.TAG_WIDTH;
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
-    if (self.env.occl) {
+    if (self.occl) {
       abbr += ',o';
       tw += 9;
     }
-    if (self.env.trunc) {
+    if (self.trunc) {
       abbr += ',t';
       tw += 9;
     }
@@ -408,107 +366,4 @@ Box2d.prototype._getHandle = function(handleNo) {
     function() {return {x: self.x, y: self.y + self.h};}, // 6
     function() {return {x: self.x, y: self.y + self.h / 2};}, // 7
   ][handleNo - 1]();
-};
-
-Box2d.prototype._mousedown = function(e) {
-  let self = this;
-  let mousePos = self.env._getMousePos(e);
-  for (let i = 0; i < self.env.catSel.options.length; i++) {
-    if (self.env.catSel.options[i].innerHTML === self.name) {
-      self.env.catSel.selectedIndex = i;
-      break;
-    }
-  }
-  if ($('[name=\'occluded-checkbox\']').prop('checked') !==
-    self.env.occl) {
-    $('[name=\'occluded-checkbox\']').trigger('click');
-  }
-  if ($('[name=\'truncated-checkbox\']').prop('checked') !==
-    self.env.trunc) {
-    $('[name=\'truncated-checkbox\']').trigger('click');
-  }
-  // TODO: Wenqi
-  // traffic light color
-  if (self.currHandle > 0) {
-    // if we have a resize handle
-    self.state = 'resize';
-
-  } else if (self.currHandle === 0) {
-    // if we have a move handle
-    self.movePos = self.getCurrentPosition();
-    self.moveClickPos = mousePos;
-    self.state = 'move';
-  }
-};
-
-Box2d.prototype._mouseup = function() {
-  if (this.state === 'resize') {
-    // if we resized, we need to reorder ourselves
-    if (this.w < 0) {
-      this.x = this.x + this.w;
-      this.w = -1 * this.w;
-    }
-    if (this.h < 0) {
-      this.y = this.y + this.h;
-      this.h = -1 * this.h;
-    }
-  }
-
-  this.state = 'free';
-
-  this.movePos = null;
-  this.moveClickPos = null;
-
-  // if parent label, make this the selected label in all other SatImages
-  if (this.parent) {
-    let currentItem = this.previousItem();
-    let currentLabel = this.previousLabel;
-    while (currentItem) {
-      currentItem.selectedLabel = currentLabel;
-      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
-      if (currentLabel) {
-        currentLabel = currentLabel.previousLabel;
-        // TODO: make both be functions, not attributes
-      }
-      currentItem = currentItem.previousItem();
-    }
-    currentItem = this.nextItem();
-    currentLabel = this.nextLabel;
-    while (currentItem) {
-      currentItem.selectedLabel = currentLabel;
-      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
-      if (currentLabel) {
-        currentLabel = currentLabel.nextLabel;
-      }
-      currentItem = currentItem.nextItem();
-    }
-  }
-};
-
-Box2d.prototype._mousemove = function(e) {
-  let canvRect = this.env.imageCanvas.getBoundingClientRect();
-  let mousePos = this.env._getMousePos(e);
-
-  // change the cursor appropriately
-  if (this.state == 'resize') {
-    this.env.imageCanvas.style.cursor = 'crosshair';
-  } else if (this.state == 'move') {
-    this.env.imageCanvas.style.cursor = 'move';
-  } else if (this.env.hoverLabel && this.env.hoverHandle >= 0) {
-    this.env.imageCanvas.style.cursor = this.env.hoverLabel.getCursorStyle(
-      this.env.hoverHandle);
-  } else {
-    this.env.imageCanvas.style.cursor = 'crosshair';
-  }
-
-  // handling according to state
-  if (this.state == 'resize') {
-    this.resize(mousePos, this.currHandle, canvRect, this.env.padBox);
-  } else if (this.state == 'move') {
-    this.move(mousePos, this.movePos, this.moveClickPos,
-        this.env.padBox);
-  }
-
-  // TODO: add on-hover effects
-  // this.hoverLabel = this._getSelected(mousePos);
 };
