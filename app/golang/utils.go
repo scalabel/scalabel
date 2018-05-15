@@ -13,16 +13,6 @@ import (
 	"unicode/utf8"
 )
 
-// GetProjPath returns the path of this go project. It assumes setup of the go
-// environment according to: https://golang.org/doc/code.html#Workspaces
-func GetProjPath() string {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		gopath = build.Default.GOPATH
-	}
-	return gopath + "/src/sat" // TODO: move project name to config
-}
-
 // Function type for handlers
 type handler func(http.ResponseWriter, *http.Request)
 
@@ -31,8 +21,7 @@ type handler func(http.ResponseWriter, *http.Request)
 // directory.
 // TODO
 func serveStaticDirectory(parentFolder string, dir string) {
-	projPath := GetProjPath()
-	fileServer := http.FileServer(http.Dir(projPath + "/" + parentFolder + "/" + dir))
+	fileServer := http.FileServer(http.Dir(env.ProjectPath + "/" + parentFolder + "/" + dir))
 	strippedHandler := http.StripPrefix("/"+dir+"/", fileServer)
 	http.Handle("/"+dir+"/", strippedHandler)
 }
@@ -40,7 +29,7 @@ func serveStaticDirectory(parentFolder string, dir string) {
 // MakeStandardHandler returns a function for handling static HTML
 func MakeStandardHandler(pagePath string) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
-		HTML, err := ioutil.ReadFile(GetProjPath() + pagePath)
+		HTML, err := ioutil.ReadFile(env.ProjectPath + pagePath)
 		if err != nil {
 			log.Fatal(err) // TODO: send stress signal
 		}
