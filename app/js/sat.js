@@ -155,9 +155,13 @@ Sat.prototype.load = function() {
   x.send(request);
 };
 
-// TODO
+/**
+ * Save this labeling session to file by sending JSON to the back end.
+ */
 Sat.prototype.submit = function() {
-
+  // let self = this;
+  // let selfJSON = self.toJSON();
+  // TODO: open a POST
 };
 
 // TODO
@@ -176,21 +180,22 @@ Sat.prototype.gotoItem = function(index) {
 };
 
 /**
- * Information used for submission
+ * Get this
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
  */
-Sat.prototype.getInfo = function() {
+Sat.prototype.toJSON = function() {
   let self = this;
   let items = [];
-  for (let i = 0; i < this.items.length; i++) {
-    items.push(this.items[i].toJson());
+  for (let i = 0; i < self.items.length; i++) {
+    items.push(self.items[i].toJson());
   }
   let labels = [];
-  for (let i = 0; i < this.labels.length; i++) {
-    if (this.labels[i].valid) {
-      labels.push(this.labels[i].toJson());
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].valid) {
+      labels.push(self.labels[i].toJson());
     }
   }
+  // TODO: do we want IP address?
   return {
     startTime: self.startTime,
     items: items,
@@ -235,13 +240,14 @@ SatItem.prototype.nextItem = function() {
 };
 
 SatItem.prototype.toJson = function() {
+  let self = this;
   let labelIds = [];
-  for (let i = 0; i < this.labels.length; i++) {
-    if (this.labels[i].valid) {
-      labelIds.push(this.labels[i].id);
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].valid) {
+      labelIds.push(self.labels[i].id);
     }
   }
-  return {url: this.url, index: this.index, labels: labelIds};
+  return {url: self.url, index: self.index, labels: labelIds};
 };
 
 SatItem.prototype.fromJson = function(object) {
@@ -807,14 +813,15 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * @return {{id: *}}
  */
 SatLabel.prototype.toJson = function() {
-  let object = {id: this.id, name: this.name, attributes: this.attributes};
-  if (this.parent !== null) object['parent'] = this.parent.id;
-  if (this.children.length > 0) {
-    let childenIds = [];
-    for (let i = 0; i < this.children.length; i++) {
-      childenIds.push(this.children[i].id);
+  let self = this;
+  let object = {id: self.id, name: self.name, attributes: self.attributes};
+  if (self.parent !== null) object['parent'] = self.parent.id;
+  if (self.children.length > 0) {
+    let children = [];
+    for (let i = 0; i < self.children.length; i++) {
+      children.push(self.children[i].toJSON());
     }
-    object['children'] = childenIds;
+    object['children'] = children;
   }
   return object;
 };
@@ -876,3 +883,49 @@ function ImageLabel(sat, id, optionalAttributes = null) {
 }
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
+
+ImageLabel.prototype.getCurrentPosition = function() {
+
+};
+
+/**
+ * Get the weighted average between this label and a provided label.
+ * @param {ImageLabel} ignoredLabel - The other label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ * corresponds to
+ *   closer to the other label.
+ * @return {object} - The label's position.
+ */
+ImageLabel.prototype.getWeightedAvg = function(ignoredLabel, ignoredWeight) {
+  return null;
+};
+
+/**
+ * Set this label to be the weighted average of the two provided labels.
+ * @param {ImageLabel} ignoredStartLabel - The first label.
+ * @param {ImageLabel} ignoredEndLabel - The second label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ *   corresponds to closer to endLabel.
+ */
+ImageLabel.prototype.weightedAvg = function(ignoredStartLabel, ignoredEndLabel,
+                                            ignoredWeight) {
+
+};
+
+/**
+ * Calculate the intersection between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The intersection between the two labels.
+ */
+ImageLabel.prototype.intersection = function(ignoredLabel) {
+  return 0;
+};
+
+/**
+ * Calculate the union between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The union between the two labels.
+ */
+ImageLabel.prototype.union = function(ignoredLabel) {
+  return 0;
+};

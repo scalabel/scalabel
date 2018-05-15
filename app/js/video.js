@@ -106,7 +106,7 @@ SatVideo.prototype.interpolate = function(startSatLabel) {
     // otherwise, just apply change to remaining items
     for (let i = self.currentFrame + 1;
       i < startSatLabel.parent.children.length; i++) {
-      startSatLabel.parent.children[i].weightAvg(
+      startSatLabel.parent.children[i].weightedAvg(
         startSatLabel, startSatLabel, 0);
     }
   }
