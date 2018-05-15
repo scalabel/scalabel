@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"go/build"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -39,7 +38,7 @@ func MakeStandardHandler(pagePath string) handler {
 
 func GetTask(projName string, taskName string) Task {
 	// TODO: account for projType directory structure
-	taskPath := path.Join(GetProjPath(),
+	taskPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		projName,
@@ -55,7 +54,7 @@ func GetTask(projName string, taskName string) Task {
 
 // TODO
 func GetTasks() []Task {
-	dirPath := path.Join(GetProjPath(),
+	dirPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"img",
@@ -75,7 +74,7 @@ func GetTasks() []Task {
 // TODO
 func GetVideoTask(projName string, taskName string) VideoTask {
 	// TODO: move "Assignments" to "Tasks"
-	projPath := path.Join(GetProjPath(),
+	projPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"video",
@@ -90,7 +89,7 @@ func GetVideoTask(projName string, taskName string) VideoTask {
 
 // TODO
 func GetVideoTasks() []VideoTask {
-	dirPath := path.Join(GetProjPath(),
+	dirPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"video",

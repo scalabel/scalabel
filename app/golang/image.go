@@ -29,7 +29,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert assignment links
-	tmpl, err := template.ParseFiles(GetProjPath() + "/app/control/monitor.html")
+	tmpl, err := template.ParseFiles(env.ProjectPath + "/app/control/monitor.html")
 	if err != nil {
 		Error.Println(err)
 		http.NotFound(w, r)
@@ -43,7 +43,7 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func box2DLabelingHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(GetProjPath() + "/app/annotation/box.html")
+	tmpl, err := template.ParseFiles(env.ProjectPath + "/app/annotation/box.html")
 	if err != nil {
 		log.Fatal(err)
 	}

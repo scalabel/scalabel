@@ -32,7 +32,7 @@ type VideoTask struct {
 
 // TODO: move "Assignments" to "Tasks"
 func (task *VideoTask) GetVideoTaskPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"video",
@@ -43,7 +43,7 @@ func (task *VideoTask) GetVideoTaskPath() string {
 }
 
 func (task *VideoTask) GetVideoSubmissionPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"data",
 		"Submissions",
 		"video",
@@ -56,7 +56,7 @@ func (task *VideoTask) GetVideoSubmissionPath() string {
 }
 
 func (task *VideoTask) GetLatestVideoSubmissionPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"data",
 		"Submissions",
 		"video",
@@ -68,7 +68,7 @@ func (task *VideoTask) GetLatestVideoSubmissionPath() string {
 }
 
 func (task *VideoTask) GetVideoLogPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"Log",
 		"video",
 		task.ProjectName,
