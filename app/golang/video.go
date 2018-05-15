@@ -92,7 +92,7 @@ type VideoMetadata struct {
 
 func videoLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert frames location
-	tmpl, err := template.ParseFiles(GetProjPath() + "/app/annotation/video.html")
+	tmpl, err := template.ParseFiles(env.ProjectPath + "/app/annotation/video.html")
 	if err != nil {
 		log.Fatal(err)
 	}

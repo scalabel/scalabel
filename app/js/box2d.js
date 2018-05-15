@@ -35,7 +35,7 @@ function Box2d(sat, id, boxAttributes) {
 
 Box2d.prototype = Object.create(ImageLabel.prototype);
 
-Box2d.prototype.toJson = function() {
+Box2d.prototype.toJSON = function() {
   let self = this;
   let object = {id: self.id, name: self.name, attributes: self.attributes};
   object.name = self.name;
@@ -48,11 +48,11 @@ Box2d.prototype.toJson = function() {
   object.trunc = self.trunc;
   if (self.parent !== null) object['parent'] = self.parent.id;
   if (self.children.length > 0) {
-    let children = [];
+    let childrenIDs = [];
     for (let i = 0; i < self.children.length; i++) {
-      children.push(self.children[i].toJSON());
+      childrenIDs.push(self.children[i].id);
     }
-    object['children'] = children;
+    object['children'] = childrenIDs;
   }
   return object;
 };

@@ -90,7 +90,7 @@ SatVideo.prototype.interpolate = function(startSatLabel) {
     for (let i = priorKeyframe; i < self.currentFrame; i++) {
       let weight = i/(self.currentFrame);
       // TODO: this is the part that makes too many assumptions (maybe)
-      startSatLabel.parent.children[i].weightAvg(
+      startSatLabel.parent.children[i].weightedAvg(
         startSatLabel.parent.children[priorKeyframe], startSatLabel, weight);
     }
   }

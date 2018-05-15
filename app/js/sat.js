@@ -121,50 +121,6 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
 };
 
 // TODO
-Sat.prototype.load = function() {
-  let self = this;
-  let x = new XMLHttpRequest();
-  x.onreadystatechange = function() {
-    if (x.readyState === 4) {
-      let assignment = JSON.parse(x.response);
-      let itemLocs = assignment.items;
-      self.addEvent('start labeling', self.currentItem); // ??
-      // preload items
-      self.items = [];
-      for (let i = 0; i < itemLocs.length; i++) {
-        self.items.push(new self.ItemType(self, i, itemLocs[i].url));
-      }
-      self.currentItem = self.items[0];
-      self.currentItem.setActive(true);
-      self.currentItem.image.onload = function() {
-        self.currentItem.redraw();
-      };
-    }
-  };
-  // get params from url path
-  let searchParams = new URLSearchParams(window.location.search);
-  self.taskId = searchParams.get('task_id');
-  self.projectName = searchParams.get('project_name');
-
-  // ?
-  let request = JSON.stringify({
-    'assignmentId': self.taskId,
-    'projectName': self.projectName,
-  });
-  x.open('POST', './requestSubmission');
-  x.send(request);
-};
-
-/**
- * Save this labeling session to file by sending JSON to the back end.
- */
-Sat.prototype.submit = function() {
-  // let self = this;
-  // let selfJSON = self.toJSON();
-  // TODO: open a POST
-};
-
-// TODO
 Sat.prototype.gotoItem = function(index) {
   //  TODO: save
   // mod the index to wrap around the list
@@ -179,20 +135,67 @@ Sat.prototype.gotoItem = function(index) {
   this.currentItem.redraw();
 };
 
+// TODO
+Sat.prototype.load = function() {
+  let self = this;
+  let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      let selfJSON = JSON.parse(xhr.response);
+      self.items = [];
+      for (let i = 0; i < selfJSON.items.length; i++) {
+        self.items.push(new self.ItemType(self, i, selfJSON.items[i].url));
+        self.items[i].fromJSON(selfJSON.items[i]);
+      }
+      self.currentItem = self.items[0];
+      self.currentItem.setActive(true);
+      // TODO: this is image specific!! remove!
+      self.currentItem.image.onload = function() {
+        self.currentItem.redraw();
+      };
+      self.addEvent('start labeling', self.currentItem);
+    }
+  };
+  // get params from url path
+  let searchParams = new URLSearchParams(window.location.search);
+  self.taskId = searchParams.get('task_id');
+  self.projectName = searchParams.get('project_name');
+
+  // ?
+  let request = JSON.stringify({
+    'assignmentId': self.taskId,
+    'projectName': self.projectName,
+  });
+  xhr.open('POST', './requestSubmission');
+  xhr.send(request);
+};
+
 /**
- * Get this
+ * Save this labeling session to file by sending JSON to the back end.
+ */
+Sat.prototype.submit = function() {
+  let self = this;
+  let selfJSON = self.toJSON();
+  // TODO: open a POST
+  let xhr = new XMLHttpRequest();
+  xhr.open('POST', './postSubmission');
+  xhr.send(selfJSON);
+};
+
+/**
+ * Get this session's JSON representation
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
  */
 Sat.prototype.toJSON = function() {
   let self = this;
   let items = [];
   for (let i = 0; i < self.items.length; i++) {
-    items.push(self.items[i].toJson());
+    items.push(self.items[i].toJSON());
   }
   let labels = [];
   for (let i = 0; i < self.labels.length; i++) {
     if (self.labels[i].valid) {
-      labels.push(self.labels[i].toJson());
+      labels.push(self.labels[i].toJSON());
     }
   }
   // TODO: do we want IP address?
@@ -239,7 +242,7 @@ SatItem.prototype.nextItem = function() {
   return this.sat.items[this.index+1];
 };
 
-SatItem.prototype.toJson = function() {
+SatItem.prototype.toJSON = function() {
   let self = this;
   let labelIds = [];
   for (let i = 0; i < self.labels.length; i++) {
@@ -250,7 +253,7 @@ SatItem.prototype.toJson = function() {
   return {url: self.url, index: self.index, labels: labelIds};
 };
 
-SatItem.prototype.fromJson = function(object) {
+SatItem.prototype.fromJSON = function(object) {
   this.url = object.url;
   this.index = object.index;
   for (let i = 0; i < object.labelIds.length; i++) {
@@ -812,16 +815,16 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * Return json object encoding the label information
  * @return {{id: *}}
  */
-SatLabel.prototype.toJson = function() {
+SatLabel.prototype.toJSON = function() {
   let self = this;
   let object = {id: self.id, name: self.name, attributes: self.attributes};
   if (self.parent !== null) object['parent'] = self.parent.id;
   if (self.children.length > 0) {
-    let children = [];
+    let childrenIDs = [];
     for (let i = 0; i < self.children.length; i++) {
-      children.push(self.children[i].toJSON());
+      childrenIDs.push(self.children[i].id);
     }
-    object['children'] = children;
+    object['children'] = childrenIDs;
   }
   return object;
 };
@@ -845,7 +848,7 @@ SatLabel.prototype.redraw = function() {
  * Load label information from json object
  * @param {Object} object: object to parse
  */
-SatLabel.prototype.fromJson = function(object) {
+SatLabel.prototype.fromJSON = function(object) {
   this.id = object.id;
   this.name = object.name;
   this.attributes = object.attributes;
