@@ -115,9 +115,8 @@ func postVideoAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	// read the video name
 	videoName := r.FormValue("video_name")
 	// get the path of the vid and vid frames
-	projPath := GetProjPath()
-	videoPath := projPath + "/data/videos/" + videoName
-	framePath := projPath + "/data/frames/" + videoName
+	videoPath := env.DataDir + "/videos/" + videoName
+	framePath := env.DataDir + "/frames/" + videoName
 	framePath = framePath[:len(framePath)-4] // take off the .mp4
 
 	// if no frames directory for this vid, throw error

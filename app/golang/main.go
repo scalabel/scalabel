@@ -21,8 +21,9 @@ var (
 
 // Environment details specified in config.json
 type Env struct {
-	Port    string `yaml:"port"`
-	DataDir string `yaml:"dataDir"`
+	Port        string `yaml:"port"`
+	DataDir     string `yaml:"dataDir"`
+	ProjectPath string `yaml:"projectPath"`
 }
 
 func Init(
@@ -80,10 +81,13 @@ func main() {
 
 	// Mux for static files
 	mux = http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir(GetProjPath()+"/app")))
+	mux.Handle("/", http.FileServer(http.Dir(env.ProjectPath+"/app")))
 
 	// serve the frames directory
-	serveStaticDirectory("data", "frames")
+	// serveStaticDirectory("data", "frames")
+	fileServer := http.FileServer(http.Dir(env.DataDir + "/frames"))
+	strippedHandler := http.StripPrefix("/frames/", fileServer)
+	http.Handle("/frames/", strippedHandler)
 
 	// routes
 	http.HandleFunc("/", parse(indexHandler))
