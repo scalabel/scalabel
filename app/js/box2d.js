@@ -37,24 +37,51 @@ Box2d.prototype = Object.create(ImageLabel.prototype);
 
 Box2d.prototype.toJSON = function() {
   let self = this;
-  let object = {id: self.id, name: self.name, attributes: self.attributes};
-  object.name = self.name;
-  object.x = self.x;
-  object.y = self.y;
-  object.w = self.w;
-  object.h = self.h;
+  let selfJSON = {id: self.id, name: self.name};
+  selfJSON.name = self.name;
+  selfJSON.x = self.x;
+  selfJSON.y = self.y;
+  selfJSON.w = self.w;
+  selfJSON.h = self.h;
   // TODO: stop hardcoding occl and trunc attributes
-  object.occl = self.occl;
-  object.trunc = self.trunc;
-  if (self.parent !== null) object['parent'] = self.parent.id;
+  selfJSON.optionalAttributes = {occl: self.occl, trunc: self.trunc};
+  selfJSON.occl = self.occl;
+  selfJSON.trunc = self.trunc;
+  if (self.parent !== null) selfJSON['parent'] = self.parent.id;
   if (self.children.length > 0) {
     let childrenIDs = [];
     for (let i = 0; i < self.children.length; i++) {
       childrenIDs.push(self.children[i].id);
     }
-    object['children'] = childrenIDs;
+    selfJSON['children'] = childrenIDs;
   }
-  return object;
+  return selfJSON;
+};
+
+/**
+ * Load label information from json object
+ * @param {object} selfJSON: JSON representation of this Box2d.
+ */
+Box2d.prototype.fromJSON = function(selfJSON) {
+  let self = this;
+  self.id = selfJSON.id;
+  self.name = selfJSON.name;
+  self.x = selfJSON.x;
+  self.y = selfJSON.y;
+  self.w = selfJSON.w;
+  self.h = selfJSON.h;
+  // TODO: stop hardcoding occl and trunc attributes
+  self.occl = selfJSON.occl;
+  let labelIdMap = self.sat.labelIdMap;
+  if ('parent' in selfJSON) {
+    self.parent = labelIdMap[selfJSON['parent']];
+  }
+  if ('children' in selfJSON) {
+    let childrenIds = selfJSON['children'];
+    for (let i = 0; i < childrenIds.length; i++) {
+      self.addChild(labelIdMap[childrenIds[i]]);
+    }
+  }
 };
 
 /**
