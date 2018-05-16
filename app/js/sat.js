@@ -122,17 +122,18 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
 
 // TODO
 Sat.prototype.gotoItem = function(index) {
+  let self = this;
   //  TODO: save
   // mod the index to wrap around the list
-  index = index % this.items.length;
+  index = index % self.items.length;
   // TODO: event?
-  this.currentItem.setActive(false);
-  this.currentItem = this.items[index];
-  this.currentItem.setActive(true);
-  this.currentItem.onload = function() {
-    this.currentItem.redraw();
+  self.currentItem.setActive(false);
+  self.currentItem = self.items[index];
+  self.currentItem.setActive(true);
+  self.currentItem.onload = function() {
+    self.currentItem.redraw();
   };
-  this.currentItem.redraw();
+  self.currentItem.redraw();
 };
 
 // TODO
