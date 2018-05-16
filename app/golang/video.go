@@ -32,7 +32,7 @@ type VideoTask struct {
 
 // TODO: move "Assignments" to "Tasks"
 func (task *VideoTask) GetVideoTaskPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"video",
@@ -43,7 +43,7 @@ func (task *VideoTask) GetVideoTaskPath() string {
 }
 
 func (task *VideoTask) GetVideoSubmissionPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"data",
 		"Submissions",
 		"video",
@@ -56,7 +56,7 @@ func (task *VideoTask) GetVideoSubmissionPath() string {
 }
 
 func (task *VideoTask) GetLatestVideoSubmissionPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"data",
 		"Submissions",
 		"video",
@@ -68,7 +68,7 @@ func (task *VideoTask) GetLatestVideoSubmissionPath() string {
 }
 
 func (task *VideoTask) GetVideoLogPath() string {
-	dir := path.Join(GetProjPath(),
+	dir := path.Join(env.ProjectPath,
 		"Log",
 		"video",
 		task.ProjectName,
@@ -92,7 +92,7 @@ type VideoMetadata struct {
 
 func videoLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert frames location
-	tmpl, err := template.ParseFiles(GetProjPath() + "/app/annotation/video.html")
+	tmpl, err := template.ParseFiles(env.ProjectPath + "/app/annotation/video.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,9 +115,8 @@ func postVideoAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	// read the video name
 	videoName := r.FormValue("video_name")
 	// get the path of the vid and vid frames
-	projPath := GetProjPath()
-	videoPath := projPath + "/data/videos/" + videoName
-	framePath := projPath + "/data/frames/" + videoName
+	videoPath := env.DataDir + "/videos/" + videoName
+	framePath := env.DataDir + "/frames/" + videoName
 	framePath = framePath[:len(framePath)-4] // take off the .mp4
 
 	// if no frames directory for this vid, throw error

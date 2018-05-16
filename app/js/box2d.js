@@ -5,22 +5,27 @@
  * 2D box label
  * @param {Sat} sat: context
  * @param {int} id: label id
- * @param {object} boxAttributes: attributes of the box, containing category,
+ * @param {object} kargs: arguments of the box, containing category,
     occl/trunc, and mousePos
  */
-function Box2d(sat, id, boxAttributes) {
+function Box2d(sat, id, kargs) {
+  // TODO: separate category and attributes in kargs
   ImageLabel.call(this, sat, id);
 
-  this.name = boxAttributes.category;
-  this.occl = boxAttributes.occl;
-  this.trunc = boxAttributes.trunc;
+  this.name = kargs.category;
+  // TODO: Move those to attributes
+  // TODO: don't use abbreviation here
+  this.occl = kargs.occl;
+  this.trunc = kargs.trunc;
 
-  this.x = boxAttributes.mousePos.x;
-  this.y = boxAttributes.mousePos.y;
+  // TODO: move the coordinates to one object
+  this.x = kargs.mousePos.x;
+  this.y = kargs.mousePos.y;
   this.w = 0;
   this.h = 0;
 
   // constants
+  // TODO: Move out, we don't have to keep a copy of constants in every object
   this.LINE_WIDTH = 2;
   this.OUTLINE_WIDTH = 1;
   this.HANDLE_RADIUS = 4;
@@ -34,6 +39,31 @@ function Box2d(sat, id, boxAttributes) {
 }
 
 Box2d.prototype = Object.create(ImageLabel.prototype);
+
+Box2d.prototype.toJson = function() {
+  let self = this;
+  let json = ImageLabel.prototype.toJson();
+  json.box2d = {x: self.x, y: self.y, w: self.w, h: self.h};
+  // TODO: remove this special attribute assignment
+  json.attributes = {occlusion: self.occl, truncation: self.trunc};
+  return json;
+};
+
+/**
+ * Load label information from json object
+ * @param {object} json: JSON representation of this Box2d.
+ */
+Box2d.prototype.fromJson = function(json) {
+  let self = this;
+  ImageLabel.prototype.fromJson(json);
+  self.x = json.box2d.x;
+  self.y = json.box2d.y;
+  self.w = json.box2d.w;
+  self.h = json.box2d.h;
+  // TODO: stop hardcoding occl and trunc attributes
+  self.occl = json.attributes.occlusion;
+  self.trunc = json.attributes.truncation;
+};
 
 /**
  * Draw this bounding box on the canvas.
@@ -68,14 +98,15 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
 /**
  * Draw the box part of this bounding box.
  * @param {object} ctx - Canvas context.
- * @param {number} selectedBox - ID of the currently selected box, or null if
- *   no box selected.
+ * @param {object} selectedBox - The currently selected box, or null if no
+ *   box selected.
+ * @param {number} selectedBox.id - ID of the currently selected box.
  * @param {boolean} resizing - Whether or not this box is being resized.
  */
 Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
   let self = this;
   ctx.save(); // save the canvas context settings
-  if (selectedBox && selectedBox.id != self.id) {
+  if (selectedBox && selectedBox.id !== self.id) {
     // if exists selected box and it's not this one, alpha this out
     ctx.globalAlpha = self.FADED_ALPHA;
   }
@@ -326,27 +357,78 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
 };
 
 /**
+ * Get the current position of this box.
+ * @return {object} - The box's current position.
+ */
+Box2d.prototype.getCurrentPosition = function() {
+    let self = this;
+    return {x: self.x, y: self.y, w: self.w, h: self.h};
+};
+
+/**
+ * Get the weighted average between this box and a provided box.
+ * @param {ImageLabel} box - The other box.
+ * @param {number} weight - The weight, b/w 0 and 1, higher corresponds to
+ *   closer to the other box.
+ * @return {object} - The box's position.
+ */
+Box2d.prototype.getWeightedAvg = function(box, weight) {
+  let self = this;
+  let avg = {};
+  avg.x = self.x + weight*(box.x - self.x);
+  avg.y = self.y + weight*(box.y - self.y);
+  avg.w = self.w + weight*(box.w - self.w);
+  avg.h = self.h + weight*(box.h - self.h);
+  return avg;
+};
+
+/**
  * Set this box to be the weighted average of the two provided boxes.
  * @param {Box2d} startBox - The first box.
  * @param {Box2d} endBox - The second box.
  * @param {number} weight - The weight, b/w 0 and 1, higher corresponds to
     closer to endBox.
  */
-Box2d.prototype.weightAvg = function(startBox, endBox, weight) {
+Box2d.prototype.weightedAvg = function(startBox, endBox, weight) {
   let self = this;
-  self.x = startBox.x + weight*(endBox.x - startBox.x);
-  self.y = startBox.y + weight*(endBox.y - startBox.y);
-  self.w = startBox.w + weight*(endBox.w - startBox.w);
-  self.h = startBox.h + weight*(endBox.h - startBox.h);
+  let avg = startBox.getWeightedAvg(endBox, weight);
+  self.x = avg.x;
+  self.y = avg.y;
+  self.w = avg.w;
+  self.h = avg.h;
 };
 
 /**
- * Get the current position of this box.
- * @return {object} - The box's current position.
+ * Calculate the intersection between this and another Box2d.
+ * @param {Box2d} box - The other box.
+ * @return {number} - The intersection between the two boxes.
  */
-Box2d.prototype.getCurrentPosition = function() {
+Box2d.prototype.intersection = function(box) {
   let self = this;
-  return {x: self.x, y: self.y, w: self.w, h: self.h};
+  let b1x1 = Math.min(self.x, self.x + self.w);
+  let b1x2 = Math.max(self.x, self.x + self.w);
+
+  let b1y1 = Math.min(self.y, self.y + self.h);
+  let b1y2 = Math.max(self.y, self.y + self.h);
+
+  let b2x1 = Math.min(box.x, box.x + box.w);
+  let b2x2 = Math.max(box.x, box.x + box.w);
+
+  let b2y1 = Math.min(box.y, box.y + box.h);
+  let b2y2 = Math.max(box.y, box.y + box.h);
+
+  let ix1 = Math.max(b1x1, b2x1);
+  let ix2 = Math.min(b1x2, b2x2);
+  let iy1 = Math.max(b1y1, b2y1);
+  let iy2 = Math.min(b1y2, b2y2);
+
+  return Math.max(0, (ix2 - ix1) * (iy2 - iy1));
+};
+
+Box2d.prototype.union = function(box) {
+  let self = this;
+  let intersection = self.intersection(box);
+  return Math.abs(self.w * self.h) + Math.abs(box.w * box.h) - intersection;
 };
 
 /**

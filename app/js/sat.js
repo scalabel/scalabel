@@ -121,24 +121,29 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
 };
 
 // TODO
+Sat.prototype.gotoItem = function(index) {
+  let self = this;
+  //  TODO: save
+  // mod the index to wrap around the list
+  index = index % self.items.length;
+  // TODO: event?
+  self.currentItem.setActive(false);
+  self.currentItem = self.items[index];
+  self.currentItem.setActive(true);
+  self.currentItem.onload = function() {
+    self.currentItem.redraw();
+  };
+  self.currentItem.redraw();
+};
+
+// TODO
 Sat.prototype.load = function() {
   let self = this;
-  let x = new XMLHttpRequest();
-  x.onreadystatechange = function() {
-    if (x.readyState === 4) {
-      let assignment = JSON.parse(x.response);
-      let itemLocs = assignment.items;
-      self.addEvent('start labeling', self.currentItem); // ??
-      // preload items
-      self.items = [];
-      for (let i = 0; i < itemLocs.length; i++) {
-        self.items.push(new self.ItemType(self, i, itemLocs[i].url));
-      }
-      self.currentItem = self.items[0];
-      self.currentItem.setActive(true);
-      self.currentItem.image.onload = function() {
-        self.currentItem.redraw();
-      };
+  let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      let json = JSON.parse(xhr.response);
+      self.fromJson(json);
     }
   };
   // get params from url path
@@ -151,44 +156,36 @@ Sat.prototype.load = function() {
     'assignmentId': self.taskId,
     'projectName': self.projectName,
   });
-  x.open('POST', './requestSubmission');
-  x.send(request);
-};
-
-// TODO
-Sat.prototype.submit = function() {
-
-};
-
-// TODO
-Sat.prototype.gotoItem = function(index) {
-  //  TODO: save
-  // mod the index to wrap around the list
-  index = index % this.items.length;
-  // TODO: event?
-  this.currentItem.setActive(false);
-  this.currentItem = this.items[index];
-  this.currentItem.setActive(true);
-  this.currentItem.onload = function() {
-    this.currentItem.redraw();
-  };
-  this.currentItem.redraw();
+  xhr.open('POST', './requestSubmission');
+  xhr.send(request);
 };
 
 /**
- * Information used for submission
+ * Save this labeling session to file by sending JSON to the back end.
+ */
+Sat.prototype.save = function() {
+  let self = this;
+  let json = self.toJson();
+  // TODO: open a POST
+  let xhr = new XMLHttpRequest();
+  xhr.open('POST', './postSubmission');
+  xhr.send(json);
+};
+
+/**
+ * Get this session's JSON representation
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
  */
-Sat.prototype.getInfo = function() {
+Sat.prototype.toJson = function() {
   let self = this;
   let items = [];
-  for (let i = 0; i < this.items.length; i++) {
-    items.push(this.items[i].toJson());
+  for (let i = 0; i < self.items.length; i++) {
+    items.push(self.items[i].toJson());
   }
   let labels = [];
-  for (let i = 0; i < this.labels.length; i++) {
-    if (this.labels[i].valid) {
-      labels.push(this.labels[i].toJson());
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].valid) {
+      labels.push(self.labels[i].toJson());
     }
   }
   return {
@@ -200,6 +197,29 @@ Sat.prototype.getInfo = function() {
     ipAddress: self.ipAddress,
   };
 };
+
+Sat.prototype.fromJson = function(json) {
+  let self = this;
+  self.items = [];
+  for (let i = 0; i < json.labels.length; i++) {
+    let newLabel = self.newLabel(json.labels[i].attributes);
+    newLabel.fromJson(json.labels[i]);
+    self.labels.push(newLabel);
+  }
+  for (let i = 0; i < json.items.length; i++) {
+    let newItem = self.newItem(json.items[i].url);
+    newItem.fromJson(json.items[i]);
+    self.items.push(newItem);
+  }
+  self.currentItem = self.items[0];
+  self.currentItem.setActive(true);
+  // TODO: this is image specific!! remove!
+  self.currentItem.image.onload = function() {
+    self.currentItem.redraw();
+  };
+  self.addEvent('start labeling', self.currentItem);
+};
+
 
 /**
  * Base class for each labeling target, can be pointcloud or 2D image
@@ -235,20 +255,30 @@ SatItem.prototype.nextItem = function() {
 };
 
 SatItem.prototype.toJson = function() {
+  let self = this;
   let labelIds = [];
-  for (let i = 0; i < this.labels.length; i++) {
-    if (this.labels[i].valid) {
-      labelIds.push(this.labels[i].id);
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].valid) {
+      labelIds.push(self.labels[i].id);
     }
   }
-  return {url: this.url, index: this.index, labels: labelIds};
+  return {url: self.url, index: self.index, labels: labelIds};
 };
 
-SatItem.prototype.fromJson = function(object) {
-  this.url = object.url;
-  this.index = object.index;
-  for (let i = 0; i < object.labelIds.length; i++) {
-    this.labels.push(this.sat.labelIdMap[object.labelIds[i]]);
+/**
+ * Restore this SatItem from JSON.
+ * @param {object} selfJSON - JSON representation of this SatItem.
+ * @param {string} selfJSON.url - This SatItem's url.
+ * @param {number} selfJSON.index - This SatItem's index in
+ * @param {list} selfJSON.labelIDs - The list of label ids of this SatItem's
+ *   SatLabels.
+ */
+SatItem.prototype.fromJson = function(selfJSON) {
+  let self = this;
+  self.url = selfJSON.url;
+  self.index = selfJSON.index;
+  for (let i = 0; i < selfJSON.labelIDs.length; i++) {
+    self.labels.push(self.sat.labelIdMap[selfJSON.labelIDs[i]]);
   }
 };
 
@@ -312,6 +342,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
     }
   }
 };
+
 
 /**
  * Base class for each targeted labeling Image.
@@ -776,7 +807,7 @@ SatLabel.prototype.getRoot = function() {
  * Get the current position of this label.
  */
 SatLabel.prototype.getCurrentPosition = function() {
-  return;
+
 };
 
 SatLabel.prototype.addChild = function(child) {
@@ -807,19 +838,45 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * @return {{id: *}}
  */
 SatLabel.prototype.toJson = function() {
-  let object = {id: this.id, name: this.name, attributes: this.attributes};
-  if (this.parent !== null) object['parent'] = this.parent.id;
-  if (this.children.length > 0) {
-    let childenIds = [];
-    for (let i = 0; i < this.children.length; i++) {
-      childenIds.push(this.children[i].id);
+  let self = this;
+  let json = {id: self.id, name: self.name};
+  if (self.parent !== null) json['parent'] = self.parent.id;
+  if (self.children.length > 0) {
+    let childrenIds = [];
+    for (let i = 0; i < self.children.length; i++) {
+      if (self.children[i].valid) {
+        childrenIds.push(self.children[i].id);
+      }
     }
-    object['children'] = childenIds;
+    json['children'] = childrenIds;
   }
-  return object;
+  json.attributes = self.attributes;
+  return json;
+};
+
+/**
+ * Load label information from json object
+ * @param {object} json: JSON representation of this SatLabel.
+ */
+SatLabel.prototype.fromJson = function(json) {
+  let self = this;
+  self.id = json.id;
+  self.name = json.name;
+  let labelIdMap = self.sat.labelIdMap;
+  if ('parent' in json) {
+    self.parent = labelIdMap[json['parent']];
+  }
+  if ('children' in json) {
+    let childrenIds = json['children'];
+    for (let i = 0; i < childrenIds.length; i++) {
+      self.addChild(labelIdMap[childrenIds[i]]);
+    }
+  }
+  self.attributes = json.attributes;
 };
 
 SatLabel.prototype.startChange = function() {
+
 };
 
 SatLabel.prototype.updateChange = function() {
@@ -832,26 +889,6 @@ SatLabel.prototype.finishChange = function() {
 
 SatLabel.prototype.redraw = function() {
 
-};
-
-/**
- * Load label information from json object
- * @param {Object} object: object to parse
- */
-SatLabel.prototype.fromJson = function(object) {
-  this.id = object.id;
-  this.name = object.name;
-  this.attributes = object.attributes;
-  let labelIdMap = this.sat.labelIdMap;
-  if ('parent' in object) {
-    this.parent = labelIdMap[object['parent']];
-  }
-  if ('children' in object) {
-    let childrenIds = object['children'];
-    for (let i = 0; i < childrenIds.length; i++) {
-      this.addChild(labelIdMap[childrenIds[i]]);
-    }
-  }
 };
 
 
@@ -876,3 +913,49 @@ function ImageLabel(sat, id, optionalAttributes = null) {
 }
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
+
+ImageLabel.prototype.getCurrentPosition = function() {
+
+};
+
+/**
+ * Get the weighted average between this label and a provided label.
+ * @param {ImageLabel} ignoredLabel - The other label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ * corresponds to
+ *   closer to the other label.
+ * @return {object} - The label's position.
+ */
+ImageLabel.prototype.getWeightedAvg = function(ignoredLabel, ignoredWeight) {
+  return null;
+};
+
+/**
+ * Set this label to be the weighted average of the two provided labels.
+ * @param {ImageLabel} ignoredStartLabel - The first label.
+ * @param {ImageLabel} ignoredEndLabel - The second label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ *   corresponds to closer to endLabel.
+ */
+ImageLabel.prototype.weightedAvg = function(ignoredStartLabel, ignoredEndLabel,
+                                            ignoredWeight) {
+
+};
+
+/**
+ * Calculate the intersection between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The intersection between the two labels.
+ */
+ImageLabel.prototype.intersection = function(ignoredLabel) {
+  return 0;
+};
+
+/**
+ * Calculate the union between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The union between the two labels.
+ */
+ImageLabel.prototype.union = function(ignoredLabel) {
+  return 0;
+};

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"go/build"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,16 +12,6 @@ import (
 	"unicode/utf8"
 )
 
-// GetProjPath returns the path of this go project. It assumes setup of the go
-// environment according to: https://golang.org/doc/code.html#Workspaces
-func GetProjPath() string {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		gopath = build.Default.GOPATH
-	}
-	return gopath + "/src/sat" // TODO: move project name to config
-}
-
 // Function type for handlers
 type handler func(http.ResponseWriter, *http.Request)
 
@@ -31,8 +20,7 @@ type handler func(http.ResponseWriter, *http.Request)
 // directory.
 // TODO
 func serveStaticDirectory(parentFolder string, dir string) {
-	projPath := GetProjPath()
-	fileServer := http.FileServer(http.Dir(projPath + "/" + parentFolder + "/" + dir))
+	fileServer := http.FileServer(http.Dir(env.ProjectPath + "/" + parentFolder + "/" + dir))
 	strippedHandler := http.StripPrefix("/"+dir+"/", fileServer)
 	http.Handle("/"+dir+"/", strippedHandler)
 }
@@ -40,7 +28,7 @@ func serveStaticDirectory(parentFolder string, dir string) {
 // MakeStandardHandler returns a function for handling static HTML
 func MakeStandardHandler(pagePath string) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
-		HTML, err := ioutil.ReadFile(GetProjPath() + pagePath)
+		HTML, err := ioutil.ReadFile(env.ProjectPath + pagePath)
 		if err != nil {
 			log.Fatal(err) // TODO: send stress signal
 		}
@@ -50,7 +38,7 @@ func MakeStandardHandler(pagePath string) handler {
 
 func GetTask(projName string, taskName string) Task {
 	// TODO: account for projType directory structure
-	taskPath := path.Join(GetProjPath(),
+	taskPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		projName,
@@ -66,7 +54,7 @@ func GetTask(projName string, taskName string) Task {
 
 // TODO
 func GetTasks() []Task {
-	dirPath := path.Join(GetProjPath(),
+	dirPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"img",
@@ -86,7 +74,7 @@ func GetTasks() []Task {
 // TODO
 func GetVideoTask(projName string, taskName string) VideoTask {
 	// TODO: move "Assignments" to "Tasks"
-	projPath := path.Join(GetProjPath(),
+	projPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"video",
@@ -101,7 +89,7 @@ func GetVideoTask(projName string, taskName string) VideoTask {
 
 // TODO
 func GetVideoTasks() []VideoTask {
-	dirPath := path.Join(GetProjPath(),
+	dirPath := path.Join(env.ProjectPath,
 		"data",
 		"Assignments",
 		"video",
