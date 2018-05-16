@@ -162,7 +162,7 @@ Sat.prototype.load = function() {
 /**
  * Save this labeling session to file by sending JSON to the back end.
  */
-Sat.prototype.submit = function() {
+Sat.prototype.save = function() {
   let self = this;
   let json = self.toJson();
   // TODO: open a POST
@@ -187,7 +187,6 @@ Sat.prototype.toJson = function() {
       labels.push(self.labels[i].toJson());
     }
   }
-  // TODO: do we want IP address?
   return {
     startTime: self.startTime,
     items: items,
