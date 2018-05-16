@@ -141,8 +141,8 @@ Sat.prototype.load = function() {
   let xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
-      let selfJSON = JSON.parse(xhr.response);
-      self.fromJSON(selfJSON);
+      let json = JSON.parse(xhr.response);
+      self.fromJson(json);
     }
   };
   // get params from url path
@@ -164,27 +164,27 @@ Sat.prototype.load = function() {
  */
 Sat.prototype.submit = function() {
   let self = this;
-  let selfJSON = self.toJSON();
+  let json = self.toJson();
   // TODO: open a POST
   let xhr = new XMLHttpRequest();
   xhr.open('POST', './postSubmission');
-  xhr.send(selfJSON);
+  xhr.send(json);
 };
 
 /**
  * Get this session's JSON representation
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
  */
-Sat.prototype.toJSON = function() {
+Sat.prototype.toJson = function() {
   let self = this;
   let items = [];
   for (let i = 0; i < self.items.length; i++) {
-    items.push(self.items[i].toJSON());
+    items.push(self.items[i].toJson());
   }
   let labels = [];
   for (let i = 0; i < self.labels.length; i++) {
     if (self.labels[i].valid) {
-      labels.push(self.labels[i].toJSON());
+      labels.push(self.labels[i].toJson());
     }
   }
   // TODO: do we want IP address?
@@ -198,17 +198,17 @@ Sat.prototype.toJSON = function() {
   };
 };
 
-Sat.prototype.fromJSON = function(selfJSON) {
+Sat.prototype.fromJson = function(json) {
   let self = this;
   self.items = [];
-  for (let i = 0; i < selfJSON.labels.length; i++) {
-    let newLabel = self.newLabel(selfJSON.labels[i].optionalAttributes);
-    newLabel.fromJSON(selfJSON.labels[i]);
+  for (let i = 0; i < json.labels.length; i++) {
+    let newLabel = self.newLabel(json.labels[i].attributes);
+    newLabel.fromJson(json.labels[i]);
     self.labels.push(newLabel);
   }
-  for (let i = 0; i < selfJSON.items.length; i++) {
-    let newItem = self.newItem(selfJSON.items[i].url);
-    newItem.fromJSON(selfJSON.items[i]);
+  for (let i = 0; i < json.items.length; i++) {
+    let newItem = self.newItem(json.items[i].url);
+    newItem.fromJson(json.items[i]);
     self.items.push(newItem);
   }
   self.currentItem = self.items[0];
@@ -254,7 +254,7 @@ SatItem.prototype.nextItem = function() {
   return this.sat.items[this.index+1];
 };
 
-SatItem.prototype.toJSON = function() {
+SatItem.prototype.toJson = function() {
   let self = this;
   let labelIds = [];
   for (let i = 0; i < self.labels.length; i++) {
@@ -273,7 +273,7 @@ SatItem.prototype.toJSON = function() {
  * @param {list} selfJSON.labelIDs - The list of label ids of this SatItem's
  *   SatLabels.
  */
-SatItem.prototype.fromJSON = function(selfJSON) {
+SatItem.prototype.fromJson = function(selfJSON) {
   let self = this;
   self.url = selfJSON.url;
   self.index = selfJSON.index;
@@ -837,38 +837,42 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * Return json object encoding the label information
  * @return {{id: *}}
  */
-SatLabel.prototype.toJSON = function() {
+SatLabel.prototype.toJson = function() {
   let self = this;
-  let selfJSON = {id: self.id, name: self.name};
-  if (self.parent !== null) selfJSON['parent'] = self.parent.id;
+  let json = {id: self.id, name: self.name};
+  if (self.parent !== null) json['parent'] = self.parent.id;
   if (self.children.length > 0) {
-    let childrenIDs = [];
+    let childrenIds = [];
     for (let i = 0; i < self.children.length; i++) {
-      childrenIDs.push(self.children[i].id);
+      if (self.children[i].valid) {
+        childrenIds.push(self.children[i].id);
+      }
     }
-    selfJSON['children'] = childrenIDs;
+    json['children'] = childrenIds;
   }
-  return selfJSON;
+  json.attributes = self.attributes;
+  return json;
 };
 
 /**
  * Load label information from json object
- * @param {object} selfJSON: JSON representation of this SatLabel.
+ * @param {object} json: JSON representation of this SatLabel.
  */
-SatLabel.prototype.fromJSON = function(selfJSON) {
+SatLabel.prototype.fromJson = function(json) {
   let self = this;
-  self.id = selfJSON.id;
-  self.name = selfJSON.name;
+  self.id = json.id;
+  self.name = json.name;
   let labelIdMap = self.sat.labelIdMap;
-  if ('parent' in selfJSON) {
-    self.parent = labelIdMap[selfJSON['parent']];
+  if ('parent' in json) {
+    self.parent = labelIdMap[json['parent']];
   }
-  if ('children' in selfJSON) {
-    let childrenIds = selfJSON['children'];
+  if ('children' in json) {
+    let childrenIds = json['children'];
     for (let i = 0; i < childrenIds.length; i++) {
       self.addChild(labelIdMap[childrenIds[i]]);
     }
   }
+  self.attributes = json.attributes;
 };
 
 SatLabel.prototype.startChange = function() {

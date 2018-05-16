@@ -5,22 +5,27 @@
  * 2D box label
  * @param {Sat} sat: context
  * @param {int} id: label id
- * @param {object} boxAttributes: attributes of the box, containing category,
+ * @param {object} kargs: arguments of the box, containing category,
     occl/trunc, and mousePos
  */
-function Box2d(sat, id, boxAttributes) {
+function Box2d(sat, id, kargs) {
+  // TODO: separate category and attributes in kargs
   ImageLabel.call(this, sat, id);
 
-  this.name = boxAttributes.category;
-  this.occl = boxAttributes.occl;
-  this.trunc = boxAttributes.trunc;
+  this.name = kargs.category;
+  // TODO: Move those to attributes
+  // TODO: don't use abbreviation here
+  this.occl = kargs.occl;
+  this.trunc = kargs.trunc;
 
-  this.x = boxAttributes.mousePos.x;
-  this.y = boxAttributes.mousePos.y;
+  // TODO: move the coordinates to one object
+  this.x = kargs.mousePos.x;
+  this.y = kargs.mousePos.y;
   this.w = 0;
   this.h = 0;
 
   // constants
+  // TODO: Move out, we don't have to keep a copy of constants in every object
   this.LINE_WIDTH = 2;
   this.OUTLINE_WIDTH = 1;
   this.HANDLE_RADIUS = 4;
@@ -35,53 +40,29 @@ function Box2d(sat, id, boxAttributes) {
 
 Box2d.prototype = Object.create(ImageLabel.prototype);
 
-Box2d.prototype.toJSON = function() {
+Box2d.prototype.toJson = function() {
   let self = this;
-  let selfJSON = {id: self.id, name: self.name};
-  selfJSON.name = self.name;
-  selfJSON.x = self.x;
-  selfJSON.y = self.y;
-  selfJSON.w = self.w;
-  selfJSON.h = self.h;
-  // TODO: stop hardcoding occl and trunc attributes
-  selfJSON.optionalAttributes = {occl: self.occl, trunc: self.trunc};
-  selfJSON.occl = self.occl;
-  selfJSON.trunc = self.trunc;
-  if (self.parent !== null) selfJSON['parent'] = self.parent.id;
-  if (self.children.length > 0) {
-    let childrenIDs = [];
-    for (let i = 0; i < self.children.length; i++) {
-      childrenIDs.push(self.children[i].id);
-    }
-    selfJSON['children'] = childrenIDs;
-  }
-  return selfJSON;
+  let json = ImageLabel.prototype.toJson();
+  json.box2d = {x: self.x, y: self.y, w: self.w, h: self.h};
+  // TODO: remove this special attribute assignment
+  json.attributes = {occlusion: self.occl, truncation: self.trunc};
+  return json;
 };
 
 /**
  * Load label information from json object
- * @param {object} selfJSON: JSON representation of this Box2d.
+ * @param {object} json: JSON representation of this Box2d.
  */
-Box2d.prototype.fromJSON = function(selfJSON) {
+Box2d.prototype.fromJson = function(json) {
   let self = this;
-  self.id = selfJSON.id;
-  self.name = selfJSON.name;
-  self.x = selfJSON.x;
-  self.y = selfJSON.y;
-  self.w = selfJSON.w;
-  self.h = selfJSON.h;
+  ImageLabel.prototype.fromJson(json);
+  self.x = json.box2d.x;
+  self.y = json.box2d.y;
+  self.w = json.box2d.w;
+  self.h = json.box2d.h;
   // TODO: stop hardcoding occl and trunc attributes
-  self.occl = selfJSON.occl;
-  let labelIdMap = self.sat.labelIdMap;
-  if ('parent' in selfJSON) {
-    self.parent = labelIdMap[selfJSON['parent']];
-  }
-  if ('children' in selfJSON) {
-    let childrenIds = selfJSON['children'];
-    for (let i = 0; i < childrenIds.length; i++) {
-      self.addChild(labelIdMap[childrenIds[i]]);
-    }
-  }
+  self.occl = json.attributes.occlusion;
+  self.trunc = json.attributes.truncation;
 };
 
 /**
