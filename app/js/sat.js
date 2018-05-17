@@ -40,7 +40,7 @@ function blendColor(rgb, base, ratio) {
   let newRgb = [0, 0, 0];
   for (let i = 0; i < 3; i++) {
     newRgb[i] = Math.max(0,
-      Math.min(255, rgb[i] + Math.round((base[i] - rgb[i]) * ratio)));
+        Math.min(255, rgb[i] + Math.round((base[i] - rgb[i]) * ratio)));
   }
   return newRgb;
 }
@@ -110,7 +110,7 @@ Sat.prototype.newLabel = function(optionalAttributes) {
 };
 
 Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
-                  position = null) {
+                                  position = null) {
   this.events.push({
     timestamp: Date.now(),
     action: action,
@@ -121,24 +121,29 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
 };
 
 // TODO
+Sat.prototype.gotoItem = function(index) {
+  let self = this;
+  //  TODO: save
+  // mod the index to wrap around the list
+  index = index % self.items.length;
+  // TODO: event?
+  self.currentItem.setActive(false);
+  self.currentItem = self.items[index];
+  self.currentItem.setActive(true);
+  self.currentItem.onload = function() {
+    self.currentItem.redraw();
+  };
+  self.currentItem.redraw();
+};
+
+// TODO
 Sat.prototype.load = function() {
   let self = this;
-  let x = new XMLHttpRequest();
-  x.onreadystatechange = function() {
-    if (x.readyState === 4) {
-      let assignment = JSON.parse(x.response);
-      let itemLocs = assignment.items;
-      self.addEvent('start labeling', self.currentItem); // ??
-      // preload items
-      self.items = [];
-      for (let i = 0; i < itemLocs.length; i++) {
-        self.items.push(new self.ItemType(self, i, itemLocs[i].url));
-      }
-      self.currentItem = self.items[0];
-      self.currentItem.setActive(true);
-      self.currentItem.image.onload = function() {
-        self.currentItem.redraw();
-      };
+  let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      let json = JSON.parse(xhr.response);
+      self.fromJson(json);
     }
   };
   // get params from url path
@@ -151,45 +156,36 @@ Sat.prototype.load = function() {
     'assignmentId': self.taskId,
     'projectName': self.projectName,
   });
-  x.open('POST', './requestSubmission');
-  x.send(request);
-};
-
-// TODO
-Sat.prototype.submit = function() {
-
-};
-
-// TODO
-Sat.prototype.gotoItem = function(index) {
-  //  TODO: save
-  // mod the index to wrap around the list
-  let self = this;
-  index = (index + self.items.length) % self.items.length;
-  // TODO: event?
-  self.currentItem.setActive(false);
-  self.currentItem = self.items[index];
-  self.currentItem.setActive(true);
-  self.currentItem.onload = function() {
-    self.currentItem.redraw();
-  };
-  self.currentItem.redraw();
+  xhr.open('POST', './requestSubmission');
+  xhr.send(request);
 };
 
 /**
- * Information used for submission
+ * Save this labeling session to file by sending JSON to the back end.
+ */
+Sat.prototype.save = function() {
+  let self = this;
+  let json = self.toJson();
+  // TODO: open a POST
+  let xhr = new XMLHttpRequest();
+  xhr.open('POST', './postSubmission');
+  xhr.send(json);
+};
+
+/**
+ * Get this session's JSON representation
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
  */
-Sat.prototype.getInfo = function() {
+Sat.prototype.toJson = function() {
   let self = this;
   let items = [];
-  for (let i = 0; i < this.items.length; i++) {
-    items.push(this.items[i].toJson());
+  for (let i = 0; i < self.items.length; i++) {
+    items.push(self.items[i].toJson());
   }
   let labels = [];
-  for (let i = 0; i < this.labels.length; i++) {
-    if (this.labels[i].valid) {
-      labels.push(this.labels[i].toJson());
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].valid) {
+      labels.push(self.labels[i].toJson());
     }
   }
   return {
@@ -201,6 +197,29 @@ Sat.prototype.getInfo = function() {
     ipAddress: self.ipAddress,
   };
 };
+
+Sat.prototype.fromJson = function(json) {
+  let self = this;
+  self.items = [];
+  for (let i = 0; i < json.labels.length; i++) {
+    let newLabel = self.newLabel(json.labels[i].attributes);
+    newLabel.fromJson(json.labels[i]);
+    self.labels.push(newLabel);
+  }
+  for (let i = 0; i < json.items.length; i++) {
+    let newItem = self.newItem(json.items[i].url);
+    newItem.fromJson(json.items[i]);
+    self.items.push(newItem);
+  }
+  self.currentItem = self.items[0];
+  self.currentItem.setActive(true);
+  // TODO: this is image specific!! remove!
+  self.currentItem.image.onload = function() {
+    self.currentItem.redraw();
+  };
+  self.addEvent('start labeling', self.currentItem);
+};
+
 
 /**
  * Base class for each labeling target, can be pointcloud or 2D image
@@ -236,20 +255,30 @@ SatItem.prototype.nextItem = function() {
 };
 
 SatItem.prototype.toJson = function() {
+  let self = this;
   let labelIds = [];
-  for (let i = 0; i < this.labels.length; i++) {
-    if (this.labels[i].valid) {
-      labelIds.push(this.labels[i].id);
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].valid) {
+      labelIds.push(self.labels[i].id);
     }
   }
-  return {url: this.url, index: this.index, labels: labelIds};
+  return {url: self.url, index: self.index, labels: labelIds};
 };
 
-SatItem.prototype.fromJson = function(object) {
-  this.url = object.url;
-  this.index = object.index;
-  for (let i = 0; i < object.labelIds.length; i++) {
-    this.labels.push(this.sat.labelIdMap[object.labelIds[i]]);
+/**
+ * Restore this SatItem from JSON.
+ * @param {object} selfJSON - JSON representation of this SatItem.
+ * @param {string} selfJSON.url - This SatItem's url.
+ * @param {number} selfJSON.index - This SatItem's index in
+ * @param {list} selfJSON.labelIDs - The list of label ids of this SatItem's
+ *   SatLabels.
+ */
+SatItem.prototype.fromJson = function(selfJSON) {
+  let self = this;
+  self.url = selfJSON.url;
+  self.index = selfJSON.index;
+  for (let i = 0; i < selfJSON.labelIDs.length; i++) {
+    self.labels.push(self.sat.labelIdMap[selfJSON.labelIDs[i]]);
   }
 };
 
@@ -277,6 +306,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
             if (currentItem.selectedLabel &&
               currentItem.selectedLabel.id === currentLabel.id) {
               currentItem.selectedLabel = null;
+              currentItem.currHandle = null;
             }
           }
         }
@@ -294,6 +324,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
             if (currentItem.selectedLabel &&
               currentItem.selectedLabel.id === currentLabel.id) {
               currentItem.selectedLabel = null;
+              currentItem.currHandle = null;
             }
           }
         }
@@ -305,11 +336,13 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
       self.labels.splice(i, 1);
       if (self.selectedLabel && self.selectedLabel.id === labelId) {
         self.selectedLabel = null;
+        self.currHandle = null;
       }
       return;
     }
   }
 };
+
 
 /**
  * Base class for each targeted labeling Image.
@@ -334,24 +367,9 @@ function SatImage(sat, index, url) {
     self.loaded();
   };
   self.image.src = self.url;
-
-  self.imageCanvas = document.getElementById('image_canvas');
-  self.hiddenCanvas = document.getElementById('hidden_canvas');
-  self.mainCtx = self.imageCanvas.getContext('2d');
-  self.hiddenCtx = self.hiddenCanvas.getContext('2d');
-
-  self.imageHeight = self.imageCanvas.height;
-  self.imageWidth = self.imageCanvas.width;
-  self.hoverLabel = null;
-  self.hoverHandle = 0;
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
-
-SatImage.prototype.loaded = function() {
-  // Call SatItem loaded
-  SatItem.prototype.loaded.call(this);
-};
 
 /**
  * Set whether this SatImage is the active one in the sat instance.
@@ -359,16 +377,25 @@ SatImage.prototype.loaded = function() {
  */
 SatImage.prototype.setActive = function(active) {
   let self = this;
-  let removeBtn = $('#remove_btn');
-  let deleteBtn = $('#delete_btn');
-  let endBtn = $('#end_btn');
+  self.active = active;
   if (active) {
-    self.imageCanvas.height = self.imageHeight;
-    self.imageCanvas.width = self.imageWidth;
-    self.hiddenCanvas.height = self.imageHeight;
-    self.hiddenCanvas.width = self.imageWidth;
-
-    // global listeners
+    self.imageCanvas = document.getElementById('image_canvas');
+    self.hiddenCanvas = document.getElementById('hidden_canvas');
+    self.mainCtx = self.imageCanvas.getContext('2d');
+    self.hiddenCtx = self.hiddenCanvas.getContext('2d');
+    self.state = 'free';
+    self.lastLabelID = 0;
+    self.padBox = self._getPadding();
+    self.catSel = document.getElementById('category_select');
+    self.catSel.selectedIndex = 0;
+    self.occlCheckbox = document.getElementById('occluded_checkbox');
+    self.truncCheckbox = document.getElementById('truncated_checkbox');
+    document.getElementById('prev_btn').onclick = function() {
+      self.sat.gotoItem(self.index - 1);
+    };
+    document.getElementById('next_btn').onclick = function() {
+      self.sat.gotoItem(self.index + 1);
+    };
     document.onmousedown = function(e) {
       self._mousedown(e);
     };
@@ -378,80 +405,62 @@ SatImage.prototype.setActive = function(active) {
     document.onmouseup = function(e) {
       self._mouseup(e);
     };
-    document.onscroll = function(e) {
-      self._scroll(e);
-    };
-
-    // buttons
-    document.getElementById('prev_btn').onclick = function() {
-      self.sat.gotoItem(self.index - 1);
-    };
-    document.getElementById('next_btn').onclick = function() {
-      self.sat.gotoItem(self.index + 1);
-    };
-    if (endBtn.length) {
+    $('#category_select').change(function() {
+      self._changeCat();
+    });
+    $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch',
+    function() {
+      self._occlSwitch();
+    });
+    $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch',
+    function() {
+      self._truncSwitch();
+    });
+    // TODO: Wenqi
+    // traffic light color
+    if ($('#end_btn').length) {
       // if the end button exists (we have a sequence) then hook it up
-      endBtn.click(function() {
+      $('#end_btn').click(function() {
         if (self.selectedLabel) {
           self.deleteLabelById(self.selectedLabel.id, false);
           self.redraw();
         }
       });
     }
-    if (deleteBtn.length) {
-      deleteBtn.click(function() {
+    if ($('#delete_btn').length) {
+      $('#delete_btn').click(function() {
         if (self.selectedLabel) {
           self.deleteLabelById(self.selectedLabel.id);
           self.redraw();
         }
       });
     }
-    if (removeBtn.length) {
-      removeBtn.click(function() {
+    if ($('#remove_btn').length) {
+      $('#remove_btn').click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
-          self.redraw();
+          self.selectedLabel.delete();
+          self.selectedLabel = null;
         }
       });
     }
-
-    // toolbox
-    self.catSel = document.getElementById('category_select');
-    self.catSel.selectedIndex = 0;
-    self.occlCheckbox = document.getElementById('occluded_checkbox');
-    self.truncCheckbox = document.getElementById('truncated_checkbox');
-
-    $('#category_select').change(function() {
-      self._changeCat();
-    });
-    $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch',
-      function() {
-        self._occlSwitch();
-      });
-    $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch',
-      function() {
-        self._truncSwitch();
-      });
-
-    // TODO: Wenqi
-    // traffic light color
-
-    self.lastLabelID = 0;
-    self.padBox = self._getPadding();
   } else {
     // .click just adds a function to a list of functions that get executed,
     // therefore we need to turn off the old functions
-    if (endBtn.length) {
-      // console.log('test');
-      endBtn.off();
+    if ($('#end_btn').length) {
+      $('#end_btn').off();
     }
-    if (deleteBtn.length) {
-      deleteBtn.off();
+    if ($('#delete_btn').length) {
+      $('#delete_btn').off();
     }
-    if (removeBtn.length) {
-      removeBtn.off();
+    if ($('#remove_btn').length) {
+      $('#remove_btn').off();
     }
   }
+};
+
+SatImage.prototype.loaded = function() {
+  // Call SatItem loaded
+  SatItem.prototype.loaded.call(this);
 };
 
 /**
@@ -469,7 +478,7 @@ SatImage.prototype.redraw = function() {
   for (let i = 0; i < self.labels.length; i++) {
     self.labels[i].redraw(self.mainCtx, self.hiddenCtx, self.selectedLabel,
       self.resizeID === self.labels[i].id, self.hoverLabel,
-      self.hoverHandle, i);
+        self.hoverHandle, i);
   }
 };
 
@@ -478,51 +487,52 @@ SatImage.prototype.redraw = function() {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousedown = function(e) {
-  if (!this._isWithinFrame(e)) {
-    return;
-  }
+  let self = this;
+  if (self._isWithinFrame(e) && self.state === 'free') {
+    let mousePos = self._getMousePos(e);
+    [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
+    // change checked traits on label selection
+    if (self.selectedLabel) {
+      for (let i = 0; i < self.catSel.options.length; i++) {
+        if (self.catSel.options[i].innerHTML === self.selectedLabel.name) {
+          self.catSel.selectedIndex = i;
+          break;
+        }
+      }
+      if ($('[name=\'occluded-checkbox\']').prop('checked') !==
+        self.selectedLabel.occl) {
+        $('[name=\'occluded-checkbox\']').trigger('click');
+      }
+      if ($('[name=\'truncated-checkbox\']').prop('checked') !==
+        self.selectedLabel.trunc) {
+        $('[name=\'truncated-checkbox\']').trigger('click');
+      }
+      // TODO: Wenqi
+      // traffic light color
+    }
 
-  let mousePos = this._getMousePos(e);
-  let currHandle;
-  [this.selectedLabel, currHandle] = this._getSelected(mousePos);
-  if (this.selectedLabel) {
-    this.selectedLabel.setCurrHandle(currHandle);
+    if (self.selectedLabel && self.currHandle > 0) {
+      // if we have a resize handle
+      self.state = 'resize';
+      self.resizeID = self.selectedLabel.id;
+    } else if (self.currHandle === 0 && self.selectedLabel) {
+      // if we have a move handle
+      self.movePos = self.selectedLabel.getCurrentPosition();
+      self.moveClickPos = mousePos;
+      self.state = 'move';
+    } else if (!self.selectedLabel) {
+      // otherwise, new label
+      let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+      let occl = self.occlCheckbox.checked;
+      let trunc = self.truncCheckbox.checked;
+      self.selectedLabel = self.sat.newLabel({category: cat, occl: occl,
+        trunc: trunc, mousePos: mousePos});
+      self.state = 'resize';
+      self.currHandle = self.selectedLabel.INITIAL_HANDLE;
+      self.resizeID = self.selectedLabel.id;
+    }
   }
-  // change checked traits on label selection
-  if (this.selectedLabel) {
-    // label specific handling of mousedown
-    this.selectedLabel.mousedown(e);
-  } else {
-    // otherwise, new label
-    this.selectedLabel = this.sat.newLabel({
-      category: this.catSel.options[this.catSel.selectedIndex].innerHTML,
-      occl: this.occlCheckbox.checked,
-      trunc: this.truncCheckbox.checked,
-      mousePos: mousePos,
-    });
-  }
-  this.redraw();
-};
-
-/**
- * Function to draw the crosshair
- * @param {object} e: mouse event
- */
-SatImage.prototype.drawCrossHair = function(e) {
-  let canvRect = this.imageCanvas.getBoundingClientRect();
-  let cH = $('#crosshair-h');
-  let cV = $('#crosshair-v');
-  cH.css('top', e.clientY);
-  cH.css('left', canvRect.x);
-  cH.css('width', canvRect.width);
-  cV.css('left', e.clientX);
-  cV.css('top', canvRect.y);
-  cV.css('height', canvRect.height);
-  if (this._isWithinFrame(e)) {
-    $('.hair').show();
-  } else {
-    $('.hair').hide();
-  }
+  self.redraw();
 };
 
 /**
@@ -530,26 +540,46 @@ SatImage.prototype.drawCrossHair = function(e) {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousemove = function(e) {
-  if (this.sat.LabelType.useCrossHair) {
-    this.drawCrossHair(e);
-  }
-  if (this._isWithinFrame(e)) {
-    // label specific handling of mousemove
-    if (this.selectedLabel) {
-      this.selectedLabel.mousemove(e);
-    }
-  }
-  this.redraw();
-};
-
-/**
- * Called when this SatImage is active and the mouse is moved.
- * @param {object} e: mouse event
- */
-SatImage.prototype._scroll = function(e) {
   let self = this;
-  if (self.sat.LabelType.useCrossHair) {
-    self.drawCrossHair(e);
+  let canvRect = this.imageCanvas.getBoundingClientRect();
+  let mousePos = self._getMousePos(e);
+
+  // draw the crosshair
+  let cH = $('#crosshair-h');
+  let cV = $('#crosshair-v');
+  cH.css('top', Math.min(canvRect.y + self.padBox.y + self.padBox.h, Math.max(
+    e.clientY, canvRect.y + self.padBox.y)));
+  cH.css('left', canvRect.x + self.padBox.x);
+  cH.css('width', self.padBox.w);
+  cV.css('left', Math.min(canvRect.x + self.padBox.x + self.padBox.w, Math.max(
+    e.clientX, canvRect.x + self.padBox.x)));
+  cV.css('top', canvRect.y + self.padBox.y);
+  cV.css('height', self.padBox.h);
+  if (self._isWithinFrame(e)) {
+    $('.hair').show();
+  } else {
+    $('.hair').hide();
+  }
+
+  // needed for on-hover animations
+  [self.hoverLabel, self.hoverHandle] = self._getSelected(mousePos);
+  // change the cursor appropriately
+  if (self.state === 'resize') {
+    self.imageCanvas.style.cursor = 'crosshair';
+  } else if (self.state === 'move') {
+    self.imageCanvas.style.cursor = 'move';
+  } else if (self.hoverLabel && self.hoverHandle >= 0) {
+    self.imageCanvas.style.cursor = self.hoverLabel.getCursorStyle(
+      self.hoverHandle);
+  } else {
+    self.imageCanvas.style.cursor = 'crosshair';
+  }
+
+  if (self.state === 'resize') {
+    self.selectedLabel.resize(mousePos, self.currHandle, canvRect, self.padBox);
+  } else if (self.state === 'move') {
+    self.selectedLabel.move(mousePos, self.movePos, self.moveClickPos,
+      self.padBox);
   }
   self.redraw();
 };
@@ -559,14 +589,54 @@ SatImage.prototype._scroll = function(e) {
  * @param {object} _: mouse event (unused)
  */
 SatImage.prototype._mouseup = function(_) { // eslint-disable-line
-  if (this.selectedLabel) {
-    // label specific handling of mouseup
-    this.selectedLabel.mouseup();
-    if (this.selectedLabel.isSmall()) {
-      this.deleteLabelById(this.selectedLabel.id);
+  let self = this;
+  if (self.state !== 'free') {
+    if (self.state === 'resize') {
+      // if we resized, we need to reorder ourselves
+      if (self.selectedLabel.w < 0) {
+        self.selectedLabel.x = self.selectedLabel.x + self.selectedLabel.w;
+        self.selectedLabel.w = -1 * self.selectedLabel.w;
+      }
+      if (self.selectedLabel.h < 0) {
+        self.selectedLabel.y = self.selectedLabel.y + self.selectedLabel.h;
+        self.selectedLabel.h = -1 * self.selectedLabel.h;
+      }
+      // remove the box if it's too small
+      if (self.selectedLabel.isSmall()) {
+        self.selectedLabel.delete();
+        self.selectedLabel = null;
+      }
+    }
+    self.state = 'free';
+    self.resizeID = null;
+    self.movePos = null;
+    self.moveClickPos = null;
+  }
+  // if parent label, make this the selected label in all other SatImages
+  if (self.selectedLabel && self.selectedLabel.parent) {
+    let currentItem = self.previousItem();
+    let currentLabel = self.selectedLabel.previousLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.previousLabel;
+        // TODO: make both be functions, not attributes
+      }
+      currentItem = currentItem.previousItem();
+    }
+    currentItem = self.nextItem();
+    currentLabel = self.selectedLabel.nextLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.nextLabel;
+      }
+      currentItem = currentItem.nextItem();
     }
   }
-  this.redraw();
+  self.redraw();
 };
 
 /**
@@ -582,14 +652,13 @@ SatImage.prototype._isWithinFrame = function(e) {
 };
 
 /**
- * Get the mouse position on the canvas in the image coordinates.
+ * Get the mouse position on the canvas.
  * @param {object} e: mouse event
  * @return {object}: mouse position (x,y) on the canvas
  */
 SatImage.prototype._getMousePos = function(e) {
-  let self = this;
-  let rect = self.imageCanvas.getBoundingClientRect();
-  return {x: (e.clientX - rect.x), y: (e.clientY - rect.y)};
+  let rect = this.imageCanvas.getBoundingClientRect();
+  return {x: e.clientX - rect.x, y: e.clientY - rect.y};
 };
 
 /**
@@ -637,6 +706,7 @@ SatImage.prototype._getLabelByID = function(labelID) {
  * @return {[ImageLabel, number]}: the box and handle (0-9) under the mouse
  */
 SatImage.prototype._getSelected = function(mousePos) {
+  let self = this;
   let pixelData = this.hiddenCtx.getImageData(mousePos.x,
     mousePos.y, 1, 1).data;
   let selectedLabelIndex = null;
@@ -645,19 +715,18 @@ SatImage.prototype._getSelected = function(mousePos) {
     selectedLabelIndex = pixelData[0] * 256 + pixelData[1];
     currHandle = pixelData[2] - 1;
   }
-  let selectedLabel = this.labels[selectedLabelIndex];
-  return [selectedLabel, currHandle];
+  return [self.labels[selectedLabelIndex], currHandle];
 };
-
 
 /**
  * Called when the selected category is changed.
  */
 SatImage.prototype._changeCat = function() {
-  if (this.selectedLabel) {
-    this.selectedLabel.name = this.catSel.options[
-        this.catSel.selectedIndex].innerHTML;
-    this.redraw();
+  let self = this;
+  if (self.selectedLabel) {
+    let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+    self.selectedLabel.name = option;
+    self.redraw();
   }
 };
 
@@ -665,27 +734,30 @@ SatImage.prototype._changeCat = function() {
  * Called when the occluded checkbox is toggled.
  */
 SatImage.prototype._occlSwitch = function() {
-    if (this.selectedLabel) {
-        this.occl = $('[name=\'occluded-checkbox\']').prop('checked');
-    }
+  let self = this;
+  if (self.selectedLabel) {
+    self.selectedLabel.occl = $('[name=\'occluded-checkbox\']').prop('checked');
+  }
 };
 
 /**
  * Called when the truncated checkbox is toggled.
  */
 SatImage.prototype._truncSwitch = function() {
-    if (this.selectedLabel) {
-        this.trunc = $('[name=\'truncated-checkbox\']').prop(
-            'checked');
-    }
+  let self = this;
+  if (self.selectedLabel) {
+    self.selectedLabel.trunc = $('[name=\'truncated-checkbox\']').prop(
+      'checked');
+  }
 };
 
 /**
  * Called when the traffic light color choice is changed.
  */
 SatImage.prototype._lightSwitch = function() {
-    // TODO: Wenqi
+  // TODO: Wenqi
 };
+
 
 /**
  * Base class for all the labeled objects. New label should be instantiated by
@@ -712,7 +784,6 @@ function SatLabel(sat, id = -1, ignored = null) {
   this.children = [];
   this.numChildren = 0;
   this.valid = true;
-  this.currHandle = 0;
 }
 
 SatLabel.prototype.delete = function() {
@@ -727,13 +798,16 @@ SatLabel.prototype.delete = function() {
   }
 };
 
-SatLabel.prototype.setCurrHandle = function(handle) {
-  this.currHandle = handle;
-};
-
 SatLabel.prototype.getRoot = function() {
   if (this.parent === null) return this;
   else return this.parent.getRoot();
+};
+
+/**
+ * Get the current position of this label.
+ */
+SatLabel.prototype.getCurrentPosition = function() {
+
 };
 
 SatLabel.prototype.addChild = function(child) {
@@ -764,19 +838,45 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  * @return {{id: *}}
  */
 SatLabel.prototype.toJson = function() {
-  let object = {id: this.id, name: this.name, attributes: this.attributes};
-  if (this.parent !== null) object['parent'] = this.parent.id;
-  if (this.children.length > 0) {
-    let childenIds = [];
-    for (let i = 0; i < this.children.length; i++) {
-      childenIds.push(this.children[i].id);
+  let self = this;
+  let json = {id: self.id, name: self.name};
+  if (self.parent !== null) json['parent'] = self.parent.id;
+  if (self.children.length > 0) {
+    let childrenIds = [];
+    for (let i = 0; i < self.children.length; i++) {
+      if (self.children[i].valid) {
+        childrenIds.push(self.children[i].id);
+      }
     }
-    object['children'] = childenIds;
+    json['children'] = childrenIds;
   }
-  return object;
+  json.attributes = self.attributes;
+  return json;
+};
+
+/**
+ * Load label information from json object
+ * @param {object} json: JSON representation of this SatLabel.
+ */
+SatLabel.prototype.fromJson = function(json) {
+  let self = this;
+  self.id = json.id;
+  self.name = json.name;
+  let labelIdMap = self.sat.labelIdMap;
+  if ('parent' in json) {
+    self.parent = labelIdMap[json['parent']];
+  }
+  if ('children' in json) {
+    let childrenIds = json['children'];
+    for (let i = 0; i < childrenIds.length; i++) {
+      self.addChild(labelIdMap[childrenIds[i]]);
+    }
+  }
+  self.attributes = json.attributes;
 };
 
 SatLabel.prototype.startChange = function() {
+
 };
 
 SatLabel.prototype.updateChange = function() {
@@ -789,26 +889,6 @@ SatLabel.prototype.finishChange = function() {
 
 SatLabel.prototype.redraw = function() {
 
-};
-
-/**
- * Load label information from json object
- * @param {Object} object: object to parse
- */
-SatLabel.prototype.fromJson = function(object) {
-  this.id = object.id;
-  this.name = object.name;
-  this.attributes = object.attributes;
-  let labelIdMap = this.sat.labelIdMap;
-  if ('parent' in object) {
-    this.parent = labelIdMap[object['parent']];
-  }
-  if ('children' in object) {
-    let childrenIds = object['children'];
-    for (let i = 0; i < childrenIds.length; i++) {
-      this.addChild(labelIdMap[childrenIds[i]]);
-    }
-  }
 };
 
 
@@ -830,38 +910,52 @@ SatLabel.prototype.fromJson = function(object) {
  */
 function ImageLabel(sat, id, optionalAttributes = null) {
   SatLabel.call(this, sat, id, optionalAttributes);
-  this.image = sat.currentItem;
 }
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
 
-ImageLabel.useCrossHair = false;
+ImageLabel.prototype.getCurrentPosition = function() {
+
+};
 
 /**
- * Draw a specified resize handle of this bounding box.
- * @param {object} ctx - Canvas context.
- * @param {number} handleNo - The handle number, i.e. which handle to draw.
+ * Get the weighted average between this label and a provided label.
+ * @param {ImageLabel} ignoredLabel - The other label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ * corresponds to
+ *   closer to the other label.
+ * @return {object} - The label's position.
  */
-ImageLabel.prototype.drawHandle = function(ctx, handleNo) {
-  let self = this;
-  ctx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo);
+ImageLabel.prototype.getWeightedAvg = function(ignoredLabel, ignoredWeight) {
+  return null;
+};
 
-  if (self.isSmall()) {
-    ctx.fillStyle = 'rgb(169, 169, 169)';
-  } else {
-    ctx.fillStyle = self.styleColor();
-  }
-  ctx.lineWidth = self.LINE_WIDTH;
-  if (posHandle) {
-    ctx.beginPath();
-    ctx.arc(posHandle.x, posHandle.y, self.HANDLE_RADIUS, 0, 2 * Math.PI);
-    ctx.fill();
-    if (!self.isSmall()) {
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = self.OUTLINE_WIDTH;
-      ctx.stroke();
-    }
-  }
-  ctx.restore(); // restore the canvas to saved settings
+/**
+ * Set this label to be the weighted average of the two provided labels.
+ * @param {ImageLabel} ignoredStartLabel - The first label.
+ * @param {ImageLabel} ignoredEndLabel - The second label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ *   corresponds to closer to endLabel.
+ */
+ImageLabel.prototype.weightedAvg = function(ignoredStartLabel, ignoredEndLabel,
+                                            ignoredWeight) {
+
+};
+
+/**
+ * Calculate the intersection between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The intersection between the two labels.
+ */
+ImageLabel.prototype.intersection = function(ignoredLabel) {
+  return 0;
+};
+
+/**
+ * Calculate the union between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The union between the two labels.
+ */
+ImageLabel.prototype.union = function(ignoredLabel) {
+  return 0;
 };
