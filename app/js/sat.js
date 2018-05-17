@@ -164,15 +164,16 @@ Sat.prototype.submit = function() {
 Sat.prototype.gotoItem = function(index) {
   //  TODO: save
   // mod the index to wrap around the list
-  index = (index + this.items.length) % this.items.length;
+  let self = this;
+  index = (index + self.items.length) % self.items.length;
   // TODO: event?
-  this.currentItem.setActive(false);
-  this.currentItem = this.items[index];
-  this.currentItem.setActive(true);
-  this.currentItem.onload = function() {
-    this.currentItem.redraw();
+  self.currentItem.setActive(false);
+  self.currentItem = self.items[index];
+  self.currentItem.setActive(true);
+  self.currentItem.onload = function() {
+    self.currentItem.redraw();
   };
-  this.currentItem.redraw();
+  self.currentItem.redraw();
 };
 
 /**
@@ -341,6 +342,8 @@ function SatImage(sat, index, url) {
 
   self.imageHeight = self.imageCanvas.height;
   self.imageWidth = self.imageCanvas.width;
+  self.hoverLabel = null;
+  self.hoverHandle = 0;
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
@@ -356,6 +359,9 @@ SatImage.prototype.loaded = function() {
  */
 SatImage.prototype.setActive = function(active) {
   let self = this;
+  let removeBtn = $('#remove_btn');
+  let deleteBtn = $('#delete_btn');
+  let endBtn = $('#end_btn');
   if (active) {
     self.imageCanvas.height = self.imageHeight;
     self.imageCanvas.width = self.imageWidth;
@@ -378,35 +384,30 @@ SatImage.prototype.setActive = function(active) {
 
     // buttons
     document.getElementById('prev_btn').onclick = function() {
-      console.log('prev');
       self.sat.gotoItem(self.index - 1);
     };
     document.getElementById('next_btn').onclick = function() {
-      console.log('next');
       self.sat.gotoItem(self.index + 1);
     };
-
-    if ($('#end_btn').length) {
+    if (endBtn.length) {
       // if the end button exists (we have a sequence) then hook it up
-      $('#end_btn').click(function() {
-        console.log('end');
+      endBtn.click(function() {
         if (self.selectedLabel) {
           self.deleteLabelById(self.selectedLabel.id, false);
           self.redraw();
         }
       });
     }
-    if ($('#delete_btn').length) {
-      $('#delete_btn').click(function() {
-        console.log('delete');
+    if (deleteBtn.length) {
+      deleteBtn.click(function() {
         if (self.selectedLabel) {
           self.deleteLabelById(self.selectedLabel.id);
           self.redraw();
         }
       });
     }
-    if ($('#remove_btn').length) {
-      $('#remove_btn').click(function() {
+    if (removeBtn.length) {
+      removeBtn.click(function() {
         if (self.selectedLabel) {
           self.deleteLabelById(self.selectedLabel.id);
           self.redraw();
@@ -440,18 +441,17 @@ SatImage.prototype.setActive = function(active) {
   } else {
     // .click just adds a function to a list of functions that get executed,
     // therefore we need to turn off the old functions
-    if ($('#end_btn').length) {
+    if (endBtn.length) {
       // console.log('test');
-      $('#end_btn').off();
+      endBtn.off();
     }
-    if ($('#delete_btn').length) {
-      $('#delete_btn').off();
+    if (deleteBtn.length) {
+      deleteBtn.off();
     }
-    if ($('#remove_btn').length) {
-      $('#remove_btn').off();
+    if (removeBtn.length) {
+      removeBtn.off();
     }
   }
-
 };
 
 /**
@@ -478,12 +478,12 @@ SatImage.prototype.redraw = function() {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousedown = function(e) {
-
   if (!this._isWithinFrame(e)) {
     return;
   }
 
   let mousePos = this._getMousePos(e);
+  let currHandle;
   [this.selectedLabel, currHandle] = this._getSelected(mousePos);
   if (this.selectedLabel) {
     this.selectedLabel.setCurrHandle(currHandle);
@@ -491,15 +491,14 @@ SatImage.prototype._mousedown = function(e) {
   // change checked traits on label selection
   if (this.selectedLabel) {
     // label specific handling of mousedown
-    this.selectedLabel._mousedown(e);
-
+    this.selectedLabel.mousedown(e);
   } else {
     // otherwise, new label
     this.selectedLabel = this.sat.newLabel({
       category: this.catSel.options[this.catSel.selectedIndex].innerHTML,
       occl: this.occlCheckbox.checked,
       trunc: this.truncCheckbox.checked,
-      mousePos: mousePos
+      mousePos: mousePos,
     });
   }
   this.redraw();
@@ -531,24 +530,16 @@ SatImage.prototype.drawCrossHair = function(e) {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousemove = function(e) {
-  let canvRect = this.imageCanvas.getBoundingClientRect();
-  let mousePos = this._getMousePos(e);
-  // get the mouse position on the coordinate of the display
-
   if (this.sat.LabelType.useCrossHair) {
     this.drawCrossHair(e);
   }
-
   if (this._isWithinFrame(e)) {
-
     // label specific handling of mousemove
     if (this.selectedLabel) {
-      this.selectedLabel._mousemove(e);
+      this.selectedLabel.mousemove(e);
     }
-
   }
   this.redraw();
-
 };
 
 /**
@@ -561,7 +552,6 @@ SatImage.prototype._scroll = function(e) {
     self.drawCrossHair(e);
   }
   self.redraw();
-
 };
 
 /**
@@ -569,16 +559,14 @@ SatImage.prototype._scroll = function(e) {
  * @param {object} _: mouse event (unused)
  */
 SatImage.prototype._mouseup = function(_) { // eslint-disable-line
-
   if (this.selectedLabel) {
     // label specific handling of mouseup
-    this.selectedLabel._mouseup();
+    this.selectedLabel.mouseup();
     if (this.selectedLabel.isSmall()) {
       this.deleteLabelById(this.selectedLabel.id);
     }
   }
   this.redraw();
-
 };
 
 /**
@@ -588,7 +576,7 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
  */
 SatImage.prototype._isWithinFrame = function(e) {
   let rect = this.imageCanvas.getBoundingClientRect();
-  return(this.padBox && rect.x + this.padBox.x < e.clientX && e.clientX <
+  return (this.padBox && rect.x + this.padBox.x < e.clientX && e.clientX <
     rect.x + this.padBox.x + this.padBox.w && rect.y + this.padBox.y <
     e.clientY && e.clientY < rect.y + this.padBox.y + this.padBox.h);
 };
@@ -649,7 +637,6 @@ SatImage.prototype._getLabelByID = function(labelID) {
  * @return {[ImageLabel, number]}: the box and handle (0-9) under the mouse
  */
 SatImage.prototype._getSelected = function(mousePos) {
-
   let pixelData = this.hiddenCtx.getImageData(mousePos.x,
     mousePos.y, 1, 1).data;
   let selectedLabelIndex = null;
@@ -658,9 +645,7 @@ SatImage.prototype._getSelected = function(mousePos) {
     selectedLabelIndex = pixelData[0] * 256 + pixelData[1];
     currHandle = pixelData[2] - 1;
   }
-
   let selectedLabel = this.labels[selectedLabelIndex];
-
   return [selectedLabel, currHandle];
 };
 
@@ -669,10 +654,9 @@ SatImage.prototype._getSelected = function(mousePos) {
  * Called when the selected category is changed.
  */
 SatImage.prototype._changeCat = function() {
-
   if (this.selectedLabel) {
-    let option = this.catSel.options[this.catSel.selectedIndex].innerHTML;
-    this.selectedLabel.name = option;
+    this.selectedLabel.name = this.catSel.options[
+        this.catSel.selectedIndex].innerHTML;
     this.redraw();
   }
 };
@@ -681,7 +665,6 @@ SatImage.prototype._changeCat = function() {
  * Called when the occluded checkbox is toggled.
  */
 SatImage.prototype._occlSwitch = function() {
-
     if (this.selectedLabel) {
         this.occl = $('[name=\'occluded-checkbox\']').prop('checked');
     }
@@ -691,7 +674,6 @@ SatImage.prototype._occlSwitch = function() {
  * Called when the truncated checkbox is toggled.
  */
 SatImage.prototype._truncSwitch = function() {
-
     if (this.selectedLabel) {
         this.trunc = $('[name=\'truncated-checkbox\']').prop(
             'checked');
@@ -849,10 +831,11 @@ SatLabel.prototype.fromJson = function(object) {
 function ImageLabel(sat, id, optionalAttributes = null) {
   SatLabel.call(this, sat, id, optionalAttributes);
   this.image = sat.currentItem;
-  this.useCrossHair = false;
 }
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
+
+ImageLabel.useCrossHair = false;
 
 /**
  * Draw a specified resize handle of this bounding box.

@@ -5,18 +5,18 @@
  * 2D box label
  * @param {Sat} sat: context
  * @param {int} id: label id
- * @param {object} boxAttributes: attributes of the box, containing category,
+ * @param {object} kargs: attributes of the box, containing category,
  occl/trunc, and mousePos
  */
-function Box2d(sat, id, boxAttributes) {
+function Box2d(sat, id, kargs) {
   ImageLabel.call(this, sat, id);
 
-  this.name = boxAttributes.category;
-  this.occl = boxAttributes.occl;
-  this.trunc = boxAttributes.trunc;
+  this.name = kargs.category;
+  this.occl = kargs.occl;
+  this.trunc = kargs.trunc;
 
-  this.x = boxAttributes.mousePos.x;
-  this.y = boxAttributes.mousePos.y;
+  this.x = kargs.mousePos.x;
+  this.y = kargs.mousePos.y;
   this.w = 0;
   this.h = 0;
 
@@ -75,14 +75,14 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
 /**
  * Draw the box part of this bounding box.
  * @param {object} ctx - Canvas context.
- * @param {number} selectedBox - ID of the currently selected box, or null if
+ * @param {number} selectedBox - the currently selected box, or null if
  *   no box selected.
  * @param {boolean} resizing - Whether or not this box is being resized.
  */
 Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
   let self = this;
   ctx.save(); // save the canvas context settings
-  if (selectedBox && selectedBox.id != self.id) {
+  if (selectedBox && selectedBox.id !== self.id) {
     // if exists selected box and it's not this one, alpha this out
     ctx.globalAlpha = self.FADED_ALPHA;
   }
@@ -103,12 +103,6 @@ Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
 /**
  * Draw the resize handles of this bounding box.
  * @param {object} ctx - Canvas context.
- * @param {number} selectedBox - ID of the currently selected box, or null if
- *   no box selected.
- * @param{number} hoverBox - ID of the currently hovered over box, or null if
- *   no box hovered over.
- * @param {number} hoverHandle - handle number of the currently hovered handle,
- *   or null if no handle hovered.
  */
 Box2d.prototype.drawHandles = function(ctx) {
   let self = this;
@@ -116,7 +110,6 @@ Box2d.prototype.drawHandles = function(ctx) {
   for (let handleNo = 1; handleNo <= 8; handleNo++) {
     self.drawHandle(ctx, handleNo);
   }
-
 };
 
 /**
@@ -230,7 +223,7 @@ Box2d.prototype.hiddenStyleColor = function(labelIndex, handleNo) {
 /**
  * Get the cursor style for a specified handle number.
  * @param {int} handleNo - The handle number, ranges from 0 to 8.
- * @return {string} - The cursor style string.
+ * @return {string} - the cursor style
  */
 Box2d.prototype.getCursorStyle = function(handleNo) {
   return ['move', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
@@ -266,9 +259,9 @@ Box2d.prototype.resize = function(mousePos, currHandle, canvRect, padBox) {
     self.w += self.x - newX;
     self.x = newX;
   }
-  if (self.parent) {
-    self.sat.interpolate(self); // TODO
-  }
+  // if (self.parent) {
+  //   self.sat.interpolate(self); // TODO
+  // }
 };
 
 /**
@@ -293,9 +286,9 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
   // update
   self.x = movePos.x + delta.x;
   self.y = movePos.y + delta.y;
-  if (self.parent) {
-    self.sat.interpolate(self); // TODO
-  }
+  // if (self.parent) {
+  //   self.sat.interpolate(self); // TODO
+  // }
 };
 
 /**
@@ -341,7 +334,7 @@ Box2d.prototype._getHandle = function(handleNo) {
   ][handleNo - 1]();
 };
 
-Box2d.prototype._mousedown = function(e) {
+Box2d.prototype.mousedown = function(e) {
   let self = this;
   let mousePos = self.image._getMousePos(e);
   for (let i = 0; i < self.image.catSel.options.length; i++) {
@@ -350,20 +343,21 @@ Box2d.prototype._mousedown = function(e) {
       break;
     }
   }
-  if ($('[name=\'occluded-checkbox\']').prop('checked') !==
+  let occludedCheckbox = $('[name=\'occluded-checkbox\']');
+  let truncatedCheckbox = $('[name=\'truncated-checkbox\']');
+  if (occludedCheckbox.prop('checked') !==
     self.image.occl) {
-    $('[name=\'occluded-checkbox\']').trigger('click');
+    occludedCheckbox.trigger('click');
   }
-  if ($('[name=\'truncated-checkbox\']').prop('checked') !==
+  if (truncatedCheckbox.prop('checked') !==
     self.image.trunc) {
-    $('[name=\'truncated-checkbox\']').trigger('click');
+    truncatedCheckbox.trigger('click');
   }
   // TODO: Wenqi
   // traffic light color
   if (self.currHandle > 0) {
     // if we have a resize handle
     self.state = 'resize';
-
   } else if (self.currHandle === 0) {
     // if we have a move handle
     self.movePos = self.getCurrentPosition();
@@ -372,7 +366,7 @@ Box2d.prototype._mousedown = function(e) {
   }
 };
 
-Box2d.prototype._mouseup = function() {
+Box2d.prototype.mouseup = function() {
   if (this.state === 'resize') {
     // if we resized, we need to reorder ourselves
     if (this.w < 0) {
@@ -416,22 +410,21 @@ Box2d.prototype._mouseup = function() {
   }
 };
 
-Box2d.prototype._mousemove = function(e) {
+Box2d.prototype.mousemove = function(e) {
   let canvRect = this.image.imageCanvas.getBoundingClientRect();
   let mousePos = this.image._getMousePos(e);
 
   // change the cursor appropriately
-  if (this.state == 'resize') {
+  if (this.state === 'resize') {
     this.image.imageCanvas.style.cursor = 'crosshair';
-  } else if (this.state == 'move') {
+  } else if (this.state === 'move') {
     this.image.imageCanvas.style.cursor = 'move';
   }
   // handling according to state
-  if (this.state == 'resize') {
+  if (this.state === 'resize') {
     this.resize(mousePos, this.currHandle, canvRect, this.image.padBox);
-  } else if (this.state == 'move') {
+  } else if (this.state === 'move') {
     this.move(mousePos, this.movePos, this.moveClickPos,
       this.image.padBox);
   }
-
 };
