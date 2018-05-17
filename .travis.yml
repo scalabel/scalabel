@@ -8,9 +8,11 @@ before_install:
 install:
   - pip install pycodestyle
   - go get gopkg.in/yaml.v2
+  - npm install --save-dev jest
 script:
   - pycodestyle --show-source .
   - eslint .
   - go build -i -o $GOPATH/bin/sat ./app/golang
   - cp travis_config.yml config.yml
   - go test ./... --travis --config ../../config.yml
+  - npm test
