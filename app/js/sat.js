@@ -121,46 +121,6 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
 };
 
 // TODO
-Sat.prototype.load = function() {
-  let self = this;
-  let x = new XMLHttpRequest();
-  x.onreadystatechange = function() {
-    if (x.readyState === 4) {
-      let assignment = JSON.parse(x.response);
-      let itemLocs = assignment.items;
-      self.addEvent('start labeling', self.currentItem); // ??
-      // preload items
-      self.items = [];
-      for (let i = 0; i < itemLocs.length; i++) {
-        self.items.push(new self.ItemType(self, i, itemLocs[i].url));
-      }
-      self.currentItem = self.items[0];
-      self.currentItem.setActive(true);
-      self.currentItem.image.onload = function() {
-        self.currentItem.redraw();
-      };
-    }
-  };
-  // get params from url path
-  let searchParams = new URLSearchParams(window.location.search);
-  self.taskId = searchParams.get('task_id');
-  self.projectName = searchParams.get('project_name');
-
-  // ?
-  let request = JSON.stringify({
-    'assignmentId': self.taskId,
-    'projectName': self.projectName,
-  });
-  x.open('POST', './requestSubmission');
-  x.send(request);
-};
-
-// TODO
-Sat.prototype.submit = function() {
-
-};
-
-// TODO
 Sat.prototype.gotoItem = function(index) {
   //  TODO: save
   // mod the index to wrap around the list
@@ -434,6 +394,7 @@ function SatImage(sat, index, url) {
   };
   self.image.src = self.url;
 
+  self.divCanvas = document.getElementById('div_canvas');
   self.imageCanvas = document.getElementById('image_canvas');
   self.hiddenCanvas = document.getElementById('hidden_canvas');
   self.mainCtx = self.imageCanvas.getContext('2d');
@@ -443,9 +404,53 @@ function SatImage(sat, index, url) {
   self.imageWidth = self.imageCanvas.width;
   self.hoverLabel = null;
   self.hoverHandle = 0;
+
+  self.MAX_SCALE = 3.0;
+  self.MIN_SCALE = 1.0;
+  self.SCALE_RATIO = 1.5;
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
+
+SatImage.prototype.transformPoints = function(points) {
+  let self = this;
+  if (points) {
+    for (let i = 0; i < points.length; i++) {
+      points[i] = points[i] * self.scale;
+    }
+  }
+  return points;
+};
+
+/**
+ * Set the scale of the image in the display
+ * @param {float} scale
+ */
+SatImage.prototype.setScale = function(scale) {
+  let self = this;
+  // set scale
+  if (scale >= self.MIN_SCALE && scale < self.MAX_SCALE) {
+    self.scale = scale;
+  } else {
+    return;
+  }
+  // handle buttons
+  if (self.scale >= self.MIN_SCALE * self.SCALE_RATIO) {
+    $('#decrease_btn').attr('disabled', false);
+  } else {
+    $('#decrease_btn').attr('disabled', true);
+  }
+  if (self.scale <= self.MAX_SCALE / self.SCALE_RATIO) {
+    $('#increase_btn').attr('disabled', false);
+  } else {
+    $('#increase_btn').attr('disabled', true);
+  }
+  // resize canvas
+  self.imageCanvas.height = self.imageHeight * self.scale;
+  self.imageCanvas.width = self.imageWidth * self.scale;
+  self.hiddenCanvas.height = self.imageHeight * self.scale;
+  self.hiddenCanvas.width = self.imageWidth * self.scale;
+};
 
 SatImage.prototype.loaded = function() {
   // Call SatItem loaded
@@ -466,6 +471,7 @@ SatImage.prototype.setActive = function(active) {
     self.imageCanvas.width = self.imageWidth;
     self.hiddenCanvas.height = self.imageHeight;
     self.hiddenCanvas.width = self.imageWidth;
+    self.setScale(self.MIN_SCALE);
 
     // global listeners
     document.onmousedown = function(e) {
@@ -487,6 +493,12 @@ SatImage.prototype.setActive = function(active) {
     };
     document.getElementById('next_btn').onclick = function() {
       self.sat.gotoItem(self.index + 1);
+    };
+    document.getElementById('increase_btn').onclick = function() {
+      self._incHandler();
+    };
+    document.getElementById('decrease_btn').onclick = function() {
+      self._decHandler();
     };
     if (endBtn.length) {
       // if the end button exists (we have a sequence) then hook it up
@@ -554,6 +566,24 @@ SatImage.prototype.setActive = function(active) {
 };
 
 /**
+ * Increase button handler
+ */
+SatImage.prototype._incHandler = function() {
+  let self = this;
+  self.setScale(self.scale * self.SCALE_RATIO);
+  self.redraw();
+};
+
+/**
+ * Decrease button handler
+ */
+SatImage.prototype._decHandler = function() {
+  let self = this;
+  self.setScale(self.scale / self.SCALE_RATIO);
+  self.redraw();
+};
+
+/**
  * Redraws this SatImage and all labels.
  */
 SatImage.prototype.redraw = function() {
@@ -608,15 +638,15 @@ SatImage.prototype._mousedown = function(e) {
  * @param {object} e: mouse event
  */
 SatImage.prototype.drawCrossHair = function(e) {
-  let canvRect = this.imageCanvas.getBoundingClientRect();
+  let divRect = this.divCanvas.getBoundingClientRect();
   let cH = $('#crosshair-h');
   let cV = $('#crosshair-v');
   cH.css('top', e.clientY);
-  cH.css('left', canvRect.x);
-  cH.css('width', canvRect.width);
+  cH.css('left', divRect.x);
+  cH.css('width', divRect.width);
   cV.css('left', e.clientX);
-  cV.css('top', canvRect.y);
-  cV.css('height', canvRect.height);
+  cV.css('top', divRect.y);
+  cV.css('height', divRect.height);
   if (this._isWithinFrame(e)) {
     $('.hair').show();
   } else {
@@ -675,9 +705,18 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
  */
 SatImage.prototype._isWithinFrame = function(e) {
   let rect = this.imageCanvas.getBoundingClientRect();
-  return (this.padBox && rect.x + this.padBox.x < e.clientX && e.clientX <
-    rect.x + this.padBox.x + this.padBox.w && rect.y + this.padBox.y <
-    e.clientY && e.clientY < rect.y + this.padBox.y + this.padBox.h);
+  let withinImage = (this.padBox
+      && rect.x + this.padBox.x < e.clientX
+      && e.clientX < rect.x + this.padBox.x + this.padBox.w
+      && rect.y + this.padBox.y < e.clientY
+      && e.clientY < rect.y + this.padBox.y + this.padBox.h);
+
+  let rectDiv = this.divCanvas.getBoundingClientRect();
+  let withinDiv = (rectDiv.x < e.clientX
+      && e.clientX < rectDiv.x + rectDiv.width
+      && rectDiv.y < e.clientY
+      && e.clientY < rectDiv.y + rectDiv.height);
+  return withinImage && withinDiv;
 };
 
 /**
@@ -688,7 +727,8 @@ SatImage.prototype._isWithinFrame = function(e) {
 SatImage.prototype._getMousePos = function(e) {
   let self = this;
   let rect = self.imageCanvas.getBoundingClientRect();
-  return {x: (e.clientX - rect.x), y: (e.clientY - rect.y)};
+  return {x: (e.clientX - rect.x) / self.scale,
+    y: (e.clientY - rect.y) / self.scale};
 };
 
 /**
@@ -1004,6 +1044,9 @@ ImageLabel.prototype.drawHandle = function(ctx, handleNo) {
   let self = this;
   ctx.save(); // save the canvas context settings
   let posHandle = self._getHandle(handleNo);
+
+  [posHandle.x, posHandle.y] = self.image.transformPoints(
+      [posHandle.x, posHandle.y]);
 
   if (self.isSmall()) {
     ctx.fillStyle = 'rgb(169, 169, 169)';

@@ -126,7 +126,9 @@ Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
     ctx.strokeStyle = self.styleColor();
   }
   ctx.lineWidth = self.LINE_WIDTH; // set line width
-  ctx.strokeRect(self.x, self.y, self.w, self.h); // draw the box
+  let [x, y, w, h] = self.image.transformPoints(
+      [self.x, self.y, self.w, self.h]);
+  ctx.strokeRect(x, y, w, h); // draw the box
   ctx.restore(); // restore the canvas to saved settings
 };
 
@@ -165,6 +167,7 @@ Box2d.prototype.drawTag = function(ctx) {
     // get the top left corner
     let tlx = Math.min(self.x, self.x + self.w);
     let tly = Math.min(self.y, self.y + self.h);
+    [tlx, tly] = self.image.transformPoints([tlx, tly]);
     ctx.fillStyle = self.styleColor();
     ctx.fillRect(tlx + 1, tly - self.TAG_HEIGHT, tw,
       self.TAG_HEIGHT);
@@ -515,6 +518,11 @@ Box2d.prototype.mousemove = function(e) {
     this.image.imageCanvas.style.cursor = 'crosshair';
   } else if (this.state === 'move') {
     this.image.imageCanvas.style.cursor = 'move';
+  } else if (this.image.hoverLabel && this.image.hoverHandle >= 0) {
+    this.image.imageCanvas.style.cursor = this.image.hoverLabel.getCursorStyle(
+        this.image.hoverHandle);
+  } else {
+    this.image.imageCanvas.style.cursor = 'crosshair';
   }
   // handling according to state
   if (this.state === 'resize') {
