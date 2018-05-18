@@ -172,6 +172,93 @@ Sat.prototype.save = function() {
   xhr.send(json);
 };
 
+// TODO
+Sat.prototype.load = function() {
+  let self = this;
+  let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      let json = JSON.parse(xhr.response);
+      self.fromJson(json);
+    }
+  };
+  // get params from url path
+  let searchParams = new URLSearchParams(window.location.search);
+  self.taskId = searchParams.get('task_id');
+  self.projectName = searchParams.get('project_name');
+
+  // ?
+  let request = JSON.stringify({
+    'assignmentId': self.taskId,
+    'projectName': self.projectName,
+  });
+  xhr.open('POST', './requestSubmission');
+  xhr.send(request);
+};
+
+/**
+ * Save this labeling session to file by sending JSON to the back end.
+ */
+Sat.prototype.save = function() {
+  let self = this;
+  let json = self.toJson();
+  // TODO: open a POST
+  let xhr = new XMLHttpRequest();
+  xhr.open('POST', './postSubmission');
+  xhr.send(json);
+};
+
+/**
+ * Get this session's JSON representation
+ * @return {{items: Array, labels: Array, events: *, userAgent: string}}
+ */
+Sat.prototype.toJson = function() {
+  let self = this;
+  let items = [];
+  for (let i = 0; i < self.items.length; i++) {
+    items.push(self.items[i].toJson());
+  }
+  let labels = [];
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].valid) {
+      labels.push(self.labels[i].toJson());
+    }
+  }
+  return {
+    startTime: self.startTime,
+    items: items,
+    labels: labels,
+    events: self.events,
+    userAgent: navigator.userAgent,
+    ipAddress: self.ipAddress,
+  };
+};
+
+Sat.prototype.fromJson = function(json) {
+  let self = this;
+  self.items = [];
+  if (json.labels) {
+    for (let i = 0; i < json.labels.length; i++) {
+      let newLabel = self.newLabel(json.labels[i].attributes);
+      newLabel.fromJson(json.labels[i]);
+      self.labels.push(newLabel);
+    }
+  }
+
+  for (let i = 0; i < json.items.length; i++) {
+    let newItem = self.newItem(json.items[i].url);
+    newItem.fromJson(json.items[i]);
+    self.items.push(newItem);
+  }
+  self.currentItem = self.items[0];
+  self.currentItem.setActive(true);
+  // TODO: this is image specific!! remove!
+  self.currentItem.image.onload = function() {
+    self.currentItem.redraw();
+  };
+  self.addEvent('start labeling', self.currentItem);
+};
+
 /**
  * Get this session's JSON representation
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
@@ -277,8 +364,10 @@ SatItem.prototype.fromJson = function(selfJSON) {
   let self = this;
   self.url = selfJSON.url;
   self.index = selfJSON.index;
-  for (let i = 0; i < selfJSON.labelIDs.length; i++) {
-    self.labels.push(self.sat.labelIdMap[selfJSON.labelIDs[i]]);
+  if (selfJSON.labelIDs) {
+    for (let i = 0; i < selfJSON.labelIDs.length; i++) {
+      self.labels.push(self.sat.labelIdMap[selfJSON.labelIDs[i]]);
+    }
   }
 };
 
@@ -891,7 +980,6 @@ SatLabel.prototype.redraw = function() {
 
 };
 
-
 /**
  * Base class for all the labeled objects. New label should be instantiated by
  * Sat.newLabel()
@@ -916,6 +1004,52 @@ ImageLabel.prototype = Object.create(SatLabel.prototype);
 
 ImageLabel.prototype.getCurrentPosition = function() {
 
+};
+
+ImageLabel.prototype.getCurrentPosition = function() {
+
+};
+
+/**
+ * Get the weighted average between this label and a provided label.
+ * @param {ImageLabel} ignoredLabel - The other label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ * corresponds to
+ *   closer to the other label.
+ * @return {object} - The label's position.
+ */
+ImageLabel.prototype.getWeightedAvg = function(ignoredLabel, ignoredWeight) {
+  return null;
+};
+
+/**
+ * Set this label to be the weighted average of the two provided labels.
+ * @param {ImageLabel} ignoredStartLabel - The first label.
+ * @param {ImageLabel} ignoredEndLabel - The second label.
+ * @param {number} ignoredWeight - The weight, b/w 0 and 1, higher
+ *   corresponds to closer to endLabel.
+ */
+ImageLabel.prototype.weightedAvg = function(ignoredStartLabel, ignoredEndLabel,
+                                            ignoredWeight) {
+
+};
+
+/**
+ * Calculate the intersection between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The intersection between the two labels.
+ */
+ImageLabel.prototype.intersection = function(ignoredLabel) {
+  return 0;
+};
+
+/**
+ * Calculate the union between this and another ImageLabel
+ * @param {ImageLabel} ignoredLabel - The other image label.
+ * @return {number} - The union between the two labels.
+ */
+ImageLabel.prototype.union = function(ignoredLabel) {
+  return 0;
 };
 
 /**
