@@ -1,4 +1,4 @@
-/* global sprintf */
+/* global sprintf module*/
 
 /* exported Sat SatImage SatLabel ImageLabel */
 module.exports = SatLabel;
