@@ -403,11 +403,12 @@ function SatImage(sat, index, url) {
   self.imageHeight = self.imageCanvas.height;
   self.imageWidth = self.imageCanvas.width;
   self.hoverLabel = null;
-  self.hoverHandle = 0;
 
   self.MAX_SCALE = 3.0;
   self.MIN_SCALE = 1.0;
   self.SCALE_RATIO = 1.5;
+
+  self._isMouseDown = false;
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
@@ -553,7 +554,6 @@ SatImage.prototype.setActive = function(active) {
     // .click just adds a function to a list of functions that get executed,
     // therefore we need to turn off the old functions
     if (endBtn.length) {
-      // console.log('test');
       endBtn.off();
     }
     if (deleteBtn.length) {
@@ -597,8 +597,7 @@ SatImage.prototype.redraw = function() {
     self.padBox.x, self.padBox.y, self.padBox.w, self.padBox.h);
   for (let i = 0; i < self.labels.length; i++) {
     self.labels[i].redraw(self.mainCtx, self.hiddenCtx, self.selectedLabel,
-      self.resizeID === self.labels[i].id, self.hoverLabel,
-      self.hoverHandle, i);
+      self.hoverLabel, i);
   }
 };
 
@@ -607,6 +606,8 @@ SatImage.prototype.redraw = function() {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousedown = function(e) {
+  self._isMouseDown = true;
+
   if (!this._isWithinFrame(e)) {
     return;
   }
@@ -659,13 +660,32 @@ SatImage.prototype.drawCrossHair = function(e) {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousemove = function(e) {
+  let mousePos = this._getMousePos(e);
   if (this.sat.LabelType.useCrossHair) {
     this.drawCrossHair(e);
   }
   if (this._isWithinFrame(e)) {
+    this.imageCanvas.style.cursor = 'auto';
+    // hover effect
+    let hoverHandle;
+    [this.hoverLabel, hoverHandle] = this._getSelected(mousePos);
+
+    if (this.hoverLabel) {
+      this.hoverLabel.setCurrHoverHandle(hoverHandle);
+    }
     // label specific handling of mousemove
     if (this.selectedLabel) {
       this.selectedLabel.mousemove(e);
+    }
+
+    if (this._isMouseDown && this.selectedLabel) {
+      this.imageCanvas.style.cursor = this.selectedLabel.getCursorStyle(
+          this.selectedLabel.getCurrHandle());
+    } else if (!this._isMouseDown && this.hoverLabel) {
+      this.imageCanvas.style.cursor = this.hoverLabel.getCursorStyle(
+          this.hoverLabel.getCurrHoverHandle());
+    } else {
+      this.imageCanvas.style.cursor = 'auto';
     }
   }
   this.redraw();
@@ -688,6 +708,8 @@ SatImage.prototype._scroll = function(e) {
  * @param {object} _: mouse event (unused)
  */
 SatImage.prototype._mouseup = function(_) { // eslint-disable-line
+  self._isMouseDown = false;
+
   if (this.selectedLabel) {
     // label specific handling of mouseup
     this.selectedLabel.mouseup();
@@ -852,6 +874,7 @@ function SatLabel(sat, id = -1, ignored = null) {
   this.numChildren = 0;
   this.valid = true;
   this.currHandle = 0;
+  this.currHoverHandle = 0;
 }
 
 SatLabel.prototype.delete = function() {
@@ -867,7 +890,19 @@ SatLabel.prototype.delete = function() {
 };
 
 SatLabel.prototype.setCurrHandle = function(handle) {
-  this.currHandle = handle;
+  this.currHandle = Math.max(0, handle);
+};
+
+SatLabel.prototype.setCurrHoverHandle = function(handle) {
+  this.currHoverHandle = Math.max(0, handle);
+};
+
+SatLabel.prototype.getCurrHandle = function() {
+  return this.currHandle;
+};
+
+SatLabel.prototype.getCurrHoverHandle = function() {
+  return this.currHoverHandle;
 };
 
 SatLabel.prototype.getRoot = function() {
@@ -1043,7 +1078,7 @@ ImageLabel.prototype.union = function(ignoredLabel) {
 ImageLabel.prototype.drawHandle = function(ctx, handleNo) {
   let self = this;
   ctx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo);
+  let posHandle = self.getHandle(handleNo);
 
   [posHandle.x, posHandle.y] = self.image.transformPoints(
       [posHandle.x, posHandle.y]);

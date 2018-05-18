@@ -76,24 +76,25 @@ Box2d.prototype.fromJson = function(json) {
  * @param {object} hiddenCtx - HTML canvas context for hidden objects.
  * @param {number} selectedBox - ID of the currently selected box, or null if
  *   no box selected.
- * @param {boolean} resizing - Whether or not this box is being resized.
  * @param{number} hoverBox - ID of the currently hovered over box, or null if
  *   no box hovered over.
- * @param {number} hoverHandle - handle number of the currently hovered handle,
- *   or null if no handle hovered.
  * @param {number} labelIndex - index of this label in this.sat.labels
  */
-Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
-                  hoverBox, hoverHandle, labelIndex) {
+Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox,
+                  hoverBox, labelIndex) {
   let self = this;
 
   // go ahead and set context font
   mainCtx.font = '11px Verdana';
 
   // draw visible elements
-  self.drawBox(mainCtx, selectedBox, resizing);
+  self.drawBox(mainCtx, selectedBox);
   self.drawTag(mainCtx);
   if (selectedBox && self.id === selectedBox.id) {
+    self.drawHandles(mainCtx);
+  }
+
+  if (hoverBox && self.id === hoverBox.id) {
     self.drawHandles(mainCtx);
   }
 
@@ -107,16 +108,15 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
  * @param {object} ctx - Canvas context.
  * @param {number} selectedBox - the currently selected box, or null if
  *   no box selected.
- * @param {boolean} resizing - Whether or not this box is being resized.
  */
-Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
+Box2d.prototype.drawBox = function(ctx, selectedBox) {
   let self = this;
   ctx.save(); // save the canvas context settings
   if (selectedBox && selectedBox.id !== self.id) {
     // if exists selected box and it's not this one, alpha this out
     ctx.globalAlpha = self.FADED_ALPHA;
   }
-  if (resizing) {
+  if (self.state === 'resize') {
     ctx.setLineDash([3]); // if box is being resized, use line dashes
   }
   if (self.isSmall()) {
@@ -224,7 +224,7 @@ Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox,
 Box2d.prototype.drawHiddenHandle = function(hiddenCtx, handleNo, labelIndex) {
   let self = this;
   hiddenCtx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo);
+  let posHandle = self.getHandle(handleNo);
   hiddenCtx.fillStyle = self.hiddenStyleColor(labelIndex, handleNo);
   hiddenCtx.lineWidth = self.HIDDEN_LINE_WIDTH;
   hiddenCtx.beginPath();
@@ -259,8 +259,14 @@ Box2d.prototype.hiddenStyleColor = function(labelIndex, handleNo) {
  * @return {string} - The cursor style string.
  */
 Box2d.prototype.getCursorStyle = function(handleNo) {
-  return ['move', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
-    'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'][handleNo];
+  if (this.state === 'resize') {
+    return 'crosshair';
+  } else if (this.state === 'move') {
+    return 'move';
+  } else {
+    return ['move', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
+      'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'][handleNo];
+  }
 };
 
 /**
@@ -419,7 +425,7 @@ Box2d.prototype.union = function(box) {
  * @param {number} handleNo - The handle number, ranges from 0 to 8.
  * @return {object} - A struct with x and y of the handle's center.
  */
-Box2d.prototype._getHandle = function(handleNo) {
+Box2d.prototype.getHandle = function(handleNo) {
   let self = this;
   return [
     function() {return {x: self.x, y: self.y};}, // 0
@@ -479,6 +485,7 @@ Box2d.prototype.mouseup = function() {
   }
 
   this.state = 'free';
+  this.setCurrHandle(0);
 
   this.movePos = null;
   this.moveClickPos = null;
@@ -513,17 +520,6 @@ Box2d.prototype.mousemove = function(e) {
   let canvRect = this.image.imageCanvas.getBoundingClientRect();
   let mousePos = this.image._getMousePos(e);
 
-  // change the cursor appropriately
-  if (this.state === 'resize') {
-    this.image.imageCanvas.style.cursor = 'crosshair';
-  } else if (this.state === 'move') {
-    this.image.imageCanvas.style.cursor = 'move';
-  } else if (this.image.hoverLabel && this.image.hoverHandle >= 0) {
-    this.image.imageCanvas.style.cursor = this.image.hoverLabel.getCursorStyle(
-        this.image.hoverHandle);
-  } else {
-    this.image.imageCanvas.style.cursor = 'crosshair';
-  }
   // handling according to state
   if (this.state === 'resize') {
     this.resize(mousePos, this.currHandle, canvRect, this.image.padBox);
