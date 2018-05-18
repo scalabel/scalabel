@@ -2,6 +2,7 @@ env:
   browser: true
   es6: true
   jquery: true
+  jest: true
 extends: ['eslint:recommended', 'google']
 rules:
   linebreak-style:
