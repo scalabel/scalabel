@@ -83,8 +83,8 @@ function Sat(ItemType, LabelType) {
 }
 
 Sat.prototype.getIPAddress = function() {
-  $.getJSON('//freegeoip.net/json/?callback=?', function(data) {
-    this.ipAddress = data;
+  $.getJSON('https://api.ipify.org?format=jsonp&callback=?', function(json) {
+    this.ipAddress = json.ip;
   });
 };
 
