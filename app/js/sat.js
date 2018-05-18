@@ -897,11 +897,11 @@ SatLabel.prototype.setCurrHoverHandle = function(handle) {
   this.currHoverHandle = Math.max(0, handle);
 };
 
-SatLabel.prototype.getCurrHandle = function(handle) {
+SatLabel.prototype.getCurrHandle = function() {
   return this.currHandle;
 };
 
-SatLabel.prototype.getCurrHoverHandle = function(handle) {
+SatLabel.prototype.getCurrHoverHandle = function() {
   return this.currHoverHandle;
 };
 
