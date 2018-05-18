@@ -1,7 +1,7 @@
 /* global sprintf */
 
 /* exported Sat SatImage SatLabel ImageLabel */
-
+module.exports = SatLabel;
 /*
  Utilities
  */
@@ -959,3 +959,5 @@ ImageLabel.prototype.intersection = function(ignoredLabel) {
 ImageLabel.prototype.union = function(ignoredLabel) {
   return 0;
 };
+
+
