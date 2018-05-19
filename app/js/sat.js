@@ -80,11 +80,13 @@ function Sat(ItemType, LabelType) {
   this.startTime = Date.now();
   this.taskId = null;
   this.projectName = null;
+  this.getIpInfo();
 }
 
-Sat.prototype.getIPAddress = function() {
-  $.getJSON('//freegeoip.net/json/?callback=?', function(data) {
-    this.ipAddress = data;
+Sat.prototype.getIpInfo = function() {
+  let self = this;
+  $.getJSON('http://freegeoip.net/json/?callback=?', function(data) {
+    self.ipInfo = data;
   });
 };
 
@@ -169,7 +171,7 @@ Sat.prototype.save = function() {
   // TODO: open a POST
   let xhr = new XMLHttpRequest();
   xhr.open('POST', './postSubmission');
-  xhr.send(json);
+  xhr.send(JSON.stringify(json));
 };
 
 /**
@@ -194,7 +196,7 @@ Sat.prototype.toJson = function() {
     labels: labels,
     events: self.events,
     userAgent: navigator.userAgent,
-    ipAddress: self.ipAddress,
+    ipInfo: self.ipInfo,
   };
 };
 
@@ -840,8 +842,8 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
 SatLabel.prototype.toJson = function() {
   let self = this;
   let json = {id: self.id, name: self.name};
-  if (self.parent !== null) json['parent'] = self.parent.id;
-  if (self.children.length > 0) {
+  if (self.parent) json['parent'] = self.parent.id;
+  if (self.children && self.children.length > 0) {
     let childrenIds = [];
     for (let i = 0; i < self.children.length; i++) {
       if (self.children[i].valid) {
