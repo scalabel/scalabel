@@ -3,15 +3,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"strconv"
 	"strings"
+	"gopkg.in/yaml.v2"
 )
 
 // Project is what the admin creates, specifying a list of items
@@ -29,14 +28,13 @@ type Project struct {
 
 // A chunk of a project
 type Task struct {
-	HandlerUrl  string          `json:"handlerUrl" yaml:"handlerUrl"`
-	ProjectName string          `json:"projectName" yaml:"projectName"`
-	Index       int             `json:"index" yaml:"index"`
-	Items       []Item          `json:"items" yaml:"items"`
-	Labels      []Label         `json:"labels" yaml:"labels"`
-	Categories  []Category      `json:"categories" yaml:"categories"`
-	Attributes  []Attribute     `json:"attributes" yaml:"attributes"`
-	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
+	HandlerUrl  string      `json:"handlerUrl" yaml:"handlerUrl"`
+    ProjectName string      `json:"projectName" yaml:"projectName"`
+    Index       int         `json:"index" yaml:"index"`
+	Items       []Item      `json:"items" yaml:"items"`
+	Labels      []Label     `json:"labels" yaml:"labels"`
+	Categories  []Category  `json:"categories" yaml:"categories"`
+	Attributes  []Attribute `json:"attributes" yaml:"attributes"`
 }
 
 // The actual assignment of a task to an annotator
@@ -58,12 +56,12 @@ type Item struct {
 
 // An annotation for an item, needs to include all possible annotation types
 type Label struct {
-	Id              int                `json:"id" yaml:"id"`
-	CategoryPath    string             `json:"categoryPath" yaml:"categoryPath"`
-	ParentId        int                `json:"parent" yaml:"parentId"`
-	ChildrenIds     []int              `json:"children" yaml:"childrenIds"`
-	AttributeValues map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
-	Box2d           map[string]float32 `json:"box2d" yaml:"box2d"`
+	Id               int                `json:"id" yaml:"id"`
+	Category         Category           `json:"name" yaml:"category"`
+	ParentId         int                `json:"parent" yaml:"parentId"`
+	ChildrenIds      []int              `json:"children" yaml:"childrenIds"`
+	AttributeValues  map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
+	Box2d            map[string]float32 `json:"box2d" yaml:"box2d"`
 }
 
 // A class value for a label.
@@ -78,13 +76,14 @@ type Attribute struct {
 	ToolType     string   `json:"toolType" yaml:"toolType"`
 	TagText      string   `json:"tagText" yaml:"tagText"`
 	TagPrefix    string   `json:"tagPrefix" yaml:"tagPrefix"`
-	TagSuffixes  []string `json:"tagSuffixes" yaml:"tagSuffixes"`
+	TagSuffixes  string   `json:"tagSuffixes" yaml:"tagSuffixes"`
 	Values       []string `json:"values" yaml:"values"`
 	ButtonColors []string `json:"buttonColors" yaml:"buttonColors"`
 }
 
 // An event describing an annotator's interaction with the session
 type Event struct {
+
 }
 
 func parse(h http.HandlerFunc) http.HandlerFunc {
@@ -137,58 +136,57 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// item list YAML
 	itemType := r.FormValue("item_type")
 	var items []Item
-	itemFile, _, err := r.FormFile("item_file")
-	defer itemFile.Close()
-	if err != nil {
-		Error.Println(err)
-	}
-	itemFileBuf := bytes.NewBuffer(nil)
-	_, err = io.Copy(itemFileBuf, itemFile)
-	if err != nil {
-		Error.Println(err)
-	}
-	var vmd VideoMetadata
 	if itemType == "video" {
-		var frameDirectoryItems []Item
-		err = yaml.Unmarshal(itemFileBuf.Bytes(), &frameDirectoryItems)
-		if err != nil {
-			Error.Println(err)
-		}
-		// in video, we only consider the first item, and
-		//   the item url is the frame directory
-		frameUrl := frameDirectoryItems[0].Url
-		framePath := env.DataDir + frameUrl[1:len(frameUrl)]
+		videoName := r.FormValue("video_name")
+		// check video has been converted to frames
+		videoPath := env.DataDir + "/videos/" + videoName
+		framePath := env.DataDir + "/frames/" + videoName
+		videoPath = videoPath[:len(videoPath)-4] // take off the .mp4
+		framePath = framePath[:len(framePath)-4]
 		// if no frames directory for this vid, throw error
 		_, err := os.Stat(framePath)
 		if err != nil {
-			Error.Println(framePath + " does not exist. Has video been split into frames?")
+			Error.Println(videoPath + " has not been split into frames.")
 			http.NotFound(w, r)
 			return
 		}
 		// get the video's metadata
 		mdContents, _ := ioutil.ReadFile(framePath + "/metadata.json")
+		vmd := VideoMetadata{}
 		json.Unmarshal(mdContents, &vmd)
 		// get the URLs of all frame images
 		numFrames, err := strconv.Atoi(vmd.NumFrames)
 		if err != nil {
 			Error.Println(err)
 		}
-		for i := 0; i < numFrames; i++ {
+		for i:=0; i < numFrames; i++ {
 			frameString := strconv.Itoa(i + 1)
 			for len(frameString) < 7 {
 				frameString = "0" + frameString
 			}
 			frameItem := Item{
-				Url:   frameUrl + "/f-" + frameString + ".jpg",
+				Url: "./frames/" + videoName[:len(videoName) - 4] + "/" + frameString + ".jpg",
 				Index: i,
 			}
 			items = append(items, frameItem)
 		}
 	} else {
+		itemFile, _, err := r.FormFile("item_file")
+		defer itemFile.Close()
+		if err != nil {
+			Error.Println(err)
+		}
+		itemFileBuf := bytes.NewBuffer(nil)
+		_, err = io.Copy(itemFileBuf, itemFile)
+		if err != nil {
+			Error.Println(err)
+		}
+		Info.Println(itemFileBuf)
 		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
 		if err != nil {
 			Error.Println(err)
 		}
+		Info.Println(items)
 	}
 
 	// categories YAML
@@ -225,6 +223,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 
+
 	// parse the task size
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
 	if err != nil {
@@ -235,28 +234,26 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	var project = Project{
-		Name:          r.FormValue("project_name"),
-		ItemType:      r.FormValue("item_type"),
-		LabelType:     r.FormValue("label_type"),
-		Items:         items,
-		Categories:    categories,
-		TaskSize:      taskSize,
-		Attributes:    attributes,
-		VendorId:      vendorId,
-		VideoMetadata: vmd,
+		Name:       r.FormValue("project_name"),
+		ItemType:   r.FormValue("item_type"),
+		LabelType:  r.FormValue("label_type"),
+		Items:      items,
+		Categories: categories,
+		TaskSize:   taskSize,
+		Attributes: attributes,
+		VendorId:   vendorId,
 	}
 
 	index := 0
 	handlerUrl := GetHandlerUrl(project)
 	if itemType == "video" {
 		task := Task{
-			HandlerUrl:    handlerUrl,
-			ProjectName:   project.Name,
-			Index:         0,
-			Items:         project.Items,
-			Categories:    project.Categories,
-			Attributes:    project.Attributes,
-			VideoMetadata: vmd,
+			HandlerUrl:  handlerUrl,
+			ProjectName: project.Name,
+			Index:       0,
+			Items:       project.Items,
+			Categories:  project.Categories,
+			Attributes:  project.Attributes,
 		}
 		index = 1
 
@@ -273,14 +270,13 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		size := len(project.Items)
-		for i := 0; i < size; i += taskSize {
+		for i:=0; i < size; i += taskSize {
 			// Initialize new task
 			task := Task{
-				HandlerUrl:  handlerUrl,
+				HandlerUrl: handlerUrl,
 				ProjectName: project.Name,
 				Index:       index,
 				Items:       project.Items[i:Min(i+taskSize, size)],
-				Categories:  project.Categories,
 				Attributes:  project.Attributes,
 			}
 			index = index + 1
@@ -341,36 +337,7 @@ func postLoadTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles the posting of saved tasks
 func postSaveHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.NotFound(w, r)
-		return
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		Error.Println(err)
-	}
-	task := Task{}
-	err = json.Unmarshal(body, &task)
-	if err != nil {
-		Error.Println(err)
-	}
-	Info.Println(task)
-
-	taskPath := path.Join(env.DataDir, "Tasks", task.ProjectName, strconv.Itoa(task.Index) + ".json")
-	taskJson, err := json.MarshalIndent(task, "", "  ")
-	if err != nil {
-		Error.Println(err)
-	}
-
-	err = ioutil.WriteFile(taskPath, taskJson, 0644)
-	if err != nil {
-		Error.Println(err)
-	} else {
-		Info.Println("Saved task " + taskPath)
-	}
-
-	w.Write(nil)
+	// TODO
 }
 
 // Handles the posting of completed tasks

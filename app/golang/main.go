@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
-	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -92,10 +92,12 @@ func main() {
 	http.HandleFunc("/", parse(indexHandler))
 	http.HandleFunc("/dashboard", dashboardHandler)
 	http.HandleFunc("/postProject", postProjectHandler)
-	http.HandleFunc("/postLoadTask", postLoadTaskHandler)
-	// TODO
 	http.HandleFunc("/postSave", postSaveHandler)
-	// TODO
+	http.HandleFunc("/postSubmission", postSubmissionHandler)
+	http.HandleFunc("/dashboard", dashboardHandler)
+	http.HandleFunc("/postProject", postProjectHandler)
+	http.HandleFunc("/postLoadTask", postLoadTaskHandler)
+	http.HandleFunc("/postSave", postSaveHandler)
 	http.HandleFunc("/postSubmission", postSubmissionHandler)
 
 	// Simple static handlers can be generated with MakeStandardHandler
