@@ -1,7 +1,10 @@
 /* global sprintf module*/
 
 /* exported Sat SatImage SatLabel ImageLabel */
-module.exports = SatLabel;
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
+  module.exports = SatLabel;
+
 /*
  Utilities
  */
