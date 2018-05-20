@@ -2,8 +2,9 @@
 
 /* exported Sat SatImage SatLabel ImageLabel */
 
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = SatLabel;
+}
 
 /*
  Utilities
