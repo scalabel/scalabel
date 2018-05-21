@@ -122,6 +122,7 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, GetTasks())
 }
 
+// TODO: split this function up
 // Handles the posting of new projects
 func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -167,7 +168,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			items = append(items, frameItem)
 		}
 	} else {
-		itemFile, _, err := r.FormFile("item_list")
+		itemFile, _, err := r.FormFile("item_file")
 		defer itemFile.Close()
 		if err != nil {
 			Error.Println(err)
@@ -177,7 +178,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			Error.Println(err)
 		}
-		err = yaml.Unmarshal(itemFileBuf.Bytes(), items)
+		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
 		if err != nil {
 			Error.Println(err)
 		}
@@ -186,6 +187,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// categories YAML
 	var categories []Category
 	categoryFile, _, err := r.FormFile("categories")
+	defer categoryFile.Close()
 	if err != nil {
 		Error.Println(err)
 	}
@@ -194,14 +196,15 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	err = yaml.Unmarshal(categoryFileBuf.Bytes(), categories)
+	err = yaml.Unmarshal(categoryFileBuf.Bytes(), &categories)
 	if err != nil {
 		Error.Println(err)
 	}
 
 	// attributes YAML
 	var attributes []Attribute
-	attributeFile, _, err := r.FormFile("custom_attributes")
+	attributeFile, _, err := r.FormFile("attributes")
+	defer attributeFile.Close()
 	if err != nil {
 		Error.Println(err)
 	}
@@ -210,7 +213,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	err = yaml.Unmarshal(attributeFileBuf.Bytes(), attributes)
+	err = yaml.Unmarshal(attributeFileBuf.Bytes(), &attributes)
 	if err != nil {
 		Error.Println(err)
 	}

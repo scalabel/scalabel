@@ -32,68 +32,77 @@
     </div>
     <!-- /.row -->
 
-    <div class="form-group">
-        <input id="img-or-vid" type="checkbox" checked data-toggle="toggle" data-on="Image" data-off="Video" data-onstyle="success" data-offstyle="info" onchange="toggleForm()">
-    </div>
-
     <!-- Content Row -->
     <div class="row">
         <div class="col-lg-12">
 
-            <form id="img-form" action=/post>
+            <form id="project-form" action=/post>
                 <div class="form-group">
-                    <label for="project_name">Project Name:</label>
-                    <input type="text" class="form-control" style="width:300px" id="project_name" name="project_name">
+                    <label for="project_name">Project Name</label>
+                    <input type="text" class="form-control"
+                           style="width:300px" id="project_name"
+                           name="project_name">
                 </div>
                 <div class="form-group">
-                    <label for="item_list">Image / Point Cloud List:</label>
-                    <input type="file" class="form-control" style="width:300px" id="item_list" name="item_list">
+                    <label for="item_type">Item Type</label>
+                    <div>
+                        <select id="item_type" name="item_type">
+                            <option value="none">&lt;select an
+                                option&gt;</option>
+                            <option value="image">Image</option>
+                            <option value="video">Video</option>
+                            <option value="pointcloud">Point Cloud</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="task_size">Task Size:</label>
-                    <input type="text" class="form-control" style="width:300px;" id="task_size" name="task_size">
+                    <label for="label_type">Label Type</label>
+                    <!-- TODO: disable options based on item type
+                     -->
+                    <div>
+                        <select id="label_type" name="label_type">
+                            <option value="none">&lt;select an
+                                option&gt;</option>
+                            <option value="box2d">2D Bounding Box</option>
+                            <option value="segmentation">Instance
+                                Segmentation</option>
+                            <option value="box3d">3D Bounding Box</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="label">Label:</label>
-                    <input type="file" class="form-control" style="width:300px;" id="label" name="label">
+                    <label for="item_file">Item List</label>
+                    <input type="file" class="form-control" style="width:300px"
+                           id="item_file" name="item_file" accept=".yml, .yaml">
                 </div>
                 <div class="form-group">
-                    <label for="custom_attributes">Attributes (optional):</label>
-                    <input type="file" class="form-control" style="width:300px" id="custom_attributes" name="custom_attributes">
+                    <label for="categories">Categories</label>
+                    <input type="file" class="form-control" style="width:300px"
+                           id="categories" name="categories"
+                           accept=".yml, .yaml">
                 </div>
                 <div class="form-group">
-                    <label for="label_type">Label Type:</label>
-                    <input type="text" class="form-control" style="width:300px;" id="label_type" name="label_type">
+                    <label for="attributes">Attributes (optional)</label>
+                    <input type="file" class="form-control"
+                           style="width:300px" id="attributes"
+                           name="attributes">
                 </div>
                 <div class="form-group">
-                    <label for="vendor_id">Vendor ID:</label>
-                    <input type="text" class="form-control" style="width:300px;"
-                           id="vendor_id" name="vendor_id">
+                    <label for="task_size">Task Size</label>
+                    <input type="text" class="form-control"
+                           style="width:300px" id="task_size" name="task_size">
                 </div>
-                <button type="submit" id="enter_btn" class="btn btn-primary btn-md">Enter</button>
-                <a type="submit" id="go_to_dashboard" class="btn btn-default btn-md" target="_blank" href="">Go to
-                    Dashboard</a>
-            </form>
+                <!-- TODO: check that this is valid -->
+                <div class="form-group">
+                    <label for="vendor_id">Vendor ID</label>
+                    <input type="text" class="form-control"
+                           style="width:300px" id="vendor_id" name="vendor_id">
+                </div>
 
-            <form id="vid-form" action=/post>
-                <div class="form-group">
-                    <label for="video_project_name">Project Name:</label>
-                    <input type="text" class="form-control" style="width:300px;" id="project_name" name="project_name">
-                </div>
-                <div class="form-group">
-                    <label for="video_task_name">Task Name:</label>
-                    <input type="text" class="form-control" style="width:300px;" id="task_name" name="task_name">
-                </div>
-                <div class="form-group">
-                    <label for="video_name">Video Name:</label>
-                    <input type="text" class="form-control" style="width:300px;" id="video_name" name="video_name">
-                </div>
-                <div class="form-group">
-                    <label for="video_object_categories">Object Categories:</label>
-                    <input type="file" class="form-control" style="width:300px;" id="object_categories" name="object_categories">
-                </div>
-                <button type="submit" id="enter_btn" class="btn btn-primary btn-md">Enter</button>
-                <a type="submit" id="go_to_dashboard2" class="btn btn-default btn-md" target="_blank" href="">Go to
+                <button type="submit" id="enter_btn"
+                        class="btn btn-primary btn-md">Enter</button>
+                <a type="submit" id="go_to_dashboard"
+                   class="btn btn-default btn-md" target="_blank" href="">Go to
                     Dashboard</a>
             </form>
 
@@ -125,64 +134,7 @@
 <script src="./js/thirdparty/bootstrap-switch.js"></script>
 <script src="./js/thirdparty/bootstrap-toggle.min.js"></script>
 
-
-<script type="text/javascript">
-
-    // hide video form at first
-    $('#vid-form').hide();
-
-    // switch between image and video forms
-    function toggleForm() {
-
-        if($('#img-or-vid')[0].checked) {
-            $('#vid-form').hide();
-            $('#img-form').show();
-        } else {
-            $('#img-form').hide();
-            $('#vid-form').show();
-        }
-    };
-
-    $(document).ready(function () {
-
-        var dashboard = $('#go_to_dashboard');
-        var dashboard2 = $('#go_to_dashboard2');
-        dashboard.hide();
-        dashboard2.hide();
-        $('#img-form').submit(function (e) {
-            e.preventDefault();
-            var x = new XMLHttpRequest();
-            x.onreadystatechange = function () {
-                if (x.readyState === 4) {
-                    var num_assignments = x.response;
-                    var project_url = "./dashboard?project_name=" +
-                        $('#project_name').val() + "&num_assignments=" + num_assignments;
-                    dashboard.attr('href', project_url);
-                    dashboard.show();
-                }
-            };
-            x.open("POST", "./postAssignment");
-            x.send(new FormData(this));
-        })
-        $('#vid-form').submit(function (e) {
-            e.preventDefault();
-            var x = new XMLHttpRequest();
-            x.onreadystatechange = function () {
-                if (x.readyState === 4) {
-                    var num_assignments = x.response;
-                    var project_url = "./dashboard?project_name=" +
-                        $('#video_project_name').val();
-                    dashboard2.attr('href', project_url)
-                    dashboard2.show();
-                }
-            };
-            x.open("POST", "./postVideoAssignment");
-            x.send(new FormData(this));
-        })
-    });
-
-
-</script>
+<script src="./js/create.js"></script>
 
 </body>
 
