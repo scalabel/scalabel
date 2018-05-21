@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -166,48 +168,53 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		itemFile, _, err := r.FormFile("item_list")
+		defer itemFile.Close()
 		if err != nil {
 			Error.Println(err)
 		}
-		itemFileContents, err := ioutil.ReadFile(*itemFile)
+		itemFileBuf := bytes.NewBuffer(nil)
+		_, err = io.Copy(itemFileBuf, itemFile)
 		if err != nil {
 			Error.Println(err)
 		}
-		err = yaml.Unmarshal(itemFileContents, items)
+		err = yaml.Unmarshal(itemFileBuf.Bytes(), items)
 		if err != nil {
 			Error.Println(err)
 		}
 	}
 
 	// categories YAML
-	categoriesFile, _, err := r.FormFile("categories")
-	if err != nil {
-		Error.Println(err)
-	}
-	categoriesFileContents, err := ioutil.ReadFile(*categoriesFile)
-	if err != nil {
-		Error.Println(err)
-	}
 	var categories []Category
-	err = yaml.Unmarshal(categoriesFileContents, categories)
+	categoryFile, _, err := r.FormFile("categories")
+	if err != nil {
+		Error.Println(err)
+	}
+	categoryFileBuf := bytes.NewBuffer(nil)
+	_, err = io.Copy(categoryFileBuf, categoryFile)
+	if err != nil {
+		Error.Println(err)
+	}
+	err = yaml.Unmarshal(categoryFileBuf.Bytes(), categories)
 	if err != nil {
 		Error.Println(err)
 	}
 
 	// attributes YAML
+	var attributes []Attribute
 	attributeFile, _, err := r.FormFile("custom_attributes")
 	if err != nil {
 		Error.Println(err)
 	}
-	attributesFileContents, err := ioutil.ReadFile(*attributeFile)
+	attributeFileBuf := bytes.NewBuffer(nil)
+	_, err = io.Copy(attributeFileBuf, attributeFile)
 	if err != nil {
 		Error.Println(err)
 	}
-	var attributes []Attribute
-	err = yaml.Unmarshal(attributesFileContents, attributes)
+	err = yaml.Unmarshal(attributeFileBuf.Bytes(), attributes)
 	if err != nil {
 		Error.Println(err)
 	}
+
 
 	// parse the task size
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
@@ -241,9 +248,8 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Save task to task folder
 		taskPath := task.GetTaskPath()
-
 		taskJson, _ := json.MarshalIndent(task, "", "  ")
-		err = ioutil.WriteFile(taskPath)
+		err = ioutil.WriteFile(taskPath, taskJson, 0644)
 		if err != nil {
 			Error.Println("Failed to save task file of", task.ProjectName,
 				task.Index)
@@ -265,9 +271,8 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 			// Save task to task folder
 			taskPath := task.GetTaskPath()
-
 			taskJson, _ := json.MarshalIndent(task, "", "  ")
-			err = ioutil.WriteFile(taskPath)
+			err = ioutil.WriteFile(taskPath, taskJson, 0644)
 
 			if err != nil {
 				Error.Println("Failed to save task file of", task.ProjectName,
