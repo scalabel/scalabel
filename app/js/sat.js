@@ -150,15 +150,15 @@ Sat.prototype.load = function() {
   };
   // get params from url path
   let searchParams = new URLSearchParams(window.location.search);
-  self.taskId = searchParams.get('task_id');
+  self.taskIndex = searchParams.get('task_index');
   self.projectName = searchParams.get('project_name');
 
   // ?
   let request = JSON.stringify({
-    'assignmentId': self.taskId,
+    'index': self.taskIndex,
     'projectName': self.projectName,
   });
-  xhr.open('POST', './requestSubmission');
+  xhr.open('POST', './postLoadTask');
   xhr.send(request);
 };
 
@@ -203,15 +203,16 @@ Sat.prototype.toJson = function() {
 Sat.prototype.fromJson = function(json) {
   let self = this;
   self.items = [];
-  for (let i = 0; i < json.labels.length; i++) {
-    let newLabel = self.newLabel(json.labels[i].attributes);
-    newLabel.fromJson(json.labels[i]);
-    self.labels.push(newLabel);
+  if (json.labels) {
+    for (let i = 0; i < json.labels.length; i++) {
+      let newLabel = self.newLabel(json.labels[i].attributes);
+      newLabel.fromJson(json.labels[i]);
+      self.labels.push(newLabel);
+    }
   }
   for (let i = 0; i < json.items.length; i++) {
     let newItem = self.newItem(json.items[i].url);
     newItem.fromJson(json.items[i]);
-    self.items.push(newItem);
   }
   self.currentItem = self.items[0];
   self.currentItem.setActive(true);
@@ -269,18 +270,20 @@ SatItem.prototype.toJson = function() {
 
 /**
  * Restore this SatItem from JSON.
- * @param {object} selfJSON - JSON representation of this SatItem.
- * @param {string} selfJSON.url - This SatItem's url.
- * @param {number} selfJSON.index - This SatItem's index in
- * @param {list} selfJSON.labelIDs - The list of label ids of this SatItem's
+ * @param {object} selfJson - JSON representation of this SatItem.
+ * @param {string} selfJson.url - This SatItem's url.
+ * @param {number} selfJson.index - This SatItem's index in
+ * @param {list} selfJson.labelIds - The list of label ids of this SatItem's
  *   SatLabels.
  */
-SatItem.prototype.fromJson = function(selfJSON) {
+SatItem.prototype.fromJson = function(selfJson) {
   let self = this;
-  self.url = selfJSON.url;
-  self.index = selfJSON.index;
-  for (let i = 0; i < selfJSON.labelIDs.length; i++) {
-    self.labels.push(self.sat.labelIdMap[selfJSON.labelIDs[i]]);
+  self.url = selfJson.url;
+  self.index = selfJson.index;
+  if (selfJson.labelIds) {
+    for (let i = 0; i < selfJson.labelIds.length; i++) {
+      self.labels.push(self.sat.labelIdMap[selfJson.labelIds[i]]);
+    }
   }
 };
 

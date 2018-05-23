@@ -32,6 +32,7 @@ type Task struct {
     ProjectName string      `json:"projectName" yaml:"projectName"`
     Index       int         `json:"index" yaml:"index"`
 	Items       []Item      `json:"items" yaml:"items"`
+	Labels      []Label     `json:"labels" yaml:"labels"`
 	Categories  []Category  `json:"categories" yaml:"categories"`
 	Attributes  []Attribute `json:"attributes" yaml:"attributes"`
 }
@@ -49,7 +50,7 @@ type Assignment struct {
 type Item struct {
 	Url         string  `json:"url" yaml:"url"`
 	Index       int     `json:"index" yaml:"index"`
-	LabelIds    []int   `json:"labels" yaml:"labelIds"`
+	LabelIds    []int   `json:"labelIds" yaml:"labelIds"`
 	GroundTruth []Label `json:"groundTruth" yaml:"groundTruth"`
 }
 
@@ -180,10 +181,12 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			Error.Println(err)
 		}
+		Info.Println(itemFileBuf)
 		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
 		if err != nil {
 			Error.Println(err)
 		}
+		Info.Println(items)
 	}
 
 	// categories YAML
@@ -312,6 +315,24 @@ func postGetTasksHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	w.Write(tasksJson)
+}
+
+func postLoadTaskHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		Error.Println(err)
+	}
+	taskToLoad := Task{}
+	err = json.Unmarshal(body, &taskToLoad)
+	if err != nil {
+		Error.Println(err)
+	}
+	loadedTask := GetTask(taskToLoad.ProjectName, strconv.Itoa(taskToLoad.Index))
+	loadedTaskJson, err := json.Marshal(loadedTask)
+	if err != nil {
+		Error.Println(err)
+	}
+	w.Write(loadedTaskJson)
 }
 
 // Handles the posting of saved tasks
