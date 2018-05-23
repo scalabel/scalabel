@@ -84,6 +84,7 @@ function Sat(ItemType, LabelType) {
   this.startTime = Date.now();
   this.taskId = null;
   this.projectName = null;
+  this.ready = false;
 }
 
 Sat.prototype.getIPAddress = function() {
@@ -104,12 +105,16 @@ Sat.prototype.newLabelId = function() {
   return newId;
 };
 
-Sat.prototype.newLabel = function(optionalAttributes) {
+Sat.prototype.newLabel = function(optionalAttributes, createNew=true) {
   let self = this;
   let label = new self.LabelType(self, self.newLabelId(), optionalAttributes);
-  self.labelIdMap[label.id] = label;
+  if (createNew) {
+    self.labelIdMap[label.id] = label;
+  }
   self.labels.push(label);
-  self.currentItem.labels.push(label);
+  if (self.currentItem) {
+    self.currentItem.labels.push(label);
+  }
   return label;
 };
 
@@ -140,6 +145,10 @@ Sat.prototype.gotoItem = function(index) {
   self.currentItem.redraw();
 };
 
+Sat.prototype.loaded = function() {
+    this.ready = true;
+};
+
 // TODO
 Sat.prototype.load = function() {
   let self = this;
@@ -148,6 +157,7 @@ Sat.prototype.load = function() {
     if (xhr.readyState === 4) {
       let json = JSON.parse(xhr.response);
       self.fromJson(json);
+      self.loaded();
     }
   };
   // get params from url path
@@ -173,7 +183,7 @@ Sat.prototype.save = function() {
   // TODO: open a POST
   let xhr = new XMLHttpRequest();
   xhr.open('POST', './postSubmission');
-  xhr.send(json);
+  xhr.send(JSON.stringify(json));
 };
 
 /**
@@ -199,6 +209,9 @@ Sat.prototype.toJson = function() {
     events: self.events,
     userAgent: navigator.userAgent,
     ipAddress: self.ipAddress,
+    assignmentId: self.assignmentId,
+    projectName: self.projectName,
+    category: self.categories,
   };
 };
 
@@ -207,24 +220,28 @@ Sat.prototype.fromJson = function(json) {
   self.items = [];
   if (json.labels) {
     for (let i = 0; i < json.labels.length; i++) {
-      let newLabel = self.newLabel(json.labels[i].attributes);
+      let newLabel = self.newLabel(json.labels[i].attributes, false);
       newLabel.fromJson(json.labels[i]);
-      self.labels.push(newLabel);
     }
   }
 
   for (let i = 0; i < json.items.length; i++) {
-    let newItem = self.newItem(json.items[i].url);
+    let newItem = self.newItem(json.items[i].url, json.items[i].attribute);
     newItem.fromJson(json.items[i]);
-    self.items.push(newItem);
   }
+
+  self.categories = json.category;
+
+  self.assignmentId = json.assignmentId;
+  self.projectName = json.projectName;
+
   self.currentItem = self.items[0];
   self.currentItem.setActive(true);
   // TODO: this is image specific!! remove!
-  self.currentItem.image.onload = function() {
-    self.currentItem.redraw();
-  };
-  self.addEvent('start labeling', self.currentItem);
+  // self.currentItem.image.onload = function() {
+  //   self.currentItem.redraw();
+  // };
+  self.addEvent('start labeling', self.currentItem.index);
 };
 
 /**
@@ -309,9 +326,9 @@ SatItem.prototype.fromJson = function(selfJSON) {
   let self = this;
   self.url = selfJSON.url;
   self.index = selfJSON.index;
-  if (selfJSON.labelIDs) {
-    for (let i = 0; i < selfJSON.labelIDs.length; i++) {
-      self.labels.push(self.sat.labelIdMap[selfJSON.labelIDs[i]]);
+  if (selfJSON.labels) {
+    for (let i = 0; i < selfJSON.labels.length; i++) {
+      self.labels.push(self.sat.labelIdMap[selfJSON.labels[i]]);
     }
   }
 };
@@ -975,6 +992,8 @@ SatLabel.prototype.fromJson = function(json) {
   self.id = json.id;
   self.name = json.name;
   let labelIdMap = self.sat.labelIdMap;
+  labelIdMap[self.id] = self;
+  self.sat.lastLabelId = Math.max(self.sat.lastLabelId, self.id);
   if ('parent' in json) {
     self.parent = labelIdMap[json['parent']];
   }
