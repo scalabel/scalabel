@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"gopkg.in/yaml.v2"
 )
 
 var (

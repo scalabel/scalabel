@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"gopkg.in/yaml.v2"
 )
 
 // Project is what the admin creates, specifying a list of items
@@ -29,8 +29,8 @@ type Project struct {
 // A chunk of a project
 type Task struct {
 	HandlerUrl  string      `json:"handlerUrl" yaml:"handlerUrl"`
-    ProjectName string      `json:"projectName" yaml:"projectName"`
-    Index       int         `json:"index" yaml:"index"`
+	ProjectName string      `json:"projectName" yaml:"projectName"`
+	Index       int         `json:"index" yaml:"index"`
 	Items       []Item      `json:"items" yaml:"items"`
 	Labels      []Label     `json:"labels" yaml:"labels"`
 	Categories  []Category  `json:"categories" yaml:"categories"`
@@ -56,12 +56,12 @@ type Item struct {
 
 // An annotation for an item, needs to include all possible annotation types
 type Label struct {
-	Id               int                `json:"id" yaml:"id"`
-	Category         Category           `json:"name" yaml:"category"`
-	ParentId         int                `json:"parent" yaml:"parentId"`
-	ChildrenIds      []int              `json:"children" yaml:"childrenIds"`
-	AttributeValues  map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
-	Box2d            map[string]float32 `json:"box2d" yaml:"box2d"`
+	Id              int                `json:"id" yaml:"id"`
+	Category        Category           `json:"category" yaml:"category"`
+	ParentId        int                `json:"parent" yaml:"parentId"`
+	ChildrenIds     []int              `json:"children" yaml:"childrenIds"`
+	AttributeValues map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
+	Box2d           map[string]float32 `json:"box2d" yaml:"box2d"`
 }
 
 // A class value for a label.
@@ -76,14 +76,13 @@ type Attribute struct {
 	ToolType     string   `json:"toolType" yaml:"toolType"`
 	TagText      string   `json:"tagText" yaml:"tagText"`
 	TagPrefix    string   `json:"tagPrefix" yaml:"tagPrefix"`
-	TagSuffixes  string   `json:"tagSuffixes" yaml:"tagSuffixes"`
+	TagSuffixes  []string `json:"tagSuffixes" yaml:"tagSuffixes"`
 	Values       []string `json:"values" yaml:"values"`
 	ButtonColors []string `json:"buttonColors" yaml:"buttonColors"`
 }
 
 // An event describing an annotator's interaction with the session
 type Event struct {
-
 }
 
 func parse(h http.HandlerFunc) http.HandlerFunc {
@@ -159,13 +158,13 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			Error.Println(err)
 		}
-		for i:=0; i < numFrames; i++ {
+		for i := 0; i < numFrames; i++ {
 			frameString := strconv.Itoa(i + 1)
 			for len(frameString) < 7 {
 				frameString = "0" + frameString
 			}
 			frameItem := Item{
-				Url: "./frames/" + videoName[:len(videoName) - 4] + "/" + frameString + ".jpg",
+				Url:   "./frames/" + videoName[:len(videoName)-4] + "/" + frameString + ".jpg",
 				Index: i,
 			}
 			items = append(items, frameItem)
@@ -181,12 +180,10 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			Error.Println(err)
 		}
-		Info.Println(itemFileBuf)
 		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
 		if err != nil {
 			Error.Println(err)
 		}
-		Info.Println(items)
 	}
 
 	// categories YAML
@@ -222,7 +219,6 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-
 
 	// parse the task size
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
@@ -270,13 +266,14 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		size := len(project.Items)
-		for i:=0; i < size; i += taskSize {
+		for i := 0; i < size; i += taskSize {
 			// Initialize new task
 			task := Task{
-				HandlerUrl: handlerUrl,
+				HandlerUrl:  handlerUrl,
 				ProjectName: project.Name,
 				Index:       index,
 				Items:       project.Items[i:Min(i+taskSize, size)],
+				Categories:  project.Categories,
 				Attributes:  project.Attributes,
 			}
 			index = index + 1
