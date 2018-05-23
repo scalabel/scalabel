@@ -37,7 +37,7 @@ func GetTasks() []Task {
 				Error.Println(err)
 			}
 			for _, taskFile := range projectDirectoryContents {
-				if len(taskFile.Name()) > 5 && taskFile.Name()[len(taskFile.Name()) - 5:len(taskFile.Name())] == ".json" {
+				if len(taskFile.Name()) > 5 && taskFile.Name()[len(taskFile.Name())-5:len(taskFile.Name())] == ".json" {
 					taskFileContents, err := ioutil.ReadFile(projectDirectoryPath + "/" + taskFile.Name())
 					if err != nil {
 						Error.Println(err)
