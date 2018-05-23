@@ -11,36 +11,43 @@ import (
 )
 
 func GetTask(projectName string, taskIndex string) Task {
-	taskPath := path.Join(env.ProjectPath,
-		"data",
-		"Tasks",
-		projectName,
-		taskIndex,
-	)
-	fileContents, err := ioutil.ReadFile(taskPath)
+	projectDirectoryPath := path.Join(env.DataDir, "Tasks", projectName)
+	taskPath := projectDirectoryPath + "/" + taskIndex + ".json"
+	taskFileContents, err := ioutil.ReadFile(taskPath)
 	if err != nil {
 		Error.Println(err)
 	}
 	task := Task{}
-	json.Unmarshal(fileContents, &task)
+	json.Unmarshal(taskFileContents, &task)
 	return task
 }
 
 func GetTasks() []Task {
-	dirPath := path.Join(env.ProjectPath,
-		"data",
-		"Tasks",
-	)
-	dirContents, _ := ioutil.ReadDir(dirPath)
+	tasksDirectoryPath := path.Join(env.DataDir, "Tasks")
+	tasksDirectoryContents, err := ioutil.ReadDir(tasksDirectoryPath)
+	if err != nil {
+		Error.Println(err)
+	}
 	tasks := []Task{}
-	for _, file := range dirContents {
-		fileContents, err := ioutil.ReadFile(dirPath + file.Name())
-		if err != nil {
-			Error.Println(err)
+	for _, projectDirectory := range tasksDirectoryContents {
+		if projectDirectory.IsDir() {
+			projectDirectoryPath := path.Join(env.DataDir, "Tasks", projectDirectory.Name())
+			projectDirectoryContents, err := ioutil.ReadDir(projectDirectoryPath)
+			if err != nil {
+				Error.Println(err)
+			}
+			for _, taskFile := range projectDirectoryContents {
+				if len(taskFile.Name()) > 5 && taskFile.Name()[len(taskFile.Name()) - 5:len(taskFile.Name())] == ".json" {
+					taskFileContents, err := ioutil.ReadFile(projectDirectoryPath + "/" + taskFile.Name())
+					if err != nil {
+						Error.Println(err)
+					}
+					task := Task{}
+					json.Unmarshal(taskFileContents, &task)
+					tasks = append(tasks, task)
+				}
+			}
 		}
-		t := Task{}
-		json.Unmarshal(fileContents, &t)
-		tasks = append(tasks, t)
 	}
 	return tasks
 }
@@ -54,6 +61,28 @@ func (task *Task) GetTaskPath() string {
 	)
 	os.MkdirAll(dir, 0777)
 	return path.Join(dir, filename+".json")
+}
+
+func GetHandlerUrl(project Project) string {
+	if project.ItemType == "image" {
+		if project.LabelType == "box2d" {
+			return "2d_bbox_labeling"
+		}
+		if project.LabelType == "segmentation" {
+			return "2d_seg_labeling"
+		}
+	}
+	if project.ItemType == "video" {
+		if project.LabelType == "box2d" {
+			return "video_bbox_labeling"
+		}
+	}
+	// if project.ItemType == "pointcloud" {
+	// 	if project.LabelType == "box3d" {
+	// 		return "" // ???
+	// 	}
+	// }
+	return "NO_VALID_HANDLER"
 }
 
 func recordTimestamp() int64 {
