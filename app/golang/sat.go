@@ -57,7 +57,7 @@ type Item struct {
 // An annotation for an item, needs to include all possible annotation types
 type Label struct {
 	Id               int                `json:"id" yaml:"id"`
-	Category         Category           `json:"name" yaml:"category"`
+	Category         Category           `json:"category" yaml:"category"`
 	ParentId         int                `json:"parent" yaml:"parentId"`
 	ChildrenIds      []int              `json:"children" yaml:"childrenIds"`
 	AttributeValues  map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
@@ -76,7 +76,7 @@ type Attribute struct {
 	ToolType     string   `json:"toolType" yaml:"toolType"`
 	TagText      string   `json:"tagText" yaml:"tagText"`
 	TagPrefix    string   `json:"tagPrefix" yaml:"tagPrefix"`
-	TagSuffixes  string   `json:"tagSuffixes" yaml:"tagSuffixes"`
+	TagSuffixes  []string `json:"tagSuffixes" yaml:"tagSuffixes"`
 	Values       []string `json:"values" yaml:"values"`
 	ButtonColors []string `json:"buttonColors" yaml:"buttonColors"`
 }
@@ -181,12 +181,10 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			Error.Println(err)
 		}
-		Info.Println(itemFileBuf)
 		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
 		if err != nil {
 			Error.Println(err)
 		}
-		Info.Println(items)
 	}
 
 	// categories YAML
@@ -222,7 +220,6 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-
 
 	// parse the task size
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
@@ -277,6 +274,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 				ProjectName: project.Name,
 				Index:       index,
 				Items:       project.Items[i:Min(i+taskSize, size)],
+				Categories:  project.Categories,
 				Attributes:  project.Attributes,
 			}
 			index = index + 1
