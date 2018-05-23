@@ -1,0 +1,10 @@
+- name: person
+- name: rider
+- name: car
+- name: truck
+- name: bus
+- name: train
+- name: motor
+- name: bike
+- name: traffic sign
+- name: traffic light
