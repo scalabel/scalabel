@@ -15,67 +15,69 @@ import (
 
 // Project is what the admin creates, specifying a list of items
 type Project struct {
-	Name          string        `json:"name"`
-	ItemType      string        `json:"itemType"`
-	LabelType     string        `json:"labelType"`
-	Items         []Item        `json:"items"`
-	Categories    []Category    `json:"categories"`
-	TaskSize      int           `json:"taskSize"`
-	Attributes    []Attribute   `json:"attributes"`
-	VendorId      int           `json:"vendorId"`
-	VideoMetadata VideoMetadata `json:"metadata"`
+	Name          string        `json:"name" yaml:"name"`
+	ItemType      string        `json:"itemType" yaml:"itemType"`
+	LabelType     string        `json:"labelType" yaml:"labelType"`
+	Items         []Item        `json:"items" yaml"items"`
+	Categories    []Category    `json:"categories" yaml:"categories"`
+	TaskSize      int           `json:"taskSize" yaml:"taskSize"`
+	Attributes    []Attribute   `json:"attributes" yaml:"attributes"`
+	VendorId      int           `json:"vendorId" yaml:"vendorId"`
+	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
 }
 
 // A chunk of a project
 type Task struct {
-    ProjectName string
-    Index       int
-	Items       []Item
-	Attributes  []Attribute
+	HandlerUrl  string      `json:"handlerUrl" yaml:"handlerUrl"`
+    ProjectName string      `json:"projectName" yaml:"projectName"`
+    Index       int         `json:"index" yaml:"index"`
+	Items       []Item      `json:"items" yaml:"items"`
+	Categories  []Category  `json:"categories" yaml:"categories"`
+	Attributes  []Attribute `json:"attributes" yaml:"attributes"`
 }
 
 // The actual assignment of a task to an annotator
 type Assignment struct {
-	Task      Task              `json:""`
-	WorkerId  int               `json:""`
-	Events    []Event           `json:"events"`
-	UserAgent string            `json:"userAgent"`
-	IpInfo    map[string]string `json:ipInfo"`
+	Task      Task              `json:"task" yaml:"task"`
+	WorkerId  int               `json:"workerId" yaml:"workerId"`
+	Events    []Event           `json:"events" yaml:"events"`
+	UserAgent string            `json:"userAgent" yaml:"userAgent"`
+	IpInfo    map[string]string `json:ipInfo" yaml:"ipInfo"`
 }
 
 // An item is something to be annotated e.g. Image, PointCloud
 type Item struct {
 	Url         string  `json:"url" yaml:"url"`
-	Index       int     `json:"index"`
-	LabelIds    []int   `json:"labels"`
+	Index       int     `json:"index" yaml:"index"`
+	LabelIds    []int   `json:"labels" yaml:"labelIds"`
 	GroundTruth []Label `json:"groundTruth" yaml:"groundTruth"`
 }
 
 // An annotation for an item, needs to include all possible annotation types
 type Label struct {
-	Id               int                `json:"id"`
-	Category         Category           `json:"name"`
-	ParentId         int                `json:"parent"`
-	ChildrenIds      []int              `json:"children"`
-	AttributeValues  map[string]bool    `json:"attributeValues"`
-	Box2d            map[string]float32 `json:"box2d"`
+	Id               int                `json:"id" yaml:"id"`
+	Category         Category           `json:"name" yaml:"category"`
+	ParentId         int                `json:"parent" yaml:"parentId"`
+	ChildrenIds      []int              `json:"children" yaml:"childrenIds"`
+	AttributeValues  map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
+	Box2d            map[string]float32 `json:"box2d" yaml:"box2d"`
 }
 
 // A class value for a label.
 type Category struct {
-	Name          string     `yaml:"name"`
-	Subcategories []Category `yaml:"subcategories"`
+	Name          string     `json:"name" yaml:"name"`
+	Subcategories []Category `json:"subcategories" yaml:"subcategories"`
 }
 
 // A configurable attribute describing a label
 type Attribute struct {
-	Name         string   `yaml:"name"`
-	ToolType     string   `yaml:"toolType"`
-	TagText      string   `yaml:"tagText"`
-	TagPrefix    string   `yaml:"tagPrefix"`
-	TagSuffixes  string   `yaml:"tagSuffixes"`
-	Values       []string `yaml:"values"`
-	ButtonColors []string `yaml:"buttonColors"`
+	Name         string   `json:"name" yaml:"name"`
+	ToolType     string   `json:"toolType" yaml:"toolType"`
+	TagText      string   `json:"tagText" yaml:"tagText"`
+	TagPrefix    string   `json:"tagPrefix" yaml:"tagPrefix"`
+	TagSuffixes  string   `json:"tagSuffixes" yaml:"tagSuffixes"`
+	Values       []string `json:"values" yaml:"values"`
+	ButtonColors []string `json:"buttonColors" yaml:"buttonColors"`
 }
 
 // An event describing an annotator's interaction with the session
@@ -240,12 +242,15 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	index := 0
+	handlerUrl := GetHandlerUrl(project)
 	if itemType == "video" {
 		task := Task{
+			HandlerUrl:  handlerUrl,
 			ProjectName: project.Name,
-			Index: 0,
-			Items: project.Items,
-			Attributes: project.Attributes,
+			Index:       0,
+			Items:       project.Items,
+			Categories:  project.Categories,
+			Attributes:  project.Attributes,
 		}
 		index = 1
 
@@ -265,6 +270,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		for i:=0; i < size; i += taskSize {
 			// Initialize new task
 			task := Task{
+				HandlerUrl: handlerUrl,
 				ProjectName: project.Name,
 				Index:       index,
 				Items:       project.Items[i:Min(i+taskSize, size)],
@@ -291,6 +297,21 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: is this necessary?
 	w.Write([]byte(strconv.Itoa(index)))
+}
+
+// Return all of the tasks.
+func postGetTasksHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+
+	tasks := GetTasks()
+	tasksJson, err := json.Marshal(tasks)
+	if err != nil {
+		Error.Println(err)
+	}
+	w.Write(tasksJson)
 }
 
 // Handles the posting of saved tasks

@@ -6,10 +6,6 @@ $(document).ready(function() {
     let x = new XMLHttpRequest();
     x.onreadystatechange = function() {
       if (x.readyState === 4) {
-        let numAssignments = x.response;
-        let projectUrl = './dashboard?project_name=' +
-          $('#project_name').val() + '&num_assignments=' + numAssignments;
-        dashboard.attr('href', projectUrl);
         dashboard.show();
       }
     };
