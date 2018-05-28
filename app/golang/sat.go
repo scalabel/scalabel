@@ -35,6 +35,7 @@ type Task struct {
 	Labels      []Label     `json:"labels" yaml:"labels"`
 	Categories  []Category  `json:"categories" yaml:"categories"`
 	Attributes  []Attribute `json:"attributes" yaml:"attributes"`
+	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
 }
 
 // The actual assignment of a task to an annotator
@@ -135,23 +136,36 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// item list YAML
 	itemType := r.FormValue("item_type")
 	var items []Item
+	itemFile, _, err := r.FormFile("item_file")
+	defer itemFile.Close()
+	if err != nil {
+		Error.Println(err)
+	}
+	itemFileBuf := bytes.NewBuffer(nil)
+	_, err = io.Copy(itemFileBuf, itemFile)
+	if err != nil {
+		Error.Println(err)
+	}
+	var vmd VideoMetadata
 	if itemType == "video" {
-		videoName := r.FormValue("video_name")
-		// check video has been converted to frames
-		videoPath := env.DataDir + "/videos/" + videoName
-		framePath := env.DataDir + "/frames/" + videoName
-		videoPath = videoPath[:len(videoPath)-4] // take off the .mp4
-		framePath = framePath[:len(framePath)-4]
+		var frameDirectoryItems []Item
+		err = yaml.Unmarshal(itemFileBuf.Bytes(), &frameDirectoryItems)
+		if err != nil {
+			Error.Println(err)
+		}
+		// in video, we only consider the first item, and
+		//   the item url is the frame directory
+		frameUrl := frameDirectoryItems[0].Url
+		framePath := env.DataDir + frameUrl[1:len(frameUrl)]
 		// if no frames directory for this vid, throw error
 		_, err := os.Stat(framePath)
 		if err != nil {
-			Error.Println(videoPath + " has not been split into frames.")
+			Error.Println(framePath + " does not exist. Has video been split into frames?")
 			http.NotFound(w, r)
 			return
 		}
 		// get the video's metadata
 		mdContents, _ := ioutil.ReadFile(framePath + "/metadata.json")
-		vmd := VideoMetadata{}
 		json.Unmarshal(mdContents, &vmd)
 		// get the URLs of all frame images
 		numFrames, err := strconv.Atoi(vmd.NumFrames)
@@ -164,22 +178,12 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 				frameString = "0" + frameString
 			}
 			frameItem := Item{
-				Url:   "./frames/" + videoName[:len(videoName)-4] + "/" + frameString + ".jpg",
+				Url:   frameUrl + "/f-" + frameString + ".jpg",
 				Index: i,
 			}
 			items = append(items, frameItem)
 		}
 	} else {
-		itemFile, _, err := r.FormFile("item_file")
-		defer itemFile.Close()
-		if err != nil {
-			Error.Println(err)
-		}
-		itemFileBuf := bytes.NewBuffer(nil)
-		_, err = io.Copy(itemFileBuf, itemFile)
-		if err != nil {
-			Error.Println(err)
-		}
 		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
 		if err != nil {
 			Error.Println(err)
@@ -230,26 +234,28 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	var project = Project{
-		Name:       r.FormValue("project_name"),
-		ItemType:   r.FormValue("item_type"),
-		LabelType:  r.FormValue("label_type"),
-		Items:      items,
-		Categories: categories,
-		TaskSize:   taskSize,
-		Attributes: attributes,
-		VendorId:   vendorId,
+		Name:          r.FormValue("project_name"),
+		ItemType:      r.FormValue("item_type"),
+		LabelType:     r.FormValue("label_type"),
+		Items:         items,
+		Categories:    categories,
+		TaskSize:      taskSize,
+		Attributes:    attributes,
+		VendorId:      vendorId,
+		VideoMetadata: vmd,
 	}
 
 	index := 0
 	handlerUrl := GetHandlerUrl(project)
 	if itemType == "video" {
 		task := Task{
-			HandlerUrl:  handlerUrl,
-			ProjectName: project.Name,
-			Index:       0,
-			Items:       project.Items,
-			Categories:  project.Categories,
-			Attributes:  project.Attributes,
+			HandlerUrl:    handlerUrl,
+			ProjectName:   project.Name,
+			Index:         0,
+			Items:         project.Items,
+			Categories:    project.Categories,
+			Attributes:    project.Attributes,
+			VideoMetadata: vmd,
 		}
 		index = 1
 

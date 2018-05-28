@@ -150,7 +150,7 @@ Sat.prototype.load = function() {
   };
   // get params from url path
   let searchParams = new URLSearchParams(window.location.search);
-  self.taskIndex = searchParams.get('task_index');
+  self.taskIndex = parseInt(searchParams.get('task_index'));
   self.projectName = searchParams.get('project_name');
 
   // ?
@@ -158,7 +158,7 @@ Sat.prototype.load = function() {
     'index': self.taskIndex,
     'projectName': self.projectName,
   });
-  xhr.open('POST', './postLoadTask');
+  xhr.open('POST', './postLoadTask', false);
   xhr.send(request);
 };
 

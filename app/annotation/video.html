@@ -52,8 +52,8 @@
                             <p>Label Category</p>
                             <select id="category_select" size="10" class="form-control">
                                 <!-- iterate over object categories -->
-                                {{ range $key, $value := .Category }}
-                                <option value={{$value}}>{{$value}}</option>
+                                {{ range $key, $value := .Categories }}
+                                <option value={{$value}}>{{ $value.Name }}</option>
                                 {{ end }}
                             </select>
                         </div>
@@ -115,7 +115,9 @@
                         <i id="play_button_icon" class="fa fa-play"></i>
                     </button>
                     <!-- video progress slider -->
-                    <input id="video_slider" class="slider" type="range" min="1" max="{{ .Metadata.NumFrames }}" value="1"/>
+                    <input id="video_slider" class="slider" type="range"
+                           min="1" max="{{ .VideoMetadata.NumFrames }}"
+                           value="1"/>
                 </div>
 
             </div>
@@ -145,8 +147,7 @@
     </div>
 
     <!-- TEMPLATE VALUES -->
-    <i id="video_name" class="template-val">{{.VideoName}}</i>
-    <i id="frame_rate" class="template-val">{{.Metadata.TBR}}</i>
+    <i id="frame_rate" class="template-val">{{.VideoMetadata.TBR}}</i>
     
     <!-- JAVASCRIPT -->
 
@@ -165,7 +166,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
 
     <script type="text/javascript">
-        document.getElementById('video_name').style.display = "none";
         document.getElementById('frame_rate').style.display = "none";
 
         $(document).ready(function () {

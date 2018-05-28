@@ -8,7 +8,7 @@ function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
 
-  self.videoName = document.getElementById('video_name').innerHTML;
+  // self.videoName = document.getElementById('video_name').innerHTML;
   self.frameRate = document.getElementById('frame_rate').innerHTML;
   self.frameCounter = document.getElementById('frame_counter');
   self.playButton = document.getElementById('play_button');
@@ -16,16 +16,7 @@ function SatVideo(LabelType) {
   self.slider = document.getElementById('video_slider');
   self.numFrames = self.slider.max;
 
-  // initialize all of the items (SatImage objects, one per frame)
-  for (let i = 1; i <= self.numFrames; i++) {
-    let frameString = i.toString();
-    while (frameString.length < 7) {
-      frameString = '0' + frameString;
-    }
-    self.newItem('./frames/' + self.videoName.slice(0, -4) + '/f-' +
-      frameString + '.jpg');
-  }
-
+  self.load();
   self.currentFrame = 0;
   self.currentItem = self.items[self.currentFrame];
   self.currentItem.setActive(true);
