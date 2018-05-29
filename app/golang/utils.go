@@ -62,6 +62,28 @@ func (task *Task) GetTaskPath() string {
 	return path.Join(dir, filename+".json")
 }
 
+func GetHandlerUrl(project Project) string {
+	if project.ItemType == "image" {
+		if project.LabelType == "box2d" {
+			return "2d_bbox_labeling"
+		}
+		if project.LabelType == "segmentation" {
+			return "2d_seg_labeling"
+		}
+	}
+	if project.ItemType == "video" {
+		if project.LabelType == "box2d" {
+			return "video_bbox_labeling"
+		}
+	}
+	// if project.ItemType == "pointcloud" {
+	// 	if project.LabelType == "box3d" {
+	// 		return "" // ???
+	// 	}
+	// }
+	return "NO_VALID_HANDLER"
+}
+
 func recordTimestamp() int64 {
 	// record timestamp in seconds
 	return time.Now().Unix()
