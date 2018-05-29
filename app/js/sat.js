@@ -202,8 +202,7 @@ Sat.prototype.toJson = function() {
 
 Sat.prototype.fromJson = function(json) {
   let self = this;
-
-  for (let i = 0; i < json.labels.length; i++) {
+  for (let i = 0; json.labels && i < json.labels.length; i++) {
     let labelId = self.newLabelId();
     let newLabel = new self.LabelType(self, labelId);
     newLabel.fromJson(json.labels[i]);
@@ -215,6 +214,7 @@ Sat.prototype.fromJson = function(json) {
     newItem.fromJson(json.items[i]);
   }
   self.currentItem = self.items[0];
+  self.currentItem.setActive(true);
   self.categories = json.categories;
   self.addEvent('start labeling', self.currentItem.index);
 };
