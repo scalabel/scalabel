@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 )
@@ -28,13 +29,13 @@ type Project struct {
 
 // A chunk of a project
 type Task struct {
-	HandlerUrl  string      `json:"handlerUrl" yaml:"handlerUrl"`
-	ProjectName string      `json:"projectName" yaml:"projectName"`
-	Index       int         `json:"index" yaml:"index"`
-	Items       []Item      `json:"items" yaml:"items"`
-	Labels      []Label     `json:"labels" yaml:"labels"`
-	Categories  []Category  `json:"categories" yaml:"categories"`
-	Attributes  []Attribute `json:"attributes" yaml:"attributes"`
+	HandlerUrl  string          `json:"handlerUrl" yaml:"handlerUrl"`
+	ProjectName string          `json:"projectName" yaml:"projectName"`
+	Index       int             `json:"index" yaml:"index"`
+	Items       []Item          `json:"items" yaml:"items"`
+	Labels      []Label         `json:"labels" yaml:"labels"`
+	Categories  []Category      `json:"categories" yaml:"categories"`
+	Attributes  []Attribute     `json:"attributes" yaml:"attributes"`
 	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
 }
 
@@ -58,7 +59,7 @@ type Item struct {
 // An annotation for an item, needs to include all possible annotation types
 type Label struct {
 	Id              int                `json:"id" yaml:"id"`
-	Category        Category           `json:"category" yaml:"category"`
+	CategoryPath    string             `json:"categoryPath" yaml:"categoryPath"`
 	ParentId        int                `json:"parent" yaml:"parentId"`
 	ChildrenIds     []int              `json:"children" yaml:"childrenIds"`
 	AttributeValues map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
@@ -340,7 +341,36 @@ func postLoadTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles the posting of saved tasks
 func postSaveHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		Error.Println(err)
+	}
+	task := Task{}
+	err = json.Unmarshal(body, &task)
+	if err != nil {
+		Error.Println(err)
+	}
+	Info.Println(task)
+
+	taskPath := path.Join(env.DataDir, "Tasks", task.ProjectName, strconv.Itoa(task.Index) + ".json")
+	taskJson, err := json.MarshalIndent(task, "", "  ")
+	if err != nil {
+		Error.Println(err)
+	}
+
+	err = ioutil.WriteFile(taskPath, taskJson, 0644)
+	if err != nil {
+		Error.Println(err)
+	} else {
+		Info.Println("Saved task " + taskPath)
+	}
+
+	w.Write(nil)
 }
 
 // Handles the posting of completed tasks
