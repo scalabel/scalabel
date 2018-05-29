@@ -91,8 +91,9 @@ Sat.prototype.getIpInfo = function() {
 };
 
 Sat.prototype.newItem = function(url) {
-  let item = new this.ItemType(this, this.items.length, url);
-  this.items.push(item);
+  let self = this;
+  let item = new self.ItemType(self, self.items.length, url);
+  self.items.push(item);
   return item;
 };
 
@@ -122,10 +123,8 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
   });
 };
 
-// TODO
 Sat.prototype.gotoItem = function(index) {
   let self = this;
-  //  TODO: save
   // mod the index to wrap around the list
   index = index % self.items.length;
   // TODO: event?
@@ -168,9 +167,8 @@ Sat.prototype.load = function() {
 Sat.prototype.save = function() {
   let self = this;
   let json = self.toJson();
-  // TODO: open a POST
   let xhr = new XMLHttpRequest();
-  xhr.open('POST', './postSubmission');
+  xhr.open('POST', './postSave');
   xhr.send(JSON.stringify(json));
 };
 
@@ -191,9 +189,11 @@ Sat.prototype.toJson = function() {
     }
   }
   return {
+    projectName: self.projectName,
     startTime: self.startTime,
     items: items,
     labels: labels,
+    categories: self.categories,
     events: self.events,
     userAgent: navigator.userAgent,
     ipInfo: self.ipInfo,
@@ -202,25 +202,21 @@ Sat.prototype.toJson = function() {
 
 Sat.prototype.fromJson = function(json) {
   let self = this;
-  self.items = [];
-  if (json.labels) {
-    for (let i = 0; i < json.labels.length; i++) {
-      let newLabel = self.newLabel(json.labels[i].attributes);
-      newLabel.fromJson(json.labels[i]);
-      self.labels.push(newLabel);
-    }
+
+  for (let i = 0; i < json.labels.length; i++) {
+    let labelId = self.newLabelId();
+    let newLabel = new self.LabelType(self, labelId);
+    newLabel.fromJson(json.labels[i]);
+    self.labelIdMap[newLabel.id] = newLabel;
+    self.labels.push(newLabel);
   }
   for (let i = 0; i < json.items.length; i++) {
     let newItem = self.newItem(json.items[i].url);
     newItem.fromJson(json.items[i]);
   }
   self.currentItem = self.items[0];
-  self.currentItem.setActive(true);
-  // TODO: this is image specific!! remove!
-  self.currentItem.image.onload = function() {
-    self.currentItem.redraw();
-  };
-  self.addEvent('start labeling', self.currentItem);
+  self.categories = json.categories;
+  self.addEvent('start labeling', self.currentItem.index);
 };
 
 
@@ -230,12 +226,13 @@ Sat.prototype.fromJson = function(json) {
  * @param {number} index: index of this item in sat
  * @param {string | null} url: url to load the item
  */
-function SatItem(sat, index = -1, url = null) {
-  this.sat = sat;
-  this.index = index;
-  this.url = url;
-  this.labels = [];
-  this.ready = false;
+function SatItem(sat, index = -1, url = '') {
+  let self = this;
+  self.sat = sat;
+  self.index = index;
+  self.url = url;
+  self.labels = [];
+  self.ready = false; // is this needed?
 }
 
 SatItem.prototype.loaded = function() {
@@ -265,7 +262,7 @@ SatItem.prototype.toJson = function() {
       labelIds.push(self.labels[i].id);
     }
   }
-  return {url: self.url, index: self.index, labels: labelIds};
+  return {url: self.url, index: self.index, labelIds: labelIds};
 };
 
 /**
@@ -499,7 +496,8 @@ SatImage.prototype._mousedown = function(e) {
     // change checked traits on label selection
     if (self.selectedLabel) {
       for (let i = 0; i < self.catSel.options.length; i++) {
-        if (self.catSel.options[i].innerHTML === self.selectedLabel.name) {
+        if (self.catSel.options[i].innerHTML ===
+          self.selectedLabel.categoryPath) {
           self.catSel.selectedIndex = i;
           break;
         }
@@ -530,7 +528,7 @@ SatImage.prototype._mousedown = function(e) {
       let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
       let occl = self.occlCheckbox.checked;
       let trunc = self.truncCheckbox.checked;
-      self.selectedLabel = self.sat.newLabel({category: cat, occl: occl,
+      self.selectedLabel = self.sat.newLabel({categoryPath: cat, occl: occl,
         trunc: trunc, mousePos: mousePos});
       self.state = 'resize';
       self.currHandle = self.selectedLabel.INITIAL_HANDLE;
@@ -730,7 +728,7 @@ SatImage.prototype._changeCat = function() {
   let self = this;
   if (self.selectedLabel) {
     let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
-    self.selectedLabel.name = option;
+    self.selectedLabel.categoryPath = option;
     self.redraw();
   }
 };
@@ -782,7 +780,7 @@ SatImage.prototype._lightSwitch = function() {
  */
 function SatLabel(sat, id = -1, ignored = null) {
   this.id = id;
-  this.name = null; // category or something else
+  this.categoryPath = null;
   this.attributes = {};
   this.sat = sat;
   this.parent = null;
@@ -844,7 +842,7 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
  */
 SatLabel.prototype.toJson = function() {
   let self = this;
-  let json = {id: self.id, name: self.name};
+  let json = {id: self.id, categoryPath: self.categoryPath};
   if (self.parent) json['parent'] = self.parent.id;
   if (self.children && self.children.length > 0) {
     let childrenIds = [];
@@ -866,7 +864,7 @@ SatLabel.prototype.toJson = function() {
 SatLabel.prototype.fromJson = function(json) {
   let self = this;
   self.id = json.id;
-  self.name = json.name;
+  self.categoryPath = json.categoryPath;
   let labelIdMap = self.sat.labelIdMap;
   if ('parent' in json) {
     self.parent = labelIdMap[json['parent']];

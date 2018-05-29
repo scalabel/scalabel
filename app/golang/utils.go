@@ -11,8 +11,7 @@ import (
 )
 
 func GetTask(projectName string, taskIndex string) Task {
-	projectDirectoryPath := path.Join(env.DataDir, "Tasks", projectName)
-	taskPath := projectDirectoryPath + "/" + taskIndex + ".json"
+	taskPath := path.Join(env.DataDir, "Tasks", projectName, taskIndex + ".json")
 	taskFileContents, err := ioutil.ReadFile(taskPath)
 	if err != nil {
 		Error.Println(err)

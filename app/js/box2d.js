@@ -12,17 +12,19 @@ function Box2d(sat, id, kargs) {
   // TODO: separate category and attributes in kargs
   ImageLabel.call(this, sat, id);
 
-  this.name = kargs.category;
-  // TODO: Move those to attributes
-  // TODO: don't use abbreviation here
-  this.occl = kargs.occl;
-  this.trunc = kargs.trunc;
+  if (kargs) {
+    this.categoryPath = kargs.categoryPath;
+    // TODO: Move those to attributes
+    // TODO: don't use abbreviation here
+    this.occl = kargs.occl;
+    this.trunc = kargs.trunc;
 
-  // TODO: move the coordinates to one object
-  this.x = kargs.mousePos.x;
-  this.y = kargs.mousePos.y;
-  this.w = 0;
-  this.h = 0;
+    // TODO: move the coordinates to one object
+    this.x = kargs.mousePos.x;
+    this.y = kargs.mousePos.y;
+    this.w = 0;
+    this.h = 0;
+  }
 
   // constants
   // TODO: Move out, we don't have to keep a copy of constants in every object
@@ -42,10 +44,20 @@ Box2d.prototype = Object.create(ImageLabel.prototype);
 
 Box2d.prototype.toJson = function() {
   let self = this;
-  let json = ImageLabel.prototype.toJson();
+  let json = {id: self.id, categoryPath: self.categoryPath};
+  if (self.parent) json['parent'] = self.parent.id;
+  if (self.children && self.children.length > 0) {
+    let childrenIds = [];
+    for (let i = 0; i < self.children.length; i++) {
+      if (self.children[i].valid) {
+        childrenIds.push(self.children[i].id);
+      }
+    }
+    json['children'] = childrenIds;
+  }
+  json.attributes = self.attributes;
+  json.categoryPath = self.categoryPath;
   json.box2d = {x: self.x, y: self.y, w: self.w, h: self.h};
-  // TODO: remove this special attribute assignment
-  json.attributes = {occlusion: self.occl, truncation: self.trunc};
   return json;
 };
 
@@ -55,14 +67,19 @@ Box2d.prototype.toJson = function() {
  */
 Box2d.prototype.fromJson = function(json) {
   let self = this;
-  ImageLabel.prototype.fromJson(json);
   self.x = json.box2d.x;
   self.y = json.box2d.y;
   self.w = json.box2d.w;
   self.h = json.box2d.h;
+  self.categoryPath = json.categoryPath;
   // TODO: stop hardcoding occl and trunc attributes
-  self.occl = json.attributes.occlusion;
-  self.trunc = json.attributes.truncation;
+  if (json.attributeValues) {
+    self.occl = json.attributeValues.occlusion;
+    self.trunc = json.attributeValues.truncation;
+  } else {
+    self.occl = false;
+    self.trunc = false;
+  }
 };
 
 /**
@@ -185,7 +202,7 @@ Box2d.prototype.drawTag = function(ctx) {
   let self = this;
   if (!self.isSmall()) {
     ctx.save();
-    let words = self.name.split(' ');
+    let words = self.categoryPath.split(' ');
     let tw = self.TAG_WIDTH;
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
