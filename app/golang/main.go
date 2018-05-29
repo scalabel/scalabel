@@ -94,12 +94,8 @@ func main() {
 	http.HandleFunc("/postProject", postProjectHandler)
 	http.HandleFunc("/postSave", postSaveHandler)
 	http.HandleFunc("/postSubmission", postSubmissionHandler)
-	http.HandleFunc("/dashboard", dashboardHandler)
-	http.HandleFunc("/postProject", postProjectHandler)
 	http.HandleFunc("/postLoadTask", postLoadTaskHandler)
-	http.HandleFunc("/postSave", postSaveHandler)
-	http.HandleFunc("/postSubmission", postSubmissionHandler)
-
+	
 	// Simple static handlers can be generated with MakeStandardHandler
 	http.HandleFunc("/create",
 		MakeStandardHandler("/app/control/create.html"))
