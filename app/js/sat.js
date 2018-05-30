@@ -72,7 +72,7 @@ function Sat(ItemType, LabelType) {
   this.items = []; // a.k.a ImageList, but can be 3D model list
   this.labels = []; // list of label objects
   this.labelIdMap = {};
-  this.lastLabelId = 0;
+  this.lastLabelId = -1;
   this.currentItem = null;
   this.ItemType = ItemType;
   this.LabelType = LabelType;
@@ -178,6 +178,11 @@ Sat.prototype.save = function() {
  */
 Sat.prototype.toJson = function() {
   let self = this;
+  return self.encodeBaseJsonRepresentation();
+};
+
+Sat.prototype.encodeBaseJsonRepresentation = function() {
+  let self = this;
   let items = [];
   for (let i = 0; i < self.items.length; i++) {
     items.push(self.items[i].toJson());
@@ -200,12 +205,22 @@ Sat.prototype.toJson = function() {
   };
 };
 
+/**
+ * Initialize this session from a JSON representation
+ * @param {string} json - The JSON representation
+ */
 Sat.prototype.fromJson = function(json) {
   let self = this;
+  self.decodeBaseJsonRepresentation(json);
+};
+
+Sat.prototype.decodeBaseJsonRepresentation = function(json) {
+  let self = this;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
-    let labelId = self.newLabelId();
-    let newLabel = new self.LabelType(self, labelId);
-    newLabel.fromJson(json.labels[i]);
+    // keep track of highest label ID
+    self.lastLabelId = Math.max(self.lastLabelId, json.labels[i].id);
+    let newLabel = new self.LabelType(self, json.labels[i].id);
+    newLabel.fromJsonVariables(json.labels[i]);
     self.labelIdMap[newLabel.id] = newLabel;
     self.labels.push(newLabel);
   }
@@ -216,6 +231,10 @@ Sat.prototype.fromJson = function(json) {
   self.currentItem = self.items[0];
   self.currentItem.setActive(true);
   self.categories = json.categories;
+
+  for (let i = 0; json.labels && i < json.labels.length; i++) {
+    self.labelIdMap[json.labels[i].id].fromJsonPointers(json.labels[i]);
+  }
   self.addEvent('start labeling', self.currentItem.index);
 };
 
@@ -300,7 +319,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
   for (let i = 0; i < self.labels.length; i++) {
     if (self.labels[i].id === labelId) {
       let currentItem = self.previousItem();
-      let currentLabel = self.labels[i].previousLabel;
+      let currentLabel = self.sat.labelIdMap[self.labels[i].previousLabelId];
       while (back && currentItem) {
         for (let j = 0; j < currentItem.labels.length; j++) {
           if (currentItem.labels[j].id === currentLabel.id) {
@@ -313,12 +332,12 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
           }
         }
         if (currentLabel) {
-          currentLabel = currentLabel.previousLabel;
+          currentLabel = self.sat.labelIdMap[currentLabel.previousLabelId];
         }
         currentItem = currentItem.previousItem();
       }
       currentItem = self.nextItem();
-      currentLabel = self.labels[i].nextLabel;
+      currentLabel = self.sat.labelIdMap[self.labels[i].nextLabelId];
       while (currentItem) {
         for (let j = 0; j < currentItem.labels.length; j++) {
           if (currentItem.labels[j].id === currentLabel.id) {
@@ -331,7 +350,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
           }
         }
         if (currentLabel) {
-          currentLabel = currentLabel.nextLabel;
+          currentLabel = self.sat.labelIdMap[currentLabel.nextLabelId];
         }
         currentItem = currentItem.nextItem();
       }
@@ -386,7 +405,7 @@ SatImage.prototype.setActive = function(active) {
     self.mainCtx = self.imageCanvas.getContext('2d');
     self.hiddenCtx = self.hiddenCanvas.getContext('2d');
     self.state = 'free';
-    self.lastLabelID = 0;
+    self.lastLabelID = -1;
     self.padBox = self._getPadding();
     self.catSel = document.getElementById('category_select');
     self.catSel.selectedIndex = 0;
@@ -618,23 +637,23 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
   // if parent label, make this the selected label in all other SatImages
   if (self.selectedLabel && self.selectedLabel.parent) {
     let currentItem = self.previousItem();
-    let currentLabel = self.selectedLabel.previousLabel;
+    let currentLabel = self.sat.labelIdMap[self.selectedLabel.previousLabelId];
     while (currentItem) {
       currentItem.selectedLabel = currentLabel;
       currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
       if (currentLabel) {
-        currentLabel = currentLabel.previousLabel;
+        currentLabel = self.sat.labelIdMap[currentLabel.previousLabelId];
         // TODO: make both be functions, not attributes
       }
       currentItem = currentItem.previousItem();
     }
     currentItem = self.nextItem();
-    currentLabel = self.selectedLabel.nextLabel;
+    currentLabel = self.sat.labelIdMap[self.selectedLabel.nextLabelId];
     while (currentItem) {
       currentItem.selectedLabel = currentLabel;
       currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
       if (currentLabel) {
-        currentLabel = currentLabel.nextLabel;
+        currentLabel = self.sat.labelIdMap[currentLabel.nextLabelId];
       }
       currentItem = currentItem.nextItem();
     }
@@ -836,14 +855,14 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
   return sprintf('rgba(%d, %d, %d, %f)', c[0], c[1], c[2], alpha);
 };
 
-/**
- * Return json object encoding the label information
- * @return {{id: *}}
- */
-SatLabel.prototype.toJson = function() {
+SatLabel.prototype.encodeBaseJsonRepresentation = function() {
   let self = this;
   let json = {id: self.id, categoryPath: self.categoryPath};
-  if (self.parent) json['parent'] = self.parent.id;
+  if (self.parent) {
+    json.parent = self.parent.id;
+  } else {
+    json.parent = -1;
+  }
   if (self.children && self.children.length > 0) {
     let childrenIds = [];
     for (let i = 0; i < self.children.length; i++) {
@@ -851,31 +870,70 @@ SatLabel.prototype.toJson = function() {
         childrenIds.push(self.children[i].id);
       }
     }
-    json['children'] = childrenIds;
+    json.children = childrenIds;
   }
-  json.attributes = self.attributes;
+  json.previousLabelId = -1;
+  json.nextLabelId = -1;
+  if (self.previousLabelId) {
+    json.previousLabelId = self.previousLabelId;
+  }
+  if (self.nextLabelId) {
+    json.nextLabelId = self.nextLabelId;
+  }
+  // TODO: remove
+  json.keyframe = self.keyframe;
   return json;
+};
+
+/**
+ * Return json object encoding the label information
+ * @return {{id: *}}
+ */
+SatLabel.prototype.toJson = function() {
+  let self = this;
+  return self.encodeBaseJsonRepresentation();
+};
+
+SatLabel.prototype.decodeBaseJsonRepresentationVariables = function(json) {
+  let self = this;
+  self.id = json.id;
+  self.categoryPath = json.categoryPath;
+  // TODO: remove
+  self.keyframe = json.keyframe;
+  if (json.previousLabelId > -1) {
+    self.previousLabelId = json.previousLabelId;
+  }
+  if (json.nextLabelId > -1) {
+    self.nextLabelId = json.nextLabelId;
+  }
+};
+
+SatLabel.prototype.decodeBaseJsonRepresentationPointers = function(json) {
+  let self = this;
+  let labelIdMap = self.sat.labelIdMap;
+  if (json.parent > -1) {
+    self.parent = labelIdMap[json.parent];
+  }
+  if (json.children) {
+    let childrenIds = json.children;
+    for (let i = 0; i < childrenIds.length; i++) {
+      self.addChild(labelIdMap[childrenIds[i]]);
+    }
+  }
 };
 
 /**
  * Load label information from json object
  * @param {object} json: JSON representation of this SatLabel.
  */
-SatLabel.prototype.fromJson = function(json) {
+SatLabel.prototype.fromJsonVariables = function(json) {
   let self = this;
-  self.id = json.id;
-  self.categoryPath = json.categoryPath;
-  let labelIdMap = self.sat.labelIdMap;
-  if ('parent' in json) {
-    self.parent = labelIdMap[json['parent']];
-  }
-  if ('children' in json) {
-    let childrenIds = json['children'];
-    for (let i = 0; i < childrenIds.length; i++) {
-      self.addChild(labelIdMap[childrenIds[i]]);
-    }
-  }
-  self.attributes = json.attributes;
+  self.decodeBaseJsonRepresentationVariables(json);
+};
+
+SatLabel.prototype.fromJsonPointers = function(json) {
+  let self = this;
+  self.decodeBaseJsonRepresentationPointers(json);
 };
 
 SatLabel.prototype.startChange = function() {

@@ -44,20 +44,10 @@ Box2d.prototype = Object.create(ImageLabel.prototype);
 
 Box2d.prototype.toJson = function() {
   let self = this;
-  let json = {id: self.id, categoryPath: self.categoryPath};
-  if (self.parent) json['parent'] = self.parent.id;
-  if (self.children && self.children.length > 0) {
-    let childrenIds = [];
-    for (let i = 0; i < self.children.length; i++) {
-      if (self.children[i].valid) {
-        childrenIds.push(self.children[i].id);
-      }
-    }
-    json['children'] = childrenIds;
-  }
-  json.attributes = self.attributes;
-  json.categoryPath = self.categoryPath;
+  let json = self.encodeBaseJsonRepresentation();
   json.box2d = {x: self.x, y: self.y, w: self.w, h: self.h};
+  // TODO: customizable
+  json.attributeValues = {occlusion: self.occl, truncation: self.trunc};
   return json;
 };
 
@@ -65,21 +55,15 @@ Box2d.prototype.toJson = function() {
  * Load label information from json object
  * @param {object} json: JSON representation of this Box2d.
  */
-Box2d.prototype.fromJson = function(json) {
+Box2d.prototype.fromJsonVariables = function(json) {
   let self = this;
+  self.decodeBaseJsonRepresentationVariables(json);
   self.x = json.box2d.x;
   self.y = json.box2d.y;
   self.w = json.box2d.w;
   self.h = json.box2d.h;
-  self.categoryPath = json.categoryPath;
-  // TODO: stop hardcoding occl and trunc attributes
-  if (json.attributeValues) {
-    self.occl = json.attributeValues.occlusion;
-    self.trunc = json.attributeValues.truncation;
-  } else {
-    self.occl = false;
-    self.trunc = false;
-  }
+  self.occl = json.attributeValues.occlusion;
+  self.trunc = json.attributeValues.truncation;
 };
 
 /**

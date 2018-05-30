@@ -29,13 +29,13 @@ type Project struct {
 
 // A chunk of a project
 type Task struct {
-	HandlerUrl  string          `json:"handlerUrl" yaml:"handlerUrl"`
-	ProjectName string          `json:"projectName" yaml:"projectName"`
-	Index       int             `json:"index" yaml:"index"`
-	Items       []Item          `json:"items" yaml:"items"`
-	Labels      []Label         `json:"labels" yaml:"labels"`
-	Categories  []Category      `json:"categories" yaml:"categories"`
-	Attributes  []Attribute     `json:"attributes" yaml:"attributes"`
+	HandlerUrl   string         `json:"handlerUrl" yaml:"handlerUrl"`
+	ProjectName  string         `json:"projectName" yaml:"projectName"`
+	Index        int            `json:"index" yaml:"index"`
+	Items        []Item         `json:"items" yaml:"items"`
+	Labels       []Label        `json:"labels" yaml:"labels"`
+	Categories   []Category     `json:"categories" yaml:"categories"`
+	Attributes   []Attribute    `json:"attributes" yaml:"attributes"`
 	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
 }
 
@@ -62,8 +62,11 @@ type Label struct {
 	CategoryPath    string             `json:"categoryPath" yaml:"categoryPath"`
 	ParentId        int                `json:"parent" yaml:"parentId"`
 	ChildrenIds     []int              `json:"children" yaml:"childrenIds"`
+	PreviousLabelId int                `json:"previousLabelId" yaml:"previousLabelId"`
+	NextLabelId     int                `json:"nextLabelId" yaml:"nextLabelId"`
 	AttributeValues map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
 	Box2d           map[string]float32 `json:"box2d" yaml:"box2d"`
+	Keyframe        bool               `json:"keyframe" yaml:"keyframe"`
 }
 
 // A class value for a label.

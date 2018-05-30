@@ -36,7 +36,7 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
   let label = new self.LabelType(self, labelId, optionalAttributes);
   self.labelIdMap[label.id] = label;
   self.labels.push(label);
-  let previousLabel = null;
+  let previousLabelId = -1;
   for (let i = self.currentItem.index; i < self.items.length; i++) {
     let labelId = self.newLabelId();
     let childLabel = new self.LabelType(self, labelId, optionalAttributes);
@@ -45,17 +45,30 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
     self.labels.push(childLabel);
     label.addChild(childLabel);
     self.items[i].labels.push(childLabel);
-    if (previousLabel) {
-      previousLabel.nextLabel = childLabel;
+    if (previousLabelId > -1) {
+      self.labelIdMap[previousLabelId].nextLabelId = childLabel.id;
     }
-    childLabel.previousLabel = previousLabel;
-    previousLabel = childLabel;
+    childLabel.previousLabelId = previousLabelId;
+    previousLabelId = childLabel.id;
   }
-  if (previousLabel) {
-    previousLabel.nextLabel = null;
+  if (previousLabelId > -1) {
+    self.labelIdMap[previousLabelId].nextLabelId = -1;
   }
   return self.currentItem.labels[
     self.currentItem.labels.length - 1];
+};
+
+SatVideo.prototype.toJson = function() {
+  let self = this;
+  let json = self.encodeBaseJsonRepresentation();
+  json.metadata = self.metadata;
+  return json;
+};
+
+SatVideo.prototype.fromJson = function(json) {
+  let self = this;
+  self.decodeBaseJsonRepresentation(json);
+  self.metadata = json.metadata;
 };
 
 // TODO: this needs to be agnostic of label type!!!
@@ -109,18 +122,18 @@ SatVideo.prototype.interpolate = function(startSatLabel) {
 
 SatVideo.prototype.gotoItem = function(index) {
   let self = this;
-  //  TODO: save
-  // mod the index to wrap around the list
-  index = index % self.items.length;
-  // TODO: event?
-  self.currentItem.setActive(false);
-  self.currentItem = self.items[index];
-  self.frameCounter.innerHTML = self.currentItem.index + 1;
-  self.currentItem.setActive(true);
-  self.currentItem.onload = function() {
+  if (index >= 0 && index < self.items.length) {
+    self.currentItem.setActive(false);
+    self.currentItem = self.items[index];
+    self.frameCounter.innerHTML = self.currentItem.index + 1;
+    self.currentItem.setActive(true);
+    self.currentItem.onload = function() {
+      self.currentItem.redraw();
+    };
     self.currentItem.redraw();
-  };
-  self.currentItem.redraw();
+    self.slider.value = index + 1;
+    self.frameCounter.innerHTML = index + 1;
+  }
 };
 
 SatVideo.prototype.clickPlayPause = function(e) {
@@ -158,20 +171,6 @@ SatVideo.prototype.nextFrame = function() {
   }
 };
 
-SatVideo.prototype.gotoItem = function(index) {
-  let self = this;
-  if (index >= 0 && index < self.items.length) {
-    self.currentItem.setActive(false);
-    self.currentItem = self.items[index];
-    self.currentItem.setActive(true);
-    self.currentItem.onload = function() {
-      self.currentItem.redraw();
-    };
-    self.currentItem.redraw();
-    self.slider.value = index;
-    self.frameCounter.innerHTML = index + 1;
-  }
-};
 
 SatVideo.prototype.moveSlider = function() {
   let self = this;
