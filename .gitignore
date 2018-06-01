@@ -7,6 +7,9 @@
 # don't upload the data directory
 data/*
 
+# don't upload node_modules from npm test
+node_modules/*
+
 # don't upload the server config, as it will vary.
 # (we still upload the example config)
 config.yml

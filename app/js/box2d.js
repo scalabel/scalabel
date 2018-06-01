@@ -6,7 +6,7 @@
  * @param {Sat} sat: context
  * @param {int} id: label id
  * @param {object} kargs: arguments of the box, containing category,
-    occl/trunc, and mousePos
+ occl/trunc, and mousePos
  */
 function Box2d(sat, id, kargs) {
   // TODO: separate category and attributes in kargs
@@ -38,9 +38,14 @@ function Box2d(sat, id, kargs) {
   this.MIN_BOX_SIZE = 15;
   this.FADED_ALPHA = 0.5;
   this.INITIAL_HANDLE = 5; // for the bottom-right of the box
+
+  this.state = 'resize';
+  this.currHandle = this.INITIAL_HANDLE;
 }
 
 Box2d.prototype = Object.create(ImageLabel.prototype);
+
+Box2d.useCrossHair = true;
 
 Box2d.prototype.toJson = function() {
   let self = this;
@@ -72,24 +77,27 @@ Box2d.prototype.fromJsonVariables = function(json) {
  * @param {object} hiddenCtx - HTML canvas context for hidden objects.
  * @param {number} selectedBox - ID of the currently selected box, or null if
  *   no box selected.
- * @param {boolean} resizing - Whether or not this box is being resized.
  * @param{number} hoverBox - ID of the currently hovered over box, or null if
  *   no box hovered over.
- * @param {number} hoverHandle - handle number of the currently hovered handle,
- *   or null if no handle hovered.
  * @param {number} labelIndex - index of this label in this.sat.labels
  */
-Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
-  hoverBox, hoverHandle, labelIndex) {
+Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox,
+                  hoverBox, labelIndex) {
   let self = this;
 
   // go ahead and set context font
   mainCtx.font = '11px Verdana';
 
   // draw visible elements
-  self.drawBox(mainCtx, selectedBox, resizing);
-  self.drawHandles(mainCtx, selectedBox, hoverBox, hoverHandle);
+  self.drawBox(mainCtx, selectedBox);
   self.drawTag(mainCtx);
+  if (selectedBox && self.id === selectedBox.id) {
+    self.drawHandles(mainCtx);
+  }
+
+  if (hoverBox && self.id === hoverBox.id) {
+    self.drawHandles(mainCtx);
+  }
 
   // draw hidden elements
   self.drawHiddenBox(hiddenCtx, selectedBox, labelIndex);
@@ -99,19 +107,17 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox, resizing,
 /**
  * Draw the box part of this bounding box.
  * @param {object} ctx - Canvas context.
- * @param {object} selectedBox - The currently selected box, or null if no
- *   box selected.
- * @param {number} selectedBox.id - ID of the currently selected box.
- * @param {boolean} resizing - Whether or not this box is being resized.
+ * @param {number} selectedBox - the currently selected box, or null if
+ *   no box selected.
  */
-Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
+Box2d.prototype.drawBox = function(ctx, selectedBox) {
   let self = this;
   ctx.save(); // save the canvas context settings
   if (selectedBox && selectedBox.id !== self.id) {
     // if exists selected box and it's not this one, alpha this out
     ctx.globalAlpha = self.FADED_ALPHA;
   }
-  if (resizing) {
+  if (self.state === 'resize') {
     ctx.setLineDash([3]); // if box is being resized, use line dashes
   }
   if (self.isSmall()) {
@@ -121,61 +127,22 @@ Box2d.prototype.drawBox = function(ctx, selectedBox, resizing) {
     ctx.strokeStyle = self.styleColor();
   }
   ctx.lineWidth = self.LINE_WIDTH; // set line width
-  ctx.strokeRect(self.x, self.y, self.w, self.h); // draw the box
+  let [x, y, w, h] = self.image.transformPoints(
+      [self.x, self.y, self.w, self.h]);
+  ctx.strokeRect(x, y, w, h); // draw the box
   ctx.restore(); // restore the canvas to saved settings
 };
 
 /**
  * Draw the resize handles of this bounding box.
  * @param {object} ctx - Canvas context.
- * @param {number} selectedBox - ID of the currently selected box, or null if
- *   no box selected.
- * @param{number} hoverBox - ID of the currently hovered over box, or null if
- *   no box hovered over.
- * @param {number} hoverHandle - handle number of the currently hovered handle,
- *   or null if no handle hovered.
  */
-Box2d.prototype.drawHandles = function(ctx, selectedBox, hoverBox,
-  hoverHandle) {
+Box2d.prototype.drawHandles = function(ctx) {
   let self = this;
-  if (selectedBox && selectedBox.id === self.id) {
-    // if this box is selected, draw all its handles
-    for (let handleNo = 1; handleNo <= 8; handleNo++) {
-      self.drawHandle(ctx, handleNo);
-    }
-  } else if (!selectedBox && hoverBox && hoverBox.id === self.id
-    && hoverHandle > 0) {
-    // else if no selection and a handle is hovered over, draw it
-    self.drawHandle(ctx, hoverHandle);
-  }
-};
 
-/**
- * Draw a specified resize handle of this bounding box.
- * @param {object} ctx - Canvas context.
- * @param {number} handleNo - The handle number, i.e. which handle to draw.
- */
-Box2d.prototype.drawHandle = function(ctx, handleNo) {
-  let self = this;
-  ctx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo);
-  if (self.isSmall()) {
-    ctx.fillStyle = 'rgb(169, 169, 169)';
-  } else {
-    ctx.fillStyle = self.styleColor();
+  for (let handleNo = 1; handleNo <= 8; handleNo++) {
+    self.drawHandle(ctx, handleNo);
   }
-  ctx.lineWidth = self.LINE_WIDTH;
-  if (posHandle) {
-    ctx.beginPath();
-    ctx.arc(posHandle.x, posHandle.y, self.HANDLE_RADIUS, 0, 2 * Math.PI);
-    ctx.fill();
-    if (!self.isSmall()) {
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = self.OUTLINE_WIDTH;
-      ctx.stroke();
-    }
-  }
-  ctx.restore(); // restore the canvas to saved settings
 };
 
 /**
@@ -190,17 +157,18 @@ Box2d.prototype.drawTag = function(ctx) {
     let tw = self.TAG_WIDTH;
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
-    if (self.occl) {
+    if (self.image.occl) {
       abbr += ',o';
       tw += 9;
     }
-    if (self.trunc) {
+    if (self.image.trunc) {
       abbr += ',t';
       tw += 9;
     }
     // get the top left corner
     let tlx = Math.min(self.x, self.x + self.w);
     let tly = Math.min(self.y, self.y + self.h);
+    [tlx, tly] = self.image.transformPoints([tlx, tly]);
     ctx.fillStyle = self.styleColor();
     ctx.fillRect(tlx + 1, tly - self.TAG_HEIGHT, tw,
       self.TAG_HEIGHT);
@@ -238,7 +206,7 @@ Box2d.prototype.drawHiddenBox = function(hiddenCtx, selectedBox, labelIndex) {
  * @param {number} labelIndex - index of this label in this.sat.labels
  */
 Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox,
-  labelIndex) {
+                       labelIndex) {
   let self = this;
   if (!selectedBox || selectedBox.id === self.id) {
     // as long as there is not another box selected, draw all the hidden handles
@@ -257,7 +225,7 @@ Box2d.prototype.drawHiddenHandles = function(hiddenCtx, selectedBox,
 Box2d.prototype.drawHiddenHandle = function(hiddenCtx, handleNo, labelIndex) {
   let self = this;
   hiddenCtx.save(); // save the canvas context settings
-  let posHandle = self._getHandle(handleNo);
+  let posHandle = self.getHandle(handleNo);
   hiddenCtx.fillStyle = self.hiddenStyleColor(labelIndex, handleNo);
   hiddenCtx.lineWidth = self.HIDDEN_LINE_WIDTH;
   hiddenCtx.beginPath();
@@ -292,8 +260,14 @@ Box2d.prototype.hiddenStyleColor = function(labelIndex, handleNo) {
  * @return {string} - The cursor style string.
  */
 Box2d.prototype.getCursorStyle = function(handleNo) {
-  return ['move', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
-    'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'][handleNo];
+  if (this.state === 'resize') {
+    return 'crosshair';
+  } else if (this.state === 'move') {
+    return 'move';
+  } else {
+    return ['move', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
+      'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'][handleNo];
+  }
 };
 
 /**
@@ -325,9 +299,9 @@ Box2d.prototype.resize = function(mousePos, currHandle, canvRect, padBox) {
     self.w += self.x - newX;
     self.x = newX;
   }
-  if (self.parent) {
-    self.sat.interpolate(self); // TODO
-  }
+  // if (self.parent) {
+  //   self.sat.interpolate(self); // TODO
+  // }
 };
 
 /**
@@ -352,9 +326,24 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
   // update
   self.x = movePos.x + delta.x;
   self.y = movePos.y + delta.y;
-  if (self.parent) {
-    self.sat.interpolate(self); // TODO
-  }
+  // if (self.parent) {
+  //   self.sat.interpolate(self); // TODO
+  // }
+};
+
+/**
+ * Set this box to be the weighted average of the two provided boxes.
+ * @param {Box2d} startBox - The first box.
+ * @param {Box2d} endBox - The second box.
+ * @param {number} weight - The weight, b/w 0 and 1, higher corresponds to
+ closer to endBox.
+ */
+Box2d.prototype.weightAvg = function(startBox, endBox, weight) {
+  let self = this;
+  self.x = startBox.x + weight*(endBox.x - startBox.x);
+  self.y = startBox.y + weight*(endBox.y - startBox.y);
+  self.w = startBox.w + weight*(endBox.w - startBox.w);
+  self.h = startBox.h + weight*(endBox.h - startBox.h);
 };
 
 /**
@@ -362,8 +351,8 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
  * @return {object} - The box's current position.
  */
 Box2d.prototype.getCurrentPosition = function() {
-    let self = this;
-    return {x: self.x, y: self.y, w: self.w, h: self.h};
+  let self = this;
+  return {x: self.x, y: self.y, w: self.w, h: self.h};
 };
 
 /**
@@ -388,7 +377,7 @@ Box2d.prototype.getWeightedAvg = function(box, weight) {
  * @param {Box2d} startBox - The first box.
  * @param {Box2d} endBox - The second box.
  * @param {number} weight - The weight, b/w 0 and 1, higher corresponds to
-    closer to endBox.
+ closer to endBox.
  */
 Box2d.prototype.weightedAvg = function(startBox, endBox, weight) {
   let self = this;
@@ -437,7 +426,7 @@ Box2d.prototype.union = function(box) {
  * @param {number} handleNo - The handle number, ranges from 0 to 8.
  * @return {object} - A struct with x and y of the handle's center.
  */
-Box2d.prototype._getHandle = function(handleNo) {
+Box2d.prototype.getHandle = function(handleNo) {
   let self = this;
   return [
     function() {return {x: self.x, y: self.y};}, // 0
@@ -449,4 +438,94 @@ Box2d.prototype._getHandle = function(handleNo) {
     function() {return {x: self.x, y: self.y + self.h};}, // 6
     function() {return {x: self.x, y: self.y + self.h / 2};}, // 7
   ][handleNo - 1]();
+};
+
+Box2d.prototype.mousedown = function(e) {
+  let self = this;
+  let mousePos = self.image._getMousePos(e);
+  for (let i = 0; i < self.image.catSel.options.length; i++) {
+    if (self.image.catSel.options[i].innerHTML === self.name) {
+      self.image.catSel.selectedIndex = i;
+      break;
+    }
+  }
+  let occludedCheckbox = $('[name=\'occluded-checkbox\']');
+  let truncatedCheckbox = $('[name=\'truncated-checkbox\']');
+  if (occludedCheckbox.prop('checked') !==
+    self.image.occl) {
+    occludedCheckbox.trigger('click');
+  }
+  if (truncatedCheckbox.prop('checked') !==
+    self.image.trunc) {
+    truncatedCheckbox.trigger('click');
+  }
+  // TODO: Wenqi
+  // traffic light color
+  if (self.currHandle > 0) {
+    // if we have a resize handle
+    self.state = 'resize';
+  } else if (self.currHandle === 0) {
+    // if we have a move handle
+    self.movePos = self.getCurrentPosition();
+    self.moveClickPos = mousePos;
+    self.state = 'move';
+  }
+};
+
+Box2d.prototype.mouseup = function() {
+  if (this.state === 'resize') {
+    // if we resized, we need to reorder ourselves
+    if (this.w < 0) {
+      this.x = this.x + this.w;
+      this.w = -1 * this.w;
+    }
+    if (this.h < 0) {
+      this.y = this.y + this.h;
+      this.h = -1 * this.h;
+    }
+  }
+
+  this.state = 'free';
+  this.setCurrHandle(0);
+
+  this.movePos = null;
+  this.moveClickPos = null;
+
+  // if parent label, make this the selected label in all other SatImages
+  if (this.parent) {
+    let currentItem = this.previousItem();
+    let currentLabel = this.previousLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.previousLabel;
+        // TODO: make both be functions, not attributes
+      }
+      currentItem = currentItem.previousItem();
+    }
+    currentItem = this.nextItem();
+    currentLabel = this.nextLabel;
+    while (currentItem) {
+      currentItem.selectedLabel = currentLabel;
+      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
+      if (currentLabel) {
+        currentLabel = currentLabel.nextLabel;
+      }
+      currentItem = currentItem.nextItem();
+    }
+  }
+};
+
+Box2d.prototype.mousemove = function(e) {
+  let canvRect = this.image.imageCanvas.getBoundingClientRect();
+  let mousePos = this.image._getMousePos(e);
+
+  // handling according to state
+  if (this.state === 'resize') {
+    this.resize(mousePos, this.currHandle, canvRect, this.image.padBox);
+  } else if (this.state === 'move') {
+    this.move(mousePos, this.movePos, this.moveClickPos,
+      this.image.padBox);
+  }
 };
