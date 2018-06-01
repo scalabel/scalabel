@@ -131,10 +131,7 @@ Sat.prototype.newLabelId = function() {
  */
 Sat.prototype.newLabel = function(optionalAttributes) {
   let self = this;
-  if (labelId < 0) {
-    labelId = self.newLabelId();
-  }
-  let label = new self.LabelType(self, labelId);
+  let label = new self.LabelType(self, self.newLabelId(), optionalAttributes);
   self.labelIdMap[label.id] = label;
   self.labels.push(label);
   if (self.currentItem) {
@@ -414,7 +411,7 @@ SatItem.prototype.fromJson = function(selfJson) {
       self.labels.push(self.sat.labelIdMap[selfJson.labelIds[i]]);
     }
   }
-  self.attributes = json.attributes;
+  self.attributes = selfJson.attributes;
 };
 
 /**
@@ -738,8 +735,8 @@ SatImage.prototype.redraw = function() {
  */
 SatImage.prototype._mousedown = function(e) {
   let self = this;
+  let mousePos = self._getMousePos(e);
   if (self._isWithinFrame(e) && self.state === 'free') {
-    let mousePos = self._getMousePos(e);
     [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
     // change checked traits on label selection
     if (self.selectedLabel) {
@@ -776,19 +773,21 @@ SatImage.prototype._mousedown = function(e) {
       let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
       let occl = self.occlCheckbox.checked;
       let trunc = self.truncCheckbox.checked;
-      self.selectedLabel = self.sat.newLabel({categoryPath: cat, occl: occl,
-        trunc: trunc, mousePos: mousePos});
+      self.selectedLabel = self.sat.newLabel({
+        categoryPath: cat, occl: occl,
+        trunc: trunc, mousePos: mousePos,
+      });
       self.state = 'resize';
       self.currHandle = self.selectedLabel.INITIAL_HANDLE;
       self.resizeID = self.selectedLabel.id;
     }
+  }
   self._isMouseDown = true;
 
   if (!this._isWithinFrame(e)) {
     return;
   }
 
-  let mousePos = this._getMousePos(e);
   let currHandle;
   [this.selectedLabel, currHandle] = this._getSelected(mousePos);
   if (this.selectedLabel) {
@@ -1320,5 +1319,3 @@ ImageLabel.prototype.drawHandle = function(ctx, handleNo) {
   }
   ctx.restore(); // restore the canvas to saved settings
 };
-
-
