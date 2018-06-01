@@ -38,8 +38,6 @@ function Box2d(sat, id, kargs) {
   this.MIN_BOX_SIZE = 15;
   this.FADED_ALPHA = 0.5;
   this.INITIAL_HANDLE = 5; // for the bottom-right of the box
-
-  this.state = 'resize';
   this.currHandle = this.INITIAL_HANDLE;
 }
 
@@ -95,8 +93,8 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox,
     self.drawHandles(mainCtx);
   }
 
-  if (hoverBox && self.id === hoverBox.id) {
-    self.drawHandles(mainCtx);
+  if (hoverBox && self.id === hoverBox.id && self.currHoverHandle) {
+    self.drawHandle(mainCtx, self.currHoverHandle);
   }
 
   // draw hidden elements
@@ -262,8 +260,6 @@ Box2d.prototype.hiddenStyleColor = function(labelIndex, handleNo) {
 Box2d.prototype.getCursorStyle = function(handleNo) {
   if (this.state === 'resize') {
     return 'crosshair';
-  } else if (this.state === 'move') {
-    return 'move';
   } else {
     return ['move', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
       'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'][handleNo];
@@ -299,9 +295,9 @@ Box2d.prototype.resize = function(mousePos, currHandle, canvRect, padBox) {
     self.w += self.x - newX;
     self.x = newX;
   }
-  // if (self.parent) {
-  //   self.sat.interpolate(self); // TODO
-  // }
+  if (self.parent) {
+    self.sat.interpolate(self); // TODO
+  }
 };
 
 /**
@@ -326,9 +322,9 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
   // update
   self.x = movePos.x + delta.x;
   self.y = movePos.y + delta.y;
-  // if (self.parent) {
-  //   self.sat.interpolate(self); // TODO
-  // }
+  if (self.parent) {
+    self.sat.interpolate(self); // TODO
+  }
 };
 
 /**
@@ -492,25 +488,26 @@ Box2d.prototype.mouseup = function() {
   this.moveClickPos = null;
 
   // if parent label, make this the selected label in all other SatImages
+  let currentItem = this.sat.currentItem;
   if (this.parent) {
-    let currentItem = this.previousItem();
-    let currentLabel = this.previousLabel;
+    currentItem = currentItem.previousItem();
+    let currentLabel = this.sat.labelIdMap[this.previousLabelId];
     while (currentItem) {
       currentItem.selectedLabel = currentLabel;
       currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
       if (currentLabel) {
-        currentLabel = currentLabel.previousLabel;
+        currentLabel = this.sat.labelIdMap[currentLabel.previousLabelId];
         // TODO: make both be functions, not attributes
       }
       currentItem = currentItem.previousItem();
     }
-    currentItem = this.nextItem();
-    currentLabel = this.nextLabel;
+    currentItem = this.sat.currentItem.nextItem();
+    currentLabel = this.sat.labelIdMap[this.nextLabelId];
     while (currentItem) {
       currentItem.selectedLabel = currentLabel;
       currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
       if (currentLabel) {
-        currentLabel = currentLabel.nextLabel;
+        currentLabel = this.sat.labelIdMap[currentLabel.nextLabelId];
       }
       currentItem = currentItem.nextItem();
     }

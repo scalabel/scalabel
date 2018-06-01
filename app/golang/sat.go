@@ -126,6 +126,7 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	Info.Println(GetTasks())
 	tmpl.Execute(w, GetTasks())
 }
 

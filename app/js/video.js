@@ -60,14 +60,14 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
 
 SatVideo.prototype.toJson = function() {
   let self = this;
-  let json = self.encodeBaseJsonRepresentation();
+  let json = self.encodeBaseJson();
   json.metadata = self.metadata;
   return json;
 };
 
 SatVideo.prototype.fromJson = function(json) {
   let self = this;
-  self.decodeBaseJsonRepresentation(json);
+  self.decodeBaseJson(json);
   self.metadata = json.metadata;
 };
 

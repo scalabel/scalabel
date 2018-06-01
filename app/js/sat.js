@@ -342,10 +342,11 @@ function SatItem(sat, index = -1, url = '') {
 }
 
 SatItem.prototype.setActive = function(active) {
+  let self = this;
   if (active) {
-    this.addEvent('start labeling', self.index);
+    self.sat.addEvent('start labeling', self.index);
   } else {
-    this.addEvent('end labeling', self.index);
+    self.sat.addEvent('end labeling', self.index);
   }
 };
 
@@ -623,12 +624,16 @@ SatImage.prototype.setActive = function(active) {
     document.getElementById('next_btn').onclick = function() {
       self.sat.gotoItem(self.index + 1);
     };
-    document.getElementById('increase_btn').onclick = function() {
-      self._incHandler();
-    };
-    document.getElementById('decrease_btn').onclick = function() {
-      self._decHandler();
-    };
+    if (document.getElementById('increase_btn')) {
+      document.getElementById('increase_btn').onclick = function() {
+        self._incHandler();
+      };
+    }
+    if (document.getElementById('decrease_btn')) {
+      document.getElementById('decrease_btn').onclick = function() {
+        self._decHandler();
+      };
+    }
     if (endBtn.length) {
       // if the end button exists (we have a sequence) then hook it up
       endBtn.click(function() {
@@ -694,24 +699,6 @@ SatImage.prototype.setActive = function(active) {
 };
 
 /**
- * Increase button handler
- */
-SatImage.prototype._incHandler = function() {
-  let self = this;
-  self.setScale(self.scale * self.SCALE_RATIO);
-  self.redraw();
-};
-
-/**
- * Decrease button handler
- */
-SatImage.prototype._decHandler = function() {
-  let self = this;
-  self.setScale(self.scale / self.SCALE_RATIO);
-  self.redraw();
-};
-
-/**
  * Redraws this SatImage and all labels.
  */
 SatImage.prototype.redraw = function() {
@@ -730,6 +717,27 @@ SatImage.prototype.redraw = function() {
 };
 
 /**
+ * Function to draw the crosshair
+ * @param {object} e: mouse event
+ */
+SatImage.prototype.drawCrossHair = function(e) {
+  let divRect = this.divCanvas.getBoundingClientRect();
+  let cH = $('#crosshair-h');
+  let cV = $('#crosshair-v');
+  cH.css('top', e.clientY);
+  cH.css('left', divRect.x);
+  cH.css('width', divRect.width);
+  cV.css('left', e.clientX);
+  cV.css('top', divRect.y);
+  cV.css('height', divRect.height);
+  if (this._isWithinFrame(e)) {
+    $('.hair').show();
+  } else {
+    $('.hair').hide();
+  }
+};
+
+/**
  * Called when this SatImage is active and the mouse is clicked.
  * @param {object} e: mouse event
  */
@@ -740,6 +748,7 @@ SatImage.prototype._mousedown = function(e) {
     [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
     // change checked traits on label selection
     if (self.selectedLabel) {
+      self.selectedLabel.currHandle = self.currHandle;
       for (let i = 0; i < self.catSel.options.length; i++) {
         if (self.catSel.options[i].innerHTML ===
           self.selectedLabel.categoryPath) {
@@ -762,12 +771,14 @@ SatImage.prototype._mousedown = function(e) {
     if (self.selectedLabel && self.currHandle > 0) {
       // if we have a resize handle
       self.state = 'resize';
+      self.selectedLabel.state = 'resize';
       self.resizeID = self.selectedLabel.id;
     } else if (self.currHandle === 0 && self.selectedLabel) {
       // if we have a move handle
-      self.movePos = self.selectedLabel.getCurrentPosition();
-      self.moveClickPos = mousePos;
+      self.selectedLabel.movePos = self.selectedLabel.getCurrentPosition();
+      self.selectedLabel.moveClickPos = mousePos;
       self.state = 'move';
+      self.selectedLabel.state = 'move';
     } else if (!self.selectedLabel) {
       // otherwise, new label
       let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
@@ -777,57 +788,17 @@ SatImage.prototype._mousedown = function(e) {
         categoryPath: cat, occl: occl,
         trunc: trunc, mousePos: mousePos,
       });
+      self.selectedLabel.state = 'resize';
       self.state = 'resize';
       self.currHandle = self.selectedLabel.INITIAL_HANDLE;
       self.resizeID = self.selectedLabel.id;
     }
   }
-  self._isMouseDown = true;
-
   if (!this._isWithinFrame(e)) {
     return;
   }
-
-  let currHandle;
-  [this.selectedLabel, currHandle] = this._getSelected(mousePos);
-  if (this.selectedLabel) {
-    this.selectedLabel.setCurrHandle(currHandle);
-  }
-  // change checked traits on label selection
-  if (this.selectedLabel) {
-    // label specific handling of mousedown
-    this.selectedLabel.mousedown(e);
-  } else {
-    // otherwise, new label
-    this.selectedLabel = this.sat.newLabel({
-      category: this.catSel.options[this.catSel.selectedIndex].innerHTML,
-      occl: this.occlCheckbox.checked,
-      trunc: this.truncCheckbox.checked,
-      mousePos: mousePos,
-    });
-  }
+  self._isMouseDown = true;
   this.redraw();
-};
-
-/**
- * Function to draw the crosshair
- * @param {object} e: mouse event
- */
-SatImage.prototype.drawCrossHair = function(e) {
-  let divRect = this.divCanvas.getBoundingClientRect();
-  let cH = $('#crosshair-h');
-  let cV = $('#crosshair-v');
-  cH.css('top', e.clientY);
-  cH.css('left', divRect.x);
-  cH.css('width', divRect.width);
-  cV.css('left', e.clientX);
-  cV.css('top', divRect.y);
-  cV.css('height', divRect.height);
-  if (this._isWithinFrame(e)) {
-    $('.hair').show();
-  } else {
-    $('.hair').hide();
-  }
 };
 
 /**
@@ -860,22 +831,10 @@ SatImage.prototype._mousemove = function(e) {
       this.imageCanvas.style.cursor = this.hoverLabel.getCursorStyle(
           this.hoverLabel.getCurrHoverHandle());
     } else {
-      this.imageCanvas.style.cursor = 'auto';
+      this.imageCanvas.style.cursor = 'crosshair';
     }
   }
   this.redraw();
-};
-
-/**
- * Called when this SatImage is active and the mouse is moved.
- * @param {object} e: mouse event
- */
-SatImage.prototype._scroll = function(e) {
-  let self = this;
-  if (self.sat.LabelType.useCrossHair) {
-    self.drawCrossHair(e);
-  }
-  self.redraw();
 };
 
 /**
@@ -883,7 +842,8 @@ SatImage.prototype._scroll = function(e) {
  * @param {object} _: mouse event (unused)
  */
 SatImage.prototype._mouseup = function(_) { // eslint-disable-line
-  self._isMouseDown = false;
+  this._isMouseDown = false;
+  this.state = 'free';
 
   if (this.selectedLabel) {
     // label specific handling of mouseup
@@ -893,6 +853,18 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
     }
   }
   this.redraw();
+};
+
+/**
+ * Called when this SatImage is active and the mouse is scrolled.
+ * @param {object} e: mouse event
+ */
+SatImage.prototype._scroll = function(e) {
+  let self = this;
+  if (self.sat.LabelType.useCrossHair) {
+    self.drawCrossHair(e);
+  }
+  self.redraw();
 };
 
 /**
@@ -1015,6 +987,24 @@ SatImage.prototype._truncSwitch = function() {
         this.trunc = $('[name=\'truncated-checkbox\']').prop(
             'checked');
     }
+};
+
+/**
+ * Increase button handler
+ */
+SatImage.prototype._incHandler = function() {
+  let self = this;
+  self.setScale(self.scale * self.SCALE_RATIO);
+  self.redraw();
+};
+
+/**
+ * Decrease button handler
+ */
+SatImage.prototype._decHandler = function() {
+  let self = this;
+  self.setScale(self.scale / self.SCALE_RATIO);
+  self.redraw();
 };
 
 /**
@@ -1244,6 +1234,12 @@ ImageLabel.useCrossHair = false;
 
 ImageLabel.prototype.getCurrentPosition = function() {
 
+};
+
+ImageLabel.prototype.fromJsonPointers = function(json) {
+  let self = this;
+  self.decodeBaseJsonPointers(json);
+  self.image = self.sat.currentItem;
 };
 
 /**
