@@ -83,6 +83,9 @@ function Sat(ItemType, LabelType) {
   this.getIpInfo();
 }
 
+/**
+ * Store IP information describing the user using the freegeoip service.
+ */
 Sat.prototype.getIpInfo = function() {
   let self = this;
   $.getJSON('http://freegeoip.net/json/?callback=?', function(data) {
@@ -90,6 +93,11 @@ Sat.prototype.getIpInfo = function() {
   });
 };
 
+/**
+ * Create a new item for this SAT.
+ * @param {string} url - Location of the new item.
+ * @return {SatItem} - The new item.
+ */
 Sat.prototype.newItem = function(url) {
   let self = this;
   let item = new self.ItemType(self, self.items.length, url);
@@ -97,12 +105,22 @@ Sat.prototype.newItem = function(url) {
   return item;
 };
 
+/**
+ * Get a new label ID.
+ * @return {int} - The new label ID.
+ */
 Sat.prototype.newLabelId = function() {
   let newId = this.lastLabelId + 1;
   this.lastLabelId = newId;
   return newId;
 };
 
+/**
+ * Create a new label for this SAT.
+ * @param {object} optionalAttributes - Optional attributes that may be used by
+ *   subclasses of SatLabel.
+ * @return {SatLabel} - The new label.
+ */
 Sat.prototype.newLabel = function(optionalAttributes) {
   let self = this;
   let label = new self.LabelType(self, self.newLabelId(), optionalAttributes);
@@ -112,6 +130,14 @@ Sat.prototype.newLabel = function(optionalAttributes) {
   return label;
 };
 
+/**
+ * Add an event to this SAT.
+ * @param {string} action - The action triggering the event.
+ * @param {int} itemIndex - Index of the item on which the event occurred.
+ * @param {int} labelId - ID of the label pertaining to the event.
+ * @param {object} position - Object storing some representation of position at
+ *   which this event occurred.
+ */
 Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
                                   position = null) {
   this.events.push({
@@ -123,6 +149,10 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
   });
 };
 
+/**
+ * Go to an item in this SAT, setting it to active.
+ * @param {int} index - Index of the item to go to.
+ */
 Sat.prototype.gotoItem = function(index) {
   let self = this;
   // mod the index to wrap around the list
@@ -137,7 +167,9 @@ Sat.prototype.gotoItem = function(index) {
   self.currentItem.redraw();
 };
 
-// TODO
+/**
+ * Load this SAT from the back end.
+ */
 Sat.prototype.load = function() {
   let self = this;
   let xhr = new XMLHttpRequest();
@@ -147,12 +179,11 @@ Sat.prototype.load = function() {
       self.fromJson(json);
     }
   };
-  // get params from url path
+  // get params from url path. These uniquely identify a SAT.
   let searchParams = new URLSearchParams(window.location.search);
   self.taskIndex = parseInt(searchParams.get('task_index'));
   self.projectName = searchParams.get('project_name');
-
-  // ?
+  // send the request to the back end
   let request = JSON.stringify({
     'index': self.taskIndex,
     'projectName': self.projectName,
@@ -181,6 +212,11 @@ Sat.prototype.toJson = function() {
   return self.encodeBaseJsonRepresentation();
 };
 
+/**
+ * Encode the base SAT objects. This should NOT be overloaded. Instead,
+ * overload Sat.prototype.toJson()
+ * @return {object} - JSON representation of the base functionality in this
+ *   SAT. */
 Sat.prototype.encodeBaseJsonRepresentation = function() {
   let self = this;
   let items = [];
@@ -207,13 +243,18 @@ Sat.prototype.encodeBaseJsonRepresentation = function() {
 
 /**
  * Initialize this session from a JSON representation
- * @param {string} json - The JSON representation
+ * @param {string} json - The JSON representation.
  */
 Sat.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJsonRepresentation(json);
 };
 
+/**
+ * Decode the base SAT objects. This should NOT be overloaded. Instead,
+ * overload Sat.prototype.fromJson()
+ * @param {string} json - The JSON representation.
+ */
 Sat.prototype.decodeBaseJsonRepresentation = function(json) {
   let self = this;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
@@ -243,7 +284,7 @@ Sat.prototype.decodeBaseJsonRepresentation = function(json) {
  * Base class for each labeling target, can be pointcloud or 2D image
  * @param {Sat} sat: context
  * @param {number} index: index of this item in sat
- * @param {string | null} url: url to load the item
+ * @param {string} url: url to load the item
  */
 function SatItem(sat, index = -1, url = '') {
   let self = this;
@@ -254,11 +295,18 @@ function SatItem(sat, index = -1, url = '') {
   self.ready = false; // is this needed?
 }
 
+/**
+ * Called when this item is loaded.
+ */
 SatItem.prototype.loaded = function() {
   this.ready = true;
   this.sat.addEvent('loaded', this.index);
 };
 
+/**
+ * Get the item before this one.
+ * @return {SatItem} the item before this one
+ */
 SatItem.prototype.previousItem = function() {
   if (this.index === 0) {
     return null;
@@ -266,6 +314,10 @@ SatItem.prototype.previousItem = function() {
   return this.sat.items[this.index-1];
 };
 
+/**
+ * Get the SatItem after this one.
+ * @return {SatItem} the item after this one
+ */
 SatItem.prototype.nextItem = function() {
   if (this.index + 1 >= this.sat.items.length) {
     return null;
@@ -273,6 +325,10 @@ SatItem.prototype.nextItem = function() {
   return this.sat.items[this.index+1];
 };
 
+/**
+ * Get this SatItem's JSON representation.
+ * @return {object} JSON representation of this item
+ */
 SatItem.prototype.toJson = function() {
   let self = this;
   let labelIds = [];
@@ -303,6 +359,10 @@ SatItem.prototype.fromJson = function(selfJson) {
   }
 };
 
+/**
+ * Get all the visible labels in this SatItem.
+ * @return {Array} list of all visible labels in this SatItem
+ */
 SatItem.prototype.getVisibleLabels = function() {
   let labels = [];
   for (let i = 0; i < this.labels.length; i++) {
@@ -313,6 +373,7 @@ SatItem.prototype.getVisibleLabels = function() {
   return labels;
 };
 
+// TODO: remove this function
 SatItem.prototype.deleteLabelById = function(labelId, back = true) {
   // TODO: refactor this ugly code
   let self = this;
@@ -477,11 +538,6 @@ SatImage.prototype.setActive = function(active) {
       $('#remove_btn').off();
     }
   }
-};
-
-SatImage.prototype.loaded = function() {
-  // Call SatItem loaded
-  SatItem.prototype.loaded.call(this);
 };
 
 /**
