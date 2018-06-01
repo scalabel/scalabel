@@ -209,7 +209,7 @@ Sat.prototype.save = function() {
  */
 Sat.prototype.toJson = function() {
   let self = this;
-  return self.encodeBaseJsonRepresentation();
+  return self.encodeBaseJson();
 };
 
 /**
@@ -217,7 +217,7 @@ Sat.prototype.toJson = function() {
  * overload Sat.prototype.toJson()
  * @return {object} - JSON representation of the base functionality in this
  *   SAT. */
-Sat.prototype.encodeBaseJsonRepresentation = function() {
+Sat.prototype.encodeBaseJson = function() {
   let self = this;
   let items = [];
   for (let i = 0; i < self.items.length; i++) {
@@ -247,7 +247,7 @@ Sat.prototype.encodeBaseJsonRepresentation = function() {
  */
 Sat.prototype.fromJson = function(json) {
   let self = this;
-  self.decodeBaseJsonRepresentation(json);
+  self.decodeBaseJson(json);
 };
 
 /**
@@ -255,7 +255,7 @@ Sat.prototype.fromJson = function(json) {
  * overload Sat.prototype.fromJson()
  * @param {string} json - The JSON representation.
  */
-Sat.prototype.decodeBaseJsonRepresentation = function(json) {
+Sat.prototype.decodeBaseJson = function(json) {
   let self = this;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID
@@ -911,7 +911,7 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
   return sprintf('rgba(%d, %d, %d, %f)', c[0], c[1], c[2], alpha);
 };
 
-SatLabel.prototype.encodeBaseJsonRepresentation = function() {
+SatLabel.prototype.encodeBaseJson = function() {
   let self = this;
   let json = {id: self.id, categoryPath: self.categoryPath};
   if (self.parent) {
@@ -947,10 +947,10 @@ SatLabel.prototype.encodeBaseJsonRepresentation = function() {
  */
 SatLabel.prototype.toJson = function() {
   let self = this;
-  return self.encodeBaseJsonRepresentation();
+  return self.encodeBaseJson();
 };
 
-SatLabel.prototype.decodeBaseJsonRepresentationVariables = function(json) {
+SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   let self = this;
   self.id = json.id;
   self.categoryPath = json.categoryPath;
@@ -964,7 +964,7 @@ SatLabel.prototype.decodeBaseJsonRepresentationVariables = function(json) {
   }
 };
 
-SatLabel.prototype.decodeBaseJsonRepresentationPointers = function(json) {
+SatLabel.prototype.decodeBaseJsonPointers = function(json) {
   let self = this;
   let labelIdMap = self.sat.labelIdMap;
   if (json.parent > -1) {
@@ -984,12 +984,12 @@ SatLabel.prototype.decodeBaseJsonRepresentationPointers = function(json) {
  */
 SatLabel.prototype.fromJsonVariables = function(json) {
   let self = this;
-  self.decodeBaseJsonRepresentationVariables(json);
+  self.decodeBaseJsonVariables(json);
 };
 
 SatLabel.prototype.fromJsonPointers = function(json) {
   let self = this;
-  self.decodeBaseJsonRepresentationPointers(json);
+  self.decodeBaseJsonPointers(json);
 };
 
 SatLabel.prototype.startChange = function() {

@@ -44,7 +44,7 @@ Box2d.prototype = Object.create(ImageLabel.prototype);
 
 Box2d.prototype.toJson = function() {
   let self = this;
-  let json = self.encodeBaseJsonRepresentation();
+  let json = self.encodeBaseJson();
   json.box2d = {x: self.x, y: self.y, w: self.w, h: self.h};
   // TODO: customizable
   json.attributeValues = {occlusion: self.occl, truncation: self.trunc};
@@ -57,7 +57,7 @@ Box2d.prototype.toJson = function() {
  */
 Box2d.prototype.fromJsonVariables = function(json) {
   let self = this;
-  self.decodeBaseJsonRepresentationVariables(json);
+  self.decodeBaseJsonVariables(json);
   self.x = json.box2d.x;
   self.y = json.box2d.y;
   self.w = json.box2d.w;
