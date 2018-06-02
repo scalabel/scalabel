@@ -2,13 +2,12 @@ package main
 
 import (
 	"flag"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -19,7 +18,7 @@ var (
 	configPath = flag.String("config", "", "")
 )
 
-// Environment details specified in config.json
+// Stores the config info found in config.yml
 type Env struct {
 	Port        string `yaml:"port"`
 	DataDir     string `yaml:"dataDir"`
@@ -27,11 +26,11 @@ type Env struct {
 }
 
 func Init(
+	// Initialize all the loggers
 	traceHandle io.Writer,
 	infoHandle io.Writer,
 	warningHandle io.Writer,
 	errorHandle io.Writer) {
-
 	Trace = log.New(traceHandle,
 		"TRACE: ",
 		log.Ldate|log.Ltime)
@@ -48,14 +47,15 @@ func Init(
 		"ERROR: ",
 		log.Ldate|log.Ltime)
 
+	// Handle the flags (right now only have config path)
 	flag.StringVar(configPath, "s", "", "Path to config.yml")
 	flag.Parse()
-
 	if *configPath == "" {
 		log.Fatal("Must include --config flag with path to config.yml")
 	}
 }
 
+// Initialize the environment from the config file
 func NewEnv() *Env {
 	env := new(Env)
 	// read config file
@@ -84,14 +84,18 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir(env.ProjectPath+"/app")))
 
 	// serve the frames directory
-	// serveStaticDirectory("data", "frames")
 	fileServer := http.FileServer(http.Dir(env.DataDir + "/frames"))
 	strippedHandler := http.StripPrefix("/frames/", fileServer)
 	http.Handle("/frames/", strippedHandler)
 
-	// routes
+	// flow control handlers
 	http.HandleFunc("/", parse(indexHandler))
-
+	http.HandleFunc("/dashboard", dashboardHandler)
+	http.HandleFunc("/postProject", postProjectHandler)
+	http.HandleFunc("/postSave", postSaveHandler)
+	http.HandleFunc("/postSubmission", postSubmissionHandler)
+	http.HandleFunc("/postLoadTask", postLoadTaskHandler)
+	
 	// Simple static handlers can be generated with MakeStandardHandler
 	http.HandleFunc("/create",
 		MakeStandardHandler("/app/control/create.html"))
@@ -104,23 +108,9 @@ func main() {
 	http.HandleFunc("/image_labeling",
 		MakeStandardHandler("/app/annotation/image.html"))
 
-	http.HandleFunc("/dashboard", dashboardHandler)
-
-	http.HandleFunc("/2d_bbox_labeling", box2DLabelingHandler)
-
-	http.HandleFunc("/result", readResultHandler)
-	http.HandleFunc("/fullResult", readFullResultHandler)
-
-	http.HandleFunc("/postAssignment", postAssignmentHandler)
-	http.HandleFunc("/postSubmission", postSubmissionHandler)
-	http.HandleFunc("/postLog", postLogHandler)
-	http.HandleFunc("/requestAssignment", requestAssignmentHandler)
-	http.HandleFunc("/requestSubmission", requestSubmissionHandler)
-	http.HandleFunc("/requestInfo", requestInfoHandler)
-
-	http.HandleFunc("/postVideoAssignment", postVideoAssignmentHandler)
+	// labeling handlers
+	http.HandleFunc("/2d_bbox_labeling", box2dLabelingHandler)
 	http.HandleFunc("/video_bbox_labeling", videoLabelingHandler)
 
 	log.Fatal(http.ListenAndServe(":"+env.Port, nil))
-
 }

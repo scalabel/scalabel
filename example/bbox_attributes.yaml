@@ -1,0 +1,27 @@
+-
+  name: Occluded
+  toolType: switch
+  tagText: o
+-
+  name: Truncated
+  toolType: switch
+  tagText: t
+-
+  name: Traffic Light Color
+  toolType: list
+  values:
+    - NA
+    - G
+    - Y
+    - R
+  tagPrefix: t
+  tagSuffixes:
+    - ""
+    - g
+    - y
+    - r
+  buttonColors:
+    - white
+    - green
+    - yellow
+    - red

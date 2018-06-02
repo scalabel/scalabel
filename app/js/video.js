@@ -8,7 +8,7 @@ function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
 
-  self.videoName = document.getElementById('video_name').innerHTML;
+  // self.videoName = document.getElementById('video_name').innerHTML;
   self.frameRate = document.getElementById('frame_rate').innerHTML;
   self.frameCounter = document.getElementById('frame_counter');
   self.playButton = document.getElementById('play_button');
@@ -16,18 +16,8 @@ function SatVideo(LabelType) {
   self.slider = document.getElementById('video_slider');
   self.numFrames = self.slider.max;
 
-  // initialize all of the items (SatImage objects, one per frame)
-  for (let i = 1; i <= self.numFrames; i++) {
-    let frameString = i.toString();
-    while (frameString.length < 7) {
-      frameString = '0' + frameString;
-    }
-    self.newItem('./frames/' + self.videoName.slice(0, -4) + '/f-' +
-      frameString + '.jpg');
-  }
-
-  self.currentFrame = 0;
-  self.currentItem = self.items[self.currentFrame];
+  self.load();
+  self.currentItem = self.items[0];
   self.currentItem.setActive(true);
   self.currentItem.image.onload = function() {
     self.currentItem.redraw();};
@@ -46,22 +36,39 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
   let label = new self.LabelType(self, labelId, optionalAttributes);
   self.labelIdMap[label.id] = label;
   self.labels.push(label);
-  let previousLabel = null;
-  for (let i = self.currentFrame; i < self.items.length; i++) {
+  let previousLabelId = -1;
+  for (let i = self.currentItem.index; i < self.items.length; i++) {
     let labelId = self.newLabelId();
     let childLabel = new self.LabelType(self, labelId, optionalAttributes);
     childLabel.parent = label;
-    self.items[i].labels.push(childLabel);
+    self.labelIdMap[childLabel.id] = childLabel;
+    self.labels.push(childLabel);
     label.addChild(childLabel);
-    if (previousLabel) {
-      previousLabel.nextLabel = childLabel;
+    self.items[i].labels.push(childLabel);
+    if (previousLabelId > -1) {
+      self.labelIdMap[previousLabelId].nextLabelId = childLabel.id;
     }
-    childLabel.previousLabel = previousLabel;
-    previousLabel = childLabel;
+    childLabel.previousLabelId = previousLabelId;
+    previousLabelId = childLabel.id;
   }
-  previousLabel.nextLabel = null;
-  let currentFrameLabels = self.items[self.currentFrame].labels;
-  return currentFrameLabels[currentFrameLabels.length - 1];
+  if (previousLabelId > -1) {
+    self.labelIdMap[previousLabelId].nextLabelId = -1;
+  }
+  return self.currentItem.labels[
+    self.currentItem.labels.length - 1];
+};
+
+SatVideo.prototype.toJson = function() {
+  let self = this;
+  let json = self.encodeBaseJson();
+  json.metadata = self.metadata;
+  return json;
+};
+
+SatVideo.prototype.fromJson = function(json) {
+  let self = this;
+  self.decodeBaseJson(json);
+  self.metadata = json.metadata;
 };
 
 // TODO: this needs to be agnostic of label type!!!
@@ -72,13 +79,13 @@ SatVideo.prototype.interpolate = function(startSatLabel) {
 
   let priorKeyframe = null;
   let nextKeyframe = null;
-  for (let i = 0; i < self.currentFrame; i++) {
+  for (let i = 0; i < self.currentItem.index; i++) {
     if (startSatLabel.parent.children[i].keyframe) {
       priorKeyframe = i;
       break;
     }
   }
-  for (let i = self.currentFrame + 1;
+  for (let i = self.currentItem.index + 1;
     i < startSatLabel.parent.children.length; i++) {
     if (startSatLabel.parent.children[i].keyframe) {
       nextKeyframe = i;
@@ -87,8 +94,8 @@ SatVideo.prototype.interpolate = function(startSatLabel) {
   }
   if (priorKeyframe !== null) {
     // if there's an earlier keyframe, interpolate
-    for (let i = priorKeyframe; i < self.currentFrame; i++) {
-      let weight = i/(self.currentFrame);
+    for (let i = priorKeyframe; i < self.currentItem.index; i++) {
+      let weight = i/(self.currentItem.index);
       // TODO: this is the part that makes too many assumptions (maybe)
       startSatLabel.parent.children[i].weightedAvg(
         startSatLabel.parent.children[priorKeyframe], startSatLabel, weight);
@@ -96,19 +103,36 @@ SatVideo.prototype.interpolate = function(startSatLabel) {
   }
   if (nextKeyframe !== null) {
     // if there's a later keyframe, interpolate
-    for (let i = self.currentFrame + 1; i < nextKeyframe; i++) {
-      let weight = (i - self.currentFrame) / (nextKeyframe - self.currentFrame);
+    for (let i = self.currentItem.index + 1; i < nextKeyframe; i++) {
+      let weight = (i - self.currentItem.index) /
+        (nextKeyframe - self.currentItem.index);
       // TODO: this is the part that makes too many assumptions (maybe)
       startSatLabel.parent.children[i].weightAvg(startSatLabel,
         startSatLabel.parent.children[nextKeyframe], weight);
     }
   } else {
     // otherwise, just apply change to remaining items
-    for (let i = self.currentFrame + 1;
+    for (let i = self.currentItem.index + 1;
       i < startSatLabel.parent.children.length; i++) {
       startSatLabel.parent.children[i].weightedAvg(
         startSatLabel, startSatLabel, 0);
     }
+  }
+};
+
+SatVideo.prototype.gotoItem = function(index) {
+  let self = this;
+  if (index >= 0 && index < self.items.length) {
+    self.currentItem.setActive(false);
+    self.currentItem = self.items[index];
+    self.frameCounter.innerHTML = self.currentItem.index + 1;
+    self.currentItem.setActive(true);
+    self.currentItem.onload = function() {
+      self.currentItem.redraw();
+    };
+    self.currentItem.redraw();
+    self.slider.value = index + 1;
+    self.frameCounter.innerHTML = index + 1;
   }
 };
 
@@ -135,12 +159,11 @@ SatVideo.prototype.clickPlayPause = function(e) {
 
 SatVideo.prototype.nextFrame = function() {
   let self = this;
-  if (self.currentFrame < self.numFrames - 1) {
-    self.currentFrame++;
-    self.currentItem = self.items[self.currentFrame];
-    self.slider.value = self.currentFrame + 1;
-    self.frameCounter.innerHTML = self.currentFrame + 1;
-    self.items[self.currentFrame - 1].setActive(false);
+  if (self.currentItem.index < self.numFrames - 1) {
+    self.currentItem = self.items[self.currentItem.index + 1];
+    self.slider.value = self.currentItem.index + 1;
+    self.frameCounter.innerHTML = self.currentItem.index + 1;
+    self.items[self.currentItem.index - 1].setActive(false);
     self.currentItem.setActive(true);
     self.currentItem.redraw();
   } else {
@@ -148,30 +171,14 @@ SatVideo.prototype.nextFrame = function() {
   }
 };
 
-SatVideo.prototype.gotoItem = function(index) {
-  let self = this;
-  if (index >= 0 && index < self.items.length) {
-    self.currentFrame = index;
-    self.currentItem.setActive(false);
-    self.currentItem = self.items[self.currentFrame];
-    self.currentItem.setActive(true);
-    self.currentItem.onload = function() {
-      self.currentItem.redraw();
-    };
-    self.currentItem.redraw();
-    self.slider.value = index;
-    self.frameCounter.innerHTML = index + 1;
-  }
-};
 
 SatVideo.prototype.moveSlider = function() {
   let self = this;
   let oldItem = self.currentItem;
-  self.currentFrame = parseInt(self.slider.value) - 1;
-  self.currentItem = self.items[self.currentFrame];
+  self.currentItem = self.items[parseInt(self.slider.value) - 1];
   if (oldItem) {
     oldItem.setActive(false);
   }
   self.currentItem.setActive(true);
-  self.frameCounter.innerHTML = self.currentFrame + 1;
+  self.frameCounter.innerHTML = self.currentItem.index + 1;
 };

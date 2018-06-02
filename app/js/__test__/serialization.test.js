@@ -21,7 +21,8 @@ label.numChildren = label.children.length;
 
 let json1 = label.toJson();
 let label2 = new SatLabel(sat);
-label2.fromJson(json1);
+label2.fromJsonVariables(json1);
+label2.fromJsonPointers(json1);
 let json2 = label2.toJson();
 
 test('fromJson and toJson should preserve all the info', () => {

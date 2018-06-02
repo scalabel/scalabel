@@ -12,17 +12,19 @@ function Box2d(sat, id, kargs) {
   // TODO: separate category and attributes in kargs
   ImageLabel.call(this, sat, id);
 
-  this.name = kargs.category;
-  // TODO: Move those to attributes
-  // TODO: don't use abbreviation here
-  this.occl = kargs.occl;
-  this.trunc = kargs.trunc;
+  if (kargs) {
+    this.categoryPath = kargs.categoryPath;
+    // TODO: Move those to attributes
+    // TODO: don't use abbreviation here
+    this.occl = kargs.occl;
+    this.trunc = kargs.trunc;
 
-  // TODO: move the coordinates to one object
-  this.x = kargs.mousePos.x;
-  this.y = kargs.mousePos.y;
-  this.w = 0;
-  this.h = 0;
+    // TODO: move the coordinates to one object
+    this.x = kargs.mousePos.x;
+    this.y = kargs.mousePos.y;
+    this.w = 0;
+    this.h = 0;
+  }
 
   // constants
   // TODO: Move out, we don't have to keep a copy of constants in every object
@@ -36,8 +38,6 @@ function Box2d(sat, id, kargs) {
   this.MIN_BOX_SIZE = 15;
   this.FADED_ALPHA = 0.5;
   this.INITIAL_HANDLE = 5; // for the bottom-right of the box
-
-  this.state = 'resize';
   this.currHandle = this.INITIAL_HANDLE;
 }
 
@@ -47,10 +47,10 @@ Box2d.useCrossHair = true;
 
 Box2d.prototype.toJson = function() {
   let self = this;
-  let json = ImageLabel.prototype.toJson();
+  let json = self.encodeBaseJson();
   json.box2d = {x: self.x, y: self.y, w: self.w, h: self.h};
-  // TODO: remove this special attribute assignment
-  json.attributes = {occlusion: self.occl, truncation: self.trunc};
+  // TODO: customizable
+  json.attributeValues = {occlusion: self.occl, truncation: self.trunc};
   return json;
 };
 
@@ -58,16 +58,15 @@ Box2d.prototype.toJson = function() {
  * Load label information from json object
  * @param {object} json: JSON representation of this Box2d.
  */
-Box2d.prototype.fromJson = function(json) {
+Box2d.prototype.fromJsonVariables = function(json) {
   let self = this;
-  ImageLabel.prototype.fromJson(json);
+  self.decodeBaseJsonVariables(json);
   self.x = json.box2d.x;
   self.y = json.box2d.y;
   self.w = json.box2d.w;
   self.h = json.box2d.h;
-  // TODO: stop hardcoding occl and trunc attributes
-  self.occl = json.attributes.occlusion;
-  self.trunc = json.attributes.truncation;
+  self.occl = json.attributeValues.occlusion;
+  self.trunc = json.attributeValues.truncation;
 };
 
 /**
@@ -94,8 +93,8 @@ Box2d.prototype.redraw = function(mainCtx, hiddenCtx, selectedBox,
     self.drawHandles(mainCtx);
   }
 
-  if (hoverBox && self.id === hoverBox.id) {
-    self.drawHandles(mainCtx);
+  if (hoverBox && self.id === hoverBox.id && self.currHoverHandle) {
+    self.drawHandle(mainCtx, self.currHoverHandle);
   }
 
   // draw hidden elements
@@ -152,7 +151,7 @@ Box2d.prototype.drawTag = function(ctx) {
   let self = this;
   if (!self.isSmall()) {
     ctx.save();
-    let words = self.name.split(' ');
+    let words = self.categoryPath.split(' ');
     let tw = self.TAG_WIDTH;
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
@@ -261,8 +260,6 @@ Box2d.prototype.hiddenStyleColor = function(labelIndex, handleNo) {
 Box2d.prototype.getCursorStyle = function(handleNo) {
   if (this.state === 'resize') {
     return 'crosshair';
-  } else if (this.state === 'move') {
-    return 'move';
   } else {
     return ['move', 'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
       'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'][handleNo];
@@ -298,9 +295,9 @@ Box2d.prototype.resize = function(mousePos, currHandle, canvRect, padBox) {
     self.w += self.x - newX;
     self.x = newX;
   }
-  // if (self.parent) {
-  //   self.sat.interpolate(self); // TODO
-  // }
+  if (self.parent) {
+    self.sat.interpolate(self); // TODO
+  }
 };
 
 /**
@@ -325,9 +322,9 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
   // update
   self.x = movePos.x + delta.x;
   self.y = movePos.y + delta.y;
-  // if (self.parent) {
-  //   self.sat.interpolate(self); // TODO
-  // }
+  if (self.parent) {
+    self.sat.interpolate(self); // TODO
+  }
 };
 
 /**
@@ -491,25 +488,26 @@ Box2d.prototype.mouseup = function() {
   this.moveClickPos = null;
 
   // if parent label, make this the selected label in all other SatImages
+  let currentItem = this.sat.currentItem;
   if (this.parent) {
-    let currentItem = this.previousItem();
-    let currentLabel = this.previousLabel;
+    currentItem = currentItem.previousItem();
+    let currentLabel = this.sat.labelIdMap[this.previousLabelId];
     while (currentItem) {
       currentItem.selectedLabel = currentLabel;
       currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
       if (currentLabel) {
-        currentLabel = currentLabel.previousLabel;
+        currentLabel = this.sat.labelIdMap[currentLabel.previousLabelId];
         // TODO: make both be functions, not attributes
       }
       currentItem = currentItem.previousItem();
     }
-    currentItem = this.nextItem();
-    currentLabel = this.nextLabel;
+    currentItem = this.sat.currentItem.nextItem();
+    currentLabel = this.sat.labelIdMap[this.nextLabelId];
     while (currentItem) {
       currentItem.selectedLabel = currentLabel;
       currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
       if (currentLabel) {
-        currentLabel = currentLabel.nextLabel;
+        currentLabel = this.sat.labelIdMap[currentLabel.nextLabelId];
       }
       currentItem = currentItem.nextItem();
     }

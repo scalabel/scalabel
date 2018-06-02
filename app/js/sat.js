@@ -76,7 +76,7 @@ function Sat(ItemType, LabelType) {
   this.items = []; // a.k.a ImageList, but can be 3D model list
   this.labels = []; // list of label objects
   this.labelIdMap = {};
-  this.lastLabelId = 0;
+  this.lastLabelId = -1;
   this.currentItem = null;
   this.ItemType = ItemType;
   this.LabelType = LabelType;
@@ -85,20 +85,35 @@ function Sat(ItemType, LabelType) {
   this.taskId = null;
   this.projectName = null;
   this.ready = false;
+  this.getIpInfo();
 }
 
-Sat.prototype.getIPAddress = function() {
-  $.getJSON('https://api.ipify.org?format=jsonp&callback=?', function(json) {
-    this.ipAddress = json.ip;
+/**
+ * Store IP information describing the user using the freegeoip service.
+ */
+Sat.prototype.getIpInfo = function() {
+  let self = this;
+  $.getJSON('http://freegeoip.net/json/?callback=?', function(data) {
+    self.ipInfo = data;
   });
 };
 
+/**
+ * Create a new item for this SAT.
+ * @param {string} url - Location of the new item.
+ * @return {SatItem} - The new item.
+ */
 Sat.prototype.newItem = function(url) {
-  let item = new this.ItemType(this, this.items.length, url);
-  this.items.push(item);
+  let self = this;
+  let item = new self.ItemType(self, self.items.length, url);
+  self.items.push(item);
   return item;
 };
 
+/**
+ * Get a new label ID.
+ * @return {int} - The new label ID.
+ */
 Sat.prototype.newLabelId = function() {
   let newId = this.lastLabelId + 1;
   while (newId in this.labelIdMap) {
@@ -108,12 +123,15 @@ Sat.prototype.newLabelId = function() {
   return newId;
 };
 
-Sat.prototype.newLabel = function(labelId = -1) {
+/**
+ * Create a new label for this SAT.
+ * @param {object} optionalAttributes - Optional attributes that may be used by
+ *   subclasses of SatLabel.
+ * @return {SatLabel} - The new label.
+ */
+Sat.prototype.newLabel = function(optionalAttributes) {
   let self = this;
-  if (labelId < 0) {
-    labelId = self.newLabelId();
-  }
-  let label = new self.LabelType(self, labelId);
+  let label = new self.LabelType(self, self.newLabelId(), optionalAttributes);
   self.labelIdMap[label.id] = label;
   self.labels.push(label);
   if (self.currentItem) {
@@ -122,6 +140,14 @@ Sat.prototype.newLabel = function(labelId = -1) {
   return label;
 };
 
+/**
+ * Add an event to this SAT.
+ * @param {string} action - The action triggering the event.
+ * @param {int} itemIndex - Index of the item on which the event occurred.
+ * @param {int} labelId - ID of the label pertaining to the event.
+ * @param {object} position - Object storing some representation of position at
+ *   which this event occurred.
+ */
 Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
                   position = null) {
   this.events.push({
@@ -133,9 +159,11 @@ Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
   });
 };
 
-// TODO
+/**
+ * Go to an item in this SAT, setting it to active.
+ * @param {int} index - Index of the item to go to.
+ */
 Sat.prototype.gotoItem = function(index) {
-  //  TODO: save
   // mod the index to wrap around the list
   let self = this;
   index = (index + self.items.length) % self.items.length;
@@ -153,7 +181,9 @@ Sat.prototype.loaded = function() {
     this.ready = true;
 };
 
-// TODO
+/**
+ * Load this SAT from the back end.
+ */
 Sat.prototype.load = function() {
   let self = this;
   let xhr = new XMLHttpRequest();
@@ -164,17 +194,16 @@ Sat.prototype.load = function() {
       self.loaded();
     }
   };
-  // get params from url path
+  // get params from url path. These uniquely identify a SAT.
   let searchParams = new URLSearchParams(window.location.search);
-  self.taskId = searchParams.get('task_id');
+  self.taskIndex = parseInt(searchParams.get('task_index'));
   self.projectName = searchParams.get('project_name');
-
-  // ?
+  // send the request to the back end
   let request = JSON.stringify({
-    'assignmentId': self.taskId,
+    'index': self.taskIndex,
     'projectName': self.projectName,
   });
-  xhr.open('POST', './requestSubmission');
+  xhr.open('POST', './postLoadTask', false);
   xhr.send(request);
 };
 
@@ -184,9 +213,8 @@ Sat.prototype.load = function() {
 Sat.prototype.save = function() {
   let self = this;
   let json = self.toJson();
-  // TODO: open a POST
   let xhr = new XMLHttpRequest();
-  xhr.open('POST', './postSubmission');
+  xhr.open('POST', './postSave');
   xhr.send(JSON.stringify(json));
 };
 
@@ -195,6 +223,16 @@ Sat.prototype.save = function() {
  * @return {{items: Array, labels: Array, events: *, userAgent: string}}
  */
 Sat.prototype.toJson = function() {
+  let self = this;
+  return self.encodeBaseJson();
+};
+
+/**
+ * Encode the base SAT objects. This should NOT be overloaded. Instead,
+ * overload Sat.prototype.toJson()
+ * @return {object} - JSON representation of the base functionality in this
+ *   SAT. */
+Sat.prototype.encodeBaseJson = function() {
   let self = this;
   let items = [];
   for (let i = 0; i < self.items.length; i++) {
@@ -207,25 +245,40 @@ Sat.prototype.toJson = function() {
     }
   }
   return {
+    projectName: self.projectName,
     startTime: self.startTime,
     items: items,
     labels: labels,
+    categories: self.categories,
     events: self.events,
     userAgent: navigator.userAgent,
-    ipAddress: self.ipAddress,
-    assignmentId: self.assignmentId,
-    projectName: self.projectName,
-    category: self.categories,
+    ipInfo: self.ipInfo,
   };
 };
 
+/**
+ * Initialize this session from a JSON representation
+ * @param {string} json - The JSON representation.
+ */
 Sat.prototype.fromJson = function(json) {
   let self = this;
-  if (json.labels) {
-    for (let i = 0; i < json.labels.length; i++) {
-      let newLabel = self.newLabel(json.labels[i].id);
-      newLabel.fromJson(json.labels[i]);
-    }
+  self.decodeBaseJson(json);
+};
+
+/**
+ * Decode the base SAT objects. This should NOT be overloaded. Instead,
+ * overload Sat.prototype.fromJson()
+ * @param {string} json - The JSON representation.
+ */
+Sat.prototype.decodeBaseJson = function(json) {
+  let self = this;
+  for (let i = 0; json.labels && i < json.labels.length; i++) {
+    // keep track of highest label ID
+    self.lastLabelId = Math.max(self.lastLabelId, json.labels[i].id);
+    let newLabel = new self.LabelType(self, json.labels[i].id);
+    newLabel.fromJsonVariables(json.labels[i]);
+    self.labelIdMap[newLabel.id] = newLabel;
+    self.labels.push(newLabel);
   }
 
   for (let i = 0; i < json.items.length; i++) {
@@ -239,6 +292,12 @@ Sat.prototype.fromJson = function(json) {
 
   self.currentItem = self.items[0];
   self.currentItem.setActive(true);
+  self.categories = json.categories;
+
+  for (let i = 0; json.labels && i < json.labels.length; i++) {
+    self.labelIdMap[json.labels[i].id].fromJsonPointers(json.labels[i]);
+  }
+  self.addEvent('start labeling', self.currentItem.index);
 };
 
 /**
@@ -271,30 +330,38 @@ Sat.prototype.getInfo = function() {
  * Base class for each labeling target, can be pointcloud or 2D image
  * @param {Sat} sat: context
  * @param {number} index: index of this item in sat
- * @param {string | null} url: url to load the item
+ * @param {string} url: url to load the item
  */
-function SatItem(sat, index = -1, url = null) {
-  this.sat = sat;
-  this.index = index;
-  this.url = url;
-  this.labels = [];
-  this.ready = false;
-  this.attributes = {};
+function SatItem(sat, index = -1, url = '') {
+  let self = this;
+  self.sat = sat;
+  self.index = index;
+  self.url = url;
+  self.labels = [];
+  self.ready = false; // is this needed?
 }
 
 SatItem.prototype.setActive = function(active) {
+  let self = this;
   if (active) {
-    this.addEvent('start labeling', self.index);
+    self.sat.addEvent('start labeling', self.index);
   } else {
-    this.addEvent('end labeling', self.index);
+    self.sat.addEvent('end labeling', self.index);
   }
 };
 
+/**
+ * Called when this item is loaded.
+ */
 SatItem.prototype.loaded = function() {
   this.ready = true;
   this.sat.addEvent('loaded', this.index);
 };
 
+/**
+ * Get the item before this one.
+ * @return {SatItem} the item before this one
+ */
 SatItem.prototype.previousItem = function() {
   if (this.index === 0) {
     return null;
@@ -302,6 +369,10 @@ SatItem.prototype.previousItem = function() {
   return this.sat.items[this.index-1];
 };
 
+/**
+ * Get the SatItem after this one.
+ * @return {SatItem} the item after this one
+ */
 SatItem.prototype.nextItem = function() {
   if (this.index + 1 >= this.sat.items.length) {
     return null;
@@ -309,6 +380,10 @@ SatItem.prototype.nextItem = function() {
   return this.sat.items[this.index+1];
 };
 
+/**
+ * Get this SatItem's JSON representation.
+ * @return {object} JSON representation of this item
+ */
 SatItem.prototype.toJson = function() {
   let self = this;
   let labelIds = [];
@@ -317,30 +392,33 @@ SatItem.prototype.toJson = function() {
       labelIds.push(self.labels[i].id);
     }
   }
-  return {url: self.url, index: self.index, labels: labelIds};
+  return {url: self.url, index: self.index, labelIds: labelIds};
 };
 
 /**
  * Restore this SatItem from JSON.
- * @param {object} json - JSON representation of this SatItem.
- * @param {string} json.url - This SatItem's url.
- * @param {number} json.index - This SatItem's index in
- * @param {list} json.labelIDs - The list of label ids of this SatItem's
+ * @param {object} selfJson - JSON representation of this SatItem.
+ * @param {string} selfJson.url - This SatItem's url.
+ * @param {number} selfJson.index - This SatItem's index in
+ * @param {list} selfJson.labelIds - The list of label ids of this SatItem's
  *   SatLabels.
  */
-SatItem.prototype.fromJson = function(json) {
+SatItem.prototype.fromJson = function(selfJson) {
   let self = this;
-  self.url = json.url;
-  // Remove this line because the index is set in Sat.newItem
-  // self.index = json.index;
-  if (json.labels) {
-    for (let i = 0; i < json.labels.length; i++) {
-      self.labels.push(self.sat.labelIdMap[json.labels[i]]);
+  self.url = selfJson.url;
+  self.index = selfJson.index;
+  if (selfJson.labelIds) {
+    for (let i = 0; i < selfJson.labelIds.length; i++) {
+      self.labels.push(self.sat.labelIdMap[selfJson.labelIds[i]]);
     }
   }
-  self.attributes = json.attributes;
+  self.attributes = selfJson.attributes;
 };
 
+/**
+ * Get all the visible labels in this SatItem.
+ * @return {Array} list of all visible labels in this SatItem
+ */
 SatItem.prototype.getVisibleLabels = function() {
   let labels = [];
   for (let i = 0; i < this.labels.length; i++) {
@@ -351,13 +429,14 @@ SatItem.prototype.getVisibleLabels = function() {
   return labels;
 };
 
+// TODO: remove this function
 SatItem.prototype.deleteLabelById = function(labelId, back = true) {
   // TODO: refactor this ugly code
   let self = this;
   for (let i = 0; i < self.labels.length; i++) {
     if (self.labels[i].id === labelId) {
       let currentItem = self.previousItem();
-      let currentLabel = self.labels[i].previousLabel;
+      let currentLabel = self.sat.labelIdMap[self.labels[i].previousLabelId];
       while (back && currentItem) {
         for (let j = 0; j < currentItem.labels.length; j++) {
           if (currentItem.labels[j].id === currentLabel.id) {
@@ -369,12 +448,12 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
           }
         }
         if (currentLabel) {
-          currentLabel = currentLabel.previousLabel;
+          currentLabel = self.sat.labelIdMap[currentLabel.previousLabelId];
         }
         currentItem = currentItem.previousItem();
       }
       currentItem = self.nextItem();
-      currentLabel = self.labels[i].nextLabel;
+      currentLabel = self.sat.labelIdMap[self.labels[i].nextLabelId];
       while (currentItem) {
         for (let j = 0; j < currentItem.labels.length; j++) {
           if (currentItem.labels[j].id === currentLabel.id) {
@@ -386,7 +465,7 @@ SatItem.prototype.deleteLabelById = function(labelId, back = true) {
           }
         }
         if (currentLabel) {
-          currentLabel = currentLabel.nextLabel;
+          currentLabel = self.sat.labelIdMap[currentLabel.nextLabelId];
         }
         currentItem = currentItem.nextItem();
       }
@@ -498,6 +577,26 @@ SatImage.prototype.setActive = function(active) {
   let deleteBtn = $('#delete_btn');
   let endBtn = $('#end_btn');
   if (active) {
+    self.imageCanvas = document.getElementById('image_canvas');
+    self.hiddenCanvas = document.getElementById('hidden_canvas');
+    self.mainCtx = self.imageCanvas.getContext('2d');
+    self.hiddenCtx = self.hiddenCanvas.getContext('2d');
+    self.state = 'free';
+    self.lastLabelID = -1;
+    self.padBox = self._getPadding();
+    self.catSel = document.getElementById('category_select');
+    self.catSel.selectedIndex = 0;
+    self.occlCheckbox = document.getElementById('occluded_checkbox');
+    self.truncCheckbox = document.getElementById('truncated_checkbox');
+    document.getElementById('prev_btn').onclick = function() {
+      self.sat.gotoItem(self.index - 1);
+    };
+    document.getElementById('next_btn').onclick = function() {
+      self.sat.gotoItem(self.index + 1);
+    };
+
+    // there may be some tension between this and the above block of code
+    // TODO: test
     self.imageCanvas.height = self.imageHeight;
     self.imageCanvas.width = self.imageWidth;
     self.hiddenCanvas.height = self.imageHeight;
@@ -525,12 +624,16 @@ SatImage.prototype.setActive = function(active) {
     document.getElementById('next_btn').onclick = function() {
       self.sat.gotoItem(self.index + 1);
     };
-    document.getElementById('increase_btn').onclick = function() {
-      self._incHandler();
-    };
-    document.getElementById('decrease_btn').onclick = function() {
-      self._decHandler();
-    };
+    if (document.getElementById('increase_btn')) {
+      document.getElementById('increase_btn').onclick = function() {
+        self._incHandler();
+      };
+    }
+    if (document.getElementById('decrease_btn')) {
+      document.getElementById('decrease_btn').onclick = function() {
+        self._decHandler();
+      };
+    }
     if (endBtn.length) {
       // if the end button exists (we have a sequence) then hook it up
       endBtn.click(function() {
@@ -596,24 +699,6 @@ SatImage.prototype.setActive = function(active) {
 };
 
 /**
- * Increase button handler
- */
-SatImage.prototype._incHandler = function() {
-  let self = this;
-  self.setScale(self.scale * self.SCALE_RATIO);
-  self.redraw();
-};
-
-/**
- * Decrease button handler
- */
-SatImage.prototype._decHandler = function() {
-  let self = this;
-  self.setScale(self.scale / self.SCALE_RATIO);
-  self.redraw();
-};
-
-/**
  * Redraws this SatImage and all labels.
  */
 SatImage.prototype.redraw = function() {
@@ -629,39 +714,6 @@ SatImage.prototype.redraw = function() {
     self.labels[i].redraw(self.mainCtx, self.hiddenCtx, self.selectedLabel,
       self.hoverLabel, i);
   }
-};
-
-/**
- * Called when this SatImage is active and the mouse is clicked.
- * @param {object} e: mouse event
- */
-SatImage.prototype._mousedown = function(e) {
-  self._isMouseDown = true;
-
-  if (!this._isWithinFrame(e)) {
-    return;
-  }
-
-  let mousePos = this._getMousePos(e);
-  let currHandle;
-  [this.selectedLabel, currHandle] = this._getSelected(mousePos);
-  if (this.selectedLabel) {
-    this.selectedLabel.setCurrHandle(currHandle);
-  }
-  // change checked traits on label selection
-  if (this.selectedLabel) {
-    // label specific handling of mousedown
-    this.selectedLabel.mousedown(e);
-  } else {
-    // otherwise, new label
-    this.selectedLabel = this.sat.newLabel({
-      category: this.catSel.options[this.catSel.selectedIndex].innerHTML,
-      occl: this.occlCheckbox.checked,
-      trunc: this.truncCheckbox.checked,
-      mousePos: mousePos,
-    });
-  }
-  this.redraw();
 };
 
 /**
@@ -683,6 +735,70 @@ SatImage.prototype.drawCrossHair = function(e) {
   } else {
     $('.hair').hide();
   }
+};
+
+/**
+ * Called when this SatImage is active and the mouse is clicked.
+ * @param {object} e: mouse event
+ */
+SatImage.prototype._mousedown = function(e) {
+  let self = this;
+  let mousePos = self._getMousePos(e);
+  if (self._isWithinFrame(e) && self.state === 'free') {
+    [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
+    // change checked traits on label selection
+    if (self.selectedLabel) {
+      self.selectedLabel.currHandle = self.currHandle;
+      for (let i = 0; i < self.catSel.options.length; i++) {
+        if (self.catSel.options[i].innerHTML ===
+          self.selectedLabel.categoryPath) {
+          self.catSel.selectedIndex = i;
+          break;
+        }
+      }
+      if ($('[name=\'occluded-checkbox\']').prop('checked') !==
+        self.selectedLabel.occl) {
+        $('[name=\'occluded-checkbox\']').trigger('click');
+      }
+      if ($('[name=\'truncated-checkbox\']').prop('checked') !==
+        self.selectedLabel.trunc) {
+        $('[name=\'truncated-checkbox\']').trigger('click');
+      }
+      // TODO: Wenqi
+      // traffic light color
+    }
+
+    if (self.selectedLabel && self.currHandle > 0) {
+      // if we have a resize handle
+      self.state = 'resize';
+      self.selectedLabel.state = 'resize';
+      self.resizeID = self.selectedLabel.id;
+    } else if (self.currHandle === 0 && self.selectedLabel) {
+      // if we have a move handle
+      self.selectedLabel.movePos = self.selectedLabel.getCurrentPosition();
+      self.selectedLabel.moveClickPos = mousePos;
+      self.state = 'move';
+      self.selectedLabel.state = 'move';
+    } else if (!self.selectedLabel) {
+      // otherwise, new label
+      let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+      let occl = self.occlCheckbox.checked;
+      let trunc = self.truncCheckbox.checked;
+      self.selectedLabel = self.sat.newLabel({
+        categoryPath: cat, occl: occl,
+        trunc: trunc, mousePos: mousePos,
+      });
+      self.selectedLabel.state = 'resize';
+      self.state = 'resize';
+      self.currHandle = self.selectedLabel.INITIAL_HANDLE;
+      self.resizeID = self.selectedLabel.id;
+    }
+  }
+  if (!this._isWithinFrame(e)) {
+    return;
+  }
+  self._isMouseDown = true;
+  this.redraw();
 };
 
 /**
@@ -715,22 +831,10 @@ SatImage.prototype._mousemove = function(e) {
       this.imageCanvas.style.cursor = this.hoverLabel.getCursorStyle(
           this.hoverLabel.getCurrHoverHandle());
     } else {
-      this.imageCanvas.style.cursor = 'auto';
+      this.imageCanvas.style.cursor = 'crosshair';
     }
   }
   this.redraw();
-};
-
-/**
- * Called when this SatImage is active and the mouse is moved.
- * @param {object} e: mouse event
- */
-SatImage.prototype._scroll = function(e) {
-  let self = this;
-  if (self.sat.LabelType.useCrossHair) {
-    self.drawCrossHair(e);
-  }
-  self.redraw();
 };
 
 /**
@@ -738,7 +842,8 @@ SatImage.prototype._scroll = function(e) {
  * @param {object} _: mouse event (unused)
  */
 SatImage.prototype._mouseup = function(_) { // eslint-disable-line
-  self._isMouseDown = false;
+  this._isMouseDown = false;
+  this.state = 'free';
 
   if (this.selectedLabel) {
     // label specific handling of mouseup
@@ -748,6 +853,18 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
     }
   }
   this.redraw();
+};
+
+/**
+ * Called when this SatImage is active and the mouse is scrolled.
+ * @param {object} e: mouse event
+ */
+SatImage.prototype._scroll = function(e) {
+  let self = this;
+  if (self.sat.LabelType.useCrossHair) {
+    self.drawCrossHair(e);
+  }
+  self.redraw();
 };
 
 /**
@@ -845,10 +962,11 @@ SatImage.prototype._getSelected = function(mousePos) {
  * Called when the selected category is changed.
  */
 SatImage.prototype._changeCat = function() {
-  if (this.selectedLabel) {
-    this.selectedLabel.name = this.catSel.options[
-        this.catSel.selectedIndex].innerHTML;
-    this.redraw();
+  let self = this;
+  if (self.selectedLabel) {
+    let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+    self.selectedLabel.categoryPath = option;
+    self.redraw();
   }
 };
 
@@ -869,6 +987,24 @@ SatImage.prototype._truncSwitch = function() {
         this.trunc = $('[name=\'truncated-checkbox\']').prop(
             'checked');
     }
+};
+
+/**
+ * Increase button handler
+ */
+SatImage.prototype._incHandler = function() {
+  let self = this;
+  self.setScale(self.scale * self.SCALE_RATIO);
+  self.redraw();
+};
+
+/**
+ * Decrease button handler
+ */
+SatImage.prototype._decHandler = function() {
+  let self = this;
+  self.setScale(self.scale / self.SCALE_RATIO);
+  self.redraw();
 };
 
 /**
@@ -896,7 +1032,7 @@ SatImage.prototype._lightSwitch = function() {
  */
 function SatLabel(sat, id = -1, ignored = null) {
   this.id = id;
-  this.name = null; // category or something else
+  this.categoryPath = null;
   this.attributes = {};
   this.sat = sat;
   this.parent = null;
@@ -971,48 +1107,88 @@ SatLabel.prototype.styleColor = function(alpha = 255) {
   return sprintf('rgba(%d, %d, %d, %f)', c[0], c[1], c[2], alpha);
 };
 
-/**
- * Return json object encoding the label information
- * @return {{id: *}}
- */
-SatLabel.prototype.toJson = function() {
+SatLabel.prototype.encodeBaseJson = function() {
   let self = this;
-  let json = {id: self.id, name: self.name};
-  if (self.parent !== null) json['parent'] = self.parent.id;
-  if (self.children.length > 0) {
+  let json = {id: self.id, categoryPath: self.categoryPath};
+  if (self.parent) {
+    json.parent = self.parent.id;
+  } else {
+    json.parent = -1;
+  }
+  if (self.children && self.children.length > 0) {
     let childrenIds = [];
     for (let i = 0; i < self.children.length; i++) {
       if (self.children[i].valid) {
         childrenIds.push(self.children[i].id);
       }
     }
-    json['children'] = childrenIds;
+    json.children = childrenIds;
   }
-  json.attributes = self.attributes;
+  json.previousLabelId = -1;
+  json.nextLabelId = -1;
+  if (self.previousLabelId) {
+    json.previousLabelId = self.previousLabelId;
+  }
+  if (self.nextLabelId) {
+    json.nextLabelId = self.nextLabelId;
+  }
+  // TODO: remove
+  json.keyframe = self.keyframe;
   return json;
+};
+
+/**
+ * Return json object encoding the label information
+ * @return {{id: *}}
+ */
+SatLabel.prototype.toJson = function() {
+  let self = this;
+  return self.encodeBaseJson();
+};
+
+SatLabel.prototype.decodeBaseJsonVariables = function(json) {
+  let self = this;
+  self.id = json.id;
+  self.categoryPath = json.categoryPath;
+  // TODO: remove
+  self.keyframe = json.keyframe;
+  if (json.previousLabelId > -1) {
+    self.previousLabelId = json.previousLabelId;
+  }
+  if (json.nextLabelId > -1) {
+    self.nextLabelId = json.nextLabelId;
+  }
+};
+
+SatLabel.prototype.decodeBaseJsonPointers = function(json) {
+  let self = this;
+  let labelIdMap = self.sat.labelIdMap;
+  labelIdMap[self.id] = self;
+  self.sat.lastLabelId = Math.max(self.sat.lastLabelId, self.id);
+  if (json.parent > -1) {
+    self.parent = labelIdMap[json.parent];
+  }
+
+  if (json.children) {
+    let childrenIds = json.children;
+    for (let i = 0; i < childrenIds.length; i++) {
+      self.addChild(labelIdMap[childrenIds[i]]);
+    }
+  }
 };
 
 /**
  * Load label information from json object
  * @param {object} json: JSON representation of this SatLabel.
  */
-SatLabel.prototype.fromJson = function(json) {
+SatLabel.prototype.fromJsonVariables = function(json) {
   let self = this;
-  self.id = json.id;
-  self.name = json.name;
-  let labelIdMap = self.sat.labelIdMap;
-  labelIdMap[self.id] = self;
-  self.sat.lastLabelId = Math.max(self.sat.lastLabelId, self.id);
-  if ('parent' in json) {
-    self.parent = labelIdMap[json['parent']];
-  }
-  if ('children' in json) {
-    let childrenIds = json['children'];
-    for (let i = 0; i < childrenIds.length; i++) {
-      self.addChild(labelIdMap[childrenIds[i]]);
-    }
-  }
-  self.attributes = json.attributes;
+  self.decodeBaseJsonVariables(json);
+};
+
+SatLabel.prototype.fromJsonPointers = function(json) {
+  let self = this;
+  self.decodeBaseJsonPointers(json);
 };
 
 SatLabel.prototype.startChange = function() {
@@ -1058,6 +1234,12 @@ ImageLabel.useCrossHair = false;
 
 ImageLabel.prototype.getCurrentPosition = function() {
 
+};
+
+ImageLabel.prototype.fromJsonPointers = function(json) {
+  let self = this;
+  self.decodeBaseJsonPointers(json);
+  self.image = self.sat.currentItem;
 };
 
 /**
@@ -1133,5 +1315,3 @@ ImageLabel.prototype.drawHandle = function(ctx, handleNo) {
   }
   ctx.restore(); // restore the canvas to saved settings
 };
-
-

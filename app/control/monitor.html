@@ -63,51 +63,26 @@
                             </tr>
                             </thead>
                             <tbody>
-                                <!-- iterate over tasks -->
-                                {{ range $key, $value := .Tasks }}
+                                 iterate over tasks
+                                {{ range $key, $value := . }}
                                 <tr>
                                     <th>
-                                        {{ $value.AssignmentID }}
+                                        {{ $value.Index }}
                                     </th>
                                     <th>
-                                        {{ $value.NumLabeledImages }}
+                                        <!--TODO-->
                                     </th>
                                     <th>
-                                        {{ $value.NumSubmissions }}
+                                        <!--TODO-->
                                     </th>
                                     <th>
-                                        <a href="{{ $value.TaskURL }}">
-                                            link
+                                        <a
+                                                href="./{{ $value.HandlerUrl }}?project_name={{ $value.ProjectName }}&task_index={{ $value.Index }}">
+                                            task link
                                         </a>
                                     </th>
                                     <th>
                                         <!-- TODO: result -->
-                                    </th>
-                                </tr>
-                                {{ end }}
-                            </tbody>
-                        </table>
-                        <table width="100%"
-                               class="table table-striped table-bordered table-hover"
-                               id="vid_table">
-                            <thead>
-                            <tr>
-                                <th>Task Link</th>
-                                <th>Task Result</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <!-- iterate over tasks -->
-                                {{ range $key, $value := .VideoTasks }}
-                                <tr>
-                                    <th>
-                                        <a href="{{ $value.TaskURL }}">
-                                            {{ $value.TaskName }}
-                                        </a>
-                                    </th>
-                                    <th>
-                                        <!-- TODO: result -->
-                                        under construction
                                     </th>
                                 </tr>
                                 {{ end }}
@@ -145,127 +120,6 @@
 
 <!-- Bootstrap Core JavaScript -->
 <script src="./js/thirdparty/bootstrap.min.js"></script>
-
-<script type="text/javascript">
-
-    function download(filename, text) {
-        var element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename);
-
-        element.style.display = 'none';
-        document.body.appendChild(element);
-
-        element.click();
-
-        document.body.removeChild(element);
-    }
-
-    function getID(id) {
-        var str = id.toString();
-        var len = str.length;
-        for (var i = 0; i < (4 - len); i++) {
-            str = "0" + str;
-        }
-        return str;
-    }
-
-    $(document).ready(function () {
-
-        var searchParams = new URLSearchParams(window.location.search);
-        var project_name = searchParams.get('project_name');
-        var num_assignments = searchParams.get('num_assignments');
-        var label_type = "";
-
-        $(".panel-heading").text(project_name);
-        var download_task_url = "";
-
-        for (var i = 0; i < num_assignments; i++) {
-            (function () {
-                var assignment_id = getID(i);
-                var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function () {
-                    var assignment;
-                    var num_labeled_images = 0;
-                    var num_submissions = 0;
-                    var task_url = "";
-                    var result_url = "";
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                        if (xhr.response) {
-                            assignment = JSON.parse(xhr.response);
-                            num_labeled_images = assignment.numLabeledImages;
-                            num_submissions = assignment.numSubmissions;
-                            label_type = assignment.labelType;
-                            task_url =  "./" + label_type + "_labeling?" +
-                                "task_id=" + assignment_id +
-                                "&project_name=" + project_name;
-
-                            download_task_url += task_url + "\n";
-
-                            result_url =
-                                "./result?" +
-                                "label_type=" + label_type +
-                                "&task_id=" + assignment_id +
-                                "&project_name=" + project_name;
-                        }
-                        var table_row = $('<tr>');
-                        $("#main_table").find('tbody').append(table_row);
-                        table_row.append($('<td>')
-                            .append($('<div></div>')
-                                .text(assignment_id)
-                            )
-                        );
-                        table_row.append($('<td align="center">')
-                            .append($('<div></div>')
-                                .text(num_labeled_images)
-                            )
-                        );
-                        table_row.append($('<td align="center">')
-                            .append($('<div></div>')
-                                .text(num_submissions)
-                            )
-                        );
-                        table_row.append($('<td>')
-                            .append($('<a href="">link</a>')
-                                .attr('href', task_url)
-                            )
-                        );
-                        table_row.append($('<td>')
-                            .append($('<a href="">link</a>')
-                                .attr('href', result_url)
-                            )
-                        );
-                    }
-                };
-
-                var request = JSON.stringify({
-                    "assignmentId": assignment_id,
-                    "projectName": project_name
-                });
-                xhr.open("POST", "./requestInfo", false);
-                xhr.send(request);
-            })();
-
-        }
-
-        $('#download_list').click(function () {
-            if (download_task_url) {
-                var filename = project_name + "_task_url.txt";
-                download(filename, download_task_url);
-            } else {
-                console.log("Task urls not available.")
-            }
-        });
-
-        $('#download_result').attr('href',
-            "./fullResult?" +
-            "label_type=" + label_type +
-            "&project_name=" + project_name);
-
-    });
-
-
-</script>
 
 </body>
 
