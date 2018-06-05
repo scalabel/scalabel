@@ -193,6 +193,9 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			Error.Println(err)
 		}
+		for i := 0; i < len(items); i++ {
+			items[i].Index = i;
+		}
 	}
 
 	// categories YAML

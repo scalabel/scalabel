@@ -1,4 +1,4 @@
-/* global Sat SatImage */
+/* global Sat SatImage ImageLabel */
 
 /**
  * Class for each video labeling session/task, uses SatImage items
@@ -171,7 +171,6 @@ SatVideo.prototype.nextFrame = function() {
   }
 };
 
-
 SatVideo.prototype.moveSlider = function() {
   let self = this;
   let oldItem = self.currentItem;
@@ -182,3 +181,17 @@ SatVideo.prototype.moveSlider = function() {
   self.currentItem.setActive(true);
   self.frameCounter.innerHTML = self.currentItem.index + 1;
 };
+
+
+/**
+ * TODO
+ * @param {Sat} sat: The labeling session
+ * @param {number} id: label object identifier
+ * @param {object} optionalAttributes: Optional attributes for the SatLabel.
+ * @constructor
+ */
+function Track(sat, id, optionalAttributes = null) {
+  ImageLabel.call(this, sat, id, optionalAttributes);
+}
+
+Track.prototype = Object.create(Track.prototype);

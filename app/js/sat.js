@@ -73,19 +73,23 @@ function pickColorPalette(index) {
  * @param {SatLabel} LabelType: label instantiation type
  */
 function Sat(ItemType, LabelType) {
-  this.items = []; // a.k.a ImageList, but can be 3D model list
-  this.labels = []; // list of label objects
-  this.labelIdMap = {};
-  this.lastLabelId = -1;
-  this.currentItem = null;
-  this.ItemType = ItemType;
-  this.LabelType = LabelType;
-  this.events = [];
-  this.startTime = Date.now();
-  this.taskId = null;
-  this.projectName = null;
-  this.ready = false;
-  this.getIpInfo();
+  let self = this;
+  self.items = []; // a.k.a ImageList, but can be 3D model list
+  self.labels = []; // list of label objects
+  self.labelIdMap = {};
+  self.lastLabelId = -1;
+  self.currentItem = null;
+  self.ItemType = ItemType;
+  self.LabelType = LabelType;
+  self.events = [];
+  self.startTime = Date.now();
+  self.taskId = null;
+  self.projectName = null;
+  self.ready = false;
+  self.getIpInfo();
+  self.slider = document.getElementById('slider');
+  self.numFrames = self.slider.max;
+  self.slider.oninput = function() {self.moveSlider();};
 }
 
 /**
@@ -175,6 +179,17 @@ Sat.prototype.gotoItem = function(index) {
     self.currentItem.redraw();
   };
   self.currentItem.redraw();
+  self.slider.value = index + 1;
+};
+
+Sat.prototype.moveSlider = function() {
+  let self = this;
+  let oldItem = self.currentItem;
+  self.currentItem = self.items[parseInt(self.slider.value) - 1];
+  if (oldItem) {
+    oldItem.setActive(false);
+  }
+  self.currentItem.setActive(true);
 };
 
 Sat.prototype.loaded = function() {

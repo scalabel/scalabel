@@ -551,7 +551,7 @@ SatImage.prototype._lightSwitch = function() {
  * NewObject.prototype = Object.create(ImageLabel.prototype);
  *
  * @param {Sat} sat: The labeling session
- * @param {number | null} id: label object identifier
+ * @param {number} id: label object identifier
  * @param {object} optionalAttributes: Optional attributes for the SatLabel.
  */
 function ImageLabel(sat, id, optionalAttributes = null) {
