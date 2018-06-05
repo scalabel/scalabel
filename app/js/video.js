@@ -1,4 +1,4 @@
-/* global Sat SatImage ImageLabel */
+/* global Sat SatImage SatLabel */
 
 /**
  * Class for each video labeling session/task, uses SatImage items
@@ -8,6 +8,7 @@ function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
 
+  self.tracks = []; // may not need this
   // self.videoName = document.getElementById('video_name').innerHTML;
   self.frameRate = document.getElementById('frame_rate').innerHTML;
   self.frameCounter = document.getElementById('frame_counter');
@@ -33,17 +34,18 @@ SatVideo.prototype = Object.create(Sat.prototype);
 SatVideo.prototype.newLabel = function(optionalAttributes) {
   let self = this;
   let labelId = self.newLabelId();
-  let label = new self.LabelType(self, labelId, optionalAttributes);
-  self.labelIdMap[label.id] = label;
-  self.labels.push(label);
-  let previousLabelId = -1;
+  let track = new Track(self, labelId, optionalAttributes);
+  self.labelIdMap[track.id] = track;
+  self.labels.push(track);
+  self.tracks.push(track);
+  let previousLabelId = -1; // -1 means null
   for (let i = self.currentItem.index; i < self.items.length; i++) {
     let labelId = self.newLabelId();
     let childLabel = new self.LabelType(self, labelId, optionalAttributes);
-    childLabel.parent = label;
+    childLabel.parent = track;
     self.labelIdMap[childLabel.id] = childLabel;
     self.labels.push(childLabel);
-    label.addChild(childLabel);
+    track.addChild(childLabel);
     self.items[i].labels.push(childLabel);
     if (previousLabelId > -1) {
       self.labelIdMap[previousLabelId].nextLabelId = childLabel.id;
@@ -61,6 +63,12 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
 SatVideo.prototype.toJson = function() {
   let self = this;
   let json = self.encodeBaseJson();
+  json.tracks = [];
+  for (let i = 0; i < self.tracks.length; i++) {
+    if (self.tracks[i].valid) {
+      json.tracks.push(self.tracks[i].toJson());
+    }
+  }
   json.metadata = self.metadata;
   return json;
 };
@@ -68,56 +76,11 @@ SatVideo.prototype.toJson = function() {
 SatVideo.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
+  self.tracks = [];
+  for (let i = 0; json.tracks && i < json.tracks.length; i++) {
+    self.tracks.push(self.labelIdMap[json.tracks[i]].id);
+  }
   self.metadata = json.metadata;
-};
-
-// TODO: this needs to be agnostic of label type!!!
-// Right now it assumes SatImage is a Box2d
-SatVideo.prototype.interpolate = function(startSatLabel) {
-  let self = this;
-  startSatLabel.keyframe = true;
-
-  let priorKeyframe = null;
-  let nextKeyframe = null;
-  for (let i = 0; i < self.currentItem.index; i++) {
-    if (startSatLabel.parent.children[i].keyframe) {
-      priorKeyframe = i;
-      break;
-    }
-  }
-  for (let i = self.currentItem.index + 1;
-    i < startSatLabel.parent.children.length; i++) {
-    if (startSatLabel.parent.children[i].keyframe) {
-      nextKeyframe = i;
-      break;
-    }
-  }
-  if (priorKeyframe !== null) {
-    // if there's an earlier keyframe, interpolate
-    for (let i = priorKeyframe; i < self.currentItem.index; i++) {
-      let weight = i/(self.currentItem.index);
-      // TODO: this is the part that makes too many assumptions (maybe)
-      startSatLabel.parent.children[i].weightedAvg(
-        startSatLabel.parent.children[priorKeyframe], startSatLabel, weight);
-    }
-  }
-  if (nextKeyframe !== null) {
-    // if there's a later keyframe, interpolate
-    for (let i = self.currentItem.index + 1; i < nextKeyframe; i++) {
-      let weight = (i - self.currentItem.index) /
-        (nextKeyframe - self.currentItem.index);
-      // TODO: this is the part that makes too many assumptions (maybe)
-      startSatLabel.parent.children[i].weightAvg(startSatLabel,
-        startSatLabel.parent.children[nextKeyframe], weight);
-    }
-  } else {
-    // otherwise, just apply change to remaining items
-    for (let i = self.currentItem.index + 1;
-      i < startSatLabel.parent.children.length; i++) {
-      startSatLabel.parent.children[i].weightedAvg(
-        startSatLabel, startSatLabel, 0);
-    }
-  }
 };
 
 SatVideo.prototype.gotoItem = function(index) {
@@ -191,7 +154,45 @@ SatVideo.prototype.moveSlider = function() {
  * @constructor
  */
 function Track(sat, id, optionalAttributes = null) {
-  ImageLabel.call(this, sat, id, optionalAttributes);
+  SatLabel.call(this, sat, id, optionalAttributes);
 }
 
-Track.prototype = Object.create(Track.prototype);
+Track.prototype = Object.create(SatLabel.prototype);
+
+Track.prototype.interpolate = function(startLabel) {
+  let self = this;
+  startLabel.keyframe = true;
+  let startIndex = null;
+  let priorKeyFrameIndex = 0;
+  let nextKeyFrameIndex = null;
+  // get the prior and next keyframe indices and the start index
+  for (let i = 0; i < self.children.length; i++) {
+    if (self.children[i].id === startLabel.id) {
+      startIndex = i;
+    } else if (startIndex && !nextKeyFrameIndex && self.children[i].keyframe) {
+      nextKeyFrameIndex = i;
+    }
+    if (!startIndex && self.children[i].keyframe) {
+      priorKeyFrameIndex = i;
+    }
+  }
+  // interpolate between the beginning of the track and the starting label
+  for (let i = priorKeyFrameIndex; i < startIndex; i++) {
+    let weight = i / startIndex;
+    self.children[i].weightedAvg(self.children[priorKeyFrameIndex], startLabel,
+      weight);
+  }
+  if (nextKeyFrameIndex) {
+    // if there is a later keyframe, interpolate
+    for (let i = startIndex; i < nextKeyFrameIndex; i++) {
+      let weight = i / (nextKeyFrameIndex - startIndex);
+      self.children[i].weightedAvg(startLabel, self.children[nextKeyFrameIndex],
+        weight);
+    }
+  } else {
+    // otherwise, just apply changes to remaining items
+    for (let i = startIndex; i < self.children.length; i++) {
+      self.children[i].weightedAvg(startLabel, startLabel, 0);
+    }
+  }
+};

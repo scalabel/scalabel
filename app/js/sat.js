@@ -88,8 +88,12 @@ function Sat(ItemType, LabelType) {
   self.ready = false;
   self.getIpInfo();
   self.slider = document.getElementById('slider');
-  self.numFrames = self.slider.max;
-  self.slider.oninput = function() {self.moveSlider();};
+  if (self.slider) {
+    self.numFrames = self.slider.max;
+    self.slider.oninput = function() {
+      self.moveSlider();
+    };
+  }
 }
 
 /**

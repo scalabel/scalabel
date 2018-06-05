@@ -1,6 +1,6 @@
 /* global ImageLabel */
 
-/* exported Box2d*/
+/* exported Box2d */
 
 /**
  * 2D box label
@@ -297,7 +297,7 @@ Box2d.prototype.resize = function(mousePos, currHandle, canvRect, padBox) {
     self.x = newX;
   }
   if (self.parent) {
-    self.sat.interpolate(self); // TODO
+    self.parent.interpolate(self); // TODO
   }
 };
 
@@ -324,7 +324,7 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
   self.x = movePos.x + delta.x;
   self.y = movePos.y + delta.y;
   if (self.parent) {
-    self.sat.interpolate(self); // TODO
+    self.parent.interpolate(self); // TODO
   }
 };
 
