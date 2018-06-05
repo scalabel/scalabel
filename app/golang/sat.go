@@ -34,6 +34,7 @@ type Task struct {
 	Index        int            `json:"index" yaml:"index"`
 	Items        []Item         `json:"items" yaml:"items"`
 	Labels       []Label        `json:"labels" yaml:"labels"`
+	Tracks       []Label        `json:"tracks" yaml:"tracks"`
 	Categories   []Category     `json:"categories" yaml:"categories"`
 	Attributes   []Attribute    `json:"attributes" yaml:"attributes"`
 	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`

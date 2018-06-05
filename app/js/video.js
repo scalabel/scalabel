@@ -78,7 +78,15 @@ SatVideo.prototype.fromJson = function(json) {
   self.decodeBaseJson(json);
   self.tracks = [];
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
-    self.tracks.push(self.labelIdMap[json.tracks[i]].id);
+    let track = new Track(self, json.tracks[i].id,
+      json.tracks[i].attributeValues);
+    track.children = [];
+    for (let j = 0; j < json.tracks[i].children.length; j++) {
+      track.children.push(self.labelIdMap[json.tracks[i].children[j]]);
+      self.labelIdMap[json.tracks[i].children[j]].parent = track;
+    }
+    self.labelIdMap[json.tracks[i].id] = track;
+    self.tracks.push(track);
   }
   self.metadata = json.metadata;
 };
@@ -184,8 +192,8 @@ Track.prototype.interpolate = function(startLabel) {
   }
   if (nextKeyFrameIndex) {
     // if there is a later keyframe, interpolate
-    for (let i = startIndex; i < nextKeyFrameIndex; i++) {
-      let weight = i / (nextKeyFrameIndex - startIndex);
+    for (let i = startIndex + 1; i < nextKeyFrameIndex; i++) {
+      let weight = (i - startIndex) / (nextKeyFrameIndex - startIndex);
       self.children[i].weightedAvg(startLabel, self.children[nextKeyFrameIndex],
         weight);
     }

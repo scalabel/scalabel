@@ -62,12 +62,16 @@ Box2d.prototype.toJson = function() {
 Box2d.prototype.fromJsonVariables = function(json) {
   let self = this;
   self.decodeBaseJsonVariables(json);
-  self.x = json.box2d.x;
-  self.y = json.box2d.y;
-  self.w = json.box2d.w;
-  self.h = json.box2d.h;
-  self.occl = json.attributeValues.occlusion;
-  self.trunc = json.attributeValues.truncation;
+  if (json.box2d) {
+    self.x = json.box2d.x;
+    self.y = json.box2d.y;
+    self.w = json.box2d.w;
+    self.h = json.box2d.h;
+  }
+  if (json.attributeValues) {
+    self.occl = json.attributeValues.occlusion;
+    self.trunc = json.attributeValues.truncation;
+  }
 };
 
 /**
