@@ -227,8 +227,14 @@ SatImage.prototype.setActive = function(active) {
  */
 SatImage.prototype.redraw = function() {
   let self = this;
+  // need to do some clean up at the beginning
+  if (self.selectedLabel && !self.selectedLabel.valid) {
+    self.selectedLabel = null;
+  }
   self.deleteInvalidLabels();
+  // update the padding box
   self.padBox = self._getPadding();
+  // draw stuff
   self.mainCtx.clearRect(0, 0, self.imageCanvas.width,
     self.imageCanvas.height);
   self.hiddenCtx.clearRect(0, 0, self.hiddenCanvas.width,
