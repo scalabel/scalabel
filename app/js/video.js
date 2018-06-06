@@ -82,7 +82,7 @@ SatVideo.prototype.fromJson = function(json) {
       json.tracks[i].attributeValues);
     track.children = [];
     for (let j = 0; j < json.tracks[i].children.length; j++) {
-      track.children.push(self.labelIdMap[json.tracks[i].children[j]]);
+      track.addChild(self.labelIdMap[json.tracks[i].children[j]]);
       self.labelIdMap[json.tracks[i].children[j]].parent = track;
     }
     self.labelIdMap[json.tracks[i].id] = track;
@@ -166,6 +166,25 @@ function Track(sat, id, optionalAttributes = null) {
 }
 
 Track.prototype = Object.create(SatLabel.prototype);
+
+// Track.prototype.childDeleted = function() {
+//   // TODO: update the behavior of track on child being too small
+//   this.delete();
+// };
+
+Track.prototype.endTrack = function(endLabel) {
+  let self = this;
+  let endIndex = null;
+  for (let i = 0; i < self.children.length; i++) {
+    if (endIndex) {
+      self.children[i].delete();
+    }
+    if (self.children[i].id === endLabel.id) {
+      endIndex = i;
+    }
+  }
+  self.children = self.children.slice(0, endIndex+1);
+};
 
 Track.prototype.interpolate = function(startLabel) {
   let self = this;

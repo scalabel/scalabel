@@ -162,7 +162,7 @@ SatImage.prototype.setActive = function(active) {
       // if the end button exists (we have a sequence) then hook it up
       endBtn.click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id, false);
+          self.selectedLabel.parent.endTrack(self.selectedLabel);
           self.redraw();
         }
       });
@@ -170,7 +170,7 @@ SatImage.prototype.setActive = function(active) {
     if (deleteBtn.length) {
       deleteBtn.click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
+          self.selectedLabel.delete();
           self.redraw();
         }
       });
@@ -178,7 +178,7 @@ SatImage.prototype.setActive = function(active) {
     if (removeBtn.length) {
       removeBtn.click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
+          self.selectedLabel.delete();
           self.redraw();
         }
       });
@@ -227,6 +227,7 @@ SatImage.prototype.setActive = function(active) {
  */
 SatImage.prototype.redraw = function() {
   let self = this;
+  self.deleteInvalidLabels();
   self.padBox = self._getPadding();
   self.mainCtx.clearRect(0, 0, self.imageCanvas.width,
     self.imageCanvas.height);
@@ -373,7 +374,7 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
     // label specific handling of mouseup
     this.selectedLabel.mouseup();
     if (this.selectedLabel.isSmall()) {
-      this.deleteLabelById(this.selectedLabel.id);
+      this.selectedLabel.delete();
     }
   }
   this.redraw();

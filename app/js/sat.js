@@ -448,51 +448,15 @@ SatItem.prototype.getVisibleLabels = function() {
   return labels;
 };
 
-// TODO: remove this function
-SatItem.prototype.deleteLabelById = function(labelId, back = true) {
-  // TODO: refactor this ugly code
+/**
+ * TODO
+ */
+SatItem.prototype.deleteInvalidLabels = function() {
   let self = this;
-  for (let i = 0; i < self.labels.length; i++) {
-    if (self.labels[i].id === labelId) {
-      let currentItem = self.previousItem();
-      let currentLabel = self.sat.labelIdMap[self.labels[i].previousLabelId];
-      while (back && currentItem) {
-        for (let j = 0; j < currentItem.labels.length; j++) {
-          if (currentItem.labels[j].id === currentLabel.id) {
-            currentItem.labels.splice(j, 1);
-            if (currentItem.selectedLabel &&
-              currentItem.selectedLabel.id === currentLabel.id) {
-              currentItem.selectedLabel = null;
-            }
-          }
-        }
-        if (currentLabel) {
-          currentLabel = self.sat.labelIdMap[currentLabel.previousLabelId];
-        }
-        currentItem = currentItem.previousItem();
-      }
-      currentItem = self.nextItem();
-      currentLabel = self.sat.labelIdMap[self.labels[i].nextLabelId];
-      while (currentItem) {
-        for (let j = 0; j < currentItem.labels.length; j++) {
-          if (currentItem.labels[j].id === currentLabel.id) {
-            currentItem.labels.splice(j, 1);
-            if (currentItem.selectedLabel &&
-              currentItem.selectedLabel.id === currentLabel.id) {
-              currentItem.selectedLabel = null;
-            }
-          }
-        }
-        if (currentLabel) {
-          currentLabel = self.sat.labelIdMap[currentLabel.nextLabelId];
-        }
-        currentItem = currentItem.nextItem();
-      }
+  for (let i = self.labels.length - 1; i >= 0; i--) {
+    if (!self.labels[i].valid) {
       self.labels.splice(i, 1);
-      if (self.selectedLabel && self.selectedLabel.id === labelId) {
-        self.selectedLabel = null;
-      }
-      return;
+      // TODO: remove from SAT
     }
   }
 };
@@ -529,14 +493,19 @@ function SatLabel(sat, id = -1, ignored = null) {
 
 SatLabel.prototype.delete = function() {
   this.valid = false;
-  if (this.parent !== null) {
-    this.parent.numChildren -= 1;
-    if (this.parent.numChildren === 0) this.parent.delete();
-  }
-  for (let i = 0; i < this.children.length; i++) {
+  for (let i = this.children.length - 1; i >= 0; i--) {
     this.children[i].parent = null;
     this.children[i].delete();
+    this.children.pop();
   }
+  if (this.parent) {
+    this.parent.childDeleted();
+  }
+};
+
+SatLabel.prototype.childDeleted = function() {
+  this.numChildren -= 1;
+  if (this.numChildren === 0) this.delete();
 };
 
 SatLabel.prototype.setCurrHandle = function(handle) {
