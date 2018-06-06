@@ -76,6 +76,7 @@ SatVideo.prototype.toJson = function() {
 SatVideo.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
+  self.metadata = json.metadata;
   self.tracks = [];
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
     let track = new Track(self, json.tracks[i].id,
@@ -84,11 +85,15 @@ SatVideo.prototype.fromJson = function(json) {
     for (let j = 0; j < json.tracks[i].children.length; j++) {
       track.addChild(self.labelIdMap[json.tracks[i].children[j]]);
       self.labelIdMap[json.tracks[i].children[j]].parent = track;
+      for (let k = 0; k < self.labels.length; k++) {
+        if (self.labels[k].id === track.id) {
+          self.labels[k] = track;
+        }
+      }
     }
     self.labelIdMap[json.tracks[i].id] = track;
     self.tracks.push(track);
   }
-  self.metadata = json.metadata;
 };
 
 SatVideo.prototype.gotoItem = function(index) {
@@ -167,10 +172,10 @@ function Track(sat, id, optionalAttributes = null) {
 
 Track.prototype = Object.create(SatLabel.prototype);
 
-// Track.prototype.childDeleted = function() {
-//   // TODO: update the behavior of track on child being too small
-//   this.delete();
-// };
+Track.prototype.childDeleted = function() {
+  // TODO: update the behavior of track on child being too small
+  this.delete();
+};
 
 Track.prototype.endTrack = function(endLabel) {
   let self = this;
