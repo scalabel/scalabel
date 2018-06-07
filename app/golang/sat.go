@@ -34,6 +34,7 @@ type Task struct {
 	Index        int            `json:"index" yaml:"index"`
 	Items        []Item         `json:"items" yaml:"items"`
 	Labels       []Label        `json:"labels" yaml:"labels"`
+	Tracks       []Label        `json:"tracks" yaml:"tracks"`
 	Categories   []Category     `json:"categories" yaml:"categories"`
 	Attributes   []Attribute    `json:"attributes" yaml:"attributes"`
 	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
@@ -192,6 +193,9 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
 		if err != nil {
 			Error.Println(err)
+		}
+		for i := 0; i < len(items); i++ {
+			items[i].Index = i;
 		}
 	}
 

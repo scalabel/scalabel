@@ -1,6 +1,6 @@
 /* global ImageLabel */
 
-/* exported Box2d*/
+/* exported Box2d */
 
 /**
  * 2D box label
@@ -62,12 +62,16 @@ Box2d.prototype.toJson = function() {
 Box2d.prototype.fromJsonVariables = function(json) {
   let self = this;
   self.decodeBaseJsonVariables(json);
-  self.x = json.box2d.x;
-  self.y = json.box2d.y;
-  self.w = json.box2d.w;
-  self.h = json.box2d.h;
-  self.occl = json.attributeValues.occlusion;
-  self.trunc = json.attributeValues.truncation;
+  if (json.box2d) {
+    self.x = json.box2d.x;
+    self.y = json.box2d.y;
+    self.w = json.box2d.w;
+    self.h = json.box2d.h;
+  }
+  if (json.attributeValues) {
+    self.occl = json.attributeValues.occlusion;
+    self.trunc = json.attributeValues.truncation;
+  }
 };
 
 /**
@@ -297,7 +301,7 @@ Box2d.prototype.resize = function(mousePos, currHandle, canvRect, padBox) {
     self.x = newX;
   }
   if (self.parent) {
-    self.sat.interpolate(self); // TODO
+    self.parent.interpolate(self); // TODO
   }
 };
 
@@ -324,7 +328,7 @@ Box2d.prototype.move = function(mousePos, movePos, moveClickPos, padBox) {
   self.x = movePos.x + delta.x;
   self.y = movePos.y + delta.y;
   if (self.parent) {
-    self.sat.interpolate(self); // TODO
+    self.parent.interpolate(self); // TODO
   }
 };
 

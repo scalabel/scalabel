@@ -162,7 +162,7 @@ SatImage.prototype.setActive = function(active) {
       // if the end button exists (we have a sequence) then hook it up
       endBtn.click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id, false);
+          self.selectedLabel.parent.endTrack(self.selectedLabel);
           self.redraw();
         }
       });
@@ -170,7 +170,7 @@ SatImage.prototype.setActive = function(active) {
     if (deleteBtn.length) {
       deleteBtn.click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
+          self.selectedLabel.delete();
           self.redraw();
         }
       });
@@ -178,7 +178,7 @@ SatImage.prototype.setActive = function(active) {
     if (removeBtn.length) {
       removeBtn.click(function() {
         if (self.selectedLabel) {
-          self.deleteLabelById(self.selectedLabel.id);
+          self.selectedLabel.delete();
           self.redraw();
         }
       });
@@ -227,7 +227,14 @@ SatImage.prototype.setActive = function(active) {
  */
 SatImage.prototype.redraw = function() {
   let self = this;
+  // need to do some clean up at the beginning
+  if (self.selectedLabel && !self.selectedLabel.valid) {
+    self.selectedLabel = null;
+  }
+  self.deleteInvalidLabels();
+  // update the padding box
   self.padBox = self._getPadding();
+  // draw stuff
   self.mainCtx.clearRect(0, 0, self.imageCanvas.width,
     self.imageCanvas.height);
   self.hiddenCtx.clearRect(0, 0, self.hiddenCanvas.width,
@@ -373,7 +380,7 @@ SatImage.prototype._mouseup = function(_) { // eslint-disable-line
     // label specific handling of mouseup
     this.selectedLabel.mouseup();
     if (this.selectedLabel.isSmall()) {
-      this.deleteLabelById(this.selectedLabel.id);
+      this.selectedLabel.delete();
     }
   }
   this.redraw();
@@ -551,7 +558,7 @@ SatImage.prototype._lightSwitch = function() {
  * NewObject.prototype = Object.create(ImageLabel.prototype);
  *
  * @param {Sat} sat: The labeling session
- * @param {number | null} id: label object identifier
+ * @param {number} id: label object identifier
  * @param {object} optionalAttributes: Optional attributes for the SatLabel.
  */
 function ImageLabel(sat, id, optionalAttributes = null) {
