@@ -449,16 +449,17 @@ SatItem.prototype.getVisibleLabels = function() {
 };
 
 /**
- * TODO
+ * Delete
  */
 SatItem.prototype.deleteInvalidLabels = function() {
   let self = this;
+  let valid = [];
   for (let i = self.labels.length - 1; i >= 0; i--) {
-    if (!self.labels[i].valid) {
-      self.labels.splice(i, 1);
-      // TODO: remove from SAT
+    if (self.labels[i].valid) {
+      valid.push(self.labels[i]);
     }
   }
+  self.labels = valid;
 };
 
 
