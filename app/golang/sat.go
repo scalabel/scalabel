@@ -131,6 +131,18 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, GetTasks())
 }
 
+func vendorHandler(w http.ResponseWriter, r *http.Request) {
+    tmpl, err := template.ParseFiles(env.ProjectPath + "/app/control/vendor.html")
+    if err != nil {
+            Error.Println(err)
+            http.NotFound(w, r)
+            return
+    }
+    Info.Println(GetTasks())
+    tmpl.Execute(w, GetTasks())
+}
+
+
 // TODO: split this function up
 // Handles the posting of new projects
 func postProjectHandler(w http.ResponseWriter, r *http.Request) {

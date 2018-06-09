@@ -91,6 +91,7 @@ func main() {
 	// flow control handlers
 	http.HandleFunc("/", parse(indexHandler))
 	http.HandleFunc("/dashboard", dashboardHandler)
+	http.HandleFunc("/vendor", vendorHandler)
 	http.HandleFunc("/postProject", postProjectHandler)
 	http.HandleFunc("/postSave", postSaveHandler)
 	http.HandleFunc("/postSubmission", postSubmissionHandler)

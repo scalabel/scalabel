@@ -1,12 +1,15 @@
 $(document).ready(function() {
   let dashboard = $('#go_to_dashboard');
+  let vendor = $('#go_to_vendor_dashboard');
   dashboard.hide();
+  vendor.hide();
   $('#project-form').submit(function(e) {
     e.preventDefault();
     let x = new XMLHttpRequest();
     x.onreadystatechange = function() {
       if (x.readyState === 4) {
         dashboard.show();
+        vendor.show();
       }
     };
     x.open('POST', './postProject');
