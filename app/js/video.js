@@ -172,6 +172,14 @@ function Track(sat, id, optionalAttributes = null) {
 
 Track.prototype = Object.create(SatLabel.prototype);
 
+Track.prototype.getActive = function() {
+  return this.active;
+};
+
+Track.prototype.setActive = function(active) {
+  this.active = active;
+};
+
 Track.prototype.childDeleted = function() {
   // TODO: update the behavior of track on child being too small
   this.delete();

@@ -100,6 +100,15 @@ SatImage.prototype.setActive = function(active) {
   let removeBtn = $('#remove_btn');
   let deleteBtn = $('#delete_btn');
   let endBtn = $('#end_btn');
+  // get which label is active
+  self.selectedLabel = null;
+  for (let i = 0; i < self.labels.length; i++) {
+    if (self.labels[i].getActive()) {
+      self.selectedLabel = self.labels[i];
+      self.currHandle = self.selectedLabel.INITIAL_HANDLE;
+      break;
+    }
+  }
   if (active) {
     self.imageCanvas = document.getElementById('image_canvas');
     self.hiddenCanvas = document.getElementById('hidden_canvas');
@@ -276,9 +285,13 @@ SatImage.prototype._mousedown = function(e) {
   let self = this;
   let mousePos = self._getMousePos(e);
   if (self._isWithinFrame(e) && self.state === 'free') {
+    if (self.selectedLabel) {
+      self.selectedLabel.setActive(false);
+    }
     [self.selectedLabel, self.currHandle] = self._getSelected(mousePos);
     // change checked traits on label selection
     if (self.selectedLabel) {
+      self.selectedLabel.setActive(true);
       self.selectedLabel.currHandle = self.currHandle;
       for (let i = 0; i < self.catSel.options.length; i++) {
         if (self.catSel.options[i].innerHTML ===
@@ -652,4 +665,16 @@ ImageLabel.prototype.drawHandle = function(ctx, handleNo) {
     }
   }
   ctx.restore(); // restore the canvas to saved settings
+};
+
+ImageLabel.prototype.getActive = function() {
+  return this.active || (this.parent && this.parent.getActive());
+};
+
+ImageLabel.prototype.setActive = function(active) {
+  if (this.parent) {
+    this.parent.setActive(active);
+  } else {
+    this.active = active;
+  }
 };

@@ -491,32 +491,6 @@ Box2d.prototype.mouseup = function() {
 
   this.movePos = null;
   this.moveClickPos = null;
-
-  // if parent label, make this the selected label in all other SatImages
-  let currentItem = this.sat.currentItem;
-  if (this.parent) {
-    currentItem = currentItem.previousItem();
-    let currentLabel = this.sat.labelIdMap[this.previousLabelId];
-    while (currentItem) {
-      currentItem.selectedLabel = currentLabel;
-      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
-      if (currentLabel) {
-        currentLabel = this.sat.labelIdMap[currentLabel.previousLabelId];
-        // TODO: make both be functions, not attributes
-      }
-      currentItem = currentItem.previousItem();
-    }
-    currentItem = this.sat.currentItem.nextItem();
-    currentLabel = this.sat.labelIdMap[this.nextLabelId];
-    while (currentItem) {
-      currentItem.selectedLabel = currentLabel;
-      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
-      if (currentLabel) {
-        currentLabel = this.sat.labelIdMap[currentLabel.nextLabelId];
-      }
-      currentItem = currentItem.nextItem();
-    }
-  }
 };
 
 Box2d.prototype.mousemove = function(e) {
