@@ -660,5 +660,3 @@ SatLabel.prototype.finishChange = function() {
 SatLabel.prototype.redraw = function() {
 
 };
-
-export {SatLabel};
