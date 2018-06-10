@@ -1,4 +1,4 @@
-package sat
+package main
 
 import (
 	"encoding/json"
