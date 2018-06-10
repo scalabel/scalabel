@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    canvas {
+        position: absolute;
+    }
+
+    canvas#main_canvas {
+        z-index: 3;
+    }
+
+    canvas#temp_canvas{
+        z-index: 4;
+    }
+
+    canvas#hidden_canvas {
+        z-index: 1;
+    }
+</style>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Labeling tool</title>
+
+    <link href="./css/style.css" rel="stylesheet">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="./css/bootstrap.css" rel="stylesheet">
+    <link href="./css/bootstrap-switch.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
+
+    <!-- Google Analytics -->
+    <script src="./js/thirdparty/analytics.js"></script>
+
+    <!-- jQuery -->
+    <script src="./js/thirdparty/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="./js/thirdparty/bootstrap.min.js"></script>
+    <script src="./js/thirdparty/tether.min.js"></script>
+    <script src="./js/thirdparty/bootstrap-switch.js"></script>
+
+</head>
+
+<body class="noselect">
+<!-- Page Content -->
+<div class="container" onselectstart="return false"
+     onselect='document.selection.empty()'
+     style="position:absolute;left:0px">
+
+    <!-- Heading -->
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="page-header" id="header">Segmentation Labeling Tool
+                <a href="http://data-bdd.berkeley.edu/label/seg/readme.html" target="view_window"
+                   class="btn btn-primary">Instructions</a>
+                <div class="btn-group">
+                    <button id="increase_btn"
+                            class="btn btn-primary">+
+                    </button>
+                    <button href="#" id="decrease_btn"
+                            class="btn btn-primary">-
+                    </button>
+                </div>
+
+                <button href="#" id="show_all"
+                        class="btn btn-primary">Hide All (H)</button>
+                <small class="col-lg-offset-1">Annotated:</small>
+                <small id="poly_count">0</small>
+
+                <a href="#" id="save_btn"
+                   style="position:absolute;right:15px;"
+                   class="btn btn-primary btn-primary">Save</a>
+            </h2>
+        </div>
+    </div>
+    <!-- /.row -->
+
+
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-sm-2">
+            <div class="panel panel-default" id="toolbox">
+                <div class="panel-heading active" id="toolhead">
+                    Toolbox
+                </div>
+                <a href="#" class="list-group-item">
+                    <div class="form-group">
+                        <p>Category</p>
+                        <select id="category_select"
+                                class="form-control" size="3"
+                                style="font-size:15px">
+                        </select>
+                        <hr>
+                        <select id="name_select"
+                                class="form-control" size="3"
+                                style="font-size:13px">
+                        </select>
+                    </div>
+                </a>
+                <a href="#" id="delete_btn"
+                   class="btn btn-primary btn-md list-group-item">Delete
+                    (Del)</a>
+                <a href="#" id="label_btn"
+                   class="btn btn-primary btn-md list-group-item">Hide
+                    Label (L)</a>
+                <a href="#" id="inside_btn"
+                   class="btn btn-primary btn-md list-group-item">On Top</a>
+                <a href="#" id="link_btn"
+                   class="btn btn-primary btn-md list-group-item">Link</a>
+            </div>
+        </div>
+
+        <canvas id="hidden_canvas" width="940" height="470" style="
+                position:absolute; background-size:contain" ></canvas>
+
+        <canvas id="main_canvas" width="940" height="470" style="
+            width:940; height:470; position:absolute; background-image: url('./img/loading.png');
+            background-size:cover; background-position: center;
+            background-repeat:no-repeat "></canvas>
+
+        <canvas id="temp_canvas" width="940" height="470" style="
+            width:940; height:470; position:absolute;"></canvas>
+
+    </div>
+
+    <div class="row">
+        <div id="control_panel">
+            <div class="col-sm-2">
+                <div class="btn-group">
+                    <button id="prev_btn"
+                            class="btn btn-primary">&laquo;</button>
+                    <button href="#" id="next_btn"
+                            class="btn btn-primary">&raquo;</button>
+                </div>
+                <div class="text-muted" id="progress"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- /.row -->
+    <!-- /.row -->
+
+
+    <!-- Footer -->
+    <footer>
+        <!--<div class="row">
+            <div class="col-lg-12">
+                <p>Copyright &copy; Your Website 2014</p>
+            </div>
+        </div>-->
+        <!-- /.row -->
+    </footer>
+
+</div>
+<!-- /.container -->
+
+<script src="./js/utils.js"></script>
+<script src="./js/sat.js"></script>
+<script src="./js/image.js"></script>
+<script src="./js/seg.js"></script>
+
+<script type="text/javascript">
+    // Record timestamp in milliseconds, action, and target image index
+    $(document).ready(function () {
+        $("#decrease_btn").attr("disabled", true);
+        $("#prev_btn").attr("disabled", true);
+        $("#next_btn").attr("disabled", true);
+        type = "poly";
+
+        LabelList = ["void", "flat", "construction", "object", "nature", "sky", "human", "vehicle"];
+        LabelChart[0] = ["unlabeled", "dynamic", "ego vehicle", "ground", "static"];
+        LabelChart[1] = ["parking", "rail track", "road", "sidewalk"];
+        LabelChart[2] = ["bridge", "building", "bus stop", "fence", "garage", "guard rail", "tunnel", "wall"];
+        LabelChart[3] = ["banner", "billboard", "fire hydrant", "lane divider", "mail box", "parking sign", "pole", "polegroup", "street light", "traffic cone", "traffic device", "traffic light", "traffic sign", "traffic sign frame", "trash can"];
+        LabelChart[4] = ["terrain", "vegetation"]
+        LabelChart[5] = ["sky"]
+        LabelChart[6] = ["person", "rider"]
+        LabelChart[7] = ["bicycle", "bus", "car", "caravan", "motorcycle", "trailer", "train", "truck"];
+
+        loadAssignment();
+
+    });
+
+
+</script>
+
+
+</body>
+
+</html>
