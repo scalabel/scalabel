@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Bounding box labeling tool</title>
+
+    <!-- Style CSS -->
+    <link href="./css/style.css" rel="stylesheet">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="./css/bootstrap.css" rel="stylesheet">
+    <link href="./css/bootstrap-switch.css" rel="stylesheet">
+
+</head>
+
+<body class="noselect">
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Heading -->
+        <div class="row p-0 m-0">
+            <div class="col-lg-12">
+                <h2 class="page-header">Bounding box labeling tool
+                    <small>verson 1.1</small>
+                    <a type="button" class="btn btn-info btn-popover" data-toggle="popover" data-placement="right" href="http://data-bdd.berkeley.edu/label/bbox/instruction.html" target="view_window" data-content="Please view instructions and annotate bounding boxes of given categories.">
+                        Instruction
+                    </a>
+                    <small class="col-lg-offset-2">Boxes: </small>
+                    <small id="bbox_count">0</small>
+                    <small class="col-lg-offset-0">Lights: </small>
+                    <small id="light_count">0</small>
+                    <a href="#" id="save_btn" style="position:absolute;right:15px;" class="btn btn-primary btn-primary">
+                        Save
+                    </a>
+                    <div class="btn-group">
+                        <button id="increase_btn" class="btn btn-primary">+</button>
+                        <button href="#" id="decrease_btn" class="btn btn-primary">-</button>
+                    </div>
+                </h2>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-md-2">
+                <div class="panel panel-default">
+                    <div id="toolbox" class="panel-heading active">
+                        Toolbox
+                    </div>
+                    <a href="#" class="list-group-item">
+                        <div class="form-group">
+                            <p>Label Category</p>
+                            <select id="category_select" size="10" class="form-control">
+                                <!-- iterate over object categories -->
+                                {{ range $key, $value := .Categories }}
+                                <option value={{$value}}>{{ $value.Name }}</option>
+                                {{ end }}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" name="occluded-checkbox" id="occluded_checkbox" data-on-color="info" data-on-text="Yes" data-off-text="No" data-size="small" data-label-text="Occluded">
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" name="truncated-checkbox" id="truncated_checkbox" data-on-color="info" data-on-text="Yes" data-off-text="No" data-size="small" data-label-text="Truncated">
+                        </div>
+                        <div class="form-group">
+                            <p>Traffic Light Color</p>
+                            <div id="radios" class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-sm btn-green">
+                                    <input type="radio" name="options" id="green"value="1"/>
+                                    G
+                                </label>
+                                <label class="btn btn-sm btn-yellow">
+                                    <input type="radio" name="options" id="yellow"value="42"/>
+                                    Y
+                                </label>
+                                <label class="btn btn-sm btn-red">
+                                    <input type="radio" name="options" id="red"value="0"/>
+                                    R
+                                </label>
+                                <label class="btn btn-sm btn-white checked">
+                                    <input type="radio" name="options" id="none"value="2"/>
+                                    NA
+                                </label>
+                            </div>
+                        </div>
+                        <a href="#" id="remove_btn" class="btn list-group-item">
+                            Remove
+                        </a>
+                    </a>
+                </div>
+            </div>
+            <div id="div_canvas" style=" position: relative; float: left; width: 900px; height: 470px; overflow:scroll; ">
+                <canvas id="image_canvas" width="900" height="470" style="position: absolute; background-image: url('./img/loading.png'); background-size:cover">
+                    Unsupported browser!
+                </canvas>
+                <canvas id="hidden_canvas" width="900" height="470" style="position: absolute; ">
+                    Unsupported browser!
+                </canvas>
+                <div id="crosshair-h" class="hair"></div>
+                <div id="crosshair-v" class="hair"></div>
+                <div id="slider_div">
+                    <!-- progress slider -->
+                    <input id="slider" class="slider" type="range"
+                           min="1" max="{{ len .Items }}"
+                           value="1"/>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div id="control_panel">
+                <div class="col-sm-2">
+                    <ul class="pagination" id="pagination_control">
+                        <li>
+                            <a id="prev_btn">
+                                &laquo;
+                            </a>
+                        </li>
+                        <li>
+                            <a id="next_btn">
+                                &raquo;
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+        <!--<div class="row">
+        <div class="col-lg-12">
+        <p>Copyright &copy; Your Website 2017</p>
+        </div>
+        </div>-->
+        <!-- /.row -->
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- Google Analytics -->
+    <script src="./js/thirdparty/analytics.js"></script>
+
+    <!-- jQuery -->
+    <script src="./js/thirdparty/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="./js/thirdparty/bootstrap.min.js"></script>
+    <script src="./js/thirdparty/tether.min.js"></script>
+    <script src="./js/thirdparty/bootstrap-switch.js"></script>
+
+    <!-- Helper JavaScript -->
+    <script src="./js/sat.js"></script>
+    <script src="./js/image.js"></script>
+    <!-- BBox Labeling JavaScript -->
+    <script src="./js/box2d.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            const type = "bbox";
+            let sat = new Sat(SatImage, Box2d);
+            sat.load();
+            // initialize the occluded/truncated switches with bootstrap
+            $('[name=\'occluded-checkbox\']').bootstrapSwitch();
+            $('[name=\'truncated-checkbox\']').bootstrapSwitch();
+          document.getElementById('save_btn').onclick = function() {sat.save()};
+        });
+
+    </script>
+
+</body>
+
+</html>

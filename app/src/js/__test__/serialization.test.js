@@ -1,4 +1,5 @@
-const SatLabel = require('../sat');
+// const SatLabel = require('../sat');
+import SatLabel from '../sat'
 
 let parent = {id: 0, valid: true};
 let child1 = {id: 2, valid: true};
