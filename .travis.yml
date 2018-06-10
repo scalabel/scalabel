@@ -13,6 +13,5 @@ script:
   - pycodestyle --show-source .
   - eslint .
   - go build -i -o $GOPATH/bin/sat ./server
-  - cp travis_config.yml config.yml
-  - go test ./... --travis --config ../../config.yml
+  - go test ./... --travis --config ../../app/config/travis_config.yml
   - npm test
