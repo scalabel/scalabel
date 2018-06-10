@@ -101,8 +101,6 @@ func NewEnv() *Env {
 	return env
 }
 
-var HTML []byte
-var mux *http.ServeMux
 var env Env
 
 func main() {
@@ -110,36 +108,34 @@ func main() {
 
 	env = *NewEnv()
 
-	// Mux for static files
-	mux = http.NewServeMux()
-	mux.Handle("/", http.FileServer(
-		http.Dir(path.Join(env.ProjectPath, env.AppDir))))
-
 	// serve the frames directory
 	fileServer := http.FileServer(http.Dir(path.Join(env.DataDir, "/frames")))
 	strippedHandler := http.StripPrefix("/frames/", fileServer)
 	http.Handle("/frames/", strippedHandler)
 
 	// flow control handlers
-	http.HandleFunc("/", parse(indexHandler))
-	http.HandleFunc("/dashboard", dashboardHandler)
-	http.HandleFunc("/vendor", vendorHandler)
-	http.HandleFunc("/postProject", postProjectHandler)
-	http.HandleFunc("/postSave", postSaveHandler)
-	http.HandleFunc("/postSubmission", postSubmissionHandler)
-	http.HandleFunc("/postLoadTask", postLoadTaskHandler)
+	//http.HandleFunc("/", parse(indexHandler))
+	http.HandleFunc("/", WrapHandler(http.FileServer(
+		http.Dir(path.Join(env.ProjectPath, env.AppDir)))))
+	http.HandleFunc("/dashboard", WrapHandleFunc(dashboardHandler))
+	http.HandleFunc("/vendor", WrapHandleFunc(vendorHandler))
+	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))
+	http.HandleFunc("/postSave", WrapHandleFunc(postSaveHandler))
+	http.HandleFunc("/postSubmission", WrapHandleFunc(postSubmissionHandler))
+	http.HandleFunc("/postLoadTask", WrapHandleFunc(postLoadTaskHandler))
 
-	// Simple static handlers can be generated with MakeStandardHandler
-	http.HandleFunc("/create", MakeStandardHandler(env.CreatePath()))
+	// Simple static handlers can be generated with MakePathHandleFunc
+	http.HandleFunc("/create", WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
 	http.HandleFunc("/2d_seg_labeling",
-		MakeStandardHandler(env.Seg2dPath()))
+		WrapHandleFunc(MakePathHandleFunc(env.Seg2dPath())))
 	//http.HandleFunc("/image_labeling",
-	//	MakeStandardHandler(path.Join(appDir, "/annotation/image.html")))
+	//	MakePathHandleFunc(path.Join(appDir, "/annotation/image.html")))
 
 	// labeling handlers
-	http.HandleFunc("/2d_bbox_labeling", box2dLabelingHandler)
-	http.HandleFunc("/video_bbox_labeling", videoLabelingHandler)
+	http.HandleFunc("/2d_bbox_labeling", WrapHandleFunc(box2dLabelingHandler))
+	http.HandleFunc("/video_bbox_labeling", WrapHandleFunc(videoLabelingHandler))
 
 	Info.Printf("Listening to Port %d", env.Port)
+	Info.Printf("Local URL: localhost:%d", env.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", env.Port), nil))
 }

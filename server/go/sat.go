@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"strings"
 )
 
 // Project is what the admin creates, specifying a list of items
@@ -91,21 +90,11 @@ type Attribute struct {
 type Event struct {
 }
 
-func parse(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if strings.ContainsRune(r.URL.Path, '.') {
-			mux.ServeHTTP(w, r)
-			return
-		}
-		h.ServeHTTP(w, r)
-	}
-}
-
 // Function type for handlers
-type handler func(http.ResponseWriter, *http.Request)
+type HandleFunc func(http.ResponseWriter, *http.Request)
 
-// MakeStandardHandler returns a function for handling static HTML
-func MakeStandardHandler(pagePath string) handler {
+// MakePathHandleFunc returns a function for handling static HTML
+func MakePathHandleFunc(pagePath string) HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		HTML, err := ioutil.ReadFile(pagePath)
 		if err != nil {
@@ -115,8 +104,18 @@ func MakeStandardHandler(pagePath string) handler {
 	}
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write(HTML)
+func WrapHandler(handler http.Handler) HandleFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
+		handler.ServeHTTP(w, r)
+	}
+}
+
+func WrapHandleFunc(fn HandleFunc) HandleFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
+		fn(w, r)
+	}
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
