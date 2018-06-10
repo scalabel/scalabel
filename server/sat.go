@@ -1,4 +1,4 @@
-package main
+package sat
 
 import (
 	"bytes"
@@ -29,14 +29,14 @@ type Project struct {
 
 // A chunk of a project
 type Task struct {
-	HandlerUrl   string         `json:"handlerUrl" yaml:"handlerUrl"`
-	ProjectName  string         `json:"projectName" yaml:"projectName"`
-	Index        int            `json:"index" yaml:"index"`
-	Items        []Item         `json:"items" yaml:"items"`
-	Labels       []Label        `json:"labels" yaml:"labels"`
-	Tracks       []Label        `json:"tracks" yaml:"tracks"`
-	Categories   []Category     `json:"categories" yaml:"categories"`
-	Attributes   []Attribute    `json:"attributes" yaml:"attributes"`
+	HandlerUrl    string        `json:"handlerUrl" yaml:"handlerUrl"`
+	ProjectName   string        `json:"projectName" yaml:"projectName"`
+	Index         int           `json:"index" yaml:"index"`
+	Items         []Item        `json:"items" yaml:"items"`
+	Labels        []Label       `json:"labels" yaml:"labels"`
+	Tracks        []Label       `json:"tracks" yaml:"tracks"`
+	Categories    []Category    `json:"categories" yaml:"categories"`
+	Attributes    []Attribute   `json:"attributes" yaml:"attributes"`
 	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
 }
 
@@ -107,7 +107,7 @@ type handler func(http.ResponseWriter, *http.Request)
 // MakeStandardHandler returns a function for handling static HTML
 func MakeStandardHandler(pagePath string) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
-		HTML, err := ioutil.ReadFile(env.ProjectPath + pagePath)
+		HTML, err := ioutil.ReadFile(pagePath)
 		if err != nil {
 			Error.Println(err)
 		}
@@ -121,7 +121,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert assignment links
-	tmpl, err := template.ParseFiles(env.ProjectPath + "/app/control/monitor.html")
+	tmpl, err := template.ParseFiles(
+		path.Join(env.MonitorPath()))
 	if err != nil {
 		Error.Println(err)
 		http.NotFound(w, r)
@@ -132,16 +133,15 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func vendorHandler(w http.ResponseWriter, r *http.Request) {
-    tmpl, err := template.ParseFiles(env.ProjectPath + "/app/control/vendor.html")
-    if err != nil {
-            Error.Println(err)
-            http.NotFound(w, r)
-            return
-    }
-    Info.Println(GetTasks())
-    tmpl.Execute(w, GetTasks())
+	tmpl, err := template.ParseFiles(env.VendorPath())
+	if err != nil {
+		Error.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+	Info.Println(GetTasks())
+	tmpl.Execute(w, GetTasks())
 }
-
 
 // TODO: split this function up
 // Handles the posting of new projects
@@ -174,7 +174,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		// in video, we only consider the first item, and
 		//   the item url is the frame directory
 		frameUrl := frameDirectoryItems[0].Url
-		framePath := env.DataDir + frameUrl[1:len(frameUrl)]
+		framePath := path.Join(env.DataDir, frameUrl[1:len(frameUrl)])
 		// if no frames directory for this vid, throw error
 		_, err := os.Stat(framePath)
 		if err != nil {
@@ -183,7 +183,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// get the video's metadata
-		mdContents, _ := ioutil.ReadFile(framePath + "/metadata.json")
+		mdContents, _ := ioutil.ReadFile(path.Join(framePath, "metadata.json"))
 		json.Unmarshal(mdContents, &vmd)
 		// get the URLs of all frame images
 		numFrames, err := strconv.Atoi(vmd.NumFrames)
@@ -196,7 +196,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 				frameString = "0" + frameString
 			}
 			frameItem := Item{
-				Url:   frameUrl + "/f-" + frameString + ".jpg",
+				Url:   path.Join(frameUrl, "f-"+frameString+".jpg"),
 				Index: i,
 			}
 			items = append(items, frameItem)
@@ -377,7 +377,7 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	Info.Println(task)
 
-	taskPath := path.Join(env.DataDir, "Tasks", task.ProjectName, strconv.Itoa(task.Index) + ".json")
+	taskPath := path.Join(env.DataDir, "tasks", task.ProjectName, strconv.Itoa(task.Index)+".json")
 	taskJson, err := json.MarshalIndent(task, "", "  ")
 	if err != nil {
 		Error.Println(err)

@@ -1,4 +1,4 @@
-package main
+package sat
 
 import (
 	"flag"
@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"fmt"
 )
 
 var (
@@ -17,18 +18,42 @@ var (
 	Warning    *log.Logger
 	Error      *log.Logger
 	configPath string
-	appDir string
 )
 
 // Stores the config info found in config.yml
 type Env struct {
-	Port        string `yaml:"port"`
+	Port        int    `yaml:"port"`
 	DataDir     string `yaml:"dataDir"`
 	ProjectPath string `yaml:"projectPath"`
+	AppDir      string `yaml:"AppDir"`
+}
+
+func (env Env) CreatePath() string {
+	return path.Join(env.ProjectPath, env.AppDir, "control/create.html")
+}
+
+func (env Env) MonitorPath() string {
+	return path.Join(env.ProjectPath, env.AppDir, "control/monitor.html")
+}
+
+func (env Env) VendorPath() string {
+	return path.Join(env.ProjectPath, env.AppDir, "control/vendor.html")
+}
+
+func (env Env) VideoPath() string {
+	return path.Join(env.ProjectPath, env.AppDir, "annotation/video.html")
+}
+
+func (env Env) Box2dPath() string {
+	return path.Join(env.ProjectPath, env.AppDir, "annotation/box.html")
+}
+
+func (env Env) Seg2dPath() string {
+	return path.Join(env.ProjectPath, env.AppDir, "annotation/seg.html")
 }
 
 func Init(
-	// Initialize all the loggers
+// Initialize all the loggers
 	traceHandle io.Writer,
 	infoHandle io.Writer,
 	warningHandle io.Writer,
@@ -50,8 +75,7 @@ func Init(
 		log.Ldate|log.Ltime)
 
 	// Handle the flags (right now only have config path)
-	flag.StringVar(&configPath, "s", "", "Path to config.yml")
-	flag.StringVar(&appDir, "d", "/app/src", "Interface directory")
+	flag.StringVar(&configPath, "config", "", "Path to config.yml")
 	flag.Parse()
 	if configPath == "" {
 		log.Fatal("Must include --config flag with path to config.yml")
@@ -63,12 +87,16 @@ func NewEnv() *Env {
 	env := new(Env)
 	// read config file
 	cfg, err := ioutil.ReadFile(configPath)
+	Info.Printf("Configuration:\n%s", cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 	err = yaml.Unmarshal(cfg, &env)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if env.AppDir == "" {
+		env.AppDir = "app/src"
 	}
 	return env
 }
@@ -84,10 +112,11 @@ func main() {
 
 	// Mux for static files
 	mux = http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir(env.ProjectPath+"/app")))
+	mux.Handle("/", http.FileServer(
+		http.Dir(path.Join(env.ProjectPath, env.AppDir))))
 
 	// serve the frames directory
-	fileServer := http.FileServer(http.Dir(env.DataDir + "/frames"))
+	fileServer := http.FileServer(http.Dir(path.Join(env.DataDir, "/frames")))
 	strippedHandler := http.StripPrefix("/frames/", fileServer)
 	http.Handle("/frames/", strippedHandler)
 
@@ -101,20 +130,16 @@ func main() {
 	http.HandleFunc("/postLoadTask", postLoadTaskHandler)
 
 	// Simple static handlers can be generated with MakeStandardHandler
-	http.HandleFunc("/create",
-		MakeStandardHandler(path.Join(appDir, "control/create.html")))
-	http.HandleFunc("/2d_road_labeling",
-		MakeStandardHandler(path.Join(appDir, "/annotation/road.html")))
+	http.HandleFunc("/create", MakeStandardHandler(env.CreatePath()))
 	http.HandleFunc("/2d_seg_labeling",
-		MakeStandardHandler(path.Join(appDir, "/annotation/seg.html")))
-	http.HandleFunc("/2d_lane_labeling",
-		MakeStandardHandler(path.Join(appDir, "/annotation/lane.html")))
-	http.HandleFunc("/image_labeling",
-		MakeStandardHandler(path.Join(appDir, "/annotation/image.html")))
+		MakeStandardHandler(env.Seg2dPath()))
+	//http.HandleFunc("/image_labeling",
+	//	MakeStandardHandler(path.Join(appDir, "/annotation/image.html")))
 
 	// labeling handlers
 	http.HandleFunc("/2d_bbox_labeling", box2dLabelingHandler)
 	http.HandleFunc("/video_bbox_labeling", videoLabelingHandler)
 
-	log.Fatal(http.ListenAndServe(":"+env.Port, nil))
+	Info.Printf("Listening to Port %d", env.Port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", env.Port), nil))
 }
