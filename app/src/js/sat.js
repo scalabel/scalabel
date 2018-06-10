@@ -1,16 +1,13 @@
-/* global sprintf module*/
 
+/* global module rgba */
 /* exported Sat SatItem SatLabel */
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = SatLabel;
 }
 
-/*
- Utilities
- */
-
-let COLOR_PALETTE = [
+// constants
+const COLOR_PALETTE = [
   [31, 119, 180],
   [174, 199, 232],
   [255, 127, 14],
@@ -44,7 +41,7 @@ function blendColor(rgb, base, ratio) {
   let newRgb = [0, 0, 0];
   for (let i = 0; i < 3; i++) {
     newRgb[i] = Math.max(0,
-      Math.min(255, rgb[i] + Math.round((base[i] - rgb[i]) * ratio)));
+        Math.min(255, rgb[i] + Math.round((base[i] - rgb[i]) * ratio)));
   }
   return newRgb;
 }
@@ -67,6 +64,7 @@ function pickColorPalette(index) {
   return rgb;
 }
 
+
 /**
  * Base class for each labeling session/task
  * @param {SatItem} ItemType: item instantiation type
@@ -87,7 +85,6 @@ function Sat(ItemType, LabelType) {
   self.projectName = null;
   self.ready = false;
   self.getIpInfo();
-  self.slider = document.getElementById('slider');
   if (self.slider) {
     self.numFrames = self.slider.max;
     self.slider.oninput = function() {
@@ -157,7 +154,7 @@ Sat.prototype.newLabel = function(optionalAttributes) {
  *   which this event occurred.
  */
 Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
-                  position = null) {
+                                  position = null) {
   this.events.push({
     timestamp: Date.now(),
     action: action,
@@ -197,7 +194,7 @@ Sat.prototype.moveSlider = function() {
 };
 
 Sat.prototype.loaded = function() {
-    this.ready = true;
+  this.ready = true;
 };
 
 /**
@@ -318,6 +315,7 @@ Sat.prototype.decodeBaseJson = function(json) {
   }
   self.addEvent('start labeling', self.currentItem.index);
 };
+
 
 /**
  * Information used for submission
@@ -454,7 +452,7 @@ SatItem.prototype.getVisibleLabels = function() {
 SatItem.prototype.deleteInvalidLabels = function() {
   let self = this;
   let valid = [];
-  for (let i = self.labels.length - 1; i >= 0; i--) {
+  for (let i = 0; i < self.labels.length; i++) {
     if (self.labels[i].valid) {
       valid.push(self.labels[i]);
     }
@@ -488,9 +486,20 @@ function SatLabel(sat, id = -1, ignored = null) {
   this.children = [];
   this.numChildren = 0;
   this.valid = true;
-  this.currHandle = 0;
-  this.currHoverHandle = 0;
+  this.selectedShape = null;
+  this.hoveredShape = null;
 }
+
+SatLabel.useCrossHair = false;
+
+
+/**
+ * Function to set the tool box of SatLabel.
+ * @param {object} satItem - the SatImage object.
+ */
+SatLabel.setToolBox = function(satItem) { // eslint-disable-line
+
+};
 
 SatLabel.prototype.delete = function() {
   this.valid = false;
@@ -509,20 +518,20 @@ SatLabel.prototype.childDeleted = function() {
   if (this.numChildren === 0) this.delete();
 };
 
-SatLabel.prototype.setCurrHandle = function(handle) {
-  this.currHandle = Math.max(0, handle);
+SatLabel.prototype.setSelectedShape = function(shape) {
+  this.selectedShape = shape;
 };
 
-SatLabel.prototype.setCurrHoverHandle = function(handle) {
-  this.currHoverHandle = Math.max(0, handle);
+SatLabel.prototype.setHoveredShape = function(shape) {
+  this.hoveredShape = shape;
 };
 
-SatLabel.prototype.getCurrHandle = function() {
-  return this.currHandle;
+SatLabel.prototype.getSelectedShape = function() {
+  return this.selectedShape;
 };
 
-SatLabel.prototype.getCurrHoverHandle = function() {
-  return this.currHoverHandle;
+SatLabel.prototype.getHoveredShape = function() {
+  return this.hoveredShape;
 };
 
 SatLabel.prototype.getRoot = function() {
@@ -536,7 +545,6 @@ SatLabel.prototype.getRoot = function() {
 SatLabel.prototype.getCurrentPosition = function() {
 
 };
-
 
 SatLabel.prototype.addChild = function(child) {
   this.numChildren += 1;
@@ -556,9 +564,8 @@ SatLabel.prototype.color = function() {
  * @param {number} alpha: color transparency
  * @return {[number,number,number]}
  */
-SatLabel.prototype.styleColor = function(alpha = 255) {
-  let c = this.color();
-  return sprintf('rgba(%d, %d, %d, %f)', c[0], c[1], c[2], alpha);
+SatLabel.prototype.styleColor = function(alpha = 1.0) {
+  return rgba(this.color(), alpha);
 };
 
 SatLabel.prototype.encodeBaseJson = function() {
@@ -644,6 +651,7 @@ SatLabel.prototype.fromJsonPointers = function(json) {
   let self = this;
   self.decodeBaseJsonPointers(json);
 };
+
 
 SatLabel.prototype.startChange = function() {
 
