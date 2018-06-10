@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 )
 
 var (
@@ -15,7 +16,8 @@ var (
 	Info       *log.Logger
 	Warning    *log.Logger
 	Error      *log.Logger
-	configPath = flag.String("config", "", "")
+	configPath string
+	appDir string
 )
 
 // Stores the config info found in config.yml
@@ -48,9 +50,10 @@ func Init(
 		log.Ldate|log.Ltime)
 
 	// Handle the flags (right now only have config path)
-	flag.StringVar(configPath, "s", "", "Path to config.yml")
+	flag.StringVar(&configPath, "s", "", "Path to config.yml")
+	flag.StringVar(&appDir, "d", "/app/src", "Interface directory")
 	flag.Parse()
-	if *configPath == "" {
+	if configPath == "" {
 		log.Fatal("Must include --config flag with path to config.yml")
 	}
 }
@@ -59,7 +62,7 @@ func Init(
 func NewEnv() *Env {
 	env := new(Env)
 	// read config file
-	cfg, err := ioutil.ReadFile(*configPath)
+	cfg, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,18 +99,18 @@ func main() {
 	http.HandleFunc("/postSave", postSaveHandler)
 	http.HandleFunc("/postSubmission", postSubmissionHandler)
 	http.HandleFunc("/postLoadTask", postLoadTaskHandler)
-	
+
 	// Simple static handlers can be generated with MakeStandardHandler
 	http.HandleFunc("/create",
-		MakeStandardHandler("/app/control/create.html"))
+		MakeStandardHandler(path.Join(appDir, "control/create.html")))
 	http.HandleFunc("/2d_road_labeling",
-		MakeStandardHandler("/app/annotation/road.html"))
+		MakeStandardHandler(path.Join(appDir, "/annotation/road.html")))
 	http.HandleFunc("/2d_seg_labeling",
-		MakeStandardHandler("/app/annotation/seg.html"))
+		MakeStandardHandler(path.Join(appDir, "/annotation/seg.html")))
 	http.HandleFunc("/2d_lane_labeling",
-		MakeStandardHandler("/app/annotation/lane.html"))
+		MakeStandardHandler(path.Join(appDir, "/annotation/lane.html")))
 	http.HandleFunc("/image_labeling",
-		MakeStandardHandler("/app/annotation/image.html"))
+		MakeStandardHandler(path.Join(appDir, "/annotation/image.html")))
 
 	// labeling handlers
 	http.HandleFunc("/2d_bbox_labeling", box2dLabelingHandler)
