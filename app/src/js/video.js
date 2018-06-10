@@ -41,6 +41,10 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
   let previousLabelId = -1; // -1 means null
   for (let i = self.currentItem.index; i < self.items.length; i++) {
     let labelId = self.newLabelId();
+    if (i > self.currentItem.index) {
+      optionalAttributes.shadow = true;
+      optionalAttributes.satItem = self.items[i];
+    }
     let childLabel = new self.LabelType(self, labelId, optionalAttributes);
     childLabel.parent = track;
     self.labelIdMap[childLabel.id] = childLabel;

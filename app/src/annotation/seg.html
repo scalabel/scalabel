@@ -1,23 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<style>
-    canvas {
-        position: absolute;
-    }
-
-    canvas#main_canvas {
-        z-index: 3;
-    }
-
-    canvas#temp_canvas{
-        z-index: 4;
-    }
-
-    canvas#hidden_canvas {
-        z-index: 1;
-    }
-</style>
-
 <head>
 
     <meta charset="utf-8">
@@ -26,136 +8,137 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Labeling tool</title>
+    <title>Segmentation labeling tool</title>
 
+    <!-- Style CSS -->
     <link href="./css/style.css" rel="stylesheet">
 
     <!-- Bootstrap Core CSS -->
     <link href="./css/bootstrap.css" rel="stylesheet">
     <link href="./css/bootstrap-switch.css" rel="stylesheet">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
-
-    <!-- Google Analytics -->
-    <script src="./js/thirdparty/analytics.js"></script>
-
-    <!-- jQuery -->
-    <script src="./js/thirdparty/jquery.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="./js/thirdparty/bootstrap.min.js"></script>
-    <script src="./js/thirdparty/tether.min.js"></script>
-    <script src="./js/thirdparty/bootstrap-switch.js"></script>
-
 </head>
 
 <body class="noselect">
 <!-- Page Content -->
-<div class="container" onselectstart="return false"
-     onselect='document.selection.empty()'
-     style="position:absolute;left:0px">
+<div class="container">
 
     <!-- Heading -->
-    <div class="row">
+    <div class="row p-0 m-0">
         <div class="col-lg-12">
-            <h2 class="page-header" id="header">Segmentation Labeling Tool
-                <a href="http://data-bdd.berkeley.edu/label/seg/readme.html" target="view_window"
-                   class="btn btn-primary">Instructions</a>
-                <div class="btn-group">
-                    <button id="increase_btn"
-                            class="btn btn-primary">+
-                    </button>
-                    <button href="#" id="decrease_btn"
-                            class="btn btn-primary">-
-                    </button>
-                </div>
-
-                <button href="#" id="show_all"
-                        class="btn btn-primary">Hide All (H)</button>
-                <small class="col-lg-offset-1">Annotated:</small>
+            <h2 class="page-header">Segmentation labeling tool
+                <small>verson 1.1</small>
+                <a type="button" class="btn btn-info btn-popover" data-toggle="popover" data-placement="right" href="http://data-bdd.berkeley.edu/label/bbox/instruction.html" target="view_window" data-content="Please view instructions and annotate bounding boxes of given categories.">
+                    Instruction
+                </a>
+                <small class="col-lg-offset-1">Polys: </small>
                 <small id="poly_count">0</small>
-
-                <a href="#" id="save_btn"
-                   style="position:absolute;right:15px;"
-                   class="btn btn-primary btn-primary">Save</a>
+                <small class="col-lg-offset-0">Lights: </small>
+                <small id="light_count">0</small>
+                <a href="#" id="link_btn"
+                   class="btn btn-primary btn-md">Link</a>
+                <div class="btn-group">
+                    <button id="increase_btn" class="btn btn-primary">+</button>
+                    <button href="#" id="decrease_btn" class="btn btn-primary">-</button>
+                </div>
+                <a href="#" id="save_btn" style="position:absolute;right:15px;" class="btn btn-primary btn-primary">
+                    Save
+                </a>
             </h2>
         </div>
     </div>
     <!-- /.row -->
 
-
     <!-- Content Row -->
     <div class="row">
-        <div class="col-sm-2">
-            <div class="panel panel-default" id="toolbox">
-                <div class="panel-heading active" id="toolhead">
+        <div class="col-md-2">
+            <div class="panel panel-default">
+                <div id="toolbox" class="panel-heading active">
                     Toolbox
                 </div>
                 <a href="#" class="list-group-item">
                     <div class="form-group">
-                        <p>Category</p>
-                        <select id="category_select"
-                                class="form-control" size="3"
-                                style="font-size:15px">
+                        <p>Label Category</p>
+                        <select id="category_select" size="10" class="form-control">
+                            <!-- iterate over object categories -->
+                            {{ range $key, $value := .Categories }}
+                            <option value={{$value}}>{{ $value }}</option>
+                            {{ end }}
                         </select>
-                        <hr>
-                        <select id="name_select"
-                                class="form-control" size="3"
-                                style="font-size:13px">
-                        </select>
+
                     </div>
+                    <div class="form-group">
+                        <input type="checkbox" name="occluded-checkbox" id="occluded_checkbox" data-on-color="info" data-on-text="Yes" data-off-text="No" data-size="small" data-label-text="Occluded">
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" name="truncated-checkbox" id="truncated_checkbox" data-on-color="info" data-on-text="Yes" data-off-text="No" data-size="small" data-label-text="Truncated">
+                    </div>
+                    <div class="form-group">
+                        <p>Traffic Light Color</p>
+                        <div id="radios" class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-sm btn-green">
+                                <input type="radio" name="options" id="green"value="1"/>
+                                G
+                            </label>
+                            <label class="btn btn-sm btn-yellow">
+                                <input type="radio" name="options" id="yellow"value="42"/>
+                                Y
+                            </label>
+                            <label class="btn btn-sm btn-red">
+                                <input type="radio" name="options" id="red"value="0"/>
+                                R
+                            </label>
+                            <label class="btn btn-sm btn-white checked">
+                                <input type="radio" name="options" id="none"value="2"/>
+                                NA
+                            </label>
+                        </div>
+                    </div>
+                    <a href="#" id="remove_btn" class="btn list-group-item">
+                        Remove
+                    </a>
                 </a>
-                <a href="#" id="delete_btn"
-                   class="btn btn-primary btn-md list-group-item">Delete
-                    (Del)</a>
-                <a href="#" id="label_btn"
-                   class="btn btn-primary btn-md list-group-item">Hide
-                    Label (L)</a>
-                <a href="#" id="inside_btn"
-                   class="btn btn-primary btn-md list-group-item">On Top</a>
-                <a href="#" id="link_btn"
-                   class="btn btn-primary btn-md list-group-item">Link</a>
             </div>
         </div>
-
-        <canvas id="hidden_canvas" width="940" height="470" style="
-                position:absolute; background-size:contain" ></canvas>
-
-        <canvas id="main_canvas" width="940" height="470" style="
-            width:940; height:470; position:absolute; background-image: url('./img/loading.png');
-            background-size:cover; background-position: center;
-            background-repeat:no-repeat "></canvas>
-
-        <canvas id="temp_canvas" width="940" height="470" style="
-            width:940; height:470; position:absolute;"></canvas>
-
+        <div id="div_canvas" style=" position: relative; float: left; width: 900px; height: 470px; overflow:scroll; ">
+            <canvas id="image_canvas" width="900" height="470" style="position: absolute; background-image: url('./img/loading.png'); background-size:cover">
+                Unsupported browser!
+            </canvas>
+            <canvas id="hidden_canvas" width="900" height="470" style="position: absolute; ">
+                Unsupported browser!
+            </canvas>
+            <div id="crosshair-h" class="hair"></div>
+            <div id="crosshair-v" class="hair"></div>
+        </div>
     </div>
-
+    <!-- /.row -->
     <div class="row">
         <div id="control_panel">
             <div class="col-sm-2">
-                <div class="btn-group">
-                    <button id="prev_btn"
-                            class="btn btn-primary">&laquo;</button>
-                    <button href="#" id="next_btn"
-                            class="btn btn-primary">&raquo;</button>
-                </div>
-                <div class="text-muted" id="progress"></div>
+                <ul class="pagination" id="pagination_control">
+                    <li>
+                        <a id="prev_btn">
+                            &laquo;
+                        </a>
+                    </li>
+                    <li>
+                        <a id="next_btn">
+                            &raquo;
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
-
-
     <!-- /.row -->
-    <!-- /.row -->
-
+    <hr>
 
     <!-- Footer -->
     <footer>
         <!--<div class="row">
-            <div class="col-lg-12">
-                <p>Copyright &copy; Your Website 2014</p>
-            </div>
+        <div class="col-lg-12">
+        <p>Copyright &copy; Your Website 2017</p>
+        </div>
         </div>-->
         <!-- /.row -->
     </footer>
@@ -163,36 +146,39 @@
 </div>
 <!-- /.container -->
 
-<script src="./js/utils.js"></script>
+<!-- Google Analytics -->
+<script src="./js/thirdparty/analytics.js"></script>
+
+<!-- jQuery -->
+<script src="./js/thirdparty/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="./js/thirdparty/bootstrap.min.js"></script>
+<script src="./js/thirdparty/tether.min.js"></script>
+<script src="./js/thirdparty/bootstrap-switch.js"></script>
+
+<!-- Helper JavaScript -->
 <script src="./js/sat.js"></script>
 <script src="./js/image.js"></script>
-<script src="./js/seg.js"></script>
+<!-- Segmentation Labeling JavaScript -->
+<script src="./js/shape.js"></script>
+<script src="./js/seg2d.js"></script>
+<script src="./js/utils.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
 
 <script type="text/javascript">
-    // Record timestamp in milliseconds, action, and target image index
-    $(document).ready(function () {
-        $("#decrease_btn").attr("disabled", true);
-        $("#prev_btn").attr("disabled", true);
-        $("#next_btn").attr("disabled", true);
-        type = "poly";
-
-        LabelList = ["void", "flat", "construction", "object", "nature", "sky", "human", "vehicle"];
-        LabelChart[0] = ["unlabeled", "dynamic", "ego vehicle", "ground", "static"];
-        LabelChart[1] = ["parking", "rail track", "road", "sidewalk"];
-        LabelChart[2] = ["bridge", "building", "bus stop", "fence", "garage", "guard rail", "tunnel", "wall"];
-        LabelChart[3] = ["banner", "billboard", "fire hydrant", "lane divider", "mail box", "parking sign", "pole", "polegroup", "street light", "traffic cone", "traffic device", "traffic light", "traffic sign", "traffic sign frame", "trash can"];
-        LabelChart[4] = ["terrain", "vegetation"]
-        LabelChart[5] = ["sky"]
-        LabelChart[6] = ["person", "rider"]
-        LabelChart[7] = ["bicycle", "bus", "car", "caravan", "motorcycle", "trailer", "train", "truck"];
-
-        loadAssignment();
-
-    });
-
+  $(document).ready(function () {
+    const type = "seg";
+    let sat = new Sat(SatImage, Seg2d);
+    sat.load();
+    // initialize the occluded/truncated switches with bootstrap
+    $('[name=\'occluded-checkbox\']').bootstrapSwitch();
+    $('[name=\'truncated-checkbox\']').bootstrapSwitch();
+    document.getElementById('save_btn').onclick = function() {sat.save()};
+  });
 
 </script>
-
 
 </body>
 

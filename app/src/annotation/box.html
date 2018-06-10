@@ -107,10 +107,10 @@
                 <div id="crosshair-h" class="hair"></div>
                 <div id="crosshair-v" class="hair"></div>
                 <div id="slider_div">
-                    <!-- progress slider -->
-                    <input id="slider" class="slider" type="range"
-                           min="1" max="{{ len .Items }}"
-                           value="1"/>
+                  <!-- progress slider -->
+                  <input id="slider" class="slider" type="range"
+                         min="1" max="{{ len .Items }}"
+                         value="1"/>
                 </div>
             </div>
         </div>
@@ -165,6 +165,8 @@
     <script src="./js/image.js"></script>
     <!-- BBox Labeling JavaScript -->
     <script src="./js/box2d.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/shape.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
 
@@ -176,7 +178,7 @@
             // initialize the occluded/truncated switches with bootstrap
             $('[name=\'occluded-checkbox\']').bootstrapSwitch();
             $('[name=\'truncated-checkbox\']').bootstrapSwitch();
-          document.getElementById('save_btn').onclick = function() {sat.save()};
+            document.getElementById('save_btn').onclick = function() {sat.save()};
         });
 
     </script>
