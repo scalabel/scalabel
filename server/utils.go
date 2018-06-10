@@ -1,4 +1,4 @@
-package main
+package sat
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 )
 
 func GetTask(projectName string, taskIndex string) Task {
-	taskPath := path.Join(env.DataDir, "Tasks", projectName, taskIndex + ".json")
+	taskPath := path.Join(env.DataDir, "tasks", projectName, taskIndex+".json")
 	taskFileContents, err := ioutil.ReadFile(taskPath)
 	if err != nil {
 		Error.Println(err)
@@ -22,7 +22,7 @@ func GetTask(projectName string, taskIndex string) Task {
 }
 
 func GetTasks() []Task {
-	tasksDirectoryPath := path.Join(env.DataDir, "Tasks")
+	tasksDirectoryPath := path.Join(env.DataDir, "tasks")
 	tasksDirectoryContents, err := ioutil.ReadDir(tasksDirectoryPath)
 	if err != nil {
 		Error.Println(err)
@@ -30,14 +30,16 @@ func GetTasks() []Task {
 	tasks := []Task{}
 	for _, projectDirectory := range tasksDirectoryContents {
 		if projectDirectory.IsDir() {
-			projectDirectoryPath := path.Join(env.DataDir, "Tasks", projectDirectory.Name())
+			projectDirectoryPath := path.Join(env.DataDir, "tasks", projectDirectory.Name())
 			projectDirectoryContents, err := ioutil.ReadDir(projectDirectoryPath)
 			if err != nil {
 				Error.Println(err)
 			}
 			for _, taskFile := range projectDirectoryContents {
-				if len(taskFile.Name()) > 5 && taskFile.Name()[len(taskFile.Name())-5:len(taskFile.Name())] == ".json" {
-					taskFileContents, err := ioutil.ReadFile(projectDirectoryPath + "/" + taskFile.Name())
+				if len(taskFile.Name()) > 5 &&
+					path.Ext(taskFile.Name()) == ".json" {
+					taskFileContents, err := ioutil.ReadFile(
+						path.Join(projectDirectoryPath, taskFile.Name()))
 					if err != nil {
 						Error.Println(err)
 					}
@@ -55,7 +57,7 @@ func (task *Task) GetTaskPath() string {
 	filename := strconv.Itoa(task.Index)
 	dir := path.Join(
 		env.DataDir,
-		"Tasks",
+		"tasks",
 		task.ProjectName,
 	)
 	os.MkdirAll(dir, 0777)

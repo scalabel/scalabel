@@ -1,4 +1,4 @@
-package main
+package sat
 
 import (
 	"html/template"
@@ -6,7 +6,7 @@ import (
 )
 
 func box2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(env.ProjectPath + "/app/annotation/box.html")
+	tmpl, err := template.ParseFiles(env.Box2dPath())
 	if err != nil {
 		Error.Println(err)
 	}
