@@ -106,7 +106,7 @@
                         <select id="category_select" size="10" class="form-control">
                             <!-- iterate over object categories -->
                             {{ range $key, $value := .Categories }}
-                            <option value={{$value}}>{{ $value }}</option>
+                            <option value={{$value}}>{{ $value.Name }}</option>
                             {{ end }}
                         </select>
 

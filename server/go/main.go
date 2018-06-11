@@ -126,8 +126,7 @@ func main() {
 
 	// Simple static handlers can be generated with MakePathHandleFunc
 	http.HandleFunc("/create", WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
-	http.HandleFunc("/2d_seg_labeling",
-		WrapHandleFunc(MakePathHandleFunc(env.Seg2dPath())))
+	http.HandleFunc("/2d_seg_labeling", WrapHandleFunc(seg2dLabelingHandler))
 	//http.HandleFunc("/image_labeling",
 	//	MakePathHandleFunc(path.Join(appDir, "/annotation/image.html")))
 
