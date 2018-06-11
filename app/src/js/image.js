@@ -119,8 +119,8 @@ SatImage.prototype.selectLabel = function(label) {
   this.selectedLabel = label;
   this.selectedLabel.setAsTargeted();
 
-  this._setOccl(this.selectedLabel.occl);
-  this._setTrunc(this.selectedLabel.trunc);
+  this._setOccl(this.selectedLabel.attributes.occl);
+  this._setTrunc(this.selectedLabel.attributes.trunc);
   this._setCatSel(this.selectedLabel.categoryPath);
   this.redraw();
 };
@@ -294,6 +294,8 @@ SatImage.prototype.setActive = function(active) {
       removeBtn.off();
     }
   }
+  self.resetHiddenMapToDefault();
+  self.redraw();
 };
 
 
@@ -753,7 +755,8 @@ SatImage.prototype._changeCat = function() {
  */
 SatImage.prototype._occlSwitch = function() {
   if (this.selectedLabel) {
-    this.selectedLabel.occl = $('[name=\'occluded-checkbox\']').prop('checked');
+    this.selectedLabel.attributes.occl =
+        $('[name=\'occluded-checkbox\']').prop('checked');
   }
   this.redraw();
 };
@@ -763,8 +766,8 @@ SatImage.prototype._occlSwitch = function() {
  */
 SatImage.prototype._truncSwitch = function() {
   if (this.selectedLabel) {
-    this.selectedLabel.trunc = $('[name=\'truncated-checkbox\']').prop(
-        'checked');
+    this.selectedLabel.attributes.trunc =
+        $('[name=\'truncated-checkbox\']').prop('checked');
   }
   this.redraw();
 };
@@ -844,7 +847,7 @@ function ImageLabel(sat, id, optionalAttributes = null) {
   this.TAG_WIDTH = 25;
   this.TAG_HEIGHT = 14;
   // whether to draw this polygon in the targeted fill color
-  this.targeted = true;
+  this.targeted = false;
 }
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
@@ -859,7 +862,7 @@ ImageLabel.prototype.getCurrentPosition = function() {
 ImageLabel.prototype.fromJsonPointers = function(json) {
   let self = this;
   self.decodeBaseJsonPointers(json);
-  self.image = self.sat.currentItem;
+  self.satItem = self.sat.currentItem;
 };
 
 /**
@@ -937,11 +940,11 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
     let tw = self.TAG_WIDTH;
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
-    if (self.occl) {
+    if (self.attributes.occl) {
       abbr += ',o';
       tw += 9;
     }
-    if (self.trunc) {
+    if (self.attributes.trunc) {
       abbr += ',t';
       tw += 9;
     }

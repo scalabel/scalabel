@@ -32,10 +32,10 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
  * base class for all shapes, holds index
  * that will be dynamically assigned by SatItem
  * to determine the color code on hidden canvas
+ * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Shape() {
-  this.id = null;
-  Shape.registerShape(this);
+function Shape(id = null) {
+  Shape.registerShape(this, id);
 }
 
 Shape.allShapes = {};
@@ -77,9 +77,10 @@ Shape.prototype.delete = function() {
  * @param {int} x: x-coordinate
  * @param {int} y: y-coordinate
  * @param {object} type: type of the vertex
+ * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Vertex(x=0, y=0, type=VertexTypes.VERTEX) {
-  Shape.call(this);
+function Vertex(x=0, y=0, type=VertexTypes.VERTEX, id = null) {
+  Shape.call(this, id);
   this._x = x;
   this._y = y;
   this.type = type;
@@ -156,13 +157,14 @@ Vertex.prototype.distanceTo = function(v) {
 Vertex.prototype.toJson = function() {
   return {
     id: this.id,
+    type: this.type,
     x: this.x,
     y: this.y,
   };
 };
 
 Vertex.fromJson = function(json) {
-  return new Vertex(json.x, json.y);
+  return new Vertex(json.x, json.y, json.type, json.id);
 };
 
 // Deep Copy
@@ -186,14 +188,21 @@ Vertex.prototype.equals = function(v, threshold=1e-6) {
  * @param {object} src: source vertex
  * @param {object} dest: destination vertex
  * @param {string} type: connection type, line or bezier
+ * @param {number} id - id of the shape. Needed only when loading saved shapes.
+ * @param {[Vertex]} controlPoints - control points of the Edge object.
+ * Needed only when loading saved shapes.
  */
-function Edge(src, dest, type=EdgeTypes.LINE) {
-  Shape.call(this);
+function Edge(src, dest, type=EdgeTypes.LINE, id = null, controlPoints = null) {
+  Shape.call(this, id);
   this._src = src; // define private variables to avoid recursive setter
   this._dest = dest;
   this._type = type;
   this._control_points = [];
-  this.initControlPoints();
+  if (controlPoints) {
+    this._control_points = controlPoints;
+  } else {
+    this.initControlPoints();
+  }
 }
 
 Object.assign(Edge, Shape);
@@ -350,14 +359,11 @@ Edge.fromJson = function(json) {
   } else {
     dest = Vertex.fromJson(json.dest);
   }
-  let edge = new Edge(src, dest);
-  edge.type = json.type;
-  let points = json.control_points;
-  edge._control_points = []; // important to directly access private var
-  for (let controlPoint of points) {
-    edge._control_points.push(Vertex.fromJson(controlPoint));
+  let controlPoints = [];
+  for (let controlPoint of json.control_points) {
+    controlPoints.push(Vertex.fromJson(controlPoint));
   }
-  return edge;
+  return new Edge(src, dest, json.type, json.id, controlPoints);
 };
 
 // Reference safe Deep copy by serialization
@@ -390,12 +396,14 @@ Edge.prototype.equals = function(e) {
 /**
  * Polyline Class, a superclass for 2d patterns
  * consisting of consecutive line segments
+ * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Polyline() {
-  Shape.call(this);
+function Polyline(id = null) {
+  Shape.call(this, id);
   this.vertices = [];
   this.edges = [];
   this.fillInside = false;
+  this.ended = false;
 }
 
 Object.assign(Polyline, Shape);
@@ -419,6 +427,14 @@ Object.defineProperty(Polyline.prototype, 'bbox', {
     return getBbox(this.control_points.concat(this.vertices));
   },
 });
+
+Polyline.prototype.endPath = function() {
+  this.ended = true;
+};
+
+Polyline.prototype.isEnded = function() {
+  return this.ended;
+};
 
 // return centroid of the curve
 Polyline.prototype.centroidCoords = function() {
@@ -539,8 +555,8 @@ Polyline.prototype.toJson = function() {
   };
 };
 
-Polyline.fromJson = function(json) {
-  let polyline = new this.prototype.constructor();
+Polyline.fromJson = function(json, id = null) {
+  let polyline = new this.prototype.constructor(id);
   let vertexJsons = json.vertices;
   let edgeJsons = json.edges;
   for (let vertexJson of vertexJsons) {
@@ -557,6 +573,7 @@ Polyline.fromJson = function(json) {
       polyline.edges.push(Edge.fromJson(edgeJson));
     }
   }
+  polyline.endPath();
   return polyline;
 };
 
@@ -598,10 +615,10 @@ Polyline.prototype.toString = function() {
  * IMPORTANT: keep in mind src and dest of edges can be
  * shuffled randomly, so call this.alignEdges to
  * align edges to correct direction before draw path
+ * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Path() {
-  Polyline.call(this);
-  this.ended = false;
+function Path(id = null) {
+  Polyline.call(this, id);
   this.type = PathTypes.VERTICAL;
 }
 
@@ -706,10 +723,10 @@ Path.prototype.equals = function(p) {
  * IMPORTANT: keep in mind src and dest of edges can be
  * shuffled randomly, so call this.alignEdges to
  * align edges to correct direction before draw polygon
+ * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Polygon() {
-  Polyline.call(this);
-  this.closed = false;
+function Polygon(id = null) {
+  Polyline.call(this, id);
   this.fillInside = true;
 }
 
@@ -727,14 +744,6 @@ Polygon.prototype.reverse = function() {
   this.vertices.unshift(this.vertices.pop());
   this.edges = this.edges.reverse();
   this.alignEdges();
-};
-
-Polygon.prototype.closePath = function() {
-  this.closed = true;
-};
-
-Polygon.prototype.isEnded = function() {
-  return this.closed;
 };
 
 /**
@@ -905,10 +914,11 @@ Polygon.prototype.equals = function(p) {
  * @param {number} y - The y coordinate of the upper-left corner.
  * @param {number} w - The width of the rectangle.
  * @param {number} h - The height of the rectangle.
+ * @param {number} id - id of the shape. Needed only when loading saved shapes.
  * @constructor
  */
-function Rect(x=-1, y=-1, w=-1, h=-1) {
-  Shape.call(this);
+function Rect(x=-1, y=-1, w=-1, h=-1, id = null) {
+  Shape.call(this, id);
   this.vertices = [];
   for (let i = 0; i < 8; i++) {
     this.vertices.push(new Vertex());
@@ -1005,7 +1015,7 @@ Rect.prototype.isValid = function() {
 };
 
 Rect.fromJson = function(json) {
-  let rect = new Rect();
+  let rect = new Rect(json.id);
   rect.setRect(json.x, json.y, json.w, json.h);
   return rect;
 };

@@ -16,23 +16,25 @@ let SegStates = Object.freeze({
  * @param {object} optionalAttributes - Optional attributes
  */
 function Seg2d(sat, id, optionalAttributes) {
-  // TODO: separate category and attributes in kargs
   ImageLabel.call(this, sat, id);
-
-  // attributes
-  this.categoryPath = optionalAttributes.categoryPath;
-  this.trunc = optionalAttributes.trunc;
-  this.occl = optionalAttributes.occl;
 
   this.polys = [];
   this.selectedShape = null;
   this.quickdrawCache = {};
+  this.state = SegStates.FREE;
+  this.selectedShape = null;
 
-  if (optionalAttributes.mousePos) {
+  let mousePos;
+  if (optionalAttributes) {
+    mousePos = optionalAttributes.mousePos;
+    this.categoryPath = optionalAttributes.categoryPath;
+    this.attributes.trunc = optionalAttributes.trunc;
+    this.attributes.occl = optionalAttributes.occl;
+  }
+
+  if (mousePos) {
     // if mousePos given, start drawing
     this.setState(SegStates.DRAW);
-
-    let mousePos = optionalAttributes.mousePos;
     this.newPoly = new Polygon();
     this.tempPoly = new Polygon();
 
@@ -51,9 +53,6 @@ function Seg2d(sat, id, optionalAttributes) {
     this.tempVertex = new Vertex(mousePos.x, mousePos.y);
     this.tempPoly.pushVertex(this.tempVertex);
     this.selectedShape = null;
-  } else {
-    // else, set state to FREE
-    this.setState(SegStates.FREE);
   }
 }
 
@@ -78,8 +77,8 @@ Seg2d.prototype.splitPolygon = function(poly) {
       this.polys.splice(i, 1);
       // create a Seg2d label for this polygon
       let label = this.sat.newLabel({
-        categoryPath: this.categoryPath, occl: this.occl,
-        trunc: this.trunc, mousePos: null,
+        categoryPath: this.categoryPath, occl: this.attributes.occl,
+        trunc: this.attributes.trunc, mousePos: null,
       });
       label.addPolygon(poly);
       label.releaseAsTargeted();
@@ -193,36 +192,31 @@ Seg2d.prototype.linkHandler = function() {
 };
 
 /**
- * Load label information from json object
- * @param {object} data: JSON representation of this Seg2d.
+ * Load label data from a encoded string
+ * @param {object} data: json representation of label data.
  */
-Seg2d.prototype.fromJson = function(data) {
-  for (let polyJson of data.polys) {
-    let poly = new Polygon();
-    poly.fromJson(polyJson);
-    this.addPolygon(poly);
+Seg2d.prototype.decodeLabelData = function(data) {
+  this.id = data.id;
+  this.polys = [];
+  if (data.polys) {
+    for (let polyJson of data.polys) {
+      this.addPolygon(Polygon.fromJson(polyJson));
+    }
   }
-  this.occl = data.occl;
-  this.trunc = data.trunc;
-  this.categoryPath = data.categoryPath;
 };
 
 /**
- * Convert label information to a json object
- * @return {object} the Json object
+ * Encode the label data into a json object.
+ * @return {object} - the encoded json object.
  */
-Seg2d.prototype.toJson = function() {
+Seg2d.prototype.encodeLabelData = function() {
   let polysJson = [];
   for (let poly of this.polys) {
-    polysJson = polysJson.append(poly.toJson());
+    polysJson = polysJson.concat(poly.toJson());
   }
   return {
+    id: this.id,
     polys: polysJson,
-    attributes: {
-      categoryPath: this.categoryPath,
-      occl: this.occl,
-      trunc: this.trunc,
-    },
   };
 };
 
@@ -444,7 +438,7 @@ Seg2d.prototype.mousedown = function(e) {
         && this.quickdrawCache.endVertex.equals(this.newPoly.vertices[0])) {
         // if occupied object the 1st vertex, close path
         this.tempPoly.popVertex();
-        this.newPoly.closePath();
+        this.newPoly.endPath();
 
         if (this.newPoly.isValid()) {
           this.addPolygon(this.newPoly);
@@ -464,7 +458,7 @@ Seg2d.prototype.mousedown = function(e) {
       && !this.quickdrawCache.startVertex) {
       // if occupied object the 1st vertex, close path
       this.tempPoly.popVertex();
-      this.newPoly.closePath();
+      this.newPoly.endPath();
 
       if (this.newPoly.isValid()) {
         this.addPolygon(this.newPoly);
@@ -476,6 +470,7 @@ Seg2d.prototype.mousedown = function(e) {
 
       this.setState(SegStates.FREE);
       this.selectedShape = this.newPoly;
+      this.setAsTargeted();
     } else if (!this.quickdrawCache.targetPoly) {
       if (occupiedShape instanceof Polygon
         && !this.newPoly.equals(occupiedShape)) {
@@ -559,8 +554,8 @@ Seg2d.prototype.mousedown = function(e) {
     } else if (occupiedLabel) {
       // if clicked another label, merge into one
       if (this.polys.length < 1) {
-        this.trunc = occupiedLabel.trunc;
-        this.occl = occupiedLabel.occl;
+        this.attributes.trunc = occupiedLabel.trunc;
+        this.attributes.occl = occupiedLabel.occl;
         this.categoryPath = occupiedLabel.categoryPath;
       }
       for (let poly of occupiedLabel.polys) {
@@ -589,7 +584,7 @@ Seg2d.prototype.mouseup = function(e) {
       if (this.newPoly.vertices.indexOf(occupiedShape) === 0) {
         // if occupied object the 1st vertex, close path
         this.tempPoly.popVertex();
-        this.newPoly.closePath();
+        this.newPoly.endPath();
 
         if (this.newPoly.isValid()) {
           this.addPolygon(this.newPoly);
@@ -716,7 +711,7 @@ Seg2d.prototype.keydown = function(e) {
         === this.newPoly.vertices[0].id) {
         // if occupied object the 1st vertex, close path
         this.tempPoly.popVertex();
-        this.newPoly.closePath();
+        this.newPoly.endPath();
 
         if (this.newPoly.isValid()) {
           this.addPolygon(this.newPoly);

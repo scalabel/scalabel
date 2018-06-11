@@ -15,26 +15,28 @@ const INITIAL_HANDLE_NO = 4;
  */
 function Box2d(sat, id, optionalAttributes) {
   ImageLabel.call(this, sat, id, optionalAttributes);
+  this.rect = new Rect();
+  this.state = BoxStates.FREE;
 
   // attributes
+  let mousePos;
   if (optionalAttributes) {
     this.categoryPath = optionalAttributes.categoryPath;
-    this.trunc = optionalAttributes.trunc;
-    this.occl = optionalAttributes.occl;
+    this.attributes.trunc = optionalAttributes.trunc;
+    this.attributes.occl = optionalAttributes.occl;
+    mousePos = optionalAttributes.mousePos;
+    if (mousePos) {
+      this.rect.setRect(mousePos.x,
+          mousePos.y, 0, 0);
+    }
+    if (optionalAttributes.shadow) {
+      this.setState(BoxStates.FREE);
+    } else {
+      this.setState(BoxStates.RESIZE);
+    }
   }
 
-  this.rect = new Rect();
-  if (optionalAttributes.mousePos) {
-    this.rect.setRect(optionalAttributes.mousePos.x,
-      optionalAttributes.mousePos.y, 0, 0);
-  }
-  if (optionalAttributes.shadow) {
-    this.setState(BoxStates.FREE);
-  } else {
-    this.setState(BoxStates.RESIZE);
-  }
   this.selectedShape = this.rect.vertices[INITIAL_HANDLE_NO];
-  this.satItem.pushToHiddenMap(this.defaultHiddenShapes());
 
   this.selectedCache = null;
 }
@@ -78,32 +80,25 @@ Box2d.prototype.selectedBy = function(shape) {
   return false;
 };
 
-Box2d.prototype.toJson = function() {
-  let self = this;
-  let json = self.encodeBaseJson();
-  json.box2d = {x: self.x, y: self.y, w: self.w, h: self.h};
-  // TODO: customizable
-  json.attributeValues = {occlusion: self.occl, truncation: self.trunc};
-  return json;
+/**
+ * Load label data from a encoded string
+ * @param {object} data: json representation of label data.
+ */
+Box2d.prototype.decodeLabelData = function(data) {
+  this.rect.setRect(data.x, data.y, data.w, data.h);
 };
 
 /**
- * Load label information from json object
- * @param {object} json: JSON representation of this Box2d.
+ * Encode the label data into a json object.
+ * @return {object} - the encoded json object.
  */
-Box2d.prototype.fromJsonVariables = function(json) {
-  let self = this;
-  self.decodeBaseJsonVariables(json);
-  if (json.box2d) {
-    self.x = json.box2d.x;
-    self.y = json.box2d.y;
-    self.w = json.box2d.w;
-    self.h = json.box2d.h;
-  }
-  if (json.attributeValues) {
-    self.occl = json.attributeValues.occlusion;
-    self.trunc = json.attributeValues.truncation;
-  }
+Box2d.prototype.encodeLabelData = function() {
+  return {
+    x: this.rect.x,
+    y: this.rect.y,
+    w: this.rect.w,
+    h: this.rect.h,
+  };
 };
 
 /**

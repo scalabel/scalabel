@@ -261,6 +261,7 @@ Sat.prototype.encodeBaseJson = function() {
     }
   }
   return {
+    handlerUrl: self.handlerUrl,
     projectName: self.projectName,
     startTime: self.startTime,
     items: items,
@@ -288,6 +289,7 @@ Sat.prototype.fromJson = function(json) {
  */
 Sat.prototype.decodeBaseJson = function(json) {
   let self = this;
+  self.handlerUrl = json.handlerUrl;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID
     self.lastLabelId = Math.max(self.lastLabelId, json.labels[i].id);
@@ -426,7 +428,9 @@ SatItem.prototype.fromJson = function(selfJson) {
   self.index = selfJson.index;
   if (selfJson.labelIds) {
     for (let i = 0; i < selfJson.labelIds.length; i++) {
-      self.labels.push(self.sat.labelIdMap[selfJson.labelIds[i]]);
+      let label = self.sat.labelIdMap[selfJson.labelIds[i]];
+      self.labels.push(label);
+      label.satItem = this;
     }
   }
   self.attributes = selfJson.attributes;
@@ -570,7 +574,8 @@ SatLabel.prototype.styleColor = function(alpha = 1.0) {
 
 SatLabel.prototype.encodeBaseJson = function() {
   let self = this;
-  let json = {id: self.id, categoryPath: self.categoryPath};
+  let json = {id: self.id, categoryPath: self.categoryPath,
+    attributes: self.attributes};
   if (self.parent) {
     json.parent = self.parent.id;
   } else {
@@ -595,7 +600,14 @@ SatLabel.prototype.encodeBaseJson = function() {
   }
   // TODO: remove
   json.keyframe = self.keyframe;
+
+  // get label data
+  json.data = self.encodeLabelData();
   return json;
+};
+
+SatLabel.prototype.encodeLabelData = function() {
+  // Specific to each label type
 };
 
 /**
@@ -611,6 +623,7 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   let self = this;
   self.id = json.id;
   self.categoryPath = json.categoryPath;
+  self.attributes = json.attributes;
   // TODO: remove
   self.keyframe = json.keyframe;
   if (json.previousLabelId > -1) {
@@ -619,6 +632,11 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   if (json.nextLabelId > -1) {
     self.nextLabelId = json.nextLabelId;
   }
+  self.decodeLabelData(json.data);
+};
+
+SatLabel.prototype.decodeLabelData = function(data) { // eslint-disable-line
+  // Specific to each label type
 };
 
 SatLabel.prototype.decodeBaseJsonPointers = function(json) {

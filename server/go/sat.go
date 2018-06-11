@@ -64,8 +64,8 @@ type Label struct {
 	ChildrenIds     []int              `json:"children" yaml:"childrenIds"`
 	PreviousLabelId int                `json:"previousLabelId" yaml:"previousLabelId"`
 	NextLabelId     int                `json:"nextLabelId" yaml:"nextLabelId"`
-	AttributeValues map[string]bool    `json:"attributeValues" yaml:"attributeValues"`
-	Box2d           map[string]float32 `json:"box2d" yaml:"box2d"`
+	Attributes      map[string]bool    `json:"attributes" yaml:"attributes"`
+	Data            map[string]interface{}              `json:"data" yaml:"data"`
 	Keyframe        bool               `json:"keyframe" yaml:"keyframe"`
 }
 
