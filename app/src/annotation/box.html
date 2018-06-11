@@ -21,6 +21,38 @@
 
 <body class="noselect">
     <!-- Page Content -->
+    <div id="keyboard_usage_window">
+        <div class="panel panel-default">
+            <div class="panel-heading active">
+                Keyboard Usage
+            </div>
+            <div class="key_usage">
+                <div>
+                    <p><span><kbd>?</kbd></span> <span>Toggle Keyboard Usage display</span></p>
+                </div>
+                <div>
+                    <p><span><kbd>Esc</kbd></span> <span>Quit draw mode and delete current polygon</span></p>
+                </div>
+                <div>
+                    <p><span><kbd>Backspace</kbd> / <kbd>delete</kbd></span> <span>Delete selected label</span></p>
+                </div>
+                <div>
+                    <p><span><kbd>&uarr;</kbd></span> <span>Zoom in</span></p>
+                </div>
+                <div>
+                    <p><span><kbd>&darr;</kbd></span> <span>Zoom out</span></p>
+                </div>
+                <div>
+                    <p><span><kbd>&larr;</kbd></span> <span>Previous item</span></p>
+                </div>
+                <div>
+                    <p><span><kbd>&rarr;</kbd></span> <span>Next item</span></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div class="container">
 
         <!-- Heading -->
@@ -179,6 +211,13 @@
             $('[name=\'occluded-checkbox\']').bootstrapSwitch();
             $('[name=\'truncated-checkbox\']').bootstrapSwitch();
             document.getElementById('save_btn').onclick = function() {sat.save()};
+          document.addEventListener ("keydown", function (e) {
+            let evtobj = window.event? event : e;
+            if (evtobj.keyCode == 191 && evtobj.shiftKey) {
+              // if the user pressed '?':
+              $("#keyboard_usage_window" ).toggle();
+            }
+          });
         });
 
     </script>

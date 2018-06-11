@@ -21,6 +21,50 @@
 
 <body class="noselect">
 <!-- Page Content -->
+<div id="keyboard_usage_window">
+    <div class="panel panel-default">
+        <div class="panel-heading active">
+            Keyboard Usage
+        </div>
+        <div class="key_usage">
+            <div>
+                <p><span><kbd>?</kbd></span> <span>Toggle Keyboard Usage display</span></p>
+            </div>
+            <div>
+                <p><span><kbd>Esc</kbd></span> <span>Quit draw mode and delete current polygon</span></p>
+            </div>
+            <div>
+                <p><span><kbd>Backspace</kbd> / <kbd>delete</kbd></span> <span>Delete selected label</span></p>
+            </div>
+            <div>
+                <p><span><kbd>&uarr;</kbd></span> <span>Zoom in</span></p>
+            </div>
+            <div>
+                <p><span><kbd>&darr;</kbd></span> <span>Zoom out</span></p>
+            </div>
+            <div>
+                <p><span><kbd>&larr;</kbd></span> <span>Previous item</span></p>
+            </div>
+            <div>
+                <p><span><kbd>&rarr;</kbd></span> <span>Next item</span></p>
+            </div>
+            <div>
+                <p><span><kbd>u</kbd></span> <span>Unlink selected label</span></p>
+            </div>
+            <div>
+                <p><span><kbd>s</kbd></span> <span>Toggle on/off quick draw mode</span></p>
+            </div>
+            <div>
+                <p><span><kbd>Alt</kbd></span> <span>Toggle path options along a polygon during quick draw mode</span></p>
+            </div>
+            <div>
+                <p><span><kbd>b</kbd></span> <span>When hovering over midpoint, change the edge to bezier curve</span></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <div class="container">
 
     <!-- Heading -->
@@ -28,7 +72,7 @@
         <div class="col-lg-12">
             <h2 class="page-header">Segmentation labeling tool
                 <small>verson 1.1</small>
-                <a type="button" class="btn btn-info btn-popover" data-toggle="popover" data-placement="right" href="http://data-bdd.berkeley.edu/label/bbox/instruction.html" target="view_window" data-content="Please view instructions and annotate bounding boxes of given categories.">
+                <a type="button" class="btn btn-info btn-popover" data-toggle="popover" data-placement="right" href="http://data-bdd.berkeley.edu/label/seg/readme.html" target="view_window" data-content="Please view instructions and annotate bounding boxes of given categories.">
                     Instruction
                 </a>
                 <small class="col-lg-offset-1">Polys: </small>
@@ -176,6 +220,13 @@
     $('[name=\'occluded-checkbox\']').bootstrapSwitch();
     $('[name=\'truncated-checkbox\']').bootstrapSwitch();
     document.getElementById('save_btn').onclick = function() {sat.save()};
+    document.addEventListener ("keydown", function (e) {
+      let evtobj = window.event? event : e;
+      if (evtobj.keyCode == 191 && evtobj.shiftKey) {
+        // if the user pressed '?':
+        $("#keyboard_usage_window" ).toggle();
+      }
+    });
   });
 
 </script>
