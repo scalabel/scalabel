@@ -195,6 +195,8 @@ Sat.prototype.moveSlider = function() {
 
 Sat.prototype.loaded = function() {
   this.ready = true;
+  this.initToolbox();
+  this.currentItem.setActive(true);
 };
 
 /**
@@ -221,6 +223,44 @@ Sat.prototype.load = function() {
   });
   xhr.open('POST', './postLoadTask', false);
   xhr.send(request);
+};
+
+Sat.prototype.initToolbox = function() {
+  let self = this;
+  // initialize all the attribute selectors
+  for (let i = 0; i < self.attributes.length; i++) {
+    let attributeInput = document.getElementById('custom_attribute_' +
+      self.attributes[i].name);
+    if (self.attributes[i].toolType === 'switch') {
+      attributeInput.type = 'checkbox';
+      attributeInput.setAttribute('data-on-color', 'info');
+      attributeInput.setAttribute('data-on-text', 'Yes');
+      attributeInput.setAttribute('data-off-text', 'No');
+      attributeInput.setAttribute('data-size', 'small');
+      attributeInput.setAttribute('data-label-text', self.attributes[i].name);
+      $('#custom_attribute_' + self.attributes[i].name).bootstrapSwitch();
+    } else if (self.attributes[i].toolType === 'list') {
+      attributeInput.parent = document.getElementById('custom_attribute_' +
+        self.attributes[i].name + '_div');
+      let listOuterHtml = '<p>' + self.attributes[i].name + '</p>';
+      listOuterHtml +=
+        '<div id="radios" class="btn-group" data-toggle="buttons">';
+      for (let j = 0; j < self.attributes[i].values.length; j++) {
+        listOuterHtml +=
+          '<label id="custom_attributeselector_' + i + '-' + j +
+          '" class="btn btn-sm btn-' + self.attributes[i].buttonColors[j] +
+          '"> <input type="radio"/>' + self.attributes[i].values[j] +
+          '</label>';
+      }
+      attributeInput.outerHTML = listOuterHtml;
+    } else {
+      attributeInput.innerHTML = 'Error: invalid tool type "' +
+        self.attributes[i].toolType + '"';
+    }
+  }
+  document.getElementById('save_btn').onclick = function() {
+    self.save();
+  };
 };
 
 /**
@@ -270,6 +310,7 @@ Sat.prototype.encodeBaseJson = function() {
     events: self.events,
     userAgent: navigator.userAgent,
     ipInfo: self.ipInfo,
+    attributes: self.attributes,
   };
 };
 
@@ -304,13 +345,12 @@ Sat.prototype.decodeBaseJson = function(json) {
     newItem.fromJson(json.items[i]);
   }
 
-  self.categories = json.category;
+  self.categories = json.categories;
+  self.attributes = json.attributes;
   self.assignmentId = json.assignmentId;
   self.projectName = json.projectName;
 
   self.currentItem = self.items[0];
-  self.currentItem.setActive(true);
-  self.categories = json.categories;
 
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     self.labelIdMap[json.labels[i].id].fromJsonPointers(json.labels[i]);

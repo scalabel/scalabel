@@ -119,10 +119,20 @@ SatImage.prototype.selectLabel = function(label) {
   this.selectedLabel = label;
   this.selectedLabel.setAsTargeted();
 
-  this._setOccl(this.selectedLabel.attributes.occl);
-  this._setTrunc(this.selectedLabel.attributes.trunc);
-  this._setCatSel(this.selectedLabel.categoryPath);
-  this.redraw();
+  for (let i = 0; i < this.sat.attributes.length; i++) {
+    if (this.sat.attributes[i].toolType === 'switch') {
+      this._setAttribute(i,
+        this.selectedLabel.attributes[this.sat.attributes[i].name]);
+    } else if (this.sat.attributes[i].toolType === 'list' &&
+      this.sat.attributes[i].name in this.selectedLabel.attributes) {
+      this._selectAttributeFromList(i,
+        this.selectedLabel.attributes[this.sat.attributes[i].name][0]);
+    }
+  }
+  if (this.active) {
+    this._setCatSel(this.selectedLabel.categoryPath);
+    this.redraw();
+  }
 };
 
 SatImage.prototype.transformPoints = function(points) {
@@ -259,23 +269,30 @@ SatImage.prototype.setActive = function(active) {
     // toolbox
     self.catSel = document.getElementById('category_select');
     self.catSel.selectedIndex = 0;
-    self.occlCheckbox = document.getElementById('occluded_checkbox');
-    self.truncCheckbox = document.getElementById('truncated_checkbox');
+    for (let i = 0; i < self.sat.attributes.length; i++) {
+      let attributeName = self.sat.attributes[i].name;
+      if (self.sat.attributes[i].toolType === 'switch') {
+        $('#custom_attribute_' + attributeName).on(
+          'switchChange.bootstrapSwitch', function(e) {
+            e.preventDefault();
+            self._attributeSwitch(i);
+            self.redraw();
+        });
+      } else if (self.sat.attributes[i].toolType === 'list') {
+        for (let j = 0; j < self.sat.attributes[i].values.length; j++) {
+          $('#custom_attributeselector_' + i + '-' + j).on('click',
+            function(e) {
+            e.preventDefault();
+            self._attributeListSelect(i, j);
+            self.redraw();
+          });
+        }
+      }
+    }
 
     $('#category_select').change(function() {
       self._changeCat();
     });
-    $('[name=\'occluded-checkbox\']').on('switchChange.bootstrapSwitch',
-        function() {
-          self._occlSwitch();
-        });
-    $('[name=\'truncated-checkbox\']').on('switchChange.bootstrapSwitch',
-        function() {
-          self._truncSwitch();
-        });
-
-    // TODO: Wenqi
-    // traffic light color
 
     // class specific tool box
     self.sat.LabelType.setToolBox(self);
@@ -298,6 +315,30 @@ SatImage.prototype.setActive = function(active) {
   self.redraw();
 };
 
+/**
+ * Returns the currently selected attributes.
+ * @private
+ * @return {object} - the currently selected attributes.
+ */
+SatImage.prototype._getSelectedAttributes = function() {
+  let self = this;
+  let attributes = {};
+  for (let i = 0; i < self.sat.attributes.length; i++) {
+    let attributeName = self.sat.attributes[i].name;
+    if (self.sat.attributes[i].toolType === 'switch') {
+      attributes[attributeName] = document.getElementById(
+        'custom_attribute_' + attributeName).checked;
+    } else if (self.sat.attributes[i].toolType === 'list') {
+      for (let j = 0; j < self.sat.attributes[i].values.length; j++) {
+        if ($('#custom_attributeselector_' + i + '-' + j).hasClass('active')) {
+          attributes[attributeName] = [j, self.sat.attributes[i].values[j]];
+          break;
+        }
+      }
+    }
+  }
+  return attributes;
+};
 
 /**
  * Prev button handler
@@ -467,11 +508,9 @@ SatImage.prototype._mousedown = function(e) {
       self.selectedLabel.mousedown(e);
     } else {
       let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
-      let occl = self.occlCheckbox.checked;
-      let trunc = self.truncCheckbox.checked;
+      let attributes = self._getSelectedAttributes();
       self.selectLabel(self.sat.newLabel({
-        categoryPath: cat, occl: occl,
-        trunc: trunc, mousePos: mousePos,
+        categoryPath: cat, attributes: attributes, mousePos: mousePos,
       }));
 
       self.selectedLabel.mousedown(e);
@@ -591,11 +630,9 @@ SatImage.prototype._mouseup = function(e) {
           let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
           let mousePos = self.getMousePos(e);
 
-          let occl = self.occlCheckbox.checked;
-          let trunc = self.truncCheckbox.checked;
+          let attributes = self._getSelectedAttributes();
           self.selectLabel(self.sat.newLabel({
-                categoryPath: cat, occl: occl,
-                trunc: trunc, mousePos: mousePos,
+                categoryPath: cat, attributes: attributes, mousePos: mousePos,
               })
           );
         }
@@ -751,51 +788,67 @@ SatImage.prototype._changeCat = function() {
 };
 
 /**
- * Called when the occluded checkbox is toggled.
+ * Called when an attribute checkbox is toggled.
+ * @param {int} attributeIndex - the index of the attribute toggled.
  */
-SatImage.prototype._occlSwitch = function() {
+SatImage.prototype._attributeSwitch = function(attributeIndex) {
+  let attributeName = this.sat.attributes[attributeIndex].name;
   if (this.selectedLabel) {
-    this.selectedLabel.attributes.occl =
-        $('[name=\'occluded-checkbox\']').prop('checked');
+    this.selectedLabel.attributes[attributeName] = $('#custom_attribute_'
+      + attributeName).prop('checked');
+    if (this.selectedLabel.parent) {
+      this.selectedLabel.parent.interpolate(this.selectedLabel);
+    }
   }
-  this.redraw();
 };
 
 /**
- * Called when the truncated checkbox is toggled.
+ * Called when an attribute list is interacted with.
+ * @param {int} attributeIndex - the index of the attribute interacted with.
+ * @param {int} selectedIndex - the index of the selected value for the
+ * attribute.
  */
-SatImage.prototype._truncSwitch = function() {
+SatImage.prototype._attributeListSelect = function(attributeIndex,
+                                                   selectedIndex) {
+  let attributeName = this.sat.attributes[attributeIndex].name;
   if (this.selectedLabel) {
-    this.selectedLabel.attributes.trunc =
-        $('[name=\'truncated-checkbox\']').prop('checked');
+    // store both the index and the value in order to prevent another loop
+    //   during tag drawing
+    this.selectedLabel.attributes[attributeName] =
+      [selectedIndex,
+        this.sat.attributes[attributeIndex].values[selectedIndex]];
+    if (this.selectedLabel.parent) {
+      this.selectedLabel.parent.interpolate(this.selectedLabel);
+    }
   }
-  this.redraw();
 };
 
 /**
- * Used to set the value of the occlusion checkbox.
+ * Sets the value of a checkbox.
+ * @param {int} attributeIndex - the index of the attribute toggled.
  * @param {boolean} value - the value to set.
  */
-SatImage.prototype._setOccl = function(value) {
-  let occludedCheckbox = $('[name=\'occluded-checkbox\']');
-  if (occludedCheckbox.prop('checked') !==
-      value) {
-    occludedCheckbox.trigger('click');
+SatImage.prototype._setAttribute = function(attributeIndex, value) {
+  let attributeName = this.sat.attributes[attributeIndex].name;
+  let attributeCheckbox = $('#custom_attribute_' + attributeName);
+  if (attributeCheckbox.prop('checked') !== value) {
+    attributeCheckbox.trigger('click');
   }
   this.redraw();
 };
 
 /**
- * Used to set the value of the truncation checkbox.
- * @param {boolean} value - the value to set.
+ * Sets the value of a list.
+ * @param {int} attributeIndex - the index of the attribute toggled.
+ * @param {int} selectedIndex - the index of the value selected.
  */
-SatImage.prototype._setTrunc = function(value) {
-  let truncatedCheckbox = $('[name=\'truncated-checkbox\']');
-  if (truncatedCheckbox.prop('checked') !==
-      value) {
-    truncatedCheckbox.trigger('click');
+SatImage.prototype._selectAttributeFromList = function(attributeIndex,
+                                                       selectedIndex) {
+  let selector = $('#custom_attributeselector_' + attributeIndex + '-' +
+    selectedIndex);
+  if (!selector.hasClass('active')) {
+    selector.trigger('click');
   }
-  this.redraw();
 };
 
 /**
@@ -811,12 +864,6 @@ SatImage.prototype._setCatSel = function(categoryPath) {
   }
 };
 
- /**
- * Called when the traffic light color choice is changed.
- */
-SatImage.prototype._lightSwitch = function() {
-  // TODO: Wenqi
-};
 
 /**
  * Base class for all the image labels. New label should be instantiated by
@@ -940,13 +987,21 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
     let tw = self.TAG_WIDTH;
     // abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3);
-    if (self.attributes.occl) {
-      abbr += ',o';
-      tw += 9;
-    }
-    if (self.attributes.trunc) {
-      abbr += ',t';
-      tw += 9;
+    for (let i = 0; i < self.sat.attributes.length; i++) {
+      let attribute = self.sat.attributes[i];
+      if (attribute.toolType === 'switch') {
+        if (self.attributes[attribute.name]) {
+          abbr+= ',' + attribute.tagText;
+          tw += 9;
+        }
+      } else if (attribute.toolType === 'list') {
+        if (self.attributes[attribute.name] &&
+          self.attributes[attribute.name][0] > 0) {
+          abbr += ',' + attribute.tagPrefix + ':' +
+            attribute.tagSuffixes[self.attributes[attribute.name][0]];
+          tw += 18;
+        }
+      }
     }
 
     let [tlx, tly] = self.satItem.transformPoints(position);

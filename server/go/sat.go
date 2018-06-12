@@ -58,15 +58,15 @@ type Item struct {
 
 // An annotation for an item, needs to include all possible annotation types
 type Label struct {
-	Id              int                `json:"id" yaml:"id"`
-	CategoryPath    string             `json:"categoryPath" yaml:"categoryPath"`
-	ParentId        int                `json:"parent" yaml:"parentId"`
-	ChildrenIds     []int              `json:"children" yaml:"childrenIds"`
-	PreviousLabelId int                `json:"previousLabelId" yaml:"previousLabelId"`
-	NextLabelId     int                `json:"nextLabelId" yaml:"nextLabelId"`
-	Attributes      map[string]bool    `json:"attributes" yaml:"attributes"`
-	Data            map[string]interface{}              `json:"data" yaml:"data"`
-	Keyframe        bool               `json:"keyframe" yaml:"keyframe"`
+	Id              int                    `json:"id" yaml:"id"`
+	CategoryPath    string                 `json:"categoryPath" yaml:"categoryPath"`
+	ParentId        int                    `json:"parent" yaml:"parentId"`
+	ChildrenIds     []int                  `json:"children" yaml:"childrenIds"`
+	PreviousLabelId int                    `json:"previousLabelId" yaml:"previousLabelId"`
+	NextLabelId     int                    `json:"nextLabelId" yaml:"nextLabelId"`
+	Attributes      map[string]bool        `json:"attributes" yaml:"attributes"`
+	Data            map[string]interface{} `json:"data" yaml:"data"`
+	Keyframe        bool                   `json:"keyframe" yaml:"keyframe"`
 }
 
 // A class value for a label.

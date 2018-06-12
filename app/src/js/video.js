@@ -19,7 +19,6 @@ function SatVideo(LabelType) {
 
   self.load();
   self.currentItem = self.items[0];
-  self.currentItem.setActive(true);
   self.currentItem.image.onload = function() {
     self.currentItem.redraw();};
 
@@ -103,6 +102,7 @@ SatVideo.prototype.fromJson = function(json) {
 SatVideo.prototype.gotoItem = function(index) {
   let self = this;
   if (index >= 0 && index < self.items.length) {
+    index = (index + self.items.length) % self.items.length;
     self.currentItem.setActive(false);
     self.currentItem = self.items[index];
     self.frameCounter.innerHTML = self.currentItem.index + 1;
@@ -225,6 +225,7 @@ Track.prototype.interpolate = function(startLabel) {
     let weight = i / startIndex;
     self.children[i].weightedAvg(self.children[priorKeyFrameIndex], startLabel,
       weight);
+    self.children[i].attributes = startLabel.attributes;
   }
   if (nextKeyFrameIndex) {
     // if there is a later keyframe, interpolate
@@ -232,11 +233,13 @@ Track.prototype.interpolate = function(startLabel) {
       let weight = (i - startIndex) / (nextKeyFrameIndex - startIndex);
       self.children[i].weightedAvg(startLabel, self.children[nextKeyFrameIndex],
         weight);
+      self.children[i].attributes = startLabel.attributes;
     }
   } else {
     // otherwise, just apply changes to remaining items
-    for (let i = startIndex; i < self.children.length; i++) {
+    for (let i = startIndex + 1; i < self.children.length; i++) {
       self.children[i].weightedAvg(startLabel, startLabel, 0);
+      self.children[i].attributes = startLabel.attributes;
     }
   }
 };

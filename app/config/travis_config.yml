@@ -1,4 +1,4 @@
 ---
-port: "8686"
+port: 8686
 dataDir: "$GOPATH/src/sat/data"
 ...

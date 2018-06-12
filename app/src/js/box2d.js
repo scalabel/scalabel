@@ -22,8 +22,13 @@ function Box2d(sat, id, optionalAttributes) {
   let mousePos;
   if (optionalAttributes) {
     this.categoryPath = optionalAttributes.categoryPath;
-    this.attributes.trunc = optionalAttributes.trunc;
-    this.attributes.occl = optionalAttributes.occl;
+    for (let i = 0; i < this.sat.attributes.length; i++) {
+      let attributeName = this.sat.attributes[i].name;
+      if (attributeName in optionalAttributes.attributes) {
+        this.attributes[attributeName] =
+          optionalAttributes.attributes[attributeName];
+      }
+    }
     mousePos = optionalAttributes.mousePos;
     if (mousePos) {
       this.rect.setRect(mousePos.x,
@@ -274,7 +279,9 @@ Box2d.prototype.mousedown = function(e) {
   if (this.state === BoxStates.FREE) {
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
     let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
-    this.selectedCache = occupiedShape.copy();
+    if (occupiedShape) {
+      this.selectedCache = occupiedShape.copy();
+    }
 
     if (occupiedLabel && occupiedLabel.id === this.id) {
       if (occupiedShape instanceof Vertex) {
@@ -318,28 +325,10 @@ Box2d.prototype.mouseup = function() {
   this.setState(BoxStates.FREE);
 
   // if parent label, make this the selected label in all other SatImages
-  let currentItem = this.sat.currentItem;
   if (this.parent) {
-    currentItem = currentItem.previousItem();
-    let currentLabel = this.sat.labelIdMap[this.previousLabelId];
-    while (currentItem) {
-      currentItem.selectedLabel = currentLabel;
-      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
-      if (currentLabel) {
-        currentLabel = this.sat.labelIdMap[currentLabel.previousLabelId];
-        // TODO: make both be functions, not attributes
-      }
-      currentItem = currentItem.previousItem();
-    }
-    currentItem = this.sat.currentItem.nextItem();
-    currentLabel = this.sat.labelIdMap[this.nextLabelId];
-    while (currentItem) {
-      currentItem.selectedLabel = currentLabel;
-      currentItem.currHandle = currentItem.selectedLabel.INITIAL_HANDLE;
-      if (currentLabel) {
-        currentLabel = this.sat.labelIdMap[currentLabel.nextLabelId];
-      }
-      currentItem = currentItem.nextItem();
+    for (let i = 0; i < this.parent.children.length; i++) {
+      let label = this.parent.children[i];
+      label.satItem.selectLabel(label);
     }
   }
 };

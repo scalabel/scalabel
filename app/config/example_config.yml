@@ -1,5 +1,5 @@
 ---
-port: "8686"
-dataDir: "../data"
-projectPath: "/Users/garychen/go/src/sat"
+port: 8686
+dataDir: "Users/myusername/data"
+projectPath: "/Users/myusername/go/src/sat"
 ...
