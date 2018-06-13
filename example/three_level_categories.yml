@@ -1,0 +1,53 @@
+- name: 0
+  subcategories:
+    - name: 00
+      subcategories:
+        - name: 000
+        - name: 001
+        - name: 002
+    - name: 01
+      subcategories:
+        - name: 010
+        - name: 011
+        - name: 012
+    - name: 02
+      subcategories:
+        - name: 020
+        - name: 021
+        - name: 022
+
+- name: 1
+  subcategories:
+    - name: 10
+      subcategories:
+        - name: 100
+        - name: 101
+        - name: 102
+    - name: 11
+      subcategories:
+        - name: 110
+        - name: 111
+        - name: 112
+    - name: 12
+      subcategories:
+        - name: 120
+        - name: 121
+        - name: 122
+
+- name: 2
+  subcategories:
+    - name: 20
+      subcategories:
+        - name: 200
+        - name: 201
+        - name: 202
+    - name: 21
+      subcategories:
+        - name: 210
+        - name: 211
+        - name: 212
+    - name: 22
+      subcategories:
+        - name: 220
+        - name: 221
+        - name: 222

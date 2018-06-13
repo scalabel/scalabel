@@ -1,0 +1,68 @@
+- name: void
+  subcategories:
+    - name: unlabeled
+    - name: dynamic
+    - name: ego vehicle
+    - name: ground
+    - name: static
+
+- name: flat
+  subcategories:
+    - name: parking
+    - name: rail track
+    - name: road
+    - name: sidewalk
+
+- name: construction
+  subcategories:
+    - name: bridge
+    - name: building
+    - name: bus stop
+    - name: fence
+    - name: garage
+    - name: guard rail
+    - name: tunnel
+    - name: wall
+
+- name: object
+  subcategories:
+    - name: banner
+    - name: billboard
+    - name: fire hydrant
+    - name: lane divider
+    - name: mail box
+    - name: parking sign
+    - name: pole
+    - name: polegroup
+    - name: street light
+    - name: traffic cone
+    - name: traffic device
+    - name: traffic light
+    - name: traffic sign
+    - name: traffic sign frame
+    - name: trash can
+
+- name: nature
+  subcategories:
+    - name: terrain
+    - name: vegetation
+
+- name: sky
+  subcategories:
+    - name: sky
+
+- name: human
+  subcategories:
+    - name: person
+    - name: rider
+
+- name: vehicle
+  subcategories:
+    - name: bicycle
+    - name: bus
+    - name: car
+    - name: caravan
+    - name: motorcycle
+    - name: trailer
+    - name: train
+    - name: truck

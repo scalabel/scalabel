@@ -180,7 +180,9 @@ Sat.prototype.gotoItem = function(index) {
     self.currentItem.redraw();
   };
   self.currentItem.redraw();
-  self.slider.value = index + 1;
+  if (self.slider) {
+    self.slider.value = index + 1;
+  }
 };
 
 Sat.prototype.moveSlider = function() {
@@ -225,8 +227,84 @@ Sat.prototype.load = function() {
   xhr.send(request);
 };
 
+// recursively create category to arbitrary level
+Sat.prototype.appendCascadeCategories = function(
+  subcategories, level, selectedIdx=0) {
+  let self = this;
+  // clean up
+  let previousChildLevel = level;
+  while (document.getElementById('parent_select_' + previousChildLevel)) {
+    $('#parent_select_' + previousChildLevel).next().remove();
+    document.getElementById('parent_select_' + previousChildLevel).remove();
+    previousChildLevel++;
+  }
+  // base case null
+  if (!subcategories) {return;}
+  // get parent div
+  let categoryDiv = document.getElementById('custom_categories');
+  // build new category select window
+  let child;
+  if (subcategories[0].subcategories) {
+    child = document.createElement('select');
+    child.id = 'parent_select_' + level;
+    child.classList.add('form-control');
+    child.size = Math.min(10, subcategories.length);
+    child.style = 'font-size:15px';
+  } else {
+    // clean up old options
+    let oldCategorySelect = document.getElementById('category_select');
+    if (oldCategorySelect) {
+      oldCategorySelect.innerHTML = '';
+      $('#category_select').next().remove();
+      child = oldCategorySelect;
+    } else {
+      child = document.createElement('select');
+      child.id = 'category_select';
+      child.classList.add('form-control');
+      child.style = 'font-size:15px';
+    }
+    child.size = Math.min(10, subcategories.length);
+  }
+  for (let subcategory of subcategories) {
+    let option = document.createElement('option');
+    option.innerHTML = subcategory.name;
+    child.append(option);
+  }
+  child.selectedIndex = selectedIdx;
+  categoryDiv.append(child);
+  categoryDiv.append(document.createElement('hr')); // horizontal break
+  // attach appropriate handler if not last level
+  if (subcategories[selectedIdx].subcategories) {
+    $('#parent_select_' + level).change(function() {
+      let newSubcategories = self.categories;
+      for (let i=0; i <= level; i++) {
+        let idx = document.getElementById('parent_select_' + i).selectedIndex;
+        newSubcategories = newSubcategories[idx].subcategories;
+      }
+      // handles the edge case where leaf categories are not at same level
+      if (!newSubcategories) { // this level becomes the category_select level
+        let thisLevel = document.getElementById('parent_select_' + level);
+        $('#parent_select_' + level).next().remove();
+        let categorySelect = document.getElementById('category_select');
+        categorySelect.innerHTML = thisLevel.innerHTML;
+        categorySelect.size = thisLevel.size;
+        categorySelect.selectedIndex = thisLevel.selectedIndex;
+        // TODO: need to tell satItem about this category change
+        // otherwise cannot handle arbitrary category tree input
+        thisLevel.remove();
+      }
+      self.appendCascadeCategories(newSubcategories, level + 1);
+    });
+  }
+  this.appendCascadeCategories(
+    subcategories[selectedIdx].subcategories,
+    level + 1); // recursively add new levels
+};
+
 Sat.prototype.initToolbox = function() {
   let self = this;
+  // initialize all categories
+  this.appendCascadeCategories(this.categories, 0);
   // initialize all the attribute selectors
   for (let i = 0; i < self.attributes.length; i++) {
     let attributeInput = document.getElementById('custom_attribute_' +

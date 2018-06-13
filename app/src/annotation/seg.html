@@ -79,8 +79,6 @@
                 <small id="poly_count">0</small>
                 <small class="col-lg-offset-0">Lights: </small>
                 <small id="light_count">0</small>
-                <a href="#" id="link_btn"
-                   class="btn btn-primary btn-md">Link</a>
                 <div class="btn-group">
                     <button id="increase_btn" class="btn btn-primary">+</button>
                     <button href="#" id="decrease_btn" class="btn btn-primary">-</button>
@@ -101,15 +99,8 @@
                     Toolbox
                 </div>
                 <a href="#" class="list-group-item">
-                    <div class="form-group">
+                    <div id="custom_categories" class="form-group">
                         <p>Label Category</p>
-                        <select id="category_select" size="10" class="form-control">
-                            <!-- iterate over object categories -->
-                            {{ range $key, $value := .Categories }}
-                            <option value={{$value}}>{{ $value.Name }}</option>
-                            {{ end }}
-                        </select>
-
                     </div>
                     <div id="custom_attributes">
                         {{ range $key, $value := .Attributes }}
@@ -120,6 +111,9 @@
                         </div>
                         {{ end }}
                     </div>
+                    <a href="#" id="link_btn" class="btn list-group-item">
+                        Link
+                    </a>
                     <a href="#" id="remove_btn" class="btn list-group-item">
                         Remove
                     </a>
@@ -198,10 +192,7 @@
     const type = "seg";
     let sat = new Sat(SatImage, Seg2d);
     sat.load();
-    // initialize the occluded/truncated switches with bootstrap
-    $('[name=\'occluded-checkbox\']').bootstrapSwitch();
-    $('[name=\'truncated-checkbox\']').bootstrapSwitch();
-    document.getElementById('save_btn').onclick = function() {sat.save()};
+
     document.addEventListener ("keydown", function (e) {
       let evtobj = window.event? event : e;
       if (evtobj.keyCode == 191 && evtobj.shiftKey) {

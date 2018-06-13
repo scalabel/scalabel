@@ -211,6 +211,7 @@ SatImage.prototype.setActive = function(active) {
       self._mouseup(e);
     };
     document.onmousemove = function(e) {
+      self._changeCat();
       self._mousemove(e);
     };
     document.onscroll = function(e) {
@@ -267,8 +268,8 @@ SatImage.prototype.setActive = function(active) {
     }
 
     // toolbox
+    self.sat.appendCascadeCategories(self.sat.categories, 0);
     self.catSel = document.getElementById('category_select');
-    self.catSel.selectedIndex = 0;
     for (let i = 0; i < self.sat.attributes.length; i++) {
       let attributeName = self.sat.attributes[i].name;
       if (self.sat.attributes[i].toolType === 'switch') {
@@ -291,7 +292,20 @@ SatImage.prototype.setActive = function(active) {
     }
 
     $('#category_select').change(function() {
+      let tempIdx = document.getElementById('category_select').selectedIndex;
+      let level = 0;
+      let newSubcategories = self.sat.categories;
+      while (document.getElementById('parent_select_' + level)) {
+        let idx = document.getElementById('parent_select_' + level)
+          .selectedIndex;
+        newSubcategories = newSubcategories[idx].subcategories;
+        level++;
+      }
+      if (newSubcategories[tempIdx].subcategories) {
+        self.sat.appendCascadeCategories(newSubcategories, level, tempIdx);
+      }
       self._changeCat();
+      self.redrawMainCanvas();
     });
 
     // class specific tool box
@@ -507,6 +521,7 @@ SatImage.prototype._mousedown = function(e) {
       self.selectedLabel.setSelectedShape(occupiedShape);
       self.selectedLabel.mousedown(e);
     } else {
+      self.catSel = document.getElementById('category_select');
       let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
       let attributes = self._getSelectedAttributes();
       self.selectLabel(self.sat.newLabel({
@@ -627,6 +642,7 @@ SatImage.prototype._mouseup = function(e) {
     if (!self.selectedLabel) {
       setTimeout(function() {
         if (!self.selectedLabel) {
+          self.catSel = document.getElementById('category_select');
           let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
           let mousePos = self.getMousePos(e);
 
@@ -781,9 +797,9 @@ SatImage.prototype.pushToHiddenMap = function(shapes) {
 SatImage.prototype._changeCat = function() {
   let self = this;
   if (self.selectedLabel) {
+    self.catSel = document.getElementById('category_select');
     let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
     self.selectedLabel.categoryPath = option;
-    self.redraw();
   }
 };
 
@@ -856,6 +872,7 @@ SatImage.prototype._selectAttributeFromList = function(attributeIndex,
  * @param {number} categoryPath - the category path.
  */
 SatImage.prototype._setCatSel = function(categoryPath) {
+  this.catSel = document.getElementById('category_select');
   for (let i = 0; i < this.catSel.options.length; i++) {
     if (this.catSel.options[i].innerHTML === categoryPath) {
       this.catSel.selectedIndex = i;

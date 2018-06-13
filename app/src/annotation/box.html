@@ -97,15 +97,8 @@
                     Toolbox
                 </div>
                 <a href="#" class="list-group-item">
-                    <div class="form-group">
-                        <p>Label Category</p>
-                        <select id="category_select" size="10"
-                                class="form-control">
-                            <!-- iterate over object categories -->
-                            {{ range $key, $value := .Categories }}
-                            <option value={{$value}}>{{ $value.Name }}</option>
-                            {{ end }}
-                        </select>
+                    <div id="custom_categories" class="form-group">
+                      <p>Label Category</p>
                     </div>
                     <div id="custom_attributes">
                         {{ range $key, $value := .Attributes }}
