@@ -25,35 +25,39 @@ type Env struct {
 	Port        int    `yaml:"port"`
 	DataDir     string `yaml:"dataDir"`
 	ProjectPath string `yaml:"projectPath"`
-	AppDir      string `yaml:"AppDir"`
+	AppSubDir   string `yaml:"AppSubDir"`
+}
+
+func (env Env) AppDir() string {
+	return path.Join(env.ProjectPath, env.AppSubDir)
 }
 
 func (env Env) CreatePath() string {
-	return path.Join(env.ProjectPath, env.AppDir, "control/create.html")
+	return path.Join(env.AppDir(), "control/create.html")
 }
 
 func (env Env) MonitorPath() string {
-	return path.Join(env.ProjectPath, env.AppDir, "control/monitor.html")
+	return path.Join(env.AppDir(), "control/monitor.html")
 }
 
 func (env Env) VendorPath() string {
-	return path.Join(env.ProjectPath, env.AppDir, "control/vendor.html")
+	return path.Join(env.AppDir(), "control/vendor.html")
 }
 
 func (env Env) VideoPath() string {
-	return path.Join(env.ProjectPath, env.AppDir, "annotation/video.html")
+	return path.Join(env.AppDir(), "annotation/video.html")
 }
 
 func (env Env) Box2dPath() string {
-	return path.Join(env.ProjectPath, env.AppDir, "annotation/box.html")
+	return path.Join(env.AppDir(), "annotation/box.html")
 }
 
 func (env Env) Seg2dPath() string {
-	return path.Join(env.ProjectPath, env.AppDir, "annotation/seg.html")
+	return path.Join(env.AppDir(), "annotation/seg.html")
 }
 
 func (env Env) Lane2dPath() string {
-	return path.Join(env.ProjectPath, env.AppDir, "annotation/seg.html")
+	return path.Join(env.AppDir(), "annotation/seg.html")
 }
 
 func Init(
@@ -99,8 +103,8 @@ func NewEnv() *Env {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if env.AppDir == "" {
-		env.AppDir = "app/src"
+	if env.AppSubDir == "" {
+		env.AppSubDir = "app/src"
 	}
 	return env
 }
@@ -120,7 +124,7 @@ func main() {
 	// flow control handlers
 	//http.HandleFunc("/", parse(indexHandler))
 	http.HandleFunc("/", WrapHandler(http.FileServer(
-		http.Dir(path.Join(env.ProjectPath, env.AppDir)))))
+		http.Dir(path.Join(env.ProjectPath, env.AppSubDir)))))
 	http.HandleFunc("/dashboard", WrapHandleFunc(dashboardHandler))
 	http.HandleFunc("/vendor", WrapHandleFunc(vendorHandler))
 	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))
