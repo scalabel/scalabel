@@ -37,7 +37,6 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
   self.labelIdMap[track.id] = track;
   self.labels.push(track);
   self.tracks.push(track);
-  let previousLabelId = -1; // -1 means null
   for (let i = self.currentItem.index; i < self.items.length; i++) {
     let labelId = self.newLabelId();
     if (i > self.currentItem.index) {
@@ -50,14 +49,6 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
     self.labels.push(childLabel);
     track.addChild(childLabel);
     self.items[i].labels.push(childLabel);
-    if (previousLabelId > -1) {
-      self.labelIdMap[previousLabelId].nextLabelId = childLabel.id;
-    }
-    childLabel.previousLabelId = previousLabelId;
-    previousLabelId = childLabel.id;
-  }
-  if (previousLabelId > -1) {
-    self.labelIdMap[previousLabelId].nextLabelId = -1;
   }
   return self.currentItem.labels[
     self.currentItem.labels.length - 1];

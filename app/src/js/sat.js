@@ -712,14 +712,6 @@ SatLabel.prototype.encodeBaseJson = function() {
     }
     json.children = childrenIds;
   }
-  json.previousLabelId = -1;
-  json.nextLabelId = -1;
-  if (self.previousLabelId) {
-    json.previousLabelId = self.previousLabelId;
-  }
-  if (self.nextLabelId) {
-    json.nextLabelId = self.nextLabelId;
-  }
   // TODO: remove
   json.keyframe = self.keyframe;
 
@@ -748,12 +740,6 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   self.attributes = json.attributes;
   // TODO: remove
   self.keyframe = json.keyframe;
-  if (json.previousLabelId > -1) {
-    self.previousLabelId = json.previousLabelId;
-  }
-  if (json.nextLabelId > -1) {
-    self.nextLabelId = json.nextLabelId;
-  }
   self.decodeLabelData(json.data);
 };
 

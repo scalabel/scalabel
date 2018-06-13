@@ -49,16 +49,8 @@
                 </div>
                 <!-- list of control sections -->
                 <a href="#" class="list-group-item">
-                    <!-- label selection controls -->
-                    <div class="form-group">
+                    <div id="custom_categories" class="form-group">
                         <p>Label Category</p>
-                        <select id="category_select" size="10"
-                                class="form-control">
-                            <!-- iterate over object categories -->
-                            {{ range $key, $value := .Categories }}
-                            <option value={{$value}}>{{ $value.Name }}</option>
-                            {{ end }}
-                        </select>
                     </div>
                     <div id="custom_attributes">
                         {{ range $key, $value := .Attributes }}
