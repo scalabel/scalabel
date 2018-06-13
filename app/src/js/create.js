@@ -40,6 +40,19 @@ itemSelect.onchange = function() {
   }
 };
 
+labelSelect.onchange = function() {
+  let labelName;
+  if (labelSelect.value === 'box2d') {
+    labelName = '2D Bounding Box';
+  } else if (labelSelect.value === 'segmentation') {
+    labelName = '2D Segmentation';
+  } else if (labelSelect.value === 'box3d') {
+    labelName = '3D Bounding Box';
+  }
+  let pageTitle = document.getElementById('page_title');
+  pageTitle.value = labelName + ' Labeling Tool';
+};
+
 /**
  * Enable the specified option in the specified select.
  * @param {object} select - The html select.

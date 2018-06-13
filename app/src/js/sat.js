@@ -380,6 +380,7 @@ Sat.prototype.encodeBaseJson = function() {
   }
   return {
     handlerUrl: self.handlerUrl,
+    pageTitle: self.pageTitle,
     projectName: self.projectName,
     startTime: self.startTime,
     items: items,
@@ -409,6 +410,9 @@ Sat.prototype.fromJson = function(json) {
 Sat.prototype.decodeBaseJson = function(json) {
   let self = this;
   self.handlerUrl = json.handlerUrl;
+  self.pageTitle = json.pageTitle;
+  document.title = self.pageTitle;
+  document.getElementById('page-title').innerHTML = self.pageTitle;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID
     self.lastLabelId = Math.max(self.lastLabelId, json.labels[i].id);

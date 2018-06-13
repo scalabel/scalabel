@@ -29,6 +29,7 @@ type Project struct {
 // A chunk of a project
 type Task struct {
 	HandlerUrl    string        `json:"handlerUrl" yaml:"handlerUrl"`
+	PageTitle     string        `json:"pageTitle" yaml:"pageTitle"`
 	ProjectName   string        `json:"projectName" yaml:"projectName"`
 	Index         int           `json:"index" yaml:"index"`
 	Items         []Item        `json:"items" yaml:"items"`
@@ -267,9 +268,14 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	index := 0
 	handlerUrl := GetHandlerUrl(project)
+	pageTitle := r.FormValue("page_title")
+	if err != nil {
+		Error.Println(err)
+	}
 	if itemType == "video" {
 		task := Task{
 			HandlerUrl:    handlerUrl,
+			PageTitle:     pageTitle,
 			ProjectName:   project.Name,
 			Index:         0,
 			Items:         project.Items,
@@ -296,6 +302,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			// Initialize new task
 			task := Task{
 				HandlerUrl:  handlerUrl,
+				PageTitle:   pageTitle,
 				ProjectName: project.Name,
 				Index:       index,
 				Items:       project.Items[i:Min(i+taskSize, size)],
