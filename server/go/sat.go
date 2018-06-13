@@ -23,7 +23,7 @@ type Project struct {
 	TaskSize      int           `json:"taskSize" yaml:"taskSize"`
 	Attributes    []Attribute   `json:"attributes" yaml:"attributes"`
 	VendorId      int           `json:"vendorId" yaml:"vendorId"`
-	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
+	VideoMetaData VideoMetaData `json:"metadata" yaml:"metadata"`
 }
 
 // A chunk of a project
@@ -37,7 +37,7 @@ type Task struct {
 	Tracks        []Label       `json:"tracks" yaml:"tracks"`
 	Categories    []Category    `json:"categories" yaml:"categories"`
 	Attributes    []Attribute   `json:"attributes" yaml:"attributes"`
-	VideoMetadata VideoMetadata `json:"metadata" yaml:"metadata"`
+	VideoMetaData VideoMetaData `json:"metadata" yaml:"metadata"`
 }
 
 // The actual assignment of a task to an annotator
@@ -87,6 +87,11 @@ type Attribute struct {
 
 // An event describing an annotator's interaction with the session
 type Event struct {
+	Timestamp  int64     `json:"timestamp" yaml:"timestamp"`
+	Action     string    `json:"action" yaml:"action"`
+	ItemIndex  int32     `json:"itemIndex" yaml:"itemIndex"`
+	LabelIndex int32     `json:"labelIndex" yaml:"labelIndex"`
+	Position   []float32 `json:"position" yaml:"position"`
 }
 
 // Function type for handlers
@@ -162,7 +167,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	var vmd VideoMetadata
+	var vmd VideoMetaData
 	if itemType == "video" {
 		var frameDirectoryItems []Item
 		err = yaml.Unmarshal(itemFileBuf.Bytes(), &frameDirectoryItems)
@@ -261,7 +266,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		TaskSize:      taskSize,
 		Attributes:    attributes,
 		VendorId:      vendorId,
-		VideoMetadata: vmd,
+		VideoMetaData: vmd,
 	}
 
 	index := 0
@@ -279,7 +284,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			Items:         project.Items,
 			Categories:    project.Categories,
 			Attributes:    project.Attributes,
-			VideoMetadata: vmd,
+			VideoMetaData: vmd,
 		}
 		index = 1
 

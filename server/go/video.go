@@ -6,7 +6,7 @@ import (
 )
 
 // Metadata describing a video
-type VideoMetadata struct {
+type VideoMetaData struct {
 	Bitrate    string `json:"bitrate"`
 	TBR        string `json:"tbr"`
 	FPS        string `json:"fps"`

@@ -150,8 +150,8 @@ Sat.prototype.newLabel = function(optionalAttributes) {
  * @param {string} action - The action triggering the event.
  * @param {int} itemIndex - Index of the item on which the event occurred.
  * @param {int} labelId - ID of the label pertaining to the event.
- * @param {object} position - Object storing some representation of position at
- *   which this event occurred.
+ * @param {[float, float]} position - coordinate storing some representation of
+ *  position at which this event occurred.
  */
 Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
                                   position = null) {
