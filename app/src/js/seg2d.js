@@ -28,8 +28,13 @@ function Seg2d(sat, id, optionalAttributes) {
   if (optionalAttributes) {
     mousePos = optionalAttributes.mousePos;
     this.categoryPath = optionalAttributes.categoryPath;
-    this.attributes.trunc = optionalAttributes.trunc;
-    this.attributes.occl = optionalAttributes.occl;
+    for (let i = 0; i < this.sat.attributes.length; i++) {
+      let attributeName = this.sat.attributes[i].name;
+      if (attributeName in optionalAttributes.attributes) {
+        this.attributes[attributeName] =
+          optionalAttributes.attributes[attributeName];
+      }
+    }
   }
 
   if (mousePos) {
@@ -77,8 +82,8 @@ Seg2d.prototype.splitPolygon = function(poly) {
       this.polys.splice(i, 1);
       // create a Seg2d label for this polygon
       let label = this.sat.newLabel({
-        categoryPath: this.categoryPath, occl: this.attributes.occl,
-        trunc: this.attributes.trunc, mousePos: null,
+        categoryPath: this.categoryPath, attributes: this.attributes,
+        mousePos: null,
       });
       label.addPolygon(poly);
       label.releaseAsTargeted();
@@ -168,6 +173,15 @@ SatImage.prototype._linkHandler = function() {
 
     let cat = this.catSel.options[this.catSel.selectedIndex].innerHTML;
     if (!this.selectedLabel) {
+      let attributes = {};
+      for (let i = 0; i < self.sat.attributes.length; i++) {
+        if (self.sat.attributes[i].toolType === 'switch') {
+          attributes[self.sat.attributes[i].name] = false;
+        } else if (self.sat.attributes[i].toolType === 'list') {
+          attributes[self.sat.attributes[i].name] = [0,
+            self.sat.attributes[i].values[0]];
+        }
+      }
       this.selectedLabel = this.sat.newLabel({
         categoryPath: cat, occl: false,
         trunc: false, mousePos: null,
@@ -554,8 +568,7 @@ Seg2d.prototype.mousedown = function(e) {
     } else if (occupiedLabel) {
       // if clicked another label, merge into one
       if (this.polys.length < 1) {
-        this.attributes.trunc = occupiedLabel.trunc;
-        this.attributes.occl = occupiedLabel.occl;
+        this.attributes = occupiedLabel.attributes;
         this.categoryPath = occupiedLabel.categoryPath;
       }
       for (let poly of occupiedLabel.polys) {

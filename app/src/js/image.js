@@ -260,7 +260,7 @@ SatImage.prototype.setActive = function(active) {
       removeBtn.click(function() {
         if (self.selectedLabel) {
           self.selectedLabel.delete();
-          self.satItem.deselectAll();
+          self.deselectAll();
           self.redraw();
         }
       });

@@ -111,32 +111,14 @@
                         </select>
 
                     </div>
-                    <div class="form-group">
-                        <input type="checkbox" name="occluded-checkbox" id="occluded_checkbox" data-on-color="info" data-on-text="Yes" data-off-text="No" data-size="small" data-label-text="Occluded">
-                    </div>
-                    <div class="form-group">
-                        <input type="checkbox" name="truncated-checkbox" id="truncated_checkbox" data-on-color="info" data-on-text="Yes" data-off-text="No" data-size="small" data-label-text="Truncated">
-                    </div>
-                    <div class="form-group">
-                        <p>Traffic Light Color</p>
-                        <div id="radios" class="btn-group" data-toggle="buttons">
-                            <label class="btn btn-sm btn-green">
-                                <input type="radio" name="options" id="green"value="1"/>
-                                G
-                            </label>
-                            <label class="btn btn-sm btn-yellow">
-                                <input type="radio" name="options" id="yellow"value="42"/>
-                                Y
-                            </label>
-                            <label class="btn btn-sm btn-red">
-                                <input type="radio" name="options" id="red"value="0"/>
-                                R
-                            </label>
-                            <label class="btn btn-sm btn-white checked">
-                                <input type="radio" name="options" id="none"value="2"/>
-                                NA
-                            </label>
+                    <div id="custom_attributes">
+                        {{ range $key, $value := .Attributes }}
+                        <div class="form-group"
+                             id="custom_attribute_{{ $value.Name }}_div">
+                            <input id="custom_attribute_{{ $value.Name }}"
+                                   name="custom_attribute_{{ $value.Name }}">
                         </div>
+                        {{ end }}
                     </div>
                     <a href="#" id="remove_btn" class="btn list-group-item">
                         Remove
