@@ -33,6 +33,7 @@ itemSelect.onchange = function() {
   if (itemSelect.value === 'image') {
     enableOption(labelSelect, 'box2d');
     enableOption(labelSelect, 'segmentation');
+    enableOption(labelSelect, 'lane');
   } else if (itemSelect.value === 'video') {
     enableOption(labelSelect, 'box2d');
   } else if (itemSelect.value === 'pointcloud') {
@@ -46,6 +47,8 @@ labelSelect.onchange = function() {
     labelName = '2D Bounding Box';
   } else if (labelSelect.value === 'segmentation') {
     labelName = '2D Segmentation';
+  } else if (labelSelect.value === 'lane') {
+    labelName = '2D Lane';
   } else if (labelSelect.value === 'box3d') {
     labelName = '3D Bounding Box';
   }

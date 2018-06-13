@@ -412,7 +412,7 @@ Sat.prototype.decodeBaseJson = function(json) {
   self.handlerUrl = json.handlerUrl;
   self.pageTitle = json.pageTitle;
   document.title = self.pageTitle;
-  document.getElementById('page-title').innerHTML = self.pageTitle;
+  document.getElementById('page-title').textContent = self.pageTitle;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID
     self.lastLabelId = Math.max(self.lastLabelId, json.labels[i].id);

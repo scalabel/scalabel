@@ -6,7 +6,6 @@ ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT */
 const VertexTypes = {VERTEX: 'vertex', MIDPOINT: 'midpoint',
   CONTROL_POINT: 'control_point'};
 const EdgeTypes = {LINE: 'line', BEZIER: 'bezier'};
-const PathTypes = {VERTICAL: 'vertical', HORIZONTAL: 'horizontal'};
 
 // find bbox around a set of vertices
 const getBbox = function(vertices) {
@@ -610,16 +609,15 @@ Polyline.prototype.toString = function() {
 };
 
 /**
- * Path Class, a data structure for lane annotation that holds
+ * Path Class, a data structure for Path annotation that holds
  * information about a Path
  * IMPORTANT: keep in mind src and dest of edges can be
  * shuffled randomly, so call this.alignEdges to
- * align edges to correct direction before draw path
+ * align edges to correct direction before draw Path
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
 function Path(id = null) {
   Polyline.call(this, id);
-  this.type = PathTypes.VERTICAL;
 }
 
 Object.assign(Path, Polyline);
@@ -671,7 +669,7 @@ Path.prototype.insertVertex = function(i, pt) {
 };
 
 /**
- * Delete vertex from path at given position i
+ * Delete vertex from Path at given position i
  * @param {int} i: index for the vertex
  */
 Path.prototype.deleteVertex = function(i) {
@@ -1064,7 +1062,7 @@ Vertex.prototype.draw = function(context, satImage, fillStyle = null,
   context.save();
   context.beginPath();
   context.fillStyle = fillStyle;
-  let [x, y] = satImage.transformPoints([this._x, this._y]);
+  let [x, y] = satImage.toCanvasCoords([this._x, this._y]);
   context.arc(x, y, radius, 0, 2 * Math.PI, false);
   context.closePath();
   if (this.type === VertexTypes.CONTROL_POINT
@@ -1078,7 +1076,7 @@ Vertex.prototype.draw = function(context, satImage, fillStyle = null,
 
 Vertex.prototype.drawHidden = function(context, satImage, fillStyle) {
   context.save();
-  let [x, y] = satImage.transformPoints([this._x, this._y]);
+  let [x, y] = satImage.toCanvasCoords([this._x, this._y]);
   context.beginPath();
   context.arc(x, y, HIDDEN_HANDLE_RADIUS, 0, 2 * Math.PI, false);
   context.closePath();
@@ -1098,14 +1096,14 @@ Vertex.prototype.drawHidden = function(context, satImage, fillStyle) {
  */
 Edge.prototype.draw = function(context, satImage) {
   context.save();
-  let [destX, destY] = satImage.transformPoints([this.dest[0], this.dest[1]]);
+  let [destX, destY] = satImage.toCanvasCoords([this.dest[0], this.dest[1]]);
   switch (this.type) {
     case EdgeTypes.LINE: {
       context.lineTo(destX, destY);
       break;
     }
     case EdgeTypes.BEZIER: {
-      let [c1X, c1Y, c2X, c2Y] = satImage.transformPoints([
+      let [c1X, c1Y, c2X, c2Y] = satImage.toCanvasCoords([
         this.control_points[0].x, this.control_points[0].y,
         this.control_points[1].x, this.control_points[1].y]);
       context.bezierCurveTo(c1X, c1Y, c2X, c2Y, destX, destY);
@@ -1138,19 +1136,19 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
   // start path
   ctx.beginPath();
   this.alignEdges(); // this is important
-  let [startX, startY] = satImage.transformPoints(
+  let [startX, startY] = satImage.toCanvasCoords(
       [this.vertices[0].x, this.vertices[0].y]);
   ctx.moveTo(startX, startY);
   if (this.edges.length > 0) {
     for (let edge of this.edges) {
-      let [destX, destY] = satImage.transformPoints(
+      let [destX, destY] = satImage.toCanvasCoords(
           [edge.dest.x, edge.dest.y]);
       if (edge.type === EdgeTypes.LINE) {
         ctx.lineTo(destX, destY);
       } else if (edge.type === EdgeTypes.BEZIER) {
-        let [c1x, c1y] = satImage.transformPoints([edge.control_points[0].x,
+        let [c1x, c1y] = satImage.toCanvasCoords([edge.control_points[0].x,
           edge.control_points[0].y]);
-        let [c2x, c2y] = satImage.transformPoints([edge.control_points[1].x,
+        let [c2x, c2y] = satImage.toCanvasCoords([edge.control_points[1].x,
           edge.control_points[1].y]);
         ctx.bezierCurveTo(c1x, c1y, c2x, c2y, destX, destY);
       }
@@ -1174,13 +1172,13 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
     ctx.strokeStyle = BEZIER_COLOR;
     for (let edge of this.edges) {
       if (edge.type === EdgeTypes.BEZIER) {
-        let [srcX, srcY] = satImage.transformPoints(
+        let [srcX, srcY] = satImage.toCanvasCoords(
             [edge.src._x, edge.src._y]);
-        let [destX, destY] = satImage.transformPoints(
+        let [destX, destY] = satImage.toCanvasCoords(
             [edge.dest._x, edge.dest._y]);
-        let [c1x, c1y] = satImage.transformPoints([edge.control_points[0].x,
+        let [c1x, c1y] = satImage.toCanvasCoords([edge.control_points[0].x,
           edge.control_points[0].y]);
-        let [c2x, c2y] = satImage.transformPoints([edge.control_points[1].x,
+        let [c2x, c2y] = satImage.toCanvasCoords([edge.control_points[1].x,
           edge.control_points[1].y]);
 
         ctx.moveTo(srcX, srcY);
@@ -1238,18 +1236,18 @@ Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
 
   // draw polygon
   hiddenCtx.beginPath();
-  let [startX, startY] = satImage.transformPoints(
+  let [startX, startY] = satImage.toCanvasCoords(
       [this.vertices[0].x, this.vertices[0].y]);
   hiddenCtx.moveTo(startX, startY);
   if (this.edges.length > 0) {
     for (let edge of this.edges) {
-      let [x, y] = satImage.transformPoints([edge.dest.x, edge.dest.y]);
+      let [x, y] = satImage.toCanvasCoords([edge.dest.x, edge.dest.y]);
       if (edge.type === EdgeTypes.LINE) {
         hiddenCtx.lineTo(x, y);
       } else if (edge.type === EdgeTypes.BEZIER) {
-        let [c1x, c1y] = satImage.transformPoints([edge.control_points[0].x,
+        let [c1x, c1y] = satImage.toCanvasCoords([edge.control_points[0].x,
           edge.control_points[0].y]);
-        let [c2x, c2y] = satImage.transformPoints([edge.control_points[1].x,
+        let [c2x, c2y] = satImage.toCanvasCoords([edge.control_points[1].x,
           edge.control_points[1].y]);
         hiddenCtx.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
       }
@@ -1286,7 +1284,7 @@ Rect.prototype.draw = function(ctx, satImage, dashed) {
     ctx.strokeStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
   }
 
-  let [x, y, w, h] = satImage.transformPoints(
+  let [x, y, w, h] = satImage.toCanvasCoords(
       [this.x, this.y, this.w, this.h]);
 
   if (dashed) {
@@ -1330,7 +1328,7 @@ Rect.prototype.drawHandles = function(context, satImage, fillStyle,
  */
 Rect.prototype.drawHidden = function(hiddenCtx, satImage, strokeStyle) {
   hiddenCtx.save();
-  let [x, y, w, h] = satImage.transformPoints(
+  let [x, y, w, h] = satImage.toCanvasCoords(
       [this.x, this.y, this.w, this.h]);
 
   hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH;

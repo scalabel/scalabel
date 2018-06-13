@@ -85,6 +85,11 @@ Box2d.prototype.selectedBy = function(shape) {
   return false;
 };
 
+Box2d.prototype.releaseAsTargeted = function() {
+  this.setState(BoxStates.FREE);
+  ImageLabel.prototype.releaseAsTargeted.call(this);
+};
+
 /**
  * Load label data from a encoded string
  * @param {object} data: json representation of label data.
@@ -112,7 +117,19 @@ Box2d.prototype.encodeLabelData = function() {
  * when not selected.
  */
 Box2d.prototype.defaultHiddenShapes = function() {
+  return this.getAllHiddenShapes();
+};
+
+/**
+ * Returns all hidden shapes.
+ * @return {[Shape]} List of all hidden shapes
+ */
+Box2d.prototype.getAllHiddenShapes = function() {
   return [this.rect].concat(this.rect.vertices);
+};
+
+Box2d.prototype.deleteAllHiddenShapes = function() {
+  this.rect.delete();
 };
 
 /**
@@ -140,10 +157,10 @@ Box2d.prototype.redrawMainCanvas = function(mainCtx) {
 };
 
 /**
- * Get whether this bounding box is valid.
- * @return {boolean} - True if the box is valid.
+ * Get whether this bounding box is geometrically valid.
+ * @return {boolean} - True if the box is geometrically valid.
  */
-Box2d.prototype.isValid = function() {
+Box2d.prototype.shapesValid = function() {
   return this.rect.isValid();
 };
 
@@ -176,6 +193,8 @@ Box2d.prototype.setState = function(state) {
     this.state = state;
     this.selectedShape = this.rect;
     this.selectedCache = null;
+    this.satItem.resetHiddenMap(this.getAllHiddenShapes());
+    this.satItem.redrawHiddenCanvas();
   } else if (state === BoxStates.RESIZE) {
     this.state = state;
   } else if (state === BoxStates.MOVE) {
@@ -309,14 +328,9 @@ Box2d.prototype.mouseup = function() {
     let h = Math.abs(this.rect.getVertex(0).y - this.rect.getVertex(4).y);
 
     this.rect.setRect(x, y, w, h);
-    if (!this.isValid()) {
-      if (this.selectedCache) {
-        this.rect.setRect([this.selectedCache.x, this.selectedCache.y,
-          this.selectedCache.w, this.selectedCache.h]);
-      } else {
-        this.satItem.deselectAll();
-        this.delete();
-      }
+    if (!this.shapesValid()) {
+      this.satItem.deselectAll();
+      return;
     }
   } else if (this.state === BoxStates.MOVE) {
     this.mouseClickPos = null;
@@ -374,6 +388,16 @@ Box2d.prototype.mousemove = function(e) {
   } else if (this.state === BoxStates.MOVE) {
     let dx = mousePos.x - this.mouseClickPos.x;
     let dy = mousePos.y - this.mouseClickPos.y;
+    // make moved box within padBox
+    let [padBoxX, padBoxW] = this.satItem.toImageCoords(
+        [this.satItem.padBox.x, this.satItem.padBox.w]);
+    dx = Math.min(dx, (padBoxX + padBoxW - this.rect.w) - this.selectedCache.x);
+    dx = Math.max(dx, padBoxX - this.selectedCache.x);
+    let [padBoxY, padBoxH] = this.satItem.toImageCoords(
+        [this.satItem.padBox.y, this.satItem.padBox.h]);
+    dy = Math.min(dy, (padBoxY + padBoxH - this.rect.h) - this.selectedCache.y);
+    dy = Math.max(dy, padBoxY - this.selectedCache.y);
+
     for (let i = 0; i < this.rect.vertices.length; i++) {
       this.rect.getVertex(i).x = this.selectedCache.getVertex(i).x + dx;
       this.rect.getVertex(i).y = this.selectedCache.getVertex(i).y + dy;
@@ -383,3 +407,10 @@ Box2d.prototype.mousemove = function(e) {
     }
   }
 };
+
+Box2d.prototype.mouseleave = function(e) { // eslint-disable-line
+  if (this.state === BoxStates.MOVE || this.state === BoxStates.RESIZE) {
+    this.setState(BoxStates.FREE);
+  }
+};
+

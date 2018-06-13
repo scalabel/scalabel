@@ -1,5 +1,5 @@
 
-/* global ImageLabel SatImage Polygon Vertex */
+/* global ImageLabel SatImage Polygon Path Vertex */
 /* global rgba VertexTypes EdgeTypes*/
 /* global GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
 ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE */
@@ -8,6 +8,7 @@ ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE */
 // constants
 let SegStates = Object.freeze({
   FREE: 0, DRAW: 1, RESIZE: 2, QUICK_DRAW: 3, LINK: 4});
+let SegTypes = Object.freeze({POLYGON: 0, PATH: 1});
 
 /**
  * 2D segmentation label
@@ -37,11 +38,24 @@ function Seg2d(sat, id, optionalAttributes) {
     }
   }
 
+  if (this.sat.handlerUrl === '2d_seg_labeling') {
+    this.type = SegTypes.POLYGON;
+  } else if (this.sat.handlerUrl === '2d_lane_labeling') {
+    this.type = SegTypes.PATH;
+  }
+
+
   if (mousePos) {
     // if mousePos given, start drawing
+    // set label type
+    if (this.type === SegTypes.POLYGON) {
+      this.newPoly = new Polygon();
+      this.tempPoly = new Polygon();
+    } else if (this.type === SegTypes.PATH) {
+      this.newPoly = new Path();
+      this.tempPoly = new Path();
+    }
     this.setState(SegStates.DRAW);
-    this.newPoly = new Polygon();
-    this.tempPoly = new Polygon();
 
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
     if (occupiedShape instanceof Vertex) {
@@ -67,16 +81,16 @@ Seg2d.useCrossHair = false;
 Seg2d.defaultCursorStyle = 'auto';
 Seg2d.useDoubleClick = true;
 
-Seg2d.prototype.addPolygon = function(poly) {
+Seg2d.prototype.addPolyline = function(poly) {
   this.polys = this.polys.concat(poly);
 };
 
 /**
- * Split a given polygon from this Seg2d label,
+ * Split a given polyline from this Seg2d label,
  * and create a new Seg2d label for it.
- * @param {Polygon} poly - the polygon
+ * @param {Polyline} poly - the polyline
  */
-Seg2d.prototype.splitPolygon = function(poly) {
+Seg2d.prototype.splitPolyline = function(poly) {
   for (let i = 0; i < this.polys.length; i++) {
     if (this.polys[i] === poly) {
       this.polys.splice(i, 1);
@@ -85,7 +99,7 @@ Seg2d.prototype.splitPolygon = function(poly) {
         categoryPath: this.categoryPath, attributes: this.attributes,
         mousePos: null,
       });
-      label.addPolygon(poly);
+      label.addPolyline(poly);
       label.releaseAsTargeted();
       break;
     }
@@ -93,10 +107,10 @@ Seg2d.prototype.splitPolygon = function(poly) {
 };
 
 /**
- * Delete a given polygon from this Seg2d label.
- * @param {Polygon} poly - the polygon
+ * Delete a given polyline from this Seg2d label.
+ * @param {Polyline} poly - the polyline
  */
-Seg2d.prototype.deletePolygon = function(poly) {
+Seg2d.prototype.deletePolyline = function(poly) {
   for (let i = 0; i < this.polys.length; i++) {
     if (this.polys[i] === poly) {
       this.polys[i].delete();
@@ -105,6 +119,7 @@ Seg2d.prototype.deletePolygon = function(poly) {
     }
   }
 };
+
 
 /**
  * Function to set the current state.
@@ -122,8 +137,10 @@ Seg2d.prototype.setState = function(state) {
     // reset hiddenMap with all existing vertices
     let shapes = [];
     for (let label of this.satItem.labels) {
-      shapes = shapes.concat(label.getVertices());
-      shapes = shapes.concat(label.getControlPoints());
+      if (label.valid) {
+        shapes = shapes.concat(label.getVertices());
+        shapes = shapes.concat(label.getControlPoints());
+      }
     }
     // draw once for each shape
     shapes = Array.from(new Set(shapes));
@@ -146,7 +163,9 @@ Seg2d.prototype.setState = function(state) {
     this.quickdrawCache = {};
     let shapes = [];
     for (let label of this.satItem.labels) {
-      shapes = shapes.concat(label.getPolygons());
+      if (label.valid) {
+        shapes = shapes.concat(label.getPolygons());
+      }
     }
     this.satItem.pushToHiddenMap(shapes);
     this.satItem.redrawHiddenCanvas();
@@ -212,9 +231,14 @@ Seg2d.prototype.linkHandler = function() {
 Seg2d.prototype.decodeLabelData = function(data) {
   this.id = data.id;
   this.polys = [];
+  this.type = data.type;
   if (data.polys) {
     for (let polyJson of data.polys) {
-      this.addPolygon(Polygon.fromJson(polyJson));
+      if (this.type === SegTypes.POLYGON) {
+        this.addPolyline(Polygon.fromJson(polyJson));
+      } else if (this.type === SegTypes.PATH) {
+        this.addPolyline(Path.fromJson(polyJson));
+      }
     }
   }
 };
@@ -230,6 +254,7 @@ Seg2d.prototype.encodeLabelData = function() {
   }
   return {
     id: this.id,
+    type: this.type,
     polys: polysJson,
   };
 };
@@ -264,6 +289,11 @@ Seg2d.prototype.selectedBy = function(shape) {
   }
 
   return false;
+};
+
+Seg2d.prototype.releaseAsTargeted = function() {
+  this.setState(SegStates.FREE);
+  ImageLabel.prototype.releaseAsTargeted.call(this);
 };
 
 /**
@@ -319,6 +349,12 @@ Seg2d.prototype.getAllHiddenShapes = function() {
   shapes = shapes.concat(this.getVertices());
   shapes = shapes.concat(this.getControlPoints());
   return shapes;
+};
+
+Seg2d.prototype.deleteAllHiddenShapes = function() {
+  for (let poly of this.polys) {
+    poly.delete();
+  }
 };
 
 /**
@@ -379,7 +415,7 @@ Seg2d.prototype.setPolygonFill = function(ctx) {
     ctx.strokeStyle = this.styleColor(ALPHA_LINE);
     ctx.fillStyle = this.styleColor(ALPHA_LOW_FILL);
   } else if (this.state === SegStates.RESIZE) {
-    if (this.isValid()) {
+    if (this.shapesValid()) {
       ctx.strokeStyle = this.styleColor(ALPHA_LINE);
       ctx.fillStyle = this.styleColor(ALPHA_LOW_FILL);
     } else {
@@ -391,10 +427,10 @@ Seg2d.prototype.setPolygonFill = function(ctx) {
 };
 
 /**
- * Get whether this Seg2d object is valid.
- * @return {boolean} - True if the Seg2d object is valid.
+ * Get whether this Seg2d object is geometrically valid.
+ * @return {boolean} - True if the Seg2d object is geometrically valid.
  */
-Seg2d.prototype.isValid = function() {
+Seg2d.prototype.shapesValid = function() {
   if (this.polys.length < 1) {
     return false;
   }
@@ -405,6 +441,7 @@ Seg2d.prototype.isValid = function() {
   }
   return true;
 };
+
 
 /**
  * Get the cursor style for a specified handle number.
@@ -455,7 +492,7 @@ Seg2d.prototype.mousedown = function(e) {
         this.newPoly.endPath();
 
         if (this.newPoly.isValid()) {
-          this.addPolygon(this.newPoly);
+          this.addPolyline(this.newPoly);
           this.tempVertex.delete();
           this.tempPoly.delete();
           this.tempVertex = null;
@@ -475,7 +512,7 @@ Seg2d.prototype.mousedown = function(e) {
       this.newPoly.endPath();
 
       if (this.newPoly.isValid()) {
-        this.addPolygon(this.newPoly);
+        this.addPolyline(this.newPoly);
         this.tempVertex.delete();
         this.tempPoly.delete();
         this.tempVertex = null;
@@ -562,7 +599,7 @@ Seg2d.prototype.mousedown = function(e) {
     if (occupiedLabel.id === this.id) {
       // if selected a polygon it has, split this polygon out
       if (occupiedShape instanceof Polygon) {
-        this.splitPolygon(occupiedShape);
+        this.splitPolyline(occupiedShape);
       }
      this.satItem.resetHiddenMapToDefault();
     } else if (occupiedLabel) {
@@ -572,7 +609,7 @@ Seg2d.prototype.mousedown = function(e) {
         this.categoryPath = occupiedLabel.categoryPath;
       }
       for (let poly of occupiedLabel.polys) {
-        this.addPolygon(poly);
+        this.addPolyline(poly);
       }
       occupiedLabel.delete();
     }
@@ -600,7 +637,7 @@ Seg2d.prototype.mouseup = function(e) {
         this.newPoly.endPath();
 
         if (this.newPoly.isValid()) {
-          this.addPolygon(this.newPoly);
+          this.addPolyline(this.newPoly);
           this.tempVertex.delete();
           this.tempPoly.delete();
           this.tempVertex = null;
@@ -632,7 +669,7 @@ Seg2d.prototype.mouseup = function(e) {
       this.selectedShape = this.tempVertex;
     }
   } else if (this.state === SegStates.RESIZE) {
-    if (!this.satItem.isValid()) {
+    if (!this.satItem.shapesValid()) {
       this.selectedShape.xy = this.selectedCache.xy;
     }
     this.selectedCache.delete();
@@ -642,7 +679,6 @@ Seg2d.prototype.mouseup = function(e) {
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
     if (!occupiedShape) {
       // deselects self
-      this.releaseAsTargeted();
       this.satItem.deselectAll();
     }
   }
@@ -675,23 +711,24 @@ Seg2d.prototype.mousemove = function(e) {
   }
 };
 
+Seg2d.prototype.mouseleave = function(e) { // eslint-disable-line
+  if (this.state === SegStates.RESIZE) {
+    this.hoveredShape = null;
+    this.setState(SegStates.FREE);
+  }
+};
+
 /**
  * Key down handler.
  * @param {type} e: Description.
  */
 Seg2d.prototype.keydown = function(e) {
   let keyID = e.KeyCode ? e.KeyCode : e.which;
-  if (keyID === 27) { // Esc
-    // if not completed, delete this label
-    if (this.state = SegStates.DRAW) {
-      this.delete();
-      this.satItem.deselectAll();
-    }
-  } else if (keyID === 85) {
+  if (keyID === 85) {
     // u for unlinking the selected label
     if (this.polys.length > 1) {
       for (let poly of this.polys) {
-        this.splitPolygon(poly);
+        this.splitPolyline(poly);
       }
     }
   } else if (keyID === 66) {
@@ -727,7 +764,7 @@ Seg2d.prototype.keydown = function(e) {
         this.newPoly.endPath();
 
         if (this.newPoly.isValid()) {
-          this.addPolygon(this.newPoly);
+          this.addPolyline(this.newPoly);
           this.tempVertex.delete();
           this.tempPoly.delete();
           this.tempVertex = null;
@@ -751,6 +788,21 @@ Seg2d.prototype.keydown = function(e) {
       this.newPoly = this.quickdrawCache.longPath
         ? this.quickdrawCache.longPathPoly
         : this.quickdrawCache.shortPathPoly;
+    }
+  } else if (keyID === 13 && this.type === SegTypes.PATH) {
+    // enter for ending a Path object
+    if (this.state === SegStates.DRAW) {
+      this.newPoly.endPath();
+
+      if (this.newPoly.isValid()) {
+        this.addPolyline(this.newPoly);
+        this.tempVertex = null;
+        this.tempPoly = null;
+      }
+
+      this.setState(SegStates.FREE);
+      this.tempVertex = null;
+      this.selectedShape = this.newPoly;
     }
   }
 };

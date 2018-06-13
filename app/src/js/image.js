@@ -93,7 +93,9 @@ SatImage.prototype = Object.create(SatItem.prototype);
 SatImage.prototype.resetHiddenMapToDefault = function() {
   let shapes = [];
   for (let label of this.labels) {
-    shapes = shapes.concat(label.defaultHiddenShapes());
+    if (label.valid) {
+      shapes = shapes.concat(label.defaultHiddenShapes());
+    }
   }
   this.resetHiddenMap(shapes);
 };
@@ -101,7 +103,7 @@ SatImage.prototype.resetHiddenMapToDefault = function() {
 SatImage.prototype.deselectAll = function() {
   if (this.selectedLabel) {
     this.selectedLabel.releaseAsTargeted();
-    if (!this.selectedLabel.isValid()) {
+    if (!this.selectedLabel.shapesValid()) {
       this.selectedLabel.delete();
     }
     this.selectedLabel = null;
@@ -135,14 +137,24 @@ SatImage.prototype.selectLabel = function(label) {
   }
 };
 
-SatImage.prototype.transformPoints = function(points) {
+SatImage.prototype.toCanvasCoords = function(values) {
   let self = this;
-  if (points) {
-    for (let i = 0; i < points.length; i++) {
-      points[i] = points[i] * self.scale;
+  if (values) {
+    for (let i = 0; i < values.length; i++) {
+      values[i] = values[i] * self.scale;
     }
   }
-  return points;
+  return values;
+};
+
+SatImage.prototype.toImageCoords = function(values) {
+  let self = this;
+  if (values) {
+    for (let i = 0; i < values.length; i++) {
+      values[i] = values[i] / self.scale;
+    }
+  }
+  return values;
 };
 
 /**
@@ -415,9 +427,10 @@ SatImage.prototype.redrawMainCanvas = function() {
       self.imageCanvas.height);
   self.mainCtx.drawImage(self.image, 0, 0, self.image.width, self.image.height,
       self.padBox.x, self.padBox.y, self.padBox.w, self.padBox.h);
-  for (let i = 0; i < self.labels.length; i++) {
-    self.labels[i].redrawMainCanvas(
-        self.mainCtx, self.hoveredLabel);
+  for (let label of self.labels) {
+    if (label.valid) {
+      label.redrawMainCanvas(self.mainCtx, self.hoveredLabel);
+    }
   }
 };
 
@@ -450,15 +463,17 @@ SatImage.prototype.showHiddenCanvas = function() {
 };
 
 /**
- * Checks if all labels are valid.
- * @return {boolean} whether all labels are valid.
+ * Checks if all existing labels are geometrically valid.
+ * @return {boolean} whether all labels are geometrically valid.
  */
-SatImage.prototype.isValid = function() {
-  let isValid = true;
+SatImage.prototype.shapesValid = function() {
+  let shapesValid = true;
   for (let label of this.labels) {
-    isValid = isValid && label.isValid();
+    if (label.valid) {
+      shapesValid = shapesValid && label.shapesValid();
+    }
   }
-  return isValid;
+  return shapesValid;
 };
 
 /**
@@ -610,6 +625,10 @@ SatImage.prototype._mousemove = function(e) {
       this.imageCanvas.style.cursor = this.hoveredLabel.getCursorStyle(
           this.hoveredLabel.getCurrHoveredShape());
     }
+  } else {
+    if (this.selectedLabel) {
+      this.selectedLabel.mouseleave(e);
+    }
   }
   this.redrawMainCanvas();
   // this.showHiddenCanvas();
@@ -730,7 +749,7 @@ SatImage.prototype._getPadding = function() {
  * @return {int}: the selected label
  */
 SatImage.prototype.getIndexOnHiddenMap = function(mousePos) {
-  let [x, y] = this.transformPoints([mousePos.x,
+  let [x, y] = this.toCanvasCoords([mousePos.x,
     mousePos.y]);
   let pixelData = this.hiddenCtx.getImageData(x, y, 1, 1).data;
   let color = (pixelData[0] << 16) || (pixelData[1] << 8) || pixelData[2];
@@ -748,7 +767,7 @@ SatImage.prototype.getLabelOfShape = function(shape) {
   }
 
   for (let label of this.labels) {
-    if (label.selectedBy(shape)) {
+    if (label.valid && label.selectedBy(shape)) {
       return label;
     }
   }
@@ -919,6 +938,15 @@ ImageLabel.prototype = Object.create(SatLabel.prototype);
 ImageLabel.useCrossHair = false;
 ImageLabel.defaultCursorStyle = 'auto';
 
+ImageLabel.prototype.delete = function() {
+  SatLabel.prototype.delete.call(this);
+  this.deleteAllShapes();
+};
+
+ImageLabel.prototype.deleteAllShapes = function() {
+  // specific to each class
+};
+
 ImageLabel.prototype.getCurrentPosition = function() {
 
 };
@@ -998,7 +1026,7 @@ ImageLabel.prototype.getCurrHoveredShape = function() {
  */
 ImageLabel.prototype.drawTag = function(ctx, position) {
   let self = this;
-  if (self.isValid()) {
+  if (self.shapesValid()) {
     ctx.save();
     let words = self.categoryPath.split(' ');
     let tw = self.TAG_WIDTH;
@@ -1021,7 +1049,7 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
       }
     }
 
-    let [tlx, tly] = self.satItem.transformPoints(position);
+    let [tlx, tly] = self.satItem.toCanvasCoords(position);
     ctx.fillStyle = self.styleColor();
     ctx.fillRect(tlx + 1, tly - self.TAG_HEIGHT, tw,
         self.TAG_HEIGHT);

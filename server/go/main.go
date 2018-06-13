@@ -52,6 +52,10 @@ func (env Env) Seg2dPath() string {
 	return path.Join(env.ProjectPath, env.AppDir, "annotation/seg.html")
 }
 
+func (env Env) Lane2dPath() string {
+	return path.Join(env.ProjectPath, env.AppDir, "annotation/seg.html")
+}
+
 func Init(
 // Initialize all the loggers
 	traceHandle io.Writer,
@@ -127,6 +131,7 @@ func main() {
 	// Simple static handlers can be generated with MakePathHandleFunc
 	http.HandleFunc("/create", WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
 	http.HandleFunc("/2d_seg_labeling", WrapHandleFunc(seg2dLabelingHandler))
+	http.HandleFunc("/2d_lane_labeling", WrapHandleFunc(lane2dLabelingHandler))
 	//http.HandleFunc("/image_labeling",
 	//	MakePathHandleFunc(path.Join(appDir, "/annotation/image.html")))
 

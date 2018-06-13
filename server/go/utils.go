@@ -72,6 +72,9 @@ func GetHandlerUrl(project Project) string {
 		if project.LabelType == "segmentation" {
 			return "2d_seg_labeling"
 		}
+		if project.LabelType == "lane" {
+        	return "2d_lane_labeling"
+        }
 	}
 	if project.ItemType == "video" {
 		if project.LabelType == "box2d" {
