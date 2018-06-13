@@ -778,19 +778,6 @@ SatLabel.prototype.fromJsonPointers = function(json) {
   self.decodeBaseJsonPointers(json);
 };
 
-
-SatLabel.prototype.startChange = function() {
-
-};
-
-SatLabel.prototype.updateChange = function() {
-
-};
-
-SatLabel.prototype.finishChange = function() {
-
-};
-
 SatLabel.prototype.redraw = function() {
 
 };
