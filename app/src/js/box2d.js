@@ -78,9 +78,13 @@ Box2d.setToolBox = function(satItem) { // eslint-disable-line
  * @return {boolean} whether the index selects this Box2d.
  */
 Box2d.prototype.selectedBy = function(shape) {
-  if (shape === this.rect) return true;
+  if (shape === this.rect) {
+    return true;
+  }
   for (let v of this.rect.vertices) {
-    if (shape === v) return true;
+    if (shape === v) {
+      return true;
+    }
   }
   return false;
 };
@@ -137,9 +141,8 @@ Box2d.prototype.deleteAllHiddenShapes = function() {
  * @param {object} mainCtx - HTML canvas context for visible objects.
  */
 Box2d.prototype.redrawMainCanvas = function(mainCtx) {
-  // go ahead and set context font
-  mainCtx.font = '11px Verdana';
-
+  // set context font
+  mainCtx.font = '22px Verdana';
   // draw visible elements
   mainCtx.strokeStyle = this.styleColor();
   this.rect.draw(mainCtx, this.satItem, this.state === BoxStates.RESIZE);
@@ -193,8 +196,8 @@ Box2d.prototype.setState = function(state) {
     this.state = state;
     this.selectedShape = this.rect;
     this.selectedCache = null;
-    this.satItem.resetHiddenMap(this.getAllHiddenShapes());
-    this.satItem.redrawHiddenCanvas();
+    // this.satItem.resetHiddenMap(this.getAllHiddenShapes());
+    // this.satItem.redrawHiddenCanvas();
   } else if (state === BoxStates.RESIZE) {
     this.state = state;
   } else if (state === BoxStates.MOVE) {
@@ -349,7 +352,6 @@ Box2d.prototype.mouseup = function() {
 
 Box2d.prototype.mousemove = function(e) {
   let mousePos = this.satItem.getMousePos(e);
-
   // handling according to state
   if (this.state === BoxStates.RESIZE) {
     let movedVertex = this.selectedShape;

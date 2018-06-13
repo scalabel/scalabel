@@ -363,8 +363,7 @@ Seg2d.prototype.deleteAllHiddenShapes = function() {
  */
 Seg2d.prototype.redrawMainCanvas = function(mainCtx) {
   // set context font
-  mainCtx.font = '13px Verdana';
-
+  mainCtx.font = '22px Verdana';
   mainCtx.save(); // save the canvas context settings
   let styleColor = this.styleColor();
   mainCtx.strokeStyle = styleColor;

@@ -141,7 +141,7 @@ SatImage.prototype.toCanvasCoords = function(values) {
   let self = this;
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] = values[i] * self.scale;
+      values[i] = values[i] * self.scale * 2;
     }
   }
   return values;
@@ -151,7 +151,7 @@ SatImage.prototype.toImageCoords = function(values) {
   let self = this;
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] = values[i] / self.scale;
+      values[i] = values[i] / self.scale / 2;
     }
   }
   return values;
@@ -181,10 +181,15 @@ SatImage.prototype.setScale = function(scale) {
     $('#increase_btn').attr('disabled', true);
   }
   // resize canvas
-  self.imageCanvas.height = self.imageHeight * self.scale;
-  self.imageCanvas.width = self.imageWidth * self.scale;
-  self.hiddenCanvas.height = self.imageHeight * self.scale;
-  self.hiddenCanvas.width = self.imageWidth * self.scale;
+  self.imageCanvas.style.height = self.imageHeight * self.scale + 'px';
+  self.imageCanvas.style.width = self.imageWidth * self.scale + 'px';
+  self.hiddenCanvas.style.height = self.imageHeight * self.scale + 'px';
+  self.hiddenCanvas.style.width = self.imageWidth * self.scale + 'px';
+
+  self.imageCanvas.height = self.imageHeight * 2 * self.scale;
+  self.imageCanvas.width = self.imageWidth * 2 * self.scale;
+  self.hiddenCanvas.height = self.imageHeight * 2 * self.scale;
+  self.hiddenCanvas.height = self.imageWidth * 2 * self.scale;
 };
 
 SatImage.prototype.loaded = function() {
@@ -206,10 +211,21 @@ SatImage.prototype.setActive = function(active) {
     self.lastLabelID = -1;
     self.padBox = self._getPadding();
 
-    self.imageCanvas.height = self.imageHeight;
-    self.imageCanvas.width = self.imageWidth;
-    self.hiddenCanvas.height = self.imageHeight;
-    self.hiddenCanvas.width = self.imageWidth;
+    self.imageCanvas.style.width = self.imageWidth + 'px';
+    self.imageCanvas.style.height = self.imageHeight + 'px';
+    self.hiddenCanvas.style.width = self.imageWidth + 'px';
+    self.hiddenCanvas.style.height = self.imageHeight + 'px';
+    self.mainCtx = self.imageCanvas.getContext('2d');
+    self.hiddenCtx = self.hiddenCanvas.getContext('2d');
+
+    self.imageCanvas.width = self.imageWidth * 2;
+    self.imageCanvas.height = self.imageHeight * 2;
+    self.hiddenCanvas.width = self.imageWidth * 2;
+    self.hiddenCanvas.height = self.imageHeight * 2;
+
+    self.mainCtx.scale(2, 2);
+    self.hiddenCtx.scale(2, 2);
+
     self.setScale(self.MIN_SCALE);
 
     // global listeners
@@ -371,6 +387,7 @@ SatImage.prototype._getSelectedAttributes = function() {
  */
 SatImage.prototype._prevHandler = function() {
   let self = this;
+  self.deselectAll();
   self.sat.gotoItem(self.index - 1);
 };
 
@@ -379,6 +396,7 @@ SatImage.prototype._prevHandler = function() {
  */
 SatImage.prototype._nextHandler = function() {
   let self = this;
+  self.deselectAll();
   self.sat.gotoItem(self.index + 1);
 };
 
@@ -927,8 +945,8 @@ function ImageLabel(sat, id, optionalAttributes = null) {
     this.satItem = sat.items[0];
   }
 
-  this.TAG_WIDTH = 25;
-  this.TAG_HEIGHT = 14;
+  this.TAG_WIDTH = 25 * 2;
+  this.TAG_HEIGHT = 14 * 2;
   // whether to draw this polygon in the targeted fill color
   this.targeted = false;
 }
@@ -954,7 +972,7 @@ ImageLabel.prototype.getCurrentPosition = function() {
 ImageLabel.prototype.fromJsonPointers = function(json) {
   let self = this;
   self.decodeBaseJsonPointers(json);
-  self.satItem = self.sat.currentItem;
+  // self.satItem = self.sat.currentItem;
 };
 
 /**
@@ -1037,14 +1055,14 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
       if (attribute.toolType === 'switch') {
         if (self.attributes[attribute.name]) {
           abbr+= ',' + attribute.tagText;
-          tw += 9;
+          tw += 18;
         }
       } else if (attribute.toolType === 'list') {
         if (self.attributes[attribute.name] &&
           self.attributes[attribute.name][0] > 0) {
           abbr += ',' + attribute.tagPrefix + ':' +
             attribute.tagSuffixes[self.attributes[attribute.name][0]];
-          tw += 18;
+          tw += 36;
         }
       }
     }

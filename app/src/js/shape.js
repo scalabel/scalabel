@@ -1031,24 +1031,24 @@ Rect.prototype.toJson = function() {
 /**
  * Drawing Utilities
  */
-const HOVERED_HANDLE_RADIUS = 6;
-const HIDDEN_LINE_WIDTH = 4;
-const HANDLE_RADIUS = 4;
-const HIDDEN_HANDLE_RADIUS = 6;
+const HOVERED_HANDLE_RADIUS = 12;
+const HIDDEN_LINE_WIDTH = 10;
+const HANDLE_RADIUS = 8;
+const HIDDEN_HANDLE_RADIUS = 12;
 
 const BEZIER_COLOR = 'rgba(200,200,100,0.7)';
 const GRAYOUT_COLOR = [169, 169, 169];
 const SELECT_COLOR = [100, 0, 100];
 
-const LINE_WIDTH = 2;
-const OUTLINE_WIDTH = 2;
+const LINE_WIDTH = 4;
+const OUTLINE_WIDTH = 4;
 
 const ALPHA_HIGH_FILL = 0.5;
 const ALPHA_LOW_FILL = 0.3;
 const ALPHA_LINE = 1.0;
 const ALPHA_CONTROL_POINT = 0.5;
 
-const MIN_BOX_SIZE = 15;
+const MIN_BOX_SIZE = 30;
 
 /**
  * Draw the vertex.
@@ -1158,11 +1158,11 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
   if (!this.isValid()) {
     ctx.strokeStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
   }
-  ctx.stroke();
   if (this.fillInside) {
     ctx.closePath();
     ctx.fill();
   }
+  ctx.stroke();
 
   // draw dashed line for bezier if targeted
   if (drawDash) {
@@ -1232,7 +1232,7 @@ Polyline.prototype.drawHandles = function(context, satImage, fillStyle,
 Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
   hiddenCtx.save(); // save the canvas context settings
   hiddenCtx.strokeStyle = fillStyle;
-  hiddenCtx.lineWidth = 5;
+  hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH;
 
   // draw polygon
   hiddenCtx.beginPath();
