@@ -1,9 +1,10 @@
-/* global ImageLabel Rect Vertex */
+/* global ImageLabel Rect Vertex UP_RES_RATIO */
 /* exported Box2d */
 
 // Constants
 const BoxStates = Object.freeze({
   FREE: 0, RESIZE: 1, MOVE: 2});
+const FONT_SIZE = 11;
 
 const INITIAL_HANDLE_NO = 4;
 
@@ -142,20 +143,20 @@ Box2d.prototype.deleteAllHiddenShapes = function() {
  */
 Box2d.prototype.redrawMainCanvas = function(mainCtx) {
   // set context font
-  mainCtx.font = '22px Verdana';
+  mainCtx.font = FONT_SIZE * UP_RES_RATIO + 'px Verdana';
   // draw visible elements
   mainCtx.strokeStyle = this.styleColor();
   this.rect.draw(mainCtx, this.satItem, this.state === BoxStates.RESIZE);
-  if (this.state === BoxStates.FREE) {
-    let tlx = Math.min(this.rect.x, this.rect.x + this.rect.w);
-    let tly = Math.min(this.rect.y, this.rect.y + this.rect.h);
-    this.drawTag(mainCtx, [tlx, tly]);
-  }
 
   if (this.isTargeted() || this.hoveredShape) {
     this.rect.drawHandles(mainCtx, this.satItem, this.styleColor(),
         this.hoveredShape);
     this.hoveredShape = null;
+  }
+  if (this.state === BoxStates.FREE) {
+    let tlx = Math.min(this.rect.x, this.rect.x + this.rect.w);
+    let tly = Math.min(this.rect.y, this.rect.y + this.rect.h);
+    this.drawTag(mainCtx, [tlx, tly]);
   }
 };
 

@@ -2,13 +2,14 @@
 /* global ImageLabel SatImage Polygon Path Vertex */
 /* global rgba VertexTypes EdgeTypes*/
 /* global GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
-ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE */
+ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO */
 /* exported Seg2d*/
 
 // constants
 let SegStates = Object.freeze({
   FREE: 0, DRAW: 1, RESIZE: 2, QUICK_DRAW: 3, LINK: 4});
 let SegTypes = Object.freeze({POLYGON: 0, PATH: 1});
+const FONT_SIZE = 13;
 
 /**
  * 2D segmentation label
@@ -31,7 +32,8 @@ function Seg2d(sat, id, optionalAttributes) {
     this.categoryPath = optionalAttributes.categoryPath;
     for (let i = 0; i < this.sat.attributes.length; i++) {
       let attributeName = this.sat.attributes[i].name;
-      if (attributeName in optionalAttributes.attributes) {
+      if (optionalAttributes.attributes && attributeName
+          in optionalAttributes.attributes) {
         this.attributes[attributeName] =
           optionalAttributes.attributes[attributeName];
       }
@@ -100,6 +102,7 @@ Seg2d.prototype.splitPolyline = function(poly) {
         mousePos: null,
       });
       label.addPolyline(poly);
+      label.setState(SegStates.FREE);
       label.releaseAsTargeted();
       break;
     }
@@ -193,22 +196,24 @@ SatImage.prototype._linkHandler = function() {
     let cat = this.catSel.options[this.catSel.selectedIndex].innerHTML;
     if (!this.selectedLabel) {
       let attributes = {};
-      for (let i = 0; i < self.sat.attributes.length; i++) {
-        if (self.sat.attributes[i].toolType === 'switch') {
-          attributes[self.sat.attributes[i].name] = false;
-        } else if (self.sat.attributes[i].toolType === 'list') {
-          attributes[self.sat.attributes[i].name] = [0,
-            self.sat.attributes[i].values[0]];
+      for (let i = 0; i < this.sat.attributes.length; i++) {
+        if (this.sat.attributes[i].toolType === 'switch') {
+          attributes[this.sat.attributes[i].name] = false;
+        } else if (this.sat.attributes[i].toolType === 'list') {
+          attributes[this.sat.attributes[i].name] = [0,
+            this.sat.attributes[i].values[0]];
         }
       }
       this.selectedLabel = this.sat.newLabel({
         categoryPath: cat, occl: false,
         trunc: false, mousePos: null,
       });
+      this.selectedLabel.setAsTargeted();
     }
   } else {
     this.isLinking = false;
     document.getElementById('link_btn').innerHTML = 'Link';
+    this.updateLabelCount();
   }
   this.selectedLabel.linkHandler();
 };
@@ -291,11 +296,6 @@ Seg2d.prototype.selectedBy = function(shape) {
   return false;
 };
 
-Seg2d.prototype.releaseAsTargeted = function() {
-  this.setState(SegStates.FREE);
-  ImageLabel.prototype.releaseAsTargeted.call(this);
-};
-
 /**
  * Returns the shapes to draw on the hidden canvas when not selected.
  * @return {[Shape]} List of shapes to draw on the hidden canvas
@@ -363,7 +363,7 @@ Seg2d.prototype.deleteAllHiddenShapes = function() {
  */
 Seg2d.prototype.redrawMainCanvas = function(mainCtx) {
   // set context font
-  mainCtx.font = '22px Verdana';
+  mainCtx.font = FONT_SIZE * UP_RES_RATIO + 'px Verdana';
   mainCtx.save(); // save the canvas context settings
   let styleColor = this.styleColor();
   mainCtx.strokeStyle = styleColor;

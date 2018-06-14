@@ -1,6 +1,6 @@
 /* global module rgba */
 /* exported BEZIER_COLOR GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
-ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT */
+ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT UP_RES_RATIO*/
 
 // Define Enums
 const VertexTypes = {VERTEX: 'vertex', MIDPOINT: 'midpoint',
@@ -83,10 +83,6 @@ function Vertex(x=0, y=0, type=VertexTypes.VERTEX, id = null) {
   this._x = x;
   this._y = y;
   this.type = type;
-
-  // constants
-  this.CONTROL_FILL_COLOR = [255, 255, 255];
-  this.CONTROL_LINE_COLOR = [0, 0, 0];
 }
 
 Object.assign(Vertex, Shape);
@@ -1031,24 +1027,28 @@ Rect.prototype.toJson = function() {
 /**
  * Drawing Utilities
  */
-const HOVERED_HANDLE_RADIUS = 12;
-const HIDDEN_LINE_WIDTH = 10;
-const HANDLE_RADIUS = 8;
-const HIDDEN_HANDLE_RADIUS = 12;
+const UP_RES_RATIO = 2;
+// Need to multiply by UP_RES_RATIO for every size definition
+const HOVERED_HANDLE_RADIUS = 6 * UP_RES_RATIO;
+const HIDDEN_LINE_WIDTH = 5 * UP_RES_RATIO;
+const HANDLE_RADIUS = 4 * UP_RES_RATIO;
+const HIDDEN_HANDLE_RADIUS = 6 * UP_RES_RATIO;
+
+const LINE_WIDTH = 2 * UP_RES_RATIO;
+const OUTLINE_WIDTH = 2 * UP_RES_RATIO;
 
 const BEZIER_COLOR = 'rgba(200,200,100,0.7)';
 const GRAYOUT_COLOR = [169, 169, 169];
 const SELECT_COLOR = [100, 0, 100];
-
-const LINE_WIDTH = 4;
-const OUTLINE_WIDTH = 4;
+const CONTROL_FILL_COLOR = [255, 255, 255];
+const CONTROL_LINE_COLOR = [0, 0, 0];
 
 const ALPHA_HIGH_FILL = 0.5;
 const ALPHA_LOW_FILL = 0.3;
 const ALPHA_LINE = 1.0;
 const ALPHA_CONTROL_POINT = 0.5;
 
-const MIN_BOX_SIZE = 30;
+const MIN_BOX_SIZE = 15 * UP_RES_RATIO;
 
 /**
  * Draw the vertex.
@@ -1067,8 +1067,8 @@ Vertex.prototype.draw = function(context, satImage, fillStyle = null,
   context.closePath();
   if (this.type === VertexTypes.CONTROL_POINT
       || this.type === VertexTypes.MIDPOINT) {
-    context.fillStyle = rgba(this.CONTROL_FILL_COLOR, ALPHA_CONTROL_POINT);
-    context.strokeStyle = rgba(this.CONTROL_LINE_COLOR, ALPHA_CONTROL_POINT);
+    context.fillStyle = rgba(CONTROL_FILL_COLOR, ALPHA_CONTROL_POINT);
+    context.strokeStyle = rgba(CONTROL_LINE_COLOR, ALPHA_CONTROL_POINT);
   }
   context.fill();
   context.restore();

@@ -1,9 +1,11 @@
 
-/* global SatItem SatLabel hiddenStyleColor */
+/* global SatItem SatLabel hiddenStyleColor UP_RES_RATIO */
 /* exported SatImage ImageLabel */
 
 // constants
 const DOUBLE_CLICK_WAIT_TIME = 300;
+const CANVAS_STYLE_WIDTH = 900;
+const CANVAS_STYLE_HEIGHT = 470;
 
 /**
  * The data structure to aid the hidden canvas,
@@ -76,8 +78,6 @@ function SatImage(sat, index, url) {
   self.mainCtx = self.imageCanvas.getContext('2d');
   self.hiddenCtx = self.hiddenCanvas.getContext('2d');
 
-  self.imageHeight = self.imageCanvas.height;
-  self.imageWidth = self.imageCanvas.width;
   self.hoveredLabel = null;
 
   self.MAX_SCALE = 3.0;
@@ -137,11 +137,21 @@ SatImage.prototype.selectLabel = function(label) {
   }
 };
 
+SatImage.prototype.updateLabelCount = function() {
+  let numLabels = 0;
+  for (let label of this.labels) {
+    if (label.valid) {
+      numLabels += 1;
+    }
+  }
+  document.getElementById('label_count').textContent = '' + numLabels;
+};
+
 SatImage.prototype.toCanvasCoords = function(values) {
   let self = this;
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] = values[i] * self.scale * 2;
+      values[i] = values[i] * self.scale * UP_RES_RATIO;
     }
   }
   return values;
@@ -151,7 +161,7 @@ SatImage.prototype.toImageCoords = function(values) {
   let self = this;
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] = values[i] / self.scale / 2;
+      values[i] = values[i] / self.scale / UP_RES_RATIO;
     }
   }
   return values;
@@ -181,15 +191,15 @@ SatImage.prototype.setScale = function(scale) {
     $('#increase_btn').attr('disabled', true);
   }
   // resize canvas
-  self.imageCanvas.style.height = self.imageHeight * self.scale + 'px';
-  self.imageCanvas.style.width = self.imageWidth * self.scale + 'px';
-  self.hiddenCanvas.style.height = self.imageHeight * self.scale + 'px';
-  self.hiddenCanvas.style.width = self.imageWidth * self.scale + 'px';
+  self.imageCanvas.style.height = CANVAS_STYLE_HEIGHT * self.scale + 'px';
+  self.imageCanvas.style.width = CANVAS_STYLE_WIDTH * self.scale + 'px';
+  self.hiddenCanvas.style.height = CANVAS_STYLE_HEIGHT * self.scale + 'px';
+  self.hiddenCanvas.style.width = CANVAS_STYLE_WIDTH * self.scale + 'px';
 
-  self.imageCanvas.height = self.imageHeight * 2 * self.scale;
-  self.imageCanvas.width = self.imageWidth * 2 * self.scale;
-  self.hiddenCanvas.height = self.imageHeight * 2 * self.scale;
-  self.hiddenCanvas.height = self.imageWidth * 2 * self.scale;
+  self.imageCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale;
+  self.imageCanvas.width = CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale;
+  self.hiddenCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale;
+  self.hiddenCanvas.height = CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale;
 };
 
 SatImage.prototype.loaded = function() {
@@ -211,20 +221,20 @@ SatImage.prototype.setActive = function(active) {
     self.lastLabelID = -1;
     self.padBox = self._getPadding();
 
-    self.imageCanvas.style.width = self.imageWidth + 'px';
-    self.imageCanvas.style.height = self.imageHeight + 'px';
-    self.hiddenCanvas.style.width = self.imageWidth + 'px';
-    self.hiddenCanvas.style.height = self.imageHeight + 'px';
+    self.imageCanvas.style.width = CANVAS_STYLE_WIDTH + 'px';
+    self.imageCanvas.style.height = CANVAS_STYLE_HEIGHT + 'px';
+    self.hiddenCanvas.style.width = CANVAS_STYLE_WIDTH + 'px';
+    self.hiddenCanvas.style.height = CANVAS_STYLE_HEIGHT + 'px';
     self.mainCtx = self.imageCanvas.getContext('2d');
     self.hiddenCtx = self.hiddenCanvas.getContext('2d');
 
-    self.imageCanvas.width = self.imageWidth * 2;
-    self.imageCanvas.height = self.imageHeight * 2;
-    self.hiddenCanvas.width = self.imageWidth * 2;
-    self.hiddenCanvas.height = self.imageHeight * 2;
+    self.imageCanvas.width = CANVAS_STYLE_WIDTH * UP_RES_RATIO;
+    self.imageCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO;
+    self.hiddenCanvas.width = CANVAS_STYLE_WIDTH * UP_RES_RATIO;
+    self.hiddenCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO;
 
-    self.mainCtx.scale(2, 2);
-    self.hiddenCtx.scale(2, 2);
+    self.mainCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
+    self.hiddenCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
 
     self.setScale(self.MIN_SCALE);
 
@@ -239,7 +249,6 @@ SatImage.prototype.setActive = function(active) {
       self._mouseup(e);
     };
     document.onmousemove = function(e) {
-      self._changeCat();
       self._mousemove(e);
     };
     document.onscroll = function(e) {
@@ -355,6 +364,7 @@ SatImage.prototype.setActive = function(active) {
   }
   self.resetHiddenMapToDefault();
   self.redraw();
+  this.updateLabelCount();
 };
 
 /**
@@ -501,6 +511,7 @@ SatImage.prototype.shapesValid = function() {
 SatImage.prototype._keydown = function(e) {
   let self = this;
   // class-specific handling of keydown event
+  e.preventDefault();
   if (self.selectedLabel) {
     self.selectedLabel.keydown(e);
   }
@@ -526,6 +537,7 @@ SatImage.prototype._keydown = function(e) {
     }
   }
   self.redraw();
+  self.updateLabelCount();
 };
 
 /**
@@ -699,7 +711,8 @@ SatImage.prototype._mouseup = function(e) {
     }
   }
 
-  this.redraw();
+  self.redraw();
+  self.updateLabelCount();
 };
 
 /**
@@ -710,10 +723,12 @@ SatImage.prototype._mouseup = function(e) {
 SatImage.prototype._isWithinFrame = function(e) {
   let rect = this.imageCanvas.getBoundingClientRect();
   let withinImage = (this.padBox
-      && rect.x + this.padBox.x < e.clientX
-      && e.clientX < rect.x + this.padBox.x + this.padBox.w
-      && rect.y + this.padBox.y < e.clientY
-      && e.clientY < rect.y + this.padBox.y + this.padBox.h);
+      && rect.x + this.padBox.x / UP_RES_RATIO < e.clientX
+      && e.clientX <
+        rect.x + this.padBox.x / UP_RES_RATIO + this.padBox.w / UP_RES_RATIO
+      && rect.y + this.padBox.y / UP_RES_RATIO < e.clientY
+      && e.clientY <
+        rect.y + this.padBox.y / UP_RES_RATIO + this.padBox.h / UP_RES_RATIO);
 
   let rectDiv = this.divCanvas.getBoundingClientRect();
   let withinDiv = (rectDiv.x < e.clientX
@@ -750,12 +765,12 @@ SatImage.prototype._getPadding = function() {
     box.y = 0.5 * (this.imageCanvas.height - this.imageCanvas.width *
         this.image.height / this.image.width);
     box.w = this.imageCanvas.width;
-    box.h = this.imageCanvas.height - 2 * box.y;
+    box.h = this.imageCanvas.height - UP_RES_RATIO * box.y;
   } else {
     box.x = 0.5 * (this.imageCanvas.width - this.imageCanvas.height *
         this.image.width / this.image.height);
     box.y = 0;
-    box.w = this.imageCanvas.width - 2 * box.x;
+    box.w = this.imageCanvas.width - UP_RES_RATIO * box.x;
     box.h = this.imageCanvas.height;
   }
   return box;
@@ -945,8 +960,8 @@ function ImageLabel(sat, id, optionalAttributes = null) {
     this.satItem = sat.items[0];
   }
 
-  this.TAG_WIDTH = 25 * 2;
-  this.TAG_HEIGHT = 14 * 2;
+  this.TAG_WIDTH = 25 * UP_RES_RATIO;
+  this.TAG_HEIGHT = 14 * UP_RES_RATIO;
   // whether to draw this polygon in the targeted fill color
   this.targeted = false;
 }
