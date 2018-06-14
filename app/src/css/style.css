@@ -1,0 +1,155 @@
+canvas {
+    position: absolute;
+}
+
+canvas#image_canvas {
+    z-index: 2;
+    background: lightgrey;
+}
+
+canvas#hidden_canvas {
+    z-index: 1;
+}
+
+#heading_row {
+    width: 1112px;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;  /* Non-prefixed version, currently
+    supported by Chrome and Opera */
+}
+
+.hair {
+    position: fixed;
+    margin-top: 0px;
+    margin-left: 0px;
+    background: transparent;
+    border-top: 1px dotted #0000ff;
+    border-left: 1px dotted #0000ff;
+    pointer-events: none;
+    z-index: 3;
+    display: none;
+}
+.btn-red,
+.btn-red:hover,
+.btn-red.active,
+.btn-red:active:hover {
+    color: white;
+    background-color: #ff4444;
+    border-color: #A9A9A9
+}
+
+.btn-yellow,
+.btn-yellow:hover,
+.btn-yellow.active,
+.btn-yellow.active:hover {
+    color: white;
+    background-color: #ffbb33;
+    border-color: #A9A9A9
+}
+
+.btn-green,
+.btn-green:hover,
+.btn-green.active,
+.btn-green.active:hover {
+    color: white;
+    background-color: #00C851;
+    border-color: #A9A9A9
+}
+
+.btn-white,
+.btn-white:hover,
+.btn-white.active,
+.btn-white.active:hover {
+    color: white;
+    background-color: grey;
+    border-color: #A9A9A9
+}
+
+.btn {
+    color: white;
+    background-color: lightgrey;
+    border-color: #A9A9A9 !important;
+}
+
+/* VIDEO PLAYER CONTROLS */
+
+#player_controls {
+    display: table;
+    table-layout: fixed;
+}
+
+#frame_counter {
+    display: table-cell;
+
+    /* position it below the canvases */
+    position: relative;
+    top: 470px;
+
+    width: 40px;
+    color: #43ff3d;
+    background-color: black;
+
+    text-align: center;
+}
+
+#play_button {
+    display: table-cell; /* needed for alignment w/ slider */
+
+    /* position it below the canvases */
+    position: relative;
+    top: 470px;
+
+    margin-right: 5px; /* b/w button and slider */
+}
+
+#slider {
+    display: table-cell; /* needed for alignment w/ button */
+
+    /* position it below the canvases */
+    position: relative;
+    top: 476px;
+
+    width: 900px;
+    outline: none; /* stop that pesky blue border */
+}
+
+#video_slider {
+    display: table-cell; /* needed for alignment w/ button */
+
+    /* position it below the canvases */
+    position: relative;
+    top: 476px;
+
+    width: 830px;
+    outline: none; /* stop that pesky blue border */
+}
+
+#keyboard_usage_window{
+    position: fixed;
+    z-index: 99 !important;
+    display: none;
+    width:600px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.key_usage {
+    text-align:center;
+}
+.key_usage span {
+    display:inline-block;
+    width:400px;
+    text-align:left;
+}
+.key_usage span:first-of-type {
+    width:150px;
+    text-align:right
+}
