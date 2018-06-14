@@ -26,6 +26,41 @@
 <!-- no text highlighting -->
 <body class="noselect">
 
+<div id="keyboard_usage_window">
+    <div class="panel panel-default">
+        <div class="panel-heading active">
+            Keyboard Usage
+        </div>
+        <div class="key_usage">
+            <div>
+                <p><span><kbd>?</kbd></span>
+                    <span>Toggle Keyboard Usage display</span></p>
+            </div>
+            <div>
+                <p><span><kbd>Esc</kbd></span> <span>Deselect label</span>
+                </p>
+            </div>
+            <div>
+                <p><span><kbd>Backspace</kbd> / <kbd>delete</kbd></span> <span>Delete selected label</span>
+                </p>
+            </div>
+            <div>
+                <p><span><kbd>&uarr;</kbd></span> <span>Zoom in</span></p>
+            </div>
+            <div>
+                <p><span><kbd>&darr;</kbd></span> <span>Zoom out</span></p>
+            </div>
+            <div>
+                <p><span><kbd>&larr;</kbd></span> <span>Previous frame</span></p>
+            </div>
+            <div>
+                <p><span><kbd>&rarr;</kbd></span> <span>Next frame</span></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <div class="container">
 
     <!-- Heading -->
@@ -159,6 +194,13 @@
 
   $(document).ready(function () {
     SatVideo(Box2d);
+    document.addEventListener("keydown", function (e) {
+      let eventObj = window.event ? event : e;
+      if (eventObj.keyCode === 191 && eventObj.shiftKey) {
+        // if the user pressed '?':
+        $("#keyboard_usage_window").toggle();
+      }
+    });
   });
 
 </script>
