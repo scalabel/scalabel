@@ -38,7 +38,7 @@
             <form id="project-form" action=/post>
                 <div class="form-group">
                     <label for="project_name">Project Name</label>
-                    <input type="text" class="form-control"
+                    <input required type="text" class="form-control"
                            style="width:300px" id="project_name"
                            name="project_name">
                 </div>
@@ -70,29 +70,29 @@
                 </div>
                 <div class="form-group">
                     <label for="page_title">Page Title</label>
-                    <input type="text" class="form-control"
+                    <input required type="text" class="form-control"
                            style="width:300px" id="page_title" name="page_title">
                 </div>
                 <div class="form-group">
                     <label for="item_file">Item List</label>
-                    <input type="file" class="form-control" style="width:300px"
+                    <input required type="file" class="form-control" style="width:300px"
                            id="item_file" name="item_file" accept=".yml, .yaml">
                 </div>
                 <div class="form-group">
                     <label for="categories">Categories</label>
-                    <input type="file" class="form-control" style="width:300px"
+                    <input required type="file" class="form-control" style="width:300px"
                            id="categories" name="categories"
                            accept=".yml, .yaml">
                 </div>
                 <div class="form-group">
                     <label for="attributes">Attributes (currently not optional)</label>
-                    <input type="file" class="form-control"
+                    <input required type="file" class="form-control"
                            style="width:300px" id="attributes"
                            name="attributes" accept=".yml, .yaml">
                 </div>
                 <div class="form-group">
                     <label for="task_size">Task Size</label>
-                    <input type="text" class="form-control"
+                    <input required type="text" class="form-control"
                            style="width:300px" id="task_size" name="task_size">
                 </div>
                 <!-- TODO: check that this is valid -->
