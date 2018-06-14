@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 	"unicode/utf8"
-	"log"
 	"strings"
 )
 
@@ -140,16 +139,17 @@ func Min(x, y int) int {
 
 // check duplicated project name
 // return false if duplicated
-func checkProjectName(projName string) string {
-	files, err := ioutil.ReadDir(path.Join(env.DataDir, "tasks"))
+func checkProjectName(projectName string) string {
+	var newName = strings.Replace(projectName, " ", "_", -1)
+	dir := path.Join(env.DataDir, "tasks")
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		log.Fatal(err)
+		return newName
 	}
 
-	var newName = strings.Replace(projName, " ", "_", -1)
 	for _, f := range files {
 		if f.Name() == newName {
-			Error.Println("Project Name - " + projName + " - already exists.")
+			Error.Println("Project Name - " + projectName + " - already exists.")
 			return ""
 		}
 	}
