@@ -91,6 +91,7 @@ function Sat(ItemType, LabelType) {
       self.moveSlider();
     };
   }
+  self.load();
 }
 
 /**

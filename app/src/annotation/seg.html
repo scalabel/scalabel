@@ -71,7 +71,7 @@
     <div class="row p-0 m-0">
         <div class="col-lg-12">
             <h2 class="page-header"> <span id="page-title">Segmentation labeling tool</span>
-                <small>verson 1.1</small>
+                <small>version 0.1.0</small>
                 <a type="button" class="btn btn-info btn-popover" data-toggle="popover" data-placement="right" href="http://data-bdd.berkeley.edu/label/seg/readme.html" target="view_window" data-content="Please view instructions and annotate bounding boxes of given categories.">
                     Instruction
                 </a>
@@ -189,13 +189,11 @@
 
 <script type="text/javascript">
   $(document).ready(function () {
-    const type = "seg";
-    let sat = new Sat(SatImage, Seg2d);
-    sat.load();
+    Sat(SatImage, Seg2d);
 
     document.addEventListener ("keydown", function (e) {
-      let evtobj = window.event? event : e;
-      if (evtobj.keyCode == 191 && evtobj.shiftKey) {
+      let eventObj = window.event? event : e;
+      if (eventObj.keyCode === 191 && eventObj.shiftKey) {
         // if the user pressed '?':
         $("#keyboard_usage_window" ).toggle();
       }
