@@ -5,11 +5,16 @@ $(document).ready(function() {
   vendor.hide();
   $('#project-form').submit(function(e) {
     e.preventDefault();
+
     let x = new XMLHttpRequest();
     x.onreadystatechange = function() {
       if (x.readyState === 4) {
-        dashboard.show();
-        vendor.show();
+        if (x.response) {
+          alert(x.response);
+        } else {
+          dashboard.show();
+          vendor.show();
+        }
       }
     };
     x.open('POST', './postProject');

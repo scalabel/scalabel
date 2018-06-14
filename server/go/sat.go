@@ -43,8 +43,6 @@ type Task struct {
 // The actual assignment of a task to an annotator
 type Assignment struct {
 	Task      Task              `json:"task" yaml:"task"`
-	Labels    []Label           `json:"labels" yaml:"labels"`
-	Tracks    []Label           `json:"tracks" yaml:"tracks"`
 	WorkerId  int               `json:"workerId" yaml:"workerId"`
 	Events    []Event           `json:"events" yaml:"events"`
 	UserAgent string            `json:"userAgent" yaml:"userAgent"`
@@ -65,7 +63,7 @@ type Label struct {
 	CategoryPath    string                 `json:"categoryPath" yaml:"categoryPath"`
 	ParentId        int                    `json:"parent" yaml:"parentId"`
 	ChildrenIds     []int                  `json:"children" yaml:"childrenIds"`
-	Attributes      map[string]interface{} `json:"attributes" yaml:"attributes"`
+	Attributes      map[string]bool        `json:"attributes" yaml:"attributes"`
 	Data            map[string]interface{} `json:"data" yaml:"data"`
 	Keyframe        bool                   `json:"keyframe" yaml:"keyframe"`
 }
@@ -153,6 +151,11 @@ func vendorHandler(w http.ResponseWriter, r *http.Request) {
 func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)
+		return
+	}
+
+	if !checkProjName(r.FormValue("project_name")) {
+		w.Write([]byte("Project Name already exists."))
 		return
 	}
 
@@ -334,7 +337,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	Info.Println("Created", index, "new tasks")
 
 	// TODO: is this necessary?
-	w.Write([]byte(strconv.Itoa(index)))
+	// w.Write([]byte(strconv.Itoa(index)))
 }
 
 // Return all of the tasks.
@@ -388,8 +391,7 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	Info.Println(task)
 
-	taskPath := path.Join(env.DataDir, "tasks", task.ProjectName,
-		strconv.Itoa(task.Index)+".json")
+	taskPath := path.Join(env.DataDir, "tasks", task.ProjectName, strconv.Itoa(task.Index)+".json")
 	taskJson, err := json.MarshalIndent(task, "", "  ")
 	if err != nil {
 		Error.Println(err)

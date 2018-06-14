@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 	"unicode/utf8"
+	"log"
 )
 
 func GetTask(projectName string, taskIndex string) Task {
@@ -123,3 +124,22 @@ func Min(x, y int) int {
 	}
 	return y
 }
+
+// check duplicated project name
+// return false if duplicated
+func checkProjName(projName string) bool {
+	files, err := ioutil.ReadDir(path.Join(env.DataDir, "tasks"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		if f.Name() == projName {
+			Error.Println("Project Name - " + projName + " - already exists.")
+			return false
+		}
+	}
+	return true
+}
+
+
+
