@@ -9,6 +9,7 @@ import (
 	"time"
 	"unicode/utf8"
 	"log"
+	"strings"
 )
 
 func GetAssignment(projectName string, taskIndex string) Assignment {
@@ -139,18 +140,20 @@ func Min(x, y int) int {
 
 // check duplicated project name
 // return false if duplicated
-func checkProjName(projName string) bool {
+func checkProjectName(projName string) string {
 	files, err := ioutil.ReadDir(path.Join(env.DataDir, "tasks"))
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	var newName = strings.Replace(projName, " ", "_", -1)
 	for _, f := range files {
-		if f.Name() == projName {
+		if f.Name() == newName {
 			Error.Println("Project Name - " + projName + " - already exists.")
-			return false
+			return ""
 		}
 	}
-	return true
+	return newName
 }
 
 
