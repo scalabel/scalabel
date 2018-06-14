@@ -39,10 +39,11 @@
                         <!-- /.table-responsive -->
                         <div class="well">
                             <h4>Downloads</h4>
-                            <p>Instructions: Task URLs are distributed to workers.</p>
+                            <p>Instructions: Assignment URLs are distributed to
+                                workers.</p>
                             <a type="submit" id="download_list"
                                class="btn btn-default btn-md" target="_blank"
-                               href="">Download Task URLs</a>
+                               href="">Download Assignment URLs</a>
                             <form id="download-form">
                                 <a type="submit" id="download_result"
                                    class="btn btn-default btn-md"
@@ -67,7 +68,7 @@
                                 {{ range $key, $value := . }}
                                 <tr>
                                     <th>
-                                        {{ $value.Index }}
+                                        {{ $value.Task.Index }}
                                     </th>
                                     <th>
                                         <!--TODO-->
@@ -77,7 +78,7 @@
                                     </th>
                                     <th>
                                         <a
-                                            href="./{{ $value.HandlerUrl }}?project_name={{ $value.ProjectName }}&task_index={{ $value.Index }}">
+                                            href="./{{ $value.Task.HandlerUrl }}?project_name={{ $value.Task.ProjectName }}&task_index={{ $value.Task.Index }}">
                                             task link
                                         </a>
                                     </th>

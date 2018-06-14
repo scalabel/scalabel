@@ -11,47 +11,48 @@ import (
 	"log"
 )
 
-func GetTask(projectName string, taskIndex string) Task {
-	taskPath := path.Join(env.DataDir, "tasks", projectName, taskIndex+".json")
-	taskFileContents, err := ioutil.ReadFile(taskPath)
+func GetAssignment(projectName string, taskIndex string) Assignment {
+	assignmentPath := path.Join(env.DataDir, "assignments", projectName, taskIndex+".json")
+	assignmentFileContents, err := ioutil.ReadFile(assignmentPath)
 	if err != nil {
 		Error.Println(err)
 	}
-	task := Task{}
-	json.Unmarshal(taskFileContents, &task)
-	return task
+	assignment := Assignment{}
+	json.Unmarshal(assignmentFileContents, &assignment)
+	return assignment
 }
 
-func GetTasks() []Task {
-	tasksDirectoryPath := path.Join(env.DataDir, "tasks")
-	tasksDirectoryContents, err := ioutil.ReadDir(tasksDirectoryPath)
+func GetAssignments() []Assignment {
+	assignmentsDirectoryPath := path.Join(env.DataDir, "assignments")
+	assignmentsDirectoryContents, err := ioutil.ReadDir(
+		assignmentsDirectoryPath)
 	if err != nil {
 		Error.Println(err)
 	}
-	tasks := []Task{}
-	for _, projectDirectory := range tasksDirectoryContents {
+	assignments := []Assignment{}
+	for _, projectDirectory := range assignmentsDirectoryContents {
 		if projectDirectory.IsDir() {
-			projectDirectoryPath := path.Join(env.DataDir, "tasks", projectDirectory.Name())
+			projectDirectoryPath := path.Join(env.DataDir, "assignments", projectDirectory.Name())
 			projectDirectoryContents, err := ioutil.ReadDir(projectDirectoryPath)
 			if err != nil {
 				Error.Println(err)
 			}
-			for _, taskFile := range projectDirectoryContents {
-				if len(taskFile.Name()) > 5 &&
-					path.Ext(taskFile.Name()) == ".json" {
-					taskFileContents, err := ioutil.ReadFile(
-						path.Join(projectDirectoryPath, taskFile.Name()))
+			for _, assignmentFile := range projectDirectoryContents {
+				if len(assignmentFile.Name()) > 5 &&
+					path.Ext(assignmentFile.Name()) == ".json" {
+					assignmentFileContents, err := ioutil.ReadFile(
+						path.Join(projectDirectoryPath, assignmentFile.Name()))
 					if err != nil {
 						Error.Println(err)
 					}
-					task := Task{}
-					json.Unmarshal(taskFileContents, &task)
-					tasks = append(tasks, task)
+					assignment := Assignment{}
+					json.Unmarshal(assignmentFileContents, &assignment)
+					assignments = append(assignments, assignment)
 				}
 			}
 		}
 	}
-	return tasks
+	return assignments
 }
 
 func (task *Task) GetTaskPath() string {
@@ -60,6 +61,17 @@ func (task *Task) GetTaskPath() string {
 		env.DataDir,
 		"tasks",
 		task.ProjectName,
+	)
+	os.MkdirAll(dir, 0777)
+	return path.Join(dir, filename+".json")
+}
+
+func (assignment *Assignment) GetAssignmentPath() string {
+	filename := strconv.Itoa(assignment.Task.Index)
+	dir := path.Join(
+		env.DataDir,
+		"assignments",
+		assignment.Task.ProjectName,
 	)
 	os.MkdirAll(dir, 0777)
 	return path.Join(dir, filename+".json")

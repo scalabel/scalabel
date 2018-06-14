@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Video labeling tool</title>
+    <title></title>
 
     <!-- Style CSS -->
     <link href="./css/style.css" rel="stylesheet">
@@ -33,6 +33,17 @@
         <div class="col-lg-12">
             <h2 class="page-header"> <span id="page-title">Bounding box labeling tool</span>
                 <small>verson 1.1</small>
+                <a type="button" class="btn btn-info btn-popover"
+                   data-toggle="popover" data-placement="right"
+                   href="http://data-bdd.berkeley.edu/label/bbox/instruction.html"
+                   target="view_window"
+                   data-content="Please view instructions and annotate bounding boxes of given categories.">
+                    Instruction
+                </a>
+                <small class="col-lg-offset-2">Boxes:</small>
+                <small id="label_count">0</small>
+                <small class="col-lg-offset-0">Lights:</small>
+                <small id="light_count">0</small>
                 <a href="#" id="save_btn" style="position:absolute;right:15px;"
                    class="btn btn-primary btn-primary">Save</a>
             </h2>
@@ -53,7 +64,7 @@
                         <p>Label Category</p>
                     </div>
                     <div id="custom_attributes">
-                        {{ range $key, $value := .Attributes }}
+                        {{ range $key, $value := .Task.Attributes }}
                         <div class="form-group"
                              id="custom_attribute_{{ $value.Name }}_div">
                             <input id="custom_attribute_{{ $value.Name }}"
@@ -90,7 +101,7 @@
                 </button>
                 <!-- video progress slider -->
                 <input id="video_slider" class="slider" type="range"
-                       min="1" max="{{ .VideoMetadata.NumFrames }}"
+                       min="1" max="{{ .Task.VideoMetaData.NumFrames }}"
                        value="1"/>
             </div>
 
@@ -121,7 +132,7 @@
 </div>
 
 <!-- TEMPLATE VALUES -->
-<i id="frame_rate" class="template-val">{{.VideoMetadata.TBR}}</i>
+<i id="frame_rate" class="template-val">{{.Task.VideoMetaData.TBR}}</i>
 
 <!-- JAVASCRIPT -->
 

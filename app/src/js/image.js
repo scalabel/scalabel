@@ -610,15 +610,15 @@ SatImage.prototype._doubleclick = function(e) {
  * @param {object} e: mouse event
  */
 SatImage.prototype.drawCrossHair = function(e) {
-  let divRect = this.divCanvas.getBoundingClientRect();
+  let imageRect = this.imageCanvas.getBoundingClientRect();
   let cH = $('#crosshair-h');
   let cV = $('#crosshair-v');
   cH.css('top', e.clientY);
-  cH.css('left', divRect.x);
-  cH.css('width', divRect.width);
+  cH.css('left', imageRect.x);
+  cH.css('width', imageRect.width);
   cV.css('left', e.clientX);
-  cV.css('top', divRect.y);
-  cV.css('height', divRect.height);
+  cV.css('top', imageRect.y);
+  cV.css('height', imageRect.height);
   if (this._isWithinFrame(e)) {
     $('.hair').show();
   } else {
@@ -710,7 +710,12 @@ SatImage.prototype._mouseup = function(e) {
       self.selectedLabel.mouseup(e);
     }
   }
-
+  if (!self.selectedLabel && self.sat.tracks) {
+    // if tracking, propagate lack of label
+    for (let i = 0; i < self.sat.items.length; i++) {
+      self.sat.items[i].deselectAll();
+    }
+  }
   self.redraw();
   self.updateLabelCount();
 };

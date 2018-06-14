@@ -219,11 +219,11 @@ Sat.prototype.load = function() {
   self.taskIndex = parseInt(searchParams.get('task_index'));
   self.projectName = searchParams.get('project_name');
   // send the request to the back end
-  let request = JSON.stringify({
+  let request = JSON.stringify({'task': {
     'index': self.taskIndex,
     'projectName': self.projectName,
-  });
-  xhr.open('POST', './postLoadTask', false);
+  }});
+  xhr.open('POST', './postLoadAssignment', false);
   xhr.send(request);
 };
 
@@ -354,7 +354,7 @@ Sat.prototype.save = function() {
 
 /**
  * Get this session's JSON representation
- * @return {{items: Array, labels: Array, events: *, userAgent: string}}
+ * @return {object}
  */
 Sat.prototype.toJson = function() {
   let self = this;
@@ -365,12 +365,17 @@ Sat.prototype.toJson = function() {
  * Encode the base SAT objects. This should NOT be overloaded. Instead,
  * overload Sat.prototype.toJson()
  * @return {object} - JSON representation of the base functionality in this
- *   SAT. */
+ *   SAT.
+ */
 Sat.prototype.encodeBaseJson = function() {
   let self = this;
   let items = [];
+  let labeledItemsCount = 0;
   for (let i = 0; i < self.items.length; i++) {
     items.push(self.items[i].toJson());
+    if (self.items[i].labels.length > 0) {
+      labeledItemsCount++;
+    }
   }
   let labels = [];
   for (let i = 0; i < self.labels.length; i++) {
@@ -378,18 +383,26 @@ Sat.prototype.encodeBaseJson = function() {
       labels.push(self.labels[i].toJson());
     }
   }
-  return {
-    handlerUrl: self.handlerUrl,
-    pageTitle: self.pageTitle,
-    projectName: self.projectName,
-    startTime: self.startTime,
-    items: items,
-    labels: labels,
-    categories: self.categories,
-    events: self.events,
+  self.assignmentInfo.submissionsCount++;
+  let assignmentInfo = {submitTime: new Date().toJSON(),
+    submissionsCount: self.assignmentInfo.submissionsCount,
+    labeledItemsCount: labeledItemsCount,
     userAgent: navigator.userAgent,
     ipInfo: self.ipInfo,
-    attributes: self.attributes,
+  };
+  return {
+    task: {
+      handlerUrl: self.handlerUrl,
+      pageTitle: self.pageTitle,
+      projectName: self.projectName,
+      items: items,
+      categories: self.categories,
+      attributes: self.attributes,
+    },
+    startTime: self.startTime,
+    labels: labels,
+    events: self.events,
+    assignmentInfo: assignmentInfo,
   };
 };
 
@@ -409,8 +422,8 @@ Sat.prototype.fromJson = function(json) {
  */
 Sat.prototype.decodeBaseJson = function(json) {
   let self = this;
-  self.handlerUrl = json.handlerUrl;
-  self.pageTitle = json.pageTitle;
+  self.handlerUrl = json.task.handlerUrl;
+  self.pageTitle = json.task.pageTitle;
   document.title = self.pageTitle;
   document.getElementById('page-title').textContent = self.pageTitle;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
@@ -422,15 +435,16 @@ Sat.prototype.decodeBaseJson = function(json) {
     self.labels.push(newLabel);
   }
 
-  for (let i = 0; i < json.items.length; i++) {
-    let newItem = self.newItem(json.items[i].url);
-    newItem.fromJson(json.items[i]);
+  for (let i = 0; i < json.task.items.length; i++) {
+    let newItem = self.newItem(json.task.items[i].url);
+    newItem.fromJson(json.task.items[i]);
   }
 
-  self.categories = json.categories;
-  self.attributes = json.attributes;
-  self.assignmentId = json.assignmentId;
-  self.projectName = json.projectName;
+  self.categories = json.task.categories;
+  self.attributes = json.task.attributes;
+  // self.assignmentId = json.assignmentId;
+  self.projectName = json.task.projectName;
+  self.assignmentInfo = json.assignmentInfo;
 
   self.currentItem = self.items[0];
 
@@ -439,7 +453,6 @@ Sat.prototype.decodeBaseJson = function(json) {
   }
   self.addEvent('start labeling', self.currentItem.index);
 };
-
 
 /**
  * Information used for submission
@@ -740,7 +753,9 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   self.attributes = json.attributes;
   // TODO: remove
   self.keyframe = json.keyframe;
-  self.decodeLabelData(json.data);
+  if (json.data) {
+    self.decodeLabelData(json.data);
+  }
 };
 
 SatLabel.prototype.decodeLabelData = function(data) { // eslint-disable-line

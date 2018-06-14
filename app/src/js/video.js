@@ -63,14 +63,14 @@ SatVideo.prototype.toJson = function() {
       json.tracks.push(self.tracks[i].toJson());
     }
   }
-  json.metadata = self.metadata;
+  json.task.metadata = self.metadata;
   return json;
 };
 
 SatVideo.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
-  self.metadata = json.metadata;
+  self.metadata = json.task.metadata;
   self.tracks = [];
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
     let track = new Track(self, json.tracks[i].id,

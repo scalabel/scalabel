@@ -23,9 +23,10 @@ func videoLabelingHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	// get task index from the URL
-	projName := r.URL.Query()["project_name"][0]
+	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
 
-	task := GetTask(projName, taskIndex)
-	tmpl.Execute(w, task)
+	assignment := GetAssignment(projectName, taskIndex)
+	Info.Println(assignment)
+	tmpl.Execute(w, assignment)
 }

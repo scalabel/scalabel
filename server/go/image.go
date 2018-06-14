@@ -14,9 +14,9 @@ func box2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
 
-	task := GetTask(projectName, taskIndex)
-	Info.Println(task)
-	tmpl.Execute(w, task)
+	assignment := GetAssignment(projectName, taskIndex)
+	Info.Println(assignment)
+	tmpl.Execute(w, assignment)
 }
 
 func seg2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,9 +28,9 @@ func seg2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
 
-	task := GetTask(projectName, taskIndex)
-	Info.Println(task)
-	tmpl.Execute(w, task)
+	assignment := GetAssignment(projectName, taskIndex)
+	Info.Println(assignment)
+	tmpl.Execute(w, assignment)
 }
 
 func lane2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func lane2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
 
-	task := GetTask(projectName, taskIndex)
-	Info.Println(task)
-	tmpl.Execute(w, task)
+	assignment := GetAssignment(projectName, taskIndex)
+	Info.Println(assignment)
+	tmpl.Execute(w, assignment)
 }

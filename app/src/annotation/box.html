@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Bounding box labeling tool</title>
+    <title></title>
 
     <!-- Style CSS -->
     <link href="./css/style.css" rel="stylesheet">
@@ -101,7 +101,7 @@
                       <p>Label Category</p>
                     </div>
                     <div id="custom_attributes">
-                        {{ range $key, $value := .Attributes }}
+                        {{ range $key, $value := .Task.Attributes }}
                         <div class="form-group"
                              id="custom_attribute_{{ $value.Name }}_div">
                             <input id="custom_attribute_{{ $value.Name }}"
@@ -130,7 +130,7 @@
             <div id="slider_div">
                 <!-- progress slider -->
                 <input id="slider" class="slider" type="range"
-                       min="1" max="{{ len .Items }}"
+                       min="1" max="{{ len .Task.Items }}"
                        value="1"/>
             </div>
         </div>

@@ -63,10 +63,10 @@
                                 {{ range $key, $value := . }}
                                 <tr>
                                     <th>
-                                        {{ $value.ProjectName }}
+                                        {{ $value.Task.ProjectName }}
                                     </th>
                                     <th>
-                                        {{ $value.Index }}
+                                        {{ $value.Task.Index }}
                                     </th>
                                     <th>
                                         <!--TODO-->
@@ -76,7 +76,7 @@
                                     </th>
                                     <th>
                                         <a
-                                            href="./{{ $value.HandlerUrl }}?project_name={{ $value.ProjectName }}&task_index={{ $value.Index }}">
+                                            href="./{{ $value.Task.HandlerUrl }}?project_name={{ $value.Task.ProjectName }}&task_index={{ $value.Task.Index }}">
                                             task link
                                         </a>
                                     </th>

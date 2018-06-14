@@ -130,10 +130,12 @@ func main() {
 	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))
 	http.HandleFunc("/postSave", WrapHandleFunc(postSaveHandler))
 	http.HandleFunc("/postSubmission", WrapHandleFunc(postSubmissionHandler))
-	http.HandleFunc("/postLoadTask", WrapHandleFunc(postLoadTaskHandler))
+	http.HandleFunc("/postLoadAssignment",
+		WrapHandleFunc(postLoadAssignmentHandler))
 
 	// Simple static handlers can be generated with MakePathHandleFunc
-	http.HandleFunc("/create", WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
+	http.HandleFunc("/create",
+		WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
 	http.HandleFunc("/2d_seg_labeling", WrapHandleFunc(seg2dLabelingHandler))
 	http.HandleFunc("/2d_lane_labeling", WrapHandleFunc(lane2dLabelingHandler))
 	//http.HandleFunc("/image_labeling",

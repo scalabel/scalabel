@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Segmentation labeling tool</title>
+    <title></title>
 
     <!-- Style CSS -->
     <link href="./css/style.css" rel="stylesheet">
@@ -103,7 +103,7 @@
                         <p>Label Category</p>
                     </div>
                     <div id="custom_attributes">
-                        {{ range $key, $value := .Attributes }}
+                        {{ range $key, $value := .Task.Attributes }}
                         <div class="form-group"
                              id="custom_attribute_{{ $value.Name }}_div">
                             <input id="custom_attribute_{{ $value.Name }}"
