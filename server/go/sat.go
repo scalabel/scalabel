@@ -156,6 +156,11 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !checkProjName(r.FormValue("project_name")) {
+		w.Write([]byte("Project Name already exists."))
+		return
+	}
+
 	// item list YAML
 	itemType := r.FormValue("item_type")
 	var items []Item
@@ -212,7 +217,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			Error.Println(err)
 		}
 		for i := 0; i < len(items); i++ {
-			items[i].Index = i;
+			items[i].Index = i
 		}
 	}
 
@@ -220,6 +225,12 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	var categories []Category
 	categoryFile, _, err := r.FormFile("categories")
 	defer categoryFile.Close()
+
+	if categoryFile == nil {
+		// categories =
+		Error.Println(categoryFile)
+	}
+
 	if err != nil {
 		Error.Println(err)
 	}
@@ -334,7 +345,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	Info.Println("Created", index, "new tasks")
 
 	// TODO: is this necessary?
-	w.Write([]byte(strconv.Itoa(index)))
+	// w.Write([]byte(strconv.Itoa(index)))
 }
 
 // Return all of the tasks.
