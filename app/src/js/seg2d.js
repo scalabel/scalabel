@@ -100,6 +100,7 @@ Seg2d.prototype.splitPolyline = function(poly) {
         mousePos: null,
       });
       label.addPolyline(poly);
+      label.setState(SegStates.FREE);
       label.releaseAsTargeted();
       break;
     }
@@ -289,11 +290,6 @@ Seg2d.prototype.selectedBy = function(shape) {
   }
 
   return false;
-};
-
-Seg2d.prototype.releaseAsTargeted = function() {
-  this.setState(SegStates.FREE);
-  ImageLabel.prototype.releaseAsTargeted.call(this);
 };
 
 /**

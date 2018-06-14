@@ -239,7 +239,6 @@ SatImage.prototype.setActive = function(active) {
       self._mouseup(e);
     };
     document.onmousemove = function(e) {
-      self._changeCat();
       self._mousemove(e);
     };
     document.onscroll = function(e) {
