@@ -1,6 +1,6 @@
 /* global module rgba */
 /* exported BEZIER_COLOR GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
-ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT UP_RES_RATIO */
+ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT UP_RES_RATIO*/
 
 // Define Enums
 const VertexTypes = {VERTEX: 'vertex', MIDPOINT: 'midpoint',
@@ -506,9 +506,10 @@ Polyline.prototype.deleteVertex = function() {};
 /**
  * Append new vertex to end of vertex sequence
  * @param {object} pt: the new vertex to be inserted
+ * @param {Edge} edge: optional edge to add
  */
-Polyline.prototype.pushVertex = function(pt) {
-  this.insertVertex(this.vertices.length, pt);
+Polyline.prototype.pushVertex = function(pt, edge=null) {
+  this.insertVertex(this.vertices.length, pt, edge);
 };
 
 /**
@@ -640,8 +641,9 @@ Path.prototype.isEnded = function() {
  * the curve will be lost
  * @param {int} i: index to insert the new vertex
  * @param {object} pt: the new vertex to be inserted
+ * @param {Edge} edge: optional edge to add
  */
-Path.prototype.insertVertex = function(i, pt) {
+Path.prototype.insertVertex = function(i, pt, edge=null) {
   // for sanity purpose, check pt type:
   pt.type = VertexTypes.VERTEX;
   // check index i
@@ -651,13 +653,13 @@ Path.prototype.insertVertex = function(i, pt) {
   // modify edges
   if (this.vertices.length >= 1) {
     if (i > 0 && i < this.vertices.length) {
-      this.edges.splice(i-1, 1, new Edge(this.vertices[i-1], pt));
+      this.edges.splice(i-1, 1, edge ? edge : new Edge(this.vertices[i-1], pt));
       this.edges.splice(i, 0, new Edge(pt, this.vertices[i]));
     } else if (i === 0) {
       this.edges.splice(i, 0, new Edge(pt, this.vertices[0]));
     } else if (i === this.vertices.length) {
       this.edges.splice(i-1, 0,
-          new Edge(this.vertices[this.vertices.length - 1], pt));
+          edge ? edge : new Edge(this.vertices[this.vertices.length - 1], pt));
     }
   }
   // modify vertices
@@ -745,8 +747,9 @@ Polygon.prototype.reverse = function() {
  * Assuming prev and next vertices are connected by line, not bezier
  * @param {int} i: index to insert the new vertex
  * @param {object} pt: the new vertex to be inserted
+ * @param {Edge} edge: optional edge to add
  */
-Polygon.prototype.insertVertex = function(i, pt) {
+Polygon.prototype.insertVertex = function(i, pt, edge=null) {
   // for sanity purpose, check pt type:
   pt.type = VertexTypes.VERTEX;
   // check index i
@@ -756,7 +759,7 @@ Polygon.prototype.insertVertex = function(i, pt) {
 
   this.vertices.splice(i, 0, pt);
   if (this.vertices.length > 1) {
-    let edge1 = new Edge(
+    let edge1 = edge ? edge : new Edge(
         this.vertices[this.idx(i-1)], this.vertices[i]
     );
     let edge2 = new Edge(
@@ -1253,21 +1256,11 @@ Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
       }
     }
   }
+  if (this.fillInside) {
+    hiddenCtx.closePath();
+    hiddenCtx.fill();
+  }
   hiddenCtx.stroke();
-  hiddenCtx.restore(); // restore the canvas to saved settings
-};
-
-/**
- * Draw the polygon on the hidden canvas.
- * @param {object} hiddenCtx - Hidden canvas context.
- * @param {SatImage} satImage - The SatImage object.
- * @param {string} fillStyle - The fill style on hidden canvas.
- */
-Polygon.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
-  hiddenCtx.save(); // save the canvas context settings
-  Polyline.prototype.drawHidden.call(this, hiddenCtx, satImage);
-  hiddenCtx.fillStyle = fillStyle;
-  hiddenCtx.fill();
   hiddenCtx.restore(); // restore the canvas to saved settings
 };
 
