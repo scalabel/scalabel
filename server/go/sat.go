@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"log"
 )
 
 // Project is what the admin creates, specifying a list of items
@@ -229,44 +230,12 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// categories YAML
-	var categories []Category
-	categoryFile, _, err := r.FormFile("categories")
-	defer categoryFile.Close()
+	var categories = getCategories(r)
 
-	if categoryFile == nil {
-		// categories =
-		Error.Println(categoryFile)
-	}
-
-	if err != nil {
-		Error.Println(err)
-	}
-	categoryFileBuf := bytes.NewBuffer(nil)
-	_, err = io.Copy(categoryFileBuf, categoryFile)
-	if err != nil {
-		Error.Println(err)
-	}
-	err = yaml.Unmarshal(categoryFileBuf.Bytes(), &categories)
-	if err != nil {
-		Error.Println(err)
-	}
 
 	// attributes YAML
-	var attributes []Attribute
-	attributeFile, _, err := r.FormFile("attributes")
-	defer attributeFile.Close()
-	if err != nil {
-		Error.Println(err)
-	}
-	attributeFileBuf := bytes.NewBuffer(nil)
-	_, err = io.Copy(attributeFileBuf, attributeFile)
-	if err != nil {
-		Error.Println(err)
-	}
-	err = yaml.Unmarshal(attributeFileBuf.Bytes(), &attributes)
-	if err != nil {
-		Error.Println(err)
-	}
+	var attributes = getAttributes(r)
+
 
 	// parse the task size
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
@@ -456,4 +425,81 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 // Handles the posting of completed tasks
 func postSubmissionHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
+}
+
+// handles category YAML file, sets to default values if file missing
+func getCategories(r *http.Request) []Category {
+	labelType := r.FormValue("label_type")
+	var categories []Category
+	categoryFile, _, err := r.FormFile("categories")
+
+	switch err {
+	case nil:
+		defer categoryFile.Close()
+
+		categoryFileBuf := bytes.NewBuffer(nil)
+		_, err = io.Copy(categoryFileBuf, categoryFile)
+		if err != nil {
+			Error.Println(err)
+		}
+		err = yaml.Unmarshal(categoryFileBuf.Bytes(), &categories)
+		if err != nil {
+			Error.Println(err)
+		}
+
+	case http.ErrMissingFile:
+		Info.Printf("Miss category file and using default categories for %s.", labelType)
+
+		if labelType == "box2d" {
+			categories = defaultBox2dCategories
+		} else if labelType == "segmentation" {
+			categories = defaultSeg2dCategories
+		} else if labelType == "lane" {
+			categories = defaultLane2dCategories
+		} else {
+			Error.Printf("No default categories for %s.", labelType)
+		}
+
+	default:
+		log.Println(err)
+	}
+
+	return categories
+}
+
+// handles category YAML file, sets to default values if file missing
+func getAttributes(r *http.Request) []Attribute {
+	labelType := r.FormValue("label_type")
+	var attributes []Attribute
+	attributeFile, _, err := r.FormFile("attributes")
+
+	switch err {
+	case nil:
+		defer attributeFile.Close()
+
+		attributeFileBuf := bytes.NewBuffer(nil)
+		_, err = io.Copy(attributeFileBuf, attributeFile)
+		if err != nil {
+			Error.Println(err)
+		}
+		err = yaml.Unmarshal(attributeFileBuf.Bytes(), &attributes)
+		if err != nil {
+			Error.Println(err)
+		}
+
+	case http.ErrMissingFile:
+		Info.Printf("Missing attribute file and using default attributes for %s.", labelType)
+
+		if labelType == "box2d" {
+			attributes = defaultBox2dAttributes
+		} else {
+			attributes = dummyAttribute
+			Info.Printf("No default attributes for %s.", labelType)
+		}
+
+	default:
+		log.Println(err)
+	}
+
+	return attributes
 }

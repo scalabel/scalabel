@@ -156,5 +156,116 @@ func checkProjectName(projectName string) string {
 	return newName
 }
 
+// default box2d category if category file is missing
+var defaultBox2dCategories = []Category {
+	{"person", nil},
+	{"rider", nil},
+	{"car", nil},
+	{"truck", nil},
+	{"bus", nil},
+	{"train", nil},
+	{"motor", nil},
+	{"bike", nil},
+	{"traffic sign", nil},
+	{"traffic light", nil},
+}
 
+// default seg2d category if category file is missing
+var defaultSeg2dCategories = []Category {
+	{"void", []Category {
+		{"unlabeled", nil},
+		{"dynamic", nil},
+		{"ego vehicle", nil},
+		{"ground", nil},
+		{"static", nil},
+	}},
+	{"flat", []Category {
+		{"parking", nil},
+		{"rail track", nil},
+		{"road", nil},
+		{"sidewalk", nil},
+	}},
+	{"construction", []Category {
+		{"bridge", nil},
+		{"building", nil},
+		{"bus stop", nil},
+		{"fence", nil},
+		{"garage", nil},
+		{"guard rail", nil},
+		{"tunnel", nil},
+		{"wall", nil},
+	}},
+	{"object", []Category {
+		{"banner", nil},
+		{"billboard", nil},
+		{"fire hydrant", nil},
+		{"lane divider", nil},
+		{"mail box", nil},
+		{"parking sign", nil},
+		{"pole", nil},
+		{"polegroup", nil},
+		{"street light", nil},
+		{"traffic cone", nil},
+		{"traffic device", nil},
+		{"traffic light", nil},
+		{"traffic sign", nil},
+		{"traffic sign frame", nil},
+		{"trash can", nil},
+	}},
+	{"nature", []Category {
+		{"terrain", nil},
+		{"vegetation", nil},
+	}},
+	{"sky", []Category {
+		{"sky", nil},
+	}},
+	{"human", []Category {
+		{"person", nil},
+		{"rider", nil},
+	}},
+	{"vehicle", []Category {
+		{"bicycle", nil},
+		{"bus", nil},
+		{"car", nil},
+		{"caravan", nil},
+		{"motorcycle", nil},
+		{"trailer", nil},
+		{"train", nil},
+		{"truck", nil},
+	}},
+}
+
+// default lane2d category if category file is missing
+var defaultLane2dCategories = []Category {
+	{"road curb", nil},
+	{"double white", nil},
+	{"double yellow", nil},
+	{"double other", nil},
+	{"single white", nil},
+	{"single yellow", nil},
+	{"single other", nil},
+	{"crosswalk", nil},
+}
+
+// default box2d attributes if attribute file is missing
+var defaultBox2dAttributes = []Attribute {
+	{"Occluded", "switch", "o",
+		"", nil, nil, nil,
+	},
+	{"Truncated", "switch", "t",
+		"", nil, nil, nil,
+	},
+	{"Traffic Light Color", "list", "", "t",
+		[]string{"", "g", "y", "r"}, []string{"NA", "G", "Y", "R"},
+		[]string{"white", "green", "yellow", "red"},
+	},
+}
+
+// default attributes if attribute file is missing
+// to avoid uncaught type error in Javascript file
+var dummyAttribute = []Attribute {
+	{"", "", "",
+		"", nil, nil, nil,
+	},
+}
 
