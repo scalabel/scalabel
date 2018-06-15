@@ -392,12 +392,13 @@ Box2d.prototype.mousemove = function(e) {
     let dx = mousePos.x - this.mouseClickPos.x;
     let dy = mousePos.y - this.mouseClickPos.y;
     // make moved box within padBox
-    let [padBoxX, padBoxW] = this.satItem.toImageCoords(
-        [this.satItem.padBox.x, this.satItem.padBox.w]);
+    let [padBoxX, padBoxY] = this.satItem.toImageCoords(
+        [this.satItem.padBox.x, this.satItem.padBox.y]);
+    let [padBoxW, padBoxH] = this.satItem.toImageCoords(
+        [this.satItem.padBox.w, this.satItem.padBox.h], false);
+
     dx = Math.min(dx, (padBoxX + padBoxW - this.rect.w) - this.selectedCache.x);
     dx = Math.max(dx, padBoxX - this.selectedCache.x);
-    let [padBoxY, padBoxH] = this.satItem.toImageCoords(
-        [this.satItem.padBox.y, this.satItem.padBox.h]);
     dy = Math.min(dy, (padBoxY + padBoxH - this.rect.h) - this.selectedCache.y);
     dy = Math.max(dy, padBoxY - this.selectedCache.y);
 

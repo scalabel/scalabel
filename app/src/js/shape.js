@@ -1106,8 +1106,9 @@ Edge.prototype.draw = function(context, satImage) {
       break;
     }
     case EdgeTypes.BEZIER: {
-      let [c1X, c1Y, c2X, c2Y] = satImage.toCanvasCoords([
-        this.control_points[0].x, this.control_points[0].y,
+      let [c1X, c1Y] = satImage.toCanvasCoords([
+        this.control_points[0].x, this.control_points[0].y]);
+      let [c2X, c2Y] = satImage.toCanvasCoords([
         this.control_points[1].x, this.control_points[1].y]);
       context.bezierCurveTo(c1X, c1Y, c2X, c2Y, destX, destY);
       break;
@@ -1279,8 +1280,8 @@ Rect.prototype.draw = function(ctx, satImage, dashed) {
     ctx.strokeStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
   }
 
-  let [x, y, w, h] = satImage.toCanvasCoords(
-      [this.x, this.y, this.w, this.h]);
+  let [x, y] = satImage.toCanvasCoords([this.x, this.y]);
+  let [w, h] = satImage.toCanvasCoords([this.w, this.h], false);
 
   if (dashed) {
     ctx.setLineDash([6, 2]);
@@ -1323,8 +1324,8 @@ Rect.prototype.drawHandles = function(context, satImage, fillStyle,
  */
 Rect.prototype.drawHidden = function(hiddenCtx, satImage, strokeStyle) {
   hiddenCtx.save();
-  let [x, y, w, h] = satImage.toCanvasCoords(
-      [this.x, this.y, this.w, this.h]);
+  let [x, y] = satImage.toCanvasCoords([this.x, this.y]);
+  let [w, h] = satImage.toCanvasCoords([this.w, this.h], false);
 
   hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH;
   hiddenCtx.strokeStyle = strokeStyle;

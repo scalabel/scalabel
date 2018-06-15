@@ -147,21 +147,43 @@ SatImage.prototype.updateLabelCount = function() {
   document.getElementById('label_count').textContent = '' + numLabels;
 };
 
-SatImage.prototype.toCanvasCoords = function(values) {
-  let self = this;
+/**
+ * Convert image coordinate to canvas coordinate.
+ * If affine, assumes values to be [x, y]. Otherwise
+ * performs linear transformation.
+ * @param {[number]} values - the values to convert.
+ * @param {boolean} affine - whether or not this transformation is affine.
+ * @return {[number]} - the converted values.
+ */
+SatImage.prototype.toCanvasCoords = function(values, affine=true) {
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] = values[i] * self.scale * UP_RES_RATIO;
+      values[i] *= this.displayToImageRatio;
     }
+  }
+  if (affine) {
+    values[0] += this.padBox.x;
+    values[1] += this.padBox.y;
   }
   return values;
 };
 
-SatImage.prototype.toImageCoords = function(values) {
-  let self = this;
+/**
+ * Convert canvas coordinate to image coordinate.
+ * If affine, assumes values to be [x, y]. Otherwise
+ * performs linear transformation.
+ * @param {[number]} values - the values to convert.
+ * @param {boolean} affine - whether or not this transformation is affine.
+ * @return {[number]} - the converted values.
+ */
+SatImage.prototype.toImageCoords = function(values, affine=true) {
+  if (affine) {
+    values[0] -= this.padBox.x;
+    values[1] -= this.padBox.y;
+  }
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] = values[i] / self.scale / UP_RES_RATIO;
+      values[i] /= this.displayToImageRatio;
     }
   }
   return values;
@@ -175,6 +197,9 @@ SatImage.prototype.setScale = function(scale) {
   let self = this;
   // set scale
   if (scale >= self.MIN_SCALE && scale < self.MAX_SCALE) {
+    let ratio = scale / self.scale;
+    self.mainCtx.scale(ratio, ratio);
+    self.hiddenCtx.scale(ratio, ratio);
     self.scale = scale;
   } else {
     return;
@@ -744,8 +769,11 @@ SatImage.prototype._isWithinFrame = function(e) {
 SatImage.prototype.getMousePos = function(e) {
   let self = this;
   let rect = self.hiddenCanvas.getBoundingClientRect();
-  return {x: (e.clientX - rect.x) / self.scale,
-    y: (e.clientY - rect.y) / self.scale};
+  return {
+    x: (e.clientX - rect.x - self.padBox.x / UP_RES_RATIO)
+    / self.displayToImageRatio * UP_RES_RATIO,
+    y: (e.clientY - rect.y - self.padBox.y / UP_RES_RATIO)
+    / self.displayToImageRatio * UP_RES_RATIO};
 };
 
 /**
@@ -759,14 +787,16 @@ SatImage.prototype._getPadding = function() {
   // use ratios to determine how to pad
   let box = {x: 0, y: 0, w: 0, h: 0};
   if (xRatio >= yRatio) {
+    this.displayToImageRatio = this.imageCanvas.width / this.image.width;
     box.x = 0;
-    box.y = 0.5 * (this.imageCanvas.height - this.imageCanvas.width *
-        this.image.height / this.image.width);
+    box.y = 0.5 * (this.imageCanvas.height -
+        this.image.height * this.displayToImageRatio);
     box.w = this.imageCanvas.width;
     box.h = this.imageCanvas.height - UP_RES_RATIO * box.y;
   } else {
-    box.x = 0.5 * (this.imageCanvas.width - this.imageCanvas.height *
-        this.image.width / this.image.height);
+    this.displayToImageRatio = this.imageCanvas.height / this.image.height;
+    box.x = 0.5 * (this.imageCanvas.width -
+        this.image.width * this.displayToImageRatio);
     box.y = 0;
     box.w = this.imageCanvas.width - UP_RES_RATIO * box.x;
     box.h = this.imageCanvas.height;
