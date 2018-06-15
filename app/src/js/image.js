@@ -191,15 +191,23 @@ SatImage.prototype.setScale = function(scale) {
     $('#increase_btn').attr('disabled', true);
   }
   // resize canvas
-  self.imageCanvas.style.height = CANVAS_STYLE_HEIGHT * self.scale + 'px';
-  self.imageCanvas.style.width = CANVAS_STYLE_WIDTH * self.scale + 'px';
-  self.hiddenCanvas.style.height = CANVAS_STYLE_HEIGHT * self.scale + 'px';
-  self.hiddenCanvas.style.width = CANVAS_STYLE_WIDTH * self.scale + 'px';
+  self.imageCanvas.style.height =
+      Math.round(CANVAS_STYLE_HEIGHT * self.scale) + 'px';
+  self.imageCanvas.style.width =
+      Math.round(CANVAS_STYLE_WIDTH * self.scale) + 'px';
+  self.hiddenCanvas.style.height =
+      Math.round(CANVAS_STYLE_HEIGHT * self.scale) + 'px';
+  self.hiddenCanvas.style.width =
+      Math.round(CANVAS_STYLE_WIDTH * self.scale) + 'px';
 
-  self.imageCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale;
-  self.imageCanvas.width = CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale;
-  self.hiddenCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale;
-  self.hiddenCanvas.height = CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale;
+  self.imageCanvas.height =
+      Math.round(CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale);
+  self.imageCanvas.width =
+      Math.round(CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale);
+  self.hiddenCanvas.height =
+      Math.round(CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale);
+  self.hiddenCanvas.width =
+      Math.round(CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale);
 };
 
 SatImage.prototype.loaded = function() {
@@ -434,8 +442,8 @@ SatImage.prototype.redrawMainCanvas = function() {
   // update the padding box
   self.padBox = self._getPadding();
   // draw stuff
-  self.mainCtx.clearRect(0, 0, self.imageCanvas.width,
-      self.imageCanvas.height);
+  self.mainCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
+      self.padBox.h * UP_RES_RATIO);
   self.mainCtx.drawImage(self.image, 0, 0, self.image.width, self.image.height,
       self.padBox.x, self.padBox.y, self.padBox.w, self.padBox.h);
   for (let label of self.labels) {
@@ -451,8 +459,8 @@ SatImage.prototype.redrawMainCanvas = function() {
 SatImage.prototype.redrawHiddenCanvas = function() {
   let self = this;
   self.padBox = self._getPadding();
-  self.hiddenCtx.clearRect(0, 0, self.hiddenCanvas.width,
-      self.hiddenCanvas.height);
+  self.hiddenCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
+      self.padBox.h * UP_RES_RATIO);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
     shape.drawHidden(self.hiddenCtx, self, hiddenStyleColor(i));
@@ -465,8 +473,8 @@ SatImage.prototype.redrawHiddenCanvas = function() {
 SatImage.prototype.showHiddenCanvas = function() {
   let self = this;
   self.padBox = self._getPadding();
-  self.mainCtx.clearRect(0, 0, self.hiddenCanvas.width,
-      self.hiddenCanvas.height);
+  self.mainCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
+      self.padBox.h * UP_RES_RATIO);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
     shape.drawHidden(self.mainCtx, self, hiddenStyleColor(i));
@@ -521,6 +529,9 @@ SatImage.prototype._keydown = function(e) {
   }
   self.redraw();
   self.updateLabelCount();
+  if (keyID === 68) { // d for debug
+    self.showHiddenCanvas();
+  }
 };
 
 /**
@@ -577,7 +588,6 @@ SatImage.prototype._doubleclick = function(e) {
     let mousePos = self.getMousePos(e);
     let occupiedShape = self.getOccupiedShape(mousePos);
     let occupiedLabel = self.getLabelOfShape(occupiedShape);
-
     if (occupiedLabel) {
       occupiedLabel.setSelectedShape(occupiedShape);
       // label specific handling of mousedown

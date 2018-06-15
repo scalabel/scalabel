@@ -1132,7 +1132,7 @@ Edge.prototype.drawHidden = function(hiddenCtx, satImage) {
  * Draw the polygon.
  * @param {object} ctx - Canvas context.
  * @param {SatImage} satImage - the SatImage object.
- * @param {bool} drawDash - optional arguments for drawing dashed lines.
+ * @param {boolean} drawDash - optional arguments for drawing dashed lines.
  */
 Polyline.prototype.draw = function(ctx, satImage, drawDash) {
   ctx.save();
@@ -1235,7 +1235,9 @@ Polyline.prototype.drawHandles = function(context, satImage, fillStyle,
 Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
   hiddenCtx.save(); // save the canvas context settings
   hiddenCtx.strokeStyle = fillStyle;
+  hiddenCtx.fillStyle = fillStyle;
   hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH;
+  this.alignEdges();
 
   // draw polygon
   hiddenCtx.beginPath();
