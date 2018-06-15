@@ -245,14 +245,15 @@ Sat.prototype.appendCascadeCategories = function(
   let categoryDiv = document.getElementById('custom_categories');
   // build new category select window
   let child;
-  if (subcategories[0].subcategories) {
+  // if there is subcategory, this node is parent node, grow tree
+  if (subcategories[selectedIdx].subcategories) {
     child = document.createElement('select');
     child.id = 'parent_select_' + level;
     child.classList.add('form-control');
     child.size = Math.min(10, subcategories.length);
     child.style = 'font-size:15px';
   } else {
-    // clean up old options
+    // this node is leaf, clean up old options
     let oldCategorySelect = document.getElementById('category_select');
     if (oldCategorySelect) {
       oldCategorySelect.innerHTML = '';
@@ -290,11 +291,28 @@ Sat.prototype.appendCascadeCategories = function(
         categorySelect.innerHTML = thisLevel.innerHTML;
         categorySelect.size = thisLevel.size;
         categorySelect.selectedIndex = thisLevel.selectedIndex;
-        // TODO: need to tell satItem about this category change
-        // otherwise cannot handle arbitrary category tree input
         thisLevel.remove();
       }
       self.appendCascadeCategories(newSubcategories, level + 1);
+      if (self.currentItem) {
+        self.currentItem._changeSelectedLabelCategory();
+      }
+    });
+  } else {
+    $('#category_select').change(function() {
+      let tempIdx = document.getElementById('category_select').selectedIndex;
+      let level = 0;
+      let newSubcategories = self.categories;
+      while (document.getElementById('parent_select_' + level)) {
+        let idx = document.getElementById('parent_select_' + level)
+          .selectedIndex;
+        newSubcategories = newSubcategories[idx].subcategories;
+        level++;
+      }
+      if (newSubcategories[tempIdx].subcategories) {
+        self.appendCascadeCategories(newSubcategories, level, tempIdx);
+      }
+      self.currentItem._changeSelectedLabelCategory();
     });
   }
   this.appendCascadeCategories(
@@ -504,6 +522,12 @@ SatItem.prototype.setActive = function(active) {
     self.sat.addEvent('end labeling', self.index);
   }
 };
+
+/**
+ * Abstract function that should be implemented by child
+ * See SatImage for example
+ */
+SatItem.prototype._changeSelectedLabelCategory = function() {};
 
 /**
  * Called when this item is loaded.

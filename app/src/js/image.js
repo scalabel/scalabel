@@ -328,23 +328,6 @@ SatImage.prototype.setActive = function(active) {
       }
     }
 
-    $('#category_select').change(function() {
-      let tempIdx = document.getElementById('category_select').selectedIndex;
-      let level = 0;
-      let newSubcategories = self.sat.categories;
-      while (document.getElementById('parent_select_' + level)) {
-        let idx = document.getElementById('parent_select_' + level)
-          .selectedIndex;
-        newSubcategories = newSubcategories[idx].subcategories;
-        level++;
-      }
-      if (newSubcategories[tempIdx].subcategories) {
-        self.sat.appendCascadeCategories(newSubcategories, level, tempIdx);
-      }
-      self._changeCat();
-      self.redrawMainCanvas();
-    });
-
     // class specific tool box
     self.sat.LabelType.setToolBox(self);
 
@@ -851,12 +834,13 @@ SatImage.prototype.pushToHiddenMap = function(shapes) {
 /**
  * Called when the selected category is changed.
  */
-SatImage.prototype._changeCat = function() {
+SatImage.prototype._changeSelectedLabelCategory = function() {
   let self = this;
   if (self.selectedLabel) {
     self.catSel = document.getElementById('category_select');
     let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
     self.selectedLabel.categoryPath = option;
+    self.redrawMainCanvas();
   }
 };
 
