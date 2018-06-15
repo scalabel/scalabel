@@ -12,6 +12,11 @@ $(document).ready(function() {
         if (x.response) {
           alert(x.response);
         } else {
+          let projectName = document.getElementById('project_name');
+          projectName.value = projectName.value.replace(
+            new RegExp(' ', 'g'), '_');
+          dashboard[0].href = './dashboard?project_name=' + projectName.value;
+          vendor[0].href = './vendor?project_name=' + projectName.value;
           dashboard.show();
           vendor.show();
         }

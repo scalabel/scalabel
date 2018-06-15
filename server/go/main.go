@@ -36,8 +36,8 @@ func (env Env) CreatePath() string {
 	return path.Join(env.AppDir(), "control/create.html")
 }
 
-func (env Env) MonitorPath() string {
-	return path.Join(env.AppDir(), "control/monitor.html")
+func (env Env) DashboardPath() string {
+	return path.Join(env.AppDir(), "control/dashboard.html")
 }
 
 func (env Env) VendorPath() string {

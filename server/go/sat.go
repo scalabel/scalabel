@@ -42,12 +42,12 @@ type Task struct {
 
 // The actual assignment of a task to an annotator
 type Assignment struct {
-	Task      Task              `json:"task" yaml:"task"`
-	Labels    []Label           `json:"labels" yaml:"labels"`
-	Tracks    []Label           `json:"tracks" yaml:"tracks"`
-	WorkerId  int               `json:"workerId" yaml:"workerId"`
-	Events    []Event           `json:"events" yaml:"events"`
-	AssignmentInfo AssignmentInfo    `json:"assignmentInfo" yaml:"AssignmentInfo"`
+	Task     Task           `json:"task" yaml:"task"`
+	Labels   []Label        `json:"labels" yaml:"labels"`
+	Tracks   []Label        `json:"tracks" yaml:"tracks"`
+	WorkerId int            `json:"workerId" yaml:"workerId"`
+	Events   []Event        `json:"events" yaml:"events"`
+	Info     AssignmentInfo `json:"info" yaml:"info"`
 }
 
 // Info describing an assignment
@@ -104,6 +104,12 @@ type Event struct {
 	Position   []float32 `json:"position" yaml:"position"`
 }
 
+// Contains all the info needed in the dashboards
+type DashboardContents struct {
+	Project     Project      `json:"project" yaml:"project"`
+	Assignments []Assignment `json:"assignment" yaml:"assignment"`
+}
+
 // Function type for handlers
 type HandleFunc func(http.ResponseWriter, *http.Request)
 
@@ -135,14 +141,19 @@ func WrapHandleFunc(fn HandleFunc) HandleFunc {
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert assignment links
 	tmpl, err := template.ParseFiles(
-		path.Join(env.MonitorPath()))
+		path.Join(env.DashboardPath()))
 	if err != nil {
 		Error.Println(err)
 		http.NotFound(w, r)
 		return
 	}
-	Info.Println(GetAssignments())
-	tmpl.Execute(w, GetAssignments())
+	projectName := r.FormValue("project_name")
+	dashboardContents := DashboardContents{
+		Project:     GetProject(projectName),
+		Assignments: GetAssignmentsInProject(projectName),
+	}
+	Info.Println(dashboardContents.Assignments) // project is too verbose to log
+	tmpl.Execute(w, dashboardContents)
 }
 
 func vendorHandler(w http.ResponseWriter, r *http.Request) {
@@ -152,8 +163,13 @@ func vendorHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	Info.Println(GetAssignments())
-	tmpl.Execute(w, GetAssignments())
+	projectName := r.FormValue("project_name")
+	dashboardContents := DashboardContents{
+		Project:     GetProject(projectName),
+		Assignments: GetAssignmentsInProject(projectName),
+	}
+	Info.Println(dashboardContents.Assignments) // project is too verbose to log
+	tmpl.Execute(w, dashboardContents)
 }
 
 // TODO: split this function up
@@ -247,7 +263,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	var project = Project{
-		Name:          projectName,
+		Name:          r.FormValue("project_name"),
 		ItemType:      r.FormValue("item_type"),
 		LabelType:     r.FormValue("label_type"),
 		Items:         items,
@@ -256,6 +272,15 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Attributes:    attributes,
 		VendorId:      vendorId,
 		VideoMetaData: vmd,
+	}
+	// Save project to project folder
+	projectPath := project.GetPath()
+	projectJson, _ := json.MarshalIndent(project, "", "  ")
+	err = ioutil.WriteFile(projectPath, projectJson, 0644)
+	if err != nil {
+		Error.Println("Failed to save project file of", project.Name)
+	} else {
+		Info.Println("Saving project file of", project.Name)
 	}
 
 	index := 0
@@ -281,13 +306,13 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		workerId, _ := strconv.Atoi(r.FormValue("worker_id"))
 		assignment := Assignment {
-			Task: task,
+			Task:     task,
 			WorkerId: workerId,
-			AssignmentInfo: assignmentInfo,
+			Info:     assignmentInfo,
 		}
 
 		// Save task to task folder
-		taskPath := task.GetTaskPath()
+		taskPath := task.GetPath()
 		taskJson, _ := json.MarshalIndent(task, "", "  ")
 		err = ioutil.WriteFile(taskPath, taskJson, 0644)
 		if err != nil {
@@ -298,7 +323,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 				task.Index)
 		}
 		// Save assignment to assignment folder
-		assignmentPath := assignment.GetAssignmentPath()
+		assignmentPath := assignment.GetPath()
 		assignmentJson, _ := json.MarshalIndent(assignment, "", "  ")
 		err = ioutil.WriteFile(assignmentPath, assignmentJson, 0644)
 		if err != nil {
@@ -327,13 +352,13 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			workerId, _ := strconv.Atoi(r.FormValue("worker_id"))
 			assignment := Assignment{
-				Task: task,
+				Task:     task,
 				WorkerId: workerId,
-				AssignmentInfo: assignmentInfo,
+				Info:     assignmentInfo,
 			}
 
 			// Save task to task folder
-			taskPath := task.GetTaskPath()
+			taskPath := task.GetPath()
 			taskJson, _ := json.MarshalIndent(task, "", "  ")
 			err = ioutil.WriteFile(taskPath, taskJson, 0644)
 			if err != nil {
@@ -344,7 +369,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 					task.Index)
 			}
 			// Save assignment to assignment folder
-			assignmentPath := assignment.GetAssignmentPath()
+			assignmentPath := assignment.GetPath()
 			assignmentJson, _ := json.MarshalIndent(assignment, "", "  ")
 			err = ioutil.WriteFile(assignmentPath, assignmentJson, 0644)
 			if err != nil {

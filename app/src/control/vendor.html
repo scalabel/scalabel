@@ -37,6 +37,30 @@
                     <!-- /.panel-heading -->
                     <div class="panel-body">
                         <!-- /.table-responsive -->
+                        <table width="100%"
+                               class="table table-striped table-bordered table-hover"
+                               id="project_table">
+                            <thead>
+                            <tr>
+                                <th>Project Name</th>
+                                <th>Item Type</th>
+                                <th>Label Type</th>
+                                <th># Items</th>
+                                <th>Task Size</th>
+                                <th># Categories</th>
+                                <th># Attributes</th>
+                            </tr>
+                            <tr>
+                                <th>{{ .Project.Name }}</th>
+                                <th>{{ .Project.ItemType }}</th>
+                                <th>{{ .Project.LabelType }}</th>
+                                <th>{{ len .Project.Items }}</th>
+                                <th>{{ .Project.TaskSize }}</th>
+                                <th>{{ len .Project.Categories }}</th>
+                                <th>{{ len .Project.Attributes }}</th>
+                            </tr>
+                            </thead>
+                        </table>
                         <div class="well">
                             <h4>Downloads</h4>
                             <p>Instructions: Task URLs are to be distributed to workers.</p>
@@ -49,42 +73,35 @@
                                id="main_table">
                             <thead>
                             <tr>
-                                <th>Project Name</th>
-                                <th>Assignment #</th>
-                                <th># Labeled Images</th>
+                                <th>Task Index</th>
+                                <th># Labeled items</th>
                                 <th># Submissions</th>
                                 <th>Task Link</th>
-                                <th>Submission Time</th>
-                                <th>Comments</th>
+                                <th>Task Result</th>
+                                <!--TODO: Comments-->
                             </tr>
                             </thead>
                             <tbody>
                                 <!-- iterate over tasks -->
-                                {{ range $key, $value := . }}
+                                {{ range $key, $value := .Assignments }}
                                 <tr>
-                                    <th>
-                                        {{ $value.Task.ProjectName }}
-                                    </th>
                                     <th>
                                         {{ $value.Task.Index }}
                                     </th>
                                     <th>
-                                        <!--TODO-->
+                                        {{ $value.Info.LabeledItemsCount }}
                                     </th>
                                     <th>
-                                        <!--TODO-->
+                                        {{ $value.Info.SubmissionsCount }}
                                     </th>
                                     <th>
                                         <a
-                                            href="./{{ $value.Task.HandlerUrl }}?project_name={{ $value.Task.ProjectName }}&task_index={{ $value.Task.Index }}">
+                                                href="./{{ $value.Task.HandlerUrl }}?project_name={{ $.Project.Name }}&task_index={{ $value.Task.Index }}">
                                             task link
                                         </a>
                                     </th>
                                     <th>
-                                        <!--TODO-->
-                                    </th>
-                                    <th>
-                                        <!--TODO-->
+                                        <!-- TODO: result -->
                                     </th>
                                 </tr>
                                 {{ end }}

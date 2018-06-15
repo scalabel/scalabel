@@ -40,11 +40,12 @@
                     <label for="project_name">Project Name*</label>
                     <input required type="text" class="form-control"
                            style="width:300px" id="project_name"
-                           name="project_name" required>
+                           name="project_name" required
+                           pattern="[A-Za-z0-9_-]*"
+                           oninvalid="setCustomValidity(
+                             'Only letters, numbers, _ and - are permitted.')"
+                           onchange="try{setCustomValidity('')}catch(e){}">
                     <!--<div class="help-block with-errors">Minimum of 6 characters</div>-->
-                    <div class="valid-feedback">
-                        Looks good!
-                    </div>
                 </div>
                 <div class="form-group">
                     <label for="item_type">Item Type*</label>
@@ -96,13 +97,13 @@
                 </div>
                 <div class="form-group">
                     <label for="task_size">Task Size</label>
-                    <input required type="text" class="form-control"
+                    <input required type="number" min="1" class="form-control"
                            style="width:300px" id="task_size" name="task_size">
                 </div>
                 <!-- TODO: check that this is valid -->
                 <div class="form-group">
                     <label for="vendor_id">Vendor ID</label>
-                    <input type="text" class="form-control"
+                    <input type="number" class="form-control"
                            style="width:300px" id="vendor_id" name="vendor_id">
                 </div>
 

@@ -37,6 +37,30 @@
                     <!-- /.panel-heading -->
                     <div class="panel-body">
                         <!-- /.table-responsive -->
+                        <table width="100%"
+                               class="table table-striped table-bordered table-hover"
+                               id="project_table">
+                            <thead>
+                            <tr>
+                                <th>Project Name</th>
+                                <th>Item Type</th>
+                                <th>Label Type</th>
+                                <th># Items</th>
+                                <th>Task Size</th>
+                                <th># Categories</th>
+                                <th># Attributes</th>
+                            </tr>
+                            <tr>
+                                <th>{{ .Project.Name }}</th>
+                                <th>{{ .Project.ItemType }}</th>
+                                <th>{{ .Project.LabelType }}</th>
+                                <th>{{ len .Project.Items }}</th>
+                                <th>{{ .Project.TaskSize }}</th>
+                                <th>{{ len .Project.Categories }}</th>
+                                <th>{{ len .Project.Attributes }}</th>
+                            </tr>
+                            </thead>
+                        </table>
                         <div class="well">
                             <h4>Downloads</h4>
                             <p>Instructions: Assignment URLs are distributed to
@@ -56,37 +80,37 @@
                                id="main_table">
                             <thead>
                             <tr>
-                                <th>Assignment #</th>
-                                <th># Labeled images</th>
+                                <th>Task Index</th>
+                                <th># Labeled items</th>
                                 <th># Submissions</th>
                                 <th>Task Link</th>
                                 <th>Task Result</th>
                             </tr>
                             </thead>
                             <tbody>
-                                <!-- iterate over tasks -->
-                                {{ range $key, $value := . }}
-                                <tr>
-                                    <th>
-                                        {{ $value.Task.Index }}
-                                    </th>
-                                    <th>
-                                        <!--TODO-->
-                                    </th>
-                                    <th>
-                                        <!--TODO-->
-                                    </th>
-                                    <th>
-                                        <a
-                                            href="./{{ $value.Task.HandlerUrl }}?project_name={{ $value.Task.ProjectName }}&task_index={{ $value.Task.Index }}">
-                                            task link
-                                        </a>
-                                    </th>
-                                    <th>
-                                        <!-- TODO: result -->
-                                    </th>
-                                </tr>
-                                {{ end }}
+                            <!-- iterate over tasks -->
+                            {{ range $key, $value := .Assignments }}
+                            <tr>
+                                <th>
+                                    {{ $value.Task.Index }}
+                                </th>
+                                <th>
+                                    {{ $value.Info.LabeledItemsCount }}
+                                </th>
+                                <th>
+                                    {{ $value.Info.SubmissionsCount }}
+                                </th>
+                                <th>
+                                    <a
+                                            href="./{{ $value.Task.HandlerUrl }}?project_name={{ $.Project.Name }}&task_index={{ $value.Task.Index }}">
+                                        task link
+                                    </a>
+                                </th>
+                                <th>
+                                    <!-- TODO: result -->
+                                </th>
+                            </tr>
+                            {{ end }}
                             </tbody>
                         </table>
                     </div>
