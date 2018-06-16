@@ -229,19 +229,31 @@ func Min(x, y int) int {
 	return y
 }
 
+// Behavior is similar to path stem in Python
+func PathStem(name string) string {
+	name = path.Base(name)
+	dotIndex := strings.LastIndex(name, ".")
+	if dotIndex < 0 {
+		return name
+	} else {
+		return name[:dotIndex]
+	}
+}
+
 // check duplicated project name
 // return false if duplicated
-func checkProjectName(projectName string) string {
+func CheckProjectName(projectName string) string {
 	var newName = strings.Replace(projectName, " ", "_", -1)
-	dir := path.Join(env.DataDir, "tasks")
+	dir := path.Join(env.DataDir, "projects")
+	os.MkdirAll(dir, 0777)
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return newName
 	}
 
 	for _, f := range files {
-		if f.Name() == newName {
-			Error.Println("Project Name - " + projectName + " - already exists.")
+		if PathStem(f.Name()) == newName {
+			Error.Printf("Project Name \"%s\" already exists.", projectName)
 			return ""
 		}
 	}

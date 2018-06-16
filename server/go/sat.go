@@ -179,7 +179,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	var projectName = checkProjectName(r.FormValue("project_name"))
+	var projectName = CheckProjectName(r.FormValue("project_name"))
 	if projectName == "" {
 		w.Write([]byte("Project Name already exists."))
 		return
