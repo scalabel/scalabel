@@ -309,14 +309,14 @@ Seg2d.prototype.handleQuickdraw = function() {
 
 /**
  * Load label data from a encoded string
- * @param {object} data: json representation of label data.
+ * @param {object} json: json representation of label.
  */
-Seg2d.prototype.decodeLabelData = function(data) {
-  this.id = data.id;
+Seg2d.prototype.fromJsonVariables = function(json) {
+  this.decodeBaseJsonVariables(json);
   this.polys = [];
-  this.type = data.type;
-  if (data.polys) {
-    for (let polyJson of data.polys) {
+  this.type = json.data.type;
+  if (json.data.polys) {
+    for (let polyJson of json.data.polys) {
       if (this.type === SegTypes.POLYGON) {
         this.addPolyline(Polygon.fromJson(polyJson));
       } else if (this.type === SegTypes.PATH) {
@@ -330,16 +330,17 @@ Seg2d.prototype.decodeLabelData = function(data) {
  * Encode the label data into a json object.
  * @return {object} - the encoded json object.
  */
-Seg2d.prototype.encodeLabelData = function() {
+Seg2d.prototype.toJson = function() {
+  let json = this.encodeBaseJson();
   let polysJson = [];
   for (let poly of this.polys) {
     polysJson = polysJson.concat(poly.toJson());
   }
-  return {
-    id: this.id,
+  json.data = {
     type: this.type,
     polys: polysJson,
   };
+  return json;
 };
 
 /**

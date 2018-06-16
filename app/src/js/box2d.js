@@ -98,23 +98,26 @@ Box2d.prototype.releaseAsTargeted = function() {
 
 /**
  * Load label data from a encoded string
- * @param {object} data: json representation of label data.
+ * @param {object} json: json representation of label json.
  */
-Box2d.prototype.decodeLabelData = function(data) {
-  this.rect.setRect(data.x, data.y, data.w, data.h);
+Box2d.prototype.fromJsonVariables = function(json) {
+  this.decodeBaseJsonVariables(json);
+  this.rect.setRect(json.data.x, json.data.y, json.data.w, json.data.h);
 };
 
 /**
  * Encode the label data into a json object.
  * @return {object} - the encoded json object.
  */
-Box2d.prototype.encodeLabelData = function() {
-  return {
+Box2d.prototype.toJson = function() {
+  let json = this.encodeBaseJson();
+  json.data = {
     x: this.rect.x,
     y: this.rect.y,
     w: this.rect.w,
     h: this.rect.h,
   };
+  return json;
 };
 
 /**

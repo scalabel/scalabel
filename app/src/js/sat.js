@@ -752,13 +752,7 @@ SatLabel.prototype.encodeBaseJson = function() {
   // TODO: remove
   json.keyframe = self.keyframe;
 
-  // get label data
-  json.data = self.encodeLabelData();
   return json;
-};
-
-SatLabel.prototype.encodeLabelData = function() {
-  // Specific to each label type
 };
 
 /**
@@ -777,13 +771,6 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   self.attributes = json.attributes;
   // TODO: remove
   self.keyframe = json.keyframe;
-  if (json.data) {
-    self.decodeLabelData(json.data);
-  }
-};
-
-SatLabel.prototype.decodeLabelData = function(data) { // eslint-disable-line
-  // Specific to each label type
 };
 
 SatLabel.prototype.decodeBaseJsonPointers = function(json) {
