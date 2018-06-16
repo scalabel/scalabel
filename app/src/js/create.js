@@ -39,7 +39,7 @@ itemSelect.onchange = function() {
     labelSelect.options[i].disabled = true;
   }
   labelSelect.selectedIndex = 0;
-  // enable just the ones that are valid
+  // enable just the labels that are valid
   if (itemSelect.value === 'image') {
     enableOption(labelSelect, 'box2d');
     enableOption(labelSelect, 'segmentation');
@@ -48,6 +48,15 @@ itemSelect.onchange = function() {
     enableOption(labelSelect, 'box2d');
   } else if (itemSelect.value === 'pointcloud') {
     enableOption(labelSelect, 'box3d');
+  }
+  // add or remove the frame rate box
+  let frameRate = document.getElementById('frame_rate');
+  if (itemSelect.value === 'video') {
+    frameRate.required = true;
+    frameRate.parentNode.style.display = '';
+  } else {
+    frameRate.required = false;
+    frameRate.parentNode.style.display = 'none';
   }
 };
 

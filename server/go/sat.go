@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path"
 	"strconv"
 	"log"
@@ -200,58 +199,22 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var vmd VideoMetaData
 	if itemType == "video" {
-		var frameDirectoryItems []Item
-		err = yaml.Unmarshal(itemFileBuf.Bytes(), &frameDirectoryItems)
-		if err != nil {
-			Error.Println(err)
-		}
-		// in video, we only consider the first item, and
-		//   the item url is the frame directory
-		frameUrl := frameDirectoryItems[0].Url
-		framePath := path.Join(env.DataDir, frameUrl[1:len(frameUrl)])
-		// if no frames directory for this vid, throw error
-		_, err := os.Stat(framePath)
-		if err != nil {
-			Error.Println(framePath + " does not exist. Has video been split into frames?")
-			http.NotFound(w, r)
-			return
-		}
-		// get the video's metadata
-		mdContents, _ := ioutil.ReadFile(path.Join(framePath, "metadata.json"))
-		json.Unmarshal(mdContents, &vmd)
-		// get the URLs of all frame images
-		numFrames, err := strconv.Atoi(vmd.NumFrames)
-		if err != nil {
-			Error.Println(err)
-		}
-		for i := 0; i < numFrames; i++ {
-			frameString := strconv.Itoa(i + 1)
-			for len(frameString) < 7 {
-				frameString = "0" + frameString
-			}
-			frameItem := Item{
-				Url:   path.Join(frameUrl, "f-"+frameString+".jpg"),
-				Index: i,
-			}
-			items = append(items, frameItem)
-		}
-	} else {
-		err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
-		if err != nil {
-			Error.Println(err)
-		}
-		for i := 0; i < len(items); i++ {
-			items[i].Index = i
-		}
+		vmd.TBR = r.FormValue("frame_rate")
+	}
+
+	err = yaml.Unmarshal(itemFileBuf.Bytes(), &items)
+	if err != nil {
+		Error.Println(err)
+	}
+	for i := 0; i < len(items); i++ {
+		items[i].Index = i
 	}
 
 	// categories YAML
 	var categories = getCategories(r)
 
-
 	// attributes YAML
 	var attributes = getAttributes(r)
-
 
 	// parse the task size
 	taskSize, err := strconv.Atoi(r.FormValue("task_size"))

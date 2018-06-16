@@ -48,7 +48,7 @@
                     <!--<div class="help-block with-errors">Minimum of 6 characters</div>-->
                 </div>
                 <div class="form-group">
-                    <label for="item_type">Item Type*</label>
+                    <label for="item_type">Item Type</label>
                     <div>
                         <select id="item_type" name="item_type" required>
                             <option value="">&lt;select an
@@ -59,8 +59,14 @@
                         </select>
                     </div>
                 </div>
+                <div class="form-group" style="display: none">
+                    <label for="frame_rate">Frame Rate</label>
+                    <input required type="number" min="1" max="60"
+                           class="form-control" style="width:300px"
+                           id="frame_rate" name="frame_rate" value=5>
+                </div>
                 <div class="form-group">
-                    <label for="label_type">Label Type*</label>
+                    <label for="label_type">Label Type</label>
                     <div>
                         <select id="label_type" name="label_type" required>
                             <option value="">&lt;select an
