@@ -55,8 +55,7 @@ def prepare_data(args):
     file_list = sorted(glob.glob(join(args.tar_dir, '*.jpg')))
 
     yaml_items = [
-        {'groundTruth': [],
-         'url': os.path.abspath(img) if not args.web_root else
+        {'url': os.path.abspath(img) if not args.web_root else
             join(args.web_root, os.path.basename(img))}
         for img in file_list]
 
