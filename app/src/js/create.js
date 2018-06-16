@@ -51,12 +51,17 @@ itemSelect.onchange = function() {
   }
   // add or remove the frame rate box
   let frameRate = document.getElementById('frame_rate');
+  let taskSize = document.getElementById(('task_size'));
   if (itemSelect.value === 'video') {
     frameRate.required = true;
     frameRate.parentNode.style.display = '';
+    taskSize.required = false;
+    taskSize.parentNode.style.display = 'none';
   } else {
     frameRate.required = false;
     frameRate.parentNode.style.display = 'none';
+    taskSize.required = true;
+    taskSize.parentNode.style.display = '';
   }
 };
 

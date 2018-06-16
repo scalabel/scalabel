@@ -16,17 +16,12 @@ type VideoMetaData struct {
 	Resolution string `json:"resolution"`
 }
 
+// DEPRECATED
 func videoLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert frames location
 	tmpl, err := template.ParseFiles(env.VideoPath())
 	if err != nil {
 		Error.Println(err)
 	}
-	// get task index from the URL
-	projectName := r.URL.Query()["project_name"][0]
-	taskIndex := r.URL.Query()["task_index"][0]
-
-	assignment := GetAssignment(projectName, taskIndex)
-	Info.Println(assignment)
-	tmpl.Execute(w, assignment)
+	executeLabelingTemplate(w, r, tmpl)
 }

@@ -222,7 +222,7 @@ Sat.prototype.load = function() {
   // send the request to the back end
   let request = JSON.stringify({'task': {
     'index': self.taskIndex,
-    'projectName': self.projectName,
+    'projectOptions': {'name': self.projectName},
   }});
   xhr.open('POST', './postLoadAssignment', false);
   xhr.send(request);
@@ -441,8 +441,8 @@ Sat.prototype.fromJson = function(json) {
  */
 Sat.prototype.decodeBaseJson = function(json) {
   let self = this;
-  self.handlerUrl = json.task.handlerUrl;
-  self.pageTitle = json.task.pageTitle;
+  self.handlerUrl = json.task.projectOptions.handlerUrl;
+  self.pageTitle = json.task.projectOptions.pageTitle;
   document.title = self.pageTitle;
   document.getElementById('page-title').textContent = self.pageTitle;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
@@ -459,11 +459,10 @@ Sat.prototype.decodeBaseJson = function(json) {
     newItem.fromJson(json.task.items[i]);
   }
 
-  self.categories = json.task.categories;
-  self.attributes = json.task.attributes;
+  self.categories = json.task.projectOptions.categories;
+  self.attributes = json.task.projectOptions.attributes;
   // self.assignmentId = json.assignmentId;
-  self.projectName = json.task.projectName;
-  self.assignmentInfo = json.assignmentInfo;
+  self.projectName = json.task.projectOptions.name;
 
   self.currentItem = self.items[0];
 

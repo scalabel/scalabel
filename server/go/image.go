@@ -5,44 +5,30 @@ import (
 	"net/http"
 )
 
+// TODO: consolidate all labeling handlers
 func box2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles(env.Box2dPath())
+	Info.Println(env.Box2dPath())
 	if err != nil {
 		Error.Println(err)
 	}
-	// get task name from the URL
-	projectName := r.URL.Query()["project_name"][0]
-	taskIndex := r.URL.Query()["task_index"][0]
-
-	assignment := GetAssignment(projectName, taskIndex)
-	Info.Println(assignment)
-	tmpl.Execute(w, assignment)
+	executeLabelingTemplate(w, r, tmpl)
 }
 
+// DEPRECATED
 func seg2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles(env.Seg2dPath())
 	if err != nil {
 		Error.Println(err)
 	}
-	// get task name from the URL
-	projectName := r.URL.Query()["project_name"][0]
-	taskIndex := r.URL.Query()["task_index"][0]
-
-	assignment := GetAssignment(projectName, taskIndex)
-	Info.Println(assignment)
-	tmpl.Execute(w, assignment)
+	executeLabelingTemplate(w, r, tmpl)
 }
 
+// DEPRECATED
 func lane2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles(env.Lane2dPath())
 	if err != nil {
 		Error.Println(err)
 	}
-	// get task name from the URL
-	projectName := r.URL.Query()["project_name"][0]
-	taskIndex := r.URL.Query()["task_index"][0]
-
-	assignment := GetAssignment(projectName, taskIndex)
-	Info.Println(assignment)
-	tmpl.Execute(w, assignment)
+	executeLabelingTemplate(w, r, tmpl)
 }

@@ -23,13 +23,13 @@ var (
 // Stores the config info found in config.yml
 type Env struct {
 	Port        int    `yaml:"port"`
-	DataDir     string `yaml:"dataDir"`
-	ProjectPath string `yaml:"projectPath"`
-	AppSubDir   string `yaml:"AppSubDir"`
+	ProjectsDir string `yaml:"projectsDir"`
+	SourcePath  string `yaml:"sourcePath"`
+	AppSubDir   string `yaml:"appSubDir"`
 }
 
 func (env Env) AppDir() string {
-	return path.Join(env.ProjectPath, env.AppSubDir)
+	return path.Join(env.SourcePath, env.AppSubDir)
 }
 
 func (env Env) CreatePath() string {
@@ -114,22 +114,18 @@ var env Env
 func main() {
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 
-	env = *NewEnv()
+	Error.SetFlags(log.LstdFlags | log.Llongfile)
 
-	// serve the frames directory
-	fileServer := http.FileServer(http.Dir(path.Join(env.DataDir, "/frames")))
-	strippedHandler := http.StripPrefix("/frames/", fileServer)
-	http.Handle("/frames/", strippedHandler)
+	env = *NewEnv()
 
 	// flow control handlers
 	//http.HandleFunc("/", parse(indexHandler))
 	http.HandleFunc("/", WrapHandler(http.FileServer(
-		http.Dir(path.Join(env.ProjectPath, env.AppSubDir)))))
+		http.Dir(path.Join(env.SourcePath, env.AppSubDir)))))
 	http.HandleFunc("/dashboard", WrapHandleFunc(dashboardHandler))
 	http.HandleFunc("/vendor", WrapHandleFunc(vendorHandler))
 	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))
 	http.HandleFunc("/postSave", WrapHandleFunc(postSaveHandler))
-	http.HandleFunc("/postSubmission", WrapHandleFunc(postSubmissionHandler))
 	http.HandleFunc("/postLoadAssignment",
 		WrapHandleFunc(postLoadAssignmentHandler))
 

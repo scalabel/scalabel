@@ -103,7 +103,7 @@
                         <p>Label Category</p>
                     </div>
                     <div id="custom_attributes">
-                        {{ range $key, $value := .Task.Attributes }}
+                        {{ range $key, $value := .Task.ProjectOptions.Attributes }}
                         <div class="form-group"
                              id="custom_attribute_{{ $value.Name }}_div">
                             <input id="custom_attribute_{{ $value.Name }}"

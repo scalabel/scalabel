@@ -11,13 +11,16 @@ import (
 	"strings"
 )
 
+// TODO: use actual worker ID
+const DEFAULT_WORKER_ID = "default_worker"
+
 func GetProject(projectName string) Project {
-	projectsDirectoryPath := path.Join(env.DataDir, "projects")
+	projectsDirectoryPath := path.Join(env.ProjectsDir)
 	err := os.MkdirAll(projectsDirectoryPath, 0777)
 	if err != nil {
 		Error.Println(err)
 	}
-	projectFilePath := path.Join(env.DataDir, "projects", projectName+".json")
+	projectFilePath := path.Join(env.ProjectsDir, projectName, "project.json")
 	projectFileContents, err := ioutil.ReadFile(projectFilePath)
 	if err != nil {
 		Error.Println(err)
@@ -30,8 +33,9 @@ func GetProject(projectName string) Project {
 	return project
 }
 
+// DEPRECATED
 func GetProjects() []Project {
-	projectsDirectoryPath := path.Join(env.DataDir, "projects")
+	projectsDirectoryPath := path.Join(env.ProjectsDir, "projects")
 	err := os.MkdirAll(projectsDirectoryPath, 0777)
 	if err != nil {
 		Error.Println(err)
@@ -61,9 +65,50 @@ func GetProjects() []Project {
 	return projects
 }
 
-func GetAssignment(projectName string, taskIndex string) Assignment {
-	assignmentPath := path.Join(env.DataDir, "assignments", projectName,
-		taskIndex+".json")
+func GetTask(projectName string, index string) Task {
+	taskPath := path.Join(env.ProjectsDir, projectName, "tasks", index+".json")
+	taskFileContents, err := ioutil.ReadFile(taskPath)
+	if err != nil {
+		Error.Println(err)
+	}
+	task := Task{}
+	err = json.Unmarshal(taskFileContents, &task)
+	if err != nil {
+		Error.Println(err)
+	}
+	return task
+}
+
+func GetTasksInProject(projectName string) []Task {
+	projectTasksPath := path.Join(env.ProjectsDir, projectName, "tasks")
+	os.MkdirAll(projectTasksPath, 0777)
+	tasksDirectoryContents, err := ioutil.ReadDir(projectTasksPath)
+	if err != nil {
+		Error.Println(err)
+	}
+	tasks := []Task{}
+	for _, taskFile := range tasksDirectoryContents {
+		if len(taskFile.Name()) > 5 &&
+			path.Ext(taskFile.Name()) == ".json" {
+			taskFileContents, err := ioutil.ReadFile(
+				path.Join(projectTasksPath, taskFile.Name()))
+			if err != nil {
+				Error.Println(err)
+			}
+			task := Task{}
+			err = json.Unmarshal(taskFileContents, &task)
+			if err != nil {
+				Error.Println(err)
+			}
+			tasks = append(tasks, task)
+		}
+	}
+	return tasks
+}
+
+func GetAssignment(projectName string, taskIndex string, workerId string) Assignment {
+	assignmentPath := path.Join(env.ProjectsDir, projectName, "assignments",
+		taskIndex, workerId+".json")
 	assignmentFileContents, err := ioutil.ReadFile(assignmentPath)
 	if err != nil {
 		Error.Println(err)
@@ -73,32 +118,20 @@ func GetAssignment(projectName string, taskIndex string) Assignment {
 	return assignment
 }
 
-func GetAssignmentsInProject(projectName string) []Assignment {
-	projectAssignmentsPath := path.Join(env.DataDir, "assignments",
-		projectName)
-	assignmentsDirectoryContents, err := ioutil.ReadDir(projectAssignmentsPath)
-	if err != nil {
-		Error.Println(err)
+func CreateAssignment(projectName string, taskIndex string, workerId string) Assignment {
+	task := GetTask(projectName, taskIndex)
+	assignment := Assignment{
+		Task: task,
+		WorkerId: workerId,
+		StartTime: recordTimestamp(),
 	}
-	assignments := []Assignment{}
-	for _, assignmentFile := range assignmentsDirectoryContents {
-		if len(assignmentFile.Name()) > 5 &&
-			path.Ext(assignmentFile.Name()) == ".json" {
-			assignmentFileContents, err := ioutil.ReadFile(
-				path.Join(projectAssignmentsPath, assignmentFile.Name()))
-			if err != nil {
-				Error.Println(err)
-			}
-			assignment := Assignment{}
-			json.Unmarshal(assignmentFileContents, &assignment)
-			assignments = append(assignments, assignment)
-		}
-	}
-	return assignments
+	assignment.Initialize()
+	return assignment
 }
 
+// DEPRECATED
 func GetAssignments() []Assignment {
-	assignmentsDirectoryPath := path.Join(env.DataDir, "assignments")
+	assignmentsDirectoryPath := path.Join(env.ProjectsDir, "assignments")
 	assignmentsDirectoryContents, err := ioutil.ReadDir(
 		assignmentsDirectoryPath)
 	if err != nil {
@@ -107,7 +140,7 @@ func GetAssignments() []Assignment {
 	assignments := []Assignment{}
 	for _, projectDirectory := range assignmentsDirectoryContents {
 		if projectDirectory.IsDir() {
-			projectDirectoryPath := path.Join(env.DataDir, "assignments",
+			projectDirectoryPath := path.Join(env.ProjectsDir, "assignments",
 				projectDirectory.Name())
 			projectDirectoryContents, err := ioutil.ReadDir(
 				projectDirectoryPath)
@@ -135,62 +168,31 @@ func GetAssignments() []Assignment {
 func GetDashboardContents(projectName string) DashboardContents {
 	return DashboardContents{
 		Project: GetProject(projectName),
-		Assignments: GetAssignmentsInProject(projectName),
+		Tasks: GetTasksInProject(projectName),
 	}
 }
 
-func (project *Project) GetPath() string {
-	return path.Join(
-		env.DataDir,
-		"projects",
-		project.Name+".json",
-	)
-}
-
-func (task *Task) GetPath() string {
-	filename := strconv.Itoa(task.Index)
-	dir := path.Join(
-		env.DataDir,
-		"tasks",
-		task.ProjectName,
-	)
-	os.MkdirAll(dir, 0777)
-	return path.Join(dir, filename+".json")
-}
-
-func (assignment *Assignment) GetPath() string {
-	filename := strconv.Itoa(assignment.Task.Index)
-	dir := path.Join(
-		env.DataDir,
-		"assignments",
-		assignment.Task.ProjectName,
-	)
-	os.MkdirAll(dir, 0777)
-	return path.Join(dir, filename+".json")
-}
-
-func GetHandlerUrl(project Project) string {
-	if project.ItemType == "image" {
-		if project.LabelType == "box2d" {
+func GetHandlerUrl(itemType string, labelType string) string {
+	switch itemType {
+	case "image":
+		switch labelType {
+		case "box2d":
 			return "2d_bbox_labeling"
-		}
-		if project.LabelType == "segmentation" {
+		case "segmentation":
 			return "2d_seg_labeling"
+		case "lane":
+			return "2d_lane_labeling"
+		default:
+			return "NO_VALID_HANDLER"
 		}
-		if project.LabelType == "lane" {
-        	return "2d_lane_labeling"
-        }
-	}
-	if project.ItemType == "video" {
-		if project.LabelType == "box2d" {
+	case "video":
+		switch labelType {
+		case "box2d":
 			return "video_bbox_labeling"
+		default:
+			return "NO_VALID_HANDLER"
 		}
 	}
-	// if project.ItemType == "pointcloud" {
-	// 	if project.LabelType == "box3d" {
-	// 		return "" // ???
-	// 	}
-	// }
 	return "NO_VALID_HANDLER"
 }
 
@@ -244,9 +246,8 @@ func PathStem(name string) string {
 // return false if duplicated
 func CheckProjectName(projectName string) string {
 	var newName = strings.Replace(projectName, " ", "_", -1)
-	dir := path.Join(env.DataDir, "projects")
-	os.MkdirAll(dir, 0777)
-	files, err := ioutil.ReadDir(dir)
+	os.MkdirAll(env.ProjectsDir, 0777)
+	files, err := ioutil.ReadDir(env.ProjectsDir)
 	if err != nil {
 		return newName
 	}

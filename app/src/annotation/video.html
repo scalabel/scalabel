@@ -99,7 +99,7 @@
                         <p>Label Category</p>
                     </div>
                     <div id="custom_attributes">
-                        {{ range $key, $value := .Task.Attributes }}
+                        {{ range $key, $value := .Task.ProjectOptions.Attributes }}
                         <div class="form-group"
                              id="custom_attribute_{{ $value.Name }}_div">
                             <input id="custom_attribute_{{ $value.Name }}"
@@ -136,7 +136,8 @@
                 </button>
                 <!-- video progress slider -->
                 <input id="video_slider" class="slider" type="range"
-                       min="1" max="{{ .Task.VideoMetaData.NumFrames }}"
+                       min="1"
+                       max="{{ .Task.ProjectOptions.VideoMetaData.NumFrames }}"
                        value="1"/>
             </div>
 
@@ -167,7 +168,7 @@
 </div>
 
 <!-- TEMPLATE VALUES -->
-<i id="frame_rate" class="template-val">{{.Task.VideoMetaData.TBR}}</i>
+<i id="frame_rate" class="template-val">{{ .Task.ProjectOptions.VideoMetaData.TBR }}</i>
 
 <!-- JAVASCRIPT -->
 
