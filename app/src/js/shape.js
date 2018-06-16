@@ -445,15 +445,8 @@ Polyline.prototype.centroidCoords = function() {
 };
 
 // check whether a curve is valid
-Polyline.prototype.isValid = function() {
-  return !(this.isSmall() || this.isSelfIntersect());
-};
-
-// check whether a curve is too short, return true if
-// the bounding box has size < 225
-Polyline.prototype.isSmall = function() {
-  let bbox = this.bbox;
-  return (bbox.max.x - bbox.min.x) * (bbox.max.y - bbox.min.y) < 225;
+Polyline.prototype.isValidShape = function() {
+  return !this.isSelfIntersect();
 };
 
 // return true if any two edges intersect with each other
@@ -983,10 +976,6 @@ Rect.prototype.copy = function() {
   return newRect;
 };
 
-Rect.prototype.isSmall = function() {
-  return Math.min(Math.abs(this.w), Math.abs(this.h)) < MIN_BOX_SIZE;
-};
-
 Rect.prototype.getHandleNo = function(handle) {
   for (let i = 0; i < this.vertices.length; i++) {
     if (handle === this.vertices[i]) {
@@ -1003,14 +992,6 @@ Rect.prototype.oppositeHandleNo = function(handleNo) {
 
 Rect.prototype.getVertex = function(index) {
   return this.vertices[(index + this.vertices.length) % this.vertices.length];
-};
-
-/**
- * Get whether this bounding box is valid.
- * @return {boolean} - True if the box is valid.
- */
-Rect.prototype.isValid = function() {
-  return !this.isSmall();
 };
 
 Rect.fromJson = function(json) {
@@ -1052,8 +1033,6 @@ const ALPHA_HIGH_FILL = 0.5;
 const ALPHA_LOW_FILL = 0.3;
 const ALPHA_LINE = 1.0;
 const ALPHA_CONTROL_POINT = 0.5;
-
-const MIN_BOX_SIZE = 15 * UP_RES_RATIO;
 
 /**
  * Draw the vertex.
@@ -1161,10 +1140,6 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
     }
   }
 
-  // Disable isValid at mouse move
-  // if (!this.isValid()) {
-  //   ctx.strokeStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
-  // }
   if (this.fillInside) {
     ctx.closePath();
     ctx.fill();
@@ -1279,10 +1254,6 @@ Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
 Rect.prototype.draw = function(ctx, satImage, dashed) {
   ctx.save();
 
-  if (!this.isValid()) {
-    ctx.strokeStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
-  }
-
   let [x, y] = satImage.toCanvasCoords([this.x, this.y]);
   let [w, h] = satImage.toCanvasCoords([this.w, this.h], false);
 
@@ -1306,9 +1277,6 @@ Rect.prototype.draw = function(ctx, satImage, dashed) {
 Rect.prototype.drawHandles = function(context, satImage, fillStyle,
                                       hoveredHandle) {
   context.save();
-  if (!this.isValid()) {
-    fillStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
-  }
   for (let v of this.vertices) {
     if (hoveredHandle && v === hoveredHandle) {
       v.draw(context, satImage, fillStyle, HOVERED_HANDLE_RADIUS);

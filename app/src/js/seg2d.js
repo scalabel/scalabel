@@ -274,7 +274,7 @@ Seg2d.prototype.handleQuickdraw = function() {
       this.tempPoly.popVertex();
       this.newPoly.endPath();
 
-      if (this.newPoly.isValid()) {
+      if (this.newPoly.isValidShape()) {
         this.addPolyline(this.newPoly);
         this.tempVertex.delete();
         this.tempPoly.delete();
@@ -509,7 +509,7 @@ Seg2d.prototype.shapesValid = function() {
     return false;
   }
   for (let poly of this.polys) {
-    if (!poly.isValid()) {
+    if (!poly.isValidShape()) {
       return false;
     }
   }
@@ -566,7 +566,7 @@ Seg2d.prototype.mousedown = function(e) {
         this.tempPoly.popVertex();
         this.newPoly.endPath();
 
-        if (this.newPoly.isValid()) {
+        if (this.newPoly.isValidShape()) {
           this.addPolyline(this.newPoly);
           this.tempVertex.delete();
           this.tempPoly.delete();
@@ -730,7 +730,7 @@ Seg2d.prototype.mouseup = function(e) {
         }
         this.newPoly.endPath();
 
-        if (this.newPoly.isValid()) {
+        if (this.newPoly.isValidShape()) {
           this.addPolyline(this.newPoly);
           this.tempVertex.delete();
           this.tempPoly.delete();
@@ -883,7 +883,7 @@ Seg2d.prototype.keydown = function(e) {
     if (this.state === SegStates.DRAW) {
       this.newPoly.endPath();
 
-      if (this.newPoly.isValid()) {
+      if (this.newPoly.isValidShape()) {
         this.addPolyline(this.newPoly);
         this.tempVertex = null;
         this.tempPoly = null;

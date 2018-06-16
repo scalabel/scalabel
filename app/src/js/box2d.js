@@ -5,6 +5,7 @@
 const BoxStates = Object.freeze({
   FREE: 0, RESIZE: 1, MOVE: 2});
 const FONT_SIZE = 11;
+const MIN_BOX_SIZE = 5;
 
 const INITIAL_HANDLE_NO = 4;
 
@@ -165,7 +166,12 @@ Box2d.prototype.redrawMainCanvas = function(mainCtx) {
  * @return {boolean} - True if the box is geometrically valid.
  */
 Box2d.prototype.shapesValid = function() {
-  return this.rect.isValid();
+  return !this.isSmall();
+};
+
+Box2d.prototype.isSmall = function() {
+  let [w, h] = this.satItem.toCanvasCoords([this.rect.w, this.rect.h]);
+  return (w < MIN_BOX_SIZE * UP_RES_RATIO || h < MIN_BOX_SIZE * UP_RES_RATIO);
 };
 
 /**
