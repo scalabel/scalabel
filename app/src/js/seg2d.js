@@ -206,6 +206,23 @@ Seg2d.setToolBox = function(satItem) {
 };
 
 /**
+ * Convert midpoint to a new vertex, do nothing if not a midpoint
+ * @param {object} pt: the position of the midpoint as vertex object
+ */
+Seg2d.prototype.midpointToVertex = function(pt) {
+  let edge1 = null;
+  let edge2 = null;
+  for (let label of this.satItem.labels) {
+    for (let poly of label.polys) {
+      poly.alignEdges();
+      [edge1, edge2] = poly.midpointToVertex(pt, edge1, edge2);
+      poly.reverse();
+      [edge1, edge2] = poly.midpointToVertex(pt, edge1, edge2);
+    }
+  }
+};
+
+/**
  * Link button handler
  */
 SatImage.prototype._linkHandler = function() {
@@ -536,10 +553,8 @@ Seg2d.prototype.mousedown = function(e) {
   if (this.state === SegStates.FREE && occupiedShape) {
     // if clicked on midpoint, convert to vertex
     if (occupiedShape instanceof Vertex) {
-      for (let poly of this.polys) {
-        if (poly.control_points.indexOf(occupiedShape) >= 0) {
-          poly.midpointToVertex(occupiedShape);
-        }
+      if (occupiedShape.type === VertexTypes.MIDPOINT) {
+        this.midpointToVertex(occupiedShape);
       }
 
       // start resize mode

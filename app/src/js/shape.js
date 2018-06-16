@@ -476,16 +476,20 @@ Polyline.prototype.alignEdges = function() {
 /**
  * Convert midpoint to a new vertex, do nothing if not a midpoint
  * @param {object} pt: the position of the midpoint as vertex object
+ * @param {Edge} inEdge: optional edge to add
+ * @param {Edge} outEdge: optional edge to add
+ * @return {Edge[]} inEdge and outEdge
  */
-Polyline.prototype.midpointToVertex = function(pt) {
+Polyline.prototype.midpointToVertex = function(pt, inEdge=null, outEdge=null) {
   for (let i = 0; i < this.edges.length; i++) {
     if (this.edges[i].type === EdgeTypes.LINE) {
       if (this.edges[i].control_points[0].equals(pt)) {
-        this.insertVertex(i+1, pt);
+        [inEdge, outEdge] = this.insertVertex(i+1, pt, inEdge, outEdge);
         break;
       }
     }
   }
+  return [inEdge, outEdge];
 };
 
 /**
@@ -636,29 +640,48 @@ Path.prototype.isEnded = function() {
  * the curve will be lost
  * @param {int} i: index to insert the new vertex
  * @param {object} pt: the new vertex to be inserted
- * @param {Edge} edge: optional edge to add
+ * @param {Edge} inEdge: optional edge to add
+ * @param {Edge} outEdge: optional edge to add
+ * @return {Edge[]} inEdge and outEdge
  */
-Path.prototype.insertVertex = function(i, pt, edge=null) {
+Path.prototype.insertVertex = function(i, pt, inEdge=null, outEdge=null) {
   // for sanity purpose, check pt type:
   pt.type = VertexTypes.VERTEX;
   // check index i
   if ( i < 0 || i > this.vertices.length) {
-    return;
+    return [null, null];
+  }
+  // check if start and end edges are legit
+  if (inEdge && (!(inEdge.src.equals(pt)
+    && inEdge.dest.equals(this.vertices[i-1]))
+    && !(inEdge.dest.equals(pt)
+      && inEdge.src.equals(this.vertices[i-1])))) {
+    return [null, null];
+  }
+  if (outEdge && (!(outEdge.src.equals(pt)
+    && outEdge.dest.equals(this.vertices[i]))
+    && !(outEdge.dest.equals(pt)
+      && outEdge.src.equals(this.vertices[i])))) {
+    return [null, null];
   }
   // modify edges
   if (this.vertices.length >= 1) {
     if (i > 0 && i < this.vertices.length) {
-      this.edges.splice(i-1, 1, edge ? edge : new Edge(this.vertices[i-1], pt));
-      this.edges.splice(i, 0, new Edge(pt, this.vertices[i]));
+      this.edges.splice(i-1, 1, inEdge ?
+        inEdge : new Edge(this.vertices[i-1], pt));
+      this.edges.splice(i, 0, outEdge ?
+        outEdge : new Edge(pt, this.vertices[i]));
     } else if (i === 0) {
-      this.edges.splice(i, 0, new Edge(pt, this.vertices[0]));
+      this.edges.splice(i, 0, outEdge ?
+        outEdge : new Edge(pt, this.vertices[0]));
     } else if (i === this.vertices.length) {
-      this.edges.splice(i-1, 0,
-        edge ? edge : new Edge(this.vertices[this.vertices.length - 1], pt));
+      this.edges.splice(i-1, 0, inEdge ?
+        inEdge : new Edge(this.vertices[this.vertices.length - 1], pt));
     }
   }
   // modify vertices
   this.vertices.splice(i, 0, pt);
+  return [this.edges[i-1], this.edges[i]];
 };
 
 /**
@@ -742,29 +765,45 @@ Polygon.prototype.reverse = function() {
  * Assuming prev and next vertices are connected by line, not bezier
  * @param {int} i: index to insert the new vertex
  * @param {object} pt: the new vertex to be inserted
- * @param {Edge} edge: optional edge to add
+ * @param {Edge} inEdge: optional edge to add
+ * @param {Edge} outEdge: optional edge to add
+ * @return {Edge[]} inEdge and outEdge
  */
-Polygon.prototype.insertVertex = function(i, pt, edge=null) {
+Polygon.prototype.insertVertex = function(i, pt, inEdge=null, outEdge=null) {
   // for sanity purpose, check pt type:
   pt.type = VertexTypes.VERTEX;
   // check index i
   if ( i < 0 || i > this.vertices.length) {
-    return;
+    return [null, null];
   }
-
+  // check if start and end edges are legit
+  if (inEdge && (!(inEdge.src.equals(pt)
+    && inEdge.dest.equals(this.vertices[this.idx(i-1)]))
+    && !(inEdge.dest.equals(pt)
+      && inEdge.src.equals(this.vertices[this.idx(i-1)])))) {
+    return [null, null];
+  }
+  if (outEdge && (!(outEdge.src.equals(pt)
+    && outEdge.dest.equals(this.vertices[this.idx(i)]))
+    && !(outEdge.dest.equals(pt)
+      && outEdge.src.equals(this.vertices[this.idx(i)])))) {
+    return [null, null];
+  }
   this.vertices.splice(i, 0, pt);
   if (this.vertices.length > 1) {
-    let edge1 = edge ? edge : new Edge(
+    let edge1 = inEdge ? inEdge : new Edge(
       this.vertices[this.idx(i-1)], this.vertices[i]
     );
-    let edge2 = new Edge(
+    let edge2 = outEdge ? outEdge : new Edge(
       this.vertices[i], this.vertices[this.idx(i+1)]
     );
     this.edges.splice(this.idx(i-1), 1, edge1);
     this.edges.splice(i, 0, edge2);
+    return [edge1, edge2];
   } else {
     this.edges = []; // doesn't allow edge with length 0
   }
+  return [null, null];
 };
 
 /**
