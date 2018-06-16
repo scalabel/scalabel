@@ -22,10 +22,10 @@ var (
 
 // Stores the config info found in config.yml
 type Env struct {
-	Port        int    `yaml:"port"`
-	ProjectsDir string `yaml:"projectsDir"`
-	SourcePath  string `yaml:"sourcePath"`
-	AppSubDir   string `yaml:"appSubDir"`
+	Port       int    `yaml:"port"`
+	DataDir    string `yaml:"dataDir"`
+	SourcePath string `yaml:"sourcePath"`
+	AppSubDir  string `yaml:"appSubDir"`
 }
 
 func (env Env) AppDir() string {

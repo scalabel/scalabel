@@ -15,12 +15,11 @@ import (
 const DEFAULT_WORKER_ID = "default_worker"
 
 func GetProject(projectName string) Project {
-	projectsDirectoryPath := path.Join(env.ProjectsDir)
-	err := os.MkdirAll(projectsDirectoryPath, 0777)
+	err := os.MkdirAll(env.DataDir, 0777)
 	if err != nil {
 		Error.Println(err)
 	}
-	projectFilePath := path.Join(env.ProjectsDir, projectName, "project.json")
+	projectFilePath := path.Join(env.DataDir, projectName, "project.json")
 	projectFileContents, err := ioutil.ReadFile(projectFilePath)
 	if err != nil {
 		Error.Println(err)
@@ -35,7 +34,7 @@ func GetProject(projectName string) Project {
 
 // DEPRECATED
 func GetProjects() []Project {
-	projectsDirectoryPath := path.Join(env.ProjectsDir, "projects")
+	projectsDirectoryPath := path.Join(env.DataDir, "projects")
 	err := os.MkdirAll(projectsDirectoryPath, 0777)
 	if err != nil {
 		Error.Println(err)
@@ -66,7 +65,7 @@ func GetProjects() []Project {
 }
 
 func GetTask(projectName string, index string) Task {
-	taskPath := path.Join(env.ProjectsDir, projectName, "tasks", index+".json")
+	taskPath := path.Join(env.DataDir, projectName, "tasks", index+".json")
 	taskFileContents, err := ioutil.ReadFile(taskPath)
 	if err != nil {
 		Error.Println(err)
@@ -80,7 +79,7 @@ func GetTask(projectName string, index string) Task {
 }
 
 func GetTasksInProject(projectName string) []Task {
-	projectTasksPath := path.Join(env.ProjectsDir, projectName, "tasks")
+	projectTasksPath := path.Join(env.DataDir, projectName, "tasks")
 	os.MkdirAll(projectTasksPath, 0777)
 	tasksDirectoryContents, err := ioutil.ReadDir(projectTasksPath)
 	if err != nil {
@@ -107,7 +106,7 @@ func GetTasksInProject(projectName string) []Task {
 }
 
 func GetAssignment(projectName string, taskIndex string, workerId string) Assignment {
-	assignmentPath := path.Join(env.ProjectsDir, projectName, "assignments",
+	assignmentPath := path.Join(env.DataDir, projectName, "assignments",
 		taskIndex, workerId+".json")
 	assignmentFileContents, err := ioutil.ReadFile(assignmentPath)
 	if err != nil {
@@ -131,7 +130,7 @@ func CreateAssignment(projectName string, taskIndex string, workerId string) Ass
 
 // DEPRECATED
 func GetAssignments() []Assignment {
-	assignmentsDirectoryPath := path.Join(env.ProjectsDir, "assignments")
+	assignmentsDirectoryPath := path.Join(env.DataDir, "assignments")
 	assignmentsDirectoryContents, err := ioutil.ReadDir(
 		assignmentsDirectoryPath)
 	if err != nil {
@@ -140,7 +139,7 @@ func GetAssignments() []Assignment {
 	assignments := []Assignment{}
 	for _, projectDirectory := range assignmentsDirectoryContents {
 		if projectDirectory.IsDir() {
-			projectDirectoryPath := path.Join(env.ProjectsDir, "assignments",
+			projectDirectoryPath := path.Join(env.DataDir, "assignments",
 				projectDirectory.Name())
 			projectDirectoryContents, err := ioutil.ReadDir(
 				projectDirectoryPath)
@@ -246,8 +245,8 @@ func PathStem(name string) string {
 // return false if duplicated
 func CheckProjectName(projectName string) string {
 	var newName = strings.Replace(projectName, " ", "_", -1)
-	os.MkdirAll(env.ProjectsDir, 0777)
-	files, err := ioutil.ReadDir(env.ProjectsDir)
+	os.MkdirAll(env.DataDir, 0777)
+	files, err := ioutil.ReadDir(env.DataDir)
 	if err != nil {
 		return newName
 	}

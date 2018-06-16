@@ -25,7 +25,7 @@ type Project struct {
 
 func (project *Project) GetPath() string {
 	dir := path.Join(
-		env.ProjectsDir,
+		env.DataDir,
 		project.Options.Name,
 	)
 	os.MkdirAll(dir, 0777)
@@ -68,7 +68,7 @@ type Task struct {
 
 func (task *Task) GetPath() string {
 	dir := path.Join(
-		env.ProjectsDir,
+		env.DataDir,
 		task.ProjectOptions.Name,
 		"tasks",
 	)
@@ -107,7 +107,7 @@ type Assignment struct {
 
 func (assignment *Assignment) GetAssignmentPath() string {
 	dir := path.Join(
-		env.ProjectsDir,
+		env.DataDir,
 		assignment.Task.ProjectOptions.Name,
 		"assignments",
 		strconv.Itoa(assignment.Task.Index),
@@ -118,7 +118,7 @@ func (assignment *Assignment) GetAssignmentPath() string {
 
 func (assignment *Assignment) GetSubmissionPath() string {
 	dir := path.Join(
-		env.ProjectsDir,
+		env.DataDir,
 		assignment.Task.ProjectOptions.Name,
 		"submissions",
 		strconv.Itoa(assignment.Task.Index),
@@ -344,7 +344,7 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
 	var assignment Assignment
-	if (!Exists(path.Join(env.ProjectsDir, projectName, "assignments",
+	if (!Exists(path.Join(env.DataDir, projectName, "assignments",
 		taskIndex, DEFAULT_WORKER_ID+".json"))) {
 		// if assignment does not exist, create it
 		assignment = CreateAssignment(projectName, taskIndex, DEFAULT_WORKER_ID)
@@ -369,7 +369,7 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	projectName := assignmentToLoad.Task.ProjectOptions.Name
 	taskIndex := strconv.Itoa(assignmentToLoad.Task.Index)
 	var loadedAssignment Assignment
-	if (!Exists(path.Join(env.ProjectsDir, projectName, taskIndex,
+	if (!Exists(path.Join(env.DataDir, projectName, taskIndex,
 		DEFAULT_WORKER_ID))) {
 		// if assignment does not exist, create it
 		// TODO: resolve tension between this function and executeLabelingTemplate()
@@ -408,7 +408,7 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	oldAssignment := GetAssignment(assignment.Task.ProjectOptions.Name, strconv.Itoa(assignment.Task.Index), DEFAULT_WORKER_ID)
 	assignment.Events = append(oldAssignment.Events, assignment.Events...)
 
-	assignmentPath := path.Join(env.ProjectsDir, "assignments",
+	assignmentPath := path.Join(env.DataDir, "assignments",
 	    assignment.Task.ProjectOptions.Name, strconv.Itoa(assignment.Task.Index) +
 	    ".json")
 	assignmentJson, err := json.MarshalIndent(assignment, "", "  ")
