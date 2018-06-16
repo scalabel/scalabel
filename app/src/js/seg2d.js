@@ -185,15 +185,22 @@ Seg2d.setToolBox = function(satItem) {
   satItem.isLinking = false;
   document.getElementById('link_btn').onclick = function()
   {satItem._linkHandler();};
+  document.getElementById('quickdraw_btn').onclick = function() {
+    if (satItem.selectedLabel) {
+      satItem.selectedLabel.handleQuickdraw();
+    }
+  };
 };
 
 /**
  * Link button handler
  */
 SatImage.prototype._linkHandler = function() {
+  let button = document.getElementById('link_btn');
   if (!this.isLinking) {
     this.isLinking = true;
-    document.getElementById('link_btn').innerHTML = 'Finish Linking';
+    button.innerHTML = 'Finish Linking';
+    button.style.backgroundColor = 'lightgreen';
 
     let cat = this.catSel.options[this.catSel.selectedIndex].innerHTML;
     if (!this.selectedLabel) {
@@ -214,7 +221,8 @@ SatImage.prototype._linkHandler = function() {
     }
   } else {
     this.isLinking = false;
-    document.getElementById('link_btn').innerHTML = 'Link';
+    button.innerHTML = 'Link';
+    button.style.backgroundColor = 'white';
     this.updateLabelCount();
   }
   this.selectedLabel.linkHandler();
@@ -227,6 +235,44 @@ Seg2d.prototype.linkHandler = function() {
     this.setState(SegStates.FREE);
     if (this.polys.length < 1) {
       this.delete();
+    }
+  }
+};
+
+Seg2d.prototype.handleQuickdraw = function() {
+  let button = document.getElementById('quickdraw_btn');
+  if (this.state === SegStates.DRAW) {
+    // s switch to quick draw
+    button.innerHTML = 'Select Target Polygon';
+    button.style.backgroundColor = 'lightgreen';
+    this.setState(SegStates.QUICK_DRAW);
+  } else if (this.state === SegStates.QUICK_DRAW) {
+    button.innerHTML = '<kbd>s</kbd> Quickdraw';
+    button.style.backgroundColor = 'white';
+    // press s again to quit quick draw
+    if (this.quickdrawCache.targetPoly) { // must be before state transition
+      this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+    }
+    if (this.newPoly.vertices.length > 1
+      && this.quickdrawCache.endVertex
+      && this.quickdrawCache.endVertex.id
+      === this.newPoly.vertices[0].id) {
+      // if occupied object the 1st vertex, close path
+      this.tempPoly.popVertex();
+      this.newPoly.endPath();
+
+      if (this.newPoly.isValid()) {
+        this.addPolyline(this.newPoly);
+        this.tempVertex.delete();
+        this.tempPoly.delete();
+        this.tempVertex = null;
+        this.tempPoly = null;
+      }
+
+      this.setState(SegStates.FREE);
+      this.selectedShape = this.newPoly;
+    } else {
+      this.setState(SegStates.DRAW);
     }
   }
 };
@@ -494,6 +540,7 @@ Seg2d.prototype.mousedown = function(e) {
     // draw
   } else if (this.state === SegStates.QUICK_DRAW) {
     // quick draw mode
+    let button = document.getElementById('quickdraw_btn');
     if (!occupiedShape) {
       // TODO: if nothing is clicked, return to DRAW state
       if (this.quickdrawCache.targetPoly) { // must be before state transition
@@ -519,6 +566,9 @@ Seg2d.prototype.mousedown = function(e) {
       } else {
         this.setState(SegStates.DRAW);
       }
+      // change back the indicator
+      button.innerHTML = '<kbd>s</kbd> Quickdraw';
+      button.style.backgroundColor = 'white';
     } else if (this.newPoly.vertices.length > 1
         && occupiedShape.id === this.newPoly.vertices[0].id
         && !this.quickdrawCache.startVertex) {
@@ -546,6 +596,7 @@ Seg2d.prototype.mousedown = function(e) {
         this.quickdrawCache.targetSeg2d.setAsTargeted();
         this.satItem.pushToHiddenMap(this.quickdrawCache.targetPoly.vertices);
         this.satItem.redrawHiddenCanvas();
+        button.innerHTML = 'Select Start Vertex';
       }
     } else if (!this.quickdrawCache.startVertex) {
       if (occupiedShape instanceof Vertex
@@ -565,6 +616,7 @@ Seg2d.prototype.mousedown = function(e) {
         this.tempVertex = new Vertex(mousePos.x, mousePos.y);
         this.tempPoly.pushVertex(this.tempVertex);
         this.selectedShape = this.tempVertex;
+        button.innerHTML = 'Select End Vertex';
       }
     } else if (!this.quickdrawCache.endVertex) {
       if (occupiedShape instanceof Vertex
@@ -606,6 +658,8 @@ Seg2d.prototype.mousedown = function(e) {
         }
 
         this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+        button.innerHTML = '<kbd>s</kbd> End Quickdraw\n' +
+          '<kbd>Alt</kbd> Toggle path';
       }
     }
   } else if (this.state === SegStates.LINK && occupiedShape) {
@@ -780,7 +834,15 @@ Seg2d.prototype.mouseleave = function(e) { // eslint-disable-line
  */
 Seg2d.prototype.keydown = function(e) {
   let keyID = e.KeyCode ? e.KeyCode : e.which;
-  if (keyID === 85) {
+  if (keyID === 27) { // Esc
+    this.setState(SegStates.FREE);
+    let quickdrawButton = document.getElementById('quickdraw_btn');
+    quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
+    quickdrawButton.style.backgroundColor = 'white';
+    let linkButton = document.getElementById('link_btn');
+    linkButton.innerHTML = 'Link';
+    linkButton.style.backgroundColor = 'white';
+  } else if (keyID === 85) {
     // u for unlinking the selected label
     if (this.polys.length > 1) {
       for (let poly of this.polys) {
@@ -803,36 +865,7 @@ Seg2d.prototype.keydown = function(e) {
       }
     }
   } else if (keyID === 83) {
-    if (this.state === SegStates.DRAW) {
-      // s switch to quick draw
-      this.setState(SegStates.QUICK_DRAW);
-    } else if (this.state === SegStates.QUICK_DRAW) {
-      // press s again to quit quick draw
-      if (this.quickdrawCache.targetPoly) { // must be before state transition
-        this.quickdrawCache.targetSeg2d.releaseAsTargeted();
-      }
-      if (this.newPoly.vertices.length > 1
-          && this.quickdrawCache.endVertex
-          && this.quickdrawCache.endVertex.id
-          === this.newPoly.vertices[0].id) {
-        // if occupied object the 1st vertex, close path
-        this.tempPoly.popVertex();
-        this.newPoly.endPath();
-
-        if (this.newPoly.isValid()) {
-          this.addPolyline(this.newPoly);
-          this.tempVertex.delete();
-          this.tempPoly.delete();
-          this.tempVertex = null;
-          this.tempPoly = null;
-        }
-
-        this.setState(SegStates.FREE);
-        this.selectedShape = this.newPoly;
-      } else {
-        this.setState(SegStates.DRAW);
-      }
-    }
+    this.handleQuickdraw();
   } else if (keyID === 18 && this.state === SegStates.QUICK_DRAW) {
     // alt toggle long path mode in quick draw
     this.quickdrawCache.longPath = !this.quickdrawCache.longPath;

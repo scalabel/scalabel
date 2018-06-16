@@ -527,7 +527,6 @@ SatImage.prototype.shapesValid = function() {
 SatImage.prototype._keydown = function(e) {
   let self = this;
   // class-specific handling of keydown event
-  e.preventDefault();
   if (self.selectedLabel) {
     self.selectedLabel.keydown(e);
   }
@@ -542,8 +541,10 @@ SatImage.prototype._keydown = function(e) {
       self.deselectAll();
     }
   } else if (keyID === 38) {// up
+    e.preventDefault();
     self._incHandler();
   } else if (keyID === 40) {// down
+    e.preventDefault();
     self._decHandler();
   } else if (keyID === 37 || keyID === 39) { // Left/Right Arrow
     if (keyID === 37) { // Left Arrow
