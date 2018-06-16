@@ -108,8 +108,10 @@ SatImage.prototype.deselectAll = function() {
     }
     this.selectedLabel = null;
   }
-  this.resetHiddenMapToDefault();
-  this.redraw();
+  if (this.active) {
+    this.resetHiddenMapToDefault();
+    this.redraw();
+  }
 };
 
 SatImage.prototype.selectLabel = function(label) {
@@ -124,11 +126,11 @@ SatImage.prototype.selectLabel = function(label) {
   for (let i = 0; i < this.sat.attributes.length; i++) {
     if (this.sat.attributes[i].toolType === 'switch') {
       this._setAttribute(i,
-        this.selectedLabel.attributes[this.sat.attributes[i].name]);
+          this.selectedLabel.attributes[this.sat.attributes[i].name]);
     } else if (this.sat.attributes[i].toolType === 'list' &&
-      this.sat.attributes[i].name in this.selectedLabel.attributes) {
+        this.sat.attributes[i].name in this.selectedLabel.attributes) {
       this._selectAttributeFromList(i,
-        this.selectedLabel.attributes[this.sat.attributes[i].name][0]);
+          this.selectedLabel.attributes[this.sat.attributes[i].name][0]);
     }
   }
   if (this.active) {
@@ -247,6 +249,7 @@ SatImage.prototype.loaded = function() {
 SatImage.prototype.setActive = function(active) {
   SatItem.prototype.setActive.call(this);
   let self = this;
+  self.active = active;
   let removeBtn = $('#remove_btn');
   let deleteBtn = $('#delete_btn');
   let endBtn = $('#end_btn');
@@ -932,7 +935,9 @@ SatImage.prototype._setAttribute = function(attributeIndex, value) {
   if (attributeCheckbox.prop('checked') !== value) {
     attributeCheckbox.trigger('click');
   }
-  this.redraw();
+  if (this.active) {
+    this.redraw();
+  }
 };
 
 /**
