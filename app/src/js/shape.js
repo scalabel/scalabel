@@ -169,7 +169,7 @@ Vertex.prototype.copy = function() {
 
 Vertex.prototype.equals = function(v, threshold=1e-6) {
   return Math.abs(this.x - v.x) < threshold
-      && Math.abs(this.y - v.y) < threshold;
+    && Math.abs(this.y - v.y) < threshold;
 };
 
 /**
@@ -308,22 +308,24 @@ Edge.prototype.contains = function(v) {
  * @return {*}
  */
 Edge.prototype.intersectWith = function(e) {
+  let tolerance = 0.01;
   if (this.equals(e)) {return true;}
   let det;
   let gamma;
   let lambda;
   det = (this.dest.x - this.src.x) * (e.dest.y - e.src.y)
-      - (e.dest.x - e.src.x) * (this.dest.y - this.src.y);
+    - (e.dest.x - e.src.x) * (this.dest.y - this.src.y);
 
   if (det === 0) { // parallel
     return this.contains(e.src) || this.contains(e.dest) ||
-        e.contains(this.src) || e.contains(this.dest);
+      e.contains(this.src) || e.contains(this.dest);
   } else {
     lambda = ((e.dest.y - e.src.y) * (e.dest.x - this.src.x)
-        + (e.src.x - e.dest.x) * (e.dest.y - this.src.y)) / det;
+      + (e.src.x - e.dest.x) * (e.dest.y - this.src.y)) / det;
     gamma = ((this.src.y - this.dest.y) * (e.dest.x - this.src.x)
-        + (this.dest.x - this.src.x) * (e.dest.y - this.src.y)) / det;
-    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+      + (this.dest.x - this.src.x) * (e.dest.y - this.src.y)) / det;
+    return (tolerance < lambda && lambda < 1 - tolerance)
+      && (tolerance < gamma && gamma < 1 - tolerance);
   }
 };
 
@@ -595,12 +597,12 @@ Polyline.prototype.toString = function() {
   let vertices = [];
   let edges = [];
   for (let v of this.vertices) {
-    vertices.push(String(v.id));
-    // vertices.push(String(v.xy));
+    // vertices.push(String(v.id));
+    vertices.push(String(v.xy));
   }
   for (let e of this.edges) {
-    // edges.push(String([e.src.xy, e.dest.xy]));
-    edges.push(String([e.src.id, e.dest.id]));
+    edges.push(String([e.src.xy, e.dest.xy]));
+    // edges.push(String([e.src.id, e.dest.id]));
   }
   return [vertices.join(', '), edges.join(', ')].join('\n');
 };
@@ -659,7 +661,7 @@ Path.prototype.insertVertex = function(i, pt, edge=null) {
       this.edges.splice(i, 0, new Edge(pt, this.vertices[0]));
     } else if (i === this.vertices.length) {
       this.edges.splice(i-1, 0,
-          edge ? edge : new Edge(this.vertices[this.vertices.length - 1], pt));
+        edge ? edge : new Edge(this.vertices[this.vertices.length - 1], pt));
     }
   }
   // modify vertices
@@ -760,10 +762,10 @@ Polygon.prototype.insertVertex = function(i, pt, edge=null) {
   this.vertices.splice(i, 0, pt);
   if (this.vertices.length > 1) {
     let edge1 = edge ? edge : new Edge(
-        this.vertices[this.idx(i-1)], this.vertices[i]
+      this.vertices[this.idx(i-1)], this.vertices[i]
     );
     let edge2 = new Edge(
-        this.vertices[i], this.vertices[this.idx(i+1)]
+      this.vertices[i], this.vertices[this.idx(i+1)]
     );
     this.edges.splice(this.idx(i-1), 1, edge1);
     this.edges.splice(i, 0, edge2);
@@ -785,7 +787,7 @@ Polygon.prototype.deleteVertex = function(i) {
   this.vertices.splice(i, 1);
   if (this.vertices.length > 1) {
     let edge = new Edge(
-        this.vertices[this.idx(i-1)], this.vertices[this.idx(i)]
+      this.vertices[this.idx(i-1)], this.vertices[this.idx(i)]
     );
     this.edges.splice(i, 1);
     this.edges.splice(this.idx(i-1), 1, edge);
@@ -864,7 +866,7 @@ Polygon.prototype.pushPath = function(targetPoly, vStart,
     this.edges.pop();
   }
   if (this.vertices.length > 0
-      && vStart.equals(this.vertices[this.vertices.length-1])) {
+    && vStart.equals(this.vertices[this.vertices.length-1])) {
     this.vertices.pop();
     this.edges.pop();
   }
@@ -874,7 +876,7 @@ Polygon.prototype.pushPath = function(targetPoly, vStart,
   this.vertices = this.vertices.concat(vertices);
   this.edges = this.edges.concat(edges);
   if (this.vertices.length > 0
-      && vEnd.equals(this.vertices[0])) {
+    && vEnd.equals(this.vertices[0])) {
     this.vertices.pop();
   } else {
     this.edges.push(new Edge(vEnd, this.vertices[0]));
@@ -940,12 +942,12 @@ Object.defineProperty(Rect.prototype, 'y', {
 
 Object.defineProperty(Rect.prototype, 'w', {
   get: function() {return Math.abs(this.vertices[0].x
-      - this.vertices[4].x);},
+    - this.vertices[4].x);},
 });
 
 Object.defineProperty(Rect.prototype, 'h', {
   get: function() {return Math.abs(this.vertices[0].y
-      - this.vertices[4].y);},
+    - this.vertices[4].y);},
 });
 
 /*
@@ -965,9 +967,9 @@ Rect.prototype.setRect = function(x, y, w, h) {
 Rect.prototype.updateMidpoints = function() {
   for (let i = 1; i < 8; i += 2) {
     this.getVertex(i).x = (this.getVertex(i + 1).x
-        + this.getVertex(i - 1).x) / 2;
+      + this.getVertex(i - 1).x) / 2;
     this.getVertex(i).y = (this.getVertex(i + 1).y
-        + this.getVertex(i - 1).y) / 2;
+      + this.getVertex(i - 1).y) / 2;
   }
 };
 
@@ -1069,7 +1071,7 @@ Vertex.prototype.draw = function(context, satImage, fillStyle = null,
   context.arc(x, y, radius, 0, 2 * Math.PI, false);
   context.closePath();
   if (this.type === VertexTypes.CONTROL_POINT
-      || this.type === VertexTypes.MIDPOINT) {
+    || this.type === VertexTypes.MIDPOINT) {
     context.fillStyle = rgba(CONTROL_FILL_COLOR, ALPHA_CONTROL_POINT);
     context.strokeStyle = rgba(CONTROL_LINE_COLOR, ALPHA_CONTROL_POINT);
   }
@@ -1141,12 +1143,12 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
   ctx.beginPath();
   this.alignEdges(); // this is important
   let [startX, startY] = satImage.toCanvasCoords(
-      [this.vertices[0].x, this.vertices[0].y]);
+    [this.vertices[0].x, this.vertices[0].y]);
   ctx.moveTo(startX, startY);
   if (this.edges.length > 0) {
     for (let edge of this.edges) {
       let [destX, destY] = satImage.toCanvasCoords(
-          [edge.dest.x, edge.dest.y]);
+        [edge.dest.x, edge.dest.y]);
       if (edge.type === EdgeTypes.LINE) {
         ctx.lineTo(destX, destY);
       } else if (edge.type === EdgeTypes.BEZIER) {
@@ -1159,9 +1161,10 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
     }
   }
 
-  if (!this.isValid()) {
-    ctx.strokeStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
-  }
+  // Disable isValid at mouse move
+  // if (!this.isValid()) {
+  //   ctx.strokeStyle = rgba(GRAYOUT_COLOR, ALPHA_LINE);
+  // }
   if (this.fillInside) {
     ctx.closePath();
     ctx.fill();
@@ -1177,9 +1180,9 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
     for (let edge of this.edges) {
       if (edge.type === EdgeTypes.BEZIER) {
         let [srcX, srcY] = satImage.toCanvasCoords(
-            [edge.src._x, edge.src._y]);
+          [edge.src._x, edge.src._y]);
         let [destX, destY] = satImage.toCanvasCoords(
-            [edge.dest._x, edge.dest._y]);
+          [edge.dest._x, edge.dest._y]);
         let [c1x, c1y] = satImage.toCanvasCoords([edge.control_points[0].x,
           edge.control_points[0].y]);
         let [c2x, c2y] = satImage.toCanvasCoords([edge.control_points[1].x,
@@ -1243,7 +1246,7 @@ Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
   // draw polygon
   hiddenCtx.beginPath();
   let [startX, startY] = satImage.toCanvasCoords(
-      [this.vertices[0].x, this.vertices[0].y]);
+    [this.vertices[0].x, this.vertices[0].y]);
   hiddenCtx.moveTo(startX, startY);
   if (this.edges.length > 0) {
     for (let edge of this.edges) {

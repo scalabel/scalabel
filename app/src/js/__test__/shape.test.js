@@ -364,21 +364,12 @@ describe('Polygon Object Tests', function() {
     expect(p.bbox.max.y).toBe(8);
     // expect(p.centroid().equals(new Vertex(4, 4))).toBe(true);
   });
-  // it('Polygon creation time', function() {
-  //   let p = randomPolygon(20000);
-  // });
-  // it('Polygon isSmallSpeed1', function() {
-  //   let p = randomPolygon(20000);
-  //   for (let i = 0; i < 20; i++) {
-  //     p.isSmall();
-  //   }
-  // });
-  // it('Polygon isSmallSpeed2', function() {
-  //   let p = randomPolygon(20000);
-  //   for (let i = 0; i < 20; i++) {
-  //     p.isSmall2();
-  //   }
-  // });
+  it('Polygon self intersect floating point', function() {
+    let p = list2Polygon([[675.2340425531914, 467.22099921043883],
+      [937.1914893617022, 467.22099921043883],
+      [845.2765957446809, 618.8805736785239]]);
+    expect(p.isSelfIntersect()).toBe(false);
+  });
   it('Polygon align edge', function() {
     let p = randomPolygon();
     for (let edge of p.edges) {
@@ -414,12 +405,12 @@ describe('Polygon Object Tests', function() {
     let p3 = list2Polygon([[0, 0], [8, 0], [8, 8], [0, 8]]);
     let p4 = list2Polygon([[0, 0], [0, 8], [8, 8], [8, 0]]);
     for (let i = 0; i < p3.edges.length; i++) {
-        expect((p3.edges[i]).equals(p4.edges[i])).toBe(false);
+      expect((p3.edges[i]).equals(p4.edges[i])).toBe(false);
     }
     p3.reverse();
     for (let i = 0; i < p3.edges.length; i++) {
-        expect((p3.vertices[i]).equals(p4.vertices[i])).toBe(true);
-        expect((p3.edges[i]).equals(p4.edges[i])).toBe(true);
+      expect((p3.vertices[i]).equals(p4.vertices[i])).toBe(true);
+      expect((p3.edges[i]).equals(p4.edges[i])).toBe(true);
     }
   });
   it('Polygon insert vertex', function() {
