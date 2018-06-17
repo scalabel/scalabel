@@ -463,10 +463,10 @@ SatImage.prototype.redraw = function() {
 SatImage.prototype.redrawMainCanvas = function() {
   let self = this;
   // need to do some clean up at the beginning
+  self.deleteInvalidLabels();
   if (self.selectedLabel && !self.selectedLabel.valid) {
     self.selectedLabel = null;
   }
-  self.deleteInvalidLabels();
   // update the padding box
   self.padBox = self._getPadding();
   // draw stuff
