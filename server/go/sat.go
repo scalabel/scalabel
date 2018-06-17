@@ -205,6 +205,27 @@ type DashboardContents struct {
 	Tasks   []Task  `json:"tasks" yaml:"tasks"`
 }
 
+// Download format specifications
+type DownloadFormat struct {
+	Name            string                     `json:"name" yaml:"name"`
+	Categories      []Category                 `json:"categories" yaml:"categories"`
+	Attributes      []Attribute                `json:"attributes" yaml:"attributes"`
+	Items           []ItemDownloadFormat       `json:"items" yaml:"items"`
+}
+
+type ItemDownloadFormat struct {
+    Timestamp       int64                       `json:"timestamp" yaml:"timestamp"`
+    Index           int                         `json:"index" yaml:"index"`
+    Labels          []LabelDownloadFormat       `json:"labels" yaml:"labels"`
+}
+
+type LabelDownloadFormat struct {
+    Id              int                         `json:"id" yaml:"id"`
+    Category        string                      `json:"category" yaml:"category"`
+    Attributes      map[string]interface{}      `json:"attributes" yaml:"attributes"`
+    Data            map[string]interface{}      `json:"data" yaml:"data"`
+}
+
 // Function type for handlers
 type HandleFunc func(http.ResponseWriter, *http.Request)
 
@@ -437,6 +458,64 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(nil)
+}
+
+// Handles the download of submitted assignments
+func postDownloadHandler(w http.ResponseWriter, r *http.Request) {
+    downloadFile := DownloadFormat{}
+    var projectName = r.FormValue("project_name")
+    projectFilePath := path.Join(env.DataDir, projectName, "project.json")
+    projectFileContents, err := ioutil.ReadFile(projectFilePath)
+    if err != nil {
+        Error.Println(err)
+    }
+
+    projectToLoad := Project{}
+    err = json.Unmarshal(projectFileContents, &projectToLoad)
+    if err != nil {
+        Error.Println(err)
+    }
+    downloadFile.Name = projectToLoad.Options.Name
+    downloadFile.Categories = projectToLoad.Options.Categories
+    downloadFile.Attributes = projectToLoad.Options.Attributes
+
+    // Grab the latest submissions from all tasks
+    tasks := GetTasksInProject(projectName)
+    for _, task := range tasks {
+        latestSubmission := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
+        for _, itemToLoad := range latestSubmission.Task.Items {
+            item := ItemDownloadFormat{}
+            item.Timestamp = latestSubmission.SubmitTime
+            item.Index = itemToLoad.Index
+            for _, labelId := range itemToLoad.LabelIds {
+                var labelToLoad Label
+                for _, label := range latestSubmission.Labels {
+                    if label.Id == labelId {
+                        labelToLoad = label
+                        break
+                    }
+                }
+                label := LabelDownloadFormat{}
+                label.Id = labelId
+                label.Category = labelToLoad.CategoryPath
+                label.Attributes = labelToLoad.Attributes
+                label.Data = labelToLoad.Data
+                item.Labels = append(item.Labels, label)
+                Info.Println("label", label)
+            }
+            downloadFile.Items = append(downloadFile.Items, item)
+            Info.Println("item", item)
+        }
+    }
+
+    downloadJson, err := json.MarshalIndent(downloadFile, "", "  ")
+    if err != nil {
+        Error.Println(err)
+    }
+
+    //set relevant header.
+    w.Header().Set("Content-Disposition", "attachment; filename=" + projectName + "_Results.json")
+    io.Copy(w, bytes.NewReader(downloadJson))
 }
 
 // DEPRECATED
