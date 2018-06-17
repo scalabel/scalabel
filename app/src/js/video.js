@@ -176,7 +176,7 @@ Track.prototype.setActive = function(active) {
 
 Track.prototype.childDeleted = function() {
   // TODO: update the behavior of track on child being too small
-  this.delete();
+  // this.delete();
 };
 
 Track.prototype.endTrack = function(endLabel) {
@@ -186,7 +186,7 @@ Track.prototype.endTrack = function(endLabel) {
     if (endIndex) {
       self.children[i].delete();
     }
-    if (self.children[i].id === endLabel.id) {
+    if (!endIndex && self.children[i].id === endLabel.id) {
       endIndex = i;
     }
   }
