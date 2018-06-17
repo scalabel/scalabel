@@ -12,7 +12,7 @@ import (
 )
 
 // TODO: use actual worker ID
-const DEFAULT_WORKER_ID = "default_worker"
+const DEFAULT_WORKER = "default_worker"
 
 func GetProject(projectName string) Project {
 	err := os.MkdirAll(env.DataDir, 0777)
@@ -105,15 +105,46 @@ func GetTasksInProject(projectName string) []Task {
 	return tasks
 }
 
+// Get the most recent assignment given the needed fields.
 func GetAssignment(projectName string, taskIndex string, workerId string) Assignment {
-	assignmentPath := path.Join(env.DataDir, projectName, "assignments",
-		taskIndex, workerId+".json")
-	assignmentFileContents, err := ioutil.ReadFile(assignmentPath)
+	assignment := Assignment{}
+	submissionsPath := path.Join(env.DataDir, projectName, "submissions",
+		taskIndex, workerId)
+	os.MkdirAll(submissionsPath, 0777)
+	submissionsDirectoryContents, err := ioutil.ReadDir(submissionsPath)
 	if err != nil {
 		Error.Println(err)
 	}
-	assignment := Assignment{}
-	json.Unmarshal(assignmentFileContents, &assignment)
+	// directory contents should already be sorted, just need to remove all non-JSON
+	submissionsDirectoryJSONs := []os.FileInfo{}
+	for _, fi := range submissionsDirectoryContents {
+		if path.Ext(fi.Name()) == ".json" {
+			submissionsDirectoryJSONs = append(submissionsDirectoryJSONs, fi)
+		}
+	}
+	// if any submissions exist, get the most recent one
+	if (len(submissionsDirectoryJSONs) > 0) {
+		submissionFileContents, err := ioutil.ReadFile(path.Join(submissionsPath,
+			submissionsDirectoryJSONs[len(submissionsDirectoryJSONs)-1].Name()))
+		if err != nil {
+			Error.Println(err)
+		}
+		err = json.Unmarshal(submissionFileContents, &assignment)
+		if err != nil {
+			Error.Println(err)
+		}
+	} else {
+		assignmentPath := path.Join(env.DataDir, projectName, "assignments",
+			taskIndex, workerId+".json")
+		assignmentFileContents, err := ioutil.ReadFile(assignmentPath)
+		if err != nil {
+			Error.Println(err)
+		}
+		err = json.Unmarshal(assignmentFileContents, &assignment)
+		if err != nil {
+			Error.Println(err)
+		}
+	}
 	return assignment
 }
 
@@ -126,42 +157,6 @@ func CreateAssignment(projectName string, taskIndex string, workerId string) Ass
 	}
 	assignment.Initialize()
 	return assignment
-}
-
-// DEPRECATED
-func GetAssignments() []Assignment {
-	assignmentsDirectoryPath := path.Join(env.DataDir, "assignments")
-	assignmentsDirectoryContents, err := ioutil.ReadDir(
-		assignmentsDirectoryPath)
-	if err != nil {
-		Error.Println(err)
-	}
-	assignments := []Assignment{}
-	for _, projectDirectory := range assignmentsDirectoryContents {
-		if projectDirectory.IsDir() {
-			projectDirectoryPath := path.Join(env.DataDir, "assignments",
-				projectDirectory.Name())
-			projectDirectoryContents, err := ioutil.ReadDir(
-				projectDirectoryPath)
-			if err != nil {
-				Error.Println(err)
-			}
-			for _, assignmentFile := range projectDirectoryContents {
-				if len(assignmentFile.Name()) > 5 &&
-					path.Ext(assignmentFile.Name()) == ".json" {
-					assignmentFileContents, err := ioutil.ReadFile(
-						path.Join(projectDirectoryPath, assignmentFile.Name()))
-					if err != nil {
-						Error.Println(err)
-					}
-					assignment := Assignment{}
-					json.Unmarshal(assignmentFileContents, &assignment)
-					assignments = append(assignments, assignment)
-				}
-			}
-		}
-	}
-	return assignments
 }
 
 func GetDashboardContents(projectName string) DashboardContents {

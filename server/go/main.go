@@ -22,14 +22,14 @@ var (
 
 // Stores the config info found in config.yml
 type Env struct {
-	Port       int    `yaml:"port"`
-	DataDir    string `yaml:"dataDir"`
-	SourcePath string `yaml:"sourcePath"`
-	AppSubDir  string `yaml:"appSubDir"`
+	Port      int    `yaml:"port"`
+	DataDir   string `yaml:"data"`
+	SrcPath   string `yaml:"src"`
+	AppSubDir string `yaml:"appSubDir"`
 }
 
 func (env Env) AppDir() string {
-	return path.Join(env.SourcePath, env.AppSubDir)
+	return path.Join(env.SrcPath, env.AppSubDir)
 }
 
 func (env Env) CreatePath() string {
@@ -121,7 +121,7 @@ func main() {
 	// flow control handlers
 	//http.HandleFunc("/", parse(indexHandler))
 	http.HandleFunc("/", WrapHandler(http.FileServer(
-		http.Dir(path.Join(env.SourcePath, env.AppSubDir)))))
+		http.Dir(path.Join(env.SrcPath, env.AppSubDir)))))
 	http.HandleFunc("/dashboard", WrapHandleFunc(dashboardHandler))
 	http.HandleFunc("/vendor", WrapHandleFunc(vendorHandler))
 	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))

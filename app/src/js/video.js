@@ -17,7 +17,6 @@ function SatVideo(LabelType) {
   self.slider = document.getElementById('video_slider');
   self.numFrames = self.slider.max;
 
-  self.load();
   self.currentItem = self.items[0];
   self.currentItem.image.onload = function() {
     self.currentItem.redraw();};
@@ -63,22 +62,22 @@ SatVideo.prototype.toJson = function() {
       json.tracks.push(self.tracks[i].toJson());
     }
   }
-  json.task.metadata = self.metadata;
+  json.task.projectOptions.metadata = self.metadata;
   return json;
 };
 
 SatVideo.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
-  self.metadata = json.task.metadata;
+  self.metadata = json.task.projectOptions.metadata;
   self.tracks = [];
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
     let track = new Track(self, json.tracks[i].id,
-      json.tracks[i].attributeValues);
+      json.tracks[i].attributes);
     track.children = [];
-    for (let j = 0; j < json.tracks[i].children.length; j++) {
-      track.addChild(self.labelIdMap[json.tracks[i].children[j]]);
-      self.labelIdMap[json.tracks[i].children[j]].parent = track;
+    for (let j = 0; j < json.tracks[i].childrenIds.length; j++) {
+      track.addChild(self.labelIdMap[json.tracks[i].childrenIds[j]]);
+      self.labelIdMap[json.tracks[i].childrenIds[j]].parent = track;
       for (let k = 0; k < self.labels.length; k++) {
         if (self.labels[k].id === track.id) {
           self.labels[k] = track;

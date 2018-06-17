@@ -48,15 +48,16 @@ func (project *Project) Save() {
 
 // Info about a Project shared by Project and Task.
 type ProjectOptions struct {
-	Name          string        `json:"name" yaml:"name"`
-	ItemType      string        `json:"itemType" yaml:"itemType"`
-	LabelType     string        `json:"labelType" yaml:"labelType"`
-	TaskSize      int           `json:"taskSize" yaml:"taskSize"`
-	HandlerUrl    string        `json:"handlerUrl" yaml:"handlerUrl"`
-	PageTitle     string        `json:"pageTitle" yaml:"pageTitle"`
-	Categories    []Category    `json:"categories" yaml:"categories"`
-	Attributes    []Attribute   `json:"attributes" yaml:"attributes"`
-	VideoMetaData VideoMetaData `json:"metadata" yaml:"metadata"`
+	Name                 string        `json:"name" yaml:"name"`
+	ItemType             string        `json:"itemType" yaml:"itemType"`
+	LabelType            string        `json:"labelType" yaml:"labelType"`
+	TaskSize             int           `json:"taskSize" yaml:"taskSize"`
+	HandlerUrl           string        `json:"handlerUrl" yaml:"handlerUrl"`
+	PageTitle            string        `json:"pageTitle" yaml:"pageTitle"`
+	Categories           []Category    `json:"categories" yaml:"categories"`
+	NumLeafCategories    int           `json:"numLeafCategories" yaml:"numLeafCategories"`
+	Attributes           []Attribute   `json:"attributes" yaml:"attributes"`
+	VideoMetaData        VideoMetaData `json:"metadata" yaml:"metadata"`
 }
 
 // A workably-sized collection of Items belonging to a Project.
@@ -93,16 +94,16 @@ func (task *Task) Save() {
 
 // The actual assignment of a task to a worker. Contains the worker's progress.
 type Assignment struct {
-	Task            Task              `json:"task" yaml:"task"`
-	WorkerId        string            `json:"workerId" yaml:"workerId"`
-	Labels          []Label           `json:"labels" yaml:"labels"`
-	Tracks          []Label           `json:"tracks" yaml:"tracks"`
-	Events          []Event           `json:"events" yaml:"events"`
-	StartTime       int64             `json:"startTime" yaml:"startTime"`
-	SubmitTime      int64             `json:"submitTime" yaml:"submitTime"`
-	NumLabeledItems int               `json:"numLabeledItems" yaml:"numLabeledItems"`
-	UserAgent       string            `json:"userAgent" yaml:"userAgent"`
-	IpInfo          map[string]string `json:"ipInfo" yaml:"ipInfo"`
+	Task            Task                   `json:"task" yaml:"task"`
+	WorkerId        string                 `json:"workerId" yaml:"workerId"`
+	Labels          []Label                `json:"labels" yaml:"labels"`
+	Tracks          []Label                `json:"tracks" yaml:"tracks"`
+	Events          []Event                `json:"events" yaml:"events"`
+	StartTime       int64                  `json:"startTime" yaml:"startTime"`
+	SubmitTime      int64                  `json:"submitTime" yaml:"submitTime"`
+	NumLabeledItems int                    `json:"numLabeledItems" yaml:"numLabeledItems"`
+	UserAgent       string                 `json:"userAgent" yaml:"userAgent"`
+	IpInfo          map[string]interface{} `json:"ipInfo" yaml:"ipInfo"`
 }
 
 func (assignment *Assignment) GetAssignmentPath() string {
@@ -149,7 +150,7 @@ func (assignment *Assignment) Serialize(path string) {
 	} else {
 		Info.Println("Saving assignment file of",
 			assignment.Task.ProjectOptions.Name, assignment.Task.Index,
-			assignment.WorkerId)
+			assignment.WorkerId, "to", path)
 	}
 }
 
@@ -165,8 +166,8 @@ type Item struct {
 type Label struct {
 	Id           int                    `json:"id" yaml:"id"`
 	CategoryPath string                 `json:"categoryPath" yaml:"categoryPath"`
-	ParentId     int                    `json:"parent" yaml:"parentId"`
-	ChildrenIds  []int                  `json:"children" yaml:"childrenIds"`
+	ParentId     int                    `json:"parentId" yaml:"parentId"`
+	ChildrenIds  []int                  `json:"childrenIds" yaml:"childrenIds"`
 	Attributes   map[string]interface{} `json:"attributes" yaml:"attributes"`
 	Data         map[string]interface{} `json:"data" yaml:"data"`
 	Keyframe     bool                   `json:"keyframe" yaml:"keyframe"`
@@ -230,6 +231,18 @@ func WrapHandleFunc(fn HandleFunc) HandleFunc {
 		Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
 		fn(w, r)
 	}
+}
+
+func countCategories(categories []Category) int {
+    count := 0
+    for _, category := range categories {
+        if len(category.Subcategories) > 0 {
+            count += countCategories(category.Subcategories)
+        } else {
+            count += 1
+        }
+    }
+    return count
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
@@ -297,6 +310,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// parse the category list YML from form
 	categories := getCategoriesFromProjectForm(r)
+	numLeafCategories := countCategories(categories)
 	// parse the attribute list YML from form
 	attributes := getAttributesFromProjectForm(r)
 	// get the task size from form
@@ -307,7 +321,11 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// get the vendor ID from form
 	vendorId, err := strconv.Atoi(r.FormValue("vendor_id"))
 	if err != nil {
-		Error.Println(err)
+		if (r.FormValue("vendor_id") == "") {
+			vendorId = -1
+		} else {
+			Error.Println(err)
+		}
 	}
 
 	// This prefix determines which handler will deal with labeling sessions
@@ -316,15 +334,16 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// initialize and save the project
 	var projectOptions = ProjectOptions{
-		Name:          projectName,
-		ItemType:      itemType,
-		LabelType:     labelType,
-		TaskSize:      taskSize,
-		HandlerUrl:    handlerUrl,
-		PageTitle:     pageTitle,
-		Categories:    categories,
-		Attributes:    attributes,
-		VideoMetaData: videoMetaData,
+		Name:                projectName,
+		ItemType:            itemType,
+		LabelType:           labelType,
+		TaskSize:            taskSize,
+		HandlerUrl:          handlerUrl,
+		PageTitle:           pageTitle,
+		Categories:          categories,
+		NumLeafCategories:   numLeafCategories,
+		Attributes:          attributes,
+		VideoMetaData:       videoMetaData,
 	}
 	var project = Project{
 		Items:    items,
@@ -345,12 +364,12 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 	taskIndex := r.URL.Query()["task_index"][0]
 	var assignment Assignment
 	if (!Exists(path.Join(env.DataDir, projectName, "assignments",
-		taskIndex, DEFAULT_WORKER_ID+".json"))) {
+		taskIndex, DEFAULT_WORKER+".json"))) {
 		// if assignment does not exist, create it
-		assignment = CreateAssignment(projectName, taskIndex, DEFAULT_WORKER_ID)
+		assignment = CreateAssignment(projectName, taskIndex, DEFAULT_WORKER)
 	} else {
 		// otherwise, get that assignment
-		assignment = GetAssignment(projectName, taskIndex, DEFAULT_WORKER_ID)
+		assignment = GetAssignment(projectName, taskIndex, DEFAULT_WORKER)
 	}
 	tmpl.Execute(w, assignment)
 }
@@ -369,15 +388,16 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	projectName := assignmentToLoad.Task.ProjectOptions.Name
 	taskIndex := strconv.Itoa(assignmentToLoad.Task.Index)
 	var loadedAssignment Assignment
-	if (!Exists(path.Join(env.DataDir, projectName, taskIndex,
-		DEFAULT_WORKER_ID))) {
+	if (!Exists(path.Join(env.DataDir, projectName, "assignments", taskIndex,
+		DEFAULT_WORKER+".json"))) {
 		// if assignment does not exist, create it
 		// TODO: resolve tension between this function and executeLabelingTemplate()
 		loadedAssignment = CreateAssignment(projectName, taskIndex,
-			DEFAULT_WORKER_ID)
+			DEFAULT_WORKER)
 	} else {
 		loadedAssignment = GetAssignment(projectName, taskIndex,
-			DEFAULT_WORKER_ID)
+			DEFAULT_WORKER)
+		loadedAssignment.StartTime = recordTimestamp()
 	}
 	loadedAssignmentJson, err := json.Marshal(loadedAssignment)
 	if err != nil {
@@ -386,14 +406,12 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(loadedAssignmentJson)
 }
 
-// DEPRECATED
 // Handles the posting of saved assignments
 func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)
 		return
 	}
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		Error.Println(err)
@@ -403,24 +421,19 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
+	assignment.SubmitTime = recordTimestamp()
 	Info.Println(assignment)
-
-	oldAssignment := GetAssignment(assignment.Task.ProjectOptions.Name, strconv.Itoa(assignment.Task.Index), DEFAULT_WORKER_ID)
-	assignment.Events = append(oldAssignment.Events, assignment.Events...)
-
-	assignmentPath := path.Join(env.DataDir, "assignments",
-	    assignment.Task.ProjectOptions.Name, strconv.Itoa(assignment.Task.Index) +
-	    ".json")
+	// TODO: don't send all events to front end, and append these events to most recent
+	submissionPath := assignment.GetSubmissionPath()
 	assignmentJson, err := json.MarshalIndent(assignment, "", "  ")
 	if err != nil {
 		Error.Println(err)
 	}
-
-	err = ioutil.WriteFile(assignmentPath, assignmentJson, 0644)
+	err = ioutil.WriteFile(submissionPath, assignmentJson, 0644)
 	if err != nil {
 		Error.Println(err)
 	} else {
-		Info.Println("Saved assignment " + assignmentPath)
+		Info.Println("Saved submission file of", submissionPath)
 	}
 
 	w.Write(nil)

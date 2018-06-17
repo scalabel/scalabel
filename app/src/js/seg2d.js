@@ -315,7 +315,7 @@ Seg2d.prototype.fromJsonVariables = function(json) {
   this.decodeBaseJsonVariables(json);
   this.polys = [];
   this.type = json.data.type;
-  if (json.data.polys) {
+  if (json.data && json.data.polys) {
     for (let polyJson of json.data.polys) {
       if (this.type === SegTypes.POLYGON) {
         this.addPolyline(Polygon.fromJson(polyJson));

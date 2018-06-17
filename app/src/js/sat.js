@@ -156,6 +156,9 @@ Sat.prototype.newLabel = function(optionalAttributes) {
  */
 Sat.prototype.addEvent = function(action, itemIndex, labelId = -1,
                                   position = null) {
+  if (!this.events) {
+    this.events = [];
+  }
   this.events.push({
     timestamp: Date.now(),
     action: action,
@@ -337,8 +340,6 @@ Sat.prototype.initToolbox = function() {
       attributeInput.setAttribute('data-label-text', self.attributes[i].name);
       $('#custom_attribute_' + self.attributes[i].name).bootstrapSwitch();
     } else if (self.attributes[i].toolType === 'list') {
-      attributeInput.parent = document.getElementById('custom_attribute_' +
-        self.attributes[i].name + '_div');
       let listOuterHtml = '<p>' + self.attributes[i].name + '</p>';
       listOuterHtml +=
         '<div id="radios" class="btn-group" data-toggle="buttons">';
@@ -402,26 +403,28 @@ Sat.prototype.encodeBaseJson = function() {
       labels.push(self.labels[i].toJson());
     }
   }
-  self.assignmentInfo.submissionsCount++;
-  let assignmentInfo = {submitTime: new Date().toJSON(),
-    submissionsCount: self.assignmentInfo.submissionsCount,
-    labeledItemsCount: labeledItemsCount,
-    userAgent: navigator.userAgent,
-    ipInfo: self.ipInfo,
-  };
   return {
     task: {
-      handlerUrl: self.handlerUrl,
-      pageTitle: self.pageTitle,
-      projectName: self.projectName,
+      projectOptions: {
+        name: self.projectName,
+        itemType: self.itemType,
+        labelType: self.labelType,
+        taskSize: self.taskSize,
+        handlerUrl: self.handlerUrl,
+        pageTitle: self.pageTitle,
+        categories: self.categories,
+        attributes: self.attributes,
+      },
+      index: self.taskIndex,
       items: items,
-      categories: self.categories,
-      attributes: self.attributes,
     },
-    startTime: self.startTime,
+    workerId: self.workerId,
     labels: labels,
     events: self.events,
-    assignmentInfo: assignmentInfo,
+    startTime: self.startTime,
+    numLabeledItems: labeledItemsCount,
+    userAgent: navigator.userAgent,
+    ipInfo: self.ipInfo,
   };
 };
 
@@ -441,10 +444,17 @@ Sat.prototype.fromJson = function(json) {
  */
 Sat.prototype.decodeBaseJson = function(json) {
   let self = this;
+  self.projectName = json.task.projectOptions.name;
+  self.itemType = json.task.projectOptions.itemType;
+  self.labelType = json.task.projectOptions.labelType;
+  self.taskSize = json.task.projectOptions.taskSize;
   self.handlerUrl = json.task.projectOptions.handlerUrl;
   self.pageTitle = json.task.projectOptions.pageTitle;
   document.title = self.pageTitle;
   document.getElementById('page-title').textContent = self.pageTitle;
+  self.categories = json.task.projectOptions.categories;
+  self.attributes = json.task.projectOptions.attributes;
+  self.taskIndex = json.task.index;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID
     self.lastLabelId = Math.max(self.lastLabelId, json.labels[i].id);
@@ -453,16 +463,13 @@ Sat.prototype.decodeBaseJson = function(json) {
     self.labelIdMap[newLabel.id] = newLabel;
     self.labels.push(newLabel);
   }
-
   for (let i = 0; i < json.task.items.length; i++) {
     let newItem = self.newItem(json.task.items[i].url);
     newItem.fromJson(json.task.items[i]);
   }
-
-  self.categories = json.task.projectOptions.categories;
-  self.attributes = json.task.projectOptions.attributes;
-  // self.assignmentId = json.assignmentId;
-  self.projectName = json.task.projectOptions.name;
+  self.workerId = json.workerId;
+  self.events = json.events; // TODO: don't deserialize all events
+  self.startTime = json.startTime;
 
   self.currentItem = self.items[0];
 
@@ -575,24 +582,23 @@ SatItem.prototype.toJson = function() {
 
 /**
  * Restore this SatItem from JSON.
- * @param {object} selfJson - JSON representation of this SatItem.
- * @param {string} selfJson.url - This SatItem's url.
- * @param {number} selfJson.index - This SatItem's index in
- * @param {list} selfJson.labelIds - The list of label ids of this SatItem's
+ * @param {object} json - JSON representation of this SatItem.
+ * @param {string} json.url - This SatItem's url.
+ * @param {number} json.index - This SatItem's index in
+ * @param {list} json.labelIds - The list of label ids of this SatItem's
  *   SatLabels.
  */
-SatItem.prototype.fromJson = function(selfJson) {
+SatItem.prototype.fromJson = function(json) {
   let self = this;
-  self.url = selfJson.url;
-  self.index = selfJson.index;
-  if (selfJson.labelIds) {
-    for (let i = 0; i < selfJson.labelIds.length; i++) {
-      let label = self.sat.labelIdMap[selfJson.labelIds[i]];
+  self.url = json.url;
+  self.index = json.index;
+  if (json.labelIds) {
+    for (let i = 0; i < json.labelIds.length; i++) {
+      let label = self.sat.labelIdMap[json.labelIds[i]];
       self.labels.push(label);
       label.satItem = this;
     }
   }
-  self.attributes = selfJson.attributes;
 };
 
 /**
@@ -736,9 +742,9 @@ SatLabel.prototype.encodeBaseJson = function() {
   let json = {id: self.id, categoryPath: self.categoryPath,
     attributes: self.attributes};
   if (self.parent) {
-    json.parent = self.parent.id;
+    json.parentId = self.parent.id;
   } else {
-    json.parent = -1;
+    json.parentId = -1;
   }
   if (self.children && self.children.length > 0) {
     let childrenIds = [];
@@ -747,7 +753,7 @@ SatLabel.prototype.encodeBaseJson = function() {
         childrenIds.push(self.children[i].id);
       }
     }
-    json.children = childrenIds;
+    json.childrenIds = childrenIds;
   }
   // TODO: remove
   json.keyframe = self.keyframe;
