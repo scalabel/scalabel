@@ -1,0 +1,33 @@
+-
+  name: Continuity
+  toolType: list
+  values:
+    - NA
+    - Full
+    - Dashed
+  tagPrefix: t
+  tagSuffixes:
+    - ""
+    - f
+    - d
+  buttonColors:
+    - white
+    - white
+    - white
+
+-
+  name: Direction
+  toolType: list
+  values:
+    - NA
+    - Parallel
+    - Vertical
+  tagPrefix: d
+  tagSuffixes:
+    - ""
+    - p
+    - v
+  buttonColors:
+    - white
+    - white
+    - white
