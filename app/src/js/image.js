@@ -240,6 +240,7 @@ SatImage.prototype.setScale = function(scale) {
 SatImage.prototype.loaded = function() {
   // Call SatItem loaded
   SatItem.prototype.loaded.call(this);
+  this.redraw();
 };
 
 /**
