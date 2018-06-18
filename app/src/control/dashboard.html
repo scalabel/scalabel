@@ -67,14 +67,14 @@
                                 workers.</p>
                             <a type="submit" id="download_list"
                                class="btn btn-default btn-md" target="_blank"
-                               href="">Download Assignment URLs</a>
-                            <form id="download-form">
-                                <a type="submit" id="download_result"
-                                   class="btn btn-default btn-md"
-                                   target="_blank"
-                                   href="./postDownload?project_name={{ .Project.Options.Name }}">
-                                    Download Results</a>
-                            </form>
+                               href="./postDownloadTaskURL?project_name={{ .Project.Options.Name }}">
+                                Download Assignment URLs</a>
+                            <br>
+                            <a type="submit" id="download_result"
+                               class="btn btn-default btn-md"
+                               target="_blank"
+                               href="./postDownload?project_name={{ .Project.Options.Name }}">
+                                Download Results</a>
                         </div>
                         <table width="100%"
                                class="table table-striped table-bordered table-hover"

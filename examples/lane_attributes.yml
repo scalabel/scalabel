@@ -1,11 +1,28 @@
 -
+  name: Type
+  toolType: list
+  values:
+    - NA
+    - Single
+    - Double
+  tagPrefix: t
+  tagSuffixes:
+    - ""
+    - s
+    - d
+  buttonColors:
+    - white
+    - white
+    - white
+
+-
   name: Continuity
   toolType: list
   values:
     - NA
     - Full
     - Dashed
-  tagPrefix: t
+  tagPrefix: c
   tagSuffixes:
     - ""
     - f

@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -224,6 +225,19 @@ type LabelDownloadFormat struct {
     Category        string                      `json:"category" yaml:"category"`
     Attributes      map[string]interface{}      `json:"attributes" yaml:"attributes"`
     Data            map[string]interface{}      `json:"data" yaml:"data"`
+}
+
+type TaskURL struct {
+    URL             string                      `json:"url" yaml:"url"`
+}
+
+// unescaped marshal used to encode url string
+func JSONMarshal(t interface{}) ([]byte, error) {
+    buffer := &bytes.Buffer{}
+    encoder := json.NewEncoder(buffer)
+    encoder.SetEscapeHTML(false)
+    err := encoder.Encode(t)
+    return buffer.Bytes(), err
 }
 
 // Function type for handlers
@@ -515,6 +529,37 @@ func postDownloadHandler(w http.ResponseWriter, r *http.Request) {
 
     //set relevant header.
     w.Header().Set("Content-Disposition", "attachment; filename=" + projectName + "_Results.json")
+    io.Copy(w, bytes.NewReader(downloadJson))
+}
+
+// Handles the download of submitted assignments
+func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
+    var projectName = r.FormValue("project_name")
+    tasks := GetTasksInProject(projectName)
+
+    taskURLs := []TaskURL{}
+    for _, task := range tasks {
+        taskURL := TaskURL{}
+        u, err := url.Parse(path.Join(r.Host, task.ProjectOptions.HandlerUrl))
+        if err != nil {
+            log.Fatal(err)
+        }
+        q := u.Query()
+        q.Set("project_name", projectName)
+        q.Set("task_index", strconv.Itoa(task.Index))
+        u.RawQuery = q.Encode()
+        taskURL.URL = u.String()
+        taskURLs = append(taskURLs, taskURL)
+    }
+
+    // downloadJson, err := json.MarshalIndent(taskURLs, "", "  ")
+    downloadJson, err := JSONMarshal(taskURLs)
+    if err != nil {
+        Error.Println(err)
+    }
+
+    //set relevant header.
+    w.Header().Set("Content-Disposition", "attachment; filename=" + projectName + "_TaskURLs.json")
     io.Copy(w, bytes.NewReader(downloadJson))
 }
 
