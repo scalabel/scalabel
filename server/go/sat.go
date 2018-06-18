@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"html/template"
+	"reflect"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -225,6 +227,41 @@ type LabelDownloadFormat struct {
     Category        string                      `json:"category" yaml:"category"`
     Attributes      map[string]interface{}      `json:"attributes" yaml:"attributes"`
     Data            map[string]interface{}      `json:"data" yaml:"data"`
+    Box2d           map[string]interface{}      `json:"box2d" yaml:"box2d"`
+    Segments2d      map[string]interface{}      `json:"segments2d" yaml:"segments2d"`
+}
+
+var floatType = reflect.TypeOf(float64(0))
+
+func getFloat(unk interface{}) (float64, error) {
+    v := reflect.ValueOf(unk)
+    v = reflect.Indirect(v)
+    if !v.Type().ConvertibleTo(floatType) {
+        return 0, fmt.Errorf("cannot convert %v to float64", v.Type())
+    }
+    fv := v.Convert(floatType)
+    return fv.Float(), nil
+}
+
+func parseBox2d(data map[string]interface{}) (map[string]interface{}) {
+    var box2d = map[string]interface{}{}
+    x, err := getFloat(data["x"])
+    y, err := getFloat(data["y"])
+    h, err := getFloat(data["h"])
+    w, err := getFloat(data["w"])
+    if err != nil {
+        Error.Println(err)
+    }
+    box2d["x1"] = x
+    box2d["y1"] = y
+    box2d["x2"] = x + w
+    box2d["y2"] = y + h
+    return box2d
+}
+
+func parseSegments2d(data map[string]interface{}) (map[string]interface{}) {
+    var segments2d = map[string]interface{}{}
+    return segments2d
 }
 
 type TaskURL struct {
@@ -514,11 +551,16 @@ func postDownloadHandler(w http.ResponseWriter, r *http.Request) {
                 label.Category = labelToLoad.CategoryPath
                 label.Attributes = labelToLoad.Attributes
                 label.Data = labelToLoad.Data
+                switch projectToLoad.Options.LabelType {
+                case "box2d":
+                    label.Box2d = parseBox2d(labelToLoad.Data)
+                case "segmentation":
+                    // TODO: handle seg2d here
+                    // label.Segments2d = parseSegments2d(labelToLoad.Data)
+                }
                 item.Labels = append(item.Labels, label)
-                Info.Println("label", label)
             }
             downloadFile.Items = append(downloadFile.Items, item)
-            Info.Println("item", item)
         }
     }
 

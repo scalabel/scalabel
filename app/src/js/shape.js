@@ -535,6 +535,7 @@ Polyline.prototype.indexOf = function(v) {
 };
 
 Polyline.prototype.toJson = function() {
+  this.alignEdges();
   let vertexJsons = [];
   let edgeJsons = [];
   for (let v of this.vertices) {
