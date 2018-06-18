@@ -358,6 +358,11 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// validate form fields that are required
+	if !formValidation(w, r) {
+		return
+	}
+
 	// make sure the project name in the form is new
 	var projectName = CheckProjectName(r.FormValue("project_name"))
 	if projectName == "" {
@@ -376,7 +381,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// get page title from form
 	pageTitle := r.FormValue("page_title")
 	// parse the item list YML from form
-	items := getItemsFromProjectForm(r)
+	items := getItemsFromProjectForm(w, r)
 	if itemType == "video" {
 		videoMetaData.NumFrames = strconv.Itoa(len(items))
 	}
@@ -607,7 +612,7 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
 
 // DEPRECATED
 // handles item YAML file
-func getItemsFromProjectForm(r *http.Request) []Item {
+func getItemsFromProjectForm(w http.ResponseWriter, r *http.Request) []Item {
 	var items []Item
 	itemFile, _, err := r.FormFile("item_file")
 
@@ -628,6 +633,10 @@ func getItemsFromProjectForm(r *http.Request) []Item {
 		for i := 0; i < len(items); i++ {
 			items[i].Index = i
 		}
+	case http.ErrMissingFile:
+		w.Write([]byte("Please upload an item file."))
+		Error.Println(err)
+
 	default:
 		Error.Println(err)
 	}
@@ -739,4 +748,28 @@ func CreateTasks(project Project) {
 		}
 	}
 	Info.Println("Created", index, "new tasks")
+}
+
+// server side create form validation
+func formValidation(w http.ResponseWriter, r *http.Request) bool {
+	if r.FormValue("project_name") == "" {
+		w.Write([]byte("Please create a project name."))
+		return false
+	}
+
+	if r.FormValue("item_type") == "" {
+		w.Write([]byte("Please choose an item type."))
+		return false
+	}
+
+	if r.FormValue("label_type") == "" {
+		w.Write([]byte("Please choose a label type."))
+		return false
+	}
+
+	if r.FormValue("task_size") == "" {
+		w.Write([]byte("Please specify a task size."))
+		return false
+	}
+	return true
 }
