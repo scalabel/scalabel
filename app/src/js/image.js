@@ -37,6 +37,13 @@ HiddenMap.prototype.appendList = function(shapes) {
   }
 };
 
+/**
+ * remove duplicate items in hidden map
+ */
+HiddenMap.prototype.removeDuplicate = function() {
+  this.list = Array.from(new Set(this.list));
+};
+
 HiddenMap.prototype.get = function(index) {
   if (index >= 0 && index < this.list.length) {
     return this.list[index];

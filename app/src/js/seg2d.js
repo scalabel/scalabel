@@ -186,6 +186,8 @@ Seg2d.prototype.setState = function(state) {
       }
     }
     this.satItem.pushToHiddenMap(shapes);
+    // draw once for each shape
+    this.satItem._hiddenMap.removeDuplicate();
     this.satItem.redrawHiddenCanvas();
   }
 };
