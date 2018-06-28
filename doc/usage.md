@@ -29,6 +29,15 @@ python3 scripts/prepare_data.py -i <path_to_image_folder>  --s3 <s3_bucket_name/
 Once obtaining the `image_list.yml`, we can proceed to create a new annotation project. 
 
 
+## Serving Data
+If you wish to serve your own data on the same domain as this server, you may
+ do so. This means the item_list.yml you provide at project creation can 
+ contain URLs to this server. Any files or directories you place in "app/src/" 
+ will be uploaded to the server with the prefix path removed. For example, 
+ you could place a directory "images" in "app/src/". If you are just testing
+ the server locally, you can then specify in your item list URLs such as 
+ "localhost:8686/images/image_1.jpg".
+
 ## Launch Server 
 As provided in the [README](../README.md), you can either set up the tool with
 the provided docker image or build the tool by yourself. Once you have the tool setup, 

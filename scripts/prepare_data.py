@@ -33,7 +33,7 @@ def prepare_data(args):
         s3_setup(args)
 
     if os.path.isfile(args.input):
-        print('Spliting the video ...')
+        print('Splitting the video ...')
 
         if len(glob.glob(join(args.tar_dir, '*.jpg'))) > 0:
             print('[ERROR] Target folder is not empty. '
