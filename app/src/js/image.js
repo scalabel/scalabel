@@ -85,6 +85,12 @@ function SatImage(sat, index, url) {
   self.mainCtx = self.imageCanvas.getContext('2d');
   self.hiddenCtx = self.hiddenCanvas.getContext('2d');
 
+  // prevent smoothing on hidden canvas
+  self.hiddenCtx.mozImageSmoothingEnabled = false;
+  self.hiddenCtx.webkitImageSmoothingEnabled = false;
+  self.hiddenCtx.msImageSmoothingEnabled = false;
+  self.hiddenCtx.imageSmoothingEnabled = false;
+
   self.hoveredLabel = null;
 
   self.MAX_SCALE = 3.0;
@@ -496,6 +502,13 @@ SatImage.prototype.redrawMainCanvas = function() {
  */
 SatImage.prototype.redrawHiddenCanvas = function() {
   let self = this;
+
+  // prevent smoothing on hidden canvas
+  self.hiddenCtx.mozImageSmoothingEnabled = false;
+  self.hiddenCtx.webkitImageSmoothingEnabled = false;
+  self.hiddenCtx.msImageSmoothingEnabled = false;
+  self.hiddenCtx.imageSmoothingEnabled = false;
+
   self.padBox = self._getPadding();
   self.hiddenCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
       self.padBox.h * UP_RES_RATIO);
@@ -827,7 +840,7 @@ SatImage.prototype.getIndexOnHiddenMap = function(mousePos) {
   let [x, y] = this.toCanvasCoords([mousePos.x,
     mousePos.y]);
   let pixelData = this.hiddenCtx.getImageData(x, y, 1, 1).data;
-  let color = (pixelData[0] << 16) || (pixelData[1] << 8) || pixelData[2];
+  let color = (pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2];
   return color - 1;
 };
 

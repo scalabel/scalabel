@@ -1105,12 +1105,15 @@ Vertex.prototype.draw = function(context, satImage, fillStyle = null,
 Vertex.prototype.drawHidden = function(context, satImage, fillStyle) {
   context.save();
   let [x, y] = satImage.toCanvasCoords([this._x, this._y]);
-  context.beginPath();
-  context.arc(x, y, HIDDEN_HANDLE_RADIUS, 0, 2 * Math.PI, false);
-  context.closePath();
   context.strokeStyle = fillStyle;
   context.fillStyle = fillStyle;
-  context.fill();
+  // context.beginPath();
+  // context.arc(x, y, HIDDEN_HANDLE_RADIUS, 0, 2 * Math.PI, false);
+  // context.closePath();
+  // context.fill();
+  context.fillRect(Math.round(x - HIDDEN_HANDLE_RADIUS/2),
+    Math.round(y - HIDDEN_HANDLE_RADIUS/2),
+    HIDDEN_HANDLE_RADIUS, HIDDEN_HANDLE_RADIUS);
   context.restore();
 };
 
