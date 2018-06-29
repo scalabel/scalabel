@@ -8,7 +8,6 @@ ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO */
 // constants
 let SegStates = Object.freeze({
   FREE: 0, DRAW: 1, RESIZE: 2, QUICK_DRAW: 3, LINK: 4});
-let SegTypes = Object.freeze({POLYGON: 0, PATH: 1});
 const FONT_SIZE = 13;
 
 /**
@@ -41,19 +40,19 @@ function Seg2d(sat, id, optionalAttributes) {
   }
 
   if (this.sat.handlerUrl === '2d_seg_labeling') {
-    this.type = SegTypes.POLYGON;
+    this.closed = true;
   } else if (this.sat.handlerUrl === '2d_lane_labeling') {
-    this.type = SegTypes.PATH;
+    this.closed = false;
   }
 
 
   if (mousePos) {
     // if mousePos given, start drawing
     // set label type
-    if (this.type === SegTypes.POLYGON) {
+    if (this.closed) {
       this.newPoly = new Polygon();
       this.tempPoly = new Polygon();
-    } else if (this.type === SegTypes.PATH) {
+    } else {
       this.newPoly = new Path();
       this.tempPoly = new Path();
     }
@@ -316,12 +315,12 @@ Seg2d.prototype.handleQuickdraw = function() {
 Seg2d.prototype.fromJsonVariables = function(json) {
   this.decodeBaseJsonVariables(json);
   this.polys = [];
-  this.type = json.data.type;
+  this.closed = json.data.closed;
   if (json.data && json.data.polys) {
     for (let polyJson of json.data.polys) {
-      if (this.type === SegTypes.POLYGON) {
+      if (this.closed) {
         this.addPolyline(Polygon.fromJson(polyJson));
-      } else if (this.type === SegTypes.PATH) {
+      } else {
         this.addPolyline(Path.fromJson(polyJson));
       }
     }
@@ -339,7 +338,7 @@ Seg2d.prototype.toJson = function() {
     polysJson = polysJson.concat(poly.toJson());
   }
   json.data = {
-    type: this.type,
+    closed: this.closed,
     polys: polysJson,
   };
   return json;
@@ -896,7 +895,7 @@ Seg2d.prototype.keydown = function(e) {
         ? this.quickdrawCache.longPathPoly
         : this.quickdrawCache.shortPathPoly;
     }
-  } else if (keyID === 13 && this.type === SegTypes.PATH) {
+  } else if (keyID === 13 && !this.closed) {
     // enter for ending a Path object
     if (this.state === SegStates.DRAW) {
       this.newPoly.endPath();

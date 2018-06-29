@@ -5,17 +5,15 @@ import (
 	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"html/template"
-	"reflect"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"math"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strconv"
 	"log"
+	"./export"
 )
 
 // A collection of Items to be split into Tasks. Represents one unified type
@@ -208,174 +206,6 @@ type Event struct {
 type DashboardContents struct {
 	Project Project `json:"project" yaml:"project"`
 	Tasks   []Task  `json:"tasks" yaml:"tasks"`
-}
-
-// Download format specifications
-type DownloadFormat struct {
-	Name            string                     `json:"name" yaml:"name"`
-	Categories      []Category                 `json:"categories" yaml:"categories"`
-	Attributes      []Attribute                `json:"attributes" yaml:"attributes"`
-	Items           []ItemDownloadFormat       `json:"items" yaml:"items"`
-}
-
-type ItemDownloadFormat struct {
-    Timestamp       int64                       `json:"timestamp" yaml:"timestamp"`
-    Index           int                         `json:"index" yaml:"index"`
-    Labels          []LabelDownloadFormat       `json:"labels" yaml:"labels"`
-}
-
-type LabelDownloadFormat struct {
-    Id              int                         `json:"id" yaml:"id"`
-    Category        string                      `json:"category" yaml:"category"`
-    Attributes      map[string]interface{}      `json:"attributes" yaml:"attributes"`
-    Data            map[string]interface{}      `json:"data" yaml:"data"`
-    Box2d           map[string]interface{}      `json:"box2d" yaml:"box2d"`
-    Box3d           map[string]interface{}      `json:"box3d" yaml:"box3d"`
-    Segments2d      map[string]interface{}      `json:"segments2d" yaml:"segments2d"`
-}
-
-var floatType = reflect.TypeOf(float64(0))
-var integerType = reflect.TypeOf(int(0))
-var stringType = reflect.TypeOf("")
-
-func getFloat(unk interface{}) (float64, error) {
-    v := reflect.ValueOf(unk)
-    v = reflect.Indirect(v)
-    if !v.Type().ConvertibleTo(floatType) {
-        return 0, fmt.Errorf("cannot convert %v to float64", v.Type())
-    }
-    fv := v.Convert(floatType)
-    return fv.Float(), nil
-}
-
-func getFloatSlice(unk interface{}) ([]float64, error) {
-    if (reflect.TypeOf(unk).Kind() != reflect.Slice) {
-        return nil, fmt.Errorf("cannot convert interface to slice")
-    }
-
-    v := reflect.ValueOf(unk)
-    array := make([]float64, v.Len())
-
-    for i := 0; i < v.Len(); i++ {
-        val, ok := v.Index(i).Interface().(float64)
-        if !ok {
-            return nil, fmt.Errorf("cannot convert interface to slice")
-        }
-        array[i] = val
-    }
-
-    return array, nil
-}
-
-func parseBox2d(data map[string]interface{}) (map[string]interface{}) {
-    var box2d = map[string]interface{}{}
-    x, err := getFloat(data["x"])
-    y, err := getFloat(data["y"])
-    h, err := getFloat(data["h"])
-    w, err := getFloat(data["w"])
-    if err != nil {
-        Error.Println(err)
-    }
-    box2d["x1"] = x
-    box2d["y1"] = y
-    box2d["x2"] = x + w
-    box2d["y2"] = y + h
-    return box2d
-}
-
-func rotateXAxis3D(vector []float64, angle float64) (error) {
-    if len(vector) != 3 {
-        return fmt.Errorf("Input array was not 3 dimensional")
-    }
-
-    y := vector[1]
-    z := vector[2]
-
-    vector[1] = math.Cos(angle) * y - math.Sin(angle) * z
-    vector[2] = math.Sin(angle) * y + math.Cos(angle) * z
-
-    return nil
-}
-
-func rotateYAxis3D(vector []float64, angle float64) (error) {
-    if len(vector) != 3 {
-        return fmt.Errorf("Input array was not 3 dimensional")
-    }
-
-    x := vector[0]
-    z := vector[2]
-
-    vector[0] = math.Cos(angle) * x + math.Sin(angle) * z
-    vector[2] = -math.Sin(angle) * x + math.Cos(angle) * z
-
-    return nil
-}
-
-func rotateZAxis3D(vector []float64, angle float64) (error) {
-    if len(vector) != 3 {
-        return fmt.Errorf("Input array was not 3 dimensional")
-    }
-
-    x := vector[0]
-    y := vector[1]
-
-    vector[0] = math.Cos(angle) * x - math.Sin(angle) * y
-    vector[1] = math.Sin(angle) * x + math.Cos(angle) * y
-
-    return nil
-}
-
-func parseBox3d(data map[string]interface{}) (map[string]interface{}) {
-    var box3d = map[string]interface{}{}
-    position, err := getFloatSlice(data["position"])
-    rotation, err := getFloatSlice(data["rotation"])
-    scale, err := getFloatSlice(data["scale"])
-    if err != nil {
-        Error.Println(err)
-    }
-
-    fmt.Println(position)
-    fmt.Println(scale)
-
-    // Initialize points
-    var points = [8][]float64{};
-    var ind = 0
-    for x := float64(-0.5); x <= 0.5; x += 1 {
-        for y := float64(-0.5); y <= 0.5; y += 1 {
-            for z := float64(-0.5); z <= 0.5; z += 1 {
-                points[ind] = []float64{x, y, z};
-                ind++;
-            }
-        }
-    }
-
-    // Modify scale, position, rotation and load into box3d
-    for i := 0; i < len(points); i++ {
-        var point = points[i]
-        if scale != nil {
-            point[0] *= scale[0]
-            point[1] *= scale[1]
-            point[2] *= scale[2]
-        }
-        if rotation != nil {
-            rotateXAxis3D(point, rotation[0])
-            rotateYAxis3D(point, rotation[1])
-            rotateZAxis3D(point, rotation[2])
-        }
-        if position != nil {
-            point[0] += position[0]
-            point[1] += position[1]
-            point[2] += position[2]
-        }
-        box3d["p" + strconv.Itoa(i)] = point
-    }
-
-    return box3d
-}
-
-func parseSegments2d(data map[string]interface{}) (map[string]interface{}) {
-    var segments2d = map[string]interface{}{}
-    return segments2d
 }
 
 type TaskURL struct {
@@ -613,7 +443,6 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	assignment.SubmitTime = recordTimestamp()
-	Info.Println(assignment)
 	// TODO: don't send all events to front end, and append these events to most recent
 	submissionPath := assignment.GetSubmissionPath()
 	assignmentJson, err := json.MarshalIndent(assignment, "", "  ")
@@ -630,9 +459,9 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(nil)
 }
 
-// Handles the download of submitted assignments
-func postDownloadHandler(w http.ResponseWriter, r *http.Request) {
-    downloadFile := DownloadFormat{}
+// Handles the export of submitted assignments
+func postExportHandler(w http.ResponseWriter, r *http.Request) {
+    exportFile := export.ExportFile{}
     var projectName = r.FormValue("project_name")
     projectFilePath := path.Join(env.DataDir, projectName, "project.json")
     projectFileContents, err := ioutil.ReadFile(projectFilePath)
@@ -645,17 +474,17 @@ func postDownloadHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         Error.Println(err)
     }
-    downloadFile.Name = projectToLoad.Options.Name
-    downloadFile.Categories = projectToLoad.Options.Categories
-    downloadFile.Attributes = projectToLoad.Options.Attributes
+    exportFile.Name = projectToLoad.Options.Name
+    // exportFile.Categories = projectToLoad.Options.Categories
+    // exportFile.Attributes = projectToLoad.Options.Attributes
 
     // Grab the latest submissions from all tasks
     tasks := GetTasksInProject(projectName)
     for _, task := range tasks {
         latestSubmission := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
         for _, itemToLoad := range latestSubmission.Task.Items {
-            item := ItemDownloadFormat{}
-            item.Timestamp = latestSubmission.SubmitTime
+            item := export.Item{}
+            item.Timestamp = 10000 // to be fixed
             item.Index = itemToLoad.Index
             for _, labelId := range itemToLoad.LabelIds {
                 var labelToLoad Label
@@ -665,34 +494,34 @@ func postDownloadHandler(w http.ResponseWriter, r *http.Request) {
                         break
                     }
                 }
-                label := LabelDownloadFormat{}
+                label := export.Label{}
                 label.Id = labelId
                 label.Category = labelToLoad.CategoryPath
                 label.Attributes = labelToLoad.Attributes
-                label.Data = labelToLoad.Data
                 switch projectToLoad.Options.LabelType {
                 case "box2d":
-                    label.Box2d = parseBox2d(labelToLoad.Data)
+                    label.Box2d = export.ParseBox2d(labelToLoad.Data)
                 case "box3d":
-                    label.Box3d = parseBox3d(labelToLoad.Data)
+                    label.Box3d = export.ParseBox3d(labelToLoad.Data)
                 case "segmentation":
-                    // TODO: handle seg2d here
-                    // label.Segments2d = parseSegments2d(labelToLoad.Data)
+                    label.Seg2d = export.ParseSeg2d(labelToLoad.Data)
+                case "lane":
+                    label.Seg2d = export.ParseSeg2d(labelToLoad.Data)
                 }
                 item.Labels = append(item.Labels, label)
             }
-            downloadFile.Items = append(downloadFile.Items, item)
+            exportFile.Items = append(exportFile.Items, item)
         }
     }
 
-    downloadJson, err := json.MarshalIndent(downloadFile, "", "  ")
+    exportJson, err := json.MarshalIndent(exportFile, "", "  ")
     if err != nil {
         Error.Println(err)
     }
 
     //set relevant header.
     w.Header().Set("Content-Disposition", "attachment; filename=" + projectName + "_Results.json")
-    io.Copy(w, bytes.NewReader(downloadJson))
+    io.Copy(w, bytes.NewReader(exportJson))
 }
 
 // Handles the download of submitted assignments

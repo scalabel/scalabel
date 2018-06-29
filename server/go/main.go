@@ -130,7 +130,7 @@ func main() {
 	http.HandleFunc("/vendor", WrapHandleFunc(vendorHandler))
 	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))
 	http.HandleFunc("/postSave", WrapHandleFunc(postSaveHandler))
-	http.HandleFunc("/postDownload", WrapHandleFunc(postDownloadHandler))
+	http.HandleFunc("/postExport", WrapHandleFunc(postExportHandler))
 	http.HandleFunc("/postDownloadTaskURL", WrapHandleFunc(downloadTaskURLHandler))
 	http.HandleFunc("/postLoadAssignment",
 		WrapHandleFunc(postLoadAssignmentHandler))

@@ -46,7 +46,10 @@ Shape.registerShape = function(shape, id=null) {
   } else {
     shape.id = id;
   }
-  Shape.allShapes[shape.id] = shape;
+  // id < 0 for temporary shapes that don't need an id
+  if (shape.id > 0) {
+    Shape.allShapes[shape.id] = shape;
+  }
   if (shape.id > Shape.largestId) {
     Shape.largestId = shape.id;
   }
@@ -120,18 +123,20 @@ Object.defineProperty(Vertex.prototype, 'y_int', {
 /**
  * Interpolation towards a target point
  * @param {object} v: target vertex
- * @param {float} f: fraction to interpolate towards v
+ * @param {number} f: fraction to interpolate towards v
+ * @param {string} type: the type of the vertex
+ * @param {int} id: the temporary id to assign
  * @return {object} interpolated point
  */
-Vertex.prototype.interpolate = function(v, f) {
+Vertex.prototype.interpolate = function(v, f, type, id=null) {
   let [x, y] = this.interpolateCoords(v, f);
-  return new Vertex(x, y);
+  return new Vertex(x, y, type, id);
 };
 
 /**
  * Interpolation towards a target point
  * @param {object} v: target vertex
- * @param {float} f: fraction to interpolate towards v
+ * @param {number} f: fraction to interpolate towards v
  * @return {[number]} coordinates of the interpolated point
  */
 Vertex.prototype.interpolateCoords = function(v, f) {
@@ -187,13 +192,13 @@ Vertex.prototype.equals = function(v, threshold=1e-6) {
  * @param {[Vertex]} controlPoints - control points of the Edge object.
  * Needed only when loading saved shapes.
  */
-function Edge(src, dest, type=EdgeTypes.LINE, id = null, controlPoints = null) {
+function Edge(src, dest, type=EdgeTypes.LINE, id = null, controlPoints = []) {
   Shape.call(this, id);
   this._src = src; // define private variables to avoid recursive setter
   this._dest = dest;
   this._type = type;
   this._control_points = [];
-  if (controlPoints) {
+  if (controlPoints.length > 0) {
     this._control_points = controlPoints;
   } else {
     this.initControlPoints();
@@ -265,16 +270,16 @@ Object.defineProperty(Edge.prototype, 'size', {
 Edge.prototype.initControlPoints = function() {
   switch (this.type) {
     case EdgeTypes.LINE: {
-      let midpoint = this.src.interpolate(this.dest, 1/2);
-      midpoint.type = VertexTypes.MIDPOINT;
+      let midpoint = this.src.interpolate(
+          this.dest, 1/2, VertexTypes.MIDPOINT, -1);
       this._control_points = [midpoint];
       break;
     }
     case EdgeTypes.BEZIER: {
-      let control1 = this.src.interpolate(this.dest, 1/3);
-      let control2 = this.src.interpolate(this.dest, 2/3);
-      control1.type = VertexTypes.CONTROL_POINT;
-      control2.type = VertexTypes.CONTROL_POINT;
+      let control1 = this.src.interpolate(
+          this.dest, 1/3, VertexTypes.CONTROL_POINT);
+      let control2 = this.src.interpolate(
+          this.dest, 2/3, VertexTypes.CONTROL_POINT);
       this._control_points = [control1, control2];
       break;
     }
@@ -330,35 +335,34 @@ Edge.prototype.intersectWith = function(e) {
 };
 
 Edge.prototype.toJson = function() {
-  let points = [];
-  for (let controlPoint of this.control_points) {
-    points.push(controlPoint.toJson());
+  let controlPoints = [];
+  if (this.type === EdgeTypes.BEZIER) {
+    for (let controlPoint of this.control_points) {
+      controlPoints.push(controlPoint.toJson());
+    }
   }
   return {
     id: this.id,
-    src: this.src.toJson(),
-    dest: this.dest.toJson(),
+    src: this.src.id,
+    dest: this.dest.id,
     type: this.type,
-    control_points: points,
+    control_points: controlPoints,
   };
 };
 
+/**
+ * Decode edge from json object. Assuming vertices already decoded.
+ * @param {object} json - the json object to decode.
+ * @return {Edge}
+ */
 Edge.fromJson = function(json) {
-  let src;
-  let dest;
-  if (Shape.hasId(json.src.id)) {
-    src = Shape.getShapeById(json.src.id);
-  } else {
-    src = Vertex.fromJson(json.src);
-  }
-  if (Shape.hasId(json.dest.id)) {
-    dest = Shape.getShapeById(json.dest.id);
-  } else {
-    dest = Vertex.fromJson(json.dest);
-  }
+  let src = Shape.getShapeById(json.src);
+  let dest = Shape.getShapeById(json.dest);
   let controlPoints = [];
-  for (let controlPoint of json.control_points) {
-    controlPoints.push(Vertex.fromJson(controlPoint));
+  if (json.type === EdgeTypes.BEZIER) {
+    for (let controlPoint of json.control_points) {
+      controlPoints.push(Vertex.fromJson(controlPoint));
+    }
   }
   return new Edge(src, dest, json.type, json.id, controlPoints);
 };
@@ -467,7 +471,7 @@ Polyline.prototype.isSelfIntersect = function() {
  */
 Polyline.prototype.alignEdges = function() {
   for (let i = 0; i < this.edges.length; i++) {
-    if (this.vertices[i].equals(this.edges[i].dest)) {
+    if (this.vertices[i] === this.edges[i].dest) {
       this.edges[i].reverse();
     }
   }
