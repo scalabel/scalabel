@@ -60,6 +60,10 @@ func (env Env) Lane2dPath() string {
 	return path.Join(env.AppDir(), "annotation/seg.html")
 }
 
+func (env Env) PointCloudPath() string {
+	return path.Join(env.AppDir(), "annotation/point_cloud.html")
+}
+
 func Init(
 // Initialize all the loggers
 	traceHandle io.Writer,
@@ -142,6 +146,7 @@ func main() {
 	// labeling handlers
 	http.HandleFunc("/2d_bbox_labeling", WrapHandleFunc(box2dLabelingHandler))
 	http.HandleFunc("/video_bbox_labeling", WrapHandleFunc(videoLabelingHandler))
+	http.HandleFunc("/point_cloud_labeling", WrapHandleFunc(pointCloudLabelingHandler))
 
 	Info.Printf("Listening to Port %d", env.Port)
 	Info.Printf("Local URL: localhost:%d", env.Port)

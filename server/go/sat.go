@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -159,10 +160,11 @@ func (assignment *Assignment) Serialize(path string) {
 
 // An item is something to be annotated e.g. Image, PointCloud
 type Item struct {
-	Url         string  `json:"url" yaml:"url"`
-	Index       int     `json:"index" yaml:"index"`
-	LabelIds    []int   `json:"labelIds" yaml:"labelIds"`
-	GroundTruth []Label `json:"groundTruth" yaml:"groundTruth"`
+	Url         string                 `json:"url" yaml:"url"`
+	Index       int                    `json:"index" yaml:"index"`
+	LabelIds    []int                  `json:"labelIds" yaml:"labelIds"`
+	GroundTruth []Label                `json:"groundTruth" yaml:"groundTruth"`
+	Data        map[string]interface{} `json:"data" yaml:"data"`
 }
 
 // An annotation for an item, needs to include all possible annotation types
@@ -228,10 +230,13 @@ type LabelDownloadFormat struct {
     Attributes      map[string]interface{}      `json:"attributes" yaml:"attributes"`
     Data            map[string]interface{}      `json:"data" yaml:"data"`
     Box2d           map[string]interface{}      `json:"box2d" yaml:"box2d"`
+    Box3d           map[string]interface{}      `json:"box3d" yaml:"box3d"`
     Segments2d      map[string]interface{}      `json:"segments2d" yaml:"segments2d"`
 }
 
 var floatType = reflect.TypeOf(float64(0))
+var integerType = reflect.TypeOf(int(0))
+var stringType = reflect.TypeOf("")
 
 func getFloat(unk interface{}) (float64, error) {
     v := reflect.ValueOf(unk)
@@ -241,6 +246,25 @@ func getFloat(unk interface{}) (float64, error) {
     }
     fv := v.Convert(floatType)
     return fv.Float(), nil
+}
+
+func getFloatSlice(unk interface{}) ([]float64, error) {
+    if (reflect.TypeOf(unk).Kind() != reflect.Slice) {
+        return nil, fmt.Errorf("cannot convert interface to slice")
+    }
+
+    v := reflect.ValueOf(unk)
+    array := make([]float64, v.Len())
+
+    for i := 0; i < v.Len(); i++ {
+        val, ok := v.Index(i).Interface().(float64)
+        if !ok {
+            return nil, fmt.Errorf("cannot convert interface to slice")
+        }
+        array[i] = val
+    }
+
+    return array, nil
 }
 
 func parseBox2d(data map[string]interface{}) (map[string]interface{}) {
@@ -257,6 +281,96 @@ func parseBox2d(data map[string]interface{}) (map[string]interface{}) {
     box2d["x2"] = x + w
     box2d["y2"] = y + h
     return box2d
+}
+
+func rotateXAxis3D(vector []float64, angle float64) (error) {
+    if len(vector) != 3 {
+        return fmt.Errorf("Input array was not 3 dimensional")
+    }
+
+    y := vector[1]
+    z := vector[2]
+
+    vector[1] = math.Cos(angle) * y - math.Sin(angle) * z
+    vector[2] = math.Sin(angle) * y + math.Cos(angle) * z
+
+    return nil
+}
+
+func rotateYAxis3D(vector []float64, angle float64) (error) {
+    if len(vector) != 3 {
+        return fmt.Errorf("Input array was not 3 dimensional")
+    }
+
+    x := vector[0]
+    z := vector[2]
+
+    vector[0] = math.Cos(angle) * x + math.Sin(angle) * z
+    vector[2] = -math.Sin(angle) * x + math.Cos(angle) * z
+
+    return nil
+}
+
+func rotateZAxis3D(vector []float64, angle float64) (error) {
+    if len(vector) != 3 {
+        return fmt.Errorf("Input array was not 3 dimensional")
+    }
+
+    x := vector[0]
+    y := vector[1]
+
+    vector[0] = math.Cos(angle) * x - math.Sin(angle) * y
+    vector[1] = math.Sin(angle) * x + math.Cos(angle) * y
+
+    return nil
+}
+
+func parseBox3d(data map[string]interface{}) (map[string]interface{}) {
+    var box3d = map[string]interface{}{}
+    position, err := getFloatSlice(data["position"])
+    rotation, err := getFloatSlice(data["rotation"])
+    scale, err := getFloatSlice(data["scale"])
+    if err != nil {
+        Error.Println(err)
+    }
+
+    fmt.Println(position)
+    fmt.Println(scale)
+
+    // Initialize points
+    var points = [8][]float64{};
+    var ind = 0
+    for x := float64(-0.5); x <= 0.5; x += 1 {
+        for y := float64(-0.5); y <= 0.5; y += 1 {
+            for z := float64(-0.5); z <= 0.5; z += 1 {
+                points[ind] = []float64{x, y, z};
+                ind++;
+            }
+        }
+    }
+
+    // Modify scale, position, rotation and load into box3d
+    for i := 0; i < len(points); i++ {
+        var point = points[i]
+        if scale != nil {
+            point[0] *= scale[0]
+            point[1] *= scale[1]
+            point[2] *= scale[2]
+        }
+        if rotation != nil {
+            rotateXAxis3D(point, rotation[0])
+            rotateYAxis3D(point, rotation[1])
+            rotateZAxis3D(point, rotation[2])
+        }
+        if position != nil {
+            point[0] += position[0]
+            point[1] += position[1]
+            point[2] += position[2]
+        }
+        box3d["p" + strconv.Itoa(i)] = point
+    }
+
+    return box3d
 }
 
 func parseSegments2d(data map[string]interface{}) (map[string]interface{}) {
@@ -559,6 +673,8 @@ func postDownloadHandler(w http.ResponseWriter, r *http.Request) {
                 switch projectToLoad.Options.LabelType {
                 case "box2d":
                     label.Box2d = parseBox2d(labelToLoad.Data)
+                case "box3d":
+                    label.Box3d = parseBox3d(labelToLoad.Data)
                 case "segmentation":
                     // TODO: handle seg2d here
                     // label.Segments2d = parseSegments2d(labelToLoad.Data)

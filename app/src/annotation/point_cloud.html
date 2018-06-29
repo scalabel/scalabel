@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+        <title>Point Cloud Labeling</title>
+		<style>
+			body, p { margin: 0 !important; padding: 0; overflow: hidden; }
+            p {font-size: 12px; }
+            #main_container {
+                width: 80vw;
+                height: 100vh;
+                float: right;
+            }
+            #info {
+                float: left;
+                width: 20vw;
+                margin: 0 auto;
+            }
+            #info_card {
+                height: 100vh;
+                overflow-y: scroll;
+            }
+            #pc_scroll {
+                width: 80%;
+                margin-left: 10%;
+                margin-right: 10%;
+                margin-top:10px;
+            }
+            #label_list a {
+                border: none;
+                border-radius: 0;
+                padding-top:6px;
+                padding-bottom:6px;
+                margin: 0 auto;
+                text-align: center;
+                border-bottom: 1px solid #dee2e6;
+            }
+            #save_button_container {
+                position:absolute;
+                top:20px;
+                right:20px;
+            }
+		</style>
+	</head>
+	<body>
+        <!-- Info card -->
+        <div id="info" class="row text-center">
+            <div style="width: 16rem;" id="info_card">
+                <div class="container mb-1" style="margin-top:10px; width:100%;">
+                    <h4><span id="page-title">Point Cloud labeling tool</span></h4>
+                    <nav>
+                        <ul class="pagination mb-2">
+                            <li class="page-item">
+                                <a class="page-link" id="prev_item" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                            </li>
+                            <li style="border: 1px solid #dee2e6; width:100%;">
+                                <input type="range" min="1" max="100" value="50" id="pc_scroll">
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" id="next_item" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <hr>
+
+                    <div class="row text-center">
+                        <div class="col-md-12">
+                            <p>Camera Position: <span id="camera_position" style="font-size:14px;">( , , )</span></p>
+                            <p>Target: <span id="target" style="font-size:14px;">( , , )</span></p>
+                            <p>Mouse: <span id="mouse" style="font-size:14px;">( , )</span></p>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6>Bounding Boxes</h6>
+
+                    <div class="list-group mb-3" style="max-height:200px; overflow:scroll; border: 1px solid #dee2e6;" id="label_list">
+                        <a href="#" class="list-group-item list-group-item-action active">
+                            loading
+                        </a>
+                    </div>
+
+                    <!-- Button for adding bounding boxes -->
+                    <div class="text-center">
+                        <button id="add_box" style="font-size:12px" type="button" class="btn btn-light">Add New Bounding Box</button>
+                    </div>
+                </div>
+
+
+                <div class="container" id="bounding_box_card" style="display: none;">
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-12" style="opacity:0.6;">
+                            <h6>Bounding Box Info</h6>
+                            <div id="custom_categories" class="form-group">
+                                <p>Label Category</p>
+                            </div>
+
+                            <div id="custom_attributes">
+                                <p>Attributes</p>
+                                {{ range $key, $value := .Task.ProjectOptions.Attributes }}
+                                <div class="form-group"
+                                     id="custom_attribute_{{ $value.Name }}_div">
+                                    <input id="custom_attribute_{{ $value.Name }}"
+                                           name="custom_attribute_{{ $value.Name }}">
+                                </div>
+                                {{ end }}
+                            </div>
+                            <p>Box Center: <span id="box_center" style="font-size:14px;">( , , )</span></p>
+                            <p>Box Dimensions: <span id="box_dimensions" style="font-size:14px;">( , , )</span></p>
+                            <p>Box Rotation: <span id="box_rotation" style="font-size:14px;">( , , )</span></p>
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+            </div>
+        </div>
+        <div id="main_container"></div>
+
+        <div class="mb-1" id="save_button_container">
+            <button id="save_btn" style="font-size:16px" type="button" class="btn btn-light">Save Labels</button>
+        </div>
+
+        <script
+                src="http://code.jquery.com/jquery-3.3.1.min.js"
+                integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+                crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js"></script>
+
+        <script src="./js/sat.js"></script>
+        <script src="./js/point_cloud/sat3d.js"></script>
+        <script src="./js/point_cloud/box3d.js"></script>
+        <script src="./js/point_cloud/sat_point_cloud.js"></script>
+
+        <script type="x-shader/x-vertex" id="vertexshader">
+            attribute float size;
+            attribute vec3 customColor;
+            varying vec3 vColor;
+            void main() {
+                vColor = customColor;
+                vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                gl_PointSize = size * ( 300.0 / -mvPosition.z );
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        </script>
+
+        <script type="x-shader/x-fragment" id="fragmentshader">
+            uniform vec3 color;
+            varying vec3 vColor;
+            void main() {
+                gl_FragColor = vec4( color * vColor, 1.0 );
+            }
+        </script>
+
+        <script>
+        </script>
+		<script>
+            let labeler = new Sat3d();
+        </script>
+	</body>
+</html>

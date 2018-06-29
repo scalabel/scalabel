@@ -32,3 +32,11 @@ func lane2dLabelingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	executeLabelingTemplate(w, r, tmpl)
 }
+
+func pointCloudLabelingHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(env.PointCloudPath())
+	if err != nil {
+		Error.Println(err)
+	}
+	executeLabelingTemplate(w, r, tmpl)
+}

@@ -186,6 +186,13 @@ func GetHandlerUrl(itemType string, labelType string) string {
 		default:
 			return "NO_VALID_HANDLER"
 		}
+	case "pointcloud":
+	    switch labelType {
+	    case "box3d":
+	        return "point_cloud_labeling"
+	    default:
+	        return "NO_VALID_HANDLER"
+	    }
 	}
 	return "NO_VALID_HANDLER"
 }
