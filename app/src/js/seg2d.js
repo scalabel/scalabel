@@ -1,5 +1,5 @@
 
-/* global ImageLabel SatImage Polygon Path Vertex */
+/* global ImageLabel SatImage Shape Polygon Path Vertex */
 /* global rgba VertexTypes EdgeTypes*/
 /* global GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
 ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO */
@@ -215,10 +215,17 @@ Seg2d.prototype.midpointToVertex = function(pt) {
   let edge2 = null;
   for (let label of this.satItem.labels) {
     for (let poly of label.polys) {
+      let _edge1 = null;
+      let _edge2 = null;
       poly.alignEdges();
-      [edge1, edge2] = poly.midpointToVertex(pt, edge1, edge2);
-      poly.reverse();
-      [edge1, edge2] = poly.midpointToVertex(pt, edge1, edge2);
+      [_edge1, _edge2] = poly.midpointToVertex(pt, edge1, edge2);
+      if (!_edge1 && !_edge2) {
+        poly.reverse();
+        [_edge1, _edge2] = poly.midpointToVertex(pt, edge1, edge2);
+      }
+      if (!edge1 && !edge2) {
+        [edge1, edge2] = [_edge1, _edge2];
+      }
     }
   }
 };
@@ -556,6 +563,7 @@ Seg2d.prototype.mousedown = function(e) {
     // if clicked on midpoint, convert to vertex
     if (occupiedShape instanceof Vertex) {
       if (occupiedShape.type === VertexTypes.MIDPOINT) {
+        Shape.registerShape(occupiedShape); // assign id to new vertex
         this.midpointToVertex(occupiedShape);
       }
 
