@@ -7,9 +7,9 @@ import yaml
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='video pre-processing')
-    parser.add_argument('--input', '-i', type=str, default='',
-                        help='path to the video to be processed')
+    parser = argparse.ArgumentParser(description='prepare data')
+    parser.add_argument('--input', '-i', type=str, nargs='+',
+                        help='path to the video/images to be processed')
     parser.add_argument('--tar-dir', '-t', type=str, default='',
                         help='target folder to save the frames')
     parser.add_argument('--fps', '-f', type=int, default=5,
@@ -27,29 +27,51 @@ def parse_arguments():
     return args
 
 
+def check_video_format(name):
+    if name.endswith(('.mov', '.avi', '.mp4')):
+        return True
+    return False
+
+
 def prepare_data(args):
 
     if args.s3:
         s3_setup(args)
 
-    if os.path.isfile(args.input):
-        print('Splitting the video ...')
-
+    if type(args.input) == list:
+        print('processing {} video(s) ...'.format(len(args.input)))
         if len(glob.glob(join(args.tar_dir, '*.jpg'))) > 0:
             print('[ERROR] Target folder is not empty. '
                   'Please specify an empty folder')
             return None
 
-        cmd = "ffmpeg -i {} -r {} -qscale:v 2 {}/{}-%07d.jpg".format(
-            args.input, args.fps, args.tar_dir,
-            os.path.splitext(os.path.split(args.input)[1])[0]
-        )
-        print('[RUNNING]', cmd)
-        p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-        p.wait()
-    else:
-        print('Loading all existing images in folder {}'.format(args.input))
-        args.tar_dir = args.input
+        for i in range(len(args.input)):
+            vf = args.input[i]
+
+            if os.path.isdir(vf):
+                print('Loading all existing images in folder {}'.format(vf))
+                args.tar_dir = vf
+
+            elif os.path.isfile(vf):
+                if not check_video_format(vf):
+                    print('[WARNING] Ignore invalid file {}'.format(vf))
+                    continue
+
+                if not os.path.exists(vf):
+                    print('[WARNING] {} does not exist'.format(vf))
+                    continue
+
+                cmd = "ffmpeg -i {} -r {} -qscale:v 2 {}/{}-%07d.jpg".format(
+                    vf, args.fps, args.tar_dir,
+                    os.path.splitext(os.path.split(vf)[1])[0]
+                )
+                print('[RUNNING]', cmd)
+                p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+                p.wait()
+            else:
+                print('[ERROR] Invalid `input` value `{}`. Neither file '
+                      'nor directory '.format(vf))
+                return None
 
     # create the yaml file
     file_list = sorted(glob.glob(join(args.tar_dir, '*.jpg')))
@@ -59,8 +81,7 @@ def prepare_data(args):
             join(args.web_root, os.path.basename(img))}
         for img in file_list]
 
-    name = os.path.basename(args.input).split('.')[0]
-    output = join(args.tar_dir, name+'.yml')
+    output = join(args.tar_dir, 'image_list.yml')
     with open(output, 'w') as f:
         yaml.dump(yaml_items, f)
 
@@ -105,6 +126,7 @@ def main():
     args = parse_arguments()
     if args.tar_dir:
         os.makedirs(args.tar_dir, exist_ok=True)
+
     output = prepare_data(args)
     if output is not None:
         print('[SUCCESS] The configuration file saved at {}'.format(output))
