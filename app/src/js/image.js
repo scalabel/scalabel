@@ -1,5 +1,6 @@
 
-/* global SatItem SatLabel hiddenStyleColor UP_RES_RATIO */
+/* global SatItem SatLabel hiddenStyleColor UP_RES_RATIO
+mode rgb pickColorPalette */
 /* exported SatImage ImageLabel */
 
 // constants
@@ -84,12 +85,6 @@ function SatImage(sat, index, url) {
   self.hiddenCanvas = document.getElementById('hidden_canvas');
   self.mainCtx = self.imageCanvas.getContext('2d');
   self.hiddenCtx = self.hiddenCanvas.getContext('2d');
-
-  // prevent smoothing on hidden canvas
-  self.hiddenCtx.mozImageSmoothingEnabled = false;
-  self.hiddenCtx.webkitImageSmoothingEnabled = false;
-  self.hiddenCtx.msImageSmoothingEnabled = false;
-  self.hiddenCtx.imageSmoothingEnabled = false;
 
   self.hoveredLabel = null;
 
@@ -503,12 +498,6 @@ SatImage.prototype.redrawMainCanvas = function() {
 SatImage.prototype.redrawHiddenCanvas = function() {
   let self = this;
 
-  // prevent smoothing on hidden canvas
-  self.hiddenCtx.mozImageSmoothingEnabled = false;
-  self.hiddenCtx.webkitImageSmoothingEnabled = false;
-  self.hiddenCtx.msImageSmoothingEnabled = false;
-  self.hiddenCtx.imageSmoothingEnabled = false;
-
   self.padBox = self._getPadding();
   self.hiddenCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
       self.padBox.h * UP_RES_RATIO);
@@ -528,7 +517,7 @@ SatImage.prototype.showHiddenCanvas = function() {
       self.padBox.h * UP_RES_RATIO);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
-    shape.drawHidden(self.mainCtx, self, hiddenStyleColor(i));
+    shape.drawHidden(self.mainCtx, self, rgb(pickColorPalette(i)));
   }
 };
 
@@ -839,9 +828,14 @@ SatImage.prototype._getPadding = function() {
 SatImage.prototype.getIndexOnHiddenMap = function(mousePos) {
   let [x, y] = this.toCanvasCoords([mousePos.x,
     mousePos.y]);
-  let pixelData = this.hiddenCtx.getImageData(x, y, 1, 1).data;
-  let color = (pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2];
-  return color - 1;
+  let data = this.hiddenCtx.getImageData(x, y, 4, 4).data;
+  let arr = [];
+  for (let i = 0; i < 16; i++) {
+    let color = (data[i*4] << 16) | (data[i*4+1] << 8) | data[i*4+2];
+    arr.push(color);
+  }
+  // finding the mode of the data array to deal with anti-aliasing of the canvas
+  return mode(arr) - 1;
 };
 
 /**

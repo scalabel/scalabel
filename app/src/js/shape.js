@@ -1107,13 +1107,10 @@ Vertex.prototype.drawHidden = function(context, satImage, fillStyle) {
   let [x, y] = satImage.toCanvasCoords([this._x, this._y]);
   context.strokeStyle = fillStyle;
   context.fillStyle = fillStyle;
-  // context.beginPath();
-  // context.arc(x, y, HIDDEN_HANDLE_RADIUS, 0, 2 * Math.PI, false);
-  // context.closePath();
-  // context.fill();
-  context.fillRect(Math.round(x - HIDDEN_HANDLE_RADIUS/2),
-    Math.round(y - HIDDEN_HANDLE_RADIUS/2),
-    HIDDEN_HANDLE_RADIUS, HIDDEN_HANDLE_RADIUS);
+  context.beginPath();
+  context.arc(x, y, HIDDEN_HANDLE_RADIUS, 0, 2 * Math.PI, false);
+  context.closePath();
+  context.fill();
   context.restore();
 };
 
