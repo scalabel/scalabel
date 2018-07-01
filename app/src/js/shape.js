@@ -450,7 +450,7 @@ Polyline.prototype.centroidCoords = function() {
 
 // check whether a curve is valid
 Polyline.prototype.isValidShape = function() {
-  return !this.isSelfIntersect();
+  return !this.isSelfIntersect() && this.vertices.length > 1;
 };
 
 // return true if any two edges intersect with each other
