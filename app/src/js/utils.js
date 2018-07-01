@@ -1,5 +1,5 @@
 /* global sprintf */
-/* exported rgb rgba hiddenStyleColor */
+/* exported rgb rgba hiddenStyleColor mode */
 
 /**
  * Returns the rgba string given color and alpha values.
@@ -29,4 +29,16 @@ function hiddenStyleColor(index) {
   let color = index + 1;
   return rgb([(color >> 16) & 255, (color >> 8) & 255,
     (color & 255)]);
+}
+
+/**
+ * Function to find mode of a number array.
+ * @param {[number]} arr - the array.
+ * @return {number} the mode of the array.
+ */
+function mode(arr) {
+  return arr.sort((a, b) =>
+      arr.filter((v) => v===a).length
+      - arr.filter((v) => v===b).length
+  ).pop();
 }
