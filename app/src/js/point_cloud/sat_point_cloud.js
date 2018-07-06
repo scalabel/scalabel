@@ -142,7 +142,7 @@ function SatPointCloud(sat, index, url) {
     this.viewPlaneNormal = new THREE.Vector3();
 
     this.info_card = document.getElementById('bounding_box_card');
-    this.label_list = document.getElementById('label_list');
+    this.labelList = document.getElementById('label_list');
 
     // Load point cloud data
     this.getPCJSON();
@@ -239,10 +239,27 @@ SatPointCloud.prototype.setActive = function(active) {
         document.addEventListener('keyup',
             this.keyUpListener, false);
 
-        this.label_list.innerHTML = '';
+        this.labelList.innerHTML = '';
 
         for (let i = 0; i < this.labels.length; i++) {
             this.addLabelToList(this.labels[i]);
+        }
+
+        for (let i = 0; i < this.sat.attributes.length; i++) {
+            let attributeName = this.sat.attributes[i].name;
+            if (this.sat.attributes[i].toolType === 'switch') {
+                $('#custom_attribute_' + attributeName).on(
+                    'switchChange.bootstrapSwitch',
+                    (function() {this._attributeSwitch(i);}).bind(this));
+            } else if (this.sat.attributes[i].toolType === 'list') {
+                for (let j = 0; j < this.sat.attributes[i].values.length; j++) {
+                    $('#custom_attributeselector_' + i + '-' + j).on(
+                        'click',
+                        (function() {
+                            this._attributeListSelect(i, j);
+                        }).bind(this));
+                }
+            }
         }
     } else {
         document.getElementById('prev_item').removeEventListener('click',
@@ -263,6 +280,18 @@ SatPointCloud.prototype.setActive = function(active) {
             this.keyDownListener, false);
         document.removeEventListener('keyup',
             this.keyUpListener, false);
+
+        for (let i = 0; i < this.sat.attributes.length; i++) {
+            let attributeName = this.sat.attributes[i].name;
+            if (this.sat.attributes[i].toolType === 'switch') {
+                $('#custom_attribute_' + attributeName).off(
+                    'switchChange.bootstrapSwitch');
+            } else if (this.sat.attributes[i].toolType === 'list') {
+                for (let j = 0; j < this.sat.attributes[i].values.length; j++) {
+                    $('#custom_attributeselector_' + i + '-' + j).off('click');
+                }
+            }
+        }
 
         this.deselect();
         this.selectionState = this.STANDBY;
@@ -476,6 +505,32 @@ SatPointCloud.prototype.handleMouseDown = function() {
     }
 };
 
+SatPointCloud.prototype._attributeSwitch = function(index) {
+    let attributeName = this.sat.attributes[index].name;
+    if (this.selectedLabel) {
+        this.selectedLabel.attributes[attributeName] = $('#custom_attribute_'
+            + attributeName).prop('checked');
+        if (this.selectedLabel.parent) {
+            this.selectedLabel.parent.interpolate(this.selectedLabel);
+        }
+    }
+};
+
+SatPointCloud.prototype._attributeListSelect = function(attributeIndex,
+                                                        selectedIndex) {
+    let attributeName = this.sat.attributes[attributeIndex].name;
+    if (this.selectedLabel) {
+        // store both the index and the value in order to prevent another loop
+        //   during tag drawing
+        this.selectedLabel.attributes[attributeName] =
+            [selectedIndex,
+                this.sat.attributes[attributeIndex].values[selectedIndex]];
+        if (this.selectedLabel.parent) {
+            this.selectedLabel.parent.interpolate(this.selectedLabel);
+        }
+    }
+};
+
 SatPointCloud.prototype._changeSelectedLabelCategory = function() {
     if (this.selectedLabel != null) {
         let selectorName = 'parent_select_';
@@ -483,9 +538,12 @@ SatPointCloud.prototype._changeSelectedLabelCategory = function() {
         let selector = document.getElementById(selectorName + level);
 
         this.selectedLabel.categoryPath = '';
+        this.selectedLabel.categoryArr = [];
         while (selector != null) {
             this.selectedLabel.categoryPath +=
                 selector.options[selector.selectedIndex].value + ',';
+            this.selectedLabel.categoryArr.push(
+                selector.options[selector.selectedIndex].value);
             level++;
             selector = document.getElementById(selectorName + level);
         }
@@ -494,10 +552,11 @@ SatPointCloud.prototype._changeSelectedLabelCategory = function() {
         this.selectedLabel.name =
             selector.options[selector.selectedIndex].value;
         this.selectedLabel.categoryPath += this.selectedLabel.name;
+        this.selectedLabel.categoryArr.push(this.selectedLabel.name);
 
-        for (let i = 0; i < this.label_list.childNodes.length; i++) {
-            if (this.label_list.childNodes[i].label == this.selectedLabel) {
-                this.label_list.childNodes[i].text = this.selectedLabel.name +
+        for (let i = 0; i < this.labelList.childNodes.length; i++) {
+            if (this.labelList.childNodes[i].label == this.selectedLabel) {
+                this.labelList.childNodes[i].text = this.selectedLabel.name +
                     ' ' + this.selectedLabel.id;
             }
         }
@@ -745,8 +804,8 @@ SatPointCloud.prototype.updateViewInfo = function() {
 };
 
 SatPointCloud.prototype.deactivateLabelList = function() {
-    for (let j = 0; j < this.label_list.childNodes.length; j++) {
-        this.label_list.childNodes[j].classList.remove('active');
+    for (let j = 0; j < this.labelList.childNodes.length; j++) {
+        this.labelList.childNodes[j].classList.remove('active');
     }
 };
 
@@ -759,15 +818,15 @@ SatPointCloud.prototype.addLabelToList = function(label) {
     item.classList.add('list-group-item');
     item.classList.add('list-group-item-action');
 
-    this.label_list.appendChild(item);
+    this.labelList.appendChild(item);
 
     item.label = label;
 
     item.addEventListener('click', (function() {
         this.deactivateLabelList();
-        if (this.selectionNewBox) {
+        if (this.selectedLabelNewBox) {
             this.deleteSelection();
-            this.selectionNewBox = false;
+            this.selectedLabelNewBox = false;
         }
         this.selectionState = this.STANDBY;
         this.select(label);
@@ -785,13 +844,72 @@ SatPointCloud.prototype.select = function(label) {
 
         this.info_card.style.display = 'block';
 
-        // Set category
-        this._changeSelectedLabelCategory();
-
         // Make active in label list
-        for (let i = 0; i < this.label_list.childNodes.length; i++) {
-            if (this.label_list.childNodes[i].label == label) {
-                this.label_list.childNodes[i].classList.add('active');
+        for (let i = 0; i < this.labelList.childNodes.length; i++) {
+            if (this.labelList.childNodes[i].label == label) {
+                this.labelList.childNodes[i].classList.add('active');
+            }
+        }
+
+        // Change selected category
+        let name = this.selectedLabel.name; // Name will change when triggering
+                                            // change listener
+        for (let i = 0; i < this.selectedLabel.categoryArr.length - 1; i++) {
+            let selectorName = '#parent_select_';
+            let selector = $(selectorName + i);
+            let index = null;
+            for (let j = 0; j < selector[0].options.length; j++) {
+                if (selector[0].options[j].text ==
+                    this.selectedLabel.categoryArr[i]) {
+                    index = j;
+                    break;
+                }
+            }
+
+            if (index) {
+                selector[0].selectedIndex = index;
+                selector.trigger('change');
+            } else {
+                break;
+            }
+        }
+
+        let categorySelector = $('#category_select');
+        for (let i = 0; i < categorySelector[0].options.length; i++) {
+            if (categorySelector[0].options[i].text == name) {
+                categorySelector[0].selectedIndex = i;
+                categorySelector.trigger('change');
+                break;
+            }
+        }
+
+        // Change selected attributes
+        for (let i = 0; i < this.sat.attributes.length; i++) {
+            let attributeName = this.sat.attributes[i].name;
+            if (this.sat.attributes[i].toolType === 'switch') {
+                if (attributeName in this.selectedLabel.attributes) {
+                    $('#custom_attribute_' +
+                      attributeName).bootstrapSwitch('state',
+                           this.selectedLabel.attributes[attributeName]);
+                } else {
+                    $('#custom_attribute_' + attributeName).bootstrapSwitch(
+                        'state', false);
+                }
+            } else if (this.sat.attributes[i].toolType === 'list') {
+                let selectedIndex = null;
+                if (attributeName in this.selectedLabel.attributes) {
+                    selectedIndex =
+                        this.selectedLabel.attributes[attributeName][0];
+                }
+                let selector = document.getElementById(
+                    'custom_attribute_' + attributeName +
+                    '_div').querySelector('#radios');
+                for (let j = 0; j < selector.children.length; j++) {
+                    selector.children[j].classList.remove('active');
+                    if (selectedIndex == j) {
+                        selector.children[j].classList.add('active');
+                    }
+                }
             }
         }
     }
@@ -813,13 +931,13 @@ SatPointCloud.prototype.deleteSelection = function() {
         this.bounding_boxes.indexOf(this.selectedLabel.box), 1);
 
     let ind = -1;
-    for (let i = 0; i < this.label_list.childNodes.length; i++) {
-        if (this.label_list.childNodes[i].label == this.selectedLabel) {
+    for (let i = 0; i < this.labelList.childNodes.length; i++) {
+        if (this.labelList.childNodes[i].label == this.selectedLabel) {
             ind = i;
         }
     }
 
-    this.label_list.removeChild(this.label_list.childNodes[ind]);
+    this.labelList.removeChild(this.labelList.childNodes[ind]);
 
     let id = this.selectedLabel.id;
     this.selectedLabel.valid = false;

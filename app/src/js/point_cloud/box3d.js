@@ -8,6 +8,7 @@
 function Box3d(sat, id) {
     SatLabel.call(this, sat, id);
     this.categoryPath = '';
+    this.categoryArr = [];
 }
 
 Box3d.prototype = Object.create(SatLabel.prototype);
@@ -154,6 +155,6 @@ Box3d.prototype.fromJsonVariables = function(json) {
     this.decodeBaseJsonVariables(json);
     this.data = json.data;
     this.categoryPath = json.categoryPath;
-    let categoryArr = this.categoryPath.split(',');
-    this.name = categoryArr[categoryArr.length - 1];
+    this.categoryArr = this.categoryPath.split(',');
+    this.name = this.categoryArr[this.categoryArr.length - 1];
 };
