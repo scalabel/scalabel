@@ -1,4 +1,5 @@
 ---
 port: 8686
-dataDir: "$GOPATH/src/sat/data"
+data: "$GOPATH/src/sat/data"
+src: "/home/travis/build/ucbdrive/sat"
 ...

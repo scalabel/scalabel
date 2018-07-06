@@ -9,16 +9,16 @@ import (
 )
 
 type Seg2d struct {
-    Vertices        [][]float32         `json:"vertices" yaml:"vertices"`
+    Vertices        [][]float64         `json:"vertices" yaml:"vertices"`
     Types           string              `json:"types" yaml:"types"`
     Closed          bool                `json:"closed" yaml:"closed"`
 }
 
 type Box2d struct {
-    X1          float32                 `json:"x1" yaml:"x1"`
-    X2          float32                 `json:"x2" yaml:"x2"`
-    Y1          float32                 `json:"y1" yaml:"y1"`
-    Y2          float32                 `json:"y2" yaml:"y2"`
+    X1          float64                 `json:"x1" yaml:"x1"`
+    X2          float64                 `json:"x2" yaml:"x2"`
+    Y1          float64                 `json:"y1" yaml:"y1"`
+    Y2          float64                 `json:"y2" yaml:"y2"`
 }
 
 // Download format specifications
@@ -46,8 +46,8 @@ type Label struct {
 // structs for saved data
 type VertexData struct {
     Id          int                     `json:"id" yaml:"id"`
-    X           float32                 `json:"x" yaml:"x"`
-    Y           float32                 `json:"y" yaml:"y"`
+    X           float64                 `json:"x" yaml:"x"`
+    Y           float64                 `json:"y" yaml:"y"`
     Type        string                  `json:"type" yaml:"type"`
 }
 
@@ -66,10 +66,10 @@ type PolylineData struct {
 }
 
 type Box2dData struct {
-    X           float32                 `json:"x" yaml:"x"`
-    Y           float32                 `json:"y" yaml:"y"`
-    W           float32                 `json:"w" yaml:"w"`
-    H           float32                 `json:"h" yaml:"h"`
+    X           float64                 `json:"x" yaml:"x"`
+    Y           float64                 `json:"y" yaml:"y"`
+    W           float64                 `json:"w" yaml:"w"`
+    H           float64                 `json:"h" yaml:"h"`
 }
 
 type Seg2dData struct {
@@ -109,21 +109,18 @@ func ParseSeg2d(data map[string]interface{}) ([]Seg2d) {
     for _, _poly := range _seg2d.Polys {
         poly := Seg2d{}
         types := []byte{}
-        for i, edge := range _poly.Edges {
-            v_xy := []float32{_poly.Vertices[i].X, _poly.Vertices[i].Y}
+        for i, vertex := range _poly.Vertices {
+            v_xy := []float64{vertex.X, vertex.Y}
             poly.Vertices = append(poly.Vertices, v_xy)
             types = append(types, 'L')
-            if (edge.Type == "bezier") {
-                for _, c := range edge.ControlPoints {
-                    c_xy := []float32{c.X, c.Y}
-                    poly.Vertices = append(poly.Vertices, c_xy)
-                    types = append(types, 'C')
+            if i < len(_poly.Edges) && _poly.Edges[i].Type == "bezier" {
+                if (i < len(_poly.Edges) - 1) || (_seg2d.Closed) {
+                    for _, c := range _poly.Edges[i].ControlPoints {
+                        c_xy := []float64{c.X, c.Y}
+                        poly.Vertices = append(poly.Vertices, c_xy)
+                        types = append(types, 'C')
+                    }
                 }
-            }
-            if (!_seg2d.Closed && i == len(_poly.Edges) - 1) {
-                xy := []float32{_poly.Vertices[i+1].X, _poly.Vertices[i+1].Y}
-                poly.Vertices = append(poly.Vertices, xy)
-                types = append(types, 'L')
             }
         }
         poly.Closed = _seg2d.Closed
