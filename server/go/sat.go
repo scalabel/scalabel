@@ -532,7 +532,7 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
     taskURLs := []TaskURL{}
     for _, task := range tasks {
         taskURL := TaskURL{}
-        u, err := url.Parse(path.Join(r.Host, task.ProjectOptions.HandlerUrl))
+        u, err := url.Parse(task.ProjectOptions.HandlerUrl)
         if err != nil {
             log.Fatal(err)
         }
@@ -540,6 +540,12 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
         q.Set("project_name", projectName)
         q.Set("task_index", strconv.Itoa(task.Index))
         u.RawQuery = q.Encode()
+        if r.TLS != nil {
+            u.Scheme = "https"
+        } else {
+			u.Scheme = "http"
+		}
+        u.Host = r.Host
         taskURL.URL = u.String()
         taskURLs = append(taskURLs, taskURL)
     }
