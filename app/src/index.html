@@ -2,12 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome to Scalabel</title>
-</head>
-<body>
-<h1>Welcome to Scalabel</h1>
+    <title>Scalabel</title>
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico'/>
 
-<p>You can start with <a href="/create">creating a new labeling project</a> or
-    check out our <a href="http://scalabel.ai">homepage</a> for more info.</p>
+    <style>
+
+        /*<!--Paragraphs-->*/
+        img {
+            margin: 0;
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        h1 {
+            font-family: Source Sans Pro, Helvetica, sans-serif;
+            font-size: 200%;
+            text-align: center;
+            color: lightgrey;
+            white-space: nowrap;
+
+            margin: 0;
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        p.b {
+            font-family: Source Sans Pro, Helvetica, sans-serif;
+            font-size: 100%;
+            text-align: center;
+            color: lightgrey;
+            white-space: nowrap;
+
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /*Botton*/
+        .button {
+            background-color: rgb(85, 129, 151);
+            color: lightgrey;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+
+            margin: 0;
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .button:hover {background-color: darkgrey;}
+
+        /*Links*/
+        a {
+            text-decoration: none;
+        }
+        a:link {
+            color: white;
+        }
+
+        /* visited link */
+        a:visited {
+            color: white;
+        }
+
+        /* mouse over link */
+        a:hover {
+            color: white;
+        }
+
+        /* selected link */
+        a:active {
+            color: white;
+        }
+    </style>
+</head>
+<body style="background-color:rgb(85, 129, 151);">
+
+<img src="img/scalabel_light.svg" alt="Scalabel Logo" align="middle" height="200">
+
+<p class="b"> A scalable open-sourced annotation web tool
+    brought by <a href="https://deepdrive.berkeley.edu/"> Berkeley DeepDrive </a> <br>
+    For more information: <a href="http://scalabel.ai"> Scalabel.ai</a>.
+</p>
+
+    <button class="button"><a href="/create">Create a new project</a></button>
+
 </body>
 </html>
