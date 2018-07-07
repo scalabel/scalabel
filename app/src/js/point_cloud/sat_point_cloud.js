@@ -9,33 +9,6 @@
 function SatPointCloud(sat, index, url) {
     SatItem.call(this, sat, index, url);
 
-    this.wheelListener = this.handleMouseWheel.bind(this);
-    this.mouseMoveListener = this.handleMouseMove.bind(this);
-    this.mouseDownListener = this.handleMouseDown.bind(this);
-    this.mouseUpListener = this.handleMouseUp.bind(this);
-    this.keyDownListener = this.handleKeyDown.bind(this);
-    this.keyUpListener = this.handleKeyUp.bind(this);
-    this.prevItemListener = (function() {
-        if (this.index > 0) {
-            this.sat.slider.value = this.index - 1;
-            this.sat.gotoItem(this.index - 1);
-        }
-    }).bind(this);
-    this.nextItemListener = (function() {
-        if (this.index < this.sat.items.length - 1) {
-            this.sat.slider.value = this.index + 1;
-            this.sat.gotoItem(this.index + 1);
-        }
-    }).bind(this);
-    this.sliderListener = (function() {
-        if (this.sat.slider.value != this.index) {
-            this.sat.gotoItem(this.sat.slider.value);
-        }
-    }).bind(this);
-    this.addBoxListener = (function() {
-        this.addBoundingBox(this.sat.newLabel(), true);
-    }).bind(this);
-
     this.POINT_SIZE = 0.2;
 
     // Set up letiables for calculating camera movement
@@ -100,8 +73,10 @@ function SatPointCloud(sat, index, url) {
         this.zoom(0);
         this.views[i].camera = camera;
     }
-    this.currentView = null;
-    this.currentCamera = null;
+
+    // We just set views[0] as default
+    this.currentView = this.views[0];
+    this.currentCamera = this.currentView.camera;
 
     this.sphere = new THREE.Mesh(new THREE.SphereGeometry(0.03),
         new THREE.MeshBasicMaterial({color:
@@ -143,6 +118,33 @@ function SatPointCloud(sat, index, url) {
 
     this.info_card = document.getElementById('bounding_box_card');
     this.labelList = document.getElementById('label_list');
+
+    this.wheelListener = this.handleMouseWheel.bind(this);
+    this.mouseMoveListener = this.handleMouseMove.bind(this);
+    this.mouseDownListener = this.handleMouseDown.bind(this);
+    this.mouseUpListener = this.handleMouseUp.bind(this);
+    this.keyDownListener = this.handleKeyDown.bind(this);
+    this.keyUpListener = this.handleKeyUp.bind(this);
+    this.prevItemListener = (function() {
+        if (this.index > 0) {
+            this.sat.slider.value = this.index - 1;
+            this.sat.gotoItem(this.index - 1);
+        }
+    }).bind(this);
+    this.nextItemListener = (function() {
+        if (this.index < this.sat.items.length - 1) {
+            this.sat.slider.value = this.index + 1;
+            this.sat.gotoItem(this.index + 1);
+        }
+    }).bind(this);
+    this.sliderListener = (function() {
+        if (this.sat.slider.value != this.index) {
+            this.sat.gotoItem(this.sat.slider.value);
+        }
+    }).bind(this);
+    this.addBoxListener = (function() {
+        this.addBoundingBox(this.sat.newLabel(), true);
+    }).bind(this);
 
     // Load point cloud data
     this.getPCJSON();
@@ -537,6 +539,7 @@ SatPointCloud.prototype._changeSelectedLabelCategory = function() {
         let level = 0;
         let selector = document.getElementById(selectorName + level);
 
+
         this.selectedLabel.categoryPath = '';
         this.selectedLabel.categoryArr = [];
         while (selector != null) {
@@ -549,6 +552,14 @@ SatPointCloud.prototype._changeSelectedLabelCategory = function() {
         }
 
         selector = document.getElementById('category_select');
+
+        // If we go without category,
+        // then we cannot select category for a label,
+        // then all this is meaningless.
+        if (selector == null) {
+            return;
+        }
+
         this.selectedLabel.name =
             selector.options[selector.selectedIndex].value;
         this.selectedLabel.categoryPath += this.selectedLabel.name;
