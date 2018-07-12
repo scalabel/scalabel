@@ -13,17 +13,87 @@ function Box3d(sat, id) {
 
 Box3d.prototype = Object.create(SatLabel.prototype);
 
+Box3d.prototype.color = function() {
+    let color = SatLabel.prototype.color.call(this);
+    let newColor = [];
+    for (let i = 0; i < color.length; i++) {
+        newColor.push(color[i] / 255.0);
+    }
+    return newColor;
+};
+
 Box3d.prototype.setColor = function(hexColor, faces=null) {
+    let inputArray = typeof hexColor == 'object';
     if (faces != null) {
         for (let i = 0; i < faces.length; i++) {
-            this.box.geometry.faces[faces[i]].color.setHex(hexColor);
+            if (inputArray) {
+                this.box.geometry.faces[faces[i]].color.fromArray(hexColor);
+            } else {
+                this.box.geometry.faces[faces[i]].color.set(hexColor);
+            }
         }
     } else {
         for (let i = 0; i < this.box.geometry.faces.length; i++) {
-            this.box.geometry.faces[i].color.setHex(hexColor);
+            if (inputArray) {
+                this.box.geometry.faces[i].color.fromArray(hexColor);
+            } else {
+                this.box.geometry.faces[i].color.set(hexColor);
+            }
         }
     }
     this.box.geometry.colorsNeedUpdate = true;
+};
+
+Box3d.prototype.createBox = function(position) {
+    let box = new THREE.Mesh(
+        new THREE.BoxGeometry( 1, 1, 1 ),
+        new THREE.MeshBasicMaterial({color: 0xffffff,
+            vertexColors: THREE.FaceColors,
+            transparent: true,
+            opacity: 0.5})
+    );
+
+    let outline = new THREE.LineSegments(
+        new THREE.EdgesGeometry(box.geometry),
+        new THREE.LineBasicMaterial({color: 0xffffff}));
+
+    box.outline = outline;
+    box.label = this;
+
+    this.box = box;
+
+    if (this.data) {
+        box.position.x = this.data['position'][0];
+        box.position.y = this.data['position'][1];
+        box.position.z = this.data['position'][2];
+        box.outline.position.copy(box.position);
+
+        box.rotation.x = this.data['rotation'][0];
+        box.rotation.y = this.data['rotation'][1];
+        box.rotation.z = this.data['rotation'][2];
+        box.outline.rotation.copy(box.rotation);
+
+        box.scale.x = this.data['scale'][0];
+        box.scale.y = this.data['scale'][1];
+        box.scale.z = this.data['scale'][2];
+        box.outline.scale.copy(box.scale);
+    } else {
+        box.scale.z = 0.01;
+
+        this.data = {};
+        this.data['position'] = [position.x, position.y, position.z];
+        this.data['rotation'] = [box.rotation.x, box.rotation.y,
+                                 box.rotation.z];
+        this.data['scale'] = [box.scale.x, box.scale.y, box.scale.z];
+
+        box.position.copy(position);
+        box.outline.position.copy(box.position);
+        box.outline.scale.copy(box.scale);
+    }
+
+    this.setColor(this.color());
+
+    return box;
 };
 
 Box3d.prototype.moveBoxAlongViewPlane = function(viewPlaneNormal,
