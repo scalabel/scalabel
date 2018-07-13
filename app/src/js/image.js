@@ -580,6 +580,11 @@ SatImage.prototype._keydown = function(e) {
  * @param {object} e: mouse event
  */
 SatImage.prototype._mousedown = function(e) {
+  // do nothing if the user tries to click on the scroll bar
+  if (e.offsetX > e.target.clientWidth || e.offsetY > e.target.clientHeight) {
+    return;
+  }
+
   let self = this;
   if (!self._isWithinFrame(e)) {
     return;
@@ -715,6 +720,10 @@ SatImage.prototype._scroll = function(e) {
  * @param {object} e: mouse event (unused)
  */
 SatImage.prototype._mouseup = function(e) {
+  if (e.offsetX > e.target.clientWidth || e.offsetY > e.target.clientHeight) {
+    return;
+  }
+
   let self = this;
   if (!self._isWithinFrame(e)) {
     return;
