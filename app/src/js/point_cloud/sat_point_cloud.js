@@ -101,8 +101,6 @@ function SatPointCloud(sat, index, url) {
     this.EDITING = 2;
 
     this.selectionState = this.STANDBY;
-    this.SELECTION_COLOR = 0xff0000;
-    this.ADJUSTING_COLOR = 0xff8000;
 
     this.MOVING_BOX = 1;
     this.ROTATING_BOX = 2;
@@ -581,7 +579,7 @@ SatPointCloud.prototype.handleMouseUp = function() {
     if (this.selectionState == this.EDITING) {
         this.selectionState = this.ADJUSTING;
         if (this.editState != this.MOVING_BOX) {
-            this.selectedLabel.setColor(this.ADJUSTING_COLOR);
+            this.selectedLabel.setColor(0xff0000);
         }
         this.editState = this.MOVING_BOX;
     }
@@ -676,7 +674,6 @@ SatPointCloud.prototype.handleKeyDown = function(e) {
             } else if (this.selectionState == this.STANDBY) {
                 if (this.selectedLabel != null) {
                     this.selectionState = this.ADJUSTING;
-                    this.selectedLabel.setColor(this.ADJUSTING_COLOR);
                 }
             }
             break;
@@ -709,20 +706,65 @@ SatPointCloud.prototype.handleKeyUp = function() {
         this.editState = this.MOVING_BOX;
     }
     if (this.selectionState == this.ADJUSTING) {
-        this.selectedLabel.setColor(this.ADJUSTING_COLOR);
+        this.selectedLabel.setColor(0xff0000);
     }
 };
 
 SatPointCloud.prototype.addBoundingBox = function(label, select=false) {
-    let box = label.createBox(this.target);
+    let box = new THREE.Mesh(
+        new THREE.BoxGeometry( 1, 1, 1 ),
+        new THREE.MeshBasicMaterial({color: 0xffffff,
+            vertexColors: THREE.FaceColors,
+            transparent: true,
+            opacity: 0.5})
+    );
+
+    let outline = new THREE.LineSegments(
+        new THREE.EdgesGeometry(box.geometry),
+        new THREE.LineBasicMaterial({color: 0xffffff}));
+
+    box.outline = outline;
+    box.label = label;
     this.bounding_boxes.push(box);
+
+    label.box = box;
+
+    if (label.data) {
+        box.position.x = label.data['position'][0];
+        box.position.y = label.data['position'][1];
+        box.position.z = label.data['position'][2];
+        box.outline.position.copy(box.position);
+
+        box.rotation.x = label.data['rotation'][0];
+        box.rotation.y = label.data['rotation'][1];
+        box.rotation.z = label.data['rotation'][2];
+        box.outline.rotation.copy(box.rotation);
+
+        box.scale.x = label.data['scale'][0];
+        box.scale.y = label.data['scale'][1];
+        box.scale.z = label.data['scale'][2];
+        box.outline.scale.copy(box.scale);
+    } else {
+        box.scale.z = 0.01;
+
+        label.data = {};
+        label.data['position'] = [this.target.x, this.target.y,
+            this.target.z];
+        label.data['rotation'] = [box.rotation.x, box.rotation.y,
+            box.rotation.z];
+        label.data['scale'] = [box.scale.x, box.scale.y, box.scale.z];
+
+        box.position.copy(this.target);
+        box.outline.position.copy(box.position);
+        box.outline.scale.copy(box.scale);
+    }
+
     this.addLabelToList(label);
 
     if (select) {
         this.selectedLabelNewBox = true;
         this.select(label);
         this.selectionState = this.ADJUSTING;
-        label.setColor(this.ADJUSTING_COLOR);
         this._changeSelectedLabelCategory();
     }
 
@@ -809,7 +851,7 @@ SatPointCloud.prototype.select = function(label) {
     // If selecting same thing, then only deselect
     if (temp != label) {
         this.selectedLabel = label;
-        this.selectedLabel.setColor(this.SELECTION_COLOR);
+        this.selectedLabel.setColor(0xff0000);
 
         this.info_card.style.display = 'block';
 
@@ -886,7 +928,7 @@ SatPointCloud.prototype.select = function(label) {
 
 SatPointCloud.prototype.deselect = function() {
     if (this.selectedLabel != null) {
-        this.selectedLabel.setColor(this.selectedLabel.color());
+        this.selectedLabel.setColor(0xffffff);
         this.selectedLabel = null;
         this.info_card.style.display = 'none';
         this.deactivateLabelList();
@@ -969,7 +1011,7 @@ SatPointCloud.prototype.highlightMousedOverBox = function(mX, mY) {
     // Highlight current box
     if (intersects.length > 0) {
         this.boxMouseOver = intersects[0].object;
-        this.boxMouseOver.outline.material.color.set(this.SELECTION_COLOR);
+        this.boxMouseOver.outline.material.color.set(0xff0000);
         this.boxMouseOverPoint = intersects[0].point;
     }
 };

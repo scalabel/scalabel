@@ -1,12 +1,17 @@
 language: python
+language: go
 python:
-  - "3.5"
+  - "3.6"
+go:
+  - "1.10"
+go_import_path: github.com/ucbdrive/sat
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y npm
   - npm install -g eslint eslint-config-google
 install:
-  - pip install pycodestyle
+  - sudo pip install --upgrade pip
+  - sudo pip install pycodestyle
   - go get gopkg.in/yaml.v2
   - npm install
 script:
