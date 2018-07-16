@@ -2,88 +2,71 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
-	"strings"
 )
 
 // TODO: use actual worker ID
 const DEFAULT_WORKER = "default_worker"
 
-func GetProject(projectName string) Project {
+func GetProject(projectName string) (Project, error) {
 	err := os.MkdirAll(env.DataDir, 0777)
 	if err != nil {
-		Error.Println(err)
+		return Project{}, err
 	}
 	projectFilePath := path.Join(env.DataDir, projectName, "project.json")
 	projectFileContents, err := ioutil.ReadFile(projectFilePath)
 	if err != nil {
-		Error.Println(err)
+		return Project{}, err
 	}
 	project := Project{}
 	err = json.Unmarshal(projectFileContents, &project)
 	if err != nil {
-		Error.Println(err)
+		return Project{}, err
 	}
-	return project
+	return project, nil
 }
 
-// DEPRECATED
-func GetProjects() []Project {
-	projectsDirectoryPath := path.Join(env.DataDir, "projects")
-	err := os.MkdirAll(projectsDirectoryPath, 0777)
+func DeleteProject(projectName string) error {
+	err := os.MkdirAll(env.DataDir, 0777)
 	if err != nil {
-		Error.Println(err)
+		return err
 	}
-	projectsDirectoryContents, err := ioutil.ReadDir(
-		projectsDirectoryPath)
-	if err != nil {
-		Error.Println(err)
-	}
-	projects := []Project{}
-	for _, projectFile := range projectsDirectoryContents {
-		if len(projectFile.Name()) > 5 &&
-		  path.Ext(projectFile.Name()) == ".json" {
-			projectFileContents, err := ioutil.ReadFile(
-				path.Join(projectsDirectoryPath, projectFile.Name()))
-			if err != nil {
-				Error.Println(err)
-			}
-			project := Project{}
-			err = json.Unmarshal(projectFileContents, &project)
-			if err != nil {
-				Error.Println(err)
-			}
-			projects = append(projects, project)
-		}
-	}
-	return projects
+	projectFileDir := path.Join(env.DataDir, projectName)
+	os.RemoveAll(projectFileDir)
+	return nil
 }
 
-func GetTask(projectName string, index string) Task {
+func GetTask(projectName string, index string) (Task, error) {
 	taskPath := path.Join(env.DataDir, projectName, "tasks", index+".json")
 	taskFileContents, err := ioutil.ReadFile(taskPath)
 	if err != nil {
-		Error.Println(err)
+		return Task{}, err
 	}
 	task := Task{}
 	err = json.Unmarshal(taskFileContents, &task)
 	if err != nil {
-		Error.Println(err)
+		return Task{}, err
 	}
-	return task
+	return task, nil
 }
 
-func GetTasksInProject(projectName string) []Task {
+func GetTasksInProject(projectName string) ([]Task, error) {
+	if projectName == "" {
+		return []Task{}, errors.New("Empty project name")
+	}
 	projectTasksPath := path.Join(env.DataDir, projectName, "tasks")
 	os.MkdirAll(projectTasksPath, 0777)
 	tasksDirectoryContents, err := ioutil.ReadDir(projectTasksPath)
 	if err != nil {
-		Error.Println(err)
+		return []Task{}, err
 	}
 	tasks := []Task{}
 	for _, taskFile := range tasksDirectoryContents {
@@ -92,28 +75,32 @@ func GetTasksInProject(projectName string) []Task {
 			taskFileContents, err := ioutil.ReadFile(
 				path.Join(projectTasksPath, taskFile.Name()))
 			if err != nil {
-				Error.Println(err)
+				return []Task{}, err
 			}
 			task := Task{}
 			err = json.Unmarshal(taskFileContents, &task)
 			if err != nil {
-				Error.Println(err)
+				return []Task{}, err
 			}
 			tasks = append(tasks, task)
 		}
 	}
-	return tasks
+	// sort tasks by index
+	sort.Slice(tasks, func(i, j int) bool {
+		return tasks[i].Index < tasks[j].Index
+	})
+	return tasks, nil
 }
 
 // Get the most recent assignment given the needed fields.
-func GetAssignment(projectName string, taskIndex string, workerId string) Assignment {
+func GetAssignment(projectName string, taskIndex string, workerId string) (Assignment, error) {
 	assignment := Assignment{}
 	submissionsPath := path.Join(env.DataDir, projectName, "submissions",
 		taskIndex, workerId)
 	os.MkdirAll(submissionsPath, 0777)
 	submissionsDirectoryContents, err := ioutil.ReadDir(submissionsPath)
 	if err != nil {
-		Error.Println(err)
+		return Assignment{}, err
 	}
 	// directory contents should already be sorted, just need to remove all non-JSON
 	submissionsDirectoryJSONs := []os.FileInfo{}
@@ -123,47 +110,58 @@ func GetAssignment(projectName string, taskIndex string, workerId string) Assign
 		}
 	}
 	// if any submissions exist, get the most recent one
-	if (len(submissionsDirectoryJSONs) > 0) {
+	if len(submissionsDirectoryJSONs) > 0 {
 		submissionFileContents, err := ioutil.ReadFile(path.Join(submissionsPath,
 			submissionsDirectoryJSONs[len(submissionsDirectoryJSONs)-1].Name()))
 		if err != nil {
-			Error.Println(err)
+			return Assignment{}, err
 		}
 		err = json.Unmarshal(submissionFileContents, &assignment)
 		if err != nil {
-			Error.Println(err)
+			return Assignment{}, err
 		}
 	} else {
 		assignmentPath := path.Join(env.DataDir, projectName, "assignments",
 			taskIndex, workerId+".json")
 		assignmentFileContents, err := ioutil.ReadFile(assignmentPath)
 		if err != nil {
-			Error.Println(err)
+			return Assignment{}, err
 		}
 		err = json.Unmarshal(assignmentFileContents, &assignment)
 		if err != nil {
-			Error.Println(err)
+			return Assignment{}, err
 		}
 	}
-	return assignment
+	return assignment, nil
 }
 
-func CreateAssignment(projectName string, taskIndex string, workerId string) Assignment {
-	task := GetTask(projectName, taskIndex)
+func CreateAssignment(projectName string, taskIndex string, workerId string) (Assignment, error) {
+	task, err := GetTask(projectName, taskIndex)
+	if err != nil {
+		return Assignment{}, err
+	}
 	assignment := Assignment{
-		Task: task,
-		WorkerId: workerId,
+		Task:      task,
+		WorkerId:  workerId,
 		StartTime: recordTimestamp(),
 	}
 	assignment.Initialize()
-	return assignment
+	return assignment, nil
 }
 
-func GetDashboardContents(projectName string) DashboardContents {
-	return DashboardContents{
-		Project: GetProject(projectName),
-		Tasks: GetTasksInProject(projectName),
+func GetDashboardContents(projectName string) (DashboardContents, error) {
+	project, err := GetProject(projectName)
+	if err != nil {
+		return DashboardContents{}, err
 	}
+	tasks, err := GetTasksInProject(projectName)
+	if err != nil {
+		return DashboardContents{}, err
+	}
+	return DashboardContents{
+		Project: project,
+		Tasks:   tasks,
+	}, nil
 }
 
 func GetHandlerUrl(itemType string, labelType string) string {
@@ -187,12 +185,12 @@ func GetHandlerUrl(itemType string, labelType string) string {
 			return "NO_VALID_HANDLER"
 		}
 	case "pointcloud":
-	    switch labelType {
-	    case "box3d":
-	        return "point_cloud_labeling"
-	    default:
-	        return "NO_VALID_HANDLER"
-	    }
+		switch labelType {
+		case "box3d":
+			return "point_cloud_labeling"
+		default:
+			return "NO_VALID_HANDLER"
+		}
 	}
 	return "NO_VALID_HANDLER"
 }
@@ -263,7 +261,7 @@ func CheckProjectName(projectName string) string {
 }
 
 // default box2d category if category file is missing
-var defaultBox2dCategories = []Category {
+var defaultBox2dCategories = []Category{
 	{"person", nil},
 	{"rider", nil},
 	{"car", nil},
@@ -277,21 +275,21 @@ var defaultBox2dCategories = []Category {
 }
 
 // default seg2d category if category file is missing
-var defaultSeg2dCategories = []Category {
-	{"void", []Category {
+var defaultSeg2dCategories = []Category{
+	{"void", []Category{
 		{"unlabeled", nil},
 		{"dynamic", nil},
 		{"ego vehicle", nil},
 		{"ground", nil},
 		{"static", nil},
 	}},
-	{"flat", []Category {
+	{"flat", []Category{
 		{"parking", nil},
 		{"rail track", nil},
 		{"road", nil},
 		{"sidewalk", nil},
 	}},
-	{"construction", []Category {
+	{"construction", []Category{
 		{"bridge", nil},
 		{"building", nil},
 		{"bus stop", nil},
@@ -301,7 +299,7 @@ var defaultSeg2dCategories = []Category {
 		{"tunnel", nil},
 		{"wall", nil},
 	}},
-	{"object", []Category {
+	{"object", []Category{
 		{"banner", nil},
 		{"billboard", nil},
 		{"fire hydrant", nil},
@@ -318,18 +316,18 @@ var defaultSeg2dCategories = []Category {
 		{"traffic sign frame", nil},
 		{"trash can", nil},
 	}},
-	{"nature", []Category {
+	{"nature", []Category{
 		{"terrain", nil},
 		{"vegetation", nil},
 	}},
-	{"sky", []Category {
+	{"sky", []Category{
 		{"sky", nil},
 	}},
-	{"human", []Category {
+	{"human", []Category{
 		{"person", nil},
 		{"rider", nil},
 	}},
-	{"vehicle", []Category {
+	{"vehicle", []Category{
 		{"bicycle", nil},
 		{"bus", nil},
 		{"car", nil},
@@ -342,7 +340,7 @@ var defaultSeg2dCategories = []Category {
 }
 
 // default lane2d category if category file is missing
-var defaultLane2dCategories = []Category {
+var defaultLane2dCategories = []Category{
 	{"road curb", nil},
 	{"double white", nil},
 	{"double yellow", nil},
@@ -354,7 +352,7 @@ var defaultLane2dCategories = []Category {
 }
 
 // default box2d attributes if attribute file is missing
-var defaultBox2dAttributes = []Attribute {
+var defaultBox2dAttributes = []Attribute{
 	{"Occluded", "switch", "o",
 		"", nil, nil, nil,
 	},
@@ -369,9 +367,8 @@ var defaultBox2dAttributes = []Attribute {
 
 // default attributes if attribute file is missing
 // to avoid uncaught type error in Javascript file
-var dummyAttribute = []Attribute {
+var dummyAttribute = []Attribute{
 	{"", "", "",
 		"", nil, nil, nil,
 	},
 }
-

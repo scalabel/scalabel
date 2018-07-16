@@ -3,17 +3,17 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strconv"
-	"log"
-	"./export"
 )
 
 // A collection of Items to be split into Tasks. Represents one unified type
@@ -50,16 +50,16 @@ func (project *Project) Save() {
 
 // Info about a Project shared by Project and Task.
 type ProjectOptions struct {
-	Name                 string        `json:"name" yaml:"name"`
-	ItemType             string        `json:"itemType" yaml:"itemType"`
-	LabelType            string        `json:"labelType" yaml:"labelType"`
-	TaskSize             int           `json:"taskSize" yaml:"taskSize"`
-	HandlerUrl           string        `json:"handlerUrl" yaml:"handlerUrl"`
-	PageTitle            string        `json:"pageTitle" yaml:"pageTitle"`
-	Categories           []Category    `json:"categories" yaml:"categories"`
-	NumLeafCategories    int           `json:"numLeafCategories" yaml:"numLeafCategories"`
-	Attributes           []Attribute   `json:"attributes" yaml:"attributes"`
-	VideoMetaData        VideoMetaData `json:"metadata" yaml:"metadata"`
+	Name              string        `json:"name" yaml:"name"`
+	ItemType          string        `json:"itemType" yaml:"itemType"`
+	LabelType         string        `json:"labelType" yaml:"labelType"`
+	TaskSize          int           `json:"taskSize" yaml:"taskSize"`
+	HandlerUrl        string        `json:"handlerUrl" yaml:"handlerUrl"`
+	PageTitle         string        `json:"pageTitle" yaml:"pageTitle"`
+	Categories        []Category    `json:"categories" yaml:"categories"`
+	NumLeafCategories int           `json:"numLeafCategories" yaml:"numLeafCategories"`
+	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
+	VideoMetaData     VideoMetaData `json:"metadata" yaml:"metadata"`
 }
 
 // A workably-sized collection of Items belonging to a Project.
@@ -209,16 +209,16 @@ type DashboardContents struct {
 }
 
 type TaskURL struct {
-    URL             string                      `json:"url" yaml:"url"`
+	URL string `json:"url" yaml:"url"`
 }
 
 // unescaped marshal used to encode url string
 func JSONMarshal(t interface{}) ([]byte, error) {
-    buffer := &bytes.Buffer{}
-    encoder := json.NewEncoder(buffer)
-    encoder.SetEscapeHTML(false)
-    err := encoder.Encode(t)
-    return buffer.Bytes(), err
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	err := encoder.Encode(t)
+	return buffer.Bytes(), err
 }
 
 // Function type for handlers
@@ -250,15 +250,15 @@ func WrapHandleFunc(fn HandleFunc) HandleFunc {
 }
 
 func countCategories(categories []Category) int {
-    count := 0
-    for _, category := range categories {
-        if len(category.Subcategories) > 0 {
-            count += countCategories(category.Subcategories)
-        } else {
-            count += 1
-        }
-    }
-    return count
+	count := 0
+	for _, category := range categories {
+		if len(category.Subcategories) > 0 {
+			count += countCategories(category.Subcategories)
+		} else {
+			count += 1
+		}
+	}
+	return count
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
@@ -270,13 +270,14 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	projectName := r.FormValue("project_name")
-	dashboardContents := DashboardContents{
-		Project: GetProject(projectName),
-		Tasks:   GetTasksInProject(projectName),
+	dashboardContents, err := GetDashboardContents(r.FormValue("project_name"))
+	Info.Println(dashboardContents.Tasks)
+	if err != nil {
+		Error.Println(err)
+	} else {
+		Info.Println(dashboardContents.Tasks) // project is too verbose to log
+		tmpl.Execute(w, dashboardContents)
 	}
-	Info.Println(dashboardContents.Tasks) // project is too verbose to log
-	tmpl.Execute(w, dashboardContents)
 }
 
 func vendorHandler(w http.ResponseWriter, r *http.Request) {
@@ -286,13 +287,13 @@ func vendorHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	projectName := r.FormValue("project_name")
-	dashboardContents := DashboardContents{
-		Project: GetProject(projectName),
-		Tasks:   GetTasksInProject(projectName),
+	dashboardContents, err := GetDashboardContents(r.FormValue("project_name"))
+	if err != nil {
+		Error.Println(err)
+	} else {
+		Info.Println(dashboardContents.Tasks) // project is too verbose to log
+		tmpl.Execute(w, dashboardContents)
 	}
-	Info.Println(dashboardContents.Tasks) // project is too verbose to log
-	tmpl.Execute(w, dashboardContents)
 }
 
 // Handles the posting of new projects
@@ -303,8 +304,9 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate form fields that are required
-	if !formValidation(w, r) {
-		return
+	err := formValidation(w, r)
+	if err != nil {
+		Error.Println(err)
 	}
 
 	// make sure the project name in the form is new
@@ -342,7 +344,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// get the vendor ID from form
 	vendorId, err := strconv.Atoi(r.FormValue("vendor_id"))
 	if err != nil {
-		if (r.FormValue("vendor_id") == "") {
+		if r.FormValue("vendor_id") == "" {
 			vendorId = -1
 		} else {
 			Error.Println(err)
@@ -355,16 +357,16 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// initialize and save the project
 	var projectOptions = ProjectOptions{
-		Name:                projectName,
-		ItemType:            itemType,
-		LabelType:           labelType,
-		TaskSize:            taskSize,
-		HandlerUrl:          handlerUrl,
-		PageTitle:           pageTitle,
-		Categories:          categories,
-		NumLeafCategories:   numLeafCategories,
-		Attributes:          attributes,
-		VideoMetaData:       videoMetaData,
+		Name:              projectName,
+		ItemType:          itemType,
+		LabelType:         labelType,
+		TaskSize:          taskSize,
+		HandlerUrl:        handlerUrl,
+		PageTitle:         pageTitle,
+		Categories:        categories,
+		NumLeafCategories: numLeafCategories,
+		Attributes:        attributes,
+		VideoMetaData:     videoMetaData,
 	}
 	var project = Project{
 		Items:    items,
@@ -383,16 +385,24 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 	// get task name from the URL
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
-	var assignment Assignment
-	if (!Exists(path.Join(env.DataDir, projectName, "assignments",
-		taskIndex, DEFAULT_WORKER+".json"))) {
+	if !Exists(path.Join(env.DataDir, projectName, "assignments",
+		taskIndex, DEFAULT_WORKER+".json")) {
 		// if assignment does not exist, create it
-		assignment = CreateAssignment(projectName, taskIndex, DEFAULT_WORKER)
+		assignment, err := CreateAssignment(projectName, taskIndex, DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		tmpl.Execute(w, assignment)
 	} else {
 		// otherwise, get that assignment
-		assignment = GetAssignment(projectName, taskIndex, DEFAULT_WORKER)
+		assignment, err := GetAssignment(projectName, taskIndex, DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		tmpl.Execute(w, assignment)
 	}
-	tmpl.Execute(w, assignment)
 }
 
 // Handles the loading of an assignment given its project name, task index, and worker ID.
@@ -409,15 +419,23 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	projectName := assignmentToLoad.Task.ProjectOptions.Name
 	taskIndex := strconv.Itoa(assignmentToLoad.Task.Index)
 	var loadedAssignment Assignment
-	if (!Exists(path.Join(env.DataDir, projectName, "assignments", taskIndex,
-		DEFAULT_WORKER+".json"))) {
+	if !Exists(path.Join(env.DataDir, projectName, "assignments", taskIndex,
+		DEFAULT_WORKER+".json")) {
 		// if assignment does not exist, create it
 		// TODO: resolve tension between this function and executeLabelingTemplate()
-		loadedAssignment = CreateAssignment(projectName, taskIndex,
+		loadedAssignment, err = CreateAssignment(projectName, taskIndex,
 			DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
 	} else {
-		loadedAssignment = GetAssignment(projectName, taskIndex,
+		loadedAssignment, err = GetAssignment(projectName, taskIndex,
 			DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
 		loadedAssignment.StartTime = recordTimestamp()
 	}
 	loadedAssignmentJson, err := json.Marshal(loadedAssignment)
@@ -461,73 +479,85 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles the export of submitted assignments
 func postExportHandler(w http.ResponseWriter, r *http.Request) {
-    exportFile := export.ExportFile{}
-    var projectName = r.FormValue("project_name")
-    projectFilePath := path.Join(env.DataDir, projectName, "project.json")
-    projectFileContents, err := ioutil.ReadFile(projectFilePath)
-    if err != nil {
-        Error.Println(err)
-    }
+	exportFile := FileExport{}
+	var projectName = r.FormValue("project_name")
+	projectFilePath := path.Join(env.DataDir, projectName, "project.json")
+	projectFileContents, err := ioutil.ReadFile(projectFilePath)
+	if err != nil {
+		Error.Println(err)
+	}
 
-    projectToLoad := Project{}
-    err = json.Unmarshal(projectFileContents, &projectToLoad)
-    if err != nil {
-        Error.Println(err)
-    }
-    exportFile.Name = projectToLoad.Options.Name
-    // exportFile.Categories = projectToLoad.Options.Categories
-    // exportFile.Attributes = projectToLoad.Options.Attributes
+	projectToLoad := Project{}
+	err = json.Unmarshal(projectFileContents, &projectToLoad)
+	if err != nil {
+		Error.Println(err)
+	}
+	exportFile.Name = projectToLoad.Options.Name
+	// exportFile.Categories = projectToLoad.Options.Categories
+	// exportFile.Attributes = projectToLoad.Options.Attributes
 
-    // Grab the latest submissions from all tasks
-    tasks := GetTasksInProject(projectName)
-    for _, task := range tasks {
-        latestSubmission := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
-        for _, itemToLoad := range latestSubmission.Task.Items {
-            item := export.Item{}
-            item.Timestamp = 10000 // to be fixed
-            item.Index = itemToLoad.Index
-            for _, labelId := range itemToLoad.LabelIds {
-                var labelToLoad Label
-                for _, label := range latestSubmission.Labels {
-                    if label.Id == labelId {
-                        labelToLoad = label
-                        break
-                    }
-                }
-                label := export.Label{}
-                label.Id = labelId
-                label.Category = labelToLoad.CategoryPath
-                label.Attributes = labelToLoad.Attributes
-                switch projectToLoad.Options.LabelType {
-                case "box2d":
-                    label.Box2d = export.ParseBox2d(labelToLoad.Data)
-                case "box3d":
-                    label.Box3d = export.ParseBox3d(labelToLoad.Data)
-                case "segmentation":
-                    label.Seg2d = export.ParseSeg2d(labelToLoad.Data)
-                case "lane":
-                    label.Seg2d = export.ParseSeg2d(labelToLoad.Data)
-                }
-                item.Labels = append(item.Labels, label)
-            }
-            exportFile.Items = append(exportFile.Items, item)
-        }
-    }
+	// Grab the latest submissions from all tasks
+	tasks, err := GetTasksInProject(projectName)
+	if err != nil {
+		Error.Println(err)
+		return
+	}
+	for _, task := range tasks {
+		latestSubmission, err := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		for _, itemToLoad := range latestSubmission.Task.Items {
+			item := ItemExport{}
+			item.Timestamp = 10000 // to be fixed
+			item.Index = itemToLoad.Index
+			for _, labelId := range itemToLoad.LabelIds {
+				var labelToLoad Label
+				for _, label := range latestSubmission.Labels {
+					if label.Id == labelId {
+						labelToLoad = label
+						break
+					}
+				}
+				label := LabelExport{}
+				label.Id = labelId
+				label.Category = labelToLoad.CategoryPath
+				label.Attributes = labelToLoad.Attributes
+				switch projectToLoad.Options.LabelType {
+				case "box2d":
+					label.Box2d = ParseBox2d(labelToLoad.Data)
+				case "box3d":
+					label.Box3d = ParseBox3d(labelToLoad.Data)
+				case "segmentation":
+					label.Seg2d = ParseSeg2d(labelToLoad.Data)
+				case "lane":
+					label.Seg2d = ParseSeg2d(labelToLoad.Data)
+				}
+				item.Labels = append(item.Labels, label)
+			}
+			exportFile.Items = append(exportFile.Items, item)
+		}
+	}
 
-    exportJson, err := json.MarshalIndent(exportFile, "", "  ")
-    if err != nil {
-        Error.Println(err)
-    }
+	exportJson, err := json.MarshalIndent(exportFile, "", "  ")
+	if err != nil {
+		Error.Println(err)
+	}
 
-    //set relevant header.
-    w.Header().Set("Content-Disposition", "attachment; filename=" + projectName + "_Results.json")
-    io.Copy(w, bytes.NewReader(exportJson))
+	//set relevant header.
+	w.Header().Set("Content-Disposition", "attachment; filename="+projectName+"_Results.json")
+	io.Copy(w, bytes.NewReader(exportJson))
 }
 
 // Handles the download of submitted assignments
 func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
     var projectName = r.FormValue("project_name")
-    tasks := GetTasksInProject(projectName)
+    tasks, err := GetTasksInProject(projectName)
+    if err != nil {
+    	Error.Println(err)
+    	return
+    }
 
     taskURLs := []TaskURL{}
     for _, task := range tasks {
@@ -545,23 +575,22 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
         } else {
 			u.Scheme = "http"
 		}
-        u.Host = r.Host
-        taskURL.URL = u.String()
-        taskURLs = append(taskURLs, taskURL)
-    }
+		u.Host = r.Host
+		taskURL.URL = u.String()
+		taskURLs = append(taskURLs, taskURL)
+	}
 
-    // downloadJson, err := json.MarshalIndent(taskURLs, "", "  ")
-    downloadJson, err := JSONMarshal(taskURLs)
-    if err != nil {
-        Error.Println(err)
-    }
+	// downloadJson, err := json.MarshalIndent(taskURLs, "", "  ")
+	downloadJson, err := JSONMarshal(taskURLs)
+	if err != nil {
+		Error.Println(err)
+	}
 
-    //set relevant header.
-    w.Header().Set("Content-Disposition", "attachment; filename=" + projectName + "_TaskURLs.json")
-    io.Copy(w, bytes.NewReader(downloadJson))
+	//set relevant header.
+	w.Header().Set("Content-Disposition", "attachment; filename="+projectName+"_TaskURLs.json")
+	io.Copy(w, bytes.NewReader(downloadJson))
 }
 
-// DEPRECATED
 // handles item YAML file
 func getItemsFromProjectForm(w http.ResponseWriter, r *http.Request) []Item {
 	var items []Item
@@ -594,7 +623,6 @@ func getItemsFromProjectForm(w http.ResponseWriter, r *http.Request) []Item {
 	return items
 }
 
-// DEPRECATED
 // handles category YAML file, sets to default values if file missing
 func getCategoriesFromProjectForm(r *http.Request) []Category {
 	labelType := r.FormValue("label_type")
@@ -635,7 +663,6 @@ func getCategoriesFromProjectForm(r *http.Request) []Category {
 	return categories
 }
 
-// DEPRECATED
 // handles category YAML file, sets to default values if file missing
 func getAttributesFromProjectForm(r *http.Request) []Attribute {
 	labelType := r.FormValue("label_type")
@@ -673,7 +700,6 @@ func getAttributesFromProjectForm(r *http.Request) []Attribute {
 	return attributes
 }
 
-// DEPRECATED
 func CreateTasks(project Project) {
 	index := 0
 	if project.Options.ItemType == "video" {
@@ -688,11 +714,11 @@ func CreateTasks(project Project) {
 	} else {
 		// otherwise, make as many tasks as required
 		size := len(project.Items)
-		for i := 0; i < size; i+= project.Options.TaskSize {
+		for i := 0; i < size; i += project.Options.TaskSize {
 			task := Task{
 				ProjectOptions: project.Options,
-				Index: index,
-				Items: project.Items[i:Min(i+project.Options.TaskSize, size)],
+				Index:          index,
+				Items:          project.Items[i:Min(i+project.Options.TaskSize, size)],
 			}
 			index = index + 1
 			task.Save()
@@ -702,25 +728,26 @@ func CreateTasks(project Project) {
 }
 
 // server side create form validation
-func formValidation(w http.ResponseWriter, r *http.Request) bool {
+func formValidation(w http.ResponseWriter, r *http.Request) error {
 	if r.FormValue("project_name") == "" {
 		w.Write([]byte("Please create a project name."))
-		return false
+		return errors.New("Invalid form: no project name.")
 	}
 
 	if r.FormValue("item_type") == "" {
 		w.Write([]byte("Please choose an item type."))
-		return false
+		return errors.New("Invalid form: no item type.")
 	}
 
 	if r.FormValue("label_type") == "" {
 		w.Write([]byte("Please choose a label type."))
-		return false
+		return errors.New("Invalid form: no label type.")
 	}
 
 	if r.FormValue("item_type") != "video" && r.FormValue("task_size") == "" {
 		w.Write([]byte("Please specify a task size."))
-		return false
+		return errors.New("Invalid form: no task size.")
 	}
-	return true
+	// TODO: check forms are actually uploaded
+	return nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"fmt"
 )
 
 var (
@@ -65,7 +65,7 @@ func (env Env) PointCloudPath() string {
 }
 
 func Init(
-// Initialize all the loggers
+	// Initialize all the loggers
 	traceHandle io.Writer,
 	infoHandle io.Writer,
 	warningHandle io.Writer,
