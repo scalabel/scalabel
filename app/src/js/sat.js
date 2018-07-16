@@ -670,9 +670,24 @@ SatLabel.useCrossHair = false;
 
 /**
  * Function to set the tool box of SatLabel.
- * @param {object} satItem - the SatImage object.
+ * @param {object} ignoredSatItem - the SatImage object.
  */
-SatLabel.setToolBox = function(satItem) { // eslint-disable-line
+SatLabel.prototype.setToolBox = function(ignoredSatItem) {
+
+};
+
+/**
+ * Set this label's category.
+ * @param {string} categoryPath - The / delimited category path for this label.
+ */
+SatLabel.prototype.setCategoryPath = function(categoryPath) {
+  this.categoryPath = categoryPath;
+  if (this.parent) {
+    this.parent.childCategoryPathChanged(categoryPath);
+  }
+};
+
+SatLabel.prototype.childCategoryPathChanged = function(ignoredCategoryPath) {
 
 };
 
@@ -693,32 +708,9 @@ SatLabel.prototype.childDeleted = function() {
   if (this.numChildren === 0) this.delete();
 };
 
-SatLabel.prototype.setSelectedShape = function(shape) {
-  this.selectedShape = shape;
-};
-
-SatLabel.prototype.setHoveredShape = function(shape) {
-  this.hoveredShape = shape;
-};
-
-SatLabel.prototype.getSelectedShape = function() {
-  return this.selectedShape;
-};
-
-SatLabel.prototype.getHoveredShape = function() {
-  return this.hoveredShape;
-};
-
 SatLabel.prototype.getRoot = function() {
   if (this.parent === null) return this;
   else return this.parent.getRoot();
-};
-
-/**
- * Get the current position of this label.
- */
-SatLabel.prototype.getCurrentPosition = function() {
-
 };
 
 SatLabel.prototype.addChild = function(child) {

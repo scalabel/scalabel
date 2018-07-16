@@ -941,13 +941,7 @@ SatImage.prototype._changeSelectedLabelCategory = function() {
   if (self.selectedLabel) {
     self.catSel = document.getElementById('category_select');
     let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
-    if (self.selectedLabel.parent) {
-      for (let c of self.selectedLabel.parent.children) {
-        c.categoryPath = option;
-      }
-    } else {
-      self.selectedLabel.categoryPath = option;
-    }
+    self.selectedLabel.setCategoryPath(option);
     self.redrawMainCanvas();
   }
 };
@@ -1083,10 +1077,6 @@ ImageLabel.prototype.deleteAllShapes = function() {
   // specific to each class
 };
 
-ImageLabel.prototype.getCurrentPosition = function() {
-
-};
-
 ImageLabel.prototype.fromJsonPointers = function(json) {
   let self = this;
   self.decodeBaseJsonPointers(json);
@@ -1149,6 +1139,26 @@ ImageLabel.prototype.intersection = function(ignoredLabel) {
  */
 ImageLabel.prototype.union = function(ignoredLabel) {
   return 0;
+};
+
+ImageLabel.prototype.getCurrentPosition = function() {
+
+};
+
+ImageLabel.prototype.setSelectedShape = function(shape) {
+  this.selectedShape = shape;
+};
+
+ImageLabel.prototype.setHoveredShape = function(shape) {
+  this.hoveredShape = shape;
+};
+
+ImageLabel.prototype.getSelectedShape = function() {
+  return this.selectedShape;
+};
+
+ImageLabel.prototype.getHoveredShape = function() {
+  return this.hoveredShape;
 };
 
 ImageLabel.prototype.setAsTargeted = function() {
