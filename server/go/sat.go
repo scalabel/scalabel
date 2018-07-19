@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
@@ -20,9 +23,10 @@ import (
 //   of annotation task with a consistent ItemType, LabelType, Category list,
 //   and Attribute list. Tasks in this Project are of uniform size.
 type Project struct {
-	Items    []Item         `json:"items" yaml"items"`
-	VendorId int            `json:"vendorId" yaml:"vendorId"`
-	Options  ProjectOptions `json:"options" yaml:"options"`
+	ProjectName string         //this is the primary key of project table
+	Items       []Item         `json:"items" yaml"items"`
+	VendorId    int            `json:"vendorId" yaml:"vendorId"`
+	Options     ProjectOptions `json:"options" yaml:"options"`
 }
 
 func (project *Project) GetPath() string {
@@ -34,7 +38,7 @@ func (project *Project) GetPath() string {
 	return path.Join(dir, "project.json")
 }
 
-func (project *Project) Save() {
+func (project *Project) SaveLocal() {
 	path := project.GetPath()
 	json, err := json.MarshalIndent(project, "", "  ")
 	if err != nil {
@@ -48,7 +52,30 @@ func (project *Project) Save() {
 	}
 }
 
-// Info about a Project shared by Project and Task.
+func (project *Project) SaveDatabase() {
+	project.ProjectName = project.Options.Name
+	av, err := dynamodbattribute.MarshalMap(project)
+	input := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String("Project"),
+	}
+	_, err = svc.PutItem(input)
+
+	if err != nil {
+		Error.Println("Got error calling PutItem:")
+		Error.Println(err.Error())
+	}
+	Info.Println("Successfully added a project to Project table on dynamodb")
+}
+
+func (project *Project) Save() {
+	if env.Database {
+		project.SaveDatabase()
+	} else {
+		project.SaveLocal()
+	}
+}
+
 type ProjectOptions struct {
 	Name              string        `json:"name" yaml:"name"`
 	ItemType          string        `json:"itemType" yaml:"itemType"`
@@ -64,8 +91,9 @@ type ProjectOptions struct {
 
 // A workably-sized collection of Items belonging to a Project.
 type Task struct {
+	ProjectName    string         //primary key
 	ProjectOptions ProjectOptions `json:"projectOptions" yaml:"projectOptions"`
-	Index          int            `json:"index" yaml:"index"`
+	Index          int            `json:"index" yaml:"index"` //sort key
 	Items          []Item         `json:"items" yaml:"items"`
 }
 
@@ -79,7 +107,7 @@ func (task *Task) GetPath() string {
 	return path.Join(dir, strconv.Itoa(task.Index)+".json")
 }
 
-func (task *Task) Save() {
+func (task *Task) SaveLocal() {
 	path := task.GetPath()
 	Info.Println(path)
 	json, err := json.MarshalIndent(task, "", "  ")
@@ -94,15 +122,41 @@ func (task *Task) Save() {
 	}
 }
 
+func (task *Task) SaveDatabase() {
+	task.ProjectName = task.ProjectOptions.Name
+	av, err := dynamodbattribute.MarshalMap(task)
+	input := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String("Task"),
+	}
+	_, err = svc.PutItem(input)
+
+	if err != nil {
+		Error.Println("Got error calling PutItem:")
+		Error.Println(err.Error())
+	}
+	Info.Println("Successfully added a task to Task table on dynamodb")
+}
+
+func (task *Task) Save() {
+	if env.Database {
+		task.SaveDatabase()
+	} else {
+		task.SaveLocal()
+	}
+}
+
 // The actual assignment of a task to a worker. Contains the worker's progress.
 type Assignment struct {
+	PrimaryKey string //Primary Key, this is the concatenation of
+	//ProjectName, TaskIndex and WorkerId
 	Task            Task                   `json:"task" yaml:"task"`
 	WorkerId        string                 `json:"workerId" yaml:"workerId"`
 	Labels          []Label                `json:"labels" yaml:"labels"`
 	Tracks          []Label                `json:"tracks" yaml:"tracks"`
 	Events          []Event                `json:"events" yaml:"events"`
 	StartTime       int64                  `json:"startTime" yaml:"startTime"`
-	SubmitTime      int64                  `json:"submitTime" yaml:"submitTime"`
+	SubmitTime      int64                  `json:"submitTime" yaml:"submitTime"` //Sort Key ONLY for Submission Table
 	NumLabeledItems int                    `json:"numLabeledItems" yaml:"numLabeledItems"`
 	UserAgent       string                 `json:"userAgent" yaml:"userAgent"`
 	IpInfo          map[string]interface{} `json:"ipInfo" yaml:"ipInfo"`
@@ -131,14 +185,67 @@ func (assignment *Assignment) GetSubmissionPath() string {
 	return path.Join(dir, strconv.FormatInt(assignment.SubmitTime, 10)+".json")
 }
 
-func (assignment *Assignment) Initialize() {
+func (assignment *Assignment) InitializeLocal() {
 	path := assignment.GetAssignmentPath()
 	assignment.Serialize(path)
 }
 
-func (assignment *Assignment) Save() {
+func (assignment *Assignment) SaveLocal() {
 	path := assignment.GetSubmissionPath()
 	assignment.Serialize(path)
+}
+
+func (assignment *Assignment) InitializeDatabase() {
+	assignment.PrimaryKey = assignment.Task.ProjectOptions.Name +
+		strconv.Itoa(assignment.Task.Index) +
+		assignment.WorkerId
+	av, err := dynamodbattribute.MarshalMap(assignment)
+	input := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String("Assignment"),
+	}
+	_, err = svc.PutItem(input)
+
+	if err != nil {
+		Error.Println("Got error calling PutItem:")
+		Error.Println(err.Error())
+	}
+	Info.Println("Successfully added a assignment to Assignment table on dynamodb")
+}
+
+func (assignment *Assignment) SaveDatabase() {
+	assignment.PrimaryKey = assignment.Task.ProjectOptions.Name +
+		strconv.Itoa(assignment.Task.Index) +
+		assignment.WorkerId
+	av, err := dynamodbattribute.MarshalMap(assignment)
+	input := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String("Submission"),
+	}
+	_, err = svc.PutItem(input)
+
+	if err != nil {
+		Error.Println("Got error calling PutItem:")
+		Error.Println(err.Error())
+	}
+	Info.Println("Successfully added a assignment to Submission table on dynamodb")
+
+}
+
+func (assignment *Assignment) Save() {
+	if env.Database {
+		assignment.SaveDatabase()
+	} else {
+		assignment.SaveLocal()
+	}
+}
+
+func (assignment *Assignment) Initialize() {
+	if env.Database {
+		assignment.InitializeDatabase()
+	} else {
+		assignment.InitializeLocal()
+	}
 }
 
 func (assignment *Assignment) Serialize(path string) {
@@ -381,7 +488,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	CreateTasks(project)
 }
 
-func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *template.Template) {
+func executeLabelingTemplateLocal(w http.ResponseWriter, r *http.Request, tmpl *template.Template) {
 	// get task name from the URL
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
@@ -405,8 +512,47 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 	}
 }
 
+func executeLabelingTemplateDatabase(w http.ResponseWriter, r *http.Request, tmpl *template.Template) {
+	// get task name from the URL
+	projectName := r.URL.Query()["project_name"][0]
+	taskIndex := r.URL.Query()["task_index"][0]
+	primaryKey := projectName + taskIndex + DEFAULT_WORKER
+	var assignment Assignment
+	result, err := svc.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String("Assignment"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"PrimaryKey": {
+				S: aws.String(primaryKey),
+			},
+		},
+	})
+	if (err != nil) || (len(result.Item) == 0) {
+		assignment, err := CreateAssignment(projectName, taskIndex, DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		tmpl.Execute(w, assignment)
+	} else {
+		err = dynamodbattribute.UnmarshalMap(result.Item, &assignment)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		tmpl.Execute(w, assignment)
+	}
+}
+
+func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *template.Template) {
+	if env.Database {
+		executeLabelingTemplateDatabase(w, r, tmpl)
+	} else {
+		executeLabelingTemplateLocal(w, r, tmpl)
+	}
+}
+
 // Handles the loading of an assignment given its project name, task index, and worker ID.
-func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
+func postLoadAssignmentHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		Error.Println(err)
@@ -445,8 +591,57 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(loadedAssignmentJson)
 }
 
+// Handles the loading of an assignment given its project name, task index, and worker ID.
+func postLoadAssignmentHandlerDatabase(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		Error.Println(err)
+	}
+	assignmentToLoad := Assignment{}
+	err = json.Unmarshal(body, &assignmentToLoad)
+	if err != nil {
+		Error.Println(err)
+	}
+	projectName := assignmentToLoad.Task.ProjectOptions.Name
+	taskIndex := strconv.Itoa(assignmentToLoad.Task.Index)
+	var loadedAssignment Assignment
+	primaryKey := projectName + taskIndex + DEFAULT_WORKER
+	result, err := svc.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String("Assignment"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"PrimaryKey": {
+				S: aws.String(primaryKey),
+			},
+		},
+	})
+	if (err != nil) || (len(result.Item) == 0) {
+		loadedAssignment, err = CreateAssignment(projectName, taskIndex, DEFAULT_WORKER)
+	} else {
+		loadedAssignment, err = GetAssignment(projectName, taskIndex,
+			DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		loadedAssignment.StartTime = recordTimestamp()
+	}
+	loadedAssignmentJson, err := json.Marshal(loadedAssignment)
+	if err != nil {
+		Error.Println(err)
+	}
+	w.Write(loadedAssignmentJson)
+}
+
+func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
+	if env.Database {
+		postLoadAssignmentHandlerDatabase(w, r)
+	} else {
+		postLoadAssignmentHandlerLocal(w, r)
+	}
+}
+
 // Handles the posting of saved assignments
-func postSaveHandler(w http.ResponseWriter, r *http.Request) {
+func postSaveHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)
 		return
@@ -473,12 +668,38 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		Info.Println("Saved submission file of", submissionPath)
 	}
-
 	w.Write(nil)
 }
 
-// Handles the export of submitted assignments
-func postExportHandler(w http.ResponseWriter, r *http.Request) {
+// Handles the posting of saved assignments
+func postSaveHandlerDatabase(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		Error.Println(err)
+	}
+	assignment := Assignment{}
+	err = json.Unmarshal(body, &assignment)
+	if err != nil {
+		Error.Println(err)
+	}
+	assignment.SubmitTime = recordTimestamp()
+	assignment.Save()
+	w.Write(nil)
+}
+
+func postSaveHandler(w http.ResponseWriter, r *http.Request) {
+	if env.Database {
+		postSaveHandlerDatabase(w, r)
+	} else {
+		postSaveHandlerLocal(w, r)
+	}
+}
+
+func postExportHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	exportFile := FileExport{}
 	var projectName = r.FormValue("project_name")
 	projectFilePath := path.Join(env.DataDir, projectName, "project.json")
@@ -550,29 +771,111 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, bytes.NewReader(exportJson))
 }
 
+// Handles the export of submitted assignments
+func postExportHandlerDatabase(w http.ResponseWriter, r *http.Request) {
+	exportFile := FileExport{}
+	var projectName = r.FormValue("project_name")
+	result, err := svc.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String("Project"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"ProjectName": {
+				S: aws.String(projectName),
+			},
+		},
+	})
+	projectToLoad := Project{}
+	err = dynamodbattribute.UnmarshalMap(result.Item, &projectToLoad)
+	if err != nil {
+		Error.Println(err)
+	}
+	exportFile.Name = projectToLoad.Options.Name
+	// exportFile.Categories = projectToLoad.Options.Categories
+	// exportFile.Attributes = projectToLoad.Options.Attributes
+	// Grab the latest submissions from all tasks
+	tasks, err := GetTasksInProject(projectName)
+	if err != nil {
+		Error.Println(err)
+		return
+	}
+	for _, task := range tasks {
+		latestSubmission, err := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		for _, itemToLoad := range latestSubmission.Task.Items {
+			item := ItemExport{}
+			item.Timestamp = 10000 // to be fixed
+			item.Index = itemToLoad.Index
+			for _, labelId := range itemToLoad.LabelIds {
+				var labelToLoad Label
+				for _, label := range latestSubmission.Labels {
+					if label.Id == labelId {
+						labelToLoad = label
+						break
+					}
+				}
+				label := LabelExport{}
+				label.Id = labelId
+				label.Category = labelToLoad.CategoryPath
+				label.Attributes = labelToLoad.Attributes
+				switch projectToLoad.Options.LabelType {
+				case "box2d":
+					label.Box2d = ParseBox2d(labelToLoad.Data)
+				case "box3d":
+					label.Box3d = ParseBox3d(labelToLoad.Data)
+				case "segmentation":
+					label.Seg2d = ParseSeg2d(labelToLoad.Data)
+				case "lane":
+					label.Seg2d = ParseSeg2d(labelToLoad.Data)
+				}
+				item.Labels = append(item.Labels, label)
+			}
+			exportFile.Items = append(exportFile.Items, item)
+		}
+	}
+
+	exportJson, err := json.MarshalIndent(exportFile, "", "  ")
+	if err != nil {
+		Error.Println(err)
+	}
+
+	//set relevant header.
+	w.Header().Set("Content-Disposition", "attachment; filename="+projectName+"_Results.json")
+	io.Copy(w, bytes.NewReader(exportJson))
+}
+
+func postExportHandler(w http.ResponseWriter, r *http.Request) {
+	if env.Database {
+		postExportHandlerDatabase(w, r)
+	} else {
+		postExportHandlerLocal(w, r)
+	}
+}
+
 // Handles the download of submitted assignments
 func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
-    var projectName = r.FormValue("project_name")
-    tasks, err := GetTasksInProject(projectName)
-    if err != nil {
-    	Error.Println(err)
-    	return
-    }
+	var projectName = r.FormValue("project_name")
+	tasks, err := GetTasksInProject(projectName)
+	if err != nil {
+		Error.Println(err)
+		return
+	}
 
-    taskURLs := []TaskURL{}
-    for _, task := range tasks {
-        taskURL := TaskURL{}
-        u, err := url.Parse(task.ProjectOptions.HandlerUrl)
-        if err != nil {
-            log.Fatal(err)
-        }
-        q := u.Query()
-        q.Set("project_name", projectName)
-        q.Set("task_index", strconv.Itoa(task.Index))
-        u.RawQuery = q.Encode()
-        if r.TLS != nil {
-            u.Scheme = "https"
-        } else {
+	taskURLs := []TaskURL{}
+	for _, task := range tasks {
+		taskURL := TaskURL{}
+		u, err := url.Parse(task.ProjectOptions.HandlerUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+		q := u.Query()
+		q.Set("project_name", projectName)
+		q.Set("task_index", strconv.Itoa(task.Index))
+		u.RawQuery = q.Encode()
+		if r.TLS != nil {
+			u.Scheme = "https"
+		} else {
 			u.Scheme = "http"
 		}
 		u.Host = r.Host
