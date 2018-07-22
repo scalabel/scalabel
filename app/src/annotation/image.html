@@ -24,8 +24,9 @@
 </head>
 
 <!-- no text highlighting -->
-<body class="noselect">
-
+<body class="noselect" style="display:none">
+<p hidden id="label_type">{{ .Task.ProjectOptions.LabelType }}</p>
+<p hidden id="item_type">{{ .Task.ProjectOptions.ItemType }}</p>
 <div id="keyboard_usage_window">
     <div class="panel panel-default">
         <div class="panel-heading active">
@@ -51,11 +52,25 @@
                 <p><span><kbd>&darr;</kbd></span> <span>Zoom out</span></p>
             </div>
             <div>
-                <p><span><kbd>&larr;</kbd></span> <span>Previous frame</span></p>
+                <p><span><kbd>&larr;</kbd></span> <span>Previous item</span></p>
             </div>
             <div>
-                <p><span><kbd>&rarr;</kbd></span> <span>Next frame</span></p>
+                <p><span><kbd>&rarr;</kbd></span> <span>Next item</span></p>
             </div>
+            <template id="seg_usage">
+              <div>
+                  <p><span><kbd>u</kbd></span> <span>Unlink selected label</span></p>
+              </div>
+              <div>
+                  <p><span><kbd>b</kbd></span> <span>When hovering over midpoint, change the edge to bezier curve</span></p>
+              </div>
+              <div>
+                  <p><span><kbd>s</kbd></span> <span>Toggle on/off quick draw mode</span></p>
+              </div>
+              <div>
+                  <p><span><kbd>Alt</kbd></span> <span>Toggle path options along a polygon during quick draw mode</span></p>
+              </div>
+            </template>
         </div>
 
     </div>
@@ -66,21 +81,27 @@
     <!-- Heading -->
     <div id="heading_row" class="row p-0 m-0">
         <div class="col-lg-12">
-            <h2 class="page-header"> <span id="page-title">Bounding box labeling tool</span>
+            <h2 class="page-header"> <span id="page-title"></span>
                 <small>version 0.1.0</small>
-                <a type="button" class="btn btn-info btn-popover"
+                <a type="button" class="btn btn-info btn-popover" id="instruction_btn"
                    data-toggle="popover" data-placement="right"
                    href="http://data-bdd.berkeley.edu/label/bbox/instruction.html"
                    target="view_window"
                    data-content="Please view instructions and annotate bounding boxes of given categories.">
                     Instruction
                 </a>
-                <small class="col-lg-offset-2">Boxes:</small>
+                <small class="col-lg-offset-1">Labels:</small>
                 <small id="label_count">0</small>
                 <small class="col-lg-offset-0">Lights:</small>
                 <small id="light_count">0</small>
                 <a href="#" id="save_btn" style="position:absolute;right:15px;"
                    class="btn btn-primary btn-primary">Save</a>
+                <div class="btn-group">
+                    <button id="increase_btn" class="btn btn-primary">+</button>
+                    <button href="#" id="decrease_btn" class="btn btn-primary">
+                        -
+                    </button>
+                </div>
             </h2>
         </div>
     </div>
@@ -107,26 +128,42 @@
                         </div>
                         {{ end }}
                     </div>
+                </a>
+                <template id="video_btns">
                     <!-- object out of frame button -->
                     <a href="#" id="end_btn" class="btn list-group-item">End
                         Object Track</a>
-                    <!-- remove button -->
-                    <a href="#" id="delete_btn" class="btn list-group-item">Remove</a>
-                </a>
+                </template>
+                <template id="seg_btns">
+                    <a href="#" id="quickdraw_btn" class="btn list-group-item" style="white-space: normal;">
+                        <kbd>s</kbd> Quickdraw
+                    </a>
+                    <a href="#" id="link_btn" class="btn list-group-item">
+                        Link
+                    </a>
+                </template>
+                <!-- remove button -->
+                <a href="#" id="delete_btn" class="btn list-group-item">Remove</a>
             </div>
         </div>
 
-        <!-- Video Player -->
-        <div id="div_canvas" class="row">
-            <!-- anything you can see lives on this canvas -->
-            <canvas id="image_canvas" width="900" height="470"></canvas>
-            <!-- this canvas stores box id's -->
-            <canvas id="hidden_canvas" width="900" height="470"></canvas>
-            <!-- mouse crosshair (horizontal and vertical) -->
-            <div id="crosshair-h" class="hair"></div>
-            <div id="crosshair-v" class="hair"></div>
-
-            <div id="player_controls">
+        <div id="div_main">
+            <div id="div_canvas"
+                 style=" position: relative; float: left; width: 900px; height: 470px; overflow:scroll; ">
+                <canvas id="image_canvas" width="900" height="470"
+                        style="position: absolute;">
+                    Unsupported browser!
+                </canvas>
+                <canvas id="hidden_canvas" width="900" height="470"
+                        style="position: absolute; ">
+                    Unsupported browser!
+                </canvas>
+                <div id="crosshair" style="visibility:none">
+                    <div id="crosshair-h" class="hair"></div>
+                    <div id="crosshair-v" class="hair"></div>
+                </div>
+            </div>
+            <div id="player_controls" style="visibility:hidden">
                 <!-- frame counter -->
                 <div id="frame_counter"> 1</div>
                 <!-- play/pause button -->
@@ -140,29 +177,26 @@
                        max="{{ .Task.ProjectOptions.VideoMetaData.NumFrames }}"
                        value="1"/>
             </div>
-
         </div>
-
-        <!-- /.row -->
-        <div class="row">
-            <div id="control_panel">
-                <div class="col-sm-2">
-                    <ul class="pagination" id="pagination_control">
-                        <li>
-                            <a id="prev_btn">
-                                &laquo;
-                            </a>
-                        </li>
-                        <li>
-                            <a id="next_btn">
-                                &raquo;
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div id="control_panel">
+            <div class="col-sm-2">
+                <ul class="pagination" id="pagination_control">
+                    <li>
+                        <a id="prev_btn">
+                            &laquo;
+                        </a>
+                    </li>
+                    <li>
+                        <a id="next_btn">
+                            &raquo;
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
-
     </div>
 
 </div>
@@ -187,14 +221,46 @@
 <script src="./js/shape.js"></script>
 <script src="./js/utils.js"></script>
 <script src="./js/box2d.js"></script>
+<script src="./js/seg2d.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
 
 <script type="text/javascript">
   document.getElementById('frame_rate').style.display = "none";
+  let showElementById = function(id) {
+    let elem = document.getElementById(id);
+    elem.style.visibility = 'visible';
+  };
+  let showTemplateById = function(id) {
+    let temp = document.getElementById(id);
+    let clone = temp.content.cloneNode(true);
+    temp.parentNode.appendChild(clone);
+  };
 
   $(document).ready(function () {
-    new SatVideo(Box2d);
+    let labelType = {{ .Task.ProjectOptions.LabelType }};
+    let itemType = {{ .Task.ProjectOptions.ItemType }};
+    let labelClass;
+    if (labelType === 'box2d') {
+      showElementById("crosshair");
+      labelClass = Box2d;
+      document.getElementById('instruction_btn').href = "http://data-bdd.berkeley.edu/label/bbox/instruction.html";
+    } else if (labelType === 'segmentation' || labelType === 'lane') {
+      labelClass = Seg2d;
+      if (labelType === 'segmentation') {
+        showTemplateById("seg_btns");
+        showTemplateById("seg_usage");
+        document.getElementById('instruction_btn').href = "http://data-bdd.berkeley.edu/label/seg/readme.html";
+      }
+    }
+    if (itemType === 'image') {
+      new Sat(SatImage, labelClass);
+    }
+    if (itemType === 'video') {
+      showElementById("player_controls");
+      showTemplateById("video_btns");
+      new SatVideo(labelClass);
+    }
     document.addEventListener("keydown", function (e) {
       let eventObj = window.event ? event : e;
       if (eventObj.keyCode === 191 && eventObj.shiftKey) {
@@ -203,7 +269,7 @@
       }
     });
   });
-
+  $('body').show();
 </script>
 
 </body>

@@ -1,10 +1,9 @@
-/* global ImageLabel Rect Vertex UP_RES_RATIO */
+/* global ImageLabel Rect Vertex UP_RES_RATIO FONT_SIZE */
 /* exported Box2d */
 
 // Constants
 const BoxStates = Object.freeze({
   FREE: 0, RESIZE: 1, MOVE: 2});
-const FONT_SIZE = 11;
 const MIN_BOX_SIZE = 5;
 
 const INITIAL_HANDLE_NO = 4;
@@ -46,6 +45,7 @@ function Box2d(sat, id, optionalAttributes) {
   this.selectedShape = this.rect.vertices[INITIAL_HANDLE_NO];
 
   this.selectedCache = null;
+  this.interpolateHandler = this.weightedAvg;
 }
 
 Box2d.prototype = Object.create(ImageLabel.prototype);

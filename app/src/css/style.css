@@ -89,6 +89,8 @@ canvas#hidden_canvas {
 #player_controls {
     display: table;
     table-layout: fixed;
+    position: relative;
+    top: 0px;
 }
 
 #frame_counter {
@@ -96,7 +98,7 @@ canvas#hidden_canvas {
 
     /* position it below the canvases */
     position: relative;
-    top: 470px;
+    top: 0;
 
     width: 40px;
     color: #43ff3d;
@@ -110,7 +112,7 @@ canvas#hidden_canvas {
 
     /* position it below the canvases */
     position: relative;
-    top: 470px;
+    top: 0;
 
     margin-right: 5px; /* b/w button and slider */
 }
@@ -131,7 +133,7 @@ canvas#hidden_canvas {
 
     /* position it below the canvases */
     position: relative;
-    top: 476px;
+    top: 6px;
 
     width: 830px;
     outline: none; /* stop that pesky blue border */

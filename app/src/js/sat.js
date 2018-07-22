@@ -657,6 +657,7 @@ function SatLabel(sat, id = -1, ignored = null) {
   this.valid = true;
   this.selectedShape = null;
   this.hoveredShape = null;
+  this.interpolateHandler = null;
 }
 
 SatLabel.useCrossHair = false;
@@ -718,6 +719,7 @@ SatLabel.prototype.getCurrentPosition = function() {
 SatLabel.prototype.addChild = function(child) {
   this.numChildren += 1;
   this.children.push(child);
+  child.parent = this;
 };
 
 /**

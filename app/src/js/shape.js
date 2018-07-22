@@ -169,7 +169,7 @@ Vertex.fromJson = function(json) {
 
 // Deep Copy
 Vertex.prototype.copy = function() {
-  return new Vertex( this.x, this.y );
+  return new Vertex( this.x, this.y, this.type );
 };
 
 Vertex.prototype.equals = function(v, threshold=1e-6) {
@@ -369,7 +369,12 @@ Edge.fromJson = function(json) {
 
 // Reference safe Deep copy by serialization
 Edge.prototype.copy = function() {
-  return Edge.fromJson(this.toJson());
+  let controlPoints = [];
+  for (let c of this.control_points) {
+    controlPoints.push(c.copy());
+  }
+  return new Edge(this.src.copy(), this.dest.copy(),
+      this.type, null, controlPoints);
 };
 
 // Equality criteria for undirected edges
@@ -403,7 +408,7 @@ function Polyline(id = null) {
   Shape.call(this, id);
   this.vertices = [];
   this.edges = [];
-  this.fillInside = false;
+  this.closed = false;
   this.ended = false;
 }
 
@@ -555,8 +560,8 @@ Polyline.prototype.toJson = function() {
   };
 };
 
-Polyline.fromJson = function(json, id = null) {
-  let polyline = new this.prototype.constructor(id);
+Polyline.fromJson = function(json) {
+  let polyline = new this.prototype.constructor(json.id);
   let vertexJsons = json.vertices;
   let edgeJsons = json.edges;
   for (let vertexJson of vertexJsons) {
@@ -580,10 +585,25 @@ Polyline.fromJson = function(json, id = null) {
 // Reference safe deep copy by serialization, allows shallow copy
 Polyline.prototype.copy = function(shallow=false) {
   // this = Polyline.prototype
+  let polyline = new this.constructor();
   if (!shallow) {
-    return this.constructor.fromJson(this.toJson());
+    for (let v of this.vertices) {
+      polyline.vertices.push(v.copy());
+    }
+    for (let i = 0; i < this.edges.length; i++) {
+      let edge = this.edges[i];
+      let controlPoints = [];
+      for (let c of edge.control_points) {
+        controlPoints.push(c.copy());
+      }
+      polyline.edges.push(
+          new Edge(polyline.vertices[i%polyline.vertices.length],
+          polyline.vertices[(i+1)%polyline.vertices.length],
+          edge.type, null, controlPoints));
+    }
+    polyline.endPath();
+    return polyline;
   } else {
-    let polyline = new this.constructor();
     for (let vertex of this.vertices) {
       polyline.vertices.push(vertex);
     }
@@ -746,7 +766,7 @@ Path.prototype.equals = function(p) {
  */
 function Polygon(id = null) {
   Polyline.call(this, id);
-  this.fillInside = true;
+  this.closed = true;
 }
 
 Object.assign(Polygon, Polyline);
@@ -1184,7 +1204,7 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
     }
   }
 
-  if (this.fillInside) {
+  if (this.closed) {
     ctx.closePath();
     ctx.fill();
   }
@@ -1226,19 +1246,13 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
  * @param {SatImage} satImage: the SatImage object.
  * @param {[number]} fillStyle: the style for filling.
  * @param {object} hoveredHandle: the handle hovered on.
+ * @param {boolean} drawControlPoints: whether or not to draw control points
  */
 Polyline.prototype.drawHandles = function(context, satImage, fillStyle,
-                                          hoveredHandle) {
+                                          hoveredHandle, drawControlPoints) {
   let vertices = this.vertices;
-  if (this.isEnded()) {
+  if (this.isEnded() && drawControlPoints) {
     vertices = vertices.concat(this.control_points);
-  } else {
-    let lastVertex = vertices[vertices.length - 1];
-    for (let edge of this.edges) {
-      if (!edge.src.equals(lastVertex) && !edge.dest.equals(lastVertex)) {
-        vertices = vertices.concat(edge.control_points);
-      }
-    }
   }
   for (let v of vertices) {
     if (v === hoveredHandle) {
@@ -1281,7 +1295,7 @@ Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
       }
     }
   }
-  if (this.fillInside) {
+  if (this.closed) {
     hiddenCtx.closePath();
     hiddenCtx.fill();
   }

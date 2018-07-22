@@ -108,7 +108,7 @@ SatImage.prototype.resetHiddenMapToDefault = function() {
   this.resetHiddenMap(shapes);
 };
 
-SatImage.prototype.deselectAll = function() {
+SatImage.prototype._deselectAll = function() {
   if (this.selectedLabel) {
     this.selectedLabel.releaseAsTargeted();
     if (!this.selectedLabel.shapesValid()) {
@@ -122,7 +122,21 @@ SatImage.prototype.deselectAll = function() {
   }
 };
 
-SatImage.prototype.selectLabel = function(label) {
+SatImage.prototype.deselectAll = function() {
+  for (let satImage of this.sat.items) {
+    satImage._deselectAll();
+  }
+};
+
+SatImage.prototype.deleteLabel = function(label) {
+  if (label.parent) {
+    label.parent.delete();
+  } else {
+    label.delete();
+  }
+};
+
+SatImage.prototype._selectLabel = function(label) {
   if (this.selectedLabel) {
     this.selectedLabel.releaseAsTargeted();
     this.deselectAll();
@@ -144,6 +158,20 @@ SatImage.prototype.selectLabel = function(label) {
   if (this.active) {
     this._setCatSel(this.selectedLabel.categoryPath);
     this.redraw();
+  }
+};
+
+SatImage.prototype.selectLabel = function(label) {
+  // if the label has a parent, select all labels along the track
+  if (label.parent) {
+    let childIndex = label.parent.children.indexOf(label);
+    let frameIndex = this.sat.items.indexOf(this);
+    for (let i = 0; i < label.parent.children.length; i++) {
+      let l = label.parent.children[i];
+      this.sat.items[frameIndex + i - childIndex]._selectLabel(l);
+    }
+  } else {
+    this._selectLabel(label);
   }
 };
 
@@ -172,6 +200,9 @@ SatImage.prototype.toCanvasCoords = function(values, affine=true) {
     }
   }
   if (affine) {
+    if (!this.padBox) {
+      this.padBox = this._getPadding();
+    }
     values[0] += this.padBox.x;
     values[1] += this.padBox.y;
   }
@@ -188,6 +219,9 @@ SatImage.prototype.toCanvasCoords = function(values, affine=true) {
  */
 SatImage.prototype.toImageCoords = function(values, affine=true) {
   if (affine) {
+    if (!this.padBox) {
+      this.padBox = this._getPadding();
+    }
     values[0] -= this.padBox.x;
     values[1] -= this.padBox.y;
   }
@@ -261,7 +295,6 @@ SatImage.prototype.setActive = function(active) {
   SatItem.prototype.setActive.call(this);
   let self = this;
   self.active = active;
-  let removeBtn = $('#remove_btn');
   let deleteBtn = $('#delete_btn');
   let endBtn = $('#end_btn');
   if (active) {
@@ -335,16 +368,7 @@ SatImage.prototype.setActive = function(active) {
     if (deleteBtn.length) {
       deleteBtn.click(function() {
         if (self.selectedLabel) {
-          self.selectedLabel.delete();
-          self.satItem.deselectAll();
-          self.redraw();
-        }
-      });
-    }
-    if (removeBtn.length) {
-      removeBtn.click(function() {
-        if (self.selectedLabel) {
-          self.selectedLabel.delete();
+          self.deleteLabel(self.selectedLabel);
           self.deselectAll();
           self.redraw();
         }
@@ -388,13 +412,16 @@ SatImage.prototype.setActive = function(active) {
     if (deleteBtn.length) {
       deleteBtn.off();
     }
-    if (removeBtn.length) {
-      removeBtn.off();
-    }
   }
-  self.resetHiddenMapToDefault();
+  if (self.selectedLabel) {
+    // refresh hidden map
+    self.selectLabel(self.selectedLabel);
+  } else {
+    self.resetHiddenMapToDefault();
+  }
+
   self.redraw();
-  this.updateLabelCount();
+  self.updateLabelCount();
 };
 
 /**
@@ -552,7 +579,7 @@ SatImage.prototype._keydown = function(e) {
     self.deselectAll();
   } else if (keyID === 46 || keyID === 8) { // Delete or Backspace
     if (self.selectedLabel) {
-      self.selectedLabel.delete();
+      self.deleteLabel(self.selectedLabel);
       self.deselectAll();
     }
   } else if (keyID === 38) {// up
@@ -649,15 +676,15 @@ SatImage.prototype._doubleclick = function(e) {
  * @param {object} e: mouse event
  */
 SatImage.prototype.drawCrossHair = function(e) {
-  let imageRect = this.imageCanvas.getBoundingClientRect();
+  let rectDiv = this.divCanvas.getBoundingClientRect();
   let cH = $('#crosshair-h');
   let cV = $('#crosshair-v');
   cH.css('top', e.clientY);
-  cH.css('left', imageRect.x);
-  cH.css('width', imageRect.width);
+  cH.css('left', rectDiv.x);
+  cH.css('width', rectDiv.width);
   cV.css('left', e.clientX);
-  cV.css('top', imageRect.y);
-  cV.css('height', imageRect.height);
+  cV.css('top', rectDiv.y);
+  cV.css('height', rectDiv.height);
   if (this._isWithinFrame(e)) {
     $('.hair').show();
   } else {
@@ -728,10 +755,9 @@ SatImage.prototype._mouseup = function(e) {
   if (!self._isWithinFrame(e)) {
     return;
   }
-  self.isMouseDown = false;
 
   if (this.sat.LabelType.useDoubleClick) {
-    if (!self.selectedLabel) {
+    if (!self.selectedLabel && self.isMouseDown) {
       setTimeout(function() {
         if (!self.selectedLabel) {
           self.catSel = document.getElementById('category_select');
@@ -745,7 +771,7 @@ SatImage.prototype._mouseup = function(e) {
           );
         }
       }, DOUBLE_CLICK_WAIT_TIME);
-    } else {
+    } else if (self.selectedLabel) {
       self.selectedLabel.mouseup(e);
     }
   } else {
@@ -761,6 +787,7 @@ SatImage.prototype._mouseup = function(e) {
   }
   self.redraw();
   self.updateLabelCount();
+  self.isMouseDown = false;
 };
 
 /**
@@ -909,7 +936,13 @@ SatImage.prototype._changeSelectedLabelCategory = function() {
   if (self.selectedLabel) {
     self.catSel = document.getElementById('category_select');
     let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
-    self.selectedLabel.categoryPath = option;
+    if (self.selectedLabel.parent) {
+      for (let c of self.selectedLabel.parent.children) {
+        c.categoryPath = option;
+      }
+    } else {
+      self.selectedLabel.categoryPath = option;
+    }
     self.redrawMainCanvas();
   }
 };
@@ -921,10 +954,14 @@ SatImage.prototype._changeSelectedLabelCategory = function() {
 SatImage.prototype._attributeSwitch = function(attributeIndex) {
   let attributeName = this.sat.attributes[attributeIndex].name;
   if (this.selectedLabel) {
-    this.selectedLabel.attributes[attributeName] = $('#custom_attribute_'
-      + attributeName).prop('checked');
     if (this.selectedLabel.parent) {
-      this.selectedLabel.parent.interpolate(this.selectedLabel);
+      for (let l of this.selectedLabel.parent.children) {
+        l.attributes[attributeName] = $('#custom_attribute_'
+            + attributeName).prop('checked');
+      }
+    } else {
+      this.selectedLabel.attributes[attributeName] = $('#custom_attribute_'
+          + attributeName).prop('checked');
     }
   }
 };

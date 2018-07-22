@@ -48,23 +48,11 @@ func (env Env) VendorPath() string {
 	return path.Join(env.AppDir(), "control/vendor.html")
 }
 
-func (env Env) VideoPath() string {
-	return path.Join(env.AppDir(), "annotation/video.html")
+func (env Env) Label2dPath() string {
+	return path.Join(env.AppDir(), "annotation/image.html")
 }
 
-func (env Env) Box2dPath() string {
-	return path.Join(env.AppDir(), "annotation/box.html")
-}
-
-func (env Env) Seg2dPath() string {
-	return path.Join(env.AppDir(), "annotation/seg.html")
-}
-
-func (env Env) Lane2dPath() string {
-	return path.Join(env.AppDir(), "annotation/seg.html")
-}
-
-func (env Env) PointCloudPath() string {
+func (env Env) Label3dPath() string {
 	return path.Join(env.AppDir(), "annotation/point_cloud.html")
 }
 
@@ -151,15 +139,8 @@ func main() {
 	// Simple static handlers can be generated with MakePathHandleFunc
 	http.HandleFunc("/create",
 		WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
-	http.HandleFunc("/2d_seg_labeling", WrapHandleFunc(seg2dLabelingHandler))
-	http.HandleFunc("/2d_lane_labeling", WrapHandleFunc(lane2dLabelingHandler))
-	//http.HandleFunc("/image_labeling",
-	//	MakePathHandleFunc(path.Join(appDir, "/annotation/image.html")))
-
-	// labeling handlers
-	http.HandleFunc("/2d_bbox_labeling", WrapHandleFunc(box2dLabelingHandler))
-	http.HandleFunc("/video_bbox_labeling", WrapHandleFunc(videoLabelingHandler))
-	http.HandleFunc("/point_cloud_labeling", WrapHandleFunc(pointCloudLabelingHandler))
+	http.HandleFunc("/2d_labeling", WrapHandleFunc(Label2dHandler))
+	http.HandleFunc("/3d_labeling", WrapHandleFunc(Label3dHandler))
 
 	Info.Printf("Listening to Port %d", env.Port)
 	Info.Printf("Local URL: localhost:%d", env.Port)

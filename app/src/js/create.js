@@ -46,6 +46,7 @@ itemSelect.onchange = function() {
     enableOption(labelSelect, 'lane');
   } else if (itemSelect.value === 'video') {
     enableOption(labelSelect, 'box2d');
+    enableOption(labelSelect, 'segmentation');
   } else if (itemSelect.value === 'pointcloud') {
     enableOption(labelSelect, 'box3d');
   }

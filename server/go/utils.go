@@ -345,30 +345,23 @@ func GetDashboardContents(projectName string) (DashboardContents, error) {
 func GetHandlerUrl(itemType string, labelType string) string {
 	switch itemType {
 	case "image":
-		switch labelType {
-		case "box2d":
-			return "2d_bbox_labeling"
-		case "segmentation":
-			return "2d_seg_labeling"
-		case "lane":
-			return "2d_lane_labeling"
-		default:
-			return "NO_VALID_HANDLER"
-		}
+	    if labelType == "box2d" || labelType == "segmentation" || labelType == "lane" {
+	        return "2d_labeling"
+	    } else {
+	        return "NO_VALID_HANDLER"
+	    }
 	case "video":
-		switch labelType {
-		case "box2d":
-			return "video_bbox_labeling"
-		default:
-			return "NO_VALID_HANDLER"
-		}
+		if labelType == "box2d" || labelType == "segmentation" {
+            return "2d_labeling"
+        } else {
+            return "NO_VALID_HANDLER"
+        }
 	case "pointcloud":
-		switch labelType {
-		case "box3d":
-			return "point_cloud_labeling"
-		default:
-			return "NO_VALID_HANDLER"
-		}
+	    if labelType == "box3d" {
+            return "3d_labeling"
+        } else {
+            return "NO_VALID_HANDLER"
+        }
 	}
 	return "NO_VALID_HANDLER"
 }

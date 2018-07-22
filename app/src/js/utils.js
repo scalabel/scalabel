@@ -1,5 +1,7 @@
 /* global sprintf */
-/* exported rgb rgba hiddenStyleColor mode */
+/* exported rgb rgba hiddenStyleColor mode FONT_SIZE */
+
+const FONT_SIZE = 13;
 
 /**
  * Returns the rgba string given color and alpha values.

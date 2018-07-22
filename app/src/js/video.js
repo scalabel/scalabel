@@ -8,7 +8,6 @@ function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
 
-  self.tracks = []; // may not need this
   // self.videoName = document.getElementById('video_name').innerHTML;
   self.frameRate = document.getElementById('frame_rate').innerHTML;
   self.frameCounter = document.getElementById('frame_counter');
@@ -34,13 +33,14 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
   let labelId = self.newLabelId();
   let track = new Track(self, labelId, optionalAttributes);
   self.labelIdMap[track.id] = track;
-  self.labels.push(track);
+  // self.labels.push(track);
   self.tracks.push(track);
   for (let i = self.currentItem.index; i < self.items.length; i++) {
     let labelId = self.newLabelId();
     if (i > self.currentItem.index) {
       optionalAttributes.shadow = true;
       optionalAttributes.satItem = self.items[i];
+      optionalAttributes.mousePos = null;
     }
     let childLabel = new self.LabelType(self, labelId, optionalAttributes);
     childLabel.parent = track;
@@ -48,6 +48,7 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
     self.labels.push(childLabel);
     track.addChild(childLabel);
     self.items[i].labels.push(childLabel);
+    childLabel.satItem = self.items[i];
   }
   return self.currentItem.labels[
     self.currentItem.labels.length - 1];
@@ -211,24 +212,24 @@ Track.prototype.interpolate = function(startLabel) {
     }
   }
   // interpolate between the beginning of the track and the starting label
-  for (let i = priorKeyFrameIndex; i < startIndex; i++) {
-    let weight = i / startIndex;
-    self.children[i].weightedAvg(self.children[priorKeyFrameIndex], startLabel,
-      weight);
+  for (let i = priorKeyFrameIndex + 1; i < startIndex; i++) {
+    let weight = (i - priorKeyFrameIndex) / (startIndex - priorKeyFrameIndex);
+    self.children[i].interpolateHandler(self.children[priorKeyFrameIndex],
+        startLabel, weight);
     self.children[i].attributes = startLabel.attributes;
   }
   if (nextKeyFrameIndex) {
     // if there is a later keyframe, interpolate
     for (let i = startIndex + 1; i < nextKeyFrameIndex; i++) {
       let weight = (i - startIndex) / (nextKeyFrameIndex - startIndex);
-      self.children[i].weightedAvg(startLabel, self.children[nextKeyFrameIndex],
-        weight);
+      self.children[i].interpolateHandler(startLabel,
+          self.children[nextKeyFrameIndex], weight);
       self.children[i].attributes = startLabel.attributes;
     }
   } else {
     // otherwise, just apply changes to remaining items
     for (let i = startIndex + 1; i < self.children.length; i++) {
-      self.children[i].weightedAvg(startLabel, startLabel, 0);
+      self.children[i].interpolateHandler(startLabel, startLabel, 0);
       self.children[i].attributes = startLabel.attributes;
     }
   }

@@ -717,6 +717,7 @@ func postExportHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	// exportFile.Categories = projectToLoad.Options.Categories
 	// exportFile.Attributes = projectToLoad.Options.Attributes
 
+
 	// Grab the latest submissions from all tasks
 	tasks, err := GetTasksInProject(projectName)
 	if err != nil {
@@ -727,7 +728,6 @@ func postExportHandlerLocal(w http.ResponseWriter, r *http.Request) {
 		latestSubmission, err := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
-			return
 		}
 		for _, itemToLoad := range latestSubmission.Task.Items {
 			item := ItemExport{}

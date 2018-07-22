@@ -2,13 +2,12 @@
 /* global ImageLabel SatImage Shape Polygon Path Vertex */
 /* global rgba VertexTypes EdgeTypes*/
 /* global GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
-ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO */
+ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO FONT_SIZE */
 /* exported Seg2d*/
 
 // constants
 let SegStates = Object.freeze({
   FREE: 0, DRAW: 1, RESIZE: 2, QUICK_DRAW: 3, LINK: 4});
-const FONT_SIZE = 13;
 
 /**
  * 2D segmentation label
@@ -24,6 +23,7 @@ function Seg2d(sat, id, optionalAttributes) {
   this.quickdrawCache = {};
   this.state = SegStates.FREE;
   this.selectedShape = null;
+  this.interpolateHandler = this.identityInterpolation;
 
   let mousePos;
   if (optionalAttributes) {
@@ -39,17 +39,10 @@ function Seg2d(sat, id, optionalAttributes) {
     }
   }
 
-  if (this.sat.handlerUrl === '2d_seg_labeling') {
-    this.closed = true;
-  } else if (this.sat.handlerUrl === '2d_lane_labeling') {
-    this.closed = false;
-  }
-
-
   if (mousePos) {
     // if mousePos given, start drawing
     // set label type
-    if (this.closed) {
+    if (Seg2d.closed) {
       this.newPoly = new Polygon();
       this.tempPoly = new Polygon();
     } else {
@@ -83,6 +76,22 @@ Seg2d.prototype = Object.create(ImageLabel.prototype);
 Seg2d.useCrossHair = false;
 Seg2d.defaultCursorStyle = 'auto';
 Seg2d.useDoubleClick = true;
+Seg2d.closed =
+    document.getElementById('label_type').innerHTML === 'segmentation';
+
+Seg2d.prototype.identityInterpolation = function(startLabel, endLabel, weight) { // eslint-disable-line
+  this.deleteAllPolyline();
+  let targetLabel;
+  if (startLabel) {
+    targetLabel = startLabel;
+  } else {
+    targetLabel = endLabel;
+  }
+  for (let poly of targetLabel.polys) {
+    this.addPolyline(poly.copy());
+  }
+  this.setState(SegStates.FREE);
+};
 
 Seg2d.prototype.addPolyline = function(poly) {
   this.polys = this.polys.concat(poly);
@@ -124,6 +133,22 @@ Seg2d.prototype.deletePolyline = function(poly) {
   }
 };
 
+/**
+ * Delete all polylines from this Seg2d label.
+ */
+Seg2d.prototype.deleteAllPolyline = function() {
+  for (let i = 0; i < this.polys.length; i++) {
+    this.polys[i].delete();
+    this.polys.splice(i, 1);
+  }
+};
+
+Seg2d.prototype.setAsTargeted = function() {
+  this.targeted = true;
+  if (this.satItem.active && this.state === SegStates.FREE) {
+    this.satItem.resetHiddenMap(this.getAllHiddenShapes());
+  }
+};
 
 /**
  * Function to set the current state.
@@ -132,31 +157,34 @@ Seg2d.prototype.deletePolyline = function(poly) {
 Seg2d.prototype.setState = function(state) {
   if (state === SegStates.FREE) {
     // clean up buttons
-    let quickdrawButton = document.getElementById('quickdraw_btn');
-    quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
-    quickdrawButton.style.backgroundColor = 'white';
-    let linkButton = document.getElementById('link_btn');
-    linkButton.innerHTML = 'Link';
-    linkButton.style.backgroundColor = 'white';
+    if (Seg2d.closed) {
+      let quickdrawButton = document.getElementById('quickdraw_btn');
+      quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
+      quickdrawButton.style.backgroundColor = 'white';
+      let linkButton = document.getElementById('link_btn');
+      linkButton.innerHTML = 'Link';
+      linkButton.style.backgroundColor = 'white';
 
-    // clean up cache
-    if (this.quickdrawCache.targetSeg2d) {
-      this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+      // clean up cache
+      if (this.quickdrawCache.targetSeg2d) {
+        this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+      }
     }
 
     this.state = state;
     this.selectedShape = null;
 
     // reset hiddenMap with this polygon and corresponding handles
-    this.satItem.resetHiddenMap(this.getAllHiddenShapes());
-    this.satItem.redrawHiddenCanvas();
+    if (this.satItem.active) {
+      this.satItem.resetHiddenMap(this.getAllHiddenShapes());
+      this.satItem.redrawHiddenCanvas();
+    }
   } else if (state === SegStates.DRAW) {
     // reset hiddenMap with all existing vertices
     let shapes = [];
     for (let label of this.satItem.labels) {
       if (label.valid) {
         shapes = shapes.concat(label.getVertices());
-        shapes = shapes.concat(label.getControlPoints());
       }
     }
     // draw once for each shape
@@ -177,7 +205,9 @@ Seg2d.prototype.setState = function(state) {
     this.satItem.redrawHiddenCanvas();
   } else if (state === SegStates.QUICK_DRAW) {
     this.state = state;
-    this.quickdrawCache = {};
+    if (Seg2d.closed) {
+      this.quickdrawCache = {};
+    }
     let shapes = [];
     for (let label of this.satItem.labels) {
       if (label.valid) {
@@ -196,14 +226,16 @@ Seg2d.prototype.setState = function(state) {
  * @param {object} satItem - the SatItem object.
  */
 Seg2d.setToolBox = function(satItem) {
-  satItem.isLinking = false;
-  document.getElementById('link_btn').onclick = function()
-  {satItem._linkHandler();};
-  document.getElementById('quickdraw_btn').onclick = function() {
-    if (satItem.selectedLabel) {
-      satItem.selectedLabel.handleQuickdraw();
-    }
-  };
+  if (Seg2d.closed) {
+    satItem.isLinking = false;
+    document.getElementById('link_btn').onclick = function()
+    {satItem._linkHandler();};
+    document.getElementById('quickdraw_btn').onclick = function() {
+      if (satItem.selectedLabel) {
+        satItem.selectedLabel.handleQuickdraw();
+      }
+    };
+  }
 };
 
 /**
@@ -322,10 +354,9 @@ Seg2d.prototype.handleQuickdraw = function() {
 Seg2d.prototype.fromJsonVariables = function(json) {
   this.decodeBaseJsonVariables(json);
   this.polys = [];
-  this.closed = json.data.closed;
   if (json.data && json.data.polys) {
     for (let polyJson of json.data.polys) {
-      if (this.closed) {
+      if (Seg2d.closed) {
         this.addPolyline(Polygon.fromJson(polyJson));
       } else {
         this.addPolyline(Path.fromJson(polyJson));
@@ -345,7 +376,7 @@ Seg2d.prototype.toJson = function() {
     polysJson = polysJson.concat(poly.toJson());
   }
   json.data = {
-    closed: this.closed,
+    closed: Seg2d.closed,
     polys: polysJson,
   };
   return json;
@@ -449,6 +480,10 @@ Seg2d.prototype.getAllHiddenShapes = function() {
   shapes = shapes.concat(this.getPolygons());
   shapes = shapes.concat(this.getVertices());
   shapes = shapes.concat(this.getControlPoints());
+  if (this.state === SegStates.DRAW) {
+    shapes = shapes.concat(this.newPoly);
+    shapes = shapes.concat(this.newPoly.vertices);
+  }
   return shapes;
 };
 
@@ -475,7 +510,7 @@ Seg2d.prototype.redrawMainCanvas = function(mainCtx) {
     this.tempPoly.draw(mainCtx, this.satItem,
       this.isTargeted() && this.state !== SegStates.DRAW
       && this.state !== SegStates.QUICK_DRAW);
-    this.tempPoly.drawHandles(mainCtx, this.satItem, styleColor, null);
+    this.tempPoly.drawHandles(mainCtx, this.satItem, styleColor, null, false);
   } else if (this.polys.length > 0) {
     for (let poly of this.polys) {
       poly.draw(mainCtx, this.satItem,
@@ -483,7 +518,7 @@ Seg2d.prototype.redrawMainCanvas = function(mainCtx) {
         && this.state !== SegStates.QUICK_DRAW);
       if (this.isTargeted()) {
         poly.drawHandles(mainCtx,
-          this.satItem, styleColor, this.hoveredShape);
+          this.satItem, styleColor, this.hoveredShape, true);
       }
     }
     mainCtx.fillStyle = this.styleColor();
@@ -621,7 +656,9 @@ Seg2d.prototype.mousedown = function(e) {
         this.quickdrawCache.targetSeg2d =
           this.satItem.getLabelOfShape(occupiedShape);
         this.quickdrawCache.targetSeg2d.setAsTargeted();
-        this.satItem.pushToHiddenMap(this.quickdrawCache.targetPoly.vertices);
+        let shapes = this.quickdrawCache.targetPoly.vertices;
+        shapes = shapes.concat(this.newPoly.vertices);
+        this.satItem.resetHiddenMap(shapes);
         this.satItem.redrawHiddenCanvas();
         button.innerHTML = 'Select Start Vertex';
       }
@@ -765,6 +802,9 @@ Seg2d.prototype.mouseup = function(e) {
 
         this.setState(SegStates.FREE);
         this.selectedShape = this.newPoly;
+        if (this.parent) {
+          this.parent.interpolate(this);
+        }
       } else if (this.newPoly.vertices.indexOf(occupiedShape) < 0) {
         // if occupied object a vertex that is not in polygon, add it
         this.tempPoly.popVertex();
@@ -816,6 +856,9 @@ Seg2d.prototype.mouseup = function(e) {
     this.selectedCache.delete();
     this.selectedCache = null;
     this.setState(SegStates.FREE);
+    if (this.parent) {
+      this.parent.interpolate(this);
+    }
   } else if (this.state === SegStates.FREE) {
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
     if (!occupiedShape) {
@@ -903,7 +946,7 @@ Seg2d.prototype.keydown = function(e) {
         ? this.quickdrawCache.longPathPoly
         : this.quickdrawCache.shortPathPoly;
     }
-  } else if (keyID === 13 && !this.closed) {
+  } else if (keyID === 13 && !Seg2d.closed) {
     // enter for ending a Path object
     if (this.state === SegStates.DRAW) {
       this.newPoly.endPath();
