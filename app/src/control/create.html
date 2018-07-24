@@ -11,6 +11,9 @@
 
     <title>Labeling tool</title>
 
+    <!-- Style CSS -->
+    <link href="./css/style.css" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
@@ -59,7 +62,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group" style="display: none">
+                <div id="frame_rate_div" class="form-group">
                     <label for="frame_rate">Frame Rate</label>
                     <input required type="number" min="1" max="60"
                            class="form-control" style="width:300px"
@@ -112,14 +115,34 @@
                     <input type="number" class="form-control"
                            style="width:300px" id="vendor_id" name="vendor_id">
                 </div>
-
+                <div class="form-group">
+                    <button type="info" id="show_advanced_options"
+                            class="btn btn-primary btn-sm">Show
+                        Advanced Options</button>
+                </div>
+                <div id="advanced_options">
+                    <div class="form-group text-nowrap">
+                        <input id="demo_mode" name="demo_mode">
+                    </div>
+                    <div id="interpolation_mode_div" class="form-group">
+                        <label for="interpolation_mode">Interpolation Mode*</label>
+                        <div>
+                            <select id="interpolation_mode"
+                                    name="interpolation_mode">
+                                <option value="linear">Linear Interpolation</option>
+                                <option value="force">Force Complete
+                                    Annotation</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <button type="submit" id="enter_btn"
                         class="btn btn-primary btn-md">Enter</button>
                 <a type="submit" href="./dashboard" id="go_to_dashboard"
-                   class="btn btn-default btn-md" target="_blank" href="">Go to
+                   class="btn btn-default btn-md" target="_blank">Go to
                     Dashboard</a>
                 <a type="submit" href="./vendor" id="go_to_vendor_dashboard"
-                   class="btn btn-default btn-md" target="_blank" href="">Go to Vendor
+                   class="btn btn-default btn-md" target="_blank">Go to Vendor
                     Dashboard</a>
             </form>
 

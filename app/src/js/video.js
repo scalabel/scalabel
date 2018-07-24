@@ -8,6 +8,7 @@ function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
 
+  self.tracks = []; // may not need this
   // self.videoName = document.getElementById('video_name').innerHTML;
   self.frameRate = document.getElementById('frame_rate').innerHTML;
   self.frameCounter = document.getElementById('frame_counter');
@@ -33,7 +34,7 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
   let labelId = self.newLabelId();
   let track = new Track(self, labelId, optionalAttributes);
   self.labelIdMap[track.id] = track;
-  // self.labels.push(track);
+  self.labels.push(track);
   self.tracks.push(track);
   for (let i = self.currentItem.index; i < self.items.length; i++) {
     let labelId = self.newLabelId();
@@ -71,6 +72,7 @@ SatVideo.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
   self.metadata = json.task.projectOptions.metadata;
+  self.interpolationMode = json.task.projectOptions.interpolationMode;
   self.tracks = [];
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
     let track = new Track(self, json.tracks[i].id,
@@ -162,7 +164,19 @@ SatVideo.prototype.moveSlider = function() {
  * @constructor
  */
 function Track(sat, id, optionalAttributes = null) {
-  SatLabel.call(this, sat, id, optionalAttributes);
+  let self = this;
+  SatLabel.call(self, sat, id, optionalAttributes);
+  switch (self.sat.interpolationMode) {
+    case 'linear':
+      self.interpolateHandler = self.linearInterpolate;
+      break;
+    case 'force':
+      self.interpolateHandler = self.forceInterpolate;
+      break;
+    default:
+      self.interpolateHandler = self.linearInterpolate;
+      break;
+  }
 }
 
 Track.prototype = Object.create(SatLabel.prototype);
@@ -211,6 +225,14 @@ Track.prototype.interpolate = function(startLabel) {
       priorKeyFrameIndex = i;
     }
   }
+  self.interpolateHandler(startLabel, startIndex, priorKeyFrameIndex,
+    nextKeyFrameIndex);
+};
+
+Track.prototype.linearInterpolate = function(startLabel, startIndex,
+                                             priorKeyFrameIndex,
+                                             nextKeyFrameIndex) {
+  let self = this;
   // interpolate between the beginning of the track and the starting label
   for (let i = priorKeyFrameIndex + 1; i < startIndex; i++) {
     let weight = (i - priorKeyFrameIndex) / (startIndex - priorKeyFrameIndex);
@@ -227,9 +249,28 @@ Track.prototype.interpolate = function(startLabel) {
       self.children[i].attributes = startLabel.attributes;
     }
   } else {
-    // otherwise, just apply changes to remaining items
+    // otherwise, apply changes to remaining items
     for (let i = startIndex + 1; i < self.children.length; i++) {
       self.children[i].interpolateHandler(startLabel, startLabel, 0);
+      self.children[i].attributes = startLabel.attributes;
+    }
+  }
+};
+
+Track.prototype.forceInterpolate = function(startLabel, startIndex,
+                                            ignoredPriorKeyFrameIndex,
+                                            nextKeyFrameIndex) {
+  let self = this;
+  if (nextKeyFrameIndex) {
+    // if there is a later keyframe, only interpolate until there
+    for (let i = startIndex + 1; i < nextKeyFrameIndex; i++) {
+      self.children[i].shrink(startLabel);
+      self.children[i].attributes = startLabel.attributes;
+    }
+  } else {
+    // otherwise, apply changes to remaining items
+    for (let i = startIndex + 1; i < self.children.length; i++) {
+      self.children[i].shrink(startLabel);
       self.children[i].attributes = startLabel.attributes;
     }
   }

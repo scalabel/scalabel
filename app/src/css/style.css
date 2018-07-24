@@ -161,3 +161,16 @@ canvas#hidden_canvas {
     width:150px;
     text-align:right
 }
+
+#frame_rate_div{
+    display: none;
+}
+
+#interpolation_mode_div{
+    display: none;
+    padding-bottom: 15px;
+}
+
+#smart_mode_detections_div{
+    display: none;
+}

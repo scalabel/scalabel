@@ -77,16 +77,19 @@ func (project *Project) Save() {
 }
 
 type ProjectOptions struct {
-	Name              string        `json:"name" yaml:"name"`
-	ItemType          string        `json:"itemType" yaml:"itemType"`
-	LabelType         string        `json:"labelType" yaml:"labelType"`
-	TaskSize          int           `json:"taskSize" yaml:"taskSize"`
-	HandlerUrl        string        `json:"handlerUrl" yaml:"handlerUrl"`
-	PageTitle         string        `json:"pageTitle" yaml:"pageTitle"`
-	Categories        []Category    `json:"categories" yaml:"categories"`
-	NumLeafCategories int           `json:"numLeafCategories" yaml:"numLeafCategories"`
-	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
-	VideoMetaData     VideoMetaData `json:"metadata" yaml:"metadata"`
+	Name                 string        `json:"name" yaml:"name"`
+	ItemType             string        `json:"itemType" yaml:"itemType"`
+	LabelType            string        `json:"labelType" yaml:"labelType"`
+	TaskSize             int           `json:"taskSize" yaml:"taskSize"`
+	HandlerUrl           string        `json:"handlerUrl" yaml:"handlerUrl"`
+	PageTitle            string        `json:"pageTitle" yaml:"pageTitle"`
+	Categories           []Category    `json:"categories" yaml:"categories"`
+	NumLeafCategories    int           `json:"numLeafCategories" yaml:"numLeafCategories"`
+	Attributes           []Attribute   `json:"attributes" yaml:"attributes"`
+	DemoMode             bool          `json:"demoMode" yaml:"demoMode"`
+	VideoMetaData        VideoMetaData `json:"metadata" yaml:"metadata"`
+	InterpolationMode    string        `json:"interpolationMode" yaml:"interpolationMode"`
+	Detections           []Detection   `json:"detections" yaml:"detections"`
 }
 
 // A workably-sized collection of Items belonging to a Project.
@@ -424,10 +427,13 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// get item type from form
 	itemType := r.FormValue("item_type")
-	// get frame rate from form only if this is a video
+	// get frame rate and interpolation mode from form only if this is a video
 	var videoMetaData VideoMetaData
+	interpolationMode := "linear"
+	var detections []Detection
 	if itemType == "video" {
 		videoMetaData.TBR = r.FormValue("frame_rate")
+		interpolationMode = r.FormValue("interpolation_mode")
 	}
 	// get label type from form
 	labelType := r.FormValue("label_type")
@@ -444,9 +450,14 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// parse the attribute list YML from form
 	attributes := getAttributesFromProjectForm(r)
 	// get the task size from form
-	taskSize, err := strconv.Atoi(r.FormValue("task_size"))
-	if err != nil {
-		Error.Println(err)
+	var taskSize int
+	if itemType != "video" {
+		ts, err := strconv.Atoi(r.FormValue("task_size"))
+		if err != nil {
+			Error.Println(err)
+			return
+		}
+		taskSize = ts
 	}
 	// get the vendor ID from form
 	vendorId, err := strconv.Atoi(r.FormValue("vendor_id"))
@@ -455,8 +466,11 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			vendorId = -1
 		} else {
 			Error.Println(err)
+			return
 		}
 	}
+
+	demoMode := r.FormValue("demo_mode") == "on"
 
 	// This prefix determines which handler will deal with labeling sessions
 	//   for this project. Uniquely determined by item type and label type.
@@ -464,16 +478,19 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// initialize and save the project
 	var projectOptions = ProjectOptions{
-		Name:              projectName,
-		ItemType:          itemType,
-		LabelType:         labelType,
-		TaskSize:          taskSize,
-		HandlerUrl:        handlerUrl,
-		PageTitle:         pageTitle,
-		Categories:        categories,
-		NumLeafCategories: numLeafCategories,
-		Attributes:        attributes,
-		VideoMetaData:     videoMetaData,
+		Name:                projectName,
+		ItemType:            itemType,
+		LabelType:           labelType,
+		TaskSize:            taskSize,
+		HandlerUrl:          handlerUrl,
+		PageTitle:           pageTitle,
+		Categories:          categories,
+		NumLeafCategories:   numLeafCategories,
+		Attributes:          attributes,
+		DemoMode:            demoMode,
+		VideoMetaData:       videoMetaData,
+		InterpolationMode:   interpolationMode,
+		Detections:          detections,
 	}
 	var project = Project{
 		Items:    items,
@@ -654,6 +671,11 @@ func postSaveHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &assignment)
 	if err != nil {
 		Error.Println(err)
+	}
+	if (assignment.Task.ProjectOptions.DemoMode) {
+		Error.Println(errors.New("Can't save a demo project."))
+		w.Write(nil)
+		return
 	}
 	assignment.SubmitTime = recordTimestamp()
 	// TODO: don't send all events to front end, and append these events to most recent

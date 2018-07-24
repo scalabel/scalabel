@@ -277,6 +277,23 @@ Box2d.prototype.weightedAvg = function(startBox, endBox, weight) {
 };
 
 /**
+ * Set this box to have the provided rect.
+ * @param {Rect} rect - The provided rect.
+ */
+Box2d.prototype.setShape = function(rect) {
+  this.rect.setRect(rect.x, rect.y, rect.w, rect.h);
+};
+
+/**
+ * Set this box to be a sized down version of the provided box.
+ * @param {Box2d} startBox - The provided box.
+ */
+Box2d.prototype.shrink = function(startBox) {
+  let self = this;
+  self.rect.setRect(startBox.x, startBox.y, startBox.w/2, startBox.h/2);
+};
+
+/**
  * Calculate the intersection between this and another Box2d.
  * @param {Box2d} box - The other box.
  * @return {number} - The intersection between the two boxes.

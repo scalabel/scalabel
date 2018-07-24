@@ -215,6 +215,9 @@ Sat.prototype.load = function() {
     if (xhr.readyState === 4) {
       let json = JSON.parse(xhr.response);
       self.fromJson(json);
+      if (self.demoMode) {
+        document.getElementById('save_btn').style.display = 'none';
+      }
       self.loaded();
     }
   };
@@ -414,6 +417,7 @@ Sat.prototype.encodeBaseJson = function() {
         pageTitle: self.pageTitle,
         categories: self.categories,
         attributes: self.attributes,
+        demoMode: self.demoMode,
       },
       index: self.taskIndex,
       items: items,
@@ -450,6 +454,7 @@ Sat.prototype.decodeBaseJson = function(json) {
   self.taskSize = json.task.projectOptions.taskSize;
   self.handlerUrl = json.task.projectOptions.handlerUrl;
   self.pageTitle = json.task.projectOptions.pageTitle;
+  self.demoMode = json.task.projectOptions.demoMode;
   document.title = self.pageTitle;
   document.getElementById('page-title').textContent = self.pageTitle;
   self.categories = json.task.projectOptions.categories;

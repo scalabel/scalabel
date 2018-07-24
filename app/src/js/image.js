@@ -300,6 +300,9 @@ SatImage.prototype.setActive = function(active) {
   if (active) {
     self.lastLabelID = -1;
     self.padBox = self._getPadding();
+    for (let i = 0; i < self.sat.items.length; i++) {
+      self.sat.items[i].padBox = self.padBox;
+    }
 
     self.imageCanvas.style.width = CANVAS_STYLE_WIDTH + 'px';
     self.imageCanvas.style.height = CANVAS_STYLE_HEIGHT + 'px';
@@ -1109,6 +1112,22 @@ ImageLabel.prototype.getWeightedAvg = function(ignoredLabel, ignoredWeight) {
  */
 ImageLabel.prototype.weightedAvg = function(ignoredStartLabel, ignoredEndLabel,
                                             ignoredWeight) {
+
+};
+
+/**
+ * Set this label to have the provided shape.
+ * @param {Shape} ignoredShape - The shape.
+ */
+ImageLabel.prototype.setShape = function(ignoredShape) {
+
+};
+
+/**
+ * Shrink this label, forcing the user to update it.
+ * @param {ImageLabel} ignoredStartLabel - The first label.
+ */
+ImageLabel.prototype.shrink = function(ignoredStartLabel) {
 
 };
 
