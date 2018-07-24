@@ -7,7 +7,7 @@ ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO FONT_SIZE */
 
 // constants
 let SegStates = Object.freeze({
-  FREE: 0, DRAW: 1, RESIZE: 2, QUICK_DRAW: 3, LINK: 4});
+  FREE: 0, DRAW: 1, RESIZE: 2, QUICK_DRAW: 3, LINK: 4, MOVE: 5});
 
 /**
  * 2D segmentation label
@@ -161,9 +161,6 @@ Seg2d.prototype.setState = function(state) {
       let quickdrawButton = document.getElementById('quickdraw_btn');
       quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
       quickdrawButton.style.backgroundColor = 'white';
-      let linkButton = document.getElementById('link_btn');
-      linkButton.innerHTML = 'Link';
-      linkButton.style.backgroundColor = 'white';
 
       // clean up cache
       if (this.quickdrawCache.targetSeg2d) {
@@ -218,6 +215,9 @@ Seg2d.prototype.setState = function(state) {
     // draw once for each shape
     this.satItem._hiddenMap.removeDuplicate();
     this.satItem.redrawHiddenCanvas();
+  } else if (state === SegStates.MOVE && Seg2d.closed) {
+    // Only polygons can be moved, not lanes
+    this.state = state;
   }
 };
 
@@ -584,8 +584,9 @@ Seg2d.prototype.shapesValid = function() {
  * @return {string} - The cursor style string.
  */
 Seg2d.prototype.getCursorStyle = function(shape) {
-  if (shape) {
-    return this.defaultCursorStyle;
+  if (shape instanceof Polygon && !this.satItem.isLinking &&
+      this.satItem.selectedLabel && this.satItem.selectedLabel.id === this.id) {
+    return 'move';
   }
   return this.defaultCursorStyle;
 };
@@ -595,19 +596,28 @@ Seg2d.prototype.mousedown = function(e) {
 
   let occupiedShape = this.satItem.getOccupiedShape(mousePos);
   if (this.state === SegStates.FREE && occupiedShape) {
-    // if clicked on midpoint, convert to vertex
+    this.selectedShape = occupiedShape;
+    this.selectedCache = occupiedShape.copy();
+    // if clicked on a vertex
     if (occupiedShape instanceof Vertex) {
+      // if clicked on midpoint, convert to vertex
       if (occupiedShape.type === VertexTypes.MIDPOINT) {
         Shape.registerShape(occupiedShape); // assign id to new vertex
         this.midpointToVertex(occupiedShape);
       }
 
       // start resize mode
-      if (occupiedShape instanceof Vertex) {
-        this.setState(SegStates.RESIZE);
-        this.selectedShape = occupiedShape;
-        this.selectedCache = occupiedShape.copy();
-      }
+      this.setState(SegStates.RESIZE);
+    } else if (occupiedShape instanceof Polygon && !this.satItem.isLinking) {
+      // if clicked on a polygon, start moving
+      this.setState(SegStates.MOVE);
+      this.mouseClickPos = mousePos;
+      this.bbox = {
+        x: this.selectedCache.bbox.min.x,
+        y: this.selectedCache.bbox.min.y,
+        w: this.selectedCache.bbox.max.x - this.selectedCache.bbox.min.x,
+        h: this.selectedCache.bbox.max.y - this.selectedCache.bbox.min.y,
+      };
     }
   } else if (this.state === SegStates.DRAW) {
     // draw
@@ -731,7 +741,6 @@ Seg2d.prototype.mousedown = function(e) {
       this.setState(SegStates.DRAW);
     }
   } else if (this.state === SegStates.LINK && occupiedShape) {
-    let occupiedShape = this.satItem.getOccupiedShape(mousePos);
     let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
     if (occupiedLabel.id === this.id) {
       // if selected a polygon it has, split this polygon out
@@ -865,6 +874,13 @@ Seg2d.prototype.mouseup = function(e) {
       // deselects self
       this.satItem.deselectAll();
     }
+  } else if (this.state === SegStates.MOVE) {
+    this.mouseClickPos = null;
+    this.bbox = null;
+    if (this.parent) {
+      this.parent.interpolate(this); // TODO
+    }
+    this.setState(SegStates.FREE);
   }
 };
 
@@ -892,12 +908,36 @@ Seg2d.prototype.mousemove = function(e) {
         this.hoveredShape = null;
       }
     }
+  } else if (this.state === SegStates.MOVE) {
+    let dx = mousePos.x - this.mouseClickPos.x;
+    let dy = mousePos.y - this.mouseClickPos.y;
+    // make moved box within padBox
+    let [padBoxX, padBoxY] = this.satItem.toImageCoords(
+        [this.satItem.padBox.x, this.satItem.padBox.y]);
+    let [padBoxW, padBoxH] = this.satItem.toImageCoords(
+        [this.satItem.padBox.w, this.satItem.padBox.h], false);
+
+    dx = Math.min(dx,
+        (padBoxX + padBoxW - this.bbox.w) - this.bbox.x);
+    dx = Math.max(dx, padBoxX - this.bbox.x);
+    dy = Math.min(dy,
+        (padBoxY + padBoxH - this.bbox.h) - this.bbox.y);
+    dy = Math.max(dy, padBoxY - this.bbox.y);
+
+    for (let i = 0; i < this.selectedShape.vertices.length; i++) {
+      this.selectedShape.vertices[i].x = this.selectedCache.vertices[i].x + dx;
+      this.selectedShape.vertices[i].y = this.selectedCache.vertices[i].y + dy;
+    }
   }
 };
 
 Seg2d.prototype.mouseleave = function(e) { // eslint-disable-line
   if (this.state === SegStates.RESIZE) {
     this.hoveredShape = null;
+    this.setState(SegStates.FREE);
+  } else if (this.state === SegStates.MOVE) {
+    this.mouseClickPos = null;
+    this.bbox = null;
     this.setState(SegStates.FREE);
   }
 };

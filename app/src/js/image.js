@@ -706,15 +706,17 @@ SatImage.prototype._mousemove = function(e) {
   if (this._isWithinFrame(e)) {
     let mousePos = this.getMousePos(e);
     this.imageCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
+
+    // label specific handling of mousemove
+    if (this.selectedLabel) {
+      this.selectedLabel.mousemove(e);
+    }
+
     // hover effect
     let hoveredShape = this.getOccupiedShape(mousePos);
     this.hoveredLabel = this.getLabelOfShape(hoveredShape);
     if (this.hoveredLabel) {
       this.hoveredLabel.setCurrHoveredShape(hoveredShape);
-    }
-    // label specific handling of mousemove
-    if (this.selectedLabel) {
-      this.selectedLabel.mousemove(e);
     }
 
     if (this.isMouseDown && this.selectedLabel) {
