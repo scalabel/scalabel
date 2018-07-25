@@ -189,15 +189,6 @@ Track.prototype.setActive = function(active) {
   this.active = active;
 };
 
-Track.prototype.childCategoryPathChanged = function(categoryPath) {
-  let self = this;
-  self.setCategoryPath(categoryPath);
-  for (let i = 0; self.children && i < self.children.length; i++) {
-    // don't call the function or we'd have an infinite loop
-    self.children[i].categoryPath = categoryPath;
-  }
-};
-
 Track.prototype.childDeleted = function() {
   // TODO: update the behavior of track on child being too small
   // this.delete();

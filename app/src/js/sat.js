@@ -681,14 +681,15 @@ SatLabel.prototype.setToolBox = function(ignoredSatItem) {
  * @param {string} categoryPath - The / delimited category path for this label.
  */
 SatLabel.prototype.setCategoryPath = function(categoryPath) {
-  this.categoryPath = categoryPath;
-  if (this.parent) {
-    this.parent.childCategoryPathChanged(categoryPath);
+  let self = this;
+  if (self.categoryPath === categoryPath) return;
+  self.categoryPath = categoryPath;
+  if (self.parent) {
+    self.parent.setCategoryPath(categoryPath);
   }
-};
-
-SatLabel.prototype.childCategoryPathChanged = function(ignoredCategoryPath) {
-
+  for (let i = 0; self.children && i < self.children.length; i++) {
+    self.children[i].setCategoryPath(categoryPath);
+  }
 };
 
 SatLabel.prototype.delete = function() {
