@@ -585,18 +585,18 @@ SatImage.prototype._keydown = function(e) {
       self.deleteLabel(self.selectedLabel);
       self.deselectAll();
     }
-  } else if (keyID === 38) {// up
+  } else if (keyID === 188) { // +
     e.preventDefault();
     self._incHandler();
-  } else if (keyID === 40) {// down
+  } else if (keyID === 189) { // -
     e.preventDefault();
     self._decHandler();
-  } else if (keyID === 37 || keyID === 39) { // Left/Right Arrow
-    if (keyID === 37) { // Left Arrow
-      self._prevHandler();
-    } else if (keyID === 39) { // Right Arrow
-      self._nextHandler();
-    }
+  } else if (keyID === 37) { // Left/Right Arrow
+    e.preventDefault();
+    self._prevHandler();
+  } else if (keyID === 39) { // Left/Right Arrow
+    e.preventDefault();
+    self._nextHandler();
   }
   self.redraw();
   self.updateLabelCount();
