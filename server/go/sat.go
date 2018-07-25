@@ -274,11 +274,10 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dashboardContents, err := GetDashboardContents(r.FormValue("project_name"))
-	Info.Println(dashboardContents.Tasks)
 	if err != nil {
 		Error.Println(err)
 	} else {
-		Info.Println(dashboardContents.Tasks) // project is too verbose to log
+		// Info.Println(dashboardContents.Tasks) // project is too verbose to log
 		tmpl.Execute(w, dashboardContents)
 	}
 }
@@ -294,7 +293,7 @@ func vendorHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	} else {
-		Info.Println(dashboardContents.Tasks) // project is too verbose to log
+		// Info.Println(dashboardContents.Tasks) // project is too verbose to log
 		tmpl.Execute(w, dashboardContents)
 	}
 }
