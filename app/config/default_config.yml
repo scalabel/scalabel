@@ -2,5 +2,4 @@
 port: 8686
 data: "../data"
 src: "."
-database: False
 ...

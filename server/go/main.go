@@ -3,9 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
@@ -29,7 +26,6 @@ type Env struct {
 	DataDir   string `yaml:"data"`
 	SrcPath   string `yaml:"src"`
 	AppSubDir string `yaml:"appSubDir"`
-	Database  bool   `yaml:"database"`
 }
 
 func (env Env) AppDir() string {
@@ -106,19 +102,10 @@ func NewEnv() *Env {
 }
 
 var env Env
-var svc *dynamodb.DynamoDB
 
 func main() {
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-1")},
-	)
-	// Create DynamoDB client
-	svc = dynamodb.New(sess)
-	if err != nil {
-		Error.Println("Got error creating dynamodb client")
-		Error.Println(err.Error())
-	}
+
 	Error.SetFlags(log.LstdFlags | log.Llongfile)
 
 	env = *NewEnv()

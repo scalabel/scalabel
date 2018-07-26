@@ -12,7 +12,6 @@ before_install:
 install:
   - sudo pip install --upgrade pip
   - sudo pip install pycodestyle
-  - go get -u github.com/aws/aws-sdk-go/...
   - go get gopkg.in/yaml.v2
   - npm install
 script:
