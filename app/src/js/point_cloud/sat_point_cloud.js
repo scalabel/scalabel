@@ -85,7 +85,7 @@ function SatPointCloud(sat, index, url) {
     this.scene.add( this.sphere );
 
     // Bounding boxes
-    this.bounding_boxes = [];
+    this.boundingBoxes = [];
     this.selectedLabel = null;
     this.selectedLabelNewBox = false;
 
@@ -101,6 +101,8 @@ function SatPointCloud(sat, index, url) {
     this.EDITING = 2;
 
     this.selectionState = this.STANDBY;
+    this.SELECTION_COLOR = 0xff0000;
+    this.ADJUSTING_COLOR = 0xff8000;
 
     this.MOVING_BOX = 1;
     this.ROTATING_BOX = 2;
@@ -125,6 +127,7 @@ function SatPointCloud(sat, index, url) {
     this.mouseUpListener = this.handleMouseUp.bind(this);
     this.keyDownListener = this.handleKeyDown.bind(this);
     this.keyUpListener = this.handleKeyUp.bind(this);
+    this.endTrackListener = this.handleEndTrack.bind(this);
     this.prevItemListener = (function() {
         if (this.index > 0) {
             this.sat.slider.value = this.index - 1;
@@ -263,6 +266,9 @@ SatPointCloud.prototype.setActive = function(active) {
                 }
             }
         }
+
+        document.getElementById('end_btn').addEventListener('click',
+            this.endTrackListener, false);
     } else {
         document.getElementById('prev_item').removeEventListener('click',
             this.prevItemListener, false);
@@ -298,6 +304,9 @@ SatPointCloud.prototype.setActive = function(active) {
         this.deselect();
         this.selectionState = this.STANDBY;
         this.editState = this.MOVING_BOX;
+
+        document.getElementById('end_btn').removeEventListener('click',
+            this.endTrackListener, false);
     }
 };
 
@@ -408,6 +417,8 @@ SatPointCloud.prototype.rotate_restricted = function(dx) {
 };
 
 SatPointCloud.prototype.handleMouseMove = function(e) {
+    // Grammar rules, fill "target" in getWorldDirection
+    let target = new THREE.Vector3();
     if (this.mouseDown) {
         if (this.selectionState == this.EDITING) {
             switch (this.editState) {
@@ -434,7 +445,7 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
                 case this.ROTATING_BOX:
                     this.selectedLabel.rotateBox(
                         this.currentCamera.position,
-                        this.currentCamera.getWorldDirection(),
+                        this.currentCamera.getWorldDirection(target),
                         this.calculateProjectionFromMouse(
                             this.mouseX + this.container.offsetLeft,
                             this.mouseY),
@@ -571,6 +582,16 @@ SatPointCloud.prototype._changeSelectedLabelCategory = function() {
                     ' ' + this.selectedLabel.id;
             }
         }
+
+        if (this.selectedLabel.parent) {
+            for (let i = 0;
+                 i < this.selectedLabel.parent.children.length; i++) {
+                let child = this.selectedLabel.parent.children[i];
+                child.categoryPath = this.selectedLabel.categoryPath;
+                child.categoryArr = this.selectedLabel.categoryArr;
+                child.name = this.selectedLabel.name;
+            }
+        }
     }
 };
 
@@ -579,7 +600,7 @@ SatPointCloud.prototype.handleMouseUp = function() {
     if (this.selectionState == this.EDITING) {
         this.selectionState = this.ADJUSTING;
         if (this.editState != this.MOVING_BOX) {
-            this.selectedLabel.setColor(0xff0000);
+            this.selectedLabel.setColor(this.ADJUSTING_COLOR);
         }
         this.editState = this.MOVING_BOX;
     }
@@ -652,10 +673,10 @@ SatPointCloud.prototype.handleKeyDown = function(e) {
             break;
         case this.DELETE_KEY:
             this.selectionState = this.STANDBY;
-            this.selectedLabelNewBox = false;
             if (this.selectedLabel) {
                 this.deleteSelection();
             }
+            this.selectedLabelNewBox = false;
             break;
         case this.ESCAPE_KEY:
             if (this.selectedLabelNewBox) {
@@ -674,6 +695,7 @@ SatPointCloud.prototype.handleKeyDown = function(e) {
             } else if (this.selectionState == this.STANDBY) {
                 if (this.selectedLabel != null) {
                     this.selectionState = this.ADJUSTING;
+                    this.selectedLabel.setColor(this.ADJUSTING_COLOR);
                 }
             }
             break;
@@ -706,65 +728,28 @@ SatPointCloud.prototype.handleKeyUp = function() {
         this.editState = this.MOVING_BOX;
     }
     if (this.selectionState == this.ADJUSTING) {
-        this.selectedLabel.setColor(0xff0000);
+        this.selectedLabel.setColor(this.ADJUSTING_COLOR);
     }
 };
 
-SatPointCloud.prototype.addBoundingBox = function(label, select=false) {
-    let box = new THREE.Mesh(
-        new THREE.BoxGeometry( 1, 1, 1 ),
-        new THREE.MeshBasicMaterial({color: 0xffffff,
-            vertexColors: THREE.FaceColors,
-            transparent: true,
-            opacity: 0.5})
-    );
+SatPointCloud.prototype.handleNewLabel = function() {
+    this.addBoundingBox(this.sat.newLabel(), true);
+};
 
-    let outline = new THREE.LineSegments(
-        new THREE.EdgesGeometry(box.geometry),
-        new THREE.LineBasicMaterial({color: 0xffffff}));
+SatPointCloud.prototype.addBoundingBox = function(label, select=false,
+                                                  addToList=true) {
+    let box = label.createBox(this.target);
+    this.boundingBoxes.push(box);
 
-    box.outline = outline;
-    box.label = label;
-    this.bounding_boxes.push(box);
-
-    label.box = box;
-
-    if (label.data) {
-        box.position.x = label.data['position'][0];
-        box.position.y = label.data['position'][1];
-        box.position.z = label.data['position'][2];
-        box.outline.position.copy(box.position);
-
-        box.rotation.x = label.data['rotation'][0];
-        box.rotation.y = label.data['rotation'][1];
-        box.rotation.z = label.data['rotation'][2];
-        box.outline.rotation.copy(box.rotation);
-
-        box.scale.x = label.data['scale'][0];
-        box.scale.y = label.data['scale'][1];
-        box.scale.z = label.data['scale'][2];
-        box.outline.scale.copy(box.scale);
-    } else {
-        box.scale.z = 0.01;
-
-        label.data = {};
-        label.data['position'] = [this.target.x, this.target.y,
-            this.target.z];
-        label.data['rotation'] = [box.rotation.x, box.rotation.y,
-            box.rotation.z];
-        label.data['scale'] = [box.scale.x, box.scale.y, box.scale.z];
-
-        box.position.copy(this.target);
-        box.outline.position.copy(box.position);
-        box.outline.scale.copy(box.scale);
+    if (addToList) {
+        this.addLabelToList(label);
     }
-
-    this.addLabelToList(label);
 
     if (select) {
         this.selectedLabelNewBox = true;
         this.select(label);
         this.selectionState = this.ADJUSTING;
+        label.setColor(this.ADJUSTING_COLOR);
         this._changeSelectedLabelCategory();
     }
 
@@ -824,7 +809,11 @@ SatPointCloud.prototype.addLabelToList = function(label) {
     let item = document.createElement('a');
     item.href = '#';
 
-    item.text = label.name + ' ' + label.id;
+    let id = label.id;
+    if (label.parent) {
+        id = label.parent.id;
+    }
+    item.text = label.name + ' ' + id;
 
     item.classList.add('list-group-item');
     item.classList.add('list-group-item-action');
@@ -851,7 +840,7 @@ SatPointCloud.prototype.select = function(label) {
     // If selecting same thing, then only deselect
     if (temp != label) {
         this.selectedLabel = label;
-        this.selectedLabel.setColor(0xff0000);
+        this.selectedLabel.setColor(this.SELECTION_COLOR);
 
         this.info_card.style.display = 'block';
 
@@ -928,7 +917,7 @@ SatPointCloud.prototype.select = function(label) {
 
 SatPointCloud.prototype.deselect = function() {
     if (this.selectedLabel != null) {
-        this.selectedLabel.setColor(0xffffff);
+        this.selectedLabel.setColor(this.selectedLabel.color());
         this.selectedLabel = null;
         this.info_card.style.display = 'none';
         this.deactivateLabelList();
@@ -936,10 +925,8 @@ SatPointCloud.prototype.deselect = function() {
 };
 
 SatPointCloud.prototype.deleteSelection = function() {
-    this.scene.remove(this.selectedLabel.box.outline);
-    this.scene.remove(this.selectedLabel.box);
-    this.bounding_boxes.splice(
-        this.bounding_boxes.indexOf(this.selectedLabel.box), 1);
+    this.boundingBoxes.splice(
+        this.boundingBoxes.indexOf(this.selectedLabel.box), 1);
 
     let ind = -1;
     for (let i = 0; i < this.labelList.childNodes.length; i++) {
@@ -962,7 +949,14 @@ SatPointCloud.prototype.deleteSelection = function() {
         }
     }
 
-    this.labels[ind].delete();
+    if (this.selectedLabelNewBox && this.labels[ind].parent) {
+        this.labels[ind].parent.delete();
+        for (let i = 0; i < this.sat.items.length; i++) {
+            this.sat.items[i].deleteInvalidLabels();
+        }
+    } else {
+        this.labels[ind].delete();
+    }
 };
 
 SatPointCloud.prototype.convertMouseToNDC = function(mX, mY) {
@@ -1000,7 +994,7 @@ SatPointCloud.prototype.highlightMousedOverBox = function(mX, mY) {
 
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.currentCamera);
 
-    let intersects = this.raycaster.intersectObjects(this.bounding_boxes);
+    let intersects = this.raycaster.intersectObjects(this.boundingBoxes);
 
     // Unhighlight previous box
     if (this.boxMouseOver != null) {
@@ -1011,9 +1005,25 @@ SatPointCloud.prototype.highlightMousedOverBox = function(mX, mY) {
     // Highlight current box
     if (intersects.length > 0) {
         this.boxMouseOver = intersects[0].object;
-        this.boxMouseOver.outline.material.color.set(0xff0000);
+        this.boxMouseOver.outline.material.color.set(this.SELECTION_COLOR);
         this.boxMouseOverPoint = intersects[0].point;
     }
+};
+
+SatPointCloud.prototype.deleteInvalidLabels = function() {
+    let valid = [];
+    let validBoxes = [];
+    for (let i = 0; i < this.labels.length; i++) {
+        if (this.labels[i].valid) {
+            valid.push(this.labels[i]);
+            validBoxes.push(this.labels[i].box);
+        } else {
+            this.scene.remove(this.labels[i].box);
+            this.scene.remove(this.labels[i].box.outline);
+        }
+    }
+    this.labels = valid;
+    this.boundingBoxes = validBoxes;
 };
 
 SatPointCloud.prototype.toJson = function() {
@@ -1052,6 +1062,14 @@ SatPointCloud.prototype.fromJson = function(item) {
         }
     }
     for (let i = 0; i < this.labels.length; i++) {
-        this.addBoundingBox(this.labels[i]);
+        if (!this.labels[i].isTrack) {
+            this.addBoundingBox(this.labels[i]);
+        }
+    }
+};
+
+SatPointCloud.prototype.handleEndTrack = function() {
+    if (this.selectedLabel) {
+        this.selectedLabel.parent.endTrack(this.selectedLabel);
     }
 };

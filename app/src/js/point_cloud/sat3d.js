@@ -1,7 +1,10 @@
 /* global Sat THREE SatPointCloud Box3d */
 
 /**
- * Point Cloud 3DBBox Sat
+ *
+ * @param {SatItem} itemType
+ * @param {SatLabel} labelType
+ * @constructor
  */
 function Sat3d() {
     this.slider = document.getElementById('pc_scroll');

@@ -54,6 +54,8 @@ $(document).ready(function() {
       enableOption(labelSelect, 'segmentation');
     } else if (itemSelect.value === 'pointcloud') {
       enableOption(labelSelect, 'box3d');
+    } else if (itemSelect.value === 'pointcloudtracking') {
+        enableOption(labelSelect, 'box3d');
     }
     // add or remove the frame rate box
     if (itemSelect.value === 'video') {

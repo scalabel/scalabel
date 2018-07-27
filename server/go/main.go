@@ -52,6 +52,10 @@ func (env Env) Label3dPath() string {
 	return path.Join(env.AppDir(), "annotation/point_cloud.html")
 }
 
+func (env Env) PointCloudTrackingPath() string {
+	return path.Join(env.AppDir(), "annotation/point_cloud_tracking.html")
+}
+
 func Init(
 	// Initialize all the loggers
 	traceHandle io.Writer,

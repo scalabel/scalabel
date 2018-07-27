@@ -6,46 +6,10 @@
 		<style>
 			body, p { margin: 0 !important; padding: 0; overflow: hidden; }
             p {font-size: 12px; }
-            #main_container {
-                width: 80vw;
-                height: 100vh;
-                float: right;
-            }
-            #info {
-                float: left;
-                width: 20vw;
-                margin: 0 auto;
-                overflow-y: scroll;
-                height: 100vh;
-            }
-            #pc_scroll {
-                width: 80%;
-                margin-left: 10%;
-                margin-right: 10%;
-                margin-top:10px;
-            }
-            #label_list a {
-                border: none;
-                border-radius: 0;
-                padding-top:6px;
-                padding-bottom:6px;
-                margin: 0 auto;
-                text-align: center;
-                border-bottom: 1px solid #dee2e6;
-            }
-            #save_button_container {
-                position:absolute;
-                top:20px;
-                right:20px;
-            }
-            #slider_group {
-                display: inline-flex;
-                margin-top: 10px;
-                margin-bottom: 10px;
-            }
 		</style>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
+        <link href="./css/style.css" rel="stylesheet">
 	</head>
 	<body>
         <!-- Info card -->
@@ -100,6 +64,7 @@
                 <hr>
                     <div class="col-md-12" style="opacity:0.6;">
                         <h6>Bounding Box Info</h6>
+                        <button id="end_btn" style="font-size:12px; margin-bottom:10px; display: none;" type="button" class="btn btn-light">End Track</button>
                         <a href="#" class="list-group-item">
                         <div id="custom_categories" class="form-group">
                             <p>Label Category</p>
@@ -143,6 +108,7 @@
         <script src="./js/point_cloud/sat3d.js"></script>
         <script src="./js/point_cloud/box3d.js"></script>
         <script src="./js/point_cloud/sat_point_cloud.js"></script>
+        <script src="./js/point_cloud/point_cloud_tracking.js"></script>
 
         <script type="x-shader/x-vertex" id="vertexshader">
             attribute float size;
@@ -164,10 +130,18 @@
             }
         </script>
 
-        <script>
-        </script>
 		<script>
-            let labeler = new Sat3d();
+            $(document).ready(function () {
+                let labelType = {{ .Task.ProjectOptions.LabelType }};
+                let itemType = {{ .Task.ProjectOptions.ItemType }};
+                if (itemType == 'pointcloudtracking') {
+                    document.getElementById('end_btn').style.display = 'block';
+                    new Sat3dTracker();
+                }
+                else {
+                    new Sat3d();
+                }
+            });
         </script>
 	</body>
 </html>

@@ -739,6 +739,7 @@ SatLabel.prototype.styleColor = function(alpha = 1.0) {
 
 SatLabel.prototype.encodeBaseJson = function() {
   let self = this;
+  self.attributes['isTrack'] = self.isTrack;
   let json = {id: self.id, categoryPath: self.categoryPath,
     attributes: self.attributes};
   if (self.parent) {
@@ -775,6 +776,7 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   self.id = json.id;
   self.categoryPath = json.categoryPath;
   self.attributes = json.attributes;
+  self.isTrack = json.attributes['isTrack'];
   // TODO: remove
   self.keyframe = json.keyframe;
 };
