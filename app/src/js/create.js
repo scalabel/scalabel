@@ -75,17 +75,21 @@ $(document).ready(function() {
 
   labelSelect.onchange = function() {
     let labelName;
+    let instructions;
     if (labelSelect.value === 'box2d') {
       labelName = '2D Bounding Box';
+      instructions = 'http://data-bdd.berkeley.edu/label/bbox/instruction.html';
     } else if (labelSelect.value === 'segmentation') {
       labelName = '2D Segmentation';
+      instructions = 'http://data-bdd.berkeley.edu/label/seg/readme.html';
     } else if (labelSelect.value === 'lane') {
       labelName = '2D Lane';
+      instructions = 'http://data-bdd.berkeley.edu/label/seg/readme.html';
     } else if (labelSelect.value === 'box3d') {
       labelName = '3D Bounding Box';
     }
-    let pageTitle = document.getElementById('page_title');
-    pageTitle.value = labelName + ' Labeling Tool';
+    document.getElementById('page_title').value = labelName + ' Labeling Tool';
+    document.getElementById('instructions').value = instructions;
   };
 
   let showAdvanced = false;
