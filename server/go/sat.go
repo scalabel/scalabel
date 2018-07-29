@@ -59,6 +59,7 @@ type ProjectOptions struct {
 	Categories           []Category    `json:"categories" yaml:"categories"`
 	NumLeafCategories    int           `json:"numLeafCategories" yaml:"numLeafCategories"`
 	Attributes           []Attribute   `json:"attributes" yaml:"attributes"`
+	Instructions		 string        `json:"instructions" yaml:"instructions"`
 	DemoMode             bool          `json:"demoMode" yaml:"demoMode"`
 	VideoMetaData        VideoMetaData `json:"metadata" yaml:"metadata"`
 	InterpolationMode    string        `json:"interpolationMode" yaml:"interpolationMode"`
@@ -366,6 +367,9 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// retrieve the link to instructions from form
+	instructions := r.FormValue("instructions")
+
 	demoMode := r.FormValue("demo_mode") == "on"
 
 	// This prefix determines which handler will deal with labeling sessions
@@ -383,6 +387,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Categories:          categories,
 		NumLeafCategories:   numLeafCategories,
 		Attributes:          attributes,
+		Instructions:        instructions,
 		DemoMode:            demoMode,
 		VideoMetaData:       videoMetaData,
 		InterpolationMode:   interpolationMode,

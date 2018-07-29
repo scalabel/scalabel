@@ -256,13 +256,11 @@
     if (labelType === 'box2d') {
       showElementById("crosshair");
       labelClass = Box2d;
-      document.getElementById('instruction_btn').href = "http://data-bdd.berkeley.edu/label/bbox/instruction.html";
     } else if (labelType === 'segmentation' || labelType === 'lane') {
       labelClass = Seg2d;
       if (labelType === 'segmentation') {
         showTemplateById("seg_btns");
         showTemplateById("seg_usage");
-        document.getElementById('instruction_btn').href = "http://data-bdd.berkeley.edu/label/seg/readme.html";
       }
     }
     if (itemType === 'image') {

@@ -417,6 +417,7 @@ Sat.prototype.encodeBaseJson = function() {
         pageTitle: self.pageTitle,
         categories: self.categories,
         attributes: self.attributes,
+        instructions: self.instructions,
         demoMode: self.demoMode,
       },
       index: self.taskIndex,
@@ -454,9 +455,11 @@ Sat.prototype.decodeBaseJson = function(json) {
   self.taskSize = json.task.projectOptions.taskSize;
   self.handlerUrl = json.task.projectOptions.handlerUrl;
   self.pageTitle = json.task.projectOptions.pageTitle;
-  self.demoMode = json.task.projectOptions.demoMode;
   document.title = self.pageTitle;
   document.getElementById('page-title').textContent = self.pageTitle;
+  self.instructions = json.task.projectOptions.instructions;
+  document.getElementById('instruction_btn').href = self.instructions;
+  self.demoMode = json.task.projectOptions.demoMode;
   self.categories = json.task.projectOptions.categories;
   self.attributes = json.task.projectOptions.attributes;
   self.taskIndex = json.task.index;
