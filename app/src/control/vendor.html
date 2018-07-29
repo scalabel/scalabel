@@ -75,8 +75,8 @@
                             <thead>
                             <tr>
                                 <th>Task Index</th>
-                                <th># Labeled items</th>
-                                <th># Submissions</th>
+                                <th># Labeled images</th>
+                                <th># Labels</th>
                                 <th>Task Link</th>
                                 <th>Task Result</th>
                                 <!--TODO: Comments-->
@@ -84,26 +84,26 @@
                             </thead>
                             <tbody>
                                 <!-- iterate over tasks -->
-                                {{ range $key, $value := .Assignments }}
+                                {{ range $key, $value := .Tasks }}
                                 <tr>
-                                    <th>
-                                        {{ $value.Task.Index }}
-                                    </th>
-                                    <th>
-                                        {{ $value.Info.LabeledItemsCount }}
-                                    </th>
-                                    <th>
-                                        {{ $value.Info.SubmissionsCount }}
-                                    </th>
-                                    <th>
+                                    <td>
+                                        {{ $value.Index }}
+                                    </td>
+                                    <td>
+                                        {{ countLabeledImage $value.ProjectOptions.Name $value.Index }}
+                                    </td>
+                                    <td>
+                                        {{ countLabelInTask $value.ProjectOptions.Name $value.Index }}
+                                    </td>
+                                    <td>
                                         <a
-                                                href="./{{ $value.Task.HandlerUrl }}?project_name={{ $.Project.Name }}&task_index={{ $value.Task.Index }}">
+                                                href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
                                             task link
                                         </a>
-                                    </th>
-                                    <th>
+                                    </td>
+                                    <td>
                                         <!-- TODO: result -->
-                                    </th>
+                                    </td>
                                 </tr>
                                 {{ end }}
                             </tbody>

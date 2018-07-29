@@ -259,6 +259,24 @@ func CheckProjectName(projectName string) string {
 	return newName
 }
 
+// Count the total number of images labeled in a task
+func countLabeledImage(projectName string, index int) int {
+	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
+	if err != nil {
+		return 0
+	}
+	return assignment.NumLabeledItems
+}
+
+// Count the total number of labels in a task
+func countLabelInTask(projectName string, index int) int {
+	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
+	if err != nil {
+		return 0
+	}
+	return len(assignment.Labels)
+}
+
 // default box2d category if category file is missing
 var defaultBox2dCategories = []Category{
 	{"person", nil},
