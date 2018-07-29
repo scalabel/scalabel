@@ -82,8 +82,8 @@
                             <thead>
                             <tr>
                                 <th>Task Index</th>
-                                <th># Labeled items</th>
-                                <th># Submissions</th>
+                                <th># Labeled Images</th>
+                                <th># Labels</th>
                                 <th>Task Link</th>
                                 <th>Task Result</th>
                             </tr>
@@ -92,28 +92,32 @@
                             <!-- iterate over tasks -->
                             {{ range $key, $value := .Tasks }}
                             <tr>
-                                <th>
+                                <td>
                                     {{ $value.Index }}
-                                </th>
-                                <th>
-                                    <!-- TODO -->
-                                </th>
-                                <th>
-                                    <!-- TODO -->
-                                </th>
-                                <th>
+                                </td>
+                                <td class="countLabeledImage">
+                                    {{ countLabeledImage $value.ProjectOptions.Name $value.Index }}
+                                </td>
+                                <td class="countLabelInTask">
+                                    {{ countLabelInTask $value.ProjectOptions.Name $value.Index }}
+                                </td>
+                                <td>
                                     <a
                                             href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
                                         task link
                                     </a>
-                                </th>
-                                <th>
+                                </td>
+                                <td>
                                     <!-- TODO: result -->
-                                </th>
+                                </td>
                             </tr>
                             {{ end }}
                             </tbody>
                         </table>
+
+                        <div class="h5" id="totalTaskLabeled"></div>
+                        <div class="h5" id="totalLabels"></div>
+                        
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -147,6 +151,21 @@
 <!-- Bootstrap Core JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/js/bootstrap.min.js"></script>
 
-</body>
+<script language="javascript" type="text/javascript">
+    var tds = document.getElementById('main_table').getElementsByTagName('td');
+    var totalTaskLabeled = 0;
+    var totalLabels = 0;
+    for(var i = 0; i < tds.length; i++) {
+        if(tds[i].className == 'countLabeledImage') {
+            totalTaskLabeled += tds[i].innerHTML > 0? 1 : 0;
+        }
+        if(tds[i].className == 'countLabelInTask') {
+            totalLabels += parseInt(tds[i].innerHTML);
+        }
+    }
+    document.getElementById('totalTaskLabeled').textContent = 'Total Number of Task Labeled: ' + totalTaskLabeled;
+    document.getElementById('totalLabels').textContent = 'Total Number of Labels: ' + totalLabels;
+</script>
 
+</body>
 </html>

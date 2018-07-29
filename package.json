@@ -5,7 +5,8 @@
   "jest": {
     "roots": [
       "app/src/js"
-    ]
+    ],
+    "testURL": "http://localhost/"
   },
   "devDependencies": {
     "jest": "^22.4"
