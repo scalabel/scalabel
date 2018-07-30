@@ -16,6 +16,8 @@ function Sat3d() {
         this.container.offsetHeight);
     this.container.appendChild(this.renderer.domElement);
 
+    window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
+
     this.view_params = [
         {
             top: 0,
@@ -47,6 +49,18 @@ function Sat3d() {
 }
 
 Sat3d.prototype = Object.create(Sat.prototype);
+
+Sat3d.prototype.onWindowResize = function() {
+    for (let i=0; i<this.items.length; i++) {
+        for (let j=0; j<this.items[i].views.length; j++) {
+            let camera = this.items[i].views[j].camera;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        }
+    }
+
+    this.renderer.setSize( window.innerWidth, window.innerHeight );
+};
 
 Sat3d.prototype.newItem = function(url) {
     let item = new this.ItemType(this, this.items.length, url);
