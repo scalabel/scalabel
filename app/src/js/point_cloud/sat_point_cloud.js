@@ -146,7 +146,7 @@ function SatPointCloud(sat, index, url) {
         }
     }).bind(this);
     this.addBoxListener = (function() {
-        this.addBoundingBox(this.sat.newLabel(), true);
+        this.addBoundingBox(this.sat.newLabel(), null, true);
     }).bind(this);
 
     // Load point cloud data
@@ -733,12 +733,17 @@ SatPointCloud.prototype.handleKeyUp = function() {
 };
 
 SatPointCloud.prototype.handleNewLabel = function() {
-    this.addBoundingBox(this.sat.newLabel(), true);
+    this.addBoundingBox(this.sat.newLabel(), null, true);
 };
 
-SatPointCloud.prototype.addBoundingBox = function(label, select=false,
+SatPointCloud.prototype.addBoundingBox = function(label, target, select=false,
                                                   addToList=true) {
-    let box = label.createBox(this.target);
+    if (target == null) {
+        target = new THREE.Vector3();
+        target.copy(this.target);
+    }
+
+    let box = label.createBox(target);
     this.boundingBoxes.push(box);
 
     if (addToList) {
@@ -1063,7 +1068,7 @@ SatPointCloud.prototype.fromJson = function(item) {
     }
     for (let i = 0; i < this.labels.length; i++) {
         if (!this.labels[i].isTrack) {
-            this.addBoundingBox(this.labels[i]);
+            this.addBoundingBox(this.labels[i], null);
         }
     }
 };

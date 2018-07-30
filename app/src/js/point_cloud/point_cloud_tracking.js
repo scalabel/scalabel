@@ -22,6 +22,7 @@ Sat3dTracker.prototype.newLabel = function(optionalAttributes=null) {
     this.tracks.push(track);
 
     let currentLabel = null;
+
     for (let i = this.currentItem.index; i < this.items.length; i++) {
         let labelId = this.newLabelId();
         let childLabel = new this.LabelType(this, labelId, optionalAttributes);
@@ -34,7 +35,8 @@ Sat3dTracker.prototype.newLabel = function(optionalAttributes=null) {
 
         this.items[i].labels.push(childLabel);
         if (i != this.currentItem.index) {
-            this.items[i].addBoundingBox(childLabel, false, false);
+            this.items[i].addBoundingBox(childLabel,
+                this.currentItem.target, false, false);
         } else {
             currentLabel = childLabel;
             childLabel.keyframe = true;
