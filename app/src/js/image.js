@@ -5,8 +5,6 @@ mode rgb pickColorPalette */
 
 // constants
 const DOUBLE_CLICK_WAIT_TIME = 300;
-const CANVAS_STYLE_WIDTH = 900;
-const CANVAS_STYLE_HEIGHT = 470;
 
 /**
  * The data structure to aid the hidden canvas,
@@ -81,6 +79,7 @@ function SatImage(sat, index, url) {
   self.image.src = self.url;
 
   self.divCanvas = document.getElementById('div_canvas');
+
   self.imageCanvas = document.getElementById('image_canvas');
   self.hiddenCanvas = document.getElementById('hidden_canvas');
   self.mainCtx = self.imageCanvas.getContext('2d');
@@ -90,7 +89,7 @@ function SatImage(sat, index, url) {
 
   self.MAX_SCALE = 3.0;
   self.MIN_SCALE = 1.0;
-  self.SCALE_RATIO = 1.5;
+  self.SCALE_RATIO = 1.05;
 
   self.isMouseDown = false;
   self._hiddenMap = new HiddenMap();
@@ -260,23 +259,24 @@ SatImage.prototype.setScale = function(scale) {
     $('#increase_btn').attr('disabled', true);
   }
   // resize canvas
+  let rectDiv = this.divCanvas.getBoundingClientRect();
   self.imageCanvas.style.height =
-      Math.round(CANVAS_STYLE_HEIGHT * self.scale) + 'px';
+      Math.round(rectDiv.height * self.scale) + 'px';
   self.imageCanvas.style.width =
-      Math.round(CANVAS_STYLE_WIDTH * self.scale) + 'px';
+      Math.round(rectDiv.width * self.scale) + 'px';
   self.hiddenCanvas.style.height =
-      Math.round(CANVAS_STYLE_HEIGHT * self.scale) + 'px';
+      Math.round(rectDiv.height * self.scale) + 'px';
   self.hiddenCanvas.style.width =
-      Math.round(CANVAS_STYLE_WIDTH * self.scale) + 'px';
+      Math.round(rectDiv.width * self.scale) + 'px';
 
   self.imageCanvas.height =
-      Math.round(CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale);
+      Math.round(rectDiv.height * UP_RES_RATIO * self.scale);
   self.imageCanvas.width =
-      Math.round(CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale);
+      Math.round(rectDiv.width * UP_RES_RATIO * self.scale);
   self.hiddenCanvas.height =
-      Math.round(CANVAS_STYLE_HEIGHT * UP_RES_RATIO * self.scale);
+      Math.round(rectDiv.height * UP_RES_RATIO * self.scale);
   self.hiddenCanvas.width =
-      Math.round(CANVAS_STYLE_WIDTH * UP_RES_RATIO * self.scale);
+      Math.round(rectDiv.width * UP_RES_RATIO * self.scale);
 };
 
 SatImage.prototype.loaded = function() {
@@ -304,26 +304,30 @@ SatImage.prototype.setActive = function(active) {
       self.sat.items[i].padBox = self.padBox;
     }
 
-    self.imageCanvas.style.width = CANVAS_STYLE_WIDTH + 'px';
-    self.imageCanvas.style.height = CANVAS_STYLE_HEIGHT + 'px';
-    self.hiddenCanvas.style.width = CANVAS_STYLE_WIDTH + 'px';
-    self.hiddenCanvas.style.height = CANVAS_STYLE_HEIGHT + 'px';
+    let rectDiv = this.divCanvas.getBoundingClientRect();
+    self.imageCanvas.style.width = rectDiv.width + 'px';
+    self.imageCanvas.style.height = rectDiv.height + 'px';
+    self.hiddenCanvas.style.width = rectDiv.width + 'px';
+    self.hiddenCanvas.style.height = rectDiv.height + 'px';
     self.mainCtx = self.imageCanvas.getContext('2d');
     self.hiddenCtx = self.hiddenCanvas.getContext('2d');
 
-    self.imageCanvas.width = CANVAS_STYLE_WIDTH * UP_RES_RATIO;
-    self.imageCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO;
-    self.hiddenCanvas.width = CANVAS_STYLE_WIDTH * UP_RES_RATIO;
-    self.hiddenCanvas.height = CANVAS_STYLE_HEIGHT * UP_RES_RATIO;
+    self.imageCanvas.width = rectDiv.width * UP_RES_RATIO;
+    self.imageCanvas.height = rectDiv.height * UP_RES_RATIO;
+    self.hiddenCanvas.width = rectDiv.width * UP_RES_RATIO;
+    self.hiddenCanvas.height = rectDiv.height * UP_RES_RATIO;
 
     self.mainCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
     self.hiddenCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
 
-    self.setScale(self.MIN_SCALE);
+    self.setScale(1.0);
 
     // global listeners
     document.onkeydown = function(e) {
       self._keydown(e);
+    };
+    document.onkeyup = function(e) {
+      self._keyup(e);
     };
     document.onmousedown = function(e) {
       self._mousedown(e);
@@ -334,8 +338,12 @@ SatImage.prototype.setActive = function(active) {
     document.onmousemove = function(e) {
       self._mousemove(e);
     };
-    document.onscroll = function(e) {
+    self.divCanvas.onwheel = function(e) {
       self._scroll(e);
+    };
+    document.getElementsByTagName('BODY')[0].onresize = function() {
+      self.setScale(self.scale);
+      self.redraw();
     };
     if (self.sat.LabelType.useDoubleClick) {
       document.ondblclick = function(e) {
@@ -597,11 +605,21 @@ SatImage.prototype._keydown = function(e) {
   } else if (keyID === 39) { // Left/Right Arrow
     e.preventDefault();
     self._nextHandler();
+  } else if (keyID === 17) { // Ctrl
+    self.ctrlDown = true;
   }
   self.redraw();
   self.updateLabelCount();
   if (keyID === 68) { // d for debug
     self.showHiddenCanvas();
+  }
+};
+
+SatImage.prototype._keyup = function(e) {
+  let self = this;
+  let keyID = e.KeyCode ? e.KeyCode : e.which;
+  if (keyID === 17) { // Ctrl
+    self.ctrlDown = false;
   }
 };
 
@@ -741,10 +759,21 @@ SatImage.prototype._mousemove = function(e) {
  */
 SatImage.prototype._scroll = function(e) {
   let self = this;
+  if (self.ctrlDown) { // control for zoom
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      self.setScale(self.scale * self.SCALE_RATIO);
+    } else if (e.deltaY > 0) {
+      self.setScale(self.scale / self.SCALE_RATIO);
+    }
+
+    self.redraw();
+    return;
+  }
   if (self.sat.LabelType.useCrossHair) {
     self.drawCrossHair(e);
   }
-  self.redrawMainCanvas();
+  self.redraw();
 };
 
 /**

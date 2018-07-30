@@ -17,8 +17,22 @@ canvas#hidden_canvas {
     -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
 }
 
+#div_canvas {
+    position: relative;
+    float: left;
+    min-width: 900px;
+    min-height: 300px;
+    width: calc(100vw - 500px);
+    padding-bottom: 45%;
+    overflow: scroll;
+}
+
+#div_main {
+    display: table;
+}
+
 #heading_row {
-    width: 1112px;
+    width: 100%;
 }
 
 .noselect {
@@ -117,17 +131,6 @@ canvas#hidden_canvas {
     margin-right: 5px; /* b/w button and slider */
 }
 
-#slider {
-    display: table-cell; /* needed for alignment w/ button */
-
-    /* position it below the canvases */
-    position: relative;
-    top: 476px;
-
-    width: 900px;
-    outline: none; /* stop that pesky blue border */
-}
-
 #video_slider {
     display: table-cell; /* needed for alignment w/ button */
 
@@ -135,8 +138,9 @@ canvas#hidden_canvas {
     position: relative;
     top: 6px;
 
-    width: 830px;
     outline: none; /* stop that pesky blue border */
+    min-width: 828px;
+    width: calc(100vw - 572px);
 }
 
 #keyboard_usage_window{
@@ -179,6 +183,14 @@ canvas#hidden_canvas {
     width: 80vw;
     height: 100vh;
     float: right;
+}
+#container {
+     width: 90%;
+     height: 90%;
+ }
+#container_wrapper {
+    width: 100%;
+    height: 90%;
 }
 #info {
     float: left;

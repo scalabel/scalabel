@@ -12,7 +12,6 @@
 
     <!-- Style CSS -->
     <link href="./css/style.css" rel="stylesheet">
-
     <!-- Font Awesome -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -88,129 +87,114 @@
     </div>
 </div>
 
-<div class="container">
+<div class="container_wrapper" id="container_wrapper">
+    <div class="container" id="container">
 
-    <!-- Heading -->
-    <div id="heading_row" class="row p-0 m-0">
-        <div class="col-lg-12">
-            <h2 class="page-header"> <span id="page-title"></span>
-                <small>version 0.1.0</small>
-                <a type="button" class="btn btn-info btn-popover" id="instruction_btn"
-                   data-toggle="popover" data-placement="right"
-                   href="http://data-bdd.berkeley.edu/label/bbox/instruction.html"
-                   target="view_window"
-                   data-content="Please view instructions and annotate bounding boxes of given categories.">
-                    Instruction
-                </a>
-                <small class="col-lg-offset-1">Labels:</small>
-                <small id="label_count">0</small>
-                <small class="col-lg-offset-0">Lights:</small>
-                <small id="light_count">0</small>
-                <a href="#" id="save_btn" style="position:absolute;right:15px;"
-                   class="btn btn-primary btn-primary">Save</a>
-                <div class="btn-group">
-                    <button id="increase_btn" class="btn btn-primary">+</button>
-                    <button href="#" id="decrease_btn" class="btn btn-primary">
-                        -
-                    </button>
-                </div>
-            </h2>
-        </div>
-    </div>
-
-    <!-- Toolbox -->
-    <div class="row">
-        <div class="col-md-2">
-            <div class="panel panel-default">
-                <!-- toolbox title -->
-                <div id="toolbox" class="panel-heading active">
-                    Toolbox
-                </div>
-                <!-- list of control sections -->
-                <a href="#" class="list-group-item">
-                    <div id="custom_categories" class="form-group">
-                        <p>Label Category</p>
-                    </div>
-                    <div id="custom_attributes">
-                        {{ range $key, $value := .Task.ProjectOptions.Attributes }}
-                        <div class="form-group"
-                             id="custom_attribute_{{ $value.Name }}_div">
-                            <input id="custom_attribute_{{ $value.Name }}"
-                                   name="custom_attribute_{{ $value.Name }}">
+        <!-- Heading -->
+        <div id="heading_row" class="row p-0 m-0">
+            <div class="col-lg-12">
+                <h2 class="page-header"> <span id="page-title"></span>
+                    <small>version 0.1.0</small>
+                    <a type="button" class="btn btn-info btn-popover" id="instruction_btn"
+                       data-toggle="popover" data-placement="right"
+                       href="http://data-bdd.berkeley.edu/label/bbox/instruction.html"
+                       target="view_window"
+                       data-content="Please view instructions and annotate bounding boxes of given categories.">
+                        Instruction
+                    </a>
+                    <div style="float:right;">
+                        <small>Labels:</small>
+                        <small id="label_count">0</small>
+                        <small class="col-lg-offset-0">Lights:</small>
+                        <small id="light_count">0</small>
+                        <div class="btn-group">
+                            <button id="increase_btn" class="btn btn-primary">+</button>
+                            <button href="#" id="decrease_btn" class="btn btn-primary">
+                                -
+                            </button>
                         </div>
-                        {{ end }}
+                        <div class="btn-group">
+                            <button id="prev_btn" class="btn btn-primary">&laquo;</button>
+                            <button href="#" id="next_btn" class="btn btn-primary">
+                                &raquo;
+                            </button>
+                        </div>
+                        <a href="#" id="save_btn"
+                           class="btn btn-primary btn-primary">Save</a>
                     </div>
-                </a>
-                <template id="video_btns">
-                    <!-- object out of frame button -->
-                    <a href="#" id="end_btn" class="btn list-group-item">End
-                        Object Track</a>
-                </template>
-                <template id="seg_btns">
-                    <a href="#" id="quickdraw_btn" class="btn list-group-item" style="white-space: normal;">
-                        <kbd>s</kbd> Quickdraw
-                    </a>
-                    <a href="#" id="link_btn" class="btn list-group-item">
-                        Link
-                    </a>
-                </template>
-                <!-- remove button -->
-                <a href="#" id="delete_btn" class="btn list-group-item">Remove</a>
+
+                </h2>
             </div>
         </div>
 
-        <div id="div_main">
-            <div id="div_canvas"
-                 style=" position: relative; float: left; width: 900px; height: 470px; overflow:scroll; ">
-                <canvas id="image_canvas" width="900" height="470"
-                        style="position: absolute;">
-                    Unsupported browser!
-                </canvas>
-                <canvas id="hidden_canvas" width="900" height="470"
-                        style="position: absolute; ">
-                    Unsupported browser!
-                </canvas>
-                <div id="crosshair" style="visibility:none">
-                    <div id="crosshair-h" class="hair"></div>
-                    <div id="crosshair-v" class="hair"></div>
+        <!-- Toolbox -->
+        <div class="row">
+            <div class="col-md-2" style="max-width:200px">
+                <div id="toolbox" class="panel panel-default">
+                    <!-- list of control sections -->
+                    <a href="#" class="list-group-item">
+                        <div id="custom_categories" class="form-group">
+                            <p>Label Category</p>
+                        </div>
+                        <div id="custom_attributes">
+                            {{ range $key, $value := .Task.ProjectOptions.Attributes }}
+                            <div class="form-group"
+                                 id="custom_attribute_{{ $value.Name }}_div">
+                                <input id="custom_attribute_{{ $value.Name }}"
+                                       name="custom_attribute_{{ $value.Name }}">
+                            </div>
+                            {{ end }}
+                        </div>
+                    </a>
+                    <template id="video_btns">
+                        <!-- object out of frame button -->
+                        <a href="#" id="end_btn" class="btn list-group-item">End
+                            Object Track</a>
+                    </template>
+                    <template id="seg_btns">
+                        <a href="#" id="quickdraw_btn" class="btn list-group-item" style="white-space: normal;">
+                            <kbd>s</kbd> Quickdraw
+                        </a>
+                        <a href="#" id="link_btn" class="btn list-group-item">
+                            Link
+                        </a>
+                    </template>
+                    <!-- remove button -->
+                    <a href="#" id="delete_btn" class="btn list-group-item">Remove</a>
                 </div>
             </div>
-            <div id="player_controls" style="visibility:hidden">
-                <!-- frame counter -->
-                <div id="frame_counter"> 1</div>
-                <!-- play/pause button -->
-                <button id="play_button" type="button">
-                    <!-- button initializes paused, so use the play icon -->
-                    <i id="play_button_icon" class="fa fa-play"></i>
-                </button>
-                <!-- video progress slider -->
-                <input id="video_slider" class="slider" type="range"
-                       min="1"
-                       max="{{ .Task.ProjectOptions.VideoMetaData.NumFrames }}"
-                       value="1"/>
-            </div>
-        </div>
-    </div>
-    <!-- /.row -->
-    <div class="row">
-        <div id="control_panel">
-            <div class="col-sm-2">
-                <ul class="pagination" id="pagination_control">
-                    <li>
-                        <a id="prev_btn">
-                            &laquo;
-                        </a>
-                    </li>
-                    <li>
-                        <a id="next_btn">
-                            &raquo;
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
 
+            <div id="div_main">
+                <div id="div_canvas">
+                    <canvas id="image_canvas">
+                        Unsupported browser!
+                    </canvas>
+                    <canvas id="hidden_canvas">
+                        Unsupported browser!
+                    </canvas>
+                    <div id="crosshair" style="visibility:none">
+                        <div id="crosshair-h" class="hair"></div>
+                        <div id="crosshair-v" class="hair"></div>
+                    </div>
+                </div>
+                <div id="player_controls" style="visibility:hidden">
+                    <!-- frame counter -->
+                    <div id="frame_counter"> 1</div>
+                    <!-- play/pause button -->
+                    <button id="play_button" type="button">
+                        <!-- button initializes paused, so use the play icon -->
+                        <i id="play_button_icon" class="fa fa-play"></i>
+                    </button>
+                    <!-- video progress slider -->
+                    <input id="video_slider" class="slider" type="range"
+                           min="1"
+                           max="{{ .Task.ProjectOptions.VideoMetaData.NumFrames }}"
+                           value="1"/>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <!-- TEMPLATE VALUES -->
