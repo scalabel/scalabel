@@ -1,10 +1,155 @@
+/* The style is inspired by https://fezvrasta.github.io/bootstrap-material-design/ */
+
+* {
+    font-family: Lato;
+}
+
+p, span {
+    font-size: 1.4rem;
+}
+
+body {
+    min-width: 1200px;
+    font-size: 1.25rem;
+}
+
+.ui-focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.navbar-small {
+    font-size: 1.6rem;
+    color: #cccccc;
+}
+
+.counter {
+    font-size: 1.4rem;
+    color: black;
+}
+
+.header {
+    padding-top: 10px;
+}
+
+
+.feather {
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+}
+
+/*
+ * Sidebar
+ */
+
+.sidebar {
+    padding: 48px 0 0; /* Height of navbar */
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    width: 200px;
+}
+
+.sidebar-sticky {
+    height: calc(100vh - 48px);
+    padding-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    width: 180px;
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+    .sidebar-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.sidebar .nav-link .feather {
+    margin-right: 4px;
+    color: #999;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+}
+
+.sidebar .nav-link:hover .feather,
+.sidebar .nav-link.active .feather {
+    color: inherit;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+.form-control {
+    outline: none;
+    border: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.option:focus {
+    background: #00C851;
+}
+
+/*
+ * Content
+ */
+
+[role="main"] {
+    padding-top: 48px; /* Space for fixed navbar */
+}
+
+/*
+ * Navbar
+ */
+
+
+.navbar .form-control {
+    padding: .75rem 1rem;
+    border-width: 0;
+    border-radius: 0;
+    position: relative;
+    z-index: -1;
+}
+
+.form-control-dark {
+    color: #fff;
+    background-color: rgba(255, 255, 255, .1);
+    border-color: rgba(255, 255, 255, .1);
+}
+
+.form-control-dark:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+
+/*
+ * Utilities
+ */
+
+.border-top { border-top: 1px solid #e5e5e5; }
+.border-bottom { border-bottom: 1px solid #e5e5e5; }
+
+
 canvas {
     position: absolute;
 }
 
 canvas#image_canvas {
     z-index: 2;
-    background: lightgrey;
+    background: #222222;
 }
 
 canvas#hidden_canvas {
@@ -17,8 +162,30 @@ canvas#hidden_canvas {
     -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
 }
 
+#page-title {
+    color: white;
+    font-size: 2rem;
+    position: absolute;
+    left: 30px;
+}
+
+#div_canvas {
+    position: relative;
+    float: left;
+    height: calc(100vh - 50px);
+    width: calc(100vw - 200px);
+    overflow: scroll;
+}
+
+#div_main {
+    display: table;
+    padding-top: 2px;
+    position: relative;
+    z-index: 1;
+}
+
 #heading_row {
-    width: 1112px;
+    width: 100%;
 }
 
 .noselect {
@@ -42,25 +209,44 @@ canvas#hidden_canvas {
     z-index: 3;
     display: none;
 }
+.btn {
+    font-size: 1.5rem;
+}
+.btn-toolbox {
+    width: 180px;
+    height: 40px;
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    background: white;
+}
+
 .btn-red,
+.btn-yellow,
+.btn-green,
+.btn-white {
+    font-size: 1.3rem;
+    background-color: white;
+}
+
 .btn-red:hover,
-.btn-red.active,
+.btn-red:active,
 .btn-red:active:hover {
     color: white;
     background-color: #ff4444;
-    border-color: #A9A9A9
+    border-color: #A9A9A9;
 }
 
-.btn-yellow,
 .btn-yellow:hover,
 .btn-yellow.active,
 .btn-yellow.active:hover {
     color: white;
     background-color: #ffbb33;
-    border-color: #A9A9A9
+    border-color: #A9A9A9;
 }
 
-.btn-green,
 .btn-green:hover,
 .btn-green.active,
 .btn-green.active:hover {
@@ -69,7 +255,6 @@ canvas#hidden_canvas {
     border-color: #A9A9A9
 }
 
-.btn-white,
 .btn-white:hover,
 .btn-white.active,
 .btn-white.active:hover {
@@ -78,10 +263,13 @@ canvas#hidden_canvas {
     border-color: #A9A9A9
 }
 
-.btn {
-    color: white;
-    background-color: lightgrey;
-    border-color: #A9A9A9 !important;
+.btn-regular {
+    height: 30px;
+    font-size: 1.5rem;
+}
+
+.switch-label {
+    font-size: 1.25rem;
 }
 
 /* VIDEO PLAYER CONTROLS */
@@ -105,6 +293,8 @@ canvas#hidden_canvas {
     background-color: black;
 
     text-align: center;
+    font-size: 1.4rem;
+    height: 30px;
 }
 
 #play_button {
@@ -113,30 +303,20 @@ canvas#hidden_canvas {
     /* position it below the canvases */
     position: relative;
     top: 0;
-
+    height: 30px;
     margin-right: 5px; /* b/w button and slider */
-}
 
-#slider {
-    display: table-cell; /* needed for alignment w/ button */
-
-    /* position it below the canvases */
-    position: relative;
-    top: 476px;
-
-    width: 900px;
-    outline: none; /* stop that pesky blue border */
 }
 
 #video_slider {
     display: table-cell; /* needed for alignment w/ button */
-
+    background: #333333;
     /* position it below the canvases */
     position: relative;
     top: 6px;
 
-    width: 830px;
     outline: none; /* stop that pesky blue border */
+    width: calc(100vw - 310px);
 }
 
 #keyboard_usage_window{
@@ -179,6 +359,14 @@ canvas#hidden_canvas {
     width: 80vw;
     height: 100vh;
     float: right;
+}
+#container {
+    width: 90%;
+    height: 90%;
+}
+#container_wrapper {
+    width: 100%;
+    height: 90%;
 }
 #info {
     float: left;

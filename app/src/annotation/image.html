@@ -8,18 +8,19 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title></title>
+    <title> {{ .Task.ProjectOptions.PageTitle }} </title>
 
-    <!-- Style CSS -->
-    <link href="./css/style.css" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato" />
 
     <!-- Bootstrap CSS-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
 
+    <!-- Style CSS -->
+    <link href="./css/image.css" rel="stylesheet">
 </head>
 
 <!-- no text highlighting -->
@@ -87,113 +88,108 @@
     </div>
 </div>
 
-<div class="container_wrapper" id="container_wrapper">
-    <div class="container" id="container">
 
-        <!-- Heading -->
-        <div id="heading_row" class="row p-0 m-0">
-            <div class="col-lg-12">
-                <h2 class="page-header"> <span id="page-title"></span>
-                    <small>version 0.1.0</small>
-                    <a type="button" class="btn btn-info btn-popover" id="instruction_btn"
-                       data-toggle="popover" data-placement="right"
-                       href="http://data-bdd.berkeley.edu/label/bbox/instruction.html"
-                       target="view_window"
-                       data-content="Please view instructions and annotate bounding boxes of given categories.">
-                        Instruction
-                    </a>
-                    <div style="float:right;">
-                        <small>Labels:</small>
-                        <small id="label_count">0</small>
-                        <small class="col-lg-offset-0">Lights:</small>
-                        <small id="light_count">0</small>
-                        <div class="btn-group">
-                            <button id="increase_btn" class="btn btn-primary">+</button>
-                            <button href="#" id="decrease_btn" class="btn btn-primary">
-                                -
-                            </button>
-                        </div>
-                        <div class="btn-group">
-                            <button id="prev_btn" class="btn btn-primary">&laquo;</button>
-                            <button href="#" id="next_btn" class="btn btn-primary">
-                                &raquo;
-                            </button>
-                        </div>
-                        <a href="#" id="save_btn"
-                           class="btn btn-primary btn-primary">Save</a>
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pull-left">
+    <p>
+      <div id="page-title" style="position: absolute; float:left; left: 30px;">
+        {{ .Task.ProjectOptions.PageTitle }}
+        <small class="navbar-small">ver 1.0.1</small>
+        <a style="left: 10px" href="http://data-bdd.berkeley.edu/label/bbox/instruction.html" target="view_window" id="instruction_btn" class="btn btn-raised btn-info btn-regular">Instruction</a>
+        <span class="navbar-small" style="padding-left: 20px">Labels </span>
+        <span class="badge badge-pill badge-light counter" id="label_count">0</span>
+        <span class="navbar-small col-lg-offset-0" style="padding-left: 10px">Lights </span>
+        <span class="badge badge-pill badge-light counter" id="light_count">0</span>
+      </div>
+      <div style="position: absolute; float:right; right: 40px;">
+          <div style="padding-left: 10px" class="btn-group">
+              <button id="increase_btn" class="btn btn-raised btn-secondary btn-regular">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button href="#" id="decrease_btn" class="btn btn-raised btn-secondary btn-regular">
+                  <i class="fas fa-minus"></i>
+              </button>
+          </div>
+          <div style="padding-left: 10px" class="btn-group">
+              <button id="prev_btn" class="btn btn-raised btn-secondary btn-regular">
+                  <i class="fas fa-chevron-left"></i>
+              </button>
+              <button href="#" id="next_btn" class="btn btn-raised btn-secondary btn-regular">
+                  <i class="fas fa-chevron-right"></i>
+              </button>
+          </div>
+          <a style="left: 20px" href="#" id="save_btn"
+             class="btn btn-raised btn-primary btn-regular">Save</a>
+  </div>
+  </p>
+</nav>
+
+<div class="container-fluid">
+    <div class="row" style="background: #777777">
+        <nav class="d-none d-md-block bg-light sidebar" style="width: 200px;">
+            <div class="sidebar-sticky" style="width: 200px;">
+                <!-- list of control sections -->
+                <div style="text-align:center;">
+                    <div id="custom_categories" class="form-group">
+                        <span>Label Category</span>
                     </div>
-
-                </h2>
-            </div>
-        </div>
-
-        <!-- Toolbox -->
-        <div class="row">
-            <div class="col-md-2" style="max-width:200px">
-                <div id="toolbox" class="panel panel-default">
-                    <!-- list of control sections -->
-                    <a href="#" class="list-group-item">
-                        <div id="custom_categories" class="form-group">
-                            <p>Label Category</p>
+                    <div id="custom_attributes">
+                        {{ range $key, $value := .Task.ProjectOptions.Attributes }}
+                        <div class="form-group"
+                             id="custom_attribute_{{ $value.Name }}_div">
+                            <input id="custom_attribute_{{ $value.Name }}"
+                                   name="custom_attribute_{{ $value.Name }}">
                         </div>
-                        <div id="custom_attributes">
-                            {{ range $key, $value := .Task.ProjectOptions.Attributes }}
-                            <div class="form-group"
-                                 id="custom_attribute_{{ $value.Name }}_div">
-                                <input id="custom_attribute_{{ $value.Name }}"
-                                       name="custom_attribute_{{ $value.Name }}">
-                            </div>
-                            {{ end }}
-                        </div>
-                    </a>
-                    <template id="video_btns">
-                        <!-- object out of frame button -->
-                        <a href="#" id="end_btn" class="btn list-group-item">End
-                            Object Track</a>
-                    </template>
-                    <template id="seg_btns">
-                        <a href="#" id="quickdraw_btn" class="btn list-group-item" style="white-space: normal;">
-                            <kbd>s</kbd> Quickdraw
-                        </a>
-                        <a href="#" id="link_btn" class="btn list-group-item">
-                            Link
-                        </a>
-                    </template>
-                    <!-- remove button -->
-                    <a href="#" id="delete_btn" class="btn list-group-item">Remove</a>
-                </div>
-            </div>
-
-            <div id="div_main">
-                <div id="div_canvas">
-                    <canvas id="image_canvas">
-                        Unsupported browser!
-                    </canvas>
-                    <canvas id="hidden_canvas">
-                        Unsupported browser!
-                    </canvas>
-                    <div id="crosshair" style="visibility:none">
-                        <div id="crosshair-h" class="hair"></div>
-                        <div id="crosshair-v" class="hair"></div>
+                        {{ end }}
                     </div>
                 </div>
-                <div id="player_controls" style="visibility:hidden">
-                    <!-- frame counter -->
-                    <div id="frame_counter"> 1</div>
-                    <!-- play/pause button -->
-                    <button id="play_button" type="button">
-                        <!-- button initializes paused, so use the play icon -->
-                        <i id="play_button_icon" class="fa fa-play"></i>
-                    </button>
-                    <!-- video progress slider -->
-                    <input id="video_slider" class="slider" type="range"
-                           min="1"
-                           max="{{ .Task.ProjectOptions.VideoMetaData.NumFrames }}"
-                           value="1"/>
-                </div>
-            </div>
-        </div>
 
+                <template id="video_btns">
+                    <!-- object out of frame button -->
+                    <a href="#" id="end_btn" class="btn btn-toolbox">End
+                        Object Track</a>
+                </template>
+                <template id="seg_btns">
+                    <a href="#" id="quickdraw_btn" class="btn btn-toolbox" style="white-space: normal;">
+                        <kbd>s</kbd> Quickdraw
+                    </a>
+                    <a href="#" id="link_btn" class="btn btn-toolbox">
+                        Link
+                    </a>
+                </template>
+                <!-- remove button -->
+                <a href="#" id="delete_btn" class="btn btn-toolbox">Remove</a>
+            </div>
+        </nav>
+        <main role="main" class="col-md-9 col-lg-10 px-0">
+          <div id="div_main">
+              <div id="div_canvas">
+                  <canvas id="image_canvas">
+                      Unsupported browser!
+                  </canvas>
+                  <canvas id="hidden_canvas">
+                      Unsupported browser!
+                  </canvas>
+                  <div id="crosshair" style="visibility:none">
+                      <div id="crosshair-h" class="hair"></div>
+                      <div id="crosshair-v" class="hair"></div>
+                  </div>
+              </div>
+              <div id="player_controls" style="visibility:hidden">
+                  <!-- frame counter -->
+                  <div id="frame_counter"> 1</div>
+                  <!-- play/pause button -->
+                  <button id="play_button" type="button" class="btn btn-raised btn-primary">
+                      <!-- button initializes paused, so use the play icon -->
+                      <i id="play_button_icon" class="fa fa-play"></i>
+                  </button>
+                  <!-- video progress slider -->
+                  <input id="video_slider" class="slider" type="range"
+                         min="1"
+                         max="{{ .Task.ProjectOptions.VideoMetaData.NumFrames }}"
+                         value="1"/>
+              </div>
+          </div>
+        </main>
     </div>
 </div>
 
@@ -208,6 +204,13 @@
 <!-- Bootstrap JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
+<script>$(document).ready(function() { $('body').bootstrapMaterialDesign(); });</script>
 
 <script src="./js/sat.js"></script>
 
@@ -249,11 +252,13 @@
     }
     if (itemType === 'image') {
       new Sat(SatImage, labelClass);
+      $('#player_controls').remove();
     }
     if (itemType === 'video') {
       showElementById("player_controls");
       showTemplateById("video_btns");
       new SatVideo(labelClass);
+      document.getElementById('div_canvas').style.height = 'calc(100vh - 83px)';
     }
     document.addEventListener("keydown", function (e) {
       let eventObj = window.event ? event : e;

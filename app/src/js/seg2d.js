@@ -732,8 +732,7 @@ Seg2d.prototype.mousedown = function(e) {
         }
 
         this.quickdrawCache.targetSeg2d.releaseAsTargeted();
-        button.innerHTML = '<kbd>s</kbd> End Quickdraw\n' +
-          '<kbd>Alt</kbd> Toggle path';
+        button.innerHTML = '<kbd>Alt</kbd>   Toggle';
       }
     } else if (occupiedShape.id === this.newPoly.vertices[0].id) {
       // user want to close the polygon after path is pushed

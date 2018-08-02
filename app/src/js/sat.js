@@ -343,15 +343,15 @@ Sat.prototype.initToolbox = function() {
       attributeInput.setAttribute('data-label-text', self.attributes[i].name);
       $('#custom_attribute_' + self.attributes[i].name).bootstrapSwitch();
     } else if (self.attributes[i].toolType === 'list') {
-      let listOuterHtml = '<p>' + self.attributes[i].name + '</p>';
+      let listOuterHtml = '<span>' + self.attributes[i].name + '</span>';
       listOuterHtml +=
         '<div id="radios" class="btn-group" data-toggle="buttons">';
       for (let j = 0; j < self.attributes[i].values.length; j++) {
         listOuterHtml +=
-          '<label id="custom_attributeselector_' + i + '-' + j +
-          '" class="btn btn-sm btn-' + self.attributes[i].buttonColors[j] +
+          '<button id="custom_attributeselector_' + i + '-' + j +
+          '" class="btn btn-raised btn-' + self.attributes[i].buttonColors[j] +
           '"> <input type="radio"/>' + self.attributes[i].values[j] +
-          '</label>';
+          '</button>';
       }
       attributeInput.outerHTML = listOuterHtml;
     } else {
@@ -455,10 +455,10 @@ Sat.prototype.decodeBaseJson = function(json) {
   self.taskSize = json.task.projectOptions.taskSize;
   self.handlerUrl = json.task.projectOptions.handlerUrl;
   self.pageTitle = json.task.projectOptions.pageTitle;
-  document.title = self.pageTitle;
-  document.getElementById('page-title').textContent = self.pageTitle;
   self.instructions = json.task.projectOptions.instructions;
-  document.getElementById('instruction_btn').href = self.instructions;
+  if (self.instructions) {
+    document.getElementById('instruction_btn').href = self.instructions;
+  }
   self.demoMode = json.task.projectOptions.demoMode;
   self.categories = json.task.projectOptions.categories;
   self.attributes = json.task.projectOptions.attributes;
