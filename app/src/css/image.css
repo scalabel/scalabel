@@ -152,6 +152,10 @@ canvas#image_canvas {
     background: #222222;
 }
 
+canvas#label_canvas {
+    z-index: 3;
+}
+
 canvas#hidden_canvas {
     z-index: 1;
     image-rendering: optimizeSpeed;             /* Older versions of FF          */
@@ -316,7 +320,7 @@ canvas#hidden_canvas {
     top: 6px;
 
     outline: none; /* stop that pesky blue border */
-    width: calc(100vw - 310px);
+    width: calc(100vw - 300px);
 }
 
 #keyboard_usage_window{

@@ -150,7 +150,7 @@ Box2d.prototype.deleteAllHiddenShapes = function() {
  * Draw this bounding box on the canvas.
  * @param {object} mainCtx - HTML canvas context for visible objects.
  */
-Box2d.prototype.redrawMainCanvas = function(mainCtx) {
+Box2d.prototype.redrawLabelCanvas = function(mainCtx) {
   // set context font
   mainCtx.font = FONT_SIZE * UP_RES_RATIO + 'px Verdana';
   // draw visible elements

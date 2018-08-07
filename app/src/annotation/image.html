@@ -166,6 +166,9 @@
                   <canvas id="image_canvas">
                       Unsupported browser!
                   </canvas>
+                  <canvas id="label_canvas">
+                      Unsupported browser!
+                  </canvas>
                   <canvas id="hidden_canvas">
                       Unsupported browser!
                   </canvas>
@@ -257,8 +260,8 @@
     if (itemType === 'video') {
       showElementById("player_controls");
       showTemplateById("video_btns");
-      new SatVideo(labelClass);
       document.getElementById('div_canvas').style.height = 'calc(100vh - 83px)';
+      new SatVideo(labelClass);
     }
     document.addEventListener("keydown", function (e) {
       let eventObj = window.event ? event : e;

@@ -497,7 +497,7 @@ Seg2d.prototype.deleteAllHiddenShapes = function() {
  * Draw this bounding box on the canvas.
  * @param {object} mainCtx - HTML canvas context for visible objects.
  */
-Seg2d.prototype.redrawMainCanvas = function(mainCtx) {
+Seg2d.prototype.redrawLabelCanvas = function(mainCtx) {
   // set context font
   mainCtx.font = FONT_SIZE * UP_RES_RATIO + 'px Verdana';
   mainCtx.save(); // save the canvas context settings
@@ -926,6 +926,12 @@ Seg2d.prototype.mousemove = function(e) {
     for (let i = 0; i < this.selectedShape.vertices.length; i++) {
       this.selectedShape.vertices[i].x = this.selectedCache.vertices[i].x + dx;
       this.selectedShape.vertices[i].y = this.selectedCache.vertices[i].y + dy;
+    }
+    for (let i = 0; i < this.selectedShape.control_points.length; i++) {
+      this.selectedShape.control_points[i].x =
+          this.selectedCache.control_points[i].x + dx;
+      this.selectedShape.control_points[i].y =
+          this.selectedCache.control_points[i].y + dy;
     }
   }
 };

@@ -81,8 +81,10 @@ function SatImage(sat, index, url) {
   self.divCanvas = document.getElementById('div_canvas');
 
   self.imageCanvas = document.getElementById('image_canvas');
+  self.labelCanvas = document.getElementById('label_canvas');
   self.hiddenCanvas = document.getElementById('hidden_canvas');
-  self.mainCtx = self.imageCanvas.getContext('2d');
+  self.imageCtx = self.imageCanvas.getContext('2d');
+  self.labelCtx = self.labelCanvas.getContext('2d');
   self.hiddenCtx = self.hiddenCanvas.getContext('2d');
 
   self.hoveredLabel = null;
@@ -90,6 +92,7 @@ function SatImage(sat, index, url) {
   self.MAX_SCALE = 3.0;
   self.MIN_SCALE = 1.0;
   self.SCALE_RATIO = 1.05;
+  self.scrollTimer = null;
 
   self.isMouseDown = false;
   self._hiddenMap = new HiddenMap();
@@ -117,7 +120,8 @@ SatImage.prototype._deselectAll = function() {
   }
   if (this.active) {
     this.resetHiddenMapToDefault();
-    this.redraw();
+    this.redrawLabelCanvas();
+    this.redrawHiddenCanvas();
   }
 };
 
@@ -156,7 +160,8 @@ SatImage.prototype._selectLabel = function(label) {
   }
   if (this.active) {
     this._setCatSel(this.selectedLabel.categoryPath);
-    this.redraw();
+    this.redrawLabelCanvas();
+    this.redrawHiddenCanvas();
   }
 };
 
@@ -195,15 +200,15 @@ SatImage.prototype.updateLabelCount = function() {
 SatImage.prototype.toCanvasCoords = function(values, affine=true) {
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] *= this.displayToImageRatio;
+      values[i] *= this.displayToImageRatio * UP_RES_RATIO;
     }
   }
   if (affine) {
     if (!this.padBox) {
       this.padBox = this._getPadding();
     }
-    values[0] += this.padBox.x;
-    values[1] += this.padBox.y;
+    values[0] += this.padBox.x * UP_RES_RATIO;
+    values[1] += this.padBox.y * UP_RES_RATIO;
   }
   return values;
 };
@@ -234,14 +239,15 @@ SatImage.prototype.toImageCoords = function(values, affine=true) {
 
 /**
  * Set the scale of the image in the display
- * @param {float} scale
+ * @param {number} scale
  */
 SatImage.prototype.setScale = function(scale) {
   let self = this;
   // set scale
   if (scale >= self.MIN_SCALE && scale < self.MAX_SCALE) {
     let ratio = scale / self.scale;
-    self.mainCtx.scale(ratio, ratio);
+    self.imageCtx.scale(ratio, ratio);
+    self.labelCtx.scale(ratio, ratio);
     self.hiddenCtx.scale(ratio, ratio);
     self.scale = scale;
   } else {
@@ -264,18 +270,24 @@ SatImage.prototype.setScale = function(scale) {
       Math.round(rectDiv.height * self.scale) + 'px';
   self.imageCanvas.style.width =
       Math.round(rectDiv.width * self.scale) + 'px';
+  self.labelCanvas.style.height =
+      Math.round(rectDiv.height * self.scale) + 'px';
+  self.labelCanvas.style.width =
+      Math.round(rectDiv.width * self.scale) + 'px';
   self.hiddenCanvas.style.height =
       Math.round(rectDiv.height * self.scale) + 'px';
   self.hiddenCanvas.style.width =
       Math.round(rectDiv.width * self.scale) + 'px';
 
-  self.imageCanvas.height =
-      Math.round(rectDiv.height * UP_RES_RATIO * self.scale);
-  self.imageCanvas.width =
-      Math.round(rectDiv.width * UP_RES_RATIO * self.scale);
+  self.imageCanvas.width = rectDiv.width * self.scale;
+  self.imageCanvas.height = rectDiv.height * self.scale;
   self.hiddenCanvas.height =
       Math.round(rectDiv.height * UP_RES_RATIO * self.scale);
   self.hiddenCanvas.width =
+      Math.round(rectDiv.width * UP_RES_RATIO * self.scale);
+  self.labelCanvas.height =
+      Math.round(rectDiv.height * UP_RES_RATIO * self.scale);
+  self.labelCanvas.width =
       Math.round(rectDiv.width * UP_RES_RATIO * self.scale);
 };
 
@@ -304,22 +316,8 @@ SatImage.prototype.setActive = function(active) {
       self.sat.items[i].padBox = self.padBox;
     }
 
-    let rectDiv = this.divCanvas.getBoundingClientRect();
-    self.imageCanvas.style.width = rectDiv.width + 'px';
-    self.imageCanvas.style.height = rectDiv.height + 'px';
-    self.hiddenCanvas.style.width = rectDiv.width + 'px';
-    self.hiddenCanvas.style.height = rectDiv.height + 'px';
-    self.mainCtx = self.imageCanvas.getContext('2d');
-    self.hiddenCtx = self.hiddenCanvas.getContext('2d');
-
-    self.imageCanvas.width = rectDiv.width * UP_RES_RATIO;
-    self.imageCanvas.height = rectDiv.height * UP_RES_RATIO;
-    self.hiddenCanvas.width = rectDiv.width * UP_RES_RATIO;
-    self.hiddenCanvas.height = rectDiv.height * UP_RES_RATIO;
-
-    self.mainCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
     self.hiddenCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
-
+    self.labelCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
     self.setScale(1.0);
 
     // global listeners
@@ -372,7 +370,8 @@ SatImage.prototype.setActive = function(active) {
       endBtn.click(function() {
         if (self.selectedLabel) {
           self.selectedLabel.parent.endTrack(self.selectedLabel);
-          self.redraw();
+          self.redrawLabelCanvas();
+          self.redrawHiddenCanvas();
         }
       });
     }
@@ -381,7 +380,8 @@ SatImage.prototype.setActive = function(active) {
         if (self.selectedLabel) {
           self.deleteLabel(self.selectedLabel);
           self.deselectAll();
-          self.redraw();
+          self.redrawLabelCanvas();
+          self.redrawHiddenCanvas();
         }
       });
     }
@@ -396,7 +396,8 @@ SatImage.prototype.setActive = function(active) {
           'switchChange.bootstrapSwitch', function(e) {
             e.preventDefault();
             self._attributeSwitch(i);
-            self.redraw();
+            self.redrawLabelCanvas();
+            self.redrawHiddenCanvas();
         });
       } else if (self.sat.attributes[i].toolType === 'list') {
         for (let j = 0; j < self.sat.attributes[i].values.length; j++) {
@@ -404,7 +405,8 @@ SatImage.prototype.setActive = function(active) {
             function(e) {
             e.preventDefault();
             self._attributeListSelect(i, j);
-            self.redraw();
+              self.redrawLabelCanvas();
+              self.redrawHiddenCanvas();
           });
         }
       }
@@ -501,7 +503,8 @@ SatImage.prototype._decHandler = function() {
  */
 SatImage.prototype.redraw = function() {
   let self = this;
-  self.redrawMainCanvas();
+  self.redrawImageCanvas();
+  self.redrawLabelCanvas();
   self.redrawHiddenCanvas();
 };
 
@@ -509,23 +512,32 @@ SatImage.prototype.redraw = function() {
 /**
  * Redraw the image canvas.
  */
-SatImage.prototype.redrawMainCanvas = function() {
+SatImage.prototype.redrawImageCanvas = function() {
+  let self = this;
+  // update the padding box
+  self.padBox = self._getPadding();
+  // draw stuff
+  self.imageCtx.clearRect(0, 0, self.padBox.w,
+      self.padBox.h);
+  self.imageCtx.drawImage(self.image, 0, 0, self.image.width, self.image.height,
+      self.padBox.x, self.padBox.y, self.padBox.w, self.padBox.h);
+};
+
+/**
+ * Redraw the label canvas.
+ */
+SatImage.prototype.redrawLabelCanvas = function() {
   let self = this;
   // need to do some clean up at the beginning
   self.deleteInvalidLabels();
   if (self.selectedLabel && !self.selectedLabel.valid) {
     self.selectedLabel = null;
   }
-  // update the padding box
-  self.padBox = self._getPadding();
-  // draw stuff
-  self.mainCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
-      self.padBox.h * UP_RES_RATIO);
-  self.mainCtx.drawImage(self.image, 0, 0, self.image.width, self.image.height,
-      self.padBox.x, self.padBox.y, self.padBox.w, self.padBox.h);
+  self.labelCtx.clearRect(0, 0, (self.padBox.x + self.padBox.w) * UP_RES_RATIO,
+      (self.padBox.y + self.padBox.h) * UP_RES_RATIO);
   for (let label of self.labels) {
     if (label.valid) {
-      label.redrawMainCanvas(self.mainCtx, self.hoveredLabel);
+      label.redrawLabelCanvas(self.labelCtx, self.hoveredLabel);
     }
   }
 };
@@ -537,8 +549,8 @@ SatImage.prototype.redrawHiddenCanvas = function() {
   let self = this;
 
   self.padBox = self._getPadding();
-  self.hiddenCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
-      self.padBox.h * UP_RES_RATIO);
+  self.hiddenCtx.clearRect(0, 0, (self.padBox.x + self.padBox.w) * UP_RES_RATIO,
+      (self.padBox.y + self.padBox.h) * UP_RES_RATIO);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
     shape.drawHidden(self.hiddenCtx, self, hiddenStyleColor(i));
@@ -546,16 +558,15 @@ SatImage.prototype.redrawHiddenCanvas = function() {
 };
 
 /**
- * Show the hidden canvas on the main canvas (debug purpose).
+ * Show the hidden canvas on the label canvas (debug purpose).
  */
 SatImage.prototype.showHiddenCanvas = function() {
   let self = this;
   self.padBox = self._getPadding();
-  self.mainCtx.clearRect(0, 0, self.padBox.w * UP_RES_RATIO,
-      self.padBox.h * UP_RES_RATIO);
+  self.labelCtx.clearRect(0, 0, self.padBox.w, self.padBox.h);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
-    shape.drawHidden(self.mainCtx, self, rgb(pickColorPalette(i)));
+    shape.drawHidden(self.labelCtx, self, rgb(pickColorPalette(i)));
   }
 };
 
@@ -593,12 +604,6 @@ SatImage.prototype._keydown = function(e) {
       self.deleteLabel(self.selectedLabel);
       self.deselectAll();
     }
-  } else if (keyID === 188) { // +
-    e.preventDefault();
-    self._incHandler();
-  } else if (keyID === 189) { // -
-    e.preventDefault();
-    self._decHandler();
   } else if (keyID === 37) { // Left/Right Arrow
     e.preventDefault();
     self._prevHandler();
@@ -608,7 +613,6 @@ SatImage.prototype._keydown = function(e) {
   } else if (keyID === 17) { // Ctrl
     self.ctrlDown = true;
   }
-  self.redraw();
   self.updateLabelCount();
   if (keyID === 68) { // d for debug
     self.showHiddenCanvas();
@@ -630,6 +634,10 @@ SatImage.prototype._keyup = function(e) {
 SatImage.prototype._mousedown = function(e) {
   // do nothing if the user tries to click on the scroll bar
   if (e.offsetX > e.target.clientWidth || e.offsetY > e.target.clientHeight) {
+    return;
+  }
+  // only applies to left click
+  if (e.which !== 1) {
     return;
   }
 
@@ -664,7 +672,7 @@ SatImage.prototype._mousedown = function(e) {
       self.selectedLabel.mousedown(e);
     }
   }
-  self.redrawMainCanvas();
+  self.redrawLabelCanvas();
 };
 
 /**
@@ -689,7 +697,7 @@ SatImage.prototype._doubleclick = function(e) {
     }
   }
 
-  self.redrawMainCanvas();
+  self.redrawLabelCanvas();
 };
 
 /**
@@ -723,7 +731,7 @@ SatImage.prototype._mousemove = function(e) {
   }
   if (this._isWithinFrame(e)) {
     let mousePos = this.getMousePos(e);
-    this.imageCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
+    this.labelCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
 
     // label specific handling of mousemove
     if (this.selectedLabel) {
@@ -738,10 +746,10 @@ SatImage.prototype._mousemove = function(e) {
     }
 
     if (this.isMouseDown && this.selectedLabel) {
-      this.imageCanvas.style.cursor = this.selectedLabel.getCursorStyle(
+      this.labelCanvas.style.cursor = this.selectedLabel.getCursorStyle(
           this.selectedLabel.getSelectedShape());
     } else if (!this.isMouseDown && this.hoveredLabel) {
-      this.imageCanvas.style.cursor = this.hoveredLabel.getCursorStyle(
+      this.labelCanvas.style.cursor = this.hoveredLabel.getCursorStyle(
           this.hoveredLabel.getCurrHoveredShape());
     }
   } else {
@@ -749,8 +757,7 @@ SatImage.prototype._mousemove = function(e) {
       this.selectedLabel.mouseleave(e);
     }
   }
-  this.redrawMainCanvas();
-  // this.showHiddenCanvas();
+  this.redrawLabelCanvas();
 };
 
 /**
@@ -761,19 +768,24 @@ SatImage.prototype._scroll = function(e) {
   let self = this;
   if (self.ctrlDown) { // control for zoom
     e.preventDefault();
+    if (self.scrollTimer !== null) {
+      clearTimeout(self.scrollTimer);
+    }
     if (e.deltaY < 0) {
       self.setScale(self.scale * self.SCALE_RATIO);
     } else if (e.deltaY > 0) {
       self.setScale(self.scale / self.SCALE_RATIO);
     }
-
-    self.redraw();
+    self.redrawImageCanvas();
+    self.redrawLabelCanvas();
+    self.scrollTimer = setTimeout(function() {
+      self.redrawHiddenCanvas();
+    }, 150);
     return;
   }
   if (self.sat.LabelType.useCrossHair) {
     self.drawCrossHair(e);
   }
-  self.redraw();
 };
 
 /**
@@ -782,6 +794,10 @@ SatImage.prototype._scroll = function(e) {
  */
 SatImage.prototype._mouseup = function(e) {
   if (e.offsetX > e.target.clientWidth || e.offsetY > e.target.clientHeight) {
+    return;
+  }
+  // only applies to left click
+  if (e.which !== 1) {
     return;
   }
 
@@ -814,12 +830,10 @@ SatImage.prototype._mouseup = function(e) {
     }
   }
   if (!self.selectedLabel && self.sat.tracks) {
-    // if tracking, propagate lack of label
-    for (let i = 0; i < self.sat.items.length; i++) {
-      self.sat.items[i].deselectAll();
-    }
+    self.deselectAll();
   }
-  self.redraw();
+  self.redrawLabelCanvas();
+  self.redrawHiddenCanvas();
   self.updateLabelCount();
   self.isMouseDown = false;
 };
@@ -832,12 +846,10 @@ SatImage.prototype._mouseup = function(e) {
 SatImage.prototype._isWithinFrame = function(e) {
   let rect = this.imageCanvas.getBoundingClientRect();
   let withinImage = (this.padBox
-      && rect.x + this.padBox.x / UP_RES_RATIO < e.clientX
-      && e.clientX <
-        rect.x + this.padBox.x / UP_RES_RATIO + this.padBox.w / UP_RES_RATIO
-      && rect.y + this.padBox.y / UP_RES_RATIO < e.clientY
-      && e.clientY <
-        rect.y + this.padBox.y / UP_RES_RATIO + this.padBox.h / UP_RES_RATIO);
+      && rect.x + this.padBox.x < e.clientX
+      && e.clientX < rect.x + this.padBox.x + this.padBox.w
+      && rect.y + this.padBox.y < e.clientY
+      && e.clientY < rect.y + this.padBox.y + this.padBox.h);
 
   let rectDiv = this.divCanvas.getBoundingClientRect();
   let withinDiv = (rectDiv.x < e.clientX
@@ -856,10 +868,9 @@ SatImage.prototype.getMousePos = function(e) {
   let self = this;
   let rect = self.hiddenCanvas.getBoundingClientRect();
   return {
-    x: (e.clientX - rect.x - self.padBox.x / UP_RES_RATIO)
-    / self.displayToImageRatio * UP_RES_RATIO,
-    y: (e.clientY - rect.y - self.padBox.y / UP_RES_RATIO)
-    / self.displayToImageRatio * UP_RES_RATIO};
+    x: (e.clientX - rect.x - self.padBox.x) / self.displayToImageRatio,
+    y: (e.clientY - rect.y - self.padBox.y) / self.displayToImageRatio,
+  };
 };
 
 /**
@@ -878,13 +889,13 @@ SatImage.prototype._getPadding = function() {
     box.y = 0.5 * (this.imageCanvas.height -
         this.image.height * this.displayToImageRatio);
     box.w = this.imageCanvas.width;
-    box.h = this.imageCanvas.height - UP_RES_RATIO * box.y;
+    box.h = this.imageCanvas.height - 2 * box.y;
   } else {
     this.displayToImageRatio = this.imageCanvas.height / this.image.height;
     box.x = 0.5 * (this.imageCanvas.width -
         this.image.width * this.displayToImageRatio);
     box.y = 0;
-    box.w = this.imageCanvas.width - UP_RES_RATIO * box.x;
+    box.w = this.imageCanvas.width - 2 * box.x;
     box.h = this.imageCanvas.height;
   }
   return box;
@@ -971,7 +982,7 @@ SatImage.prototype._changeSelectedLabelCategory = function() {
     self.catSel = document.getElementById('category_select');
     let option = self.catSel.options[self.catSel.selectedIndex].innerHTML;
     self.selectedLabel.setCategoryPath(option);
-    self.redrawMainCanvas();
+    self.redrawLabelCanvas();
   }
 };
 
@@ -1027,7 +1038,7 @@ SatImage.prototype._setAttribute = function(attributeIndex, value) {
     attributeCheckbox.trigger('click');
   }
   if (this.active) {
-    this.redraw();
+    this.redrawLabelCanvas();
   }
 };
 
@@ -1086,8 +1097,8 @@ function ImageLabel(sat, id, optionalAttributes = null) {
     this.satItem = sat.items[0];
   }
 
-  this.TAG_WIDTH = 25 * UP_RES_RATIO;
-  this.TAG_HEIGHT = 14 * UP_RES_RATIO;
+  this.TAG_WIDTH = 25;
+  this.TAG_HEIGHT = 14;
   // whether to draw this polygon in the targeted fill color
   this.targeted = false;
 }
@@ -1242,8 +1253,8 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
 
     let [tlx, tly] = self.satItem.toCanvasCoords(position);
     ctx.fillStyle = self.styleColor();
-    ctx.fillRect(tlx + 1, tly - self.TAG_HEIGHT, tw,
-        self.TAG_HEIGHT);
+    ctx.fillRect(tlx + UP_RES_RATIO, tly - self.TAG_HEIGHT * UP_RES_RATIO,
+        tw * UP_RES_RATIO, self.TAG_HEIGHT * UP_RES_RATIO);
     ctx.fillStyle = 'rgb(0,0,0)';
     ctx.fillText(abbr, tlx + 3, tly - 3);
     ctx.restore();
