@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
     <meta charset="utf-8">
@@ -9,51 +8,97 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Labeling tool</title>
+    <title> Create Annotation Project </title>
 
-    <!-- Style CSS -->
-    <link href="./css/style.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato" />
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
 
+    <!-- Style CSS -->
+    <link href="./css/image.css" rel="stylesheet">
+
+    <style>
+        * {
+            font-size: 1.4rem;
+        }
+        h1 {
+            font-size: 4rem;
+            font-weight: bold;
+        }
+        label, .form-control {
+            font-size: 1.4rem;
+        }
+        input {
+            height: 50px;
+        }
+        .btn-default, .btn-default:focus {
+            font-size: 1.4rem;
+            color: black
+        }
+        .btn {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            color: black;
+        }
+        #div_main {
+            background: white;
+            padding-left: 30px;
+            padding-top: 50px;
+            position: relative;
+            z-index: 0;
+        }
+        #project-form {
+            padding-top: 30px;
+        }
+    </style>
 </head>
 
-<body>
-<!-- Page Content -->
-<div class="container">
+<!-- no text highlighting -->
+<body class="noselect" style="display:none">
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pull-left">
+    <p>
+      <div id="page-title" style="position: absolute; float:left; left: 30px;">
+        Create Annotation Project
+      </div>
+      <div style="position: absolute; float:right; right: 40px;">
+      </div>
+    </p>
+</nav>
 
-    <!-- Heading -->
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Create Annotation Project
-            </h1>
-        </div>
-    </div>
-    <!-- /.row -->
-
-    <!-- Content Row -->
-    <div class="row">
-        <div class="col-lg-12">
-
-            <form id="project-form" action=/post data-toggle="validator">
-                <div class="form-group">
-                    <label for="project_name">Project Name*</label>
-                    <input type="text" class="form-control"
-                           style="width:300px" id="project_name"
-                           name="project_name" required
-                           pattern="[A-Za-z0-9_-]*"
-                           oninvalid="setCustomValidity(
-                             'Only letters, numbers, _ and - are permitted.')"
-                           onchange="try{setCustomValidity('')}catch(e){}">
-                    <!--<div class="help-block with-errors">Minimum of 6 characters</div>-->
+<div class="container-fluid main_row" style="position: absolute; left: 0;">
+    <div class="row" style="background: #777777">
+        <nav class="d-none d-md-block bg-light sidebar scroll" style="padding-top: 48px; width: 200px; height: calc(100vh)">
+            <div class="sidebar-sticky" style="width: 200px; height: calc(100vh - 48px)">
+                <!-- list of control sections -->
+                <div style="text-align:center;">
+                    <div id="sidebar_content" class="form-group">
+                    </div>
                 </div>
-                <div class="form-group">
+            </div>
+        </nav>
+        <div id="div_main" class="main_col scroll" style="padding-top: 48px; height: calc(100vh);">
+        <form id="project-form" action=/post data-toggle="validator" style="width:100%; height: calc(100vh); overflow: scroll;">
+            <div class="form-group" style="width:300px;">
+                <label for="project_name">Project Name*</label>
+                <input type="text" class="form-control"
+                       style="width:700px" id="project_name"
+                       name="project_name" required
+                       pattern="[A-Za-z0-9_-]*"
+                       oninvalid="setCustomValidity(
+                         'Only letters, numbers, _ and - are permitted.')"
+                       onchange="try{setCustomValidity('')}catch(e){}">
+                <!--<div class="help-block with-errors">Minimum of 6 characters</div>-->
+            </div>
+            <div class="form-row" style="width:710px;">
+                <div class="form-group col">
                     <label for="item_type">Item Type</label>
                     <div>
-                        <select id="item_type" name="item_type" required>
+                        <select id="item_type" name="item_type" class="custom-select mr-sm-2 col" required>
                             <option value="">&lt;select an
                                 option&gt;</option>
                             <option value="image">Image</option>
@@ -63,16 +108,10 @@
                         </select>
                     </div>
                 </div>
-                <div id="frame_rate_div" class="form-group">
-                    <label for="frame_rate">Frame Rate</label>
-                    <input required type="number" min="1" max="60"
-                           class="form-control" style="width:300px"
-                           id="frame_rate" name="frame_rate" value=5>
-                </div>
-                <div class="form-group">
+                <div class="form-group col">
                     <label for="label_type">Label Type</label>
                     <div>
-                        <select id="label_type" name="label_type" required>
+                        <select id="label_type" name="label_type" class="custom-select mr-sm-2" required>
                             <option value="">&lt;select an
                                 option&gt;</option>
                             <option value="box2d">2D Bounding Box</option>
@@ -83,93 +122,94 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="page_title">Page Title</label>
-                    <input required type="text" class="form-control"
-                           style="width:300px" id="page_title" name="page_title">
-                </div>
-                <div class="form-group">
+            </div>
+            <br/>
+            <div class="form-group">
+                <label for="page_title">Page Title</label>
+                <input required type="text" class="form-control"
+                       style="width:700px" id="page_title" name="page_title">
+            </div>
+            <div class="form-row" style="width:710px;">
+                <div class="form-group col">
                     <label for="item_file">Item List*</label>
-                    <input required type="file" class="form-control" style="width:300px"
+                    <input required type="file" class="form-control-file"
                            id="item_file" name="item_file" accept=".yml, .yaml">
                 </div>
-                <div class="form-group">
+                <div class="form-group col">
                     <label for="categories">Categories</label>
-                    <input type="file" class="form-control" style="width:300px"
+                    <input type="file" class="form-control-file"
                            id="categories" name="categories"
                            accept=".yml, .yaml">
                 </div>
-                <div class="form-group">
+                <div class="form-group col">
                     <label for="attributes">Attributes</label>
-                    <input type="file" class="form-control"
-                           style="width:300px" id="attributes"
+                    <input type="file" class="form-control-file"
+                           id="attributes"
                            name="attributes" accept=".yml, .yaml">
                 </div>
-                <div class="form-group">
+            </div>
+            <div class="form-row" style="width:710px;">
+                <div class="form-group col" style="display: none;">
+                    <label for="frame_rate">Frame Rate</label>
+                    <input required type="number" min="1" max="60"
+                           class="form-control" id="frame_rate" name="frame_rate">
+                </div>
+                <div class="form-group col">
                     <label for="task_size">Task Size</label>
                     <input required type="number" min="1" class="form-control"
-                           style="width:300px" id="task_size" name="task_size">
+                           id="task_size" name="task_size">
                 </div>
                 <!-- TODO: check that this is valid -->
-                <div class="form-group">
+                <div class="form-group col">
                     <label for="vendor_id">Vendor ID</label>
                     <input type="number" class="form-control"
-                           style="width:300px" id="vendor_id" name="vendor_id">
+                           id="vendor_id" name="vendor_id">
                 </div>
-                <div class="form-group">
-                    <label for="instructions">Instructions</label>
-                    <input type="text" class="form-control"
-                           style="width:300px" id="instructions" name="instructions">
+            </div>
+            <div class="form-group">
+                <label for="instructions">Instruction URL</label>
+                <input type="text" class="form-control"
+                       style="width:700px" id="instructions" name="instructions">
+            </div>
+            <br/>
+            <div class="form-group">
+                <button type="button" id="show_advanced_options"
+                        class="btn btn-light btn-raised btn-default" style="cursor:default; color: black;">Show
+                    Advanced Options</button>
+            </div>
+            <div id="advanced_options">
+                <br/>
+                <div class="form-group text-nowrap">
+                    <input type="checkbox" class="switch" id="demo_mode" name="demo_mode">
                 </div>
-
-                <div class="form-group">
-                    <button type="info" id="show_advanced_options"
-                            class="btn btn-primary btn-sm">Show
-                        Advanced Options</button>
-                </div>
-                <div id="advanced_options">
-                    <div class="form-group text-nowrap">
-                        <input id="demo_mode" name="demo_mode">
+                <div id="interpolation_mode_div" class="form-group">
+                    <label for="interpolation_mode">Interpolation Mode*</label>
+                    <div>
+                        <select id="interpolation_mode" name="interpolation_mode" class="custom-select mr-sm-2" style="width:300px;">
+                            <option value="">&lt;select an
+                                option&gt;</option>
+                            <option value="linear">Linear Interpolation</option>
+                            <option value="force">Force Complete
+                                Annotation</option>
+                        </select>
                     </div>
-                    <div id="interpolation_mode_div" class="form-group">
-                        <label for="interpolation_mode">Interpolation Mode*</label>
-                        <div>
-                            <select id="interpolation_mode"
-                                    name="interpolation_mode">
-                                <option value="linear">Linear Interpolation</option>
-                                <option value="force">Force Complete
-                                    Annotation</option>
-                            </select>
-                        </div>
-                    </div>
                 </div>
-                <button type="submit" id="enter_btn"
-                        class="btn btn-primary btn-md">Enter</button>
-                <a type="submit" href="./dashboard" id="go_to_dashboard"
-                   class="btn btn-default btn-md" target="_blank">Go to
-                    Dashboard</a>
-                <a type="submit" href="./vendor" id="go_to_vendor_dashboard"
-                   class="btn btn-default btn-md" target="_blank">Go to Vendor
-                    Dashboard</a>
-            </form>
+                <br/>
+            </div>
+            <button type="submit" id="enter_btn"
+                    class="btn btn-light btn-raised btn-default"
+                    style="cursor: default; color: black;">Enter</button>
+            <a type="submit" href="./dashboard" id="go_to_dashboard" target="_blank" style="cursor:default; color: black;" class="btn btn-light btn-raised btn-md btn-default">Go to Dashboard</a>
 
+            <a type="submit" href="./vendor" id="go_to_vendor_dashboard"
+               target="_blank" class="btn btn-light btn-raised btn-md btn-default" style="cursor:default; color: black;">Go to Vendor
+                Dashboard</a>
+        </form>
         </div>
     </div>
-    <hr>
-
-    <!-- Footer -->
-    <footer>
-        <!--<div class="row">
-            <div class="col-lg-12">
-                <p>Copyright &copy; Your Website 2014</p>
-            </div>
-        </div>-->
-        <!-- /.row -->
-    </footer>
-
 </div>
 
-<!-- /.container -->
+<!-- JAVASCRIPT -->
 
 <!-- Google Analytics -->
 <script src="./js/thirdparty/analytics.js"></script>
@@ -181,8 +221,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
 
 <script src="./js/create.js"></script>
+<script>$(document).ready(function() { $('body').show();});</script>
 
 </body>
 

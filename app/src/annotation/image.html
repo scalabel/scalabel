@@ -123,8 +123,8 @@
   </p>
 </nav>
 
-<div class="container-fluid">
-    <div class="row" style="background: #777777">
+<div class="container-fluid main_row" style="position: absolute; left: 0;">
+    <div class="row main_row" style="background: #777777">
         <nav class="d-none d-md-block bg-light sidebar" style="width: 200px;">
             <div class="sidebar-sticky" style="width: 200px;">
                 <!-- list of control sections -->
@@ -145,22 +145,22 @@
 
                 <template id="video_btns">
                     <!-- object out of frame button -->
-                    <a href="#" id="end_btn" class="btn btn-toolbox">End
+                    <a href="#" id="end_btn" class="btn btn-sidebar">End
                         Object Track</a>
                 </template>
                 <template id="seg_btns">
-                    <a href="#" id="quickdraw_btn" class="btn btn-toolbox" style="white-space: normal;">
+                    <a href="#" id="quickdraw_btn" class="btn btn-sidebar" style="white-space: normal;">
                         <kbd>s</kbd> Quickdraw
                     </a>
-                    <a href="#" id="link_btn" class="btn btn-toolbox">
+                    <a href="#" id="link_btn" class="btn btn-sidebar">
                         Link
                     </a>
                 </template>
                 <!-- remove button -->
-                <a href="#" id="delete_btn" class="btn btn-toolbox">Remove</a>
+                <a href="#" id="delete_btn" class="btn btn-sidebar">Remove</a>
             </div>
         </nav>
-        <main role="main" class="col-md-9 col-lg-10 px-0">
+        <main role="main" class="main_col">
           <div id="div_main">
               <div id="div_canvas">
                   <canvas id="image_canvas">

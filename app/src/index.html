@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <title>Scalabel</title>
     <link rel='shortcut icon' type='image/x-icon' href='favicon.ico'/>
-
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato" />
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Exo+2" />
+    <!-- Style CSS -->
+    <link href="./css/image.css" rel="stylesheet">
     <style>
 
         /*<!--Paragraphs-->*/
@@ -17,7 +21,6 @@
         }
 
         h1 {
-            font-family: Source Sans Pro, Helvetica, sans-serif;
             font-size: 200%;
             text-align: center;
             color: lightgrey;
@@ -31,10 +34,10 @@
         }
 
         p.b {
-            font-family: Source Sans Pro, Helvetica, sans-serif;
-            font-size: 100%;
+            font-weight: lighter;
+            font-size: 90%;
             text-align: center;
-            color: lightgrey;
+            color: #dddddd;
             white-space: nowrap;
 
             margin: 0;
@@ -44,9 +47,34 @@
             transform: translate(-50%, -50%);
         }
 
-        /*Botton*/
-        .button {
-            background-color: rgb(85, 129, 151);
+        a {
+            color: white;
+            font-size: 110%;
+        }
+
+        br {
+            line-height: 200%;
+        }
+
+        .bdd_font {
+            font-family: Exo+2;
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        .bdd_font:hover {
+            color: #FDB515;
+        }
+
+        .scalabel_font {
+            font-weight: normal;
+        }
+
+        .scalabel_font:hover {
+            color: lightblue;
+        }
+
+        .btn {
             color: lightgrey;
             padding: 16px 32px;
             text-align: center;
@@ -64,40 +92,20 @@
 
         .button:hover {background-color: darkgrey;}
 
-        /*Links*/
-        a {
-            text-decoration: none;
-        }
-        a:link {
-            color: white;
-        }
-
-        /* visited link */
-        a:visited {
-            color: white;
-        }
-
-        /* mouse over link */
-        a:hover {
-            color: white;
-        }
-
-        /* selected link */
-        a:active {
-            color: white;
-        }
     </style>
 </head>
-<body style="background-color:rgb(85, 129, 151);">
+<body style="background-color:#3B7EA1;">
 
-<img src="img/scalabel_light.svg" alt="Scalabel Logo" align="middle" height="200">
-
+<img src="img/scalabel_white.svg" alt="Scalabel Logo" align="middle" height="200">
+<br/>
 <p class="b"> A scalable open-sourced annotation web tool
-    brought by <a href="https://deepdrive.berkeley.edu/"> Berkeley DeepDrive </a> <br>
-    For more information: <a href="http://scalabel.ai"> Scalabel.ai</a>.
+    brought by <a href="https://deepdrive.berkeley.edu/" class="bdd_font"> Berkeley DeepDrive </a> <br>
+    For more information: <a class="scalabel_font" href="http://scalabel.ai"> Scalabel.ai</a>.
 </p>
-
-    <button class="button"><a href="/create">Create a new project</a></button>
+<br/>
+<div>
+    <a class="btn btn-light" href="/create" style="cursor:default;">Create a new project</a>
+</div>
 
 </body>
 </html>

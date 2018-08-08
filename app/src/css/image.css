@@ -11,6 +11,15 @@ p, span {
 body {
     min-width: 1200px;
     font-size: 1.25rem;
+    overflow-y: hidden;
+}
+
+.main_row {
+    width: calc(100vw);
+}
+
+.main_col {
+    width: calc(100vw - 200px);
 }
 
 .ui-focus {
@@ -101,6 +110,14 @@ body {
 
 .option:focus {
     background: #00C851;
+}
+
+.scroll {
+    height: calc(100vh - 48px);
+    padding-top: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    width: calc(100vw - 200px);
 }
 
 /*
@@ -216,7 +233,7 @@ canvas#hidden_canvas {
 .btn {
     font-size: 1.5rem;
 }
-.btn-toolbox {
+.btn-sidebar {
     width: 180px;
     height: 40px;
     font-size: 1.5rem;

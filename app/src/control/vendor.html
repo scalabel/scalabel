@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
     <meta charset="utf-8">
@@ -9,128 +8,200 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Vendor Dashboard</title>
+    <title> Vendor Dashboard </title>
 
-    <!-- Bootstrap Core CSS -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato" />
+
+    <!-- Bootstrap CSS-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+
+    <!-- Style CSS -->
+    <link href="./css/image.css" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: Lato;
+            font-size: 1.5rem;
+        }
+        a {
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 4rem;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        p {
+
+        }
+        .tr_info {
+            height: 3.0rem;
+        }
+        .th_info {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: right;
+            width: 100px;
+        }
+        .td_info {
+            font-size: 1.3rem;
+            text-align: left;
+            font-weight: normal;
+            padding-left: 10px;
+        }
+        tr {
+            height: 4.0rem;
+        }
+        th {
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        td {
+            font-size: 1.4rem;
+            text-align: center;
+            font-weight: lighter;
+        }
+        input {
+            height: 50px;
+        }
+        .btn-default, .btn-default:focus {
+            font-size: 1.3rem;
+            color: black;
+        }
+        .btn {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            color: black;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        #div_main {
+            background: white;
+            position: relative;
+            z-index: 0;
+        }
+        .counter {
+            font-size: 1.25rem;
+        }
+    </style>
 </head>
 
-<body>
-<!-- Page Content -->
-<div class="container">
+<!-- no text highlighting -->
+<body class="noselect" style="display:none">
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pull-left" style="padding-bottom:0">
+    <p>
+      <div id="page-title" style="position: absolute; float:left; left: 30px;">
+        Vendor Dashboard
+      </div>
+    </p>
+</nav>
 
-    <!-- Heading -->
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Vendor Dashboard
-            </h1>
-        </div>
-    </div>
-    <!-- /.row -->
-
-    <!-- Content Row -->
-    <div class="row">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading"></div>
-                    <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <!-- /.table-responsive -->
-                        <table width="100%"
-                               class="table table-striped table-bordered table-hover"
-                               id="project_table">
-                            <thead>
-                            <tr>
-                                <th>Project Name</th>
-                                <th>Item Type</th>
-                                <th>Label Type</th>
-                                <th># Items</th>
-                                <th>Task Size</th>
-                                <th># Categories</th>
-                                <th># Attributes</th>
-                            </tr>
-                            <tr>
-                                <th>{{ .Project.Options.Name }}</th>
-                                <th>{{ .Project.Options.ItemType }}</th>
-                                <th>{{ .Project.Options.LabelType }}</th>
-                                <th>{{ len .Project.Items }}</th>
-                                <th>{{ .Project.Options.TaskSize }}</th>
-                                <th>{{ .Project.Options.NumLeafCategories }}</th>
-                                <th>{{ len .Project.Options.Attributes }}</th>
-                            </tr>
-                            </thead>
-                        </table>
-                        <div class="well">
-                            <h4>Downloads</h4>
-                            <p>Instructions: Task URLs are to be distributed to workers.</p>
-                            <a type="submit" id="download_list"
-                               class="btn btn-default btn-md" target="_blank"
-                               href="./postDownloadTaskURL?project_name={{ .Project.Options.Name }}">
-                                Download Task URLs</a>
-                        </div>
-                        <table width="100%"
-                               class="table table-striped table-bordered table-hover"
-                               id="main_table">
-                            <thead>
-                            <tr>
-                                <th>Task Index</th>
-                                <th># Labeled images</th>
-                                <th># Labels</th>
-                                <th>Task Link</th>
-                                <th>Task Result</th>
-                                <!--TODO: Comments-->
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <!-- iterate over tasks -->
-                                {{ range $key, $value := .Tasks }}
-                                <tr>
-                                    <td>
-                                        {{ $value.Index }}
-                                    </td>
-                                    <td>
-                                        {{ countLabeledImage $value.ProjectOptions.Name $value.Index }}
-                                    </td>
-                                    <td>
-                                        {{ countLabelInTask $value.ProjectOptions.Name $value.Index }}
-                                    </td>
-                                    <td>
-                                        <a
-                                                href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
-                                            task link
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <!-- TODO: result -->
-                                    </td>
-                                </tr>
-                                {{ end }}
-                            </tbody>
-                        </table>
+<div class="container-fluid main_row" style="position: absolute; left: 0;">
+    <div class="row" style="background: #777777">
+        <nav class="d-none d-md-block bg-light sidebar scroll" style="padding-top: 48px; width: 250px; height: calc(100vh)">
+            <div class="sidebar-sticky" style="width: 250px; height: calc(100vh - 48px)">
+                <!-- list of control sections -->
+                <div style="text-align:center;">
+                    <div id="sidebar_content" class="form-group" style="position:absolute; top:20px; bottom:10px; left: 0;">
+                          <table style="width:220px; position:relative; left: 15px;"
+                                 class="table-borderless table-hover table-striped project-table"
+                                 id="project_table">
+                              <tbody>
+                              <tr class="tr_info">
+                                  <th scope="row" class="th_info">Project Name</th>
+                                  <td class="td_info">{{ .Project.Options.Name }}</td>
+                              </tr>
+                              <tr class="tr_info">
+                                  <th class="th_info" scope="row">Item Type</th>
+                                  <td class="td_info">{{ .Project.Options.ItemType }}</td>
+                              </tr>
+                              <tr class="tr_info">
+                                  <th class="th_info" scope="row">Label Type</th>
+                                  <td class="td_info">{{ .Project.Options.LabelType }}</td>
+                              </tr>
+                              <tr class="tr_info">
+                                  <th class="th_info" scope="row">Task Size</th>
+                                  <td class="td_info">{{ .Project.Options.TaskSize }}</td>
+                              </tr>
+                              <tr class="tr_info">
+                                  <th class="th_info" scope="row"># Items</th>
+                                  <td class="td_info">{{ len .Project.Items }}</td>
+                              </tr>
+                              <tr class="tr_info">
+                                  <th class="th_info" scope="row"># Categories</th>
+                                  <td class="td_info">{{ .Project.Options.NumLeafCategories }}</td>
+                              </tr>
+                              <tr class="tr_info">
+                                  <th class="th_info" scope="row"># Attributes</th>
+                                  <td class="td_info">{{ len .Project.Options.Attributes }}</td>
+                              </tr>
+                              </tbody>
+                          </table>
+                          <br/>
+                          <a type="submit" id="download_list"
+                             class="btn btn-primary btn-md btn-default" target="_blank"
+                             href="./postDownloadTaskURL?project_name={{ .Project.Options.Name }}"
+                             style="width:220px; height:30px; position:relative; left:15px;">
+                              Download Assignment URLs</a>
                     </div>
-                    <!-- /.panel-body -->
                 </div>
-                <!-- /.panel -->
             </div>
-            <!-- /.col-lg-12 -->
+        </nav>
+        <div id="div_main" class="main_col scroll" style="padding-top: 48px; height: calc(100vh); width: calc(100vw - 250px);">
+        <div style="width:100%; height: calc(100vh); overflow: scroll;">
+            <table style="width:calc(100vw - 250px); min-height: 100px; overflow-y: scroll;"
+                   class="table-striped table-borderless table-hover"
+                   id="main_table">
+                <thead>
+                <tr>
+                    <th>Task Index</th>
+                    <th># Labeled Images</th>
+                    <th># Labels</th>
+                    <th>Task Link</th>
+                    <th>Task Result</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- iterate over tasks -->
+                {{ range $key, $value := .Tasks }}
+                <tr>
+                    <td>
+                        {{ $value.Index }}
+                    </td>
+                    <td class="countLabeledImage">
+                        {{ countLabeledImage $value.ProjectOptions.Name $value.Index }}
+                    </td>
+                    <td class="countLabelInTask">
+                        {{ countLabelInTask $value.ProjectOptions.Name $value.Index }}
+                    </td>
+                    <td>
+                        <a
+                                href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
+                            task link
+                        </a>
+                    </td>
+                    <td>
+                        <!-- TODO: result -->
+                    </td>
+                </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </div>
         </div>
     </div>
-
-    <hr>
-
-    <!-- Footer -->
-    <footer>
-        <!--<div class="row">
-            <div class="col-lg-12">
-                <p>Copyright &copy; Your Website 2014</p>
-            </div>
-        </div>-->
-        <!-- /.row -->
-    </footer>
-
 </div>
-<!-- /.container -->
+
+<!-- JAVASCRIPT -->
 
 <!-- Google Analytics -->
 <script src="./js/thirdparty/analytics.js"></script>
@@ -138,8 +209,13 @@
 <!-- jQuery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
 
-<!-- Bootstrap Core JavaScript -->
+<!-- Bootstrap JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
+
+<script>$(document).ready(function() { $('body').show();});</script>
 
 </body>
 
