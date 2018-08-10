@@ -155,30 +155,51 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.js"></script>
 
+<script src="./js/thirdparty/PLYLoader.js"></script>
+
 <script src="./js/point_cloud/sat3d.js"></script>
 <script src="./js/point_cloud/box3d.js"></script>
 <script src="./js/point_cloud/sat_point_cloud.js"></script>
 <script src="./js/point_cloud/point_cloud_tracking.js"></script>
 
 <script type="x-shader/x-vertex" id="vertexshader">
-            attribute float size;
-            attribute vec3 customColor;
-            varying vec3 vColor;
-            void main() {
-                vColor = customColor;
-                vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-                gl_PointSize = size * ( 300.0 / -mvPosition.z );
-                gl_Position = projectionMatrix * mvPosition;
-            }
-        </script>
+    varying float distFromOrigin;
+    void main() {
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        distFromOrigin = length(position);
+        gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
+        gl_Position = projectionMatrix * mvPosition;
+    }
+</script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
-            uniform vec3 color;
-            varying vec3 vColor;
-            void main() {
-                gl_FragColor = vec4( color * vColor, 1.0 );
-            }
-        </script>
+    varying float distFromOrigin;
+
+    uniform vec3 red;
+    uniform vec3 yellow;
+    uniform vec3 green;
+    uniform vec3 teal;
+    uniform vec3 blue;
+
+    vec3 getHeatMapColor(float dist) {
+        if (dist < 5.0) {
+            float val = dist / 5.0;
+            return (1.0 - val) * red + val * yellow;
+        } else if (dist < 10.0) {
+            float val = (dist - 5.0) / 5.0;
+            return (1.0 - val) * yellow + val * green;
+        } else if (dist < 15.0) {
+            float val = (dist - 10.0) / 5.0;
+            return (1.0 - val) * green + val * teal;
+        } else {
+            float val = (dist - 15.0) / 5.0;
+            return (1.0 - val) * teal + val * blue;
+        }
+    }
+    void main() {
+        gl_FragColor = vec4(getHeatMapColor(distFromOrigin), 1.0 );
+    }
+</script>
 
 <script type="text/javascript">
     $(document).ready(function () {
