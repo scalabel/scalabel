@@ -26,6 +26,7 @@ type Env struct {
 	DataDir   string `yaml:"data"`
 	SrcPath   string `yaml:"src"`
 	AppSubDir string `yaml:"appSubDir"`
+	Database  string `yaml:"database"`
 }
 
 func (env Env) AppDir() string {
@@ -106,6 +107,7 @@ func NewEnv() *Env {
 }
 
 var env Env
+var storage Storage
 
 func main() {
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
@@ -113,6 +115,19 @@ func main() {
 	Error.SetFlags(log.LstdFlags | log.Llongfile)
 
 	env = *NewEnv()
+	if env.Database == "dynamodb" {
+		storage = &DynamodbStorage{}
+		err := storage.Init("us-west-1")
+		if err != nil {
+			Error.Println(err)
+		}
+	} else {
+		storage = &FileStorage{}
+		err := storage.Init(env.DataDir)
+		if err != nil {
+			Error.Println(err)
+		}
+	}
 
 	// flow control handlers
 	//http.HandleFunc("/", parse(indexHandler))

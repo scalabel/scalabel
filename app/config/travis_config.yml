@@ -2,4 +2,5 @@
 port: 8686
 data: "$GOPATH/src/sat/data"
 src: "/home/travis/build/ucbdrive/sat"
+database: "dynamodb"
 ...

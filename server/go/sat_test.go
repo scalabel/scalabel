@@ -13,8 +13,10 @@ import (
 	"testing"
 )
 
-const TEST_PROJECT_NAME = "Test_Project"
-const TEST_PAGE_TITLE = "TEST PAGE TITLE"
+const (
+	ProjectName = "scalabel_test"
+	PageTitle   = "TEST PAGE TITLE"
+)
 
 func init() {
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
@@ -46,18 +48,43 @@ func addFileToForm(writer *multipart.Writer, filePath string, fileField string) 
 	return nil
 }
 
-// test project creation
+func Test(test *testing.T) {
+	storage = &DynamodbStorage{}
+	err := storage.Init("us-west-1")
+	if err != nil {
+		test.Fatal(err)
+	}
+	RunTests(test)
+	storage = &FileStorage{}
+	err = storage.Init(env.DataDir)
+	if err != nil {
+		test.Fatal(err)
+	}
+	RunTests(test)
+}
+
+func RunTests(t *testing.T) {
+	TestPostProject(t)
+	TestDashboard(t)
+	TestVendorDashboard(t)
+	TestLoadAssignment(t)
+	TestSaveHandler(t)
+	TestExportHandler(t)
+	TestDownloadTaskURLHandler(t)
+	TestDeleteProject(t)
+}
+
 func TestPostProject(t *testing.T) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
-	project, err := GetProject(TEST_PROJECT_NAME)
+	project, err := GetProject(ProjectName)
 	if project.Options.Name != "" {
-		t.Fatal(TEST_PROJECT_NAME + " already exists.")
+		t.Fatal(ProjectName + " already exists.")
 	}
-	writer.WriteField("project_name", TEST_PROJECT_NAME)
+	writer.WriteField("project_name", ProjectName)
 	writer.WriteField("item_type", "image")
 	writer.WriteField("label_type", "box2d")
-	writer.WriteField("page_title", TEST_PAGE_TITLE)
+	writer.WriteField("page_title", PageTitle)
 	err = addFileToForm(writer, path.Join(env.SrcPath, "examples", "image_list.yml"), "item_file")
 	if err != nil {
 		t.Fatal(err)
@@ -83,14 +110,14 @@ func TestPostProject(t *testing.T) {
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 	rr := httptest.NewRecorder()
 	postProjectHandler(rr, req)
-	project, err = GetProject(TEST_PROJECT_NAME)
+	project, err = GetProject(ProjectName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if project.Options.Name != TEST_PROJECT_NAME {
+	if project.Options.Name != ProjectName {
 		t.Fatal(errors.New("Project name was not saved correctly."))
 	}
-	tasks, err := GetTasksInProject(TEST_PROJECT_NAME)
+	tasks, err := GetTasksInProject(ProjectName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +128,7 @@ func TestPostProject(t *testing.T) {
 
 // test dashboard
 func TestDashboard(t *testing.T) {
-	req, err := http.NewRequest("POST", "dashboard?project_name="+TEST_PROJECT_NAME, nil)
+	req, err := http.NewRequest("POST", "dashboard?project_name="+ProjectName, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +141,7 @@ func TestDashboard(t *testing.T) {
 
 // test vendor dashboard
 func TestVendorDashboard(t *testing.T) {
-	req, err := http.NewRequest("POST", "vendor?project_name="+TEST_PROJECT_NAME, nil)
+	req, err := http.NewRequest("POST", "vendor?project_name="+ProjectName, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +155,7 @@ func TestVendorDashboard(t *testing.T) {
 func TestLoadAssignment(t *testing.T) {
 	for i := 0; i < 10; i += 1 {
 		req, err := http.NewRequest("POST", "postLoadAssignment",
-			bytes.NewBuffer([]byte(fmt.Sprintf(`{"task": {"projectOptions": {"name": "%s"}, "index": "%d"}}`, TEST_PROJECT_NAME, i))))
+			bytes.NewBuffer([]byte(fmt.Sprintf(`{"task": {"projectOptions": {"name": "%s"}, "index": "%d"}}`, ProjectName, i))))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -143,7 +170,7 @@ func TestLoadAssignment(t *testing.T) {
 func TestSaveHandler(t *testing.T) {
 	for i := 0; i < 10; i += 1 {
 		req, err := http.NewRequest("POST", "postSave",
-			bytes.NewBuffer([]byte(fmt.Sprintf(`{"task": {"projectOptions": {"name": "%s"}, "index":%d}, "labels": [{"id": 0, "categoryPath": "test"}, {"id": 1, "categoryPath": "test"}]}`, TEST_PROJECT_NAME, i))))
+			bytes.NewBuffer([]byte(fmt.Sprintf(`{"task": {"projectOptions": {"name": "%s"}, "index":%d}, "labels": [{"id": 0, "categoryPath": "test"}, {"id": 1, "categoryPath": "test"}]}`, ProjectName, i))))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -158,7 +185,7 @@ func TestSaveHandler(t *testing.T) {
 func TestExportHandler(t *testing.T) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
-	writer.WriteField("project_name", TEST_PROJECT_NAME)
+	writer.WriteField("project_name", ProjectName)
 	err := writer.Close()
 	if err != nil {
 		t.Fatal(err)
@@ -178,7 +205,7 @@ func TestExportHandler(t *testing.T) {
 func TestDownloadTaskURLHandler(t *testing.T) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
-	writer.WriteField("project_name", TEST_PROJECT_NAME)
+	writer.WriteField("project_name", ProjectName)
 	err := writer.Close()
 	if err != nil {
 		t.Fatal(err)
@@ -196,7 +223,7 @@ func TestDownloadTaskURLHandler(t *testing.T) {
 }
 
 func TestDeleteProject(t *testing.T) {
-	err := DeleteProject(TEST_PROJECT_NAME)
+	err := DeleteProject(ProjectName)
 	if err != nil {
 		t.Fatal(err)
 	}

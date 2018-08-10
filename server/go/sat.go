@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
@@ -11,94 +12,54 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"strconv"
 )
 
-// A collection of Items to be split into Tasks. Represents one unified type
-//   of annotation task with a consistent ItemType, LabelType, Category list,
-//   and Attribute list. Tasks in this Project are of uniform size.
+type Serializable interface {
+	GetKey() string
+	GetFields() map[string]interface{}
+}
+
+//implements Serializable
 type Project struct {
 	Items    []Item         `json:"items" yaml"items"`
 	VendorId int            `json:"vendorId" yaml:"vendorId"`
 	Options  ProjectOptions `json:"options" yaml:"options"`
 }
 
-func (project *Project) GetPath() string {
-	dir := path.Join(
-		env.DataDir,
-		project.Options.Name,
-	)
-	os.MkdirAll(dir, 0777)
-	return path.Join(dir, "project.json")
+func (project *Project) GetKey() string {
+	return path.Join(project.Options.Name, "project")
 }
 
-func (project *Project) Save() {
-	path := project.GetPath()
-	json, err := json.MarshalIndent(project, "", "  ")
-	if err != nil {
-		Error.Println(err)
-	}
-	err = ioutil.WriteFile(path, json, 0644)
-	if err != nil {
-		Error.Println(err)
-	} else {
-		Info.Println("Saving project file of", project.Options.Name)
+func (project *Project) GetFields() map[string]interface{} {
+	return map[string]interface{}{
+		"Items":    project.Items,
+		"VendorId": project.VendorId,
+		"Options":  project.Options,
 	}
 }
 
-// Info about a Project shared by Project and Task.
-type ProjectOptions struct {
-	Name                 string        `json:"name" yaml:"name"`
-	ItemType             string        `json:"itemType" yaml:"itemType"`
-	LabelType            string        `json:"labelType" yaml:"labelType"`
-	TaskSize             int           `json:"taskSize" yaml:"taskSize"`
-	HandlerUrl           string        `json:"handlerUrl" yaml:"handlerUrl"`
-	PageTitle            string        `json:"pageTitle" yaml:"pageTitle"`
-	Categories           []Category    `json:"categories" yaml:"categories"`
-	NumLeafCategories    int           `json:"numLeafCategories" yaml:"numLeafCategories"`
-	Attributes           []Attribute   `json:"attributes" yaml:"attributes"`
-	Instructions		 string        `json:"instructions" yaml:"instructions"`
-	DemoMode             bool          `json:"demoMode" yaml:"demoMode"`
-	VideoMetaData        VideoMetaData `json:"metadata" yaml:"metadata"`
-	InterpolationMode    string        `json:"interpolationMode" yaml:"interpolationMode"`
-	Detections           []Detection   `json:"detections" yaml:"detections"`
-}
-
-// A workably-sized collection of Items belonging to a Project.
+//implements Serializable
 type Task struct {
 	ProjectOptions ProjectOptions `json:"projectOptions" yaml:"projectOptions"`
 	Index          int            `json:"index" yaml:"index"`
 	Items          []Item         `json:"items" yaml:"items"`
 }
 
-func (task *Task) GetPath() string {
-	dir := path.Join(
-		env.DataDir,
-		task.ProjectOptions.Name,
-		"tasks",
-	)
-	os.MkdirAll(dir, 0777)
-	return path.Join(dir, strconv.Itoa(task.Index)+".json")
+func (task *Task) GetKey() string {
+	return path.Join(task.ProjectOptions.Name, "tasks", strconv.Itoa(task.Index))
 }
 
-func (task *Task) Save() {
-	path := task.GetPath()
-	Info.Println(path)
-	json, err := json.MarshalIndent(task, "", "  ")
-	if err != nil {
-		Error.Println(err)
-	}
-	err = ioutil.WriteFile(path, json, 0644)
-	if err != nil {
-		Error.Println(err)
-	} else {
-		Info.Println("Saving task file of", task.ProjectOptions.Name, task.Index)
+func (task *Task) GetFields() map[string]interface{} {
+	return map[string]interface{}{
+		"ProjectOptions": task.ProjectOptions,
+		"Index":          task.Index,
+		"Items":          task.Items,
 	}
 }
 
-// The actual assignment of a task to a worker. Contains the worker's progress.
+//implements Serializable
 type Assignment struct {
 	Task            Task                   `json:"task" yaml:"task"`
 	WorkerId        string                 `json:"workerId" yaml:"workerId"`
@@ -112,52 +73,48 @@ type Assignment struct {
 	IpInfo          map[string]interface{} `json:"ipInfo" yaml:"ipInfo"`
 }
 
-func (assignment *Assignment) GetAssignmentPath() string {
-	dir := path.Join(
-		env.DataDir,
-		assignment.Task.ProjectOptions.Name,
-		"assignments",
-		strconv.Itoa(assignment.Task.Index),
-	)
-	os.MkdirAll(dir, 0777)
-	return path.Join(dir, assignment.WorkerId+".json")
-}
-
-func (assignment *Assignment) GetSubmissionPath() string {
-	dir := path.Join(
-		env.DataDir,
-		assignment.Task.ProjectOptions.Name,
-		"submissions",
-		strconv.Itoa(assignment.Task.Index),
-		assignment.WorkerId,
-	)
-	os.MkdirAll(dir, 0777)
-	return path.Join(dir, strconv.FormatInt(assignment.SubmitTime, 10)+".json")
-}
-
-func (assignment *Assignment) Initialize() {
-	path := assignment.GetAssignmentPath()
-	assignment.Serialize(path)
-}
-
-func (assignment *Assignment) Save() {
-	path := assignment.GetSubmissionPath()
-	assignment.Serialize(path)
-}
-
-func (assignment *Assignment) Serialize(path string) {
-	json, err := json.MarshalIndent(assignment, "", "  ")
-	if err != nil {
-		Error.Println(err)
-	}
-	err = ioutil.WriteFile(path, json, 0644)
-	if err != nil {
-		Error.Println(err)
+func (assignment *Assignment) GetKey() string {
+	task := assignment.Task
+	if assignment.SubmitTime == 0 {
+		return path.Join(task.ProjectOptions.Name, "assignments", strconv.Itoa(task.Index),
+			assignment.WorkerId)
 	} else {
-		Info.Println("Saving assignment file of",
-			assignment.Task.ProjectOptions.Name, assignment.Task.Index,
-			assignment.WorkerId, "to", path)
+		return path.Join(task.ProjectOptions.Name, "submissions", strconv.Itoa(task.Index),
+			assignment.WorkerId, strconv.FormatInt(assignment.SubmitTime, 10))
 	}
+}
+
+func (assignment *Assignment) GetFields() map[string]interface{} {
+	return map[string]interface{}{
+		"Task":            assignment.Task,
+		"WorkerId":        assignment.WorkerId,
+		"Labels":          assignment.Labels,
+		"Tracks":          assignment.Tracks,
+		"Events":          assignment.Events,
+		"StartTime":       assignment.StartTime,
+		"SubmitTime":      assignment.SubmitTime,
+		"NumLabeledItems": assignment.NumLabeledItems,
+		"UserAgent":       assignment.UserAgent,
+		"IpInfo":          assignment.IpInfo,
+	}
+}
+
+// Info about a Project shared by Project and Task.
+type ProjectOptions struct {
+	Name              string        `json:"name" yaml:"name"`
+	ItemType          string        `json:"itemType" yaml:"itemType"`
+	LabelType         string        `json:"labelType" yaml:"labelType"`
+	TaskSize          int           `json:"taskSize" yaml:"taskSize"`
+	HandlerUrl        string        `json:"handlerUrl" yaml:"handlerUrl"`
+	PageTitle         string        `json:"pageTitle" yaml:"pageTitle"`
+	Categories        []Category    `json:"categories" yaml:"categories"`
+	NumLeafCategories int           `json:"numLeafCategories" yaml:"numLeafCategories"`
+	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
+	Instructions      string        `json:"instructions" yaml:"instructions"`
+	DemoMode          bool          `json:"demoMode" yaml:"demoMode"`
+	VideoMetaData     VideoMetaData `json:"metadata" yaml:"metadata"`
+	InterpolationMode string        `json:"interpolationMode" yaml:"interpolationMode"`
+	Detections        []Detection   `json:"detections" yaml:"detections"`
 }
 
 // An item is something to be annotated e.g. Image, PointCloud
@@ -212,7 +169,7 @@ type DashboardContents struct {
 	Tasks   []Task  `json:"tasks" yaml:"tasks"`
 }
 
-type TaskURL struct {
+type TaskURL struct { //shared type
 	URL string `json:"url" yaml:"url"`
 }
 
@@ -268,7 +225,7 @@ func countCategories(categories []Category) int {
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert assignment links
 	funcMap := template.FuncMap{"countLabeledImage": countLabeledImage,
-								"countLabelInTask": countLabelInTask}
+		"countLabelInTask": countLabelInTask}
 	tmpl, err := template.New("dashboard.html").Funcs(funcMap).ParseFiles(
 		path.Join(env.DashboardPath()))
 	if err != nil {
@@ -280,14 +237,14 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	} else {
-		// Info.Println(dashboardContents.Tasks) // project is too verbose to log
+		//Info.Println(dashboardContents.Tasks) // project is too verbose to log
 		tmpl.Execute(w, dashboardContents)
 	}
 }
 
 func vendorHandler(w http.ResponseWriter, r *http.Request) {
 	funcMap := template.FuncMap{"countLabeledImage": countLabeledImage,
-								"countLabelInTask": countLabelInTask}
+		"countLabelInTask": countLabelInTask}
 	tmpl, err := template.New("vendor.html").Funcs(funcMap).ParseFiles(env.VendorPath())
 	if err != nil {
 		Error.Println(err)
@@ -378,30 +335,31 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// initialize and save the project
 	var projectOptions = ProjectOptions{
-		Name:                projectName,
-		ItemType:            itemType,
-		LabelType:           labelType,
-		TaskSize:            taskSize,
-		HandlerUrl:          handlerUrl,
-		PageTitle:           pageTitle,
-		Categories:          categories,
-		NumLeafCategories:   numLeafCategories,
-		Attributes:          attributes,
-		Instructions:        instructions,
-		DemoMode:            demoMode,
-		VideoMetaData:       videoMetaData,
-		InterpolationMode:   interpolationMode,
-		Detections:          detections,
+		Name:              projectName,
+		ItemType:          itemType,
+		LabelType:         labelType,
+		TaskSize:          taskSize,
+		HandlerUrl:        handlerUrl,
+		PageTitle:         pageTitle,
+		Categories:        categories,
+		NumLeafCategories: numLeafCategories,
+		Attributes:        attributes,
+		Instructions:      instructions,
+		DemoMode:          demoMode,
+		VideoMetaData:     videoMetaData,
+		InterpolationMode: interpolationMode,
+		Detections:        detections,
 	}
 	var project = Project{
 		Items:    items,
 		VendorId: vendorId,
 		Options:  projectOptions,
 	}
-
 	// Save project to project folder
-	project.Save()
-
+	err = storage.Save(project.GetKey(), project.GetFields())
+	if err != nil {
+		Error.Println(err)
+	}
 	// Initialize all the tasks
 	CreateTasks(project)
 }
@@ -410,8 +368,8 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 	// get task name from the URL
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex := r.URL.Query()["task_index"][0]
-	if !Exists(path.Join(env.DataDir, projectName, "assignments",
-		taskIndex, DEFAULT_WORKER+".json")) {
+	if !storage.HasKey(path.Join(projectName, "assignments",
+		taskIndex, DEFAULT_WORKER)) {
 		// if assignment does not exist, create it
 		assignment, err := CreateAssignment(projectName, taskIndex, DEFAULT_WORKER)
 		if err != nil {
@@ -444,8 +402,8 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	projectName := assignmentToLoad.Task.ProjectOptions.Name
 	taskIndex := strconv.Itoa(assignmentToLoad.Task.Index)
 	var loadedAssignment Assignment
-	if !Exists(path.Join(env.DataDir, projectName, "assignments", taskIndex,
-		DEFAULT_WORKER+".json")) {
+	if !storage.HasKey(path.Join(projectName, "assignments",
+		taskIndex, DEFAULT_WORKER)) {
 		// if assignment does not exist, create it
 		// TODO: resolve tension between this function and executeLabelingTemplate()
 		loadedAssignment, err = CreateAssignment(projectName, taskIndex,
@@ -463,6 +421,7 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		loadedAssignment.StartTime = recordTimestamp()
 	}
+	Error.Println(loadedAssignment)
 	loadedAssignmentJson, err := json.Marshal(loadedAssignment)
 	if err != nil {
 		Error.Println(err)
@@ -480,30 +439,24 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	assignment := Assignment{}
-	err = json.Unmarshal(body, &assignment)
+	var fields map[string]interface{}
+	err = json.Unmarshal(body, &fields)
 	if err != nil {
 		Error.Println(err)
 	}
-	if (assignment.Task.ProjectOptions.DemoMode) {
+	fields["SubmitTime"] = recordTimestamp()
+	assignment := Assignment{}
+	mapstructure.Decode(fields, &assignment)
+	if assignment.Task.ProjectOptions.DemoMode {
 		Error.Println(errors.New("Can't save a demo project."))
 		w.Write(nil)
 		return
 	}
-	assignment.SubmitTime = recordTimestamp()
 	// TODO: don't send all events to front end, and append these events to most recent
-	submissionPath := assignment.GetSubmissionPath()
-	assignmentJson, err := json.MarshalIndent(assignment, "", "  ")
+	err = storage.Save(assignment.GetKey(), assignment.GetFields())
 	if err != nil {
 		Error.Println(err)
 	}
-	err = ioutil.WriteFile(submissionPath, assignmentJson, 0644)
-	if err != nil {
-		Error.Println(err)
-	} else {
-		Info.Println("Saved submission file of", submissionPath)
-	}
-
 	w.Write(nil)
 }
 
@@ -511,22 +464,16 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	exportFile := FileExport{}
 	var projectName = r.FormValue("project_name")
-	projectFilePath := path.Join(env.DataDir, projectName, "project.json")
-	projectFileContents, err := ioutil.ReadFile(projectFilePath)
+	key := path.Join(projectName, "project")
+	fields, err := storage.Load(key)
 	if err != nil {
 		Error.Println(err)
 	}
-
 	projectToLoad := Project{}
-	err = json.Unmarshal(projectFileContents, &projectToLoad)
-	if err != nil {
-		Error.Println(err)
-	}
+	mapstructure.Decode(fields, &projectToLoad)
 	exportFile.Name = projectToLoad.Options.Name
 	// exportFile.Categories = projectToLoad.Options.Categories
 	// exportFile.Attributes = projectToLoad.Options.Attributes
-
-
 	// Grab the latest submissions from all tasks
 	tasks, err := GetTasksInProject(projectName)
 	if err != nil {
@@ -582,27 +529,27 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles the download of submitted assignments
 func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
-    var projectName = r.FormValue("project_name")
-    tasks, err := GetTasksInProject(projectName)
-    if err != nil {
-    	Error.Println(err)
-    	return
-    }
+	var projectName = r.FormValue("project_name")
+	tasks, err := GetTasksInProject(projectName)
+	if err != nil {
+		Error.Println(err)
+		return
+	}
 
-    taskURLs := []TaskURL{}
-    for _, task := range tasks {
-        taskURL := TaskURL{}
-        u, err := url.Parse(task.ProjectOptions.HandlerUrl)
-        if err != nil {
-            log.Fatal(err)
-        }
-        q := u.Query()
-        q.Set("project_name", projectName)
-        q.Set("task_index", strconv.Itoa(task.Index))
-        u.RawQuery = q.Encode()
-        if r.TLS != nil {
-            u.Scheme = "https"
-        } else {
+	taskURLs := []TaskURL{}
+	for _, task := range tasks {
+		taskURL := TaskURL{}
+		u, err := url.Parse(task.ProjectOptions.HandlerUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+		q := u.Query()
+		q.Set("project_name", projectName)
+		q.Set("task_index", strconv.Itoa(task.Index))
+		u.RawQuery = q.Encode()
+		if r.TLS != nil {
+			u.Scheme = "https"
+		} else {
 			u.Scheme = "http"
 		}
 		u.Host = r.Host
@@ -740,7 +687,10 @@ func CreateTasks(project Project) {
 			Items:          project.Items,
 		}
 		index = 1
-		task.Save()
+		err := storage.Save(task.GetKey(), task.GetFields())
+		if err != nil {
+			Error.Println(err)
+		}
 	} else {
 		// otherwise, make as many tasks as required
 		size := len(project.Items)
@@ -751,7 +701,10 @@ func CreateTasks(project Project) {
 				Items:          project.Items[i:Min(i+project.Options.TaskSize, size)],
 			}
 			index = index + 1
-			task.Save()
+			err := storage.Save(task.GetKey(), task.GetFields())
+			if err != nil {
+				Error.Println(err)
+			}
 		}
 	}
 	Info.Println("Created", index, "new tasks")

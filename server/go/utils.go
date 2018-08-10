@@ -1,9 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"github.com/mitchellh/mapstructure"
 	"os"
 	"path"
 	"sort"
@@ -17,44 +16,34 @@ import (
 const DEFAULT_WORKER = "default_worker"
 
 func GetProject(projectName string) (Project, error) {
-	err := os.MkdirAll(env.DataDir, 0777)
-	if err != nil {
-		return Project{}, err
-	}
-	projectFilePath := path.Join(env.DataDir, projectName, "project.json")
-	projectFileContents, err := ioutil.ReadFile(projectFilePath)
-	if err != nil {
-		return Project{}, err
-	}
+	fields, err := storage.Load(path.Join(projectName, "project"))
 	project := Project{}
-	err = json.Unmarshal(projectFileContents, &project)
 	if err != nil {
-		return Project{}, err
+		return project, err
 	}
+	mapstructure.Decode(fields, &project)
 	return project, nil
 }
 
+//Never used in scripts other than sat_test.go
 func DeleteProject(projectName string) error {
-	err := os.MkdirAll(env.DataDir, 0777)
-	if err != nil {
-		return err
+	keys := storage.ListKeys(projectName)
+	for _, key := range keys {
+		err := storage.Delete(key)
+		if err != nil {
+			return err
+		}
 	}
-	projectFileDir := path.Join(env.DataDir, projectName)
-	os.RemoveAll(projectFileDir)
 	return nil
 }
 
 func GetTask(projectName string, index string) (Task, error) {
-	taskPath := path.Join(env.DataDir, projectName, "tasks", index+".json")
-	taskFileContents, err := ioutil.ReadFile(taskPath)
-	if err != nil {
-		return Task{}, err
-	}
+	fields, err := storage.Load(path.Join(projectName, "tasks", index))
 	task := Task{}
-	err = json.Unmarshal(taskFileContents, &task)
 	if err != nil {
-		return Task{}, err
+		return task, err
 	}
+	mapstructure.Decode(fields, &task)
 	return task, nil
 }
 
@@ -62,28 +51,16 @@ func GetTasksInProject(projectName string) ([]Task, error) {
 	if projectName == "" {
 		return []Task{}, errors.New("Empty project name")
 	}
-	projectTasksPath := path.Join(env.DataDir, projectName, "tasks")
-	os.MkdirAll(projectTasksPath, 0777)
-	tasksDirectoryContents, err := ioutil.ReadDir(projectTasksPath)
-	if err != nil {
-		return []Task{}, err
-	}
+	keys := storage.ListKeys(path.Join(projectName, "tasks"))
 	tasks := []Task{}
-	for _, taskFile := range tasksDirectoryContents {
-		if len(taskFile.Name()) > 5 &&
-			path.Ext(taskFile.Name()) == ".json" {
-			taskFileContents, err := ioutil.ReadFile(
-				path.Join(projectTasksPath, taskFile.Name()))
-			if err != nil {
-				return []Task{}, err
-			}
-			task := Task{}
-			err = json.Unmarshal(taskFileContents, &task)
-			if err != nil {
-				return []Task{}, err
-			}
-			tasks = append(tasks, task)
+	for _, key := range keys {
+		fields, err := storage.Load(key)
+		if err != nil {
+			return []Task{}, err
 		}
+		task := Task{}
+		mapstructure.Decode(fields, &task)
+		tasks = append(tasks, task)
 	}
 	// sort tasks by index
 	sort.Slice(tasks, func(i, j int) bool {
@@ -95,42 +72,22 @@ func GetTasksInProject(projectName string) ([]Task, error) {
 // Get the most recent assignment given the needed fields.
 func GetAssignment(projectName string, taskIndex string, workerId string) (Assignment, error) {
 	assignment := Assignment{}
-	submissionsPath := path.Join(env.DataDir, projectName, "submissions",
-		taskIndex, workerId)
-	os.MkdirAll(submissionsPath, 0777)
-	submissionsDirectoryContents, err := ioutil.ReadDir(submissionsPath)
-	if err != nil {
-		return Assignment{}, err
-	}
-	// directory contents should already be sorted, just need to remove all non-JSON
-	submissionsDirectoryJSONs := []os.FileInfo{}
-	for _, fi := range submissionsDirectoryContents {
-		if path.Ext(fi.Name()) == ".json" {
-			submissionsDirectoryJSONs = append(submissionsDirectoryJSONs, fi)
-		}
-	}
+	submissionsPath := path.Join(projectName, "submissions", taskIndex, workerId)
+	keys := storage.ListKeys(submissionsPath)
 	// if any submissions exist, get the most recent one
-	if len(submissionsDirectoryJSONs) > 0 {
-		submissionFileContents, err := ioutil.ReadFile(path.Join(submissionsPath,
-			submissionsDirectoryJSONs[len(submissionsDirectoryJSONs)-1].Name()))
+	if len(keys) > 0 {
+		fields, err := storage.Load(keys[len(keys)-1])
 		if err != nil {
 			return Assignment{}, err
 		}
-		err = json.Unmarshal(submissionFileContents, &assignment)
-		if err != nil {
-			return Assignment{}, err
-		}
+		mapstructure.Decode(fields, &assignment)
 	} else {
-		assignmentPath := path.Join(env.DataDir, projectName, "assignments",
-			taskIndex, workerId+".json")
-		assignmentFileContents, err := ioutil.ReadFile(assignmentPath)
+		assignmentPath := path.Join(projectName, "assignments", taskIndex, workerId)
+		fields, err := storage.Load(assignmentPath)
 		if err != nil {
 			return Assignment{}, err
 		}
-		err = json.Unmarshal(assignmentFileContents, &assignment)
-		if err != nil {
-			return Assignment{}, err
-		}
+		mapstructure.Decode(fields, &assignment)
 	}
 	return assignment, nil
 }
@@ -145,7 +102,7 @@ func CreateAssignment(projectName string, taskIndex string, workerId string) (As
 		WorkerId:  workerId,
 		StartTime: recordTimestamp(),
 	}
-	assignment.Initialize()
+	storage.Save(assignment.GetKey(), assignment.GetFields())
 	return assignment, nil
 }
 
@@ -167,29 +124,29 @@ func GetDashboardContents(projectName string) (DashboardContents, error) {
 func GetHandlerUrl(itemType string, labelType string) string {
 	switch itemType {
 	case "image":
-	    if labelType == "box2d" || labelType == "segmentation" || labelType == "lane" {
-	        return "2d_labeling"
-	    } else {
-	        return "NO_VALID_HANDLER"
-	    }
+		if labelType == "box2d" || labelType == "segmentation" || labelType == "lane" {
+			return "2d_labeling"
+		} else {
+			return "NO_VALID_HANDLER"
+		}
 	case "video":
 		if labelType == "box2d" || labelType == "segmentation" {
-            return "2d_labeling"
-        } else {
-            return "NO_VALID_HANDLER"
-        }
+			return "2d_labeling"
+		} else {
+			return "NO_VALID_HANDLER"
+		}
 	case "pointcloud":
-	    if labelType == "box3d" {
-            return "3d_labeling"
-        } else {
-            return "NO_VALID_HANDLER"
-        }
+		if labelType == "box3d" {
+			return "3d_labeling"
+		} else {
+			return "NO_VALID_HANDLER"
+		}
 	case "pointcloudtracking":
-        if labelType == "box3d" {
-            return "3d_labeling"
-        } else {
-            return "NO_VALID_HANDLER"
-        }
+		if labelType == "box3d" {
+			return "3d_labeling"
+		} else {
+			return "NO_VALID_HANDLER"
+		}
 	}
 	return "NO_VALID_HANDLER"
 }
@@ -244,19 +201,12 @@ func PathStem(name string) string {
 // return false if duplicated
 func CheckProjectName(projectName string) string {
 	var newName = strings.Replace(projectName, " ", "_", -1)
-	os.MkdirAll(env.DataDir, 0777)
-	files, err := ioutil.ReadDir(env.DataDir)
-	if err != nil {
+	if storage.HasKey(path.Join(projectName, "project")) {
+		Error.Printf("Project Name \"%s\" already exists.", projectName)
+		return ""
+	} else {
 		return newName
 	}
-
-	for _, f := range files {
-		if PathStem(f.Name()) == newName {
-			Error.Printf("Project Name \"%s\" already exists.", projectName)
-			return ""
-		}
-	}
-	return newName
 }
 
 // Count the total number of images labeled in a task
