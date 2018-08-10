@@ -7,7 +7,7 @@
  * @constructor
  */
 function Sat3d() {
-    this.slider = document.getElementById('pc_scroll');
+    this.slider = document.getElementById('slider');
     this.container = document.getElementById('main_container');
 
     this.renderer = new THREE.WebGLRenderer();
@@ -54,12 +54,14 @@ Sat3d.prototype.onWindowResize = function() {
     for (let i=0; i<this.items.length; i++) {
         for (let j=0; j<this.items[i].views.length; j++) {
             let camera = this.items[i].views[j].camera;
-            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = this.container.offsetWidth /
+                this.container.offsetHeight;
             camera.updateProjectionMatrix();
         }
     }
 
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
+    this.renderer.setSize(this.container.offsetWidth,
+        this.container.offsetHeight);
 };
 
 Sat3d.prototype.newItem = function(url) {
@@ -73,6 +75,9 @@ Sat3d.prototype.loaded = function() {
     this.slider.min = 1;
     this.slider.max = this.items.length;
     this.slider.value = 1;
+
+    // Load point cloud data
+    this.items[0].getPCJSON();
 
     this.animate();
 };

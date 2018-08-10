@@ -176,23 +176,10 @@ canvas#hidden_canvas {
 }
 
 #main_container {
-    width: 80vw;
-    height: 100vh;
-    float: right;
+    width: 100%;
+    height: 100%;
 }
-#info {
-    float: left;
-    width: 20vw;
-    margin: 0 auto;
-    overflow-y: scroll;
-    height: 100vh;
-}
-#pc_scroll {
-    width: 80%;
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-top:10px;
-}
+
 #label_list a {
     border: none;
     border-radius: 0;
@@ -201,14 +188,4 @@ canvas#hidden_canvas {
     margin: 0 auto;
     text-align: center;
     border-bottom: 1px solid #dee2e6;
-}
-#save_button_container {
-    position:absolute;
-    top:20px;
-    right:20px;
-}
-#slider_group {
-    display: inline-flex;
-    margin-top: 10px;
-    margin-bottom: 10px;
 }

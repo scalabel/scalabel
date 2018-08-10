@@ -247,10 +247,6 @@ Box3d.prototype.fromJsonVariables = function(json) {
     this.name = this.categoryArr[this.categoryArr.length - 1];
 };
 
-Box3d.prototype.delete = function() {
-    SatLabel.prototype.delete.call(this);
-};
-
 Box3d.prototype.interpolate = function(prevKeyframeIndex, nextKeyframeIndex,
                                        myIndex, attributes) {
     let distance = nextKeyframeIndex - prevKeyframeIndex;

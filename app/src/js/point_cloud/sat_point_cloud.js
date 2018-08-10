@@ -118,7 +118,7 @@ function SatPointCloud(sat, index, url) {
     this.viewPlaneOffset = new THREE.Vector3();
     this.viewPlaneNormal = new THREE.Vector3();
 
-    this.info_card = document.getElementById('bounding_box_card');
+    // this.info_card = document.getElementById('bounding_box_card');
     this.labelList = document.getElementById('label_list');
 
     this.wheelListener = this.handleMouseWheel.bind(this);
@@ -148,14 +148,15 @@ function SatPointCloud(sat, index, url) {
     this.addBoxListener = (function() {
         this.addBoundingBox(this.sat.newLabel(), null, true);
     }).bind(this);
-
-    // Load point cloud data
-    this.getPCJSON();
 }
 
 SatPointCloud.prototype = Object.create(SatItem.prototype);
 
 SatPointCloud.prototype.getPCJSON = function() {
+    if (this.ready) {
+        return;
+    }
+
     // Get the JSON point cloud from the url
     let req = new XMLHttpRequest();
     req.onreadystatechange = (function() {
@@ -203,6 +204,11 @@ SatPointCloud.prototype.getPCJSON = function() {
             this.scene.add(this.particles);
 
             this.loaded();
+
+            let nextIndex = this.index + 1;
+            if (nextIndex < this.sat.items.length) {
+                this.sat.items[nextIndex].getPCJSON();
+            }
         }
     }).bind(this);
 
@@ -217,13 +223,13 @@ SatPointCloud.prototype.setActive = function(active) {
     }
 
     if (active) {
-        document.getElementById('prev_item').addEventListener('click',
+        document.getElementById('prev_btn').addEventListener('click',
             this.prevItemListener, false);
 
-        document.getElementById('next_item').addEventListener('click',
+        document.getElementById('next_btn').addEventListener('click',
             this.nextItemListener, false);
 
-        document.getElementById('add_box').addEventListener('click',
+        document.getElementById('add_btn').addEventListener('click',
             this.addBoxListener, false);
 
         this.container.addEventListener('wheel',
@@ -270,11 +276,11 @@ SatPointCloud.prototype.setActive = function(active) {
         document.getElementById('end_btn').addEventListener('click',
             this.endTrackListener, false);
     } else {
-        document.getElementById('prev_item').removeEventListener('click',
+        document.getElementById('prev_btn').removeEventListener('click',
             this.prevItemListener, false);
-        document.getElementById('next_item').removeEventListener('click',
+        document.getElementById('next_btn').removeEventListener('click',
             this.nextItemListener, false);
-        document.getElementById('add_box').removeEventListener('click',
+        document.getElementById('add_btn').removeEventListener('click',
             this.addBoxListener, false);
         this.container.removeEventListener('wheel',
             this.wheelListener, false);
@@ -330,13 +336,13 @@ SatPointCloud.prototype.redraw = function() {
         this.sat.renderer.render(this.scene, camera);
     }
 
-    if (this.selectedLabel != null) {
-        this.updateRotationInfo();
-        this.updatePositionInfo();
-        this.updateScaleInfo();
-    }
+    // if (this.selectedLabel != null) {
+    //     this.updateRotationInfo();
+    //     this.updatePositionInfo();
+    //     this.updateScaleInfo();
+    // }
 
-    this.updateViewInfo();
+    // this.updateViewInfo();
 };
 
 SatPointCloud.prototype.zoom = function(amount) {
@@ -447,16 +453,16 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
                         this.currentCamera.position,
                         this.currentCamera.getWorldDirection(target),
                         this.calculateProjectionFromMouse(
-                            this.mouseX + this.container.offsetLeft,
-                            this.mouseY),
+                            this.mouseX + $(this.container).offset().left,
+                            this.mouseY + $(this.container).offset().top),
                         this.calculateProjectionFromMouse(e.clientX, e.clientY)
                     );
                     break;
             }
         } else {
             // Rotate when dragging
-            let dx = e.clientX - this.container.offsetLeft - this.mouseX;
-            let dy = e.clientY - this.mouseY;
+            let dx = e.clientX - $(this.container).offset().left - this.mouseX;
+            let dy = e.clientY - $(this.container).offset().top - this.mouseY;
 
             if (this.currentView.restrictDrag) {
                 this.rotate_restricted(dx / this.MOUSE_CORRECTION_FACTOR,
@@ -468,9 +474,10 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
         }
     } else {
         // Find view that mouse is currently hovering over
-        let x = (e.clientX - this.container.offsetLeft) /
+        let x = (e.clientX - $(this.container).offset().left) /
             this.container.offsetWidth;
-        let y = e.clientY / this.container.offsetHeight;
+        let y = (e.clientY - $(this.container).offset().top) /
+            this.container.offsetHeight;
 
         for (let i = 0; i < this.views.length; i++) {
             if (x >= this.views[i].left &&
@@ -486,12 +493,8 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
         this.highlightMousedOverBox(e.clientX, e.clientY);
     }
 
-    document.getElementById('mouse').innerHTML =
-        '(' + (e.clientX - this.container.offsetLeft).toFixed(2) + ', ' +
-        e.clientY.toFixed(2) + ')';
-
-    this.mouseX = e.clientX - this.container.offsetLeft;
-    this.mouseY = e.clientY;
+    this.mouseX = e.clientX - $(this.container).offset().left;
+    this.mouseY = e.clientY - $(this.container).offset().top;
 };
 
 SatPointCloud.prototype.handleMouseDown = function() {
@@ -847,7 +850,7 @@ SatPointCloud.prototype.select = function(label) {
         this.selectedLabel = label;
         this.selectedLabel.setColor(this.SELECTION_COLOR);
 
-        this.info_card.style.display = 'block';
+        // this.info_card.style.display = 'block';
 
         // Make active in label list
         for (let i = 0; i < this.labelList.childNodes.length; i++) {
@@ -924,7 +927,7 @@ SatPointCloud.prototype.deselect = function() {
     if (this.selectedLabel != null) {
         this.selectedLabel.setColor(this.selectedLabel.color());
         this.selectedLabel = null;
-        this.info_card.style.display = 'none';
+        // this.info_card.style.display = 'none';
         this.deactivateLabelList();
     }
 };
@@ -961,13 +964,14 @@ SatPointCloud.prototype.deleteSelection = function() {
         }
     } else {
         this.labels[ind].delete();
+        this.deleteInvalidLabels();
     }
 };
 
 SatPointCloud.prototype.convertMouseToNDC = function(mX, mY) {
-    let x = (mX - this.container.offsetLeft) /
+    let x = (mX - $(this.container).offset().left) /
         this.container.offsetWidth;
-    let y = mY / this.container.offsetHeight;
+    let y = (mY - $(this.container).offset().top) / this.container.offsetHeight;
     x -= this.currentView.left;
     x /= this.currentView.width;
     x = 2 * x - 1;
