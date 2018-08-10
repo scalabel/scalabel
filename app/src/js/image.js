@@ -72,14 +72,17 @@ HiddenMap.prototype.clear = function() {
 function SatImage(sat, index, url) {
   let self = this;
   SatItem.call(self, sat, index, url);
+
   self.image = new Image();
   self.image.onload = function() {
     self.loaded();
   };
+  self.image.onerror = function() {
+    alert('Image ' + self.url + ' was not found.');
+  };
   self.image.src = self.url;
 
   self.divCanvas = document.getElementById('div_canvas');
-
   self.imageCanvas = document.getElementById('image_canvas');
   self.labelCanvas = document.getElementById('label_canvas');
   self.hiddenCanvas = document.getElementById('hidden_canvas');
