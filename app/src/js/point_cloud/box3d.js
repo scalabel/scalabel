@@ -62,6 +62,7 @@ Box3d.prototype.createBox = function(position) {
 
     this.box = box;
 
+
     if (this.data) {
         box.position.x = this.data['position'][0];
         box.position.y = this.data['position'][1];

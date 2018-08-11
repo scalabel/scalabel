@@ -93,6 +93,10 @@ function SatPointCloud(sat, index, url) {
     this.R_KEY = 82;
     this.S_KEY = 83;
     this.E_KEY = 69;
+    // Press G, the box will automatically
+    // grow in z-coordinate to contain all the
+    // points inside its projection on X-Y plane.
+    this.G_KEY = 71;
     this.ENTER_KEY = 13;
     this.DELETE_KEY = 8;
 
@@ -627,6 +631,30 @@ SatPointCloud.prototype.calculateLeft = function(forward) {
     return left;
 };
 
+SatPointCloud.prototype.extendBox = function(box) {
+    let zh = box.position.z + box.scale.z / 2;
+    let zl = box.position.z - box.scale.z / 2;
+    let xl = box.position.x - box.scale.x / 2;
+    let xh = box.position.x + box.scale.x / 2;
+    let yl = box.position.y - box.scale.y / 2;
+    let yh = box.position.y + box.scale.y / 2;
+    // If the point cloud is not loaded yet,
+    // just leave it untouched
+    if (this.pc_json == null) {
+        return;
+    }
+    let pcPoints = [].concat(...this.pc_json.points);
+    for (let i = 0; i < pcPoints.length; i++) {
+        if (xl <= pcPoints[i][0] && pcPoints[i][0] <= xh &&
+            yl <= pcPoints[i][1] && pcPoints[i][1] <= yh) {
+            zh=Math.max(zh, pcPoints[i][2]);
+            zl=Math.min(zl, pcPoints[i][2]);
+        }
+    }
+    box.position.z = (zh + zl) / 2;
+    box.scale.z = zh - zl;
+};
+
 SatPointCloud.prototype.handleKeyDown = function(e) {
     let forward = this.calculateForward();
     let left = this.calculateLeft(forward);
@@ -717,6 +745,14 @@ SatPointCloud.prototype.handleKeyDown = function(e) {
             if (this.selectionState == this.ADJUSTING) {
                 this.selectedLabel.setColor(0x00ff00,
                     [0, 1, 2, 3, 4, 5, 6, 7]);
+            }
+            break;
+        case this.G_KEY:
+            if (this.selectionState != this.STANDBY) {
+                let box = this.selectedLabel.box;
+                this.extendBox(box);
+                box.outline.position.copy(box.position);
+                box.outline.scale.copy(box.scale);
             }
             break;
         case this.R_KEY:
