@@ -106,6 +106,23 @@ func NewEnv() *Env {
 	return env
 }
 
+func InitStorage(database string, dir string) Storage {
+	var storage Storage
+	switch  database {
+	case "dynamodb":
+		storage = &DynamodbStorage{}
+	case "local":
+		storage = &FileStorage{}
+	default:
+		Error.Panic(fmt.Sprintf("Unknown database %s", database))
+	}
+	err := storage.Init(dir)
+	if err != nil {
+		Error.Panic(err)
+	}
+	return storage
+}
+
 var env Env
 var storage Storage
 
@@ -115,19 +132,7 @@ func main() {
 	Error.SetFlags(log.LstdFlags | log.Llongfile)
 
 	env = *NewEnv()
-	if env.Database == "dynamodb" {
-		storage = &DynamodbStorage{}
-		err := storage.Init("us-west-1")
-		if err != nil {
-			Error.Println(err)
-		}
-	} else {
-		storage = &FileStorage{}
-		err := storage.Init(env.DataDir)
-		if err != nil {
-			Error.Println(err)
-		}
-	}
+	storage = InitStorage(env.Database, env.DataDir)
 
 	// flow control handlers
 	//http.HandleFunc("/", parse(indexHandler))
