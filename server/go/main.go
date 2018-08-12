@@ -150,8 +150,8 @@ func main() {
 	// Simple static handlers can be generated with MakePathHandleFunc
 	http.HandleFunc("/create",
 		WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
-	http.HandleFunc("/2d_labeling", WrapHandleFunc(Label2dHandler))
-	http.HandleFunc("/3d_labeling", WrapHandleFunc(Label3dHandler))
+	http.HandleFunc("/label2d", WrapHandleFunc(Label2dHandler))
+	http.HandleFunc("/label3d", WrapHandleFunc(Label3dHandler))
 
 	Info.Printf("Listening to Port %d", env.Port)
 	Info.Printf("Local URL: localhost:%d", env.Port)

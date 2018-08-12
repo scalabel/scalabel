@@ -125,25 +125,25 @@ func GetHandlerUrl(itemType string, labelType string) string {
 	switch itemType {
 	case "image":
 		if labelType == "box2d" || labelType == "segmentation" || labelType == "lane" {
-			return "2d_labeling"
+			return "label2d"
 		} else {
 			return "NO_VALID_HANDLER"
 		}
 	case "video":
 		if labelType == "box2d" || labelType == "segmentation" {
-			return "2d_labeling"
+			return "label2d"
 		} else {
 			return "NO_VALID_HANDLER"
 		}
 	case "pointcloud":
 		if labelType == "box3d" {
-			return "3d_labeling"
+			return "label3d"
 		} else {
 			return "NO_VALID_HANDLER"
 		}
 	case "pointcloudtracking":
 		if labelType == "box3d" {
-			return "3d_labeling"
+			return "label3d"
 		} else {
 			return "NO_VALID_HANDLER"
 		}
