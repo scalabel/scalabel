@@ -161,64 +161,58 @@ SatPointCloud.prototype.getPCJSON = function() {
         return;
     }
 
-    // Get the JSON point cloud from the url
-    let req = new XMLHttpRequest();
-    req.onreadystatechange = (function() {
-        if (req.readyState == XMLHttpRequest.DONE && req.status == 200) {
-            this.pc_json = req.response;
-
-            // Parse point cloud
-            let pcPoints = [].concat(...this.pc_json.points);
-            let pcColors = [].concat(...this.pc_json.colors);
-
-            let positions = new Float32Array(pcPoints.length * 3);
-            let sizes = new Float32Array(pcPoints.length);
-            let colors = new Float32Array(pcPoints.length * 3);
-
-            for (let i = 0; i < pcPoints.length; i++) {
-                for (let j = 0; j < 3; j++) {
-                    positions[3 * i + j] = pcPoints[i][j];
-                    colors[3 * i + j] = pcColors[i][j];
-                }
-                sizes[i] = this.POINT_SIZE / 2.0;
-            }
-
-            let geometry = new THREE.BufferGeometry();
-            geometry.addAttribute('position',
-                new THREE.BufferAttribute(positions, 3));
-            geometry.addAttribute('customColor',
-                new THREE.BufferAttribute(colors, 3));
-            geometry.addAttribute('size',
-                new THREE.BufferAttribute(sizes, 1));
-
-            let material = new THREE.ShaderMaterial({
-                uniforms: {
-                    color: {
-                        value: new THREE.Color(0xffffff),
-                    },
+    let loader = new THREE.PLYLoader();
+    let e = document.createElement('div');
+    e.innerHTML = document.getElementById('vertexshader').textContent;
+    let vertexShader = e.childNodes[0].nodeValue;
+    e.innerHTML = document.getElementById('fragmentshader').textContent;
+    let fragmentShader = e.childNodes[0].nodeValue;
+    loader.load(this.url, (function(geometry) {
+        let material = new THREE.ShaderMaterial({
+            uniforms: {
+                red: {
+                    value: new THREE.Color(0xff0000),
                 },
-                vertexShader:
-                document.getElementById('vertexshader').textContent,
-                fragmentShader:
-                document.getElementById('fragmentshader').textContent,
-                alphaTest: 0.9,
-            });
+                yellow: {
+                    value: new THREE.Color(0xffff00),
+                },
+                green: {
+                    value: new THREE.Color(0x00ff00),
+                },
+                teal: {
+                    value: new THREE.Color(0x00ffff),
+                },
+                blue: {
+                    value: new THREE.Color(0x0000ff),
+                },
+            },
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            alphaTest: 0.9,
+        });
 
-            this.particles = new THREE.Points(geometry, material);
-            this.scene.add(this.particles);
+        this.particles = new THREE.Points(geometry, material);
+        this.scene.add(this.particles);
 
-            this.loaded();
+        this.loaded();
 
-            let nextIndex = this.index + 1;
-            if (nextIndex < this.sat.items.length) {
-                this.sat.items[nextIndex].getPCJSON();
-            }
+        let nextIndex = this.index + 1;
+        if (nextIndex < this.sat.items.length) {
+            this.sat.items[nextIndex].getPCJSON();
         }
-    }).bind(this);
+    }).bind(this),
 
-    req.responseType = 'json';
-    req.open('GET', this.url);
-    req.send();
+    function() {},
+
+    (function() {
+        let nextIndex = this.index + 1;
+        if (nextIndex < this.sat.items.length) {
+            this.sat.items[nextIndex].getPCJSON();
+        }
+
+        alert('Point cloud at ' + this.url + ' was not found.');
+    }).bind(this)
+    );
 };
 
 SatPointCloud.prototype.setActive = function(active) {
