@@ -19,7 +19,7 @@ body {
 }
 
 .main_col {
-    width: calc(100vw - 200px);
+    width: calc(100vw - 201px);
 }
 
 .ui-focus {
@@ -117,7 +117,6 @@ body {
     padding-top: 20px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    width: calc(100vw - 200px);
 }
 
 /*
@@ -194,7 +193,7 @@ canvas#hidden_canvas {
     position: relative;
     float: left;
     height: calc(100vh - 50px);
-    width: calc(100vw - 200px);
+    width: calc(100vw - 201px);
     overflow: scroll;
 }
 
@@ -339,7 +338,7 @@ canvas#hidden_canvas {
     top: 6px;
 
     outline: none; /* stop that pesky blue border */
-    width: calc(100vw - 300px);
+    width: calc(100vw - 301px);
 }
 
 #keyboard_usage_window{
@@ -391,7 +390,7 @@ canvas#hidden_canvas {
     position: relative;
     float: left;
     height: calc(100vh - 83px);
-    width: calc(100vw - 200px);
+    width: calc(100vw - 201px);
     overflow: scroll;
 }
 
