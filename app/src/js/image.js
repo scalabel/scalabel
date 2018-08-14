@@ -1114,6 +1114,7 @@ ImageLabel.defaultCursorStyle = 'auto';
 ImageLabel.prototype.delete = function() {
   SatLabel.prototype.delete.call(this);
   this.deleteAllShapes();
+  self.updateLabelCount();
 };
 
 ImageLabel.prototype.deleteAllShapes = function() {

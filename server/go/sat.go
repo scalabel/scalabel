@@ -112,7 +112,7 @@ type ProjectOptions struct {
 	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
 	Instructions      string        `json:"instructions" yaml:"instructions"`
 	DemoMode          bool          `json:"demoMode" yaml:"demoMode"`
-	VideoMetaData     VideoMetaData `json:"metadata" yaml:"metadata"`
+	VideoMetaData     VideoMetaData `json:"videoMetaData" yaml:"videoMetaData"`
 	InterpolationMode string        `json:"interpolationMode" yaml:"interpolationMode"`
 	Detections        []Detection   `json:"detections" yaml:"detections"`
 }
