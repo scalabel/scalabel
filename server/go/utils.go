@@ -213,18 +213,44 @@ func CheckProjectName(projectName string) string {
 func countLabeledImage(projectName string, index int) int {
 	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
 	if err != nil {
-		return 0
+        Error.Println(err)
 	}
-	return assignment.NumLabeledItems
+	numLabeledItems := assignment.NumLabeledItems
+	// add labels that are imported but not loaded yet
+	for _, item := range assignment.Task.Items {
+	    for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
+            Info.Println(item.Url)
+            if item.Url == importItem.Url {
+                Info.Println(importItem.Url)
+                numLabeledItems += 1
+            }
+        }
+	}
+	return numLabeledItems
 }
 
 // Count the total number of labels in a task
 func countLabelInTask(projectName string, index int) int {
 	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
 	if err != nil {
-		return 0
+	    Error.Println(err)
 	}
-	return len(assignment.Labels)
+	numLabels := len(assignment.Labels)
+	// for videos, count the number of tracks
+	if (assignment.Task.ProjectOptions.ItemType == "video") {
+	    numLabels = len(assignment.Tracks)
+	} else {
+    	// add labels that are imported but not loaded yet
+    	for _, item := range assignment.Task.Items {
+            for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
+                if item.Url == importItem.Url {
+                    Info.Println("in")
+                    numLabels += len(importItem.Labels)
+                }
+            }
+        }
+	}
+    return numLabels
 }
 
 // default box2d category if category file is missing

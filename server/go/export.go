@@ -21,23 +21,21 @@ type Box2d struct {
 	Y2 float64 `json:"y2" yaml:"y2"`
 }
 
-// Download format specifications
-type FileExport struct {
-	Name       string                   `json:"name" yaml:"name"`
-	Attributes []map[string]interface{} `json:"attributes" yaml:"attributes"`
-	Items      []ItemExport             `json:"items" yaml:"items"`
-}
-
 type ItemExport struct {
-	Timestamp int64         `json:"timestamp" yaml:"timestamp"`
-	Index     int           `json:"index" yaml:"index"`
-	Labels    []LabelExport `json:"labels" yaml:"labels"`
+    Name       string                   `json:"name" yaml:"name"`
+    Url        string                   `json:"url" yaml:"url"`
+    VideoName  string                   `json:"videoName" yaml:"videoName"`
+	Attributes []map[string]interface{} `json:"attributes" yaml:"attributes"`
+	Timestamp  int64                    `json:"timestamp" yaml:"timestamp"`
+	Index      int                      `json:"index" yaml:"index"`
+	Labels     []LabelExport            `json:"labels" yaml:"labels"`
 }
 
 type LabelExport struct {
 	Id         int                    `json:"id" yaml:"id"`
 	Category   string                 `json:"category" yaml:"category"`
 	Attributes map[string]interface{} `json:"attributes" yaml:"attributes"`
+	Manual     bool                   `json:"manual" yaml:"manual"`
 	Box2d      Box2d                  `json:"box2d" yaml:"box2d"`
 	Seg2d      []Seg2d                `json:"seg2d" yaml:"seg2d"`
 	Box3d      map[string]interface{} `json:"box3d" yaml:"box3d"`

@@ -110,6 +110,7 @@ type ProjectOptions struct {
 	Categories        []Category    `json:"categories" yaml:"categories"`
 	NumLeafCategories int           `json:"numLeafCategories" yaml:"numLeafCategories"`
 	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
+    LabelImport       []ItemExport  `json:"labelImport" yaml:"labelImport"`
 	Instructions      string        `json:"instructions" yaml:"instructions"`
 	DemoMode          bool          `json:"demoMode" yaml:"demoMode"`
 	VideoMetaData     VideoMetaData `json:"videoMetaData" yaml:"videoMetaData"`
@@ -303,6 +304,8 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	numLeafCategories := countCategories(categories)
 	// parse the attribute list YML from form
 	attributes := getAttributesFromProjectForm(r)
+	// get the imported labels from form
+	labelImport := getImportFromProjectForm(r)
 	// get the task size from form
 	var taskSize int
 	if itemType != "video" {
@@ -344,6 +347,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Categories:        categories,
 		NumLeafCategories: numLeafCategories,
 		Attributes:        attributes,
+		LabelImport:       labelImport,
 		Instructions:      instructions,
 		DemoMode:          demoMode,
 		VideoMetaData:     videoMetaData,
@@ -462,7 +466,6 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles the export of submitted assignments
 func postExportHandler(w http.ResponseWriter, r *http.Request) {
-	exportFile := FileExport{}
 	var projectName = r.FormValue("project_name")
 	key := path.Join(projectName, "project")
 	fields, err := storage.Load(key)
@@ -471,15 +474,14 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	projectToLoad := Project{}
 	mapstructure.Decode(fields, &projectToLoad)
-	exportFile.Name = projectToLoad.Options.Name
-	// exportFile.Categories = projectToLoad.Options.Categories
-	// exportFile.Attributes = projectToLoad.Options.Attributes
+
 	// Grab the latest submissions from all tasks
 	tasks, err := GetTasksInProject(projectName)
 	if err != nil {
 		Error.Println(err)
 		return
 	}
+	items := []ItemExport{}
 	for _, task := range tasks {
 		latestSubmission, err := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
 		if err != nil {
@@ -487,8 +489,13 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, itemToLoad := range latestSubmission.Task.Items {
 			item := ItemExport{}
+			if (projectToLoad.Options.ItemType == "video") {
+                item.VideoName = projectToLoad.Options.Name + "_" + strconv.Itoa(task.Index)
+                item.Index = itemToLoad.Index
+            }
 			item.Timestamp = 10000 // to be fixed
-			item.Index = itemToLoad.Index
+			item.Name = itemToLoad.Url
+			item.Url = itemToLoad.Url
 			for _, labelId := range itemToLoad.LabelIds {
 				var labelToLoad Label
 				for _, label := range latestSubmission.Labels {
@@ -498,7 +505,6 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 				label := LabelExport{}
-				label.Id = labelId
 				label.Category = labelToLoad.CategoryPath
 				label.Attributes = labelToLoad.Attributes
 				switch projectToLoad.Options.LabelType {
@@ -511,13 +517,21 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 				case "lane":
 					label.Seg2d = ParseSeg2d(labelToLoad.Data)
 				}
+				label.Manual = true
+				if (projectToLoad.Options.ItemType == "video") {
+                    label.Manual = labelToLoad.Keyframe
+                    label.Id = labelToLoad.ParentId
+                } else {
+                    label.Manual = true
+                    label.Id = labelId
+                }
 				item.Labels = append(item.Labels, label)
 			}
-			exportFile.Items = append(exportFile.Items, item)
+			items = append(items, item)
 		}
 	}
 
-	exportJson, err := json.MarshalIndent(exportFile, "", "  ")
+	exportJson, err := json.MarshalIndent(items, "", "  ")
 	if err != nil {
 		Error.Println(err)
 	}
@@ -675,6 +689,35 @@ func getAttributesFromProjectForm(r *http.Request) []Attribute {
 	}
 
 	return attributes
+}
+
+// load label json file
+func getImportFromProjectForm(r *http.Request) []ItemExport {
+	var labelImport []ItemExport
+	importFile, _, err := r.FormFile("label_import")
+
+	switch err {
+	case nil:
+		defer importFile.Close()
+
+		importFileBuf := bytes.NewBuffer(nil)
+		_, err = io.Copy(importFileBuf, importFile)
+		if err != nil {
+			Error.Println(err)
+		}
+		err = json.Unmarshal(importFileBuf.Bytes(), &labelImport)
+		if err != nil {
+			Error.Println(err)
+		}
+
+	case http.ErrMissingFile:
+		Info.Printf("Nothing imported")
+
+	default:
+		log.Println(err)
+	}
+
+	return labelImport
 }
 
 func CreateTasks(project Project) {

@@ -366,6 +366,16 @@ Seg2d.prototype.fromJsonVariables = function(json) {
 };
 
 /**
+ * Load label data from export format
+ * @param {object} exportFormat: json representation of label json.
+ * @return {Box2d} the label loaded by exportFormat
+ */
+Seg2d.prototype.fromExportFormat = function(exportFormat) { // eslint-disable-line
+  // to be completed
+  return null;
+};
+
+/**
  * Encode the label data into a json object.
  * @return {object} - the encoded json object.
  */

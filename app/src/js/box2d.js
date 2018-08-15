@@ -111,6 +111,23 @@ Box2d.prototype.fromJsonVariables = function(json) {
 };
 
 /**
+ * Load label data from export format
+ * @param {object} exportFormat: json representation of label json.
+ * @return {Box2d} the label loaded by exportFormat
+ */
+Box2d.prototype.fromExportFormat = function(exportFormat) {
+  if (exportFormat['box2d']) {
+    let [x1, x2, y1, y2] = [exportFormat['box2d'].x1, exportFormat['box2d'].x2,
+      exportFormat['box2d'].y1, exportFormat['box2d'].y2];
+    this.rect.setRect(x1, y1, x2-x1, y2-y1);
+    this.categoryPath = exportFormat.category;
+    this.attributes = exportFormat.attributes;
+    return this;
+  }
+  return null;
+};
+
+/**
  * Encode the label data into a json object.
  * @return {object} - the encoded json object.
  */
@@ -372,14 +389,6 @@ Box2d.prototype.mouseup = function() {
   }
 
   this.setState(BoxStates.FREE);
-
-  // if parent label, make this the selected label in all other SatImages
-  if (this.parent) {
-    for (let i = 0; i < this.parent.children.length; i++) {
-      let label = this.parent.children[i];
-      label.satItem.selectLabel(label);
-    }
-  }
 };
 
 Box2d.prototype.mousemove = function(e) {

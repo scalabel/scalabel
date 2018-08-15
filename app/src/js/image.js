@@ -117,6 +117,9 @@ SatImage.prototype._deselectAll = function() {
   if (this.selectedLabel) {
     this.selectedLabel.releaseAsTargeted();
     if (!this.selectedLabel.shapesValid()) {
+      if (this.selectedLabel.parent) {
+        this.selectedLabel.parent.delete();
+      }
       this.selectedLabel.delete();
     }
     this.selectedLabel = null;
@@ -184,9 +187,17 @@ SatImage.prototype.selectLabel = function(label) {
 
 SatImage.prototype.updateLabelCount = function() {
   let numLabels = 0;
-  for (let label of this.labels) {
-    if (label.valid) {
-      numLabels += 1;
+  if (this.sat.tracks) {
+    for (let track of this.sat.tracks) {
+      if (track.valid) {
+        numLabels += 1;
+      }
+    }
+  } else {
+    for (let label of this.labels) {
+      if (label.valid) {
+        numLabels += 1;
+      }
     }
   }
   document.getElementById('label_count').textContent = '' + numLabels;

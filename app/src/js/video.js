@@ -7,8 +7,6 @@
 function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
-
-  self.tracks = []; // may not need this
   // self.videoName = document.getElementById('video_name').innerHTML;
   self.frameRate = document.getElementById('frame_rate').innerHTML;
   self.frameCounter = document.getElementById('frame_counter');
@@ -89,6 +87,64 @@ SatVideo.prototype.fromJson = function(json) {
     }
     self.labelIdMap[json.tracks[i].id] = track;
     self.tracks.push(track);
+  }
+  // import labels
+  if (self.importFiles &&
+      self.importFiles.length > 0) {
+    self.importLabelsFromImportFiles();
+    self.save();
+  }
+};
+
+SatVideo.prototype.importLabelsFromImportFiles = function() {
+  let self = this;
+  for (let i = 0; i < self.items.length; i++) {
+    let item = self.items[i];
+    for (let j = self.importFiles.length - 1; j >= 0; j--) {
+      let importItem = self.importFiles[j];
+      // correspondence by url
+      if (importItem.url === item.url) {
+        if (importItem.labels) {
+          for (let labelToImport of importItem.labels) {
+            let imported = false;
+            let newLabel = null;
+            let newId = null;
+            let newTrack = null;
+            for (let k = 0; k < self.tracks.length; k++) {
+              if (self.tracks[k].id === labelToImport.id) {
+                newId = self.tracks[k].children[
+                    self.tracks[k].children.length-1].id + 1;
+                newTrack = self.tracks[k];
+                imported = true;
+              }
+            }
+            if (!imported) {
+              newId = labelToImport.id + 1;
+            }
+            newLabel = new self.LabelType(self, newId);
+            newLabel = newLabel.fromExportFormat(labelToImport);
+            if (newLabel) {
+              if (!imported) {
+                newTrack = new Track(self, labelToImport.id);
+                self.labelIdMap[newTrack.id] = newTrack;
+                self.labels.push(newTrack);
+                self.tracks.push(newTrack);
+                newId = newTrack.id + 1;
+              }
+              newLabel.satItem = self.items[i];
+              newLabel.keyframe = labelToImport.manual;
+              self.labelIdMap[newLabel.id] = newLabel;
+              self.labels.push(newLabel);
+              self.items[i].labels.push(newLabel);
+              newTrack.children.push(newLabel);
+              newLabel.parent = newTrack;
+            }
+          }
+        }
+        self.importFiles.splice(j, 1);
+        break;
+      }
+    }
   }
 };
 
@@ -206,6 +262,9 @@ Track.prototype.endTrack = function(endLabel) {
     }
   }
   self.children = self.children.slice(0, endIndex+1);
+  if (self.children.length > 0) {
+    self.children[self.children.length - 1].keyframe = true;
+  }
 };
 
 Track.prototype.interpolate = function(startLabel) {
