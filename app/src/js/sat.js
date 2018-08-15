@@ -95,12 +95,11 @@ function Sat(ItemType, LabelType) {
 }
 
 /**
- * Store IP information describing the user using the freegeoip service.
+ * Store IP information describing the user using the ipify service.
  */
 Sat.prototype.getIpInfo = function() {
-  let self = this;
-  $.getJSON('http://freegeoip.net/json/?callback=?', function(data) {
-    self.ipInfo = data;
+  $.getJSON('https://api.ipify.org?format=jsonp&callback=?', function(json) {
+    this.ipInfo = json.ip;
   });
 };
 
