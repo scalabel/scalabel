@@ -12,9 +12,7 @@ before_install:
 install:
   - sudo pip install --upgrade pip
   - sudo pip install pycodestyle
-  - go get -u github.com/aws/aws-sdk-go
-  - go get github.com/mitchellh/mapstructure
-  - go get gopkg.in/yaml.v2
+  - go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure gopkg.in/yaml.v2 github.com/satori/go.uuid
   - npm install
 script:
   - pycodestyle --show-source .

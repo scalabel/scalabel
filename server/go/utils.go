@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+	"github.com/satori/go.uuid"
 )
 
 // TODO: use actual worker ID
@@ -97,7 +98,9 @@ func CreateAssignment(projectName string, taskIndex string, workerId string) (As
 	if err != nil {
 		return Assignment{}, err
 	}
+	uuid := getUUIDv4()
 	assignment := Assignment{
+		Id:        uuid,
 		Task:      task,
 		WorkerId:  workerId,
 		StartTime: recordTimestamp(),
@@ -251,6 +254,15 @@ func countLabelInTask(projectName string, index int) int {
         }
 	}
     return numLabels
+}
+
+// Get UUIDv4
+func getUUIDv4() (string) {
+    uuid, err := uuid.NewV4()
+    if err != nil {
+        Error.Println(err)
+    }
+    return uuid.String()
 }
 
 // default box2d category if category file is missing

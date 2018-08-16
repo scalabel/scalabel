@@ -407,6 +407,7 @@ Sat.prototype.encodeBaseJson = function() {
   }
   return {
     task: {
+      id: self.id,
       projectOptions: {
         name: self.projectName,
         itemType: self.itemType,
@@ -455,6 +456,7 @@ Sat.prototype.fromJson = function(json) {
  */
 Sat.prototype.decodeBaseJson = function(json) {
   let self = this;
+  self.id = json.id;
   self.projectName = json.task.projectOptions.name;
   self.itemType = json.task.projectOptions.itemType;
   self.labelType = json.task.projectOptions.labelType;

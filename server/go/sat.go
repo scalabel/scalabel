@@ -61,6 +61,7 @@ func (task *Task) GetFields() map[string]interface{} {
 
 //implements Serializable
 type Assignment struct {
+	Id              string                 `json:"id" yaml:"id"`
 	Task            Task                   `json:"task" yaml:"task"`
 	WorkerId        string                 `json:"workerId" yaml:"workerId"`
 	Labels          []Label                `json:"labels" yaml:"labels"`
@@ -86,6 +87,7 @@ func (assignment *Assignment) GetKey() string {
 
 func (assignment *Assignment) GetFields() map[string]interface{} {
 	return map[string]interface{}{
+		"Id":              assignment.Id,
 		"Task":            assignment.Task,
 		"WorkerId":        assignment.WorkerId,
 		"Labels":          assignment.Labels,
