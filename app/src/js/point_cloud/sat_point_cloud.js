@@ -626,27 +626,29 @@ SatPointCloud.prototype.calculateLeft = function(forward) {
 };
 
 SatPointCloud.prototype.extendBox = function(box) {
-    let zh = box.position.z + box.scale.z / 2;
-    let zl = box.position.z - box.scale.z / 2;
+    // If the point cloud is not loaded yet,
+    // just leave it untouched
+    if (!this.ready) {
+        return;
+    }
+
     let xl = box.position.x - box.scale.x / 2;
     let xh = box.position.x + box.scale.x / 2;
     let yl = box.position.y - box.scale.y / 2;
     let yh = box.position.y + box.scale.y / 2;
-    // If the point cloud is not loaded yet,
-    // just leave it untouched
-    if (this.pc_json == null) {
-        return;
-    }
-    let pcPoints = [].concat(...this.pc_json.points);
-    for (let i = 0; i < pcPoints.length; i++) {
-        if (xl <= pcPoints[i][0] && pcPoints[i][0] <= xh &&
-            yl <= pcPoints[i][1] && pcPoints[i][1] <= yh) {
-            zh=Math.max(zh, pcPoints[i][2]);
-            zl=Math.min(zl, pcPoints[i][2]);
+
+    let zMin = Number.POSITIVE_INFINITY;
+    let zMax = Number.NEGATIVE_INFINITY;
+    let pcPoints = this.particles.geometry.attributes.position.array;
+    for (let i = 0; i < pcPoints.length; i+=3) {
+        if (xl <= pcPoints[i] && pcPoints[i] <= xh &&
+            yl <= pcPoints[i + 1] && pcPoints[i + 1] <= yh) {
+            zMax=Math.max(zMax, pcPoints[i + 2]);
+            zMin=Math.min(zMin, pcPoints[i + 2]);
         }
     }
-    box.position.z = (zh + zl) / 2;
-    box.scale.z = zh - zl;
+    box.position.z = (zMax + zMin) / 2;
+    box.scale.z = zMax - zMin;
 };
 
 SatPointCloud.prototype.handleKeyDown = function(e) {
