@@ -582,6 +582,34 @@ Polyline.fromJson = function(json) {
   return polyline;
 };
 
+Polyline.fromExportFormat = function(json) {
+  let polyline = new this.prototype.constructor();
+  let controlPoints = [];
+  for (let i = 0; i < json.vertices.length; i++) {
+    if (json.types.charAt(i) === 'L') {
+      if (controlPoints.length > 0) {
+        let newVertex = new Vertex(json.vertices[i][0], json.vertices[i][1]);
+        polyline.pushVertex(newVertex,
+            new Edge(polyline.vertices[polyline.vertices.length - 1],
+                newVertex, EdgeTypes.BEZIER, null, controlPoints));
+        controlPoints = [];
+      } else {
+        polyline.pushVertex(
+            new Vertex(json.vertices[i][0], json.vertices[i][1]));
+      }
+    } else if (json.types.charAt(i) === 'C') {
+      controlPoints.push(new Vertex(json.vertices[i][0], json.vertices[i][1],
+          VertexTypes.CONTROL_POINT));
+    }
+  }
+  if (controlPoints.length > 0) {
+    polyline.edges[polyline.edges.length - 1].type = EdgeTypes.BEZIER;
+    polyline.edges[polyline.edges.length - 1].control_points = controlPoints;
+  }
+  polyline.endPath();
+  return polyline;
+};
+
 // Reference safe deep copy by serialization, allows shallow copy
 Polyline.prototype.copy = function(shallow=false) {
   // this = Polyline.prototype
@@ -649,10 +677,6 @@ Path.prototype.reverse = function() {
   this.vertices = this.vertices.reverse();
   this.edges = this.edges.reverse();
   this.alignEdges();
-};
-
-Path.prototype.endPath = function() {
-  this.ended = true;
 };
 
 Path.prototype.isEnded = function() {
@@ -1181,6 +1205,9 @@ Edge.prototype.drawHidden = function(hiddenCtx, satImage) {
  * @param {boolean} drawDash - optional arguments for drawing dashed lines.
  */
 Polyline.prototype.draw = function(ctx, satImage, drawDash) {
+  if (this.vertices.length === 0) {
+    return;
+  }
   ctx.save();
   // start path
   ctx.beginPath();
@@ -1270,6 +1297,9 @@ Polyline.prototype.drawHandles = function(context, satImage, fillStyle,
  * @param {string} fillStyle - The fill style on hidden canvas.
  */
 Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
+  if (this.vertices.length === 0) {
+    return;
+  }
   hiddenCtx.save(); // save the canvas context settings
   hiddenCtx.strokeStyle = fillStyle;
   hiddenCtx.fillStyle = fillStyle;

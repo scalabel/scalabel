@@ -370,8 +370,19 @@ Seg2d.prototype.fromJsonVariables = function(json) {
  * @param {object} exportFormat: json representation of label json.
  * @return {Box2d} the label loaded by exportFormat
  */
-Seg2d.prototype.fromExportFormat = function(exportFormat) { // eslint-disable-line
-  // to be completed
+Seg2d.prototype.fromExportFormat = function(exportFormat) {
+  if (exportFormat.seg2d && exportFormat.seg2d.length > 0) {
+    for (let poly of exportFormat.seg2d) {
+      if (poly.closed) {
+        this.addPolyline(Polygon.fromExportFormat(poly));
+      } else {
+        this.addPolyline(Path.fromExportFormat(poly));
+      }
+    }
+    this.categoryPath = exportFormat.category;
+    this.attributes = exportFormat.attributes;
+    return this;
+  }
   return null;
 };
 
