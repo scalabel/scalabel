@@ -1,11 +1,13 @@
-/* global SatLabel THREE */
+/* global THREE */
+
+import {SatLabel} from '../sat';
 
 /**
  * Label for Point Cloud 3D BBox
  * @param {Sat} sat: context
  * @param {int} id: label id
  */
-function Box3d(sat, id) {
+export function Box3d(sat, id) {
     SatLabel.call(this, sat, id);
     this.categoryPath = '';
     this.categoryArr = [];

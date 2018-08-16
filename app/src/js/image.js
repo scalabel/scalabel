@@ -1,7 +1,10 @@
 
-/* global SatItem SatLabel hiddenStyleColor UP_RES_RATIO
-mode rgb pickColorPalette */
+// /* global SatItem SatLabel hiddenStyleColor UP_RES_RATIO
+// mode rgb pickColorPalette */
 /* exported SatImage ImageLabel */
+import {SatItem, SatLabel, pickColorPalette} from './sat';
+import {hiddenStyleColor, mode, rgb} from './utils';
+import {UP_RES_RATIO} from './shape';
 
 // constants
 const DOUBLE_CLICK_WAIT_TIME = 300;
@@ -69,7 +72,7 @@ HiddenMap.prototype.clear = function() {
  * @param {number} index: index of this item in sat
  * @param {string} url: url to load the item
  */
-function SatImage(sat, index, url) {
+export function SatImage(sat, index, url) {
   let self = this;
   SatItem.call(self, sat, index, url);
 
@@ -1101,7 +1104,7 @@ SatImage.prototype._setCatSel = function(categoryPath) {
  * @param {number} id: label object identifier
  * @param {object} optionalAttributes: Optional attributes for the SatLabel.
  */
-function ImageLabel(sat, id, optionalAttributes = null) {
+export function ImageLabel(sat, id, optionalAttributes = null) {
   SatLabel.call(this, sat, id, optionalAttributes);
   if (optionalAttributes && optionalAttributes.satItem) {
     this.satItem = optionalAttributes.satItem;

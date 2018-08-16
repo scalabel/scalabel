@@ -1,5 +1,9 @@
-/* global ImageLabel Rect Vertex UP_RES_RATIO FONT_SIZE */
+// /* global ImageLabel Rect Vertex UP_RES_RATIO FONT_SIZE */
 /* exported Box2d */
+
+import {ImageLabel} from './image';
+import {Rect, Vertex, UP_RES_RATIO} from './shape';
+import {FONT_SIZE} from './utils';
 
 // Constants
 const BoxStates = Object.freeze({
@@ -14,7 +18,7 @@ const INITIAL_HANDLE_NO = 4;
  * @param {int} id: label id
  * @param {object} optionalAttributes - Optional attributes
  */
-function Box2d(sat, id, optionalAttributes) {
+export function Box2d(sat, id, optionalAttributes) {
   ImageLabel.call(this, sat, id, optionalAttributes);
   this.rect = new Rect();
   this.state = BoxStates.FREE;

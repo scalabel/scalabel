@@ -215,64 +215,13 @@
 <script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
 <script>$(document).ready(function() { $('body').bootstrapMaterialDesign(); });</script>
 
-<script src="./js/sat.js"></script>
-
-<!-- manages bounding boxes -->
-<script src="./js/utils.js"></script>
-<script src="./js/video.js"></script>
-<script src="./js/image.js"></script>
-<script src="./js/shape.js"></script>
-<script src="./js/box2d.js"></script>
-<script src="./js/seg2d.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.1/sprintf.min.js"></script>
 
 <script type="text/javascript">
-  document.getElementById('frame_rate').style.display = "none";
-  let showElementById = function(id) {
-    let elem = document.getElementById(id);
-    elem.style.visibility = 'visible';
-  };
-  let showTemplateById = function(id) {
-    let temp = document.getElementById(id);
-    let clone = temp.content.cloneNode(true);
-    temp.parentNode.appendChild(clone);
-  };
-
-  $(document).ready(function () {
-    let labelType = {{ .Task.ProjectOptions.LabelType }};
-    let itemType = {{ .Task.ProjectOptions.ItemType }};
-    let labelClass;
-    if (labelType === 'box2d') {
-      showElementById("crosshair");
-      labelClass = Box2d;
-    } else if (labelType === 'segmentation' || labelType === 'lane') {
-      labelClass = Seg2d;
-      if (labelType === 'segmentation') {
-        showTemplateById("seg_btns");
-        showTemplateById("seg_usage");
-      }
-    }
-    if (itemType === 'image') {
-      new Sat(SatImage, labelClass);
-      $('#player_controls').remove();
-    }
-    if (itemType === 'video') {
-      showElementById("player_controls");
-      showTemplateById("video_btns");
-      document.getElementById('div_canvas').style.height = 'calc(100vh - 83px)';
-      new SatVideo(labelClass);
-    }
-    document.addEventListener("keydown", function (e) {
-      let eventObj = window.event ? event : e;
-      if (eventObj.keyCode === 191 && eventObj.shiftKey) {
-        // if the user pressed '?':
-        $("#keyboard_usage_window").toggle();
-      }
-    });
-  });
-  $('body').show();
+let labelType = {{ .Task.ProjectOptions.LabelType }};
+let itemType = {{ .Task.ProjectOptions.ItemType }};
 </script>
+<script src="./js/image.js"></script>
 
 </body>
 

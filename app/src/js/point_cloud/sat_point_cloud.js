@@ -1,4 +1,6 @@
-/* global SatItem THREE */
+/* global THREE */
+
+import {SatItem} from '../sat';
 
 /**
  * Point Cloud Item
@@ -6,7 +8,7 @@
  * @param {int} index: index of the point cloud in the sat
  * @param {string} url: URL of the data
  */
-function SatPointCloud(sat, index, url) {
+export function SatPointCloud(sat, index, url) {
     SatItem.call(this, sat, index, url);
 
     this.POINT_SIZE = 0.2;
@@ -81,7 +83,7 @@ function SatPointCloud(sat, index, url) {
     this.sphere = new THREE.Mesh(new THREE.SphereGeometry(0.03),
         new THREE.MeshBasicMaterial({color:
                 0xffffff}));
-    this.sphere.position = this.target;
+    this.sphere.position.copy(this.target);
     this.scene.add( this.sphere );
 
     // Bounding boxes

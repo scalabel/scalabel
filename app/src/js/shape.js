@@ -1,11 +1,13 @@
-/* global module rgba */
+/* global module */
 /* exported BEZIER_COLOR GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
 ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT UP_RES_RATIO*/
 
+import {rgba} from './utils';
+
 // Define Enums
-const VertexTypes = {VERTEX: 'vertex', MIDPOINT: 'midpoint',
+export const VertexTypes = {VERTEX: 'vertex', MIDPOINT: 'midpoint',
   CONTROL_POINT: 'control_point'};
-const EdgeTypes = {LINE: 'line', BEZIER: 'bezier'};
+export const EdgeTypes = {LINE: 'line', BEZIER: 'bezier'};
 
 // find bbox around a set of vertices
 const getBbox = function(vertices) {
@@ -33,7 +35,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
  * to determine the color code on hidden canvas
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Shape(id = null) {
+export function Shape(id = null) {
   Shape.registerShape(this, id);
 }
 
@@ -81,7 +83,7 @@ Shape.prototype.delete = function() {
  * @param {object} type: type of the vertex
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Vertex(x=0, y=0, type=VertexTypes.VERTEX, id = null) {
+export function Vertex(x=0, y=0, type=VertexTypes.VERTEX, id = null) {
   Shape.call(this, id);
   this._x = x;
   this._y = y;
@@ -192,7 +194,8 @@ Vertex.prototype.equals = function(v, threshold=1e-6) {
  * @param {[Vertex]} controlPoints - control points of the Edge object.
  * Needed only when loading saved shapes.
  */
-function Edge(src, dest, type=EdgeTypes.LINE, id = null, controlPoints = []) {
+export function Edge(src, dest, type=EdgeTypes.LINE,
+                     id = null, controlPoints = []) {
   Shape.call(this, id);
   this._src = src; // define private variables to avoid recursive setter
   this._dest = dest;
@@ -404,7 +407,7 @@ Edge.prototype.equals = function(e) {
  * consisting of consecutive line segments
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Polyline(id = null) {
+export function Polyline(id = null) {
   Shape.call(this, id);
   this.vertices = [];
   this.edges = [];
@@ -665,7 +668,7 @@ Polyline.prototype.toString = function() {
  * align edges to correct direction before draw Path
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Path(id = null) {
+export function Path(id = null) {
   Polyline.call(this, id);
 }
 
@@ -788,7 +791,7 @@ Path.prototype.equals = function(p) {
  * align edges to correct direction before draw polygon
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-function Polygon(id = null) {
+export function Polygon(id = null) {
   Polyline.call(this, id);
   this.closed = true;
 }
@@ -997,7 +1000,7 @@ Polygon.prototype.equals = function(p) {
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  * @constructor
  */
-function Rect(x=-1, y=-1, w=-1, h=-1, id = null) {
+export function Rect(x=-1, y=-1, w=-1, h=-1, id = null) {
   Shape.call(this, id);
   this.vertices = [];
   for (let i = 0; i < 8; i++) {
@@ -1101,26 +1104,26 @@ Rect.prototype.toJson = function() {
 /**
  * Drawing Utilities
  */
-const UP_RES_RATIO = 2;
+export const UP_RES_RATIO = 2;
 // Need to multiply by UP_RES_RATIO for every size definition
 const HOVERED_HANDLE_RADIUS = 6 * UP_RES_RATIO;
 const HIDDEN_LINE_WIDTH = 5 * UP_RES_RATIO;
 const HANDLE_RADIUS = 4 * UP_RES_RATIO;
 const HIDDEN_HANDLE_RADIUS = 6 * UP_RES_RATIO;
 
-const LINE_WIDTH = 2 * UP_RES_RATIO;
-const OUTLINE_WIDTH = 2 * UP_RES_RATIO;
+export const LINE_WIDTH = 2 * UP_RES_RATIO;
+export const OUTLINE_WIDTH = 2 * UP_RES_RATIO;
 
-const BEZIER_COLOR = 'rgba(200,200,100,0.7)';
-const GRAYOUT_COLOR = [169, 169, 169];
-const SELECT_COLOR = [100, 0, 100];
+export const BEZIER_COLOR = 'rgba(200,200,100,0.7)';
+export const GRAYOUT_COLOR = [169, 169, 169];
+export const SELECT_COLOR = [100, 0, 100];
 const CONTROL_FILL_COLOR = [255, 255, 255];
 const CONTROL_LINE_COLOR = [0, 0, 0];
 
-const ALPHA_HIGH_FILL = 0.5;
-const ALPHA_LOW_FILL = 0.3;
-const ALPHA_LINE = 1.0;
-const ALPHA_CONTROL_POINT = 0.5;
+export const ALPHA_HIGH_FILL = 0.5;
+export const ALPHA_LOW_FILL = 0.3;
+export const ALPHA_LINE = 1.0;
+export const ALPHA_CONTROL_POINT = 0.5;
 
 /**
  * Draw the vertex.

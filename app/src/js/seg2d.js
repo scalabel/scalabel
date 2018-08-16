@@ -1,9 +1,16 @@
 
-/* global ImageLabel SatImage Shape Polygon Path Vertex */
-/* global rgba VertexTypes EdgeTypes*/
-/* global GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
-ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO FONT_SIZE */
+// /* global ImageLabel SatImage Shape Polygon Path Vertex */
+// /* global rgba VertexTypes EdgeTypes*/
+// /* global GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
+// ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO FONT_SIZE */
 /* exported Seg2d*/
+
+import {SatImage, ImageLabel} from './image';
+import {Shape, Polygon, Path, Vertex,
+  VertexTypes, EdgeTypes, GRAYOUT_COLOR, SELECT_COLOR,
+  LINE_WIDTH, OUTLINE_WIDTH, ALPHA_HIGH_FILL,
+  ALPHA_LOW_FILL, ALPHA_LINE, UP_RES_RATIO} from './shape';
+import {rgba, FONT_SIZE} from './utils';
 
 // constants
 let SegStates = Object.freeze({
@@ -15,7 +22,7 @@ let SegStates = Object.freeze({
  * @param {int} id: label id
  * @param {object} optionalAttributes - Optional attributes
  */
-function Seg2d(sat, id, optionalAttributes) {
+export function Seg2d(sat, id, optionalAttributes) {
   ImageLabel.call(this, sat, id);
 
   this.polys = [];

@@ -8,12 +8,13 @@ go_import_path: github.com/ucbdrive/sat
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y npm
-  - npm install -g eslint eslint-config-google
+  - npm install -g npx eslint eslint-config-google
 install:
   - sudo pip install --upgrade pip
   - sudo pip install pycodestyle
   - go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure gopkg.in/yaml.v2 github.com/satori/go.uuid
   - npm install
+  - npx webpack --config webpack.config.js
 script:
   - pycodestyle --show-source .
   - eslint .

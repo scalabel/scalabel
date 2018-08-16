@@ -14,5 +14,9 @@ rules:
   no-unused-vars: 
     - error
     - argsIgnorePattern: '[iI]gnored'
+  no-invalid-this:
+    - 0
   brace-style:
     - 0
+parserOptions:
+  sourceType: "module"

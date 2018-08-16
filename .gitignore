@@ -13,3 +13,6 @@ bin/
 
 # don't upload items directory
 items/
+
+# don't upload webpack bundle file
+app/dist/

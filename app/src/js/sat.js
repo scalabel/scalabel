@@ -1,10 +1,7 @@
 
-/* global module rgba */
+// /* global module rgba */
 /* exported Sat SatItem SatLabel */
-
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports = SatLabel;
-}
+import {rgba} from './utils';
 
 // constants
 const COLOR_PALETTE = [
@@ -52,7 +49,7 @@ function blendColor(rgb, base, ratio) {
  * @param {[int]} index: palette index
  * @return {[number,number,number]}
  */
-function pickColorPalette(index) {
+export function pickColorPalette(index) {
   let colorIndex = index % COLOR_PALETTE.length;
   let shadeIndex = (Math.floor(index / COLOR_PALETTE.length)) % 3;
   let rgb = COLOR_PALETTE[colorIndex];
@@ -70,7 +67,7 @@ function pickColorPalette(index) {
  * @param {SatItem} ItemType: item instantiation type
  * @param {SatLabel} LabelType: label instantiation type
  */
-function Sat(ItemType, LabelType) {
+export function Sat(ItemType, LabelType) {
   let self = this;
   self.items = []; // a.k.a ImageList, but can be 3D model list
   self.labels = []; // list of label objects
@@ -98,8 +95,9 @@ function Sat(ItemType, LabelType) {
  * Store IP information describing the user using the ipify service.
  */
 Sat.prototype.getIpInfo = function() {
+  let self = this;
   $.getJSON('https://api.ipify.org?format=jsonp&callback=?', function(json) {
-    this.ipInfo = json.ip;
+    self.ipInfo = json.ip;
   });
 };
 
@@ -443,7 +441,7 @@ Sat.prototype.fromJson = function(json) {
   self.decodeBaseJson(json);
   // import labels
   if (self.importFiles &&
-      self.importFiles.length > 0) {
+    self.importFiles.length > 0) {
     self.importLabelsFromImportFiles();
     self.save();
   }
@@ -556,7 +554,7 @@ Sat.prototype.getInfo = function() {
  * @param {number} index: index of this item in sat
  * @param {string} url: url to load the item
  */
-function SatItem(sat, index = -1, url = '') {
+export function SatItem(sat, index = -1, url = '') {
   let self = this;
   self.sat = sat;
   self.index = index;
@@ -691,7 +689,7 @@ SatItem.prototype.deleteInvalidLabels = function() {
  * @param {number | null} id: label object identifier
  * @param {object} ignored: ignored parameter for optional attributes.
  */
-function SatLabel(sat, id = -1, ignored = null) {
+export function SatLabel(sat, id = -1, ignored = null) {
   this.id = id;
   this.categoryPath = null;
   this.attributes = {};

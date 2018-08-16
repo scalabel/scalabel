@@ -101,7 +101,7 @@ func NewEnv() *Env {
 		log.Fatal(err)
 	}
 	if env.AppSubDir == "" {
-		env.AppSubDir = "app/src"
+		env.AppSubDir = "app/dist"
 	}
 	return env
 }

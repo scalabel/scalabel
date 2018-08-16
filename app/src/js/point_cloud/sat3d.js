@@ -1,4 +1,8 @@
-/* global Sat THREE SatPointCloud Box3d */
+/* global THREE */
+
+import {Sat} from '../sat';
+import {SatPointCloud} from './sat_point_cloud';
+import {Box3d} from './box3d';
 
 /**
  *
@@ -6,7 +10,7 @@
  * @param {SatLabel} labelType
  * @constructor
  */
-function Sat3d() {
+export function Sat3d() {
     this.slider = document.getElementById('slider');
     this.container = document.getElementById('main_container');
 

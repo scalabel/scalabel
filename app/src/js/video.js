@@ -1,10 +1,13 @@
-/* global Sat SatImage SatLabel */
+// /* global Sat SatImage SatLabel */
+import {Sat, SatLabel} from './sat';
+import {SatImage} from './image';
+
 
 /**
  * Class for each video labeling session/task, uses SatImage items
  * @param {SatLabel} LabelType: label instantiation type
  */
-function SatVideo(LabelType) {
+export function SatVideo(LabelType) {
   let self = this;
   Sat.call(self, SatImage, LabelType);
   // self.videoName = document.getElementById('video_name').innerHTML;
@@ -90,7 +93,7 @@ SatVideo.prototype.fromJson = function(json) {
   }
   // import labels
   if (self.importFiles &&
-      self.importFiles.length > 0) {
+    self.importFiles.length > 0) {
     self.importLabelsFromImportFiles();
     self.save();
   }
@@ -113,7 +116,7 @@ SatVideo.prototype.importLabelsFromImportFiles = function() {
             for (let k = 0; k < self.tracks.length; k++) {
               if (self.tracks[k].id === labelToImport.id) {
                 newId = self.tracks[k].children[
-                    self.tracks[k].children.length-1].id + 1;
+                  self.tracks[k].children.length-1].id + 1;
                 newTrack = self.tracks[k];
                 imported = true;
               }

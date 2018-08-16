@@ -151,16 +151,9 @@
 <script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
 <script>$(document).ready(function() { $('body').bootstrapMaterialDesign(); });</script>
 
-<script src="./js/sat.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.js"></script>
 
 <script src="./js/thirdparty/PLYLoader.js"></script>
-
-<script src="./js/point_cloud/sat3d.js"></script>
-<script src="./js/point_cloud/box3d.js"></script>
-<script src="./js/point_cloud/sat_point_cloud.js"></script>
-<script src="./js/point_cloud/point_cloud_tracking.js"></script>
 
 <script type="x-shader/x-vertex" id="vertexshader">
     varying float distFromOrigin;
@@ -202,19 +195,10 @@
 </script>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        let labelType = {{ .Task.ProjectOptions.LabelType }};
-        let itemType = {{ .Task.ProjectOptions.ItemType }};
-        if (itemType == 'pointcloudtracking') {
-            document.getElementById('end_btn').style.visibility = 'visible';
-            new Sat3dTracker();
-        }
-        else {
-            new Sat3d();
-        }
-    });
-    $('body').show();
+  let labelType = {{ .Task.ProjectOptions.LabelType }};
+  let itemType = {{ .Task.ProjectOptions.ItemType }};
 </script>
+<script src="./js/point_cloud.js"></script>
 
 </body>
 
