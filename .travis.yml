@@ -14,10 +14,10 @@ install:
   - sudo pip install pycodestyle
   - go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure gopkg.in/yaml.v2 github.com/satori/go.uuid
   - npm install
-  - npx webpack --config webpack.config.js
 script:
   - pycodestyle --show-source .
   - eslint .
+  - npx webpack --config webpack.config.js --mode=production
   - go build -i -o $GOPATH/bin/sat ./server/go
   - go test ./server/go -args --config ../../app/config/travis_config.yml
   - npm test
