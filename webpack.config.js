@@ -1,7 +1,7 @@
 /* global module */
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = {
+var config = {
   entry: {
     create: __dirname + '/app/src/js/create.js',
     image: __dirname + '/app/src/js/image.index.js',
@@ -20,4 +20,13 @@ module.exports = {
       { from: __dirname + '/app/src/js/thirdparty', to: __dirname + '/app/dist/js/thirdparty' },
     ])
   ]
+};
+
+module.exports = (env, argv) => {
+
+  if (argv.mode === 'development') {
+    config.devtool = 'source-map';
+  }
+
+  return config;
 };
