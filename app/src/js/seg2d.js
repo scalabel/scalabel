@@ -378,8 +378,8 @@ Seg2d.prototype.fromJsonVariables = function(json) {
  * @return {Box2d} the label loaded by exportFormat
  */
 Seg2d.prototype.fromExportFormat = function(exportFormat) {
-  if (exportFormat.seg2d && exportFormat.seg2d.length > 0) {
-    for (let poly of exportFormat.seg2d) {
+  if (exportFormat.poly2d && exportFormat.poly2d.length > 0) {
+    for (let poly of exportFormat.poly2d) {
       if (poly.closed) {
         this.addPolyline(Polygon.fromExportFormat(poly));
       } else {

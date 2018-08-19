@@ -8,17 +8,10 @@ import (
 	"strconv"
 )
 
-type Seg2d struct {
+type Poly2d struct {
 	Vertices [][]float64 `json:"vertices" yaml:"vertices"`
 	Types    string      `json:"types" yaml:"types"`
 	Closed   bool        `json:"closed" yaml:"closed"`
-}
-
-type Box2d struct {
-	X1 float64 `json:"x1" yaml:"x1"`
-	X2 float64 `json:"x2" yaml:"x2"`
-	Y1 float64 `json:"y1" yaml:"y1"`
-	Y2 float64 `json:"y2" yaml:"y2"`
 }
 
 type ItemExport struct {
@@ -36,8 +29,8 @@ type LabelExport struct {
 	Category   string                 `json:"category" yaml:"category"`
 	Attributes map[string]interface{} `json:"attributes" yaml:"attributes"`
 	Manual     bool                   `json:"manual" yaml:"manual"`
-	Box2d      Box2d                  `json:"box2d" yaml:"box2d"`
-	Seg2d      []Seg2d                `json:"seg2d" yaml:"seg2d"`
+	Box2d      map[string]interface{} `json:"box2d" yaml:"box2d"`
+	Poly2d     []Poly2d               `json:"poly2d" yaml:"poly2d"`
 	Box3d      map[string]interface{} `json:"box3d" yaml:"box3d"`
 }
 
@@ -70,7 +63,7 @@ type Box2dData struct {
 	H float64 `json:"h" yaml:"h"`
 }
 
-type Seg2dData struct {
+type Poly2dData struct {
 	Closed bool           `json:"closed" yaml:"closed"`
 	Polys  []PolylineData `json:"polys" yaml:"polys"`
 }
@@ -87,32 +80,32 @@ func MapToStruct(m map[string]interface{}, val interface{}) error {
 	return nil
 }
 
-func ParseBox2d(data map[string]interface{}) Box2d {
+func ParseBox2d(data map[string]interface{}) map[string]interface{} {
 	_box2d := Box2dData{}
 	MapToStruct(data, &_box2d)
 
-	box2d := Box2d{}
-	box2d.X1 = _box2d.X
-	box2d.Y1 = _box2d.Y
-	box2d.X2 = _box2d.X + _box2d.W
-	box2d.Y2 = _box2d.Y + _box2d.H
+	box2d := map[string]interface{}{}
+	box2d["x1"] = _box2d.X
+	box2d["y1"] = _box2d.Y
+	box2d["x2"] = _box2d.X + _box2d.W
+	box2d["y2"] = _box2d.Y + _box2d.H
 	return box2d
 }
 
-func ParseSeg2d(data map[string]interface{}) []Seg2d {
-	_seg2d := Seg2dData{}
-	MapToStruct(data, &_seg2d)
+func ParsePoly2d(data map[string]interface{}) []Poly2d {
+	_poly2d := Poly2dData{}
+	MapToStruct(data, &_poly2d)
 
-	seg2ds := []Seg2d{}
-	for _, _poly := range _seg2d.Polys {
-		poly := Seg2d{}
+	poly2ds := []Poly2d{}
+	for _, _poly := range _poly2d.Polys {
+		poly := Poly2d{}
 		types := []byte{}
 		for i, vertex := range _poly.Vertices {
 			v_xy := []float64{vertex.X, vertex.Y}
 			poly.Vertices = append(poly.Vertices, v_xy)
 			types = append(types, 'L')
 			if i < len(_poly.Edges) && _poly.Edges[i].Type == "bezier" {
-				if (i < len(_poly.Edges)-1) || (_seg2d.Closed) {
+				if (i < len(_poly.Edges)-1) || (_poly2d.Closed) {
 					for _, c := range _poly.Edges[i].ControlPoints {
 						c_xy := []float64{c.X, c.Y}
 						poly.Vertices = append(poly.Vertices, c_xy)
@@ -121,11 +114,11 @@ func ParseSeg2d(data map[string]interface{}) []Seg2d {
 				}
 			}
 		}
-		poly.Closed = _seg2d.Closed
+		poly.Closed = _poly2d.Closed
 		poly.Types = string(types[:])
-		seg2ds = append(seg2ds, poly)
+		poly2ds = append(poly2ds, poly)
 	}
-	return seg2ds
+	return poly2ds
 }
 
 var floatType = reflect.TypeOf(float64(0))

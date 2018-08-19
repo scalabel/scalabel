@@ -132,7 +132,7 @@ var PolylineDataStructs = []map[string]interface{}{
 	},
 }
 
-var PolygonSeg2dDataStructs = []map[string]interface{}{
+var PolygonPoly2dDataStructs = []map[string]interface{}{
 	{"closed": true, "polys": []map[string]interface{}{PolylineDataStructs[0]}},
 	{"closed": true, "polys": []map[string]interface{}{PolylineDataStructs[1]}},
 	{"closed": true, "polys": []map[string]interface{}{PolylineDataStructs[2]}},
@@ -140,7 +140,7 @@ var PolygonSeg2dDataStructs = []map[string]interface{}{
 	{"closed": true, "polys": []map[string]interface{}{PolylineDataStructs[0], PolylineDataStructs[1], PolylineDataStructs[2]}},
 }
 
-var PathSeg2dDataStructs = []map[string]interface{}{
+var PathPoly2dDataStructs = []map[string]interface{}{
 	{"closed": false, "polys": []map[string]interface{}{PolylineDataStructs[0]}},
 	{"closed": false, "polys": []map[string]interface{}{PolylineDataStructs[1]}},
 	{"closed": false, "polys": []map[string]interface{}{PolylineDataStructs[2]}},
@@ -150,7 +150,7 @@ var PathSeg2dDataStructs = []map[string]interface{}{
 
 // data after parsing
 
-var Box2dStructs = []Box2d{
+var Box2dStructs = [][]float64{
 	{478.7920184573, 651.9366628024, 454.5838057954, 479.2344814658},
 	{910.1114888987, 932.7220114636, 699.7739185242, 779.4364498182},
 	{857.6822839050, 1009.2094169334, 62.5223033165, 237.1320146872},
@@ -163,7 +163,7 @@ var Box2dStructs = []Box2d{
 	{965.0563346591, 1113.0259152359, 636.1565779043, 657.0322869132},
 }
 
-var PolygonStructs = []Seg2d{
+var PolygonStructs = []Poly2d{
 	{
 		[][]float64{
 			coords(Vertices[0]),
@@ -218,7 +218,7 @@ var PolygonStructs = []Seg2d{
 	},
 }
 
-var PathStructs = []Seg2d{
+var PathStructs = []Poly2d{
 	{
 		[][]float64{
 			coords(Vertices[0]),
@@ -269,7 +269,7 @@ var PathStructs = []Seg2d{
 	},
 }
 
-var PolygonSeg2dStructs = [][]Seg2d{
+var PolygonPoly2dStructs = [][]Poly2d{
 	{PolygonStructs[0]},
 	{PolygonStructs[1]},
 	{PolygonStructs[2]},
@@ -277,7 +277,7 @@ var PolygonSeg2dStructs = [][]Seg2d{
 	{PolygonStructs[0], PolygonStructs[1], PolygonStructs[2]},
 }
 
-var PathSeg2dStructs = [][]Seg2d{
+var PathPoly2dStructs = [][]Poly2d{
 	{PathStructs[0]},
 	{PathStructs[1]},
 	{PathStructs[2]},
@@ -288,10 +288,27 @@ var PathSeg2dStructs = [][]Seg2d{
 func TestBox2d(t *testing.T) {
 	for i := 0; i < len(Box2dDataStructs); i++ {
 		box2dConverted := ParseBox2d(Box2dDataStructs[i])
-		allEqual := FloatEqual(box2dConverted.X1, Box2dStructs[i].X1) &&
-			FloatEqual(box2dConverted.X2, Box2dStructs[i].X2) &&
-			FloatEqual(box2dConverted.Y1, Box2dStructs[i].Y1) &&
-			FloatEqual(box2dConverted.Y2, Box2dStructs[i].Y2)
+		box2d := Box2dStructs[i]
+		x1, ok := box2dConverted["x1"].(float64)
+		if !ok {
+		    return
+		}
+		x2, ok := box2dConverted["x2"].(float64)
+		if !ok {
+            return
+        }
+		y1, ok := box2dConverted["y1"].(float64)
+		if !ok {
+            return
+        }
+		y2, ok := box2dConverted["y2"].(float64)
+		if !ok {
+            return
+        }
+		allEqual := FloatEqual(x1, box2d[0]) &&
+			FloatEqual(x2, box2d[1]) &&
+			FloatEqual(y1, box2d[2]) &&
+			FloatEqual(y2, box2d[3])
 
 		if !allEqual {
 			// error!
@@ -303,58 +320,58 @@ func TestBox2d(t *testing.T) {
 	}
 }
 
-func TestPolygonSeg2d(t *testing.T) {
-	for i := 0; i < len(PolygonSeg2dDataStructs); i++ {
-		seg2dConverted := ParseSeg2d(PolygonSeg2dDataStructs[i])
-		for j := 0; j < len(seg2dConverted); j++ {
-			if seg2dConverted[j].Types != PolygonSeg2dStructs[i][j].Types {
+func TestPolygonPoly2d(t *testing.T) {
+	for i := 0; i < len(PolygonPoly2dDataStructs); i++ {
+		poly2dConverted := ParsePoly2d(PolygonPoly2dDataStructs[i])
+		for j := 0; j < len(poly2dConverted); j++ {
+			if poly2dConverted[j].Types != PolygonPoly2dStructs[i][j].Types {
 				// error for types
 				t.Error(
-					"expected", PolygonSeg2dStructs[i][j].Types,
-					"got", seg2dConverted[j].Types,
+					"expected", PolygonPoly2dStructs[i][j].Types,
+					"got", poly2dConverted[j].Types,
 				)
 			}
-			if !FloatArrayOfArrayEqual(seg2dConverted[j].Vertices, PolygonSeg2dStructs[i][j].Vertices) {
+			if !FloatArrayOfArrayEqual(poly2dConverted[j].Vertices, PolygonPoly2dStructs[i][j].Vertices) {
 				// error for vertices
 				t.Error(
-					"expected", PolygonSeg2dStructs[i][j].Vertices,
-					"got", seg2dConverted[j].Vertices,
+					"expected", PolygonPoly2dStructs[i][j].Vertices,
+					"got", poly2dConverted[j].Vertices,
 				)
 			}
-			if seg2dConverted[j].Closed != PolygonSeg2dStructs[i][j].Closed {
+			if poly2dConverted[j].Closed != PolygonPoly2dStructs[i][j].Closed {
 				// error for closed
 				t.Error(
-					"expected", PolygonSeg2dStructs[i][j].Closed,
-					"got", seg2dConverted[j].Closed,
+					"expected", PolygonPoly2dStructs[i][j].Closed,
+					"got", poly2dConverted[j].Closed,
 				)
 			}
 		}
 	}
 }
 
-func TestPathSeg2d(t *testing.T) {
-	for i := 0; i < len(PathSeg2dDataStructs); i++ {
-		seg2dConverted := ParseSeg2d(PathSeg2dDataStructs[i])
-		for j := 0; j < len(seg2dConverted); j++ {
-			if seg2dConverted[j].Types != PathSeg2dStructs[i][j].Types {
+func TestPathPoly2d(t *testing.T) {
+	for i := 0; i < len(PathPoly2dDataStructs); i++ {
+		poly2dConverted := ParsePoly2d(PathPoly2dDataStructs[i])
+		for j := 0; j < len(poly2dConverted); j++ {
+			if poly2dConverted[j].Types != PathPoly2dStructs[i][j].Types {
 				// error for types
 				t.Error(
-					"expected", PathSeg2dStructs[i][j].Types,
-					"got", seg2dConverted[j].Types,
+					"expected", PathPoly2dStructs[i][j].Types,
+					"got", poly2dConverted[j].Types,
 				)
 			}
-			if !FloatArrayOfArrayEqual(seg2dConverted[j].Vertices, PathSeg2dStructs[i][j].Vertices) {
+			if !FloatArrayOfArrayEqual(poly2dConverted[j].Vertices, PathPoly2dStructs[i][j].Vertices) {
 				// error for vertices
 				t.Error(
-					"expected", PathSeg2dStructs[i][j].Vertices,
-					"got", seg2dConverted[j].Vertices,
+					"expected", PathPoly2dStructs[i][j].Vertices,
+					"got", poly2dConverted[j].Vertices,
 				)
 			}
-			if seg2dConverted[j].Closed != PathSeg2dStructs[i][j].Closed {
+			if poly2dConverted[j].Closed != PathPoly2dStructs[i][j].Closed {
 				// error for closed
 				t.Error(
-					"expected", PathSeg2dStructs[i][j].Closed,
-					"got", seg2dConverted[j].Closed,
+					"expected", PathPoly2dStructs[i][j].Closed,
+					"got", poly2dConverted[j].Closed,
 				)
 			}
 		}

@@ -515,9 +515,9 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 				case "box3d":
 					label.Box3d = ParseBox3d(labelToLoad.Data)
 				case "segmentation":
-					label.Seg2d = ParseSeg2d(labelToLoad.Data)
+					label.Poly2d = ParsePoly2d(labelToLoad.Data)
 				case "lane":
-					label.Seg2d = ParseSeg2d(labelToLoad.Data)
+					label.Poly2d = ParsePoly2d(labelToLoad.Data)
 				}
 				label.Manual = true
 				if (projectToLoad.Options.ItemType == "video") {
@@ -718,7 +718,6 @@ func getImportFromProjectForm(r *http.Request) []ItemExport {
 	default:
 		log.Println(err)
 	}
-
 	return labelImport
 }
 
