@@ -4,6 +4,7 @@ import {Sat} from '../sat';
 import {SatPointCloud} from './sat_point_cloud';
 import {Box3d} from './box3d';
 
+
 /**
  *
  * @param {SatItem} itemType
@@ -90,3 +91,4 @@ Sat3d.prototype.animate = function() {
     requestAnimationFrame(this.animate.bind(this));
     this.currentItem.redraw();
 };
+

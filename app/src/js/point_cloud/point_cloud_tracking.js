@@ -2,7 +2,6 @@ import {SatPointCloud} from './sat_point_cloud';
 import {Sat3d} from './sat3d';
 import {SatLabel} from '../sat';
 import {Box3d} from './box3d';
-
 /**
  *
  * @constructor
@@ -116,7 +115,7 @@ Sat3dTracker.prototype.broadcastViews = function(item) {
  * @param {object} optionalAttributes
  * @constructor
  */
-function Box3dTrack(sat, id, optionalAttributes=null) {
+export function Box3dTrack(sat, id, optionalAttributes=null) {
     SatLabel.call(this, sat, id, optionalAttributes);
 }
 
@@ -194,3 +193,4 @@ Box3dTrack.prototype.interpolate = function(newKeyframeLabel) {
         }
     }
 };
+

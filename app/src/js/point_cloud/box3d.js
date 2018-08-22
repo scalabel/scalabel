@@ -192,7 +192,9 @@ Box3d.prototype.rotateBox = function(cameraPosition,
 
     let norm = cameraWorldDirection;
     norm.normalize();
-    let viewPlane = new THREE.Plane(norm, norm.dot(this.box.position));
+    // Note: the constant of THREE.Plane is
+    // -(normal.dot(some_point_on_the_plane))
+    let viewPlane = new THREE.Plane(norm, -norm.dot(this.box.position));
     let target1=new THREE.Vector3();
     let currentHit = currentRay.intersectPlane(viewPlane, target1);
     let target2=new THREE.Vector3();
