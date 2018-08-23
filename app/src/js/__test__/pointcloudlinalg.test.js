@@ -162,8 +162,8 @@ function createTestBox3d() {
                                      Math.random() * 50));
     box.scale.copy(new THREE.Vector3(Math.random() * 50, Math.random() * 50,
         Math.random() * 50));
-    box.rotation.copy(new THREE.Vector3(Math.random(), Math.random(),
-        Math.random()));
+    box.rotation.copy(new THREE.Euler(Math.random(), Math.random(),
+        Math.random(), 'XYZ'));
 
     let outline = new THREE.LineSegments(
         new THREE.EdgesGeometry(box.geometry),
@@ -371,6 +371,7 @@ test('rotate_restricted and rotate_free funciton', () => {
     expect((pc.currentCamera.position.sub(pc.target)).angleTo(
         newposition.sub(pc.target))).toBeCloseTo(dy, 5);
 });
+
 test('Box3d rotate', () => {
     // Set up test objects
     let pc = createTestPointCloudItem();
@@ -432,6 +433,7 @@ test('Box3d rotate', () => {
     expectVectors(hit1, hit2, 5);
 });
 
+
 /**
  * Interpolate between vector a and b
  * t=0, return a
@@ -477,9 +479,13 @@ test('Box3d interpolate', () => {
     q.copy(bb.box.quaternion);
     q.slerp(bc.box.quaternion, t);
     q.normalize();
-    let qa=ba.box.quaternion;
+    let qa=new THREE.Quaternion();
+    qa.copy(ba.box.quaternion);
     qa.normalize();
-    expect(q.equals(qa)).toBe(true);
+    expect(q.x).toBeCloseTo(qa.x, 5);
+    expect(q.y).toBeCloseTo(qa.y, 5);
+    expect(q.z).toBeCloseTo(qa.z, 5);
+    expect(q.w).toBeCloseTo(qa.w, 5);
 });
 
 test('Box3dTrack interpolate', () => {
