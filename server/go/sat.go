@@ -16,11 +16,6 @@ import (
 	"strconv"
 )
 
-type Serializable interface {
-	GetKey() string
-	GetFields() map[string]interface{}
-}
-
 //implements Serializable
 type Project struct {
 	Items    []Item         `json:"items" yaml"items"`
@@ -427,7 +422,6 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		loadedAssignment.StartTime = recordTimestamp()
 	}
-	Error.Println(loadedAssignment)
 	loadedAssignmentJson, err := json.Marshal(loadedAssignment)
 	if err != nil {
 		Error.Println(err)
@@ -454,7 +448,7 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	assignment := Assignment{}
 	mapstructure.Decode(fields, &assignment)
 	if assignment.Task.ProjectOptions.DemoMode {
-		Error.Println(errors.New("Can't save a demo project."))
+		Error.Println(errors.New("can't save a demo project"))
 		w.Write(nil)
 		return
 	}
@@ -491,7 +485,7 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, itemToLoad := range latestSubmission.Task.Items {
 			item := ItemExport{}
-			if (projectToLoad.Options.ItemType == "video") {
+			if projectToLoad.Options.ItemType == "video" {
                 item.VideoName = projectToLoad.Options.Name + "_" + strconv.Itoa(task.Index)
                 item.Index = itemToLoad.Index
             }
@@ -520,7 +514,7 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 					label.Poly2d = ParsePoly2d(labelToLoad.Data)
 				}
 				label.Manual = true
-				if (projectToLoad.Options.ItemType == "video") {
+				if projectToLoad.Options.ItemType == "video" {
                     label.Manual = labelToLoad.Keyframe
                     label.Id = labelToLoad.ParentId
                 } else {
@@ -713,10 +707,10 @@ func getImportFromProjectForm(r *http.Request) []ItemExport {
 		}
 
 	case http.ErrMissingFile:
-		Info.Printf("Nothing imported")
+		Error.Printf("Nothing imported")
 
 	default:
-		log.Println(err)
+		Error.Println(err)
 	}
 	return labelImport
 }
@@ -758,22 +752,22 @@ func CreateTasks(project Project) {
 func formValidation(w http.ResponseWriter, r *http.Request) error {
 	if r.FormValue("project_name") == "" {
 		w.Write([]byte("Please create a project name."))
-		return errors.New("Invalid form: no project name.")
+		return errors.New("invalid form: no project name")
 	}
 
 	if r.FormValue("item_type") == "" {
 		w.Write([]byte("Please choose an item type."))
-		return errors.New("Invalid form: no item type.")
+		return errors.New("invalid form: no item type")
 	}
 
 	if r.FormValue("label_type") == "" {
 		w.Write([]byte("Please choose a label type."))
-		return errors.New("Invalid form: no label type.")
+		return errors.New("invalid form: no label type")
 	}
 
 	if r.FormValue("item_type") != "video" && r.FormValue("task_size") == "" {
 		w.Write([]byte("Please specify a task size."))
-		return errors.New("Invalid form: no task size.")
+		return errors.New("invalid form: no task size")
 	}
 	// TODO: check forms are actually uploaded
 	return nil
