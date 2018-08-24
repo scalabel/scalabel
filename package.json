@@ -9,7 +9,7 @@
   },
   "jest": {
     "roots": [
-      "app/src/js"
+      "app/dist/js"
     ],
     "testURL": "http://localhost/",
     "transform": {
