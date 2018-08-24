@@ -2,7 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"github.com/satori/go.uuid"
 	"os"
 	"path"
 	"sort"
@@ -10,8 +12,6 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-	"github.com/satori/go.uuid"
-	"fmt"
 )
 
 // TODO: use actual worker ID
@@ -24,7 +24,6 @@ type NotExistError struct {
 func (e *NotExistError) Error() string {
 	return fmt.Sprintf("%s does not exist", e.name)
 }
-
 
 func GetProject(projectName string) (Project, error) {
 	fields, err := storage.Load(path.Join(projectName, "project"))
@@ -229,18 +228,18 @@ func countLabeledImage(projectName string, index int) int {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
 		}
-        return 0
+		return 0
 	}
 	numLabeledItems := assignment.NumLabeledItems
 	// add labels that are imported but not loaded yet
 	for _, item := range assignment.Task.Items {
-	    for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
-            Info.Println(item.Url)
-            if item.Url == importItem.Url {
-                Info.Println(importItem.Url)
-                numLabeledItems += 1
-            }
-        }
+		for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
+			Info.Println(item.Url)
+			if item.Url == importItem.Url {
+				Info.Println(importItem.Url)
+				numLabeledItems += 1
+			}
+		}
 	}
 	return numLabeledItems
 }
@@ -256,29 +255,29 @@ func countLabelInTask(projectName string, index int) int {
 	}
 	numLabels := len(assignment.Labels)
 	// for videos, count the number of tracks
-	if (assignment.Task.ProjectOptions.ItemType == "video") {
-	    numLabels = len(assignment.Tracks)
+	if assignment.Task.ProjectOptions.ItemType == "video" {
+		numLabels = len(assignment.Tracks)
 	} else {
-    	// add labels that are imported but not loaded yet
-    	for _, item := range assignment.Task.Items {
-            for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
-                if item.Url == importItem.Url {
-                    Info.Println("in")
-                    numLabels += len(importItem.Labels)
-                }
-            }
-        }
+		// add labels that are imported but not loaded yet
+		for _, item := range assignment.Task.Items {
+			for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
+				if item.Url == importItem.Url {
+					Info.Println("in")
+					numLabels += len(importItem.Labels)
+				}
+			}
+		}
 	}
-    return numLabels
+	return numLabels
 }
 
 // Get UUIDv4
-func getUUIDv4() (string) {
-    uuid, err := uuid.NewV4()
-    if err != nil {
-        Error.Println(err)
-    }
-    return uuid.String()
+func getUUIDv4() string {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		Error.Println(err)
+	}
+	return uuid.String()
 }
 
 // default box2d category if category file is missing

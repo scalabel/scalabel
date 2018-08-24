@@ -107,7 +107,7 @@ type ProjectOptions struct {
 	Categories        []Category    `json:"categories" yaml:"categories"`
 	NumLeafCategories int           `json:"numLeafCategories" yaml:"numLeafCategories"`
 	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
-    LabelImport       []ItemExport  `json:"labelImport" yaml:"labelImport"`
+	LabelImport       []ItemExport  `json:"labelImport" yaml:"labelImport"`
 	Instructions      string        `json:"instructions" yaml:"instructions"`
 	DemoMode          bool          `json:"demoMode" yaml:"demoMode"`
 	VideoMetaData     VideoMetaData `json:"videoMetaData" yaml:"videoMetaData"`
@@ -486,9 +486,9 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 		for _, itemToLoad := range latestSubmission.Task.Items {
 			item := ItemExport{}
 			if projectToLoad.Options.ItemType == "video" {
-                item.VideoName = projectToLoad.Options.Name + "_" + strconv.Itoa(task.Index)
-                item.Index = itemToLoad.Index
-            }
+				item.VideoName = projectToLoad.Options.Name + "_" + strconv.Itoa(task.Index)
+				item.Index = itemToLoad.Index
+			}
 			item.Timestamp = 10000 // to be fixed
 			item.Name = itemToLoad.Url
 			item.Url = itemToLoad.Url
@@ -515,12 +515,12 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				label.Manual = true
 				if projectToLoad.Options.ItemType == "video" {
-                    label.Manual = labelToLoad.Keyframe
-                    label.Id = labelToLoad.ParentId
-                } else {
-                    label.Manual = true
-                    label.Id = labelId
-                }
+					label.Manual = labelToLoad.Keyframe
+					label.Id = labelToLoad.ParentId
+				} else {
+					label.Manual = true
+					label.Id = labelId
+				}
 				item.Labels = append(item.Labels, label)
 			}
 			items = append(items, item)

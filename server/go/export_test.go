@@ -291,20 +291,20 @@ func TestBox2d(t *testing.T) {
 		box2d := Box2dStructs[i]
 		x1, ok := box2dConverted["x1"].(float64)
 		if !ok {
-		    return
+			return
 		}
 		x2, ok := box2dConverted["x2"].(float64)
 		if !ok {
-            return
-        }
+			return
+		}
 		y1, ok := box2dConverted["y1"].(float64)
 		if !ok {
-            return
-        }
+			return
+		}
 		y2, ok := box2dConverted["y2"].(float64)
 		if !ok {
-            return
-        }
+			return
+		}
 		allEqual := FloatEqual(x1, box2d[0]) &&
 			FloatEqual(x2, box2d[1]) &&
 			FloatEqual(y1, box2d[2]) &&
