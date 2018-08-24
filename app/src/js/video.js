@@ -253,6 +253,21 @@ Track.prototype.childDeleted = function() {
   // this.delete();
 };
 
+Track.prototype.childAttributeChanged = function(name, value, childId) {
+  let pastChild = false;
+  for (let i = 0; i < this.children.length; i++) {
+    if (pastChild) {
+      if (this.children[i].attributeframe) {
+        return;
+      }
+      this.children[i].attributes = {...this.children[i].attributes};
+      this.children[i].attributes[name] = value;
+    } else if (childId === this.children[i].id) {
+      pastChild = true;
+    }
+  }
+};
+
 Track.prototype.endTrack = function(endLabel) {
   let self = this;
   let endIndex = null;

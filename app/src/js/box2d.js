@@ -31,7 +31,7 @@ export function Box2d(sat, id, optionalAttributes) {
       let attributeName = this.sat.attributes[i].name;
       if (attributeName in optionalAttributes.attributes) {
         this.attributes[attributeName] =
-          optionalAttributes.attributes[attributeName];
+            optionalAttributes.attributes[attributeName];
       }
     }
     mousePos = optionalAttributes.mousePos;

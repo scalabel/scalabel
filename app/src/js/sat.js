@@ -747,6 +747,11 @@ SatLabel.prototype.childDeleted = function() {
   if (this.numChildren === 0) this.delete();
 };
 
+SatLabel.prototype.childAttributeChanged = function(ignoredName, ignoredValue,
+                                                    ignoredChildId) {
+
+};
+
 SatLabel.prototype.getRoot = function() {
   if (this.parent === null) return this;
   else return this.parent.getRoot();
@@ -813,7 +818,7 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   let self = this;
   self.id = json.id;
   self.categoryPath = json.categoryPath;
-  self.attributes = json.attributes;
+  self.attributes = {...json.attributes};
   self.isTrack = json.attributes['isTrack'];
   // TODO: remove
   self.keyframe = json.keyframe;

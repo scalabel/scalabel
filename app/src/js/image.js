@@ -442,6 +442,17 @@ SatImage.prototype.setActive = function(active) {
     if (deleteBtn.length) {
       deleteBtn.off();
     }
+    for (let i = 0; i < self.sat.attributes.length; i++) {
+      let attributeName = self.sat.attributes[i].name;
+      if (self.sat.attributes[i].toolType === 'switch') {
+        $('#custom_attribute_' + attributeName).off(
+            'switchChange.bootstrapSwitch');
+      } else if (self.sat.attributes[i].toolType === 'list') {
+        for (let j = 0; j < self.sat.attributes[i].values.length; j++) {
+          $('#custom_attributeselector_' + i + '-' + j).off('click');
+        }
+      }
+    }
   }
   if (self.selectedLabel) {
     // refresh hidden map
@@ -1010,15 +1021,14 @@ SatImage.prototype._changeSelectedLabelCategory = function() {
 SatImage.prototype._attributeSwitch = function(attributeIndex) {
   let attributeName = this.sat.attributes[attributeIndex].name;
   if (this.selectedLabel) {
+    let checked = $('#custom_attribute_' + attributeName).prop('checked');
     if (this.selectedLabel.parent) {
-      for (let l of this.selectedLabel.parent.children) {
-        l.attributes[attributeName] = $('#custom_attribute_'
-            + attributeName).prop('checked');
-      }
-    } else {
-      this.selectedLabel.attributes[attributeName] = $('#custom_attribute_'
-          + attributeName).prop('checked');
+      this.selectedLabel.parent.childAttributeChanged(
+        attributeName, checked, this.selectedLabel.id);
     }
+    this.selectedLabel.attributes = {...this.selectedLabel.attributes};
+    this.selectedLabel.attributeframe = true;
+    this.selectedLabel.attributes[attributeName] = checked;
   }
 };
 
@@ -1052,7 +1062,8 @@ SatImage.prototype._setAttribute = function(attributeIndex, value) {
   let attributeName = this.sat.attributes[attributeIndex].name;
   let attributeCheckbox = $('#custom_attribute_' + attributeName);
   if (attributeCheckbox.prop('checked') !== value) {
-    attributeCheckbox.trigger('click');
+    attributeCheckbox.prop('checked', value);
+    // attributeCheckbox.trigger('click');
   }
   if (this.active) {
     this.redrawLabelCanvas();
