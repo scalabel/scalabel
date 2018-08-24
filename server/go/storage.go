@@ -78,9 +78,10 @@ func (fs *FileStorage) Save(key string, fields map[string]interface{}) error {
 func (fs *FileStorage) Load(key string) (map[string]interface{}, error) {
 	var fields map[string]interface{}
 	projectFilePath := path.Join(fs.DataDir, key+".json")
+	// TODO: check whether the file exists first
 	projectFileContents, err := ioutil.ReadFile(projectFilePath)
 	if err != nil {
-		return fields, err
+		return fields, &NotExistError{projectFilePath}
 	}
 	err = json.Unmarshal(projectFileContents, &fields)
 	if err != nil {
@@ -209,7 +210,7 @@ func (ds *DynamodbStorage) Load(key string) (map[string]interface{}, error) {
 	})
 	var fields map[string]interface{}
 	if err != nil {
-		return fields, err
+		return fields, &NotExistError{key}
 	}
 	err = dynamodbattribute.UnmarshalMap(result.Item, &fields)
 	if err != nil {

@@ -11,10 +11,20 @@ import (
 	"time"
 	"unicode/utf8"
 	"github.com/satori/go.uuid"
+	"fmt"
 )
 
 // TODO: use actual worker ID
 const DEFAULT_WORKER = "default_worker"
+
+type NotExistError struct {
+	name string
+}
+
+func (e *NotExistError) Error() string {
+	return fmt.Sprintf("%s does not exist", e.name)
+}
+
 
 func GetProject(projectName string) (Project, error) {
 	fields, err := storage.Load(path.Join(projectName, "project"))
@@ -216,7 +226,10 @@ func CheckProjectName(projectName string) string {
 func countLabeledImage(projectName string, index int) int {
 	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
 	if err != nil {
-        Error.Println(err)
+		if _, ok := err.(*NotExistError); !ok {
+			Error.Println(err)
+		}
+        return 0
 	}
 	numLabeledItems := assignment.NumLabeledItems
 	// add labels that are imported but not loaded yet
@@ -236,7 +249,10 @@ func countLabeledImage(projectName string, index int) int {
 func countLabelInTask(projectName string, index int) int {
 	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
 	if err != nil {
-	    Error.Println(err)
+		if _, ok := err.(*NotExistError); !ok {
+			Error.Println(err)
+		}
+		return 0
 	}
 	numLabels := len(assignment.Labels)
 	// for videos, count the number of tracks
