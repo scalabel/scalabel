@@ -43,9 +43,6 @@ export function SatPointCloud(sat, index, url) {
     this.scene = new THREE.Scene();
 
     this.container = sat.container;
-
-    this.particles;
-
     // Set up camera and views
     this.views = [];
 

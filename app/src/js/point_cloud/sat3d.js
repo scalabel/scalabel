@@ -2,16 +2,13 @@
 
 import {Sat} from '../sat';
 import {SatPointCloud} from './sat_point_cloud';
-import {Box3d} from './box3d';
-
 
 /**
  *
- * @param {SatItem} itemType
  * @param {SatLabel} labelType
  * @constructor
  */
-export function Sat3d() {
+export function Sat3d(labelType) {
     this.slider = document.getElementById('slider');
     this.container = document.getElementById('main_container');
 
@@ -50,7 +47,7 @@ export function Sat3d() {
         },
     ];
 
-    Sat.call(this, SatPointCloud, Box3d);
+    Sat.call(this, SatPointCloud, labelType);
 }
 
 Sat3d.prototype = Object.create(Sat.prototype);

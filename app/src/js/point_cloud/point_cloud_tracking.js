@@ -1,4 +1,3 @@
-import {SatPointCloud} from './sat_point_cloud';
 import {Sat3d} from './sat3d';
 import {SatLabel} from '../sat';
 import {Box3d} from './box3d';
@@ -7,7 +6,7 @@ import {Box3d} from './box3d';
  * @constructor
  */
 export function Sat3dTracker() {
-    Sat3d.call(this, SatPointCloud, Box3d);
+    Sat3d.call(this, Box3d);
     if (this.tracks == null) {
         this.tracks = [];
     }
