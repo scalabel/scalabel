@@ -404,8 +404,8 @@ Sat.prototype.encodeBaseJson = function() {
     }
   }
   return {
+    id: self.id,
     task: {
-      id: self.id,
       projectOptions: {
         name: self.projectName,
         itemType: self.itemType,
