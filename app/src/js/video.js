@@ -132,7 +132,6 @@ SatVideo.prototype.importLabelsFromImportFiles = function() {
                 self.labelIdMap[newTrack.id] = newTrack;
                 self.labels.push(newTrack);
                 self.tracks.push(newTrack);
-                newId = newTrack.id + 1;
               }
               newLabel.satItem = self.items[i];
               newLabel.keyframe = labelToImport.manual;
