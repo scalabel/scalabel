@@ -43,7 +43,7 @@ type Task struct {
 }
 
 func (task *Task) GetKey() string {
-	return path.Join(task.ProjectOptions.Name, "tasks", strconv.Itoa(task.Index))
+	return path.Join(task.ProjectOptions.Name, "tasks", Index2str(task.Index))
 }
 
 func (task *Task) GetFields() map[string]interface{} {
@@ -72,10 +72,10 @@ type Assignment struct {
 func (assignment *Assignment) GetKey() string {
 	task := assignment.Task
 	if assignment.SubmitTime == 0 {
-		return path.Join(task.ProjectOptions.Name, "assignments", strconv.Itoa(task.Index),
+		return path.Join(task.ProjectOptions.Name, "assignments", Index2str(task.Index),
 			assignment.WorkerId)
 	} else {
-		return path.Join(task.ProjectOptions.Name, "submissions", strconv.Itoa(task.Index),
+		return path.Join(task.ProjectOptions.Name, "submissions", Index2str(task.Index),
 			assignment.WorkerId, strconv.FormatInt(assignment.SubmitTime, 10))
 	}
 }
@@ -401,7 +401,7 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	projectName := assignmentToLoad.Task.ProjectOptions.Name
-	taskIndex := strconv.Itoa(assignmentToLoad.Task.Index)
+	taskIndex := Index2str(assignmentToLoad.Task.Index)
 	var loadedAssignment Assignment
 	if !storage.HasKey(path.Join(projectName, "assignments",
 		taskIndex, DEFAULT_WORKER)) {
@@ -479,14 +479,14 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	items := []ItemExport{}
 	for _, task := range tasks {
-		latestSubmission, err := GetAssignment(projectName, strconv.Itoa(task.Index), DEFAULT_WORKER)
+		latestSubmission, err := GetAssignment(projectName, Index2str(task.Index), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
 		}
 		for _, itemToLoad := range latestSubmission.Task.Items {
 			item := ItemExport{}
 			if projectToLoad.Options.ItemType == "video" {
-				item.VideoName = projectToLoad.Options.Name + "_" + strconv.Itoa(task.Index)
+				item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
 				item.Index = itemToLoad.Index
 			}
 			item.Timestamp = 10000 // to be fixed
@@ -555,7 +555,7 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		q := u.Query()
 		q.Set("project_name", projectName)
-		q.Set("task_index", strconv.Itoa(task.Index))
+		q.Set("task_index", Index2str(task.Index))
 		u.RawQuery = q.Encode()
 		if r.TLS != nil {
 			u.Scheme = "https"

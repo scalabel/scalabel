@@ -8,10 +8,8 @@ import (
 	"os"
 	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 )
 
 // TODO: use actual worker ID
@@ -23,6 +21,10 @@ type NotExistError struct {
 
 func (e *NotExistError) Error() string {
 	return fmt.Sprintf("%s does not exist", e.name)
+}
+
+func Index2str(id int) string {
+	return fmt.Sprintf("%06d", id)
 }
 
 func GetProject(projectName string) (Project, error) {
@@ -168,20 +170,6 @@ func recordTimestamp() int64 {
 	return time.Now().Unix()
 }
 
-func formatTime(timestamp int64) string {
-	t := time.Unix(timestamp, 0)
-	return t.Format("2006-01-02_03-04-05")
-}
-
-func formatID(id int) string {
-	str := strconv.Itoa(id)
-	strLen := utf8.RuneCountInString(str)
-	for i := 0; i < (4 - strLen); i += 1 {
-		str = "0" + str
-	}
-	return str
-}
-
 func Exists(name string) bool {
 	_, err := os.Stat(name)
 	if os.IsNotExist(err) {
@@ -223,7 +211,7 @@ func CheckProjectName(projectName string) string {
 
 // Count the total number of images labeled in a task
 func countLabeledImage(projectName string, index int) int {
-	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
+	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
@@ -246,7 +234,7 @@ func countLabeledImage(projectName string, index int) int {
 
 // Count the total number of labels in a task
 func countLabelInTask(projectName string, index int) int {
-	assignment, err := GetAssignment(projectName, strconv.Itoa(index), DEFAULT_WORKER)
+	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
