@@ -1,5 +1,5 @@
-
-const [Shape, Vertex, Edge, Path, Polygon,
+const [
+  Shape, Vertex, Edge, Path, Polygon,
   VertexTypes, EdgeTypes] = require('../shape');
 
 /**
@@ -8,8 +8,8 @@ const [Shape, Vertex, Edge, Path, Polygon,
  * @param {int} max: max value
  * @return {int}: random integer
  */
-function randomInteger(min=1, max=1000) {
-  return Math.floor(Math.random() * (max - min) ) + min;
+function randomInteger(min = 1, max = 1000) {
+  return Math.floor(Math.random() * (max - min)) + min;
 }
 
 /**
@@ -70,7 +70,7 @@ describe('Vertex Object Tests', function() {
   it('Vertex interpolation', function() {
     let vertex = randomVertex();
     let vertex2 = randomVertex();
-    let midPoint = vertex.interpolate(vertex2, 1/2);
+    let midPoint = vertex.interpolate(vertex2, 1 / 2);
     let x = (vertex.x + vertex2.x) / 2;
     let y = (vertex.y + vertex2.y) / 2;
     expect(midPoint.x).toBe(x);
@@ -101,7 +101,7 @@ describe('Vertex Object Tests', function() {
  * @param {bool} randomizeType: whether to randomize edge type
  * @return {object}: random edge
  */
-function randomEdge(randomizeType=false) {
+function randomEdge(randomizeType = false) {
   let e = new Edge(randomVertex(), randomVertex());
   if (Math.random() > 0.5 && randomizeType) {
     e.type = EdgeTypes.BEZIER;
@@ -249,7 +249,7 @@ describe('Edge Object Tests', function() {
  * @param {int} size: number of vertices
  * @return {object}: random path
  */
-function randomPath(size=255) {
+function randomPath(size = 255) {
   let p = new Path();
   for (let i = 0; i < size; i++) {
     p.pushVertex(randomVertex());
@@ -324,7 +324,7 @@ describe('Path Object Tests', function() {
  * @param {int} size: number of vertices
  * @return {object}: random polygon
  */
-function randomPolygon(size=255) {
+function randomPolygon(size = 255) {
   let p = new Polygon();
   for (let i = 0; i < size; i++) {
     p.pushVertex(randomVertex());
@@ -365,7 +365,8 @@ describe('Polygon Object Tests', function() {
     // expect(p.centroid().equals(new Vertex(4, 4))).toBe(true);
   });
   it('Polygon self intersect floating point', function() {
-    let p = list2Polygon([[675.2340425531914, 467.22099921043883],
+    let p = list2Polygon([
+      [675.2340425531914, 467.22099921043883],
       [937.1914893617022, 467.22099921043883],
       [845.2765957446809, 618.8805736785239]]);
     expect(p.isSelfIntersect()).toBe(false);
@@ -380,17 +381,19 @@ describe('Polygon Object Tests', function() {
     let edgeAligned = true;
     for (let i = 0; i < p.edges.length; i++) {
       edgeAligned = edgeAligned &&
-        p.edges[i].src.equals(p.vertices[i]) &&
-        p.edges[i].dest.equals(p.vertices[p.idx(i+1)]);
-      if (!edgeAligned) {break;}
+          p.edges[i].src.equals(p.vertices[i]) &&
+          p.edges[i].dest.equals(p.vertices[p.idx(i + 1)]);
+      if (!edgeAligned) {
+        break;
+      }
     }
     expect(edgeAligned).toBe(false);
     p.alignEdges();
     edgeAligned = true;
     for (let i = 0; i < p.edges.length; i++) {
       edgeAligned = edgeAligned &&
-        p.edges[i].src.equals(p.vertices[i]) &&
-        p.edges[i].dest.equals(p.vertices[p.idx(i+1)]);
+          p.edges[i].src.equals(p.vertices[i]) &&
+          p.edges[i].dest.equals(p.vertices[p.idx(i + 1)]);
     }
     expect(edgeAligned).toBe(true);
   });
@@ -570,10 +573,12 @@ describe('Polygon Object Tests', function() {
     expect(p2.equals(pTarget)).toBe(true);
   });
   it('Polygon pushPath case6', function() {
-    let p1 = list2Polygon([[2, 0], [4, 0],
+    let p1 = list2Polygon([
+      [2, 0], [4, 0],
       [4, 4], [2, 4], [2, 3], [2, 2], [2, 1]]);
     let p2 = list2Polygon([[2, 4], [0, 4], [0, 0], [2, 0]]);
-    let pTarget = list2Polygon([[2, 4], [0, 4],
+    let pTarget = list2Polygon([
+      [2, 4], [0, 4],
       [0, 0], [2, 0], [2, 1], [2, 2], [2, 3]]);
     let vStart = new Vertex(2, 0);
     let vEnd = new Vertex(2, 4);
@@ -590,7 +595,8 @@ describe('Polygon Object Tests', function() {
 
 describe('Shared Reference Behavior Tests', function() {
   it('Shared vertex movement', function() {
-    let [v1, v2, v3, v4, v5, v6] = list2Vertices([[0, 0], [2, 0],
+    let [v1, v2, v3, v4, v5, v6] = list2Vertices([
+      [0, 0], [2, 0],
       [4, 0], [4, 4], [2, 4], [0, 4]]);
     let v7 = new Vertex(2, 2);
     let p1 = vertices2Polygon([v1, v2, v5, v6]);
@@ -603,7 +609,8 @@ describe('Shared Reference Behavior Tests', function() {
     expect(p2.equals(p4)).toBe(true);
   });
   it('Shared edges operations', function() {
-    let [v1, v2, v3, v4, v5, v6] = list2Vertices([[0, 0], [2, 0],
+    let [v1, v2, v3, v4, v5, v6] = list2Vertices([
+      [0, 0], [2, 0],
       [4, 0], [4, 4], [2, 4], [0, 4]]);
     let newEdge = new Edge(v2, v5, EdgeTypes.BEZIER);
     newEdge.control_points[0].xy = [1, 1];

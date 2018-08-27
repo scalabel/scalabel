@@ -1,4 +1,3 @@
-
 // /* global SatItem SatLabel hiddenStyleColor UP_RES_RATIO
 // mode rgb pickColorPalette */
 /* exported SatImage ImageLabel */
@@ -214,7 +213,7 @@ SatImage.prototype.updateLabelCount = function() {
  * @param {boolean} affine - whether or not this transformation is affine.
  * @return {[number]} - the converted values.
  */
-SatImage.prototype.toCanvasCoords = function(values, affine=true) {
+SatImage.prototype.toCanvasCoords = function(values, affine = true) {
   if (values) {
     for (let i = 0; i < values.length; i++) {
       values[i] *= this.displayToImageRatio * UP_RES_RATIO;
@@ -238,7 +237,7 @@ SatImage.prototype.toCanvasCoords = function(values, affine=true) {
  * @param {boolean} affine - whether or not this transformation is affine.
  * @return {[number]} - the converted values.
  */
-SatImage.prototype.toImageCoords = function(values, affine=true) {
+SatImage.prototype.toImageCoords = function(values, affine = true) {
   if (affine) {
     if (!this.padBox) {
       this.padBox = this._getPadding();
@@ -367,19 +366,23 @@ SatImage.prototype.setActive = function(active) {
     }
 
     // buttons
-    document.getElementById('prev_btn').onclick = function()
-    {self._prevHandler();};
-    document.getElementById('next_btn').onclick = function()
-    {self._nextHandler();};
+    document.getElementById('prev_btn').onclick = function() {
+      self._prevHandler();
+    };
+    document.getElementById('next_btn').onclick = function() {
+      self._nextHandler();
+    };
 
     if (document.getElementById('increase_btn')) {
-      document.getElementById('increase_btn').onclick = function()
-      {self._incHandler();};
+      document.getElementById('increase_btn').onclick = function() {
+        self._incHandler();
+      };
     }
 
     if (document.getElementById('decrease_btn')) {
-      document.getElementById('decrease_btn').onclick = function()
-      {self._decHandler();};
+      document.getElementById('decrease_btn').onclick = function() {
+        self._decHandler();
+      };
     }
 
     if (endBtn.length) {
@@ -410,21 +413,21 @@ SatImage.prototype.setActive = function(active) {
       let attributeName = self.sat.attributes[i].name;
       if (self.sat.attributes[i].toolType === 'switch') {
         $('#custom_attribute_' + attributeName).on(
-          'switchChange.bootstrapSwitch', function(e) {
-            e.preventDefault();
-            self._attributeSwitch(i);
-            self.redrawLabelCanvas();
-            self.redrawHiddenCanvas();
-        });
+            'switchChange.bootstrapSwitch', function(e) {
+              e.preventDefault();
+              self._attributeSwitch(i);
+              self.redrawLabelCanvas();
+              self.redrawHiddenCanvas();
+            });
       } else if (self.sat.attributes[i].toolType === 'list') {
         for (let j = 0; j < self.sat.attributes[i].values.length; j++) {
           $('#custom_attributeselector_' + i + '-' + j).on('click',
-            function(e) {
-            e.preventDefault();
-            self._attributeListSelect(i, j);
-              self.redrawLabelCanvas();
-              self.redrawHiddenCanvas();
-          });
+              function(e) {
+                e.preventDefault();
+                self._attributeListSelect(i, j);
+                self.redrawLabelCanvas();
+                self.redrawHiddenCanvas();
+              });
         }
       }
     }
@@ -477,7 +480,7 @@ SatImage.prototype._getSelectedAttributes = function() {
     let attributeName = self.sat.attributes[i].name;
     if (self.sat.attributes[i].toolType === 'switch') {
       attributes[attributeName] = document.getElementById(
-        'custom_attribute_' + attributeName).checked;
+          'custom_attribute_' + attributeName).checked;
     } else if (self.sat.attributes[i].toolType === 'list') {
       for (let j = 0; j < self.sat.attributes[i].values.length; j++) {
         if ($('#custom_attributeselector_' + i + '-' + j).hasClass('active')) {
@@ -535,7 +538,6 @@ SatImage.prototype.redraw = function() {
   self.redrawLabelCanvas();
   self.redrawHiddenCanvas();
 };
-
 
 /**
  * Redraw the image canvas.
@@ -845,7 +847,7 @@ SatImage.prototype._mouseup = function(e) {
           let attributes = self._getSelectedAttributes();
           self.selectLabel(self.sat.newLabel({
                 categoryPath: cat, attributes: attributes, mousePos: mousePos,
-              })
+              }),
           );
         }
       }, DOUBLE_CLICK_WAIT_TIME);
@@ -935,12 +937,13 @@ SatImage.prototype._getPadding = function() {
  * @return {int}: the selected label
  */
 SatImage.prototype.getIndexOnHiddenMap = function(mousePos) {
-  let [x, y] = this.toCanvasCoords([mousePos.x,
+  let [x, y] = this.toCanvasCoords([
+    mousePos.x,
     mousePos.y]);
   let data = this.hiddenCtx.getImageData(x, y, 4, 4).data;
   let arr = [];
   for (let i = 0; i < 16; i++) {
-    let color = (data[i*4] << 16) | (data[i*4+1] << 8) | data[i*4+2];
+    let color = (data[i * 4] << 16) | (data[i * 4 + 1] << 8) | data[i * 4 + 2];
     arr.push(color);
   }
   // finding the mode of the data array to deal with anti-aliasing of the canvas
@@ -1024,7 +1027,7 @@ SatImage.prototype._attributeSwitch = function(attributeIndex) {
     let checked = $('#custom_attribute_' + attributeName).prop('checked');
     if (this.selectedLabel.parent) {
       this.selectedLabel.parent.childAttributeChanged(
-        attributeName, checked, this.selectedLabel.id);
+          attributeName, checked, this.selectedLabel.id);
     }
     this.selectedLabel.attributes = {...this.selectedLabel.attributes};
     this.selectedLabel.attributeframe = true;
@@ -1038,15 +1041,17 @@ SatImage.prototype._attributeSwitch = function(attributeIndex) {
  * @param {int} selectedIndex - the index of the selected value for the
  * attribute.
  */
-SatImage.prototype._attributeListSelect = function(attributeIndex,
-                                                   selectedIndex) {
+SatImage.prototype._attributeListSelect = function(
+    attributeIndex,
+    selectedIndex) {
   let attributeName = this.sat.attributes[attributeIndex].name;
   if (this.selectedLabel) {
     // store both the index and the value in order to prevent another loop
     //   during tag drawing
     this.selectedLabel.attributes[attributeName] =
-      [selectedIndex,
-        this.sat.attributes[attributeIndex].values[selectedIndex]];
+        [
+          selectedIndex,
+          this.sat.attributes[attributeIndex].values[selectedIndex]];
     if (this.selectedLabel.parent) {
       this.selectedLabel.parent.interpolate(this.selectedLabel);
     }
@@ -1075,10 +1080,11 @@ SatImage.prototype._setAttribute = function(attributeIndex, value) {
  * @param {int} attributeIndex - the index of the attribute toggled.
  * @param {int} selectedIndex - the index of the value selected.
  */
-SatImage.prototype._selectAttributeFromList = function(attributeIndex,
-                                                       selectedIndex) {
+SatImage.prototype._selectAttributeFromList = function(
+    attributeIndex,
+    selectedIndex) {
   let selector = $('#custom_attributeselector_' + attributeIndex + '-' +
-    selectedIndex);
+      selectedIndex);
   if (!selector.hasClass('active')) {
     selector.trigger('click');
   }
@@ -1097,7 +1103,6 @@ SatImage.prototype._setCatSel = function(categoryPath) {
     }
   }
 };
-
 
 /**
  * Base class for all the image labels. New label should be instantiated by
@@ -1266,14 +1271,14 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
       let attribute = self.sat.attributes[i];
       if (attribute.toolType === 'switch') {
         if (self.attributes[attribute.name]) {
-          abbr+= ',' + attribute.tagText;
+          abbr += ',' + attribute.tagText;
           tw += 18;
         }
       } else if (attribute.toolType === 'list') {
         if (self.attributes[attribute.name] &&
-          self.attributes[attribute.name][0] > 0) {
+            self.attributes[attribute.name][0] > 0) {
           abbr += ',' + attribute.tagPrefix + ':' +
-            attribute.tagSuffixes[self.attributes[attribute.name][0]];
+              attribute.tagSuffixes[self.attributes[attribute.name][0]];
           tw += 36;
         }
       }
