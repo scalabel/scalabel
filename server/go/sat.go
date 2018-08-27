@@ -368,11 +368,11 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *template.Template) {
 	// get task name from the URL
 	projectName := r.URL.Query()["project_name"][0]
-	taskIndex := r.URL.Query()["task_index"][0]
+	taskIndex, _ := strconv.ParseInt(r.URL.Query()["task_index"][0], 10, 32)
 	if !storage.HasKey(path.Join(projectName, "assignments",
-		taskIndex, DEFAULT_WORKER)) {
+		Index2str(int(taskIndex)), DEFAULT_WORKER)) {
 		// if assignment does not exist, create it
-		assignment, err := CreateAssignment(projectName, taskIndex, DEFAULT_WORKER)
+		assignment, err := CreateAssignment(projectName, Index2str(int(taskIndex)), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -380,7 +380,7 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 		tmpl.Execute(w, assignment)
 	} else {
 		// otherwise, get that assignment
-		assignment, err := GetAssignment(projectName, taskIndex, DEFAULT_WORKER)
+		assignment, err := GetAssignment(projectName, Index2str(int(taskIndex)), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
 			return
