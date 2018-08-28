@@ -642,6 +642,48 @@ SatImage.prototype._keydown = function(e) {
     self._nextHandler();
   } else if (keyID === 17) { // Ctrl
     self.ctrlDown = true;
+  } else if (keyID === 38) { // up key
+    if (this.selectedLabel) {
+      e.preventDefault();
+      let index = this.labels.indexOf(this.selectedLabel);
+      if (index < this.labels.length - 1) {
+        this.labels[index] = this.labels[index + 1];
+        this.labels[index + 1] = this.selectedLabel;
+      }
+      this.redrawLabelCanvas();
+      this.redrawHiddenCanvas();
+    }
+  } else if (keyID === 40) { // down key
+    if (this.selectedLabel) {
+      e.preventDefault();
+      let index = this.labels.indexOf(this.selectedLabel);
+      if (index > 0) {
+        this.labels[index] = this.labels[index - 1];
+        this.labels[index - 1] = this.selectedLabel;
+      }
+      this.redrawLabelCanvas();
+      this.redrawHiddenCanvas();
+    }
+  } else if (keyID === 70) { // f for front
+    if (this.selectedLabel) {
+      let index = this.labels.indexOf(this.selectedLabel);
+      if (index < this.labels.length - 1) {
+        this.labels.splice(index, 1);
+        this.labels.push(this.selectedLabel);
+      }
+      this.redrawLabelCanvas();
+      this.redrawHiddenCanvas();
+    }
+  } else if (keyID === 66) { // b for back
+    if (this.selectedLabel) {
+      let index = this.labels.indexOf(this.selectedLabel);
+      if (index > 0) {
+        this.labels.splice(index, 1);
+        this.labels.unshift(this.selectedLabel);
+      }
+      this.redrawLabelCanvas();
+      this.redrawHiddenCanvas();
+    }
   }
   self.updateLabelCount();
   if (keyID === 68) { // d for debug

@@ -1034,31 +1034,5 @@ Seg2d.prototype.keydown = function(e) {
       this.tempVertex = null;
       this.selectedShape = this.newPoly;
     }
-  } else if (keyID === 38) { // up key
-    e.preventDefault();
-    let index = this.satItem.labels.indexOf(this);
-    if (index < this.satItem.labels.length - 1) {
-      this.satItem.labels[index] = this.satItem.labels[index + 1];
-      this.satItem.labels[index + 1] = this;
-    }
-  } else if (keyID === 40) { // down key
-    e.preventDefault();
-    let index = this.satItem.labels.indexOf(this);
-    if (index > 0) {
-      this.satItem.labels[index] = this.satItem.labels[index - 1];
-      this.satItem.labels[index - 1] = this;
-    }
-  } else if (keyID === 70) { // f for front
-    let index = this.satItem.labels.indexOf(this);
-    if (index < this.satItem.labels.length - 1) {
-      this.satItem.labels.splice(index, 1);
-      this.satItem.labels.push(this);
-    }
-  } else if (keyID === 66) { // b for back
-    let index = this.satItem.labels.indexOf(this);
-    if (index > 0) {
-      this.satItem.labels.splice(index, 1);
-      this.satItem.labels.unshift(this);
-    }
   }
 };
