@@ -193,7 +193,8 @@ canvas#hidden_canvas {
     position: relative;
     float: left;
     height: calc(100vh - 50px);
-    width: calc(100vw - 201px);
+    width: calc(100vw - 220px);
+    left: 10px;
     overflow: scroll;
 }
 
@@ -204,6 +205,7 @@ canvas#hidden_canvas {
     height: 100%;
     width: 100%;
     z-index: 1;
+    background-color: #222222;
 }
 
 #heading_row {
