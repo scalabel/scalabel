@@ -406,7 +406,6 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	if !storage.HasKey(path.Join(projectName, "assignments",
 		taskIndex, DEFAULT_WORKER)) {
 		// if assignment does not exist, create it
-		// TODO: resolve tension between this function and executeLabelingTemplate()
 		loadedAssignment, err = CreateAssignment(projectName, taskIndex,
 			DEFAULT_WORKER)
 		if err != nil {

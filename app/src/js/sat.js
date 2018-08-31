@@ -801,6 +801,7 @@ SatLabel.prototype.encodeBaseJson = function() {
   }
   // TODO: remove
   json.keyframe = self.keyframe;
+  json.attributeframe = self.attributeframe;
 
   return json;
 };
@@ -822,6 +823,7 @@ SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   self.isTrack = json.attributes['isTrack'];
   // TODO: remove
   self.keyframe = json.keyframe;
+  self.attributeframe = json.attributeframe;
 };
 
 SatLabel.prototype.decodeBaseJsonPointers = function(json) {

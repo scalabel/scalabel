@@ -16,7 +16,6 @@ export function SatVideo(LabelType) {
   self.playButton = document.getElementById('play_button');
   self.playButtonIcon = document.getElementById('play_button_icon');
   self.slider = document.getElementById('video_slider');
-  self.numFrames = self.slider.max;
 
   self.currentItem = self.items[0];
   self.currentItem.image.onload = function() {
@@ -65,14 +64,14 @@ SatVideo.prototype.toJson = function() {
       json.tracks.push(self.tracks[i].toJson());
     }
   }
-  json.task.projectOptions.metadata = self.metadata;
+  json.task.projectOptions.videoMetaData = self.videoMetaData;
   return json;
 };
 
 SatVideo.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
-  self.metadata = json.task.projectOptions.metadata;
+  self.videoMetaData = json.task.projectOptions.videoMetaData;
   self.interpolationMode = json.task.projectOptions.interpolationMode;
   self.tracks = [];
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
@@ -169,7 +168,6 @@ SatVideo.prototype.gotoItem = function(index) {
 
 SatVideo.prototype.clickPlayPause = function(e) {
   let self = this;
-
   if (e) {
     e.preventDefault();
   }
@@ -190,7 +188,7 @@ SatVideo.prototype.clickPlayPause = function(e) {
 
 SatVideo.prototype.nextFrame = function() {
   let self = this;
-  if (self.currentItem.index < self.numFrames - 1) {
+  if (self.currentItem.index < self.items.length - 1) {
     self.currentItem = self.items[self.currentItem.index + 1];
     self.slider.value = self.currentItem.index + 1;
     self.frameCounter.innerHTML = self.currentItem.index + 1;

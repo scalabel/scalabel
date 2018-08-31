@@ -156,17 +156,17 @@ SatImage.prototype._selectLabel = function(label) {
   this.selectedLabel = label;
   this.selectedLabel.setAsTargeted();
 
-  for (let i = 0; i < this.sat.attributes.length; i++) {
-    if (this.sat.attributes[i].toolType === 'switch') {
-      this._setAttribute(i,
-          this.selectedLabel.attributes[this.sat.attributes[i].name]);
-    } else if (this.sat.attributes[i].toolType === 'list' &&
-        this.sat.attributes[i].name in this.selectedLabel.attributes) {
-      this._selectAttributeFromList(i,
-          this.selectedLabel.attributes[this.sat.attributes[i].name][0]);
-    }
-  }
   if (this.active) {
+    for (let i = 0; i < this.sat.attributes.length; i++) {
+      if (this.sat.attributes[i].toolType === 'switch') {
+        this._setAttribute(i,
+            this.selectedLabel.attributes[this.sat.attributes[i].name]);
+      } else if (this.sat.attributes[i].toolType === 'list' &&
+          this.sat.attributes[i].name in this.selectedLabel.attributes) {
+        this._selectAttributeFromList(i,
+            this.selectedLabel.attributes[this.sat.attributes[i].name][0]);
+      }
+    }
     this._setCatSel(this.selectedLabel.categoryPath);
     this.redrawLabelCanvas();
     this.redrawHiddenCanvas();
@@ -498,7 +498,6 @@ SatImage.prototype._getSelectedAttributes = function() {
  */
 SatImage.prototype._prevHandler = function() {
   let self = this;
-  self.deselectAll();
   self.sat.gotoItem(self.index - 1);
 };
 
@@ -507,7 +506,6 @@ SatImage.prototype._prevHandler = function() {
  */
 SatImage.prototype._nextHandler = function() {
   let self = this;
-  self.deselectAll();
   self.sat.gotoItem(self.index + 1);
 };
 
@@ -1090,13 +1088,15 @@ SatImage.prototype._attributeListSelect = function(
   if (this.selectedLabel) {
     // store both the index and the value in order to prevent another loop
     //   during tag drawing
-    this.selectedLabel.attributes[attributeName] =
-        [
-          selectedIndex,
-          this.sat.attributes[attributeIndex].values[selectedIndex]];
+    let value = this.sat.attributes[attributeIndex].values[selectedIndex];
     if (this.selectedLabel.parent) {
-      this.selectedLabel.parent.interpolate(this.selectedLabel);
+      this.selectedLabel.parent.childAttributeChanged(attributeName,
+        [selectedIndex, value], this.selectedLabel.id);
     }
+    this.selectedLabel.attributes = {...this.selectedLabel.attributes};
+    this.selectedLabel.attributeframe = true;
+    this.selectedLabel.attributes[attributeName] =
+        [selectedIndex, value];
   }
 };
 
@@ -1110,7 +1110,6 @@ SatImage.prototype._setAttribute = function(attributeIndex, value) {
   let attributeCheckbox = $('#custom_attribute_' + attributeName);
   if (attributeCheckbox.prop('checked') !== value) {
     attributeCheckbox.prop('checked', value);
-    // attributeCheckbox.trigger('click');
   }
   if (this.active) {
     this.redrawLabelCanvas();
