@@ -161,10 +161,14 @@ SatImage.prototype._selectLabel = function(label) {
       if (this.sat.attributes[i].toolType === 'switch') {
         this._setAttribute(i,
             this.selectedLabel.attributes[this.sat.attributes[i].name]);
-      } else if (this.sat.attributes[i].toolType === 'list' &&
-          this.sat.attributes[i].name in this.selectedLabel.attributes) {
-        this._selectAttributeFromList(i,
-            this.selectedLabel.attributes[this.sat.attributes[i].name][0]);
+      } else if (this.sat.attributes[i].toolType === 'list') {
+        // list attributes defaults to 0
+        let selectedIndex = 0;
+        if (this.sat.attributes[i].name in this.selectedLabel.attributes) {
+          selectedIndex =
+              this.selectedLabel.attributes[this.sat.attributes[i].name][0];
+        }
+        this._selectAttributeFromList(i, selectedIndex);
       }
     }
     this._setCatSel(this.selectedLabel.categoryPath);
@@ -682,6 +686,12 @@ SatImage.prototype._keydown = function(e) {
       this.redrawLabelCanvas();
       this.redrawHiddenCanvas();
     }
+  } else if (keyID === 72) { // h for hiding all labels
+    if (this.labelCanvas.style.visibility === 'visible') {
+      this.labelCanvas.style.visibility = 'hidden';
+    } else {
+      this.labelCanvas.style.visibility = 'visible';
+    }
   }
   self.updateLabelCount();
   if (keyID === 68) { // d for debug
@@ -801,7 +811,6 @@ SatImage.prototype._mousemove = function(e) {
   }
   if (this._isWithinFrame(e)) {
     let mousePos = this.getMousePos(e);
-    this.labelCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
 
     // label specific handling of mousemove
     if (this.selectedLabel) {
@@ -821,6 +830,8 @@ SatImage.prototype._mousemove = function(e) {
     } else if (!this.isMouseDown && this.hoveredLabel) {
       this.labelCanvas.style.cursor = this.hoveredLabel.getCursorStyle(
           this.hoveredLabel.getCurrHoveredShape());
+    } else {
+      this.labelCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
     }
   } else {
     if (this.selectedLabel) {
@@ -1110,6 +1121,7 @@ SatImage.prototype._setAttribute = function(attributeIndex, value) {
   let attributeCheckbox = $('#custom_attribute_' + attributeName);
   if (attributeCheckbox.prop('checked') !== value) {
     attributeCheckbox.prop('checked', value);
+    attributeCheckbox.bootstrapSwitch('state', value);
   }
   if (this.active) {
     this.redrawLabelCanvas();

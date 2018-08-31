@@ -391,7 +391,7 @@ Box2d.prototype.mouseup = function() {
   } else if (this.state === BoxStates.MOVE) {
     this.mouseClickPos = null;
   }
-
+  this.satItem.redrawHiddenCanvas();
   this.setState(BoxStates.FREE);
 };
 
@@ -457,8 +457,7 @@ Box2d.prototype.mousemove = function(e) {
 };
 
 Box2d.prototype.mouseleave = function(e) { // eslint-disable-line
-  if (this.state === BoxStates.MOVE || this.state === BoxStates.RESIZE) {
-    this.setState(BoxStates.FREE);
-  }
+  this.mouseup();
+  this.satItem.isMouseDown = false;
 };
 
