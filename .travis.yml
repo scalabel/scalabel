@@ -8,7 +8,6 @@ go_import_path: github.com/ucbdrive/sat
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y npm
-  - npm install -g npx eslint eslint-config-google eslint-plugin-flowtype
 install:
   - sudo pip install --upgrade pip
   - sudo pip install pycodestyle
@@ -16,7 +15,8 @@ install:
   - npm install
 script:
   - pycodestyle --show-source .
-  - eslint .
+  - node_modules/.bin/eslint .
+  - node_modules/.bin/flow check
   - npx webpack --config webpack.config.js --mode=production
   - go build -i -o $GOPATH/bin/sat ./server/go
   - go test ./server/go -args --config ../../app/config/travis_config.yml

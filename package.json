@@ -9,8 +9,8 @@
     ],
     "plugins": [
       "@babel/plugin-proposal-object-rest-spread",
-      "transform-flow-comments",
-      "transform-flow-strip-types"
+      "@babel/transform-flow-comments",
+      "@babel/transform-flow-strip-types"
     ]
   },
   "jest": {
@@ -19,20 +19,21 @@
     ],
     "testURL": "http://localhost/",
     "transform": {
-      "^.+\\.js$": "babel-jest"
+      "^.+\\.jsx?$": "babel-jest"
     }
   },
   "devDependencies": {
+    "@babel/cli": "^7.0.0",
     "@babel/core": "^7.0.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/plugin-transform-flow-comments": "^7.0.0",
+    "@babel/plugin-transform-flow-strip-types": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-flow": "^7.0.0",
-    "babel-cli": "^6.26.0",
+    "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^9.0.0",
-    "babel-jest": "^9.0.3",
+    "babel-jest": "^23.4.2",
     "babel-loader": "^8.0.0",
-    "babel-plugin-transform-flow-comments": "^6.22.0",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "copy-webpack-plugin": "^4.5.2",
     "eslint": "^5.5.0",
     "eslint-config-google": "^0.9.1",
