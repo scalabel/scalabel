@@ -4,10 +4,13 @@
   },
   "babel": {
     "presets": [
-      "env"
+      "@babel/preset-env",
+      "@babel/preset-flow"
     ],
     "plugins": [
-      "transform-object-rest-spread"
+      "@babel/plugin-proposal-object-rest-spread",
+      "transform-flow-comments",
+      "transform-flow-strip-types"
     ]
   },
   "jest": {
@@ -20,16 +23,27 @@
     }
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-flow": "^7.0.0",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^9.0.0",
     "babel-jest": "^9.0.3",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
+    "babel-loader": "^8.0.0",
+    "babel-plugin-transform-flow-comments": "^6.22.0",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "copy-webpack-plugin": "^4.5.2",
+    "eslint": "^5.5.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-flowtype": "^2.50.0",
+    "flow-bin": "^0.80.0",
+    "immutable": "^3.8.2",
     "jest": "^22.4.4",
     "jquery": "^3",
     "regenerator-runtime": "^0.12.1",
     "three": "^0.95.0",
-    "webpack": "^4",
+    "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"
   }
 }

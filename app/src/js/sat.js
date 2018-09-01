@@ -1,5 +1,6 @@
 // /* global module rgba */
 /* exported Sat SatItem SatLabel */
+// @flow
 import {rgba} from './utils';
 
 // constants
@@ -692,7 +693,7 @@ SatItem.prototype.deleteInvalidLabels = function() {
  * @param {number | null} id: label object identifier
  * @param {object} ignored: ignored parameter for optional attributes.
  */
-export function SatLabel(sat, id = -1, ignored = null) {
+export function SatLabel(sat: Sat, id: number = -1, ignored = null) {
   this.id = id;
   this.categoryPath = null;
   this.attributes = {};
