@@ -5,8 +5,10 @@ ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT UP_RES_RATIO*/
 import {rgba} from './utils';
 
 // Define Enums
-export const VertexTypes = {VERTEX: 'vertex', MIDPOINT: 'midpoint',
-  CONTROL_POINT: 'control_point'};
+export const VertexTypes = {
+  VERTEX: 'vertex', MIDPOINT: 'midpoint',
+  CONTROL_POINT: 'control_point',
+};
 export const EdgeTypes = {LINE: 'line', BEZIER: 'bezier'};
 
 // find bbox around a set of vertices
@@ -42,7 +44,7 @@ export function Shape(id = null) {
 Shape.allShapes = {};
 Shape.largestId = -1;
 
-Shape.registerShape = function(shape, id=null) {
+Shape.registerShape = function(shape, id = null) {
   if (id === null) {
     shape.id = Shape.largestId + 1;
   } else {
@@ -83,7 +85,7 @@ Shape.prototype.delete = function() {
  * @param {object} type: type of the vertex
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  */
-export function Vertex(x=0, y=0, type=VertexTypes.VERTEX, id = null) {
+export function Vertex(x = 0, y = 0, type = VertexTypes.VERTEX, id = null) {
   Shape.call(this, id);
   this._x = x;
   this._y = y;
@@ -95,17 +97,27 @@ Vertex.prototype = Object.create(Shape.prototype);
 Vertex.prototype.constructor = Vertex;
 
 Object.defineProperty(Vertex.prototype, 'x', {
-  get: function() {return this._x;},
-  set: function(x) {this._x = x;},
+  get: function() {
+    return this._x;
+  },
+  set: function(x) {
+    this._x = x;
+  },
 });
 
 Object.defineProperty(Vertex.prototype, 'y', {
-  get: function() {return this._y;},
-  set: function(y) {this._y = y;},
+  get: function() {
+    return this._y;
+  },
+  set: function(y) {
+    this._y = y;
+  },
 });
 
 Object.defineProperty(Vertex.prototype, 'xy', {
-  get: function() {return [this._x, this._y];},
+  get: function() {
+    return [this._x, this._y];
+  },
   set: function(xy) {
     let [x, y] = xy;
     this.x = x;
@@ -114,13 +126,16 @@ Object.defineProperty(Vertex.prototype, 'xy', {
 });
 
 Object.defineProperty(Vertex.prototype, 'x_int', {
-  get: function() {return Math.round(this.x);},
+  get: function() {
+    return Math.round(this.x);
+  },
 });
 
 Object.defineProperty(Vertex.prototype, 'y_int', {
-  get: function() {return Math.round(this.y);},
+  get: function() {
+    return Math.round(this.y);
+  },
 });
-
 
 /**
  * Interpolation towards a target point
@@ -130,7 +145,7 @@ Object.defineProperty(Vertex.prototype, 'y_int', {
  * @param {int} id: the temporary id to assign
  * @return {object} interpolated point
  */
-Vertex.prototype.interpolate = function(v, f, type, id=null) {
+Vertex.prototype.interpolate = function(v, f, type, id = null) {
   let [x, y] = this.interpolateCoords(v, f);
   return new Vertex(x, y, type, id);
 };
@@ -153,7 +168,7 @@ Vertex.prototype.interpolateCoords = function(v, f) {
 Vertex.prototype.distanceTo = function(v) {
   let a = this.x - v.x;
   let b = this.y - v.y;
-  return Math.sqrt( a * a + b * b );
+  return Math.sqrt(a * a + b * b);
 };
 
 Vertex.prototype.toJson = function() {
@@ -171,12 +186,12 @@ Vertex.fromJson = function(json) {
 
 // Deep Copy
 Vertex.prototype.copy = function() {
-  return new Vertex( this.x, this.y, this.type );
+  return new Vertex(this.x, this.y, this.type);
 };
 
-Vertex.prototype.equals = function(v, threshold=1e-6) {
+Vertex.prototype.equals = function(v, threshold = 1e-6) {
   return Math.abs(this.x - v.x) < threshold
-    && Math.abs(this.y - v.y) < threshold;
+      && Math.abs(this.y - v.y) < threshold;
 };
 
 /**
@@ -194,7 +209,7 @@ Vertex.prototype.equals = function(v, threshold=1e-6) {
  * @param {[Vertex]} controlPoints - control points of the Edge object.
  * Needed only when loading saved shapes.
  */
-export function Edge(src, dest, type=EdgeTypes.LINE,
+export function Edge(src, dest, type = EdgeTypes.LINE,
                      id = null, controlPoints = []) {
   Shape.call(this, id);
   this._src = src; // define private variables to avoid recursive setter
@@ -217,19 +232,31 @@ Edge.prototype.constructor = Edge;
 // eager setters are efficient in this case because most
 // edges in a polygon is not changing at every frame
 Object.defineProperty(Edge.prototype, 'src', {
-  get: function() {return this._src;},
-  set: function(vertex) {this._src = vertex;},
+  get: function() {
+    return this._src;
+  },
+  set: function(vertex) {
+    this._src = vertex;
+  },
 });
 
 Object.defineProperty(Edge.prototype, 'dest', {
-  get: function() {return this._dest;},
-  set: function(vertex) {this._dest = vertex;},
+  get: function() {
+    return this._dest;
+  },
+  set: function(vertex) {
+    this._dest = vertex;
+  },
 });
 
 Object.defineProperty(Edge.prototype, 'type', {
-  get: function() {return this._type;},
+  get: function() {
+    return this._type;
+  },
   set: function(newType) {
-    if (this.type === newType) {return;} // do nothing
+    if (this.type === newType) {
+      return;
+    } // do nothing
     this._type = newType;
     this.initControlPoints();
   },
@@ -238,7 +265,7 @@ Object.defineProperty(Edge.prototype, 'type', {
 Object.defineProperty(Edge.prototype, 'control_points', {
   get: function() {
     if (this.type === EdgeTypes.LINE) {
-      let [x, y] = this.src.interpolateCoords(this.dest, 1/2);
+      let [x, y] = this.src.interpolateCoords(this.dest, 1 / 2);
       this._control_points[0].xy = [x, y];
     }
     return this._control_points;
@@ -256,14 +283,18 @@ Object.defineProperty(Edge.prototype, 'bbox', {
 });
 
 Object.defineProperty(Edge.prototype, 'length', {
-  get: function() {return this.src.distanceTo(this.dest);},
+  get: function() {
+    return this.src.distanceTo(this.dest);
+  },
 });
 
 /**
  * LINE has a size of 2 and BEZIER has a size of 3.
  */
 Object.defineProperty(Edge.prototype, 'size', {
-  get: function() {return 1 + this.control_points.length;},
+  get: function() {
+    return 1 + this.control_points.length;
+  },
 });
 
 /**
@@ -274,15 +305,15 @@ Edge.prototype.initControlPoints = function() {
   switch (this.type) {
     case EdgeTypes.LINE: {
       let midpoint = this.src.interpolate(
-          this.dest, 1/2, VertexTypes.MIDPOINT, -1);
+          this.dest, 1 / 2, VertexTypes.MIDPOINT, -1);
       this._control_points = [midpoint];
       break;
     }
     case EdgeTypes.BEZIER: {
       let control1 = this.src.interpolate(
-          this.dest, 1/3, VertexTypes.CONTROL_POINT);
+          this.dest, 1 / 3, VertexTypes.CONTROL_POINT);
       let control2 = this.src.interpolate(
-          this.dest, 2/3, VertexTypes.CONTROL_POINT);
+          this.dest, 2 / 3, VertexTypes.CONTROL_POINT);
       this._control_points = [control1, control2];
       break;
     }
@@ -317,23 +348,25 @@ Edge.prototype.contains = function(v) {
  */
 Edge.prototype.intersectWith = function(e) {
   let tolerance = 0.01;
-  if (this.equals(e)) {return true;}
+  if (this.equals(e)) {
+    return true;
+  }
   let det;
   let gamma;
   let lambda;
   det = (this.dest.x - this.src.x) * (e.dest.y - e.src.y)
-    - (e.dest.x - e.src.x) * (this.dest.y - this.src.y);
+      - (e.dest.x - e.src.x) * (this.dest.y - this.src.y);
 
   if (det === 0) { // parallel
     return this.contains(e.src) || this.contains(e.dest) ||
-      e.contains(this.src) || e.contains(this.dest);
+        e.contains(this.src) || e.contains(this.dest);
   } else {
     lambda = ((e.dest.y - e.src.y) * (e.dest.x - this.src.x)
-      + (e.src.x - e.dest.x) * (e.dest.y - this.src.y)) / det;
+        + (e.src.x - e.dest.x) * (e.dest.y - this.src.y)) / det;
     gamma = ((this.src.y - this.dest.y) * (e.dest.x - this.src.x)
-      + (this.dest.x - this.src.x) * (e.dest.y - this.src.y)) / det;
+        + (this.dest.x - this.src.x) * (e.dest.y - this.src.y)) / det;
     return (tolerance < lambda && lambda < 1 - tolerance)
-      && (tolerance < gamma && gamma < 1 - tolerance);
+        && (tolerance < gamma && gamma < 1 - tolerance);
   }
 };
 
@@ -384,14 +417,20 @@ Edge.prototype.copy = function() {
 Edge.prototype.equals = function(e) {
   let vertexMatch = this.src.equals(e.src) && this.dest.equals(e.dest);
   let reverseMatch = this.src.equals(e.dest) && this.dest.equals(e.src);
-  if (!(vertexMatch || reverseMatch)) {return false;}
-  if (this.type !== e.type) {return false;}
-  if (this.size !== e.size) {return false;}
+  if (!(vertexMatch || reverseMatch)) {
+    return false;
+  }
+  if (this.type !== e.type) {
+    return false;
+  }
+  if (this.size !== e.size) {
+    return false;
+  }
   for (let i = 0; i < this.control_points.length; i++) {
     let point1 = this.control_points[i];
     let point2;
     if (reverseMatch) {
-      point2 = e.control_points[this.control_points.length-i-1];
+      point2 = e.control_points[this.control_points.length - i - 1];
     } else {
       point2 = e.control_points[i];
     }
@@ -465,7 +504,7 @@ Polyline.prototype.isValidShape = function() {
 Polyline.prototype.isSelfIntersect = function() {
   let intersect = false;
   for (let i = 0; i < this.edges.length; i++) {
-    for (let j = i+1; j < this.edges.length; j++) {
+    for (let j = i + 1; j < this.edges.length; j++) {
       if (this.edges[i].intersectWith(this.edges[j])) {
         intersect = true;
       }
@@ -492,11 +531,12 @@ Polyline.prototype.alignEdges = function() {
  * @param {Edge} outEdge: optional edge to add
  * @return {Edge[]} inEdge and outEdge
  */
-Polyline.prototype.midpointToVertex = function(pt, inEdge=null, outEdge=null) {
+Polyline.prototype.midpointToVertex = function(
+    pt, inEdge = null, outEdge = null) {
   for (let i = 0; i < this.edges.length; i++) {
     if (this.edges[i].type === EdgeTypes.LINE) {
       if (this.edges[i].control_points[0].equals(pt)) {
-        [inEdge, outEdge] = this.insertVertex(i+1, pt, inEdge, outEdge);
+        [inEdge, outEdge] = this.insertVertex(i + 1, pt, inEdge, outEdge);
         break;
       }
     }
@@ -507,19 +547,21 @@ Polyline.prototype.midpointToVertex = function(pt, inEdge=null, outEdge=null) {
 /**
  * Abstract function that should be implemented by child
  */
-Polyline.prototype.insertVertex = function() {};
+Polyline.prototype.insertVertex = function() {
+};
 
 /**
  * Abstract function that should be implemented by child
  */
-Polyline.prototype.deleteVertex = function() {};
+Polyline.prototype.deleteVertex = function() {
+};
 
 /**
  * Append new vertex to end of vertex sequence
  * @param {object} pt: the new vertex to be inserted
  * @param {Edge} edge: optional edge to add
  */
-Polyline.prototype.pushVertex = function(pt, edge=null) {
+Polyline.prototype.pushVertex = function(pt, edge = null) {
   this.insertVertex(this.vertices.length, pt, edge);
 };
 
@@ -527,7 +569,7 @@ Polyline.prototype.pushVertex = function(pt, edge=null) {
  * Delete the last vertex.
  */
 Polyline.prototype.popVertex = function() {
-  this.deleteVertex(this.vertices.length-1);
+  this.deleteVertex(this.vertices.length - 1);
 };
 
 /**
@@ -614,7 +656,7 @@ Polyline.fromExportFormat = function(json) {
 };
 
 // Reference safe deep copy by serialization, allows shallow copy
-Polyline.prototype.copy = function(shallow=false) {
+Polyline.prototype.copy = function(shallow = false) {
   // this = Polyline.prototype
   let polyline = new this.constructor();
   if (!shallow) {
@@ -628,9 +670,9 @@ Polyline.prototype.copy = function(shallow=false) {
         controlPoints.push(c.copy());
       }
       polyline.edges.push(
-          new Edge(polyline.vertices[i%polyline.vertices.length],
-          polyline.vertices[(i+1)%polyline.vertices.length],
-          edge.type, null, controlPoints));
+          new Edge(polyline.vertices[i % polyline.vertices.length],
+              polyline.vertices[(i + 1) % polyline.vertices.length],
+              edge.type, null, controlPoints));
     }
     polyline.endPath();
     return polyline;
@@ -696,44 +738,44 @@ Path.prototype.isEnded = function() {
  * @param {Edge} outEdge: optional edge to add
  * @return {Edge[]} inEdge and outEdge
  */
-Path.prototype.insertVertex = function(i, pt, inEdge=null, outEdge=null) {
+Path.prototype.insertVertex = function(i, pt, inEdge = null, outEdge = null) {
   // for sanity purpose, check pt type:
   pt.type = VertexTypes.VERTEX;
   // check index i
-  if ( i < 0 || i > this.vertices.length) {
+  if (i < 0 || i > this.vertices.length) {
     return [null, null];
   }
   // check if start and end edges are legit
   if (inEdge && (!(inEdge.src.equals(pt)
-    && inEdge.dest.equals(this.vertices[i-1]))
-    && !(inEdge.dest.equals(pt)
-      && inEdge.src.equals(this.vertices[i-1])))) {
+      && inEdge.dest.equals(this.vertices[i - 1]))
+      && !(inEdge.dest.equals(pt)
+          && inEdge.src.equals(this.vertices[i - 1])))) {
     return [null, null];
   }
   if (outEdge && (!(outEdge.src.equals(pt)
-    && outEdge.dest.equals(this.vertices[i]))
-    && !(outEdge.dest.equals(pt)
-      && outEdge.src.equals(this.vertices[i])))) {
+      && outEdge.dest.equals(this.vertices[i]))
+      && !(outEdge.dest.equals(pt)
+          && outEdge.src.equals(this.vertices[i])))) {
     return [null, null];
   }
   // modify edges
   if (this.vertices.length >= 1) {
     if (i > 0 && i < this.vertices.length) {
-      this.edges.splice(i-1, 1, inEdge ?
-        inEdge : new Edge(this.vertices[i-1], pt));
+      this.edges.splice(i - 1, 1, inEdge ?
+          inEdge : new Edge(this.vertices[i - 1], pt));
       this.edges.splice(i, 0, outEdge ?
-        outEdge : new Edge(pt, this.vertices[i]));
+          outEdge : new Edge(pt, this.vertices[i]));
     } else if (i === 0) {
       this.edges.splice(i, 0, outEdge ?
-        outEdge : new Edge(pt, this.vertices[0]));
+          outEdge : new Edge(pt, this.vertices[0]));
     } else if (i === this.vertices.length) {
-      this.edges.splice(i-1, 0, inEdge ?
-        inEdge : new Edge(this.vertices[this.vertices.length - 1], pt));
+      this.edges.splice(i - 1, 0, inEdge ?
+          inEdge : new Edge(this.vertices[this.vertices.length - 1], pt));
     }
   }
   // modify vertices
   this.vertices.splice(i, 0, pt);
-  return [this.edges[i-1], this.edges[i]];
+  return [this.edges[i - 1], this.edges[i]];
 };
 
 /**
@@ -746,14 +788,14 @@ Path.prototype.deleteVertex = function(i) {
     return;
   }
   if (this.vertices.length > 1) {
-    if (i > 0 && i < this.vertices.length-1) {
-      let edge = new Edge(this.vertices[i-1], this.vertices[i+1]);
+    if (i > 0 && i < this.vertices.length - 1) {
+      let edge = new Edge(this.vertices[i - 1], this.vertices[i + 1]);
       this.edges.splice(i, 1);
-      this.edges.splice(i-1, 1, edge);
+      this.edges.splice(i - 1, 1, edge);
     } else if (i === 0) {
       this.edges.splice(i, 1);
-    } else if (i === this.vertices.length-1) {
-      this.edges.splice(i-1, 1);
+    } else if (i === this.vertices.length - 1) {
+      this.edges.splice(i - 1, 1);
     }
   } else {
     this.edges = [];
@@ -764,9 +806,13 @@ Path.prototype.deleteVertex = function(i) {
 
 Path.prototype.equals = function(p) {
   let numVertexMatch = this.vertices.length === p.vertices.length;
-  if (!numVertexMatch) {return false;}
+  if (!numVertexMatch) {
+    return false;
+  }
   let numEdgeMatch = this.edges.length === p.edges.length;
-  if (!numEdgeMatch) {return false;}
+  if (!numEdgeMatch) {
+    return false;
+  }
   if (this.vertices[0] && !this.vertices[0].equals(p.vertices[0])) {
     p.reverse();
   }
@@ -821,35 +867,36 @@ Polygon.prototype.reverse = function() {
  * @param {Edge} outEdge: optional edge to add
  * @return {Edge[]} inEdge and outEdge
  */
-Polygon.prototype.insertVertex = function(i, pt, inEdge=null, outEdge=null) {
+Polygon.prototype.insertVertex = function(
+    i, pt, inEdge = null, outEdge = null) {
   // for sanity purpose, check pt type:
   pt.type = VertexTypes.VERTEX;
   // check index i
-  if ( i < 0 || i > this.vertices.length) {
+  if (i < 0 || i > this.vertices.length) {
     return [null, null];
   }
   // check if start and end edges are legit
   if (inEdge && (!(inEdge.src.equals(pt)
-    && inEdge.dest.equals(this.vertices[this.idx(i-1)]))
-    && !(inEdge.dest.equals(pt)
-      && inEdge.src.equals(this.vertices[this.idx(i-1)])))) {
+      && inEdge.dest.equals(this.vertices[this.idx(i - 1)]))
+      && !(inEdge.dest.equals(pt)
+          && inEdge.src.equals(this.vertices[this.idx(i - 1)])))) {
     return [null, null];
   }
   if (outEdge && (!(outEdge.src.equals(pt)
-    && outEdge.dest.equals(this.vertices[this.idx(i)]))
-    && !(outEdge.dest.equals(pt)
-      && outEdge.src.equals(this.vertices[this.idx(i)])))) {
+      && outEdge.dest.equals(this.vertices[this.idx(i)]))
+      && !(outEdge.dest.equals(pt)
+          && outEdge.src.equals(this.vertices[this.idx(i)])))) {
     return [null, null];
   }
   this.vertices.splice(i, 0, pt);
   if (this.vertices.length > 1) {
     let edge1 = inEdge ? inEdge : new Edge(
-      this.vertices[this.idx(i-1)], this.vertices[i]
+        this.vertices[this.idx(i - 1)], this.vertices[i],
     );
     let edge2 = outEdge ? outEdge : new Edge(
-      this.vertices[i], this.vertices[this.idx(i+1)]
+        this.vertices[i], this.vertices[this.idx(i + 1)],
     );
-    this.edges.splice(this.idx(i-1), 1, edge1);
+    this.edges.splice(this.idx(i - 1), 1, edge1);
     this.edges.splice(i, 0, edge2);
     return [edge1, edge2];
   } else {
@@ -871,10 +918,10 @@ Polygon.prototype.deleteVertex = function(i) {
   this.vertices.splice(i, 1);
   if (this.vertices.length > 1) {
     let edge = new Edge(
-      this.vertices[this.idx(i-1)], this.vertices[this.idx(i)]
+        this.vertices[this.idx(i - 1)], this.vertices[this.idx(i)],
     );
     this.edges.splice(i, 1);
-    this.edges.splice(this.idx(i-1), 1, edge);
+    this.edges.splice(this.idx(i - 1), 1, edge);
   } else {
     this.edges = []; // doesn't allow edge with length 0
   }
@@ -940,27 +987,30 @@ Polygon.prototype.getPathBetween = function(vStart, vEnd) {
  * @param {bool} longPath: for switching to longer path selection.
  */
 Polygon.prototype.pushPath = function(targetPoly, vStart,
-                                      vEnd, longPath=false) {
+                                      vEnd, longPath = false) {
   let paths = targetPoly.getPathBetween(vStart, vEnd);
   let vertices;
   let edges;
-  if (longPath) {[vertices, edges] = paths.long;}
-  else {[vertices, edges] = paths.short;}
+  if (longPath) {
+    [vertices, edges] = paths.long;
+  } else {
+    [vertices, edges] = paths.short;
+  }
   if (this.vertices.length > 1) {
     this.edges.pop();
   }
   if (this.vertices.length > 0
-    && vStart.equals(this.vertices[this.vertices.length-1])) {
+      && vStart.equals(this.vertices[this.vertices.length - 1])) {
     this.vertices.pop();
     this.edges.pop();
   }
   if (this.vertices.length > 0) {
-    this.edges.push(new Edge(this.vertices[this.vertices.length-1], vStart));
+    this.edges.push(new Edge(this.vertices[this.vertices.length - 1], vStart));
   }
   this.vertices = this.vertices.concat(vertices);
   this.edges = this.edges.concat(edges);
   if (this.vertices.length > 0
-    && vEnd.equals(this.vertices[0])) {
+      && vEnd.equals(this.vertices[0])) {
     this.vertices.pop();
   } else {
     this.edges.push(new Edge(vEnd, this.vertices[0]));
@@ -969,22 +1019,28 @@ Polygon.prototype.pushPath = function(targetPoly, vStart,
 
 Polygon.prototype.equals = function(p) {
   let numVertexMatch = this.vertices.length === p.vertices.length;
-  if (!numVertexMatch) {return false;}
+  if (!numVertexMatch) {
+    return false;
+  }
   let numEdgeMatch = this.edges.length === p.edges.length;
-  if (!numEdgeMatch) {return false;}
+  if (!numEdgeMatch) {
+    return false;
+  }
   let vertex = this.vertices[0];
   let index = p.indexOf(vertex);
-  if (index === -1) {return false;}
-  let reversed = this.vertices[1].equals(p.vertices[p.idx(index-1)]);
+  if (index === -1) {
+    return false;
+  }
+  let reversed = this.vertices[1].equals(p.vertices[p.idx(index - 1)]);
   let direction = reversed ? -1 : 1;
   let offset = reversed ? -1 : 0;
   for (let i = 0; i < this.vertices.length; i++) {
-    if (!this.vertices[i].equals(p.vertices[p.idx(index + direction*i)])) {
+    if (!this.vertices[i].equals(p.vertices[p.idx(index + direction * i)])) {
       return false;
     }
   }
   for (let i = 0; i < this.edges.length; i++) {
-    if (!this.edges[i].equals(p.edges[p.idx(index + direction*i + offset)])) {
+    if (!this.edges[i].equals(p.edges[p.idx(index + direction * i + offset)])) {
       return false;
     }
   }
@@ -1000,7 +1056,7 @@ Polygon.prototype.equals = function(p) {
  * @param {number} id - id of the shape. Needed only when loading saved shapes.
  * @constructor
  */
-export function Rect(x=-1, y=-1, w=-1, h=-1, id = null) {
+export function Rect(x = -1, y = -1, w = -1, h = -1, id = null) {
   Shape.call(this, id);
   this.vertices = [];
   for (let i = 0; i < 8; i++) {
@@ -1017,21 +1073,29 @@ export function Rect(x=-1, y=-1, w=-1, h=-1, id = null) {
 Rect.prototype = Object.create(Shape.prototype);
 
 Object.defineProperty(Rect.prototype, 'x', {
-  get: function() {return Math.min(this.vertices[0].x, this.vertices[4].x);},
+  get: function() {
+    return Math.min(this.vertices[0].x, this.vertices[4].x);
+  },
 });
 
 Object.defineProperty(Rect.prototype, 'y', {
-  get: function() {return Math.min(this.vertices[0].y, this.vertices[4].y);},
+  get: function() {
+    return Math.min(this.vertices[0].y, this.vertices[4].y);
+  },
 });
 
 Object.defineProperty(Rect.prototype, 'w', {
-  get: function() {return Math.abs(this.vertices[0].x
-    - this.vertices[4].x);},
+  get: function() {
+    return Math.abs(this.vertices[0].x
+        - this.vertices[4].x);
+  },
 });
 
 Object.defineProperty(Rect.prototype, 'h', {
-  get: function() {return Math.abs(this.vertices[0].y
-    - this.vertices[4].y);},
+  get: function() {
+    return Math.abs(this.vertices[0].y
+        - this.vertices[4].y);
+  },
 });
 
 /*
@@ -1051,9 +1115,9 @@ Rect.prototype.setRect = function(x, y, w, h) {
 Rect.prototype.updateMidpoints = function() {
   for (let i = 1; i < 8; i += 2) {
     this.getVertex(i).x = (this.getVertex(i + 1).x
-      + this.getVertex(i - 1).x) / 2;
+        + this.getVertex(i - 1).x) / 2;
     this.getVertex(i).y = (this.getVertex(i + 1).y
-      + this.getVertex(i - 1).y) / 2;
+        + this.getVertex(i - 1).y) / 2;
   }
 };
 
@@ -1141,7 +1205,7 @@ Vertex.prototype.draw = function(context, satImage, fillStyle = null,
   context.arc(x, y, radius, 0, 2 * Math.PI, false);
   context.closePath();
   if (this.type === VertexTypes.CONTROL_POINT
-    || this.type === VertexTypes.MIDPOINT) {
+      || this.type === VertexTypes.MIDPOINT) {
     context.fillStyle = rgba(CONTROL_FILL_COLOR, ALPHA_CONTROL_POINT);
     context.strokeStyle = rgba(CONTROL_LINE_COLOR, ALPHA_CONTROL_POINT);
   }
@@ -1216,18 +1280,20 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
   ctx.beginPath();
   this.alignEdges(); // this is important
   let [startX, startY] = satImage.toCanvasCoords(
-    [this.vertices[0].x, this.vertices[0].y]);
+      [this.vertices[0].x, this.vertices[0].y]);
   ctx.moveTo(startX, startY);
   if (this.edges.length > 0) {
     for (let edge of this.edges) {
       let [destX, destY] = satImage.toCanvasCoords(
-        [edge.dest.x, edge.dest.y]);
+          [edge.dest.x, edge.dest.y]);
       if (edge.type === EdgeTypes.LINE) {
         ctx.lineTo(destX, destY);
       } else if (edge.type === EdgeTypes.BEZIER) {
-        let [c1x, c1y] = satImage.toCanvasCoords([edge.control_points[0].x,
+        let [c1x, c1y] = satImage.toCanvasCoords([
+          edge.control_points[0].x,
           edge.control_points[0].y]);
-        let [c2x, c2y] = satImage.toCanvasCoords([edge.control_points[1].x,
+        let [c2x, c2y] = satImage.toCanvasCoords([
+          edge.control_points[1].x,
           edge.control_points[1].y]);
         ctx.bezierCurveTo(c1x, c1y, c2x, c2y, destX, destY);
       }
@@ -1249,12 +1315,14 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
     for (let edge of this.edges) {
       if (edge.type === EdgeTypes.BEZIER) {
         let [srcX, srcY] = satImage.toCanvasCoords(
-          [edge.src._x, edge.src._y]);
+            [edge.src._x, edge.src._y]);
         let [destX, destY] = satImage.toCanvasCoords(
-          [edge.dest._x, edge.dest._y]);
-        let [c1x, c1y] = satImage.toCanvasCoords([edge.control_points[0].x,
+            [edge.dest._x, edge.dest._y]);
+        let [c1x, c1y] = satImage.toCanvasCoords([
+          edge.control_points[0].x,
           edge.control_points[0].y]);
-        let [c2x, c2y] = satImage.toCanvasCoords([edge.control_points[1].x,
+        let [c2x, c2y] = satImage.toCanvasCoords([
+          edge.control_points[1].x,
           edge.control_points[1].y]);
 
         ctx.moveTo(srcX, srcY);
@@ -1312,7 +1380,7 @@ Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
   // draw polygon
   hiddenCtx.beginPath();
   let [startX, startY] = satImage.toCanvasCoords(
-    [this.vertices[0].x, this.vertices[0].y]);
+      [this.vertices[0].x, this.vertices[0].y]);
   hiddenCtx.moveTo(startX, startY);
   if (this.edges.length > 0) {
     for (let edge of this.edges) {
@@ -1320,9 +1388,11 @@ Polyline.prototype.drawHidden = function(hiddenCtx, satImage, fillStyle) {
       if (edge.type === EdgeTypes.LINE) {
         hiddenCtx.lineTo(x, y);
       } else if (edge.type === EdgeTypes.BEZIER) {
-        let [c1x, c1y] = satImage.toCanvasCoords([edge.control_points[0].x,
+        let [c1x, c1y] = satImage.toCanvasCoords([
+          edge.control_points[0].x,
           edge.control_points[0].y]);
-        let [c2x, c2y] = satImage.toCanvasCoords([edge.control_points[1].x,
+        let [c2x, c2y] = satImage.toCanvasCoords([
+          edge.control_points[1].x,
           edge.control_points[1].y]);
         hiddenCtx.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
       }
@@ -1355,7 +1425,6 @@ Rect.prototype.draw = function(ctx, satImage, dashed) {
   ctx.strokeRect(x, y, w, h);
   ctx.restore();
 };
-
 
 /**
  * Draw all handles on the given context,

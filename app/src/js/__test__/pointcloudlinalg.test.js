@@ -561,8 +561,7 @@ test('Box3dTrack interpolate', () => {
       expect(call[0]).toBe(b);
       expect(call[1]).toBe(a);
       expect(call[2]).toBe(b + 1 + i);
-    }
-    else {
+    } else {
       expect(call[0]).toBe(a);
       expect(call[1]).toBe(c);
       expect(call[2]).toBe(b + 2 + i);

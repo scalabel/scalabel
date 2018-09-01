@@ -7,7 +7,8 @@ import {FONT_SIZE} from './utils';
 
 // Constants
 const BoxStates = Object.freeze({
-  FREE: 0, RESIZE: 1, MOVE: 2});
+  FREE: 0, RESIZE: 1, MOVE: 2,
+});
 const MIN_BOX_SIZE = 5;
 
 const INITIAL_HANDLE_NO = 4;
@@ -55,19 +56,27 @@ export function Box2d(sat, id, optionalAttributes) {
 Box2d.prototype = Object.create(ImageLabel.prototype);
 
 Object.defineProperty(Box2d.prototype, 'x', {
-  get: function() {return this.rect.x;},
+  get: function() {
+    return this.rect.x;
+  },
 });
 
 Object.defineProperty(Box2d.prototype, 'y', {
-  get: function() {return this.rect.y;},
+  get: function() {
+    return this.rect.y;
+  },
 });
 
 Object.defineProperty(Box2d.prototype, 'w', {
-  get: function() {return this.rect.w;},
+  get: function() {
+    return this.rect.w;
+  },
 });
 
 Object.defineProperty(Box2d.prototype, 'h', {
-  get: function() {return this.rect.h;},
+  get: function() {
+    return this.rect.h;
+  },
 });
 
 Box2d.useCrossHair = true;
@@ -121,9 +130,10 @@ Box2d.prototype.fromJsonVariables = function(json) {
  */
 Box2d.prototype.fromExportFormat = function(exportFormat) {
   if (exportFormat['box2d']) {
-    let [x1, x2, y1, y2] = [exportFormat['box2d'].x1, exportFormat['box2d'].x2,
+    let [x1, x2, y1, y2] = [
+      exportFormat['box2d'].x1, exportFormat['box2d'].x2,
       exportFormat['box2d'].y1, exportFormat['box2d'].y2];
-    this.rect.setRect(x1, y1, x2-x1, y2-y1);
+    this.rect.setRect(x1, y1, x2 - x1, y2 - y1);
     this.categoryPath = exportFormat.category;
     this.attributes = exportFormat.attributes;
     return this;
@@ -219,7 +229,8 @@ Box2d.prototype.getCursorStyle = function(shape) {
   if (this.state === BoxStates.RESIZE) {
     return 'crosshair';
   } else {
-    return ['nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
+    return [
+      'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize',
       'nwse-resize', 'ns-resize', 'nesw-resize', 'ew-resize'][handleNo];
   }
 };
@@ -251,10 +262,10 @@ Box2d.prototype.setState = function(state) {
 Box2d.prototype.weightAvg = function(startBox, endBox, weight) {
   let self = this;
   self.rect.setRect(
-      startBox.x + weight*(endBox.x - startBox.x),
-      startBox.y + weight*(endBox.y - startBox.y),
-      startBox.w + weight*(endBox.w - startBox.w),
-      startBox.h + weight*(endBox.h - startBox.h)
+      startBox.x + weight * (endBox.x - startBox.x),
+      startBox.y + weight * (endBox.y - startBox.y),
+      startBox.w + weight * (endBox.w - startBox.w),
+      startBox.h + weight * (endBox.h - startBox.h),
   );
 };
 
@@ -277,10 +288,10 @@ Box2d.prototype.getCurrentPosition = function() {
 Box2d.prototype.getWeightedAvg = function(box, weight) {
   let self = this;
   let avg = {};
-  avg.x = self.x + weight*(box.x - self.x);
-  avg.y = self.y + weight*(box.y - self.y);
-  avg.w = self.w + weight*(box.w - self.w);
-  avg.h = self.h + weight*(box.h - self.h);
+  avg.x = self.x + weight * (box.x - self.x);
+  avg.y = self.y + weight * (box.y - self.y);
+  avg.w = self.w + weight * (box.w - self.w);
+  avg.h = self.h + weight * (box.h - self.h);
   return avg;
 };
 
@@ -311,7 +322,7 @@ Box2d.prototype.setShape = function(rect) {
  */
 Box2d.prototype.shrink = function(startBox) {
   let self = this;
-  self.rect.setRect(startBox.x, startBox.y, startBox.w/2, startBox.h/2);
+  self.rect.setRect(startBox.x, startBox.y, startBox.w / 2, startBox.h / 2);
 };
 
 /**

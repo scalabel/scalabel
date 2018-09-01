@@ -2,7 +2,6 @@
 import {Sat, SatLabel} from './sat';
 import {SatImage} from './image';
 
-
 /**
  * Class for each video labeling session/task, uses SatImage items
  * @param {SatLabel} LabelType: label instantiation type
@@ -19,12 +18,17 @@ export function SatVideo(LabelType) {
 
   self.currentItem = self.items[0];
   self.currentItem.image.onload = function() {
-    self.currentItem.redraw();};
+    self.currentItem.redraw();
+  };
 
   self.playing = false;
-  self.playButton.onclick = function() {self.clickPlayPause();};
+  self.playButton.onclick = function() {
+    self.clickPlayPause();
+  };
 
-  self.slider.oninput = function() {self.moveSlider();};
+  self.slider.oninput = function() {
+    self.moveSlider();
+  };
 }
 
 SatVideo.prototype = Object.create(Sat.prototype);
@@ -52,7 +56,7 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
     childLabel.satItem = self.items[i];
   }
   return self.currentItem.labels[
-    self.currentItem.labels.length - 1];
+  self.currentItem.labels.length - 1];
 };
 
 SatVideo.prototype.toJson = function() {
@@ -76,7 +80,7 @@ SatVideo.prototype.fromJson = function(json) {
   self.tracks = [];
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
     let track = new Track(self, json.tracks[i].id,
-      json.tracks[i].attributes);
+        json.tracks[i].attributes);
     track.children = [];
     for (let j = 0; j < json.tracks[i].childrenIds.length; j++) {
       track.addChild(self.labelIdMap[json.tracks[i].childrenIds[j]]);
@@ -92,7 +96,7 @@ SatVideo.prototype.fromJson = function(json) {
   }
   // import labels
   if (self.importFiles &&
-    self.importFiles.length > 0) {
+      self.importFiles.length > 0) {
     self.importLabelsFromImportFiles();
     self.save();
   }
@@ -115,7 +119,7 @@ SatVideo.prototype.importLabelsFromImportFiles = function() {
             for (let k = 0; k < self.tracks.length; k++) {
               if (self.tracks[k].id === labelToImport.id) {
                 newId = self.tracks[k].children[
-                  self.tracks[k].children.length-1].id + 1;
+                self.tracks[k].children.length - 1].id + 1;
                 newTrack = self.tracks[k];
                 imported = true;
               }
@@ -178,8 +182,10 @@ SatVideo.prototype.clickPlayPause = function(e) {
   // update the icon and play/pause the vid
   if (self.playing) {
     self.playButtonIcon.className = 'fa fa-pause';
-    self.intervalID = setInterval(function() {self.nextFrame();},
-      1000/self.frameRate);
+    self.intervalID = setInterval(function() {
+          self.nextFrame();
+        },
+        1000 / self.frameRate);
   } else {
     self.playButtonIcon.className = 'fa fa-play';
     clearInterval(self.intervalID);
@@ -210,7 +216,6 @@ SatVideo.prototype.moveSlider = function() {
   self.currentItem.setActive(true);
   self.frameCounter.innerHTML = self.currentItem.index + 1;
 };
-
 
 /**
  * TODO
@@ -276,7 +281,7 @@ Track.prototype.endTrack = function(endLabel) {
       endIndex = i;
     }
   }
-  self.children = self.children.slice(0, endIndex+1);
+  self.children = self.children.slice(0, endIndex + 1);
   if (self.children.length > 0) {
     self.children[self.children.length - 1].keyframe = true;
   }
@@ -300,7 +305,7 @@ Track.prototype.interpolate = function(startLabel) {
     }
   }
   self.interpolateHandler(startLabel, startIndex, priorKeyFrameIndex,
-    nextKeyFrameIndex);
+      nextKeyFrameIndex);
 };
 
 Track.prototype.linearInterpolate = function(startLabel, startIndex,

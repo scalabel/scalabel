@@ -1,4 +1,3 @@
-
 // /* global module rgba */
 /* exported Sat SatItem SatLabel */
 import {rgba} from './utils';
@@ -60,7 +59,6 @@ export function pickColorPalette(index) {
   }
   return rgb;
 }
-
 
 /**
  * Base class for each labeling session/task
@@ -223,17 +221,19 @@ Sat.prototype.load = function() {
   self.taskIndex = parseInt(searchParams.get('task_index'));
   self.projectName = searchParams.get('project_name');
   // send the request to the back end
-  let request = JSON.stringify({'task': {
-    'index': self.taskIndex,
-    'projectOptions': {'name': self.projectName},
-  }});
+  let request = JSON.stringify({
+    'task': {
+      'index': self.taskIndex,
+      'projectOptions': {'name': self.projectName},
+    },
+  });
   xhr.open('POST', './postLoadAssignment', false);
   xhr.send(request);
 };
 
 // recursively create category to arbitrary level
 Sat.prototype.appendCascadeCategories = function(
-  subcategories, level, selectedIdx=0) {
+    subcategories, level, selectedIdx = 0) {
   let self = this;
   // clean up
   let previousChildLevel = level;
@@ -243,7 +243,9 @@ Sat.prototype.appendCascadeCategories = function(
     previousChildLevel++;
   }
   // base case null
-  if (!subcategories) {return;}
+  if (!subcategories) {
+    return;
+  }
   // get parent div
   let categoryDiv = document.getElementById('custom_categories');
   // build new category select window
@@ -282,7 +284,7 @@ Sat.prototype.appendCascadeCategories = function(
   if (subcategories[selectedIdx].subcategories) {
     $('#parent_select_' + level).change(function() {
       let newSubcategories = self.categories;
-      for (let i=0; i <= level; i++) {
+      for (let i = 0; i <= level; i++) {
         let idx = document.getElementById('parent_select_' + i).selectedIndex;
         newSubcategories = newSubcategories[idx].subcategories;
       }
@@ -307,8 +309,8 @@ Sat.prototype.appendCascadeCategories = function(
       let level = 0;
       let newSubcategories = self.categories;
       while (document.getElementById('parent_select_' + level)) {
-        let idx = document.getElementById('parent_select_' + level)
-          .selectedIndex;
+        let idx = document.getElementById(
+            'parent_select_' + level).selectedIndex;
         newSubcategories = newSubcategories[idx].subcategories;
         level++;
       }
@@ -319,8 +321,8 @@ Sat.prototype.appendCascadeCategories = function(
     });
   }
   this.appendCascadeCategories(
-    subcategories[selectedIdx].subcategories,
-    level + 1); // recursively add new levels
+      subcategories[selectedIdx].subcategories,
+      level + 1); // recursively add new levels
 };
 
 Sat.prototype.initToolbox = function() {
@@ -330,7 +332,7 @@ Sat.prototype.initToolbox = function() {
   // initialize all the attribute selectors
   for (let i = 0; i < self.attributes.length; i++) {
     let attributeInput = document.getElementById('custom_attribute_' +
-      self.attributes[i].name);
+        self.attributes[i].name);
     if (self.attributes[i].toolType === 'switch') {
       attributeInput.type = 'checkbox';
       attributeInput.setAttribute('data-on-color', 'info');
@@ -342,18 +344,19 @@ Sat.prototype.initToolbox = function() {
     } else if (self.attributes[i].toolType === 'list') {
       let listOuterHtml = '<span>' + self.attributes[i].name + '</span>';
       listOuterHtml +=
-        '<div id="radios" class="btn-group" data-toggle="buttons">';
+          '<div id="radios" class="btn-group" data-toggle="buttons">';
       for (let j = 0; j < self.attributes[i].values.length; j++) {
         listOuterHtml +=
-          '<button id="custom_attributeselector_' + i + '-' + j +
-          '" class="btn btn-raised btn-' + self.attributes[i].buttonColors[j] +
-          '"> <input type="radio"/>' + self.attributes[i].values[j] +
-          '</button>';
+            '<button id="custom_attributeselector_' + i + '-' + j +
+            '" class="btn btn-raised btn-' +
+            self.attributes[i].buttonColors[j] +
+            '"> <input type="radio"/>' + self.attributes[i].values[j] +
+            '</button>';
       }
       attributeInput.outerHTML = listOuterHtml;
     } else {
       attributeInput.innerHTML = 'Error: invalid tool type "' +
-        self.attributes[i].toolType + '"';
+          self.attributes[i].toolType + '"';
     }
   }
   document.getElementById('save_btn').onclick = function() {
@@ -441,7 +444,7 @@ Sat.prototype.fromJson = function(json) {
   self.decodeBaseJson(json);
   // import labels
   if (self.importFiles &&
-    self.importFiles.length > 0) {
+      self.importFiles.length > 0) {
     self.importLabelsFromImportFiles();
     self.save();
   }
@@ -576,7 +579,8 @@ SatItem.prototype.setActive = function(active) {
  * Abstract function that should be implemented by child
  * See SatImage for example
  */
-SatItem.prototype._changeSelectedLabelCategory = function() {};
+SatItem.prototype._changeSelectedLabelCategory = function() {
+};
 
 /**
  * Called when this item is loaded.
@@ -594,7 +598,7 @@ SatItem.prototype.previousItem = function() {
   if (this.index === 0) {
     return null;
   }
-  return this.sat.items[this.index-1];
+  return this.sat.items[this.index - 1];
 };
 
 /**
@@ -605,7 +609,7 @@ SatItem.prototype.nextItem = function() {
   if (this.index + 1 >= this.sat.items.length) {
     return null;
   }
-  return this.sat.items[this.index+1];
+  return this.sat.items[this.index + 1];
 };
 
 /**
@@ -672,7 +676,6 @@ SatItem.prototype.deleteInvalidLabels = function() {
   self.labels = valid;
 };
 
-
 /**
  * Base class for all the labeled objects. New label should be instantiated by
  * Sat.newLabel()
@@ -704,7 +707,6 @@ export function SatLabel(sat, id = -1, ignored = null) {
 }
 
 SatLabel.useCrossHair = false;
-
 
 /**
  * Function to set the tool box of SatLabel.
@@ -783,8 +785,10 @@ SatLabel.prototype.styleColor = function(alpha = 1.0) {
 SatLabel.prototype.encodeBaseJson = function() {
   let self = this;
   self.attributes['isTrack'] = self.isTrack;
-  let json = {id: self.id, categoryPath: self.categoryPath,
-    attributes: self.attributes};
+  let json = {
+    id: self.id, categoryPath: self.categoryPath,
+    attributes: self.attributes,
+  };
   if (self.parent) {
     json.parentId = self.parent.id;
   } else {
