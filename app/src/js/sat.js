@@ -1,6 +1,7 @@
 // /* global module rgba */
 /* exported Sat SatItem SatLabel */
 import {rgba} from './utils';
+import {SatState} from './state';
 
 // constants
 const COLOR_PALETTE = [
@@ -87,6 +88,7 @@ export function Sat(ItemType, LabelType) {
     };
   }
   self.load();
+  self.state = new SatState();
 }
 
 /**
@@ -139,6 +141,13 @@ Sat.prototype.newLabel = function(optionalAttributes) {
     self.currentItem.labels.push(label);
   }
   return label;
+};
+
+// @flow
+Sat.prototype.newLabelF = function(state: SatState) {
+  let labelId = state.maxObjectId + 1;
+  return state.update('maxObjectId', (id) => id + 1).update(
+      'labels', (labels) => labels.push(self.LabelType.f.createLabel(labelId)));
 };
 
 /**

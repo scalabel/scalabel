@@ -4,6 +4,8 @@
 import {ImageLabel} from './image';
 import {Rect, Vertex, UP_RES_RATIO} from './shape';
 import {FONT_SIZE} from './utils';
+import {Label, RectS} from './state';
+import {List} from 'immutable';
 
 // Constants
 const BoxStates = Object.freeze({
@@ -52,6 +54,10 @@ export function Box2d(sat, id, optionalAttributes) {
   this.selectedCache = null;
   this.interpolateHandler = this.weightedAvg;
 }
+
+Box2d.f.createLabel = function(labelId) {
+  return new Label({id: labelId, shapes: new List([new RectS])});
+};
 
 Box2d.prototype = Object.create(ImageLabel.prototype);
 
