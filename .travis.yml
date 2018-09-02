@@ -13,6 +13,7 @@ install:
   - sudo pip install pycodestyle
   - go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure gopkg.in/yaml.v2 github.com/satori/go.uuid
   - npm install
+  - node_modules/.bin/flow-typed install jest
 script:
   - pycodestyle --show-source .
   - node_modules/.bin/eslint .

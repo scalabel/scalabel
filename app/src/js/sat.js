@@ -1,7 +1,7 @@
 // /* global module rgba */
 /* exported Sat SatItem SatLabel */
 import {rgba} from './utils';
-import {SatS} from './state';
+import {newSat} from './state';
 import $ from 'jquery';
 
 // constants
@@ -92,7 +92,7 @@ export function Sat(ItemType, LabelType, hasNetwork=true) {
     self.load();
     self.getIpInfo();
   }
-  self.state = new SatS();
+  self.state = newSat();
 }
 
 /**
@@ -148,9 +148,13 @@ Sat.prototype.newLabel = function(optionalAttributes) {
 };
 
 // @flow
-Sat.prototype.newLabelF = function(state: SatS) {
+Sat.prototype.newLabelF = function(state: newSat) {
   let labelId = state.maxObjectId + 1;
-  return state.update('maxObjectId', (id) => id + 1).update(
+  if (state.current.item >= 0) {
+    state = state.updateIn(['items', 'labels'],
+        (labels) => labels.push(labelId));
+  }
+  return state.updateIn(['current', 'maxObjectId'], (id) => id + 1).update(
       'labels', (labels) => labels.merge({
         labelId: this.LabelType.f.createLabel(labelId)}));
 };

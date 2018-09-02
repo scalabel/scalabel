@@ -47,6 +47,11 @@ type ItemProps = {
 
 export type ItemType = RecordFactory<ItemProps>;
 
+/*
+  Those properties are not changed during the lifetime of a session.
+  It also make SatProps smaller. When in doubt, put the props in config in favor
+  of smaller SatProps.
+ */
 export type SatConfigProps = {
   assignmentId: string, // id
   projectName: string,
@@ -60,21 +65,31 @@ export type SatConfigProps = {
   categories: List<string>,
   attributes: Map<string, string | number>,
   taskId: string,
-  workerId: string
+  workerId: string,
+  startTime: number,
 };
 
 export type SatConfigType = RecordFactory<SatConfigProps>;
 
+/*
+  The current state of Sat.
+ */
+type SatCurrentProps = {
+  item: number,
+  label: number,
+  maxObjectId: number,
+};
+
+export type SatCurrentType = RecordFactory<SatCurrentProps>;
+
 type SatProps = {
   config: RecordOf<SatConfigProps>,
+  current: RecordOf<SatCurrentProps>,
   items: List<ItemType>,
   labels: Map<number, LabelType>, // Map from label id to label
   tracks: Map<number, LabelType>,
   shapes: Map<number, RectType | CubeType>,
   actions: List<any>,
-  currentItem: number, // id of current item
-  maxObjectId: number,
-  startTime: number,
 };
 
 export type SatType = RecordFactory<SatProps>;

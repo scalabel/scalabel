@@ -8,10 +8,10 @@ import type {
   ItemType,
   RectType,
   SatType,
-  SatConfigType,
+  SatConfigType, SatCurrentType,
 } from './types';
 
-export const LabelS: LabelType = Record({
+export const newLabel: LabelType = Record({
   id: -1,
   item: -1, // id
   categoryPath: '',
@@ -25,7 +25,7 @@ export const LabelS: LabelType = Record({
   state: -1,
 });
 
-export const RectS: RectType = Record({
+export const newRect: RectType = Record({
   id: -1,
   x1: -1,
   y1: -1,
@@ -33,7 +33,7 @@ export const RectS: RectType = Record({
   y2: -1,
 });
 
-export const ItemS: ItemType = Record({
+export const newItem: ItemType = Record({
   id: -1,
   index: 0,
   url: '',
@@ -56,16 +56,21 @@ export const SatConfigS: SatConfigType = Record({
   attributes: Map(),
   taskId: '',
   workerId: '',
+  startTime: 0,
 });
 
-export const SatS: SatType = Record({
+export const SatCurrentS: SatCurrentType = Record({
+  item: -1,
+  label: -1,
+  maxObjectId: -1,
+});
+
+export const newSat: SatType = Record({
   config: SatConfigS(),
+  current: SatCurrentS(),
   items: List(), // Map from item index to item, ordered
   labels: Map(), // Map from label id to label
   tracks: Map(),
   shapes: Map(), // Map from shapeId to shape
   actions: List(),
-  currentItem: -1, // id of current item
-  maxObjectId: -1,
-  startTime: 0,
 });

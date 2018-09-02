@@ -46,6 +46,7 @@
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-flowtype": "^2.50.0",
     "flow-bin": "^0.80.0",
+    "flow-typed": "^2.5.1",
     "immutable": "^4.0.0-rc.9",
     "jest": "^22.4.4",
     "jquery": "^3",
