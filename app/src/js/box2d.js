@@ -1,10 +1,9 @@
 // /* global ImageLabel Rect Vertex UP_RES_RATIO FONT_SIZE */
-/* exported Box2d */
 
 import {ImageLabel} from './image';
 import {Rect, Vertex, UP_RES_RATIO} from './shape';
 import {FONT_SIZE} from './utils';
-import {Label, RectS} from './state';
+import {LabelS, RectS} from './state';
 import {List} from 'immutable';
 
 // Constants
@@ -55,8 +54,10 @@ export function Box2d(sat, id, optionalAttributes) {
   this.interpolateHandler = this.weightedAvg;
 }
 
+Box2d.f = {};
+
 Box2d.f.createLabel = function(labelId) {
-  return new Label({id: labelId, shapes: new List([new RectS])});
+  return new LabelS({id: labelId, shapes: new List([new RectS()])});
 };
 
 Box2d.prototype = Object.create(ImageLabel.prototype);

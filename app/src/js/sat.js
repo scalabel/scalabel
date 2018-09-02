@@ -1,7 +1,8 @@
 // /* global module rgba */
 /* exported Sat SatItem SatLabel */
 import {rgba} from './utils';
-import {SatState} from './state';
+import {SatS} from './state';
+import $ from 'jquery';
 
 // constants
 const COLOR_PALETTE = [
@@ -65,8 +66,9 @@ export function pickColorPalette(index) {
  * Base class for each labeling session/task
  * @param {SatItem} ItemType: item instantiation type
  * @param {SatLabel} LabelType: label instantiation type
+ * @param {boolean} hasNetwork: whether network is available
  */
-export function Sat(ItemType, LabelType) {
+export function Sat(ItemType, LabelType, hasNetwork=true) {
   let self = this;
   self.items = []; // a.k.a ImageList, but can be 3D model list
   self.labels = []; // list of label objects
@@ -80,15 +82,17 @@ export function Sat(ItemType, LabelType) {
   self.taskId = null;
   self.projectName = null;
   self.ready = false;
-  self.getIpInfo();
   if (self.slider) {
     self.numFrames = self.slider.max;
     self.slider.oninput = function() {
       self.moveSlider();
     };
   }
-  self.load();
-  self.state = new SatState();
+  if (hasNetwork) {
+    self.load();
+    self.getIpInfo();
+  }
+  self.state = new SatS();
 }
 
 /**
@@ -144,10 +148,11 @@ Sat.prototype.newLabel = function(optionalAttributes) {
 };
 
 // @flow
-Sat.prototype.newLabelF = function(state: SatState) {
+Sat.prototype.newLabelF = function(state: SatS) {
   let labelId = state.maxObjectId + 1;
   return state.update('maxObjectId', (id) => id + 1).update(
-      'labels', (labels) => labels.push(self.LabelType.f.createLabel(labelId)));
+      'labels', (labels) => labels.merge({
+        labelId: this.LabelType.f.createLabel(labelId)}));
 };
 
 /**
