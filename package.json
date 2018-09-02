@@ -1,4 +1,11 @@
 {
+  "name": "scalabel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ucbdrive/scalabel"
+  },
+  "license": "BSD-3-Clause",
+  "homepage": "https://www.scalabel.ai",
   "scripts": {
     "test": "jest"
   },
