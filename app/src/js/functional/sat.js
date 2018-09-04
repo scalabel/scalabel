@@ -26,3 +26,13 @@ export function newLabel(
     current: {...state.current, maxObjectId: labelId},
   };
 }
+
+/**
+ * Update configurations in Sat
+ * @param {SatType} sat: Sat State
+ * @param {Object} config: new configuration
+ * @return {SatType}
+ */
+export function updateConfig(sat: SatType, config: {}): SatType {
+  return {...sat, config: {...sat.config, config}};
+}
