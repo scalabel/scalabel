@@ -3,8 +3,6 @@
 import {ImageLabel} from './image';
 import {Rect, Vertex, UP_RES_RATIO} from './shape';
 import {FONT_SIZE} from './utils';
-import {newLabel, newRect} from './states';
-import {List} from 'immutable';
 
 // Constants
 const BoxStates = Object.freeze({
