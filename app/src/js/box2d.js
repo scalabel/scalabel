@@ -3,7 +3,7 @@
 import {ImageLabel} from './image';
 import {Rect, Vertex, UP_RES_RATIO} from './shape';
 import {FONT_SIZE} from './utils';
-import {newLabel, newRect} from './state';
+import {newLabel, newRect} from './states';
 import {List} from 'immutable';
 
 // Constants
@@ -53,12 +53,6 @@ export function Box2d(sat, id, optionalAttributes) {
   this.selectedCache = null;
   this.interpolateHandler = this.weightedAvg;
 }
-
-Box2d.f = {};
-
-Box2d.f.createLabel = function(labelId) {
-  return newLabel({id: labelId, shapes: new List([newRect()])});
-};
 
 Box2d.prototype = Object.create(ImageLabel.prototype);
 

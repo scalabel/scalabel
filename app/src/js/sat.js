@@ -1,8 +1,8 @@
 // /* global module rgba */
 /* exported Sat SatItem SatLabel */
 import {rgba} from './utils';
-import {newSat} from './state';
 import $ from 'jquery';
+import {makeSat} from './states';
 
 // constants
 const COLOR_PALETTE = [
@@ -92,7 +92,7 @@ export function Sat(ItemType, LabelType, hasNetwork=true) {
     self.load();
     self.getIpInfo();
   }
-  self.state = newSat();
+  self.state = makeSat();
 }
 
 /**

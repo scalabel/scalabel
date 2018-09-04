@@ -1,14 +1,15 @@
 /* @flow */
-import {newLabel} from '../state';
+import {makeLabel} from '../states';
+import _ from 'lodash/fp';
 
 describe('Label Tests', function() {
   it('Shape', function() {
-    let label = newLabel({id: 10});
-    let label1 = newLabel({id: 10});
+    let label = makeLabel({id: 10});
+    let label1 = makeLabel({id: 10});
     expect(label !== label1).toBe(true);
     let oldId = label.id;
-    label = label.update('shapes', (shapes) => shapes.push(1));
-    label = label.update('id', (id) => id + 10);
+    label = _.update('id', (id) => id + 10, label);
+    label = _.update('shapes', (shapes) => shapes.concat(1), label);
     expect(label.id).toBe(20);
     expect(label.id === oldId).toBe(false);
   });
