@@ -1,8 +1,6 @@
 /* @flow */
 
-import type {Map, List, RecordFactory, RecordOf} from 'immutable';
-
-type LabelProps = {
+export type LabelProps = {
   id: number,
   item: number,
   categoryPath: string,
