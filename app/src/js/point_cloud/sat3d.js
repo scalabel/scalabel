@@ -1,7 +1,6 @@
-/* global THREE */
-
 import {Sat} from '../sat';
 import {SatPointCloud} from './sat_point_cloud';
+import * as THREE from 'three';
 
 /**
  *

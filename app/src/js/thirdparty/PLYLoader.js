@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 /**
  * @author Wei Meng / http://about.me/menway
  *
@@ -27,7 +29,7 @@
  */
 
 
-THREE.PLYLoader = function(manager) {
+export const PLYLoader = function(manager) {
 
   this.manager = (manager !== undefined) ?
       manager :
@@ -37,9 +39,9 @@ THREE.PLYLoader = function(manager) {
 
 };
 
-THREE.PLYLoader.prototype = {
+PLYLoader.prototype = {
 
-  constructor: THREE.PLYLoader,
+  constructor: PLYLoader,
 
   load: function(url, onLoad, onProgress, onError) {
 

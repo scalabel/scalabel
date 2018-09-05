@@ -1,5 +1,4 @@
-/* global THREE */
-
+import * as THREE from 'three';
 import {SatLabel} from '../sat';
 
 /**

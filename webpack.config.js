@@ -31,10 +31,6 @@ let config = {
       {from: __dirname + '/app/src/css', to: __dirname + '/app/dist/css'},
       {from: __dirname + '/app/src/img', to: __dirname + '/app/dist/img'},
       {
-        from: __dirname + '/app/src/js/thirdparty',
-        to: __dirname + '/app/dist/js/thirdparty',
-      },
-      {
         from: __dirname + '/app/src/index.html',
         to: __dirname + '/app/dist/index.html',
       },

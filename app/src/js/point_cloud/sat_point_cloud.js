@@ -1,7 +1,7 @@
-/* global THREE */
 import {SatItem} from '../sat';
-
-const $ = require('jquery');
+import $ from 'jquery';
+import * as THREE from 'three';
+import {PLYLoader} from '../thirdparty/PLYLoader';
 
 /**
  * Point Cloud Item
@@ -163,7 +163,7 @@ SatPointCloud.prototype.getPCJSON = function() {
     return;
   }
 
-  let loader = new THREE.PLYLoader();
+  let loader = new PLYLoader();
   let e = document.createElement('div');
   e.innerHTML = document.getElementById('vertexshader').textContent;
   let vertexShader = e.childNodes[0].nodeValue;

@@ -1,14 +1,9 @@
-/* global THREE */
-/* global global */
-
 import {Box3dTrack} from '../point_cloud/point_cloud_tracking.js';
 import {SatItem, SatLabel} from '../sat.js';
 import {Box3d} from '../point_cloud/box3d.js';
 import {SatPointCloud} from '../point_cloud/sat_point_cloud.js';
-import $ from 'jquery';
-
-global.$ = global.jQuery = $;
-global.THREE = require('three');
+import * as THREE from 'three';
+import * as jQuery from 'jquery';
 
 /**
  * Create a mock SatPointCloud Object for testing linear algebra functions
@@ -568,5 +563,3 @@ test('Box3dTrack interpolate', () => {
     }
   }
 });
-
-
