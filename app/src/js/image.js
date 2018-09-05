@@ -1,6 +1,3 @@
-// /* global SatItem SatLabel hiddenStyleColor UP_RES_RATIO
-// mode rgb pickColorPalette */
-/* exported SatImage ImageLabel */
 import {SatItem, SatLabel, pickColorPalette} from './sat';
 import {hiddenStyleColor, mode, rgb} from './utils';
 import {UP_RES_RATIO} from './shape';

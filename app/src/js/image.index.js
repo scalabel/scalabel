@@ -1,6 +1,4 @@
 /* global labelType itemType */
-/* exported initiateSatSession */
-
 import $ from 'jquery';
 import {Sat} from './sat';
 import {SatImage} from './image';
@@ -8,8 +6,6 @@ import {SatVideo} from './video';
 import {Box2d} from './box2d';
 import {Seg2d} from './seg2d';
 import 'bootstrap-material-design';
-
-// module.exports = [initiateSatSession];
 
 document.getElementById('frame_rate').style.display = 'none';
 let showElementById = function(id) {
@@ -27,7 +23,7 @@ let showTemplateById = function(id) {
  * @param {string} labelType
  * @param {string} itemType
  */
-export function initiateSatSession(labelType, itemType) {
+export function initSatSession(labelType, itemType) {
   let labelClass;
   if (labelType === 'box2d') {
     showElementById('crosshair');
@@ -53,7 +49,7 @@ export function initiateSatSession(labelType, itemType) {
 
 $(document).ready(function() {
   $('body').bootstrapMaterialDesign();
-  initiateSatSession(labelType, itemType);
+  initSatSession(labelType, itemType);
   document.addEventListener('keydown', function(e) {
     let eventObj = window.event ? event : e;
     if (eventObj.keyCode === 191 && eventObj.shiftKey) {

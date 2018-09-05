@@ -1,5 +1,3 @@
-// /* global module rgba */
-/* exported Sat SatItem SatLabel */
 import {rgba} from './utils';
 import $ from 'jquery';
 import 'bootstrap-switch';

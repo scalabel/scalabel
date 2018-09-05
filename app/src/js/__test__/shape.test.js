@@ -1,6 +1,5 @@
-const [
-  Shape, Vertex, Edge, Path, Polygon,
-  VertexTypes, EdgeTypes] = require('../shape');
+import {Shape, Vertex, Edge, Path, Polygon,
+  VertexTypes, EdgeTypes} from '../shape';
 
 /**
  * Random Integer Generator

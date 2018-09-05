@@ -1,5 +1,4 @@
-/* global sprintf */
-/* exported rgb rgba hiddenStyleColor mode FONT_SIZE */
+import {sprintf} from 'sprintf-js';
 
 export const FONT_SIZE = 13;
 

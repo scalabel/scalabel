@@ -1,9 +1,3 @@
-// /* global ImageLabel SatImage Shape Polygon Path Vertex */
-// /* global rgba VertexTypes EdgeTypes*/
-// /* global GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
-// ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE UP_RES_RATIO FONT_SIZE */
-/* exported Seg2d*/
-
 import {SatImage, ImageLabel} from './image';
 import {
   Shape, Polygon, Path, Vertex,

@@ -1,7 +1,3 @@
-/* global module */
-/* exported BEZIER_COLOR GRAYOUT_COLOR SELECT_COLOR LINE_WIDTH OUTLINE_WIDTH
-ALPHA_HIGH_FILL ALPHA_LOW_FILL ALPHA_LINE ALPHA_CONTROL_POINT UP_RES_RATIO*/
-
 import {rgba} from './utils';
 
 // Define Enums
@@ -25,10 +21,6 @@ const getBbox = function(vertices) {
   }
   return {min: {x: minX, y: minY}, max: {x: maxX, y: maxY}};
 };
-
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports = [Shape, Vertex, Edge, Path, Polygon, VertexTypes, EdgeTypes];
-}
 
 /**
  * Shape class
