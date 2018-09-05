@@ -1,5 +1,6 @@
 /* global module __dirname */
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
 
 let config = {
   entry: {
@@ -12,6 +13,12 @@ let config = {
     path: __dirname + '/app/dist/js/',
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      '$': 'jquery',
+      'jQuery': 'jquery',
+      'window.jQuery': 'jquery',
+      'Popper': ['popper.js', 'default'],
+    }),
     new CopyWebpackPlugin([
       {
         from: __dirname + '/app/src/annotation',
@@ -37,6 +44,9 @@ let config = {
       },
     ]),
   ],
+  performance: {
+    hints: false,
+  },
   module: {
     rules: [
       {

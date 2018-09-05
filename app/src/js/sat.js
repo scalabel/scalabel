@@ -2,6 +2,7 @@
 /* exported Sat SatItem SatLabel */
 import {rgba} from './utils';
 import $ from 'jquery';
+import 'bootstrap-switch';
 import {makeSat} from './states';
 
 // constants

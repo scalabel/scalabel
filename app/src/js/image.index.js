@@ -1,11 +1,13 @@
 /* global labelType itemType */
 /* exported initiateSatSession */
 
+import $ from 'jquery';
 import {Sat} from './sat';
 import {SatImage} from './image';
 import {SatVideo} from './video';
 import {Box2d} from './box2d';
 import {Seg2d} from './seg2d';
+import 'bootstrap-material-design';
 
 // module.exports = [initiateSatSession];
 
@@ -50,6 +52,7 @@ export function initiateSatSession(labelType, itemType) {
 }
 
 $(document).ready(function() {
+  $('body').bootstrapMaterialDesign();
   initiateSatSession(labelType, itemType);
   document.addEventListener('keydown', function(e) {
     let eventObj = window.event ? event : e;
