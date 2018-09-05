@@ -109,6 +109,8 @@ func NewEnv() *Env {
 func InitStorage(database string, dir string) Storage {
 	var storage Storage
 	switch database {
+	case "s3":
+		storage = &S3Storage{}
 	case "dynamodb":
 		storage = &DynamodbStorage{}
 	case "local":

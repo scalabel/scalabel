@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"io/ioutil"
 	"os"
 	"path"
@@ -32,6 +34,13 @@ type DynamodbStorage struct {
 //implement Storage interface
 type FileStorage struct {
 	DataDir string
+}
+
+type S3Storage struct {
+	BucketName string
+	svc        *s3.S3
+	downloader *s3manager.Downloader
+	uploader   *s3manager.Uploader
 }
 
 func (fs *FileStorage) Init(path string) error {
@@ -242,6 +251,146 @@ func (ds *DynamodbStorage) HasTable() bool {
 		TableName: aws.String("scalabel"),
 	}
 	_, err := ds.svc.DescribeTable(input)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (ss *S3Storage) Init(path string) error {
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-1")},
+	)
+	ss.downloader = s3manager.NewDownloader(sess)
+	ss.uploader = s3manager.NewUploader(sess)
+	// Create S3 client
+	ss.svc = s3.New(sess)
+	ss.BucketName = path
+	if err != nil {
+		return err
+	}
+	if !ss.HasBucket() {
+		Info.Println("Creating scalabel s3 bucket")
+		_, err = ss.svc.CreateBucket(&s3.CreateBucketInput{
+			Bucket: aws.String(ss.BucketName),
+		})
+		if err != nil {
+			return err
+		}
+		// Wait until bucket is created before finishing
+		Info.Println("Waiting for bucket scalabel to be created...")
+		err = ss.svc.WaitUntilBucketExists(&s3.HeadBucketInput{
+			Bucket: aws.String(ss.BucketName),
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (ss *S3Storage) HasKey(key string) bool {
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(ss.BucketName),
+		Key:    aws.String(key),
+	}
+	_, err := ss.svc.GetObject(input)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (ss *S3Storage) ListKeys(prefix string) []string {
+	params := &s3.ListObjectsInput{
+		Bucket: aws.String(ss.BucketName),
+		Prefix: aws.String(prefix),
+	}
+	resp, err := ss.svc.ListObjects(params)
+	if err != nil {
+		Error.Println(err)
+	}
+	keys := []string{}
+	for _, key := range resp.Contents {
+		keys = append(keys, *key.Key)
+	}
+	return keys
+}
+
+func (ss *S3Storage) Save(key string, fields map[string]interface{}) error {
+	tmpfile, err := ioutil.TempFile("", "*.json")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmpfile.Name())
+	json, err := json.MarshalIndent(fields, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(tmpfile.Name(), json, 0644)
+	if err != nil {
+		return err
+	}
+	_, err = ss.uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(ss.BucketName),
+		Key:    aws.String(key),
+		Body:   tmpfile,
+	})
+	if err != nil {
+		return err
+	} else {
+		Info.Println("Successfully added an item to the S3")
+	}
+	return nil
+}
+
+func (ss *S3Storage) Load(key string) (map[string]interface{}, error) {
+	var fields map[string]interface{}
+	tmpfile, err := ioutil.TempFile("", "*.json")
+	if err != nil {
+		return fields, err
+	}
+	defer os.Remove(tmpfile.Name())
+	_, err = ss.downloader.Download(tmpfile,
+		&s3.GetObjectInput{
+			Bucket: aws.String(ss.BucketName),
+			Key:    aws.String(key),
+		})
+	if err != nil {
+		return fields, &NotExistError{key}
+	}
+	projectFileContents, err := ioutil.ReadFile(tmpfile.Name())
+	if err != nil {
+		return fields, &NotExistError{tmpfile.Name()}
+	}
+	err = json.Unmarshal(projectFileContents, &fields)
+	if err != nil {
+		return fields, err
+	}
+	return fields, nil
+}
+
+func (ss *S3Storage) Delete(key string) error {
+	_, err := ss.svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(ss.BucketName), Key: aws.String(key)})
+	if err != nil {
+		return err
+	}
+	err = ss.svc.WaitUntilObjectNotExists(&s3.HeadObjectInput{
+		Bucket: aws.String(ss.BucketName),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Check whether scalabel table already exists
+func (ss *S3Storage) HasBucket() bool {
+	input := &s3.HeadBucketInput{
+		Bucket: aws.String(ss.BucketName),
+	}
+	_, err := ss.svc.HeadBucket(input)
 	if err != nil {
 		return false
 	}

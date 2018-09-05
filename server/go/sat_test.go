@@ -49,8 +49,14 @@ func addFileToForm(writer *multipart.Writer, filePath string, fileField string) 
 }
 
 func Test(test *testing.T) {
+	storage = &S3Storage{}
+	err := storage.Init("scalabel")
+	if err != nil {
+		test.Fatal(err)
+	}
+	RunTests(test)
 	storage = &DynamodbStorage{}
-	err := storage.Init("us-west-1")
+	err = storage.Init("us-west-1")
 	if err != nil {
 		test.Fatal(err)
 	}

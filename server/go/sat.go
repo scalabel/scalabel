@@ -38,7 +38,7 @@ func (project *Project) GetFields() map[string]interface{} {
 //implements Serializable
 type Task struct {
 	ProjectOptions ProjectOptions `json:"projectOptions" yaml:"projectOptions"`
-	Index          int            `json:"index" yaml:"index"`
+	Index          int            `json:"index,string" yaml:"index"`
 	Items          []Item         `json:"items" yaml:"items"`
 }
 
