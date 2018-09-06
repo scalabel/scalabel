@@ -41,6 +41,7 @@ function createTestPointCloudItem() {
 
   pc.container = {};
   pc.container.offsetLeft = Math.random() * 500;
+  pc.container.offsetTop = Math.random() * 500;
   pc.container.offsetWidth = Math.random() * 500;
   pc.container.offsetHeight = Math.random() * 500;
 
@@ -188,9 +189,8 @@ function generateMouseCoordinates(pc) {
       pc.container.offsetLeft + // Put inside container
       pc.container.offsetWidth *
       (pc.currentView.left + Math.random() * pc.currentView.width);
-  // pc.container.offsetWidth * pc.currentView.left + // Put inside view
-  // Math.random() * pc.currentView.width; // Random location
-  let mY = // container always at top
+  let mY =
+      pc.container.offsetTop +
       pc.container.offsetHeight *
       (pc.currentView.top + Math.random() * pc.currentView.height);
   // pc.container.offsetHeight * pc.currentView.top +
@@ -387,7 +387,7 @@ test('Box3d rotate', () => {
   let mX0 = 0.5 * pc.currentView.width + pc.currentView.left;
   mX0 = mX0 * pc.container.offsetWidth + pc.container.offsetLeft;
   let mY0 = 0.5 * pc.currentView.height + pc.currentView.top;
-  mY0 = mY0 * pc.container.offsetHeight;
+  mY0 = mY0 * pc.container.offsetHeight + pc.container.offsetTop;
   let proj0 =
       SatPointCloud.prototype.calculateProjectionFromMouse.bind(pc)(mX0, mY0);
   expectVectors(proj0, camnorm);
