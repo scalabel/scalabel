@@ -161,7 +161,7 @@ func TestVendorDashboard(t *testing.T) {
 func TestLoadAssignment(t *testing.T) {
 	for i := 0; i < 10; i += 1 {
 		req, err := http.NewRequest("POST", "postLoadAssignment",
-			bytes.NewBuffer([]byte(fmt.Sprintf(`{"task": {"projectOptions": {"name": "%s"}, "index": "%d"}}`, ProjectName, i))))
+			bytes.NewBuffer([]byte(fmt.Sprintf(`{"task": {"projectOptions": {"name": "%s"}, "index": %d}}`, ProjectName, i))))
 		if err != nil {
 			t.Fatal(err)
 		}
