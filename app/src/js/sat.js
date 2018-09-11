@@ -435,7 +435,6 @@ Sat.prototype.encodeBaseJson = function() {
         pageTitle: self.pageTitle,
         categories: self.categories,
         attributes: self.attributes,
-        labelImport: self.importFiles,
         instructions: self.instructions,
         demoMode: self.demoMode,
       },
@@ -459,12 +458,8 @@ Sat.prototype.encodeBaseJson = function() {
 Sat.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
-  // import labels
-  if (self.importFiles &&
-      self.importFiles.length > 0) {
-    self.importLabelsFromImportFiles();
-    self.save();
-  }
+  // save after importing labels
+  self.save();
 };
 
 /**
@@ -488,7 +483,6 @@ Sat.prototype.decodeBaseJson = function(json) {
   self.demoMode = json.task.projectOptions.demoMode;
   self.categories = json.task.projectOptions.categories;
   self.attributes = json.task.projectOptions.attributes;
-  self.importFiles = json.task.projectOptions.labelImport;
   self.taskIndex = json.task.index;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID
@@ -512,34 +506,6 @@ Sat.prototype.decodeBaseJson = function(json) {
     self.labelIdMap[json.labels[i].id].fromJsonPointers(json.labels[i]);
   }
   self.addEvent('start labeling', self.currentItem.index);
-};
-
-Sat.prototype.importLabelsFromImportFiles = function() {
-  let self = this;
-  for (let i = 0; i < self.items.length; i++) {
-    let item = self.items[i];
-    for (let j = self.importFiles.length - 1; j >= 0; j--) {
-      let importItem = self.importFiles[j];
-      // correspondence by url
-      if (importItem.url === item.url) {
-        if (importItem.labels) {
-          for (let labelToImport of importItem.labels) {
-            self.lastLabelId += 1;
-            let newLabel = new self.LabelType(self, self.lastLabelId);
-            newLabel = newLabel.fromExportFormat(labelToImport);
-            if (newLabel) {
-              newLabel.satItem = self.items[i];
-              self.labelIdMap[newLabel.id] = newLabel;
-              self.labels.push(newLabel);
-              self.items[i].labels.push(newLabel);
-            }
-          }
-        }
-        self.importFiles.splice(j, 1);
-        break;
-      }
-    }
-  }
 };
 
 /**
@@ -641,7 +607,8 @@ SatItem.prototype.toJson = function() {
       labelIds.push(self.labels[i].id);
     }
   }
-  return {url: self.url, index: self.index, labelIds: labelIds};
+  return {url: self.url, index: self.index,
+    labelIds: labelIds, labelImport: null};
 };
 
 /**
@@ -661,6 +628,24 @@ SatItem.prototype.fromJson = function(json) {
       let label = self.sat.labelIdMap[json.labelIds[i]];
       self.labels.push(label);
       label.satItem = this;
+    }
+  }
+  if (json.labelImport) {
+    self.importLabels(json.labelImport);
+  }
+};
+
+SatItem.prototype.importLabels = function(labels) {
+  let self = this;
+  for (let labelToImport of labels) {
+    self.sat.lastLabelId += 1;
+    let newLabel = new self.sat.LabelType(self.sat, self.sat.lastLabelId);
+    newLabel = newLabel.fromExportFormat(labelToImport);
+    if (newLabel) {
+      newLabel.satItem = self;
+      self.sat.labelIdMap[newLabel.id] = newLabel;
+      self.sat.labels.push(newLabel);
+      self.labels.push(newLabel);
     }
   }
 };

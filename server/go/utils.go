@@ -219,16 +219,7 @@ func countLabeledImage(projectName string, index int) int {
 		return 0
 	}
 	numLabeledItems := assignment.NumLabeledItems
-	// add labels that are imported but not loaded yet
-	for _, item := range assignment.Task.Items {
-		for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
-			Info.Println(item.Url)
-			if item.Url == importItem.Url {
-				Info.Println(importItem.Url)
-				numLabeledItems += 1
-			}
-		}
-	}
+	// TODO: add labels that are imported but not loaded yet
 	return numLabeledItems
 }
 
@@ -246,15 +237,7 @@ func countLabelInTask(projectName string, index int) int {
 	if assignment.Task.ProjectOptions.ItemType == "video" {
 		numLabels = len(assignment.Tracks)
 	} else {
-		// add labels that are imported but not loaded yet
-		for _, item := range assignment.Task.Items {
-			for _, importItem := range assignment.Task.ProjectOptions.LabelImport {
-				if item.Url == importItem.Url {
-					Info.Println("in")
-					numLabels += len(importItem.Labels)
-				}
-			}
-		}
+		// TODO: add labels that are imported but not loaded yet
 	}
 	return numLabels
 }
