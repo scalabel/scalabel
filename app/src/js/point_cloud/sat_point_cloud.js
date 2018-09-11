@@ -633,12 +633,14 @@ SatPointCloud.prototype.calculateLeft = function(forward) {
   return left;
 };
 
-SatPointCloud.prototype.extendBox = function(box) {
+SatPointCloud.prototype.extendBox = function() {
   // If the point cloud is not loaded yet,
   // just leave it untouched
   if (!this.ready) {
     return;
   }
+
+  let box = this.selectedLabel.box;
 
   let xl = box.position.x - box.scale.x / 2;
   let xh = box.position.x + box.scale.x / 2;
@@ -656,7 +658,12 @@ SatPointCloud.prototype.extendBox = function(box) {
     }
   }
   box.position.z = (zMax + zMin) / 2;
-  box.scale.z = zMax - zMin;
+  box.scale.z = Math.abs(zMax - zMin);
+  box.outline.position.z = box.position.z;
+  box.outline.scale.z = box.scale.z;
+  if (this.selectedLabel.parent) {
+      this.selectedLabel.parent.interpolate(this.selectedLabel);
+  }
 };
 
 SatPointCloud.prototype.handleKeyDown = function(e) {
@@ -753,10 +760,7 @@ SatPointCloud.prototype.handleKeyDown = function(e) {
       break;
     case this.G_KEY:
       if (this.selectionState != this.STANDBY) {
-        let box = this.selectedLabel.box;
-        this.extendBox(box);
-        box.outline.position.copy(box.position);
-        box.outline.scale.copy(box.scale);
+        this.extendBox();
       }
       break;
     case this.R_KEY:
