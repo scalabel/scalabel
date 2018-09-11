@@ -44,6 +44,11 @@ function createTestPointCloudItem() {
   pc.container.offsetTop = Math.random() * 500;
   pc.container.offsetWidth = Math.random() * 500;
   pc.container.offsetHeight = Math.random() * 500;
+  pc.container.getBoundingClientRect = function() {
+    return {x: pc.container.offsetLeft, y: pc.container.offsetTop,
+            width: pc.container.offsetWidth, height: pc.container.offsetHeight,
+            top: pc.container.offsetTop, left: pc.container.offsetLeft};
+  };
 
   return pc;
 }

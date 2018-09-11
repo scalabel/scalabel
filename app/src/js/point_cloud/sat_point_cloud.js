@@ -456,16 +456,18 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
               this.currentCamera.position,
               this.currentCamera.getWorldDirection(target),
               this.calculateProjectionFromMouse(
-                  this.mouseX + this.container.offsetLeft,
-                  this.mouseY + this.container.offsetTop),
+                  this.mouseX + this.container.getBoundingClientRect().left,
+                  this.mouseY + this.container.getBoundingClientRect().top),
               this.calculateProjectionFromMouse(e.clientX, e.clientY),
           );
           break;
       }
     } else {
       // Rotate when dragging
-      let dx = e.clientX - this.container.offsetLeft - this.mouseX;
-      let dy = e.clientY - this.container.offsetTop - this.mouseY;
+      let dx = e.clientX - this.container.getBoundingClientRect().left -
+               this.mouseX;
+      let dy = e.clientY - this.container.getBoundingClientRect().top -
+               this.mouseY;
 
       if (this.currentView.restrictDrag) {
         this.rotate_restricted(dx / this.MOUSE_CORRECTION_FACTOR,
@@ -477,9 +479,9 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
     }
   } else {
     // Find view that mouse is currently hovering over
-    let x = (e.clientX - this.container.offsetLeft) /
+    let x = (e.clientX - this.container.getBoundingClientRect().left) /
         this.container.offsetWidth;
-    let y = (e.clientY - this.container.offsetTop) /
+    let y = (e.clientY - this.container.getBoundingClientRect().top) /
         this.container.offsetHeight;
 
     for (let i = 0; i < this.views.length; i++) {
@@ -496,8 +498,8 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
     this.highlightMousedOverBox(e.clientX, e.clientY);
   }
 
-  this.mouseX = e.clientX - this.container.offsetLeft;
-  this.mouseY = e.clientY - this.container.offsetTop;
+  this.mouseX = e.clientX - this.container.getBoundingClientRect().left;
+  this.mouseY = e.clientY - this.container.getBoundingClientRect().top;
 };
 
 SatPointCloud.prototype.handleMouseDown = function() {
@@ -1007,9 +1009,9 @@ SatPointCloud.prototype.deleteSelection = function() {
 };
 
 SatPointCloud.prototype.convertMouseToNDC = function(mX, mY) {
-  let x = (mX - this.container.offsetLeft) /
+  let x = (mX - this.container.getBoundingClientRect().left) /
       this.container.offsetWidth;
-  let y = (mY - this.container.offsetTop) /
+  let y = (mY - this.container.getBoundingClientRect().top) /
       this.container.offsetHeight;
   x -= this.currentView.left;
   x /= this.currentView.width;
