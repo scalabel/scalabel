@@ -45,32 +45,8 @@ export function Seg2d(sat, id, optionalAttributes) {
   if (mousePos) {
     // if mousePos given, start drawing
     // set label type
-    if (Seg2d.closed) {
-      this.newPoly = new Polygon();
-      this.tempPoly = new Polygon();
-    } else {
-      this.newPoly = new Path();
-      this.tempPoly = new Path();
-    }
     this.setState(SegStates.DRAW);
-
-    let occupiedShape = this.satItem.getOccupiedShape(mousePos);
-    if (occupiedShape instanceof Vertex) {
-      this.newPoly.pushVertex(occupiedShape);
-      this.tempPoly.pushVertex(occupiedShape);
-      this.satItem.pushToHiddenMap([occupiedShape]);
-      this.latestSharedVertex = occupiedShape;
-    } else {
-      let firstVertex = new Vertex(mousePos.x, mousePos.y);
-      this.newPoly.pushVertex(firstVertex);
-      this.tempPoly.pushVertex(firstVertex);
-      this.satItem.pushToHiddenMap([firstVertex]);
-      this.latestSharedVertex = null;
-    }
-
-    this.tempVertex = new Vertex(mousePos.x, mousePos.y);
-    this.tempPoly.pushVertex(this.tempVertex);
-    this.selectedShape = null;
+    this.initDrawing(mousePos);
   }
 }
 
@@ -81,6 +57,33 @@ Seg2d.defaultCursorStyle = 'auto';
 Seg2d.useDoubleClick = true;
 Seg2d.closed =
     document.getElementById('label_type').innerHTML === 'segmentation';
+
+Seg2d.prototype.initDrawing = function(mousePos) {
+  if (Seg2d.closed) {
+    this.newPoly = new Polygon();
+    this.tempPoly = new Polygon();
+  } else {
+    this.newPoly = new Path();
+    this.tempPoly = new Path();
+  }
+  let occupiedShape = this.satItem.getOccupiedShape(mousePos);
+  if (occupiedShape instanceof Vertex) {
+    this.newPoly.pushVertex(occupiedShape);
+    this.tempPoly.pushVertex(occupiedShape);
+    this.satItem.pushToHiddenMap([occupiedShape]);
+    this.latestSharedVertex = occupiedShape;
+  } else {
+    let firstVertex = new Vertex(mousePos.x, mousePos.y);
+    this.newPoly.pushVertex(firstVertex);
+    this.tempPoly.pushVertex(firstVertex);
+    this.satItem.pushToHiddenMap([firstVertex]);
+    this.latestSharedVertex = null;
+  }
+
+  this.tempVertex = new Vertex(mousePos.x, mousePos.y);
+  this.tempPoly.pushVertex(this.tempVertex);
+  this.selectedShape = null;
+};
 
 Seg2d.prototype.identityInterpolation = function(startLabel, endLabel, weight) { // eslint-disable-line
   this.deleteAllPolyline();
@@ -179,6 +182,9 @@ Seg2d.prototype.setState = function(state) {
       this.satItem.resetHiddenMap(this.getAllHiddenShapes());
       this.satItem.redrawHiddenCanvas();
     }
+    this.newPoly = null;
+    this.tempPoly = null;
+    this.tempVertex = null;
   } else if (state === SegStates.DRAW) {
     // reset hiddenMap with all existing vertices
     let shapes = [];
@@ -338,11 +344,21 @@ Seg2d.prototype.handleQuickdraw = function() {
 
       if (this.newPoly.isValidShape()) {
         this.addPolyline(this.newPoly);
-        this.tempVertex.delete();
-        this.tempPoly.delete();
-        this.tempVertex = null;
-        this.tempPoly = null;
+        if (this.polyBuffer) {
+          for (let poly of this.polyBuffer) {
+            poly.delete();
+          }
+        }
+      } else if (this.polyBuffer) {
+        for (let poly of this.polyBuffer) {
+          this.polys.push(poly);
+        }
       }
+      this.polyBuffer = null;
+      this.tempVertex.delete();
+      this.tempPoly.delete();
+      this.tempVertex = null;
+      this.tempPoly = null;
 
       this.setState(SegStates.FREE);
       this.selectedShape = this.newPoly;
@@ -532,7 +548,8 @@ Seg2d.prototype.redrawLabelCanvas = function(mainCtx) {
   this.setPolygonLine(mainCtx);
   this.setPolygonFill(mainCtx);
 
-  if (this.state === SegStates.DRAW || this.state === SegStates.QUICK_DRAW) {
+  if ((this.state === SegStates.DRAW ||
+      this.state === SegStates.QUICK_DRAW) && this.tempPoly) {
     this.tempPoly.draw(mainCtx, this.satItem,
         this.isTargeted() && this.state !== SegStates.DRAW
         && this.state !== SegStates.QUICK_DRAW);
@@ -798,6 +815,10 @@ Seg2d.prototype.doubleclick = function() {
 Seg2d.prototype.mouseup = function(e) {
   let mousePos = this.satItem.getMousePos(e);
   if (this.state === SegStates.DRAW) {
+    if (!this.tempVertex) {
+      this.initDrawing(mousePos);
+      return;
+    }
     this.tempVertex.xy = [mousePos.x, mousePos.y];
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
     if (occupiedShape && (occupiedShape instanceof Vertex)) {
@@ -827,12 +848,21 @@ Seg2d.prototype.mouseup = function(e) {
 
         if (this.newPoly.isValidShape()) {
           this.addPolyline(this.newPoly);
-          this.tempVertex.delete();
-          this.tempPoly.delete();
-          this.tempVertex = null;
-          this.tempPoly = null;
+          if (this.polyBuffer) {
+            for (let poly of this.polyBuffer) {
+              poly.delete();
+            }
+          }
+        } else if (this.polyBuffer) {
+          for (let poly of this.polyBuffer) {
+            this.polys.push(poly);
+          }
         }
-
+        this.polyBuffer = null;
+        this.tempVertex.delete();
+        this.tempPoly.delete();
+        this.tempVertex = null;
+        this.tempPoly = null;
         this.setState(SegStates.FREE);
         this.selectedShape = this.newPoly;
         if (this.parent) {
@@ -912,7 +942,7 @@ Seg2d.prototype.mousemove = function(e) {
   let mousePos = this.satItem.getMousePos(e);
   // handling according to state
   if ((this.state === SegStates.DRAW || this.state === SegStates.QUICK_DRAW)
-      && !this.satItem.isMouseDown) {
+      && !this.satItem.isMouseDown && this.tempVertex) {
     this.tempVertex.xy = [mousePos.x, mousePos.y];
   } else if (this.state === SegStates.RESIZE
       && this.selectedShape instanceof Vertex) {
@@ -979,6 +1009,12 @@ Seg2d.prototype.mouseleave = function(e) { // eslint-disable-line
 Seg2d.prototype.keydown = function(e) {
   let keyID = e.KeyCode ? e.KeyCode : e.which;
   if (keyID === 27) { // Esc
+    if (this.polyBuffer) {
+      for (let poly of this.polyBuffer) {
+        this.polys.push(poly);
+      }
+      this.polyBuffer = null;
+    }
     this.setState(SegStates.FREE);
   } else if (keyID === 85) {
     // u for unlinking the selected label
@@ -1030,6 +1066,17 @@ Seg2d.prototype.keydown = function(e) {
       this.setState(SegStates.FREE);
       this.tempVertex = null;
       this.selectedShape = this.newPoly;
+    }
+  } else if (keyID === 82) {
+    // r for relabeling a seg2d
+    if (this.state === SegStates.FREE) {
+      this.polyBuffer = [];
+      for (let poly of this.polys) {
+        this.polyBuffer.push(poly);
+      }
+      this.polys = [];
+      this.setState(SegStates.DRAW);
+      this.satItem.redrawLabelCanvas();
     }
   }
 };
