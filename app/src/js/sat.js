@@ -553,6 +553,8 @@ SatItem.prototype.setActive = function(active) {
   let self = this;
   if (active) {
     self.sat.addEvent('start labeling', self.index);
+    self.redraw();
+    self.updateLabelCount();
   } else {
     self.sat.addEvent('end labeling', self.index);
   }

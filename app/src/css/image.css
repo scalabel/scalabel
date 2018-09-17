@@ -192,9 +192,10 @@ canvas#hidden_canvas {
 #div_canvas {
     position: relative;
     float: left;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 70px);
     width: calc(100vw - 220px);
     left: 10px;
+    top: 10px;
     overflow: scroll;
 }
 
@@ -302,7 +303,7 @@ canvas#hidden_canvas {
     display: table;
     table-layout: fixed;
     position: relative;
-    top: 0px;
+    top: 20px;
 }
 
 #frame_counter {

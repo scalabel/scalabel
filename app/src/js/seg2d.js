@@ -53,7 +53,7 @@ export function Seg2d(sat, id, optionalAttributes) {
 Seg2d.prototype = Object.create(ImageLabel.prototype);
 
 Seg2d.useCrossHair = false;
-Seg2d.defaultCursorStyle = 'auto';
+Seg2d.defaultCursorStyle = 'default';
 Seg2d.useDoubleClick = true;
 Seg2d.closed =
     document.getElementById('label_type').innerHTML === 'segmentation';
@@ -164,6 +164,13 @@ Seg2d.prototype.setState = function(state) {
   if (state === SegStates.FREE) {
     // clean up buttons
     if (Seg2d.closed) {
+      // stop incompletely drawn labels
+      if ((this.state === SegStates.DRAW ||
+          this.state === SegStates.QUICK_DRAW) &&
+          this.polys.length === 0) {
+        this.delete();
+        return;
+      }
       let quickdrawButton = document.getElementById('quickdraw_btn');
       quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
       quickdrawButton.style.backgroundColor = 'white';
@@ -238,7 +245,7 @@ Seg2d.setToolBox = function(satItem) {
   if (Seg2d.closed) {
     satItem.isLinking = false;
     document.getElementById('link_btn').onclick = function() {
-      satItem._linkHandler();
+      satItem.linkHandler();
     };
     document.getElementById('quickdraw_btn').onclick = function() {
       if (satItem.selectedLabel) {
@@ -272,41 +279,51 @@ Seg2d.prototype.midpointToVertex = function(pt) {
   }
 };
 
+SatImage.prototype.startLinking = function() {
+  let button = document.getElementById('link_btn');
+  this.isLinking = true;
+  button.innerHTML = 'Finish Linking';
+  button.style.backgroundColor = 'lightgreen';
+
+  let cat = this.catSel.options[this.catSel.selectedIndex].innerHTML;
+  if (!this.selectedLabel) {
+    let attributes = {};
+    for (let i = 0; i < this.sat.attributes.length; i++) {
+      if (this.sat.attributes[i].toolType === 'switch') {
+        attributes[this.sat.attributes[i].name] = false;
+      } else if (this.sat.attributes[i].toolType === 'list') {
+        attributes[this.sat.attributes[i].name] = [
+          0,
+          this.sat.attributes[i].values[0]];
+      }
+    }
+    this.selectedLabel = this.sat.newLabel({
+      categoryPath: cat, occl: false,
+      trunc: false, mousePos: null,
+    });
+    this.selectedLabel.setAsTargeted();
+  }
+  this.selectedLabel.linkHandler();
+};
+
+SatImage.prototype.endLinking = function() {
+  let button = document.getElementById('link_btn');
+  this.isLinking = false;
+  button.innerHTML = 'Link';
+  button.style.backgroundColor = 'white';
+  this.updateLabelCount();
+  this.selectedLabel.linkHandler();
+};
+
 /**
  * Link button handler
  */
-SatImage.prototype._linkHandler = function() {
-  let button = document.getElementById('link_btn');
+SatImage.prototype.linkHandler = function() {
   if (!this.isLinking) {
-    this.isLinking = true;
-    button.innerHTML = 'Finish Linking';
-    button.style.backgroundColor = 'lightgreen';
-
-    let cat = this.catSel.options[this.catSel.selectedIndex].innerHTML;
-    if (!this.selectedLabel) {
-      let attributes = {};
-      for (let i = 0; i < this.sat.attributes.length; i++) {
-        if (this.sat.attributes[i].toolType === 'switch') {
-          attributes[this.sat.attributes[i].name] = false;
-        } else if (this.sat.attributes[i].toolType === 'list') {
-          attributes[this.sat.attributes[i].name] = [
-            0,
-            this.sat.attributes[i].values[0]];
-        }
-      }
-      this.selectedLabel = this.sat.newLabel({
-        categoryPath: cat, occl: false,
-        trunc: false, mousePos: null,
-      });
-      this.selectedLabel.setAsTargeted();
-    }
+    this.startLinking();
   } else {
-    this.isLinking = false;
-    button.innerHTML = 'Link';
-    button.style.backgroundColor = 'white';
-    this.updateLabelCount();
+    this.endLinking();
   }
-  this.selectedLabel.linkHandler();
 };
 
 Seg2d.prototype.linkHandler = function() {
@@ -456,6 +473,23 @@ Seg2d.prototype.selectedBy = function(shape) {
   return false;
 };
 
+Seg2d.prototype.releaseAsTargeted = function() {
+  ImageLabel.prototype.releaseAsTargeted.call(this);
+};
+
+Seg2d.prototype.deactivate = function() {
+  if (this.satItem.isLinking) {
+    this.satItem.endLinking();
+  }
+  if (this.state !== SegStates.FREE) {
+    this.setState(SegStates.FREE);
+  }
+};
+
+Seg2d.prototype.allowsLeavingCurrentItem = function() {
+  return this.state !== SegStates.QUICK_DRAW;
+};
+
 /**
  * Returns the shapes to draw on the hidden canvas when not selected.
  * @return {[Shape]} List of shapes to draw on the hidden canvas
@@ -553,13 +587,17 @@ Seg2d.prototype.redrawLabelCanvas = function(mainCtx) {
     this.tempPoly.draw(mainCtx, this.satItem,
         this.isTargeted() && this.state !== SegStates.DRAW
         && this.state !== SegStates.QUICK_DRAW);
-    this.tempPoly.drawHandles(mainCtx, this.satItem, styleColor, null, false);
+    this.tempPoly.drawHandles(mainCtx, this.satItem,
+        styleColor, this.hoveredShape, false);
   } else if (this.polys.length > 0) {
     for (let poly of this.polys) {
+      let drawDashWhenTargeted = this.isTargeted()
+          && this.state !== SegStates.DRAW
+          && this.state !== SegStates.QUICK_DRAW;
+      let polyHovered = this.polys.indexOf(this.hoveredShape) >= 0;
       poly.draw(mainCtx, this.satItem,
-          this.isTargeted() && this.state !== SegStates.DRAW
-          && this.state !== SegStates.QUICK_DRAW);
-      if (this.isTargeted()) {
+          drawDashWhenTargeted || polyHovered);
+      if (this.isTargeted() || polyHovered) {
         poly.drawHandles(mainCtx,
             this.satItem, styleColor, this.hoveredShape, true);
       }
@@ -626,11 +664,11 @@ Seg2d.prototype.shapesValid = function() {
  * @return {string} - The cursor style string.
  */
 Seg2d.prototype.getCursorStyle = function(shape) {
-  if (shape instanceof Polygon && !this.satItem.isLinking &&
+  if (shape instanceof Polygon && !this.satItem.isLinking && this._M_down &&
       this.satItem.selectedLabel && this.satItem.selectedLabel.id === this.id) {
     return 'move';
   }
-  return this.defaultCursorStyle;
+  return Seg2d.defaultCursorStyle;
 };
 
 Seg2d.prototype.mousedown = function(e) {
@@ -650,7 +688,8 @@ Seg2d.prototype.mousedown = function(e) {
 
       // start resize mode
       this.setState(SegStates.RESIZE);
-    } else if (occupiedShape instanceof Polygon && !this.satItem.isLinking) {
+    } else if (occupiedShape instanceof Polygon && !this.satItem.isLinking
+        && this._M_down) {
       // if clicked on a polygon, start moving
       this.setState(SegStates.MOVE);
       this.mouseClickPos = mousePos;
@@ -743,7 +782,6 @@ Seg2d.prototype.mousedown = function(e) {
 
         // if occupied object is a vertex that is not in this polygon, add it
         this.tempPoly.popVertex();
-        // this.tempPoly.popVertex();
         this.quickdrawCache.shortPathTempPoly = this.tempPoly.copy(true);
         this.quickdrawCache.longPathTempPoly = this.tempPoly.copy(true);
         this.quickdrawCache.shortPathTempPoly.pushPath(
@@ -944,9 +982,18 @@ Seg2d.prototype.mousemove = function(e) {
   if ((this.state === SegStates.DRAW || this.state === SegStates.QUICK_DRAW)
       && !this.satItem.isMouseDown && this.tempVertex) {
     this.tempVertex.xy = [mousePos.x, mousePos.y];
+    // hover over vertex
+    let hoveredObject = this.satItem.getOccupiedShape(mousePos);
+    this.hoveredShape = null;
+    let relevant = hoveredObject instanceof Vertex &&
+        (this.newPoly.vertices.indexOf(hoveredObject) >= 0);
+    if (relevant) {
+      this.hoveredShape = hoveredObject;
+    }
   } else if (this.state === SegStates.RESIZE
       && this.selectedShape instanceof Vertex) {
     this.selectedShape.xy = [mousePos.x, mousePos.y];
+    this.hoveredShape = this.selectedShape;
   } else if (this.state === SegStates.FREE) {
     // hover over vertex
     let hoveredObject = this.satItem.getOccupiedShape(mousePos);
@@ -958,8 +1005,6 @@ Seg2d.prototype.mousemove = function(e) {
       if (relevant) {
         this.hoveredShape = hoveredObject;
         break;
-      } else {
-        this.hoveredShape = null;
       }
     }
   } else if (this.state === SegStates.MOVE) {
@@ -1078,5 +1123,44 @@ Seg2d.prototype.keydown = function(e) {
       this.setState(SegStates.DRAW);
       this.satItem.redrawLabelCanvas();
     }
+  } else if (keyID === 77) {
+    // m for moving seg2d
+    this._M_down = true;
+  } else if (keyID === 68) {
+    // d for deleting single vertex
+    if (this.state === SegStates.DRAW) {
+      if (this.newPoly.vertices.length < 2) {
+        // set state to free to be deleted
+        this.setState(SegStates.FREE);
+      } else {
+        // otherwise, pop the last labeled vertex
+        this.newPoly.popVertex();
+        this.tempPoly.popVertex();
+        this.tempPoly.popVertex();
+        this.tempPoly.pushVertex(this.tempVertex);
+      }
+    } else if (this.state === SegStates.FREE) {
+      for (let poly of this.polys) {
+        if (poly.vertices.length > 3) {
+          let index = poly.vertices.indexOf(this.hoveredShape);
+          if (index >= 0) {
+            // in vertices, and # vertices > 3, delete
+            poly.deleteVertex(index);
+          }
+        }
+      }
+    }
+  }
+};
+
+/**
+ * Key up handler.
+ * @param {type} e: Description.
+ */
+Seg2d.prototype.keyup = function(e) {
+  let keyID = e.KeyCode ? e.KeyCode : e.which;
+  if (keyID === 77) {
+    // m for moving seg2d
+    this._M_down = false;
   }
 };

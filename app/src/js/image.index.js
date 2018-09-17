@@ -42,7 +42,7 @@ export function initSatSession(labelType, itemType) {
   if (itemType === 'video') {
     showElementById('player_controls');
     showTemplateById('video_btns');
-    document.getElementById('div_canvas').style.height = 'calc(100vh - 83px)';
+    document.getElementById('div_canvas').style.height = 'calc(100vh - 103px)';
     new SatVideo(labelClass);
   }
 }

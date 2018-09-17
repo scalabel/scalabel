@@ -1,3 +1,5 @@
+import 'bootstrap-switch';
+
 $(document).ready(function() {
   let dashboard = $('#go_to_dashboard');
   let vendor = $('#go_to_vendor_dashboard');
@@ -106,9 +108,9 @@ $(document).ready(function() {
   demoModeCheckbox.setAttribute('data-on-color', 'info');
   demoModeCheckbox.setAttribute('data-on-text', 'Yes');
   demoModeCheckbox.setAttribute('data-off-text', 'No');
-  demoModeCheckbox.setAttribute('data-size', 'small');
-  demoModeCheckbox.setAttribute('data-label-text', 'Demo Mode');
-  $('#demo_mode').bootstrapSwitch();
+  demoModeCheckbox.setAttribute('data-size', 'medium');
+  demoModeCheckbox.setAttribute('data-label-text', 'Demo');
+  $('#demo_mode').bootstrapSwitch('state', false);
 
   /**
    * Enable the specified option in the specified select.

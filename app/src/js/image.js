@@ -499,6 +499,12 @@ SatImage.prototype._getSelectedAttributes = function() {
  */
 SatImage.prototype._prevHandler = function() {
   let self = this;
+  if (self.selectedLabel) {
+    if (!self.selectedLabel.allowsLeavingCurrentItem()) {
+      return;
+    }
+    self.selectedLabel.deactivate();
+  }
   self.sat.gotoItem(self.index - 1);
 };
 
@@ -507,6 +513,12 @@ SatImage.prototype._prevHandler = function() {
  */
 SatImage.prototype._nextHandler = function() {
   let self = this;
+  if (self.selectedLabel) {
+    if (!self.selectedLabel.allowsLeavingCurrentItem()) {
+      return;
+    }
+    self.selectedLabel.deactivate();
+  }
   self.sat.gotoItem(self.index + 1);
 };
 
@@ -562,8 +574,9 @@ SatImage.prototype.redrawLabelCanvas = function() {
   if (self.selectedLabel && !self.selectedLabel.valid) {
     self.selectedLabel = null;
   }
-  self.labelCtx.clearRect(0, 0, (self.padBox.x + self.padBox.w) * UP_RES_RATIO,
-      (self.padBox.y + self.padBox.h) * UP_RES_RATIO);
+  self.labelCtx.clearRect(0, 0,
+      (2 * self.padBox.x + self.imageCanvas.width) * UP_RES_RATIO,
+      (2 * self.padBox.y + self.imageCanvas.height) * UP_RES_RATIO);
   for (let label of self.labels) {
     if (label.valid) {
       label.redrawLabelCanvas(self.labelCtx, self.hoveredLabel);
@@ -636,9 +649,11 @@ SatImage.prototype._keydown = function(e) {
   } else if (keyID === 37) { // Left/Right Arrow
     e.preventDefault();
     self._prevHandler();
+    return;
   } else if (keyID === 39) { // Left/Right Arrow
     e.preventDefault();
     self._nextHandler();
+    return;
   } else if (keyID === 17) { // Ctrl
     self.ctrlDown = true;
   } else if (keyID === 38) { // up key
@@ -649,8 +664,6 @@ SatImage.prototype._keydown = function(e) {
         this.labels[index] = this.labels[index + 1];
         this.labels[index + 1] = this.selectedLabel;
       }
-      this.redrawLabelCanvas();
-      this.redrawHiddenCanvas();
     }
   } else if (keyID === 40) { // down key
     if (this.selectedLabel) {
@@ -660,8 +673,6 @@ SatImage.prototype._keydown = function(e) {
         this.labels[index] = this.labels[index - 1];
         this.labels[index - 1] = this.selectedLabel;
       }
-      this.redrawLabelCanvas();
-      this.redrawHiddenCanvas();
     }
   } else if (keyID === 70) { // f for front
     if (this.selectedLabel) {
@@ -670,8 +681,6 @@ SatImage.prototype._keydown = function(e) {
         this.labels.splice(index, 1);
         this.labels.push(this.selectedLabel);
       }
-      this.redrawLabelCanvas();
-      this.redrawHiddenCanvas();
     }
   } else if (keyID === 66) { // b for back
     if (this.selectedLabel) {
@@ -680,8 +689,6 @@ SatImage.prototype._keydown = function(e) {
         this.labels.splice(index, 1);
         this.labels.unshift(this.selectedLabel);
       }
-      this.redrawLabelCanvas();
-      this.redrawHiddenCanvas();
     }
   } else if (keyID === 72) { // h for hiding all labels
     if (this.labelCanvas.style.visibility === 'visible') {
@@ -690,8 +697,10 @@ SatImage.prototype._keydown = function(e) {
       this.labelCanvas.style.visibility = 'visible';
     }
   }
+  this.redrawLabelCanvas();
+  this.redrawHiddenCanvas();
   self.updateLabelCount();
-  if (keyID === 68) { // d for debug
+  if (keyID === 220) { // backslash for showing hidden canvas (debug)
     self.showHiddenCanvas();
   }
 };
@@ -699,6 +708,9 @@ SatImage.prototype._keydown = function(e) {
 SatImage.prototype._keyup = function(e) {
   let self = this;
   let keyID = e.KeyCode ? e.KeyCode : e.which;
+  if (self.selectedLabel) {
+    self.selectedLabel.keyup(e);
+  }
   if (keyID === 17) { // Ctrl
     self.ctrlDown = false;
   }
@@ -808,7 +820,6 @@ SatImage.prototype._mousemove = function(e) {
   }
   if (this._isWithinFrame(e)) {
     let mousePos = this.getMousePos(e);
-
     // label specific handling of mousemove
     if (this.selectedLabel) {
       this.selectedLabel.mousemove(e);
@@ -816,8 +827,13 @@ SatImage.prototype._mousemove = function(e) {
 
     // hover effect
     let hoveredShape = this.getOccupiedShape(mousePos);
-    this.hoveredLabel = this.getLabelOfShape(hoveredShape);
-    if (this.hoveredLabel) {
+    let hoveredLabel = this.getLabelOfShape(hoveredShape);
+    // hovered label changed
+    if (this.hoveredLabel && this.hoveredLabel !== hoveredLabel) {
+      this.hoveredLabel.releaseCurrHoveredShape();
+    }
+    if (hoveredLabel) {
+      this.hoveredLabel = hoveredLabel;
       this.hoveredLabel.setCurrHoveredShape(hoveredShape);
     }
 
@@ -922,19 +938,11 @@ SatImage.prototype._mouseup = function(e) {
  * @return {boolean}: whether the mouse is within the image frame
  */
 SatImage.prototype._isWithinFrame = function(e) {
-  let rect = this.imageCanvas.getBoundingClientRect();
-  let withinImage = (this.padBox
-      && rect.x + this.padBox.x < e.clientX
-      && e.clientX < rect.x + this.padBox.x + this.padBox.w
-      && rect.y + this.padBox.y < e.clientY
-      && e.clientY < rect.y + this.padBox.y + this.padBox.h);
-
   let rectDiv = this.divCanvas.getBoundingClientRect();
-  let withinDiv = (rectDiv.x < e.clientX
-      && e.clientX < rectDiv.x + rectDiv.width
-      && rectDiv.y < e.clientY
-      && e.clientY < rectDiv.y + rectDiv.height);
-  return withinImage && withinDiv;
+  return (rectDiv.x - 10 < e.clientX
+      && e.clientX < rectDiv.x + rectDiv.width + 10
+      && rectDiv.y - 10 < e.clientY
+      && e.clientY < rectDiv.y + rectDiv.height + 10);
 };
 
 /**
@@ -944,10 +952,28 @@ SatImage.prototype._isWithinFrame = function(e) {
  */
 SatImage.prototype.getMousePos = function(e) {
   let self = this;
+  // limit mouse within the image
   let rect = self.hiddenCanvas.getBoundingClientRect();
+  let x = Math.min(
+      Math.max(e.clientX, rect.x + this.padBox.x),
+      rect.x + this.padBox.x + this.padBox.w);
+  let y = Math.min(
+      Math.max(e.clientY, rect.y + this.padBox.y),
+      rect.y + this.padBox.y + this.padBox.h);
+
+  // limit mouse within the main div
+  let rectDiv = this.divCanvas.getBoundingClientRect();
+  x = Math.min(
+      Math.max(x, rectDiv.x),
+      rectDiv.x + rectDiv.width
+  );
+  y = Math.min(
+      Math.max(y, rectDiv.y),
+      rectDiv.y + rectDiv.height
+  );
   return {
-    x: (e.clientX - rect.x - self.padBox.x) / self.displayToImageRatio,
-    y: (e.clientY - rect.y - self.padBox.y) / self.displayToImageRatio,
+    x: (x - rect.x - self.padBox.x) / self.displayToImageRatio,
+    y: (y - rect.y - self.padBox.y) / self.displayToImageRatio,
   };
 };
 
@@ -1300,6 +1326,10 @@ ImageLabel.prototype.setCurrHoveredShape = function(shape) {
   this.hoveredShape = shape;
 };
 
+ImageLabel.prototype.releaseCurrHoveredShape = function() {
+  this.hoveredShape = null;
+};
+
 ImageLabel.prototype.getCurrHoveredShape = function() {
   return this.hoveredShape;
 };
@@ -1350,6 +1380,14 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
  */
 ImageLabel.defaultHiddenShapes = function() {
   return null;
+};
+
+/**
+ * Returns whether or not this label allows switching to another SatItem
+ * @return {boolean}
+ */
+ImageLabel.prototype.allowsLeavingCurrentItem = function() {
+  return true;
 };
 
 // event handlers

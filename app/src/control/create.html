@@ -96,7 +96,7 @@
             </div>
             <div class="form-row" style="width:710px;">
                 <div class="form-group col">
-                    <label for="item_type">Item Type</label>
+                    <label for="item_type">Item Type*</label>
                     <div>
                         <select id="item_type" name="item_type" class="custom-select mr-sm-2 col" required>
                             <option value="">&lt;select an
@@ -109,7 +109,7 @@
                     </div>
                 </div>
                 <div class="form-group col">
-                    <label for="label_type">Label Type</label>
+                    <label for="label_type">Label Type*</label>
                     <div>
                         <select id="label_type" name="label_type" class="custom-select mr-sm-2" required>
                             <option value="">&lt;select an
@@ -136,7 +136,7 @@
                            id="item_file" name="item_file" accept=".json, .yaml, .yml">
                 </div>
                 <div class="form-group col">
-                    <label for="categories">Categories</label>
+                    <label for="categories">Categories*</label>
                     <input type="file" class="form-control-file"
                            id="categories" name="categories"
                            accept=".yml, .yaml">
@@ -150,12 +150,12 @@
             </div>
             <div class="form-row" style="width:710px;">
                 <div class="form-group col" style="display: none;">
-                    <label for="frame_rate">Frame Rate</label>
+                    <label for="frame_rate">Frame Rate*</label>
                     <input required type="number" min="1" max="60"
                            class="form-control" id="frame_rate" name="frame_rate">
                 </div>
                 <div class="form-group col">
-                    <label for="task_size">Task Size</label>
+                    <label for="task_size">Task Size*</label>
                     <input required type="number" min="1" class="form-control"
                            id="task_size" name="task_size">
                 </div>
@@ -179,11 +179,13 @@
             </div>
             <div id="advanced_options">
                 <br/>
-                <div class="form-group text-nowrap">
-                    <input type="checkbox" class="switch" id="demo_mode" name="demo_mode">
+                <div id="demo_mode_div">
+                    <div class="form-group">
+                        <input id="demo_mode" name="demo_mode">
+                    </div>
                 </div>
                 <div id="interpolation_mode_div" class="form-group">
-                    <label for="interpolation_mode">Interpolation Mode*</label>
+                    <label for="interpolation_mode">Interpolation Mode</label>
                     <div>
                         <select id="interpolation_mode" name="interpolation_mode" class="custom-select mr-sm-2" style="width:300px;">
                             <option value="">&lt;select an

@@ -104,8 +104,13 @@ Box2d.prototype.selectedBy = function(shape) {
 };
 
 Box2d.prototype.releaseAsTargeted = function() {
-  this.setState(BoxStates.FREE);
   ImageLabel.prototype.releaseAsTargeted.call(this);
+};
+
+Box2d.prototype.deactivate = function() {
+  if (this.state !== BoxStates.FREE) {
+    this.setState(BoxStates.FREE);
+  }
 };
 
 /**
@@ -223,7 +228,7 @@ Box2d.prototype.getCursorStyle = function(shape) {
   }
   let handleNo = this.rect.getHandleNo(shape);
   if (handleNo < 0) {
-    return this.defaultCursorStyle;
+    return Box2d.defaultCursorStyle;
   }
   if (this.state === BoxStates.RESIZE) {
     return 'crosshair';
@@ -242,8 +247,8 @@ Box2d.prototype.setState = function(state) {
     this.state = state;
     this.selectedShape = this.rect;
     this.selectedCache = null;
-    // this.satItem.resetHiddenMap(this.getAllHiddenShapes());
-    // this.satItem.redrawHiddenCanvas();
+    this.satItem.resetHiddenMap(this.getAllHiddenShapes());
+    this.satItem.redrawHiddenCanvas();
   } else if (state === BoxStates.RESIZE) {
     this.state = state;
   } else if (state === BoxStates.MOVE) {
