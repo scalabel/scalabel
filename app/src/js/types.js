@@ -33,6 +33,7 @@ export type ItemType = {
   index: number,
   url: string,
   active: boolean,
+  loaded: boolean,
   labels: Array<number>, // list of label ids
   attributes: {[string]: string}
 };
