@@ -2,6 +2,7 @@ import {rgba} from './utils';
 import $ from 'jquery';
 import 'bootstrap-switch';
 import {makeSat} from './states';
+import {Shape} from './shape';
 
 // constants
 const COLOR_PALETTE = [
@@ -650,6 +651,7 @@ SatItem.prototype.importLabels = function(labels) {
       self.labels.push(newLabel);
     }
   }
+  Shape.resolveIdCollision();
 };
 
 /**

@@ -43,3 +43,13 @@ export function mode(arr) {
       - arr.filter((v) => v===b).length
   ).pop();
 }
+
+/**
+ * Function to wrap index
+ * @param {number} i - the raw index
+ * @param {number} length - the actual length of the array
+ * @return {number} the index in the array
+ */
+export function idx(i, length) {
+  return (i + length) % length;
+}

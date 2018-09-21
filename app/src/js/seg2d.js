@@ -1,7 +1,7 @@
 import {SatImage, ImageLabel} from './image';
 import {
-  Shape, Polygon, Path, Vertex,
-  VertexTypes, EdgeTypes, GRAYOUT_COLOR, SELECT_COLOR,
+  Polygon, Path, Vertex,
+  VertexTypes, GRAYOUT_COLOR, SELECT_COLOR,
   LINE_WIDTH, OUTLINE_WIDTH, ALPHA_HIGH_FILL,
   ALPHA_LOW_FILL, ALPHA_LINE, UP_RES_RATIO,
 } from './shape';
@@ -61,10 +61,10 @@ Seg2d.closed =
 Seg2d.prototype.initDrawing = function(mousePos) {
   if (Seg2d.closed) {
     this.newPoly = new Polygon();
-    this.tempPoly = new Polygon();
+    this.tempPoly = new Polygon(-1);
   } else {
     this.newPoly = new Path();
-    this.tempPoly = new Path();
+    this.tempPoly = new Path(-1);
   }
   let occupiedShape = this.satItem.getOccupiedShape(mousePos);
   if (occupiedShape instanceof Vertex) {
@@ -80,9 +80,36 @@ Seg2d.prototype.initDrawing = function(mousePos) {
     this.latestSharedVertex = null;
   }
 
-  this.tempVertex = new Vertex(mousePos.x, mousePos.y);
+  this.tempVertex = new Vertex(mousePos.x, mousePos.y,
+      VertexTypes.VERTEX, -1);
   this.tempPoly.pushVertex(this.tempVertex);
   this.selectedShape = null;
+};
+
+Seg2d.prototype.completeDrawing = function() {
+  this.newPoly.endPath();
+  if (this.newPoly.isValidShape()) {
+    this.addPolyline(this.newPoly);
+    if (this.polyBuffer) {
+      for (let poly of this.polyBuffer) {
+        poly.delete();
+      }
+    }
+  } else if (this.polyBuffer) {
+    for (let poly of this.polyBuffer) {
+      this.polys.push(poly);
+    }
+  }
+  this.polyBuffer = null;
+  this.tempVertex.delete();
+  this.tempPoly.delete();
+  this.tempVertex = null;
+  this.tempPoly = null;
+  this.setState(SegStates.FREE);
+  this.selectedShape = this.newPoly;
+  if (this.parent) {
+    this.parent.interpolate(this);
+  }
 };
 
 Seg2d.prototype.identityInterpolation = function(startLabel, endLabel, weight) { // eslint-disable-line
@@ -164,20 +191,15 @@ Seg2d.prototype.setState = function(state) {
   if (state === SegStates.FREE) {
     // clean up buttons
     if (Seg2d.closed) {
+      if (this.state === SegStates.QUICK_DRAW) {
+        this.resetQuickdrawButton();
+      }
       // stop incompletely drawn labels
       if ((this.state === SegStates.DRAW ||
           this.state === SegStates.QUICK_DRAW) &&
           this.polys.length === 0) {
         this.delete();
         return;
-      }
-      let quickdrawButton = document.getElementById('quickdraw_btn');
-      quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
-      quickdrawButton.style.backgroundColor = 'white';
-
-      // clean up cache
-      if (this.quickdrawCache.targetSeg2d) {
-        this.quickdrawCache.targetSeg2d.releaseAsTargeted();
       }
     }
 
@@ -217,10 +239,8 @@ Seg2d.prototype.setState = function(state) {
     this.satItem.resetHiddenMapToDefault();
     this.satItem.redrawHiddenCanvas();
   } else if (state === SegStates.QUICK_DRAW) {
+    this.quickdrawCache.tempPolyCache = this.tempPoly;
     this.state = state;
-    if (Seg2d.closed) {
-      this.quickdrawCache = {};
-    }
     let shapes = [];
     for (let label of this.satItem.labels) {
       if (label.valid) {
@@ -256,24 +276,83 @@ Seg2d.setToolBox = function(satItem) {
 };
 
 /**
- * Convert midpoint to a new vertex, do nothing if not a midpoint
- * @param {object} pt: the position of the midpoint as vertex object
+ * Convert midpoint to a new vertex
+ * @param {Vertex} pt: midpoint to be converted to a vertex
+ * @return {Vertex} the converted vertex
  */
 Seg2d.prototype.midpointToVertex = function(pt) {
-  let edge1 = null;
-  let edge2 = null;
+  let v1;
+  let v2;
+  let vertex;
+  for (let poly of this.polys) {
+    if (poly.control_points.indexOf(pt) >= 0) {
+      let edgeIndex = poly.getEdgeIndexWithControlPoint(pt);
+      vertex = poly.midpointToVertexWithEdgeIndex(edgeIndex);
+      [v1, v2] = [poly.edges[edgeIndex].src, poly.edges[edgeIndex + 1].dest];
+      break;
+    }
+  }
+  // convert every shared edge
   for (let label of this.satItem.labels) {
     for (let poly of label.polys) {
-      let _edge1 = null;
-      let _edge2 = null;
-      poly.alignEdges();
-      [_edge1, _edge2] = poly.midpointToVertex(pt, edge1, edge2);
-      if (!_edge1 && !_edge2) {
-        poly.reverse();
-        [_edge1, _edge2] = poly.midpointToVertex(pt, edge1, edge2);
+      poly.convertMidpointToKnownVertexBetween(vertex, v1, v2);
+    }
+  }
+  return vertex;
+};
+
+/**
+ * Convert midpoint to bezier curve control points
+ * @param {Vertex} pt: midpoint to be converted to a vertex
+ */
+Seg2d.prototype.midpointToBezierControl = function(pt) {
+  let v1;
+  let v2;
+  let c1;
+  let c2;
+  let convertedPoly;
+  for (let poly of this.polys) {
+    if (poly.control_points.indexOf(pt) >= 0) {
+      let edgeIndex = poly.getEdgeIndexWithControlPoint(pt);
+      [c1, c2] = poly.midpointToBezierControlWithEdgeIndex(edgeIndex);
+      [v1, v2] = [poly.edges[edgeIndex].src, poly.edges[edgeIndex].dest];
+      convertedPoly = poly;
+      break;
+    }
+  }
+  // convert every shared edge
+  for (let label of this.satItem.labels) {
+    for (let poly of label.polys) {
+      if (poly !== convertedPoly) {
+        poly.convertMidpointToKnownBezierControlBetween(c1, c2, v1, v2);
       }
-      if (!edge1 && !edge2) {
-        [edge1, edge2] = [_edge1, _edge2];
+    }
+  }
+};
+
+/**
+ * Convert two bezier curve control points to a midpoint
+ * @param {Vertex} pt: bezier control point to be converted to a vertex
+ */
+Seg2d.prototype.bezierControlToMidpoint = function(pt) {
+  let v1;
+  let v2;
+  let midpoint;
+  let convertedPoly;
+  for (let poly of this.polys) {
+    if (poly.control_points.indexOf(pt) >= 0) {
+      let edgeIndex = poly.getEdgeIndexWithControlPoint(pt);
+      midpoint = poly.bezierControlToMidpointWithEdgeIndex(edgeIndex);
+      [v1, v2] = [poly.edges[edgeIndex].src, poly.edges[edgeIndex].dest];
+      convertedPoly = poly;
+      break;
+    }
+  }
+  // convert every shared edge
+  for (let label of this.satItem.labels) {
+    for (let poly of label.polys) {
+      if (poly !== convertedPoly) {
+        poly.convertBezierControlToKnownMidpointBetween(midpoint, v1, v2);
       }
     }
   }
@@ -338,15 +417,13 @@ Seg2d.prototype.linkHandler = function() {
 };
 
 Seg2d.prototype.handleQuickdraw = function() {
-  let button = document.getElementById('quickdraw_btn');
   if (this.state === SegStates.DRAW) {
     // s switch to quick draw
+    let button = document.getElementById('quickdraw_btn');
     button.innerHTML = 'Select Target Polygon';
     button.style.backgroundColor = 'lightgreen';
     this.setState(SegStates.QUICK_DRAW);
   } else if (this.state === SegStates.QUICK_DRAW) {
-    button.innerHTML = '<kbd>s</kbd> Quickdraw';
-    button.style.backgroundColor = 'white';
     // press s again to quit quick draw
     if (this.quickdrawCache.targetPoly) { // must be before state transition
       this.quickdrawCache.targetSeg2d.releaseAsTargeted();
@@ -377,12 +454,62 @@ Seg2d.prototype.handleQuickdraw = function() {
       this.tempVertex = null;
       this.tempPoly = null;
 
+      this.endQuickDraw();
       this.setState(SegStates.FREE);
       this.selectedShape = this.newPoly;
     } else {
+      this.endQuickDraw();
       this.setState(SegStates.DRAW);
     }
   }
+};
+
+Seg2d.prototype.endQuickDraw = function() {
+  // push the final path to tempPoly and newPoly
+  this.tempPoly = this.quickdrawCache.tempPolyCache;
+  if (this.quickdrawCache.endVertex) {
+    this.tempPoly.popVertex();
+    this.tempPoly.pushPath(
+        this.quickdrawCache.targetPoly,
+        this.quickdrawCache.startVertex,
+        this.quickdrawCache.endVertex, this.quickdrawCache.longPath, true);
+    this.newPoly.pushPath(
+        this.quickdrawCache.targetPoly,
+        this.quickdrawCache.startVertex,
+        this.quickdrawCache.endVertex, this.quickdrawCache.longPath);
+    if (this.quickdrawCache.endVertex === this.newPoly.vertices[0]) {
+      this.completeDrawing();
+    } else {
+      this.tempPoly.pushVertex(this.tempVertex);
+      this.setState(SegStates.DRAW);
+    }
+  } else if (this.quickdrawCache.startVertex) {
+    if (this.quickdrawCache.startVertex === this.newPoly.vertices[0]) {
+      this.newPoly.endPath();
+      this.setState(SegStates.FREE);
+    } else {
+      this.tempPoly.popVertex();
+      this.tempPoly.pushVertex(this.quickdrawCache.startVertex);
+      this.tempPoly.pushVertex(this.tempVertex);
+      this.newPoly.pushVertex(this.quickdrawCache.startVertex);
+      this.setState(SegStates.DRAW);
+    }
+  } else if (this.quickdrawCache.targetPoly) {
+    this.setState(SegStates.DRAW);
+  } else {
+    this.setState(SegStates.DRAW);
+  }
+  if (this.quickdrawCache.targetSeg2d) {
+    this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+  }
+  this.quickdrawCache = {};
+  this.resetQuickdrawButton();
+};
+
+Seg2d.prototype.resetQuickdrawButton = function() {
+  let quickdrawButton = document.getElementById('quickdraw_btn');
+  quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
+  quickdrawButton.style.backgroundColor = 'white';
 };
 
 /**
@@ -664,7 +791,8 @@ Seg2d.prototype.shapesValid = function() {
  * @return {string} - The cursor style string.
  */
 Seg2d.prototype.getCursorStyle = function(shape) {
-  if (shape instanceof Polygon && !this.satItem.isLinking && this._M_down &&
+  if (shape instanceof Polygon && !this.satItem.isLinking &&
+      this.satItem.isDown('M') &&
       this.satItem.selectedLabel && this.satItem.selectedLabel.id === this.id) {
     return 'move';
   }
@@ -677,19 +805,21 @@ Seg2d.prototype.mousedown = function(e) {
   let occupiedShape = this.satItem.getOccupiedShape(mousePos);
   if (this.state === SegStates.FREE && occupiedShape) {
     this.selectedShape = occupiedShape;
-    this.selectedCache = occupiedShape.copy();
+    this.selectedCache = occupiedShape.copy(-1);
     // if clicked on a vertex
     if (occupiedShape instanceof Vertex) {
-      // if clicked on midpoint, convert to vertex
+      if (this.satItem.anyKeyDown(['C', 'D'])) return;
       if (occupiedShape.type === VertexTypes.MIDPOINT) {
-        Shape.registerShape(occupiedShape); // assign id to new vertex
-        this.midpointToVertex(occupiedShape);
+        // convert midpoint to a vertex
+        this.selectedShape = this.midpointToVertex(occupiedShape);
+        // start resize mode
+        this.setState(SegStates.RESIZE);
+      } else {
+        // resize vertex or control points
+        this.setState(SegStates.RESIZE);
       }
-
-      // start resize mode
-      this.setState(SegStates.RESIZE);
     } else if (occupiedShape instanceof Polygon && !this.satItem.isLinking
-        && this._M_down) {
+        && this.satItem.isDown('M')) {
       // if clicked on a polygon, start moving
       this.setState(SegStates.MOVE);
       this.mouseClickPos = mousePos;
@@ -705,119 +835,72 @@ Seg2d.prototype.mousedown = function(e) {
   } else if (this.state === SegStates.QUICK_DRAW) {
     // quick draw mode
     let button = document.getElementById('quickdraw_btn');
-    if (!occupiedShape) {
-      // TODO: if nothing is clicked, return to DRAW state
-      if (this.quickdrawCache.targetPoly) { // must be before state transition
-        this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+    if (!this.quickdrawCache.targetPoly && occupiedShape instanceof Polygon) {
+      this.quickdrawCache.targetPoly = occupiedShape;
+      this.quickdrawCache.targetSeg2d =
+          this.satItem.getLabelOfShape(occupiedShape);
+      this.quickdrawCache.targetSeg2d.setAsTargeted();
+      let shapes = this.quickdrawCache.targetPoly.vertices;
+      shapes = shapes.concat(this.newPoly.vertices);
+      this.satItem.resetHiddenMap(shapes);
+      this.satItem.redrawHiddenCanvas();
+      button.innerHTML = 'Select Start Vertex';
+    } else if (this.quickdrawCache.targetPoly &&
+        !this.quickdrawCache.startVertex &&
+        occupiedShape instanceof Vertex &&
+        this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0) {
+      this.quickdrawCache.startVertex = occupiedShape;
+
+      // if occupied object a vertex that is not in polygon, add it
+      this.tempPoly.popVertex();
+
+      if (this.tempPoly.vertices.indexOf(occupiedShape) < 0) {
+        this.tempPoly.pushVertex(occupiedShape);
+        // need below for correct interrupt case
+        this.newPoly.pushVertex(occupiedShape);
       }
-      if (this.newPoly.vertices.length > 1
-          && this.quickdrawCache.endVertex
-          && this.quickdrawCache.endVertex.equals(this.newPoly.vertices[0])) {
-        // if occupied object the 1st vertex, close path
-        this.tempPoly.popVertex();
-        this.newPoly.endPath();
 
-        if (this.newPoly.isValidShape()) {
-          this.addPolyline(this.newPoly);
-          this.tempVertex.delete();
-          this.tempPoly.delete();
-          this.tempVertex = null;
-          this.tempPoly = null;
-        }
+      this.tempVertex = new Vertex(mousePos.x, mousePos.y,
+          VertexTypes.VERTEX, -1);
+      this.tempPoly.pushVertex(this.tempVertex);
+      this.selectedShape = this.tempVertex;
+      button.innerHTML = 'Select End Vertex';
+    } else if (this.quickdrawCache.startVertex &&
+        !this.quickdrawCache.endVertex &&
+        occupiedShape instanceof Vertex &&
+        this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0 &&
+        !this.quickdrawCache.startVertex.equals(occupiedShape)) {
+      this.quickdrawCache.endVertex = occupiedShape;
 
-        this.setState(SegStates.FREE);
-        this.selectedShape = this.newPoly;
-      } else {
-        this.setState(SegStates.DRAW);
-        // change back the indicator
-        button.innerHTML = '<kbd>s</kbd> Quickdraw';
-        button.style.backgroundColor = 'white';
-      }
-    } else if (this.newPoly.vertices.length > 1
-        && occupiedShape.id === this.newPoly.vertices[0].id
-        && !this.quickdrawCache.endVertex
-        && this.quickdrawCache.targetPoly
-        && this.quickdrawCache.targetPoly.indexOf(occupiedShape) < 0) {
-      // if occupied object the 1st vertex, change to draw mode to close path
-      this.setState(SegStates.DRAW);
-    } else if (!this.quickdrawCache.targetPoly) {
-      if (occupiedShape instanceof Polygon
-          && !this.newPoly.equals(occupiedShape)) {
-        this.quickdrawCache.targetPoly = occupiedShape;
-        this.quickdrawCache.targetSeg2d =
-            this.satItem.getLabelOfShape(occupiedShape);
-        this.quickdrawCache.targetSeg2d.setAsTargeted();
-        let shapes = this.quickdrawCache.targetPoly.vertices;
-        shapes = shapes.concat(this.newPoly.vertices);
-        this.satItem.resetHiddenMap(shapes);
-        this.satItem.redrawHiddenCanvas();
-        button.innerHTML = 'Select Start Vertex';
-      }
-    } else if (!this.quickdrawCache.startVertex) {
-      if (occupiedShape instanceof Vertex
-          && occupiedShape.type === VertexTypes.VERTEX
-          && this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0) {
-        this.quickdrawCache.startVertex = occupiedShape;
+      // if occupied object is a vertex that is not in this polygon, add it
+      this.tempPoly.popVertex();
+      this.quickdrawCache.shortPathTempPoly = this.tempPoly.copy(-1);
+      this.quickdrawCache.longPathTempPoly = this.tempPoly.copy(-1);
+      this.quickdrawCache.shortPathTempPoly.pushPath(
+          this.quickdrawCache.targetPoly,
+          this.quickdrawCache.startVertex,
+          this.quickdrawCache.endVertex, false, true);
+      this.quickdrawCache.longPathTempPoly.pushPath(
+          this.quickdrawCache.targetPoly,
+          this.quickdrawCache.startVertex,
+          this.quickdrawCache.endVertex, true, true);
+      this.tempPoly = this.quickdrawCache.longPath
+          ? this.quickdrawCache.longPathTempPoly
+          : this.quickdrawCache.shortPathTempPoly;
 
-        // if occupied object a vertex that is not in polygon, add it
-        this.tempPoly.popVertex();
-
-        if (this.tempPoly.vertices.indexOf(occupiedShape) < 0) {
-          this.tempPoly.pushVertex(occupiedShape);
-          // need below for correct interrupt case
-          this.newPoly.pushVertex(occupiedShape);
-        }
-
-        this.tempVertex = new Vertex(mousePos.x, mousePos.y);
-        this.tempPoly.pushVertex(this.tempVertex);
+      // if path is not closed after push path, prepare for draw mode
+      if (!occupiedShape.equals(this.newPoly.vertices[0])) {
+        this.tempVertex = new Vertex(mousePos.x, mousePos.y,
+            VertexTypes.VERTEX, -1);
+        this.quickdrawCache.shortPathTempPoly.pushVertex(this.tempVertex);
+        this.quickdrawCache.longPathTempPoly.pushVertex(this.tempVertex);
         this.selectedShape = this.tempVertex;
-        button.innerHTML = 'Select End Vertex';
       }
-    } else if (!this.quickdrawCache.endVertex) {
-      if (occupiedShape instanceof Vertex
-          && occupiedShape.type === VertexTypes.VERTEX
-          && this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0
-          && !this.quickdrawCache.startVertex.equals(occupiedShape)) {
-        this.quickdrawCache.endVertex = occupiedShape;
 
-        // if occupied object is a vertex that is not in this polygon, add it
-        this.tempPoly.popVertex();
-        this.quickdrawCache.shortPathTempPoly = this.tempPoly.copy(true);
-        this.quickdrawCache.longPathTempPoly = this.tempPoly.copy(true);
-        this.quickdrawCache.shortPathTempPoly.pushPath(
-            this.quickdrawCache.targetPoly,
-            this.quickdrawCache.startVertex,
-            this.quickdrawCache.endVertex);
-        this.quickdrawCache.longPathTempPoly.pushPath(
-            this.quickdrawCache.targetPoly,
-            this.quickdrawCache.startVertex,
-            this.quickdrawCache.endVertex, true);
-        this.quickdrawCache.shortPathPoly =
-            this.quickdrawCache.shortPathTempPoly.copy(true);
-        this.quickdrawCache.longPathPoly =
-            this.quickdrawCache.longPathTempPoly.copy(true);
-        this.tempPoly = this.quickdrawCache.longPath
-            ? this.quickdrawCache.longPathTempPoly
-            : this.quickdrawCache.shortPathTempPoly;
-        this.newPoly = this.quickdrawCache.longPath
-            ? this.quickdrawCache.longPathPoly
-            : this.quickdrawCache.shortPathPoly;
-
-        // if path is not closed after push path, prepare for draw mode
-        if (!occupiedShape.equals(this.newPoly.vertices[0])) {
-          this.tempVertex = new Vertex(mousePos.x, mousePos.y);
-          this.quickdrawCache.shortPathTempPoly.pushVertex(this.tempVertex);
-          this.quickdrawCache.longPathTempPoly.pushVertex(this.tempVertex);
-          this.selectedShape = this.tempVertex;
-        }
-
-        this.quickdrawCache.targetSeg2d.releaseAsTargeted();
-        button.innerHTML = '<kbd>Alt</kbd>   Toggle';
-      }
-    } else if (occupiedShape.id === this.newPoly.vertices[0].id) {
-      // user want to close the polygon after path is pushed
-      // note: must toggle path before this action!!
-      this.setState(SegStates.DRAW);
+      this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+      button.innerHTML = '<kbd>Alt</kbd>   Toggle';
+    } else {
+      this.endQuickDraw();
     }
   } else if (this.state === SegStates.LINK && occupiedShape) {
     let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
@@ -863,49 +946,7 @@ Seg2d.prototype.mouseup = function(e) {
       if (this.newPoly.vertices.indexOf(occupiedShape) === 0) {
         // if occupied object the 1st vertex, close path
         this.tempPoly.popVertex();
-
-        if (this.latestSharedVertex) {
-          let pushed = false;
-          let firstVertex = this.newPoly.vertices[0];
-          for (let label of this.satItem.labels) {
-            for (let edge of label.getEdges()) {
-              if ((edge.src === firstVertex
-                  && edge.dest === this.latestSharedVertex) ||
-                  (edge.dest === firstVertex
-                      && edge.src === this.latestSharedVertex)) {
-                this.newPoly.edges.pop();
-                this.newPoly.edges.push(edge);
-                pushed = true;
-                break;
-              }
-            }
-            if (pushed) break;
-          }
-        }
-        this.newPoly.endPath();
-
-        if (this.newPoly.isValidShape()) {
-          this.addPolyline(this.newPoly);
-          if (this.polyBuffer) {
-            for (let poly of this.polyBuffer) {
-              poly.delete();
-            }
-          }
-        } else if (this.polyBuffer) {
-          for (let poly of this.polyBuffer) {
-            this.polys.push(poly);
-          }
-        }
-        this.polyBuffer = null;
-        this.tempVertex.delete();
-        this.tempPoly.delete();
-        this.tempVertex = null;
-        this.tempPoly = null;
-        this.setState(SegStates.FREE);
-        this.selectedShape = this.newPoly;
-        if (this.parent) {
-          this.parent.interpolate(this);
-        }
+        this.completeDrawing();
       } else if (this.newPoly.vertices.indexOf(occupiedShape) < 0) {
         // if occupied object a vertex that is not in polygon, add it
         this.tempPoly.popVertex();
@@ -933,7 +974,8 @@ Seg2d.prototype.mouseup = function(e) {
         }
         this.latestSharedVertex = occupiedShape;
 
-        this.tempVertex = new Vertex(mousePos.x, mousePos.y);
+        this.tempVertex = new Vertex(mousePos.x, mousePos.y,
+            VertexTypes.VERTEX, -1);
         this.tempPoly.pushVertex(this.tempVertex);
         this.selectedShape = this.tempVertex;
       }
@@ -946,7 +988,8 @@ Seg2d.prototype.mouseup = function(e) {
       this.satItem.pushToHiddenMap([newVertex]);
       this.latestSharedVertex = null;
 
-      this.tempVertex = new Vertex(mousePos.x, mousePos.y);
+      this.tempVertex = new Vertex(mousePos.x, mousePos.y,
+          VertexTypes.VERTEX, -1);
       this.tempPoly.pushVertex(this.tempVertex);
       this.selectedShape = this.tempVertex;
     }
@@ -962,7 +1005,32 @@ Seg2d.prototype.mouseup = function(e) {
     }
   } else if (this.state === SegStates.FREE) {
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
-    if (!occupiedShape) {
+    if (occupiedShape && occupiedShape instanceof Vertex) {
+      if (occupiedShape.type === VertexTypes.VERTEX &&
+          this.satItem.isDown('D')) {
+        // deleting a vertex
+        for (let label of this.satItem.labels) {
+          for (let poly of label.polys) {
+            if (poly.vertices.length > 3) {
+              let index = poly.vertices.indexOf(this.hoveredShape);
+              if (index >= 0) {
+                // in vertices, and # vertices > 3, delete
+                poly.deleteVertex(index);
+              }
+            }
+          }
+        }
+      } else if (this.satItem.isDown('C')) {
+        if (occupiedShape.type === VertexTypes.MIDPOINT) {
+          // convert midpoint to bezier control points
+          this.midpointToBezierControl(occupiedShape);
+        } else if (occupiedShape.type === VertexTypes.CONTROL_POINT) {
+          // convert bezier control points to midpoint
+          this.bezierControlToMidpoint(occupiedShape);
+        }
+      }
+      this.setState(SegStates.FREE);
+    } else if (!occupiedShape) {
       // deselects self
       this.satItem.deselectAll();
     }
@@ -1060,27 +1128,15 @@ Seg2d.prototype.keydown = function(e) {
       }
       this.polyBuffer = null;
     }
+    if (this.state === SegStates.QUICK_DRAW) {
+      this.endQuickDraw();
+    }
     this.setState(SegStates.FREE);
   } else if (keyID === 85) {
     // u for unlinking the selected label
     if (this.polys.length > 1) {
       for (let poly of this.polys) {
         this.splitPolyline(poly);
-      }
-    }
-  } else if (keyID === 67) {
-    // c for showing bezier control points
-    if (this.state === SegStates.FREE &&
-        this.hoveredShape &&
-        this.hoveredShape.type === VertexTypes.MIDPOINT) {
-      for (let poly of this.polys) {
-        for (let edge of poly.edges) {
-          if (edge.control_points[0] === this.hoveredShape) {
-            edge.type = EdgeTypes.BEZIER;
-            this.setState(SegStates.FREE);
-            return;
-          }
-        }
       }
     }
   } else if (keyID === 83) {
@@ -1093,9 +1149,6 @@ Seg2d.prototype.keydown = function(e) {
       this.tempPoly = this.quickdrawCache.longPath
           ? this.quickdrawCache.longPathTempPoly
           : this.quickdrawCache.shortPathTempPoly;
-      this.newPoly = this.quickdrawCache.longPath
-          ? this.quickdrawCache.longPathPoly
-          : this.quickdrawCache.shortPathPoly;
     }
   } else if (keyID === 13 && !Seg2d.closed) {
     // enter for ending a Path object
@@ -1123,11 +1176,8 @@ Seg2d.prototype.keydown = function(e) {
       this.setState(SegStates.DRAW);
       this.satItem.redrawLabelCanvas();
     }
-  } else if (keyID === 77) {
-    // m for moving seg2d
-    this._M_down = true;
   } else if (keyID === 68) {
-    // d for deleting single vertex
+    // d for deleting the last labeled vertex while drawing
     if (this.state === SegStates.DRAW) {
       if (this.newPoly.vertices.length < 2) {
         // set state to free to be deleted
@@ -1139,28 +1189,6 @@ Seg2d.prototype.keydown = function(e) {
         this.tempPoly.popVertex();
         this.tempPoly.pushVertex(this.tempVertex);
       }
-    } else if (this.state === SegStates.FREE) {
-      for (let poly of this.polys) {
-        if (poly.vertices.length > 3) {
-          let index = poly.vertices.indexOf(this.hoveredShape);
-          if (index >= 0) {
-            // in vertices, and # vertices > 3, delete
-            poly.deleteVertex(index);
-          }
-        }
-      }
     }
-  }
-};
-
-/**
- * Key up handler.
- * @param {type} e: Description.
- */
-Seg2d.prototype.keyup = function(e) {
-  let keyID = e.KeyCode ? e.KeyCode : e.which;
-  if (keyID === 77) {
-    // m for moving seg2d
-    this._M_down = false;
   }
 };

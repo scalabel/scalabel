@@ -98,6 +98,7 @@ export function SatImage(sat, index, url) {
 
   self.isMouseDown = false;
   self._hiddenMap = new HiddenMap();
+  self._keyDownMap = {};
 }
 
 SatImage.prototype = Object.create(SatItem.prototype);
@@ -638,6 +639,7 @@ SatImage.prototype._keydown = function(e) {
   }
 
   let keyID = e.KeyCode ? e.KeyCode : e.which;
+  self._keyDownMap[keyID] = true;
   if (keyID === 27) { // Esc
     // deselect
     self.deselectAll();
@@ -708,6 +710,7 @@ SatImage.prototype._keydown = function(e) {
 SatImage.prototype._keyup = function(e) {
   let self = this;
   let keyID = e.KeyCode ? e.KeyCode : e.which;
+  delete self._keyDownMap[keyID];
   if (self.selectedLabel) {
     self.selectedLabel.keyup(e);
   }
@@ -715,6 +718,20 @@ SatImage.prototype._keyup = function(e) {
     self.ctrlDown = false;
   }
 };
+
+SatImage.prototype.isDown = function(c) {
+  return this._keyDownMap[c.charCodeAt()];
+};
+
+SatImage.prototype.anyKeyDown = function(keys) {
+  for (let key of keys) {
+    if (this.isDown(key)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 
 /**
  * Called when this SatImage is active and the mouse is clicked.
@@ -1408,5 +1425,9 @@ ImageLabel.prototype.doubleclick = function(e) { // eslint-disable-line
 };
 
 ImageLabel.prototype.keydown = function(e) { // eslint-disable-line
+
+};
+
+ImageLabel.prototype.keyup = function(e) { // eslint-disable-line
 
 };

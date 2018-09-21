@@ -1,5 +1,6 @@
 import {Shape, Vertex, Edge, Path, Polygon,
   VertexTypes, EdgeTypes} from '../shape';
+import {idx} from '../utils';
 
 /**
  * Random Integer Generator
@@ -341,6 +342,7 @@ function vertices2Polygon(vertices) {
   for (let vertex of vertices) {
     p.pushVertex(vertex);
   }
+  p.endPath();
   return p;
 }
 
@@ -381,7 +383,7 @@ describe('Polygon Object Tests', function() {
     for (let i = 0; i < p.edges.length; i++) {
       edgeAligned = edgeAligned &&
           p.edges[i].src.equals(p.vertices[i]) &&
-          p.edges[i].dest.equals(p.vertices[p.idx(i + 1)]);
+          p.edges[i].dest.equals(p.vertices[idx(i + 1, p.vertices.length)]);
       if (!edgeAligned) {
         break;
       }
@@ -392,7 +394,7 @@ describe('Polygon Object Tests', function() {
     for (let i = 0; i < p.edges.length; i++) {
       edgeAligned = edgeAligned &&
           p.edges[i].src.equals(p.vertices[i]) &&
-          p.edges[i].dest.equals(p.vertices[p.idx(i + 1)]);
+          p.edges[i].dest.equals(p.vertices[idx(i + 1, p.vertices.length)]);
     }
     expect(edgeAligned).toBe(true);
   });
@@ -419,7 +421,6 @@ describe('Polygon Object Tests', function() {
     let p = list2Polygon([[0, 0], [8, 0], [8, 8], [0, 8]]);
     let p2 = list2Polygon([[0, 0], [8, 0], [2, 2], [8, 8], [0, 8]]);
     let v = new Vertex(2, 2);
-
     p.insertVertex(2, v);
     p.insertVertex(-1, v); // do nothing if i is out of index
     p.insertVertex(10, v);
@@ -436,10 +437,7 @@ describe('Polygon Object Tests', function() {
     let p = list2Polygon([[0, 0], [8, 0], [8, 8], [0, 8]]);
     let targetP = list2Polygon([[0, 0], [4, 0], [8, 0], [8, 8], [0, 8]]);
 
-    p.midpointToVertex(new Vertex(4, 0));
-    expect(p.equals(targetP)).toBe(true);
-    // do nothing if the point is not a midpoint
-    p.midpointToVertex(new Vertex(4, 1));
+    p.midpointToVertexWithEdgeIndex(0);
     expect(p.equals(targetP)).toBe(true);
   });
   it('Polygon push vertex', function() {
