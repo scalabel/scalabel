@@ -33,6 +33,8 @@ export function initSatSession(labelType, itemType) {
     if (labelType === 'segmentation') {
       showTemplateById('seg_btns');
       showTemplateById('seg_usage');
+    } else if (labelType === 'lane') {
+      showTemplateById('lane_usage');
     }
   }
   if (itemType === 'image') {

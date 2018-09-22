@@ -698,6 +698,12 @@ SatImage.prototype._keydown = function(e) {
     } else {
       this.labelCanvas.style.visibility = 'visible';
     }
+  } else if (keyID === 187) {
+    this._incHandler();
+    return;
+  } else if (keyID === 189) {
+    this._decHandler();
+    return;
   }
   this.redrawLabelCanvas();
   this.redrawHiddenCanvas();
