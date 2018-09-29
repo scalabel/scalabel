@@ -17,3 +17,6 @@ items/
 
 # don't upload webpack bundle file
 app/dist/
+
+# potential data directory
+data/
