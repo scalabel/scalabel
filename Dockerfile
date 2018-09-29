@@ -15,8 +15,8 @@ WORKDIR /opt/scalabel
 RUN chmod -R a+w /opt/scalabel
 
 COPY package*.json ./
-RUN npm install --only=production
+RUN npm install
 
 COPY . .
 RUN ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production
-RUN go build -i -o bin/sat ./server/go
+RUN go build -i -o bin/scalabel ./server/go

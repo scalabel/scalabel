@@ -1,6 +1,6 @@
 ---
 port: 8686
-data: "../data"
+data: "./data"
 src: "."
 database: "local"
 ...
