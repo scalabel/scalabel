@@ -198,20 +198,16 @@ SatPointCloud.prototype.getPCJSON = function() {
 
         this.loaded();
 
-        let nextIndex = this.index + 1;
-        if (nextIndex < this.sat.items.length) {
-          this.sat.items[nextIndex].getPCJSON();
-        }
+        let nextIndex = (this.index + 1) % this.sat.items.length;
+        this.sat.items[nextIndex].getPCJSON();
       }).bind(this),
 
       function() {
       },
 
       (function() {
-        let nextIndex = this.index + 1;
-        if (nextIndex < this.sat.items.length) {
+          let nextIndex = (this.index + 1) % this.sat.items.length;
           this.sat.items[nextIndex].getPCJSON();
-        }
 
         alert('Point cloud at ' + this.url + ' was not found.');
       }).bind(this),
