@@ -274,7 +274,7 @@ Track.prototype.endTrack = function(endLabel) {
   let self = this;
   let endIndex = null;
   for (let i = 0; i < self.children.length; i++) {
-    if (endIndex) {
+    if (endIndex!==null) {
       self.children[i].delete();
     }
     if (!endIndex && self.children[i].id === endLabel.id) {
