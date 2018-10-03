@@ -155,17 +155,17 @@
     uniform vec3 blue;
 
     vec3 getHeatMapColor(float dist) {
-        if (dist < 5.0) {
-            float val = dist / 5.0;
+        if (dist < 8.0) {
+            float val = dist / 8.0;
             return (1.0 - val) * red + val * yellow;
-        } else if (dist < 10.0) {
-            float val = (dist - 5.0) / 5.0;
+        } else if (dist < 16.0) {
+            float val = (dist - 8.0) / 8.0;
             return (1.0 - val) * yellow + val * green;
-        } else if (dist < 15.0) {
-            float val = (dist - 10.0) / 5.0;
+        } else if (dist < 24.0) {
+            float val = (dist - 16.0) / 8.0;
             return (1.0 - val) * green + val * teal;
         } else {
-            float val = (dist - 15.0) / 5.0;
+            float val = (dist - 24.0) / 8.0;
             return (1.0 - val) * teal + val * blue;
         }
     }

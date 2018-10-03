@@ -190,7 +190,7 @@ SatPointCloud.prototype.getPCJSON = function() {
           },
           vertexShader: vertexShader,
           fragmentShader: fragmentShader,
-          alphaTest: 0.9,
+          alphaTest: 1.0,
         });
 
         this.particles = new THREE.Points(geometry, material);

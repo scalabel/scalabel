@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"reflect"
-	"strconv"
 )
 
 type Poly2d struct {
@@ -188,48 +187,10 @@ func rotateZAxis3D(vector []float64, angle float64) error {
 
 func ParseBox3d(data map[string]interface{}) map[string]interface{} {
 	var box3d = map[string]interface{}{}
-	position, err := getFloatSlice(data["position"])
-	rotation, err := getFloatSlice(data["rotation"])
-	scale, err := getFloatSlice(data["scale"])
-	if err != nil {
-		fmt.Println(err)
-	}
 
-	fmt.Println(position)
-	fmt.Println(scale)
-
-	// Initialize points
-	var points = [8][]float64{}
-	var ind = 0
-	for x := float64(-0.5); x <= 0.5; x += 1 {
-		for y := float64(-0.5); y <= 0.5; y += 1 {
-			for z := float64(-0.5); z <= 0.5; z += 1 {
-				points[ind] = []float64{x, y, z}
-				ind++
-			}
-		}
-	}
-
-	// Modify scale, position, rotation and load into box3d
-	for i := 0; i < len(points); i++ {
-		var point = points[i]
-		if scale != nil {
-			point[0] *= scale[0]
-			point[1] *= scale[1]
-			point[2] *= scale[2]
-		}
-		if rotation != nil {
-			rotateXAxis3D(point, rotation[0])
-			rotateYAxis3D(point, rotation[1])
-			rotateZAxis3D(point, rotation[2])
-		}
-		if position != nil {
-			point[0] += position[0]
-			point[1] += position[1]
-			point[2] += position[2]
-		}
-		box3d["p"+strconv.Itoa(i)] = point
-	}
+	box3d["location"] = data["position"]
+	box3d["orientation"] = data["rotation"]
+	box3d["dimension"] = data["scale"]
 
 	return box3d
 }
