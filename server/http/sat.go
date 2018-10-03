@@ -311,6 +311,8 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		taskSize = ts
+	} else {
+		taskSize = 1
 	}
 	// get the vendor ID from form
 	vendorId, err := strconv.Atoi(r.FormValue("vendor_id"))

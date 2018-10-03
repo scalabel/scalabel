@@ -190,7 +190,9 @@ Box2d.prototype.redrawLabelCanvas = function(mainCtx) {
   mainCtx.font = FONT_SIZE * UP_RES_RATIO + 'px Verdana';
   // draw visible elements
   mainCtx.strokeStyle = this.styleColor();
-  this.rect.draw(mainCtx, this.satItem, this.state === BoxStates.RESIZE);
+  this.rect.draw(mainCtx, this.satItem, this.state === BoxStates.RESIZE ||
+    this.getRoot().linkTarget || (this.sat.linkingTrack &&
+      this.sat.linkingTrack.id === this.getRoot().id));
 
   if (this.isTargeted() || this.hoveredShape) {
     this.rect.drawHandles(mainCtx, this.satItem, this.styleColor(),

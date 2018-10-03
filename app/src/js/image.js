@@ -178,11 +178,8 @@ SatImage.prototype._selectLabel = function(label) {
 SatImage.prototype.selectLabel = function(label) {
   // if the label has a parent, select all labels along the track
   if (label.parent) {
-    let childIndex = label.parent.children.indexOf(label);
-    let frameIndex = this.sat.items.indexOf(this);
-    for (let i = 0; i < label.parent.children.length; i++) {
-      let l = label.parent.children[i];
-      this.sat.items[frameIndex + i - childIndex]._selectLabel(l);
+    for (let l of label.parent.children) {
+      l.satItem._selectLabel(l);
     }
   } else {
     this._selectLabel(label);
@@ -327,6 +324,7 @@ SatImage.prototype.setActive = function(active) {
   self.active = active;
   let deleteBtn = $('#delete_btn');
   let endBtn = $('#end_btn');
+  let trackLinkBtn = $('#track_link_btn');
   if (active) {
     self.lastLabelID = -1;
     self.padBox = self._getPadding();
@@ -406,6 +404,21 @@ SatImage.prototype.setActive = function(active) {
           self.redrawHiddenCanvas();
         }
       });
+    }
+    if (trackLinkBtn.length) {
+      document.getElementById('track_link_btn').onclick = function() {
+        if (self.selectedLabel) {
+          if (self.sat.linkingTrack != null) {
+            self.sat.linkTracks();
+          }
+          self.sat.toggleTrackLink(self.selectedLabel.getRoot());
+        } else if (self.sat.linkingTrack != null) {
+          self.sat.linkTracks();
+          self.sat.toggleTrackLink(self.sat.linkingTrack);
+        } else {
+          alert('Please select a track before clicking Track-Link.');
+        }
+      };
     }
 
     // toolbox
@@ -770,9 +783,14 @@ SatImage.prototype._mousedown = function(e) {
     let occupiedShape = self.getOccupiedShape(mousePos);
     let occupiedLabel = self.getLabelOfShape(occupiedShape);
     if (occupiedLabel) {
-      self.selectLabel(occupiedLabel);
-      self.selectedLabel.setSelectedShape(occupiedShape);
-      self.selectedLabel.mousedown(e);
+      if (this.sat.linkingTrack && occupiedLabel.getRoot().id !==
+          this.sat.linkingTrack.id) {
+        this.sat.addTrackToLinkingTrack(occupiedLabel.getRoot());
+      } else {
+        self.selectLabel(occupiedLabel);
+        self.selectedLabel.setSelectedShape(occupiedShape);
+        self.selectedLabel.mousedown(e);
+      }
     } else {
       self.catSel = document.getElementById('category_select');
       let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
@@ -1239,6 +1257,7 @@ ImageLabel.prototype = Object.create(SatLabel.prototype);
 
 ImageLabel.useCrossHair = false;
 ImageLabel.defaultCursorStyle = 'auto';
+ImageLabel.allowsLinkingWithinFrame = false;
 
 ImageLabel.prototype.delete = function() {
   SatLabel.prototype.delete.call(this);
@@ -1403,6 +1422,12 @@ ImageLabel.prototype.drawTag = function(ctx, position) {
  */
 ImageLabel.defaultHiddenShapes = function() {
   return null;
+};
+
+ImageLabel.prototype.addShape = function() {
+};
+
+ImageLabel.prototype.splitShape = function() {
 };
 
 /**

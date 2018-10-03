@@ -48,6 +48,10 @@ SatVideo.prototype.newLabel = function(optionalAttributes) {
       optionalAttributes.mousePos = null;
     }
     let childLabel = new self.LabelType(self, labelId, optionalAttributes);
+    if (i === self.currentItem.index) {
+      // the first frame should always be the keyframe
+      childLabel.keyframe = true;
+    }
     childLabel.parent = track;
     self.labelIdMap[childLabel.id] = childLabel;
     self.labels.push(childLabel);
@@ -217,6 +221,98 @@ SatVideo.prototype.moveSlider = function() {
   self.frameCounter.innerHTML = self.currentItem.index + 1;
 };
 
+SatVideo.prototype.linkTracks = function() {
+  let allChildren = [];
+  let trackIds = new Set([]);
+  for (let it = this.linkingTrack.tracksToLink.values(), t=null;
+       t=it.next().value;) {
+    trackIds.add(t.id);
+    allChildren = allChildren.concat(t.children);
+  }
+  trackIds.add(this.linkingTrack.id);
+  // check the validity of the link operation
+  let valid = true;
+  trackIds.add(this.linkingTrack.id);
+  for (let frame = 0; frame < this.items.length && valid; frame++) {
+    let occupiedFrameTrack = null;
+    this.items[frame].deleteInvalidLabels();
+    for (let i = 0; i < this.items[frame].labels.length; i++) {
+      let trackId = this.items[frame].labels[i].getRoot().id;
+      if (trackIds.has(trackId)) {
+        if (occupiedFrameTrack) {
+          if (this.LabelType.allowsLinkingWithinFrame) {
+            for (let j = 0; j < this.items[frame].labels[i].polys.length; j++) {
+              occupiedFrameTrack.addShape(
+                this.items[frame].labels[i].polys[j]);
+            }
+          } else {
+            valid = false;
+            break;
+          }
+        } else {
+          occupiedFrameTrack = this.items[frame].labels[i];
+        }
+      }
+    }
+  }
+  // If it's an invalid link, throw an alert
+  if (!valid) {
+    alert('Cannot link tracks due to overlapping histories.');
+    return;
+  }
+  // linkingTrack gets all of the linked tracks' children
+  for (let c = 0; c < allChildren.length; c++) {
+    allChildren[c].parent = this.linkingTrack;
+    this.linkingTrack.children.push(allChildren[c]);
+  }
+  this.linkingTrack.numChildren = this.linkingTrack.children.length;
+  // delete all of the other tracks
+  for (let it = this.linkingTrack.tracksToLink.values(), t=null;
+       t=it.next().value;) {
+    t.valid = false;
+    this.labels.splice( this.labels.indexOf(t), 1 );
+    this.tracks.splice( this.tracks.indexOf(t), 1 );
+  }
+  this.linkingTrack.sortChildren();
+};
+
+SatVideo.prototype.addTrackToLinkingTrack = function(track) {
+  track.getRoot().linkTarget = true;
+  this.linkingTrack.tracksToLink.add(track);
+};
+
+SatVideo.prototype.toggleTrackLink = function(ogTrack) {
+  let trackLinkBtn = document.getElementById('track_link_btn');
+  let labelLinkBtn = $('#link_btn');
+  if (!this.linkingTrack) {
+    trackLinkBtn.innerHTML = 'Finish Track-Linking';
+    trackLinkBtn.style.backgroundColor = 'lightgreen';
+    if (labelLinkBtn.length) {
+      labelLinkBtn.hide();
+    }
+    this.linkingTrack = ogTrack;
+    ogTrack.tracksToLink = new Set([]);
+    // de-select all selected labels
+    for (let i = 0; i < this.items.length; i++) {
+      if (i !== this.currentItem.index) {
+        this.items[i]._deselectAll();
+      }
+    }
+  } else {
+    trackLinkBtn.innerHTML = 'Track-Link';
+    trackLinkBtn.style.backgroundColor = '';
+    if (labelLinkBtn.length) {
+      labelLinkBtn.show();
+    }
+    for (let it = this.linkingTrack.tracksToLink.values(), val=null;
+         val=it.next().value;) {
+      val.linkTarget = false;
+    }
+    this.linkingTrack = null;
+  }
+  this.currentItem.updateLabelCount();
+};
+
 /**
  * TODO
  * @param {Sat} sat: The labeling session
@@ -287,9 +383,14 @@ Track.prototype.endTrack = function(endLabel) {
   }
 };
 
+Track.prototype.sortChildren = function() {
+  this.children.sort(function(a, b) {
+    return a.satItem.index - b.satItem.index;
+  });
+};
+
 Track.prototype.interpolate = function(startLabel) {
   let self = this;
-  startLabel.keyframe = true;
   let startIndex = null;
   let priorKeyFrameIndex = 0;
   let nextKeyFrameIndex = null;

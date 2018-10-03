@@ -1370,9 +1370,10 @@ Edge.prototype.hasVertices = function(v1, v2) {
  * Draw the polygon.
  * @param {object} ctx - Canvas context.
  * @param {SatImage} satImage - the SatImage object.
+ * @param {boolean} bezierDash - optional argument for drawing dashed beziers.
  * @param {boolean} drawDash - optional arguments for drawing dashed lines.
  */
-Polyline.prototype.draw = function(ctx, satImage, drawDash) {
+Polyline.prototype.draw = function(ctx, satImage, bezierDash, drawDash) {
   if (this.vertices.length === 0) {
     return;
   }
@@ -1405,10 +1406,13 @@ Polyline.prototype.draw = function(ctx, satImage, drawDash) {
     ctx.closePath();
     ctx.fill();
   }
+  if (drawDash) {
+    ctx.setLineDash([6, 2]);
+  }
   ctx.stroke();
 
   // draw dashed line for bezier if targeted
-  if (drawDash) {
+  if (bezierDash) {
     ctx.save();
     ctx.beginPath();
     ctx.setLineDash([6, 2]);
