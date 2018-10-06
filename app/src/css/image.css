@@ -196,7 +196,7 @@ canvas#hidden_canvas {
     width: calc(100vw - 220px);
     left: 10px;
     top: 10px;
-    overflow: scroll;
+    overflow: auto;
 }
 
 #div_main {

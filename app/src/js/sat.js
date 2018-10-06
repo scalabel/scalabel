@@ -362,7 +362,7 @@ Sat.prototype.initToolbox = function() {
     } else if (self.attributes[i].toolType === 'list') {
       let listOuterHtml = '<span>' + self.attributes[i].name + '</span>';
       listOuterHtml +=
-          '<div id="radios" class="btn-group" data-toggle="buttons">';
+          '<div id="radios" class="btn-group flex-wrap" data-toggle="buttons">';
       for (let j = 0; j < self.attributes[i].values.length; j++) {
         listOuterHtml +=
             '<button id="custom_attributeselector_' + i + '-' + j +
