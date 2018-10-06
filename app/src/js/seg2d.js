@@ -90,7 +90,7 @@ Seg2d.prototype.initDrawing = function(mousePos) {
 Seg2d.prototype.completeDrawing = function() {
   this.newPoly.endPath();
   if (this.newPoly.isValidShape()) {
-    this.addPolyline(this.newPoly);
+    this.addShape(this.newPoly);
     if (this.polyBuffer) {
       for (let poly of this.polyBuffer) {
         poly.delete();
