@@ -140,9 +140,11 @@ func GetHandlerUrl(itemType string, labelType string) string {
 	case "image":
 		if labelType == "box2d" || labelType == "segmentation" || labelType == "lane" {
 			return "label2d"
-		} else {
-			return "NO_VALID_HANDLER"
 		}
+		if labelType == "tag" {
+			return "label2dv2"
+		}
+		return "NO_VALID_HANDLER"
 	case "video":
 		if labelType == "box2d" || labelType == "segmentation" {
 			return "label2d"

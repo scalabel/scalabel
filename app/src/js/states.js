@@ -78,8 +78,9 @@ export function makeSatConfig(params: {} = {}): SatConfigType {
     pageTitle: '',
     instructionPage: '', // instruction url
     demoMode: false,
+    bundleFile: '',
     categories: [],
-    attributes: {},
+    attributes: [],
     taskId: '',
     workerId: '',
     startTime: 0,
@@ -103,17 +104,18 @@ export function makeSatCurrent(params: {} = {}): SatCurrentType {
 
 /**
  * Initialize a Sat state
- * @param {{}} config
+ * @param {{}} params
  * @return {SatType}
  */
-export function makeSat(config: {} = {}): SatType {
+export function makeSat(params: {} = {}): SatType {
   return {
-    config: makeSatConfig(config),
+    config: makeSatConfig(),
     current: makeSatCurrent(),
     items: [], // Map from item index to item, ordered
     labels: {}, // Map from label id to label
     tracks: {},
     shapes: {}, // Map from shapeId to shape
     actions: [],
+    ...params,
   };
 }

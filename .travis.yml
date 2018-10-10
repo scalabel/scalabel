@@ -13,7 +13,7 @@ install:
   - sudo pip install pycodestyle
   - go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure gopkg.in/yaml.v2 github.com/satori/go.uuid
   - npm install
-  - node_modules/.bin/flow-typed install jest jquery lodash
+  - node_modules/.bin/flow-typed install
 script:
   - pycodestyle --show-source . --exclude=node_modules
   - node_modules/.bin/eslint .

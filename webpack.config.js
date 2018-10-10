@@ -6,6 +6,7 @@ let config = {
   entry: {
     create: __dirname + '/app/src/js/create.js',
     image: __dirname + '/app/src/js/image.index.js',
+    image_v2: __dirname + '/app/src/js/functional/image.v2.index.js',
     point_cloud: __dirname + '/app/src/js/point_cloud/point_cloud.index.js',
   },
   output: {

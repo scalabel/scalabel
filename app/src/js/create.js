@@ -48,6 +48,7 @@ $(document).ready(function() {
     labelSelect.selectedIndex = 0;
     // enable just the labels that are valid
     if (itemSelect.value === 'image') {
+      enableOption(labelSelect, 'tag');
       enableOption(labelSelect, 'box2d');
       enableOption(labelSelect, 'segmentation');
       enableOption(labelSelect, 'lane');
@@ -78,17 +79,29 @@ $(document).ready(function() {
   labelSelect.onchange = function() {
     let labelName;
     let instructions;
-    if (labelSelect.value === 'box2d') {
+    if (labelSelect.value === 'tag') {
+      labelName = 'Image Tagging';
+      document.getElementById('categories').style.visibility = 'hidden';
+      document.getElementById('categories_label').style.visibility = 'hidden';
+    } else if (labelSelect.value === 'box2d') {
       labelName = '2D Bounding Box';
       instructions = 'http://data-bdd.berkeley.edu/label/bbox/instruction.html';
+      document.getElementById('categories').style.visibility = 'visible';
+      document.getElementById('categories_label').style.visibility = 'visible';
     } else if (labelSelect.value === 'segmentation') {
       labelName = '2D Segmentation';
       instructions = 'http://data-bdd.berkeley.edu/label/seg/readme.html';
+      document.getElementById('categories').style.visibility = 'visible';
+      document.getElementById('categories_label').style.visibility = 'visible';
     } else if (labelSelect.value === 'lane') {
       labelName = '2D Lane';
       instructions = 'http://data-bdd.berkeley.edu/label/seg/readme.html';
+      document.getElementById('categories').style.visibility = 'visible';
+      document.getElementById('categories_label').style.visibility = 'visible';
     } else if (labelSelect.value === 'box3d') {
       labelName = '3D Bounding Box';
+      document.getElementById('categories').style.visibility = 'visible';
+      document.getElementById('categories_label').style.visibility = 'visible';
     }
     document.getElementById('page_title').value = labelName + ' Labeling Tool';
     document.getElementById('instructions').value = instructions;

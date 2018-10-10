@@ -35,7 +35,7 @@ export type ItemType = {
   active: boolean,
   loaded: boolean,
   labels: Array<number>, // list of label ids
-  attributes: {[string]: string}
+  attributes: {[string]: number},
 };
 
 /*
@@ -53,8 +53,9 @@ export type SatConfigType = {
   pageTitle: string,
   instructionPage: string, // instruction url
   demoMode: boolean,
+  bundleFile: string,
   categories: Array<string>,
-  attributes: { [string]: string | number },
+  attributes: Array<Object>,
   taskId: string,
   workerId: string,
   startTime: number,
@@ -81,4 +82,9 @@ export type SatType = {
 
 export type LabelFunctionalType ={
   createLabel: (number) => LabelType,
+};
+
+export type ItemFunctionalType ={
+  createItem: (number, string) => ItemType,
+  // setActive: (number, boolean) => ItemType,
 };

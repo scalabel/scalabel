@@ -143,16 +143,21 @@ func main() {
 	http.HandleFunc("/dashboard", WrapHandleFunc(dashboardHandler))
 	http.HandleFunc("/vendor", WrapHandleFunc(vendorHandler))
 	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))
+	//http.HandleFunc("/postSatProject", WrapHandleFunc(postSatProjectHandler))
 	http.HandleFunc("/postSave", WrapHandleFunc(postSaveHandler))
+	http.HandleFunc("/postSaveV2", WrapHandleFunc(postSaveV2Handler))
 	http.HandleFunc("/postExport", WrapHandleFunc(postExportHandler))
 	http.HandleFunc("/postDownloadTaskURL", WrapHandleFunc(downloadTaskURLHandler))
 	http.HandleFunc("/postLoadAssignment",
 		WrapHandleFunc(postLoadAssignmentHandler))
+	http.HandleFunc("/postLoadAssignmentV2",
+		WrapHandleFunc(postLoadAssignmentV2Handler))
 
 	// Simple static handlers can be generated with MakePathHandleFunc
 	http.HandleFunc("/create",
 		WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
 	http.HandleFunc("/label2d", WrapHandleFunc(Label2dHandler))
+	http.HandleFunc("/label2dv2", WrapHandleFunc(Label2dv2Handler))
 	http.HandleFunc("/label3d", WrapHandleFunc(Label3dHandler))
 
 	Info.Printf("Listening to Port %d", env.Port)

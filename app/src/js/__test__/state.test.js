@@ -1,4 +1,5 @@
 /* @flow */
+
 import {makeLabel} from '../states';
 import _ from 'lodash/fp';
 

@@ -113,6 +113,7 @@ type ProjectOptions struct {
 	VideoMetaData     VideoMetaData `json:"videoMetaData" yaml:"videoMetaData"`
 	InterpolationMode string        `json:"interpolationMode" yaml:"interpolationMode"`
 	Detections        []Detection   `json:"detections" yaml:"detections"`
+	BundleFile        string        `json:"bundleFile" yaml:"bundleFile"`
 }
 
 // An item is something to be annotated e.g. Image, PointCloud
@@ -123,6 +124,7 @@ type Item struct {
 	GroundTruth []Label                `json:"groundTruth" yaml:"groundTruth"`
 	Data        map[string]interface{} `json:"data" yaml:"data"`
 	LabelImport []LabelExport          `json:"labelImport" yaml:"labelImport"`
+	Attributes  map[string]interface{} `json:"attributes" yaml:"attributes"`
 }
 
 // An annotation for an item, needs to include all possible annotation types
@@ -300,8 +302,8 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// import items and corresponding labels
 	items := getItemsFromProjectForm(r)
 	if itemType == "video" {
-        videoMetaData.NumFrames = strconv.Itoa(len(items))
-    }
+		videoMetaData.NumFrames = strconv.Itoa(len(items))
+	}
 	// get the task size from form
 	var taskSize int
 	if itemType != "video" {
@@ -334,6 +336,12 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	//   for this project. Uniquely determined by item type and label type.
 	handlerUrl := GetHandlerUrl(itemType, labelType)
 
+	// get which bundle to use depending on redux progress
+	bundleFile := "image.js"
+	if labelType == "tag" {
+		bundleFile = "image_v2.js"
+	}
+
 	// initialize and save the project
 	var projectOptions = ProjectOptions{
 		Name:              projectName,
@@ -350,12 +358,14 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		VideoMetaData:     videoMetaData,
 		InterpolationMode: interpolationMode,
 		Detections:        detections,
+		BundleFile:        bundleFile,
 	}
 	var project = Project{
 		Items:    items,
 		VendorId: vendorId,
 		Options:  projectOptions,
 	}
+
 	// Save project to project folder
 	err = storage.Save(project.GetKey(), project.GetFields())
 	if err != nil {
@@ -479,64 +489,64 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	items := []ItemExport{}
 	for _, task := range tasks {
 		latestSubmission, err := GetAssignment(projectName, Index2str(task.Index), DEFAULT_WORKER)
-        if err == nil {
-            for _, itemToLoad := range latestSubmission.Task.Items {
-                item := ItemExport{}
-                item.Index = itemToLoad.Index
-                if projectToLoad.Options.ItemType == "video" {
-                    item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
-                }
-                item.Timestamp = 10000 // to be fixed
-                item.Name = itemToLoad.Url
-                item.Url = itemToLoad.Url
-                for _, labelId := range itemToLoad.LabelIds {
-                    var labelToLoad Label
-                    for _, label := range latestSubmission.Labels {
-                        if label.Id == labelId {
-                            labelToLoad = label
-                            break
-                        }
-                    }
-                    label := LabelExport{}
-                    label.Category = labelToLoad.CategoryPath
-                    label.Attributes = labelToLoad.Attributes
-                    switch projectToLoad.Options.LabelType {
-                    case "box2d":
-                        label.Box2d = ParseBox2d(labelToLoad.Data)
-                    case "box3d":
-                        label.Box3d = ParseBox3d(labelToLoad.Data)
-                    case "segmentation":
-                        label.Poly2d = ParsePoly2d(labelToLoad.Data)
-                    case "lane":
-                        label.Poly2d = ParsePoly2d(labelToLoad.Data)
-                    }
-                    label.Manual = true
-                    if projectToLoad.Options.ItemType == "video" {
-                        label.Manual = labelToLoad.Keyframe
-                        label.Id = labelToLoad.ParentId
-                    } else {
-                        label.Manual = true
-                        label.Id = labelId
-                    }
-                    item.Labels = append(item.Labels, label)
-                }
-                items = append(items, item)
-            }
-        } else {
-            // if file not found, return list of items with url
-            Info.Println(err)
-            for _, itemToLoad := range task.Items {
-                item := ItemExport{}
-                item.Index = itemToLoad.Index
-                if projectToLoad.Options.ItemType == "video" {
-                    item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
-                }
-                item.Timestamp = 10000 // to be fixed
-                item.Name = itemToLoad.Url
-                item.Url = itemToLoad.Url
-                items = append(items, item)
-            }
-        }
+		if err == nil {
+			for _, itemToLoad := range latestSubmission.Task.Items {
+				item := ItemExport{}
+				item.Index = itemToLoad.Index
+				if projectToLoad.Options.ItemType == "video" {
+					item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+				}
+				item.Timestamp = 10000 // to be fixed
+				item.Name = itemToLoad.Url
+				item.Url = itemToLoad.Url
+				for _, labelId := range itemToLoad.LabelIds {
+					var labelToLoad Label
+					for _, label := range latestSubmission.Labels {
+						if label.Id == labelId {
+							labelToLoad = label
+							break
+						}
+					}
+					label := LabelExport{}
+					label.Category = labelToLoad.CategoryPath
+					label.Attributes = labelToLoad.Attributes
+					switch projectToLoad.Options.LabelType {
+					case "box2d":
+						label.Box2d = ParseBox2d(labelToLoad.Data)
+					case "box3d":
+						label.Box3d = ParseBox3d(labelToLoad.Data)
+					case "segmentation":
+						label.Poly2d = ParsePoly2d(labelToLoad.Data)
+					case "lane":
+						label.Poly2d = ParsePoly2d(labelToLoad.Data)
+					}
+					label.Manual = true
+					if projectToLoad.Options.ItemType == "video" {
+						label.Manual = labelToLoad.Keyframe
+						label.Id = labelToLoad.ParentId
+					} else {
+						label.Manual = true
+						label.Id = labelId
+					}
+					item.Labels = append(item.Labels, label)
+				}
+				items = append(items, item)
+			}
+		} else {
+			// if file not found, return list of items with url
+			Info.Println(err)
+			for _, itemToLoad := range task.Items {
+				item := ItemExport{}
+				item.Index = itemToLoad.Index
+				if projectToLoad.Options.ItemType == "video" {
+					item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+				}
+				item.Timestamp = 10000 // to be fixed
+				item.Name = itemToLoad.Url
+				item.Url = itemToLoad.Url
+				items = append(items, item)
+			}
+		}
 	}
 
 	exportJson, err := json.MarshalIndent(items, "", "  ")
@@ -668,8 +678,8 @@ func getAttributesFromProjectForm(r *http.Request) []Attribute {
 }
 
 // load label json file
-func getItemsFromProjectForm(r *http.Request) ([]Item) {
-    var items []Item
+func getItemsFromProjectForm(r *http.Request) []Item {
+	var items []Item
 	var itemsImport []ItemExport
 	importFile, header, err := r.FormFile("item_file")
 
@@ -682,23 +692,23 @@ func getItemsFromProjectForm(r *http.Request) ([]Item) {
 		if err != nil {
 			Error.Println(err)
 		}
-		if (strings.HasSuffix(header.Filename, ".json")) {
-		    err = json.Unmarshal(importFileBuf.Bytes(), &itemsImport)
+		if strings.HasSuffix(header.Filename, ".json") {
+			err = json.Unmarshal(importFileBuf.Bytes(), &itemsImport)
 		} else {
-		    err = yaml.Unmarshal(importFileBuf.Bytes(), &itemsImport)
+			err = yaml.Unmarshal(importFileBuf.Bytes(), &itemsImport)
 		}
 		if err != nil {
-            Error.Println(err)
-        }
-        for i, itemImport := range itemsImport {
-            item := Item{}
-            item.Url = itemImport.Url
-            item.Index = i
-            if (len(itemImport.Labels) > 0) {
-                item.LabelImport = itemImport.Labels
-            }
-            items = append(items, item)
-        }
+			Error.Println(err)
+		}
+		for i, itemImport := range itemsImport {
+			item := Item{}
+			item.Url = itemImport.Url
+			item.Index = i
+			if len(itemImport.Labels) > 0 {
+				item.LabelImport = itemImport.Labels
+			}
+			items = append(items, item)
+		}
 
 	case http.ErrMissingFile:
 		Error.Printf("Nothing imported")

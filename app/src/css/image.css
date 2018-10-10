@@ -168,8 +168,12 @@ canvas#image_canvas {
     background: #222222;
 }
 
-canvas#label_canvas {
+canvas#tag_canvas {
     z-index: 3;
+}
+
+canvas#label_canvas {
+    z-index: 4;
 }
 
 canvas#hidden_canvas {
@@ -416,4 +420,15 @@ canvas#hidden_canvas {
     margin: 0 auto;
     text-align: center;
     border-bottom: 1px solid #dee2e6;
+}
+
+.attribute-btns {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-y: hidden;
+}
+
+.btn-attribute {
+    flex-grow: 1 !important;
 }
