@@ -131,6 +131,7 @@ export function SatPointCloud(sat, index, url) {
   this.mouseMoveListener = this.handleMouseMove.bind(this);
   this.mouseDownListener = this.handleMouseDown.bind(this);
   this.mouseUpListener = this.handleMouseUp.bind(this);
+  this.dblClickListener = this.handleDblClick.bind(this);
   this.keyDownListener = this.handleKeyDown.bind(this);
   this.keyUpListener = this.handleKeyUp.bind(this);
   this.endTrackListener = this.handleEndTrack.bind(this);
@@ -183,9 +184,6 @@ SatPointCloud.prototype.getPCJSON = function() {
             },
             teal: {
               value: new THREE.Color(0x00ffff),
-            },
-            blue: {
-              value: new THREE.Color(0x0000ff),
             },
           },
           vertexShader: vertexShader,
@@ -241,6 +239,9 @@ SatPointCloud.prototype.setActive = function(active) {
     this.container.addEventListener('mouseup',
         this.mouseUpListener, false);
 
+    this.container.addEventListener('dblclick',
+        this.dblClickListener, false);
+
     document.addEventListener('keydown',
         this.keyDownListener, false);
 
@@ -289,6 +290,8 @@ SatPointCloud.prototype.setActive = function(active) {
         this.mouseDownListener, false);
     this.container.removeEventListener('mouseup',
         this.mouseUpListener, false);
+    this.container.removeEventListener('dblclick',
+        this.dblClickListener, false);
     document.removeEventListener('keydown',
         this.keyDownListener, false);
     document.removeEventListener('keyup',
@@ -519,6 +522,32 @@ SatPointCloud.prototype.handleMouseDown = function() {
         this.viewPlaneOffset.sub(this.boxMouseOverPoint);
       }
     }
+  }
+};
+
+SatPointCloud.prototype.handleDblClick = function() {
+  let NDC = this.convertMouseToNDC(
+    this.mouseX + this.container.getBoundingClientRect().left,
+    this.mouseY + this.container.getBoundingClientRect().top);
+  let x = NDC[0];
+  let y = NDC[1];
+
+  this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.currentCamera);
+
+  this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.currentCamera);
+
+  let intersects = this.raycaster.intersectObject(this.particles);
+
+  if (intersects.length > 0) {
+    let newTarget = intersects[0].point;
+    for (let i = 0; i < this.views.length; i++) {
+        let distToOldTarget = (new THREE.Vector3()).subVectors(
+            this.views[i].camera.position, this.target);
+        this.views[i].camera.position.addVectors(newTarget, distToOldTarget);
+        this.views[i].camera.lookAt(newTarget);
+    }
+    this.target.copy(newTarget);
+    this.sphere.position.copy(newTarget);
   }
 };
 
