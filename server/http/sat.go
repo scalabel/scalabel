@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -124,7 +125,7 @@ type Item struct {
 	GroundTruth []Label                `json:"groundTruth" yaml:"groundTruth"`
 	Data        map[string]interface{} `json:"data" yaml:"data"`
 	LabelImport []LabelExport          `json:"labelImport" yaml:"labelImport"`
-	Attributes  map[string]interface{} `json:"attributes" yaml:"attributes"`
+	Attributes  map[string]int         `json:"attributes" yaml:"attributes"`
 }
 
 // An annotation for an item, needs to include all possible annotation types
@@ -300,7 +301,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// parse the attribute list YML from form
 	attributes := getAttributesFromProjectForm(r)
 	// import items and corresponding labels
-	items := getItemsFromProjectForm(r)
+	items := getItemsFromProjectForm(r, attributes)
 	if itemType == "video" {
 		videoMetaData.NumFrames = strconv.Itoa(len(items))
 	}
@@ -318,17 +319,17 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if itemType == "pointcloud" || itemType == "pointcloudtracking" {
-	    for i := 0; i < len(items); i++ {
-	        coeffs, err := parsePLYForGround(items[i].Url)
-            if err == nil {
-                 if items[i].Data == nil {
-                     items[i].Data = make(map[string]interface{})
-                 }
-                 items[i].Data["groundCoefficients"] = coeffs
-            } else {
-                Error.Println(err)
-            }
-        }
+		for i := 0; i < len(items); i++ {
+			coeffs, err := parsePLYForGround(items[i].Url)
+			if err == nil {
+				if items[i].Data == nil {
+					items[i].Data = make(map[string]interface{})
+				}
+				items[i].Data["groundCoefficients"] = coeffs
+			} else {
+				Error.Println(err)
+			}
+		}
 	}
 
 	// get the vendor ID from form
@@ -693,7 +694,7 @@ func getAttributesFromProjectForm(r *http.Request) []Attribute {
 }
 
 // load label json file
-func getItemsFromProjectForm(r *http.Request) []Item {
+func getItemsFromProjectForm(r *http.Request, attributes []Attribute) []Item {
 	var items []Item
 	var itemsImport []ItemExport
 	importFile, header, err := r.FormFile("item_file")
@@ -719,6 +720,28 @@ func getItemsFromProjectForm(r *http.Request) []Item {
 			item := Item{}
 			item.Url = itemImport.Url
 			item.Index = i
+			// load item attributes if needed
+			if len(itemImport.Attributes) > 0 {
+				item.Attributes = map[string]int{}
+				keys := reflect.ValueOf(itemImport.Attributes).MapKeys()
+				strkeys := make([]string, len(keys))
+				for i := 0; i < len(keys); i++ {
+					strkeys[i] = keys[i].String()
+				}
+				for _, key := range strkeys {
+					for _, attribute := range attributes {
+						if attribute.Name == key {
+							for i := 0; i < len(attribute.Values); i++ {
+								if itemImport.Attributes[key] == attribute.Values[i] {
+									item.Attributes[key] = i
+									break
+								}
+							}
+							break
+						}
+					}
+				}
+			}
 			if len(itemImport.Labels) > 0 {
 				item.LabelImport = itemImport.Labels
 			}

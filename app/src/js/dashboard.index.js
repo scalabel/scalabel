@@ -20,4 +20,9 @@ $(document).ready(function() {
       sprintf('%d', totalLabels);
 
   $('body').show();
+  if (document.getElementById('label_type').innerText === 'tag') {
+    document.getElementById('export_result').href =
+        './postExportV2?project_name='
+        + document.getElementById('project_name').innerText;
+  }
 });

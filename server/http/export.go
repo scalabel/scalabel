@@ -14,13 +14,13 @@ type Poly2d struct {
 }
 
 type ItemExport struct {
-	Name       string                   `json:"name" yaml:"name"`
-	Url        string                   `json:"url" yaml:"url"`
-	VideoName  string                   `json:"videoName" yaml:"videoName"`
-	Attributes []map[string]interface{} `json:"attributes" yaml:"attributes"`
-	Timestamp  int64                    `json:"timestamp" yaml:"timestamp"`
-	Index      int                      `json:"index" yaml:"index"`
-	Labels     []LabelExport            `json:"labels" yaml:"labels"`
+	Name       string            `json:"name" yaml:"name"`
+	Url        string            `json:"url" yaml:"url"`
+	VideoName  string            `json:"videoName" yaml:"videoName"`
+	Attributes map[string]string `json:"attributes" yaml:"attributes"`
+	Timestamp  int64             `json:"timestamp" yaml:"timestamp"`
+	Index      int               `json:"index" yaml:"index"`
+	Labels     []LabelExport     `json:"labels" yaml:"labels"`
 }
 
 type LabelExport struct {

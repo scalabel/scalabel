@@ -1,13 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/mitchellh/mapstructure"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"path"
+	"reflect"
 	"strconv"
 )
 
@@ -212,7 +215,7 @@ func assignmentToSat(assignment *Assignment) Sat {
 			Index:      item.Index,
 			Url:        item.Url,
 			Labels:     []int{},
-			Attributes: map[string]int{},
+			Attributes: item.Attributes,
 		}
 		items = append(items, satItem)
 	}
@@ -295,4 +298,78 @@ func postSaveV2Handler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	w.Write(nil)
+}
+
+// Handles the export of submitted assignments
+func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
+	var projectName = r.FormValue("project_name")
+	key := path.Join(projectName, "project")
+	fields, err := storage.Load(key)
+	if err != nil {
+		Error.Println(err)
+	}
+	projectToLoad := Project{}
+	mapstructure.Decode(fields, &projectToLoad)
+
+	// Grab the latest submissions from all tasks
+	tasks, err := GetTasksInProject(projectName)
+	if err != nil {
+		Error.Println(err)
+		return
+	}
+	items := []ItemExport{}
+	for _, task := range tasks {
+		sat, err := GetSat(projectName, Index2str(task.Index), DEFAULT_WORKER)
+		if err == nil {
+			for _, itemToLoad := range sat.Items {
+				item := ItemExport{}
+				item.Index = itemToLoad.Index
+				if projectToLoad.Options.ItemType == "video" {
+					item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+				}
+				item.Timestamp = 10000 // to be fixed
+				item.Name = itemToLoad.Url
+				item.Url = itemToLoad.Url
+				item.Attributes = map[string]string{}
+				keys := reflect.ValueOf(itemToLoad.Attributes).MapKeys()
+				strkeys := make([]string, len(keys))
+				for i := 0; i < len(keys); i++ {
+					strkeys[i] = keys[i].String()
+				}
+				for _, key := range strkeys {
+					for _, attribute := range sat.Config.Attributes {
+						if attribute.Name == key {
+							item.Attributes[key] = attribute.Values[itemToLoad.Attributes[key]]
+							break
+						}
+					}
+				}
+
+				items = append(items, item)
+			}
+		} else {
+			// if file not found, return list of items with url
+			Info.Println(err)
+			for _, itemToLoad := range task.Items {
+				item := ItemExport{}
+				item.Index = itemToLoad.Index
+				if projectToLoad.Options.ItemType == "video" {
+					item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+				}
+				item.Timestamp = 10000 // to be fixed
+				item.Name = itemToLoad.Url
+				item.Url = itemToLoad.Url
+				items = append(items, item)
+			}
+		}
+	}
+
+	exportJson, err := json.MarshalIndent(items, "", "  ")
+	if err != nil {
+		Error.Println(err)
+	}
+
+	//set relevant header.
+	w.Header().Set("Content-Disposition", "attachment; filename="+projectName+"_Results.json")
+	io.Copy(w, bytes.NewReader(exportJson))
 }
