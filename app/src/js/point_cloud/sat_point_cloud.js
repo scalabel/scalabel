@@ -1090,12 +1090,40 @@ SatPointCloud.prototype.toJson = function() {
   }
 
   item.data['view'] = view;
+  item.data['groundCoefficients'] = this.groundCoefficients;
 
   return item;
 };
 
 SatPointCloud.prototype.fromJson = function(item) {
   SatItem.prototype.fromJson.call(this, item);
+
+  if (item.data != null) {
+      this.groundCoefficients = item.data['groundCoefficients'];
+
+      if (this.groundCoefficients != null) {
+          this.groundMesh = new THREE.Mesh(
+              new THREE.PlaneGeometry(100, 100, 50, 50),
+              new THREE.MeshBasicMaterial({color: 0xd0d0d0, wireframe: true}));
+
+          let rotationAxis = new THREE.Vector3(-this.groundCoefficients[1],
+                                               this.groundCoefficients[0], 0);
+          let length =
+              Math.sqrt(this.groundCoefficients[0] *
+                        this.groundCoefficients[0] +
+                        this.groundCoefficients[1] *
+                        this.groundCoefficients[1] +
+                        this.groundCoefficients[2] *
+                        this.groundCoefficients[2]);
+          let rotationAngle = Math.acos(this.groundCoefficients[2] / length);
+
+          this.groundMesh.rotateOnAxis(rotationAxis, rotationAngle);
+
+          this.groundMesh.position.z = -this.groundCoefficients[3] /
+                                        this.groundCoefficients[2];
+          this.scene.add(this.groundMesh);
+      }
+  }
 
   if (item.data && item.data['view']) {
     this.target.x = item.data['view'][0][0];

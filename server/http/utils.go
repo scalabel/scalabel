@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/satori/go.uuid"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -364,4 +368,46 @@ var dummyAttribute = []Attribute{
 	{"", "", "",
 		"", nil, nil, nil,
 	},
+}
+
+var floatMatch = `[+-]?(\d+(\.\d*)?|\d?\.\d+)`
+var floatFinder = regexp.MustCompile(floatMatch)
+var groundCoefficientsFinder = regexp.MustCompile(
+    `comment\s*\[groundCoefficients\]\s*` +
+    floatMatch + `\s*,\s*` + floatMatch + `\s*,\s*` +
+    floatMatch + `\s*,\s*` + floatMatch)
+
+func parsePLYForGround(url string) ([4]float64, error) {
+    var coefficients [4]float64
+    r, err := http.Get(url)
+    if err != nil {
+        return coefficients, err
+    }
+    defer r.Body.Close()
+    contents, err := ioutil.ReadAll(r.Body)
+
+    groundCoeffBytes := groundCoefficientsFinder.Find(contents)
+
+    if groundCoeffBytes == nil {
+        return coefficients, errors.New("Could not find ground coefficients")
+    }
+
+    coefficientByteArrays := floatFinder.FindAll(groundCoeffBytes, 4)
+
+    if coefficientByteArrays == nil {
+        return coefficients, errors.New("Error parsing ground coefficients")
+    }
+
+    if len(coefficientByteArrays) != 4 {
+        return coefficients, errors.New("Incorrect number of ground coefficients")
+    }
+
+    for i, coeffArr := range coefficientByteArrays {
+        coefficients[i], err = strconv.ParseFloat(string(coeffArr), 64)
+        if err != nil {
+            return coefficients, err
+        }
+    }
+
+    return coefficients, nil
 }

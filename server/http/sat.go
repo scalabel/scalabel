@@ -316,6 +316,21 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		taskSize = 1
 	}
+
+	if itemType == "pointcloud" || itemType == "pointcloudtracking" {
+	    for i := 0; i < len(items); i++ {
+	        coeffs, err := parsePLYForGround(items[i].Url)
+            if err == nil {
+                 if items[i].Data == nil {
+                     items[i].Data = make(map[string]interface{})
+                 }
+                 items[i].Data["groundCoefficients"] = coeffs
+            } else {
+                Error.Println(err)
+            }
+        }
+	}
+
 	// get the vendor ID from form
 	vendorId, err := strconv.Atoi(r.FormValue("vendor_id"))
 	if err != nil {
