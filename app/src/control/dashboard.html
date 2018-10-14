@@ -217,33 +217,7 @@
     </div>
 </div>
 
-<!-- JAVASCRIPT -->
-<!-- jQuery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
-
-<!-- Bootstrap JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/todc-bootstrap/3.3.7-3.3.13/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
-
-<script language="javascript" type="text/javascript">
-    var tds = document.getElementById('main_table').getElementsByTagName('td');
-    var totalTaskLabeled = 0;
-    var totalLabels = 0;
-    for(var i = 0; i < tds.length; i++) {
-        if(tds[i].className == 'countLabeledImage') {
-            totalTaskLabeled += tds[i].innerHTML > 0? 1 : 0;
-        }
-        if(tds[i].className == 'countLabelInTask') {
-            totalLabels += parseInt(tds[i].innerHTML);
-        }
-    }
-    document.getElementById('totalTaskLabeled').textContent = '' + totalTaskLabeled;
-    document.getElementById('totalLabels').textContent = '' + totalLabels;
-</script>
-
-<script>$(document).ready(function() {$('body').show();});</script>
+<script src="./js/dashboard.js"></script>
 
 </body>
 

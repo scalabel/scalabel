@@ -18,7 +18,7 @@ export class ToolboxViewer {
    * initialize viewer
    */
   init() {
-    if (this.store.getState().present.config.labelType === 'tag') {
+    if (this.store.getState().present.config.categories.length === 0) {
       let customCategories = document.getElementById('custom_categories');
       if (customCategories) {
         customCategories.style.visibility = 'hidden';
