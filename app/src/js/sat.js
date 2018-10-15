@@ -438,6 +438,7 @@ Sat.prototype.encodeBaseJson = function() {
         attributes: self.attributes,
         instructions: self.instructions,
         demoMode: self.demoMode,
+        bundleFile: self.bundleFile,
       },
       index: self.taskIndex,
       items: items,
@@ -484,6 +485,7 @@ Sat.prototype.decodeBaseJson = function(json) {
   self.demoMode = json.task.projectOptions.demoMode;
   self.categories = json.task.projectOptions.categories;
   self.attributes = json.task.projectOptions.attributes;
+  self.bundleFile = json.task.projectOptions.bundleFile;
   self.taskIndex = json.task.index;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID
