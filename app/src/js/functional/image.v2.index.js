@@ -9,6 +9,7 @@ import {TagViewer} from './viewers/tag_viewer';
 import {TitleBarViewer} from './viewers/title_bar_viewer';
 import {ToolboxViewer} from './viewers/toolbox_viewer';
 import {PageControl} from './controllers/page_controller';
+import {sprintf} from 'sprintf-js';
 import * as types from './actions/action_types';
 
 declare var labelType: String;
@@ -52,7 +53,7 @@ function initViewers(store) {
       tagViewer.loaded(i);
     };
     image.onerror = function() {
-      alert('Image ' + url + ' was not found.');
+      alert(sprintf('Image %s was not found.', url));
     };
     image.src = url;
   }

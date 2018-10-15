@@ -35,14 +35,14 @@ export class TagViewer extends ImageBaseViewer {
     // preparation
     this.padBox = this._getPadding();
     let activeTags = this.getActiveTags();
-    this.ctx.font = '30px Arial';
+    this.ctx.font = '24px Arial';
     let abbr = [];
     let attributes = this.store.getState().present.config.attributes;
     for (let i = 0; i < attributes.length; i++) {
       let key = attributes[i].name;
       if (activeTags && activeTags[key]) {
-        abbr.push(sprintf('  %s: %s', attributes[i].tagPrefix,
-                          attributes[i].tagSuffixes[activeTags[key]]));
+        abbr.push(sprintf('  %s: %s', attributes[i].name,
+                          attributes[i].values[activeTags[key]]));
       }
     }
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
