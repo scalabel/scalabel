@@ -18,7 +18,9 @@ export class ToolboxViewer {
    * initialize viewer
    */
   init() {
-    if (this.store.getState().present.config.categories.length === 0) {
+    let categories: Array<string> =
+        this.store.getState().present.config.categories;
+    if (categories === null || categories.length === 0) {
       let customCategories = document.getElementById('custom_categories');
       if (customCategories) {
         customCategories.style.visibility = 'hidden';
@@ -35,14 +37,24 @@ export class ToolboxViewer {
     let currItemId = state.current.item;
     let currItem = state.items[currItemId];
     let attributes = currItem.attributes;
-    let attributesMap = state.config.attributes;
-    for (let i=0; i < attributesMap.length; i++) {
-      for (let j=0; j < attributesMap[i].values.length; j++) {
-        let selectedIndex = attributes[attributesMap[i].name];
-        let selector = $('#custom_attributeselector_' + i + '-' + j);
-        if (selectedIndex === j) {
-          selector.addClass('active');
-        } else {
+    if (attributes) {
+      let attributesMap = state.config.attributes;
+      for (let i = 0; i < attributesMap.length; i++) {
+        for (let j = 0; j < attributesMap[i].values.length; j++) {
+          let selectedIndex = attributes[attributesMap[i].name];
+          let selector = $('#custom_attributeselector_' + i + '-' + j);
+          if (selectedIndex === j) {
+            selector.addClass('active');
+          } else {
+            selector.removeClass('active');
+          }
+        }
+      }
+    } else {
+      let attributesMap = state.config.attributes;
+      for (let i = 0; i < attributesMap.length; i++) {
+        for (let j = 0; j < attributesMap[i].values.length; j++) {
+          let selector = $('#custom_attributeselector_' + i + '-' + j);
           selector.removeClass('active');
         }
       }

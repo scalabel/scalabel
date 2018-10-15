@@ -270,14 +270,14 @@ SatImage.prototype.setScale = function(scale) {
   }
   // handle buttons
   if (self.scale >= self.MIN_SCALE * self.SCALE_RATIO) {
-    $('#decrease_btn').attr('disabled', false);
+    $('#decrease-btn').attr('disabled', false);
   } else {
-    $('#decrease_btn').attr('disabled', true);
+    $('#decrease-btn').attr('disabled', true);
   }
   if (self.scale <= self.MAX_SCALE / self.SCALE_RATIO) {
-    $('#increase_btn').attr('disabled', false);
+    $('#increase-btn').attr('disabled', false);
   } else {
-    $('#increase_btn').attr('disabled', true);
+    $('#increase-btn').attr('disabled', true);
   }
   // resize canvas
   let rectDiv = this.divCanvas.getBoundingClientRect();
@@ -373,14 +373,14 @@ SatImage.prototype.setActive = function(active) {
       self._nextHandler();
     };
 
-    if (document.getElementById('increase_btn')) {
-      document.getElementById('increase_btn').onclick = function() {
+    if (document.getElementById('increase-btn')) {
+      document.getElementById('increase-btn').onclick = function() {
         self._incHandler();
       };
     }
 
-    if (document.getElementById('decrease_btn')) {
-      document.getElementById('decrease_btn').onclick = function() {
+    if (document.getElementById('decrease-btn')) {
+      document.getElementById('decrease-btn').onclick = function() {
         self._decHandler();
       };
     }

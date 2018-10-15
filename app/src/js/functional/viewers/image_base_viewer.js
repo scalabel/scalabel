@@ -134,14 +134,14 @@ export class ImageBaseViewer {
     }
     // handle buttons
     if (this.scale >= this.MIN_SCALE * this.SCALE_RATIO) {
-      $('#decrease_btn').prop('disabled', false);
+      $('#decrease-btn').prop('disabled', false);
     } else {
-      $('#decrease_btn').prop('disabled', true);
+      $('#decrease-btn').prop('disabled', true);
     }
     if (this.scale <= this.MAX_SCALE / this.SCALE_RATIO) {
-      $('#increase_btn').prop('disabled', false);
+      $('#increase-btn').prop('disabled', false);
     } else {
-      $('#increase_btn').prop('disabled', true);
+      $('#increase-btn').prop('disabled', true);
     }
     // resize canvas
     let rectDiv = this.divCanvas.getBoundingClientRect();

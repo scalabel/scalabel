@@ -39,10 +39,10 @@ export function initSatSession(labelType, itemType) {
   }
   if (itemType === 'image') {
     new Sat(SatImage, labelClass);
-    $('#player_controls').remove();
+    $('#player-controls').remove();
   }
   if (itemType === 'video') {
-    showElementById('player_controls');
+    showElementById('player-controls');
     showTemplateById('video_btns');
     document.getElementById('div_canvas').style.height = 'calc(100vh - 103px)';
     new SatVideo(labelClass);
@@ -60,4 +60,5 @@ $(document).ready(function() {
     }
   });
 });
+
 $('body').show();
