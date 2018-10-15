@@ -11,6 +11,23 @@ import {newItem as newItemF, newLabel as newLabelF} from '../sat';
 import {updateObject, updateListItems} from '../util';
 
 /**
+ * Initialize state
+ * @param {SatType} state
+ * @return {SatType}
+ */
+function initSession(state: SatType): SatType {
+  // initialize state
+  if (state.current.item === -1) {
+    let current = updateObject(state.current, {item: 0});
+    let items = updateListItems(
+        state.items, [0], [updateObject(state.items[0], {active: true})]);
+    return updateObject(state, {current: current, items: items});
+  } else {
+    return state;
+  }
+}
+
+/**
  * Create Item from url with provided creator
  * @param {SatType} state
  * @param {Function} createItem
@@ -18,7 +35,7 @@ import {updateObject, updateListItems} from '../util';
  * @return {SatType}
  */
 function newItem(state: SatType, createItem: (number, string) => ItemType,
-                 url: string) {
+                 url: string): SatType {
   return newItemF(state, createItem, url);
 }
 
@@ -28,7 +45,7 @@ function newItem(state: SatType, createItem: (number, string) => ItemType,
  * @param {number} index
  * @return {SatType}
  */
-function goToItem(state: SatType, index: number) {
+function goToItem(state: SatType, index: number): SatType {
   index = (index + state.items.length) % state.items.length;
   if (index === state.current.item) {
     return state;
@@ -51,9 +68,8 @@ function goToItem(state: SatType, index: number) {
  * @return {SatType}
  */
 function newLabel(state: SatType, createLabel: (number, Object) => LabelType,
-                  optionalAttributes: Object = {}) {
-  let newState = newLabelF(state, createLabel, optionalAttributes);
-  return newState;
+                  optionalAttributes: Object = {}): SatType {
+  return newLabelF(state, createLabel, optionalAttributes);
 }
 
 // TODO: now we are using redux, we have all the history anyway,
@@ -61,11 +77,12 @@ function newLabel(state: SatType, createLabel: (number, Object) => LabelType,
 /**
  * Delete given label
  * @param {SatType} state
- * @param {number} itemId
- * @param {number} labelId
+ * @param {number} ignoredItemId
+ * @param {number} ignoredLabelId
  * @return {SatType}
  */
-function deleteLabel(state: SatType, itemId: number, labelId: number) { // eslint-disable-line
+function deleteLabel(
+    state: SatType, ignoredItemId: number, ignoredLabelId: number): SatType {
   return state;
 }
 
@@ -78,7 +95,7 @@ function deleteLabel(state: SatType, itemId: number, labelId: number) { // eslin
  * @return {SatType}
  */
  function tagImage(state: SatType, itemId: number, attributeName: string,
-                   selectedIndex: number) {
+                   selectedIndex: number): SatType {
    let attributes = updateObject(state.items[itemId].attributes,
      {[attributeName]: selectedIndex});
    // be careful about this merge
@@ -88,24 +105,24 @@ function deleteLabel(state: SatType, itemId: number, labelId: number) { // eslin
 /**
  * assign Attribute to a label
  * @param {SatType} state
- * @param {number} labelId
- * @param {object} attributeOptions
+ * @param {number} ignoredLabelId
+ * @param {object} ignoredAttributeOptions
  * @return {SatType}
  */
-function changeAttribute(state: SatType,
-                         labelId: number, attributeOptions: Object) { // eslint-disable-line
+function changeAttribute(state: SatType, ignoredLabelId: number,
+                         ignoredAttributeOptions: Object): SatType {
   return state;
 }
 
 /**
  * change label category
  * @param {SatType} state
- * @param {number} labelId
- * @param {object} categoryOptions
+ * @param {number} ignoredLabelId
+ * @param {object} ignoredCategoryOptions
  * @return {SatType}
  */
-function changeCategory(state: SatType,
-                        labelId: number, categoryOptions: Object) { // eslint-disable-line
+function changeCategory(state: SatType, ignoredLabelId: number,
+                        ignoredCategoryOptions: Object): SatType {
   return state;
 }
 
@@ -115,13 +132,16 @@ function changeCategory(state: SatType,
  * @param {object} action
  * @return {SatType}
  */
-export default function(currState: SatType = makeSat(), action: Object) {
+export default function(currState: SatType = makeSat(),
+                        action: Object): SatType {
   // Appending actions to action array
   let newActions = currState.actions.slice();
   newActions.push(action);
   let state = {...currState, actions: newActions};
   // Apply reducers to state
   switch (action.type) {
+    case types.INIT_SESSION:
+      return initSession(state);
     case types.NEW_ITEM:
       return newItem(state, action.createItem, action.url);
     case types.GO_TO_ITEM:

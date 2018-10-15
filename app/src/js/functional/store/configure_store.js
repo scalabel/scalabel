@@ -15,19 +15,11 @@ import {
   CHANGE_CATEGORY,
 } from '../actions/action_types';
 
-const configureStore = (json: Object = {},
-                         devMode: boolean = false) => {
+const configureStore = (json: Object = {}, devMode: boolean = false) => {
   let store;
-
-  let initState = makeSat(json);
-  // initialize state
-  if (initState.current.item === -1) {
-    initState.current.item = 0;
-    initState.items[0].active = true;
-  }
   const initialHistory = {
     past: [],
-    present: initState,
+    present: makeSat(json),
     future: [],
   };
 

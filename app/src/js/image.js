@@ -1,6 +1,7 @@
 import {SatItem, SatLabel, pickColorPalette} from './sat';
 import {hiddenStyleColor, mode, rgb} from './utils';
 import {UP_RES_RATIO} from './shape';
+import {sprintf} from 'sprintf-js';
 
 // constants
 const DOUBLE_CLICK_WAIT_TIME = 300;
@@ -201,7 +202,7 @@ SatImage.prototype.updateLabelCount = function() {
       }
     }
   }
-  document.getElementById('label_count').textContent = '' + numLabels;
+  document.getElementById('label-count').textContent = sprintf('%s', numLabels);
 };
 
 /**

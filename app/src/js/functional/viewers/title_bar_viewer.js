@@ -1,4 +1,6 @@
 /* @flow */
+// $FlowFixMe
+import {sprintf} from 'sprintf-js';
 
 /**
  * TitleBarViewer class
@@ -19,11 +21,11 @@ export class TitleBarViewer {
    */
   init() {
     if (this.store.getState().present.config.labelType === 'tag') {
-      let labelCountTitle = document.getElementById('label_count_title');
+      let labelCountTitle = document.getElementById('label-count-title');
       if (labelCountTitle) {
         labelCountTitle.style.visibility = 'hidden';
       }
-      let labelCount = document.getElementById('label_count');
+      let labelCount = document.getElementById('label-count');
       if (labelCount) {
         labelCount.style.visibility = 'hidden';
       }
@@ -40,9 +42,9 @@ export class TitleBarViewer {
     let state = this.store.getState().present;
     let currItem = state.current.item;
     let numLabels = state.items[currItem].labels.length;
-    let labelCount = document.getElementById('label_count');
+    let labelCount = document.getElementById('label-count');
     if (labelCount) {
-      labelCount.textContent = '' + numLabels;
+      labelCount.textContent = sprintf('%s', numLabels);
     }
   }
 }

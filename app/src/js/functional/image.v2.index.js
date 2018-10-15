@@ -9,6 +9,7 @@ import {TagViewer} from './viewers/tag_viewer';
 import {TitleBarViewer} from './viewers/title_bar_viewer';
 import {ToolboxViewer} from './viewers/toolbox_viewer';
 import {PageControl} from './controllers/page_controller';
+import * as types from './actions/action_types';
 
 declare var labelType: String;
 declare var itemType: String;
@@ -55,6 +56,8 @@ function initViewers(store) {
     };
     image.src = url;
   }
+
+  store.dispatch({type: types.INIT_SESSION});
 
   // TODO: Refactor into a single registration function that takes a list of
   // TODO: viewers and establish direct interactions that do not impact store

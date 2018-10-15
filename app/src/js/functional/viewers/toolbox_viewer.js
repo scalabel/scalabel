@@ -34,9 +34,9 @@ export class ToolboxViewer {
    */
   redraw() {
     let state = this.store.getState().present;
-    let currItemId = state.current.item;
-    let currItem = state.items[currItemId];
-    let attributes = currItem.attributes;
+    let currentItemIndex = state.current.item;
+    let currentItem = state.items[currentItemIndex];
+    let attributes = currentItem.attributes;
     if (attributes) {
       let attributesMap = state.config.attributes;
       for (let i = 0; i < attributesMap.length; i++) {

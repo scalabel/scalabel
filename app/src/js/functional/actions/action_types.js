@@ -2,6 +2,7 @@
 // SAT specific actions
 // seperate into activate and deactivate?
 // no need if the two are always called together
+export const INIT_SESSION = 'INIT_SESSION';
 export const NEW_ITEM = 'NEW_ITEM'; // no delete item
 export const GO_TO_ITEM = 'GO_TO_ITEM';
 
