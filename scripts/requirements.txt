@@ -1,2 +1,3 @@
 pyyaml
 boto3
+numpy
