@@ -732,7 +732,7 @@ SatLabel.prototype.setToolBox = function(ignoredSatItem) {
 SatLabel.prototype.setCategoryPath = function(categoryPath) {
   let self = this;
   if (self.categoryPath === categoryPath) return;
-  self.categoryPath = categoryPath;
+  self.category = categoryPath;
   if (self.parent) {
     self.parent.setCategoryPath(categoryPath);
   }
@@ -831,7 +831,7 @@ SatLabel.prototype.toJson = function() {
 SatLabel.prototype.decodeBaseJsonVariables = function(json) {
   let self = this;
   self.id = json.id;
-  self.categoryPath = json.categoryPath;
+  self.category = json.categoryPath;
   self.attributes = {...json.attributes};
   self.isTrack = json.attributes['isTrack'];
   // TODO: remove

@@ -57,7 +57,7 @@ export function Toolbox(store: Object) {
         function(e) {
           e.preventDefault();
           let currItem = self.store.getState().present.current.item;
-          self.store.dispatch(tagImage(currItem, attributes[i].name, j));
+          self.store.dispatch(tagImage(currItem, attributes[i].name, [j]));
         });
     }
   }

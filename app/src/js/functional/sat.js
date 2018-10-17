@@ -172,7 +172,7 @@ export function itemToJson(state: SatType, itemId: number) {
 export function labelToJson(state: SatType, labelId: number) {
   let label = state.labels[labelId];
   let json = {
-    id: label.id, categoryPath: label.categoryPath,
+    id: label.id, category: label.category,
     attributes: label.attributes, parentId: label.parent,
     childrenIds: label.children,
   };

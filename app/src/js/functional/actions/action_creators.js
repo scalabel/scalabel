@@ -62,11 +62,11 @@ export function deleteLabel(itemId: number, labelId: number) {
  * Image tagging
  * @param {number} itemId
  * @param {number} attributeName
- * @param {number} selectedIndex
+ * @param {Array<number>} selectedIndex
  * @return {Object}
  */
 export function tagImage(itemId: number,
-                         attributeName: string, selectedIndex: number) {
+                         attributeName: string, selectedIndex: Array<number>) {
   return {
     type: types.TAG_IMAGE,
     itemId,

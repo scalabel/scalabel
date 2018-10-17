@@ -70,13 +70,13 @@ type SatConfig struct {
 }
 
 type SatItem struct {
-	Id         int            `json:"id" yaml:"id"`
-	Index      int            `json:"index" yaml:"index"`
-	Url        string         `json:"url" yaml:"url"`
-	Active     bool           `json:"active" yaml:"active"`
-	Loaded     bool           `json:"loaded" yaml:"loaded"`
-	Labels     []int          `json:"labels, []int" yaml:"labels"`
-	Attributes map[string]int `json:"attributes" yaml:"attributes"`
+	Id         int              `json:"id" yaml:"id"`
+	Index      int              `json:"index" yaml:"index"`
+	Url        string           `json:"url" yaml:"url"`
+	Active     bool             `json:"active" yaml:"active"`
+	Loaded     bool             `json:"loaded" yaml:"loaded"`
+	Labels     []int            `json:"labels, []int" yaml:"labels"`
+	Attributes map[string][]int `json:"attributes" yaml:"attributes"`
 }
 
 type SatLabel struct {
@@ -341,7 +341,7 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 				for _, key := range strkeys {
 					for _, attribute := range sat.Config.Attributes {
 						if attribute.Name == key {
-							item.Attributes[key] = attribute.Values[itemToLoad.Attributes[key]]
+							item.Attributes[key] = attribute.Values[itemToLoad.Attributes[key][0]]
 							break
 						}
 					}

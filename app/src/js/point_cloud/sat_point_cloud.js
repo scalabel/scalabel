@@ -585,10 +585,10 @@ SatPointCloud.prototype._changeSelectedLabelCategory = function() {
     let level = 0;
     let selector = document.getElementById(selectorName + level);
 
-    this.selectedLabel.categoryPath = '';
+    this.selectedLabel.category = '';
     this.selectedLabel.categoryArr = [];
     while (selector != null) {
-      this.selectedLabel.categoryPath +=
+      this.selectedLabel.category +=
           selector.options[selector.selectedIndex].value + ',';
       this.selectedLabel.categoryArr.push(
           selector.options[selector.selectedIndex].value);
@@ -607,7 +607,7 @@ SatPointCloud.prototype._changeSelectedLabelCategory = function() {
 
     this.selectedLabel.name =
         selector.options[selector.selectedIndex].value;
-    this.selectedLabel.categoryPath += this.selectedLabel.name;
+    this.selectedLabel.category += this.selectedLabel.name;
     this.selectedLabel.categoryArr.push(this.selectedLabel.name);
 
     for (let i = 0; i < this.labelList.childNodes.length; i++) {

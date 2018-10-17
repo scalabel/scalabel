@@ -15,7 +15,7 @@ export function makeLabel(params: {} = {}): LabelType {
   return {
     id: -1,
     item: -1, // id
-    categoryPath: '',
+    category: [],
     attributes: {},
     parent: -1, // id
     children: [], // ids

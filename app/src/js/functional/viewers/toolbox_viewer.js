@@ -37,24 +37,17 @@ export class ToolboxViewer {
     let currentItemIndex = state.current.item;
     let currentItem = state.items[currentItemIndex];
     let attributes = currentItem.attributes;
-    if (attributes) {
-      let attributesMap = state.config.attributes;
-      for (let i = 0; i < attributesMap.length; i++) {
-        for (let j = 0; j < attributesMap[i].values.length; j++) {
-          let selectedIndex = attributes[attributesMap[i].name];
-          let selector = $('#custom_attributeselector_' + i + '-' + j);
-          if (selectedIndex === j) {
-            selector.addClass('active');
-          } else {
-            selector.removeClass('active');
-          }
+    let attributesMap = state.config.attributes;
+    for (let i = 0; i < attributesMap.length; i++) {
+      for (let j = 0; j < attributesMap[i].values.length; j++) {
+        let selector = $('#custom_attributeselector_' + i + '-' + j);
+        let selectedIndices = null;
+        if (attributes) {
+          selectedIndices = attributes[attributesMap[i].name];
         }
-      }
-    } else {
-      let attributesMap = state.config.attributes;
-      for (let i = 0; i < attributesMap.length; i++) {
-        for (let j = 0; j < attributesMap[i].values.length; j++) {
-          let selector = $('#custom_attributeselector_' + i + '-' + j);
+        if (attributes && selectedIndices && selectedIndices[0] === j) {
+          selector.addClass('active');
+        } else {
           selector.removeClass('active');
         }
       }

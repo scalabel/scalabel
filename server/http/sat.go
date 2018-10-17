@@ -125,7 +125,7 @@ type Item struct {
 	GroundTruth []Label                `json:"groundTruth" yaml:"groundTruth"`
 	Data        map[string]interface{} `json:"data" yaml:"data"`
 	LabelImport []LabelExport          `json:"labelImport" yaml:"labelImport"`
-	Attributes  map[string]int         `json:"attributes" yaml:"attributes"`
+	Attributes  map[string][]int       `json:"attributes" yaml:"attributes"`
 }
 
 // An annotation for an item, needs to include all possible annotation types
@@ -722,7 +722,7 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) []Item {
 			item.Index = i
 			// load item attributes if needed
 			if len(itemImport.Attributes) > 0 {
-				item.Attributes = map[string]int{}
+				item.Attributes = map[string][]int{}
 				keys := reflect.ValueOf(itemImport.Attributes).MapKeys()
 				strkeys := make([]string, len(keys))
 				for i := 0; i < len(keys); i++ {
@@ -733,7 +733,7 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) []Item {
 						if attribute.Name == key {
 							for i := 0; i < len(attribute.Values); i++ {
 								if itemImport.Attributes[key] == attribute.Values[i] {
-									item.Attributes[key] = i
+									item.Attributes[key] = []int{i}
 									break
 								}
 							}

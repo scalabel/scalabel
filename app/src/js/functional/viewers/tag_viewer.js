@@ -1,6 +1,5 @@
 /* @flow */
 import {ImageBaseViewer} from './image_base_viewer';
-// $FlowFixMe
 import {sprintf} from 'sprintf-js';
 
 /**

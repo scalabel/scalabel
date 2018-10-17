@@ -91,13 +91,13 @@ function deleteLabel(
  * @param {SatType} state
  * @param {number} itemId
  * @param {number} attributeName
- * @param {number} selectedIndex
+ * @param {number} attributeValue
  * @return {SatType}
  */
  function tagImage(state: SatType, itemId: number, attributeName: string,
-                   selectedIndex: number): SatType {
+                   attributeValue: Array<number>): SatType {
    let attributes = updateObject(state.items[itemId].attributes,
-     {[attributeName]: selectedIndex});
+     {[attributeName]: attributeValue});
    // be careful about this merge
    return _.merge({}, state, {items: {[itemId]: {attributes: attributes}}});
  }

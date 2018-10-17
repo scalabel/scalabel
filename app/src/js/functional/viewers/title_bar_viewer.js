@@ -1,5 +1,4 @@
 /* @flow */
-// $FlowFixMe
 import {sprintf} from 'sprintf-js';
 
 /**

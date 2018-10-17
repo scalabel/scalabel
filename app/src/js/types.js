@@ -3,8 +3,8 @@
 export type LabelType = {
   id: number,
   item: number,
-  categoryPath: string,
-  attributes: {[string]: string | number},
+  category: Array<number>,
+  attributes: {[string]: Array<number>},
   parent: number,
   children: Array<number>,
   valid: boolean,
@@ -13,8 +13,13 @@ export type LabelType = {
   state: number
 };
 
-export type RectType = {
+export type ShapeType = {
   id: number,
+  label: number
+};
+
+export type RectType = {
+  ...ShapeType,
   x1: number,
   y1: number,
   x2: number,
@@ -22,7 +27,7 @@ export type RectType = {
 };
 
 export type CubeType = {
-  id: number,
+  ...ShapeType,
   center: Array<number>,
   size: Array<number>,
   orientation: Array<number>
@@ -35,7 +40,7 @@ export type ItemType = {
   active: boolean,
   loaded: boolean,
   labels: Array<number>, // list of label ids
-  attributes: {[string]: number},
+  attributes: {[string]: Array<number>},
 };
 
 /*
