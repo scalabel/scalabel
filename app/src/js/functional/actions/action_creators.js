@@ -31,14 +31,17 @@ export function goToItem(index: number) {
 
 /**
  * Create new label from given creator function
+ * @param {number} itemId
  * @param {Function} createLabel
  * @param {Object} optionalAttributes
  * @return {Object}
  */
-export function newLabel(createLabel: (number, Object) => LabelType,
+export function newLabel(itemId: number,
+                         createLabel: (number, number, Object) => LabelType,
                          optionalAttributes: Object = Object) {
   return {
     type: types.NEW_LABEL,
+    itemId,
     createLabel,
     optionalAttributes,
   };

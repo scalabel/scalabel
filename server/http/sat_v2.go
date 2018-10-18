@@ -16,13 +16,71 @@ import (
 
 //Sat state
 type Sat struct {
-	Config  SatConfig           `json:"config" yaml:"config"`
-	Current SatCurrent          `json:"current" yaml:"current"`
-	Items   []SatItem           `json:"items" yaml:"items"`
-	Labels  map[int]SatLabel    `json:"labels" yaml:"labels"`
-	Tracks  map[int]SatLabel    `json:"tracks" yaml:"tracks"`
-	Shapes  map[int]interface{} `json:"shapes" yaml:"shapes"`
-	Actions []interface{}       `json:"actions" yaml:"actions"`
+	Config  SatConfig     `json:"config" yaml:"config"`
+	Current SatCurrent    `json:"current" yaml:"current"`
+	Items   []SatItem     `json:"items" yaml:"items"`
+	Labels  LabelMap      `json:"labels" yaml:"labels"`
+	Tracks  TrackMap      `json:"tracks" yaml:"tracks"`
+	Shapes  ShapeMap      `json:"shapes" yaml:"shapes"`
+	Actions []interface{} `json:"actions" yaml:"actions"`
+}
+
+type LabelMap map[int]SatLabel
+
+func (labels *LabelMap) UnmarshalJSON(data []byte) error {
+	(*labels) = make(map[int]SatLabel)
+	var fields map[string]interface{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	for k, v := range fields {
+		label := SatLabel{}
+		mapstructure.Decode(v, &label)
+		i, err := strconv.Atoi(k)
+		if err != nil {
+			return err
+		}
+		(*labels)[i] = label
+	}
+	return nil
+}
+
+type ShapeMap map[int]interface{}
+
+func (shapes *ShapeMap) UnmarshalJSON(data []byte) error {
+	(*shapes) = make(map[int]interface{})
+	var fields map[string]interface{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	for k, v := range fields {
+		i, err := strconv.Atoi(k)
+		if err != nil {
+			return err
+		}
+		(*shapes)[i] = v
+	}
+	return nil
+}
+
+type TrackMap map[int][]SatLabel
+
+func (tracks *TrackMap) UnmarshalJSON(data []byte) error {
+	(*tracks) = make(map[int][]SatLabel)
+	var fields map[string]interface{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	for k, v := range fields {
+		var labels []SatLabel
+		mapstructure.Decode(v, &labels)
+		i, err := strconv.Atoi(k)
+		if err != nil {
+			return err
+		}
+		(*tracks)[i] = labels
+	}
+	return nil
 }
 
 func (sat *Sat) GetKey() string {
@@ -70,26 +128,26 @@ type SatConfig struct {
 }
 
 type SatItem struct {
-	Id         int              `json:"id" yaml:"id"`
-	Index      int              `json:"index" yaml:"index"`
-	Url        string           `json:"url" yaml:"url"`
-	Active     bool             `json:"active" yaml:"active"`
-	Loaded     bool             `json:"loaded" yaml:"loaded"`
-	Labels     []int            `json:"labels, []int" yaml:"labels"`
-	Attributes map[string][]int `json:"attributes" yaml:"attributes"`
+	Id     int    `json:"id" yaml:"id"`
+	Index  int    `json:"index" yaml:"index"`
+	Url    string `json:"url" yaml:"url"`
+	Active bool   `json:"active" yaml:"active"`
+	Loaded bool   `json:"loaded" yaml:"loaded"`
+	Labels []int  `json:"labels, []int" yaml:"labels"`
 }
 
 type SatLabel struct {
-	Id            int                    `json:"id" yaml:"id"`
-	Item          int                    `json:"item" yaml:"item"`
-	CategoryPath  string                 `json:"categoryPath" yaml:"categoryPath"`
-	Attributes    map[string]interface{} `json:"attributes" yaml:"attributes"`
-	Parent        int                    `json:"parent" yaml:"parent"`
-	Children      []int                  `json:"children" yaml:"children"`
-	Valid         bool                   `json:"valid" yaml:"valid"`
-	Shapes        []int                  `json:"shapes" yaml:"shapes"`
-	SelectedShape int                    `json:"selectedShape" yaml:"selectedShape"`
-	State         int                    `json:"state" yaml:"state"`
+	Id            int              `json:"id" yaml:"id"`
+	Item          int              `json:"item" yaml:"item"`
+	Category      []int            `json:"category" yaml:"category"`
+	Attributes    map[string][]int `json:"attributes" yaml:"attributes"`
+	Parent        int              `json:"parent" yaml:"parent"`
+	Children      []int            `json:"children" yaml:"children"`
+	NumChildren   int              `json:"numChildren" yaml:"numChildren"`
+	Valid         bool             `json:"valid" yaml:"valid"`
+	Shapes        []int            `json:"shapes" yaml:"shapes"`
+	SelectedShape int              `json:"selectedShape" yaml:"selectedShape"`
+	State         int              `json:"state" yaml:"state"`
 }
 
 // Get the most recent assignment given the needed fields.
@@ -104,7 +162,13 @@ func GetSat(projectName string, taskIndex string, workerId string) (Sat, error) 
 		if err != nil {
 			return Sat{}, err
 		}
-		mapstructure.Decode(fields, &sat)
+		loadedSatJson, err := json.Marshal(fields)
+		if err != nil {
+			return Sat{}, err
+		}
+		if err := json.Unmarshal(loadedSatJson, &sat); err != nil {
+			return Sat{}, err
+		}
 	} else {
 		var assignment Assignment
 		assignmentPath := path.Join(projectName, "assignments", taskIndex, workerId)
@@ -213,36 +277,19 @@ func assignmentToSat(assignment *Assignment) Sat {
 	var items []SatItem
 	for _, item := range assignment.Task.Items {
 		satItem := SatItem{
-			Id:         item.Index,
-			Index:      item.Index,
-			Url:        item.Url,
-			Labels:     []int{},
-			Attributes: item.Attributes,
+			Id:     item.Index,
+			Index:  item.Index,
+			Url:    item.Url,
+			Labels: []int{},
 		}
 		items = append(items, satItem)
 	}
-	var labels map[int]SatLabel
-	for _, label := range assignment.Labels {
-		satLabel := SatLabel{
-			Id:           label.Id,
-			CategoryPath: label.CategoryPath,
-			Attributes:   label.Attributes,
-			Parent:       label.ParentId,
-			Children:     label.ChildrenIds,
-		}
-		labels[label.Id] = satLabel
-	}
-	var tracks map[int]SatLabel
-	for _, track := range assignment.Tracks {
-		satTrack := SatLabel{
-			Id:           track.Id,
-			CategoryPath: track.CategoryPath,
-			Attributes:   track.Attributes,
-			Parent:       track.ParentId,
-			Children:     track.ChildrenIds,
-		}
-		tracks[track.Id] = satTrack
-	}
+	// only items are needed because this function is only called once
+	// at the first visit to annotation interface before submission
+	// and will go away when redux have its own project creation logic
+	labels := map[int]SatLabel{}
+	tracks := map[int][]SatLabel{}
+	shapes := map[int]interface{}{}
 	projectOptions := assignment.Task.ProjectOptions
 	loadedSatConfig := SatConfig{
 		AssignmentId:    assignment.Id,
@@ -262,11 +309,18 @@ func assignmentToSat(assignment *Assignment) Sat {
 		StartTime:       assignment.StartTime,
 		SubmitTime:      assignment.SubmitTime,
 	}
+	satCurrent := SatCurrent{
+		Item:        -1,
+		Label:       -1,
+		MaxObjectId: -1,
+	}
 	loadedSat := Sat{
 		Config:  loadedSatConfig,
+		Current: satCurrent,
 		Items:   items,
 		Labels:  labels,
 		Tracks:  tracks,
+		Shapes:  shapes,
 		Actions: []interface{}{},
 	}
 	return loadedSat
@@ -281,13 +335,18 @@ func postSaveV2Handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	var fields map[string]interface{}
-	err = json.Unmarshal(body, &fields)
+	// var fields map[string]interface{}
+	// err = json.Unmarshal(body, &fields)
+	// if err != nil {
+	// 	   Error.Println(err)
+	// }
+	// assignment := Sat{}
+	// mapstructure.Decode(fields, &assignment)
+	assignment := Sat{}
+	err = json.Unmarshal(body, &assignment)
 	if err != nil {
 		Error.Println(err)
 	}
-	assignment := Sat{}
-	mapstructure.Decode(fields, &assignment)
 	if assignment.Config.DemoMode {
 		Error.Println(errors.New("can't save a demo project"))
 		w.Write(nil)
@@ -333,20 +392,22 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 				item.Name = itemToLoad.Url
 				item.Url = itemToLoad.Url
 				item.Attributes = map[string]string{}
-				keys := reflect.ValueOf(itemToLoad.Attributes).MapKeys()
-				strkeys := make([]string, len(keys))
-				for i := 0; i < len(keys); i++ {
-					strkeys[i] = keys[i].String()
-				}
-				for _, key := range strkeys {
-					for _, attribute := range sat.Config.Attributes {
-						if attribute.Name == key {
-							item.Attributes[key] = attribute.Values[itemToLoad.Attributes[key][0]]
-							break
+				if len(itemToLoad.Labels) > 0 {
+					itemLabel := sat.Labels[itemToLoad.Labels[0]]
+					keys := reflect.ValueOf(itemLabel.Attributes).MapKeys()
+					strkeys := make([]string, len(keys))
+					for i := 0; i < len(keys); i++ {
+						strkeys[i] = keys[i].String()
+					}
+					for _, key := range strkeys {
+						for _, attribute := range sat.Config.Attributes {
+							if attribute.Name == key {
+								item.Attributes[key] = attribute.Values[itemLabel.Attributes[key][0]]
+								break
+							}
 						}
 					}
 				}
-
 				items = append(items, item)
 			}
 		} else {

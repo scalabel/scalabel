@@ -4,52 +4,18 @@ import * as types from '../functional/actions/action_types';
 import {ActionCreators} from 'redux-undo';
 
 let testJson = {
-  'actions': [
-    {
-      'type': '@@redux/INIT4.d.1.9.1.p',
-    },
-    {
-      'attributeName': 'Weather',
-      'itemId': 0,
-      'selectedIndex': 2,
-      'type': 'TAG_IMAGE',
-    },
-    {
-      'attributeName': 'Scene',
-      'itemId': 0,
-      'selectedIndex': 1,
-      'type': 'TAG_IMAGE',
-    },
-    {
-      'attributeName': 'Timeofday',
-      'itemId': 0,
-      'selectedIndex': 2,
-      'type': 'TAG_IMAGE',
-    },
-  ],
   'config': {
-    'assignmentId': '65d9e070-163e-4dc4-8cbe-d049a4d05a32',
+    'assignmentId': 'e6015077-aad9-4e60-a5ed-dbccf931a049',
     'projectName': 'Redux0',
     'itemType': 'image',
     'labelType': 'tag',
     'taskSize': 5,
-    'handlerUrl': 'label2d',
+    'handlerUrl': 'label2dv2',
     'pageTitle': 'Image Tagging Labeling Tool',
     'instructionPage': 'undefined',
     'demoMode': false,
     'bundleFile': 'image_v2.js',
-    'categories': [
-      'person',
-      'rider',
-      'car',
-      'truck',
-      'bus',
-      'train',
-      'motor',
-      'bike',
-      'traffic sign',
-      'traffic light',
-    ],
+    'categories': null,
     'attributes': [
       {
         'name': 'Weather',
@@ -144,27 +110,22 @@ let testJson = {
     ],
     'taskId': '000000',
     'workerId': 'default_worker',
-    'startTime': 1538885790,
-    'submitTime': 1538885819,
+    'startTime': 1539820189,
+    'submitTime': 0,
   },
   'current': {
-    'item': 0,
-    'label': 0,
-    'maxObjectId': 0,
+    'item': -1,
+    'label': -1,
+    'maxObjectId': -1,
   },
   'items': [
     {
       'id': 0,
       'index': 0,
       'url': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
-      'active': true,
+      'active': false,
       'loaded': false,
-      'labels': null,
-      'attributes': {
-        'Scene': 1,
-        'Timeofday': 2,
-        'Weather': 2,
-      },
+      'labels': [],
     },
     {
       'id': 1,
@@ -172,8 +133,7 @@ let testJson = {
       'url': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg',
       'active': false,
       'loaded': false,
-      'labels': null,
-      'attributes': null,
+      'labels': [],
     },
     {
       'id': 2,
@@ -181,8 +141,7 @@ let testJson = {
       'url': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg',
       'active': false,
       'loaded': false,
-      'labels': null,
-      'attributes': null,
+      'labels': [],
     },
     {
       'id': 3,
@@ -190,8 +149,7 @@ let testJson = {
       'url': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg',
       'active': false,
       'loaded': false,
-      'labels': null,
-      'attributes': null,
+      'labels': [],
     },
     {
       'id': 4,
@@ -199,18 +157,19 @@ let testJson = {
       'url': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg',
       'active': false,
       'loaded': false,
-      'labels': null,
-      'attributes': null,
+      'labels': [],
     },
   ],
-  'Labels': null,
-  'Shapes': null,
-  'Tracks': null,
+  'labels': {},
+  'tracks': {},
+  'shapes': {},
+  'actions': [],
 };
 
 describe('Sat Redux Tests', function() {
   it('Initialize', function() {
     let store = configureStore(testJson, false);
+    store.dispatch({type: types.INIT_SESSION});
     let state = store.getState().present;
     for (let i = 0; i < state.items.length; i++) {
       expect(state.items[i].id).toBe(i);
@@ -220,6 +179,7 @@ describe('Sat Redux Tests', function() {
   });
   it('Go to item', function() {
     let store = configureStore(testJson, false);
+    store.dispatch({type: types.INIT_SESSION});
     let state = store.getState().present;
     expect(state.current.item).toBe(0);
     for (let i = 0; i < state.items.length; i++) {
@@ -265,15 +225,17 @@ describe('Sat Redux Tests', function() {
   });
   it('Image Tagging', function() {
     let store = configureStore(testJson, false);
+    store.dispatch({type: types.INIT_SESSION});
     let state = store.getState().present;
+    let itemId = state.current.item;
     store.dispatch({
       type: types.TAG_IMAGE,
-      itemId: state.current.item,
+      itemId: itemId,
       attributeName: 'Weather', // Weather
       selectedIndex: 2, // Snowy
     });
     state = store.getState().present;
-    expect(state.items[0].attributes['Weather']).toBe(2);
+    expect(state.labels[itemId].attributes['Weather']).toBe(2);
     store.dispatch({
       type: types.TAG_IMAGE,
       itemId: state.current.item,
@@ -281,12 +243,12 @@ describe('Sat Redux Tests', function() {
       selectedIndex: 3, // Snowy
     });
     state = store.getState().present;
-    expect(state.items[0].attributes['Weather']).toBe(3);
+    expect(state.labels[itemId].attributes['Weather']).toBe(3);
     store.dispatch(ActionCreators.undo());
     state = store.getState().present;
-    expect(state.items[0].attributes['Weather']).toBe(2);
+    expect(state.labels[itemId].attributes['Weather']).toBe(2);
     store.dispatch(ActionCreators.redo());
     state = store.getState().present;
-    expect(state.items[0].attributes['Weather']).toBe(3);
+    expect(state.labels[itemId].attributes['Weather']).toBe(3);
   });
 });

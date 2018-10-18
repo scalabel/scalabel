@@ -57,7 +57,6 @@ export function makeItem(params: {} = {}): ItemType {
     active: false,
     loaded: false,
     labels: [], // list of label ids
-    attributes: {},
     ...params,
   };
 }

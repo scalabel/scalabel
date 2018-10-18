@@ -23,7 +23,12 @@ export class TagViewer extends ImageBaseViewer {
     let state = this.store.getState().present;
     let activeItem = state.current.item;
     let item = state.items[activeItem];
-    return item.attributes;
+    let attributes = {};
+    let label = state.labels[item.labels[0]];
+    if (label) {
+      attributes = label.attributes;
+    }
+    return attributes;
   }
 
   /**

@@ -40,7 +40,6 @@ export type ItemType = {
   active: boolean,
   loaded: boolean,
   labels: Array<number>, // list of label ids
-  attributes: {[string]: Array<number>},
 };
 
 /*
@@ -86,7 +85,7 @@ export type SatType = {
 };
 
 export type LabelFunctionalType ={
-  createLabel: (number) => LabelType,
+  createLabel: (number, number, Object) => LabelType,
 };
 
 export type ItemFunctionalType ={

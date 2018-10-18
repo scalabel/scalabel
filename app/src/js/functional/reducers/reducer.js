@@ -3,12 +3,12 @@
 import _ from 'lodash';
 
 import type {ItemType, LabelType, SatType} from '../../types';
-import {makeSat} from '../../states';
+import {makeSat, makeLabel} from '../../states';
 import * as types from '../actions/action_types';
 
 import {newItem as newItemF, newLabel as newLabelF} from '../sat';
 
-import {updateObject, updateListItems} from '../util';
+import {updateObject, updateListItem, updateListItems} from '../util';
 
 /**
  * Initialize state
@@ -19,8 +19,8 @@ function initSession(state: SatType): SatType {
   // initialize state
   if (state.current.item === -1) {
     let current = updateObject(state.current, {item: 0});
-    let items = updateListItems(
-        state.items, [0], [updateObject(state.items[0], {active: true})]);
+    let items = updateListItem(
+        state.items, 0, updateObject(state.items[0], {active: true}));
     return updateObject(state, {current: current, items: items});
   } else {
     return state;
@@ -63,13 +63,16 @@ function goToItem(state: SatType, index: number): SatType {
 /**
  * Create new label from given creator function
  * @param {SatType} state
+ * @param {number} itemId
  * @param {Function} createLabel
  * @param {Object} optionalAttributes
  * @return {SatType}
  */
-function newLabel(state: SatType, createLabel: (number, Object) => LabelType,
+function newLabel(state: SatType,
+                  itemId: number,
+                  createLabel: (number, number, Object) => LabelType,
                   optionalAttributes: Object = {}): SatType {
-  return newLabelF(state, createLabel, optionalAttributes);
+  return newLabelF(state, itemId, createLabel, optionalAttributes);
 }
 
 // TODO: now we are using redux, we have all the history anyway,
@@ -87,6 +90,18 @@ function deleteLabel(
 }
 
 /**
+ * Create a Tag label
+ * @param {number} labelId
+ * @param {number} itemId
+ * @param {Object} optionalAttributes
+ * @return {LabelType}
+ */
+function createTagLabel(labelId: number, itemId: number,
+                        optionalAttributes: Object): LabelType {
+  return makeLabel({id: labelId, item: itemId, attributes: optionalAttributes});
+}
+
+/**
  *Image tagging
  * @param {SatType} state
  * @param {number} itemId
@@ -94,13 +109,17 @@ function deleteLabel(
  * @param {number} attributeValue
  * @return {SatType}
  */
- function tagImage(state: SatType, itemId: number, attributeName: string,
-                   attributeValue: Array<number>): SatType {
-   let attributes = updateObject(state.items[itemId].attributes,
-     {[attributeName]: attributeValue});
-   // be careful about this merge
-   return _.merge({}, state, {items: {[itemId]: {attributes: attributes}}});
- }
+function tagImage(state: SatType, itemId: number, attributeName: string,
+                 attributeValue: Array<number>): SatType {
+  let attributes = {[attributeName]: attributeValue};
+  let item = state.items[itemId];
+  if (item.labels.length > 0) {
+    let labelId = item.labels[0];
+    // be careful about this merge
+    return _.merge({}, state, {labels: {[labelId]: {attributes: attributes}}});
+  }
+  return newLabel(state, itemId, createTagLabel, attributes);
+}
 
 /**
  * assign Attribute to a label
@@ -147,7 +166,8 @@ export default function(currState: SatType = makeSat(),
     case types.GO_TO_ITEM:
       return goToItem(state, action.index);
     case types.NEW_LABEL:
-      return newLabel(state, action.createLabel, action.optionalAttributes);
+      return newLabel(state, action.itemId,
+        action.createLabel, action.optionalAttributes);
     case types.DELETE_LABEL:
       return deleteLabel(state, action.itemId, action.labelId);
     case types.TAG_IMAGE:

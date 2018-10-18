@@ -36,16 +36,17 @@ export class ToolboxViewer {
     let state = this.store.getState().present;
     let currentItemIndex = state.current.item;
     let currentItem = state.items[currentItemIndex];
-    let attributes = currentItem.attributes;
+    let label = state.labels[currentItem.labels[0]];
     let attributesMap = state.config.attributes;
     for (let i = 0; i < attributesMap.length; i++) {
       for (let j = 0; j < attributesMap[i].values.length; j++) {
         let selector = $('#custom_attributeselector_' + i + '-' + j);
         let selectedIndices = null;
-        if (attributes) {
-          selectedIndices = attributes[attributesMap[i].name];
+        if (label && label.attributes) {
+          selectedIndices = label.attributes[attributesMap[i].name];
         }
-        if (attributes && selectedIndices && selectedIndices[0] === j) {
+        if (label && label.attributes
+          && selectedIndices && selectedIndices[0] === j) {
           selector.addClass('active');
         } else {
           selector.removeClass('active');
