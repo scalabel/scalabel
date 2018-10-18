@@ -37,7 +37,7 @@ More installation and usage details can be find in our [documentation](http://ww
 
     There are two alternative ways to get the compiled code
     
-    1. Usage docker 
+    1. Usage docker (recommended if you only need to run the code)
     
         Download from dockerhub
         ```
@@ -50,7 +50,7 @@ More installation and usage details can be find in our [documentation](http://ww
         docker build . -t scalabel/www
         ```
     
-    2. Compile the code yourself
+    2. Compile the code yourself (recommended if you want to customize the source code)
         
         Install [golang](https://golang.org/doc/install), [nodejs and npm](https://nodejs.org/en/download/).
         
@@ -61,10 +61,15 @@ More installation and usage details can be find in our [documentation](http://ww
         go build -i -o ./bin/scalabel ./server/http
         ```
         
-        Transpile Javascript code
+        Transpile or build Javascript code
         ```
         npm install
         node_modules/.bin/npx webpack --config webpack.config.js --mode=production
+        ```
+        
+        **Note** If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger.
+        ```
+        node_modules/.bin/npx webpack --config webpack.config.js --mode=development
         ```
 
 3. Prepare data directory
@@ -87,7 +92,7 @@ More installation and usage details can be find in our [documentation](http://ww
     ./bin/scalabel --config ./data/config.yml
     ```
     
-    Then, the server can be accessed at `http://localhost:8686`.
+    Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project.
     
 5. Get labels
     
@@ -95,7 +100,26 @@ More installation and usage details can be find in our [documentation](http://ww
     ``` 
     python3 -m bdd_data.show_labels.py -l <your_downloaded_label_path.json>
     ```
+    
+## Usage
 
-## More Usage Info
+### Create annotation projects
+
+The entry point of creating an project is `http://localhost:8686/create`. The page looks like
+
+<img src="https://s3-us-west-2.amazonaws.com/scalabel-public/demo/screenshots/project_creation_page.png" width="500px">
+
+
+`Project Name` is an arbitrary string. You can create multiple projects, but they cannot have duplicated names. You can choose `Item Type` and `Label Type` from the dropdown menus. An automatic page title will be provided based on the label settings. A project consists of multiple tasks. `Task Size` is the number of items (image or point cloud) in each task. 
+
+`Item List` is the list of images or point clouds to label. The format is either json or yaml with a list of frame objects in the [bdd data format](https://github.com/ucbdrive/bdd-data/blob/master/doc/format.md). The only required field for the item list is `url`. See [examples/image_list.yml](examples/image_list.yml) for an example of image list. 
+
+`Category` and `Attributes` are the list of tags giving to each label. Typical settings are shown in [examples/categories.yml](examples/categories.yml) and [examples/bbox_attributes.yml](examples/bbox_attributes.yml). We also support multi-level categories such as [two](examples/two_level_categories.yml) and [three](examples/three_level_categories.yml) levels. Scalabel also supports [image tagging](examples/image_tags.yml).
+
+If you want to create an annotation project to label 2d bounding boxes, the setup will looks like
+
+<img src="https://s3-us-west-2.amazonaws.com/scalabel-public/demo/screenshots/project_creation_bbox2d.png" width="500px">
+
+### More Usage Info
 
 Please go to [documentation](http://www.scalabel.ai/doc) for detailed annotation instructions and advanced usages.
