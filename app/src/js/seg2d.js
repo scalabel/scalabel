@@ -839,133 +839,91 @@ Seg2d.prototype.mousedown = function(e) {
   } else if (this.state === SegStates.QUICK_DRAW) {
     // quick draw mode
     let button = document.getElementById('quickdraw_btn');
-    if (!occupiedShape) {
-      // TODO: if nothing is clicked, return to DRAW state
-      if (this.quickdrawCache.targetPoly) { // must be before state transition
-        this.quickdrawCache.targetSeg2d.releaseAsTargeted();
-      }
-      if (this.newPoly.vertices.length > 1
-        && this.quickdrawCache.endVertex
-        && this.quickdrawCache.endVertex.equals(this.newPoly.vertices[0])) {
-        // if occupied object the 1st vertex, close path
-        this.tempPoly.popVertex();
-        this.newPoly.endPath();
-
-        if (this.newPoly.isValidShape()) {
-          this.addShape(this.newPoly);
-          this.tempVertex.delete();
-          this.tempPoly.delete();
-          this.tempVertex = null;
-          this.tempPoly = null;
-        }
-
-        this.setState(SegStates.FREE);
-        this.selectedShape = this.newPoly;
-      } else {
-        this.setState(SegStates.DRAW);
-        // change back the indicator
-        button.innerHTML = '<kbd>s</kbd> Quickdraw';
-        button.style.backgroundColor = 'white';
-      }
-    } else if (this.newPoly.vertices.length > 1
-      && occupiedShape.id === this.newPoly.vertices[0].id
-      && !this.quickdrawCache.endVertex
-      && this.quickdrawCache.targetPoly
-      && this.quickdrawCache.targetPoly.indexOf(occupiedShape) < 0) {
-      // if occupied object the 1st vertex, change to draw mode to close path
-      this.setState(SegStates.DRAW);
-    } else if (!this.quickdrawCache.targetPoly) {
-      if (occupiedShape instanceof Polygon
-        && !this.newPoly.equals(occupiedShape)) {
-        this.quickdrawCache.targetPoly = occupiedShape;
-        this.quickdrawCache.targetSeg2d =
+    if (!this.quickdrawCache.targetPoly && occupiedShape instanceof Polygon) {
+      this.quickdrawCache.targetPoly = occupiedShape;
+      this.quickdrawCache.targetSeg2d =
           this.satItem.getLabelOfShape(occupiedShape);
-        this.quickdrawCache.targetSeg2d.setAsTargeted();
-        let shapes = this.quickdrawCache.targetPoly.vertices;
-        shapes = shapes.concat(this.newPoly.vertices);
-        this.satItem.resetHiddenMap(shapes);
-        this.satItem.redrawHiddenCanvas();
-        button.innerHTML = 'Select Start Vertex';
+      this.quickdrawCache.targetSeg2d.setAsTargeted();
+      let shapes = this.quickdrawCache.targetPoly.vertices;
+      shapes = shapes.concat(this.newPoly.vertices);
+      this.satItem.resetHiddenMap(shapes);
+      this.satItem.redrawHiddenCanvas();
+      button.innerHTML = 'Select Start Vertex';
+    } else if (this.quickdrawCache.targetPoly &&
+        !this.quickdrawCache.startVertex &&
+        occupiedShape instanceof Vertex &&
+        this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0) {
+      this.quickdrawCache.startVertex = occupiedShape;
+
+      // if occupied object a vertex that is not in polygon, add it
+      this.tempPoly.popVertex();
+
+      if (this.tempPoly.vertices.indexOf(occupiedShape) < 0) {
+        this.tempPoly.pushVertex(occupiedShape);
+        // need below for correct interrupt case
+        this.newPoly.pushVertex(occupiedShape);
       }
-    } else if ((this.quickdrawCache.targetPoly &&
-      !this.quickdrawCache.startVertex &&
-      occupiedShape instanceof Vertex &&
-      this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0)) {
-      if (occupiedShape instanceof Vertex
-        && occupiedShape.type === VertexTypes.VERTEX
-        && this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0) {
-        this.quickdrawCache.startVertex = occupiedShape;
 
-        // if occupied object a vertex that is not in polygon, add it
-        this.tempPoly.popVertex();
-
-        if (this.tempPoly.vertices.indexOf(occupiedShape) < 0) {
-          this.tempPoly.pushVertex(occupiedShape);
-          // need below for correct interrupt case
-          this.newPoly.pushVertex(occupiedShape);
-        }
-
-        this.tempVertex = new Vertex(mousePos.x, mousePos.y,
+      this.tempVertex = new Vertex(mousePos.x, mousePos.y,
           VertexTypes.VERTEX, -1);
-        this.tempPoly.pushVertex(this.tempVertex);
-        this.selectedShape = this.tempVertex;
-        button.innerHTML = 'Select End Vertex';
-      } else if (this.quickdrawCache.startVertex &&
+      this.tempPoly.pushVertex(this.tempVertex);
+      this.selectedShape = this.tempVertex;
+      button.innerHTML = 'Select End Vertex';
+    } else if (this.quickdrawCache.startVertex &&
         !this.quickdrawCache.endVertex &&
         occupiedShape instanceof Vertex &&
         this.quickdrawCache.targetPoly.indexOf(occupiedShape) >= 0 &&
         !this.quickdrawCache.startVertex.equals(occupiedShape)) {
-        this.quickdrawCache.endVertex = occupiedShape;
+      this.quickdrawCache.endVertex = occupiedShape;
 
-        // if occupied object is a vertex that is not in this polygon, add it
-        this.tempPoly.popVertex();
-        this.quickdrawCache.shortPathTempPoly = this.tempPoly.copy(-1);
-        this.quickdrawCache.longPathTempPoly = this.tempPoly.copy(-1);
-        this.quickdrawCache.shortPathTempPoly.pushPath(
+      // if occupied object is a vertex that is not in this polygon, add it
+      this.tempPoly.popVertex();
+      this.quickdrawCache.shortPathTempPoly = this.tempPoly.copy(-1);
+      this.quickdrawCache.longPathTempPoly = this.tempPoly.copy(-1);
+      this.quickdrawCache.shortPathTempPoly.pushPath(
           this.quickdrawCache.targetPoly,
           this.quickdrawCache.startVertex,
           this.quickdrawCache.endVertex, false, true);
-        this.quickdrawCache.longPathTempPoly.pushPath(
+      this.quickdrawCache.longPathTempPoly.pushPath(
           this.quickdrawCache.targetPoly,
           this.quickdrawCache.startVertex,
           this.quickdrawCache.endVertex, true, true);
-        this.tempPoly = this.quickdrawCache.longPath
+      this.tempPoly = this.quickdrawCache.longPath
           ? this.quickdrawCache.longPathTempPoly
           : this.quickdrawCache.shortPathTempPoly;
 
-        // if path is not closed after push path, prepare for draw mode
-        if (!occupiedShape.equals(this.newPoly.vertices[0])) {
-          this.tempVertex = new Vertex(mousePos.x, mousePos.y,
+      // if path is not closed after push path, prepare for draw mode
+      if (!occupiedShape.equals(this.newPoly.vertices[0])) {
+        this.tempVertex = new Vertex(mousePos.x, mousePos.y,
             VertexTypes.VERTEX, -1);
-          this.quickdrawCache.shortPathTempPoly.pushVertex(this.tempVertex);
-          this.quickdrawCache.longPathTempPoly.pushVertex(this.tempVertex);
-          this.selectedShape = this.tempVertex;
-        }
+        this.quickdrawCache.shortPathTempPoly.pushVertex(this.tempVertex);
+        this.quickdrawCache.longPathTempPoly.pushVertex(this.tempVertex);
+        this.selectedShape = this.tempVertex;
+      }
 
-        this.quickdrawCache.targetSeg2d.releaseAsTargeted();
-        button.innerHTML = '<kbd>Alt</kbd>   Toggle';
-      } else {
-        this.endQuickDraw();
+      this.quickdrawCache.targetSeg2d.releaseAsTargeted();
+      button.innerHTML = '<kbd>Alt</kbd>   Toggle';
+    } else {
+      this.endQuickDraw();
+    }
+  } else if (this.state === SegStates.LINK && occupiedShape) {
+    let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
+    if (occupiedLabel.id === this.id) {
+      // if selected a polygon it has, split this polygon out
+      if (occupiedShape instanceof Polygon) {
+        this.splitShape(occupiedShape);
       }
-    } else if (this.state === SegStates.LINK && occupiedShape) {
-      let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
-      if (occupiedLabel.id === this.id) {
-        // if selected a polygon it has, split this polygon out
-        if (occupiedShape instanceof Polygon) {
-          this.splitShape(occupiedShape);
-        }
-        this.satItem.resetHiddenMapToDefault();
-      } else if (occupiedLabel) {
-        // if clicked another label, merge into one
-        if (this.polys.length < 1) {
-          this.attributes = occupiedLabel.attributes;
-          this.categoryPath = occupiedLabel.categoryPath;
-        }
-        for (let poly of occupiedLabel.polys) {
-          this.addShape(poly);
-        }
-        occupiedLabel.delete();
+      this.satItem.resetHiddenMapToDefault();
+    } else if (occupiedLabel) {
+      // if clicked another label, merge into one
+      if (this.polys.length < 1) {
+        this.attributes = occupiedLabel.attributes;
+        this.categoryPath = occupiedLabel.categoryPath;
       }
+      for (let poly of occupiedLabel.polys) {
+        this.addShape(poly);
+      }
+      occupiedLabel.delete();
     }
   }
 };
