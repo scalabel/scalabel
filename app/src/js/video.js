@@ -227,32 +227,42 @@ SatVideo.prototype.linkTracks = function() {
   for (let it = this.linkingTrack.tracksToLink.values(), t=null;
        t=it.next().value;) {
     trackIds.add(t.id);
-    allChildren = allChildren.concat(t.children);
   }
   trackIds.add(this.linkingTrack.id);
   // check the validity of the link operation
   let valid = true;
-  trackIds.add(this.linkingTrack.id);
   for (let frame = 0; frame < this.items.length && valid; frame++) {
     let occupiedFrameTrack = null;
     this.items[frame].deleteInvalidLabels();
-    for (let i = 0; i < this.items[frame].labels.length; i++) {
-      let trackId = this.items[frame].labels[i].getRoot().id;
-      if (trackIds.has(trackId)) {
+    for (let label of this.items[frame].labels) {
+      if (trackIds.has(label.getRoot().id)) {
         if (occupiedFrameTrack) {
-          if (this.LabelType.allowsLinkingWithinFrame) {
-            for (let j = 0; j < this.items[frame].labels[i].polys.length; j++) {
-              occupiedFrameTrack.addShape(
-                this.items[frame].labels[i].polys[j]);
-            }
-          } else {
+          if (!this.LabelType.allowsLinkingWithinFrame) {
             valid = false;
             break;
           }
         } else {
-          occupiedFrameTrack = this.items[frame].labels[i];
+          occupiedFrameTrack = label;
+        }
+        if (label.id === this.linkingTrack.id) {
+          occupiedFrameTrack = label;
+          break;
         }
       }
+    }
+    if (valid && occupiedFrameTrack) {
+      for (let label of this.items[frame].labels) {
+        if (trackIds.has(label.getRoot().id) &&
+            label.id !== occupiedFrameTrack.id) {
+          for (let j = 0; j < label.polys.length; j++) {
+            occupiedFrameTrack.addShape(
+                label.polys[j]);
+          }
+          label.delete();
+        }
+      }
+      occupiedFrameTrack.parent = this.linkingTrack;
+      allChildren.push(occupiedFrameTrack);
     }
   }
   // If it's an invalid link, throw an alert
@@ -261,11 +271,9 @@ SatVideo.prototype.linkTracks = function() {
     return;
   }
   // linkingTrack gets all of the linked tracks' children
-  for (let c = 0; c < allChildren.length; c++) {
-    allChildren[c].parent = this.linkingTrack;
-    this.linkingTrack.children.push(allChildren[c]);
-  }
+  this.linkingTrack.children = allChildren;
   this.linkingTrack.numChildren = this.linkingTrack.children.length;
+  this.linkingTrack.sortChildren();
   // delete all of the other tracks
   for (let it = this.linkingTrack.tracksToLink.values(), t=null;
        t=it.next().value;) {
@@ -273,7 +281,6 @@ SatVideo.prototype.linkTracks = function() {
     this.labels.splice( this.labels.indexOf(t), 1 );
     this.tracks.splice( this.tracks.indexOf(t), 1 );
   }
-  this.linkingTrack.sortChildren();
 };
 
 SatVideo.prototype.addTrackToLinkingTrack = function(track) {
@@ -285,6 +292,9 @@ SatVideo.prototype.toggleTrackLink = function(ogTrack) {
   let trackLinkBtn = document.getElementById('track_link_btn');
   let labelLinkBtn = $('#link_btn');
   if (!this.linkingTrack) {
+    if (this.LabelType._useDoubleClick) {
+      this.LabelType.useDoubleClick = false;
+    }
     trackLinkBtn.innerHTML = 'Finish Track-Linking';
     trackLinkBtn.style.backgroundColor = 'lightgreen';
     if (labelLinkBtn.length) {
@@ -299,6 +309,7 @@ SatVideo.prototype.toggleTrackLink = function(ogTrack) {
       }
     }
   } else {
+    this.LabelType.useDoubleClick = this.LabelType._useDoubleClick;
     trackLinkBtn.innerHTML = 'Track-Link';
     trackLinkBtn.style.backgroundColor = '';
     if (labelLinkBtn.length) {

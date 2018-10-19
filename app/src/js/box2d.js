@@ -80,6 +80,7 @@ Object.defineProperty(Box2d.prototype, 'h', {
 
 Box2d.useCrossHair = true;
 Box2d.defaultCursorStyle = 'crosshair';
+Box2d._useDoubleClick = false;
 Box2d.useDoubleClick = false;
 
 Box2d.setToolBox = function(satItem) { // eslint-disable-line

@@ -149,9 +149,8 @@ SatImage.prototype.deleteLabel = function(label) {
 SatImage.prototype._selectLabel = function(label) {
   if (this.selectedLabel) {
     this.selectedLabel.releaseAsTargeted();
-    this.deselectAll();
+    this._deselectAll();
   }
-
   this.selectedLabel = label;
   this.selectedLabel.setAsTargeted();
 
@@ -783,24 +782,26 @@ SatImage.prototype._mousedown = function(e) {
     // else, label created at mousedown
     let occupiedShape = self.getOccupiedShape(mousePos);
     let occupiedLabel = self.getLabelOfShape(occupiedShape);
-    if (occupiedLabel) {
-      if (this.sat.linkingTrack && occupiedLabel.getRoot().id !==
-          this.sat.linkingTrack.id) {
+    if (this.sat.linkingTrack) {
+      if (occupiedLabel && occupiedLabel.getRoot().id !==
+        this.sat.linkingTrack.id) {
         this.sat.addTrackToLinkingTrack(occupiedLabel.getRoot());
-      } else {
+      }
+    } else {
+      if (occupiedLabel) {
         self.selectLabel(occupiedLabel);
         self.selectedLabel.setSelectedShape(occupiedShape);
         self.selectedLabel.mousedown(e);
-      }
-    } else {
-      self.catSel = document.getElementById('category_select');
-      let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
-      let attributes = self._getSelectedAttributes();
-      self.selectLabel(self.sat.newLabel({
-        categoryPath: cat, attributes: attributes, mousePos: mousePos,
-      }));
+      } else {
+        self.catSel = document.getElementById('category_select');
+        let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+        let attributes = self._getSelectedAttributes();
+        self.selectLabel(self.sat.newLabel({
+          categoryPath: cat, attributes: attributes, mousePos: mousePos,
+        }));
 
-      self.selectedLabel.mousedown(e);
+        self.selectedLabel.mousedown(e);
+      }
     }
   }
   self.redrawLabelCanvas();
@@ -1256,6 +1257,8 @@ export function ImageLabel(sat, id, optionalAttributes = null) {
 
 ImageLabel.prototype = Object.create(SatLabel.prototype);
 
+ImageLabel._useDoubleClick = false;
+ImageLabel.useDoubleClick = false;
 ImageLabel.useCrossHair = false;
 ImageLabel.defaultCursorStyle = 'auto';
 ImageLabel.allowsLinkingWithinFrame = false;

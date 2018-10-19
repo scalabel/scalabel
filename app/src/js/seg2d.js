@@ -54,8 +54,9 @@ Seg2d.prototype = Object.create(ImageLabel.prototype);
 
 Seg2d.useCrossHair = false;
 Seg2d.defaultCursorStyle = 'default';
+Seg2d._useDoubleClick = true;
 Seg2d.useDoubleClick = true;
-ImageLabel.allowsLinkingWithinFrame = true;
+Seg2d.allowsLinkingWithinFrame = true;
 Seg2d.closed =
     document.getElementById('label_type').innerHTML === 'segmentation';
 
@@ -173,8 +174,8 @@ Seg2d.prototype.deletePolyline = function(poly) {
 Seg2d.prototype.deleteAllPolyline = function() {
   for (let i = 0; i < this.polys.length; i++) {
     this.polys[i].delete();
-    this.polys.splice(i, 1);
   }
+  this.polys = [];
 };
 
 Seg2d.prototype.setAsTargeted = function() {
@@ -207,9 +208,19 @@ Seg2d.prototype.setState = function(state) {
     this.state = state;
     this.selectedShape = null;
 
-    // reset hiddenMap with this polygon and corresponding handles
+    // reset hiddenMap with polygons and handles of this
     if (this.satItem.active) {
-      this.satItem.resetHiddenMap(this.getAllHiddenShapes());
+      let shapes = [];
+      for (let label of this.satItem.labels) {
+        if (label.valid) {
+          shapes = shapes.concat(label.defaultHiddenShapes());
+          if (label === this) {
+            shapes = shapes.concat(label.getVertices());
+            shapes = shapes.concat(this.getControlPoints());
+          }
+        }
+      }
+      this.satItem.resetHiddenMap(shapes);
       this.satItem.redrawHiddenCanvas();
     }
     this.newPoly = null;
@@ -235,10 +246,6 @@ Seg2d.prototype.setState = function(state) {
     this.state = state;
   } else if (state === SegStates.RESIZE) {
     this.state = state;
-  } else if (state === SegStates.LINK) {
-    this.state = state;
-    this.satItem.resetHiddenMapToDefault();
-    this.satItem.redrawHiddenCanvas();
   } else if (state === SegStates.QUICK_DRAW) {
     this.quickdrawCache.tempPolyCache = this.tempPoly;
     this.state = state;
@@ -265,9 +272,11 @@ Seg2d.prototype.setState = function(state) {
 Seg2d.setToolBox = function(satItem) {
   if (Seg2d.closed) {
     satItem.isLinking = false;
-    document.getElementById('link_btn').onclick = function() {
-      satItem.linkHandler();
-    };
+    if (document.getElementById('link_btn')) {
+      document.getElementById('link_btn').onclick = function() {
+        satItem.linkHandler();
+      };
+    }
     document.getElementById('quickdraw_btn').onclick = function() {
       if (satItem.selectedLabel) {
         satItem.selectedLabel.handleQuickdraw();
@@ -361,7 +370,6 @@ Seg2d.prototype.bezierControlToMidpoint = function(pt) {
 
 SatImage.prototype.startLinking = function() {
   let button = document.getElementById('link_btn');
-  this.isLinking = true;
   button.innerHTML = 'Finish Linking';
   button.style.backgroundColor = 'lightgreen';
 
@@ -384,6 +392,9 @@ SatImage.prototype.startLinking = function() {
     this.selectedLabel.setAsTargeted();
   }
   this.selectedLabel.linkHandler();
+  this.isLinking = true;
+  this.resetHiddenMapToDefault();
+  this.redrawHiddenCanvas();
 };
 
 SatImage.prototype.endLinking = function() {
@@ -407,9 +418,7 @@ SatImage.prototype.linkHandler = function() {
 };
 
 Seg2d.prototype.linkHandler = function() {
-  if (this.state === SegStates.FREE) {
-    this.setState(SegStates.LINK);
-  } else if (this.state === SegStates.LINK) {
+  if (this.satItem.isLinking) {
     this.setState(SegStates.FREE);
     if (this.polys.length < 1) {
       this.delete();
@@ -575,7 +584,7 @@ Seg2d.prototype.toJson = function() {
  * @return {boolean} whether the index selects this Seg2d.
  */
 Seg2d.prototype.selectedBy = function(shape) {
-  if (this.polys.length < 1) {
+  if (this.polys.length < 1 || shape === null) {
     return false;
   }
 
@@ -714,9 +723,7 @@ Seg2d.prototype.redrawLabelCanvas = function(mainCtx) {
       this.state === SegStates.QUICK_DRAW) && this.tempPoly) {
     this.tempPoly.draw(mainCtx, this.satItem,
       this.isTargeted() && this.state !== SegStates.DRAW
-        && this.state !== SegStates.QUICK_DRAW, this.getRoot().linkTarget ||
-        (this.sat.linkingTrack &&
-          this.sat.linkingTrack.id === this.getRoot().id));
+        && this.state !== SegStates.QUICK_DRAW, false);
     this.tempPoly.drawHandles(mainCtx, this.satItem, styleColor,
       this.hoveredShape, false);
   } else if (this.polys.length > 0) {
@@ -726,7 +733,8 @@ Seg2d.prototype.redrawLabelCanvas = function(mainCtx) {
           && this.state !== SegStates.QUICK_DRAW;
       let polyHovered = this.polys.indexOf(this.hoveredShape) >= 0;
       poly.draw(mainCtx, this.satItem,
-          drawDashWhenTargeted || polyHovered || (this.sat.linkingTrack &&
+          drawDashWhenTargeted || polyHovered,
+          this.getRoot().linkTarget || (this.sat.linkingTrack &&
             this.sat.linkingTrack.id === this.getRoot().id));
       if (this.isTargeted() || polyHovered) {
         poly.drawHandles(mainCtx,
@@ -796,7 +804,7 @@ Seg2d.prototype.shapesValid = function() {
  */
 Seg2d.prototype.getCursorStyle = function(shape) {
   if (shape instanceof Polygon && !this.satItem.isLinking &&
-      this.satItem.isDown('M') &&
+      !this.sat.linkingTrack && this.satItem.isDown('M') &&
       this.satItem.selectedLabel && this.satItem.selectedLabel.id === this.id) {
     return 'move';
   }
@@ -807,7 +815,26 @@ Seg2d.prototype.mousedown = function(e) {
   let mousePos = this.satItem.getMousePos(e);
 
   let occupiedShape = this.satItem.getOccupiedShape(mousePos);
-  if (this.state === SegStates.FREE && occupiedShape) {
+  if ((this.satItem.isLinking || this.sat.linkingTrack) && occupiedShape) {
+    let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
+    if (occupiedLabel.id === this.id) {
+      // if selected a polygon it has, split this polygon out
+      if (occupiedShape instanceof Polygon) {
+        this.splitShape(occupiedShape);
+      }
+      this.satItem.resetHiddenMapToDefault();
+    } else if (occupiedLabel) {
+      // if clicked another label, merge into one
+      if (this.polys.length < 1) {
+        this.attributes = occupiedLabel.attributes;
+        this.categoryPath = occupiedLabel.categoryPath;
+      }
+      for (let poly of occupiedLabel.polys) {
+        this.addShape(poly);
+      }
+      occupiedLabel.delete();
+    }
+  } else if (this.state === SegStates.FREE && this.selectedBy(occupiedShape)) {
     this.selectedShape = occupiedShape;
     this.selectedCache = occupiedShape.copy(-1);
     // if clicked on a vertex
@@ -823,7 +850,7 @@ Seg2d.prototype.mousedown = function(e) {
         this.setState(SegStates.RESIZE);
       }
     } else if (occupiedShape instanceof Polygon && !this.satItem.isLinking
-      && this.satItem.isDown('M')) {
+        && !this.sat.linkingTrack && this.satItem.isDown('M')) {
       // if clicked on a polygon, start moving
       this.setState(SegStates.MOVE);
       this.mouseClickPos = mousePos;
@@ -929,7 +956,8 @@ Seg2d.prototype.mousedown = function(e) {
 };
 
 Seg2d.prototype.doubleclick = function() {
-  if (!this.satItem.isLinking && this.state === SegStates.FREE) {
+  if (!this.satItem.isLinking && !this.sat.linkingTrack &&
+      this.state === SegStates.FREE) {
     let label = this;
     label.satItem.selectLabel(label);
     label.setAsTargeted();
@@ -1009,7 +1037,8 @@ Seg2d.prototype.mouseup = function(e) {
     }
   } else if (this.state === SegStates.FREE) {
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
-    if (occupiedShape && occupiedShape instanceof Vertex) {
+    let relevant = this.selectedBy(occupiedShape);
+    if (relevant && occupiedShape instanceof Vertex) {
       if (occupiedShape.type === VertexTypes.VERTEX &&
         this.satItem.isDown('D')) {
         // deleting a vertex
@@ -1034,7 +1063,7 @@ Seg2d.prototype.mouseup = function(e) {
         }
       }
       this.setState(SegStates.FREE);
-    } else if (!occupiedShape) {
+    } else if (!relevant) {
       // deselects self
       this.satItem.deselectAll();
     }

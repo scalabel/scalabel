@@ -31,6 +31,9 @@ export function initSatSession(labelType, itemType) {
   } else if (labelType === 'segmentation' || labelType === 'lane') {
     labelClass = Seg2d;
     if (labelType === 'segmentation') {
+      if (itemType === 'image') {
+        showTemplateById('seg_image_btns');
+      }
       showTemplateById('seg_btns');
       showTemplateById('seg_usage');
     } else if (labelType === 'lane') {

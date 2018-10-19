@@ -1380,6 +1380,9 @@ Polyline.prototype.draw = function(ctx, satImage, bezierDash, drawDash) {
   ctx.save();
   // start path
   ctx.beginPath();
+  if (drawDash) {
+    ctx.setLineDash([8, 6]);
+  }
   this.alignEdges(); // this is important
   let [startX, startY] = satImage.toCanvasCoords(
       [this.vertices[0].x, this.vertices[0].y]);
@@ -1405,9 +1408,6 @@ Polyline.prototype.draw = function(ctx, satImage, bezierDash, drawDash) {
   if (this.closed) {
     ctx.closePath();
     ctx.fill();
-  }
-  if (drawDash) {
-    ctx.setLineDash([6, 2]);
   }
   ctx.stroke();
 
