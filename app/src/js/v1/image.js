@@ -359,7 +359,7 @@ SatImage.prototype.setActive = function(active) {
       self.setScale(self.scale);
       self.redraw();
     };
-    if (self.sat.LabelType.useDoubleClick) {
+    if (self.sat.LabelType._useDoubleClick) {
       document.ondblclick = function(e) {
         self._doubleclick(e);
       };

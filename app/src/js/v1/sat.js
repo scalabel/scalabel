@@ -643,12 +643,16 @@ SatItem.prototype.fromJson = function(json) {
 SatItem.prototype.importLabels = function(labels) {
   let self = this;
   for (let labelToImport of labels) {
-    self.sat.lastLabelId += 1;
-    let newLabel = new self.sat.LabelType(self.sat, self.sat.lastLabelId);
+    let newLabel = new self.sat.LabelType(self.sat, self.sat.newLabelId());
     newLabel = newLabel.fromExportFormat(labelToImport);
     if (newLabel) {
       newLabel.satItem = self;
       self.sat.labelIdMap[newLabel.id] = newLabel;
+      if (self.sat.constructor.name === 'SatVideo') {
+        newLabel.trackInfo = {
+          trackId: labelToImport.id,
+        };
+      }
       self.sat.labels.push(newLabel);
       self.labels.push(newLabel);
     }

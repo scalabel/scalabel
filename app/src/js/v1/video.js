@@ -32,6 +32,7 @@ export function SatVideo(LabelType) {
 }
 
 SatVideo.prototype = Object.create(Sat.prototype);
+SatVideo.prototype.constructor = SatVideo;
 
 SatVideo.prototype.newLabel = function(optionalAttributes) {
   let self = this;
@@ -82,77 +83,19 @@ SatVideo.prototype.fromJson = function(json) {
   self.videoMetaData = json.task.projectOptions.videoMetaData;
   self.interpolationMode = json.task.projectOptions.interpolationMode;
   self.tracks = [];
-  for (let i = 0; json.tracks && i < json.tracks.length; i++) {
-    let track = new Track(self, json.tracks[i].id,
-        json.tracks[i].attributes);
-    track.children = [];
-    for (let j = 0; j < json.tracks[i].childrenIds.length; j++) {
-      track.addChild(self.labelIdMap[json.tracks[i].childrenIds[j]]);
-      self.labelIdMap[json.tracks[i].childrenIds[j]].parent = track;
-      for (let k = 0; k < self.labels.length; k++) {
-        if (self.labels[k].id === track.id) {
-          self.labels[k] = track;
-        }
+  // initialize tracks
+  let trackMap = {};
+  for (let item of this.items) {
+    for (let label of item.labels) {
+      let key = label.trackInfo.trackId;
+      if (!(key in trackMap)) {
+        trackMap[key] = new Track(self,
+            self.newLabelId());
+        self.labels.push(trackMap[key]);
+        self.tracks.push(trackMap[key]);
       }
-    }
-    self.labelIdMap[json.tracks[i].id] = track;
-    self.tracks.push(track);
-  }
-  // import labels
-  if (self.importFiles &&
-      self.importFiles.length > 0) {
-    self.importLabelsFromImportFiles();
-    self.save();
-  }
-};
-
-SatVideo.prototype.importLabelsFromImportFiles = function() {
-  let self = this;
-  for (let i = 0; i < self.items.length; i++) {
-    let item = self.items[i];
-    for (let j = self.importFiles.length - 1; j >= 0; j--) {
-      let importItem = self.importFiles[j];
-      // correspondence by url
-      if (importItem.url === item.url) {
-        if (importItem.labels) {
-          for (let labelToImport of importItem.labels) {
-            let imported = false;
-            let newLabel = null;
-            let newId = null;
-            let newTrack = null;
-            for (let k = 0; k < self.tracks.length; k++) {
-              if (self.tracks[k].id === labelToImport.id) {
-                newId = self.tracks[k].children[
-                self.tracks[k].children.length - 1].id + 1;
-                newTrack = self.tracks[k];
-                imported = true;
-              }
-            }
-            if (!imported) {
-              newId = labelToImport.id + 1;
-            }
-            newLabel = new self.LabelType(self, newId);
-            newLabel = newLabel.fromExportFormat(labelToImport);
-            if (newLabel) {
-              if (!imported) {
-                newTrack = new Track(self, labelToImport.id);
-                self.labelIdMap[newTrack.id] = newTrack;
-                self.labels.push(newTrack);
-                self.tracks.push(newTrack);
-              }
-              newLabel.satItem = self.items[i];
-              newLabel.keyframe = labelToImport.manual;
-              self.labelIdMap[newLabel.id] = newLabel;
-              self.labels.push(newLabel);
-              self.items[i].labels.push(newLabel);
-              newTrack.children.push(newLabel);
-              newLabel.parent = newTrack;
-            }
-          }
-        }
-        self.importFiles.splice(j, 1);
-        break;
-      }
+      delete label.trackInfo;
+      trackMap[key].addChild(label);
     }
   }
 };
@@ -230,18 +173,29 @@ SatVideo.prototype.linkTracks = function() {
   }
   trackIds.add(this.linkingTrack.id);
   // check the validity of the link operation
-  let valid = true;
-  for (let frame = 0; frame < this.items.length && valid; frame++) {
+  if (!this.LabelType.allowsLinkingWithinFrame) {
+    for (let frame = 0; frame < this.items.length; frame++) {
+      let occupiedFrameTrack = null;
+      for (let label of this.items[frame].labels) {
+        if (trackIds.has(label.getRoot().id)) {
+          if (occupiedFrameTrack === null) {
+            occupiedFrameTrack = label;
+          } else {
+            // if invalid, throw an alert
+            alert('Cannot link tracks due to overlapping histories.');
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  for (let frame = 0; frame < this.items.length; frame++) {
     let occupiedFrameTrack = null;
     this.items[frame].deleteInvalidLabels();
     for (let label of this.items[frame].labels) {
       if (trackIds.has(label.getRoot().id)) {
-        if (occupiedFrameTrack) {
-          if (!this.LabelType.allowsLinkingWithinFrame) {
-            valid = false;
-            break;
-          }
-        } else {
+        if (occupiedFrameTrack === null) {
           occupiedFrameTrack = label;
         }
         if (label.id === this.linkingTrack.id) {
@@ -250,7 +204,7 @@ SatVideo.prototype.linkTracks = function() {
         }
       }
     }
-    if (valid && occupiedFrameTrack) {
+    if (occupiedFrameTrack) {
       for (let label of this.items[frame].labels) {
         if (trackIds.has(label.getRoot().id) &&
             label.id !== occupiedFrameTrack.id) {
@@ -264,11 +218,6 @@ SatVideo.prototype.linkTracks = function() {
       occupiedFrameTrack.parent = this.linkingTrack;
       allChildren.push(occupiedFrameTrack);
     }
-  }
-  // If it's an invalid link, throw an alert
-  if (!valid) {
-    alert('Cannot link tracks due to overlapping histories.');
-    return;
   }
   // linkingTrack gets all of the linked tracks' children
   this.linkingTrack.children = allChildren;

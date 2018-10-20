@@ -181,7 +181,17 @@ Seg2d.prototype.deleteAllPolyline = function() {
 Seg2d.prototype.setAsTargeted = function() {
   this.targeted = true;
   if (this.satItem.active && this.state === SegStates.FREE) {
-    this.satItem.resetHiddenMap(this.getAllHiddenShapes());
+    let shapes = [];
+    for (let label of this.satItem.labels) {
+      if (label.valid) {
+        shapes = shapes.concat(label.defaultHiddenShapes());
+        if (label === this) {
+          shapes = shapes.concat(label.getVertices());
+          shapes = shapes.concat(this.getControlPoints());
+        }
+      }
+    }
+    this.satItem.resetHiddenMap(shapes);
   }
 };
 
@@ -815,24 +825,26 @@ Seg2d.prototype.mousedown = function(e) {
   let mousePos = this.satItem.getMousePos(e);
 
   let occupiedShape = this.satItem.getOccupiedShape(mousePos);
-  if ((this.satItem.isLinking || this.sat.linkingTrack) && occupiedShape) {
-    let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
-    if (occupiedLabel.id === this.id) {
-      // if selected a polygon it has, split this polygon out
-      if (occupiedShape instanceof Polygon) {
-        this.splitShape(occupiedShape);
+  if ((this.satItem.isLinking || this.sat.linkingTrack)) {
+    if (occupiedShape) {
+      let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
+      if (occupiedLabel.id === this.id) {
+        // if selected a polygon it has, split this polygon out
+        if (occupiedShape instanceof Polygon) {
+          this.splitShape(occupiedShape);
+        }
+        this.satItem.resetHiddenMapToDefault();
+      } else if (occupiedLabel) {
+        // if clicked another label, merge into one
+        if (this.polys.length < 1) {
+          this.attributes = occupiedLabel.attributes;
+          this.categoryPath = occupiedLabel.categoryPath;
+        }
+        for (let poly of occupiedLabel.polys) {
+          this.addShape(poly);
+        }
+        occupiedLabel.delete();
       }
-      this.satItem.resetHiddenMapToDefault();
-    } else if (occupiedLabel) {
-      // if clicked another label, merge into one
-      if (this.polys.length < 1) {
-        this.attributes = occupiedLabel.attributes;
-        this.categoryPath = occupiedLabel.categoryPath;
-      }
-      for (let poly of occupiedLabel.polys) {
-        this.addShape(poly);
-      }
-      occupiedLabel.delete();
     }
   } else if (this.state === SegStates.FREE && this.selectedBy(occupiedShape)) {
     this.selectedShape = occupiedShape;
@@ -933,25 +945,6 @@ Seg2d.prototype.mousedown = function(e) {
     } else {
       this.endQuickDraw();
     }
-  } else if (this.state === SegStates.LINK && occupiedShape) {
-    let occupiedLabel = this.satItem.getLabelOfShape(occupiedShape);
-    if (occupiedLabel.id === this.id) {
-      // if selected a polygon it has, split this polygon out
-      if (occupiedShape instanceof Polygon) {
-        this.splitShape(occupiedShape);
-      }
-      this.satItem.resetHiddenMapToDefault();
-    } else if (occupiedLabel) {
-      // if clicked another label, merge into one
-      if (this.polys.length < 1) {
-        this.attributes = occupiedLabel.attributes;
-        this.categoryPath = occupiedLabel.categoryPath;
-      }
-      for (let poly of occupiedLabel.polys) {
-        this.addShape(poly);
-      }
-      occupiedLabel.delete();
-    }
   }
 };
 
@@ -1035,7 +1028,9 @@ Seg2d.prototype.mouseup = function(e) {
     if (this.parent) {
       this.parent.interpolate(this);
     }
-  } else if (this.state === SegStates.FREE) {
+  } else if (this.state === SegStates.FREE && !this.satItem.isLinking &&
+      (typeof this.sat.linkingTrack === 'undefined'
+          || this.sat.linkingTrack === null)) {
     let occupiedShape = this.satItem.getOccupiedShape(mousePos);
     let relevant = this.selectedBy(occupiedShape);
     if (relevant && occupiedShape instanceof Vertex) {

@@ -250,8 +250,10 @@ Box2d.prototype.setState = function(state) {
     this.state = state;
     this.selectedShape = this.rect;
     this.selectedCache = null;
-    this.satItem.resetHiddenMap(this.getAllHiddenShapes());
-    this.satItem.redrawHiddenCanvas();
+    if (this.satItem.active) {
+      this.satItem.resetHiddenMapToDefault();
+      this.satItem.redrawHiddenCanvas();
+    }
   } else if (state === BoxStates.RESIZE) {
     this.state = state;
   } else if (state === BoxStates.MOVE) {
