@@ -83,19 +83,38 @@ SatVideo.prototype.fromJson = function(json) {
   self.videoMetaData = json.task.projectOptions.videoMetaData;
   self.interpolationMode = json.task.projectOptions.interpolationMode;
   self.tracks = [];
-  // initialize tracks
+  // load tracks from json
+  for (let i = 0; json.tracks && i < json.tracks.length; i++) {
+    let track = new Track(self, json.tracks[i].id,
+        json.tracks[i].attributes);
+    track.children = [];
+    for (let j = 0; j < json.tracks[i].childrenIds.length; j++) {
+      track.addChild(self.labelIdMap[json.tracks[i].childrenIds[j]]);
+      self.labelIdMap[json.tracks[i].childrenIds[j]].parent = track;
+      for (let k = 0; k < self.labels.length; k++) {
+        if (self.labels[k].id === track.id) {
+          self.labels[k] = track;
+        }
+      }
+    }
+    self.labelIdMap[json.tracks[i].id] = track;
+    self.tracks.push(track);
+  }
+  // initialize tracks from import files
   let trackMap = {};
   for (let item of this.items) {
     for (let label of item.labels) {
-      let key = label.trackInfo.trackId;
-      if (!(key in trackMap)) {
-        trackMap[key] = new Track(self,
-            self.newLabelId());
-        self.labels.push(trackMap[key]);
-        self.tracks.push(trackMap[key]);
+      if (label.trackInfo) {
+        let key = label.trackInfo.trackId;
+        if (!(key in trackMap)) {
+          trackMap[key] = new Track(self,
+              self.newLabelId());
+          self.labels.push(trackMap[key]);
+          self.tracks.push(trackMap[key]);
+        }
+        delete label.trackInfo;
+        trackMap[key].addChild(label);
       }
-      delete label.trackInfo;
-      trackMap[key].addChild(label);
     }
   }
 };
