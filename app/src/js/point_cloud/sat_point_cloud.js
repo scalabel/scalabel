@@ -1,4 +1,4 @@
-import {SatItem} from '../sat';
+import {SatItem} from '../v1/sat';
 import $ from 'jquery';
 import * as THREE from 'three';
 import {PLYLoader} from '../thirdparty/PLYLoader';

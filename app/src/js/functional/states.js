@@ -2,8 +2,8 @@
 
 import type {
   LabelType, ItemType,
-  RectType, SatType,
-  SatConfigType, SatCurrentType,
+  RectType, StateType,
+  ConfigType, CurrentType,
 } from './types';
 
 /**
@@ -64,9 +64,9 @@ export function makeItem(params: {} = {}): ItemType {
 /**
  * Make Sat configuration state
  * @param {{}} params
- * @return {SatConfigType}
+ * @return {ConfigType}
  */
-export function makeSatConfig(params: {} = {}): SatConfigType {
+export function makeSatConfig(params: {} = {}): ConfigType {
   return {
     assignmentId: '', // id
     projectName: '',
@@ -90,9 +90,9 @@ export function makeSatConfig(params: {} = {}): SatConfigType {
 /**
  * Initialize a Sat current state
  * @param {{}} params
- * @return {SatCurrentType}
+ * @return {CurrentType}
  */
-export function makeSatCurrent(params: {} = {}): SatCurrentType {
+export function makeSatCurrent(params: {} = {}): CurrentType {
   return {
     item: -1,
     label: -1,
@@ -104,9 +104,9 @@ export function makeSatCurrent(params: {} = {}): SatCurrentType {
 /**
  * Initialize a Sat state
  * @param {{}} params
- * @return {SatType}
+ * @return {StateType}
  */
-export function makeSat(params: {} = {}): SatType {
+export function makeState(params: {} = {}): StateType {
   return {
     config: makeSatConfig(),
     current: makeSatCurrent(),

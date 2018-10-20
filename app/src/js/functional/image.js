@@ -1,7 +1,7 @@
 /* @flow */
 
-import {makeItem} from '../states';
-import type {ItemType, ItemFunctionalType} from '../types';
+import {makeItem} from './states';
+import type {ItemType, ItemFunctionalType} from './types';
 
 /**
  * Create new Image item

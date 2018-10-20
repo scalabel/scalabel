@@ -1,7 +1,7 @@
 import {rgba} from './utils';
 import $ from 'jquery';
 import 'bootstrap-switch';
-import {makeSat} from './states';
+import {makeState} from '../functional/states';
 import {Shape} from './shape';
 
 // constants
@@ -92,7 +92,7 @@ export function Sat(ItemType, LabelType, hasNetwork=true) {
     self.load();
     self.getIpInfo();
   }
-  self.state = makeSat();
+  self.state = makeState();
 }
 
 /**

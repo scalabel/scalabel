@@ -1,7 +1,7 @@
 /* @flow */
 
-import {makeLabel, makeRect} from '../states';
-import type {LabelType, LabelFunctionalType} from '../types';
+import {makeLabel, makeRect} from './states';
+import type {LabelType, LabelFunctionalType} from './types';
 
 /**
  * Create new Box2d label

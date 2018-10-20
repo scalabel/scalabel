@@ -1,5 +1,5 @@
 import {Box3dTrack} from '../point_cloud/point_cloud_tracking.js';
-import {SatItem, SatLabel} from '../sat.js';
+import {SatItem, SatLabel} from '../v1/sat.js';
 import {Box3d} from '../point_cloud/box3d.js';
 import {SatPointCloud} from '../point_cloud/sat_point_cloud.js';
 import * as THREE from 'three';

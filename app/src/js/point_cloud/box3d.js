@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {SatLabel} from '../sat';
+import {SatLabel} from '../v1/sat';
 
 /**
  * Label for Point Cloud 3D BBox

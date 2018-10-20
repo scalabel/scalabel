@@ -1,4 +1,4 @@
-import {Sat} from '../sat';
+import {Sat} from '../v1/sat';
 import {SatPointCloud} from './sat_point_cloud';
 import * as THREE from 'three';
 

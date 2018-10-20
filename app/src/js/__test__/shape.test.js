@@ -1,6 +1,6 @@
 import {Shape, Vertex, Edge, Path, Polygon,
-  VertexTypes, EdgeTypes} from '../shape';
-import {idx} from '../utils';
+  VertexTypes, EdgeTypes} from '../v1/shape';
+import {idx} from '../v1/utils';
 
 /**
  * Random Integer Generator

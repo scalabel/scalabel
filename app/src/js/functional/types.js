@@ -47,7 +47,7 @@ export type ItemType = {
   It also make SatProps smaller. When in doubt, put the props in config in favor
   of smaller SatProps.
  */
-export type SatConfigType = {
+export type ConfigType = {
   assignmentId: string, // id
   projectName: string,
   itemType: string,
@@ -68,15 +68,15 @@ export type SatConfigType = {
 /*
   The current state of Sat.
  */
-export type SatCurrentType = {
+export type CurrentType = {
   item: number,
   label: number,
   maxObjectId: number,
 };
 
-export type SatType = {
-  config: SatConfigType,
-  current: SatCurrentType,
+export type StateType = {
+  config: ConfigType,
+  current: CurrentType,
   items: Array<ItemType>,
   labels: {[number]: LabelType}, // Map from label id to label
   tracks: {[number]: LabelType},

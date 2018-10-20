@@ -1,5 +1,5 @@
 import {Sat3d} from './sat3d';
-import {SatLabel} from '../sat';
+import {SatLabel} from '../v1/sat';
 import {Box3d} from './box3d';
 
 /**

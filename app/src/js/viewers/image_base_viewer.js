@@ -1,6 +1,6 @@
 /* @flow */
 import $ from 'jquery';
-import {UP_RES_RATIO} from '../../shape';
+import {UP_RES_RATIO} from '../v1/shape';
 
 /**
  * ImageBaseViewer class

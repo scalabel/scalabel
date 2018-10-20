@@ -1,7 +1,7 @@
 /* @flow */
 import {createStore} from 'redux';
 import undoable, {includeAction} from 'redux-undo';
-import {makeSat} from '../../states';
+import {makeState} from '../functional/states';
 import reducer from '../reducers/reducer';
 
 import {
@@ -19,7 +19,7 @@ const configureStore = (json: Object = {}, devMode: boolean = false) => {
   let store;
   const initialHistory = {
     past: [],
-    present: makeSat(json),
+    present: makeState(json),
     future: [],
   };
 
