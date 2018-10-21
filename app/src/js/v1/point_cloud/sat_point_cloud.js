@@ -1,7 +1,7 @@
-import {SatItem} from '../v1/sat';
+import {SatItem} from '../sat';
 import $ from 'jquery';
 import * as THREE from 'three';
-import {PLYLoader} from '../thirdparty/PLYLoader';
+import {PLYLoader} from '../../thirdparty/PLYLoader';
 
 /**
  * Point Cloud Item

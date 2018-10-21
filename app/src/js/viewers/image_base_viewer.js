@@ -1,6 +1,8 @@
 /* @flow */
 import $ from 'jquery';
-import {UP_RES_RATIO} from '../v1/shape';
+
+// TODO: Make this part of Viewer state
+const UP_RES_RATIO = 2;
 
 /**
  * ImageBaseViewer class

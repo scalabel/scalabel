@@ -1,10 +1,10 @@
 /* global labelType itemType */
 import $ from 'jquery';
-import {Sat} from './v1/sat';
-import {SatImage} from './v1/image';
-import {SatVideo} from './v1/video';
-import {Box2d} from './v1/box2d';
-import {Seg2d} from './v1/seg2d';
+import {Sat} from './sat';
+import {SatImage} from './image';
+import {SatVideo} from './video';
+import {Box2d} from './box2d';
+import {Seg2d} from './seg2d';
 import 'bootstrap-material-design';
 
 document.getElementById('frame_rate').style.display = 'none';

@@ -22,7 +22,8 @@
   },
   "jest": {
     "roots": [
-      "app/src/js"
+      "app/src/js",
+      "app/src/js/v1"
     ],
     "testURL": "http://localhost/",
     "transform": {

@@ -3,12 +3,13 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
 let config = {
+  devtool: '',
   entry: {
-    create: __dirname + '/app/src/js/create.js',
-    image: __dirname + '/app/src/js/image.index.js',
-    image_v2: __dirname + '/app/src/js/image.v2.index.js',
-    point_cloud: __dirname + '/app/src/js/point_cloud/point_cloud.index.js',
-    dashboard: __dirname + '/app/src/js/dashboard.index.js',
+    create: __dirname + '/app/src/js/v1/create.js',
+    image: __dirname + '/app/src/js/v1/image.index.js',
+    image_v2: __dirname + '/app/src/js/entries/image.index.js',
+    point_cloud: __dirname + '/app/src/js/v1/point_cloud/point_cloud.index.js',
+    dashboard: __dirname + '/app/src/js/v1/dashboard.index.js',
   },
   output: {
     filename: '[name].js',

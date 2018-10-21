@@ -1,6 +1,6 @@
 /* @flow */
 
-import {makeLabel} from '../functional/states';
+import {makeLabel} from '../../functional/states';
 import _ from 'lodash/fp';
 
 describe('Label Tests', function() {

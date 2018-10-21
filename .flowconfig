@@ -1,6 +1,12 @@
 [ignore]
 
 <PROJECT_ROOT>/node_modules/.*
+<PROJECT_ROOT>/app/src/js/v1/.*
+<PROJECT_ROOT>/app/src/js/point_cloud/.*
+<PROJECT_ROOT>/app/src/js/thirdparty/.*
+<PROJECT_ROOT>/app/src/js/__test__/.*
+<PROJECT_ROOT>/app/dist/*
+<PROJECT_ROOT>/webpack.config.js
 
 [include]
 
@@ -9,5 +15,6 @@
 [lints]
 
 [options]
+all=true
 
 [strict]

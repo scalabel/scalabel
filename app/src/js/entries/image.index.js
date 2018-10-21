@@ -2,15 +2,15 @@
 import $ from 'jquery';
 // $FlowFixMe
 import 'bootstrap-material-design';
-import configureStore from './store/configure_store';
-import {Toolbox} from './controllers/toolbox_controller';
-import {ImageViewer} from './viewers/image_viewer';
-import {TagViewer} from './viewers/tag_viewer';
-import {TitleBarViewer} from './viewers/title_bar_viewer';
-import {ToolboxViewer} from './viewers/toolbox_viewer';
-import {PageControl} from './controllers/page_controller';
+import configureStore from '../store/configure_store';
+import {Toolbox} from '../controllers/toolbox_controller';
+import {ImageViewer} from '../viewers/image_viewer';
+import {TagViewer} from '../viewers/tag_viewer';
+import {TitleBarViewer} from '../viewers/title_bar_viewer';
+import {ToolboxViewer} from '../viewers/toolbox_viewer';
+import {PageControl} from '../controllers/page_controller';
 import {sprintf} from 'sprintf-js';
-import * as types from './actions/action_types';
+import * as types from '../actions/action_types';
 
 declare var labelType: String;
 declare var itemType: String;
