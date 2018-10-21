@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -49,18 +50,21 @@ func addFileToForm(writer *multipart.Writer, filePath string, fileField string) 
 }
 
 func Test(test *testing.T) {
-	storage = &S3Storage{}
-	err := storage.Init("scalabel")
-	if err != nil {
-		test.Fatal(err)
+	_, err := session.NewSession()
+	if err == nil {
+		storage = &S3Storage{}
+		err := storage.Init("scalabel")
+		if err != nil {
+			test.Fatal(err)
+		}
+		RunTests(test)
+		storage = &DynamodbStorage{}
+		err = storage.Init("us-west-1")
+		if err != nil {
+			test.Fatal(err)
+		}
+		RunTests(test)
 	}
-	RunTests(test)
-	storage = &DynamodbStorage{}
-	err = storage.Init("us-west-1")
-	if err != nil {
-		test.Fatal(err)
-	}
-	RunTests(test)
 	storage = &FileStorage{}
 	err = storage.Init(env.DataDir)
 	if err != nil {
