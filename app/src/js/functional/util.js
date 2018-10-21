@@ -1,4 +1,3 @@
-/* @flow */
 
 // TODO: need a deep merge? i.e. to update below:
 // state.items[itemId].attributes[attributeId].selectedIndex

@@ -1,4 +1,3 @@
-/* @flow */
 
 import {makeItem} from './states';
 import type {ItemType, ItemFunctionalType} from './types';

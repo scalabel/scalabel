@@ -1,4 +1,3 @@
-/* @flow */
 
 import type {ItemType, LabelType, StateType} from './types';
 import {updateListItem, updateListItems, updateObject} from './util';

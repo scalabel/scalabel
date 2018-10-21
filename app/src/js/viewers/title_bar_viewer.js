@@ -1,4 +1,3 @@
-/* @flow */
 import {sprintf} from 'sprintf-js';
 
 /**

@@ -62,7 +62,7 @@ let config = {
   },
 };
 
-module.exports = (env, argv) => {
+module.exports = (env /* : Object */, argv /* : Object */) => {
   if (argv.mode === 'development') {
     config.devtool = 'source-map';
   }

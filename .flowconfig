@@ -6,7 +6,6 @@
 <PROJECT_ROOT>/app/src/js/thirdparty/.*
 <PROJECT_ROOT>/app/src/js/__test__/.*
 <PROJECT_ROOT>/app/dist/*
-<PROJECT_ROOT>/webpack.config.js
 
 [include]
 

@@ -1,4 +1,3 @@
-/* @flow */
 
 import {makeLabel} from '../../functional/states';
 import _ from 'lodash/fp';

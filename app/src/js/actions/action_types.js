@@ -1,4 +1,3 @@
-/* @flow */
 // SAT specific actions
 // seperate into activate and deactivate?
 // no need if the two are always called together

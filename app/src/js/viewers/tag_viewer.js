@@ -1,4 +1,3 @@
-/* @flow */
 import {ImageBaseViewer} from './image_base_viewer';
 import {sprintf} from 'sprintf-js';
 

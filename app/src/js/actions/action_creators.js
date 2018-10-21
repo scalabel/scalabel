@@ -1,4 +1,3 @@
-/* @flow */
 import * as types from './action_types';
 import type {ItemType, LabelType} from '../functional/types';
 

@@ -1,4 +1,3 @@
-/* @flow */
 import $ from 'jquery';
 
 // TODO: Make this part of Viewer state

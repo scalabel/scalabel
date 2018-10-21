@@ -1,4 +1,3 @@
-/* @flow */
 
 import {makeLabel, makeRect} from './states';
 import type {LabelType, LabelFunctionalType} from './types';

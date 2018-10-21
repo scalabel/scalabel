@@ -1,4 +1,3 @@
-/* @flow */
 import {createStore} from 'redux';
 import undoable, {includeAction} from 'redux-undo';
 import {makeState} from '../functional/states';

@@ -1,4 +1,3 @@
-/* @flow */
 
 /**
  * Viewer base class

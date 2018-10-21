@@ -25,6 +25,7 @@ $(document).ready(function() {
       }
     };
     x.open('POST', './postProject');
+    // eslint-disable-next-line
     x.send(new FormData(this));
   });
 

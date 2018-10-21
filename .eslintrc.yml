@@ -17,7 +17,7 @@ rules:
   no-unused-vars: 
     - error
     - argsIgnorePattern: "[iI]gnored"
-  no-invalid-this:
+  flowtype/no-types-missing-file-annotation:
     - 0
 parserOptions:
   ecmaVersion: 2018

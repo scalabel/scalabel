@@ -1,4 +1,3 @@
-/* @flow */
 
 import {makeState} from '../functional/states';
 import * as types from '../actions/action_types';

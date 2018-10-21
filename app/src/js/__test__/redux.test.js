@@ -1,4 +1,3 @@
-/* @flow */
 import configureStore from '../store/configure_store';
 import * as types from '../actions/action_types';
 import {ActionCreators} from 'redux-undo';
