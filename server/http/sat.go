@@ -226,8 +226,8 @@ func countCategories(categories []Category) int {
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert assignment links
-	funcMap := template.FuncMap{"countLabeledImage": countLabeledImage,
-		"countLabelInTask": countLabelInTask}
+	funcMap := template.FuncMap{"countLabeledImages": countLabeledImages,
+		"countLabelsInTask": countLabelsInTask}
 	tmpl, err := template.New("dashboard.html").Funcs(funcMap).ParseFiles(
 		path.Join(env.DashboardPath()))
 	if err != nil {
@@ -245,8 +245,8 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func vendorHandler(w http.ResponseWriter, r *http.Request) {
-	funcMap := template.FuncMap{"countLabeledImage": countLabeledImage,
-		"countLabelInTask": countLabelInTask}
+	funcMap := template.FuncMap{"countLabeledImages": countLabeledImages,
+		"countLabelsInTask": countLabelsInTask}
 	tmpl, err := template.New("vendor.html").Funcs(funcMap).ParseFiles(env.VendorPath())
 	if err != nil {
 		Error.Println(err)

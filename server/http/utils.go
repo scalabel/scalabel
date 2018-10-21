@@ -221,8 +221,20 @@ func CheckProjectName(projectName string) string {
 }
 
 // Count the total number of images labeled in a task
-func countLabeledImage(projectName string, index int) int {
+func countLabeledImages(projectName string, index int) int {
 	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
+	if assignment.Task.ProjectOptions.LabelType == "" {
+		sat, err := GetSat(projectName, Index2str(index), DEFAULT_WORKER)
+		if err != nil {
+			if _, ok := err.(*NotExistError); !ok {
+				Error.Println(err)
+			}
+			return 0
+		}
+		numLabeledItems := len(sat.Labels)
+		// TODO: add labels that are imported but not loaded yet
+		return numLabeledItems
+	}
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
@@ -235,8 +247,23 @@ func countLabeledImage(projectName string, index int) int {
 }
 
 // Count the total number of labels in a task
-func countLabelInTask(projectName string, index int) int {
+func countLabelsInTask(projectName string, index int) int {
 	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
+	if assignment.Task.ProjectOptions.LabelType == "" {
+		sat, err := GetSat(projectName, Index2str(index), DEFAULT_WORKER)
+		if err != nil {
+			if _, ok := err.(*NotExistError); !ok {
+				Error.Println(err)
+			}
+			return 0
+		}
+		numLabeledItems := 0
+		for _, label := range sat.Labels {
+			numLabeledItems += len(label.Attributes)
+		}
+		// TODO: add labels that are imported but not loaded yet
+		return numLabeledItems
+	}
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)

@@ -178,14 +178,13 @@
                         {{ $value.Index }}
                     </td>
                     <td class="countLabeledImage">
-                        {{ countLabeledImage $value.ProjectOptions.Name $value.Index }}
+                        {{ countLabeledImages $value.ProjectOptions.Name $value.Index }}
                     </td>
                     <td class="countLabelInTask">
-                        {{ countLabelInTask $value.ProjectOptions.Name $value.Index }}
+                        {{ countLabelsInTask $value.ProjectOptions.Name $value.Index }}
                     </td>
                     <td>
-                        <a
-                                href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
+                        <a href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
                             task link
                         </a>
                     </td>
