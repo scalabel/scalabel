@@ -370,6 +370,7 @@ Track.prototype.sortChildren = function() {
 
 Track.prototype.interpolate = function(startLabel) {
   let self = this;
+  startLabel.keyframe = true;
   let startIndex = null;
   let priorKeyFrameIndex = 0;
   let nextKeyFrameIndex = null;
