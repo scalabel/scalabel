@@ -202,6 +202,8 @@ SatImage.prototype.updateLabelCount = function() {
     }
   }
   document.getElementById('label-count').textContent = sprintf('%s', numLabels);
+  document.getElementById('page-count').textContent =
+    sprintf('%s/%s', this.index + 1, this.sat.items.length);
 };
 
 /**
