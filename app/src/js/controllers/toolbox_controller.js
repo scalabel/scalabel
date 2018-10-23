@@ -2,6 +2,7 @@ import $ from 'jquery';
 // $FlowFixMe
 import 'bootstrap-switch';
 import {tagImage} from '../actions/action_creators';
+import {sprintf} from 'sprintf-js';
 
 /**
  * Initialize Toolbox
@@ -29,7 +30,7 @@ export function Toolbox(store: Object) {
       // $FlowFixMe
       $('#custom_attribute_' + attributes[i].name).bootstrapSwitch();
     } else if (attributes[i].toolType === 'list') {
-      let listOuterHtml = '<span>' + attributes[i].name + '</span>';
+      let listOuterHtml = sprintf('<span>%s</span>', attributes[i].name);
       listOuterHtml += '<div id="radios" class="btn-group ';
       listOuterHtml += 'attribute-btns" data-toggle="buttons">';
       for (let j = 0; j < attributes[i].values.length; j++) {
@@ -47,7 +48,7 @@ export function Toolbox(store: Object) {
     }
   }
   // FIXME: hook up the save listener else where
-  // document.getElementById('save_btn').onclick = function() {
+  // document.getElementById('save-btn').onclick = function() {
   //   save();
   // };
   for (let i = 0; i < attributes.length; i++) {

@@ -229,7 +229,7 @@ Sat.prototype.load = function() {
       let json = JSON.parse(xhr.response);
       self.fromJson(json);
       if (self.demoMode) {
-        document.getElementById('save_btn').style.display = 'none';
+        document.getElementById('save-btn').style.display = 'none';
       }
       self.loaded();
     }
@@ -377,8 +377,15 @@ Sat.prototype.initToolbox = function() {
           self.attributes[i].toolType + '"';
     }
   }
-  document.getElementById('save_btn').onclick = function() {
+  document.getElementById('save-btn').onclick = function() {
     self.save();
+  };
+  document.getElementById('submit-btn').onclick = function() {
+    if (window.confirm(
+        'Submit the task only if all images are labeled. Proceed?')) {
+      self.submitted = true;
+      self.save();
+    }
   };
 };
 
@@ -439,6 +446,7 @@ Sat.prototype.encodeBaseJson = function() {
         instructions: self.instructions,
         demoMode: self.demoMode,
         bundleFile: self.bundleFile,
+        submitted: self.submitted,
       },
       index: self.taskIndex,
       items: items,
@@ -486,6 +494,7 @@ Sat.prototype.decodeBaseJson = function(json) {
   self.categories = json.task.projectOptions.categories;
   self.attributes = json.task.projectOptions.attributes;
   self.bundleFile = json.task.projectOptions.bundleFile;
+  self.submitted = json.task.projectOptions.submitted;
   self.taskIndex = json.task.index;
   for (let i = 0; json.labels && i < json.labels.length; i++) {
     // keep track of highest label ID

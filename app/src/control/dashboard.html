@@ -182,8 +182,8 @@
                     <th>Task Index</th>
                     <th># Labeled Images</th>
                     <th># Labels</th>
+                    <th>Submitted</th>
                     <th>Task Link</th>
-                    <th>Task Result</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -199,14 +199,12 @@
                     <td class="countLabelInTask">
                         {{ countLabelsInTask $value.ProjectOptions.Name $value.Index }}
                     </td>
+                    <td class="submitted">{{ taskSubmitted $value.ProjectOptions.Name $value.Index }}</td>
                     <td>
                         <a
                                 href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
                             task link
                         </a>
-                    </td>
-                    <td>
-                        <!-- TODO: result -->
                     </td>
                 </tr>
                 {{ end }}

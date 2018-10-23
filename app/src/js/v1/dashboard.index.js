@@ -13,6 +13,13 @@ $(document).ready(function() {
     if (tds[i].className === 'countLabelInTask') {
       totalLabels += parseInt(tds[i].innerHTML);
     }
+    if (tds[i].className === 'submitted') {
+      if (tds[i].innerHTML === 'true') {
+        tds[i].innerHTML = '<i class="fas fa-check"></i>';
+      } else {
+        tds[i].innerHTML = '';
+      }
+    }
   }
   document.getElementById('totalTaskLabeled').textContent =
       sprintf('%d', totalTaskLabeled);

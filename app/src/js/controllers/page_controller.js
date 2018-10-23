@@ -20,7 +20,7 @@ export function PageControl(store: Object) {
       self._nextHandler();
     };
   }
-  let saveBtn = document.getElementById('save_btn');
+  let saveBtn = document.getElementById('save-btn');
   if (saveBtn) {
     saveBtn.onclick = function() {
       self.save();

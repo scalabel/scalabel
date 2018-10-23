@@ -147,11 +147,6 @@
                               </tbody>
                           </table>
                           <br/>
-                          <a type="submit" id="download_list"
-                             class="btn btn-primary btn-md btn-default" target="_blank"
-                             href="./postDownloadTaskURL?project_name={{ .Project.Options.Name }}"
-                             style="width:220px; height:30px; position:relative; left:15px;">
-                              Download Assignment URLs</a>
                     </div>
                 </div>
             </div>
@@ -166,8 +161,8 @@
                     <th>Task Index</th>
                     <th># Labeled Images</th>
                     <th># Labels</th>
+                    <th>Submitted</th>
                     <th>Task Link</th>
-                    <th>Task Result</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -183,13 +178,11 @@
                     <td class="countLabelInTask">
                         {{ countLabelsInTask $value.ProjectOptions.Name $value.Index }}
                     </td>
+                    <td class="submitted">{{ taskSubmitted $value.ProjectOptions.Name $value.Index }}</td>
                     <td>
                         <a href="./{{ $value.ProjectOptions.HandlerUrl }}?project_name={{ $value.ProjectOptions.Name }}&task_index={{ $value.Index }}">
                             task link
                         </a>
-                    </td>
-                    <td>
-                        <!-- TODO: result -->
                     </td>
                 </tr>
                 {{ end }}
@@ -211,7 +204,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 <script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
 
-<script>$(document).ready(function() { $('body').show();});</script>
+<script src="./js/vendor.js"></script>
 
 </body>
 

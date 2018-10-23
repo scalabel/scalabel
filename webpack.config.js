@@ -10,6 +10,7 @@ let config = {
     image_v2: __dirname + '/app/src/js/entries/image.index.js',
     point_cloud: __dirname + '/app/src/js/v1/point_cloud/point_cloud.index.js',
     dashboard: __dirname + '/app/src/js/v1/dashboard.index.js',
+    vendor: __dirname + '/app/src/js/v1/vendor.index.js',
   },
   output: {
     filename: '[name].js',

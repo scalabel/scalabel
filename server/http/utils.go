@@ -280,6 +280,16 @@ func countLabelsInTask(projectName string, index int) int {
 	return numLabels
 }
 
+// Check if a given task is submitted
+func taskSubmitted(projectName string, index int) bool {
+	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
+	if err != nil {
+        Error.Println(err)
+        return false
+    }
+	return assignment.Task.ProjectOptions.Submitted
+}
+
 // Get UUIDv4
 func getUUIDv4() string {
 	uuid, err := uuid.NewV4()

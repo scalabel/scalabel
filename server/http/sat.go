@@ -115,6 +115,7 @@ type ProjectOptions struct {
 	InterpolationMode string        `json:"interpolationMode" yaml:"interpolationMode"`
 	Detections        []Detection   `json:"detections" yaml:"detections"`
 	BundleFile        string        `json:"bundleFile" yaml:"bundleFile"`
+	Submitted         bool          `json:"submitted" yaml:"submitted"`
 }
 
 // An item is something to be annotated e.g. Image, PointCloud
@@ -227,7 +228,7 @@ func countCategories(categories []Category) int {
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert assignment links
 	funcMap := template.FuncMap{"countLabeledImages": countLabeledImages,
-		"countLabelsInTask": countLabelsInTask}
+		"countLabelsInTask": countLabelsInTask, "taskSubmitted": taskSubmitted}
 	tmpl, err := template.New("dashboard.html").Funcs(funcMap).ParseFiles(
 		path.Join(env.DashboardPath()))
 	if err != nil {
@@ -246,7 +247,7 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 
 func vendorHandler(w http.ResponseWriter, r *http.Request) {
 	funcMap := template.FuncMap{"countLabeledImages": countLabeledImages,
-		"countLabelsInTask": countLabelsInTask}
+		"countLabelsInTask": countLabelsInTask, "taskSubmitted": taskSubmitted}
 	tmpl, err := template.New("vendor.html").Funcs(funcMap).ParseFiles(env.VendorPath())
 	if err != nil {
 		Error.Println(err)
@@ -375,6 +376,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		InterpolationMode: interpolationMode,
 		Detections:        detections,
 		BundleFile:        bundleFile,
+		Submitted:         false,
 	}
 	var project = Project{
 		Items:    items,
