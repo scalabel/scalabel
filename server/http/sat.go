@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
 	"html/template"
@@ -573,7 +574,8 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//set relevant header.
-	w.Header().Set("Content-Disposition", "attachment; filename="+projectName+"_Results.json")
+	w.Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=%s_results.json", projectName))
 	io.Copy(w, bytes.NewReader(exportJson))
 }
 
@@ -614,7 +616,8 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//set relevant header.
-	w.Header().Set("Content-Disposition", "attachment; filename="+projectName+"_TaskURLs.json")
+	w.Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=%s_task_urls.json", projectName))
 	io.Copy(w, bytes.NewReader(downloadJson))
 }
 

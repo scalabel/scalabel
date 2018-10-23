@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"html/template"
 	"io"
@@ -433,6 +434,7 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//set relevant header.
-	w.Header().Set("Content-Disposition", "attachment; filename="+projectName+"_Results.json")
+	w.Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=%s_results.json", projectName))
 	io.Copy(w, bytes.NewReader(exportJson))
 }
