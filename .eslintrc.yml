@@ -19,6 +19,7 @@ rules:
     - argsIgnorePattern: "[iI]gnored"
   flowtype/no-types-missing-file-annotation:
     - 0
+  no-console: ["error", { allow: ["warn", "error"] }]
 parserOptions:
   ecmaVersion: 2018
   sourceType: "module"

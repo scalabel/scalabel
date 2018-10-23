@@ -1,17 +1,17 @@
-import {ImageBaseViewer} from './image_base_viewer';
+import {BaseViewer2D} from './image_base_viewer';
 import {sprintf} from 'sprintf-js';
+import {BaseController} from '../controllers/base_controller';
 
 /**
  * Tag viewer class
  */
-export class TagViewer extends ImageBaseViewer {
+export class TagViewer extends BaseViewer2D {
   /**
-   * @param {Object} store
-   * @param {Array<Image>} images
+   * @param {BaseController} controller
    * @constructor
    */
-  constructor(store: Object, images: Array<Image>) {
-    super(store, images, 'tag_canvas');
+  constructor(controller: BaseController) {
+    super(controller, 'tag_canvas');
   }
 
   /**
@@ -19,11 +19,9 @@ export class TagViewer extends ImageBaseViewer {
    * @return {*}
    */
   getActiveTags() {
-    let state = this.store.getState().present;
-    let activeItem = state.current.item;
-    let item = state.items[activeItem];
+    let item = this.getCurrentItem();
     let attributes = {};
-    let label = state.labels[item.labels[0]];
+    let label = this.state.labels[item.labels[0]];
     if (label) {
       attributes = label.attributes;
     }
@@ -31,16 +29,19 @@ export class TagViewer extends ImageBaseViewer {
   }
 
   /**
-   * @param {number} index: item index
    * Redraw the image canvas.
+   * @return {boolean}
    */
-  redraw() {
+  redraw(): boolean {
+    if (!super.redraw()) {
+      return false;
+    }
     // preparation
-    this.padBox = this._getPadding();
+    let padBox = this._getPadding();
     let activeTags = this.getActiveTags();
-    this.ctx.font = '24px Arial';
+    this.context.font = '24px Arial';
     let abbr = [];
-    let attributes = this.store.getState().present.config.attributes;
+    let attributes = this.state.config.attributes;
     for (let i = 0; i < attributes.length; i++) {
       let key = attributes[i].name;
       if (activeTags && activeTags[key]) {
@@ -48,16 +49,17 @@ export class TagViewer extends ImageBaseViewer {
                           attributes[i].values[activeTags[key]]));
       }
     }
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = 'lightgrey';
-    this.ctx.globalAlpha = 0.3;
-    this.ctx.fillRect(this.padBox.x + 10, this.padBox.y + 10, 250,
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillStyle = 'lightgrey';
+    this.context.globalAlpha = 0.3;
+    this.context.fillRect(padBox.x + 10, padBox.y + 10, 250,
       (abbr.length) ? abbr.length * 35 + 15 : 0);
-    this.ctx.fillStyle = 'red';
-    this.ctx.globalAlpha = 1.0;
+    this.context.fillStyle = 'red';
+    this.context.globalAlpha = 1.0;
     for (let i = 0; i < abbr.length; i++) {
-      this.ctx.fillText(abbr[i],
-        this.padBox.x + 5, this.padBox.y + 40 + i * 35);
+      this.context.fillText(abbr[i],
+        padBox.x + 5, padBox.y + 40 + i * 35);
     }
+    return true;
   }
 }

@@ -1,5 +1,5 @@
 
-import type {ItemType, LabelType, StateType} from './types';
+import type {ItemType, LabelType, StateType, ViewerConfigType} from './types';
 import {updateListItem, updateListItems, updateObject} from './util';
 
 /**
@@ -9,6 +9,11 @@ import {updateListItem, updateListItems, updateObject} from './util';
  */
 export function initSession(state: StateType): StateType {
   // initialize state
+  let items = state.items.slice();
+  for (let i = 0; i < items.length; i+=1) {
+    items[i] = updateObject(items[i], {loaded: false});
+  }
+  state = updateObject(state, {items: items});
   if (state.current.item === -1) {
     let current = updateObject(state.current, {item: 0});
     let items = updateListItem(
@@ -75,7 +80,11 @@ export function newItem(
  * @return {StateType}
  */
 export function goToItem(state: StateType, index: number): StateType {
-  index = (index + state.items.length) % state.items.length;
+  if (index < 0 || index >= state.items.length) {
+    return state;
+  }
+  // TODO: don't do circling when no image number is shown
+  // index = (index + state.items.length) % state.items.length;
   if (index === state.current.item) {
     return state;
   }
@@ -87,6 +96,22 @@ export function goToItem(state: StateType, index: number): StateType {
       [deactivatedItem, activatedItem]);
   let current = {...state.current, item: index};
   return updateObject(state, {items: items, current: current});
+}
+
+/**
+ * Signify a new item is loaded
+ * @param {StateType} state
+ * @param {number} itemIndex
+ * @param {ViewerConfigType} viewerConfig
+ * @return {StateType}
+ */
+export function loadItem(state: StateType, itemIndex: number,
+                         viewerConfig: ViewerConfigType): StateType {
+  return updateObject(
+      state, {items: updateListItem(
+          state.items, itemIndex,
+            updateObject(state.items[itemIndex],
+                {viewerConfig: viewerConfig, loaded: true}))});
 }
 
 // TODO: now we are using redux, we have all the history anyway,
@@ -124,5 +149,14 @@ export function changeAttribute(state: StateType, ignoredLabelId: number,
  */
 export function changeCategory(state: StateType, ignoredLabelId: number,
                                ignoredCategoryOptions: Object): StateType {
+  return state;
+}
+
+/**
+ * Notify all the subscribers to update. it is an no-op now.
+ * @param {StateType} state
+ * @return {StateType}
+ */
+export function updateAll(state: StateType): StateType {
   return state;
 }

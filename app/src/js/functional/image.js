@@ -1,6 +1,8 @@
-
 import {makeItem} from './states';
-import type {ItemType, ItemFunctionalType} from './types';
+import type {ItemType, ItemFunctionalType, StateType} from './types';
+import {updateObject} from './util';
+import {getCurrentItemViewerConfig,
+  setCurrentItemViewerConfig} from './state_util';
 
 /**
  * Create new Image item
@@ -10,6 +12,18 @@ import type {ItemType, ItemFunctionalType} from './types';
  */
 export function createItem(id: number, url: string): ItemType {
   return makeItem({id: id, index: id, url: url});
+}
+
+/**
+ * Zoom image viewer by a certain ratio
+ * @param {StateType} state
+ * @param {number} ratio
+ * @return {StateType}
+ */
+export function zoomImage(state: StateType, ratio: number): StateType {
+  let config = getCurrentItemViewerConfig(state);
+  config = updateObject(config, {viewScale: config.viewScale * ratio});
+  return setCurrentItemViewerConfig(state, config);
 }
 
 /**

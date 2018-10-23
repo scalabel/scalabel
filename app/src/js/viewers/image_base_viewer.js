@@ -1,33 +1,31 @@
 import $ from 'jquery';
+import {BaseViewer} from './base_viewer';
+import {BaseController} from '../controllers/base_controller';
+import type {ImageViewerConfigType} from '../functional/types';
 
-// TODO: Make this part of Viewer state
+// TODO: Make this part of BaseViewer state
 const UP_RES_RATIO = 2;
 
 /**
- * ImageBaseViewer class
+ * BaseViewer2D class
  */
-export class ImageBaseViewer {
-  store: Object;
-  images: Array<Image>;
+export class BaseViewer2D extends BaseViewer {
   divCanvas: Object;
   canvas: Object;
-  ctx: Object;
+  context: Object;
   MAX_SCALE: number;
   MIN_SCALE: number;
   SCALE_RATIO: number;
   scale: number;
-  padBox: Object;
   displayToImageRatio: number;
 
   /**
-   * @param {Object} store
-   * @param {Array<Image>} images
+   * @param {BaseController} controller
    * @param {string} canvasId
    * @constructor
    */
-  constructor(store: Object, images: Array<Image>, canvasId: string) {
-    this.store = store;
-    this.images = images;
+  constructor(controller: BaseController, canvasId: string) {
+    super(controller);
     // necessary variables
     let divCanvas = document.getElementById('div_canvas');
     if (divCanvas) {
@@ -38,43 +36,39 @@ export class ImageBaseViewer {
       this.canvas = canvas;
     }
     // $FlowFixMe
-    this.ctx = this.canvas.getContext('2d');
+    this.context = this.canvas.getContext('2d');
     this.MAX_SCALE = 3.0;
     this.MIN_SCALE = 1.0;
     this.SCALE_RATIO = 1.05;
-    this.scale = 1.0;
-    // Resize
-    this.padBox;
-    this.displayToImageRatio;
+    this.scale = 1;
   }
 
-  /**
-   * set initial canvas scales
-   */
-  init() {
-    this.setScale(1.0);
-    this.store.subscribe(this.redraw.bind(this));
-  }
-
-  /**
-   * load the given Item
-   * @param {number} index
-   */
-  loaded(index: number) {
-    let activeItem = this.getActiveItem();
-    if (activeItem === index) {
-      this.redraw();
-    }
-  }
-
-  /**
-   * Get current active item
-   * @return {*}
-   */
-  getActiveItem(): number {
-    let state = this.store.getState().present;
-    return state.current.item;
-  }
+  // /**
+  //  * set initial canvas scales
+  //  */
+  // init() {
+  //   // this.store.subscribe(this.redraw.bind(this));
+  // }
+  //
+  // /**
+  //  * load the given Item
+  //  * @param {number} index
+  //  */
+  // loaded(index: number) {
+  //   let activeItem = this.getActiveItem();
+  //   if (activeItem === index) {
+  //     this.redraw();
+  //   }
+  // }
+  //
+  // /**
+  //  * Get current active item
+  //  * @return {*}
+  //  */
+  // getActiveItem(): number {
+  //   let state = this.store.getState().present;
+  //   return state.current.item;
+  // }
 
   /**
    * Convert image coordinate to canvas coordinate.
@@ -85,15 +79,15 @@ export class ImageBaseViewer {
    * @return {[number]} - the converted values.
    */
   toCanvasCoords(values: Array<number>, affine: boolean = true): Array<number> {
-    this.padBox = this._getPadding();
+    let padBox = this._getPadding();
     if (values) {
       for (let i = 0; i < values.length; i++) {
         values[i] *= this.displayToImageRatio * UP_RES_RATIO;
       }
     }
     if (affine) {
-      values[0] += this.padBox.x * UP_RES_RATIO;
-      values[1] += this.padBox.y * UP_RES_RATIO;
+      values[0] += padBox.x * UP_RES_RATIO;
+      values[1] += padBox.y * UP_RES_RATIO;
     }
     return values;
   }
@@ -107,10 +101,10 @@ export class ImageBaseViewer {
    * @return {[number]} - the converted values.
    */
   toImageCoords(values: Array<number>, affine: boolean = true): Array<number> {
-    this.padBox = this._getPadding();
+    let padBox = this._getPadding();
     if (affine) {
-      values[0] -= this.padBox.x;
-      values[1] -= this.padBox.y;
+      values[0] -= padBox.x;
+      values[1] -= padBox.y;
     }
     if (values) {
       for (let i = 0; i < values.length; i++) {
@@ -121,38 +115,40 @@ export class ImageBaseViewer {
   }
 
   /**
-   * Set the scale of the image in the display
-   * @param {number} scale
+   * Update the scale of the image in the display
    */
-  setScale(scale: number) {
+  updateScale() {
+    let config: ImageViewerConfigType = this.getCurrentViewerConfig();
     // set scale
-    if (scale >= this.MIN_SCALE && scale < this.MAX_SCALE) {
-      let ratio = scale / this.scale;
-      this.ctx.scale(ratio, ratio);
-      this.scale = scale;
+    if (config.viewScale >= this.MIN_SCALE &&
+        config.viewScale < this.MAX_SCALE) {
+      let ratio = this.scale / config.viewScale;
+      this.context.scale(ratio, ratio);
+      this.scale = config.viewScale;
     } else {
       return;
     }
     // handle buttons
-    if (this.scale >= this.MIN_SCALE * this.SCALE_RATIO) {
-      $('#decrease-btn').prop('disabled', false);
+    // TODO: This should be in TitleBarViewer
+    if (config.viewScale >= this.MIN_SCALE * this.SCALE_RATIO) {
+      $('#decrease-button').prop('disabled', false);
     } else {
-      $('#decrease-btn').prop('disabled', true);
+      $('#decrease-button').prop('disabled', true);
     }
-    if (this.scale <= this.MAX_SCALE / this.SCALE_RATIO) {
-      $('#increase-btn').prop('disabled', false);
+    if (config.viewScale <= this.MAX_SCALE / this.SCALE_RATIO) {
+      $('#increase-button').prop('disabled', false);
     } else {
-      $('#increase-btn').prop('disabled', true);
+      $('#increase-button').prop('disabled', true);
     }
     // resize canvas
     let rectDiv = this.divCanvas.getBoundingClientRect();
     this.canvas.style.height =
-      Math.round(rectDiv.height * this.scale) + 'px';
+      Math.round(rectDiv.height * config.viewScale) + 'px';
     this.canvas.style.width =
-      Math.round(rectDiv.width * this.scale) + 'px';
+      Math.round(rectDiv.width * config.viewScale) + 'px';
 
-    this.canvas.width = rectDiv.width * this.scale;
-    this.canvas.height = rectDiv.height * this.scale;
+    this.canvas.width = rectDiv.width * config.viewScale;
+    this.canvas.height = rectDiv.height * config.viewScale;
   }
 
   /**
@@ -160,24 +156,25 @@ export class ImageBaseViewer {
    * @return {Object}: padding box (x,y,w,h)
    */
   _getPadding(): Object {
-    let index = this.getActiveItem();
-    let image = this.images[index];
+    let config: ImageViewerConfigType = this.getCurrentViewerConfig();
     // which dim is bigger compared to canvas
-    let xRatio = image.width / this.canvas.width;
-    let yRatio = image.height / this.canvas.height;
+    let xRatio = config.imageWidth / this.canvas.width;
+    let yRatio = config.imageHeight / this.canvas.height;
     // use ratios to determine how to pad
     let box = {x: 0, y: 0, w: 0, h: 0};
     if (xRatio >= yRatio) {
-      this.displayToImageRatio = this.canvas.width / image.width;
+      this.displayToImageRatio =
+          this.canvas.width / config.imageWidth;
       box.x = 0;
       box.y = 0.5 * (this.canvas.height -
-        image.height * this.displayToImageRatio);
+        config.imageHeight * this.displayToImageRatio);
       box.w = this.canvas.width;
       box.h = this.canvas.height - 2 * box.y;
     } else {
-      this.displayToImageRatio = this.canvas.height / image.height;
+      this.displayToImageRatio =
+          this.canvas.height / config.imageHeight;
       box.x = 0.5 * (this.canvas.width -
-        image.width * this.displayToImageRatio);
+        config.imageWidth * this.displayToImageRatio);
       box.y = 0;
       box.w = this.canvas.width - 2 * box.x;
       box.h = this.canvas.height;
@@ -186,23 +183,35 @@ export class ImageBaseViewer {
   }
 
   /**
-   * Redraw the image canvas.
+   * Redraw the image canvas
+   * @return {boolean}: whether redraw is successful
    */
-  redraw() {}
-
-  /**
-   * incHandler
-   */
-  _incHandler() {
-    this.setScale(this.scale * this.SCALE_RATIO);
-    this.redraw();
+  redraw(): boolean {
+    if (!super.redraw()) {
+      return false;
+    }
+    if (!this.getCurrentItem().loaded) {
+      return false;
+    }
+    this.updateScale();
+    return true;
   }
 
-  /**
-   * decHandler
-   */
-  _decHandler() {
-    this.setScale(this.scale / this.SCALE_RATIO);
-    this.redraw();
-  }
+  // /**
+  //  * incHandler
+  //  */
+  // _incHandler() {
+  //   this.setScale(this.getCurrentViewerConfig().scale *
+  // this.getCurrentViewerConfig().SCALE_RATIO);
+  //   this.redraw();
+  // }
+  //
+  // /**
+  //  * decHandler
+  //  */
+  // _decHandler() {
+  //   this.setScale(this.getCurrentViewerConfig().scale /
+  // this.getCurrentViewerConfig().SCALE_RATIO);
+  //   this.redraw();
+  // }
 }

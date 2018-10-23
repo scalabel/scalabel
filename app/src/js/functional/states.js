@@ -3,7 +3,7 @@
 import type {
   LabelType, ItemType,
   RectType, StateType,
-  ConfigType, CurrentType,
+  ConfigType, CurrentType, ImageViewerConfigType,
 } from './types';
 
 /**
@@ -45,6 +45,18 @@ export function makeRect(params: {} = {}): RectType {
 }
 
 /**
+ * Make a new viewer config
+ * @return {ImageViewerConfigType}
+ */
+export function makeImageViewerConfig(): ImageViewerConfigType {
+  return {
+    imageWidth: 0,
+    imageHeight: 0,
+    viewScale: 1.0,
+  };
+}
+
+/**
  * Initialize an item state
  * @param {{}} params
  * @return {ItemType}
@@ -57,6 +69,7 @@ export function makeItem(params: {} = {}): ItemType {
     active: false,
     loaded: false,
     labels: [], // list of label ids
+    viewerConfig: {},
     ...params,
   };
 }

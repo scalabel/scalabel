@@ -1,31 +1,36 @@
-import {ImageBaseViewer} from './image_base_viewer';
+import {BaseViewer2D} from './image_base_viewer';
+import {BaseController} from '../controllers/base_controller';
+import Session from '../common/session';
 
 /**
  * Image viewer Class
  */
-export class ImageViewer extends ImageBaseViewer {
+export class ImageViewer extends BaseViewer2D {
   /**
-   * @param {Object} store
-   * @param {Array<Image>} images
+   * @param {BaseController} controller
    * @constructor
    */
-  constructor(store: Object, images: Array<Image>) {
-    super(store, images, 'image_canvas');
+  constructor(controller: BaseController) {
+    super(controller, 'image_canvas');
   }
   /**
-   * @param {number} index: item index
    * Redraw the image canvas.
+   * @return {boolean}: whether redraw is successful
    */
-  redraw() {
-    let index = this.getActiveItem();
-    let image = this.images[index];
+  redraw(): boolean {
+    // TODO: should support lazy drawing
+    if (!super.redraw()) {
+      return false;
+    }
+    let item = this.getCurrentItem();
+    let image = Session.images[item.index];
     // update the padding box
-    this.padBox = this._getPadding();
+    let padBox = this._getPadding();
     // draw stuff
-    this.ctx.clearRect(0, 0, this.padBox.w,
-      this.padBox.h);
-    this.ctx.drawImage(image, 0, 0, image.width, image.height,
-      this.padBox.x, this.padBox.y, this.padBox.w, this.padBox.h);
+    this.context.clearRect(0, 0, padBox.w, padBox.h);
+    this.context.drawImage(image, 0, 0, image.width, image.height,
+      padBox.x, padBox.y, padBox.w, padBox.h);
+    return true;
   }
 }
 

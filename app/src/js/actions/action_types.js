@@ -1,9 +1,13 @@
 // SAT specific actions
-// seperate into activate and deactivate?
+// separate into activate and deactivate?
 // no need if the two are always called together
 export const INIT_SESSION = 'INIT_SESSION';
 export const NEW_ITEM = 'NEW_ITEM'; // no delete item
 export const GO_TO_ITEM = 'GO_TO_ITEM';
+export const LOAD_ITEM = 'LOAD_ITEM';
+export const UPDATE_ALL = 'UPDATE_ALL';
+
+export const IMAGE_ZOOM = 'IMAGE_ZOOM';
 
 // Item Level
 export const NEW_LABEL = 'NEW_LABEL';

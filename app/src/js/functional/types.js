@@ -32,6 +32,17 @@ export type CubeType = {
   orientation: Array<number>
 };
 
+export type ImageViewerConfigType = {
+  imageWidth: number,
+  imageHeight: number,
+  viewScale: number
+};
+
+export type PointCloudViewerConfigType = {
+};
+
+export type ViewerConfigType = Object;
+
 export type ItemType = {
   id: number,
   index: number,
@@ -39,6 +50,7 @@ export type ItemType = {
   active: boolean,
   loaded: boolean,
   labels: Array<number>, // list of label ids
+  viewerConfig: ViewerConfigType
 };
 
 /*

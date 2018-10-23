@@ -2,6 +2,7 @@
 import {makeState} from '../functional/states';
 import * as types from '../actions/action_types';
 import * as common from '../functional/common';
+import * as image from '../functional/image';
 import * as tag from '../functional/tag';
 import type {StateType} from '../functional/types';
 
@@ -26,6 +27,12 @@ export default function(
       return common.newItem(state, action.createItem, action.url);
     case types.GO_TO_ITEM:
       return common.goToItem(state, action.index);
+    case types.LOAD_ITEM:
+      return common.loadItem(state, action.index, action.config);
+    case types.UPDATE_ALL:
+      return common.updateAll(state);
+    case types.IMAGE_ZOOM:
+      return image.zoomImage(state, action.ratio);
     case types.NEW_LABEL:
       return common.newLabel(state, action.itemId,
           action.createLabel, action.optionalAttributes);

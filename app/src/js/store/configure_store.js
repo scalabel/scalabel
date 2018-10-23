@@ -7,6 +7,7 @@ import {
 // SAT specific actions
   NEW_ITEM,
   GO_TO_ITEM,
+  IMAGE_ZOOM,
   NEW_LABEL,
   DELETE_LABEL,
   TAG_IMAGE,
@@ -28,6 +29,7 @@ const configureStore = (json: Object = {}, devMode: boolean = false) => {
       // undoable actions
       NEW_ITEM,
       GO_TO_ITEM,
+      IMAGE_ZOOM,
       NEW_LABEL,
       DELETE_LABEL,
       TAG_IMAGE,
