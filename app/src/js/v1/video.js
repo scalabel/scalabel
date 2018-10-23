@@ -378,11 +378,23 @@ Track.prototype.interpolate = function(startLabel) {
   for (let i = 0; i < self.children.length; i++) {
     if (self.children[i].id === startLabel.id) {
       startIndex = i;
-    } else if (startIndex && !nextKeyFrameIndex && self.children[i].keyframe) {
-      nextKeyFrameIndex = i;
+      break;
     }
-    if (!startIndex && self.children[i].keyframe) {
-      priorKeyFrameIndex = i;
+  }
+  // find prior key frame index
+  if (startIndex > 0) {
+    for (let i = startIndex - 1; i >= 0; i--) {
+      if (self.children[i].keyframe) {
+        priorKeyFrameIndex = i;
+        break;
+      }
+    }
+  }
+  // find next key frame index
+  for (let i = startIndex + 1; i < self.children.length; i++) {
+    if (self.children[i].keyframe) {
+      nextKeyFrameIndex = i;
+      break;
     }
   }
   self.interpolateHandler(startLabel, startIndex, priorKeyFrameIndex,
@@ -393,12 +405,14 @@ Track.prototype.linearInterpolate = function(startLabel, startIndex,
                                              priorKeyFrameIndex,
                                              nextKeyFrameIndex) {
   let self = this;
-  // interpolate between the beginning of the track and the starting label
-  for (let i = priorKeyFrameIndex + 1; i < startIndex; i++) {
-    let weight = (i - priorKeyFrameIndex) / (startIndex - priorKeyFrameIndex);
-    self.children[i].interpolateHandler(self.children[priorKeyFrameIndex],
-        startLabel, weight);
-    self.children[i].attributes = startLabel.attributes;
+  if (priorKeyFrameIndex !== null) {
+    // interpolate between the beginning of the track and the starting label
+    for (let i = priorKeyFrameIndex + 1; i < startIndex; i++) {
+      let weight = (i - priorKeyFrameIndex) / (startIndex - priorKeyFrameIndex);
+      self.children[i].interpolateHandler(self.children[priorKeyFrameIndex],
+          startLabel, weight);
+      self.children[i].attributes = startLabel.attributes;
+    }
   }
   if (nextKeyFrameIndex) {
     // if there is a later keyframe, interpolate

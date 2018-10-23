@@ -114,15 +114,10 @@ Seg2d.prototype.completeDrawing = function() {
   }
 };
 
-Seg2d.prototype.identityInterpolation = function(startLabel, endLabel, weight) { // eslint-disable-line
+Seg2d.prototype.identityInterpolation = function(startLabel,
+      startIndex, priorKeyFrameIndex, nextKeyFrameIndex) { // eslint-disable-line
   this.deleteAllPolyline();
-  let targetLabel;
-  if (startLabel) {
-    targetLabel = startLabel;
-  } else {
-    targetLabel = endLabel;
-  }
-  for (let poly of targetLabel.polys) {
+  for (let poly of startLabel.polys) {
     this.addShape(poly.copy());
   }
   this.setState(SegStates.FREE);
