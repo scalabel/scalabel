@@ -196,7 +196,7 @@ SatVideo.prototype.linkTracks = function() {
     for (let frame = 0; frame < this.items.length; frame++) {
       let occupiedFrameTrack = null;
       for (let label of this.items[frame].labels) {
-        if (trackIds.has(label.getRoot().id)) {
+        if (trackIds.has(label.getRoot().id) && label.valid) {
           if (occupiedFrameTrack === null) {
             occupiedFrameTrack = label;
           } else {
