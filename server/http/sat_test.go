@@ -53,7 +53,7 @@ func Test(test *testing.T) {
 	_, err := session.NewSession()
 	if err == nil {
 		storage = &S3Storage{}
-		err := storage.Init("scalabel")
+		err := storage.Init("us-west-1:scalabel/travis")
 		if err != nil {
 			test.Fatal(err)
 		}
