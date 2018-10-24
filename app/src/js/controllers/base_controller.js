@@ -1,5 +1,6 @@
 import {BaseViewer} from '../viewers/base_viewer';
 import Session from '../common/session';
+import type {StateType} from '../functional/types';
 
 /**
  * Basic controller
@@ -30,5 +31,21 @@ export class BaseController {
     for (let viewer of this.viewers) {
       viewer.updateState(Session.getState());
     }
+  }
+
+  /**
+   * Dispatch actions from controllers
+   * @param {Object} action
+   */
+  dispatch(action: Object): void {
+    Session.dispatch(action);
+  }
+
+  /**
+   * Wrapper function for session getState
+   * @return {StateType}
+   */
+  getState(): StateType {
+    return Session.getState();
   }
 }

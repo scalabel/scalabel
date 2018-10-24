@@ -27,15 +27,15 @@ export class TitleBarViewer extends BaseViewer {
     // buttons
     let prevBtn = document.getElementById('prev_btn');
     if (prevBtn) {
-      prevBtn.onclick = TitleBarController.goToPreviousItem;
+      prevBtn.onclick = controller.goToPreviousItem.bind(controller);
     }
     let nextBtn = document.getElementById('next_btn');
     if (nextBtn) {
-      nextBtn.onclick = TitleBarController.goToNextItem;
+      nextBtn.onclick = controller.goToNextItem.bind(controller);
     }
     let saveBtn = document.getElementById('save-btn');
     if (saveBtn) {
-      saveBtn.onclick = TitleBarController.save;
+      saveBtn.onclick = controller.save.bind(controller);
     }
   }
 

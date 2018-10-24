@@ -1,4 +1,4 @@
-import {Toolbox} from '../controllers/toolbox_controller';
+import {ToolboxController} from '../controllers/toolbox_controller';
 import {TitleBarController} from '../controllers/title_bar_controller';
 import {ImageViewer} from '../viewers/image_viewer';
 import {TagViewer} from '../viewers/tag_viewer';
@@ -59,7 +59,6 @@ class Session {
     // TODO: refactor the general initialization code to a general init()
     store.dispatch({type: types.INIT_SESSION});
     window.store = store;
-    new Toolbox(store);
     let imageController = new BaseController();
     let tagController = new BaseController();
     let imageViewer: ImageViewer = new ImageViewer(imageController);
@@ -68,11 +67,12 @@ class Session {
     // TODO: change this to viewer controller design
     let titleBarController: TitleBarController = new TitleBarController();
     let titleBarViewer: TitleBarViewer = new TitleBarViewer(titleBarController);
-    let toolboxViewer: ToolboxViewer = new ToolboxViewer(store);
-    toolboxViewer.init();
+    let toolboxController: ToolboxController = new ToolboxController();
+    let toolboxViewer: ToolboxViewer = new ToolboxViewer(toolboxController);
 
-    this.controllers = [imageController, tagController, titleBarController];
-    this.viewers = [imageViewer, tagViewer, titleBarViewer];
+    this.controllers = [imageController, tagController, titleBarController,
+      toolboxController];
+    this.viewers = [imageViewer, tagViewer, titleBarViewer, toolboxViewer];
 
     for (let c of this.controllers) {
       store.subscribe(c.onStateUpdated.bind(c));
