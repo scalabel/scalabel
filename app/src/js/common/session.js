@@ -1,5 +1,5 @@
 import {Toolbox} from '../controllers/toolbox_controller';
-import {PageControl} from '../controllers/page_controller';
+import {TitleBarController} from '../controllers/title_bar_controller';
 import {ImageViewer} from '../viewers/image_viewer';
 import {TagViewer} from '../viewers/tag_viewer';
 import {TitleBarViewer} from '../viewers/title_bar_viewer';
@@ -43,6 +43,14 @@ class Session {
   }
 
   /**
+   * Wrapper for redux store dispatch
+   * @param {Object} action
+   */
+  dispatch(action: Object): void {
+    this.store.dispatch(action);
+  }
+
+  /**
    * Initialize tagging interface
    * @param {Object} store
    */
@@ -52,20 +60,19 @@ class Session {
     store.dispatch({type: types.INIT_SESSION});
     window.store = store;
     new Toolbox(store);
-    new PageControl(store);
     let imageController = new BaseController();
     let tagController = new BaseController();
     let imageViewer: ImageViewer = new ImageViewer(imageController);
     let tagViewer: TagViewer = new TagViewer(tagController);
 
     // TODO: change this to viewer controller design
-    let titleBarViewer: TitleBarViewer = new TitleBarViewer(store);
+    let titleBarController: TitleBarController = new TitleBarController();
+    let titleBarViewer: TitleBarViewer = new TitleBarViewer(titleBarController);
     let toolboxViewer: ToolboxViewer = new ToolboxViewer(store);
-    titleBarViewer.init();
     toolboxViewer.init();
 
-    this.controllers = [imageController, tagController];
-    this.viewers = [imageViewer, tagViewer];
+    this.controllers = [imageController, tagController, titleBarController];
+    this.viewers = [imageViewer, tagViewer, titleBarViewer];
 
     for (let c of this.controllers) {
       store.subscribe(c.onStateUpdated.bind(c));

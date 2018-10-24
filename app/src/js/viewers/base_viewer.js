@@ -8,12 +8,12 @@ import {makeState} from '../functional/states';
 export class BaseViewer {
   // TODO: support temporary objects
   state: StateType;
-  controller: BaseController;
+  controller: $Subtype<BaseController>;
   /**
    * General viewer constructor to initialize the viewer state
    * @param {BaseController} controller: controller object to listen to events
    */
-  constructor(controller: BaseController) {
+  constructor(controller: $Subtype<BaseController>) {
     this.state = makeState();
     this.controller = controller;
     controller.addViewer(this);

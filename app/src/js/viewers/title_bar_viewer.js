@@ -1,24 +1,20 @@
 import {sprintf} from 'sprintf-js';
+import Session from '../common/session.js';
+import {BaseViewer} from './base_viewer';
+import {TitleBarController} from '../controllers/title_bar_controller';
 
 /**
  * TitleBarViewer class
  * Currently only responsible for counting labels
  */
-export class TitleBarViewer {
-  store: Object;
+export class TitleBarViewer extends BaseViewer {
   /**
-   * @param {Object} store
+   * @param {TitleBarController} controller
    * @constructor
    */
-  constructor(store: Object) {
-    this.store = store;
-  }
-
-  /**
-   * initialize viewer
-   */
-  init() {
-    if (this.store.getState().present.config.labelType === 'tag') {
+  constructor(controller: TitleBarController) {
+    super(controller);
+    if (Session.getState().config.labelType === 'tag') {
       let labelCountTitle = document.getElementById('label-count-title');
       if (labelCountTitle) {
         labelCountTitle.style.visibility = 'hidden';
@@ -27,22 +23,37 @@ export class TitleBarViewer {
       if (labelCount) {
         labelCount.style.visibility = 'hidden';
       }
-    } else {
-      this.store.subscribe(this.redraw.bind(this));
+    }
+    // buttons
+    let prevBtn = document.getElementById('prev_btn');
+    if (prevBtn) {
+      prevBtn.onclick = TitleBarController.goToPreviousItem;
+    }
+    let nextBtn = document.getElementById('next_btn');
+    if (nextBtn) {
+      nextBtn.onclick = TitleBarController.goToNextItem;
+    }
+    let saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+      saveBtn.onclick = TitleBarController.save;
     }
   }
 
   /**
-   * @param {number} index: item index
    * Redraw the image canvas.
+   * @return {boolean}
    */
-  redraw() {
-    let state = this.store.getState().present;
+  redraw(): boolean {
+    if (!super.redraw()) {
+      return false;
+    }
+    let state = this.state;
     let currItem = state.current.item;
     let numLabels = state.items[currItem].labels.length;
     let labelCount = document.getElementById('label-count');
     if (labelCount) {
-      labelCount.textContent = sprintf('%s', numLabels);
+      labelCount.textContent = sprintf('%d', numLabels);
     }
+    return true;
   }
 }
