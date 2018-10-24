@@ -122,8 +122,11 @@
         <span class="badge badge-pill badge-light counter" id="label-count">0</span>
       </div>
       <div style="position: absolute; float:right; right: 40px;">
-          <span class="navbar-small" id="page-count-title" style="padding-left: 20px">Page </span>
-          <span class="badge badge-pill badge-light counter" id="page-count">0</span>
+          <span class="navbar-small" id="page-count-title" style="padding-left: 20px">Item </span>
+          <span class="badge badge-pill badge-light counter" style="padding-right:10px;">
+            <span id="page-count" contenteditable="true">0</span>
+            <span id="total-page-count">/</span>
+          </span>
           <div style="padding-left: 10px" class="btn-group">
               <button id="increase-button" class="btn btn-raised btn-secondary btn-regular">
                 <i class="fas fa-plus"></i>
@@ -140,9 +143,9 @@
                   <i class="fas fa-chevron-right"></i>
               </button>
           </div>
-          <a style="left: 20px" href="#" id="save-btn"
+          <a style="left: 10px;" href="#" id="save-btn"
              class="btn btn-raised btn-primary btn-regular">Save</a>
-          <a style="left: 20px" href="#" id="submit-btn"
+          <a style="left: 10px;" href="#" id="submit-btn"
                        class="btn btn-raised btn-primary btn-regular">Submit</a>
   </div>
   </p>

@@ -202,9 +202,6 @@ SatImage.prototype.updateLabelCount = function() {
     }
   }
   document.getElementById('label-count').textContent = sprintf('%s', numLabels);
-  document.getElementById('page-count').textContent =
-    sprintf('%s/%s', (this.index + 1) % this.sat.items.length,
-        this.sat.items.length);
 };
 
 /**
@@ -368,6 +365,22 @@ SatImage.prototype.setActive = function(active) {
       };
     }
 
+    document.getElementById('page-count').onkeypress = function(e) {
+      let keyId = e.KeyCode ? e.KeyCode : e.which;
+      if (keyId === 13) {
+        e.preventDefault();
+        // Enter pressed
+        let index = parseInt(document.getElementById('page-count').textContent);
+        if (isNaN(index) || index < 1 || index > self.sat.items.length) {
+          alert('Please enter a valid index!');
+          document.getElementById('page-count').textContent = self.index + 1;
+        } else {
+          self.sat.gotoItem(index - 1);
+        }
+        this.blur();
+      }
+    };
+
     // buttons
     document.getElementById('prev_btn').onclick = function() {
       self._prevHandler();
@@ -481,6 +494,12 @@ SatImage.prototype.setActive = function(active) {
   } else {
     self.resetHiddenMapToDefault();
   }
+
+  // image counter
+  document.getElementById('page-count').textContent =
+      sprintf('%s', (this.index) % this.sat.items.length + 1);
+  document.getElementById('total-page-count').textContent =
+      sprintf('/ %s', this.sat.items.length);
 
   self.redraw();
   self.updateLabelCount();
