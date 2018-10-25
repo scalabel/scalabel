@@ -12,6 +12,7 @@ import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 import {BaseController} from '../controllers/base_controller';
 import {BaseViewer} from '../viewers/base_viewer';
+import configureStore from '../store/configure_store';
 
 /**
  * Singleton session class
@@ -23,6 +24,7 @@ class Session {
   labelType: string;
   controllers: Array<BaseController>;
   viewers: Array<BaseViewer>;
+  devMode: boolean;
 
   /**
    * no-op for state initialization
@@ -32,6 +34,8 @@ class Session {
     this.images = [];
     this.controllers = [];
     this.viewers = [];
+    // TODO: make it configurable in the url
+    this.devMode = true;
   }
 
   /**
@@ -51,14 +55,30 @@ class Session {
   }
 
   /**
-   * Initialize tagging interface
-   * @param {Object} store
+   * Wrapper for redux store subscribe
+   * @param {function} func: callback function on state chnage.
    */
-  initImageTagging(store: Object): void {
-    this.store = store;
-    // TODO: refactor the general initialization code to a general init()
-    store.dispatch({type: types.INIT_SESSION});
-    window.store = store;
+  subscribe(func: () => void) {
+    this.store.subscribe(func);
+  }
+
+  /**
+   * Intialize state store
+   * @param {Object} stateJson
+   */
+  initStore(stateJson: Object): void {
+    this.store = configureStore(stateJson, this.devMode);
+    this.store.dispatch({type: types.INIT_SESSION});
+    window.store = this.store;
+  }
+
+  /**
+   * Initialize tagging interface
+   * @param {Object} stateJson
+   */
+  initImageTagging(stateJson: Object): void {
+    let self = this;
+    this.initStore(stateJson);
     let imageController = new BaseController();
     let tagController = new BaseController();
     let imageViewer: ImageViewer = new ImageViewer(imageController);
@@ -75,10 +95,10 @@ class Session {
     this.viewers = [imageViewer, tagViewer, titleBarViewer, toolboxViewer];
 
     for (let c of this.controllers) {
-      store.subscribe(c.onStateUpdated.bind(c));
+      self.subscribe(c.onStateUpdated.bind(c));
     }
 
-    this.loadImages(store.getState().present.items);
+    self.loadImages();
 
     // TODO: Refactor into a single registration function that takes a list of
     // TODO: viewers and establish direct interactions that do not impact store
@@ -87,30 +107,30 @@ class Session {
       // imageViewer.redraw();
       // tagViewer.setScale(tagViewer.scale);
       // tagViewer.redraw();
-      store.dispatch({type: types.UPDATE_ALL});
+      self.dispatch({type: types.UPDATE_ALL});
     };
 
     // TODO: move to TitleBarViewer
     let increaseButton = document.getElementById('increase-button');
     if (increaseButton) {
       increaseButton.onclick = function() {
-        store.dispatch({type: types.IMAGE_ZOOM, ratio: 1.05});
+        self.dispatch({type: types.IMAGE_ZOOM, ratio: 1.05});
       };
     }
     let decreaseButton = document.getElementById('decrease-button');
     if (decreaseButton) {
       decreaseButton.onclick = function() {
-        store.dispatch({type: types.IMAGE_ZOOM, ratio: 1.0 / 1.05});
+        self.dispatch({type: types.IMAGE_ZOOM, ratio: 1.0 / 1.05});
       };
     }
   }
 
   /**
    * Load all the images in the state
-   * @param {Array<ItemType>} items
    */
-  loadImages(items: Array<ItemType>): void {
+  loadImages(): void {
     let self = this;
+    let items = this.getState().items;
     for (let i = 0; i < items.length; i++) {
       let item: ItemType = items[i];
       // Copy item config

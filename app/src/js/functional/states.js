@@ -109,6 +109,7 @@ export function makeSatCurrent(params: {} = {}): CurrentType {
   return {
     item: -1,
     label: -1,
+    shape: -1,
     maxObjectId: -1,
     ...params,
   };

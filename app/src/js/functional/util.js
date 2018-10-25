@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 
 // TODO: need a deep merge? i.e. to update below:
 // state.items[itemId].attributes[attributeId].selectedIndex
@@ -52,4 +53,39 @@ export function updateListItems<T>(
  */
 export function addListItem<T>(items: Array<T>, item: T): Array<T> {
   return items.concat([item]);
+}
+
+/**
+ * Remove fields from an object
+ * @param {T} object
+ * @param {Array<any>} fields
+ * @return {T}
+ */
+export function removeObjectFields<T>(object: T, fields: Array<any>): T {
+  object = {...object};
+  for (let f of fields) {
+    delete object[f];
+  }
+  return object;
+}
+
+/**
+ * remove list items by item id
+ * @param {Array<T>} items
+ * @param {Array<number>} ids
+ * @return {Array<T>}
+ */
+export function removeListItemsById<T: {id: number}>(
+    items: Array<T>, ids: Array<number>): Array<T> {
+  return fp.remove((item: T) => fp.indexOf(item.id, ids) >= 0)(items);
+}
+
+/**
+ * Remove list items by equivalence
+ * @param {Array<T>} items
+ * @param {Array<T>} a
+ * @return {Array<T>}
+ */
+export function removeListItems<T>(items: Array<T>, a: Array<T>): Array<T> {
+  return fp.remove((item) => fp.indexOf(item, a) >= 0, items);
 }

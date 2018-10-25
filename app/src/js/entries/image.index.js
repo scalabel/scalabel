@@ -1,7 +1,6 @@
 import $ from 'jquery';
 // $FlowFixMe
 import 'bootstrap-material-design';
-import configureStore from '../store/configure_store';
 import Session from '../common/session.js';
 
 declare var labelType: String;
@@ -28,18 +27,12 @@ $(document).ready(function() {
     // itemClass = SatImage;
     $('#player-controls').remove();
   }
-
-  // TODO: make it configurable in the url
-  let devMode = true;
-
   // collect store from server
-  let store = {};
   let xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
       let json = JSON.parse(xhr.response);
-      store = configureStore(json, devMode);
-      Session.initImageTagging(store);
+      Session.initImageTagging(json);
     }
   };
   // get params from url path. These uniquely identify a SAT.

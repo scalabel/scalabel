@@ -1,6 +1,8 @@
-
 import type {ItemType, LabelType, StateType, ViewerConfigType} from './types';
-import {updateListItem, updateListItems, updateObject} from './util';
+import {
+  removeListItems, removeObjectFields, updateListItem, updateListItems,
+  updateObject,
+} from './util';
 
 /**
  * Initialize state
@@ -119,13 +121,32 @@ export function loadItem(state: StateType, itemIndex: number,
 /**
  * Delete given label
  * @param {StateType} state
- * @param {number} ignoredItemId
- * @param {number} ignoredLabelId
+ * @param {number} itemIndex
+ * @param {number} labelId
  * @return {StateType}
  */
-export function deleteLabel(state: StateType, ignoredItemId: number,
-                            ignoredLabelId: number): StateType {
-  return state;
+export function deleteLabel(state: StateType, itemIndex: number,
+                            labelId: number): StateType {
+  // TODO: should we remove shapes?
+  // depending on how boundary sharing is implemented.
+
+  // remove labels
+  let labels = removeObjectFields(state.labels, [labelId.toString()]);
+  let items = state.items;
+  if (itemIndex >= 0) {
+    let item = items[itemIndex];
+    items = updateListItem(items, itemIndex,
+        updateObject(item,
+            {labels: removeListItems(item.labels, [labelId])}));
+  }
+
+  // Reset selected object
+  let current = state.current;
+  if (current.label === labelId) {
+    current = updateObject(current, {label: -1});
+  }
+  return updateObject(
+      state, {current: current, labels: labels, items: items});
 }
 
 /**

@@ -80,8 +80,9 @@ export type ConfigType = {
   The current state of Sat.
  */
 export type CurrentType = {
-  item: number,
-  label: number,
+  item: number, // currently viewed item
+  label: number, // currently selected label
+  shape: number, // currently selected shape
   maxObjectId: number,
 };
 
@@ -89,7 +90,7 @@ export type StateType = {
   config: ConfigType,
   current: CurrentType,
   items: Array<ItemType>,
-  labels: {[number]: LabelType}, // Map from label id to label
+  labels: {[number]: LabelType}, // Map from label id string to label
   tracks: {[number]: LabelType},
   shapes: {[number]: RectType | CubeType},
   actions: Array<any>,
