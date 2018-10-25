@@ -284,9 +284,8 @@ func countLabelsInTask(projectName string, index int) int {
 func taskSubmitted(projectName string, index int) bool {
 	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
 	if err != nil {
-        Error.Println(err)
-        return false
-    }
+		return false
+	}
 	return assignment.Task.ProjectOptions.Submitted
 }
 

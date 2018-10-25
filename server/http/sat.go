@@ -21,9 +21,9 @@ import (
 
 //implements Serializable
 type Project struct {
-	Items    []Item         `json:"items" yaml"items"`
-	VendorId int            `json:"vendorId" yaml:"vendorId"`
-	Options  ProjectOptions `json:"options" yaml:"options"`
+	Items    map[string][]Item `json:"items" yaml"items"`
+	VendorId int               `json:"vendorId" yaml:"vendorId"`
+	Options  ProjectOptions    `json:"options" yaml:"options"`
 }
 
 func (project *Project) GetKey() string {
@@ -43,6 +43,7 @@ type Task struct {
 	ProjectOptions ProjectOptions `json:"projectOptions" yaml:"projectOptions"`
 	Index          int            `json:"index" yaml:"index"`
 	Items          []Item         `json:"items" yaml:"items"`
+	NumFrames      int            `json:"numFrames" yaml:"numFrames"`
 }
 
 func (task *Task) GetKey() string {
@@ -54,6 +55,7 @@ func (task *Task) GetFields() map[string]interface{} {
 		"ProjectOptions": task.ProjectOptions,
 		"Index":          task.Index,
 		"Items":          task.Items,
+		"NumFrames":      task.NumFrames,
 	}
 }
 
@@ -303,9 +305,10 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// parse the attribute list YML from form
 	attributes := getAttributesFromProjectForm(r)
 	// import items and corresponding labels
-	items := getItemsFromProjectForm(r, attributes)
+	itemLists := getItemsFromProjectForm(r, attributes)
 	if itemType == "video" {
-		videoMetaData.NumFrames = strconv.Itoa(len(items))
+		//this field should no longer be used, NumFrames is now stored in Task
+		//videoMetaData.NumFrames = strconv.Itoa(len(items))
 	}
 	// get the task size from form
 	var taskSize int
@@ -321,6 +324,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if itemType == "pointcloud" || itemType == "pointcloudtracking" {
+		items := itemLists[" "] // assume there is only one image list
 		for i := 0; i < len(items); i++ {
 			coeffs, err := parsePLYForGround(items[i].Url)
 			if err == nil {
@@ -380,7 +384,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Submitted:         false,
 	}
 	var project = Project{
-		Items:    items,
+		Items:    itemLists,
 		VendorId: vendorId,
 		Options:  projectOptions,
 	}
@@ -699,8 +703,8 @@ func getAttributesFromProjectForm(r *http.Request) []Attribute {
 }
 
 // load label json file
-func getItemsFromProjectForm(r *http.Request, attributes []Attribute) []Item {
-	var items []Item
+func getItemsFromProjectForm(r *http.Request, attributes []Attribute) map[string][]Item {
+	itemLists := make(map[string][]Item) //map[string][]Item
 	var itemsImport []ItemExport
 	importFile, header, err := r.FormFile("item_file")
 
@@ -721,10 +725,13 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) []Item {
 		if err != nil {
 			Error.Println(err)
 		}
-		for i, itemImport := range itemsImport {
+
+		//to seperate indexes by videoName. This also initializes indexes to 0.
+		indexes := make(map[string]int)
+		for _, itemImport := range itemsImport {
 			item := Item{}
 			item.Url = itemImport.Url
-			item.Index = i
+			item.Index = indexes[itemImport.VideoName]
 			// load item attributes if needed
 			if len(itemImport.Attributes) > 0 {
 				item.Attributes = map[string][]int{}
@@ -750,7 +757,12 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) []Item {
 			if len(itemImport.Labels) > 0 {
 				item.LabelImport = itemImport.Labels
 			}
-			items = append(items, item)
+			if itemImport.VideoName == "" {
+				itemLists[" "] = append(itemLists[" "], item)
+			} else {
+				itemLists[itemImport.VideoName] = append(itemLists[itemImport.VideoName], item)
+			}
+			indexes[itemImport.VideoName] += 1
 		}
 
 	case http.ErrMissingFile:
@@ -759,31 +771,37 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) []Item {
 	default:
 		Error.Println(err)
 	}
-	return items
+	return itemLists
 }
 
 func CreateTasks(project Project) {
 	index := 0
 	if project.Options.ItemType == "video" {
-		// if the project is on video, only make 1 task
-		task := Task{
-			ProjectOptions: project.Options,
-			Index:          0,
-			Items:          project.Items,
-		}
-		index = 1
-		err := storage.Save(task.GetKey(), task.GetFields())
-		if err != nil {
-			Error.Println(err)
-		}
-	} else {
-		// otherwise, make as many tasks as required
-		size := len(project.Items)
-		for i := 0; i < size; i += project.Options.TaskSize {
+		for _, itemList := range project.Items {
 			task := Task{
 				ProjectOptions: project.Options,
 				Index:          index,
-				Items:          project.Items[i:Min(i+project.Options.TaskSize, size)],
+				Items:          itemList,
+				NumFrames:      len(itemList),
+			}
+			index += 1
+			err := storage.Save(task.GetKey(), task.GetFields())
+			if err != nil {
+				Error.Println(err)
+			}
+		}
+
+	} else {
+		// otherwise, make as many tasks as required
+		items := project.Items[" "]
+		size := len(items)
+		for i := 0; i < size; i += project.Options.TaskSize {
+			itemsSlice := items[i:Min(i+project.Options.TaskSize, size)]
+			task := Task{
+				ProjectOptions: project.Options,
+				Index:          index,
+				Items:          itemsSlice,
+				NumFrames:      len(itemsSlice),
 			}
 			index = index + 1
 			err := storage.Save(task.GetKey(), task.GetFields())
