@@ -101,6 +101,7 @@ export function SatPointCloud(sat, index, url) {
   this.G_KEY = 71;
   this.ENTER_KEY = 13;
   this.DELETE_KEY = 8;
+  this.TAB_KEY = 9;
 
   this.STANDBY = 0;
   this.ADJUSTING = 1;
@@ -118,6 +119,7 @@ export function SatPointCloud(sat, index, url) {
   this.editState = this.MOVING_BOX;
 
   this.raycaster = new THREE.Raycaster();
+  this.raycaster.linePrecision = 0.1;
   this.boxMouseOver = null;
   this.boxMouseOverPoint = null;
 
@@ -355,15 +357,18 @@ SatPointCloud.prototype.zoom = function(amount) {
   let spherical = new THREE.Spherical();
   spherical.setFromVector3(offset);
 
-  spherical.radius *= 1 - amount;
+  let newRadius = (1 - amount) * spherical.radius;
+  if (newRadius > 0.1) {
+    spherical.radius = newRadius;
 
-  offset.setFromSpherical(spherical);
+    offset.setFromSpherical(spherical);
 
-  offset.add(this.target);
+    offset.add(this.target);
 
-  this.currentCamera.position.copy(offset);
+    this.currentCamera.position.copy(offset);
 
-  this.currentCamera.lookAt(this.target);
+    this.currentCamera.lookAt(this.target);
+  }
 };
 
 SatPointCloud.prototype.handleMouseWheel = function(e) {
@@ -439,6 +444,7 @@ SatPointCloud.prototype.handleMouseMove = function(e) {
           break;
         case this.SCALING_BOX:
           this.selectedLabel.scaleBox(
+              this.boxMouseOverPoint,
               this.currentCamera.position,
               this.calculateProjectionFromMouse(e.clientX, e.clientY),
           );
@@ -755,6 +761,7 @@ SatPointCloud.prototype.handleKeyDown = function(e) {
       this.deselect();
       break;
     case this.ENTER_KEY:
+    case this.TAB_KEY:
       if (this.selectionState == this.ADJUSTING) {
         this.selectedLabelNewBox = false;
         this.selectionState = this.STANDBY;

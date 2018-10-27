@@ -129,7 +129,8 @@ Box3d.prototype.moveBoxAlongViewPlane = function(
   }
 };
 
-Box3d.prototype.scaleBox = function(cameraPosition, projection) {
+Box3d.prototype.scaleBox = function(boxMouseOverPoint,
+                                    cameraPosition, projection) {
   let worldToModel = new THREE.Matrix4();
   worldToModel.getInverse(this.box.matrixWorld);
 
@@ -138,6 +139,11 @@ Box3d.prototype.scaleBox = function(cameraPosition, projection) {
   cameraPosModel.copy(cameraPosition);
   cameraPosModel.applyMatrix4(worldToModel);
 
+  // Get intersection point in model space
+  let intersectionPointModel = new THREE.Vector3();
+  intersectionPointModel.copy(boxMouseOverPoint);
+  intersectionPointModel.applyMatrix4(worldToModel);
+
   // Get projection from camera to world
   worldToModel.setPosition(new THREE.Vector3(0, 0, 0));
   projection.applyMatrix4(worldToModel);
@@ -145,6 +151,11 @@ Box3d.prototype.scaleBox = function(cameraPosition, projection) {
   // Adjust projection to go from camera position to either the top
   // or the bottom of the box, depending on which is closer
   let distToTop = -cameraPosModel.z;
+  if (intersectionPointModel.z > 0) {
+    distToTop += 0.5;
+  } else {
+    distToTop -= 0.5;
+  }
   let dist = distToTop / projection.z;
   projection.multiplyScalar(dist);
 
