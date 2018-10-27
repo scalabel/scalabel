@@ -20,14 +20,14 @@ export function createTagLabel(labelId: number, itemId: number,
  *Image tagging
  * @param {StateType} state
  * @param {number} itemId
- * @param {number} attributeName
+ * @param {number} attributeIndex
  * @param {number} attributeValue
  * @return {StateType}
  */
 export function tagImage(
-    state: StateType, itemId: number, attributeName: string,
+    state: StateType, itemId: number, attributeIndex: number,
     attributeValue: Array<number>): StateType {
-  let attributes = {[attributeName]: attributeValue};
+  let attributes = {[attributeIndex]: attributeValue};
   let item = state.items[itemId];
   if (item.labels.length > 0) {
     let labelId = item.labels[0];

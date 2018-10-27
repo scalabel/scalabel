@@ -158,7 +158,7 @@ func GetSat(projectName string, taskIndex string, workerId string) (Sat, error) 
 	keys := storage.ListKeys(submissionsPath)
 	// if any submissions exist, get the most recent one
 	if len(keys) > 0 {
-		Info.Printf("Readding %s\n", keys[len(keys)-1])
+		Info.Printf("Reading %s\n", keys[len(keys)-1])
 		fields, err := storage.Load(keys[len(keys)-1])
 		if err != nil {
 			return Sat{}, err
@@ -173,7 +173,7 @@ func GetSat(projectName string, taskIndex string, workerId string) (Sat, error) 
 	} else {
 		var assignment Assignment
 		assignmentPath := path.Join(projectName, "assignments", taskIndex, workerId)
-		Info.Printf("Readding %s\n", assignmentPath)
+		Info.Printf("Reading %s\n", assignmentPath)
 		fields, err := storage.Load(assignmentPath)
 		if err != nil {
 			return Sat{}, err

@@ -43,10 +43,9 @@ export class TagViewer extends BaseViewer2D {
     let abbr = [];
     let attributes = this.state.config.attributes;
     for (let i = 0; i < attributes.length; i++) {
-      let key = attributes[i].name;
-      if (activeTags && activeTags[key]) {
+      if (activeTags && activeTags[i]) {
         abbr.push(sprintf('  %s: %s', attributes[i].name,
-                          attributes[i].values[activeTags[key]]));
+                          attributes[i].values[activeTags[i]]));
       }
     }
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);

@@ -40,7 +40,7 @@ export default function(
       return common.deleteLabel(state, action.itemId, action.labelId);
     case types.TAG_IMAGE:
       return tag.tagImage(state, action.itemId,
-          action.attributeName, action.selectedIndex);
+          action.attributeIndex, action.selectedIndex);
     case types.CHANGE_ATTRIBUTE:
       return common.changeAttribute(state, action.labelId,
           action.attributeOptions);

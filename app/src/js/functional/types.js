@@ -3,7 +3,7 @@ export type LabelType = {
   id: number,
   item: number,
   category: Array<number>,
-  attributes: {[string]: Array<number>},
+  attributes: {[number]: Array<number>},
   parent: number,
   children: Array<number>,
   valid: boolean,

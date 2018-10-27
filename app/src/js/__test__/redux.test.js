@@ -68,24 +68,24 @@ describe('Sat Redux Tests', function() {
     store.dispatch({
       type: types.TAG_IMAGE,
       itemId: itemId,
-      attributeName: 'Weather', // Weather
+      attributeIndex: 0, // Weather
       selectedIndex: 2, // Snowy
     });
     state = store.getState().present;
-    expect(state.labels[itemId].attributes['Weather']).toBe(2);
+    expect(state.labels[itemId].attributes[0]).toBe(2);
     store.dispatch({
       type: types.TAG_IMAGE,
       itemId: state.current.item,
-      attributeName: 'Weather', // Weather
+      attributeIndex: 0, // Weather
       selectedIndex: 3, // Snowy
     });
     state = store.getState().present;
-    expect(state.labels[itemId].attributes['Weather']).toBe(3);
+    expect(state.labels[itemId].attributes[0]).toBe(3);
     store.dispatch(ActionCreators.undo());
     state = store.getState().present;
-    expect(state.labels[itemId].attributes['Weather']).toBe(2);
+    expect(state.labels[itemId].attributes[0]).toBe(2);
     store.dispatch(ActionCreators.redo());
     state = store.getState().present;
-    expect(state.labels[itemId].attributes['Weather']).toBe(3);
+    expect(state.labels[itemId].attributes[0]).toBe(3);
   });
 });
