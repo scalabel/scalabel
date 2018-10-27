@@ -111,13 +111,13 @@ class Session {
     };
 
     // TODO: move to TitleBarViewer
-    let increaseButton = document.getElementById('increase-button');
+    let increaseButton = document.getElementById('increase-btn');
     if (increaseButton) {
       increaseButton.onclick = function() {
         self.dispatch({type: types.IMAGE_ZOOM, ratio: 1.05});
       };
     }
-    let decreaseButton = document.getElementById('decrease-button');
+    let decreaseButton = document.getElementById('decrease-btn');
     if (decreaseButton) {
       decreaseButton.onclick = function() {
         self.dispatch({type: types.IMAGE_ZOOM, ratio: 1.0 / 1.05});

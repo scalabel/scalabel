@@ -131,14 +131,14 @@ export class BaseViewer2D extends BaseViewer {
     // handle buttons
     // TODO: This should be in TitleBarViewer
     if (config.viewScale >= this.MIN_SCALE * this.SCALE_RATIO) {
-      $('#decrease-button').prop('disabled', false);
+      $('#decrease-btn').prop('disabled', false);
     } else {
-      $('#decrease-button').prop('disabled', true);
+      $('#decrease-btn').prop('disabled', true);
     }
     if (config.viewScale <= this.MAX_SCALE / this.SCALE_RATIO) {
-      $('#increase-button').prop('disabled', false);
+      $('#increase-btn').prop('disabled', false);
     } else {
-      $('#increase-button').prop('disabled', true);
+      $('#increase-btn').prop('disabled', true);
     }
     // resize canvas
     let rectDiv = this.divCanvas.getBoundingClientRect();
