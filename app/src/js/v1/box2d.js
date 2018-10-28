@@ -454,16 +454,13 @@ Box2d.prototype.mousemove = function(e) {
   } else if (this.state === BoxStates.MOVE) {
     let dx = mousePos.x - this.mouseClickPos.x;
     let dy = mousePos.y - this.mouseClickPos.y;
-    // make moved box within padBox
-    let [padBoxX, padBoxY] = this.satItem.toImageCoords(
-        [this.satItem.padBox.x, this.satItem.padBox.y]);
-    let [padBoxW, padBoxH] = this.satItem.toImageCoords(
-        [this.satItem.padBox.w, this.satItem.padBox.h], false);
-
-    dx = Math.min(dx, (padBoxX + padBoxW - this.rect.w) - this.selectedCache.x);
-    dx = Math.max(dx, padBoxX - this.selectedCache.x);
-    dy = Math.min(dy, (padBoxY + padBoxH - this.rect.h) - this.selectedCache.y);
-    dy = Math.max(dy, padBoxY - this.selectedCache.y);
+    // make moved box within the canvas
+    dx = Math.min(dx, (this.satItem.image.width
+        - this.rect.w) - this.selectedCache.x);
+    dx = Math.max(dx, -this.selectedCache.x);
+    dy = Math.min(dy, (this.satItem.image.height
+        - this.rect.h) - this.selectedCache.y);
+    dy = Math.max(dy, -this.selectedCache.y);
 
     for (let i = 0; i < this.rect.vertices.length; i++) {
       this.rect.getVertex(i).x = this.selectedCache.getVertex(i).x + dx;

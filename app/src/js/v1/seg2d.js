@@ -1101,18 +1101,14 @@ Seg2d.prototype.mousemove = function(e) {
   } else if (this.state === SegStates.MOVE) {
     let dx = mousePos.x - this.mouseClickPos.x;
     let dy = mousePos.y - this.mouseClickPos.y;
-    // make moved box within padBox
-    let [padBoxX, padBoxY] = this.satItem.toImageCoords(
-      [this.satItem.padBox.x, this.satItem.padBox.y]);
-    let [padBoxW, padBoxH] = this.satItem.toImageCoords(
-      [this.satItem.padBox.w, this.satItem.padBox.h], false);
+    // make moved box within the canvas
 
     dx = Math.min(dx,
-      (padBoxX + padBoxW - this.bbox.w) - this.bbox.x);
-    dx = Math.max(dx, padBoxX - this.bbox.x);
+      (this.satItem.image.width - this.bbox.w) - this.bbox.x);
+    dx = Math.max(dx, -this.bbox.x);
     dy = Math.min(dy,
-      (padBoxY + padBoxH - this.bbox.h) - this.bbox.y);
-    dy = Math.max(dy, padBoxY - this.bbox.y);
+      (this.satItem.image.height - this.bbox.h) - this.bbox.y);
+    dy = Math.max(dy, -this.bbox.y);
 
     for (let i = 0; i < this.selectedShape.vertices.length; i++) {
       this.selectedShape.vertices[i].x = this.selectedCache.vertices[i].x + dx;

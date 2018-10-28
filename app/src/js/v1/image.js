@@ -209,21 +209,17 @@ SatImage.prototype.updateLabelCount = function() {
  * If affine, assumes values to be [x, y]. Otherwise
  * performs linear transformation.
  * @param {[number]} values - the values to convert.
- * @param {boolean} affine - whether or not this transformation is affine.
+ * @param {boolean} upRes - whether or not to apply UP_RES_RATIO.
  * @return {[number]} - the converted values.
  */
-SatImage.prototype.toCanvasCoords = function(values, affine = true) {
+SatImage.prototype.toCanvasCoords = function(values, upRes = true) {
   if (values) {
     for (let i = 0; i < values.length; i++) {
-      values[i] *= this.displayToImageRatio * UP_RES_RATIO;
+      values[i] *= this.displayToImageRatio;
+      if (upRes) {
+        values[i] *= UP_RES_RATIO;
+      }
     }
-  }
-  if (affine) {
-    if (!this.padBox) {
-      this.padBox = this._getPadding();
-    }
-    values[0] += this.padBox.x * UP_RES_RATIO;
-    values[1] += this.padBox.y * UP_RES_RATIO;
   }
   return values;
 };
@@ -233,17 +229,9 @@ SatImage.prototype.toCanvasCoords = function(values, affine = true) {
  * If affine, assumes values to be [x, y]. Otherwise
  * performs linear transformation.
  * @param {[number]} values - the values to convert.
- * @param {boolean} affine - whether or not this transformation is affine.
  * @return {[number]} - the converted values.
  */
-SatImage.prototype.toImageCoords = function(values, affine = true) {
-  if (affine) {
-    if (!this.padBox) {
-      this.padBox = this._getPadding();
-    }
-    values[0] -= this.padBox.x;
-    values[1] -= this.padBox.y;
-  }
+SatImage.prototype.toImageCoords = function(values) {
   if (values) {
     for (let i = 0; i < values.length; i++) {
       values[i] /= this.displayToImageRatio;
@@ -252,58 +240,118 @@ SatImage.prototype.toImageCoords = function(values, affine = true) {
   return values;
 };
 
+SatImage.prototype.getVisibleCanvasCoords = function() {
+  let imgRect = this.imageCanvas.getBoundingClientRect();
+  let divRect = this.divCanvas.getBoundingClientRect();
+  return [divRect.x - imgRect.x, divRect.y - imgRect.y];
+};
+
 /**
  * Set the scale of the image in the display
  * @param {number} scale
+ * @param {object} mouseOffset
  */
-SatImage.prototype.setScale = function(scale) {
+SatImage.prototype.setScale = function(scale, mouseOffset = null) {
   let self = this;
+  let upperLeftCoords;
+  let rectDiv = this.divCanvas.getBoundingClientRect();
+  if (scale > 1.0) {
+    upperLeftCoords = self.getVisibleCanvasCoords();
+    if (mouseOffset === null) {
+      mouseOffset = [
+        Math.min(rectDiv.width, self.imageCanvas.width) / 2,
+        Math.min(rectDiv.height, self.imageCanvas.height) / 2,
+      ];
+    } else {
+      mouseOffset = self.toCanvasCoords([mouseOffset.x, mouseOffset.y], false);
+      mouseOffset[0] -= upperLeftCoords[0];
+      mouseOffset[1] -= upperLeftCoords[1];
+    }
+  }
+
   // set scale
   if (scale >= self.MIN_SCALE && scale < self.MAX_SCALE) {
     let ratio = scale / self.scale;
     self.imageCtx.scale(ratio, ratio);
     self.labelCtx.scale(ratio, ratio);
     self.hiddenCtx.scale(ratio, ratio);
-    self.scale = scale;
   } else {
     return;
   }
   // handle buttons
-  if (self.scale >= self.MIN_SCALE * self.SCALE_RATIO) {
+  if (scale >= self.MIN_SCALE * self.SCALE_RATIO) {
     $('#decrease-btn').attr('disabled', false);
   } else {
     $('#decrease-btn').attr('disabled', true);
   }
-  if (self.scale <= self.MAX_SCALE / self.SCALE_RATIO) {
+  if (scale <= self.MAX_SCALE / self.SCALE_RATIO) {
     $('#increase-btn').attr('disabled', false);
   } else {
     $('#increase-btn').attr('disabled', true);
   }
   // resize canvas
-  let rectDiv = this.divCanvas.getBoundingClientRect();
-  self.imageCanvas.style.height =
-      Math.round(rectDiv.height * self.scale) + 'px';
-  self.imageCanvas.style.width =
-      Math.round(rectDiv.width * self.scale) + 'px';
-  self.labelCanvas.style.height =
-      Math.round(rectDiv.height * self.scale) + 'px';
-  self.labelCanvas.style.width =
-      Math.round(rectDiv.width * self.scale) + 'px';
-  self.hiddenCanvas.style.height =
-      Math.round(rectDiv.height * self.scale) + 'px';
-  self.hiddenCanvas.style.width =
-      Math.round(rectDiv.width * self.scale) + 'px';
+  let ratio = self.image.width / self.image.height;
 
-  self.imageCanvas.width = rectDiv.width * self.scale;
-  self.imageCanvas.height = rectDiv.height * self.scale;
-  self.hiddenCanvas.height =
-      Math.round(rectDiv.height * UP_RES_RATIO * self.scale);
-  self.hiddenCanvas.width =
-      Math.round(rectDiv.width * UP_RES_RATIO * self.scale);
-  self.labelCanvas.height =
-      Math.round(rectDiv.height * UP_RES_RATIO * self.scale);
-  self.labelCanvas.width =
-      Math.round(rectDiv.width * UP_RES_RATIO * self.scale);
+  let canvasHeight;
+  let canvasWidth;
+  if (rectDiv.width / rectDiv.height > ratio) {
+    canvasHeight = rectDiv.height * scale;
+    canvasWidth = canvasHeight * ratio;
+    self.displayToImageRatio = canvasHeight / self.image.height;
+  } else {
+    canvasWidth = rectDiv.width * scale;
+    canvasHeight = canvasWidth / ratio;
+    self.displayToImageRatio = canvasWidth / self.image.width;
+  }
+
+  // translate back to origin
+  if (mouseOffset) {
+    self.divCanvas.scrollTop = self.imageCanvas.offsetTop;
+    self.divCanvas.scrollLeft = self.imageCanvas.offsetLeft;
+  }
+
+  // set canvas resolution
+  self.imageCanvas.height = canvasHeight;
+  self.hiddenCanvas.height = canvasHeight * UP_RES_RATIO;
+  self.labelCanvas.height = canvasHeight * UP_RES_RATIO;
+  self.imageCanvas.width = canvasWidth;
+  self.hiddenCanvas.width = canvasWidth * UP_RES_RATIO;
+  self.labelCanvas.width = canvasWidth * UP_RES_RATIO;
+
+  // set canvas size
+  self.imageCanvas.style.height = canvasHeight + 'px';
+  self.imageCanvas.style.width = canvasWidth + 'px';
+  self.labelCanvas.style.height = canvasHeight + 'px';
+  self.labelCanvas.style.width = canvasWidth + 'px';
+  self.hiddenCanvas.style.height = canvasHeight + 'px';
+  self.hiddenCanvas.style.width = canvasWidth + 'px';
+
+  // set padding
+  self.padding = self._getPadding();
+  let padX = self.padding.x;
+  let padY = self.padding.y;
+
+  self.imageCanvas.style.left = padX + 'px';
+  self.imageCanvas.style.top = padY + 'px';
+  self.labelCanvas.style.left = padX + 'px';
+  self.labelCanvas.style.top = padY + 'px';
+  self.hiddenCanvas.style.left = padX + 'px';
+  self.hiddenCanvas.style.top = padY + 'px';
+
+  // zoom to point
+  if (mouseOffset) {
+    if (canvasWidth > rectDiv.width) {
+      self.divCanvas.scrollLeft =
+          scale / self.scale * (upperLeftCoords[0] + mouseOffset[0])
+          - mouseOffset[0];
+    }
+    if (canvasHeight > rectDiv.height) {
+      self.divCanvas.scrollTop =
+          scale / self.scale * (upperLeftCoords[1] + mouseOffset[1])
+          - mouseOffset[1];
+    }
+  }
+  self.scale = scale;
 };
 
 SatImage.prototype.loaded = function() {
@@ -327,14 +375,6 @@ SatImage.prototype.setActive = function(active) {
   let trackLinkBtn = $('#track_link_btn');
   if (active) {
     self.lastLabelID = -1;
-    self.padBox = self._getPadding();
-    for (let i = 0; i < self.sat.items.length; i++) {
-      self.sat.items[i].padBox = self.padBox;
-    }
-
-    self.hiddenCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
-    self.labelCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
-    self.setScale(1.0);
 
     // global listeners
     document.onkeydown = function(e) {
@@ -463,6 +503,10 @@ SatImage.prototype.setActive = function(active) {
       }
     }
 
+    self.hiddenCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
+    self.labelCtx.scale(UP_RES_RATIO, UP_RES_RATIO);
+    self.setScale(1.0);
+
     // class specific tool box
     self.sat.LabelType.setToolBox(self);
 
@@ -487,6 +531,8 @@ SatImage.prototype.setActive = function(active) {
         }
       }
     }
+    self.hiddenCtx.scale(1/UP_RES_RATIO, 1/UP_RES_RATIO);
+    self.labelCtx.scale(1/UP_RES_RATIO, 1/UP_RES_RATIO);
   }
   if (self.selectedLabel) {
     // refresh hidden map
@@ -591,13 +637,11 @@ SatImage.prototype.redraw = function() {
  */
 SatImage.prototype.redrawImageCanvas = function() {
   let self = this;
-  // update the padding box
-  self.padBox = self._getPadding();
   // draw stuff
-  self.imageCtx.clearRect(0, 0, self.padBox.w,
-      self.padBox.h);
+  self.imageCtx.clearRect(0, 0,
+      self.imageCanvas.width, self.imageCanvas.height);
   self.imageCtx.drawImage(self.image, 0, 0, self.image.width, self.image.height,
-      self.padBox.x, self.padBox.y, self.padBox.w, self.padBox.h);
+      0, 0, self.imageCanvas.width, self.imageCanvas.height);
 };
 
 /**
@@ -611,8 +655,8 @@ SatImage.prototype.redrawLabelCanvas = function() {
     self.selectedLabel = null;
   }
   self.labelCtx.clearRect(0, 0,
-      (2 * self.padBox.x + self.imageCanvas.width) * UP_RES_RATIO,
-      (2 * self.padBox.y + self.imageCanvas.height) * UP_RES_RATIO);
+      self.labelCanvas.width * UP_RES_RATIO,
+      self.labelCanvas.height * UP_RES_RATIO);
   for (let label of self.labels) {
     if (label.valid) {
       label.redrawLabelCanvas(self.labelCtx, self.hoveredLabel);
@@ -626,9 +670,8 @@ SatImage.prototype.redrawLabelCanvas = function() {
 SatImage.prototype.redrawHiddenCanvas = function() {
   let self = this;
 
-  self.padBox = self._getPadding();
-  self.hiddenCtx.clearRect(0, 0, (self.padBox.x + self.padBox.w) * UP_RES_RATIO,
-      (self.padBox.y + self.padBox.h) * UP_RES_RATIO);
+  self.hiddenCtx.clearRect(0, 0, self.hiddenCanvas.width * UP_RES_RATIO,
+      self.hiddenCanvas.height * UP_RES_RATIO);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
     shape.drawHidden(self.hiddenCtx, self, hiddenStyleColor(i));
@@ -640,8 +683,8 @@ SatImage.prototype.redrawHiddenCanvas = function() {
  */
 SatImage.prototype.showHiddenCanvas = function() {
   let self = this;
-  self.padBox = self._getPadding();
-  self.labelCtx.clearRect(0, 0, self.padBox.w, self.padBox.h);
+  self.labelCtx.clearRect(0, 0, self.labelCanvas.width * UP_RES_RATIO,
+      self.labelCanvas.height * UP_RES_RATIO);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
     shape.drawHidden(self.labelCtx, self, rgb(pickColorPalette(i)));
@@ -692,7 +735,7 @@ SatImage.prototype._keydown = function(e) {
     self._nextHandler();
     return;
   } else if (keyID === 17) { // Ctrl
-    self.ctrlDown = true;
+    self._keyDownMap['ctrl'] = true;
   } else if (keyID === 38) { // up key
     if (this.selectedLabel) {
       e.preventDefault();
@@ -756,7 +799,7 @@ SatImage.prototype._keyup = function(e) {
     self.selectedLabel.keyup(e);
   }
   if (keyID === 17) { // Ctrl
-    self.ctrlDown = false;
+    self._keyDownMap['ctrl'] = false;
   }
 };
 
@@ -925,15 +968,16 @@ SatImage.prototype._mousemove = function(e) {
  */
 SatImage.prototype._scroll = function(e) {
   let self = this;
-  if (self.ctrlDown) { // control for zoom
+  if (self._keyDownMap['ctrl']) { // control for zoom
     e.preventDefault();
+    let mousePos = self.getMousePos(e);
     if (self.scrollTimer !== null) {
       clearTimeout(self.scrollTimer);
     }
     if (e.deltaY < 0) {
-      self.setScale(self.scale * self.SCALE_RATIO);
+      self.setScale(self.scale * self.SCALE_RATIO, mousePos);
     } else if (e.deltaY > 0) {
-      self.setScale(self.scale / self.SCALE_RATIO);
+      self.setScale(self.scale / self.SCALE_RATIO, mousePos);
     }
     self.redrawImageCanvas();
     self.redrawLabelCanvas();
@@ -1020,14 +1064,14 @@ SatImage.prototype.getMousePos = function(e) {
   // limit mouse within the image
   let rect = self.hiddenCanvas.getBoundingClientRect();
   let x = Math.min(
-      Math.max(e.clientX, rect.x + this.padBox.x),
-      rect.x + this.padBox.x + this.padBox.w);
+      Math.max(e.clientX, rect.x),
+      rect.x + self.imageCanvas.width);
   let y = Math.min(
-      Math.max(e.clientY, rect.y + this.padBox.y),
-      rect.y + this.padBox.y + this.padBox.h);
+      Math.max(e.clientY, rect.y),
+      rect.y + self.imageCanvas.height);
 
   // limit mouse within the main div
-  let rectDiv = this.divCanvas.getBoundingClientRect();
+  let rectDiv = self.divCanvas.getBoundingClientRect();
   x = Math.min(
       Math.max(x, rectDiv.x),
       rectDiv.x + rectDiv.width
@@ -1037,37 +1081,21 @@ SatImage.prototype.getMousePos = function(e) {
       rectDiv.y + rectDiv.height
   );
   return {
-    x: (x - rect.x - self.padBox.x) / self.displayToImageRatio,
-    y: (y - rect.y - self.padBox.y) / self.displayToImageRatio,
+    x: (x - rect.x) / self.displayToImageRatio,
+    y: (y - rect.y) / self.displayToImageRatio,
   };
 };
 
 /**
  * Get the padding for the image given its size and canvas size.
- * @return {object}: padding box (x,y,w,h)
+ * @return {object} padding
  */
 SatImage.prototype._getPadding = function() {
-  // which dim is bigger compared to canvas
-  let xRatio = this.image.width / this.imageCanvas.width;
-  let yRatio = this.image.height / this.imageCanvas.height;
-  // use ratios to determine how to pad
-  let box = {x: 0, y: 0, w: 0, h: 0};
-  if (xRatio >= yRatio) {
-    this.displayToImageRatio = this.imageCanvas.width / this.image.width;
-    box.x = 0;
-    box.y = 0.5 * (this.imageCanvas.height -
-        this.image.height * this.displayToImageRatio);
-    box.w = this.imageCanvas.width;
-    box.h = this.imageCanvas.height - 2 * box.y;
-  } else {
-    this.displayToImageRatio = this.imageCanvas.height / this.image.height;
-    box.x = 0.5 * (this.imageCanvas.width -
-        this.image.width * this.displayToImageRatio);
-    box.y = 0;
-    box.w = this.imageCanvas.width - 2 * box.x;
-    box.h = this.imageCanvas.height;
-  }
-  return box;
+  let rectDiv = this.divCanvas.getBoundingClientRect();
+  return {
+    x: Math.max(0, (rectDiv.width - this.imageCanvas.width) / 2),
+    y: Math.max(0, (rectDiv.height - this.imageCanvas.height) / 2),
+  };
 };
 
 /**

@@ -1521,7 +1521,7 @@ Rect.prototype.draw = function(ctx, satImage, dashed) {
   ctx.save();
 
   let [x, y] = satImage.toCanvasCoords([this.x, this.y]);
-  let [w, h] = satImage.toCanvasCoords([this.w, this.h], false);
+  let [w, h] = satImage.toCanvasCoords([this.w, this.h]);
 
   if (dashed) {
     ctx.setLineDash([6, 2]);
@@ -1561,7 +1561,7 @@ Rect.prototype.drawHandles = function(context, satImage, fillStyle,
 Rect.prototype.drawHidden = function(hiddenCtx, satImage, strokeStyle) {
   hiddenCtx.save();
   let [x, y] = satImage.toCanvasCoords([this.x, this.y]);
-  let [w, h] = satImage.toCanvasCoords([this.w, this.h], false);
+  let [w, h] = satImage.toCanvasCoords([this.w, this.h]);
 
   hiddenCtx.lineWidth = HIDDEN_LINE_WIDTH;
   hiddenCtx.strokeStyle = strokeStyle;
