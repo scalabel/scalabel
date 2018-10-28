@@ -8,7 +8,7 @@ import {FONT_SIZE} from './utils';
 const BoxStates = Object.freeze({
   FREE: 0, RESIZE: 1, MOVE: 2,
 });
-const MIN_BOX_SIZE = 5;
+const MIN_BOX_SIZE = 7;
 
 const INITIAL_HANDLE_NO = 4;
 
@@ -216,8 +216,7 @@ Box2d.prototype.shapesValid = function() {
 };
 
 Box2d.prototype.isSmall = function() {
-  let [w, h] = this.satItem.toCanvasCoords([this.rect.w, this.rect.h]);
-  return (w < MIN_BOX_SIZE * UP_RES_RATIO || h < MIN_BOX_SIZE * UP_RES_RATIO);
+  return (this.rect.w < MIN_BOX_SIZE || this.rect.h < MIN_BOX_SIZE);
 };
 
 /**
