@@ -24,13 +24,13 @@ type ItemExport struct {
 }
 
 type LabelExport struct {
-	Id         int                    `json:"id" yaml:"id"`
-	Category   string                 `json:"category" yaml:"category"`
-	Attributes map[string]interface{} `json:"attributes" yaml:"attributes"`
-	Manual     bool                   `json:"manual" yaml:"manual"`
-	Box2d      map[string]interface{} `json:"box2d" yaml:"box2d"`
-	Poly2d     []Poly2d               `json:"poly2d" yaml:"poly2d"`
-	Box3d      map[string]interface{} `json:"box3d" yaml:"box3d"`
+	Id          int                    `json:"id" yaml:"id"`
+	Category    string                 `json:"category" yaml:"category"`
+	Attributes  map[string]interface{} `json:"attributes" yaml:"attributes"`
+	ManualShape bool                   `json:"manualShape" yaml:"manualShape"`
+	Box2d       map[string]interface{} `json:"box2d" yaml:"box2d"`
+	Poly2d      []Poly2d               `json:"poly2d" yaml:"poly2d"`
+	Box3d       map[string]interface{} `json:"box3d" yaml:"box3d"`
 }
 
 // structs for saved data

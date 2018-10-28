@@ -548,12 +548,12 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 					case "lane":
 						label.Poly2d = ParsePoly2d(labelToLoad.Data)
 					}
-					label.Manual = true
+					label.ManualShape = true
 					if projectToLoad.Options.ItemType == "video" {
-						label.Manual = labelToLoad.Keyframe
+						label.ManualShape = labelToLoad.Keyframe
 						label.Id = labelToLoad.ParentId
 					} else {
-						label.Manual = true
+						label.ManualShape = true
 						label.Id = labelId
 					}
 					item.Labels = append(item.Labels, label)
