@@ -31,7 +31,6 @@ $(document).ready(function() {
 
   let itemSelect = document.getElementById('item_type');
   let labelSelect = document.getElementById('label_type');
-  let frameRate = document.getElementById('frame_rate');
   let taskSize = document.getElementById(('task_size'));
   let interpolationModeDiv = document.getElementById('interpolation_mode_div');
   let advancedOptionsButton = document.getElementById('show_advanced_options');
@@ -63,14 +62,10 @@ $(document).ready(function() {
     }
     // add or remove the frame rate box
     if (itemSelect.value === 'video') {
-      frameRate.required = true;
-      frameRate.parentNode.style.display = '';
       taskSize.required = false;
       taskSize.parentNode.style.display = 'none';
       interpolationModeDiv.style.display = 'table-cell';
     } else {
-      frameRate.required = false;
-      frameRate.parentNode.style.display = 'none';
       taskSize.required = true;
       taskSize.parentNode.style.display = '';
       interpolationModeDiv.style.display = 'none';

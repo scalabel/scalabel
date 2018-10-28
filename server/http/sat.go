@@ -297,7 +297,6 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	interpolationMode := "linear"
 	var detections []Detection
 	if itemType == "video" {
-		videoMetaData.TBR = r.FormValue("frame_rate")
 		interpolationMode = r.FormValue("interpolation_mode")
 	}
 	// get label type from form
