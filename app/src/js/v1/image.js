@@ -358,6 +358,7 @@ SatImage.prototype.loaded = function() {
   // Call SatItem loaded
   SatItem.prototype.loaded.call(this);
   if (this.active) {
+    this.setScale(1.0);
     this.redraw();
   }
 };
