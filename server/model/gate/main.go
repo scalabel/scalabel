@@ -1,15 +1,15 @@
 package main
 
 import (
-	"net/http"
-	"log"
 	"flag"
-	"os"
-	"io"
-	"github.com/gorilla/websocket"
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
 	"fmt"
+	"github.com/gorilla/websocket"
+	"gopkg.in/yaml.v2"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
 )
 
 var (
@@ -23,10 +23,11 @@ var (
 type Configuration struct {
 	MachineHost string `yaml:"machineHost"`
 	MachinePort string `yaml:"machinePort"`
-	Port int `yaml:"port"`
+	Port        int    `yaml:"port"`
 }
+
 func Init(
-// Initialize all the loggers
+	// Initialize all the loggers
 	traceHandle io.Writer,
 	infoHandle io.Writer,
 	warningHandle io.Writer,
@@ -66,7 +67,7 @@ func main() {
 
 	configuration := new(Configuration)
 	err := yaml.Unmarshal(cfg, &configuration)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -82,7 +83,7 @@ func main() {
 		log.Println("Listen and serve error: ", err)
 	}
 }
-func RegisterServer(h *Hub, w http.ResponseWriter, r *http.Request){
+func RegisterServer(h *Hub, w http.ResponseWriter, r *http.Request) {
 	upg := websocket.Upgrader{ReadBufferSize: 1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
@@ -90,8 +91,8 @@ func RegisterServer(h *Hub, w http.ResponseWriter, r *http.Request){
 		},
 	}
 	conn, err := upg.Upgrade(w, r, nil)
-	if err != nil{
-		log.Println("Register Server Error:",err)
+	if err != nil {
+		log.Println("Register Server Error:", err)
 	}
 	startSession(h, conn)
 }

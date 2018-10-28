@@ -22,13 +22,13 @@ var (
 
 // Stores the config info found in config.yml
 type Env struct {
-	Port      int    `yaml:"port"`
-	DataDir   string `yaml:"data"`
-	SrcPath   string `yaml:"src"`
-	AppSubDir string `yaml:"appSubDir"`
-	Database  string `yaml:"database"`
-	ModelGateHost  string `yaml:"modelGateHost"`
-	ModelGatePort  string `yaml:"modelGatePort"`
+	Port          int    `yaml:"port"`
+	DataDir       string `yaml:"data"`
+	SrcPath       string `yaml:"src"`
+	AppSubDir     string `yaml:"appSubDir"`
+	Database      string `yaml:"database"`
+	ModelGateHost string `yaml:"modelGateHost"`
+	ModelGatePort string `yaml:"modelGatePort"`
 }
 
 func (env Env) AppDir() string {

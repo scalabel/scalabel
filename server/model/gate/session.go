@@ -1,41 +1,40 @@
 package main
 
 import (
+	pb "../proto"
 	"encoding/json"
 	"fmt"
-	"log"
 	"github.com/gorilla/websocket"
-	"time"
 	"golang.org/x/net/context"
-	pb "../proto"
-
+	"log"
+	"time"
 )
-const (
-	pongWait = 1800 * time.Second
-	pingPeriod = (pongWait * 9)/10
 
+const (
+	pongWait   = 1800 * time.Second
+	pingPeriod = (pongWait * 9) / 10
 )
 
 type Session struct {
-	uuid string
-	client *Client
-	appName string
-	modelName string
+	uuid         string
+	client       *Client
+	appName      string
+	modelName    string
 	modelVersion int
 }
 
-type AppMessage struct{
+type AppMessage struct {
 	SessionId string `json:"sessionId"`
 	StartTime string `json:"startTime"`
 }
 
-type SessionResponse struct{
-	SessionId string `json:"sessionId"`
- 	TimingData DummyResponse `json:"timingData"`
+type SessionResponse struct {
+	SessionId  string        `json:"sessionId"`
+	TimingData DummyResponse `json:"timingData"`
 }
 
 type Message struct {
-	Type string `json:"type"`
+	Type    string          `json:"type"`
 	Message json.RawMessage `json:"message"`
 }
 
@@ -53,26 +52,26 @@ func startSession(hub *Hub, conn *websocket.Conn) {
 	if existingSession, ok := hub.sessions[msg.SessionId]; ok {
 		session = existingSession
 	} else {
-		echoedMessage, modelServerTimestamp, modelServerDuration, grpcDuration := hub.grpcRegistration(msg.SessionId);
+		echoedMessage, modelServerTimestamp, modelServerDuration, grpcDuration := hub.grpcRegistration(msg.SessionId)
 
 		session = &Session{
 			uuid: msg.SessionId,
-			client : &Client{
-				hub : hub,
-				conn : conn,
+			client: &Client{
+				hub:  hub,
+				conn: conn,
 			},
 		}
 
 		hub.registerSession <- session
 		timingData := DummyResponse{
-			EchoedMessage: echoedMessage,
+			EchoedMessage:        echoedMessage,
 			ModelServerTimestamp: modelServerTimestamp,
-			ModelServerDuration: modelServerDuration,
-			GrpcDuration: grpcDuration,
-			StartTime: msg.StartTime,
+			ModelServerDuration:  modelServerDuration,
+			GrpcDuration:         grpcDuration,
+			StartTime:            msg.StartTime,
 		}
 		registrationResponse := SessionResponse{
-			SessionId: session.uuid,
+			SessionId:  session.uuid,
 			TimingData: timingData,
 		}
 		session.client.conn.WriteJSON(&registrationResponse)
@@ -81,12 +80,12 @@ func startSession(hub *Hub, conn *websocket.Conn) {
 }
 
 //Call the Register remote procedure and get the timing data
-func (hub *Hub) grpcRegistration(sessionId string) (string, string, string, string){
+func (hub *Hub) grpcRegistration(sessionId string) (string, string, string, string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	start := time.Now()
-	response, err := hub.modelServer.Register(ctx, &pb.Session{Message:"register",SessionId:sessionId})
+	response, err := hub.modelServer.Register(ctx, &pb.Session{Message: "register", SessionId: sessionId})
 	end := time.Now()
 	grpcDuration := fmt.Sprintf("%.3f", float64(end.Sub(start))/float64(time.Millisecond))
 
@@ -97,28 +96,29 @@ func (hub *Hub) grpcRegistration(sessionId string) (string, string, string, stri
 }
 
 type DummyData struct {
-	Message string `json:"message"`
+	Message   string `json:"message"`
 	StartTime string `json:"startTime"`
 }
 
 type DummyResponse struct {
-	EchoedMessage string `json:"echoedMessage"`
+	EchoedMessage        string `json:"echoedMessage"`
 	ModelServerTimestamp string `json:"modelServerTimestamp"`
-	ModelServerDuration string `json:"modelServerDuration"`
-	GrpcDuration string `json:"grpcDuration"`
-	StartTime string `json:"startTime"`
+	ModelServerDuration  string `json:"modelServerDuration"`
+	GrpcDuration         string `json:"grpcDuration"`
+	StartTime            string `json:"startTime"`
 }
-func (session *Session) DataListener(){
-	defer func(){
+
+func (session *Session) DataListener() {
+	defer func() {
 		log.Println("Close DataListener.")
 		session.client.conn.Close()
-	} ()
+	}()
 
 	for {
 		var msg DummyData
 		err := session.client.conn.ReadJSON(&msg)
 		log.Printf("Got this message: %v at %s\n", msg, time.Now().String())
-		if err != nil{
+		if err != nil {
 			log.Println("Invalid message")
 			session.client.hub.unregisterSession <- session
 			break
@@ -127,24 +127,24 @@ func (session *Session) DataListener(){
 		echoedMessage, modelServerTimestamp, modelServerDuration, grpcDuration := session.grpcComputation(msg)
 
 		dummyResponse := DummyResponse{
-			EchoedMessage: echoedMessage,
+			EchoedMessage:        echoedMessage,
 			ModelServerTimestamp: modelServerTimestamp,
-			ModelServerDuration: modelServerDuration,
-			GrpcDuration: grpcDuration,
-			StartTime: msg.StartTime,
+			ModelServerDuration:  modelServerDuration,
+			GrpcDuration:         grpcDuration,
+			StartTime:            msg.StartTime,
 		}
 		session.client.conn.WriteJSON(&dummyResponse)
 	}
 }
 
 //Call the DummyComputation remote procedure with DummyData, and get data for DummyResponse
-func (session *Session) grpcComputation(msg DummyData) (string, string, string, string){
+func (session *Session) grpcComputation(msg DummyData) (string, string, string, string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	start := time.Now()
 	response, err := session.client.hub.modelServer.DummyComputation(
-		ctx, &pb.Session{Message: msg.Message, SessionId:session.uuid})
+		ctx, &pb.Session{Message: msg.Message, SessionId: session.uuid})
 	end := time.Now()
 	grpcDuration := fmt.Sprintf("%.3f", float64(end.Sub(start))/float64(time.Millisecond))
 	if err != nil {

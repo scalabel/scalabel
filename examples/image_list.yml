@@ -1,53 +1,44 @@
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000056.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000057.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000058.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000059.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000060.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000061.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000062.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000063.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000064.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000065.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000066.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000067.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000068.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000069.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000070.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000071.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000072.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000073.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000074.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000075.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000076.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000077.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000078.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000079.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000080.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000081.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000082.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000083.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000084.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000085.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000086.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000087.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000088.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000089.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000090.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000091.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000092.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000093.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000094.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000095.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000096.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000097.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000098.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000099.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000100.jpg'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000056.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000057.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000058.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000059.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000062.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000063.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000064.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000065.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000066.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000067.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000068.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000069.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000070.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000071.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000072.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000073.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000074.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000075.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000082.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000083.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000084.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000085.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000086.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000087.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000088.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000089.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000090.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000091.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000092.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000093.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000094.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000095.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000096.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000097.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000098.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000099.jpg', videoName: 'a'}
 - {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg'}
 - {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg'}
 - {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg'}
@@ -65,36 +56,44 @@
 - {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000115.jpg'}
 - {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000116.jpg'}
 - {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000117.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000118.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000119.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000120.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000121.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000122.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000123.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000124.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000125.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000126.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000127.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000128.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000129.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000130.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000131.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000132.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000133.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000134.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000135.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000136.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000137.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000138.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000139.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000140.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000141.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000142.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000143.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000144.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000145.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000146.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000147.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000148.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000149.jpg'}
-- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000150.jpg'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000118.jpg', videoName: ''}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000119.jpg', videoName: ''}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000120.jpg', videoName: ''}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000121.jpg', videoName: ''}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000122.jpg', videoName: ''}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000123.jpg', videoName: ''}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000124.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000125.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000126.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000127.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000128.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000129.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000130.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000131.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000132.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000133.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000134.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000135.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000136.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000137.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000138.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000139.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000060.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000140.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000141.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000142.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000143.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000144.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000145.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000146.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000147.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000148.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000149.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000150.jpg', videoName: 'a'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000076.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000077.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000078.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000079.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000080.jpg', videoName: 'c'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000061.jpg', videoName: 'b'}
+- {url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000081.jpg', videoName: 'c'}

@@ -14,8 +14,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 )
 
 type Storage interface {
@@ -43,7 +43,7 @@ type S3Storage struct {
 	downloader *s3manager.Downloader
 	uploader   *s3manager.Uploader
 	Region     string
-    DataDir string
+	DataDir    string
 }
 
 func (fs *FileStorage) Init(path string) error {
@@ -261,11 +261,11 @@ func (ds *DynamodbStorage) HasTable() bool {
 }
 
 func (ss *S3Storage) Init(path string) error {
-    info := strings.Split(path, ":")
-    ss.Region = info[0]
-    bucketPath := strings.Split(info[1], "/")
-    ss.BucketName = bucketPath[0]
-    ss.DataDir = strings.Join(bucketPath[1:], "/")
+	info := strings.Split(path, ":")
+	ss.Region = info[0]
+	bucketPath := strings.Split(info[1], "/")
+	ss.BucketName = bucketPath[0]
+	ss.DataDir = strings.Join(bucketPath[1:], "/")
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(ss.Region)},
 	)
@@ -311,7 +311,7 @@ func (ss *S3Storage) HasKey(key string) bool {
 func (ss *S3Storage) ListKeys(prefix string) []string {
 	params := &s3.ListObjectsInput{
 		Bucket: aws.String(ss.BucketName),
-		Prefix: aws.String(path.Join(ss.DataDir,prefix)),
+		Prefix: aws.String(path.Join(ss.DataDir, prefix)),
 	}
 	resp, err := ss.svc.ListObjects(params)
 	if err != nil {
@@ -340,7 +340,7 @@ func (ss *S3Storage) Save(key string, fields map[string]interface{}) error {
 	}
 	_, err = ss.uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(ss.BucketName),
-		Key:    aws.String(path.Join(ss.DataDir,key)),
+		Key:    aws.String(path.Join(ss.DataDir, key)),
 		Body:   tmpfile,
 	})
 	if err != nil {
@@ -354,8 +354,8 @@ func (ss *S3Storage) Save(key string, fields map[string]interface{}) error {
 func (ss *S3Storage) Load(key string) (map[string]interface{}, error) {
 	var fields map[string]interface{}
 	if !strings.HasPrefix(key, ss.DataDir) {
-        key = path.Join(ss.DataDir, key)
-    }
+		key = path.Join(ss.DataDir, key)
+	}
 	tmpfile, err := ioutil.TempFile("", "*.json")
 	if err != nil {
 		return fields, err

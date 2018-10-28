@@ -75,8 +75,8 @@ type Assignment struct {
 }
 
 type GatewayInfo struct {
-	Addr            string                 `json:"Addr"`
-	Port            string                 `json:"Port"`
+	Addr string `json:"Addr"`
+	Port string `json:"Port"`
 }
 
 func (assignment *Assignment) GetKey() string {
@@ -798,7 +798,12 @@ func CreateTasks(project Project) {
 
 	} else {
 		// otherwise, make as many tasks as required
-		items := project.Items[" "]
+		items := []Item{}
+		for _, itemList := range project.Items {
+			for _, item := range itemList {
+				items = append(items, item)
+			}
+		}
 		size := len(items)
 		for i := 0; i < size; i += project.Options.TaskSize {
 			itemsSlice := items[i:Min(i+project.Options.TaskSize, size)]
@@ -849,8 +854,8 @@ func gatewayHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	gate := GatewayInfo{
-		Addr : env.ModelGateHost,
-		Port : env.ModelGatePort,
+		Addr: env.ModelGateHost,
+		Port: env.ModelGatePort,
 	}
 	gateJson, err := json.Marshal(gate)
 	if err != nil {
