@@ -9,6 +9,7 @@ let config = {
     image: __dirname + '/app/src/js/v1/image.index.js',
     image_v2: __dirname + '/app/src/js/entries/image.index.js',
     point_cloud: __dirname + '/app/src/js/v1/point_cloud/point_cloud.index.js',
+    speed_test: __dirname + '/app/src/js/dev/speed_test.js',
     dashboard: __dirname + '/app/src/js/v1/dashboard.index.js',
     vendor: __dirname + '/app/src/js/v1/vendor.index.js',
   },
@@ -41,6 +42,9 @@ let config = {
       {
         from: __dirname + '/app/src/favicon.ico',
         to: __dirname + '/app/dist/favicon.ico',
+      },
+      {
+        from: __dirname + '/app/src/dev', to: __dirname + '/app/dist/dev',
       },
     ]),
   ],

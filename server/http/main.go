@@ -27,6 +27,8 @@ type Env struct {
 	SrcPath   string `yaml:"src"`
 	AppSubDir string `yaml:"appSubDir"`
 	Database  string `yaml:"database"`
+	ModelGateHost  string `yaml:"modelGateHost"`
+	ModelGatePort  string `yaml:"modelGatePort"`
 }
 
 func (env Env) AppDir() string {
@@ -160,6 +162,9 @@ func main() {
 	http.HandleFunc("/label2d", WrapHandleFunc(Label2dHandler))
 	http.HandleFunc("/label2dv2", WrapHandleFunc(Label2dv2Handler))
 	http.HandleFunc("/label3d", WrapHandleFunc(Label3dHandler))
+
+	//Get information of the gateway server
+	http.HandleFunc("/dev/gateway", WrapHandleFunc(gatewayHandler))
 
 	Info.Printf("Listening to Port %d", env.Port)
 	Info.Printf("Local URL: localhost:%d", env.Port)

@@ -20,3 +20,6 @@ app/dist/
 
 # potential data directory
 data/
+
+#python
+.pyc

@@ -74,6 +74,11 @@ type Assignment struct {
 	IpInfo          map[string]interface{} `json:"ipInfo" yaml:"ipInfo"`
 }
 
+type GatewayInfo struct {
+	Addr            string                 `json:"Addr"`
+	Port            string                 `json:"Port"`
+}
+
 func (assignment *Assignment) GetKey() string {
 	task := assignment.Task
 	if assignment.SubmitTime == 0 {
@@ -836,4 +841,20 @@ func formValidation(w http.ResponseWriter, r *http.Request) error {
 	}
 	// TODO: check forms are actually uploaded
 	return nil
+}
+
+func gatewayHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.NotFound(w, r)
+		return
+	}
+	gate := GatewayInfo{
+		Addr : env.ModelGateHost,
+		Port : env.ModelGatePort,
+	}
+	gateJson, err := json.Marshal(gate)
+	if err != nil {
+		Error.Println(err)
+	}
+	w.Write(gateJson)
 }
