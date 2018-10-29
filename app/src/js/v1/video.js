@@ -74,6 +74,7 @@ SatVideo.prototype.toJson = function() {
     }
   }
   json.task.projectOptions.videoMetaData = self.videoMetaData;
+  json.task.numFrames = self.numFrames;
   return json;
 };
 
@@ -82,6 +83,7 @@ SatVideo.prototype.fromJson = function(json) {
   self.decodeBaseJson(json);
   self.videoMetaData = json.task.projectOptions.videoMetaData;
   self.interpolationMode = json.task.projectOptions.interpolationMode;
+  self.numFrames = json.task.numFrames;
   self.tracks = [];
   // load tracks from json
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
