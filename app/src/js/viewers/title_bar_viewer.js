@@ -54,6 +54,15 @@ export class TitleBarViewer extends BaseViewer {
     if (labelCount) {
       labelCount.textContent = sprintf('%d', numLabels);
     }
+    let pageCount = document.getElementById('page-count');
+    if (pageCount) {
+      pageCount.textContent =
+        sprintf('%s', (currItem) % state.items.length + 1);
+    }
+    let totalPageCount = document.getElementById('total-page-count');
+    if (totalPageCount) {
+      totalPageCount.textContent = sprintf('/ %s', state.items.length);
+    }
     return true;
   }
 }

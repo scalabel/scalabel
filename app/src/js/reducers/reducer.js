@@ -4,6 +4,7 @@ import * as types from '../actions/action_types';
 import * as common from '../functional/common';
 import * as image from '../functional/image';
 import * as tag from '../functional/tag';
+import * as box2d from '../functional/box2d';
 import type {StateType} from '../functional/types';
 
 /**
@@ -36,6 +37,9 @@ export default function(
     case types.NEW_LABEL:
       return common.newLabel(state, action.itemId,
           action.createLabel, action.optionalAttributes);
+    case types.NEW_IMAGE_BOX2D_LABEL:
+      return box2d.newImageBox2DLabel(state, action.itemId,
+        action.optionalAttributes);
     case types.DELETE_LABEL:
       return common.deleteLabel(state, action.itemId, action.labelId);
     case types.TAG_IMAGE:
@@ -47,6 +51,9 @@ export default function(
     case types.CHANGE_CATEGORY:
       return common.changeCategory(state, action.labelId,
           action.categoryOptions);
+    case types.CHANGE_RECT:
+      return box2d.changeRect(state, action.shapeId,
+          action.x, action.y, action.w, action.h);
     default:
   }
   return state;

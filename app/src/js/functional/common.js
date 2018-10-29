@@ -164,13 +164,16 @@ export function changeAttribute(state: StateType, ignoredLabelId: number,
 /**
  * change label category
  * @param {StateType} state
- * @param {number} ignoredLabelId
- * @param {object} ignoredCategoryOptions
+ * @param {number} labelId
+ * @param {Array} categoryOptions
  * @return {StateType}
  */
-export function changeCategory(state: StateType, ignoredLabelId: number,
-                               ignoredCategoryOptions: Object): StateType {
-  return state;
+export function changeCategory(state: StateType, labelId: number,
+                               categoryOptions: Array<number>): StateType {
+  let targetLabel = state.labels[labelId];
+  let newLabel = updateObject(targetLabel, {category: categoryOptions});
+  let labels = updateObject(state.labels, {[labelId]: newLabel});
+  return updateObject(state, {labels: labels});
 }
 
 /**

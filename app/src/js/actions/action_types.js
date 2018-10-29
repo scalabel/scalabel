@@ -18,3 +18,7 @@ export const TAG_IMAGE = 'TAG_IMAGE';
 // Label Level
 export const CHANGE_ATTRIBUTE = 'CHANGE_ATTRIBUTE';
 export const CHANGE_CATEGORY = 'CHANGE_CATEGORY';
+
+// Box2D specific
+export const NEW_IMAGE_BOX2D_LABEL = 'NEW_IMAGE_BOX2D_LABEL';
+export const CHANGE_RECT = 'CHANGE_RECT';

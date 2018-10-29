@@ -3,6 +3,7 @@ import Session from '../common/session';
 import {BaseViewer} from './base_viewer';
 import {ToolboxController} from '../controllers/toolbox_controller';
 import {sprintf} from 'sprintf-js';
+import 'bootstrap-switch';
 
 /**
  * ToolboxViewer class

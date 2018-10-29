@@ -284,6 +284,13 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 
+	// get version from the URL
+	version := "v1"
+	if r.URL.Query()["v"] != nil {
+		version = r.URL.Query()["v"][0]
+	}
+	Info.Println("Selecting Version ", version)
+
 	// make sure the project name in the form is new
 	var projectName = CheckProjectName(r.FormValue("project_name"))
 	if projectName == "" {
@@ -301,6 +308,10 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// get label type from form
 	labelType := r.FormValue("label_type")
+	// postpend version to supported label type
+	if labelType == "box2d" && version == "v2" {
+		labelType = "box2dv2"
+	}
 	// get page title from form
 	pageTitle := r.FormValue("page_title")
 	// parse the category list YML from form
@@ -364,7 +375,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// get which bundle to use depending on redux progress
 	bundleFile := "image.js"
-	if labelType == "tag" {
+	if labelType == "tag" || labelType == "box2dv2" {
 		bundleFile = "image_v2.js"
 	}
 

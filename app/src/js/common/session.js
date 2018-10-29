@@ -12,6 +12,8 @@ import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 import {BaseController} from '../controllers/base_controller';
 import {BaseViewer} from '../viewers/base_viewer';
+import {Box2dViewer} from '../viewers/image_box2d_viewer';
+import {Box2dController} from '../controllers/image_box2d_controller';
 import configureStore from '../store/configure_store';
 
 /**
@@ -70,15 +72,15 @@ class Session {
     this.store = configureStore(stateJson, this.devMode);
     this.store.dispatch({type: types.INIT_SESSION});
     window.store = this.store;
+    let state = this.getState();
+    this.itemType = state.config.itemType;
+    this.labelType = state.config.labelType;
   }
 
   /**
-   * Initialize tagging interface
-   * @param {Object} stateJson
+   * Init image tagging mode
    */
-  initImageTagging(stateJson: Object): void {
-    let self = this;
-    this.initStore(stateJson);
+  initImageTagging(): void {
     let imageController = new BaseController();
     let tagController = new BaseController();
     let imageViewer: ImageViewer = new ImageViewer(imageController);
@@ -93,15 +95,45 @@ class Session {
     this.controllers = [imageController, tagController, titleBarController,
       toolboxController];
     this.viewers = [imageViewer, tagViewer, titleBarViewer, toolboxViewer];
+  }
 
+  /**
+   * init box2d labeling mode
+   */
+  initImageBox2DLabeling(): void {
+    let imageController = new BaseController();
+    let imageViewer: ImageViewer = new ImageViewer(imageController);
+    let box2dController = new Box2dController();
+    let box2dViewer: Box2dViewer = new Box2dViewer(box2dController);
+
+    // TODO: change this to viewer controller design
+    let titleBarController: TitleBarController = new TitleBarController();
+    let titleBarViewer: TitleBarViewer = new TitleBarViewer(titleBarController);
+    let toolboxController: ToolboxController = new ToolboxController();
+    let toolboxViewer: ToolboxViewer = new ToolboxViewer(toolboxController);
+
+    this.controllers = [imageController, titleBarController,
+      toolboxController, box2dController];
+    this.viewers = [imageViewer, titleBarViewer, toolboxViewer,
+      box2dViewer];
+  }
+
+  /**
+   * Initialize tagging interface
+   */
+  initImageLabeling(): void {
+    let self = this;
+    if (this.labelType === 'tag') {
+      this.initImageTagging();
+    } else if (this.labelType === 'box2dv2') {
+      this.initImageBox2DLabeling();
+    }
     for (let c of this.controllers) {
       self.subscribe(c.onStateUpdated.bind(c));
     }
 
     self.loadImages();
 
-    // TODO: Refactor into a single registration function that takes a list of
-    // TODO: viewers and establish direct interactions that do not impact store
     document.getElementsByTagName('BODY')[0].onresize = function() {
       // imageViewer.setScale(imageViewer.scale);
       // imageViewer.redraw();
@@ -122,6 +154,18 @@ class Session {
       decreaseButton.onclick = function() {
         self.dispatch({type: types.IMAGE_ZOOM, ratio: 1.0 / 1.05});
       };
+    }
+  }
+
+  /**
+   * Init labeling session
+   * @param {Object} stateJson
+   */
+  init(stateJson: Object): void {
+    this.initStore(stateJson);
+
+    if (this.itemType === 'image') {
+      this.initImageLabeling();
     }
   }
 

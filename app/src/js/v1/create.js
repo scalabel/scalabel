@@ -1,4 +1,33 @@
 import 'bootstrap-switch';
+import {sprintf} from 'sprintf-js';
+
+/**
+ * get url variables
+ * @return {*}
+ */
+function getUrlVars() {
+  let vars = {};
+  window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+    function(m, key, value) {
+      vars[key] = value;
+    }
+  );
+  return vars;
+}
+
+/**
+ * get url parameter
+ * @param {Object} parameter
+ * @param {Object} defaultvalue
+ * @return {*}
+ */
+function getUrlParam(parameter, defaultvalue) {
+  let urlparameter = defaultvalue;
+  if (window.location.href.indexOf(parameter) > -1) {
+    urlparameter = getUrlVars()[parameter];
+  }
+  return urlparameter;
+}
 
 $(document).ready(function() {
   let dashboard = $('#go_to_dashboard');
@@ -24,7 +53,8 @@ $(document).ready(function() {
         }
       }
     };
-    x.open('POST', './postProject');
+    let version = getUrlParam('v', 'v1');
+    x.open('POST', sprintf('./postProject?v=%s', version));
     // eslint-disable-next-line
     x.send(new FormData(this));
   });

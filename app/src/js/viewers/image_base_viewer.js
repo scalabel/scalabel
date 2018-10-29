@@ -3,9 +3,6 @@ import {BaseViewer} from './base_viewer';
 import {BaseController} from '../controllers/base_controller';
 import type {ImageViewerConfigType} from '../functional/types';
 
-// TODO: Make this part of BaseViewer state
-const UP_RES_RATIO = 2;
-
 /**
  * BaseViewer2D class
  */
@@ -16,6 +13,7 @@ export class BaseViewer2D extends BaseViewer {
   MAX_SCALE: number;
   MIN_SCALE: number;
   SCALE_RATIO: number;
+  UP_RES_RATIO: number;
   scale: number;
   displayToImageRatio: number;
 
@@ -40,6 +38,7 @@ export class BaseViewer2D extends BaseViewer {
     this.MAX_SCALE = 3.0;
     this.MIN_SCALE = 1.0;
     this.SCALE_RATIO = 1.05;
+    this.UP_RES_RATIO = 2;
     this.scale = 1;
   }
 
@@ -82,12 +81,12 @@ export class BaseViewer2D extends BaseViewer {
     let padBox = this._getPadding();
     if (values) {
       for (let i = 0; i < values.length; i++) {
-        values[i] *= this.displayToImageRatio * UP_RES_RATIO;
+        values[i] *= this.displayToImageRatio * this.UP_RES_RATIO;
       }
     }
     if (affine) {
-      values[0] += padBox.x * UP_RES_RATIO;
-      values[1] += padBox.y * UP_RES_RATIO;
+      values[0] += padBox.x;
+      values[1] += padBox.y;
     }
     return values;
   }

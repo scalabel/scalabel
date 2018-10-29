@@ -19,4 +19,11 @@ describe('Functional Common Tests', function() {
     expect(state.items[0].labels.length).toBe(0);
     expect(_.size(state.labels)).toBe(0);
   });
+  it('Change Category', function() {
+    Session.devMode = false;
+    Session.initStore(testJson);
+    let state = Session.getState();
+    state = common.changeCategory(state, 0, [2]);
+    expect(state.labels[0].category[0]).toBe(2);
+  });
 });

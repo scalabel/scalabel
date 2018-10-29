@@ -48,4 +48,10 @@ export class BaseController {
   getState(): StateType {
     return Session.getState();
   }
+
+  /**
+   * mouseUp callback
+   * @param {Object} ignoredEvent
+   */
+  mouseUp(ignoredEvent: Object): void {}
 }

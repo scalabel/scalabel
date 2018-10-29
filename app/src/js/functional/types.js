@@ -19,10 +19,10 @@ export type ShapeType = {
 
 export type RectType = {
   ...ShapeType,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number
+  x: number,
+  y: number,
+  w: number,
+  h: number
 };
 
 export type CubeType = {
@@ -92,7 +92,7 @@ export type StateType = {
   items: Array<ItemType>,
   labels: {[number]: LabelType}, // Map from label id string to label
   tracks: {[number]: LabelType},
-  shapes: {[number]: RectType | CubeType},
+  shapes: {[number]: any},
   actions: Array<any>,
 };
 

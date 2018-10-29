@@ -104,3 +104,34 @@ export function changeCategory(labelId: number, categoryOptions: Object) {
     categoryOptions,
   };
 }
+
+// Below are box2d specific
+/**
+ * Create a new box2d label
+ * @param {number} itemId
+ * @param {Object} optionalAttributes
+ * @return {Object}
+ */
+export function newImageBox2DLabel(itemId: number, optionalAttributes: Object) {
+  return {
+    type: types.NEW_IMAGE_BOX2D_LABEL,
+    itemId,
+    optionalAttributes,
+  };
+}
+
+/**
+ * assign new x, y, w, h to a rectangle
+ * @param {number} shapeId
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @return {Object}
+ */
+export function changeRect(shapeId: number,
+                           x: number, y: number, w: number, h: number) {
+    return {
+        type: types.CHANGE_RECT, shapeId, x, y, w, h,
+    };
+}
