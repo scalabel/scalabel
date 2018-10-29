@@ -36,4 +36,11 @@ export class TitleBarController extends BaseController {
     xhr.open('POST', './postSaveV2');
     xhr.send(JSON.stringify(state));
   }
+
+  /**
+   * turn assistant view on/off
+   */
+  toggleAssistantView() {
+    this.dispatch({type: types.TOGGLE_ASSISTANT_VIEW});
+  }
 }

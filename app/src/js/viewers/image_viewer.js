@@ -11,7 +11,7 @@ export class ImageViewer extends BaseViewer2D {
    * @constructor
    */
   constructor(controller: BaseController) {
-    super(controller, 'image_canvas');
+    super(controller, 'image-canvas');
   }
   /**
    * Redraw the image canvas.

@@ -11,7 +11,7 @@ export class TagViewer extends BaseViewer2D {
    * @constructor
    */
   constructor(controller: BaseController) {
-    super(controller, 'tag_canvas');
+    super(controller, 'tag-canvas');
   }
 
   /**

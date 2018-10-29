@@ -1,6 +1,7 @@
 import {ToolboxController} from '../controllers/toolbox_controller';
 import {TitleBarController} from '../controllers/title_bar_controller';
 import {ImageViewer} from '../viewers/image_viewer';
+import {AssistantViewer} from '../viewers/assistant_viewer';
 import {TagViewer} from '../viewers/tag_viewer';
 import {TitleBarViewer} from '../viewers/title_bar_viewer';
 import {ToolboxViewer} from '../viewers/toolbox_viewer';
@@ -84,6 +85,7 @@ class Session {
     let imageController = new BaseController();
     let tagController = new BaseController();
     let imageViewer: ImageViewer = new ImageViewer(imageController);
+    let assistantViewer: AssistantViewer = new AssistantViewer(imageController);
     let tagViewer: TagViewer = new TagViewer(tagController);
 
     // TODO: change this to viewer controller design
@@ -93,8 +95,9 @@ class Session {
     let toolboxViewer: ToolboxViewer = new ToolboxViewer(toolboxController);
 
     this.controllers = [imageController, tagController, titleBarController,
-      toolboxController];
-    this.viewers = [imageViewer, tagViewer, titleBarViewer, toolboxViewer];
+            toolboxController];
+    this.viewers = [imageViewer, assistantViewer, tagViewer,
+            titleBarViewer, toolboxViewer];
   }
 
   /**
@@ -103,6 +106,7 @@ class Session {
   initImageBox2DLabeling(): void {
     let imageController = new BaseController();
     let imageViewer: ImageViewer = new ImageViewer(imageController);
+    let assistantViewer: AssistantViewer = new AssistantViewer(imageController);
     let box2dController = new Box2dController();
     let box2dViewer: Box2dViewer = new Box2dViewer(box2dController);
 
@@ -114,7 +118,7 @@ class Session {
 
     this.controllers = [imageController, titleBarController,
       toolboxController, box2dController];
-    this.viewers = [imageViewer, titleBarViewer, toolboxViewer,
+    this.viewers = [imageViewer, assistantViewer, titleBarViewer, toolboxViewer,
       box2dViewer];
   }
 
@@ -184,6 +188,7 @@ class Session {
       }
       let url = item.url;
       let image = new Image();
+      image.crossOrigin = 'Anonymous';
       self.images.push(image);
       image.onload = function() {
         config.imageHeight = this.height;

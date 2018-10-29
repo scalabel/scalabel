@@ -163,20 +163,20 @@ canvas {
     position: absolute;
 }
 
-canvas#image_canvas {
+canvas#image-canvas {
     z-index: 2;
     background: #222222;
 }
 
-canvas#tag_canvas {
+canvas#tag-canvas {
     z-index: 3;
 }
 
-canvas#label_canvas {
+canvas#label-canvas {
     z-index: 4;
 }
 
-canvas#hidden_canvas {
+canvas#hidden-canvas {
     z-index: 1;
     image-rendering: optimizeSpeed;             /* Older versions of FF          */
     image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
@@ -186,6 +186,19 @@ canvas#hidden_canvas {
     -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
 }
 
+canvas#image-canvas-assistant {
+    z-index: 2;
+    background: #222222;
+}
+
+canvas#tag-canvas-assistant {
+    z-index: 3;
+}
+
+canvas#label-canvas-assistant {
+    z-index: 4;
+}
+
 #page-title {
     color: white;
     font-size: 2rem;
@@ -193,17 +206,35 @@ canvas#hidden_canvas {
     left: 30px;
 }
 
-#div_canvas {
+#split-bar {
+    background-color: grey;
+    height:calc(100vh - 70px);
+    position: relative;
+    float: left;
+    width: 4px;
+    cursor: col-resize;
+    z-index: 3;
+}
+
+#div-canvas {
     position: relative;
     float: left;
     height: calc(100vh - 70px);
-    width: calc(100vw - 220px);
-    left: 10px;
+    width: calc(100vw - 206px);
     top: 10px;
     overflow: auto;
 }
 
-#div_main {
+#div-canvas-assistant {
+    position: relative;
+    float: left;
+    height: calc(100vh - 70px);
+    width: 0;
+    top: 10px;
+    overflow: auto;
+}
+
+#div-main {
     display: table;
     padding-top: 2px;
     position: relative;

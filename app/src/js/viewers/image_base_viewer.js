@@ -2,6 +2,7 @@ import $ from 'jquery';
 import {BaseViewer} from './base_viewer';
 import {BaseController} from '../controllers/base_controller';
 import type {ImageViewerConfigType} from '../functional/types';
+import {sprintf} from 'sprintf-js';
 
 /**
  * BaseViewer2D class
@@ -16,16 +17,25 @@ export class BaseViewer2D extends BaseViewer {
   UP_RES_RATIO: number;
   scale: number;
   displayToImageRatio: number;
+  // TODO: This can be more general for different types of view composition
+  isAssistantView: boolean;
 
   /**
    * @param {BaseController} controller
    * @param {string} canvasId
+   * @param {string} canvasSuffix
    * @constructor
    */
-  constructor(controller: BaseController, canvasId: string) {
+  constructor(controller: BaseController, canvasId: string,
+              canvasSuffix: string = '') {
     super(controller);
     // necessary variables
-    let divCanvas = document.getElementById('div_canvas');
+    let divCanvasName = 'div-canvas';
+    if (canvasSuffix !== '') {
+        divCanvasName = sprintf('%s-%s', divCanvasName, canvasSuffix);
+        canvasId = sprintf('%s-%s', canvasId, canvasSuffix);
+    }
+    let divCanvas = document.getElementById(divCanvasName);
     if (divCanvas) {
       this.divCanvas = divCanvas;
     }
@@ -40,6 +50,7 @@ export class BaseViewer2D extends BaseViewer {
     this.SCALE_RATIO = 1.05;
     this.UP_RES_RATIO = 2;
     this.scale = 1;
+    this.isAssistantView = false;
   }
 
   // /**
@@ -139,15 +150,6 @@ export class BaseViewer2D extends BaseViewer {
     } else {
       $('#increase-btn').prop('disabled', true);
     }
-    // resize canvas
-    let rectDiv = this.divCanvas.getBoundingClientRect();
-    this.canvas.style.height =
-      Math.round(rectDiv.height * config.viewScale) + 'px';
-    this.canvas.style.width =
-      Math.round(rectDiv.width * config.viewScale) + 'px';
-
-    this.canvas.width = rectDiv.width * config.viewScale;
-    this.canvas.height = rectDiv.height * config.viewScale;
   }
 
   /**
@@ -193,7 +195,45 @@ export class BaseViewer2D extends BaseViewer {
       return false;
     }
     this.updateScale();
+    this.resizeCanvas();
     return true;
+  }
+
+  /**
+   * Resize the image canvas
+   */
+  resizeCanvas(): void {
+    let config: ImageViewerConfigType = this.getCurrentViewerConfig();
+    // TODO: make this configurable
+    let sideBarWidth = this.state.layout.toolbarWidth;
+    let windowSize = $(window).width() - 11 - sideBarWidth;
+    let splitBarWidth = 4;
+    let newWidth = 0;
+    if (this.state.layout.assistantView) {
+      windowSize -= splitBarWidth;
+      let ratio = this.isAssistantView ? this.state.layout.assistantViewRatio :
+          1 - this.state.layout.assistantViewRatio;
+      newWidth = Math.round(windowSize * ratio);
+    } else {
+      newWidth = this.isAssistantView ? 0 : windowSize;
+    }
+    this.divCanvas.style.width = sprintf('%dpx', newWidth);
+    this.setCanvasSize(config);
+  }
+
+  /**
+   * Set the image canvas size
+   * @param {ImageViewerConfigType} config
+   */
+  setCanvasSize(config: ImageViewerConfigType): void {
+    let rectDiv = this.divCanvas.getBoundingClientRect();
+    this.canvas.style.height = sprintf('%dpx',
+        Math.round(rectDiv.height * config.viewScale));
+    this.canvas.style.width = sprintf('%dpx',
+        Math.round(rectDiv.width * config.viewScale));
+
+    this.canvas.width = rectDiv.width * config.viewScale;
+    this.canvas.height = rectDiv.height * config.viewScale;
   }
 
   // /**

@@ -129,10 +129,10 @@
               <span id="total-page-count">/</span>
           </span>
           <div style="padding-left: 5px;" class="btn-group btn-group-sm">
-            <button id="prev_btn" class="btn btn-raised btn-secondary bmd-btn-fab">
+            <button id="prev-btn" class="btn btn-raised btn-secondary bmd-btn-fab">
                 <i class="fas fa-chevron-left"></i>
             </button>
-            <button href="#" id="next_btn" class="btn btn-raised btn-secondary bmd-btn-fab">
+            <button href="#" id="next-btn" class="btn btn-raised btn-secondary bmd-btn-fab">
                 <i class="fas fa-chevron-right"></i>
             </button>
           </div>
@@ -142,6 +142,11 @@
               </button>
               <button href="#" id="decrease-btn" class="btn btn-raised btn-secondary bmd-btn-fab">
                   <i class="fas fa-minus"></i>
+              </button>
+          </div>
+          <div style="padding-left: 5px;" class="btn-group btn-group-sm">
+              <button id="assistant-view-btn" class="btn btn-raised btn-secondary bmd-btn-fab" style="padding-top: 1px">
+                  <img src="./icons/view-split.svg" style="width: 60%; height: 60%">
               </button>
           </div>
           <div class="btn-group" style="left: 10px;">
@@ -203,24 +208,36 @@
             </div>
         </nav>
         <main role="main" class="main_col">
-          <div id="div_main">
-              <div id="div_canvas">
-                  <canvas id="image_canvas">
+          <div id="div-main">
+              <div id="div-canvas">
+                  <canvas id="image-canvas">
                       Unsupported browser!
                   </canvas>
-                  <canvas id="tag_canvas">
+                  <canvas id="tag-canvas">
                       Unsupported browser!
                   </canvas>
-                  <canvas id="label_canvas">
+                  <canvas id="label-canvas">
                       Unsupported browser!
                   </canvas>
-                  <canvas id="hidden_canvas">
+                  <canvas id="hidden-canvas">
                       Unsupported browser!
                   </canvas>
                   <div id="crosshair" style="visibility:none">
                       <div id="crosshair-h" class="hair"></div>
                       <div id="crosshair-v" class="hair"></div>
                   </div>
+              </div>
+              <div id="split-bar"></div>
+              <div id="div-canvas-assistant">
+                  <canvas id="image-canvas-assistant">
+                      Unsupported browser!
+                  </canvas>
+                  <canvas id="tag-canvas-assistant">
+                      Unsupported browser!
+                  </canvas>
+                  <canvas id="label-canvas-assistant">
+                      Unsupported browser!
+                  </canvas>
               </div>
               <div id="player-controls" style="visibility:hidden">
                   <!-- frame counter -->

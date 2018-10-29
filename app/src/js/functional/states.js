@@ -3,7 +3,7 @@
 import type {
   LabelType, ItemType,
   RectType, StateType,
-  ConfigType, CurrentType, ImageViewerConfigType,
+  ConfigType, CurrentType, ImageViewerConfigType, LayoutType,
 } from './types';
 
 /**
@@ -116,6 +116,20 @@ export function makeSatCurrent(params: {} = {}): CurrentType {
 }
 
 /**
+ * Initialize a Layout state
+ * @param {{}} params
+ * @return {LayoutType}
+ */
+export function makeLayout(params: {} = {}): LayoutType {
+  return {
+    toolbarWidth: 200,
+    assistantView: false,
+    assistantViewRatio: 0.3,
+    ...params,
+  };
+}
+
+/**
  * Initialize a Sat state
  * @param {{}} params
  * @return {StateType}
@@ -129,6 +143,7 @@ export function makeState(params: {} = {}): StateType {
     tracks: {},
     shapes: {}, // Map from shapeId to shape
     actions: [],
+    layout: makeLayout(),
     ...params,
   };
 }

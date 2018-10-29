@@ -51,6 +51,8 @@ export default function(
     case types.CHANGE_CATEGORY:
       return common.changeCategory(state, action.labelId,
           action.categoryOptions);
+    case types.TOGGLE_ASSISTANT_VIEW:
+      return common.toggleAssistantView(state);
     case types.CHANGE_RECT:
       return box2d.changeRect(state, action.shapeId,
           action.x, action.y, action.w, action.h);

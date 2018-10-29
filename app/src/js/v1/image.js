@@ -83,10 +83,10 @@ export function SatImage(sat, index, url) {
   };
   self.image.src = self.url;
 
-  self.divCanvas = document.getElementById('div_canvas');
-  self.imageCanvas = document.getElementById('image_canvas');
-  self.labelCanvas = document.getElementById('label_canvas');
-  self.hiddenCanvas = document.getElementById('hidden_canvas');
+  self.divCanvas = document.getElementById('div-canvas');
+  self.imageCanvas = document.getElementById('image-canvas');
+  self.labelCanvas = document.getElementById('label-canvas');
+  self.hiddenCanvas = document.getElementById('hidden-canvas');
   self.imageCtx = self.imageCanvas.getContext('2d');
   self.labelCtx = self.labelCanvas.getContext('2d');
   self.hiddenCtx = self.hiddenCanvas.getContext('2d');
@@ -424,10 +424,10 @@ SatImage.prototype.setActive = function(active) {
     };
 
     // buttons
-    document.getElementById('prev_btn').onclick = function() {
+    document.getElementById('prev-btn').onclick = function() {
       self._prevHandler();
     };
-    document.getElementById('next_btn').onclick = function() {
+    document.getElementById('next-btn').onclick = function() {
       self._nextHandler();
     };
     document.getElementById('usage-btn').onclick = function() {

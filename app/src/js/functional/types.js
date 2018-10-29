@@ -76,6 +76,12 @@ export type ConfigType = {
   startTime: number,
 };
 
+export type LayoutType = {
+  toolbarWidth: number,
+  assistantView: boolean,
+  assistantViewRatio: number,
+};
+
 /*
   The current state of Sat.
  */
@@ -94,6 +100,7 @@ export type StateType = {
   tracks: {[number]: LabelType},
   shapes: {[number]: any},
   actions: Array<any>,
+  layout: LayoutType,
 };
 
 export type LabelFunctionalType ={

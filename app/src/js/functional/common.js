@@ -184,3 +184,14 @@ export function changeCategory(state: StateType, labelId: number,
 export function updateAll(state: StateType): StateType {
   return state;
 }
+
+/**
+ * turn on/off assistant view
+ * @param {StateType} state
+ * @return {StateType}
+ */
+export function toggleAssistantView(state: StateType): StateType {
+  return updateObject(state, {layout:
+            updateObject(state.layout, {assistantView:
+                  !state.layout.assistantView})});
+}

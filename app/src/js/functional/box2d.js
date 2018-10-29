@@ -44,7 +44,8 @@ export function newImageBox2DLabel(
   // create the actual label with the labelId and shapeId and put inside labels
   let labels = updateObject(state.labels,
     {[labelId]: createBox2DLabel(labelId, itemId, {shapes: [shapeId]})});
-  let current = updateObject(state.current, {maxObjectId: shapeId});
+  let current = updateObject(state.current,
+          {label: labelId, maxObjectId: shapeId});
   return {
     ...state,
     items: items,

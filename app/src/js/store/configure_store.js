@@ -13,6 +13,7 @@ import {
   TAG_IMAGE,
   CHANGE_ATTRIBUTE,
   CHANGE_CATEGORY,
+  TOGGLE_ASSISTANT_VIEW,
 } from '../actions/action_types';
 
 const configureStore = (json: Object = {}, devMode: boolean = false) => {
@@ -35,6 +36,7 @@ const configureStore = (json: Object = {}, devMode: boolean = false) => {
       TAG_IMAGE,
       CHANGE_ATTRIBUTE,
       CHANGE_CATEGORY,
+      TOGGLE_ASSISTANT_VIEW,
     ]),
     debug: devMode,
   }), initialHistory);

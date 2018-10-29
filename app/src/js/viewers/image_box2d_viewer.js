@@ -11,8 +11,7 @@ export class Box2dViewer extends BaseViewer2D {
    * @constructor
    */
   constructor(controller: BaseController) {
-    super(controller, 'label_canvas');
-
+    super(controller, 'label-canvas');
     // $FlowFixMe
     let self = this;
     this.canvas.addEventListener('mouseup', function(e) {
@@ -60,7 +59,7 @@ export class Box2dViewer extends BaseViewer2D {
     if (!super.redraw()) {
       return false;
     }
-    super.redraw();
+
     let rects = this.getRects();
     for (let rect of rects) {
         this.drawRect(rect);

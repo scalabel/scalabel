@@ -19,6 +19,10 @@ export const TAG_IMAGE = 'TAG_IMAGE';
 export const CHANGE_ATTRIBUTE = 'CHANGE_ATTRIBUTE';
 export const CHANGE_CATEGORY = 'CHANGE_CATEGORY';
 
+// View Level
+export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW';
+
 // Box2D specific
 export const NEW_IMAGE_BOX2D_LABEL = 'NEW_IMAGE_BOX2D_LABEL';
 export const CHANGE_RECT = 'CHANGE_RECT';
+
