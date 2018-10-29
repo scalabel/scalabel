@@ -32,7 +32,8 @@
         <div class="panel-heading active">
             Keyboard Usage
         </div>
-        <div class="key_usage">
+        <br/>
+        <div class="key_usage" style="max-height: calc(100vh - 230px); overflow: scroll;">
             <div>
                 <p><span><kbd>?</kbd></span>
                     <span>Toggle Keyboard Usage display</span></p>
@@ -42,37 +43,53 @@
                 </p>
             </div>
             <div>
-                <p><span><kbd>Backspace</kbd> / <kbd>delete</kbd></span> <span>Delete selected label</span>
+                <p><span><kbd>&#9003;</kbd></span> <span>Delete selected label</span>
                 </p>
             </div>
             <div>
-                <p><span><kbd>+</kbd></span> <span>Zoom in</span></p>
+                  <p><span><kbd>&larr;</kbd> / <kbd>&rarr;</kbd></span> <span>Previous/next item</span></p>
             </div>
             <div>
-                <p><span><kbd>-</kbd></span> <span>Zoom out</span></p>
+                <p><span><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></span> <span>Bring a selected label forward/backward</span></p>
             </div>
             <div>
-                  <p><span><kbd>&larr;</kbd></span> <span>Previous item</span></p>
+                <p><span><kbd>+</kbd> / <kbd>-</kbd> or <kbd>Ctrl+scroll</kbd></span> <span>Zoom in/out</span></p>
             </div>
             <div>
-                  <p><span><kbd>&rarr;</kbd></span> <span>Next item</span></p>
+                <p><span><kbd>Ctrl+drag</kbd></span> <span>Drag image when zoomed in</span></p>
             </div>
             <div>
-                <p><span><kbd>&uarr;</kbd></span> <span>Bring a selected label forward</span></p>
+                <p><span><kbd>Ctrl+S</kbd></span> <span>Save the current task</span></p>
             </div>
             <div>
-                <p><span><kbd>f</kbd></span> <span>Bring a selected label to front</span></p>
+                <p><span><kbd>Ctrl+F</kbd> / <kbd>Ctrl+B</kbd></span> <span>Bring a selected label to front/back</span></p>
             </div>
             <div>
-                <p><span><kbd>&darr;</kbd></span> <span>Bring a selected label backward</span></p>
+              <p><span><kbd>Ctrl+H</kbd></span> <span>Hiding/showing all labels</span></p>
             </div>
-            <div>
-              <p><span><kbd>b</kbd></span> <span>Bring a selected label to back</span></p>
-            </div>
-            <div>
-              <p><span><kbd>h</kbd></span> <span>Hiding/showing all labels</span></p>
-            </div>
+            <template id="video_usage">
+              <div>
+                  <p><span style="vertical-align: top"><kbd>&#9251;</kbd></span> <span>Play/pause the sequence</span></p>
+              </div>
+              <div>
+                  <p><span><kbd>Ctrl+L</kbd></span> <span>Start track linking; <kbd>&#8629;</kbd> when finished</span></p>
+              </div>
+              <div>
+                  <p><span><kbd>Ctrl+E</kbd></span> <span>End track</span></p>
+              </div>
+            </template>
+            <template id="seg_image_usage">
+              <div>
+                  <p><span><kbd>Ctrl+L</kbd></span> <span>Start linking; <kbd>&#8617;</kbd> when finished</span></p>
+              </div>
+            </template>
             <template id="seg_usage">
+              <div>
+                  <p><span><kbd>Ctrl+&#9003;</kbd></span> <span>redraw a selected segmentation label</span></p>
+              </div>
+              <div>
+                  <p><span><kbd>Ctrl+D</kbd></span> <span>Start quick-draw</span></p>
+              </div>
               <div>
                   <p><span style="vertical-align: top"><kbd>c</kbd></span> <span>Press and click on the midpoint of an edge in the selected label to change the edge to a bezier curve</span></p>
               </div>
@@ -82,18 +99,6 @@
               <div>
                   <p><span><kbd>m</kbd></span> <span>Enable moving a selected segmentation label</span></p>
               </div>
-              <div>
-                  <p><span><kbd>r</kbd></span> <span>redraw a selected segmentation label</span></p>
-              </div>
-              <div>
-                  <p><span><kbd>s</kbd></span> <span>Toggle on/off quick draw mode</span></p>
-              </div>
-              <div>
-                  <p><span><kbd>u</kbd></span> <span>Unlink selected label</span></p>
-              </div>
-              <div>
-                  <p><span><kbd>Alt</kbd></span> <span>Toggle path options along a polygon during quick draw mode</span></p>
-              </div>
             </template>
             <template id="lane_usage">
               <div>
@@ -102,12 +107,9 @@
               <div>
                   <p><span style="vertical-align: top"><kbd>d</kbd></span> <span>Press and click on a vertex in the selected label to delete the vertex. While drawing, press to delete the last labeled vertex</span></p>
               </div>
-              <div>
-                  <p><span><kbd>r</kbd></span> <span>redraw a selected label</span></p>
-              </div>
             </template>
         </div>
-
+        <br/>
     </div>
 </div>
 
@@ -117,36 +119,42 @@
       <div id="page-title" style="position: absolute; float:left; left: 30px;">
         {{ .Task.ProjectOptions.PageTitle }}
         <!--<small class="navbar-small">ver 1.0.1</small>-->
-        <a style="left: 10px" href="http://data-bdd.berkeley.edu/label/bbox/instruction.html" target="view_window" id="instruction_btn" class="btn btn-raised btn-info btn-regular">Instruction</a>
         <span class="navbar-small" id="label-count-title" style="padding-left: 20px">Labels </span>
         <span class="badge badge-pill badge-light counter" id="label-count">0</span>
       </div>
-      <div style="position: absolute; float:right; right: 40px;">
-          <span class="navbar-small" id="page-count-title" style="padding-left: 20px">Item </span>
+      <div style="position: absolute; float:right; right: 30px;">
+          <span class="navbar-small" id="page-count-title" style="padding-left: 5px">Item </span>
           <span class="badge badge-pill badge-light counter" style="padding-right:10px;">
-            <span id="page-count" contenteditable="true">0</span>
-            <span id="total-page-count">/</span>
+              <span id="page-count" contenteditable="true">0</span>
+              <span id="total-page-count">/</span>
           </span>
-          <div style="padding-left: 10px" class="btn-group">
-              <button id="increase-btn" class="btn btn-raised btn-secondary btn-regular">
+          <div style="padding-left: 5px;" class="btn-group btn-group-sm">
+            <button id="prev_btn" class="btn btn-raised btn-secondary bmd-btn-fab">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button href="#" id="next_btn" class="btn btn-raised btn-secondary bmd-btn-fab">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+          <div style="padding-left: 5px;" class="btn-group btn-group-sm">
+              <button id="increase-btn" class="btn btn-raised btn-secondary bmd-btn-fab">
                 <i class="fas fa-plus"></i>
               </button>
-              <button href="#" id="decrease-btn" class="btn btn-raised btn-secondary btn-regular">
+              <button href="#" id="decrease-btn" class="btn btn-raised btn-secondary bmd-btn-fab">
                   <i class="fas fa-minus"></i>
               </button>
           </div>
-          <div style="padding-left: 10px" class="btn-group">
-              <button id="prev_btn" class="btn btn-raised btn-secondary btn-regular">
-                  <i class="fas fa-chevron-left"></i>
-              </button>
-              <button href="#" id="next_btn" class="btn btn-raised btn-secondary btn-regular">
-                  <i class="fas fa-chevron-right"></i>
-              </button>
+          <div class="btn-group" style="left: 10px;">
+              <a title="Instructions" style="color: #bbbbbb;" href="http://data-bdd.berkeley.edu/label/bbox/instruction.html" target="view_window" id="instruction_btn" class="btn btn-info btn-regular"><i class="fas fa-chalkboard-teacher"></i></a>
+              <a title="Keyboard Usage" style="color: #bbbbbb;" href="#" id="usage-btn"
+                           class="btn btn-secondary"><i class="fas fa-question"></i></a>
+              <a title="Dashboard" style="color: #bbbbbb;" href="/vendor?project_name={{ .Task.ProjectOptions.Name }}" target="view_window" id="dashboard-btn"
+                           class="btn btn-secondary"><i class="fas fa-list"></i></a>
+              <a title="Save" style="color: #bbbbbb;" href="#" id="save-btn"
+                           class="btn btn-secondary"><i class="fas fa-save"></i></a>
+              <a title="Submit" style="color: #bbbbbb;" href="#" id="submit-btn"
+                           class="btn btn-secondary"><i class="fas fa-user-check"></i></a>
           </div>
-          <a style="left: 10px;" href="#" id="save-btn"
-             class="btn btn-raised btn-primary btn-regular">Save</a>
-          <a style="left: 10px;" href="#" id="submit-btn"
-                       class="btn btn-raised btn-primary btn-regular">Submit</a>
   </div>
   </p>
 </nav>
@@ -187,7 +195,7 @@
                 </template>
                 <template id="seg_btns">
                     <a href="#" id="quickdraw_btn" class="btn btn-sidebar" style="white-space: normal;">
-                        <kbd>s</kbd> Quickdraw
+                        Quick-draw
                     </a>
                 </template>
                 <!-- remove button -->
@@ -256,7 +264,13 @@ let itemType = {{ .Task.ProjectOptions.ItemType }};
 </script>
 <script src="./js/{{ .Task.ProjectOptions.BundleFile }}"></script>
 
-<script></script>
+<script>
+let isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+if (isMac) {
+  document.getElementById("keyboard_usage_window").innerHTML =
+  document.getElementById("keyboard_usage_window").innerHTML.replace(/Ctrl\+/g, "&#8984;")
+}
+</script>
 
 </body>
 

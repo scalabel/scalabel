@@ -2,6 +2,7 @@ import {SatItem, SatLabel, pickColorPalette} from './sat';
 import {hiddenStyleColor, mode, rgb} from './utils';
 import {UP_RES_RATIO} from './shape';
 import {sprintf} from 'sprintf-js';
+import $ from 'jquery';
 
 // constants
 const DOUBLE_CLICK_WAIT_TIME = 300;
@@ -429,6 +430,9 @@ SatImage.prototype.setActive = function(active) {
     document.getElementById('next_btn').onclick = function() {
       self._nextHandler();
     };
+    document.getElementById('usage-btn').onclick = function() {
+      $('#keyboard_usage_window').toggle();
+    };
 
     if (document.getElementById('increase-btn')) {
       document.getElementById('increase-btn').onclick = function() {
@@ -445,11 +449,7 @@ SatImage.prototype.setActive = function(active) {
     if (endBtn.length) {
       // if the end button exists (we have a sequence) then hook it up
       endBtn.click(function() {
-        if (self.selectedLabel) {
-          self.selectedLabel.parent.endTrack(self.selectedLabel);
-          self.redrawLabelCanvas();
-          self.redrawHiddenCanvas();
-        }
+        self._endTrackHandler();
       });
     }
     if (deleteBtn.length) {
@@ -464,17 +464,7 @@ SatImage.prototype.setActive = function(active) {
     }
     if (trackLinkBtn.length) {
       document.getElementById('track_link_btn').onclick = function() {
-        if (self.selectedLabel) {
-          if (self.sat.linkingTrack != null) {
-            self.sat.linkTracks();
-          }
-          self.sat.toggleTrackLink(self.selectedLabel.getRoot());
-        } else if (self.sat.linkingTrack != null) {
-          self.sat.linkTracks();
-          self.sat.toggleTrackLink(self.sat.linkingTrack);
-        } else {
-          alert('Please select a track before clicking Track-Link.');
-        }
+        self._trackLinkHandler();
       };
     }
 
@@ -623,6 +613,30 @@ SatImage.prototype._decHandler = function() {
   self.redraw();
 };
 
+SatImage.prototype._trackLinkHandler = function() {
+  let self = this;
+  if (self.selectedLabel) {
+    if (self.sat.linkingTrack != null) {
+      self.sat.linkTracks();
+    }
+    self.sat.toggleTrackLink(self.selectedLabel.getRoot());
+  } else if (self.sat.linkingTrack != null) {
+    self.sat.linkTracks();
+    self.sat.toggleTrackLink(self.sat.linkingTrack);
+  } else {
+    alert('Please select a track before track linking.');
+  }
+};
+
+SatImage.prototype._endTrackHandler = function() {
+  let self = this;
+  if (self.selectedLabel) {
+    self.selectedLabel.parent.endTrack(self.selectedLabel);
+    self.redrawLabelCanvas();
+    self.redrawHiddenCanvas();
+  }
+};
+
 /**
  * Redraw
  */
@@ -719,70 +733,108 @@ SatImage.prototype._keydown = function(e) {
 
   let keyID = e.KeyCode ? e.KeyCode : e.which;
   self._keyDownMap[keyID] = true;
-  if (keyID === 27) { // Esc
-    // deselect
-    self.deselectAll();
-  } else if (keyID === 46 || keyID === 8) { // Delete or Backspace
-    if (self.selectedLabel) {
-      self.deleteLabel(self.selectedLabel);
+
+  // key down when ctrl is pressed, need to preventDefault
+  // and call ctrlCommandPressed
+  if (self.isDown('ctrl')) {
+    this.labelCanvas.style.cursor = 'grab';
+    if (keyID === 83) { // ctrl-s for save
+      e.preventDefault();
+      this.sat.save();
+      this.ctrlCommandPressed();
+    } else if (keyID === 70) { // ctrl-f for front
+      e.preventDefault();
+      if (this.selectedLabel) {
+        let index = this.labels.indexOf(this.selectedLabel);
+        if (index < this.labels.length - 1) {
+          this.labels.splice(index, 1);
+          this.labels.push(this.selectedLabel);
+        }
+      }
+      this.ctrlCommandPressed();
+    } else if (keyID === 66) { // ctrl-b for back
+      e.preventDefault();
+      if (this.selectedLabel) {
+        let index = this.labels.indexOf(this.selectedLabel);
+        if (index > 0) {
+          this.labels.splice(index, 1);
+          this.labels.unshift(this.selectedLabel);
+        }
+      }
+      this.ctrlCommandPressed();
+    } else if (keyID === 72) { // ctrl-h for hiding all labels
+      e.preventDefault();
+      if (this.labelCanvas.style.visibility === 'visible') {
+        this.labelCanvas.style.visibility = 'hidden';
+      } else {
+        this.labelCanvas.style.visibility = 'visible';
+      }
+      this.ctrlCommandPressed();
+    } else if (keyID === 76 &&
+        $('#track_link_btn').length) {
+      // ctrl-l for triggering track linking
+      e.preventDefault();
+      this._trackLinkHandler();
+      this.ctrlCommandPressed();
+    } else if (keyID === 69 &&
+        $('#end_btn').length) {
+      // ctrl-e for ending a track
+      e.preventDefault();
+      this._endTrackHandler();
+      this.ctrlCommandPressed();
+    }
+  } else {
+    // solo key down
+    if (keyID === 27) { // Esc
+      // deselect
       self.deselectAll();
-    }
-  } else if (keyID === 37) { // Left/Right Arrow
-    e.preventDefault();
-    self._prevHandler();
-    return;
-  } else if (keyID === 39) { // Left/Right Arrow
-    e.preventDefault();
-    self._nextHandler();
-    return;
-  } else if (keyID === 17) { // Ctrl
-    self._keyDownMap['ctrl'] = true;
-  } else if (keyID === 38) { // up key
-    if (this.selectedLabel) {
+    } else if (keyID === 13) { // Enter
+      // end linking if linking tracks
+      if (this.sat.linkingTrack) {
+        this._trackLinkHandler();
+      }
+    } else if (keyID === 32) { // Space bar
+      if (this.sat.constructor.name === 'SatVideo') {
+        this.sat.clickPlayPause();
+      }
+    } else if (keyID === 46 || keyID === 8) { // Delete or Backspace
+      if (self.selectedLabel) {
+        self.deleteLabel(self.selectedLabel);
+        self.deselectAll();
+      }
+    } else if (keyID === 37) { // Left/Right Arrow
       e.preventDefault();
-      let index = this.labels.indexOf(this.selectedLabel);
-      if (index < this.labels.length - 1) {
-        this.labels[index] = this.labels[index + 1];
-        this.labels[index + 1] = this.selectedLabel;
-      }
-    }
-  } else if (keyID === 40) { // down key
-    if (this.selectedLabel) {
+      self._prevHandler();
+      return;
+    } else if (keyID === 39) { // Left/Right Arrow
       e.preventDefault();
-      let index = this.labels.indexOf(this.selectedLabel);
-      if (index > 0) {
-        this.labels[index] = this.labels[index - 1];
-        this.labels[index - 1] = this.selectedLabel;
+      self._nextHandler();
+      return;
+    } else if (keyID === 38) { // up key
+      if (this.selectedLabel) {
+        e.preventDefault();
+        let index = this.labels.indexOf(this.selectedLabel);
+        if (index < this.labels.length - 1) {
+          this.labels[index] = this.labels[index + 1];
+          this.labels[index + 1] = this.selectedLabel;
+        }
       }
-    }
-  } else if (keyID === 70) { // f for front
-    if (this.selectedLabel) {
-      let index = this.labels.indexOf(this.selectedLabel);
-      if (index < this.labels.length - 1) {
-        this.labels.splice(index, 1);
-        this.labels.push(this.selectedLabel);
+    } else if (keyID === 40) { // down key
+      if (this.selectedLabel) {
+        e.preventDefault();
+        let index = this.labels.indexOf(this.selectedLabel);
+        if (index > 0) {
+          this.labels[index] = this.labels[index - 1];
+          this.labels[index - 1] = this.selectedLabel;
+        }
       }
+    } else if (keyID === 187) {
+      this._incHandler();
+      return;
+    } else if (keyID === 189) {
+      this._decHandler();
+      return;
     }
-  } else if (keyID === 66) { // b for back
-    if (this.selectedLabel) {
-      let index = this.labels.indexOf(this.selectedLabel);
-      if (index > 0) {
-        this.labels.splice(index, 1);
-        this.labels.unshift(this.selectedLabel);
-      }
-    }
-  } else if (keyID === 72) { // h for hiding all labels
-    if (this.labelCanvas.style.visibility === 'visible') {
-      this.labelCanvas.style.visibility = 'hidden';
-    } else {
-      this.labelCanvas.style.visibility = 'visible';
-    }
-  } else if (keyID === 187) {
-    this._incHandler();
-    return;
-  } else if (keyID === 189) {
-    this._decHandler();
-    return;
   }
   this.redrawLabelCanvas();
   this.redrawHiddenCanvas();
@@ -792,20 +844,37 @@ SatImage.prototype._keydown = function(e) {
   }
 };
 
+SatImage.prototype.ctrlCommandPressed = function() {
+  this.deleteDownKey('ctrl');
+  this.labelCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
+};
+
 SatImage.prototype._keyup = function(e) {
   let self = this;
   let keyID = e.KeyCode ? e.KeyCode : e.which;
   delete self._keyDownMap[keyID];
+  if (keyID === 17 || keyID === 91) {
+    // ctrl or command
+    this.labelCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
+  }
   if (self.selectedLabel) {
     self.selectedLabel.keyup(e);
-  }
-  if (keyID === 17) { // Ctrl
-    self._keyDownMap['ctrl'] = false;
   }
 };
 
 SatImage.prototype.isDown = function(c) {
+  if (c === 'ctrl') {
+    // ctrl or command key
+    return this._keyDownMap[17] || this._keyDownMap[91];
+  }
   return this._keyDownMap[c.charCodeAt()];
+};
+
+SatImage.prototype.deleteDownKey = function(c) {
+  if (c === 'ctrl') {
+    delete this._keyDownMap[17];
+  }
+  delete this._keyDownMap[c.charCodeAt()];
 };
 
 SatImage.prototype.anyKeyDown = function(keys) {
@@ -838,39 +907,55 @@ SatImage.prototype._mousedown = function(e) {
   }
   self.isMouseDown = true;
   let mousePos = self.getMousePos(e);
-  if (this.sat.LabelType.useDoubleClick) {
-    // if using double click, label created at mouseup
-    if (self.selectedLabel) {
-      // if there is a label selected, let it handle mousedown
-      self.selectedLabel.mousedown(e);
+  if (this.isDown('ctrl')) {
+    e.preventDefault();
+    // ctrl down
+    let rectDiv = this.divCanvas.getBoundingClientRect();
+    if (this.imageCanvas.width > rectDiv.width ||
+      this.imageCanvas.height > rectDiv.height) {
+      // if needed, start grabbing
+      this.labelCanvas.style.cursor = 'grabbing';
+      this.grabbingImage = true;
+      this.startGrabX = e.clientX;
+      this.startGrabY = e.clientY;
+      this.startVisibleCoords = this.getVisibleCanvasCoords();
     }
   } else {
-    // else, label created at mousedown
-    let occupiedShape = self.getOccupiedShape(mousePos);
-    let occupiedLabel = self.getLabelOfShape(occupiedShape);
-    if (this.sat.linkingTrack) {
-      if (occupiedLabel && occupiedLabel.getRoot().id !==
-        this.sat.linkingTrack.id) {
-        this.sat.addTrackToLinkingTrack(occupiedLabel.getRoot());
+    // ctrl not down
+    if (this.sat.LabelType.useDoubleClick) {
+      // if using double click, label created at mouseup
+      if (self.selectedLabel) {
+        // if there is a label selected, let it handle mousedown
+        self.selectedLabel.mousedown(e);
       }
     } else {
-      if (occupiedLabel) {
-        self.selectLabel(occupiedLabel);
-        self.selectedLabel.setSelectedShape(occupiedShape);
-        self.selectedLabel.mousedown(e);
+      // else, label created at mousedown
+      let occupiedShape = self.getOccupiedShape(mousePos);
+      let occupiedLabel = self.getLabelOfShape(occupiedShape);
+      if (this.sat.linkingTrack) {
+        if (occupiedLabel && occupiedLabel.getRoot().id !==
+            this.sat.linkingTrack.id) {
+          this.sat.addTrackToLinkingTrack(occupiedLabel.getRoot());
+        }
       } else {
-        self.catSel = document.getElementById('category_select');
-        let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
-        let attributes = self._getSelectedAttributes();
-        self.selectLabel(self.sat.newLabel({
-          categoryPath: cat, attributes: attributes, mousePos: mousePos,
-        }));
+        if (occupiedLabel) {
+          self.selectLabel(occupiedLabel);
+          self.selectedLabel.setSelectedShape(occupiedShape);
+          self.selectedLabel.mousedown(e);
+        } else {
+          self.catSel = document.getElementById('category_select');
+          let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+          let attributes = self._getSelectedAttributes();
+          self.selectLabel(self.sat.newLabel({
+            categoryPath: cat, attributes: attributes, mousePos: mousePos,
+          }));
 
-        self.selectedLabel.mousedown(e);
+          self.selectedLabel.mousedown(e);
+        }
       }
     }
+    self.redrawLabelCanvas();
   }
-  self.redrawLabelCanvas();
 };
 
 /**
@@ -946,7 +1031,17 @@ SatImage.prototype._mousemove = function(e) {
       this.hoveredLabel.setCurrHoveredShape(hoveredShape);
     }
 
-    if (this.isMouseDown && this.selectedLabel) {
+    if (this.isDown('ctrl')) {
+      if (this.grabbingImage) {
+        this.labelCanvas.style.cursor = 'grabbing';
+        let dx = e.clientX - this.startGrabX;
+        let dy = e.clientY - this.startGrabY;
+        this.divCanvas.scrollLeft = this.startVisibleCoords[0] - dx;
+        this.divCanvas.scrollTop = this.startVisibleCoords[1] - dy;
+      } else {
+        this.labelCanvas.style.cursor = 'grab';
+      }
+    } else if (this.isMouseDown && this.selectedLabel) {
       this.labelCanvas.style.cursor = this.selectedLabel.getCursorStyle(
           this.selectedLabel.getSelectedShape());
     } else if (!this.isMouseDown && this.hoveredLabel) {
@@ -969,7 +1064,7 @@ SatImage.prototype._mousemove = function(e) {
  */
 SatImage.prototype._scroll = function(e) {
   let self = this;
-  if (self._keyDownMap['ctrl']) { // control for zoom
+  if (self.isDown('ctrl')) { // control for zoom
     e.preventDefault();
     let mousePos = self.getMousePos(e);
     if (self.scrollTimer !== null) {
@@ -1010,36 +1105,49 @@ SatImage.prototype._mouseup = function(e) {
     return;
   }
 
-  if (this.sat.LabelType.useDoubleClick) {
-    if (!self.selectedLabel && self.isMouseDown) {
-      setTimeout(function() {
-        if (!self.selectedLabel) {
-          self.catSel = document.getElementById('category_select');
-          let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
-          let mousePos = self.getMousePos(e);
-
-          let attributes = self._getSelectedAttributes();
-          self.selectLabel(self.sat.newLabel({
-                categoryPath: cat, attributes: attributes, mousePos: mousePos,
-              }),
-          );
-        }
-      }, DOUBLE_CLICK_WAIT_TIME);
-    } else if (self.selectedLabel) {
-      self.selectedLabel.mouseup(e);
-    }
+  if (this.isDown('ctrl')) {
+    // ctrl is pressed
+    this.labelCanvas.style.cursor = 'grab';
+  } else if (this.grabbingImage) {
+    this.labelCanvas.style.cursor = this.sat.LabelType.defaultCursorStyle;
   } else {
-    if (self.selectedLabel) {
-      self.selectedLabel.mouseup(e);
+    // ctrl is not pressed
+    if (this.sat.LabelType.useDoubleClick) {
+      if (!self.selectedLabel && self.isMouseDown) {
+        setTimeout(function() {
+          if (!self.selectedLabel) {
+            self.catSel = document.getElementById('category_select');
+            let cat = self.catSel.options[self.catSel.selectedIndex].innerHTML;
+            let mousePos = self.getMousePos(e);
+
+            let attributes = self._getSelectedAttributes();
+            self.selectLabel(self.sat.newLabel({
+                  categoryPath: cat, attributes: attributes, mousePos: mousePos,
+                }),
+            );
+          }
+        }, DOUBLE_CLICK_WAIT_TIME);
+      } else if (self.selectedLabel) {
+        self.selectedLabel.mouseup(e);
+      }
+    } else {
+      if (self.selectedLabel) {
+        self.selectedLabel.mouseup(e);
+      }
     }
+    if (!self.selectedLabel && self.sat.tracks) {
+      self.deselectAll();
+    }
+    self.redrawLabelCanvas();
+    self.redrawHiddenCanvas();
+    self.updateLabelCount();
   }
-  if (!self.selectedLabel && self.sat.tracks) {
-    self.deselectAll();
-  }
-  self.redrawLabelCanvas();
-  self.redrawHiddenCanvas();
-  self.updateLabelCount();
   self.isMouseDown = false;
+  // maintaining fields of image grabbing
+  delete this.grabbingImage;
+  delete this.startGrabX;
+  delete this.startGrabY;
+  delete this.startVisibleCoords;
 };
 
 /**

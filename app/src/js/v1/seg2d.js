@@ -523,7 +523,7 @@ Seg2d.prototype.endQuickDraw = function() {
 
 Seg2d.prototype.resetQuickdrawButton = function() {
   let quickdrawButton = document.getElementById('quickdraw_btn');
-  quickdrawButton.innerHTML = '<kbd>s</kbd> Quickdraw';
+  quickdrawButton.innerHTML = 'Quick-draw';
   quickdrawButton.style.backgroundColor = 'white';
 };
 
@@ -1140,73 +1140,89 @@ Seg2d.prototype.mouseleave = function (e) { // eslint-disable-line
  */
 Seg2d.prototype.keydown = function(e) {
   let keyID = e.KeyCode ? e.KeyCode : e.which;
-  if (keyID === 27) { // Esc
-    if (this.polyBuffer) {
-      for (let poly of this.polyBuffer) {
-        this.polys.push(poly);
+  if (this.satItem.isDown('ctrl')) {
+    // key down when ctrl is pressed
+    if (keyID === 68) {
+      e.preventDefault();
+      // ctrl-d for quick draw
+      if ($('#quickdraw_btn').length) {
+        this.handleQuickdraw();
       }
-      this.polyBuffer = null;
-    }
-    if (this.state === SegStates.QUICK_DRAW) {
-      this.endQuickDraw();
-    }
-    this.setState(SegStates.FREE);
-  } else if (keyID === 85) {
-    // u for unlinking the selected label
-    if (this.polys.length > 1) {
-      for (let poly of this.polys) {
-        this.splitShape(poly);
+      this.satItem.ctrlCommandPressed();
+    } else if (keyID === 76 &&
+        $('#link_btn').length) {
+      e.preventDefault();
+      // ctrl-l for linking
+      this.satItem.linkHandler();
+      this.satItem.ctrlCommandPressed();
+    } else if (keyID === 46 || keyID === 8) {
+      e.preventDefault();
+      // ctrl-delete or ctrl-backspace for relabeling a seg2d
+      if (this.state === SegStates.FREE) {
+        this.polyBuffer = [];
+        for (let poly of this.polys) {
+          this.polyBuffer.push(poly);
+        }
+        this.polys = [];
+        this.setState(SegStates.DRAW);
+        this.satItem.redrawLabelCanvas();
       }
+      this.satItem.ctrlCommandPressed();
     }
-  } else if (keyID === 83) {
-    this.handleQuickdraw();
-  } else if (keyID === 18 && this.state === SegStates.QUICK_DRAW) {
-    // alt toggle long path mode in quick draw
-    this.quickdrawCache.longPath = !this.quickdrawCache.longPath;
-    if (this.quickdrawCache.shortPathTempPoly
-      && this.quickdrawCache.longPathTempPoly) {
-      this.tempPoly = this.quickdrawCache.longPath
-        ? this.quickdrawCache.longPathTempPoly
-        : this.quickdrawCache.shortPathTempPoly;
-    }
-  } else if (keyID === 13 && !Seg2d.closed) {
-    // enter for ending a Path object
-    if (this.state === SegStates.DRAW) {
-      this.newPoly.endPath();
-
-      if (this.newPoly.isValidShape()) {
-        this.addShape(this.newPoly);
-        this.tempVertex = null;
-        this.tempPoly = null;
+  } else {
+    // solo key down
+    if (keyID === 27) { // Esc
+      if (this.polyBuffer) {
+        for (let poly of this.polyBuffer) {
+          this.polys.push(poly);
+        }
+        this.polyBuffer = null;
       }
-
+      if (this.state === SegStates.QUICK_DRAW) {
+        this.endQuickDraw();
+      }
       this.setState(SegStates.FREE);
-      this.tempVertex = null;
-      this.selectedShape = this.newPoly;
-    }
-  } else if (keyID === 82) {
-    // r for relabeling a seg2d
-    if (this.state === SegStates.FREE) {
-      this.polyBuffer = [];
-      for (let poly of this.polys) {
-        this.polyBuffer.push(poly);
+    } else if (keyID === 18 && this.state === SegStates.QUICK_DRAW) {
+      // alt toggle long path mode in quick draw
+      this.quickdrawCache.longPath = !this.quickdrawCache.longPath;
+      if (this.quickdrawCache.shortPathTempPoly
+          && this.quickdrawCache.longPathTempPoly) {
+        this.tempPoly = this.quickdrawCache.longPath
+            ? this.quickdrawCache.longPathTempPoly
+            : this.quickdrawCache.shortPathTempPoly;
       }
-      this.polys = [];
-      this.setState(SegStates.DRAW);
-      this.satItem.redrawLabelCanvas();
-    }
-  } else if (keyID === 68) {
-    // d for deleting the last labeled vertex while drawing
-    if (this.state === SegStates.DRAW) {
-      if (this.newPoly.vertices.length < 2) {
-        // set state to free to be deleted
+    } else if (keyID === 13) {
+      // enter for ending a Path object
+      if (this.state === SegStates.DRAW && !Seg2d.closed) {
+        this.newPoly.endPath();
+
+        if (this.newPoly.isValidShape()) {
+          this.addShape(this.newPoly);
+          this.tempVertex = null;
+          this.tempPoly = null;
+        }
+
         this.setState(SegStates.FREE);
-      } else {
-        // otherwise, pop the last labeled vertex
-        this.newPoly.popVertex();
-        this.tempPoly.popVertex();
-        this.tempPoly.popVertex();
-        this.tempPoly.pushVertex(this.tempVertex);
+        this.tempVertex = null;
+        this.selectedShape = this.newPoly;
+      }
+      // end linking
+      if (this.satItem.isLinking) {
+        this.satItem.linkHandler();
+      }
+    } else if (keyID === 68) {
+      // d for deleting the last labeled vertex while drawing
+      if (this.state === SegStates.DRAW) {
+        if (this.newPoly.vertices.length < 2) {
+          // set state to free to be deleted
+          this.setState(SegStates.FREE);
+        } else {
+          // otherwise, pop the last labeled vertex
+          this.newPoly.popVertex();
+          this.tempPoly.popVertex();
+          this.tempPoly.popVertex();
+          this.tempPoly.pushVertex(this.tempVertex);
+        }
       }
     }
   }

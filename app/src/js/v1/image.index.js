@@ -25,6 +25,12 @@ let showTemplateById = function(id) {
  */
 export function initSatSession(labelType, itemType) {
   let labelClass;
+  if (itemType === 'video') {
+    showElementById('player-controls');
+    showTemplateById('video_btns');
+    showTemplateById('video_usage');
+    document.getElementById('div_canvas').style.height = 'calc(100vh - 103px)';
+  }
   if (labelType === 'box2d') {
     showElementById('crosshair');
     labelClass = Box2d;
@@ -33,6 +39,7 @@ export function initSatSession(labelType, itemType) {
     if (labelType === 'segmentation') {
       if (itemType === 'image') {
         showTemplateById('seg_image_btns');
+        showTemplateById('seg_image_usage');
       }
       showTemplateById('seg_btns');
       showTemplateById('seg_usage');
@@ -45,9 +52,6 @@ export function initSatSession(labelType, itemType) {
     $('#player-controls').remove();
   }
   if (itemType === 'video') {
-    showElementById('player-controls');
-    showTemplateById('video_btns');
-    document.getElementById('div_canvas').style.height = 'calc(100vh - 103px)';
     new SatVideo(labelClass);
   }
 }
