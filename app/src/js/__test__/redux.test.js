@@ -1,4 +1,4 @@
-import configureStore from '../store/configure_store';
+import {configureStore} from '../redux/configure_store';
 import * as types from '../actions/action_types';
 import {ActionCreators} from 'redux-undo';
 import {testJson} from './test_objects';

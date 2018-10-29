@@ -1,4 +1,3 @@
-
 import {makeState} from '../functional/states';
 import * as types from '../actions/action_types';
 import * as common from '../functional/common';
@@ -13,7 +12,7 @@ import type {StateType} from '../functional/types';
  * @param {object} action
  * @return {StateType}
  */
-export default function(
+export function reducer(
     currentState: StateType = makeState(),
     action: Object): StateType {
   // Appending actions to action array

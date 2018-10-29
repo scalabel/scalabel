@@ -29,7 +29,16 @@ export class BaseController {
    */
   onStateUpdated(): void {
     for (let viewer of this.viewers) {
-      viewer.updateState(Session.getState());
+      viewer.updateState(this.getState());
+    }
+  }
+
+  /**
+   * Callback of fast store update
+   */
+  onFastStateUpdated(): void {
+    for (let viewer of this.viewers) {
+      viewer.updateFastState(this.getFastState());
     }
   }
 
@@ -47,6 +56,14 @@ export class BaseController {
    */
   getState(): StateType {
     return Session.getState();
+  }
+
+  /**
+   * Wrapper function for session getFastState
+   * @return {StateType}
+   */
+  getFastState(): StateType {
+    return Session.getFastState();
   }
 
   /**

@@ -15,13 +15,14 @@ import {BaseController} from '../controllers/base_controller';
 import {BaseViewer} from '../viewers/base_viewer';
 import {Box2dViewer} from '../viewers/image_box2d_viewer';
 import {Box2dController} from '../controllers/image_box2d_controller';
-import configureStore from '../store/configure_store';
+import {configureStore, configureFastStore} from '../redux/configure_store';
 
 /**
  * Singleton session class
  */
 class Session {
   store: Object;
+  fastStore: Object; // This store contains the temporary state
   images: Array<Image>;
   itemType: string;
   labelType: string;
@@ -34,6 +35,7 @@ class Session {
    */
   constructor() {
     this.store = {};
+    this.fastStore = configureFastStore();
     this.images = [];
     this.controllers = [];
     this.viewers = [];
@@ -50,6 +52,14 @@ class Session {
   }
 
   /**
+   * Get the current temporary state. It is for animation rendering.
+   * @return {StateType}
+   */
+  getFastState(): StateType {
+    return this.fastStore.getState();
+  }
+
+  /**
    * Wrapper for redux store dispatch
    * @param {Object} action
    */
@@ -58,15 +68,17 @@ class Session {
   }
 
   /**
-   * Wrapper for redux store subscribe
-   * @param {function} func: callback function on state chnage.
+   * Subscribe all the controllers to the states
    */
-  subscribe(func: () => void) {
-    this.store.subscribe(func);
+  connectControllers() {
+    for (let c of this.controllers) {
+      this.store.subscribe(c.onStateUpdated.bind(c));
+      this.fastStore.subscribe(c.onFastStateUpdated.bind(c));
+    }
   }
 
   /**
-   * Intialize state store
+   * Initialize state store
    * @param {Object} stateJson
    */
   initStore(stateJson: Object): void {
@@ -132,10 +144,7 @@ class Session {
     } else if (this.labelType === 'box2dv2') {
       this.initImageBox2DLabeling();
     }
-    for (let c of this.controllers) {
-      self.subscribe(c.onStateUpdated.bind(c));
-    }
-
+    self.connectControllers();
     self.loadImages();
 
     document.getElementsByTagName('BODY')[0].onresize = function() {

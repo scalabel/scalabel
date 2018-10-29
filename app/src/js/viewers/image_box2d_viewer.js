@@ -29,9 +29,9 @@ export class Box2dViewer extends BaseViewer2D {
       let labels = items.labels;
       let rects = [];
       for (let labelId of labels) {
-        let label = this.state.labels[labelId];
+        let label = this.getLabel(labelId);
         if (label.shapes && label.shapes.length > 0) {
-          rects.push(this.state.shapes[label.shapes[0]]);
+          rects.push(this.getShape(label.shapes[0]));
         }
       }
       return rects;

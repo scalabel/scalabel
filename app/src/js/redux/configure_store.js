@@ -1,7 +1,7 @@
 import {createStore} from 'redux';
 import undoable, {includeAction} from 'redux-undo';
 import {makeState} from '../functional/states';
-import reducer from '../reducers/reducer';
+import {reducer} from './reducer';
 
 import {
 // SAT specific actions
@@ -16,7 +16,14 @@ import {
   TOGGLE_ASSISTANT_VIEW,
 } from '../actions/action_types';
 
-const configureStore = (json: Object = {}, devMode: boolean = false) => {
+/**
+ * Configure the main store for the state
+ * @param {Object} json: initial state
+ * @param {boolean} devMode: whether to turn on dev mode
+ * @return {Object}
+ */
+export function configureStore(
+    json: Object = {}, devMode: boolean = false): Object {
   let store;
   const initialHistory = {
     past: [],
@@ -42,6 +49,12 @@ const configureStore = (json: Object = {}, devMode: boolean = false) => {
   }), initialHistory);
 
   return store;
-};
+}
 
-export default configureStore;
+/**
+ * Create fast and partial store for interactive mode
+ * @return {Object}
+ */
+export function configureFastStore(): Object {
+  return createStore(reducer, makeState());
+}

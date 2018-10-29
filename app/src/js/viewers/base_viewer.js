@@ -1,5 +1,10 @@
 import {BaseController} from '../controllers/base_controller';
-import type {StateType, ViewerConfigType, ItemType} from '../functional/types';
+import type {
+  StateType,
+  ViewerConfigType,
+  ItemType,
+  LabelType,
+} from '../functional/types';
 import {makeState} from '../functional/states';
 
 /**
@@ -8,6 +13,7 @@ import {makeState} from '../functional/states';
 export class BaseViewer {
   // TODO: support temporary objects
   state: StateType;
+  fastState: StateType;
   controller: $Subtype<BaseController>;
   /**
    * General viewer constructor to initialize the viewer state
@@ -15,6 +21,7 @@ export class BaseViewer {
    */
   constructor(controller: $Subtype<BaseController>) {
     this.state = makeState();
+    this.fastState = makeState();
     this.controller = controller;
     controller.addViewer(this);
   }
@@ -23,11 +30,20 @@ export class BaseViewer {
    * map state of the store and the state of the controller
    * to the actual values needed by the render, so that
    * the render function does not need to fetch the values itself
-   * @param {Object} state: partial state definition
+   * @param {StateType} state: state definition
    */
   updateState(state: StateType): void {
     this.state = state;
     this.redraw();
+  }
+
+  /**
+   * Update the fast state. Some of the viewers like ImageViewer will ignore it.
+   * So the state change is ignored by default.
+   * @param {StateType} state: state definition
+   */
+  updateFastState(state: StateType): void {
+    this.fastState = state;
   }
 
   /**
@@ -36,6 +52,32 @@ export class BaseViewer {
    */
   getState(): StateType {
     return this.state;
+  }
+
+  /**
+   * Get the label from the combination of state and fastState
+   * @param {number} labelId
+   * @return {LabelType}
+   */
+  getLabel(labelId: number): LabelType {
+    if ('labels' in this.fastState && labelId in this.fastState.labels) {
+      return this.fastState.labels[labelId];
+    } else {
+      return this.state.labels[labelId];
+    }
+  }
+
+  /**
+   * Get the shape from the combination of state and fastState
+   * @param {number} shapeId
+   * @return {Object}
+   */
+  getShape(shapeId: number): Object {
+    if ('shapes' in this.fastState && shapeId in this.fastState.shapes) {
+      return this.fastState.shapes[shapeId];
+    } else {
+      return this.state.shapes[shapeId];
+    }
   }
 
   /**
