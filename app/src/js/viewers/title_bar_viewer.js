@@ -72,11 +72,13 @@ export class TitleBarViewer extends BaseViewer {
     let assistantViewIcon = document.getElementById('assistant-view-btn');
     if (assistantViewIcon) {
       if (this.state.layout.assistantView) {
-        assistantViewIcon.innerHTML =
-          '<img src="./icons/view-full.svg" style="width: 60%; height: 60%">';
+        assistantViewIcon.innerHTML = sprintf('<i %s %s></i>',
+            'class="far fa-window-maximize"',
+            'style="width: 15px; height: 15px"');
       } else {
-        assistantViewIcon.innerHTML =
-          '<img src="./icons/view-split.svg" style="width: 60%; height: 60%">';
+        assistantViewIcon.innerHTML = sprintf('<i %s %s></i>',
+            'class="fas fa-columns"',
+            'style="width: 15px; height: 15px"');
       }
     }
     return true;

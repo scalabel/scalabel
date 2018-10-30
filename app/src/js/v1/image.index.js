@@ -29,7 +29,7 @@ export function initSatSession(labelType, itemType) {
     showElementById('player-controls');
     showTemplateById('video_btns');
     showTemplateById('video_usage');
-    document.getElementById('div_canvas').style.height = 'calc(100vh - 103px)';
+    document.getElementById('div-canvas').style.height = 'calc(100vh - 103px)';
   }
   if (labelType === 'box2d') {
     showElementById('crosshair');
