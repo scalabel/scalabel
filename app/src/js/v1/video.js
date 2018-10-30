@@ -17,9 +17,6 @@ export function SatVideo(LabelType) {
   self.slider = document.getElementById('video_slider');
 
   self.currentItem = self.items[0];
-  self.currentItem.image.onload = function() {
-    self.currentItem.redraw();
-  };
 
   self.playing = false;
   self.playButton.onclick = function() {
