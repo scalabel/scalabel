@@ -11,6 +11,7 @@ export function Sat3dTracker() {
   if (this.tracks == null) {
     this.tracks = [];
   }
+  this.frameCounter = document.getElementById('frame_counter');
 }
 
 Sat3dTracker.prototype = Object.create(Sat3d.prototype);
@@ -87,12 +88,16 @@ Sat3dTracker.prototype.gotoItem = function(index) {
   let self = this;
   self.broadcastViews(self.currentItem);
   Sat3d.prototype.gotoItem.call(this, index);
+  self.frameCounter.innerHTML =
+      (self.currentItem.index % self.items.length) + 1;
 };
 
 Sat3dTracker.prototype.moveSlider = function() {
   let self = this;
   self.broadcastViews(self.currentItem);
   Sat3d.prototype.moveSlider.call(this);
+  self.frameCounter.innerHTML =
+      (self.currentItem.index % self.items.length) + 1;
 };
 
 Sat3dTracker.prototype.broadcastViews = function(item) {

@@ -124,9 +124,9 @@
         </nav>
         <main role="main" class="main_col">
             <div id="div_main">
-                <div id="main_container"></div>
+                <div id="main_container" style="overflow: hidden;"></div>
                 <div id="player-controls" style="width: 100%; top: 0;">
-                    <!-- video progress slider -->
+                    <div id="frame_counter"> 1</div>
                     <input id="slider" class="slider" type="range"
                            min="1"
                            max="{{ .Task.ProjectOptions.VideoMetaData.NumFrames }}"
