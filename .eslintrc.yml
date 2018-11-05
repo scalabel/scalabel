@@ -6,7 +6,8 @@ env:
 extends:
   ["eslint:recommended",
    "google",
-   "plugin:flowtype/recommended"]
+   "plugin:flowtype/recommended",
+   "plugin:react/recommended"]
 rules:
   linebreak-style:
     - error
@@ -14,7 +15,7 @@ rules:
   semi:
     - error
     - always
-  no-unused-vars: 
+  no-unused-vars:
     - error
     - argsIgnorePattern: "[iI]gnored"
   flowtype/no-types-missing-file-annotation:
@@ -23,5 +24,10 @@ rules:
 parserOptions:
   ecmaVersion: 2018
   sourceType: "module"
+  ecmaFeatures:
+      jsx: true
+settings:
+  react:
+    version: "16.6.0"
 parser: "babel-eslint"
 plugins: ["flowtype"]

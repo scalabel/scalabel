@@ -47,8 +47,12 @@ func (env Env) VendorPath() string {
 	return path.Join(env.AppDir(), "control/vendor.html")
 }
 
-func (env Env) Label2dPath() string {
-	return path.Join(env.AppDir(), "annotation/image.html")
+func (env Env) Label2dPath(v string) string {
+    if (v == "2") {
+        return path.Join(env.AppDir(), "annotation/label.html")
+    } else {
+        return path.Join(env.AppDir(), "annotation/image.html")
+    }
 }
 
 func (env Env) Label3dPath() string {

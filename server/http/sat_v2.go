@@ -261,7 +261,7 @@ func executeLabelingTemplateV2(w http.ResponseWriter, r *http.Request, tmpl *tem
 }
 
 func Label2dv2Handler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(env.Label2dPath())
+	tmpl, err := template.ParseFiles(env.Label2dPath(r.FormValue("v")))
 	if err != nil {
 		Error.Println(err)
 	}
