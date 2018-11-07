@@ -76,7 +76,27 @@
             <div class="sidebar-sticky" style="width: 200px; height: calc(100vh - 48px)">
                 <!-- list of control sections -->
                 <div style="text-align:center;">
-                    <div id="sidebar_content" class="form-group">
+                    <div id="sidebar_content" class="form-group" style="position:absolute; top:20px; bottom:10px; left: 0;">
+                        <table style="width:170px; position:relative; left: 15px;"
+                                 class="table-borderless table-hover table-striped project-table"
+                                 id="project_table">
+                            <thead>
+                            <tr style="height: 3.0rem; font-size: 1.4rem;">
+                                <th>Existing Projects</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <!-- iterate over projects -->
+                                {{ range .}}
+                                <tr style="height: 3.0rem; font-size: 1.3rem;">
+                                    <td>
+                                        <a href="./dashboard?project_name={{.}}"> {{.}}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                          </table>
                     </div>
                 </div>
             </div>

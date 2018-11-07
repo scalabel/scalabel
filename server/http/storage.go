@@ -58,13 +58,14 @@ func (fs *FileStorage) HasKey(key string) bool {
 
 func (fs *FileStorage) ListKeys(prefix string) []string {
 	files, err := ioutil.ReadDir(path.Join(fs.DataDir, prefix))
-	if err != nil {
-		return []string{}
-	}
 	keys := []string{}
+	if err != nil {
+		return keys
+	}
+
 	for _, f := range files {
 		key := f.Name()
-		key = key[:len(key)-5]
+		key = key[:len(key) - 5]
 		keys = append(keys, path.Join(prefix, key))
 	}
 	return keys

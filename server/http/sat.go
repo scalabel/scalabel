@@ -233,6 +233,18 @@ func countCategories(categories []Category) int {
 	return count
 }
 
+func createHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(env.CreatePath())
+	if err != nil {
+		Error.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+
+	existingProjects := GetExistingProjects()
+	tmpl.Execute(w, existingProjects)
+}
+
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// use template to insert assignment links
 	funcMap := template.FuncMap{"countLabeledImages": countLabeledImages,
