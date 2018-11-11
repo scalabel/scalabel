@@ -1,7 +1,7 @@
 import {sprintf} from 'sprintf-js';
 import Session from '../common/session.js';
 import {BaseViewer} from './base_viewer';
-import {TitleBarController} from '../controllers/title_bar_controller';
+/* :: import {TitleBarController} from '../controllers/title_bar_controller'; */
 
 /**
  * TitleBarViewer class
@@ -9,10 +9,10 @@ import {TitleBarController} from '../controllers/title_bar_controller';
  */
 export class TitleBarViewer extends BaseViewer {
   /**
-   * @param {TitleBarController} controller
+   * @param {TitleBarController} controller: reference to controller
    * @constructor
    */
-  constructor(controller: TitleBarController) {
+  constructor(controller/* : TitleBarController */) {
     super(controller);
     if (Session.getState().config.labelType === 'tag') {
       let labelCountTitle = document.getElementById('label-count-title');

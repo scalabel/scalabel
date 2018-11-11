@@ -1,4 +1,4 @@
-import {BaseViewer} from '../viewers/base_viewer';
+/* :: import {BaseViewer} from '../viewers/base_viewer'; */
 import Session from '../common/session';
 import type {StateType} from '../functional/types';
 
@@ -7,7 +7,7 @@ import type {StateType} from '../functional/types';
  * If there is no temporary object or algorithm involved, this is usually enough
  */
 export class BaseController {
-  viewers: Array<BaseViewer>;
+  /* :: viewers: Array<BaseViewer>; */
 
   /**
    * initialize internal states
@@ -18,7 +18,7 @@ export class BaseController {
 
   /**
    * Set the connected viewer
-   * @param {BaseViewer} viewer
+   * @param {BaseViewer} viewer: reference to corresponding viewer
    */
   addViewer(viewer: BaseViewer): void {
     this.viewers.push(viewer);
@@ -44,7 +44,7 @@ export class BaseController {
 
   /**
    * Dispatch actions from controllers
-   * @param {Object} action
+   * @param {Object} action: action returned by action creator
    */
   dispatch(action: Object): void {
     Session.dispatch(action);
@@ -68,7 +68,7 @@ export class BaseController {
 
   /**
    * mouseUp callback
-   * @param {Object} ignoredEvent
+   * @param {Object} ignoredEvent: mouse event
    */
   mouseUp(ignoredEvent: Object): void {}
 }

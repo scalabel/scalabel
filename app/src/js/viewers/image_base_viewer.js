@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import {BaseViewer} from './base_viewer';
-import {BaseController} from '../controllers/base_controller';
+/* :: import {BaseController} from '../controllers/base_controller'; */
 import type {ImageViewerConfigType} from '../functional/types';
 import {sprintf} from 'sprintf-js';
 
@@ -21,12 +21,12 @@ export class BaseViewer2D extends BaseViewer {
   isAssistantView: boolean;
 
   /**
-   * @param {BaseController} controller
-   * @param {string} canvasId
-   * @param {string} canvasSuffix
+   * @param {BaseController} controller: reference to controller
+   * @param {string} canvasId: element id of canvas
+   * @param {string} canvasSuffix: suffix to canvas id
    * @constructor
    */
-  constructor(controller: BaseController, canvasId: string,
+  constructor(controller/* : BaseController */, canvasId: string,
               canvasSuffix: string = '') {
     super(controller);
     // necessary variables
@@ -223,7 +223,7 @@ export class BaseViewer2D extends BaseViewer {
 
   /**
    * Set the image canvas size
-   * @param {ImageViewerConfigType} config
+   * @param {ImageViewerConfigType} config: imageViewer configuration
    */
   setCanvasSize(config: ImageViewerConfigType): void {
     let rectDiv = this.divCanvas.getBoundingClientRect();

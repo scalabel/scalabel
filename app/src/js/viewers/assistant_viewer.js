@@ -1,5 +1,5 @@
 import {BaseViewer2D} from './image_base_viewer';
-import {BaseController} from '../controllers/base_controller';
+/* :: import {BaseController} from '../controllers/base_controller'; */
 import Session from '../common/session';
 import type {RectType} from '../functional/types';
 
@@ -7,20 +7,12 @@ import type {RectType} from '../functional/types';
  * Image viewer Class
  */
 export class AssistantViewer extends BaseViewer2D {
-  holderCanvas: HTMLCanvasElement;
-  holderContext: CanvasRenderingContext2D;
   /**
-   * @param {BaseController} controller
+   * @param {BaseController} controller: corresponding controller
    * @constructor
    */
-  constructor(controller: BaseController) {
+  constructor(controller /* : BaseController */) {
     super(controller, 'image-canvas', 'assistant');
-    let holderCanvas: HTMLCanvasElement = ((document.
-        getElementById('holder-image-canvas'): any): HTMLCanvasElement);
-    if (holderCanvas) {
-        this.holderCanvas = holderCanvas;
-        this.holderContext = this.holderCanvas.getContext('2d');
-    }
     this.isAssistantView = true;
   }
 

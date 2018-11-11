@@ -1,3 +1,4 @@
+// @flow
 import {ToolboxController} from '../controllers/toolbox_controller';
 import {TitleBarController} from '../controllers/title_bar_controller';
 import {ImageViewer} from '../viewers/image_viewer';
@@ -12,7 +13,7 @@ import type {ImageViewerConfigType,
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 import {BaseController} from '../controllers/base_controller';
-import {BaseViewer} from '../viewers/base_viewer';
+/* :: import {BaseViewer} from '../viewers/base_viewer'; */
 import {Box2dViewer} from '../viewers/image_box2d_viewer';
 import {Box2dController} from '../controllers/image_box2d_controller';
 import {configureStore, configureFastStore} from '../redux/configure_store';
@@ -27,7 +28,7 @@ class Session {
   itemType: string;
   labelType: string;
   controllers: Array<BaseController>;
-  viewers: Array<BaseViewer>;
+  /* :: viewers: Array<BaseViewer>; */
   devMode: boolean;
 
   /**
@@ -61,7 +62,7 @@ class Session {
 
   /**
    * Wrapper for redux store dispatch
-   * @param {Object} action
+   * @param {Object} action: action description
    */
   dispatch(action: Object): void {
     this.store.dispatch(action);
@@ -79,7 +80,7 @@ class Session {
 
   /**
    * Initialize state store
-   * @param {Object} stateJson
+   * @param {Object} stateJson: json state from backend
    */
   initStore(stateJson: Object): void {
     this.store = configureStore(stateJson, this.devMode);
@@ -172,7 +173,7 @@ class Session {
 
   /**
    * Init labeling session
-   * @param {Object} stateJson
+   * @param {Object} stateJson: json state from backend
    */
   init(stateJson: Object): void {
     this.initStore(stateJson);

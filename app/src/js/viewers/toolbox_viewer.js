@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Session from '../common/session';
 import {BaseViewer} from './base_viewer';
-import {ToolboxController} from '../controllers/toolbox_controller';
+/* :: import {ToolboxController} from '../controllers/toolbox_controller'; */
 import {sprintf} from 'sprintf-js';
 import 'bootstrap-switch';
 
@@ -11,10 +11,10 @@ import 'bootstrap-switch';
  */
 export class ToolboxViewer extends BaseViewer {
   /**
-   * @param {ToolboxController} controller
+   * @param {ToolboxController} controller: reference to controller
    * @constructor
    */
-  constructor(controller: ToolboxController) {
+  constructor(controller/* : ToolboxController */) {
     super(controller);
     let self = this;
     let categories: Array<string> = Session.getState().config.categories;

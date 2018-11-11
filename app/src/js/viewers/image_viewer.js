@@ -1,5 +1,5 @@
 import {BaseViewer2D} from './image_base_viewer';
-import {BaseController} from '../controllers/base_controller';
+/* :: import {BaseController} from '../controllers/base_controller'; */
 import Session from '../common/session';
 
 /**
@@ -7,10 +7,10 @@ import Session from '../common/session';
  */
 export class ImageViewer extends BaseViewer2D {
   /**
-   * @param {BaseController} controller
+   * @param {BaseController} controller: reference to controller
    * @constructor
    */
-  constructor(controller: BaseController) {
+  constructor(controller/* : BaseController */) {
     super(controller, 'image-canvas');
   }
   /**
