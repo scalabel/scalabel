@@ -135,6 +135,8 @@ type Item struct {
 	Data        map[string]interface{} `json:"data" yaml:"data"`
 	LabelImport []LabelExport          `json:"labelImport" yaml:"labelImport"`
 	Attributes  map[string][]int       `json:"attributes" yaml:"attributes"`
+	VideoName   string                 `json:"videoName" yaml:"videoName"`
+	Timestamp   int64                  `json:"timestamp" yaml:"timestamp"`
 }
 
 // An annotation for an item, needs to include all possible annotation types
@@ -544,9 +546,13 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 				item := ItemExport{}
 				item.Index = itemToLoad.Index
 				if projectToLoad.Options.ItemType == "video" {
-					item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+					item.VideoName = itemToLoad.VideoName
+				} else {
+					//TODO: ask about what to do here
+					item.VideoName = itemToLoad.VideoName
+					//item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
 				}
-				item.Timestamp = 10000 // to be fixed
+				item.Timestamp = itemToLoad.Timestamp
 				item.Name = itemToLoad.Url
 				item.Url = itemToLoad.Url
 				for _, labelId := range itemToLoad.LabelIds {
@@ -589,9 +595,12 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 				item := ItemExport{}
 				item.Index = itemToLoad.Index
 				if projectToLoad.Options.ItemType == "video" {
-					item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+					item.VideoName = itemToLoad.VideoName
+				} else {
+					//TODO: ask about what to do here
+					item.VideoName = itemToLoad.VideoName
 				}
-				item.Timestamp = 10000 // to be fixed
+				item.Timestamp = itemToLoad.Timestamp
 				item.Name = itemToLoad.Url
 				item.Url = itemToLoad.Url
 				items = append(items, item)
@@ -759,6 +768,8 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) map[string
 			item := Item{}
 			item.Url = itemImport.Url
 			item.Index = indexes[itemImport.VideoName]
+			item.VideoName = itemImport.VideoName
+			item.Timestamp = itemImport.Timestamp
 			// load item attributes if needed
 			if len(itemImport.Attributes) > 0 {
 				item.Attributes = map[string][]int{}
