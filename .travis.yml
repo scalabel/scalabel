@@ -22,3 +22,6 @@ script:
   - go build -i -o ./bin/sat ./server/http
   - go test ./server/http -args --config ../../app/config/travis_config.yml
   - npm test
+branches:
+  only:
+    master
