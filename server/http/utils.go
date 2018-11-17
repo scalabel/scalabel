@@ -31,6 +31,26 @@ func Index2str(id int) string {
 	return fmt.Sprintf("%06d", id)
 }
 
+/**
+ * Fetch names of all existing projects in the data folder
+**/
+func GetExistingProjects() []string {
+	files, err := ioutil.ReadDir(env.DataDir)
+	names := []string{}
+	if err != nil {
+		return names
+	}
+
+	for _, f := range files {
+		name := f.Name()
+		// remove hidden files and the config file
+		if !strings.ContainsAny(name, ".") {
+	 		names = append(names, name)
+	 	}
+	}
+	return names
+}
+
 func GetProject(projectName string) (Project, error) {
 	fields, err := storage.Load(path.Join(projectName, "project"))
 	project := Project{}

@@ -1,5 +1,5 @@
 import {BaseViewer2D} from './image_base_viewer';
-import {BaseController} from '../controllers/base_controller';
+/* :: import {BaseController} from '../controllers/base_controller'; */
 import type {RectType} from '../functional/types';
 
 /**
@@ -7,10 +7,10 @@ import type {RectType} from '../functional/types';
  */
 export class Box2dViewer extends BaseViewer2D {
   /**
-   * @param {BaseController} controller
+   * @param {BaseController} controller: reference to Box2DController
    * @constructor
    */
-  constructor(controller: BaseController) {
+  constructor(controller/* : BaseController */) {
     super(controller, 'label-canvas');
     // $FlowFixMe
     let self = this;
@@ -39,7 +39,7 @@ export class Box2dViewer extends BaseViewer2D {
 
   /**
    * Draw a single box
-   * @param {RectType} rect
+   * @param {RectType} rect: rectangle to be drawn
    */
   drawRect(rect: RectType) {
       this.context.save();

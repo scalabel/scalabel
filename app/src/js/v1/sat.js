@@ -622,7 +622,8 @@ SatItem.prototype.toJson = function() {
     }
   }
   return {url: self.url, index: self.index,
-    labelIds: labelIds, labelImport: null};
+    labelIds: labelIds, labelImport: null,
+    name: self.name, videoName: self.videoName, timestamp: self.timestamp};
 };
 
 /**
@@ -637,6 +638,9 @@ SatItem.prototype.fromJson = function(json) {
   let self = this;
   self.url = json.url;
   self.index = json.index;
+  self.name = json.name;
+  self.videoName = json.videoName;
+  self.timestamp = json.timestamp;
   if (json.labelIds) {
     for (let i = 0; i < json.labelIds.length; i++) {
       let label = self.sat.labelIdMap[json.labelIds[i]];

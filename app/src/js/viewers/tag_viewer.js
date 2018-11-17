@@ -1,16 +1,16 @@
 import {BaseViewer2D} from './image_base_viewer';
 import {sprintf} from 'sprintf-js';
-import {BaseController} from '../controllers/base_controller';
+/* :: import {BaseController} from '../controllers/base_controller'; */
 
 /**
  * Tag viewer class
  */
 export class TagViewer extends BaseViewer2D {
   /**
-   * @param {BaseController} controller
+   * @param {BaseController} controller: reference to controller
    * @constructor
    */
-  constructor(controller: BaseController) {
+  constructor(controller/* : BaseController */) {
     super(controller, 'tag-canvas');
   }
 

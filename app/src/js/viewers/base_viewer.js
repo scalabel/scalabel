@@ -1,4 +1,4 @@
-import {BaseController} from '../controllers/base_controller';
+/* :: import {BaseController} from '../controllers/base_controller'; */
 import type {
   StateType,
   ViewerConfigType,
@@ -14,12 +14,12 @@ export class BaseViewer {
   // TODO: support temporary objects
   state: StateType;
   fastState: StateType;
-  controller: $Subtype<BaseController>;
+  /* :: controller: $Subtype<BaseController>; */
   /**
    * General viewer constructor to initialize the viewer state
    * @param {BaseController} controller: controller object to listen to events
    */
-  constructor(controller: $Subtype<BaseController>) {
+  constructor(controller/* : $Subtype<BaseController> */) {
     this.state = makeState();
     this.fastState = makeState();
     this.controller = controller;
@@ -56,7 +56,7 @@ export class BaseViewer {
 
   /**
    * Get the label from the combination of state and fastState
-   * @param {number} labelId
+   * @param {number} labelId: id of target label
    * @return {LabelType}
    */
   getLabel(labelId: number): LabelType {
@@ -69,7 +69,7 @@ export class BaseViewer {
 
   /**
    * Get the shape from the combination of state and fastState
-   * @param {number} shapeId
+   * @param {number} shapeId: id of target shape
    * @return {Object}
    */
   getShape(shapeId: number): Object {
