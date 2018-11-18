@@ -445,6 +445,7 @@ Sat.prototype.encodeBaseJson = function() {
         attributes: self.attributes,
         instructions: self.instructions,
         demoMode: self.demoMode,
+        interpolationMode: self.interpolationMode,
         bundleFile: self.bundleFile,
         submitted: self.submitted,
       },
