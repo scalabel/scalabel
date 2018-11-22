@@ -1,93 +1,89 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {AppBar, CssBaseline, Toolbar, Typography, withStyles, IconButton,
-  MenuIcon, Tooltip} from '@material-ui/core';
+import CssBaseline from '@material-ui/core';
 import SplitPane from 'react-split-pane';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faInfo, faQuestion, faSave, faCheck} from
-      '@fortawesome/free-solid-svg-icons';
 
-const styles = (theme) => ({
-  appBar: {
-    position: 'relative',
-    background: '#222222',
-  },
-  grow: {
-    flexGrow: 1,
-  },
-  btnTitle: {
-    color: '#bbbbbb',
-    margin: theme.spacing.unit,
-  },
-});
+type Props = {
+  titleBar: Object,
+  leftSidebar1: Object,
+  leftSidebar2?: Object,
+  center: Object,
+  bottomBar?: Object,
+  rightSidebar1?: Object,
+  rightSidebar2?: Object,
+}
 
 /**
- * React label interface
- * @param {Object} props
- * @return {*}
- * @constructor
+ * Layout of the labeling interface
  */
-function LabelLayout(props) {
-  const {classes} = props;
+class LabelLayout extends React.Component<Props> {
+  /**
+  * Render function
+  * @return {React.Fragment} React fragment
+  */
+  render() {
+    const {titleBar} = this.props;
+    const {leftSidebar1} = this.props;
+    const {leftSidebar2} = this.props;
+    const {bottomBar} = this.props;
+    const {center} = this.props;
+    const {rightSidebar1} = this.props;
+    const {rightSidebar2} = this.props;
+    return (
+        <React.Fragment>
+          <CssBaseline />
+          {titleBar}
+          <main>
+            <SplitPane split='vertical' minSize={180}
+                       defaultSize={200} maxSize={300}>
+              {/* left sidebar */}
+              {leftSidebar2 ?
+                  <SplitPane split='horizontal' minSize={180}
+                             defaultSize={200} maxSize={-180}>
+                    {leftSidebar1}
+                    {leftSidebar2}
+                  </SplitPane>
+                  : leftSidebar1
+              }
 
-  return (
-      <React.Fragment>
-        <CssBaseline />
-        <AppBar position="static" className={classes.appBar}>
-          <Toolbar variant="dense">
-            <IconButton className={classes.menuButton}
-                        color="inherit" aria-label="Menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" color="inherit">
-              BDD Labeling Session
-            </Typography>
-            <div className={classes.grow} />
-            <Tooltip title='Instructions'>
-              <IconButton className={classes.btnTitle}>
-                <FontAwesomeIcon icon={faInfo} size='xs'/>
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Keyboard Usage'>
-              <IconButton className={classes.btnTitle}>
-                <FontAwesomeIcon icon={faQuestion} size='xs'/>
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Save'>
-              <IconButton className={classes.btnTitle}>
-                <FontAwesomeIcon icon={faSave} size='xs'/>
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Submit'>
-              <IconButton className={classes.btnTitle}>
-                <FontAwesomeIcon icon={faCheck} size='xs'/>
-              </IconButton>
-            </Tooltip>
-          </Toolbar>
-        </AppBar>
-        <main>
-          <SplitPane split='vertical' minSize={180}
-                     defaultSize={200} maxSize={300}>
-            <div></div>
-            <SplitPane split='vertical' minSize={500}
-                       defaultSize='80%' maxSize={-200}>
-              <div></div>
-              <SplitPane split='horizontal' minSize={180}
-                         defaultSize={200} maxSize={-180}>
-                <div></div>
-                <div></div>
+              <SplitPane split='vertical' minSize={500}
+                         defaultSize='80%' maxSize={-200}>
+                {/* content */}
+                {bottomBar ?
+                    <SplitPane split='horizontal' minSize={180}
+                               defaultSize='70%' maxSize={-180}>
+                      {center}
+                      {bottomBar}
+                    </SplitPane>
+                    : center
+                }
+
+                {/* right sidebar */}
+                {rightSidebar2 ?
+                    <SplitPane split='horizontal' minSize={180}
+                               defaultSize={200} maxSize={-180}>
+                      {rightSidebar1}
+                      {rightSidebar2}
+                    </SplitPane>
+                    : rightSidebar1
+                }
               </SplitPane>
             </SplitPane>
-          </SplitPane>
-        </main>
-        {/* End footer */}
-      </React.Fragment>
-  );
+          </main>
+          {/* End footer */}
+        </React.Fragment>
+    );
+  }
 }
 
 LabelLayout.propTypes = {
-  classes: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
+  titleBar: PropTypes.object.isRequired,
+  leftSidebar1: PropTypes.object.isRequired,
+  leftSidebar2: PropTypes.object,
+  center: PropTypes.object.isRequired,
+  bottomBar: PropTypes.object,
+  rightSidebar1: PropTypes.object,
+  rightSidebar2: PropTypes.object,
 };
 
-export default withStyles(styles, {withTheme: true})(LabelLayout);
+export default LabelLayout;
