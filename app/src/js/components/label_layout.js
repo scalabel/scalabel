@@ -13,6 +13,8 @@ type Props = {
   rightSidebar2?: Object,
 }
 
+window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
+
 /**
  * Split component with the second component optional
  * @param {string} split - horizontal or vertical

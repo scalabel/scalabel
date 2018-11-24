@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {AppBar, Toolbar, IconButton, Tooltip, Typography}
+import {AppBar, Toolbar, IconButton, Tooltip}
        from '@material-ui/core';
 import {faCheck, faInfo, faQuestion, faSave, faList, faColumns}
        from '@fortawesome/free-solid-svg-icons/index';
@@ -45,9 +45,7 @@ class TitleBar extends React.Component<Props> {
     const {dashboardLink} = this.props;
     return (<AppBar position="static" className={classes.appBar}>
       <Toolbar variant="dense">
-        <Typography variant="h6" color="inherit">
-          {title}
-        </Typography>
+        {title}
         <div className={classes.grow} />
         <Tooltip title='Instructions'>
           <IconButton className={classes.titleUnit}
