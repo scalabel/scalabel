@@ -1142,6 +1142,17 @@ Polygon.prototype.equals = function(p) {
   return true;
 };
 
+Polygon.prototype.isSmall = function() {
+  let box = this.bbox;
+  return (box.max.x - box.min.x) *
+      (box.max.y - box.min.y) < 50;
+};
+
+// check whether a curve is valid
+Polygon.prototype.isValidShape = function() {
+  return !this.isSelfIntersect() && this.vertices.length > 1 && !this.isSmall();
+};
+
 /**
  * The Rectangle object for box2d annotation.
  * @param {number} x - The x coordinate of the upper-left corner.
