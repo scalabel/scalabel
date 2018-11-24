@@ -38,7 +38,7 @@ $(document).ready(function() {
 function renderInterface(json) {
   /* LabelLayout props:
        * titleBar: required
-       * center: required
+       * main: required
        * leftSidebar1: required
        * leftSidebar2: optional
        * bottomBar: optional
@@ -55,7 +55,7 @@ function renderInterface(json) {
     />
   );
   let leftSidebar1 = (<div>1</div>);
-  let center = (<div>2</div>);
+  let main = (<div>2</div>);
   let bottomBar = (<div>3</div>);
   let rightSidebar1 = (<div>4</div>);
   let rightSidebar2 = (<div>5</div>);
@@ -68,7 +68,7 @@ function renderInterface(json) {
             titleBar={titleBar}
             leftSidebar1={leftSidebar1}
             bottomBar={bottomBar}
-            center={center}
+            main={main}
             rightSidebar1={rightSidebar1}
             rightSidebar2={rightSidebar2}
         />,
