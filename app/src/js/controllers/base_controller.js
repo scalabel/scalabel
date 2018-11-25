@@ -1,5 +1,5 @@
 /* :: import {BaseViewer} from '../viewers/base_viewer'; */
-import Session from '../common/session';
+import Session from '../common/session_single';
 import type {StateType} from '../functional/types';
 
 /**

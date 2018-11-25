@@ -1,7 +1,7 @@
 import $ from 'jquery';
 // $FlowFixMe
 import 'bootstrap-material-design';
-import Session from '../common/session.js';
+import Session from '../common/session_single.js';
 
 declare var labelType: String;
 declare var itemType: String;

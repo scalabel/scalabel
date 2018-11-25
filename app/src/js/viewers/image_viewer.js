@@ -1,6 +1,6 @@
 import {BaseViewer2D} from './image_base_viewer';
 /* :: import {BaseController} from '../controllers/base_controller'; */
-import Session from '../common/session';
+import Session from '../common/session_single';
 
 /**
  * Image viewer Class

@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import Session from '../common/session';
+import Session from '../common/session_single';
 import {BaseViewer} from './base_viewer';
 /* :: import {ToolboxController} from '../controllers/toolbox_controller'; */
 import {sprintf} from 'sprintf-js';

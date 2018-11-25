@@ -3,7 +3,7 @@ import {BaseViewer} from './base_viewer';
 /* :: import {BaseController} from '../controllers/base_controller'; */
 import type {ImageViewerConfigType} from '../functional/types';
 import {sprintf} from 'sprintf-js';
-import Session from '../common/session';
+import Session from '../common/session_single';
 
 /**
  * BaseViewer2D class
