@@ -13,10 +13,13 @@ import type {ImageViewerConfigType,
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 import {BaseController} from '../controllers/base_controller';
+
 /* :: import {BaseViewer} from '../viewers/base_viewer'; */
 import {Box2DViewer} from '../viewers/image_box2d_viewer';
 import {Box2DController} from '../controllers/image_box2d_controller';
 import {configureStore, configureFastStore} from '../redux/configure_store';
+
+import {Window} from './window';
 
 /**
  * Singleton session class
@@ -28,6 +31,7 @@ class Session {
   itemType: string;
   labelType: string;
   controllers: Array<BaseController>;
+  window: Window;
   /* :: viewers: Array<BaseViewer>; */
   devMode: boolean;
 
@@ -42,6 +46,7 @@ class Session {
     this.viewers = [];
     // TODO: make it configurable in the url
     this.devMode = true;
+    this.window = new Window('labeling-interface');
   }
 
   /**
@@ -92,6 +97,88 @@ class Session {
   }
 
   /**
+   * Init general labeling session.
+   * @param {Object} stateJson: json state from backend
+   */
+  init(stateJson: Object): void {
+    this.initStore(stateJson);
+    if (this.itemType === 'image') {
+      this.initImage();
+    }
+    this.window.render();
+  }
+
+  /**
+   * Initialize tagging interface
+   */
+  initImage(): void {
+  }
+
+  /**
+   * Request Session state from the server
+   */
+  requestState(): void {
+    let self = this;
+    // collect store from server
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        let json = JSON.parse(xhr.response);
+        self.init(json);
+      }
+    };
+
+    // get params from url path. These uniquely identify a SAT.
+    let searchParams = new URLSearchParams(window.location.search);
+    let taskIndex = parseInt(searchParams.get('task_index'));
+    let projectName = searchParams.get('project_name');
+
+    // send the request to the back end
+    let request = JSON.stringify({
+      'task': {
+        'index': taskIndex,
+        'projectOptions': {'name': projectName},
+      },
+    });
+    xhr.open('POST', './postLoadAssignmentV2', true);
+    xhr.send(request);
+  }
+
+  /**
+   * Load all the images in the state
+   */
+  loadImages(): void {
+    let self = this;
+    let items = this.getState().items;
+    for (let i = 0; i < items.length; i++) {
+      let item: ItemType = items[i];
+      // Copy item config
+      let config: ImageViewerConfigType = {...item.viewerConfig};
+      if (_.isEmpty(config)) {
+        config = makeImageViewerConfig();
+      }
+      let url = item.url;
+      let image = new Image();
+      image.crossOrigin = 'Anonymous';
+      self.images.push(image);
+      image.onload = function() {
+        config.imageHeight = this.height;
+        config.imageWidth = this.width;
+        self.store.dispatch({type: types.LOAD_ITEM, index: item.index,
+          config: config});
+      };
+      image.onerror = function() {
+        alert(sprintf('Image %s was not found.', url));
+      };
+      image.src = url;
+    }
+  }
+
+  /*
+  old functions for single purpose annotation initialization
+   */
+
+  /**
    * Init image tagging mode
    */
   initImageTagging(): void {
@@ -108,13 +195,13 @@ class Session {
     let toolboxViewer: ToolboxViewer = new ToolboxViewer(toolboxController);
 
     this.controllers = [imageController, tagController, titleBarController,
-            toolboxController];
+      toolboxController];
     this.viewers = [imageViewer, assistantViewer, tagViewer,
-            titleBarViewer, toolboxViewer];
+      titleBarViewer, toolboxViewer];
   }
 
   /**
-   * init box2d labeling mode
+   * initSingle box2d labeling mode
    */
   initImageBox2DLabeling(): void {
     let imageController = new BaseController();
@@ -138,7 +225,7 @@ class Session {
   /**
    * Initialize tagging interface
    */
-  initImageLabeling(): void {
+  initImageLabelingSingle(): void {
     let self = this;
     if (this.labelType === 'tag') {
       this.initImageTagging();
@@ -172,44 +259,15 @@ class Session {
   }
 
   /**
-   * Init labeling session
+   * Init labeling session. Each session can only support one single
+   * type of labels.
    * @param {Object} stateJson: json state from backend
    */
-  init(stateJson: Object): void {
+  initSingle(stateJson: Object): void {
     this.initStore(stateJson);
 
     if (this.itemType === 'image') {
-      this.initImageLabeling();
-    }
-  }
-
-  /**
-   * Load all the images in the state
-   */
-  loadImages(): void {
-    let self = this;
-    let items = this.getState().items;
-    for (let i = 0; i < items.length; i++) {
-      let item: ItemType = items[i];
-      // Copy item config
-      let config: ImageViewerConfigType = {...item.viewerConfig};
-      if (_.isEmpty(config)) {
-        config = makeImageViewerConfig();
-      }
-      let url = item.url;
-      let image = new Image();
-      image.crossOrigin = 'Anonymous';
-      self.images.push(image);
-      image.onload = function() {
-        config.imageHeight = this.height;
-        config.imageWidth = this.width;
-        self.store.dispatch({type: types.LOAD_ITEM, index: item.index,
-          config: config});
-      };
-      image.onerror = function() {
-        alert(sprintf('Image %s was not found.', url));
-      };
-      image.src = url;
+      this.initImageLabelingSingle();
     }
   }
 }

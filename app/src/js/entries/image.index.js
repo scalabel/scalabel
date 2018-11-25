@@ -32,7 +32,7 @@ $(document).ready(function() {
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
       let json = JSON.parse(xhr.response);
-      Session.init(json);
+      Session.initSingle(json);
     }
   };
   // get params from url path. These uniquely identify a SAT.

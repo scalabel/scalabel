@@ -39,8 +39,8 @@ export class BaseViewer2D extends BaseViewer {
     // necessary variables
     let divCanvasName = 'div-canvas';
     if (canvasSuffix !== '') {
-        divCanvasName = sprintf('%s-%s', divCanvasName, canvasSuffix);
-        canvasId = sprintf('%s-%s', canvasId, canvasSuffix);
+      divCanvasName = sprintf('%s-%s', divCanvasName, canvasSuffix);
+      canvasId = sprintf('%s-%s', canvasId, canvasSuffix);
     }
     let divCanvas = document.getElementById(divCanvasName);
     if (divCanvas) {
