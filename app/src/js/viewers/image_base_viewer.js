@@ -3,6 +3,7 @@ import {BaseViewer} from './base_viewer';
 /* :: import {BaseController} from '../controllers/base_controller'; */
 import type {ImageViewerConfigType} from '../functional/types';
 import {sprintf} from 'sprintf-js';
+import Session from '../common/session';
 
 /**
  * BaseViewer2D class
@@ -16,18 +17,24 @@ export class BaseViewer2D extends BaseViewer {
   SCALE_RATIO: number;
   UP_RES_RATIO: number;
   scale: number;
+  // need these two below to prevent jitters caused by round off
+  canvasHeight: number;
+  canvasWidth: number;
   displayToImageRatio: number;
+  // False for image canvas, true for anything else
+  upRes: boolean;
   // TODO: This can be more general for different types of view composition
   isAssistantView: boolean;
 
   /**
-   * @param {BaseController} controller: reference to controller
-   * @param {string} canvasId: element id of canvas
-   * @param {string} canvasSuffix: suffix to canvas id
+   * @param {BaseController} controller
+   * @param {string} canvasId
+   * @param {string} canvasSuffix
+   * @param {boolean} upRes
    * @constructor
    */
   constructor(controller/* : BaseController */, canvasId: string,
-              canvasSuffix: string = '') {
+              canvasSuffix: string = '', upRes: boolean = true) {
     super(controller);
     // necessary variables
     let divCanvasName = 'div-canvas';
@@ -50,54 +57,26 @@ export class BaseViewer2D extends BaseViewer {
     this.SCALE_RATIO = 1.05;
     this.UP_RES_RATIO = 2;
     this.scale = 1;
-    this.isAssistantView = false;
-  }
 
-  // /**
-  //  * set initial canvas scales
-  //  */
-  // init() {
-  //   // this.store.subscribe(this.redraw.bind(this));
-  // }
-  //
-  // /**
-  //  * load the given Item
-  //  * @param {number} index
-  //  */
-  // loaded(index: number) {
-  //   let activeItem = this.getActiveItem();
-  //   if (activeItem === index) {
-  //     this.redraw();
-  //   }
-  // }
-  //
-  // /**
-  //  * Get current active item
-  //  * @return {*}
-  //  */
-  // getActiveItem(): number {
-  //   let state = this.store.getState().present;
-  //   return state.current.item;
-  // }
+    this.isAssistantView = false;
+    this.upRes = upRes;
+  }
 
   /**
    * Convert image coordinate to canvas coordinate.
    * If affine, assumes values to be [x, y]. Otherwise
    * performs linear transformation.
-   * @param {[number]} values - the values to convert.
-   * @param {boolean} affine - whether or not this transformation is affine.
-   * @return {[number]} - the converted values.
+   * @param {Array<number>} values - the values to convert.
+   * @return {Array<number>} - the converted values.
    */
-  toCanvasCoords(values: Array<number>, affine: boolean = true): Array<number> {
-    let padBox = this._getPadding();
+  toCanvasCoords(values: Array<number>) {
     if (values) {
       for (let i = 0; i < values.length; i++) {
-        values[i] *= this.displayToImageRatio * this.UP_RES_RATIO;
+        values[i] *= this.displayToImageRatio;
+        if (this.upRes) {
+          values[i] *= this.UP_RES_RATIO;
+        }
       }
-    }
-    if (affine) {
-      values[0] += padBox.x;
-      values[1] += padBox.y;
     }
     return values;
   }
@@ -106,16 +85,10 @@ export class BaseViewer2D extends BaseViewer {
    * Convert canvas coordinate to image coordinate.
    * If affine, assumes values to be [x, y]. Otherwise
    * performs linear transformation.
-   * @param {[number]} values - the values to convert.
-   * @param {boolean} affine - whether or not this transformation is affine.
-   * @return {[number]} - the converted values.
+   * @param {Array<number>} values - the values to convert.
+   * @return {Array<number>} - the converted values.
    */
-  toImageCoords(values: Array<number>, affine: boolean = true): Array<number> {
-    let padBox = this._getPadding();
-    if (affine) {
-      values[0] -= padBox.x;
-      values[1] -= padBox.y;
-    }
+  toImageCoords(values: Array<number>) {
     if (values) {
       for (let i = 0; i < values.length; i++) {
         values[i] /= this.displayToImageRatio;
@@ -125,21 +98,76 @@ export class BaseViewer2D extends BaseViewer {
   }
 
   /**
-   * Update the scale of the image in the display
+   * get visible canvas coords
+   * @return {Array<number>}
    */
-  updateScale() {
+  getVisibleCanvasCoords() {
+    let imgRect = this.canvas.getBoundingClientRect();
+    let divRect = this.divCanvas.getBoundingClientRect();
+    return [divRect.x - imgRect.x, divRect.y - imgRect.y];
+  }
+
+  /**
+   * Get the mouse position on the canvas in the image coordinates.
+   * @param {Object} e: mouse event
+   * @return {CoordinateType}: mouse position (x,y) on the canvas
+   */
+  getMousePos(e: Object) {
+    // limit mouse within the image
+    let rect = this.canvas.getBoundingClientRect();
+    let x = Math.min(
+      Math.max(e.clientX, rect.x),
+      rect.x + this.canvasWidth);
+    let y = Math.min(
+      Math.max(e.clientY, rect.y),
+      rect.y + this.canvasHeight);
+    // limit mouse within the main div
+    let rectDiv = this.divCanvas.getBoundingClientRect();
+    x = Math.min(
+      Math.max(x, rectDiv.x),
+      rectDiv.x + rectDiv.width
+    );
+    y = Math.min(
+      Math.max(y, rectDiv.y),
+      rectDiv.y + rectDiv.height
+    );
+    return {
+      x: (x - rect.x) / this.displayToImageRatio,
+      y: (y - rect.y) / this.displayToImageRatio,
+    };
+  }
+
+  /**
+   * Set the scale of the image in the display
+   * @param {Array<number>} mouseOffset: [x, y]
+   */
+  updateScale(mouseOffset: Array<number> = []) {
     let config: ImageViewerConfigType = this.getCurrentViewerConfig();
+    let upperLeftCoords = [0, 0];
+    let rectDiv = this.divCanvas.getBoundingClientRect();
+    if (config.viewScale > 1.0) {
+      upperLeftCoords = this.getVisibleCanvasCoords();
+      if (mouseOffset.length !== 2) {
+        mouseOffset = [
+          Math.min(rectDiv.width, this.canvas.width) / 2,
+          Math.min(rectDiv.height, this.canvas.height) / 2,
+        ];
+      } else {
+        mouseOffset = this.toCanvasCoords(mouseOffset);
+        mouseOffset[0] -= upperLeftCoords[0];
+        mouseOffset[1] -= upperLeftCoords[1];
+      }
+    }
+
     // set scale
-    if (config.viewScale >= this.MIN_SCALE &&
-        config.viewScale < this.MAX_SCALE) {
-      let ratio = this.scale / config.viewScale;
+    if (config.viewScale >= this.MIN_SCALE
+      && config.viewScale < this.MAX_SCALE) {
+      let ratio = config.viewScale / this.scale;
       this.context.scale(ratio, ratio);
-      this.scale = config.viewScale;
     } else {
       return;
     }
     // handle buttons
-    // TODO: This should be in TitleBarViewer
     if (config.viewScale >= this.MIN_SCALE * this.SCALE_RATIO) {
       $('#decrease-btn').prop('disabled', false);
     } else {
@@ -150,37 +178,74 @@ export class BaseViewer2D extends BaseViewer {
     } else {
       $('#increase-btn').prop('disabled', true);
     }
+    // resize canvas
+    let item = this.getCurrentItem();
+    let image = Session.images[item.index];
+    let ratio = image.width / image.height;
+
+    if (rectDiv.width / rectDiv.height > ratio) {
+      this.canvasHeight = rectDiv.height * config.viewScale;
+      this.canvasWidth = this.canvasHeight * ratio;
+      this.displayToImageRatio = this.canvasHeight / image.height;
+    } else {
+      this.canvasWidth = rectDiv.width * config.viewScale;
+      this.canvasHeight = this.canvasWidth / ratio;
+      this.displayToImageRatio = this.canvasWidth / image.width;
+    }
+
+    // translate back to origin
+    if (mouseOffset) {
+      this.divCanvas.scrollTop = this.canvas.offsetTop;
+      this.divCanvas.scrollLeft = this.canvas.offsetLeft;
+    }
+
+    // set canvas resolution
+    if (this.upRes) {
+      this.canvas.height = this.canvasHeight * this.UP_RES_RATIO;
+      this.canvas.width = this.canvasWidth * this.UP_RES_RATIO;
+    } else {
+      this.canvas.height = this.canvasHeight;
+      this.canvas.width = this.canvasWidth;
+    }
+
+    // set canvas size
+    this.canvas.style.height = this.canvasHeight + 'px';
+    this.canvas.style.width = this.canvasWidth + 'px';
+
+    // set padding
+    let padding = this._getPadding();
+    let padX = padding.x;
+    let padY = padding.y;
+
+    this.canvas.style.left = padX + 'px';
+    this.canvas.style.top = padY + 'px';
+
+    // zoom to point
+    if (mouseOffset) {
+      if (this.canvasWidth > rectDiv.width) {
+        this.divCanvas.scrollLeft =
+          config.viewScale / this.scale * (upperLeftCoords[0] + mouseOffset[0])
+          - mouseOffset[0];
+      }
+      if (this.canvasHeight > rectDiv.height) {
+        this.divCanvas.scrollTop =
+          config.viewScale / this.scale * (upperLeftCoords[1] + mouseOffset[1])
+          - mouseOffset[1];
+      }
+    }
+    this.scale = config.viewScale;
   }
 
   /**
    * Get the padding for the image given its size and canvas size.
-   * @return {Object}: padding box (x,y,w,h)
+   * @return {object} padding
    */
-  _getPadding(): Object {
-    let config: ImageViewerConfigType = this.getCurrentViewerConfig();
-    // which dim is bigger compared to canvas
-    let xRatio = config.imageWidth / this.canvas.width;
-    let yRatio = config.imageHeight / this.canvas.height;
-    // use ratios to determine how to pad
-    let box = {x: 0, y: 0, w: 0, h: 0};
-    if (xRatio >= yRatio) {
-      this.displayToImageRatio =
-          this.canvas.width / config.imageWidth;
-      box.x = 0;
-      box.y = 0.5 * (this.canvas.height -
-        config.imageHeight * this.displayToImageRatio);
-      box.w = this.canvas.width;
-      box.h = this.canvas.height - 2 * box.y;
-    } else {
-      this.displayToImageRatio =
-          this.canvas.height / config.imageHeight;
-      box.x = 0.5 * (this.canvas.width -
-        config.imageWidth * this.displayToImageRatio);
-      box.y = 0;
-      box.w = this.canvas.width - 2 * box.x;
-      box.h = this.canvas.height;
-    }
-    return box;
+  _getPadding() {
+    let rectDiv = this.divCanvas.getBoundingClientRect();
+    return {
+      x: Math.max(0, (rectDiv.width - this.canvasWidth) / 2),
+      y: Math.max(0, (rectDiv.height - this.canvasHeight) / 2),
+    };
   }
 
   /**
@@ -194,8 +259,8 @@ export class BaseViewer2D extends BaseViewer {
     if (!this.getCurrentItem().loaded) {
       return false;
     }
-    this.updateScale();
     this.resizeCanvas();
+    this.updateScale();
     return true;
   }
 
@@ -235,22 +300,4 @@ export class BaseViewer2D extends BaseViewer {
     this.canvas.width = rectDiv.width * config.viewScale;
     this.canvas.height = rectDiv.height * config.viewScale;
   }
-
-  // /**
-  //  * incHandler
-  //  */
-  // _incHandler() {
-  //   this.setScale(this.getCurrentViewerConfig().scale *
-  // this.getCurrentViewerConfig().SCALE_RATIO);
-  //   this.redraw();
-  // }
-  //
-  // /**
-  //  * decHandler
-  //  */
-  // _decHandler() {
-  //   this.setScale(this.getCurrentViewerConfig().scale /
-  // this.getCurrentViewerConfig().SCALE_RATIO);
-  //   this.redraw();
-  // }
 }

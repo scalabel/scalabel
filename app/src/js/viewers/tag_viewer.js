@@ -37,7 +37,6 @@ export class TagViewer extends BaseViewer2D {
       return false;
     }
     // preparation
-    let padBox = this._getPadding();
     let activeTags = this.getActiveTags();
     this.context.font = '24px Arial';
     let abbr = [];
@@ -51,13 +50,12 @@ export class TagViewer extends BaseViewer2D {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.context.fillStyle = 'lightgrey';
     this.context.globalAlpha = 0.3;
-    this.context.fillRect(padBox.x + 10, padBox.y + 10, 250,
+    this.context.fillRect(10, 10, 250,
       (abbr.length) ? abbr.length * 35 + 15 : 0);
     this.context.fillStyle = 'red';
     this.context.globalAlpha = 1.0;
     for (let i = 0; i < abbr.length; i++) {
-      this.context.fillText(abbr[i],
-        padBox.x + 5, padBox.y + 40 + i * 35);
+      this.context.fillText(abbr[i], 5, 40 + i * 35);
     }
     return true;
   }

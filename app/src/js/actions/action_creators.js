@@ -123,15 +123,12 @@ export function newImageBox2DLabel(itemId: number, optionalAttributes: Object) {
 /**
  * assign new x, y, w, h to a rectangle
  * @param {number} shapeId
- * @param {number} x
- * @param {number} y
- * @param {number} w
- * @param {number} h
+ * @param {Object} targetBoxAttributes
  * @return {Object}
  */
 export function changeRect(shapeId: number,
-                           x: number, y: number, w: number, h: number) {
+                           targetBoxAttributes: Object) {
     return {
-        type: types.CHANGE_RECT, shapeId, x, y, w, h,
+        type: types.CHANGE_RECT, shapeId, targetBoxAttributes,
     };
 }

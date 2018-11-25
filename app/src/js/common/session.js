@@ -14,8 +14,8 @@ import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 import {BaseController} from '../controllers/base_controller';
 /* :: import {BaseViewer} from '../viewers/base_viewer'; */
-import {Box2dViewer} from '../viewers/image_box2d_viewer';
-import {Box2dController} from '../controllers/image_box2d_controller';
+import {Box2DViewer} from '../viewers/image_box2d_viewer';
+import {Box2DController} from '../controllers/image_box2d_controller';
 import {configureStore, configureFastStore} from '../redux/configure_store';
 
 /**
@@ -120,8 +120,8 @@ class Session {
     let imageController = new BaseController();
     let imageViewer: ImageViewer = new ImageViewer(imageController);
     let assistantViewer: AssistantViewer = new AssistantViewer(imageController);
-    let box2dController = new Box2dController();
-    let box2dViewer: Box2dViewer = new Box2dViewer(box2dController);
+    let box2dController = new Box2DController();
+    let box2dViewer: Box2DViewer = new Box2DViewer(box2dController);
 
     // TODO: change this to viewer controller design
     let titleBarController: TitleBarController = new TitleBarController();
