@@ -1,7 +1,7 @@
 import $ from 'jquery';
 // $FlowFixMe
 import 'bootstrap-material-design';
-import Session from '../common/session_single.js';
+import {initSingle} from '../common/session_single_init';
 
 declare var labelType: String;
 declare var itemType: String;
@@ -32,7 +32,7 @@ $(document).ready(function() {
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
       let json = JSON.parse(xhr.response);
-      Session.initSingle(json);
+      initSingle(json);
     }
   };
   // get params from url path. These uniquely identify a SAT.

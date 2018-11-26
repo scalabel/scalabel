@@ -67,3 +67,5 @@ export class Window {
     );
   }
 }
+
+export type WindowType = Window;

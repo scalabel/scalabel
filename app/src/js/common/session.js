@@ -6,8 +6,7 @@ import type {ImageViewerConfigType,
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 import {configureStore, configureFastStore} from '../redux/configure_store';
-
-import {Window} from './window';
+import type {WindowType} from './window';
 
 /**
  * Singleton session class
@@ -18,7 +17,7 @@ class Session {
   images: Array<Image>;
   itemType: string;
   labelType: string;
-  window: Window;
+  window: WindowType;
   devMode: boolean;
 
   /**
@@ -30,7 +29,6 @@ class Session {
     this.images = [];
     // TODO: make it configurable in the url
     this.devMode = true;
-    this.window = new Window('labeling-interface');
   }
 
   /**
@@ -68,55 +66,6 @@ class Session {
     let state = this.getState();
     this.itemType = state.config.itemType;
     this.labelType = state.config.labelType;
-  }
-
-  /**
-   * Init general labeling session.
-   * @param {Object} stateJson: json state from backend
-   */
-  init(stateJson: Object): void {
-    this.initStore(stateJson);
-    if (this.itemType === 'image') {
-      this.initImage();
-    }
-    this.window.render();
-  }
-
-  /**
-   * Initialize tagging interface
-   */
-  initImage(): void {
-    this.loadImages();
-  }
-
-  /**
-   * Request Session state from the server
-   */
-  requestState(): void {
-    let self = this;
-    // collect store from server
-    let xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {
-        let json = JSON.parse(xhr.response);
-        self.init(json);
-      }
-    };
-
-    // get params from url path. These uniquely identify a SAT.
-    let searchParams = new URLSearchParams(window.location.search);
-    let taskIndex = parseInt(searchParams.get('task_index'));
-    let projectName = searchParams.get('project_name');
-
-    // send the request to the back end
-    let request = JSON.stringify({
-      'task': {
-        'index': taskIndex,
-        'projectOptions': {'name': projectName},
-      },
-    });
-    xhr.open('POST', './postLoadAssignmentV2', true);
-    xhr.send(request);
   }
 
   /**

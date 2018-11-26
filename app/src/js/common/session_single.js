@@ -1,22 +1,13 @@
 // @flow
-import {ToolboxController} from '../controllers/toolbox_controller';
-import {TitleBarController} from '../controllers/title_bar_controller';
-import {ImageViewer} from '../viewers/image_viewer';
-import {AssistantViewer} from '../viewers/assistant_viewer';
-import {TagViewer} from '../viewers/tag_viewer';
-import {TitleBarViewer} from '../viewers/title_bar_viewer';
-import {ToolboxViewer} from '../viewers/toolbox_viewer';
 import {sprintf} from 'sprintf-js';
 import * as types from '../actions/action_types';
 import type {ImageViewerConfigType,
   ItemType, StateType} from '../functional/types';
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
-import {BaseController} from '../controllers/base_controller';
-
+/* :: import {BaseController} from '../controllers/base_controller'; */
 /* :: import {BaseViewer} from '../viewers/base_viewer'; */
-import {Box2DViewer} from '../viewers/image_box2d_viewer';
-import {Box2DController} from '../controllers/image_box2d_controller';
+
 import {configureStore, configureFastStore} from '../redux/configure_store';
 
 /**
@@ -28,7 +19,7 @@ class Session {
   images: Array<Image>;
   itemType: string;
   labelType: string;
-  controllers: Array<BaseController>;
+  /* :: controllers: Array<BaseController>; */
   /* :: viewers: Array<BaseViewer>; */
   devMode: boolean;
 
@@ -119,99 +110,6 @@ class Session {
         alert(sprintf('Image %s was not found.', url));
       };
       image.src = url;
-    }
-  }
-
-  /**
-   * Init image tagging mode
-   */
-  initImageTagging(): void {
-    let imageController = new BaseController();
-    let tagController = new BaseController();
-    let imageViewer: ImageViewer = new ImageViewer(imageController);
-    let assistantViewer: AssistantViewer = new AssistantViewer(imageController);
-    let tagViewer: TagViewer = new TagViewer(tagController);
-
-    // TODO: change this to viewer controller design
-    let titleBarController: TitleBarController = new TitleBarController();
-    let titleBarViewer: TitleBarViewer = new TitleBarViewer(titleBarController);
-    let toolboxController: ToolboxController = new ToolboxController();
-    let toolboxViewer: ToolboxViewer = new ToolboxViewer(toolboxController);
-
-    this.controllers = [imageController, tagController, titleBarController,
-      toolboxController];
-    this.viewers = [imageViewer, assistantViewer, tagViewer,
-      titleBarViewer, toolboxViewer];
-  }
-
-  /**
-   * initSingle box2d labeling mode
-   */
-  initImageBox2DLabeling(): void {
-    let imageController = new BaseController();
-    let imageViewer: ImageViewer = new ImageViewer(imageController);
-    let assistantViewer: AssistantViewer = new AssistantViewer(imageController);
-    let box2dController = new Box2DController();
-    let box2dViewer: Box2DViewer = new Box2DViewer(box2dController);
-
-    // TODO: change this to viewer controller design
-    let titleBarController: TitleBarController = new TitleBarController();
-    let titleBarViewer: TitleBarViewer = new TitleBarViewer(titleBarController);
-    let toolboxController: ToolboxController = new ToolboxController();
-    let toolboxViewer: ToolboxViewer = new ToolboxViewer(toolboxController);
-
-    this.controllers = [imageController, titleBarController,
-      toolboxController, box2dController];
-    this.viewers = [imageViewer, assistantViewer, titleBarViewer, toolboxViewer,
-      box2dViewer];
-  }
-
-  /**
-   * Initialize tagging interface
-   */
-  initImageLabelingSingle(): void {
-    let self = this;
-    if (this.labelType === 'tag') {
-      this.initImageTagging();
-    } else if (this.labelType === 'box2dv2') {
-      this.initImageBox2DLabeling();
-    }
-    self.connectControllers();
-    self.loadImages();
-
-    document.getElementsByTagName('BODY')[0].onresize = function() {
-      // imageViewer.setScale(imageViewer.scale);
-      // imageViewer.redraw();
-      // tagViewer.setScale(tagViewer.scale);
-      // tagViewer.redraw();
-      self.dispatch({type: types.UPDATE_ALL});
-    };
-
-    // TODO: move to TitleBarViewer
-    let increaseButton = document.getElementById('increase-btn');
-    if (increaseButton) {
-      increaseButton.onclick = function() {
-        self.dispatch({type: types.IMAGE_ZOOM, ratio: 1.05});
-      };
-    }
-    let decreaseButton = document.getElementById('decrease-btn');
-    if (decreaseButton) {
-      decreaseButton.onclick = function() {
-        self.dispatch({type: types.IMAGE_ZOOM, ratio: 1.0 / 1.05});
-      };
-    }
-  }
-
-  /**
-   * Init labeling session. Each session can only support one single
-   * type of labels.
-   * @param {Object} stateJson: json state from backend
-   */
-  initSingle(stateJson: Object): void {
-    this.initStore(stateJson);
-
-    if (this.itemType === 'image') {
-      this.initImageLabelingSingle();
     }
   }
 }

@@ -1,5 +1,5 @@
-import Session from '../common/session';
+import {initSession} from '../common/session_init';
 
 $(document).ready(function() {
-  Session.requestState();
+  initSession();
 });
