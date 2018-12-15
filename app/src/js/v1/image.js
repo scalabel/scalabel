@@ -673,7 +673,7 @@ SatImage.prototype.redrawLabelCanvas = function() {
       self.labelCanvas.width * UP_RES_RATIO,
       self.labelCanvas.height * UP_RES_RATIO);
   for (let label of self.labels) {
-    if (label.valid) {
+    if (label.valid && !(this.soloMode && this.selectedLabel !== label)) {
       label.redrawLabelCanvas(self.labelCtx, self.hoveredLabel);
     }
   }
@@ -764,11 +764,7 @@ SatImage.prototype._keydown = function(e) {
       this.ctrlCommandPressed();
     } else if (keyID === 72) { // ctrl-h for hiding all labels
       e.preventDefault();
-      if (this.labelCanvas.style.visibility === 'visible') {
-        this.labelCanvas.style.visibility = 'hidden';
-      } else {
-        this.labelCanvas.style.visibility = 'visible';
-      }
+      this.soloMode = this.soloMode !== true;
       this.ctrlCommandPressed();
     } else if (keyID === 76 &&
         $('#track_link_btn').length) {
