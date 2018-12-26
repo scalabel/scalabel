@@ -192,7 +192,12 @@ SatImage.prototype.updateLabelCount = function() {
   if (this.sat.tracks) {
     for (let track of this.sat.tracks) {
       if (track.valid) {
-        numLabels += 1;
+        // count number of keyframes
+        for (let frame of track.children) {
+          if (frame.keyframe) {
+            numLabels += 1;
+          }
+        }
       }
     }
   } else {
