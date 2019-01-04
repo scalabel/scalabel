@@ -81,7 +81,7 @@ func startSession(hub *Hub, conn *websocket.Conn) {
 
 //Call the Register remote procedure and get the timing data
 func (hub *Hub) grpcRegistration(sessionId string) (string, string, string, string) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 
 	start := time.Now()
@@ -98,6 +98,7 @@ func (hub *Hub) grpcRegistration(sessionId string) (string, string, string, stri
 type DummyData struct {
 	Message   string `json:"message"`
 	StartTime string `json:"startTime"`
+	TerminateSession string `json:"terminateSession"`
 }
 
 type DummyResponse struct {
@@ -124,6 +125,13 @@ func (session *Session) DataListener() {
 			break
 		}
 
+		if msg.TerminateSession == "true" {
+			log.Println("Terminating go session")
+			session.grpcKill()
+			session.client.hub.unregisterSession <- session
+			break
+		}
+
 		echoedMessage, modelServerTimestamp, modelServerDuration, grpcDuration := session.grpcComputation(msg)
 
 		dummyResponse := DummyResponse{
@@ -139,7 +147,7 @@ func (session *Session) DataListener() {
 
 //Call the DummyComputation remote procedure with DummyData, and get data for DummyResponse
 func (session *Session) grpcComputation(msg DummyData) (string, string, string, string) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 
 	start := time.Now()
@@ -151,4 +159,17 @@ func (session *Session) grpcComputation(msg DummyData) (string, string, string, 
 		log.Fatalf("could not echo from gRPC: %v", err)
 	}
 	return response.Session.Message, response.ModelServerTimestamp, response.ModelServerDuration, grpcDuration
+}
+
+//Kill the ray actor corresponding to the go session being killed
+func (session *Session) grpcKill() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	defer cancel()
+
+	_, err := session.client.hub.modelServer.KillActor(
+		ctx, &pb.Session{Message: "", SessionId: session.uuid})
+
+	if err != nil {
+		log.Fatalf("could not kill ray worker using grpc: %v", err)
+	}
 }

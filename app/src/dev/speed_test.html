@@ -21,18 +21,46 @@
 
         .button:hover {background-color: darkgrey;}
 
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+        }
+
+        th, td {padding: 5px;}
+
+        th {text-align: left;}
     </style>
 
     <script src="../js/speed_test.js"></script>
 
 </head>
 <body>
-    <button id="connectButton" class="button">Connect</button>
-
+    <div class="form-group">
+        <label for="numSessions">Number of sessions to simulate:</label>
+        <form>
+          <input type="text" id="numSessions" value="">
+        </form>
+    </div>
+    <div class="form-group">
+        <label for="numMessages"> Number of messages to send:</label>
+        <form>
+            <input type="text" id="numMessages" value="">
+        </form>
+    </div>
     <div class="form-group">
         <label for="message">Message:</label>
         <textarea class="form-control" rows="5" id="message"></textarea>
     </div>
-    <button id="messageButton" class="button">Send</button>
+    <button id="runButton" class="button">Start Speed Test</button>
+    <div> Results of Speed Test:</div>
+    <table style="width:100%" id="resultsTable">
+      <tr>
+        <th>Test Type</th>
+        <th>Roundrip total</th>
+        <th>Websocket server time</th>
+        <th> Grpc call</th>
+        <th> Model server backend</th>
+      </tr>
+    </table>
 </body>
 </html>

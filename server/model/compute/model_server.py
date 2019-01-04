@@ -47,9 +47,20 @@ class ModelServer(pb2_grpc.ModelServerServicer):
                             modelServerTimestamp=timestamp,
                             modelServerDuration=duration)
 
+    def KillActor(self, request, context):
+        id = request.sessionId
+        worker = self.sessionIdsToWorkers.pop(id, None)
+        if worker:
+            del worker
+            logging.info(f'deleted worker for id {id}')
+        else:
+            loggin.info(f'attempted to delete worker for id {id}'
+                        + ' but none exists')
+        return pb2.Empty()
+
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=100))
     pb2_grpc.add_ModelServerServicer_to_server(ModelServer(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
@@ -61,5 +72,5 @@ def serve():
 
 
 if __name__ == '__main__':
-    ray.init(num_cpus=4, ignore_reinit_error=True)
+    ray.init(num_cpus=100, ignore_reinit_error=True)
     serve()

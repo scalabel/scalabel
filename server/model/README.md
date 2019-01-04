@@ -22,6 +22,6 @@ go build -o gateway .
 Start the python server:
 ````
 cd ../compute
-python model-server.py
+python model_server.py
 ````
 Follow the instructions [here](https://github.com/ucbdrive/sat) to launch the http server and go to ``localhost:8686/dev/speed_test.html``.
