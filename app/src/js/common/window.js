@@ -4,6 +4,8 @@ import LabelLayout from '../components/label_layout';
 import TitleBar from '../components/title_bar';
 import Session from './session';
 import Path from './path';
+import MainView from '../components/main_view';
+import ImageView from '../components/image_view';
 
 /**
  * Manage the whole window
@@ -49,7 +51,8 @@ export class Window {
         />
     );
     let leftSidebar1 = (<div>1</div>);
-    let main = (<div>2</div>);
+    let imageView = (<ImageView key={'imageView'}/>);
+    let main = (<MainView views={[imageView]} />);
     let bottomBar = (<div>3</div>);
     let rightSidebar1 = (<div>4</div>);
     let rightSidebar2 = (<div>5</div>);

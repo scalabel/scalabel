@@ -56,6 +56,17 @@ class Session {
   }
 
   /**
+   * Subscribe all the controllers to the states
+   * @param {Object} component: view component
+   */
+  subscribe(component: Object) {
+    if (this.store.subscribe) {
+      this.store.subscribe(component.onStateUpdated.bind(component));
+    }
+    // this.fastStore.subscribe(c.onFastStateUpdated.bind(c));
+  }
+
+  /**
    * Initialize state store
    * @param {Object} stateJson: json state from backend
    */

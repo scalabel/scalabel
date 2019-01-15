@@ -31,5 +31,3 @@ export class ImageViewer extends BaseViewer2D {
     return true;
   }
 }
-
-

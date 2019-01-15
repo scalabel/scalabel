@@ -1,5 +1,6 @@
 import Session from './session';
 import {Window} from './window';
+import * as types from '../actions/action_types';
 
 /**
  * Init general labeling session.
@@ -11,6 +12,7 @@ function initFromJson(stateJson: Object): void {
     initImage();
   }
   Session.window.render();
+  Session.dispatch({type: types.UPDATE_ALL});
 }
 
 /**
