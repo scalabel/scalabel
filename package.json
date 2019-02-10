@@ -83,5 +83,9 @@
     "three": "^0.95.0",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.0"
+  },
+  "dependencies": {
+    "terser": "3.14.1",
+    "ajv": "6.8.1"
   }
 }

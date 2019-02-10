@@ -6,10 +6,11 @@ import model_server_pb2_grpc as pb2_grpc
 import time
 import ray
 import logging
+import argparse
 logging.basicConfig(level=logging.INFO)
 
 
-@ray.remote
+@ray.remote(num_cpus=1)
 class SessionWorker():
     def __init__(self, sessionId):
         self.sessionId = sessionId
@@ -64,6 +65,7 @@ def serve():
     pb2_grpc.add_ModelServerServicer_to_server(ModelServer(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
+    print("Started ray server")
     try:
         while True:
             time.sleep(300000)
@@ -72,5 +74,13 @@ def serve():
 
 
 if __name__ == '__main__':
-    ray.init(num_cpus=100, ignore_reinit_error=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--local', dest='local', action='store_true')
+    parser.set_defaults(local=False)
+    args = parser.parse_args()
+    if args.local:
+        ray.init(num_cpus=100, ignore_reinit_error=True)
+    else:
+        ray.init(redis_address="localhost:6379")
+
     serve()

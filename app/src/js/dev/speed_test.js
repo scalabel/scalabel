@@ -1,3 +1,5 @@
+import {sprintf} from 'sprintf-js';
+
 /**
  * @param {Object.<string, array>} data - map from category to data
  * @return {Object.<string, number>} - map from category to average
@@ -102,11 +104,12 @@ function processDataAfterCompletion(
     // wait until all sessions complete to aggregate data
     if (window.allTimingData.roundTrip.length === window.numSessions) {
         let allAvgTimes = datasToAverages(window.allTimingData);
-        let experimentType = 'Initializing ' + window.numSessions + ' sessions';
+        let numSessions = sprintf('%d sessions', window.numSessions);
+        let numMessages = sprintf('%d messages', window.numMessages);
+        let experimentType = sprintf('Initializing %s', numSessions);
         if (testType !== 'init') {
-            experimentType = 'Speed test with  '
-                             + window.numSessions + ' sessions, '
-                             + window.numMessages + ' messages per sessions';
+            experimentType = sprintf('Speed test with %s, %s per session',
+                numSessions, numMessages);
         }
 
         addRowToTable(allAvgTimes, experimentType);
@@ -243,8 +246,11 @@ function speedTest() {
  * @param {number} sessionIndex - The index of the session in window.websockets
  */
 function sendData(sessionIndex: number) {
+  let messageElement = (document.getElementById('message'): any);
+  let message = (messageElement: HTMLTextAreaElement).value;
+
   window.websockets[sessionIndex].send(JSON.stringify({
-    message: $('#message').val() + sessionIndex.toString(),
+    message: sprintf('%s%d', message, sessionIndex),
     startTime: window.performance.now().toString(),
   }));
 }
