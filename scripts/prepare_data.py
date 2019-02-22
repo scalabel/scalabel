@@ -77,8 +77,11 @@ def prepare_data(args):
     file_list = sorted(glob.glob(join(args.tar_dir, '*.jpg')))
 
     yaml_items = [
-        {'url': os.path.abspath(img) if not args.web_root else
-            join(args.web_root, os.path.basename(img))}
+        {
+            'url': os.path.abspath(img) if not args.web_root else
+            join(args.web_root, os.path.basename(img)),
+            'videoName':  '{}-{}'.format(*img.split('/')[-1].split('-')[:-1])
+        }
         for img in file_list]
 
     output = join(args.tar_dir, 'image_list.yml')

@@ -4,7 +4,7 @@
 - name: truck
 - name: bus
 - name: train
-- name: motor
+- name: motorcycle
 - name: bike
 - name: traffic sign
 - name: traffic light

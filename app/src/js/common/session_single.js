@@ -5,8 +5,10 @@ import type {ImageViewerConfigType,
   ItemType, StateType} from '../functional/types';
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
+/* :: import {BaseController} from '../controllers/base_controller'; */
+/* :: import {BaseViewer} from '../viewers/base_viewer'; */
+
 import {configureStore, configureFastStore} from '../redux/configure_store';
-import type {WindowType} from './window';
 
 /**
  * Singleton session class
@@ -17,7 +19,8 @@ class Session {
   images: Array<Image>;
   itemType: string;
   labelType: string;
-  window: WindowType;
+  /* :: controllers: Array<BaseController>; */
+  /* :: viewers: Array<BaseViewer>; */
   devMode: boolean;
 
   /**
@@ -27,6 +30,8 @@ class Session {
     this.store = {};
     this.fastStore = configureFastStore();
     this.images = [];
+    this.controllers = [];
+    this.viewers = [];
     // TODO: make it configurable in the url
     this.devMode = true;
   }
@@ -57,13 +62,12 @@ class Session {
 
   /**
    * Subscribe all the controllers to the states
-   * @param {Object} component: view component
    */
-  subscribe(component: Object) {
-    if (this.store.subscribe) {
-      this.store.subscribe(component.onStateUpdated.bind(component));
+  connectControllers() {
+    for (let c of this.controllers) {
+      this.store.subscribe(c.onStateUpdated.bind(c));
+      this.fastStore.subscribe(c.onFastStateUpdated.bind(c));
     }
-    // this.fastStore.subscribe(c.onFastStateUpdated.bind(c));
   }
 
   /**

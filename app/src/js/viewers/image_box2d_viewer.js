@@ -5,7 +5,7 @@ import type {RectType} from '../functional/types';
 /**
  * Image viewer Class
  */
-export class Box2dViewer extends BaseViewer2D {
+export class Box2DViewer extends BaseViewer2D {
   /**
    * @param {BaseController} controller: reference to Box2DController
    * @constructor
@@ -15,7 +15,7 @@ export class Box2dViewer extends BaseViewer2D {
     // $FlowFixMe
     let self = this;
     this.canvas.addEventListener('mouseup', function(e) {
-      self.controller.mouseUp(e);
+      self.controller.mouseUp(self.getMousePos(e));
     });
   }
 
@@ -43,8 +43,7 @@ export class Box2dViewer extends BaseViewer2D {
    */
   drawRect(rect: RectType) {
       this.context.save();
-      let [x, y] = this.toCanvasCoords([rect.x, rect.y]);
-      let [w, h] = this.toCanvasCoords([rect.w, rect.h], false);
+      let [x, y, w, h] = this.toCanvasCoords([rect.x, rect.y, rect.w, rect.h]);
       this.context.lineWidth = 2 * this.UP_RES_RATIO;
       // this.context.strokeStyle = strokeStyle;
       this.context.strokeRect(x, y, w, h);

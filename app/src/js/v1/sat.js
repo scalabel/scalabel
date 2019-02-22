@@ -396,6 +396,13 @@ Sat.prototype.save = function() {
   let self = this;
   let json = self.toJson();
   let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (JSON.parse(xhr.response) === 0) {
+        alert('Saved successfully.');
+      }
+    }
+  };
   xhr.open('POST', './postSave');
   xhr.send(JSON.stringify(json));
 };
@@ -445,6 +452,7 @@ Sat.prototype.encodeBaseJson = function() {
         attributes: self.attributes,
         instructions: self.instructions,
         demoMode: self.demoMode,
+        interpolationMode: self.interpolationMode,
         bundleFile: self.bundleFile,
         submitted: self.submitted,
       },
@@ -468,8 +476,6 @@ Sat.prototype.encodeBaseJson = function() {
 Sat.prototype.fromJson = function(json) {
   let self = this;
   self.decodeBaseJson(json);
-  // save after importing labels
-  self.save();
 };
 
 /**

@@ -54,7 +54,7 @@ export function reducer(
       return common.toggleAssistantView(state);
     case types.CHANGE_RECT:
       return box2d.changeRect(state, action.shapeId,
-          action.x, action.y, action.w, action.h);
+          action.targetBoxAttributes);
     default:
   }
   return state;

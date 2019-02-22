@@ -33,7 +33,6 @@
     - name: mail box
     - name: parking sign
     - name: pole
-    - name: polegroup
     - name: street light
     - name: traffic cone
     - name: traffic device

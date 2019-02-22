@@ -17,7 +17,12 @@ message Response{
     string modelServerDuration = 3;
 }
 
+message Empty {
+
+}
+
 service ModelServer{
 rpc DummyComputation(Session) returns (Response) {}
 rpc Register(Session) returns (Response) {}
+rpc KillActor(Session) returns (Empty) {}
 }

@@ -1,5 +1,6 @@
-/* global module __dirname */
+/* global module __dirname process */
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const webpack = require('webpack');
 
 let config = {
@@ -12,7 +13,7 @@ let config = {
     speed_test: __dirname + '/app/src/js/dev/speed_test.js',
     dashboard: __dirname + '/app/src/js/v1/dashboard.index.js',
     vendor: __dirname + '/app/src/js/v1/vendor.index.js',
-    label: __dirname + '/app/src/js/v1/label.index.js',
+    label: __dirname + '/app/src/js/entries/label.index.js',
   },
   output: {
     filename: '[name].js',
@@ -24,6 +25,17 @@ let config = {
       'jQuery': 'jquery',
       'window.jQuery': 'jquery',
       'Popper': ['popper.js', 'default'],
+    }),
+    new CircularDependencyPlugin({
+      // exclude detection of files based on a RegExp
+      exclude: /node_modules/,
+      // add errors to webpack instead of warnings
+      failOnError: true,
+      // allow import cycles that include an asynchronous import,
+      // e.g. via import(/* webpackMode: "weak" */ './file.js')
+      allowAsyncCycles: false,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
     }),
     new CopyWebpackPlugin([
       {

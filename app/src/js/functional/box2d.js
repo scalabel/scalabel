@@ -57,18 +57,15 @@ export function newImageBox2DLabel(
 
 /**
  * assign new values to rectangle
- * @param {Object} state
+ * @param {StateType} state
  * @param {number} shapeId
- * @param {number} x
- * @param {number} y
- * @param {number} w
- * @param {number} h
+ * @param {Object} targetBoxAttributes: including x, y, w, h
  * @return {Object}
  */
-export function changeRect(state: Object, shapeId: number,
-                           x: number, y: number, w: number, h: number) {
+export function changeRect(state: StateType, shapeId: number,
+                           targetBoxAttributes: Object) {
     let shapes = state.shapes;
-    let newRect = makeRect({id: shapeId, x: x, y: y, w: w, h: h});
+    let newRect = updateObject(shapes[shapeId], targetBoxAttributes);
     let newShapes = updateObject(shapes, {[shapeId]: newRect});
     return {...state, shapes: newShapes};
 }

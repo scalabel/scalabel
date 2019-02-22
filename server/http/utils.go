@@ -291,9 +291,14 @@ func countLabelsInTask(projectName string, index int) int {
 		return 0
 	}
 	numLabels := len(assignment.Labels)
-	// for videos, count the number of tracks
+	// for videos, count the number of keyframes
 	if assignment.Task.ProjectOptions.ItemType == "video" {
-		numLabels = len(assignment.Tracks)
+		numLabels = 0
+		for _, label := range assignment.Labels {
+		    if label.Keyframe {
+		        numLabels += 1
+		    }
+		}
 	} else {
 		// TODO: add labels that are imported but not loaded yet
 	}

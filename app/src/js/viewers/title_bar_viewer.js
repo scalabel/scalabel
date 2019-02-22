@@ -1,5 +1,5 @@
 import {sprintf} from 'sprintf-js';
-import Session from '../common/session.js';
+import Session from '../common/session_single.js';
 import {BaseViewer} from './base_viewer';
 /* :: import {TitleBarController} from '../controllers/title_bar_controller'; */
 

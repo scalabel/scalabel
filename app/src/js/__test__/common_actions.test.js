@@ -1,6 +1,6 @@
 import * as common from '../functional/common';
 import {testJson} from './test_objects';
-import Session from '../common/session';
+import Session from '../common/session_single';
 import {makeLabel} from '../functional/states';
 import {_} from 'lodash';
 

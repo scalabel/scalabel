@@ -517,8 +517,15 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	err = storage.Save(assignment.GetKey(), assignment.GetFields())
 	if err != nil {
 		Error.Println(err)
+		w.Write(nil)
+    } else {
+        response, err := json.Marshal(0)
+        if err != nil {
+            w.Write(nil)
+        } else {
+            w.Write(response)
+        }
 	}
-	w.Write(nil)
 }
 
 // Handles the export of submitted assignments

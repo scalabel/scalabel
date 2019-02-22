@@ -1,6 +1,6 @@
 import {BaseViewer2D} from './image_base_viewer';
 /* :: import {BaseController} from '../controllers/base_controller'; */
-import Session from '../common/session';
+import Session from '../common/session_single';
 import type {RectType} from '../functional/types';
 
 /**
@@ -28,7 +28,7 @@ export class AssistantViewer extends BaseViewer2D {
     let currentShape = this.state.labels[currentLabel].shapes[0];
     let labelArea = this.state.shapes[currentShape];
     let [x0, y0] = this.toCanvasCoords([labelArea.x, labelArea.y]);
-    let [w0, h0] = this.toCanvasCoords([labelArea.w, labelArea.h], false);
+    let [w0, h0] = this.toCanvasCoords([labelArea.w, labelArea.h]);
     return {x: x0, y: y0, w: w0, h: h0};
   }
 
@@ -37,25 +37,22 @@ export class AssistantViewer extends BaseViewer2D {
    * @return {boolean}: whether redraw is successful
    */
   redraw(): boolean {
-    // TODO: rewrite this function to draw wanted contents
     if (!super.redraw()) {
       return false;
     }
 
     let item = this.getCurrentItem();
     let image = Session.images[item.index];
-    // update the padding box
-    let padBox = this._getPadding();
     // draw stuff
-    this.context.clearRect(0, 0, padBox.w, padBox.h);
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.context.drawImage(image, 0, 0, image.width, image.height,
-        padBox.x, padBox.y, padBox.w, padBox.h);
-    if (padBox.w && padBox.h) {
+        0, 0, this.canvas.width, this.canvas.height);
+    if (this.canvas.width && this.canvas.height) {
         let labelConfig = this.generateLabelArea();
         if (labelConfig.w && labelConfig.h) {
           this.context.drawImage(this.canvas,
               labelConfig.x, labelConfig.y, labelConfig.w, labelConfig.h,
-              padBox.x, padBox.y, padBox.w, padBox.h);
+              0, 0, this.canvas.width, this.canvas.height);
         }
     }
     return true;
