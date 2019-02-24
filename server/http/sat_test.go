@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"log"
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -49,39 +50,30 @@ func addFileToForm(writer *multipart.Writer, filePath string, fileField string) 
 	return nil
 }
 
-func Test(test *testing.T) {
+func TestMain(m *testing.M) {
 	_, err := session.NewSession()
-	//if err == nil {
-	//	storage = &S3Storage{}
-	//	err := storage.Init("us-west-1:scalabel/travis")
-	//	if err != nil {
-	//		test.Fatal(err)
-	//	}
-	//	RunTests(test)
-	//	storage = &DynamodbStorage{}
-	//	err = storage.Init("us-west-1")
-	//	if err != nil {
-	//		test.Fatal(err)
-	//	}
-	//	RunTests(test)
-	//}
+	if err == nil {
+		storage = &S3Storage{}
+		err := storage.Init("us-west-1:scalabel/travis")
+		if err != nil {
+			Error.Println(err)
+		} else {
+		        m.Run()
+		}
+		storage = &DynamodbStorage{}
+		err = storage.Init("us-west-1")
+		if err != nil {
+			Error.Println(err)
+		} else {	
+		        m.Run()
+		}
+	}
 	storage = &FileStorage{}
 	err = storage.Init(env.DataDir)
 	if err != nil {
-		test.Fatal(err)
+		log.Fatal(err)
 	}
-	RunTests(test)
-}
-
-func RunTests(t *testing.T) {
-	TestPostProject(t)
-	TestDashboard(t)
-	TestVendorDashboard(t)
-	TestLoadAssignment(t)
-	TestSaveHandler(t)
-	TestExportHandler(t)
-	TestDownloadTaskURLHandler(t)
-	TestDeleteProject(t)
+	os.Exit(m.Run())
 }
 
 func TestPostProject(t *testing.T) {
