@@ -51,20 +51,20 @@ func addFileToForm(writer *multipart.Writer, filePath string, fileField string) 
 
 func Test(test *testing.T) {
 	_, err := session.NewSession()
-	if err == nil {
-		storage = &S3Storage{}
-		err := storage.Init("us-west-1:scalabel/travis")
-		if err != nil {
-			test.Fatal(err)
-		}
-		RunTests(test)
-		storage = &DynamodbStorage{}
-		err = storage.Init("us-west-1")
-		if err != nil {
-			test.Fatal(err)
-		}
-		RunTests(test)
-	}
+	//if err == nil {
+	//	storage = &S3Storage{}
+	//	err := storage.Init("us-west-1:scalabel/travis")
+	//	if err != nil {
+	//		test.Fatal(err)
+	//	}
+	//	RunTests(test)
+	//	storage = &DynamodbStorage{}
+	//	err = storage.Init("us-west-1")
+	//	if err != nil {
+	//		test.Fatal(err)
+	//	}
+	//	RunTests(test)
+	//}
 	storage = &FileStorage{}
 	err = storage.Init(env.DataDir)
 	if err != nil {
