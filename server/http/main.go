@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path"
+
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -22,13 +23,22 @@ var (
 
 // Stores the config info found in config.yml
 type Env struct {
-	Port          int    `yaml:"port"`
-	DataDir       string `yaml:"data"`
-	SrcPath       string `yaml:"src"`
-	AppSubDir     string `yaml:"appSubDir"`
-	Database      string `yaml:"database"`
-	ModelGateHost string `yaml:"modelGateHost"`
-	ModelGatePort string `yaml:"modelGatePort"`
+	Port           int    `yaml:"port"`
+	DataDir        string `yaml:"data"`
+	SrcPath        string `yaml:"src"`
+	AppSubDir      string `yaml:"appSubDir"`
+	Database       string `yaml:"database"`
+	ModelGateHost  string `yaml:"modelGateHost"`
+	ModelGatePort  string `yaml:"modelGatePort"`
+	UserManagement string `yaml:"UserManagement"`
+	Region         string `yaml:"region"`
+	ClientId       string `yaml:"clientId"`
+	RedirectUri    string `yaml:"redirectUri"`
+	LogOutUri      string `yaml:logOutUri`
+	ClientSecret   string `yaml:"clientSecret"`
+	AWSTokenUrl    string `yaml:"awsTokenURL"`
+	AwsJwkUrl      string `yaml:"awsJwkUrl"`
+	UserPoolID     string `yaml:"userPoolID"`
 }
 
 func (env Env) AppDir() string {
@@ -47,12 +57,20 @@ func (env Env) VendorPath() string {
 	return path.Join(env.AppDir(), "control/vendor.html")
 }
 
+func (env Env) WorkerPath() string {
+	return path.Join(env.AppDir(), "control/worker.html")
+}
+
+func (env Env) AdminPath() string {
+	return path.Join(env.AppDir(), "control/admin.html")
+}
+
 func (env Env) Label2dPath(v string) string {
-    if (v == "2") {
-        return path.Join(env.AppDir(), "annotation/label.html")
-    } else {
-        return path.Join(env.AppDir(), "annotation/image.html")
-    }
+	if v == "2" {
+		return path.Join(env.AppDir(), "annotation/label.html")
+	} else {
+		return path.Join(env.AppDir(), "annotation/image.html")
+	}
 }
 
 func (env Env) Label3dPath() string {
@@ -133,6 +151,7 @@ func InitStorage(database string, dir string) Storage {
 
 var env Env
 var storage Storage
+var Users = make(map[string]*User) // store the refreshTokens in the map
 
 func main() {
 	Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
@@ -159,6 +178,13 @@ func main() {
 		WrapHandleFunc(postLoadAssignmentHandler))
 	http.HandleFunc("/postLoadAssignmentV2",
 		WrapHandleFunc(postLoadAssignmentV2Handler))
+	http.HandleFunc("/auth", authHandler)
+	http.HandleFunc("/load", loadHandler)
+	http.HandleFunc("/workerDashboard", WrapHandleFunc(workerDashboardHandler))
+	http.HandleFunc("/adminDashboard", WrapHandleFunc(adminDashboardHandler))
+	http.HandleFunc("/logOut", WrapHandleFunc(logOutHandler))
+	http.HandleFunc("/postUsers", WrapHandleFunc(postUsersHandler))
+	http.HandleFunc("/postProjectNames", WrapHandleFunc(postProjectNamesHandler))
 
 	// Simple static handlers can be generated with MakePathHandleFunc
 	// http.HandleFunc("/create", WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))

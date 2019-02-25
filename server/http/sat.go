@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"gopkg.in/yaml.v2"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -17,7 +15,20 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v2"
 )
+
+// Stores the user info
+type User struct {
+	Id           string
+	Email        string
+	Group        string
+	RefreshToken string
+	Projects     []string
+}
 
 //implements Serializable
 type Project struct {
@@ -218,8 +229,27 @@ func WrapHandler(handler http.Handler) HandleFunc {
 
 func WrapHandleFunc(fn HandleFunc) HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
-		fn(w, r)
+		// check if User Management System is On
+		flag := env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON"
+		refreshTokenCookie, _ := r.Cookie("refreshTokenScalabel")
+		idCookie, _ := r.Cookie("idScalabel")
+		if !flag { // if User Management System is off, continue
+			fn(w, r)
+			return
+		} else if refreshTokenCookie == nil {
+			redirectToLogin(w, r, "No refreshTokenCookie")
+			return
+		} else if idCookie == nil {
+			redirectToLogin(w, r, "No idCookie")
+			return
+		} else if verifyRefreshToken(refreshTokenCookie.Value, idCookie.Value) == false {
+			redirectToLogin(w, r, "Failed to verify: Invalid Tokens")
+			return
+		} else {
+			Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
+			fn(w, r)
+			return
+		}
 	}
 }
 
@@ -518,13 +548,13 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 		w.Write(nil)
-    } else {
-        response, err := json.Marshal(0)
-        if err != nil {
-            w.Write(nil)
-        } else {
-            w.Write(response)
-        }
+	} else {
+		response, err := json.Marshal(0)
+		if err != nil {
+			w.Write(nil)
+		} else {
+			w.Write(response)
+		}
 	}
 }
 
@@ -902,4 +932,212 @@ func gatewayHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	w.Write(gateJson)
+}
+
+// Handles the flag value of User Management System during the redirection from index.html to /auth
+func loadHandler(w http.ResponseWriter, r *http.Request) {
+	Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
+	Info.Printf("User Management System is %s", env.UserManagement)
+	// Check if WORKER_SYSTEM is On
+	if env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON" {
+		// redirect to AWS authentication website
+		authUrl := fmt.Sprintf("https://satworker.auth.%v.amazoncognito.com/login?response_type=code&client_id=%v&redirect_uri=%v", env.Region, env.ClientId, env.RedirectUri)
+		http.Redirect(w, r, authUrl, 301)
+	} else {
+		// redirect to create
+		createUrl := "http://localhost:8686/create"
+		http.Redirect(w, r, createUrl, 301)
+	}
+}
+
+// Handles the authenticatoin of access token
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if WORKER_SYSTEM is On
+	flag := env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON"
+	if !flag {
+		// redirect to create
+		createUrl := "http://localhost:8686/create"
+		http.Redirect(w, r, createUrl, 301)
+	}
+	Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
+
+	// retrieve value from config file
+	region := env.Region
+	userPoolID := env.UserPoolID
+	clientId := env.ClientId
+	secret := env.ClientSecret
+	redirectUri := env.RedirectUri
+	awsTokenUrl := env.AWSTokenUrl
+	awsJwkUrl := env.AwsJwkUrl
+	code := r.FormValue("code")
+	// check if the server received a valid authorization code, if not, redirect to login page
+	if code == "" {
+		redirectToLogin(w, r, "Invalid authorization code")
+		return
+	}
+	idTokenString, accessTokenString, refreshTokenString := requestToken(w, r, clientId, redirectUri, awsTokenUrl, code, secret)
+
+	// Download and store the JSON Web Key (JWK) for your user pool
+	jwkURL := fmt.Sprintf(awsJwkUrl, region, userPoolID)
+	jwk := getJWK(jwkURL)
+	Info.Printf("Downloading Json Web Key from Amazon")
+
+	// veryfy accesstoken
+	accessToken, err := validateAccessToken(accessTokenString, region, userPoolID, jwk)
+	if err != nil || !accessToken.Valid {
+		// failed to verify the jwt
+		Error.Println(err)
+		Error.Println(errors.New("Access token is not valid"))
+		newUrl := "http://localhost:8686/"
+		http.Redirect(w, r, newUrl, 301)
+		return
+	} else {
+		Info.Printf("Access token verifed")
+		// check identity by idtoken and get the user's information
+		idToken, userInfo, err := validateIdToken(idTokenString, region, userPoolID, jwk)
+		identity := userInfo.Group
+
+		if err != nil || !idToken.Valid || identity == "" {
+			// error or not valid token or empty group, redirect to index
+			Error.Println(err)
+			newUrl := "http://localhost:8686/"
+			http.Redirect(w, r, newUrl, 301)
+			return
+		} else {
+			// save refresh token in the backend
+			if Users == nil {
+				fmt.Printf("global variable mistake")
+				return
+			}
+			userInfo.RefreshToken = refreshTokenString
+
+			/* TODO: Here we are trying to track which projects are assigned for this user,
+			Later the coder could feel free to use the 'Projects' attribute of 'User' sturcture
+			*/
+			// load the projects information from disk for this user
+			if _, ok := Users[userInfo.Id]; ok {
+				userInfo.Projects = Users[userInfo.Id].Projects
+			}
+			Users[userInfo.Id] = &userInfo // save userinfo to memory
+
+			// save refresh/id tokens in the cookie
+			refreshTokenExpireTime := 365 * 24 * time.Hour // TODO: find a better expire time for the cookie, maybe use the expire time of refresh token
+			expiration := time.Now().Add(refreshTokenExpireTime)
+			refreshTokenCookie := http.Cookie{Name: "refreshTokenScalabel", Value: refreshTokenString, Expires: expiration}
+			idTokenCookie := http.Cookie{Name: "idScalabel", Value: userInfo.Id, Expires: expiration}
+			http.SetCookie(w, &refreshTokenCookie)
+			http.SetCookie(w, &idTokenCookie)
+			if identity == "worker" {
+				// if the user is not admin, redirect to user's tasks
+				newUrl := "http://localhost:8686/workerDashboard"
+				http.Redirect(w, r, newUrl, 301)
+				return
+			} else if identity == "admin" {
+				// if the user is admin, redirect to admin's dashboard
+				Info.Println("Admin's Cookie Saved")
+				newUrl := "http://localhost:8686/adminDashboard"
+				http.Redirect(w, r, newUrl, 301)
+				return
+			}
+		}
+	}
+}
+
+// Handles the log out action
+func logOutHandler(w http.ResponseWriter, r *http.Request) {
+	// get the id from cookie
+	id, _ := r.Cookie("idScalabel")
+	if id == nil {
+		redirectToLogin(w, r, "No idCookie")
+		return
+	}
+	// remove corresponding userInfo from backend
+	Users[id.Value].RefreshToken = ""
+	// reset the cookies
+	refreshTokenExpireTime := 365 * 24 * time.Hour // TODO: find a better expire time for the cookie, maybe use the expire time of refresh token
+	expiration := time.Now().Add(refreshTokenExpireTime)
+	refreshCookie := http.Cookie{Name: "refreshTokenScalabel", Value: "refreshTokenCookie", Expires: expiration}
+	idCookie := http.Cookie{Name: "idScalabel", Value: "id", Expires: expiration}
+	http.SetCookie(w, &refreshCookie)
+	http.SetCookie(w, &idCookie)
+
+	// Redirect to logOut Endpoint to log out from cognito console
+	/* Replace this if you are using other authorizaition server instead of AWS */
+	logOutUrl := fmt.Sprintf("https://satworker.auth.%v.amazoncognito.com/logout?client_id=%v&logout_uri=http://localhost:8686/", env.Region, env.ClientId)
+	Info.Println("User logged out")
+	http.Redirect(w, r, logOutUrl, 301)
+}
+
+// Handles the Dashboard for Worker
+func workerDashboardHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(env.WorkerPath())
+	if err != nil {
+		Error.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+	tmpl.Execute(w, "")
+}
+
+// Handles the Dashboard for Admin
+func adminDashboardHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(env.AdminPath())
+	if err != nil {
+		Error.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+	tmpl.Execute(w, "")
+}
+
+// Handles the posting of users information
+func postUsersHandler(w http.ResponseWriter, r *http.Request) {
+	// check identity:
+	refreshTokenCookie, _ := r.Cookie("refreshTokenScalabel")
+	idCookie, _ := r.Cookie("idScalabel")
+	if refreshTokenCookie == nil {
+		redirectToLogin(w, r, "No refreshTokenCookie")
+		return
+	} else if idCookie == nil {
+		redirectToLogin(w, r, "No idCookie")
+		return
+	} else if verifyRefreshToken(refreshTokenCookie.Value, idCookie.Value) == false {
+		redirectToLogin(w, r, "Failed to verify: Invalid Tokens")
+		return
+	} else {
+		group := Users[idCookie.Value].Group
+		if group == "admin" { // valid to get users information
+			// retrieve all the users information
+			userlist := make([]User, 0, len(Users))
+			for _, value := range Users {
+				userlist = append(userlist, *value)
+			}
+			// marshal the Users as a json
+			loadedUsers, err := json.Marshal(userlist)
+			if err != nil {
+				Error.Println(err)
+			}
+			// send to front end
+			w.Write(loadedUsers)
+		} else {
+			return
+		}
+	}
+}
+
+// Handles the posting of all projects' names
+func postProjectNamesHandler(w http.ResponseWriter, r *http.Request) {
+	// retrieve values from server's disk
+	existingProjects := GetExistingProjects()
+	// check if the list is empty
+	if len(existingProjects) == 0 {
+		existingProjects = []string{"No existing project."}
+	}
+	// marshal the projects' names as a json
+	projectsNames, err := json.Marshal(existingProjects)
+	if err != nil {
+		Error.Println(err)
+	}
+	// send to front end
+	w.Write(projectsNames)
 }

@@ -1,0 +1,17 @@
+---
+port: 8686
+data: "./data"
+src: "."
+database: "local"
+modelGateHost: "127.0.0.1"
+modelGatePort: "8001"
+UserManagement: "on"
+region: ""
+clientId: ""
+redirectUri: ""
+logOutUri: ""
+clientSecret: ""
+awsTokenURL: ""
+awsJwkUrl : ""
+userPoolID: ""
+...

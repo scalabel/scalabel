@@ -86,6 +86,7 @@
   },
   "dependencies": {
     "terser": "3.14.1",
+    "classnames": "latest",
     "ajv": "6.8.1"
   }
 }

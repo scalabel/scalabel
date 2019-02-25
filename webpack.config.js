@@ -9,6 +9,8 @@ let config = {
     create: __dirname + '/app/src/js/v1/create.js',
     image: __dirname + '/app/src/js/v1/image.index.js',
     image_v2: __dirname + '/app/src/js/entries/image.index.js',
+    worker: __dirname + '/app/src/js/entries/worker.js',
+    admin: __dirname + '/app/src/js/entries/admin.js',
     point_cloud: __dirname + '/app/src/js/v1/point_cloud/point_cloud.index.js',
     speed_test: __dirname + '/app/src/js/dev/speed_test.js',
     dashboard: __dirname + '/app/src/js/v1/dashboard.index.js',

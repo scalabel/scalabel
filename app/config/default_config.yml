@@ -5,4 +5,5 @@ src: "."
 database: "local"
 modelGateHost: "127.0.0.1"
 modelGatePort: "8001"
+UserManagement: "off"
 ...
