@@ -694,7 +694,9 @@ SatImage.prototype.redrawHiddenCanvas = function() {
       self.hiddenCanvas.height * UP_RES_RATIO);
   for (let i = 0; i < self._hiddenMap.list.length; i++) {
     let shape = self._hiddenMap.get(i);
-    shape.drawHidden(self.hiddenCtx, self, hiddenStyleColor(i));
+    if (!this.soloMode || this.getLabelOfShape(shape) === this.selectedLabel) {
+      shape.drawHidden(self.hiddenCtx, self, hiddenStyleColor(i));
+    }
   }
 };
 
