@@ -302,10 +302,11 @@ func (ss *S3Storage) HasKey(key string) bool {
 		Bucket: aws.String(ss.BucketName),
 		Key:    aws.String(path.Join(ss.DataDir, key)),
 	}
-	_, err := ss.svc.GetObject(input)
+	f, err := ss.svc.GetObject(input)
 	if err != nil {
 		return false
 	}
+	f.Body.Close()
 	return true
 }
 

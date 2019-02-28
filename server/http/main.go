@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"time"
 
 	"gopkg.in/yaml.v2"
 )
@@ -198,5 +199,12 @@ func main() {
 
 	Info.Printf("Listening to Port %d", env.Port)
 	Info.Printf("Local URL: localhost:%d", env.Port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", env.Port), nil))
+	server := &http.Server{
+		Addr:           fmt.Sprintf(":%d", env.Port),
+		Handler:        nil,
+		ReadTimeout:    1800 * time.Second,
+		WriteTimeout:   1800 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	log.Fatal(server.ListenAndServe())
 }
