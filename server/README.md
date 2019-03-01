@@ -2,8 +2,7 @@
 ## One time actions
 Locally, install the following dependencies:
 ````
-pip install awscli --upgrade --user
-pip install -U ray
+pip install -U -r requirements.txt
 ````
 Set up your aws credentials. Use `us-east-2` as default region. (see [this page](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-tutorial.html#tutorial-configure-cli) for details):
 ````

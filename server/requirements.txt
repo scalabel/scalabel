@@ -1,0 +1,4 @@
+awscli
+grpcio
+grpcio-tools
+ray
