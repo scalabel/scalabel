@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",         // path to output directory
+    "sourceMap": true,           // allow sourcemap support
+    "strict": true,
+    "module": "es6",             // specify module code generation
+    "jsx": "react",              // use typescript to transpile jsx to js
+    "target": "es6",             // specify ECMAScript target version
+    "allowJs": false,             // allow a partial TypeScript and JavaScript codebase
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "moduleResolution": "node",
+    "strictNullChecks": true,    // enable strict null checks as a best practice
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "app/src/js/entries/*.tsx",
+    "app/src/js/entries/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "extends": ["tslint:recommended"],
+  "rulesDirectory": ["./app/src"],
+  "rules": {
+    "ordered-imports": false,
+    "no-unused-expression": true,
+    "member-ordering": [
+      false,
+      {
+        "order": [
+          "private-static-field",
+          "private-instance-field",
+          "public-static-field",
+          "public-instance-field",
+          "private-constructor",
+          "public-constructor",
+          "private-instance-method",
+          "protected-instance-method",
+          "public-instance-method"
+        ]
+      }
+    ],
+    "object-literal-sort-keys": false,
+    "arrow-parens": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
+    "class-name": true,
+    "no-shadowed-variable": false,
+    "comment-format": [true, "check-space"],
+    "indent": [true, "spaces"],
+    "one-line": [true, "check-open-brace", "check-whitespace"],
+    "no-var-keyword": true,
+    "quotemark": [true, "single", "avoid-escape"],
+    "semicolon": [true, "always", "ignore-bound-class-methods"],
+    "encoding": true,
+    "typedef-whitespace": [
+      true,
+      {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      },
+      {
+        "call-signature": "onespace",
+        "index-signature": "onespace",
+        "parameter": "onespace",
+        "property-declaration": "onespace",
+        "variable-declaration": "onespace"
+      }
+    ],
+    "no-internal-module": true,
+    "no-trailing-whitespace": true,
+    "no-null-keyword": false,
+    "triple-equals": true,
+    "prefer-const": true,
+    "jsdoc-format": true,
+    "interface-name": [true, "never-prefix"],
+    "only-arrow-functions": false,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": {
+          "objects": "never",
+          "arrays": "never",
+          "functions": "never",
+          "typeLiterals": "ignore"
+        }
+      }
+    ]
+  }
+}

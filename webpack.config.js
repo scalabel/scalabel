@@ -9,8 +9,8 @@ let config = {
     create: __dirname + '/app/src/js/v1/create.js',
     image: __dirname + '/app/src/js/v1/image.index.js',
     image_v2: __dirname + '/app/src/js/entries/image.index.js',
-    worker: __dirname + '/app/src/js/entries/worker.js',
-    admin: __dirname + '/app/src/js/entries/admin.js',
+    worker: __dirname + '/app/src/js/entries/worker.tsx',
+    admin: __dirname + '/app/src/js/entries/admin.tsx',
     point_cloud: __dirname + '/app/src/js/v1/point_cloud/point_cloud.index.js',
     speed_test: __dirname + '/app/src/js/dev/speed_test.js',
     dashboard: __dirname + '/app/src/js/v1/dashboard.index.js',
@@ -66,8 +66,16 @@ let config = {
   performance: {
     hints: false,
   },
+  resolve: {
+    // changed from extensions: [".js", ".jsx"]
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+  },
   module: {
     rules: [
+      {
+        test: /\.t(s|sx)$/,
+        use: {loader: 'awesome-typescript-loader'},
+       },
       {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,

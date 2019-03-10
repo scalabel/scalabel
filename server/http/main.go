@@ -31,7 +31,7 @@ type Env struct {
 	Database       string `yaml:"database"`
 	ModelGateHost  string `yaml:"modelGateHost"`
 	ModelGatePort  string `yaml:"modelGatePort"`
-	UserManagement string `yaml:"UserManagement"`
+	UserManagement string `yaml:"userManagement"`
 	Region         string `yaml:"region"`
 	ClientId       string `yaml:"clientId"`
 	RedirectUri    string `yaml:"redirectUri"`
