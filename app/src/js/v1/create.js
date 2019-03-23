@@ -111,17 +111,17 @@ $(document).ready(function() {
       document.getElementById('categories_label').style.visibility = 'hidden';
     } else if (labelSelect.value === 'box2d') {
       labelName = '2D Bounding Box';
-      instructions = 'http://data-bdd.berkeley.edu/label/bbox/instruction.html';
+      instructions = 'https://www.scalabel.ai/doc/instructions/bbox.html';
       document.getElementById('categories').style.visibility = 'visible';
       document.getElementById('categories_label').style.visibility = 'visible';
     } else if (labelSelect.value === 'segmentation') {
       labelName = '2D Segmentation';
-      instructions = 'http://data-bdd.berkeley.edu/label/seg/readme.html';
+      instructions = 'https://www.scalabel.ai/doc/instructions/segmentation.html';
       document.getElementById('categories').style.visibility = 'visible';
       document.getElementById('categories_label').style.visibility = 'visible';
     } else if (labelSelect.value === 'lane') {
       labelName = '2D Lane';
-      instructions = 'http://data-bdd.berkeley.edu/label/seg/readme.html';
+      instructions = 'https://www.scalabel.ai/doc/instructions/segmentation.html';
       document.getElementById('categories').style.visibility = 'visible';
       document.getElementById('categories_label').style.visibility = 'visible';
     } else if (labelSelect.value === 'box3d') {
