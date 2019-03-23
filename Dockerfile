@@ -14,19 +14,15 @@ RUN curl -o go.tgz -O https://dl.google.com/go/go1.11.linux-amd64.tar.gz; \
     export PATH="/usr/local/go/bin:$PATH";
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-RUN go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure \
-    gopkg.in/yaml.v2 github.com/satori/go.uuid
 
 WORKDIR /opt/scalabel
 RUN chmod -R a+w /opt/scalabel
 
-# COPY package*.json ./
-COPY . .
-RUN npm install && \
-    ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production && \
-    rm -rf node_modules
+COPY package*.json ./
+RUN npm install
 
-#COPY . .
-#RUN ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production
-#RUN rm -rf node_modules
+COPY . .
+RUN bash scripts/install_go_packages.sh
+RUN ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production && \
+    rm -rf node_modules
 RUN go build -i -o bin/scalabel ./server/http

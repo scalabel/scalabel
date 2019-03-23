@@ -11,7 +11,7 @@ before_install:
 install:
   - sudo pip install --upgrade pip
   - sudo pip install pycodestyle
-  - go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure gopkg.in/yaml.v2 github.com/satori/go.uuid github.com/dgrijalva/jwt-go
+  - bash scripts/install_go_packages.sh
   - npm install
   - node_modules/.bin/flow-typed install
   - node_modules/.bin/flow-typed install @material-ui/core@1 # install material-ui types separately
@@ -26,4 +26,10 @@ script:
   - npm test
 branches:
   only:
-    master
+    - master
+deploy:
+  provider: script
+  services: docker
+  script: bash docker_push
+  on:
+    branch: master
