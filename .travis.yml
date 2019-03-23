@@ -30,6 +30,6 @@ branches:
 deploy:
   provider: script
   services: docker
-  script: bash docker_push
+  script: bash scripts/docker_push.sh
   on:
     branch: master
