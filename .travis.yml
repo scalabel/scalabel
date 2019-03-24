@@ -27,9 +27,3 @@ script:
 branches:
   only:
     - master
-deploy:
-  provider: script
-  services: docker
-  script: bash scripts/docker_push.sh
-  on:
-    branch: master

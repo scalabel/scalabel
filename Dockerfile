@@ -21,8 +21,9 @@ RUN chmod -R a+w /opt/scalabel
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+COPY scripts ./scripts
 RUN bash scripts/install_go_packages.sh
-RUN ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production && \
-    rm -rf node_modules
+
+COPY . .
+RUN ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production
 RUN go build -i -o bin/scalabel ./server/http
