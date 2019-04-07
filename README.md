@@ -56,8 +56,7 @@ More installation and usage details can be find in our [documentation](http://ww
         
         Compile Go server code
         ```
-        go get github.com/aws/aws-sdk-go github.com/mitchellh/mapstructure \ 
-            gopkg.in/yaml.v2 github.com/satori/go.uuid go.uuid github.com/dgrijalva/jwt-go
+        bash scripts/install_go_packages.sh
         go build -i -o ./bin/scalabel ./server/http
         ```
         
