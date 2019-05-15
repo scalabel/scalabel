@@ -650,7 +650,11 @@ SatItem.prototype.fromJson = function(json) {
   if (json.labelIds) {
     for (let i = 0; i < json.labelIds.length; i++) {
       let label = self.sat.labelIdMap[json.labelIds[i]];
-      self.labels.push(label);
+      if (!label.shapesValid()) {
+        label.delete();
+      } else {
+        self.labels.push(label);
+      }
       label.satItem = this;
     }
   }
