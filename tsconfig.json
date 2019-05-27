@@ -12,13 +12,16 @@
     "moduleResolution": "node",
     "strictNullChecks": true,    // enable strict null checks as a best practice
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "include": [
     "app/src/js/entries/*.tsx",
-    "app/src/js/entries/*.ts"
+    "app/src/js/entries/*.ts",
+    "app/src/js/components/tool_bar.tsx"
   ],
   "exclude": [
     "node_modules"
   ]
 }
+

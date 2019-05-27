@@ -6,7 +6,7 @@ import {initSingle} from '../common/session_single_init';
 declare var labelType: String;
 declare var itemType: String;
 
-let frameRate = document.getElementById('frame_rate');
+const frameRate = document.getElementById('frame_rate');
 if (frameRate) {
   frameRate.style.display = 'none';
 }
@@ -28,19 +28,19 @@ $(document).ready(function() {
     $('#player-controls').remove();
   }
   // collect store from server
-  let xhr = new XMLHttpRequest();
+  const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
-      let json = JSON.parse(xhr.response);
+      const json = JSON.parse(xhr.response);
       initSingle(json);
     }
   };
   // get params from url path. These uniquely identify a SAT.
-  let searchParams = new URLSearchParams(window.location.search);
-  let taskIndex = parseInt(searchParams.get('task_index'));
-  let projectName = searchParams.get('project_name');
+  const searchParams = new URLSearchParams(window.location.search);
+  const taskIndex = parseInt(searchParams.get('task_index'));
+  const projectName = searchParams.get('project_name');
   // send the request to the back end
-  let request = JSON.stringify({
+  const request = JSON.stringify({
     'task': {
       'index': taskIndex,
       'projectOptions': {'name': projectName},

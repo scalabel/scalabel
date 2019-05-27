@@ -4,6 +4,8 @@ import LabelLayout from '../components/label_layout';
 import TitleBar from '../components/title_bar';
 import Session from './session';
 import Path from './path';
+// $FlowFixMe
+import {ToolBar} from '../components/tool_bar';
 import MainView from '../components/main_view';
 import ImageView from '../components/image_view';
 
@@ -50,7 +52,15 @@ export class Window {
             dashboardLink={Path.vendorDashboard()}
         />
     );
-    let leftSidebar1 = (<div>1</div>);
+    let leftSidebar1 = (
+        <ToolBar
+            categories={state.config.categories}
+            attributes={state.config.attributes}
+            itemType={state.config.itemType}
+            labelType={state.config.labelType}
+        />
+    );
+    /* const leftSidebar1 = (<ToolBar/>); // just replace this*/
     let imageView = (<ImageView key={'imageView'}/>);
     let main = (<MainView views={[imageView]} />);
     let bottomBar = (<div>3</div>);
@@ -66,7 +76,7 @@ export class Window {
             rightSidebar1={rightSidebar1}
             rightSidebar2={rightSidebar2}
         />,
-        this.container,
+        this.container
     );
   }
 }

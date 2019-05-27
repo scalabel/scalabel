@@ -13,13 +13,10 @@ install:
   - sudo pip install pycodestyle
   - bash scripts/install_go_packages.sh
   - npm install
-  - node_modules/.bin/flow-typed install
-  - node_modules/.bin/flow-typed install @material-ui/core@1 # install material-ui types separately
 script:
   - pycodestyle --show-source . --exclude=node_modules
   - node_modules/.bin/eslint .
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
-  - node_modules/.bin/flow check
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
   - go build -i -o ./bin/sat ./server/http
   - go test ./server/http -args --config ../../app/config/travis_config.yml

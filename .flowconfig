@@ -6,6 +6,8 @@
 <PROJECT_ROOT>/app/src/js/thirdparty/.*
 <PROJECT_ROOT>/app/src/js/__test__/.*
 <PROJECT_ROOT>/app/dist/*
+<PROJECT_ROOT>/flow-typed/.*
+<PROJECT_ROOT>/flow-typed/npm/typescript_v3.3.x.js
 
 [include]
 
