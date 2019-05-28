@@ -190,13 +190,10 @@ SatImage.prototype.selectLabel = function(label) {
 SatImage.prototype.updateLabelCount = function() {
   let numLabels = 0;
   if (this.sat.tracks) {
-    for (let track of this.sat.tracks) {
-      if (track.valid) {
-        // count number of keyframes
-        for (let frame of track.children) {
-          if (frame.keyframe) {
-            numLabels += 1;
-          }
+    for (let item of this.sat.items) {
+      for (let label of item.labels) {
+        if (label.valid && label.children.length === 0 && label.keyframe) {
+          numLabels += 1;
         }
       }
     }
