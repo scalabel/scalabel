@@ -1,10 +1,11 @@
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import {SwitchBtn} from '../components/toolbar_switch';
 import {genButton} from '../components/general_button';
-import {ListButton} from '../components/toolbar_listButton';
+import {ListButton} from '../components/toolbar_list_button';
 import React from 'react';
 
-export function renderTemplate(toolType: any, handleToggle: any, name: any, values: any) {
+export function renderTemplate(toolType: any, handleToggle: any,
+                               name: any, values: any) {
     if (toolType === 'switch') {
         return (
             <SwitchBtn onChange = {handleToggle} value = {name} />
@@ -23,7 +24,7 @@ export function renderButtons(itemType: any, labelType: any) {
         return (
             <div>
                 <div>
-                    {genButton({name: 'End Object Trac'})}
+                    {genButton({name: 'End Object Track'})}
                 </div>
                 <div>
                     {genButton({name: 'Track-Link'})}

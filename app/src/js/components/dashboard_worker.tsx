@@ -10,7 +10,11 @@ import {withStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {MuiThemeProvider} from '@material-ui/core/styles';
 import {getProjects, logout, toProject} from '../common/service';
-import {dashboardStyles, tableCellStyles, tableStyles} from '../styles/dashboard';
+import {
+  dashboardStyles,
+  tableCellStyles,
+  tableStyles
+} from '../styles/dashboard';
 // icons
 import SvgIcon from '@material-ui/core/SvgIcon';
 // table

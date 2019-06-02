@@ -5,7 +5,7 @@ import TitleBar from '../components/title_bar';
 import Session from './session';
 import Path from './path';
 // $FlowFixMe
-import {ToolBar} from '../components/tool_bar';
+import {ToolBar} from '../components/toolbar';
 import MainView from '../components/main_view';
 import ImageView from '../components/image_view';
 

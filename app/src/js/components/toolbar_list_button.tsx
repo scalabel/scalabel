@@ -1,6 +1,6 @@
 import React from 'react';
 import {Validator} from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import {withStyles} from '@material-ui/core/styles';
 import {toggleButtonStyle, listButtonStyle} from '../styles/label';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -18,7 +18,8 @@ class ToggleButtons extends React.Component<Props> {
     public state = {
         alignment: this.props.values[0]
     };
-    public handleAlignment = (event: any, alignment: any) => this.setState({ alignment });
+    public handleAlignment =
+        (event: any, alignment: any) => this.setState({alignment});
     public static propTypes: { classes: Validator<NonNullable<object>> };
 
     public render() {
@@ -35,7 +36,8 @@ class ToggleButtons extends React.Component<Props> {
                     <div className={classes.toggleContainer}
                          style={{
                              marginRight: 'auto',
-                             marginLeft: 'auto'}}
+                             marginLeft: 'auto'
+                         }}
                     >
                         <ToggleButtonGroup
                             className={classes.buttonGroup}
@@ -44,7 +46,8 @@ class ToggleButtons extends React.Component<Props> {
                             onChange={this.handleAlignment}
                         >
                             {values.map((element: any) => (
-                                <ToggleBtn value = {element}> {element} </ToggleBtn>
+                                <ToggleBtn
+                                    value={element}> {element} </ToggleBtn>
                             ))}
                         </ToggleButtonGroup>
                     </div>

@@ -17,11 +17,11 @@ interface Props {
  */
 class MultipleSelect extends React.Component<Props> {
     public state = {
-        selectedValue : 'a'
+        selectedValue: 'a'
     };
 
     public handleChange = (event: { target: { value: any; }; }) => {
-        this.setState({ selectedValue: event.target.value });
+        this.setState({selectedValue: event.target.value});
     };
 
     /**
@@ -35,7 +35,8 @@ class MultipleSelect extends React.Component<Props> {
         return (
             <div className={classes.root}>
                 <FormControl className={classes.formControl}>
-                    <ListItemText classes={{primary: classes.primary}} primary={'Label Category'}/>
+                    <ListItemText classes={{primary: classes.primary}}
+                                  primary={'Label Category'}/>
                     <div className={classes.root}>
                         {categories.map((name) => (
                             <FormControlLabel
@@ -44,7 +45,10 @@ class MultipleSelect extends React.Component<Props> {
                                     onChange={this.handleChange}
                                     key={name}
                                     value={name}
-                                    classes={{root: classes.checkbox, checked: classes.checked}}
+                                    classes={{
+                                        root: classes.checkbox,
+                                        checked: classes.checked
+                                    }}
                                 />}
                                 label={name}
                             />
@@ -56,4 +60,5 @@ class MultipleSelect extends React.Component<Props> {
     }
 }
 
-export const Category = withStyles(categoryStyle, {withTheme: true})(MultipleSelect);
+export const Category =
+    withStyles(categoryStyle, {withTheme: true})(MultipleSelect);

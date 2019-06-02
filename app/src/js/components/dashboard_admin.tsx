@@ -10,8 +10,18 @@ import IconButton from '@material-ui/core/IconButton';
 import {withStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {MuiThemeProvider} from '@material-ui/core/styles';
-import {getProjects, getUsers, goCreate, logout, toProject} from '../common/service';
-import {dashboardStyles, tableCellStyles, tableStyles} from '../styles/dashboard';
+import {
+    getProjects,
+    getUsers,
+    goCreate,
+    logout,
+    toProject
+} from '../common/service';
+import {
+    dashboardStyles,
+    tableCellStyles,
+    tableStyles
+} from '../styles/dashboard';
 // lists
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';

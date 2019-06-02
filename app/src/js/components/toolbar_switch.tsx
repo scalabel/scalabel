@@ -27,7 +27,8 @@ class SwitchButton extends React.Component<Props> {
 
         return (
             <ListItem>
-                <ListItemText classes={{primary: classes.primary}} primary={value}/>
+                <ListItemText classes={{primary: classes.primary}}
+                              primary={value}/>
                 <ListItemSecondaryAction>
                     <Switch
                         classes={{
