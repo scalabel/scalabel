@@ -16,10 +16,8 @@ interface Props {
 
 class ToggleButtons extends React.Component<Props> {
     public state = {
-        alignment: this.props.values[0],
-        formats: ['bold']
+        alignment: this.props.values[0]
     };
-
     public handleAlignment = (event: any, alignment: any) => this.setState({ alignment });
     public static propTypes: { classes: Validator<NonNullable<object>> };
 
