@@ -34,13 +34,13 @@ const myTheme = theme({ palette: { primary: {main: '#616161'} }});
  * This is Dashboard component that displays
  * the everything post in the dashboard.
  * @param {object} props
- * @return {jsx} component
+ * @return component
  */
 function Dashboard(props: any) {
     const {classes} = props;
     /**
      * render function
-     * @return {jsx} component
+     * @return component
      */
     return (
       <div className={classes.root}>
@@ -90,9 +90,11 @@ const DashboardTableCell = withStyles(tableCellStyles)(TableCell);
  * This is projectTable component that displays
  * all the information about projects
  * @param {object} props
- * @return {jsx} component
+ * @return component
  */
-const ProjectTable = function(props: { classes: any; }) {
+const ProjectTable = function(props: {
+  /** styles of Project Table */
+  classes: any; }) {
   const {classes} = props;
   return (
     <Paper className={classes.root}>
@@ -121,4 +123,5 @@ const ProjectTable = function(props: { classes: any; }) {
 };
 const DashboardTable = withStyles(tableStyles)(ProjectTable);
 
+/** export Dashboard */
 export default withStyles(dashboardStyles)(Dashboard);

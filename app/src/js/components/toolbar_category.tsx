@@ -7,7 +7,9 @@ import Radio from '@material-ui/core/Radio/Radio';
 import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel';
 
 interface Props {
+    /** categories of MultipleSelect */
     categories: any[];
+    /** styles of MultipleSelect */
     classes: any;
 }
 
@@ -16,17 +18,28 @@ interface Props {
  * all the categories as a list.
  */
 class MultipleSelect extends React.Component<Props> {
+    /**
+     * This is the state of MultipleSelect
+     */
     public state = {
         selectedValue: 'a'
     };
 
-    public handleChange = (event: { target: { value: any; }; }) => {
+    /**
+     * This is the handleChange function of MultipleSelect
+     * that change the set the state of MultipleSelect.
+     */
+    public handleChange = (event: {
+        /** target to change */
+        target: {
+            /** value to be changed */
+            value: any;
+        }; }) => {
         this.setState({selectedValue: event.target.value});
     };
 
     /**
      * MultipleSelect render function
-     * @return {jsx} component
      */
     public render() {
         const {categories} = this.props;

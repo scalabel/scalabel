@@ -9,19 +9,33 @@ import List from '@material-ui/core/List';
 import {ListItemText} from '@material-ui/core';
 
 interface Props {
+    /** styles of ToggleButtons */
     classes: any;
+    /** name of ToggleButtons */
     name: any;
+    /** values of ToggleButtons */
     values: string[];
 }
 
+/**
+ * This is ToggleButtons component that displays
+ * the everything post in the dashboard.
+ * @param {object} props
+ */
 class ToggleButtons extends React.Component<Props> {
+    /** state of ToggleButtons */
     public state = {
         alignment: this.props.values[0]
     };
+    /** handleAlignment of ToggleButtons that align buttons */
     public handleAlignment =
         (event: any, alignment: any) => this.setState({alignment});
-    public static propTypes: { classes: Validator<NonNullable<object>> };
-
+    /** propTypes of ToggleButtons */
+    public static propTypes: {
+        /** type of classes */
+        classes: Validator<NonNullable<object>>
+    };
+    /** render function of ToggleButtons */
     public render() {
         const {name, classes, values} = this.props;
         const {alignment} = this.state;

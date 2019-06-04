@@ -9,11 +9,17 @@ import {genButton} from './general_button';
 type ItemType = 'video' | 'image';
 type LabelType = 'box2d' | 'segmentation' | 'lane';
 
+/** This is the interface of props passed to ToolBar */
 interface Props {
+    /** categories of ToolBar */
     categories: any[];
+    /** attributes of ToolBar */
     attributes: any[];
+    /** itemType of ToolBar */
     itemType: ItemType;
+    /** labelType of ToolBar */
     labelType: LabelType;
+    /** styles of ToolBar */
     classes: any;
 }
 /**
@@ -30,10 +36,9 @@ export class ToolBar extends React.Component<Props> {
     }
     /**
      * This function updates the checked list of switch buttons.
-     * @param {array} checked
      * @param {string} switchName
      */
-    private handleToggle = (switchName: any) => () => {
+    private readonly handleToggle = (switchName: any) => () => {
         // @ts-ignore
         const {checked} = this.state;
         const currentIndex = checked.indexOf(switchName);
@@ -51,7 +56,7 @@ export class ToolBar extends React.Component<Props> {
     };
     /**
      * ToolBar render function
-     * @return {jsx} component
+     * @return component
      */
     public render() {
         const {categories, attributes, itemType, labelType} = this.props;

@@ -4,6 +4,13 @@ import {genButton} from '../components/general_button';
 import {ListButton} from '../components/toolbar_list_button';
 import React from 'react';
 
+/**
+ * This is renderTemplate function that renders the category.
+ * @param {Object} toolType
+ * @param {Object} handleToggle
+ * @param {Object} name
+ * @param {Object} values
+ */
 export function renderTemplate(toolType: any, handleToggle: any,
                                name: any, values: any) {
     if (toolType === 'switch') {
@@ -19,6 +26,11 @@ export function renderTemplate(toolType: any, handleToggle: any,
     }
 }
 
+/**
+ * This is renderButtons function that renders the buttons in the toolbar.
+ * @param {Object} itemType
+ * @param {Object} labelType
+ */
 export function renderButtons(itemType: any, labelType: any) {
     if (itemType === 'video') {
         return (

@@ -2,6 +2,7 @@
   "extends": ["tslint:recommended"],
   "rulesDirectory": ["./app/src"],
   "rules": {
+    "completed-docs": true,
     "max-line-length": [true, {"limit":80, "ignore-pattern": "^import"}],
     "ordered-imports": false,
     "no-unused-expression": true,

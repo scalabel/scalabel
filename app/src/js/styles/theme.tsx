@@ -3,13 +3,19 @@ import {Palette, PaletteOptions} from '@material-ui/core/styles/createPalette';
 
 declare module '@material-ui/core/styles/createMuiTheme' {
     interface Theme {
+        /** palette of Theme */
         palette: Palette;
     }
     interface ThemeOptions {
+        /** palette of ThemeOptions */
         palette?: PaletteOptions;
     }
 }
 
+/**
+ * This is createMyTheme function
+ * that overwrites the primary main color
+ */
 export default function createMyTheme(options: ThemeOptions) {
     return createMuiTheme({
         palette: {

@@ -61,13 +61,15 @@ export const mainListItems = (
  * This is Dashboard component that displays
  * the everything post in the dashboard.
  * @param {Object} props
- * @return {jsx} component
+ * @return component
  */
-function Dashboard(props: { classes: any; }) {
+function Dashboard(props: {
+  /** styles of Dashboard */
+  classes: any; }) {
   const {classes} = props;
     /**
      * render function
-     * @return {jsx} component
+     * @return component
      */
   return (
     <div className={classes.root}>
@@ -132,9 +134,11 @@ const DashboardTableCell = withStyles(tableCellStyles)(TableCell);
  * This is projectTable component that displays
  * all the information about projects
  * @param {object} Props
- * @return {jsx} component
+ * @return component
  */
-const ProjectTable = function(Props: { classes: any; }) {
+const ProjectTable = function(Props: {
+  /** styles of ProjectTable */
+  classes: any; }) {
   const {classes} = Props;
   return (
     <Paper className={classes.root}>
@@ -167,10 +171,12 @@ const ProjectTableDisplay = withStyles(tableStyles)(ProjectTable);
 /**
  * This is WorkersTable component that displays
  * all the information about workers
- * @param {object} Props
- * @return {jsx} component
+ * @param props
+ * @return component
  */
-const WorkersTable = function(props: { classes: any; }) {
+const WorkersTable = function(props: {
+  /** styles of ProjectTable */
+  classes: any; }) {
   const {classes} = props;
   return (
     <Paper className={classes.root}>
@@ -198,4 +204,5 @@ const WorkersTable = function(props: { classes: any; }) {
 
 const WorkersTableDisplay = withStyles(tableStyles)(WorkersTable);
 
+/** export Dashboard */
 export default withStyles(dashboardStyles)(Dashboard);

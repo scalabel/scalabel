@@ -5,8 +5,9 @@
  * @param {boolean} async
  * @return {function} data
  */
-export function requestData(url: string, method: string, async: boolean):
-    { map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode; } {
+export function requestData(url: string, method: string, async: boolean): {
+    /** map function */
+    map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode; } {
     let data: any;
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -23,8 +24,9 @@ export function requestData(url: string, method: string, async: boolean):
  * This function post request to backend to retrieve users' information
  * @return {function} users
  */
-export function getUsers():
-    { map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode; } {
+export function getUsers(): {
+    /** map function */
+    map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode; } {
     return requestData('./postUsers', 'get', false);
 }
 
@@ -32,8 +34,9 @@ export function getUsers():
  * This function post request to backend to retrieve users' information
  * @return {function} projects
  */
-export function getProjects():
-    { map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode; } {
+export function getProjects(): {
+    /** map function */
+    map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode; } {
     return requestData('./postProjectNames', 'get', false);
 }
 

@@ -5,9 +5,15 @@ import Switch from '@material-ui/core/Switch';
 import {withStyles} from '@material-ui/core/styles';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 
+/**
+ * Interface used for props.
+ */
 interface Props {
+    /** onChange function */
     onChange: any;
+    /** values passed to onChange function . */
     value: any;
+    /** styles of SwitchButton. */
     classes: any;
 }
 
@@ -15,12 +21,10 @@ interface Props {
  * This is a Switch Button component that
  * displays the list of selections.
  * @param {object} Props
- * @return {jsx} component
  */
 class SwitchButton extends React.Component<Props> {
     /**
      * SwitchButton render function
-     * @return {jsx} component
      */
     public render() {
         const {onChange, value, classes} = this.props;
