@@ -1,9 +1,10 @@
 // @flow
 
-import type {
+import {
   LabelType, ItemType,
-  RectType, StateType,
-  ConfigType, CurrentType, ImageViewerConfigType, LayoutType,
+  RectType, CubeType, StateType,
+  ConfigType, CurrentType, ImageViewerConfigType, PointCloudViewerConfigType,
+  LayoutType,
 } from './types';
 
 /**
@@ -19,7 +20,6 @@ export function makeLabel(params: {} = {}): LabelType {
     attributes: {},
     parent: -1, // id
     children: [], // ids
-    numChildren: 0,
     valid: true,
     shapes: [],
     selectedShape: -1,
@@ -36,10 +36,27 @@ export function makeLabel(params: {} = {}): LabelType {
 export function makeRect(params: {} = {}): RectType {
   return {
     id: -1,
+    label: -1,
     x: -1,
     y: -1,
     w: -1,
     h: -1,
+    ...params,
+  };
+}
+
+/**
+ * Initialize a 3d box shape
+ * @param {{}} params
+ * @return {CubeType}
+ */
+export function makeCube(params: {} = {}): CubeType {
+  return {
+    id: -1,
+    label: -1,
+    center: {x: 0, y: 0, z: 0},
+    size: {x: 1, y: 1, z: 1},
+    orientation: {x: 0, y: 0, z: 0},
     ...params,
   };
 }
@@ -57,11 +74,23 @@ export function makeImageViewerConfig(): ImageViewerConfigType {
 }
 
 /**
+ * Make a new point cloud viewer config
+ * @return {PointCloudViewerConfigType}
+ */
+export function makePointCloudViewerConfig(): PointCloudViewerConfigType {
+  return {
+    position: {x: 0.0, y: 10.0, z: 0.0},
+    target: {x: 0.0, y: 0.0, z: 0.0},
+    verticalAxis: {x: 0.0, y: 0.0, z: 1.0},
+  };
+}
+
+/**
  * Initialize an item state
  * @param {{}} params
  * @return {ItemType}
  */
-export function makeItem(params: {} = {}): ItemType {
+export function makeItem(params: any = {}): ItemType {
   return {
     id: -1,
     index: 0,
@@ -69,7 +98,7 @@ export function makeItem(params: {} = {}): ItemType {
     active: false,
     loaded: false,
     labels: [], // list of label ids
-    viewerConfig: {},
+    viewerConfig: null,
     ...params,
   };
 }

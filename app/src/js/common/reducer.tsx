@@ -4,7 +4,9 @@ import * as common from '../functional/common';
 import * as image from '../functional/image';
 import * as tag from '../functional/tag';
 import * as box2d from '../functional/box2d';
-import type {StateType} from '../functional/types';
+import * as pointCloud from '../functional/point_cloud';
+import {StateType} from '../functional/types';
+import {ActionTypes} from '../actions/action_types';
 
 /**
  * Reducer
@@ -14,11 +16,11 @@ import type {StateType} from '../functional/types';
  */
 export function reducer(
     currentState: StateType = makeState(),
-    action: Object): StateType {
+    action: ActionTypes): StateType {
   // Appending actions to action array
-  let newActions = currentState.actions.slice();
+  const newActions = currentState.actions.slice();
   newActions.push(action);
-  let state = {...currentState, actions: newActions};
+  const state = {...currentState, actions: newActions};
   // Apply reducers to state
   switch (action.type) {
     case types.INIT_SESSION:
@@ -52,9 +54,16 @@ export function reducer(
           action.categoryOptions);
     case types.TOGGLE_ASSISTANT_VIEW:
       return common.toggleAssistantView(state);
+
     case types.CHANGE_RECT:
       return box2d.changeRect(state, action.shapeId,
           action.targetBoxAttributes);
+
+    case types.MOVE_CAMERA:
+      return pointCloud.moveCamera(state, action.newPosition);
+    case types.MOVE_CAMERA_AND_TARGET:
+      return pointCloud.moveCameraAndTarget(state, action.newPosition,
+        action.newTarget);
     default:
   }
   return state;

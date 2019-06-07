@@ -268,6 +268,14 @@ func Label2dv2Handler(w http.ResponseWriter, r *http.Request) {
 	executeLabelingTemplateV2(w, r, tmpl)
 }
 
+func Label3dv2Handler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(env.Label3dPath(r.FormValue("v")))
+	if err != nil {
+		Error.Println(err)
+	}
+	executeLabelingTemplate(w, r, tmpl)
+}
+
 // Essentially rewriting the decodeBaseJson logic, need to get rid of this
 // when backend is completely transferred to redux
 func assignmentToSat(assignment *Assignment) Sat {

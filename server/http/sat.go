@@ -355,6 +355,8 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// postpend version to supported label type
 	if labelType == "box2d" && version == "v2" {
 		labelType = "box2dv2"
+	} else if labelType == "box3d" && version == "v2" {
+		labelType = "box3dv2"
 	}
 	// get page title from form
 	pageTitle := r.FormValue("page_title")
@@ -418,7 +420,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	handlerUrl := GetHandlerUrl(itemType, labelType)
 
 	// get which bundle to use depending on redux progress
-	bundleFile := "image.js"
+	bundleFile := "image.tsx"
 	if labelType == "tag" || labelType == "box2dv2" {
 		bundleFile = "image_v2.js"
 	}

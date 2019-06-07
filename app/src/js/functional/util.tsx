@@ -10,7 +10,7 @@ import * as fp from 'lodash/fp';
  * @param {{}} newFields
  * @return {{}}
  */
-export function updateObject(object: Object, newFields: Object): Object {
+export function updateObject<T>(object: T, newFields: Partial<T>): T {
   return {...object, ...newFields};
 }
 
@@ -22,7 +22,7 @@ export function updateObject(object: Object, newFields: Object): Object {
  * @return {Array}
  */
 export function updateListItem<T>(
-    array: Array<T>, index: number, item: T): Array<T> {
+    array: T[], index: number, item: T): T[] {
   array = array.slice();
   array[index] = item;
   return array;
@@ -37,9 +37,9 @@ export function updateListItem<T>(
  * @return {Array}
  */
 export function updateListItems<T>(
-  array: Array<T>, indices: Array<number>, items: Array<T>): Array<T> {
+  array: T[], indices: number[], items: T[]): T[] {
   array = array.slice();
-  for (let i=0; i < indices.length; i++) {
+  for (let i = 0; i < indices.length; i++) {
     array[indices[i]] = items[i];
   }
   return array;
@@ -51,41 +51,46 @@ export function updateListItems<T>(
  * @param {any} item
  * @return {Array}
  */
-export function addListItem<T>(items: Array<T>, item: T): Array<T> {
+export function addListItem<T>(items: T[], item: T): T[] {
   return items.concat([item]);
 }
 
 /**
  * Remove fields from an object
  * @param {T} object
- * @param {Array<any>} fields
+ * @param {any[]} fields
  * @return {T}
  */
-export function removeObjectFields<T>(object: T, fields: Array<any>): T {
+export function removeObjectFields<T>(object: T, fields: any[]): T {
   object = {...object};
-  for (let f of fields) {
-    delete object[f];
+  for (const f of fields) {
+    delete (object as any)[f];
   }
   return object;
 }
 
+interface idSingle {
+  id: number;
+}
+
 /**
  * remove list items by item id
- * @param {Array<T>} items
- * @param {Array<number>} ids
- * @return {Array<T>}
+ * @param {T[]} items
+ * @param {number[]} ids
+ * @return {T[]}
  */
-export function removeListItemsById<T: {id: number}>(
-    items: Array<T>, ids: Array<number>): Array<T> {
-  return fp.remove((item: T) => fp.indexOf(item.id, ids) >= 0)(items);
+export function removeListItemsById(items: idSingle[],
+                                    ids: number[]): idSingle[] {
+  return fp.remove(
+      (item: idSingle) => fp.indexOf(item.id, ids) >= 0)(items);
 }
 
 /**
  * Remove list items by equivalence
- * @param {Array<T>} items
- * @param {Array<T>} a
- * @return {Array<T>}
+ * @param {T[]} items
+ * @param {T[]} a
+ * @return {T[]}
  */
-export function removeListItems<T>(items: Array<T>, a: Array<T>): Array<T> {
+export function removeListItems<T>(items: T[], a: T[]): T[] {
   return fp.remove((item) => fp.indexOf(item, a) >= 0, items);
 }

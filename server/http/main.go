@@ -74,8 +74,12 @@ func (env Env) Label2dPath(v string) string {
 	}
 }
 
-func (env Env) Label3dPath() string {
-	return path.Join(env.AppDir(), "annotation/point_cloud.html")
+func (env Env) Label3dPath(v string) string {
+	if v == "2" {
+		return path.Join(env.AppDir(), "annotation/label.html")
+	} else {
+		return path.Join(env.AppDir(), "annotation/point_cloud.html")
+	}
 }
 
 func (env Env) PointCloudTrackingPath() string {
@@ -193,6 +197,7 @@ func main() {
 	http.HandleFunc("/label2d", WrapHandleFunc(Label2dHandler))
 	http.HandleFunc("/label2dv2", WrapHandleFunc(Label2dv2Handler))
 	http.HandleFunc("/label3d", WrapHandleFunc(Label3dHandler))
+	http.HandleFunc("/label3dv2", WrapHandleFunc(Label3dv2Handler))
 
 	//Get information of the gateway server
 	http.HandleFunc("/dev/gateway", WrapHandleFunc(gatewayHandler))

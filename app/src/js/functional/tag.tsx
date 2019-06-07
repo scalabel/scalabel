@@ -1,5 +1,5 @@
 
-import type {LabelType, StateType} from './types';
+import {LabelType, StateType} from './types';
 import {makeLabel} from './states';
 import {newLabel} from './common';
 import _ from 'lodash';
@@ -12,7 +12,7 @@ import _ from 'lodash';
  * @return {LabelType}
  */
 export function createTagLabel(labelId: number, itemId: number,
-                               optionalAttributes: Object): LabelType {
+                               optionalAttributes: any): LabelType {
   return makeLabel({id: labelId, item: itemId, attributes: optionalAttributes});
 }
 
@@ -26,13 +26,13 @@ export function createTagLabel(labelId: number, itemId: number,
  */
 export function tagImage(
     state: StateType, itemId: number, attributeIndex: number,
-    attributeValue: Array<number>): StateType {
-  let attributes = {[attributeIndex]: attributeValue};
-  let item = state.items[itemId];
+    attributeValue: number[]): StateType {
+  const attributes = {[attributeIndex]: attributeValue};
+  const item = state.items[itemId];
   if (item.labels.length > 0) {
-    let labelId = item.labels[0];
+    const labelId = item.labels[0];
     // be careful about this merge
-    return _.merge({}, state, {labels: {[labelId]: {attributes: attributes}}});
+    return _.merge({}, state, {labels: {[labelId]: {attributes}}});
   }
   return newLabel(state, itemId, createTagLabel, attributes);
 }

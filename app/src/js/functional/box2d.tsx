@@ -1,6 +1,6 @@
 
 import {makeLabel, makeRect} from './states';
-import type {LabelType, StateType} from './types';
+import {LabelType, StateType} from './types';
 import {updateListItem, updateObject} from './util';
 
 /**
@@ -11,8 +11,8 @@ import {updateListItem, updateObject} from './util';
  * @return {LabelType}
  */
 export function createBox2DLabel(labelId: number,
-                            itemId: number,
-                            optionalAttributes: Object = {}): LabelType {
+                                 itemId: number,
+                                 optionalAttributes: any = {}): LabelType {
   return makeLabel({id: labelId, item: itemId,
     shapes: optionalAttributes.shapes});
 }
@@ -27,31 +27,31 @@ export function createBox2DLabel(labelId: number,
 export function newImageBox2DLabel(
   state: StateType,
   itemId: number,
-  optionalAttributes: Object = {}): StateType {
+  optionalAttributes: any = {}): StateType {
   // get the labelId
-  let labelId = state.current.maxObjectId + 1;
+  const labelId = state.current.maxObjectId + 1;
   // put the labelId inside item
-  let item = updateObject(state.items[itemId],
+  const item = updateObject(state.items[itemId],
     {labels: state.items[itemId].labels.concat([labelId])});
   // put updated item inside items
-  let items = updateListItem(state.items, itemId, item);
+  const items = updateListItem(state.items, itemId, item);
   // get the shape Id
-  let shapeId = labelId + 1;
+  const shapeId = labelId + 1;
   // create the rect object
-  let rect = makeRect({id: shapeId, ...optionalAttributes});
+  const rect = makeRect({id: shapeId, ...optionalAttributes});
   // put rect inside shapes
-  let shapes = updateObject(state.shapes, {[shapeId]: rect});
+  const shapes = updateObject(state.shapes, {[shapeId]: rect});
   // create the actual label with the labelId and shapeId and put inside labels
-  let labels = updateObject(state.labels,
+  const labels = updateObject(state.labels,
     {[labelId]: createBox2DLabel(labelId, itemId, {shapes: [shapeId]})});
-  let current = updateObject(state.current,
+  const current = updateObject(state.current,
           {label: labelId, maxObjectId: shapeId});
   return {
     ...state,
-    items: items,
-    labels: labels,
-    shapes: shapes,
-    current: current,
+    items,
+    labels,
+    shapes,
+    current,
   };
 }
 
@@ -63,9 +63,9 @@ export function newImageBox2DLabel(
  * @return {Object}
  */
 export function changeRect(state: StateType, shapeId: number,
-                           targetBoxAttributes: Object) {
-    let shapes = state.shapes;
-    let newRect = updateObject(shapes[shapeId], targetBoxAttributes);
-    let newShapes = updateObject(shapes, {[shapeId]: newRect});
+                           targetBoxAttributes: any) {
+    const shapes = state.shapes;
+    const newRect = updateObject(shapes[shapeId], targetBoxAttributes);
+    const newShapes = updateObject(shapes, {[shapeId]: newRect});
     return {...state, shapes: newShapes};
 }

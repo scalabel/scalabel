@@ -8,18 +8,9 @@ import * as types from '../actions/action_types';
  */
 function initFromJson(stateJson: Object): void {
   Session.initStore(stateJson);
-  if (Session.itemType === 'image') {
-    initImage();
-  }
+  Session.loadData();
   Session.window.render();
   Session.dispatch({type: types.UPDATE_ALL});
-}
-
-/**
- * Initialize tagging interface
- */
-function initImage(): void {
-  Session.loadImages();
 }
 
 /**

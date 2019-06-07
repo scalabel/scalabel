@@ -23,12 +23,12 @@ import {
  * @return {Object}
  */
 export function configureStore(
-    json: Object = {}, devMode: boolean = false): Object {
+    json: any = {}, devMode: boolean = false): any {
   let store;
   const initialHistory = {
     past: [],
     present: makeState(json),
-    future: [],
+    future: []
   };
 
   store = createStore(undoable(reducer, {
@@ -46,7 +46,7 @@ export function configureStore(
       TOGGLE_ASSISTANT_VIEW,
     ]),
     debug: devMode,
-  }), initialHistory);
+  }), initialHistory as any);
 
   return store;
 }
@@ -55,6 +55,6 @@ export function configureStore(
  * Create fast and partial store for interactive mode
  * @return {Object}
  */
-export function configureFastStore(): Object {
+export function configureFastStore(): any {
   return createStore(reducer, makeState());
 }

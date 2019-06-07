@@ -128,7 +128,7 @@ func GetAssignment(projectName string, taskIndex string, workerId string) (Assig
 	// Asssigns default value for BundleFile
 	// Should get rid of this and separate bundleFiles in the future
 	if assignment.Task.ProjectOptions.LabelType != "tag" {
-		assignment.Task.ProjectOptions.BundleFile = "image.js"
+		assignment.Task.ProjectOptions.BundleFile = "image.tsx"
 	}
 	return assignment, nil
 }
@@ -183,6 +183,8 @@ func GetHandlerUrl(itemType string, labelType string) string {
 	case "pointcloud":
 		if labelType == "box3d" {
 			return "label3d"
+		} else if labelType == "box3dv2" {
+			return "label3dv2"
 		} else {
 			return "NO_VALID_HANDLER"
 		}

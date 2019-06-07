@@ -1,5 +1,5 @@
 import {makeItem} from './states';
-import type {ItemType, ItemFunctionalType, StateType} from './types';
+import {ItemType, ItemFunctionalType, StateType, ImageViewerConfigType} from './types';
 import {updateObject} from './util';
 import {getCurrentItemViewerConfig,
   setCurrentItemViewerConfig} from './state_util';
@@ -11,7 +11,7 @@ import {getCurrentItemViewerConfig,
  * @return {ItemType}
  */
 export function createItem(id: number, url: string): ItemType {
-  return makeItem({id: id, index: id, url: url});
+  return makeItem({id, index: id, url});
 }
 
 /**
@@ -22,8 +22,13 @@ export function createItem(id: number, url: string): ItemType {
  */
 export function zoomImage(state: StateType, ratio: number): StateType {
   let config = getCurrentItemViewerConfig(state);
-  config = updateObject(config, {viewScale: config.viewScale * ratio});
-  return setCurrentItemViewerConfig(state, config);
+  if (config) {
+    config = updateObject(config,
+        {viewScale: (config as ImageViewerConfigType).viewScale * ratio});
+    return setCurrentItemViewerConfig(state, config);
+  } else {
+    return state;
+  }
 }
 
 /**
@@ -31,7 +36,7 @@ export function zoomImage(state: StateType, ratio: number): StateType {
  * @param {Object} json
  * @return {ItemType}
  */
-export function fromJson(json: Object): ItemType {
+export function fromJson(json: any): ItemType {
   return makeItem({
     id: json.index,
     index: json.index,
@@ -42,7 +47,4 @@ export function fromJson(json: Object): ItemType {
 }
 
 // This is necessary for different label types
-export const ImageF: ItemFunctionalType = {
-  createItem: createItem,
-  // setActive: setActive,
-};
+export type ImageF = ItemFunctionalType;

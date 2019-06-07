@@ -8,7 +8,7 @@ import {makeImageViewerConfig} from '../functional/states';
 /* :: import {BaseController} from '../controllers/base_controller'; */
 /* :: import {BaseViewer} from '../viewers/base_viewer'; */
 
-import {configureStore, configureFastStore} from '../redux/configure_store';
+import {configureStore, configureFastStore} from './configure_store';
 
 /**
  * Singleton session class

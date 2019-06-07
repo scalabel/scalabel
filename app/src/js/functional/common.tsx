@@ -1,4 +1,4 @@
-import type {ItemType, LabelType, StateType, ViewerConfigType} from './types';
+import {ItemType, LabelType, StateType, ViewerConfigType} from './types';
 import {
   removeListItems, removeObjectFields, updateListItem, updateListItems,
   updateObject,
@@ -11,16 +11,16 @@ import {
  */
 export function initSession(state: StateType): StateType {
   // initialize state
-  let items = state.items.slice();
-  for (let i = 0; i < items.length; i+=1) {
+  const items = state.items.slice();
+  for (let i = 0; i < items.length; i++) {
     items[i] = updateObject(items[i], {loaded: false});
   }
-  state = updateObject(state, {items: items});
+  state = updateObject(state, {items});
   if (state.current.item === -1) {
-    let current = updateObject(state.current, {item: 0});
-    let items = updateListItem(
+    const current = updateObject(state.current, {item: 0});
+    const items = updateListItem(
         state.items, 0, updateObject(state.items[0], {active: true}));
-    return updateObject(state, {current: current, items: items});
+    return updateObject(state, {current, items});
   } else {
     return state;
   }
@@ -37,20 +37,21 @@ export function initSession(state: StateType): StateType {
 export function newLabel(
     state: StateType,
     itemId: number,
-    createLabel: (number, number, Object) => LabelType,
-    optionalAttributes: Object = {}): StateType {
-  let labelId = state.current.maxObjectId + 1;
-  let item = updateObject(state.items[itemId],
+    createLabel: (labelId: number, itemId: number,
+                  optionalAttributes: any) => LabelType,
+    optionalAttributes: any = {}): StateType {
+  const labelId = state.current.maxObjectId + 1;
+  const item = updateObject(state.items[itemId],
       {labels: state.items[itemId].labels.concat([labelId])});
-  let items = updateListItem(state.items, itemId, item);
-  let labels = updateObject(state.labels,
+  const items = updateListItem(state.items, itemId, item);
+  const labels = updateObject(state.labels,
       {[labelId]: createLabel(labelId, itemId, optionalAttributes)});
-  let current = updateObject(state.current, {maxObjectId: labelId});
+  const current = updateObject(state.current, {maxObjectId: labelId});
   return {
     ...state,
-    items: items,
-    labels: labels,
-    current: current,
+    items,
+    labels,
+    current
   };
 }
 
@@ -62,18 +63,17 @@ export function newLabel(
  * @return {StateType}
  */
 export function newItem(
-    state: StateType, createItem: (number, string) => ItemType,
+    state: StateType, createItem: (itemId: number, url: string) => ItemType,
     url: string): StateType {
-  let id = state.items.length;
-  let item = createItem(id, url);
-  let items = state.items.slice();
+  const id = state.items.length;
+  const item = createItem(id, url);
+  const items = state.items.slice();
   items.push(item);
   return {
     ...state,
-    items: items,
+    items
   };
 }
-
 
 /**
  * Go to item at index
@@ -90,14 +90,14 @@ export function goToItem(state: StateType, index: number): StateType {
   if (index === state.current.item) {
     return state;
   }
-  let deactivatedItem = updateObject(state.items[state.current.item],
+  const deactivatedItem = updateObject(state.items[state.current.item],
       {active: false});
-  let activatedItem = updateObject(state.items[index], {active: true});
-  let items = updateListItems(state.items,
+  const activatedItem = updateObject(state.items[index], {active: true});
+  const items = updateListItems(state.items,
       [state.current.item, index],
       [deactivatedItem, activatedItem]);
-  let current = {...state.current, item: index};
-  return updateObject(state, {items: items, current: current});
+  const current = {...state.current, item: index};
+  return updateObject(state, {items, current});
 }
 
 /**
@@ -113,13 +113,13 @@ export function loadItem(state: StateType, itemIndex: number,
       state, {items: updateListItem(
           state.items, itemIndex,
             updateObject(state.items[itemIndex],
-                {viewerConfig: viewerConfig, loaded: true}))});
+                {viewerConfig, loaded: true}))});
 }
 
 // TODO: now we are using redux, we have all the history anyway,
 // TODO: do we still need to keep around all labels in current state?
 /**
- * Delete given label
+ * Deconste given label
  * @param {StateType} state
  * @param {number} itemIndex
  * @param {number} labelId
@@ -131,10 +131,10 @@ export function deleteLabel(state: StateType, itemIndex: number,
   // depending on how boundary sharing is implemented.
 
   // remove labels
-  let labels = removeObjectFields(state.labels, [labelId.toString()]);
+  const labels = removeObjectFields(state.labels, [labelId.toString()]);
   let items = state.items;
   if (itemIndex >= 0) {
-    let item = items[itemIndex];
+    const item = items[itemIndex];
     items = updateListItem(items, itemIndex,
         updateObject(item,
             {labels: removeListItems(item.labels, [labelId])}));
@@ -146,7 +146,7 @@ export function deleteLabel(state: StateType, itemIndex: number,
     current = updateObject(current, {label: -1});
   }
   return updateObject(
-      state, {current: current, labels: labels, items: items});
+      state, {current, labels, items});
 }
 
 /**
@@ -157,7 +157,7 @@ export function deleteLabel(state: StateType, itemIndex: number,
  * @return {StateType}
  */
 export function changeAttribute(state: StateType, ignoredLabelId: number,
-                                ignoredAttributeOptions: Object): StateType {
+                                ignoredAttributeOptions: any): StateType {
   return state;
 }
 
@@ -169,11 +169,11 @@ export function changeAttribute(state: StateType, ignoredLabelId: number,
  * @return {StateType}
  */
 export function changeCategory(state: StateType, labelId: number,
-                               categoryOptions: Array<number>): StateType {
-  let targetLabel = state.labels[labelId];
-  let newLabel = updateObject(targetLabel, {category: categoryOptions});
-  let labels = updateObject(state.labels, {[labelId]: newLabel});
-  return updateObject(state, {labels: labels});
+                               categoryOptions: number[]): StateType {
+  const targetLabel = state.labels[labelId];
+  const newLabel = updateObject(targetLabel, {category: categoryOptions});
+  const labels = updateObject(state.labels, {[labelId]: newLabel});
+  return updateObject(state, {labels});
 }
 
 /**

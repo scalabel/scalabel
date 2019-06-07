@@ -1,33 +1,34 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import {AppBar, Toolbar, IconButton, Tooltip}
        from '@material-ui/core';
 import {faCheck, faInfo, faQuestion, faSave, faList, faColumns}
        from '@fortawesome/free-solid-svg-icons/index';
 import {withStyles} from '@material-ui/core/styles/index';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import createStyles from '@material-ui/core/styles/createStyles';
 
-const styles = (theme) => ({
+const styles: any = (theme: any) => createStyles({
   appBar: {
     position: 'relative',
     background: '#222222',
-    height: '50px',
+    height: '50px'
   },
   grow: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   titleUnit: {
     color: '#bbbbbb',
-    margin: theme.spacing.unit * 0.5,
+    margin: theme.spacing.unit * 0.5
   },
 });
 
-type Props = {
-  classes: Object,
-  theme: Object,
-  title: String,
-  dashboardLink: String,
-  instructionLink: String,
+interface Props {
+  classes: any;
+  theme: any;
+  title: string;
+  dashboardLink: string;
+  instructionLink: string;
 }
 
 /**
@@ -38,18 +39,18 @@ class TitleBar extends React.Component<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  render() {
+  public render() {
     const {classes} = this.props;
     const {title} = this.props;
     const {instructionLink} = this.props;
     const {dashboardLink} = this.props;
-    return (<AppBar position="static" className={classes.appBar}>
-      <Toolbar variant="dense">
+    return (<AppBar position='static' className={classes.appBar}>
+      <Toolbar variant='dense'>
         {title}
         <div className={classes.grow} />
         <Tooltip title='Instructions'>
           <IconButton className={classes.titleUnit}
-                      href={instructionLink} target="view_window">
+                      href={instructionLink} target='view_window'>
             <FontAwesomeIcon icon={faInfo} size='xs'/>
           </IconButton>
         </Tooltip>
@@ -60,7 +61,7 @@ class TitleBar extends React.Component<Props> {
         </Tooltip>
         <Tooltip title='Dashboard'>
           <IconButton className={classes.titleUnit}
-                      href={dashboardLink} target="view_window">
+                      href={dashboardLink} target='view_window'>
             <FontAwesomeIcon icon={faList} size='xs'/>
           </IconButton>
         </Tooltip>
@@ -85,12 +86,12 @@ class TitleBar extends React.Component<Props> {
   }
 }
 
-TitleBar.propTypes = {
-  classes: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
-  title: PropTypes.string.isRequired,
-  dashboardLink: PropTypes.string.isRequired,
-  instructionLink: PropTypes.string.isRequired,
-};
+// TitleBar.propTypes = {
+//   classes: PropTypes.object.isRequired,
+//   theme: PropTypes.object.isRequired,
+//   title: PropTypes.string.isRequired,
+//   dashboardLink: PropTypes.string.isRequired,
+//   instructionLink: PropTypes.string.isRequired
+// };
 
 export default withStyles(styles, {withTheme: true})(TitleBar);

@@ -1,22 +1,22 @@
 import React from 'react';
 import Session from '../common/session';
-import type {ImageViewerConfigType}
-from '../functional/types';
+import {ImageViewerConfigType} from '../functional/types';
 import {withStyles} from '@material-ui/core/styles/index';
+import createStyles from '@material-ui/core/styles/createStyles';
 
 const pad = 10;
 
-const styles = () => ({
+const styles: any = (theme: any) => createStyles({
   canvas: {
     position: 'relative',
   },
 });
 
-type Props = {
-  classes: Object,
-  theme: Object,
-  height: number,
-  width: number,
+interface Props {
+  classes: any;
+  theme: any;
+  height: number;
+  width: number;
 }
 
 /**
@@ -24,7 +24,7 @@ type Props = {
  * @return {ItemType}
  */
 function getCurrentItem() {
-  let state = Session.getState();
+  const state = Session.getState();
   return state.items[state.current.item];
 }
 
@@ -33,7 +33,7 @@ function getCurrentItem() {
  * @return {ViewerConfigType}
  */
 function getCurrentViewerConfig() {
-  let state = Session.getState();
+  const state = Session.getState();
   return state.items[state.current.item].viewerConfig;
 }
 
@@ -41,31 +41,34 @@ function getCurrentViewerConfig() {
  * Canvas Viewer
  */
 class ImageView extends React.Component<Props> {
-  canvas: Object;
-  context: Object;
-  MAX_SCALE: number;
-  MIN_SCALE: number;
-  SCALE_RATIO: number;
-  UP_RES_RATIO: number;
-  scale: number;
+  private canvas: any;
+  public context: any;
+  private MAX_SCALE: number;
+  private MIN_SCALE: number;
+  // private SCALE_RATIO: number;
+  private UP_RES_RATIO: number;
+  private scale: number;
   // need these two below to prevent jitters caused by round off
-  canvasHeight: number;
-  canvasWidth: number;
-  displayToImageRatio: number;
+  private canvasHeight: number;
+  private canvasWidth: number;
+  private displayToImageRatio: number;
   // False for image canvas, true for anything else
-  upRes: boolean;
+  private upRes: boolean;
   /**
    * Constructor, handles subscription to store
    * @param {Object} props: react props
    */
-  constructor(props: Object) {
+  constructor(props: any) {
     super(props);
 
     this.MAX_SCALE = 3.0;
     this.MIN_SCALE = 1.0;
-    this.SCALE_RATIO = 1.05;
+    // this.SCALE_RATIO = 1.05;
     this.UP_RES_RATIO = 2;
     this.scale = 1;
+    this.canvasHeight = props.height;
+    this.canvasWidth = props.width;
+    this.displayToImageRatio = 1;
 
     this.upRes = true;
   }
@@ -77,7 +80,7 @@ class ImageView extends React.Component<Props> {
    * @param {Array<number>} values - the values to convert.
    * @return {Array<number>} - the converted values.
    */
-  toCanvasCoords(values: Array<number>) {
+  public toCanvasCoords(values: number[]) {
     if (values) {
       for (let i = 0; i < values.length; i++) {
         values[i] *= this.displayToImageRatio;
@@ -96,7 +99,7 @@ class ImageView extends React.Component<Props> {
    * @param {Array<number>} values - the values to convert.
    * @return {Array<number>} - the converted values.
    */
-  toImageCoords(values: Array<number>) {
+  public toImageCoords(values: number[]) {
     if (values) {
       for (let i = 0; i < values.length; i++) {
         values[i] /= this.displayToImageRatio;
@@ -109,7 +112,7 @@ class ImageView extends React.Component<Props> {
    * Get the padding for the image given its size and canvas size.
    * @return {object} padding
    */
-  _getPadding() {
+  private _getPadding() {
     return {
       x: Math.max(pad, (this.props.width - this.canvasWidth) / 2),
       y: Math.max(pad, (this.props.height - this.canvasHeight) / 2),
@@ -119,22 +122,23 @@ class ImageView extends React.Component<Props> {
   /**
    * Set the scale of the image in the display
    */
-  updateScale() {
-    let config: ImageViewerConfigType = getCurrentViewerConfig();
+  private updateScale() {
+    const config: ImageViewerConfigType =
+      getCurrentViewerConfig() as ImageViewerConfigType;
 
     // set scale
     if (config.viewScale >= this.MIN_SCALE
       && config.viewScale < this.MAX_SCALE) {
-      let ratio = config.viewScale / this.scale;
+      const ratio = config.viewScale / this.scale;
       this.context.scale(ratio, ratio);
     } else {
       return;
     }
 
     // resize canvas
-    let item = getCurrentItem();
-    let image = Session.images[item.index];
-    let ratio = (image.width + 2 * pad) / (image.height + 2 * pad);
+    const item = getCurrentItem();
+    const image = Session.images[item.index];
+    const ratio = (image.width + 2 * pad) / (image.height + 2 * pad);
 
     if (this.props.width / this.props.height > ratio) {
       this.canvasHeight = (this.props.height - 2 * pad) * config.viewScale;
@@ -160,9 +164,9 @@ class ImageView extends React.Component<Props> {
     this.canvas.style.width = this.canvasWidth + 'px';
 
     // set padding
-    let padding = this._getPadding();
-    let padX = padding.x;
-    let padY = padding.y;
+    const padding = this._getPadding();
+    const padX = padding.x;
+    const padY = padding.y;
 
     this.canvas.style.left = padX + 'px';
     this.canvas.style.top = padY + 'px';
@@ -176,7 +180,7 @@ class ImageView extends React.Component<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  render() {
+  public render() {
     const {classes} = this.props;
     return (<canvas className={classes.canvas} ref={(canvas) => {
       if (canvas) {
@@ -193,7 +197,7 @@ class ImageView extends React.Component<Props> {
   /**
    * Execute when component state is updated
    */
-  componentDidUpdate() {
+  public componentDidUpdate() {
     this.redraw();
   }
 
@@ -201,13 +205,13 @@ class ImageView extends React.Component<Props> {
    * Handles canvas redraw
    * @return {boolean}
    */
-  redraw(): boolean {
+  public redraw(): boolean {
     // TODO: should support lazy drawing
-    let state = Session.getState();
-    let item = state.current.item;
-    let loaded = state.items[item].loaded;
+    const state = Session.getState();
+    const item = state.current.item;
+    const loaded = state.items[item].loaded;
     if (loaded) {
-      let image = Session.images[item];
+      const image = Session.images[item];
       // draw stuff
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.context.drawImage(image, 0, 0, image.width, image.height,

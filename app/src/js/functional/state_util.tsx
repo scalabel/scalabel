@@ -1,4 +1,4 @@
-import type {ItemType, StateType, ViewerConfigType} from './types';
+import {ItemType, StateType, ViewerConfigType} from './types';
 import {updateListItem, updateObject} from './util';
 import {makeItem} from './states';
 
@@ -20,7 +20,8 @@ export function getCurrentItem(state: StateType): ItemType {
  * @param {StateType} state
  * @return {ViewerConfigType}
  */
-export function getCurrentItemViewerConfig(state: StateType): ViewerConfigType {
+export function getCurrentItemViewerConfig(
+    state: StateType): ViewerConfigType {
   return getCurrentItem(state).viewerConfig;
 }
 
