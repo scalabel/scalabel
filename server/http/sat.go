@@ -420,7 +420,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	handlerUrl := GetHandlerUrl(itemType, labelType)
 
 	// get which bundle to use depending on redux progress
-	bundleFile := "image.tsx"
+	bundleFile := "image.js"
 	if labelType == "tag" || labelType == "box2dv2" {
 		bundleFile = "image_v2.js"
 	}
