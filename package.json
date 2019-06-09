@@ -24,12 +24,11 @@
   },
   "jest": {
     "roots": [
-      "app/src/js",
-      "app/src/js/v1"
+      "app/src/js/test"
     ],
     "testURL": "http://localhost/",
     "transform": {
-      "^.+\\.jsx?$": "babel-jest"
+      "^.+\\.tsx?$": "ts-jest"
     }
   },
   "devDependencies": {
@@ -49,6 +48,7 @@
     "@material-ui/icons": "^3.0.1",
     "@material-ui/lab": "^3.0.0-alpha.30",
     "@types/classnames": "^2.2.7",
+    "@types/jest": "^24.0.13",
     "@types/lodash": "^4.14.134",
     "@types/material-ui": "^0.21.6",
     "@types/node": "^11.13.4",
@@ -77,7 +77,7 @@
     "eslint-plugin-react": "^7.11.1",
     "flow-bin": "^0.80.0",
     "flow-typed": "^2.5.1",
-    "jest": "^24.1.0",
+    "jest": "^24.8.0",
     "jquery": "^3.3.1",
     "lodash": "^4.17.10",
     "npx": "^10.2.0",
@@ -94,6 +94,7 @@
     "sprintf-js": "^1.1.1",
     "terser": "3.14.1",
     "three": "^0.103.0",
+    "ts-jest": "^24.0.2",
     "tslint": "^5.13.1",
     "typescript": "^3.3.3333",
     "webpack": "^4.20.2",
