@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom';
 import LabelLayout from '../components/label_layout';
 import TitleBar from '../components/title_bar';
 import Session from './session';
-import Path from './path';
-// $FlowFixMe
+import path from './path';
 import {ToolBar} from '../components/toolbar';
 import MainView from '../components/main_view';
 import ImageView from '../components/image_view';
@@ -14,6 +13,7 @@ import PointCloudView from '../components/point_cloud_view';
  * Manage the whole window
  */
 export class Window {
+  /** The container */
   private container?: Element;
 
   /**
@@ -48,7 +48,7 @@ export class Window {
         <TitleBar
             title={state.config.pageTitle}
             instructionLink={state.config.instructionPage}
-            dashboardLink={Path.vendorDashboard()}
+            dashboardLink={path.vendorDashboard()}
         />
     );
     const leftSidebar1 = (
@@ -61,7 +61,8 @@ export class Window {
     );
     let labelView = null;
     if (Session.itemType === 'image') {
-      labelView = (<ImageView key={'imageView'}/>);
+      /* FIXME: set correct props */
+      labelView = (<ImageView height={0} width={1}/>);
     } else if (Session.itemType === 'pointcloud') {
       labelView = (<PointCloudView key={'pointCloudView'}/>);
     }

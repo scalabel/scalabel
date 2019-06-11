@@ -1,9 +1,7 @@
 import React from 'react';
 // import PropTypes from 'prop-types';
-import {AppBar, Toolbar, IconButton, Tooltip}
-       from '@material-ui/core';
-import {faCheck, faInfo, faQuestion, faSave, faList, faColumns}
-       from '@fortawesome/free-solid-svg-icons/index';
+import {AppBar, Toolbar, IconButton, Tooltip} from '@material-ui/core';
+import {faCheck, faInfo, faQuestion, faSave, faList, faColumns} from '@fortawesome/free-solid-svg-icons/index';
 import {withStyles} from '@material-ui/core/styles/index';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import createStyles from '@material-ui/core/styles/createStyles';
@@ -20,14 +18,19 @@ const styles: any = (theme: any) => createStyles({
   titleUnit: {
     color: '#bbbbbb',
     margin: theme.spacing.unit * 0.5
-  },
+  }
 });
 
 interface Props {
+  /** Styles of TitleBar */
   classes: any;
+  /** Theme of TitleBar */
   theme: any;
+  /** title of TitleBar */
   title: string;
+  /** dashboardLink of TittleBar */
   dashboardLink: string;
+  /** instructionLink of TittleBar */
   instructionLink: string;
 }
 

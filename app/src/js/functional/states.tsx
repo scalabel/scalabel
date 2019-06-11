@@ -24,7 +24,7 @@ export function makeLabel(params: {} = {}): LabelType {
     shapes: [],
     selectedShape: -1,
     state: -1,
-    ...params,
+    ...params
   };
 }
 
@@ -41,7 +41,7 @@ export function makeRect(params: {} = {}): RectType {
     y: -1,
     w: -1,
     h: -1,
-    ...params,
+    ...params
   };
 }
 
@@ -57,7 +57,7 @@ export function makeCube(params: {} = {}): CubeType {
     center: {x: 0, y: 0, z: 0},
     size: {x: 1, y: 1, z: 1},
     orientation: {x: 0, y: 0, z: 0},
-    ...params,
+    ...params
   };
 }
 
@@ -69,7 +69,7 @@ export function makeImageViewerConfig(): ImageViewerConfigType {
   return {
     imageWidth: 0,
     imageHeight: 0,
-    viewScale: 1.0,
+    viewScale: 1.0
   };
 }
 
@@ -81,7 +81,7 @@ export function makePointCloudViewerConfig(): PointCloudViewerConfigType {
   return {
     position: {x: 0.0, y: 10.0, z: 0.0},
     target: {x: 0.0, y: 0.0, z: 0.0},
-    verticalAxis: {x: 0.0, y: 0.0, z: 1.0},
+    verticalAxis: {x: 0.0, y: 0.0, z: 1.0}
   };
 }
 
@@ -99,7 +99,7 @@ export function makeItem(params: any = {}): ItemType {
     loaded: false,
     labels: [], // list of label ids
     viewerConfig: null,
-    ...params,
+    ...params
   };
 }
 
@@ -125,7 +125,7 @@ export function makeSatConfig(params: {} = {}): ConfigType {
     taskId: '',
     workerId: '',
     startTime: 0,
-    ...params,
+    ...params
   };
 }
 
@@ -140,7 +140,7 @@ export function makeSatCurrent(params: {} = {}): CurrentType {
     label: -1,
     shape: -1,
     maxObjectId: -1,
-    ...params,
+    ...params
   };
 }
 
@@ -154,7 +154,7 @@ export function makeLayout(params: {} = {}): LayoutType {
     toolbarWidth: 200,
     assistantView: false,
     assistantViewRatio: 0.3,
-    ...params,
+    ...params
   };
 }
 
@@ -173,6 +173,6 @@ export function makeState(params: {} = {}): StateType {
     shapes: {}, // Map from shapeId to shape
     actions: [],
     layout: makeLayout(),
-    ...params,
+    ...params
   };
 }

@@ -6,18 +6,11 @@ import createStyles from '@material-ui/core/styles/createStyles';
 
 const pad = 10;
 
-const styles: any = (theme: any) => createStyles({
+const styles: any = () => createStyles({
   canvas: {
-    position: 'relative',
-  },
+    position: 'relative'
+  }
 });
-
-interface Props {
-  classes: any;
-  theme: any;
-  height: number;
-  width: number;
-}
 
 /**
  * Get the current item in the state
@@ -37,28 +30,44 @@ function getCurrentViewerConfig() {
   return state.items[state.current.item].viewerConfig;
 }
 
+interface Props {
+  /** image height */
+  height: number;
+  /** image width */
+  width: number;
+}
+
 /**
  * Canvas Viewer
  */
 class ImageView extends React.Component<Props> {
+  /** Canvas */
   private canvas: any;
+  /** Context */
   public context: any;
-  private MAX_SCALE: number;
-  private MIN_SCALE: number;
-  // private SCALE_RATIO: number;
-  private UP_RES_RATIO: number;
+  /** Maximum scale */
+  private readonly MAX_SCALE: number;
+  /** Minimum scale */
+  private readonly MIN_SCALE: number;
+  /** Up resolution ratio */
+  private readonly UP_RES_RATIO: number;
+  /** Scale */
   private scale: number;
   // need these two below to prevent jitters caused by round off
+  /** Canvas height */
   private canvasHeight: number;
+  /** Canvas width */
   private canvasWidth: number;
+  /** Display to image ratio */
   private displayToImageRatio: number;
   // False for image canvas, true for anything else
-  private upRes: boolean;
+  /** Up resolution */
+  private readonly upRes: boolean;
   /**
    * Constructor, handles subscription to store
    * @param {Object} props: react props
    */
-  constructor(props: any) {
+  constructor(props: Readonly<Props>) {
     super(props);
 
     this.MAX_SCALE = 3.0;
@@ -115,7 +124,7 @@ class ImageView extends React.Component<Props> {
   private _getPadding() {
     return {
       x: Math.max(pad, (this.props.width - this.canvasWidth) / 2),
-      y: Math.max(pad, (this.props.height - this.canvasHeight) / 2),
+      y: Math.max(pad, (this.props.height - this.canvasHeight) / 2)
     };
   }
 
@@ -181,8 +190,8 @@ class ImageView extends React.Component<Props> {
    * @return {React.Fragment} React fragment
    */
   public render() {
-    const {classes} = this.props;
-    return (<canvas className={classes.canvas} ref={(canvas) => {
+    // const {classes} = this.props;
+    return (<canvas className={this.canvas} ref={(canvas) => {
       if (canvas) {
         this.canvas = canvas;
         this.context = canvas.getContext('2d');

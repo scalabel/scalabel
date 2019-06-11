@@ -42,7 +42,7 @@ export function fromJson(json: any): ItemType {
     index: json.index,
     url: json.url,
     attributes: json.attributes,
-    labels: json.labels,
+    labels: json.labels
   });
 }
 

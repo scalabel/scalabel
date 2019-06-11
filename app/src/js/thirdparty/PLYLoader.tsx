@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 import * as THREE from 'three';
 
 /**

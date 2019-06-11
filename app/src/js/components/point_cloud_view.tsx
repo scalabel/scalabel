@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 import React from 'react';
 import Session from '../common/session';
 import {PointCloudViewerConfigType} from '../functional/types';

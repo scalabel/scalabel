@@ -10,7 +10,7 @@ test('New And Delete', () => {
     let state = Session.getState();
     state = common.newLabel(state, 0,
         (labelId, itemId, ignored) => makeLabel({id: labelId, item: itemId}));
-    let labelId = state.current.maxObjectId;
+    const labelId = state.current.maxObjectId;
     expect(state.items[0].labels.length).toBe(1);
     expect(_.size(state.labels)).toBe(1);
     expect(state.labels[labelId].item).toBe(0);
@@ -19,7 +19,6 @@ test('New And Delete', () => {
     expect(_.size(state.labels)).toBe(0);
 
 });
-
 
 test('Change Category', () => {
     Session.devMode = false;

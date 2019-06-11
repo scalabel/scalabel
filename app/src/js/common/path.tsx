@@ -5,30 +5,23 @@ import {sprintf} from 'sprintf-js';
 /**
  * Contain the single source for URLs
  */
-class Path {
-  public session: typeof Session;
-
-  /**
-   * Initialize the state
-   */
-  constructor() {
-    this.session = Session;
-  }
+const path = {
 
   /**
    * Convenient function to get state config
    * @return {ConfigType}
    */
-  public getConfig(): ConfigType {
+  getConfig(): ConfigType {
     return Session.getState().config;
-  }
+  },
 
   /**
+   * Get the URL of the vendor dashboard
    * @return {string}
    */
-  public vendorDashboard(): string {
-    return sprintf('/vendor?project_name=%s', this.getConfig().projectName);
+  vendorDashboard(): string {
+    return sprintf('/vendor?project_name=%s', path.getConfig().projectName);
   }
-}
+};
 
-export default new Path();
+export default path;

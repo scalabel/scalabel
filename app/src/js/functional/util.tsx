@@ -69,7 +69,8 @@ export function removeObjectFields<T>(object: T, fields: any[]): T {
   return object;
 }
 
-interface idSingle {
+interface IdSingle {
+  /** ID */
   id: number;
 }
 
@@ -79,10 +80,10 @@ interface idSingle {
  * @param {number[]} ids
  * @return {T[]}
  */
-export function removeListItemsById(items: idSingle[],
-                                    ids: number[]): idSingle[] {
+export function removeListItemsById(items: IdSingle[],
+                                    ids: number[]): IdSingle[] {
   return fp.remove(
-      (item: idSingle) => fp.indexOf(item.id, ids) >= 0)(items);
+      (item: IdSingle) => fp.indexOf(item.id, ids) >= 0)(items);
 }
 
 /**

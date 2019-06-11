@@ -16,8 +16,6 @@ interface Props {
     itemType: string;
     /** labelType of ToolBar 'box2d' | 'segmentation' | 'lane' */
     labelType: string;
-    /** styles of ToolBar */
-    // classes: any;
 }
 /**
  * This is ToolBar component that displays

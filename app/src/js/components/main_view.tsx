@@ -1,6 +1,7 @@
 import React from 'react';
 
 interface Props {
+  /** Views */
   views: any[];
 }
 
@@ -8,6 +9,7 @@ interface Props {
  * Canvas Viewer
  */
 class MainView extends React.Component<Props> {
+  /** The container */
   private divRef?: any;
 
   /**
@@ -50,7 +52,7 @@ class MainView extends React.Component<Props> {
         }}
              style={{
                display: 'block', height: '100%', position: 'absolute',
-               outline: 'none', width: '100%', background: '#222222',
+               outline: 'none', width: '100%', background: '#222222'
              }}>
           {viewsWithProps}
         </div>

@@ -43,9 +43,9 @@ export function configureStore(
       TAG_IMAGE,
       CHANGE_ATTRIBUTE,
       CHANGE_CATEGORY,
-      TOGGLE_ASSISTANT_VIEW,
+      TOGGLE_ASSISTANT_VIEW
     ]),
-    debug: devMode,
+    debug: devMode
   }), initialHistory as any);
 
   return store;

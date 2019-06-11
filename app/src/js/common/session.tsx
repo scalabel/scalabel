@@ -15,13 +15,21 @@ import {PLYLoader} from '../thirdparty/PLYLoader';
  * Singleton session class
  */
 class Session {
+  /** The store to save states */
   public store: any;
+  /** The store to save fast states */
   public fastStore: any; // This store contains the temporary state
+  /** Images of the session */
   public images: HTMLImageElement[];
+  /** Point cloud */
   public pointClouds: THREE.Points[];
+  /** Item type: image, point cloud */
   public itemType: string;
+  /** Label type: bounding box, segmentation */
   public labelType: string;
+  /** The window component */
   public window?: WindowType;
+  /** Dev mode */
   public devMode: boolean;
 
   /**
@@ -167,21 +175,21 @@ class Session {
           const material = new THREE.ShaderMaterial({
             uniforms: {
               red: {
-                value: new THREE.Color(0xff0000),
+                value: new THREE.Color(0xff0000)
               },
               yellow: {
-                value: new THREE.Color(0xffff00),
+                value: new THREE.Color(0xffff00)
               },
               green: {
-                value: new THREE.Color(0x00ff00),
+                value: new THREE.Color(0x00ff00)
               },
               teal: {
-                value: new THREE.Color(0x00ffff),
-              },
+                value: new THREE.Color(0x00ffff)
+              }
             },
             vertexShader,
             fragmentShader,
-            alphaTest: 1.0,
+            alphaTest: 1.0
           });
 
           const particles = new THREE.Points(geometry, material);
@@ -191,12 +199,11 @@ class Session {
             config});
         },
 
-        function() {
-        },
+        () => null,
 
         function() {
           alert('Point cloud at ' + item.url + ' was not found.');
-        },
+        }
       );
     }
   }

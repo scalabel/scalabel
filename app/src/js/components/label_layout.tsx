@@ -5,24 +5,37 @@ import SplitPane from 'react-split-pane';
 import Session from '../common/session';
 
 interface Props {
+  /** The title bar */
   titleBar: any;
+  /** The top part of the left side bar */
   leftSidebar1: any;
+  /** The bottom part of the left side bar */
   leftSidebar2?: any;
+  /** The main div */
   main: any;
+  /** The bottom bar */
   bottomBar?: any;
+  /** The top part of the right side bar */
   rightSidebar1?: any;
+  /** The bottom part of the right side bar */
   rightSidebar2?: any;
 }
 
 interface State {
+  /** The width of the left side bar */
   left_size: number;
+  /** The height of the center side bar */
   center_size: number;
+  /** The width of the right side bar */
   right_size: number;
 }
 
 interface LayoutState {
+  /** The width of the left side bar */
   left_size: number;
+  /** The height of the center side bar */
   center_size: number;
+  /** The width of the right side bar */
   right_size: number;
 }
 
@@ -32,6 +45,7 @@ interface LayoutState {
  * Layout of the labeling interface
  */
 class LabelLayout extends React.Component<Props, State> {
+  /** The state of the layout */
   public layoutState: LayoutState;
   /**
    * @param {object} props
@@ -50,6 +64,7 @@ class LabelLayout extends React.Component<Props, State> {
   }
 
   /**
+   * Handler on change
    * @param {number} size
    * @param {string} position
    */

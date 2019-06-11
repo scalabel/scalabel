@@ -16,12 +16,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "app/src/js/entries/*.tsx",
-    "app/src/js/entries/*.ts",
-    "app/src/js/components/toolbar.tsx"
-  ],
-  "exclude": [
-    "node_modules"
+    "app/src"
   ],
   "typeRoots": [
     "./node_modules/@types"

@@ -51,7 +51,7 @@ export function newImageBox2DLabel(
     items,
     labels,
     shapes,
-    current,
+    current
   };
 }
 

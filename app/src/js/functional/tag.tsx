@@ -17,7 +17,7 @@ export function createTagLabel(labelId: number, itemId: number,
 }
 
 /**
- *Image tagging
+ * Image tagging
  * @param {StateType} state
  * @param {number} itemId
  * @param {number} attributeIndex
