@@ -5,7 +5,6 @@
     "completed-docs": true,
     "max-line-length": [true, {"limit":80, "ignore-pattern": "^import"}],
     "ordered-imports": false,
-    "no-unused-variable": [true, {"ignore-pattern": "^_"}],
     "no-unused-expression": true,
     "member-ordering": [
       false,

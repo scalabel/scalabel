@@ -9,7 +9,7 @@ import * as types from '../actions/action_types';
 import {Object3D} from 'three';
 import createStyles from '@material-ui/core/styles/createStyles';
 
-const styles: any = (theme: any) => createStyles({
+const styles: any = () => createStyles({
   canvas: {
     position: 'relative'
   }
