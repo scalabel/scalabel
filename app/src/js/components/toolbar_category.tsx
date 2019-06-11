@@ -39,22 +39,20 @@ class MultipleSelect extends React.Component<Props> {
     };
 
     /**
-     * MultipleSelect render function
+     * Render the category in a list
      */
-    public render() {
-        const {categories} = this.props;
-        const {classes} = this.props;
-
+    public renderCategory(categories: any, classes: any) {
         return (
             <div className={classes.root}>
                 <FormControl className={classes.formControl}>
                     <ListItemText classes={{primary: classes.primary}}
                                   primary={'Label Category'}/>
                     <div className={classes.root}>
-                        {categories.map((name) => (
+                        {categories.map((name: string) => (
                             <FormControlLabel
                                 control={<Radio
-                                    checked={this.state.selectedValue === name}
+                                    checked=
+                                        {this.state.selectedValue === name}
                                     onChange={this.handleChange}
                                     key={name}
                                     value={name}
@@ -70,6 +68,19 @@ class MultipleSelect extends React.Component<Props> {
                 </FormControl>
             </div>
         );
+    }
+
+    /**
+     * MultipleSelect render function
+     */
+    public render() {
+        const {categories} = this.props;
+        const {classes} = this.props;
+        if (!categories) {
+            return (<div> </div>);
+        } else {
+            this.renderCategory(categories, classes);
+        }
     }
 }
 
