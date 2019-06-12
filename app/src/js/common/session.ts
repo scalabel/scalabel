@@ -1,4 +1,3 @@
-// @flow
 import {sprintf} from 'sprintf-js';
 import * as types from '../actions/action_types';
 import {ImageViewerConfigType, PointCloudViewerConfigType,
@@ -7,7 +6,6 @@ import _ from 'lodash';
 import {makeImageViewerConfig,
   makePointCloudViewerConfig} from '../functional/states';
 import {configureStore, configureFastStore} from './configure_store';
-import {WindowType} from './window';
 import * as THREE from 'three';
 import {PLYLoader} from '../thirdparty/PLYLoader';
 
@@ -27,8 +25,6 @@ class Session {
   public itemType: string;
   /** Label type: bounding box, segmentation */
   public labelType: string;
-  /** The window component */
-  public window?: WindowType;
   /** Dev mode */
   public devMode: boolean;
 
@@ -88,7 +84,6 @@ class Session {
   public initStore(stateJson: any): void {
     this.store = configureStore(stateJson, this.devMode);
     this.store.dispatch({type: types.INIT_SESSION});
-    (window as any).store = this.store;
     const state = this.getState();
     this.itemType = state.config.itemType;
     this.labelType = state.config.labelType;
@@ -112,8 +107,8 @@ class Session {
       image.crossOrigin = 'Anonymous';
       self.images.push(image);
       image.onload = function() {
-        config.imageHeight = (this as any).height;
-        config.imageWidth = (this as any).width;
+        config.imageHeight = image.height;
+        config.imageWidth = image.width;
         self.store.dispatch({type: types.LOAD_ITEM, index: item.index,
           config});
       };
