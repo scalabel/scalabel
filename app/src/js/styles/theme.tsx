@@ -16,7 +16,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
  * This is createMyTheme function
  * that overwrites the primary main color
  */
-export default function createMyTheme(options: ThemeOptions) {
+export default function createMyTheme(_options: ThemeOptions) {
     return createMuiTheme({
         palette: {
             primary: {

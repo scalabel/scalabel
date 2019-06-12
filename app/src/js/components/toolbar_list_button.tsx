@@ -29,7 +29,7 @@ class ToggleButtons extends React.Component<Props> {
     };
     /** handleAlignment of ToggleButtons that align buttons */
     public handleAlignment =
-        (event: any, alignment: any) => this.setState({alignment});
+        (_event: any, alignment: any) => this.setState({alignment});
     /** propTypes of ToggleButtons */
     public static propTypes: {
         /** type of classes */

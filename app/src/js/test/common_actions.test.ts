@@ -9,7 +9,7 @@ test('New And Delete', () => {
     Session.initStore(testJson);
     let state = Session.getState();
     state = common.newLabel(state, 0,
-        (labelId, itemId, ignored) => makeLabel({id: labelId, item: itemId}));
+        (labelId, itemId, _) => makeLabel({id: labelId, item: itemId}));
     const labelId = state.current.maxObjectId;
     expect(state.items[0].labels.length).toBe(1);
     expect(_.size(state.labels)).toBe(1);

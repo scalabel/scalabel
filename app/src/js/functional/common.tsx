@@ -152,12 +152,12 @@ export function deleteLabel(state: StateType, itemIndex: number,
 /**
  * assign Attribute to a label
  * @param {StateType} state
- * @param {number} ignoredLabelId
- * @param {object} ignoredAttributeOptions
+ * @param {number} _labelId
+ * @param {object} _attributeOptions
  * @return {StateType}
  */
-export function changeAttribute(state: StateType, ignoredLabelId: number,
-                                ignoredAttributeOptions: any): StateType {
+export function changeAttribute(state: StateType, _labelId: number,
+                                _attributeOptions: any): StateType {
   return state;
 }
 
