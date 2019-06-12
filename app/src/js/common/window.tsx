@@ -8,39 +8,34 @@ import {ToolBar} from '../components/toolbar';
 import MainView from '../components/main_view';
 import ImageView from '../components/image_view';
 import PointCloudView from '../components/point_cloud_view';
+import {sprintf} from 'sprintf-js';
 
 /**
  * Manage the whole window
  */
-export class Window {
+export default class Window {
   /** The container */
-  private container?: Element;
+  private container: Element;
 
   /**
    * Window constructor
-   * @param {string} containerName: name of the container in HTML to
-   * place this window
+   *
    */
   constructor(containerName: string) {
     const container = document.getElementById(containerName);
     if (container) {
       this.container = container;
+    } else {
+      throw new Error(sprintf("Can't find container %s", containerName));
     }
   }
 
   /**
    * Function to render the interface
+   * @param {string} containerName: name of the container in HTML to
+   * place this window
    */
   public render() {
-    /* LabelLayout props:
-         * titleBar: required
-         * main: required
-         * leftSidebar1: required
-         * leftSidebar2: optional
-         * bottomBar: optional
-         * rightSidebar1: optional
-         * rightSidebar2: optional
-         */
     const state = Session.getState();
 
     // get all the components
@@ -86,5 +81,3 @@ export class Window {
     }
   }
 }
-
-export type WindowType = Window;
