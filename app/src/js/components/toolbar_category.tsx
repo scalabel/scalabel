@@ -79,7 +79,7 @@ class MultipleSelect extends React.Component<Props> {
         if (!categories) {
             return (<div> </div>);
         } else {
-            this.renderCategory(categories, classes);
+            return this.renderCategory(categories, classes);
         }
     }
 }
