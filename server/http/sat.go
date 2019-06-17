@@ -947,7 +947,7 @@ func loadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, authUrl, 301)
 	} else {
 		// redirect to create
-		createUrl := "http://localhost:8686/create"
+		createUrl := "/create"
 		http.Redirect(w, r, createUrl, 301)
 	}
 }
@@ -958,7 +958,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	flag := env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON"
 	if !flag {
 		// redirect to create
-		createUrl := "http://localhost:8686/create"
+		createUrl := "/create"
 		http.Redirect(w, r, createUrl, 301)
 	}
 	Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
@@ -990,7 +990,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		// failed to verify the jwt
 		Error.Println(err)
 		Error.Println(errors.New("Access token is not valid"))
-		newUrl := "http://localhost:8686/"
+		newUrl := "/"
 		http.Redirect(w, r, newUrl, 301)
 		return
 	} else {
@@ -1002,7 +1002,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil || !idToken.Valid || identity == "" {
 			// error or not valid token or empty group, redirect to index
 			Error.Println(err)
-			newUrl := "http://localhost:8686/"
+			newUrl := "/"
 			http.Redirect(w, r, newUrl, 301)
 			return
 		} else {
@@ -1031,13 +1031,13 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 			http.SetCookie(w, &idTokenCookie)
 			if identity == "worker" {
 				// if the user is not admin, redirect to user's tasks
-				newUrl := "http://localhost:8686/workerDashboard"
+				newUrl := "/workerDashboard"
 				http.Redirect(w, r, newUrl, 301)
 				return
 			} else if identity == "admin" {
 				// if the user is admin, redirect to admin's dashboard
 				Info.Println("Admin's Cookie Saved")
-				newUrl := "http://localhost:8686/adminDashboard"
+				newUrl := "/adminDashboard"
 				http.Redirect(w, r, newUrl, 301)
 				return
 			}
@@ -1065,7 +1065,7 @@ func logOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Redirect to logOut Endpoint to log out from cognito console
 	/* Replace this if you are using other authorizaition server instead of AWS */
-	logOutUrl := fmt.Sprintf("https://satworker.auth.%v.amazoncognito.com/logout?client_id=%v&logout_uri=http://localhost:8686/", env.Region, env.ClientId)
+	logOutUrl := fmt.Sprintf("https://satworker.auth.%v.amazoncognito.com/logout?client_id=%v&logout_uri=/", env.Region, env.ClientId)
 	Info.Println("User logged out")
 	http.Redirect(w, r, logOutUrl, 301)
 }
