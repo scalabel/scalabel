@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import {categoryStyle} from '../styles/label';
 import {withStyles} from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
@@ -8,9 +8,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabe
 
 interface Props {
     /** categories of MultipleSelect */
-    categories: any[];
+    categories: string[] | null;
     /** styles of MultipleSelect */
-    classes: any;
+    classes: object;
 }
 
 /**
@@ -22,7 +22,7 @@ class MultipleSelect extends React.Component<Props> {
      * This is the state of MultipleSelect
      */
     public state = {
-        selectedValue: 'a'
+        selectedValue: ''
     };
 
     /**
@@ -33,7 +33,7 @@ class MultipleSelect extends React.Component<Props> {
         /** target to change */
         target: {
             /** value to be changed */
-            value: any;
+            value: string;
         }; }) => {
         this.setState({selectedValue: event.target.value});
     };
@@ -43,18 +43,18 @@ class MultipleSelect extends React.Component<Props> {
      */
     public renderCategory(categories: any, classes: any) {
         return (
-            <div className={classes.root}>
+            <div>
                 <FormControl className={classes.formControl}>
                     <ListItemText classes={{primary: classes.primary}}
                                   primary={'Label Category'}/>
                     <div className={classes.root}>
-                        {categories.map((name: string) => (
+                        {categories.map((name: string, index: number) => (
                             <FormControlLabel
+                                key={index}
                                 control={<Radio
-                                    checked=
-                                        {this.state.selectedValue === name}
+                                    checked={this.state.selectedValue === name}
                                     onChange={this.handleChange}
-                                    key={name}
+                                    key={'kk'}
                                     value={name}
                                     classes={{
                                         root: classes.checkbox,
@@ -77,7 +77,7 @@ class MultipleSelect extends React.Component<Props> {
         const {categories} = this.props;
         const {classes} = this.props;
         if (!categories) {
-            return (<div> </div>);
+            return (null);
         } else {
             return this.renderCategory(categories, classes);
         }
@@ -86,3 +86,4 @@ class MultipleSelect extends React.Component<Props> {
 
 export const Category =
     withStyles(categoryStyle, {withTheme: true})(MultipleSelect);
+export default Category;

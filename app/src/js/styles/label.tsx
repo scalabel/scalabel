@@ -2,7 +2,7 @@ import grey from '@material-ui/core/colors/grey';
 import createStyles from '@material-ui/core/styles/createStyles';
 import {Theme, withStyles} from '@material-ui/core';
 import Button from '@material-ui/core/Button/Button';
-import {blue} from '@material-ui/core/es/colors';
+import {blue} from '@material-ui/core/colors';
 
 export const categoryStyle = (theme: Theme) => createStyles({
     root: {
@@ -11,7 +11,7 @@ export const categoryStyle = (theme: Theme) => createStyles({
         alignItems: 'left'
     },
     formControl: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         minWidth: 150,
         maxWidth: 360
     },
@@ -40,9 +40,9 @@ export const switchStyle = () => ({
     colorSwitchBase: {
         'color': grey[400],
         '&$colorChecked': {
-            'color': blue[500],
+            'color': grey[500],
             '& + $colorBar': {
-                backgroundColor: blue[500]
+                backgroundColor: grey[600]
             }
         }
     },

@@ -56,6 +56,7 @@
     "no-null-keyword": false,
     "triple-equals": true,
     "prefer-const": true,
+    "no-console": [false, "log", "error"],
     "jsdoc-format": true,
     "interface-name": [true, "never-prefix"],
     "only-arrow-functions": false,

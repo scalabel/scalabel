@@ -29,6 +29,7 @@ class SwitchButton extends React.Component<Props> {
     public render() {
         const {onChange, value, classes} = this.props;
 
+        // @ts-ignore
         return (
             <ListItem>
                 <ListItemText classes={{primary: classes.primary}}
@@ -37,10 +38,10 @@ class SwitchButton extends React.Component<Props> {
                     <Switch
                         classes={{
                             switchBase: classes.colorSwitchBase,
-                            checked: classes.colorChecked,
-                            bar: classes.colorBar
+                            checked: classes.colorChecked
                         }}
                         onChange={onChange(value)}
+                        color = 'default'
                     />
                 </ListItemSecondaryAction>
             </ListItem>
