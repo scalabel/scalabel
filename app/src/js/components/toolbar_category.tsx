@@ -6,11 +6,24 @@ import {ListItemText} from '@material-ui/core';
 import Radio from '@material-ui/core/Radio/Radio';
 import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel';
 
+interface ClassType {
+    /** root of the category selector */
+    root: string;
+    /** form control tag */
+    formControl: string;
+    /** primary for ListItemText */
+    primary: string;
+    /** checkbox class */
+    checkbox: string;
+    /** checked selector class */
+    checked: string;
+}
+
 interface Props {
     /** categories of MultipleSelect */
     categories: string[] | null;
     /** styles of MultipleSelect */
-    classes: object;
+    classes: ClassType;
 }
 
 /**
@@ -41,7 +54,7 @@ class MultipleSelect extends React.Component<Props> {
     /**
      * Render the category in a list
      */
-    public renderCategory(categories: any, classes: any) {
+    public renderCategory(categories: string[], classes: ClassType) {
         return (
             <div>
                 <FormControl className={classes.formControl}>
