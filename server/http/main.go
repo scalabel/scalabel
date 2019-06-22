@@ -33,9 +33,10 @@ type Env struct {
 	ModelGatePort  string `yaml:"modelGatePort"`
 	UserManagement string `yaml:"userManagement"`
 	Region         string `yaml:"region"`
+	DomainName     string `yaml:"domainName"`
 	ClientId       string `yaml:"clientId"`
 	RedirectUri    string `yaml:"redirectUri"`
-	LogOutUri      string `yaml:logOutUri`
+	LogOutUri      string `yaml:"logOutUri"`
 	ClientSecret   string `yaml:"clientSecret"`
 	AWSTokenUrl    string `yaml:"awsTokenURL"`
 	AwsJwkUrl      string `yaml:"awsJwkUrl"`
@@ -126,6 +127,7 @@ func NewEnv() *Env {
 		log.Fatal(err)
 	}
 	err = yaml.Unmarshal(cfg, &env)
+	Info.Println(env)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -943,7 +943,7 @@ func loadHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if WORKER_SYSTEM is On
 	if env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON" {
 		// redirect to AWS authentication website
-		authUrl := fmt.Sprintf("https://satworker.auth.%v.amazoncognito.com/login?response_type=code&client_id=%v&redirect_uri=%v", env.Region, env.ClientId, env.RedirectUri)
+		authUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/login?response_type=code&client_id=%v&redirect_uri=%v", env.DomainName, env.Region, env.ClientId, env.RedirectUri)
 		http.Redirect(w, r, authUrl, 301)
 	} else {
 		// redirect to create
@@ -1065,7 +1065,10 @@ func logOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Redirect to logOut Endpoint to log out from cognito console
 	/* Replace this if you are using other authorizaition server instead of AWS */
-	logOutUrl := fmt.Sprintf("https://satworker.auth.%v.amazoncognito.com/logout?client_id=%v&logout_uri=/", env.Region, env.ClientId)
+	logOutUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/logout?client_id=%v&logout_uri=%v", env.DomainName, env.Region, env.ClientId, env.LogOutUri)
+
+	Info.Println(logOutUrl)
+	Info.Println(env.LogOutUri, env.Region, env.ClientId)
 	Info.Println("User logged out")
 	http.Redirect(w, r, logOutUrl, 301)
 }

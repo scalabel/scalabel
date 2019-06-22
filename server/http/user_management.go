@@ -307,7 +307,7 @@ func verifyRefreshToken(refreshToken string, id string) bool {
 func redirectToLogin(w http.ResponseWriter, r *http.Request, errorMessage string) {
 	Error.Println(errors.New(errorMessage))
 	Info.Println("redirect to login")
-	authUrl := fmt.Sprintf("https://satworker.auth.%v.amazoncognito.com/login?response_type=code&client_id=%v&redirect_uri=%v", env.Region, env.ClientId, env.RedirectUri)
+	authUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/login?response_type=code&client_id=%v&redirect_uri=%v", env.DomainName, env.Region, env.ClientId, env.RedirectUri)
 	http.Redirect(w, r, authUrl, 301)
 	return
 }
