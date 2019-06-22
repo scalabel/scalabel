@@ -1,5 +1,3 @@
-/* tslint:disable */
-
 import React from 'react';
 import Session from '../common/session';
 import {PointCloudViewerConfigType} from '../functional/types';
@@ -9,15 +7,22 @@ import * as types from '../actions/action_types';
 import {Object3D} from 'three';
 import createStyles from '@material-ui/core/styles/createStyles';
 
-const styles: any = () => createStyles({
+const styles = () => createStyles({
   canvas: {
-    position: 'relative'
+    position: 'absolute',
+    height: '100%',
+    width: '100%'
   }
 });
 
+interface ClassType {
+  /** CSS canvas name */
+  canvas: string;
+}
+
 interface Props {
-  classes: any;
-  theme: any;
+  /** CSS class */
+  classes: ClassType;
 }
 
 /**
@@ -42,25 +47,45 @@ function getCurrentViewerConfig() {
  * Canvas Viewer
  */
 class PointCloudView extends React.Component<Props> {
-  private canvas: any;
-  private container: any;
+  /** Canvas to draw on */
+  private canvas: HTMLCanvasElement | null;
+  /** ThreeJS Renderer */
   private renderer?: THREE.WebGLRenderer;
+  /** ThreeJS Scene object */
   private scene: THREE.Scene;
+  /** ThreeJS Camera */
   private camera: THREE.PerspectiveCamera;
+  /** ThreeJS sphere mesh for indicating camera target location */
   private target: THREE.Mesh;
+  /** ThreeJS raycaster */
   private raycaster: THREE.Raycaster;
+  /** Mouse click state */
   private mouseDown: boolean;
+  /** Mouse position */
   private mX: number;
+  /** Mouse position */
   private mY: number;
 
+  /** Ref Handler */
+  private refInitializer:
+    (component: HTMLDivElement | HTMLCanvasElement | null) => void;
+
+  /** UI handler */
   private mouseDownHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  /** UI handler */
   private mouseUpHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  /** UI handler */
   private mouseMoveHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  /** UI handler */
   private keyDownHandler: (e: KeyboardEvent) => void;
+  /** UI handler */
   private mouseWheelHandler: (e: React.WheelEvent<HTMLCanvasElement>) => void;
+  /** UI handler */
   private doubleClickHandler: () => void;
 
+  /** Factor to divide mouse delta by */
   private MOUSE_CORRECTION_FACTOR: number;
+  /** Move amount when using arrow keys */
   private MOVE_AMOUNT: number;
   // private UP_KEY: number;
   // private DOWN_KEY: number;
@@ -72,7 +97,7 @@ class PointCloudView extends React.Component<Props> {
    * Constructor, handles subscription to store
    * @param {Object} props: react props
    */
-  constructor(props: any) {
+  constructor(props: Readonly<Props>) {
     super(props);
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
@@ -89,11 +114,13 @@ class PointCloudView extends React.Component<Props> {
     this.raycaster.near = 1.0;
     this.raycaster.far = 100.0;
 
-    this.container = React.createRef();
+    this.canvas = null;
 
     this.mouseDown = false;
     this.mX = 0;
     this.mY = 0;
+
+    this.refInitializer = this.initializeRefs.bind(this);
 
     this.mouseDownHandler = this.handleMouseDown.bind(this);
     this.mouseUpHandler = this.handleMouseUp.bind(this);
@@ -122,12 +149,15 @@ class PointCloudView extends React.Component<Props> {
    * @return {Array<number>}
    */
   private convertMouseToNDC(mX: number, mY: number): number[] {
-    let x = mX / this.container.current.offsetWidth;
-    let y = mY / this.container.current.offsetHeight;
-    x = 2 * x - 1;
-    y = -2 * y + 1;
+    if (this.canvas) {
+      let x = mX / this.canvas.offsetWidth;
+      let y = mY / this.canvas.offsetHeight;
+      x = 2 * x - 1;
+      y = -2 * y + 1;
 
-    return [x, y];
+      return [x, y];
+    }
+    return [0, 0];
   }
 
   /**
@@ -154,8 +184,15 @@ class PointCloudView extends React.Component<Props> {
    */
   private handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
     e.stopPropagation();
-    const newX = e.clientX - this.container.current.getBoundingClientRect().left;
-    const newY = e.clientY - this.container.current.getBoundingClientRect().top;
+
+    if (!this.canvas) {
+      return;
+    }
+
+    const newX = e.clientX -
+      this.canvas.getBoundingClientRect().left;
+    const newY = e.clientY -
+      this.canvas.getBoundingClientRect().top;
 
     if (this.mouseDown) {
       const viewerConfig: PointCloudViewerConfigType =
@@ -409,28 +446,41 @@ class PointCloudView extends React.Component<Props> {
   }
 
   /**
+   * Set references to div elements and try to initialize renderer
+   * @param {HTMLDivElement} component
+   * @param {string} componentType
+   */
+  private initializeRefs(component:
+                               HTMLDivElement | HTMLCanvasElement | null) {
+    if (!component) {
+      return;
+    }
+
+    if (component.nodeName === 'CANVAS') {
+      this.canvas = component as HTMLCanvasElement;
+    }
+
+    if (this.canvas) {
+      const rendererParams = {canvas: this.canvas};
+      this.renderer = new THREE.WebGLRenderer(rendererParams);
+      if (getCurrentItem().loaded) {
+        this.updateRenderer();
+      }
+    }
+  }
+
+  /**
    * Render function
    * @return {React.Fragment} React fragment
    */
   public render() {
     const {classes} = this.props;
     return (
-      <div ref={this.container} style={{width: '100%', height: '100%'}}>
-        <canvas className={classes.canvas} ref={(canvas) => {
-            if (canvas) {
-              this.canvas = canvas;
-              if (getCurrentItem().loaded) {
-                const rendererParams = {canvas: this.canvas};
-                this.renderer = new THREE.WebGLRenderer(rendererParams);
-                this.updateRenderer();
-              }
-            }
-          }}
+        <canvas className={classes.canvas} ref={this.refInitializer}
           onMouseDown={this.mouseDownHandler} onMouseUp={this.mouseUpHandler}
           onMouseMove={this.mouseMoveHandler} onWheel={this.mouseWheelHandler}
           onDoubleClick={this.doubleClickHandler}
         />
-      </div>
     );
   }
 
@@ -444,9 +494,11 @@ class PointCloudView extends React.Component<Props> {
     this.target.position.y = config.target.y;
     this.target.position.z = config.target.z;
 
-    this.camera.aspect = this.container.current.offsetWidth /
-      this.container.current.offsetHeight;
-    this.camera.updateProjectionMatrix();
+    if (this.canvas) {
+      this.camera.aspect = this.canvas.offsetWidth /
+        this.canvas.offsetHeight;
+      this.camera.updateProjectionMatrix();
+    }
 
     this.camera.up.x = config.verticalAxis.x;
     this.camera.up.y = config.verticalAxis.y;
@@ -456,9 +508,9 @@ class PointCloudView extends React.Component<Props> {
     this.camera.position.z = config.position.z;
     this.camera.lookAt(this.target.position);
 
-    if (this.renderer) {
-      this.renderer.setSize(this.container.current.offsetWidth,
-        this.container.current.offsetHeight);
+    if (this.renderer && this.canvas) {
+      this.renderer.setSize(this.canvas.offsetWidth,
+        this.canvas.offsetHeight);
     }
   }
 
@@ -485,7 +537,10 @@ class PointCloudView extends React.Component<Props> {
       if (this.scene.children[0] !== pointCloud) {
         this.scene.children[0] = pointCloud;
       }
-      this.updateRenderer();
+
+      if (this.canvas) {
+        this.updateRenderer();
+      }
 
       if (this.renderer) {
         this.renderer.render(this.scene, this.camera);

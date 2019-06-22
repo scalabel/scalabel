@@ -54,14 +54,15 @@ export default class Window {
             labelType={state.config.labelType}
         />
     );
-    let labelView = null;
+
+    const views = [];
     if (Session.itemType === 'image') {
       /* FIXME: set correct props */
-      labelView = (<ImageView height={0} width={1}/>);
+      views.push(<ImageView key={'imageView'} height={0} width={1}/>);
     } else if (Session.itemType === 'pointcloud') {
-      labelView = (<PointCloudView key={'pointCloudView'}/>);
+      views.push(<PointCloudView key={'pointCloudView'}/>);
     }
-    const main = (<MainView views={[labelView]} />);
+    const main = (<MainView views={views} />);
     const bottomBar = (<div>3</div>);
     const rightSidebar1 = (<div>4</div>);
     const rightSidebar2 = (<div>5</div>);
