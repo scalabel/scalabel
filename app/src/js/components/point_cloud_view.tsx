@@ -1,4 +1,5 @@
-import React from 'react';
+import * as React from 'react';
+import {Canvas3d} from './canvas3d';
 import Session from '../common/session';
 import {PointCloudViewerConfigType} from '../functional/types';
 import {withStyles} from '@material-ui/core/styles/index';
@@ -46,7 +47,7 @@ function getCurrentViewerConfig() {
 /**
  * Canvas Viewer
  */
-class PointCloudView extends React.Component<Props> {
+class PointCloudView extends Canvas3d<Props> {
   /** Canvas to draw on */
   private canvas: HTMLCanvasElement | null;
   /** ThreeJS Renderer */
@@ -512,13 +513,6 @@ class PointCloudView extends React.Component<Props> {
       this.renderer.setSize(this.canvas.offsetWidth,
         this.canvas.offsetHeight);
     }
-  }
-
-  /**
-   * Execute when component state is updated
-   */
-  public componentDidUpdate() {
-    this.redraw();
   }
 
   /**

@@ -1,4 +1,5 @@
-import React from 'react';
+import {Canvas2d} from './canvas2d';
+import * as React from 'react';
 import Session from '../common/session';
 import {ImageViewerConfigType, ViewerConfigType} from '../functional/types';
 import {withStyles} from '@material-ui/core/styles';
@@ -9,7 +10,7 @@ import {imageViewStyle} from '../styles/label';
 interface ClassType {
   /** canvas */
   canvas: string;
-  /** mask */
+  /** image display area */
   mask: string;
   /** background */
   background: string;
@@ -41,7 +42,7 @@ function getCurrentViewerConfig() {
 /**
  * Canvas Viewer
  */
-class ImageView extends React.Component<Props> {
+class ImageView extends Canvas2d<Props> {
   /** The image canvas */
   private imageCanvas: any;
   /** The context */
@@ -483,20 +484,13 @@ class ImageView extends React.Component<Props> {
   }
 
   /**
-   * Execute when component state is updated
-   */
-  public componentDidUpdate() {
-    this.redraw();
-  }
-
-  /**
    * Handles canvas redraw
    * @return {boolean}
    */
-  private redraw(): boolean {
+  protected redraw(): boolean {
       // TODO: should support lazy drawing
       // TODO: draw each canvas separately for optimization
-      const state = Session.getState();
+      const state = this.state.session;
       const item = state.current.item;
       const loaded = state.items[item].loaded;
       if (loaded) {

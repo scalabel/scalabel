@@ -83,13 +83,11 @@ class Session {
 
   /**
    * Subscribe all the controllers to the states
-   * @param {any} component: view component
+   * @param {Function} callback: view component
    */
-  public subscribe(component: any) {
-    if (this.store.subscribe) {
-      this.store.subscribe(component.onStateUpdated.bind(component));
-    }
-    // this.fastStore.subscribe(c.onFastStateUpdated.bind(c));
+  public subscribe(callback: () => void) {
+    this.store.subscribe(callback);
+    this.fastStore.subscribe(callback);
   }
 
   /**

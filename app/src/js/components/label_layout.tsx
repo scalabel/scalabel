@@ -1,5 +1,4 @@
-import React from 'react';
-// import PropTypes from 'prop-types';
+import * as React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import SplitPane from 'react-split-pane';
 import Session from '../common/session';
@@ -53,7 +52,7 @@ class LabelLayout extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.layoutState = {left_size: 0, center_size: 0, right_size: 0};
-    Session.subscribe(this);
+    Session.subscribe(this.onStateUpdated.bind(this));
   }
 
   /**

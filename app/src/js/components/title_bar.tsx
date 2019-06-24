@@ -1,5 +1,5 @@
 import React from 'react';
-// import PropTypes from 'prop-types';
+import {Component} from './component';
 import {AppBar, Toolbar, IconButton, Tooltip} from '@material-ui/core';
 import {faCheck, faInfo, faQuestion, faSave, faList, faColumns} from '@fortawesome/free-solid-svg-icons/index';
 import {withStyles} from '@material-ui/core/styles/index';
@@ -37,7 +37,7 @@ interface Props {
 /**
  * Title bar
  */
-class TitleBar extends React.Component<Props> {
+class TitleBar extends Component<Props> {
   /**
    * Render function
    * @return {React.Fragment} React fragment
