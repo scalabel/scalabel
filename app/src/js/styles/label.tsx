@@ -106,3 +106,22 @@ export const listButtonStyle = () => ({
         fontSize: '15px'
     }
 });
+
+export const imageViewStyle = () => createStyles({
+    canvas: {
+      position: 'absolute'
+    },
+    mask: {
+        display: 'block',
+        height: 'calc(100% - 20px)',
+        top: '10px', left: '10px',
+        position: 'absolute', overflow: 'scroll',
+        outline: 'none',
+        width: 'calc(100% - 20px)'
+    },
+    background: {
+      display: 'block', height: 'calc(100% - 50px)',
+      position: 'absolute',
+      outline: 'none', width: '100%', background: '#222222'
+    }
+});

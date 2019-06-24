@@ -77,6 +77,10 @@ export interface ImageZoomAction {
   type: typeof IMAGE_ZOOM;
   /** Zoom ratio */
   ratio: number;
+  /** View Offset X */
+  viewOffsetX: number;
+  /** View Offset Y */
+  viewOffsetY: number;
 }
 
 export interface NewLabelAction {

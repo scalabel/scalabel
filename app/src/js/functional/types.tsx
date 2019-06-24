@@ -64,6 +64,10 @@ export interface ImageViewerConfigType {
   imageHeight: number;
   /** View scale */
   viewScale: number;
+  /** View Offset X */
+  viewOffsetX: number;
+  /** View Offset Y */
+  viewOffsetY: number;
 }
 
 export interface PointCloudViewerConfigType {

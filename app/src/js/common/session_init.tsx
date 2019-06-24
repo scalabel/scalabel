@@ -1,5 +1,7 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
 import Session from './session';
-import Window from './window';
+import Window from '../components/window';
 import * as types from '../actions/action_types';
 
 /**
@@ -14,7 +16,7 @@ function initFromJson(stateJson: object): void {
 
 /**
  * Request Session state from the server
- * @param {string} containerName: div name for the labeling interface
+ * @param {string} containerName - the name of the container
  */
 export function initSession(containerName: string): void {
     // collect store from server
@@ -23,8 +25,9 @@ export function initSession(containerName: string): void {
         if (xhr.readyState === 4) {
             const json = JSON.parse(xhr.response);
             initFromJson(json);
-            const window = new Window(containerName);
-            window.render();
+            ReactDOM.render(
+              <Window />,
+              document.getElementById(containerName));
         }
     };
 

@@ -34,7 +34,8 @@ export function reducer(
     case types.UPDATE_ALL:
       return common.updateAll(state);
     case types.IMAGE_ZOOM:
-      return image.zoomImage(state, action.ratio);
+      return image.zoomImage(state, action.ratio,
+          action.viewOffsetX, action.viewOffsetY);
     case types.NEW_LABEL:
       return common.newLabel(state, action.itemId,
           action.createLabel, action.optionalAttributes);

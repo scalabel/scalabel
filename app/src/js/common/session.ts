@@ -6,6 +6,7 @@ import _ from 'lodash';
 import {makeImageViewerConfig,
   makePointCloudViewerConfig} from '../functional/states';
 import {configureStore, configureFastStore} from './configure_store';
+import {Window} from '../components/window';
 import * as THREE from 'three';
 import {PLYLoader} from '../thirdparty/PLYLoader';
 
@@ -25,6 +26,8 @@ class Session {
   public itemType: string;
   /** Label type: bounding box, segmentation */
   public labelType: string;
+  /** The window component */
+  public window?: Window;
   /** Dev mode */
   public devMode: boolean;
 
@@ -40,7 +43,19 @@ class Session {
     this.labelType = '';
     // TODO: make it configurable in the url
     this.devMode = true;
+    this.setListeners();
   }
+
+    /**
+     * set listeners for the session
+     */
+    private setListeners() {
+        const body = document.getElementsByTagName('BODY') as
+            HTMLCollectionOf<HTMLElement>;
+        body[0].onresize = () => {
+            this.dispatch({type: types.UPDATE_ALL});
+        };
+    }
 
   /**
    * Get current state in store
@@ -83,7 +98,8 @@ class Session {
    */
   public initStore(stateJson: any): void {
     this.store = configureStore(stateJson, this.devMode);
-    this.store.dispatch({type: types.INIT_SESSION});
+    this.dispatch({type: types.INIT_SESSION});
+    (window as any).store = this.store;
     const state = this.getState();
     this.itemType = state.config.itemType;
     this.labelType = state.config.labelType;
@@ -93,8 +109,8 @@ class Session {
    * Load all the images in the state
    */
   private loadImages(): void {
-    const self = this;
     const items = this.getState().items;
+    const self = this;
     for (const item of items) {
       // Copy item config
       let config: ImageViewerConfigType = {
@@ -105,15 +121,15 @@ class Session {
       const url = item.url;
       const image = new Image();
       image.crossOrigin = 'Anonymous';
-      self.images.push(image);
+      this.images.push(image);
       image.onload = function() {
         config.imageHeight = image.height;
         config.imageWidth = image.width;
-        self.store.dispatch({type: types.LOAD_ITEM, index: item.index,
+        self.dispatch({type: types.LOAD_ITEM, index: item.index,
           config});
       };
       image.onerror = function() {
-        alert(sprintf('Image %s was not found.', url));
+        alert(sprintf('Failed to load image at %s', url));
       };
       image.src = url;
     }
