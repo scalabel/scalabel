@@ -1,7 +1,7 @@
 import {sprintf} from 'sprintf-js';
 import * as types from '../actions/action_types';
 import {ImageViewerConfigType, PointCloudViewerConfigType,
-  StateType} from '../functional/types';
+  State} from '../functional/types';
 import _ from 'lodash';
 import {makeImageViewerConfig,
   makePointCloudViewerConfig} from '../functional/states';
@@ -59,17 +59,17 @@ class Session {
 
   /**
    * Get current state in store
-   * @return {StateType}
+   * @return {State}
    */
-  public getState(): StateType {
+  public getState(): State {
     return this.store.getState().present;
   }
 
   /**
    * Get the current temporary state. It is for animation rendering.
-   * @return {StateType}
+   * @return {State}
    */
-  public getFastState(): StateType {
+  public getFastState(): State {
     return this.fastStore.getState();
   }
 

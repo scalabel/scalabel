@@ -5,22 +5,23 @@ import * as image from '../functional/image';
 import * as tag from '../functional/tag';
 import * as box2d from '../functional/box2d';
 import * as pointCloud from '../functional/point_cloud';
-import {StateType} from '../functional/types';
+import {State} from '../functional/types';
 import {ActionTypes} from '../actions/action_types';
 
 /**
  * Reducer
- * @param {StateType} currentState
+ * @param {State} currentState
  * @param {object} action
- * @return {StateType}
+ * @return {State}
  */
 export function reducer(
-    currentState: StateType = makeState(),
-    action: ActionTypes): StateType {
+    currentState: State = makeState(),
+    action: ActionTypes): State {
   // Appending actions to action array
-  const newActions = currentState.actions.slice();
-  newActions.push(action);
-  const state = {...currentState, actions: newActions};
+  // const newActions = currentState.actions.slice();
+  // newActions.push(action);
+  // const state = {...currentState, actions: newActions};
+  const state = currentState;
   // Apply reducers to state
   switch (action.type) {
     case types.INIT_SESSION:
@@ -36,17 +37,16 @@ export function reducer(
     case types.IMAGE_ZOOM:
       return image.zoomImage(state, action.ratio,
           action.viewOffsetX, action.viewOffsetY);
-    case types.NEW_LABEL:
-      return common.newLabel(state, action.itemId,
-          action.createLabel, action.optionalAttributes);
+    case types.ADD_LABEL:
+      return common.addLabel(state, action.label, action.shapes);
+    case types.UPDATE_LABEL_SHAPE:
+      return common.updateLabelShape(state, action.shapeId, action.props);
     case types.NEW_IMAGE_BOX2D_LABEL:
-      return box2d.newImageBox2DLabel(state, action.itemId,
-        action.optionalAttributes);
+      return box2d.addImageBox2DLabel(state, action.optionalAttributes);
     case types.DELETE_LABEL:
-      return common.deleteLabel(state, action.itemId, action.labelId);
+      return common.deleteLabel(state, action.labelId);
     case types.TAG_IMAGE:
-      return tag.tagImage(state, action.itemId,
-          action.attributeIndex, action.selectedIndex);
+      return tag.tagImage(state, action.attributeIndex, action.selectedIndex);
     case types.CHANGE_ATTRIBUTE:
       return common.changeAttribute(state, action.labelId,
           action.attributeOptions);

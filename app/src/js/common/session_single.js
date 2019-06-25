@@ -2,7 +2,7 @@
 import {sprintf} from 'sprintf-js';
 import * as types from '../actions/action_types';
 import type {ImageViewerConfigType,
-  ItemType, StateType} from '../functional/types';
+  ItemType, State} from '../functional/types';
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 /* :: import {BaseController} from '../controllers/base_controller'; */
@@ -38,17 +38,17 @@ class Session {
 
   /**
    * Get current state in store
-   * @return {StateType}
+   * @return {State}
    */
-  getState(): StateType {
+  getState(): State {
     return this.store.getState().present;
   }
 
   /**
    * Get the current temporary state. It is for animation rendering.
-   * @return {StateType}
+   * @return {State}
    */
-  getFastState(): StateType {
+  getFastState(): State {
     return this.fastStore.getState();
   }
 

@@ -2,7 +2,7 @@
 
 import {
   LabelType, ItemType,
-  RectType, CubeType, StateType,
+  RectType, CubeType, State,
   ConfigType, CurrentType, ImageViewerConfigType, PointCloudViewerConfigType,
   LayoutType,
 } from './types';
@@ -20,7 +20,6 @@ export function makeLabel(params: {} = {}): LabelType {
     attributes: {},
     parent: -1, // id
     children: [], // ids
-    valid: true,
     shapes: [],
     selectedShape: -1,
     state: -1,
@@ -99,7 +98,8 @@ export function makeItem(params: any = {}): ItemType {
     url: '',
     active: false,
     loaded: false,
-    labels: [], // list of label ids
+    labels: {},
+    shapes: {},
     viewerConfig: null,
     ...params
   };
@@ -163,17 +163,14 @@ export function makeLayout(params: {} = {}): LayoutType {
 /**
  * Initialize a Sat state
  * @param {{}} params
- * @return {StateType}
+ * @return {State}
  */
-export function makeState(params: {} = {}): StateType {
+export function makeState(params: {} = {}): State {
   return {
     config: makeSatConfig(),
     current: makeSatCurrent(),
     items: [], // Map from item index to item, ordered
-    labels: {}, // Map from label id to label
     tracks: {},
-    shapes: {}, // Map from shapeId to shape
-    actions: [],
     layout: makeLayout(),
     ...params
   };

@@ -1,12 +1,10 @@
 import * as React from 'react';
-import {StateType} from '../functional/types';
+import {State as StateType} from '../functional/types';
 import Session from '../common/session';
 
 interface State {
     /** state of the session */
     session: StateType;
-    /** fast state of the session */
-    fast: StateType;
 }
 
 /**
@@ -21,8 +19,7 @@ export abstract class Component<Props> extends React.Component<Props, State> {
         super(props);
         Session.subscribe(this.onStateUpdated.bind(this));
         this.state = {
-            session: Session.getState(),
-            fast: Session.getFastState()
+            session: Session.getState()
         };
     }
 
@@ -32,8 +29,7 @@ export abstract class Component<Props> extends React.Component<Props, State> {
      */
     private onStateUpdated(): void {
         this.setState({
-            session: Session.getState(),
-            fast: Session.getFastState()
+            session: Session.getState()
         });
     }
 }

@@ -1,5 +1,6 @@
 import * as types from './action_types';
-import {ItemType, LabelType} from '../functional/types';
+import {ItemType, LabelType, ShapeType} from '../functional/types';
+import {AddLabelAction} from './action_types';
 
 /**
  * Create Item from url with provided creator
@@ -29,22 +30,14 @@ export function goToItem(index: number) {
 }
 
 /**
- * Create new label from given creator function
- * @param {number} itemId
- * @param {Function} createLabel
- * @param {Object} optionalAttributes
- * @return {Object}
+ * Add label to the item
+ * @param {LabelType} label
+ * @param {ShapeType[]} shapes
+ * @return {AddLabelAction}
  */
-export function newLabel(itemId: number,
-                         createLabel: (labelId: number, itemId: number,
-                                       optionalAttributes: any) => LabelType,
-                         optionalAttributes: any) {
-    return {
-        type: types.NEW_LABEL,
-        itemId,
-        createLabel,
-        optionalAttributes
-    };
+export function addLabel(
+    label: LabelType, shapes: ShapeType[]): AddLabelAction {
+    return {type: types.ADD_LABEL, label, shapes};
 }
 
 /**

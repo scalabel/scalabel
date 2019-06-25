@@ -1,6 +1,6 @@
 /* :: import {BaseViewer} from '../viewers/base_viewer'; */
 import Session from '../common/session_single';
-import type {StateType} from '../functional/types';
+import type {State} from '../functional/types';
 
 /**
  * Basic controller
@@ -52,17 +52,17 @@ export class BaseController {
 
   /**
    * Wrapper function for session getState
-   * @return {StateType}
+   * @return {State}
    */
-  getState(): StateType {
+  getState(): State {
     return Session.getState();
   }
 
   /**
    * Wrapper function for session getFastState
-   * @return {StateType}
+   * @return {State}
    */
-  getFastState(): StateType {
+  getFastState(): State {
     return Session.getFastState();
   }
 

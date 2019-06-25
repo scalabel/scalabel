@@ -1,5 +1,5 @@
 import {makeItem} from './states';
-import {ItemType, ItemFunctionalType, StateType, ViewerConfigType, ImageViewerConfigType} from './types';
+import {ItemType, ItemFunctionalType, State, ViewerConfigType, ImageViewerConfigType} from './types';
 import {updateObject} from './util';
 import {getCurrentItemViewerConfig,
   setCurrentItemViewerConfig} from './state_util';
@@ -16,14 +16,14 @@ export function createItem(id: number, url: string): ItemType {
 
 /**
  * Zoom image viewer by a certain ratio
- * @param {StateType} state
+ * @param {State} state
  * @param {number} ratio
  * @param {number | null} offsetX
  * @param {number | null} offsetY
- * @return {StateType}
+ * @return {State}
  */
-export function zoomImage(state: StateType, ratio: number,
-                          offsetX: number, offsetY: number): StateType {
+export function zoomImage(state: State, ratio: number,
+                          offsetX: number, offsetY: number): State {
     let config: ViewerConfigType
         = getCurrentItemViewerConfig(state) as ImageViewerConfigType;
     config = updateObject(config, {

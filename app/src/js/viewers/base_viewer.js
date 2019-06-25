@@ -1,6 +1,6 @@
 /* :: import {BaseController} from '../controllers/base_controller'; */
 import type {
-  StateType,
+  State,
   ViewerConfigType,
   ItemType,
   LabelType,
@@ -12,8 +12,8 @@ import {makeState} from '../functional/states';
  */
 export class BaseViewer {
   // TODO: support temporary objects
-  state: StateType;
-  fastState: StateType;
+  state: State;
+  fastState: State;
   /* :: controller: $Subtype<BaseController>; */
   /**
    * General viewer constructor to initialize the viewer state
@@ -30,9 +30,9 @@ export class BaseViewer {
    * map state of the store and the state of the controller
    * to the actual values needed by the render, so that
    * the render function does not need to fetch the values itself
-   * @param {StateType} state: state definition
+   * @param {State} state: state definition
    */
-  updateState(state: StateType): void {
+  updateState(state: State): void {
     this.state = state;
     this.redraw();
   }
@@ -40,17 +40,17 @@ export class BaseViewer {
   /**
    * Update the fast state. Some of the viewers like ImageViewer will ignore it.
    * So the state change is ignored by default.
-   * @param {StateType} state: state definition
+   * @param {State} state: state definition
    */
-  updateFastState(state: StateType): void {
+  updateFastState(state: State): void {
     this.fastState = state;
   }
 
   /**
    * Retrieve the current state
-   * @return {StateType}
+   * @return {State}
    */
-  getState(): StateType {
+  getState(): State {
     return this.state;
   }
 

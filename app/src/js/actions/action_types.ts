@@ -5,7 +5,7 @@ import {
   ItemType,
   ViewerConfigType,
   LabelType,
-  Vector3Type
+  Vector3Type, ShapeType
 } from '../functional/types';
 
 export const INIT_SESSION = 'INIT_SESSION';
@@ -17,7 +17,8 @@ export const UPDATE_ALL = 'UPDATE_ALL';
 export const IMAGE_ZOOM = 'IMAGE_ZOOM';
 
 // Item Level
-export const NEW_LABEL = 'NEW_LABEL';
+export const ADD_LABEL = 'ADD_LABEL';
+export const UPDATE_LABEL_SHAPE = 'UPDATE_LABEL_SHAPE';
 export const DELETE_LABEL = 'DELETE_LABEL';
 // Image specific actions
 export const TAG_IMAGE = 'TAG_IMAGE';
@@ -83,23 +84,27 @@ export interface ImageZoomAction {
   viewOffsetY: number;
 }
 
-export interface NewLabelAction {
+export interface AddLabelAction {
   /** Type of the action */
-  type: typeof NEW_LABEL;
-  /** Item ID of the new label */
-  itemId: number;
-  /** Create label function */
-  createLabel: (labelId: number, itemId: number, optionalAttributes: any) =>
-    LabelType;
-  /** Optional attributes */
-  optionalAttributes: any;
+  type: typeof ADD_LABEL;
+  /** label to add */
+  label: LabelType;
+  /** Shapes of the label */
+  shapes: ShapeType[];
+}
+
+export interface UpdateLabelShapeAction {
+  /** Type of the action */
+  type: typeof UPDATE_LABEL_SHAPE;
+  /** Shape ID */
+  shapeId: number;
+  /** properties to update for the shape */
+  props: object;
 }
 
 export interface DeleteLabelAction {
   /** Type of the action */
   type: typeof DELETE_LABEL;
-  /** ID of the corresponding item */
-  itemId: number;
   /** ID of label to be deleted */
   labelId: number;
 }
@@ -173,8 +178,20 @@ export interface MoveCameraAndTargetAction {
 }
 
 export type ActionTypes =
-  InitSessionAction | NewItemAction | GoToItemAction | LoadItemAction |
-  UpdateAllAction | ImageZoomAction | NewLabelAction | DeleteLabelAction |
-  TagImageAction | ChangeAttributeAction | ChangeCategoryAction |
-  ToggleAssistantViewAction | NewImageBox2dLabelAction | ChangeRectAction |
-  MoveCameraAction | MoveCameraAndTargetAction;
+    InitSessionAction
+    | NewItemAction
+    | GoToItemAction
+    | LoadItemAction
+    | UpdateAllAction
+    | ImageZoomAction
+    | AddLabelAction
+    | UpdateLabelShapeAction
+    | DeleteLabelAction
+    | TagImageAction
+    | ChangeAttributeAction
+    | ChangeCategoryAction
+    | ToggleAssistantViewAction
+    | NewImageBox2dLabelAction
+    | ChangeRectAction
+    | MoveCameraAction
+    | MoveCameraAndTargetAction;

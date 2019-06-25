@@ -1,7 +1,6 @@
-
-import {LabelType, StateType} from './types';
+import {LabelType, State} from './types';
 import {makeLabel} from './states';
-import {newLabel} from './common';
+import {addLabel, updateLabelProps} from './common';
 import _ from 'lodash';
 
 /**
@@ -18,21 +17,20 @@ export function createTagLabel(labelId: number, itemId: number,
 
 /**
  * Image tagging
- * @param {StateType} state
- * @param {number} itemId
+ * @param {State} state
  * @param {number} attributeIndex
  * @param {number} attributeValue
- * @return {StateType}
+ * @return {State}
  */
 export function tagImage(
-    state: StateType, itemId: number, attributeIndex: number,
-    attributeValue: number[]): StateType {
+    state: State, attributeIndex: number,
+    attributeValue: number[]): State {
   const attributes = {[attributeIndex]: attributeValue};
-  const item = state.items[itemId];
-  if (item.labels.length > 0) {
-    const labelId = item.labels[0];
-    // be careful about this merge
-    return _.merge({}, state, {labels: {[labelId]: {attributes}}});
+  const item = state.items[state.current.item];
+  if (_.size(item.labels) > 0) {
+    const labelId = parseInt(_.findKey(item.labels) as string, 10);
+    return updateLabelProps(state, labelId, {attributes});
   }
-  return newLabel(state, itemId, createTagLabel, attributes);
+  const label = createTagLabel(0, state.current.item, attributes);
+  return addLabel(state, label, []);
 }

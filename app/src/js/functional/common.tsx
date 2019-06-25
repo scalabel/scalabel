@@ -1,15 +1,21 @@
-import {ItemType, LabelType, StateType, ViewerConfigType} from './types';
 import {
-  removeListItems, removeObjectFields, updateListItem, updateListItems,
+  ItemType,
+  LabelType,
+  ShapeType,
+  State,
+  ViewerConfigType
+} from './types';
+import {removeObjectFields, updateListItem, updateListItems,
   updateObject,
 } from './util';
+import * as _ from 'lodash';
 
 /**
  * Initialize state
- * @param {StateType} state
- * @return {StateType}
+ * @param {State} state
+ * @return {State}
  */
-export function initSession(state: StateType): StateType {
+export function initSession(state: State): State {
   // initialize state
   const items = state.items.slice();
   for (let i = 0; i < items.length; i++) {
@@ -27,44 +33,86 @@ export function initSession(state: StateType): StateType {
 }
 
 /**
- * Create new label
- * @param {StateType} state: current state
- * @param {number} itemId
- * @param {Function} createLabel: label creation function
- * @param {Object} optionalAttributes
- * @return {StateType}
+ * Add new label. The ids of label and shapes will be updated according to
+ * the current state.
+ * @param {State} state: current state
+ * @param {LabelType} label: new label to add.
+ * @param {ShapeType} shapes: shapes of the label.
+ * @return {State}
  */
-export function newLabel(
-    state: StateType,
-    itemId: number,
-    createLabel: (labelId: number, itemId: number,
-                  optionalAttributes: any) => LabelType,
-    optionalAttributes: any = {}): StateType {
-  const labelId = state.current.maxObjectId + 1;
-  const item = updateObject(state.items[itemId],
-      {labels: state.items[itemId].labels.concat([labelId])});
-  const items = updateListItem(state.items, itemId, item);
-  const labels = updateObject(state.labels,
-      {[labelId]: createLabel(labelId, itemId, optionalAttributes)});
-  const current = updateObject(state.current, {maxObjectId: labelId});
+export function addLabel(
+    state: State,
+    label: LabelType,
+    shapes: ShapeType[] = []): State {
+  const itemIndex = state.current.item;
+  const newId = state.current.maxObjectId + 1;
+  const shapeIds = _.range(shapes.length).map((i) => i + newId);
+  const newShapes = shapes.map(
+      (s, i) => updateObject(s, {label: newId, id: shapeIds[i]}));
+  const labelId = newId + shapes.length;
+  label = updateObject(label, {id: labelId, item: itemIndex,
+    shapes: label.shapes.concat(shapeIds)});
+  const newLabels = updateObject(
+      state.items[itemIndex].labels,
+      {[labelId]: label});
+  const item = updateObject(
+      state.items[itemIndex],
+      {labels: newLabels, shapes: newShapes});
+  const items = updateListItem(state.items, itemIndex, item);
+  const current = updateObject(
+      state.current,
+      {maxObjectId: labelId});
   return {
     ...state,
     items,
-    labels,
     current
   };
 }
 
 /**
+ * Update the properties of a shape
+ * @param {State} state
+ * @param {number} shapeId
+ * @param {object} props
+ * @return {State}
+ */
+export function updateLabelShape(
+    state: State, shapeId: number, props: object): State {
+  const itemIndex = state.current.item;
+  let item = state.items[itemIndex];
+  const shape = updateObject(item.shapes[shapeId], props);
+  item = updateObject(item, updateObject(item.shapes, {[shapeId]: shape}));
+  const items = updateListItem(state.items, itemIndex, item);
+  return {...state, items};
+}
+
+/**
+ * Update label properties except shapes
+ * @param {State} state
+ * @param {number} labelId
+ * @param {object} props
+ * @return {State}
+ */
+export function updateLabelProps(
+    state: State, labelId: number, props: object): State {
+  const itemIndex = state.current.item;
+  let item = state.items[itemIndex];
+  const label = updateObject(item.labels[labelId], props);
+  item = updateObject(item, updateObject(item.labels, {[labelId]: label}));
+  const items = updateListItem(state.items, itemIndex, item);
+  return {...state, items};
+}
+
+/**
  * Create Item from url with provided creator
- * @param {StateType} state
+ * @param {State} state
  * @param {Function} createItem
  * @param {string} url
- * @return {StateType}
+ * @return {State}
  */
 export function newItem(
-    state: StateType, createItem: (itemId: number, url: string) => ItemType,
-    url: string): StateType {
+    state: State, createItem: (itemId: number, url: string) => ItemType,
+    url: string): State {
   const id = state.items.length;
   const item = createItem(id, url);
   const items = state.items.slice();
@@ -77,11 +125,11 @@ export function newItem(
 
 /**
  * Go to item at index
- * @param {StateType} state
+ * @param {State} state
  * @param {number} index
- * @return {StateType}
+ * @return {State}
  */
-export function goToItem(state: StateType, index: number): StateType {
+export function goToItem(state: State, index: number): State {
   if (index < 0 || index >= state.items.length) {
     return state;
   }
@@ -102,13 +150,13 @@ export function goToItem(state: StateType, index: number): StateType {
 
 /**
  * Signify a new item is loaded
- * @param {StateType} state
+ * @param {State} state
  * @param {number} itemIndex
  * @param {ViewerConfigType} viewerConfig
- * @return {StateType}
+ * @return {State}
  */
-export function loadItem(state: StateType, itemIndex: number,
-                         viewerConfig: ViewerConfigType): StateType {
+export function loadItem(state: State, itemIndex: number,
+                         viewerConfig: ViewerConfigType): State {
   return updateObject(
       state, {items: updateListItem(
           state.items, itemIndex,
@@ -119,78 +167,76 @@ export function loadItem(state: StateType, itemIndex: number,
 // TODO: now we are using redux, we have all the history anyway,
 // TODO: do we still need to keep around all labels in current state?
 /**
- * Deconste given label
- * @param {StateType} state
- * @param {number} itemIndex
+ * Deconstruct given label
+ * @param {State} state
  * @param {number} labelId
- * @return {StateType}
+ * @return {State}
  */
-export function deleteLabel(state: StateType, itemIndex: number,
-                            labelId: number): StateType {
+export function deleteLabel(state: State, labelId: number): State {
+  const itemIndex = state.current.item;
+  const item = state.items[itemIndex];
+  const label = item.labels[labelId];
+  const labels = removeObjectFields(item.labels, [labelId]);
   // TODO: should we remove shapes?
   // depending on how boundary sharing is implemented.
-
   // remove labels
-  const labels = removeObjectFields(state.labels, [labelId.toString()]);
-  let items = state.items;
-  if (itemIndex >= 0) {
-    const item = items[itemIndex];
-    items = updateListItem(items, itemIndex,
-        updateObject(item,
-            {labels: removeListItems(item.labels, [labelId])}));
-  }
-
+  const shapes = removeObjectFields(item.shapes, label.shapes);
+  const items = updateListItem(state.items, itemIndex,
+      updateObject(item, {labels, shapes}));
   // Reset selected object
   let current = state.current;
   if (current.label === labelId) {
     current = updateObject(current, {label: -1});
   }
   return updateObject(
-      state, {current, labels, items});
+      state, {current, items});
 }
 
 /**
  * assign Attribute to a label
- * @param {StateType} state
+ * @param {State} state
  * @param {number} _labelId
  * @param {object} _attributeOptions
- * @return {StateType}
+ * @return {State}
  */
-export function changeAttribute(state: StateType, _labelId: number,
-                                _attributeOptions: any): StateType {
+export function changeAttribute(state: State, _labelId: number,
+                                _attributeOptions: any): State {
   return state;
 }
 
 /**
  * change label category
- * @param {StateType} state
+ * @param {State} state
  * @param {number} labelId
  * @param {Array} categoryOptions
- * @return {StateType}
+ * @return {State}
  */
-export function changeCategory(state: StateType, labelId: number,
-                               categoryOptions: number[]): StateType {
-  const targetLabel = state.labels[labelId];
+export function changeCategory(state: State, labelId: number,
+                               categoryOptions: number[]): State {
+  const itemIndex = state.current.item;
+  const item = state.items[itemIndex];
+  const targetLabel = state.items[itemIndex].labels[labelId];
   const newLabel = updateObject(targetLabel, {category: categoryOptions});
-  const labels = updateObject(state.labels, {[labelId]: newLabel});
-  return updateObject(state, {labels});
+  const labels = updateObject(item.labels, {[labelId]: newLabel});
+  return updateObject(state, {items: updateListItem(
+      state.items, itemIndex, updateObject(item, {labels}))});
 }
 
 /**
  * Notify all the subscribers to update. it is an no-op now.
- * @param {StateType} state
- * @return {StateType}
+ * @param {State} state
+ * @return {State}
  */
-export function updateAll(state: StateType): StateType {
+export function updateAll(state: State): State {
   return state;
 }
 
 /**
  * turn on/off assistant view
- * @param {StateType} state
- * @return {StateType}
+ * @param {State} state
+ * @return {State}
  */
-export function toggleAssistantView(state: StateType): StateType {
+export function toggleAssistantView(state: State): State {
   return updateObject(state, {layout:
             updateObject(state.layout, {assistantView:
                   !state.layout.assistantView})});

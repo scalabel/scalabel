@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 
 // TODO: need a deep merge? i.e. to update below:
-// state.items[itemId].attributes[attributeId].selectedIndex
+// state.items[itemIndex].attributes[attributeId].selectedIndex
 // something like updateIn() in immutable
 
 /**

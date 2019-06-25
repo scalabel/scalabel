@@ -11,14 +11,19 @@ export interface LabelType {
   parent: number;
   /** Children label IDs */
   children: number[];
-  /** Whether or not the label is valid */
-  valid: boolean;
-  /** Shapes of the label */
+  /** Shape ids of the label */
   shapes: number[];
   /** Selected shape of the label */
   selectedShape: number;
   /** State */
   state: number;
+}
+
+export interface Track {
+  /** ID of the track */
+  id: number;
+  /** labels in this track [item index, label id] */
+  labels: Array<[number, number]>;
 }
 
 export interface ShapeType {
@@ -94,7 +99,9 @@ export interface ItemType {
   /** Whether or not the item is loaded */
   loaded: boolean;
   /** Labels of the item */
-  labels: number[]; // list of label ids
+  labels: {[key: number]: LabelType}; // list of label
+  /** shapes of the labels on this item */
+  shapes: {[key: number]: ShapeType};
   /** Configurations of the viewer */
   viewerConfig: ViewerConfigType;
 }
@@ -150,7 +157,7 @@ export interface LayoutType {
   The current state of Sat.
  */
 export interface CurrentType {
-  /** Currently viewed item ID */
+  /** Currently viewed item index */
   item: number;
   /** Currently selected label ID */
   label: number;
@@ -160,21 +167,15 @@ export interface CurrentType {
   maxObjectId: number;
 }
 
-export interface StateType {
+export interface State {
   /** Configurations */
   config: ConfigType;
   /** The current state */
   current: CurrentType;
   /** Items */
   items: ItemType[];
-  /** Labels */
-  labels: {[key: number]: LabelType}; // Map from label id string to label
   /** tracks */
-  tracks: {[key: number]: LabelType};
-  /** shapes */
-  shapes: {[key: number]: any};
-  /** Actions */
-  actions: any[];
+  tracks: {[key: number]: Track};
   /** Layout */
   layout: LayoutType;
 }
