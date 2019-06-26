@@ -4,7 +4,7 @@ import Session from '../common/session';
 import {PointCloudViewerConfigType} from '../functional/types';
 import {withStyles} from '@material-ui/core/styles/index';
 import * as THREE from 'three';
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 import {Object3D} from 'three';
 import createStyles from '@material-ui/core/styles/createStyles';
 

@@ -5,7 +5,7 @@ import * as fa from '@fortawesome/free-solid-svg-icons/index';
 import {withStyles} from '@material-ui/core/styles/index';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import createStyles from '@material-ui/core/styles/createStyles';
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 import Session from '../common/session';
 import * as _ from 'lodash';
 

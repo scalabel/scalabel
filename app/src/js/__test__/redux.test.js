@@ -1,7 +1,7 @@
 import {configureStore} from '../common/configure_store';
 import * as types from '../actions/action_types';
 import {ActionCreators} from 'redux-undo';
-import {testJson} from './test_objects';
+import {testJson} from '../test_objects';
 
 describe('Sat Redux Tests', function() {
   it('Initialize', function() {

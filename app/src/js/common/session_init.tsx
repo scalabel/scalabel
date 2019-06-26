@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Session from './session';
 import Window from '../components/window';
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 
 /**
  * Init general labeling session.

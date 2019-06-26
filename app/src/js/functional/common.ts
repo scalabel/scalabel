@@ -52,12 +52,12 @@ export function addLabel(
   const labelId = newId + shapes.length;
   label = updateObject(label, {id: labelId, item: itemIndex,
     shapes: label.shapes.concat(shapeIds)});
-  const newLabels = updateObject(
-      state.items[itemIndex].labels,
+  let item = state.items[itemIndex];
+  const labels = updateObject(
+      item.labels,
       {[labelId]: label});
-  const item = updateObject(
-      state.items[itemIndex],
-      {labels: newLabels, shapes: newShapes});
+  const allShapes = updateObject(item.shapes, _.zipObject(shapeIds, newShapes));
+  item = updateObject(item, {labels, shapes: allShapes});
   const items = updateListItem(state.items, itemIndex, item);
   const current = updateObject(
       state.current,
@@ -76,12 +76,13 @@ export function addLabel(
  * @param {object} props
  * @return {State}
  */
-export function updateLabelShape(
+export function changeLabelShape(
     state: State, shapeId: number, props: object): State {
   const itemIndex = state.current.item;
   let item = state.items[itemIndex];
   const shape = updateObject(item.shapes[shapeId], props);
-  item = updateObject(item, updateObject(item.shapes, {[shapeId]: shape}));
+  item = updateObject(
+      item, {shapes: updateObject(item.shapes, {[shapeId]: shape})});
   const items = updateListItem(state.items, itemIndex, item);
   return {...state, items};
 }
@@ -93,12 +94,13 @@ export function updateLabelShape(
  * @param {object} props
  * @return {State}
  */
-export function updateLabelProps(
+export function changeLabelProps(
     state: State, labelId: number, props: object): State {
   const itemIndex = state.current.item;
   let item = state.items[itemIndex];
   const label = updateObject(item.labels[labelId], props);
-  item = updateObject(item, updateObject(item.labels, {[labelId]: label}));
+  item = updateObject(
+      item, {labels: updateObject(item.labels, {[labelId]: label})});
   const items = updateListItem(state.items, itemIndex, item);
   return {...state, items};
 }
@@ -202,24 +204,6 @@ export function deleteLabel(state: State, labelId: number): State {
 export function changeAttribute(state: State, _labelId: number,
                                 _attributeOptions: any): State {
   return state;
-}
-
-/**
- * change label category
- * @param {State} state
- * @param {number} labelId
- * @param {Array} categoryOptions
- * @return {State}
- */
-export function changeCategory(state: State, labelId: number,
-                               categoryOptions: number[]): State {
-  const itemIndex = state.current.item;
-  const item = state.items[itemIndex];
-  const targetLabel = state.items[itemIndex].labels[labelId];
-  const newLabel = updateObject(targetLabel, {category: categoryOptions});
-  const labels = updateObject(item.labels, {[labelId]: newLabel});
-  return updateObject(state, {items: updateListItem(
-      state.items, itemIndex, updateObject(item, {labels}))});
 }
 
 /**

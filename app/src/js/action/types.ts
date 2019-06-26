@@ -18,7 +18,8 @@ export const IMAGE_ZOOM = 'IMAGE_ZOOM';
 
 // Item Level
 export const ADD_LABEL = 'ADD_LABEL';
-export const UPDATE_LABEL_SHAPE = 'UPDATE_LABEL_SHAPE';
+export const CHANGE_LABEL_SHAPE = 'CHANGE_LABEL_SHAPE';
+export const CHANGE_LABEL_PROPS = 'CHANGE_LABEL_PROPS';
 export const DELETE_LABEL = 'DELETE_LABEL';
 // Image specific actions
 export const TAG_IMAGE = 'TAG_IMAGE';
@@ -93,11 +94,20 @@ export interface AddLabelAction {
   shapes: ShapeType[];
 }
 
-export interface UpdateLabelShapeAction {
+export interface ChangeLabelShapeAction {
   /** Type of the action */
-  type: typeof UPDATE_LABEL_SHAPE;
+  type: typeof CHANGE_LABEL_SHAPE;
   /** Shape ID */
   shapeId: number;
+  /** properties to update for the shape */
+  props: object;
+}
+
+export interface ChangeLabelPropsAction {
+  /** Type of the action */
+  type: typeof CHANGE_LABEL_PROPS;
+  /** Label ID */
+  labelId: number;
   /** properties to update for the shape */
   props: object;
 }
@@ -185,13 +195,13 @@ export type ActionTypes =
     | UpdateAllAction
     | ImageZoomAction
     | AddLabelAction
-    | UpdateLabelShapeAction
+    | ChangeLabelShapeAction
+    | ChangeLabelPropsAction
     | DeleteLabelAction
     | TagImageAction
     | ChangeAttributeAction
     | ChangeCategoryAction
     | ToggleAssistantViewAction
-    | NewImageBox2dLabelAction
     | ChangeRectAction
     | MoveCameraAction
     | MoveCameraAndTargetAction;

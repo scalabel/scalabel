@@ -8,7 +8,7 @@ import {ToolboxViewer} from '../viewers/toolbox_viewer';
 import {Box2DController} from '../controllers/image_box2d_controller';
 import {Box2DViewer} from '../viewers/image_box2d_viewer';
 import {BaseController} from '../controllers/base_controller';
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 
 import Session from './session_single';
 

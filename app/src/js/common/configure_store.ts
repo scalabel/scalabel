@@ -14,7 +14,7 @@ import {
   CHANGE_ATTRIBUTE,
   CHANGE_CATEGORY,
   TOGGLE_ASSISTANT_VIEW,
-} from '../actions/action_types';
+} from '../action/types';
 
 /**
  * Configure the main store for the state

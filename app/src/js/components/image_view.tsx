@@ -3,7 +3,7 @@ import * as React from 'react';
 import Session from '../common/session';
 import {ImageViewerConfigType, ViewerConfigType} from '../functional/types';
 import {withStyles} from '@material-ui/core/styles';
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 import EventListener, {withOptions} from 'react-event-listener';
 import {imageViewStyle} from '../styles/label';
 

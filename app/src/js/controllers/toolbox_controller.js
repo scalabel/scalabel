@@ -1,4 +1,4 @@
-import {tagImage} from '../actions/action_creators';
+import {tagImage} from '../action/creators';
 import {BaseController} from './base_controller';
 
 /**

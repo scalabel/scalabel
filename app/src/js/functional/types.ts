@@ -1,8 +1,10 @@
 export interface LabelType {
   /** ID of the label */
   id: number;
-  /** The item ID */
+  /** The item index */
   item: number;
+  /** type of the label */
+  type: string;
   /** The category ID */
   category: number[];
   /** Attributes */

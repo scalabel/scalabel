@@ -1,4 +1,4 @@
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 import {BaseController} from './base_controller';
 
 // Constants

@@ -1,6 +1,5 @@
-import * as types from './action_types';
+import * as types from './types';
 import {ItemType, LabelType, ShapeType} from '../functional/types';
-import {AddLabelAction} from './action_types';
 
 /**
  * Create Item from url with provided creator
@@ -36,20 +35,41 @@ export function goToItem(index: number) {
  * @return {AddLabelAction}
  */
 export function addLabel(
-    label: LabelType, shapes: ShapeType[]): AddLabelAction {
+    label: LabelType, shapes: ShapeType[]): types.AddLabelAction {
     return {type: types.ADD_LABEL, label, shapes};
+}
+
+/**
+ * Change the shape of the label
+ * @param {number} shapeId
+ * @param {{}}props
+ * @return {ChangeLabelShapeAction}
+ */
+export function changeLabelShape(
+    shapeId: number, props: {}): types.ChangeLabelShapeAction {
+    return {type: types.CHANGE_LABEL_SHAPE, shapeId, props};
+}
+
+/**
+ * Change the properties of the label
+ * @param {number} labelId
+ * @param {{}}props
+ * @return {ChangeLabelPropsAction}
+ */
+export function changeLabelProps(
+    labelId: number, props: {}): types.ChangeLabelPropsAction {
+    return {type: types.CHANGE_LABEL_PROPS, labelId, props};
 }
 
 /**
  * Delete given label
  * @param {number} itemId
  * @param {number} labelId
- * @return {Object}
+ * @return {DeleteLabelAction}
  */
-export function deleteLabel(itemId: number, labelId: number) {
+export function deleteLabel(labelId: number): types.DeleteLabelAction {
     return {
         type: types.DELETE_LABEL,
-        itemId,
         labelId
     };
 }
@@ -96,33 +116,5 @@ export function changeCategory(labelId: number, categoryOptions: object) {
         type: types.CHANGE_CATEGORY,
         labelId,
         categoryOptions
-    };
-}
-
-// Below are box2d specific
-/**
- * Create a new box2d label
- * @param {number} itemId
- * @param {Object} optionalAttributes
- * @return {Object}
- */
-export function newImageBox2DLabel(itemId: number, optionalAttributes: object) {
-    return {
-        type: types.NEW_IMAGE_BOX2D_LABEL,
-        itemId,
-        optionalAttributes
-    };
-}
-
-/**
- * assign new x, y, w, h to a rectangle
- * @param {number} shapeId
- * @param {Object} targetBoxAttributes
- * @return {Object}
- */
-export function changeRect(shapeId: number,
-                           targetBoxAttributes: object) {
-    return {
-        type: types.CHANGE_RECT, shapeId, targetBoxAttributes
     };
 }

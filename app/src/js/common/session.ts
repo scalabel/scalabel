@@ -1,5 +1,5 @@
 import {sprintf} from 'sprintf-js';
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 import {ImageViewerConfigType, PointCloudViewerConfigType,
   State} from '../functional/types';
 import _ from 'lodash';

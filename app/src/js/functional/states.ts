@@ -1,11 +1,11 @@
-// @flow
-
 import {
   LabelType, ItemType,
   RectType, CubeType, State,
   ConfigType, CurrentType, ImageViewerConfigType, PointCloudViewerConfigType,
   LayoutType,
 } from './types';
+
+import * as labels from '../common/label_types';
 
 /**
  * Initialize a label state
@@ -15,7 +15,8 @@ import {
 export function makeLabel(params: {} = {}): LabelType {
   return {
     id: -1,
-    item: -1, // id
+    item: -1,
+    type: labels.EMPTY,
     category: [],
     attributes: {},
     parent: -1, // id

@@ -1,12 +1,10 @@
 import {makeState} from '../functional/states';
-import * as types from '../actions/action_types';
+import * as types from '../action/types';
 import * as common from '../functional/common';
 import * as image from '../functional/image';
 import * as tag from '../functional/tag';
-import * as box2d from '../functional/box2d';
 import * as pointCloud from '../functional/point_cloud';
 import {State} from '../functional/types';
-import {ActionTypes} from '../actions/action_types';
 
 /**
  * Reducer
@@ -16,7 +14,7 @@ import {ActionTypes} from '../actions/action_types';
  */
 export function reducer(
     currentState: State = makeState(),
-    action: ActionTypes): State {
+    action: types.ActionTypes): State {
   // Appending actions to action array
   // const newActions = currentState.actions.slice();
   // newActions.push(action);
@@ -39,10 +37,10 @@ export function reducer(
           action.viewOffsetX, action.viewOffsetY);
     case types.ADD_LABEL:
       return common.addLabel(state, action.label, action.shapes);
-    case types.UPDATE_LABEL_SHAPE:
-      return common.updateLabelShape(state, action.shapeId, action.props);
-    case types.NEW_IMAGE_BOX2D_LABEL:
-      return box2d.addImageBox2DLabel(state, action.optionalAttributes);
+    case types.CHANGE_LABEL_SHAPE:
+      return common.changeLabelShape(state, action.shapeId, action.props);
+    case types.CHANGE_LABEL_PROPS:
+      return common.changeLabelProps(state, action.labelId, action.props);
     case types.DELETE_LABEL:
       return common.deleteLabel(state, action.labelId);
     case types.TAG_IMAGE:
@@ -50,16 +48,8 @@ export function reducer(
     case types.CHANGE_ATTRIBUTE:
       return common.changeAttribute(state, action.labelId,
           action.attributeOptions);
-    case types.CHANGE_CATEGORY:
-      return common.changeCategory(state, action.labelId,
-          action.categoryOptions);
     case types.TOGGLE_ASSISTANT_VIEW:
       return common.toggleAssistantView(state);
-
-    case types.CHANGE_RECT:
-      return box2d.changeRect(state, action.shapeId,
-          action.targetBoxAttributes);
-
     case types.MOVE_CAMERA:
       return pointCloud.moveCamera(state, action.newPosition);
     case types.MOVE_CAMERA_AND_TARGET:

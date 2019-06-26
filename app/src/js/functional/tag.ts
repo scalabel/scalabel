@@ -1,6 +1,6 @@
 import {LabelType, State} from './types';
 import {makeLabel} from './states';
-import {addLabel, updateLabelProps} from './common';
+import {addLabel, changeLabelProps} from './common';
 import _ from 'lodash';
 
 /**
@@ -29,7 +29,7 @@ export function tagImage(
   const item = state.items[state.current.item];
   if (_.size(item.labels) > 0) {
     const labelId = parseInt(_.findKey(item.labels) as string, 10);
-    return updateLabelProps(state, labelId, {attributes});
+    return changeLabelProps(state, labelId, {attributes});
   }
   const label = createTagLabel(0, state.current.item, attributes);
   return addLabel(state, label, []);
