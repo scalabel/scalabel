@@ -113,7 +113,7 @@ export const testJson = {
       id: 0,
       index: 0,
       url: 'https://s3-us-west-2.amazonaws.com/' +
-      'scalabel-public/demo/frames/intersection-0000051.jpg',
+        'scalabel-public/demo/frames/intersection-0000051.jpg',
       active: false,
       loaded: false,
       labels: []
@@ -122,7 +122,7 @@ export const testJson = {
       id: 1,
       index: 1,
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-      'demo/frames/intersection-0000052.jpg',
+        'demo/frames/intersection-0000052.jpg',
       active: false,
       loaded: false,
       labels: []
@@ -131,7 +131,7 @@ export const testJson = {
       id: 2,
       index: 2,
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-      'demo/frames/intersection-0000053.jpg',
+        'demo/frames/intersection-0000053.jpg',
       active: false,
       loaded: false,
       labels: []
@@ -140,7 +140,7 @@ export const testJson = {
       id: 3,
       index: 3,
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-      'demo/frames/intersection-0000054.jpg',
+        'demo/frames/intersection-0000054.jpg',
       active: false,
       loaded: false,
       labels: []
@@ -149,7 +149,7 @@ export const testJson = {
       id: 4,
       index: 4,
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-      'demo/frames/intersection-0000055.jpg',
+        'demo/frames/intersection-0000055.jpg',
       active: false,
       loaded: false,
       labels: []
