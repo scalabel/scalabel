@@ -1,34 +1,34 @@
+import * as _ from 'lodash'
 import {
   ItemType,
   LabelType,
   ShapeType,
   State,
   ViewerConfigType
-} from './types';
+} from './types'
 import {removeObjectFields, updateListItem, updateListItems,
-  updateObject,
-} from './util';
-import * as _ from 'lodash';
+  updateObject
+} from './util'
 
 /**
  * Initialize state
  * @param {State} state
  * @return {State}
  */
-export function initSession(state: State): State {
+export function initSession (state: State): State {
   // initialize state
-  const items = state.items.slice();
+  let items = state.items.slice()
   for (let i = 0; i < items.length; i++) {
-    items[i] = updateObject(items[i], {loaded: false});
+    items[i] = updateObject(items[i], { loaded: false })
   }
-  state = updateObject(state, {items});
+  state = updateObject(state, { items })
   if (state.current.item === -1) {
-    const current = updateObject(state.current, {item: 0});
-    const items = updateListItem(
-        state.items, 0, updateObject(state.items[0], {active: true}));
-    return updateObject(state, {current, items});
+    const current = updateObject(state.current, { item: 0 })
+    items = updateListItem(
+        state.items, 0, updateObject(state.items[0], { active: true }))
+    return updateObject(state, { current, items })
   } else {
-    return state;
+    return state
   }
 }
 
@@ -40,33 +40,33 @@ export function initSession(state: State): State {
  * @param {ShapeType} shapes: shapes of the label.
  * @return {State}
  */
-export function addLabel(
+export function addLabel (
     state: State,
     label: LabelType,
     shapes: ShapeType[] = []): State {
-  const itemIndex = state.current.item;
-  const newId = state.current.maxObjectId + 1;
-  const shapeIds = _.range(shapes.length).map((i) => i + newId);
+  const itemIndex = state.current.item
+  const newId = state.current.maxObjectId + 1
+  const shapeIds = _.range(shapes.length).map((i) => i + newId)
   const newShapes = shapes.map(
-      (s, i) => updateObject(s, {label: newId, id: shapeIds[i]}));
-  const labelId = newId + shapes.length;
+      (s, i) => updateObject(s, { label: newId, id: shapeIds[i] }))
+  const labelId = newId + shapes.length
   label = updateObject(label, {id: labelId, item: itemIndex,
-    shapes: label.shapes.concat(shapeIds)});
-  let item = state.items[itemIndex];
+    shapes: label.shapes.concat(shapeIds)})
+  let item = state.items[itemIndex]
   const labels = updateObject(
       item.labels,
-      {[labelId]: label});
-  const allShapes = updateObject(item.shapes, _.zipObject(shapeIds, newShapes));
-  item = updateObject(item, {labels, shapes: allShapes});
-  const items = updateListItem(state.items, itemIndex, item);
+      { [labelId]: label })
+  const allShapes = updateObject(item.shapes, _.zipObject(shapeIds, newShapes))
+  item = updateObject(item, { labels, shapes: allShapes })
+  const items = updateListItem(state.items, itemIndex, item)
   const current = updateObject(
       state.current,
-      {maxObjectId: labelId});
+      { maxObjectId: labelId })
   return {
     ...state,
     items,
     current
-  };
+  }
 }
 
 /**
@@ -76,15 +76,15 @@ export function addLabel(
  * @param {object} props
  * @return {State}
  */
-export function changeLabelShape(
+export function changeLabelShape (
     state: State, shapeId: number, props: object): State {
-  const itemIndex = state.current.item;
-  let item = state.items[itemIndex];
-  const shape = updateObject(item.shapes[shapeId], props);
+  const itemIndex = state.current.item
+  let item = state.items[itemIndex]
+  const shape = updateObject(item.shapes[shapeId], props)
   item = updateObject(
-      item, {shapes: updateObject(item.shapes, {[shapeId]: shape})});
-  const items = updateListItem(state.items, itemIndex, item);
-  return {...state, items};
+      item, { shapes: updateObject(item.shapes, { [shapeId]: shape }) })
+  const items = updateListItem(state.items, itemIndex, item)
+  return { ...state, items }
 }
 
 /**
@@ -94,15 +94,15 @@ export function changeLabelShape(
  * @param {object} props
  * @return {State}
  */
-export function changeLabelProps(
+export function changeLabelProps (
     state: State, labelId: number, props: object): State {
-  const itemIndex = state.current.item;
-  let item = state.items[itemIndex];
-  const label = updateObject(item.labels[labelId], props);
+  const itemIndex = state.current.item
+  let item = state.items[itemIndex]
+  const label = updateObject(item.labels[labelId], props)
   item = updateObject(
-      item, {labels: updateObject(item.labels, {[labelId]: label})});
-  const items = updateListItem(state.items, itemIndex, item);
-  return {...state, items};
+      item, { labels: updateObject(item.labels, { [labelId]: label }) })
+  const items = updateListItem(state.items, itemIndex, item)
+  return { ...state, items }
 }
 
 /**
@@ -112,17 +112,17 @@ export function changeLabelProps(
  * @param {string} url
  * @return {State}
  */
-export function newItem(
+export function newItem (
     state: State, createItem: (itemId: number, url: string) => ItemType,
     url: string): State {
-  const id = state.items.length;
-  const item = createItem(id, url);
-  const items = state.items.slice();
-  items.push(item);
+  const id = state.items.length
+  const item = createItem(id, url)
+  const items = state.items.slice()
+  items.push(item)
   return {
     ...state,
     items
-  };
+  }
 }
 
 /**
@@ -131,23 +131,23 @@ export function newItem(
  * @param {number} index
  * @return {State}
  */
-export function goToItem(state: State, index: number): State {
+export function goToItem (state: State, index: number): State {
   if (index < 0 || index >= state.items.length) {
-    return state;
+    return state
   }
   // TODO: don't do circling when no image number is shown
   // index = (index + state.items.length) % state.items.length;
   if (index === state.current.item) {
-    return state;
+    return state
   }
   const deactivatedItem = updateObject(state.items[state.current.item],
-      {active: false});
-  const activatedItem = updateObject(state.items[index], {active: true});
+      { active: false })
+  const activatedItem = updateObject(state.items[index], { active: true })
   const items = updateListItems(state.items,
       [state.current.item, index],
-      [deactivatedItem, activatedItem]);
-  const current = {...state.current, item: index};
-  return updateObject(state, {items, current});
+      [deactivatedItem, activatedItem])
+  const current = { ...state.current, item: index }
+  return updateObject(state, { items, current })
 }
 
 /**
@@ -157,13 +157,13 @@ export function goToItem(state: State, index: number): State {
  * @param {ViewerConfigType} viewerConfig
  * @return {State}
  */
-export function loadItem(state: State, itemIndex: number,
-                         viewerConfig: ViewerConfigType): State {
+export function loadItem (state: State, itemIndex: number,
+                          viewerConfig: ViewerConfigType): State {
   return updateObject(
       state, {items: updateListItem(
           state.items, itemIndex,
             updateObject(state.items[itemIndex],
-                {viewerConfig, loaded: true}))});
+                { viewerConfig, loaded: true }))})
 }
 
 // TODO: now we are using redux, we have all the history anyway,
@@ -174,24 +174,24 @@ export function loadItem(state: State, itemIndex: number,
  * @param {number} labelId
  * @return {State}
  */
-export function deleteLabel(state: State, labelId: number): State {
-  const itemIndex = state.current.item;
-  const item = state.items[itemIndex];
-  const label = item.labels[labelId];
-  const labels = removeObjectFields(item.labels, [labelId]);
+export function deleteLabel (state: State, labelId: number): State {
+  const itemIndex = state.current.item
+  const item = state.items[itemIndex]
+  const label = item.labels[labelId]
+  const labels = removeObjectFields(item.labels, [labelId])
   // TODO: should we remove shapes?
   // depending on how boundary sharing is implemented.
   // remove labels
-  const shapes = removeObjectFields(item.shapes, label.shapes);
+  const shapes = removeObjectFields(item.shapes, label.shapes)
   const items = updateListItem(state.items, itemIndex,
-      updateObject(item, {labels, shapes}));
+      updateObject(item, { labels, shapes }))
   // Reset selected object
-  let current = state.current;
+  let current = state.current
   if (current.label === labelId) {
-    current = updateObject(current, {label: -1});
+    current = updateObject(current, { label: -1 })
   }
   return updateObject(
-      state, {current, items});
+      state, { current, items })
 }
 
 /**
@@ -201,9 +201,9 @@ export function deleteLabel(state: State, labelId: number): State {
  * @param {object} _attributeOptions
  * @return {State}
  */
-export function changeAttribute(state: State, _labelId: number,
-                                _attributeOptions: any): State {
-  return state;
+export function changeAttribute (state: State, _labelId: number,
+                                 _attributeOptions: any): State {
+  return state
 }
 
 /**
@@ -211,8 +211,8 @@ export function changeAttribute(state: State, _labelId: number,
  * @param {State} state
  * @return {State}
  */
-export function updateAll(state: State): State {
-  return state;
+export function updateAll (state: State): State {
+  return state
 }
 
 /**
@@ -220,8 +220,8 @@ export function updateAll(state: State): State {
  * @param {State} state
  * @return {State}
  */
-export function toggleAssistantView(state: State): State {
+export function toggleAssistantView (state: State): State {
   return updateObject(state, {layout:
             updateObject(state.layout, {assistantView:
-                  !state.layout.assistantView})});
+                  !state.layout.assistantView})})
 }

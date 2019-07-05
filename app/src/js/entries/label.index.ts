@@ -1,3 +1,3 @@
-import {initSession} from '../common/session_init';
+import { initSession } from '../common/session_init'
 
-initSession('labeling-interface');
+initSession('labeling-interface')

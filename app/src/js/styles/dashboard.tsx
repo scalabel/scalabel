@@ -1,4 +1,4 @@
-import createStyles from '@material-ui/core/styles/createStyles';
+import createStyles from '@material-ui/core/styles/createStyles'
 
 /* dashboardStyles */
 export const dashboardStyles: any = (theme: any) => createStyles({
@@ -48,7 +48,7 @@ export const dashboardStyles: any = (theme: any) => createStyles({
   h5: {
     marginBottom: theme.spacing.unit * 2
   }
-});
+})
 
 /* tableStyles */
 export const tableStyles: any = (theme: any) => createStyles({
@@ -65,7 +65,7 @@ export const tableStyles: any = (theme: any) => createStyles({
       backgroundColor: theme.palette.background.default
     }
   }
-});
+})
 
 /* tableCellStyles */
 export const tableCellStyles: any = (theme: any) => createStyles({
@@ -76,4 +76,4 @@ export const tableCellStyles: any = (theme: any) => createStyles({
   body: {
     fontSize: 16
   }
-});
+})

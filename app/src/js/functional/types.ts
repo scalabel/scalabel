@@ -1,111 +1,111 @@
 export interface LabelType {
   /** ID of the label */
-  id: number;
+  id: number
   /** The item index */
-  item: number;
+  item: number
   /** type of the label */
-  type: string;
+  type: string
   /** The category ID */
-  category: number[];
+  category: number[]
   /** Attributes */
-  attributes: {[key: number]: number[]};
+  attributes: {[key: number]: number[]}
   /** Parent label ID */
-  parent: number;
+  parent: number
   /** Children label IDs */
-  children: number[];
+  children: number[]
   /** Shape ids of the label */
-  shapes: number[];
+  shapes: number[]
   /** Selected shape of the label */
-  selectedShape: number;
+  selectedShape: number
   /** State */
-  state: number;
+  state: number
 }
 
 export interface Track {
   /** ID of the track */
-  id: number;
+  id: number
   /** labels in this track [item index, label id] */
-  labels: Array<[number, number]>;
+  labels: Array<[number, number]>
 }
 
 export interface ShapeType {
   /** ID of the shape */
-  id: number;
+  id: number
   /** Label ID of the shape */
-  label: number;
+  label: number
 }
 
 export interface RectType extends ShapeType {
   /** The x-coordinate */
-  x: number;
+  x: number
   /** The y-coordinate */
-  y: number;
+  y: number
   /** Width */
-  w: number;
+  w: number
   /** Height */
-  h: number;
+  h: number
 }
 
 export interface Vector3Type {
   /** The x-coordinate */
-  x: number;
+  x: number
   /** The y-coordinate */
-  y: number;
+  y: number
   /** The z-coordinate */
-  z: number;
+  z: number
 }
 
 export interface CubeType extends ShapeType {
   /** Center of the cube */
-  center: Vector3Type;
+  center: Vector3Type
   /** size */
-  size: Vector3Type;
+  size: Vector3Type
   /** orientation */
-  orientation: Vector3Type;
+  orientation: Vector3Type
 }
 
 export interface ImageViewerConfigType {
   /** The width of the image */
-  imageWidth: number;
+  imageWidth: number
   /** The height of the image */
-  imageHeight: number;
+  imageHeight: number
   /** View scale */
-  viewScale: number;
+  viewScale: number
   /** View Offset X */
-  viewOffsetX: number;
+  viewOffsetX: number
   /** View Offset Y */
-  viewOffsetY: number;
+  viewOffsetY: number
 }
 
 export interface PointCloudViewerConfigType {
   /** Camera position */
-  position: Vector3Type;
+  position: Vector3Type
   /** Viewing direction */
-  target: Vector3Type;
+  target: Vector3Type
   /** Up direction of the camera */
-  verticalAxis: Vector3Type;
+  verticalAxis: Vector3Type
 }
 
 export type ViewerConfigType =
-    ImageViewerConfigType | PointCloudViewerConfigType;
+    ImageViewerConfigType | PointCloudViewerConfigType
 
 export interface ItemType {
   /** The ID of the item */
-  id: number;
+  id: number
   /** The index of the item */
-  index: number;
+  index: number
   /** The URL of the item */
-  url: string;
+  url: string
   /** Whether or not the item is active */
-  active: boolean;
+  active: boolean
   /** Whether or not the item is loaded */
-  loaded: boolean;
+  loaded: boolean
   /** Labels of the item */
-  labels: {[key: number]: LabelType}; // list of label
+  labels: {[key: number]: LabelType} // list of label
   /** shapes of the labels on this item */
-  shapes: {[key: number]: ShapeType};
+  shapes: {[key: number]: ShapeType}
   /** Configurations of the viewer */
-  viewerConfig: ViewerConfigType;
+  viewerConfig: ViewerConfigType
 }
 
 /*
@@ -115,44 +115,44 @@ export interface ItemType {
  */
 export interface ConfigType {
   /** Assignment ID */
-  assignmentId: string;
+  assignmentId: string
   /** Project name */
-  projectName: string;
+  projectName: string
   /** Item type */
-  itemType: string;
+  itemType: string
   /** Label type */
-  labelType: string;
+  labelType: string
   /** Task size */
-  taskSize: number;
+  taskSize: number
   /** Handler URL */
-  handlerUrl: string;
+  handlerUrl: string
   /** Page title */
-  pageTitle: string;
+  pageTitle: string
   /** Instruction page URL */
-  instructionPage: string;
+  instructionPage: string
   /** Whether or not in demo mode */
-  demoMode: boolean;
+  demoMode: boolean
   /** Bundle file */
-  bundleFile: string;
+  bundleFile: string
   /** Categories */
-  categories: string[];
+  categories: string[]
   /** Attributes */
-  attributes: object[];
+  attributes: object[]
   /** Task ID */
-  taskId: string;
+  taskId: string
   /** Worker ID */
-  workerId: string;
+  workerId: string
   /** Start time */
-  startTime: number;
+  startTime: number
 }
 
 export interface LayoutType {
   /** Width of the tool bar */
-  toolbarWidth: number;
+  toolbarWidth: number
   /** Whether or not to show the assistant view */
-  assistantView: boolean;
+  assistantView: boolean
   /** Assistant view ratio */
-  assistantViewRatio: number;
+  assistantViewRatio: number
 }
 
 /*
@@ -160,29 +160,29 @@ export interface LayoutType {
  */
 export interface CurrentType {
   /** Currently viewed item index */
-  item: number;
+  item: number
   /** Currently selected label ID */
-  label: number;
+  label: number
   /** Currently selected shape ID */
-  shape: number;
+  shape: number
   /** Max object ID */
-  maxObjectId: number;
+  maxObjectId: number
 }
 
 export interface State {
   /** Configurations */
-  config: ConfigType;
+  config: ConfigType
   /** The current state */
-  current: CurrentType;
+  current: CurrentType
   /** Items */
-  items: ItemType[];
+  items: ItemType[]
   /** tracks */
-  tracks: {[key: number]: Track};
+  tracks: {[key: number]: Track}
   /** Layout */
-  layout: LayoutType;
+  layout: LayoutType
 }
 
 export type LabelFunctionalType =
-    (id: number, itemId: number, attributes: object) => LabelType;
+    (id: number, itemId: number, attributes: object) => LabelType
 
-export type ItemFunctionalType = (id: number, url: string) => ItemType;
+export type ItemFunctionalType = (id: number, url: string) => ItemType

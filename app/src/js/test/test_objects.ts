@@ -159,4 +159,4 @@ export const testJson = {
   tracks: {},
   shapes: {},
   actions: []
-};
+}

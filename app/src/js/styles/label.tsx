@@ -1,8 +1,8 @@
-import grey from '@material-ui/core/colors/grey';
-import createStyles from '@material-ui/core/styles/createStyles';
-import { Theme, withStyles } from '@material-ui/core';
-import Button from '@material-ui/core/Button/Button';
-import { blue } from '@material-ui/core/colors';
+import { Theme, withStyles } from '@material-ui/core'
+import Button from '@material-ui/core/Button/Button'
+import { blue } from '@material-ui/core/colors'
+import grey from '@material-ui/core/colors/grey'
+import createStyles from '@material-ui/core/styles/createStyles'
 
 export const categoryStyle = (theme: Theme) => createStyles({
   root: {
@@ -27,7 +27,7 @@ export const categoryStyle = (theme: Theme) => createStyles({
     'margin': '-10px'
   },
   checked: {}
-});
+})
 
 export const switchStyle = () => ({
   root: {
@@ -48,7 +48,7 @@ export const switchStyle = () => ({
   },
   colorBar: {},
   colorChecked: {}
-});
+})
 
 export const StyledButton = withStyles({
   root: {
@@ -71,7 +71,7 @@ export const StyledButton = withStyles({
     fontSize: 10,
     fontWeight: 500
   }
-})(Button);
+})(Button)
 
 export const toggleButtonStyle = () => ({
   root: {
@@ -85,7 +85,7 @@ export const toggleButtonStyle = () => ({
   label: {
     fontSize: '11px'
   }
-});
+})
 
 export const listButtonStyle = () => ({
   root: {
@@ -105,7 +105,7 @@ export const listButtonStyle = () => ({
   primary: {
     fontSize: '15px'
   }
-});
+})
 
 export const imageViewStyle = () => createStyles({
   canvas: {
@@ -124,4 +124,4 @@ export const imageViewStyle = () => createStyles({
     position: 'absolute',
     outline: 'none', width: '100%', background: '#222222'
   }
-});
+})

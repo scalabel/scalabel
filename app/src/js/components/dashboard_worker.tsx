@@ -1,34 +1,33 @@
-import React from 'react';
-import theme from '../styles/theme';
-import classNames from 'classnames';
-import Paper from '@material-ui/core/Paper';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import {withStyles} from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import {MuiThemeProvider} from '@material-ui/core/styles';
-import {getProjects, logout, toProject} from '../common/service';
+import AppBar from '@material-ui/core/AppBar'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import IconButton from '@material-ui/core/IconButton'
+import Paper from '@material-ui/core/Paper'
+import { MuiThemeProvider, withStyles } from '@material-ui/core/styles'
+// icons
+import SvgIcon from '@material-ui/core/SvgIcon'
+// table
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
+import classNames from 'classnames'
+import React from 'react'
+import { getProjects, logout, toProject } from '../common/service'
 import {
   dashboardStyles,
   tableCellStyles,
   tableStyles
-} from '../styles/dashboard';
-// icons
-import SvgIcon from '@material-ui/core/SvgIcon';
-// table
-import Table from '@material-ui/core/Table';
-import TableRow from '@material-ui/core/TableRow';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
+} from '../styles/dashboard'
+import theme from '../styles/theme'
 
 /* Retrieve data from backend */
-const projectsToExpress = getProjects();
+const projectsToExpress = getProjects()
 
 /* Theme for dashboard, set main color as grey */
-const myTheme = theme({ palette: { primary: {main: '#616161'} }});
+const myTheme = theme({ palette: { primary: { main: '#616161' } } })
 
 /**
  * This is Dashboard component that displays
@@ -36,13 +35,13 @@ const myTheme = theme({ palette: { primary: {main: '#616161'} }});
  * @param {object} props
  * @return component
  */
-function Dashboard(props: any) {
-    const {classes} = props;
+function Dashboard (props: any) {
+  const { classes } = props
     /**
      * render function
      * @return component
      */
-    return (
+  return (
       <div className={classes.root}>
         <CssBaseline />
           <AppBar
@@ -82,9 +81,9 @@ function Dashboard(props: any) {
           </Typography>
         </main>
       </div>
-    );
-  }
-const DashboardTableCell = withStyles(tableCellStyles)(TableCell);
+  )
+}
+const DashboardTableCell = withStyles(tableCellStyles)(TableCell)
 
 /**
  * This is projectTable component that displays
@@ -92,10 +91,10 @@ const DashboardTableCell = withStyles(tableCellStyles)(TableCell);
  * @param {object} props
  * @return component
  */
-const ProjectTable = function(props: {
+const ProjectTable = (props: {
   /** styles of Project Table */
-  classes: any; }) {
-  const {classes} = props;
+  classes: any; }) => {
+  const { classes } = props
   return (
     <Paper className={classes.root}>
       <Table className={classes.table}>
@@ -110,8 +109,8 @@ const ProjectTable = function(props: {
           {projectsToExpress.map((row: any, i: any) => (
             <TableRow className={classes.row} key={i}>
               <DashboardTableCell onClick={() => {
-                toProject(row);
-                }} component='th' scope='row'>
+                toProject(row)
+              }} component='th' scope='row'>
                 {row}
               </DashboardTableCell>
             </TableRow>
@@ -119,9 +118,9 @@ const ProjectTable = function(props: {
         </TableBody>
       </Table>
     </Paper>
-  );
-};
-const DashboardTable = withStyles(tableStyles)(ProjectTable);
+  )
+}
+const DashboardTable = withStyles(tableStyles)(ProjectTable)
 
 /** export Dashboard */
-export default withStyles(dashboardStyles)(Dashboard);
+export default withStyles(dashboardStyles)(Dashboard)

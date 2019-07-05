@@ -3,188 +3,188 @@
 // no need if the two are always called together
 import {
   ItemType,
-  ViewerConfigType,
   LabelType,
-  Vector3Type, ShapeType
-} from '../functional/types';
+  ShapeType,
+  Vector3Type, ViewerConfigType
+} from '../functional/types'
 
-export const INIT_SESSION = 'INIT_SESSION';
-export const NEW_ITEM = 'NEW_ITEM'; // no delete item
-export const GO_TO_ITEM = 'GO_TO_ITEM';
-export const LOAD_ITEM = 'LOAD_ITEM';
-export const UPDATE_ALL = 'UPDATE_ALL';
+export const INIT_SESSION = 'INIT_SESSION'
+export const NEW_ITEM = 'NEW_ITEM' // no delete item
+export const GO_TO_ITEM = 'GO_TO_ITEM'
+export const LOAD_ITEM = 'LOAD_ITEM'
+export const UPDATE_ALL = 'UPDATE_ALL'
 
-export const IMAGE_ZOOM = 'IMAGE_ZOOM';
+export const IMAGE_ZOOM = 'IMAGE_ZOOM'
 
 // Item Level
-export const ADD_LABEL = 'ADD_LABEL';
-export const CHANGE_LABEL_SHAPE = 'CHANGE_LABEL_SHAPE';
-export const CHANGE_LABEL_PROPS = 'CHANGE_LABEL_PROPS';
-export const DELETE_LABEL = 'DELETE_LABEL';
+export const ADD_LABEL = 'ADD_LABEL'
+export const CHANGE_LABEL_SHAPE = 'CHANGE_LABEL_SHAPE'
+export const CHANGE_LABEL_PROPS = 'CHANGE_LABEL_PROPS'
+export const DELETE_LABEL = 'DELETE_LABEL'
 // Image specific actions
-export const TAG_IMAGE = 'TAG_IMAGE';
+export const TAG_IMAGE = 'TAG_IMAGE'
 
 // Label Level
-export const CHANGE_ATTRIBUTE = 'CHANGE_ATTRIBUTE';
-export const CHANGE_CATEGORY = 'CHANGE_CATEGORY';
+export const CHANGE_ATTRIBUTE = 'CHANGE_ATTRIBUTE'
+export const CHANGE_CATEGORY = 'CHANGE_CATEGORY'
 
 // View Level
-export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW';
+export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW'
 
 // Box2D specific
-export const NEW_IMAGE_BOX2D_LABEL = 'NEW_IMAGE_BOX2D_LABEL';
-export const CHANGE_RECT = 'CHANGE_RECT';
+export const NEW_IMAGE_BOX2D_LABEL = 'NEW_IMAGE_BOX2D_LABEL'
+export const CHANGE_RECT = 'CHANGE_RECT'
 
 // Point Cloud Specific
-export const MOVE_CAMERA = 'MOVE_CAMERA';
-export const MOVE_CAMERA_AND_TARGET = 'MOVE_CAMERA_AND_TARGET';
+export const MOVE_CAMERA = 'MOVE_CAMERA'
+export const MOVE_CAMERA_AND_TARGET = 'MOVE_CAMERA_AND_TARGET'
 
 export interface InitSessionAction {
   /** Type of the action */
-  type: typeof INIT_SESSION;
+  type: typeof INIT_SESSION
 }
 
 export interface NewItemAction {
   /** Type of the action */
-  type: typeof NEW_ITEM;
+  type: typeof NEW_ITEM
   /** Function of createItem */
-  createItem: (itemId: number, url: string) => ItemType;
+  createItem: (itemId: number, url: string) => ItemType
   /** The url */
-  url: string;
+  url: string
 }
 
 export interface GoToItemAction {
   /** Type of the action */
-  type: typeof GO_TO_ITEM;
+  type: typeof GO_TO_ITEM
   /** Index of the item to go to */
-  index: number;
+  index: number
 }
 
 export interface LoadItemAction {
   /** Type of the action */
-  type: typeof LOAD_ITEM;
+  type: typeof LOAD_ITEM
   /** Index of the item to load */
-  index: number;
+  index: number
   /** Configurations */
-  config: ViewerConfigType;
+  config: ViewerConfigType
 }
 
 export interface UpdateAllAction {
   /** Type of the action */
-  type: typeof UPDATE_ALL;
+  type: typeof UPDATE_ALL
 }
 
 export interface ImageZoomAction {
   /** Type of the action */
-  type: typeof IMAGE_ZOOM;
+  type: typeof IMAGE_ZOOM
   /** Zoom ratio */
-  ratio: number;
+  ratio: number
   /** View Offset X */
-  viewOffsetX: number;
+  viewOffsetX: number
   /** View Offset Y */
-  viewOffsetY: number;
+  viewOffsetY: number
 }
 
 export interface AddLabelAction {
   /** Type of the action */
-  type: typeof ADD_LABEL;
+  type: typeof ADD_LABEL
   /** label to add */
-  label: LabelType;
+  label: LabelType
   /** Shapes of the label */
-  shapes: ShapeType[];
+  shapes: ShapeType[]
 }
 
 export interface ChangeLabelShapeAction {
   /** Type of the action */
-  type: typeof CHANGE_LABEL_SHAPE;
+  type: typeof CHANGE_LABEL_SHAPE
   /** Shape ID */
-  shapeId: number;
+  shapeId: number
   /** properties to update for the shape */
-  props: object;
+  props: object
 }
 
 export interface ChangeLabelPropsAction {
   /** Type of the action */
-  type: typeof CHANGE_LABEL_PROPS;
+  type: typeof CHANGE_LABEL_PROPS
   /** Label ID */
-  labelId: number;
+  labelId: number
   /** properties to update for the shape */
-  props: object;
+  props: object
 }
 
 export interface DeleteLabelAction {
   /** Type of the action */
-  type: typeof DELETE_LABEL;
+  type: typeof DELETE_LABEL
   /** ID of label to be deleted */
-  labelId: number;
+  labelId: number
 }
 
 export interface TagImageAction {
   /** Type of the action */
-  type: typeof TAG_IMAGE;
+  type: typeof TAG_IMAGE
   /** ID of the corresponding item */
-  itemId: number;
+  itemId: number
   /** Index of the attribute */
-  attributeIndex: number;
+  attributeIndex: number
   /** Index of the selected attribute */
-  selectedIndex: number[];
+  selectedIndex: number[]
 }
 
 export interface ChangeAttributeAction {
   /** Type of the action */
-  type: typeof CHANGE_ATTRIBUTE;
+  type: typeof CHANGE_ATTRIBUTE
   /** ID of the label */
-  labelId: number;
+  labelId: number
   /** Attribute options */
-  attributeOptions: any;
+  attributeOptions: object
 }
 
 export interface ChangeCategoryAction {
   /** Type of the action */
-  type: typeof CHANGE_CATEGORY;
+  type: typeof CHANGE_CATEGORY
   /** ID of the label */
-  labelId: number;
+  labelId: number
   /** Category options */
-  categoryOptions: any;
+  categoryOptions: object
 }
 
 export interface ToggleAssistantViewAction {
   /** Type of the action */
-  type: typeof TOGGLE_ASSISTANT_VIEW;
+  type: typeof TOGGLE_ASSISTANT_VIEW
 }
 
 export interface NewImageBox2dLabelAction {
   /** Type of the action */
-  type: typeof NEW_IMAGE_BOX2D_LABEL;
+  type: typeof NEW_IMAGE_BOX2D_LABEL
   /** Item of the corresponding item */
-  itemId: number;
+  itemId: number
   /** Optional attributes */
-  optionalAttributes: any;
+  optionalAttributes: object
 }
 
 export interface ChangeRectAction {
   /** Type of the action */
-  type: typeof CHANGE_RECT;
+  type: typeof CHANGE_RECT
   /** ID of the shape */
-  shapeId: number;
+  shapeId: number
   /** Target box attributes */
-  targetBoxAttributes: any;
+  targetBoxAttributes: object
 }
 
 export interface MoveCameraAction {
   /** Type of the action */
-  type: typeof MOVE_CAMERA;
+  type: typeof MOVE_CAMERA
   /** New position */
-  newPosition: Vector3Type;
+  newPosition: Vector3Type
 }
 
 export interface MoveCameraAndTargetAction {
   /** Type of the action */
-  type: typeof MOVE_CAMERA_AND_TARGET;
+  type: typeof MOVE_CAMERA_AND_TARGET
   /** New position */
-  newPosition: Vector3Type;
+  newPosition: Vector3Type
   /** New target */
-  newTarget: Vector3Type;
+  newTarget: Vector3Type
 }
 
 export type ActionTypes =
@@ -204,4 +204,4 @@ export type ActionTypes =
     | ToggleAssistantViewAction
     | ChangeRectAction
     | MoveCameraAction
-    | MoveCameraAndTargetAction;
+    | MoveCameraAndTargetAction

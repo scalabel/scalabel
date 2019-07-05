@@ -1,49 +1,48 @@
-import React from 'react';
-import theme from '../styles/theme';
-import classNames from 'classnames';
-import Paper from '@material-ui/core/Paper';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import {withStyles} from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import {MuiThemeProvider} from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import Divider from '@material-ui/core/Divider'
+import Drawer from '@material-ui/core/Drawer'
+import IconButton from '@material-ui/core/IconButton'
+// lists
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemText from '@material-ui/core/ListItemText'
+import Paper from '@material-ui/core/Paper'
+import { MuiThemeProvider, withStyles } from '@material-ui/core/styles'
+// icons
+import SvgIcon from '@material-ui/core/SvgIcon'
+// table
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
+import CreateIcon from '@material-ui/icons/Create'
+import classNames from 'classnames'
+import React from 'react'
 import {
     getProjects,
     getUsers,
     goCreate,
     logout,
     toProject
-} from '../common/service';
+} from '../common/service'
 import {
     dashboardStyles,
     tableCellStyles,
     tableStyles
-} from '../styles/dashboard';
-// lists
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-// icons
-import SvgIcon from '@material-ui/core/SvgIcon';
-import CreateIcon from '@material-ui/icons/Create';
-// table
-import Table from '@material-ui/core/Table';
-import TableRow from '@material-ui/core/TableRow';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
+} from '../styles/dashboard'
+import theme from '../styles/theme'
 
 /* Retrieve data from backend */
-const usersToExpress = getUsers();
-const projectsToExpress = getProjects();
+const usersToExpress = getUsers()
+const projectsToExpress = getProjects()
 
 /* Theme for dashboard, set main color as grey */
-const myTheme = theme({ palette: { primary: {main: '#616161'} }});
+const myTheme = theme({ palette: { primary: { main: '#616161' } } })
 
 /* Sidebar: mainList */
 export const mainListItems = (
@@ -55,7 +54,7 @@ export const mainListItems = (
       <ListItemText primary='Create new project' />
     </ListItem>
   </div>
-);
+)
 
 /**
  * This is Dashboard component that displays
@@ -63,10 +62,10 @@ export const mainListItems = (
  * @param {Object} props
  * @return component
  */
-function Dashboard(props: {
+function Dashboard (props: {
   /** styles of Dashboard */
   classes: any; }) {
-  const {classes} = props;
+  const { classes } = props
     /**
      * render function
      * @return component
@@ -101,7 +100,7 @@ function Dashboard(props: {
         <Drawer
             variant='permanent'
             classes={{
-                paper: classNames(classes.drawerPaper)
+              paper: classNames(classes.drawerPaper)
             }}
         >
             <div className={classes.toolbarIcon}/>
@@ -125,10 +124,10 @@ function Dashboard(props: {
                 <WorkersTableDisplay classes = {tableStyles}/>
             </Typography>
         </main>
-    </div>);
+    </div>)
 }
 
-const DashboardTableCell = withStyles(tableCellStyles)(TableCell);
+const DashboardTableCell = withStyles(tableCellStyles)(TableCell)
 
 /**
  * This is projectTable component that displays
@@ -136,10 +135,10 @@ const DashboardTableCell = withStyles(tableCellStyles)(TableCell);
  * @param {object} Props
  * @return component
  */
-const ProjectTable = function(Props: {
+const ProjectTable = (Props: {
   /** styles of ProjectTable */
-  classes: any; }) {
-  const {classes} = Props;
+  classes: any; }) => {
+  const { classes } = Props
   return (
     <Paper className={classes.root}>
       <Table className={classes.table}>
@@ -154,8 +153,8 @@ const ProjectTable = function(Props: {
           {projectsToExpress.map((row, i) => (
             <TableRow className={classes.row} key={i}>
               <DashboardTableCell className={'align'} onClick={() => {
-                toProject(row);
-                }} component='th' scope='row'>
+                toProject(row)
+              }} component='th' scope='row'>
                 {row}
               </DashboardTableCell>
             </TableRow>
@@ -163,10 +162,10 @@ const ProjectTable = function(Props: {
         </TableBody>
       </Table>
     </Paper>
-  );
-};
+  )
+}
 
-const ProjectTableDisplay = withStyles(tableStyles)(ProjectTable);
+const ProjectTableDisplay = withStyles(tableStyles)(ProjectTable)
 
 /**
  * This is WorkersTable component that displays
@@ -174,10 +173,10 @@ const ProjectTableDisplay = withStyles(tableStyles)(ProjectTable);
  * @param props
  * @return component
  */
-const WorkersTable = function(props: {
+const WorkersTable = (props: {
   /** styles of ProjectTable */
-  classes: any; }) {
-  const {classes} = props;
+  classes: any; }) => {
+  const { classes } = props
   return (
     <Paper className={classes.root}>
       <Table className={classes.table}>
@@ -199,10 +198,10 @@ const WorkersTable = function(props: {
         </TableBody>
       </Table>
     </Paper>
-  );
-};
+  )
+}
 
-const WorkersTableDisplay = withStyles(tableStyles)(WorkersTable);
+const WorkersTableDisplay = withStyles(tableStyles)(WorkersTable)
 
 /** export Dashboard */
-export default withStyles(dashboardStyles)(Dashboard);
+export default withStyles(dashboardStyles)(Dashboard)

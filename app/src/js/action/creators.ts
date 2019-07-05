@@ -1,5 +1,5 @@
-import * as types from './types';
-import { ItemType, LabelType, ShapeType } from '../functional/types';
+import { ItemType, LabelType, ShapeType } from '../functional/types'
+import * as types from './types'
 
 /**
  * Create Item from url with provided creator
@@ -7,13 +7,13 @@ import { ItemType, LabelType, ShapeType } from '../functional/types';
  * @param {string} url
  * @return {Object}
  */
-export function newItem(createItem: (itemId: number, url: string) => ItemType,
-                        url: string) {
+export function newItem (createItem: (itemId: number, url: string) => ItemType,
+                         url: string) {
   return {
     type: types.NEW_ITEM,
     createItem,
     url
-  };
+  }
 }
 
 /**
@@ -21,11 +21,11 @@ export function newItem(createItem: (itemId: number, url: string) => ItemType,
  * @param {number} index
  * @return {Object}
  */
-export function goToItem(index: number) {
+export function goToItem (index: number) {
   return {
     type: types.GO_TO_ITEM,
     index
-  };
+  }
 }
 
 /**
@@ -34,9 +34,9 @@ export function goToItem(index: number) {
  * @param {ShapeType[]} shapes
  * @return {AddLabelAction}
  */
-export function addLabel(
+export function addLabel (
   label: LabelType, shapes: ShapeType[]): types.AddLabelAction {
-  return { type: types.ADD_LABEL, label, shapes };
+  return { type: types.ADD_LABEL, label, shapes }
 }
 
 /**
@@ -45,9 +45,9 @@ export function addLabel(
  * @param {{}}props
  * @return {ChangeLabelShapeAction}
  */
-export function changeLabelShape(
+export function changeLabelShape (
   shapeId: number, props: {}): types.ChangeLabelShapeAction {
-  return { type: types.CHANGE_LABEL_SHAPE, shapeId, props };
+  return { type: types.CHANGE_LABEL_SHAPE, shapeId, props }
 }
 
 /**
@@ -56,9 +56,9 @@ export function changeLabelShape(
  * @param {{}}props
  * @return {ChangeLabelPropsAction}
  */
-export function changeLabelProps(
+export function changeLabelProps (
   labelId: number, props: {}): types.ChangeLabelPropsAction {
-  return { type: types.CHANGE_LABEL_PROPS, labelId, props };
+  return { type: types.CHANGE_LABEL_PROPS, labelId, props }
 }
 
 /**
@@ -67,11 +67,11 @@ export function changeLabelProps(
  * @param {number} labelId
  * @return {DeleteLabelAction}
  */
-export function deleteLabel(labelId: number): types.DeleteLabelAction {
+export function deleteLabel (labelId: number): types.DeleteLabelAction {
   return {
     type: types.DELETE_LABEL,
     labelId
-  };
+  }
 }
 
 /**
@@ -81,14 +81,14 @@ export function deleteLabel(labelId: number): types.DeleteLabelAction {
  * @param {Array<number>} selectedIndex
  * @return {Object}
  */
-export function tagImage(itemId: number,
-                         attributeIndex: number, selectedIndex: number[]) {
+export function tagImage (itemId: number,
+                          attributeIndex: number, selectedIndex: number[]) {
   return {
     type: types.TAG_IMAGE,
     itemId,
     attributeIndex,
     selectedIndex
-  };
+  }
 }
 
 /**
@@ -97,12 +97,12 @@ export function tagImage(itemId: number,
  * @param {Object} attributeOptions
  * @return {Object}
  */
-export function changeAttribute(labelId: number, attributeOptions: object) {
+export function changeAttribute (labelId: number, attributeOptions: object) {
   return {
     type: types.CHANGE_ATTRIBUTE,
     labelId,
     attributeOptions
-  };
+  }
 }
 
 /**
@@ -111,10 +111,10 @@ export function changeAttribute(labelId: number, attributeOptions: object) {
  * @param {Object} categoryOptions
  * @return {Object}
  */
-export function changeCategory(labelId: number, categoryOptions: object) {
+export function changeCategory (labelId: number, categoryOptions: object) {
   return {
     type: types.CHANGE_CATEGORY,
     labelId,
     categoryOptions
-  };
+  }
 }

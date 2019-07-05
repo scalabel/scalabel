@@ -1,8 +1,8 @@
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import { SwitchBtn } from '../components/toolbar_switch';
-import { genButton } from '../components/general_button';
-import { ListButton } from '../components/toolbar_list_button';
-import React from 'react';
+import ListItem from '@material-ui/core/ListItem/ListItem'
+import React from 'react'
+import { genButton } from '../components/general_button'
+import { ListButton } from '../components/toolbar_list_button'
+import { SwitchBtn } from '../components/toolbar_switch'
 
 /**
  * This is renderTemplate function that renders the category.
@@ -11,18 +11,18 @@ import React from 'react';
  * @param {Object} name
  * @param {Object} values
  */
-export function renderTemplate(toolType: any, handleToggle: any,
-                               name: any, values: any) {
+export function renderTemplate (toolType: any, handleToggle: any,
+                                name: any, values: any) {
   if (toolType === 'switch') {
     return (
       <SwitchBtn onChange={handleToggle} value={name} />
-    );
+    )
   } else if (toolType === 'list') {
     return (
       <ListItem style={{ textAlign: 'center' }} >
         <ListButton name={name} values={values} />
       </ListItem>
-    );
+    )
   }
 }
 
@@ -31,7 +31,7 @@ export function renderTemplate(toolType: any, handleToggle: any,
  * @param {Object} itemType
  * @param {Object} labelType
  */
-export function renderButtons(itemType: any, labelType: any) {
+export function renderButtons (itemType: any, labelType: any) {
   if (itemType === 'video') {
     return (
       <div>
@@ -42,7 +42,7 @@ export function renderButtons(itemType: any, labelType: any) {
           {genButton({ name: 'Track-Link' })}
         </div>
       </div>
-    );
+    )
   }
   if (labelType === 'box2d') {
     // do nothing
@@ -58,7 +58,7 @@ export function renderButtons(itemType: any, labelType: any) {
               {genButton({ name: 'Quick-draw' })}
             </div>
           </div>
-        );
+        )
       }
     } else if (labelType === 'lane') {
       // do nothing

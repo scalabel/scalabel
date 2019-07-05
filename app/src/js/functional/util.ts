@@ -1,4 +1,4 @@
-import * as fp from 'lodash/fp';
+import * as fp from 'lodash/fp'
 
 // TODO: need a deep merge? i.e. to update below:
 // state.items[itemIndex].attributes[attributeId].selectedIndex
@@ -10,8 +10,8 @@ import * as fp from 'lodash/fp';
  * @param {{}} newFields
  * @return {{}}
  */
-export function updateObject<T>(object: T, newFields: Partial<T>): T {
-  return {...object, ...newFields};
+export function updateObject<T> (object: T, newFields: Partial<T>): T {
+  return { ...object, ...newFields }
 }
 
 /**
@@ -21,11 +21,11 @@ export function updateObject<T>(object: T, newFields: Partial<T>): T {
  * @param {any} item
  * @return {Array}
  */
-export function updateListItem<T>(
+export function updateListItem<T> (
     array: T[], index: number, item: T): T[] {
-  array = array.slice();
-  array[index] = item;
-  return array;
+  array = array.slice()
+  array[index] = item
+  return array
 }
 
 /**
@@ -36,13 +36,13 @@ export function updateListItem<T>(
  * @param {Array} items
  * @return {Array}
  */
-export function updateListItems<T>(
+export function updateListItems<T> (
   array: T[], indices: number[], items: T[]): T[] {
-  array = array.slice();
+  array = array.slice()
   for (let i = 0; i < indices.length; i++) {
-    array[indices[i]] = items[i];
+    array[indices[i]] = items[i]
   }
-  return array;
+  return array
 }
 
 /**
@@ -51,8 +51,8 @@ export function updateListItems<T>(
  * @param {any} item
  * @return {Array}
  */
-export function addListItem<T>(items: T[], item: T): T[] {
-  return items.concat([item]);
+export function addListItem<T> (items: T[], item: T): T[] {
+  return items.concat([item])
 }
 
 /**
@@ -61,17 +61,17 @@ export function addListItem<T>(items: T[], item: T): T[] {
  * @param {any[]} fields
  * @return {T}
  */
-export function removeObjectFields<T>(object: T, fields: any[]): T {
-  object = {...object};
+export function removeObjectFields<T> (object: T, fields: any[]): T {
+  object = { ...object }
   for (const f of fields) {
-    delete (object as any)[f];
+    delete (object as any)[f]
   }
-  return object;
+  return object
 }
 
 interface IdSingle {
   /** ID */
-  id: number;
+  id: number
 }
 
 /**
@@ -80,10 +80,10 @@ interface IdSingle {
  * @param {number[]} ids
  * @return {T[]}
  */
-export function removeListItemsById(items: IdSingle[],
-                                    ids: number[]): IdSingle[] {
+export function removeListItemsById (items: IdSingle[],
+                                     ids: number[]): IdSingle[] {
   return fp.remove(
-      (item: IdSingle) => fp.indexOf(item.id, ids) >= 0)(items);
+      (item: IdSingle) => fp.indexOf(item.id, ids) >= 0)(items)
 }
 
 /**
@@ -92,6 +92,6 @@ export function removeListItemsById(items: IdSingle[],
  * @param {T[]} a
  * @return {T[]}
  */
-export function removeListItems<T>(items: T[], a: T[]): T[] {
-  return fp.remove((item) => fp.indexOf(item, a) >= 0, items);
+export function removeListItems<T> (items: T[], a: T[]): T[] {
+  return fp.remove((item) => fp.indexOf(item, a) >= 0, items)
 }

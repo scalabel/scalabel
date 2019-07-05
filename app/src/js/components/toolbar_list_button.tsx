@@ -1,20 +1,20 @@
-import React from 'react';
-import { Validator } from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import { toggleButtonStyle, listButtonStyle } from '../styles/label';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import ListItem from '@material-ui/core/ListItem';
-import List from '@material-ui/core/List';
-import { ListItemText } from '@material-ui/core';
+import { ListItemText } from '@material-ui/core'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import { withStyles } from '@material-ui/core/styles'
+import ToggleButton from '@material-ui/lab/ToggleButton'
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
+import { Validator } from 'prop-types'
+import React from 'react'
+import { listButtonStyle, toggleButtonStyle } from '../styles/label'
 
 interface Props {
   /** styles of ToggleButtons */
-  classes: any;
+  classes: any
   /** name of ToggleButtons */
-  name: any;
+  name: any
   /** values of ToggleButtons */
-  values: string[];
+  values: string[]
 }
 
 /**
@@ -23,23 +23,23 @@ interface Props {
  * @param {object} props
  */
 class ToggleButtons extends React.Component<Props> {
-  /** state of ToggleButtons */
-  public state = {
-    alignment: this.props.values[0]
-  };
-  /** handleAlignment of ToggleButtons that align buttons */
-  public handleAlignment =
-    (_event: any, alignment: any) => this.setState({ alignment });
   /** propTypes of ToggleButtons */
   public static propTypes: {
     /** type of classes */
     classes: Validator<NonNullable<object>>
-  };
+  }
+  /** state of ToggleButtons */
+  public state = {
+    alignment: this.props.values[0]
+  }
+  /** handleAlignment of ToggleButtons that align buttons */
+  public handleAlignment =
+    (_event: any, alignment: any) => this.setState({ alignment })
   /** render function of ToggleButtons */
-  public render() {
-    const { name, classes, values } = this.props;
-    const { alignment } = this.state;
-    const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton);
+  public render () {
+    const { name, classes, values } = this.props
+    const { alignment } = this.state
+    const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton)
 
     return (
       <List style={{ width: '100%' }}>
@@ -67,8 +67,8 @@ class ToggleButtons extends React.Component<Props> {
           </div>
         </ListItem>
       </List>
-    );
+    )
   }
 }
 
-export const ListButton = withStyles(listButtonStyle)(ToggleButtons);
+export const ListButton = withStyles(listButtonStyle)(ToggleButtons)

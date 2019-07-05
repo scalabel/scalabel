@@ -1,65 +1,65 @@
-import * as React from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import SplitPane from 'react-split-pane';
-import Session from '../common/session';
+import CssBaseline from '@material-ui/core/CssBaseline'
+import * as React from 'react'
+import SplitPane from 'react-split-pane'
+import Session from '../common/session'
 
 interface Props {
   /** The title bar */
-  titleBar: any;
+  titleBar: any
   /** The top part of the left side bar */
-  leftSidebar1: any;
+  leftSidebar1: any
   /** The bottom part of the left side bar */
-  leftSidebar2?: any;
+  leftSidebar2?: any
   /** The main div */
-  main: any;
+  main: any
   /** The bottom bar */
-  bottomBar?: any;
+  bottomBar?: any
   /** The top part of the right side bar */
-  rightSidebar1?: any;
+  rightSidebar1?: any
   /** The bottom part of the right side bar */
-  rightSidebar2?: any;
+  rightSidebar2?: any
 }
 
 interface State {
   /** The width of the left side bar */
-  left_size: number;
+  left_size: number
   /** The height of the center side bar */
-  center_size: number;
+  center_size: number
   /** The width of the right side bar */
-  right_size: number;
+  right_size: number
 }
 
 interface LayoutState {
   /** The width of the left side bar */
-  left_size: number;
+  left_size: number
   /** The height of the center side bar */
-  center_size: number;
+  center_size: number
   /** The width of the right side bar */
-  right_size: number;
+  right_size: number
 }
 
-(window as any).__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
+(window as any).__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true
 
 /**
  * Layout of the labeling interface
  */
 class LabelLayout extends React.Component<Props, State> {
   /** The state of the layout */
-  public layoutState: LayoutState;
+  public layoutState: LayoutState
   /**
    * @param {object} props
    */
-  constructor(props: any) {
-    super(props);
-    this.layoutState = {left_size: 0, center_size: 0, right_size: 0};
-    Session.subscribe(this.onStateUpdated.bind(this));
+  constructor (props: any) {
+    super(props)
+    this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
+    Session.subscribe(this.onStateUpdated.bind(this))
   }
 
   /**
    * called on redux store update
    */
-  public onStateUpdated() {
-    this.setState(this.layoutState);
+  public onStateUpdated () {
+    this.setState(this.layoutState)
   }
 
   /**
@@ -67,16 +67,16 @@ class LabelLayout extends React.Component<Props, State> {
    * @param {number} size
    * @param {string} position
    */
-  public handleOnChange(size: number, position: string) {
-    const layoutState = this.layoutState;
+  public handleOnChange (size: number, position: string) {
+    const layoutState = this.layoutState
     if (position === 'left' && this.layoutState.left_size !== size) {
-      layoutState.left_size = size;
+      layoutState.left_size = size
     } else if (position === 'center' && this.layoutState.center_size !== size) {
-      layoutState.center_size = size;
+      layoutState.center_size = size
     } else if (position === 'right' && this.layoutState.right_size !== size) {
-      layoutState.right_size = size;
+      layoutState.right_size = size
     }
-    this.setState(layoutState);
+    this.setState(layoutState)
   }
 
   /**
@@ -95,14 +95,14 @@ class LabelLayout extends React.Component<Props, State> {
    * which size to update in layoutState
    * @return {Component}
    */
-  public optionalSplit(split: 'vertical' | 'horizontal',
-                       comp1: React.ReactFragment | undefined,
-                       comp2: React.ReactFragment | undefined,
-                       name1: string, name2: string, min: number, dflt: number,
-                       max: number, primary: 'first' | 'second' = 'first',
-                       position: string = 'center') {
+  public optionalSplit (split: 'vertical' | 'horizontal',
+                        comp1: React.ReactFragment | undefined,
+                        comp2: React.ReactFragment | undefined,
+                        name1: string, name2: string, min: number, dflt: number,
+                        max: number, primary: 'first' | 'second' = 'first',
+                        position: string = 'center') {
     if (!comp1) {
-      return;
+      return
     }
     return (
         comp2 ?
@@ -110,7 +110,7 @@ class LabelLayout extends React.Component<Props, State> {
                        defaultSize={dflt}
                        maxSize={max} primary={primary}
                        onChange={(size) => {
-                         this.handleOnChange(size, position);
+                         this.handleOnChange(size, position)
                        }}>
               <div className={name1}>
                 {comp1}
@@ -122,30 +122,30 @@ class LabelLayout extends React.Component<Props, State> {
             : <div className={name1}>
               {comp1}
             </div>
-    );
+    )
   }
 
   /**
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render () {
     const {titleBar, leftSidebar1, leftSidebar2, bottomBar,
-      main, rightSidebar1, rightSidebar2} = this.props;
-    const mainWithProps = React.cloneElement(main, {});
+      main, rightSidebar1, rightSidebar2} = this.props
+    const mainWithProps = React.cloneElement(main, {})
 
-    const leftDefaultWidth = 200;
-    const leftMaxWidth = 300;
-    const leftMinWidth = 180;
-    const rightDefaultWidth = 200;
-    const rightMaxWidth = 300;
-    const rightMinWidth = 180;
-    const topDefaultHeight = 200;
-    const topMaxHeight = 300;
-    const topMinHeight = 180;
-    const bottomDefaultHeight = 200;
-    const bottomMaxHeight = 300;
-    const bottomMinHeight = 180;
+    const leftDefaultWidth = 200
+    const leftMaxWidth = 300
+    const leftMinWidth = 180
+    const rightDefaultWidth = 200
+    const rightMaxWidth = 300
+    const rightMinWidth = 180
+    const topDefaultHeight = 200
+    const topMaxHeight = 300
+    const topMinHeight = 180
+    const bottomDefaultHeight = 200
+    const bottomMaxHeight = 300
+    const bottomMinHeight = 180
 
     return (
         <React.Fragment>
@@ -185,7 +185,7 @@ class LabelLayout extends React.Component<Props, State> {
           </main>
           {/* End footer */}
         </React.Fragment>
-    );
+    )
   }
 }
 
@@ -199,4 +199,4 @@ class LabelLayout extends React.Component<Props, State> {
 //   rightSidebar2: PropTypes.object,
 // };
 
-export default LabelLayout;
+export default LabelLayout

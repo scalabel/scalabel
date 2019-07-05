@@ -1,7 +1,7 @@
-import {LabelType, State} from './types';
-import {makeLabel} from './states';
-import {addLabel, changeLabelProps} from './common';
-import _ from 'lodash';
+import _ from 'lodash'
+import { addLabel, changeLabelProps } from './common'
+import { makeLabel } from './states'
+import { LabelType, State } from './types'
 
 /**
  * Create a Tag label
@@ -10,9 +10,9 @@ import _ from 'lodash';
  * @param {Object} optionalAttributes
  * @return {LabelType}
  */
-export function createTagLabel(labelId: number, itemId: number,
-                               optionalAttributes: any): LabelType {
-  return makeLabel({id: labelId, item: itemId, attributes: optionalAttributes});
+export function createTagLabel (labelId: number, itemId: number,
+                                optionalAttributes: any): LabelType {
+  return makeLabel({ id: labelId, item: itemId, attributes: optionalAttributes })
 }
 
 /**
@@ -22,15 +22,15 @@ export function createTagLabel(labelId: number, itemId: number,
  * @param {number} attributeValue
  * @return {State}
  */
-export function tagImage(
+export function tagImage (
     state: State, attributeIndex: number,
     attributeValue: number[]): State {
-  const attributes = {[attributeIndex]: attributeValue};
-  const item = state.items[state.current.item];
+  const attributes = { [attributeIndex]: attributeValue }
+  const item = state.items[state.current.item]
   if (_.size(item.labels) > 0) {
-    const labelId = parseInt(_.findKey(item.labels) as string, 10);
-    return changeLabelProps(state, labelId, {attributes});
+    const labelId = parseInt(_.findKey(item.labels) as string, 10)
+    return changeLabelProps(state, labelId, { attributes })
   }
-  const label = createTagLabel(0, state.current.item, attributes);
-  return addLabel(state, label, []);
+  const label = createTagLabel(0, state.current.item, attributes)
+  return addLabel(state, label, [])
 }

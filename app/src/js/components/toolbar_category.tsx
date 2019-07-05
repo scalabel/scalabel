@@ -1,29 +1,29 @@
-import * as React from 'react';
-import { categoryStyle } from '../styles/label';
-import { withStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
-import { ListItemText } from '@material-ui/core';
-import Radio from '@material-ui/core/Radio/Radio';
-import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel';
+import { ListItemText } from '@material-ui/core'
+import FormControl from '@material-ui/core/FormControl'
+import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel'
+import Radio from '@material-ui/core/Radio/Radio'
+import { withStyles } from '@material-ui/core/styles'
+import * as React from 'react'
+import { categoryStyle } from '../styles/label'
 
 interface ClassType {
   /** root of the category selector */
-  root: string;
+  root: string
   /** form control tag */
-  formControl: string;
+  formControl: string
   /** primary for ListItemText */
-  primary: string;
+  primary: string
   /** checkbox class */
-  checkbox: string;
+  checkbox: string
   /** checked selector class */
-  checked: string;
+  checked: string
 }
 
 interface Props {
   /** categories of MultipleSelect */
-  categories: string[] | null;
+  categories: string[] | null
   /** styles of MultipleSelect */
-  classes: ClassType;
+  classes: ClassType
 }
 
 /**
@@ -36,7 +36,7 @@ class MultipleSelect extends React.Component<Props> {
    */
   public state = {
     selectedValue: ''
-  };
+  }
 
   /**
    * This is the handleChange function of MultipleSelect
@@ -49,13 +49,13 @@ class MultipleSelect extends React.Component<Props> {
       value: string;
     };
   }) => {
-    this.setState({ selectedValue: event.target.value });
-  };
+    this.setState({ selectedValue: event.target.value })
+  }
 
   /**
    * Render the category in a list
    */
-  public renderCategory(categories: string[], classes: ClassType) {
+  public renderCategory (categories: string[], classes: ClassType) {
     return (
       <div>
         <FormControl className={classes.formControl}>
@@ -81,23 +81,23 @@ class MultipleSelect extends React.Component<Props> {
           </div>
         </FormControl>
       </div>
-    );
+    )
   }
 
   /**
    * MultipleSelect render function
    */
-  public render() {
-    const { categories } = this.props;
-    const { classes } = this.props;
+  public render () {
+    const { categories } = this.props
+    const { classes } = this.props
     if (!categories) {
-      return (null);
+      return (null)
     } else {
-      return this.renderCategory(categories, classes);
+      return this.renderCategory(categories, classes)
     }
   }
 }
 
 export const Category =
-  withStyles(categoryStyle, { withTheme: true })(MultipleSelect);
-export default Category;
+  withStyles(categoryStyle, { withTheme: true })(MultipleSelect)
+export default Category

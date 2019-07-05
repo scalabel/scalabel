@@ -1,18 +1,18 @@
 import {
-  LabelType, ItemType,
-  RectType, CubeType, State,
-  ConfigType, CurrentType, ImageViewerConfigType, PointCloudViewerConfigType,
-  LayoutType,
-} from './types';
+  ConfigType, CubeType,
+  CurrentType, ImageViewerConfigType, ItemType,
+  LabelType, LayoutType, PointCloudViewerConfigType, RectType,
+  State
+} from './types'
 
-import * as labels from '../common/label_types';
+import * as labels from '../common/label_types'
 
 /**
  * Initialize a label state
  * @param {{}} params
  * @return {LabelType}
  */
-export function makeLabel(params: {} = {}): LabelType {
+export function makeLabel (params: {} = {}): LabelType {
   return {
     id: -1,
     item: -1,
@@ -25,7 +25,7 @@ export function makeLabel(params: {} = {}): LabelType {
     selectedShape: -1,
     state: -1,
     ...params
-  };
+  }
 }
 
 /**
@@ -33,7 +33,7 @@ export function makeLabel(params: {} = {}): LabelType {
  * @param {{}} params
  * @return {RectType}
  */
-export function makeRect(params: {} = {}): RectType {
+export function makeRect (params: {} = {}): RectType {
   return {
     id: -1,
     label: -1,
@@ -42,7 +42,7 @@ export function makeRect(params: {} = {}): RectType {
     w: -1,
     h: -1,
     ...params
-  };
+  }
 }
 
 /**
@@ -50,41 +50,41 @@ export function makeRect(params: {} = {}): RectType {
  * @param {{}} params
  * @return {CubeType}
  */
-export function makeCube(params: {} = {}): CubeType {
+export function makeCube (params: {} = {}): CubeType {
   return {
     id: -1,
     label: -1,
-    center: {x: 0, y: 0, z: 0},
-    size: {x: 1, y: 1, z: 1},
-    orientation: {x: 0, y: 0, z: 0},
+    center: { x: 0, y: 0, z: 0 },
+    size: { x: 1, y: 1, z: 1 },
+    orientation: { x: 0, y: 0, z: 0 },
     ...params
-  };
+  }
 }
 
 /**
  * Make a new viewer config
  * @return {ImageViewerConfigType}
  */
-export function makeImageViewerConfig(): ImageViewerConfigType {
+export function makeImageViewerConfig (): ImageViewerConfigType {
   return {
     imageWidth: 0,
     imageHeight: 0,
     viewScale: 1.0,
     viewOffsetX: -1,
     viewOffsetY: -1
-  };
+  }
 }
 
 /**
  * Make a new point cloud viewer config
  * @return {PointCloudViewerConfigType}
  */
-export function makePointCloudViewerConfig(): PointCloudViewerConfigType {
+export function makePointCloudViewerConfig (): PointCloudViewerConfigType {
   return {
-    position: {x: 0.0, y: 10.0, z: 0.0},
-    target: {x: 0.0, y: 0.0, z: 0.0},
-    verticalAxis: {x: 0.0, y: 0.0, z: 1.0}
-  };
+    position: { x: 0.0, y: 10.0, z: 0.0 },
+    target: { x: 0.0, y: 0.0, z: 0.0 },
+    verticalAxis: { x: 0.0, y: 0.0, z: 1.0 }
+  }
 }
 
 /**
@@ -92,7 +92,7 @@ export function makePointCloudViewerConfig(): PointCloudViewerConfigType {
  * @param {{}} params
  * @return {ItemType}
  */
-export function makeItem(params: any = {}): ItemType {
+export function makeItem (params: any = {}): ItemType {
   return {
     id: -1,
     index: 0,
@@ -103,7 +103,7 @@ export function makeItem(params: any = {}): ItemType {
     shapes: {},
     viewerConfig: null,
     ...params
-  };
+  }
 }
 
 /**
@@ -111,7 +111,7 @@ export function makeItem(params: any = {}): ItemType {
  * @param {{}} params
  * @return {ConfigType}
  */
-export function makeSatConfig(params: {} = {}): ConfigType {
+export function makeSatConfig (params: {} = {}): ConfigType {
   return {
     assignmentId: '', // id
     projectName: '',
@@ -129,7 +129,7 @@ export function makeSatConfig(params: {} = {}): ConfigType {
     workerId: '',
     startTime: 0,
     ...params
-  };
+  }
 }
 
 /**
@@ -137,14 +137,14 @@ export function makeSatConfig(params: {} = {}): ConfigType {
  * @param {{}} params
  * @return {CurrentType}
  */
-export function makeSatCurrent(params: {} = {}): CurrentType {
+export function makeSatCurrent (params: {} = {}): CurrentType {
   return {
     item: -1,
     label: -1,
     shape: -1,
     maxObjectId: -1,
     ...params
-  };
+  }
 }
 
 /**
@@ -152,13 +152,13 @@ export function makeSatCurrent(params: {} = {}): CurrentType {
  * @param {{}} params
  * @return {LayoutType}
  */
-export function makeLayout(params: {} = {}): LayoutType {
+export function makeLayout (params: {} = {}): LayoutType {
   return {
     toolbarWidth: 200,
     assistantView: false,
     assistantViewRatio: 0.3,
     ...params
-  };
+  }
 }
 
 /**
@@ -166,7 +166,7 @@ export function makeLayout(params: {} = {}): LayoutType {
  * @param {{}} params
  * @return {State}
  */
-export function makeState(params: {} = {}): State {
+export function makeState (params: {} = {}): State {
   return {
     config: makeSatConfig(),
     current: makeSatCurrent(),
@@ -174,5 +174,5 @@ export function makeState(params: {} = {}): State {
     tracks: {},
     layout: makeLayout(),
     ...params
-  };
+  }
 }

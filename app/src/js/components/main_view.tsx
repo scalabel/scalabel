@@ -1,8 +1,8 @@
-import React from 'react';
+import React from 'react'
 
 interface Props {
   /** Views */
-  views: any[];
+  views: any[]
 }
 
 /**
@@ -10,44 +10,44 @@ interface Props {
  */
 class MainView extends React.Component<Props> {
   /** The container */
-  private divRef?: any;
+  private divRef?: any
 
   /**
    * Constructor
    * @param {Object} props: react props
    */
-  constructor(props: any) {
-    super(props);
+  constructor (props: any) {
+    super(props)
   }
 
   /**
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
-    let rectDiv: any;
+  public render () {
+    let rectDiv: any
     if (this.divRef) {
-      rectDiv = this.divRef.getBoundingClientRect();
+      rectDiv = this.divRef.getBoundingClientRect()
     }
 
-    const {views} = this.props;
-    let viewsWithProps = views;
+    const { views } = this.props
+    let viewsWithProps = views
     if (rectDiv) {
       viewsWithProps = React.Children.map(views, (view) => {
-          if (rectDiv) {
-            return React.cloneElement(view,
-                {height: rectDiv.height, width: rectDiv.width});
-          } else {
-            return React.cloneElement(view, {});
-          }
+        if (rectDiv) {
+          return React.cloneElement(view,
+            { height: rectDiv.height, width: rectDiv.width })
+        } else {
+          return React.cloneElement(view, {})
         }
-      );
+      }
+      )
     }
 
     return (
         <div ref={(element) => {
           if (element) {
-            this.divRef = element;
+            this.divRef = element
           }
         }}
              style={{
@@ -56,8 +56,8 @@ class MainView extends React.Component<Props> {
              }}>
           {viewsWithProps}
         </div>
-    );
+    )
   }
 }
 
-export default MainView;
+export default MainView

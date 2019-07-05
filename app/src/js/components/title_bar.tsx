@@ -1,13 +1,13 @@
-import React from 'react';
-import { Component } from './component';
-import { AppBar, Toolbar, IconButton, Tooltip } from '@material-ui/core';
-import * as fa from '@fortawesome/free-solid-svg-icons/index';
-import { withStyles } from '@material-ui/core/styles/index';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import createStyles from '@material-ui/core/styles/createStyles';
-import * as types from '../action/types';
-import Session from '../common/session';
-import * as _ from 'lodash';
+import * as fa from '@fortawesome/free-solid-svg-icons/index'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'
+import createStyles from '@material-ui/core/styles/createStyles'
+import { withStyles } from '@material-ui/core/styles/index'
+import * as _ from 'lodash'
+import React from 'react'
+import * as types from '../action/types'
+import Session from '../common/session'
+import { Component } from './component'
 
 const styles: any = (theme: any) => createStyles({
   appBar: {
@@ -22,47 +22,47 @@ const styles: any = (theme: any) => createStyles({
     color: '#bbbbbb',
     margin: theme.spacing.unit * 0.5
   }
-});
+})
 
 interface Props {
   /** Styles of TitleBar */
-  classes: any;
+  classes: any
   /** Theme of TitleBar */
-  theme: any;
+  theme: any
   /** title of TitleBar */
-  title: string;
+  title: string
   /** dashboardLink of TittleBar */
-  dashboardLink: string;
+  dashboardLink: string
   /** instructionLink of TittleBar */
-  instructionLink: string;
+  instructionLink: string
 }
 
 /**
  * Go to the next Item
  */
-function goToNextItem() {
-  const index = Session.getState().current.item;
+function goToNextItem () {
+  const index = Session.getState().current.item
   Session.dispatch({
     type: types.GO_TO_ITEM,
     index: index + 1
-  });
+  })
 }
 
 /**
  * Go to the previous Item
  */
-function goToPreviousItem() {
-  const index = Session.getState().current.item;
+function goToPreviousItem () {
+  const index = Session.getState().current.item
   Session.dispatch({
     type: types.GO_TO_ITEM,
     index: index - 1
-  });
+  })
 }
 
 /**
  * Save the current state to the server
  */
-function save() {
+function save () {
   // const state = Session.getState();
   // const xhr = new XMLHttpRequest();
   // xhr.open('POST', './postSaveV2');
@@ -72,7 +72,7 @@ function save() {
 /**
  * turn assistant view on/off
  */
-function toggleAssistantView() {
+function toggleAssistantView () {
   // Session.dispatch({type: types.TOGGLE_ASSISTANT_VIEW});
 }
 
@@ -84,11 +84,11 @@ class TitleBar extends Component<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
-    const { classes } = this.props;
-    const { title } = this.props;
-    const { instructionLink } = this.props;
-    const { dashboardLink } = this.props;
+  public render () {
+    const { classes } = this.props
+    const { title } = this.props
+    const { instructionLink } = this.props
+    const { dashboardLink } = this.props
     const buttonInfo = [
       {
         title: 'Previous Image', onClick: goToPreviousItem,
@@ -104,11 +104,11 @@ class TitleBar extends Component<Props> {
       },
       { title: 'Save', onClick: save, icon: fa.faSave },
       { title: 'Submit', onClick: save, icon: fa.faCheck }
-    ];
+    ]
     const buttons = buttonInfo.map((b) => {
-      const onClick = _.get(b, 'onClick', undefined);
-      const href = _.get(b, 'href', '#');
-      const target = ('href' in b ? 'view_window' : '_self');
+      const onClick = _.get(b, 'onClick', undefined)
+      const href = _.get(b, 'href', '#')
+      const target = ('href' in b ? 'view_window' : '_self')
       return (
         <Tooltip title={b.title}>
           <IconButton className={classes.titleUnit} onClick={onClick}
@@ -116,8 +116,8 @@ class TitleBar extends Component<Props> {
             <FontAwesomeIcon icon={b.icon} size='xs' />
           </IconButton>
         </Tooltip>
-      );
-    });
+      )
+    })
     return (<AppBar position='static' className={classes.appBar}>
       <Toolbar variant='dense'>
         {title}
@@ -125,8 +125,8 @@ class TitleBar extends Component<Props> {
         {buttons}
       </Toolbar>
     </AppBar>
-    );
+    )
   }
 }
 
-export default withStyles(styles, { withTheme: true })(TitleBar);
+export default withStyles(styles, { withTheme: true })(TitleBar)

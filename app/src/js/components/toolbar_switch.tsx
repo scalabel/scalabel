@@ -1,20 +1,20 @@
-import React from 'react';
-import { ListItem, ListItemText } from '@material-ui/core';
-import { switchStyle } from '../styles/label';
-import Switch from '@material-ui/core/Switch';
-import { withStyles } from '@material-ui/core/styles';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import { ListItem, ListItemText } from '@material-ui/core'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import { withStyles } from '@material-ui/core/styles'
+import Switch from '@material-ui/core/Switch'
+import React from 'react'
+import { switchStyle } from '../styles/label'
 
 /**
  * Interface used for props.
  */
 interface Props {
   /** onChange function */
-  onChange: any;
+  onChange: any
   /** values passed to onChange function . */
-  value: any;
+  value: any
   /** styles of SwitchButton. */
-  classes: any;
+  classes: any
 }
 
 /**
@@ -26,8 +26,8 @@ class SwitchButton extends React.Component<Props> {
   /**
    * SwitchButton render function
    */
-  public render() {
-    const { onChange, value, classes } = this.props;
+  public render () {
+    const { onChange, value, classes } = this.props
 
     // @ts-ignore
     return (
@@ -45,8 +45,8 @@ class SwitchButton extends React.Component<Props> {
           />
         </ListItemSecondaryAction>
       </ListItem>
-    );
+    )
   }
 }
 
-export const SwitchBtn = withStyles(switchStyle)(SwitchButton);
+export const SwitchBtn = withStyles(switchStyle)(SwitchButton)
