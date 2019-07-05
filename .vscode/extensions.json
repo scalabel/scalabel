@@ -1,0 +1,24 @@
+{
+    "recommendations": [
+        "ban.spellright",
+        "christian-kohler.npm-intellisense",
+        "DavidAnson.vscode-markdownlint",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "eg2.vscode-npm-script",
+        "esbenp.prettier-vscode",
+        "formulahendry.auto-close-tag",
+        "formulahendry.auto-rename-tag",
+        "HookyQR.beautify",
+        "isudox.vscode-jetbrains-keybindings",
+        "krizzdewizz.goto-last-edit-location",
+        "mgmcdermott.vscode-language-babel",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "ms-vscode.Go",
+        "ms-vscode.vscode-typescript-tslint-plugin",
+        "wayou.vscode-todo-highlight",
+        "Zignd.html-css-class-completion"
+    ]
+}
