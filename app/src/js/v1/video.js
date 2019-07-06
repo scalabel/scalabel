@@ -84,6 +84,9 @@ SatVideo.prototype.fromJson = function(json) {
   self.tracks = [];
   // load tracks from json
   for (let i = 0; json.tracks && i < json.tracks.length; i++) {
+    if (json.tracks[i].childrenIds === null) {
+      continue;
+    }
     let track = new Track(self, json.tracks[i].id,
         json.tracks[i].attributes);
     track.children = [];
