@@ -26,5 +26,5 @@ RUN bash scripts/install_go_packages.sh
 
 COPY . .
 RUN ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production; \
-    rm app/dist/tsconfig.tsbuildinfo
+    rm -f app/dist/tsconfig.tsbuildinfo
 RUN go build -i -o bin/scalabel ./server/http
