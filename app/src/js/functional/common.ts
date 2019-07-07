@@ -202,7 +202,7 @@ export function deleteLabel (state: State, labelId: number): State {
  * @return {State}
  */
 export function changeAttribute (state: State, _labelId: number,
-                                 _attributeOptions: any): State {
+                                 _attributeOptions: object): State {
   return state
 }
 

@@ -7,11 +7,11 @@ import { LabelType, State } from './types'
  * Create a Tag label
  * @param {number} labelId
  * @param {number} itemId
- * @param {Object} optionalAttributes
+ * @param {object} optionalAttributes
  * @return {LabelType}
  */
 export function createTagLabel (labelId: number, itemId: number,
-                                optionalAttributes: any): LabelType {
+                                optionalAttributes: object): LabelType {
   return makeLabel({ id: labelId, item: itemId, attributes: optionalAttributes })
 }
 

@@ -6,13 +6,14 @@ import { SwitchBtn } from '../components/toolbar_switch'
 
 /**
  * This is renderTemplate function that renders the category.
- * @param {Object} toolType
- * @param {Object} handleToggle
- * @param {Object} name
- * @param {Object} values
+ * @param {string} toolType
+ * @param {function} handleToggle
+ * @param {string} name
+ * @param {string[]} values
  */
-export function renderTemplate (toolType: any, handleToggle: any,
-                                name: any, values: any) {
+export function renderTemplate (
+  toolType: string, handleToggle: (switchName: string) => () => void,
+  name: string, values: string[]) {
   if (toolType === 'switch') {
     return (
       <SwitchBtn onChange={handleToggle} value={name} />
@@ -28,10 +29,10 @@ export function renderTemplate (toolType: any, handleToggle: any,
 
 /**
  * This is renderButtons function that renders the buttons in the toolbar.
- * @param {Object} itemType
- * @param {Object} labelType
+ * @param {string} itemType
+ * @param {string} labelType
  */
-export function renderButtons (itemType: any, labelType: any) {
+export function renderButtons (itemType: string, labelType: string) {
   if (itemType === 'video') {
     return (
       <div>

@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 import React from 'react'
 
 interface Props {

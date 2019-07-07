@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 import Divider from '@material-ui/core/Divider'
 import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
@@ -61,7 +63,7 @@ export class ToolBar extends React.Component<Props> {
    * This function updates the checked list of switch buttons.
    * @param {string} switchName
    */
-  private readonly handleToggle = (switchName: any) => () => {
+  private readonly handleToggle = (switchName: string) => () => {
     // @ts-ignore
     const { checked } = this.state
     const currentIndex = checked.indexOf(switchName)

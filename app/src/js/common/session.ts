@@ -1,3 +1,6 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
+
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
@@ -68,9 +71,9 @@ class Session {
 
   /**
    * Wrapper for redux store dispatch
-   * @param {any} action: action description
+   * @param {types.ActionType} action: action description
    */
-  public dispatch (action: any): void {
+  public dispatch (action: types.ActionType): void {
     this.store.dispatch(action)
   }
 

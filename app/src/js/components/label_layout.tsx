@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 import CssBaseline from '@material-ui/core/CssBaseline'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'

@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 import createStyles from '@material-ui/core/styles/createStyles'
 
 /* dashboardStyles */

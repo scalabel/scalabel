@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 /**
  * This function post request to backend to retrieve requried data to display
  * @param {string} url

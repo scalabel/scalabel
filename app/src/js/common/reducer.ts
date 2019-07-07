@@ -14,7 +14,7 @@ import { State } from '../functional/types'
  */
 export function reducer (
     currentState: State = makeState(),
-    action: types.ActionTypes): State {
+    action: types.ActionType): State {
   // Appending actions to action array
   // const newActions = currentState.actions.slice();
   // newActions.push(action);

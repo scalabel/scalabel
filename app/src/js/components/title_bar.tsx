@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 import * as fa from '@fortawesome/free-solid-svg-icons/index'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'

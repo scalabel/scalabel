@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 import { createStore } from 'redux'
 import undoable, { includeAction } from 'redux-undo'
 import { makeState } from '../functional/states'

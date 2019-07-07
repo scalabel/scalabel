@@ -18,7 +18,7 @@ export function updateObject<T> (object: T, newFields: Partial<T>): T {
  * This should be used to update the immutable array
  * @param {Array} array
  * @param {number} index
- * @param {any} item
+ * @param {T} item
  * @return {Array}
  */
 export function updateListItem<T> (
@@ -48,7 +48,7 @@ export function updateListItems<T> (
 /**
  * Add an item to an array
  * @param {Array} items
- * @param {any} item
+ * @param {T} item
  * @return {Array}
  */
 export function addListItem<T> (items: T[], item: T): T[] {
@@ -57,16 +57,17 @@ export function addListItem<T> (items: T[], item: T): T[] {
 
 /**
  * Remove fields from an object
- * @param {T} object
- * @param {any[]} fields
+ * @param {T} target
+ * @param {keyof T} fields
  * @return {T}
  */
-export function removeObjectFields<T> (object: T, fields: any[]): T {
-  object = { ...object }
+export function removeObjectFields<T> (
+    target: T, fields: Array<keyof T>): T {
+  target = { ...target }
   for (const f of fields) {
-    delete (object as any)[f]
+    delete target[f]
   }
-  return object
+  return target
 }
 
 interface IdSingle {

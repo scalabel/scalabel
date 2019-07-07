@@ -19,9 +19,9 @@ export function newItem (createItem: (itemId: number, url: string) => ItemType,
 /**
  * Go to item at index
  * @param {number} index
- * @return {Object}
+ * @return {types.GoToItemAction}
  */
-export function goToItem (index: number) {
+export function goToItem (index: number): types.GoToItemAction {
   return {
     type: types.GO_TO_ITEM,
     index

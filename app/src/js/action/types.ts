@@ -187,7 +187,7 @@ export interface MoveCameraAndTargetAction {
   newTarget: Vector3Type
 }
 
-export type ActionTypes =
+export type ActionType =
     InitSessionAction
     | NewItemAction
     | GoToItemAction

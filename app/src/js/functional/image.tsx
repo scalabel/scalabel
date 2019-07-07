@@ -35,15 +35,16 @@ export function zoomImage (state: State, ratio: number,
 
 /**
  * decode image item from json
- * @param {Object} json
+ * @param {ItemType} json
  * @return {ItemType}
  */
-export function fromJson (json: any): ItemType {
+// TODO: check correctness...
+export function fromJson (json: ItemType): ItemType {
   return makeItem({
     id: json.index,
     index: json.index,
     url: json.url,
-    attributes: json.attributes,
+    // attributes: json.attributes,
     labels: json.labels
   })
 }

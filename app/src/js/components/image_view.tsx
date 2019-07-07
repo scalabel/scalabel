@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+// TODO: remove the disable tag
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import EventListener, { withOptions } from 'react-event-listener'
