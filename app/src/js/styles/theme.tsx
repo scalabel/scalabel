@@ -6,6 +6,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
     /** palette of Theme */
     palette: Palette
   }
+
   interface ThemeOptions {
     /** palette of ThemeOptions */
     palette?: PaletteOptions
@@ -21,7 +22,14 @@ export default function createMyTheme (_options: ThemeOptions) {
     palette: {
       primary: {
         main: '#616161'
+      },
+      secondary: {
+        main: '#cde6df',
+        light: '#e5fafc',
+        dark: '#dc004e'
       }
     }
   })
 }
+
+export const myTheme = createMyTheme({})

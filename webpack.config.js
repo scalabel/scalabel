@@ -6,7 +6,7 @@ const webpack = require('webpack');
 let config = {
   devtool: '',
   entry: {
-    create: __dirname + '/app/src/js/v1/create.js',
+    create: __dirname + '/app/src/js/entries/create.tsx',
     image: __dirname + '/app/src/js/v1/image.index.js',
     image_v2: __dirname + '/app/src/js/entries/image.index.js',
     worker: __dirname + '/app/src/js/entries/worker.tsx',

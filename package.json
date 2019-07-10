@@ -11,7 +11,7 @@
   },
   "jest": {
     "globals": {
-      "ts-jest": {}
+      "ts-jest": {"tsConfig": "tsconfig.test.json"}
     },
     "roots": [
       "app/src/js/test"

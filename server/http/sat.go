@@ -413,7 +413,7 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// retrieve the link to instructions from form
 	instructions := r.FormValue("instructions")
 
-	demoMode := r.FormValue("demo_mode") == "on"
+	demoMode := r.FormValue("demo_mode") == "true"
 
 	// This prefix determines which handler will deal with labeling sessions
 	//   for this project. Uniquely determined by item type and label type.
