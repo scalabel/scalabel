@@ -5,6 +5,7 @@ import { AddLabelAction } from './types'
 
 /**
  * Create AddLabelAction to create a box2d label
+ * @param {number} itemIndex
  * @param {number[]} category: list of category ids
  * @param {number} x
  * @param {number} y
@@ -13,10 +14,10 @@ import { AddLabelAction } from './types'
  * @return {AddLabelAction}
  */
 export function addBox2dLabel (
-  category: number[],
+  itemIndex: number, category: number[],
   x: number, y: number, w: number, h: number): AddLabelAction {
   // create the rect object
   const rect = makeRect({ x, y, w, h })
   const label = makeLabel({ type: labels.BOX_2D, category })
-  return actions.addLabel(label, [rect])
+  return actions.addLabel(itemIndex, label, [rect])
 }

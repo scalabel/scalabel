@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as THREE from 'three'
 import * as types from '../action/types'
 import Session from '../common/session'
-import { PointCloudViewerConfigType } from '../functional/types'
+import { PointCloudViewerConfigType, State } from '../functional/types'
 import { Canvas3d } from './canvas3d'
 
 const styles = () => createStyles({
@@ -183,6 +183,13 @@ class PointCloudView extends Canvas3d<Props> {
       }
     }
     return true
+  }
+
+  /**
+   * notify state is updated
+   */
+  protected updateState (_state: State): void {
+    return
   }
 
   /**

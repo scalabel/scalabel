@@ -36,21 +36,23 @@ export function initSession (state: State): State {
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
  * @param {State} state: current state
+ * @param {number} itemIndex
  * @param {LabelType} label: new label to add.
  * @param {ShapeType} shapes: shapes of the label.
  * @return {State}
  */
 export function addLabel (
     state: State,
+    itemIndex: number,
     label: LabelType,
     shapes: ShapeType[] = []): State {
-  const itemIndex = state.current.item
-  const newId = state.current.maxObjectId + 1
-  const shapeIds = _.range(shapes.length).map((i) => i + newId)
+  const newShapeId = state.current.maxShapeId + 1
+  const labelId = state.current.maxLabelId + 1
+  const shapeIds = _.range(shapes.length).map((i) => i + newShapeId)
   const newShapes = shapes.map(
-      (s, i) => updateObject(s, { label: newId, id: shapeIds[i] }))
-  const labelId = newId + shapes.length
-  label = updateObject(label, {id: labelId, item: itemIndex,
+    (s, i) => updateObject(s, { label: labelId, id: shapeIds[i] }))
+  const order = state.current.maxOrder + 1
+  label = updateObject(label, {id: labelId, item: itemIndex, order,
     shapes: label.shapes.concat(shapeIds)})
   let item = state.items[itemIndex]
   const labels = updateObject(
@@ -61,7 +63,10 @@ export function addLabel (
   const items = updateListItem(state.items, itemIndex, item)
   const current = updateObject(
       state.current,
-      { maxObjectId: labelId })
+    { maxLabelId: labelId,
+      maxShapeId: shapeIds[shapeIds.length - 1],
+      maxOrder: order
+    })
   return {
     ...state,
     items,
@@ -72,13 +77,13 @@ export function addLabel (
 /**
  * Update the properties of a shape
  * @param {State} state
+ * @param {number} itemIndex
  * @param {number} shapeId
  * @param {object} props
  * @return {State}
  */
 export function changeLabelShape (
-    state: State, shapeId: number, props: object): State {
-  const itemIndex = state.current.item
+  state: State, itemIndex: number, shapeId: number, props: object): State {
   let item = state.items[itemIndex]
   const shape = updateObject(item.shapes[shapeId], props)
   item = updateObject(
@@ -90,13 +95,13 @@ export function changeLabelShape (
 /**
  * Update label properties except shapes
  * @param {State} state
+ * @param {number} itemIndex
  * @param {number} labelId
  * @param {object} props
  * @return {State}
  */
 export function changeLabelProps (
-    state: State, labelId: number, props: object): State {
-  const itemIndex = state.current.item
+    state: State, itemIndex: number, labelId: number, props: object): State {
   let item = state.items[itemIndex]
   const label = updateObject(item.labels[labelId], props)
   item = updateObject(
@@ -171,11 +176,12 @@ export function loadItem (state: State, itemIndex: number,
 /**
  * Deconstruct given label
  * @param {State} state
+ * @param {number} itemIndex
  * @param {number} labelId
  * @return {State}
  */
-export function deleteLabel (state: State, labelId: number): State {
-  const itemIndex = state.current.item
+export function deleteLabel (
+    state: State, itemIndex: number, labelId: number): State {
   const item = state.items[itemIndex]
   const label = item.labels[labelId]
   const labels = removeObjectFields(item.labels, [labelId])

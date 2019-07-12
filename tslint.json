@@ -4,6 +4,10 @@
     "rules": {
         "object-literal-sort-keys": false,
         "interface-name": [true, "never-prefix"],
-        "no-any": true
+        "no-any": true,
+        "completed-docs": true,
+        "max-line-length": [true, {
+                "limit": 80,
+                "ignore-pattern": "^import"}]
     }
 }

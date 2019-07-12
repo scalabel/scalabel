@@ -30,46 +30,52 @@ export function goToItem (index: number): types.GoToItemAction {
 
 /**
  * Add label to the item
+ * @param {number} itemIndex
  * @param {LabelType} label
  * @param {ShapeType[]} shapes
  * @return {AddLabelAction}
  */
 export function addLabel (
-  label: LabelType, shapes: ShapeType[]): types.AddLabelAction {
-  return { type: types.ADD_LABEL, label, shapes }
+  itemIndex: number, label: LabelType,
+  shapes: ShapeType[]): types.AddLabelAction {
+  return { type: types.ADD_LABEL, itemIndex, label, shapes }
 }
 
 /**
  * Change the shape of the label
+ * @param {number} itemIndex
  * @param {number} shapeId
  * @param {{}}props
  * @return {ChangeLabelShapeAction}
  */
 export function changeLabelShape (
-  shapeId: number, props: {}): types.ChangeLabelShapeAction {
-  return { type: types.CHANGE_LABEL_SHAPE, shapeId, props }
+  itemIndex: number, shapeId: number, props: {}): types.ChangeLabelShapeAction {
+  return { type: types.CHANGE_LABEL_SHAPE, itemIndex, shapeId, props }
 }
 
 /**
  * Change the properties of the label
+ * @param {number} itemIndex
  * @param {number} labelId
  * @param {{}}props
  * @return {ChangeLabelPropsAction}
  */
 export function changeLabelProps (
-  labelId: number, props: {}): types.ChangeLabelPropsAction {
-  return { type: types.CHANGE_LABEL_PROPS, labelId, props }
+  itemIndex: number, labelId: number, props: {}): types.ChangeLabelPropsAction {
+  return { type: types.CHANGE_LABEL_PROPS, itemIndex, labelId, props }
 }
 
 /**
  * Delete given label
- * @param {number} itemId
+ * @param {number} itemIndex
  * @param {number} labelId
  * @return {DeleteLabelAction}
  */
-export function deleteLabel (labelId: number): types.DeleteLabelAction {
+export function deleteLabel (
+    itemIndex: number, labelId: number): types.DeleteLabelAction {
   return {
     type: types.DELETE_LABEL,
+    itemIndex,
     labelId
   }
 }

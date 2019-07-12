@@ -36,13 +36,16 @@ export function reducer (
       return image.zoomImage(state, action.ratio,
           action.viewOffsetX, action.viewOffsetY)
     case types.ADD_LABEL:
-      return common.addLabel(state, action.label, action.shapes)
+      return common.addLabel(
+        state, action.itemIndex, action.label, action.shapes)
     case types.CHANGE_LABEL_SHAPE:
-      return common.changeLabelShape(state, action.shapeId, action.props)
+      return common.changeLabelShape(
+        state, action.itemIndex, action.shapeId, action.props)
     case types.CHANGE_LABEL_PROPS:
-      return common.changeLabelProps(state, action.labelId, action.props)
+      return common.changeLabelProps(
+        state, action.itemIndex, action.labelId, action.props)
     case types.DELETE_LABEL:
-      return common.deleteLabel(state, action.labelId)
+      return common.deleteLabel(state, action.itemIndex, action.labelId)
     case types.TAG_IMAGE:
       return tag.tagImage(state, action.attributeIndex, action.selectedIndex)
     case types.CHANGE_ATTRIBUTE:

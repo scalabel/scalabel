@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -13,6 +12,8 @@ import (
 	"path"
 	"reflect"
 	"strconv"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 //Sat state
@@ -113,7 +114,7 @@ type SatConfig struct {
 	AssignmentId    string      `json:"assignmentId" yaml:"assignmentId"`
 	ProjectName     string      `json:"projectName" yaml:"projectName"`
 	ItemType        string      `json:"itemType" yaml:"itemType"`
-	LabelType       string      `json:"labelType" yaml:"labelType"`
+	LabelTypes      []string    `json:"labelTypes" yaml:"labelTypes"`
 	TaskSize        int         `json:"taskSize" yaml:"taskSize"`
 	HandlerUrl      string      `json:"handlerUrl" yaml:"handlerUrl"`
 	PageTitle       string      `json:"pageTitle" yaml:"pageTitle"`
@@ -304,7 +305,7 @@ func assignmentToSat(assignment *Assignment) Sat {
 		AssignmentId:    assignment.Id,
 		ProjectName:     projectOptions.Name,
 		ItemType:        projectOptions.ItemType,
-		LabelType:       projectOptions.LabelType,
+		LabelTypes:      []string{projectOptions.LabelType},
 		TaskSize:        projectOptions.TaskSize,
 		HandlerUrl:      projectOptions.HandlerUrl,
 		PageTitle:       projectOptions.PageTitle,

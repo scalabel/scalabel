@@ -111,7 +111,9 @@ export const testJson = {
   'current': {
     'item': -1,
     'label': -1,
-    'maxObjectId': -1,
+    'maxLabelId': -1,
+    'maxShapeId': -1,
+    'maxOrder': -1,
   },
   'items': [
     {

@@ -59,7 +59,9 @@ export default class UploadButton extends React.Component<Props, State> {
     const { classes } = this.props
     return (
       <div className={classes.root}>
-        <label id={this.props.form_id + '_label'} htmlFor={this.props.form_id + '-grid'}> {this.props.label}
+        <label id={this.props.form_id + '_label'}
+         htmlFor={this.props.form_id + '-grid'}>
+         {this.props.label}
         </label>
         <Grid
           container

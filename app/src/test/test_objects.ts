@@ -3,7 +3,7 @@ export const testJson = {
     assignmentId: 'e6015077-aad9-4e60-a5ed-dbccf931a049',
     projectName: 'Redux0',
     itemType: 'image',
-    labelType: 'tag',
+    labelTypes: ['box2d', 'tag'],
     taskSize: 5,
     handlerUrl: 'label2dv2',
     pageTitle: 'Image Tagging Labeling Tool',
@@ -106,7 +106,10 @@ export const testJson = {
   current: {
     item: -1,
     label: -1,
-    maxObjectId: -1
+    labelType: 0,
+    maxLabelId: -1,
+    maxShapeId: -1,
+    maxOrder: -1
   },
   items: [
     {

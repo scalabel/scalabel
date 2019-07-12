@@ -8,7 +8,7 @@ import {makeImageViewerConfig} from '../functional/states';
 /* :: import {BaseController} from '../controllers/base_controller'; */
 /* :: import {BaseViewer} from '../viewers/base_viewer'; */
 
-import {configureStore, configureFastStore} from './configure_store';
+import {configureStore} from './configure_store';
 
 /**
  * Singleton session class
@@ -28,7 +28,7 @@ class Session {
    */
   constructor() {
     this.store = {};
-    this.fastStore = configureFastStore();
+    this.fastStore = {};
     this.images = [];
     this.controllers = [];
     this.viewers = [];

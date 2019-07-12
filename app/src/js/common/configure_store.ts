@@ -52,11 +52,3 @@ export function configureStore (
 
   return store
 }
-
-/**
- * Create fast and partial store for interactive mode
- * @return {Object}
- */
-export function configureFastStore (): any {
-  return createStore(reducer, makeState())
-}

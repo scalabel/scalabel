@@ -43,7 +43,7 @@ export class Window extends React.Component {
             categories={state.config.categories}
             attributes={state.config.attributes}
             itemType={state.config.itemType}
-            labelType={state.config.labelType}
+            labelType={state.config.labelTypes[0]}
         />
     )
 

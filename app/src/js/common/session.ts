@@ -15,7 +15,7 @@ import {
   State
 } from '../functional/types'
 import { PLYLoader } from '../thirdparty/PLYLoader'
-import { configureFastStore, configureStore } from './configure_store'
+import { configureStore } from './configure_store'
 
 /**
  * Singleton session class
@@ -23,16 +23,12 @@ import { configureFastStore, configureStore } from './configure_store'
 class Session {
   /** The store to save states */
   public store: any
-  /** The store to save fast states */
-  public fastStore: any // This store contains the temporary state
   /** Images of the session */
   public images: HTMLImageElement[]
   /** Point cloud */
   public pointClouds: THREE.Points[]
   /** Item type: image, point cloud */
   public itemType: string
-  /** Label type: bounding box, segmentation */
-  public labelType: string
   /** The window component */
   public window?: Window
   /** Dev mode */
@@ -43,11 +39,9 @@ class Session {
    */
   constructor () {
     this.store = {}
-    this.fastStore = configureFastStore()
     this.images = []
     this.pointClouds = []
     this.itemType = ''
-    this.labelType = ''
     // TODO: make it configurable in the url
     this.devMode = true
     this.setListeners()
@@ -59,14 +53,6 @@ class Session {
    */
   public getState (): State {
     return this.store.getState().present
-  }
-
-  /**
-   * Get the current temporary state. It is for animation rendering.
-   * @return {State}
-   */
-  public getFastState (): State {
-    return this.fastStore.getState()
   }
 
   /**
@@ -83,7 +69,6 @@ class Session {
    */
   public subscribe (callback: () => void) {
     this.store.subscribe(callback)
-    this.fastStore.subscribe(callback)
   }
 
   /**
@@ -96,7 +81,6 @@ class Session {
     (window as any).store = this.store
     const state = this.getState()
     this.itemType = state.config.itemType
-    this.labelType = state.config.labelType
   }
 
   /**

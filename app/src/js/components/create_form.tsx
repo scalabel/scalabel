@@ -88,13 +88,15 @@ export default class CreateForm extends React.Component<Props, State> {
                         name='project_name'
                         value={this.state.projectName}
                         onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                                this.setState({ projectName: event.target.value })}
+                                this.setState(
+                                  { projectName: event.target.value })}
                         label='Project Name'
                         inputProps={{
                           'pattern': '[A-Za-z0-9_-]*',
                           'data-testid': 'project-name'
                         }}
-                        helperText='Only letters, numbers, dashes, and underscores are permitted.'
+                        helperText={'Only letters, numbers, dashes, and ' +
+                                    'underscores are permitted.'}
                         className={classes.fullWidthText}
                         margin='normal'
                 /> </FormGroup>
@@ -140,7 +142,9 @@ export default class CreateForm extends React.Component<Props, State> {
                         }}
                 >
                   <option/>
-                  <option value='tag' data-testid='image-tagging'>Image Tagging</option>
+                  <option value='tag' data-testid='image-tagging'>
+                    Image Tagging
+                  </option>
                   <option value='box2d'>2D Bounding Box</option>
                   <option value='segmentation'>Instance
                     Segmentation
@@ -319,11 +323,13 @@ export default class CreateForm extends React.Component<Props, State> {
       this.setState({ showCategoriesUpload: true })
     } else if (itemType === 'segmentation') {
       labelName = '2D Segmentation'
-      instructions = 'https://www.scalabel.ai/doc/instructions/segmentation.html'
+      instructions = 'https://www.scalabel.ai/doc/instructions/' +
+          'segmentation.html'
       this.setState({ showCategoriesUpload: true })
     } else if (itemType === 'lane') {
       labelName = '2D Lane'
-      instructions = 'https://www.scalabel.ai/doc/instructions/segmentation.html'
+      instructions = 'https://www.scalabel.ai/doc/instructions/' +
+      'segmentation.html'
       this.setState({ showCategoriesUpload: true })
     } else if (itemType === 'box3d') {
       labelName = '3D Bounding Box'

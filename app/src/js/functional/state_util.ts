@@ -1,5 +1,5 @@
 import { makeItem } from './states'
-import { ItemType, State, ViewerConfigType } from './types'
+import { ItemType, ShapeType, State, ViewerConfigType } from './types'
 import { updateListItem, updateObject } from './util'
 
 /**
@@ -50,4 +50,17 @@ export function setCurrentItemViewerConfig (
     state: State, config: ViewerConfigType): State {
   return setCurrentItem(
       state, updateObject(getCurrentItem(state), { viewerConfig: config }))
+}
+
+/**
+ * Get shape from the state
+ * @param state
+ * @param itemIndex
+ * @param labelId
+ * @param shapeIndex
+ */
+export function getShape (state: State, itemIndex: number,
+                          labelId: number, shapeIndex: number): ShapeType {
+  return state.items[itemIndex].shapes[
+    state.items[itemIndex].labels[labelId].shapes[shapeIndex]]
 }

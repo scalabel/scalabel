@@ -1,3 +1,4 @@
+import * as labels from '../common/label_types'
 import {
   ConfigType, CubeType,
   CurrentType, ImageViewerConfigType, ItemType,
@@ -5,14 +6,12 @@ import {
   State
 } from './types'
 
-import * as labels from '../common/label_types'
-
 /**
  * Initialize a label state
  * @param {{}} params
  * @return {LabelType}
  */
-export function makeLabel (params: {} = {}): LabelType {
+export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return {
     id: -1,
     item: -1,
@@ -24,6 +23,7 @@ export function makeLabel (params: {} = {}): LabelType {
     shapes: [],
     selectedShape: -1,
     state: -1,
+    order: 0,
     ...params
   }
 }
@@ -33,7 +33,7 @@ export function makeLabel (params: {} = {}): LabelType {
  * @param {{}} params
  * @return {RectType}
  */
-export function makeRect (params: {} = {}): RectType {
+export function makeRect (params: Partial<RectType> = {}): RectType {
   return {
     id: -1,
     label: -1,
@@ -111,12 +111,12 @@ export function makeItem (params: {} = {}): ItemType {
  * @param {{}} params
  * @return {ConfigType}
  */
-export function makeSatConfig (params: {} = {}): ConfigType {
+export function makeSatConfig (params: Partial<ConfigType> = {}): ConfigType {
   return {
     assignmentId: '', // id
     projectName: '',
     itemType: '',
-    labelType: '',
+    labelTypes: [],
     taskSize: 0,
     handlerUrl: '',
     pageTitle: '',
@@ -137,12 +137,17 @@ export function makeSatConfig (params: {} = {}): ConfigType {
  * @param {{}} params
  * @return {CurrentType}
  */
-export function makeSatCurrent (params: {} = {}): CurrentType {
+export function makeSatCurrent (
+    params: Partial<CurrentType> = {}): CurrentType {
   return {
     item: -1,
     label: -1,
     shape: -1,
-    maxObjectId: -1,
+    category: 0,
+    labelType:  0,
+    maxLabelId: -1,
+    maxShapeId: -1,
+    maxOrder: -1,
     ...params
   }
 }
@@ -166,8 +171,10 @@ export function makeLayout (params: {} = {}): LayoutType {
  * @param {{}} params
  * @return {State}
  */
-export function makeState (params: {} = {}): State {
-  return {
+export function makeState (params: Partial<State> = {}): State {
+  params.config = makeSatConfig(params.config)
+  params.current = makeSatCurrent(params.current)
+  const state = {
     config: makeSatConfig(),
     current: makeSatCurrent(),
     items: [], // Map from item index to item, ordered
@@ -175,4 +182,5 @@ export function makeState (params: {} = {}): State {
     layout: makeLayout(),
     ...params
   }
+  return state
 }

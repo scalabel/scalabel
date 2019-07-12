@@ -88,6 +88,8 @@ export interface ImageZoomAction {
 export interface AddLabelAction {
   /** Type of the action */
   type: typeof ADD_LABEL
+  /** item of the added label */
+  itemIndex: number
   /** label to add */
   label: LabelType
   /** Shapes of the label */
@@ -97,6 +99,8 @@ export interface AddLabelAction {
 export interface ChangeLabelShapeAction {
   /** Type of the action */
   type: typeof CHANGE_LABEL_SHAPE
+  /** item of the shape */
+  itemIndex: number
   /** Shape ID */
   shapeId: number
   /** properties to update for the shape */
@@ -106,6 +110,8 @@ export interface ChangeLabelShapeAction {
 export interface ChangeLabelPropsAction {
   /** Type of the action */
   type: typeof CHANGE_LABEL_PROPS
+  /** item of the label */
+  itemIndex: number
   /** Label ID */
   labelId: number
   /** properties to update for the shape */
@@ -115,6 +121,8 @@ export interface ChangeLabelPropsAction {
 export interface DeleteLabelAction {
   /** Type of the action */
   type: typeof DELETE_LABEL
+  /** item of the label */
+  itemIndex: number
   /** ID of label to be deleted */
   labelId: number
 }

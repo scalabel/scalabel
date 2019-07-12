@@ -19,6 +19,8 @@ export interface LabelType {
   selectedShape: number
   /** State */
   state: number
+  /** order of the label among all the labels */
+  order: number
 }
 
 export interface Track {
@@ -36,9 +38,9 @@ export interface ShapeType {
 }
 
 export interface RectType extends ShapeType {
-  /** The x-coordinate */
+  /** The x-coordinate of upper left corner */
   x: number
-  /** The y-coordinate */
+  /** The y-coordinate of upper left corner */
   y: number
   /** Width */
   w: number
@@ -120,8 +122,8 @@ export interface ConfigType {
   projectName: string
   /** Item type */
   itemType: string
-  /** Label type */
-  labelType: string
+  /** Label types available for the session */
+  labelTypes: string[]
   /** Task size */
   taskSize: number
   /** Handler URL */
@@ -165,8 +167,16 @@ export interface CurrentType {
   label: number
   /** Currently selected shape ID */
   shape: number
-  /** Max object ID */
-  maxObjectId: number
+  /** selected category */
+  category: number
+  /** selected label type */
+  labelType: number
+  /** Max label ID */
+  maxLabelId: number
+  /** Max shape ID */
+  maxShapeId: number
+  /** max order number */
+  maxOrder: number
 }
 
 export interface State {

@@ -108,10 +108,20 @@ export const listButtonStyle = () => ({
 })
 
 export const imageViewStyle = () => createStyles({
-  canvas: {
-    position: 'absolute'
+  image_canvas: {
+    'position': 'absolute',
+    'z-index': 0
   },
-  mask: {
+  label_canvas: {
+    'position': 'absolute',
+    'z-index': 1
+  },
+  control_canvas: {
+    'position': 'absolute',
+    'visibility': 'hidden',
+    'z-index': 2
+  },
+  display: {
     display: 'block',
     height: 'calc(100% - 20px)',
     top: '10px', left: '10px',

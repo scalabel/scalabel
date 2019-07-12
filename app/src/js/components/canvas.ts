@@ -1,3 +1,4 @@
+import { State } from '../functional/types'
 import { Component } from './component'
 
 /**
@@ -16,6 +17,7 @@ export abstract class Canvas<Props> extends Component<Props> {
    * Execute when component state is updated
    */
   public componentDidUpdate () {
+    this.updateState(this.state.session)
     this.redraw()
   }
 
@@ -24,5 +26,10 @@ export abstract class Canvas<Props> extends Component<Props> {
    * It should always fetch the current state from this.state
    * instead of Session
    */
-  protected abstract redraw (): boolean
+  public abstract redraw (): boolean
+
+  /**
+   * notify state is updated
+   */
+  protected abstract updateState (state: State): void
 }
