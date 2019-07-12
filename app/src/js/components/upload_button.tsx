@@ -33,6 +33,9 @@ interface Props {
 
   /** UploadButton classes */
   classes: ClassType
+
+  /** add json to accepted file types */
+  with_json?: boolean
 }
 
 interface State {
@@ -85,7 +88,8 @@ export default class UploadButton extends React.Component<Props, State> {
                 border: '0'
               }}
               onChange={(event) => this.handleFileChange(event)}
-              accept='.yml, .yaml' />
+              accept={this.props.with_json ?
+                      '.json, .yml, .yaml' : '.yml, .yaml'} />
             <label htmlFor={this.props.form_id}>
               <Button
                 variant='contained'

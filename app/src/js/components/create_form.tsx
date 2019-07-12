@@ -52,6 +52,8 @@ interface State {
   hasSubmitted: boolean
   /** whether to show the categories upload button */
   showCategoriesUpload: boolean
+  /** whether to show task size */
+  showTaskSize: boolean
 }
 
 /**
@@ -71,7 +73,8 @@ export default class CreateForm extends React.Component<Props, State> {
       showAdvancedOptions: false,
       demoMode: false,
       hasSubmitted: false,
-      showCategoriesUpload: true
+      showCategoriesUpload: true,
+      showTaskSize: true
     }
   }
 
@@ -89,14 +92,14 @@ export default class CreateForm extends React.Component<Props, State> {
                         value={this.state.projectName}
                         onChange={(event: ChangeEvent<HTMLInputElement>) =>
                                 this.setState(
-                                  { projectName: event.target.value })}
+                                        { projectName: event.target.value })}
                         label='Project Name'
                         inputProps={{
                           'pattern': '[A-Za-z0-9_-]*',
                           'data-testid': 'project-name'
                         }}
                         helperText={'Only letters, numbers, dashes, and ' +
-                                    'underscores are permitted.'}
+                        'underscores are permitted.'}
                         className={classes.fullWidthText}
                         margin='normal'
                 /> </FormGroup>
@@ -106,8 +109,9 @@ export default class CreateForm extends React.Component<Props, State> {
                         select
                         name='item_type'
                         label='Item Type'
-                        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                                this.setState({ itemType: event.target.value })}
+                        onChange={
+                          this.handleItemTypeChange
+                        }
                         required
                         inputProps={{
                           'data-testid': 'item-type'
@@ -169,8 +173,9 @@ export default class CreateForm extends React.Component<Props, State> {
                 /> </FormGroup>
               <FormGroup row={true} className={classes.formGroup}>
                 <StyledUpload required={true}
-                              label={'Item Type*'}
+                              label={'Item List*'}
                               form_id={'item_file'}
+                              with_json
                 />
                 {this.state.showCategoriesUpload ?
                         <StyledUpload required={true}
@@ -183,13 +188,19 @@ export default class CreateForm extends React.Component<Props, State> {
               </FormGroup>
               <FormGroup row={true} className={classes.formGroup}>
                 <TextField
-                        required
+                        required={this.state.showTaskSize}
                         type='number'
                         name='task_size'
                         label='Tasksize'
-                        className={classes.halfWidthText}
-                        InputProps={{ inputProps: { min: 1 } }}
+                        className={this.state.showTaskSize ?
+                                classes.halfWidthText : classes.hidden}
+                        InputProps={{
+                          inputProps: {
+                            min: 1
+                          }
+                        }}
                         margin='normal'
+                        data-testid= 'tasksize'
                 />
               </FormGroup>
               <FormGroup row={true} className={classes.formGroup}>
@@ -324,12 +335,12 @@ export default class CreateForm extends React.Component<Props, State> {
     } else if (itemType === 'segmentation') {
       labelName = '2D Segmentation'
       instructions = 'https://www.scalabel.ai/doc/instructions/' +
-          'segmentation.html'
+              'segmentation.html'
       this.setState({ showCategoriesUpload: true })
     } else if (itemType === 'lane') {
       labelName = '2D Lane'
       instructions = 'https://www.scalabel.ai/doc/instructions/' +
-      'segmentation.html'
+              'segmentation.html'
       this.setState({ showCategoriesUpload: true })
     } else if (itemType === 'box3d') {
       labelName = '3D Bounding Box'
@@ -345,6 +356,18 @@ export default class CreateForm extends React.Component<Props, State> {
   private handleLabelChange = (event: ChangeEvent<HTMLSelectElement>) => {
     this.handleInstructions(event.target.value)
     this.setState({ labelType: event.target.value })
+  }
+  /**
+   * handles item type changing
+   * @param event
+   */
+  private handleItemTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    this.setState({ itemType: event.target.value })
+    if (event.target.value === 'video') {
+      this.setState({ showTaskSize: false })
+    } else {
+      this.setState({ showTaskSize: true })
+    }
   }
 }
 const StyledChecbox = withStyles(checkboxStyle)(Checkbox)

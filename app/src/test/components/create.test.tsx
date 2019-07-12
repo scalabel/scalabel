@@ -44,13 +44,13 @@ describe('Test create page functionality', () => {
       expect(instructions.value).toBeFalsy()
       fireEvent.change(select, { target: { value: 'box2d' } })
       expect(instructions.value).toBe(
-        'https://www.scalabel.ai/doc/instructions/bbox.html')
+              'https://www.scalabel.ai/doc/instructions/bbox.html')
       fireEvent.change(select, { target: { value: 'segmentation' } })
       expect(instructions.value).toBe(
-        'https://www.scalabel.ai/doc/instructions/segmentation.html')
+              'https://www.scalabel.ai/doc/instructions/segmentation.html')
       fireEvent.change(select, { target: { value: 'lane' } })
       expect(instructions.value).toBe(
-        'https://www.scalabel.ai/doc/instructions/segmentation.html')
+              'https://www.scalabel.ai/doc/instructions/segmentation.html')
       fireEvent.change(select, { target: { value: 'box3d' } })
       expect(instructions.value).toBeFalsy()
     })
@@ -69,7 +69,7 @@ describe('Test create page functionality', () => {
       expect((getByTestId('label-type') as HTMLSelectElement).value).toBe('tag')
       expect(queryByTestId('categories')).toBeNull()
     })
-    test('Hides and re-shows categories on tagging option', () => {
+    test('Hides and re-shows categories on video option', () => {
       const { getByTestId, queryByTestId } = render(
               <MuiThemeProvider theme={myTheme}>
                 <ThemeProvider theme={myTheme}>
@@ -96,6 +96,50 @@ describe('Test create page functionality', () => {
       fireEvent.click(form)
       expect(queryByTestId('hidden-buttons')).not.toBeNull()
     })
+    test('Hides task size on video option', () => {
+      const { getByTestId } = render(
+              <MuiThemeProvider theme={myTheme}>
+                <ThemeProvider theme={myTheme}>
+                  <StyledForm/>
+                </ThemeProvider>
+              </MuiThemeProvider>)
+      const select = getByTestId('item-type') as HTMLSelectElement
+      const tasksize = getByTestId('tasksize')
+      expect(tasksize.className).not.toContain('hidden')
+      fireEvent.change(select, { target: { value: 'video' } })
+      expect((getByTestId('item-type') as HTMLSelectElement)
+              .value).toBe('video')
+      expect(tasksize.className).toContain('hidden')
+    })
+    test('Hides and re-shows task size on tagging option', () => {
+      const { getByTestId } = render(
+              <MuiThemeProvider theme={myTheme}>
+                <ThemeProvider theme={myTheme}>
+                  <StyledForm/>
+                </ThemeProvider>
+              </MuiThemeProvider>)
+      const select = getByTestId('item-type') as HTMLSelectElement
+      const tasksize = getByTestId('tasksize')
+      expect(tasksize.className).not.toContain('hidden')
+      fireEvent.change(select, { target: { value: 'video' } })
+      expect((getByTestId('item-type') as HTMLSelectElement)
+              .value).toBe('video')
+      expect(tasksize.className).toContain('hidden')
+      fireEvent.change(select, { target: { value: 'image' } })
+      expect(tasksize.className).not.toContain('hidden')
+    })
+    test('Hidden buttons are shown on submission', () => {
+      const { getByTestId, queryByTestId } = render(
+              <MuiThemeProvider theme={myTheme}>
+                <ThemeProvider theme={myTheme}>
+                  <StyledForm/>
+                </ThemeProvider>
+              </MuiThemeProvider>)
+      const form = getByTestId('submit-button')
+      expect(queryByTestId('hidden-buttons')).toBeNull()
+      fireEvent.click(form)
+      expect(queryByTestId('hidden-buttons')).not.toBeNull()
+    })
   })
   describe('Test user ability to change fields', () => {
     test('Instruction url cannot be changed by user', () => {
@@ -109,7 +153,7 @@ describe('Test create page functionality', () => {
       const select = getByTestId('label-type') as HTMLSelectElement
       fireEvent.change(select, { target: { value: 'box2d' } })
       expect(instructions.value).toBe(
-        'https://www.scalabel.ai/doc/instructions/bbox.html')
+              'https://www.scalabel.ai/doc/instructions/bbox.html')
       fireEvent.change(instructions, { target: { value: 'should not change' } })
       expect(instructions.value).not.toBe('should not change')
     })
@@ -146,7 +190,6 @@ describe('Test create page functionality', () => {
       fireEvent.change(upload)
       expect(filename.value).toBe('test.yml')
     })
-
     test('Cannot change filename', () => {
       const { getByTestId } = render(
               <MuiThemeProvider theme={myTheme}>
@@ -157,7 +200,6 @@ describe('Test create page functionality', () => {
       const upload = getByTestId('item_file') as HTMLInputElement
       const filename = getByTestId('item_file_filename') as HTMLInputElement
       const file = new File(['test'], 'test.yml')
-
       expect(filename.value).toBe('No file chosen')
       Object.defineProperty(upload, 'files', {
         value: [file]
