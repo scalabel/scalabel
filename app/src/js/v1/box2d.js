@@ -141,6 +141,7 @@ Box2d.prototype.fromExportFormat = function(exportFormat) {
     this.rect.setRect(x1, y1, x2 - x1, y2 - y1);
     this.categoryPath = exportFormat.category;
     this.attributes = exportFormat.attributes;
+    this.keyframe = exportFormat.manualShape;
     return this;
   }
   return null;

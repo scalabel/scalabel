@@ -56,6 +56,28 @@ export function initSatSession(labelType, itemType) {
   }
 }
 
+/**
+ * Initialize a task by creating the first submission
+ * @param {string} labelType
+ * @param {string} itemType
+ */
+export function initTask(labelType, itemType) {
+    let labelClass;
+    if (labelType === 'box2d') {
+      labelClass = Box2d;
+    } else if (labelType === 'segmentation' || labelType === 'lane') {
+      labelClass = Seg2d;
+    }
+    let sat;
+    if (itemType === 'image') {
+      sat = new Sat(SatImage, labelClass);
+    }
+    if (itemType === 'video') {
+      sat = new SatVideo(labelClass);
+    }
+    sat.save();
+  }
+
 $(document).ready(function() {
   $('body').bootstrapMaterialDesign();
   initSatSession(labelType, itemType);

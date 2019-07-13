@@ -32,7 +32,7 @@ type User struct {
 
 //implements Serializable
 type Project struct {
-	Items    map[string][]Item `json:"items" yaml"items"`
+	Items    map[string][]Item `json:"items" yaml:"items"`
 	VendorId int               `json:"vendorId" yaml:"vendorId"`
 	Options  ProjectOptions    `json:"options" yaml:"options"`
 }
@@ -55,6 +55,8 @@ type Task struct {
 	Index          int            `json:"index" yaml:"index"`
 	Items          []Item         `json:"items" yaml:"items"`
 	NumFrames      int            `json:"numFrames" yaml:"numFrames"`
+	NumLabelImport int 			  `json:"numLabelImport" yaml:"numLabelImport"`
+	NumLabeledItemImport int 			  `json:"numLabeledItemImport" yaml:"numLabeledItemImport"`
 }
 
 func (task *Task) GetKey() string {
@@ -67,6 +69,8 @@ func (task *Task) GetFields() map[string]interface{} {
 		"Index":          task.Index,
 		"Items":          task.Items,
 		"NumFrames":      task.NumFrames,
+		"NumLabelImport": task.NumLabelImport,
+		"NumLabeledItemImport": task.NumLabeledItemImport,
 	}
 }
 
@@ -642,6 +646,7 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 				item.Timestamp = itemToLoad.Timestamp
 				item.Name = itemToLoad.Url
 				item.Url = itemToLoad.Url
+				item.Labels = itemToLoad.LabelImport
 				items = append(items, item)
 			}
 		}
@@ -855,11 +860,27 @@ func CreateTasks(project Project) {
 	index := 0
 	if project.Options.ItemType == "video" {
 		for _, itemList := range project.Items {
+			numLabelImport := 0
+			numLabeledItemImport := 0
+			for _, item := range itemList {
+				hasLabel := false
+				for _, label := range item.LabelImport {
+					if label.ManualShape {
+						numLabelImport += 1
+						hasLabel = true
+					}
+				}
+				if hasLabel {
+					numLabeledItemImport += 1
+				}
+			}
 			task := Task{
 				ProjectOptions: project.Options,
 				Index:          index,
 				Items:          itemList,
 				NumFrames:      len(itemList),
+				NumLabelImport: numLabelImport,
+				NumLabeledItemImport: numLabeledItemImport,
 			}
 			index += 1
 			err := storage.Save(task.GetKey(), task.GetFields())
@@ -878,12 +899,22 @@ func CreateTasks(project Project) {
 		}
 		size := len(items)
 		for i := 0; i < size; i += project.Options.TaskSize {
+			numLabelImport := 0
+			numLabeledItemImport := 0
 			itemsSlice := items[i:Min(i+project.Options.TaskSize, size)]
+			for _, item := range itemsSlice {
+				numLabelImport += len(item.LabelImport)
+				if item.LabelImport != nil {
+					numLabeledItemImport += 1
+				}
+			}
 			task := Task{
 				ProjectOptions: project.Options,
 				Index:          index,
 				Items:          itemsSlice,
 				NumFrames:      len(itemsSlice),
+				NumLabelImport: numLabelImport,
+				NumLabeledItemImport: numLabeledItemImport,
 			}
 			index = index + 1
 			err := storage.Save(task.GetKey(), task.GetFields())

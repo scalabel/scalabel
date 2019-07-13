@@ -561,6 +561,7 @@ Seg2d.prototype.fromExportFormat = function(exportFormat) {
     }
     this.categoryPath = exportFormat.category;
     this.attributes = exportFormat.attributes;
+    this.keyframe = exportFormat.manualShape;
     return this;
   }
   return null;
