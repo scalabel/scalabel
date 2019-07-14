@@ -1,5 +1,6 @@
 import { Theme } from '@material-ui/core/styles'
 import createStyles from '@material-ui/core/styles/createStyles'
+import { defaultAppBar, defaultHeader } from './general'
 
 const drawerWidth = 240
 const fullWidth = 700
@@ -10,30 +11,27 @@ export const createStyle = (theme: Theme) => createStyles({
     display: 'flex'
   },
   appBar: {
-    width: `100%`,
+    ...defaultAppBar,
     zIndex: theme.zIndex.drawer + 1
-  },
-
-  menuButton: {
-    marginRight: theme.spacing(2)
   },
 
   drawer: {
     width: drawerWidth,
     flexShrink: 0
   },
+
   drawerPaper: {
     width: drawerWidth,
     background: theme.palette.secondary.main
   },
 
   drawerHeader: {
-    ...theme.mixins.toolbar
+    ...defaultHeader
   },
 
   content: {
+    marginTop: theme.spacing(2),
     flexGrow: 1,
-    marginTop: 30,
     padding: theme.spacing(3)
   },
 

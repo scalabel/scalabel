@@ -1,7 +1,9 @@
+import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import * as types from '../action/types'
 import Window from '../components/window'
+import { myTheme } from '../styles/theme'
 import Session from './session'
 
 /**
@@ -26,7 +28,9 @@ export function initSession (containerName: string): void {
       const json = JSON.parse(xhr.response)
       initFromJson(json)
       ReactDOM.render(
-        <Window />,
+                     <MuiThemeProvider theme={myTheme}>
+                <Window />
+              </MuiThemeProvider>,
         document.getElementById(containerName))
     }
   }

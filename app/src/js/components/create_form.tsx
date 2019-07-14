@@ -27,6 +27,8 @@ interface ClassType {
 interface Props {
   /** styles of the create form */
   classes: ClassType
+  /** project list reload callback */
+  projectReloadCallback?: () => void
 }
 
 interface State {
@@ -232,7 +234,7 @@ export default class CreateForm extends React.Component<Props, State> {
                       <FormGroup row={true} className={classes.formGroup}>
                         <FormControlLabel
                                 control={
-                                  <StyledChecbox
+                                  <StyledCheckbox
                                           onChange={() => {
                                             this.setState({
                                               demoMode:
@@ -304,6 +306,9 @@ export default class CreateForm extends React.Component<Props, State> {
             vendorUrl: './vendor?project_name='
                     + prevState.projectName
           }))
+          if (that.props.projectReloadCallback) {
+            that.props.projectReloadCallback()
+          }
           return
         }
       }
@@ -311,7 +316,6 @@ export default class CreateForm extends React.Component<Props, State> {
     // CHANGE AFTER VERSION UPDATE
     const version = 'v1'
     x.open('POST', sprintf('./postProject?v=%s', version))
-    // eslint-disable-next-line
     const formData = new FormData(event.target)
     x.send(formData)
     if (!this.state.hasSubmitted) {
@@ -370,8 +374,8 @@ export default class CreateForm extends React.Component<Props, State> {
     }
   }
 }
-const StyledChecbox = withStyles(checkboxStyle)(Checkbox)
+const StyledCheckbox = withStyles(checkboxStyle)(Checkbox)
 const StyledUpload = withStyles(uploadStyle)(UploadButton)
-/* Need to have seperate class for attribute upload in the case where
+/* Need to have separate class for attribute upload in the case where
    the categories upload is hidden */
 const StyledAttributeUpload = withStyles(attributeStyle)(StyledUpload)

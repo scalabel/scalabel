@@ -5,17 +5,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
+import Typography from '@material-ui/core/Typography'
 import * as _ from 'lodash'
 import React from 'react'
 import * as types from '../action/types'
 import Session from '../common/session'
+import { defaultAppBar } from '../styles/general'
 import { Component } from './component'
 
 const styles: any = (theme: any) => createStyles({
   appBar: {
-    position: 'relative',
-    background: '#222222',
-    height: '50px'
+    ...defaultAppBar,
+    position: 'relative'
   },
   grow: {
     flexGrow: 1
@@ -112,21 +113,24 @@ class TitleBar extends Component<Props> {
       const href = _.get(b, 'href', '#')
       const target = ('href' in b ? 'view_window' : '_self')
       return (
-        <Tooltip title={b.title}>
-          <IconButton className={classes.titleUnit} onClick={onClick}
-            href={href} target={target}>
-            <FontAwesomeIcon icon={b.icon} size='xs' />
-          </IconButton>
-        </Tooltip>
+              <Tooltip title={b.title}>
+                <IconButton className={classes.titleUnit} onClick={onClick}
+                            href={href} target={target}>
+                  <FontAwesomeIcon icon={b.icon} size='xs'/>
+                </IconButton>
+              </Tooltip>
       )
     })
-    return (<AppBar position='static' className={classes.appBar}>
-      <Toolbar variant='dense'>
-        {title}
-        <div className={classes.grow} />
-        {buttons}
-      </Toolbar>
-    </AppBar>
+    return (
+            <AppBar className={classes.appBar}>
+              <Toolbar>
+                <Typography variant='h6' noWrap>
+                  {title}
+                </Typography>
+                <div className={classes.grow}/>
+                {buttons}
+              </Toolbar>
+            </AppBar>
     )
   }
 }

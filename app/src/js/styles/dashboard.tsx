@@ -1,6 +1,7 @@
 // tslint:disable:no-any
 // TODO: remove the disable tag
 import createStyles from '@material-ui/core/styles/createStyles'
+import { defaultAppBar } from './general'
 
 /* dashboardStyles */
 export const dashboardStyles: any = (theme: any) => createStyles({
@@ -17,14 +18,12 @@ export const dashboardStyles: any = (theme: any) => createStyles({
     padding: '0 8px',
     ...theme.mixins.toolbar
   },
-  appBar: {
-    backgroundColor: '#333',
+  appBar: {...defaultAppBar,
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
-    })
-  },
+    })},
   title: {
     flexGrow: 1
   },
@@ -72,7 +71,7 @@ export const tableStyles: any = (theme: any) => createStyles({
 /* tableCellStyles */
 export const tableCellStyles: any = (theme: any) => createStyles({
   head: {
-    backgroundColor: '#333',
+    backgroundColor: theme.palette.primary.dark,
     color: theme.palette.common.white
   },
   body: {
