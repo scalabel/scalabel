@@ -147,6 +147,7 @@ export abstract class Label2D {
     this._order = this._label.order
     this._labelId = this._label.id
     this._color = getColorById(this._labelId)
+    this.setSelected(labelId === state.current.label, 0)
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i]))
   }
 }

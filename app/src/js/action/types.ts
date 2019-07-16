@@ -39,44 +39,37 @@ export const CHANGE_RECT = 'CHANGE_RECT'
 export const MOVE_CAMERA = 'MOVE_CAMERA'
 export const MOVE_CAMERA_AND_TARGET = 'MOVE_CAMERA_AND_TARGET'
 
-export interface InitSessionAction {
-  /** Type of the action */
-  type: typeof INIT_SESSION
+interface BaseAction {
+  /** type of the action */
+  type: string
+  /** id of the session that initiates the action */
+  sessionId: string
 }
 
-export interface NewItemAction {
-  /** Type of the action */
-  type: typeof NEW_ITEM
+export type InitSessionAction = BaseAction
+
+export interface NewItemAction extends BaseAction {
   /** Function of createItem */
   createItem: (itemId: number, url: string) => ItemType
   /** The url */
   url: string
 }
 
-export interface GoToItemAction {
-  /** Type of the action */
-  type: typeof GO_TO_ITEM
+export interface GoToItemAction extends BaseAction {
   /** Index of the item to go to */
-  index: number
+  itemIndex: number
 }
 
-export interface LoadItemAction {
-  /** Type of the action */
-  type: typeof LOAD_ITEM
+export interface LoadItemAction extends BaseAction {
   /** Index of the item to load */
-  index: number
+  itemIndex: number
   /** Configurations */
   config: ViewerConfigType
 }
 
-export interface UpdateAllAction {
-  /** Type of the action */
-  type: typeof UPDATE_ALL
-}
+export type UpdateAllAction = BaseAction
 
-export interface ImageZoomAction {
-  /** Type of the action */
-  type: typeof IMAGE_ZOOM
+export interface ImageZoomAction extends BaseAction {
   /** Zoom ratio */
   ratio: number
   /** View Offset X */
@@ -85,9 +78,7 @@ export interface ImageZoomAction {
   viewOffsetY: number
 }
 
-export interface AddLabelAction {
-  /** Type of the action */
-  type: typeof ADD_LABEL
+export interface AddLabelAction extends BaseAction {
   /** item of the added label */
   itemIndex: number
   /** label to add */
@@ -96,9 +87,7 @@ export interface AddLabelAction {
   shapes: ShapeType[]
 }
 
-export interface ChangeLabelShapeAction {
-  /** Type of the action */
-  type: typeof CHANGE_LABEL_SHAPE
+export interface ChangeShapeAction extends BaseAction {
   /** item of the shape */
   itemIndex: number
   /** Shape ID */
@@ -107,9 +96,7 @@ export interface ChangeLabelShapeAction {
   props: object
 }
 
-export interface ChangeLabelPropsAction {
-  /** Type of the action */
-  type: typeof CHANGE_LABEL_PROPS
+export interface ChangeLabelAction extends BaseAction {
   /** item of the label */
   itemIndex: number
   /** Label ID */
@@ -118,81 +105,29 @@ export interface ChangeLabelPropsAction {
   props: object
 }
 
-export interface DeleteLabelAction {
-  /** Type of the action */
-  type: typeof DELETE_LABEL
+export interface DeleteLabelAction extends BaseAction {
   /** item of the label */
   itemIndex: number
   /** ID of label to be deleted */
   labelId: number
 }
 
-export interface TagImageAction {
-  /** Type of the action */
-  type: typeof TAG_IMAGE
+export interface TagImageAction extends BaseAction {
   /** ID of the corresponding item */
-  itemId: number
+  itemIndex: number
   /** Index of the attribute */
   attributeIndex: number
   /** Index of the selected attribute */
   selectedIndex: number[]
 }
 
-export interface ChangeAttributeAction {
-  /** Type of the action */
-  type: typeof CHANGE_ATTRIBUTE
-  /** ID of the label */
-  labelId: number
-  /** Attribute options */
-  attributeOptions: object
-}
+export type ToggleAssistantViewAction = BaseAction
 
-export interface ChangeCategoryAction {
-  /** Type of the action */
-  type: typeof CHANGE_CATEGORY
-  /** ID of the label */
-  labelId: number
-  /** Category options */
-  categoryOptions: object
-}
-
-export interface ToggleAssistantViewAction {
-  /** Type of the action */
-  type: typeof TOGGLE_ASSISTANT_VIEW
-}
-
-export interface NewImageBox2dLabelAction {
-  /** Type of the action */
-  type: typeof NEW_IMAGE_BOX2D_LABEL
-  /** Item of the corresponding item */
-  itemId: number
-  /** Optional attributes */
-  optionalAttributes: object
-}
-
-export interface ChangeRectAction {
-  /** Type of the action */
-  type: typeof CHANGE_RECT
-  /** ID of the shape */
-  shapeId: number
-  /** Target box attributes */
-  targetBoxAttributes: object
-}
-
-export interface MoveCameraAction {
-  /** Type of the action */
-  type: typeof MOVE_CAMERA
-  /** New position */
-  newPosition: Vector3Type
-}
-
-export interface MoveCameraAndTargetAction {
-  /** Type of the action */
-  type: typeof MOVE_CAMERA_AND_TARGET
+export interface MoveCameraAndTargetAction extends BaseAction {
   /** New position */
   newPosition: Vector3Type
   /** New target */
-  newTarget: Vector3Type
+  newTarget?: Vector3Type
 }
 
 export type ActionType =
@@ -203,13 +138,9 @@ export type ActionType =
     | UpdateAllAction
     | ImageZoomAction
     | AddLabelAction
-    | ChangeLabelShapeAction
-    | ChangeLabelPropsAction
+    | ChangeShapeAction
+    | ChangeLabelAction
     | DeleteLabelAction
     | TagImageAction
-    | ChangeAttributeAction
-    | ChangeCategoryAction
     | ToggleAssistantViewAction
-    | ChangeRectAction
-    | MoveCameraAction
     | MoveCameraAndTargetAction

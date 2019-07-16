@@ -1,14 +1,15 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
 import * as box2d from '../../js/action/box2d'
 import * as action from '../../js/action/creators'
 import * as labels from '../../js/common/label_types'
 import Session from '../../js/common/session'
+import { initStore } from '../../js/common/session_init'
 import { RectType } from '../../js/functional/types'
 import { testJson } from '../test_objects'
 
 test('Add, change and delete box2d labels', () => {
   Session.devMode = false
-  Session.initStore(testJson)
+  initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(box2d.addBox2dLabel(itemIndex, [0], 1, 2, 3, 4))

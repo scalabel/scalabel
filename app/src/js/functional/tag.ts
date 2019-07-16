@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import { addLabel, changeLabelProps } from './common'
+import * as types from '../action/types'
+import { addLabel, changeLabel } from './common'
 import { makeLabel } from './states'
 import { LabelType, State } from './types'
 
@@ -20,19 +21,34 @@ export function createTagLabel (
 /**
  * Image tagging
  * @param {State} state
- * @param {number} attributeIndex
- * @param {number} attributeValue
+ * @param {types.TagImageAction} action
  * @return {State}
  */
 export function tagImage (
-    state: State, attributeIndex: number,
-    attributeValue: number[]): State {
+    state: State, action: types.TagImageAction): State {
+  const [attributeIndex, attributeValue] =
+    [action.attributeIndex, action.selectedIndex]
   const attributes = { [attributeIndex]: attributeValue }
   const item = state.items[state.current.item]
   if (_.size(item.labels) > 0) {
-    const labelId = parseInt(_.findKey(item.labels) as string, 10)
-    return changeLabelProps(state, item.index, labelId, { attributes })
+    const labelId = Number(_.findKey(item.labels))
+    const newAction: types.ChangeLabelAction = {
+      type: types.CHANGE_LABEL_PROPS,
+      sessionId: action.sessionId,
+      itemIndex: action.itemIndex,
+      labelId,
+      props: { attributes }
+    }
+    return changeLabel(state, newAction)
+  } else {
+    const label = createTagLabel(0, state.current.item, attributes)
+    const newAction: types.AddLabelAction = {
+      type: types.ADD_LABEL,
+      sessionId: action.sessionId,
+      itemIndex: action.itemIndex,
+      label,
+      shapes: []
+    }
+    return addLabel(state, newAction)
   }
-  const label = createTagLabel(0, state.current.item, attributes)
-  return addLabel(state, item.index, label, [])
 }

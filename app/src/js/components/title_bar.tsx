@@ -6,9 +6,9 @@ import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import Typography from '@material-ui/core/Typography'
-import * as _ from 'lodash'
+import _ from 'lodash'
 import React from 'react'
-import * as types from '../action/types'
+import { goToItem } from '../action/creators'
 import Session from '../common/session'
 import { defaultAppBar } from '../styles/general'
 import { Component } from './component'
@@ -44,22 +44,14 @@ interface Props {
  * Go to the next Item
  */
 function goToNextItem () {
-  const index = Session.getState().current.item
-  Session.dispatch({
-    type: types.GO_TO_ITEM,
-    index: index + 1
-  })
+  Session.dispatch(goToItem(Session.getState().current.item + 1))
 }
 
 /**
  * Go to the previous Item
  */
 function goToPreviousItem () {
-  const index = Session.getState().current.item
-  Session.dispatch({
-    type: types.GO_TO_ITEM,
-    index: index - 1
-  })
+  Session.dispatch(goToItem(Session.getState().current.item - 1))
 }
 
 /**

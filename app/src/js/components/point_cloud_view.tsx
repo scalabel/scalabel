@@ -2,9 +2,10 @@ import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
-import * as types from '../action/types'
+import { moveCamera, moveCameraAndTarget } from '../action/point_cloud'
 import Session from '../common/session'
 import { PointCloudViewerConfigType, State } from '../functional/types'
+import { Vector3D } from '../math/vector3d'
 import { Canvas3d } from './canvas3d'
 
 const styles = () => createStyles({
@@ -285,10 +286,7 @@ class PointCloudView extends Canvas3d<Props> {
 
       offset.add(target)
 
-      Session.dispatch({
-        type: types.MOVE_CAMERA,
-        newPosition: { x: offset.x, y: offset.y, z: offset.z }
-      })
+      Session.dispatch(moveCamera((new Vector3D()).fromThree(offset)))
     }
 
     this.mX = newX
@@ -326,98 +324,92 @@ class PointCloudView extends Canvas3d<Props> {
 
     switch (e.key) {
       case '.':
-        Session.dispatch({
-          type: types.MOVE_CAMERA_AND_TARGET,
-          newPosition: {
-            x: viewerConfig.position.x,
-            y: viewerConfig.position.y,
-            z: viewerConfig.position.z + this.MOVE_AMOUNT
-          },
-          newTarget: {
-            x: viewerConfig.target.x,
-            y: viewerConfig.target.y,
-            z: viewerConfig.target.z + this.MOVE_AMOUNT
-          }
-        })
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x,
+            viewerConfig.position.y,
+            viewerConfig.position.z + this.MOVE_AMOUNT
+          ),
+          new Vector3D(
+            viewerConfig.target.x,
+            viewerConfig.target.y,
+            viewerConfig.target.z + this.MOVE_AMOUNT
+          )
+        ))
         break
       case '/':
-        Session.dispatch({
-          type: types.MOVE_CAMERA_AND_TARGET,
-          newPosition: {
-            x: viewerConfig.position.x,
-            y: viewerConfig.position.y,
-            z: viewerConfig.position.z - this.MOVE_AMOUNT
-          },
-          newTarget: {
-            x: viewerConfig.target.x,
-            y: viewerConfig.target.y,
-            z: viewerConfig.target.z - this.MOVE_AMOUNT
-          }
-        })
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x,
+            viewerConfig.position.y,
+            viewerConfig.position.z - this.MOVE_AMOUNT
+          ),
+          new Vector3D(
+            viewerConfig.target.x,
+            viewerConfig.target.y,
+            viewerConfig.target.z - this.MOVE_AMOUNT
+          )
+        ))
         break
       case 'Down':
       case 'ArrowDown':
-        Session.dispatch({
-          type: types.MOVE_CAMERA_AND_TARGET,
-          newPosition: {
-            x: viewerConfig.position.x - forwardX,
-            y: viewerConfig.position.y - forwardY,
-            z: viewerConfig.position.z
-          },
-          newTarget: {
-            x: viewerConfig.target.x - forwardX,
-            y: viewerConfig.target.y - forwardY,
-            z: viewerConfig.target.z
-          }
-        })
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x - forwardX,
+            viewerConfig.position.x - forwardX,
+            viewerConfig.position.z
+          ),
+          new Vector3D(
+            viewerConfig.target.x - forwardX,
+            viewerConfig.target.y - forwardY,
+            viewerConfig.target.z
+          )
+        ))
         break
       case 'Up':
       case 'ArrowUp':
-        Session.dispatch({
-          type: types.MOVE_CAMERA_AND_TARGET,
-          newPosition: {
-            x: viewerConfig.position.x + forwardX,
-            y: viewerConfig.position.y + forwardY,
-            z: viewerConfig.position.z
-          },
-          newTarget: {
-            x: viewerConfig.target.x + forwardX,
-            y: viewerConfig.target.y + forwardY,
-            z: viewerConfig.target.z
-          }
-        })
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x + forwardX,
+            viewerConfig.position.x + forwardX,
+            viewerConfig.position.z
+          ),
+          new Vector3D(
+            viewerConfig.target.x + forwardX,
+            viewerConfig.target.y + forwardY,
+            viewerConfig.target.z
+          )
+        ))
         break
       case 'Left':
       case 'ArrowLeft':
-        Session.dispatch({
-          type: types.MOVE_CAMERA_AND_TARGET,
-          newPosition: {
-            x: viewerConfig.position.x + left.x,
-            y: viewerConfig.position.y + left.y,
-            z: viewerConfig.position.z + left.z
-          },
-          newTarget: {
-            x: viewerConfig.target.x + left.x,
-            y: viewerConfig.target.y + left.y,
-            z: viewerConfig.target.z + left.z
-          }
-        })
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x + left.x,
+            viewerConfig.position.y + left.y,
+            viewerConfig.position.z + left.z
+          ),
+          new Vector3D(
+            viewerConfig.target.x + left.x,
+            viewerConfig.target.y + left.y,
+            viewerConfig.target.z + left.z
+          )
+        ))
         break
       case 'Right':
       case 'ArrowRight':
-        Session.dispatch({
-          type: types.MOVE_CAMERA_AND_TARGET,
-          newPosition: {
-            x: viewerConfig.position.x - left.x,
-            y: viewerConfig.position.y - left.y,
-            z: viewerConfig.position.z - left.z
-          },
-          newTarget: {
-            x: viewerConfig.target.x - left.x,
-            y: viewerConfig.target.y - left.y,
-            z: viewerConfig.target.z - left.z
-          }
-        })
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x - left.x,
+            viewerConfig.position.y - left.y,
+            viewerConfig.position.z - left.z
+          ),
+          new Vector3D(
+            viewerConfig.target.x - left.x,
+            viewerConfig.target.y - left.y,
+            viewerConfig.target.z - left.z
+          )
+        ))
         break
     }
   }
@@ -452,10 +444,7 @@ class PointCloudView extends Canvas3d<Props> {
 
       offset.add(target)
 
-      Session.dispatch({
-        type: types.MOVE_CAMERA,
-        newPosition: { x: offset.x, y: offset.y, z: offset.z }
-      })
+      Session.dispatch(moveCamera(new Vector3D().fromThree(offset)))
     }
   }
 
@@ -479,19 +468,18 @@ class PointCloudView extends Canvas3d<Props> {
       const newTarget = intersects[0].point
       const viewerConfig: PointCloudViewerConfigType =
         getCurrentViewerConfig() as PointCloudViewerConfigType
-      Session.dispatch({
-        type: types.MOVE_CAMERA_AND_TARGET,
-        newPosition: {
-          x: viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
-          y: viewerConfig.position.y - viewerConfig.target.y + newTarget.y,
-          z: viewerConfig.position.z - viewerConfig.target.z + newTarget.z
-        },
-        newTarget: {
-          x: newTarget.x,
-          y: newTarget.y,
-          z: newTarget.z
-        }
-      })
+      Session.dispatch(moveCameraAndTarget(
+        new Vector3D(
+          viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
+          viewerConfig.position.y - viewerConfig.target.y + newTarget.y,
+          viewerConfig.position.z - viewerConfig.target.z + newTarget.z
+        ),
+        new Vector3D(
+          newTarget.x,
+          newTarget.y,
+          newTarget.z
+        )
+      ))
     }
   }
 

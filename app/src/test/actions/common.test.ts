@@ -1,12 +1,13 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
 import * as action from '../../js/action/creators'
 import Session from '../../js/common/session'
+import { initStore } from '../../js/common/session_init'
 import { makeLabel } from '../../js/functional/states'
 import { testJson } from '../test_objects'
 
 test('Add and delete labels', () => {
   Session.devMode = false
-  Session.initStore(testJson)
+  initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   const label = makeLabel({ item: itemIndex })
@@ -24,7 +25,7 @@ test('Add and delete labels', () => {
 
 test('Change category', () => {
   Session.devMode = false
-  Session.initStore(testJson)
+  initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))

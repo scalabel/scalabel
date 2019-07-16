@@ -133,9 +133,6 @@ export class Label2DList {
 
   /**
    * Process mouse up action
-   */
-  /**
-   * Process mouse up action
    * @param coord
    * @param labelIndex
    * @param handleIndex
@@ -167,6 +164,7 @@ export class Label2DList {
       }
       this._selectedLabel.drag(this._mouseDownCoord, coord, canvasLimit)
       this._labelChanged = true
+      this._mouseDownCoord.set(...coord)
     } else {
       if (labelIndex >= 0) {
         if (this._highlightedLabel === null) {

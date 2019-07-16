@@ -169,7 +169,7 @@ export class Box2D extends Label2D {
     rect.y += delta.y
     // The rect should not go outside the frame limit
     rect.x = Math.min(width - rect.w, Math.max(0, rect.x))
-    rect.y = Math.min(height - rect.y, Math.max(0, rect.y))
+    rect.y = Math.min(height - rect.h, Math.max(0, rect.y))
     this.updateShapeValues(rect)
   }
 

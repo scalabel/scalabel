@@ -116,7 +116,16 @@ export interface ItemType {
   of smaller SatProps.
  */
 export interface ConfigType {
-  /** Assignment ID */
+  /**
+   * a unique id for each session. When the same assignment/task is opened
+   * twice, they will have different session ids.
+   * It is uuid of the session
+   */
+  sessionId: string
+  /**
+   * Assignment ID. The same assignment can be given to multiple sesssions
+   * for collaboration
+   */
   assignmentId: string
   /** Project name */
   projectName: string

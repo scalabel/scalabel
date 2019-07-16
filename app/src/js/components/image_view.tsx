@@ -1,7 +1,7 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import EventListener, { withOptions } from 'react-event-listener'
-import * as types from '../action/types'
+import { zoomImage } from '../action/image'
 import Session from '../common/session'
 import { Label2DList } from '../drawable/label2d_list'
 import { decodeControlIndex, rgbToIndex } from '../drawable/util'
@@ -198,10 +198,7 @@ export class ImageView extends Canvas2d<Props> {
                       offsetX: number, offsetY: number) {
     const newScale = getCurrentViewerConfig().viewScale * zoomRatio
     if (newScale >= this.MIN_SCALE && newScale <= this.MAX_SCALE) {
-      Session.dispatch({
-        type: types.IMAGE_ZOOM, ratio: zoomRatio,
-        viewOffsetX: offsetX, viewOffsetY: offsetY
-      })
+      Session.dispatch(zoomImage(zoomRatio, offsetX, offsetY))
     }
   }
 

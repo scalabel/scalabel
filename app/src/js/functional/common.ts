@@ -1,10 +1,7 @@
-import * as _ from 'lodash'
+import _ from 'lodash'
+import * as types from '../action/types'
 import {
-  ItemType,
-  LabelType,
-  ShapeType,
-  State,
-  ViewerConfigType
+  State
 } from './types'
 import {removeObjectFields, updateListItem, updateListItems,
   updateObject
@@ -36,16 +33,13 @@ export function initSession (state: State): State {
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
  * @param {State} state: current state
- * @param {number} itemIndex
- * @param {LabelType} label: new label to add.
- * @param {ShapeType} shapes: shapes of the label.
+ * @param {types.AddLabelAction} action
  * @return {State}
  */
-export function addLabel (
-    state: State,
-    itemIndex: number,
-    label: LabelType,
-    shapes: ShapeType[] = []): State {
+export function addLabel (state: State, action: types.AddLabelAction): State {
+  const itemIndex = action.itemIndex
+  let label = action.label
+  const shapes = action.shapes
   const newShapeId = state.current.maxShapeId + 1
   const labelId = state.current.maxLabelId + 1
   const shapeIds = _.range(shapes.length).map((i) => i + newShapeId)
@@ -61,9 +55,13 @@ export function addLabel (
   const allShapes = updateObject(item.shapes, _.zipObject(shapeIds, newShapes))
   item = updateObject(item, { labels, shapes: allShapes })
   const items = updateListItem(state.items, itemIndex, item)
+  const selectedLabelId = (action.sessionId === state.config.sessionId) ?
+    labelId : state.current.label
   const current = updateObject(
       state.current,
-    { maxLabelId: labelId,
+    {
+      label: selectedLabelId,
+      maxLabelId: labelId,
       maxShapeId: shapeIds[shapeIds.length - 1],
       maxOrder: order
     })
@@ -77,49 +75,56 @@ export function addLabel (
 /**
  * Update the properties of a shape
  * @param {State} state
- * @param {number} itemIndex
- * @param {number} shapeId
- * @param {object} props
+ * @param {types.ChangeShapeAction} action
  * @return {State}
  */
-export function changeLabelShape (
-  state: State, itemIndex: number, shapeId: number, props: object): State {
+export function changeShape (
+  state: State, action: types.ChangeShapeAction): State {
+  const itemIndex = action.itemIndex
+  const shapeId = action.shapeId
   let item = state.items[itemIndex]
-  const shape = updateObject(item.shapes[shapeId], props)
+  let shape = item.shapes[shapeId]
+  const props = updateObject(action.props, { id: shapeId, label: shape.label })
+  shape = updateObject(shape, props)
   item = updateObject(
       item, { shapes: updateObject(item.shapes, { [shapeId]: shape }) })
+  const selectedLabelId = (action.sessionId === state.config.sessionId) ?
+    shape.label : state.current.label
+  const current = updateObject(state.current, { label: selectedLabelId })
   const items = updateListItem(state.items, itemIndex, item)
-  return { ...state, items }
+  return { ...state, items, current }
 }
 
 /**
  * Update label properties except shapes
  * @param {State} state
- * @param {number} itemIndex
- * @param {number} labelId
- * @param {object} props
+ * @param {types.ChangeLabelAction} action
  * @return {State}
  */
-export function changeLabelProps (
-    state: State, itemIndex: number, labelId: number, props: object): State {
+export function changeLabel (
+    state: State, action: types.ChangeLabelAction): State {
+  const itemIndex = action.itemIndex
+  const labelId = action.labelId
+  const props = action.props
   let item = state.items[itemIndex]
   const label = updateObject(item.labels[labelId], props)
   item = updateObject(
       item, { labels: updateObject(item.labels, { [labelId]: label }) })
   const items = updateListItem(state.items, itemIndex, item)
-  return { ...state, items }
+  const selectedLabelId = (action.sessionId === state.config.sessionId) ?
+    labelId : state.current.label
+  const current = updateObject(state.current, { label: selectedLabelId })
+  return { ...state, items, current }
 }
 
 /**
  * Create Item from url with provided creator
  * @param {State} state
- * @param {Function} createItem
- * @param {string} url
+ * @param {types.NewItemAction} action
  * @return {State}
  */
-export function newItem (
-    state: State, createItem: (itemId: number, url: string) => ItemType,
-    url: string): State {
+export function newItem (state: State, action: types.NewItemAction): State {
+  const [createItem, url] = [action.createItem, action.url]
   const id = state.items.length
   const item = createItem(id, url)
   const items = state.items.slice()
@@ -133,10 +138,11 @@ export function newItem (
 /**
  * Go to item at index
  * @param {State} state
- * @param {number} index
+ * @param {types.GoToItemAction} actoin
  * @return {State}
  */
-export function goToItem (state: State, index: number): State {
+export function goToItem (state: State, action: types.GoToItemAction): State {
+  const index = action.itemIndex
   if (index < 0 || index >= state.items.length) {
     return state
   }
@@ -162,8 +168,9 @@ export function goToItem (state: State, index: number): State {
  * @param {ViewerConfigType} viewerConfig
  * @return {State}
  */
-export function loadItem (state: State, itemIndex: number,
-                          viewerConfig: ViewerConfigType): State {
+export function loadItem (state: State, action: types.LoadItemAction): State {
+  const itemIndex = action.itemIndex
+  const viewerConfig = action.config
   return updateObject(
       state, {items: updateListItem(
           state.items, itemIndex,
@@ -181,7 +188,9 @@ export function loadItem (state: State, itemIndex: number,
  * @return {State}
  */
 export function deleteLabel (
-    state: State, itemIndex: number, labelId: number): State {
+    state: State, action: types.DeleteLabelAction): State {
+  const itemIndex = action.itemIndex
+  const labelId = action.labelId
   const item = state.items[itemIndex]
   const label = item.labels[labelId]
   const labels = removeObjectFields(item.labels, [labelId])
@@ -190,14 +199,14 @@ export function deleteLabel (
   // remove labels
   const shapes = removeObjectFields(item.shapes, label.shapes)
   const items = updateListItem(state.items, itemIndex,
-      updateObject(item, { labels, shapes }))
+  updateObject(item, { labels, shapes }))
   // Reset selected object
   let current = state.current
   if (current.label === labelId) {
     current = updateObject(current, { label: -1 })
   }
   return updateObject(
-      state, { current, items })
+  state, { current, items })
 }
 
 /**

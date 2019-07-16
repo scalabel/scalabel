@@ -1,39 +1,34 @@
-// tslint:disable:no-any
-// TODO: remove the disable tag
-import { createStore } from 'redux'
-import undoable, { includeAction } from 'redux-undo'
-import { makeState } from '../functional/states'
-import { reducer } from './reducer'
-
+import { createStore, Reducer, Store } from 'redux'
+import undoable, { includeAction, StateWithHistory } from 'redux-undo'
 import {
 // SAT specific actions
   ADD_LABEL,
-  CHANGE_ATTRIBUTE,
-  CHANGE_CATEGORY,
   DELETE_LABEL,
   GO_TO_ITEM,
   IMAGE_ZOOM,
   NEW_ITEM,
-  TAG_IMAGE,
-  TOGGLE_ASSISTANT_VIEW
+  TAG_IMAGE
 } from '../action/types'
+import { makeState } from '../functional/states'
+import { State } from '../functional/types'
+import { reducer } from './reducer'
 
 /**
  * Configure the main store for the state
- * @param {Object} json: initial state
+ * @param {Partial<State>} json: initial state
  * @param {boolean} devMode: whether to turn on dev mode
- * @return {Object}
+ * @return {Store<StateWithHistory<State>>}
  */
 export function configureStore (
-    json: any = {}, devMode: boolean = false): any {
-  let store
+    initialState: Partial<State>,
+    devMode: boolean = false): Store<StateWithHistory<State>> {
   const initialHistory = {
-    past: [],
-    present: makeState(json),
-    future: []
+    past: Array<State>(),
+    present: makeState(initialState),
+    future: Array<State>()
   }
 
-  store = createStore(undoable(reducer, {
+  const undoableReduer: Reducer<StateWithHistory<State>> = undoable(reducer, {
     limit: 20, // add a limit to history
     filter: includeAction([
       // undoable actions
@@ -42,13 +37,10 @@ export function configureStore (
       IMAGE_ZOOM,
       ADD_LABEL,
       DELETE_LABEL,
-      TAG_IMAGE,
-      CHANGE_ATTRIBUTE,
-      CHANGE_CATEGORY,
-      TOGGLE_ASSISTANT_VIEW
+      TAG_IMAGE
     ]),
     debug: devMode
-  }), initialHistory as any)
+  })
 
-  return store
+  return createStore(undoableReduer, initialHistory)
 }

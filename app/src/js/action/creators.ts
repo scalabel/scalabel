@@ -1,5 +1,14 @@
-import { ItemType, LabelType, ShapeType } from '../functional/types'
+import Session from '../common/session'
+import { ItemType, LabelType, ShapeType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
+
+/** init session */
+export function initSessionAction (): types.InitSessionAction {
+  return {
+    type: types.INIT_SESSION,
+    sessionId: Session.id
+  }
+}
 
 /**
  * Create Item from url with provided creator
@@ -8,9 +17,10 @@ import * as types from './types'
  * @return {Object}
  */
 export function newItem (createItem: (itemId: number, url: string) => ItemType,
-                         url: string) {
+                         url: string): types.NewItemAction {
   return {
     type: types.NEW_ITEM,
+    sessionId: Session.id,
     createItem,
     url
   }
@@ -24,7 +34,21 @@ export function newItem (createItem: (itemId: number, url: string) => ItemType,
 export function goToItem (index: number): types.GoToItemAction {
   return {
     type: types.GO_TO_ITEM,
-    index
+    sessionId: Session.id,
+    itemIndex: index
+  }
+}
+
+/**
+ * Create load item action
+ */
+export function loadItem (
+    itemIndex: number, config: ViewerConfigType): types.LoadItemAction {
+  return {
+    type: types.LOAD_ITEM,
+    sessionId: Session.id,
+    itemIndex,
+    config
   }
 }
 
@@ -38,7 +62,12 @@ export function goToItem (index: number): types.GoToItemAction {
 export function addLabel (
   itemIndex: number, label: LabelType,
   shapes: ShapeType[]): types.AddLabelAction {
-  return { type: types.ADD_LABEL, itemIndex, label, shapes }
+  return {
+    type: types.ADD_LABEL,
+    sessionId: Session.id,
+    itemIndex,
+    label, shapes
+  }
 }
 
 /**
@@ -49,8 +78,14 @@ export function addLabel (
  * @return {ChangeLabelShapeAction}
  */
 export function changeLabelShape (
-  itemIndex: number, shapeId: number, props: {}): types.ChangeLabelShapeAction {
-  return { type: types.CHANGE_LABEL_SHAPE, itemIndex, shapeId, props }
+  itemIndex: number, shapeId: number, props: {}): types.ChangeShapeAction {
+  return {
+    type: types.CHANGE_LABEL_SHAPE,
+    sessionId: Session.id,
+    itemIndex,
+    shapeId,
+    props
+  }
 }
 
 /**
@@ -61,8 +96,13 @@ export function changeLabelShape (
  * @return {ChangeLabelPropsAction}
  */
 export function changeLabelProps (
-  itemIndex: number, labelId: number, props: {}): types.ChangeLabelPropsAction {
-  return { type: types.CHANGE_LABEL_PROPS, itemIndex, labelId, props }
+  itemIndex: number, labelId: number, props: {}): types.ChangeLabelAction {
+  return {
+    type: types.CHANGE_LABEL_PROPS,
+    sessionId: Session.id,
+    itemIndex,
+    labelId,
+    props }
 }
 
 /**
@@ -75,6 +115,7 @@ export function deleteLabel (
     itemIndex: number, labelId: number): types.DeleteLabelAction {
   return {
     type: types.DELETE_LABEL,
+    sessionId: Session.id,
     itemIndex,
     labelId
   }
@@ -82,45 +123,30 @@ export function deleteLabel (
 
 /**
  * Image tagging
- * @param {number} itemId
+ * @param {number} itemIndex
  * @param {number} attributeIndex
  * @param {Array<number>} selectedIndex
  * @return {Object}
  */
-export function tagImage (itemId: number,
-                          attributeIndex: number, selectedIndex: number[]) {
+export function tagImage (
+  itemIndex: number,
+  attributeIndex: number,
+  selectedIndex: number[]): types.TagImageAction {
   return {
     type: types.TAG_IMAGE,
-    itemId,
+    sessionId: Session.id,
+    itemIndex,
     attributeIndex,
     selectedIndex
   }
 }
 
 /**
- * assign Attribute to a label
- * @param {number} labelId
- * @param {Object} attributeOptions
- * @return {Object}
+ * wrapper for update all action
  */
-export function changeAttribute (labelId: number, attributeOptions: object) {
+export function updateAll (): types.UpdateAllAction {
   return {
-    type: types.CHANGE_ATTRIBUTE,
-    labelId,
-    attributeOptions
-  }
-}
-
-/**
- * assign Category to a label
- * @param {number} labelId
- * @param {Object} categoryOptions
- * @return {Object}
- */
-export function changeCategory (labelId: number, categoryOptions: object) {
-  return {
-    type: types.CHANGE_CATEGORY,
-    labelId,
-    categoryOptions
+    type: types.UPDATE_ALL,
+    sessionId: Session.id
   }
 }

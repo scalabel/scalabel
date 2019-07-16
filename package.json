@@ -64,6 +64,7 @@
     "@types/react-test-renderer": "^16.8.2",
     "@types/sprintf-js": "^1.1.2",
     "@types/three": "^0.103.2",
+    "@types/uuid": "^3.4.5",
     "ajv": "^6.10.0",
     "awesome-typescript-loader": "^5.2.1",
     "babel-cli": "^6.26.0",
@@ -107,6 +108,7 @@
     "tslint": "^5.13.1",
     "tslint-config-standard": "^8.0.1",
     "typescript": "^3.3.3333",
+    "uuid": "^3.3.2",
     "webpack": "^4.35.0",
     "webpack-cli": "^3.1.0"
   }

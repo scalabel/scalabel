@@ -1,3 +1,4 @@
+import uuid from 'uuid/v4'
 import * as labels from '../common/label_types'
 import {
   ConfigType, CubeType,
@@ -113,6 +114,7 @@ export function makeItem (params: {} = {}): ItemType {
  */
 export function makeSatConfig (params: Partial<ConfigType> = {}): ConfigType {
   return {
+    sessionId: uuid(),
     assignmentId: '', // id
     projectName: '',
     itemType: '',
