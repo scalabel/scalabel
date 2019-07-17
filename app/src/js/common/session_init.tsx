@@ -4,7 +4,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
-import { initSessionAction, loadItem, updateAll } from '../action/creators'
+import { initSessionAction, loadItem, updateAll } from '../action/common'
 import Window from '../components/window'
 import {
   makeImageViewerConfig,

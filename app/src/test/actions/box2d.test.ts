@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import * as box2d from '../../js/action/box2d'
-import * as action from '../../js/action/creators'
+import * as action from '../../js/action/common'
 import * as labels from '../../js/common/label_types'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
