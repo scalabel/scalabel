@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { addBox2dLabel } from '../action/box2d'
-import { changeLabelShape } from '../action/creators'
+import { changeLabelShape } from '../action/common'
 import * as labels from '../common/label_types'
 import Session from '../common/session'
 import { makeLabel, makeRect } from '../functional/states'

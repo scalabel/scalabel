@@ -1,6 +1,6 @@
 import * as labels from '../common/label_types'
 import { makeLabel, makeRect } from '../functional/states'
-import * as actions from './creators'
+import * as actions from './common'
 import { AddLabelAction } from './types'
 
 /**

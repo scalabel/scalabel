@@ -1,6 +1,6 @@
 import { createCanvas } from 'canvas'
 import _ from 'lodash'
-import * as action from '../../js/action/creators'
+import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2DList } from '../../js/drawable/label2d_list'
