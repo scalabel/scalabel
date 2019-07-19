@@ -10,7 +10,7 @@ import { Vector2D } from '../math/vector2d'
 import { DrawMode, Label2D } from './label2d'
 import { makePoint2DStyle, Point2D } from './point2d'
 import { makeRect2DStyle, Rect2D } from './rect2d'
-import { Context2D, encodeControlColor, getColorById } from './util'
+import { blendColor, Context2D, encodeControlColor, getColorById } from './util'
 
 type Shape = Rect2D | Point2D
 
@@ -31,8 +31,8 @@ export class Box2D extends Label2D {
     super()
     this._shapes = [
       new Rect2D(),
-      new Point2D(), new Point2D(), new Point2D(), new Point2D(), // corners
-      new Point2D(), new Point2D(), new Point2D(), new Point2D()  // midpoints
+      new Point2D(), new Point2D(), new Point2D(), new Point2D(),
+      new Point2D(), new Point2D(), new Point2D(), new Point2D()
     ]
   }
 
@@ -57,11 +57,20 @@ export class Box2D extends Label2D {
         pointStyle = _.assign(pointStyle, DEFAULT_VIEW_POINT_STYLE)
         highPointStyle = _.assign(highPointStyle, DEFAULT_VIEW_HIGH_POINT_STYLE)
         rectStyle = _.assign(rectStyle, DEFAULT_VIEW_RECT_STYLE)
-        assignColor = (_i: number): number[] => self._color
+        assignColor = (i: number): number[] => {
+          if (i % 2 === 0 && i > 0) {
+            // midpoint
+            return blendColor(self._color, [255, 255, 255], 0.7)
+          } else {
+            // vertex
+            return self._color
+          }
+        }
         break
       case DrawMode.CONTROL:
         pointStyle = _.assign(pointStyle, DEFAULT_CONTROL_POINT_STYLE)
-        highPointStyle = _.assign(highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
+        highPointStyle = _.assign(
+          highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
         rectStyle = _.assign(rectStyle, DEFAULT_CONTROL_RECT_STYLE)
         assignColor = (i: number): number[] => {
           return encodeControlColor(self._index, i)
@@ -75,13 +84,15 @@ export class Box2D extends Label2D {
     rect.draw(context, ratio, rectStyle)
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       for (let i = 1; i <= 8; i += 1) {
-        let style = pointStyle
+        let style
         if (i === self._highlightedHandle) {
           style = highPointStyle
+        } else {
+          style = pointStyle
         }
         style.color = assignColor(i)
         const point = self._shapes[i] as Point2D
-        point.draw(context, ratio, pointStyle)
+        point.draw(context, ratio, style)
       }
     }
   }

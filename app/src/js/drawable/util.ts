@@ -31,7 +31,8 @@ const COLOR_PALETTE = [
  * @param {number} ratio: blending ratio
  * @return {[number,number,number]}
  */
-function blendColor (rgb: number[], base: number[], ratio: number): number[] {
+export function blendColor (rgb: number[], base: number[], ratio: number):
+ number[] {
   const newRgb = [0, 0, 0]
   for (let i = 0; i < 3; i++) {
     newRgb[i] = Math.max(0,
