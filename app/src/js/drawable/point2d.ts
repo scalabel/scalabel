@@ -16,7 +16,7 @@ export function makePoint2DStyle (
     style: Partial<Point2DStyle> = {}): Point2DStyle {
   return {
     radius: 1,
-    color: [0, 0, 0, 1],
+    color: [0, 0, 0],
     ...style
   }
 }
@@ -39,6 +39,7 @@ export class Point2D extends Vector2D {
    */
   public draw (
     context: Context2D, ratio: number, style: Point2DStyle): void {
+    context.save()
     // convert to display resolution
     const real = this.clone().scale(ratio)
     context.beginPath()
@@ -46,5 +47,6 @@ export class Point2D extends Vector2D {
     context.arc(real.x, real.y, style.radius, 0, 2 * Math.PI, false)
     context.closePath()
     context.fill()
+    context.restore()
   }
 }
