@@ -161,8 +161,8 @@ export class Box2D extends Label2D {
     const rect = (this._shapes[0] as Rect2D).toRect()
     rect.x = x1
     rect.y = y1
-    rect.w = x2 - x1 + 1
-    rect.h = y2 - y1 + 1
+    rect.w = x2 - x1
+    rect.h = y2 - y1
     this.updateShapeValues(rect)
   }
 
@@ -257,14 +257,14 @@ export class Box2D extends Label2D {
 
     // vertices
     tl.set(x, y)
-    tr.set(x + w - 1, y)
-    bl.set(x, y + h - 1)
-    br.set(x + w - 1, y + h - 1)
+    tr.set(x + w, y)
+    bl.set(x, y + h)
+    br.set(x + w, y + h)
 
     // midpoints
-    tm.set(x + (w - 1) / 2, y)
-    bm.set(x + (w - 1) / 2, y + h - 1)
-    lm.set(x, y + (h - 1) / 2)
-    rm.set(x + w - 1, y + (h - 1) / 2)
+    tm.set(x + w / 2, y)
+    bm.set(x + w / 2, y + h)
+    lm.set(x, y + h / 2)
+    rm.set(x + w, y + h / 2)
   }
 }

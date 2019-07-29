@@ -30,8 +30,8 @@ test('Draw 2d boxes to label2d list', () => {
   let rect = getShape(state, 0, 0, 0) as RectType
   expect(rect.x).toEqual(1)
   expect(rect.y).toEqual(1)
-  expect(rect.w).toEqual(10)
-  expect(rect.h).toEqual(10)
+  expect(rect.w).toEqual(9)
+  expect(rect.h).toEqual(9)
 
   // Second box
   label2dList.onMouseDown(new Vector2D(19, 20), -1, 0)
@@ -44,8 +44,8 @@ test('Draw 2d boxes to label2d list', () => {
   rect = getShape(state, 0, 1, 0) as RectType
   expect(rect.x).toEqual(19)
   expect(rect.y).toEqual(20)
-  expect(rect.w).toEqual(12)
-  expect(rect.h).toEqual(10)
+  expect(rect.w).toEqual(11)
+  expect(rect.h).toEqual(9)
 
   // third box
   label2dList.onMouseDown(new Vector2D(4, 5), -1, 0)
@@ -57,8 +57,8 @@ test('Draw 2d boxes to label2d list', () => {
   rect = getShape(state, 0, 2, 0) as RectType
   expect(rect.x).toEqual(4)
   expect(rect.y).toEqual(5)
-  expect(rect.w).toEqual(20)
-  expect(rect.h).toEqual(20)
+  expect(rect.w).toEqual(19)
+  expect(rect.h).toEqual(19)
 
   // resize the second box
   label2dList.onMouseDown(new Vector2D(19, 20), 1, 1)
@@ -79,8 +79,8 @@ test('Draw 2d boxes to label2d list', () => {
   rect = getShape(state, 0, 1, 0) as RectType
   expect(rect.x).toEqual(30)
   expect(rect.y).toEqual(29)
-  expect(rect.w).toEqual(13)
-  expect(rect.h).toEqual(15)
+  expect(rect.w).toEqual(12)
+  expect(rect.h).toEqual(14)
 
   // move
   label2dList.onMouseDown(new Vector2D(32, 31), 1, 0)
@@ -90,8 +90,8 @@ test('Draw 2d boxes to label2d list', () => {
   rect = getShape(state, 0, 1, 0) as RectType
   expect(rect.x).toEqual(34)
   expect(rect.y).toEqual(30)
-  expect(rect.w).toEqual(13)
-  expect(rect.h).toEqual(15)
+  expect(rect.w).toEqual(12)
+  expect(rect.h).toEqual(14)
 
   // delete label
   Session.dispatch(action.deleteLabel(0, 1))
@@ -132,6 +132,6 @@ test('Draw label2d list to canvas', () => {
   const rect = getShape(state, 0, 0, 0) as RectType
   expect(rect.x).toEqual(1)
   expect(rect.y).toEqual(1)
-  expect(rect.w).toEqual(10)
-  expect(rect.h).toEqual(10)
+  expect(rect.w).toEqual(9)
+  expect(rect.h).toEqual(9)
 })
