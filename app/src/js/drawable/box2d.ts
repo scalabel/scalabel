@@ -159,10 +159,10 @@ export class Box2D extends Label2D {
     }
     // update the rectangle
     const rect = (this._shapes[0] as Rect2D).toRect()
-    rect.x = x1
-    rect.y = y1
-    rect.w = x2 - x1
-    rect.h = y2 - y1
+    rect.x1 = x1
+    rect.y1 = y1
+    rect.x2 = x2
+    rect.y2 = y2
     this.updateShapeValues(rect)
   }
 
@@ -176,11 +176,14 @@ export class Box2D extends Label2D {
     const [width, height] = [limit.width, limit.height]
     const rect = (this._shapes[0] as Rect2D).toRect()
     const delta = end.clone().substract(start)
-    rect.x += delta.x
-    rect.y += delta.y
+    const [rw, rh] = [rect.x2 - rect.x1, rect.y2 - rect.y1]
+    rect.x1 += delta.x
+    rect.y1 += delta.y
     // The rect should not go outside the frame limit
-    rect.x = Math.min(width - rect.w, Math.max(0, rect.x))
-    rect.y = Math.min(height - rect.h, Math.max(0, rect.y))
+    rect.x1 = Math.min(width - rw, Math.max(0, rect.x1))
+    rect.y1 = Math.min(height - rh, Math.max(0, rect.y1))
+    rect.x2 = rect.x1 + rw
+    rect.y2 = rect.y1 + rh
     this.updateShapeValues(rect)
   }
 
@@ -204,7 +207,7 @@ export class Box2D extends Label2D {
       if (this._labelId < 0) {
         const r = this.toRect()
         Session.dispatch(addBox2dLabel(
-          this._label.item, this._label.category, r.x, r.y, r.w, r.h))
+          this._label.item, this._label.category, r.x1, r.y1, r.x2, r.y2))
       } else {
         Session.dispatch(changeLabelShape(
           this._label.item, this._label.shapes[0], this.toRect()))
@@ -223,7 +226,7 @@ export class Box2D extends Label2D {
     })
     this._labelId = -1
     this._color = getColorById(state.current.maxLabelId + 1)
-    const rect = makeRect({ x: start.x, y: start.y, w: 0, h: 0 })
+    const rect = makeRect({ x1: start.x, y1: start.y, x2: 0, y2: 0 })
     this.updateShapes([rect])
     this.setSelected(true, 5)
   }
@@ -249,10 +252,10 @@ export class Box2D extends Label2D {
    */
   private updateShapeValues (rect: RectType): void {
     const [rect2d, tl, tm, tr, rm, br, bm, bl, lm] = this._shapes
-    const x = rect.x
-    const y = rect.y
-    const w = rect.w
-    const h = rect.h
+    const x = rect.x1
+    const y = rect.y1
+    const w = rect.x2 - rect.x1
+    const h = rect.y2 - rect.y1
     rect2d.set(x, y, w, h)
 
     // vertices

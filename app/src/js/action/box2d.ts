@@ -17,7 +17,7 @@ export function addBox2dLabel (
   itemIndex: number, category: number[],
   x: number, y: number, w: number, h: number): AddLabelAction {
   // create the rect object
-  const rect = makeRect({ x, y, w, h })
+  const rect = makeRect({ x1: x, y1: y, x2: w, y2: h })
   const label = makeLabel({ type: labels.BOX_2D, category })
   return actions.addLabel(itemIndex, label, [rect])
 }

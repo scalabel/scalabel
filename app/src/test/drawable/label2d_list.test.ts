@@ -28,10 +28,10 @@ test('Draw 2d boxes to label2d list', () => {
   let state = Session.getState()
   expect(_.size(state.items[0].labels)).toEqual(1)
   let rect = getShape(state, 0, 0, 0) as RectType
-  expect(rect.x).toEqual(1)
-  expect(rect.y).toEqual(1)
-  expect(rect.w).toEqual(9)
-  expect(rect.h).toEqual(9)
+  expect(rect.x1).toEqual(1)
+  expect(rect.y1).toEqual(1)
+  expect(rect.x2).toEqual(10)
+  expect(rect.y2).toEqual(10)
 
   // Second box
   label2dList.onMouseDown(new Vector2D(19, 20), -1, 0)
@@ -42,10 +42,10 @@ test('Draw 2d boxes to label2d list', () => {
   state = Session.getState()
   expect(_.size(state.items[0].labels)).toEqual(2)
   rect = getShape(state, 0, 1, 0) as RectType
-  expect(rect.x).toEqual(19)
-  expect(rect.y).toEqual(20)
-  expect(rect.w).toEqual(11)
-  expect(rect.h).toEqual(9)
+  expect(rect.x1).toEqual(19)
+  expect(rect.y1).toEqual(20)
+  expect(rect.x2).toEqual(30)
+  expect(rect.y2).toEqual(29)
 
   // third box
   label2dList.onMouseDown(new Vector2D(4, 5), -1, 0)
@@ -55,10 +55,10 @@ test('Draw 2d boxes to label2d list', () => {
   state = Session.getState()
   expect(_.size(state.items[0].labels)).toEqual(3)
   rect = getShape(state, 0, 2, 0) as RectType
-  expect(rect.x).toEqual(4)
-  expect(rect.y).toEqual(5)
-  expect(rect.w).toEqual(19)
-  expect(rect.h).toEqual(19)
+  expect(rect.x1).toEqual(4)
+  expect(rect.y1).toEqual(5)
+  expect(rect.x2).toEqual(23)
+  expect(rect.y2).toEqual(24)
 
   // resize the second box
   label2dList.onMouseDown(new Vector2D(19, 20), 1, 1)
@@ -68,8 +68,8 @@ test('Draw 2d boxes to label2d list', () => {
   state = Session.getState()
   expect(_.size(state.items[0].labels)).toEqual(3)
   rect = getShape(state, 0, 1, 0) as RectType
-  expect(rect.x).toEqual(16)
-  expect(rect.y).toEqual(17)
+  expect(rect.x1).toEqual(16)
+  expect(rect.y1).toEqual(17)
 
   // flip top left and bottom right corner
   label2dList.onMouseDown(new Vector2D(16, 17), 1, 1)
@@ -77,10 +77,10 @@ test('Draw 2d boxes to label2d list', () => {
   label2dList.onMouseUp(new Vector2D(40, 41), -1, 0)
   state = Session.getState()
   rect = getShape(state, 0, 1, 0) as RectType
-  expect(rect.x).toEqual(30)
-  expect(rect.y).toEqual(29)
-  expect(rect.w).toEqual(12)
-  expect(rect.h).toEqual(14)
+  expect(rect.x1).toEqual(30)
+  expect(rect.y1).toEqual(29)
+  expect(rect.x2).toEqual(42)
+  expect(rect.y2).toEqual(43)
 
   // move
   label2dList.onMouseDown(new Vector2D(32, 31), 1, 0)
@@ -88,10 +88,10 @@ test('Draw 2d boxes to label2d list', () => {
   label2dList.onMouseUp(new Vector2D(36, 32), -1, 0)
   state = Session.getState()
   rect = getShape(state, 0, 1, 0) as RectType
-  expect(rect.x).toEqual(34)
-  expect(rect.y).toEqual(30)
-  expect(rect.w).toEqual(12)
-  expect(rect.h).toEqual(14)
+  expect(rect.x1).toEqual(34)
+  expect(rect.y1).toEqual(30)
+  expect(rect.x2).toEqual(46)
+  expect(rect.y2).toEqual(44)
 
   // delete label
   Session.dispatch(action.deleteLabel(0, 1))
@@ -130,8 +130,8 @@ test('Draw label2d list to canvas', () => {
   const state = Session.getState()
   expect(_.size(state.items[0].labels)).toEqual(1)
   const rect = getShape(state, 0, 0, 0) as RectType
-  expect(rect.x).toEqual(1)
-  expect(rect.y).toEqual(1)
-  expect(rect.w).toEqual(9)
-  expect(rect.h).toEqual(9)
+  expect(rect.x1).toEqual(1)
+  expect(rect.y1).toEqual(1)
+  expect(rect.x2).toEqual(10)
+  expect(rect.y2).toEqual(10)
 })
