@@ -93,6 +93,7 @@ export class Label2DList {
     // remove any label not in the state
     self._labels = Object.assign({} as typeof self._labels,
         _.pick(self._labels, _.keys(item.labels)))
+    // update drawable label values
     _.forEach(item.labels, (label, key) => {
       const labelId = Number(key)
       if (!(labelId in self._labels)) {
@@ -100,6 +101,7 @@ export class Label2DList {
       }
       self._labels[labelId].updateState(state, itemIndex, labelId)
     })
+    // order the labels and assign order values
     self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })

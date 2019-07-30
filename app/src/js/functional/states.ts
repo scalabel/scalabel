@@ -38,10 +38,10 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
   return {
     id: -1,
     label: -1,
-    x: -1,
-    y: -1,
-    w: -1,
-    h: -1,
+    x1: -1,
+    y1: -1,
+    x2: -1,
+    y2: -1,
     ...params
   }
 }

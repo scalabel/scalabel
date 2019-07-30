@@ -76,7 +76,8 @@ export class Rect2D extends Vector {
 
   /** convert this drawable rect to a rect state */
   public toRect (): RectType {
-    return makeRect({ x: this.x, y: this.y, w: this.w, h: this.h })
+    return makeRect({
+      x1: this.x, y1: this.y, x2: this.x + this.w, y2: this.y + this.h})
   }
 
   /**

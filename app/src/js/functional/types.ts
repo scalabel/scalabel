@@ -39,13 +39,13 @@ export interface ShapeType {
 
 export interface RectType extends ShapeType {
   /** The x-coordinate of upper left corner */
-  x: number
+  x1: number
   /** The y-coordinate of upper left corner */
-  y: number
-  /** Width */
-  w: number
-  /** Height */
-  h: number
+  y1: number
+  /** The x-coordinate of lower right corner */
+  x2: number
+  /** The y-coordinate of lower right corner */
+  y2: number
 }
 
 export interface Vector3Type {
