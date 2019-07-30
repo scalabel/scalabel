@@ -469,6 +469,7 @@ export class ImageView extends Canvas2d<Props> {
       const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
       this._labels.onMouseDown(mousePos, labelIndex, handleIndex)
     }
+    this.redrawLabels()
   }
 
   /**
@@ -485,6 +486,7 @@ export class ImageView extends Canvas2d<Props> {
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     this._labels.onMouseUp(mousePos, labelIndex, handleIndex)
+    this.redrawLabels()
   }
 
   /**

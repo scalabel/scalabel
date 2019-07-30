@@ -2,8 +2,10 @@ import uuid from 'uuid/v4'
 import * as labels from '../common/label_types'
 import {
   ConfigType, CubeType,
-  CurrentType, ImageViewerConfigType, ItemType,
-  LabelType, LayoutType, PointCloudViewerConfigType, RectType,
+  CurrentType, ImageViewerConfigType, IndexedShapeType,
+  ItemType, LabelType, LayoutType, PointCloudViewerConfigType,
+  RectType,
+  ShapeType,
   State
 } from './types'
 
@@ -36,8 +38,6 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
  */
 export function makeRect (params: Partial<RectType> = {}): RectType {
   return {
-    id: -1,
-    label: -1,
     x1: -1,
     y1: -1,
     x2: -1,
@@ -53,12 +53,23 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
  */
 export function makeCube (params: {} = {}): CubeType {
   return {
-    id: -1,
-    label: -1,
     center: { x: 0, y: 0, z: 0 },
     size: { x: 1, y: 1, z: 1 },
     orientation: { x: 0, y: 0, z: 0 },
     ...params
+  }
+}
+
+/**
+ * Compose indexed shape
+ * @param {number} id
+ * @param {number} label
+ * @param {ShapeType} shape
+ */
+export function makeIndexedShape (
+    id: number, label: number, shape: ShapeType): IndexedShapeType {
+  return {
+    id, label: [label], shape: { ...shape }
   }
 }
 
