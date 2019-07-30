@@ -62,5 +62,5 @@ export function setCurrentItemViewerConfig (
 export function getShape (state: State, itemIndex: number,
                           labelId: number, shapeIndex: number): ShapeType {
   return state.items[itemIndex].shapes[
-    state.items[itemIndex].labels[labelId].shapes[shapeIndex]]
+    state.items[itemIndex].labels[labelId].shapes[shapeIndex]].shape
 }

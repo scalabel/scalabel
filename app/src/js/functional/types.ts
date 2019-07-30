@@ -30,14 +30,7 @@ export interface Track {
   labels: Array<[number, number]>
 }
 
-export interface ShapeType {
-  /** ID of the shape */
-  id: number
-  /** Label ID of the shape */
-  label: number
-}
-
-export interface RectType extends ShapeType {
+export interface RectType {
   /** The x-coordinate of upper left corner */
   x1: number
   /** The y-coordinate of upper left corner */
@@ -57,13 +50,24 @@ export interface Vector3Type {
   z: number
 }
 
-export interface CubeType extends ShapeType {
+export interface CubeType {
   /** Center of the cube */
   center: Vector3Type
   /** size */
   size: Vector3Type
   /** orientation */
   orientation: Vector3Type
+}
+
+export type ShapeType = RectType | CubeType
+
+export interface IndexedShapeType {
+  /** ID of the shape */
+  id: number
+  /** Label ID of the shape */
+  label: [number]
+  /** Shape data */
+  shape: ShapeType
 }
 
 export interface ImageViewerConfigType {
@@ -105,7 +109,7 @@ export interface ItemType {
   /** Labels of the item */
   labels: {[key: number]: LabelType} // list of label
   /** shapes of the labels on this item */
-  shapes: {[key: number]: ShapeType}
+  shapes: {[key: number]: IndexedShapeType}
   /** Configurations of the viewer */
   viewerConfig: ViewerConfigType
 }

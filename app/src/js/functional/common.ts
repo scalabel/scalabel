@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import * as types from '../action/types'
+import { makeIndexedShape } from './states'
 import {
   State
 } from './types'
@@ -44,7 +45,7 @@ export function addLabel (state: State, action: types.AddLabelAction): State {
   const labelId = state.current.maxLabelId + 1
   const shapeIds = _.range(shapes.length).map((i) => i + newShapeId)
   const newShapes = shapes.map(
-    (s, i) => updateObject(s, { label: labelId, id: shapeIds[i] }))
+    (s, i) => makeIndexedShape(shapeIds[i], labelId, s))
   const order = state.current.maxOrder + 1
   label = updateObject(label, {id: labelId, item: itemIndex, order,
     shapes: label.shapes.concat(shapeIds)})
@@ -83,13 +84,13 @@ export function changeShape (
   const itemIndex = action.itemIndex
   const shapeId = action.shapeId
   let item = state.items[itemIndex]
-  let shape = item.shapes[shapeId]
-  const props = updateObject(action.props, { id: shapeId, label: shape.label })
-  shape = updateObject(shape, props)
+  let indexedShape = item.shapes[shapeId]
+  indexedShape = updateObject(
+    indexedShape, { shape: updateObject(indexedShape.shape, action.props) })
   item = updateObject(
-      item, { shapes: updateObject(item.shapes, { [shapeId]: shape }) })
+      item, { shapes: updateObject(item.shapes, { [shapeId]: indexedShape }) })
   const selectedLabelId = (action.sessionId === state.config.sessionId) ?
-    shape.label : state.current.label
+    indexedShape.label[0] : state.current.label
   const current = updateObject(state.current, { label: selectedLabelId })
   const items = updateListItem(state.items, itemIndex, item)
   return { ...state, items, current }
