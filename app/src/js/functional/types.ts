@@ -8,7 +8,7 @@ export interface LabelType {
   /** The category ID */
   category: number[]
   /** Attributes */
-  attributes: {[key: number]: number[]}
+  attributes: { [key: number]: number[] }
   /** Parent label ID */
   parent: number
   /** Children label IDs */
@@ -93,7 +93,7 @@ export interface PointCloudViewerConfigType {
 }
 
 export type ViewerConfigType =
-    ImageViewerConfigType | PointCloudViewerConfigType | null
+        ImageViewerConfigType | PointCloudViewerConfigType | null
 
 export interface ItemType {
   /** The ID of the item */
@@ -107,7 +107,7 @@ export interface ItemType {
   /** Whether or not the item is loaded */
   loaded: boolean
   /** Labels of the item */
-  labels: {[key: number]: LabelType} // list of label
+  labels: { [key: number]: LabelType } // list of label
   /** shapes of the labels on this item */
   shapes: {[key: number]: IndexedShapeType}
   /** Configurations of the viewer */
@@ -200,12 +200,46 @@ export interface State {
   /** Items */
   items: ItemType[]
   /** tracks */
-  tracks: {[key: number]: Track}
+  tracks: { [key: number]: Track }
   /** Layout */
   layout: LayoutType
 }
 
-export type LabelFunctionalType =
-    (id: number, itemId: number, attributes: object) => LabelType
+export interface ProjectMetaData {
+  /** project name */
+  name: string
+  /** item type */
+  itemType: string
+  /** label type */
+  labelType: string
+  /** task size */
+  taskSize: number
+  /** number of items */
+  numItems: number
+  /** number of categories */
+  numLeafCategories: number
+  /** number of attributes */
+  numAttributes: number
+}
 
+export interface TaskMetaData {
+  /** number of labeled images */
+  numLabeledImages: string
+  /** number of labels */
+  numLabels: string
+  /** if the task was submitted */
+  submitted: boolean
+  /** task link handler url */
+  handlerUrl: string
+}
+
+export interface DashboardContents {
+  /** project metadata */
+  projectMetaData: ProjectMetaData
+  /** tasks */
+  taskMetaDatas: TaskMetaData[]
+}
+
+export type LabelFunctionalType =
+        (id: number, itemId: number, attributes: object) => LabelType
 export type ItemFunctionalType = (id: number, url: string) => ItemType

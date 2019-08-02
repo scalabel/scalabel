@@ -192,6 +192,7 @@ func main() {
 	http.HandleFunc("/logOut", WrapHandleFunc(logOutHandler))
 	http.HandleFunc("/postUsers", WrapHandleFunc(postUsersHandler))
 	http.HandleFunc("/postProjectNames", WrapHandleFunc(postProjectNamesHandler))
+	http.HandleFunc("/postDashboardContents", WrapHandleFunc(postDashboardContentsHandler))
 
 	// Simple static handlers can be generated with MakePathHandleFunc
 	// http.HandleFunc("/create", WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))

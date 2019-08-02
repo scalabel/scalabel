@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,6 +12,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
+	uuid "github.com/satori/go.uuid"
 )
 
 // TODO: use actual worker ID
@@ -45,8 +46,8 @@ func GetExistingProjects() []string {
 		name := f.Name()
 		// remove hidden files and the config file
 		if !strings.ContainsAny(name, ".") {
-	 		names = append(names, name)
-	 	}
+			names = append(names, name)
+		}
 	}
 	return names
 }
@@ -158,9 +159,30 @@ func GetDashboardContents(projectName string) (DashboardContents, error) {
 	if err != nil {
 		return DashboardContents{}, err
 	}
+	projectMetaData := ProjectMetaData{
+		Name:              project.Options.Name,
+		ItemType:          project.Options.ItemType,
+		LabelType:         project.Options.LabelType,
+		TaskSize:          project.Options.TaskSize,
+		NumItems:          len(project.Items),
+		NumLeafCategories: project.Options.NumLeafCategories,
+		NumAttributes:     len(project.Options.Attributes),
+	}
+	taskMetaDatas := []TaskMetaData{}
+	/* Iterate of tasks to send meta data for each one, instead of sending the entire
+	task and doing this work later */
+	for index, task := range tasks {
+		taskMetaData := TaskMetaData{
+			NumLabeledImages: countLabeledImages(projectName, index),
+			NumLabels:        countLabelsInTask(projectName, index),
+			Submitted:        taskSubmitted(projectName, index),
+			HandlerUrl:       task.ProjectOptions.HandlerUrl,
+		}
+		taskMetaDatas = append(taskMetaDatas, taskMetaData)
+	}
 	return DashboardContents{
-		Project: project,
-		Tasks:   tasks,
+		ProjectMetaData: projectMetaData,
+		TaskMetaDatas:   taskMetaDatas,
 	}, nil
 }
 
@@ -279,9 +301,9 @@ func countLabelsInTask(projectName string, index int) int {
 	if assignment.Task.ProjectOptions.ItemType == "video" {
 		numLabels = 0
 		for _, label := range assignment.Labels {
-		    if label.Keyframe {
-		        numLabels += 1
-		    }
+			if label.Keyframe {
+				numLabels += 1
+			}
 		}
 	}
 	return numLabels

@@ -1,44 +1,17 @@
 import { Theme } from '@material-ui/core/styles'
 import createStyles from '@material-ui/core/styles/createStyles'
-import { defaultAppBar, defaultHeader } from './general'
 
-const drawerWidth = 240
 const fullWidth = 700
 
 // Styles for the create page
-export const createStyle = (theme: Theme) => createStyles({
-  root: {
-    display: 'flex'
-  },
-  appBar: {
-    ...defaultAppBar,
-    zIndex: theme.zIndex.drawer + 1
-  },
-
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0
-  },
-
-  drawerPaper: {
-    width: drawerWidth,
-    background: theme.palette.secondary.main
-  },
-
-  drawerHeader: {
-    ...defaultHeader
-  },
-
-  content: {
-    marginTop: theme.spacing(2),
-    flexGrow: 1,
-    padding: theme.spacing(3)
-  },
-
+export const createStyle = () => createStyles({
   listHeader: {
     textAlign: 'center'
-  },
+  }
+})
 
+// Styles for sidebar project list
+export const projectListStyle = (theme: Theme) => createStyles({
   coloredListItem: {
     backgroundColor: theme.palette.secondary.light
   }
@@ -46,7 +19,10 @@ export const createStyle = (theme: Theme) => createStyles({
 
 // Styles for the create form
 export const formStyle = (theme: Theme) => createStyles({
-
+  root: {
+    padding: theme.spacing(3),
+    marginTop: theme.spacing(2)
+  },
   fullWidthText: {
     width: fullWidth
   },

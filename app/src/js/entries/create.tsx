@@ -8,4 +8,4 @@ ReactDOM.render(
   <MuiThemeProvider theme={myTheme}>
     <Create />
   </MuiThemeProvider>
-  , document.getElementById('create'))
+  , document.getElementById('create-root'))

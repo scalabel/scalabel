@@ -51,12 +51,12 @@ func (project *Project) GetFields() map[string]interface{} {
 
 //implements Serializable
 type Task struct {
-	ProjectOptions ProjectOptions `json:"projectOptions" yaml:"projectOptions"`
-	Index          int            `json:"index" yaml:"index"`
-	Items          []Item         `json:"items" yaml:"items"`
-	NumFrames      int            `json:"numFrames" yaml:"numFrames"`
-	NumLabelImport int 			  `json:"numLabelImport" yaml:"numLabelImport"`
-	NumLabeledItemImport int 			  `json:"numLabeledItemImport" yaml:"numLabeledItemImport"`
+	ProjectOptions       ProjectOptions `json:"projectOptions" yaml:"projectOptions"`
+	Index                int            `json:"index" yaml:"index"`
+	Items                []Item         `json:"items" yaml:"items"`
+	NumFrames            int            `json:"numFrames" yaml:"numFrames"`
+	NumLabelImport       int            `json:"numLabelImport" yaml:"numLabelImport"`
+	NumLabeledItemImport int            `json:"numLabeledItemImport" yaml:"numLabeledItemImport"`
 }
 
 func (task *Task) GetKey() string {
@@ -65,11 +65,11 @@ func (task *Task) GetKey() string {
 
 func (task *Task) GetFields() map[string]interface{} {
 	return map[string]interface{}{
-		"ProjectOptions": task.ProjectOptions,
-		"Index":          task.Index,
-		"Items":          task.Items,
-		"NumFrames":      task.NumFrames,
-		"NumLabelImport": task.NumLabelImport,
+		"ProjectOptions":       task.ProjectOptions,
+		"Index":                task.Index,
+		"Items":                task.Items,
+		"NumFrames":            task.NumFrames,
+		"NumLabelImport":       task.NumLabelImport,
 		"NumLabeledItemImport": task.NumLabeledItemImport,
 	}
 }
@@ -92,6 +92,11 @@ type Assignment struct {
 type GatewayInfo struct {
 	Addr string `json:"Addr"`
 	Port string `json:"Port"`
+}
+
+// Page data sent from the frontend, used in sending dashboard contents
+type PageData struct {
+	Name string `json:"name"`
 }
 
 func (assignment *Assignment) GetKey() string {
@@ -139,6 +144,29 @@ type ProjectOptions struct {
 	Detections        []Detection   `json:"detections" yaml:"detections"`
 	BundleFile        string        `json:"bundleFile" yaml:"bundleFile"`
 	Submitted         bool          `json:"submitted" yaml:"submitted"`
+}
+
+/* Contains meta data about project, used for dashboard contents. This
+is better than using project options as this contains the minimal amount of
+data needed for the dashboard. */
+type ProjectMetaData struct {
+	Name              string `json:"name"`
+	ItemType          string `json:"itemType"`
+	LabelType         string `json:"labelType"`
+	TaskSize          int    `json:"taskSize"`
+	NumItems          int    `json:"numItems"`
+	NumLeafCategories int    `json:"numLeafCategories"`
+	NumAttributes     int    `json:"numAttributes"`
+}
+
+/* Contains meta data about tasks, used for dashboard conents. This
+is better than sending all of the tasks, as this contains the minimal amount
+of data needed for the dashboard. */
+type TaskMetaData struct {
+	NumLabeledImages int    `json:"numLabeledImages"`
+	NumLabels        int    `json:"numLabels"`
+	Submitted        bool   `json:"submitted"`
+	HandlerUrl       string `json:"handlerUrl"`
 }
 
 // An item is something to be annotated e.g. Image, PointCloud
@@ -193,8 +221,8 @@ type Event struct {
 
 // Contains all the info needed in the dashboards
 type DashboardContents struct {
-	Project Project `json:"project" yaml:"project"`
-	Tasks   []Task  `json:"tasks" yaml:"tasks"`
+	ProjectMetaData ProjectMetaData `json:"projectMetaData" yaml:"projectMetaData"`
+	TaskMetaDatas   []TaskMetaData  `json:"taskMetaDatas" yaml:"taskMetaDatas"`
 }
 
 type TaskURL struct { //shared type
@@ -282,40 +310,24 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
-	// use template to insert assignment links
-	funcMap := template.FuncMap{"countLabeledImages": countLabeledImages,
-		"countLabelsInTask": countLabelsInTask, "taskSubmitted": taskSubmitted}
-	tmpl, err := template.New("dashboard.html").Funcs(funcMap).ParseFiles(
-		path.Join(env.DashboardPath()))
+	tmpl, err := template.ParseFiles(path.Join(env.DashboardPath()))
 	if err != nil {
 		Error.Println(err)
 		http.NotFound(w, r)
 		return
-	}
-	dashboardContents, err := GetDashboardContents(r.FormValue("project_name"))
-	if err != nil {
-		Error.Println(err)
 	} else {
-		// Info.Println(dashboardContents.Tasks) // project is too verbose to log
-		tmpl.Execute(w, dashboardContents)
+		tmpl.Execute(w, "")
 	}
 }
 
 func vendorHandler(w http.ResponseWriter, r *http.Request) {
-	funcMap := template.FuncMap{"countLabeledImages": countLabeledImages,
-		"countLabelsInTask": countLabelsInTask, "taskSubmitted": taskSubmitted}
-	tmpl, err := template.New("vendor.html").Funcs(funcMap).ParseFiles(env.VendorPath())
+	tmpl, err := template.ParseFiles(env.VendorPath())
 	if err != nil {
 		Error.Println(err)
 		http.NotFound(w, r)
 		return
-	}
-	dashboardContents, err := GetDashboardContents(r.FormValue("project_name"))
-	if err != nil {
-		Error.Println(err)
 	} else {
-		// Info.Println(dashboardContents.Tasks) // project is too verbose to log
-		tmpl.Execute(w, dashboardContents)
+		tmpl.Execute(w, "")
 	}
 }
 
@@ -875,11 +887,11 @@ func CreateTasks(project Project) {
 				}
 			}
 			task := Task{
-				ProjectOptions: project.Options,
-				Index:          index,
-				Items:          itemList,
-				NumFrames:      len(itemList),
-				NumLabelImport: numLabelImport,
+				ProjectOptions:       project.Options,
+				Index:                index,
+				Items:                itemList,
+				NumFrames:            len(itemList),
+				NumLabelImport:       numLabelImport,
 				NumLabeledItemImport: numLabeledItemImport,
 			}
 			index += 1
@@ -909,11 +921,11 @@ func CreateTasks(project Project) {
 				}
 			}
 			task := Task{
-				ProjectOptions: project.Options,
-				Index:          index,
-				Items:          itemsSlice,
-				NumFrames:      len(itemsSlice),
-				NumLabelImport: numLabelImport,
+				ProjectOptions:       project.Options,
+				Index:                index,
+				Items:                itemsSlice,
+				NumFrames:            len(itemsSlice),
+				NumLabelImport:       numLabelImport,
 				NumLabeledItemImport: numLabeledItemImport,
 			}
 			index = index + 1
@@ -1176,4 +1188,29 @@ func postProjectNamesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// send to front end
 	w.Write(projectsNames)
+}
+
+// Handles the posting of dashboard contents
+func postDashboardContentsHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		Error.Println(err)
+	}
+	pageData := PageData{}
+	err = json.Unmarshal(body, &pageData)
+	if err != nil {
+		Error.Println(err)
+	}
+	dashboardContents, err := GetDashboardContents(pageData.Name)
+	if err != nil {
+		Error.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+	jsonDashboardContents, err := json.Marshal(dashboardContents)
+	if err != nil {
+		Error.Println(err)
+	} else {
+		w.Write(jsonDashboardContents)
+	}
 }

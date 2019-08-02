@@ -10,6 +10,8 @@ import { attributeStyle, checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
 interface ClassType {
+  /** root class */
+  root: string
   /** select class */
   selectEmpty: string
   /** full length text class */
@@ -86,6 +88,7 @@ export default class CreateForm extends React.Component<Props, State> {
   public render () {
     const { classes } = this.props
     return (
+            <div className={classes.root}>
             <form onSubmit={this.handleSubmit} data-testid='create-form'>
               <FormGroup row={true} className={classes.formGroup}>
                 <TextField
@@ -278,6 +281,7 @@ export default class CreateForm extends React.Component<Props, State> {
                         : null}
               </FormGroup>
             </form>
+            </div>
     )
   }
 

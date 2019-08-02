@@ -1,6 +1,6 @@
 import { myTheme } from './theme'
 
-// File for general styles which are used for multi-page components
+// general styles which are used for in components across all pages
 
 export const defaultAppBar = {
   background: myTheme.palette.primary.dark,

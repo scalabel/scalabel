@@ -1,21 +1,34 @@
 import { Grid, Link } from '@material-ui/core'
 import ListItem from '@material-ui/core/ListItem'
+import { withStyles } from '@material-ui/core/styles'
 import React from 'react'
 import { getProjects, toProject } from '../common/service'
-import { Props, State } from './create_project'
+import { projectListStyle } from '../styles/create'
+
+interface ClassType {
+  /** style for a colored entry */
+  coloredListItem: string
+}
 
 // props for project list
-interface ProjectListProps extends Props {
+interface ProjectListProps {
+  /** Project List classes */
+  classes: ClassType
   /** refresh boolean */
   refresh: boolean
+}
+
+interface ProjectListState {
+  /** boolean which when changed forces a refresh */
+  reloadProjects: boolean
 }
 
 /** Project list sidebar component. Re-renders after
  *  submission
  * @param props
  */
-export default class ProjectList extends React.Component
-        <ProjectListProps, State> {
+class ProjectList extends React.Component
+        <ProjectListProps, ProjectListState> {
 
   /** receive data from backend */
   private projectsToExpress = getProjects()
@@ -70,3 +83,5 @@ export default class ProjectList extends React.Component
             </div>)
   }
 }
+
+export default withStyles(projectListStyle)(ProjectList)

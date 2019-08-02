@@ -116,14 +116,14 @@ function Dashboard (props: {
                 Projects
             </Typography>
             <Typography component='div' className={classes.chartContainer}>
-                <ProjectTableDisplay classes = {tableStyles}/>
+                <ProjectTableDisplay/>
             </Typography>
             <div><br/></div>
             <Typography variant='h6' gutterBottom component='h2'>
                 Users Lists
             </Typography>
             <Typography component='div' className={classes.chartContainer}>
-                <WorkersTableDisplay classes = {tableStyles}/>
+                <WorkersTableDisplay/>
             </Typography>
         </main>
     </div>)

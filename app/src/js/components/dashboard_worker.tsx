@@ -79,7 +79,7 @@ function Dashboard (props: any) {
             Projects
           </Typography>
           <Typography component='div' className={classes.chartContainer}>
-            <DashboardTable classes = {tableStyles}/>
+            <DashboardTable/>
           </Typography>
         </main>
       </div>
