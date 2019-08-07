@@ -4,6 +4,7 @@ import argparse
 import glob
 from os.path import join
 import yaml
+import shutil
 
 
 def parse_arguments():
@@ -14,6 +15,8 @@ def parse_arguments():
                         help='target folder to save the frames')
     parser.add_argument('--fps', '-f', type=int, default=5,
                         help='the target frame rate.')
+    parser.add_argument('--scratch', action='store_true',
+                        help='ignore non-empty folder.')
 
     # Specify S3 bucket path
     parser.add_argument('--s3', type=str, default='',
@@ -80,7 +83,8 @@ def prepare_data(args):
         {
             'url': os.path.abspath(img) if not args.web_root else
             join(args.web_root, os.path.basename(img)),
-            'videoName':  '{}-{}'.format(*img.split('/')[-1].split('-')[:-1])
+            'videoName':  '{}'.format(
+                '-'.join(os.path.split(img)[-1].split('-')[:-1]))
         }
         for img in file_list]
 
@@ -128,7 +132,10 @@ def s3_setup(args):
 def main():
     args = parse_arguments()
     if args.tar_dir:
-        os.makedirs(args.tar_dir, exist_ok=True)
+        if args.scratch and os.path.exists(args.tar_dir):
+            print('[INFO] Remove existing target directory')
+            shutil.rmtree(args.tar_dir)
+        os.makedirs(args.tar_dir)
 
     output = prepare_data(args)
     if output is not None:
