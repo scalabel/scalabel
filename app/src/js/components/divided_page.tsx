@@ -1,16 +1,10 @@
-import AppBar from '@material-ui/core/AppBar'
-import CssBaseline from '@material-ui/core/CssBaseline'
 import Drawer from '@material-ui/core/Drawer'
 import { withStyles } from '@material-ui/core/styles'
-import Toolbar from '@material-ui/core/Toolbar'
 import React, { ReactNode } from 'react'
 import { dividedPageStyle } from '../styles/navigation_page'
+import HeaderPage from './header_page'
 
 export interface ClassType {
-  /** root class */
-  root: string
-  /** top bar on page */
-  appBar: string
   /** sidebar class */
   drawer: string
   /** sidebar background */
@@ -19,6 +13,8 @@ export interface ClassType {
   drawerHeader: string
   /** class for main content */
   content: string
+  /** app bar spacer class */
+  appBarSpacer: string
 }
 
 export interface DividedPageProps {
@@ -42,16 +38,8 @@ export interface DividedPageProps {
  */
 function DividedPage (props: DividedPageProps) {
   const { classes, children } = props
-  return (
-          <div className={classes.root}>
-            <CssBaseline/>
-            <AppBar
-                    className={classes.appBar}
-            >
-              <Toolbar>
-                {children.headerContent}
-              </Toolbar>
-            </AppBar>
+  const mainPageContent = (
+          <React.Fragment>
             <Drawer
                     className={classes.drawer}
                     variant='permanent'
@@ -63,13 +51,20 @@ function DividedPage (props: DividedPageProps) {
               <div className={classes.drawerHeader}/>
               {children.sidebarContent}
             </Drawer>
-
             <main className={classes.content}>
+              <div className={classes.appBarSpacer}/>
               {children.mainContent}
             </main>
-          </div>
+          </React.Fragment>
+  )
+  return (
+          <HeaderPage children={{
+            headerContent: children.headerContent,
+            pageContent: mainPageContent
+          }}
+          />
   )
 }
 
-/** export Dashboard page */
+/** export divided page */
 export default withStyles(dividedPageStyle, { withTheme: true })(DividedPage)

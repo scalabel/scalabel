@@ -243,3 +243,16 @@ export interface DashboardContents {
 export type LabelFunctionalType =
         (id: number, itemId: number, attributes: object) => LabelType
 export type ItemFunctionalType = (id: number, url: string) => ItemType
+
+export interface User {
+  /** User ID */
+  id: string
+  /** User email */
+  email: string
+  /** User group */
+  group: string
+  /** User refresh token */
+  refreshToken: string
+  /** User's projects */
+  projects: string[]
+}

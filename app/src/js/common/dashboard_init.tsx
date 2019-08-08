@@ -16,7 +16,6 @@ export function initDashboard (vendor?: boolean) {
       dashboardContents = JSON.parse(xhr.responseText)
       ReactDOM.render(
               <MuiThemeProvider theme={myTheme}>
-                <p> .Project.Options.Name </p>
                 <Dashboard dashboardContents={dashboardContents}
                            vendor={vendor}/>
               </MuiThemeProvider>

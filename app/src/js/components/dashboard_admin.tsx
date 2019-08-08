@@ -1,209 +1,95 @@
-// tslint:disable:no-any
-// TODO: remove the disable tag
-import AppBar from '@material-ui/core/AppBar'
-import CssBaseline from '@material-ui/core/CssBaseline'
+import { List, ListItemIcon } from '@material-ui/core'
 import Divider from '@material-ui/core/Divider'
-import Drawer from '@material-ui/core/Drawer'
-import IconButton from '@material-ui/core/IconButton'
-// lists
-import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
-import Paper from '@material-ui/core/Paper'
-import { MuiThemeProvider, withStyles } from '@material-ui/core/styles'
-// icons
-import SvgIcon from '@material-ui/core/SvgIcon'
-// table
-import Table from '@material-ui/core/Table'
-import TableBody from '@material-ui/core/TableBody'
-import TableCell from '@material-ui/core/TableCell'
-import TableHead from '@material-ui/core/TableHead'
-import TableRow from '@material-ui/core/TableRow'
-import Toolbar from '@material-ui/core/Toolbar'
+import { withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import CreateIcon from '@material-ui/icons/Create'
-import classNames from 'classnames'
 import React from 'react'
-import {
-    getProjects,
-    getUsers,
-    goCreate,
-    logout,
-    toProject
-} from '../common/service'
-import {
-    dashboardStyles,
-    tableCellStyles,
-    tableStyles
-} from '../styles/dashboard'
-import theme from '../styles/theme'
+import { getProjects, getUsers, goCreate } from '../common/service'
+import { User } from '../functional/types'
+import { dashboardStyles } from '../styles/dashboard'
+import DashboardHeader from './dashboard_header'
+import { DashboardClassType } from './dashboard_worker'
+import DataTable from './data_table'
+import DividedPage from './divided_page'
 
-/* Retrieve data from backend */
-const usersToExpress = getUsers()
-const projectsToExpress = getProjects()
-
-/* Theme for dashboard, set main color as grey */
-const myTheme = theme({ palette: { primary: { main: '#616161' } } })
-
-/* Sidebar: mainList */
-export const mainListItems = (
-  <div>
-    <ListItem button onClick={goCreate}>
-      <ListItemIcon>
-        <CreateIcon />
-      </ListItemIcon>
-      <ListItemText primary='Create new project' />
-    </ListItem>
-  </div>
-)
+interface AdminClassType extends DashboardClassType {
+  /** admin root */
+  adminRoot: string
+}
 
 /**
  * This is Dashboard component that displays
- * the everything post in the dashboard.
- * @param {Object} props
+ * the admin dashboard.
+ * @param {object} props
  * @return component
  */
 function Dashboard (props: {
-  /** styles of Dashboard */
-  classes: any; }) {
+  /** style of admin dashboard */
+  classes: AdminClassType
+}) {
   const { classes } = props
-    /**
-     * render function
-     * @return component
-     */
-  return (
-    <div className={classes.root}>
-        <CssBaseline/>
-        <AppBar
-            position='absolute'
-            className={classNames(classes.appBar)}
-        >
-            <Toolbar className={classes.toolbar}>
-                <Typography
-                    component='h1'
-                    variant='h6'
-                    color='inherit'
-                    noWrap
-                    className={classes.title}
-                >
-                    Scalabel Admin Dashboard
-                </Typography>
-                <IconButton className={classes.logout} onClick={logout}>
-                  <SvgIcon >
-                      <path d='M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67
-                    11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2
-                    2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9
-                    2-2V5c0-1.1-.9-2-2-2z' fill='#ffffff'/>
-                  </SvgIcon>
-                </IconButton>
-            </Toolbar>
-        </AppBar>
-        <Drawer
-            variant='permanent'
-            classes={{
-              paper: classNames(classes.drawerPaper)
-            }}
-        >
-            <div className={classes.toolbarIcon}/>
-            <Divider/>
-            <List>{mainListItems}</List>
-            <Divider/>
-        </Drawer>
-        <main className={classes.content}>
-            <div className={classes.appBarSpacer}/>
-            <Typography variant='h6' gutterBottom component='h2'>
-                Projects
-            </Typography>
-            <Typography component='div' className={classes.chartContainer}>
-                <ProjectTableDisplay/>
-            </Typography>
-            <div><br/></div>
-            <Typography variant='h6' gutterBottom component='h2'>
-                Users Lists
-            </Typography>
-            <Typography component='div' className={classes.chartContainer}>
-                <WorkersTableDisplay/>
-            </Typography>
-        </main>
-    </div>)
-}
+  const headerContent = (
+          <DashboardHeader admin/>
+  )
+  let usersToDisplay: User[]
+  const users = getUsers()
+  if (users.length > 0) {
+    usersToDisplay = users
+  } else {
+    usersToDisplay = [{
+      email: 'no user data available', group: '0',
+      id: '', projects: [''], refreshToken: ''
+    }]
+  }
+  const sidebarContent = (
+          <List>
+            <ListItem button
+                      onClick = {goCreate}
+            >
+              <ListItemIcon>
+                <CreateIcon/>
+              </ListItemIcon>
+              <ListItemText primary={'Create new project'}/>
+            </ListItem>
 
-const DashboardTableCell = withStyles(tableCellStyles)(TableCell)
-
-/**
- * This is projectTable component that displays
- * all the information about projects
- * @param {object} Props
- * @return component
- */
-const ProjectTable = (Props: {
-  /** styles of ProjectTable */
-  classes: any; }) => {
-  const { classes } = Props
+          </List>
+  )
+  const mainContent = (
+          <div className={classes.adminRoot}>
+            <Typography variant='h6' component='h2'
+                        className={classes.labelText}>
+              Projects
+            </Typography>
+            <Divider/>
+            <DataTable dataList={getProjects()}
+                       headers={[{ header: 'Project', align: 'left' }]}
+            />
+            <Typography variant='h6' component='h2'
+                        className={classes.labelText}>
+              Users
+            </Typography>
+            <Divider/>
+            <DataTable dataList={usersToDisplay}
+                       headers={[{ header: 'Email', align: 'left' },
+                         { header: 'Group', align: 'right' }]}
+            />
+          </div>
+  )
+  /**
+   * render function
+   * @return component
+   */
   return (
-    <Paper className={classes.root}>
-      <Table className={classes.table}>
-        <MuiThemeProvider theme={myTheme}>
-          <TableHead >
-            <TableRow>
-              <DashboardTableCell>Projects</DashboardTableCell>
-            </TableRow>
-          </TableHead>
-        </MuiThemeProvider>
-        <TableBody>
-          {projectsToExpress.map((row, i) => (
-            <TableRow className={classes.row} key={i}>
-              <DashboardTableCell className={'align'} onClick={() => {
-                toProject(row)
-              }} component='th' scope='row'>
-                {row}
-              </DashboardTableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Paper>
+          <DividedPage children={{
+            headerContent,
+            sidebarContent,
+            mainContent
+          }}
+          />
   )
 }
-
-const ProjectTableDisplay = withStyles(tableStyles)(ProjectTable)
-
-/**
- * This is WorkersTable component that displays
- * all the information about workers
- * @param props
- * @return component
- */
-const WorkersTable = (props: {
-  /** styles of ProjectTable */
-  classes: any; }) => {
-  const { classes } = props
-  return (
-    <Paper className={classes.root}>
-      <Table className={classes.table}>
-        <TableHead>
-          <TableRow>
-            <DashboardTableCell>Email</DashboardTableCell>
-            <DashboardTableCell align='right'>Group</DashboardTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {usersToExpress.map((row, i) => (
-            <TableRow className={classes.row} key={i}>
-              <DashboardTableCell component='th' scope='row'>
-                {row.Email}
-              </DashboardTableCell>
-              <DashboardTableCell align='right'>{row.Group}</DashboardTableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Paper>
-  )
-}
-
-const WorkersTableDisplay = withStyles(tableStyles)(WorkersTable)
 
 /** export Dashboard */
-export default withStyles(dashboardStyles)(Dashboard)
+export default withStyles(dashboardStyles, { withTheme: true })(Dashboard)

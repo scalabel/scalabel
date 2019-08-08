@@ -20,8 +20,8 @@ export const projectListStyle = (theme: Theme) => createStyles({
 // Styles for the create form
 export const formStyle = (theme: Theme) => createStyles({
   root: {
-    padding: theme.spacing(3),
-    marginTop: theme.spacing(2)
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3)
   },
   fullWidthText: {
     width: fullWidth

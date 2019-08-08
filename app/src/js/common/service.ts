@@ -1,5 +1,5 @@
-// tslint:disable:no-any
-// TODO: remove the disable tag
+import { User } from '../functional/types'
+
 /**
  * This function post request to backend to retrieve requried data to display
  * @param {string} url
@@ -7,11 +7,10 @@
  * @param {boolean} async
  * @return {function} data
  */
-export function requestData (url: string, method: string, async: boolean): {
-  /** map function */
-  map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode;
-} {
-  let data: any
+export function requestData<DataType> (url: string,
+                                       method: string,
+                                       async: boolean): DataType[] {
+  let data!: DataType[]
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -27,10 +26,7 @@ export function requestData (url: string, method: string, async: boolean): {
  * This function post request to backend to retrieve users' information
  * @return {function} users
  */
-export function getUsers (): {
-  /** map function */
-  map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode;
-} {
+export function getUsers (): User[] {
   return requestData('./postUsers', 'get', false)
 }
 
@@ -38,10 +34,7 @@ export function getUsers (): {
  * This function post request to backend to retrieve users' information
  * @return {function} projects
  */
-export function getProjects (): {
-  /** map function */
-  map: (arg0: (row: any, i: any) => JSX.Element) => React.ReactNode;
-} {
+export function getProjects (): string[] {
   return requestData('./postProjectNames', 'get', false)
 }
 

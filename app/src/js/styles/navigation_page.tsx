@@ -5,7 +5,7 @@ import { defaultAppBar, defaultHeader } from './general'
 // styles used in the create and dashboard navigation page
 export const drawerWidth = 240
 
-export const dividedPageStyle = (theme: Theme) => createStyles({
+export const headerPageStyle = (theme: Theme) => createStyles({
   root: {
     display: 'flex',
     alignItems: 'left'
@@ -13,8 +13,10 @@ export const dividedPageStyle = (theme: Theme) => createStyles({
   appBar: {
     ...defaultAppBar,
     zIndex: theme.zIndex.drawer + 1
-  },
+  }
+})
 
+export const dividedPageStyle = (theme: Theme) => createStyles({
   drawer: {
     width: drawerWidth,
     flexShrink: 0
@@ -31,5 +33,7 @@ export const dividedPageStyle = (theme: Theme) => createStyles({
 
   content: {
     flexGrow: 1
-  }
+  },
+
+  appBarSpacer: theme.mixins.toolbar
 })

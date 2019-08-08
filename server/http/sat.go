@@ -23,11 +23,11 @@ import (
 
 // Stores the user info
 type User struct {
-	Id           string
-	Email        string
-	Group        string
-	RefreshToken string
-	Projects     []string
+	Id           string   `json:"id"`
+	Email        string   `json:"email"`
+	Group        string   `json:"group"`
+	RefreshToken string   `json:"refreshToken"`
+	Projects     []string `json:"projects"`
 }
 
 //implements Serializable

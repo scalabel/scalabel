@@ -1,7 +1,6 @@
 import { Theme } from '@material-ui/core'
 import { cyan } from '@material-ui/core/colors'
 import createStyles from '@material-ui/core/styles/createStyles'
-import { defaultAppBar } from './general'
 /* Dashboard window styles */
 export const dashboardWindowStyles = (theme: Theme) =>
         createStyles({
@@ -66,72 +65,42 @@ export const listEntryStyle = () =>
             margin: 0
           }
         })
-
 /* styles for worker and admin dashboard*/
 export const dashboardStyles = (theme: Theme) => createStyles({
-  root: {
-    display: 'flex'
+  adminRoot: {
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3)
   },
-  toolbar: {
-    paddingRight: 24
+  workerRoot: {
+    flexGrow: 1,
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3)
   },
-  toolbarIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-    ...theme.mixins.toolbar
+  labelText: {
+    marginTop: theme.spacing(2)
   },
-  appBar: {...defaultAppBar,
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
-    })},
+  appBarSpacer: theme.mixins.toolbar
+})
+/* dashboard header style */
+export const dashboardHeaderStyles = createStyles({
   title: {
     flexGrow: 1
-  },
-  drawerPaper: {
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    width: 285,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
-    })
-  },
-  appBarSpacer: theme.mixins.toolbar,
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    height: '100vh',
-    overflow: 'auto'
-  },
-  chartContainer: {
-    marginLeft: -22
-  },
-  h5: {
-    marginBottom: theme.spacing(2)
   }
 })
-
 /* tableStyles */
 export const tableStyles = (theme: Theme) => createStyles({
   root: {
-    width: '100%',
-    marginTop: theme.spacing(3),
-    overflowX: 'auto'
+    marginTop: theme.spacing(3)
   },
-  table: {
-    minWidth: 700
+  headerCell: {
+    fontWeight: 'bold',
+    fontSize: '0.8rem',
+    color: theme.palette.common.black
   },
   row: {
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.background.default
-    }
+    background: theme.palette.common.white
   }
 })
-
 /* tableCellStyles */
 export const tableCellStyles = (theme: Theme) => createStyles({
   head: {
