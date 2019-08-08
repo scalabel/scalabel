@@ -49,7 +49,7 @@ class Create extends React.Component<Props, State> {
       reloadProjects: false
     }
     this.headerContent = (<Typography variant='h6' noWrap>
-      Create A Project
+      Open or create project
     </Typography>)
     this.sidebarContent = (
             <List>
