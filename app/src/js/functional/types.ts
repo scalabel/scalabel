@@ -240,9 +240,14 @@ export interface DashboardContents {
   taskMetaDatas: TaskMetaData[]
 }
 
-export type LabelFunctionalType =
+export const enum ConnectionStatus {
+  SAVED, SAVING, RECONNECTING, UNSAVED
+}
+
+export type LabelFuncType =
         (id: number, itemId: number, attributes: object) => LabelType
-export type ItemFunctionalType = (id: number, url: string) => ItemType
+
+export type ItemFuncType = (id: number, url: string) => ItemType
 
 export interface User {
   /** User ID */

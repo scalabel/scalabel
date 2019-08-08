@@ -2,7 +2,7 @@
 // TODO: remove the disable tag
 import * as fa from '@fortawesome/free-solid-svg-icons/index'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'
+import { AppBar, Box, IconButton, Toolbar, Tooltip } from '@material-ui/core'
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import Typography from '@material-ui/core/Typography'
@@ -10,6 +10,7 @@ import _ from 'lodash'
 import React from 'react'
 import { goToItem } from '../action/common'
 import Session from '../common/session'
+import { ConnectionStatus } from '../functional/types'
 import { defaultAppBar } from '../styles/general'
 import { Component } from './component'
 
@@ -34,9 +35,9 @@ interface Props {
   theme: any
   /** title of TitleBar */
   title: string
-  /** dashboardLink of TittleBar */
+  /** dashboardLink of TitleBar */
   dashboardLink: string
-  /** instructionLink of TittleBar */
+  /** instructionLink of TitleBar */
   instructionLink: string
 }
 
@@ -57,11 +58,26 @@ function goToPreviousItem () {
 /**
  * Save the current state to the server
  */
-function save () {
-  // const state = Session.getState();
-  // const xhr = new XMLHttpRequest();
-  // xhr.open('POST', './postSaveV2');
-  // xhr.send(JSON.stringify(state));
+function save (callerComponent: TitleBar) {
+  Session.status = ConnectionStatus.SAVING
+  callerComponent.forceUpdate()
+  const state = Session.getState()
+  const xhr = new XMLHttpRequest()
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+      Session.status = ConnectionStatus.SAVED
+      callerComponent.forceUpdate()
+      setTimeout(() => {
+        Session.status = ConnectionStatus.UNSAVED
+        callerComponent.forceUpdate()
+      }, 5000)
+      if (JSON.parse(xhr.response) !== 0) {
+        alert('Save failed.')
+      }
+    }
+  }
+  xhr.open('POST', './postSaveV2')
+  xhr.send(JSON.stringify(state))
 }
 
 /**
@@ -76,6 +92,14 @@ function toggleAssistantView () {
  */
 class TitleBar extends Component<Props> {
   /**
+   * Constructor
+   * @param {Object} props: react props
+   */
+  constructor (props: any) {
+    super(props)
+  }
+
+  /**
    * Render function
    * @return {React.Fragment} React fragment
    */
@@ -84,6 +108,7 @@ class TitleBar extends Component<Props> {
     const { title } = this.props
     const { instructionLink } = this.props
     const { dashboardLink } = this.props
+
     const buttonInfo = [
       {
         title: 'Previous Image', onClick: goToPreviousItem,
@@ -97,8 +122,8 @@ class TitleBar extends Component<Props> {
         title: 'Assistant View', onClick: toggleAssistantView,
         icon: fa.faColumns
       },
-      { title: 'Save', onClick: save, icon: fa.faSave },
-      { title: 'Submit', onClick: save, icon: fa.faCheck }
+      { title: 'Save', onClick: () => { save(this) }, icon: fa.faSave },
+      { title: 'Submit', onClick: () => { save(this) }, icon: fa.faCheck }
     ]
     const buttons = buttonInfo.map((b) => {
       const onClick = _.get(b, 'onClick', undefined)
@@ -113,12 +138,48 @@ class TitleBar extends Component<Props> {
               </Tooltip>
       )
     })
+
+    let sessionStatus: string
+    let hideMessage = false
+    switch (Session.status) {
+      case ConnectionStatus.SAVING: {
+        sessionStatus = 'Saving in progress...'
+        break
+      }
+      case ConnectionStatus.SAVED: {
+        sessionStatus = 'All progress saved.'
+        break
+      }
+      case ConnectionStatus.RECONNECTING: {
+        sessionStatus = 'Trying to reconnect...'
+        break
+      }
+      case ConnectionStatus.UNSAVED: {
+        sessionStatus = ''
+        hideMessage = true
+        break
+      }
+      default: {
+        sessionStatus = 'Error occured, try refreshing.'
+        break
+      }
+    }
+
+    const statusMessage = hideMessage ? null : (
+      <Box marginLeft={5} borderRadius='borderRadius'
+        color='text.primary' bgcolor='#909090'
+        padding='3px' fontSize='fontSize'>
+        {sessionStatus}
+      </Box>
+    )
+
     return (
             <AppBar className={classes.appBar}>
               <Toolbar>
                 <Typography variant='h6' noWrap>
                   {title}
                 </Typography>
+                {statusMessage}
                 <div className={classes.grow}/>
                 {buttons}
               </Toolbar>

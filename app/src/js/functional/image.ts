@@ -2,7 +2,7 @@ import * as types from '../action/types'
 import {getCurrentItemViewerConfig,
   setCurrentItemViewerConfig} from './state_util'
 import { makeItem } from './states'
-import { ImageViewerConfigType, ItemFunctionalType, ItemType, State, ViewerConfigType } from './types'
+import { ImageViewerConfigType, ItemFuncType, ItemType, State, ViewerConfigType } from './types'
 import { updateObject } from './util'
 
 /**
@@ -51,4 +51,4 @@ export function fromJson (json: ItemType): ItemType {
 }
 
 // This is necessary for different label types
-export type ImageF = ItemFunctionalType
+export type ImageF = ItemFuncType

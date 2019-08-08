@@ -4,7 +4,7 @@ import { StateWithHistory } from 'redux-undo'
 import * as THREE from 'three'
 import * as types from '../action/types'
 import { Window } from '../components/window'
-import { State } from '../functional/types'
+import { ConnectionStatus, State } from '../functional/types'
 import { configureStore } from './configure_store'
 
 /**
@@ -23,6 +23,8 @@ class Session {
   public window?: Window
   /** Dev mode */
   public devMode: boolean
+  /** Connection status */
+  public status: ConnectionStatus
 
   /**
    * no-op for state initialization
@@ -34,6 +36,7 @@ class Session {
     // TODO: make it configurable in the url
     this.devMode = true
     this.store = configureStore({}, this.devMode)
+    this.status = ConnectionStatus.UNSAVED
   }
 
   /**

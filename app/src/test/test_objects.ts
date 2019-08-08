@@ -163,3 +163,87 @@ export const testJson = {
   shapes: {},
   actions: []
 }
+
+const dummyViewerConfig = {
+  imageWidth: 800,
+  imageHeight: 800,
+  viewScale: 1,
+  viewOffsetX: 0,
+  viewOffsetY: 0
+}
+
+/**
+ * make a dummy item for testing
+ */
+function makeItem (
+  id: number,
+  labels: object,
+  shapes: object
+): object {
+  return {
+    id,
+    index: 0,
+    loaded: false,
+    labels,
+    shapes,
+    viewerConfig: dummyViewerConfig
+  }
+}
+
+const dummyLabels = {
+  0: {
+    id: 0,
+    category: [0],
+    attributes: { 0: [0] },
+    shapes: [0]
+  },
+  1: {
+    id: 1,
+    category: [1],
+    attributes: { 1: [1] },
+    shapes: [1]
+  }
+}
+
+export const dummyNewLabel = {
+  id: 1,
+  item: 1,
+  type: 'bbox',
+  category: [],
+  attributes: {},
+  parent: 1,
+  children: [],
+  shapes: [
+    2
+  ],
+  selectedShape: 2,
+  state: 2,
+  order: 2
+}
+
+const dummyShapes = {
+  0: {
+    id: 0,
+    label: [0],
+    shape: { x1: 0, y1: 0, x2: 1, y2: 1
+    }
+  },
+  1: {
+    id: 1,
+    label: [1],
+    shape: { x1: 2, y1: 2, x2: 3, y2: 3 }
+  }
+}
+
+export const autoSaveTestJson = {
+  items: [
+    makeItem(0, dummyLabels, dummyShapes),
+    makeItem(1, {}, {})
+  ],
+  current: {
+    item: 0,
+    maxLabelId: 1,
+    maxShapeId: 1,
+    maxOrder: 1
+  }
+}
