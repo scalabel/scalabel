@@ -135,7 +135,7 @@ type SatItem struct {
 	Url    string `json:"url" yaml:"url"`
 	Active bool   `json:"active" yaml:"active"`
 	Loaded bool   `json:"loaded" yaml:"loaded"`
-	Labels []int  `json:"labels, []int" yaml:"labels"`
+	Labels []int  `json:"labels,[]int" yaml:"labels"`
 }
 
 type SatLabel struct {

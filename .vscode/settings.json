@@ -17,6 +17,10 @@
         "editor.insertSpaces": true,
         "editor.detectIndentation": false
     },
+    "[go]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": false
+    },
     "editor.codeActionsOnSave": {
         "source.fixAll.tslint": true
     },
