@@ -102,10 +102,11 @@ type PageData struct {
 func (assignment *Assignment) GetKey() string {
 	task := assignment.Task
 	if assignment.SubmitTime == 0 {
-		return path.Join(task.ProjectOptions.Name, "assignments", Index2str(task.Index),
-			assignment.WorkerId)
+		return path.Join(task.ProjectOptions.Name,
+			"assignments", Index2str(task.Index), assignment.WorkerId)
 	} else {
-		return path.Join(task.ProjectOptions.Name, "submissions", Index2str(task.Index),
+		return path.Join(task.ProjectOptions.Name,
+			"submissions", Index2str(task.Index),
 			assignment.WorkerId, strconv.FormatInt(assignment.SubmitTime, 10))
 	}
 }
@@ -262,7 +263,8 @@ func WrapHandler(handler http.Handler) HandleFunc {
 func WrapHandleFunc(fn HandleFunc) HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// check if User Management System is On
-		flag := env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON"
+		flag := env.UserManagement == "on" ||
+			env.UserManagement == "On" || env.UserManagement == "ON"
 		refreshTokenCookie, _ := r.Cookie("refreshTokenScalabel")
 		idCookie, _ := r.Cookie("idScalabel")
 		if !flag { // if User Management System is off, continue
@@ -274,7 +276,8 @@ func WrapHandleFunc(fn HandleFunc) HandleFunc {
 		} else if idCookie == nil {
 			redirectToLogin(w, r, "No idCookie")
 			return
-		} else if verifyRefreshToken(refreshTokenCookie.Value, idCookie.Value) == false {
+		} else if verifyRefreshToken(refreshTokenCookie.Value,
+			idCookie.Value) == false {
 			redirectToLogin(w, r, "Failed to verify: Invalid Tokens")
 			return
 		} else {
@@ -475,14 +478,16 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	CreateTasks(project)
 }
 
-func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *template.Template) {
+func executeLabelingTemplate(w http.ResponseWriter,
+	r *http.Request, tmpl *template.Template) {
 	// get task name from the URL
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex, _ := strconv.ParseInt(r.URL.Query()["task_index"][0], 10, 32)
 	if !storage.HasKey(path.Join(projectName, "assignments",
 		Index2str(int(taskIndex)), DEFAULT_WORKER)) {
 		// if assignment does not exist, create it
-		assignment, err := CreateAssignment(projectName, Index2str(int(taskIndex)), DEFAULT_WORKER)
+		assignment, err := CreateAssignment(projectName,
+			Index2str(int(taskIndex)), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -490,7 +495,8 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 		tmpl.Execute(w, assignment)
 	} else {
 		// otherwise, get that assignment
-		assignment, err := GetAssignment(projectName, Index2str(int(taskIndex)), DEFAULT_WORKER)
+		assignment, err := GetAssignment(projectName,
+			Index2str(int(taskIndex)), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -499,7 +505,8 @@ func executeLabelingTemplate(w http.ResponseWriter, r *http.Request, tmpl *templ
 	}
 }
 
-// Handles the loading of an assignment given its project name, task index, and worker ID.
+// Handles the loading of an assignment given
+// its project name, task index, and worker ID.
 func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -561,7 +568,8 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(nil)
 		return
 	}
-	// TODO: don't send all events to front end, and append these events to most recent
+	// TODO: don't send all events to front end,
+	// and append these events to most recent
 	err = storage.Save(assignment.GetKey(), assignment.GetFields())
 	if err != nil {
 		Error.Println(err)
@@ -595,7 +603,8 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	items := []ItemExport{}
 	for _, task := range tasks {
-		latestSubmission, err := GetAssignment(projectName, Index2str(task.Index), DEFAULT_WORKER)
+		latestSubmission, err := GetAssignment(projectName,
+			Index2str(task.Index), DEFAULT_WORKER)
 		if err == nil {
 			for _, itemToLoad := range latestSubmission.Task.Items {
 				item := ItemExport{}
@@ -605,7 +614,8 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 				} else {
 					//TODO: ask about what to do here
 					item.VideoName = itemToLoad.VideoName
-					//item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+					//item.VideoName = projectToLoad.Options.Name
+					//+ "_" + Index2str(task.Index)
 				}
 				item.Timestamp = itemToLoad.Timestamp
 				item.Name = itemToLoad.Url
@@ -738,7 +748,8 @@ func getCategoriesFromProjectForm(r *http.Request) []Category {
 		}
 
 	case http.ErrMissingFile:
-		Info.Printf("Miss category file and using default categories for %s.", labelType)
+		Info.Printf("Miss category file and using default categories for %s.",
+			labelType)
 
 		if labelType == "box2d" {
 			categories = defaultBox2dCategories
@@ -778,7 +789,8 @@ func getAttributesFromProjectForm(r *http.Request) []Attribute {
 		}
 
 	case http.ErrMissingFile:
-		Info.Printf("Missing attribute file and using default attributes for %s.", labelType)
+		Info.Printf("Missing attribute file and"+
+			"using default attributes for %s.", labelType)
 
 		if labelType == "box2d" {
 			attributes = defaultBox2dAttributes
@@ -794,8 +806,34 @@ func getAttributesFromProjectForm(r *http.Request) []Attribute {
 	return attributes
 }
 
+// helper function for loading label json file to seperate indices by videoname
+func handleAttributeLoad(itemPtr *Item, itemImport ItemExport,
+	attributes []Attribute) {
+	item := *itemPtr
+	item.Attributes = map[string][]int{}
+	keys := reflect.ValueOf(itemImport.Attributes).MapKeys()
+	strkeys := make([]string, len(keys))
+	for i := 0; i < len(keys); i++ {
+		strkeys[i] = keys[i].String()
+	}
+	for _, key := range strkeys {
+		for _, attribute := range attributes {
+			if attribute.Name == key {
+				for i := 0; i < len(attribute.Values); i++ {
+					if itemImport.Attributes[key] == attribute.Values[i] {
+						item.Attributes[key] = []int{i}
+						break
+					}
+				}
+				break
+			}
+		}
+	}
+}
+
 // load label json file
-func getItemsFromProjectForm(r *http.Request, attributes []Attribute) map[string][]Item {
+func getItemsFromProjectForm(r *http.Request,
+	attributes []Attribute) map[string][]Item {
 	itemLists := make(map[string][]Item) //map[string][]Item
 	var itemsImport []ItemExport
 	importFile, header, err := r.FormFile("item_file")
@@ -828,25 +866,7 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) map[string
 			item.Timestamp = itemImport.Timestamp
 			// load item attributes if needed
 			if len(itemImport.Attributes) > 0 {
-				item.Attributes = map[string][]int{}
-				keys := reflect.ValueOf(itemImport.Attributes).MapKeys()
-				strkeys := make([]string, len(keys))
-				for i := 0; i < len(keys); i++ {
-					strkeys[i] = keys[i].String()
-				}
-				for _, key := range strkeys {
-					for _, attribute := range attributes {
-						if attribute.Name == key {
-							for i := 0; i < len(attribute.Values); i++ {
-								if itemImport.Attributes[key] == attribute.Values[i] {
-									item.Attributes[key] = []int{i}
-									break
-								}
-							}
-							break
-						}
-					}
-				}
+				handleAttributeLoad(&item, itemImport, attributes)
 			}
 			if len(itemImport.Labels) > 0 {
 				item.LabelImport = itemImport.Labels
@@ -854,7 +874,8 @@ func getItemsFromProjectForm(r *http.Request, attributes []Attribute) map[string
 			if itemImport.VideoName == "" {
 				itemLists[" "] = append(itemLists[" "], item)
 			} else {
-				itemLists[itemImport.VideoName] = append(itemLists[itemImport.VideoName], item)
+				itemLists[itemImport.VideoName] =
+					append(itemLists[itemImport.VideoName], item)
 			}
 			indexes[itemImport.VideoName] += 1
 		}
@@ -979,14 +1000,19 @@ func gatewayHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(gateJson)
 }
 
-// Handles the flag value of User Management System during the redirection from index.html to /auth
+// Handles the flag value of User Management System
+// during the redirection from index.html to /auth
 func loadHandler(w http.ResponseWriter, r *http.Request) {
 	Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
 	Info.Printf("User Management System is %s", env.UserManagement)
 	// Check if WORKER_SYSTEM is On
-	if env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON" {
+	if env.UserManagement == "on" ||
+		env.UserManagement == "On" || env.UserManagement == "ON" {
 		// redirect to AWS authentication website
-		authUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/login?response_type=code&client_id=%v&redirect_uri=%v", env.DomainName, env.Region, env.ClientId, env.RedirectUri)
+		authUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/",
+			env.DomainName, env.Region) +
+			fmt.Sprintf("login?response_type=code&client_id=%v&redirect_uri=%v",
+				env.ClientId, env.RedirectUri)
 		http.Redirect(w, r, authUrl, 301)
 	} else {
 		// redirect to create
@@ -998,7 +1024,8 @@ func loadHandler(w http.ResponseWriter, r *http.Request) {
 // Handles the authenticatoin of access token
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if WORKER_SYSTEM is On
-	flag := env.UserManagement == "on" || env.UserManagement == "On" || env.UserManagement == "ON"
+	flag := env.UserManagement == "on" ||
+		env.UserManagement == "On" || env.UserManagement == "ON"
 	if !flag {
 		// redirect to create
 		createUrl := "/create"
@@ -1015,12 +1042,14 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	awsTokenUrl := env.AWSTokenUrl
 	awsJwkUrl := env.AwsJwkUrl
 	code := r.FormValue("code")
-	// check if the server received a valid authorization code, if not, redirect to login page
+	// check if the server received a valid authorization code,
+	// if not, redirect to login page
 	if code == "" {
 		redirectToLogin(w, r, "Invalid authorization code")
 		return
 	}
-	idTokenString, accessTokenString, refreshTokenString := requestToken(w, r, clientId, redirectUri, awsTokenUrl, code, secret)
+	idTokenString, accessTokenString, refreshTokenString := requestToken(w, r,
+		clientId, redirectUri, awsTokenUrl, code, secret)
 
 	// Download and store the JSON Web Key (JWK) for your user pool
 	jwkURL := fmt.Sprintf(awsJwkUrl, region, userPoolID)
@@ -1028,7 +1057,8 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	Info.Printf("Downloading Json Web Key from Amazon")
 
 	// veryfy accesstoken
-	accessToken, err := validateAccessToken(accessTokenString, region, userPoolID, jwk)
+	accessToken, err := validateAccessToken(accessTokenString,
+		region, userPoolID, jwk)
 	if err != nil || !accessToken.Valid {
 		// failed to verify the jwt
 		Error.Println(err)
@@ -1039,7 +1069,8 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		Info.Printf("Access token verifed")
 		// check identity by idtoken and get the user's information
-		idToken, userInfo, err := validateIdToken(idTokenString, region, userPoolID, jwk)
+		idToken, userInfo, err := validateIdToken(idTokenString,
+			region, userPoolID, jwk)
 		identity := userInfo.Group
 
 		if err != nil || !idToken.Valid || identity == "" {
@@ -1056,8 +1087,9 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			userInfo.RefreshToken = refreshTokenString
 
-			/* TODO: Here we are trying to track which projects are assigned for this user,
-			Later the coder could feel free to use the 'Projects' attribute of 'User' sturcture
+			/* TODO: Here we are trying to track which projects are
+			assigned for this user, Later the coder could feel free to use the
+			'Projects' attribute of 'User' sturcture
 			*/
 			// load the projects information from disk for this user
 			if _, ok := Users[userInfo.Id]; ok {
@@ -1066,10 +1098,14 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 			Users[userInfo.Id] = &userInfo // save userinfo to memory
 
 			// save refresh/id tokens in the cookie
-			refreshTokenExpireTime := 365 * 24 * time.Hour // TODO: find a better expire time for the cookie, maybe use the expire time of refresh token
+			refreshTokenExpireTime := 365 * 24 * time.Hour
+			// TODO: find a better expire time for the cookie,
+			// maybe use the expire time of refresh token
 			expiration := time.Now().Add(refreshTokenExpireTime)
-			refreshTokenCookie := http.Cookie{Name: "refreshTokenScalabel", Value: refreshTokenString, Expires: expiration}
-			idTokenCookie := http.Cookie{Name: "idScalabel", Value: userInfo.Id, Expires: expiration}
+			refreshTokenCookie := http.Cookie{Name: "refreshTokenScalabel",
+				Value: refreshTokenString, Expires: expiration}
+			idTokenCookie := http.Cookie{Name: "idScalabel",
+				Value: userInfo.Id, Expires: expiration}
 			http.SetCookie(w, &refreshTokenCookie)
 			http.SetCookie(w, &idTokenCookie)
 			if identity == "worker" {
@@ -1099,16 +1135,23 @@ func logOutHandler(w http.ResponseWriter, r *http.Request) {
 	// remove corresponding userInfo from backend
 	Users[id.Value].RefreshToken = ""
 	// reset the cookies
-	refreshTokenExpireTime := 365 * 24 * time.Hour // TODO: find a better expire time for the cookie, maybe use the expire time of refresh token
+	refreshTokenExpireTime := 365 * 24 * time.Hour
+	// TODO: find a better expire time for the cookie,
+	// maybe use the expire time of refresh token
 	expiration := time.Now().Add(refreshTokenExpireTime)
-	refreshCookie := http.Cookie{Name: "refreshTokenScalabel", Value: "refreshTokenCookie", Expires: expiration}
-	idCookie := http.Cookie{Name: "idScalabel", Value: "id", Expires: expiration}
+	refreshCookie := http.Cookie{Name: "refreshTokenScalabel",
+		Value: "refreshTokenCookie", Expires: expiration}
+	idCookie := http.Cookie{Name: "idScalabel", Value: "id",
+		Expires: expiration}
 	http.SetCookie(w, &refreshCookie)
 	http.SetCookie(w, &idCookie)
 
 	// Redirect to logOut Endpoint to log out from cognito console
-	/* Replace this if you are using other authorizaition server instead of AWS */
-	logOutUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/logout?client_id=%v&logout_uri=%v", env.DomainName, env.Region, env.ClientId, env.LogOutUri)
+	/* Replace this if you are using other authorizaition
+	server instead of AWS */
+	logOutUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/logout",
+		env.DomainName, env.Region) +
+		fmt.Sprintf("?client_id=%v&logout_uri=%v", env.ClientId, env.LogOutUri)
 
 	Info.Println(logOutUrl)
 	Info.Println(env.LogOutUri, env.Region, env.ClientId)
@@ -1149,7 +1192,8 @@ func postUsersHandler(w http.ResponseWriter, r *http.Request) {
 	} else if idCookie == nil {
 		redirectToLogin(w, r, "No idCookie")
 		return
-	} else if verifyRefreshToken(refreshTokenCookie.Value, idCookie.Value) == false {
+	} else if verifyRefreshToken(refreshTokenCookie.Value,
+		idCookie.Value) == false {
 		redirectToLogin(w, r, "Failed to verify: Invalid Tokens")
 		return
 	} else {

@@ -107,9 +107,11 @@ func GetTasksInProject(projectName string) ([]Task, error) {
 }
 
 // Get the most recent assignment given the needed fields.
-func GetAssignment(projectName string, taskIndex string, workerId string) (Assignment, error) {
+func GetAssignment(projectName string, taskIndex string,
+	workerId string) (Assignment, error) {
 	assignment := Assignment{}
-	submissionsPath := path.Join(projectName, "submissions", taskIndex, workerId)
+	submissionsPath := path.Join(projectName, "submissions",
+		taskIndex, workerId)
 	keys := storage.ListKeys(submissionsPath)
 	// if any submissions exist, get the most recent one
 	if len(keys) > 0 {
@@ -119,7 +121,8 @@ func GetAssignment(projectName string, taskIndex string, workerId string) (Assig
 		}
 		mapstructure.Decode(fields, &assignment)
 	} else {
-		assignmentPath := path.Join(projectName, "assignments", taskIndex, workerId)
+		assignmentPath := path.Join(projectName, "assignments",
+			taskIndex, workerId)
 		fields, err := storage.Load(assignmentPath)
 		if err != nil {
 			return Assignment{}, err
@@ -134,7 +137,8 @@ func GetAssignment(projectName string, taskIndex string, workerId string) (Assig
 	return assignment, nil
 }
 
-func CreateAssignment(projectName string, taskIndex string, workerId string) (Assignment, error) {
+func CreateAssignment(projectName string, taskIndex string,
+	workerId string) (Assignment, error) {
 	task, err := GetTask(projectName, taskIndex)
 	if err != nil {
 		return Assignment{}, err
@@ -169,8 +173,8 @@ func GetDashboardContents(projectName string) (DashboardContents, error) {
 		NumAttributes:     len(project.Options.Attributes),
 	}
 	taskMetaDatas := []TaskMetaData{}
-	/* Iterate of tasks to send meta data for each one, instead of sending the entire
-	task and doing this work later */
+	/* Iterate of tasks to send meta data for each one,
+	instead of sending the entire task and doing this work later */
 	for index, task := range tasks {
 		taskMetaData := TaskMetaData{
 			NumLabeledImages: countLabeledImages(projectName, index),
@@ -189,7 +193,8 @@ func GetDashboardContents(projectName string) (DashboardContents, error) {
 func GetHandlerUrl(itemType string, labelType string) string {
 	switch itemType {
 	case "image":
-		if labelType == "box2d" || labelType == "segmentation" || labelType == "lane" {
+		if labelType == "box2d" || labelType == "segmentation" ||
+			labelType == "lane" {
 			return "label2d"
 		}
 		if labelType == "tag" || labelType == "box2dv2" {
@@ -271,7 +276,8 @@ func countLabeledImages(projectName string, index int) int {
 	if task.NumLabeledItemImport > 0 {
 		return task.NumLabeledItemImport
 	}
-	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
+	assignment, err := GetAssignment(projectName, Index2str(index),
+		DEFAULT_WORKER)
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
@@ -288,7 +294,8 @@ func countLabelsInTask(projectName string, index int) int {
 	if task.NumLabelImport > 0 {
 		return task.NumLabelImport
 	}
-	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
+	assignment, err := GetAssignment(projectName, Index2str(index),
+		DEFAULT_WORKER)
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
@@ -311,7 +318,8 @@ func countLabelsInTask(projectName string, index int) int {
 
 // Check if a given task is submitted
 func taskSubmitted(projectName string, index int) bool {
-	assignment, err := GetAssignment(projectName, Index2str(index), DEFAULT_WORKER)
+	assignment, err := GetAssignment(projectName, Index2str(index),
+		DEFAULT_WORKER)
 	if err != nil {
 		return false
 	}
@@ -469,7 +477,8 @@ func parsePLYForGround(url string) ([4]float64, error) {
 	}
 
 	if len(coefficientByteArrays) != 4 {
-		return coefficients, errors.New("Incorrect number of ground coefficients")
+		errString := "Incorrect number of ground coefficients"
+		return coefficients, errors.New(errString)
 	}
 
 	for i, coeffArr := range coefficientByteArrays {

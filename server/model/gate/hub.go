@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	pb "../proto"
 	"google.golang.org/grpc"
-	"log"
 )
 
 type Hub struct {
@@ -16,7 +17,8 @@ type Hub struct {
 }
 
 func newhub(config *Configuration) *Hub {
-	grpcConnection, err := grpc.Dial(config.MachineHost+":"+config.MachinePort, grpc.WithInsecure())
+	grpcConnection, err := grpc.Dial(config.MachineHost+":"+config.MachinePort,
+		grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Fail to dial: %v", err)
 	}

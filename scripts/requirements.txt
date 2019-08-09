@@ -1,4 +1,6 @@
 pyyaml
 boto3
 numpy
+pycodestyle
 pylint
+colorama

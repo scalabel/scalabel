@@ -3,6 +3,13 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -10,12 +17,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"io/ioutil"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 type Storage interface {
@@ -65,7 +66,7 @@ func (fs *FileStorage) ListKeys(prefix string) []string {
 
 	for _, f := range files {
 		key := f.Name()
-		key = key[:len(key) - 5]
+		key = key[:len(key)-5]
 		keys = append(keys, path.Join(prefix, key))
 	}
 	return keys
@@ -169,7 +170,8 @@ func (ds *DynamodbStorage) HasKey(key string) bool {
 func (ds *DynamodbStorage) ListKeys(prefix string) []string {
 	filt := expression.BeginsWith(expression.Name("Key"), prefix)
 	proj := expression.NamesList(expression.Name("Key"))
-	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+	expr, err := expression.NewBuilder().WithFilter(filt).
+		WithProjection(proj).Build()
 	if err != nil {
 		Error.Println(err)
 	}
@@ -197,7 +199,8 @@ func (ds *DynamodbStorage) ListKeys(prefix string) []string {
 	return keys
 }
 
-func (ds *DynamodbStorage) Save(key string, fields map[string]interface{}) error {
+func (ds *DynamodbStorage) Save(key string,
+	fields map[string]interface{}) error {
 	fields["Key"] = key
 	av, err := dynamodbattribute.MarshalMap(fields)
 	input := &dynamodb.PutItemInput{
@@ -383,7 +386,9 @@ func (ss *S3Storage) Load(key string) (map[string]interface{}, error) {
 }
 
 func (ss *S3Storage) Delete(key string) error {
-	_, err := ss.svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(ss.BucketName), Key: aws.String(key)})
+	s3ptr := &s3.DeleteObjectInput{Bucket: aws.String(ss.BucketName),
+		Key: aws.String(key)}
+	_, err := ss.svc.DeleteObject(s3ptr)
 	if err != nil {
 		return err
 	}

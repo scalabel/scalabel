@@ -22,16 +22,20 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func validateAccessToken(tokenStr, region, userPoolID string, jwk map[string]JWKKey) (*jwt.Token, error) {
+func validateAccessToken(tokenStr, region, userPoolID string,
+	jwk map[string]JWKKey) (*jwt.Token, error) {
 	// Decode the token string into JWT format.
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{},
+		error) {
 
 		// cognito user pool : RS256
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("Unexpected signing method: %v",
+				token.Header["alg"])
 		}
 
-		// 5. Get the kid from the JWT token header and retrieve the corresponding JSON Web Key that was stored
+		// 5. Get the kid from the JWT token header and
+		// retrieve the corresponding JSON Web Key that was stored
 		if kid, ok := token.Header["kid"]; ok {
 			if kidStr, ok := kid.(string); ok {
 				key := jwk[kidStr]
@@ -71,10 +75,12 @@ func validateAccessToken(tokenStr, region, userPoolID string, jwk map[string]JWK
 }
 
 // validateAWSJwtClaims validates AWS Cognito User Pool JWT
-func validateAWSJwtClaims(claims jwt.MapClaims, region, userPoolID string) error {
+func validateAWSJwtClaims(claims jwt.MapClaims, region,
+	userPoolID string) error {
 	var err error
 	// 3. Check the iss claim. It should match your user pool.
-	issShoudBe := fmt.Sprintf("https://cognito-idp.%v.amazonaws.com/%v", region, userPoolID)
+	issShoudBe := fmt.Sprintf("https://cognito-idp.%v.amazonaws.com/%v",
+		region, userPoolID)
 	err = validateClaimItem("iss", []string{issShoudBe}, claims)
 	if err != nil {
 		return err
@@ -106,7 +112,8 @@ func validateAWSJwtClaims(claims jwt.MapClaims, region, userPoolID string) error
 	return nil
 }
 
-func validateClaimItem(key string, keyShouldBe []string, claims jwt.MapClaims) error {
+func validateClaimItem(key string, keyShouldBe []string,
+	claims jwt.MapClaims) error {
 	if val, ok := claims[key]; ok {
 		if valStr, ok := val.(string); ok {
 			for _, shouldbe := range keyShouldBe {
@@ -116,7 +123,8 @@ func validateClaimItem(key string, keyShouldBe []string, claims jwt.MapClaims) e
 			}
 		}
 	}
-	return fmt.Errorf("%v does not match any of valid values: %v", key, keyShouldBe)
+	return fmt.Errorf("%v does not match any of valid values: %v",
+		key, keyShouldBe)
 }
 
 func validateExpired(claims jwt.MapClaims) error {
@@ -198,7 +206,8 @@ func getJSON(url string, target interface{}) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func validateIdToken(tokenStr, region, userPoolID string, jwk map[string]JWKKey) (*jwt.Token, User, error) {
+func validateIdToken(tokenStr, region, userPoolID string,
+	jwk map[string]JWKKey) (*jwt.Token, User, error) {
 	// Initialize userInfo
 	userInfo := User{
 		Id:           "",
@@ -208,12 +217,15 @@ func validateIdToken(tokenStr, region, userPoolID string, jwk map[string]JWKKey)
 		Projects:     []string{""},
 	}
 	// Decode the token string into JWT format.
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{},
+		error) {
 		// cognito user pool : RS256
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("Unexpected signing method: %v",
+				token.Header["alg"])
 		}
-		// Get the kid from the JWT token header and retrieve the corresponding JSON Web Key that was stored
+		// Get the kid from the JWT token header and retrieve
+		// the corresponding JSON Web Key that was stored
 		if kid, ok := token.Header["kid"]; ok {
 			if kidStr, ok := kid.(string); ok {
 				key := jwk[kidStr]
@@ -254,7 +266,8 @@ func validateIdToken(tokenStr, region, userPoolID string, jwk map[string]JWKKey)
 	// email
 	Email, ok := claims["email"]
 	if !ok {
-		return token, userInfo, fmt.Errorf("token does not have email attribute")
+		return token, userInfo,
+			fmt.Errorf("token does not have email attribute")
 	}
 	emailaddress := fmt.Sprint(Email)
 
@@ -291,9 +304,11 @@ func verifyRefreshToken(refreshToken string, id string) bool {
 	if (id == "") || (refreshToken == "") {
 		return false
 	}
-	// TODO: check if refresh token is expired, remove refresh token from backend (and cookie?)
+	/* TODO: check if refresh token is expired,
+	   remove refresh token from backend (and cookie?) */
 
-	correctRefreshToken := Users[id].RefreshToken // fetech correctRefreshToken saved in our memory
+	// fetech correctRefreshToken saved in our memory
+	correctRefreshToken := Users[id].RefreshToken
 	if correctRefreshToken != "" {
 		if correctRefreshToken == refreshToken {
 			return true
@@ -304,15 +319,21 @@ func verifyRefreshToken(refreshToken string, id string) bool {
 }
 
 // Print the error message passed in and redirect to login page
-func redirectToLogin(w http.ResponseWriter, r *http.Request, errorMessage string) {
+func redirectToLogin(w http.ResponseWriter, r *http.Request,
+	errorMessage string) {
 	Error.Println(errors.New(errorMessage))
 	Info.Println("redirect to login")
-	authUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/login?response_type=code&client_id=%v&redirect_uri=%v", env.DomainName, env.Region, env.ClientId, env.RedirectUri)
+	authUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/login?",
+		env.DomainName, env.Region) +
+		fmt.Sprintf("response_type=code&client_id=%v&redirect_uri=%v",
+			env.ClientId, env.RedirectUri)
 	http.Redirect(w, r, authUrl, 301)
 	return
 }
 
-func requestToken(w http.ResponseWriter, r *http.Request, clientId string, redirectUri string, awsTokenUrl string, code string, secret string) (string, string, string) {
+func requestToken(w http.ResponseWriter, r *http.Request, clientId string,
+	redirectUri string, awsTokenUrl string, code string,
+	secret string) (string, string, string) {
 	// create request form
 	var tokenRequest http.Request
 	tokenRequest.ParseForm()
@@ -331,7 +352,8 @@ func requestToken(w http.ResponseWriter, r *http.Request, clientId string, redir
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	authorization := b64.URLEncoding.EncodeToString([]byte(clientId + ":" + secret))
+	autString := clientId + ":" + secret
+	authorization := b64.URLEncoding.EncodeToString([]byte(autString))
 	req.Header.Add("Authorization", "Basic "+authorization)
 	clt := http.Client{}
 	resp, err := clt.Do(req)

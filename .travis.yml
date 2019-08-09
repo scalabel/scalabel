@@ -1,16 +1,17 @@
+dist: xenial
 language: python
 language: go
 python:
-  - "3.6"
+  - "3.7"
 go:
   - "1.10"
 go_import_path: github.com/ucbdrive/scalabel
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y npm
+  - sudo apt-get install -y npm python3-pip python3-setuptools
 install:
-  - sudo pip install --upgrade pip
-  - sudo pip install pycodestyle
+  - sudo pip3 install --upgrade pip
+  - sudo pip3 install -r scripts/requirements.txt
   - bash scripts/install_go_packages.sh
   - npm install
 script:
@@ -18,6 +19,7 @@ script:
   - node_modules/.bin/eslint .
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
+  - python3 scripts/lll.py -d server
   - go build -i -o ./bin/sat ./server/http
   - go test ./server/http -args --config ../../app/config/travis_config.yml
   - npm test

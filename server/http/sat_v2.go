@@ -20,11 +20,11 @@ import (
 
 //Sat state
 type Sat struct {
-	Config  SatConfig     `json:"config" yaml:"config"`
-	Current SatCurrent    `json:"current" yaml:"current"`
-	Items   []SatItem     `json:"items" yaml:"items"`
-	Tracks  TrackMap      `json:"tracks" yaml:"tracks"`
-	Layout  SatLayout     `json:"layout" yaml:"layout"`
+	Config  SatConfig  `json:"config" yaml:"config"`
+	Current SatCurrent `json:"current" yaml:"current"`
+	Items   []SatItem  `json:"items" yaml:"items"`
+	Tracks  TrackMap   `json:"tracks" yaml:"tracks"`
+	Layout  SatLayout  `json:"layout" yaml:"layout"`
 }
 
 //Sat configuration
@@ -50,25 +50,25 @@ type SatConfig struct {
 
 //current state of Sat
 type SatCurrent struct {
-	Item       int  `json:"item" yaml:"item"`
-	Label      int  `json:"label" yaml:"label"`
-	Shape      int  `json:"shape" yaml:"shape"`
-	Category   int  `json:"category" yaml:"category"`
-	LabelType  int  `json:"labelType" yaml:"labelType"`
-	MaxLabelId int  `json:"maxLabelId" yaml:"maxLabelId"`
-	MaxShapeId int  `json:"maxShapeId" yaml:"maxShapeId"`
-	MaxOrder   int  `json:"maxOrder" yaml:"maxOrder"`
+	Item       int `json:"item" yaml:"item"`
+	Label      int `json:"label" yaml:"label"`
+	Shape      int `json:"shape" yaml:"shape"`
+	Category   int `json:"category" yaml:"category"`
+	LabelType  int `json:"labelType" yaml:"labelType"`
+	MaxLabelId int `json:"maxLabelId" yaml:"maxLabelId"`
+	MaxShapeId int `json:"maxShapeId" yaml:"maxShapeId"`
+	MaxOrder   int `json:"maxOrder" yaml:"maxOrder"`
 }
 
 type SatItem struct {
-	Id           int               `json:"id" yaml:"id"`
-	Index        int               `json:"index" yaml:"index"`
-	Url          string            `json:"url" yaml:"url"`
-	Active       bool              `json:"active" yaml:"active"`
-	Loaded       bool              `json:"loaded" yaml:"loaded"`
-	Labels       map[int]SatLabel  `json:"labels" yaml:"labels"`
-	Shapes       map[int]SatShape  `json:"shapes" yaml:"shapes"`
-	ViewerConfig interface{}       `json:"viewerConfig" yaml:"viewerConfig"`
+	Id           int              `json:"id" yaml:"id"`
+	Index        int              `json:"index" yaml:"index"`
+	Url          string           `json:"url" yaml:"url"`
+	Active       bool             `json:"active" yaml:"active"`
+	Loaded       bool             `json:"loaded" yaml:"loaded"`
+	Labels       map[int]SatLabel `json:"labels" yaml:"labels"`
+	Shapes       map[int]SatShape `json:"shapes" yaml:"shapes"`
+	ViewerConfig interface{}      `json:"viewerConfig" yaml:"viewerConfig"`
 }
 
 type SatLabel struct {
@@ -114,9 +114,11 @@ func (sat *Sat) GetFields() map[string]interface{} {
 }
 
 // Get the most recent assignment given the needed fields.
-func GetSat(projectName string, taskIndex string, workerId string) (Sat, error) {
+func GetSat(projectName string, taskIndex string,
+	workerId string) (Sat, error) {
 	sat := Sat{}
-	submissionsPath := path.Join(projectName, "submissions", taskIndex, workerId)
+	submissionsPath := path.Join(projectName, "submissions",
+		taskIndex, workerId)
 	keys := storage.ListKeys(submissionsPath)
 	// if any submissions exist, get the most recent one
 	if len(keys) > 0 {
@@ -134,7 +136,8 @@ func GetSat(projectName string, taskIndex string, workerId string) (Sat, error) 
 		}
 	} else {
 		var assignment Assignment
-		assignmentPath := path.Join(projectName, "assignments", taskIndex, workerId)
+		assignmentPath := path.Join(projectName, "assignments",
+			taskIndex, workerId)
 		Info.Printf("Reading %s\n", assignmentPath)
 		fields, err := storage.Load(assignmentPath)
 		if err != nil {
@@ -146,7 +149,8 @@ func GetSat(projectName string, taskIndex string, workerId string) (Sat, error) 
 	return sat, nil
 }
 
-func GetAssignmentV2(projectName string, taskIndex string, workerId string) (Assignment, error) {
+func GetAssignmentV2(projectName string, taskIndex string,
+	workerId string) (Assignment, error) {
 	assignment := Assignment{}
 	assignmentPath := path.Join(projectName, "assignments", taskIndex, workerId)
 	fields, err := storage.Load(assignmentPath)
@@ -157,7 +161,8 @@ func GetAssignmentV2(projectName string, taskIndex string, workerId string) (Ass
 	return assignment, nil
 }
 
-// Handles the loading of an assignment given its project name, task index, and worker ID.
+/* Handles the loading of an assignment given
+   its project name, task index, and worker ID. */
 func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -198,14 +203,16 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(loadedSatJson)
 }
 
-func executeLabelingTemplateV2(w http.ResponseWriter, r *http.Request, tmpl *template.Template) {
+func executeLabelingTemplateV2(w http.ResponseWriter, r *http.Request,
+	tmpl *template.Template) {
 	// get task name from the URL
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex, _ := strconv.ParseInt(r.URL.Query()["task_index"][0], 10, 32)
 	if !storage.HasKey(path.Join(projectName, "assignments",
 		Index2str(int(taskIndex)), DEFAULT_WORKER)) {
 		// if assignment does not exist, create it
-		assignment, err := CreateAssignment(projectName, Index2str(int(taskIndex)), DEFAULT_WORKER)
+		assignment, err := CreateAssignment(projectName,
+			Index2str(int(taskIndex)), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -213,7 +220,8 @@ func executeLabelingTemplateV2(w http.ResponseWriter, r *http.Request, tmpl *tem
 		tmpl.Execute(w, assignment)
 	} else {
 		// otherwise, get that assignment
-		assignment, err := GetAssignmentV2(projectName, Index2str(int(taskIndex)), DEFAULT_WORKER)
+		assignment, err := GetAssignmentV2(projectName,
+			Index2str(int(taskIndex)), DEFAULT_WORKER)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -281,8 +289,8 @@ func assignmentToSat(assignment *Assignment) Sat {
 		SubmitTime:      assignment.SubmitTime,
 	}
 	satCurrent := SatCurrent{
-		Item:        -1,
-		Label:       -1,
+		Item:  -1,
+		Label: -1,
 	}
 	loadedSat := Sat{
 		Config:  loadedSatConfig,
@@ -357,7 +365,8 @@ func exportSatItem(
 		for _, key := range strkeys {
 			for _, attribute := range satAttributes {
 				if attribute.Name == key {
-					item.Attributes[key] = attribute.Values[itemLabel.Attributes[key][0]]
+					item.Attributes[key] =
+						attribute.Values[itemLabel.Attributes[key][0]]
 					break
 				}
 			}
@@ -393,7 +402,7 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 					sat.Config.Attributes,
 					task.Index,
 					projectToLoad.Options.ItemType,
-					projectToLoad.Options.Name )
+					projectToLoad.Options.Name)
 				items = append(items, item)
 			}
 		} else {
@@ -403,7 +412,8 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 				item := ItemExport{}
 				item.Index = itemToLoad.Index
 				if projectToLoad.Options.ItemType == "video" {
-					item.VideoName = projectToLoad.Options.Name + "_" + Index2str(task.Index)
+					item.VideoName = projectToLoad.Options.Name +
+						"_" + Index2str(task.Index)
 				}
 				item.Timestamp = 10000 // to be fixed
 				item.Name = itemToLoad.Url

@@ -1,13 +1,14 @@
 package main
 
 import (
-	pb "../proto"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"golang.org/x/net/context"
 	"log"
 	"time"
+
+	pb "../proto"
+	"github.com/gorilla/websocket"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -52,7 +53,8 @@ func startSession(hub *Hub, conn *websocket.Conn) {
 	if existingSession, ok := hub.sessions[msg.SessionId]; ok {
 		session = existingSession
 	} else {
-		echoedMessage, modelServerTimestamp, modelServerDuration, grpcDuration := hub.grpcRegistration(msg.SessionId)
+		echoedMessage, modelServerTimestamp, modelServerDuration,
+			grpcDuration := hub.grpcRegistration(msg.SessionId)
 
 		session = &Session{
 			uuid: msg.SessionId,
@@ -80,24 +82,28 @@ func startSession(hub *Hub, conn *websocket.Conn) {
 }
 
 //Call the Register remote procedure and get the timing data
-func (hub *Hub) grpcRegistration(sessionId string) (string, string, string, string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+func (hub *Hub) grpcRegistration(sessionId string) (string, string, string,
+	string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	start := time.Now()
-	response, err := hub.modelServer.Register(ctx, &pb.Session{Message: "register", SessionId: sessionId})
+	sessionPtr := &pb.Session{Message: "register", SessionId: sessionId}
+	response, err := hub.modelServer.Register(ctx, sessionPtr)
 	end := time.Now()
-	grpcDuration := fmt.Sprintf("%.3f", float64(end.Sub(start))/float64(time.Millisecond))
+	grpcDuration := fmt.Sprintf("%.3f",
+		float64(end.Sub(start))/float64(time.Millisecond))
 
 	if err != nil {
 		log.Fatalf("could not register with gRPC: %v", err)
 	}
-	return response.Session.Message, response.ModelServerTimestamp, response.ModelServerDuration, grpcDuration
+	return response.Session.Message, response.ModelServerTimestamp,
+		response.ModelServerDuration, grpcDuration
 }
 
 type DummyData struct {
-	Message   string `json:"message"`
-	StartTime string `json:"startTime"`
+	Message          string `json:"message"`
+	StartTime        string `json:"startTime"`
 	TerminateSession string `json:"terminateSession"`
 }
 
@@ -132,7 +138,8 @@ func (session *Session) DataListener() {
 			break
 		}
 
-		echoedMessage, modelServerTimestamp, modelServerDuration, grpcDuration := session.grpcComputation(msg)
+		echoedMessage, modelServerTimestamp, modelServerDuration,
+			grpcDuration := session.grpcComputation(msg)
 
 		dummyResponse := DummyResponse{
 			EchoedMessage:        echoedMessage,
@@ -145,25 +152,29 @@ func (session *Session) DataListener() {
 	}
 }
 
-//Call the DummyComputation remote procedure with DummyData, and get data for DummyResponse
-func (session *Session) grpcComputation(msg DummyData) (string, string, string, string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+/* Call the DummyComputation remote procedure with DummyData,
+   and get data for DummyResponse */
+func (session *Session) grpcComputation(msg DummyData) (string, string, string,
+	string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	start := time.Now()
 	response, err := session.client.hub.modelServer.DummyComputation(
 		ctx, &pb.Session{Message: msg.Message, SessionId: session.uuid})
 	end := time.Now()
-	grpcDuration := fmt.Sprintf("%.3f", float64(end.Sub(start))/float64(time.Millisecond))
+	grpcDuration := fmt.Sprintf("%.3f",
+		float64(end.Sub(start))/float64(time.Millisecond))
 	if err != nil {
 		log.Fatalf("could not echo from gRPC: %v", err)
 	}
-	return response.Session.Message, response.ModelServerTimestamp, response.ModelServerDuration, grpcDuration
+	return response.Session.Message, response.ModelServerTimestamp,
+		response.ModelServerDuration, grpcDuration
 }
 
 //Kill the ray actor corresponding to the go session being killed
 func (session *Session) grpcKill() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	_, err := session.client.hub.modelServer.KillActor(

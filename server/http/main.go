@@ -180,7 +180,8 @@ func main() {
 	http.HandleFunc("/postSaveV2", WrapHandleFunc(postSaveV2Handler))
 	http.HandleFunc("/postExport", WrapHandleFunc(postExportHandler))
 	http.HandleFunc("/postExportV2", WrapHandleFunc(postExportV2Handler))
-	http.HandleFunc("/postDownloadTaskURL", WrapHandleFunc(downloadTaskURLHandler))
+	http.HandleFunc("/postDownloadTaskURL",
+		WrapHandleFunc(downloadTaskURLHandler))
 	http.HandleFunc("/postLoadAssignment",
 		WrapHandleFunc(postLoadAssignmentHandler))
 	http.HandleFunc("/postLoadAssignmentV2",
@@ -191,11 +192,12 @@ func main() {
 	http.HandleFunc("/adminDashboard", WrapHandleFunc(adminDashboardHandler))
 	http.HandleFunc("/logOut", WrapHandleFunc(logOutHandler))
 	http.HandleFunc("/postUsers", WrapHandleFunc(postUsersHandler))
-	http.HandleFunc("/postProjectNames", WrapHandleFunc(postProjectNamesHandler))
-	http.HandleFunc("/postDashboardContents", WrapHandleFunc(postDashboardContentsHandler))
+	http.HandleFunc("/postProjectNames",
+		WrapHandleFunc(postProjectNamesHandler))
+	http.HandleFunc("/postDashboardContents",
+		WrapHandleFunc(postDashboardContentsHandler))
 
 	// Simple static handlers can be generated with MakePathHandleFunc
-	// http.HandleFunc("/create", WrapHandleFunc(MakePathHandleFunc(env.CreatePath())))
 	http.HandleFunc("/create", WrapHandleFunc(createHandler))
 	http.HandleFunc("/label2d", WrapHandleFunc(Label2dHandler))
 	http.HandleFunc("/label2dv2", WrapHandleFunc(Label2dv2Handler))
