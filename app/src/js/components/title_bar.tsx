@@ -8,7 +8,6 @@ import { withStyles } from '@material-ui/core/styles/index'
 import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
-import { goToItem } from '../action/common'
 import Session from '../common/session'
 import { ConnectionStatus } from '../functional/types'
 import { defaultAppBar } from '../styles/general'
@@ -17,7 +16,8 @@ import { Component } from './component'
 const styles: any = (theme: any) => createStyles({
   appBar: {
     ...defaultAppBar,
-    position: 'relative'
+    position: 'relative',
+    height: '100%'
   },
   grow: {
     flexGrow: 1
@@ -39,20 +39,6 @@ interface Props {
   dashboardLink: string
   /** instructionLink of TitleBar */
   instructionLink: string
-}
-
-/**
- * Go to the next Item
- */
-function goToNextItem () {
-  Session.dispatch(goToItem(Session.getState().current.item + 1))
-}
-
-/**
- * Go to the previous Item
- */
-function goToPreviousItem () {
-  Session.dispatch(goToItem(Session.getState().current.item - 1))
 }
 
 /**
@@ -110,11 +96,6 @@ class TitleBar extends Component<Props> {
     const { dashboardLink } = this.props
 
     const buttonInfo = [
-      {
-        title: 'Previous Image', onClick: goToPreviousItem,
-        icon: fa.faAngleLeft
-      },
-      { title: 'Next Image', onClick: goToNextItem, icon: fa.faAngleRight },
       { title: 'Instructions', href: instructionLink, icon: fa.faInfo },
       { title: 'Keyboard Usage', icon: fa.faQuestion },
       { title: 'Dashboard', href: dashboardLink, icon: fa.faList },

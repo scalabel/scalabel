@@ -10,6 +10,7 @@ import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'
 import { imageViewStyle } from '../styles/label'
 import { Canvas2d } from './canvas2d'
+import PlayerControl from './player_control'
 
 interface ClassType {
   /** image canvas */
@@ -22,6 +23,8 @@ interface ClassType {
   display: string
   /** background */
   background: string
+  /** background */
+  background_with_player_control: string
 }
 
 interface Props {
@@ -80,6 +83,8 @@ export class ImageView extends Canvas2d<Props> {
   private controlCanvas: HTMLCanvasElement | null
   /** The mask to hold the display */
   private display: HTMLDivElement | null
+  /** The mask to hold the background */
+  private background: HTMLDivElement | null
 
   // display constants
   /** The maximum scale */
@@ -153,6 +158,7 @@ export class ImageView extends Canvas2d<Props> {
     this.labelContext = null
     this.labelCanvas = null
     this.display = null
+    this.background = null
 
     // set keyboard listeners
     document.onkeydown = this.onKeyDown.bind(this)
@@ -289,6 +295,9 @@ export class ImageView extends Canvas2d<Props> {
       }}
     />)
 
+    const playerControl = (<PlayerControl key='player-control'
+        num_frames={Session.getState().items.length}
+    />)
     let canvasesWithProps
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
@@ -301,25 +310,32 @@ export class ImageView extends Canvas2d<Props> {
     }
 
     return (
-      <div className={classes.background}>
-        <EventListener
-          target='window'
-          onMouseDown={(e) => this.onMouseDown(e)}
-          onMouseMove={(e) => this.onMouseMove(e)}
-          onMouseUp={(e) => this.onMouseUp(e)}
-          onMouseLeave={(e) => this.onMouseLeave(e)}
-          onDblClick={(e) => this.onDblClick(e)}
-          onWheel={withOptions((e) => this.onWheel(e), { passive: false })}
-        />
+      <div className={classes.background_with_player_control}>
         <div ref={(element) => {
           if (element) {
-            this.display = element
+            this.background = element
           }
-        }}
-          className={classes.display}
-        >
-          {canvasesWithProps}
+        }} className={classes.background}>
+          <EventListener
+            target='parent'
+            onMouseDown={(e) => this.onMouseDown(e)}
+            onMouseMove={(e) => this.onMouseMove(e)}
+            onMouseUp={(e) => this.onMouseUp(e)}
+            onMouseLeave={(e) => this.onMouseLeave(e)}
+            onDblClick={(e) => this.onDblClick(e)}
+            onWheel={withOptions((e) => this.onWheel(e), { passive: false })}
+          />
+          <div ref={(element) => {
+            if (element) {
+              this.display = element
+            }
+          }}
+            className={classes.display}
+          >
+            {canvasesWithProps}
+          </div>
         </div>
+        {playerControl}
       </div>
     )
   }
@@ -445,10 +461,26 @@ export class ImageView extends Canvas2d<Props> {
   }
 
   /**
+   * Whether or not the mouse event is within the frame
+   */
+  private isWithinFrame (e: MouseEvent) {
+    if (this.background === null) {
+      return false
+    }
+    const background = this.background.getBoundingClientRect()
+    return e.x >= background.left && e.y >= background.top &&
+           e.x <= background.left + background.width &&
+           e.y <= background.top + background.height
+  }
+
+  /**
    * Callback function when mouse is down
    * @param {MouseEvent} e - event
    */
   private onMouseDown (e: MouseEvent) {
+    if (!this.isWithinFrame(e) || e.button !== 0) {
+      return
+    }
     // ctrl + click for dragging
     if (this.isKeyDown('ctrl')) {
       if (this.display && this.imageCanvas) {
@@ -477,6 +509,9 @@ export class ImageView extends Canvas2d<Props> {
    * @param {MouseEvent} e - event
    */
   private onMouseUp (e: MouseEvent) {
+    if (!this.isWithinFrame(e) || e.button !== 0) {
+      return
+    }
     // get mouse position in image coordinates
     this._isGrabbingImage = false
     this._startGrabX = -1
@@ -503,6 +538,10 @@ export class ImageView extends Canvas2d<Props> {
    * @param {MouseEvent} e - event
    */
   private onMouseMove (e: MouseEvent) {
+    if (!this.isWithinFrame(e)) {
+      this.onMouseLeave(e)
+      return
+    }
     // TODO: update hovered label
     // grabbing image
     if (this.isKeyDown('ctrl')) {
@@ -534,6 +573,9 @@ export class ImageView extends Canvas2d<Props> {
    * @param {WheelEvent} e - event
    */
   private onWheel (e: WheelEvent) {
+    if (!this.isWithinFrame(e)) {
+      return
+    }
     // get mouse position in image coordinates
     const mousePos = this.getMousePos(e)
     if (this.isKeyDown('ctrl')) { // control for zoom
@@ -555,11 +597,14 @@ export class ImageView extends Canvas2d<Props> {
    * Callback function when double click occurs
    * @param {MouseEvent} e - event
    */
-  private onDblClick (_e: MouseEvent) {
+  private onDblClick (e: MouseEvent) {
     // get mouse position in image coordinates
     // const mousePos = this.getMousePos(e)
     // label-specific handling of double click
     // this.getCurrentController().onDblClick(mousePos)
+    if (!this.isWithinFrame(e)) {
+      return
+    }
   }
 
   /**

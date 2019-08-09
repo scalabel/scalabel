@@ -130,8 +130,60 @@ export const imageViewStyle = () => createStyles({
     width: 'calc(100% - 20px)'
   },
   background: {
-    display: 'block', height: 'calc(100% - 50px)',
+    display: 'block', height: 'calc(100% - 40px)',
     position: 'absolute',
     outline: 'none', width: '100%', background: '#222222'
+  },
+  background_with_player_control: {
+    display: 'block', height: '100%',
+    position: 'absolute',
+    outline: 'none', width: '100%', background: '#000000'
+  }
+})
+
+export const playerControlStyles = () => createStyles({
+  button: {
+    color: '#bbbbbb',
+    left: '-3px',
+    verticalAlign: 'middle'
+  },
+  playerControl: {
+    display: 'block',
+    height: '50px',
+    left: '10px',
+    position: 'relative',
+    width: 'calc(100% - 40px)',
+    top: 'calc(100% - 50px)'
+  },
+  input: {
+    background: '#000000',
+    color: 'green',
+    direction: 'rtl',
+    width: '50px',
+    fontWeight: 500,
+    left: '-1px',
+    right: '2px',
+    verticalAlign: 'middle'
+  },
+  underline: {
+    color: 'green'
+  },
+  slider: {
+    selectionColor: 'green',
+    rippleColor: 'white',
+    verticalAlign: 'middle'
+  }
+})
+
+export const LayoutStyles = () => createStyles({
+  titleBar: {
+    height: '50px'
+  },
+  main: {
+    height: 'calc(100% - 50px)',
+    display: 'block',
+    position: 'absolute',
+    outline: 'none',
+    width: '100%'
   }
 })

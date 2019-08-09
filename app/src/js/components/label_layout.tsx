@@ -1,9 +1,18 @@
 // tslint:disable:no-any
 // TODO: remove the disable tag
 import CssBaseline from '@material-ui/core/CssBaseline'
+import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import Session from '../common/session'
+import { LayoutStyles } from '../styles/label'
+
+interface ClassType {
+  /** title bar */
+  titleBar: string
+  /** everything below title bar */
+  main: string
+}
 
 interface Props {
   /** The title bar */
@@ -20,6 +29,8 @@ interface Props {
   rightSidebar1?: any
   /** The bottom part of the right side bar */
   rightSidebar2?: any
+  /** class type */
+  classes: ClassType
 }
 
 interface State {
@@ -133,7 +144,7 @@ class LabelLayout extends React.Component<Props, State> {
    */
   public render () {
     const {titleBar, leftSidebar1, leftSidebar2, bottomBar,
-      main, rightSidebar1, rightSidebar2} = this.props
+      main, rightSidebar1, rightSidebar2, classes} = this.props
     const mainWithProps = React.cloneElement(main, {})
 
     const leftDefaultWidth = 200
@@ -152,10 +163,10 @@ class LabelLayout extends React.Component<Props, State> {
     return (
         <React.Fragment>
           <CssBaseline />
-          <div className='titleBar'>
+          <div className={classes.titleBar}>
             {titleBar}
           </div>
-          <main>
+          <main className={classes.main}>
             {this.optionalSplit('vertical',
 
               // left sidebar
@@ -201,4 +212,5 @@ class LabelLayout extends React.Component<Props, State> {
 //   rightSidebar2: PropTypes.object,
 // };
 
-export default LabelLayout
+export default withStyles(
+  LayoutStyles, { withTheme: true })(LabelLayout)

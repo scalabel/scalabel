@@ -91,7 +91,7 @@ function setListeners () {
    * Load labeling data initialization function
    */
 function loadData (): void {
-  if (Session.itemType === 'image') {
+  if (Session.itemType === 'image' || Session.itemType === 'video') {
     loadImages()
   } else if (Session.itemType === 'pointcloud') {
     loadPointClouds()

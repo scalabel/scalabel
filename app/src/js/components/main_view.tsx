@@ -53,7 +53,8 @@ class MainView extends React.Component<Props> {
           }
         }}
              style={{
-               display: 'block', height: '100%', position: 'absolute',
+               display: 'block', height: '100%',
+               position: 'absolute',
                outline: 'none', width: '100%', background: '#222222'
              }}>
           {viewsWithProps}
