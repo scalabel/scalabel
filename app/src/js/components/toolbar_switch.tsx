@@ -1,5 +1,3 @@
-// tslint:disable:no-any
-// TODO: remove the disable tag
 import { ListItem, ListItemText } from '@material-ui/core'
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
 import { withStyles } from '@material-ui/core/styles'
@@ -7,16 +5,29 @@ import Switch from '@material-ui/core/Switch'
 import React from 'react'
 import { switchStyle } from '../styles/label'
 
+interface ClassType {
+  /** root class */
+  root: string,
+  /** primary text class */
+  primary: string,
+  /** switch color class */
+  switchBase: string
+  /** checked state class */
+  checked: string
+  /** track class */
+  track: string
+}
+
 /**
  * Interface used for props.
  */
 interface Props {
   /** onChange function */
-  onChange: any
+  onChange: (switchName: string) => () => void
   /** values passed to onChange function . */
-  value: any
+  value: string
   /** styles of SwitchButton. */
-  classes: any
+  classes: ClassType
 }
 
 /**
@@ -31,19 +42,18 @@ class SwitchButton extends React.Component<Props> {
   public render () {
     const { onChange, value, classes } = this.props
 
-    // @ts-ignore
     return (
-      <ListItem>
+      <ListItem dense={true}>
         <ListItemText classes={{ primary: classes.primary }}
           primary={value} />
         <ListItemSecondaryAction>
           <Switch
             classes={{
-              switchBase: classes.colorSwitchBase,
-              checked: classes.colorChecked
+              switchBase: classes.switchBase,
+              checked: classes.checked,
+              track: classes.track
             }}
             onChange={onChange(value)}
-            color='default'
           />
         </ListItemSecondaryAction>
       </ListItem>

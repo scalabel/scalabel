@@ -1,19 +1,18 @@
-// tslint:disable:no-any
-// TODO: remove the disable tag
 import Divider from '@material-ui/core/Divider'
 import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import React from 'react'
 import { renderButtons, renderTemplate } from '../common/label'
+import { Attribute } from '../functional/types'
 import { genButton } from './general_button'
 import { Category } from './toolbar_category'
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
   /** categories of ToolBar */
-  categories: any[]
+  categories: string[] | null
   /** attributes of ToolBar */
-  attributes: any[]
+  attributes: Attribute[]
   /** itemType of ToolBar 'video' | 'image' */
   itemType: string
   /** labelType of ToolBar 'box2d' | 'segmentation' | 'lane' */
@@ -41,11 +40,11 @@ export class ToolBar extends React.Component<Props> {
     return (
       <div>
         <ListItem style={{ textAlign: 'center' }} >
-          <Category categories={categories} />
+          <Category categories={categories} headerText={'Label Category'}/>
         </ListItem>
         <Divider variant='middle' />
         <List>
-          {attributes.map((element: any) => (
+          {attributes.map((element: Attribute) => (
             renderTemplate(element.toolType, this.handleToggle,
               element.name, element.values)
           ))}

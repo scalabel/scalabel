@@ -1,20 +1,28 @@
-// tslint:disable:no-any
-// TODO: remove the disable tag
 import { ListItemText } from '@material-ui/core'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import { withStyles } from '@material-ui/core/styles'
 import ToggleButton from '@material-ui/lab/ToggleButton'
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
-import { Validator } from 'prop-types'
 import React from 'react'
 import { listButtonStyle, toggleButtonStyle } from '../styles/label'
 
+interface ClassType {
+  /** root class */
+  root: string,
+  /** element containg toggle class */
+  toggleContainer: string,
+  /** button group class */
+  buttonGroup: string,
+  /** primary text class */
+  primary: string
+}
+
 interface Props {
   /** styles of ToggleButtons */
-  classes: any
+  classes: ClassType
   /** name of ToggleButtons */
-  name: any
+  name: string
   /** values of ToggleButtons */
   values: string[]
 }
@@ -25,18 +33,14 @@ interface Props {
  * @param {object} props
  */
 class ToggleButtons extends React.Component<Props> {
-  /** propTypes of ToggleButtons */
-  public static propTypes: {
-    /** type of classes */
-    classes: Validator<NonNullable<object>>
-  }
   /** state of ToggleButtons */
   public state = {
     alignment: this.props.values[0]
   }
   /** handleAlignment of ToggleButtons that align buttons */
   public handleAlignment =
-    (_event: any, alignment: any) => this.setState({ alignment })
+    (_event: React.MouseEvent<HTMLElement>,
+     alignment: string) => this.setState({ alignment })
   /** render function of ToggleButtons */
   public render () {
     const { name, classes, values } = this.props
@@ -44,11 +48,11 @@ class ToggleButtons extends React.Component<Props> {
     const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton)
 
     return (
-      <List style={{ width: '100%' }}>
+      <List style={{ width: '100%', padding: '0px' }}>
         <ListItemText style={{ textAlign: 'center', width: '100%' }}
           classes={{ primary: classes.primary }}
           primary={name} />
-        <ListItem style={{ width: '100%' }}>
+        <ListItem style={{ width: '100%' }} dense={true}>
           <div className={classes.toggleContainer}
             style={{
               marginRight: 'auto',
@@ -61,7 +65,7 @@ class ToggleButtons extends React.Component<Props> {
               exclusive
               onChange={this.handleAlignment}
             >
-              {values.map((element: any) => (
+              {values.map((element: string) => (
                 <ToggleBtn
                   value={element}> {element} </ToggleBtn>
               ))}

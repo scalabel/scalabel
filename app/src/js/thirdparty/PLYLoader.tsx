@@ -349,7 +349,6 @@ export class PLYLoader {
     function handleElement(buffer: BufferType, elementName: string,
                            element: Record<string, number | number[]>) {
 
-      /* tslint:disable:no-string-literal */
       if (elementName === 'vertex') {
         buffer.vertices.push(
           element['x'] as number,

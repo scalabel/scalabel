@@ -1,4 +1,3 @@
-// tslint:disable:no-any
 import { IconButton } from '@material-ui/core'
 import { cleanup } from '@testing-library/react'
 import * as React from 'react'
@@ -18,23 +17,31 @@ beforeEach(() => {
 afterEach(cleanup)
 
 afterAll(() => {
-  untypedWindow.XMLHttpRequest = oldXMLHttpRequest
-  untypedWindow.alert = oldAlert
+  windowInterface.XMLHttpRequest = oldXMLHttpRequest
+  windowInterface.alert = oldAlert
 })
 
-const untypedWindow = window as any
-const oldXMLHttpRequest = untypedWindow.XMLHttpRequest
-const oldAlert = untypedWindow.alert
+interface WindowInterface extends Window {
+  /** XML request init function */
+  XMLHttpRequest: () => {
+    /** Callback function for xhr request */
+    onreadystatechange: () => void
+  }
+}
+
+const windowInterface = window as WindowInterface
+const oldXMLHttpRequest = windowInterface.XMLHttpRequest
+const oldAlert = windowInterface.alert
 
 const xhrMockClass = {
   open: jest.fn(),
   send: jest.fn(),
-  onreadystatechange: oldXMLHttpRequest.onreadystatechange,
+  onreadystatechange: jest.fn(),
   readyState: 4,
   response: JSON.stringify(0)
 }
-untypedWindow.XMLHttpRequest = jest.fn(() => xhrMockClass)
-untypedWindow.alert = jest.fn()
+windowInterface.XMLHttpRequest = jest.fn(() => xhrMockClass)
+windowInterface.alert = jest.fn()
 
 describe('Save button functionality', () => {
   beforeEach(() => {
@@ -75,7 +82,7 @@ describe('Save button functionality', () => {
 
     saveButton.props.onClick()
     xhrMockClass.onreadystatechange()
-    expect(untypedWindow.alert).toBeCalled()
+    expect(windowInterface.alert).toBeCalled()
     expect(Session.status).toBe(ConnectionStatus.SAVED)
 
     xhrMockClass.response = JSON.stringify(0)

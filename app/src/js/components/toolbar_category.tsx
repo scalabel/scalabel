@@ -2,7 +2,10 @@ import { ListItemText } from '@material-ui/core'
 import FormControl from '@material-ui/core/FormControl'
 import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel'
 import Radio from '@material-ui/core/Radio/Radio'
+import RadioGroup from '@material-ui/core/RadioGroup'
 import { withStyles } from '@material-ui/core/styles'
+import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked'
+import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked'
 import * as React from 'react'
 import { categoryStyle } from '../styles/label'
 
@@ -24,6 +27,8 @@ interface Props {
   categories: string[] | null
   /** styles of MultipleSelect */
   classes: ClassType
+  /** header text of MultipleSelect */
+  headerText: string
 }
 
 /**
@@ -55,13 +60,14 @@ class MultipleSelect extends React.Component<Props> {
   /**
    * Render the category in a list
    */
-  public renderCategory (categories: string[], classes: ClassType) {
+  public renderCategory (
+    categories: string[], classes: ClassType, headerText: string) {
     return (
       <div>
         <FormControl className={classes.formControl}>
           <ListItemText classes={{ primary: classes.primary }}
-            primary={'Label Category'} />
-          <div className={classes.root}>
+            primary={headerText} />
+          <RadioGroup className={classes.root}>
             {categories.map((name: string, index: number) => (
               <FormControlLabel
                 key={index}
@@ -70,6 +76,8 @@ class MultipleSelect extends React.Component<Props> {
                   onChange={this.handleChange}
                   key={'kk'}
                   value={name}
+                  icon={<RadioButtonUncheckedIcon fontSize='small' />}
+                  checkedIcon={<RadioButtonCheckedIcon fontSize='small' />}
                   classes={{
                     root: classes.checkbox,
                     checked: classes.checked
@@ -78,7 +86,7 @@ class MultipleSelect extends React.Component<Props> {
                 label={name}
               />
             ))}
-          </div>
+          </RadioGroup>
         </FormControl>
       </div>
     )
@@ -90,10 +98,11 @@ class MultipleSelect extends React.Component<Props> {
   public render () {
     const { categories } = this.props
     const { classes } = this.props
+    const { headerText } = this.props
     if (!categories) {
       return (null)
     } else {
-      return this.renderCategory(categories, classes)
+      return this.renderCategory(categories, classes, headerText)
     }
   }
 }

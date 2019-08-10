@@ -10,7 +10,7 @@ afterEach(cleanup)
 describe('Toolbar category setting', () => {
   test('Category selection', () => {
     const { getByLabelText } = render(
-      <Category categories={['A', 'B']} />)
+      <Category categories={['A', 'B']} headerText={'Label Category'} />)
     const selectedValued = getByLabelText(/A/i)
     expect(selectedValued.getAttribute('value')).toEqual('A')
     const radio = getByLabelText('A')
@@ -21,7 +21,7 @@ describe('Toolbar category setting', () => {
 
   test('Test elements in Category', () => {
     const category = create(
-      <Category categories={['A', 'B']} />)
+      <Category categories={['A', 'B']} headerText={'Label Category'} />)
     const root = category.root
     expect(root.props.categories[0].toString()).toBe('A')
     expect(root.props.categories[1].toString()).toBe('B')
@@ -31,14 +31,15 @@ describe('Toolbar category setting', () => {
 
   test('Category by type', () => {
     const category = create(
-      <Category categories={['OnlyCategory']} />)
+      <Category categories={['OnlyCategory']} headerText={'Label Category'} />)
     const root = category.root
     expect(root.findByType(FormControlLabel).props.label)
       .toBe('OnlyCategory')
   })
 
   test('Null category', () => {
-    const category = create(<Category categories={null} />)
+    const category = create(
+      <Category categories={null} headerText={'Label Category'} />)
     const root = category.getInstance()
     expect(root).toBe(null)
   })

@@ -152,7 +152,7 @@ export interface ConfigType {
   /** Categories */
   categories: string[]
   /** Attributes */
-  attributes: object[]
+  attributes: Attribute[]
   /** Task ID */
   taskId: string
   /** Worker ID */
@@ -260,4 +260,13 @@ export interface User {
   refreshToken: string
   /** User's projects */
   projects: string[]
+}
+
+export interface Attribute {
+  /** Attribute tool type */
+  toolType: string,
+  /** Attribute name */
+  name: string,
+  /** Values of attribute */
+  values: string[]
 }

@@ -1,8 +1,7 @@
-// tslint:disable:no-any
-// TODO: remove the disable tag
 import * as fa from '@fortawesome/free-solid-svg-icons/index'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AppBar, Box, IconButton, Toolbar, Tooltip } from '@material-ui/core'
+import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'
+import { Theme } from '@material-ui/core/styles'
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import Typography from '@material-ui/core/Typography'
@@ -11,9 +10,10 @@ import React from 'react'
 import Session from '../common/session'
 import { ConnectionStatus } from '../functional/types'
 import { defaultAppBar } from '../styles/general'
+import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
 
-const styles: any = (theme: any) => createStyles({
+const styles = (theme: Theme) => createStyles({
   appBar: {
     ...defaultAppBar,
     position: 'relative',
@@ -24,15 +24,24 @@ const styles: any = (theme: any) => createStyles({
   },
   titleUnit: {
     color: '#bbbbbb',
-    margin: theme.spacing.unit * 0.5
+    margin: theme.spacing(0) * 0.5
   }
 })
 
+interface ClassType {
+  /** app bar class */
+  appBar: string,
+  /** grow class for spacing */
+  grow: string,
+  /** title unit class */
+  titleUnit: string
+}
+
 interface Props {
   /** Styles of TitleBar */
-  classes: any
+  classes: ClassType
   /** Theme of TitleBar */
-  theme: any
+  theme: Theme
   /** title of TitleBar */
   title: string
   /** dashboardLink of TitleBar */
@@ -81,7 +90,7 @@ class TitleBar extends Component<Props> {
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: any) {
+  constructor (props: Props) {
     super(props)
   }
 
@@ -111,7 +120,7 @@ class TitleBar extends Component<Props> {
       const href = _.get(b, 'href', '#')
       const target = ('href' in b ? 'view_window' : '_self')
       return (
-              <Tooltip title={b.title}>
+              <Tooltip title={b.title} key={b.title}>
                 <IconButton className={classes.titleUnit} onClick={onClick}
                             href={href} target={target}>
                   <FontAwesomeIcon icon={b.icon} size='xs'/>
@@ -147,11 +156,9 @@ class TitleBar extends Component<Props> {
     }
 
     const statusMessage = hideMessage ? null : (
-      <Box marginLeft={5} borderRadius='borderRadius'
-        color='text.primary' bgcolor='#909090'
-        padding='3px' fontSize='fontSize'>
+      <StatusMessageBox>
         {sessionStatus}
-      </Box>
+      </StatusMessageBox>
     )
 
     return (

@@ -1,17 +1,19 @@
-import { Theme, withStyles } from '@material-ui/core'
+import { withStyles } from '@material-ui/core'
+import Box from '@material-ui/core/Box/Box'
 import Button from '@material-ui/core/Button/Button'
 import { blue } from '@material-ui/core/colors'
 import grey from '@material-ui/core/colors/grey'
 import createStyles from '@material-ui/core/styles/createStyles'
 
-export const categoryStyle = (theme: Theme) => createStyles({
+export const categoryStyle = () => createStyles({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
+    flexDirection: 'column',
     alignItems: 'left'
   },
   formControl: {
-    margin: theme.spacing(1),
+    margin: '0px 4px',
     minWidth: 150,
     maxWidth: 360
   },
@@ -24,7 +26,8 @@ export const categoryStyle = (theme: Theme) => createStyles({
       color: blue[500]
     },
     'fontSize': '15px',
-    'margin': '-10px'
+    'margin': '-10px',
+    'marginRight': '-5px'
   },
   checked: {}
 })
@@ -37,17 +40,17 @@ export const switchStyle = () => ({
   primary: {
     fontSize: '15px'
   },
-  colorSwitchBase: {
+  switchBase: {
     'color': grey[400],
-    '&$colorChecked': {
+    '&$checked': {
       'color': grey[500],
-      '& + $colorBar': {
-        backgroundColor: grey[600]
+      '& + $track': {
+        backgroundColor: blue[700]
       }
     }
   },
-  colorBar: {},
-  colorChecked: {}
+  checked: {},
+  track: {}
 })
 
 export const StyledButton = withStyles({
@@ -89,6 +92,7 @@ export const toggleButtonStyle = () => ({
 
 export const listButtonStyle = () => ({
   root: {
+    padding: '0px',
     height: '28px'
   },
   toggleContainer: {
@@ -187,3 +191,14 @@ export const LayoutStyles = () => createStyles({
     width: '100%'
   }
 })
+
+export const StatusMessageBox = withStyles({
+  root: {
+    padding: '3px',
+    fontSize: 'fontSize',
+    background: '#909090',
+    marginLeft: '40px',
+    borderRadius: '2px',
+    color: 'black'
+  }
+})(Box)

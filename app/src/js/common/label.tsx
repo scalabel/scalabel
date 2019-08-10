@@ -1,6 +1,7 @@
 import ListItem from '@material-ui/core/ListItem/ListItem'
 import React from 'react'
 import { genButton } from '../components/general_button'
+import { Category } from '../components/toolbar_category'
 import { ListButton } from '../components/toolbar_list_button'
 import { SwitchBtn } from '../components/toolbar_switch'
 
@@ -20,8 +21,14 @@ export function renderTemplate (
     )
   } else if (toolType === 'list') {
     return (
-      <ListItem style={{ textAlign: 'center' }} >
+      <ListItem dense={true} style={{ textAlign: 'center' }} >
         <ListButton name={name} values={values} />
+      </ListItem>
+    )
+  } else if (toolType === 'longList') {
+    return (
+      <ListItem dense={true} style={{ textAlign: 'center' }} >
+        <Category categories={values} headerText={name}/>
       </ListItem>
     )
   }
