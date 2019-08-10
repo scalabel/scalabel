@@ -1,13 +1,20 @@
-import os
-from subprocess import Popen, PIPE, STDOUT
+"""
+Convert videos or images to a data folder and an image list that can be
+directly used for creating scalabel projects
+"""
 import argparse
 import glob
+import os
 from os.path import join
-import yaml
 import shutil
+from subprocess import Popen, PIPE, STDOUT
+
+import boto3
+import yaml
 
 
 def parse_arguments():
+    "parse arguments"
     parser = argparse.ArgumentParser(description='prepare data')
     parser.add_argument('--input', '-i', type=str, nargs='+',
                         help='path to the video/images to be processed')
@@ -31,19 +38,20 @@ def parse_arguments():
 
 
 def check_video_format(name):
+    "only accept mov, avi, and mp4"
     if name.endswith(('.mov', '.avi', '.mp4')):
         return True
     return False
 
 
 def prepare_data(args):
-
+    "break one or a list of videos into frames"
     if args.s3:
         s3_setup(args)
 
-    if type(args.input) == list:
+    if isinstance(args.input, list):
         print('processing {} video(s) ...'.format(len(args.input)))
-        if len(glob.glob(join(args.tar_dir, '*.jpg'))) > 0:
+        if glob.glob(join(args.tar_dir, '*.jpg')):
             print('[ERROR] Target folder is not empty. '
                   'Please specify an empty folder')
             return None
@@ -81,9 +89,9 @@ def prepare_data(args):
 
     yaml_items = [
         {
-            'url': os.path.abspath(img) if not args.web_root else
-            join(args.web_root, os.path.basename(img)),
-            'videoName':  '{}'.format(
+            'url': (os.path.abspath(img) if not args.web_root else
+                    join(args.web_root, os.path.basename(img))),
+            'videoName': '{}'.format(
                 '-'.join(os.path.split(img)[-1].split('-')[:-1]))
         }
         for img in file_list]
@@ -100,7 +108,7 @@ def prepare_data(args):
 
 
 def upload_files_to_s3(args):
-    import boto3
+    """send the files to s3"""
     s3 = boto3.resource('s3')
     bn = args.bucket_name
     file_list = glob.glob(join(args.tar_dir, '*'))
@@ -109,15 +117,14 @@ def upload_files_to_s3(args):
             s3.Bucket(bn).upload_file(f, join(args.s3_folder,
                                               os.path.basename(f)),
                                       ExtraArgs={'ACL': 'public-read'})
-        except Exception as e:
+        except boto3.exceptions.S3UploadFailedError as e:
             print('[ERROR] s3 bucket is not properly configured')
             print('[ERROR]', e)
             break
 
 
 def s3_setup(args):
-    import boto3
-
+    """optionaly store the data on s3"""
     args.bucket_name, args.s3_folder = args.s3.split('/')[0], '/'.join(
         args.s3.split('/')[1:])
     s3 = boto3.resource('s3')
@@ -130,6 +137,7 @@ def s3_setup(args):
 
 
 def main():
+    """ main function """
     args = parse_arguments()
     if args.tar_dir:
         if args.scratch and os.path.exists(args.tar_dir):

@@ -15,7 +15,7 @@ install:
   - bash scripts/install_go_packages.sh
   - npm install
 script:
-  - pycodestyle --show-source . --exclude=node_modules
+  - pylint scripts/
   - node_modules/.bin/eslint .
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
