@@ -5,7 +5,7 @@
     "[python]": {
         "editor.rulers": [
             79
-        ]
+        ],
     },
     "[typescript]": {
         "editor.tabSize": 2,
@@ -33,5 +33,9 @@
     // When opening a file, `editor.tabSize` and `editor.insertSpaces`
     // will be detected based on the file contents. Set to false to keep
     // the values you've explicitly set, above.
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    // python settings
+    "python.formatting.provider": "autopep8",
+    "python.linting.pylintEnabled": true
 }
