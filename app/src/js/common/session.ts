@@ -4,8 +4,12 @@ import { StateWithHistory } from 'redux-undo'
 import * as THREE from 'three'
 import * as types from '../action/types'
 import { Window } from '../components/window'
-import { ConnectionStatus, State } from '../functional/types'
+import { State } from '../functional/types'
 import { configureStore } from './configure_store'
+
+export const enum ConnectionStatus {
+  SAVED, SAVING, RECONNECTING, UNSAVED
+}
 
 /**
  * Singleton session class

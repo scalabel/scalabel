@@ -1,3 +1,6 @@
+/**
+ * Interfaces for immutable states
+ */
 export interface LabelType {
   /** ID of the label */
   id: number
@@ -93,7 +96,7 @@ export interface PointCloudViewerConfigType {
 }
 
 export type ViewerConfigType =
-        ImageViewerConfigType | PointCloudViewerConfigType | null
+  ImageViewerConfigType | PointCloudViewerConfigType | null
 
 export interface ItemType {
   /** The ID of the item */
@@ -109,9 +112,18 @@ export interface ItemType {
   /** Labels of the item */
   labels: { [key: number]: LabelType } // list of label
   /** shapes of the labels on this item */
-  shapes: {[key: number]: IndexedShapeType}
+  shapes: { [key: number]: IndexedShapeType }
   /** Configurations of the viewer */
   viewerConfig: ViewerConfigType
+}
+
+export interface Attribute {
+  /** Attribute tool type */
+  toolType: string,
+  /** Attribute name */
+  name: string,
+  /** Values of attribute */
+  values: string[]
 }
 
 /*
@@ -203,70 +215,4 @@ export interface State {
   tracks: { [key: number]: Track }
   /** Layout */
   layout: LayoutType
-}
-
-export interface ProjectMetaData {
-  /** project name */
-  name: string
-  /** item type */
-  itemType: string
-  /** label type */
-  labelType: string
-  /** task size */
-  taskSize: number
-  /** number of items */
-  numItems: number
-  /** number of categories */
-  numLeafCategories: number
-  /** number of attributes */
-  numAttributes: number
-}
-
-export interface TaskMetaData {
-  /** number of labeled images */
-  numLabeledImages: string
-  /** number of labels */
-  numLabels: string
-  /** if the task was submitted */
-  submitted: boolean
-  /** task link handler url */
-  handlerUrl: string
-}
-
-export interface DashboardContents {
-  /** project metadata */
-  projectMetaData: ProjectMetaData
-  /** tasks */
-  taskMetaDatas: TaskMetaData[]
-}
-
-export const enum ConnectionStatus {
-  SAVED, SAVING, RECONNECTING, UNSAVED
-}
-
-export type LabelFuncType =
-        (id: number, itemId: number, attributes: object) => LabelType
-
-export type ItemFuncType = (id: number, url: string) => ItemType
-
-export interface User {
-  /** User ID */
-  id: string
-  /** User email */
-  email: string
-  /** User group */
-  group: string
-  /** User refresh token */
-  refreshToken: string
-  /** User's projects */
-  projects: string[]
-}
-
-export interface Attribute {
-  /** Attribute tool type */
-  toolType: string,
-  /** Attribute name */
-  name: string,
-  /** Values of attribute */
-  values: string[]
 }

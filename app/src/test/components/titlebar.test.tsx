@@ -3,10 +3,9 @@ import { cleanup } from '@testing-library/react'
 import * as React from 'react'
 import { create } from 'react-test-renderer'
 import * as types from '../../js/action/types'
-import Session from '../../js/common/session'
+import Session, { ConnectionStatus } from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import TitleBar from '../../js/components/title_bar'
-import { ConnectionStatus } from '../../js/functional/types'
 import { autoSaveTestJson, dummyNewLabel } from '../test_objects'
 
 beforeEach(() => {
@@ -51,11 +50,11 @@ describe('Save button functionality', () => {
 
   // titlebar contains save button
   const titleBar = create(
-      <TitleBar
-      title={ 'title' }
-      instructionLink={ 'instructionLink' }
-      dashboardLink={ 'dashboardLink' }
-      />
+    <TitleBar
+      title={'title'}
+      instructionLink={'instructionLink'}
+      dashboardLink={'dashboardLink'}
+    />
   )
   const buttonContainer = titleBar.root.findByProps({ title: 'Save' })
   const saveButton = buttonContainer.findByType(IconButton)
@@ -64,7 +63,7 @@ describe('Save button functionality', () => {
     saveButton.props.onClick()
     expect(xhrMockClass.open).toBeCalled()
     expect(xhrMockClass.send).toBeCalledWith(
-        expect.stringContaining('"testKey":"testValue"')
+      expect.stringContaining('"testKey":"testValue"')
     )
     xhrMockClass.onreadystatechange()
   })
@@ -96,21 +95,25 @@ xdescribe('Autosave', () => {
 
     // titlebar contains autosave subscriber
     create(
-        <TitleBar
-        title={ 'title' }
-        instructionLink={ 'instructionLink' }
-        dashboardLink={ 'dashboardLink' }
-        />
+      <TitleBar
+        title={'title'}
+        instructionLink={'instructionLink'}
+        dashboardLink={'dashboardLink'}
+      />
     )
     // dispatch an action to trigger/init autosave subscriber
-    Session.dispatch({ type: types.IMAGE_ZOOM, ratio: 1.05,
-      viewOffsetX: 0, viewOffsetY: 0, sessionId: Session.id })
+    Session.dispatch({
+      type: types.IMAGE_ZOOM, ratio: 1.05,
+      viewOffsetX: 0, viewOffsetY: 0, sessionId: Session.id
+    })
     xhrMockClass.onreadystatechange()
   })
 
   test('No save if data does not change', () => {
-    Session.dispatch({ type: types.IMAGE_ZOOM, ratio: 1.05,
-      viewOffsetX: 0, viewOffsetY: 0, sessionId: Session.id })
+    Session.dispatch({
+      type: types.IMAGE_ZOOM, ratio: 1.05,
+      viewOffsetX: 0, viewOffsetY: 0, sessionId: Session.id
+    })
     expect(xhrMockClass.open).not.toBeCalled()
     expect(xhrMockClass.send).not.toBeCalled()
   })
@@ -122,7 +125,7 @@ xdescribe('Autosave', () => {
       sessionId: Session.id,
       label: dummyNewLabel,
       shapes: [
-          { x1: 1, y1: 1, x2: 2, y2: 2 }
+        { x1: 1, y1: 1, x2: 2, y2: 2 }
       ]
     })
     expect(xhrMockClass.open).toBeCalled()
@@ -166,8 +169,8 @@ xdescribe('Autosave', () => {
       labelId: 0,
       props: {
         attributes: {
-          0 : [0],
-          1 : [1]
+          0: [0],
+          1: [1]
         }
       }
     })

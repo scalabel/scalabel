@@ -1,20 +1,21 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import { cleanup, render } from '@testing-library/react'
 import React from 'react'
-import Dashboard, { StyledHeader, StyledSidebar } from '../../js/components/dashboard_window'
-import { DashboardContents } from '../../js/functional/types'
+import Dashboard, {
+  DashboardContents, StyledHeader, StyledSidebar
+} from '../../js/components/dashboard'
 import { myTheme } from '../../js/styles/theme'
 
 afterEach(cleanup)
 describe('Test dashboard functionality', () => {
   test('Correct table values', () => {
     const { getByTestId } = render(
-            <MuiThemeProvider theme={myTheme}>
-              <Dashboard dashboardContents={sampleDashboardContents}/>
-            </MuiThemeProvider>)
+      <MuiThemeProvider theme={myTheme}>
+        <Dashboard dashboardContents={sampleDashboardContents} />
+      </MuiThemeProvider>)
     sampleDashboardContents.taskMetaDatas.forEach((value, index) => {
       const numLabeledImages = getByTestId('num-labeled-images-'
-              + index.toString()).innerHTML
+        + index.toString()).innerHTML
       const numLabels = getByTestId('num-labels-' + index.toString()).innerHTML
       expect(numLabeledImages).toBe(value.numLabeledImages)
       expect(numLabels).toBe(value.numLabels)
@@ -22,9 +23,9 @@ describe('Test dashboard functionality', () => {
   })
   test('Correct totals', () => {
     const { getByTestId } = render(
-            <MuiThemeProvider theme={myTheme}>
-              <Dashboard dashboardContents={sampleDashboardContents}/>
-            </MuiThemeProvider>)
+      <MuiThemeProvider theme={myTheme}>
+        <Dashboard dashboardContents={sampleDashboardContents} />
+      </MuiThemeProvider>)
     const totalTasks = getByTestId('total-tasks').firstElementChild!.innerHTML
     const totalLabels = getByTestId('total-labels').firstElementChild!.innerHTML
     expect(totalTasks).toBe('3')
@@ -32,27 +33,27 @@ describe('Test dashboard functionality', () => {
   })
   test('Correct task urls', () => {
     const { getByTestId } = render(
-            <MuiThemeProvider theme={myTheme}>
-              <Dashboard dashboardContents={sampleDashboardContents}/>
-            </MuiThemeProvider>)
+      <MuiThemeProvider theme={myTheme}>
+        <Dashboard dashboardContents={sampleDashboardContents} />
+      </MuiThemeProvider>)
     sampleDashboardContents.taskMetaDatas.forEach((value, index) => {
       const taskLinkElem = getByTestId('task-link-' +
-              index.toString()) as HTMLAnchorElement
+        index.toString()) as HTMLAnchorElement
       const url = taskLinkElem.href
       expect(url).toContain(value.handlerUrl +
-              '?project_name=' +
-              sampleDashboardContents.projectMetaData.name +
-              '&task_index=' + index)
+        '?project_name=' +
+        sampleDashboardContents.projectMetaData.name +
+        '&task_index=' + index)
     })
   })
   describe('Test dashboard sidebar links', () => {
     test('Correct non-tag url', () => {
       const { getByTestId } = render(
-              <MuiThemeProvider theme={myTheme}>
-                <StyledSidebar projectMetaData=
-                                       {sampleDashboardContents.projectMetaData}
-                />
-              </MuiThemeProvider>)
+        <MuiThemeProvider theme={myTheme}>
+          <StyledSidebar projectMetaData=
+            {sampleDashboardContents.projectMetaData}
+          />
+        </MuiThemeProvider>)
       const exportElem = getByTestId('export-link') as HTMLLinkElement
       const exportURL = exportElem.href
       expect(exportURL).not.toContain('V2')
@@ -61,11 +62,11 @@ describe('Test dashboard functionality', () => {
       const tagProjectMetadata = { ...sampleDashboardContents.projectMetaData }
       tagProjectMetadata.labelType = 'tag'
       const { getByTestId } = render(
-              <MuiThemeProvider theme={myTheme}>
-                <StyledSidebar projectMetaData=
-                                       {tagProjectMetadata}
-                />
-              </MuiThemeProvider>)
+        <MuiThemeProvider theme={myTheme}>
+          <StyledSidebar projectMetaData=
+            {tagProjectMetadata}
+          />
+        </MuiThemeProvider>)
       const exportElem = getByTestId('export-link') as HTMLLinkElement
       const exportURL = exportElem.href
       expect(exportURL).toContain('V2')
@@ -73,25 +74,25 @@ describe('Test dashboard functionality', () => {
     describe('Test not rendering elements if vendor', () => {
       test('Hiding header elements', () => {
         const { queryByTestId } = render(
-                <MuiThemeProvider theme={myTheme}>
-                  <StyledHeader
-                          totalTaskLabeled={0}
-                          totalLabels={0}
-                          vendor={true}
-                  />
-                </MuiThemeProvider>)
+          <MuiThemeProvider theme={myTheme}>
+            <StyledHeader
+              totalTaskLabeled={0}
+              totalLabels={0}
+              vendor={true}
+            />
+          </MuiThemeProvider>)
         expect(queryByTestId('total-tasks')).toBeNull()
         expect(queryByTestId('total-labels')).toBeNull()
       })
       test('Hiding sidebar elements', () => {
         const projectMetaData = sampleDashboardContents.projectMetaData
         const { queryByTestId } = render(
-                <MuiThemeProvider theme={myTheme}>
-                  <StyledSidebar
-                          projectMetaData={projectMetaData}
-                          vendor={true}
-                  />
-                </MuiThemeProvider>)
+          <MuiThemeProvider theme={myTheme}>
+            <StyledSidebar
+              projectMetaData={projectMetaData}
+              vendor={true}
+            />
+          </MuiThemeProvider>)
         expect(queryByTestId('export-link')).toBeNull()
         expect(queryByTestId('download-link')).toBeNull()
       })

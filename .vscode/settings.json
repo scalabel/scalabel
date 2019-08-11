@@ -37,5 +37,6 @@
     "editor.formatOnSave": true,
     // python settings
     "python.formatting.provider": "autopep8",
-    "python.linting.pylintEnabled": true
+    "python.linting.pylintEnabled": true,
+    "tslint.configFile": "tslint.json"
 }

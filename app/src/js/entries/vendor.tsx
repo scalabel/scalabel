@@ -1,3 +1,3 @@
-import { initDashboard } from '../common/dashboard_init'
+import { initDashboard } from '../components/dashboard_init'
 
 initDashboard(true)

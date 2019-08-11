@@ -1,5 +1,3 @@
-import { User } from '../functional/types'
-
 /**
  * This function post request to backend to retrieve requried data to display
  * @param {string} url
@@ -20,14 +18,6 @@ export function requestData<DataType> (url: string,
   xhr.open(method, url, async)
   xhr.send(null)
   return data
-}
-
-/**
- * This function post request to backend to retrieve users' information
- * @return {function} users
- */
-export function getUsers (): User[] {
-  return requestData('./postUsers', 'get', false)
 }
 
 /**

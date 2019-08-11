@@ -1,9 +1,8 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Dashboard from '../components/dashboard_window'
-import { DashboardContents } from '../functional/types'
 import { myTheme } from '../styles/theme'
+import Dashboard, { DashboardContents } from './dashboard'
 
 /**
  * This function post requests to backend to retrieve dashboard contents
@@ -15,12 +14,12 @@ export function initDashboard (vendor?: boolean) {
     if (xhr.readyState === 4 && xhr.status === 200) {
       dashboardContents = JSON.parse(xhr.responseText)
       ReactDOM.render(
-              <MuiThemeProvider theme={myTheme}>
-                <Dashboard dashboardContents={dashboardContents}
-                           vendor={vendor}/>
-              </MuiThemeProvider>
-              , document.getElementById(vendor ? 'vendor-root'
-                      : 'dashboard-root'))
+        <MuiThemeProvider theme={myTheme}>
+          <Dashboard dashboardContents={dashboardContents}
+            vendor={vendor} />
+        </MuiThemeProvider>
+        , document.getElementById(vendor ? 'vendor-root'
+          : 'dashboard-root'))
     }
   }
   // get params from url path.

@@ -5,8 +5,21 @@ import React from 'react'
 import { getProjects } from '../common/service'
 import { dashboardStyles } from '../styles/dashboard'
 import DashboardHeader from './dashboard_header'
-import DataTable from './data_table'
+import DataTable from './dashboard_table'
 import HeaderPage from './header_page'
+
+export interface User {
+  /** User ID */
+  id: string
+  /** User email */
+  email: string
+  /** User group */
+  group: string
+  /** User refresh token */
+  refreshToken: string
+  /** User's projects */
+  projects: string[]
+}
 
 export interface DashboardClassType {
   /** root class */
@@ -29,32 +42,32 @@ function Dashboard (props: {
 }) {
   const { classes } = props
   const dashboardHeaderContent = (
-          <DashboardHeader/>
+    <DashboardHeader />
   )
   const dashboardPageContent = (
-          <React.Fragment>
-            <main className={classes.workerRoot}>
-              <div className={classes.appBarSpacer}/>
-              <Typography variant='h6' component='h2'
-                          className={classes.labelText}>
-                Projects
+    <React.Fragment>
+      <main className={classes.workerRoot}>
+        <div className={classes.appBarSpacer} />
+        <Typography variant='h6' component='h2'
+          className={classes.labelText}>
+          Projects
               </Typography>
-              <Divider/>
-              <DataTable dataList={getProjects()}
-                         headers={[{ header: 'Project', align: 'left' }]}/>
-            </main>
-          </React.Fragment>
+        <Divider />
+        <DataTable dataList={getProjects()}
+          headers={[{ header: 'Project', align: 'left' }]} />
+      </main>
+    </React.Fragment>
   )
   /**
    * render function
    * @return component
    */
   return (
-          <HeaderPage children={{
-            headerContent: dashboardHeaderContent,
-            pageContent: dashboardPageContent
-          }}
-          />
+    <HeaderPage children={{
+      headerContent: dashboardHeaderContent,
+      pageContent: dashboardPageContent
+    }}
+    />
   )
 }
 

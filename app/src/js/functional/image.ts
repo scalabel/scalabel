@@ -1,8 +1,10 @@
 import * as types from '../action/types'
-import {getCurrentItemViewerConfig,
-  setCurrentItemViewerConfig} from './state_util'
+import {
+  getCurrentItemViewerConfig,
+  setCurrentItemViewerConfig
+} from './state_util'
 import { makeItem } from './states'
-import { ImageViewerConfigType, ItemFuncType, ItemType, State, ViewerConfigType } from './types'
+import { ImageViewerConfigType, ItemType, State, ViewerConfigType } from './types'
 import { updateObject } from './util'
 
 /**
@@ -22,15 +24,16 @@ export function createItem (id: number, url: string): ItemType {
  * @return {State}
  */
 export function zoomImage (
-    state: State, action: types.ImageZoomAction): State {
+  state: State, action: types.ImageZoomAction): State {
   const [ratio, offsetX, offsetY] = [action.ratio,
     action.viewOffsetX, action.viewOffsetY]
   let config: ViewerConfigType
-        = getCurrentItemViewerConfig(state) as ImageViewerConfigType
+    = getCurrentItemViewerConfig(state) as ImageViewerConfigType
   config = updateObject(config, {
     viewScale: config.viewScale * ratio,
     viewOffsetX: offsetX,
-    viewOffsetY: offsetY})
+    viewOffsetY: offsetY
+  })
   return setCurrentItemViewerConfig(state, config)
 }
 
@@ -49,6 +52,3 @@ export function fromJson (json: ItemType): ItemType {
     labels: json.labels
   })
 }
-
-// This is necessary for different label types
-export type ImageF = ItemFuncType
