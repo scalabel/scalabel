@@ -55,6 +55,8 @@ interface DashboardClassType {
   linkButton: string
   /** table header cell */
   headerCell: string
+  /** table body cell */
+  bodyCell: string
 }
 
 interface DashboardProps {

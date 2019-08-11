@@ -19,6 +19,10 @@ export const dashboardWindowStyles = (theme: Theme) =>
       fontWeight: 'bold',
       fontSize: '0.8rem',
       color: theme.palette.common.black
+    },
+    bodyCell : {
+      paddingTop: 0,
+      paddingBottom: 0
     }
   })
 export const headerStyle = (theme: Theme) =>
