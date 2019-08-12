@@ -22,7 +22,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func validateAccessToken(tokenStr, region, userPoolID string,
+func validateAccessToken(tokenStr, region, userPoolId string,
 	jwk map[string]JWKKey) (*jwt.Token, error) {
 	// Decode the token string into JWT format.
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{},
@@ -62,7 +62,7 @@ func validateAccessToken(tokenStr, region, userPoolID string,
 	issStr := iss.(string)
 	if strings.Contains(issStr, "cognito-idp") {
 		// 3. 4. 7. Together with checking
-		err = validateAWSJwtClaims(claims, region, userPoolID)
+		err = validateAWSJwtClaims(claims, region, userPoolId)
 		if err != nil {
 			return token, err
 		}
@@ -76,11 +76,11 @@ func validateAccessToken(tokenStr, region, userPoolID string,
 
 // validateAWSJwtClaims validates AWS Cognito User Pool JWT
 func validateAWSJwtClaims(claims jwt.MapClaims, region,
-	userPoolID string) error {
+	userPoolId string) error {
 	var err error
 	// 3. Check the iss claim. It should match your user pool.
 	issShoudBe := fmt.Sprintf("https://cognito-idp.%v.amazonaws.com/%v",
-		region, userPoolID)
+		region, userPoolId)
 	err = validateClaimItem("iss", []string{issShoudBe}, claims)
 	if err != nil {
 		return err
@@ -182,20 +182,22 @@ type JWKKey struct {
 	Use string
 }
 
-func getJWK(jwkURL string) map[string]JWKKey {
+func getJWK(jwkUrl string) map[string]JWKKey {
 
 	jwk := &JWK{}
 
-	getJSON(jwkURL, jwk)
-
-	jwkMap := make(map[string]JWKKey, 0)
+	err := getJson(jwkUrl, jwk)
+	if err != nil {
+		Error.Println(err)
+	}
+	jwkMap := make(map[string]JWKKey)
 	for _, jwk := range jwk.Keys {
 		jwkMap[jwk.Kid] = jwk
 	}
 	return jwkMap
 }
 
-func getJSON(url string, target interface{}) error {
+func getJson(url string, target interface{}) error {
 	var myClient = &http.Client{Timeout: 10 * time.Second}
 	r, err := myClient.Get(url)
 	if err != nil {
@@ -206,7 +208,7 @@ func getJSON(url string, target interface{}) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func validateIdToken(tokenStr, region, userPoolID string,
+func validateIdToken(tokenStr, region, userPoolId string,
 	jwk map[string]JWKKey) (*jwt.Token, User, error) {
 	// Initialize userInfo
 	userInfo := User{
@@ -286,7 +288,7 @@ func validateIdToken(tokenStr, region, userPoolID string,
 	issStr := iss.(string)
 	if strings.Contains(issStr, "cognito-idp") {
 		// 3. 4. 7. Together with checking
-		err = validateAWSJwtClaims(claims, region, userPoolID)
+		err = validateAWSJwtClaims(claims, region, userPoolId)
 		if err != nil {
 			return token, userInfo, err
 		}
@@ -310,10 +312,7 @@ func verifyRefreshToken(refreshToken string, id string) bool {
 	// fetech correctRefreshToken saved in our memory
 	correctRefreshToken := Users[id].RefreshToken
 	if correctRefreshToken != "" {
-		if correctRefreshToken == refreshToken {
-			return true
-		}
-		return false
+		return correctRefreshToken == refreshToken
 	}
 	return false
 }
@@ -328,7 +327,6 @@ func redirectToLogin(w http.ResponseWriter, r *http.Request,
 		fmt.Sprintf("response_type=code&client_id=%v&redirect_uri=%v",
 			env.ClientId, env.RedirectUri)
 	http.Redirect(w, r, authUrl, 301)
-	return
 }
 
 func requestToken(w http.ResponseWriter, r *http.Request, clientId string,
@@ -336,15 +334,19 @@ func requestToken(w http.ResponseWriter, r *http.Request, clientId string,
 	secret string) (string, string, string) {
 	// create request form
 	var tokenRequest http.Request
-	tokenRequest.ParseForm()
+	err := tokenRequest.ParseForm()
+	if err != nil {
+		Error.Println(err)
+	}
 	tokenRequest.Form.Add("grant_type", "authorization_code")
 	tokenRequest.Form.Add("client_id", clientId)
 	tokenRequest.Form.Add("code", code)
 	tokenRequest.Form.Add("redirect_uri", redirectUri)
 	tokenRequestBody := strings.NewReader(tokenRequest.Form.Encode())
 
+	var req *http.Request
 	// Post token request to AWS Cognito to get JWT
-	req, err := http.NewRequest("POST", awsTokenUrl, tokenRequestBody)
+	req, err = http.NewRequest("POST", awsTokenUrl, tokenRequestBody)
 	if err != nil {
 		log.Println(err)
 		redirectToLogin(w, r, "Failed to post token request")

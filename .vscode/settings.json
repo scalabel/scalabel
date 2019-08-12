@@ -40,5 +40,10 @@
     // python settings
     "python.formatting.provider": "autopep8",
     "python.linting.pylintEnabled": true,
-    "tslint.configFile": "tslint.json"
+    "tslint.configFile": "tslint.json",
+    // Enabgle golangci to automatically check for issues in go code
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ]
 }

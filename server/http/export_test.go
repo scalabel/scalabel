@@ -6,10 +6,7 @@ import (
 )
 
 func FloatEqual(f1 float64, f2 float64) bool {
-	if math.Abs(f1-f2) < 0.001 {
-		return true
-	}
-	return false
+	return math.Abs(f1-f2) < 0.001
 }
 
 func FloatArrayEqual(vertices1 []float64, vertices2 []float64) bool {

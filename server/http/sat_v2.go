@@ -27,7 +27,7 @@ type Sat struct {
 	Layout  SatLayout  `json:"layout" yaml:"layout"`
 }
 
-//Sat configuration
+//SatConfig Sat configuration
 type SatConfig struct {
 	SessionId       string      `json:"sessionId" yaml:"sessionId"`
 	AssignmentId    string      `json:"assignmentId" yaml:"assignmentId"`
@@ -48,7 +48,7 @@ type SatConfig struct {
 	SubmitTime      int64       `json:"submitTime" yaml:"submitTime"`
 }
 
-//current state of Sat
+//SatCurrent stores current state of Sat
 type SatCurrent struct {
 	Item       int `json:"item" yaml:"item"`
 	Label      int `json:"label" yaml:"label"`
@@ -60,6 +60,7 @@ type SatCurrent struct {
 	MaxOrder   int `json:"maxOrder" yaml:"maxOrder"`
 }
 
+//SatItem contains data for single item
 type SatItem struct {
 	Id           int              `json:"id" yaml:"id"`
 	Index        int              `json:"index" yaml:"index"`
@@ -71,6 +72,7 @@ type SatItem struct {
 	ViewerConfig interface{}      `json:"viewerConfig" yaml:"viewerConfig"`
 }
 
+//SatLabel contains data for single label
 type SatLabel struct {
 	Id            int              `json:"id" yaml:"id"`
 	Item          int              `json:"item" yaml:"item"`
@@ -85,25 +87,30 @@ type SatLabel struct {
 	Order         int              `json:"order" yaml:"order"`
 }
 
+//SatShape contains data for single shape
 type SatShape struct {
 	Id    int         `json:"id" yaml:"id"`
 	Label []int       `json:"label" yaml:"label"`
 	Shape interface{} `json:"shape" yaml:"shape"`
 }
 
+//TrackMap tracks data
 type TrackMap map[int]interface{}
 
+//SatLayout for frontend layout
 type SatLayout struct {
 	ToolbarWidth       int     `json:"toolbarWidth" yaml:"toolbarWidth"`
 	AssistantView      bool    `json:"assistantView" yaml:"assistantView"`
 	AssistantViewRatio float32 `json:"assistantViewRatio" yaml:"assistantViewRatio"`
 }
 
+//GetKey gets key for single task and worker
 func (sat *Sat) GetKey() string {
 	return path.Join(sat.Config.ProjectName, "submissions", sat.Config.TaskId,
 		sat.Config.WorkerId, strconv.FormatInt(sat.Config.SubmitTime, 10))
 }
 
+//GetFields returns sat as a map
 func (sat *Sat) GetFields() map[string]interface{} {
 	return map[string]interface{}{
 		"config":  sat.Config,
@@ -113,7 +120,7 @@ func (sat *Sat) GetFields() map[string]interface{} {
 	}
 }
 
-// Get the most recent assignment given the needed fields.
+//GetSat gets the most recent assignment given the needed fields.
 func GetSat(projectName string, taskIndex string,
 	workerId string) (Sat, error) {
 	sat := Sat{}
@@ -143,12 +150,16 @@ func GetSat(projectName string, taskIndex string,
 		if err != nil {
 			return Sat{}, err
 		}
-		mapstructure.Decode(fields, &assignment)
+		err = mapstructure.Decode(fields, &assignment)
+		if err != nil {
+			return Sat{}, err
+		}
 		sat = assignmentToSat(&assignment)
 	}
 	return sat, nil
 }
 
+//GetAssignmentV2 retrieves assignment
 func GetAssignmentV2(projectName string, taskIndex string,
 	workerId string) (Assignment, error) {
 	assignment := Assignment{}
@@ -157,7 +168,10 @@ func GetAssignmentV2(projectName string, taskIndex string,
 	if err != nil {
 		return Assignment{}, err
 	}
-	mapstructure.Decode(fields, &assignment)
+	err = mapstructure.Decode(fields, &assignment)
+	if err != nil {
+		return Assignment{}, err
+	}
 	return assignment, nil
 }
 
@@ -178,10 +192,10 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 	var loadedAssignment Assignment
 	var loadedSat Sat
 	if !storage.HasKey(path.Join(projectName, "assignments",
-		taskIndex, DEFAULT_WORKER)) {
+		taskIndex, DefaultWorker)) {
 		// if assignment does not exist, create it
 		loadedAssignment, err = CreateAssignment(projectName, taskIndex,
-			DEFAULT_WORKER)
+			DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -189,7 +203,7 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 		loadedSat = assignmentToSat(&loadedAssignment)
 	} else {
 		loadedSat, err = GetSat(projectName, taskIndex,
-			DEFAULT_WORKER)
+			DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -200,7 +214,10 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	w.Write(loadedSatJson)
+	_, err = w.Write(loadedSatJson)
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 func executeLabelingTemplateV2(w http.ResponseWriter, r *http.Request,
@@ -209,24 +226,30 @@ func executeLabelingTemplateV2(w http.ResponseWriter, r *http.Request,
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex, _ := strconv.ParseInt(r.URL.Query()["task_index"][0], 10, 32)
 	if !storage.HasKey(path.Join(projectName, "assignments",
-		Index2str(int(taskIndex)), DEFAULT_WORKER)) {
+		Index2str(int(taskIndex)), DefaultWorker)) {
 		// if assignment does not exist, create it
 		assignment, err := CreateAssignment(projectName,
-			Index2str(int(taskIndex)), DEFAULT_WORKER)
+			Index2str(int(taskIndex)), DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
 		}
-		tmpl.Execute(w, assignment)
+		err = tmpl.Execute(w, assignment)
+		if err != nil {
+			Error.Println(err)
+		}
 	} else {
 		// otherwise, get that assignment
 		assignment, err := GetAssignmentV2(projectName,
-			Index2str(int(taskIndex)), DEFAULT_WORKER)
+			Index2str(int(taskIndex)), DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
 		}
-		tmpl.Execute(w, assignment)
+		err = tmpl.Execute(w, assignment)
+		if err != nil {
+			Error.Println(err)
+		}
 	}
 }
 
@@ -315,12 +338,12 @@ func postSaveV2Handler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &assignment)
 	if err != nil {
 		Error.Println(err)
-		w.Write(nil)
+		writeNil(w)
 		return
 	}
 	if assignment.Config.DemoMode {
 		Error.Println(errors.New("can't save a demo project"))
-		w.Write(nil)
+		writeNil(w)
 		return
 	}
 
@@ -328,13 +351,17 @@ func postSaveV2Handler(w http.ResponseWriter, r *http.Request) {
 	err = storage.Save(assignment.GetKey(), assignment.GetFields())
 	if err != nil {
 		Error.Println(err)
-		w.Write(nil)
+		writeNil(w)
 	} else {
 		response, err := json.Marshal(0)
 		if err != nil {
-			w.Write(nil)
+			Error.Println(err)
+			writeNil(w)
 		} else {
-			w.Write(response)
+			_, err = w.Write(response)
+			if err != nil {
+				Error.Println(err)
+			}
 		}
 	}
 }
@@ -384,8 +411,10 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	projectToLoad := Project{}
-	mapstructure.Decode(fields, &projectToLoad)
-
+	err = mapstructure.Decode(fields, &projectToLoad)
+	if err != nil {
+		Error.Println(err)
+	}
 	// Grab the latest submissions from all tasks
 	tasks, err := GetTasksInProject(projectName)
 	if err != nil {
@@ -393,8 +422,9 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	items := []ItemExport{}
+	sat := Sat{}
 	for _, task := range tasks {
-		sat, err := GetSat(projectName, Index2str(task.Index), DEFAULT_WORKER)
+		sat, err = GetSat(projectName, Index2str(task.Index), DefaultWorker)
 		if err == nil {
 			for _, itemToLoad := range sat.Items {
 				item := exportSatItem(
@@ -431,5 +461,9 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 	//set relevant header.
 	w.Header().Set("Content-Disposition",
 		fmt.Sprintf("attachment; filename=%s_results.json", projectName))
-	io.Copy(w, bytes.NewReader(exportJson))
+	_, err = io.Copy(w, bytes.NewReader(exportJson))
+	if err != nil {
+		Error.Println(err)
+	}
+
 }

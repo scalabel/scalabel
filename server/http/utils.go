@@ -18,7 +18,7 @@ import (
 )
 
 // TODO: use actual worker ID
-const DEFAULT_WORKER = "default_worker"
+const DefaultWorker = "default_worker"
 
 type NotExistError struct {
 	name string
@@ -58,7 +58,10 @@ func GetProject(projectName string) (Project, error) {
 	if err != nil {
 		return project, err
 	}
-	mapstructure.Decode(fields, &project)
+	err = mapstructure.Decode(fields, &project)
+	if err != nil {
+		Error.Println(err)
+	}
 	return project, nil
 }
 
@@ -80,7 +83,10 @@ func GetTask(projectName string, index string) (Task, error) {
 	if err != nil {
 		return task, err
 	}
-	mapstructure.Decode(fields, &task)
+	err = mapstructure.Decode(fields, &task)
+	if err != nil {
+		Error.Println(err)
+	}
 	return task, nil
 }
 
@@ -96,7 +102,10 @@ func GetTasksInProject(projectName string) ([]Task, error) {
 			return []Task{}, err
 		}
 		task := Task{}
-		mapstructure.Decode(fields, &task)
+		err = mapstructure.Decode(fields, &task)
+		if err != nil {
+			Error.Println(err)
+		}
 		tasks = append(tasks, task)
 	}
 	// sort tasks by index
@@ -119,7 +128,10 @@ func GetAssignment(projectName string, taskIndex string,
 		if err != nil {
 			return Assignment{}, err
 		}
-		mapstructure.Decode(fields, &assignment)
+		err = mapstructure.Decode(fields, &assignment)
+		if err != nil {
+			Error.Println(err)
+		}
 	} else {
 		assignmentPath := path.Join(projectName, "assignments",
 			taskIndex, workerId)
@@ -127,7 +139,10 @@ func GetAssignment(projectName string, taskIndex string,
 		if err != nil {
 			return Assignment{}, err
 		}
-		mapstructure.Decode(fields, &assignment)
+		err = mapstructure.Decode(fields, &assignment)
+		if err != nil {
+			Error.Println(err)
+		}
 	}
 	// Asssigns default value for BundleFile
 	// Should get rid of this and separate bundleFiles in the future
@@ -143,14 +158,17 @@ func CreateAssignment(projectName string, taskIndex string,
 	if err != nil {
 		return Assignment{}, err
 	}
-	uuid := getUUIDv4()
+	uuid := getUuidV4()
 	assignment := Assignment{
 		Id:        uuid,
 		Task:      task,
 		WorkerId:  workerId,
 		StartTime: recordTimestamp(),
 	}
-	storage.Save(assignment.GetKey(), assignment.GetFields())
+	err = storage.Save(assignment.GetKey(), assignment.GetFields())
+	if err != nil {
+		Error.Println(err)
+	}
 	return assignment, nil
 }
 
@@ -204,23 +222,22 @@ func GetHandlerUrl(itemType string, labelType string) string {
 	case "video":
 		if labelType == "box2d" || labelType == "segmentation" {
 			return "label2d"
-		} else {
-			return "NO_VALID_HANDLER"
 		}
+		return "NO_VALID_HANDLER"
+
 	case "pointcloud":
 		if labelType == "box3d" {
 			return "label3d"
 		} else if labelType == "box3dv2" {
 			return "label3dv2"
-		} else {
-			return "NO_VALID_HANDLER"
 		}
+		return "NO_VALID_HANDLER"
+
 	case "pointcloudtracking":
 		if labelType == "box3d" {
 			return "label3d"
-		} else {
-			return "NO_VALID_HANDLER"
 		}
+		return "NO_VALID_HANDLER"
 	}
 	return "NO_VALID_HANDLER"
 }
@@ -232,11 +249,8 @@ func recordTimestamp() int64 {
 
 func Exists(name string) bool {
 	_, err := os.Stat(name)
-	if os.IsNotExist(err) {
-		return false
-	} else {
-		return true
-	}
+	return !os.IsNotExist(err)
+
 }
 
 func Min(x, y int) int {
@@ -246,17 +260,6 @@ func Min(x, y int) int {
 	return y
 }
 
-// Behavior is similar to path stem in Python
-func PathStem(name string) string {
-	name = path.Base(name)
-	dotIndex := strings.LastIndex(name, ".")
-	if dotIndex < 0 {
-		return name
-	} else {
-		return name[:dotIndex]
-	}
-}
-
 // check duplicated project name
 // return false if duplicated
 func CheckProjectName(projectName string) string {
@@ -264,20 +267,23 @@ func CheckProjectName(projectName string) string {
 	if storage.HasKey(path.Join(projectName, "project")) {
 		Error.Printf("Project Name \"%s\" already exists.", projectName)
 		return ""
-	} else {
-		return newName
 	}
+	return newName
+
 }
 
 // Count the total number of images labeled in a task
 func countLabeledImages(projectName string, index int) int {
 	// return the number of labeled images in the import file if not initialized
 	task, err := GetTask(projectName, Index2str(index))
+	if err != nil {
+		Error.Println(err)
+	}
 	if task.NumLabeledItemImport > 0 {
 		return task.NumLabeledItemImport
 	}
 	assignment, err := GetAssignment(projectName, Index2str(index),
-		DEFAULT_WORKER)
+		DefaultWorker)
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
@@ -291,11 +297,14 @@ func countLabeledImages(projectName string, index int) int {
 func countLabelsInTask(projectName string, index int) int {
 	// return the number of labels in the import file if not initialized
 	task, err := GetTask(projectName, Index2str(index))
+	if err != nil {
+		Error.Println(err)
+	}
 	if task.NumLabelImport > 0 {
 		return task.NumLabelImport
 	}
 	assignment, err := GetAssignment(projectName, Index2str(index),
-		DEFAULT_WORKER)
+		DefaultWorker)
 	if err != nil {
 		if _, ok := err.(*NotExistError); !ok {
 			Error.Println(err)
@@ -309,7 +318,7 @@ func countLabelsInTask(projectName string, index int) int {
 		numLabels = 0
 		for _, label := range assignment.Labels {
 			if label.Keyframe {
-				numLabels += 1
+				numLabels++
 			}
 		}
 	}
@@ -319,7 +328,7 @@ func countLabelsInTask(projectName string, index int) int {
 // Check if a given task is submitted
 func taskSubmitted(projectName string, index int) bool {
 	assignment, err := GetAssignment(projectName, Index2str(index),
-		DEFAULT_WORKER)
+		DefaultWorker)
 	if err != nil {
 		return false
 	}
@@ -327,7 +336,7 @@ func taskSubmitted(projectName string, index int) bool {
 }
 
 // Get UUIDv4
-func getUUIDv4() string {
+func getUuidV4() string {
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		Error.Println(err)
@@ -457,13 +466,19 @@ var groundCoefficientsFinder = regexp.MustCompile(
 
 func parsePLYForGround(url string) ([4]float64, error) {
 	var coefficients [4]float64
-	r, err := http.Get(url)
+	// TODO: Make sure this url get isn't tainted and remove nolint
+	r, err := http.Get(url) // nolint
+	if err != nil {
+		Error.Println(err)
+	}
 	if err != nil {
 		return coefficients, err
 	}
 	defer r.Body.Close()
 	contents, err := ioutil.ReadAll(r.Body)
-
+	if err != nil {
+		Error.Println(err)
+	}
 	groundCoeffBytes := groundCoefficientsFinder.Find(contents)
 
 	if groundCoeffBytes == nil {
@@ -489,4 +504,12 @@ func parsePLYForGround(url string) ([4]float64, error) {
 	}
 
 	return coefficients, nil
+}
+
+// Writes nil to a http request
+func writeNil(w http.ResponseWriter) {
+	_, err := w.Write(nil)
+	if err != nil {
+		Error.Println(err)
+	}
 }

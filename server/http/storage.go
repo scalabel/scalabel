@@ -73,19 +73,22 @@ func (fs *FileStorage) ListKeys(prefix string) []string {
 }
 
 func (fs *FileStorage) Save(key string, fields map[string]interface{}) error {
-	os.MkdirAll(path.Join(fs.DataDir, filepath.Dir(key)), 0777)
+	err := os.MkdirAll(path.Join(fs.DataDir, filepath.Dir(key)), 0777)
+	if err != nil {
+		Error.Println(err)
+	}
 	path := path.Join(fs.DataDir, key+".json")
 	Info.Println(path)
-	json, err := json.MarshalIndent(fields, "", "  ")
+	var tempJson []byte
+	tempJson, err = json.MarshalIndent(fields, "", "  ")
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(path, json, 0644)
+	err = ioutil.WriteFile(path, tempJson, 0644)
 	if err != nil {
 		return err
-	} else {
-		Info.Println("Saving file of", key)
 	}
+	Info.Println("Saving file of", key)
 	return nil
 }
 
@@ -140,7 +143,10 @@ func (ds *DynamodbStorage) Init(path string) error {
 			},
 			TableName: aws.String("scalabel"),
 		}
-		ds.svc.CreateTable(input)
+		_, err = ds.svc.CreateTable(input)
+		if err != nil {
+		Error.Println(err)
+	}
 		for i := 0; i < 30; i++ {
 			if ds.HasTable() {
 				return nil
@@ -203,6 +209,9 @@ func (ds *DynamodbStorage) Save(key string,
 	fields map[string]interface{}) error {
 	fields["Key"] = key
 	av, err := dynamodbattribute.MarshalMap(fields)
+	if err != nil {
+		Error.Println(err)
+	}
 	input := &dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String("scalabel"),
@@ -258,10 +267,7 @@ func (ds *DynamodbStorage) HasTable() bool {
 		TableName: aws.String("scalabel"),
 	}
 	_, err := ds.svc.DescribeTable(input)
-	if err != nil {
-		return false
-	}
-	return true
+	return (err == nil)
 }
 
 func (ss *S3Storage) Init(path string) error {
@@ -350,9 +356,9 @@ func (ss *S3Storage) Save(key string, fields map[string]interface{}) error {
 	})
 	if err != nil {
 		return err
-	} else {
-		Info.Println("Successfully added an item to the S3")
 	}
+	Info.Println("Successfully added an item to the S3")
+
 	return nil
 }
 
@@ -408,8 +414,5 @@ func (ss *S3Storage) HasBucket() bool {
 		Bucket: aws.String(ss.BucketName),
 	}
 	_, err := ss.svc.HeadBucket(input)
-	if err != nil {
-		return false
-	}
-	return true
+	return (err == nil)
 }

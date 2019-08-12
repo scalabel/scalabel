@@ -104,11 +104,10 @@ func (assignment *Assignment) GetKey() string {
 	if assignment.SubmitTime == 0 {
 		return path.Join(task.ProjectOptions.Name,
 			"assignments", Index2str(task.Index), assignment.WorkerId)
-	} else {
-		return path.Join(task.ProjectOptions.Name,
-			"submissions", Index2str(task.Index),
-			assignment.WorkerId, strconv.FormatInt(assignment.SubmitTime, 10))
 	}
+	return path.Join(task.ProjectOptions.Name,
+		"submissions", Index2str(task.Index),
+		assignment.WorkerId, strconv.FormatInt(assignment.SubmitTime, 10))
 }
 
 func (assignment *Assignment) GetFields() map[string]interface{} {
@@ -132,19 +131,19 @@ type ProjectOptions struct {
 	Name              string        `json:"name" yaml:"name"`
 	ItemType          string        `json:"itemType" yaml:"itemType"`
 	LabelType         string        `json:"labelType" yaml:"labelType"`
-	TaskSize          int           `json:"taskSize" yaml:"taskSize"`
 	HandlerUrl        string        `json:"handlerUrl" yaml:"handlerUrl"`
 	PageTitle         string        `json:"pageTitle" yaml:"pageTitle"`
-	Categories        []Category    `json:"categories" yaml:"categories"`
-	NumLeafCategories int           `json:"numLeafCategories" yaml:"numLeafCategories"`
-	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
 	Instructions      string        `json:"instructions" yaml:"instructions"`
-	DemoMode          bool          `json:"demoMode" yaml:"demoMode"`
-	VideoMetaData     VideoMetaData `json:"videoMetaData" yaml:"videoMetaData"`
 	InterpolationMode string        `json:"interpolationMode" yaml:"interpolationMode"`
-	Detections        []Detection   `json:"detections" yaml:"detections"`
 	BundleFile        string        `json:"bundleFile" yaml:"bundleFile"`
+	TaskSize          int           `json:"taskSize" yaml:"taskSize"`
+	NumLeafCategories int           `json:"numLeafCategories" yaml:"numLeafCategories"`
+	DemoMode          bool          `json:"demoMode" yaml:"demoMode"`
 	Submitted         bool          `json:"submitted" yaml:"submitted"`
+	VideoMetaData     VideoMetaData `json:"videoMetaData" yaml:"videoMetaData"`
+	Detections        []Detection   `json:"detections" yaml:"detections"`
+	Categories        []Category    `json:"categories" yaml:"categories"`
+	Attributes        []Attribute   `json:"attributes" yaml:"attributes"`
 }
 
 /* Contains meta data about project, used for dashboard contents. This
@@ -226,12 +225,12 @@ type DashboardContents struct {
 	TaskMetaDatas   []TaskMetaData  `json:"taskMetaDatas" yaml:"taskMetaDatas"`
 }
 
-type TaskURL struct { //shared type
-	URL string `json:"url" yaml:"url"`
+type TaskUrl struct { //shared type
+	Url string `json:"url" yaml:"url"`
 }
 
 // unescaped marshal used to encode url string
-func JSONMarshal(t interface{}) ([]byte, error) {
+func JsonMarshal(t interface{}) ([]byte, error) {
 	buffer := &bytes.Buffer{}
 	encoder := json.NewEncoder(buffer)
 	encoder.SetEscapeHTML(false)
@@ -241,17 +240,6 @@ func JSONMarshal(t interface{}) ([]byte, error) {
 
 // Function type for handlers
 type HandleFunc func(http.ResponseWriter, *http.Request)
-
-// MakePathHandleFunc returns a function for handling static HTML
-func MakePathHandleFunc(pagePath string) HandleFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		HTML, err := ioutil.ReadFile(pagePath)
-		if err != nil {
-			Error.Println(err)
-		}
-		w.Write(HTML)
-	}
-}
 
 func WrapHandler(handler http.Handler) HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -276,8 +264,8 @@ func WrapHandleFunc(fn HandleFunc) HandleFunc {
 		} else if idCookie == nil {
 			redirectToLogin(w, r, "No idCookie")
 			return
-		} else if verifyRefreshToken(refreshTokenCookie.Value,
-			idCookie.Value) == false {
+		} else if !verifyRefreshToken(refreshTokenCookie.Value,
+			idCookie.Value) {
 			redirectToLogin(w, r, "Failed to verify: Invalid Tokens")
 			return
 		} else {
@@ -294,7 +282,7 @@ func countCategories(categories []Category) int {
 		if len(category.Subcategories) > 0 {
 			count += countCategories(category.Subcategories)
 		} else {
-			count += 1
+			count++
 		}
 	}
 	return count
@@ -309,7 +297,10 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	existingProjects := GetExistingProjects()
-	tmpl.Execute(w, existingProjects)
+	err = tmpl.Execute(w, existingProjects)
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
@@ -318,8 +309,10 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 		http.NotFound(w, r)
 		return
-	} else {
-		tmpl.Execute(w, "")
+	}
+	err = tmpl.Execute(w, "")
+	if err != nil {
+		Error.Println(err)
 	}
 }
 
@@ -329,8 +322,10 @@ func vendorHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 		http.NotFound(w, r)
 		return
-	} else {
-		tmpl.Execute(w, "")
+	}
+	err = tmpl.Execute(w, "")
+	if err != nil {
+		Error.Println(err)
 	}
 }
 
@@ -357,7 +352,10 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	// make sure the project name in the form is new
 	var projectName = CheckProjectName(r.FormValue("project_name"))
 	if projectName == "" {
-		w.Write([]byte("Project Name already exists."))
+		_, err = w.Write([]byte("Project Name already exists."))
+		if err != nil {
+			Error.Println(err)
+		}
 		return
 	}
 	// get item type from form
@@ -386,14 +384,16 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 	attributes := getAttributesFromProjectForm(r)
 	// import items and corresponding labels
 	itemLists := getItemsFromProjectForm(r, attributes)
-	if itemType == "video" {
-		//this field should no longer be used, NumFrames is now stored in Task
-		//videoMetaData.NumFrames = strconv.Itoa(len(items))
-	}
+
+	//this field should no longer be used, NumFrames is now stored in Task
+	/*if itemType == "video" {
+		videoMetaData.NumFrames = strconv.Itoa(len(items))
+	}*/
 	// get the task size from form
 	var taskSize int
+	var ts int
 	if itemType != "video" {
-		ts, err := strconv.Atoi(r.FormValue("task_size"))
+		ts, err = strconv.Atoi(r.FormValue("task_size"))
 		if err != nil {
 			Error.Println(err)
 			return
@@ -405,8 +405,9 @@ func postProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	if itemType == "pointcloud" || itemType == "pointcloudtracking" {
 		items := itemLists[" "] // assume there is only one image list
+		var coeffs [4]float64
 		for i := 0; i < len(items); i++ {
-			coeffs, err := parsePLYForGround(items[i].Url)
+			coeffs, err = parsePLYForGround(items[i].Url)
 			if err == nil {
 				if items[i].Data == nil {
 					items[i].Data = make(map[string]interface{})
@@ -484,24 +485,30 @@ func executeLabelingTemplate(w http.ResponseWriter,
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex, _ := strconv.ParseInt(r.URL.Query()["task_index"][0], 10, 32)
 	if !storage.HasKey(path.Join(projectName, "assignments",
-		Index2str(int(taskIndex)), DEFAULT_WORKER)) {
+		Index2str(int(taskIndex)), DefaultWorker)) {
 		// if assignment does not exist, create it
 		assignment, err := CreateAssignment(projectName,
-			Index2str(int(taskIndex)), DEFAULT_WORKER)
+			Index2str(int(taskIndex)), DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
 		}
-		tmpl.Execute(w, assignment)
+		err = tmpl.Execute(w, assignment)
+		if err != nil {
+			Error.Println(err)
+		}
 	} else {
 		// otherwise, get that assignment
 		assignment, err := GetAssignment(projectName,
-			Index2str(int(taskIndex)), DEFAULT_WORKER)
+			Index2str(int(taskIndex)), DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
 		}
-		tmpl.Execute(w, assignment)
+		err = tmpl.Execute(w, assignment)
+		if err != nil {
+			Error.Println(err)
+		}
 	}
 }
 
@@ -521,17 +528,17 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	taskIndex := Index2str(assignmentToLoad.Task.Index)
 	var loadedAssignment Assignment
 	if !storage.HasKey(path.Join(projectName, "assignments",
-		taskIndex, DEFAULT_WORKER)) {
+		taskIndex, DefaultWorker)) {
 		// if assignment does not exist, create it
 		loadedAssignment, err = CreateAssignment(projectName, taskIndex,
-			DEFAULT_WORKER)
+			DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
 		}
 	} else {
 		loadedAssignment, err = GetAssignment(projectName, taskIndex,
-			DEFAULT_WORKER)
+			DefaultWorker)
 		if err != nil {
 			Error.Println(err)
 			return
@@ -542,7 +549,10 @@ func postLoadAssignmentHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	w.Write(loadedAssignmentJson)
+	_, err = w.Write(loadedAssignmentJson)
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 // Handles the posting of saved assignments
@@ -562,10 +572,13 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fields["SubmitTime"] = recordTimestamp()
 	assignment := Assignment{}
-	mapstructure.Decode(fields, &assignment)
+	err = mapstructure.Decode(fields, &assignment)
+	if err != nil {
+		Error.Println(err)
+	}
 	if assignment.Task.ProjectOptions.DemoMode {
 		Error.Println(errors.New("can't save a demo project"))
-		w.Write(nil)
+		writeNil(w)
 		return
 	}
 	// TODO: don't send all events to front end,
@@ -573,13 +586,17 @@ func postSaveHandler(w http.ResponseWriter, r *http.Request) {
 	err = storage.Save(assignment.GetKey(), assignment.GetFields())
 	if err != nil {
 		Error.Println(err)
-		w.Write(nil)
+		writeNil(w)
 	} else {
 		response, err := json.Marshal(0)
 		if err != nil {
-			w.Write(nil)
+			Error.Println(err)
+			writeNil(w)
 		} else {
-			w.Write(response)
+			_, err = w.Write(response)
+			if err != nil {
+				Error.Println(err)
+			}
 		}
 	}
 }
@@ -593,7 +610,10 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	projectToLoad := Project{}
-	mapstructure.Decode(fields, &projectToLoad)
+	err = mapstructure.Decode(fields, &projectToLoad)
+	if err != nil {
+		Error.Println(err)
+	}
 
 	// Grab the latest submissions from all tasks
 	tasks, err := GetTasksInProject(projectName)
@@ -602,9 +622,10 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	items := []ItemExport{}
+	var latestSubmission Assignment
 	for _, task := range tasks {
-		latestSubmission, err := GetAssignment(projectName,
-			Index2str(task.Index), DEFAULT_WORKER)
+		latestSubmission, err = GetAssignment(projectName,
+			Index2str(task.Index), DefaultWorker)
 		if err == nil {
 			for _, itemToLoad := range latestSubmission.Task.Items {
 				item := ItemExport{}
@@ -682,11 +703,14 @@ func postExportHandler(w http.ResponseWriter, r *http.Request) {
 	//set relevant header.
 	w.Header().Set("Content-Disposition",
 		fmt.Sprintf("attachment; filename=%s_results.json", projectName))
-	io.Copy(w, bytes.NewReader(exportJson))
+	_, err = io.Copy(w, bytes.NewReader(exportJson))
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 // Handles the download of submitted assignments
-func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
+func downloadTaskUrlHandler(w http.ResponseWriter, r *http.Request) {
 	var projectName = r.FormValue("project_name")
 	tasks, err := GetTasksInProject(projectName)
 	if err != nil {
@@ -694,10 +718,11 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	taskURLs := []TaskURL{}
+	var u *url.URL
+	taskUrls := []TaskUrl{}
 	for _, task := range tasks {
-		taskURL := TaskURL{}
-		u, err := url.Parse(task.ProjectOptions.HandlerUrl)
+		taskUrl := TaskUrl{}
+		u, err = url.Parse(task.ProjectOptions.HandlerUrl)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -711,12 +736,12 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
 			u.Scheme = "http"
 		}
 		u.Host = r.Host
-		taskURL.URL = u.String()
-		taskURLs = append(taskURLs, taskURL)
+		taskUrl.Url = u.String()
+		taskUrls = append(taskUrls, taskUrl)
 	}
 
 	// downloadJson, err := json.MarshalIndent(taskURLs, "", "  ")
-	downloadJson, err := JSONMarshal(taskURLs)
+	downloadJson, err := JsonMarshal(taskUrls)
 	if err != nil {
 		Error.Println(err)
 	}
@@ -724,7 +749,10 @@ func downloadTaskURLHandler(w http.ResponseWriter, r *http.Request) {
 	//set relevant header.
 	w.Header().Set("Content-Disposition",
 		fmt.Sprintf("attachment; filename=%s_task_urls.json", projectName))
-	io.Copy(w, bytes.NewReader(downloadJson))
+	_, err = io.Copy(w, bytes.NewReader(downloadJson))
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 // handles category YAML file, sets to default values if file missing
@@ -877,7 +905,7 @@ func getItemsFromProjectForm(r *http.Request,
 				itemLists[itemImport.VideoName] =
 					append(itemLists[itemImport.VideoName], item)
 			}
-			indexes[itemImport.VideoName] += 1
+			indexes[itemImport.VideoName]++
 		}
 
 	case http.ErrMissingFile:
@@ -899,12 +927,12 @@ func CreateTasks(project Project) {
 				hasLabel := false
 				for _, label := range item.LabelImport {
 					if label.ManualShape {
-						numLabelImport += 1
+						numLabelImport++
 						hasLabel = true
 					}
 				}
 				if hasLabel {
-					numLabeledItemImport += 1
+					numLabeledItemImport++
 				}
 			}
 			task := Task{
@@ -915,7 +943,7 @@ func CreateTasks(project Project) {
 				NumLabelImport:       numLabelImport,
 				NumLabeledItemImport: numLabeledItemImport,
 			}
-			index += 1
+			index++
 			err := storage.Save(task.GetKey(), task.GetFields())
 			if err != nil {
 				Error.Println(err)
@@ -926,9 +954,7 @@ func CreateTasks(project Project) {
 		// otherwise, make as many tasks as required
 		items := []Item{}
 		for _, itemList := range project.Items {
-			for _, item := range itemList {
-				items = append(items, item)
-			}
+			items = append(items, itemList...)
 		}
 		size := len(items)
 		for i := 0; i < size; i += project.Options.TaskSize {
@@ -938,7 +964,7 @@ func CreateTasks(project Project) {
 			for _, item := range itemsSlice {
 				numLabelImport += len(item.LabelImport)
 				if item.LabelImport != nil {
-					numLabeledItemImport += 1
+					numLabeledItemImport++
 				}
 			}
 			task := Task{
@@ -962,22 +988,34 @@ func CreateTasks(project Project) {
 // server side create form validation
 func formValidation(w http.ResponseWriter, r *http.Request) error {
 	if r.FormValue("project_name") == "" {
-		w.Write([]byte("Please create a project name."))
+		_, err := w.Write([]byte("Please create a project name."))
+		if err != nil {
+			Error.Println(err)
+		}
 		return errors.New("invalid form: no project name")
 	}
 
 	if r.FormValue("item_type") == "" {
-		w.Write([]byte("Please choose an item type."))
+		_, err := w.Write([]byte("Please choose an item type."))
+		if err != nil {
+			Error.Println(err)
+		}
 		return errors.New("invalid form: no item type")
 	}
 
 	if r.FormValue("label_type") == "" {
-		w.Write([]byte("Please choose a label type."))
+		_, err := w.Write([]byte("Please choose a label type."))
+		if err != nil {
+			Error.Println(err)
+		}
 		return errors.New("invalid form: no label type")
 	}
 
 	if r.FormValue("item_type") != "video" && r.FormValue("task_size") == "" {
-		w.Write([]byte("Please specify a task size."))
+		_, err := w.Write([]byte("Please specify a task size."))
+		if err != nil {
+			Error.Println(err)
+		}
 		return errors.New("invalid form: no task size")
 	}
 	// TODO: check forms are actually uploaded
@@ -997,7 +1035,11 @@ func gatewayHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	}
-	w.Write(gateJson)
+	_, err = w.Write(gateJson)
+	if err != nil {
+		Error.Println(err)
+	}
+
 }
 
 // Handles the flag value of User Management System
@@ -1035,7 +1077,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 	// retrieve value from config file
 	region := env.Region
-	userPoolID := env.UserPoolID
+	userPoolId := env.UserPoolId
 	clientId := env.ClientId
 	secret := env.ClientSecret
 	redirectUri := env.RedirectUri
@@ -1052,13 +1094,13 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		clientId, redirectUri, awsTokenUrl, code, secret)
 
 	// Download and store the JSON Web Key (JWK) for your user pool
-	jwkURL := fmt.Sprintf(awsJwkUrl, region, userPoolID)
-	jwk := getJWK(jwkURL)
+	jwkUrl := fmt.Sprintf(awsJwkUrl, region, userPoolId)
+	jwk := getJWK(jwkUrl)
 	Info.Printf("Downloading Json Web Key from Amazon")
 
 	// veryfy accesstoken
 	accessToken, err := validateAccessToken(accessTokenString,
-		region, userPoolID, jwk)
+		region, userPoolId, jwk)
 	if err != nil || !accessToken.Valid {
 		// failed to verify the jwt
 		Error.Println(err)
@@ -1066,61 +1108,59 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		newUrl := "/"
 		http.Redirect(w, r, newUrl, 301)
 		return
-	} else {
-		Info.Printf("Access token verifed")
-		// check identity by idtoken and get the user's information
-		idToken, userInfo, err := validateIdToken(idTokenString,
-			region, userPoolID, jwk)
-		identity := userInfo.Group
+	}
+	Info.Printf("Access token verifed")
+	// check identity by idtoken and get the user's information
+	idToken, userInfo, err := validateIdToken(idTokenString,
+		region, userPoolId, jwk)
+	identity := userInfo.Group
 
-		if err != nil || !idToken.Valid || identity == "" {
-			// error or not valid token or empty group, redirect to index
-			Error.Println(err)
-			newUrl := "/"
-			http.Redirect(w, r, newUrl, 301)
-			return
-		} else {
-			// save refresh token in the backend
-			if Users == nil {
-				fmt.Printf("global variable mistake")
-				return
-			}
-			userInfo.RefreshToken = refreshTokenString
+	if err != nil || !idToken.Valid || identity == "" {
+		// error or not valid token or empty group, redirect to index
+		Error.Println(err)
+		newUrl := "/"
+		http.Redirect(w, r, newUrl, 301)
+		return
+	}
+	// save refresh token in the backend
+	if Users == nil {
+		fmt.Printf("global variable mistake")
+		return
+	}
+	userInfo.RefreshToken = refreshTokenString
 
-			/* TODO: Here we are trying to track which projects are
-			assigned for this user, Later the coder could feel free to use the
-			'Projects' attribute of 'User' sturcture
-			*/
-			// load the projects information from disk for this user
-			if _, ok := Users[userInfo.Id]; ok {
-				userInfo.Projects = Users[userInfo.Id].Projects
-			}
-			Users[userInfo.Id] = &userInfo // save userinfo to memory
+	/* TODO: Here we are trying to track which projects are
+	assigned for this user, Later the coder could feel free to use the
+	'Projects' attribute of 'User' sturcture
+	*/
+	// load the projects information from disk for this user
+	if _, ok := Users[userInfo.Id]; ok {
+		userInfo.Projects = Users[userInfo.Id].Projects
+	}
+	Users[userInfo.Id] = &userInfo // save userinfo to memory
 
-			// save refresh/id tokens in the cookie
-			refreshTokenExpireTime := 365 * 24 * time.Hour
-			// TODO: find a better expire time for the cookie,
-			// maybe use the expire time of refresh token
-			expiration := time.Now().Add(refreshTokenExpireTime)
-			refreshTokenCookie := http.Cookie{Name: "refreshTokenScalabel",
-				Value: refreshTokenString, Expires: expiration}
-			idTokenCookie := http.Cookie{Name: "idScalabel",
-				Value: userInfo.Id, Expires: expiration}
-			http.SetCookie(w, &refreshTokenCookie)
-			http.SetCookie(w, &idTokenCookie)
-			if identity == "worker" {
-				// if the user is not admin, redirect to user's tasks
-				newUrl := "/workerDashboard"
-				http.Redirect(w, r, newUrl, 301)
-				return
-			} else if identity == "admin" {
-				// if the user is admin, redirect to admin's dashboard
-				Info.Println("Admin's Cookie Saved")
-				newUrl := "/adminDashboard"
-				http.Redirect(w, r, newUrl, 301)
-				return
-			}
-		}
+	// save refresh/id tokens in the cookie
+	refreshTokenExpireTime := 365 * 24 * time.Hour
+	// TODO: find a better expire time for the cookie,
+	// maybe use the expire time of refresh token
+	expiration := time.Now().Add(refreshTokenExpireTime)
+	refreshTokenCookie := http.Cookie{Name: "refreshTokenScalabel",
+		Value: refreshTokenString, Expires: expiration}
+	idTokenCookie := http.Cookie{Name: "idScalabel",
+		Value: userInfo.Id, Expires: expiration}
+	http.SetCookie(w, &refreshTokenCookie)
+	http.SetCookie(w, &idTokenCookie)
+	if identity == "worker" {
+		// if the user is not admin, redirect to user's tasks
+		newUrl := "/workerDashboard"
+		http.Redirect(w, r, newUrl, 301)
+		return
+	} else if identity == "admin" {
+		// if the user is admin, redirect to admin's dashboard
+		Info.Println("Admin's Cookie Saved")
+		newUrl := "/adminDashboard"
+		http.Redirect(w, r, newUrl, 301)
+		return
 	}
 }
 
@@ -1167,7 +1207,10 @@ func workerDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	tmpl.Execute(w, "")
+	err = tmpl.Execute(w, "")
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 // Handles the Dashboard for Admin
@@ -1178,7 +1221,10 @@ func adminDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	tmpl.Execute(w, "")
+	err = tmpl.Execute(w, "")
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 // Handles the posting of users information
@@ -1192,8 +1238,8 @@ func postUsersHandler(w http.ResponseWriter, r *http.Request) {
 	} else if idCookie == nil {
 		redirectToLogin(w, r, "No idCookie")
 		return
-	} else if verifyRefreshToken(refreshTokenCookie.Value,
-		idCookie.Value) == false {
+	} else if !verifyRefreshToken(refreshTokenCookie.Value,
+		idCookie.Value) {
 		redirectToLogin(w, r, "Failed to verify: Invalid Tokens")
 		return
 	} else {
@@ -1210,7 +1256,10 @@ func postUsersHandler(w http.ResponseWriter, r *http.Request) {
 				Error.Println(err)
 			}
 			// send to front end
-			w.Write(loadedUsers)
+			_, err = w.Write(loadedUsers)
+			if err != nil {
+				Error.Println(err)
+			}
 		} else {
 			return
 		}
@@ -1231,7 +1280,10 @@ func postProjectNamesHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 	// send to front end
-	w.Write(projectsNames)
+	_, err = w.Write(projectsNames)
+	if err != nil {
+		Error.Println(err)
+	}
 }
 
 // Handles the posting of dashboard contents
@@ -1239,6 +1291,7 @@ func postDashboardContentsHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		Error.Println(err)
+		return
 	}
 	pageData := PageData{}
 	err = json.Unmarshal(body, &pageData)
@@ -1255,6 +1308,9 @@ func postDashboardContentsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		Error.Println(err)
 	} else {
-		w.Write(jsonDashboardContents)
+		_, err = w.Write(jsonDashboardContents)
+		if err != nil {
+			Error.Println(err)
+		}
 	}
 }

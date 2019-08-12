@@ -9,20 +9,25 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
 var (
-	Trace      *log.Logger
-	Info       *log.Logger
-	Warning    *log.Logger
+	// Trace traces error when printed to log
+	Trace *log.Logger
+	// Info is used for logging non-error/warning info
+	Info *log.Logger
+	// Warning logs warnings
+	Warning *log.Logger
+	// Error logs errors
 	Error      *log.Logger
 	configPath string
 )
 
-// Stores the config info found in config.yml
+// Env stores the config info found in config.yml
 type Env struct {
 	Port           int    `yaml:"port"`
 	DataDir        string `yaml:"data"`
@@ -40,7 +45,7 @@ type Env struct {
 	ClientSecret   string `yaml:"clientSecret"`
 	AWSTokenUrl    string `yaml:"awsTokenURL"`
 	AwsJwkUrl      string `yaml:"awsJwkUrl"`
-	UserPoolID     string `yaml:"userPoolID"`
+	UserPoolId     string `yaml:"userPoolID"`
 }
 
 func (env Env) AppDir() string {
@@ -70,17 +75,15 @@ func (env Env) AdminPath() string {
 func (env Env) Label2dPath(v string) string {
 	if v == "2" {
 		return path.Join(env.AppDir(), "annotation/label.html")
-	} else {
-		return path.Join(env.AppDir(), "annotation/image.html")
 	}
+	return path.Join(env.AppDir(), "annotation/image.html")
 }
 
 func (env Env) Label3dPath(v string) string {
 	if v == "2" {
 		return path.Join(env.AppDir(), "annotation/label.html")
-	} else {
-		return path.Join(env.AppDir(), "annotation/point_cloud.html")
 	}
+	return path.Join(env.AppDir(), "annotation/point_cloud.html")
 }
 
 func (env Env) PointCloudTrackingPath() string {
@@ -121,7 +124,7 @@ func Init(
 func NewEnv() *Env {
 	env := new(Env)
 	// read config file
-	cfg, err := ioutil.ReadFile(configPath)
+	cfg, err := ioutil.ReadFile(filepath.Clean(configPath))
 	Info.Printf("Configuration:\n%s", cfg)
 	if err != nil {
 		log.Fatal(err)
@@ -138,22 +141,22 @@ func NewEnv() *Env {
 }
 
 func InitStorage(database string, dir string) Storage {
-	var storage Storage
+	var newStorage Storage
 	switch database {
 	case "s3":
-		storage = &S3Storage{}
+		newStorage = &S3Storage{}
 	case "dynamodb":
-		storage = &DynamodbStorage{}
+		newStorage = &DynamodbStorage{}
 	case "local":
-		storage = &FileStorage{}
+		newStorage = &FileStorage{}
 	default:
 		Error.Panic(fmt.Sprintf("Unknown database %s", database))
 	}
-	err := storage.Init(dir)
+	err := newStorage.Init(dir)
 	if err != nil {
 		Error.Panic(err)
 	}
-	return storage
+	return newStorage
 }
 
 var env Env
@@ -181,7 +184,7 @@ func main() {
 	http.HandleFunc("/postExport", WrapHandleFunc(postExportHandler))
 	http.HandleFunc("/postExportV2", WrapHandleFunc(postExportV2Handler))
 	http.HandleFunc("/postDownloadTaskURL",
-		WrapHandleFunc(downloadTaskURLHandler))
+		WrapHandleFunc(downloadTaskUrlHandler))
 	http.HandleFunc("/postLoadAssignment",
 		WrapHandleFunc(postLoadAssignmentHandler))
 	http.HandleFunc("/postLoadAssignmentV2",

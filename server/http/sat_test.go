@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 	_, err := session.NewSession()
 	if err == nil {
 		storage = &S3Storage{}
-		err := storage.Init("us-west-1:scalabel/travis")
+		err = storage.Init("us-west-1:scalabel/travis")
 		if err != nil {
 			Error.Println(err)
 		} else {
@@ -81,7 +81,7 @@ func TestMain(m *testing.M) {
 func TestPostProject(t *testing.T) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
-	project, err := GetProject(ProjectName)
+	project, _ := GetProject(ProjectName)
 	if project.Options.Name != "" {
 		t.Fatal(ProjectName + " already exists.")
 	}
@@ -89,7 +89,7 @@ func TestPostProject(t *testing.T) {
 	writer.WriteField("item_type", "image")
 	writer.WriteField("label_type", "box2d")
 	writer.WriteField("page_title", PageTitle)
-	err = addFileToForm(writer, path.Join(env.SrcPath, "examples",
+	err := addFileToForm(writer, path.Join(env.SrcPath, "examples",
 		"image_list.yml"), "item_file")
 	if err != nil {
 		t.Fatal(err)
@@ -122,14 +122,14 @@ func TestPostProject(t *testing.T) {
 		t.Fatal(err)
 	}
 	if project.Options.Name != ProjectName {
-		t.Fatal(errors.New("Project name was not saved correctly."))
+		t.Fatal(errors.New("project name was not saved correctly"))
 	}
 	tasks, err := GetTasksInProject(ProjectName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(tasks) != 10 {
-		t.Fatal(errors.New("Incorrect number of tasks in project."))
+		t.Fatal(errors.New("incorrect number of tasks in project"))
 	}
 }
 
@@ -143,8 +143,7 @@ func TestDashboard(t *testing.T) {
 	rr := httptest.NewRecorder()
 	dashboardHandler(rr, req)
 	if rr.Code != 200 {
-		t.Fatal(errors.New(fmt.Sprintf("Dashboard handler HTTP code: %d",
-			rr.Code)))
+		t.Fatal(fmt.Errorf("Dashboard handler HTTP code: %d", rr.Code))
 	}
 }
 
@@ -157,13 +156,13 @@ func TestVendorDashboard(t *testing.T) {
 	rr := httptest.NewRecorder()
 	vendorHandler(rr, req)
 	if rr.Code != 200 {
-		t.Fatal(errors.New(fmt.Sprintf("Vendor handler HTTP code: %d",
-			rr.Code)))
+		t.Fatal(fmt.Errorf("Vendor handler HTTP code: %d",
+			rr.Code))
 	}
 }
 
 func TestLoadAssignment(t *testing.T) {
-	for i := 0; i < 10; i += 1 {
+	for i := 0; i < 10; i++ {
 		taskJson := `{"task": {"projectOptions": {"name": "%s"}, "index": %d}}`
 		buf := bytes.NewBuffer([]byte(fmt.Sprintf(taskJson, ProjectName, i)))
 		req, err := http.NewRequest("POST", "postLoadAssignment", buf)
@@ -174,13 +173,13 @@ func TestLoadAssignment(t *testing.T) {
 		postLoadAssignmentHandler(rr, req)
 		if rr.Code != 200 {
 			errString := "Load assignment handler HTTP code: %d"
-			t.Fatal(errors.New(fmt.Sprintf(errString, rr.Code)))
+			t.Fatal(fmt.Errorf(errString, rr.Code))
 		}
 	}
 }
 
 func TestSaveHandler(t *testing.T) {
-	for i := 0; i < 10; i += 1 {
+	for i := 0; i < 10; i++ {
 		taskJson := `{"task": {"projectOptions": {"name": "%s"}, "index":%d},` +
 			`"labels": [{"id": 0, "categoryPath": "test"},` +
 			`{"id": 1, "categoryPath": "test"}]}`
@@ -193,7 +192,7 @@ func TestSaveHandler(t *testing.T) {
 		postSaveHandler(rr, req)
 		if rr.Code != 200 {
 			errString := "Save assignment handler HTTP code: %d"
-			t.Fatal(errors.New(fmt.Sprintf(errString, rr.Code)))
+			t.Fatal(fmt.Errorf(errString, rr.Code))
 		}
 	}
 }
@@ -214,12 +213,11 @@ func TestExportHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	postExportHandler(rr, req)
 	if rr.Code != 200 {
-		t.Fatal(errors.New(fmt.Sprintf("Export handler HTTP code: %d",
-			rr.Code)))
+		t.Fatal(fmt.Errorf("Export handler HTTP code: %d", rr.Code))
 	}
 }
 
-func TestDownloadTaskURLHandler(t *testing.T) {
+func TestDownloadTaskUrlHandler(t *testing.T) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 	writer.WriteField("project_name", ProjectName)
@@ -233,10 +231,10 @@ func TestDownloadTaskURLHandler(t *testing.T) {
 	}
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 	rr := httptest.NewRecorder()
-	downloadTaskURLHandler(rr, req)
+	downloadTaskUrlHandler(rr, req)
 	if rr.Code != 200 {
 		errString := "Download task URL handler HTTP code: %d"
-		t.Fatal(errors.New(fmt.Sprintf(errString, rr.Code)))
+		t.Fatal(fmt.Errorf(errString, rr.Code))
 	}
 }
 
