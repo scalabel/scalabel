@@ -10,12 +10,14 @@
     "[typescript]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true,
-        "editor.detectIndentation": false
+        "editor.detectIndentation": false,
+        "editor.formatOnSave": false
     },
     "[typescriptreact]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true,
-        "editor.detectIndentation": false
+        "editor.detectIndentation": false,
+        "editor.formatOnSave": false
     },
     "[go]": {
         "editor.tabSize": 4,
