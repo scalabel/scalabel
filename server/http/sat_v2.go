@@ -293,7 +293,9 @@ func assignmentToSat(assignment *Assignment) Sat {
 	tracks := TrackMap{}
 
 	projectOptions := assignment.Task.ProjectOptions
+	uuid := getUuidV4()
 	loadedSatConfig := SatConfig{
+		SessionId:       uuid,
 		AssignmentId:    assignment.Id,
 		ProjectName:     projectOptions.Name,
 		ItemType:        projectOptions.ItemType,
