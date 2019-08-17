@@ -161,36 +161,51 @@ function Dashboard (props: DashboardProps) {
             totalLabels += Number(value.numLabels)
             totalTaskLabeled += Number(value.numLabeledImages) > 0 ? 1 : 0
             return (
-              <TableRow key={index} className={
-                index % 2 === 0 ? classes.row : ''
-              }>
-                <TableCell align={align}>{index}</TableCell>
-                <TableCell align={align} data-testid=
-                  {'num-labeled-images-' + index.toString()}>
-                  {value.numLabeledImages}</TableCell>
-                <TableCell align={align} data-testid=
-                  {'num-labels-' + index.toString()}>
-                  {value.numLabels}</TableCell>
-                <TableCell align={align}>
-                  {value.submitted ? <FontAwesomeIcon
-                    icon={fa.faCheck} size={'lg'}
-                    data-testid={'submitted-' +
-                      index.toString()} /> : null}
+              <TableRow
+                key={index}
+                className={index % 2 === 0 ? classes.row : ''}
+              >
+                <TableCell className={classes.bodyCell} align={align}>
+                  {index}
                 </TableCell>
-                <TableCell align={align}>
+                <TableCell
+                  className={classes.bodyCell}
+                  align={align}
+                  data-testid={'num-labeled-images-' + index.toString()}
+                >
+                  {value.numLabeledImages}
+                </TableCell>
+                <TableCell
+                  className={classes.bodyCell}
+                  align={align}
+                  data-testid={'num-labels-' + index.toString()}
+                >
+                  {value.numLabels}
+                </TableCell>
+                <TableCell className={classes.bodyCell} align={align}>
+                  {value.submitted ? (
+                    <FontAwesomeIcon
+                      icon={fa.faCheck}
+                      size={'lg'}
+                      data-testid={'submitted-' + index.toString()}
+                    />
+                  ) : null}
+                </TableCell>
+                <TableCell className={classes.bodyCell} align={align}>
                   <IconButton
                     className={classes.linkButton}
                     color='inherit'
-                    href={'./' +
+                    href={
+                      './' +
                       value.handlerUrl +
                       '?project_name=' +
                       projectMetaData.name +
-                      '&task_index=' + index}
-                    data-testid=
-                    {'task-link-' + index.toString()}>
-                    <FontAwesomeIcon
-                      icon={fa.faExternalLinkAlt}
-                      size={'sm'} />
+                      '&task_index=' +
+                      index
+                    }
+                    data-testid={'task-link-' + index.toString()}
+                  >
+                    <FontAwesomeIcon icon={fa.faExternalLinkAlt} size={'sm'} />
                   </IconButton>
                 </TableCell>
               </TableRow>
