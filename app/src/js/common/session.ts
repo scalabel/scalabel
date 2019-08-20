@@ -55,7 +55,7 @@ class Session {
    * Get the id of the current session
    */
   public get id (): string {
-    return this.getState().config.sessionId
+    return this.getState().session.id
   }
 
   /**

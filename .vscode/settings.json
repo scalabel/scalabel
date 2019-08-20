@@ -23,6 +23,11 @@
         "editor.tabSize": 4,
         "editor.insertSpaces": false
     },
+    "[html]": {
+        "editor.detectIndentation": true,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2
+    },
     "editor.codeActionsOnSave": {
         "source.fixAll.tslint": true
     },
@@ -45,5 +50,6 @@
     "go.lintTool": "golangci-lint",
     "go.lintFlags": [
         "--fast"
-    ]
+    ],
+    "files.autoSave": "afterDelay"
 }

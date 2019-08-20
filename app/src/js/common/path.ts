@@ -12,7 +12,7 @@ const path = {
    * @return {ConfigType}
    */
   getConfig (): ConfigType {
-    return Session.getState().config
+    return Session.getState().task.config
   },
 
   /**

@@ -1,5 +1,5 @@
 import Session from '../common/session'
-import { ItemType, LabelType, ShapeType, ViewerConfigType } from '../functional/types'
+import { LabelType, ShapeType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -7,22 +7,6 @@ export function initSessionAction (): types.InitSessionAction {
   return {
     type: types.INIT_SESSION,
     sessionId: Session.id
-  }
-}
-
-/**
- * Create Item from url with provided creator
- * @param {Function} createItem
- * @param {string} url
- * @return {Object}
- */
-export function newItem (createItem: (itemId: number, url: string) => ItemType,
-                         url: string): types.NewItemAction {
-  return {
-    type: types.NEW_ITEM,
-    sessionId: Session.id,
-    createItem,
-    url
   }
 }
 

@@ -15,12 +15,12 @@ test('Add and delete labels', () => {
   Session.dispatch(action.addLabel(itemIndex, label, []))
   let state = Session.getState()
   const labelId =
-    state.current.maxLabelId
-  expect(_.size(state.items[0].labels)).toBe(2)
-  expect(state.items[0].labels[labelId].item).toBe(0)
+    state.task.status.maxLabelId
+  expect(_.size(state.task.items[0].labels)).toBe(2)
+  expect(state.task.items[0].labels[labelId].item).toBe(0)
   Session.dispatch(action.deleteLabel(itemIndex, labelId))
   state = Session.getState()
-  expect(_.size(state.items[0].labels)).toBe(1)
+  expect(_.size(state.task.items[0].labels)).toBe(1)
 })
 
 test('Change category', () => {
@@ -31,5 +31,5 @@ test('Change category', () => {
   Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
   Session.dispatch(action.changeLabelProps(itemIndex, 0, { category: [2] }))
   const state = Session.getState()
-  expect(state.items[0].labels[0].category[0]).toBe(2)
+  expect(state.task.items[0].labels[0].category[0]).toBe(2)
 })

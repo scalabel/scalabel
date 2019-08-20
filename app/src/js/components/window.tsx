@@ -30,20 +30,22 @@ export class Window extends React.Component {
   public render () {
     const state = Session.getState()
 
+    const config = state.task.config
+
     // get all the components
     const titleBar = (
         <TitleBar
-            title={state.config.pageTitle}
-            instructionLink={state.config.instructionPage}
+            title={config.pageTitle}
+            instructionLink={state.task.config.instructionPage}
             dashboardLink={Path.vendorDashboard()}
         />
     )
     const leftSidebar1 = (
         <ToolBar
-            categories={state.config.categories}
-            attributes={state.config.attributes}
-            itemType={state.config.itemType}
-            labelType={state.config.labelTypes[0]}
+            categories={config.categories}
+            attributes={config.attributes}
+            itemType={config.itemType}
+            labelType={config.labelTypes[0]}
         />
     )
 

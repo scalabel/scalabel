@@ -142,12 +142,12 @@ export abstract class Label2D {
   /** Convert label state to drawable */
   public updateState (
     state: State, itemIndex: number, labelId: number): void {
-    const item = state.items[itemIndex]
+    const item = state.task.items[itemIndex]
     this._label = item.labels[labelId]
     this._order = this._label.order
     this._labelId = this._label.id
     this._color = getColorById(this._labelId)
-    this.setSelected(labelId === state.current.label, 0)
+    this.setSelected(labelId === state.user.select.label, 0)
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }
 }

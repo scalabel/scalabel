@@ -17,7 +17,8 @@ test('Draw 2d boxes to label2d list', () => {
   Session.dispatch(action.goToItem(itemIndex))
   const label2dList = new Label2DList()
   Session.subscribe(() => {
-    label2dList.updateState(Session.getState(), Session.getState().current.item)
+    label2dList.updateState(Session.getState(),
+      Session.getState().user.select.item)
   })
 
   // Draw first box
@@ -26,7 +27,7 @@ test('Draw 2d boxes to label2d list', () => {
   label2dList.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 0)
   label2dList.onMouseUp(new Vector2D(10, 10), -1, 0)
   let state = Session.getState()
-  expect(_.size(state.items[0].labels)).toEqual(1)
+  expect(_.size(state.task.items[0].labels)).toEqual(1)
   let rect = getShape(state, 0, 0, 0) as RectType
   expect(rect.x1).toEqual(1)
   expect(rect.y1).toEqual(1)
@@ -40,7 +41,7 @@ test('Draw 2d boxes to label2d list', () => {
   label2dList.onMouseUp(new Vector2D(30, 29), -1, 0)
 
   state = Session.getState()
-  expect(_.size(state.items[0].labels)).toEqual(2)
+  expect(_.size(state.task.items[0].labels)).toEqual(2)
   rect = getShape(state, 0, 1, 0) as RectType
   expect(rect.x1).toEqual(19)
   expect(rect.y1).toEqual(20)
@@ -53,7 +54,7 @@ test('Draw 2d boxes to label2d list', () => {
   label2dList.onMouseMove(new Vector2D(23, 24), canvasSize, -1, 0)
   label2dList.onMouseUp(new Vector2D(23, 24), -1, 0)
   state = Session.getState()
-  expect(_.size(state.items[0].labels)).toEqual(3)
+  expect(_.size(state.task.items[0].labels)).toEqual(3)
   rect = getShape(state, 0, 2, 0) as RectType
   expect(rect.x1).toEqual(4)
   expect(rect.y1).toEqual(5)
@@ -66,7 +67,7 @@ test('Draw 2d boxes to label2d list', () => {
   label2dList.onMouseMove(new Vector2D(16, 17), canvasSize, -1, 0)
   label2dList.onMouseUp(new Vector2D(16, 17), -1, 0)
   state = Session.getState()
-  expect(_.size(state.items[0].labels)).toEqual(3)
+  expect(_.size(state.task.items[0].labels)).toEqual(3)
   rect = getShape(state, 0, 1, 0) as RectType
   expect(rect.x1).toEqual(16)
   expect(rect.y1).toEqual(17)
@@ -114,7 +115,8 @@ test('Draw label2d list to canvas', () => {
   Session.dispatch(action.goToItem(itemIndex))
   const label2dList = new Label2DList()
   Session.subscribe(() => {
-    label2dList.updateState(Session.getState(), Session.getState().current.item)
+    label2dList.updateState(Session.getState(),
+      Session.getState().user.select.item)
   })
 
   // Draw first box
@@ -128,7 +130,7 @@ test('Draw label2d list to canvas', () => {
   label2dList.redraw(labelContext, controlContext, 1)
 
   const state = Session.getState()
-  expect(_.size(state.items[0].labels)).toEqual(1)
+  expect(_.size(state.task.items[0].labels)).toEqual(1)
   const rect = getShape(state, 0, 0, 0) as RectType
   expect(rect.x1).toEqual(1)
   expect(rect.y1).toEqual(1)

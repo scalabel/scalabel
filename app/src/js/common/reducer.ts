@@ -25,8 +25,6 @@ export const reducer: Reducer<State> = (
   switch (action.type) {
     case types.INIT_SESSION:
       return common.initSession(state)
-    case types.NEW_ITEM:
-      return common.newItem(state, action as types.NewItemAction)
     case types.GO_TO_ITEM:
       return common.goToItem(state, action as types.GoToItemAction)
     case types.LOAD_ITEM:

@@ -44,7 +44,17 @@ describe('Save button functionality', () => {
   let saveButton: HTMLElement
 
   beforeEach(() => {
-    initStore({ testKey: 'testValue' })
+    initStore({
+      task: {
+        taskTestKey: 'taskTestValue'
+      },
+      user: {
+        userTestKey: 'userTestValue'
+      },
+      session: {
+        sessionTestKey: 'sessionTestValue'
+      }
+    })
     jest.clearAllMocks()
     // recreate for each test because of timeout side effects
     const { getByTestId } = render(
@@ -64,7 +74,13 @@ describe('Save button functionality', () => {
 
     expect(xhrMockClass.open).toBeCalled()
     expect(xhrMockClass.send).toBeCalledWith(
-      expect.stringContaining('"testKey":"testValue"')
+      expect.stringContaining('"taskTestKey":"taskTestValue"')
+    )
+    expect(xhrMockClass.send).toBeCalledWith(
+      expect.stringContaining('"userTestKey":"userTestValue"')
+    )
+    expect(xhrMockClass.send).toBeCalledWith(
+      expect.stringContaining('"sessionTestKey":"sessionTestValue"')
     )
     xhrMockClass.onreadystatechange()
   })

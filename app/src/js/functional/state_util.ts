@@ -1,6 +1,6 @@
 import { makeItem } from './states'
 import { ItemType, ShapeType, State, ViewerConfigType } from './types'
-import { updateListItem, updateObject } from './util'
+import { updateObject } from './util'
 
 /**
  * Get the current item from state
@@ -8,10 +8,10 @@ import { updateListItem, updateObject } from './util'
  * @return {ItemType}: If no item is selected, return a new item with id -1
  */
 export function getCurrentItem (state: State): ItemType {
-  if (state.current.item < 0) {
+  if (state.user.select.item < 0) {
     return makeItem()
   } else {
-    return state.items[state.current.item]
+    return state.task.items[state.user.select.item]
   }
 }
 
@@ -20,24 +20,8 @@ export function getCurrentItem (state: State): ItemType {
  * @param {State} state
  * @return {ViewerConfigType}
  */
-export function getCurrentItemViewerConfig (
-    state: State): ViewerConfigType {
-  return getCurrentItem(state).viewerConfig
-}
-
-/**
- * set the current item with new item
- * @param {State} state
- * @param {ItemType} item
- * @return {State}
- */
-export function setCurrentItem (state: State, item: ItemType): State {
-  if (state.current.item < 0) {
-    // console.error("No valid current item exists");
-    return state
-  }
-  return updateObject(state, {items:
-        updateListItem(state.items, state.current.item, item)})
+export function getCurrentItemViewerConfig (state: State): ViewerConfigType {
+  return state.user.viewerConfig
 }
 
 /**
@@ -48,8 +32,8 @@ export function setCurrentItem (state: State, item: ItemType): State {
  */
 export function setCurrentItemViewerConfig (
     state: State, config: ViewerConfigType): State {
-  return setCurrentItem(
-      state, updateObject(getCurrentItem(state), { viewerConfig: config }))
+  return updateObject(state,
+    { user: updateObject(state.user, { viewerConfig: config }) })
 }
 
 /**
@@ -61,6 +45,15 @@ export function setCurrentItemViewerConfig (
  */
 export function getShape (state: State, itemIndex: number,
                           labelId: number, shapeIndex: number): ShapeType {
-  return state.items[itemIndex].shapes[
-    state.items[itemIndex].labels[labelId].shapes[shapeIndex]].shape
+  return state.task.items[itemIndex].shapes[
+    state.task.items[itemIndex].labels[labelId].shapes[shapeIndex]].shape
+}
+
+/**
+ * Check whether the current item is loaded
+ * @param {State} state
+ * @return boolean
+ */
+export function isItemLoaded (state: State): boolean {
+  return state.session.items[state.user.select.item].loaded
 }

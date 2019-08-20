@@ -2,14 +2,12 @@
 // separate into activate and deactivate?
 // no need if the two are always called together
 import {
-  ItemType,
   LabelType,
   ShapeType,
   Vector3Type, ViewerConfigType
 } from '../functional/types'
 
 export const INIT_SESSION = 'INIT_SESSION'
-export const NEW_ITEM = 'NEW_ITEM' // no delete item
 export const GO_TO_ITEM = 'GO_TO_ITEM'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
@@ -47,13 +45,6 @@ interface BaseAction {
 }
 
 export type InitSessionAction = BaseAction
-
-export interface NewItemAction extends BaseAction {
-  /** Function of createItem */
-  createItem: (itemId: number, url: string) => ItemType
-  /** The url */
-  url: string
-}
 
 export interface GoToItemAction extends BaseAction {
   /** Index of the item to go to */
@@ -132,7 +123,6 @@ export interface MoveCameraAndTargetAction extends BaseAction {
 
 export type ActionType =
     InitSessionAction
-    | NewItemAction
     | GoToItemAction
     | LoadItemAction
     | UpdateAllAction

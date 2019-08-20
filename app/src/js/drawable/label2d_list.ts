@@ -53,7 +53,7 @@ export class Label2DList {
     this._mouseDownCoord = new Vector2D()
     this._labelChanged = false
     this._state = Session.getState()
-    this.updateState(this._state, this._state.current.item)
+    this.updateState(this._state, this._state.user.select.item)
   }
 
   /**
@@ -93,7 +93,7 @@ export class Label2DList {
     }
     const self = this
     self._state = state
-    const item = state.items[itemIndex]
+    const item = state.task.items[itemIndex]
     // remove any label not in the state
     self._labels = Object.assign({} as typeof self._labels,
         _.pick(self._labels, _.keys(item.labels)))
@@ -110,8 +110,9 @@ export class Label2DList {
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })
     this._highlightedLabel = null
-    if (state.current.label >= 0 && (state.current.label in this._labels)) {
-      this._selectedLabel = this._labels[state.current.label]
+    if (state.user.select.label >= 0 &&
+        (state.user.select.label in this._labels)) {
+      this._selectedLabel = this._labels[state.user.select.label]
     } else {
       this._selectedLabel = null
     }
@@ -167,7 +168,7 @@ export class Label2DList {
       if (this._selectedLabel === null) {
         const state = this._state
         const label = makeDrawableLabel(
-          state.config.labelTypes[state.current.labelType])
+          state.task.config.labelTypes[state.user.select.labelType])
         label.initTemp(state, this._mouseDownCoord)
         this._selectedLabel = label
         this._labelList.push(label)

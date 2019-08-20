@@ -5,6 +5,7 @@ import { zoomImage } from '../action/image'
 import Session from '../common/session'
 import { Label2DList } from '../drawable/label2d_list'
 import { decodeControlIndex, rgbToIndex } from '../drawable/util'
+import { getCurrentItemViewerConfig, isItemLoaded } from '../functional/state_util'
 import { ImageViewerConfigType, ItemType, State, ViewerConfigType } from '../functional/types'
 import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'
@@ -38,7 +39,7 @@ interface Props {
  */
 function getCurrentItem (): ItemType {
   const state = Session.getState()
-  return state.items[state.current.item]
+  return state.task.items[state.user.select.item]
 }
 
 /**
@@ -46,8 +47,7 @@ function getCurrentItem (): ItemType {
  * @return {ImageViewerConfigType}
  */
 function getCurrentViewerConfig (): ImageViewerConfigType {
-  const state = Session.getState()
-  return state.items[state.current.item].viewerConfig as ImageViewerConfigType
+  return getCurrentItemViewerConfig(Session.getState()) as ImageViewerConfigType
 }
 
 /**
@@ -254,7 +254,7 @@ export class ImageView extends Canvas2d<Props> {
             this.display.getBoundingClientRect()
           if (displayRect.width
             && displayRect.height
-            && getCurrentItem().loaded) {
+            && this.currentItemIsLoaded()) {
             this.updateScale(canvas, true)
           }
         }
@@ -271,7 +271,7 @@ export class ImageView extends Canvas2d<Props> {
             this.display.getBoundingClientRect()
           if (displayRect.width
             && displayRect.height
-            && getCurrentItem().loaded) {
+            && this.currentItemIsLoaded()) {
             this.updateScale(canvas, true)
           }
         }
@@ -288,7 +288,7 @@ export class ImageView extends Canvas2d<Props> {
             this.display.getBoundingClientRect()
           if (displayRect.width
             && displayRect.height
-            && getCurrentItem().loaded) {
+            && this.currentItemIsLoaded()) {
             this.updateScale(canvas, false)
           }
         }
@@ -296,7 +296,7 @@ export class ImageView extends Canvas2d<Props> {
     />)
 
     const playerControl = (<PlayerControl key='player-control'
-        num_frames={Session.getState().items.length}
+        num_frames={Session.getState().task.items.length}
     />)
     let canvasesWithProps
     if (this.display) {
@@ -358,7 +358,7 @@ export class ImageView extends Canvas2d<Props> {
    */
   public redrawImageCanvas () {
     if (this.currentItemIsLoaded() && this.imageCanvas && this.imageContext) {
-      const image = Session.images[this.state.session.current.item]
+      const image = Session.images[this.state.session.user.select.item]
       // redraw imageCanvas
       this.clearCanvas(this.imageCanvas, this.imageContext)
       this.imageContext.drawImage(image, 0, 0, image.width, image.height,
@@ -384,7 +384,7 @@ export class ImageView extends Canvas2d<Props> {
    * notify state is updated
    */
   protected updateState (state: State): void {
-    this._labels.updateState(state, state.current.item)
+    this._labels.updateState(state, state.user.select.item)
   }
 
   /**
@@ -764,9 +764,7 @@ export class ImageView extends Canvas2d<Props> {
    * @return {boolean}
    */
   private currentItemIsLoaded (): boolean {
-    const state = this.state.session
-    const item = state.current.item
-    return state.items[item].loaded
+    return isItemLoaded(this.state.session)
   }
 }
 

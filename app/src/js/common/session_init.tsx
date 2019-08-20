@@ -63,7 +63,7 @@ export function initStore (stateJson: {}): void {
   Session.store = configureStore(stateJson, Session.devMode)
   Session.dispatch(initSessionAction())
   const state = Session.getState()
-  Session.itemType = state.config.itemType
+  Session.itemType = state.task.config.itemType
 }
 
 /**
@@ -102,11 +102,12 @@ function loadData (): void {
  * Load all the images in the state
  */
 function loadImages (): void {
-  const items = Session.getState().items
+  const state = Session.getState()
+  const items = state.task.items
   for (const item of items) {
     // Copy item config
     let config: ImageViewerConfigType = {
-      ...(item.viewerConfig as ImageViewerConfigType)
+      ...(state.user.viewerConfig as ImageViewerConfigType)
     }
     if (_.isEmpty(config)) {
       config = makeImageViewerConfig()
@@ -166,10 +167,11 @@ function loadPointClouds (): void {
       }
     `
 
-  const items = Session.getState().items
+  const state = Session.getState()
+  const items = state.task.items
   for (const item of items) {
     let config: PointCloudViewerConfigType = {
-      ...(item.viewerConfig as PointCloudViewerConfigType)
+      ...(state.user.viewerConfig as PointCloudViewerConfigType)
     }
     if (_.isEmpty(config)) {
       config = makePointCloudViewerConfig()

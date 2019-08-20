@@ -35,7 +35,7 @@ func TestSavePostV2(t *testing.T) {
 // Tests that malformed input (wrong type) will through errors
 func TestSavePostMalformedV2(t *testing.T) {
 	req, err := http.NewRequest("POST", "postSave",
-		bytes.NewBuffer([]byte(`{"config": {"assignmentId": 50}}`)))
+		bytes.NewBuffer([]byte(`{"task": {"config": {"taskId": 50}}}`)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,10 +48,10 @@ func TestSavePostMalformedV2(t *testing.T) {
 	}
 }
 
-// Tests that demoMode being true will throw errrors
+// Tests that demoMode being true will throw errors
 func TestSavePostDemoV2(t *testing.T) {
 	req, err := http.NewRequest("POST", "postSave",
-		bytes.NewBuffer([]byte(`{"config": {"demoMode": true}}`)))
+		bytes.NewBuffer([]byte(`{"session": {"demoMode": true}}`)))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import * as types from '../action/types'
 import { addLabel, changeLabel } from './common'
+import { getCurrentItem } from './state_util'
 import { makeLabel } from './states'
 import { LabelType, State } from './types'
 
@@ -29,7 +30,7 @@ export function tagImage (
   const [attributeIndex, attributeValue] =
     [action.attributeIndex, action.selectedIndex]
   const attributes = { [attributeIndex]: attributeValue }
-  const item = state.items[state.current.item]
+  const item = getCurrentItem(state)
   if (_.size(item.labels) > 0) {
     const labelId = Number(_.findKey(item.labels))
     const newAction: types.ChangeLabelAction = {
@@ -41,7 +42,7 @@ export function tagImage (
     }
     return changeLabel(state, newAction)
   } else {
-    const label = createTagLabel(0, state.current.item, attributes)
+    const label = createTagLabel(0, state.user.select.item, attributes)
     const newAction: types.AddLabelAction = {
       type: types.ADD_LABEL,
       sessionId: action.sessionId,

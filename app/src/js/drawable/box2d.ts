@@ -217,15 +217,15 @@ export class Box2D extends Label2D {
 
   /** Initialize this label to be temporary */
   public initTemp (state: State, start: Vector2D): void {
-    const itemIndex = state.current.item
-    this._order = state.current.maxOrder + 1
+    const itemIndex = state.user.select.item
+    this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
       type: labels.BOX_2D, id: -1, item: itemIndex,
-      category: [state.current.category],
+      category: [state.user.select.category],
       order: this._order
     })
     this._labelId = -1
-    this._color = getColorById(state.current.maxLabelId + 1)
+    this._color = getColorById(state.task.status.maxLabelId + 1)
     const rect = makeRect({ x1: start.x, y1: start.y, x2: 0, y2: 0 })
     this.updateShapes([rect])
     this.setSelected(true, 5)

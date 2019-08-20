@@ -4,10 +4,10 @@ import * as React from 'react'
 import * as THREE from 'three'
 import { moveCamera, moveCameraAndTarget } from '../action/point_cloud'
 import Session from '../common/session'
+import { getCurrentItem, getCurrentItemViewerConfig, isItemLoaded } from '../functional/state_util'
 import { PointCloudViewerConfigType, State } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
 import { Canvas3d } from './canvas3d'
-
 const styles = () => createStyles({
   canvas: {
     position: 'absolute',
@@ -24,24 +24,6 @@ interface ClassType {
 interface Props {
   /** CSS class */
   classes: ClassType
-}
-
-/**
- * Get the current item in the state
- * @return {ItemType}
- */
-function getCurrentItem () {
-  const state = Session.getState()
-  return state.items[state.current.item]
-}
-
-/**
- * Retrieve the current viewer configuration
- * @return {ViewerConfigType}
- */
-function getCurrentViewerConfig () {
-  const state = Session.getState()
-  return state.items[state.current.item].viewerConfig
 }
 
 /**
@@ -163,9 +145,9 @@ class PointCloudView extends Canvas3d<Props> {
    * @return {boolean}
    */
   public redraw (): boolean {
-    const state = Session.getState()
-    const item = state.current.item
-    const loaded = state.items[item].loaded
+    const state = this.state.session
+    const item = state.user.select.item
+    const loaded = state.session.items[item].loaded
     if (loaded) {
       const pointCloud = Session.pointClouds[item]
       if (this.scene.children.length !== 1) {
@@ -247,7 +229,8 @@ class PointCloudView extends Canvas3d<Props> {
 
     if (this.mouseDown) {
       const viewerConfig: PointCloudViewerConfigType =
-        getCurrentViewerConfig() as PointCloudViewerConfigType
+        (getCurrentItemViewerConfig(this.state.session) as
+          PointCloudViewerConfigType)
 
       const target = new THREE.Vector3(viewerConfig.target.x,
         viewerConfig.target.y,
@@ -299,7 +282,7 @@ class PointCloudView extends Canvas3d<Props> {
    */
   private handleKeyDown (e: KeyboardEvent) {
     const viewerConfig: PointCloudViewerConfigType =
-      getCurrentViewerConfig() as PointCloudViewerConfigType
+      this.getCurrentViewerConfig()
 
     // Get vector pointing from camera to target projected to horizontal plane
     let forwardX = viewerConfig.target.x - viewerConfig.position.x
@@ -420,7 +403,7 @@ class PointCloudView extends Canvas3d<Props> {
    */
   private handleMouseWheel (e: React.WheelEvent<HTMLCanvasElement>) {
     const viewerConfig: PointCloudViewerConfigType =
-      getCurrentViewerConfig() as PointCloudViewerConfigType
+      this.getCurrentViewerConfig()
 
     const target = new THREE.Vector3(viewerConfig.target.x,
       viewerConfig.target.y,
@@ -459,7 +442,7 @@ class PointCloudView extends Canvas3d<Props> {
     const y = NDC[1]
 
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
-    const item = getCurrentItem()
+    const item = getCurrentItem(this.state.session)
     const pointCloud = Session.pointClouds[item.index]
 
     const intersects = this.raycaster.intersectObject(pointCloud)
@@ -467,7 +450,7 @@ class PointCloudView extends Canvas3d<Props> {
     if (intersects.length > 0) {
       const newTarget = intersects[0].point
       const viewerConfig: PointCloudViewerConfigType =
-        getCurrentViewerConfig() as PointCloudViewerConfigType
+        this.getCurrentViewerConfig()
       Session.dispatch(moveCameraAndTarget(
         new Vector3D(
           viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
@@ -501,7 +484,7 @@ class PointCloudView extends Canvas3d<Props> {
     if (this.canvas) {
       const rendererParams = { canvas: this.canvas }
       this.renderer = new THREE.WebGLRenderer(rendererParams)
-      if (getCurrentItem().loaded) {
+      if (isItemLoaded(this.state.session)) {
         this.updateRenderer()
       }
     }
@@ -512,7 +495,7 @@ class PointCloudView extends Canvas3d<Props> {
    */
   private updateRenderer () {
     const config: PointCloudViewerConfigType =
-      getCurrentViewerConfig() as PointCloudViewerConfigType
+      this.getCurrentViewerConfig()
     this.target.position.x = config.target.x
     this.target.position.y = config.target.y
     this.target.position.z = config.target.z
@@ -535,6 +518,14 @@ class PointCloudView extends Canvas3d<Props> {
       this.renderer.setSize(this.canvas.offsetWidth,
         this.canvas.offsetHeight)
     }
+  }
+
+  /**
+   * Get point cloud view config
+   */
+  private getCurrentViewerConfig (): PointCloudViewerConfigType {
+    return (getCurrentItemViewerConfig(this.state.session) as
+      PointCloudViewerConfigType)
   }
 }
 

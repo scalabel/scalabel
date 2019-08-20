@@ -2,9 +2,10 @@ import _ from 'lodash'
 import * as types from '../action/types'
 import { makeIndexedShape } from './states'
 import {
-  State
+  Select, State, UserType
 } from './types'
-import {removeObjectFields, updateListItem, updateListItems,
+import {
+  removeObjectFields, updateListItem,
   updateObject
 } from './util'
 
@@ -15,19 +16,23 @@ import {removeObjectFields, updateListItem, updateListItems,
  */
 export function initSession (state: State): State {
   // initialize state
-  let items = state.items.slice()
+  let session = state.session
+  const items = session.items.slice()
   for (let i = 0; i < items.length; i++) {
     items[i] = updateObject(items[i], { loaded: false })
   }
-  state = updateObject(state, { items })
-  if (state.current.item === -1) {
-    const current = updateObject(state.current, { item: 0 })
-    items = updateListItem(
-        state.items, 0, updateObject(state.items[0], { active: true }))
-    return updateObject(state, { current, items })
-  } else {
-    return state
-  }
+  session = updateObject(session, { items })
+  return updateObject(state, { session })
+}
+
+/**
+ * Update the selected label in user
+ * @param {UserType} user
+ * @param {Partial<Select>} pselect partial selection
+ */
+function updateSelect (user: UserType, pselect: Partial<Select>): UserType {
+  const select = updateObject(user.select, pselect)
+  return updateObject(user, { select })
 }
 
 /**
@@ -38,39 +43,40 @@ export function initSession (state: State): State {
  * @return {State}
  */
 export function addLabel (state: State, action: types.AddLabelAction): State {
+  let { task, user } = state
+  const session = state.session
   const itemIndex = action.itemIndex
   let label = action.label
   const shapes = action.shapes
-  const newShapeId = state.current.maxShapeId + 1
-  const labelId = state.current.maxLabelId + 1
+  const newShapeId = task.status.maxShapeId + 1
+  const labelId = task.status.maxLabelId + 1
   const shapeIds = _.range(shapes.length).map((i) => i + newShapeId)
   const newShapes = shapes.map(
-    (s, i) => makeIndexedShape(shapeIds[i], labelId, s))
-  const order = state.current.maxOrder + 1
-  label = updateObject(label, {id: labelId, item: itemIndex, order,
-    shapes: label.shapes.concat(shapeIds)})
-  let item = state.items[itemIndex]
+    (s, i) => makeIndexedShape(shapeIds[i], labelId, true, s))
+  const order = task.status.maxOrder + 1
+  label = updateObject(label, {
+    id: labelId, item: itemIndex, order,
+    shapes: label.shapes.concat(shapeIds)
+  })
+  let item = state.task.items[itemIndex]
   const labels = updateObject(
-      item.labels,
-      { [labelId]: label })
+    item.labels,
+    { [labelId]: label })
   const allShapes = updateObject(item.shapes, _.zipObject(shapeIds, newShapes))
   item = updateObject(item, { labels, shapes: allShapes })
-  const items = updateListItem(state.items, itemIndex, item)
-  const selectedLabelId = (action.sessionId === state.config.sessionId) ?
-    labelId : state.current.label
-  const current = updateObject(
-      state.current,
+  const items = updateListItem(state.task.items, itemIndex, item)
+  if (action.sessionId === session.id) {
+    user = updateSelect(user, { label: labelId })
+  }
+  const status = updateObject(
+    task.status,
     {
-      label: selectedLabelId,
       maxLabelId: labelId,
       maxShapeId: shapeIds[shapeIds.length - 1],
       maxOrder: order
     })
-  return {
-    ...state,
-    items,
-    current
-  }
+  task = updateObject(task, { status, items })
+  return { task, user, session }
 }
 
 /**
@@ -81,19 +87,22 @@ export function addLabel (state: State, action: types.AddLabelAction): State {
  */
 export function changeShape (
   state: State, action: types.ChangeShapeAction): State {
+  let { task, user } = state
   const itemIndex = action.itemIndex
   const shapeId = action.shapeId
-  let item = state.items[itemIndex]
+  let item = state.task.items[itemIndex]
   let indexedShape = item.shapes[shapeId]
   indexedShape = updateObject(
     indexedShape, { shape: updateObject(indexedShape.shape, action.props) })
   item = updateObject(
-      item, { shapes: updateObject(item.shapes, { [shapeId]: indexedShape }) })
-  const selectedLabelId = (action.sessionId === state.config.sessionId) ?
-    indexedShape.label[0] : state.current.label
-  const current = updateObject(state.current, { label: selectedLabelId })
-  const items = updateListItem(state.items, itemIndex, item)
-  return { ...state, items, current }
+    item, { shapes: updateObject(item.shapes, { [shapeId]: indexedShape }) })
+  const selectedLabelId = (action.sessionId === state.session.id) ?
+    indexedShape.label[0] : user.select.label
+  const select = updateObject(user.select, { label: selectedLabelId })
+  user = updateObject(user, { select })
+  const items = updateListItem(state.task.items, itemIndex, item)
+  task = updateObject(task, { items })
+  return { ...state, task, user }
 }
 
 /**
@@ -103,37 +112,21 @@ export function changeShape (
  * @return {State}
  */
 export function changeLabel (
-    state: State, action: types.ChangeLabelAction): State {
+  state: State, action: types.ChangeLabelAction): State {
+  let { task, user } = state
   const itemIndex = action.itemIndex
   const labelId = action.labelId
   const props = action.props
-  let item = state.items[itemIndex]
+  let item = task.items[itemIndex]
   const label = updateObject(item.labels[labelId], props)
   item = updateObject(
-      item, { labels: updateObject(item.labels, { [labelId]: label }) })
-  const items = updateListItem(state.items, itemIndex, item)
-  const selectedLabelId = (action.sessionId === state.config.sessionId) ?
-    labelId : state.current.label
-  const current = updateObject(state.current, { label: selectedLabelId })
-  return { ...state, items, current }
-}
-
-/**
- * Create Item from url with provided creator
- * @param {State} state
- * @param {types.NewItemAction} action
- * @return {State}
- */
-export function newItem (state: State, action: types.NewItemAction): State {
-  const [createItem, url] = [action.createItem, action.url]
-  const id = state.items.length
-  const item = createItem(id, url)
-  const items = state.items.slice()
-  items.push(item)
-  return {
-    ...state,
-    items
+    item, { labels: updateObject(item.labels, { [labelId]: label }) })
+  const items = updateListItem(task.items, itemIndex, item)
+  task = updateObject(task, { items })
+  if (action.sessionId === state.session.id) {
+    user = updateSelect(user, { label: labelId })
   }
+  return { ...state, user, task }
 }
 
 /**
@@ -143,40 +136,33 @@ export function newItem (state: State, action: types.NewItemAction): State {
  * @return {State}
  */
 export function goToItem (state: State, action: types.GoToItemAction): State {
+  let user = state.user
   const index = action.itemIndex
-  if (index < 0 || index >= state.items.length) {
+  if (index < 0 || index >= state.task.items.length) {
     return state
   }
-  // TODO: don't do circling when no image number is shown
-  // index = (index + state.items.length) % state.items.length;
-  if (index === state.current.item) {
+  if (index === user.select.item) {
     return state
   }
-  const deactivatedItem = updateObject(state.items[state.current.item],
-      { active: false })
-  const activatedItem = updateObject(state.items[index], { active: true })
-  const items = updateListItems(state.items,
-      [state.current.item, index],
-      [deactivatedItem, activatedItem])
-  const current = { ...state.current, item: index }
-  return updateObject(state, { items, current })
+  user = updateSelect(user, { item: index })
+  return updateObject(state, { user })
 }
 
 /**
  * Signify a new item is loaded
  * @param {State} state
- * @param {number} itemIndex
- * @param {ViewerConfigType} viewerConfig
+ * @param {types.LoadItemAction} action
  * @return {State}
  */
 export function loadItem (state: State, action: types.LoadItemAction): State {
   const itemIndex = action.itemIndex
-  const viewerConfig = action.config
-  return updateObject(
-      state, {items: updateListItem(
-          state.items, itemIndex,
-            updateObject(state.items[itemIndex],
-                { viewerConfig, loaded: true }))})
+  let session = state.session
+  session = updateObject(session, {
+    items:
+      updateListItem(session.items, itemIndex,
+        updateObject(session.items[itemIndex], { loaded: true }))
+  })
+  return updateObject(state, { session })
 }
 
 // TODO: now we are using redux, we have all the history anyway,
@@ -189,25 +175,25 @@ export function loadItem (state: State, action: types.LoadItemAction): State {
  * @return {State}
  */
 export function deleteLabel (
-    state: State, action: types.DeleteLabelAction): State {
+  state: State, action: types.DeleteLabelAction): State {
+  let { task, user } = state
   const itemIndex = action.itemIndex
   const labelId = action.labelId
-  const item = state.items[itemIndex]
+  const item = state.task.items[itemIndex]
   const label = item.labels[labelId]
   const labels = removeObjectFields(item.labels, [labelId])
   // TODO: should we remove shapes?
   // depending on how boundary sharing is implemented.
   // remove labels
   const shapes = removeObjectFields(item.shapes, label.shapes)
-  const items = updateListItem(state.items, itemIndex,
-  updateObject(item, { labels, shapes }))
+  const items = updateListItem(state.task.items, itemIndex,
+    updateObject(item, { labels, shapes }))
+  task = updateObject(task, { items })
   // Reset selected object
-  let current = state.current
-  if (current.label === labelId) {
-    current = updateObject(current, { label: -1 })
+  if (user.select.label === labelId) {
+    user = updateSelect(user, { label: -1 })
   }
-  return updateObject(
-  state, { current, items })
+  return updateObject(state, { user, task })
 }
 
 /**
@@ -237,7 +223,13 @@ export function updateAll (state: State): State {
  * @return {State}
  */
 export function toggleAssistantView (state: State): State {
-  return updateObject(state, {layout:
-            updateObject(state.layout, {assistantView:
-                  !state.layout.assistantView})})
+  let user = state.user
+  user = updateObject(user, {
+    layout:
+      updateObject(user.layout, {
+        assistantView:
+          !user.layout.assistantView
+      })
+  })
+  return updateObject(state, { user })
 }

@@ -6,7 +6,6 @@ import {
   DELETE_LABEL,
   GO_TO_ITEM,
   IMAGE_ZOOM,
-  NEW_ITEM,
   TAG_IMAGE
 } from '../action/types'
 import { makeState } from '../functional/states'
@@ -32,7 +31,6 @@ export function configureStore (
     limit: 20, // add a limit to history
     filter: includeAction([
       // undoable actions
-      NEW_ITEM,
       GO_TO_ITEM,
       IMAGE_ZOOM,
       ADD_LABEL,

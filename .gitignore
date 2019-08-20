@@ -26,3 +26,6 @@ data/
 
 # pytype
 .pytype
+
+# vscode sftp setting
+.vscode/sftp.json
