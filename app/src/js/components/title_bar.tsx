@@ -1,6 +1,7 @@
 import * as fa from '@fortawesome/free-solid-svg-icons/index'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'
+import Fade from '@material-ui/core/Fade'
 import { Theme } from '@material-ui/core/styles'
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
@@ -121,7 +122,7 @@ class TitleBar extends Component<Props> {
       return (
               <Tooltip title={b.title} key={b.title}>
                 <IconButton className={classes.titleUnit} onClick={onClick}
-                            href={href} target={target}>
+                            href={href} target={target} data-testid={b.title}>
                   <FontAwesomeIcon icon={b.icon} size='xs'/>
                 </IconButton>
               </Tooltip>
@@ -144,7 +145,8 @@ class TitleBar extends Component<Props> {
         break
       }
       case ConnectionStatus.UNSAVED: {
-        sessionStatus = ''
+        // Want the SAVED status text during fade animation
+        sessionStatus = 'All progress saved.'
         hideMessage = true
         break
       }
@@ -154,23 +156,21 @@ class TitleBar extends Component<Props> {
       }
     }
 
-    const statusMessage = hideMessage ? null : (
-      <StatusMessageBox>
-        {sessionStatus}
-      </StatusMessageBox>
-    )
-
     return (
-            <AppBar className={classes.appBar}>
-              <Toolbar>
-                <Typography variant='h6' noWrap>
-                  {title}
-                </Typography>
-                {statusMessage}
-                <div className={classes.grow}/>
-                {buttons}
-              </Toolbar>
-            </AppBar>
+      <AppBar className={classes.appBar}>
+        <Toolbar>
+          <Typography variant='h6' noWrap>
+            {title}
+          </Typography>
+          <Fade in={!hideMessage} timeout={300}>
+            <StatusMessageBox>
+              {sessionStatus}
+            </StatusMessageBox>
+          </Fade>
+          <div className={classes.grow}/>
+          {buttons}
+        </Toolbar>
+      </AppBar>
     )
   }
 }
