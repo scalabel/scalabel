@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"sort"
 )
 
 // Poly2d datatype for 2d polygon
@@ -32,6 +33,39 @@ type LabelExport struct {
 	Poly2d      []Poly2d               `json:"poly2d" yaml:"poly2d"`
 	Box3d       map[string]interface{} `json:"box3d" yaml:"box3d"`
 }
+
+type ItemExportV2 struct {
+	Name       string            `json:"name" yaml:"name"`
+	Url        string            `json:"url" yaml:"url"`
+	VideoName  string            `json:"videoName" yaml:"videoName"`
+	Attributes map[string]string `json:"attributes" yaml:"attributes"`
+	Timestamp  int64             `json:"timestamp" yaml:"timestamp"`
+	Index      int               `json:"index" yaml:"index"`
+	Labels     []LabelExportV2   `json:"labels" yaml:"labels"`
+}
+type LabelExportV2 struct {
+	Id          int                    `json:"id" yaml:"id"`
+	Category    string                 `json:"category" yaml:"category"`
+	Attributes  map[string]interface{} `json:"attributes" yaml:"attributes"`
+	ManualShape bool                   `json:"manualShape" yaml:"manualShape"`
+	Box2d       interface{}            `json:"box2d" yaml:"box2d"`
+	Poly2d      []Poly2d               `json:"poly2d" yaml:"poly2d"`
+	Box3d       interface{}            `json:"box3d" yaml:"box3d"`
+}
+
+/*type SatLabel struct {
+	Id            int              `json:"id" yaml:"id"`
+	Item          int              `json:"item" yaml:"item"`
+	Type          string           `json:"type" yaml:"type"`
+	Category      []int            `json:"category" yaml:"category"`
+	Attributes    map[string][]int `json:"attributes" yaml:"attributes"`
+	Parent        int              `json:"parent" yaml:"parent"`
+	Children      []int            `json:"children" yaml:"children"`
+	Shapes        []int            `json:"shapes" yaml:"shapes"`
+	SelectedShape int              `json:"selectedShape" yaml:"selectedShape"`
+	State         int              `json:"state" yaml:"state"`
+	Order         int              `json:"order" yaml:"order"`
+}*/
 
 // structs for saved data
 
@@ -180,4 +214,60 @@ func ParseBox3d(data map[string]interface{}) map[string]interface{} {
 	box3d["dimension"] = data["scale"]
 
 	return box3d
+}
+
+//Parses SatLabel attributes for exportable format
+func parseSatLabelAttributes(map[string][]int) map[string]interface{} {
+
+	return map[string]interface{}{}
+}
+
+// helper function for v2 exporting, converts ItemData to ItemExportV2
+func exportItemData(
+	itemToLoad ItemData,
+	satConfig ConfigData,
+	taskIndex int,
+	itemType string,
+	projectName string) ItemExportV2 {
+	item := ItemExportV2{}
+	item.Index = itemToLoad.Index
+	if itemType == "video" {
+		item.VideoName = projectName + "_" + Index2str(taskIndex)
+	}
+
+	item.Timestamp = satConfig.SubmitTime
+	item.Name = itemToLoad.Url
+	item.Url = itemToLoad.Url
+	// TODO: add attributes when implemented
+	// item.Attributes = parseAttributes(itemToLoad.attributes)
+
+	// map every label to its SatShape and create correct ordering
+	labelMap := make(map[int]int)
+	labelMapKeys := make([]int, 0)
+	for _, shape := range itemToLoad.Shapes {
+		for _, labelId := range shape.Label {
+			labelMap[labelId] = shape.Id
+			labelMapKeys = append(labelMapKeys, labelId)
+		}
+	}
+
+	sort.Ints(labelMapKeys)
+	item.Labels = []LabelExportV2{}
+	itemLabel := LabelExportV2{}
+
+	// Iterate over labels and convert them to an exportable format
+	for _, labelId := range labelMapKeys {
+		shapeId := labelMap[labelId]
+		labelToLoad := itemToLoad.Labels[labelId]
+		itemLabel.Id = labelId
+		itemLabel.Attributes = parseSatLabelAttributes(labelToLoad.Attributes)
+		// TODO: Handle multiple categories
+		itemLabel.Category = satConfig.Categories[labelToLoad.Category[0]]
+		if labelToLoad.Type == "box2d" {
+			itemLabel.ManualShape = false
+			itemLabel.Box2d = itemToLoad.Shapes[shapeId].Shape
+		}
+		item.Labels = append(item.Labels, itemLabel)
+	}
+	return item
 }

@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"math"
+	"path"
+	"reflect"
 	"testing"
 )
 
@@ -437,4 +442,120 @@ func TestPathPoly2d(t *testing.T) {
 			}
 		}
 	}
+}
+
+// Helper function which reads the sample sat and v2 export from storage
+func readSatandExportV2() (Sat, ItemExportV2, error) {
+	sampleSat := Sat{}
+	sampleItemExportV2 := ItemExportV2{}
+
+	statePath := path.Join("testdata", "sample_sat.json")
+	inputBytes, err := ioutil.ReadFile(statePath)
+	if err != nil {
+		return sampleSat, sampleItemExportV2, err
+	}
+	err = json.Unmarshal(inputBytes, &sampleSat)
+	if err != nil {
+		return sampleSat, sampleItemExportV2, err
+	}
+
+	statePath = path.Join("testdata", "sample_item_export_v2.json")
+	inputBytes, err = ioutil.ReadFile(statePath)
+	if err != nil {
+		return sampleSat, sampleItemExportV2, err
+	}
+	err = json.Unmarshal(inputBytes, &sampleItemExportV2)
+	if err != nil {
+		return sampleSat, sampleItemExportV2, err
+	}
+	return sampleSat, sampleItemExportV2, nil
+
+}
+
+func TestExportItemDataBox2dSimple(t *testing.T) {
+	var itemExportV2 ItemExportV2
+
+	sampleSat, sampleItemExportV2, err := readSatandExportV2()
+	if err != nil {
+		t.Fatal(err)
+	}
+	itemData := sampleSat.Task.Items[0]
+	itemData.Labels = map[int]LabelData{1: itemData.Labels[1]}
+	itemData.Shapes = map[int]ShapeData{1: itemData.Shapes[1]}
+	sampleItemExportV2.Labels = []LabelExportV2{sampleItemExportV2.Labels[0]}
+
+	itemExportV2 = exportItemData(
+		itemData,
+		sampleSat.Task.Config,
+		0,
+		"box2d",
+		"test")
+
+	diff := reflect.DeepEqual(itemExportV2, sampleItemExportV2)
+	if !diff {
+		t.Fatal(fmt.Errorf("%+v\n%+v", itemExportV2, sampleItemExportV2))
+	}
+
+}
+
+// Tests when multiple labels share a single shape
+func TestExportItemDataBox2dSharedShape(t *testing.T) {
+	var itemExportV2 ItemExportV2
+
+	sampleSat, sampleItemExportV2, err := readSatandExportV2()
+	if err != nil {
+		t.Fatal(err)
+	}
+	itemData := sampleSat.Task.Items[0]
+	itemData.Labels = map[int]LabelData{1: itemData.Labels[1],
+		10: itemData.Labels[1]}
+
+	shapeWithMultipleLabels := itemData.Shapes[1]
+	shapeWithMultipleLabels.Label = append(shapeWithMultipleLabels.Label, 10)
+	itemData.Shapes = map[int]ShapeData{1: shapeWithMultipleLabels}
+	labelCopy := sampleItemExportV2.Labels[0]
+	labelCopy.Id = 10
+	sampleItemExportV2.Labels = []LabelExportV2{sampleItemExportV2.Labels[0],
+		labelCopy}
+
+	itemExportV2 = exportItemData(
+		itemData,
+		sampleSat.Task.Config,
+		0,
+		"box2d",
+		"test")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	diff := reflect.DeepEqual(itemExportV2, sampleItemExportV2)
+	if !diff {
+		t.Fatal(fmt.Errorf("%+v\n%+v", itemExportV2, sampleItemExportV2))
+	}
+
+}
+
+// Test using full sat with multiple labels
+func TestExportItemDataBox2dFull(t *testing.T) {
+	var itemExportV2 ItemExportV2
+
+	sampleSat, sampleItemExportV2, err := readSatandExportV2()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	itemExportV2 = exportItemData(
+		sampleSat.Task.Items[0],
+		sampleSat.Task.Config,
+		0,
+		"box2d",
+		"test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	diff := reflect.DeepEqual(itemExportV2, sampleItemExportV2)
+	if !diff {
+		t.Fatal(fmt.Errorf("%+v\n%+v", itemExportV2, sampleItemExportV2))
+	}
+
 }

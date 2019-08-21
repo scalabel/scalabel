@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
-	"reflect"
 	"strconv"
 
 	"github.com/mitchellh/mapstructure"
@@ -426,42 +425,6 @@ func postSaveV2Handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// helper function for exports
-func exportSatItem(
-	itemToLoad ItemData,
-	satAttributes []Attribute,
-	taskIndex int,
-	itemType string,
-	projectName string) ItemExport {
-	item := ItemExport{}
-	item.Index = itemToLoad.Index
-	if itemType == "video" {
-		item.VideoName = projectName + "_" + Index2str(taskIndex)
-	}
-	item.Timestamp = 10000 // to be fixed
-	item.Name = itemToLoad.Url
-	item.Url = itemToLoad.Url
-	item.Attributes = map[string]string{}
-	if len(itemToLoad.Labels) > 0 {
-		itemLabel := itemToLoad.Labels[0]
-		keys := reflect.ValueOf(itemLabel.Attributes).MapKeys()
-		strkeys := make([]string, len(keys))
-		for i := 0; i < len(keys); i++ {
-			strkeys[i] = keys[i].String()
-		}
-		for _, key := range strkeys {
-			for _, attribute := range satAttributes {
-				if attribute.Name == key {
-					item.Attributes[key] =
-						attribute.Values[itemLabel.Attributes[key][0]]
-					break
-				}
-			}
-		}
-	}
-	return item
-}
-
 // Handles the export of submitted assignments
 func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 	var projectName = r.FormValue("project_name")
@@ -481,15 +444,15 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 		return
 	}
-	items := []ItemExport{}
+	items := []ItemExportV2{}
 	sat := Sat{}
 	for _, task := range tasks {
 		sat, err = GetSat(projectName, Index2str(task.Index), DefaultWorker)
 		if err == nil {
 			for _, itemToLoad := range sat.Task.Items {
-				item := exportSatItem(
+				item := exportItemData(
 					itemToLoad,
-					sat.Task.Config.Attributes,
+					sat.Task.Config,
 					task.Index,
 					projectToLoad.Options.ItemType,
 					projectToLoad.Options.Name)
@@ -499,7 +462,7 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 			// if file not found, return list of items with url
 			Info.Println(err)
 			for _, itemToLoad := range task.Items {
-				item := ItemExport{}
+				item := ItemExportV2{}
 				item.Index = itemToLoad.Index
 				if projectToLoad.Options.ItemType == "video" {
 					item.VideoName = projectToLoad.Options.Name +
