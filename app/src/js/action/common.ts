@@ -15,9 +15,9 @@ export function initSessionAction (): types.InitSessionAction {
  * @param {number} index
  * @return {types.GoToItemAction}
  */
-export function goToItem (index: number): types.UpdateSelectAction {
+export function goToItem (index: number): types.ChangeSelectAction {
   return {
-    type: types.UPDATE_SELECT,
+    type: types.CHANGE_SELECT,
     sessionId: Session.id,
     select: { item: index }
   }

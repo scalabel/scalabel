@@ -8,7 +8,7 @@ import {
 } from '../functional/types'
 
 export const INIT_SESSION = 'INIT_SESSION'
-export const UPDATE_SELECT = 'UPDATE_SELECT'
+export const CHANGE_SELECT = 'CHANGE_SELECT'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 
@@ -37,7 +37,7 @@ interface BaseAction {
 
 export type InitSessionAction = BaseAction
 
-export interface UpdateSelectAction extends BaseAction {
+export interface ChangeSelectAction extends BaseAction {
   /** partial selection */
   select: Partial<Select>
 }
@@ -114,7 +114,7 @@ export interface MoveCameraAndTargetAction extends BaseAction {
 
 export type ActionType =
     InitSessionAction
-    | UpdateSelectAction
+    | ChangeSelectAction
     | LoadItemAction
     | UpdateAllAction
     | ImageZoomAction

@@ -132,10 +132,10 @@ export function changeLabel (
 /**
  * Update the user selection
  * @param {State} state
- * @param {types.UpdateSelectAction} action
+ * @param {types.ChangeSelectAction} action
  */
-export function updateSelect (
-    state: State, action: types.UpdateSelectAction): State {
+export function changeSelect (
+    state: State, action: types.ChangeSelectAction): State {
   const newSelect = updateObject(state.user.select, action.select)
   if (newSelect.item < 0 || newSelect.item >= state.task.items.length) {
     newSelect.item = state.user.select.item
@@ -160,8 +160,6 @@ export function loadItem (state: State, action: types.LoadItemAction): State {
   return updateObject(state, { session })
 }
 
-// TODO: now we are using redux, we have all the history anyway,
-// TODO: do we still need to keep around all labels in current state?
 /**
  * Deconstruct given label
  * @param {State} state
