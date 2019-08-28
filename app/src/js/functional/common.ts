@@ -30,7 +30,7 @@ export function initSession (state: State): State {
  * @param {UserType} user
  * @param {Partial<Select>} pselect partial selection
  */
-function updateSelect (user: UserType, pselect: Partial<Select>): UserType {
+function updateUserSelect (user: UserType, pselect: Partial<Select>): UserType {
   const select = updateObject(user.select, pselect)
   return updateObject(user, { select })
 }
@@ -66,7 +66,7 @@ export function addLabel (state: State, action: types.AddLabelAction): State {
   item = updateObject(item, { labels, shapes: allShapes })
   const items = updateListItem(state.task.items, itemIndex, item)
   if (action.sessionId === session.id) {
-    user = updateSelect(user, { label: labelId })
+    user = updateUserSelect(user, { label: labelId })
   }
   const status = updateObject(
     task.status,
@@ -124,28 +124,23 @@ export function changeLabel (
   const items = updateListItem(task.items, itemIndex, item)
   task = updateObject(task, { items })
   if (action.sessionId === state.session.id) {
-    user = updateSelect(user, { label: labelId })
+    user = updateUserSelect(user, { label: labelId })
   }
   return { ...state, user, task }
 }
 
 /**
- * Go to item at index
+ * Update the user selection
  * @param {State} state
- * @param {types.GoToItemAction} actoin
- * @return {State}
+ * @param {types.UpdateSelectAction} action
  */
-export function goToItem (state: State, action: types.GoToItemAction): State {
-  let user = state.user
-  const index = action.itemIndex
-  if (index < 0 || index >= state.task.items.length) {
-    return state
+export function updateSelect (
+    state: State, action: types.UpdateSelectAction): State {
+  const newSelect = updateObject(state.user.select, action.select)
+  if (newSelect.item < 0 || newSelect.item >= state.task.items.length) {
+    newSelect.item = state.user.select.item
   }
-  if (index === user.select.item) {
-    return state
-  }
-  user = updateSelect(user, { item: index })
-  return updateObject(state, { user })
+  return updateObject(state, { user: updateUserSelect(state.user, newSelect) })
 }
 
 /**
@@ -191,7 +186,7 @@ export function deleteLabel (
   task = updateObject(task, { items })
   // Reset selected object
   if (user.select.label === labelId) {
-    user = updateSelect(user, { label: -1 })
+    user = updateUserSelect(user, { label: -1 })
   }
   return updateObject(state, { user, task })
 }

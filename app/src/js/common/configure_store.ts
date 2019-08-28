@@ -4,7 +4,6 @@ import {
 // SAT specific actions
   ADD_LABEL,
   DELETE_LABEL,
-  GO_TO_ITEM,
   IMAGE_ZOOM,
   TAG_IMAGE
 } from '../action/types'
@@ -31,7 +30,6 @@ export function configureStore (
     limit: 20, // add a limit to history
     filter: includeAction([
       // undoable actions
-      GO_TO_ITEM,
       IMAGE_ZOOM,
       ADD_LABEL,
       DELETE_LABEL,
