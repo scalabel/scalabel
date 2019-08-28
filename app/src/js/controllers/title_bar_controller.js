@@ -1,7 +1,7 @@
 import * as types from '../action/types';
 import * as actions from '../action/common';
 import {
-    BaseController
+    BaseController,
 } from './base_controller';
 
 /**
@@ -39,7 +39,7 @@ export class TitleBarController extends BaseController {
      */
     toggleAssistantView() {
         this.dispatch({
-            type: types.TOGGLE_ASSISTANT_VIEW
+            type: types.TOGGLE_ASSISTANT_VIEW,
         });
     }
 }
