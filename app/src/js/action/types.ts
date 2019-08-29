@@ -1,14 +1,14 @@
-// SAT specific actions
-// separate into activate and deactivate?
-// no need if the two are always called together
+/**
+ * Define string indentifiers and interfaces of actions
+ */
 import {
   LabelType,
-  ShapeType,
-  Vector3Type, ViewerConfigType
+  Select,
+  ShapeType, Vector3Type, ViewerConfigType
 } from '../functional/types'
 
 export const INIT_SESSION = 'INIT_SESSION'
-export const GO_TO_ITEM = 'GO_TO_ITEM'
+export const CHANGE_SELECT = 'CHANGE_SELECT'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 
@@ -22,19 +22,10 @@ export const DELETE_LABEL = 'DELETE_LABEL'
 // Image specific actions
 export const TAG_IMAGE = 'TAG_IMAGE'
 
-// Label Level
-export const CHANGE_ATTRIBUTE = 'CHANGE_ATTRIBUTE'
-export const CHANGE_CATEGORY = 'CHANGE_CATEGORY'
-
 // View Level
 export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW'
 
-// Box2D specific
-export const NEW_IMAGE_BOX2D_LABEL = 'NEW_IMAGE_BOX2D_LABEL'
-export const CHANGE_RECT = 'CHANGE_RECT'
-
 // Point Cloud Specific
-export const MOVE_CAMERA = 'MOVE_CAMERA'
 export const MOVE_CAMERA_AND_TARGET = 'MOVE_CAMERA_AND_TARGET'
 
 interface BaseAction {
@@ -46,9 +37,9 @@ interface BaseAction {
 
 export type InitSessionAction = BaseAction
 
-export interface GoToItemAction extends BaseAction {
-  /** Index of the item to go to */
-  itemIndex: number
+export interface ChangeSelectAction extends BaseAction {
+  /** partial selection */
+  select: Partial<Select>
 }
 
 export interface LoadItemAction extends BaseAction {
@@ -123,7 +114,7 @@ export interface MoveCameraAndTargetAction extends BaseAction {
 
 export type ActionType =
     InitSessionAction
-    | GoToItemAction
+    | ChangeSelectAction
     | LoadItemAction
     | UpdateAllAction
     | ImageZoomAction

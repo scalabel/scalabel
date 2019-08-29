@@ -15,11 +15,11 @@ export function initSessionAction (): types.InitSessionAction {
  * @param {number} index
  * @return {types.GoToItemAction}
  */
-export function goToItem (index: number): types.GoToItemAction {
+export function goToItem (index: number): types.ChangeSelectAction {
   return {
-    type: types.GO_TO_ITEM,
+    type: types.CHANGE_SELECT,
     sessionId: Session.id,
-    itemIndex: index
+    select: { item: index }
   }
 }
 
