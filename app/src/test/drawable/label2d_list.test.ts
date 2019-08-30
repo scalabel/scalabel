@@ -8,7 +8,7 @@ import { getShape } from '../../js/functional/state_util'
 import { RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
-import { testJson } from '../test_objects'
+import { testJson } from '../test_image_objects'
 
 test('Draw 2d boxes to label2d list', () => {
   Session.devMode = false

@@ -3,7 +3,7 @@ import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { makeLabel } from '../../js/functional/states'
-import { testJson } from '../test_objects'
+import { testJson } from '../test_image_objects'
 
 test('Add and delete labels', () => {
   Session.devMode = false

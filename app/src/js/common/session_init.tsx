@@ -107,7 +107,7 @@ function loadImages (): void {
   for (const item of items) {
     // Copy item config
     let config: ImageViewerConfigType = {
-      ...(state.user.viewerConfig as ImageViewerConfigType)
+      ...(state.user.imageViewerConfig)
     }
     if (_.isEmpty(config)) {
       config = makeImageViewerConfig()
@@ -171,45 +171,45 @@ function loadPointClouds (): void {
   const items = state.task.items
   for (const item of items) {
     let config: PointCloudViewerConfigType = {
-      ...(state.user.viewerConfig as PointCloudViewerConfigType)
+      ...(state.user.pointCloudViewerConfig)
     }
     if (_.isEmpty(config)) {
       config = makePointCloudViewerConfig()
     }
-  // tslint:disable-next-line
-  loader.load(item.url, (geometry: THREE.BufferGeometry) => {
+    // tslint:disable-next-line
+    loader.load(item.url, (geometry: THREE.BufferGeometry) => {
 
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        red: {
-          value: new THREE.Color(0xff0000)
+      const material = new THREE.ShaderMaterial({
+        uniforms: {
+          red: {
+            value: new THREE.Color(0xff0000)
+          },
+          yellow: {
+            value: new THREE.Color(0xffff00)
+          },
+          green: {
+            value: new THREE.Color(0x00ff00)
+          },
+          teal: {
+            value: new THREE.Color(0x00ffff)
+          }
         },
-        yellow: {
-          value: new THREE.Color(0xffff00)
-        },
-        green: {
-          value: new THREE.Color(0x00ff00)
-        },
-        teal: {
-          value: new THREE.Color(0x00ffff)
-        }
-      },
-      vertexShader,
-      fragmentShader,
-      alphaTest: 1.0
-    })
+        vertexShader,
+        fragmentShader,
+        alphaTest: 1.0
+      })
 
-    const particles = new THREE.Points(geometry, material)
-    Session.pointClouds.push(particles)
+      const particles = new THREE.Points(geometry, material)
+      Session.pointClouds.push(particles)
 
-    Session.dispatch(loadItem(item.index, config))
-  },
+      Session.dispatch(loadItem(item.index, config))
+    },
 
-    () => null,
+      () => null,
 
-    () => {
-      alert('Point cloud at ' + item.url + ' was not found.')
-    }
-  )
+      () => {
+        alert('Point cloud at ' + item.url + ' was not found.')
+      }
+    )
   }
 }

@@ -118,9 +118,11 @@ export function changeLabel (
   const labelId = action.labelId
   const props = action.props
   let item = task.items[itemIndex]
-  const label = updateObject(item.labels[labelId], props)
-  item = updateObject(
-    item, { labels: updateObject(item.labels, { [labelId]: label }) })
+  if (labelId in item.labels) {
+    const label = updateObject(item.labels[labelId], props)
+    item = updateObject(
+        item, { labels: updateObject(item.labels, { [labelId]: label }) })
+  }
   const items = updateListItem(task.items, itemIndex, item)
   task = updateObject(task, { items })
   if (action.sessionId === state.session.id) {

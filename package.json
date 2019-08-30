@@ -99,6 +99,7 @@
         "redux": "^4.0.4",
         "redux-undo": "^1.0.0-beta9-9-7",
         "regenerator-runtime": "^0.12.1",
+        "rxjs": "^6.3.3",
         "source-map-loader": "^0.2.4",
         "sprintf-js": "^1.1.1",
         "terser": "3.14.1",

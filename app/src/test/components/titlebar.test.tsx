@@ -13,22 +13,14 @@ beforeEach(() => {
 
 afterEach(cleanup)
 
+/* tslint:disable */
 afterAll(() => {
-  windowInterface.XMLHttpRequest = oldXMLHttpRequest
-  windowInterface.alert = oldAlert
+  (window as any).XMLHttpRequest = oldXMLHttpRequest
+  window.alert = oldAlert
 })
 
-interface WindowInterface extends Window {
-  /** XML request init function */
-  XMLHttpRequest: () => {
-    /** Callback function for xhr request */
-    onreadystatechange: () => void
-  }
-}
-
-const windowInterface = window as WindowInterface
-const oldXMLHttpRequest = windowInterface.XMLHttpRequest
-const oldAlert = windowInterface.alert
+const oldXMLHttpRequest = (window as any).XMLHttpRequest
+const oldAlert = window.alert
 
 const xhrMockClass = {
   open: jest.fn(),
@@ -36,9 +28,11 @@ const xhrMockClass = {
   onreadystatechange: jest.fn(),
   readyState: 4,
   response: JSON.stringify(0)
-}
-windowInterface.XMLHttpRequest = jest.fn(() => xhrMockClass)
-windowInterface.alert = jest.fn()
+};
+(window as any).XMLHttpRequest =
+  jest.fn().mockImplementation(() => xhrMockClass)
+window.alert = jest.fn()
+/* tslint:enable */
 
 describe('Save button functionality', () => {
   let saveButton: HTMLElement
@@ -99,7 +93,7 @@ describe('Save button functionality', () => {
     fireEvent.click(saveButton)
 
     xhrMockClass.onreadystatechange()
-    expect(windowInterface.alert).toBeCalled()
+    expect(window.alert).toBeCalled()
     expect(Session.status).toBe(ConnectionStatus.SAVED)
 
     xhrMockClass.response = JSON.stringify(0)

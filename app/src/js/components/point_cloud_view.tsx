@@ -4,26 +4,50 @@ import * as React from 'react'
 import * as THREE from 'three'
 import { moveCamera, moveCameraAndTarget } from '../action/point_cloud'
 import Session from '../common/session'
+import { Label3DList } from '../drawable/label3d_list'
 import { getCurrentItem, getCurrentItemViewerConfig, isItemLoaded } from '../functional/state_util'
 import { PointCloudViewerConfigType, State } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
 import { Canvas3d } from './canvas3d'
+import PlayerControl from './player_control'
+
 const styles = () => createStyles({
   canvas: {
     position: 'absolute',
     height: '100%',
     width: '100%'
+  },
+  background_with_player_control: {
+    display: 'block', height: '100%',
+    position: 'absolute',
+    outline: 'none', width: '100%', background: '#000000'
   }
 })
 
 interface ClassType {
   /** CSS canvas name */
   canvas: string
+  /** background */
+  background_with_player_control: string
 }
 
 interface Props {
   /** CSS class */
   classes: ClassType
+}
+
+/**
+ * Normalize mouse coordinates to make canvas left top origin
+ * @param x
+ * @param y
+ * @param canvas
+ */
+function normalizeCoordinatesToCanvas (
+  x: number, y: number, canvas: HTMLCanvasElement): number[] {
+  return [
+    x - canvas.getBoundingClientRect().left,
+    y - canvas.getBoundingClientRect().top
+  ]
 }
 
 /**
@@ -40,6 +64,8 @@ class PointCloudView extends Canvas3d<Props> {
   private camera: THREE.PerspectiveCamera
   /** ThreeJS sphere mesh for indicating camera target location */
   private target: THREE.Mesh
+  /** Current point cloud for rendering */
+  private pointCloud: THREE.Points | null
   /** ThreeJS raycaster */
   private raycaster: THREE.Raycaster
   /** Mouse click state */
@@ -49,9 +75,12 @@ class PointCloudView extends Canvas3d<Props> {
   /** Mouse position */
   private mY: number
 
+  /** drawable label list */
+  private _labels: Label3DList
+
   /** Ref Handler */
   private refInitializer:
-    (component: HTMLDivElement | HTMLCanvasElement | null) => void
+    (component: HTMLCanvasElement | null) => void
 
   /** UI handler */
   private mouseDownHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
@@ -62,6 +91,8 @@ class PointCloudView extends Canvas3d<Props> {
   /** UI handler */
   private keyDownHandler: (e: KeyboardEvent) => void
   /** UI handler */
+  private keyUpHandler: () => void
+  /** UI handler */
   private mouseWheelHandler: (e: React.WheelEvent<HTMLCanvasElement>) => void
   /** UI handler */
   private doubleClickHandler: () => void
@@ -70,12 +101,6 @@ class PointCloudView extends Canvas3d<Props> {
   private MOUSE_CORRECTION_FACTOR: number
   /** Move amount when using arrow keys */
   private MOVE_AMOUNT: number
-  // private UP_KEY: number;
-  // private DOWN_KEY: number;
-  // private LEFT_KEY: number;
-  // private RIGHT_KEY: number;
-  // private PERIOD_KEY: number;
-  // private SLASH_KEY: number;
   /**
    * Constructor, handles subscription to store
    * @param {Object} props: react props
@@ -93,9 +118,10 @@ class PointCloudView extends Canvas3d<Props> {
     this.scene.add(this.target)
 
     this.raycaster = new THREE.Raycaster()
-    this.raycaster.linePrecision = 0.5
     this.raycaster.near = 1.0
     this.raycaster.far = 100.0
+
+    this.pointCloud = null
 
     this.canvas = null
 
@@ -103,26 +129,23 @@ class PointCloudView extends Canvas3d<Props> {
     this.mX = 0
     this.mY = 0
 
+    this._labels = new Label3DList()
+
     this.refInitializer = this.initializeRefs.bind(this)
 
     this.mouseDownHandler = this.handleMouseDown.bind(this)
     this.mouseUpHandler = this.handleMouseUp.bind(this)
     this.mouseMoveHandler = this.handleMouseMove.bind(this)
     this.keyDownHandler = this.handleKeyDown.bind(this)
+    this.keyUpHandler = this.handleKeyUp.bind(this)
     this.mouseWheelHandler = this.handleMouseWheel.bind(this)
     this.doubleClickHandler = this.handleDoubleClick.bind(this)
 
     this.MOUSE_CORRECTION_FACTOR = 80.0
     this.MOVE_AMOUNT = 0.3
 
-    // this.UP_KEY = 38;
-    // this.DOWN_KEY = 40;
-    // this.LEFT_KEY = 37;
-    // this.RIGHT_KEY = 39;
-    // this.PERIOD_KEY = 190;
-    // this.SLASH_KEY = 191;
-
-    document.addEventListener('keydown', this.keyDownHandler)
+    document.onkeydown = this.keyDownHandler
+    document.onkeyup = this.keyUpHandler
   }
 
   /**
@@ -130,13 +153,19 @@ class PointCloudView extends Canvas3d<Props> {
    * @return {React.Fragment} React fragment
    */
   public render () {
+    const playerControl = (<PlayerControl key='player-control'
+        num_frames={Session.getState().task.items.length}
+    />)
     const { classes } = this.props
     return (
+      <div className={classes.background_with_player_control}>
         <canvas className={classes.canvas} ref={this.refInitializer}
           onMouseDown={this.mouseDownHandler} onMouseUp={this.mouseUpHandler}
           onMouseMove={this.mouseMoveHandler} onWheel={this.mouseWheelHandler}
           onDoubleClick={this.doubleClickHandler}
         />
+        {playerControl}
+      </div >
     )
   }
 
@@ -149,20 +178,10 @@ class PointCloudView extends Canvas3d<Props> {
     const item = state.user.select.item
     const loaded = state.session.items[item].loaded
     if (loaded) {
-      const pointCloud = Session.pointClouds[item]
-      if (this.scene.children.length !== 1) {
-        this.scene.children = [new THREE.Object3D()]
-      }
-      if (this.scene.children[0] !== pointCloud) {
-        this.scene.children[0] = pointCloud
-      }
-
       if (this.canvas) {
         this.updateRenderer()
-      }
-
-      if (this.renderer) {
-        this.renderer.render(this.scene, this.camera)
+        this.pointCloud = Session.pointClouds[item]
+        this.renderThree()
       }
     }
     return true
@@ -171,8 +190,20 @@ class PointCloudView extends Canvas3d<Props> {
   /**
    * notify state is updated
    */
-  protected updateState (_state: State): void {
-    return
+  protected updateState (state: State): void {
+    this._labels.updateState(state, state.user.select.item)
+  }
+
+  /**
+   * Render ThreeJS Scene
+   */
+  private renderThree () {
+    if (this.renderer && this.pointCloud) {
+      this.scene.children = []
+      this._labels.render(this.scene)
+      this.scene.add(this.pointCloud)
+      this.renderer.render(this.scene, this.camera)
+    }
   }
 
   /**
@@ -194,12 +225,62 @@ class PointCloudView extends Canvas3d<Props> {
   }
 
   /**
+   * Rotate camera according to mouse movement
+   * @param newX
+   * @param newY
+   */
+  private rotateCamera (newX: number, newY: number) {
+    const viewerConfig: PointCloudViewerConfigType =
+      this.getCurrentViewerConfig()
+
+    const target = new THREE.Vector3(viewerConfig.target.x,
+      viewerConfig.target.y,
+      viewerConfig.target.z)
+    const offset = new THREE.Vector3(viewerConfig.position.x,
+      viewerConfig.position.y,
+      viewerConfig.position.z)
+    offset.sub(target)
+
+    // Rotate so that positive y-axis is vertical
+    const rotVertQuat = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(viewerConfig.verticalAxis.x,
+        viewerConfig.verticalAxis.y,
+        viewerConfig.verticalAxis.z),
+      new THREE.Vector3(0, 1, 0))
+    offset.applyQuaternion(rotVertQuat)
+
+    // Convert to spherical coordinates
+    const spherical = new THREE.Spherical()
+    spherical.setFromVector3(offset)
+
+    // Apply rotations
+    spherical.theta += (newX - this.mX) / this.MOUSE_CORRECTION_FACTOR
+    spherical.phi += (newY - this.mY) / this.MOUSE_CORRECTION_FACTOR
+
+    spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
+
+    spherical.makeSafe()
+
+    // Convert to Cartesian
+    offset.setFromSpherical(spherical)
+
+    // Rotate back to original coordinate space
+    const quatInverse = rotVertQuat.clone().inverse()
+    offset.applyQuaternion(quatInverse)
+
+    offset.add(target)
+
+    Session.dispatch(moveCamera((new Vector3D()).fromThree(offset)))
+  }
+
+  /**
    * Handle mouse down
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   private handleMouseDown (e: React.MouseEvent<HTMLCanvasElement>) {
     e.stopPropagation()
     this.mouseDown = true
+    this._labels.onMouseDown()
   }
 
   /**
@@ -209,6 +290,7 @@ class PointCloudView extends Canvas3d<Props> {
   private handleMouseUp (e: React.MouseEvent<HTMLCanvasElement>) {
     e.stopPropagation()
     this.mouseDown = false
+    this._labels.onMouseUp()
   }
 
   /**
@@ -222,55 +304,25 @@ class PointCloudView extends Canvas3d<Props> {
       return
     }
 
-    const newX = e.clientX -
-      this.canvas.getBoundingClientRect().left
-    const newY = e.clientY -
-      this.canvas.getBoundingClientRect().top
+    const normalized = normalizeCoordinatesToCanvas(
+      e.clientX, e.clientY, this.canvas
+    )
 
-    if (this.mouseDown) {
-      const viewerConfig: PointCloudViewerConfigType =
-        (getCurrentItemViewerConfig(this.state.session) as
-          PointCloudViewerConfigType)
+    const newX = normalized[0]
+    const newY = normalized[1]
 
-      const target = new THREE.Vector3(viewerConfig.target.x,
-        viewerConfig.target.y,
-        viewerConfig.target.z)
-      const offset = new THREE.Vector3(viewerConfig.position.x,
-        viewerConfig.position.y,
-        viewerConfig.position.z)
-      offset.sub(target)
+    const NDC = this.convertMouseToNDC(
+      newX,
+      newY)
+    const x = NDC[0]
+    const y = NDC[1]
 
-      // Rotate so that positive y-axis is vertical
-      const rotVertQuat = new THREE.Quaternion().setFromUnitVectors(
-        new THREE.Vector3(viewerConfig.verticalAxis.x,
-          viewerConfig.verticalAxis.y,
-          viewerConfig.verticalAxis.z),
-        new THREE.Vector3(0, 1, 0))
-      offset.applyQuaternion(rotVertQuat)
-
-      // Convert to spherical coordinates
-      const spherical = new THREE.Spherical()
-      spherical.setFromVector3(offset)
-
-      // Apply rotations
-      spherical.theta += (newX - this.mX) / this.MOUSE_CORRECTION_FACTOR
-      spherical.phi += (newY - this.mY) / this.MOUSE_CORRECTION_FACTOR
-
-      spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
-
-      spherical.makeSafe()
-
-      // Convert to Cartesian
-      offset.setFromSpherical(spherical)
-
-      // Rotate back to original coordinate space
-      const quatInverse = rotVertQuat.clone().inverse()
-      offset.applyQuaternion(quatInverse)
-
-      offset.add(target)
-
-      Session.dispatch(moveCamera((new Vector3D()).fromThree(offset)))
+    if (!this._labels.onMouseMove(x, y, this.camera, this.raycaster) &&
+        this.mouseDown) {
+      this.rotateCamera(newX, newY)
     }
+
+    this.renderThree()
 
     this.mX = newX
     this.mY = newY
@@ -339,7 +391,7 @@ class PointCloudView extends Canvas3d<Props> {
         Session.dispatch(moveCameraAndTarget(
           new Vector3D(
             viewerConfig.position.x - forwardX,
-            viewerConfig.position.x - forwardX,
+            viewerConfig.position.y - forwardY,
             viewerConfig.position.z
           ),
           new Vector3D(
@@ -354,7 +406,7 @@ class PointCloudView extends Canvas3d<Props> {
         Session.dispatch(moveCameraAndTarget(
           new Vector3D(
             viewerConfig.position.x + forwardX,
-            viewerConfig.position.x + forwardX,
+            viewerConfig.position.y + forwardY,
             viewerConfig.position.z
           ),
           new Vector3D(
@@ -394,6 +446,21 @@ class PointCloudView extends Canvas3d<Props> {
           )
         ))
         break
+      case ' ':
+      case 'Escape':
+        break
+    }
+    if (this._labels.onKeyDown(e)) {
+      this.renderThree()
+    }
+  }
+
+  /**
+   * Handle key up event
+   */
+  private handleKeyUp () {
+    if (this._labels.onKeyUp()) {
+      this.renderThree()
     }
   }
 
@@ -435,34 +502,37 @@ class PointCloudView extends Canvas3d<Props> {
    * Handle double click
    */
   private handleDoubleClick () {
-    const NDC = this.convertMouseToNDC(
-      this.mX,
-      this.mY)
-    const x = NDC[0]
-    const y = NDC[1]
+    if (!this._labels.onDoubleClick()) {
+      const NDC = this.convertMouseToNDC(
+        this.mX,
+        this.mY)
+      const x = NDC[0]
+      const y = NDC[1]
 
-    this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
-    const item = getCurrentItem(this.state.session)
-    const pointCloud = Session.pointClouds[item.index]
+      this.raycaster.linePrecision = 0.2
+      this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
+      const item = getCurrentItem(this.state.session)
+      const pointCloud = Session.pointClouds[item.index]
 
-    const intersects = this.raycaster.intersectObject(pointCloud)
+      const intersects = this.raycaster.intersectObject(pointCloud)
 
-    if (intersects.length > 0) {
-      const newTarget = intersects[0].point
-      const viewerConfig: PointCloudViewerConfigType =
-        this.getCurrentViewerConfig()
-      Session.dispatch(moveCameraAndTarget(
-        new Vector3D(
-          viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
-          viewerConfig.position.y - viewerConfig.target.y + newTarget.y,
-          viewerConfig.position.z - viewerConfig.target.z + newTarget.z
-        ),
-        new Vector3D(
-          newTarget.x,
-          newTarget.y,
-          newTarget.z
-        )
-      ))
+      if (intersects.length > 0) {
+        const newTarget = intersects[0].point
+        const viewerConfig: PointCloudViewerConfigType =
+          this.getCurrentViewerConfig()
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
+            viewerConfig.position.y - viewerConfig.target.y + newTarget.y,
+            viewerConfig.position.z - viewerConfig.target.z + newTarget.z
+          ),
+          new Vector3D(
+            newTarget.x,
+            newTarget.y,
+            newTarget.z
+          )
+        ))
+      }
     }
   }
 
@@ -471,14 +541,13 @@ class PointCloudView extends Canvas3d<Props> {
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */
-  private initializeRefs (component:
-                               HTMLDivElement | HTMLCanvasElement | null) {
+  private initializeRefs (component: HTMLCanvasElement | null) {
     if (!component) {
       return
     }
 
     if (component.nodeName === 'CANVAS') {
-      this.canvas = component as HTMLCanvasElement
+      this.canvas = component
     }
 
     if (this.canvas) {

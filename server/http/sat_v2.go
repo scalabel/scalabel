@@ -17,17 +17,17 @@ import (
 
 //Sat state
 type Sat struct {
-	Task TaskData       `json:"task" yaml:"task"`
-	User UserData       `json:"user" yaml:"user"`
+	Task    TaskData    `json:"task" yaml:"task"`
+	User    UserData    `json:"user" yaml:"user"`
 	Session SessionData `json:"session" yaml:"session"`
 }
 
 //Task specific data
 type TaskData struct {
-	Config  ConfigData `json:"config" yaml:"config"`
-	Status  TaskStatus `json:"status" yaml:"status"`
-	Items   []ItemData `json:"items" yaml:"items"`
-	Tracks  TrackMap   `json:"tracks" yaml:"tracks"`
+	Config ConfigData `json:"config" yaml:"config"`
+	Status TaskStatus `json:"status" yaml:"status"`
+	Items  []ItemData `json:"items" yaml:"items"`
+	Tracks TrackMap   `json:"tracks" yaml:"tracks"`
 }
 
 //Task properties not changed during lifetime of a session
@@ -55,11 +55,11 @@ type TaskStatus struct {
 
 //Contains data for single item
 type ItemData struct {
-	Id           int              `json:"id" yaml:"id"`
-	Index        int              `json:"index" yaml:"index"`
-	Url          string           `json:"url" yaml:"url"`
-	Labels       map[int]LabelData `json:"labels" yaml:"labels"`
-	Shapes       map[int]ShapeData `json:"shapes" yaml:"shapes"`
+	Id     int               `json:"id" yaml:"id"`
+	Index  int               `json:"index" yaml:"index"`
+	Url    string            `json:"url" yaml:"url"`
+	Labels map[int]LabelData `json:"labels" yaml:"labels"`
+	Shapes map[int]ShapeData `json:"shapes" yaml:"shapes"`
 }
 
 //Contains data for single label
@@ -90,10 +90,11 @@ type TrackMap map[int]interface{}
 
 //User specific data
 type UserData struct {
-	UserId       string       `json:"id" yaml:"id"`
-	Selection    SelectedData `json:"select" yaml:"select"`
-	Layout       LayoutData   `json:"layout" yaml:"layout"`
-	ViewConfig   ViewerConfig `json:"viewerConfig" yaml:"viewerConfig"`
+	UserId               string                 `json:"id" yaml:"id"`
+	Selection            SelectedData           `json:"select" yaml:"select"`
+	Layout               LayoutData             `json:"layout" yaml:"layout"`
+	ImageViewConfig      ImageViewerConfig      `json:"imageViewerConfig" yaml:"imageViewerConfig"`
+	PointCloudViewConfig PointCloudViewerConfig `json:"pointCloudViewerConfig" yaml:"pointCloudViewerConfig"`
 }
 
 //User's currently selected data
@@ -112,21 +113,32 @@ type LayoutData struct {
 	AssistantViewRatio float32 `json:"assistantViewRatio" yaml:"assistantViewRatio"`
 }
 
-//View config data
-type ViewerConfig struct {
-  ImageWidth  int     `json:"imageWidth" yaml:"imageWidth"`
-  ImageHeight int     `json:"imageHeight" yaml:"imageHeight"`
-  ViewScale   float32 `json:"viewScale" yaml:"viewScale"`
-  ViewOffsetX int     `json:"viewOffsetX" yaml:"viewOffsetX"`
-  ViewOffsetY int     `json:"viewOffsetY" yaml:"viewOffsetY"`
+type ImageViewerConfig struct {
+	ImageWidth  int     `json:"imageWidth" yaml:"imageWidth"`
+	ImageHeight int     `json:"imageHeight" yaml:"imageHeight"`
+	ViewScale   float32 `json:"viewScale" yaml:"viewScale"`
+	ViewOffsetX int     `json:"viewOffsetX" yaml:"viewOffsetX"`
+	ViewOffsetY int     `json:"viewOffsetY" yaml:"viewOffsetY"`
+}
+
+type Vector3D struct {
+	X float32 `json:"x" yaml:"x"`
+	Y float32 `json:"y" yaml:"y"`
+	Z float32 `json:"z" yaml:"z"`
+}
+
+type PointCloudViewerConfig struct {
+	Target       Vector3D `json:"target" yaml:"target"`
+	Position     Vector3D `json:"position" yaml:"position"`
+	VerticalAxis Vector3D `json:"verticalAxis" yaml:"verticalAxis"`
 }
 
 //Session specific data
 type SessionData struct {
-	SessionId        string       `json:"id" yaml:"id"`
-	DemoMode         bool         `json:"demoMode" yaml:"demoMode"`
-	StartTime        int64        `json:"startTime" yaml:"startTime"`
-	ItemStatuses    []ItemStatus `json:"items" yaml:"items"`
+	SessionId    string       `json:"id" yaml:"id"`
+	DemoMode     bool         `json:"demoMode" yaml:"demoMode"`
+	StartTime    int64        `json:"startTime" yaml:"startTime"`
+	ItemStatuses []ItemStatus `json:"items" yaml:"items"`
 }
 
 //Item status
@@ -349,22 +361,47 @@ func assignmentToSat(assignment *Assignment) Sat {
 	}
 
 	selectedData := SelectedData{
-		Item: 0,
+		Item:  0,
 		Label: 0,
 	}
 
-	viewConfig := ViewerConfig{
-		ImageWidth: 0,
+	imageViewConfig := ImageViewerConfig{
+		ImageWidth:  0,
 		ImageHeight: 0,
-		ViewScale: 1.0,
+		ViewScale:   1.0,
 		ViewOffsetX: -1,
 		ViewOffsetY: -1,
 	}
 
+	target := Vector3D{
+		X: 0.,
+		Y: 0.,
+		Z: 0.,
+	}
+
+	position := Vector3D{
+		X: 0.,
+		Y: 10.,
+		Z: 0.,
+	}
+
+	verticalAxis := Vector3D{
+		X: 0.,
+		Y: 0.,
+		Z: 1.,
+	}
+
+	pointCloudViewConfig := PointCloudViewerConfig{
+		Target:       target,
+		Position:     position,
+		VerticalAxis: verticalAxis,
+	}
+
 	userData := UserData{
-		UserId: assignment.WorkerId,
-		Selection: selectedData,
-		ViewConfig: viewConfig,
+		UserId:               assignment.WorkerId,
+		Selection:            selectedData,
+		ImageViewConfig:      imageViewConfig,
+		PointCloudViewConfig: pointCloudViewConfig,
 	}
 
 	uuid := getUuidV4()

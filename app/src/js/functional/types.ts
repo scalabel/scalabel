@@ -60,6 +60,8 @@ export interface CubeType {
   size: Vector3Type
   /** orientation */
   orientation: Vector3Type
+  /** Anchor corner index for reshaping */
+  anchorIndex: number
 }
 
 export type ShapeType = RectType | CubeType
@@ -206,8 +208,10 @@ export interface UserType {
   select: Select
   /** interface layout */
   layout: LayoutType
-  /** Configurations of the viewer */
-  viewerConfig: ViewerConfigType
+  /** Viewer configuration for images */
+  imageViewerConfig: ImageViewerConfigType
+  /** Viewer configuration for point clouds */
+  pointCloudViewerConfig: PointCloudViewerConfigType
 }
 
 export interface ItemStatus {

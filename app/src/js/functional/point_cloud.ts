@@ -5,6 +5,13 @@ import {getCurrentItemViewerConfig,
 import { State } from './types'
 import { updateObject } from './util'
 
+export enum EditMode {
+  MOVE,
+  SCALE,
+  EXTRUDE,
+  ROTATE
+}
+
 /**
  * Move camera and target position
  * @param {State} state: Current state

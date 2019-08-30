@@ -1,5 +1,13 @@
 import { makeItem } from './states'
-import { ItemType, ShapeType, State, ViewerConfigType } from './types'
+import {
+  ImageViewerConfigType,
+  ItemType,
+  PointCloudViewerConfigType,
+  ShapeType,
+  State,
+  UserType,
+  ViewerConfigType
+} from './types'
 import { updateObject } from './util'
 
 /**
@@ -20,8 +28,16 @@ export function getCurrentItem (state: State): ItemType {
  * @param {State} state
  * @return {ViewerConfigType}
  */
-export function getCurrentItemViewerConfig (state: State): ViewerConfigType {
-  return state.user.viewerConfig
+export function getCurrentItemViewerConfig (state: State):
+  ViewerConfigType | null {
+  switch (state.task.config.itemType) {
+    case 'image':
+      return state.user.imageViewerConfig
+    case 'pointcloud':
+      return state.user.pointCloudViewerConfig
+    default:
+      return state.user.imageViewerConfig
+  }
 }
 
 /**
@@ -32,8 +48,20 @@ export function getCurrentItemViewerConfig (state: State): ViewerConfigType {
  */
 export function setCurrentItemViewerConfig (
     state: State, config: ViewerConfigType): State {
-  return updateObject(state,
-    { user: updateObject(state.user, { viewerConfig: config }) })
+  let newUser: UserType = state.user
+  switch (state.task.config.itemType) {
+    case 'image':
+      newUser = updateObject(state.user, {
+        imageViewerConfig: config as ImageViewerConfigType
+      })
+      break
+    case 'pointcloud':
+      newUser = updateObject(state.user, {
+        pointCloudViewerConfig: config as PointCloudViewerConfigType
+      })
+      break
+  }
+  return updateObject(state, { user: newUser })
 }
 
 /**
