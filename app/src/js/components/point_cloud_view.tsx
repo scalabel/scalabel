@@ -74,6 +74,10 @@ class PointCloudView extends Canvas3d<Props> {
   private mX: number
   /** Mouse position */
   private mY: number
+  /** The hashed list of keys currently down */
+  private _keyDownMap: { [key: string]: boolean }
+  /** Modifier string 'Control' or 'Meta' */
+  private _modifierString: string
 
   /** drawable label list */
   private _labels: Label3DList
@@ -91,7 +95,7 @@ class PointCloudView extends Canvas3d<Props> {
   /** UI handler */
   private keyDownHandler: (e: KeyboardEvent) => void
   /** UI handler */
-  private keyUpHandler: () => void
+  private keyUpHandler: (e: KeyboardEvent) => void
   /** UI handler */
   private mouseWheelHandler: (e: React.WheelEvent<HTMLCanvasElement>) => void
   /** UI handler */
@@ -129,6 +133,14 @@ class PointCloudView extends Canvas3d<Props> {
     this.mX = 0
     this.mY = 0
 
+    this._keyDownMap = {}
+
+    if (navigator.appVersion.indexOf('Mac') === -1) {
+      this._modifierString = 'Control'
+    } else {
+      this._modifierString = 'Meta'
+    }
+
     this._labels = new Label3DList()
 
     this.refInitializer = this.initializeRefs.bind(this)
@@ -141,7 +153,7 @@ class PointCloudView extends Canvas3d<Props> {
     this.mouseWheelHandler = this.handleMouseWheel.bind(this)
     this.doubleClickHandler = this.handleDoubleClick.bind(this)
 
-    this.MOUSE_CORRECTION_FACTOR = 80.0
+    this.MOUSE_CORRECTION_FACTOR = 50.0
     this.MOVE_AMOUNT = 0.3
 
     document.onkeydown = this.keyDownHandler
@@ -274,6 +286,36 @@ class PointCloudView extends Canvas3d<Props> {
   }
 
   /**
+   * Drag camera according to mouse movement
+   * @param newX
+   * @param newY
+   */
+  private dragCamera (newX: number, newY: number) {
+    const viewerConfig: PointCloudViewerConfigType =
+      this.getCurrentViewerConfig()
+
+    const dragVector = new THREE.Vector3(
+      (this.mX - newX) / this.MOUSE_CORRECTION_FACTOR * 2,
+      (newY - this.mY) / this.MOUSE_CORRECTION_FACTOR * 2,
+      0
+    )
+    dragVector.applyQuaternion(this.camera.quaternion)
+
+    Session.dispatch(moveCameraAndTarget(
+      new Vector3D(
+        viewerConfig.position.x + dragVector.x,
+        viewerConfig.position.y + dragVector.y,
+        viewerConfig.position.z + dragVector.z
+      ),
+      new Vector3D(
+        viewerConfig.target.x + dragVector.x,
+        viewerConfig.target.y + dragVector.y,
+        viewerConfig.target.z + dragVector.z
+      )
+    ))
+  }
+
+  /**
    * Handle mouse down
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
@@ -319,7 +361,11 @@ class PointCloudView extends Canvas3d<Props> {
 
     if (!this._labels.onMouseMove(x, y, this.camera, this.raycaster) &&
         this.mouseDown) {
-      this.rotateCamera(newX, newY)
+      if (this._keyDownMap[this._modifierString]) {
+        this.dragCamera(newX, newY)
+      } else {
+        this.rotateCamera(newX, newY)
+      }
     }
 
     this.renderThree()
@@ -356,6 +402,8 @@ class PointCloudView extends Canvas3d<Props> {
     left.crossVectors(vertical, forward)
     left.normalize()
     left.multiplyScalar(this.MOVE_AMOUNT)
+
+    this._keyDownMap[e.key] = true
 
     switch (e.key) {
       case '.':
@@ -446,9 +494,6 @@ class PointCloudView extends Canvas3d<Props> {
           )
         ))
         break
-      case ' ':
-      case 'Escape':
-        break
     }
     if (this._labels.onKeyDown(e)) {
       this.renderThree()
@@ -457,11 +502,13 @@ class PointCloudView extends Canvas3d<Props> {
 
   /**
    * Handle key up event
+   * @param {KeyboardEvent} e
    */
-  private handleKeyUp () {
+  private handleKeyUp (e: KeyboardEvent) {
     if (this._labels.onKeyUp()) {
       this.renderThree()
     }
+    delete this._keyDownMap[e.key]
   }
 
   /**
