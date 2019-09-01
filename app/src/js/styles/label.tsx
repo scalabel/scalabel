@@ -67,7 +67,6 @@ export const StyledButton = withStyles({
     margin: '0px 20px'
   },
   label: {
-    textTransform: 'uppercase',
     fontSize: '15px'
   },
   itemText: {

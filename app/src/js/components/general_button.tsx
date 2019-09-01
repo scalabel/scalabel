@@ -3,14 +3,12 @@ import { StyledButton } from '../styles/label'
 
 /**
  * This is genButton function that renders the buttons in the toolbar.
- * @param props
+ * @param {string} name name of the button
+ * @param {function} clickCallback call back function for lick
  */
-export function genButton (props: {
-  /** name of the button */
-  name: string
-}) {
-  const { name } = props
+export function makeButton (name: string,
+                            clickCallback: () => void = () => { return }) {
   return (
-    <StyledButton>{name}</StyledButton>
+    <StyledButton onClick={clickCallback}>{name}</StyledButton>
   )
 }
