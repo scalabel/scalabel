@@ -1,6 +1,6 @@
 import ListItem from '@material-ui/core/ListItem/ListItem'
 import React from 'react'
-import { genButton } from '../components/general_button'
+import { makeButton } from '../components/general_button'
 import { Category } from '../components/toolbar_category'
 import { ListButton } from '../components/toolbar_list_button'
 import { SwitchBtn } from '../components/toolbar_switch'
@@ -44,10 +44,10 @@ export function renderButtons (itemType: string, labelType: string) {
     return (
       <div>
         <div>
-          {genButton({ name: 'End Object Track' })}
+          {makeButton('End Object Track')}
         </div>
         <div>
-          {genButton({ name: 'Track-Link' })}
+          {makeButton('Track-Link')}
         </div>
       </div>
     )
@@ -60,10 +60,10 @@ export function renderButtons (itemType: string, labelType: string) {
         return (
           <div>
             <div>
-              {genButton({ name: 'Link' })}
+              {makeButton('Link')}
             </div>
             <div>
-              {genButton({ name: 'Quick-draw' })}
+              {makeButton('Quick-draw')}
             </div>
           </div>
         )

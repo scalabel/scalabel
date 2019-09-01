@@ -2,10 +2,22 @@ import Divider from '@material-ui/core/Divider'
 import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import React from 'react'
+import { deleteLabel } from '../action/common'
 import { renderButtons, renderTemplate } from '../common/label'
+import Session from '../common/session'
 import { Attribute } from '../functional/types'
-import { genButton } from './general_button'
+import { makeButton } from './general_button'
 import { Category } from './toolbar_category'
+
+/**
+ * callback function for delete label button
+ */
+function onDeleteLabel () {
+  const select = Session.getState().user.select
+  if (select.label >= 0) {
+    Session.dispatch(deleteLabel(select.item, select.label))
+  }
+}
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
@@ -51,7 +63,7 @@ export class ToolBar extends React.Component<Props> {
         </List>
         <div>
           <div>
-            {genButton({ name: 'Remove' })}
+            {makeButton('Delete', onDeleteLabel)}
           </div>
           {renderButtons(itemType, labelType)}
         </div>

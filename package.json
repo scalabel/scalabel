@@ -85,7 +85,7 @@
         "eslint-plugin-react": "^7.14.3",
         "flow-bin": "^0.80.0",
         "flow-typed": "^2.6.1",
-        "jest": "^24.8.0",
+        "jest": "^24.9.0",
         "jquery": "^3.3.1",
         "lodash": "^4.17.15",
         "npx": "^10.2.0",
