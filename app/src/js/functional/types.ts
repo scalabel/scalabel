@@ -18,10 +18,8 @@ export interface LabelType {
   children: number[]
   /** Shape ids of the label */
   shapes: number[]
-  /** Selected shape of the label */
-  selectedShape: number
-  /** state */
-  state: number
+  /** connected track */
+  track: number
   /** order of the label among all the labels */
   order: number
 }

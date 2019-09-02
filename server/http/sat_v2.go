@@ -64,17 +64,16 @@ type ItemData struct {
 
 //Contains data for single label
 type LabelData struct {
-	Id            int              `json:"id" yaml:"id"`
-	Item          int              `json:"item" yaml:"item"`
-	Type          string           `json:"type" yaml:"type"`
-	Category      []int            `json:"category" yaml:"category"`
-	Attributes    map[string][]int `json:"attributes" yaml:"attributes"`
-	Parent        int              `json:"parent" yaml:"parent"`
-	Children      []int            `json:"children" yaml:"children"`
-	Shapes        []int            `json:"shapes" yaml:"shapes"`
-	SelectedShape int              `json:"selectedShape" yaml:"selectedShape"`
-	State         int              `json:"state" yaml:"state"`
-	Order         int              `json:"order" yaml:"order"`
+	Id         int              `json:"id" yaml:"id"`
+	Item       int              `json:"item" yaml:"item"`
+	Type       string           `json:"type" yaml:"type"`
+	Category   []int            `json:"category" yaml:"category"`
+	Attributes map[string][]int `json:"attributes" yaml:"attributes"`
+	Parent     int              `json:"parent" yaml:"parent"`
+	Children   []int            `json:"children" yaml:"children"`
+	Shapes     []int            `json:"shapes" yaml:"shapes"`
+	Track      int              `json:"track" yaml:"track"`
+	Order      int              `json:"order" yaml:"order"`
 }
 
 //Contains data for single shape

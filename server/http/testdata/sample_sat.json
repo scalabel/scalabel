@@ -110,8 +110,7 @@
               "shapes": [
                 1
               ],
-              "selectedShape": -1,
-              "state": -1,
+              "track": -1,
               "order": 1
             },
             "2": {
@@ -127,8 +126,7 @@
               "shapes": [
                 2
               ],
-              "selectedShape": -1,
-              "state": -1,
+              "track": -1,
               "order": 2
             },
             "3": {
@@ -144,8 +142,7 @@
               "shapes": [
                 3
               ],
-              "selectedShape": -1,
-              "state": -1,
+              "track": -1,
               "order": 3
             },
             "4": {
@@ -161,8 +158,7 @@
               "shapes": [
                 4
               ],
-              "selectedShape": -1,
-              "state": -1,
+              "track": -1,
               "order": 4
             }
           },
@@ -239,8 +235,7 @@
               "shapes": [
                 5
               ],
-              "selectedShape": -1,
-              "state": -1,
+              "track": -1,
               "order": 5
             }
           },
@@ -278,8 +273,7 @@
               "shapes": [
                 6
               ],
-              "selectedShape": -1,
-              "state": -1,
+              "track": -1,
               "order": 6
             }
           },

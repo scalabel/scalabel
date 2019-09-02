@@ -218,7 +218,6 @@ export const dummyNewLabel = {
   shapes: [
     2
   ],
-  selectedShape: 2,
   state: 2,
   order: 2
 }

@@ -29,8 +29,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
     parent: -1, // id
     children: [], // ids
     shapes: [],
-    selectedShape: -1,
-    state: -1,
+    track: -1,
     order: 0,
     ...params
   }

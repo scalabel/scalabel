@@ -53,20 +53,6 @@ type LabelExportV2 struct {
 	Box3d       interface{}            `json:"box3d" yaml:"box3d"`
 }
 
-/*type SatLabel struct {
-	Id            int              `json:"id" yaml:"id"`
-	Item          int              `json:"item" yaml:"item"`
-	Type          string           `json:"type" yaml:"type"`
-	Category      []int            `json:"category" yaml:"category"`
-	Attributes    map[string][]int `json:"attributes" yaml:"attributes"`
-	Parent        int              `json:"parent" yaml:"parent"`
-	Children      []int            `json:"children" yaml:"children"`
-	Shapes        []int            `json:"shapes" yaml:"shapes"`
-	SelectedShape int              `json:"selectedShape" yaml:"selectedShape"`
-	State         int              `json:"state" yaml:"state"`
-	Order         int              `json:"order" yaml:"order"`
-}*/
-
 // structs for saved data
 
 // VertexData for single vertex
