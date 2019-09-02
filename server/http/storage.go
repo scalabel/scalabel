@@ -320,17 +320,35 @@ func (ss *S3Storage) HasKey(key string) bool {
 }
 
 func (ss *S3Storage) ListKeys(prefix string) []string {
-	params := &s3.ListObjectsInput{
-		Bucket: aws.String(ss.BucketName),
-		Prefix: aws.String(path.Join(ss.DataDir, prefix)),
-	}
-	resp, err := ss.svc.ListObjects(params)
-	if err != nil {
-		Error.Println(err)
-	}
+	continuation_token := ""
 	keys := []string{}
-	for _, key := range resp.Contents {
-		keys = append(keys, *key.Key)
+	for {
+		params := &s3.ListObjectsV2Input{
+			Bucket: aws.String(ss.BucketName),
+			Prefix: aws.String(path.Join(ss.DataDir, prefix)),
+		}
+		if len(continuation_token) > 0 {
+			params = &s3.ListObjectsV2Input{
+				Bucket: aws.String(ss.BucketName),
+				Prefix: aws.String(path.Join(ss.DataDir, prefix)),
+				ContinuationToken: &continuation_token,
+			}
+		}
+		
+		resp, err := ss.svc.ListObjectsV2(params)
+		if err != nil {
+			Error.Println(err)
+			break
+		}
+
+		for _, key := range resp.Contents {
+			keys = append(keys, *key.Key)
+		}
+
+		if !*resp.IsTruncated {
+			break
+		}
+		continuation_token = *resp.NextContinuationToken
 	}
 	return keys
 }
