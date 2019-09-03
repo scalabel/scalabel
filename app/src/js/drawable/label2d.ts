@@ -39,6 +39,12 @@ export abstract class Label2D {
   protected _highlightedHandle: number
   /** rgba color decided by labelId */
   protected _color: number[]
+  /** true if label should be committed */
+  protected _shouldCommit: boolean
+  /** true if mouse down */
+  protected _mouseDown: boolean
+  /** mouse coordinate when pressed down */
+  protected _mouseDownCoord: Vector2D
 
   constructor () {
     this._index = -1
@@ -53,6 +59,9 @@ export abstract class Label2D {
     this._viewMode = {
       dimmed: false
     }
+    this._mouseDownCoord = new Vector2D()
+    this._shouldCommit = true
+    this._mouseDown = false
   }
 
   /** Set whether the label is highlighted */
@@ -114,12 +123,35 @@ export abstract class Label2D {
   public abstract draw (canvas: Context2D, ratio: number, mode: DrawMode): void
 
   /**
-   * Drag the handle to a new position
-   * @param {Vector2D} start: starting point of the drag
-   * @param {Vector2D} delta: displacement
-   * @param {Size2D} limit: limist of the canvas frame
+   * Handle mouse down
+   * @param coord
    */
-  public abstract drag (start: Vector2D, delta: Vector2D, limit: Size2D): void
+  public onMouseDown (coord: Vector2D): boolean {
+    this._mouseDown = true
+    if (this._selected) {
+      this._mouseDownCoord = coord.clone()
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Handle mouse up
+   * @param coord
+   */
+  public onMouseUp (_coord: Vector2D): boolean {
+    this._mouseDown = false
+    return false
+  }
+
+  /**
+   * Process mouse move
+   * @param {Vector2D} coord: mouse coordinate
+   * @param {Size2D} limit: limit of the canvas frame
+   */
+  public abstract onMouseMove (
+    coord: Vector2D, limit: Size2D
+  ): boolean
 
   /**
    * Expand the primitive shapes to drawable shapes
@@ -128,12 +160,11 @@ export abstract class Label2D {
   public abstract updateShapes (shapes: ShapeType[]): void
 
   /** Update the shapes of the label to the state */
-  public abstract commitLabel (): void
+  public abstract commitLabel (): boolean
 
   /**
    * Initialize this label to be temporary
    * @param {State} state
-   * @param {number} itemIndex
    * @param {Vector2D} start: starting coordinate of the label
    */
   public abstract initTemp (
