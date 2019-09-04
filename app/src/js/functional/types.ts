@@ -237,7 +237,7 @@ export interface SessionType {
 
 export interface State {
   /**
-   * task config and labels. It is irrevant who makes the labels and other
+   * task config and labels. It is irrelevant who makes the labels and other
    * content in task
    */
   task: TaskType

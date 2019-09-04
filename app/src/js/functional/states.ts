@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import * as labels from '../common/label_types'
 import {
   ConfigType, CubeType,
@@ -15,12 +16,12 @@ import {
 } from './types'
 
 /**
- * Initialize a label state
- * @param {{}} params
+ * Initialize a label state and deep copy the parameters
+ * @param {Partial<LabelType>} params
  * @return {LabelType}
  */
 export function makeLabel (params: Partial<LabelType> = {}): LabelType {
-  return {
+  return _.cloneDeep<LabelType>({
     id: -1,
     item: -1,
     type: labels.EMPTY,
@@ -32,7 +33,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
     track: -1,
     order: 0,
     ...params
-  }
+  })
 }
 
 /**

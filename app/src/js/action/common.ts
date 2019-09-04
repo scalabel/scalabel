@@ -90,6 +90,21 @@ export function changeLabelProps (
 }
 
 /**
+ * Link two labels
+ * @param {number} itemIndex
+ * @param {[]number} labelIds labels to link
+ */
+export function linkLabels (
+    itemIndex: number, labelIds: number[]): types.LinkLabelsAction {
+  return {
+    type: types.LINK_LABELS,
+    sessionId: Session.id,
+    itemIndex,
+    labelIds
+  }
+}
+
+/**
  * Delete given label
  * @param {number} itemIndex
  * @param {number} labelId

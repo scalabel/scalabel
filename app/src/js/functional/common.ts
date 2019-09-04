@@ -2,10 +2,11 @@ import _ from 'lodash'
 import * as types from '../action/types'
 import { makeIndexedShape } from './states'
 import {
-  Select, State, UserType
+  ItemType, LabelType, Select, State, UserType
 } from './types'
 import {
-  removeObjectFields, updateListItem,
+  removeListItems, removeObjectFields,
+  updateListItem,
   updateObject
 } from './util'
 
@@ -132,6 +133,84 @@ export function changeLabel (
 }
 
 /**
+ * Get the root of a label by tracing its ancestors
+ * @param item
+ * @param labelId
+ */
+function getRoot (item: ItemType, labelId: number): number {
+  let parent = item.labels[labelId].parent
+  while (parent >= 0) {
+    labelId = parent
+    parent = item.labels[labelId].parent
+  }
+  return labelId
+}
+
+/**
+ * Link two labels on the same item
+ * The new label properties are the same as label1 in action
+ * @param {State} state
+ * @param {types.LinkLabelsAction} action
+ */
+export function linkLabels (
+    state: State, action: types.LinkLabelsAction): State {
+  // Add a new label to the state
+  let item = state.task.items[action.itemIndex]
+  if (action.labelIds.length === 0) {
+    return state
+  }
+  const children = _.map(action.labelIds, (labelId) => getRoot(item, labelId))
+  let newLabel: LabelType = _.cloneDeep(item.labels[children[0]])
+  newLabel.parent = -1
+  newLabel.shapes = []
+  newLabel.children = children
+  const addLabelAction: types.AddLabelAction = {
+    label: newLabel,
+    shapes: [],
+    ...action
+  }
+  state = addLabel(state, addLabelAction)
+
+  // assign the label properties
+  item = state.task.items[action.itemIndex]
+  const newLabelId = state.task.status.maxLabelId
+  newLabel = item.labels[newLabelId]
+  const labels: LabelType[] = _.map(children,
+    (labelId) => _.cloneDeep(item.labels[labelId]))
+
+  _.forEach(labels, (label) => {
+    label.parent = newLabelId
+    // sync the category and attributes of the labels
+    label.category = _.cloneDeep(newLabel.category)
+    label.attributes = _.cloneDeep(newLabel.attributes)
+  })
+
+  // update track information
+  let tracks = state.task.tracks
+  let trackId = -1
+  for (const label of labels) {
+    trackId = label.track
+    if (trackId >= 0) break
+  }
+  if (trackId >= 0) {
+    newLabel.track = trackId
+    let track = tracks[trackId]
+    const trackLabelIndex = _.findIndex(
+      track.labels, (p) => (p[0] === item.index))
+    track = updateObject(track, { labels: updateListItem(
+      track.labels, trackLabelIndex, [item.index, newLabelId ])})
+    tracks = updateObject(tracks, { [trackId]: track })
+  }
+
+  // update the item
+  item = updateObject(item, {
+    labels: updateObject(item.labels, _.zipObject(children, labels))})
+  const items = updateListItem(state.task.items, item.id, item)
+  const task = updateObject(state.task, { items, tracks })
+  return { ...state, task }
+}
+
+/**
  * Update the user selection
  * @param {State} state
  * @param {types.ChangeSelectAction} action
@@ -176,7 +255,13 @@ export function deleteLabel (
   const labelId = action.labelId
   const item = state.task.items[itemIndex]
   const label = item.labels[labelId]
-  const labels = removeObjectFields(item.labels, [labelId])
+  let labels = removeObjectFields(item.labels, [labelId])
+  // Also remove the label from its parent
+  if (label.parent >= 0) {
+    const parentLabel = _.cloneDeep(labels[label.parent])
+    parentLabel.children = removeListItems(parentLabel.children, [labelId])
+    labels = updateObject(labels, { [parentLabel.id]: parentLabel })
+  }
   // TODO: should we remove shapes?
   // depending on how boundary sharing is implemented.
   // remove labels

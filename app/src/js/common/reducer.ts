@@ -40,6 +40,8 @@ export const reducer: Reducer<State> = (
     case types.CHANGE_LABEL_PROPS:
       return common.changeLabel(
         state, action as types.ChangeLabelAction)
+    case types.LINK_LABELS:
+      return common.linkLabels(state, action as types.LinkLabelsAction)
     case types.DELETE_LABEL:
       return common.deleteLabel(state, action as types.DeleteLabelAction)
     case types.TAG_IMAGE:
