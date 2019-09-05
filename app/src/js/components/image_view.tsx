@@ -1,6 +1,5 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
-import EventListener, { withOptions } from 'react-event-listener'
 import { zoomImage } from '../action/image'
 import Session from '../common/session'
 import { Label2DList } from '../drawable/label2d_list'
@@ -11,6 +10,7 @@ import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'
 import { imageViewStyle } from '../styles/label'
 import { Canvas2d } from './canvas2d'
+import MouseEventListeners from './mouse_event_listeners'
 import PlayerControl from './player_control'
 
 interface ClassType {
@@ -296,7 +296,7 @@ export class ImageView extends Canvas2d<Props> {
     />)
 
     const playerControl = (<PlayerControl key='player-control'
-        num_frames={Session.getState().task.items.length}
+      num_frames={Session.getState().task.items.length}
     />)
     let canvasesWithProps
     if (this.display) {
@@ -316,14 +316,13 @@ export class ImageView extends Canvas2d<Props> {
             this.background = element
           }
         }} className={classes.background}>
-          <EventListener
-            target='parent'
-            onMouseDown={(e) => this.onMouseDown(e)}
-            onMouseMove={(e) => this.onMouseMove(e)}
-            onMouseUp={(e) => this.onMouseUp(e)}
-            onMouseLeave={(e) => this.onMouseLeave(e)}
-            onDblClick={(e) => this.onDblClick(e)}
-            onWheel={withOptions((e) => this.onWheel(e), { passive: false })}
+          <MouseEventListeners
+            onMouseDown={this.onMouseDown.bind(this)}
+            onMouseMove={this.onMouseMove.bind(this)}
+            onMouseUp={this.onMouseUp.bind(this)}
+            onMouseLeave={this.onMouseLeave.bind(this)}
+            onDblClick={this.onDblClick.bind(this)}
+            onWheel={this.onWheel.bind(this)}
           />
           <div ref={(element) => {
             if (element) {
@@ -469,8 +468,8 @@ export class ImageView extends Canvas2d<Props> {
     }
     const background = this.background.getBoundingClientRect()
     return e.x >= background.left && e.y >= background.top &&
-           e.x <= background.left + background.width &&
-           e.y <= background.top + background.height
+      e.x <= background.left + background.width &&
+      e.y <= background.top + background.height
   }
 
   /**

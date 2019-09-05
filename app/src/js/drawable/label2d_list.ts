@@ -1,25 +1,27 @@
 import _ from 'lodash'
-// import { sprintf } from 'sprintf-js'
-// import * as LabelTypes from '../common/label_types'
+import { sprintf } from 'sprintf-js'
+import * as LabelTypes from '../common/label_types'
 import Session from '../common/session'
 import { State } from '../functional/types'
 import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'
 import { Box2D } from './box2d'
 import { DrawMode, Label2D } from './label2d'
+import { Tag2D } from './tag2d'
 import { Context2D } from './util'
 
 /**
  * Make a new drawable label based on the label type
  * @param {string} labelType: type of the new label
  */
-function makeDrawableLabel (_labelType: string): Label2D {
-  // if (labelType === LabelTypes.BOX_2D) {
-  //   return new Box2D()
-  // } else {
-  //   throw new Error(sprintf('Undefined label type %s', labelType))
-  // }
-  return new Box2D()
+function makeDrawableLabel (labelType: string): Label2D {
+  if (labelType === LabelTypes.BOX_2D) {
+    return new Box2D()
+  } else if (labelType === LabelTypes.TAG) {
+    return new Tag2D()
+  } else {
+    throw new Error(sprintf('Undefined label type %s', labelType))
+  }
 }
 
 /**

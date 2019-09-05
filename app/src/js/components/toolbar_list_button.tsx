@@ -4,27 +4,37 @@ import ListItem from '@material-ui/core/ListItem'
 import { withStyles } from '@material-ui/core/styles'
 import ToggleButton from '@material-ui/lab/ToggleButton'
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
+import _ from 'lodash'
 import React from 'react'
 import { listButtonStyle, toggleButtonStyle } from '../styles/label'
 
 interface ClassType {
   /** root class */
-  root: string,
+  root: string
   /** element containg toggle class */
-  toggleContainer: string,
+  toggleContainer: string
   /** button group class */
-  buttonGroup: string,
+  buttonGroup: string
   /** primary text class */
   primary: string
+  /** toggle button class */
+  toggleButton: string
 }
 
 interface Props {
+  /** handles attribute toggling */
+  handleAttributeToggle: (
+    toggleName: string,
+    alignment: string
+  ) => void
   /** styles of ToggleButtons */
   classes: ClassType
   /** name of ToggleButtons */
   name: string
   /** values of ToggleButtons */
   values: string[]
+  /** initial alignment index */
+  initialAlignmentIndex: number
 }
 
 /**
@@ -35,25 +45,35 @@ interface Props {
 class ToggleButtons extends React.Component<Props> {
   /** state of ToggleButtons */
   public state = {
-    alignment: this.props.values[0]
+    alignment: this.props.values[this.props.initialAlignmentIndex]
   }
   /** handleAlignment of ToggleButtons that align buttons */
-  public handleAlignment =
-    (_event: React.MouseEvent<HTMLElement>,
-     alignment: string) => this.setState({ alignment })
+  public handleAlignment = (
+    _event: React.MouseEvent<HTMLElement>,
+    alignment: string
+  ) => {
+    this.props.handleAttributeToggle(
+      this.props.name,
+      alignment
+    )
+    this.setState({ alignment })
+  }
+
   /** render function of ToggleButtons */
   public render () {
-    const { name, classes, values } = this.props
     const { alignment } = this.state
+    const { name, classes, values } = this.props
     const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton)
-
     return (
       <List style={{ width: '100%', padding: '0px' }}>
-        <ListItemText style={{ textAlign: 'center', width: '100%' }}
+        <ListItemText
+          style={{ textAlign: 'center', width: '100%' }}
           classes={{ primary: classes.primary }}
-          primary={name} />
+          primary={name}
+        />
         <ListItem style={{ width: '100%' }} dense={true}>
-          <div className={classes.toggleContainer}
+          <div
+            className={classes.toggleContainer}
             style={{
               marginRight: 'auto',
               marginLeft: 'auto'
@@ -66,14 +86,27 @@ class ToggleButtons extends React.Component<Props> {
               onChange={this.handleAlignment}
             >
               {values.map((element: string) => (
-                <ToggleBtn
-                  value={element}> {element} </ToggleBtn>
+                <ToggleBtn className={classes.toggleButton} value={element}
+                key={element}
+                data-testid={'toggle-button-' + element}>
+                  {' '}
+                  {element}{' '}
+                </ToggleBtn>
               ))}
             </ToggleButtonGroup>
           </div>
         </ListItem>
       </List>
     )
+  }
+
+  /**
+   * updates props when re-rendered
+   * @param nextProps
+   */
+  public componentWillReceiveProps (nextProps: Props) {
+    this.setState({alignment: nextProps.values[nextProps.initialAlignmentIndex]
+    })
   }
 }
 

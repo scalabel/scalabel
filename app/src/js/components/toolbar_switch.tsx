@@ -23,7 +23,7 @@ interface ClassType {
  */
 interface Props {
   /** onChange function */
-  onChange: (switchName: string) => () => void
+  onChange: (switchName: string) => void
   /** values passed to onChange function . */
   value: string
   /** styles of SwitchButton. */
@@ -53,7 +53,7 @@ class SwitchButton extends React.Component<Props> {
               checked: classes.checked,
               track: classes.track
             }}
-            onChange={onChange(value)}
+            onChange={() => onChange(value)}
           />
         </ListItemSecondaryAction>
       </ListItem>

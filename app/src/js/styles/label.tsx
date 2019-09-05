@@ -95,18 +95,22 @@ export const listButtonStyle = () => ({
     height: '28px'
   },
   toggleContainer: {
-    height: '28px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-start',
     background: 'rgba(250,250,250,0)'
   },
   buttonGroup: {
-    height: '28px',
-    width: '100%'
+    width: '100%',
+    display: 'flex',
+    // needed to prevent compiler from complaining about types
+    flexWrap: 'wrap' as ('wrap')
   },
   primary: {
     fontSize: '15px'
+  },
+  toggleButton: {
+    flexGrow: 1
   }
 })
 

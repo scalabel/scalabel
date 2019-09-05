@@ -10,25 +10,36 @@ import { SwitchBtn } from '../components/toolbar_switch'
  * @param {string} toolType
  * @param {function} handleToggle
  * @param {string} name
- * @param {string[]} values
+ * @param {string[]} options
  */
 export function renderTemplate (
-  toolType: string, handleToggle: (switchName: string) => () => void,
-  name: string, values: string[]) {
+  toolType: string,
+  handleToggle: (switchName: string) => void,
+  handleAttributeToggle: (
+    toggleName: string,
+    alignment: string) => void,
+  name: string,
+  options: string[],
+  initialAlignmentIndex: number
+) {
   if (toolType === 'switch') {
-    return (
-      <SwitchBtn onChange={handleToggle} value={name} />
-    )
+    return <SwitchBtn onChange={handleToggle} value={name} />
   } else if (toolType === 'list') {
+    // console.log(initialAlignmentIndex)
     return (
-      <ListItem dense={true} style={{ textAlign: 'center' }} >
-        <ListButton name={name} values={values} />
+      <ListItem dense={true} style={{ textAlign: 'center' }}>
+        <ListButton
+          name={name}
+          values={options}
+          handleAttributeToggle={handleAttributeToggle}
+          initialAlignmentIndex={initialAlignmentIndex}
+        />
       </ListItem>
     )
   } else if (toolType === 'longList') {
     return (
-      <ListItem dense={true} style={{ textAlign: 'center' }} >
-        <Category categories={values} headerText={name}/>
+      <ListItem dense={true} style={{ textAlign: 'center' }}>
+        <Category categories={options} headerText={name} />
       </ListItem>
     )
   }
