@@ -10,17 +10,28 @@ test('Add and delete labels', () => {
   initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
-  const label = makeLabel({ item: itemIndex })
+  let label = makeLabel({ item: itemIndex })
   Session.dispatch(action.addLabel(itemIndex, label, []))
+  Session.dispatch(action.addLabel(itemIndex, label, []))
+  label = makeLabel({ item: itemIndex, manual: false })
   Session.dispatch(action.addLabel(itemIndex, label, []))
   let state = Session.getState()
   const labelId =
     state.task.status.maxLabelId
-  expect(_.size(state.task.items[0].labels)).toBe(2)
-  expect(state.task.items[0].labels[labelId].item).toBe(0)
+
+  // check setting of manual and order
+  const label1 = state.task.items[0].labels[labelId - 1]
+  expect(label1.manual).toBe(true)
+  label = state.task.items[0].labels[labelId]
+  expect(label.item).toBe(0)
+  expect(label.manual).toBe(false)
+  expect(label1.order < label.order).toBe(true)
+
+  // check deleting label
+  expect(_.size(state.task.items[0].labels)).toBe(3)
   Session.dispatch(action.deleteLabel(itemIndex, labelId))
   state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toBe(1)
+  expect(_.size(state.task.items[0].labels)).toBe(2)
 })
 
 test('Change category', () => {

@@ -53,7 +53,7 @@ export function addLabel (state: State, action: types.AddLabelAction): State {
   const labelId = task.status.maxLabelId + 1
   const shapeIds = _.range(shapes.length).map((i) => i + newShapeId)
   const newShapes = shapes.map(
-    (s, i) => makeIndexedShape(shapeIds[i], labelId, true, s))
+    (s, i) => makeIndexedShape(shapeIds[i], labelId, s))
   const order = task.status.maxOrder + 1
   label = updateObject(label, {
     id: labelId, item: itemIndex, order,
