@@ -32,6 +32,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
     shapes: [],
     track: -1,
     order: 0,
+    manual: true, // by default, manual is true
     ...params
   })
 }
@@ -73,10 +74,9 @@ export function makeCube (params: {} = {}): CubeType {
  * @param {ShapeType} shape
  */
 export function makeIndexedShape (
-    id: number, label: number, manual: boolean,
-    shape: ShapeType): IndexedShapeType {
+    id: number, label: number, shape: ShapeType): IndexedShapeType {
   return {
-    id, label: [label], manual, shape: { ...shape }
+    id, label: [label], shape: { ...shape }
   }
 }
 

@@ -74,6 +74,7 @@ type LabelData struct {
 	Shapes     []int            `json:"shapes" yaml:"shapes"`
 	Track      int              `json:"track" yaml:"track"`
 	Order      int              `json:"order" yaml:"order"`
+	Manual     bool             `json:"manual" yaml:"manual"`
 }
 
 //Contains data for single shape

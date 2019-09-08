@@ -22,6 +22,8 @@ export interface LabelType {
   track: number
   /** order of the label among all the labels */
   order: number
+  /** whether the label is created manually */
+  manual: boolean
 }
 
 export interface Track {
@@ -69,8 +71,6 @@ export interface IndexedShapeType {
   id: number
   /** Label ID of the shape */
   label: [number]
-  /** Whether the shape is created manually */
-  manual: boolean
   /** Shape data */
   shape: ShapeType
 }
