@@ -48,6 +48,7 @@ export function tagImage (
       sessionId: action.sessionId,
       itemIndex: action.itemIndex,
       label,
+      shapeTypes: [],
       shapes: []
     }
     return addLabel(state, newAction)

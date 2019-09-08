@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { addBox2dLabel } from '../action/box2d'
 import { changeLabelShape } from '../action/common'
-import * as labels from '../common/label_types'
 import Session from '../common/session'
+import { LabelTypes } from '../common/types'
 import { makeLabel, makeRect } from '../functional/states'
 import { RectType, ShapeType, State } from '../functional/types'
 import { Size2D } from '../math/size2d'
@@ -264,7 +264,7 @@ export class Box2D extends Label2D {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
-      type: labels.BOX_2D, id: -1, item: itemIndex,
+      type: LabelTypes.BOX_2D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })

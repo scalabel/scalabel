@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import * as LabelTypes from '../common/label_types'
 import Session from '../common/session'
+import { LabelTypes } from '../common/types'
 import { State } from '../functional/types'
 import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'

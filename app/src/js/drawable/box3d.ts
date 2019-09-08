@@ -3,7 +3,6 @@ import * as THREE from 'three'
 
 import { addBox3dLabel } from '../action/box3d'
 import { changeLabelShape } from '../action/common'
-import * as labels from '../common/label_types'
 import Session from '../common/session'
 
 import { getCurrentItemViewerConfig } from '../functional/state_util'
@@ -14,6 +13,7 @@ import {
 
 import { Vector3D } from '../math/vector3d'
 
+import { LabelTypes } from '../common/types'
 import { EditMode } from '../functional/point_cloud'
 import { Cube3D, DrawMode } from './cube3d'
 import { Label3D } from './label3d'
@@ -61,7 +61,7 @@ export class Box3D extends Label3D {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
-      type: labels.BOX_2D, id: -1, item: itemIndex,
+      type: LabelTypes.BOX_2D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })
