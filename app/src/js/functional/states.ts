@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import * as labels from '../common/label_types'
+import { LabelTypes } from '../common/types'
 import {
   ConfigType, CubeType,
   ImageViewerConfigType, IndexedShapeType,
@@ -24,7 +24,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return _.cloneDeep<LabelType>({
     id: -1,
     item: -1,
-    type: labels.EMPTY,
+    type: LabelTypes.EMPTY,
     category: [],
     attributes: {},
     parent: -1, // id
@@ -57,7 +57,7 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
  * @param {{}} params
  * @return {CubeType}
  */
-export function makeCube (params: {} = {}): CubeType {
+export function makeCube (params: Partial<CubeType> = {}): CubeType {
   return {
     center: { x: 0, y: 0, z: 0 },
     size: { x: 1, y: 1, z: 1 },
@@ -70,13 +70,15 @@ export function makeCube (params: {} = {}): CubeType {
 /**
  * Compose indexed shape
  * @param {number} id
- * @param {number} label
+ * @param {number[]} label
+ * @param {string} type
  * @param {ShapeType} shape
  */
 export function makeIndexedShape (
-    id: number, label: number, shape: ShapeType): IndexedShapeType {
+    id: number, label: number[], type: string, shape: ShapeType
+  ): IndexedShapeType {
   return {
-    id, label: [label], shape: { ...shape }
+    id, label: [...label], type, shape: { ...shape }
   }
 }
 
@@ -111,7 +113,7 @@ export function makePointCloudViewerConfig (): PointCloudViewerConfigType {
  * @param {{}} params
  * @return {ItemType}
  */
-export function makeItem (params: {} = {}): ItemType {
+export function makeItem (params: Partial<ItemType> = {}): ItemType {
   return {
     id: -1,
     index: 0,

@@ -64,13 +64,31 @@ export interface CubeType {
   anchorIndex: number
 }
 
-export type ShapeType = RectType | CubeType
+export interface Point2DType {
+  /** The x-coordinate */
+  x: number
+  /** The y-coordinate */
+  y: number
+}
+
+export interface PathPoint2DType {
+  /** The x-coordinate */
+  x: number
+  /** The y-coordinate */
+  y: number
+  /** type of the point in the path. value from common/types.PathPointType */
+  type: string
+}
+
+export type ShapeType = RectType | CubeType | Point2DType | PathPoint2DType
 
 export interface IndexedShapeType {
   /** ID of the shape */
   id: number
   /** Label ID of the shape */
-  label: [number]
+  label: number[]
+  /** type string of the shape. Value from common/types.ShapeType */
+  type: string
   /** Shape data */
   shape: ShapeType
 }

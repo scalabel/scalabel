@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import * as box2d from '../../js/action/box2d'
 import * as action from '../../js/action/common'
-import * as labels from '../../js/common/label_types'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
+import { LabelTypes, ShapeTypes } from '../../js/common/types'
 import { RectType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
 
@@ -21,8 +21,9 @@ test('Add, change and delete box2d labels', () => {
   const labelIds: number[] = _.map(state.task.items[0].labels, (l) => l.id)
   let label = state.task.items[0].labels[labelIds[0]]
   expect(label.item).toBe(0)
-  expect(label.type).toBe(labels.BOX_2D)
+  expect(label.type).toBe(LabelTypes.BOX_2D)
   const indexedShape = state.task.items[0].shapes[label.shapes[0]]
+  expect(indexedShape.type).toBe(ShapeTypes.RECT)
   let shape = indexedShape.shape as RectType
   // Check label ids
   let index = 0

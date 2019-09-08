@@ -1,5 +1,5 @@
 /**
- * Define string indentifiers and interfaces of actions
+ * Define string identifiers and interfaces of actions
  */
 import {
   LabelType,
@@ -66,6 +66,8 @@ export interface AddLabelAction extends BaseAction {
   itemIndex: number
   /** label to add */
   label: LabelType
+  /** types of the shapes */
+  shapeTypes: string[]
   /** Shapes of the label */
   shapes: ShapeType[]
 }

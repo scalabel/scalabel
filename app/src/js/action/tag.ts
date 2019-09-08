@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import * as labels from '../common/label_types'
 import Session from '../common/session'
+import { LabelTypes } from '../common/types'
 import { makeLabel } from '../functional/states'
 import { updateObject } from '../functional/util'
 import * as actions from './common'
@@ -28,7 +28,7 @@ export function addLabelTag (attributeIndex: number,
     return actions.changeLabelProps(itemIndex, labelId,
       { attributes: newAttributes })
   } else {
-    const label = makeLabel({ type: labels.TAG, attributes: attribute })
-    return actions.addLabel(itemIndex, label, [])
+    const label = makeLabel({ type: LabelTypes.TAG, attributes: attribute })
+    return actions.addLabel(itemIndex, label, [], [])
   }
 }
