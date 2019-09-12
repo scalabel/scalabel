@@ -45,12 +45,14 @@ export function loadItem (
  */
 export function addLabel (
   itemIndex: number, label: LabelType, shapeTypes: string[] = [],
-  shapes: ShapeType[] = []): types.AddLabelAction {
+  shapes: ShapeType[] = []): types.AddLabelsAction {
   return {
-    type: types.ADD_LABEL,
+    type: types.ADD_LABELS,
     sessionId: Session.id,
-    itemIndex,
-    label, shapeTypes, shapes
+    itemIndices: [itemIndex],
+    labels: [[label]],
+    shapeTypes: [[shapeTypes]],
+    shapes: [[shapes]]
   }
 }
 
@@ -62,14 +64,14 @@ export function addLabel (
  * @return {ChangeLabelShapeAction}
  */
 export function changeLabelShape (
-    itemIndex: number, shapeId: number, props: Partial<ShapeType>
-  ): types.ChangeShapeAction {
+    itemIndex: number, shapeId: number, shape: Partial<ShapeType>
+  ): types.ChangeShapesAction {
   return {
-    type: types.CHANGE_LABEL_SHAPE,
+    type: types.CHANGE_SHAPES,
     sessionId: Session.id,
-    itemIndex,
-    shapeId,
-    props
+    itemIndices: [itemIndex],
+    shapeIds: [[shapeId]],
+    shapes: [[shape]]
   }
 }
 
@@ -82,13 +84,14 @@ export function changeLabelShape (
  */
 export function changeLabelProps (
     itemIndex: number, labelId: number, props: Partial<LabelType>
-  ): types.ChangeLabelAction {
+  ): types.ChangeLabelsAction {
   return {
-    type: types.CHANGE_LABEL_PROPS,
+    type: types.CHANGE_LABELS,
     sessionId: Session.id,
-    itemIndex,
-    labelId,
-    props }
+    itemIndices: [itemIndex],
+    labelIds: [[labelId]],
+    props: [[props ]]
+  }
 }
 
 /**
@@ -113,32 +116,12 @@ export function linkLabels (
  * @return {DeleteLabelAction}
  */
 export function deleteLabel (
-    itemIndex: number, labelId: number): types.DeleteLabelAction {
+    itemIndex: number, labelId: number): types.DeleteLabelsAction {
   return {
-    type: types.DELETE_LABEL,
+    type: types.DELETE_LABELS,
     sessionId: Session.id,
-    itemIndex,
-    labelId
-  }
-}
-
-/**
- * Image tagging
- * @param {number} itemIndex
- * @param {number} attributeIndex
- * @param {Array<number>} selectedIndex
- * @return {Object}
- */
-export function tagImage (
-  itemIndex: number,
-  attributeIndex: number,
-  selectedIndex: number[]): types.TagImageAction {
-  return {
-    type: types.TAG_IMAGE,
-    sessionId: Session.id,
-    itemIndex,
-    attributeIndex,
-    selectedIndex
+    itemIndices: [itemIndex],
+    labelIds: [[labelId]]
   }
 }
 

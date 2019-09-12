@@ -26,11 +26,11 @@ export interface LabelType {
   manual: boolean
 }
 
-export interface Track {
+export interface TrackType {
   /** ID of the track */
   id: number
-  /** labels in this track [item index, label id] */
-  labels: Array<[number, number]>
+  /** labels in this track {item index: label id} */
+  labels: {[key: number]: number}
 }
 
 export interface RectType {
@@ -188,7 +188,11 @@ export interface TaskStatus {
   maxShapeId: number
   /** max order number */
   maxOrder: number
+  /** max track ID */
+  maxTrackId: number
 }
+
+export interface TrackMapType { [key: number]: TrackType }
 
 export interface TaskType {
   /** Configurations */
@@ -198,7 +202,7 @@ export interface TaskType {
   /** Items */
   items: ItemType[]
   /** tracks */
-  tracks: { [key: number]: Track }
+  tracks: TrackMapType
 }
 
 export interface Select {

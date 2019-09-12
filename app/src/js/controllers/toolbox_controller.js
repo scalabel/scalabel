@@ -1,4 +1,3 @@
-import {tagImage} from '../action/common';
 import {BaseController} from './base_controller';
 
 /**
@@ -10,12 +9,10 @@ export class ToolboxController extends BaseController {
    * @param {number} attributeIndex
    * @param {Array<number>} selectedIndex
    */
-   selectAttribute(
-      attributeIndex: number, selectedIndex: Array<number>): void {
-    let currItem = self.store.getState().present.current.item;
-    // TODO change attributeName to attributeIndex
-    this.dispatch(tagImage(
-        currItem, attributeIndex,
-        selectedIndex));
-  }
+  // selectAttribute(attributeIndex: number, selectedIndex: Array<number>):
+  // void {
+  // let currItem = self.store.getState().present.current.item;
+  // TODO change attributeName to attributeIndex
+  // this.dispatch(tagImage(currItem, attributeIndex, selectedIndex));
+  // }
 }

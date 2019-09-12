@@ -361,7 +361,7 @@ export default class CreateForm extends React.Component<Props, State> {
    * handles label changing
    * @param event
    */
-  private handleLabelChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  private handleLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.handleInstructions(event.target.value)
     this.setState({ labelType: event.target.value })
   }
@@ -369,7 +369,7 @@ export default class CreateForm extends React.Component<Props, State> {
    * handles item type changing
    * @param event
    */
-  private handleItemTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  private handleItemTypeChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({ itemType: event.target.value })
     if (event.target.value === 'video') {
       this.setState({ showTaskSize: false })

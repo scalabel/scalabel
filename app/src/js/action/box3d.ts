@@ -2,7 +2,7 @@ import { LabelTypes, ShapeTypes } from '../common/types'
 import { makeCube, makeLabel } from '../functional/states'
 import { Vector3Type } from '../functional/types'
 import * as actions from './common'
-import { AddLabelAction } from './types'
+import { AddLabelsAction } from './types'
 
 /**
  * Create AddLabelAction to create a box3d label
@@ -16,7 +16,7 @@ import { AddLabelAction } from './types'
 export function addBox3dLabel (
   itemIndex: number, category: number[],
   center: Vector3Type, size: Vector3Type,
-  orientation: Vector3Type): AddLabelAction {
+  orientation: Vector3Type): AddLabelsAction {
   // create the rect object
   const cube = makeCube({ center, size, orientation })
   const label = makeLabel({ type: LabelTypes.BOX_3D, category })

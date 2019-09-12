@@ -7,7 +7,8 @@
         "no-any": true,
         "completed-docs": true,
         "max-line-length": [true, {
-                "limit": 80,
-                "ignore-pattern": "^import"}]
+            "limit": 80,
+            "ignore-pattern": "^import"
+        }]
     }
 }

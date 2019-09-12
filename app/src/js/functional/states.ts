@@ -12,6 +12,7 @@ import {
   State,
   TaskStatus,
   TaskType,
+  TrackType,
   UserType
 } from './types'
 
@@ -35,6 +36,16 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
     manual: true, // by default, manual is true
     ...params
   })
+}
+
+/**
+ * Initialize a track
+ * @param {number} id
+ * @param {{[key: number]: number}} labels
+ */
+export function makeTrack (
+  id: number, labels: {[key: number]: number} = {}): TrackType {
+  return { id, labels }
 }
 
 /**
@@ -230,6 +241,7 @@ function makeTaskStatus (params: Partial<TaskStatus> = {}): TaskStatus {
     maxLabelId: -1,
     maxShapeId: -1,
     maxOrder: -1,
+    maxTrackId: -1,
     ...params
   }
 }

@@ -1,11 +1,9 @@
 import { createStore, Reducer, Store } from 'redux'
 import undoable, { includeAction, StateWithHistory } from 'redux-undo'
 import {
-// SAT specific actions
-  ADD_LABEL,
-  DELETE_LABEL,
-  IMAGE_ZOOM,
-  TAG_IMAGE
+  ADD_LABELS,
+  DELETE_LABELS,
+  IMAGE_ZOOM
 } from '../action/types'
 import { makeState } from '../functional/states'
 import { State } from '../functional/types'
@@ -31,9 +29,8 @@ export function configureStore (
     filter: includeAction([
       // undoable actions
       IMAGE_ZOOM,
-      ADD_LABEL,
-      DELETE_LABEL,
-      TAG_IMAGE
+      ADD_LABELS,
+      DELETE_LABELS
     ]),
     debug: devMode
   })

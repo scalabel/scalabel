@@ -4,7 +4,6 @@ import * as common from '../functional/common'
 import * as image from '../functional/image'
 import * as pointCloud from '../functional/point_cloud'
 import { makeState } from '../functional/states'
-import * as tag from '../functional/tag'
 import { State } from '../functional/types'
 
 /**
@@ -33,19 +32,17 @@ export const reducer: Reducer<State> = (
       return common.updateAll(state)
     case types.IMAGE_ZOOM:
       return image.zoomImage(state, action as types.ImageZoomAction)
-    case types.ADD_LABEL:
-      return common.addLabel(state, action as types.AddLabelAction)
-    case types.CHANGE_LABEL_SHAPE:
-      return common.changeShape(state, action as types.ChangeShapeAction)
-    case types.CHANGE_LABEL_PROPS:
-      return common.changeLabel(
-        state, action as types.ChangeLabelAction)
+    case types.ADD_LABELS:
+      return common.addLabels(state, action as types.AddLabelsAction)
+    case types.CHANGE_SHAPES:
+      return common.changeShapes(state, action as types.ChangeShapesAction)
+    case types.CHANGE_LABELS:
+      return common.changeLabels(
+        state, action as types.ChangeLabelsAction)
     case types.LINK_LABELS:
       return common.linkLabels(state, action as types.LinkLabelsAction)
-    case types.DELETE_LABEL:
-      return common.deleteLabel(state, action as types.DeleteLabelAction)
-    case types.TAG_IMAGE:
-      return tag.tagImage(state, action as types.TagImageAction)
+    case types.DELETE_LABELS:
+      return common.deleteLabels(state, action as types.DeleteLabelsAction)
     case types.TOGGLE_ASSISTANT_VIEW:
       return common.toggleAssistantView(state)
     case types.MOVE_CAMERA_AND_TARGET:

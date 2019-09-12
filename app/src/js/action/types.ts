@@ -15,13 +15,14 @@ export const UPDATE_ALL = 'UPDATE_ALL'
 export const IMAGE_ZOOM = 'IMAGE_ZOOM'
 
 // Item Level
-export const ADD_LABEL = 'ADD_LABEL'
-export const CHANGE_LABEL_SHAPE = 'CHANGE_LABEL_SHAPE'
-export const CHANGE_LABEL_PROPS = 'CHANGE_LABEL_PROPS'
+export const ADD_LABELS = 'ADD_LABELS'
+export const CHANGE_SHAPES = 'CHANGE_SHAPES'
+export const CHANGE_LABELS = 'CHANGE_LABELS'
 export const LINK_LABELS = 'LINK_LABELS'
-export const DELETE_LABEL = 'DELETE_LABEL'
-// Image specific actions
-export const TAG_IMAGE = 'TAG_IMAGE'
+export const DELETE_LABELS = 'DELETE_LABELS'
+
+export const ADD_TRACK = 'ADD_TRACK'
+export const MERGE_TRACKS = 'MERGE_TRACKS'
 
 // View Level
 export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW'
@@ -61,33 +62,49 @@ export interface ImageZoomAction extends BaseAction {
   viewOffsetY: number
 }
 
-export interface AddLabelAction extends BaseAction {
+export interface AddLabelsAction extends BaseAction {
   /** item of the added label */
-  itemIndex: number
-  /** label to add */
-  label: LabelType
-  /** types of the shapes */
-  shapeTypes: string[]
-  /** Shapes of the label */
-  shapes: ShapeType[]
+  itemIndices: number[]
+  /** labels to add to each item */
+  labels: LabelType[][]
+  /** shape types for each label */
+  shapeTypes: string[][][]
+  /** shapes for each label */
+  shapes: ShapeType[][][]
 }
 
-export interface ChangeShapeAction extends BaseAction {
+export interface AddTrackAction extends BaseAction {
+  /** item of the added label */
+  itemIndices: number[]
+  /** labels to add to each item */
+  labels: LabelType[]
+  /** shape types for each label */
+  shapeTypes: string[][]
+  /** shapes for each label */
+  shapes: ShapeType[][]
+}
+
+export interface MergeTrackAction extends BaseAction {
+  /** item of the added label */
+  trackIds: number[]
+}
+
+export interface ChangeShapesAction extends BaseAction {
   /** item of the shape */
-  itemIndex: number
-  /** Shape ID */
-  shapeId: number
+  itemIndices: number[]
+  /** Shape ids in each item */
+  shapeIds: number[][]
   /** properties to update for the shape */
-  props: object
+  shapes: Array<Array<Partial<ShapeType>>>
 }
 
-export interface ChangeLabelAction extends BaseAction {
+export interface ChangeLabelsAction extends BaseAction {
   /** item of the label */
-  itemIndex: number
+  itemIndices: number[]
   /** Label ID */
-  labelId: number
+  labelIds: number[][]
   /** properties to update for the shape */
-  props: object
+  props: Array<Array<Partial<LabelType>>>
 }
 
 export interface LinkLabelsAction extends BaseAction {
@@ -97,20 +114,11 @@ export interface LinkLabelsAction extends BaseAction {
   labelIds: number[]
 }
 
-export interface DeleteLabelAction extends BaseAction {
+export interface DeleteLabelsAction extends BaseAction {
   /** item of the label */
-  itemIndex: number
+  itemIndices: number[]
   /** ID of label to be deleted */
-  labelId: number
-}
-
-export interface TagImageAction extends BaseAction {
-  /** ID of the corresponding item */
-  itemIndex: number
-  /** Index of the attribute */
-  attributeIndex: number
-  /** Index of the selected attribute */
-  selectedIndex: number[]
+  labelIds: number[][]
 }
 
 export type ToggleAssistantViewAction = BaseAction
@@ -123,16 +131,17 @@ export interface MoveCameraAndTargetAction extends BaseAction {
 }
 
 export type ActionType =
-    InitSessionAction
-    | ChangeSelectAction
-    | LoadItemAction
-    | UpdateAllAction
-    | ImageZoomAction
-    | AddLabelAction
-    | ChangeShapeAction
-    | ChangeLabelAction
-    | LinkLabelsAction
-    | DeleteLabelAction
-    | TagImageAction
-    | ToggleAssistantViewAction
-    | MoveCameraAndTargetAction
+  | InitSessionAction
+  | ChangeSelectAction
+  | LoadItemAction
+  | UpdateAllAction
+  | ImageZoomAction
+  | AddLabelsAction
+  | AddTrackAction
+  | MergeTrackAction
+  | ChangeShapesAction
+  | ChangeLabelsAction
+  | LinkLabelsAction
+  | DeleteLabelsAction
+  | ToggleAssistantViewAction
+  | MoveCameraAndTargetAction
