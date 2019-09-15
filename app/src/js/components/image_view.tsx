@@ -161,10 +161,15 @@ export class ImageView extends Canvas2d<Props> {
     this.background = null
 
     // set keyboard listeners
+    this._labels = new Label2DList()
+  }
+
+  /**
+   * Bind onKeyDown and onKeyUp
+   */
+  public componentDidMount () {
     document.onkeydown = this.onKeyDown.bind(this)
     document.onkeyup = this.onKeyUp.bind(this)
-
-    this._labels = new Label2DList()
   }
 
   /**

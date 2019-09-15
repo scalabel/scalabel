@@ -13,13 +13,25 @@ export function initSessionAction (): types.InitSessionAction {
 /**
  * Go to item at index
  * @param {number} index
- * @return {types.GoToItemAction}
+ * @return {types.ChangeSelectAction}
  */
 export function goToItem (index: number): types.ChangeSelectAction {
   return {
     type: types.CHANGE_SELECT,
     sessionId: Session.id,
     select: { item: index }
+  }
+}
+
+/**
+ * Select label by ID
+ * @param {number} labelId
+ */
+export function selectLabel (labelId: number): types.ChangeSelectAction {
+  return {
+    type: types.CHANGE_SELECT,
+    sessionId: Session.id,
+    select: { label: labelId }
   }
 }
 

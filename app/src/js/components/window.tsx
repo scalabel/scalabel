@@ -12,13 +12,13 @@ import { ToolBar } from './toolbar'
 /**
  * Manage the whole window
  */
-
 export class Window extends React.Component {
   /**
    * Window constructor
    * @param {object} props: name of the container in HTML to
    * place this window
    */
+
   constructor (props: object) {
     super(props)
   }
@@ -40,6 +40,7 @@ export class Window extends React.Component {
             dashboardLink={Path.vendorDashboard()}
         />
     )
+
     const leftSidebar1 = (
         <ToolBar
             categories={config.categories}

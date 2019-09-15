@@ -41,7 +41,36 @@ export class ToolBar extends Component<Props> {
   constructor (props: Readonly<Props>) {
     super(props)
     this.handleToggle = this.handleToggle.bind(this)
+    this.keyDownHandler = this.keyDownHandler.bind(this)
   }
+
+  /**
+   * handles keyDown Events
+   * @param {keyboardEvent} e
+   */
+  public keyDownHandler (e: KeyboardEvent) {
+    if (e.key === 'Backspace') {
+      const select = Session.getState().user.select
+      if (select.label >= 0) {
+        Session.dispatch(deleteLabel(select.item, select.label))
+      }
+    }
+  }
+
+  /**
+   * Add keyDown Event Listener
+   */
+  public componentDidMount () {
+    document.addEventListener('keydown', this.keyDownHandler)
+  }
+
+  /**
+   * Remove keyDown Event Listener
+   */
+  public componentWillUnmount () {
+    document.removeEventListener('keydown', this.keyDownHandler)
+  }
+
   /**
    * ToolBar render function
    * @return component
