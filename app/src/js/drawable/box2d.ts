@@ -180,7 +180,7 @@ export class Box2D extends Label2D {
   public move (end: Vector2D, limit: Size2D): void {
     const [width, height] = [limit.width, limit.height]
     const rect = (this._shapes[0] as Rect2D).toRect()
-    const delta = end.clone().substract(this._mouseDownCoord)
+    const delta = end.clone().subtract(this._mouseDownCoord)
     rect.x1 = this._startingRect.x + delta.x
     rect.y1 = this._startingRect.y + delta.y
     // The rect should not go outside the frame limit
@@ -198,8 +198,7 @@ export class Box2D extends Label2D {
   public onMouseUp (coord: Vector2D): boolean {
     this._mouseDown = false
     if (this._selected) {
-      const area = Math.abs(coord.x - this._mouseDownCoord.x) *
-                   Math.abs(coord.y - this._mouseDownCoord.y)
+      const area = coord.clone().subtract(this._mouseDownCoord).abs().area()
       // TODO: Move comparison rhs to constant
       if (!this._shouldCommit && area >= MIN_AREA) {
         this._shouldCommit = true

@@ -44,8 +44,8 @@ export class Vector extends Array<number> {
     return this
   }
 
-  /** substract a number or vector */
-  public substract (s: number | Vector): this {
+  /** subtract a number or vector */
+  public subtract (s: number | Vector): this {
     if (typeof s === 'number') {
       this.forEach((v, i, arr) => arr[i] = v - s)
     } else {
@@ -58,5 +58,18 @@ export class Vector extends Array<number> {
   public dot (vector: Vector): this {
     this.forEach((v, i, arr) => arr[i] = v * vector[i])
     return this
+  }
+
+  /** calculate the absolute values of the vector elements */
+  public abs (): this {
+    this.forEach((v, i, arr) => arr[i] = Math.abs(v))
+    return this
+  }
+
+  /** product of the elements */
+  public prod (): number {
+    let p = 1
+    this.forEach((v) => p *= v)
+    return p
   }
 }

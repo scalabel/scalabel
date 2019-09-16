@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { Vector } from '../../js/math/vector'
 import { Vector2D } from '../../js/math/vector2d'
 
@@ -20,6 +21,19 @@ test('Test basic vector operations', () => {
   v1.dot(v2)
   expect(v1[0]).toEqual(14)
   expect(v2[0]).toEqual(2)
+
+  // absolute values
+  const v3 = (new Vector(3)).fill(0).subtract(v1)
+  for (const i of _.range(3)) {
+    expect(v1[i]).toEqual(-v3[i])
+  }
+  v3.abs()
+  for (const i of _.range(3)) {
+    expect(v1[i]).toEqual(v3[i])
+  }
+
+  // product
+  expect(v3.prod()).toEqual(v3[0] * v3[1] * v3[2])
 })
 
 test('Test basic Vector2D', () => {

@@ -27,4 +27,9 @@ export class Vector2D extends Vector {
   public set y (v: number) {
     this[1] = v
   }
+
+  /** area of the vector */
+  public area (): number {
+    return this.prod()
+  }
 }
