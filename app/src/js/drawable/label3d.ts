@@ -106,7 +106,7 @@ export abstract class Label3D {
    * Handle keyboard events
    * @returns true if consumed, false otherwise
    */
-  public abstract onKeyUp (): boolean
+  public abstract onKeyUp (e: KeyboardEvent): boolean
 
   /**
    * Expand the primitive shapes to drawable shapes

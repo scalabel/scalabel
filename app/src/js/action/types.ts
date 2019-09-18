@@ -2,17 +2,15 @@
  * Define string identifiers and interfaces of actions
  */
 import {
+  ImageViewerConfigType,
   LabelType,
-  Select,
-  ShapeType, Vector3Type, ViewerConfigType
+  PointCloudViewerConfigType, Select, ShapeType, ViewerConfigType
 } from '../functional/types'
 
 export const INIT_SESSION = 'INIT_SESSION'
 export const CHANGE_SELECT = 'CHANGE_SELECT'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
-
-export const IMAGE_ZOOM = 'IMAGE_ZOOM'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -24,11 +22,15 @@ export const DELETE_LABELS = 'DELETE_LABELS'
 export const ADD_TRACK = 'ADD_TRACK'
 export const MERGE_TRACKS = 'MERGE_TRACKS'
 
+// Image specific actions
+export const UPDATE_IMAGE_VIEWER_CONFIG = 'UPDATE_IMAGE_VIEWER_CONFIG'
+
 // View Level
 export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW'
 
 // Point Cloud Specific
-export const MOVE_CAMERA_AND_TARGET = 'MOVE_CAMERA_AND_TARGET'
+export const UPDATE_POINT_CLOUD_VIEWER_CONFIG =
+  'UPDATE_POINT_CLOUD_VIEWER_CONFIG'
 
 interface BaseAction {
   /** type of the action */
@@ -53,13 +55,9 @@ export interface LoadItemAction extends BaseAction {
 
 export type UpdateAllAction = BaseAction
 
-export interface ImageZoomAction extends BaseAction {
-  /** Zoom ratio */
-  ratio: number
-  /** View Offset X */
-  viewOffsetX: number
-  /** View Offset Y */
-  viewOffsetY: number
+export interface UpdateImageViewerConfigAction extends BaseAction {
+  /** fields to update */
+  newFields: Partial<ImageViewerConfigType>
 }
 
 export interface AddLabelsAction extends BaseAction {
@@ -123,11 +121,9 @@ export interface DeleteLabelsAction extends BaseAction {
 
 export type ToggleAssistantViewAction = BaseAction
 
-export interface MoveCameraAndTargetAction extends BaseAction {
-  /** New position */
-  newPosition: Vector3Type
-  /** New target */
-  newTarget?: Vector3Type
+export interface UpdatePointCloudViewerConfigAction extends BaseAction {
+  /** Fields to update */
+  newFields: Partial<PointCloudViewerConfigType>
 }
 
 export type ActionType =
@@ -135,7 +131,7 @@ export type ActionType =
   | ChangeSelectAction
   | LoadItemAction
   | UpdateAllAction
-  | ImageZoomAction
+  | UpdateImageViewerConfigAction
   | AddLabelsAction
   | AddTrackAction
   | MergeTrackAction
@@ -144,4 +140,4 @@ export type ActionType =
   | LinkLabelsAction
   | DeleteLabelsAction
   | ToggleAssistantViewAction
-  | MoveCameraAndTargetAction
+  | UpdatePointCloudViewerConfigAction

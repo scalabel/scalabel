@@ -5,8 +5,7 @@ import { moveCameraAndTarget } from '../../js/action/point_cloud'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label3DList } from '../../js/drawable/label3d_list'
-import {
-  getCurrentItemViewerConfig, getShape } from '../../js/functional/state_util'
+import { getCurrentPointCloudViewerConfig, getShape } from '../../js/functional/state_util'
 import {
   CubeType,
   PointCloudViewerConfigType,
@@ -73,7 +72,7 @@ test('Draw 3d bbox', () => {
   expect(_.size(state.task.items[0].labels)).toEqual(1)
   let cube = getShape(state, 0, 0, 0) as CubeType
   let viewerConfig =
-    getCurrentItemViewerConfig(state) as PointCloudViewerConfigType
+    getCurrentPointCloudViewerConfig(state)
   expect(viewerConfig).not.toBeNull()
   expectVector3TypesClose(cube.center, viewerConfig.target)
   expectVector3TypesClose(cube.orientation, { x: 0, y: 0, z: 0 })
@@ -98,7 +97,7 @@ test('Draw 3d bbox', () => {
     expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
     cube = getShape(state, 0, i, 0) as CubeType
     viewerConfig =
-      getCurrentItemViewerConfig(state) as PointCloudViewerConfigType
+      getCurrentPointCloudViewerConfig(state)
     expect(viewerConfig).not.toBeNull()
 
     expectVector3TypesClose(viewerConfig.position, position)
@@ -123,7 +122,7 @@ test('Move 3d bbox', () => {
   let state = Session.getState()
 
   const viewerConfig =
-    getCurrentItemViewerConfig(state) as PointCloudViewerConfigType
+    getCurrentPointCloudViewerConfig(state)
   expectVector3TypesClose(viewerConfig.position, { x: 0, y: 10, z: 0 })
   expectVector3TypesClose(viewerConfig.target, { x: 0, y: 0, z: 0 })
   expectVector3TypesClose(viewerConfig.verticalAxis, { x: 0, y: 0, z: 1 })
@@ -211,7 +210,7 @@ test('Scale 3d bbox', () => {
   let state = Session.getState()
 
   const viewerConfig =
-    getCurrentItemViewerConfig(state) as PointCloudViewerConfigType
+    getCurrentPointCloudViewerConfig(state)
   viewerConfig.position.x = 0
   viewerConfig.position.y = 0
   viewerConfig.position.z = 10
@@ -239,7 +238,7 @@ test('Scale 3d bbox', () => {
 
   // Drag
   label3dList.onMouseDown()
-  label3dList.onKeyUp()
+  label3dList.onKeyUp(sEvent)
   label3dList.onMouseMove(0, 0, camera, raycaster)
   label3dList.onMouseUp()
 
@@ -263,7 +262,7 @@ test('Extrude 3d bbox', () => {
   let state = Session.getState()
 
   const viewerConfig =
-    getCurrentItemViewerConfig(state) as PointCloudViewerConfigType
+    getCurrentPointCloudViewerConfig(state)
 
   const camera = getCameraFromViewerConfig(viewerConfig)
 
@@ -283,7 +282,7 @@ test('Extrude 3d bbox', () => {
 
   // Drag
   label3dList.onMouseDown()
-  label3dList.onKeyUp()
+  label3dList.onKeyUp(sEvent)
   label3dList.onMouseMove(0, 0, camera, raycaster)
   label3dList.onMouseUp()
 
@@ -308,7 +307,7 @@ test('Rotate 3d bbox', () => {
   let state = Session.getState()
 
   const viewerConfig =
-    getCurrentItemViewerConfig(state) as PointCloudViewerConfigType
+    getCurrentPointCloudViewerConfig(state)
 
   const camera = getCameraFromViewerConfig(viewerConfig)
 
@@ -332,7 +331,7 @@ test('Rotate 3d bbox', () => {
 
   // Drag
   label3dList.onMouseDown()
-  label3dList.onKeyUp()
+  label3dList.onKeyUp(sEvent)
 
   // Move mouse in circle around box
   const numSteps = 10

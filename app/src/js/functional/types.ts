@@ -100,10 +100,10 @@ export interface ImageViewerConfigType {
   imageHeight: number
   /** View scale */
   viewScale: number
-  /** View Offset X */
-  viewOffsetX: number
-  /** View Offset Y */
-  viewOffsetY: number
+  /** Display Scroll Top */
+  displayTop: number
+  /** Display Scroll Left */
+  displayLeft: number
 }
 
 export interface PointCloudViewerConfigType {
@@ -116,7 +116,7 @@ export interface PointCloudViewerConfigType {
 }
 
 export type ViewerConfigType =
-  ImageViewerConfigType | PointCloudViewerConfigType | null
+  ImageViewerConfigType | PointCloudViewerConfigType
 
 export interface ItemType {
   /** The ID of the item */

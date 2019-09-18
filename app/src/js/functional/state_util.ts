@@ -28,39 +28,46 @@ export function getCurrentItem (state: State): ItemType {
  * @param {State} state
  * @return {ViewerConfigType}
  */
-export function getCurrentItemViewerConfig (state: State):
-  ViewerConfigType | null {
-  switch (state.task.config.itemType) {
-    case 'image':
-      return state.user.imageViewerConfig
-    case 'pointcloud':
-      return state.user.pointCloudViewerConfig
-    default:
-      return state.user.imageViewerConfig
-  }
+export function getCurrentImageViewerConfig (state: State):
+  ImageViewerConfigType {
+  return state.user.imageViewerConfig
 }
 
 /**
- * Set current item viewer config
+ * Get the current item viewer config
+ * @param {State} state
+ * @return {ViewerConfigType}
+ */
+export function getCurrentPointCloudViewerConfig (state: State):
+  PointCloudViewerConfigType {
+  return state.user.pointCloudViewerConfig
+}
+
+/**
+ * Set current image viewer config
  * @param {State} state
  * @param {ViewerConfigType} config
  * @return {State}
  */
-export function setCurrentItemViewerConfig (
+export function setCurrentImageViewerConfig (
     state: State, config: ViewerConfigType): State {
-  let newUser: UserType = state.user
-  switch (state.task.config.itemType) {
-    case 'image':
-      newUser = updateObject(state.user, {
-        imageViewerConfig: config as ImageViewerConfigType
-      })
-      break
-    case 'pointcloud':
-      newUser = updateObject(state.user, {
-        pointCloudViewerConfig: config as PointCloudViewerConfigType
-      })
-      break
-  }
+  const newUser: UserType = updateObject(state.user, {
+    imageViewerConfig: config as ImageViewerConfigType
+  })
+  return updateObject(state, { user: newUser })
+}
+
+/**
+ * Set current point cloud viewer config
+ * @param {State} state
+ * @param {ViewerConfigType} config
+ * @return {State}
+ */
+export function setCurrentPointCloudViewerConfig (
+    state: State, config: ViewerConfigType): State {
+  const newUser: UserType = updateObject(state.user, {
+    pointCloudViewerConfig: config as PointCloudViewerConfigType
+  })
   return updateObject(state, { user: newUser })
 }
 

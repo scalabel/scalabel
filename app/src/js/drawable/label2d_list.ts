@@ -121,7 +121,7 @@ export class Label2DList {
    * @param handleIndex
    */
   public onMouseDown (
-      coord: Vector2D, labelIndex: number, handleIndex: number): void {
+      coord: Vector2D, labelIndex: number, handleIndex: number): boolean {
     this._mouseDown = true
     if (this._highlightedLabel !== null) {
       this._highlightedLabel.setHighlighted(false)
@@ -135,6 +135,7 @@ export class Label2DList {
       this._selectedLabel = this._labelList[labelIndex]
       this._selectedLabel.setSelected(true, handleIndex)
       this._selectedLabel.onMouseDown(coord)
+      return true
     } else {
       const state = this._state
       const label = makeDrawableLabel(
@@ -143,6 +144,7 @@ export class Label2DList {
       this._selectedLabel = label
       this._labelList.push(label)
       label.onMouseDown(coord)
+      return true
     }
   }
 
@@ -169,7 +171,7 @@ export class Label2DList {
    */
   public onMouseMove (
       coord: Vector2D, canvasLimit: Size2D,
-      labelIndex: number, handleIndex: number): void {
+      labelIndex: number, handleIndex: number): boolean {
     if (!this._selectedLabel ||
         !this._selectedLabel.onMouseMove(coord, canvasLimit)) {
       if (labelIndex >= 0) {
@@ -185,6 +187,8 @@ export class Label2DList {
         this._highlightedLabel.setHighlighted(false)
         this._highlightedLabel = null
       }
+      return false
     }
+    return true
   }
 }

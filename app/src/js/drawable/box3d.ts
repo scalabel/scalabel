@@ -5,7 +5,7 @@ import { addBox3dLabel } from '../action/box3d'
 import { changeLabelShape } from '../action/common'
 import Session from '../common/session'
 
-import { getCurrentItemViewerConfig } from '../functional/state_util'
+import { getCurrentPointCloudViewerConfig } from '../functional/state_util'
 import { makeLabel } from '../functional/states'
 import {
   CubeType, PointCloudViewerConfigType, ShapeType, State
@@ -14,11 +14,17 @@ import {
 import { Vector3D } from '../math/vector3d'
 
 import { LabelTypes } from '../common/types'
-import { EditMode } from '../functional/point_cloud'
 import { Cube3D, DrawMode } from './cube3d'
 import { Label3D } from './label3d'
 
 type Shape = Cube3D
+
+enum EditMode {
+  MOVE,
+  SCALE,
+  EXTRUDE,
+  ROTATE
+}
 
 /**
  * Box3d Label
@@ -61,13 +67,13 @@ export class Box3D extends Label3D {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
-      type: LabelTypes.BOX_2D, id: -1, item: itemIndex,
+      type: LabelTypes.BOX_3D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })
     this._labelId = -1
     const viewerConfig: PointCloudViewerConfigType =
-      getCurrentItemViewerConfig(state) as PointCloudViewerConfigType
+      getCurrentPointCloudViewerConfig(state)
     this._shape.setCenter((new Vector3D()).fromObject(viewerConfig.target))
     Session.dispatch(addBox3dLabel(
       this._label.item, this._label.category,
@@ -175,7 +181,7 @@ export class Box3D extends Label3D {
    */
   public stopDrag () {
     this._dragging = false
-    this.resetModes()
+    this.resetModes('')
   }
 
   /**
@@ -262,18 +268,18 @@ export class Box3D extends Label3D {
   /**
    * Handle key up
    */
-  public onKeyUp (): boolean {
+  public onKeyUp (e: KeyboardEvent): boolean {
     if (this._dragging) {
       return false
     }
-    return this.resetModes()
+    return this.resetModes(e.key)
   }
 
   /**
    * Go back to default states
    * @returns {boolean} True if any state changed
    */
-  private resetModes (): boolean {
+  private resetModes (_key: string): boolean {
     this._editMode = EditMode.MOVE
     if (this._selected && this._shape.drawMode !== DrawMode.SELECTED) {
       this._shape.drawMode = DrawMode.SELECTED

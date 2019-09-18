@@ -1,16 +1,9 @@
 import _ from 'lodash'
 import * as types from '../action/types'
-import {getCurrentItemViewerConfig,
-  setCurrentItemViewerConfig} from './state_util'
+import {getCurrentPointCloudViewerConfig,
+  setCurrentPointCloudViewerConfig} from './state_util'
 import { State } from './types'
 import { updateObject } from './util'
-
-export enum EditMode {
-  MOVE,
-  SCALE,
-  EXTRUDE,
-  ROTATE
-}
 
 /**
  * Move camera and target position
@@ -19,13 +12,9 @@ export enum EditMode {
  * @return {State}
  */
 export function moveCameraAndTarget (
-  state: State, action: types.MoveCameraAndTargetAction): State {
-  let config = getCurrentItemViewerConfig(state)
-  if ('newTarget' in action) {
-    config = updateObject(
-      config, { position: action.newPosition, target: action.newTarget })
-  } else {
-    config = updateObject(config, { position: action.newPosition })
-  }
-  return setCurrentItemViewerConfig(state, config)
+  state: State, action: types.UpdatePointCloudViewerConfigAction): State {
+  let config = getCurrentPointCloudViewerConfig(state)
+  config = updateObject(
+    config, action.newFields)
+  return setCurrentPointCloudViewerConfig(state, config)
 }

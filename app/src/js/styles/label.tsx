@@ -114,11 +114,7 @@ export const listButtonStyle = () => ({
   }
 })
 
-export const imageViewStyle = () => createStyles({
-  image_canvas: {
-    'position': 'absolute',
-    'z-index': 0
-  },
+export const label2dViewStyle = () => createStyles({
   label_canvas: {
     'position': 'absolute',
     'z-index': 1
@@ -127,24 +123,13 @@ export const imageViewStyle = () => createStyles({
     'position': 'absolute',
     'visibility': 'hidden',
     'z-index': 2
-  },
-  display: {
-    display: 'block',
-    height: 'calc(100% - 20px)',
-    top: '10px', left: '10px',
-    position: 'absolute', overflow: 'scroll',
-    outline: 'none',
-    width: 'calc(100% - 20px)'
-  },
-  background: {
-    display: 'block', height: 'calc(100% - 40px)',
-    position: 'absolute',
-    outline: 'none', width: '100%', background: '#222222'
-  },
-  background_with_player_control: {
-    display: 'block', height: '100%',
-    position: 'absolute',
-    outline: 'none', width: '100%', background: '#000000'
+  }
+})
+
+export const imageViewStyle = () => createStyles({
+  image_canvas: {
+    'position': 'absolute',
+    'z-index': 0
   }
 })
 

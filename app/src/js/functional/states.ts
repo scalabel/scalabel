@@ -102,8 +102,8 @@ export function makeImageViewerConfig (): ImageViewerConfigType {
     imageWidth: 0,
     imageHeight: 0,
     viewScale: 1.0,
-    viewOffsetX: -1,
-    viewOffsetY: -1
+    displayLeft: 0,
+    displayTop: 0
   }
 }
 

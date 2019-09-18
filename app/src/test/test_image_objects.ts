@@ -169,9 +169,7 @@ export const testJson = {
 const dummyViewerConfig = {
   imageWidth: 800,
   imageHeight: 800,
-  viewScale: 1,
-  viewOffsetX: 0,
-  viewOffsetY: 0
+  viewScale: 1
 }
 
 /**

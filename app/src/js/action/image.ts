@@ -1,19 +1,46 @@
 import Session from '../common/session'
+import { ImageViewerConfigType } from '../functional/types'
+import {
+  MAX_SCALE,
+  MIN_SCALE
+} from '../view/image'
 import * as types from './types'
 
 /**
- * create image zoom action
- * @param {number} ratio: zoom ratio
- * @param {number} offsetX: view offset x
- * @param {number} offsetY: vew offset y
+ * Update viewer config
+ * @param newFields
+ */
+export function updateImageViewerConfig (
+  newFields: Partial<ImageViewerConfigType>
+): types.UpdateImageViewerConfigAction {
+  return {
+    type: types.UPDATE_IMAGE_VIEWER_CONFIG,
+    sessionId: Session.id,
+    newFields
+  }
+}
+
+/**
+ * Zoom the image
+ * @param zoomRatio
+ * @param offsetX
+ * @param offsetY
+ * @param display
+ * @param canvas
+ * @param config
+ * @param canvasWidth
+ * @param canvasHeight
+ * @param displayToImageRatio
  */
 export function zoomImage (
-    ratio: number, offsetX: number, offsetY: number): types.ImageZoomAction {
-  return {
-    type: types.IMAGE_ZOOM,
-    sessionId: Session.id,
-    ratio,
-    viewOffsetX: offsetX,
-    viewOffsetY: offsetY
+  zoomRatio: number,
+  config: ImageViewerConfigType
+): types.UpdateImageViewerConfigAction | null {
+  const newScale = config.viewScale * zoomRatio
+  if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
+    return updateImageViewerConfig({
+      viewScale: newScale
+    })
   }
+  return null
 }

@@ -30,8 +30,10 @@ export const reducer: Reducer<State> = (
       return common.loadItem(state, action as types.LoadItemAction)
     case types.UPDATE_ALL:
       return common.updateAll(state)
-    case types.IMAGE_ZOOM:
-      return image.zoomImage(state, action as types.ImageZoomAction)
+    case types.UPDATE_IMAGE_VIEWER_CONFIG:
+      return image.updateImageViewerConfig(
+        state, action as types.UpdateImageViewerConfigAction
+      )
     case types.ADD_LABELS:
       return common.addLabels(state, action as types.AddLabelsAction)
     case types.CHANGE_SHAPES:
@@ -45,9 +47,9 @@ export const reducer: Reducer<State> = (
       return common.deleteLabels(state, action as types.DeleteLabelsAction)
     case types.TOGGLE_ASSISTANT_VIEW:
       return common.toggleAssistantView(state)
-    case types.MOVE_CAMERA_AND_TARGET:
+    case types.UPDATE_POINT_CLOUD_VIEWER_CONFIG:
       return pointCloud.moveCameraAndTarget(
-        state, action as types.MoveCameraAndTargetAction)
+        state, action as types.UpdatePointCloudViewerConfigAction)
     default:
   }
   return state
