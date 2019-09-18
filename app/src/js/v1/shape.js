@@ -1145,7 +1145,7 @@ Polygon.prototype.equals = function(p) {
 Polygon.prototype.isSmall = function() {
   let box = this.bbox;
   return (box.max.x - box.min.x) *
-      (box.max.y - box.min.y) < 50;
+      (box.max.y - box.min.y) < 16;
 };
 
 // check whether a curve is valid
