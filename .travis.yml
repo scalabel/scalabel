@@ -22,7 +22,7 @@ script:
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
   - python3 scripts/lll.py -d server
   - golangci-lint run server/http/... --print-issued-lines=false
-  - go build -i -o ./bin/sat ./server/http
+  - go build -i -o ./bin/scalabel ./server/http
   - go test ./server/http -args --config ../../app/config/travis_config.yml
   - npm test
 branches:

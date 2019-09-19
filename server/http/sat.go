@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"path"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -953,8 +954,13 @@ func CreateTasks(project Project) {
 	} else {
 		// otherwise, make as many tasks as required
 		items := []Item{}
-		for _, itemList := range project.Items {
-			items = append(items, itemList...)
+		projectItemsKeys := []string{}
+		for key := range project.Items {
+			projectItemsKeys = append(projectItemsKeys, key)
+		}
+		sort.Strings(projectItemsKeys)
+		for _, key := range projectItemsKeys {
+			items = append(items, project.Items[key]...)
 		}
 		size := len(items)
 		for i := 0; i < size; i += project.Options.TaskSize {

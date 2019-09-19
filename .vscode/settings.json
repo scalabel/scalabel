@@ -60,5 +60,6 @@
         "latex",
         "plaintext",
         "typescript"
-    ]
+    ],
+    "jest.pathToJest": "npm run test --"
 }

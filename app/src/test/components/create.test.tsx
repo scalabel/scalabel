@@ -6,6 +6,27 @@ import CreateForm from '../../js/components/create_form'
 import { formStyle } from '../../js/styles/create'
 import { myTheme } from '../../js/styles/theme'
 
+/* tslint:disable */
+afterAll(() => {
+  (window as any).XMLHttpRequest = oldXMLHttpRequest
+  window.alert = oldAlert
+})
+
+const oldXMLHttpRequest = (window as any).XMLHttpRequest
+const oldAlert = window.alert
+
+const xhrMockClass = {
+  open: jest.fn(),
+  send: jest.fn(),
+  onreadystatechange: jest.fn(),
+  readyState: 4,
+  response: ""
+};
+(window as any).XMLHttpRequest =
+  jest.fn().mockImplementation(() => xhrMockClass)
+window.alert = jest.fn()
+/* tslint:enable */
+
 afterEach(cleanup)
 describe('Test create page functionality', () => {
   describe('Test different label options', () => {
@@ -84,18 +105,6 @@ describe('Test create page functionality', () => {
       fireEvent.change(select, { target: { value: 'lane' } })
       expect(queryByTestId('categories')).not.toBeNull()
     })
-    test('Hidden buttons are shown on submission', () => {
-      const { getByTestId, queryByTestId } = render(
-              <MuiThemeProvider theme={myTheme}>
-                <ThemeProvider theme={myTheme}>
-                  <StyledForm/>
-                </ThemeProvider>
-              </MuiThemeProvider>)
-      const form = getByTestId('submit-button')
-      expect(queryByTestId('hidden-buttons')).toBeNull()
-      fireEvent.click(form)
-      expect(queryByTestId('hidden-buttons')).not.toBeNull()
-    })
     test('Hides task size on video option', () => {
       const { getByTestId } = render(
               <MuiThemeProvider theme={myTheme}>
@@ -128,7 +137,7 @@ describe('Test create page functionality', () => {
       fireEvent.change(select, { target: { value: 'image' } })
       expect(tasksize.className).not.toContain('hidden')
     })
-    test('Hidden buttons are shown on submission', () => {
+    test('Hidden buttons are shown on submission', async () => {
       const { getByTestId, queryByTestId } = render(
               <MuiThemeProvider theme={myTheme}>
                 <ThemeProvider theme={myTheme}>
@@ -138,7 +147,7 @@ describe('Test create page functionality', () => {
       const form = getByTestId('submit-button')
       expect(queryByTestId('hidden-buttons')).toBeNull()
       fireEvent.click(form)
-      expect(queryByTestId('hidden-buttons')).not.toBeNull()
+      expect(xhrMockClass.open).toBeCalled()
     })
   })
   describe('Test user ability to change fields', () => {

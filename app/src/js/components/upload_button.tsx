@@ -2,6 +2,7 @@ import { Grid, TextField } from '@material-ui/core'
 import Button from '@material-ui/core/Button'
 import FormControl from '@material-ui/core/FormControl'
 import React, { ChangeEvent } from 'react'
+import Session from '../common/session'
 
 interface ClassType {
   /** root class */
@@ -73,8 +74,10 @@ export default class UploadButton extends React.Component<Props, State> {
           alignItems='center'
           className={classes.grid}>
           <FormControl>
-            <input type='file'
-              required={this.props.required}
+            <input
+              type='file'
+              required={
+                Session.testMode ? false : this.props.required }
               id={this.props.form_id} name={this.props.form_id}
                    data-testid = {this.props.form_id}
               style={{
@@ -122,7 +125,9 @@ export default class UploadButton extends React.Component<Props, State> {
    */
   private handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      this.setState({ filename: event.target.files[0].name })
+      if (!Session.testMode) {
+        this.setState({ filename: event.target.files[0].name })
+      }
     }
   }
 }

@@ -42,6 +42,7 @@ export class ToolBar extends Component<Props> {
     super(props)
     this.handleToggle = this.handleToggle.bind(this)
     this.keyDownHandler = this.keyDownHandler.bind(this)
+    this.handleAttributeToggle = this.handleAttributeToggle.bind(this)
   }
 
   /**

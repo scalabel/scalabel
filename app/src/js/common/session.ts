@@ -27,6 +27,9 @@ class Session {
   public window?: Window
   /** Dev mode */
   public devMode: boolean
+  /** if in test mode, needed for integration and end to end testing */
+  // TODO: when we move to node move this into state
+  public testMode: boolean
   /** Connection status */
   public status: ConnectionStatus
 
@@ -39,6 +42,7 @@ class Session {
     this.itemType = ''
     // TODO: make it configurable in the url
     this.devMode = true
+    this.testMode = false
     this.store = configureStore({}, this.devMode)
     this.status = ConnectionStatus.UNSAVED
   }

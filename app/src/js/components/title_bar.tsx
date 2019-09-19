@@ -13,6 +13,9 @@ import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
 
+// how long to wait until saving times out
+export const saveTimeout = 20000
+
 const styles = (theme: Theme) => createStyles({
   appBar: {
     ...defaultAppBar,
@@ -58,6 +61,7 @@ function save (callerComponent: TitleBar) {
   callerComponent.forceUpdate()
   const state = Session.getState()
   const xhr = new XMLHttpRequest()
+  xhr.timeout = saveTimeout
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       Session.status = ConnectionStatus.SAVED
@@ -65,7 +69,7 @@ function save (callerComponent: TitleBar) {
       setTimeout(() => {
         Session.status = ConnectionStatus.UNSAVED
         callerComponent.forceUpdate()
-      }, 5000)
+      }, saveTimeout)
       if (JSON.parse(xhr.response) !== 0) {
         alert('Save failed.')
       }

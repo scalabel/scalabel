@@ -21,11 +21,14 @@ app/dist/
 # potential data directory
 data/
 
+# potential integration testing data directory
+test_data/
+
 #python
 .pyc
 
 # pytype
 .pytype
 
-# vscode sftp setting
-.vscode/sftp.json
+# vscode settings
+.vscode/

@@ -70,7 +70,7 @@ export function initStore (stateJson: {}): void {
  * Init general labeling session.
  * @param {{}}} stateJson: json state from backend
  */
-function initFromJson (stateJson: {}): void {
+export function initFromJson (stateJson: {}): void {
   initStore(stateJson)
   loadData()
   Session.dispatch(updateAll())

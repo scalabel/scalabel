@@ -80,8 +80,9 @@ export function setCurrentPointCloudViewerConfig (
  */
 export function getShape (state: State, itemIndex: number,
                           labelId: number, shapeIndex: number): ShapeType {
-  return state.task.items[itemIndex].shapes[
-    state.task.items[itemIndex].labels[labelId].shapes[shapeIndex]].shape
+  const item = state.task.items[itemIndex]
+  const shapeId = item.labels[labelId].shapes[shapeIndex]
+  return item.shapes[shapeId].shape
 }
 
 /**

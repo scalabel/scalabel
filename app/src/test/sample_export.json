@@ -1,0 +1,922 @@
+[
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 1568928550,
+      "index": 0,
+      "labels": [
+        {
+          "id": 1,
+          "category": "person",
+          "attributes": {},
+          "manualShape": false,
+          "box2d": {
+            "x1": 1,
+            "x2": 10,
+            "y1": 1,
+            "y2": 10
+          },
+          "poly2d": null,
+          "box3d": null
+        },
+        {
+          "id": 2,
+          "category": "person",
+          "attributes": {},
+          "manualShape": false,
+          "box2d": {
+            "x1": 20,
+            "x2": 40,
+            "y1": 20,
+            "y2": 40
+          },
+          "poly2d": null,
+          "box3d": null
+        }
+      ]
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 1568928550,
+      "index": 1,
+      "labels": []
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 1568928550,
+      "index": 2,
+      "labels": []
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 1568928550,
+      "index": 3,
+      "labels": []
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 1568928550,
+      "index": 4,
+      "labels": []
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 5,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 6,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 7,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 8,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 9,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 10,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000112.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000112.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 11,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000113.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000113.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 12,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000114.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000114.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 13,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000115.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000115.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 14,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000116.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000116.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 15,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000117.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000117.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 16,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000118.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000118.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 17,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000119.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000119.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 18,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000120.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000120.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 19,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000121.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000121.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 20,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000122.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000122.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 21,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000123.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000123.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 22,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000082.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000082.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 0,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000083.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000083.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 1,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000084.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000084.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 2,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000085.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000085.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 3,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000086.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000086.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 4,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000087.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000087.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 5,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000088.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000088.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 6,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000089.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000089.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 7,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000090.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000090.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 8,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000091.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000091.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 9,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000092.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000092.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 10,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000093.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000093.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 11,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000094.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000094.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 12,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000095.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000095.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 13,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000096.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000096.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 14,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000097.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000097.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 15,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000098.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000098.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 16,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000099.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000099.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 17,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000124.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000124.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 18,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000125.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000125.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 19,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000126.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000126.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 20,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000127.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000127.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 21,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000128.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000128.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 22,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000129.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000129.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 23,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000130.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000130.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 24,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000131.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000131.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 25,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000132.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000132.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 26,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000133.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000133.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 27,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000134.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000134.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 28,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000135.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000135.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 29,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000136.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000136.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 30,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000137.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000137.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 31,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000138.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000138.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 32,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000139.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000139.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 33,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000140.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000140.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 34,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000141.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000141.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 35,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000142.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000142.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 36,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000143.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000143.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 37,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000144.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000144.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 38,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000145.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000145.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 39,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000146.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000146.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 40,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000147.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000147.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 41,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000148.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000148.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 42,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000149.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000149.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 43,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000150.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000150.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 44,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 0,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 1,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 2,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 3,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 4,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000056.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000056.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 5,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000057.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000057.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 6,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000058.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000058.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 7,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000059.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000059.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 8,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000060.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000060.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 9,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000061.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000061.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 10,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000062.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000062.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 0,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000063.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000063.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 1,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000064.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000064.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 2,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000065.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000065.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 3,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000066.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000066.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 4,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000067.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000067.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 5,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000068.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000068.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 6,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000069.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000069.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 7,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000070.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000070.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 8,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000071.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000071.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 9,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000072.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000072.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 10,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000073.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000073.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 11,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000074.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000074.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 12,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000075.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000075.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 13,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000076.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000076.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 14,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000077.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000077.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 15,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000078.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000078.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 16,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000079.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000079.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 17,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000080.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000080.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 18,
+      "labels": null
+    },
+    {
+      "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000081.jpg",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000081.jpg",
+      "videoName": "",
+      "attributes": null,
+      "timestamp": 10000,
+      "index": 19,
+      "labels": null
+    }
+  ]

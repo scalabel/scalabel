@@ -9,6 +9,8 @@ import { sprintf } from 'sprintf-js'
 import { attributeStyle, checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
+// submission timeout
+export const submissionTimeout = 5000
 interface ClassType {
   /** root class */
   root: string
@@ -201,7 +203,8 @@ export default class CreateForm extends React.Component<Props, State> {
                                 classes.halfWidthText : classes.hidden}
                         InputProps={{
                           inputProps: {
-                            min: 1
+                            'min': 1,
+                            'data-testid': 'tasksize-input'
                           }
                         }}
                         margin='normal'
@@ -284,6 +287,14 @@ export default class CreateForm extends React.Component<Props, State> {
             </div>
     )
   }
+  /**
+   * gets form data from submission event this is overriden during
+   * integration testing
+   * @param event
+   */
+  protected getFormData (event: ChangeEvent<HTMLFormElement>): FormData {
+    return new FormData(event.target)
+  }
 
   /**
    * Handles submission event
@@ -293,6 +304,7 @@ export default class CreateForm extends React.Component<Props, State> {
     event.preventDefault()
     const that = this
     const x = new XMLHttpRequest()
+    x.timeout = submissionTimeout
     x.onreadystatechange = () => {
       if (x.readyState === 4) {
         if (x.response) {
@@ -313,6 +325,9 @@ export default class CreateForm extends React.Component<Props, State> {
           if (that.props.projectReloadCallback) {
             that.props.projectReloadCallback()
           }
+          if (!that.state.hasSubmitted) {
+            that.setState({ hasSubmitted: true })
+          }
           return
         }
       }
@@ -320,11 +335,8 @@ export default class CreateForm extends React.Component<Props, State> {
     // CHANGE AFTER VERSION UPDATE
     const version = 'v1'
     x.open('POST', sprintf('./postProject?v=%s', version))
-    const formData = new FormData(event.target)
+    const formData = this.getFormData(event)
     x.send(formData)
-    if (!this.state.hasSubmitted) {
-      this.setState({ hasSubmitted: true })
-    }
   }
   /**
    * handles instruction url
