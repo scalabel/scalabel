@@ -31,4 +31,4 @@ test_data/
 .pytype
 
 # vscode settings
-.vscode/
+.vscode/sftp.json
