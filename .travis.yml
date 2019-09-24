@@ -8,12 +8,14 @@ go:
 go_import_path: github.com/ucbdrive/scalabel
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y npm python3-pip python3-setuptools
+  - sudo apt-get install -y npm python3-pip python3-setuptools build-essential
+    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
   - npm install -g npm@latest
 install:
   - sudo pip3 install --upgrade pip
   - sudo pip3 install -r scripts/requirements.txt
   - bash scripts/install_go_packages.sh
+  - npm install canvas --build-from-source
   - npm install
 script:
   - pylint scripts/

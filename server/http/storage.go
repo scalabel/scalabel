@@ -145,8 +145,8 @@ func (ds *DynamodbStorage) Init(path string) error {
 		}
 		_, err = ds.svc.CreateTable(input)
 		if err != nil {
-		Error.Println(err)
-	}
+			Error.Println(err)
+		}
 		for i := 0; i < 30; i++ {
 			if ds.HasTable() {
 				return nil
@@ -329,12 +329,12 @@ func (ss *S3Storage) ListKeys(prefix string) []string {
 		}
 		if len(continuation_token) > 0 {
 			params = &s3.ListObjectsV2Input{
-				Bucket: aws.String(ss.BucketName),
-				Prefix: aws.String(path.Join(ss.DataDir, prefix)),
+				Bucket:            aws.String(ss.BucketName),
+				Prefix:            aws.String(path.Join(ss.DataDir, prefix)),
 				ContinuationToken: &continuation_token,
 			}
 		}
-		
+
 		resp, err := ss.svc.ListObjectsV2(params)
 		if err != nil {
 			Error.Println(err)

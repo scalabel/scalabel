@@ -921,7 +921,13 @@ func getItemsFromProjectForm(r *http.Request,
 func CreateTasks(project Project) {
 	index := 0
 	if project.Options.ItemType == "video" {
-		for _, itemList := range project.Items {
+		var keys []string
+		for k := range project.Items {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			itemList := project.Items[k]
 			numLabelImport := 0
 			numLabeledItemImport := 0
 			for _, item := range itemList {
