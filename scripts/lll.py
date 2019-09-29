@@ -5,6 +5,8 @@ import glob
 import re
 from argparse import ArgumentParser
 from os.path import join
+import sys
+
 from colorama import Fore
 
 
@@ -68,7 +70,7 @@ def main():
         print('All good!')
     else:
         print('\nFound {} errors'.format(errors))
-    exit(errors > 0)
+    sys.exit(errors > 0)
 
 
 if __name__ == "__main__":

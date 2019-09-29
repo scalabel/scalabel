@@ -311,8 +311,8 @@ export function changeShapes (
   const items = assignToArray(task.items, newItems, action.itemIndices)
   // select the label of the first shape on the current item
   if (action.sessionId === state.session.id) {
-    const index = _.find(action.itemIndices, user.select.item)
-    if (index) {
+    const index = _.find(action.itemIndices, (v) => v === user.select.item)
+    if (index !== undefined) {
       const labelId = items[index].shapes[shapeIds[index][0]].label[0]
       user = updateUserSelect(user, { label: labelId })
     }

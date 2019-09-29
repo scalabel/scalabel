@@ -114,7 +114,8 @@ def upload_files_to_s3(args):
     file_list = glob.glob(join(args.tar_dir, '*'))
     for f in file_list:
         try:
-            s3.Bucket(bn).upload_file(f, join(args.s3_folder,
+            # pylint is added here because it thinks boto3.resource is a string
+            s3.Bucket(bn).upload_file(f, join(args.s3_folder,  # pylint: disable=no-member
                                               os.path.basename(f)),
                                       ExtraArgs={'ACL': 'public-read'})
         except boto3.exceptions.S3UploadFailedError as e:
