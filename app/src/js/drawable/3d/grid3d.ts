@@ -51,8 +51,9 @@ export class Grid3D extends THREE.Group {
    */
   public toPlane (): Plane3DType {
     return {
-      center: (new Vector3D()).fromThree(this.position),
-      orientation: (new Vector3D()).fromThree(this.rotation.toVector3())
+      center: (new Vector3D()).fromThree(this.position).toObject(),
+      orientation:
+        (new Vector3D()).fromThree(this.rotation.toVector3()).toObject()
     }
   }
 
