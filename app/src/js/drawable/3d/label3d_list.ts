@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { changeLabelProps, deleteLabel } from '../../action/common'
+import { deleteLabel, selectLabel } from '../../action/common'
 import Session from '../../common/session'
 import { LabelTypes } from '../../common/types'
 import { CubeType, State } from '../../functional/types'
@@ -172,9 +172,7 @@ export class Label3DList {
   public onDoubleClick (): boolean {
     if (this._highlightedLabel !== null) {
       // Set current label as selected label
-      Session.dispatch(changeLabelProps(
-        this._state.user.select.item, this._highlightedLabel.labelId, {}
-      ))
+      Session.dispatch(selectLabel(this._highlightedLabel.labelId))
       return true
     }
     return false
@@ -199,9 +197,7 @@ export class Label3DList {
       if (consumed) {
         this._mouseDownOnSelection = true
         // Set current label as selected label
-        Session.dispatch(changeLabelProps(
-          this._state.user.select.item, this._highlightedLabel.labelId, {}
-        ))
+        Session.dispatch(selectLabel(this._highlightedLabel.labelId))
         return false
       }
     }
@@ -291,9 +287,7 @@ export class Label3DList {
         return true
       case 'Escape':
       case 'Enter':
-        Session.dispatch(changeLabelProps(
-          this._state.user.select.item, -1, {}
-        ))
+        Session.dispatch(selectLabel(-1))
         return true
       case 'Backspace':
         if (this._selectedLabel) {
@@ -307,13 +301,9 @@ export class Label3DList {
       case 'p':
         if (this._plane) {
           if (this._selectedLabel === this._plane) {
-            Session.dispatch(changeLabelProps(
-              this._state.user.select.item, -1, {}
-            ))
+            Session.dispatch(selectLabel(-1))
           } else {
-            Session.dispatch(changeLabelProps(
-              this._state.user.select.item, this._plane.labelId, {}
-            ))
+            Session.dispatch(selectLabel(this._plane.labelId))
           }
           return true
         }
