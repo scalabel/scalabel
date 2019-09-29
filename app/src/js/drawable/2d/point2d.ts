@@ -1,5 +1,5 @@
-import { Vector2D } from '../math/vector2d'
-import { Context2D, toCssColor } from './util'
+import { Vector2D } from '../../math/vector2d'
+import { Context2D, toCssColor } from '../util'
 
 export interface Point2DStyle {
   /** radius of the point on drawing */

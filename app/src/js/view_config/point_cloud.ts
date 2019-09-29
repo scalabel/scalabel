@@ -35,8 +35,8 @@ export function updateThreeCameraAndRenderer (
   camera.lookAt(target.position)
 
   if (renderer && canvas) {
-    renderer.setSize(canvas.offsetWidth,
-      canvas.offsetHeight)
+    renderer.setSize(canvas.width,
+      canvas.height)
   }
 }
 
@@ -57,4 +57,24 @@ export function convertMouseToNDC (
   y = -2 * y + 1
 
   return [x, y]
+}
+
+/**
+ * Get projection from mouse into scene
+ * @param x
+ * @param y
+ * @param camera
+ */
+export function projectionFromNDC (
+  x: number, y: number, camera: THREE.Camera
+): THREE.Ray {
+  const direction = new THREE.Vector3(x, y, -1)
+
+  direction.unproject(camera)
+  direction.sub(camera.position)
+  direction.normalize()
+
+  const projection = new THREE.Ray(camera.position, direction)
+
+  return projection
 }

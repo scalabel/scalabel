@@ -62,6 +62,8 @@ export interface CubeType {
   orientation: Vector3Type
   /** Anchor corner index for reshaping */
   anchorIndex: number
+  /** ID of the surface this box is attached to */
+  surfaceId: number
 }
 
 export interface Point2DType {
@@ -80,7 +82,15 @@ export interface PathPoint2DType {
   type: string
 }
 
-export type ShapeType = RectType | CubeType | Point2DType | PathPoint2DType
+export interface Plane3DType {
+  /** Plane origin in world */
+  center: Vector3Type
+  /** orientation in Euler */
+  orientation: Vector3Type
+}
+
+export type ShapeType =
+  RectType | CubeType | Point2DType | PathPoint2DType | Plane3DType
 
 export interface IndexedShapeType {
   /** ID of the shape */

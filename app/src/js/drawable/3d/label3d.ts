@@ -1,9 +1,12 @@
 import * as THREE from 'three'
-import { LabelType, ShapeType, State } from '../functional/types'
+import { LabelType, ShapeType, State } from '../../functional/types'
+import { getColorById } from '../util'
+import { TransformationControl } from './control/transformation_control'
 import { Cube3D } from './cube3d'
-import { getColorById } from './util'
+import { Grid3D } from './grid3d'
+import { Plane3D } from './plane3d'
 
-type Shape = Cube3D
+type Shape = Cube3D | Grid3D
 
 /**
  * Abstract class for 3D drawable labels
@@ -24,6 +27,8 @@ export abstract class Label3D {
   protected _highlighted: boolean
   /** rgba color decided by labelId */
   protected _color: number[]
+  /** plane if attached */
+  protected _plane: Plane3D | null
 
   constructor () {
     this._index = -1
@@ -33,6 +38,7 @@ export abstract class Label3D {
     this._highlighted = false
     this._label = null
     this._color = [0, 0, 0, 1]
+    this._plane = null
   }
 
   /**
@@ -58,55 +64,62 @@ export abstract class Label3D {
   }
 
   /** highlight the label */
-  public setHighlighted (h: boolean) {
-    this._highlighted = h
+  public setHighlighted (intersection?: THREE.Intersection) {
+    if (intersection) {
+      this._highlighted = true
+    } else {
+      this._highlighted = false
+    }
   }
+
+  /** Attach label to plane */
+  public attachToPlane (plane: Plane3D) {
+    if (plane === this._plane) {
+      return
+    }
+    this._plane = plane
+  }
+
+  /** Attach label to plane */
+  public detachFromPlane () {
+    if (this._plane) {
+      this._plane = null
+    }
+  }
+
+  /** Attach control */
+  public abstract attachControl (control: TransformationControl): void
+
+  /** Attach control */
+  public abstract detachControl (control: TransformationControl): void
 
   /**
    * Modify ThreeJS objects to draw label
    * @param {THREE.Scene} scene: ThreeJS Scene Object
    */
-  public abstract render (scene: THREE.Scene): void
+  public abstract render (scene: THREE.Scene, camera: THREE.Camera): void
 
   /**
-   * Set up for drag action
-   * @param viewPlaneNormal
-   * @param cameraPosition
-   * @param intersectionPoint
-   */
-  public abstract startDrag (
-    viewPlaneNormal: THREE.Vector3,
-    cameraPosition: THREE.Vector3,
-    intersectionPoint: THREE.Vector3
-  ): void
-
-  /**
-   * Mouse movement while mouse down on box (from raycast)
+   * Handle mouse move
    * @param projection
    */
-  public abstract drag (projection: THREE.Vector3): void
+  public abstract onMouseDown (
+    x: number, y: number, camera: THREE.Camera
+  ): boolean
 
   /**
-   * Clean up for drag action
-   * @param viewPlaneNormal
-   * @param cameraPosition
-   * @param intersectionPoint
-   * @param editMode
+   * Handle mouse up
+   * @param projection
    */
-  public abstract stopDrag (): void
+  public abstract onMouseUp (): void
 
   /**
-   * Handle keyboard events
-   * @param {KeyboardEvent} e
-   * @returns true if consumed, false otherwise
+   * Handle mouse move
+   * @param projection
    */
-  public abstract onKeyDown (e: KeyboardEvent): boolean
-
-  /**
-   * Handle keyboard events
-   * @returns true if consumed, false otherwise
-   */
-  public abstract onKeyUp (e: KeyboardEvent): boolean
+  public abstract onMouseMove (
+    x: number, y: number, camera: THREE.Camera
+  ): boolean
 
   /**
    * Expand the primitive shapes to drawable shapes
@@ -121,7 +134,9 @@ export abstract class Label3D {
    * Initialize label
    * @param {State} state
    */
-  public abstract init (state: State): void
+  public abstract init (
+    state: State, surfaceId?: number, temporary?: boolean
+  ): void
 
   /**
    * Return a list of the shape for inspection and testing

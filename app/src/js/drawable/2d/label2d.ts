@@ -1,8 +1,8 @@
 import _ from 'lodash'
-import { LabelType, ShapeType, State } from '../functional/types'
-import { Size2D } from '../math/size2d'
-import { Vector2D } from '../math/vector2d'
-import { Context2D, getColorById } from './util'
+import { LabelType, ShapeType, State } from '../../functional/types'
+import { Size2D } from '../../math/size2d'
+import { Vector2D } from '../../math/vector2d'
+import { Context2D, getColorById } from '../util'
 
 export enum DrawMode {
   VIEW,

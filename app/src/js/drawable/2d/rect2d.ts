@@ -1,7 +1,7 @@
-import { makeRect } from '../functional/states'
-import { RectType } from '../functional/types'
-import { Vector } from '../math/vector'
-import { Context2D, toCssColor } from './util'
+import { makeRect } from '../../functional/states'
+import { RectType } from '../../functional/types'
+import { Vector } from '../../math/vector'
+import { Context2D, toCssColor } from '../util'
 
 export interface Rect2DStyle {
   /** line width of the rect sides */

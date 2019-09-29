@@ -1,14 +1,14 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import Session from '../common/session'
-import { LabelTypes } from '../common/types'
-import { State } from '../functional/types'
-import { Size2D } from '../math/size2d'
-import { Vector2D } from '../math/vector2d'
+import Session from '../../common/session'
+import { LabelTypes } from '../../common/types'
+import { State } from '../../functional/types'
+import { Size2D } from '../../math/size2d'
+import { Vector2D } from '../../math/vector2d'
+import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { DrawMode, Label2D } from './label2d'
 import { Tag2D } from './tag2d'
-import { Context2D } from './util'
 
 /**
  * Make a new drawable label based on the label type

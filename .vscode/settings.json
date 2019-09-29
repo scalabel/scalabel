@@ -51,7 +51,6 @@
     "go.lintFlags": [
         "--fast"
     ],
-    "files.autoSave": "afterDelay",
     "spellright.language": [
         "en"
     ],
@@ -62,4 +61,11 @@
         "typescript"
     ],
     "jest.pathToJest": "npm run test --"
+    "files.exclude": {
+        "**/node_modules/**": true,
+        "node_modules": true
+    },
+    "files.watcherExclude": {
+        "node_modules": true
+    }
 }

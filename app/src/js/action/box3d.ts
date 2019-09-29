@@ -16,9 +16,9 @@ import { AddLabelsAction } from './types'
 export function addBox3dLabel (
   itemIndex: number, category: number[],
   center: Vector3Type, size: Vector3Type,
-  orientation: Vector3Type): AddLabelsAction {
+  orientation: Vector3Type, surfaceId: number = -1): AddLabelsAction {
   // create the rect object
-  const cube = makeCube({ center, size, orientation })
+  const cube = makeCube({ center, size, orientation, surfaceId })
   const label = makeLabel({ type: LabelTypes.BOX_3D, category })
   return actions.addLabel(itemIndex, label, [ShapeTypes.CUBE], [cube])
 }

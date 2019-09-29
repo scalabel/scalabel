@@ -1,11 +1,12 @@
 import React from 'react'
 import Session from '../common/session'
 import { getCurrentImageViewerConfig } from '../functional/state_util'
-import ViewerConfigUpdater from '../view/viewer_config'
+import ViewerConfigUpdater from '../view_config/viewer_config'
 import ImageViewer from './image_viewer'
 import Label2dViewer from './label2d_viewer'
 import Label3dViewer from './label3d_viewer'
 import MouseEventListeners from './mouse_event_listeners'
+import PlayerControl from './player_control'
 import PointCloudViewer from './point_cloud_viewer'
 
 /**
@@ -79,13 +80,13 @@ class ViewerContainer extends React.Component<{}> {
       /* FIXME: set correct props */
       views.push(<ImageViewer key={'imageView'} display={null} />)
       if (Session.getState().task.config.labelTypes[0] === 'box3d') {
-        views.push(<Label3dViewer key={'label3dView'} />)
+        views.push(<Label3dViewer key={'label3dView'} display={null}/>)
       } else {
         views.push(<Label2dViewer key={'label2dView'} display={null} />)
       }
     } else if (Session.itemType === 'pointcloud') {
-      views.push(<PointCloudViewer key={'pointCloudView'}/>)
-      views.push(<Label3dViewer key={'label3dView'} />)
+      views.push(<PointCloudViewer key={'pointCloudView'} display={null}/>)
+      views.push(<Label3dViewer key={'label3dView'} display={null} />)
     }
 
     let viewsWithProps = views
@@ -104,6 +105,10 @@ class ViewerContainer extends React.Component<{}> {
       }
       )
     }
+
+    const playerControl = (<PlayerControl key='player-control'
+      num_frames={Session.getState().task.items.length}
+    />)
 
     return (
         <div
@@ -150,6 +155,7 @@ class ViewerContainer extends React.Component<{}> {
             />
             {viewsWithProps}
           </div>
+          { playerControl }
         </div >
     )
   }

@@ -17,7 +17,7 @@ export abstract class Viewer<Props> extends Component<Props> {
    * Execute when component state is updated
    */
   public componentDidUpdate () {
-    this.updateState(this.state.session)
+    this.updateState(this.state)
     this.redraw()
   }
 

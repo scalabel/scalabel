@@ -115,7 +115,7 @@ export const listButtonStyle = () => ({
 })
 
 export const label2dViewStyle = () => createStyles({
-  label_canvas: {
+  label2d_canvas: {
     'position': 'absolute',
     'z-index': 1
   },

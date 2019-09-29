@@ -3,7 +3,7 @@ import { ImageViewerConfigType } from '../functional/types'
 import {
   MAX_SCALE,
   MIN_SCALE
-} from '../view/image'
+} from '../view_config/image'
 import * as types from './types'
 
 /**

@@ -2,14 +2,16 @@ import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
-import { Label3DList } from '../drawable/label3d_list'
-import { getCurrentPointCloudViewerConfig, isItemLoaded } from '../functional/state_util'
+import Session from '../common/session'
+import { Label3DList } from '../drawable/3d/label3d_list'
+import { getCurrentImageViewerConfig, getCurrentPointCloudViewerConfig, isItemLoaded } from '../functional/state_util'
 import { PointCloudViewerConfigType, State } from '../functional/types'
-import { convertMouseToNDC, updateThreeCameraAndRenderer } from '../view/point_cloud'
+import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
+import { convertMouseToNDC, updateThreeCameraAndRenderer } from '../view_config/point_cloud'
 import { Viewer } from './viewer'
 
 const styles = () => createStyles({
-  canvas: {
+  label3d_canvas: {
     position: 'absolute',
     height: '100%',
     width: '100%'
@@ -18,12 +20,14 @@ const styles = () => createStyles({
 
 interface ClassType {
   /** CSS canvas name */
-  canvas: string
+  label3d_canvas: string
 }
 
 interface Props {
   /** CSS class */
   classes: ClassType
+  /** container */
+  display: HTMLDivElement | null
 }
 
 /**
@@ -46,6 +50,10 @@ function normalizeCoordinatesToCanvas (
 class Label3dViewer extends Viewer<Props> {
   /** Canvas to draw on */
   private canvas: HTMLCanvasElement | null
+  /** Container */
+  private display: HTMLDivElement | null
+  /** Current scale */
+  private scale: number
   /** ThreeJS Renderer */
   private renderer?: THREE.WebGLRenderer
   /** ThreeJS Scene object */
@@ -54,17 +62,11 @@ class Label3dViewer extends Viewer<Props> {
   private camera: THREE.PerspectiveCamera
   /** ThreeJS sphere mesh for indicating camera target location */
   private target: THREE.Mesh
-  /** ThreeJS raycaster */
-  private raycaster: THREE.Raycaster
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
 
   /** drawable label list */
   private _labels: Label3DList
-
-  /** Ref Handler */
-  private refInitializer:
-    (component: HTMLCanvasElement | null) => void
 
   /** UI onr */
   private mouseDownHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
@@ -72,6 +74,8 @@ class Label3dViewer extends Viewer<Props> {
   private mouseUpHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
   /** UI onr */
   private mouseMoveHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
+  /** UI onr */
+  private doubleClickHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
   /** UI onr */
   private keyDownHandler: (e: KeyboardEvent) => void
   /** UI onr */
@@ -93,23 +97,20 @@ class Label3dViewer extends Viewer<Props> {
         }))
     this.scene.add(this.target)
 
-    this.raycaster = new THREE.Raycaster()
-    this.raycaster.near = 1.0
-    this.raycaster.far = 100.0
+    this._labels = new Label3DList(this.camera)
 
+    this.display = null
     this.canvas = null
+    this.scale = 1
 
     this._keyDownMap = {}
-
-    this._labels = new Label3DList()
-
-    this.refInitializer = this.initializeRefs.bind(this)
 
     this.mouseDownHandler = this.onMouseDown.bind(this)
     this.mouseUpHandler = this.onMouseUp.bind(this)
     this.mouseMoveHandler = this.onMouseMove.bind(this)
     this.keyDownHandler = this.onKeyDown.bind(this)
     this.keyUpHandler = this.onKeyUp.bind(this)
+    this.doubleClickHandler = this.onDoubleClick.bind(this)
   }
 
   /**
@@ -126,12 +127,26 @@ class Label3dViewer extends Viewer<Props> {
    */
   public render () {
     const { classes } = this.props
-    return (
-      <canvas className={classes.canvas} ref={this.refInitializer}
-        onMouseDown={this.mouseDownHandler} onMouseUp={this.mouseUpHandler}
-        onMouseMove={this.mouseMoveHandler}
-      />
-    )
+
+    let canvas = (<canvas
+      key='label3d-canvas'
+      className={classes.label3d_canvas}
+      ref={(ref) => { this.initializeRefs(ref) }}
+      onMouseDown={this.mouseDownHandler}
+      onMouseUp={this.mouseUpHandler}
+      onMouseMove={this.mouseMoveHandler}
+      onDoubleClick={this.doubleClickHandler}
+    />)
+
+    if (this.display) {
+      const displayRect = this.display.getBoundingClientRect()
+      canvas = React.cloneElement(
+        canvas,
+        { height: displayRect.height, width: displayRect.width }
+      )
+    }
+
+    return canvas
   }
 
   /**
@@ -139,7 +154,7 @@ class Label3dViewer extends Viewer<Props> {
    * @return {boolean}
    */
   public redraw (): boolean {
-    const state = this.state.session
+    const state = this.state
     const item = state.user.select.item
     const loaded = state.session.items[item].loaded
     if (loaded) {
@@ -155,6 +170,7 @@ class Label3dViewer extends Viewer<Props> {
    * notify state is updated
    */
   protected updateState (state: State): void {
+    this.display = this.props.display
     this._labels.updateState(state, state.user.select.item)
   }
 
@@ -174,7 +190,20 @@ class Label3dViewer extends Viewer<Props> {
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   private onMouseDown (e: React.MouseEvent<HTMLCanvasElement>) {
-    if (this._labels.onMouseDown()) {
+    if (!this.canvas) {
+      return
+    }
+    const normalized = normalizeCoordinatesToCanvas(
+      e.clientX, e.clientY, this.canvas
+    )
+    const NDC = convertMouseToNDC(
+      normalized[0],
+      normalized[1],
+      this.canvas
+    )
+    const x = NDC[0]
+    const y = NDC[1]
+    if (this._labels.onMouseDown(x, y)) {
       e.stopPropagation()
     }
   }
@@ -184,6 +213,9 @@ class Label3dViewer extends Viewer<Props> {
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   private onMouseUp (e: React.MouseEvent<HTMLCanvasElement>) {
+    if (!this.canvas) {
+      return
+    }
     if (this._labels.onMouseUp()) {
       e.stopPropagation()
     }
@@ -213,11 +245,21 @@ class Label3dViewer extends Viewer<Props> {
     const x = NDC[0]
     const y = NDC[1]
 
-    if (this._labels.onMouseMove(x, y, this.camera, this.raycaster)) {
+    if (this._labels.onMouseMove(x, y)) {
       e.stopPropagation()
     }
 
     this.renderThree()
+  }
+
+  /**
+   * Handle double click
+   * @param _e
+   */
+  private onDoubleClick (e: React.MouseEvent<HTMLCanvasElement>) {
+    if (this._labels.onDoubleClick()) {
+      e.stopPropagation()
+    }
   }
 
   /**
@@ -255,13 +297,34 @@ class Label3dViewer extends Viewer<Props> {
     }
 
     if (component.nodeName === 'CANVAS') {
-      this.canvas = component
-    }
+      if (this.canvas !== component) {
+        this.canvas = component
+        const rendererParams = { canvas: this.canvas, alpha: true }
+        this.renderer = new THREE.WebGLRenderer(rendererParams)
+      }
 
-    if (this.canvas) {
-      const rendererParams = { canvas: this.canvas, alpha: true }
-      this.renderer = new THREE.WebGLRenderer(rendererParams)
-      if (isItemLoaded(this.state.session)) {
+      if (this.canvas && this.display) {
+        if (Session.itemType === 'image') {
+          const config = getCurrentImageViewerConfig(this.state)
+
+          if (config.viewScale < MIN_SCALE || config.viewScale >= MAX_SCALE) {
+            return
+          }
+          const newParams =
+            updateCanvasScale(
+              this.state,
+              this.display,
+              this.canvas,
+              null,
+              config,
+              config.viewScale / this.scale,
+              false
+            )
+          this.scale = newParams[3]
+        }
+      }
+
+      if (isItemLoaded(this.state)) {
         this.updateRenderer()
       }
     }
@@ -287,7 +350,7 @@ class Label3dViewer extends Viewer<Props> {
    * Get point cloud view config
    */
   private getCurrentViewerConfig (): PointCloudViewerConfigType {
-    return (getCurrentPointCloudViewerConfig(this.state.session))
+    return (getCurrentPointCloudViewerConfig(this.state))
   }
 }
 

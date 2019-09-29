@@ -2,15 +2,11 @@ import * as React from 'react'
 import Session from '../common/session'
 import { State as StateType } from '../functional/types'
 
-interface State {
-  /** state of the session */
-  session: StateType
-}
-
 /**
  * Root class of our components
  */
-export abstract class Component<Props> extends React.Component<Props, State> {
+export abstract class Component<Props> extends
+  React.Component<Props, StateType> {
   /**
    * General constructor
    * @param props: component props
@@ -18,9 +14,7 @@ export abstract class Component<Props> extends React.Component<Props, State> {
   constructor (props: Readonly<Props>) {
     super(props)
     Session.subscribe(this.onStateUpdated.bind(this))
-    this.state = {
-      session: Session.getState()
-    }
+    this.state = Session.getState()
   }
 
   /**
@@ -28,8 +22,6 @@ export abstract class Component<Props> extends React.Component<Props, State> {
    * When the global state is updated, this component should be updated
    */
   private onStateUpdated (): void {
-    this.setState({
-      session: Session.getState()
-    })
+    this.setState(Session.getState())
   }
 }

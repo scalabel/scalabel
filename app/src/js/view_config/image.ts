@@ -3,7 +3,7 @@ import { decodeControlIndex, rgbToIndex } from '../drawable/util'
 import {
   getCurrentItem
 } from '../functional/state_util'
-import { ImageViewerConfigType } from '../functional/types'
+import { ImageViewerConfigType, State } from '../functional/types'
 import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'
 
@@ -23,8 +23,8 @@ export const SCROLL_ZOOM_RATIO = 1.03
  * Get the current item in the state
  * @return {Size2D}
  */
-export function getCurrentImageSize (): Size2D {
-  const item = getCurrentItem(Session.getState())
+export function getCurrentImageSize (state: State): Size2D {
+  const item = getCurrentItem(state)
   const image = Session.images[item.index]
   return new Size2D(image.width, image.height)
 }
@@ -176,17 +176,19 @@ export function imageDataToHandleId (data: Uint8ClampedArray) {
  * @param upRes
  */
 export function updateCanvasScale (
+  state: State,
   display: HTMLDivElement,
   canvas: HTMLCanvasElement,
-  context: CanvasRenderingContext2D,
+  context: CanvasRenderingContext2D | null,
   config: ImageViewerConfigType,
   zoomRatio: number,
   upRes: boolean
 ): number[] {
-  const state = Session.getState()
   const displayRect = display.getBoundingClientRect()
 
-  context.scale(zoomRatio, zoomRatio)
+  if (context) {
+    context.scale(zoomRatio, zoomRatio)
+  }
 
   // resize canvas
   const item = getCurrentItem(state)

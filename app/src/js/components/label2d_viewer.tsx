@@ -1,7 +1,6 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
-import Session from '../common/session'
-import { Label2DList } from '../drawable/label2d_list'
+import { Label2DList } from '../drawable/2d/label2d_list'
 import { getCurrentImageViewerConfig } from '../functional/state_util'
 import { State } from '../functional/types'
 import { Vector2D } from '../math/vector2d'
@@ -16,12 +15,12 @@ import {
   toCanvasCoords,
   UP_RES_RATIO,
   updateCanvasScale
-} from '../view/image'
+} from '../view_config/image'
 import { Viewer } from './viewer'
 
 interface ClassType {
   /** label canvas */
-  label_canvas: string
+  label2d_canvas: string
   /** control canvas */
   control_canvas: string
 }
@@ -155,8 +154,8 @@ export class Label2dViewer extends Viewer<Props> {
       }}
     />)
     let labelCanvas = (<canvas
-      key='label-canvas'
-      className={classes.label_canvas}
+      key='label2d-canvas'
+      className={classes.label2d_canvas}
       ref={(canvas) => {
         if (canvas && this.display) {
           this.labelCanvas = canvas
@@ -294,7 +293,10 @@ export class Label2dViewer extends Viewer<Props> {
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     if (this._labels.onMouseMove(
-      mousePos, getCurrentImageSize(), labelIndex, handleIndex)) {
+      mousePos,
+      getCurrentImageSize(this.state),
+      labelIndex, handleIndex
+    )) {
       e.stopPropagation()
       this.redraw()
     }
@@ -344,9 +346,8 @@ export class Label2dViewer extends Viewer<Props> {
     if (!this.display) {
       return
     }
-    const state = Session.getState()
     const config =
-      getCurrentImageViewerConfig(state)
+      getCurrentImageViewerConfig(this.state)
 
     if (config.viewScale < MIN_SCALE || config.viewScale >= MAX_SCALE) {
       return
@@ -359,6 +360,7 @@ export class Label2dViewer extends Viewer<Props> {
         this.scale
       ] =
       updateCanvasScale(
+        this.state,
         this.display,
         canvas,
         context,
