@@ -176,7 +176,6 @@ function loadPointClouds (): void {
     if (_.isEmpty(config)) {
       config = makePointCloudViewerConfig()
     }
-    // tslint:disable-next-line
     loader.load(item.url, (geometry: THREE.BufferGeometry) => {
 
       const material = new THREE.ShaderMaterial({
