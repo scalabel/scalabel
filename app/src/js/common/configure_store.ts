@@ -1,4 +1,4 @@
-import { createStore, Reducer, Store } from 'redux'
+import { applyMiddleware, createStore, Middleware, Reducer, Store } from 'redux'
 import undoable, { includeAction, StateWithHistory } from 'redux-undo'
 import {
   ADD_LABELS,
@@ -12,18 +12,20 @@ import { reducer } from './reducer'
  * Configure the main store for the state
  * @param {Partial<State>} json: initial state
  * @param {boolean} devMode: whether to turn on dev mode
+ * @param {Middleware} middleware: optional middleware for redux
  * @return {Store<StateWithHistory<State>>}
  */
 export function configureStore (
     initialState: Partial<State>,
-    devMode: boolean = false): Store<StateWithHistory<State>> {
+    devMode: boolean = false,
+    middleware?: Middleware): Store<StateWithHistory<State>> {
   const initialHistory = {
     past: Array<State>(),
     present: makeState(initialState),
     future: Array<State>()
   }
 
-  const undoableReduer: Reducer<StateWithHistory<State>> = undoable(reducer, {
+  const undoableReducer: Reducer<StateWithHistory<State>> = undoable(reducer, {
     limit: 20, // add a limit to history
     filter: includeAction([
       // undoable actions
@@ -33,5 +35,16 @@ export function configureStore (
     debug: devMode
   })
 
-  return createStore(undoableReduer, initialHistory)
+  if (middleware === undefined) {
+    return createStore(
+      undoableReducer,
+      initialHistory
+    )
+  } else {
+    return createStore(
+      undoableReducer,
+      initialHistory,
+      applyMiddleware(middleware)
+    )
+  }
 }

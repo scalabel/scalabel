@@ -94,7 +94,7 @@ describe('Save button functionality', () => {
 
     xhrMockClass.onreadystatechange()
     expect(window.alert).toBeCalled()
-    expect(Session.status).toBe(ConnectionStatus.SAVED)
+    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
 
     xhrMockClass.response = JSON.stringify(0)
   })

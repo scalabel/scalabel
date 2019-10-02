@@ -30,6 +30,8 @@ export const reducer: Reducer<State> = (
       return common.loadItem(state, action as types.LoadItemAction)
     case types.UPDATE_ALL:
       return common.updateAll(state)
+    case types.UPDATE_TASK:
+      return common.updateTask(state, action as types.UpdateTaskAction)
     case types.UPDATE_IMAGE_VIEWER_CONFIG:
       return image.updateImageViewerConfig(
         state, action as types.UpdateImageViewerConfigAction

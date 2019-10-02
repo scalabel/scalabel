@@ -4,13 +4,14 @@
 import {
   ImageViewerConfigType,
   LabelType,
-  PointCloudViewerConfigType, Select, ShapeType, ViewerConfigType
+  PointCloudViewerConfigType, Select, ShapeType, TaskType, ViewerConfigType
 } from '../functional/types'
 
 export const INIT_SESSION = 'INIT_SESSION'
 export const CHANGE_SELECT = 'CHANGE_SELECT'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
+export const UPDATE_TASK = 'UPDATE_TASK'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -32,11 +33,23 @@ export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW'
 export const UPDATE_POINT_CLOUD_VIEWER_CONFIG =
   'UPDATE_POINT_CLOUD_VIEWER_CONFIG'
 
-interface BaseAction {
+export const TASK_ACTION_TYPES = [
+  ADD_LABELS,
+  CHANGE_SHAPES,
+  CHANGE_LABELS,
+  LINK_LABELS,
+  DELETE_LABELS,
+  ADD_TRACK,
+  MERGE_TRACKS
+]
+
+export interface BaseAction {
   /** type of the action */
   type: string
   /** id of the session that initiates the action */
   sessionId: string
+  /** timestamp given by backend */
+  timestamp?: string
 }
 
 export type InitSessionAction = BaseAction
@@ -54,6 +67,11 @@ export interface LoadItemAction extends BaseAction {
 }
 
 export type UpdateAllAction = BaseAction
+
+export interface UpdateTaskAction extends BaseAction {
+  /** task data to use */
+  newTask: TaskType
+}
 
 export interface UpdateImageViewerConfigAction extends BaseAction {
   /** fields to update */
@@ -126,18 +144,28 @@ export interface UpdatePointCloudViewerConfigAction extends BaseAction {
   newFields: Partial<PointCloudViewerConfigType>
 }
 
-export type ActionType =
-  | InitSessionAction
-  | ChangeSelectAction
+export type SessionActionType =
+  InitSessionAction
   | LoadItemAction
   | UpdateAllAction
+  | UpdateTaskAction
+
+export type UserActionType =
+  ChangeSelectAction
+  | ToggleAssistantViewAction
   | UpdateImageViewerConfigAction
-  | AddLabelsAction
-  | AddTrackAction
-  | MergeTrackAction
+  | UpdatePointCloudViewerConfigAction
+
+export type TaskActionType =
+  AddLabelsAction
   | ChangeShapesAction
   | ChangeLabelsAction
-  | LinkLabelsAction
   | DeleteLabelsAction
-  | ToggleAssistantViewAction
-  | UpdatePointCloudViewerConfigAction
+  | LinkLabelsAction
+  | AddTrackAction
+  | MergeTrackAction
+
+export type ActionType =
+  SessionActionType
+  | UserActionType
+  | TaskActionType

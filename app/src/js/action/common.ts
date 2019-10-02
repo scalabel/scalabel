@@ -1,11 +1,23 @@
 import Session from '../common/session'
-import { LabelType, ShapeType, ViewerConfigType } from '../functional/types'
+import { LabelType, ShapeType,
+  TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
 export function initSessionAction (): types.InitSessionAction {
   return {
     type: types.INIT_SESSION,
+    sessionId: Session.id
+  }
+}
+
+/** update task data
+ * @param {TaskType} newTask
+ */
+export function updateTask (newTask: TaskType): types.UpdateTaskAction {
+  return {
+    type: types.UPDATE_TASK,
+    newTask,
     sessionId: Session.id
   }
 }

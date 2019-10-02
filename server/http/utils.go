@@ -119,8 +119,7 @@ func GetTasksInProject(projectName string) ([]Task, error) {
 func GetAssignment(projectName string, taskIndex string,
 	workerId string) (Assignment, error) {
 	assignment := Assignment{}
-	submissionsPath := path.Join(projectName, "submissions",
-		taskIndex, workerId)
+	submissionsPath := GetSatPath(projectName, taskIndex, workerId)
 	keys := storage.ListKeys(submissionsPath)
 	// if any submissions exist, get the most recent one
 	if len(keys) > 0 {
@@ -133,8 +132,7 @@ func GetAssignment(projectName string, taskIndex string,
 			Error.Println(err)
 		}
 	} else {
-		assignmentPath := path.Join(projectName, "assignments",
-			taskIndex, workerId)
+		assignmentPath := GetAssignmentPath(projectName, taskIndex, workerId)
 		fields, err := storage.Load(assignmentPath)
 		if err != nil {
 			return Assignment{}, err

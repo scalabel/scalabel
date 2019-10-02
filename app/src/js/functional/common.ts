@@ -47,6 +47,17 @@ function updateUserSelect (user: UserType, pselect: Partial<Select>): UserType {
 }
 
 /**
+ * Update the task in state
+ * @param {State} state: current state
+ * @param {types.UpdateTaskAction} action
+ */
+export function updateTask (
+  state: State,
+  action: types.UpdateTaskAction): State {
+  return updateObject(state, { task: _.cloneDeep(action.newTask) })
+}
+
+/**
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
  * @param {State} state: current state
@@ -313,7 +324,7 @@ export function changeShapes (
   if (action.sessionId === state.session.id) {
     const index = _.find(action.itemIndices, (v) => v === user.select.item)
     if (index !== undefined) {
-      const labelId = items[index].shapes[shapeIds[index][0]].label[0]
+      const labelId = items[index].shapes[shapeIds[0][0]].label[0]
       user = updateUserSelect(user, { label: labelId })
     }
   }

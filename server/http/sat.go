@@ -90,25 +90,9 @@ type Assignment struct {
 	IpInfo          map[string]interface{} `json:"ipInfo" yaml:"ipInfo"`
 }
 
-type GatewayInfo struct {
-	Addr string `json:"Addr"`
-	Port string `json:"Port"`
-}
-
 // Page data sent from the frontend, used in sending dashboard contents
 type PageData struct {
 	Name string `json:"name"`
-}
-
-func (assignment *Assignment) GetKey() string {
-	task := assignment.Task
-	if assignment.SubmitTime == 0 {
-		return path.Join(task.ProjectOptions.Name,
-			"assignments", Index2str(task.Index), assignment.WorkerId)
-	}
-	return path.Join(task.ProjectOptions.Name,
-		"submissions", Index2str(task.Index),
-		assignment.WorkerId, strconv.FormatInt(assignment.SubmitTime, 10))
 }
 
 func (assignment *Assignment) GetFields() map[string]interface{} {
@@ -251,12 +235,9 @@ func WrapHandler(handler http.Handler) HandleFunc {
 
 func WrapHandleFunc(fn HandleFunc) HandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// check if User Management System is On
-		flag := env.UserManagement == "on" ||
-			env.UserManagement == "On" || env.UserManagement == "ON"
 		refreshTokenCookie, _ := r.Cookie("refreshTokenScalabel")
 		idCookie, _ := r.Cookie("idScalabel")
-		if !flag { // if User Management System is off, continue
+		if !env.UserManagement {
 			fn(w, r)
 			return
 		} else if refreshTokenCookie == nil {
@@ -1034,34 +1015,13 @@ func formValidation(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func gatewayHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.NotFound(w, r)
-		return
-	}
-	gate := GatewayInfo{
-		Addr: env.ModelGateHost,
-		Port: env.ModelGatePort,
-	}
-	gateJson, err := json.Marshal(gate)
-	if err != nil {
-		Error.Println(err)
-	}
-	_, err = w.Write(gateJson)
-	if err != nil {
-		Error.Println(err)
-	}
-
-}
-
 // Handles the flag value of User Management System
 // during the redirection from index.html to /auth
 func loadHandler(w http.ResponseWriter, r *http.Request) {
 	Info.Printf("%s is requesting %s", r.RemoteAddr, r.URL)
-	Info.Printf("User Management System is %s", env.UserManagement)
+	Info.Printf("User Management System is %v", env.UserManagement)
 	// Check if WORKER_SYSTEM is On
-	if env.UserManagement == "on" ||
-		env.UserManagement == "On" || env.UserManagement == "ON" {
+	if env.UserManagement {
 		// redirect to AWS authentication website
 		authUrl := fmt.Sprintf("https://%v.auth.%v.amazoncognito.com/",
 			env.DomainName, env.Region) +
@@ -1077,10 +1037,7 @@ func loadHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles the authenticatoin of access token
 func authHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if WORKER_SYSTEM is On
-	flag := env.UserManagement == "on" ||
-		env.UserManagement == "On" || env.UserManagement == "ON"
-	if !flag {
+	if !env.UserManagement {
 		// redirect to create
 		createUrl := "/create"
 		http.Redirect(w, r, createUrl, 301)

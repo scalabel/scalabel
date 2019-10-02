@@ -167,30 +167,11 @@ class Label3dViewer extends Viewer<Props> {
   }
 
   /**
-   * notify state is updated
-   */
-  protected updateState (state: State): void {
-    this.display = this.props.display
-    this._labels.updateState(state, state.user.select.item)
-  }
-
-  /**
-   * Render ThreeJS Scene
-   */
-  private renderThree () {
-    if (this.renderer) {
-      this.scene.children = []
-      this._labels.render(this.scene)
-      this.renderer.render(this.scene, this.camera)
-    }
-  }
-
-  /**
    * Handle mouse down
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
-  private onMouseDown (e: React.MouseEvent<HTMLCanvasElement>) {
-    if (!this.canvas) {
+  public onMouseDown (e: React.MouseEvent<HTMLCanvasElement>) {
+    if (!this.canvas || this.checkFreeze()) {
       return
     }
     const normalized = normalizeCoordinatesToCanvas(
@@ -212,8 +193,8 @@ class Label3dViewer extends Viewer<Props> {
    * Handle mouse up
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
-  private onMouseUp (e: React.MouseEvent<HTMLCanvasElement>) {
-    if (!this.canvas) {
+  public onMouseUp (e: React.MouseEvent<HTMLCanvasElement>) {
+    if (!this.canvas || this.checkFreeze()) {
       return
     }
     if (this._labels.onMouseUp()) {
@@ -225,8 +206,8 @@ class Label3dViewer extends Viewer<Props> {
    * Handle mouse move
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
-  private onMouseMove (e: React.MouseEvent<HTMLCanvasElement>) {
-    if (!this.canvas) {
+  public onMouseMove (e: React.MouseEvent<HTMLCanvasElement>) {
+    if (!this.canvas || this.checkFreeze()) {
       return
     }
 
@@ -253,20 +234,14 @@ class Label3dViewer extends Viewer<Props> {
   }
 
   /**
-   * Handle double click
-   * @param _e
-   */
-  private onDoubleClick (e: React.MouseEvent<HTMLCanvasElement>) {
-    if (this._labels.onDoubleClick()) {
-      e.stopPropagation()
-    }
-  }
-
-  /**
    * Handle keyboard events
    * @param {KeyboardEvent} e
    */
-  private onKeyDown (e: KeyboardEvent) {
+  public onKeyDown (e: KeyboardEvent) {
+    if (this.checkFreeze()) {
+      return
+    }
+
     this._keyDownMap[e.key] = true
 
     if (this._labels.onKeyDown(e)) {
@@ -278,11 +253,44 @@ class Label3dViewer extends Viewer<Props> {
    * Handle keyboard events
    * @param {KeyboardEvent} e
    */
-  private onKeyUp (e: KeyboardEvent) {
+  public onKeyUp (e: KeyboardEvent) {
+    if (this.checkFreeze()) {
+      return
+    }
+
     this._keyDownMap[e.key] = true
 
     if (this._labels.onKeyUp(e)) {
       this.renderThree()
+    }
+  }
+
+  /**
+   * notify state is updated
+   */
+  protected updateState (state: State): void {
+    this.display = this.props.display
+    this._labels.updateState(state, state.user.select.item)
+  }
+
+  /**
+   * Render ThreeJS Scene
+   */
+  private renderThree () {
+    if (this.renderer) {
+      this.scene.children = []
+      this._labels.render(this.scene)
+      this.renderer.render(this.scene, this.camera)
+    }
+  }
+
+  /**
+   * Handle double click
+   * @param _e
+   */
+  private onDoubleClick (e: React.MouseEvent<HTMLCanvasElement>) {
+    if (this._labels.onDoubleClick()) {
+      e.stopPropagation()
     }
   }
 

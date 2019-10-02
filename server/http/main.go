@@ -34,9 +34,8 @@ type Env struct {
 	SrcPath        string `yaml:"src"`
 	AppSubDir      string `yaml:"appSubDir"`
 	Database       string `yaml:"database"`
-	ModelGateHost  string `yaml:"modelGateHost"`
-	ModelGatePort  string `yaml:"modelGatePort"`
-	UserManagement string `yaml:"userManagement"`
+	Sync           bool   `yaml:"sync"`
+	UserManagement bool   `yaml:"userManagement"`
 	Region         string `yaml:"region"`
 	DomainName     string `yaml:"domainName"`
 	ClientId       string `yaml:"clientId"`
@@ -46,6 +45,8 @@ type Env struct {
 	AWSTokenUrl    string `yaml:"awsTokenURL"`
 	AwsJwkUrl      string `yaml:"awsJwkUrl"`
 	UserPoolId     string `yaml:"userPoolID"`
+	SyncHost       string `yaml:"syncHost"`
+	SyncPort       int    `yaml:"syncPort"`
 }
 
 func (env Env) AppDir() string {
@@ -173,8 +174,8 @@ func main() {
 
 	// flow control handlers
 	//http.HandleFunc("/", parse(indexHandler))
-	http.HandleFunc("/", WrapHandler(http.FileServer(
-		http.Dir(path.Join(env.SrcPath, env.AppSubDir)))))
+	fileServer := http.FileServer(http.Dir(env.AppDir()))
+	http.HandleFunc("/", WrapHandler(fileServer))
 	http.HandleFunc("/dashboard", WrapHandleFunc(dashboardHandler))
 	http.HandleFunc("/vendor", WrapHandleFunc(vendorHandler))
 	http.HandleFunc("/postProject", WrapHandleFunc(postProjectHandler))
@@ -206,9 +207,6 @@ func main() {
 	http.HandleFunc("/label2dv2", WrapHandleFunc(Label2dv2Handler))
 	http.HandleFunc("/label3d", WrapHandleFunc(Label3dHandler))
 	http.HandleFunc("/label3dv2", WrapHandleFunc(Label3dv2Handler))
-
-	//Get information of the gateway server
-	http.HandleFunc("/dev/gateway", WrapHandleFunc(gatewayHandler))
 
 	Info.Printf("Listening to Port %d", env.Port)
 	Info.Printf("Local URL: localhost:%d", env.Port)

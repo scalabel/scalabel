@@ -143,7 +143,7 @@ func TestDashboard(t *testing.T) {
 	rr := httptest.NewRecorder()
 	dashboardHandler(rr, req)
 	if rr.Code != 200 {
-		t.Fatal(fmt.Errorf("Dashboard handler HTTP code: %d", rr.Code))
+		t.Fatalf("Dashboard handler HTTP code: %d", rr.Code)
 	}
 }
 
@@ -156,8 +156,8 @@ func TestVendorDashboard(t *testing.T) {
 	rr := httptest.NewRecorder()
 	vendorHandler(rr, req)
 	if rr.Code != 200 {
-		t.Fatal(fmt.Errorf("Vendor handler HTTP code: %d",
-			rr.Code))
+		t.Fatalf("Vendor handler HTTP code: %d",
+			rr.Code)
 	}
 }
 
@@ -173,7 +173,7 @@ func TestLoadAssignment(t *testing.T) {
 		postLoadAssignmentHandler(rr, req)
 		if rr.Code != 200 {
 			errString := "Load assignment handler HTTP code: %d"
-			t.Fatal(fmt.Errorf(errString, rr.Code))
+			t.Fatalf(errString, rr.Code)
 		}
 	}
 }
@@ -192,7 +192,7 @@ func TestSaveHandler(t *testing.T) {
 		postSaveHandler(rr, req)
 		if rr.Code != 200 {
 			errString := "Save assignment handler HTTP code: %d"
-			t.Fatal(fmt.Errorf(errString, rr.Code))
+			t.Fatalf(errString, rr.Code)
 		}
 	}
 }
@@ -213,7 +213,7 @@ func TestExportHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	postExportHandler(rr, req)
 	if rr.Code != 200 {
-		t.Fatal(fmt.Errorf("Export handler HTTP code: %d", rr.Code))
+		t.Fatalf("Export handler HTTP code: %d", rr.Code)
 	}
 }
 
@@ -234,7 +234,7 @@ func TestDownloadTaskUrlHandler(t *testing.T) {
 	downloadTaskUrlHandler(rr, req)
 	if rr.Code != 200 {
 		errString := "Download task URL handler HTTP code: %d"
-		t.Fatal(fmt.Errorf(errString, rr.Code))
+		t.Fatalf(errString, rr.Code)
 	}
 }
 

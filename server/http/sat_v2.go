@@ -15,14 +15,14 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-//Sat state
+// Sat state
 type Sat struct {
 	Task    TaskData    `json:"task" yaml:"task"`
 	User    UserData    `json:"user" yaml:"user"`
 	Session SessionData `json:"session" yaml:"session"`
 }
 
-//Task specific data
+// Task specific data
 type TaskData struct {
 	Config ConfigData `json:"config" yaml:"config"`
 	Status TaskStatus `json:"status" yaml:"status"`
@@ -30,7 +30,7 @@ type TaskData struct {
 	Tracks TrackMap   `json:"tracks" yaml:"tracks"`
 }
 
-//Task properties not changed during lifetime of a session
+// Task properties not changed during lifetime of a session
 type ConfigData struct {
 	ProjectName     string      `json:"projectName" yaml:"projectName"`
 	ItemType        string      `json:"itemType" yaml:"itemType"`
@@ -44,16 +44,18 @@ type ConfigData struct {
 	Attributes      []Attribute `json:"attributes" yaml:"attributes"`
 	TaskId          string      `json:"taskId" yaml:"taskId"`
 	SubmitTime      int64       `json:"submitTime" yaml:"submitTime"`
+	Sync            bool        `json:"sync" yaml:"sync"`
+	SyncAddress     string      `json:"syncAddress" yaml:"syncAddress"`
 }
 
-//Task properties that depend on the current state of session
+// Task properties that depend on the current state of session
 type TaskStatus struct {
 	MaxLabelId int `json:"maxLabelId" yaml:"maxLabelId"`
 	MaxShapeId int `json:"maxShapeId" yaml:"maxShapeId"`
 	MaxOrder   int `json:"maxOrder" yaml:"maxOrder"`
 }
 
-//Contains data for single item
+// Contains data for single item
 type ItemData struct {
 	Id     int               `json:"id" yaml:"id"`
 	Index  int               `json:"index" yaml:"index"`
@@ -62,7 +64,7 @@ type ItemData struct {
 	Shapes map[int]ShapeData `json:"shapes" yaml:"shapes"`
 }
 
-//Contains data for single label
+// Contains data for single label
 type LabelData struct {
 	Id         int              `json:"id" yaml:"id"`
 	Item       int              `json:"item" yaml:"item"`
@@ -77,7 +79,7 @@ type LabelData struct {
 	Manual     bool             `json:"manual" yaml:"manual"`
 }
 
-//Contains data for single shape
+// Contains data for single shape
 type ShapeData struct {
 	Id    int         `json:"id" yaml:"id"`
 	Label []int       `json:"label" yaml:"label"`
@@ -85,10 +87,10 @@ type ShapeData struct {
 	Shape interface{} `json:"shape" yaml:"shape"`
 }
 
-//Data for tracks
+// Data for tracks
 type TrackMap map[int]interface{}
 
-//User specific data
+// User specific data
 type UserData struct {
 	UserId               string                 `json:"id" yaml:"id"`
 	Selection            SelectedData           `json:"select" yaml:"select"`
@@ -97,7 +99,7 @@ type UserData struct {
 	PointCloudViewConfig PointCloudViewerConfig `json:"pointCloudViewerConfig" yaml:"pointCloudViewerConfig"`
 }
 
-//User's currently selected data
+// User's currently selected data
 type SelectedData struct {
 	Item      int `json:"item" yaml:"item"`
 	Label     int `json:"label" yaml:"label"`
@@ -106,7 +108,7 @@ type SelectedData struct {
 	LabelType int `json:"labelType" yaml:"labelType"`
 }
 
-//Data for frontend layout
+// Data for frontend layout
 type LayoutData struct {
 	ToolbarWidth       int     `json:"toolbarWidth" yaml:"toolbarWidth"`
 	AssistantView      bool    `json:"assistantView" yaml:"assistantView"`
@@ -133,7 +135,7 @@ type PointCloudViewerConfig struct {
 	VerticalAxis Vector3D `json:"verticalAxis" yaml:"verticalAxis"`
 }
 
-//Session specific data
+// Session specific data
 type SessionData struct {
 	SessionId    string       `json:"id" yaml:"id"`
 	DemoMode     bool         `json:"demoMode" yaml:"demoMode"`
@@ -141,19 +143,12 @@ type SessionData struct {
 	ItemStatuses []ItemStatus `json:"items" yaml:"items"`
 }
 
-//Item status
+// Item status
 type ItemStatus struct {
 	Loaded bool `json:"loaded" yaml:"loaded"`
 }
 
-//GetKey gets key for single task and worker
-func (sat *Sat) GetKey() string {
-	return path.Join(sat.Task.Config.ProjectName, "submissions",
-		sat.Task.Config.TaskId, sat.User.UserId,
-		strconv.FormatInt(sat.Task.Config.SubmitTime, 10))
-}
-
-//GetFields returns sat as a map
+// GetFields returns sat as a map
 func (sat *Sat) GetFields() map[string]interface{} {
 	return map[string]interface{}{
 		"task":    sat.Task,
@@ -162,13 +157,11 @@ func (sat *Sat) GetFields() map[string]interface{} {
 	}
 }
 
-//GetSat gets the most recent assignment given the needed fields.
-func GetSat(projectName string, taskIndex string,
+// LoadSat loads the most recent assignment given the needed fields.
+func LoadSat(projectName string, taskIndex string,
 	workerId string) (Sat, error) {
 	sat := Sat{}
-	submissionsPath := path.Join(projectName, "submissions",
-		taskIndex, workerId)
-	keys := storage.ListKeys(submissionsPath)
+	keys := storage.ListKeys(GetSatPath(projectName, taskIndex, workerId))
 	// if any submissions exist, get the most recent one
 	if len(keys) > 0 {
 		Info.Printf("Reading %s\n", keys[len(keys)-1])
@@ -185,8 +178,7 @@ func GetSat(projectName string, taskIndex string,
 		}
 	} else {
 		var assignment Assignment
-		assignmentPath := path.Join(projectName, "assignments",
-			taskIndex, workerId)
+		assignmentPath := GetAssignmentPath(projectName, taskIndex, workerId)
 		Info.Printf("Reading %s\n", assignmentPath)
 		fields, err := storage.Load(assignmentPath)
 		if err != nil {
@@ -201,11 +193,11 @@ func GetSat(projectName string, taskIndex string,
 	return sat, nil
 }
 
-//GetAssignmentV2 retrieves assignment
+// GetAssignmentV2 retrieves assignment
 func GetAssignmentV2(projectName string, taskIndex string,
 	workerId string) (Assignment, error) {
 	assignment := Assignment{}
-	assignmentPath := path.Join(projectName, "assignments", taskIndex, workerId)
+	assignmentPath := GetAssignmentPath(projectName, taskIndex, workerId)
 	fields, err := storage.Load(assignmentPath)
 	if err != nil {
 		return Assignment{}, err
@@ -233,8 +225,10 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 	taskIndex := Index2str(assignmentToLoad.Task.Index)
 	var loadedAssignment Assignment
 	var loadedSat Sat
-	if !storage.HasKey(path.Join(projectName, "assignments",
-		taskIndex, DefaultWorker)) {
+	// If no submission or assignment exist, create a new assignment
+	assignmentPath := GetAssignmentPath(projectName, taskIndex, DefaultWorker)
+	satPath := GetSatPath(projectName, taskIndex, DefaultWorker)
+	if !storage.HasKey(assignmentPath) && len(storage.ListKeys(satPath)) == 0 {
 		// if assignment does not exist, create it
 		loadedAssignment, err = CreateAssignment(projectName, taskIndex,
 			DefaultWorker)
@@ -244,7 +238,7 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 		}
 		loadedSat = assignmentToSat(&loadedAssignment)
 	} else {
-		loadedSat, err = GetSat(projectName, taskIndex,
+		loadedSat, err = LoadSat(projectName, taskIndex,
 			DefaultWorker)
 		if err != nil {
 			Error.Println(err)
@@ -252,6 +246,17 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	loadedSat.Session.StartTime = recordTimestamp()
+
+	// Update state with config variables needed by frontend
+	loadedSat.Task.Config.Sync = env.Sync
+	if (env.Sync) {
+		syncPort := strconv.Itoa(env.SyncPort)
+		syncAddress := fmt.Sprintf("%s:%s", env.SyncHost, syncPort)
+		loadedSat.Task.Config.SyncAddress = syncAddress
+	}
+
+	// temporary fix to ensure sessions have different IDs
+	loadedSat.Session.SessionId = getUuidV4()
 	loadedSatJson, err := json.Marshal(loadedSat)
 	if err != nil {
 		Error.Println(err)
@@ -267,7 +272,7 @@ func executeLabelingTemplateV2(w http.ResponseWriter, r *http.Request,
 	// get task name from the URL
 	projectName := r.URL.Query()["project_name"][0]
 	taskIndex, _ := strconv.ParseInt(r.URL.Query()["task_index"][0], 10, 32)
-	if !storage.HasKey(path.Join(projectName, "assignments",
+	if !storage.HasKey(GetAssignmentPath(projectName,
 		Index2str(int(taskIndex)), DefaultWorker)) {
 		// if assignment does not exist, create it
 		assignment, err := CreateAssignment(projectName,
@@ -420,6 +425,17 @@ func assignmentToSat(assignment *Assignment) Sat {
 	return loadedSat
 }
 
+//Saves a Sat Object
+func (sat Sat) save() error {
+	if sat.Session.DemoMode {
+		return errors.New("can't save a demo project")
+	}
+
+	sat.Task.Config.SubmitTime = recordTimestamp()
+	err := storage.Save(sat.GetKey(), sat.GetFields())
+	return err
+}
+
 func postSaveV2Handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)
@@ -430,35 +446,32 @@ func postSaveV2Handler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err)
 	}
 
-	assignment := Sat{}
-	err = json.Unmarshal(body, &assignment)
+	sat := Sat{}
+	err = json.Unmarshal(body, &sat)
 	if err != nil {
 		Error.Println(err)
-		writeNil(w)
-		return
-	}
-	if assignment.Session.DemoMode {
-		Error.Println(errors.New("can't save a demo project"))
 		writeNil(w)
 		return
 	}
 
-	assignment.Task.Config.SubmitTime = recordTimestamp()
-	err = storage.Save(assignment.GetKey(), assignment.GetFields())
+	// Save the data
+	err = sat.save()
 	if err != nil {
 		Error.Println(err)
 		writeNil(w)
-	} else {
-		response, err := json.Marshal(0)
-		if err != nil {
-			Error.Println(err)
-			writeNil(w)
-		} else {
-			_, err = w.Write(response)
-			if err != nil {
-				Error.Println(err)
-			}
-		}
+		return
+	}
+
+	// Send back 0 for success
+	response, err := json.Marshal(0)
+	if err != nil {
+		Error.Println(err)
+		writeNil(w)
+		return
+	}
+	_, err = w.Write(response)
+	if err != nil {
+		Error.Println(err)
 	}
 }
 
@@ -484,7 +497,7 @@ func postExportV2Handler(w http.ResponseWriter, r *http.Request) {
 	items := []ItemExportV2{}
 	sat := Sat{}
 	for _, task := range tasks {
-		sat, err = GetSat(projectName, Index2str(task.Index), DefaultWorker)
+		sat, err = LoadSat(projectName, Index2str(task.Index), DefaultWorker)
 		if err == nil {
 			for _, itemToLoad := range sat.Task.Items {
 				item := exportItemData(

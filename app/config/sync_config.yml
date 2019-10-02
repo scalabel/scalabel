@@ -4,5 +4,7 @@ data: "./data"
 src: "."
 database: "local"
 userManagement: false
-sync: false
+sync: true
+syncHost: 'http://localhost'
+syncPort: 3000
 ...

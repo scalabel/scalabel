@@ -30,21 +30,21 @@ class Session {
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
   public testMode: boolean
-  /** Connection status */
+  /** Connection status for saving */
   public status: ConnectionStatus
+  /** Overwriteable function that adds side effects to state change */
+  public applyStatusEffects: () => void
 
-  /**
-   * no-op for state initialization
-   */
   constructor () {
     this.images = []
     this.pointClouds = []
     this.itemType = ''
+    this.status = ConnectionStatus.UNSAVED
     // TODO: make it configurable in the url
     this.devMode = true
+    this.applyStatusEffects = () => { return }
     this.testMode = false
     this.store = configureStore({}, this.devMode)
-    this.status = ConnectionStatus.UNSAVED
   }
 
   /**
@@ -76,6 +76,17 @@ class Session {
    */
   public subscribe (callback: () => void) {
     this.store.subscribe(callback)
+  }
+
+  /**
+   * Update the status, then call overwritable function
+   * This should update any parts of the view that depend on status
+   * @param {ConnectionStatus} newStatus: new value of status
+   */
+  public updateStatusDisplay (newStatus: ConnectionStatus): ConnectionStatus {
+    this.status = newStatus
+    this.applyStatusEffects()
+    return newStatus
   }
 }
 

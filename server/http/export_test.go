@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"math"
 	"path"
@@ -444,23 +443,30 @@ func TestPathPoly2d(t *testing.T) {
 	}
 }
 
-// Helper function which reads the sample sat and v2 export from storage
-func readSatandExportV2() (Sat, ItemExportV2, error) {
-	sampleSat := Sat{}
-	sampleItemExportV2 := ItemExportV2{}
-
+func ReadSampleSatData() (Sat, []byte, error) {
 	statePath := path.Join("testdata", "sample_sat.json")
 	inputBytes, err := ioutil.ReadFile(statePath)
 	if err != nil {
-		return sampleSat, sampleItemExportV2, err
+		return Sat{}, inputBytes, err
 	}
-	err = json.Unmarshal(inputBytes, &sampleSat)
+	sat := Sat{}
+	err = json.Unmarshal(inputBytes, &sat)
+	if err != nil {
+		return Sat{}, inputBytes, err
+	}
+	return sat, inputBytes, nil
+}
+
+// Helper function which reads the sample sat and v2 export from storage
+func readSatandExportV2() (Sat, ItemExportV2, error) {
+	sampleItemExportV2 := ItemExportV2{}
+	sampleSat, _, err := ReadSampleSatData()
 	if err != nil {
 		return sampleSat, sampleItemExportV2, err
 	}
 
-	statePath = path.Join("testdata", "sample_item_export_v2.json")
-	inputBytes, err = ioutil.ReadFile(statePath)
+	statePath := path.Join("testdata", "sample_item_export_v2.json")
+	inputBytes, err := ioutil.ReadFile(statePath)
 	if err != nil {
 		return sampleSat, sampleItemExportV2, err
 	}
@@ -493,7 +499,7 @@ func TestExportItemDataBox2dSimple(t *testing.T) {
 
 	diff := reflect.DeepEqual(itemExportV2, sampleItemExportV2)
 	if !diff {
-		t.Fatal(fmt.Errorf("%+v\n%+v", itemExportV2, sampleItemExportV2))
+		t.Fatalf("%+v\n%+v", itemExportV2, sampleItemExportV2)
 	}
 
 }
@@ -530,7 +536,7 @@ func TestExportItemDataBox2dSharedShape(t *testing.T) {
 	}
 	diff := reflect.DeepEqual(itemExportV2, sampleItemExportV2)
 	if !diff {
-		t.Fatal(fmt.Errorf("%+v\n%+v", itemExportV2, sampleItemExportV2))
+		t.Fatalf("%+v\n%+v", itemExportV2, sampleItemExportV2)
 	}
 
 }
@@ -555,7 +561,7 @@ func TestExportItemDataBox2dFull(t *testing.T) {
 	}
 	diff := reflect.DeepEqual(itemExportV2, sampleItemExportV2)
 	if !diff {
-		t.Fatal(fmt.Errorf("%+v\n%+v", itemExportV2, sampleItemExportV2))
+		t.Fatalf("%+v\n%+v", itemExportV2, sampleItemExportV2)
 	}
 
 }

@@ -19,6 +19,18 @@
         "editor.detectIndentation": false,
         "editor.formatOnSave": false
     },
+    "[javascript]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false,
+        "editor.formatOnSave": false
+    },
+    "[javacriptreact]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false,
+        "editor.formatOnSave": false
+    },
     "[go]": {
         "editor.tabSize": 4,
         "editor.insertSpaces": false

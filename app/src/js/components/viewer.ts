@@ -1,3 +1,4 @@
+import Session, { ConnectionStatus } from '../common/session'
 import { State } from '../functional/types'
 import { Component } from './component'
 
@@ -19,6 +20,13 @@ export abstract class Viewer<Props> extends Component<Props> {
   public componentDidUpdate () {
     this.updateState(this.state)
     this.redraw()
+  }
+
+  /**
+   * Checks whether to freeze interface
+   */
+  public checkFreeze () {
+    return Session.status === ConnectionStatus.RECONNECTING
   }
 
   /**

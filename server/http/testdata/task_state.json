@@ -1,0 +1,140 @@
+{
+  "config": {
+    "projectName": "Redux0",
+    "itemType": "image",
+    "labelTypes": ["box2d", "tag"],
+    "taskSize": 5,
+    "handlerUrl": "label2dv2",
+    "pageTitle": "Image Tagging Labeling Tool",
+    "instructionPage": "undefined",
+    "bundleFile": "image_v2.js",
+    "categories": null,
+    "attributes": [
+      {
+        "name": "Weather",
+        "toolType": "list",
+        "tagText": "",
+        "tagPrefix": "w",
+        "tagSuffixes": [
+          "",
+          "r",
+          "s",
+          "c",
+          "o",
+          "p",
+          "f"
+        ],
+        "values": [
+          "NA",
+          "Rainy",
+          "Snowy",
+          "Clear",
+          "Overcast",
+          "Partly Cloudy",
+          "Foggy"
+        ],
+        "buttonColors": [
+          "white",
+          "white",
+          "white",
+          "white",
+          "white",
+          "white",
+          "white"
+        ]
+      },
+      {
+        "name": "Scene",
+        "toolType": "list",
+        "tagText": "",
+        "tagPrefix": "s",
+        "tagSuffixes": [
+          "",
+          "t",
+          "r",
+          "p",
+          "c",
+          "g",
+          "h"
+        ],
+        "values": [
+          "NA",
+          "Tunnel",
+          "Residential",
+          "Parking Lot",
+          "City Street",
+          "Gas Stations",
+          "Highway"
+        ],
+        "buttonColors": [
+          "white",
+          "white",
+          "white",
+          "white",
+          "white",
+          "white",
+          "white"
+        ]
+      },
+      {
+        "name": "Timeofday",
+        "toolType": "list",
+        "tagText": "",
+        "tagPrefix": "t",
+        "tagSuffixes": ["", "day", "n", "daw"],
+        "values": [
+          "NA",
+          "Daytime",
+          "Night",
+          "Dawn/Dusk"
+        ],
+        "buttonColors": [
+          "white",
+          "white",
+          "white",
+          "white"
+        ]
+      }
+    ],
+    "taskId": "000000",
+    "submitTime": 0
+  },
+  "status": {
+    "maxLabelId": -1,
+    "maxShapeId": -1,
+    "maxOrder": -1
+  },
+  "items": [
+    {
+      "id": 0,
+      "index": 0,
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+      "labels": {}
+    },
+    {
+      "id": 1,
+      "index": 1,
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+      "labels": {}
+    },
+    {
+      "id": 2,
+      "index": 2,
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+      "labels": {}
+    },
+    {
+      "id": 3,
+      "index": 3,
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+      "labels": {}
+    },
+    {
+      "id": 4,
+      "index": 4,
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+      "labels": {}
+    }
+  ],
+  "tracks": {}
+}
