@@ -157,7 +157,7 @@ export default class CreateForm extends React.Component<Props, State> {
                     Image Tagging
                   </option>
                   <option value='box2d'>2D Bounding Box</option>
-                  <option value='segmentation'>Instance
+                  <option value='polygon2d'>Instance
                     Segmentation
                   </option>
                   <option value='lane'>Lane</option>
@@ -352,7 +352,7 @@ export default class CreateForm extends React.Component<Props, State> {
       labelName = '2D Bounding Box'
       instructions = 'https://www.scalabel.ai/doc/instructions/bbox.html'
       this.setState({ showCategoriesUpload: true })
-    } else if (itemType === 'segmentation') {
+    } else if (itemType === 'polygon2d') {
       labelName = '2D Segmentation'
       instructions = 'https://www.scalabel.ai/doc/instructions/' +
               'segmentation.html'

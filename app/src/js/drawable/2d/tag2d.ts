@@ -34,6 +34,20 @@ export class Tag2D extends Label2D {
   /**
    * no-op
    */
+  public onKeyDown (): boolean {
+    return true
+  }
+
+  /**
+   * no-op
+   */
+  public onKeyUp (): void {
+    return
+  }
+
+  /**
+   * no-op
+   */
   public updateShapes () {
     return
   }

@@ -44,7 +44,7 @@ describe('Test create page functionality', () => {
       expect(pageTitle.value).toBe('Image Tagging')
       fireEvent.change(select, { target: { value: 'box2d' } })
       expect(pageTitle.value).toBe('2D Bounding Box')
-      fireEvent.change(select, { target: { value: 'segmentation' } })
+      fireEvent.change(select, { target: { value: 'polygon2d' } })
       expect(pageTitle.value).toBe('2D Segmentation')
       fireEvent.change(select, { target: { value: 'lane' } })
       expect(pageTitle.value).toBe('2D Lane')
@@ -66,7 +66,7 @@ describe('Test create page functionality', () => {
       fireEvent.change(select, { target: { value: 'box2d' } })
       expect(instructions.value).toBe(
               'https://www.scalabel.ai/doc/instructions/bbox.html')
-      fireEvent.change(select, { target: { value: 'segmentation' } })
+      fireEvent.change(select, { target: { value: 'polygon2d' } })
       expect(instructions.value).toBe(
               'https://www.scalabel.ai/doc/instructions/segmentation.html')
       fireEvent.change(select, { target: { value: 'lane' } })

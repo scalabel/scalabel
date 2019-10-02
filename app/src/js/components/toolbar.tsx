@@ -30,7 +30,7 @@ interface Props {
   attributes: Attribute[]
   /** itemType of ToolBar 'video' | 'image' */
   itemType: string
-  /** labelType of ToolBar 'box2d' | 'segmentation' | 'lane' */
+  /** labelType of ToolBar 'box2d' | 'polygon2d' | 'lane' */
   labelType: string
 }
 /**

@@ -44,6 +44,11 @@ export interface RectType {
   y2: number
 }
 
+export interface PolygonType {
+  /** array of control points */
+  points: PathPoint2DType []
+}
+
 export interface Vector3Type {
   /** The x-coordinate */
   x: number
@@ -89,8 +94,8 @@ export interface Plane3DType {
   orientation: Vector3Type
 }
 
-export type ShapeType =
-  RectType | CubeType | Point2DType | PathPoint2DType | Plane3DType
+export type ShapeType = RectType | CubeType | PolygonType |
+                        Point2DType | PathPoint2DType | Plane3DType
 
 export interface IndexedShapeType {
   /** ID of the shape */

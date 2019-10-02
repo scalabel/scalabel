@@ -39,12 +39,12 @@ export abstract class Label2D {
   protected _highlightedHandle: number
   /** rgba color decided by labelId */
   protected _color: number[]
-  /** true if label should be committed */
-  protected _shouldCommit: boolean
   /** true if mouse down */
   protected _mouseDown: boolean
   /** mouse coordinate when pressed down */
   protected _mouseDownCoord: Vector2D
+  /** whether the label is being editing */
+  protected _editing: boolean
 
   constructor () {
     this._index = -1
@@ -60,8 +60,8 @@ export abstract class Label2D {
       dimmed: false
     }
     this._mouseDownCoord = new Vector2D()
-    this._shouldCommit = true
     this._mouseDown = false
+    this._editing = false
   }
 
   /** Set whether the label is highlighted */
@@ -114,8 +114,18 @@ export abstract class Label2D {
     this._order = o
   }
 
+  /** return the editing of this label */
+  public get editing (): boolean {
+    return this._editing
+  }
+
+  /** set the editing of this label */
+  public set editing (e: boolean) {
+    this._editing = e
+  }
+
   /**
-   * Draw the label on viewing or control convas
+   * Draw the label on viewing or control canvas
    * @param {Context2D} canvas
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
@@ -150,8 +160,21 @@ export abstract class Label2D {
    * @param {Size2D} limit: limit of the canvas frame
    */
   public abstract onMouseMove (
-    coord: Vector2D, limit: Size2D
+    coord: Vector2D, limit: Size2D,
+    labelIndex: number, handleIndex: number
   ): boolean
+
+  /**
+   * handle keyboard down event
+   * @param e pressed key
+   */
+  public abstract onKeyDown (e: string): boolean
+
+  /**
+   * handle keyboard up event
+   * @param e pressed key
+   */
+  public abstract onKeyUp (e: string): void
 
   /**
    * Expand the primitive shapes to drawable shapes

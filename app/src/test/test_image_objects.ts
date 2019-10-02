@@ -4,7 +4,7 @@ export const testJson = {
       assignmentId: 'e6015077-aad9-4e60-a5ed-dbccf931a049',
       projectName: 'Redux0',
       itemType: 'image',
-      labelTypes: ['box2d', 'tag'],
+      labelTypes: ['box2d', 'polygon2d', 'tag'],
       taskSize: 5,
       handlerUrl: 'label2dv2',
       pageTitle: 'Image Tagging Labeling Tool',

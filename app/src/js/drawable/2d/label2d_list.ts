@@ -8,6 +8,7 @@ import { Vector2D } from '../../math/vector2d'
 import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { DrawMode, Label2D } from './label2d'
+import { Polygon2D } from './polygon2d'
 import { Tag2D } from './tag2d'
 
 /**
@@ -19,6 +20,8 @@ function makeDrawableLabel (labelType: string): Label2D {
     return new Box2D()
   } else if (labelType === LabelTypes.TAG) {
     return new Tag2D()
+  } else if (labelType === LabelTypes.POLYGON_2D) {
+    return new Polygon2D()
   } else {
     throw new Error(sprintf('Undefined label type %s', labelType))
   }
@@ -59,9 +62,19 @@ export class Label2DList {
     return this._labelList[index]
   }
 
-  /** get readonly label list for state inspection */
-  public getLabelList (): Array<Readonly<Label2D>> {
+  /** get label list for state inspection */
+  public get labelList (): Label2D[] {
     return this._labelList
+  }
+
+  /** get highlightedLabel for state inspection */
+  public get highlightedLabel (): Label2D | null {
+    return this._highlightedLabel
+  }
+
+  /** get selectedLabel for state inspection */
+  public get selectedLabel (): Label2D | null {
+    return this._selectedLabel
   }
 
   /**
@@ -123,29 +136,33 @@ export class Label2DList {
   public onMouseDown (
       coord: Vector2D, labelIndex: number, handleIndex: number): boolean {
     this._mouseDown = true
-    if (this._highlightedLabel !== null) {
+
+    if (this._highlightedLabel !== null &&
+      (this._selectedLabel === null || this._selectedLabel.editing === false)) {
       this._highlightedLabel.setHighlighted(false)
       this._highlightedLabel = null
     }
-    if (this._selectedLabel !== null) {
+
+    if (this._selectedLabel !== null && this._selectedLabel.editing === false) {
       this._selectedLabel.setSelected(false)
       this._selectedLabel = null
     }
-    if (labelIndex >= 0) {
-      this._selectedLabel = this._labelList[labelIndex]
-      this._selectedLabel.setSelected(true, handleIndex)
-      this._selectedLabel.onMouseDown(coord)
-      return true
-    } else {
-      const state = this._state
-      const label = makeDrawableLabel(
+
+    if (this._selectedLabel === null) {
+      if (labelIndex >= 0) {
+        this._selectedLabel = this._labelList[labelIndex]
+        this._selectedLabel.setSelected(true, handleIndex)
+      } else {
+        const state = this._state
+        const label = makeDrawableLabel(
         state.task.config.labelTypes[state.user.select.labelType])
-      label.initTemp(state, coord)
-      this._selectedLabel = label
-      this._labelList.push(label)
-      label.onMouseDown(coord)
-      return true
+        label.initTemp(state, coord)
+        this._selectedLabel = label
+        this._labelList.push(label)
+      }
     }
+    this._selectedLabel.onMouseDown(coord)
+    return true
   }
 
   /**
@@ -158,9 +175,8 @@ export class Label2DList {
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     this._mouseDown = false
     if (this._selectedLabel !== null) {
-      this._selectedLabel.onMouseUp(coord)
-      // If label did not commit remove from list
-      if (!this._selectedLabel.commitLabel()) {
+      const shouldDelete = !this._selectedLabel.onMouseUp(coord)
+      if (shouldDelete) {
         this._labelList.splice(this._labelList.indexOf(this._selectedLabel), 1)
       }
     }
@@ -172,10 +188,12 @@ export class Label2DList {
   public onMouseMove (
       coord: Vector2D, canvasLimit: Size2D,
       labelIndex: number, handleIndex: number): boolean {
-    if (!this._selectedLabel ||
-        !this._selectedLabel.onMouseMove(coord, canvasLimit)) {
+    if (this._selectedLabel && this._selectedLabel.editing === true) {
+      this._selectedLabel.onMouseMove(
+        coord, canvasLimit, labelIndex, handleIndex)
+    } else {
       if (labelIndex >= 0) {
-        if (this._highlightedLabel === null) {
+        if (!this._highlightedLabel) {
           this._highlightedLabel = this._labelList[labelIndex]
         }
         if (this._highlightedLabel.index !== labelIndex) {
@@ -187,8 +205,31 @@ export class Label2DList {
         this._highlightedLabel.setHighlighted(false)
         this._highlightedLabel = null
       }
-      return false
+      return true
     }
     return true
+  }
+
+  /**
+   * Handle keyboard down events
+   * @param e
+   */
+  public onKeyDown (e: KeyboardEvent): void {
+    if (this._selectedLabel) {
+      if (!this._selectedLabel.onKeyDown(e.key)) {
+        this._labelList.splice(this._labelList.indexOf(this._selectedLabel), 1)
+        this._selectedLabel = null
+      }
+    }
+  }
+
+  /**
+   * Handle keyboard up events
+   * @param e
+   */
+  public onKeyUp (e: KeyboardEvent): void {
+    if (this._selectedLabel) {
+      this._selectedLabel.onKeyUp(e.key)
+    }
   }
 }

@@ -273,6 +273,8 @@ export class Label2dViewer extends Viewer<Props> {
 
     const key = e.key
     this._keyDownMap[key] = true
+    this._labels.onKeyDown(e)
+    this.redraw()
   }
 
   /**
@@ -290,6 +292,8 @@ export class Label2dViewer extends Viewer<Props> {
       // Control or command
       this.setDefaultCursor()
     }
+    this._labels.onKeyUp(e)
+    this.redraw()
   }
 
   /**

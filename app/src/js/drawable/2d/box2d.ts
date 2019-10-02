@@ -48,7 +48,7 @@ export class Box2D extends Label2D {
     return this._shapes
   }
 
-  /** Draw the label on viewing or control convas */
+  /** Draw the label on viewing or control canvas */
   public draw (context: Context2D, ratio: number, mode: DrawMode): void {
     const self = this
 
@@ -195,17 +195,10 @@ export class Box2D extends Label2D {
    * Handle mouse up
    * @param coord
    */
-  public onMouseUp (coord: Vector2D): boolean {
+  public onMouseUp (_coord: Vector2D): boolean {
     this._mouseDown = false
-    if (this._selected) {
-      const area = coord.clone().subtract(this._mouseDownCoord).abs().area()
-      // TODO: Move comparison rhs to constant
-      if (!this._shouldCommit && area >= MIN_AREA) {
-        this._shouldCommit = true
-      }
-      return true
-    }
-    return false
+    this.editing = false
+    return this.commitLabel()
   }
 
   /**
@@ -215,6 +208,7 @@ export class Box2D extends Label2D {
   public onMouseDown (coord: Vector2D): boolean {
     this._mouseDown = true
     if (this._selected) {
+      this.editing = true
       this._mouseDownCoord = coord.clone()
       this._startingRect = (this.shapes[0] as Rect2D).clone()
       return true
@@ -227,8 +221,9 @@ export class Box2D extends Label2D {
  * @param {Vector2D} coord: current mouse position
  * @param {Vector2D} limit: limit of the canvas frame
  */
-  public onMouseMove (coord: Vector2D, limit: Size2D): boolean {
-    if (this._selected && this._mouseDown) {
+  public onMouseMove (coord: Vector2D, limit: Size2D,
+                      _labelIndex: number, _handleIndex: number): boolean {
+    if (this._selected && this._mouseDown && this.editing) {
       if (this._selectedHandle > 0) {
         this.resize(coord, limit)
       } else if (this._selectedHandle === 0) {
@@ -240,26 +235,46 @@ export class Box2D extends Label2D {
     return false
   }
 
+  /**
+   * handle keyboard down event
+   * @param e pressed key
+   */
+  public onKeyDown (_e: string): boolean {
+    return true
+  }
+
+  /**
+   * handle keyboard up event
+   * @param e pressed key
+   */
+  public onKeyUp (_e: string): void {
+    return
+  }
+
   /** Update the shapes of the label to the state */
   public commitLabel (): boolean {
-    if (!this._shouldCommit || !this._label) {
+    if (!this._label) {
       return false
     }
-
-    if (this._labelId < 0) {
-      const r = this.toRect()
-      Session.dispatch(addBox2dLabel(
-        this._label.item, this._label.category, r.x1, r.y1, r.x2, r.y2))
-    } else {
-      Session.dispatch(changeLabelShape(
-        this._label.item, this._label.shapes[0], this.toRect()))
+    if (this._selected) {
+      const valid = this.isValid()
+      if (valid) {
+        if (this._labelId < 0) {
+          const r = this.toRect()
+          Session.dispatch(addBox2dLabel(
+            this._label.item, this._label.category, r.x1, r.y1, r.x2, r.y2))
+        } else {
+          Session.dispatch(changeLabelShape(
+            this._label.item, this._label.shapes[0], this.toRect()))
+        }
+        return true
+      }
     }
-    return true
+    return false
   }
 
   /** Initialize this label to be temporary */
   public initTemp (state: State, start: Vector2D): void {
-    this._shouldCommit = false
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
@@ -279,6 +294,19 @@ export class Box2D extends Label2D {
   /** Get rect representation */
   public toRect (): RectType {
     return (this._shapes[0] as Rect2D).toRect()
+  }
+
+  /**
+   * to check whether the label is valid
+   */
+  public isValid (): boolean {
+    const rect = this._shapes[0] as Rect2D
+    const area = rect.w * rect.h
+    if (area >= MIN_AREA) {
+      return true
+    } else {
+      return false
+    }
   }
 
   /** Convert label state to drawable */

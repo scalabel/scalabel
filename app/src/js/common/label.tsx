@@ -65,8 +65,8 @@ export function renderButtons (itemType: string, labelType: string) {
   }
   if (labelType === 'box2d') {
     // do nothing
-  } else if (labelType === 'segmentation' || labelType === 'lane') {
-    if (labelType === 'segmentation') {
+  } else if (labelType === 'polygon2d' || labelType === 'lane') {
+    if (labelType === 'polygon2d') {
       if (itemType === 'image') {
         return (
           <div>
