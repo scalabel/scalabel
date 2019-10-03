@@ -105,6 +105,7 @@ type SelectedData struct {
 	Label     int `json:"label" yaml:"label"`
 	Shape     int `json:"shape" yaml:"shape"`
 	Category  int `json:"category" yaml:"category"`
+	Attributes map[int][]int `json:"attributes" yaml:"attributes"`
 	LabelType int `json:"labelType" yaml:"labelType"`
 }
 
@@ -365,9 +366,15 @@ func assignmentToSat(assignment *Assignment) Sat {
 		Tracks: TrackMap{},
 	}
 
+	attributes := make(map[int][]int)
+	for i := 0; i < len(projectOptions.Attributes); i++ {
+		attributes[i] = []int{0}
+	}
+
 	selectedData := SelectedData{
 		Item:  0,
 		Label: 0,
+		Attributes: attributes,
 	}
 
 	imageViewConfig := ImageViewerConfig{

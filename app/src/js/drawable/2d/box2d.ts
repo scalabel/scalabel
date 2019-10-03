@@ -87,6 +87,9 @@ export class Box2D extends Label2D {
     const rect = self._shapes[0] as Rect2D
     rectStyle.color = assignColor(0)
     rect.draw(context, ratio, rectStyle)
+    if (mode === DrawMode.VIEW) {
+      self.drawTag(context, ratio, [rect.x, rect.y], self._color)
+    }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       for (let i = 1; i <= 8; i += 1) {
         let style
@@ -262,7 +265,8 @@ export class Box2D extends Label2D {
         if (this._labelId < 0) {
           const r = this.toRect()
           Session.dispatch(addBox2dLabel(
-            this._label.item, this._label.category, r.x1, r.y1, r.x2, r.y2))
+            this._label.item, this._label.category, this._label.attributes,
+            r.x1, r.y1, r.x2, r.y2))
         } else {
           Session.dispatch(changeLabelShape(
             this._label.item, this._label.shapes[0], this.toRect()))
@@ -280,6 +284,7 @@ export class Box2D extends Label2D {
     this._label = makeLabel({
       type: LabelTypes.BOX_2D, id: -1, item: itemIndex,
       category: [state.user.select.category],
+      attributes: state.user.select.attributes,
       order: this._order
     })
     this._labelId = -1

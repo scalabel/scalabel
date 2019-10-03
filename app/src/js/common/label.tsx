@@ -19,13 +19,13 @@ export function renderTemplate (
     toggleName: string,
     alignment: string) => void,
   name: string,
+  value: number,
   options: string[],
   initialAlignmentIndex: number
 ) {
   if (toolType === 'switch') {
-    return <SwitchBtn onChange={handleToggle} value={name} />
+    return <SwitchBtn onChange={handleToggle} name={name} value={value} />
   } else if (toolType === 'list') {
-    // console.log(initialAlignmentIndex)
     return (
       <ListItem dense={true} style={{ textAlign: 'center' }}>
         <ListButton

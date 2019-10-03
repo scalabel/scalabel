@@ -152,7 +152,11 @@ export interface Attribute {
   /** Attribute name */
   name: string,
   /** Values of attribute */
-  values: string[]
+  values: string[],
+  /** Tag text */
+  tagText: string,
+  /** Tag suffixes */
+  tagSuffixes: string[]
 }
 
 /*
@@ -229,6 +233,8 @@ export interface Select {
   shape: number
   /** selected category */
   category: number
+  /** selected attributes */
+  attributes: {[key: number]: number[]}
   /** selected label type */
   labelType: number
 }

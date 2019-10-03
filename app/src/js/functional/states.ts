@@ -226,6 +226,7 @@ function makeSelect (params: Partial<Select>= {}): Select {
     label: -1,
     shape: -1,
     category: 0,
+    attributes: {},
     labelType: 0,
     ...params
   }

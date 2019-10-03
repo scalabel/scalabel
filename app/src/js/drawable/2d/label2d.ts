@@ -1,4 +1,6 @@
 import _ from 'lodash'
+import { sprintf } from 'sprintf-js'
+import Session from '../../common/session'
 import { LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -81,6 +83,22 @@ export abstract class Label2D {
     return this._index
   }
 
+  /** get category */
+  public get category (): number[] {
+    if (this._label && this._label.category) {
+      return this._label.category
+    }
+    return []
+  }
+
+  /** get attributes */
+  public get attributes (): {[key: number]: number[]} {
+    if (this._label && this._label.attributes) {
+      return this._label.attributes
+    }
+    return {}
+  }
+
   /** get labelId */
   public get labelId (): number {
     return this._labelId
@@ -131,6 +149,60 @@ export abstract class Label2D {
    * @param {DrawMode} mode
    */
   public abstract draw (canvas: Context2D, ratio: number, mode: DrawMode): void
+
+  /**
+   * Draw the label tag on viewing or control canvas
+   * @param {Context2D} ctx
+   * @param {[number, number]} position
+   * @param {number} ratio
+   * @param {number[]} fillStyle
+   */
+  public drawTag (ctx: Context2D,
+                  ratio: number,
+                  position: [number, number],
+                  fillStyle: number[]
+                  ) {
+    const TAG_WIDTH = 50
+    const TAG_HEIGHT = 28
+    const [x, y] = position
+    const self = this
+    ctx.save()
+    const config = Session.getState().task.config
+    const category = self._label ?
+    config.categories[self._label.category[0]] : ''
+    const attributes = self._label && self._label.attributes ?
+                       self._label.attributes : {}
+    const words = category.split(' ')
+    let tw = TAG_WIDTH
+    // abbreviate tag as the first 3 chars of the last word
+    let abbr = words[words.length - 1].substring(0, 3)
+
+    for (const attributeId of Object.keys(attributes)) {
+      const attribute = config.attributes[Number(attributeId)]
+      if (attribute.toolType === 'switch') {
+        if (attributes[Number(attributeId)][0] > 0) {
+          abbr += ',' + attribute.tagText
+          tw += 36
+        }
+      } else if (attribute.toolType === 'list') {
+        if (attribute &&
+          attributes[Number(attributeId)][0] > 0) {
+          abbr += ',' + attribute.tagText + ':' +
+              attribute.tagSuffixes[attributes[Number(attributeId)][0]]
+          tw += 72
+        }
+      }
+    }
+
+    ctx.fillStyle = sprintf('rgb(%d, %d, %d)',
+      fillStyle[0], fillStyle[1], fillStyle[2])
+    ctx.fillRect(x * ratio, y * ratio - TAG_HEIGHT,
+                 tw, TAG_HEIGHT)
+    ctx.fillStyle = 'rgb(0,0,0)'
+    ctx.font = sprintf('%dpx Verdana', 20)
+    ctx.fillText(abbr, (x * ratio + 6), (y * ratio - 6))
+    ctx.restore()
+  }
 
   /**
    * Handle mouse down

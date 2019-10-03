@@ -3,7 +3,7 @@ import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
-import { deleteLabel } from '../action/common'
+import { changeLabelProps, changeSelect, deleteLabel } from '../action/common'
 import { addLabelTag } from '../action/tag'
 import { renderButtons, renderTemplate } from '../common/label'
 import Session from '../common/session'
@@ -78,6 +78,7 @@ export class ToolBar extends Component<Props> {
    */
   public render () {
     const { categories, attributes, itemType, labelType } = this.props
+    const currentAttributes = Session.getState().user.select.attributes
     return (
       <div>
         {categories !== null ? (
@@ -87,12 +88,17 @@ export class ToolBar extends Component<Props> {
         ) : null}
         <Divider variant='middle' />
         <List>
-          {attributes.map((element: Attribute) =>
+          {attributes.map((element: Attribute, index: number) =>
             renderTemplate(
               element.toolType,
               this.handleToggle,
               this.handleAttributeToggle,
               element.name,
+              currentAttributes ? (
+                Object.keys(currentAttributes).indexOf(String(index)) >= 0 ?
+                  currentAttributes[index][0]
+                  : 0)
+              : 0,
               element.values,
               this.getAlignmentIndex(element.name)
             )
@@ -127,17 +133,33 @@ export class ToolBar extends Component<Props> {
    * @param {string} switchName
    */
   private handleToggle (switchName: string) {
-    // @ts-ignore
-    const { checked } = this.state
-    const currentIndex = checked.indexOf(switchName)
-    const newChecked = [...checked]
-
-    if (currentIndex === -1) {
-      newChecked.push(switchName)
-    } else {
-      newChecked.splice(currentIndex, 1)
+    const state = Session.getState()
+    const allAttributes = state.task.config.attributes
+    let toggleIndex = -1
+    for (let i = 0; i < allAttributes.length; i++) {
+      if (allAttributes[i].name === switchName) {
+        toggleIndex = i
+        break
+      }
+    }
+    if (toggleIndex >= 0) {
+      const currentAttributes = state.user.select.attributes
+      const attributes: {[key: number]: number[]} = {}
+      for (const keyStr of Object.keys(currentAttributes)) {
+        const key = Number(keyStr)
+        attributes[key] = currentAttributes[key]
+      }
+      if (attributes[toggleIndex][0] > 0) {
+        attributes[toggleIndex][0] = 0
+      } else {
+        attributes[toggleIndex][0] = 1
+      }
+      Session.dispatch(changeLabelProps(state.user.select.item,
+                       state.user.select.label, { attributes }))
+      Session.dispatch(changeSelect({ attributes }))
     }
   }
+
   /**
    * helper function to get attribute index with respect to the config
    * attributes

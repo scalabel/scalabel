@@ -11,7 +11,7 @@ export const testJson = {
       instructionPage: 'undefined',
       demoMode: false,
       bundleFile: 'image_v2.js',
-      categories: null,
+      categories: ['1', '2', '3'],
       attributes: [
         {
           name: 'Weather',

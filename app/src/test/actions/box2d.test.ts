@@ -12,9 +12,9 @@ test('Add, change and delete box2d labels', () => {
   initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
-  Session.dispatch(box2d.addBox2dLabel(itemIndex, [0], 1, 2, 3, 4))
-  Session.dispatch(box2d.addBox2dLabel(itemIndex, [0], 1, 2, 3, 4))
-  Session.dispatch(box2d.addBox2dLabel(itemIndex, [0], 1, 2, 3, 4))
+  Session.dispatch(box2d.addBox2dLabel(itemIndex, [0], {}, 1, 2, 3, 4))
+  Session.dispatch(box2d.addBox2dLabel(itemIndex, [0], {}, 1, 2, 3, 4))
+  Session.dispatch(box2d.addBox2dLabel(itemIndex, [0], {}, 1, 2, 3, 4))
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toBe(3)
   expect(_.size(state.task.items[0].shapes)).toBe(3)

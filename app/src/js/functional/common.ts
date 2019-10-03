@@ -174,7 +174,11 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
   if (action.sessionId === session.id) {
     for (const label of newLabels) {
       if (label.item === user.select.item) {
-        user = updateUserSelect(user, { label: label.id })
+        user = updateUserSelect(user, {
+          label: label.id,
+          category: label.category[0],
+          attributes: label.attributes
+        })
         break
       }
     }

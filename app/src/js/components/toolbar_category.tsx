@@ -7,7 +7,10 @@ import { withStyles } from '@material-ui/core/styles'
 import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked'
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked'
 import * as React from 'react'
+import { changeLabelProps, changeSelect } from '../action/common'
+import Session from '../common/session'
 import { categoryStyle } from '../styles/label'
+import { Component } from './component'
 
 interface ClassType {
   /** root of the category selector */
@@ -35,13 +38,7 @@ interface Props {
  * This is a multipleSelect component that displays
  * all the categories as a list.
  */
-class MultipleSelect extends React.Component<Props> {
-  /**
-   * This is the state of MultipleSelect
-   */
-  public state = {
-    selectedValue: ''
-  }
+class MultipleSelect extends Component<Props> {
 
   /**
    * This is the handleChange function of MultipleSelect
@@ -54,7 +51,11 @@ class MultipleSelect extends React.Component<Props> {
       value: string;
     };
   }) => {
-    this.setState({ selectedValue: event.target.value })
+    const state = Session.getState()
+    const categoryId = state.task.config.categories.indexOf(event.target.value)
+    Session.dispatch(changeSelect({ category: categoryId }))
+    Session.dispatch(changeLabelProps(state.user.select.item,
+      state.user.select.label, { category: [categoryId] }))
   }
 
   /**
@@ -62,6 +63,9 @@ class MultipleSelect extends React.Component<Props> {
    */
   public renderCategory (
     categories: string[], classes: ClassType, headerText: string) {
+    const state = Session.getState()
+    const currentCategoryId = state.user.select.category
+    const currentCategory = state.task.config.categories[currentCategoryId]
     return (
       <div>
         <FormControl className={classes.formControl}>
@@ -72,7 +76,7 @@ class MultipleSelect extends React.Component<Props> {
               <FormControlLabel
                 key={index}
                 control={<Radio
-                  checked={this.state.selectedValue === name}
+                  checked={currentCategory === name}
                   onChange={this.handleChange}
                   key={'kk'}
                   value={name}
