@@ -68,19 +68,6 @@ class Label3dViewer extends Viewer<Props> {
   /** drawable label list */
   private _labels: Label3DList
 
-  /** UI onr */
-  private mouseDownHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
-  /** UI onr */
-  private mouseUpHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
-  /** UI onr */
-  private mouseMoveHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
-  /** UI onr */
-  private doubleClickHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
-  /** UI onr */
-  private keyDownHandler: (e: KeyboardEvent) => void
-  /** UI onr */
-  private keyUpHandler: (e: KeyboardEvent) => void
-
   /**
    * Constructor, ons subscription to store
    * @param {Object} props: react props
@@ -104,21 +91,15 @@ class Label3dViewer extends Viewer<Props> {
     this.scale = 1
 
     this._keyDownMap = {}
-
-    this.mouseDownHandler = this.onMouseDown.bind(this)
-    this.mouseUpHandler = this.onMouseUp.bind(this)
-    this.mouseMoveHandler = this.onMouseMove.bind(this)
-    this.keyDownHandler = this.onKeyDown.bind(this)
-    this.keyUpHandler = this.onKeyUp.bind(this)
-    this.doubleClickHandler = this.onDoubleClick.bind(this)
   }
 
   /**
    * Mount callback
    */
   public componentDidMount () {
-    document.onkeydown = this.keyDownHandler
-    document.onkeyup = this.keyUpHandler
+    // TODO: Change this to add event listener
+    document.onkeydown = (e) => { this.onKeyDown(e) }
+    document.onkeyup = (e) => { this.onKeyUp(e) }
   }
 
   /**
@@ -132,10 +113,10 @@ class Label3dViewer extends Viewer<Props> {
       key='label3d-canvas'
       className={classes.label3d_canvas}
       ref={(ref) => { this.initializeRefs(ref) }}
-      onMouseDown={this.mouseDownHandler}
-      onMouseUp={this.mouseUpHandler}
-      onMouseMove={this.mouseMoveHandler}
-      onDoubleClick={this.doubleClickHandler}
+      onMouseDown={(e) => { this.onMouseDown(e) }}
+      onMouseUp={(e) => { this.onMouseUp(e) }}
+      onMouseMove={(e) => { this.onMouseMove(e) }}
+      onDoubleClick={(e) => { this.onDoubleClick(e) }}
     />)
 
     if (this.display) {

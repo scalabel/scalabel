@@ -60,17 +60,6 @@ export class Label2dViewer extends Viewer<Props> {
   /** The scale between the display and image data */
   private displayToImageRatio: number
 
-  /** UI onr */
-  private mouseDownHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
-  /** UI onr */
-  private mouseUpHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
-  /** UI onr */
-  private mouseMoveHandler: (e: React.MouseEvent<HTMLCanvasElement>) => void
-  /** UI onr */
-  private keyDownHandler: (e: KeyboardEvent) => void
-  /** UI onr */
-  private keyUpHandler: (e: KeyboardEvent) => void
-
   // keyboard and mouse status
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
@@ -96,12 +85,6 @@ export class Label2dViewer extends Viewer<Props> {
     this.labelCanvas = null
     this.display = null
 
-    this.mouseDownHandler = this.onMouseDown.bind(this)
-    this.mouseUpHandler = this.onMouseUp.bind(this)
-    this.mouseMoveHandler = this.onMouseMove.bind(this)
-    this.keyDownHandler = this.onKeyDown.bind(this)
-    this.keyUpHandler = this.onKeyUp.bind(this)
-
     this._labels = new Label2DList()
   }
 
@@ -109,8 +92,8 @@ export class Label2dViewer extends Viewer<Props> {
    * Component mount callback
    */
   public componentDidMount () {
-    document.addEventListener('keydown', this.keyDownHandler)
-    document.addEventListener('keyup', this.keyUpHandler)
+    document.addEventListener('keydown', (e) => { this.onKeyDown(e) })
+    document.addEventListener('keyup', (e) => { this.onKeyUp(e) })
   }
 
   /**
@@ -169,8 +152,9 @@ export class Label2dViewer extends Viewer<Props> {
           }
         }
       }}
-      onMouseDown={this.mouseDownHandler} onMouseUp={this.mouseUpHandler}
-      onMouseMove={this.mouseMoveHandler}
+      onMouseDown={(e) => { this.onMouseDown(e) }}
+      onMouseUp={(e) => { this.onMouseUp(e) }}
+      onMouseMove={(e) => { this.onMouseMove(e) }}
     />)
 
     if (this.display) {
