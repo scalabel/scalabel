@@ -13,7 +13,7 @@ export function roomName (projectName: string, taskId: string): string {
 export function getPath (
   dataDir: string, projectName: string,
   taskId: string, workerId: string): string {
-  return sprintf('%s/%s/submissions/shared/%s/%s/',
+  return sprintf('%s/%s/saved/%s/%s/',
     dataDir, projectName, taskId, workerId)
 }
 
@@ -22,5 +22,5 @@ export function getPath (
  */
 export function getFile (path: string) {
   const timestamp = Date.now()
-  return sprintf('%s/%s.json', path, timestamp)
+  return sprintf('%s/%s_%s.json', path, timestamp)
 }
