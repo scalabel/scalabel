@@ -1,3 +1,4 @@
+import * as moment from 'moment'
 import { sprintf } from 'sprintf-js'
 
 /**
@@ -11,16 +12,15 @@ export function roomName (projectName: string, taskId: string): string {
  * Builds the path for sync data
  */
 export function getPath (
-  dataDir: string, projectName: string,
-  taskId: string, workerId: string): string {
-  return sprintf('%s/%s/saved/%s/%s/',
-    dataDir, projectName, taskId, workerId)
+  dataDir: string, projectName: string, taskId: string): string {
+  return sprintf('%s/%s/saved/%s/',
+    dataDir, projectName, taskId)
 }
 
 /**
  * Saves a timestamped file
  */
-export function getFile (path: string, sessionId: string) {
-  const timestamp = Date.now()
-  return sprintf('%s/%s_%s.json', path, timestamp, sessionId)
+export function getFile (path: string) {
+  const today = moment().format('YYYY-MM-DD_hh-mm-ss')
+  return sprintf('%s/%s.json', path, today)
 }
