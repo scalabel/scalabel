@@ -20,7 +20,7 @@ export function getPath (
 /**
  * Saves a timestamped file
  */
-export function getFile (path: string) {
+export function getFile (path: string, sessionId: string) {
   const timestamp = Date.now()
-  return sprintf('%s/%s_%s.json', path, timestamp)
+  return sprintf('%s/%s_%s.json', path, timestamp, sessionId)
 }

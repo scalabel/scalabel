@@ -61,6 +61,7 @@ io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
     const taskId = state.task.config.taskId
     const projectName = state.task.config.projectName
     const workerId = state.user.id
+    const sessionId = state.session.id
 
     const syncPath = path.getPath(dataDir, projectName, taskId, workerId)
     const room = path.roomName(projectName, taskId)
@@ -89,7 +90,7 @@ io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
       // automatically save task data on updates
       stores[room].subscribe(() => {
         const content = JSON.stringify(stores[room].getState().present.task)
-        const file = path.getFile(syncPath)
+        const file = path.getFile(syncPath, sessionId)
         fs.writeFileSync(file, content)
       })
     } else {
