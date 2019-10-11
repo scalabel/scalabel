@@ -3,7 +3,7 @@ import * as action from '../../js/action/common'
 import * as polygon2d from '../../js/action/polygon2d'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { LabelTypes } from '../../js/common/types'
+import { LabelTypeName } from '../../js/common/types'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { PolygonType } from '../../js/functional/types'
@@ -35,7 +35,7 @@ test('Add, change and delete polygon labels', () => {
   const labelIds: number[] = _.map(state.task.items[0].labels, (l) => l.id)
   let label = state.task.items[0].labels[labelIds[0]]
   expect(label.item).toBe(0)
-  expect(label.type).toBe(LabelTypes.POLYGON_2D)
+  expect(label.type).toBe(LabelTypeName.POLYGON_2D)
   const indexedShape = state.task.items[0].shapes[label.shapes[0]]
   let shape = indexedShape.shape as PolygonType
   // Check label ids

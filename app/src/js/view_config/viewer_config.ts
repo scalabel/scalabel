@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { updateImageViewerConfig, zoomImage } from '../action/image'
 import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, zoomCamera } from '../action/point_cloud'
 import Session from '../common/session'
+import { Key } from '../common/types'
 import { getCurrentImageViewerConfig, getCurrentItem, getCurrentPointCloudViewerConfig } from '../functional/state_util'
 import { Vector3D } from '../math/vector3d'
 import { SCROLL_ZOOM_RATIO } from './image'
@@ -298,26 +299,26 @@ export default class ViewerConfigUpdater {
   private pointCloudKeyEvents (key: string) {
     const viewerConfig = getCurrentPointCloudViewerConfig(Session.getState())
     switch (key) {
-      case '.':
+      case Key.PERIOD:
         Session.dispatch(moveUp(viewerConfig))
         break
-      case '/':
+      case Key.SLASH:
         Session.dispatch(moveDown(viewerConfig))
         break
-      case 'Down':
-      case 'ArrowDown':
+      case Key.DOWN:
+      case Key.ARROW_DOWN:
         Session.dispatch(moveBack(viewerConfig))
         break
-      case 'Up':
-      case 'ArrowUp':
+      case Key.UP:
+      case Key.ARROW_UP:
         Session.dispatch(moveForward(viewerConfig))
         break
-      case 'Left':
-      case 'ArrowLeft':
+      case Key.LEFT:
+      case Key.ARROW_LEFT:
         Session.dispatch(moveLeft(viewerConfig))
         break
-      case 'Right':
-      case 'ArrowRight':
+      case Key.RIGHT:
+      case Key.ARROW_RIGHT:
         Session.dispatch(moveRight(viewerConfig))
         break
     }

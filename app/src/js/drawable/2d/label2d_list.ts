@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { changeSelect } from '../../action/common'
 import Session from '../../common/session'
-import { LabelTypes } from '../../common/types'
+import { LabelTypeName } from '../../common/types'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -17,11 +17,11 @@ import { Tag2D } from './tag2d'
  * @param {string} labelType: type of the new label
  */
 function makeDrawableLabel (labelType: string): Label2D {
-  if (labelType === LabelTypes.BOX_2D) {
+  if (labelType === LabelTypeName.BOX_2D) {
     return new Box2D()
-  } else if (labelType === LabelTypes.TAG) {
+  } else if (labelType === LabelTypeName.TAG) {
     return new Tag2D()
-  } else if (labelType === LabelTypes.POLYGON_2D) {
+  } else if (labelType === LabelTypeName.POLYGON_2D) {
     return new Polygon2D()
   } else {
     throw new Error(sprintf('Undefined label type %s', labelType))

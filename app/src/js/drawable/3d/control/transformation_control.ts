@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { Key } from '../../../common/types'
 import { projectionFromNDC } from '../../../view_config/point_cloud'
 import { Controller } from './controller'
 import { RotationControl } from './rotation_control'
@@ -51,24 +52,24 @@ export class TransformationControl extends THREE.Group {
    */
   public onKeyDown (e: KeyboardEvent): boolean {
     switch (e.key) {
-      case 'Q':
-      case 'q':
+      case Key.Q_UP:
+      case Key.Q_LOW:
         this._currentController.toggleFrame()
         return true
-      case 'T':
-      case 't':
+      case Key.T_UP:
+      case Key.T_LOW:
         this.switchController(this._translationControl)
         return true
-      case 'R':
-      case 'r':
+      case Key.R_UP:
+      case Key.R_LOW:
         this.switchController(this._rotationControl)
         return true
-      case 'S':
-      case 's':
+      case Key.S_UP:
+      case Key.S_LOW:
         this.switchController(this._scaleControl)
         return true
-      case 'F':
-      case 'f':
+      case Key.F_UP:
+      case Key.F_LOW:
         return true
     }
     return false

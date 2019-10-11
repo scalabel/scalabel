@@ -1,7 +1,7 @@
 import { changeLabelShape } from '../../action/common'
 import { addPlaneLabel } from '../../action/plane3d'
 import Session from '../../common/session'
-import { LabelTypes } from '../../common/types'
+import { LabelTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
 import { Plane3DType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
@@ -115,7 +115,7 @@ export class Plane3D extends Label3D {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
-      type: LabelTypes.PLANE_3D, id: -1, item: itemIndex,
+      type: LabelTypeName.PLANE_3D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })

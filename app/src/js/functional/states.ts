@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { LabelTypes } from '../common/types'
+import { LabelTypeName } from '../common/types'
 import {
   ConfigType, CubeType,
   ImageViewerConfigType, IndexedShapeType,
@@ -28,7 +28,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return _.cloneDeep<LabelType>({
     id: -1,
     item: -1,
-    type: LabelTypes.EMPTY,
+    type: LabelTypeName.EMPTY,
     category: [],
     attributes: {},
     parent: -1, // id

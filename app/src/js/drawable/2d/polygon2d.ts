@@ -3,7 +3,7 @@ import { sprintf } from 'sprintf-js'
 import { changeLabelShape } from '../../action/common'
 import { addPolygon2dLabel } from '../../action/polygon2d'
 import Session from '../../common/session'
-import { LabelTypes } from '../../common/types'
+import { LabelTypeName } from '../../common/types'
 import { makeLabel, makePolygon } from '../../functional/states'
 import { PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -456,7 +456,7 @@ export class Polygon2D extends Label2D {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
-      type: LabelTypes.POLYGON_2D, id: -1, item: itemIndex,
+      type: LabelTypeName.POLYGON_2D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })

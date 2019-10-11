@@ -2,7 +2,7 @@ import _ from 'lodash'
 import * as THREE from 'three'
 import { deleteLabel, selectLabel } from '../../action/common'
 import Session from '../../common/session'
-import { LabelTypes } from '../../common/types'
+import { Key, LabelTypeName } from '../../common/types'
 import { CubeType, State } from '../../functional/types'
 import { Box3D } from './box3d'
 import { TransformationControl } from './control/transformation_control'
@@ -17,9 +17,9 @@ function makeDrawableLabel (
   labelType: string
 ): Label3D {
   switch (labelType) {
-    case LabelTypes.BOX_3D:
+    case LabelTypeName.BOX_3D:
       return new Box3D()
-    case LabelTypes.PLANE_3D:
+    case LabelTypeName.PLANE_3D:
       return new Plane3D()
   }
   return new Box3D()
@@ -68,7 +68,7 @@ export class Label3DList {
       const itemIndex = state.user.select.item
       const item = state.task.items[itemIndex]
       for (const key of Object.keys(item.labels)) {
-        if (item.labels[Number(key)].type === LabelTypes.PLANE_3D) {
+        if (item.labels[Number(key)].type === LabelTypeName.PLANE_3D) {
           planeExists = true
           break
         }
@@ -118,7 +118,7 @@ export class Label3DList {
         newLabels[id] =
           makeDrawableLabel(item.labels[id].type)
       }
-      if (item.labels[id].type === LabelTypes.PLANE_3D) {
+      if (item.labels[id].type === LabelTypeName.PLANE_3D) {
         this._plane = newLabels[id] as Plane3D
       }
       newLabels[id].updateState(state, itemIndex, id)
@@ -131,7 +131,7 @@ export class Label3DList {
     // Attach shapes to plane
     for (const key of Object.keys(item.labels)) {
       const id = Number(key)
-      if (item.labels[id].type === LabelTypes.BOX_3D) {
+      if (item.labels[id].type === LabelTypeName.BOX_3D) {
         const shape = item.shapes[item.labels[id].shapes[0]].shape as CubeType
         if (shape.surfaceId >= 0) {
           newLabels[id].attachToPlane(newLabels[shape.surfaceId] as Plane3D)
@@ -269,7 +269,7 @@ export class Label3DList {
    */
   public onKeyDown (e: KeyboardEvent): boolean {
     switch (e.key) {
-      case ' ':
+      case Key.SPACE:
         const state = this._state
         const label = new Box3D()
         if (this._plane) {
@@ -278,8 +278,8 @@ export class Label3DList {
           label.init(state)
         }
         return true
-      case 'Escape':
-      case 'Enter':
+      case Key.ESCAPE:
+      case Key.ENTER:
         Session.dispatch(selectLabel(-1))
         return true
       case 'Backspace':
@@ -290,8 +290,8 @@ export class Label3DList {
           ))
         }
         return true
-      case 'P':
-      case 'p':
+      case Key.P_UP:
+      case Key.P_LOW:
         if (this._plane) {
           if (this._selectedLabel === this._plane) {
             Session.dispatch(selectLabel(-1))

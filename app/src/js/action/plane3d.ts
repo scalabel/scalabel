@@ -1,4 +1,4 @@
-import { LabelTypes } from '../common/types'
+import { LabelTypeName } from '../common/types'
 import { makeLabel, makePlane } from '../functional/states'
 import { Vector3Type } from '../functional/types'
 import * as actions from './common'
@@ -19,6 +19,6 @@ export function addPlaneLabel (
   orientation: Vector3Type): AddLabelsAction {
   // create the rect object
   const plane = makePlane({ offset, orientation })
-  const label = makeLabel({ type: LabelTypes.PLANE_3D })
-  return actions.addLabel(itemIndex, label, [LabelTypes.PLANE_3D], [plane])
+  const label = makeLabel({ type: LabelTypeName.PLANE_3D })
+  return actions.addLabel(itemIndex, label, [LabelTypeName.PLANE_3D], [plane])
 }

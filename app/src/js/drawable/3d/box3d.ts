@@ -13,7 +13,7 @@ import {
 
 import { Vector3D } from '../../math/vector3d'
 
-import { LabelTypes } from '../../common/types'
+import { LabelTypeName } from '../../common/types'
 import { TransformationControl } from './control/transformation_control'
 import { Cube3D } from './cube3d'
 import { Label3D } from './label3d'
@@ -42,7 +42,7 @@ export class Box3D extends Label3D {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
-      type: LabelTypes.BOX_3D, id: -1, item: itemIndex,
+      type: LabelTypeName.BOX_3D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })
