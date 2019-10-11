@@ -50,14 +50,10 @@ export class Label3DList {
   private _raycastableShapes: Readonly<Array<Readonly<Shape>>>
   /** Plane visualization */
   private _plane?: Plane3D
-  /** Camera */
-  private _camera: THREE.Camera
-  /** raycaster */
-  private _raycaster: THREE.Raycaster
   /** transformation control */
   private _control: TransformationControl
 
-  constructor (camera: THREE.Camera) {
+  constructor () {
     this._labels = {}
     this._raycastMap = {}
     this._selectedLabel = null
@@ -65,12 +61,7 @@ export class Label3DList {
     this._mouseDownOnSelection = false
     this._labelChanged = false
     this._raycastableShapes = []
-    this._camera = camera
-    this._raycaster = new THREE.Raycaster()
-    this._raycaster.near = 1.0
-    this._raycaster.far = 100.0
-    this._raycaster.linePrecision = 0.02
-    this._control = new TransformationControl(this._camera)
+    this._control = new TransformationControl()
     if (Session.itemType === 'image') {
       let planeExists = false
       const state = Session.getState()
@@ -95,9 +86,9 @@ export class Label3DList {
    * Add labels to scene object
    * @param {THREE.Scene} scene: ThreeJS Scene Object
    */
-  public render (scene: THREE.Scene): void {
+  public render (scene: THREE.Scene, camera: THREE.Camera): void {
     for (const id of Object.keys(this._labels)) {
-      this._labels[Number(id)].render(scene, this._camera)
+      this._labels[Number(id)].render(scene, camera)
     }
   }
 
@@ -181,11 +172,11 @@ export class Label3DList {
   /**
    * Process mouse down action
    */
-  public onMouseDown (x: number, y: number): boolean {
+  public onMouseDown (x: number, y: number, camera: THREE.Camera): boolean {
     if (this._highlightedLabel === this._selectedLabel && this._selectedLabel) {
       this._mouseDownOnSelection = true
       if (this._control.attached()) {
-        const consumed = this._control.onMouseDown()
+        const consumed = this._control.onMouseDown(camera)
         if (consumed) {
           return false
         }
@@ -193,7 +184,7 @@ export class Label3DList {
     }
 
     if (this._highlightedLabel) {
-      const consumed = this._highlightedLabel.onMouseDown(x, y, this._camera)
+      const consumed = this._highlightedLabel.onMouseDown(x, y, camera)
       if (consumed) {
         this._mouseDownOnSelection = true
         // Set current label as selected label
@@ -218,7 +209,7 @@ export class Label3DList {
       this._selectedLabel = newLabel
       this._mouseDownOnSelection = true
 
-      this._highlightedLabel.onMouseDown(x, y, this._camera)
+      this._highlightedLabel.onMouseDown(x, y, camera)
     }
 
     return false
@@ -251,20 +242,22 @@ export class Label3DList {
    */
   public onMouseMove (
     x: number,
-    y: number
+    y: number,
+    camera: THREE.Camera,
+    raycastIntersection?: THREE.Intersection
   ): boolean {
     if (this._mouseDownOnSelection && this._selectedLabel) {
       this._labelChanged = true
       if (this._control.attached()) {
-        const consumed = this._control.onMouseMove(x, y)
+        const consumed = this._control.onMouseMove(x, y, camera)
         if (consumed) {
           return true
         }
       }
-      this._selectedLabel.onMouseMove(x, y, this._camera)
+      this._selectedLabel.onMouseMove(x, y, camera)
       return true
     } else {
-      this.raycastLabels(x, y, this._camera, this._raycaster)
+      this.highlight(raycastIntersection)
     }
     return false
   }
@@ -323,11 +316,18 @@ export class Label3DList {
   }
 
   /**
+   * Get raycastable list
+   */
+  public getRaycastableShapes (): Readonly<Array<Readonly<Shape>>> {
+    return this._raycastableShapes
+  }
+
+  /**
    * Highlight label if ray from mouse is intersecting a label
    * @param object
    * @param point
    */
-  private highlight (intersection: THREE.Intersection | null) {
+  private highlight (intersection?: THREE.Intersection) {
     if (this._highlightedLabel) {
       this._highlightedLabel.setHighlighted()
       this._control.setHighlighted()
@@ -348,39 +348,6 @@ export class Label3DList {
         }
         return
       }
-    }
-  }
-
-  /**
-   * Get raycastable list
-   */
-  private getRaycastableShapes (): Readonly<Array<Readonly<Shape>>> {
-    return this._raycastableShapes
-  }
-
-  /**
-   * Raycast labels from current mouse position to find possible intersections
-   */
-  private raycastLabels (
-    x: number,
-    y: number,
-    camera: THREE.Camera,
-    raycaster: THREE.Raycaster
-  ): void {
-    raycaster.setFromCamera(new THREE.Vector2(x, y), camera)
-
-    const shapes = this.getRaycastableShapes()
-    const intersects = raycaster.intersectObjects(
-      // Need to do this middle conversion because ThreeJS does not specify
-      // as readonly, but this should be readonly for all other purposes
-      shapes as unknown as THREE.Object3D[], false
-    )
-
-    if (intersects.length > 0) {
-      const closestIntersect = intersects[0]
-      this.highlight(closestIntersect)
-    } else {
-      this.highlight(null)
     }
   }
 }

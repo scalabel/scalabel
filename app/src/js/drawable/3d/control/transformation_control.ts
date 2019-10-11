@@ -17,17 +17,14 @@ export class TransformationControl extends THREE.Group {
   private _rotationControl: RotationControl
   /** Scale controller */
   private _scaleControl: ScaleControl
-  /** Camera */
-  private _camera: THREE.Camera
   /** Attached object */
   private _object: THREE.Object3D | null
 
-  constructor (camera: THREE.Camera) {
+  constructor () {
     super()
-    this._camera = camera
-    this._translationControl = new TranslationControl(camera)
-    this._rotationControl = new RotationControl(camera)
-    this._scaleControl = new ScaleControl(camera)
+    this._translationControl = new TranslationControl()
+    this._rotationControl = new RotationControl()
+    this._scaleControl = new ScaleControl()
     this._currentController = this._rotationControl
     this.add(this._currentController)
     this._object = null
@@ -44,8 +41,8 @@ export class TransformationControl extends THREE.Group {
   /**
    * Mouse down
    */
-  public onMouseDown () {
-    return this._currentController.onMouseDown()
+  public onMouseDown (camera: THREE.Camera) {
+    return this._currentController.onMouseDown(camera)
   }
 
   /**
@@ -82,8 +79,8 @@ export class TransformationControl extends THREE.Group {
    * @param x: NDC
    * @param y: NDC
    */
-  public onMouseMove (x: number, y: number) {
-    const projection = projectionFromNDC(x, y, this._camera)
+  public onMouseMove (x: number, y: number, camera: THREE.Camera) {
+    const projection = projectionFromNDC(x, y, camera)
     return this._currentController.onMouseMove(projection)
   }
 

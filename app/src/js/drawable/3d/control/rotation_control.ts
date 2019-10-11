@@ -6,8 +6,8 @@ import { RotationRing } from './rotation_ring'
  * Groups TranslationAxis's and TranslationPlanes to perform translation ops
  */
 export class RotationControl extends Controller {
-  constructor (camera: THREE.Camera) {
-    super(camera)
+  constructor () {
+    super()
     this._controlUnits.push(
       new RotationRing(
         new THREE.Vector3(1, 0, 0),

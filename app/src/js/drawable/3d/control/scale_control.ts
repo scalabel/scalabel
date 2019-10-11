@@ -1,5 +1,4 @@
 
-import * as THREE from 'three'
 import { Controller } from './controller'
 import { ScaleAxis } from './scale_axis'
 
@@ -7,8 +6,8 @@ import { ScaleAxis } from './scale_axis'
  * Groups TranslationAxis's and TranslationPlanes to perform translation ops
  */
 export class ScaleControl extends Controller {
-  constructor (camera: THREE.Camera) {
-    super(camera)
+  constructor () {
+    super()
     this._controlUnits.push(
       new ScaleAxis(
         'x',

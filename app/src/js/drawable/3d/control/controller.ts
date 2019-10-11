@@ -22,8 +22,6 @@ export abstract class Controller extends THREE.Object3D {
   protected _controlUnits: ControlUnit[]
   /** current axis being dragged */
   protected _highlightedUnit: ControlUnit | null
-  /** camera */
-  protected _camera: THREE.Camera
   /** Object to modify */
   protected _object: THREE.Object3D | null
   /** local or world */
@@ -35,10 +33,9 @@ export abstract class Controller extends THREE.Object3D {
   /** previous projection */
   protected _projection: THREE.Ray
 
-  constructor (camera: THREE.Camera) {
+  constructor () {
     super()
     this._controlUnits = []
-    this._camera = camera
     this._object = null
     this._local = true
     this._intersectionPoint = new THREE.Vector3()
@@ -60,10 +57,10 @@ export abstract class Controller extends THREE.Object3D {
   }
 
   /** mouse down */
-  public onMouseDown () {
+  public onMouseDown (camera: THREE.Camera) {
     if (this._highlightedUnit && this._object) {
       const normal = new THREE.Vector3()
-      this._camera.getWorldDirection(normal)
+      camera.getWorldDirection(normal)
       this._dragPlane.setFromNormalAndCoplanarPoint(
         normal,
         this._intersectionPoint

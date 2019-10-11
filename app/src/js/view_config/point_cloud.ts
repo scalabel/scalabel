@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { PointCloudViewerConfigType } from '../functional/types'
+import { Vector3D } from '../math/vector3d'
 
 /**
  * Update ThreeJS rendering objects with viewer config params
@@ -10,20 +11,24 @@ import { PointCloudViewerConfigType } from '../functional/types'
  * @param target
  */
 export function updateThreeCameraAndRenderer (
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | null,
   config: PointCloudViewerConfigType,
-  renderer: THREE.Renderer,
-  camera: THREE.PerspectiveCamera,
-  target: THREE.Object3D
+  renderer: THREE.Renderer | null,
+  camera: THREE.Camera,
+  target: THREE.Object3D | null
 ) {
-  target.position.x = config.target.x
-  target.position.y = config.target.y
-  target.position.z = config.target.z
+  if (target) {
+    target.position.x = config.target.x
+    target.position.y = config.target.y
+    target.position.z = config.target.z
+  }
 
   if (canvas) {
-    camera.aspect = canvas.offsetWidth /
-      canvas.offsetHeight
-    camera.updateProjectionMatrix()
+    {
+      (camera as THREE.PerspectiveCamera).aspect =
+        canvas.offsetWidth / canvas.offsetHeight
+    }
+    { (camera as THREE.PerspectiveCamera).updateProjectionMatrix() }
   }
 
   camera.up.x = config.verticalAxis.x
@@ -32,7 +37,7 @@ export function updateThreeCameraAndRenderer (
   camera.position.x = config.position.x
   camera.position.y = config.position.y
   camera.position.z = config.position.z
-  camera.lookAt(target.position)
+  camera.lookAt((new Vector3D()).fromObject(config.target).toThree())
 
   if (renderer && canvas) {
     renderer.setSize(canvas.width,

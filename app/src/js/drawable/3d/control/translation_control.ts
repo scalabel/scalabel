@@ -7,8 +7,8 @@ import { TranslationPlane } from './translation_plane'
  * Groups TranslationAxis's and TranslationPlanes to perform translation ops
  */
 export class TranslationControl extends Controller {
-  constructor (camera: THREE.Camera) {
-    super(camera)
+  constructor () {
+    super()
     this._controlUnits = []
     this._controlUnits.push(
       new TranslationAxis(new THREE.Vector3(1, 0, 0), 0xff0000)

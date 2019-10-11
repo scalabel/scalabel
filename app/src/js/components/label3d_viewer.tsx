@@ -62,6 +62,8 @@ class Label3dViewer extends Viewer<Props> {
   private camera: THREE.PerspectiveCamera
   /** ThreeJS sphere mesh for indicating camera target location */
   private target: THREE.Mesh
+  /** raycaster */
+  private _raycaster: THREE.Raycaster
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
 
@@ -84,11 +86,16 @@ class Label3dViewer extends Viewer<Props> {
         }))
     this.scene.add(this.target)
 
-    this._labels = new Label3DList(this.camera)
+    this._labels = new Label3DList()
 
     this.display = null
     this.canvas = null
     this.scale = 1
+
+    this._raycaster = new THREE.Raycaster()
+    this._raycaster.near = 1.0
+    this._raycaster.far = 100.0
+    this._raycaster.linePrecision = 0.02
 
     this._keyDownMap = {}
   }
@@ -165,7 +172,7 @@ class Label3dViewer extends Viewer<Props> {
     )
     const x = NDC[0]
     const y = NDC[1]
-    if (this._labels.onMouseDown(x, y)) {
+    if (this._labels.onMouseDown(x, y, this.camera)) {
       e.stopPropagation()
     }
   }
@@ -207,7 +214,19 @@ class Label3dViewer extends Viewer<Props> {
     const x = NDC[0]
     const y = NDC[1]
 
-    if (this._labels.onMouseMove(x, y)) {
+    this._raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
+
+    const shapes = this._labels.getRaycastableShapes()
+    const intersects = this._raycaster.intersectObjects(
+      // Need to do this middle conversion because ThreeJS does not specify
+      // as readonly, but this should be readonly for all other purposes
+      shapes as unknown as THREE.Object3D[], false
+    )
+
+    const consumed = (intersects && intersects.length > 0) ?
+      this._labels.onMouseMove(x, y, this.camera, intersects[0]) :
+      this._labels.onMouseMove(x, y, this.camera)
+    if (consumed) {
       e.stopPropagation()
     }
 
@@ -260,7 +279,7 @@ class Label3dViewer extends Viewer<Props> {
   private renderThree () {
     if (this.renderer) {
       this.scene.children = []
-      this._labels.render(this.scene)
+      this._labels.render(this.scene, this.camera)
       this.renderer.render(this.scene, this.camera)
     }
   }
