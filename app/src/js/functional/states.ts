@@ -47,7 +47,8 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
  * @param {{[key: number]: number}} labels
  */
 export function makeTrack (
-  id: number, labels: {[key: number]: number} = {}): TrackType {
+  id: number, labels: {[key: number]: number} = {}
+): TrackType {
   return { id, labels }
 }
 
@@ -188,7 +189,9 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     projectName: '',
     itemType: '',
     labelTypes: [],
+    policyTypes: [],
     taskSize: 0,
+    tracking: false,
     handlerUrl: '',
     pageTitle: '',
     instructionPage: '', // instruction url
@@ -228,6 +231,7 @@ function makeSelect (params: Partial<Select>= {}): Select {
     category: 0,
     attributes: {},
     labelType: 0,
+    policyType: 0,
     ...params
   }
 }

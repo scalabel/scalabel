@@ -23,6 +23,8 @@ export abstract class Label2D {
   /* The members are public for testing purpose */
   /** label id in state */
   protected _labelId: number
+  /** track id in state */
+  protected _trackId: number
   /** index of the label */
   protected _index: number
   /** drawing order of the label */
@@ -51,6 +53,7 @@ export abstract class Label2D {
   constructor () {
     this._index = -1
     this._labelId = -1
+    this._trackId = -1
     this._selected = false
     this._selectedHandle = -1
     this._highlighted = false
@@ -272,6 +275,7 @@ export abstract class Label2D {
     this._label = item.labels[labelId]
     this._order = this._label.order
     this._labelId = this._label.id
+    this._trackId = this._label.track
     this._color = getColorById(this._labelId)
     this.setSelected(labelId === state.user.select.label, 0)
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))

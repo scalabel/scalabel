@@ -171,8 +171,12 @@ export interface ConfigType {
   itemType: string
   /** Label types available for the session */
   labelTypes: string[]
+  /** Policy types available for session */
+  policyTypes: string[]
   /** Task size */
   taskSize: number
+  /** Whether to track */
+  tracking: boolean
   /** Handler URL */
   handlerUrl: string
   /** Page title */
@@ -237,6 +241,8 @@ export interface Select {
   attributes: {[key: number]: number[]}
   /** selected label type */
   labelType: number
+  /** selected track policy type */
+  policyType: number
 }
 
 /**

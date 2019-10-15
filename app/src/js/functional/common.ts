@@ -196,10 +196,16 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
  * @param shapes
  */
 function addTrackToTask (
-  task: TaskType, itemIndices: number[],
-  labels: LabelType[], shapeTypes: string[][],
+  task: TaskType,
+  itemIndices: number[],
+  labels: LabelType[],
+  shapeTypes: string[][],
   shapes: ShapeType[][]
-  ): [TaskType, TrackType, LabelType[]] {
+): [TaskType, TrackType, LabelType[]] {
+  const track = makeTrack(task.status.maxTrackId + 1, {})
+  for (const label of labels) {
+    label.track = track.id
+  }
   const labelList = labels.map((l) => [l])
   const shapeTypeList = shapeTypes.map((s) => [s])
   const shapeList = shapes.map((s) => [s])
@@ -207,7 +213,6 @@ function addTrackToTask (
     pickArray(task.items, itemIndices),
     task.status, labelList, shapeTypeList, shapeList)
   const items = assignToArray(task.items, newItems, itemIndices)
-  const track = makeTrack(task.status.maxTrackId + 1)
   newLabels.map((l) => {
     track.labels[l.item] = l.id
   })
@@ -226,7 +231,8 @@ export function addTrack (state: State, action: types.AddTrackAction): State {
   let { user } = state
   const [task,, newLabels] = addTrackToTask(
     state.task, action.itemIndices, action.labels,
-    action.shapeTypes, action.shapes)
+    action.shapeTypes, action.shapes
+  )
   // select the label on the current item
   if (action.sessionId === state.session.id) {
     for (const l of newLabels) {

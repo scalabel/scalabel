@@ -15,6 +15,8 @@ export abstract class Label3D {
   /* The members are public for testing purpose */
   /** label id in state */
   protected _labelId: number
+  /** track id in state */
+  protected _trackId: number
   /** index of the label */
   protected _index: number
   /** drawing order of the label */
@@ -33,6 +35,7 @@ export abstract class Label3D {
   constructor () {
     this._index = -1
     this._labelId = -1
+    this._trackId = -1
     this._order = -1
     this._selected = false
     this._highlighted = false
@@ -56,6 +59,14 @@ export abstract class Label3D {
   /** get labelId */
   public get labelId (): number {
     return this._labelId
+  }
+
+  /** get category index */
+  public get category (): number[] {
+    if (this._label) {
+      return this._label.category
+    }
+    return []
   }
 
   /** select the label */
@@ -149,6 +160,7 @@ export abstract class Label3D {
     const item = state.task.items[itemIndex]
     this._label = item.labels[labelId]
     this._labelId = this._label.id
+    this._trackId = this._label.track
     this._color = getColorById(this._labelId)
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }

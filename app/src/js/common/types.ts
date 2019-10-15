@@ -96,3 +96,8 @@ export enum Key {
   Y_LOW = 'y',
   Z_LOW = 'z'
 }
+
+export enum TrackPolicyTypes {
+  LINEAR_INTERPOLATION_BOX_2D = 'linear_interpolation_box_2d',
+  LINEAR_INTERPOLATION_BOX_3D = 'linear_interpolation_box_3d'
+}

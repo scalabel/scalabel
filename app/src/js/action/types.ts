@@ -4,7 +4,11 @@
 import {
   ImageViewerConfigType,
   LabelType,
-  PointCloudViewerConfigType, Select, ShapeType, TaskType, ViewerConfigType
+  PointCloudViewerConfigType,
+  Select,
+  ShapeType,
+  TaskType,
+  ViewerConfigType
 } from '../functional/types'
 
 export const INIT_SESSION = 'INIT_SESSION'

@@ -2,7 +2,9 @@ import _ from 'lodash'
 import * as THREE from 'three'
 import { deleteLabel, selectLabel } from '../../action/common'
 import Session from '../../common/session'
+import { makeTrackPolicy, Track } from '../../common/track'
 import { Key, LabelTypeName } from '../../common/types'
+import { makeTrack } from '../../functional/states'
 import { CubeType, State } from '../../functional/types'
 import { Box3D } from './box3d'
 import { TransformationControl } from './control/transformation_control'
@@ -194,6 +196,15 @@ export class Label3DList {
     }
 
     if (this._plane) {
+      const state = this._state
+      const currentPolicyType =
+        state.task.config.policyTypes[state.user.select.policyType]
+      const newTrack = new Track()
+      newTrack.updateState(
+        makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
+      )
+      Session.tracks[-1] = newTrack
+
       const newLabel = new Box3D()
       newLabel.init(this._state, this._plane.labelId, true)
       this._labels[-1] = newLabel
@@ -271,12 +282,17 @@ export class Label3DList {
     switch (e.key) {
       case Key.SPACE:
         const state = this._state
+        const currentPolicyType =
+          state.task.config.policyTypes[state.user.select.policyType]
+        const newTrack = new Track()
+        newTrack.updateState(
+          makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
+        )
+        Session.tracks[-1] = newTrack
+
         const label = new Box3D()
-        if (this._plane) {
-          label.init(state, this._plane.labelId)
-        } else {
-          label.init(state)
-        }
+        const planeId = (this._plane) ? this._plane.labelId : -1
+        label.init(state, planeId)
         return true
       case Key.ESCAPE:
       case Key.ENTER:

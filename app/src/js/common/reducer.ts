@@ -38,6 +38,8 @@ export const reducer: Reducer<State> = (
       )
     case types.ADD_LABELS:
       return common.addLabels(state, action as types.AddLabelsAction)
+    case types.ADD_TRACK:
+      return common.addTrack(state, action as types.AddTrackAction)
     case types.CHANGE_SHAPES:
       return common.changeShapes(state, action as types.ChangeShapesAction)
     case types.CHANGE_LABELS:

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import * as THREE from 'three'
 
 import { addBox3dLabel } from '../../action/box3d'
-import { changeLabelShape } from '../../action/common'
+import { changeLabelProps, changeLabelShape } from '../../action/common'
 import Session from '../../common/session'
 
 import { getCurrentPointCloudViewerConfig } from '../../functional/state_util'
@@ -59,13 +59,7 @@ export class Box3D extends Label3D {
     if (temporary && surfaceId && surfaceId >= 0) {
       this._temporary = temporary
     } else if (!temporary) {
-      Session.dispatch(addBox3dLabel(
-        this._label.item, this._label.category,
-        this._shape.getCenter(),
-        this._shape.getSize(),
-        this._shape.getOrientation(),
-        surfaceId
-      ))
+      this.addToState()
     }
   }
 
@@ -165,18 +159,19 @@ export class Box3D extends Label3D {
       }
 
       if (this.labelId < 0 && !this._temporary) {
-        Session.dispatch(addBox3dLabel(
-          this._label.item,
-          this._label.category,
-          cube.center,
-          cube.size,
-          cube.orientation,
-          cube.surfaceId
-        ))
+        this.addToState()
       } else {
         Session.dispatch(changeLabelShape(
           this._label.item, this._label.shapes[0], cube
         ))
+        Session.dispatch(changeLabelProps(
+          this._label.item, this._labelId, { manual: true }
+        ))
+        if (this._trackId in Session.tracks) {
+          Session.tracks[this._trackId].onLabelUpdated(
+            this._label.item, [cube]
+          )
+        }
       }
     }
   }
@@ -220,5 +215,28 @@ export class Box3D extends Label3D {
   public setHighlighted (intersection?: THREE.Intersection) {
     super.setHighlighted(intersection)
     this._shape.setHighlighted(intersection)
+  }
+
+  /**
+   * Add this label to state when newly created
+   */
+  private addToState () {
+    if (this._label) {
+      const cube = this._shape.toCube()
+      if (Session.tracking && this._trackId in Session.tracks) {
+        Session.tracks[this._trackId].onLabelCreated(
+          this._label.item, this
+        )
+      } else {
+        Session.dispatch(addBox3dLabel(
+          this._label.item,
+          this._label.category,
+          cube.center,
+          cube.size,
+          cube.orientation,
+          cube.surfaceId
+        ))
+      }
+    }
   }
 }

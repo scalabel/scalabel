@@ -90,6 +90,29 @@ export function addLabel (
 }
 
 /**
+ * Add a track
+ * @param itemIndices
+ * @param labels
+ * @param shapeTypes
+ * @param shapes
+ */
+export function addTrack (
+  itemIndices: number[],
+  labels: LabelType[],
+  shapeTypes: string[][],
+  shapes: ShapeType[][]
+): types.AddTrackAction {
+  return {
+    type: types.ADD_TRACK,
+    sessionId: Session.id,
+    itemIndices,
+    labels,
+    shapeTypes,
+    shapes
+  }
+}
+
+/**
  * Change the shape of the label
  * @param {number} itemIndex
  * @param {number} shapeId

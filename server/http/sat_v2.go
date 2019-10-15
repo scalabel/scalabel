@@ -35,6 +35,7 @@ type ConfigData struct {
 	ProjectName     string      `json:"projectName" yaml:"projectName"`
 	ItemType        string      `json:"itemType" yaml:"itemType"`
 	LabelTypes      []string    `json:"labelTypes" yaml:"labelTypes"`
+	PolicyTypes     []string    `json:"policyTypes" yaml:"policyTypes"`
 	TaskSize        int         `json:"taskSize" yaml:"taskSize"`
 	HandlerUrl      string      `json:"handlerUrl" yaml:"handlerUrl"`
 	PageTitle       string      `json:"pageTitle" yaml:"pageTitle"`
@@ -45,12 +46,14 @@ type ConfigData struct {
 	TaskId          string      `json:"taskId" yaml:"taskId"`
 	SubmitTime      int64       `json:"submitTime" yaml:"submitTime"`
 	Sync            bool        `json:"sync" yaml:"sync"`
+	Tracking        bool        `json:"tracking" yaml:"tracking"`
 	SyncAddress     string      `json:"syncAddress" yaml:"syncAddress"`
 }
 
 // Task properties that depend on the current state of session
 type TaskStatus struct {
 	MaxLabelId int `json:"maxLabelId" yaml:"maxLabelId"`
+	MaxTrackId int `json:"maxTrackId" yaml:"maxTrackId"`
 	MaxShapeId int `json:"maxShapeId" yaml:"maxShapeId"`
 	MaxOrder   int `json:"maxOrder" yaml:"maxOrder"`
 }
@@ -101,12 +104,13 @@ type UserData struct {
 
 // User's currently selected data
 type SelectedData struct {
-	Item      int `json:"item" yaml:"item"`
-	Label     int `json:"label" yaml:"label"`
-	Shape     int `json:"shape" yaml:"shape"`
-	Category  int `json:"category" yaml:"category"`
+	Item       int           `json:"item" yaml:"item"`
+	Label      int           `json:"label" yaml:"label"`
+	Shape      int           `json:"shape" yaml:"shape"`
+	Category   int           `json:"category" yaml:"category"`
 	Attributes map[int][]int `json:"attributes" yaml:"attributes"`
-	LabelType int `json:"labelType" yaml:"labelType"`
+	LabelType  int           `json:"labelType" yaml:"labelType"`
+	PolicyType int           `json:"policyType" yaml:"policyType"`
 }
 
 // Data for frontend layout
@@ -250,7 +254,7 @@ func postLoadAssignmentV2Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Update state with config variables needed by frontend
 	loadedSat.Task.Config.Sync = env.Sync
-	if (env.Sync) {
+	if env.Sync {
 		syncPort := strconv.Itoa(env.SyncPort)
 		syncAddress := fmt.Sprintf("%s:%s", env.SyncHost, syncPort)
 		loadedSat.Task.Config.SyncAddress = syncAddress
@@ -345,11 +349,29 @@ func assignmentToSat(assignment *Assignment) Sat {
 	// and will go away when redux have its own project creation logic
 	projectOptions := assignment.Task.ProjectOptions
 
+	tracking := false
+	if projectOptions.ItemType == "pointcloudtracking" {
+		projectOptions.ItemType = "pointcloud"
+		tracking = true
+	} else if projectOptions.ItemType == "video" {
+		projectOptions.ItemType = "image"
+		tracking = true
+	}
+
+	var policyTypes []string
+	if projectOptions.ItemType == "pointcloud" {
+		policyTypes = append(policyTypes, "linear_interpolation_box_3d")
+	} else if projectOptions.ItemType == "image" {
+		policyTypes = append(policyTypes, "linear_interpolation_box_2d")
+	}
+
 	configData := ConfigData{
 		ProjectName:     projectOptions.Name,
 		ItemType:        projectOptions.ItemType,
 		LabelTypes:      []string{projectOptions.LabelType},
+		PolicyTypes:     policyTypes,
 		TaskSize:        projectOptions.TaskSize,
+		Tracking:        tracking,
 		HandlerUrl:      projectOptions.HandlerUrl,
 		PageTitle:       projectOptions.PageTitle,
 		InstructionPage: projectOptions.Instructions,
@@ -372,8 +394,8 @@ func assignmentToSat(assignment *Assignment) Sat {
 	}
 
 	selectedData := SelectedData{
-		Item:  0,
-		Label: 0,
+		Item:       0,
+		Label:      0,
 		Attributes: attributes,
 	}
 

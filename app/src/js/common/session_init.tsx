@@ -12,13 +12,16 @@ import {
   makePointCloudViewerConfig
 } from '../functional/states'
 import {
-  ImageViewerConfigType, PointCloudViewerConfigType, State
+  ImageViewerConfigType,
+  PointCloudViewerConfigType,
+  State
 } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
+import { makeTrackPolicy, Track } from './track'
 
 /**
  * Request Session state from the server
@@ -66,6 +69,40 @@ export function initSession (containerName: string): void {
 }
 
 /**
+ * Update session objects with new state
+ */
+function updateTracks (): void {
+  const state = Session.getState()
+  const currentPolicyType =
+    state.task.config.policyTypes[state.user.select.policyType]
+  const newTracks: {[trackId: number]: Track} = {}
+  for (const key of Object.keys(state.task.tracks)) {
+    const trackId = Number(key)
+    const track = state.task.tracks[trackId]
+    if (trackId in Session.tracks) {
+      newTracks[trackId] = Session.tracks[trackId]
+      let trackPolicy = newTracks[trackId].trackPolicy
+      if (newTracks[trackId].policyType !== currentPolicyType) {
+        const newPolicy = makeTrackPolicy(newTracks[trackId], currentPolicyType)
+        if (newPolicy) {
+          trackPolicy = newPolicy
+        }
+        newTracks[trackId].updateState(track, trackPolicy)
+      }
+    } else {
+      newTracks[trackId] = new Track()
+      newTracks[trackId].updateState(
+        track,
+        makeTrackPolicy(newTracks[trackId], currentPolicyType)
+      )
+    }
+  }
+
+  Session.tracks = newTracks
+  Session.currentPolicyType = currentPolicyType
+}
+
+/**
  * Render the dom after data is laoded
  * @param containername: string name
  */
@@ -87,6 +124,7 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
   Session.dispatch(initSessionAction())
   const state = Session.getState()
   Session.itemType = state.task.config.itemType
+  Session.tracking = state.task.config.tracking
 }
 
 /**
@@ -97,6 +135,7 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
 export function initFromJson (stateJson: {}, middleware?: Middleware): void {
   initStore(stateJson, middleware)
   loadData()
+  Session.subscribe(updateTracks)
   Session.dispatch(updateAll())
 }
 

@@ -6,6 +6,7 @@ import * as types from '../action/types'
 import { Window } from '../components/window'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
+import { Track } from './track'
 
 export const enum ConnectionStatus {
   SAVED, SAVING, RECONNECTING, UNSAVED
@@ -21,8 +22,14 @@ class Session {
   public images: HTMLImageElement[]
   /** Point cloud */
   public pointClouds: THREE.Points[]
+  /** map between track id and track objects */
+  public tracks: {[trackId: number]: Track}
   /** Item type: image, point cloud */
   public itemType: string
+  /** whether tracking is enabled */
+  public tracking: boolean
+  /** Current tracking policy type */
+  public currentPolicyType: string
   /** The window component */
   public window?: Window
   /** Dev mode */
@@ -38,7 +45,10 @@ class Session {
   constructor () {
     this.images = []
     this.pointClouds = []
+    this.tracks = {}
     this.itemType = ''
+    this.tracking = true
+    this.currentPolicyType = ''
     this.status = ConnectionStatus.UNSAVED
     // TODO: make it configurable in the url
     this.devMode = true
