@@ -41,6 +41,15 @@ export class TranslationPlane extends THREE.Mesh
   }
 
   /**
+   * Set not highlighted when another object is highlighted
+   * @param object
+   */
+  public setFaded (): void {
+    { (this.material as THREE.Material).needsUpdate = true }
+    { (this.material as THREE.Material).opacity = 0.25 }
+  }
+
+  /**
    * Get translation delta
    * @param oldIntersection
    * @param newProjection
@@ -97,7 +106,14 @@ export class TranslationPlane extends THREE.Mesh
    * Update scale according to world scale
    * @param worldScale
    */
-  public updateScale (_worldScale: THREE.Vector3) {
-    return
+  public updateScale (worldScale: THREE.Vector3) {
+    if (this.parent) {
+      const newScale = Math.max(2, Math.min(
+        Math.abs(worldScale.x),
+        Math.abs(worldScale.y),
+        Math.abs(worldScale.z)
+      ))
+      this.scale.set(newScale, newScale, newScale)
+    }
   }
 }

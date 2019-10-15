@@ -12,6 +12,8 @@ export class TranslationAxis extends THREE.Group
   private _coneSize: number
   /** line */
   private _line: THREE.Line
+  /** guideline */
+  private _guideline: THREE.Line
   /** cone */
   private _cone: THREE.Mesh
 
@@ -35,6 +37,17 @@ export class TranslationAxis extends THREE.Group
       new THREE.LineBasicMaterial({ color, transparent: true })
     )
     this.add(this._line)
+
+    const guidelineGeometry = new THREE.BufferGeometry()
+    guidelineGeometry.addAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([ 0, 0, -10, 0, 0, 10 ], 3)
+    )
+    this._guideline = new THREE.Line(
+      guidelineGeometry,
+      new THREE.LineBasicMaterial({ color, transparent: true })
+    )
+    this._guideline.scale.set(1, 1, 1)
 
     this._cone = new THREE.Mesh(
       new THREE.ConeGeometry(1, 1.2),
@@ -135,12 +148,24 @@ export class TranslationAxis extends THREE.Group
     ) {
       { (this._line.material as THREE.Material).opacity = 0.9 }
       { (this._cone.material as THREE.Material).opacity = 0.9 }
+      this.add(this._guideline)
       return true
     } else {
       { (this._line.material as THREE.Material).opacity = 0.65 }
       { (this._cone.material as THREE.Material).opacity = 0.65 }
+      this.remove(this._guideline)
       return false
     }
+  }
+
+  /**
+   * Set faded when another object is highlighted
+   */
+  public setFaded (): void {
+    { (this._line.material as THREE.Material).needsUpdate = true }
+    { (this._cone.material as THREE.Material).needsUpdate = true }
+    { (this._line.material as THREE.Material).opacity = 0.25 }
+    { (this._cone.material as THREE.Material).opacity = 0.25 }
   }
 
   /**

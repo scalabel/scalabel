@@ -10,6 +10,8 @@ export interface ControlUnit extends THREE.Object3D {
   ) => [THREE.Vector3, THREE.Quaternion, THREE.Vector3, THREE.Vector3]
   /** set highlight */
   setHighlighted: (intersection ?: THREE.Intersection) => boolean
+  /** set faded */
+  setFaded: () => void
   /** Update scale according to world scale */
   updateScale: (worldScale: THREE.Vector3) => void
 }
@@ -52,6 +54,12 @@ export abstract class Controller extends THREE.Object3D {
       if (axis.setHighlighted(intersection) && intersection) {
         this._highlightedUnit = axis
         this._intersectionPoint = intersection.point
+        for (const nonAxis of this._controlUnits) {
+          if (nonAxis !== axis) {
+            nonAxis.setFaded()
+          }
+        }
+        break
       }
     }
   }
@@ -158,15 +166,9 @@ export abstract class Controller extends THREE.Object3D {
           )
         )
       }
-      const rotationMatrix = new THREE.Matrix4()
-      rotationMatrix.extractRotation(this.matrix)
-
-      const quaternion = new THREE.Quaternion()
-      quaternion.setFromRotationMatrix(rotationMatrix)
 
       const worldScale = new THREE.Vector3()
       this._object.getWorldScale(worldScale)
-      worldScale.applyQuaternion(quaternion)
 
       for (const unit of this._controlUnits) {
         unit.updateScale(worldScale)

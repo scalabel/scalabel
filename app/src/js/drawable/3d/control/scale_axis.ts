@@ -11,6 +11,8 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
   private _direction: THREE.Vector3
   /** line */
   private _line: THREE.Line
+  /** guideline */
+  private _guideline: THREE.Line
   /** box */
   private _box: THREE.Mesh
   /** side length */
@@ -49,6 +51,17 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
       new THREE.LineBasicMaterial({ color, transparent: true })
     )
     this.add(this._line)
+
+    const guidelineGeometry = new THREE.BufferGeometry()
+    guidelineGeometry.addAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([ 0, 0, -10, 0, 0, 10 ], 3)
+    )
+    this._guideline = new THREE.Line(
+      guidelineGeometry,
+      new THREE.LineBasicMaterial({ color, transparent: true })
+    )
+    this._guideline.scale.set(1, 1, 1)
 
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
@@ -137,7 +150,10 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     ]
   }
 
-  /** set highlight */
+  /**
+   * Set highlighted
+   * @param object
+   */
   public setHighlighted (intersection ?: THREE.Intersection): boolean {
     { (this._box.material as THREE.Material).needsUpdate = true }
     { (this._line.material as THREE.Material).needsUpdate = true }
@@ -150,12 +166,24 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     ) {
       { (this._box.material as THREE.Material).opacity = 0.9 }
       { (this._line.material as THREE.Material).opacity = 0.9 }
+      this.add(this._guideline)
       return true
     } else {
       { (this._box.material as THREE.Material).opacity = 0.65 }
       { (this._line.material as THREE.Material).opacity = 0.65 }
+      this.remove(this._guideline)
       return false
     }
+  }
+
+  /**
+   * Set faded when another object is highlighted
+   */
+  public setFaded (): void {
+    { (this._box.material as THREE.Material).needsUpdate = true }
+    { (this._line.material as THREE.Material).needsUpdate = true }
+    { (this._box.material as THREE.Material).opacity = 0.25 }
+    { (this._line.material as THREE.Material).opacity = 0.25 }
   }
 
   /**

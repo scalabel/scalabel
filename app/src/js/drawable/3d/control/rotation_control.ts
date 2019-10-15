@@ -1,9 +1,10 @@
 import * as THREE from 'three'
+import { BLUE, GREEN, RED } from '../common'
 import { Controller } from './controller'
 import { RotationRing } from './rotation_ring'
 
 /**
- * Groups TranslationAxis's and TranslationPlanes to perform translation ops
+ * perform rotation ops
  */
 export class RotationControl extends Controller {
   constructor () {
@@ -11,19 +12,19 @@ export class RotationControl extends Controller {
     this._controlUnits.push(
       new RotationRing(
         new THREE.Vector3(1, 0, 0),
-        0xff0000
+        RED
       )
     )
     this._controlUnits.push(
       new RotationRing(
         new THREE.Vector3(0, 1, 0),
-        0x00ff00
+        GREEN
       )
     )
     this._controlUnits.push(
       new RotationRing(
         new THREE.Vector3(0, 0, 1),
-        0x0000ff
+        BLUE
       )
     )
     for (const unit of this._controlUnits) {

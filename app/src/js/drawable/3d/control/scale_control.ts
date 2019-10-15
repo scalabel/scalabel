@@ -1,9 +1,9 @@
-
+import { BLUE, GREEN, RED } from '../common'
 import { Controller } from './controller'
 import { ScaleAxis } from './scale_axis'
 
 /**
- * Groups TranslationAxis's and TranslationPlanes to perform translation ops
+ * perform scaling ops
  */
 export class ScaleControl extends Controller {
   constructor () {
@@ -12,42 +12,42 @@ export class ScaleControl extends Controller {
       new ScaleAxis(
         'x',
         false,
-        0xff0000
+        RED
       )
     )
     this._controlUnits.push(
       new ScaleAxis(
         'y',
         false,
-        0x00ff00
+        GREEN
       )
     )
     this._controlUnits.push(
       new ScaleAxis(
         'z',
         false,
-        0x0000ff
+        BLUE
       )
     )
     this._controlUnits.push(
       new ScaleAxis(
         'x',
         true,
-        0xff0000
+        RED
       )
     )
     this._controlUnits.push(
       new ScaleAxis(
         'y',
         true,
-        0x00ff00
+        GREEN
       )
     )
     this._controlUnits.push(
       new ScaleAxis(
         'z',
         true,
-        0x0000ff
+        BLUE
       )
     )
     for (const unit of this._controlUnits) {
