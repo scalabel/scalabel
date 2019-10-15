@@ -173,8 +173,7 @@ export class Cube3D extends THREE.Group {
    */
   public setId (id: number): void {
     this._id = id
-    this._color = getColorById(id)
-    this._color = this._color.map((v) => v / 255.)
+    this._color = getColorById(id).map((v) => v / 255.)
   }
 
   /**
@@ -260,6 +259,11 @@ export class Cube3D extends THREE.Group {
       for (const sphere of this._controlSpheres) {
         sphere.visible = false
       }
+    }
+
+    const geometry = this._box.geometry as THREE.Geometry
+    for (const face of geometry.faces) {
+      face.color.fromArray(this._color)
     }
 
     // Check if shape already in scene
