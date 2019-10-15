@@ -70,6 +70,11 @@ class Label3dViewer extends Viewer<Props> {
   /** drawable label list */
   private _labels: Label3DList
 
+  /** key up listener */
+  private _keyUpListener: (e: KeyboardEvent) => void
+  /** key down listener */
+  private _keyDownListener: (e: KeyboardEvent) => void
+
   /**
    * Constructor, ons subscription to store
    * @param {Object} props: react props
@@ -98,15 +103,25 @@ class Label3dViewer extends Viewer<Props> {
     this._raycaster.linePrecision = 0.02
 
     this._keyDownMap = {}
+
+    this._keyUpListener = (e) => { this.onKeyUp(e) }
+    this._keyDownListener = (e) => { this.onKeyDown(e) }
   }
 
   /**
    * Mount callback
    */
   public componentDidMount () {
-    // TODO: Change this to add event listener
-    document.onkeydown = (e) => { this.onKeyDown(e) }
-    document.onkeyup = (e) => { this.onKeyUp(e) }
+    document.addEventListener('keydown', this._keyDownListener)
+    document.addEventListener('keyup', this._keyUpListener)
+  }
+
+  /**
+   * Unmount callback
+   */
+  public componentWillUnmount () {
+    document.removeEventListener('keydown', this._keyDownListener)
+    document.removeEventListener('keyup', this._keyUpListener)
   }
 
   /**
