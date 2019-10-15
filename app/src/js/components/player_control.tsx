@@ -81,6 +81,9 @@ class PlayerControl extends Component<Props> {
           spacing={1}>
           <Grid item>
             <IconButton className={classes.button}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
               onClick={() => {
                 this.currentFrame = Math.max(this.currentFrame - 1, 1)
                 goToItemWithIndex(this.currentFrame)
@@ -88,6 +91,9 @@ class PlayerControl extends Component<Props> {
               <FontAwesomeIcon icon={fa.faAngleLeft} size='lg' />
             </IconButton>
             <IconButton className={classes.button}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
               onClick={() => {
                 this.currentFrame = Math.min(
                   this.currentFrame + 1, this.numFrames)
@@ -99,6 +105,9 @@ class PlayerControl extends Component<Props> {
               className={classes.input}
               value={this.currentFrame}
               margin='dense'
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
               onChange={(e) => this.handleInputChange(e)}
               inputProps={{
                 'step': 1,
@@ -109,6 +118,9 @@ class PlayerControl extends Component<Props> {
               }}
             />
             <IconButton className={classes.button}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
               onClick={() => this.togglePlay()}>
               <FontAwesomeIcon icon={playIcon} size='xs' />
             </IconButton>
@@ -117,6 +129,9 @@ class PlayerControl extends Component<Props> {
             <Slider
               className={classes.slider}
               value={this.currentFrame}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
               onChange={(e, newVal) =>
                 this.handleSliderChange(e, newVal)}
               aria-labelledby='input-slider'
