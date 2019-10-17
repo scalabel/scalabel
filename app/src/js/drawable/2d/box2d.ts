@@ -242,7 +242,7 @@ export class Box2D extends Label2D {
    * handle keyboard down event
    * @param e pressed key
    */
-  public onKeyDown (_e: string): boolean {
+  public onKeyDown (): boolean {
     return true
   }
 
@@ -250,7 +250,7 @@ export class Box2D extends Label2D {
    * handle keyboard up event
    * @param e pressed key
    */
-  public onKeyUp (_e: string): void {
+  public onKeyUp (): void {
     return
   }
 

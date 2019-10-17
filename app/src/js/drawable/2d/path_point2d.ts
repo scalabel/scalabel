@@ -83,6 +83,16 @@ export class PathPoint2D extends Point2D {
   }
 
   /**
+   * pass the value to the current point
+   * @param target
+   */
+  public copy (target: PathPoint2D): void {
+    this.x = target.x
+    this.y = target.y
+    this.type = target.type
+  }
+
+  /**
    * Draw the point on a 2D context
    * @param context
    * @param ratio

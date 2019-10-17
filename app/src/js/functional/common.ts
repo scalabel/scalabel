@@ -124,9 +124,15 @@ function addLabelsToItem (
     taskStatus,
     {
       maxLabelId: newLabelIds[newLabelIds.length - 1],
-      maxShapeId: newShapeIds[newShapeIds.length - 1],
       maxOrder: taskStatus.maxOrder + newLabels.length
     })
+  if (newShapeIds.length !== 0) {
+    taskStatus = updateObject(
+      taskStatus,
+      {
+        maxShapeId: newShapeIds[newShapeIds.length - 1]
+      })
+  }
   return [item, newLabels, taskStatus]
 }
 
