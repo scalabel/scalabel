@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Session from '../common/session'
 import { LabelType, ShapeType } from '../functional/types'
 import { addTrack } from './common'
@@ -36,7 +37,7 @@ export function addDuplicatedTrack (
   const end = Math.min(stopIndex, itemLength)
 
   for (let index = startIndex; index < end; index += 1) {
-    trackLabels.push(label)
+    trackLabels.push(_.cloneDeep(label))
     trackShapeTypes.push(shapeTypes)
     trackShapes.push(shapes)
     itemIndices.push(index)

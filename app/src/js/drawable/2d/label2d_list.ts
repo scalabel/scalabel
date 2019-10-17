@@ -2,7 +2,9 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { changeSelect } from '../../action/common'
 import Session from '../../common/session'
+import { makeTrackPolicy, Track } from '../../common/track'
 import { LabelTypeName } from '../../common/types'
+import { makeTrack } from '../../functional/states'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -159,8 +161,16 @@ export class Label2DList {
             labels: [this._selectedLabel.labelId] }))
       } else {
         const state = this._state
+        const currentPolicyType =
+          state.task.config.policyTypes[state.user.select.policyType]
+        const newTrack = new Track()
+        newTrack.updateState(
+          makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
+        )
+        Session.tracks[-1] = newTrack
+
         const label = makeDrawableLabel(
-        state.task.config.labelTypes[state.user.select.labelType])
+          state.task.config.labelTypes[state.user.select.labelType])
         label.initTemp(state, coord)
         this._selectedLabel = label
         this._labelList.push(label)

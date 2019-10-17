@@ -168,7 +168,7 @@ export class Box3D extends Label3D {
         Session.dispatch(changeLabelProps(
           this._label.item, this._labelId, { manual: true }
         ))
-        if (this._trackId in Session.tracks) {
+        if (Session.tracking && this._trackId in Session.tracks) {
           Session.tracks[this._trackId].onLabelUpdated(
             this._label.item, [cube]
           )

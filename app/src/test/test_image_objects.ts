@@ -5,6 +5,7 @@ export const testJson = {
       projectName: 'Redux0',
       itemType: 'image',
       labelTypes: ['box2d', 'polygon2d', 'tag'],
+      policyTypes: ['linear_interpolation_box_2d'],
       taskSize: 5,
       handlerUrl: 'label2dv2',
       pageTitle: 'Image Tagging Labeling Tool',
