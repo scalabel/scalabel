@@ -69,6 +69,7 @@ export class Box3D extends Label3D {
    */
   public setSelected (s: boolean) {
     super.setSelected(s)
+    this._shape.setSelected(s)
   }
 
   /** Attach label to plane */

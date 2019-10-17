@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { deleteLabel, selectLabel } from '../../action/common'
+import { deleteSelectedLabels, selectLabel } from '../../action/select'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
 import { Key, LabelTypeName } from '../../common/types'
@@ -54,6 +54,8 @@ export class Label3DList {
   private _plane?: Plane3D
   /** transformation control */
   private _control: TransformationControl
+  /** The hashed list of keys currently down */
+  private _keyDownMap: { [key: string]: boolean }
 
   constructor () {
     this._labels = {}
@@ -80,6 +82,7 @@ export class Label3DList {
         this._plane.init(state)
       }
     }
+    this._keyDownMap = {}
     this._state = Session.getState()
     this.updateState(this._state, this._state.user.select.item)
   }
@@ -128,6 +131,8 @@ export class Label3DList {
         newRaycastableShapes.push(shape as Shape)
         newRaycastMap[shape.id] = newLabels[id]
       }
+
+      newLabels[id].setSelected(false)
     }
 
     // Attach shapes to plane
@@ -150,11 +155,17 @@ export class Label3DList {
       this._selectedLabel.detachControl(this._control)
     }
     this._selectedLabel = null
-    if (state.user.select.label >= 0 &&
-        (state.user.select.label in this._labels)) {
-      this._selectedLabel = this._labels[state.user.select.label]
+    if (state.user.select.labels.length === 1 &&
+        (state.user.select.labels[0] in this._labels)) {
+      this._selectedLabel = this._labels[state.user.select.labels[0]]
       this._selectedLabel.setSelected(true)
       this._selectedLabel.attachControl(this._control)
+    } else if (state.user.select.labels.length > 1) {
+      for (const labelId of state.user.select.labels) {
+        if (labelId in this._labels) {
+          this._labels[labelId].setSelected(true)
+        }
+      }
     }
   }
 
@@ -163,11 +174,7 @@ export class Label3DList {
    * @returns true if consumed, false otherwise
    */
   public onDoubleClick (): boolean {
-    if (this._highlightedLabel !== null) {
-      // Set current label as selected label
-      Session.dispatch(selectLabel(this._highlightedLabel.labelId))
-      return true
-    }
+    this.selectHighlighted()
     return false
   }
 
@@ -190,7 +197,7 @@ export class Label3DList {
       if (consumed) {
         this._mouseDownOnSelection = true
         // Set current label as selected label
-        Session.dispatch(selectLabel(this._highlightedLabel.labelId))
+        this.selectHighlighted()
         return false
       }
     }
@@ -300,10 +307,7 @@ export class Label3DList {
         return true
       case 'Backspace':
         if (this._selectedLabel) {
-          Session.dispatch(deleteLabel(
-            this._state.user.select.item,
-            this._state.user.select.label
-          ))
+          Session.dispatch(deleteSelectedLabels())
         }
         return true
       case Key.P_UP:
@@ -317,6 +321,8 @@ export class Label3DList {
           return true
         }
         return false
+      default:
+        this._keyDownMap[e.key] = true
     }
     if (this._selectedLabel !== null) {
       return this._control.onKeyDown(e)
@@ -327,7 +333,8 @@ export class Label3DList {
   /**
    * Handle key up
    */
-  public onKeyUp (_e: KeyboardEvent) {
+  public onKeyUp (e: KeyboardEvent) {
+    delete this._keyDownMap[e.key]
     return false
   }
 
@@ -364,6 +371,40 @@ export class Label3DList {
         }
         return
       }
+    }
+  }
+
+  /**
+   * Whether a specific key is pressed down
+   * @param {string} key - the key to check
+   * @return {boolean}
+   */
+  private isKeyDown (key: string): boolean {
+    return this._keyDownMap[key]
+  }
+
+  /**
+   * Select highlighted label
+   */
+  private selectHighlighted () {
+    if (this._highlightedLabel !== null) {
+      if ((this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) &&
+          this._highlightedLabel !== this._selectedLabel) {
+        Session.dispatch(selectLabel(
+          this._highlightedLabel.labelId,
+          this._highlightedLabel.category[0],
+          this._highlightedLabel.attributes,
+          true
+        )
+        )
+      } else {
+        Session.dispatch(selectLabel(
+          this._highlightedLabel.labelId,
+          this._highlightedLabel.category[0],
+          this._highlightedLabel.attributes
+        ))
+      }
+      return true
     }
   }
 }

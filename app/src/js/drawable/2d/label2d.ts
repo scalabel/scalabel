@@ -277,7 +277,7 @@ export abstract class Label2D {
     this._labelId = this._label.id
     this._trackId = this._label.track
     this._color = getColorById(this._labelId)
-    this.setSelected(labelId === state.user.select.label, 0)
+    this.setSelected(state.user.select.labels.includes(labelId), 0)
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }
 }

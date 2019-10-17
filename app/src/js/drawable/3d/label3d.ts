@@ -61,14 +61,6 @@ export abstract class Label3D {
     return this._labelId
   }
 
-  /** get category index */
-  public get category (): number[] {
-    if (this._label) {
-      return this._label.category
-    }
-    return []
-  }
-
   /** select the label */
   public setSelected (s: boolean) {
     this._selected = s
@@ -96,6 +88,22 @@ export abstract class Label3D {
     if (this._plane) {
       this._plane = null
     }
+  }
+
+  /** get category */
+  public get category (): number[] {
+    if (this._label && this._label.category) {
+      return this._label.category
+    }
+    return []
+  }
+
+  /** get attributes */
+  public get attributes (): {[key: number]: number[]} {
+    if (this._label && this._label.attributes) {
+      return this._label.attributes
+    }
+    return {}
   }
 
   /** Attach control */

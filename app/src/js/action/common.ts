@@ -49,14 +49,6 @@ export function changeSelect (
 }
 
 /**
- * Select label by ID
- * @param {number} labelId
- */
-export function selectLabel (labelId: number): types.ChangeSelectAction {
-  return changeSelect({ label: labelId })
-}
-
-/**
  * Create load item action
  */
 export function loadItem (

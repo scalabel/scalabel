@@ -29,6 +29,7 @@ export enum PathPointType {
 export enum Key {
   ESCAPE = 'Escape',
   CONTROL = 'Control',
+  META = 'Meta',
   SHIFT = 'Shift',
   BACKSPACE = 'Backspace',
   SPACE = ' ',

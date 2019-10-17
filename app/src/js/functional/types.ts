@@ -232,9 +232,9 @@ export interface Select {
   /** Currently viewed item index */
   item: number
   /** Currently selected label ID */
-  label: number
+  labels: number[]
   /** Currently selected shape ID */
-  shape: number
+  shapes: number[]
   /** selected category */
   category: number
   /** selected attributes */

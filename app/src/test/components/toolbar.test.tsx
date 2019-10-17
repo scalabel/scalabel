@@ -5,6 +5,7 @@ import _ from 'lodash'
 import * as React from 'react'
 import { create } from 'react-test-renderer'
 import * as action from '../../js/action/common'
+import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { ToolBar } from '../../js/components/toolbar'
@@ -100,7 +101,7 @@ describe('test Delete', () => {
       let item = Session.getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(3)
       expect(secondLabelId in item.labels).toBe(true)
-      Session.dispatch(action.selectLabel(secondLabelId))
+      Session.dispatch(selectLabel(secondLabelId))
       fireEvent.keyDown(document, { key: 'Backspace' })
       item = Session.getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(2)

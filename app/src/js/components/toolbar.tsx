@@ -3,7 +3,8 @@ import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
-import { changeLabelProps, changeSelect, deleteLabel } from '../action/common'
+import { changeSelect } from '../action/common'
+import { changeSelectedLabelsAttributes, deleteSelectedLabels } from '../action/select'
 import { addLabelTag } from '../action/tag'
 import { renderButtons, renderTemplate } from '../common/label'
 import Session from '../common/session'
@@ -16,10 +17,7 @@ import { Category } from './toolbar_category'
  * callback function for delete label button
  */
 function onDeleteLabel () {
-  const select = Session.getState().user.select
-  if (select.label >= 0) {
-    Session.dispatch(deleteLabel(select.item, select.label))
-  }
+  Session.dispatch(deleteSelectedLabels())
 }
 
 /** This is the interface of props passed to ToolBar */
@@ -51,10 +49,7 @@ export class ToolBar extends Component<Props> {
    */
   public keyDownHandler (e: KeyboardEvent) {
     if (e.key === 'Backspace') {
-      const select = Session.getState().user.select
-      if (select.label >= 0) {
-        Session.dispatch(deleteLabel(select.item, select.label))
-      }
+      onDeleteLabel()
     }
   }
 
@@ -154,8 +149,7 @@ export class ToolBar extends Component<Props> {
       } else {
         attributes[toggleIndex][0] = 1
       }
-      Session.dispatch(changeLabelProps(state.user.select.item,
-                       state.user.select.label, { attributes }))
+      Session.dispatch(changeSelectedLabelsAttributes(attributes))
       Session.dispatch(changeSelect({ attributes }))
     }
   }

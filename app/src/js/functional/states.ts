@@ -226,8 +226,8 @@ function makeLayout (params: {} = {}): LayoutType {
 function makeSelect (params: Partial<Select>= {}): Select {
   return {
     item: -1,
-    label: -1,
-    shape: -1,
+    labels: [],
+    shapes: [],
     category: 0,
     attributes: {},
     labelType: 0,

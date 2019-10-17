@@ -175,7 +175,7 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
     for (const label of newLabels) {
       if (label.item === user.select.item) {
         user = updateUserSelect(user, {
-          label: label.id,
+          labels: [label.id],
           category: label.category[0],
           attributes: label.attributes
         })
@@ -237,7 +237,7 @@ export function addTrack (state: State, action: types.AddTrackAction): State {
   if (action.sessionId === state.session.id) {
     for (const l of newLabels) {
       if (l.item === user.select.item) {
-        user = updateUserSelect(user, { label: l.id })
+        user = updateUserSelect(user, { labels: [l.id] })
         break
       }
     }
@@ -335,7 +335,7 @@ export function changeShapes (
     const index = _.find(action.itemIndices, (v) => v === user.select.item)
     if (index !== undefined) {
       const labelId = items[index].shapes[shapeIds[0][0]].label[0]
-      user = updateUserSelect(user, { label: labelId })
+      user = updateUserSelect(user, { labels: [labelId] })
     }
   }
   task = updateObject(task, { items })
@@ -606,17 +606,19 @@ export function deleteLabels (
   const task = updateObject(state.task, { items, tracks })
   // Reset selected object
   let { user } = state
+  const deletedIds = new Set()
   for (const ids of action.labelIds) {
-    if (user.select.label === -1) {
-      break
-    }
     for (const labelId of ids) {
-      if (user.select.label === labelId) {
-        user = updateUserSelect(user, { label: -1 })
-        break
-      }
+      deletedIds.add(labelId)
     }
   }
+  const newIds = []
+  for (const labelId of user.select.labels) {
+    if (!deletedIds.has(labelId)) {
+      newIds.push(labelId)
+    }
+  }
+  user = updateUserSelect(user, { labels: newIds })
   return updateObject(state, { user, task })
 }
 

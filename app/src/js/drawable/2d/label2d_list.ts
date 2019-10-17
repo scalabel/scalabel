@@ -120,9 +120,9 @@ export class Label2DList {
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })
     this._highlightedLabel = null
-    if (state.user.select.label >= 0 &&
-        (state.user.select.label in this._labels)) {
-      this._selectedLabel = this._labels[state.user.select.label]
+    if (state.user.select.labels.length > 0 &&
+        (state.user.select.labels[0] in this._labels)) {
+      this._selectedLabel = this._labels[state.user.select.labels[0]]
     } else {
       this._selectedLabel = null
     }
@@ -156,7 +156,7 @@ export class Label2DList {
         Session.dispatch(changeSelect(
           { category: this._selectedLabel.category[0],
             attributes: this._selectedLabel.attributes,
-            label: this._selectedLabel.labelId }))
+            labels: [this._selectedLabel.labelId] }))
       } else {
         const state = this._state
         const label = makeDrawableLabel(

@@ -47,6 +47,8 @@ export class Cube3D extends THREE.Group {
   private _highlightedSphere: THREE.Mesh | null
   /** whether highlighted */
   private _highlighted: boolean
+  /** whether selected */
+  private _selected: boolean
   /** Plane shape */
   private _grid: Readonly<Grid3D> | null
   /** Id of surface */
@@ -109,6 +111,7 @@ export class Cube3D extends THREE.Group {
     this._highlightedSphere = null
 
     this._highlighted = false
+    this._selected = false
 
     this ._grid = null
 
@@ -254,6 +257,8 @@ export class Cube3D extends THREE.Group {
       }
 
       this.setControlSpheres(camera)
+    } else if (this._selected) {
+      (this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
       (this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       for (const sphere of this._controlSpheres) {
@@ -314,6 +319,11 @@ export class Cube3D extends THREE.Group {
     } else {
       this._highlighted = false
     }
+  }
+
+  /** Set selected */
+  public setSelected (s: boolean) {
+    this._selected = s
   }
 
   /**
