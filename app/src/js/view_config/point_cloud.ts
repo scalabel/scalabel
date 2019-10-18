@@ -11,11 +11,11 @@ import { Vector3D } from '../math/vector3d'
  * @param target
  */
 export function updateThreeCameraAndRenderer (
-  canvas: HTMLCanvasElement | null,
   config: PointCloudViewerConfigType,
-  renderer: THREE.Renderer | null,
   camera: THREE.Camera,
-  target: THREE.Object3D | null
+  canvas?: HTMLCanvasElement,
+  renderer?: THREE.Renderer,
+  target?: THREE.Object3D
 ) {
   if (target) {
     target.position.x = config.target.x

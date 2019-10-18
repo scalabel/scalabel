@@ -186,10 +186,10 @@ class PointCloudViewer extends Viewer<Props> {
     if (this.canvas && this.renderer) {
       const config: PointCloudViewerConfigType = this.getCurrentViewerConfig()
       updateThreeCameraAndRenderer(
-        this.canvas,
         config,
-        this.renderer,
         this.camera,
+        this.canvas,
+        this.renderer,
         this.target
       )
     }

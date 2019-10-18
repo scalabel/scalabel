@@ -5,6 +5,7 @@ export const testJson = {
       projectName: 'Redux0',
       itemType: 'pointcloud',
       labelTypes: ['box3d'],
+      policyTypes: ['linear_interpolation_box_3d'],
       taskSize: 5,
       handlerUrl: 'label3dv2',
       pageTitle: 'Scalabel Annotation',
