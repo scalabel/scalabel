@@ -4,7 +4,7 @@ import io from 'socket.io-client'
 import { updateTask } from '../action/common'
 import * as types from '../action/types'
 import { State } from '../functional/types'
-import { EventName } from '../server/hub'
+import { EventName } from '../server/types'
 import Session, { ConnectionStatus } from './session'
 
 /**
@@ -94,13 +94,14 @@ export class Synchronizer {
   public sendActions () {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
+        const sessionState = Session.getState()
         this.socket.emit(
-        EventName.ACTION_SEND, JSON.stringify({
-          id: Session.getState().task.config.taskId,
-          project: Session.getState().task.config.projectName,
-          worker: Session.getState().user.id,
-          actions: this.actionQueue
-        }))
+          EventName.ACTION_SEND, JSON.stringify({
+            taskId: sessionState.task.config.taskId,
+            project: sessionState.task.config.projectName,
+            sessId: sessionState.session.id,
+            actions: this.actionQueue
+          }))
         this.actionQueue = []
       }
     }

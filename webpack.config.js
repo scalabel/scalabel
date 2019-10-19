@@ -103,7 +103,7 @@ let serverConfig = {
   externals: [nodeExternals()],
   devtool: '',
   entry: {
-    server: __dirname + '/app/src/js/server/hub.ts',
+    main: __dirname + '/app/src/js/server/main.ts',
   },
   output: {
     filename: '[name].js',
@@ -135,6 +135,10 @@ let serverConfig = {
         loader: 'ts-loader',
       },
     }],
+  },
+  node: {
+    __dirname: false,
+    __filename: false,
   },
 };
 

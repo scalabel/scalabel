@@ -12,6 +12,19 @@ export enum LabelTypeName {
   PLANE_3D = 'plane3d'
 }
 
+export enum ItemTypeName {
+  IMAGE = 'image',
+  VIDEO = 'video',
+  POINT_CLOUD = 'pointcloud',
+  POINT_CLOUD_TRACKING = 'pointcloudtracking'
+}
+
+export enum HandlerUrl {
+  INVALID = 'NO_VALID_HANDLER',
+  LABEL_2D = 'label2d',
+  LABEL_3D = 'label3d'
+}
+
 export enum ShapeType {
   UNKNOWN = 'unknown',
   RECT = 'rect',

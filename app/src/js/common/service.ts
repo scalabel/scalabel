@@ -1,5 +1,7 @@
+import { Endpoint } from '../server/types'
+
 /**
- * This function post request to backend to retrieve requried data to display
+ * This function post request to backend to retrieve required data to display
  * @param {string} url
  * @param {string} method
  * @param {boolean} async
@@ -21,11 +23,11 @@ export function requestData<DataType> (url: string,
 }
 
 /**
- * This function post request to backend to retrieve users' information
- * @return {function} projects
+ * This function get request to backend to retrieve users' information
+ * @return {string[]} projects
  */
 export function getProjects (): string[] {
-  return requestData('./postProjectNames', 'get', false)
+  return requestData(Endpoint.GET_PROJECT_NAMES, 'get', false)
 }
 
 /**

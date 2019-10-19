@@ -46,7 +46,7 @@ describe('Test create page functionality', () => {
       expect(pageTitle.value).toBe('2D Bounding Box')
       fireEvent.change(select, { target: { value: 'polygon2d' } })
       expect(pageTitle.value).toBe('2D Segmentation')
-      fireEvent.change(select, { target: { value: 'lane' } })
+      fireEvent.change(select, { target: { value: 'polyline2d' } })
       expect(pageTitle.value).toBe('2D Lane')
       fireEvent.change(select, { target: { value: 'box3d' } })
       expect(pageTitle.value).toBe('3D Bounding Box')
@@ -69,7 +69,7 @@ describe('Test create page functionality', () => {
       fireEvent.change(select, { target: { value: 'polygon2d' } })
       expect(instructions.value).toBe(
               'https://www.scalabel.ai/doc/instructions/segmentation.html')
-      fireEvent.change(select, { target: { value: 'lane' } })
+      fireEvent.change(select, { target: { value: 'polyline2d' } })
       expect(instructions.value).toBe(
               'https://www.scalabel.ai/doc/instructions/segmentation.html')
       fireEvent.change(select, { target: { value: 'box3d' } })
@@ -102,7 +102,7 @@ describe('Test create page functionality', () => {
       fireEvent.change(select, { target: { value: 'tag' } })
       expect((getByTestId('label-type') as HTMLSelectElement).value).toBe('tag')
       expect(queryByTestId('categories')).toBeNull()
-      fireEvent.change(select, { target: { value: 'lane' } })
+      fireEvent.change(select, { target: { value: 'polyline2d' } })
       expect(queryByTestId('categories')).not.toBeNull()
     })
     test('Hides task size on video option', () => {

@@ -1,125 +1,97 @@
-import express from 'express'
 import * as fs from 'fs-extra'
-import { createServer } from 'http'
-import * as yaml from 'js-yaml'
 import { Store } from 'redux'
 import * as socketio from 'socket.io'
 import { sprintf } from 'sprintf-js'
-import * as yargs from 'yargs'
+import * as uuid from 'uuid'
 import * as types from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { State } from '../functional/types'
 import * as path from './path'
+import Session from './server_session'
+import { ErrorCode, EventName } from './types'
 
-export const enum EventName {
-  ACTION_BROADCAST = 'actionBroadcast',
-  ACTION_SEND = 'actionSend',
-  REGISTER_ACK = 'registerAck',
-  REGISTER = 'register',
-  CONNECTION = 'connection',
-  CONNECT = 'connect',
-  DISCONNECT = 'disconnect'
-}
+/* TODO: convert these handlers to use the new backend functionality
+ * including global storage
+ */
+/**
+ * Starts socket.io handlers for saving, loading, and synchronization
+ */
+export function startSocketServer (io: socketio.Server) {
+  const env = Session.getEnv()
+  // maintain a store for each task
+  const stores: { [key: string]: Store } = {}
+  io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
+    socket.on(EventName.REGISTER, (state: State) => {
+      const taskId = state.task.config.taskId
+      const projectName = state.task.config.projectName
 
-const NO_FILE_ERROR_CODE = 'ENOENT'
+      // TODO: add session id to state (instead of getting it from go backend)
+      const sessId = uuid()
 
-const argv = yargs
-  .option('config', {
-    describe: 'Config file path.'
-  })
-  .demandOption('config')
-  .string('config')
-  .argv
+      const savePath = path.getPath(env.data, projectName, taskId)
+      const room = path.roomName(projectName, taskId, sessId, env.sync)
 
-const configDir: string = argv.config
+      // If there's no store in memory, try to load it
+      if (!stores[room]) {
+        /* frontend data is used to initialize a valid store
+          but the non-task data is arbitrary */
+        try {
+          // Try to load task state from file system
+          const fileNames = fs.readdirSync(savePath)
+          // Get most recently saved file
+          const fileName = fileNames[fileNames.length - 1]
+          const file = sprintf('%s/%s', savePath, fileName)
+          const rawContent = fs.readFileSync(file, 'utf8')
+          const content = JSON.parse(rawContent)
+          // Combine loaded task state with other state sent from frontend
+          state.task = content
+        } catch (e) {
+          /* Don't crash if file does not exist; this just means it has not
+            been initialized yet */
+          if (e.code !== ErrorCode.NO_FILE) {
+            throw(e)
+          }
+        }
+        stores[room] = configureStore(state)
+        // automatically save task data on updates
+        stores[room].subscribe(() => {
+          const content = JSON.stringify(stores[room].getState().present.task)
+          const file = path.getFile(savePath)
+          fs.writeFileSync(file, content)
+        })
+      } else {
+        state.task = stores[room].getState().present.task
+      }
 
-// load the config for port info
-let syncPort: number | undefined
-let dataDir: string
-try {
-  const cfg = yaml.load(fs.readFileSync(configDir, 'utf8'))
-  syncPort = cfg.syncPort
-  dataDir = cfg.data
-} catch (e) {
-  throw(e)
-}
+      // Connect socket to others in the same room
+      socket.join(room)
+      // Send backend state to newly registered socket
+      socket.emit(EventName.REGISTER_ACK, state)
+    })
 
-const port = process.env.PORT || syncPort
-if (port === undefined) {
-  throw(Error('config file is missing required field nodePort'))
-}
+    socket.on(EventName.ACTION_SEND, (rawData: string) => {
+      const data = JSON.parse(rawData)
+      const projectName = data.project
+      const taskId = data.taskId
+      const sessId = data.sessId
+      const actionList = data.actions
 
-const app = express()
-const httpServer = createServer(app)
-const io = socketio(httpServer)
+      const savePath = path.getPath(env.data, projectName, taskId)
+      const room = path.roomName(projectName, taskId, sessId, env.sync)
 
-// maintain a store for each task
-const stores: { [key: string]: Store } = {}
-
-io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
-  socket.on(EventName.REGISTER, (state: State) => {
-    const taskId = state.task.config.taskId
-    const projectName = state.task.config.projectName
-
-    const syncPath = path.getPath(dataDir, projectName, taskId)
-    const room = path.roomName(projectName, taskId)
-    // If there's no store in memory, try to load it
-    if (!stores[room]) {
-      /* frontend data is used to initialize a valid store
-        but the non-task data is arbitrary */
-      try {
-        // Try to load task state from file system
-        const fileNames = fs.readdirSync(syncPath)
-        // Get most recently saved file
-        const fileName = fileNames[fileNames.length - 1]
-        const file = sprintf('%s/%s', syncPath, fileName)
-        const rawContent = fs.readFileSync(file, 'utf8')
-        const content = JSON.parse(rawContent)
-        // Combine loaded task state with other state sent from frontend
-        state.task = content
-      } catch (e) {
-        /* Don't crash if file does not exist; this just means it has not
-          been initialized yet */
-        if (e.code !== NO_FILE_ERROR_CODE) {
-          throw(e)
+      // Make sure file exists before saving to it
+      fs.ensureDirSync(savePath)
+      // For each action, update the backend store and broadcast
+      for (const action of actionList) {
+        action.timestamp = Date.now()
+        // for task actions, update store and broadcast to room
+        if (types.TASK_ACTION_TYPES.includes(action.type)) {
+          stores[room].dispatch(action)
+          io.in(room).emit(EventName.ACTION_BROADCAST, action)
+        } else {
+          socket.emit(EventName.ACTION_BROADCAST, action)
         }
       }
-      stores[room] = configureStore(state)
-      // automatically save task data on updates
-      stores[room].subscribe(() => {
-        const content = JSON.stringify(stores[room].getState().present.task)
-        const file = path.getFile(syncPath)
-        fs.writeFileSync(file, content)
-      })
-    } else {
-      state.task = stores[room].getState().present.task
-    }
-    socket.join(room)
-    // Send backend state to newly registered socket
-    socket.emit(EventName.REGISTER_ACK, state)
+    })
   })
-
-  socket.on(EventName.ACTION_SEND, (rawData: string) => {
-    const data = JSON.parse(rawData)
-    const taskId = data.id
-    const projectName = data.project
-    const actionList = data.actions
-    const syncPath = path.getPath(dataDir, projectName, taskId)
-    // Make sure file exists before saving to it
-    fs.ensureDirSync(syncPath)
-    const room = path.roomName(projectName, taskId)
-    // For each action, update the backend store and broadcast
-    for (const action of actionList) {
-      action.timestamp = Date.now()
-      // for task actions, update store and broadcast to room
-      if (types.TASK_ACTION_TYPES.includes(action.type)) {
-        stores[room].dispatch(action)
-        io.in(room).emit(EventName.ACTION_BROADCAST, action)
-      } else {
-        socket.emit(EventName.ACTION_BROADCAST, action)
-      }
-    }
-  })
-})
-
-httpServer.listen(port)
+}

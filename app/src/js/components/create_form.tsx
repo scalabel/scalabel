@@ -5,7 +5,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 import FormGroup from '@material-ui/core/FormGroup'
 import withStyles from '@material-ui/core/styles/withStyles'
 import React, { ChangeEvent } from 'react'
-import { sprintf } from 'sprintf-js'
+import { ItemTypeName, LabelTypeName } from '../common/types'
+import { Endpoint, FormField } from '../server/types'
 import { attributeStyle, checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
@@ -95,7 +96,7 @@ export default class CreateForm extends React.Component<Props, State> {
               <FormGroup row={true} className={classes.formGroup}>
                 <TextField
                         required
-                        name='project_name'
+                        name={FormField.PROJECT_NAME}
                         value={this.state.projectName}
                         onChange={(event: ChangeEvent<HTMLInputElement>) =>
                                 this.setState(
@@ -114,7 +115,7 @@ export default class CreateForm extends React.Component<Props, State> {
                 <TextField
                         value={this.state.itemType}
                         select
-                        name='item_type'
+                        name={FormField.ITEM_TYPE}
                         label='Item Type'
                         onChange={
                           this.handleItemTypeChange
@@ -130,17 +131,17 @@ export default class CreateForm extends React.Component<Props, State> {
 
                 >
                   <option/>
-                  <option value='image'>Image</option>
-                  <option value='video'>Video</option>
-                  <option value='pointcloud'>Point Cloud</option>
-                  <option value='pointcloudtracking'>
+                  <option value={ItemTypeName.IMAGE}>Image</option>
+                  <option value={ItemTypeName.VIDEO}>Video</option>
+                  <option value={ItemTypeName.POINT_CLOUD}>Point Cloud</option>
+                  <option value={ItemTypeName.POINT_CLOUD_TRACKING}>
                     Point Cloud Tracking
                   </option>
                 </TextField>
                 <TextField
                         value={this.state.labelType}
                         select
-                        name='label_type'
+                        name={FormField.LABEL_TYPE}
                         label='Label Type'
                         onChange={this.handleLabelChange}
                         required
@@ -153,21 +154,21 @@ export default class CreateForm extends React.Component<Props, State> {
                         }}
                 >
                   <option/>
-                  <option value='tag' data-testid='image-tagging'>
+                  <option value={LabelTypeName.TAG} data-testid='image-tagging'>
                     Image Tagging
                   </option>
-                  <option value='box2d'>2D Bounding Box</option>
-                  <option value='polygon2d'>Instance
+                  <option value={LabelTypeName.BOX_2D}>2D Bounding Box</option>
+                  <option value={LabelTypeName.POLYGON_2D}>Instance
                     Segmentation
                   </option>
-                  <option value='lane'>Lane</option>
-                  <option value='box3d'>3D Bounding Box</option>
+                  <option value={LabelTypeName.POLYLINE_2D}>Lane</option>
+                  <option value={LabelTypeName.BOX_3D}>3D Bounding Box</option>
                 </TextField>
               </FormGroup>
               <FormGroup row={true} className={classes.formGroup}>
                 <TextField
                         value={this.state.pageTitle}
-                        name='page_title'
+                        name={FormField.PAGE_TITLE}
                         label='Page Title'
                         className={classes.fullWidthText}
                         margin='normal'
@@ -181,23 +182,23 @@ export default class CreateForm extends React.Component<Props, State> {
               <FormGroup row={true} className={classes.formGroup}>
                 <StyledUpload required={true}
                               label={'Item List*'}
-                              form_id={'item_file'}
+                              form_id={FormField.ITEMS}
                               with_json
                 />
                 {this.state.showCategoriesUpload ?
                         <StyledUpload required={true}
                                       label={'Categories*'}
-                                      form_id={'categories'}/>
+                                      form_id={FormField.CATEGORIES}/>
                         : null}
                 <StyledAttributeUpload required={false}
                                        label={'Attributes'}
-                                       form_id={'attributes'}/>
+                                       form_id={FormField.ATTRIBUTES}/>
               </FormGroup>
               <FormGroup row={true} className={classes.formGroup}>
                 <TextField
                         required={this.state.showTaskSize}
                         type='number'
-                        name='task_size'
+                        name={FormField.TASK_SIZE}
                         label='Tasksize'
                         className={this.state.showTaskSize ?
                                 classes.halfWidthText : classes.hidden}
@@ -213,7 +214,7 @@ export default class CreateForm extends React.Component<Props, State> {
               </FormGroup>
               <FormGroup row={true} className={classes.formGroup}>
                 <TextField
-                        name='instructions'
+                        name={FormField.INSTRUCTIONS_URL}
                         label='Instruction URL'
                         className={classes.fullWidthText}
                         margin='normal'
@@ -250,7 +251,7 @@ export default class CreateForm extends React.Component<Props, State> {
                                   />
                                 }
                                 id='demo_mode'
-                                name='demo_mode'
+                                name={FormField.DEMO_MODE}
                                 value={this.state.demoMode}
                                 label='Demo Mode'
                                 labelPlacement='end'
@@ -332,9 +333,7 @@ export default class CreateForm extends React.Component<Props, State> {
         }
       }
     }
-    // CHANGE AFTER VERSION UPDATE
-    const version = 'v1'
-    x.open('POST', sprintf('./postProject?v=%s', version))
+    x.open('POST', Endpoint.POST_PROJECT)
     const formData = this.getFormData(event)
     x.send(formData)
   }
@@ -342,27 +341,27 @@ export default class CreateForm extends React.Component<Props, State> {
    * handles instruction url
    * @param itemType {string}
    */
-  private handleInstructions = (itemType: string) => {
+  private handleInstructions = (labelType: string) => {
     let labelName = ''
     let instructions = ''
-    if (itemType === 'tag') {
+    if (labelType === LabelTypeName.TAG) {
       labelName = 'Image Tagging'
       this.setState({ showCategoriesUpload: false })
-    } else if (itemType === 'box2d') {
+    } else if (labelType === LabelTypeName.BOX_2D) {
       labelName = '2D Bounding Box'
       instructions = 'https://www.scalabel.ai/doc/instructions/bbox.html'
       this.setState({ showCategoriesUpload: true })
-    } else if (itemType === 'polygon2d') {
+    } else if (labelType === LabelTypeName.POLYGON_2D) {
       labelName = '2D Segmentation'
       instructions = 'https://www.scalabel.ai/doc/instructions/' +
               'segmentation.html'
       this.setState({ showCategoriesUpload: true })
-    } else if (itemType === 'lane') {
+    } else if (labelType === LabelTypeName.POLYLINE_2D) {
       labelName = '2D Lane'
       instructions = 'https://www.scalabel.ai/doc/instructions/' +
               'segmentation.html'
       this.setState({ showCategoriesUpload: true })
-    } else if (itemType === 'box3d') {
+    } else if (labelType === LabelTypeName.BOX_3D) {
       labelName = '3D Bounding Box'
       this.setState({ showCategoriesUpload: true })
     }
