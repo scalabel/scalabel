@@ -19,12 +19,18 @@ export interface TestConfig {
   exportUrl: string
   /** path to test directory */
   testDirPath: string
+  /** example export path */
+  sampleExportPath: string
+  /** example export filename */
+  sampleExportFilename: string
   /** item list filename */
   itemListFilename: string
   /** categories filename */
   categoriesFilename: string
   /** attributes filename */
   attributesFilename: string
+  /** if we are exporting */
+  exportMode: boolean
 }
 
 export let testConfig: TestConfig = {
@@ -33,9 +39,12 @@ export let testConfig: TestConfig = {
   examplePath: './examples/',
   exportUrl: './postExportV2?project_name=integration-test',
   testDirPath: './test_data/',
+  sampleExportPath : './app/src/test/',
+  sampleExportFilename: 'sample_export.json',
   itemListFilename: 'image_list.yml',
   categoriesFilename: 'categories.yml',
-  attributesFilename: 'bbox_attributes.yml'
+  attributesFilename: 'bbox_attributes.yml',
+  exportMode: false
 }
 
 /**
@@ -53,8 +62,8 @@ export function changeTestConfig (newConfig: Partial<TestConfig>) {
  * helper function to get example file from disc
  * @param filename
  */
-function getExampleFileFromDisc (filename: string): File {
-  const examplePath = testConfig.examplePath
+function getExampleFileFromDisc (filename: string,
+                                 examplePath = testConfig.examplePath): File {
   const fileAsString = fs.readFileSync(examplePath + filename, {
     encoding: 'utf8'
   })
@@ -65,8 +74,8 @@ function getExampleFileFromDisc (filename: string): File {
  * gets true export data from disc
  */
 export function getExportFromDisc () {
-  const sampleExportPath = './app/src/test/sample_export.json'
-  return JSON.parse(fs.readFileSync(sampleExportPath, 'utf8'))
+  return JSON.parse(fs.readFileSync(testConfig.sampleExportPath +
+    testConfig.sampleExportFilename, 'utf8'))
 }
 
 /**
@@ -209,7 +218,16 @@ class IntegrationCreateForm extends CreateForm {
    * @param event
    */
   protected getFormData (event: ChangeEvent<HTMLFormElement>): FormData {
-    const itemFile = getExampleFileFromDisc(testConfig.itemListFilename)
+    let itemFilePath: string
+    let itemFilename: string
+    if (testConfig.exportMode) {
+      itemFilePath = testConfig.sampleExportPath
+      itemFilename = testConfig.sampleExportFilename
+    } else {
+      itemFilePath = testConfig.examplePath
+      itemFilename = testConfig.itemListFilename
+    }
+    const itemFile = getExampleFileFromDisc(itemFilename, itemFilePath)
     const categoriesFile = getExampleFileFromDisc(testConfig.categoriesFilename)
     const attributesFile = getExampleFileFromDisc(testConfig.attributesFilename)
     const formData = new FormData(event.target)

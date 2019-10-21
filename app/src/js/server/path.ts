@@ -28,14 +28,20 @@ export function getPath (
 }
 
 /**
+ * Get formatted timestamp
+ */
+export function getNow (): string {
+  return moment().format('YYYY-MM-DD_hh-mm-ss')
+}
+
+/**
  * Saves a timestamped file
  */
 export function getFile (filePath: string) {
-  const today = moment().format('YYYY-MM-DD_hh-mm-ss')
-  return sprintf('%s/%s.json', filePath, today)
+  return sprintf('%s/%s.json', filePath, getNow())
 }
 
-/* path to html file directoriess, relative to js */
+/* path to html file directories, relative to js */
 export const HTMLDirectories: string[] = ['../control', '../annotation']
 
 /**
@@ -43,4 +49,12 @@ export const HTMLDirectories: string[] = ['../control', '../annotation']
  */
 export function getAbsoluteSrcPath (relativePath: string) {
   return path.join(__dirname, relativePath)
+}
+
+/**
+ * Get name for export download
+ * @param {string} projectName
+ */
+export function getExportName (projectName: string): string {
+  return sprintf('%s_export_%s.json', projectName, getNow())
 }

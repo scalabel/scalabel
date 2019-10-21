@@ -1,0 +1,310 @@
+{
+    "session": {
+        "id": "eababa15-83aa-4111-90b6-f90c4a99140c",
+        "demoMode": false,
+        "startTime": 1570506876,
+        "items": [{
+                "loaded": true
+            },
+            {
+                "loaded": true
+            },
+            {
+                "loaded": true
+            },
+            {
+                "loaded": true
+            },
+            {
+                "loaded": true
+            }
+        ]
+    },
+    "task": {
+        "config": {
+            "projectName": "box2d",
+            "itemType": "image",
+            "labelTypes": [
+                "box2d"
+            ],
+            "taskSize": 5,
+            "handlerUrl": "label2d",
+            "pageTitle": "2D Bounding Box",
+            "instructionPage": "https://www.scalabel.ai/doc/instructions/bbox.html",
+            "bundleFile": "image.js",
+            "categories": [
+                "person",
+                "rider",
+                "car",
+                "truck",
+                "bus",
+                "train",
+                "motorcycle",
+                "bike",
+                "traffic sign",
+                "traffic light"
+            ],
+            "attributes": [{
+                    "name": "Occluded",
+                    "toolType": "switch",
+                    "tagText": "o",
+                    "tagPrefix": "",
+                    "tagSuffixes": null,
+                    "values": null,
+                    "buttonColors": null
+                },
+                {
+                    "name": "Truncated",
+                    "toolType": "switch",
+                    "tagText": "t",
+                    "tagPrefix": "",
+                    "tagSuffixes": null,
+                    "values": null,
+                    "buttonColors": null
+                },
+                {
+                    "name": "Traffic Light Color",
+                    "toolType": "list",
+                    "tagText": "",
+                    "tagPrefix": "t",
+                    "tagSuffixes": [
+                        "",
+                        "g",
+                        "y",
+                        "r"
+                    ],
+                    "values": [
+                        "NA",
+                        "G",
+                        "Y",
+                        "R"
+                    ],
+                    "buttonColors": [
+                        "white",
+                        "green",
+                        "yellow",
+                        "red"
+                    ]
+                }
+            ],
+            "taskId": "000000",
+            "submitTime": 1570506897,
+            "sync": false,
+            "syncAddress": ""
+        },
+        "status": {
+            "maxLabelId": 3,
+            "maxShapeId": 3,
+            "maxOrder": 3
+        },
+        "items": [{
+                "id": 0,
+                "index": 0,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+                "labels": {
+                    "1": {
+                        "id": 1,
+                        "item": 0,
+                        "type": "box2d",
+                        "category": [
+                            0
+                        ],
+                        "attributes": {
+                            "0": [
+                                0
+                            ],
+                            "1": [
+                                0
+                            ],
+                            "2": [
+                                0
+                            ]
+                        },
+                        "parent": -1,
+                        "children": [],
+                        "shapes": [
+                            1
+                        ],
+                        "track": -1,
+                        "order": 1,
+                        "manual": true
+                    },
+                    "2": {
+                        "id": 2,
+                        "item": 0,
+                        "type": "box2d",
+                        "category": [
+                            0
+                        ],
+                        "attributes": {
+                            "0": [
+                                0
+                            ],
+                            "1": [
+                                0
+                            ],
+                            "2": [
+                                0
+                            ]
+                        },
+                        "parent": -1,
+                        "children": [],
+                        "shapes": [
+                            2
+                        ],
+                        "track": -1,
+                        "order": 2,
+                        "manual": true
+                    },
+                    "3": {
+                        "id": 3,
+                        "item": 0,
+                        "type": "box2d",
+                        "category": [
+                            0
+                        ],
+                        "attributes": {
+                            "0": [
+                                0
+                            ],
+                            "1": [
+                                0
+                            ],
+                            "2": [
+                                0
+                            ]
+                        },
+                        "parent": -1,
+                        "children": [],
+                        "shapes": [
+                            3
+                        ],
+                        "track": -1,
+                        "order": 3,
+                        "manual": true
+                    }
+                },
+                "shapes": {
+                    "1": {
+                        "id": 1,
+                        "label": [
+                            1
+                        ],
+                        "type": "rect",
+                        "shape": {
+                            "x1": 280.00968616094616,
+                            "x2": 450.53600195041986,
+                            "y1": 152.57617728531858,
+                            "y2": 446.75900277008316
+                        }
+                    },
+                    "2": {
+                        "id": 2,
+                        "label": [
+                            2
+                        ],
+                        "type": "rect",
+                        "shape": {
+                            "x1": 405.66065569003206,
+                            "x2": 618.0706279892011,
+                            "y1": 73.79501385041551,
+                            "y2": 215.4016620498615
+                        }
+                    },
+                    "3": {
+                        "id": 3,
+                        "label": [
+                            3
+                        ],
+                        "type": "rect",
+                        "shape": {
+                            "x1": 648.9847554130238,
+                            "x2": 915.245143224658,
+                            "y1": 106.70360110803324,
+                            "y2": 329.0858725761773
+                        }
+                    }
+                }
+            },
+            {
+                "id": 1,
+                "index": 1,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg",
+                "labels": {},
+                "shapes": {}
+            },
+            {
+                "id": 2,
+                "index": 2,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg",
+                "labels": {},
+                "shapes": {}
+            },
+            {
+                "id": 3,
+                "index": 3,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg",
+                "labels": {},
+                "shapes": {}
+            },
+            {
+                "id": 4,
+                "index": 4,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg",
+                "labels": {},
+                "shapes": {}
+            }
+        ],
+        "tracks": {}
+    },
+    "user": {
+        "id": "default_worker",
+        "select": {
+            "item": 0,
+            "label": 3,
+            "shape": 0,
+            "category": 0,
+            "attributes": {
+                "0": [
+                    0
+                ],
+                "1": [
+                    0
+                ],
+                "2": [
+                    0
+                ]
+            },
+            "labelType": 0
+        },
+        "layout": {
+            "toolbarWidth": 0,
+            "assistantView": false,
+            "assistantViewRatio": 0
+        },
+        "imageViewerConfig": {
+            "imageWidth": 0,
+            "imageHeight": 0,
+            "viewScale": 1,
+            "displayTop": 0,
+            "displayLeft": 0
+        },
+        "pointCloudViewerConfig": {
+            "target": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "position": {
+                "x": 0,
+                "y": 10,
+                "z": 0
+            },
+            "verticalAxis": {
+                "x": 0,
+                "y": 0,
+                "z": 1
+            }
+        }
+    }
+}

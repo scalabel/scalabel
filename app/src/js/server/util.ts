@@ -6,6 +6,7 @@ import { sprintf } from 'sprintf-js'
 import { filterXSS } from 'xss'
 import * as yargs from 'yargs'
 import { HandlerUrl, ItemTypeName, LabelTypeName } from '../common/types'
+import { State } from '../functional/types'
 import { FileStorage } from './file_storage'
 import Session from './server_session'
 import { Storage } from './storage'
@@ -76,8 +77,8 @@ export function initStorage (env: Env) {
  * With empty arguments, default is created
  */
 export function makeCreationForm (
-  projectName= '', itemType= '', labelType= '',
-  pageTitle= '', taskSize= 0, instructions= '', demoMode= false
+  projectName = '', itemType = '', labelType = '',
+  pageTitle = '', taskSize = 0, instructions = '', demoMode = false
 ): CreationForm {
   const form: CreationForm = {
     projectName, itemType, labelType, pageTitle,
@@ -114,9 +115,18 @@ export function getProjectKey (project: string) {
 /**
  * Gets name of json file with task data
  */
-export function getTaskKey (project: string, task: Task) {
+export function getTaskKey (projectName: string, task: Task): string {
   // name/tasks/000001.json
-  return path.join(project, 'tasks', index2str(task.index))
+  return path.join(projectName, 'tasks', index2str(task.index))
+}
+
+/**
+ * Gets name of submission directory for a given task
+ * @param projectName
+ * @param task
+ */
+export function getSavedKey (projectName: string, task: Task): string {
+  return path.join(projectName, 'saved', index2str(task.index))
 }
 
 /**
@@ -194,12 +204,75 @@ export function getTracking (itemType: string): [string, boolean] {
 }
 
 /**
+ * gets all tasks in project sorted by index
+ * @param projectName
+ */
+export async function getTasksInProject (projectName: string): Promise<Task[]> {
+  const storage = Session.getStorage()
+  const taskPromises: Array<Promise<Task>> = []
+  const keys = await storage.listKeys(path.join(projectName, 'tasks'), false)
+  // iterate over all keys and load each task asynchronously
+  for (const key of keys) {
+    taskPromises.push(storage.load(key).then((fields) => {
+      return JSON.parse(fields) as Task
+    })
+    )
+  }
+  const tasks = await Promise.all(taskPromises)
+  // sort tasks by index
+  tasks.sort((a: Task, b: Task) => {
+    return a.index - b.index
+  })
+  return tasks
+}
+
+/**
+ * Loads the most recent state for the given task. If no such submission throw
+ * an error.
+ * TODO: if we're using assignments, incorporate them here
+ * @param stateKey
+ */
+export async function loadSavedState (projectName: string, task: Task):
+  Promise<State> {
+  const storage = Session.getStorage()
+  return storage.listKeys(getSavedKey(projectName, task), false)
+    .then((keys) => {
+      if (keys.length > 0) {
+        logInfo(sprintf('Reading %s\n', keys[keys.length - 1]))
+        return storage.load(keys[keys.length - 1])
+      }
+      return Promise.reject(Error())
+    })
+    .then((fields) => {
+      return JSON.parse(fields) as State
+    })
+    .catch(() => {
+      return Promise.reject(
+        Error(sprintf('No submissions found for task number %s', task.index)))
+    })
+}
+
+/**
  * Logs error to backend console
  */
 export function logError (err: MaybeError) {
   if (err) {
-    const log = sprintf('Error: %s', err.message)
-    // tslint:disable-next-line
-    console.error(log)
+    Session.getLogger().log({
+      level: 'error',
+      message: err.message
+    })
+  }
+}
+
+/**
+ * logs info
+ * @param info
+ */
+export function logInfo (info: string) {
+  if (info) {
+    Session.getLogger().log({
+      level: 'info',
+      message: info
+    })
   }
 }

@@ -26,6 +26,8 @@ function startHTTPServer (app: Application) {
   // set up post/get handlers
   // TODO: set up other endpoints
   app.get(Endpoint.GET_PROJECT_NAMES, listeners.ProjectNameHandler)
+  app.get(Endpoint.EXPORT, listeners.GetExportHandler)
+
   app.post(Endpoint.POST_PROJECT, listeners.PostProjectHandler)
 }
 

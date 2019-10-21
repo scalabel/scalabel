@@ -91,7 +91,6 @@ export interface FormFileData {
  * Defining the types of some general callback functions
  */
 export type MaybeError = Error | null | undefined
-
 /* socket.io event names */
 export const enum EventName {
   ACTION_BROADCAST = 'actionBroadcast',
@@ -119,7 +118,8 @@ export const enum DatabaseType {
 /* endpoint names for http server */
 export const enum Endpoint {
   POST_PROJECT = '/postProject',
-  GET_PROJECT_NAMES = '/postProjectNames'
+  GET_PROJECT_NAMES = '/postProjectNames',
+  EXPORT = '/export'
 }
 
 /* default categories when file is missing and label is box2D or box3D */
@@ -134,18 +134,6 @@ export const defaultBoxCategories = [
   'bike',
   'traffic sign',
   'traffic light'
-]
-
-/* default categories when file is missing and label is polyline2D */
-export const defaultPolyline2DCategories = [
-  'road curb',
-  'double white',
-  'double yellow',
-  'double other',
-  'single white',
-  'single yellow',
-  'single other',
-  'crosswalk'
 ]
 
 /*
@@ -211,3 +199,27 @@ export const defaultEnv: Env = {
   sync: false,
   syncHost: 'http://localhost'
 }
+
+export const defaultBox2DCategories = [
+  'person',
+  'rider',
+  'car',
+  'truck',
+  'bus',
+  'train',
+  'motor',
+  'bike',
+  'traffic sign',
+  'traffic light'
+]
+
+export const defaultPolyline2DCategories = [
+  'road curb',
+  'double white',
+  'double yellow',
+  'double other',
+  'single white',
+  'single yellow',
+  'single other',
+  'crosswalk'
+]

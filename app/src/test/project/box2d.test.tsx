@@ -15,6 +15,7 @@ import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { myTheme } from '../../js/styles/theme'
 import {
+  changeTestConfig,
   deepDeleteTimestamp,
   deleteTestDir,
   getExport,
@@ -170,10 +171,43 @@ describe('full 2d bounding box integration test', () => {
   })
 
   test('test export of saved bounding boxes', async () => {
-    const exportJSON = await getExport()
+    const exportJson = await getExport()
     const trueExportJson = getExportFromDisc()
-    deepDeleteTimestamp(exportJSON)
+    deepDeleteTimestamp(exportJson)
     deepDeleteTimestamp(trueExportJson)
-    expect(exportJSON).toEqual(trueExportJson)
+    expect(exportJson).toEqual(trueExportJson)
+    changeTestConfig({
+      exportMode: true
+    })
+  })
+
+  test('import exported json from saved bounding boxes', async () => {
+    const { getByTestId } = render(
+      <MuiThemeProvider theme={myTheme}>
+        <StyledIntegrationForm />
+      </MuiThemeProvider>
+    )
+    // change project meta-data
+    const projectNameInput = getByTestId('project-name') as HTMLInputElement
+    fireEvent.change(projectNameInput, { target: { value:
+      testConfig.projectName + '_exported' } })
+    expect(projectNameInput.value).toBe(testConfig.projectName + '_exported')
+    const itemSelect = getByTestId('item-type') as HTMLSelectElement
+    fireEvent.change(itemSelect, { target: { value: 'image' } })
+    expect(itemSelect.value).toBe('image')
+    const labelSelect = getByTestId('label-type') as HTMLSelectElement
+    fireEvent.change(labelSelect, { target: { value: 'box2d' } })
+    expect(labelSelect.value).toBe('box2d')
+    const tasksizeInput = getByTestId('tasksize-input') as HTMLInputElement
+    fireEvent.change(tasksizeInput, { target: { value: '5' } })
+    expect(tasksizeInput.value).toBe('5')
+    // submit the project
+    const submitButton = getByTestId('submit-button')
+    fireEvent.click(submitButton)
+    await Promise.race(
+      [waitForElement(() => getByTestId('hidden-buttons')),
+        sleep(submissionTimeout)
+      ]
+    )
   })
 })
