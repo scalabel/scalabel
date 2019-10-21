@@ -206,6 +206,7 @@ export class Label2DList {
     if (this._selectedLabel && this._selectedLabel.editing === true) {
       this._selectedLabel.onMouseMove(
         coord, canvasLimit, labelIndex, handleIndex)
+      return true
     } else {
       if (labelIndex >= 0) {
         if (!this._highlightedLabel) {
@@ -220,9 +221,8 @@ export class Label2DList {
         this._highlightedLabel.setHighlighted(false)
         this._highlightedLabel = null
       }
-      return true
     }
-    return true
+    return false
   }
 
   /**
