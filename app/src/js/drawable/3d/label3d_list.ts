@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { deleteSelectedLabels, selectLabel } from '../../action/select'
+import { selectLabel } from '../../action/select'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
 import { Key, LabelTypeName } from '../../common/types'
@@ -304,11 +304,6 @@ export class Label3DList {
       case Key.ESCAPE:
       case Key.ENTER:
         Session.dispatch(selectLabel(-1))
-        return true
-      case 'Backspace':
-        if (this._selectedLabel) {
-          Session.dispatch(deleteSelectedLabels())
-        }
         return true
       case Key.P_UP:
       case Key.P_LOW:

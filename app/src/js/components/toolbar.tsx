@@ -6,8 +6,10 @@ import React from 'react'
 import { changeSelect } from '../action/common'
 import { changeSelectedLabelsAttributes, deleteSelectedLabels } from '../action/select'
 import { addLabelTag } from '../action/tag'
+import { deleteTracks, terminateTracks } from '../action/track'
 import { renderButtons, renderTemplate } from '../common/label'
 import Session from '../common/session'
+import { Key } from '../common/types'
 import { Attribute } from '../functional/types'
 import { Component } from './component'
 import { makeButton } from './general_button'
@@ -36,35 +38,85 @@ interface Props {
  * all the attributes and categories for the 2D bounding box labeling tool
  */
 export class ToolBar extends Component<Props> {
+  /** The hashed list of keys currently down */
+  private _keyDownMap: { [key: string]: boolean }
+  /** key down handler */
+  private _keyDownHandler: (e: KeyboardEvent) => void
+  /** key up handler */
+  private _keyUpHandler: (e: KeyboardEvent) => void
   constructor (props: Readonly<Props>) {
     super(props)
     this.handleToggle = this.handleToggle.bind(this)
-    this.keyDownHandler = this.keyDownHandler.bind(this)
+    this._keyDownHandler = this.onKeyDown.bind(this)
+    this._keyUpHandler = this.onKeyUp.bind(this)
     this.handleAttributeToggle = this.handleAttributeToggle.bind(this)
+    this._keyDownMap = {}
   }
 
   /**
    * handles keyDown Events
    * @param {keyboardEvent} e
    */
-  public keyDownHandler (e: KeyboardEvent) {
-    if (e.key === 'Backspace') {
-      onDeleteLabel()
+  public onKeyDown (e: KeyboardEvent) {
+    if (e.key === Key.BACKSPACE) {
+      const state = Session.getState()
+      const select = state.user.select
+      if (select.labels.length > 0) {
+        const controlDown =
+          this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)
+        if (controlDown && this.isKeyDown(Key.SHIFT)) {
+          // Delete track
+          e.stopPropagation()
+          const tracks = []
+          for (const labelId of select.labels) {
+            const label = state.task.items[select.item].labels[labelId]
+            if (label.track in state.task.tracks) {
+              tracks.push(state.task.tracks[label.track])
+            }
+          }
+          Session.dispatch(deleteTracks(tracks))
+        } else if (controlDown) {
+          // Terminate track
+          e.stopPropagation()
+          const tracks = []
+          for (const labelId of select.labels) {
+            const label = state.task.items[select.item].labels[labelId]
+            if (label.track in state.task.tracks) {
+              tracks.push(state.task.tracks[label.track])
+            }
+          }
+          Session.dispatch(terminateTracks(tracks, select.item))
+        } else {
+          // delete labels
+          Session.dispatch(deleteSelectedLabels())
+        }
+      }
     }
+    this._keyDownMap[e.key] = true
+  }
+
+  /**
+   * Key up handler
+   * @param e
+   */
+  public onKeyUp (e: KeyboardEvent) {
+    delete this._keyDownMap[e.key]
   }
 
   /**
    * Add keyDown Event Listener
    */
   public componentDidMount () {
-    document.addEventListener('keydown', this.keyDownHandler)
+    document.addEventListener('keydown', this._keyDownHandler)
+    document.addEventListener('keyup', this._keyUpHandler)
   }
 
   /**
    * Remove keyDown Event Listener
    */
   public componentWillUnmount () {
-    document.removeEventListener('keydown', this.keyDownHandler)
+    document.removeEventListener('keydown', this._keyDownHandler)
+    document.removeEventListener('keyup', this._keyUpHandler)
   }
 
   /**
@@ -196,5 +248,14 @@ export class ToolBar extends Component<Props> {
     } else {
       return 0
     }
+  }
+
+  /**
+   * Whether a specific key is pressed down
+   * @param {string} key - the key to check
+   * @return {boolean}
+   */
+  private isKeyDown (key: string): boolean {
+    return this._keyDownMap[key]
   }
 }

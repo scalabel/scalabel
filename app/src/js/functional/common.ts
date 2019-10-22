@@ -545,7 +545,7 @@ function deleteLabelsFromItem (
     item.labels, updatedLabels), getObjectKeys(deletedLabels))
   const shapes = removeObjectFields(updateObject(
     item.shapes, updatedShapes), getObjectKeys(deletedShapes))
-  return [{ ...item, labels, shapes }, _.values(deleteLabels)]
+  return [{ ...item, labels, shapes }, _.values(deletedLabels)]
 }
 
 /**
@@ -582,16 +582,19 @@ function deleteLabelsFromTracks (
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
   }
   _.forEach(deletedLabelsByTrack, (track, id) => {
-    const oldTrack = tracks[Number(id)]
-    const newTrack = updateObject(oldTrack,
-      {
-        labels: removeObjectFields(
-          oldTrack.labels, getObjectKeys(track.labels))
-      })
-    if (_.size(newTrack.labels) > 0) {
-      tracks[Number(id)] = newTrack
-    } else {
-      delete tracks[Number(id)]
+    const trackId = Number(id)
+    if (trackId >= 0 && trackId in tracks) {
+      const oldTrack = tracks[trackId]
+      const newTrack = updateObject(oldTrack,
+        {
+          labels: removeObjectFields(
+            oldTrack.labels, getObjectKeys(track.labels))
+        })
+      if (_.size(newTrack.labels) > 0) {
+        tracks[trackId] = newTrack
+      } else {
+        delete tracks[trackId]
+      }
     }
   })
   return tracks

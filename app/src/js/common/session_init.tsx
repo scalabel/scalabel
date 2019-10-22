@@ -84,11 +84,9 @@ function updateTracks (): void {
       let trackPolicy = newTracks[trackId].trackPolicy
       if (newTracks[trackId].policyType !== currentPolicyType) {
         const newPolicy = makeTrackPolicy(newTracks[trackId], currentPolicyType)
-        if (newPolicy) {
-          trackPolicy = newPolicy
-        }
-        newTracks[trackId].updateState(track, trackPolicy)
+        trackPolicy = newPolicy
       }
+      newTracks[trackId].updateState(track, trackPolicy)
     } else {
       newTracks[trackId] = new Track()
       newTracks[trackId].updateState(
