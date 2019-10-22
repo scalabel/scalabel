@@ -113,7 +113,7 @@ export default class ViewerConfigUpdater {
     if (this._mouseDown) {
       switch (state.task.config.itemType) {
         case 'image':
-          if (this.isKeyDown('Control')) {
+          if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
             const dx = normalized[0] - this._mX
             const dy = normalized[1] - this._mY
             const displayLeft = this._container.scrollLeft - dx
@@ -240,18 +240,28 @@ export default class ViewerConfigUpdater {
     const state = Session.getState()
     switch (state.task.config.itemType) {
       case 'image':
-        if (this.isKeyDown('Control')) { // control for zoom
+        if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
           e.preventDefault()
           let zoomRatio = SCROLL_ZOOM_RATIO
           if (e.deltaY < 0) {
             zoomRatio = 1. / zoomRatio
           }
+          const config = getCurrentImageViewerConfig(state)
           const imageZoomAction = zoomImage(
-            zoomRatio,
-            getCurrentImageViewerConfig(state)
+            zoomRatio, config
           )
           if (imageZoomAction) {
             Session.dispatch(imageZoomAction)
+            if (this._container) {
+              const displayLeft = zoomRatio * (this._mX + config.displayLeft) -
+                this._mX
+              const displayTop = zoomRatio * (this._mY + config.displayTop) -
+                this._mY
+              Session.dispatch(updateImageViewerConfig({
+                displayLeft,
+                displayTop
+              }))
+            }
           }
         }
         break
