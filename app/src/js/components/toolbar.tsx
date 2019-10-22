@@ -4,12 +4,15 @@ import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
 import { changeSelect } from '../action/common'
-import { changeSelectedLabelsAttributes, deleteSelectedLabels } from '../action/select'
+import {
+  changeSelectedLabelsAttributes,
+  deleteSelectedLabels
+} from '../action/select'
 import { addLabelTag } from '../action/tag'
 import { deleteTracks, terminateTracks } from '../action/track'
 import { renderButtons, renderTemplate } from '../common/label'
 import Session from '../common/session'
-import { Key } from '../common/types'
+import { Key, LabelTypeName } from '../common/types'
 import { Attribute } from '../functional/types'
 import { Component } from './component'
 import { makeButton } from './general_button'
@@ -50,6 +53,7 @@ export class ToolBar extends Component<Props> {
     this._keyDownHandler = this.onKeyDown.bind(this)
     this._keyUpHandler = this.onKeyUp.bind(this)
     this.handleAttributeToggle = this.handleAttributeToggle.bind(this)
+    this.getAlignmentIndex = this.getAlignmentIndex.bind(this)
     this._keyDownMap = {}
   }
 
@@ -140,14 +144,14 @@ export class ToolBar extends Component<Props> {
               element.toolType,
               this.handleToggle,
               this.handleAttributeToggle,
+              this.getAlignmentIndex,
               element.name,
-              currentAttributes ? (
-                Object.keys(currentAttributes).indexOf(String(index)) >= 0 ?
-                  currentAttributes[index][0]
-                  : 0)
-              : 0,
-              element.values,
-              this.getAlignmentIndex(element.name)
+              currentAttributes
+                ? Object.keys(currentAttributes).indexOf(String(index)) >= 0
+                  ? currentAttributes[index][0]
+                  : 0
+                : 0,
+              element.values
             )
           )}
         </List>
@@ -172,26 +176,34 @@ export class ToolBar extends Component<Props> {
     }
     const currentAttribute = allAttributes[attributeIndex]
     const selectedIndex = currentAttribute.values.indexOf(alignment)
-    Session.dispatch(addLabelTag(attributeIndex, selectedIndex))
+    if (
+      state.task.config.labelTypes[state.user.select.labelType]
+      === LabelTypeName.TAG
+    ) {
+      Session.dispatch(addLabelTag(attributeIndex, selectedIndex))
+    } else {
+      const currentAttributes = state.user.select.attributes
+      const attributes: { [key: number]: number[] } = {}
+      for (const keyStr of Object.keys(currentAttributes)) {
+        const key = Number(keyStr)
+        attributes[key] = currentAttributes[key]
+      }
+      attributes[attributeIndex] = [selectedIndex]
+      Session.dispatch(changeSelectedLabelsAttributes(attributes))
+      Session.dispatch(changeSelect({ attributes }))
+    }
   }
   /**
    * This function updates the checked list of switch buttons.
-   * TODO: Add attribute update for label here (PR 188)
    * @param {string} switchName
    */
   private handleToggle (switchName: string) {
     const state = Session.getState()
     const allAttributes = state.task.config.attributes
-    let toggleIndex = -1
-    for (let i = 0; i < allAttributes.length; i++) {
-      if (allAttributes[i].name === switchName) {
-        toggleIndex = i
-        break
-      }
-    }
+    const toggleIndex = this.getAttributeIndex(allAttributes, switchName)
     if (toggleIndex >= 0) {
       const currentAttributes = state.user.select.attributes
-      const attributes: {[key: number]: number[]} = {}
+      const attributes: { [key: number]: number[] } = {}
       for (const keyStr of Object.keys(currentAttributes)) {
         const key = Number(keyStr)
         attributes[key] = currentAttributes[key]
@@ -206,6 +218,50 @@ export class ToolBar extends Component<Props> {
     }
   }
 
+  /**
+   * helper function to get attribute index with respect to the label's
+   * attributes
+   */
+  private getAlignmentIndex (name: string): number {
+    const state = Session.getState()
+    const attributeIndex = this.getAttributeIndex(
+      state.task.config.attributes,
+      name
+    )
+    if (attributeIndex < 0) {
+      return 0
+    }
+    if (
+      state.task.config.labelTypes[state.user.select.labelType]
+      === LabelTypeName.TAG
+    ) {
+      const item = state.task.items[state.user.select.item]
+      const labelId = Number(_.findKey(item.labels))
+      if (isNaN(labelId)) {
+        return 0
+      }
+      const attributes = item.labels[labelId].attributes
+      const index = this.getAttributeIndex(
+      state.task.config.attributes,
+      name
+    )
+      if (index < 0) {
+        return 0
+      }
+      if (attributes[index]) {
+        return attributes[index][0]
+      } else {
+        return 0
+      }
+    } else {
+      const currentAttributes = state.user.select.attributes
+      return currentAttributes
+        ? Object.keys(currentAttributes).indexOf(String(attributeIndex)) >= 0
+          ? currentAttributes[attributeIndex][0]
+          : 0
+        : 0
+    }
+  }
   /**
    * helper function to get attribute index with respect to the config
    * attributes
@@ -223,31 +279,6 @@ export class ToolBar extends Component<Props> {
       }
     }
     return attributeIndex
-  }
-  /**
-   * helper function to get attribute index with respect to the label's
-   * attributes
-   */
-  private getAlignmentIndex (name: string): number {
-    const state = Session.getState()
-    const item = state.task.items[state.user.select.item]
-    const labelId = Number(_.findKey(item.labels))
-    if (isNaN(labelId)) {
-      return 0
-    }
-    const attributes = item.labels[labelId].attributes
-    const attributeIndex = this.getAttributeIndex(
-      state.task.config.attributes,
-      name
-    )
-    if (attributeIndex < 0) {
-      return 0
-    }
-    if (attributes[attributeIndex]) {
-      return attributes[attributeIndex][0]
-    } else {
-      return 0
-    }
   }
 
   /**

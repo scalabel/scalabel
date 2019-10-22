@@ -18,10 +18,10 @@ export function renderTemplate (
   handleAttributeToggle: (
     toggleName: string,
     alignment: string) => void,
+  getAlignmentIndex: (switName: string) => number,
   name: string,
   value: number,
-  options: string[],
-  initialAlignmentIndex: number
+  options: string[]
 ) {
   if (toolType === 'switch') {
     return <SwitchBtn onChange={handleToggle} name={name} value={value} />
@@ -32,7 +32,7 @@ export function renderTemplate (
           name={name}
           values={options}
           handleAttributeToggle={handleAttributeToggle}
-          initialAlignmentIndex={initialAlignmentIndex}
+          getAlignmentIndex = {getAlignmentIndex}
         />
       </ListItem>
     )

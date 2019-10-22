@@ -3,7 +3,7 @@ import { sprintf } from 'sprintf-js'
 import Session from '../../common/session'
 import { Attribute } from '../../functional/types'
 import { Context2D } from '../util'
-import { Label2D } from './label2d'
+import { DrawMode, Label2D } from './label2d'
 
 /**
  * Tag2D drawable class
@@ -56,25 +56,27 @@ export class Tag2D extends Label2D {
    * Draws tag box
    * @param context
    */
-  public draw (context: Context2D) {
-    context.font = '36px Arial'
-    const abbr: string[] = []
-    for (const key in this.attributes) {
-      if (this.attributes[key][0] !== -1) {
-        const selectedIndex = this.attributes[key][0]
-        const selectedAttribute = this.configAttributes[key]
-        abbr.push(sprintf('  %s: %s', selectedAttribute.name,
+  public draw (context: Context2D, _ratio: number, mode: DrawMode) {
+    if (mode === DrawMode.VIEW) {
+      context.font = '36px Arial'
+      const abbr: string[] = []
+      for (const key in this.attributes) {
+        if (this.attributes[key][0] !== -1) {
+          const selectedIndex = this.attributes[key][0]
+          const selectedAttribute = this.configAttributes[key]
+          abbr.push(sprintf('  %s: %s', selectedAttribute.name,
           selectedAttribute.values[selectedIndex]))
+        }
       }
-    }
-    context.fillStyle = 'lightgrey'
-    context.globalAlpha = 0.3
-    context.fillRect(5, 5, 400,
+      context.fillStyle = 'lightgrey'
+      context.globalAlpha = 0.3
+      context.fillRect(5, 5, 400,
       (abbr.length) ? abbr.length * 35 + 15 : 0)
-    context.fillStyle = 'red'
-    context.globalAlpha = 1.0
-    for (let i = 0; i < abbr.length; i++) {
-      context.fillText(abbr[i], 5, 40 + i * 35)
+      context.fillStyle = 'red'
+      context.globalAlpha = 1.0
+      for (let i = 0; i < abbr.length; i++) {
+        context.fillText(abbr[i], 5, 40 + i * 35)
+      }
     }
   }
 

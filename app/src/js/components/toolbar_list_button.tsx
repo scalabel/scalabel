@@ -23,18 +23,15 @@ interface ClassType {
 
 interface Props {
   /** handles attribute toggling */
-  handleAttributeToggle: (
-    toggleName: string,
-    alignment: string
-  ) => void
+  handleAttributeToggle: (toggleName: string, alignment: string) => void
+  /** gets alignment index for selected attribute */
+  getAlignmentIndex: (toggleName: string) => number
   /** styles of ToggleButtons */
   classes: ClassType
   /** name of ToggleButtons */
   name: string
   /** values of ToggleButtons */
   values: string[]
-  /** initial alignment index */
-  initialAlignmentIndex: number
 }
 
 /**
@@ -43,25 +40,18 @@ interface Props {
  * @param {object} props
  */
 class ToggleButtons extends React.Component<Props> {
-  /** state of ToggleButtons */
-  public state = {
-    alignment: this.props.values[this.props.initialAlignmentIndex]
-  }
   /** handleAlignment of ToggleButtons that align buttons */
   public handleAlignment = (
     _event: React.MouseEvent<HTMLElement>,
     alignment: string
   ) => {
-    this.props.handleAttributeToggle(
-      this.props.name,
-      alignment
-    )
-    this.setState({ alignment })
+    this.props.handleAttributeToggle(this.props.name, alignment)
+    // re-render to get correct alignment
+    this.setState({})
   }
 
   /** render function of ToggleButtons */
   public render () {
-    const { alignment } = this.state
     const { name, classes, values } = this.props
     const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton)
     return (
@@ -81,14 +71,20 @@ class ToggleButtons extends React.Component<Props> {
           >
             <ToggleButtonGroup
               className={classes.buttonGroup}
-              value={alignment}
+              value={
+                this.props.values[this.props.getAlignmentIndex(
+                  this.props.name)]
+              }
               exclusive
               onChange={this.handleAlignment}
             >
               {values.map((element: string) => (
-                <ToggleBtn className={classes.toggleButton} value={element}
-                key={element}
-                data-testid={'toggle-button-' + element}>
+                <ToggleBtn
+                  className={classes.toggleButton}
+                  value={element}
+                  key={element}
+                  data-testid={'toggle-button-' + element}
+                >
                   {' '}
                   {element}{' '}
                 </ToggleBtn>
@@ -98,15 +94,6 @@ class ToggleButtons extends React.Component<Props> {
         </ListItem>
       </List>
     )
-  }
-
-  /**
-   * updates props when re-rendered
-   * @param nextProps
-   */
-  public componentWillReceiveProps (nextProps: Props) {
-    this.setState({alignment: nextProps.values[nextProps.initialAlignmentIndex]
-    })
   }
 }
 

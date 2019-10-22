@@ -16,6 +16,7 @@ import { testJson } from '../test_image_objects'
 
 let handleToggleWasCalled: boolean = false
 const testValues = ['NA', 'A', 'B', 'C']
+const selected: {[key: string]: string} = {}
 
 /**
  * dummy attribute toggle function to test if the correct toggle action was
@@ -28,9 +29,13 @@ const dummyAttributeToggle = (
   toggleName: string,
   alignment: string
 ): void => {
-  toggleName = toggleName
-  alignment = alignment
+  selected[toggleName] = alignment
   handleToggleWasCalled = true
+}
+
+const dummyGetAlignmentIndex = (toggleName: string) => {
+  const index = testValues.indexOf(selected[toggleName])
+  return index >= 0 ? index : 0
 }
 
 beforeEach(() => {
@@ -117,7 +122,7 @@ describe('test functionality for attributes with multiple values', () => {
         name={'test'}
         values={testValues}
         handleAttributeToggle={dummyAttributeToggle}
-        initialAlignmentIndex={0}
+        getAlignmentIndex={dummyGetAlignmentIndex}
       />
     )
     expect(handleToggleWasCalled).toBe(false)
@@ -130,7 +135,8 @@ describe('test functionality for attributes with multiple values', () => {
         name={'test'}
         values={testValues}
         handleAttributeToggle={dummyAttributeToggle}
-        initialAlignmentIndex={0}
+        getAlignmentIndex={dummyGetAlignmentIndex}
+
       />
     )
     let AButton = getByTestId('toggle-button-A') as (HTMLButtonElement)
@@ -139,6 +145,7 @@ describe('test functionality for attributes with multiple values', () => {
     AButton = getByTestId('toggle-button-A') as (HTMLButtonElement)
     let NAButton = getByTestId('toggle-button-NA') as (HTMLButtonElement)
     expect(handleToggleWasCalled).toBe(true)
+    AButton = getByTestId('toggle-button-A') as (HTMLButtonElement)
     expect(AButton.className).toContain('selected')
     expect(NAButton.className).not.toContain('selected')
     handleToggleWasCalled = false
