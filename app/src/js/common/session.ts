@@ -73,6 +73,14 @@ class Session {
   }
 
   /**
+   * Get the number of items in the current session
+   */
+  public get numItems (): number {
+    return (this.itemType === 'image') ? this.images.length :
+      this.pointClouds.length
+  }
+
+  /**
    * Wrapper for redux store dispatch
    * @param {types.ActionType} action: action description
    */

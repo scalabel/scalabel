@@ -24,8 +24,7 @@ export function addDuplicatedTrack (
   const trackShapes: ShapeType[][] = []
   const itemIndices: number[] = []
 
-  const itemLength = (Session.itemType === 'image') ? Session.images.length :
-    Session.pointClouds.length
+  const itemLength = Session.numItems
 
   if (!startIndex) {
     startIndex = 0
@@ -58,8 +57,7 @@ export function addDuplicatedTrack (
 export function deleteTracks (
   tracks: TrackType[]
 ): DeleteLabelsAction {
-  const itemLength = (Session.itemType === 'image') ? Session.images.length :
-    Session.pointClouds.length
+  const itemLength = Session.numItems
 
   const itemIndices = []
   const labelIds = []
@@ -92,8 +90,7 @@ export function terminateTracks (
   tracks: TrackType[],
   lastIndex: number
 ): DeleteLabelsAction {
-  const itemLength = (Session.itemType === 'image') ? Session.images.length :
-    Session.pointClouds.length
+  const itemLength = Session.numItems
 
   const itemIndices = []
   const labelIds = []
