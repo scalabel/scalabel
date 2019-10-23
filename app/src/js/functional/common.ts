@@ -464,7 +464,7 @@ export function linkLabels (
   // update the item
   item = updateObject(item, {
     labels: updateObject(item.labels, _.zipObject(children, labels))})
-  const items = updateListItem(state.task.items, item.id, item)
+  const items = updateListItem(state.task.items, item.index, item)
   const task = updateObject(state.task, { items, tracks })
   return { ...state, task }
 }
