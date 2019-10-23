@@ -41,8 +41,11 @@ export function getFile (filePath: string) {
   return sprintf('%s/%s.json', filePath, getNow())
 }
 
-/* path to html file directories, relative to js */
-export const HTMLDirectories: string[] = ['../control', '../annotation']
+/* path to html file directories, relative to js
+ * note that ../ corresponds to index.html
+ */
+export const HTMLDirectories: string[] =
+  ['../control', '../annotation', '../']
 
 /**
  * Converts relative (to js) path into absolute path
