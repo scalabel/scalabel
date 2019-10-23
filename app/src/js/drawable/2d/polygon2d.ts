@@ -623,7 +623,10 @@ export class Polygon2D extends Label2D {
       order: this._order
     })
     this._labelId = -1
-    this._color = getColorById(state.task.status.maxLabelId + 1)
+    this._color = getColorById(
+      state.task.status.maxLabelId + 1,
+      ((Session.tracking) ? state.task.status.maxTrackId + 1 : -1)
+    )
     this.setSelected(true, 1)
   }
 

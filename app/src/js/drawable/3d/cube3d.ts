@@ -3,7 +3,6 @@ import { CubeType } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
 import { projectionFromNDC } from '../../view_config/point_cloud'
-import { getColorById } from '../util'
 import { TransformationControl } from './control/transformation_control'
 import { Grid3D } from './grid3d'
 import { Plane3D } from './plane3d'
@@ -176,7 +175,14 @@ export class Cube3D extends THREE.Group {
    */
   public setId (id: number): void {
     this._id = id
-    this._color = getColorById(id).map((v) => v / 255.)
+  }
+
+  /**
+   * Set color
+   * @param color
+   */
+  public setColor (color: number[]): void {
+    this._color = color.map((v) => v / 255.)
   }
 
   /**

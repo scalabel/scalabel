@@ -123,6 +123,7 @@ export class Box3D extends Label3D {
     state: State, itemIndex: number, labelId: number): void {
     super.updateState(state, itemIndex, labelId)
     this._shape.setId(labelId)
+    this._shape.setColor(this._color)
   }
 
   /**

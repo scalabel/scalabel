@@ -169,7 +169,7 @@ export abstract class Label3D {
     this._label = item.labels[labelId]
     this._labelId = this._label.id
     this._trackId = this._label.track
-    this._color = getColorById(this._labelId)
+    this._color = getColorById(this._labelId, this._trackId)
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }
 }

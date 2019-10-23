@@ -60,12 +60,13 @@ function pickColorPalette (index: number): number[] {
 }
 
 /**
- * Convert numerical id to color value
- * @param {number} id
+ * Convert numerical id to color value in range of [0, 255]
+ * @param {number} labelId
+ * @param {number} trackId
  * @return {number[]}
  */
-export function getColorById (id: number): number[] {
-  return pickColorPalette(id)
+export function getColorById (labelId: number, trackId: number): number[] {
+  return pickColorPalette((trackId >= 0) ? trackId : labelId)
 }
 
 /**
