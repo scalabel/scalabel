@@ -119,7 +119,8 @@ export const enum DatabaseType {
 export const enum Endpoint {
   POST_PROJECT = '/postProject',
   GET_PROJECT_NAMES = '/postProjectNames',
-  EXPORT = '/export'
+  EXPORT = '/export',
+  DASHBOARD = '/postDashboardContents'
 }
 
 /* default categories when file is missing and label is box2D or box3D */

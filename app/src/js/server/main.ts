@@ -1,3 +1,4 @@
+import * as bodyParser from 'body-parser'
 import express, { Application } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
@@ -28,7 +29,8 @@ function startHTTPServer (app: Application) {
   app.get(Endpoint.GET_PROJECT_NAMES, listeners.ProjectNameHandler)
   app.get(Endpoint.EXPORT, listeners.GetExportHandler)
 
-  app.post(Endpoint.POST_PROJECT, listeners.PostProjectHandler)
+  app.post(Endpoint.POST_PROJECT, formidable(), listeners.PostProjectHandler)
+  app.post(Endpoint.DASHBOARD, bodyParser.json(), listeners.DashboardHandler)
 }
 
 /**
@@ -49,7 +51,6 @@ function main () {
 
   // set up middleware
   app.use(listeners.LoggingHandler)
-  app.use(formidable()) // handles posted form data
 
   // set up http handlers
   startHTTPServer(app)

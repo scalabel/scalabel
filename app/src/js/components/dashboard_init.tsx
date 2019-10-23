@@ -29,6 +29,7 @@ export function initDashboard (vendor?: boolean) {
   const request = JSON.stringify({
     name: projectName
   })
-  xhr.open('post', './postDashboardContents')
+  xhr.open('POST', './postDashboardContents')
+  xhr.setRequestHeader('Content-Type', 'application/json')
   xhr.send(request)
 }

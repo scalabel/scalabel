@@ -4,6 +4,7 @@ import {
   Response
 } from 'express'
 import { sprintf } from 'sprintf-js'
+import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { ItemExport } from '../functional/bdd_types'
 import { State } from '../functional/types'
 import {
@@ -131,5 +132,65 @@ export async function PostProjectHandler (req: Request, res: Response) {
     const err = Error('illegal fields')
     logError(err)
     res.send(err.message)
+  }
+}
+
+/**
+ * Return dashboard info
+ * @param req
+ * @param res
+ */
+export async function DashboardHandler (req: Request, res: Response) {
+  if (req.method !== 'POST') {
+    res.sendStatus(404)
+    res.end()
+    return
+  }
+
+  const body = req.body
+  if (body) {
+    const name = body.name
+    const key = getProjectKey(name)
+    const fields = await Session.getStorage().load(key)
+    const project = JSON.parse(fields) as types.Project
+    // grab the latest submissions from all tasks
+    const tasks = await getTasksInProject(name)
+    const projectOptions: ProjectOptions = {
+      name: project.options.config.projectName,
+      itemType: project.options.config.itemType,
+      labelTypes: project.options.config.labelTypes,
+      taskSize: project.options.config.taskSize,
+      numItems: project.items.length,
+      numLeafCategories: project.options.config.categories.length,
+      numAttributes: project.options.config.attributes.length
+    }
+
+    const taskOptions = []
+    for (const task of tasks) {
+      let numLabeledItems = 0
+      let numLabels = 0
+      for (const item of task.items) {
+        if (item.labels && item.labels.length > 0) {
+          numLabeledItems++
+          numLabels += item.labels.length
+        }
+      }
+
+      const options: TaskOptions = {
+        numLabeledItems: numLabeledItems.toString(),
+        numLabels: numLabels.toString(),
+        submitted: task.options.submitted,
+        handlerUrl: task.options.config.handlerUrl
+      }
+
+      taskOptions.push(options)
+    }
+
+    const contents: DashboardContents = {
+      projectMetaData: projectOptions,
+      taskMetaDatas: taskOptions
+    }
+
+    res.send(JSON.stringify(contents))
   }
 }

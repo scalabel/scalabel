@@ -17,7 +17,7 @@ export interface ProjectOptions {
   /** item type */
   itemType: string
   /** label type */
-  labelType: string
+  labelTypes: string[]
   /** task size */
   taskSize: number
   /** number of items */
@@ -30,7 +30,7 @@ export interface ProjectOptions {
 
 export interface TaskOptions {
   /** number of labeled images */
-  numLabeledImages: string
+  numLabeledItems: string
   /** number of labels */
   numLabels: string
   /** if the task was submitted */
@@ -159,7 +159,7 @@ function Dashboard (props: DashboardProps) {
         <TableBody>
           {taskMetaDatas.map((value: TaskOptions, index) => {
             totalLabels += Number(value.numLabels)
-            totalTaskLabeled += Number(value.numLabeledImages) > 0 ? 1 : 0
+            totalTaskLabeled += Number(value.numLabeledItems) > 0 ? 1 : 0
             return (
               <TableRow
                 key={index}
@@ -173,7 +173,7 @@ function Dashboard (props: DashboardProps) {
                   align={align}
                   data-testid={'num-labeled-images-' + index.toString()}
                 >
-                  {value.numLabeledImages}
+                  {value.numLabeledItems}
                 </TableCell>
                 <TableCell
                   className={classes.bodyCell}
@@ -265,7 +265,7 @@ function sidebar (props: SidebarProps) {
   const sidebarListItems = [
     { tag: 'Project Name', entry: projectMetaData.name },
     { tag: 'Item Type', entry: projectMetaData.itemType },
-    { tag: 'Label Type', entry: projectMetaData.labelType },
+    { tag: 'Label Type', entry: projectMetaData.labelTypes[0] },
     { tag: 'Task Size', entry: projectMetaData.taskSize },
     { tag: '# Items', entry: projectMetaData.numItems },
     { tag: '# Categories', entry: projectMetaData.numLeafCategories },
@@ -293,11 +293,10 @@ function sidebar (props: SidebarProps) {
           variant='button'
           className={classes.link}
           color='inherit'
-          href={projectMetaData.labelType === 'tag' ?
+          href={
             './postExportV2?project_name=' +
-            projectMetaData.name :
-            './postExport?project_name=' +
-            projectMetaData.name}
+            projectMetaData.name
+          }
           data-testid='export-link'
         >
           EXPORT RESULTS
