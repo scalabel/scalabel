@@ -4,7 +4,7 @@ import { ShapeType, TrackType } from '../functional/types'
 import { LinearInterpolationBox2DPolicy } from './track_policies/box2d_linear_interpolation_policy'
 import { LinearInterpolationBox3DPolicy } from './track_policies/box3d_linear_interpolation_policy'
 import { TrackPolicy } from './track_policies/track_policy'
-import { TrackPolicyTypes } from './types'
+import { TrackPolicyType } from './types'
 
 export type Label = Label2D | Label3D
 
@@ -13,9 +13,9 @@ export type Label = Label2D | Label3D
  */
 export function makeTrackPolicy (track: Track, policyType: string) {
   switch (policyType) {
-    case TrackPolicyTypes.LINEAR_INTERPOLATION_BOX_3D:
+    case TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D:
       return new LinearInterpolationBox3DPolicy(track)
-    case TrackPolicyTypes.LINEAR_INTERPOLATION_BOX_2D:
+    case TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D:
       return new LinearInterpolationBox2DPolicy(track)
   }
 }

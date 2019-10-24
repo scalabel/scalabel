@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import Session from '../../common/session'
+import { AttributeToolType } from '../../common/types'
 import { Attribute } from '../../functional/types'
 import { Context2D } from '../util'
 import { DrawMode, Label2D } from './label2d'
@@ -64,14 +65,21 @@ export class Tag2D extends Label2D {
         if (this.attributes[key][0] !== -1) {
           const selectedIndex = this.attributes[key][0]
           const selectedAttribute = this.configAttributes[key]
-          abbr.push(sprintf('  %s: %s', selectedAttribute.name,
-          selectedAttribute.values[selectedIndex]))
+          if (selectedAttribute.toolType === AttributeToolType.SWITCH) {
+            if (selectedIndex === 1) {
+              abbr.push(sprintf(' %s: %s', selectedAttribute.name,
+                selectedAttribute.tagText))
+            }
+          } else {
+            abbr.push(sprintf('  %s: %s', selectedAttribute.name,
+              selectedAttribute.values[selectedIndex]))
+          }
         }
       }
       context.fillStyle = 'lightgrey'
       context.globalAlpha = 0.3
       context.fillRect(5, 5, 400,
-      (abbr.length) ? abbr.length * 35 + 15 : 0)
+        (abbr.length) ? abbr.length * 35 + 15 : 0)
       context.fillStyle = 'red'
       context.globalAlpha = 1.0
       for (let i = 0; i < abbr.length; i++) {

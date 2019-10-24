@@ -4,6 +4,7 @@ import { makeButton } from '../components/general_button'
 import { Category } from '../components/toolbar_category'
 import { ListButton } from '../components/toolbar_list_button'
 import { SwitchBtn } from '../components/toolbar_switch'
+import { AttributeToolType } from './types'
 
 /**
  * This is renderTemplate function that renders the category.
@@ -20,12 +21,12 @@ export function renderTemplate (
     alignment: string) => void,
   getAlignmentIndex: (switName: string) => number,
   name: string,
-  value: number,
   options: string[]
 ) {
-  if (toolType === 'switch') {
-    return <SwitchBtn onChange={handleToggle} name={name} value={value} />
-  } else if (toolType === 'list') {
+  if (toolType === AttributeToolType.SWITCH) {
+    return <SwitchBtn onChange={handleToggle}
+    name={name} getAlignmentIndex={getAlignmentIndex} />
+  } else if (toolType === AttributeToolType.LIST) {
     return (
       <ListItem dense={true} style={{ textAlign: 'center' }}>
         <ListButton
@@ -36,7 +37,7 @@ export function renderTemplate (
         />
       </ListItem>
     )
-  } else if (toolType === 'longList') {
+  } else if (toolType === AttributeToolType.LONG_LIST) {
     return (
       <ListItem dense={true} style={{ textAlign: 'center' }}>
         <Category categories={options} headerText={name} />

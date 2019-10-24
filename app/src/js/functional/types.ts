@@ -1,3 +1,5 @@
+import { AttributeToolType } from '../common/types'
+
 /**
  * Interfaces for immutable states
  */
@@ -148,7 +150,7 @@ export interface ItemType {
 
 export interface Attribute {
   /** Attribute tool type */
-  toolType: string,
+  toolType: AttributeToolType,
   /** Attribute name */
   name: string,
   /** Values of attribute */

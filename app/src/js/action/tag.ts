@@ -8,8 +8,7 @@ import { AddLabelsAction, ChangeLabelsAction } from './types'
 
 /**
  * If tag exists for attribute, updates the label, else create a new label for
- * the attribute. This is used for both image tagging and updating attributes
- * for labels
+ * the attribute.
  * @param itemIndex
  * @param attributeIndex
  * @param selectedIndex

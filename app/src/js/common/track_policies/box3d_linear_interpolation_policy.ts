@@ -181,7 +181,7 @@ function linearInterpolateBox3D (
 export class LinearInterpolationBox3DPolicy extends TrackPolicy {
   constructor (track: Track) {
     super(track)
-    this._policyType = types.TrackPolicyTypes.LINEAR_INTERPOLATION_BOX_3D
+    this._policyType = types.TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D
   }
 
   /**

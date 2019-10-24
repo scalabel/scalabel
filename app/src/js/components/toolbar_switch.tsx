@@ -23,10 +23,12 @@ interface ClassType {
 interface Props {
   /** onChange function */
   onChange: (switchName: string) => void
+  /** gets alignment (either 0 or 1) */
+  getAlignmentIndex?: (switchName: string) => number
+  /** optional value, overrides get alignment index */
+  value?: number
   /** name of the switch */
   name: string
-  /** value of the switch */
-  value: number
   /** styles of SwitchButton. */
   classes: ClassType
 }
@@ -41,7 +43,7 @@ class SwitchButton extends Component<Props> {
    * SwitchButton render function
    */
   public render () {
-    const { onChange, name, value, classes } = this.props
+    const { onChange, name, value, getAlignmentIndex, classes } = this.props
 
     return (
       <ListItem dense={true}>
@@ -53,7 +55,10 @@ class SwitchButton extends Component<Props> {
               switchBase: classes.switchBase,
               track: classes.track
             }}
-            checked={value > 0}
+            checked={(value === undefined) ?
+              (getAlignmentIndex === undefined) ?
+              true : (getAlignmentIndex(name) > 0)
+              : (value > 0)}
             onChange={() => onChange(name)}
           />
         </ListItemSecondaryAction>

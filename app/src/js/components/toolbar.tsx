@@ -129,7 +129,6 @@ export class ToolBar extends Component<Props> {
    */
   public render () {
     const { categories, attributes, itemType, labelType } = this.props
-    const currentAttributes = Session.getState().user.select.attributes
     return (
       <div>
         {categories !== null ? (
@@ -139,18 +138,13 @@ export class ToolBar extends Component<Props> {
         ) : null}
         <Divider variant='middle' />
         <List>
-          {attributes.map((element: Attribute, index: number) =>
+          {attributes.map((element: Attribute) =>
             renderTemplate(
               element.toolType,
               this.handleToggle,
               this.handleAttributeToggle,
               this.getAlignmentIndex,
               element.name,
-              currentAttributes
-                ? Object.keys(currentAttributes).indexOf(String(index)) >= 0
-                  ? currentAttributes[index][0]
-                  : 0
-                : 0,
               element.values
             )
           )}
@@ -177,8 +171,8 @@ export class ToolBar extends Component<Props> {
     const currentAttribute = allAttributes[attributeIndex]
     const selectedIndex = currentAttribute.values.indexOf(alignment)
     if (
-      state.task.config.labelTypes[state.user.select.labelType]
-      === LabelTypeName.TAG
+      state.task.config.labelTypes[state.user.select.labelType] ===
+      LabelTypeName.TAG
     ) {
       Session.dispatch(addLabelTag(attributeIndex, selectedIndex))
     } else {
@@ -204,16 +198,26 @@ export class ToolBar extends Component<Props> {
     if (toggleIndex >= 0) {
       const currentAttributes = state.user.select.attributes
       const attributes: { [key: number]: number[] } = {}
-      for (const keyStr of Object.keys(currentAttributes)) {
-        const key = Number(keyStr)
-        attributes[key] = currentAttributes[key]
+      for (const [key] of allAttributes.entries()) {
+        if (currentAttributes[key]) {
+          attributes[key] = currentAttributes[key]
+        } else {
+          attributes[key] = [0]
+        }
       }
       if (attributes[toggleIndex][0] > 0) {
         attributes[toggleIndex][0] = 0
       } else {
         attributes[toggleIndex][0] = 1
       }
-      Session.dispatch(changeSelectedLabelsAttributes(attributes))
+      if (
+          state.task.config.labelTypes[state.user.select.labelType] ===
+          LabelTypeName.TAG
+        ) {
+        Session.dispatch(addLabelTag(toggleIndex, attributes[toggleIndex][0]))
+      } else {
+        Session.dispatch(changeSelectedLabelsAttributes(attributes))
+      }
       Session.dispatch(changeSelect({ attributes }))
     }
   }
@@ -232,8 +236,8 @@ export class ToolBar extends Component<Props> {
       return 0
     }
     if (
-      state.task.config.labelTypes[state.user.select.labelType]
-      === LabelTypeName.TAG
+      state.task.config.labelTypes[state.user.select.labelType] ===
+      LabelTypeName.TAG
     ) {
       const item = state.task.items[state.user.select.item]
       const labelId = Number(_.findKey(item.labels))
@@ -241,10 +245,7 @@ export class ToolBar extends Component<Props> {
         return 0
       }
       const attributes = item.labels[labelId].attributes
-      const index = this.getAttributeIndex(
-      state.task.config.attributes,
-      name
-    )
+      const index = this.getAttributeIndex(state.task.config.attributes, name)
       if (index < 0) {
         return 0
       }
@@ -268,9 +269,7 @@ export class ToolBar extends Component<Props> {
    * @param allAttributes
    * @param name
    */
-  private getAttributeIndex (
-    allAttributes: Attribute[],
-    toggleName: string
+  private getAttributeIndex (allAttributes: Attribute[], toggleName: string
   ): number {
     let attributeIndex = -1
     for (let i = 0; i < allAttributes.length; i++) {

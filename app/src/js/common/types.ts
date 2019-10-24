@@ -111,7 +111,14 @@ export enum Key {
   Z_LOW = 'z'
 }
 
-export enum TrackPolicyTypes {
+export enum TrackPolicyType {
   LINEAR_INTERPOLATION_BOX_2D = 'linear_interpolation_box_2d',
   LINEAR_INTERPOLATION_BOX_3D = 'linear_interpolation_box_3d'
+}
+
+export enum AttributeToolType {
+  SWITCH = 'switch',
+  LIST = 'list',
+  LONG_LIST = 'longList',
+  NONE = ''
 }

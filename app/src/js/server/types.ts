@@ -1,3 +1,4 @@
+import { AttributeToolType } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
 import { Attribute, ConfigType } from '../functional/types'
 
@@ -145,21 +146,21 @@ First need to add them to the attribute type
 export const defaultBox2DAttributes = [
   {
     name: 'Occluded',
-    toolType: 'switch',
+    toolType: AttributeToolType.SWITCH,
     tagText: 'o',
     tagSuffixes: [],
     values: []
   },
   {
     name: 'Truncated',
-    toolType: 'switch',
+    toolType: AttributeToolType.SWITCH,
     tagText: 't',
     tagSuffixes: [],
     values: []
   },
   {
     name: 'Traffic Color Light',
-    toolType: 'list',
+    toolType: AttributeToolType.LIST,
     tagText: 't',
     tagSuffixes: ['', 'g', 'y', 'r'],
     values: ['NA', 'G', 'Y', 'R']
@@ -169,7 +170,7 @@ export const defaultBox2DAttributes = [
 /* default attributes when file is missing and no other defaults exist */
 export const dummyAttributes = [{
   name: '',
-  toolType: '',
+  toolType: AttributeToolType.NONE,
   tagText: '',
   tagSuffixes: [],
   values: []
