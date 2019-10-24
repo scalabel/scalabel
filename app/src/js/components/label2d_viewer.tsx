@@ -16,6 +16,7 @@ import {
   UP_RES_RATIO,
   updateCanvasScale
 } from '../view_config/image'
+import { Crosshair, Crosshair2D } from './crosshair'
 import { Viewer } from './viewer'
 
 interface ClassType {
@@ -59,6 +60,8 @@ export class Label2dViewer extends Viewer<Props> {
   private canvasWidth: number
   /** The scale between the display and image data */
   private displayToImageRatio: number
+  /** The crosshair */
+  private crosshair: React.RefObject<Crosshair2D>
 
   // keyboard and mouse status
   /** The hashed list of keys currently down */
@@ -84,8 +87,8 @@ export class Label2dViewer extends Viewer<Props> {
     this.labelContext = null
     this.labelCanvas = null
     this.display = null
-
     this._labels = new Label2DList()
+    this.crosshair = React.createRef()
   }
 
   /**
@@ -156,7 +159,10 @@ export class Label2dViewer extends Viewer<Props> {
       onMouseUp={(e) => { this.onMouseUp(e) }}
       onMouseMove={(e) => { this.onMouseMove(e) }}
     />)
-
+    const ch = (<Crosshair
+      display={this.display}
+      innerRef={this.crosshair}
+      />)
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
       controlCanvas = React.cloneElement(controlCanvas,
@@ -165,7 +171,7 @@ export class Label2dViewer extends Viewer<Props> {
          { height: displayRect.height, width: displayRect.width })
     }
 
-    return [controlCanvas, labelCanvas]
+    return [ch, controlCanvas, labelCanvas]
   }
 
   /**
@@ -231,6 +237,10 @@ export class Label2dViewer extends Viewer<Props> {
     // grabbing image
     if (!this.isKeyDown('Control')) {
       this.setDefaultCursor()
+    }
+
+    if (this.crosshair.current) {
+      this.crosshair.current.onMouseMove(e)
     }
 
     // update the currently hovered shape

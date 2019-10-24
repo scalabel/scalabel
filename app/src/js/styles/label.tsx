@@ -119,6 +119,16 @@ export const label2dViewStyle = () => createStyles({
     'position': 'absolute',
     'visibility': 'hidden',
     'z-index': 2
+  },
+  hair: {
+    'position': 'fixed',
+    'margin-top': '0px',
+    'margin-left': '0px',
+    'background': 'transparent',
+    'border-top': '1px dotted #0000ff',
+    'border-left': '1px dotted #0000ff',
+    'pointer-events': 'none',
+    'z-index': 3
   }
 })
 
