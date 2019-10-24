@@ -1,4 +1,4 @@
-import { LabelTypeName, ShapeType } from '../common/types'
+import { LabelTypeName, ShapeTypeName } from '../common/types'
 import { makeLabel, makePolygon } from '../functional/states'
 import { PathPoint2DType } from '../functional/types'
 import * as actions from './common'
@@ -18,5 +18,5 @@ export function addPolygon2dLabel (
   const polygon = makePolygon({ points })
   const label = makeLabel({ type: LabelTypeName.POLYGON_2D, category })
   return actions.addLabel(
-    itemIndex, label, [ShapeType.POLYGON_2D], [polygon])
+    itemIndex, label, [ShapeTypeName.POLYGON_2D], [polygon])
 }

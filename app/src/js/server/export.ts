@@ -1,6 +1,7 @@
-import { ShapeType } from '../common/types'
+import { AttributeToolType, ItemTypeName, LabelTypeName } from '../common/types'
 import { ItemExport, LabelExport } from '../functional/bdd_types'
-import { Attribute, ConfigType, CubeType, ItemType, PolygonType, RectType, State } from '../functional/types'
+import { Attribute, ConfigType, CubeType,
+  ItemType, PolygonType, RectType, State } from '../functional/types'
 import { index2str } from './util'
 
 /**
@@ -15,11 +16,11 @@ export function convertItemToExport (config: ConfigType,
     url: item.url,
     videoName: '',
     attributes: {},
-    timestamp: config.submitTime,
+    timestamp: item.timestamp,
     index: item.index,
     labels: []
   }
-  if (config.itemType === 'video') {
+  if (config.itemType === ItemTypeName.VIDEO) {
     itemExport.videoName = config.projectName + index2str(item.index)
   }
   const labelExports: LabelExport[] = []
@@ -33,20 +34,25 @@ export function convertItemToExport (config: ConfigType,
       poly2d: null,
       box3d: null
     }
-    const indexedShape = item.shapes[label.id]
-    switch (indexedShape.type) {
-      case ShapeType.RECT:
-        const box2d = indexedShape.shape as RectType
-        labelExport.box2d = box2d
-        break
-      case ShapeType.POLYGON_2D:
-        const poly2d = indexedShape.shape as PolygonType
-        labelExport.poly2d = poly2d
-        break
-      case ShapeType.CUBE:
-        const poly3d = indexedShape.shape as CubeType
-        labelExport.box3d = poly3d
-        break
+    // TODO: fix this to loop over all labels shapes
+    // right now it just exports the first one
+    if (label.shapes.length > 0) {
+      const shapeId = label.shapes[0]
+      const indexedShape = item.shapes[shapeId]
+      switch (label.type) {
+        case LabelTypeName.BOX_2D:
+          const box2d = indexedShape.shape as RectType
+          labelExport.box2d = box2d
+          break
+        case LabelTypeName.POLYGON_2D:
+          const poly2d = indexedShape.shape as PolygonType
+          labelExport.poly2d = poly2d
+          break
+        case LabelTypeName.BOX_3D:
+          const poly3d = indexedShape.shape as CubeType
+          labelExport.box3d = poly3d
+          break
+      }
     }
     labelExports.push(labelExport)
   })
@@ -60,19 +66,33 @@ export function convertItemToExport (config: ConfigType,
  */
 function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
                                configAttributes: Attribute[]):
-  {[key: string]: string[] } {
-  const exportAttributes: {[key: string]: string[]} = {}
+  {[key: string]: (string[] | boolean) } {
+  const exportAttributes: {[key: string]: (string[] | boolean) } = {}
   Object.entries(labelAttributes).forEach(([key, attributeList]) => {
     const index = parseInt(key, 10)
     const attribute = configAttributes[index]
-    const selectedValues: string[] = []
-    attributeList.forEach((value) => {
-      // tslint:disable-next-line: strict-type-predicates //TODO: remove
-      if (attribute.values != null) {
-        selectedValues.push(attribute.values[value])
+    if (attribute.toolType === AttributeToolType.LIST
+        || attribute.toolType === AttributeToolType.LONG_LIST) {
+      // list attribute case- check whether each value is applied
+      const selectedValues: string[] = []
+      attributeList.forEach((valueIndex) => {
+        if (valueIndex in attribute.values) {
+          selectedValues.push(attribute.values[valueIndex])
+        }
+      })
+      exportAttributes[attribute.name] = selectedValues
+    } else if (attribute.toolType === AttributeToolType.SWITCH) {
+      // boolean attribute case- should be a single boolean in the list
+      let value = false
+      if (attributeList.length > 0) {
+        const attributeVal = attributeList[0]
+        if (attributeVal === 1) {
+          value = true
+        }
       }
-    })
-    exportAttributes[attribute.name] = selectedValues
+      exportAttributes[attribute.name] = value
+    }
+
   })
   return exportAttributes
 }
@@ -81,7 +101,7 @@ function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
  * converts state to export format
  * @param state
  */
-export function convertState (state: State): ItemExport[] {
+export function convertStateToExport (state: State): ItemExport[] {
   const config = state.task.config
   const items = state.task.items
   const exportList: ItemExport[] = []

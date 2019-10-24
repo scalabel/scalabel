@@ -25,7 +25,12 @@ export enum HandlerUrl {
   LABEL_3D = 'label3d'
 }
 
-export enum ShapeType {
+export enum BundleFile {
+  V2 = 'image_v2.js',
+  V1 = 'image.js'
+}
+
+export enum ShapeTypeName {
   UNKNOWN = 'unknown',
   RECT = 'rect',
   CUBE = 'cube',

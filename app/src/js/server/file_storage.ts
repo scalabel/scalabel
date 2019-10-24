@@ -1,7 +1,6 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import { Storage } from './storage'
-import { MaybeError } from './types'
 
 /**
  * Implements local file storage
@@ -59,19 +58,21 @@ export class FileStorage extends Storage {
   public save (key: string, json: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const dir = this.fullDir(path.dirname(key))
-      fs.ensureDir(dir, undefined, (ensureErr: MaybeError) => {
-        if (ensureErr) {
-          reject(ensureErr)
-          return
-        }
-        fs.writeFile(this.fullFile(key), json, (writeErr: Error) => {
-          if (writeErr) {
-            reject(writeErr)
+      fs.ensureDir(dir, undefined,
+        (ensureErr: NodeJS.ErrnoException | null) => {
+          // no need to reject if dir existed
+          if (ensureErr && ensureErr.code !== 'EEXIST') {
+            reject(ensureErr)
             return
           }
-          resolve()
+          fs.writeFile(this.fullFile(key), json, (writeErr: Error) => {
+            if (writeErr) {
+              reject(writeErr)
+              return
+            }
+            resolve()
+          })
         })
-      })
     })
   }
 

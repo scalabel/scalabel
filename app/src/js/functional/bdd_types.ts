@@ -35,8 +35,8 @@ export interface LabelExport {
   id: number
   /** category */
   category: string
-  /** label attributes */
-  attributes: { [key: string]: string[] }
+  /** label attributes- can be list or switch type */
+  attributes: { [key: string]: (string[] | boolean) }
   /** if shape was manual */
   manualShape: boolean
   /** box2d label */

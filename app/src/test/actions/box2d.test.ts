@@ -3,7 +3,7 @@ import * as box2d from '../../js/action/box2d'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { LabelTypeName, ShapeType } from '../../js/common/types'
+import { LabelTypeName, ShapeTypeName } from '../../js/common/types'
 import { RectType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
 
@@ -23,7 +23,7 @@ test('Add, change and delete box2d labels', () => {
   expect(label.item).toBe(0)
   expect(label.type).toBe(LabelTypeName.BOX_2D)
   const indexedShape = state.task.items[0].shapes[label.shapes[0]]
-  expect(indexedShape.type).toBe(ShapeType.RECT)
+  expect(indexedShape.type).toBe(ShapeTypeName.RECT)
   let shape = indexedShape.shape as RectType
   // Check label ids
   let index = 0

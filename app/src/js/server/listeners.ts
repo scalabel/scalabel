@@ -6,12 +6,12 @@ import {
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { ItemExport } from '../functional/bdd_types'
-import { State } from '../functional/types'
+import { State, TaskType } from '../functional/types'
 import {
   createProject, createTasks, parseFiles,
   parseForm, saveProject, saveTasks
 } from './create_project'
-import { convertState } from './export'
+import { convertStateToExport } from './export'
 import { getExportName } from './path'
 import Session from './server_session'
 import * as types from './types'
@@ -23,8 +23,7 @@ import { getExistingProjects, getProjectKey, getTasksInProject, loadSavedState, 
 export function LoggingHandler (
   req: Request, _res: Response, next: NextFunction) {
   const log = sprintf('Requesting %s', req.originalUrl)
-  // tslint:disable-next-line
-  console.info(log)
+  logInfo(log)
   next()
 }
 
@@ -70,7 +69,7 @@ export async function GetExportHandler (req: Request, res: Response) {
     for (const task of tasks) {
       await loadSavedState(projectName, task)
         .then((state: State) => {
-          items = items.concat(convertState(state))
+          items = items.concat(convertStateToExport(state))
         })
         .catch((err: Error) => {
           // if state submission is not found, use an empty item
@@ -80,7 +79,7 @@ export async function GetExportHandler (req: Request, res: Response) {
               name: itemToLoad.url,
               url: itemToLoad.url,
               videoName: '',
-              timestamp: projectToLoad.options.config.submitTime,
+              timestamp: projectToLoad.config.submitTime,
               attributes: {},
               index: itemToLoad.index,
               labels: []
@@ -120,7 +119,7 @@ export async function PostProjectHandler (req: Request, res: Response) {
         saveProject(project),
         // create tasks then save them
         createTasks(project).then(
-          (tasks: types.Task[]) => saveTasks(tasks))
+          (tasks: TaskType[]) => saveTasks(tasks))
       ])
     } catch (err) {
       logError(err)
@@ -156,13 +155,13 @@ export async function DashboardHandler (req: Request, res: Response) {
     // grab the latest submissions from all tasks
     const tasks = await getTasksInProject(name)
     const projectOptions: ProjectOptions = {
-      name: project.options.config.projectName,
-      itemType: project.options.config.itemType,
-      labelTypes: project.options.config.labelTypes,
-      taskSize: project.options.config.taskSize,
+      name: project.config.projectName,
+      itemType: project.config.itemType,
+      labelTypes: project.config.labelTypes,
+      taskSize: project.config.taskSize,
       numItems: project.items.length,
-      numLeafCategories: project.options.config.categories.length,
-      numAttributes: project.options.config.attributes.length
+      numLeafCategories: project.config.categories.length,
+      numAttributes: project.config.attributes.length
     }
 
     const taskOptions = []
@@ -170,17 +169,18 @@ export async function DashboardHandler (req: Request, res: Response) {
       let numLabeledItems = 0
       let numLabels = 0
       for (const item of task.items) {
-        if (item.labels && item.labels.length > 0) {
+        const currNumLabels = Object.keys(item.labels).length
+        if (item.labels && currNumLabels > 0) {
           numLabeledItems++
-          numLabels += item.labels.length
+          numLabels += currNumLabels
         }
       }
 
       const options: TaskOptions = {
         numLabeledItems: numLabeledItems.toString(),
         numLabels: numLabels.toString(),
-        submitted: task.options.submitted,
-        handlerUrl: task.options.config.handlerUrl
+        submitted: task.config.submitted,
+        handlerUrl: task.config.handlerUrl
       }
 
       taskOptions.push(options)

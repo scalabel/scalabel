@@ -3,7 +3,11 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
-import { Attribute, ConfigType } from '../functional/types'
+import { makeTask } from '../functional/states'
+import {
+  Attribute, ConfigType,
+  ItemType, TaskType } from '../functional/types'
+import { convertItemToImport } from './import'
 import Session from './server_session'
 import * as types from './types'
 import * as util from './util'
@@ -69,7 +73,7 @@ export function parseFiles (labelType: string, files: Files)
     parseItems(files),
     parseAttributes(files, labelType),
     parseCategories(files, labelType)])
-    .then((result: [ItemExport[], Attribute[], string[]]) => {
+    .then((result: [Array<Partial<ItemExport>>, Attribute[], string[]]) => {
       return {
         items: result[0],
         attributes: result[1],
@@ -176,7 +180,7 @@ export function parseAttributes (
 /**
  * Read items from yaml file at path
  */
-function readItemsFile (path: string): Promise<ItemExport[]> {
+function readItemsFile (path: string): Promise<Array<Partial<ItemExport>>> {
   return new Promise((resolve, reject) => {
     fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
       if (err) {
@@ -184,7 +188,8 @@ function readItemsFile (path: string): Promise<ItemExport[]> {
         return
       }
       try {
-        const items = yaml.load(fileBytes) as ItemExport[]
+        // might not have all fields defined, so use partial
+        const items = yaml.load(fileBytes) as Array<Partial<ItemExport>>
         resolve(items)
       } catch {
         reject(Error('Improper formatting for items file'))
@@ -197,7 +202,7 @@ function readItemsFile (path: string): Promise<ItemExport[]> {
  * Load from items file
  * Group by video name
  */
-export function parseItems (files: Files): Promise<ItemExport[]> {
+export function parseItems (files: Files): Promise<Array<Partial<ItemExport>>> {
   const itemFile = files[types.FormField.ITEMS]
   if (util.formFileExists(itemFile)) {
     return readItemsFile(itemFile.path)
@@ -219,7 +224,7 @@ export function createProject (
 
   /* use arbitrary values for
    * submitTime, taskId, and policyTypes
-   * assign these when state is created
+   * assign these when tasks are created
    */
   const config: ConfigType = {
     projectName: form.projectName,
@@ -234,17 +239,14 @@ export function createProject (
     attributes: formFileData.attributes,
     taskId: '',
     submitTime: -1,
-    tracking,
-    policyTypes: []
-  }
-  const options: types.ProjectOptions = {
-    config,
     submitted: false,
+    tracking,
+    policyTypes: [],
     demoMode: form.demoMode
   }
   const project: types.Project = {
-    items: formFileData.items,
-    options
+    config,
+    items: formFileData.items
   }
   return Promise.resolve(project)
 }
@@ -253,41 +255,99 @@ export function createProject (
  * Save a project
  */
 export function saveProject (project: types.Project): Promise<void> {
-  const key = util.getProjectKey(project.options.config.projectName)
+  const key = util.getProjectKey(project.config.projectName)
   const data = JSON.stringify(project, null, 2)
   return Session.getStorage().save(key, data)
 }
 
 /**
- * Split project into tasks
+ * Create two maps for quick lookup of attribute data
+ * @param configAttributes the attributes from config file
+ * first RV: map from attribute name to attribute and its index
+ * second RV: map from attribute value to its index within that attribute
  */
-export function createTasks (project: types.Project): Promise<types.Task[]> {
-  let taskInd = 0
-  const items = project.items
-  const taskSize = project.options.config.taskSize
-  const tasks: types.Task[] = []
-  for (let i = 0; i < items.length; i += taskSize) {
-    const itemsForTask = items.slice(i, i + taskSize)
-    for (let itemInd = 0; itemInd < itemsForTask.length; itemInd += 1) {
-      itemsForTask[itemInd].index = itemInd
-    }
-
-    // update task size in case there aren't enough items
-    const taskOptions: types.ProjectOptions = {
-      ...project.options,
-      config: {
-        ...project.options.config,
-        taskSize: itemsForTask.length
+function getAttributeMaps (
+  configAttributes: Attribute[]):
+  [{[key: string]: [number, Attribute]}, {[key: string]: number}] {
+  const attributeNameMap: {[key: string]: [number, Attribute]} = {}
+  const attributeValueMap: {[key: string]: number} = {}
+  for (let attrInd = 0; attrInd < configAttributes.length; attrInd++) {
+    const configAttribute = configAttributes[attrInd]
+    // map attribute name to its index and its value
+    attributeNameMap[configAttribute.name] = [attrInd, configAttribute]
+    // map attribute values to their indices (if its a list)
+    if (configAttribute.toolType === 'list') {
+      const values = configAttribute.values
+      for (let valueInd = 0; valueInd < values.length; valueInd++) {
+        const value = values[valueInd]
+        attributeValueMap[value] = valueInd
       }
     }
-    // TODO: add numFrames, numLabelImport, numLabeledItemImport
-    const task: types.Task = {
-      options: taskOptions,
-      index: taskInd,
+  }
+  return [attributeNameMap, attributeValueMap]
+}
+
+/**
+ * Create a map for quick lookup of category data
+ * @param configCategories the categories from config file
+ * returns a map from category value to its index
+ */
+function getCategoryMap (
+  configCategories: string[]): {[key: string]: number} {
+  const categoryNameMap: {[key: string]: number} = {}
+  for (let catInd = 0; catInd < configCategories.length; catInd++) {
+    // map category names to their indices
+    const category = configCategories[catInd]
+    categoryNameMap[category] = catInd
+  }
+  return categoryNameMap
+}
+
+/**
+ * Split project into tasks
+ * Each consists of the task portion of a frontend state
+ */
+export function createTasks (project: types.Project): Promise<TaskType[]> {
+  const items = project.items
+  const taskSize = project.config.taskSize
+
+  /* create quick lookup dicts for conversion from export type
+   * to external type for attributes/categories
+   * this avoids lots of indexof calls which slows down creation */
+  const [attributeNameMap, attributeValueMap] = getAttributeMaps(
+    project.config.attributes)
+  const categoryNameMap = getCategoryMap(project.config.categories)
+
+  const tasks: TaskType[] = []
+  let taskId = 0
+  for (let i = 0; i < items.length; i += taskSize) {
+    const itemsExport = items.slice(i, i + taskSize)
+
+    /* assign task id,
+     and update task size in case there aren't enough items */
+    const config: ConfigType = {
+      ...project.config,
+      taskSize: itemsExport.length,
+      taskId: util.index2str(taskId)
+    }
+
+    // convert from export format to internal format
+    const itemsForTask: ItemType[] = []
+    for (let itemInd = 0; itemInd < itemsExport.length; itemInd += 1) {
+      const itemId = i + itemInd // id is not relative to task, unlike index
+      const newItem = convertItemToImport(
+        itemsExport[itemInd], itemInd, itemId,
+        attributeNameMap, attributeValueMap, categoryNameMap)
+      itemsForTask.push(newItem)
+    }
+
+    const partialTask: Partial<TaskType> = {
+      config,
       items: itemsForTask
     }
+    const task = makeTask(partialTask)
     tasks.push(task)
-    taskInd += 1
+    taskId += 1
   }
   return Promise.resolve(tasks)
 }
@@ -295,10 +355,10 @@ export function createTasks (project: types.Project): Promise<types.Task[]> {
 /**
  * Saves a list of tasks
  */
-export function saveTasks (tasks: types.Task[]): Promise<void[]> {
+export function saveTasks (tasks: TaskType[]): Promise<void[]> {
   const promises: Array<Promise<void>> = []
   for (const task of tasks) {
-    const key = util.getTaskKey(task.options.config.projectName, task)
+    const key = util.getTaskKey(task.config.projectName, task.config.taskId)
     const data = JSON.stringify(task, null, 2)
     promises.push(Session.getStorage().save(key, data))
   }

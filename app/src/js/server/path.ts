@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import moment from 'moment'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
 

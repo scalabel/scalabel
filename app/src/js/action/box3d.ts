@@ -21,5 +21,5 @@ export function addBox3dLabel (
   const cube = makeCube({ center, size, orientation, surfaceId })
   const label = makeLabel({ type: types.LabelTypeName.BOX_3D, category })
 
-  return addLabel(itemIndex, label, [types.ShapeType.CUBE], [cube])
+  return addLabel(itemIndex, label, [types.ShapeTypeName.CUBE], [cube])
 }

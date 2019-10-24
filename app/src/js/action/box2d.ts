@@ -1,4 +1,4 @@
-import { LabelTypeName, ShapeType } from '../common/types'
+import { LabelTypeName, ShapeTypeName } from '../common/types'
 import { makeLabel, makeRect } from '../functional/states'
 import * as actions from './common'
 import { AddLabelsAction } from './types'
@@ -20,5 +20,5 @@ export function addBox2dLabel (
   // create the rect object
   const rect = makeRect({ x1: x, y1: y, x2: w, y2: h })
   const label = makeLabel({ type: LabelTypeName.BOX_2D, category, attributes })
-  return actions.addLabel(itemIndex, label, [ShapeType.RECT], [rect])
+  return actions.addLabel(itemIndex, label, [ShapeTypeName.RECT], [rect])
 }

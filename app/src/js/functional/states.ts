@@ -175,6 +175,7 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
     url: '',
     labels: {},
     shapes: {},
+    timestamp: -1,
     ...params
   }
 }
@@ -200,6 +201,8 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     attributes: [],
     taskId: '',
     submitTime: 0,
+    demoMode: false,
+    submitted: false,
     ...params
   }
 }
@@ -265,14 +268,13 @@ export function makeItemStatus (params: Partial<ItemStatus>= {}): ItemStatus {
 }
 
 /**
- * Initialize a session sate
+ * Initialize a session state
  * @param {{}} params
  * @return {Session}
  */
 function makeSession (params: Partial<SessionType>= {}): SessionType {
   return {
     id: '',
-    demoMode: false,
     startTime: 0,
     items: [],
     ...params
@@ -299,7 +301,7 @@ function makeTaskStatus (params: Partial<TaskStatus> = {}): TaskStatus {
  * @param {{}} params
  * @return {TaskType}
  */
-function makeTask (params: Partial<TaskType> = {}): TaskType {
+export function makeTask (params: Partial<TaskType> = {}): TaskType {
   return {
     config: makeTaskConfig(),
     status: makeTaskStatus(),

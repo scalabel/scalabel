@@ -101,6 +101,7 @@
                 "id": 0,
                 "index": 0,
                 "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+                "timestamp": 1570506897,
                 "labels": {
                     "1": {
                         "id": 1,
@@ -134,17 +135,17 @@
                         "item": 0,
                         "type": "box2d",
                         "category": [
-                            0
+                            1
                         ],
                         "attributes": {
                             "0": [
-                                0
+                                1
                             ],
                             "1": [
                                 0
                             ],
                             "2": [
-                                0
+                                3
                             ]
                         },
                         "parent": -1,
@@ -161,17 +162,17 @@
                         "item": 0,
                         "type": "box2d",
                         "category": [
-                            0
+                            3
                         ],
                         "attributes": {
                             "0": [
                                 0
                             ],
                             "1": [
-                                0
+                                1
                             ],
                             "2": [
-                                0
+                                1, 2
                             ]
                         },
                         "parent": -1,
@@ -230,6 +231,7 @@
                 "id": 1,
                 "index": 1,
                 "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg",
+                "timestamp": 1570506897,
                 "labels": {},
                 "shapes": {}
             },
@@ -237,6 +239,7 @@
                 "id": 2,
                 "index": 2,
                 "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg",
+                "timestamp": 1570506897,
                 "labels": {},
                 "shapes": {}
             },
@@ -244,6 +247,7 @@
                 "id": 3,
                 "index": 3,
                 "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg",
+                "timestamp": 1570506897,
                 "labels": {},
                 "shapes": {}
             },
@@ -251,6 +255,7 @@
                 "id": 4,
                 "index": 4,
                 "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg",
+                "timestamp": 1570506897,
                 "labels": {},
                 "shapes": {}
             }

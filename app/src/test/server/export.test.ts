@@ -2,7 +2,7 @@ import * as fs from 'fs-extra'
 import _ from 'lodash'
 import Session from '../../js/common/session'
 import { State } from '../../js/functional/types'
-import { convertItemToExport, convertState } from '../../js/server/export'
+import { convertItemToExport, convertStateToExport } from '../../js/server/export'
 import { sampleItemExport, sampleStateExport } from '../test_export_objects'
 
 beforeAll(() => {
@@ -36,8 +36,7 @@ describe('test export functionality for bounding box', () => {
   }),
   test('full state export with empty items', () => {
     const state = readSampleState()
-    const exportedState = convertState(state)
-    fs.writeFileSync('test.json', JSON.stringify(exportedState))
+    const exportedState = convertStateToExport(state)
     expect(exportedState).toEqual(sampleStateExport)
   })
 })

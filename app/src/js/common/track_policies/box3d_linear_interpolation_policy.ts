@@ -220,7 +220,7 @@ export class LinearInterpolationBox3DPolicy extends TrackPolicy {
     if (state.task.config.tracking) {
       Session.dispatch(addDuplicatedTrack(
         labelObject,
-        [types.ShapeType.CUBE],
+        [types.ShapeTypeName.CUBE],
         [cube],
         itemIndex
       ))

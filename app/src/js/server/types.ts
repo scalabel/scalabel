@@ -7,34 +7,11 @@ import { Attribute, ConfigType } from '../functional/types'
  */
 export interface Project {
   /** array of items */
-  items: ItemExport[]
-  /** metadata about project */
-  options: ProjectOptions
-}
-
-/**
- * Metadata for a project
- */
-export interface ProjectOptions {
+  items: Array<Partial<ItemExport>>
   /** frontend config */
   config: ConfigType
-  /** whether project is submitted */
-  submitted: boolean,
-  /** whether we are in demo mode */
-  demoMode: boolean,
 }
 
-/**
- * Stores specifications of a task
- */
-export interface Task {
-  /** metadata about project */
-  options: ProjectOptions,
-  /** index of particular task */
-  index: number,
-  /** array of items */
-  items: ItemExport[]
-}
 /**
  * Information for backend environment variables
  * Populated using configuration file
@@ -84,8 +61,8 @@ export interface FormFileData {
   categories: string[]
   /** attributes parsed from form file */
   attributes: Attribute[]
-  /** items parsed from form file */
-  items: ItemExport[]
+  /** items parsed from form file (may be incomplete) */
+  items: Array<Partial<ItemExport>>
 }
 
 /**
@@ -124,58 +101,6 @@ export const enum Endpoint {
   DASHBOARD = '/postDashboardContents'
 }
 
-/* default categories when file is missing and label is box2D or box3D */
-export const defaultBoxCategories = [
-  'person',
-  'rider',
-  'car',
-  'truck',
-  'bus',
-  'train',
-  'motor',
-  'bike',
-  'traffic sign',
-  'traffic light'
-]
-
-/*
-TODO: add buttonColors here
-First need to add them to the attribute type
-*/
-/* default attributes when file is missing and label is box2D */
-export const defaultBox2DAttributes = [
-  {
-    name: 'Occluded',
-    toolType: AttributeToolType.SWITCH,
-    tagText: 'o',
-    tagSuffixes: [],
-    values: []
-  },
-  {
-    name: 'Truncated',
-    toolType: AttributeToolType.SWITCH,
-    tagText: 't',
-    tagSuffixes: [],
-    values: []
-  },
-  {
-    name: 'Traffic Color Light',
-    toolType: AttributeToolType.LIST,
-    tagText: 't',
-    tagSuffixes: ['', 'g', 'y', 'r'],
-    values: ['NA', 'G', 'Y', 'R']
-  }
-]
-
-/* default attributes when file is missing and no other defaults exist */
-export const dummyAttributes = [{
-  name: '',
-  toolType: AttributeToolType.NONE,
-  tagText: '',
-  tagSuffixes: [],
-  values: []
-}]
-
 /* form field names */
 export const enum FormField {
   PROJECT_NAME = 'project_name',
@@ -202,7 +127,8 @@ export const defaultEnv: Env = {
   syncHost: 'http://localhost'
 }
 
-export const defaultBox2DCategories = [
+/* default categories when file is missing and label is box2D or box3D */
+export const defaultBoxCategories = [
   'person',
   'rider',
   'car',
@@ -215,6 +141,7 @@ export const defaultBox2DCategories = [
   'traffic light'
 ]
 
+/* default categories when file is missing and label is polyline2d */
 export const defaultPolyline2DCategories = [
   'road curb',
   'double white',
@@ -225,3 +152,47 @@ export const defaultPolyline2DCategories = [
   'single other',
   'crosswalk'
 ]
+
+// TODO: add default seg2d categories once nested categories are supported
+
+/* default attributes when file is missing and label is box2D */
+export const defaultBox2DAttributes = [
+  {
+    name: 'Occluded',
+    toolType: AttributeToolType.SWITCH,
+    tagText: 'o',
+    tagSuffixes: [],
+    tagPrefix: '',
+    values: [],
+    buttonColors: []
+  },
+  {
+    name: 'Truncated',
+    toolType: AttributeToolType.SWITCH,
+    tagText: 't',
+    tagSuffixes: [],
+    tagPrefix: '',
+    values: [],
+    buttonColors: []
+  },
+  {
+    name: 'Traffic Color Light',
+    toolType: AttributeToolType.LIST,
+    tagText: 't',
+    tagSuffixes: ['', 'g', 'y', 'r'],
+    tagPrefix: '',
+    values: ['NA', 'G', 'Y', 'R'],
+    buttonColors: ['white', 'green', 'yellow', 'red']
+  }
+]
+
+/* default attributes when file is missing and no other defaults exist */
+export const dummyAttributes = [{
+  name: '',
+  toolType: AttributeToolType.NONE,
+  tagText: '',
+  tagSuffixes: [],
+  values: [],
+  tagPrefix: '',
+  buttonColors: []
+}]

@@ -146,6 +146,8 @@ export interface ItemType {
   labels: { [key: number]: LabelType } // list of label
   /** shapes of the labels on this item */
   shapes: { [key: number]: IndexedShapeType }
+  /** the timestamp for the item */
+  timestamp: number
 }
 
 export interface Attribute {
@@ -157,8 +159,12 @@ export interface Attribute {
   values: string[],
   /** Tag text */
   tagText: string,
+  /** Tag prefix */
+  tagPrefix: string,
   /** Tag suffixes */
   tagSuffixes: string[]
+  /** button colors */
+  buttonColors: string[]
 }
 
 /*
@@ -195,6 +201,10 @@ export interface ConfigType {
   taskId: string
   /** the time of last project submission */
   submitTime: number
+  /** Whether or not in demo mode */
+  demoMode: boolean
+  /** Whether or not submitted */
+  submitted: boolean
 }
 
 export interface LayoutType {
@@ -278,8 +288,6 @@ export interface SessionType {
    * It is uuid of the session
    */
   id: string
-  /** Whether or not in demo mode */
-  demoMode: boolean
   /** Start time */
   startTime: number
   /** item statuses */

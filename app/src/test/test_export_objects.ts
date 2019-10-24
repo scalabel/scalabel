@@ -12,8 +12,8 @@ export const sampleItemExport: ItemExport = {
       id: 1,
       category: 'person',
       attributes: {
-        'Occluded': [],
-        'Truncated': [],
+        'Occluded': false,
+        'Truncated': false,
         'Traffic Light Color': [
           'NA'
         ]
@@ -30,12 +30,12 @@ export const sampleItemExport: ItemExport = {
     },
     {
       id: 2,
-      category: 'person',
+      category: 'rider',
       attributes: {
-        'Occluded': [],
-        'Truncated': [],
+        'Occluded': true,
+        'Truncated': false,
         'Traffic Light Color': [
-          'NA'
+          'R'
         ]
       },
       manualShape: true,
@@ -50,12 +50,12 @@ export const sampleItemExport: ItemExport = {
     },
     {
       id: 3,
-      category: 'person',
+      category: 'truck',
       attributes: {
-        'Occluded': [],
-        'Truncated': [],
+        'Occluded': false,
+        'Truncated': true,
         'Traffic Light Color': [
-          'NA'
+          'G', 'Y'
         ]
       },
       manualShape: true,
@@ -85,8 +85,8 @@ export const sampleStateExport: ItemExport[] =
           id: 1,
           category: 'person',
           attributes: {
-            'Occluded': [],
-            'Truncated': [],
+            'Occluded': false,
+            'Truncated': false,
             'Traffic Light Color': [
               'NA'
             ]
@@ -103,12 +103,12 @@ export const sampleStateExport: ItemExport[] =
         },
         {
           id: 2,
-          category: 'person',
+          category: 'rider',
           attributes: {
-            'Occluded': [],
-            'Truncated': [],
+            'Occluded': true,
+            'Truncated': false,
             'Traffic Light Color': [
-              'NA'
+              'R'
             ]
           },
           manualShape: true,
@@ -123,12 +123,12 @@ export const sampleStateExport: ItemExport[] =
         },
         {
           id: 3,
-          category: 'person',
+          category: 'truck',
           attributes: {
-            'Occluded': [],
-            'Truncated': [],
+            'Occluded': false,
+            'Truncated': true,
             'Traffic Light Color': [
-              'NA'
+              'G', 'Y'
             ]
           },
           manualShape: true,
