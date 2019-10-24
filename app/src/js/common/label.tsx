@@ -71,12 +71,12 @@ export function renderButtons (itemType: string, labelType: string) {
       if (itemType === 'image') {
         return (
           <div>
-            <div>
+            {/* <div>
               {makeButton('Link')}
             </div>
             <div>
               {makeButton('Quick-draw')}
-            </div>
+            </div> */}
           </div>
         )
       }

@@ -273,7 +273,8 @@ export class Polygon2D extends Label2D {
     if (numPoints === 0) return false
     switch (this._state) {
       case Polygon2DState.DRAW:
-        this._points.splice(numPoints - 1, 1)
+        const indexGap = numPoints === 1 ? 1 : 2
+        this._points.splice(numPoints - indexGap, indexGap)
         break
       case Polygon2DState.CLOSED:
         let numVertices = 0

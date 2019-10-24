@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { changeSelect } from '../../action/common'
+import { changeSelect, linkLabels } from '../../action/common'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
-import { LabelTypeName } from '../../common/types'
+import { Key, LabelTypeName } from '../../common/types'
 import { makeTrack } from '../../functional/states'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -42,19 +42,22 @@ export class Label2DList {
   /** Recorded state of last update */
   private _state: State
   /** selected label */
-  private _selectedLabel: Label2D | null
+  private _selectedLabels: Label2D[]
   /** highlighted label */
   private _highlightedLabel: Label2D | null
   /** whether mouse is down */
   private _mouseDown: boolean
+  /** The hashed list of keys currently down */
+  private _keyDownMap: { [key: string]: boolean }
 
   constructor () {
     this._labels = {}
     this._labelList = []
-    this._selectedLabel = null
+    this._selectedLabels = []
     this._highlightedLabel = null
     this._mouseDown = false
     this._state = Session.getState()
+    this._keyDownMap = {}
     this.updateState(this._state, this._state.user.select.item)
   }
 
@@ -76,8 +79,8 @@ export class Label2DList {
   }
 
   /** get selectedLabel for state inspection */
-  public get selectedLabel (): Label2D | null {
-    return this._selectedLabel
+  public get selectedLabels (): Label2D[] {
+    return this._selectedLabels
   }
 
   /**
@@ -112,21 +115,26 @@ export class Label2DList {
     // update drawable label values
     _.forEach(item.labels, (label, key) => {
       const labelId = Number(key)
-      if (!(labelId in self._labels)) {
+      if (!(labelId in self._labels) &&
+        item.labels[labelId].shapes.length > 0) {
         self._labels[labelId] = makeDrawableLabel(label.type)
       }
-      self._labels[labelId].updateState(state, itemIndex, labelId)
+      if (labelId in self._labels) {
+        self._labels[labelId].updateState(state, itemIndex, labelId)
+      }
     })
     // order the labels and assign order values
     self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })
     this._highlightedLabel = null
-    if (state.user.select.labels.length > 0 &&
-        (state.user.select.labels[0] in this._labels)) {
-      this._selectedLabel = this._labels[state.user.select.labels[0]]
-    } else {
-      this._selectedLabel = null
+    this._selectedLabels = []
+    if (state.user.select.labels.length > 0) {
+      for (const id of state.user.select.labels) {
+        if (id in this._labels) {
+          this._selectedLabels.push(this._labels[id])
+        }
+      }
     }
   }
 
@@ -138,27 +146,57 @@ export class Label2DList {
    */
   public onMouseDown (
       coord: Vector2D, labelIndex: number, handleIndex: number): boolean {
-    this._mouseDown = true
-
     if (this._highlightedLabel !== null &&
-      (this._selectedLabel === null || this._selectedLabel.editing === false)) {
+      (this.isSelectedLabelsEmpty() ||
+      this._selectedLabels[0].editing === false)) {
       this._highlightedLabel.setHighlighted(false)
       this._highlightedLabel = null
     }
 
-    if (this._selectedLabel !== null && this._selectedLabel.editing === false) {
-      this._selectedLabel.setSelected(false)
-      this._selectedLabel = null
+    if (this.isKeyDown(Key.META)) {
+      // multi select
+      if (labelIndex >= 0) {
+        const label = this._labelList[labelIndex]
+        const index = this.selectedLabels.indexOf(label)
+        if (index === -1) {
+          this._selectedLabels.push(label)
+        } else {
+          this._selectedLabels.splice(index, 1)
+        }
+        const selectedLabelIdArray = []
+        for (const tmp of this._selectedLabels) {
+          selectedLabelIdArray.push(tmp.labelId)
+        }
+        if (this.isSelectedLabelsEmpty()) {
+          Session.dispatch(changeSelect(
+            { category: undefined,
+              attributes: undefined,
+              labels: selectedLabelIdArray }))
+        } else {
+          Session.dispatch(changeSelect(
+            { category: this._selectedLabels[0].category[0],
+              attributes: this._selectedLabels[0].attributes,
+              labels: selectedLabelIdArray }))
+        }
+      }
+      return true
+    } else if (!this.isSelectedLabelsEmpty() &&
+      this._selectedLabels[0].editing === false) {
+      for (const label of this._selectedLabels) {
+        label.setSelected(false)
+      }
+      this._selectedLabels = []
     }
 
-    if (this._selectedLabel === null) {
+    this._mouseDown = true
+    if (this.isSelectedLabelsEmpty()) {
       if (labelIndex >= 0) {
-        this._selectedLabel = this._labelList[labelIndex]
-        this._selectedLabel.setSelected(true, handleIndex)
+        this._selectedLabels.push(this._labelList[labelIndex])
+        this._selectedLabels[0].setSelected(true, handleIndex)
         Session.dispatch(changeSelect(
-          { category: this._selectedLabel.category[0],
-            attributes: this._selectedLabel.attributes,
-            labels: [this._selectedLabel.labelId] }))
+          { category: this._selectedLabels[0].category[0],
+            attributes: this._selectedLabels[0].attributes,
+            labels: [this._selectedLabels[0].labelId] }))
       } else {
         const state = this._state
         const currentPolicyType =
@@ -172,11 +210,11 @@ export class Label2DList {
         const label = makeDrawableLabel(
           state.task.config.labelTypes[state.user.select.labelType])
         label.initTemp(state, coord)
-        this._selectedLabel = label
+        this._selectedLabels.push(label)
         this._labelList.push(label)
       }
     }
-    this._selectedLabel.onMouseDown(coord)
+    this._selectedLabels[0].onMouseDown(coord)
     return true
   }
 
@@ -189,10 +227,12 @@ export class Label2DList {
   public onMouseUp (
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     this._mouseDown = false
-    if (this._selectedLabel !== null) {
-      const shouldDelete = !this._selectedLabel.onMouseUp(coord)
+    if (!this.isSelectedLabelsEmpty() && !this.isKeyDown(Key.META)) {
+      const shouldDelete = !this._selectedLabels[0].onMouseUp(coord)
       if (shouldDelete) {
-        this._labelList.splice(this._labelList.indexOf(this._selectedLabel), 1)
+        this._labelList.splice(
+          this._labelList.indexOf(this._selectedLabels[0]), 1
+        )
       }
     }
   }
@@ -203,8 +243,9 @@ export class Label2DList {
   public onMouseMove (
       coord: Vector2D, canvasLimit: Size2D,
       labelIndex: number, handleIndex: number): boolean {
-    if (this._selectedLabel && this._selectedLabel.editing === true) {
-      this._selectedLabel.onMouseMove(
+    if (!this.isSelectedLabelsEmpty() &&
+      this._selectedLabels[0].editing === true) {
+      this._selectedLabels[0].onMouseMove(
         coord, canvasLimit, labelIndex, handleIndex)
       return true
     } else {
@@ -230,11 +271,17 @@ export class Label2DList {
    * @param e
    */
   public onKeyDown (e: KeyboardEvent): void {
-    if (this._selectedLabel) {
-      if (!this._selectedLabel.onKeyDown(e.key)) {
-        this._labelList.splice(this._labelList.indexOf(this._selectedLabel), 1)
-        this._selectedLabel = null
-      }
+    this._keyDownMap[e.key] = true
+    if (!this.isSelectedLabelsEmpty() &&
+      !this._selectedLabels[0].onKeyDown(e.key)) {
+      this._labelList.splice(
+        this._labelList.indexOf(this._selectedLabels[0]), 1
+      )
+      this._selectedLabels = []
+    }
+    // linking
+    if (this.isKeyDown(Key.L_LOW) || this.isKeyDown(Key.L_UP)) {
+      this.linkLabels()
     }
   }
 
@@ -243,8 +290,36 @@ export class Label2DList {
    * @param e
    */
   public onKeyUp (e: KeyboardEvent): void {
-    if (this._selectedLabel) {
-      this._selectedLabel.onKeyUp(e.key)
+    delete this._keyDownMap[e.key]
+    if (!this.isSelectedLabelsEmpty()) {
+      this._selectedLabels[0].onKeyUp(e.key)
     }
+  }
+
+  /** judge whether selectedLabels is empty */
+  private isSelectedLabelsEmpty (): boolean {
+    return this._selectedLabels.length === 0
+  }
+
+  /**
+   * Whether a specific key is pressed down
+   * @param key - the key to check
+   */
+  private isKeyDown (key: Key): boolean {
+    return this._keyDownMap[key]
+  }
+
+  /** link selected labels */
+  private linkLabels (): void {
+    if (this.selectedLabels.length < 2) {
+      return
+    }
+    const selectedLabelIdArray = []
+    for (const tmp of this._selectedLabels) {
+      selectedLabelIdArray.push(tmp.labelId)
+    }
+    Session.dispatch(linkLabels(
+      this._state.user.select.item, selectedLabelIdArray
+    ))
   }
 }

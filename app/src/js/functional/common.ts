@@ -399,17 +399,31 @@ export function changeLabels (
 }
 
 /**
- * Get the root of a label by tracing its ancestors
+ * Get the label id of the root of a label by tracing its ancestors
  * @param item
  * @param labelId
  */
-function getRoot (item: ItemType, labelId: number): number {
+export function getRootLabelId (item: ItemType, labelId: number): number {
   let parent = item.labels[labelId].parent
   while (parent >= 0) {
     labelId = parent
     parent = item.labels[labelId].parent
   }
   return labelId
+}
+
+/**
+ * Get the trackId of the root of a label by tracing its ancestors
+ * @param item
+ * @param labelId
+ */
+export function getRootTrackId (item: ItemType, labelId: number): number {
+  let parent = item.labels[labelId].parent
+  while (parent >= 0) {
+    labelId = parent
+    parent = item.labels[labelId].parent
+  }
+  return item.labels[labelId].track
 }
 
 /**
@@ -425,7 +439,8 @@ export function linkLabels (
   if (action.labelIds.length === 0) {
     return state
   }
-  const children = _.map(action.labelIds, (labelId) => getRoot(item, labelId))
+  const children = _.map(
+    action.labelIds, (labelId) => getRootLabelId(item, labelId))
   let newLabel: LabelType = _.cloneDeep(item.labels[children[0]])
   newLabel.parent = -1
   newLabel.shapes = []

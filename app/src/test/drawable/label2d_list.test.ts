@@ -234,6 +234,8 @@ test('2d polygons highlighted and selected', () => {
   /**
    * (12, 12) (21, 21) (31, 26) (41, 21) (21, 11)
    */
+  let selected = label2dList.selectedLabels
+  expect(selected[0].labelId).toEqual(0)
   // draw another polygon
   label2dList.onMouseMove(new Vector2D(5000, 5000), canvasSize, -1, 0)
   label2dList.onMouseDown(new Vector2D(5000, 5000), -1, 0)
@@ -255,32 +257,26 @@ test('2d polygons highlighted and selected', () => {
   // change highlighted
   label2dList.onMouseMove(new Vector2D(1300, 1300), canvasSize, 0, 0)
   let highlighted = label2dList.highlightedLabel
-  let selected = label2dList.selectedLabel
+  selected = label2dList.selectedLabels
+  expect(label2dList.labelList.length).toEqual(2)
+  expect(label2dList.labelList[1].labelId).toEqual(1)
   if (!highlighted) {
     throw new Error('no highlightedLabel')
   } else {
     expect(highlighted.labelId).toEqual(0)
   }
-  if (!selected) {
-    throw new Error('no selectedLabel')
-  } else {
-    expect(selected.labelId).toEqual(1)
-  }
+  expect(selected[0].labelId).toEqual(1)
 
   // change selected
   label2dList.onMouseDown(new Vector2D(1300, 1300), 0, 0)
   label2dList.onMouseMove(new Vector2D(1400, 1400), canvasSize, 0, 0)
   label2dList.onMouseUp(new Vector2D(1400, 1400), 0, 0)
   highlighted = label2dList.highlightedLabel
-  selected = label2dList.selectedLabel
+  selected = label2dList.selectedLabels
   if (highlighted) {
     expect(highlighted.labelId).toEqual(0)
   }
-  if (!selected) {
-    throw new Error('no selectedLabel')
-  } else {
-    expect(selected.labelId).toEqual(0)
-  }
+  expect(selected[0].labelId).toEqual(0)
 })
 
 test('validation check for polygon2d', () => {
@@ -599,6 +595,138 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   state = Session.getState()
   polygon = getShape(state, 0, 0, 0) as PolygonType
   expect(polygon.points.length).toEqual(3)
+})
+
+test('2d polygons multi-select and linking labels', () => {
+  Session.devMode = false
+  initStore(testJson)
+  const itemIndex = 0
+  Session.dispatch(action.goToItem(itemIndex))
+  Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const label2dList = new Label2DList()
+  Session.subscribe(() => {
+    label2dList.updateState(Session.getState(),
+      Session.getState().user.select.item)
+  })
+  // draw first polygon
+  const canvasSize = new Size2D(10000, 10000)
+  label2dList.onMouseDown(new Vector2D(100, 100), -1, 0)
+  label2dList.onMouseUp(new Vector2D(100, 100), -1, 0)
+  label2dList.onMouseMove(new Vector2D(1000, 1000), canvasSize, -1, 0)
+  label2dList.onMouseDown(new Vector2D(1000, 1000), -1, 0)
+  label2dList.onMouseUp(new Vector2D(1000, 1000), -1, 0)
+  label2dList.onMouseMove(new Vector2D(2000, 1000), canvasSize, -1, 1)
+  label2dList.onMouseDown(new Vector2D(2000, 1000), -1, 1)
+  label2dList.onMouseUp(new Vector2D(2000, 1000), -1, 1)
+  /**
+   * (1, 1) (10, 10) (20, 10)
+   */
+
+  // draw second polygon
+  label2dList.onMouseMove(new Vector2D(5000, 5000), canvasSize, -1, 0)
+  label2dList.onMouseDown(new Vector2D(5000, 5000), -1, 0)
+  label2dList.onMouseUp(new Vector2D(5000, 5000), -1, 0)
+  label2dList.onMouseMove(new Vector2D(6000, 4000), canvasSize, -1, 0)
+  label2dList.onMouseDown(new Vector2D(6000, 4000), -1, 0)
+  label2dList.onMouseUp(new Vector2D(6000, 4000), -1, 0)
+  label2dList.onMouseMove(new Vector2D(7000, 7000), canvasSize, -1, 0)
+  label2dList.onMouseDown(new Vector2D(7000, 7000), -1, 0)
+  label2dList.onMouseUp(new Vector2D(7000, 7000), -1, 0)
+  label2dList.onMouseMove(new Vector2D(5000, 5000), canvasSize, -1, 1)
+  label2dList.onMouseDown(new Vector2D(5000, 5000), -1, 1)
+  label2dList.onMouseUp(new Vector2D(5000, 5000), -1, 1)
+  /**
+   * (1, 1) (10, 10) (20, 10)
+   * (50, 50) (60, 40) (70, 70)
+   */
+
+  // draw third polygon
+  label2dList.onMouseMove(new Vector2D(2500, 2500), canvasSize, -1, 0)
+  label2dList.onMouseDown(new Vector2D(2500, 2500), -1, 0)
+  label2dList.onMouseUp(new Vector2D(2500, 2500), -1, 0)
+  label2dList.onMouseMove(new Vector2D(3000, 2500), canvasSize, -1, 0)
+  label2dList.onMouseDown(new Vector2D(3000, 2500), -1, 0)
+  label2dList.onMouseUp(new Vector2D(3000, 2500), -1, 0)
+  label2dList.onMouseMove(new Vector2D(3500, 3500), canvasSize, -1, 0)
+  label2dList.onMouseDown(new Vector2D(3500, 3500), -1, 0)
+  label2dList.onMouseUp(new Vector2D(3500, 3500), -1, 0)
+  label2dList.onMouseMove(new Vector2D(2500, 2500), canvasSize, -1, 1)
+  label2dList.onMouseDown(new Vector2D(2500, 2500), -1, 1)
+  label2dList.onMouseUp(new Vector2D(2500, 2500), -1, 1)
+  /**
+   * (1, 1) (10, 10) (20, 10)
+   * (50, 50) (60, 40) (70, 70)
+   * (25, 25) (30, 25) (35, 35)
+   */
+
+  let state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(3)
+
+  // multi-select
+  label2dList.onMouseMove(new Vector2D(3000, 3000), canvasSize, 2, 0)
+  label2dList.onMouseDown(new Vector2D(3000, 3000), 2, 0)
+  label2dList.onMouseUp(new Vector2D(3000, 3000), 2, 0)
+  label2dList.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+  label2dList.onMouseMove(new Vector2D(1000, 1000), canvasSize, 0, 2)
+  label2dList.onMouseDown(new Vector2D(1000, 1000), 0, 2)
+  label2dList.onMouseUp(new Vector2D(1000, 1000), 0, 2)
+  label2dList.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+  // select label 2 and 0
+  state = Session.getState()
+  expect(state.user.select.labels.length).toEqual(2)
+  expect(state.user.select.labels[0]).toEqual(2)
+  expect(state.user.select.labels[1]).toEqual(0)
+  expect(label2dList.selectedLabels.length).toEqual(2)
+  expect(label2dList.selectedLabels[0].labelId).toEqual(2)
+  expect(label2dList.selectedLabels[1].labelId).toEqual(0)
+
+  label2dList.onMouseMove(new Vector2D(6000, 6000), canvasSize, 1, 0)
+  label2dList.onMouseDown(new Vector2D(6000, 6000), 1, 0)
+  label2dList.onMouseUp(new Vector2D(6000, 6000), 1, 0)
+
+  // select label 1
+  state = Session.getState()
+  expect(state.user.select.labels.length).toEqual(1)
+  expect(state.user.select.labels[0]).toEqual(1)
+  expect(label2dList.selectedLabels.length).toEqual(1)
+  expect(label2dList.selectedLabels[0].labelId).toEqual(1)
+
+  label2dList.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+  label2dList.onMouseMove(new Vector2D(3000, 2500), canvasSize, 2, 2)
+  label2dList.onMouseDown(new Vector2D(3000, 2500), 2, 2)
+  label2dList.onMouseUp(new Vector2D(3000, 2500), 2, 2)
+  label2dList.onMouseMove(new Vector2D(500, 500), canvasSize, 0, 0)
+  label2dList.onMouseDown(new Vector2D(500, 500), 0, 0)
+  label2dList.onMouseUp(new Vector2D(500, 500), 0, 0)
+  label2dList.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+  // select label 1, 2, 3
+  state = Session.getState()
+  expect(state.user.select.labels.length).toEqual(3)
+  expect(label2dList.selectedLabels.length).toEqual(3)
+
+  label2dList.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+  label2dList.onMouseMove(new Vector2D(3000, 2500), canvasSize, 2, 2)
+  label2dList.onMouseDown(new Vector2D(3000, 2500), 2, 2)
+  label2dList.onMouseUp(new Vector2D(3000, 2500), 2, 2)
+  label2dList.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+  // select label 1, 2
+  state = Session.getState()
+  expect(state.user.select.labels.length).toEqual(2)
+  expect(label2dList.selectedLabels.length).toEqual(2)
+
+  label2dList.onKeyDown(new KeyboardEvent('keydown', { key: 'l' }))
+  label2dList.onKeyUp(new KeyboardEvent('keydown', { key: 'l' }))
+
+  // link label 1 and 2
+  state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(4)
+  expect(_.size(label2dList.labelList)).toEqual(3)
+  expect(label2dList.labelList[0].color).toEqual(
+    label2dList.labelList[1].color
+  )
 })
 
 test('Draw label2d list to canvas', () => {

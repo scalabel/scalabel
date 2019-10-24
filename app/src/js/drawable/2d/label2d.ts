@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import Session from '../../common/session'
+import { getRootLabelId, getRootTrackId } from '../../functional/common'
 import { LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -105,6 +106,11 @@ export abstract class Label2D {
   /** get labelId */
   public get labelId (): number {
     return this._labelId
+  }
+
+  /** get color */
+  public get color (): number[] {
+    return this._color
   }
 
   /** select the label */
@@ -276,7 +282,8 @@ export abstract class Label2D {
     this._order = this._label.order
     this._labelId = this._label.id
     this._trackId = this._label.track
-    this._color = getColorById(this._labelId, this._trackId)
+    this._color = getColorById(
+      getRootLabelId(item, labelId), getRootTrackId(item, labelId))
     this.setSelected(state.user.select.labels.includes(labelId), 0)
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }
