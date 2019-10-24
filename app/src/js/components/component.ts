@@ -7,6 +7,10 @@ import { State as StateType } from '../functional/types'
  */
 export abstract class Component<Props> extends
   React.Component<Props, StateType> {
+    /** flag to check if a component is mounted, preventing possible memory
+     * leak from rendering un-mounted component
+     */
+  private _isMounted = false
   /**
    * General constructor
    * @param props: component props
@@ -18,10 +22,26 @@ export abstract class Component<Props> extends
   }
 
   /**
+   * after mounting, set flag to allow for rendering and state updates
+   */
+  public componentDidMount () {
+    this._isMounted = true
+  }
+
+  /**
+   * after unmounting, set flag so no state updates are possible
+   */
+  public componentWillUnmount () {
+    this._isMounted = false
+  }
+
+  /**
    * Callback for updated state
    * When the global state is updated, this component should be updated
    */
   private onStateUpdated (): void {
-    this.setState(Session.getState())
+    if (this._isMounted) {
+      this.setState(Session.getState())
+    }
   }
 }

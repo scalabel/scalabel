@@ -68,10 +68,6 @@ export const StyledButton = withStyles({
   },
   label: {
     fontSize: '15px'
-  },
-  itemText: {
-    fontSize: 10,
-    fontWeight: 500
   }
 })(Button)
 

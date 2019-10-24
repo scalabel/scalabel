@@ -139,13 +139,16 @@ export class ToolBar extends Component<Props> {
         <Divider variant='middle' />
         <List>
           {attributes.map((element: Attribute) =>
-            renderTemplate(
+            (<React.Fragment key = {element.name}>
+            {renderTemplate(
               element.toolType,
               this.handleToggle,
               this.handleAttributeToggle,
               this.getAlignmentIndex,
               element.name,
               element.values
+            )}
+            </React.Fragment>
             )
           )}
         </List>
