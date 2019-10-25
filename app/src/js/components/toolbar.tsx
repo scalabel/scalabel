@@ -111,6 +111,7 @@ export class ToolBar extends Component<Props> {
    * Add keyDown Event Listener
    */
   public componentDidMount () {
+    super.componentDidMount()
     document.addEventListener('keydown', this._keyDownHandler)
     document.addEventListener('keyup', this._keyUpHandler)
   }
@@ -119,6 +120,7 @@ export class ToolBar extends Component<Props> {
    * Remove keyDown Event Listener
    */
   public componentWillUnmount () {
+    super.componentWillUnmount()
     document.removeEventListener('keydown', this._keyDownHandler)
     document.removeEventListener('keyup', this._keyUpHandler)
   }

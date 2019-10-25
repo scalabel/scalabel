@@ -95,6 +95,7 @@ export class Label2dViewer extends Viewer<Props> {
    * Component mount callback
    */
   public componentDidMount () {
+    super.componentDidMount()
     document.addEventListener('keydown', (e) => { this.onKeyDown(e) })
     document.addEventListener('keyup', (e) => { this.onKeyUp(e) })
   }

@@ -106,6 +106,7 @@ class TitleBar extends Component<Props> {
    * Disables asynchronous callbacks
    */
   public componentWillUnmount () {
+    super.componentWillUnmount()
     // De-couple the titlebar and the session
     Session.applyStatusEffects = () => { return }
   }

@@ -112,6 +112,7 @@ class Label3dViewer extends Viewer<Props> {
    * Mount callback
    */
   public componentDidMount () {
+    super.componentDidMount()
     document.addEventListener('keydown', this._keyDownListener)
     document.addEventListener('keyup', this._keyUpListener)
   }
@@ -120,6 +121,7 @@ class Label3dViewer extends Viewer<Props> {
    * Unmount callback
    */
   public componentWillUnmount () {
+    super.componentWillUnmount()
     document.removeEventListener('keydown', this._keyDownListener)
     document.removeEventListener('keyup', this._keyUpListener)
   }
