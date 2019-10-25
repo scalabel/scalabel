@@ -257,7 +257,7 @@ export const sampleTasksImage: TaskType[] = [
     status: {
       maxLabelId: -1,
       maxShapeId: -1,
-      maxOrder: -1,
+      maxOrder: 0,
       maxTrackId: -1
     },
     items: [
@@ -326,7 +326,7 @@ export const sampleTasksImage: TaskType[] = [
     status: {
       maxLabelId: -1,
       maxShapeId: -1,
-      maxOrder: -1,
+      maxOrder: 0,
       maxTrackId: -1
     },
     items: [

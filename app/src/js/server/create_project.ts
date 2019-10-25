@@ -6,7 +6,7 @@ import { ItemExport } from '../functional/bdd_types'
 import { makeTask } from '../functional/states'
 import {
   Attribute, ConfigType,
-  ItemType, TaskType } from '../functional/types'
+  ItemType, TaskStatus, TaskType } from '../functional/types'
 import { convertItemToImport } from './import'
 import Session from './server_session'
 import * as types from './types'
@@ -304,6 +304,23 @@ function getCategoryMap (
 }
 
 /**
+ * gets the max of values and currMax
+ * @param values an array of numbers in string format
+ */
+function getMax (values: string[], oldMax: number): number {
+  const numericValues = values.map((value: string) => {
+    return parseInt(value, 10)
+  })
+  let currMax = -1
+  if (numericValues.length > 0) {
+    currMax = numericValues.reduce((a, b) => {
+      return Math.max(a, b)
+    })
+  }
+  return Math.max(currMax, oldMax)
+}
+
+/**
  * Split project into tasks
  * Each consists of the task portion of a frontend state
  */
@@ -331,6 +348,12 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
       taskId: util.index2str(taskId)
     }
 
+    // based on the imported labels, compute max ids
+    let maxLabelId = -1
+    let maxShapeId = -1
+    // max order is the total number of labels
+    let maxOrder = 0
+
     // convert from export format to internal format
     const itemsForTask: ItemType[] = []
     for (let itemInd = 0; itemInd < itemsExport.length; itemInd += 1) {
@@ -338,12 +361,26 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
       const newItem = convertItemToImport(
         itemsExport[itemInd], itemInd, itemId,
         attributeNameMap, attributeValueMap, categoryNameMap)
+
+      maxLabelId = getMax(Object.keys(newItem.labels), maxLabelId)
+      maxShapeId = getMax(Object.keys(newItem.shapes), maxShapeId)
+      maxOrder += Object.keys(newItem.labels).length
+
       itemsForTask.push(newItem)
+    }
+
+    // update the num labels/shapes based on imports
+    const taskStatus: TaskStatus = {
+      maxLabelId,
+      maxShapeId,
+      maxOrder,
+      maxTrackId: -1
     }
 
     const partialTask: Partial<TaskType> = {
       config,
-      items: itemsForTask
+      items: itemsForTask,
+      status: taskStatus
     }
     const task = makeTask(partialTask)
     tasks.push(task)
