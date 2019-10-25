@@ -170,6 +170,13 @@ export abstract class Label3D {
     this._labelId = this._label.id
     this._trackId = this._label.track
     this._color = getColorById(this._labelId, this._trackId)
+    const select = state.user.select
+    if (this._label.item in select.labels &&
+        select.labels[this._label.item].includes(labelId)) {
+      this.setSelected(true)
+    } else {
+      this.setSelected(false)
+    }
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }
 }

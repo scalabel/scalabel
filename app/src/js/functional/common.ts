@@ -180,8 +180,10 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
   if (action.sessionId === session.id) {
     for (const label of newLabels) {
       if (label.item === user.select.item) {
+        const selectedLabels: {[index: number]: number[]} = {}
+        selectedLabels[user.select.item] = [label.id]
         user = updateUserSelect(user, {
-          labels: [label.id],
+          labels: selectedLabels,
           category: label.category[0],
           attributes: label.attributes
         })
@@ -243,7 +245,9 @@ export function addTrack (state: State, action: types.AddTrackAction): State {
   if (action.sessionId === state.session.id) {
     for (const l of newLabels) {
       if (l.item === user.select.item) {
-        user = updateUserSelect(user, { labels: [l.id] })
+        const selectedLabels: {[index: number]: number[]} = {}
+        selectedLabels[user.select.item] = [l.id]
+        user = updateUserSelect(user, { labels: selectedLabels })
         break
       }
     }
@@ -331,19 +335,13 @@ function changeShapesInItems (
  */
 export function changeShapes (
     state: State, action: types.ChangeShapesAction): State {
-  let { task, user } = state
+  let task = state.task
+  const user = state.user
   const shapeIds = action.shapeIds
   const newItems = changeShapesInItems(
     pickArray(task.items, action.itemIndices), shapeIds, action.shapes)
   const items = assignToArray(task.items, newItems, action.itemIndices)
   // select the label of the first shape on the current item
-  if (action.sessionId === state.session.id) {
-    const index = _.find(action.itemIndices, (v) => v === user.select.item)
-    if (index !== undefined) {
-      const labelId = items[index].shapes[shapeIds[0][0]].label[0]
-      user = updateUserSelect(user, { labels: [labelId] })
-    }
-  }
   task = updateObject(task, { items })
   return { ...state, task, user }
 }
@@ -492,6 +490,12 @@ export function linkLabels (
 export function changeSelect (
     state: State, action: types.ChangeSelectAction): State {
   const newSelect = updateObject(state.user.select, action.select)
+  for (const key of Object.keys(newSelect.labels)) {
+    const index = Number(key)
+    if (newSelect.labels[index].length === 0) {
+      delete newSelect.labels[index]
+    }
+  }
   if (newSelect.item < 0 || newSelect.item >= state.task.items.length) {
     newSelect.item = state.user.select.item
   }
@@ -636,13 +640,20 @@ export function deleteLabels (
       deletedIds.add(labelId)
     }
   }
-  const newIds = []
-  for (const labelId of user.select.labels) {
-    if (!deletedIds.has(labelId)) {
-      newIds.push(labelId)
+  const newSelectedLabels: {[index: number]: number[]} = []
+  for (const key of Object.keys(user.select.labels)) {
+    const index = Number(key)
+    const newSelectedIds = []
+    for (const labelId of user.select.labels[index]) {
+      if (!deletedIds.has(labelId)) {
+        newSelectedIds.push(labelId)
+      }
+    }
+    if (newSelectedIds.length > 0) {
+      newSelectedLabels[index] = newSelectedIds
     }
   }
-  user = updateUserSelect(user, { labels: newIds })
+  user = updateUserSelect(user, { labels: newSelectedLabels })
   return updateObject(state, { user, task })
 }
 

@@ -105,8 +105,8 @@ type UserData struct {
 // User's currently selected data
 type SelectedData struct {
 	Item       int           `json:"item" yaml:"item"`
-	Labels     []int         `json:"labels" yaml:"labels"`
-	Shapes     []int         `json:"shapes" yaml:"shapes"`
+	Labels     map[int][]int `json:"labels" yaml:"labels"`
+	Shapes     map[int]int   `json:"shapes" yaml:"shapes"`
 	Category   int           `json:"category" yaml:"category"`
 	Attributes map[int][]int `json:"attributes" yaml:"attributes"`
 	LabelType  int           `json:"labelType" yaml:"labelType"`
@@ -395,7 +395,7 @@ func assignmentToSat(assignment *Assignment) Sat {
 
 	selectedData := SelectedData{
 		Item:       0,
-		Labels:     []int{},
+		Labels:     map[int][]int{},
 		Attributes: attributes,
 	}
 

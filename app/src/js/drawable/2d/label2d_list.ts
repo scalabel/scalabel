@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { changeSelect, linkLabels } from '../../action/common'
+import { selectLabel } from '../../action/select'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
 import { Key, LabelTypeName } from '../../common/types'
@@ -129,8 +130,11 @@ export class Label2DList {
       (l: Label2D, index: number) => { l.index = index })
     this._highlightedLabel = null
     this._selectedLabels = []
-    if (state.user.select.labels.length > 0) {
-      for (const id of state.user.select.labels) {
+    const select = state.user.select
+    const selectedLabelItems = Object.keys(select.labels)
+    for (const key of selectedLabelItems) {
+      const index = Number(key)
+      for (const id of select.labels[index]) {
         if (id in this._labels) {
           this._selectedLabels.push(this._labels[id])
         }
@@ -171,12 +175,17 @@ export class Label2DList {
           Session.dispatch(changeSelect(
             { category: undefined,
               attributes: undefined,
-              labels: selectedLabelIdArray }))
+              labels: {}
+            })
+          )
         } else {
           Session.dispatch(changeSelect(
-            { category: this._selectedLabels[0].category[0],
+            {
+              category: this._selectedLabels[0].category[0],
               attributes: this._selectedLabels[0].attributes,
-              labels: selectedLabelIdArray }))
+              labels: { [this._state.user.select.item]: selectedLabelIdArray }
+            })
+          )
         }
       }
       return true
@@ -193,10 +202,13 @@ export class Label2DList {
       if (labelIndex >= 0) {
         this._selectedLabels.push(this._labelList[labelIndex])
         this._selectedLabels[0].setSelected(true, handleIndex)
-        Session.dispatch(changeSelect(
-          { category: this._selectedLabels[0].category[0],
-            attributes: this._selectedLabels[0].attributes,
-            labels: [this._selectedLabels[0].labelId] }))
+        Session.dispatch(selectLabel(
+          this._state,
+          this._state.user.select.item,
+          this._selectedLabels[0].labelId,
+          this._selectedLabels[0].category[0],
+          this._selectedLabels[0].attributes
+        ))
       } else {
         const state = this._state
         const currentPolicyType =

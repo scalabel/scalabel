@@ -143,6 +143,26 @@ export function changeLabelProps (
 }
 
 /**
+ * Change the properties of the labels
+ * @param {number} itemIndex
+ * @param {number} labelId
+ * @param {Partial<LabelType>}props
+ * @return {ChangeLabelPropsAction}
+ */
+export function changeLabelsProps (
+  itemIndices: number[], labelIds: number[][],
+  props: Array<Array<Partial<LabelType>>>
+): types.ChangeLabelsAction {
+  return {
+    type: types.CHANGE_LABELS,
+    sessionId: Session.id,
+    itemIndices,
+    labelIds,
+    props
+  }
+}
+
+/**
  * Link two labels
  * @param {number} itemIndex
  * @param {[]number} labelIds labels to link
@@ -158,6 +178,18 @@ export function linkLabels (
 }
 
 /**
+ * Merge tracks
+ * @param trackIds
+ */
+export function mergeTracks (trackIds: number[]): types.MergeTrackAction {
+  return {
+    type: types.MERGE_TRACKS,
+    sessionId: Session.id,
+    trackIds
+  }
+}
+
+/**
  * Delete given label
  * @param {number} itemIndex
  * @param {number} labelId
@@ -165,11 +197,22 @@ export function linkLabels (
  */
 export function deleteLabel (
     itemIndex: number, labelId: number): types.DeleteLabelsAction {
+  return deleteLabels([itemIndex], [[labelId]])
+}
+
+/**
+ * Delete all the input labels
+ * @param {number[]} itemIndices
+ * @param {number[][]} labelIds
+ * @return {types.DeleteLabelsAction}
+ */
+export function deleteLabels (
+  itemIndices: number[], labelIds: number[][]): types.DeleteLabelsAction {
   return {
     type: types.DELETE_LABELS,
     sessionId: Session.id,
-    itemIndices: [itemIndex],
-    labelIds: [[labelId]]
+    itemIndices,
+    labelIds
   }
 }
 

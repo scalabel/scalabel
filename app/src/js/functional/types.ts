@@ -243,10 +243,10 @@ export interface TaskType {
 export interface Select {
   /** Currently viewed item index */
   item: number
-  /** Currently selected label ID */
-  labels: number[]
-  /** Currently selected shape ID */
-  shapes: number[]
+  /** Map between item indices and label id's */
+  labels: {[index: number]: number[]}
+  /** Map between label id's and shape id's */
+  shapes: {[index: number]: number}
   /** selected category */
   category: number
   /** selected attributes */

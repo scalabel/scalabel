@@ -163,7 +163,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
   const labelId = Number(Object.keys(state.task.items[0].labels)[0])
-  Session.dispatch(selectLabel(labelId))
+  Session.dispatch(selectLabel(state, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
   label3dList.onKeyDown(tEvent)
@@ -248,7 +248,7 @@ test('Move axis aligned 3d bbox along all axes', () => {
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
   const labelId = Number(Object.keys(state.task.items[0].labels)[0])
-  Session.dispatch(selectLabel(labelId))
+  Session.dispatch(selectLabel(state, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
   label3dList.onKeyDown(tEvent)
@@ -358,7 +358,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
   const labelId = Number(Object.keys(state.task.items[0].labels)[0])
-  Session.dispatch(selectLabel(labelId))
+  Session.dispatch(selectLabel(state, 0, labelId))
 
   const sEvent = new KeyboardEvent('keydown', { key: 's' })
   label3dList.onKeyDown(sEvent)
@@ -481,7 +481,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       expect(_.size(state.task.items[0].labels)).toEqual(1)
 
       const labelId = Number(Object.keys(state.task.items[0].labels)[0])
-      Session.dispatch(selectLabel(labelId))
+      Session.dispatch(selectLabel(state, 0, labelId))
 
       const rEvent = new KeyboardEvent('keydown', { key: 'r' })
       label3dList.onKeyDown(rEvent)

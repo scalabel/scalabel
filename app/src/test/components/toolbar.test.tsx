@@ -86,14 +86,21 @@ describe('test Delete', () => {
   test('Delete by keyboard', () => {
     Session.devMode = false
     initStore(testJson)
+    const toolbarRef: React.Ref<ToolBar> = React.createRef()
     render(
     <ToolBar
+      ref={toolbarRef}
       categories={null}
       attributes={[]}
       itemType={'itemType'}
       labelType={'labelType'}
       />
     )
+    expect(toolbarRef.current).not.toBeNull()
+    expect(toolbarRef.current).not.toBeUndefined()
+    if (toolbarRef.current) {
+      toolbarRef.current.componentDidMount()
+    }
     for (let itemIndex = 0; itemIndex < 3; itemIndex += 1) {
       Session.dispatch(action.goToItem(itemIndex))
       const label = makeLabel({ item: itemIndex })
@@ -106,7 +113,8 @@ describe('test Delete', () => {
       let item = Session.getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(3)
       expect(secondLabelId in item.labels).toBe(true)
-      Session.dispatch(selectLabel(secondLabelId))
+      Session.dispatch(selectLabel(
+        Session.getState(), itemIndex, secondLabelId))
       fireEvent.keyDown(document, { key: 'Backspace' })
       item = Session.getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(2)

@@ -155,16 +155,14 @@ export class Label3DList {
       this._selectedLabel.detachControl(this._control)
     }
     this._selectedLabel = null
-    if (state.user.select.labels.length === 1 &&
-        (state.user.select.labels[0] in this._labels)) {
-      this._selectedLabel = this._labels[state.user.select.labels[0]]
-      this._selectedLabel.setSelected(true)
-      this._selectedLabel.attachControl(this._control)
-    } else if (state.user.select.labels.length > 1) {
-      for (const labelId of state.user.select.labels) {
-        if (labelId in this._labels) {
-          this._labels[labelId].setSelected(true)
-        }
+
+    const select = state.user.select
+    if (select.item in select.labels) {
+      const selectedLabelIds = select.labels[select.item]
+      if (selectedLabelIds.length === 1 &&
+          selectedLabelIds[0] in this._labels) {
+        this._selectedLabel = this._labels[select.labels[select.item][0]]
+        this._selectedLabel.attachControl(this._control)
       }
     }
   }
@@ -286,9 +284,9 @@ export class Label3DList {
    * @returns true if consumed, false otherwise
    */
   public onKeyDown (e: KeyboardEvent): boolean {
+    const state = this._state
     switch (e.key) {
       case Key.SPACE:
-        const state = this._state
         const currentPolicyType =
           state.task.config.policyTypes[state.user.select.policyType]
         const newTrack = new Track()
@@ -303,15 +301,19 @@ export class Label3DList {
         return true
       case Key.ESCAPE:
       case Key.ENTER:
-        Session.dispatch(selectLabel(-1))
+        Session.dispatch(selectLabel(state, -1, -1))
         return true
       case Key.P_UP:
       case Key.P_LOW:
         if (this._plane) {
           if (this._selectedLabel === this._plane) {
-            Session.dispatch(selectLabel(-1))
+            Session.dispatch(selectLabel(state, -1, -1))
           } else {
-            Session.dispatch(selectLabel(this._plane.labelId))
+            Session.dispatch(selectLabel(
+              state,
+              state.user.select.item,
+              this._plane.labelId
+            ))
           }
           return true
         }
@@ -386,14 +388,17 @@ export class Label3DList {
       if ((this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) &&
           this._highlightedLabel !== this._selectedLabel) {
         Session.dispatch(selectLabel(
+          this._state,
+          this._state.user.select.item,
           this._highlightedLabel.labelId,
           this._highlightedLabel.category[0],
           this._highlightedLabel.attributes,
           true
-        )
-        )
+        ))
       } else {
         Session.dispatch(selectLabel(
+          this._state,
+          this._state.user.select.item,
           this._highlightedLabel.labelId,
           this._highlightedLabel.category[0],
           this._highlightedLabel.attributes

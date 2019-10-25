@@ -674,9 +674,9 @@ test('2d polygons multi-select and linking labels', () => {
 
   // select label 2 and 0
   state = Session.getState()
-  expect(state.user.select.labels.length).toEqual(2)
-  expect(state.user.select.labels[0]).toEqual(2)
-  expect(state.user.select.labels[1]).toEqual(0)
+  expect(state.user.select.labels[0].length).toEqual(2)
+  expect(state.user.select.labels[0][0]).toEqual(2)
+  expect(state.user.select.labels[0][1]).toEqual(0)
   expect(label2dList.selectedLabels.length).toEqual(2)
   expect(label2dList.selectedLabels[0].labelId).toEqual(2)
   expect(label2dList.selectedLabels[1].labelId).toEqual(0)
@@ -687,8 +687,8 @@ test('2d polygons multi-select and linking labels', () => {
 
   // select label 1
   state = Session.getState()
-  expect(state.user.select.labels.length).toEqual(1)
-  expect(state.user.select.labels[0]).toEqual(1)
+  expect(state.user.select.labels[0].length).toEqual(1)
+  expect(state.user.select.labels[0][0]).toEqual(1)
   expect(label2dList.selectedLabels.length).toEqual(1)
   expect(label2dList.selectedLabels[0].labelId).toEqual(1)
 
@@ -703,7 +703,7 @@ test('2d polygons multi-select and linking labels', () => {
 
   // select label 1, 2, 3
   state = Session.getState()
-  expect(state.user.select.labels.length).toEqual(3)
+  expect(state.user.select.labels[0].length).toEqual(3)
   expect(label2dList.selectedLabels.length).toEqual(3)
 
   label2dList.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
@@ -714,7 +714,7 @@ test('2d polygons multi-select and linking labels', () => {
 
   // select label 1, 2
   state = Session.getState()
-  expect(state.user.select.labels.length).toEqual(2)
+  expect(state.user.select.labels[0].length).toEqual(2)
   expect(label2dList.selectedLabels.length).toEqual(2)
 
   label2dList.onKeyDown(new KeyboardEvent('keydown', { key: 'l' }))
