@@ -177,8 +177,11 @@ export abstract class Label2D {
     const self = this
     ctx.save()
     const config = Session.getState().task.config
-    const category = self._label ?
-    config.categories[self._label.category[0]] : ''
+    const category = (
+      self._label &&
+      self._label.category[0] < config.categories.length &&
+      self._label.category[0] >= 0
+    ) ? config.categories[self._label.category[0]] : ''
     const attributes = self._label && self._label.attributes ?
                        self._label.attributes : {}
     const words = category.split(' ')
