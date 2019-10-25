@@ -63,6 +63,7 @@ export function initSession (containerName: string): void {
     }
   })
   xhr.open('POST', './postLoadAssignmentV2', true)
+  xhr.setRequestHeader('Content-Type', 'application/json')
   xhr.send(request)
 
   setListeners()

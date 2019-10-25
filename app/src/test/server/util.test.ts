@@ -53,12 +53,12 @@ describe('test general utility methods', () => {
     // img item => label2d handler
     let handler = util.getHandlerUrl(
       ItemTypeName.IMAGE, LabelTypeName.BOX_3D)
-    expect(handler).toBe(HandlerUrl.LABEL_2D)
+    expect(handler).toBe(HandlerUrl.LABEL)
 
     // video item + box2d label => 2d handler
     handler = util.getHandlerUrl(
       ItemTypeName.VIDEO, LabelTypeName.BOX_2D)
-    expect(handler).toBe(HandlerUrl.LABEL_2D)
+    expect(handler).toBe(HandlerUrl.LABEL)
 
     // video item + other label => invalid handler
     handler = util.getHandlerUrl(
@@ -68,10 +68,10 @@ describe('test general utility methods', () => {
     // point cloud item + box3d label => 3d handler
     handler = util.getHandlerUrl(
       ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D)
-    expect(handler).toBe(HandlerUrl.LABEL_3D)
+    expect(handler).toBe(HandlerUrl.LABEL)
     handler = util.getHandlerUrl(
       ItemTypeName.POINT_CLOUD_TRACKING, LabelTypeName.BOX_3D)
-    expect(handler).toBe(HandlerUrl.LABEL_3D)
+    expect(handler).toBe(HandlerUrl.LABEL)
 
     // point cloud item + other label => invalid handler
     handler = util.getHandlerUrl(

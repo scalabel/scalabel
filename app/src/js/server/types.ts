@@ -98,7 +98,8 @@ export const enum Endpoint {
   POST_PROJECT = '/postProject',
   GET_PROJECT_NAMES = '/postProjectNames',
   EXPORT = '/export',
-  DASHBOARD = '/postDashboardContents'
+  DASHBOARD = '/postDashboardContents',
+  LOAD = '/postLoadAssignmentV2'
 }
 
 /* form field names */

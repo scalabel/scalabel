@@ -159,16 +159,16 @@ export function formFileExists (file: File | undefined): boolean {
 export function getHandlerUrl (itemType: string, labelType: string): string {
   switch (itemType) {
     case ItemTypeName.IMAGE:
-      return HandlerUrl.LABEL_2D
+      return HandlerUrl.LABEL
     case ItemTypeName.VIDEO:
       if (labelType === LabelTypeName.BOX_2D) {
-        return HandlerUrl.LABEL_2D
+        return HandlerUrl.LABEL
       }
       return HandlerUrl.INVALID
     case ItemTypeName.POINT_CLOUD:
     case ItemTypeName.POINT_CLOUD_TRACKING:
       if (labelType === LabelTypeName.BOX_3D) {
-        return HandlerUrl.LABEL_3D
+        return HandlerUrl.LABEL
       }
       return HandlerUrl.INVALID
     default:

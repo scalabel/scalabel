@@ -21,8 +21,7 @@ export enum ItemTypeName {
 
 export enum HandlerUrl {
   INVALID = 'NO_VALID_HANDLER',
-  LABEL_2D = 'label2d',
-  LABEL_3D = 'label3d'
+  LABEL = 'label'
 }
 
 export enum BundleFile {
