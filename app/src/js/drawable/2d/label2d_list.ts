@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { changeSelect, linkLabels } from '../../action/common'
 import { selectLabel } from '../../action/select'
 import Session from '../../common/session'
@@ -19,15 +18,14 @@ import { Tag2D } from './tag2d'
  * Make a new drawable label based on the label type
  * @param {string} labelType: type of the new label
  */
-function makeDrawableLabel (labelType: string): Label2D {
-  if (labelType === LabelTypeName.BOX_2D) {
-    return new Box2D()
-  } else if (labelType === LabelTypeName.TAG) {
-    return new Tag2D()
-  } else if (labelType === LabelTypeName.POLYGON_2D) {
-    return new Polygon2D()
-  } else {
-    throw new Error(sprintf('Undefined label type %s', labelType))
+function makeDrawableLabel (labelType: string): Label2D | undefined {
+  switch (labelType) {
+    case LabelTypeName.BOX_2D:
+      return new Box2D()
+    case LabelTypeName.TAG:
+      return new Tag2D()
+    case LabelTypeName.POLYGON_2D:
+      return new Polygon2D()
   }
 }
 
@@ -116,9 +114,11 @@ export class Label2DList {
     // update drawable label values
     _.forEach(item.labels, (label, key) => {
       const labelId = Number(key)
-      if (!(labelId in self._labels) &&
-        item.labels[labelId].shapes.length > 0) {
-        self._labels[labelId] = makeDrawableLabel(label.type)
+      if (!(labelId in self._labels)) {
+        const newLabel = makeDrawableLabel(label.type)
+        if (newLabel) {
+          self._labels[labelId] = newLabel
+        }
       }
       if (labelId in self._labels) {
         self._labels[labelId].updateState(state, itemIndex, labelId)
@@ -157,7 +157,7 @@ export class Label2DList {
       this._highlightedLabel = null
     }
 
-    if (this.isKeyDown(Key.META)) {
+    if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
       // multi select
       if (labelIndex >= 0) {
         const label = this._labelList[labelIndex]
@@ -221,9 +221,11 @@ export class Label2DList {
 
         const label = makeDrawableLabel(
           state.task.config.labelTypes[state.user.select.labelType])
-        label.initTemp(state, coord)
-        this._selectedLabels.push(label)
-        this._labelList.push(label)
+        if (label) {
+          label.initTemp(state, coord)
+          this._selectedLabels.push(label)
+          this._labelList.push(label)
+        }
       }
     }
     this._selectedLabels[0].onMouseDown(coord)

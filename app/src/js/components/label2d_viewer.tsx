@@ -199,13 +199,11 @@ export class Label2dViewer extends Viewer<Props> {
       return
     }
     // Control + click for dragging
-    if (!this.isKeyDown('Control')) {
       // get mouse position in image coordinates
-      const mousePos = this.getMousePos(e)
-      const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
-      if (this._labels.onMouseDown(mousePos, labelIndex, handleIndex)) {
-        e.stopPropagation()
-      }
+    const mousePos = this.getMousePos(e)
+    const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
+    if (this._labels.onMouseDown(mousePos, labelIndex, handleIndex)) {
+      e.stopPropagation()
     }
     this.redraw()
   }

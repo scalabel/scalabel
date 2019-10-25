@@ -5,6 +5,7 @@
  */
 import _ from 'lodash'
 import * as types from '../action/types'
+import { LabelTypeName } from '../common/types'
 import { makeIndexedShape, makeTrack } from './states'
 import {
   IndexedShapeType, ItemType, LabelType, Select, ShapeType, State,
@@ -443,6 +444,7 @@ export function linkLabels (
   newLabel.parent = -1
   newLabel.shapes = []
   newLabel.children = children
+  newLabel.type = LabelTypeName.EMPTY
   state = addLabel(state, action.sessionId, action.itemIndex, newLabel)
 
   // assign the label properties
