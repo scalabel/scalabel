@@ -114,15 +114,15 @@ function convertLabelToImport (
   let labelType = LabelTypeName.EMPTY
   let shapeData = null
 
-  if (label.box2d !== null) {
+  if (label.box2d) {
     shapeType = ShapeTypeName.RECT
     labelType = LabelTypeName.BOX_2D
     shapeData = label.box2d
-  } else if (label.poly2d !== null) {
+  } else if (label.poly2d) {
     shapeType = ShapeTypeName.POLYGON_2D
     labelType = LabelTypeName.POLYGON_2D
     shapeData = label.poly2d
-  } else if (label.box3d !== null) {
+  } else if (label.box3d) {
     shapeType = ShapeTypeName.CUBE
     labelType = LabelTypeName.BOX_3D
     shapeData = label.box3d
