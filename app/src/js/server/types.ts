@@ -33,6 +33,8 @@ export interface Env {
   sync: boolean
   /** Hostname for synchronization socket */
   syncHost: string
+  /** whether to save automatically */
+  autosave: boolean
 }
 
 /**
@@ -80,11 +82,6 @@ export const enum EventName {
   DISCONNECT = 'disconnect'
 }
 
-/* constant error codes used */
-export const enum ErrorCode {
-  NO_FILE = 'ENOENT'
-}
-
 /* database types for storage */
 export const enum DatabaseType {
   S3 = 's3',
@@ -98,8 +95,7 @@ export const enum Endpoint {
   POST_PROJECT = '/postProject',
   GET_PROJECT_NAMES = '/postProjectNames',
   EXPORT = '/export',
-  DASHBOARD = '/postDashboardContents',
-  LOAD = '/postLoadAssignmentV2'
+  DASHBOARD = '/postDashboardContents'
 }
 
 /* form field names */
@@ -125,7 +121,8 @@ export const defaultEnv: Env = {
   database: 'local',
   userManagement: false,
   sync: false,
-  syncHost: 'http://localhost'
+  syncHost: 'http://localhost',
+  autosave: true
 }
 
 /* default categories when file is missing and label is box2D or box3D */

@@ -31,7 +31,6 @@ function startHTTPServer (app: Application) {
 
   app.post(Endpoint.POST_PROJECT, formidable(), listeners.PostProjectHandler)
   app.post(Endpoint.DASHBOARD, bodyParser.json(), listeners.DashboardHandler)
-  app.post(Endpoint.LOAD, bodyParser.json(), listeners.LoadHandler)
 }
 
 /**

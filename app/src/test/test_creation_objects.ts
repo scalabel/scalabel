@@ -186,7 +186,8 @@ export const sampleProjectImage: Project = {
     taskId: '',
     submitTime: -1,
     demoMode: false,
-    submitted: false
+    submitted: false,
+    autosave: true
   }
 }
 
@@ -208,7 +209,8 @@ export const sampleProjectVideo: Project = {
     taskId: '',
     submitTime: -1,
     demoMode: true,
-    submitted: false
+    submitted: false,
+    autosave: true
   }
 }
 
@@ -230,7 +232,8 @@ export const sampleProjectAutolabel: Project = {
     taskId: '',
     submitTime: -1,
     demoMode: false,
-    submitted: false
+    submitted: false,
+    autosave: true
   }
 }
 
@@ -252,7 +255,8 @@ export const sampleTasksImage: TaskType[] = [
       taskId: '000000',
       submitTime: -1,
       demoMode: false,
-      submitted: false
+      submitted: false,
+      autosave: true
     },
     status: {
       maxLabelId: -1,
@@ -321,7 +325,8 @@ export const sampleTasksImage: TaskType[] = [
       taskId: '000001',
       submitTime: -1,
       demoMode: false,
-      submitted: false
+      submitted: false,
+      autosave: true
     },
     status: {
       maxLabelId: -1,

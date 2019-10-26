@@ -1,23 +1,28 @@
 import React from 'react'
 import Path from '../common/path'
 import Session from '../common/session'
+import Synchronizer from '../common/synchronizer'
 import LabelLayout from './label_layout'
 import TitleBar from './title_bar'
 // $FlowFixMe
 import { ToolBar } from './toolbar'
 import ViewerContainer from './viewer_container'
 
+interface Props {
+  /** global synchronizer for backend */
+  synchronizer: Synchronizer
+}
+
 /**
  * Manage the whole window
  */
-export class Window extends React.Component {
+export class Window extends React.Component<Props> {
   /**
    * Window constructor
-   * @param {object} props: name of the container in HTML to
-   * place this window
+   * @param {Props} props
    */
 
-  constructor (props: object) {
+  constructor (props: Props) {
     super(props)
   }
 
@@ -36,6 +41,8 @@ export class Window extends React.Component {
             title={config.pageTitle}
             instructionLink={state.task.config.instructionPage}
             dashboardLink={Path.vendorDashboard()}
+            autosave={config.autosave}
+            synchronizer={this.props.synchronizer}
         />
     )
 

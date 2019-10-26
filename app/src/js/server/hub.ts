@@ -1,18 +1,17 @@
-import * as fs from 'fs-extra'
 import { Store } from 'redux'
 import * as socketio from 'socket.io'
-import { sprintf } from 'sprintf-js'
-import * as uuid from 'uuid'
+import * as uuid4 from 'uuid/v4'
 import * as types from '../action/types'
 import { configureStore } from '../common/configure_store'
-import { State } from '../functional/types'
+import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
+import { makeState } from '../functional/states'
+import { State, TaskType } from '../functional/types'
 import * as path from './path'
 import Session from './server_session'
-import { ErrorCode, EventName } from './types'
+import { EventName } from './types'
+import { getSavedKey, getTaskKey,
+  index2str, loadSavedState} from './util'
 
-/* TODO: convert these handlers to use the new backend functionality
- * including global storage
- */
 /**
  * Starts socket.io handlers for saving, loading, and synchronization
  */
@@ -21,47 +20,54 @@ export function startSocketServer (io: socketio.Server) {
   // maintain a store for each task
   const stores: { [key: string]: Store } = {}
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
-    socket.on(EventName.REGISTER, (state: State) => {
-      const taskId = state.task.config.taskId
-      const projectName = state.task.config.projectName
+    socket.on(EventName.REGISTER, async (rawData: string) => {
+      const data = JSON.parse(rawData)
+      const projectName = data.project
 
-      // TODO: add session id to state (instead of getting it from go backend)
-      const sessId = uuid()
+      const taskIndex = data.index
+      const taskId = index2str(taskIndex)
 
-      const savePath = path.getPath(env.data, projectName, taskId)
-      const room = path.roomName(projectName, taskId, sessId, env.sync)
-
-      // If there's no store in memory, try to load it
-      if (!stores[room]) {
-        /* frontend data is used to initialize a valid store
-          but the non-task data is arbitrary */
-        try {
-          // Try to load task state from file system
-          const fileNames = fs.readdirSync(savePath)
-          // Get most recently saved file
-          const fileName = fileNames[fileNames.length - 1]
-          const file = sprintf('%s/%s', savePath, fileName)
-          const rawContent = fs.readFileSync(file, 'utf8')
-          const content = JSON.parse(rawContent)
-          // Combine loaded task state with other state sent from frontend
-          state.task = content
-        } catch (e) {
-          /* Don't crash if file does not exist; this just means it has not
-            been initialized yet */
-          if (e.code !== ErrorCode.NO_FILE) {
-            throw(e)
-          }
-        }
-        stores[room] = configureStore(state)
-        // automatically save task data on updates
-        stores[room].subscribe(() => {
-          const content = JSON.stringify(stores[room].getState().present.task)
-          const file = path.getFile(savePath)
-          fs.writeFileSync(file, content)
-        })
-      } else {
-        state.task = stores[room].getState().present.task
+      let sessId = data.sessId
+      // keep session id if it exists, i.e. if it is a reconnection
+      if (!sessId) {
+        // new session on new load
+        sessId = uuid4()
       }
+
+      let room = path.roomName(projectName, taskId, env.sync)
+
+      let state: State
+
+      // if sync is on, try to load from memory
+      if (env.sync && room in stores) {
+        // try load from memory
+        state = stores[room].getState().present
+      } else {
+        // load from storage
+        try {
+          // first, attempt loading previous submission
+          state = await loadSavedState(projectName, taskId)
+        } catch {
+          // if no submissions exist, load from task
+          state = await loadStateFromTask(projectName, taskIndex)
+        }
+
+        // update room with loaded sessId
+        room = path.roomName(projectName, taskId,
+          env.sync, sessId)
+
+        // update memory with new state
+        stores[room] = configureStore(state)
+
+        // automatically save task data on updates
+        stores[room].subscribe(async () => {
+          const content = JSON.stringify(stores[room].getState().present)
+          const filePath = path.getFileKey(getSavedKey(projectName, taskId))
+          await Session.getStorage().save(filePath, content)
+        })
+      }
+      state.session.id = sessId
+      state.task.config.autosave = env.autosave
 
       // Connect socket to others in the same room
       socket.join(room)
@@ -76,11 +82,8 @@ export function startSocketServer (io: socketio.Server) {
       const sessId = data.sessId
       const actionList = data.actions
 
-      const savePath = path.getPath(env.data, projectName, taskId)
-      const room = path.roomName(projectName, taskId, sessId, env.sync)
+      const room = path.roomName(projectName, taskId, env.sync, sessId)
 
-      // Make sure file exists before saving to it
-      fs.ensureDirSync(savePath)
       // For each action, update the backend store and broadcast
       for (const action of actionList) {
         action.timestamp = Date.now()
@@ -94,4 +97,39 @@ export function startSocketServer (io: socketio.Server) {
       }
     })
   })
+}
+
+/**
+ * Loads the state from task.json (created at import)
+ * Used for first load
+ */
+async function loadStateFromTask (
+  projectName: string,
+  taskIndex: number): Promise<State> {
+  const key = getTaskKey(projectName, index2str(taskIndex))
+  const fields = await Session.getStorage().load(key)
+  const task = JSON.parse(fields) as TaskType
+  const state = makeState({ task })
+
+  state.session.items = state.task.items.map((_i) => ({ loaded: false }))
+
+  switch (state.task.config.itemType) {
+    case ItemTypeName.IMAGE:
+    case ItemTypeName.VIDEO:
+      if (state.task.config.labelTypes.length === 1 &&
+          state.task.config.labelTypes[0] === LabelTypeName.BOX_2D) {
+        state.task.config.policyTypes =
+          [TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D]
+      }
+      break
+    case ItemTypeName.POINT_CLOUD:
+    case ItemTypeName.POINT_CLOUD_TRACKING:
+      if (state.task.config.labelTypes.length === 1 &&
+          state.task.config.labelTypes[0] === LabelTypeName.BOX_3D) {
+        state.task.config.policyTypes =
+          [TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D]
+      }
+      break
+  }
+  return state
 }

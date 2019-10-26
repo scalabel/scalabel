@@ -4,11 +4,8 @@ import {
   Response
 } from 'express'
 import { sprintf } from 'sprintf-js'
-import * as uuid4 from 'uuid/v4'
-import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { ItemExport } from '../functional/bdd_types'
-import { makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
 import {
   createProject, createTasks, parseFiles,
@@ -18,7 +15,8 @@ import { convertStateToExport } from './export'
 import { getExportName } from './path'
 import Session from './server_session'
 import * as types from './types'
-import { getExistingProjects, getProjectKey, getTaskKey, getTasksInProject, index2str, loadSavedState, logError, logInfo } from './util'
+import { getExistingProjects, getProjectKey,
+  getTasksInProject, loadSavedState, logError, logInfo } from './util'
 
 /**
  * Logs requests to static or dynamic files
@@ -69,10 +67,10 @@ export async function GetExportHandler (req: Request, res: Response) {
     const tasks = await getTasksInProject(projectName)
     let items: ItemExport[] = []
     // load the latest submission for each task to export
-    for (const task of tasks) {
-      await loadSavedState(projectName, task)
+    for (const [taskIndex, task] of tasks.entries()) {
+      await loadSavedState(projectName, task.config.taskId)
         .then((state: State) => {
-          items = items.concat(convertStateToExport(state))
+          items = items.concat(convertStateToExport(state, taskIndex))
         })
         .catch((err: Error) => {
           // if state submission is not found, use an empty item
@@ -84,7 +82,8 @@ export async function GetExportHandler (req: Request, res: Response) {
               videoName: '',
               timestamp: projectToLoad.config.submitTime,
               attributes: {},
-              index: itemToLoad.index,
+              // do not index relative to task index when exporting
+              index: itemToLoad.index + taskIndex * task.items.length,
               labels: []
             })
           }
@@ -197,59 +196,6 @@ export async function DashboardHandler (req: Request, res: Response) {
       }
 
       res.send(JSON.stringify(contents))
-    } catch (err) {
-      logError(err)
-      res.send(err.message)
-    }
-  }
-}
-
-/**
- * Handler for loading tasks
- * @param req
- * @param res
- */
-export async function LoadHandler (req: Request, res: Response) {
-  if (req.method !== 'POST') {
-    res.sendStatus(404)
-    res.end()
-    return
-  }
-
-  const body = req.body
-  if (body) {
-    try {
-      const name = body.task.projectOptions.name
-      const index = body.task.index
-      const key = getTaskKey(name, index2str(index))
-      const fields = await Session.getStorage().load(key)
-      const task = JSON.parse(fields) as TaskType
-      const state = makeState({ task })
-
-      state.session.items = state.task.items.map((_i) => ({ loaded: false }))
-
-      switch (state.task.config.itemType) {
-        case ItemTypeName.IMAGE:
-        case ItemTypeName.VIDEO:
-          if (state.task.config.labelTypes.length === 1 &&
-              state.task.config.labelTypes[0] === LabelTypeName.BOX_2D) {
-            state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D]
-          }
-          break
-        case ItemTypeName.POINT_CLOUD:
-        case ItemTypeName.POINT_CLOUD_TRACKING:
-          if (state.task.config.labelTypes.length === 1 &&
-              state.task.config.labelTypes[0] === LabelTypeName.BOX_3D) {
-            state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D]
-          }
-          break
-      }
-
-      state.session.id = uuid4()
-
-      res.send(JSON.stringify(state))
     } catch (err) {
       logError(err)
       res.send(err.message)

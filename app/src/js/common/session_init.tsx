@@ -28,45 +28,20 @@ import { makeTrackPolicy, Track } from './track'
  * @param {string} containerName - the name of the container
  */
 export function initSession (containerName: string): void {
-  // collect store from server
-  const xhr = new XMLHttpRequest()
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
-      const json = JSON.parse(xhr.response)
-      // Only enable synchronization if the backend says to
-      if (json.task.config.sync) {
-        // synchronizer callback handles json init
-        const syncAddress = json.task.config.syncAddress
-        const synchronizer = new Synchronizer(json, syncAddress,
-          (state: State) => {
-            initFromJson(state, synchronizer.middleware)
-            renderDom(containerName)
-          }
-        )
-      } else {
-        initFromJson(json)
-        renderDom(containerName)
-      }
-    }
-  }
-
   // get params from url path. These uniquely identify a SAT.
   const searchParams = new URLSearchParams(window.location.search)
   const taskIndex = parseInt(searchParams.get('task_index') as string, 10)
-  const projectName = searchParams.get('project_name')
-
-  // send the request to the back end
-  const request = JSON.stringify({
-    task: {
-      index: taskIndex,
-      projectOptions: { name: projectName }
-    }
-  })
-  xhr.open('POST', './postLoadAssignmentV2', true)
-  xhr.setRequestHeader('Content-Type', 'application/json')
-  xhr.send(request)
-
+  const projectName = searchParams.get('project_name') as string
   setListeners()
+
+  const synchronizer = new Synchronizer(
+    taskIndex,
+    projectName,
+    (state: State) => {
+      initFromJson(state, synchronizer.middleware)
+      renderDom(containerName, synchronizer)
+    }
+  )
 }
 
 /**
@@ -105,10 +80,10 @@ function updateTracks (): void {
  * Render the dom after data is laoded
  * @param containername: string name
  */
-function renderDom (containerName: string) {
+function renderDom (containerName: string, synchronizer: Synchronizer) {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
-      <Window />
+      <Window synchronizer={synchronizer} />
     </MuiThemeProvider>,
     document.getElementById(containerName))
 }
@@ -124,6 +99,7 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
   const state = Session.getState()
   Session.itemType = state.task.config.itemType
   Session.tracking = state.task.config.tracking
+  Session.autosave = state.task.config.autosave
 }
 
 /**

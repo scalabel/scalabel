@@ -1,11 +1,10 @@
 dist: xenial
 language: python
-language: go
+language: node_js 
 python:
   - "3.7"
-go:
-  - "1.12.6"
-go_import_path: github.com/ucbdrive/scalabel
+node_js:
+  - "12.11.1"
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y npm python3-pip python3-setuptools build-essential
@@ -14,7 +13,6 @@ before_install:
 install:
   - sudo pip3 install --upgrade pip
   - sudo pip3 install -r scripts/requirements.txt
-  - bash scripts/install_go_packages.sh
   - npm install canvas --build-from-source
   - npm install
 script:
@@ -23,9 +21,6 @@ script:
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
   - python3 scripts/lll.py -d server
-  - golangci-lint run server/http/... --print-issued-lines=false
-  - go build -i -o ./bin/scalabel ./server/http
-  - go test ./server/http -args --config ../../app/config/travis_config.yml
   - npm test
 branches:
   only:

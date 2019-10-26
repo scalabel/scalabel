@@ -2,11 +2,13 @@ import { withStyles } from '@material-ui/core'
 import * as fs from 'fs-extra'
 import { ChangeEvent } from 'react'
 import Session, { ConnectionStatus } from '../../js/common/session'
+import { initFromJson } from '../../js/common/session_init'
+import { Synchronizer } from '../../js/common/synchronizer'
 import CreateForm from '../../js/components/create_form'
-import { DashboardContents } from '../../js/components/dashboard'
+import { ItemExport } from '../../js/functional/bdd_types'
+import { State } from '../../js/functional/types'
+import { Endpoint, FormField } from '../../js/server/types'
 import { formStyle } from '../../js/styles/create'
-
-// TODO: Remove no any's when exporting is implemented with node
 
 export interface TestConfig {
   /** project name for current test */
@@ -15,8 +17,6 @@ export interface TestConfig {
   taskIndex: number
   /** path to examples folder */
   examplePath: string
-  /** export url */
-  exportUrl: string
   /** path to test directory */
   testDirPath: string
   /** example export path */
@@ -37,9 +37,8 @@ export let testConfig: TestConfig = {
   projectName: 'integration-test',
   taskIndex: 0,
   examplePath: './examples/',
-  exportUrl: './postExportV2?project_name=integration-test',
   testDirPath: './test_data/',
-  sampleExportPath : './app/src/test/',
+  sampleExportPath: './app/src/test/',
   sampleExportFilename: 'sample_export.json',
   itemListFilename: 'image_list.yml',
   categoriesFilename: 'categories.yml',
@@ -62,8 +61,10 @@ export function changeTestConfig (newConfig: Partial<TestConfig>) {
  * helper function to get example file from disc
  * @param filename
  */
-function getExampleFileFromDisc (filename: string,
-                                 examplePath = testConfig.examplePath): File {
+function getExampleFileFromDisc (
+  filename: string,
+  examplePath = testConfig.examplePath
+): File {
   const fileAsString = fs.readFileSync(examplePath + filename, {
     encoding: 'utf8'
   })
@@ -74,8 +75,12 @@ function getExampleFileFromDisc (filename: string,
  * gets true export data from disc
  */
 export function getExportFromDisc () {
-  return JSON.parse(fs.readFileSync(testConfig.sampleExportPath +
-    testConfig.sampleExportFilename, 'utf8'))
+  return JSON.parse(
+    fs.readFileSync(
+      testConfig.sampleExportPath + testConfig.sampleExportFilename,
+      'utf8'
+    )
+  )
 }
 
 /**
@@ -83,12 +88,14 @@ export function getExportFromDisc () {
  * @param data
  */
 // tslint:disable-next-line: no-any
-export function deepDeleteTimestamp (data: any[]) {
-  for (const entry of data) {
+export function deepDeleteTimestamp (data: ItemExport[]): any[] {
+  const copy = JSON.parse(JSON.stringify(data))
+  for (const entry of copy) {
     if (entry) {
       delete entry.timestamp
     }
   }
+  return copy
 }
 
 /**
@@ -122,73 +129,24 @@ export function deleteTestDir (): void {
 /**
  * init session for integration test
  */
-export async function projectInitSession (): Promise<{}> {
-  return new Promise<{}>((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(JSON.parse(xhr.response))
-        } else {
-          reject({
-            status: xhr.status,
-            statusText: xhr.statusText
-          })
-        }
-      } else {
-        return
+export async function projectInitSession (): Promise<Synchronizer> {
+  return new Promise<Synchronizer>((resolve) => {
+    const synchronizer = new Synchronizer(
+      testConfig.taskIndex,
+      testConfig.projectName,
+      (state: State) => {
+        initFromJson(state, synchronizer.middleware)
+        resolve(synchronizer)
       }
-    }
-
-    // send the request to the back end
-    const request = JSON.stringify({
-      task: {
-        index: testConfig.taskIndex,
-        projectOptions: { name: testConfig.projectName }
-      }
-    })
-    xhr.open('POST', './postLoadAssignmentV2', true)
-    xhr.send(request)
-  })
-}
-
-/**
- * init dashboard for integration test
- */
-export async function projectInitDashboard (): Promise<DashboardContents> {
-  return new Promise<DashboardContents>((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(JSON.parse(xhr.response) as DashboardContents)
-        } else {
-          reject({
-            status: xhr.status,
-            statusText: xhr.statusText
-          })
-        }
-      } else {
-        return
-      }
-    }
-
-    // send the request to the back end
-    const request = JSON.stringify({
-      name: testConfig.projectName
-    })
-    xhr.open('POST', './postDashboardContents', true)
-    xhr.send(request)
+    )
   })
 }
 
 /**
  * gets exported annotations as a string
  */
-// tslint:disable-next-line: no-any
-export async function getExport (): Promise<any[]> {
-  // tslint:disable-next-line: no-any
-  return new Promise<any[]>((resolve, reject) => {
+export async function getExport (): Promise<ItemExport[]> {
+  return new Promise<ItemExport[]>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
@@ -204,7 +162,8 @@ export async function getExport (): Promise<any[]> {
         return
       }
     }
-    xhr.open('GET', testConfig.exportUrl)
+    xhr.open('GET', Endpoint.EXPORT + '?' +
+    FormField.PROJECT_NAME + '=' + testConfig.projectName)
     xhr.send()
   })
 }
@@ -228,8 +187,12 @@ class IntegrationCreateForm extends CreateForm {
       itemFilename = testConfig.itemListFilename
     }
     const itemFile = getExampleFileFromDisc(itemFilename, itemFilePath)
-    const categoriesFile = getExampleFileFromDisc(testConfig.categoriesFilename)
-    const attributesFile = getExampleFileFromDisc(testConfig.attributesFilename)
+    const categoriesFile = getExampleFileFromDisc(
+      testConfig.categoriesFilename
+    )
+    const attributesFile = getExampleFileFromDisc(
+      testConfig.attributesFilename
+    )
     const formData = new FormData(event.target)
     formData.delete('item_file')
     formData.append('item_file', itemFile, itemFile.name)

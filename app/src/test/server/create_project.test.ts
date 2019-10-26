@@ -63,7 +63,7 @@ describe('create with auto labels', () => {
       const state: Partial<State> = {
         task: tasks[0]
       }
-      const exportedItems = convertStateToExport(state as State)
+      const exportedItems = convertStateToExport(state as State, 0)
       expect(exportedItems).toEqual(sampleStateExport)
     })
   })

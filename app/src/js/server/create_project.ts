@@ -242,7 +242,8 @@ export function createProject (
     submitted: false,
     tracking,
     policyTypes: [],
-    demoMode: form.demoMode
+    demoMode: form.demoMode,
+    autosave: true
   }
   const project: types.Project = {
     config,

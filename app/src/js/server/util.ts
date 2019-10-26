@@ -230,13 +230,12 @@ export async function getTasksInProject (
 /**
  * Loads the most recent state for the given task. If no such submission throw
  * an error.
- * TODO: if we're using assignments, incorporate them here
  * @param stateKey
  */
-export async function loadSavedState (projectName: string, task: TaskType):
+export async function loadSavedState (projectName: string, taskId: string):
   Promise<State> {
   const storage = Session.getStorage()
-  return storage.listKeys(getSavedKey(projectName, task.config.taskId), false)
+  return storage.listKeys(getSavedKey(projectName, taskId), false)
     .then((keys) => {
       if (keys.length > 0) {
         logInfo(sprintf('Reading %s\n', keys[keys.length - 1]))
@@ -250,7 +249,7 @@ export async function loadSavedState (projectName: string, task: TaskType):
     .catch(() => {
       return Promise.reject(
         Error(sprintf('No submissions found for task number %s',
-          task.config.taskId)))
+          taskId)))
     })
 }
 

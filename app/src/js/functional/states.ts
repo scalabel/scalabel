@@ -203,6 +203,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     submitTime: 0,
     demoMode: false,
     submitted: false,
+    autosave: false,
     ...params
   }
 }

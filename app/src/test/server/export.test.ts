@@ -15,7 +15,7 @@ describe('test export functionality for bounding box', () => {
       const state = readSampleState()
       const config = state.task.config
       const item = state.task.items[0]
-      const itemExport = convertItemToExport(config, item)
+      const itemExport = convertItemToExport(config, item, 0)
       expect(itemExport).toEqual(sampleItemExport)
     })
 
@@ -28,7 +28,7 @@ describe('test export functionality for bounding box', () => {
       item.url = 'altered'
       sampleItemExport.name = 'altered'
       sampleItemExport.url = 'altered'
-      const itemExport = convertItemToExport(config, item)
+      const itemExport = convertItemToExport(config, item, 0)
       expect(itemExport).toEqual(sampleItemExport)
       sampleItemExport.name = oldExportName
       sampleItemExport.url = oldExportUrl
@@ -36,7 +36,7 @@ describe('test export functionality for bounding box', () => {
   }),
   test('full state export with empty items', () => {
     const state = readSampleState()
-    const exportedState = convertStateToExport(state)
+    const exportedState = convertStateToExport(state, 0)
     expect(exportedState).toEqual(sampleStateExport)
   })
 })

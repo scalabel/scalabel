@@ -10,14 +10,16 @@ import { index2str } from './util'
  * @param item
  */
 export function convertItemToExport (config: ConfigType,
-                                     item: ItemType): ItemExport {
+                                     item: ItemType,
+                                     baseTaskIndex: number): ItemExport {
   const itemExport: ItemExport = {
     name: item.url,
     url: item.url,
     videoName: '',
     attributes: {},
     timestamp: item.timestamp,
-    index: item.index,
+    // Don't index relative to task index, but rather from 0 to numItems
+    index: item.index + baseTaskIndex,
     labels: []
   }
   if (config.itemType === ItemTypeName.VIDEO) {
@@ -101,12 +103,13 @@ function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
  * converts state to export format
  * @param state
  */
-export function convertStateToExport (state: State): ItemExport[] {
+export function convertStateToExport (state: State, taskIndex: number)
+: ItemExport[] {
   const config = state.task.config
   const items = state.task.items
   const exportList: ItemExport[] = []
   items.forEach((item) => {
-    exportList.push(convertItemToExport(config, item))
+    exportList.push(convertItemToExport(config, item, taskIndex * items.length))
   })
   return exportList
 }

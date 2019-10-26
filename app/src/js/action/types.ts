@@ -44,7 +44,8 @@ export const TASK_ACTION_TYPES = [
   LINK_LABELS,
   DELETE_LABELS,
   ADD_TRACK,
-  MERGE_TRACKS
+  MERGE_TRACKS,
+  UPDATE_TASK
 ]
 
 export interface BaseAction {

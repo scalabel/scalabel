@@ -5,6 +5,5 @@ src: "."
 database: "local"
 userManagement: false
 sync: true
-syncHost: 'http://localhost'
-syncPort: 3000
+autosave: true
 ...

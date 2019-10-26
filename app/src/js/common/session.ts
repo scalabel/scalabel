@@ -32,6 +32,8 @@ class Session {
   public currentPolicyType: string
   /** The window component */
   public window?: Window
+  /** Whether autosave is enabled */
+  public autosave: boolean
   /** Dev mode */
   public devMode: boolean
   /** if in test mode, needed for integration and end to end testing */
@@ -50,6 +52,7 @@ class Session {
     this.tracking = true
     this.currentPolicyType = ''
     this.status = ConnectionStatus.UNSAVED
+    this.autosave = false
     // TODO: make it configurable in the url
     this.devMode = true
     this.applyStatusEffects = () => { return }
@@ -101,7 +104,7 @@ class Session {
    * This should update any parts of the view that depend on status
    * @param {ConnectionStatus} newStatus: new value of status
    */
-  public updateStatusDisplay (newStatus: ConnectionStatus): ConnectionStatus {
+  public updateStatus (newStatus: ConnectionStatus): ConnectionStatus {
     this.status = newStatus
     this.applyStatusEffects()
     return newStatus

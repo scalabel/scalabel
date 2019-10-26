@@ -205,6 +205,8 @@ export interface ConfigType {
   demoMode: boolean
   /** Whether or not submitted */
   submitted: boolean
+  /** whether to use autosave */
+  autosave: boolean
 }
 
 export interface LayoutType {

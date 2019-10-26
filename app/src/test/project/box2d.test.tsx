@@ -5,7 +5,6 @@ import * as child from 'child_process'
 import _ from 'lodash'
 import * as React from 'react'
 import Session, { ConnectionStatus } from '../../js/common/session'
-import { initFromJson } from '../../js/common/session_init'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DList } from '../../js/drawable/2d/label2d_list'
@@ -31,15 +30,15 @@ import {
 
 let launchProc: child.ChildProcessWithoutNullStreams
 
-beforeAll(() => {
+beforeAll(async () => {
   Session.devMode = false
   Session.testMode = true
-  launchProc = child.spawn('./bin/scalabel', [
+  launchProc = child.spawn('node', [
+    'app/dist/js/main.js',
     '--config',
     './app/config/test_config.yml'
   ])
-  /*
-  launchProc.stdout.on('data', (data) => {
+  /*launchProc.stdout.on('data', (data) => {
     process.stdout.write(data)
   })
 
@@ -49,6 +48,9 @@ beforeAll(() => {
   window.alert = (): void => {
     return
   }
+  // Needed as buffer period for theserver to launch. The amount of time needed
+  // is inconsistent so this is on the convservative side.
+  await sleep(2000)
 })
 beforeEach(() => {
   cleanup()
@@ -93,27 +95,26 @@ describe('full 2d bounding box integration test', () => {
   test('test 2d-bounding-box annotation and save to disc', async () => {
     // Spawn a canvas and draw labels on this canvas
     // Uses similar code to drawable tests
-    const json = await projectInitSession()
-    initFromJson(json)
-
+    const synchronizer = await projectInitSession()
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <TitleBar
           title={'title'}
           instructionLink={'instructionLink'}
           dashboardLink={'dashboardLink'}
+          autosave = {Session.autosave}
+          synchronizer = {synchronizer}
         />
       </MuiThemeProvider>
     )
     const saveButton = getByTestId('Save')
-
     const labelCanvas = createCanvas(200, 200)
     const labelContext = labelCanvas.getContext('2d')
     const controlCanvas = createCanvas(200, 200)
     const controlContext = controlCanvas.getContext('2d')
     const handleIndex = 0
     const _labelIndex = -2
-    let labelId = 0
+    let labelId = -1
     let state = Session.getState()
     const itemIndex = state.user.select.item
     const label2dList = new Label2DList()
@@ -160,7 +161,6 @@ describe('full 2d bounding box integration test', () => {
     expect(rect.y1).toEqual(20)
     expect(rect.x2).toEqual(40)
     expect(rect.y2).toEqual(40)
-
     // save to disc
     fireEvent.click(saveButton)
     await Promise.race([
@@ -168,14 +168,14 @@ describe('full 2d bounding box integration test', () => {
       waitForSave()
     ])
     expect(Session.status).toBe(ConnectionStatus.SAVED)
-  })
+  }, saveTimeout)
 
   test('test export of saved bounding boxes', async () => {
     const exportJson = await getExport()
     const trueExportJson = getExportFromDisc()
-    deepDeleteTimestamp(exportJson)
-    deepDeleteTimestamp(trueExportJson)
-    expect(exportJson).toEqual(trueExportJson)
+    const noTimestampExportJson = deepDeleteTimestamp(exportJson)
+    const noTimestampTrueExportJSon = deepDeleteTimestamp(trueExportJson)
+    expect(noTimestampExportJson).toEqual(noTimestampTrueExportJSon)
     changeTestConfig({
       exportMode: true
     })
@@ -207,7 +207,6 @@ describe('full 2d bounding box integration test', () => {
     await Promise.race(
       [waitForElement(() => getByTestId('hidden-buttons')),
         sleep(submissionTimeout)
-      ]
-    )
+      ])
   })
 })

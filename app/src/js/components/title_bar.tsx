@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
 import Session, { ConnectionStatus } from '../common/session'
+import Synchronizer from '../common/synchronizer'
 import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
@@ -51,32 +52,36 @@ interface Props {
   dashboardLink: string
   /** instructionLink of TitleBar */
   instructionLink: string
+  /** whether to show save button or to autosave */
+  autosave: boolean
+  /** synchronizer */
+  synchronizer: Synchronizer
 }
 
-/**
- * Save the current state to the server
- */
-function save () {
-  Session.updateStatusDisplay(ConnectionStatus.SAVING)
-  const state = Session.getState()
-  const xhr = new XMLHttpRequest()
-  xhr.timeout = saveTimeout
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
-      if (JSON.parse(xhr.response) !== 0) {
-        alert('Save failed.')
-        Session.updateStatusDisplay(ConnectionStatus.UNSAVED)
-      } else {
-        Session.updateStatusDisplay(ConnectionStatus.SAVED)
-        setTimeout(() => {
-          Session.updateStatusDisplay(ConnectionStatus.UNSAVED)
-        }, 5000)
-      }
-    }
-  }
-  xhr.open('POST', './postSaveV2')
-  xhr.send(JSON.stringify(state))
-}
+// /**
+//  * Save the current state to the server
+//  */
+// function save () {
+//   Session.updateStatusDisplay(ConnectionStatus.SAVING)
+//   const state = Session.getState()
+//   const xhr = new XMLHttpRequest()
+//   xhr.timeout = saveTimeout
+//   xhr.onreadystatechange = () => {
+//     if (xhr.readyState === 4) {
+//       if (JSON.parse(xhr.response) !== 0) {
+//         alert('Save failed.')
+//         Session.updateStatusDisplay(ConnectionStatus.UNSAVED)
+//       } else {
+//         Session.updateStatusDisplay(ConnectionStatus.SAVED)
+//         setTimeout(() => {
+//           Session.updateStatusDisplay(ConnectionStatus.UNSAVED)
+//         }, 5000)
+//       }
+//     }
+//   }
+//   xhr.open('POST', './postSaveV2')
+//   xhr.send(JSON.stringify(state))
+// }
 
 /**
  * turn assistant view on/off
@@ -120,6 +125,7 @@ class TitleBar extends Component<Props> {
     const { title } = this.props
     const { instructionLink } = this.props
     const { dashboardLink } = this.props
+    const { autosave } = this.props
 
     const buttonInfo = [
       { title: 'Instructions', href: instructionLink, icon: fa.faInfo },
@@ -128,10 +134,17 @@ class TitleBar extends Component<Props> {
       {
         title: 'Assistant View', onClick: toggleAssistantView,
         icon: fa.faColumns
-      },
-      { title: 'Save', onClick: () => { save() }, icon: fa.faSave },
-      { title: 'Submit', onClick: () => { save() }, icon: fa.faCheck }
+      }
     ]
+
+    // if autosave is on, don't need manual save button
+    if (!autosave) {
+      buttonInfo.push(
+        { title: 'Save', onClick: () => { this.save() }, icon: fa.faSave })
+      buttonInfo.push(
+        { title: 'Submit', onClick: () => { this.save() }, icon: fa.faCheck })
+    }
+
     const buttons = buttonInfo.map((b) => {
       const onClick = _.get(b, 'onClick', undefined)
       const href = _.get(b, 'href', '#')
@@ -151,10 +164,16 @@ class TitleBar extends Component<Props> {
     switch (Session.status) {
       case ConnectionStatus.SAVING: {
         sessionStatus = 'Saving in progress...'
+        if (autosave) {
+          hideMessage = true
+        }
         break
       }
       case ConnectionStatus.SAVED: {
         sessionStatus = 'All progress saved.'
+        if (autosave) {
+          hideMessage = true
+        }
         break
       }
       case ConnectionStatus.RECONNECTING: {
@@ -189,6 +208,13 @@ class TitleBar extends Component<Props> {
         </Toolbar>
       </AppBar>
     )
+  }
+
+  /**
+   * Save task by
+   */
+  private save () {
+    this.props.synchronizer.sendActions()
   }
 }
 

@@ -4,11 +4,11 @@ import { sprintf } from 'sprintf-js'
 
 /**
  * Converts task id to name of the room for that id
- * If sync is off, room is separated by session
+ * If sync is off, room is separated by sessionId
  */
 export function roomName (
   projectName: string, taskId: string,
-  sessionId: string, sync: boolean): string {
+  sync: boolean, sessionId = ''): string {
   if (sync) {
     return sprintf('project%s-task%s', projectName, taskId)
   } else {
@@ -35,10 +35,10 @@ export function getNow (): string {
 }
 
 /**
- * Saves a timestamped file
+ * Creates path for a timestamped file
  */
-export function getFile (filePath: string) {
-  return sprintf('%s/%s.json', filePath, getNow())
+export function getFileKey (filePath: string) {
+  return sprintf('%s/%s', filePath, getNow())
 }
 
 /* path to html file directories, relative to js

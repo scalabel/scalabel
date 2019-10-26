@@ -19,15 +19,13 @@ export class Synchronizer {
   public actionLog: types.BaseAction[]
   /** Middleware to use */
   public middleware: Middleware
-  /** The address of the nodejs server that handles syncing */
-  public syncAddress: string
   /** The function to call after state is synced with backend */
   public initStateCallback: (state: State) => void
 
   /* Make sure Session state is loaded before initializing this class */
-  constructor (initialJson: State, syncAddress: string,
-               initStateCallback: (state: State) => void) {
-    this.syncAddress = syncAddress
+  constructor (
+    taskIndex: number, projectName: string,
+    initStateCallback: (state: State) => void) {
     this.initStateCallback = initStateCallback
 
     this.actionQueue = []
@@ -42,27 +40,30 @@ export class Synchronizer {
       /* Only send back actions that originated locally */
       if (Session.id === action.sessionId) {
         self.actionQueue.push(action)
-        self.sendActions()
+        if (Session.autosave) {
+          self.sendActions()
+        }
       }
       return next(action)
     }
 
-    const socket = io.connect(this.syncAddress)
+    // use the same port as http
+    const syncAddress = 'http://localhost:' + location.port
+    const socket = io.connect(syncAddress)
     this.socket = socket
 
     this.socket.on(EventName.CONNECT, () => {
       /* Send the registration message to the backend */
-      // If the store has been initialized, use it
-      let sessionState = Session.getState()
-      if (sessionState.session.id.length === 0) {
-        // Otherwise use the loaded json
-        sessionState = initialJson
-      }
-      self.socket.emit(EventName.REGISTER, sessionState)
-      Session.updateStatusDisplay(ConnectionStatus.UNSAVED)
+      self.socket.emit(
+        EventName.REGISTER, JSON.stringify({
+          project: projectName,
+          index: taskIndex,
+          sessId: Session.id
+        }))
+      Session.updateStatus(ConnectionStatus.UNSAVED)
     })
 
-    /* on receipt of registration ack from backend
+    /* on receipt of registration back from backend
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
       self.initStateCallback(syncState)
@@ -72,15 +73,23 @@ export class Synchronizer {
     this.socket.on(EventName.ACTION_BROADCAST, (action: types.ActionType) => {
       // actionLog matches backend action ordering
       self.actionLog.push(action)
-      // Dispatch any actions broadcasted from other sessions
-      if (action.sessionId !== Session.id) {
-        Session.dispatch(action)
+      if (types.TASK_ACTION_TYPES.includes(action.type)) {
+        if (action.sessionId !== Session.id) {
+          // Dispatch any task actions broadcasted from other sessions
+          Session.dispatch(action)
+        } else {
+          // Otherwise, indicate that task action from this session was saved
+          Session.updateStatus(ConnectionStatus.SAVED)
+          setTimeout(() => {
+            Session.updateStatus(ConnectionStatus.UNSAVED)
+          }, 5000)
+        }
       }
     })
 
     // If backend disconnects, keep trying to reconnect
     this.socket.on(EventName.DISCONNECT, () => {
-      Session.updateStatusDisplay(ConnectionStatus.RECONNECTING)
+      Session.updateStatus(ConnectionStatus.RECONNECTING)
       // On reconnect, just update store instead of re-initializing it
       self.initStateCallback = (state: State) => {
         Session.dispatch(updateTask(state.task))
@@ -94,6 +103,13 @@ export class Synchronizer {
   public sendActions () {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
+        const taskActions = this.actionQueue.filter((action) => {
+          return types.TASK_ACTION_TYPES.includes(action.type)
+        })
+        if (taskActions.length > 0) {
+          Session.updateStatus(ConnectionStatus.SAVING)
+        }
+
         const sessionState = Session.getState()
         this.socket.emit(
           EventName.ACTION_SEND, JSON.stringify({
