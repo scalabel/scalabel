@@ -6,6 +6,7 @@ export const testJson = {
       itemType: 'pointcloud',
       labelTypes: ['box3d'],
       policyTypes: ['linear_interpolation_box_3d'],
+      tracking: false,
       taskSize: 5,
       handlerUrl: 'label3dv2',
       pageTitle: 'Scalabel Annotation',
@@ -36,8 +37,6 @@ export const testJson = {
         index: 0,
         url: 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401598139528987.ply',
-        active: false,
-        loaded: false,
         labels: []
       },
       {
@@ -45,8 +44,6 @@ export const testJson = {
         index: 1,
         url: 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401599138308593.ply',
-        active: false,
-        loaded: false,
         labels: []
       },
       {
@@ -54,8 +51,6 @@ export const testJson = {
         index: 2,
         url: 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401600135798773.ply',
-        active: false,
-        loaded: false,
         labels: []
       },
       {
@@ -63,8 +58,6 @@ export const testJson = {
         index: 3,
         url: 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401601134108834.ply',
-        active: false,
-        loaded: false,
         labels: []
       },
       {
@@ -72,13 +65,9 @@ export const testJson = {
         index: 4,
         url: 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401602133158775.ply',
-        active: false,
-        loaded: false,
         labels: []
       }
     ],
-    labels: {},
-    tracks: {},
-    shapes: {}
+    tracks: {}
   }
 }

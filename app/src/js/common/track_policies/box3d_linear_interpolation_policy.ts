@@ -216,8 +216,7 @@ export class LinearInterpolationBox3DPolicy extends TrackPolicy {
       category: label.category
     })
 
-    const state = Session.getState()
-    if (state.task.config.tracking) {
+    if (Session.tracking) {
       Session.dispatch(addDuplicatedTrack(
         labelObject,
         [types.ShapeTypeName.CUBE],

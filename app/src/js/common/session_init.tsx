@@ -214,6 +214,7 @@ function loadPointClouds (): void {
     if (_.isEmpty(config)) {
       config = makePointCloudViewerConfig()
     }
+    Session.pointClouds.push(new THREE.Points())
     loader.load(item.url, (geometry: THREE.BufferGeometry) => {
 
       const material = new THREE.ShaderMaterial({
@@ -237,7 +238,7 @@ function loadPointClouds (): void {
       })
 
       const particles = new THREE.Points(geometry, material)
-      Session.pointClouds.push(particles)
+      Session.pointClouds[item.index] = particles
 
       Session.dispatch(loadItem(item.index, config))
     },

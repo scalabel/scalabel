@@ -8,21 +8,11 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label3DList } from '../../js/drawable/3d/label3d_list'
 import { getCurrentPointCloudViewerConfig, getShape } from '../../js/functional/state_util'
-import { CubeType, Vector3Type } from '../../js/functional/types'
+import { CubeType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
 import { testJson } from '../test_point_cloud_objects'
-
-/**
- * Check equality between two Vector3Type objects
- * @param v1
- * @param v2
- */
-function expectVector3TypesClose (v1: Vector3Type, v2: Vector3Type, num = 2) {
-  expect(v1.x).toBeCloseTo(v2.x, num)
-  expect(v1.y).toBeCloseTo(v2.y, num)
-  expect(v1.z).toBeCloseTo(v2.z, num)
-}
+import { expectVector3TypesClose } from '../util'
 
 /**
  * Get active axis given camLoc and axis
