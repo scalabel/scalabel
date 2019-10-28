@@ -55,7 +55,10 @@ class MultipleSelect extends Component<Props> {
     const state = Session.getState()
     const categoryId = state.task.config.categories.indexOf(event.target.value)
     Session.dispatch(changeSelect({ category: categoryId }))
-    Session.dispatch(changeSelectedLabelsCategories(state, [categoryId]))
+    // update categories if any labels are selected
+    if (Object.keys(state.user.select.labels).length > 0) {
+      Session.dispatch(changeSelectedLabelsCategories(state, [categoryId]))
+    }
   }
 
   /**

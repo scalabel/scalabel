@@ -28,6 +28,8 @@ class Session {
   public itemType: string
   /** whether tracking is enabled */
   public tracking: boolean
+  /** whether track linking is enabled */
+  public trackLinking: boolean
   /** Current tracking policy type */
   public currentPolicyType: string
   /** The window component */
@@ -50,6 +52,7 @@ class Session {
     this.tracks = {}
     this.itemType = ''
     this.tracking = true
+    this.trackLinking = false
     this.currentPolicyType = ''
     this.status = ConnectionStatus.UNSAVED
     this.autosave = false

@@ -175,7 +175,9 @@ export class ToolBar extends Component<Props> {
         attributes[key] = currentAttributes[key]
       }
       attributes[attributeIndex] = [selectedIndex]
-      Session.dispatch(changeSelectedLabelsAttributes(state, attributes))
+      if (_.size(state.user.select.labels) > 0) {
+        Session.dispatch(changeSelectedLabelsAttributes(state, attributes))
+      }
       Session.dispatch(changeSelect({ attributes }))
     }
   }
@@ -208,7 +210,9 @@ export class ToolBar extends Component<Props> {
         ) {
         Session.dispatch(addLabelTag(toggleIndex, attributes[toggleIndex][0]))
       } else {
-        Session.dispatch(changeSelectedLabelsAttributes(state, attributes))
+        if (_.size(state.user.select.labels) > 0) {
+          Session.dispatch(changeSelectedLabelsAttributes(state, attributes))
+        }
       }
       Session.dispatch(changeSelect({ attributes }))
     }
