@@ -1,14 +1,10 @@
 import { makeItem } from './states'
 import {
-  ImageViewerConfigType,
   ItemType,
-  PointCloudViewerConfigType,
   ShapeType,
   State,
-  UserType,
   ViewerConfigType
 } from './types'
-import { updateObject } from './util'
 
 /**
  * Get the current item from state
@@ -21,54 +17,6 @@ export function getCurrentItem (state: State): ItemType {
   } else {
     return state.task.items[state.user.select.item]
   }
-}
-
-/**
- * Get the current item viewer config
- * @param {State} state
- * @return {ViewerConfigType}
- */
-export function getCurrentImageViewerConfig (state: State):
-  ImageViewerConfigType {
-  return state.user.imageViewerConfig
-}
-
-/**
- * Get the current item viewer config
- * @param {State} state
- * @return {ViewerConfigType}
- */
-export function getCurrentPointCloudViewerConfig (state: State):
-  PointCloudViewerConfigType {
-  return state.user.pointCloudViewerConfig
-}
-
-/**
- * Set current image viewer config
- * @param {State} state
- * @param {ViewerConfigType} config
- * @return {State}
- */
-export function setCurrentImageViewerConfig (
-    state: State, config: ViewerConfigType): State {
-  const newUser: UserType = updateObject(state.user, {
-    imageViewerConfig: config as ImageViewerConfigType
-  })
-  return updateObject(state, { user: newUser })
-}
-
-/**
- * Set current point cloud viewer config
- * @param {State} state
- * @param {ViewerConfigType} config
- * @return {State}
- */
-export function setCurrentPointCloudViewerConfig (
-    state: State, config: ViewerConfigType): State {
-  const newUser: UserType = updateObject(state.user, {
-    pointCloudViewerConfig: config as PointCloudViewerConfigType
-  })
-  return updateObject(state, { user: newUser })
 }
 
 /**
@@ -92,4 +40,18 @@ export function getShape (state: State, itemIndex: number,
  */
 export function isItemLoaded (state: State): boolean {
   return state.session.items[state.user.select.item].loaded
+}
+
+/**
+ * Get config associated with viewer id
+ * @param state
+ * @param viewerId
+ */
+export function getCurrentViewerConfig (
+  state: State, viewerId: number
+): ViewerConfigType {
+  if (viewerId in state.user.viewerConfigs) {
+    return state.user.viewerConfigs[viewerId]
+  }
+  throw new Error(`Viewer id ${viewerId} not found`)
 }

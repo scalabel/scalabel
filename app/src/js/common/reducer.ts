@@ -1,8 +1,6 @@
 import { AnyAction, Reducer } from 'redux'
 import * as types from '../action/types'
 import * as common from '../functional/common'
-import * as image from '../functional/image'
-import * as pointCloud from '../functional/point_cloud'
 import { makeState } from '../functional/states'
 import { State } from '../functional/types'
 
@@ -32,10 +30,6 @@ export const reducer: Reducer<State> = (
       return common.updateAll(state)
     case types.UPDATE_TASK:
       return common.updateTask(state, action as types.UpdateTaskAction)
-    case types.UPDATE_IMAGE_VIEWER_CONFIG:
-      return image.updateImageViewerConfig(
-        state, action as types.UpdateImageViewerConfigAction
-      )
     case types.ADD_LABELS:
       return common.addLabels(state, action as types.AddLabelsAction)
     case types.ADD_TRACK:
@@ -51,11 +45,14 @@ export const reducer: Reducer<State> = (
       return common.mergeTracks(state, action as types.MergeTrackAction)
     case types.DELETE_LABELS:
       return common.deleteLabels(state, action as types.DeleteLabelsAction)
-    case types.TOGGLE_ASSISTANT_VIEW:
-      return common.toggleAssistantView(state)
-    case types.UPDATE_POINT_CLOUD_VIEWER_CONFIG:
-      return pointCloud.moveCameraAndTarget(
-        state, action as types.UpdatePointCloudViewerConfigAction)
+    case types.ADD_VIEWER_CONFIG:
+      return common.addViewerConfig(
+        state, action as types.AddViewerConfigAction
+      )
+    case types.CHANGE_VIEWER_CONFIG:
+      return common.changeViewerConfig(
+        state, action as types.ChangeViewerConfigAction
+      )
     default:
   }
   return state

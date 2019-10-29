@@ -7,8 +7,9 @@ import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label3DList } from '../../js/drawable/3d/label3d_list'
-import { getCurrentPointCloudViewerConfig, getShape } from '../../js/functional/state_util'
-import { CubeType } from '../../js/functional/types'
+import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util'
+import { makePointCloudViewerConfig } from '../../js/functional/states'
+import { CubeType, PointCloudViewerConfigType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
 import { testJson } from '../test_point_cloud_objects'
@@ -71,6 +72,8 @@ function getActiveAxisForRotation (camLoc: number, axis: number) {
 test('Add 3d bbox', () => {
   Session.devMode = false
   initStore(testJson)
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  const viewerId = 1
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
 
@@ -78,7 +81,8 @@ test('Add 3d bbox', () => {
   Session.subscribe(() => {
     label3dList.updateState(
       Session.getState(),
-      Session.getState().user.select.item
+      Session.getState().user.select.item,
+      viewerId
     )
   })
 
@@ -88,7 +92,8 @@ test('Add 3d bbox', () => {
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
   let cube = getShape(state, 0, 0, 0) as CubeType
-  let viewerConfig = getCurrentPointCloudViewerConfig(state)
+  let viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
   expect(viewerConfig).not.toBeNull()
   expectVector3TypesClose(cube.center, viewerConfig.target)
   expectVector3TypesClose(cube.orientation, { x: 0, y: 0, z: 0 })
@@ -106,13 +111,16 @@ test('Add 3d bbox', () => {
     target[1] = Math.random() * 2 - 1
     target[2] = Math.random() * 2 - 1
     target.multiplyScalar(maxVal)
-    Session.dispatch(moveCameraAndTarget(position, target))
+    Session.dispatch(moveCameraAndTarget(
+      position, target, viewerId, viewerConfig
+    ))
 
     label3dList.onKeyDown(spaceEvent)
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
     cube = getShape(state, 0, i, 0) as CubeType
-    viewerConfig = getCurrentPointCloudViewerConfig(state)
+    viewerConfig =
+      getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     expect(viewerConfig).not.toBeNull()
 
     expectVector3TypesClose(viewerConfig.position, position)
@@ -127,24 +135,30 @@ test('Add 3d bbox', () => {
 test('Move axis aligned 3d bbox along z axis', () => {
   Session.devMode = false
   initStore(testJson)
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  const viewerId = 1
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
-
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-  camera.aspect = 1
 
   const label3dList = new Label3DList()
   Session.subscribe(() => {
     label3dList.updateState(
       Session.getState(),
-      Session.getState().user.select.item
+      Session.getState().user.select.item,
+      viewerId
     )
   })
 
   let state = Session.getState()
 
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+  camera.aspect = 1
+
+  let viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+
   Session.dispatch(moveCameraAndTarget(
-    new Vector3D(), new Vector3D()
+    new Vector3D(), new Vector3D(), viewerId, viewerConfig
   ))
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
@@ -161,11 +175,14 @@ test('Move axis aligned 3d bbox along z axis', () => {
   const position = new Vector3D()
   position[1] = 10
   Session.dispatch(moveCamera(
-    position
+    position,
+    viewerId,
+    viewerConfig
   ))
 
   state = Session.getState()
-  const viewerConfig = getCurrentPointCloudViewerConfig(state)
+  viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
   updateThreeCameraAndRenderer(viewerConfig, camera)
   camera.updateMatrixWorld(true)
 
@@ -211,24 +228,29 @@ test('Move axis aligned 3d bbox along z axis', () => {
 test('Move axis aligned 3d bbox along all axes', () => {
   Session.devMode = false
   initStore(testJson)
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  const viewerId = 1
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
-
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-  camera.aspect = 1
 
   const label3dList = new Label3DList()
   Session.subscribe(() => {
     label3dList.updateState(
       Session.getState(),
-      Session.getState().user.select.item
+      Session.getState().user.select.item,
+      viewerId
     )
   })
 
   let state = Session.getState()
+  let viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+  camera.aspect = 1
 
   Session.dispatch(moveCameraAndTarget(
-    new Vector3D(), new Vector3D()
+    new Vector3D(), new Vector3D(), viewerId, viewerConfig
   ))
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
@@ -246,14 +268,18 @@ test('Move axis aligned 3d bbox along all axes', () => {
   // Set camera to each of 6 axis aligned locations around cube
   // 0 = +x, 1 = -x, 2 = +y, 3 = -y, 4= +z, 5 = -z
   for (let camLoc = 0; camLoc < 6; camLoc++) {
+    state = Session.getState()
+    viewerConfig =
+      getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     const position = new Vector3D()
     position[Math.floor(camLoc / 2)] = 10 * (camLoc % 1 === 0 ? -1 : 1)
     Session.dispatch(moveCamera(
-      position
+      position, viewerId, viewerConfig
     ))
 
     state = Session.getState()
-    const viewerConfig = getCurrentPointCloudViewerConfig(state)
+    viewerConfig =
+      getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     updateThreeCameraAndRenderer(viewerConfig, camera)
     camera.updateMatrixWorld(true)
 
@@ -321,24 +347,29 @@ test('Move axis aligned 3d bbox along all axes', () => {
 test('Scale axis aligned 3d bbox along all axes', () => {
   Session.devMode = false
   initStore(testJson)
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  const viewerId = 1
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
-
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-  camera.aspect = 1
 
   const label3dList = new Label3DList()
   Session.subscribe(() => {
     label3dList.updateState(
       Session.getState(),
-      Session.getState().user.select.item
+      Session.getState().user.select.item,
+      viewerId
     )
   })
 
   let state = Session.getState()
+  let viewerConfig =
+      getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+  camera.aspect = 1
 
   Session.dispatch(moveCameraAndTarget(
-    new Vector3D(), new Vector3D()
+    new Vector3D(), new Vector3D(), viewerId, viewerConfig
   ))
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
@@ -356,14 +387,18 @@ test('Scale axis aligned 3d bbox along all axes', () => {
   // Set camera to each of 6 axis aligned locations around cube
   // 0 = +x, 1 = -x, 2 = +y, 3 = -y, 4= +z, 5 = -z
   for (let camLoc = 0; camLoc < 6; camLoc++) {
+    state = Session.getState()
+    viewerConfig =
+      getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     const position = new Vector3D()
     position[Math.floor(camLoc / 2)] = 10 * (camLoc % 1 === 0 ? -1 : 1)
     Session.dispatch(moveCamera(
-      position
+      position, viewerId, viewerConfig
     ))
 
     state = Session.getState()
-    const viewerConfig = getCurrentPointCloudViewerConfig(state)
+    viewerConfig =
+      getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     updateThreeCameraAndRenderer(viewerConfig, camera)
     camera.updateMatrixWorld(true)
 
@@ -444,24 +479,29 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
     for (let axis = 0; axis < 4; axis++) {
       Session.devMode = false
       initStore(testJson)
+      Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+      const viewerId = 1
       const itemIndex = 0
       Session.dispatch(action.goToItem(itemIndex))
-
-      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-      camera.aspect = 1
 
       const label3dList = new Label3DList()
       Session.subscribe(() => {
         label3dList.updateState(
           Session.getState(),
-          Session.getState().user.select.item
+          Session.getState().user.select.item,
+          viewerId
         )
       })
 
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+      camera.aspect = 1
+
       let state = Session.getState()
+      let viewerConfig =
+        getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
 
       Session.dispatch(moveCameraAndTarget(
-        new Vector3D(), new Vector3D()
+        new Vector3D(), new Vector3D(), viewerId, viewerConfig
       ))
 
       const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
@@ -476,14 +516,19 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       const rEvent = new KeyboardEvent('keydown', { key: 'r' })
       label3dList.onKeyDown(rEvent)
 
+      state = Session.getState()
+      viewerConfig =
+        getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+
       const position = new Vector3D()
       position[Math.floor(camLoc / 2)] = 10 * (camLoc % 1 === 0 ? -1 : 1)
       Session.dispatch(moveCamera(
-        position
+        position, viewerId, viewerConfig
       ))
 
       state = Session.getState()
-      const viewerConfig = getCurrentPointCloudViewerConfig(state)
+      viewerConfig =
+        getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
       updateThreeCameraAndRenderer(viewerConfig, camera)
       camera.updateMatrixWorld(true)
 

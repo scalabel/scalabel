@@ -38,6 +38,17 @@ export enum ShapeTypeName {
   POLYGON_2D = 'polygon2d'
 }
 
+export enum ItemType {
+  IMAGE = 'image',
+  POINT_CLOUD = 'pointcloud'
+}
+
+export enum ViewerConfigType {
+  IMAGE = 'image',
+  POINT_CLOUD = 'pointcloud',
+  IMAGE_3D = 'image_3d'
+}
+
 export enum PathPointType {
   LINE = 'line',
   CURVE = 'bezier' // cubic Bezier curve path points

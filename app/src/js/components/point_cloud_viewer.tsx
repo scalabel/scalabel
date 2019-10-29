@@ -3,8 +3,9 @@ import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
 import Session from '../common/session'
-import { getCurrentImageViewerConfig, getCurrentPointCloudViewerConfig, isItemLoaded } from '../functional/state_util'
-import { PointCloudViewerConfigType, State } from '../functional/types'
+import * as types from '../common/types'
+import { getCurrentViewerConfig, isItemLoaded } from '../functional/state_util'
+import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { updateThreeCameraAndRenderer } from '../view_config/point_cloud'
 import { Viewer } from './viewer'
@@ -27,6 +28,8 @@ interface Props {
   classes: ClassType
   /** container */
   display: HTMLDivElement | null
+  /** viewer id */
+  id: number
 }
 
 /**
@@ -147,10 +150,10 @@ class PointCloudViewer extends Viewer<Props> {
 
     if (component.nodeName === 'CANVAS') {
       if (this.canvas && this.display) {
-        if (Session.itemType === 'image') {
-          const config = getCurrentImageViewerConfig(this.state)
-
-          if (config.viewScale < MIN_SCALE || config.viewScale >= MAX_SCALE) {
+        const config = getCurrentViewerConfig(this.state, this.props.id)
+        if (config && config.type === types.ViewerConfigType.IMAGE_3D) {
+          if ((config as Image3DViewerConfigType).viewScale < MIN_SCALE ||
+              (config as Image3DViewerConfigType).viewScale >= MAX_SCALE) {
             return
           }
           const newParams =
@@ -159,8 +162,8 @@ class PointCloudViewer extends Viewer<Props> {
               this.display,
               component,
               null,
-              config,
-              config.viewScale / this.scale,
+              config as Image3DViewerConfigType,
+              (config as Image3DViewerConfigType).viewScale / this.scale,
               false
             )
           this.scale = newParams[3]
@@ -184,7 +187,9 @@ class PointCloudViewer extends Viewer<Props> {
    */
   private updateRenderer () {
     if (this.canvas && this.renderer) {
-      const config: PointCloudViewerConfigType = this.getCurrentViewerConfig()
+      const config = getCurrentViewerConfig(
+        this.state, this.props.id
+      ) as PointCloudViewerConfigType
       updateThreeCameraAndRenderer(
         config,
         this.camera,
@@ -193,13 +198,6 @@ class PointCloudViewer extends Viewer<Props> {
         this.target
       )
     }
-  }
-
-  /**
-   * Get point cloud view config
-   */
-  private getCurrentViewerConfig (): PointCloudViewerConfigType {
-    return (getCurrentPointCloudViewerConfig(this.state))
   }
 }
 

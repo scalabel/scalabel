@@ -1,8 +1,8 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import { Label2DList } from '../drawable/2d/label2d_list'
-import { getCurrentImageViewerConfig } from '../functional/state_util'
-import { State } from '../functional/types'
+import { getCurrentViewerConfig } from '../functional/state_util'
+import { ImageViewerConfigType, State } from '../functional/types'
 import { Vector2D } from '../math/vector2d'
 import { label2dViewStyle } from '../styles/label'
 import {
@@ -31,6 +31,8 @@ interface Props {
   classes: ClassType
   /** display */
   display: HTMLDivElement | null
+  /** viewer id */
+  id: number
 }
 
 /**
@@ -355,13 +357,9 @@ export class Label2dViewer extends Viewer<Props> {
     if (!this.display) {
       return
     }
-    const config =
-      getCurrentImageViewerConfig(this.state)
-
-    if (config.viewScale < MIN_SCALE || config.viewScale >= MAX_SCALE) {
-      return
-    }
-    (
+    const imgConfig =
+      getCurrentViewerConfig(this.state, this.props.id) as ImageViewerConfigType
+    if (imgConfig.viewScale >= MIN_SCALE && imgConfig.viewScale < MAX_SCALE) {
       [
         this.canvasWidth,
         this.canvasHeight,
@@ -373,11 +371,11 @@ export class Label2dViewer extends Viewer<Props> {
         this.display,
         canvas,
         context,
-        config,
-        config.viewScale / this.scale,
+        imgConfig,
+        imgConfig.viewScale / this.scale,
         upRes
       )
-    )
+    }
   }
 }
 

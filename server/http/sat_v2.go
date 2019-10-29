@@ -95,11 +95,10 @@ type TrackMap map[int]interface{}
 
 // User specific data
 type UserData struct {
-	UserId               string                 `json:"id" yaml:"id"`
-	Selection            SelectedData           `json:"select" yaml:"select"`
-	Layout               LayoutData             `json:"layout" yaml:"layout"`
-	ImageViewConfig      ImageViewerConfig      `json:"imageViewerConfig" yaml:"imageViewerConfig"`
-	PointCloudViewConfig PointCloudViewerConfig `json:"pointCloudViewerConfig" yaml:"pointCloudViewerConfig"`
+	UserId        string              `json:"id" yaml:"id"`
+	Selection     SelectedData        `json:"select" yaml:"select"`
+	Layout        LayoutData          `json:"layout" yaml:"layout"`
+	ViewerConfigs map[int]interface{} `json:"viewerConfigs" yaml:"viewerConfigs"`
 }
 
 // User's currently selected data
@@ -116,28 +115,8 @@ type SelectedData struct {
 // Data for frontend layout
 type LayoutData struct {
 	ToolbarWidth       int     `json:"toolbarWidth" yaml:"toolbarWidth"`
-	AssistantView      bool    `json:"assistantView" yaml:"assistantView"`
+	MaxViewerConfigId  int     `json:"maxViewerConfigId" yaml:"maxViewerConfigId"`
 	AssistantViewRatio float32 `json:"assistantViewRatio" yaml:"assistantViewRatio"`
-}
-
-type ImageViewerConfig struct {
-	ImageWidth  int     `json:"imageWidth" yaml:"imageWidth"`
-	ImageHeight int     `json:"imageHeight" yaml:"imageHeight"`
-	ViewScale   float32 `json:"viewScale" yaml:"viewScale"`
-	DisplayTop  int     `json:"displayTop" yaml:"displayTop"`
-	DisplayLeft int     `json:"displayLeft" yaml:"displayLeft"`
-}
-
-type Vector3D struct {
-	X float32 `json:"x" yaml:"x"`
-	Y float32 `json:"y" yaml:"y"`
-	Z float32 `json:"z" yaml:"z"`
-}
-
-type PointCloudViewerConfig struct {
-	Target       Vector3D `json:"target" yaml:"target"`
-	Position     Vector3D `json:"position" yaml:"position"`
-	VerticalAxis Vector3D `json:"verticalAxis" yaml:"verticalAxis"`
 }
 
 // Session specific data
@@ -399,43 +378,17 @@ func assignmentToSat(assignment *Assignment) Sat {
 		Attributes: attributes,
 	}
 
-	imageViewConfig := ImageViewerConfig{
-		ImageWidth:  0,
-		ImageHeight: 0,
-		ViewScale:   1.0,
-		DisplayLeft: 0,
-		DisplayTop:  0,
-	}
-
-	target := Vector3D{
-		X: 0.,
-		Y: 0.,
-		Z: 0.,
-	}
-
-	position := Vector3D{
-		X: 0.,
-		Y: 10.,
-		Z: 0.,
-	}
-
-	verticalAxis := Vector3D{
-		X: 0.,
-		Y: 0.,
-		Z: 1.,
-	}
-
-	pointCloudViewConfig := PointCloudViewerConfig{
-		Target:       target,
-		Position:     position,
-		VerticalAxis: verticalAxis,
+	layout := LayoutData{
+		ToolbarWidth:       200,
+		MaxViewerConfigId:  0,
+		AssistantViewRatio: 0.3,
 	}
 
 	userData := UserData{
-		UserId:               assignment.WorkerId,
-		Selection:            selectedData,
-		ImageViewConfig:      imageViewConfig,
-		PointCloudViewConfig: pointCloudViewConfig,
+		UserId:        assignment.WorkerId,
+		Selection:     selectedData,
+		Layout:        layout,
+		ViewerConfigs: map[int]interface{}{},
 	}
 
 	uuid := getUuidV4()

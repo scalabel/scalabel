@@ -111,7 +111,12 @@ export class Plane3D extends Label3D {
    * Initialize label
    * @param {State} state
    */
-  public init (state: State, _surfaceId?: number, _temporary?: boolean): void {
+  public init (
+    state: State,
+    _surfaceId?: number,
+    _viewerId?: number,
+    _temporary?: boolean
+  ): void {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({

@@ -4,8 +4,9 @@ import * as action from '../../js/action/common'
 import { MOUSE_CORRECTION_FACTOR, moveCameraAndTarget } from '../../js/action/point_cloud'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { getCurrentPointCloudViewerConfig } from '../../js/functional/state_util'
-import { Vector3Type } from '../../js/functional/types'
+import { getCurrentViewerConfig } from '../../js/functional/state_util'
+import { makePointCloudViewerConfig } from '../../js/functional/states'
+import { PointCloudViewerConfigType, Vector3Type } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import ViewerConfigUpdater from '../../js/view_config/viewer_config'
 import { testJson } from '../test_point_cloud_objects'
@@ -24,22 +25,31 @@ function expectVector3TypesClose (v1: Vector3Type, v2: Vector3Type) {
 test('Viewer Config 3d drag test', () => {
   Session.devMode = false
   initStore(testJson)
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  const viewerId = 1
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
 
+  let state = Session.getState()
+  let viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+
   const viewerConfigUpdater = new ViewerConfigUpdater()
   Session.subscribe(() => {
-    viewerConfigUpdater.updateCamera()
+    viewerConfigUpdater.updateState(Session.getState(), viewerId)
   })
   viewerConfigUpdater.setContainer(document.createElement('div'))
 
   Session.dispatch(moveCameraAndTarget(
     (new Vector3D()).fromObject({ x: 0, y: 1, z: 0 }),
-    (new Vector3D()).fromObject({ x: 0, y: 0, z: 0 })
+    (new Vector3D()).fromObject({ x: 0, y: 0, z: 0 }),
+    viewerId,
+    viewerConfig
   ))
 
-  let state = Session.getState()
-  let viewerConfig = getCurrentPointCloudViewerConfig(state)
+  state = Session.getState()
+  viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
 
   expectVector3TypesClose(viewerConfig.position, { x: 0, y: 1, z: 0 })
   expectVector3TypesClose(viewerConfig.target, { x: 0, y: 0, z: 0 })
@@ -71,7 +81,8 @@ test('Viewer Config 3d drag test', () => {
   viewerConfigUpdater.onMouseUp(mouseUpEvent)
 
   state = Session.getState()
-  viewerConfig = getCurrentPointCloudViewerConfig(state)
+  viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
 
   expectVector3TypesClose(viewerConfig.position, { x: 1, y: 1, z: 1 })
   expectVector3TypesClose(viewerConfig.target, { x: 1, y: 0, z: 1 })

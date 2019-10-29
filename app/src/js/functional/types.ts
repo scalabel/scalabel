@@ -110,7 +110,14 @@ export interface IndexedShapeType {
   shape: ShapeType
 }
 
-export interface ImageViewerConfigType {
+export interface ViewerConfigType {
+  /** string indicating type */
+  type: string
+  /** whether to show */
+  show: boolean
+}
+
+export interface ImageViewerConfigType extends ViewerConfigType {
   /** The width of the image */
   imageWidth: number
   /** The height of the image */
@@ -123,7 +130,7 @@ export interface ImageViewerConfigType {
   displayLeft: number
 }
 
-export interface PointCloudViewerConfigType {
+export interface PointCloudViewerConfigType extends ViewerConfigType {
   /** Camera position */
   position: Vector3Type
   /** Viewing direction */
@@ -132,8 +139,8 @@ export interface PointCloudViewerConfigType {
   verticalAxis: Vector3Type
 }
 
-export type ViewerConfigType =
-  ImageViewerConfigType | PointCloudViewerConfigType
+export interface Image3DViewerConfigType extends
+  ImageViewerConfigType, PointCloudViewerConfigType {}
 
 export interface ItemType {
   /** The ID of the item */
@@ -212,8 +219,8 @@ export interface ConfigType {
 export interface LayoutType {
   /** Width of the tool bar */
   toolbarWidth: number
-  /** Whether or not to show the assistant view */
-  assistantView: boolean
+  /** max viewer config id */
+  maxViewerConfigId: number
   /** Assistant view ratio */
   assistantViewRatio: number
 }
@@ -269,10 +276,8 @@ export interface UserType {
   select: Select
   /** interface layout */
   layout: LayoutType
-  /** Viewer configuration for images */
-  imageViewerConfig: ImageViewerConfigType
-  /** Viewer configuration for point clouds */
-  pointCloudViewerConfig: PointCloudViewerConfigType
+  /** Viewer configurations, only id 0 & 1 for now (main & assistant) */
+  viewerConfigs: {[id: number]: ViewerConfigType}
 }
 
 export interface ItemStatus {

@@ -56,6 +56,8 @@ export class Label3DList {
   private _control: TransformationControl
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
+  /** id of viewer */
+  private _viewerId: number
 
   constructor () {
     this._labels = {}
@@ -83,8 +85,9 @@ export class Label3DList {
       }
     }
     this._keyDownMap = {}
+    this._viewerId = -1
     this._state = Session.getState()
-    this.updateState(this._state, this._state.user.select.item)
+    this.updateState(this._state, this._state.user.select.item, -1)
   }
 
   /**
@@ -100,8 +103,9 @@ export class Label3DList {
   /**
    * update labels from the state
    */
-  public updateState (state: State, itemIndex: number): void {
+  public updateState (state: State, itemIndex: number, viewerId: number): void {
     this._state = state
+    this._viewerId = viewerId
 
     const newLabels: {[labelId: number]: Label3D} = {}
     const newRaycastableShapes: Array<Readonly<Shape>> = []
@@ -211,7 +215,7 @@ export class Label3DList {
       Session.tracks[-1] = newTrack
 
       const newLabel = new Box3D()
-      newLabel.init(this._state, this._plane.labelId, true)
+      newLabel.init(this._state, this._plane.labelId, -1, true)
       this._labels[-1] = newLabel
       newLabel.attachToPlane(this._plane)
       if (this._highlightedLabel) {
@@ -297,7 +301,7 @@ export class Label3DList {
 
         const label = new Box3D()
         const planeId = (this._plane) ? this._plane.labelId : -1
-        label.init(state, planeId)
+        label.init(state, planeId, this._viewerId)
         return true
       case Key.ESCAPE:
       case Key.ENTER:

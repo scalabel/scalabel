@@ -9,7 +9,7 @@ import { LabelTypeName } from '../common/types'
 import { makeIndexedShape, makeTrack } from './states'
 import {
   IndexedShapeType, ItemType, LabelType, Select, ShapeType, State,
-  TaskStatus, TaskType, TrackMapType, TrackType, UserType
+  TaskStatus, TaskType, TrackMapType, TrackType, UserType, ViewerConfigType
 } from './types'
 import {
   assignToArray, getObjectKeys,
@@ -681,18 +681,46 @@ export function updateAll (state: State): State {
 }
 
 /**
- * turn on/off assistant view
- * @param {State} state
- * @return {State}
+ * Add new viewer config to state
+ * @param state
+ * @param action
  */
-export function toggleAssistantView (state: State): State {
-  let user = state.user
-  user = updateObject(user, {
-    layout:
-      updateObject(user.layout, {
-        assistantView:
-          !user.layout.assistantView
-      })
-  })
-  return updateObject(state, { user })
+export function addViewerConfig (
+  state: State, action: types.AddViewerConfigAction
+) {
+  const newViewerConfigs = {
+    ...state.user.viewerConfigs,
+    [action.id]: action.config
+  }
+  const newUser = updateObject(
+    state.user,
+    { viewerConfigs: newViewerConfigs }
+  )
+  return updateObject(state, { user: newUser })
+}
+
+/**
+ * Update viewer configs in state w/ fields in action
+ * @param state
+ * @param action
+ */
+export function changeViewerConfig (
+  state: State, action: types.ChangeViewerConfigAction
+): State {
+  if (action.viewerId in state.user.viewerConfigs) {
+    const newViewerConfig: {[id: number]: ViewerConfigType} = {}
+    newViewerConfig[action.viewerId] = updateObject(
+      state.user.viewerConfigs[action.viewerId],
+      action.config
+    )
+    const viewerConfigs = updateObject(
+      state.user.viewerConfigs,
+      newViewerConfig
+    )
+    return updateObject(
+      state,
+      { user: updateObject(state.user, { viewerConfigs }) }
+    )
+  }
+  return state
 }

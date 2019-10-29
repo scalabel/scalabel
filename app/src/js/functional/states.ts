@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { LabelTypeName } from '../common/types'
+import * as types from '../common/types'
 import {
   ConfigType, CubeType,
   ImageViewerConfigType, IndexedShapeType,
@@ -28,7 +28,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return _.cloneDeep<LabelType>({
     id: -1,
     item: -1,
-    type: LabelTypeName.EMPTY,
+    type: types.LabelTypeName.EMPTY,
     category: [],
     attributes: {},
     parent: -1, // id
@@ -147,7 +147,9 @@ export function makeImageViewerConfig (): ImageViewerConfigType {
     imageHeight: 0,
     viewScale: 1.0,
     displayLeft: 0,
-    displayTop: 0
+    displayTop: 0,
+    show: true,
+    type: types.ViewerConfigType.IMAGE
   }
 }
 
@@ -159,7 +161,9 @@ export function makePointCloudViewerConfig (): PointCloudViewerConfigType {
   return {
     position: { x: 0.0, y: 10.0, z: 0.0 },
     target: { x: 0.0, y: 0.0, z: 0.0 },
-    verticalAxis: { x: 0.0, y: 0.0, z: 1.0 }
+    verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
+    show: true,
+    type: types.ViewerConfigType.POINT_CLOUD
   }
 }
 
@@ -216,7 +220,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
 function makeLayout (params: {} = {}): LayoutType {
   return {
     toolbarWidth: 200,
-    assistantView: false,
+    maxViewerConfigId: 0,
     assistantViewRatio: 0.3,
     ...params
   }
@@ -250,8 +254,7 @@ function makeUser (params: Partial<UserType>= {}): UserType {
     id: '',
     select: makeSelect(),
     layout: makeLayout(),
-    imageViewerConfig: makeImageViewerConfig(),
-    pointCloudViewerConfig: makePointCloudViewerConfig(),
+    viewerConfigs: [],
     ...params
   }
 }

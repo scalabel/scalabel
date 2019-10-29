@@ -2,10 +2,9 @@ import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
-import Session from '../common/session'
 import { Label3DList } from '../drawable/3d/label3d_list'
-import { getCurrentImageViewerConfig, getCurrentPointCloudViewerConfig, isItemLoaded } from '../functional/state_util'
-import { PointCloudViewerConfigType, State } from '../functional/types'
+import { getCurrentViewerConfig, isItemLoaded } from '../functional/state_util'
+import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { convertMouseToNDC, updateThreeCameraAndRenderer } from '../view_config/point_cloud'
 import { Viewer } from './viewer'
@@ -28,6 +27,8 @@ interface Props {
   classes: ClassType
   /** container */
   display: HTMLDivElement | null
+  /** viewer id */
+  id: number
 }
 
 /**
@@ -287,7 +288,7 @@ class Label3dViewer extends Viewer<Props> {
    */
   protected updateState (state: State): void {
     this.display = this.props.display
-    this._labels.updateState(state, state.user.select.item)
+    this._labels.updateState(state, state.user.select.item, this.props.id)
   }
 
   /**
@@ -329,20 +330,19 @@ class Label3dViewer extends Viewer<Props> {
       }
 
       if (this.canvas && this.display) {
-        if (Session.itemType === 'image') {
-          const config = getCurrentImageViewerConfig(this.state)
-
-          if (config.viewScale < MIN_SCALE || config.viewScale >= MAX_SCALE) {
-            return
-          }
+        const img3dConfig = getCurrentViewerConfig(
+          this.state, this.props.id
+        ) as Image3DViewerConfigType
+        if (img3dConfig.viewScale >= MIN_SCALE &&
+            img3dConfig.viewScale < MAX_SCALE) {
           const newParams =
             updateCanvasScale(
               this.state,
               this.display,
               this.canvas,
               null,
-              config,
-              config.viewScale / this.scale,
+              img3dConfig,
+              img3dConfig.viewScale / this.scale,
               false
             )
           this.scale = newParams[3]
@@ -360,22 +360,19 @@ class Label3dViewer extends Viewer<Props> {
    */
   private updateRenderer () {
     if (this.canvas && this.renderer) {
-      const config: PointCloudViewerConfigType = this.getCurrentViewerConfig()
-      updateThreeCameraAndRenderer(
-        config,
-        this.camera,
-        this.canvas,
-        this.renderer,
-        this.target
+      const config = getCurrentViewerConfig(
+        this.state, this.props.id
       )
+      if (config) {
+        updateThreeCameraAndRenderer(
+          config as PointCloudViewerConfigType,
+          this.camera,
+          this.canvas,
+          this.renderer,
+          this.target
+        )
+      }
     }
-  }
-
-  /**
-   * Get point cloud view config
-   */
-  private getCurrentViewerConfig (): PointCloudViewerConfigType {
-    return (getCurrentPointCloudViewerConfig(this.state))
   }
 }
 

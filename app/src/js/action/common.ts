@@ -66,12 +66,11 @@ export function changeSelect (
  * Create load item action
  */
 export function loadItem (
-    itemIndex: number, config: ViewerConfigType): types.LoadItemAction {
+    itemIndex: number): types.LoadItemAction {
   return {
     type: types.LOAD_ITEM,
     sessionId: Session.id,
-    itemIndex,
-    config
+    itemIndex
   }
 }
 
@@ -227,6 +226,37 @@ export function deleteLabels (
     sessionId: Session.id,
     itemIndices,
     labelIds
+  }
+}
+
+/**
+ * Add new viewer config
+ * @param config
+ */
+export function addViewerConfig (
+  id: number,
+  config: ViewerConfigType
+): types.AddViewerConfigAction {
+  return {
+    type: types.ADD_VIEWER_CONFIG,
+    sessionId: Session.id,
+    id,
+    config
+  }
+}
+
+/**
+ * Change viewer configs
+ * @param configs
+ */
+export function changeViewerConfig (
+  viewerId: number, config: ViewerConfigType
+): types.ChangeViewerConfigAction {
+  return {
+    type: types.CHANGE_VIEWER_CONFIG,
+    sessionId: Session.id,
+    viewerId,
+    config
   }
 }
 

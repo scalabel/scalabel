@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import Session from '../common/session'
-import { PointCloudViewerConfigType } from '../functional/types'
+import { PointCloudViewerConfigType, ViewerConfigType } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
 import * as types from './types'
 
@@ -13,13 +13,19 @@ export const ZOOM_SPEED = 1.1
  * @param {Vector3D} newPosition
  */
 export function moveCamera (
-  newPosition: Vector3D): types.UpdatePointCloudViewerConfigAction {
+  newPosition: Vector3D,
+  viewerId: number,
+  viewerConfig: ViewerConfigType
+): types.ChangeViewerConfigAction {
+  const config = {
+    ...viewerConfig,
+    position: newPosition.toObject()
+  }
   return {
-    type: types.UPDATE_POINT_CLOUD_VIEWER_CONFIG,
+    type: types.CHANGE_VIEWER_CONFIG,
     sessionId: Session.id,
-    newFields: {
-      position: newPosition.toObject()
-    }
+    viewerId,
+    config
   }
 }
 
@@ -30,15 +36,20 @@ export function moveCamera (
  */
 export function moveCameraAndTarget (
   newPosition: Vector3D,
-  newTarget: Vector3D
-): types.UpdatePointCloudViewerConfigAction {
+  newTarget: Vector3D,
+  viewerId: number,
+  viewerConfig: ViewerConfigType
+): types.ChangeViewerConfigAction {
+  const config = {
+    ...viewerConfig,
+    position: newPosition.toObject(),
+    target: newTarget.toObject()
+  }
   return {
-    type: types.UPDATE_POINT_CLOUD_VIEWER_CONFIG,
+    type: types.CHANGE_VIEWER_CONFIG,
     sessionId: Session.id,
-    newFields: {
-      position: newPosition.toObject(),
-      target: newTarget.toObject()
-    }
+    viewerId,
+    config
   }
 }
 
@@ -46,9 +57,10 @@ export function moveCameraAndTarget (
  * Zoom camera
  */
 export function zoomCamera (
-  viewerConfig: PointCloudViewerConfigType,
-  deltaY: number
-): types.UpdatePointCloudViewerConfigAction | null {
+  deltaY: number,
+  viewerId: number,
+  viewerConfig: PointCloudViewerConfigType
+): types.ChangeViewerConfigAction | null {
   const target = new THREE.Vector3(viewerConfig.target.x,
       viewerConfig.target.y,
       viewerConfig.target.z)
@@ -75,7 +87,7 @@ export function zoomCamera (
 
     offset.add(target)
 
-    return moveCamera(new Vector3D().fromThree(offset))
+    return moveCamera(new Vector3D().fromThree(offset), viewerId, viewerConfig)
   }
   return null
 }
@@ -90,8 +102,9 @@ export function rotateCamera (
   initialY: number,
   newX: number,
   newY: number,
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   const target = new THREE.Vector3(viewerConfig.target.x,
     viewerConfig.target.y,
     viewerConfig.target.z)
@@ -129,7 +142,7 @@ export function rotateCamera (
 
   offset.add(target)
 
-  return moveCamera((new Vector3D()).fromThree(offset))
+  return moveCamera((new Vector3D()).fromThree(offset), viewerId, viewerConfig)
 }
 
 /**
@@ -143,8 +156,9 @@ export function dragCamera (
   newX: number,
   newY: number,
   camera: THREE.Camera,
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   const dragVector = new THREE.Vector3(
     (initialX - newX) / MOUSE_CORRECTION_FACTOR * 2,
     (newY - initialY) / MOUSE_CORRECTION_FACTOR * 2,
@@ -162,7 +176,9 @@ export function dragCamera (
       viewerConfig.target.x + dragVector.x,
       viewerConfig.target.y + dragVector.y,
       viewerConfig.target.z + dragVector.z
-    )
+    ),
+    viewerId,
+    viewerConfig
   ))
 }
 
@@ -171,8 +187,9 @@ export function dragCamera (
  * @param viewerConfig
  */
 export function moveUp (
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   return moveCameraAndTarget(
     new Vector3D(
       viewerConfig.position.x,
@@ -183,7 +200,9 @@ export function moveUp (
       viewerConfig.target.x,
       viewerConfig.target.y,
       viewerConfig.target.z + MOVE_AMOUNT
-    )
+    ),
+    viewerId,
+    viewerConfig
   )
 }
 
@@ -192,8 +211,9 @@ export function moveUp (
  * @param viewerConfig
  */
 export function moveDown (
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   return moveCameraAndTarget(
     new Vector3D(
       viewerConfig.position.x,
@@ -204,7 +224,9 @@ export function moveDown (
       viewerConfig.target.x,
       viewerConfig.target.y,
       viewerConfig.target.z - MOVE_AMOUNT
-    )
+    ),
+    viewerId,
+    viewerConfig
   )
 }
 
@@ -229,8 +251,9 @@ function calculateForward (
  * @param viewerConfig
  */
 export function moveBack (
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   const forward = calculateForward(viewerConfig)
   return moveCameraAndTarget(
     new Vector3D(
@@ -242,7 +265,9 @@ export function moveBack (
       viewerConfig.target.x - forward.x,
       viewerConfig.target.y - forward.y,
       viewerConfig.target.z
-    )
+    ),
+    viewerId,
+    viewerConfig
   )
 }
 
@@ -251,8 +276,9 @@ export function moveBack (
  * @param viewerConfig
  */
 export function moveForward (
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   const forward = calculateForward(viewerConfig)
   return moveCameraAndTarget(
     new Vector3D(
@@ -264,7 +290,9 @@ export function moveForward (
       viewerConfig.target.x + forward.x,
       viewerConfig.target.y + forward.y,
       viewerConfig.target.z
-    )
+    ),
+    viewerId,
+    viewerConfig
   )
 }
 
@@ -297,8 +325,9 @@ function calculateLeft (
  * @param viewerConfig
  */
 export function moveLeft (
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   const forward = calculateForward(viewerConfig)
   const left = calculateLeft(viewerConfig, forward)
   return moveCameraAndTarget(
@@ -311,7 +340,9 @@ export function moveLeft (
       viewerConfig.target.x + left.x,
       viewerConfig.target.y + left.y,
       viewerConfig.target.z + left.z
-    )
+    ),
+    viewerId,
+    viewerConfig
   )
 }
 
@@ -320,8 +351,9 @@ export function moveLeft (
  * @param viewerConfig
  */
 export function moveRight (
+  viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-): types.UpdatePointCloudViewerConfigAction {
+): types.ChangeViewerConfigAction {
   const forward = calculateForward(viewerConfig)
   const left = calculateLeft(viewerConfig, forward)
   return moveCameraAndTarget(
@@ -334,6 +366,8 @@ export function moveRight (
       viewerConfig.target.x - left.x,
       viewerConfig.target.y - left.y,
       viewerConfig.target.z - left.z
-    )
+    ),
+    viewerId,
+    viewerConfig
   )
 }

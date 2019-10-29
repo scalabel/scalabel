@@ -5,7 +5,6 @@ import { addBox3dLabel } from '../../action/box3d'
 import { changeLabelProps, changeLabelShape } from '../../action/common'
 import Session from '../../common/session'
 
-import { getCurrentPointCloudViewerConfig } from '../../functional/state_util'
 import { makeLabel } from '../../functional/states'
 import {
   CubeType, PointCloudViewerConfigType, ShapeType, State
@@ -38,7 +37,12 @@ export class Box3D extends Label3D {
    * Initialize label
    * @param {State} state
    */
-  public init (state: State, surfaceId?: number, temporary?: boolean): void {
+  public init (
+    state: State,
+    surfaceId?: number,
+    viewerId?: number,
+    temporary?: boolean
+  ): void {
     const itemIndex = state.user.select.item
     this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
@@ -47,9 +51,12 @@ export class Box3D extends Label3D {
       order: this._order
     })
     this._labelId = -1
-    const viewerConfig: PointCloudViewerConfigType =
-      getCurrentPointCloudViewerConfig(state)
-    const center = (new Vector3D()).fromObject(viewerConfig.target)
+    const center = new Vector3D()
+    if (viewerId && viewerId in state.user.viewerConfigs) {
+      const viewerConfig =
+        state.user.viewerConfigs[viewerId] as PointCloudViewerConfigType
+      center.fromObject(viewerConfig.target)
+    }
     if (surfaceId && surfaceId >= 0) {
       center.z = 0.5
       this._shape.setSurfaceId(surfaceId)

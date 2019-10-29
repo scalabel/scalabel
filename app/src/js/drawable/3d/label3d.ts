@@ -154,7 +154,10 @@ export abstract class Label3D {
    * @param {State} state
    */
   public abstract init (
-    state: State, surfaceId?: number, temporary?: boolean
+    state: State,
+    surfaceId?: number,
+    viewerId?: number,
+    temporary?: boolean
   ): void
 
   /**

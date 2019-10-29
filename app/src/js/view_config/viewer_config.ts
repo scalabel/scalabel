@@ -1,9 +1,10 @@
 import * as THREE from 'three'
-import { updateImageViewerConfig, zoomImage } from '../action/image'
+import { changeViewerConfig } from '../action/common'
+import { zoomImage } from '../action/image'
 import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, zoomCamera } from '../action/point_cloud'
 import Session from '../common/session'
-import { Key } from '../common/types'
-import { getCurrentImageViewerConfig, getCurrentItem, getCurrentPointCloudViewerConfig } from '../functional/state_util'
+import * as types from '../common/types'
+import { ImageViewerConfigType, PointCloudViewerConfigType, State, ViewerConfigType } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
 import { SCROLL_ZOOM_RATIO } from './image'
 
@@ -47,6 +48,12 @@ export default class ViewerConfigUpdater {
   private _raycaster: THREE.Raycaster
   /** target */
   private _target: THREE.Vector3
+  /** viewer config */
+  private _viewerConfig?: ViewerConfigType
+  /** viewer id */
+  private _viewerId: number
+  /** item number */
+  private _item: number
 
   constructor () {
     this._keyDownMap = {}
@@ -58,10 +65,8 @@ export default class ViewerConfigUpdater {
     this._raycaster = new THREE.Raycaster()
     this._target = new THREE.Vector3()
     this._mouseButton = 0
-
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault()
-    }, false)
+    this._item = -1
+    this._viewerId = -1
   }
 
   /**
@@ -76,14 +81,26 @@ export default class ViewerConfigUpdater {
    * Update state
    * @param state
    */
-  public updateCamera () {
-    const state = Session.getState()
+  public updateState (state: State, id: number) {
+    this._viewerId = id
+    this._viewerConfig = state.user.viewerConfigs[id]
+    this._item = state.user.select.item
+  }
+
+  /**
+   * Update state
+   * @param state
+   */
+  public updateCamera (config: PointCloudViewerConfigType) {
+    if (!this._viewerConfig) {
+      return
+    }
+
     if (this._container) {
       this._camera.aspect = this._container.offsetWidth /
         this._container.offsetHeight
       this._camera.updateProjectionMatrix()
     }
-    const config = getCurrentPointCloudViewerConfig(state)
     this._target.x = config.target.x
     this._target.y = config.target.y
     this._target.z = config.target.z
@@ -102,38 +119,44 @@ export default class ViewerConfigUpdater {
    * @param e
    */
   public onMouseMove (e: MouseEvent) {
-    if (!this._container) {
+    if (!this._container || !this._viewerConfig) {
       return
     }
 
-    const state = Session.getState()
     const normalized = normalizeCoordinatesToCanvas(
       e.clientX, e.clientY, this._container
     )
     if (this._mouseDown) {
-      switch (state.task.config.itemType) {
-        case 'image':
-          if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
+      switch (this._viewerConfig.type) {
+        case types.ViewerConfigType.IMAGE:
+          if (this.isKeyDown(types.Key.META) ||
+              this.isKeyDown(types.Key.CONTROL)) {
             const dx = normalized[0] - this._mX
             const dy = normalized[1] - this._mY
             const displayLeft = this._container.scrollLeft - dx
             const displayTop = this._container.scrollTop - dy
-            Session.dispatch(updateImageViewerConfig({
-              displayLeft, displayTop
-            }))
+            const newConfig = {
+              ...this._viewerConfig,
+              displayLeft,
+              displayTop
+            }
+            Session.dispatch(changeViewerConfig(
+              this._viewerId, newConfig
+            ))
           }
           break
-        case 'pointcloud':
-          const viewerConfig = getCurrentPointCloudViewerConfig(state)
+        case types.ViewerConfigType.IMAGE_3D:
+        case types.ViewerConfigType.POINT_CLOUD:
           if (this._mouseButton === 2) {
-            this.updateCamera()
+            this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
             Session.dispatch(dragCamera(
               this._mX,
               this._mY,
               normalized[0],
               normalized[1],
               this._camera,
-              viewerConfig
+              this._viewerId,
+              this._viewerConfig as PointCloudViewerConfigType
             ))
           } else {
             Session.dispatch(rotateCamera(
@@ -141,7 +164,8 @@ export default class ViewerConfigUpdater {
               this._mY,
               normalized[0],
               normalized[1],
-              viewerConfig
+              this._viewerId,
+              this._viewerConfig as PointCloudViewerConfigType
             ))
           }
           break
@@ -184,19 +208,16 @@ export default class ViewerConfigUpdater {
    * @param e
    */
   public onDoubleClick (e: MouseEvent) {
-    if (!this._container) {
+    if (!this._container || !this._viewerConfig) {
       return
     }
 
-    const state = Session.getState()
     const normalized = normalizeCoordinatesToCanvas(
       e.clientX, e.clientY, this._container
     )
-    switch (state.task.config.itemType) {
-      case 'image':
-        break
-      case 'pointcloud':
-        this.updateCamera()
+    switch (this._viewerConfig.type) {
+      case types.ViewerConfigType.POINT_CLOUD:
+        this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
 
         const NDC = this.convertMouseToNDC(
           normalized[0],
@@ -207,14 +228,13 @@ export default class ViewerConfigUpdater {
 
         this._raycaster.linePrecision = 0.2
         this._raycaster.setFromCamera(new THREE.Vector2(x, y), this._camera)
-        const item = getCurrentItem(state)
-        const pointCloud = Session.pointClouds[item.index]
+        const pointCloud = Session.pointClouds[this._item]
 
         const intersects = this._raycaster.intersectObject(pointCloud)
 
         if (intersects.length > 0) {
           const newTarget = intersects[0].point
-          const viewerConfig = getCurrentPointCloudViewerConfig(state)
+          const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
           Session.dispatch(moveCameraAndTarget(
             new Vector3D(
               viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
@@ -225,7 +245,9 @@ export default class ViewerConfigUpdater {
               newTarget.x,
               newTarget.y,
               newTarget.z
-            )
+            ),
+            this._viewerId,
+            viewerConfig
           ))
         }
         break
@@ -237,18 +259,24 @@ export default class ViewerConfigUpdater {
    * @param _e
    */
   public onWheel (e: WheelEvent) {
-    const state = Session.getState()
-    switch (state.task.config.itemType) {
-      case 'image':
-        if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
+    if (!this._viewerConfig) {
+      return
+    }
+
+    switch (this._viewerConfig.type) {
+      case types.ViewerConfigType.IMAGE:
+        if (this.isKeyDown(types.Key.META) ||
+            this.isKeyDown(types.Key.CONTROL)) {
           e.preventDefault()
           let zoomRatio = SCROLL_ZOOM_RATIO
           if (e.deltaY < 0) {
             zoomRatio = 1. / zoomRatio
           }
-          const config = getCurrentImageViewerConfig(state)
+          const config = this._viewerConfig as ImageViewerConfigType
           const imageZoomAction = zoomImage(
-            zoomRatio, config
+            zoomRatio,
+            this._viewerId,
+            config
           )
           if (imageZoomAction) {
             Session.dispatch(imageZoomAction)
@@ -257,17 +285,24 @@ export default class ViewerConfigUpdater {
                 this._mX
               const displayTop = zoomRatio * (this._mY + config.displayTop) -
                 this._mY
-              Session.dispatch(updateImageViewerConfig({
+              const newConfig = {
+                ...this._viewerConfig,
                 displayLeft,
                 displayTop
-              }))
+              } as ImageViewerConfigType
+              Session.dispatch(changeViewerConfig(
+                this._viewerId,
+                newConfig
+              ))
             }
           }
         }
         break
-      case 'pointcloud':
+      case types.ViewerConfigType.POINT_CLOUD:
         const pointCloudZoomAction = zoomCamera(
-          getCurrentPointCloudViewerConfig(state), e.deltaY
+          e.deltaY,
+          this._viewerId,
+          this._viewerConfig as PointCloudViewerConfigType
         )
         if (pointCloudZoomAction) {
           Session.dispatch(pointCloudZoomAction)
@@ -283,11 +318,13 @@ export default class ViewerConfigUpdater {
   public onKeyDown (e: KeyboardEvent) {
     const key = e.key
     this._keyDownMap[key] = true
-    const state = Session.getState()
-    switch (state.task.config.itemType) {
-      case 'image':
-        break
-      case 'pointcloud':
+
+    if (!this._viewerConfig) {
+      return
+    }
+
+    switch (this._viewerConfig.type) {
+      case types.ViewerConfigType.POINT_CLOUD:
         this.pointCloudKeyEvents(e.key)
         break
     }
@@ -307,29 +344,29 @@ export default class ViewerConfigUpdater {
    * @param key
    */
   private pointCloudKeyEvents (key: string) {
-    const viewerConfig = getCurrentPointCloudViewerConfig(Session.getState())
+    const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
     switch (key) {
-      case Key.PERIOD:
-        Session.dispatch(moveUp(viewerConfig))
+      case types.Key.PERIOD:
+        Session.dispatch(moveUp(this._viewerId, viewerConfig))
         break
-      case Key.SLASH:
-        Session.dispatch(moveDown(viewerConfig))
+      case types.Key.SLASH:
+        Session.dispatch(moveDown(this._viewerId, viewerConfig))
         break
-      case Key.DOWN:
-      case Key.ARROW_DOWN:
-        Session.dispatch(moveBack(viewerConfig))
+      case types.Key.DOWN:
+      case types.Key.ARROW_DOWN:
+        Session.dispatch(moveBack(this._viewerId, viewerConfig))
         break
-      case Key.UP:
-      case Key.ARROW_UP:
-        Session.dispatch(moveForward(viewerConfig))
+      case types.Key.UP:
+      case types.Key.ARROW_UP:
+        Session.dispatch(moveForward(this._viewerId, viewerConfig))
         break
-      case Key.LEFT:
-      case Key.ARROW_LEFT:
-        Session.dispatch(moveLeft(viewerConfig))
+      case types.Key.LEFT:
+      case types.Key.ARROW_LEFT:
+        Session.dispatch(moveLeft(this._viewerId, viewerConfig))
         break
-      case Key.RIGHT:
-      case Key.ARROW_RIGHT:
-        Session.dispatch(moveRight(viewerConfig))
+      case types.Key.RIGHT:
+      case types.Key.ARROW_RIGHT:
+        Session.dispatch(moveRight(this._viewerId, viewerConfig))
         break
     }
   }

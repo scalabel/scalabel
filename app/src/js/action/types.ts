@@ -2,9 +2,7 @@
  * Define string identifiers and interfaces of actions
  */
 import {
-  ImageViewerConfigType,
   LabelType,
-  PointCloudViewerConfigType,
   Select,
   ShapeType,
   TaskType,
@@ -27,15 +25,9 @@ export const DELETE_LABELS = 'DELETE_LABELS'
 export const ADD_TRACK = 'ADD_TRACK'
 export const MERGE_TRACKS = 'MERGE_TRACKS'
 
-// Image specific actions
-export const UPDATE_IMAGE_VIEWER_CONFIG = 'UPDATE_IMAGE_VIEWER_CONFIG'
-
 // View Level
-export const TOGGLE_ASSISTANT_VIEW = 'TOGGLE_ASSISTANT_VIEW'
-
-// Point Cloud Specific
-export const UPDATE_POINT_CLOUD_VIEWER_CONFIG =
-  'UPDATE_POINT_CLOUD_VIEWER_CONFIG'
+export const ADD_VIEWER_CONFIG = 'ADD_VIEWER_CONFIG'
+export const CHANGE_VIEWER_CONFIG = 'CHANGE_VIEWER_CONFIG'
 
 export const TASK_ACTION_TYPES = [
   ADD_LABELS,
@@ -67,8 +59,6 @@ export interface ChangeSelectAction extends BaseAction {
 export interface LoadItemAction extends BaseAction {
   /** Index of the item to load */
   itemIndex: number
-  /** Configurations */
-  config: ViewerConfigType
 }
 
 export type UpdateAllAction = BaseAction
@@ -76,11 +66,6 @@ export type UpdateAllAction = BaseAction
 export interface UpdateTaskAction extends BaseAction {
   /** task data to use */
   newTask: TaskType
-}
-
-export interface UpdateImageViewerConfigAction extends BaseAction {
-  /** fields to update */
-  newFields: Partial<ImageViewerConfigType>
 }
 
 export interface AddLabelsAction extends BaseAction {
@@ -142,11 +127,23 @@ export interface DeleteLabelsAction extends BaseAction {
   labelIds: number[][]
 }
 
-export type ToggleAssistantViewAction = BaseAction
+export interface AddViewerConfigAction extends BaseAction {
+  /** viewer id */
+  id: number
+  /** config to add */
+  config: ViewerConfigType
+}
 
-export interface UpdatePointCloudViewerConfigAction extends BaseAction {
-  /** Fields to update */
-  newFields: Partial<PointCloudViewerConfigType>
+export interface ChangeViewerConfigAction extends BaseAction {
+  /** id of viewer to update */
+  viewerId: number
+  /** configs to update */
+  config: ViewerConfigType
+}
+
+export interface DeleteViewerConfigAction extends BaseAction {
+  /** id of config to delete */
+  viewerId: number
 }
 
 export type SessionActionType =
@@ -157,9 +154,8 @@ export type SessionActionType =
 
 export type UserActionType =
   ChangeSelectAction
-  | ToggleAssistantViewAction
-  | UpdateImageViewerConfigAction
-  | UpdatePointCloudViewerConfigAction
+  | ChangeViewerConfigAction
+  | AddViewerConfigAction
 
 export type TaskActionType =
   AddLabelsAction
