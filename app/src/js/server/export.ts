@@ -1,8 +1,7 @@
-import { AttributeToolType, ItemTypeName, LabelTypeName } from '../common/types'
+import { AttributeToolType, LabelTypeName } from '../common/types'
 import { ItemExport, LabelExport } from '../functional/bdd_types'
 import { Attribute, ConfigType, CubeType,
   ItemType, PolygonType, RectType, State } from '../functional/types'
-import { index2str } from './util'
 
 /**
  * converts single item to exportable format
@@ -10,20 +9,19 @@ import { index2str } from './util'
  * @param item
  */
 export function convertItemToExport (config: ConfigType,
-                                     item: ItemType,
-                                     baseTaskIndex: number): ItemExport {
+                                     item: ItemType): ItemExport {
   const itemExport: ItemExport = {
+    ...defaultItemExport,
     name: item.url,
     url: item.url,
-    videoName: '',
-    attributes: {},
-    timestamp: item.timestamp,
+    videoName: item.videoName,
     // Don't index relative to task index, but rather from 0 to numItems
-    index: item.index + baseTaskIndex,
-    labels: []
+    index: item.id
   }
-  if (config.itemType === ItemTypeName.VIDEO) {
-    itemExport.videoName = config.projectName + index2str(item.index)
+  // TODO: remove after fixing timestamps
+  // tslint:disable-next-line: strict-type-predicates
+  if (item.timestamp !== undefined) {
+    itemExport.timestamp = item.timestamp
   }
   const labelExports: LabelExport[] = []
   Object.entries(item.labels).forEach(([_, label]) => {
@@ -103,13 +101,23 @@ function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
  * converts state to export format
  * @param state
  */
-export function convertStateToExport (state: State, taskIndex: number)
+export function convertStateToExport (state: State)
 : ItemExport[] {
   const config = state.task.config
   const items = state.task.items
   const exportList: ItemExport[] = []
   items.forEach((item) => {
-    exportList.push(convertItemToExport(config, item, taskIndex * items.length))
+    exportList.push(convertItemToExport(config, item))
   })
   return exportList
+}
+
+const defaultItemExport = {
+  name: '',
+  url: '',
+  videoName: '',
+  attributes: {},
+  timestamp: -1,
+  index: -1,
+  labels: []
 }

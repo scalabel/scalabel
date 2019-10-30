@@ -1,69 +1,51 @@
 import { ItemExport } from '../js/functional/bdd_types'
 
-export const sampleItemExport: ItemExport = {
-  name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg',
-  url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg',
-  videoName: '',
+export const sampleItemExportImage: ItemExport = {
+  name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+  url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+  videoName: 'b',
   attributes: {},
-  timestamp: 1570506897,
+  timestamp: -1,
   index: 0,
   labels: [
     {
-      id: 1,
+      id: 0,
       category: 'person',
-      attributes: {
-        'Occluded': false,
-        'Truncated': false,
-        'Traffic Light Color': [
-          'NA'
-        ]
-      },
+      attributes: {},
       manualShape: true,
       box2d: {
-        x1: 280.00968616094616,
-        x2: 450.53600195041986,
-        y1: 152.57617728531858,
-        y2: 446.75900277008316
+        x1: 317.9044230030514,
+        y1: 192.46537396121883,
+        x2: 676.9071930861539,
+        y2: 411.85595567867034
+      },
+      poly2d: null,
+      box3d: null
+    },
+    {
+      id: 1,
+      category: 'person',
+      attributes: {},
+      manualShape: true,
+      box2d: {
+        x1: 459.5110712024974,
+        y1: 276.2326869806094,
+        x2: 752.6966667703645,
+        y2: 400.88642659279776
       },
       poly2d: null,
       box3d: null
     },
     {
       id: 2,
-      category: 'rider',
-      attributes: {
-        'Occluded': true,
-        'Truncated': false,
-        'Traffic Light Color': [
-          'R'
-        ]
-      },
+      category: 'person',
+      attributes: {},
       manualShape: true,
       box2d: {
-        x1: 405.66065569003206,
-        x2: 618.0706279892011,
-        y1: 73.79501385041551,
-        y2: 215.4016620498615
-      },
-      poly2d: null,
-      box3d: null
-    },
-    {
-      id: 3,
-      category: 'truck',
-      attributes: {
-        'Occluded': false,
-        'Truncated': true,
-        'Traffic Light Color': [
-          'G', 'Y'
-        ]
-      },
-      manualShape: true,
-      box2d: {
-        x1: 648.9847554130238,
-        x2: 915.245143224658,
-        y1: 106.70360110803324,
-        y2: 329.0858725761773
+        x1: 746.7132872689795,
+        y1: 137.61772853185596,
+        x2: 1018.9570545819988,
+        y2: 294.1828254847645
       },
       poly2d: null,
       box3d: null
@@ -71,72 +53,54 @@ export const sampleItemExport: ItemExport = {
   ]
 }
 
-export const sampleStateExport: ItemExport[] =
+export const sampleStateExportImage: ItemExport[] =
   [
     {
-      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg',
-      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg',
-      videoName: '',
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+      videoName: 'b',
       attributes: {},
-      timestamp: 1570506897,
+      timestamp: -1,
       index: 0,
       labels: [
         {
-          id: 1,
+          id: 0,
           category: 'person',
-          attributes: {
-            'Occluded': false,
-            'Truncated': false,
-            'Traffic Light Color': [
-              'NA'
-            ]
-          },
+          attributes: {},
           manualShape: true,
           box2d: {
-            x1: 280.00968616094616,
-            x2: 450.53600195041986,
-            y1: 152.57617728531858,
-            y2: 446.75900277008316
+            x1: 317.9044230030514,
+            y1: 192.46537396121883,
+            x2: 676.9071930861539,
+            y2: 411.85595567867034
+          },
+          poly2d: null,
+          box3d: null
+        },
+        {
+          id: 1,
+          category: 'person',
+          attributes: {},
+          manualShape: true,
+          box2d: {
+            x1: 459.5110712024974,
+            y1: 276.2326869806094,
+            x2: 752.6966667703645,
+            y2: 400.88642659279776
           },
           poly2d: null,
           box3d: null
         },
         {
           id: 2,
-          category: 'rider',
-          attributes: {
-            'Occluded': true,
-            'Truncated': false,
-            'Traffic Light Color': [
-              'R'
-            ]
-          },
+          category: 'person',
+          attributes: {},
           manualShape: true,
           box2d: {
-            x1: 405.66065569003206,
-            x2: 618.0706279892011,
-            y1: 73.79501385041551,
-            y2: 215.4016620498615
-          },
-          poly2d: null,
-          box3d: null
-        },
-        {
-          id: 3,
-          category: 'truck',
-          attributes: {
-            'Occluded': false,
-            'Truncated': true,
-            'Traffic Light Color': [
-              'G', 'Y'
-            ]
-          },
-          manualShape: true,
-          box2d: {
-            x1: 648.9847554130238,
-            x2: 915.245143224658,
-            y1: 106.70360110803324,
-            y2: 329.0858725761773
+            x1: 746.7132872689795,
+            y1: 137.61772853185596,
+            x2: 1018.9570545819988,
+            y2: 294.1828254847645
           },
           poly2d: null,
           box3d: null
@@ -144,39 +108,38 @@ export const sampleStateExport: ItemExport[] =
       ]
     },
     {
-      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
-      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
-      videoName: '',
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg',
+      videoName: 'b',
       attributes: {},
-      timestamp: 1570506897,
+      timestamp: -1,
       index: 1,
       labels: []
     },
     {
-      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
-      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
-      videoName: '',
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg',
+      videoName: 'b',
       attributes: {},
-      timestamp: 1570506897,
+      timestamp: -1,
       index: 2,
       labels: []
     },
     {
-      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
-      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
-      videoName: '',
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg',
+      videoName: 'b',
       attributes: {},
-      timestamp: 1570506897,
+      timestamp: -1,
       index: 3,
       labels: []
     },
     {
-      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
-      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
-      videoName: '',
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg',
+      videoName: 'b',
       attributes: {},
-      timestamp: 1570506897,
+      timestamp: -1,
       index: 4,
       labels: []
-    }
-  ]
+    }]

@@ -1,37 +1,16 @@
 {
-    "session": {
-        "id": "eababa15-83aa-4111-90b6-f90c4a99140c",
-        "demoMode": false,
-        "startTime": 1570506876,
-        "items": [{
-                "loaded": true
-            },
-            {
-                "loaded": true
-            },
-            {
-                "loaded": true
-            },
-            {
-                "loaded": true
-            },
-            {
-                "loaded": true
-            }
-        ]
-    },
     "task": {
         "config": {
-            "projectName": "box2d",
+            "projectName": "2dImage",
             "itemType": "image",
             "labelTypes": [
                 "box2d"
             ],
             "taskSize": 5,
-            "handlerUrl": "label2d",
+            "handlerUrl": "label",
             "pageTitle": "2D Bounding Box",
             "instructionPage": "https://www.scalabel.ai/doc/instructions/bbox.html",
-            "bundleFile": "image.js",
+            "bundleFile": "image_v2.js",
             "categories": [
                 "person",
                 "rider",
@@ -44,40 +23,32 @@
                 "traffic sign",
                 "traffic light"
             ],
-            "attributes": [{
+            "attributes": [
+                {
                     "name": "Occluded",
                     "toolType": "switch",
-                    "tagText": "o",
-                    "tagPrefix": "",
-                    "tagSuffixes": null,
-                    "values": null,
-                    "buttonColors": null
+                    "tagText": "o"
                 },
                 {
                     "name": "Truncated",
                     "toolType": "switch",
-                    "tagText": "t",
-                    "tagPrefix": "",
-                    "tagSuffixes": null,
-                    "values": null,
-                    "buttonColors": null
+                    "tagText": "t"
                 },
                 {
                     "name": "Traffic Light Color",
                     "toolType": "list",
-                    "tagText": "",
+                    "values": [
+                        "NA",
+                        "G",
+                        "Y",
+                        "R"
+                    ],
                     "tagPrefix": "t",
                     "tagSuffixes": [
                         "",
                         "g",
                         "y",
                         "r"
-                    ],
-                    "values": [
-                        "NA",
-                        "G",
-                        "Y",
-                        "R"
                     ],
                     "buttonColors": [
                         "white",
@@ -88,21 +59,44 @@
                 }
             ],
             "taskId": "000000",
-            "submitTime": 1570506897,
-            "sync": false,
-            "syncAddress": ""
+            "submitTime": -1,
+            "submitted": false,
+            "tracking": false,
+            "policyTypes": [
+                "linear_interpolation_box_2d"
+            ],
+            "demoMode": false,
+            "autosave": false
         },
         "status": {
-            "maxLabelId": 3,
-            "maxShapeId": 3,
-            "maxOrder": 3
+            "maxLabelId": 2,
+            "maxShapeId": 2,
+            "maxOrder": 3,
+            "maxTrackId": -1
         },
-        "items": [{
+        "items": [
+            {
                 "id": 0,
                 "index": 0,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
-                "timestamp": 1570506897,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
                 "labels": {
+                    "0": {
+                        "id": 0,
+                        "item": 0,
+                        "type": "box2d",
+                        "category": [
+                            0
+                        ],
+                        "attributes": {},
+                        "parent": -1,
+                        "children": [],
+                        "shapes": [
+                            0
+                        ],
+                        "track": -1,
+                        "order": 1,
+                        "manual": true
+                    },
                     "1": {
                         "id": 1,
                         "item": 0,
@@ -110,24 +104,14 @@
                         "category": [
                             0
                         ],
-                        "attributes": {
-                            "0": [
-                                0
-                            ],
-                            "1": [
-                                0
-                            ],
-                            "2": [
-                                0
-                            ]
-                        },
+                        "attributes": {},
                         "parent": -1,
                         "children": [],
                         "shapes": [
                             1
                         ],
                         "track": -1,
-                        "order": 1,
+                        "order": 2,
                         "manual": true
                     },
                     "2": {
@@ -135,50 +119,13 @@
                         "item": 0,
                         "type": "box2d",
                         "category": [
-                            1
+                            0
                         ],
-                        "attributes": {
-                            "0": [
-                                1
-                            ],
-                            "1": [
-                                0
-                            ],
-                            "2": [
-                                3
-                            ]
-                        },
+                        "attributes": {},
                         "parent": -1,
                         "children": [],
                         "shapes": [
                             2
-                        ],
-                        "track": -1,
-                        "order": 2,
-                        "manual": true
-                    },
-                    "3": {
-                        "id": 3,
-                        "item": 0,
-                        "type": "box2d",
-                        "category": [
-                            3
-                        ],
-                        "attributes": {
-                            "0": [
-                                0
-                            ],
-                            "1": [
-                                1
-                            ],
-                            "2": [
-                                1, 2
-                            ]
-                        },
-                        "parent": -1,
-                        "children": [],
-                        "shapes": [
-                            3
                         ],
                         "track": -1,
                         "order": 3,
@@ -186,6 +133,19 @@
                     }
                 },
                 "shapes": {
+                    "0": {
+                        "id": 0,
+                        "label": [
+                            0
+                        ],
+                        "type": "rect",
+                        "shape": {
+                            "x1": 317.9044230030514,
+                            "y1": 192.46537396121883,
+                            "x2": 676.9071930861539,
+                            "y2": 411.85595567867034
+                        }
+                    },
                     "1": {
                         "id": 1,
                         "label": [
@@ -193,10 +153,10 @@
                         ],
                         "type": "rect",
                         "shape": {
-                            "x1": 280.00968616094616,
-                            "x2": 450.53600195041986,
-                            "y1": 152.57617728531858,
-                            "y2": 446.75900277008316
+                            "x1": 459.5110712024974,
+                            "y1": 276.2326869806094,
+                            "x2": 752.6966667703645,
+                            "y2": 400.88642659279776
                         }
                     },
                     "2": {
@@ -206,110 +166,87 @@
                         ],
                         "type": "rect",
                         "shape": {
-                            "x1": 405.66065569003206,
-                            "x2": 618.0706279892011,
-                            "y1": 73.79501385041551,
-                            "y2": 215.4016620498615
-                        }
-                    },
-                    "3": {
-                        "id": 3,
-                        "label": [
-                            3
-                        ],
-                        "type": "rect",
-                        "shape": {
-                            "x1": 648.9847554130238,
-                            "x2": 915.245143224658,
-                            "y1": 106.70360110803324,
-                            "y2": 329.0858725761773
+                            "x1": 746.7132872689795,
+                            "y1": 137.61772853185596,
+                            "x2": 1018.9570545819988,
+                            "y2": 294.1828254847645
                         }
                     }
-                }
+                },
+                "videoName": "b"
             },
             {
                 "id": 1,
                 "index": 1,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg",
-                "timestamp": 1570506897,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
                 "labels": {},
-                "shapes": {}
+                "shapes": {},
+                "videoName": "b"
             },
             {
                 "id": 2,
                 "index": 2,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg",
-                "timestamp": 1570506897,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
                 "labels": {},
-                "shapes": {}
+                "shapes": {},
+                "videoName": "b"
             },
             {
                 "id": 3,
                 "index": 3,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg",
-                "timestamp": 1570506897,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
                 "labels": {},
-                "shapes": {}
+                "shapes": {},
+                "videoName": "b"
             },
             {
                 "id": 4,
                 "index": 4,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg",
-                "timestamp": 1570506897,
+                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
                 "labels": {},
-                "shapes": {}
+                "shapes": {},
+                "videoName": "b"
             }
         ],
         "tracks": {}
     },
     "user": {
-        "id": "default_worker",
+        "id": "",
         "select": {
             "item": 0,
-            "label": 3,
-            "shape": 0,
+            "labels": [],
+            "shapes": [],
             "category": 0,
-            "attributes": {
-                "0": [
-                    0
-                ],
-                "1": [
-                    0
-                ],
-                "2": [
-                    0
-                ]
-            },
-            "labelType": 0
+            "attributes": {},
+            "labelType": 0,
+            "policyType": 0
         },
         "layout": {
-            "toolbarWidth": 0,
-            "assistantView": false,
-            "assistantViewRatio": 0
+            "toolbarWidth": 200,
+            "maxViewerConfigId": 0,
+            "assistantViewRatio": 0.3
         },
-        "imageViewerConfig": {
-            "imageWidth": 0,
-            "imageHeight": 0,
-            "viewScale": 1,
-            "displayTop": 0,
-            "displayLeft": 0
-        },
-        "pointCloudViewerConfig": {
-            "target": {
-                "x": 0,
-                "y": 0,
-                "z": 0
+        "viewerConfigs": []
+    },
+    "session": {
+        "id": "",
+        "startTime": 0,
+        "items": [
+            {
+                "loaded": false
             },
-            "position": {
-                "x": 0,
-                "y": 10,
-                "z": 0
+            {
+                "loaded": false
             },
-            "verticalAxis": {
-                "x": 0,
-                "y": 0,
-                "z": 1
+            {
+                "loaded": false
+            },
+            {
+                "loaded": false
+            },
+            {
+                "loaded": false
             }
-        }
+        ]
     }
 }

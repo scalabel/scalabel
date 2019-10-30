@@ -8,8 +8,8 @@ import { CreationForm, Project } from '../../js/server/types'
 import { getProjectKey, getTaskKey, initStorage } from '../../js/server/util'
 import { sampleFormFileData, sampleFormImage,
   sampleFormVideo, sampleProjectAutolabel, sampleProjectImage,
-  sampleProjectVideo, sampleTasksImage } from '../test_creation_objects'
-import { sampleStateExport } from '../test_export_objects'
+  sampleProjectVideo, sampleTasksImage, sampleTasksVideo } from '../test_creation_objects'
+import { sampleStateExportImage } from '../test_export_objects'
 
 beforeAll(() => {
   // mock the file system for saving/loading
@@ -45,12 +45,17 @@ describe('test project.json creation', () => {
 })
 
 describe('test task.json creation', () => {
-  test('task creation', () => {
+  test('task non-tracking creation', () => {
     return createTasks(sampleProjectImage).then((tasks) => {
       expect(tasks).toEqual(sampleTasksImage)
     })
   })
 
+  test('test tracking creation', async () => {
+    return createTasks(sampleProjectVideo).then((tasks) => {
+      expect(tasks).toEqual(sampleTasksVideo)
+    })
+  })
   test('task saving', () => {
     return testTaskSaving(sampleTasksImage)
   })
@@ -63,8 +68,8 @@ describe('create with auto labels', () => {
       const state: Partial<State> = {
         task: tasks[0]
       }
-      const exportedItems = convertStateToExport(state as State, 0)
-      expect(exportedItems).toEqual(sampleStateExport)
+      const exportedItems = convertStateToExport(state as State)
+      expect(exportedItems).toEqual(sampleStateExportImage)
     })
   })
 })

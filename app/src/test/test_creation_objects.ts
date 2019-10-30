@@ -3,7 +3,7 @@ import { AttributeToolType, BundleFile,
 import { ItemExport } from '../js/functional/bdd_types'
 import { Attribute, TaskType } from '../js/functional/types'
 import { CreationForm, FormFileData, Project } from '../js/server/types'
-import { sampleStateExport } from './test_export_objects'
+import { sampleStateExportImage } from './test_export_objects'
 
 const sampleCategories: string[] = [
   'person',
@@ -58,70 +58,70 @@ export const sampleItems: Array<Partial<ItemExport>> = [
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
-    videoName: '',
+    videoName: 'a',
     timestamp: 1568928550,
     index: 1
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
-    videoName: '',
+    videoName: 'a',
     timestamp: 1568928550,
     index: 2
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
-    videoName: '',
+    videoName: 'a',
     timestamp: 1568928550,
     index: 3
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
-    videoName: '',
+    videoName: 'b',
     timestamp: 1568928550,
     index: 4
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
-    videoName: '',
+    videoName: 'b',
     timestamp: 10000,
     index: 5
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
-    videoName: '',
+    videoName: 'b',
     timestamp: 10000,
     index: 6
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
-    videoName: '',
+    videoName: 'b',
     timestamp: 10000,
     index: 7
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
-    videoName: '',
+    videoName: 'b',
     timestamp: 10000,
     index: 8
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
-    videoName: '',
+    videoName: 'b',
     timestamp: 10000,
     index: 9
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
-    videoName: '',
+    videoName: 'b',
     timestamp: 10000,
     index: 10
   }
@@ -215,7 +215,7 @@ export const sampleProjectVideo: Project = {
 }
 
 export const sampleProjectAutolabel: Project = {
-  items: sampleStateExport,
+  items: sampleStateExportImage,
   config: {
     projectName: sampleProjectName,
     itemType: ItemTypeName.IMAGE,
@@ -271,7 +271,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 0,
         labels: {},
         shapes: {},
-        timestamp: 1568928550
+        timestamp: 1568928550,
+        videoName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
@@ -279,7 +280,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 1,
         labels: {},
         shapes: {},
-        timestamp: 1568928550
+        timestamp: 1568928550,
+        videoName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
@@ -287,7 +289,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 2,
         labels: {},
         shapes: {},
-        timestamp: 1568928550
+        timestamp: 1568928550,
+        videoName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
@@ -295,7 +298,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 3,
         labels: {},
         shapes: {},
-        timestamp: 1568928550
+        timestamp: 1568928550,
+        videoName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
@@ -303,7 +307,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 4,
         labels: {},
         shapes: {},
-        timestamp: 10000
+        timestamp: 10000,
+        videoName: 'b'
       }
     ],
     tracks: {}
@@ -341,7 +346,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 5,
         labels: {},
         shapes: {},
-        timestamp: 10000
+        timestamp: 10000,
+        videoName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
@@ -349,7 +355,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 6,
         labels: {},
         shapes: {},
-        timestamp: 10000
+        timestamp: 10000,
+        videoName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
@@ -357,7 +364,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 7,
         labels: {},
         shapes: {},
-        timestamp: 10000
+        timestamp: 10000,
+        videoName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
@@ -365,7 +373,8 @@ export const sampleTasksImage: TaskType[] = [
         id: 8,
         labels: {},
         shapes: {},
-        timestamp: 10000
+        timestamp: 10000,
+        videoName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
@@ -373,7 +382,161 @@ export const sampleTasksImage: TaskType[] = [
         id: 9,
         labels: {},
         shapes: {},
-        timestamp: 10000
+        timestamp: 10000,
+        videoName: 'b'
+      }
+    ],
+    tracks: {}
+  }
+]
+
+export const sampleTasksVideo: TaskType[] = [
+  {
+    config: {
+      projectName: sampleProjectName,
+      itemType: ItemTypeName.IMAGE,
+      labelTypes: [LabelTypeName.POLYGON_2D],
+      policyTypes: [],
+      taskSize: 3,
+      tracking: true,
+      handlerUrl: HandlerUrl.INVALID,
+      pageTitle: sampleTitle,
+      instructionPage: sampleInstructions,
+      bundleFile: BundleFile.V1,
+      categories: sampleCategories,
+      attributes: sampleAttributes as Attribute[],
+      taskId: '000000',
+      submitTime: -1,
+      demoMode: true,
+      submitted: false,
+      autosave: true
+    },
+    status: {
+      maxLabelId: -1,
+      maxShapeId: -1,
+      maxOrder: 0,
+      maxTrackId: -1
+    },
+    items: [
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
+        index: 0,
+        id: 0,
+        labels: {},
+        shapes: {},
+        timestamp: 1568928550,
+        videoName: 'a'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
+        index: 1,
+        id: 1,
+        labels: {},
+        shapes: {},
+        timestamp: 1568928550,
+        videoName: 'a'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
+        index: 2,
+        id: 2,
+        labels: {},
+        shapes: {},
+        timestamp: 1568928550,
+        videoName: 'a'
+      }
+    ],
+    tracks: {}
+  },
+  {
+    config: {
+      projectName: sampleProjectName,
+      itemType: ItemTypeName.IMAGE,
+      labelTypes: [LabelTypeName.POLYGON_2D],
+      policyTypes: [],
+      taskSize: 7,
+      tracking: true,
+      handlerUrl: HandlerUrl.INVALID,
+      pageTitle: sampleTitle,
+      instructionPage: sampleInstructions,
+      bundleFile: BundleFile.V1,
+      categories: sampleCategories,
+      attributes: sampleAttributes as Attribute[],
+      taskId: '000001',
+      submitTime: -1,
+      demoMode: true,
+      submitted: false,
+      autosave: true
+    },
+    status: {
+      maxLabelId: -1,
+      maxShapeId: -1,
+      maxOrder: 0,
+      maxTrackId: -1
+    },
+    items: [
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
+        index: 0,
+        id: 3,
+        labels: {},
+        shapes: {},
+        timestamp: 1568928550,
+        videoName: 'b'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
+        index: 1,
+        id: 4,
+        labels: {},
+        shapes: {},
+        timestamp: 10000,
+        videoName: 'b'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
+        index: 2,
+        id: 5,
+        labels: {},
+        shapes: {},
+        timestamp: 10000,
+        videoName: 'b'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
+        index: 3,
+        id: 6,
+        labels: {},
+        shapes: {},
+        timestamp: 10000,
+        videoName: 'b'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
+        index: 4,
+        id: 7,
+        labels: {},
+        shapes: {},
+        timestamp: 10000,
+        videoName: 'b'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
+        index: 5,
+        id: 8,
+        labels: {},
+        shapes: {},
+        timestamp: 10000,
+        videoName: 'b'
+      },
+      {
+        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
+        index: 6,
+        id: 9,
+        labels: {},
+        shapes: {},
+        timestamp: 10000,
+        videoName: 'b'
       }
     ],
     tracks: {}

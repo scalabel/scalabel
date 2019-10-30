@@ -25,6 +25,9 @@ export function convertItemToImport (
     id: itemId,
     timestamp: item.timestamp
   }
+  if (item.videoName !== undefined) {
+    partialItemImport.videoName = item.videoName
+  }
   const itemImport = makeItem(partialItemImport)
 
   const labelsImport: { [key: number]: LabelType } = {}

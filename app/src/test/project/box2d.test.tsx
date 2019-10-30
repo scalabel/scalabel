@@ -19,6 +19,8 @@ import {
   deleteTestDir,
   getExport,
   getExportFromDisc,
+  getProjectJson,
+  getProjectJsonFromDisc,
   projectInitSession,
   sleep,
   StyledIntegrationForm,
@@ -38,13 +40,13 @@ beforeAll(async () => {
     '--config',
     './app/config/test_config.yml'
   ])
-  /*launchProc.stdout.on('data', (data) => {
+  /* launchProc.stdout.on('data', (data) => {
     process.stdout.write(data)
   })
 
   launchProc.stderr.on('data', (data) => {
     process.stdout.write(data)
-  })*/
+  }) */
   window.alert = (): void => {
     return
   }
@@ -90,6 +92,12 @@ describe('full 2d bounding box integration test', () => {
         sleep(submissionTimeout)
       ]
     )
+  }),
+
+  test('test project.json was properly created', () => {
+    const projectJson = getProjectJson()
+    const sampleProjectJson = getProjectJsonFromDisc()
+    expect(projectJson).toEqual(sampleProjectJson)
   })
 
   test('test 2d-bounding-box annotation and save to disc', async () => {

@@ -1,6 +1,7 @@
 import { Fields, Files } from 'formidable'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
+import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
 import { makeTask } from '../functional/states'
@@ -245,9 +246,22 @@ export function createProject (
     demoMode: form.demoMode,
     autosave: true
   }
+
+  // ensure that all videonames are set to default if empty
+  let projectItems = formFileData.items
+  projectItems.forEach((itemExport) => {
+    if (itemExport.videoName === undefined) {
+      itemExport.videoName = ''
+    }
+  })
+
+  // With tracking, order by videoname lexicographically and split according
+  // to videoname. It should be noted that a stable sort must be used to
+  // maintain ordering provided in the image list file
+  projectItems = _.sortBy(projectItems, [(item) => item.videoName])
   const project: types.Project = {
     config,
-    items: formFileData.items
+    items: projectItems
   }
   return Promise.resolve(project)
 }
@@ -335,18 +349,37 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   const [attributeNameMap, attributeValueMap] = getAttributeMaps(
     project.config.attributes)
   const categoryNameMap = getCategoryMap(project.config.categories)
-
   const tasks: TaskType[] = []
-  let taskId = 0
-  for (let i = 0; i < items.length; i += taskSize) {
-    const itemsExport = items.slice(i, i + taskSize)
-
+  // taskIndices contains each [start, stop) range for every task
+  const taskIndices: number[] = []
+  if (project.config.tracking) {
+    let prevVideoName: string
+    items.forEach((value, index) => {
+      if (value.videoName !== undefined) {
+        if (value.videoName !== prevVideoName) {
+          taskIndices.push(index)
+          prevVideoName = value.videoName
+        }
+      }
+    })
+  } else {
+    for (let i = 0; i < items.length; i += taskSize) {
+      taskIndices.push(i)
+    }
+  }
+  taskIndices.push(items.length)
+  let taskStartIndex: number
+  let taskEndIndex
+  for (let i = 0; i < taskIndices.length - 1; i ++) {
+    taskStartIndex = taskIndices[i]
+    taskEndIndex = taskIndices[i + 1]
+    const itemsExport = items.slice(taskStartIndex, taskEndIndex)
     /* assign task id,
      and update task size in case there aren't enough items */
     const config: ConfigType = {
       ...project.config,
       taskSize: itemsExport.length,
-      taskId: util.index2str(taskId)
+      taskId: util.index2str(i)
     }
 
     // based on the imported labels, compute max ids
@@ -358,7 +391,8 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     // convert from export format to internal format
     const itemsForTask: ItemType[] = []
     for (let itemInd = 0; itemInd < itemsExport.length; itemInd += 1) {
-      const itemId = i + itemInd // id is not relative to task, unlike index
+      // id is not relative to task, unlike index
+      const itemId = taskStartIndex + itemInd
       const newItem = convertItemToImport(
         itemsExport[itemInd], itemInd, itemId,
         attributeNameMap, attributeValueMap, categoryNameMap)
@@ -385,7 +419,6 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     }
     const task = makeTask(partialTask)
     tasks.push(task)
-    taskId += 1
   }
   return Promise.resolve(tasks)
 }

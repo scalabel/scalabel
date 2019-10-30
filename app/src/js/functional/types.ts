@@ -155,6 +155,8 @@ export interface ItemType {
   shapes: { [key: number]: IndexedShapeType }
   /** the timestamp for the item */
   timestamp: number
+  /** the videoname for the item */
+  videoName: string
 }
 
 export interface Attribute {

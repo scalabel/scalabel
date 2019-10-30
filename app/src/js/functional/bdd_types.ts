@@ -24,7 +24,7 @@ export interface ItemExport {
   attributes: { [key: string]: string[] }
   /** submitted timestamp */
   timestamp: number
-  /** item index */
+  /** item index NOT relative to task */
   index: number
   /** item labels */
   labels: LabelExport[]

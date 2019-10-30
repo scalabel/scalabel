@@ -1,5 +1,6 @@
 import { withStyles } from '@material-ui/core'
 import * as fs from 'fs-extra'
+import * as path from 'path'
 import { ChangeEvent } from 'react'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { initFromJson } from '../../js/common/session_init'
@@ -20,15 +21,19 @@ export interface TestConfig {
   /** path to test directory */
   testDirPath: string
   /** example export path */
-  sampleExportPath: string
+  samplePath: string
   /** example export filename */
   sampleExportFilename: string
+  /** example project json filename */
+  sampleProjectJsonFilename: string
   /** item list filename */
   itemListFilename: string
   /** categories filename */
   categoriesFilename: string
   /** attributes filename */
   attributesFilename: string
+  /** filename for storing project info */
+  projectFilename: string
   /** if we are exporting */
   exportMode: boolean
 }
@@ -38,11 +43,13 @@ export let testConfig: TestConfig = {
   taskIndex: 0,
   examplePath: './examples/',
   testDirPath: './test_data/',
-  sampleExportPath: './app/src/test/',
+  samplePath: './app/src/test/',
   sampleExportFilename: 'sample_export.json',
+  sampleProjectJsonFilename: 'sample_project.json',
   itemListFilename: 'image_list.yml',
   categoriesFilename: 'categories.yml',
   attributesFilename: 'bbox_attributes.yml',
+  projectFilename: 'project.json',
   exportMode: false
 }
 
@@ -77,8 +84,20 @@ function getExampleFileFromDisc (
 export function getExportFromDisc () {
   return JSON.parse(
     fs.readFileSync(
-      testConfig.sampleExportPath + testConfig.sampleExportFilename,
+      path.join(testConfig.samplePath, testConfig.sampleExportFilename),
       'utf8'
+    )
+  )
+}
+
+/**
+ * gets true project data from disc
+ */
+export function getProjectJsonFromDisc () {
+  return JSON.parse(
+    fs.readFileSync(
+      path.join(testConfig.samplePath, testConfig.sampleProjectJsonFilename),
+      'utf-8'
     )
   )
 }
@@ -169,6 +188,19 @@ export async function getExport (): Promise<ItemExport[]> {
 }
 
 /**
+ * gets created project.json file
+ */
+export function getProjectJson () {
+  return JSON.parse(
+    fs.readFileSync(
+      path.join(testConfig.testDirPath, testConfig.projectName,
+        testConfig.projectFilename),
+      'utf-8'
+    )
+  )
+}
+
+/**
  * over writes CreateForm
  */
 class IntegrationCreateForm extends CreateForm {
@@ -180,7 +212,7 @@ class IntegrationCreateForm extends CreateForm {
     let itemFilePath: string
     let itemFilename: string
     if (testConfig.exportMode) {
-      itemFilePath = testConfig.sampleExportPath
+      itemFilePath = testConfig.samplePath
       itemFilename = testConfig.sampleExportFilename
     } else {
       itemFilePath = testConfig.examplePath

@@ -67,10 +67,10 @@ export async function GetExportHandler (req: Request, res: Response) {
     const tasks = await getTasksInProject(projectName)
     let items: ItemExport[] = []
     // load the latest submission for each task to export
-    for (const [taskIndex, task] of tasks.entries()) {
+    for (const task of tasks) {
       await loadSavedState(projectName, task.config.taskId)
         .then((state: State) => {
-          items = items.concat(convertStateToExport(state, taskIndex))
+          items = items.concat(convertStateToExport(state))
         })
         .catch((err: Error) => {
           // if state submission is not found, use an empty item
@@ -79,11 +79,11 @@ export async function GetExportHandler (req: Request, res: Response) {
             items.push({
               name: itemToLoad.url,
               url: itemToLoad.url,
-              videoName: '',
+              videoName: itemToLoad.videoName,
               timestamp: projectToLoad.config.submitTime,
               attributes: {},
               // do not index relative to task index when exporting
-              index: itemToLoad.index + taskIndex * task.items.length,
+              index: itemToLoad.id,
               labels: []
             })
           }

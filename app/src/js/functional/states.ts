@@ -180,6 +180,7 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
     labels: {},
     shapes: {},
     timestamp: -1,
+    videoName: '',
     ...params
   }
 }
