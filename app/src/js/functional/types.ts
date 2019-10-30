@@ -137,6 +137,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   target: Vector3Type
   /** Up direction of the camera */
   verticalAxis: Vector3Type
+  /** Camera rotation lock */
+  lockStatus: number
 }
 
 export interface Image3DViewerConfigType extends

@@ -7,6 +7,11 @@ import * as types from './types'
 export const MOUSE_CORRECTION_FACTOR = 60.0
 export const MOVE_AMOUNT = 0.3
 export const ZOOM_SPEED = 1.1
+export enum CameraLockState {
+  UNLOCKED = 0,
+  X_LOCKED = 1,
+  Y_LOCKED = 2
+}
 
 /**
  * Generate move camera action
@@ -105,12 +110,18 @@ export function rotateCamera (
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): types.ChangeViewerConfigAction {
+  if (viewerConfig.lockStatus === CameraLockState.X_LOCKED) {
+    newX = initialX
+  } else if (viewerConfig.lockStatus === CameraLockState.Y_LOCKED) {
+    newY = initialY
+  }
   const target = new THREE.Vector3(viewerConfig.target.x,
     viewerConfig.target.y,
     viewerConfig.target.z)
   const offset = new THREE.Vector3(viewerConfig.position.x,
-    viewerConfig.position.y,
-    viewerConfig.position.z)
+      viewerConfig.position.y,
+      viewerConfig.position.z)
+
   offset.sub(target)
 
   // Rotate so that positive y-axis is vertical
@@ -139,7 +150,6 @@ export function rotateCamera (
   // Rotate back to original coordinate space
   const quatInverse = rotVertQuat.clone().inverse()
   offset.applyQuaternion(quatInverse)
-
   offset.add(target)
 
   return moveCamera((new Vector3D()).fromThree(offset), viewerId, viewerConfig)
@@ -370,4 +380,25 @@ export function moveRight (
     viewerId,
     viewerConfig
   )
+}
+
+/**
+ * Update lockStatus in viewerConfig
+ * @param viewerConfig
+ */
+export function updateLockStatus (
+  viewerId: number,
+  viewerConfig: PointCloudViewerConfigType
+): types.ChangeViewerConfigAction {
+  const newLockStatus = (viewerConfig.lockStatus + 1) % 3
+  const config = {
+    ...viewerConfig,
+    lockStatus: newLockStatus
+  }
+  return {
+    type: types.CHANGE_VIEWER_CONFIG,
+    sessionId: Session.id,
+    viewerId,
+    config
+  }
 }

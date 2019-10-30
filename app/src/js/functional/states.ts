@@ -162,6 +162,7 @@ export function makePointCloudViewerConfig (): PointCloudViewerConfigType {
     position: { x: 0.0, y: 10.0, z: 0.0 },
     target: { x: 0.0, y: 0.0, z: 0.0 },
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
+    lockStatus: 0,
     show: true,
     type: types.ViewerConfigType.POINT_CLOUD
   }

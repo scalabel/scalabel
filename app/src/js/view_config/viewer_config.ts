@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import { changeViewerConfig } from '../action/common'
 import { zoomImage } from '../action/image'
-import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, zoomCamera } from '../action/point_cloud'
+import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera } from '../action/point_cloud'
+
 import Session from '../common/session'
 import * as types from '../common/types'
 import { ImageViewerConfigType, PointCloudViewerConfigType, State, ViewerConfigType } from '../functional/types'
@@ -367,6 +368,10 @@ export default class ViewerConfigUpdater {
       case types.Key.RIGHT:
       case types.Key.ARROW_RIGHT:
         Session.dispatch(moveRight(this._viewerId, viewerConfig))
+        break
+      case types.Key.C_UP:
+      case types.Key.C_LOW:
+        Session.dispatch(updateLockStatus(this._viewerId, viewerConfig))
         break
     }
   }
