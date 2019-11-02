@@ -1,4 +1,5 @@
 import mockfs from 'mock-fs'
+import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
 import { getProjectKey, getTaskKey, index2str } from '../../js/server/util'
 
@@ -41,11 +42,63 @@ describe('test local file storage', () => {
     })
   })
 
- /* TODO:
-  test saving- there seems to be some issue with mock-fs and writeFile
-  test saving then loading
-  test deletion
-  */
+  test('save then load', () => {
+    const taskId = index2str(2)
+    const key = getTaskKey(projectName, taskId)
+    const fakeData = '{"testField": "testValue2"}'
+    return storage.save(key, fakeData).then(() => {
+      return Promise.all([
+        checkTaskKey(2, true),
+        checkTaskKey(3, false),
+        checkLoad(2)
+      ])
+    })
+  })
+
+  test('multiple saves multiple loads', () => {
+    const savePromises = []
+    for (let i = 3; i < 7; i++) {
+      savePromises.push(checkTaskKey(i, false))
+      savePromises.push(
+        storage.save(getTaskKey(projectName, index2str(i)),
+         sprintf('{"testField": "testValue%d"}', i)
+        )
+      )
+    }
+    savePromises.push(
+      storage.save('fakeFile', `fake content`)
+    )
+    return Promise.all(savePromises).then(() => {
+      const loadPromises = []
+      for (let j = 3; j < 7; j++) {
+        loadPromises.push(checkTaskKey(j, true))
+        loadPromises.push(checkLoad(j))
+      }
+      loadPromises.push(
+        storage.load('fakeFile').then((data: string) => {
+          expect(data).toBe(`fake content`)
+        })
+      )
+      return Promise.all(loadPromises)
+    })
+  })
+
+  test('delete', () => {
+    const key = 'myProject/tasks'
+    return Promise.all([
+      checkTaskKey(1, true),
+      checkTaskKey(0, true)
+    ]).then(() => {
+      return storage.delete(key).then(() => {
+        return Promise.all([
+          checkTaskKey(1, false),
+          checkTaskKey(0, false)
+        ])
+      })
+    })
+
+  })
+
 })
 
 /**
@@ -66,6 +119,17 @@ function checkProjectKey (): Promise<void> {
   const key = getProjectKey(projectName)
   return storage.hasKey(key).then((exists) => {
     expect(exists).toBe(true)
+  })
+}
+
+/**
+ * tests if load on an index works
+ */
+function checkLoad (index: number): Promise<void> {
+  return storage.load(getTaskKey(projectName, index2str(index)))
+  .then((data: string) => {
+    const loadedData = JSON.parse(data)
+    expect(loadedData.testField).toBe(sprintf('testValue%d', index))
   })
 }
 
