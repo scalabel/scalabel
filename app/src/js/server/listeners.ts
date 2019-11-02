@@ -12,11 +12,12 @@ import {
   parseForm, saveProject, saveTasks
 } from './create_project'
 import { convertStateToExport } from './export'
+import Logger from './logger'
 import { getExportName } from './path'
 import Session from './server_session'
 import * as types from './types'
 import { getExistingProjects, getProjectKey,
-  getTasksInProject, loadSavedState, logError, logInfo } from './util'
+  getTasksInProject, loadSavedState } from './util'
 
 /**
  * Logs requests to static or dynamic files
@@ -24,7 +25,7 @@ import { getExistingProjects, getProjectKey,
 export function LoggingHandler (
   req: Request, _res: Response, next: NextFunction) {
   const log = sprintf('Requesting %s', req.originalUrl)
-  logInfo(log)
+  Logger.info(log)
   next()
 }
 
@@ -40,7 +41,7 @@ export async function ProjectNameHandler (_req: Request, res: Response) {
       projects = defaultProjects
     }
   } catch (err) {
-    logError(err)
+    Logger.error(err)
     projects = defaultProjects
   }
   const projectNames = JSON.stringify(projects)
@@ -74,7 +75,7 @@ export async function GetExportHandler (req: Request, res: Response) {
         })
         .catch((err: Error) => {
           // if state submission is not found, use an empty item
-          logInfo(err.message)
+          Logger.info(err.message)
           for (const itemToLoad of task.items) {
             items.push({
               name: itemToLoad.url,
@@ -94,7 +95,7 @@ export async function GetExportHandler (req: Request, res: Response) {
     res.attachment(getExportName(projectName))
     res.end(Buffer.from(exportJson, 'binary'), 'binary')
   } catch (err) {
-    logError(err)
+    Logger.error(err)
     res.end()
   }
 }
@@ -125,14 +126,14 @@ export async function PostProjectHandler (req: Request, res: Response) {
       ])
       res.send()
     } catch (err) {
-      logError(err)
+      Logger.error(err)
       // alert the user that something failed
       res.send(err.message)
     }
   } else {
     // alert the user that the sent fields were illegal
     const err = Error('illegal fields')
-    logError(err)
+    Logger.error(err)
     res.send(err.message)
   }
 }
@@ -197,7 +198,7 @@ export async function DashboardHandler (req: Request, res: Response) {
 
       res.send(JSON.stringify(contents))
     } catch (err) {
-      logError(err)
+      Logger.error(err)
       res.send(err.message)
     }
   }

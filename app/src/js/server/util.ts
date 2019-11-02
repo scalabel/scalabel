@@ -8,6 +8,7 @@ import * as yargs from 'yargs'
 import { BundleFile, HandlerUrl, ItemTypeName, LabelTypeName } from '../common/types'
 import { State, TaskType } from '../functional/types'
 import { FileStorage } from './file_storage'
+import Logger from './logger'
 import Session from './server_session'
 import { Storage } from './storage'
 import { CreationForm, DatabaseType, Env, MaybeError } from './types'
@@ -68,7 +69,7 @@ function makeStorage (
 export function initStorage (env: Env) {
   // set up storage
   const [err, storage] = makeStorage(env.database, env.data)
-  logError(err)
+  Logger.error(err)
   Session.setStorage(storage)
 }
 
@@ -238,7 +239,7 @@ export async function loadSavedState (projectName: string, taskId: string):
   return storage.listKeys(getSavedKey(projectName, taskId), false)
     .then((keys) => {
       if (keys.length > 0) {
-        logInfo(sprintf('Reading %s\n', keys[keys.length - 1]))
+        Logger.info(sprintf('Reading %s\n', keys[keys.length - 1]))
         return storage.load(keys[keys.length - 1])
       }
       return Promise.reject(Error())
@@ -251,29 +252,4 @@ export async function loadSavedState (projectName: string, taskId: string):
         Error(sprintf('No submissions found for task number %s',
           taskId)))
     })
-}
-
-/**
- * Logs error to backend console
- */
-export function logError (err: MaybeError) {
-  if (err) {
-    Session.getLogger().log({
-      level: 'error',
-      message: err.message
-    })
-  }
-}
-
-/**
- * logs info
- * @param info
- */
-export function logInfo (info: string) {
-  if (info) {
-    Session.getLogger().log({
-      level: 'info',
-      message: info
-    })
-  }
 }
