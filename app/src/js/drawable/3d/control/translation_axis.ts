@@ -41,7 +41,7 @@ export class TranslationAxis extends THREE.Group
     const guidelineGeometry = new THREE.BufferGeometry()
     guidelineGeometry.addAttribute(
       'position',
-      new THREE.Float32BufferAttribute([ 0, 0, -10, 0, 0, 10 ], 3)
+      new THREE.Float32BufferAttribute([ 0, -10, 0, 0, 10, 0 ], 3)
     )
     this._guideline = new THREE.Line(
       guidelineGeometry,
