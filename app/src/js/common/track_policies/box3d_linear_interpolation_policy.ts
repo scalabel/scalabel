@@ -1,7 +1,6 @@
 import { addDuplicatedTrack } from '../../action/track'
 import { CHANGE_SHAPES } from '../../action/types'
 import { Box3D } from '../../drawable/3d/box3d'
-import { Cube3D } from '../../drawable/3d/cube3d'
 import { makeLabel } from '../../functional/states'
 import { CubeType, ItemType, ShapeType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
@@ -210,7 +209,7 @@ export class LinearInterpolationBox3DPolicy extends TrackPolicy {
     label: Label
   ) {
     label = label as Box3D
-    const cube = (label.shapes()[0] as Cube3D).toCube()
+    const cube = label.shapes()[0].toObject()
     const labelObject = makeLabel({
       type: types.LabelTypeName.BOX_3D,
       category: label.category

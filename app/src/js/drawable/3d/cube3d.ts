@@ -1,11 +1,13 @@
 import * as THREE from 'three'
-import { CubeType } from '../../functional/types'
+import { ShapeTypeName } from '../../common/types'
+import { CubeType, ShapeType } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
 import { projectionFromNDC } from '../../view_config/point_cloud'
-import { TransformationControl } from './control/transformation_control'
 import { Grid3D } from './grid3d'
+import Label3D from './label3d'
 import { Plane3D } from './plane3d'
+import { Shape3D } from './shape3d'
 
 const faceNormals = [
   new THREE.Vector3(1, 0, 0),
@@ -19,13 +21,11 @@ const faceNormals = [
 /**
  * Shape for Box3D label
  */
-export class Cube3D extends THREE.Group {
+export class Cube3D extends Shape3D {
   /** Box faces */
   private _box: THREE.Mesh
   /** Outline ThreeJS object */
   private _outline: THREE.LineSegments
-  /** Id of corresponding Box3D */
-  private _id: number
   /** Color */
   private _color: number[]
   /** Anchor corner index */
@@ -36,18 +36,12 @@ export class Cube3D extends THREE.Group {
   private _size: Vector3D
   /** Redux state */
   private _orientation: Vector3D
-  /** controls */
-  private _control: TransformationControl | null
   /** Normal of the closest face */
   private _closestFaceNormal: THREE.Vector3
   /** Control points */
   private _controlSpheres: THREE.Mesh[]
   /** Highlighted control point */
   private _highlightedSphere: THREE.Mesh | null
-  /** whether highlighted */
-  private _highlighted: boolean
-  /** whether selected */
-  private _selected: boolean
   /** Plane shape */
   private _grid: Readonly<Grid3D> | null
   /** Id of surface */
@@ -59,8 +53,8 @@ export class Cube3D extends THREE.Group {
    * Make box with assigned id
    * @param id
    */
-  constructor (id: number) {
-    super()
+  constructor (label: Label3D) {
+    super(label)
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
@@ -70,26 +64,21 @@ export class Cube3D extends THREE.Group {
         opacity: 0.5
       })
     )
+    this.add(this._box)
 
     this._outline = new THREE.LineSegments(
       new THREE.EdgesGeometry(this._box.geometry),
       new THREE.LineBasicMaterial({ color: 0xffffff })
     )
-
-    this._id = id
+    this.add(this._outline)
 
     this._color = []
 
     this._anchorIndex = 0
 
-    this.add(this._box)
-    this.add(this._outline)
-
     this._center = new Vector3D()
     this._size = new Vector3D()
     this._orientation = new Vector3D()
-
-    this._control = null
 
     this._closestFaceNormal = new THREE.Vector3()
     this._controlSpheres = []
@@ -109,23 +98,25 @@ export class Cube3D extends THREE.Group {
     this._highlightedSphere.position.x = 0
     this._highlightedSphere = null
 
-    this._highlighted = false
-    this._selected = false
-
-    this ._grid = null
+    this._grid = null
 
     this._surfaceId = -1
 
-    this.setHighlighted()
-
     this._firstCorner = null
+
+    this.setHighlighted()
+  }
+
+  /** Get shape type name */
+  public get typeName () {
+    return ShapeTypeName.CUBE
   }
 
   /**
    * Set size
    * @param size
    */
-  public setSize (size: Vector3D): void {
+  public set size (size: Vector3D) {
     this.scale.copy(size.toThree())
     this._size.copy(size)
   }
@@ -133,7 +124,7 @@ export class Cube3D extends THREE.Group {
   /**
    * Get size
    */
-  public getSize (): Vector3D {
+  public get size (): Vector3D {
     return (new Vector3D()).fromThree(this.scale)
   }
 
@@ -141,7 +132,7 @@ export class Cube3D extends THREE.Group {
    * Set center position
    * @param center
    */
-  public setCenter (center: Vector3D): void {
+  public set center (center: Vector3D) {
     this.position.copy(center.toThree())
     this._center.copy(center)
   }
@@ -149,7 +140,7 @@ export class Cube3D extends THREE.Group {
   /**
    * Get center position
    */
-  public getCenter (): Vector3D {
+  public get center (): Vector3D {
     return (new Vector3D()).fromThree(this.position)
   }
 
@@ -157,7 +148,7 @@ export class Cube3D extends THREE.Group {
    * Set orientation as euler
    * @param orientation
    */
-  public setOrientation (orientation: Vector3D): void {
+  public set orientation (orientation: Vector3D) {
     this.rotation.setFromVector3(orientation.toThree())
     this._orientation.copy(orientation)
   }
@@ -165,37 +156,22 @@ export class Cube3D extends THREE.Group {
   /**
    * Get orientation as euler
    */
-  public getOrientation (): Vector3D {
+  public get orientation (): Vector3D {
     return (new Vector3D()).fromThree(this.rotation.toVector3())
-  }
-
-  /**
-   * set id of associated label
-   * @param id
-   */
-  public setId (id: number): void {
-    this._id = id
   }
 
   /**
    * Set color
    * @param color
    */
-  public setColor (color: number[]): void {
+  public set color (color: number[]) {
     this._color = color.map((v) => v / 255.)
-  }
-
-  /**
-   * Get index
-   */
-  public getId (): number {
-    return this._id
   }
 
   /**
    * Get ThreeJS box
    */
-  public getBox (): THREE.Mesh {
+  public get box (): THREE.Mesh {
     return this._box
   }
 
@@ -203,18 +179,19 @@ export class Cube3D extends THREE.Group {
    * Set surface id
    * @param id
    */
-  public setSurfaceId (id: number) {
+  public set surfaceId (id: number) {
     this._surfaceId = id
   }
 
+  /** Return state representation of shape */
   /**
    * Convert to state representation
    */
-  public toCube (): CubeType {
+  public toObject (): ShapeType {
     return {
-      center: this.getCenter().toObject(),
-      size: this.getSize().toObject(),
-      orientation: this.getOrientation().toObject(),
+      center: this.center.toObject(),
+      size: this.size.toObject(),
+      orientation: this.orientation.toObject(),
       anchorIndex: this._anchorIndex,
       surfaceId: this._surfaceId
     }
@@ -232,7 +209,7 @@ export class Cube3D extends THREE.Group {
    * @param plane
    */
   public attachToPlane (plane: Plane3D) {
-    this._grid = plane.shapes()[0]
+    this._grid = plane.shapes()[0] as Grid3D
     this._grid.add(this)
   }
 
@@ -245,6 +222,20 @@ export class Cube3D extends THREE.Group {
       this._grid.remove(this)
     }
     this._grid = null
+  }
+
+  /** update parameters */
+  public updateState (
+    shape: ShapeType, id: number, activeCamera?: THREE.Camera
+  ) {
+    super.updateState(shape, id)
+    const cube = shape as CubeType
+    this.center = (new Vector3D()).fromObject(cube.center)
+    this.orientation = (new Vector3D()).fromObject(cube.orientation)
+    this.size = (new Vector3D()).fromObject(cube.size)
+    if (activeCamera) {
+      this.setControlSpheres(activeCamera)
+    }
   }
 
   /**
@@ -263,7 +254,7 @@ export class Cube3D extends THREE.Group {
       }
 
       this.setControlSpheres(camera)
-    } else if (this._selected) {
+    } else if (this._label.selected) {
       (this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
       (this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
@@ -289,32 +280,18 @@ export class Cube3D extends THREE.Group {
     }
   }
 
-  /**
-   * Add/remove controls
-   * @param control
-   * @param show
-   */
-  public setControl (control: TransformationControl, show: boolean) {
-    if (show) {
-      this.add(control)
-      this._control = control
-      this._control.attach(this)
-    } else if (this._control) {
-      this._control.detach()
-      this.remove(control)
-      this._control = null
-    }
-  }
-
   /** Set highlighted */
   public setHighlighted (intersection?: THREE.Intersection) {
     for (const sphere of this._controlSpheres) {
       { (sphere.material as THREE.Material).opacity = 0.3 }
       { (sphere.material as THREE.Material).needsUpdate = true }
+      sphere.visible = true
     }
     this._highlightedSphere = null
     if (intersection) {
+      (this._outline.material as THREE.LineBasicMaterial).color.set(0xff0000)
       this._highlighted = true
+
       for (const sphere of this._controlSpheres) {
         if (intersection.object === sphere) {
           this._highlightedSphere = sphere
@@ -323,13 +300,13 @@ export class Cube3D extends THREE.Group {
         }
       }
     } else {
+      (this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       this._highlighted = false
-    }
-  }
 
-  /** Set selected */
-  public setSelected (s: boolean) {
-    this._selected = s
+      for (const sphere of this._controlSpheres) {
+        sphere.visible = false
+      }
+    }
   }
 
   /**
@@ -578,6 +555,12 @@ export class Cube3D extends THREE.Group {
     this.position.add(positionDelta)
     this.scale.add(scaleDelta)
 
+    for (const sphere of this._controlSpheres) {
+      sphere.scale.set(
+        1. / this.scale.x, 1. / this.scale.y, 1. / this.scale.z
+      )
+    }
+
     return true
   }
 
@@ -625,6 +608,10 @@ export class Cube3D extends THREE.Group {
         )
       }
       this._controlSpheres[i].position.multiplyScalar(0.5)
+
+      this._controlSpheres[i].scale.set(
+        1. / this.scale.x, 1. / this.scale.y, 1. / this.scale.z
+      )
     }
   }
 }

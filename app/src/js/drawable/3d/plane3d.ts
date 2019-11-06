@@ -1,13 +1,11 @@
-import { changeLabelShape } from '../../action/common'
-import { addPlaneLabel } from '../../action/plane3d'
-import Session from '../../common/session'
-import { LabelTypeName } from '../../common/types'
+import { LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
 import { Plane3DType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { TransformationControl } from './control/transformation_control'
 import { Grid3D } from './grid3d'
 import Label3D from './label3d'
+import { Shape3D } from './shape3d'
 
 /**
  * Class for managing plane for holding 3d labels
@@ -18,12 +16,7 @@ export class Plane3D extends Label3D {
 
   constructor () {
     super()
-    this._shape = new Grid3D(this._index)
-  }
-
-  /** select the label */
-  public setSelected (s: boolean) {
-    super.setSelected(s)
+    this._shape = new Grid3D(this)
   }
 
   /**
@@ -36,12 +29,12 @@ export class Plane3D extends Label3D {
 
   /** Attach control */
   public attachControl (control: TransformationControl): void {
-    this._shape.setControl(control, true)
+    this._shape.attachControl(control)
   }
 
   /** Detach control */
-  public detachControl (control: TransformationControl): void {
-    this._shape.setControl(control, false)
+  public detachControl (): void {
+    this._shape.detachControl()
   }
 
   /**
@@ -94,17 +87,6 @@ export class Plane3D extends Label3D {
   public updateState (
     state: State, itemIndex: number, labelId: number): void {
     super.updateState(state, itemIndex, labelId)
-    this._shape.labelId = labelId
-  }
-
-  /** Update the shapes of the label to the state */
-  public commitLabel (): void {
-    if (this._label !== null) {
-      const shape = this._shape.toPlane()
-      Session.dispatch(changeLabelShape(
-        this._label.item, this._label.shapes[0], shape
-      ))
-    }
   }
 
   /**
@@ -112,30 +94,33 @@ export class Plane3D extends Label3D {
    * @param {State} state
    */
   public init (
-    state: State,
-    _surfaceId?: number,
-    _viewerId?: number,
-    _temporary?: boolean
+    itemIndex: number,
+    category: number
   ): void {
-    const itemIndex = state.user.select.item
-    this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
       type: LabelTypeName.PLANE_3D, id: -1, item: itemIndex,
-      category: [state.user.select.category],
-      order: this._order
+      category: [category]
     })
     this._labelId = -1
-    const plane = this._shape.toPlane()
-    Session.dispatch(addPlaneLabel(
-      this._label.item, plane.center, plane.orientation
-    ))
   }
 
   /**
    * Return a list of the shape for inspection and testing
    */
-  public shapes (): Array<Readonly<Grid3D>> {
+  public shapes (): Shape3D[] {
     return [this._shape]
+  }
+
+  /** State representation of shape */
+  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
+    if (!this._label) {
+      throw new Error('Uninitialized label')
+    }
+    return [
+      [this._label.shapes[0]],
+      [ShapeTypeName.GRID],
+      [this._shape.toObject()]
+    ]
   }
 
   /**

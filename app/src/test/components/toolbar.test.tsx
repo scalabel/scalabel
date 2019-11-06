@@ -114,7 +114,7 @@ describe('test Delete', () => {
       expect(_.size(item.labels)).toBe(3)
       expect(secondLabelId in item.labels).toBe(true)
       Session.dispatch(selectLabel(
-        Session.getState(), itemIndex, secondLabelId))
+        Session.getState().user.select.labels, itemIndex, secondLabelId))
       fireEvent.keyDown(document, { key: 'Backspace' })
       item = Session.getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(2)

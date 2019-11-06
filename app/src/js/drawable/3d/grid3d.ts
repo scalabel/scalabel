@@ -1,26 +1,28 @@
 import * as THREE from 'three'
-import { Plane3DType } from '../../functional/types'
+import { ShapeTypeName } from '../../common/types'
+import { ShapeType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { TransformationControl } from './control/transformation_control'
+import Label3D from './label3d'
+import { Shape3D } from './shape3d'
 
 /**
  * ThreeJS class for rendering grid
  */
-export class Grid3D extends THREE.Group {
+export class Grid3D extends Shape3D {
   /** grid lines */
   private _lines: THREE.GridHelper
-  /** label id */
-  private _id: number
-  /** control */
-  private _control: TransformationControl | null
 
-  constructor (id: number) {
-    super()
-    this._id = id
+  constructor (label: Label3D) {
+    super(label)
     this._lines = new THREE.GridHelper(6, 6, 0xffffff, 0xffffff)
     this._lines.rotation.x = Math.PI / 2
     this.add(this._lines)
-    this._control = null
+  }
+
+  /** Get shape type name */
+  public get typeName () {
+    return ShapeTypeName.GRID
   }
 
   /**
@@ -31,26 +33,16 @@ export class Grid3D extends THREE.Group {
     scene.add(this)
   }
 
-  /**
-   * Get id
-   */
-  public get labelId (): number {
-    return this._id
-  }
-
-  /**
-   * Set id
-   * @param {number} id
-   */
-  public set labelId (id: number) {
-    this._id = id
+  /** Do not highlight plane for now */
+  public setHighlighted (_intersection: THREE.Intersection) {
+    return
   }
 
   /**
    * Object representation
    */
-  public toPlane (): Plane3DType {
-    return {
+  public toObject (): ShapeType {
+    return{
       center: (new Vector3D()).fromThree(this.position).toObject(),
       orientation:
         (new Vector3D()).fromThree(this.rotation.toVector3()).toObject()

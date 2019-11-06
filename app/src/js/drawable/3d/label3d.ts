@@ -1,18 +1,15 @@
 import * as THREE from 'three'
-import { LabelType, ShapeType, State } from '../../functional/types'
+import { ShapeTypeName } from '../../common/types'
+import { LabelType, PointCloudViewerConfigType, ShapeType, State } from '../../functional/types'
 import { getColorById } from '../util'
 import { TransformationControl } from './control/transformation_control'
-import { Cube3D } from './cube3d'
-import { Grid3D } from './grid3d'
 import { Plane3D } from './plane3d'
-
-type Shape = Cube3D | Grid3D
+import { Shape3D } from './shape3d'
 
 /**
  * Abstract class for 3D drawable labels
  */
 export abstract class Label3D {
-  /* The members are public for testing purpose */
   /** label id in state */
   protected _labelId: number
   /** track id in state */
@@ -61,10 +58,26 @@ export abstract class Label3D {
     return this._labelId
   }
 
+  /** get label state */
+  public get label (): Readonly<LabelType> {
+    if (!this._label) {
+      throw new Error('Label uninitialized')
+    }
+    return this._label
+  }
+
   /** select the label */
-  public setSelected (s: boolean) {
+  public set selected (s: boolean) {
     this._selected = s
   }
+
+  /** return whether label selected */
+  public get selected (): boolean {
+    return this._selected
+  }
+
+  /** Get shape id's and shapes for updating */
+  public abstract shapeObjects (): [number[], ShapeTypeName[], ShapeType[]]
 
   /** highlight the label */
   public setHighlighted (intersection?: THREE.Intersection) {
@@ -110,13 +123,7 @@ export abstract class Label3D {
   public abstract attachControl (control: TransformationControl): void
 
   /** Attach control */
-  public abstract detachControl (control: TransformationControl): void
-
-  /**
-   * Modify ThreeJS objects to draw label
-   * @param {THREE.Scene} scene: ThreeJS Scene Object
-   */
-  public abstract render (scene: THREE.Scene, camera: THREE.Camera): void
+  public abstract detachControl (): void
 
   /**
    * Handle mouse move
@@ -141,33 +148,29 @@ export abstract class Label3D {
   ): boolean
 
   /**
-   * Expand the primitive shapes to drawable shapes
-   * @param {ShapeType[]} shapes
-   */
-  public abstract updateShapes (shapes: ShapeType[]): void
-
-  /** Update the shapes of the label to the state */
-  public abstract commitLabel (): void
-
-  /**
    * Initialize label
    * @param {State} state
    */
   public abstract init (
-    state: State,
+    itemIndex: number,
+    category: number,
+    viewerConfig?: PointCloudViewerConfigType,
     surfaceId?: number,
-    viewerId?: number,
     temporary?: boolean
   ): void
 
   /**
    * Return a list of the shape for inspection and testing
    */
-  public abstract shapes (): Array<Readonly<Shape>>
+  public abstract shapes (): Shape3D[]
 
   /** Convert label state to drawable */
   public updateState (
-    state: State, itemIndex: number, labelId: number): void {
+    state: State,
+    itemIndex: number,
+    labelId: number,
+    _activeCamera?: THREE.Camera
+  ): void {
     const item = state.task.items[itemIndex]
     this._label = item.labels[labelId]
     this._labelId = this._label.id
@@ -176,11 +179,11 @@ export abstract class Label3D {
     const select = state.user.select
     if (this._label.item in select.labels &&
         select.labels[this._label.item].includes(labelId)) {
-      this.setSelected(true)
+      this.selected = true
     } else {
-      this.setSelected(false)
+      this.selected = false
+      this.detachControl()
     }
-    this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }
 }
 

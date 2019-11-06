@@ -124,6 +124,25 @@ export function addTrack (
  * @param {Partial<ShapeType>} props
  * @return {ChangeLabelShapeAction}
  */
+export function changeShapes (
+    itemIndex: number, shapeIds: number[], shapes: Array<Partial<ShapeType>>
+  ): types.ChangeShapesAction {
+  return {
+    type: types.CHANGE_SHAPES,
+    sessionId: Session.id,
+    itemIndices: [itemIndex],
+    shapeIds: [shapeIds],
+    shapes: [shapes]
+  }
+}
+
+/**
+ * Change the shape of the label
+ * @param {number} itemIndex
+ * @param {number} shapeId
+ * @param {Partial<ShapeType>} props
+ * @return {ChangeLabelShapeAction}
+ */
 export function changeLabelShape (
     itemIndex: number, shapeId: number, shape: Partial<ShapeType>
   ): types.ChangeShapesAction {

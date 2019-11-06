@@ -2,7 +2,8 @@ import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
-import { Label3DList } from '../drawable/3d/label3d_list'
+import Session from '../common/session'
+import { Label3DHandler } from '../drawable/3d/label3d_handler'
 import { getCurrentViewerConfig, isItemLoaded } from '../functional/state_util'
 import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
@@ -69,7 +70,7 @@ class Label3dViewer extends Viewer<Props> {
   private _keyDownMap: { [key: string]: boolean }
 
   /** drawable label list */
-  private _labels: Label3DList
+  private _labelHandler: Label3DHandler
 
   /** key up listener */
   private _keyUpListener: (e: KeyboardEvent) => void
@@ -92,7 +93,7 @@ class Label3dViewer extends Viewer<Props> {
         }))
     this.scene.add(this.target)
 
-    this._labels = new Label3DList()
+    this._labelHandler = new Label3DHandler()
 
     this.display = null
     this.canvas = null
@@ -190,7 +191,7 @@ class Label3dViewer extends Viewer<Props> {
     )
     const x = NDC[0]
     const y = NDC[1]
-    if (this._labels.onMouseDown(x, y, this.camera)) {
+    if (this._labelHandler.onMouseDown(x, y, this.camera)) {
       e.stopPropagation()
     }
   }
@@ -203,7 +204,7 @@ class Label3dViewer extends Viewer<Props> {
     if (!this.canvas || this.checkFreeze()) {
       return
     }
-    if (this._labels.onMouseUp()) {
+    if (this._labelHandler.onMouseUp()) {
       e.stopPropagation()
     }
   }
@@ -234,7 +235,7 @@ class Label3dViewer extends Viewer<Props> {
 
     this._raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
 
-    const shapes = this._labels.getRaycastableShapes()
+    const shapes = Session.label3dList.raycastableShapes
     const intersects = this._raycaster.intersectObjects(
       // Need to do this middle conversion because ThreeJS does not specify
       // as readonly, but this should be readonly for all other purposes
@@ -242,8 +243,8 @@ class Label3dViewer extends Viewer<Props> {
     )
 
     const consumed = (intersects && intersects.length > 0) ?
-      this._labels.onMouseMove(x, y, this.camera, intersects[0]) :
-      this._labels.onMouseMove(x, y, this.camera)
+      this._labelHandler.onMouseMove(x, y, this.camera, intersects[0]) :
+      this._labelHandler.onMouseMove(x, y, this.camera)
     if (consumed) {
       e.stopPropagation()
     }
@@ -262,7 +263,7 @@ class Label3dViewer extends Viewer<Props> {
 
     this._keyDownMap[e.key] = true
 
-    if (this._labels.onKeyDown(e)) {
+    if (this._labelHandler.onKeyDown(e)) {
       this.renderThree()
     }
   }
@@ -278,7 +279,7 @@ class Label3dViewer extends Viewer<Props> {
 
     this._keyDownMap[e.key] = true
 
-    if (this._labels.onKeyUp(e)) {
+    if (this._labelHandler.onKeyUp(e)) {
       this.renderThree()
     }
   }
@@ -288,7 +289,8 @@ class Label3dViewer extends Viewer<Props> {
    */
   protected updateState (state: State): void {
     this.display = this.props.display
-    this._labels.updateState(state, state.user.select.item, this.props.id)
+    Session.label3dList.setActiveCamera(this.camera)
+    this._labelHandler.updateState(state, state.user.select.item, this.props.id)
   }
 
   /**
@@ -297,8 +299,7 @@ class Label3dViewer extends Viewer<Props> {
   private renderThree () {
     if (this.renderer) {
       this.scene.children = []
-      this._labels.render(this.scene, this.camera)
-      this.renderer.render(this.scene, this.camera)
+      this.renderer.render(Session.label3dList.scene, this.camera)
     }
   }
 
@@ -307,7 +308,7 @@ class Label3dViewer extends Viewer<Props> {
    * @param _e
    */
   private onDoubleClick (e: React.MouseEvent<HTMLCanvasElement>) {
-    if (this._labels.onDoubleClick()) {
+    if (this._labelHandler.onDoubleClick()) {
       e.stopPropagation()
     }
   }

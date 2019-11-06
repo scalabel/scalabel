@@ -1,5 +1,20 @@
 import { ShapeType } from '../../functional/types'
 import { Label, Track } from '../track'
+import { TrackPolicyType } from '../types'
+
+/** Convert policy type name to enum */
+export function policyFromString (
+  typeName: string
+): TrackPolicyType {
+  switch (typeName) {
+    case TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D:
+      return TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D
+    case TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D:
+      return TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D
+  }
+
+  throw new Error(`Unrecognized policy type: ${typeName}`)
+}
 
 /**
  * Track policy for updating track

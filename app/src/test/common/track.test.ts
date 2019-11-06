@@ -5,7 +5,6 @@ import { makeTrackPolicy, Track } from '../../js/common/track'
 import { Box2D } from '../../js/drawable/2d/box2d'
 import { Rect2D } from '../../js/drawable/2d/rect2d'
 import { Box3D } from '../../js/drawable/3d/box3d'
-import { Cube3D } from '../../js/drawable/3d/cube3d'
 import { makeTrack } from '../../js/functional/states'
 import { CubeType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
@@ -23,6 +22,9 @@ test('box3d linear interpolation tracking', () => {
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(action.changeSelect({ policyType: 0 }))
 
+  const box = new Box3D()
+  box.init(0, 0)
+
   let state = Session.getState()
   const currentPolicyType =
     state.task.config.policyTypes[state.user.select.policyType]
@@ -30,10 +32,7 @@ test('box3d linear interpolation tracking', () => {
   newTrack.updateState(
     makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
   )
-  Session.tracks[-1] = newTrack
-
-  const box = new Box3D()
-  box.init(state)
+  newTrack.onLabelCreated(0, box)
 
   state = Session.getState()
 
@@ -73,7 +72,7 @@ test('box3d linear interpolation tracking', () => {
   expect(lastLabel).not.toBeUndefined()
 
   if (firstLabel && lastLabel) {
-    const newProps: CubeType = (box.shapes()[0] as Cube3D).toCube()
+    const newProps: CubeType = box.shapes()[0].toObject() as CubeType
     newProps.center = { x: 5, y: 5, z: 5 }
     Session.dispatch(action.changeLabelShape(
       firstLabel.item,

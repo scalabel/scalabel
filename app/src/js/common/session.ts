@@ -4,6 +4,7 @@ import { StateWithHistory } from 'redux-undo'
 import * as THREE from 'three'
 import * as types from '../action/types'
 import { Window } from '../components/window'
+import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
 import { Track } from './track'
@@ -22,6 +23,8 @@ class Session {
   public images: HTMLImageElement[]
   /** Point cloud */
   public pointClouds: THREE.Points[]
+  /** 3d label list */
+  public label3dList: Label3DList
   /** map between track id and track objects */
   public tracks: {[trackId: number]: Track}
   /** Item type: image, point cloud */
@@ -49,6 +52,7 @@ class Session {
   constructor () {
     this.images = []
     this.pointClouds = []
+    this.label3dList = new Label3DList()
     this.tracks = {}
     this.itemType = ''
     this.tracking = true

@@ -33,6 +33,7 @@ export enum ShapeTypeName {
   UNKNOWN = 'unknown',
   RECT = 'rect',
   CUBE = 'cube',
+  GRID = 'grid',
   POINT_2D = 'point2d',
   PATH_POINT_2D = 'path_point2d',
   POLYGON_2D = 'polygon2d'

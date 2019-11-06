@@ -99,14 +99,14 @@ export function changeSelectedLabelsCategories (
  * @param {number} labelId
  */
 export function selectLabel (
-  state: State,
+  currentSelection: {[index: number]: number[]},
   itemIndex: number,
   labelId: number,
   category?: number,
   attributes?: {[key: number]: number[]},
   append: boolean = false
 ): types.ChangeSelectAction {
-  const selectedLabels = _.cloneDeep(state.user.select.labels)
+  const selectedLabels = _.cloneDeep(currentSelection)
   const labelIds = (append && itemIndex in selectedLabels) ?
     selectedLabels[itemIndex] : []
   if (labelId >= 0 && !labelIds.includes(labelId)) {

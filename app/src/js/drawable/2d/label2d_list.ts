@@ -203,7 +203,7 @@ export class Label2DList {
         this._selectedLabels.push(this._labelList[labelIndex])
         this._selectedLabels[0].setSelected(true, handleIndex)
         Session.dispatch(selectLabel(
-          this._state,
+          this._state.user.select.labels,
           this._state.user.select.item,
           this._selectedLabels[0].labelId,
           this._selectedLabels[0].category[0],
