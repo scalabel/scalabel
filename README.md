@@ -80,7 +80,7 @@ More installation and usage details can be find in our [documentation](http://ww
 
    ```
    docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 scalabel/www \
-       /opt/scalabel/bin/scalabel --config /opt/scalabel/data/config.yml
+       node /opt/scalabel/app/dist/js/main.js --config /opt/scalabel/app/config/default_config.yml
    ```
 
    Otherwise
