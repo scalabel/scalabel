@@ -6,7 +6,6 @@ import ListItemText from '@material-ui/core/ListItemText'
 import withStyles from '@material-ui/core/styles/withStyles'
 import TableBody from '@material-ui/core/TableBody'
 import Typography from '@material-ui/core/Typography'
-import classNames from 'classnames'
 import React from 'react'
 import { dashboardWindowStyles, headerStyle, listEntryStyle, sidebarStyle } from '../styles/dashboard'
 import DividedPage from './divided_page'
@@ -277,9 +276,7 @@ function sidebar (props: SidebarProps) {
         <ListItemText
           key={value.tag}
           className={!(index % 2) ?
-            classNames(classes.listItem,
-              classes.coloredListItem) :
-            classes.listItem}
+            '${classes.listItem} ${classes.coloredListItem}' : classes.listItem}
           primary={
             <StyledListEntry tag={value.tag} entry={value.entry} />
           }
