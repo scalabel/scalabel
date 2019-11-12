@@ -597,7 +597,7 @@ export class Polygon2D extends Label2D {
       if (this._labelId < 0) {
         const p = this.toPolygon()
         Session.dispatch(addPolygon2dLabel(
-          this._label.item, this._label.category, p.points))
+          this._label.item, -1, this._label.category, p.points))
       } else {
         const p = this.toPolygon()
         Session.dispatch(changeLabelShape(

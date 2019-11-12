@@ -59,6 +59,8 @@ export interface ChangeSelectAction extends BaseAction {
 export interface LoadItemAction extends BaseAction {
   /** Index of the item to load */
   itemIndex: number
+  /** Id of corresponding data source of element in item */
+  sensorId: number
 }
 
 export type UpdateAllAction = BaseAction

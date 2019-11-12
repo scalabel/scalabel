@@ -249,7 +249,7 @@ export class Label2dViewer extends Viewer<Props> {
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     if (this._labels.onMouseMove(
       mousePos,
-      getCurrentImageSize(this.state),
+      getCurrentImageSize(this.state, this.props.id),
       labelIndex, handleIndex
     )) {
       e.stopPropagation()

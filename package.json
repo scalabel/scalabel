@@ -122,7 +122,7 @@
         "ts-loader": "^6.2.1",
         "tslint": "^5.20.0",
         "tslint-config-standard": "^8.0.1",
-        "typescript": "^3.6.4",
+        "typescript": "^3.7.2",
         "uuid": "^3.3.3",
         "uws": "^10.148.1",
         "webpack": "^4.41.2",

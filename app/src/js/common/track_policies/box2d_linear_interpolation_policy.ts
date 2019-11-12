@@ -204,12 +204,14 @@ export class LinearInterpolationBox2DPolicy extends TrackPolicy {
    */
   public onLabelCreated (
     itemIndex: number,
-    label: Label
+    label: Label,
+    sensors: number[]
   ) {
     const rect = ((label as Box2D).shapes[0] as Rect2D).toRect()
     const labelObject = makeLabel({
       type: types.LabelTypeName.BOX_2D,
-      category: label.category
+      category: label.category,
+      sensors
     })
 
     const state = Session.getState()

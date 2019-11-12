@@ -66,11 +66,14 @@ export function changeSelect (
  * Create load item action
  */
 export function loadItem (
-    itemIndex: number): types.LoadItemAction {
+  itemIndex: number,
+  sensorId: number
+): types.LoadItemAction {
   return {
     type: types.LOAD_ITEM,
     sessionId: Session.id,
-    itemIndex
+    itemIndex,
+    sensorId
   }
 }
 
@@ -82,8 +85,11 @@ export function loadItem (
  * @return {AddLabelAction}
  */
 export function addLabel (
-  itemIndex: number, label: LabelType, shapeTypes: string[] = [],
-  shapes: ShapeType[] = []): types.AddLabelsAction {
+  itemIndex: number,
+  label: LabelType,
+  shapeTypes: string[] = [],
+  shapes: ShapeType[] = []
+): types.AddLabelsAction {
   return {
     type: types.ADD_LABELS,
     sessionId: Session.id,

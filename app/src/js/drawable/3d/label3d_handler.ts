@@ -4,7 +4,7 @@ import { addLabel, changeShapes } from '../../action/common'
 import { selectLabel } from '../../action/select'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
-import { Key, LabelTypeName } from '../../common/types'
+import { Key } from '../../common/types'
 import { getCurrentViewerConfig } from '../../functional/state_util'
 import { makePointCloudViewerConfig, makeTrack } from '../../functional/states'
 import { PointCloudViewerConfigType, State } from '../../functional/types'
@@ -35,22 +35,22 @@ export class Label3DHandler {
     this._highlightedLabel = null
     this._mouseDownOnSelection = false
     this._labelChanged = false
-    if (Session.itemType === 'image') {
-      let planeExists = false
-      const state = Session.getState()
-      const itemIndex = state.user.select.item
-      const item = state.task.items[itemIndex]
-      for (const key of Object.keys(item.labels)) {
-        if (item.labels[Number(key)].type === LabelTypeName.PLANE_3D) {
-          planeExists = true
-          break
-        }
-      }
-      if (!planeExists) {
-        this._plane = new Plane3D()
-        this._plane.init(itemIndex, -1)
-      }
-    }
+    // if (Session.itemType === 'image') {
+    //   let planeExists = false
+    //   const state = Session.getState()
+    //   const itemIndex = state.user.select.item
+    //   const item = state.task.items[itemIndex]
+    //   for (const key of Object.keys(item.labels)) {
+    //     if (item.labels[Number(key)].type === LabelTypeName.PLANE_3D) {
+    //       planeExists = true
+    //       break
+    //     }
+    //   }
+    //   if (!planeExists) {
+    //     this._plane = new Plane3D()
+    //     this._plane.init(itemIndex, -1)
+    //   }
+    // }
     this._keyDownMap = {}
     this._viewerConfig = makePointCloudViewerConfig()
     this._selectedItemIndex = -1
@@ -187,7 +187,7 @@ export class Label3DHandler {
               makeTrack(-1),
               makeTrackPolicy(newTrack, Session.label3dList.policyType)
             )
-            newTrack.onLabelCreated(this._selectedItemIndex, box)
+            newTrack.onLabelCreated(this._selectedItemIndex, box, [-1])
           } else {
             Session.dispatch(addLabel(
               this._selectedItemIndex,

@@ -34,12 +34,30 @@ export function getShape (state: State, itemIndex: number,
 }
 
 /**
+ * Check whether item is loaded
+ * @param state
+ * @param item
+ */
+export function isItemLoaded (state: State, item: number) {
+  const loadedMap =
+    state.session.itemStatuses[item].sensorDataLoaded
+
+  for (const loaded of Object.values(loadedMap)) {
+    if (!loaded) {
+      return false
+    }
+  }
+
+  return true
+}
+
+/**
  * Check whether the current item is loaded
  * @param {State} state
  * @return boolean
  */
-export function isItemLoaded (state: State): boolean {
-  return state.session.items[state.user.select.item].loaded
+export function isCurrentItemLoaded (state: State): boolean {
+  return isItemLoaded(state, state.user.select.item)
 }
 
 /**

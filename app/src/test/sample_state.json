@@ -78,11 +78,17 @@
             {
                 "id": 0,
                 "index": 0,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+                "timestamp": 0,
+                "urls": {
+                    "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg"
+                },
                 "labels": {
                     "0": {
                         "id": 0,
                         "item": 0,
+                        "sensors": [
+                            -1
+                        ],
                         "type": "box2d",
                         "category": [
                             0
@@ -100,6 +106,9 @@
                     "1": {
                         "id": 1,
                         "item": 0,
+                        "sensors": [
+                            -1
+                        ],
                         "type": "box2d",
                         "category": [
                             0
@@ -117,6 +126,9 @@
                     "2": {
                         "id": 2,
                         "item": 0,
+                        "sensors": [
+                            -1
+                        ],
                         "type": "box2d",
                         "category": [
                             0
@@ -178,7 +190,10 @@
             {
                 "id": 1,
                 "index": 1,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+                "timestamp": 1,
+                "urls": {
+                    "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg"
+                },
                 "labels": {},
                 "shapes": {},
                 "videoName": "b"
@@ -186,7 +201,10 @@
             {
                 "id": 2,
                 "index": 2,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+                "timestamp": 2,
+                "urls": {
+                    "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg"
+                },
                 "labels": {},
                 "shapes": {},
                 "videoName": "b"
@@ -194,7 +212,10 @@
             {
                 "id": 3,
                 "index": 3,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+                "timestamp": 3,
+                "urls": {
+                    "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg"
+                },
                 "labels": {},
                 "shapes": {},
                 "videoName": "b"
@@ -202,13 +223,23 @@
             {
                 "id": 4,
                 "index": 4,
-                "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+                "timestamp": 4,
+                "urls": {
+                    "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg"
+                },
                 "labels": {},
                 "shapes": {},
                 "videoName": "b"
             }
         ],
-        "tracks": {}
+        "tracks": {},
+        "sensors": {
+            "-1": {
+                "id": -1,
+                "name": "default",
+                "type": "image"
+            }
+        }
     },
     "user": {
         "id": "",
@@ -231,21 +262,31 @@
     "session": {
         "id": "",
         "startTime": 0,
-        "items": [
+        "itemsStatuses": [
             {
-                "loaded": false
+                "sensorDataLoaded": {
+                    "-1": false
+                }
             },
             {
-                "loaded": false
+                "sensorDataLoaded": {
+                    "-1": false
+                }
             },
             {
-                "loaded": false
+                "sensorDataLoaded": {
+                    "-1": false
+                }
             },
             {
-                "loaded": false
+                "sensorDataLoaded": {
+                    "-1": false
+                }
             },
             {
-                "loaded": false
+                "sensorDataLoaded": {
+                    "-1": false
+                }
             }
         ]
     }

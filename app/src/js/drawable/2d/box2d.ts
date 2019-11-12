@@ -266,12 +266,18 @@ export class Box2D extends Label2D {
           const r = this.toRect()
           if (Session.tracking && this._trackId in Session.tracks) {
             Session.tracks[this._trackId].onLabelCreated(
-              this._label.item, this
+              this._label.item, this, [-1]
             )
           } else {
             Session.dispatch(addBox2dLabel(
-              this._label.item, this._label.category, this._label.attributes,
-              r.x1, r.y1, r.x2, r.y2
+              this._label.item,
+              -1,
+              this._label.category,
+              this._label.attributes,
+              r.x1,
+              r.y1,
+              r.x2,
+              r.y2
             ))
           }
         } else {

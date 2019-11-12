@@ -232,6 +232,7 @@ class IntegrationCreateForm extends CreateForm {
     formData.append('categories', categoriesFile, categoriesFile.name)
     formData.delete('attributes')
     formData.append('attributes', attributesFile, attributesFile.name)
+
     return formData
   }
 }

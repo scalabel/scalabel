@@ -8,23 +8,28 @@ import { Attribute, ConfigType, CubeType,
  * @param config
  * @param item
  */
-export function convertItemToExport (config: ConfigType,
-                                     item: ItemType): ItemExport {
-  const itemExport: ItemExport = {
-    ...defaultItemExport,
-    name: item.url,
-    url: item.url,
-    videoName: item.videoName,
-    // Don't index relative to task index, but rather from 0 to numItems
-    index: item.id
+export function convertItemToExport (
+  config: ConfigType,
+  item: ItemType
+): ItemExport[] {
+  const itemExports: {[sensor: number]: ItemExport} = {}
+  for (const key of Object.keys(item.urls)) {
+    const sensor = Number(key)
+    const url = item.urls[sensor]
+    const videoName = item.videoName
+    const timestamp = (item.timestamp) ? item.timestamp : 0
+    itemExports[sensor] = {
+      name: url,
+      url,
+      videoName,
+      timestamp,
+      attributes: {},
+      labels: [],
+      sensor
+    }
   }
-  // TODO: remove after fixing timestamps
-  // tslint:disable-next-line: strict-type-predicates
-  if (item.timestamp !== undefined) {
-    itemExport.timestamp = item.timestamp
-  }
-  const labelExports: LabelExport[] = []
-  Object.entries(item.labels).forEach(([_, label]) => {
+  for (const key of Object.keys(item.labels)) {
+    const label = item.labels[Number(key)]
     const labelExport: LabelExport = {
       id: label.id,
       category: config.categories[label.category[0]],
@@ -34,8 +39,6 @@ export function convertItemToExport (config: ConfigType,
       poly2d: null,
       box3d: null
     }
-    // TODO: fix this to loop over all labels shapes
-    // right now it just exports the first one
     if (label.shapes.length > 0) {
       const shapeId = label.shapes[0]
       const indexedShape = item.shapes[shapeId]
@@ -54,10 +57,11 @@ export function convertItemToExport (config: ConfigType,
           break
       }
     }
-    labelExports.push(labelExport)
-  })
-  itemExport.labels = labelExports
-  return itemExport
+    for (const sensor of label.sensors) {
+      itemExports[sensor].labels.push(labelExport)
+    }
+  }
+  return Object.values(itemExports)
 }
 
 /**
@@ -107,17 +111,7 @@ export function convertStateToExport (state: State)
   const items = state.task.items
   const exportList: ItemExport[] = []
   items.forEach((item) => {
-    exportList.push(convertItemToExport(config, item))
+    exportList.push(...convertItemToExport(config, item))
   })
   return exportList
-}
-
-const defaultItemExport = {
-  name: '',
-  url: '',
-  videoName: '',
-  attributes: {},
-  timestamp: -1,
-  index: -1,
-  labels: []
 }

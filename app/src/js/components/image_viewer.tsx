@@ -1,7 +1,7 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import Session from '../common/session'
-import { getCurrentViewerConfig, isItemLoaded } from '../functional/state_util'
+import { getCurrentViewerConfig, isCurrentItemLoaded } from '../functional/state_util'
 import { ImageViewerConfigType, State } from '../functional/types'
 import { imageViewStyle } from '../styles/label'
 import {
@@ -100,7 +100,9 @@ export class ImageViewer extends Viewer<Props> {
    */
   public redraw (): boolean {
     if (this.currentItemIsLoaded() && this.imageCanvas && this.imageContext) {
-      const image = Session.images[this.state.user.select.item]
+      const image = Session.images[this.state.user.select.item][
+        this.state.user.viewerConfigs[this.props.id].sensor
+      ]
       // redraw imageCanvas
       drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
     }
@@ -149,7 +151,7 @@ export class ImageViewer extends Viewer<Props> {
    * @return {boolean}
    */
   private currentItemIsLoaded (): boolean {
-    return isItemLoaded(this.state)
+    return isCurrentItemLoaded(this.state)
   }
 }
 

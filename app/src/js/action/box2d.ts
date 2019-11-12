@@ -15,10 +15,18 @@ import { AddLabelsAction } from './types'
  * @return {AddLabelAction}
  */
 export function addBox2dLabel (
-  itemIndex: number, category: number[], attributes: {[key: number]: number[]},
-  x: number, y: number, w: number, h: number): AddLabelsAction {
+  itemIndex: number,
+  sensor: number,
+  category: number[],
+  attributes: {[key: number]: number[]},
+  x: number, y: number, w: number, h: number
+): AddLabelsAction {
   // create the rect object
   const rect = makeRect({ x1: x, y1: y, x2: w, y2: h })
-  const label = makeLabel({ type: LabelTypeName.BOX_2D, category, attributes })
-  return actions.addLabel(itemIndex, label, [ShapeTypeName.RECT], [rect])
+  const label = makeLabel({
+    type: LabelTypeName.BOX_2D, category, attributes, sensors: [sensor]
+  })
+  return actions.addLabel(
+    itemIndex, label, [ShapeTypeName.RECT], [rect]
+  )
 }

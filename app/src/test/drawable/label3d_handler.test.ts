@@ -75,7 +75,7 @@ function getActiveAxisForRotation (camLoc: number, axis: number) {
 function initializeTestingObjects (): [Label3DHandler, number] {
   Session.devMode = false
   initStore(testJson)
-  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig(-1)))
   const viewerId = 1
 
   const label3dHandler = new Label3DHandler()

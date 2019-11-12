@@ -9,13 +9,13 @@ beforeAll(() => {
   Session.devMode = false
 })
 
-describe('test export functinoality across multiple labeling types', () => {
+describe('test export functionality across multiple labeling types', () => {
   describe('test export functionality for bounding box', () => {
     test('single item conversion', () => {
       const state = readSampleState()
       const config = state.task.config
       const item = state.task.items[0]
-      const itemExport = convertItemToExport(config, item)
+      const itemExport = convertItemToExport(config, item)[0]
       expect(itemExport).toEqual(sampleItemExportImage)
     }),
       test('full state export with empty items', () => {

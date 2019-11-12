@@ -1,6 +1,14 @@
 import {
-  ConfigType, CubeType, ItemType,
-  PolygonType, RectType, TaskStatus, TrackType } from './types'
+  ConfigType,
+  CubeType,
+  ExtrinsicsType,
+  IntrinsicsType,
+  ItemType,
+  PolygonType,
+  RectType,
+  TaskStatus,
+  TrackType
+} from './types'
 
 export interface TaskData {
   /** task config data that's constant throughout a session */
@@ -18,14 +26,20 @@ export interface ItemExport {
   name: string
   /** item url */
   url: string
-  /** item videoname */
+  /** video name */
   videoName: string
+  /** id of data source */
+  sensor: number
+  /** data type, overrides data source if present */
+  dataType?: string
+  /** intrinsics, overrides data source if present */
+  intrinsics?: IntrinsicsType
+  /** extrinsics, overrides data source if present */
+  extrinsics?: ExtrinsicsType
   /** item attributes */
   attributes: { [key: string]: string[] }
   /** submitted timestamp */
   timestamp: number
-  /** item index NOT relative to task */
-  index: number
   /** item labels */
   labels: LabelExport[]
 }

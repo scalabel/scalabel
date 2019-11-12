@@ -4,7 +4,7 @@ import * as uuid4 from 'uuid/v4'
 import * as types from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
-import { makeState } from '../functional/states'
+import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
 import * as path from './path'
 import Session from './server_session'
@@ -111,7 +111,14 @@ async function loadStateFromTask (
   const task = JSON.parse(fields) as TaskType
   const state = makeState({ task })
 
-  state.session.items = state.task.items.map((_i) => ({ loaded: false }))
+  state.session.itemStatuses = []
+  for (const item of state.task.items) {
+    const itemStatus = makeItemStatus()
+    for (const sensorKey of Object.keys(item.urls)) {
+      itemStatus.sensorDataLoaded[Number(sensorKey)] = false
+    }
+    state.session.itemStatuses.push(itemStatus)
+  }
 
   switch (state.task.config.itemType) {
     case ItemTypeName.IMAGE:

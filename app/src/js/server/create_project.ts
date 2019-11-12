@@ -4,10 +4,10 @@ import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
-import { makeTask } from '../functional/states'
+import { makeSensor, makeTask, makeTrack } from '../functional/states'
 import {
   Attribute, ConfigType,
-  ItemType, TaskStatus, TaskType } from '../functional/types'
+  ItemType, SensorType, TaskStatus, TaskType, TrackMapType } from '../functional/types'
 import { convertItemToImport } from './import'
 import Session from './server_session'
 import * as types from './types'
@@ -255,13 +255,16 @@ export function createProject (
     }
   })
 
+  const sensors: {[id: number]: SensorType} = {}
+
   // With tracking, order by videoname lexicographically and split according
   // to videoname. It should be noted that a stable sort must be used to
   // maintain ordering provided in the image list file
   projectItems = _.sortBy(projectItems, [(item) => item.videoName])
   const project: types.Project = {
     config,
-    items: projectItems
+    items: projectItems,
+    sensors
   }
   return Promise.resolve(project)
 }
@@ -318,30 +321,42 @@ function getCategoryMap (
   return categoryNameMap
 }
 
-/**
- * gets the max of values and currMax
- * @param values an array of numbers in string format
- */
-function getMax (values: string[], oldMax: number): number {
-  const numericValues = values.map((value: string) => {
-    return parseInt(value, 10)
-  })
-  let currMax = -1
-  if (numericValues.length > 0) {
-    currMax = numericValues.reduce((a, b) => {
-      return Math.max(a, b)
-    })
-  }
-  return Math.max(currMax, oldMax)
-}
+// /**
+//  * gets the max of values and currMax
+//  * @param values an array of numbers in string format
+//  */
+// function getMax (values: string[], oldMax: number): number {
+//   const numericValues = values.map((value: string) => {
+//     return parseInt(value, 10)
+//   })
+//   let currMax = -1
+//   if (numericValues.length > 0) {
+//     currMax = numericValues.reduce((a, b) => {
+//       return Math.max(a, b)
+//     })
+//   }
+//   return Math.max(currMax, oldMax)
+// }
 
 /**
  * Split project into tasks
  * Each consists of the task portion of a frontend state
  */
 export function createTasks (project: types.Project): Promise<TaskType[]> {
-  const items = project.items
-  const taskSize = project.config.taskSize
+  // Filter invalid items, condition depends on whether labeling fusion data
+  const items = (project.config.itemType === ItemTypeName.FUSION) ?
+    project.items.filter((itemExport) =>
+      itemExport.dataType === undefined &&
+      itemExport.sensor !== undefined &&
+      itemExport.timestamp !== undefined &&
+      itemExport.sensor in project.sensors
+    ) :
+    project.items.filter((itemExport) =>
+      !itemExport.dataType ||
+      itemExport.dataType === project.config.itemType
+    )
+
+  let taskSize = project.config.taskSize
 
   /* create quick lookup dicts for conversion from export type
    * to external type for attributes/categories
@@ -349,6 +364,33 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   const [attributeNameMap, attributeValueMap] = getAttributeMaps(
     project.config.attributes)
   const categoryNameMap = getCategoryMap(project.config.categories)
+
+  const sensors: {[id: number]: SensorType} = project.sensors
+  if (project.config.itemType !== ItemTypeName.FUSION) {
+    sensors[-1] = makeSensor(-1, 'default', project.config.itemType)
+    let maxSensorId =
+      Math.max(...Object.keys(sensors).map((key) => Number(key)))
+    for (const itemExport of items) {
+      if (itemExport.dataType) {
+        sensors[maxSensorId + 1] = makeSensor(
+          maxSensorId,
+          '',
+          itemExport.dataType,
+          itemExport.intrinsics,
+          itemExport.extrinsics
+        )
+        itemExport.sensor = maxSensorId
+        itemExport.dataType = undefined
+        maxSensorId++
+      } else if (
+        itemExport.sensor === undefined ||
+        !(itemExport.sensor in project.sensors)
+      ) {
+        itemExport.sensor = -1
+      }
+    }
+  }
+
   const tasks: TaskType[] = []
   // taskIndices contains each [start, stop) range for every task
   const taskIndices: number[] = []
@@ -369,16 +411,48 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   }
   taskIndices.push(items.length)
   let taskStartIndex: number
-  let taskEndIndex
+  let taskEndIndex: number
   for (let i = 0; i < taskIndices.length - 1; i ++) {
     taskStartIndex = taskIndices[i]
     taskEndIndex = taskIndices[i + 1]
-    const itemsExport = items.slice(taskStartIndex, taskEndIndex)
+    const taskItemsExport = items.slice(taskStartIndex, taskEndIndex)
+
+    // Map from data source id to list of item exports
+    const itemExportsBySensor:
+      {[id: number]: Array<Partial<ItemExport>>} = {}
+    for (const itemExport of taskItemsExport) {
+      if (itemExport.sensor !== undefined) {
+        if (!(itemExport.sensor in itemExportsBySensor)) {
+          itemExportsBySensor[itemExport.sensor] = []
+        }
+        itemExportsBySensor[itemExport.sensor].push(itemExport)
+      }
+    }
+
+    taskSize = 0
+    let largestSensor = -1
+    const sensorMatchingIndices: {[id: number]: number} = {}
+    for (const key of Object.keys(itemExportsBySensor)) {
+      const sensorId = Number(key)
+      itemExportsBySensor[sensorId] = _.sortBy(
+        itemExportsBySensor[sensorId],
+        [(itemExport) => (itemExport.timestamp === undefined) ?
+          0 : itemExport.timestamp]
+      )
+      taskSize = Math.max(
+        taskSize, itemExportsBySensor[sensorId].length
+      )
+      if (taskSize === itemExportsBySensor[sensorId].length) {
+        largestSensor = sensorId
+      }
+      sensorMatchingIndices[sensorId] = 0
+    }
+
     /* assign task id,
      and update task size in case there aren't enough items */
     const config: ConfigType = {
       ...project.config,
-      taskSize: itemsExport.length,
+      taskSize,
       taskId: util.index2str(i)
     }
 
@@ -390,18 +464,64 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
 
     // convert from export format to internal format
     const itemsForTask: ItemType[] = []
-    for (let itemInd = 0; itemInd < itemsExport.length; itemInd += 1) {
+    const trackMap: TrackMapType = {}
+    for (let itemInd = 0; itemInd < taskSize; itemInd += 1) {
+      const timestampToMatch = itemExportsBySensor[largestSensor][
+        sensorMatchingIndices[largestSensor]
+      ] as number
+      const itemExportMap: {[id: number]: Partial<ItemExport>} = {}
+      for (const key of Object.keys(sensorMatchingIndices)) {
+        const sensorId = Number(key)
+        let newIndex = sensorMatchingIndices[sensorId]
+        const itemExports = itemExportsBySensor[sensorId]
+        while (newIndex < itemExports.length - 1 &&
+               Math.abs(itemExports[newIndex + 1].timestamp as number -
+                        timestampToMatch) <
+               Math.abs(itemExports[newIndex].timestamp as number -
+                        timestampToMatch)
+        ) {
+          newIndex++
+        }
+        sensorMatchingIndices[sensorId] = newIndex
+        itemExportMap[sensorId] = itemExports[newIndex]
+      }
+
       // id is not relative to task, unlike index
       const itemId = taskStartIndex + itemInd
-      const newItem = convertItemToImport(
-        itemsExport[itemInd], itemInd, itemId,
-        attributeNameMap, attributeValueMap, categoryNameMap)
+      const timestamp = (
+        (itemExportMap[largestSensor].timestamp !== undefined) ?
+          itemExportMap[largestSensor].timestamp : 0
+      ) as number
+      const [newItem, newMaxLabelId, newMaxShapeId] = convertItemToImport(
+        itemExportMap[largestSensor].videoName as string,
+        timestamp,
+        itemExportMap,
+        itemInd,
+        itemId,
+        attributeNameMap,
+        attributeValueMap,
+        categoryNameMap,
+        maxLabelId,
+        maxShapeId,
+        project.config.tracking
+      )
 
-      maxLabelId = getMax(Object.keys(newItem.labels), maxLabelId)
-      maxShapeId = getMax(Object.keys(newItem.shapes), maxShapeId)
+      if (project.config.tracking) {
+        for (const label of Object.values(newItem.labels)) {
+          if (label.track >= 0 && !(label.track in trackMap)) {
+            trackMap[label.track] = makeTrack(label.track)
+          }
+          trackMap[label.track].labels[label.item] = label.id
+        }
+      }
+
+      maxLabelId = newMaxLabelId
+      maxShapeId = newMaxShapeId
       maxOrder += Object.keys(newItem.labels).length
 
       itemsForTask.push(newItem)
+
+      sensorMatchingIndices[largestSensor]++
     }
 
     // update the num labels/shapes based on imports
@@ -415,7 +535,9 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     const partialTask: Partial<TaskType> = {
       config,
       items: itemsForTask,
-      status: taskStatus
+      status: taskStatus,
+      sensors,
+      tracks: trackMap
     }
     const task = makeTask(partialTask)
     tasks.push(task)

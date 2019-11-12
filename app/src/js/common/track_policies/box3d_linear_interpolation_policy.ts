@@ -206,13 +206,15 @@ export class LinearInterpolationBox3DPolicy extends TrackPolicy {
    */
   public onLabelCreated (
     itemIndex: number,
-    label: Label
+    label: Label,
+    sensors: number[]
   ) {
     label = label as Box3D
     const cube = label.shapes()[0].toObject()
     const labelObject = makeLabel({
       type: types.LabelTypeName.BOX_3D,
-      category: label.category
+      category: label.category,
+      sensors
     })
 
     if (Session.tracking) {

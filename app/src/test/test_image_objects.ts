@@ -118,54 +118,58 @@ export const testJson = {
       {
         id: 0,
         index: 0,
-        url: 'https://s3-us-west-2.amazonaws.com/' +
-          'scalabel-public/demo/frames/intersection-0000051.jpg',
-        active: false,
-        loaded: false,
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com/' +
+            'scalabel-public/demo/frames/intersection-0000051.jpg'
+        },
         labels: []
       },
       {
         id: 1,
         index: 1,
-        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-          'demo/frames/intersection-0000052.jpg',
-        active: false,
-        loaded: false,
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
+            'demo/frames/intersection-0000052.jpg'
+        },
         labels: []
       },
       {
         id: 2,
         index: 2,
-        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-          'demo/frames/intersection-0000053.jpg',
-        active: false,
-        loaded: false,
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
+            'demo/frames/intersection-0000053.jpg'
+        },
         labels: []
       },
       {
         id: 3,
         index: 3,
-        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-          'demo/frames/intersection-0000054.jpg',
-        active: false,
-        loaded: false,
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
+            'demo/frames/intersection-0000054.jpg'
+        },
         labels: []
       },
       {
         id: 4,
         index: 4,
-        url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
-          'demo/frames/intersection-0000055.jpg',
-        active: false,
-        loaded: false,
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
+            'demo/frames/intersection-0000055.jpg'
+        },
         labels: []
       }
     ],
-    labels: {},
     tracks: {},
-    shapes: {}
-  },
-  actions: []
+    sensors: {
+      '-1': {
+        id: -1,
+        name: 'default',
+        type: 'image'
+      }
+    }
+  }
 }
 
 const dummyViewerConfig = {

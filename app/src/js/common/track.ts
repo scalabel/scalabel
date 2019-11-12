@@ -96,10 +96,11 @@ export class Track {
    */
   public onLabelCreated (
     itemIndex: number,
-    label: Label
+    label: Label,
+    sensors: number[]
   ) {
     if (this._policy) {
-      this._policy.onLabelCreated(itemIndex, label)
+      this._policy.onLabelCreated(itemIndex, label, sensors)
     }
   }
 }

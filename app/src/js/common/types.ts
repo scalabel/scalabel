@@ -16,7 +16,8 @@ export enum ItemTypeName {
   IMAGE = 'image',
   VIDEO = 'video',
   POINT_CLOUD = 'pointcloud',
-  POINT_CLOUD_TRACKING = 'pointcloudtracking'
+  POINT_CLOUD_TRACKING = 'pointcloudtracking',
+  FUSION = 'fusion'
 }
 
 export enum HandlerUrl {
@@ -39,7 +40,7 @@ export enum ShapeTypeName {
   POLYGON_2D = 'polygon2d'
 }
 
-export enum ItemType {
+export enum DataType {
   IMAGE = 'image',
   POINT_CLOUD = 'pointcloud'
 }

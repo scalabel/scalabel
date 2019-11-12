@@ -13,10 +13,17 @@ import { AddLabelsAction } from './types'
  * @return {AddLabelAction}
  */
 export function addPolygon2dLabel (
-  itemIndex: number, category: number[], points: PathPoint2DType[])
+  itemIndex: number,
+  sensor: number,
+  category: number[],
+  points: PathPoint2DType[]
+)
   : AddLabelsAction {
   const polygon = makePolygon({ points })
-  const label = makeLabel({ type: LabelTypeName.POLYGON_2D, category })
+  const label = makeLabel({
+    type: LabelTypeName.POLYGON_2D, category, sensors: [sensor]
+  })
   return actions.addLabel(
-    itemIndex, label, [ShapeTypeName.POLYGON_2D], [polygon])
+    itemIndex, label, [ShapeTypeName.POLYGON_2D], [polygon]
+  )
 }

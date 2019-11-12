@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as THREE from 'three'
 import Session from '../common/session'
 import * as types from '../common/types'
-import { getCurrentViewerConfig, isItemLoaded } from '../functional/state_util'
+import { getCurrentViewerConfig, isCurrentItemLoaded } from '../functional/state_util'
 import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { updateThreeCameraAndRenderer } from '../view_config/point_cloud'
@@ -109,11 +109,14 @@ class PointCloudViewer extends Viewer<Props> {
   public redraw (): boolean {
     const state = this.state
     const item = state.user.select.item
-    const loaded = state.session.items[item].loaded
-    if (loaded) {
-      if (this.canvas) {
+    if (this.canvas) {
+      const sensor =
+        this.state.user.viewerConfigs[this.props.id].sensor
+      const loaded =
+        state.session.itemStatuses[item].sensorDataLoaded[sensor]
+      if (loaded) {
         this.updateRenderer()
-        this.pointCloud = Session.pointClouds[item]
+        this.pointCloud = Session.pointClouds[item][sensor]
         this.renderThree()
       }
     }
@@ -176,7 +179,7 @@ class PointCloudViewer extends Viewer<Props> {
         this.renderer = new THREE.WebGLRenderer(rendererParams)
       }
 
-      if (isItemLoaded(this.state)) {
+      if (isCurrentItemLoaded(this.state)) {
         this.updateRenderer()
       }
     }

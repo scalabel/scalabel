@@ -32,7 +32,7 @@ test('box3d linear interpolation tracking', () => {
   newTrack.updateState(
     makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
   )
-  newTrack.onLabelCreated(0, box)
+  newTrack.onLabelCreated(0, box, [-1])
 
   state = Session.getState()
 

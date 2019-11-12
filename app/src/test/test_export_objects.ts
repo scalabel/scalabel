@@ -5,8 +5,8 @@ export const sampleItemExportImage: ItemExport = {
   url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
   videoName: 'b',
   attributes: {},
-  timestamp: -1,
-  index: 0,
+  timestamp: 0,
+  sensor: -1,
   labels: [
     {
       id: 0,
@@ -60,8 +60,8 @@ export const sampleStateExportImage: ItemExport[] =
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
       videoName: 'b',
       attributes: {},
-      timestamp: -1,
-      index: 0,
+      timestamp: 0,
+      sensor: -1,
       labels: [
         {
           id: 0,
@@ -112,34 +112,34 @@ export const sampleStateExportImage: ItemExport[] =
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg',
       videoName: 'b',
       attributes: {},
-      timestamp: -1,
-      index: 1,
-      labels: []
+      timestamp: 1,
+      labels: [],
+      sensor: -1
     },
     {
       name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg',
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg',
       videoName: 'b',
       attributes: {},
-      timestamp: -1,
-      index: 2,
-      labels: []
+      timestamp: 2,
+      labels: [],
+      sensor: -1
     },
     {
       name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg',
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg',
       videoName: 'b',
       attributes: {},
-      timestamp: -1,
-      index: 3,
-      labels: []
+      timestamp: 3,
+      labels: [],
+      sensor: -1
     },
     {
       name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg',
       url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg',
       videoName: 'b',
       attributes: {},
-      timestamp: -1,
-      index: 4,
-      labels: []
+      timestamp: 4,
+      labels: [],
+      sensor: -1
     }]

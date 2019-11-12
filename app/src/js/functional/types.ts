@@ -8,6 +8,8 @@ export interface LabelType {
   id: number
   /** The item index */
   item: number
+  /** Associated data sources */
+  sensors: number[]
   /** type of the label */
   type: string
   /** The category ID */
@@ -51,7 +53,25 @@ export interface PolygonType {
   points: PathPoint2DType []
 }
 
+export interface Vector2Type {
+  /** The x-coordinate */
+  x: number
+  /** The y-coordinate */
+  y: number
+}
+
 export interface Vector3Type {
+  /** The x-coordinate */
+  x: number
+  /** The y-coordinate */
+  y: number
+  /** The z-coordinate */
+  z: number
+}
+
+export interface Vector4Type {
+  /** The w-coordinate */
+  w: number
   /** The x-coordinate */
   x: number
   /** The y-coordinate */
@@ -73,18 +93,9 @@ export interface CubeType {
   surfaceId: number
 }
 
-export interface Point2DType {
-  /** The x-coordinate */
-  x: number
-  /** The y-coordinate */
-  y: number
-}
+export type Point2DType = Vector2Type
 
-export interface PathPoint2DType {
-  /** The x-coordinate */
-  x: number
-  /** The y-coordinate */
-  y: number
+export interface PathPoint2DType extends Point2DType {
   /** type of the point in the path. value from common/types.PathPointType */
   type: string
 }
@@ -115,6 +126,8 @@ export interface ViewerConfigType {
   type: string
   /** whether to show */
   show: boolean
+  /** which data sources to view */
+  sensor: number
 }
 
 export interface ImageViewerConfigType extends ViewerConfigType {
@@ -144,20 +157,51 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
 export interface Image3DViewerConfigType extends
   ImageViewerConfigType, PointCloudViewerConfigType {}
 
+export interface CameraIntrinsicsType {
+  /** focal length 2d */
+  focalLength: Vector2Type
+  /** focal center 2d */
+  focalCenter: Vector2Type
+}
+
+export type IntrinsicsType = CameraIntrinsicsType
+
+export interface ExtrinsicsType {
+  /** rotation to data source frame */
+  rotation: Vector4Type
+  /** translation to data source frame */
+  translation: Vector3Type
+}
+
+export interface SensorType {
+  /** id */
+  id: number
+  /** name */
+  name: string
+  /** data type */
+  type: string
+  /** intrinsics */
+  intrinsics?: IntrinsicsType
+  /** extrinsics */
+  extrinsics?: ExtrinsicsType
+}
+
+export interface SensorMapType { [id: number]: SensorType }
+
 export interface ItemType {
   /** The ID of the item */
   id: number
   /** The index of the item */
   index: number
-  /** The URL of the item */
-  url: string
+  /** Map between data source id and url */
+  urls: {[id: number]: string}
   /** Labels of the item */
   labels: { [key: number]: LabelType } // list of label
   /** shapes of the labels on this item */
   shapes: { [key: number]: IndexedShapeType }
   /** the timestamp for the item */
   timestamp: number
-  /** the videoname for the item */
+  /** video item belongs to */
   videoName: string
 }
 
@@ -186,7 +230,7 @@ export interface Attribute {
 export interface ConfigType {
   /** Project name */
   projectName: string
-  /** Item type */
+  /** item type */
   itemType: string
   /** Label types available for the session */
   labelTypes: string[]
@@ -251,6 +295,8 @@ export interface TaskType {
   items: ItemType[]
   /** tracks */
   tracks: TrackMapType
+  /** data sources */
+  sensors: SensorMapType
 }
 
 export interface Select {
@@ -285,8 +331,8 @@ export interface UserType {
 }
 
 export interface ItemStatus {
-  /** whether this item is loaded in this session */
-  loaded: boolean
+  /** Whether data source in item is loaded */
+  sensorDataLoaded: {[id: number]: boolean}
 }
 
 /**
@@ -302,7 +348,7 @@ export interface SessionType {
   /** Start time */
   startTime: number
   /** item statuses */
-  items: ItemStatus[]
+  itemStatuses: ItemStatus[]
 }
 
 export interface State {

@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as THREE from 'three'
 import Session from '../common/session'
 import { Label3DHandler } from '../drawable/3d/label3d_handler'
-import { getCurrentViewerConfig, isItemLoaded } from '../functional/state_util'
+import { getCurrentViewerConfig, isCurrentItemLoaded } from '../functional/state_util'
 import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { convertMouseToNDC, updateThreeCameraAndRenderer } from '../view_config/point_cloud'
@@ -163,9 +163,12 @@ class Label3dViewer extends Viewer<Props> {
   public redraw (): boolean {
     const state = this.state
     const item = state.user.select.item
-    const loaded = state.session.items[item].loaded
-    if (loaded) {
-      if (this.canvas) {
+    if (this.canvas) {
+      const sensor =
+        this.state.user.viewerConfigs[this.props.id].sensor
+      const loaded =
+        state.session.itemStatuses[item].sensorDataLoaded[sensor]
+      if (loaded) {
         this.updateRenderer()
         this.renderThree()
       }
@@ -289,6 +292,8 @@ class Label3dViewer extends Viewer<Props> {
    */
   protected updateState (state: State): void {
     this.display = this.props.display
+    // Filter labels if not in layer
+    // this.camera.layers.set(this.props.id)
     Session.label3dList.setActiveCamera(this.camera)
     this._labelHandler.updateState(state, state.user.select.item, this.props.id)
   }
@@ -350,7 +355,7 @@ class Label3dViewer extends Viewer<Props> {
         }
       }
 
-      if (isItemLoaded(this.state)) {
+      if (isCurrentItemLoaded(this.state)) {
         this.updateRenderer()
       }
     }

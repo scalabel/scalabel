@@ -35,39 +35,56 @@ export const testJson = {
       {
         id: 0,
         index: 0,
-        url: 'https://s3-us-west-2.amazonaws.com' +
-          '/scalabel-public/demo/luminar/1525401598139528987.ply',
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com' +
+            '/scalabel-public/demo/luminar/1525401598139528987.ply'
+        },
         labels: []
       },
       {
         id: 1,
         index: 1,
-        url: 'https://s3-us-west-2.amazonaws.com' +
-          '/scalabel-public/demo/luminar/1525401599138308593.ply',
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com' +
+          '/scalabel-public/demo/luminar/1525401599138308593.ply'
+        },
         labels: []
       },
       {
         id: 2,
         index: 2,
-        url: 'https://s3-us-west-2.amazonaws.com' +
-          '/scalabel-public/demo/luminar/1525401600135798773.ply',
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com' +
+            '/scalabel-public/demo/luminar/1525401600135798773.ply'
+        },
         labels: []
       },
       {
         id: 3,
         index: 3,
-        url: 'https://s3-us-west-2.amazonaws.com' +
-          '/scalabel-public/demo/luminar/1525401601134108834.ply',
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com' +
+          '/scalabel-public/demo/luminar/1525401601134108834.ply'
+        },
         labels: []
       },
       {
         id: 4,
         index: 4,
-        url: 'https://s3-us-west-2.amazonaws.com' +
-          '/scalabel-public/demo/luminar/1525401602133158775.ply',
+        urls: {
+          '-1': 'https://s3-us-west-2.amazonaws.com' +
+          '/scalabel-public/demo/luminar/1525401602133158775.ply'
+        },
         labels: []
       }
     ],
-    tracks: {}
+    tracks: {},
+    sensors: {
+      '-1': {
+        id: -1,
+        name: 'default',
+        type: 'pointcloud'
+      }
+    }
   }
 }

@@ -6,7 +6,7 @@ import React from 'react'
 import { changeSelect, mergeTracks } from '../action/common'
 import { changeSelectedLabelsAttributes, deleteSelectedLabels, deleteSelectedTracks, terminateSelectedTracks } from '../action/select'
 import { addLabelTag } from '../action/tag'
-import { renderButtons, renderTemplate } from '../common/label'
+import { renderTemplate } from '../common/label'
 import Session from '../common/session'
 import { Key, LabelTypeName } from '../common/types'
 import { tracksOverlapping } from '../functional/track'
@@ -21,8 +21,6 @@ interface Props {
   categories: string[] | null
   /** attributes of ToolBar */
   attributes: Attribute[]
-  /** itemType of ToolBar 'video' | 'image' */
-  itemType: string
   /** labelType of ToolBar 'box2d' | 'polygon2d' | 'lane' */
   labelType: string
 }
@@ -114,7 +112,7 @@ export class ToolBar extends Component<Props> {
    * @return component
    */
   public render () {
-    const { categories, attributes, itemType, labelType } = this.props
+    const { categories, attributes } = this.props
     return (
       <div>
         {categories !== null ? (
@@ -143,7 +141,6 @@ export class ToolBar extends Component<Props> {
             Session.dispatch(deleteSelectedLabels(this.state))
           })
           }</div>
-          {renderButtons(itemType, labelType)}
         </div>
       </div>
     )

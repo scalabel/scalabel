@@ -4,11 +4,19 @@ import { createProject, createTasks,
   saveProject, saveTasks } from '../../js/server/create_project'
 import { convertStateToExport } from '../../js/server/export'
 import Session from '../../js/server/server_session'
-import { CreationForm, Project } from '../../js/server/types'
+import { CreationForm, FormFileData, Project } from '../../js/server/types'
 import { getProjectKey, getTaskKey, initStorage } from '../../js/server/util'
-import { sampleFormFileData, sampleFormImage,
-  sampleFormVideo, sampleProjectAutolabel, sampleProjectImage,
-  sampleProjectVideo, sampleTasksImage, sampleTasksVideo } from '../test_creation_objects'
+import {
+  sampleFormFileData,
+  sampleFormImage,
+  sampleFormVideo,
+  sampleProjectAutolabel,
+  sampleProjectImage,
+  sampleProjectVideo,
+  sampleTasksImage,
+  sampleTasksVideo,
+  sampleVideoFormFileData
+} from '../test_creation_objects'
 import { sampleStateExportImage } from '../test_export_objects'
 
 beforeAll(() => {
@@ -28,11 +36,15 @@ beforeAll(() => {
 
 describe('test project.json creation', () => {
   test('image project creation', () => {
-    return testProjectCreation(sampleFormImage, sampleProjectImage)
+    return testProjectCreation(
+      sampleFormImage, sampleProjectImage, sampleFormFileData
+    )
   })
 
   test('video project creation', () => {
-    return testProjectCreation(sampleFormVideo, sampleProjectVideo)
+    return testProjectCreation(
+      sampleFormVideo, sampleProjectVideo, sampleVideoFormFileData
+    )
   })
 
   test('image project saving', () => {
@@ -53,6 +65,7 @@ describe('test task.json creation', () => {
 
   test('test tracking creation', async () => {
     return createTasks(sampleProjectVideo).then((tasks) => {
+      process.stdout.write(JSON.stringify(tasks, null, 2))
       expect(tasks).toEqual(sampleTasksVideo)
     })
   })
@@ -78,8 +91,11 @@ describe('create with auto labels', () => {
  * Tested that desired project is created from form
  */
 async function testProjectCreation (
-  sampleForm: CreationForm, sampleProject: Project): Promise<void> {
-  return createProject(sampleForm, sampleFormFileData).then((project) => {
+  sampleForm: CreationForm,
+  sampleProject: Project,
+  formFileData: FormFileData
+): Promise<void> {
+  return createProject(sampleForm, formFileData).then((project) => {
     expect(project).toEqual(sampleProject)
     return
   })

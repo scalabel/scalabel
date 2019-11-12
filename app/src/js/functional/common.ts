@@ -29,11 +29,17 @@ import {
 export function initSession (state: State): State {
   // initialize state
   let session = state.session
-  const items = session.items.slice()
-  for (let i = 0; i < items.length; i++) {
-    items[i] = updateObject(items[i], { loaded: false })
+  const items = state.task.items
+  const itemStatuses = session.itemStatuses.slice()
+  for (let i = 0; i < itemStatuses.length; i++) {
+    const loadedMap: {[id: number]: boolean} = {}
+    for (const key of Object.keys(items[i].urls)) {
+      const sensorId = Number(key)
+      loadedMap[sensorId] = false
+    }
+    itemStatuses[i] = updateObject(itemStatuses[i], loadedMap)
   }
-  session = updateObject(session, { items })
+  session = updateObject(session, { itemStatuses })
   return updateObject(state, { session })
 }
 
@@ -514,9 +520,15 @@ export function loadItem (state: State, action: types.LoadItemAction): State {
   const itemIndex = action.itemIndex
   let session = state.session
   session = updateObject(session, {
-    items:
-      updateListItem(session.items, itemIndex,
-        updateObject(session.items[itemIndex], { loaded: true }))
+    itemStatuses:
+      updateListItem(session.itemStatuses, itemIndex,
+        updateObject(session.itemStatuses[itemIndex], {
+          sensorDataLoaded: updateObject(
+            session.itemStatuses[itemIndex].sensorDataLoaded,
+            { [action.sensorId]: true }
+          )
+        })
+      )
   })
   return updateObject(state, { session })
 }

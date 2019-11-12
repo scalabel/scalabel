@@ -23,9 +23,10 @@ export const SCROLL_ZOOM_RATIO = 1.03
  * Get the current item in the state
  * @return {Size2D}
  */
-export function getCurrentImageSize (state: State): Size2D {
+export function getCurrentImageSize (state: State, viewerId: number): Size2D {
   const item = getCurrentItem(state)
-  const image = Session.images[item.index]
+  const sensor = state.user.viewerConfigs[viewerId].sensor
+  const image = Session.images[item.index][sensor]
   return new Size2D(image.width, image.height)
 }
 
@@ -98,8 +99,8 @@ export function getVisibleCanvasCoords (
   canvas: HTMLCanvasElement
 ): Vector2D {
   if (display && canvas) {
-    const displayRect = display.getBoundingClientRect() as DOMRect
-    const imgRect = canvas.getBoundingClientRect() as DOMRect
+    const displayRect = display.getBoundingClientRect()
+    const imgRect = canvas.getBoundingClientRect()
     return new Vector2D(displayRect.x - imgRect.x, displayRect.y - imgRect.y)
   }
   return new Vector2D(0, 0)
@@ -126,7 +127,7 @@ export function normalizeMouseCoordinates (
 ) {
   const [offsetX, offsetY] =
     getVisibleCanvasCoords(display, canvas)
-  const displayRect = display.getBoundingClientRect() as DOMRect
+  const displayRect = display.getBoundingClientRect()
   let x = clientX - displayRect.x + offsetX
   let y = clientY - displayRect.y + offsetY
 
@@ -192,7 +193,7 @@ export function updateCanvasScale (
 
   // resize canvas
   const item = getCurrentItem(state)
-  const image = Session.images[item.index]
+  const image = Session.images[item.index][config.sensor]
   const ratio = image.width / image.height
   let canvasHeight
   let canvasWidth

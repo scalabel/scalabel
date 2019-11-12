@@ -13,8 +13,10 @@ import { AddLabelsAction, ChangeLabelsAction } from './types'
  * @param attributeIndex
  * @param selectedIndex
  */
-export function addLabelTag (attributeIndex: number,
-                             selectedIndex: number):
+export function addLabelTag (
+  attributeIndex: number,
+  selectedIndex: number
+):
   AddLabelsAction | ChangeLabelsAction {
   const state = Session.getState()
   const itemIndex = state.user.select.item
@@ -27,7 +29,16 @@ export function addLabelTag (attributeIndex: number,
     return actions.changeLabelProps(itemIndex, labelId,
       { attributes: newAttributes })
   } else {
-    const label = makeLabel({ type: LabelTypeName.TAG, attributes: attribute })
-    return actions.addLabel(itemIndex, label, [], [])
+    const label = makeLabel({
+      type: LabelTypeName.TAG,
+      attributes: attribute,
+      sensors: Object.keys(state.task.sensors).map((key) => Number(key))
+    })
+    return actions.addLabel(
+      itemIndex,
+      label,
+      [],
+      []
+    )
   }
 }

@@ -7,7 +7,7 @@ import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
 import { addViewerConfig, initSessionAction, loadItem, updateAll } from '../action/common'
 import Window from '../components/window'
-import { makeImageViewerConfig, makePointCloudViewerConfig } from '../functional/states'
+import { makeDefaultViewerConfig } from '../functional/states'
 import { State } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
@@ -15,7 +15,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { makeTrackPolicy, Track } from './track'
-import { ItemType } from './types'
+import { DataType } from './types'
 
 /**
  * Request Session state from the server
@@ -91,7 +91,6 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
   Session.store = configureStore(stateJson, Session.devMode, middleware)
   Session.dispatch(initSessionAction())
   const state = Session.getState()
-  Session.itemType = state.task.config.itemType
   Session.tracking = state.task.config.tracking
   Session.autosave = state.task.config.autosave
 }
@@ -102,14 +101,14 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
 function initViewerConfigs (): void {
   const state = Session.getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
-    switch (state.task.config.itemType) {
-      case ItemType.IMAGE:
-        Session.dispatch(addViewerConfig(1, makeImageViewerConfig()))
-        break
-      case ItemType.POINT_CLOUD:
-        Session.dispatch(addViewerConfig(1, makePointCloudViewerConfig()))
-        break
-    }
+    const sensorIds = Object.keys(state.task.sensors).map(
+      (key) => Number(key)
+    ).sort()
+    const firstId = sensorIds[0]
+    const firstSensor = state.task.sensors[firstId]
+    Session.dispatch(addViewerConfig(1, makeDefaultViewerConfig(
+      firstSensor.type as DataType
+    )))
   }
 }
 
@@ -142,11 +141,8 @@ function setListeners () {
  * Load labeling data initialization function
  */
 function loadData (): void {
-  if (Session.itemType === 'image' || Session.itemType === 'video') {
-    loadImages()
-  } else if (Session.itemType === 'pointcloud') {
-    loadPointClouds()
-  }
+  loadImages()
+  loadPointClouds()
 }
 
 /**
@@ -155,18 +151,27 @@ function loadData (): void {
 function loadImages (): void {
   const state = Session.getState()
   const items = state.task.items
+  Session.images = []
   for (const item of items) {
-    const url = item.url
-    const image = new Image()
-    image.crossOrigin = 'Anonymous'
-    Session.images.push(image)
-    image.onload = () => {
-      Session.dispatch(loadItem(item.index))
+    const itemImageMap: {[id: number]: HTMLImageElement} = {}
+    for (const key of Object.keys(item.urls)) {
+      const sensorId = Number(key)
+      if (sensorId in state.task.sensors &&
+          state.task.sensors[sensorId].type === DataType.IMAGE) {
+        const url = item.urls[sensorId]
+        const image = new Image()
+        image.crossOrigin = 'Anonymous'
+        image.onload = () => {
+          Session.dispatch(loadItem(item.index, sensorId))
+        }
+        image.onerror = () => {
+          alert(sprintf('Failed to load image at %s', url))
+        }
+        image.src = url
+        itemImageMap[sensorId] = image
+      }
     }
-    image.onerror = () => {
-      alert(sprintf('Failed to load image at %s', url))
-    }
-    image.src = url
+    Session.images.push(itemImageMap)
   }
 }
 
@@ -211,41 +216,51 @@ function loadPointClouds (): void {
 
   const state = Session.getState()
   const items = state.task.items
+  Session.pointClouds = []
   for (const item of items) {
-    Session.pointClouds.push(new THREE.Points())
-    loader.load(item.url, (geometry: THREE.BufferGeometry) => {
+    const pcImageMap: {[id: number]: THREE.Points} = {}
+    Session.pointClouds.push(pcImageMap)
+    for (const key of Object.keys(item.urls)) {
+      const sensorId = Number(key)
+      if (sensorId in state.task.sensors &&
+          state.task.sensors[sensorId].type === DataType.POINT_CLOUD) {
+        const url = item.urls[sensorId]
+        loader.load(
+          url,
+          (geometry: THREE.BufferGeometry) => {
+            const material = new THREE.ShaderMaterial({
+              uniforms: {
+                red: {
+                  value: new THREE.Color(0xff0000)
+                },
+                yellow: {
+                  value: new THREE.Color(0xffff00)
+                },
+                green: {
+                  value: new THREE.Color(0x00ff00)
+                },
+                teal: {
+                  value: new THREE.Color(0x00ffff)
+                }
+              },
+              vertexShader,
+              fragmentShader,
+              alphaTest: 1.0
+            })
 
-      const material = new THREE.ShaderMaterial({
-        uniforms: {
-          red: {
-            value: new THREE.Color(0xff0000)
+            const particles = new THREE.Points(geometry, material)
+            Session.pointClouds[item.index][sensorId] = particles
+
+            Session.dispatch(loadItem(item.index, sensorId))
           },
-          yellow: {
-            value: new THREE.Color(0xffff00)
-          },
-          green: {
-            value: new THREE.Color(0x00ff00)
-          },
-          teal: {
-            value: new THREE.Color(0x00ffff)
+
+          () => null,
+
+          () => {
+            alert(`Point cloud at ${url} was not found.`)
           }
-        },
-        vertexShader,
-        fragmentShader,
-        alphaTest: 1.0
-      })
-
-      const particles = new THREE.Points(geometry, material)
-      Session.pointClouds[item.index] = particles
-
-      Session.dispatch(loadItem(item.index))
-    },
-
-      () => null,
-
-      () => {
-        alert('Point cloud at ' + item.url + ' was not found.')
+        )
       }
-    )
+    }
   }
 }

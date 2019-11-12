@@ -229,7 +229,8 @@ export default class ViewerConfigUpdater {
 
         this._raycaster.linePrecision = 0.2
         this._raycaster.setFromCamera(new THREE.Vector2(x, y), this._camera)
-        const pointCloud = Session.pointClouds[this._item]
+        const pointCloud =
+          Session.pointClouds[this._item][this._viewerConfig.sensor]
 
         const intersects = this._raycaster.intersectObject(pointCloud)
 

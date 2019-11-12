@@ -15,10 +15,14 @@ import { AddLabelsAction } from './types'
  */
 export function addPlaneLabel (
   itemIndex: number,
+  sensors: number[],
   offset: Vector3Type,
-  orientation: Vector3Type): AddLabelsAction {
+  orientation: Vector3Type
+): AddLabelsAction {
   // create the rect object
   const plane = makePlane({ offset, orientation })
-  const label = makeLabel({ type: LabelTypeName.PLANE_3D })
-  return actions.addLabel(itemIndex, label, [LabelTypeName.PLANE_3D], [plane])
+  const label = makeLabel({ type: LabelTypeName.PLANE_3D, sensors })
+  return actions.addLabel(
+    itemIndex, label, [LabelTypeName.PLANE_3D], [plane]
+  )
 }

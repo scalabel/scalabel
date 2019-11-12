@@ -54,7 +54,6 @@ export class Window extends React.Component<Props> {
         <ToolBar
             categories={config.categories}
             attributes={config.attributes}
-            itemType={config.itemType}
             labelType={config.labelTypes[0]}
         />
     )

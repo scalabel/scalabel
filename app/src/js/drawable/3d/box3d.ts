@@ -39,9 +39,10 @@ export class Box3D extends Label3D {
     surfaceId?: number,
     temporary?: boolean
   ): void {
+    const sensors = (viewerConfig) ? [viewerConfig.sensor] : [-1]
     this._label = makeLabel({
       type: LabelTypeName.BOX_3D, id: -1, item: itemIndex,
-      category: [category]
+      category: [category], sensors
     })
     this._labelId = -1
     const center = new Vector3D()

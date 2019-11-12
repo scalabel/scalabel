@@ -199,6 +199,8 @@ export function getTracking (itemType: string): [string, boolean] {
       return [ItemTypeName.IMAGE, true]
     case ItemTypeName.POINT_CLOUD_TRACKING:
       return [ItemTypeName.POINT_CLOUD, true]
+    case ItemTypeName.FUSION:
+      return [ItemTypeName.FUSION, true]
     default:
       return [itemType, false]
   }

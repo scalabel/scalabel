@@ -92,7 +92,6 @@ describe('test Delete', () => {
       ref={toolbarRef}
       categories={null}
       attributes={[]}
-      itemType={'itemType'}
       labelType={'labelType'}
       />
     )

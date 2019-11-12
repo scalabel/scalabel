@@ -1,6 +1,6 @@
 import { AttributeToolType } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
-import { Attribute, ConfigType } from '../functional/types'
+import { Attribute, ConfigType, SensorType } from '../functional/types'
 
 /**
  * Stores specifications of project
@@ -10,6 +10,8 @@ export interface Project {
   items: Array<Partial<ItemExport>>
   /** frontend config */
   config: ConfigType
+  /** map between data source id and data sources */
+  sensors: {[id: number]: SensorType}
 }
 
 /**
@@ -102,6 +104,7 @@ export const enum Endpoint {
 export const enum FormField {
   PROJECT_NAME = 'project_name',
   ITEM_TYPE = 'item_type',
+  TRACKING = 'tracking',
   LABEL_TYPE = 'label_type',
   PAGE_TITLE = 'page_title',
   TASK_SIZE = 'task_size',

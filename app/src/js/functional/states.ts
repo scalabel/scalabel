@@ -2,14 +2,17 @@ import _ from 'lodash'
 import * as types from '../common/types'
 import {
   ConfigType, CubeType,
-  ImageViewerConfigType, IndexedShapeType,
-  ItemStatus, ItemType, LabelType, LayoutType,
+  ExtrinsicsType, ImageViewerConfigType,
+  IndexedShapeType, IntrinsicsType, ItemStatus, ItemType,
+  LabelType,
+  LayoutType,
   PathPoint2DType,
   Plane3DType,
   PointCloudViewerConfigType,
   PolygonType,
   RectType,
   Select,
+  SensorType,
   SessionType,
   ShapeType,
   State,
@@ -28,6 +31,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return _.cloneDeep<LabelType>({
     id: -1,
     item: -1,
+    sensors: [-1],
     type: types.LabelTypeName.EMPTY,
     category: [],
     attributes: {},
@@ -138,10 +142,28 @@ export function makeIndexedShape (
 }
 
 /**
+ * Create data source
+ * @param id
+ * @param type
+ * @param name
+ */
+export function makeSensor (
+  id: number,
+  name: string,
+  type: string,
+  intrinsics?: IntrinsicsType,
+  extrinsics?: ExtrinsicsType
+): SensorType {
+  return { id, name, type, intrinsics, extrinsics }
+}
+
+/**
  * Make a new viewer config
  * @return {ImageViewerConfigType}
  */
-export function makeImageViewerConfig (): ImageViewerConfigType {
+export function makeImageViewerConfig (
+  sensor: number = -1
+): ImageViewerConfigType {
   return {
     imageWidth: 0,
     imageHeight: 0,
@@ -149,7 +171,8 @@ export function makeImageViewerConfig (): ImageViewerConfigType {
     displayLeft: 0,
     displayTop: 0,
     show: true,
-    type: types.ViewerConfigType.IMAGE
+    type: types.ViewerConfigType.IMAGE,
+    sensor
   }
 }
 
@@ -157,14 +180,33 @@ export function makeImageViewerConfig (): ImageViewerConfigType {
  * Make a new point cloud viewer config
  * @return {PointCloudViewerConfigType}
  */
-export function makePointCloudViewerConfig (): PointCloudViewerConfigType {
+export function makePointCloudViewerConfig (
+  sensor: number = -1
+): PointCloudViewerConfigType {
   return {
     position: { x: 0.0, y: 10.0, z: 0.0 },
     target: { x: 0.0, y: 0.0, z: 0.0 },
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
     show: true,
-    type: types.ViewerConfigType.POINT_CLOUD
+    type: types.ViewerConfigType.POINT_CLOUD,
+    sensor
+  }
+}
+
+/**
+ * Create default viewer config for item type
+ * @param sensors
+ * @param type
+ */
+export function makeDefaultViewerConfig (
+  type: types.DataType
+) {
+  switch (type) {
+    case types.DataType.IMAGE:
+      return makeImageViewerConfig()
+    case types.DataType.POINT_CLOUD:
+      return makePointCloudViewerConfig()
   }
 }
 
@@ -177,11 +219,11 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
   return {
     id: -1,
     index: 0,
-    url: '',
+    videoName: '',
+    urls: {},
     labels: {},
     shapes: {},
     timestamp: -1,
-    videoName: '',
     ...params
   }
 }
@@ -268,7 +310,7 @@ function makeUser (params: Partial<UserType>= {}): UserType {
  */
 export function makeItemStatus (params: Partial<ItemStatus>= {}): ItemStatus {
   return {
-    loaded: false,
+    sensorDataLoaded: {},
     ...params
   }
 }
@@ -282,7 +324,7 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
   return {
     id: '',
     startTime: 0,
-    items: [],
+    itemStatuses: [],
     ...params
   }
 }
@@ -313,6 +355,7 @@ export function makeTask (params: Partial<TaskType> = {}): TaskType {
     status: makeTaskStatus(),
     items: [],
     tracks: {},
+    sensors: {},
     ...params
   }
 }
