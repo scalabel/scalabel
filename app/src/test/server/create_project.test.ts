@@ -65,7 +65,6 @@ describe('test task.json creation', () => {
 
   test('test tracking creation', async () => {
     return createTasks(sampleProjectVideo).then((tasks) => {
-      process.stdout.write(JSON.stringify(tasks, null, 2))
       expect(tasks).toEqual(sampleTasksVideo)
     })
   })
