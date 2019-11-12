@@ -354,20 +354,20 @@ export default class ViewerConfigUpdater {
       case types.Key.SLASH:
         Session.dispatch(moveDown(this._viewerId, viewerConfig))
         break
-      case types.Key.DOWN:
-      case types.Key.ARROW_DOWN:
+      case types.Key.S_LOW:
+      case types.Key.S_UP:
         Session.dispatch(moveBack(this._viewerId, viewerConfig))
         break
-      case types.Key.UP:
-      case types.Key.ARROW_UP:
+      case types.Key.W_LOW:
+      case types.Key.W_UP:
         Session.dispatch(moveForward(this._viewerId, viewerConfig))
         break
-      case types.Key.LEFT:
-      case types.Key.ARROW_LEFT:
+      case types.Key.A_LOW:
+      case types.Key.A_UP:
         Session.dispatch(moveLeft(this._viewerId, viewerConfig))
         break
-      case types.Key.RIGHT:
-      case types.Key.ARROW_RIGHT:
+      case types.Key.D_LOW:
+      case types.Key.D_UP:
         Session.dispatch(moveRight(this._viewerId, viewerConfig))
         break
       case types.Key.C_UP:

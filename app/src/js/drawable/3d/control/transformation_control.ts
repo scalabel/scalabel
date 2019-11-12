@@ -64,8 +64,8 @@ export class TransformationControl extends THREE.Group {
       case Key.R_LOW:
         this.switchController(this._rotationControl)
         return true
-      case Key.S_UP:
-      case Key.S_LOW:
+      case Key.E_UP:
+      case Key.E_LOW:
         this.switchController(this._scaleControl)
         return true
       case Key.F_UP:

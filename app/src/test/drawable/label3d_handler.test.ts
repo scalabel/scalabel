@@ -346,7 +346,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
   const labelId = Number(Object.keys(state.task.items[0].labels)[0])
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
-  const sEvent = new KeyboardEvent('keydown', { key: 's' })
+  const sEvent = new KeyboardEvent('keydown', { key: 'e' })
   label3dHandler.onKeyDown(sEvent)
 
   // Set camera to each of 6 axis aligned locations around cube

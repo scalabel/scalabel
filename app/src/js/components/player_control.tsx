@@ -9,6 +9,7 @@ import _ from 'lodash'
 import React, { ChangeEvent } from 'react'
 import { goToItem } from '../action/common'
 import Session from '../common/session'
+import { Key } from '../common/types'
 import { playerControlStyles } from '../styles/label'
 import { Component } from './component'
 
@@ -54,6 +55,9 @@ class PlayerControl extends Component<Props> {
   /** number of frames */
   private numFrames: number
 
+  /** key down listener */
+  private _keyDownListener: (e: KeyboardEvent) => void
+
   public constructor (props: Readonly<Props>) {
     super(props)
     this.playing = false
@@ -61,6 +65,23 @@ class PlayerControl extends Component<Props> {
     this.intervalId = -1
     const { num_frames } = this.props
     this.numFrames = num_frames
+    this._keyDownListener = this.onKeyDown.bind(this)
+  }
+
+  /**
+   * Mount callback
+   */
+  public componentDidMount () {
+    super.componentDidMount()
+    document.addEventListener('keydown', this._keyDownListener)
+  }
+
+  /**
+   * Unmount callback
+   */
+  public componentWillUnmount () {
+    super.componentWillUnmount()
+    document.removeEventListener('keydown', this._keyDownListener)
   }
 
   /**
@@ -193,6 +214,21 @@ class PlayerControl extends Component<Props> {
       window.clearInterval(this.intervalId)
     }
     this.forceUpdate()
+  }
+
+  /** Listen to key down */
+  private onKeyDown (e: KeyboardEvent) {
+    switch (e.key) {
+      case Key.ARROW_LEFT:
+        this.currentFrame = Math.max(this.currentFrame - 1, 1)
+        goToItemWithIndex(this.currentFrame)
+        break
+      case Key.ARROW_RIGHT:
+        this.currentFrame = Math.min(
+          this.currentFrame + 1, this.numFrames)
+        goToItemWithIndex(this.currentFrame)
+        break
+    }
   }
 }
 
