@@ -6,6 +6,9 @@
     },
     "license": "BSD-3-Clause",
     "homepage": "https://www.scalabel.ai",
+    "engines": {
+        "node": ">=0.12"
+    },
     "scripts": {
         "test": "jest"
     },
