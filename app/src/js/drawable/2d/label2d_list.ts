@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { changeSelect, linkLabels } from '../../action/common'
-import { selectLabel } from '../../action/select'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
 import { Key, LabelTypeName } from '../../common/types'
+import { getLinkedLabelIds } from '../../functional/common'
 import { makeTrack } from '../../functional/states'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -121,7 +121,10 @@ export class Label2DList {
         }
       }
       if (labelId in self._labels) {
-        self._labels[labelId].updateState(state, itemIndex, labelId)
+        const drawableLabel = self._labels[labelId]
+        if (!drawableLabel.editing) {
+          drawableLabel.updateState(state, itemIndex, labelId)
+        }
       }
     })
     // order the labels and assign order values
@@ -190,7 +193,9 @@ export class Label2DList {
       }
       return true
     } else if (!this.isSelectedLabelsEmpty() &&
-      this._selectedLabels[0].editing === false) {
+      this._selectedLabels[0].editing === false &&
+      (this._selectedLabels.length === 1 ||
+        this._selectedLabels.indexOf(this._labelList[labelIndex]) === -1)) {
       for (const label of this._selectedLabels) {
         label.setSelected(false)
       }
@@ -200,15 +205,22 @@ export class Label2DList {
     this._mouseDown = true
     if (this.isSelectedLabelsEmpty()) {
       if (labelIndex >= 0) {
-        this._selectedLabels.push(this._labelList[labelIndex])
-        this._selectedLabels[0].setSelected(true, handleIndex)
-        Session.dispatch(selectLabel(
-          this._state.user.select.labels,
-          this._state.user.select.item,
-          this._selectedLabels[0].labelId,
-          this._selectedLabels[0].category[0],
-          this._selectedLabels[0].attributes
-        ))
+        const selectedLabelId = this._labelList[labelIndex].labelId
+        const item = this._state.task.items[this._state.user.select.item]
+        const selectedLabelIds = getLinkedLabelIds(item, selectedLabelId)
+        for (const labelId of selectedLabelIds) {
+          const label = this._labels[labelId]
+          this._selectedLabels.push(label)
+          const labelHandleIndex =
+            (labelId === selectedLabelId) ? handleIndex : 0
+          label.setSelected(true, labelHandleIndex)
+        }
+        Session.dispatch(changeSelect(
+          { category: this._selectedLabels[0].category[0],
+            attributes: this._selectedLabels[0].attributes,
+            labels: { [this._state.user.select.item]: selectedLabelIds }
+          })
+        )
       } else {
         const state = this._state
         const currentPolicyType =
@@ -218,7 +230,6 @@ export class Label2DList {
           makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
         )
         Session.tracks[-1] = newTrack
-
         const label = makeDrawableLabel(
           state.task.config.labelTypes[state.user.select.labelType])
         if (label) {
@@ -228,7 +239,9 @@ export class Label2DList {
         }
       }
     }
-    this._selectedLabels[0].onMouseDown(coord)
+    for (const label of this._selectedLabels) {
+      label.onMouseDown(coord)
+    }
     return true
   }
 
@@ -242,11 +255,11 @@ export class Label2DList {
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     this._mouseDown = false
     if (!this.isSelectedLabelsEmpty() && !this.isKeyDown(Key.META)) {
-      const shouldDelete = !this._selectedLabels[0].onMouseUp(coord)
-      if (shouldDelete) {
-        this._labelList.splice(
-          this._labelList.indexOf(this._selectedLabels[0]), 1
-        )
+      for (const label of this._selectedLabels) {
+        const shouldDelete = !label.onMouseUp(coord)
+        if (shouldDelete) {
+          this._labelList.splice(this._labelList.indexOf(label), 1)
+        }
       }
     }
   }
@@ -257,12 +270,7 @@ export class Label2DList {
   public onMouseMove (
       coord: Vector2D, canvasLimit: Size2D,
       labelIndex: number, handleIndex: number): boolean {
-    if (!this.isSelectedLabelsEmpty() &&
-      this._selectedLabels[0].editing === true) {
-      this._selectedLabels[0].onMouseMove(
-        coord, canvasLimit, labelIndex, handleIndex)
-      return true
-    } else {
+    if (this.isSelectedLabelsEmpty() || !this._selectedLabels[0].editing) {
       if (labelIndex >= 0) {
         if (!this._highlightedLabel) {
           this._highlightedLabel = this._labelList[labelIndex]
@@ -275,9 +283,16 @@ export class Label2DList {
       } else if (this._highlightedLabel !== null) {
         this._highlightedLabel.setHighlighted(false)
         this._highlightedLabel = null
+      } else {
+        // do not change highlighted label
+        return false
+      }
+    } else {
+      for (const label of this._selectedLabels) {
+        label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
       }
     }
-    return false
+    return true
   }
 
   /**

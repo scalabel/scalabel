@@ -348,7 +348,6 @@ export function changeShapes (
   const newItems = changeShapesInItems(
     pickArray(task.items, action.itemIndices), shapeIds, action.shapes)
   const items = assignToArray(task.items, newItems, action.itemIndices)
-  // select the label of the first shape on the current item
   task = updateObject(task, { items })
   return { ...state, task, user }
 }
@@ -415,6 +414,36 @@ export function getRootLabelId (item: ItemType, labelId: number): number {
     parent = item.labels[labelId].parent
   }
   return labelId
+}
+
+/**
+ * get all linked label ids from one labelId
+ * @param item
+ * @param labelId
+ */
+export function getLinkedLabelIds (item: ItemType, labelId: number): number[] {
+  return getChildLabelIds(item, getRootLabelId(item, labelId))
+}
+
+/**
+ * get all linked label ids from the root
+ * @param item
+ * @param labelId
+ */
+function getChildLabelIds (item: ItemType, labelId: number): number[] {
+  const labelIds: number[] = []
+  const label = item.labels[labelId]
+  if (label.children.length === 0) {
+    labelIds.push(labelId)
+  } else {
+    for (const child of label.children) {
+      const childLabelIds = getChildLabelIds(item, child)
+      for (const childLabelId of childLabelIds) {
+        labelIds.push(childLabelId)
+      }
+    }
+  }
+  return labelIds
 }
 
 /**
