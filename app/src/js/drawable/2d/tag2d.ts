@@ -1,8 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import Session from '../../common/session'
-import { AttributeToolType } from '../../common/types'
-import { Attribute } from '../../functional/types'
+import { AttributeToolType, ShapeTypeName } from '../../common/types'
+import { Attribute, ShapeType, State } from '../../functional/types'
 import { Context2D } from '../util'
 import { DrawMode, Label2D } from './label2d'
 
@@ -15,7 +14,7 @@ export class Tag2D extends Label2D {
 
   constructor () {
     super()
-    this.configAttributes = Session.getState().task.config.attributes
+    this.configAttributes = []
   }
 
   /**
@@ -23,6 +22,11 @@ export class Tag2D extends Label2D {
    */
   public commitLabel () {
     return false
+  }
+
+  /** Get shape objects for committing to state */
+  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
+    return [[], [], []]
   }
 
   /**
@@ -51,6 +55,13 @@ export class Tag2D extends Label2D {
    */
   public updateShapes () {
     return
+  }
+
+  /** Convert label state to drawable */
+  public updateState (
+    state: State, itemIndex: number, labelId: number): void {
+    super.updateState(state, itemIndex, labelId)
+    this.configAttributes = state.task.config.attributes
   }
 
   /**

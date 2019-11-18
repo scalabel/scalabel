@@ -1,8 +1,5 @@
 import _ from 'lodash'
-import { addBox2dLabel } from '../../action/box2d'
-import { changeLabelProps, changeLabelShape } from '../../action/common'
-import Session from '../../common/session'
-import { LabelTypeName } from '../../common/types'
+import { LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel, makeRect } from '../../functional/states'
 import { RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -118,17 +115,17 @@ export class Box2D extends Label2D {
     let x2
     let y1
     let y2
-    if (this._selectedHandle % 2 === 0) {
+    if (this._highlightedHandle % 2 === 0) {
       // move a midpoint
       const v1 = this._shapes[1]
       const v2 = this._shapes[5]
-      if (this._selectedHandle === 2) {
+      if (this._highlightedHandle === 2) {
         v1.y = y
-      } else if (this._selectedHandle === 4) {
+      } else if (this._highlightedHandle === 4) {
         v2.x = x
-      } else if (this._selectedHandle === 6) {
+      } else if (this._highlightedHandle === 6) {
         v2.y = y
-      } else if (this._selectedHandle === 8) {
+      } else if (this._highlightedHandle === 8) {
         v1.x = x
       }
       x1 = Math.min(v1.x, v2.x)
@@ -136,32 +133,32 @@ export class Box2D extends Label2D {
       y1 = Math.min(v1.y, v2.y)
       y2 = Math.max(v1.y, v2.y)
       if (x === x1) {
-        this._selectedHandle = 8
+        this._highlightedHandle = 8
       } else if (x === x2) {
-        this._selectedHandle = 4
+        this._highlightedHandle = 4
       } else if (y === y1) {
-        this._selectedHandle = 2
+        this._highlightedHandle = 2
       } else if (y === y2) {
-        this._selectedHandle = 6
+        this._highlightedHandle = 6
       }
     } else {
       // move a vertex
-      const oppVertex = this._shapes[(this._selectedHandle + 4 + 8) % 8]
+      const oppVertex = this._shapes[(this._highlightedHandle + 4 + 8) % 8]
       x1 = Math.min(x, oppVertex.x)
       x2 = Math.max(x, oppVertex.x)
       y1 = Math.min(y, oppVertex.y)
       y2 = Math.max(y, oppVertex.y)
       if (oppVertex.x < x) {
         if (oppVertex.y < y) {
-          this._selectedHandle = 5
+          this._highlightedHandle = 5
         } else {
-          this._selectedHandle = 3
+          this._highlightedHandle = 3
         }
       } else {
         if (oppVertex.y < y) {
-          this._selectedHandle = 7
+          this._highlightedHandle = 7
         } else {
-          this._selectedHandle = 1
+          this._highlightedHandle = 1
         }
       }
     }
@@ -201,7 +198,7 @@ export class Box2D extends Label2D {
   public onMouseUp (_coord: Vector2D): boolean {
     this._mouseDown = false
     this.editing = false
-    return this.commitLabel()
+    return true
   }
 
   /**
@@ -227,9 +224,9 @@ export class Box2D extends Label2D {
   public onMouseMove (coord: Vector2D, limit: Size2D,
                       _labelIndex: number, _handleIndex: number): boolean {
     if (this._selected && this._mouseDown && this.editing) {
-      if (this._selectedHandle > 0) {
+      if (this._highlightedHandle > 0) {
         this.resize(coord, limit)
-      } else if (this._selectedHandle === 0) {
+      } else if (this._highlightedHandle === 0) {
         this.move(coord, limit)
       }
       return true
@@ -254,49 +251,12 @@ export class Box2D extends Label2D {
     return
   }
 
-  /** Update the shapes of the label to the state */
-  public commitLabel (): boolean {
+  /** Get shape objects for committing to state */
+  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
-      return false
+      throw new Error('Uninitialized label')
     }
-    if (this._selected) {
-      const valid = this.isValid()
-      if (valid) {
-        if (this._labelId < 0) {
-          const r = this.toRect()
-          if (Session.tracking && this._trackId in Session.tracks) {
-            Session.tracks[this._trackId].onLabelCreated(
-              this._label.item, this, [-1]
-            )
-          } else {
-            Session.dispatch(addBox2dLabel(
-              this._label.item,
-              -1,
-              this._label.category,
-              this._label.attributes,
-              r.x1,
-              r.y1,
-              r.x2,
-              r.y2
-            ))
-          }
-        } else {
-          const rect = this.toRect()
-          Session.dispatch(changeLabelShape(
-            this._label.item, this._label.shapes[0], rect))
-          Session.dispatch(changeLabelProps(
-            this._label.item, this._labelId, { manual: true }
-          ))
-          if (Session.tracking && this._trackId in Session.tracks) {
-            Session.tracks[this._trackId].onLabelUpdated(
-              this._label.item, [rect]
-            )
-          }
-        }
-        return true
-      }
-    }
-    return false
+    return [this._label.shapes, [ShapeTypeName.RECT], [this.toRect()]]
   }
 
   /** Initialize this label to be temporary */
@@ -311,14 +271,14 @@ export class Box2D extends Label2D {
     })
     this._labelId = -1
     this._color = getColorById(
-      state.task.status.maxLabelId + 1,
-      ((Session.tracking) ? (state.task.status.maxTrackId + 1) : -1)
+      state.task.status.maxLabelId + 1, state.task.status.maxTrackId + 1
     )
     const rect = makeRect({
       x1: start.x, y1: start.y, x2: start.x, y2: start.y
     })
     this.updateShapes([rect])
-    this.setSelected(true, 5)
+    this.setSelected(true)
+    this._highlightedHandle = 5
   }
 
   /** Get rect representation */

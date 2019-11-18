@@ -123,6 +123,7 @@ export function initFromJson (stateJson: {}, middleware?: Middleware): void {
   loadData()
   Session.subscribe(updateTracks)
   Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
+  Session.subscribe(() => Session.label2dList.updateState(Session.getState()))
   Session.dispatch(updateAll())
 }
 

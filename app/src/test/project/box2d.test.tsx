@@ -7,6 +7,7 @@ import * as React from 'react'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
+import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { Label2DList } from '../../js/drawable/2d/label2d_list'
 import { getShape } from '../../js/functional/state_util'
 import { RectType } from '../../js/functional/types'
@@ -126,21 +127,24 @@ describe('full 2d bounding box integration test', () => {
     let state = Session.getState()
     const itemIndex = state.user.select.item
     const label2dList = new Label2DList()
+    const label2dHandler = new Label2DHandler()
     Session.subscribe(() => {
-      label2dList.updateState(
-        Session.getState(),
-        Session.getState().user.select.item
-      )
+      const newState = Session.getState()
+      Session.label2dList.updateState(newState)
+      label2dHandler.updateState(newState)
     })
 
     const canvasSize = new Size2D(100, 100)
-    label2dList.onMouseDown(new Vector2D(1, 1), _labelIndex, handleIndex)
+    label2dHandler.onMouseMove(
+      new Vector2D(1, 1), canvasSize, _labelIndex, handleIndex
+    )
+    label2dHandler.onMouseDown(new Vector2D(1, 1), _labelIndex, handleIndex)
     for (let i = 1; i <= 10; i += 1) {
-      label2dList.onMouseMove(new Vector2D(i, i), canvasSize, _labelIndex,
+      label2dHandler.onMouseMove(new Vector2D(i, i), canvasSize, _labelIndex,
       handleIndex)
       label2dList.redraw(labelContext, controlContext, 1)
     }
-    label2dList.onMouseUp(new Vector2D(10, 10), _labelIndex, handleIndex)
+    label2dHandler.onMouseUp(new Vector2D(10, 10), _labelIndex, handleIndex)
     label2dList.redraw(labelContext, controlContext, 1)
     labelId += 1
 
@@ -152,13 +156,16 @@ describe('full 2d bounding box integration test', () => {
     expect(rect.x2).toEqual(10)
     expect(rect.y2).toEqual(10)
 
-    label2dList.onMouseDown(new Vector2D(20, 20), _labelIndex, handleIndex)
+    label2dHandler.onMouseMove(
+      new Vector2D(20, 20), canvasSize, _labelIndex, handleIndex
+    )
+    label2dHandler.onMouseDown(new Vector2D(20, 20), _labelIndex, handleIndex)
     for (let i = 20; i <= 40; i += 1) {
-      label2dList.onMouseMove(new Vector2D(i, i), canvasSize, _labelIndex,
+      label2dHandler.onMouseMove(new Vector2D(i, i), canvasSize, _labelIndex,
       handleIndex)
       label2dList.redraw(labelContext, controlContext, 1)
     }
-    label2dList.onMouseUp(new Vector2D(40, 40), _labelIndex, handleIndex)
+    label2dHandler.onMouseUp(new Vector2D(40, 40), _labelIndex, handleIndex)
     label2dList.redraw(labelContext, controlContext, 1)
     labelId += 1
 

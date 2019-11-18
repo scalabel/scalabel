@@ -1,13 +1,8 @@
 import _ from 'lodash'
-import { changeSelect, linkLabels } from '../../action/common'
-import Session from '../../common/session'
-import { makeTrackPolicy, Track } from '../../common/track'
-import { Key, LabelTypeName } from '../../common/types'
-import { getLinkedLabelIds } from '../../functional/common'
-import { makeTrack } from '../../functional/states'
+import { policyFromString } from '../../common/track_policies/track_policy'
+import { LabelTypeName, TrackPolicyType } from '../../common/types'
+import { makeState } from '../../functional/states'
 import { State } from '../../functional/types'
-import { Size2D } from '../../math/size2d'
-import { Vector2D } from '../../math/vector2d'
 import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { DrawMode, Label2D } from './label2d'
@@ -18,7 +13,7 @@ import { Tag2D } from './tag2d'
  * Make a new drawable label based on the label type
  * @param {string} labelType: type of the new label
  */
-function makeDrawableLabel (labelType: string): Label2D | undefined {
+export function makeDrawableLabel2D (labelType: string): Label2D | null {
   switch (labelType) {
     case LabelTypeName.BOX_2D:
       return new Box2D()
@@ -27,6 +22,7 @@ function makeDrawableLabel (labelType: string): Label2D | undefined {
     case LabelTypeName.POLYGON_2D:
       return new Polygon2D()
   }
+  return null
 }
 
 /**
@@ -38,26 +34,16 @@ export class Label2DList {
   private _labels: {[labelId: number]: Label2D}
   /** list of the labels sorted by label order */
   private _labelList: Label2D[]
-  /** Recorded state of last update */
-  private _state: State
   /** selected label */
   private _selectedLabels: Label2D[]
-  /** highlighted label */
-  private _highlightedLabel: Label2D | null
-  /** whether mouse is down */
-  private _mouseDown: boolean
-  /** The hashed list of keys currently down */
-  private _keyDownMap: { [key: string]: boolean }
+  /** state */
+  private _state: State
 
   constructor () {
     this._labels = {}
     this._labelList = []
     this._selectedLabels = []
-    this._highlightedLabel = null
-    this._mouseDown = false
-    this._state = Session.getState()
-    this._keyDownMap = {}
-    this.updateState(this._state, this._state.user.select.item)
+    this._state = makeState()
   }
 
   /**
@@ -67,19 +53,38 @@ export class Label2DList {
     return this._labelList[index]
   }
 
+  /**
+   * Get label by id
+   * @param id
+   */
+  public getLabelById (id: number): Label2D {
+    return this._labels[id]
+  }
+
   /** get label list for state inspection */
   public get labelList (): Label2D[] {
     return this._labelList
   }
 
-  /** get highlightedLabel for state inspection */
-  public get highlightedLabel (): Label2D | null {
-    return this._highlightedLabel
-  }
-
   /** get selectedLabel for state inspection */
   public get selectedLabels (): Label2D[] {
     return this._selectedLabels
+  }
+
+  /**
+   * Get id's of selected labels
+   */
+  public get selectedLabelIds (): {[index: number]: number[]} {
+    return this._state.user.select.labels
+  }
+
+  /**
+   * Get current policy type
+   */
+  public get policyType (): TrackPolicyType {
+    return policyFromString(
+      this._state.task.config.policyTypes[this._state.user.select.policyType]
+    )
   }
 
   /**
@@ -91,22 +96,18 @@ export class Label2DList {
   public redraw (
       labelContext: Context2D, controlContext: Context2D, ratio: number): void {
     this._labelList.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
-    if (!this._mouseDown) {
-      this._labelList.forEach(
-        (v) => v.draw(controlContext, ratio, DrawMode.CONTROL))
-    }
+    this._labelList.forEach(
+      (v) => v.draw(controlContext, ratio, DrawMode.CONTROL)
+    )
   }
 
   /**
    * update labels from the state
    */
-  public updateState (state: State, itemIndex: number): void {
-    if (this._mouseDown) {
-      // don't update the drawing state when the mouse is down
-      return
-    }
+  public updateState (state: State): void {
+    this._state = state
     const self = this
-    self._state = state
+    const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
     // remove any label not in the state
     self._labels = Object.assign({} as typeof self._labels,
@@ -115,7 +116,7 @@ export class Label2DList {
     _.forEach(item.labels, (label, key) => {
       const labelId = Number(key)
       if (!(labelId in self._labels)) {
-        const newLabel = makeDrawableLabel(label.type)
+        const newLabel = makeDrawableLabel2D(label.type)
         if (newLabel) {
           self._labels[labelId] = newLabel
         }
@@ -131,7 +132,6 @@ export class Label2DList {
     self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })
-    this._highlightedLabel = null
     this._selectedLabels = []
     const select = state.user.select
     const selectedLabelItems = Object.keys(select.labels)
@@ -145,210 +145,8 @@ export class Label2DList {
     }
   }
 
-  /**
-   * Process mouse down action
-   * @param coord
-   * @param labelIndex
-   * @param handleIndex
-   */
-  public onMouseDown (
-      coord: Vector2D, labelIndex: number, handleIndex: number): boolean {
-    if (this._highlightedLabel !== null &&
-      (this.isSelectedLabelsEmpty() ||
-      this._selectedLabels[0].editing === false)) {
-      this._highlightedLabel.setHighlighted(false)
-      this._highlightedLabel = null
-    }
-
-    if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
-      // multi select
-      if (labelIndex >= 0) {
-        const label = this._labelList[labelIndex]
-        const index = this.selectedLabels.indexOf(label)
-        if (index === -1) {
-          this._selectedLabels.push(label)
-        } else {
-          this._selectedLabels.splice(index, 1)
-        }
-        const selectedLabelIdArray = []
-        for (const tmp of this._selectedLabels) {
-          selectedLabelIdArray.push(tmp.labelId)
-        }
-        if (this.isSelectedLabelsEmpty()) {
-          Session.dispatch(changeSelect(
-            { category: undefined,
-              attributes: undefined,
-              labels: {}
-            })
-          )
-        } else {
-          Session.dispatch(changeSelect(
-            {
-              category: this._selectedLabels[0].category[0],
-              attributes: this._selectedLabels[0].attributes,
-              labels: { [this._state.user.select.item]: selectedLabelIdArray }
-            })
-          )
-        }
-      }
-      return true
-    } else if (!this.isSelectedLabelsEmpty() &&
-      this._selectedLabels[0].editing === false &&
-      (this._selectedLabels.length === 1 ||
-        this._selectedLabels.indexOf(this._labelList[labelIndex]) === -1)) {
-      for (const label of this._selectedLabels) {
-        label.setSelected(false)
-      }
-      this._selectedLabels = []
-    }
-
-    this._mouseDown = true
-    if (this.isSelectedLabelsEmpty()) {
-      if (labelIndex >= 0) {
-        const selectedLabelId = this._labelList[labelIndex].labelId
-        const item = this._state.task.items[this._state.user.select.item]
-        const selectedLabelIds = getLinkedLabelIds(item, selectedLabelId)
-        for (const labelId of selectedLabelIds) {
-          const label = this._labels[labelId]
-          this._selectedLabels.push(label)
-          const labelHandleIndex =
-            (labelId === selectedLabelId) ? handleIndex : 0
-          label.setSelected(true, labelHandleIndex)
-        }
-        Session.dispatch(changeSelect(
-          { category: this._selectedLabels[0].category[0],
-            attributes: this._selectedLabels[0].attributes,
-            labels: { [this._state.user.select.item]: selectedLabelIds }
-          })
-        )
-      } else {
-        const state = this._state
-        const currentPolicyType =
-          state.task.config.policyTypes[state.user.select.policyType]
-        const newTrack = new Track()
-        newTrack.updateState(
-          makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
-        )
-        Session.tracks[-1] = newTrack
-        const label = makeDrawableLabel(
-          state.task.config.labelTypes[state.user.select.labelType])
-        if (label) {
-          label.initTemp(state, coord)
-          this._selectedLabels.push(label)
-          this._labelList.push(label)
-        }
-      }
-    }
-    for (const label of this._selectedLabels) {
-      label.onMouseDown(coord)
-    }
-    return true
-  }
-
-  /**
-   * Process mouse up action
-   * @param coord
-   * @param labelIndex
-   * @param handleIndex
-   */
-  public onMouseUp (
-      coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
-    this._mouseDown = false
-    if (!this.isSelectedLabelsEmpty() && !this.isKeyDown(Key.META)) {
-      for (const label of this._selectedLabels) {
-        const shouldDelete = !label.onMouseUp(coord)
-        if (shouldDelete) {
-          this._labelList.splice(this._labelList.indexOf(label), 1)
-        }
-      }
-    }
-  }
-
-  /**
-   * Process mouse move action
-   */
-  public onMouseMove (
-      coord: Vector2D, canvasLimit: Size2D,
-      labelIndex: number, handleIndex: number): boolean {
-    if (this.isSelectedLabelsEmpty() || !this._selectedLabels[0].editing) {
-      if (labelIndex >= 0) {
-        if (!this._highlightedLabel) {
-          this._highlightedLabel = this._labelList[labelIndex]
-        }
-        if (this._highlightedLabel.index !== labelIndex) {
-          this._highlightedLabel.setHighlighted(false)
-          this._highlightedLabel = this._labelList[labelIndex]
-        }
-        this._highlightedLabel.setHighlighted(true, handleIndex)
-      } else if (this._highlightedLabel !== null) {
-        this._highlightedLabel.setHighlighted(false)
-        this._highlightedLabel = null
-      } else {
-        // do not change highlighted label
-        return false
-      }
-    } else {
-      for (const label of this._selectedLabels) {
-        label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
-      }
-    }
-    return true
-  }
-
-  /**
-   * Handle keyboard down events
-   * @param e
-   */
-  public onKeyDown (e: KeyboardEvent): void {
-    this._keyDownMap[e.key] = true
-    if (!this.isSelectedLabelsEmpty() &&
-      !this._selectedLabels[0].onKeyDown(e.key)) {
-      this._labelList.splice(
-        this._labelList.indexOf(this._selectedLabels[0]), 1
-      )
-      this._selectedLabels = []
-    }
-    // linking
-    if (this.isKeyDown(Key.L_LOW) || this.isKeyDown(Key.L_UP)) {
-      this.linkLabels()
-    }
-  }
-
-  /**
-   * Handle keyboard up events
-   * @param e
-   */
-  public onKeyUp (e: KeyboardEvent): void {
-    delete this._keyDownMap[e.key]
-    if (!this.isSelectedLabelsEmpty()) {
-      this._selectedLabels[0].onKeyUp(e.key)
-    }
-  }
-
-  /** judge whether selectedLabels is empty */
-  private isSelectedLabelsEmpty (): boolean {
+  /** check whether selectedLabels is empty */
+  public selectedLabelsEmpty (): boolean {
     return this._selectedLabels.length === 0
-  }
-
-  /**
-   * Whether a specific key is pressed down
-   * @param key - the key to check
-   */
-  private isKeyDown (key: Key): boolean {
-    return this._keyDownMap[key]
-  }
-
-  /** link selected labels */
-  private linkLabels (): void {
-    if (this.selectedLabels.length < 2) {
-      return
-    }
-    const selectedLabelIdArray = []
-    for (const tmp of this._selectedLabels) {
-      selectedLabelIdArray.push(tmp.labelId)
-    }
-    Session.dispatch(linkLabels(
-      this._state.user.select.item, selectedLabelIdArray
-    ))
   }
 }

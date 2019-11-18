@@ -106,16 +106,63 @@ export function selectLabel (
   attributes?: {[key: number]: number[]},
   append: boolean = false
 ): types.ChangeSelectAction {
+  return selectLabels(
+    currentSelection, itemIndex, [labelId], category, attributes, append
+  )
+}
+
+/**
+ * Select label by ID
+ * @param {number} labelId
+ */
+export function selectLabels (
+  currentSelection: {[index: number]: number[]},
+  itemIndex: number,
+  labelIds: number[],
+  category?: number,
+  attributes?: {[key: number]: number[]},
+  append: boolean = false
+): types.ChangeSelectAction {
   const selectedLabels = _.cloneDeep(currentSelection)
-  const labelIds = (append && itemIndex in selectedLabels) ?
+  const newLabelIds = (append && itemIndex in selectedLabels) ?
     selectedLabels[itemIndex] : []
-  if (labelId >= 0 && !labelIds.includes(labelId)) {
-    labelIds.push(labelId)
+  for (const labelId of labelIds) {
+    newLabelIds.push(labelId)
   }
   if (labelIds.length > 0 && itemIndex >= 0) {
-    selectedLabels[itemIndex] = labelIds
+    selectedLabels[itemIndex] = newLabelIds
   } else {
     delete selectedLabels[itemIndex]
   }
+
+  if (!category) {
+    category = 0
+  }
+
+  if (!attributes) {
+    attributes = {}
+  }
+
   return changeSelect({ labels: selectedLabels, category, attributes })
+}
+
+/**
+ * Unselect label
+ * @param currentSelection
+ * @param itemIndex
+ * @param labelId
+ */
+export function unselectLabels (
+  currentSelection: {[index: number]: number[]},
+  itemIndex: number,
+  labelIds: number[]
+) {
+  const selectedLabels = _.cloneDeep(currentSelection)
+  for (const labelId of labelIds) {
+    const idIndex = selectedLabels[itemIndex].indexOf(labelId)
+    if (idIndex >= 0) {
+      selectedLabels[itemIndex].splice(idIndex, 1)
+    }
+  }
+  return changeSelect({ labels: selectedLabels })
 }

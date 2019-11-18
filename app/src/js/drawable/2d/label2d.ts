@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import Session from '../../common/session'
+import { ShapeTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { LabelType, ShapeType, State } from '../../functional/types'
+import { makeTaskConfig } from '../../functional/states'
+import { ConfigType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, getColorById } from '../util'
@@ -36,8 +37,6 @@ export abstract class Label2D {
   protected _viewMode: ViewMode
   /** whether the label is selected */
   protected _selected: boolean
-  /** -1 means no handle is selected */
-  protected _selectedHandle: number
   /** whether the label is highlighted */
   protected _highlighted: boolean
   /** -1 means no handle is selected */
@@ -50,13 +49,14 @@ export abstract class Label2D {
   protected _mouseDownCoord: Vector2D
   /** whether the label is being editing */
   protected _editing: boolean
+  /** config */
+  protected _config: ConfigType
 
   constructor () {
     this._index = -1
     this._labelId = -1
     this._trackId = -1
     this._selected = false
-    this._selectedHandle = -1
     this._highlighted = false
     this._highlightedHandle = -1
     this._order = -1
@@ -68,6 +68,7 @@ export abstract class Label2D {
     this._mouseDownCoord = new Vector2D()
     this._mouseDown = false
     this._editing = false
+    this._config = makeTaskConfig()
   }
 
   /** Set whether the label is highlighted */
@@ -103,6 +104,14 @@ export abstract class Label2D {
     return {}
   }
 
+  /** get label state */
+  public get label (): LabelType {
+    if (!this._label) {
+      throw new Error('Label uninitialized')
+    }
+    return this._label
+  }
+
   /** get labelId */
   public get labelId (): number {
     return this._labelId
@@ -114,12 +123,8 @@ export abstract class Label2D {
   }
 
   /** select the label */
-  public setSelected (s: boolean, h: number = -1) {
-    if (s && h < 0) {
-      throw Error('need to select handle as well')
-    }
+  public setSelected (s: boolean) {
     this._selected = s
-    this._selectedHandle = h
   }
 
   /** highlight the label */
@@ -151,6 +156,11 @@ export abstract class Label2D {
     this._editing = e
   }
 
+  /** Whether label valid */
+  public isValid (): boolean {
+    return true
+  }
+
   /**
    * Draw the label on viewing or control canvas
    * @param {Context2D} canvas
@@ -176,7 +186,7 @@ export abstract class Label2D {
     const [x, y] = position
     const self = this
     ctx.save()
-    const config = Session.getState().task.config
+    const config = this._config
     const category = (
       self._label &&
       self._label.category[0] < config.categories.length &&
@@ -266,8 +276,8 @@ export abstract class Label2D {
    */
   public abstract updateShapes (shapes: ShapeType[]): void
 
-  /** Update the shapes of the label to the state */
-  public abstract commitLabel (): boolean
+  /** Get shape id's and shapes for updating */
+  public abstract shapeObjects (): [number[], ShapeTypeName[], ShapeType[]]
 
   /**
    * Initialize this label to be temporary
@@ -285,13 +295,13 @@ export abstract class Label2D {
     this._order = this._label.order
     this._labelId = this._label.id
     this._trackId = this._label.track
+    this._config = state.task.config
     const select = state.user.select
     this._color = getColorById(
       getRootLabelId(item, labelId), getRootTrackId(item, labelId))
     this.setSelected(
       this._label.item in select.labels &&
-        select.labels[this._label.item].includes(labelId),
-      0
+        select.labels[this._label.item].includes(labelId)
     )
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
   }

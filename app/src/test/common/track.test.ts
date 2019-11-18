@@ -170,6 +170,8 @@ test('box2d linear interpolation tracking', () => {
   box.onMouseMove(new Vector2D(5, 5), new Size2D(50, 50), 0, 0)
   box.onMouseUp(new Vector2D(5, 5))
 
+  newTrack.onLabelCreated(itemIndex, box, [-1])
+
   state = Session.getState()
 
   let trackId = -1

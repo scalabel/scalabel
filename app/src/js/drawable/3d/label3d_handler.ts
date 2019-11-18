@@ -298,7 +298,6 @@ export class Label3DHandler {
           this._highlightedLabel.attributes
         ))
       }
-      return true
     }
   }
 }
