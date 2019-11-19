@@ -64,6 +64,7 @@ export class Label2DHandler {
         if (label) {
           label.initTemp(state, coord)
           Session.label2dList.selectedLabels.push(label)
+          Session.label2dList.labelList.push(label)
         }
 
         this._highlightedLabel = label
@@ -135,6 +136,11 @@ export class Label2DHandler {
               }
             }
           }
+        } else {
+          Session.label2dList.labelList.splice(
+            Session.label2dList.labelList.length - 1,
+            1
+          )
         }
       }
     }

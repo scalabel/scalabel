@@ -254,8 +254,8 @@ export class Label2dViewer extends Viewer<Props> {
       labelIndex, handleIndex
     )) {
       e.stopPropagation()
-      this.redraw()
     }
+    this.redraw()
   }
 
   /**
