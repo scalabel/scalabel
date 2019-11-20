@@ -50,7 +50,6 @@ export class Label2DHandler {
         !Session.label2dList.selectedLabels[0].editing) {
       if (this._highlightedLabel) {
         this.selectHighlighted()
-        this._highlightedLabel.setSelected(true)
       } else {
         Session.dispatch(selectLabels(
           {}, -1, []

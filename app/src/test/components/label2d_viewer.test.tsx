@@ -833,14 +833,15 @@ test('2d polygons multi-select and multi-label moving', () => {
   // unselect label 3
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
-    viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
     viewerRef.current.onMouseDown(mouseDownEvent(300, 250))
     viewerRef.current.onMouseUp(mouseUpEvent(300, 250))
     viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+    viewerRef.current.onMouseMove(mouseMoveEvent(0, 0))
 
     state = Session.getState()
     expect(state.user.select.labels[0].length).toEqual(2)
     expect(Session.label2dList.selectedLabels.length).toEqual(2)
+    expect(Session.label2dList.labelList[2].highlighted).toEqual(false)
 
   // select three labels
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))

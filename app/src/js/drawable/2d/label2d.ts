@@ -122,6 +122,11 @@ export abstract class Label2D {
     return this._color
   }
 
+  /** get whether highlighted */
+  public get highlighted (): boolean {
+    return this._highlighted || this._selected
+  }
+
   /** select the label */
   public setSelected (s: boolean) {
     this._selected = s
