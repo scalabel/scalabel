@@ -24,7 +24,8 @@
         "testURL": "http://localhost:8687",
         "transform": {
             "^.+\\.tsx?$": "ts-jest"
-        }
+        },
+        "testEnvironment": "jest-environment-jsdom-fourteen"
     },
     "babel": {
         "presets": [
@@ -85,7 +86,7 @@
         "bootstrap": "^4.1.3",
         "bootstrap-material-design": "^4.1.1",
         "bootstrap-switch": "^3.3.4",
-        "canvas": "2.6.0",
+        "canvas": "^2.6.0",
         "circular-dependency-plugin": "^5.0.2",
         "copy-webpack-plugin": "^4.5.2",
         "eslint": "^5.16.0",
@@ -98,8 +99,10 @@
         "flow-typed": "^2.6.2",
         "fs-extra": "^8.1.0",
         "jest": "^24.9.0",
+        "jest-environment-jsdom-fourteen": "^0.1.0",
         "jquery": "^3.3.1",
         "js-yaml": "^3.13.1",
+        "jsdom-screenshot": "^3.2.0",
         "lodash": "^4.17.15",
         "mock-fs": "^4.10.3",
         "moment": "^2.24.0",

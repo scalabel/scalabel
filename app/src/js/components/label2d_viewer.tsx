@@ -89,7 +89,7 @@ export class Label2dViewer extends Viewer<Props> {
     this.controlCanvas = null
     this.labelContext = null
     this.labelCanvas = null
-    this.display = null
+    this.display = this.props.display
     this._labelHandler = new Label2DHandler()
     this.crosshair = React.createRef()
   }
@@ -255,6 +255,7 @@ export class Label2dViewer extends Viewer<Props> {
     )) {
       e.stopPropagation()
     }
+
     this.redraw()
   }
 
