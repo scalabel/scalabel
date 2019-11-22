@@ -20,6 +20,7 @@ export const ADD_LABELS = 'ADD_LABELS'
 export const CHANGE_SHAPES = 'CHANGE_SHAPES'
 export const CHANGE_LABELS = 'CHANGE_LABELS'
 export const LINK_LABELS = 'LINK_LABELS'
+export const UNLINK_LABELS = 'UNLINK_LABELS'
 export const DELETE_LABELS = 'DELETE_LABELS'
 
 export const ADD_TRACK = 'ADD_TRACK'
@@ -119,6 +120,13 @@ export interface LinkLabelsAction extends BaseAction {
   /** item of the labels */
   itemIndex: number,
   /** ids of the labels to link */
+  labelIds: number[]
+}
+
+export interface UnlinkLabelsAction extends BaseAction {
+  /** item of the labels */
+  itemIndex: number,
+  /** ids of the labels to unlink */
   labelIds: number[]
 }
 

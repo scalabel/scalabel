@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { addLabel, changeLabelProps, changeShapes, linkLabels } from '../../action/common'
+import { addLabel, changeLabelProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
@@ -191,9 +191,15 @@ export class Label2DHandler {
       )
       Session.label2dList.selectedLabels.length = 0
     }
-    // linking
-    if (this.isKeyDown(Key.L_LOW) || this.isKeyDown(Key.L_UP)) {
-      this.linkLabels()
+    switch (e.key) {
+      case Key.L_LOW:
+        // linking
+        this.linkLabels()
+        break
+      case Key.L_UP:
+        // unlinking
+        this.unlinkLabels()
+        break
     }
   }
 
@@ -267,14 +273,18 @@ export class Label2DHandler {
 
   /** link selected labels */
   private linkLabels (): void {
-    if (Session.label2dList.selectedLabels.length < 2) {
-      return
-    }
-    const selectedLabelIdArray = []
-    for (const tmp of Session.label2dList.selectedLabels) {
-      selectedLabelIdArray.push(tmp.labelId)
-    }
+    const selectedLabelIdArray = _.map(
+      Session.label2dList.selectedLabels, (label) => label.labelId)
     Session.dispatch(linkLabels(
+      this._state.user.select.item, selectedLabelIdArray
+    ))
+  }
+
+  /** unlink selected labels */
+  private unlinkLabels (): void {
+    const selectedLabelIdArray = _.map(
+      Session.label2dList.selectedLabels, (label) => label.labelId)
+    Session.dispatch(unlinkLabels(
       this._state.user.select.item, selectedLabelIdArray
     ))
   }

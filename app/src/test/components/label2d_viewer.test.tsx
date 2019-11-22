@@ -580,7 +580,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
 
   if (viewerRef.current) {
-  // draw a polygon and delete vertex when drawing
+    // draw a polygon and delete vertex when drawing
     viewerRef.current.onMouseMove(mouseMoveEvent(200, 100))
     viewerRef.current.onMouseMove(mouseMoveEvent(200, 100))
     viewerRef.current.onMouseUp(mouseUpEvent(200, 100))
@@ -617,9 +617,9 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(250, 100))
     viewerRef.current.onMouseDown(mouseDownEvent(250, 100))
     viewerRef.current.onMouseUp(mouseUpEvent(250, 100))
-  /**
-   * polygon: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
-   */
+    /**
+     * polygon: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
+     */
 
     let state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(1)
@@ -643,7 +643,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points[4].y).toEqual(150)
     expect(polygon.points[4].type).toEqual('vertex')
 
-  // delete vertex when closed
+    // delete vertex when closed
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
     viewerRef.current.onMouseMove(mouseMoveEvent(275, 125))
     viewerRef.current.onMouseMove(mouseMoveEvent(275, 125))
@@ -654,9 +654,9 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     viewerRef.current.onMouseDown(mouseDownEvent(300, 150))
     viewerRef.current.onMouseUp(mouseUpEvent(300, 150))
     viewerRef.current.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
-  /**
-   * polygon: (250, 100) (300, 0) (350, 100) (320, 130)
-   */
+    /**
+     * polygon: (250, 100) (300, 0) (350, 100) (320, 130)
+     */
 
     state = Session.getState()
     polygon = getShape(state, 0, 0, 0) as PolygonType
@@ -665,18 +665,18 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points[3].y).toEqual(130)
     expect(polygon.points[3].type).toEqual('vertex')
 
-  // draw bezier curve
+    // draw bezier curve
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'c' }))
     viewerRef.current.onMouseMove(mouseMoveEvent(335, 115))
     viewerRef.current.onMouseMove(mouseMoveEvent(335, 115))
     viewerRef.current.onMouseDown(mouseDownEvent(335, 115))
     viewerRef.current.onMouseUp(mouseUpEvent(335, 115))
     viewerRef.current.onKeyUp(new KeyboardEvent('keyup', { key: 'c' }))
-  /**
-   * polygon: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 110) (330, 120) <bezier curve control points>]
-   *          (320, 130)
-   */
+    /**
+     * polygon: (250, 100) (300, 0) (350, 100)
+     *          [ (340, 110) (330, 120) <bezier curve control points>]
+     *          (320, 130)
+     */
 
     state = Session.getState()
     polygon = getShape(state, 0, 0, 0) as PolygonType
@@ -688,18 +688,18 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points[4].y).toEqual(120)
     expect(polygon.points[4].type).toEqual('bezier')
 
-  // drag bezier curve control points
+    // drag bezier curve control points
     viewerRef.current.onMouseMove(mouseMoveEvent(340, 110))
     viewerRef.current.onMouseMove(mouseMoveEvent(340, 110))
     viewerRef.current.onMouseDown(mouseDownEvent(340, 110))
     viewerRef.current.onMouseMove(mouseMoveEvent(340, 90))
     viewerRef.current.onMouseMove(mouseMoveEvent(340, 90))
     viewerRef.current.onMouseUp(mouseUpEvent(340, 90))
-  /**
-   * polygon: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 90) (330, 120) <bezier curve control points>]
-   *          (320, 130)
-   */
+    /**
+     * polygon: (250, 100) (300, 0) (350, 100)
+     *          [ (340, 90) (330, 120) <bezier curve control points>]
+     *          (320, 130)
+     */
 
     state = Session.getState()
     polygon = getShape(state, 0, 0, 0) as PolygonType
@@ -714,16 +714,16 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points[4].y).toEqual(120)
     expect(polygon.points[4].type).toEqual('bezier')
 
-  // delete vertex on bezier curve
+    // delete vertex on bezier curve
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
     viewerRef.current.onMouseMove(mouseMoveEvent(350, 100))
     viewerRef.current.onMouseMove(mouseMoveEvent(350, 100))
     viewerRef.current.onMouseDown(mouseDownEvent(350, 100))
     viewerRef.current.onMouseUp(mouseUpEvent(350, 100))
     viewerRef.current.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
-  /**
-   * polygon: (250, 100) (300, 0) (320, 130)
-   */
+    /**
+     * polygon: (250, 100) (300, 0) (320, 130)
+     */
 
     state = Session.getState()
     polygon = getShape(state, 0, 0, 0) as PolygonType
@@ -735,7 +735,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
 
   if (viewerRef.current) {
-  // draw first polygon
+    // draw first polygon
     viewerRef.current.onMouseDown(mouseDownEvent(10, 10))
     viewerRef.current.onMouseUp(mouseUpEvent(10, 10))
     viewerRef.current.onMouseMove(mouseMoveEvent(100, 100))
@@ -750,11 +750,11 @@ test('2d polygons multi-select and multi-label moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(10, 10))
     viewerRef.current.onMouseDown(mouseDownEvent(10, 10))
     viewerRef.current.onMouseUp(mouseUpEvent(10, 10))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     */
 
-  // draw second polygon
+    // draw second polygon
     viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
     viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
     viewerRef.current.onMouseDown(mouseDownEvent(500, 500))
@@ -771,12 +771,12 @@ test('2d polygons multi-select and multi-label moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
     viewerRef.current.onMouseDown(mouseDownEvent(500, 500))
     viewerRef.current.onMouseUp(mouseUpEvent(500, 500))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   * polygon 2: (500, 500) (600, 400) (700, 700)
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     */
 
-  // draw third polygon
+    // draw third polygon
     viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
     viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
     viewerRef.current.onMouseDown(mouseDownEvent(250, 250))
@@ -793,16 +793,16 @@ test('2d polygons multi-select and multi-label moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
     viewerRef.current.onMouseDown(mouseDownEvent(250, 250))
     viewerRef.current.onMouseUp(mouseUpEvent(250, 250))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   * polygon 2: (500, 500) (600, 400) (700, 700)
-   * polygon 3: (250, 250) (300, 250) (350, 350)
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     */
 
     let state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(3)
 
-   // select label 1
+     // select label 1
     viewerRef.current.onMouseMove(mouseMoveEvent(600, 600))
     viewerRef.current.onMouseMove(mouseMoveEvent(600, 600))
     viewerRef.current.onMouseDown(mouseDownEvent(600, 600))
@@ -814,7 +814,7 @@ test('2d polygons multi-select and multi-label moving', () => {
     expect(Session.label2dList.selectedLabels.length).toEqual(1)
     expect(Session.label2dList.selectedLabels[0].labelId).toEqual(1)
 
-  // select label 1, 2, 3
+    // select label 1, 2, 3
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
@@ -830,7 +830,7 @@ test('2d polygons multi-select and multi-label moving', () => {
     expect(state.user.select.labels[0].length).toEqual(3)
     expect(Session.label2dList.selectedLabels.length).toEqual(3)
 
-  // unselect label 3
+    // unselect label 3
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
     viewerRef.current.onMouseDown(mouseDownEvent(300, 250))
@@ -843,7 +843,7 @@ test('2d polygons multi-select and multi-label moving', () => {
     expect(Session.label2dList.selectedLabels.length).toEqual(2)
     expect(Session.label2dList.labelList[2].highlighted).toEqual(false)
 
-  // select three labels
+    // select three labels
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
@@ -855,7 +855,7 @@ test('2d polygons multi-select and multi-label moving', () => {
     expect(state.user.select.labels[0].length).toEqual(3)
     expect(Session.label2dList.selectedLabels.length).toEqual(3)
 
-  // move
+    // move
     viewerRef.current.onMouseMove(mouseMoveEvent(20, 20))
     viewerRef.current.onMouseMove(mouseMoveEvent(20, 20))
     viewerRef.current.onMouseDown(mouseDownEvent(20, 20))
@@ -864,11 +864,11 @@ test('2d polygons multi-select and multi-label moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(120, 120))
     viewerRef.current.onMouseMove(mouseMoveEvent(120, 120))
     viewerRef.current.onMouseUp(mouseUpEvent(120, 120))
-  /**
-   * polygon 1: (110, 110) (200, 200) (300, 200)
-   * polygon 2: (600, 600) (700, 500) (800, 800)
-   * polygon 3: (350, 350) (400, 350) (450, 450)
-   */
+    /**
+     * polygon 1: (110, 110) (200, 200) (300, 200)
+     * polygon 2: (600, 600) (700, 500) (800, 800)
+     * polygon 3: (350, 350) (400, 350) (450, 450)
+     */
 
     state = Session.getState()
     let polygon = getShape(state, 0, 0, 0) as PolygonType
@@ -887,7 +887,7 @@ test('2d polygons linking labels and moving', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
 
   if (viewerRef.current) {
-  // draw first polygon
+    // draw first polygon
     viewerRef.current.onMouseMove(mouseMoveEvent(10, 10))
     viewerRef.current.onMouseMove(mouseMoveEvent(10, 10))
     viewerRef.current.onMouseDown(mouseDownEvent(10, 10))
@@ -904,11 +904,11 @@ test('2d polygons linking labels and moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(10, 10))
     viewerRef.current.onMouseDown(mouseDownEvent(10, 10))
     viewerRef.current.onMouseUp(mouseUpEvent(10, 10))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     */
 
-  // draw second polygon
+    // draw second polygon
     viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
     viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
     viewerRef.current.onMouseDown(mouseDownEvent(500, 500))
@@ -925,12 +925,12 @@ test('2d polygons linking labels and moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
     viewerRef.current.onMouseDown(mouseDownEvent(500, 500))
     viewerRef.current.onMouseUp(mouseUpEvent(500, 500))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   * polygon 2: (500, 500) (600, 400) (700, 700)
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     */
 
-  // draw third polygon
+    // draw third polygon
     viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
     viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
     viewerRef.current.onMouseDown(mouseDownEvent(250, 250))
@@ -947,16 +947,16 @@ test('2d polygons linking labels and moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
     viewerRef.current.onMouseDown(mouseDownEvent(250, 250))
     viewerRef.current.onMouseUp(mouseUpEvent(250, 250))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   * polygon 2: (500, 500) (600, 400) (700, 700)
-   * polygon 3: (250, 250) (300, 250) (350, 350)
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     */
 
     let state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(3)
 
-  // select label 2 and 0
+    // select label 2 and 0
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 300))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 300))
     viewerRef.current.onMouseDown(mouseDownEvent(300, 300))
@@ -967,11 +967,11 @@ test('2d polygons linking labels and moving', () => {
     viewerRef.current.onMouseDown(mouseDownEvent(100, 100))
     viewerRef.current.onMouseUp(mouseUpEvent(100, 100))
     viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   * polygon 2: (500, 500) (600, 400) (700, 700)
-   * polygon 3: (250, 250) (300, 250) (350, 350)
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     */
 
     state = Session.getState()
     expect(state.user.select.labels[0].length).toEqual(2)
@@ -981,7 +981,7 @@ test('2d polygons linking labels and moving', () => {
     expect(Session.label2dList.selectedLabels[0].labelId).toEqual(2)
     expect(Session.label2dList.selectedLabels[1].labelId).toEqual(0)
 
-  // select label 1 and 2
+    // select label 1 and 2
     viewerRef.current.onMouseMove(mouseMoveEvent(600, 600))
     viewerRef.current.onMouseMove(mouseMoveEvent(600, 600))
     viewerRef.current.onMouseDown(mouseDownEvent(600, 600))
@@ -993,15 +993,15 @@ test('2d polygons linking labels and moving', () => {
     viewerRef.current.onMouseUp(mouseUpEvent(50, 50))
     viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
 
-  // link label 1 and 2
+    // link label 1 and 2
     viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'l' }))
     viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'l' }))
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   * polygon 2: (500, 500) (600, 400) (700, 700)
-   * polygon 3: (250, 250) (300, 250) (350, 350)
-   * group 1: 1, 2
-   */
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     * group 1: 1, 2
+     */
 
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(4)
@@ -1010,7 +1010,7 @@ test('2d polygons linking labels and moving', () => {
     Session.label2dList.labelList[1].color
   )
 
-  // reselect label 1 and 2
+    // reselect label 1 and 2
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
     viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
     viewerRef.current.onMouseDown(mouseDownEvent(300, 250))
@@ -1024,7 +1024,7 @@ test('2d polygons linking labels and moving', () => {
     expect(state.user.select.labels[0].length).toEqual(2)
     expect(Session.label2dList.selectedLabels.length).toEqual(2)
 
-  // moving group 1
+    // moving group 1
     viewerRef.current.onMouseMove(mouseMoveEvent(20, 20))
     viewerRef.current.onMouseMove(mouseMoveEvent(20, 20))
     viewerRef.current.onMouseDown(mouseDownEvent(20, 20))
@@ -1033,12 +1033,12 @@ test('2d polygons linking labels and moving', () => {
     viewerRef.current.onMouseMove(mouseMoveEvent(120, 120))
     viewerRef.current.onMouseMove(mouseMoveEvent(120, 120))
     viewerRef.current.onMouseUp(mouseUpEvent(120, 120))
-  /**
-   * polygon 1: (110, 110) (200, 200) (300, 200)
-   * polygon 2: (600, 600) (700, 500) (800, 800)
-   * polygon 3: (250, 250) (300, 250) (350, 350)
-   * group 1: 1, 2
-   */
+    /**
+     * polygon 1: (110, 110) (200, 200) (300, 200)
+     * polygon 2: (600, 600) (700, 500) (800, 800)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     * group 1: 1, 2
+     */
 
     state = Session.getState()
     let polygon = getShape(state, 0, 0, 0) as PolygonType
@@ -1050,5 +1050,134 @@ test('2d polygons linking labels and moving', () => {
     polygon = getShape(state, 0, 2, 0) as PolygonType
     expect(polygon.points[0].x).toEqual(250)
     expect(polygon.points[0].y).toEqual(250)
+  }
+})
+
+test('2d polygons unlinking', () => {
+  Session.dispatch(action.changeSelect({ labelType: 1 }))
+
+  if (viewerRef.current) {
+    // draw first polygon
+    viewerRef.current.onMouseDown(mouseDownEvent(10, 10))
+    viewerRef.current.onMouseUp(mouseUpEvent(10, 10))
+    viewerRef.current.onMouseMove(mouseMoveEvent(100, 100))
+    viewerRef.current.onMouseDown(mouseDownEvent(100, 100))
+    viewerRef.current.onMouseUp(mouseUpEvent(100, 100))
+    viewerRef.current.onMouseMove(mouseMoveEvent(200, 100))
+    viewerRef.current.onMouseDown(mouseDownEvent(200, 100))
+    viewerRef.current.onMouseUp(mouseUpEvent(200, 100))
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     */
+
+    // draw second polygon
+    viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
+    viewerRef.current.onMouseDown(mouseDownEvent(500, 500))
+    viewerRef.current.onMouseUp(mouseUpEvent(500, 500))
+    viewerRef.current.onMouseMove(mouseMoveEvent(600, 400))
+    viewerRef.current.onMouseDown(mouseDownEvent(600, 400))
+    viewerRef.current.onMouseUp(mouseUpEvent(600, 400))
+    viewerRef.current.onMouseMove(mouseMoveEvent(700, 700))
+    viewerRef.current.onMouseDown(mouseDownEvent(700, 700))
+    viewerRef.current.onMouseUp(mouseUpEvent(700, 700))
+    viewerRef.current.onMouseMove(mouseMoveEvent(500, 500))
+    viewerRef.current.onMouseDown(mouseDownEvent(500, 500))
+    viewerRef.current.onMouseUp(mouseUpEvent(500, 500))
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     */
+
+    // draw third polygon
+    viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
+    viewerRef.current.onMouseDown(mouseDownEvent(250, 250))
+    viewerRef.current.onMouseUp(mouseUpEvent(250, 250))
+    viewerRef.current.onMouseMove(mouseMoveEvent(300, 250))
+    viewerRef.current.onMouseDown(mouseDownEvent(300, 250))
+    viewerRef.current.onMouseUp(mouseUpEvent(300, 250))
+    viewerRef.current.onMouseMove(mouseMoveEvent(350, 350))
+    viewerRef.current.onMouseDown(mouseDownEvent(350, 350))
+    viewerRef.current.onMouseUp(mouseUpEvent(350, 350))
+    viewerRef.current.onMouseMove(mouseMoveEvent(250, 250))
+    viewerRef.current.onMouseDown(mouseDownEvent(250, 250))
+    viewerRef.current.onMouseUp(mouseUpEvent(250, 250))
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     */
+
+    let state = Session.getState()
+    expect(_.size(state.task.items[0].labels)).toEqual(3)
+
+    // select polygon 1 and 3
+    viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+    viewerRef.current.onMouseMove(mouseMoveEvent(100, 100))
+    viewerRef.current.onMouseDown(mouseDownEvent(100, 100))
+    viewerRef.current.onMouseUp(mouseUpEvent(100, 100))
+    viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+    // link polygon 1 and 3
+    viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'l' }))
+    viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'l' }))
+
+    state = Session.getState()
+    expect(_.size(state.task.items[0].labels)).toEqual(4)
+    expect(_.size(Session.label2dList.labelList)).toEqual(3)
+    expect(Session.label2dList.labelList[0].color).toEqual(
+      Session.label2dList.labelList[2].color
+  )
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     * group 1: polygon 1, 3
+     */
+
+    // select polygon 1, 2, 3
+    viewerRef.current.onMouseMove(mouseMoveEvent(550, 550))
+    viewerRef.current.onMouseDown(mouseDownEvent(550, 550))
+    viewerRef.current.onMouseUp(mouseUpEvent(550, 550))
+    viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+    viewerRef.current.onMouseMove(mouseMoveEvent(100, 100))
+    viewerRef.current.onMouseDown(mouseDownEvent(100, 100))
+    viewerRef.current.onMouseUp(mouseUpEvent(100, 100))
+    viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+    // unlink polygon 1 and 3
+    viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'L' }))
+    viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'L' }))
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     */
+
+    state = Session.getState()
+    expect(_.size(state.task.items[0].labels)).toEqual(3)
+    expect(_.size(Session.label2dList.labelList)).toEqual(3)
+
+    // unselect polygon 1
+    viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+    viewerRef.current.onMouseMove(mouseMoveEvent(100, 100))
+    viewerRef.current.onMouseDown(mouseDownEvent(100, 100))
+    viewerRef.current.onMouseUp(mouseUpEvent(100, 100))
+    viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+    // link polygon 2 and 3
+    viewerRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'l' }))
+    viewerRef.current.onKeyUp(new KeyboardEvent('keydown', { key: 'l' }))
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100)
+     * polygon 2: (500, 500) (600, 400) (700, 700)
+     * polygon 3: (250, 250) (300, 250) (350, 350)
+     * group 1: polygon 2, 3
+     */
+
+    state = Session.getState()
+    expect(_.size(state.task.items[0].labels)).toEqual(4)
+    expect(_.size(Session.label2dList.labelList)).toEqual(3)
+    expect(Session.label2dList.labelList[1].color).toEqual(
+      Session.label2dList.labelList[2].color)
   }
 })

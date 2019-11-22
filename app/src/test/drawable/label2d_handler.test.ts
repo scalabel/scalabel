@@ -863,6 +863,135 @@ test('2d polygons linking labels and moving', () => {
   expect(polygon.points[0].y).toEqual(250)
 })
 
+test('2d polygons unlinking', () => {
+  const [label2dHandler] = initializeTestingObjects()
+  Session.dispatch(action.changeSelect({ labelType: 1 }))
+
+  // draw first polygon
+  const canvasSize = new Size2D(1000, 1000)
+  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 1)
+  /**
+   * polygon 1: (10, 10) (100, 100) (200, 100)
+   */
+
+  // draw second polygon
+  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(600, 400), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(600, 400), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(600, 400), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(700, 700), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(700, 700), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(700, 700), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 1)
+  /**
+   * polygon 1: (10, 10) (100, 100) (200, 100)
+   * polygon 2: (500, 500) (600, 400) (700, 700)
+   */
+
+  // draw third polygon
+  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(300, 250), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(300, 250), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(300, 250), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(350, 350), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(350, 350), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(350, 350), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 1)
+  /**
+   * polygon 1: (10, 10) (100, 100) (200, 100)
+   * polygon 2: (500, 500) (600, 400) (700, 700)
+   * polygon 3: (250, 250) (300, 250) (350, 350)
+   */
+
+  let state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(3)
+
+  // select polygon 1 and 3
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, 0, 2)
+  label2dHandler.onMouseDown(new Vector2D(100, 100), 0, 2)
+  label2dHandler.onMouseUp(new Vector2D(100, 100), 0, 2)
+  label2dHandler.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+  // link polygon 1 and 3
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'l' }))
+  label2dHandler.onKeyUp(new KeyboardEvent('keydown', { key: 'l' }))
+
+  state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(4)
+  expect(_.size(Session.label2dList.labelList)).toEqual(3)
+  expect(Session.label2dList.labelList[0].color).toEqual(
+    Session.label2dList.labelList[2].color
+  )
+  /**
+   * polygon 1: (10, 10) (100, 100) (200, 100)
+   * polygon 2: (500, 500) (600, 400) (700, 700)
+   * polygon 3: (250, 250) (300, 250) (350, 350)
+   * group 1: polygon 1, 3
+   */
+
+  // select polygon 1, 2, 3
+  label2dHandler.onMouseMove(new Vector2D(550, 550), canvasSize, 1, 0)
+  label2dHandler.onMouseDown(new Vector2D(550, 550), 1, 0)
+  label2dHandler.onMouseUp(new Vector2D(550, 550), 1, 0)
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, 0, 2)
+  label2dHandler.onMouseDown(new Vector2D(100, 100), 0, 2)
+  label2dHandler.onMouseUp(new Vector2D(100, 100), 0, 2)
+  label2dHandler.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+  // unlink polygon 1 and 3
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'L' }))
+  label2dHandler.onKeyUp(new KeyboardEvent('keydown', { key: 'L' }))
+  /**
+   * polygon 1: (10, 10) (100, 100) (200, 100)
+   * polygon 2: (500, 500) (600, 400) (700, 700)
+   * polygon 3: (250, 250) (300, 250) (350, 350)
+   */
+
+  state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(3)
+  expect(_.size(Session.label2dList.labelList)).toEqual(3)
+
+  // unselect polygon 1
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'Meta' }))
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, 0, 2)
+  label2dHandler.onMouseDown(new Vector2D(100, 100), 0, 2)
+  label2dHandler.onMouseUp(new Vector2D(100, 100), 0, 2)
+  label2dHandler.onKeyUp(new KeyboardEvent('keydown', { key: 'Meta' }))
+
+  // link polygon 2 and 3
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'l' }))
+  label2dHandler.onKeyUp(new KeyboardEvent('keydown', { key: 'l' }))
+  /**
+   * polygon 1: (10, 10) (100, 100) (200, 100)
+   * polygon 2: (500, 500) (600, 400) (700, 700)
+   * polygon 3: (250, 250) (300, 250) (350, 350)
+   * group 1: polygon 2, 3
+   */
+
+  state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(4)
+  expect(_.size(Session.label2dList.labelList)).toEqual(3)
+  expect(Session.label2dList.labelList[1].color).toEqual(
+    Session.label2dList.labelList[2].color)
+})
+
 test('Draw label2d list to canvas', () => {
   const labelCanvas = createCanvas(200, 200)
   const labelContext = labelCanvas.getContext('2d')

@@ -86,6 +86,25 @@ export function addLabel (
 }
 
 /**
+ * Delete parent label. The ids of label will be updated according to
+ * the current state.
+ * @param {State} state: current state
+ * @param {types.DeleteLabelAction} action
+ * @return {State}
+ */
+export function deleteLabelsById (
+  state: State, sessionId: string, itemIndex: number, labelIds: number[])
+  : State {
+  const deleteLabelsAction: types.DeleteLabelsAction = {
+    type: types.DELETE_LABELS,
+    sessionId,
+    itemIndices: [itemIndex],
+    labelIds: [labelIds]
+  }
+  return deleteLabels(state, deleteLabelsAction)
+}
+
+/**
  * Add news labels to one item
  * @param item
  * @param taskStatus
@@ -461,7 +480,7 @@ export function getRootTrackId (item: ItemType, labelId: number): number {
 }
 
 /**
- * Link two labels on the same item
+ * Link labels on the same item
  * The new label properties are the same as label1 in action
  * @param {State} state
  * @param {types.LinkLabelsAction} action
@@ -517,6 +536,52 @@ export function linkLabels (
   const items = updateListItem(state.task.items, item.index, item)
   const task = updateObject(state.task, { items, tracks })
   return { ...state, task }
+}
+
+/**
+ * Unlink labels on the same item
+ * @param {State} state
+ * @param {types.UnlinkLabelsAction} action
+ */
+export function unlinkLabels (
+  state: State, action: types.UnlinkLabelsAction): State {
+  if (action.labelIds.length < 1) {
+    return state
+  }
+  const deleteLabelList = []
+  const labels = _.clone(state.task.items[action.itemIndex].labels)
+
+  for (let labelId of action.labelIds) {
+
+    let label = _.cloneDeep(labels[labelId])
+    let parentId = label.parent
+    let parentLabel
+    label.parent = -1
+    labels[labelId] = label
+
+    while (parentId >= 0) {
+      parentLabel = _.cloneDeep(labels[parentId])
+      parentLabel.children = removeListItems(parentLabel.children, [labelId])
+      labels[parentId] = parentLabel
+
+      label = parentLabel
+      labelId = parentId
+      parentId = label.parent
+
+      if (label.children.length !== 0) {
+        break
+      } else if (label.type === LabelTypeName.EMPTY) {
+        deleteLabelList.push(labelId)
+      } else {
+        label.parent = -1
+      }
+    }
+  }
+  const items = updateListItem(state.task.items, action.itemIndex,
+    updateObject(state.task.items[action.itemIndex], { labels }))
+  const task = updateObject(state.task, { items })
+  return deleteLabelsById(updateObject(state, { task }),
+    action.sessionId, action.itemIndex, deleteLabelList)
 }
 
 /**

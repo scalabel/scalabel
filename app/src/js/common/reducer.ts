@@ -41,6 +41,8 @@ export const reducer: Reducer<State> = (
         state, action as types.ChangeLabelsAction)
     case types.LINK_LABELS:
       return common.linkLabels(state, action as types.LinkLabelsAction)
+    case types.UNLINK_LABELS:
+      return common.unlinkLabels(state, action as types.UnlinkLabelsAction)
     case types.MERGE_TRACKS:
       return common.mergeTracks(state, action as types.MergeTrackAction)
     case types.DELETE_LABELS:

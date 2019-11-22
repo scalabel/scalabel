@@ -201,7 +201,7 @@ export function changeLabelsProps (
 }
 
 /**
- * Link two labels
+ * Link labels
  * @param {number} itemIndex
  * @param {[]number} labelIds labels to link
  */
@@ -209,6 +209,21 @@ export function linkLabels (
     itemIndex: number, labelIds: number[]): types.LinkLabelsAction {
   return {
     type: types.LINK_LABELS,
+    sessionId: Session.id,
+    itemIndex,
+    labelIds
+  }
+}
+
+/**
+ * unlink labels
+ * @param {number} itemIndex
+ * @param {[]number} labelIds labels to unlink
+ */
+export function unlinkLabels (
+    itemIndex: number, labelIds: number[]): types.UnlinkLabelsAction {
+  return {
+    type: types.UNLINK_LABELS,
     sessionId: Session.id,
     itemIndex,
     labelIds
