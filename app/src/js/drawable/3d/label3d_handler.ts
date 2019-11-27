@@ -52,7 +52,7 @@ export class Label3DHandler {
     //   }
     // }
     this._keyDownMap = {}
-    this._viewerConfig = makePointCloudViewerConfig()
+    this._viewerConfig = makePointCloudViewerConfig(-1)
     this._selectedItemIndex = -1
   }
 

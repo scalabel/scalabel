@@ -6,12 +6,16 @@ import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import Session from '../common/session'
 import { LayoutStyles } from '../styles/label'
+import LabelPane from './label_pane'
+import PlayerControl from './player_control'
 
 interface ClassType {
   /** title bar */
   titleBar: string
   /** everything below title bar */
   main: string
+  /** interface container */
+  interfaceContainer: string
 }
 
 interface Props {
@@ -21,8 +25,6 @@ interface Props {
   leftSidebar1: any
   /** The bottom part of the left side bar */
   leftSidebar2?: any
-  /** The main div */
-  main: any
   /** The bottom bar */
   bottomBar?: any
   /** The top part of the right side bar */
@@ -59,6 +61,7 @@ interface LayoutState {
 class LabelLayout extends React.Component<Props, State> {
   /** The state of the layout */
   public layoutState: LayoutState
+
   /**
    * @param {object} props
    */
@@ -143,10 +146,15 @@ class LabelLayout extends React.Component<Props, State> {
    * @return {React.Fragment} React fragment
    */
   public render () {
-    const {titleBar, leftSidebar1, leftSidebar2, bottomBar,
-      main, rightSidebar1, rightSidebar2, classes} = this.props
-    const mainWithProps = React.cloneElement(main, {})
-
+    const {
+      titleBar,
+      leftSidebar1,
+      leftSidebar2,
+      bottomBar,
+      rightSidebar1,
+      rightSidebar2,
+      classes
+    } = this.props
     const leftDefaultWidth = 200
     const leftMaxWidth = 300
     const leftMinWidth = 180
@@ -160,6 +168,22 @@ class LabelLayout extends React.Component<Props, State> {
     const bottomMaxHeight = 300
     const bottomMinHeight = 180
 
+    const playerControl = (<PlayerControl key='player-control'
+      num_frames={Session.getState().task.items.length}
+    />)
+
+    const state = Session.getState()
+
+    const labelInterface = (
+      <div className={this.props.classes.interfaceContainer}
+      >
+        <LabelPane
+          pane={state.user.layout.rootPane} key={'rootPane'}
+        />
+        { playerControl }
+      </div >
+    )
+
     return (
         <React.Fragment>
           <CssBaseline />
@@ -167,34 +191,63 @@ class LabelLayout extends React.Component<Props, State> {
             {titleBar}
           </div>
           <main className={classes.main}>
-            {this.optionalSplit('vertical',
-
-              // left sidebar
-              this.optionalSplit('horizontal', leftSidebar1, leftSidebar2,
-                'leftSidebar1', 'leftSidebar2',
-                topMinHeight, topDefaultHeight, topMaxHeight,
-                'first'),
-
+            {
               this.optionalSplit('vertical',
-
-                // center
-                this.optionalSplit('horizontal', mainWithProps, bottomBar,
-                'main', 'bottomBar',
-                bottomMinHeight, bottomDefaultHeight, bottomMaxHeight,
-                'second', 'center'),
-
-                // right sidebar
-                this.optionalSplit('horizontal', rightSidebar1, rightSidebar2,
-                'rightSidebar1', 'rightSidebar2',
-                topMinHeight, topDefaultHeight, topMaxHeight),
-                'center', 'rightSidebar',
-                rightMinWidth, rightDefaultWidth, rightMaxWidth, 'second',
-                'right'
+                // left sidebar
+                this.optionalSplit('horizontal',
+                  leftSidebar1,
+                  leftSidebar2,
+                  'leftSidebar1',
+                  'leftSidebar2',
+                  topMinHeight,
+                  topDefaultHeight,
+                  topMaxHeight,
+                  'first'
                 ),
 
-                'leftSidebar', 'centerAndRightSidebar',
-                leftMinWidth, leftDefaultWidth, leftMaxWidth, 'first', 'left'
-              )}
+                this.optionalSplit('vertical',
+                  // center
+                  this.optionalSplit('horizontal',
+                    labelInterface,
+                    bottomBar,
+                    'main',
+                    'bottomBar',
+                    bottomMinHeight,
+                    bottomDefaultHeight,
+                    bottomMaxHeight,
+                    'second',
+                    'center'
+                  ),
+
+                  // right sidebar
+                  this.optionalSplit('horizontal',
+                    rightSidebar1,
+                    rightSidebar2,
+                    'rightSidebar1',
+                    'rightSidebar2',
+                    topMinHeight,
+                    topDefaultHeight,
+                    topMaxHeight
+                  ),
+
+                  'center',
+                  'rightSidebar',
+                  rightMinWidth,
+                  rightDefaultWidth,
+                  rightMaxWidth,
+                  'second',
+                  'right'
+                ),
+
+                'leftSidebar',
+                'centerAndRightSidebar',
+                leftMinWidth,
+                leftDefaultWidth,
+                leftMaxWidth,
+                'first',
+                'left'
+              )
+            }
           </main>
           {/* End footer */}
         </React.Fragment>

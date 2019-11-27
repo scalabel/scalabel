@@ -104,11 +104,14 @@ function initViewerConfigs (): void {
     const sensorIds = Object.keys(state.task.sensors).map(
       (key) => Number(key)
     ).sort()
-    const firstId = sensorIds[0]
-    const firstSensor = state.task.sensors[firstId]
-    Session.dispatch(addViewerConfig(1, makeDefaultViewerConfig(
-      firstSensor.type as DataType
+    const id0 = sensorIds[0]
+    const sensor0 = state.task.sensors[id0]
+    Session.dispatch(addViewerConfig(0, makeDefaultViewerConfig(
+      sensor0.type as DataType, 0
     )))
+    // Session.dispatch(changeLayout(
+    //   updateObject(state.user.layout, { rootPane: makePane(1) })
+    // ))
   }
 }
 

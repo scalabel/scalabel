@@ -183,6 +183,11 @@ export const LayoutStyles = () => createStyles({
     position: 'absolute',
     outline: 'none',
     width: '100%'
+  },
+  interfaceContainer: {
+    display: 'block', height: '100%',
+    position: 'absolute',
+    outline: 'none', width: '100%', background: '#222222'
   }
 })
 

@@ -30,7 +30,7 @@ beforeAll(() => {
 
 /** Set up component for testing */
 function setUpLabel2dViewer (width: number, height: number) {
-  Session.dispatch(action.addViewerConfig(0, makeImageViewerConfig()))
+  Session.dispatch(action.addViewerConfig(0, makeImageViewerConfig(0)))
 
   const display = document.createElement('div')
   display.getBoundingClientRect = () => {

@@ -85,7 +85,7 @@ class PointCloudViewer extends Viewer<Props> {
 
     let canvas = (
       <canvas
-        key='point-cloud-canvas'
+        key={`point-cloud-canvas-${this.props.id}`}
         className={classes.point_cloud_canvas}
         ref={(ref) => { this.initializeRefs(ref) }}
       />
@@ -99,6 +99,8 @@ class PointCloudViewer extends Viewer<Props> {
       )
     }
 
+    this.redraw()
+
     return canvas
   }
 
@@ -108,13 +110,11 @@ class PointCloudViewer extends Viewer<Props> {
    */
   public redraw (): boolean {
     const state = this.state
-    const item = state.user.select.item
-    if (this.canvas) {
+    if (isCurrentItemLoaded(state) && this.canvas) {
+      const item = state.user.select.item
       const sensor =
         this.state.user.viewerConfigs[this.props.id].sensor
-      const loaded =
-        state.session.itemStatuses[item].sensorDataLoaded[sensor]
-      if (loaded) {
+      if (item < Session.images.length && sensor in Session.pointClouds[item]) {
         this.updateRenderer()
         this.pointCloud = Session.pointClouds[item][sensor]
         this.renderThree()
@@ -128,7 +128,10 @@ class PointCloudViewer extends Viewer<Props> {
    * @param _state
    */
   protected updateState (_state: State) {
-    this.display = this.props.display
+    if (this.display !== this.props.display) {
+      this.display = this.props.display
+      this.forceUpdate()
+    }
   }
 
   /**
@@ -152,9 +155,16 @@ class PointCloudViewer extends Viewer<Props> {
     }
 
     if (component.nodeName === 'CANVAS') {
+      if (this.canvas !== component) {
+        this.canvas = component
+        const rendererParams = { canvas: this.canvas, alpha: true }
+        this.renderer = new THREE.WebGLRenderer(rendererParams)
+        this.forceUpdate()
+      }
+
       if (this.canvas && this.display) {
         const config = getCurrentViewerConfig(this.state, this.props.id)
-        if (config && config.type === types.ViewerConfigType.IMAGE_3D) {
+        if (config && config.type === types.ViewerConfigTypeName.IMAGE_3D) {
           if ((config as Image3DViewerConfigType).viewScale < MIN_SCALE ||
               (config as Image3DViewerConfigType).viewScale >= MAX_SCALE) {
             return
@@ -171,12 +181,6 @@ class PointCloudViewer extends Viewer<Props> {
             )
           this.scale = newParams[3]
         }
-      }
-
-      if (this.canvas !== component) {
-        this.canvas = component
-        const rendererParams = { canvas: this.canvas, alpha: true }
-        this.renderer = new THREE.WebGLRenderer(rendererParams)
       }
 
       if (isCurrentItemLoaded(this.state)) {

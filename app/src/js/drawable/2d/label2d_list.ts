@@ -38,12 +38,15 @@ export class Label2DList {
   private _selectedLabels: Label2D[]
   /** state */
   private _state: State
+  /** callbacks */
+  private _callbacks: Array<() => void>
 
   constructor () {
     this._labels = {}
     this._labelList = []
     this._selectedLabels = []
     this._state = makeState()
+    this._callbacks = []
   }
 
   /**
@@ -51,6 +54,26 @@ export class Label2DList {
    */
   public get (index: number): Label2D {
     return this._labelList[index]
+  }
+
+  /** Subscribe callback for drawable update */
+  public subscribe (callback: () => void) {
+    this._callbacks.push(callback)
+  }
+
+  /** Unsubscribe callback for drawable update */
+  public unsubscribe (callback: () => void) {
+    const index = this._callbacks.indexOf(callback)
+    if (index >= 0) {
+      this._callbacks.splice(index, 1)
+    }
+  }
+
+  /** Call when any drawable has been updated */
+  public onDrawableUpdate (): void {
+    for (const callback of this._callbacks) {
+      callback()
+    }
   }
 
   /**

@@ -76,6 +76,8 @@ class Label3dViewer extends Viewer<Props> {
   private _keyUpListener: (e: KeyboardEvent) => void
   /** key down listener */
   private _keyDownListener: (e: KeyboardEvent) => void
+  /** drawable callback */
+  private _drawableUpdateCallback: () => void
 
   /**
    * Constructor, ons subscription to store
@@ -108,6 +110,7 @@ class Label3dViewer extends Viewer<Props> {
 
     this._keyUpListener = (e) => { this.onKeyUp(e) }
     this._keyDownListener = (e) => { this.onKeyDown(e) }
+    this._drawableUpdateCallback = this.renderThree.bind(this)
   }
 
   /**
@@ -117,6 +120,7 @@ class Label3dViewer extends Viewer<Props> {
     super.componentDidMount()
     document.addEventListener('keydown', this._keyDownListener)
     document.addEventListener('keyup', this._keyUpListener)
+    Session.label3dList.subscribe(this._drawableUpdateCallback)
   }
 
   /**
@@ -126,6 +130,7 @@ class Label3dViewer extends Viewer<Props> {
     super.componentWillUnmount()
     document.removeEventListener('keydown', this._keyDownListener)
     document.removeEventListener('keyup', this._keyUpListener)
+    Session.label3dList.unsubscribe(this._drawableUpdateCallback)
   }
 
   /**
@@ -136,7 +141,7 @@ class Label3dViewer extends Viewer<Props> {
     const { classes } = this.props
 
     let canvas = (<canvas
-      key='label3d-canvas'
+      key={`label3d-canvas-${this.props.id}`}
       className={classes.label3d_canvas}
       ref={(ref) => { this.initializeRefs(ref) }}
       onMouseDown={(e) => { this.onMouseDown(e) }}
@@ -252,7 +257,7 @@ class Label3dViewer extends Viewer<Props> {
       e.stopPropagation()
     }
 
-    this.renderThree()
+    Session.label3dList.onDrawableUpdate()
   }
 
   /**
@@ -260,14 +265,14 @@ class Label3dViewer extends Viewer<Props> {
    * @param {KeyboardEvent} e
    */
   public onKeyDown (e: KeyboardEvent) {
-    if (this.checkFreeze()) {
+    if (this.checkFreeze() || Session.activeViewerId !== this.props.id) {
       return
     }
 
     this._keyDownMap[e.key] = true
 
     if (this._labelHandler.onKeyDown(e)) {
-      this.renderThree()
+      Session.label2dList.onDrawableUpdate()
     }
   }
 
@@ -276,14 +281,14 @@ class Label3dViewer extends Viewer<Props> {
    * @param {KeyboardEvent} e
    */
   public onKeyUp (e: KeyboardEvent) {
-    if (this.checkFreeze()) {
+    if (this.checkFreeze() || Session.activeViewerId !== this.props.id) {
       return
     }
 
     this._keyDownMap[e.key] = true
 
     if (this._labelHandler.onKeyUp(e)) {
-      this.renderThree()
+      Session.label2dList.onDrawableUpdate()
     }
   }
 
@@ -291,10 +296,15 @@ class Label3dViewer extends Viewer<Props> {
    * notify state is updated
    */
   protected updateState (state: State): void {
-    this.display = this.props.display
+    if (this.display !== this.props.display) {
+      this.display = this.props.display
+      this.forceUpdate()
+    }
     // Filter labels if not in layer
     // this.camera.layers.set(this.props.id)
-    Session.label3dList.setActiveCamera(this.camera)
+    if (Session.activeViewerId === this.props.id) {
+      Session.label3dList.setActiveCamera(this.camera)
+    }
     this._labelHandler.updateState(state, state.user.select.item, this.props.id)
   }
 
@@ -333,6 +343,7 @@ class Label3dViewer extends Viewer<Props> {
         this.canvas = component
         const rendererParams = { canvas: this.canvas, alpha: true }
         this.renderer = new THREE.WebGLRenderer(rendererParams)
+        this.forceUpdate()
       }
 
       if (this.canvas && this.display) {

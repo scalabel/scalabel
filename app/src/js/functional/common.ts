@@ -6,13 +6,24 @@
 import _ from 'lodash'
 import * as types from '../action/types'
 import { LabelTypeName } from '../common/types'
-import { makeIndexedShape, makeTrack } from './states'
+import { makeIndexedShape, makePane, makeTrack } from './states'
 import {
-  IndexedShapeType, ItemType, LabelType, Select, ShapeType, State,
-  TaskStatus, TaskType, TrackMapType, TrackType, UserType, ViewerConfigType
+  IndexedShapeType,
+  ItemType,
+  LabelType,
+  LayoutType,
+  Select,
+  ShapeType,
+  State,
+  TaskStatus,
+  TaskType,
+  TrackMapType,
+  TrackType,
+  UserType
 } from './types'
 import {
-  assignToArray, getObjectKeys,
+  assignToArray,
+  getObjectKeys,
   pickArray,
   pickObject,
   removeListItems,
@@ -814,14 +825,15 @@ export function changeViewerConfig (
   state: State, action: types.ChangeViewerConfigAction
 ): State {
   if (action.viewerId in state.user.viewerConfigs) {
-    const newViewerConfig: {[id: number]: ViewerConfigType} = {}
-    newViewerConfig[action.viewerId] = updateObject(
-      state.user.viewerConfigs[action.viewerId],
-      action.config
-    )
+    const oldConfig = state.user.viewerConfigs[action.viewerId]
+    const newViewerConfig = (action.config.type === oldConfig.type) ?
+      updateObject(
+        oldConfig,
+        action.config
+      ) : _.cloneDeep(action.config)
     const viewerConfigs = updateObject(
       state.user.viewerConfigs,
-      newViewerConfig
+      { [action.viewerId]: newViewerConfig }
     )
     return updateObject(
       state,
@@ -829,4 +841,158 @@ export function changeViewerConfig (
     )
   }
   return state
+}
+
+/**
+ * Split existing pane into half
+ * @param state
+ * @param action
+ */
+export function splitPane (
+  state: State, action: types.SplitPaneAction
+): State {
+  if (!(action.pane in state.user.layout.panes)) {
+    return state
+  }
+
+  const child1Id = state.user.layout.maxPaneId + 1
+  const child2Id = state.user.layout.maxPaneId + 2
+
+  const oldViewerConfig = state.user.viewerConfigs[action.viewerId]
+  const newViewerConfig = _.cloneDeep(oldViewerConfig)
+  newViewerConfig.pane = child2Id
+  const newViewerConfigId = state.user.layout.maxViewerConfigId + 1
+
+  const oldPane = state.user.layout.panes[action.pane]
+  const child1 = makePane(
+    oldPane.viewerId,
+    child1Id,
+    oldPane.id
+  )
+  const child2 = makePane(
+    newViewerConfigId,
+    child2Id,
+    oldPane.id
+  )
+
+  const newPane = updateObject(oldPane, {
+    viewerId: -1,
+    split: action.split,
+    primarySize: 50,
+    child1: child1Id,
+    child2: child2Id
+  })
+
+  const newViewerConfigs = updateObject(
+    state.user.viewerConfigs,
+    {
+      [action.viewerId]: updateObject(
+        oldViewerConfig,
+        { pane: child1Id }
+      ),
+      [newViewerConfigId]: newViewerConfig
+    }
+  )
+
+  const newLayout = updateObject(
+    state.user.layout,
+    {
+      maxViewerConfigId: newViewerConfigId,
+      maxPaneId: child2Id,
+      panes: updateObject(
+        state.user.layout.panes,
+        {
+          [newPane.id]: newPane,
+          [child1Id]: child1,
+          [child2Id]: child2
+        }
+      )
+    }
+  )
+
+  return updateObject(
+    state,
+    {
+      user: updateObject(
+        state.user,
+        { viewerConfigs: newViewerConfigs, layout: newLayout }
+      )
+    }
+  )
+}
+
+/** delete pane from state */
+export function deletePane (
+  state: State, action: types.DeletePaneAction
+): State {
+  const panes = state.user.layout.panes
+  if (action.pane === state.user.layout.rootPane || !(action.pane in panes)) {
+    return state
+  }
+
+  const parentId = panes[action.pane].parent
+
+  if (!(parentId in panes)) {
+    return state
+  }
+
+  const parent = panes[parentId]
+
+  // Shallow copy of panes and modification of dictionary
+  const newPanes = { ...panes }
+
+  // Get id of the child that is not the pane that will be deleted
+  let newLeafId: number = -1
+  if (parent.child1 === action.pane && parent.child2) {
+    newLeafId = parent.child2
+  } else if (parent.child2 === action.pane && parent.child1) {
+    newLeafId = parent.child1
+  } else {
+    return state
+  }
+
+  if (!(newLeafId in panes)) {
+    return state
+  }
+
+  let newParentId = -1
+  if (parentId !== state.user.layout.rootPane) {
+    newParentId = parent.parent
+    if (!(newParentId in panes)) {
+      return state
+    }
+
+    let newParent = panes[newParentId]
+
+    // Flatten tree by removing old parent from the parent of the old parent and
+    // replacing with the new leaf
+    if (parentId === newParent.child1) {
+      newParent = updateObject(newParent, { child1: newLeafId })
+    } else if (parentId === newParent.child2) {
+      newParent = updateObject(newParent, { child2: newLeafId })
+    } else {
+      return state
+    }
+
+    newPanes[newParentId] = newParent
+  }
+
+  delete newPanes[parentId]
+  delete newPanes[action.pane]
+  newPanes[newLeafId] = updateObject(panes[newLeafId], { parent: newParentId })
+  const updateParams: Partial<LayoutType> = { panes: newPanes }
+
+  if (parentId === state.user.layout.rootPane) {
+    updateParams.rootPane = newLeafId
+  }
+
+  return updateObject(
+    state,
+    {
+      user: updateObject(
+        state.user,
+        { layout: updateObject(state.user.layout, updateParams) }
+      )
+    }
+  )
 }

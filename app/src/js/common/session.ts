@@ -36,6 +36,8 @@ class Session {
   public trackLinking: boolean
   /** Current tracking policy type */
   public currentPolicyType: string
+  /** id of the viewer that the mouse is currently hovering over */
+  public activeViewerId: number
   /** The window component */
   public window?: Window
   /** Whether autosave is enabled */
@@ -59,6 +61,7 @@ class Session {
     this.tracking = true
     this.trackLinking = false
     this.currentPolicyType = ''
+    this.activeViewerId = -1
     this.status = ConnectionStatus.UNSAVED
     this.autosave = false
     // TODO: make it configurable in the url

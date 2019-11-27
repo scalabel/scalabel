@@ -46,6 +46,8 @@ export class Label3DList {
   private _raycastableShapes: Readonly<Array<Readonly<Shape3D>>>
   /** active camera */
   private _activeCamera?: THREE.Camera
+  /** callbacks */
+  private _callbacks: Array<() => void>
 
   constructor () {
     this.control = new TransformationControl()
@@ -55,6 +57,7 @@ export class Label3DList {
     this._scene = new THREE.Scene()
     this._raycastableShapes = []
     this._state = makeState()
+    this._callbacks = []
   }
 
   /**
@@ -62,6 +65,26 @@ export class Label3DList {
    */
   public get scene (): THREE.Scene {
     return this._scene
+  }
+
+  /** Subscribe callback for drawable update */
+  public subscribe (callback: () => void) {
+    this._callbacks.push(callback)
+  }
+
+  /** Unsubscribe callback for drawable update */
+  public unsubscribe (callback: () => void) {
+    const index = this._callbacks.indexOf(callback)
+    if (index >= 0) {
+      this._callbacks.splice(index, 1)
+    }
+  }
+
+  /** Call when any drawable has been updated */
+  public onDrawableUpdate (): void {
+    for (const callback of this._callbacks) {
+      callback()
+    }
   }
 
   /**

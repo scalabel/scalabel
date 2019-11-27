@@ -128,6 +128,8 @@ export interface ViewerConfigType {
   show: boolean
   /** which data sources to view */
   sensor: number
+  /** id of pane this belongs to */
+  pane: number
 }
 
 export interface ImageViewerConfigType extends ViewerConfigType {
@@ -264,13 +266,51 @@ export interface ConfigType {
   autosave: boolean
 }
 
+export enum SplitType {
+  HORIZONTAL = 'horizontal',
+  VERTICAL = 'vertical'
+}
+
+export interface PaneType {
+  /** id of the pane */
+  id: number
+  /** id of parent pane, negative for root */
+  parent: number
+  /** If leaf, >= 0 */
+  viewerId: number
+  /**
+   * Which child is the primary pane to apply sizing to.
+   * Other child is sized based on the size of the primary child
+   * (100% - primary width)
+   */
+  primary?: 'first' | 'second'
+  /**
+   * Size of primary pane in percentage.
+   */
+  primarySize?: number
+  /** Split type, horizontal or vertical */
+  split?: SplitType
+  /** Min size of primary pane */
+  minPrimarySize?: number
+  /** Max size of primary pane */
+  maxPrimarySize?: number
+  /** Id of first child if not leaf */
+  child1?: number
+  /** Id of second child if not leaf */
+  child2?: number
+}
+
 export interface LayoutType {
   /** Width of the tool bar */
   toolbarWidth: number
   /** max viewer config id */
   maxViewerConfigId: number
-  /** Assistant view ratio */
-  assistantViewRatio: number
+  /** max viewer config id */
+  maxPaneId: number
+  /** top level pane node */
+  rootPane: number
+  /** map between pane id and pane states */
+  panes: {[id: number]: PaneType}
 }
 
 export interface TaskStatus {

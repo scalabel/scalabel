@@ -84,13 +84,6 @@ interface Props {
 // }
 
 /**
- * turn assistant view on/off
- */
-function toggleAssistantView () {
-  // Session.dispatch({type: types.TOGGLE_ASSISTANT_VIEW});
-}
-
-/**
  * Title bar
  */
 class TitleBar extends Component<Props> {
@@ -127,14 +120,19 @@ class TitleBar extends Component<Props> {
     const { dashboardLink } = this.props
     const { autosave } = this.props
 
-    const buttonInfo = [
+    const buttonInfo: Array<{
+      /** Name */
+      title: string,
+      /** Icon */
+      icon: fa.IconDefinition,
+      /** Link */
+      href?: string,
+      /** Listener  */
+      onClick?: () => void
+    }> = [
       { title: 'Instructions', href: instructionLink, icon: fa.faInfo },
       { title: 'Keyboard Usage', icon: fa.faQuestion },
-      { title: 'Dashboard', href: dashboardLink, icon: fa.faList },
-      {
-        title: 'Assistant View', onClick: toggleAssistantView,
-        icon: fa.faColumns
-      }
+      { title: 'Dashboard', href: dashboardLink, icon: fa.faList }
     ]
 
     // if autosave is on, don't need manual save button

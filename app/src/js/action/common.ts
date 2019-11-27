@@ -1,6 +1,6 @@
 import Session from '../common/session'
-import { LabelType, Select, ShapeType,
-  TaskType, ViewerConfigType } from '../functional/types'
+import { LabelType, Select,
+  ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -297,6 +297,34 @@ export function changeViewerConfig (
     sessionId: Session.id,
     viewerId,
     config
+  }
+}
+
+/** action to split pane */
+export function splitPane (
+  pane: number,
+  split: SplitType,
+  viewerId: number
+): types.SplitPaneAction {
+  return {
+    type: types.SPLIT_PANE,
+    sessionId: Session.id,
+    pane,
+    split,
+    viewerId
+  }
+}
+
+/** action to delete pane */
+export function deletePane (
+  pane: number,
+  viewerId: number
+): types.DeletePaneAction {
+  return {
+    type: types.DELETE_PANE,
+    sessionId: Session.id,
+    pane,
+    viewerId
   }
 }
 

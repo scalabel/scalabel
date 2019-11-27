@@ -2,10 +2,12 @@ import _ from 'lodash'
 import * as types from '../common/types'
 import {
   ConfigType, CubeType,
-  ExtrinsicsType, ImageViewerConfigType,
-  IndexedShapeType, IntrinsicsType, ItemStatus, ItemType,
+  ExtrinsicsType, Image3DViewerConfigType,
+  ImageViewerConfigType, IndexedShapeType, IntrinsicsType, ItemStatus,
+  ItemType,
   LabelType,
   LayoutType,
+  PaneType,
   PathPoint2DType,
   Plane3DType,
   PointCloudViewerConfigType,
@@ -15,6 +17,7 @@ import {
   SensorType,
   SessionType,
   ShapeType,
+  SplitType,
   State,
   TaskStatus,
   TaskType,
@@ -162,7 +165,7 @@ export function makeSensor (
  * @return {ImageViewerConfigType}
  */
 export function makeImageViewerConfig (
-  sensor: number = -1
+  pane: number, sensor: number = -1
 ): ImageViewerConfigType {
   return {
     imageWidth: 0,
@@ -171,8 +174,9 @@ export function makeImageViewerConfig (
     displayLeft: 0,
     displayTop: 0,
     show: true,
-    type: types.ViewerConfigType.IMAGE,
-    sensor
+    type: types.ViewerConfigTypeName.IMAGE,
+    sensor,
+    pane
   }
 }
 
@@ -181,7 +185,7 @@ export function makeImageViewerConfig (
  * @return {PointCloudViewerConfigType}
  */
 export function makePointCloudViewerConfig (
-  sensor: number = -1
+  pane: number, sensor: number = -1
 ): PointCloudViewerConfigType {
   return {
     position: { x: 0.0, y: 10.0, z: 0.0 },
@@ -189,9 +193,23 @@ export function makePointCloudViewerConfig (
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
     show: true,
-    type: types.ViewerConfigType.POINT_CLOUD,
-    sensor
+    type: types.ViewerConfigTypeName.POINT_CLOUD,
+    sensor,
+    pane
   }
+}
+
+/**
+ * Make image 3d viewer config
+ * @param pane
+ * @param sensor
+ */
+export function makeImage3DViewerConfig (
+  pane: number, sensor: number = -1
+): Image3DViewerConfigType {
+  const pcConfig = makePointCloudViewerConfig(pane, sensor)
+  const imageConfig = makeImageViewerConfig(pane, sensor)
+  return { ...pcConfig, ...imageConfig }
 }
 
 /**
@@ -200,13 +218,13 @@ export function makePointCloudViewerConfig (
  * @param type
  */
 export function makeDefaultViewerConfig (
-  type: types.DataType
+  type: types.DataType, pane: number = 0
 ) {
   switch (type) {
     case types.DataType.IMAGE:
-      return makeImageViewerConfig()
+      return makeImageViewerConfig(pane)
     case types.DataType.POINT_CLOUD:
-      return makePointCloudViewerConfig()
+      return makePointCloudViewerConfig(pane)
   }
 }
 
@@ -257,15 +275,51 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
 }
 
 /**
+ * Make pane node
+ * @param viewerId
+ * @param size
+ * @param split
+ * @param minSize
+ * @param maxSize
+ */
+export function makePane (
+  viewerId: number = -1,
+  paneId: number = -1,
+  parent: number = -1,
+  primarySize?: number,
+  split?: SplitType,
+  primary?: 'first' | 'second',
+  minPrimarySize?: number,
+  maxPrimarySize?: number,
+  child1?: number,
+  child2?: number
+): PaneType {
+  return {
+    id: paneId,
+    viewerId,
+    parent,
+    primary,
+    primarySize,
+    split,
+    minPrimarySize,
+    maxPrimarySize,
+    child1,
+    child2
+  }
+}
+
+/**
  * Initialize a Layout state
  * @param {{}} params
  * @return {LayoutType}
  */
-function makeLayout (params: {} = {}): LayoutType {
+export function makeLayout (params: {} = {}): LayoutType {
   return {
     toolbarWidth: 200,
     maxViewerConfigId: 0,
-    assistantViewRatio: 0.3,
+    maxPaneId: 0,
+    rootPane: 0,
+    panes: { [0]: makePane(0, 0) },
     ...params
   }
 }

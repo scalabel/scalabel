@@ -17,7 +17,7 @@ import { testJson } from '../test_image_objects'
 function initializeTestingObjects (): [Label2DHandler, number] {
   Session.devMode = false
   initStore(testJson)
-  Session.dispatch(action.addViewerConfig(1, makeImageViewerConfig()))
+  Session.dispatch(action.addViewerConfig(1, makeImageViewerConfig(0)))
   const viewerId = 1
 
   const label2dHandler = new Label2DHandler()

@@ -25,7 +25,7 @@ function expectVector3TypesClose (v1: Vector3Type, v2: Vector3Type) {
 test('Viewer Config 3d drag test', () => {
   Session.devMode = false
   initStore(testJson)
-  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig(-1)))
   const viewerId = 1
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
@@ -54,31 +54,14 @@ test('Viewer Config 3d drag test', () => {
   expectVector3TypesClose(viewerConfig.position, { x: 0, y: 1, z: 0 })
   expectVector3TypesClose(viewerConfig.target, { x: 0, y: 0, z: 0 })
 
-  const mouseDownEvent = new MouseEvent(
-    'mousedown',
-    { clientX: 0, clientY: 0, button: 2 }
-  )
-  viewerConfigUpdater.onMouseDown(mouseDownEvent)
+  viewerConfigUpdater.onMouseDown(0, 0, 2)
 
-  const mouseMoveEvent = new MouseEvent(
-    'mousemove',
-    {
-      clientX: MOUSE_CORRECTION_FACTOR / 2,
-      clientY: MOUSE_CORRECTION_FACTOR / 2,
-      button: 2
-    }
+  viewerConfigUpdater.onMouseMove(
+    MOUSE_CORRECTION_FACTOR / 2,
+    MOUSE_CORRECTION_FACTOR / 2
   )
-  viewerConfigUpdater.onMouseMove(mouseMoveEvent)
 
-  const mouseUpEvent = new MouseEvent(
-    'mouseup',
-    {
-      clientX: MOUSE_CORRECTION_FACTOR / 2,
-      clientY: MOUSE_CORRECTION_FACTOR / 2,
-      button: 2
-    }
-  )
-  viewerConfigUpdater.onMouseUp(mouseUpEvent)
+  viewerConfigUpdater.onMouseUp()
 
   state = Session.getState()
   viewerConfig =

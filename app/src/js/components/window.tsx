@@ -6,7 +6,6 @@ import LabelLayout from './label_layout'
 import TitleBar from './title_bar'
 // $FlowFixMe
 import { ToolBar } from './toolbar'
-import ViewerContainer from './viewer_container'
 
 interface Props {
   /** global synchronizer for backend */
@@ -58,7 +57,6 @@ export class Window extends React.Component<Props> {
         />
     )
 
-    const main = (<ViewerContainer id={1} />)
     const bottomBar = null
     const rightSidebar1 = null
     const rightSidebar2 = null
@@ -67,9 +65,9 @@ export class Window extends React.Component<Props> {
           titleBar={titleBar}
           leftSidebar1={leftSidebar1}
           bottomBar={bottomBar}
-          main={main}
           rightSidebar1={rightSidebar1}
           rightSidebar2={rightSidebar2}
+          key='labelLayout'
         />
     )
   }
