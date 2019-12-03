@@ -1,4 +1,13 @@
 export const testJson = {
+  session: {
+    itemStatuses: [
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} }
+    ]
+  },
   task: {
     config: {
       assignmentId: 'e6015077-aad9-4e60-a5ed-dbccf931a049',

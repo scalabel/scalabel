@@ -26,7 +26,7 @@ export function updateThreeCameraAndRenderer (
   if (canvas) {
     {
       (camera as THREE.PerspectiveCamera).aspect =
-        canvas.offsetWidth / canvas.offsetHeight
+        canvas.width / canvas.height
     }
     { (camera as THREE.PerspectiveCamera).updateProjectionMatrix() }
   }
@@ -56,8 +56,8 @@ export function convertMouseToNDC (
   mY: number,
   canvas: HTMLCanvasElement
 ): number[] {
-  let x = mX / canvas.offsetWidth
-  let y = mY / canvas.offsetHeight
+  let x = mX / canvas.width
+  let y = mY / canvas.height
   x = 2 * x - 1
   y = -2 * y + 1
 

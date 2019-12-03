@@ -49,7 +49,7 @@ function normalizeCoordinatesToCanvas (
 /**
  * Canvas Viewer
  */
-class Label3dViewer extends Viewer<Props> {
+export class Label3dViewer extends Viewer<Props> {
   /** Canvas to draw on */
   private canvas: HTMLCanvasElement | null
   /** Container */
@@ -272,7 +272,7 @@ class Label3dViewer extends Viewer<Props> {
     this._keyDownMap[e.key] = true
 
     if (this._labelHandler.onKeyDown(e)) {
-      Session.label2dList.onDrawableUpdate()
+      Session.label3dList.onDrawableUpdate()
     }
   }
 
@@ -288,7 +288,7 @@ class Label3dViewer extends Viewer<Props> {
     this._keyDownMap[e.key] = true
 
     if (this._labelHandler.onKeyUp(e)) {
-      Session.label2dList.onDrawableUpdate()
+      Session.label3dList.onDrawableUpdate()
     }
   }
 
