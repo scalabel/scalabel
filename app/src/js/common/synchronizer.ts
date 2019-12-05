@@ -47,8 +47,8 @@ export class Synchronizer {
       return next(action)
     }
 
-    // use the same port as http
-    const syncAddress = 'http://localhost:' + location.port
+    // use the same address as http
+    const syncAddress = location.origin
     const socket = io.connect(syncAddress)
     this.socket = socket
 
