@@ -58,13 +58,6 @@ export function startSocketServer (io: socketio.Server) {
 
         // update memory with new state
         stores[room] = configureStore(state)
-
-        // automatically save task data on updates
-        stores[room].subscribe(async () => {
-          const content = JSON.stringify(stores[room].getState().present)
-          const filePath = path.getFileKey(getSavedKey(projectName, taskId))
-          await Session.getStorage().save(filePath, content)
-        })
       }
       state.session.id = sessId
       state.task.config.autosave = env.autosave
@@ -75,7 +68,7 @@ export function startSocketServer (io: socketio.Server) {
       socket.emit(EventName.REGISTER_ACK, state)
     })
 
-    socket.on(EventName.ACTION_SEND, (rawData: string) => {
+    socket.on(EventName.ACTION_SEND, async (rawData: string) => {
       const data = JSON.parse(rawData)
       const projectName = data.project
       const taskId = data.taskId
@@ -95,6 +88,10 @@ export function startSocketServer (io: socketio.Server) {
           socket.emit(EventName.ACTION_BROADCAST, action)
         }
       }
+      // save task data with all updates
+      const content = JSON.stringify(stores[room].getState().present)
+      const filePath = path.getFileKey(getSavedKey(projectName, taskId))
+      await Session.getStorage().save(filePath, content)
     })
   })
 }
