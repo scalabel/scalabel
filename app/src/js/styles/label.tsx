@@ -151,7 +151,8 @@ export const playerControlStyles = () => createStyles({
     left: '10px',
     position: 'relative',
     width: 'calc(100% - 40px)',
-    top: 'calc(100% - 50px)'
+    top: 'calc(100% - 50px)',
+    zIndex: 100
   },
   input: {
     background: '#000000',
