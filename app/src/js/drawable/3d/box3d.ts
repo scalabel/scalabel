@@ -174,6 +174,7 @@ export class Box3D extends Label3D {
     activeCamera?: THREE.Camera
   ): void {
     super.updateState(state, itemIndex, labelId)
+    this._shape.color = this._color
     const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
       state.task.items[itemIndex].shapes[label.shapes[0]].shape,
