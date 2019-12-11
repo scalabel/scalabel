@@ -36,16 +36,16 @@ function interpolateRects (
     (firstRect.y1 + firstRect.y2) / 2.
   )
   const firstDimension = new Vector2D(
-    firstRect.x1 - firstRect.x2,
-    firstRect.y1 - firstRect.y2
+    Math.abs(firstRect.x1 - firstRect.x2),
+    Math.abs(firstRect.y1 - firstRect.y2)
   )
   const lastCenter = new Vector2D(
     (lastRect.x1 + lastRect.x2) / 2.,
     (lastRect.y1 + lastRect.y2) / 2.
   )
   const lastDimension = new Vector2D(
-    lastRect.x1 - lastRect.x2,
-    lastRect.y1 - lastRect.y2
+    Math.abs(lastRect.x1 - lastRect.x2),
+    Math.abs(lastRect.y1 - lastRect.y2)
   )
 
   const numItems = lastItemIndex - firstItemIndex
