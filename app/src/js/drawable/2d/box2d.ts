@@ -205,7 +205,7 @@ export class Box2D extends Label2D {
    * Handle mouse down
    * @param coord
    */
-  public onMouseDown (coord: Vector2D): boolean {
+  public onMouseDown (coord: Vector2D, _handleIndex: number): boolean {
     this._mouseDown = true
     if (this._selected) {
       this.editing = true
@@ -222,11 +222,11 @@ export class Box2D extends Label2D {
  * @param {Vector2D} limit: limit of the canvas frame
  */
   public onMouseMove (coord: Vector2D, limit: Size2D,
-                      _labelIndex: number, _handleIndex: number): boolean {
+                      _labelIndex: number, handleIndex: number): boolean {
     if (this._selected && this._mouseDown && this.editing) {
       if (this._highlightedHandle > 0) {
         this.resize(coord, limit)
-      } else if (this._highlightedHandle === 0) {
+      } else if (this._highlightedHandle === 0 && handleIndex === 0) {
         this.move(coord, limit)
       }
       return true

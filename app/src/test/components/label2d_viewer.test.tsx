@@ -1126,7 +1126,7 @@ test('2d polygons unlinking', () => {
     expect(_.size(Session.label2dList.labelList)).toEqual(3)
     expect(Session.label2dList.labelList[0].color).toEqual(
       Session.label2dList.labelList[2].color
-  )
+    )
     /**
      * polygon 1: (10, 10) (100, 100) (200, 100)
      * polygon 2: (500, 500) (600, 400) (700, 700)

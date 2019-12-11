@@ -20,7 +20,9 @@ export function makeDrawableLabel2D (labelType: string): Label2D | null {
     case LabelTypeName.TAG:
       return new Tag2D()
     case LabelTypeName.POLYGON_2D:
-      return new Polygon2D()
+      return new Polygon2D(true)
+    case LabelTypeName.POLYLINE_2D:
+      return new Polygon2D(false)
   }
   return null
 }
@@ -166,10 +168,5 @@ export class Label2DList {
         }
       }
     }
-  }
-
-  /** check whether selectedLabels is empty */
-  public selectedLabelsEmpty (): boolean {
-    return this._selectedLabels.length === 0
   }
 }

@@ -235,7 +235,7 @@ export abstract class Label2D {
    * Handle mouse down
    * @param coord
    */
-  public onMouseDown (coord: Vector2D): boolean {
+  public onMouseDown (coord: Vector2D, _handleIndex: number): boolean {
     this._mouseDown = true
     if (this._selected) {
       this._mouseDownCoord = coord.clone()

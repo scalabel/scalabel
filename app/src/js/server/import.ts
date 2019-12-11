@@ -160,6 +160,7 @@ function convertLabelToImport (
   let labelType = LabelTypeName.EMPTY
   let shapeData = null
 
+  // no polyline2d
   if (labelExport.box2d) {
     shapeType = ShapeTypeName.RECT
     labelType = LabelTypeName.BOX_2D

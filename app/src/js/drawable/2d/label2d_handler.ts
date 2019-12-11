@@ -45,9 +45,8 @@ export class Label2DHandler {
    * @param handleIndex
    */
   public onMouseDown (
-      coord: Vector2D, _labelIndex: number, _handleIndex: number): boolean {
-    if (Session.label2dList.selectedLabelsEmpty() ||
-        !Session.label2dList.selectedLabels[0].editing) {
+      coord: Vector2D, _labelIndex: number, handleIndex: number): boolean {
+    if (!this.hasSelectedLabels() || !this.isEditingSelectedLabels()) {
       if (this._highlightedLabel) {
         this.selectHighlighted()
       } else {
@@ -69,13 +68,13 @@ export class Label2DHandler {
         this._highlightedLabel = label
       }
     }
-    if (!Session.label2dList.selectedLabelsEmpty() &&
+    if (this.hasSelectedLabels() &&
         !this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
       for (const label of Session.label2dList.selectedLabels) {
         if (label !== this._highlightedLabel) {
           label.setHighlighted(true, 0)
         }
-        label.onMouseDown(coord)
+        label.onMouseDown(coord, handleIndex)
       }
     }
     return true
@@ -89,59 +88,14 @@ export class Label2DHandler {
    */
   public onMouseUp (
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
-    if (!this.isSelectedLabelsEmpty() && !this.isKeyDown(Key.META)) {
-      for (const selectedLabel of Session.label2dList.selectedLabels) {
+    if (this.hasSelectedLabels() && !this.isKeyDown(Key.META)) {
+      Session.label2dList.selectedLabels.forEach((selectedLabel, index) => {
         selectedLabel.onMouseUp(coord)
         if (selectedLabel !== this._highlightedLabel) {
           selectedLabel.setHighlighted(false)
         }
-        const valid = selectedLabel.isValid()
-        const editing = selectedLabel.editing
-        if (valid || editing) {
-          const [shapeIds, shapeTypes, shapeObjects] =
-            selectedLabel.shapeObjects()
-          if (valid) {
-            if (selectedLabel.labelId < 0) {
-            // Add new label to state
-              if (Session.tracking) {
-                const newTrack = new Track()
-                newTrack.updateState(
-                  makeTrack(-1),
-                  makeTrackPolicy(newTrack, Session.label2dList.policyType)
-                )
-                newTrack.onLabelCreated(
-                  this._selectedItemIndex, selectedLabel, [-1]
-                )
-              } else {
-                const label = selectedLabel.label
-                Session.dispatch(addLabel(
-                  this._selectedItemIndex, label, shapeTypes, shapeObjects
-                ))
-              }
-            } else {
-            // Update existing label
-              const label = selectedLabel.label
-              Session.dispatch(changeShapes(
-                this._selectedItemIndex, shapeIds, shapeObjects
-              ))
-              Session.dispatch(changeLabelProps(
-                this._selectedItemIndex, selectedLabel.labelId, { manual: true }
-              ))
-              if (Session.tracking && label.track in Session.tracks) {
-                Session.tracks[label.track].onLabelUpdated(
-                  this._selectedItemIndex,
-                  shapeObjects
-                )
-              }
-            }
-          }
-        } else {
-          Session.label2dList.labelList.splice(
-            Session.label2dList.labelList.length - 1,
-            1
-          )
-        }
-      }
+        this.commitLabel(index)
+      })
     }
   }
 
@@ -151,8 +105,7 @@ export class Label2DHandler {
   public onMouseMove (
       coord: Vector2D, canvasLimit: Size2D,
       labelIndex: number, handleIndex: number): boolean {
-    if (!this.isSelectedLabelsEmpty() &&
-        Session.label2dList.selectedLabels[0].editing) {
+    if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
       for (const label of Session.label2dList.selectedLabels) {
         label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
       }
@@ -176,20 +129,75 @@ export class Label2DHandler {
   }
 
   /**
+   * commit selectedLabel
+   * @param index
+   */
+  public commitLabel (index: number): void {
+    const selectedLabel = Session.label2dList.selectedLabels[index]
+    const valid = selectedLabel.isValid()
+    const editing = selectedLabel.editing
+    if (valid || editing) {
+      const [shapeIds, shapeTypes, shapeObjects] =
+        selectedLabel.shapeObjects()
+      if (valid) {
+        if (selectedLabel.labelId < 0) {
+        // Add new label to state
+          if (Session.tracking) {
+            const newTrack = new Track()
+            newTrack.updateState(
+              makeTrack(-1),
+              makeTrackPolicy(newTrack, Session.label2dList.policyType)
+            )
+            newTrack.onLabelCreated(
+              this._selectedItemIndex, selectedLabel, [-1]
+            )
+          } else {
+            const label = selectedLabel.label
+            Session.dispatch(addLabel(
+              this._selectedItemIndex, label, shapeTypes, shapeObjects
+            ))
+          }
+        } else {
+        // Update existing label
+          const label = selectedLabel.label
+          Session.dispatch(changeShapes(
+            this._selectedItemIndex, shapeIds, shapeObjects
+          ))
+          Session.dispatch(changeLabelProps(
+            this._selectedItemIndex, selectedLabel.labelId, { manual: true }
+          ))
+          if (Session.tracking && label.track in Session.tracks) {
+            Session.tracks[label.track].onLabelUpdated(
+              this._selectedItemIndex,
+              shapeObjects
+            )
+          }
+        }
+      }
+    } else {
+      Session.label2dList.labelList.splice(
+        Session.label2dList.labelList.length - 1,
+        1
+      )
+    }
+  }
+
+  /**
    * Handle keyboard down events
    * @param e
    */
   public onKeyDown (e: KeyboardEvent): void {
     this._keyDownMap[e.key] = true
-    if (!this.isSelectedLabelsEmpty() &&
-      !Session.label2dList.selectedLabels[0].onKeyDown(e.key)) {
-      Session.label2dList.labelList.splice(
-        Session.label2dList.labelList.indexOf(
-          Session.label2dList.selectedLabels[0]
-        ),
-        1
-      )
-      Session.label2dList.selectedLabels.length = 0
+    for (const selectedLabel of Session.label2dList.selectedLabels) {
+      if (!selectedLabel.onKeyDown(e.key)) {
+        Session.label2dList.labelList.splice(
+          Session.label2dList.labelList.indexOf(
+            Session.label2dList.selectedLabels[0]
+          ),
+          1
+        )
+        Session.label2dList.selectedLabels.length = 0
+      }
     }
     switch (e.key) {
       case Key.L_LOW:
@@ -215,14 +223,24 @@ export class Label2DHandler {
    */
   public onKeyUp (e: KeyboardEvent): void {
     delete this._keyDownMap[e.key]
-    if (!this.isSelectedLabelsEmpty()) {
-      Session.label2dList.selectedLabels[0].onKeyUp(e.key)
+    for (const selectedLabel of Session.label2dList.selectedLabels) {
+      selectedLabel.onKeyUp(e.key)
     }
   }
 
   /** returns whether selectedLabels is empty */
-  private isSelectedLabelsEmpty (): boolean {
-    return Session.label2dList.selectedLabels.length === 0
+  private hasSelectedLabels (): boolean {
+    return Session.label2dList.selectedLabels.length !== 0
+  }
+
+  /** returns whether selectedLabels is editing */
+  private isEditingSelectedLabels (): boolean {
+    for (const label of Session.label2dList.selectedLabels) {
+      if (label.editing) {
+        return true
+      }
+    }
+    return false
   }
 
   /**

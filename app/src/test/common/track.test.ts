@@ -166,7 +166,7 @@ test('box2d linear interpolation tracking', () => {
 
   const box = new Box2D()
   box.initTemp(state, new Vector2D())
-  box.onMouseDown(new Vector2D())
+  box.onMouseDown(new Vector2D(), 0)
   box.onMouseMove(new Vector2D(5, 5), new Size2D(50, 50), 0, 0)
   box.onMouseUp(new Vector2D(5, 5))
 

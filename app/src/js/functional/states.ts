@@ -75,11 +75,12 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
 }
 
 /**
- * Initialize a polygon shape
+ * Initialize a polygon
  * @param {{}} params
  * @return {PolygonType}
  */
-export function makePolygon (params: Partial<PolygonType> = {}): PolygonType {
+export function makePolygon
+  (params: Partial<PolygonType> = {}): PolygonType {
   return {
     points: [],
     ...params

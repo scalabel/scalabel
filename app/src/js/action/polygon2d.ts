@@ -16,12 +16,15 @@ export function addPolygon2dLabel (
   itemIndex: number,
   sensor: number,
   category: number[],
-  points: PathPoint2DType[]
+  points: PathPoint2DType[],
+  closed: boolean
 )
   : AddLabelsAction {
   const polygon = makePolygon({ points })
+  const labelType = closed ?
+    LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
   const label = makeLabel({
-    type: LabelTypeName.POLYGON_2D, category, sensors: [sensor]
+    type: labelType, category, sensors: [sensor]
   })
   return actions.addLabel(
     itemIndex, label, [ShapeTypeName.POLYGON_2D], [polygon]

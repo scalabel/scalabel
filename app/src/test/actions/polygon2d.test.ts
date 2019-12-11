@@ -21,7 +21,8 @@ test('Add, change and delete polygon labels', () => {
     [(new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(1, 1, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(1, 2, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(0, 2, PointType.CURVE)).toPathPoint()]
+      (new PathPoint2D(0, 2, PointType.CURVE)).toPathPoint()],
+    true
   ))
   Session.dispatch(polygon2d.addPolygon2dLabel(
     itemIndex,
@@ -30,7 +31,8 @@ test('Add, change and delete polygon labels', () => {
     [(new PathPoint2D(3, 4, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(4, 4, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(4, 5, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(3, 5, PointType.CURVE)).toPathPoint()]
+      (new PathPoint2D(3, 5, PointType.CURVE)).toPathPoint()],
+    false
   ))
   Session.dispatch(polygon2d.addPolygon2dLabel(
     itemIndex,
@@ -39,7 +41,8 @@ test('Add, change and delete polygon labels', () => {
     [(new PathPoint2D(10, 11, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(11, 11, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(11, 12, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(10, 12, PointType.CURVE)).toPathPoint()]
+      (new PathPoint2D(10, 12, PointType.CURVE)).toPathPoint()],
+    true
   ))
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toBe(3)

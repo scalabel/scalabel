@@ -156,6 +156,7 @@ test('Draw 2d polygons to label2d list', () => {
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
    */
+
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
   let polygon = getShape(state, 0, 0, 0) as PolygonType
@@ -509,7 +510,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
   label2dHandler.onMouseMove(new Vector2D(275, 125), canvasSize, 0, 10)
   label2dHandler.onMouseDown(new Vector2D(275, 125), 0, 10)
-  label2dHandler.onMouseUp(new Vector2D(2750, 1250), 0, 0)
+  label2dHandler.onMouseUp(new Vector2D(275, 125), 0, 0)
   label2dHandler.onMouseMove(new Vector2D(300, 150), canvasSize, 0, 9)
   label2dHandler.onMouseDown(new Vector2D(300, 150), 0, 9)
   label2dHandler.onMouseUp(new Vector2D(300, 150), 0, 9)
@@ -861,6 +862,29 @@ test('2d polygons linking labels and moving', () => {
   polygon = getShape(state, 0, 2, 0) as PolygonType
   expect(polygon.points[0].x).toEqual(250)
   expect(polygon.points[0].y).toEqual(250)
+
+  // reshape for one label in group
+  label2dHandler.onMouseMove(new Vector2D(110, 110), canvasSize, 0, 1)
+  label2dHandler.onMouseDown(new Vector2D(110, 110), 0, 1)
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, 0, 1)
+  label2dHandler.onMouseUp(new Vector2D(100, 100), 0, 1)
+  /**
+   * polygon 1: (100, 100) (200, 200) (300, 200)
+   * polygon 2: (600, 600) (700, 500) (800, 800)
+   * polygon 3: (250, 250) (300, 250) (350, 350)
+   * group 1: 1, 2
+   */
+
+  state = Session.getState()
+  polygon = getShape(state, 0, 0, 0) as PolygonType
+  expect(polygon.points[0].x).toEqual(100)
+  expect(polygon.points[0].y).toEqual(100)
+  polygon = getShape(state, 0, 1, 0) as PolygonType
+  expect(polygon.points[0].x).toEqual(600)
+  expect(polygon.points[0].y).toEqual(600)
+  polygon = getShape(state, 0, 2, 0) as PolygonType
+  expect(polygon.points[0].x).toEqual(250)
+  expect(polygon.points[0].y).toEqual(250)
 })
 
 test('2d polygons unlinking', () => {
@@ -874,9 +898,12 @@ test('2d polygons unlinking', () => {
   label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
   label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
   label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 1)
+  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    */
@@ -990,6 +1017,319 @@ test('2d polygons unlinking', () => {
   expect(_.size(Session.label2dList.labelList)).toEqual(3)
   expect(Session.label2dList.labelList[1].color).toEqual(
     Session.label2dList.labelList[2].color)
+})
+
+test('2d polyline creating', () => {
+  const [label2dHandler] = initializeTestingObjects()
+  Session.dispatch(action.changeSelect({ labelType: 3 }))
+
+  // draw first polyline
+  const canvasSize = new Size2D(1000, 1000)
+  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
+  /**
+   * polyline 1: (10, 10) (100, 100) (200, 100)
+   */
+
+  // draw second polyline
+  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(600, 400), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(600, 400), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(600, 400), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(700, 700), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(700, 700), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(700, 700), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 1)
+  /**
+   * polyline 1: (10, 10) (100, 100) (200, 100)
+   * polyline 2: (500, 500) (600, 400) (700, 700)
+   */
+
+  // draw third polyline
+  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(300, 250), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(300, 250), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(300, 250), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(350, 350), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(350, 350), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(350, 350), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 1)
+  /**
+   * polyline 1: (10, 10) (100, 100) (200, 100)
+   * polyline 2: (500, 500) (600, 400) (700, 700)
+   * polyline 3: (250, 250) (300, 250) (350, 350)
+   */
+
+  const state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(3)
+
+  let polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points.length).toEqual(3)
+  expect(polyline.points[0].x).toEqual(10)
+  expect(polyline.points[0].y).toEqual(10)
+  expect(polyline.points[0].type).toEqual('vertex')
+  expect(polyline.points[1].x).toEqual(100)
+  expect(polyline.points[1].y).toEqual(100)
+  expect(polyline.points[1].type).toEqual('vertex')
+  expect(polyline.points[2].x).toEqual(200)
+  expect(polyline.points[2].y).toEqual(100)
+  expect(polyline.points[2].type).toEqual('vertex')
+
+  polyline = getShape(state, 0, 1, 0) as PolygonType
+  expect(polyline.points.length).toEqual(3)
+  expect(polyline.points[0].x).toEqual(500)
+  expect(polyline.points[0].y).toEqual(500)
+  expect(polyline.points[0].type).toEqual('vertex')
+
+  polyline = getShape(state, 0, 1, 0) as PolygonType
+  expect(polyline.points.length).toEqual(3)
+  expect(polyline.points[0].x).toEqual(500)
+  expect(polyline.points[0].y).toEqual(500)
+  expect(polyline.points[0].type).toEqual('vertex')
+})
+
+test('2d polylines drag vertices, midpoints and edges', () => {
+  const [label2dHandler] = initializeTestingObjects()
+  Session.dispatch(action.changeSelect({ labelType: 3 }))
+
+  // draw a polyline
+  const canvasSize = new Size2D(1000, 1000)
+  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(100, 0), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(100, 0), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(100, 0), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
+  /**
+   * polyline 1: (10, 10) (100, 100) (200, 100) (100, 0)
+   */
+
+  // drag a vertex
+  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, 0, 5)
+  label2dHandler.onMouseDown(new Vector2D(200, 100), 0, 5)
+  label2dHandler.onMouseMove(new Vector2D(300, 100), canvasSize, 0, 5)
+  label2dHandler.onMouseUp(new Vector2D(300, 100), 0, 5)
+  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, 0, 1)
+  label2dHandler.onMouseDown(new Vector2D(10, 10), 0, 1)
+  label2dHandler.onMouseMove(new Vector2D(50, 50), canvasSize, 0, 1)
+  label2dHandler.onMouseUp(new Vector2D(50, 50), 0, 1)
+  let state = Session.getState()
+  let polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points[2].x).toEqual(300)
+  expect(polyline.points[2].y).toEqual(100)
+  expect(polyline.points[0].x).toEqual(50)
+  expect(polyline.points[0].y).toEqual(50)
+  expect(polyline.points[3].x).toEqual(100)
+  expect(polyline.points[3].y).toEqual(0)
+  /**
+   * polyline 1: (50, 50) (100, 100) (300, 100) (100, 0)
+   */
+
+  // drag midpoints
+  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, 0, 4)
+  label2dHandler.onMouseDown(new Vector2D(200, 100), 0, 4)
+  label2dHandler.onMouseMove(new Vector2D(200, 150), canvasSize, 0, 5)
+  label2dHandler.onMouseUp(new Vector2D(200, 150), 0, 5)
+  state = Session.getState()
+  polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points[2].x).toEqual(200)
+  expect(polyline.points[2].y).toEqual(150)
+  expect(polyline.points[2].type).toEqual('vertex')
+  expect(polyline.points.length).toEqual(5)
+  /**
+   * polyline 1: (50, 50) (100, 100) (200, 150) (300, 100) (100, 0)
+   */
+
+  // drag edges
+  label2dHandler.onMouseMove(new Vector2D(70, 70), canvasSize, 0, 0)
+  label2dHandler.onMouseDown(new Vector2D(70, 70), 0, 0)
+  label2dHandler.onMouseMove(new Vector2D(170, 170), canvasSize, 0, 0)
+  label2dHandler.onMouseUp(new Vector2D(170, 170), 0, 0)
+  state = Session.getState()
+  polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points[0].x).toEqual(150)
+  expect(polyline.points[0].y).toEqual(150)
+  expect(polyline.points[0].type).toEqual('vertex')
+  expect(polyline.points.length).toEqual(5)
+  /**
+   * polyline 1: (150, 150) (200, 200) (300, 250) (400, 200) (200, 100)
+   */
+})
+
+test('2d polylines delete vertex and draw bezier curve', () => {
+  const [label2dHandler] = initializeTestingObjects()
+  Session.dispatch(action.changeSelect({ labelType: 3 }))
+
+  // draw a polyline and delete vertex when drawing
+  const canvasSize = new Size2D(1000, 1000)
+  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
+  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
+  label2dHandler.onMouseMove(new Vector2D(250, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(250, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(250, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(300, 0), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(300, 0), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(300, 0), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(350, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(350, 100), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(350, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(300, 200), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(300, 200), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(300, 200), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(320, 130), canvasSize, -1, 0)
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
+  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
+  label2dHandler.onMouseDown(new Vector2D(320, 130), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(320, 130), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(300, 150), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(300, 150), -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(300, 150), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(250, 100), canvasSize, -1, 1)
+  label2dHandler.onMouseDown(new Vector2D(250, 100), -1, 1)
+  label2dHandler.onMouseUp(new Vector2D(250, 100), -1, 1)
+  /**
+   * polyline: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
+   */
+
+  let state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(1)
+  expect(Session.label2dList.labelList.length).toEqual(1)
+
+  let polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points.length).toEqual(5)
+  expect(polyline.points[0].x).toEqual(250)
+  expect(polyline.points[0].y).toEqual(100)
+  expect(polyline.points[0].type).toEqual('vertex')
+  expect(polyline.points[1].x).toEqual(300)
+  expect(polyline.points[1].y).toEqual(0)
+  expect(polyline.points[1].type).toEqual('vertex')
+  expect(polyline.points[2].x).toEqual(350)
+  expect(polyline.points[2].y).toEqual(100)
+  expect(polyline.points[2].type).toEqual('vertex')
+  expect(polyline.points[3].x).toEqual(320)
+  expect(polyline.points[3].y).toEqual(130)
+  expect(polyline.points[3].type).toEqual('vertex')
+  expect(polyline.points[4].x).toEqual(300)
+  expect(polyline.points[4].y).toEqual(150)
+  expect(polyline.points[4].type).toEqual('vertex')
+
+  // delete vertex when closed
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
+  label2dHandler.onMouseMove(new Vector2D(325, 50), canvasSize, 0, 4)
+  label2dHandler.onMouseDown(new Vector2D(325, 50), 0, 4)
+  label2dHandler.onMouseUp(new Vector2D(325, 50), 0, 4)
+  label2dHandler.onMouseMove(new Vector2D(300, 150), canvasSize, 0, 9)
+  label2dHandler.onMouseDown(new Vector2D(300, 150), 0, 9)
+  label2dHandler.onMouseUp(new Vector2D(300, 150), 0, 9)
+  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
+  /**
+   * polyline: (250, 100) (300, 0) (350, 100) (320, 130)
+   */
+
+  state = Session.getState()
+  polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points.length).toEqual(4)
+  expect(polyline.points[3].x).toEqual(320)
+  expect(polyline.points[3].y).toEqual(130)
+  expect(polyline.points[3].type).toEqual('vertex')
+  expect(polyline.points[0].x).toEqual(250)
+  expect(polyline.points[0].y).toEqual(100)
+  expect(polyline.points[0].type).toEqual('vertex')
+
+  // draw bezier curve
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'c' }))
+  label2dHandler.onMouseMove(new Vector2D(335, 115), canvasSize, 0, 6)
+  label2dHandler.onMouseDown(new Vector2D(335, 125), 0, 6)
+  label2dHandler.onMouseUp(new Vector2D(335, 115), 0, 0)
+  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'c' }))
+  /**
+   * polyline: (250, 100) (300, 0) (350, 100)
+   *          [ (340, 110) (330, 120) <bezier curve control points>]
+   *          (320, 130)
+   */
+
+  state = Session.getState()
+  polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points.length).toEqual(6)
+  expect(polyline.points[3].x).toEqual(340)
+  expect(polyline.points[3].y).toEqual(110)
+  expect(polyline.points[3].type).toEqual('bezier')
+  expect(polyline.points[4].x).toEqual(330)
+  expect(polyline.points[4].y).toEqual(120)
+  expect(polyline.points[4].type).toEqual('bezier')
+
+  // drag bezier curve control points
+  label2dHandler.onMouseMove(new Vector2D(340, 110), canvasSize, 0, 6)
+  label2dHandler.onMouseDown(new Vector2D(340, 110), 0, 6)
+  label2dHandler.onMouseMove(new Vector2D(340, 90), canvasSize, 0, 6)
+  label2dHandler.onMouseUp(new Vector2D(340, 90), 0, 6)
+  /**
+   * polyline: (250, 100) (300, 0) (350, 100)
+   *          [ (340, 90) (330, 120) <bezier curve control points>]
+   *          (320, 130)
+   */
+
+  state = Session.getState()
+  polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points.length).toEqual(6)
+  expect(polyline.points[2].x).toEqual(350)
+  expect(polyline.points[2].y).toEqual(100)
+  expect(polyline.points[2].type).toEqual('vertex')
+  expect(polyline.points[3].x).toEqual(340)
+  expect(polyline.points[3].y).toEqual(90)
+  expect(polyline.points[3].type).toEqual('bezier')
+  expect(polyline.points[4].x).toEqual(330)
+  expect(polyline.points[4].y).toEqual(120)
+  expect(polyline.points[4].type).toEqual('bezier')
+  expect(polyline.points[5].x).toEqual(320)
+  expect(polyline.points[5].y).toEqual(130)
+  expect(polyline.points[5].type).toEqual('vertex')
+
+  // delete vertex on bezier curve
+  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
+  label2dHandler.onMouseMove(new Vector2D(350, 100), canvasSize, 0, 5)
+  label2dHandler.onMouseDown(new Vector2D(350, 100), 0, 5)
+  label2dHandler.onMouseUp(new Vector2D(350, 100), 0, 5)
+  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
+  /**
+   * polyline: (250, 100) (300, 0) (320, 130)
+   */
+
+  state = Session.getState()
+  polyline = getShape(state, 0, 0, 0) as PolygonType
+  expect(polyline.points.length).toEqual(3)
+  expect(polyline.points[1].x).toEqual(300)
+  expect(polyline.points[1].y).toEqual(0)
+  expect(polyline.points[1].type).toEqual('vertex')
 })
 
 test('Draw label2d list to canvas', () => {
