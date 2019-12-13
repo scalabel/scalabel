@@ -125,6 +125,11 @@ async function loadStateFromTask (
         state.task.config.policyTypes =
           [TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D]
       }
+      if (state.task.config.labelTypes.length === 1 &&
+          state.task.config.labelTypes[0] === LabelTypeName.POLYGON_2D) {
+        state.task.config.policyTypes =
+          [TrackPolicyType.LINEAR_INTERPOLATION_POLYGON]
+      }
       break
     case ItemTypeName.POINT_CLOUD:
     case ItemTypeName.POINT_CLOUD_TRACKING:

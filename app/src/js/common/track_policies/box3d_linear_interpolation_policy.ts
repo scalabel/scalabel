@@ -163,6 +163,20 @@ function linearInterpolateBox3D (
       updatedShapeIds,
       updatedShapes
     )
+  } else if (nextManualIndex === -1) {
+    for (let i = updatedItemIndex + 1; i < items.length; i += 1) {
+      if (i in track.labels) {
+        const labelId = track.labels[i]
+        const label = items[i].labels[labelId]
+        updatedIndices.push(i)
+        updatedShapeIds.push([label.shapes[0]])
+        updatedShapes.push([{
+          center: (new Vector3D()).fromObject(newCube.center),
+          orientation: (new Vector3D()).fromObject(newCube.orientation),
+          size: (new Vector3D()).fromObject(newCube.size)
+        }])
+      }
+    }
   }
 
   return {

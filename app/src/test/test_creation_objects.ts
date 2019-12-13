@@ -231,7 +231,7 @@ export const sampleProjectVideo: Project = {
     policyTypes: [],
     taskSize: sampleTaskSize,
     tracking: true,
-    handlerUrl: HandlerUrl.INVALID,
+    handlerUrl: HandlerUrl.LABEL,
     pageTitle: sampleTitle,
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V1,
@@ -448,7 +448,7 @@ export const sampleTasksVideo: TaskType[] = [
       policyTypes: [],
       taskSize: 3,
       tracking: true,
-      handlerUrl: 'NO_VALID_HANDLER',
+      handlerUrl: 'label',
       pageTitle: 'sampleTitle',
       instructionPage: 'instructions.com',
       bundleFile: 'image.js',
@@ -610,7 +610,9 @@ export const sampleTasksVideo: TaskType[] = [
       '-1': {
         id: -1,
         name: 'default',
-        type: 'image'
+        type: 'image',
+        extrinsics: undefined,
+        intrinsics: undefined
       }
     }
   },
@@ -624,7 +626,7 @@ export const sampleTasksVideo: TaskType[] = [
       policyTypes: [],
       taskSize: 7,
       tracking: true,
-      handlerUrl: 'NO_VALID_HANDLER',
+      handlerUrl: 'label',
       pageTitle: 'sampleTitle',
       instructionPage: 'instructions.com',
       bundleFile: 'image.js',
@@ -726,7 +728,9 @@ export const sampleTasksVideo: TaskType[] = [
       '-1': {
         id: -1,
         name: 'default',
-        type: 'image'
+        type: 'image',
+        extrinsics: undefined,
+        intrinsics: undefined
       }
     }
   }

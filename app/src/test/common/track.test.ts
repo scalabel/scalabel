@@ -3,7 +3,7 @@ import Session from '../../js/common/session'
 import { initFromJson } from '../../js/common/session_init'
 import { makeTrackPolicy, Track } from '../../js/common/track'
 import { Box2D } from '../../js/drawable/2d/box2d'
-import { Rect2D } from '../../js/drawable/2d/rect2d'
+import { Polygon2D } from '../../js/drawable/2d/polygon2d'
 import { Box3D } from '../../js/drawable/3d/box3d'
 import { makeTrack } from '../../js/functional/states'
 import { CubeType, RectType } from '../../js/functional/types'
@@ -98,7 +98,7 @@ test('box3d linear interpolation tracking', () => {
       if (item.index > 0) {
         const label = labels[Number(keys[0])]
         const shape = item.shapes[label.shapes[0]].shape as CubeType
-        expectVector3TypesClose(shape.center, (new Vector3D()).toObject())
+        expectVector3TypesClose(shape.center, newProps.center)
         expect(label.manual).toEqual(false)
       }
     }
@@ -209,7 +209,6 @@ test('box2d linear interpolation tracking', () => {
   expect(firstLabel).not.toBeUndefined()
   expect(lastLabel).not.toBeUndefined()
 
-  const originalProps: RectType = (box.shapes[0] as Rect2D).toRect()
   if (firstLabel && lastLabel) {
     let newProps: RectType = { x1: -2.5, y1: 2.5, x2: 2.5, y2: -2.5 }
     Session.dispatch(action.changeLabelShape(
@@ -236,7 +235,7 @@ test('box2d linear interpolation tracking', () => {
       if (item.index > 0) {
         const label = labels[Number(keys[0])]
         const shape = item.shapes[label.shapes[0]].shape as RectType
-        expectRectTypesClose(originalProps, shape)
+        expectRectTypesClose(newProps, shape)
         expect(label.manual).toEqual(false)
       }
     }
@@ -290,4 +289,67 @@ test('box2d linear interpolation tracking', () => {
       currentDelta = newDelta
     }
   }
+})
+
+test('polygon linear interpolation tracking', () => {
+  Session.devMode = false
+  pcTestJson.task.config.tracking = true
+  initFromJson(imgTestJson)
+  const itemIndex = 0
+  Session.dispatch(action.goToItem(itemIndex))
+  Session.dispatch(action.changeSelect({ policyType: 1 }))
+
+  let state = Session.getState()
+
+  const polygon = new Polygon2D(true)
+  polygon.initTemp(state, new Vector2D())
+  polygon.onMouseDown(new Vector2D(0, 0), 0)
+  polygon.onMouseMove(new Vector2D(5, 5), new Size2D(50, 50), 0, 0)
+  polygon.onMouseUp(new Vector2D(5, 5))
+
+  const currentPolicyType =
+    state.task.config.policyTypes[state.user.select.policyType]
+  const newTrack = new Track()
+  newTrack.updateState(
+    makeTrack(-1), makeTrackPolicy(newTrack, currentPolicyType)
+  )
+
+  newTrack.onLabelCreated(itemIndex, polygon, [-1])
+
+  state = Session.getState()
+
+  let trackId = -1
+  let firstLabel
+  let lastLabel
+  for (let i = 0; i < state.task.items.length; i++) {
+    const item = state.task.items[i]
+    const labels = item.labels
+    const keys = Object.keys(labels)
+    expect(keys.length).toEqual(1)
+
+    const labelId = Number(keys[0])
+    if (trackId < 0) {
+      trackId = labels[labelId].track
+    } else {
+      expect(labels[labelId].track).toEqual(trackId)
+    }
+
+    if (i === 0) {
+      firstLabel = labels[labelId]
+    } else if (i === state.task.items.length - 1) {
+      lastLabel = labels[labelId]
+    }
+
+    // Set all to be not manual
+    Session.dispatch(action.changeLabelProps(
+      labels[labelId].item, labels[labelId].id, { manual: false }
+    ))
+  }
+
+  expect(trackId in Session.tracks).toEqual(true)
+
+  expect(firstLabel).not.toBeNull()
+  expect(lastLabel).not.toBeNull()
+  expect(firstLabel).not.toBeUndefined()
+  expect(lastLabel).not.toBeUndefined()
 })

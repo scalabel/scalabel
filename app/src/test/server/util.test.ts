@@ -107,7 +107,8 @@ describe('test general utility methods', () => {
 
   test('tracking selection', () => {
     // video => true
-    const [itemType1, tracking1] = util.getTracking(ItemTypeName.VIDEO)
+    const [itemType1, tracking1]
+    = util.getTracking(ItemTypeName.VIDEO)
     expect(itemType1).toBe(ItemTypeName.IMAGE)
     expect(tracking1).toBe(true)
 
@@ -118,11 +119,13 @@ describe('test general utility methods', () => {
     expect(tracking2).toBe(true)
 
     // any other item => false
-    const [itemType3, tracking3] = util.getTracking(ItemTypeName.IMAGE)
+    const [itemType3, tracking3] =
+    util.getTracking(ItemTypeName.IMAGE)
     expect(itemType3).toBe(ItemTypeName.IMAGE)
     expect(tracking3).toBe(false)
 
-    const [itemType4, tracking4] = util.getTracking(ItemTypeName.POINT_CLOUD)
+    const [itemType4, tracking4] =
+    util.getTracking(ItemTypeName.POINT_CLOUD)
     expect(itemType4).toBe(ItemTypeName.POINT_CLOUD)
     expect(tracking4).toBe(false)
   })

@@ -131,7 +131,8 @@ export enum Key {
 
 export enum TrackPolicyType {
   LINEAR_INTERPOLATION_BOX_2D = 'linear_interpolation_box_2d',
-  LINEAR_INTERPOLATION_BOX_3D = 'linear_interpolation_box_3d'
+  LINEAR_INTERPOLATION_BOX_3D = 'linear_interpolation_box_3d',
+  LINEAR_INTERPOLATION_POLYGON = 'linear_interpolation_polygon'
 }
 
 export enum AttributeToolType {

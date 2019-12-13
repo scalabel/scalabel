@@ -161,6 +161,21 @@ function linearInterpolateBox2D (
       updatedShapeIds,
       updatedShapes
     )
+  } else if (nextManualIndex === -1) {
+    for (let i = updatedItemIndex + 1; i < items.length; i += 1) {
+      if (i in track.labels) {
+        const labelId = track.labels[i]
+        const label = items[i].labels[labelId]
+        updatedIndices.push(i)
+        updatedShapeIds.push([label.shapes[0]])
+        updatedShapes.push([{
+          x1: newRect.x1,
+          x2: newRect.x2,
+          y1: newRect.y1,
+          y2: newRect.y2
+        }])
+      }
+    }
   }
 
   return {
