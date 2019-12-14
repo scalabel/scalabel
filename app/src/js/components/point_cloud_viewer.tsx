@@ -49,7 +49,7 @@ class PointCloudViewer extends Viewer<Props> {
   /** ThreeJS Camera */
   private camera: THREE.PerspectiveCamera
   /** ThreeJS sphere mesh for indicating camera target location */
-  private target: THREE.Mesh
+  private target: THREE.AxesHelper
   /** Current point cloud for rendering */
   private pointCloud: THREE.Points | null
 
@@ -61,12 +61,7 @@ class PointCloudViewer extends Viewer<Props> {
     super(props)
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-    this.target = new THREE.Mesh(
-      new THREE.SphereGeometry(0.03),
-        new THREE.MeshBasicMaterial({
-          color:
-            0xffffff
-        }))
+    this.target = new THREE.AxesHelper(0.2)
     this.scene.add(this.target)
 
     this.pointCloud = null
@@ -141,6 +136,7 @@ class PointCloudViewer extends Viewer<Props> {
     if (this.renderer && this.pointCloud) {
       this.scene.children = []
       this.scene.add(this.pointCloud)
+      this.scene.add(this.target)
       this.renderer.render(this.scene, this.camera)
     }
   }

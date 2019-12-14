@@ -341,7 +341,11 @@ export class Label3dViewer extends Viewer<Props> {
     if (component.nodeName === 'CANVAS') {
       if (this.canvas !== component) {
         this.canvas = component
-        const rendererParams = { canvas: this.canvas, alpha: true }
+        const rendererParams = {
+          canvas: this.canvas,
+          alpha: true,
+          antialias: true
+        }
         this.renderer = new THREE.WebGLRenderer(rendererParams)
         this.forceUpdate()
       }

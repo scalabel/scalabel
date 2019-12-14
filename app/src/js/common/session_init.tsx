@@ -186,35 +186,25 @@ function loadPointClouds (): void {
   const loader = new PLYLoader()
   const vertexShader =
     `
-      varying float distFromOrigin;
+      varying float zValue;
       void main() {
         vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-        distFromOrigin = length(position);
+        zValue = position.z;
         gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
         gl_Position = projectionMatrix * mvPosition;
       }
     `
   const fragmentShader =
     `
-      varying float distFromOrigin;
-      uniform vec3 red;
-      uniform vec3 yellow;
-      uniform vec3 green;
-      uniform vec3 teal;
-      vec3 getHeatMapColor(float dist) {
-        if (dist < 8.0) {
-          float val = dist / 8.0;
-          return (1.0 - val) * red + val * yellow;
-        } else if (dist < 16.0) {
-          float val = (dist - 8.0) / 8.0;
-          return (1.0 - val) * yellow + val * green;
-        } else {
-          float val = (dist - 16.0) / 8.0;
-          return (1.0 - val) * green + val * teal;
-        }
+      varying float zValue;
+      uniform vec3 low;
+      uniform vec3 high;
+      vec3 getHeatMapColor(float height) {
+        float val = min(1.0, max(0.0, (height + 3.0) / 6.0));
+        return (1.0 - val) * low + val * high;
       }
       void main() {
-        gl_FragColor = vec4(getHeatMapColor(distFromOrigin), 1.0);
+        gl_FragColor = vec4(getHeatMapColor(zValue), 1.0);
       }
     `
 
@@ -234,17 +224,11 @@ function loadPointClouds (): void {
           (geometry: THREE.BufferGeometry) => {
             const material = new THREE.ShaderMaterial({
               uniforms: {
-                red: {
-                  value: new THREE.Color(0xff0000)
+                low: {
+                  value: new THREE.Color(0x0000ff)
                 },
-                yellow: {
+                high: {
                   value: new THREE.Color(0xffff00)
-                },
-                green: {
-                  value: new THREE.Color(0x00ff00)
-                },
-                teal: {
-                  value: new THREE.Color(0x00ffff)
                 }
               },
               vertexShader,
