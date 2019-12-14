@@ -67,6 +67,8 @@ export default class ViewerConfigUpdater {
     this._mouseDown = false
     this._camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
     this._raycaster = new THREE.Raycaster()
+    this._raycaster.params = {}
+    this._raycaster.params.Points = { threshold: 2 }
     this._target = new THREE.Vector3()
     this._mouseButton = 0
     this._item = -1
@@ -225,7 +227,6 @@ export default class ViewerConfigUpdater {
           normalized[1]
         )
 
-        this._raycaster.linePrecision = 0.2
         this._raycaster.setFromCamera(
           new THREE.Vector2(NDC[0], NDC[1]), this._camera
         )
