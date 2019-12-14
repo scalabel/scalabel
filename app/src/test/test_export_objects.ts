@@ -143,3 +143,285 @@ export const sampleStateExportImage: ItemExport[] =
       labels: [],
       sensor: -1
     }]
+
+export const sampleItemExportImagePolygon: ItemExport = {
+  name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+  url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+  videoName: 'b',
+  attributes: {},
+  timestamp: 0,
+  sensor: -1,
+  labels: [
+    {
+      id: 0,
+      category: 'person',
+      attributes: {},
+      manualShape: true,
+      box2d: null,
+      poly2d: {
+        points: [
+          {
+            x: 100.9044230030514,
+            y: 100.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 200.9044230030514,
+            y: 100.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 200.9044230030514,
+            y: 200.46537396121883,
+            type: 'vertex'
+          }
+        ]
+      },
+      box3d: null
+    },
+    {
+      id: 1,
+      category: 'person',
+      attributes: {},
+      manualShape: true,
+      box2d: null,
+      poly2d: {
+        points: [
+          {
+            x: 300.9044230030514,
+            y: 300.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 400.9044230030514,
+            y: 400.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 350.9044230030514,
+            y: 300.46537396121883,
+            type: 'bezier'
+          },
+          {
+            x: 325.9044230030514,
+            y: 200.46537396121883,
+            type: 'bezier'
+          },
+          {
+            x: 400.9044230030514,
+            y: 100.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 375.9044230030514,
+            y: 125.46537396121883,
+            type: 'bezier'
+          },
+          {
+            x: 325.9044230030514,
+            y: 250.46537396121883,
+            type: 'bezier'
+          }
+        ]
+      },
+      box3d: null
+    },
+    {
+      id: 2,
+      category: 'person',
+      attributes: {},
+      manualShape: true,
+      box2d: null,
+      poly2d: {
+        points: [
+          {
+            x: 400.9044230030514,
+            y: 400.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 800.9044230030514,
+            y: 100.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 100.9044230030514,
+            y: 100.46537396121883,
+            type: 'vertex'
+          },
+          {
+            x: 125.9044230030514,
+            y: 120.46537396121883,
+            type: 'bezier'
+          },
+          {
+            x: 325.9044230030514,
+            y: 220.46537396121883,
+            type: 'bezier'
+          }
+        ]
+      },
+      box3d: null
+    }
+  ]
+}
+
+export const sampleStateExportImagePolygon: ItemExport[] =
+  [
+    {
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
+      videoName: 'b',
+      attributes: {},
+      timestamp: 0,
+      sensor: -1,
+      labels: [
+        {
+          id: 0,
+          category: 'person',
+          attributes: {},
+          manualShape: true,
+          box2d: null,
+          poly2d: {
+            points: [
+              {
+                x: 100.9044230030514,
+                y: 100.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 200.9044230030514,
+                y: 100.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 200.9044230030514,
+                y: 200.46537396121883,
+                type: 'vertex'
+              }
+            ]
+          },
+          box3d: null
+        },
+        {
+          id: 1,
+          category: 'person',
+          attributes: {},
+          manualShape: true,
+          box2d: null,
+          poly2d: {
+            points: [
+              {
+                x: 300.9044230030514,
+                y: 300.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 400.9044230030514,
+                y: 400.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 350.9044230030514,
+                y: 300.46537396121883,
+                type: 'bezier'
+              },
+              {
+                x: 325.9044230030514,
+                y: 200.46537396121883,
+                type: 'bezier'
+              },
+              {
+                x: 400.9044230030514,
+                y: 100.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 375.9044230030514,
+                y: 125.46537396121883,
+                type: 'bezier'
+              },
+              {
+                x: 325.9044230030514,
+                y: 250.46537396121883,
+                type: 'bezier'
+              }
+            ]
+          },
+          box3d: null
+        },
+        {
+          id: 2,
+          category: 'person',
+          attributes: {},
+          manualShape: true,
+          box2d: null,
+          poly2d: {
+            points: [
+              {
+                x: 400.9044230030514,
+                y: 400.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 800.9044230030514,
+                y: 100.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 100.9044230030514,
+                y: 100.46537396121883,
+                type: 'vertex'
+              },
+              {
+                x: 125.9044230030514,
+                y: 120.46537396121883,
+                type: 'bezier'
+              },
+              {
+                x: 325.9044230030514,
+                y: 220.46537396121883,
+                type: 'bezier'
+              }
+            ]
+          },
+          box3d: null
+        }
+      ]
+    },
+    {
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg',
+      videoName: 'b',
+      attributes: {},
+      timestamp: 1,
+      labels: [],
+      sensor: -1
+    },
+    {
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg',
+      videoName: 'b',
+      attributes: {},
+      timestamp: 2,
+      labels: [],
+      sensor: -1
+    },
+    {
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg',
+      videoName: 'b',
+      attributes: {},
+      timestamp: 3,
+      labels: [],
+      sensor: -1
+    },
+    {
+      name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg',
+      url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg',
+      videoName: 'b',
+      attributes: {},
+      timestamp: 4,
+      labels: [],
+      sensor: -1
+    }]

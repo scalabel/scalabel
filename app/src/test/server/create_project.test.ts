@@ -11,13 +11,14 @@ import {
   sampleFormImage,
   sampleFormVideo,
   sampleProjectAutolabel,
+  sampleProjectAutolabelPolygon,
   sampleProjectImage,
   sampleProjectVideo,
   sampleTasksImage,
   sampleTasksVideo,
   sampleVideoFormFileData
 } from '../test_creation_objects'
-import { sampleStateExportImage } from '../test_export_objects'
+import { sampleStateExportImage, sampleStateExportImagePolygon } from '../test_export_objects'
 
 beforeAll(() => {
   // mock the file system for saving/loading
@@ -82,6 +83,16 @@ describe('create with auto labels', () => {
       }
       const exportedItems = convertStateToExport(state as State)
       expect(exportedItems).toEqual(sampleStateExportImage)
+    })
+  })
+  test('import then export for polygon', () => {
+    return createTasks(sampleProjectAutolabelPolygon).then((tasks) => {
+      // only 1 task should be created
+      const state: Partial<State> = {
+        task: tasks[0]
+      }
+      const exportedItems = convertStateToExport(state as State)
+      expect(exportedItems).toEqual(sampleStateExportImagePolygon)
     })
   })
 })

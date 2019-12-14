@@ -5,7 +5,7 @@ import { PointType } from '../js/drawable/2d/path_point2d'
 import { ItemExport } from '../js/functional/bdd_types'
 import { Attribute, TaskType } from '../js/functional/types'
 import { CreationForm, FormFileData, Project } from '../js/server/types'
-import { sampleStateExportImage } from './test_export_objects'
+import { sampleStateExportImage, sampleStateExportImagePolygon } from './test_export_objects'
 
 const sampleCategories: string[] = [
   'person',
@@ -252,6 +252,30 @@ export const sampleProjectAutolabel: Project = {
     projectName: sampleProjectName,
     itemType: ItemTypeName.IMAGE,
     labelTypes: [LabelTypeName.BOX_2D],
+    policyTypes: [],
+    taskSize: sampleTaskSize,
+    tracking: false,
+    handlerUrl: HandlerUrl.LABEL,
+    pageTitle: sampleTitle,
+    instructionPage: sampleInstructions,
+    bundleFile: BundleFile.V2,
+    categories: sampleCategories,
+    attributes: sampleAttributes as Attribute[],
+    taskId: '',
+    submitTime: -1,
+    demoMode: false,
+    submitted: false,
+    autosave: true
+  },
+  sensors: {}
+}
+
+export const sampleProjectAutolabelPolygon: Project = {
+  items: sampleStateExportImagePolygon,
+  config: {
+    projectName: sampleProjectName,
+    itemType: ItemTypeName.IMAGE,
+    labelTypes: [LabelTypeName.POLYGON_2D],
     policyTypes: [],
     taskSize: sampleTaskSize,
     tracking: false,
