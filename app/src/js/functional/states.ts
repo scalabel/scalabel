@@ -189,8 +189,8 @@ export function makePointCloudViewerConfig (
   pane: number, sensor: number = -1
 ): PointCloudViewerConfigType {
   return {
-    position: { x: 0.0, y: 10.0, z: 0.0 },
-    target: { x: 0.0, y: 0.0, z: 0.0 },
+    position: { x: 0.0, y: 0.0, z: 0.0 },
+    target: { x: 1.0, y: 0.0, z: 0.0 },
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
     show: true,
@@ -208,9 +208,12 @@ export function makePointCloudViewerConfig (
 export function makeImage3DViewerConfig (
   pane: number, sensor: number = -1
 ): Image3DViewerConfigType {
-  const pcConfig = makePointCloudViewerConfig(pane, sensor)
   const imageConfig = makeImageViewerConfig(pane, sensor)
-  return { ...pcConfig, ...imageConfig }
+  return {
+    ...imageConfig,
+    type: types.ViewerConfigTypeName.IMAGE_3D,
+    pointCloudSensor: -2
+  }
 }
 
 /**
@@ -219,13 +222,13 @@ export function makeImage3DViewerConfig (
  * @param type
  */
 export function makeDefaultViewerConfig (
-  type: types.DataType, pane: number = 0
+  type: types.DataType, pane: number = 0, sensor: number = -1
 ) {
   switch (type) {
     case types.DataType.IMAGE:
-      return makeImageViewerConfig(pane)
+      return makeImageViewerConfig(pane, sensor)
     case types.DataType.POINT_CLOUD:
-      return makePointCloudViewerConfig(pane)
+      return makePointCloudViewerConfig(pane, sensor)
   }
 }
 

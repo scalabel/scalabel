@@ -173,6 +173,11 @@ export function getHandlerUrl (itemType: string, labelType: string): string {
         return HandlerUrl.LABEL
       }
       return HandlerUrl.INVALID
+    case ItemTypeName.FUSION:
+      if (labelType === LabelTypeName.BOX_3D) {
+        return HandlerUrl.LABEL
+      }
+      return HandlerUrl.INVALID
     default:
       return HandlerUrl.INVALID
   }

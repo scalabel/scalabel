@@ -14,15 +14,8 @@ export function updateThreeCameraAndRenderer (
   config: PointCloudViewerConfigType,
   camera: THREE.Camera,
   canvas?: HTMLCanvasElement,
-  renderer?: THREE.Renderer,
-  target?: THREE.Object3D
+  renderer?: THREE.Renderer
 ) {
-  if (target) {
-    target.position.x = config.target.x
-    target.position.y = config.target.y
-    target.position.z = config.target.z
-  }
-
   if (canvas) {
     {
       (camera as THREE.PerspectiveCamera).aspect =

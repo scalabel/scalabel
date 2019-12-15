@@ -27,6 +27,8 @@ function initializeTestingObjects (): [Label2DHandler, number] {
     label2dHandler.updateState(state)
   })
 
+  Session.dispatch(action.loadItem(0, -1))
+
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
 

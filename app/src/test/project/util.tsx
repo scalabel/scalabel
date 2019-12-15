@@ -228,6 +228,7 @@ class IntegrationCreateForm extends CreateForm {
     const formData = new FormData(event.target)
     formData.delete('item_file')
     formData.append('item_file', itemFile, itemFile.name)
+    formData.delete('sensors_file')
     formData.delete('categories')
     formData.append('categories', categoriesFile, categoriesFile.name)
     formData.delete('attributes')

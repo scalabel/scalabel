@@ -49,7 +49,6 @@ test('Add, change and delete box2d labels', () => {
   state = Session.getState()
   label = state.task.items[0].labels[label.id]
   shape = state.task.items[0].shapes[label.shapes[0]].shape as RectType
-  // console.log(label, shape, state.task.items[0].shapes);
   expect(shape.x1).toBe(2)
   expect(shape.y1).toBe(2)
   expect(shape.x2).toBe(7)

@@ -1,10 +1,11 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import Session from '../common/session'
-import { getCurrentViewerConfig, isCurrentItemLoaded } from '../functional/state_util'
+import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
 import { ImageViewerConfigType, State } from '../functional/types'
 import { imageViewStyle } from '../styles/label'
 import {
+  clearCanvas,
   drawImageOnCanvas,
   MAX_SCALE,
   MIN_SCALE,
@@ -73,9 +74,11 @@ export class ImageViewer extends Viewer<Props> {
           this.imageContext = canvas.getContext('2d')
           const displayRect =
             this.display.getBoundingClientRect()
+          const item = this.state.user.select.item
+          const sensor = this.state.user.viewerConfigs[this.props.id].sensor
           if (displayRect.width
             && displayRect.height
-            && this.currentItemIsLoaded()
+            && isFrameLoaded(this.state, item, sensor)
             && this.imageContext) {
             this.updateScale(this.imageCanvas, this.imageContext, true)
           }
@@ -99,14 +102,17 @@ export class ImageViewer extends Viewer<Props> {
    * @return {boolean}
    */
   public redraw (): boolean {
-    if (this.currentItemIsLoaded() && this.imageCanvas && this.imageContext) {
+    if (this.imageCanvas && this.imageContext) {
       const item = this.state.user.select.item
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
-      if (item < Session.images.length &&
+      if (isFrameLoaded(this.state, item, sensor) &&
+          item < Session.images.length &&
           sensor in Session.images[item]) {
         const image = Session.images[item][sensor]
         // redraw imageCanvas
         drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
+      } else {
+        clearCanvas(this.imageCanvas, this.imageContext)
       }
     }
     return true
@@ -150,14 +156,6 @@ export class ImageViewer extends Viewer<Props> {
       )
       this.scale = newParams[3]
     }
-  }
-
-  /**
-   * function to check if the current item is loaded
-   * @return {boolean}
-   */
-  private currentItemIsLoaded (): boolean {
-    return isCurrentItemLoaded(this.state)
   }
 }
 

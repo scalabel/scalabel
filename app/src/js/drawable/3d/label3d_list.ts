@@ -6,14 +6,14 @@ import { makeState } from '../../functional/states'
 import { CubeType, State } from '../../functional/types'
 import { Box3D } from './box3d'
 import { TransformationControl } from './control/transformation_control'
-import { Label3D } from './label3d'
+import { Label3D, labelTypeFromString } from './label3d'
 import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
 /**
  * Make a new drawable label based on the label type
  * @param {string} labelType: type of the new label
  */
-function makeDrawableLabel3D (
+export function makeDrawableLabel3D (
   labelType: string
 ): Label3D | null {
   switch (labelType) {
@@ -51,6 +51,7 @@ export class Label3DList {
 
   constructor () {
     this.control = new TransformationControl()
+    this.control.layers.enableAll()
     this._labels = {}
     this._raycastMap = {}
     this._selectedLabel = null
@@ -80,6 +81,14 @@ export class Label3DList {
     }
   }
 
+  /** Get label by id */
+  public get (id: number): Label3D | null {
+    if (id in this._labels) {
+      return this._labels[id]
+    }
+    return null
+  }
+
   /** Call when any drawable has been updated */
   public onDrawableUpdate (): void {
     for (const callback of this._callbacks) {
@@ -101,12 +110,31 @@ export class Label3DList {
     return this._state.user.select.labels
   }
 
+  /** Get all policy types in config */
+  public get policyTypes (): TrackPolicyType[] {
+    return this._state.task.config.policyTypes.map(policyFromString)
+  }
+
+  /** Get all label types in config */
+  public get labelTypes (): LabelTypeName[] {
+    return this._state.task.config.labelTypes.map(labelTypeFromString)
+  }
+
   /**
    * Get current policy type
    */
-  public get policyType (): TrackPolicyType {
+  public get currentPolicyType (): TrackPolicyType {
     return policyFromString(
       this._state.task.config.policyTypes[this._state.user.select.policyType]
+    )
+  }
+
+  /**
+   * Get current label type
+   */
+  public get currentLabelType (): LabelTypeName {
+    return labelTypeFromString(
+      this._state.task.config.labelTypes[this._state.user.select.labelType]
     )
   }
 
@@ -166,6 +194,11 @@ export class Label3DList {
         }
 
         newLabels[id].selected = false
+
+        // Disable all layers. Viewers will re-enable
+        for (const shape of newLabels[id].shapes()) {
+          shape.layers.disableAll()
+        }
       }
     }
 
@@ -222,5 +255,6 @@ export class Label3DList {
   /** Set active camera */
   public setActiveCamera (camera: THREE.Camera) {
     this._activeCamera = camera
+    this.onDrawableUpdate()
   }
 }

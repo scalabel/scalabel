@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
-import { ShapeType } from '../../functional/types'
+import { Plane3DType, ShapeType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { TransformationControl } from './control/transformation_control'
 import Label3D from './label3d'
@@ -23,6 +23,11 @@ export class Grid3D extends Shape3D {
   /** Get shape type name */
   public get typeName () {
     return ShapeTypeName.GRID
+  }
+
+  /** Set center */
+  public set center (center: Vector3D) {
+    this.position.copy(center.toThree())
   }
 
   /**
@@ -61,6 +66,7 @@ export class Grid3D extends Shape3D {
     if (this._control) {
       this._control.raycast(raycaster, intersects)
     }
+    this._lines.raycast(raycaster, intersects)
   }
 
   /**
@@ -72,11 +78,25 @@ export class Grid3D extends Shape3D {
     if (show) {
       this.add(control)
       this._control = control
-      this._control.attach(this)
+      this._control.attachShape(this)
     } else if (this._control) {
-      this._control.detach()
+      this._control.detachShape()
       this.remove(control)
       this._control = null
     }
+  }
+
+  /** update parameters */
+  public updateState (
+    shape: ShapeType, id: number, _activeCamera?: THREE.Camera
+  ) {
+    super.updateState(shape, id)
+    const newShape = shape as Plane3DType
+    this.position.copy(
+      (new Vector3D()).fromObject(newShape.center).toThree()
+    )
+    this.rotation.setFromVector3(
+      (new Vector3D()).fromObject(newShape.orientation).toThree()
+    )
   }
 }

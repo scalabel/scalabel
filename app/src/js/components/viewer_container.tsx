@@ -46,6 +46,36 @@ function makeViewerConfig (
   return null
 }
 
+/** convert string to enum */
+function viewerTypeFromString (type: string): types.ViewerConfigTypeName {
+  switch (type) {
+    case types.ViewerConfigTypeName.IMAGE:
+      return types.ViewerConfigTypeName.IMAGE
+    case types.ViewerConfigTypeName.POINT_CLOUD:
+      return types.ViewerConfigTypeName.POINT_CLOUD
+    case types.ViewerConfigTypeName.IMAGE_3D:
+      return types.ViewerConfigTypeName.IMAGE_3D
+    default:
+      return types.ViewerConfigTypeName.UNKNOWN
+  }
+}
+
+/** Returns whether the config types are compatible */
+function viewerConfigTypesCompatible (type1: string, type2: string) {
+  let configType1 = viewerTypeFromString(type1)
+  let configType2 = viewerTypeFromString(type2)
+
+  if (configType1 === types.ViewerConfigTypeName.IMAGE_3D) {
+    configType1 = types.ViewerConfigTypeName.IMAGE
+  }
+
+  if (configType2 === types.ViewerConfigTypeName.IMAGE_3D) {
+    configType2 = types.ViewerConfigTypeName.IMAGE
+  }
+
+  return configType1 === configType2
+}
+
 interface ClassType {
   /** grid */
   viewer_container_bar: string
@@ -187,7 +217,7 @@ class ViewerContainer extends Component<Props> {
           (this._viewerConfig) ? this._viewerConfig.type :
             types.ViewerConfigTypeName.UNKNOWN
         }
-        onChange={this.handleViewerTypeChange}
+        onChange={(e) => this.handleViewerTypeChange(e)}
         classes={{ select: this.props.classes.select }}
         inputProps={{
           classes: {
@@ -202,6 +232,39 @@ class ViewerContainer extends Component<Props> {
         <MenuItem value={types.ViewerConfigTypeName.IMAGE_3D}>
           Image 3D
         </MenuItem>
+      </Select>
+    )
+
+    const viewerIdMenu = (
+      <Select
+        value={
+          (this._viewerConfig) ? this._viewerConfig.sensor : null
+        }
+        onChange={(e) => {
+          if (this._viewerConfig) {
+            Session.dispatch(changeViewerConfig(
+              this.props.id,
+              { ...this._viewerConfig, sensor: e.target.value as number }
+            ))
+          }
+        }}
+        classes={{ select: this.props.classes.select }}
+        inputProps={{
+          classes: {
+            icon: this.props.classes.icon
+          }
+        }}
+      >
+        {Object.keys(this.state.task.sensors).filter((key) =>
+          (this._viewerConfig) ?
+            viewerConfigTypesCompatible(
+              this.state.task.sensors[Number(key)].type,
+              this._viewerConfig.type
+            ) :
+            false
+        ).map((key) =>
+          <MenuItem value={Number(key)}>{key}</MenuItem>
+        )}
       </Select>
     )
 
@@ -265,6 +328,7 @@ class ViewerContainer extends Component<Props> {
           }}
         >
           {viewerTypeMenu}
+          {viewerIdMenu}
           {verticalSplitButton}
           {horizontalSplitButton}
           {deleteButton}
@@ -310,7 +374,7 @@ class ViewerContainer extends Component<Props> {
       const newConfig = makeViewerConfig(
         e.target.value as types.ViewerConfigTypeName,
         this._viewerConfig.pane,
-        this._viewerConfig.sensor
+        -2
       )
       if (newConfig) {
         Session.dispatch(changeViewerConfig(

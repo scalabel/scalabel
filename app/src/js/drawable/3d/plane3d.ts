@@ -1,6 +1,6 @@
 import { LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { Plane3DType, ShapeType, State } from '../../functional/types'
+import { ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { TransformationControl } from './control/transformation_control'
 import { Grid3D } from './grid3d'
@@ -85,8 +85,18 @@ export class Plane3D extends Label3D {
    * @param {ShapeType[]} shapes
    */
   public updateState (
-    state: State, itemIndex: number, labelId: number): void {
+    state: State,
+    itemIndex: number,
+    labelId: number,
+    activeCamera?: THREE.Camera
+  ): void {
     super.updateState(state, itemIndex, labelId)
+    const label = state.task.items[itemIndex].labels[labelId]
+    this._shape.updateState(
+      state.task.items[itemIndex].shapes[label.shapes[0]].shape,
+      label.shapes[0],
+      activeCamera
+    )
   }
 
   /**
@@ -95,13 +105,17 @@ export class Plane3D extends Label3D {
    */
   public init (
     itemIndex: number,
-    category: number
+    category: number,
+    center?: Vector3D
   ): void {
     this._label = makeLabel({
       type: LabelTypeName.PLANE_3D, id: -1, item: itemIndex,
       category: [category]
     })
     this._labelId = -1
+    if (center) {
+      this._shape.center = center
+    }
   }
 
   /**
@@ -121,19 +135,5 @@ export class Plane3D extends Label3D {
       [ShapeTypeName.GRID],
       [this._shape.toObject()]
     ]
-  }
-
-  /**
-   * Expand the primitive shapes to drawable shapes
-   * @param {ShapeType[]} shapes
-   */
-  public updateShapes (shapes: ShapeType[]): void {
-    const newShape = shapes[0] as Plane3DType
-    this._shape.position.copy(
-      (new Vector3D()).fromObject(newShape.center).toThree()
-    )
-    this._shape.rotation.setFromVector3(
-      (new Vector3D()).fromObject(newShape.orientation).toThree()
-    )
   }
 }

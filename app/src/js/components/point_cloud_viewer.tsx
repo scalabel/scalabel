@@ -197,8 +197,7 @@ class PointCloudViewer extends Viewer<Props> {
         config,
         this.camera,
         this.canvas,
-        this.renderer,
-        this.target
+        this.renderer
       )
     }
   }

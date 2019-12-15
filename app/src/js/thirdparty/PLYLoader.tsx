@@ -318,27 +318,27 @@ export class PLYLoader {
 
       }
 
-      geometry.addAttribute('position',
+      geometry.setAttribute('position',
           new THREE.Float32BufferAttribute(buffer.vertices, 3));
 
       // optional buffer data
 
       if (buffer.normals.length > 0) {
 
-        geometry.addAttribute('normal',
+        geometry.setAttribute('normal',
             new THREE.Float32BufferAttribute(buffer.normals, 3));
 
       }
 
       if (buffer.uvs.length > 0) {
 
-        geometry.addAttribute('uv',
+        geometry.setAttribute('uv',
             new THREE.Float32BufferAttribute(buffer.uvs, 2));
 
       }
 
       if (buffer.colors.length > 0) {
-        geometry.addAttribute('color',
+        geometry.setAttribute('color',
             new THREE.Float32BufferAttribute(buffer.colors, 3));
       }
 

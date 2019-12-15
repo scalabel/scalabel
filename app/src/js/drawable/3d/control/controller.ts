@@ -129,7 +129,7 @@ export abstract class Controller extends THREE.Object3D {
   }
 
   /** attach to object */
-  public attach (object: THREE.Object3D) {
+  public attachShape (object: THREE.Object3D) {
     this._object = object
     this.updateMatrix()
     this.updateMatrixWorld(true)
@@ -137,7 +137,7 @@ export abstract class Controller extends THREE.Object3D {
   }
 
   /** detach */
-  public detach () {
+  public detachShape () {
     this._object = null
   }
 
@@ -145,7 +145,7 @@ export abstract class Controller extends THREE.Object3D {
   public toggleFrame () {
     if (this._object) {
       this._local = !this._local
-      this.attach(this._object)
+      this.attachShape(this._object)
     }
   }
 

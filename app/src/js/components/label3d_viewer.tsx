@@ -3,8 +3,10 @@ import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
 import Session from '../common/session'
+import { ViewerConfigTypeName } from '../common/types'
+import { IntrinsicCamera } from '../drawable/3d/intrinsic_camera'
 import { Label3DHandler } from '../drawable/3d/label3d_handler'
-import { getCurrentViewerConfig, isCurrentItemLoaded } from '../functional/state_util'
+import { getCurrentViewerConfig, isCurrentFrameLoaded } from '../functional/state_util'
 import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { convertMouseToNDC, updateThreeCameraAndRenderer } from '../view_config/point_cloud'
@@ -58,12 +60,8 @@ export class Label3dViewer extends Viewer<Props> {
   private scale: number
   /** ThreeJS Renderer */
   private renderer?: THREE.WebGLRenderer
-  /** ThreeJS Scene object */
-  private scene: THREE.Scene
   /** ThreeJS Camera */
-  private camera: THREE.PerspectiveCamera
-  /** ThreeJS sphere mesh for indicating camera target location */
-  private target: THREE.Mesh
+  private camera: THREE.Camera
   /** raycaster */
   private _raycaster: THREE.Raycaster
   /** The hashed list of keys currently down */
@@ -85,17 +83,9 @@ export class Label3dViewer extends Viewer<Props> {
    */
   constructor (props: Readonly<Props>) {
     super(props)
-    this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-    this.target = new THREE.Mesh(
-      new THREE.SphereGeometry(0.03),
-        new THREE.MeshBasicMaterial({
-          color:
-            0xffffff
-        }))
-    this.scene.add(this.target)
 
-    this._labelHandler = new Label3DHandler()
+    this._labelHandler = new Label3DHandler(this.camera)
 
     this.display = null
     this.canvas = null
@@ -166,16 +156,14 @@ export class Label3dViewer extends Viewer<Props> {
    * @return {boolean}
    */
   public redraw (): boolean {
-    const state = this.state
-    const item = state.user.select.item
     if (this.canvas) {
       const sensor =
         this.state.user.viewerConfigs[this.props.id].sensor
-      const loaded =
-        state.session.itemStatuses[item].sensorDataLoaded[sensor]
-      if (loaded) {
+      if (isCurrentFrameLoaded(this.state, sensor)) {
         this.updateRenderer()
         this.renderThree()
+      } else if (this.renderer) {
+        this.renderer.clear()
       }
     }
     return true
@@ -199,7 +187,7 @@ export class Label3dViewer extends Viewer<Props> {
     )
     const x = NDC[0]
     const y = NDC[1]
-    if (this._labelHandler.onMouseDown(x, y, this.camera)) {
+    if (this._labelHandler.onMouseDown(x, y)) {
       e.stopPropagation()
     }
   }
@@ -241,6 +229,7 @@ export class Label3dViewer extends Viewer<Props> {
     const x = NDC[0]
     const y = NDC[1]
 
+    this.camera.updateMatrixWorld(true)
     this._raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
 
     const shapes = Session.label3dList.raycastableShapes
@@ -251,8 +240,8 @@ export class Label3dViewer extends Viewer<Props> {
     )
 
     const consumed = (intersects && intersects.length > 0) ?
-      this._labelHandler.onMouseMove(x, y, this.camera, intersects[0]) :
-      this._labelHandler.onMouseMove(x, y, this.camera)
+      this._labelHandler.onMouseMove(x, y, intersects[0]) :
+      this._labelHandler.onMouseMove(x, y)
     if (consumed) {
       e.stopPropagation()
     }
@@ -300,8 +289,49 @@ export class Label3dViewer extends Viewer<Props> {
       this.display = this.props.display
       this.forceUpdate()
     }
-    // Filter labels if not in layer
-    // this.camera.layers.set(this.props.id)
+
+    this.camera.layers.set(
+      this.props.id - Math.min(
+        ...Object.keys(this.state.user.viewerConfigs).map((key) => Number(key))
+      )
+    )
+
+    const item = state.task.items[state.user.select.item]
+    const viewerConfig = this.state.user.viewerConfigs[this.props.id]
+    const sensorId = viewerConfig.sensor
+    for (const key of Object.keys(item.labels)) {
+      const id = Number(key)
+      if (item.labels[id].sensors.includes(sensorId)) {
+        const label = Session.label3dList.get(id)
+        if (label) {
+          for (const shape of label.shapes()) {
+            shape.layers.enable(this.props.id)
+          }
+        }
+      }
+    }
+
+    if (this.props.id in this.state.user.viewerConfigs) {
+      if (viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
+        if (viewerConfig.sensor in this.state.task.sensors) {
+          const sensor = this.state.task.sensors[sensorId]
+          if (sensor.intrinsics &&
+              isCurrentFrameLoaded(state, viewerConfig.sensor)) {
+            const image =
+              Session.images[state.user.select.item][viewerConfig.sensor]
+            this.camera = new IntrinsicCamera(
+              sensor.intrinsics,
+              image.width,
+              image.height
+            )
+          }
+        }
+      } else {
+        this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+      }
+      this._labelHandler.camera = this.camera
+    }
+
     if (Session.activeViewerId === this.props.id) {
       Session.label3dList.setActiveCamera(this.camera)
     }
@@ -312,9 +342,13 @@ export class Label3dViewer extends Viewer<Props> {
    * Render ThreeJS Scene
    */
   private renderThree () {
-    if (this.renderer) {
-      this.scene.children = []
+    const state = this.state
+    const sensor =
+      this.state.user.viewerConfigs[this.props.id].sensor
+    if (this.renderer && isCurrentFrameLoaded(state, sensor)) {
       this.renderer.render(Session.label3dList.scene, this.camera)
+    } else if (this.renderer) {
+      this.renderer.clear()
     }
   }
 
@@ -334,7 +368,9 @@ export class Label3dViewer extends Viewer<Props> {
    * @param {string} componentType
    */
   private initializeRefs (component: HTMLCanvasElement | null) {
-    if (!component) {
+    const sensor =
+      this.state.user.viewerConfigs[this.props.id].sensor
+    if (!component || !isCurrentFrameLoaded(this.state, sensor)) {
       return
     }
 
@@ -350,10 +386,12 @@ export class Label3dViewer extends Viewer<Props> {
         this.forceUpdate()
       }
 
-      if (this.canvas && this.display) {
-        const img3dConfig = getCurrentViewerConfig(
-          this.state, this.props.id
-        ) as Image3DViewerConfigType
+      const viewerConfig = getCurrentViewerConfig(
+        this.state, this.props.id
+      )
+      if (this.canvas && this.display &&
+          viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
+        const img3dConfig = viewerConfig as Image3DViewerConfigType
         if (img3dConfig.viewScale >= MIN_SCALE &&
             img3dConfig.viewScale < MAX_SCALE) {
           const newParams =
@@ -368,11 +406,14 @@ export class Label3dViewer extends Viewer<Props> {
             )
           this.scale = newParams[3]
         }
+      } else if (this.display) {
+        this.canvas.removeAttribute('style')
+        const displayRect = this.display.getBoundingClientRect()
+        this.canvas.width = displayRect.width
+        this.canvas.height = displayRect.height
       }
 
-      if (isCurrentItemLoaded(this.state)) {
-        this.updateRenderer()
-      }
+      this.updateRenderer()
     }
   }
 
@@ -385,13 +426,48 @@ export class Label3dViewer extends Viewer<Props> {
         this.state, this.props.id
       )
       if (config) {
-        updateThreeCameraAndRenderer(
-          config as PointCloudViewerConfigType,
-          this.camera,
-          this.canvas,
-          this.renderer,
-          this.target
-        )
+        switch (config.type) {
+          case ViewerConfigTypeName.POINT_CLOUD:
+            updateThreeCameraAndRenderer(
+              config as PointCloudViewerConfigType,
+              this.camera,
+              this.canvas,
+              this.renderer
+            )
+            break
+          case ViewerConfigTypeName.IMAGE_3D:
+            const img3dConfig = config as Image3DViewerConfigType
+            const sensor = img3dConfig.sensor
+            if (sensor in this.state.task.sensors) {
+              const extrinsics = this.state.task.sensors[sensor].extrinsics
+              this.camera.position.set(0, 0, 0)
+              if (extrinsics) {
+                this.camera.quaternion.set(
+                  extrinsics.rotation.x,
+                  extrinsics.rotation.y,
+                  extrinsics.rotation.z,
+                  extrinsics.rotation.w
+                )
+                this.camera.quaternion.multiply(
+                  (new THREE.Quaternion()).setFromAxisAngle(
+                    new THREE.Vector3(1, 0, 0), Math.PI
+                  )
+                )
+                this.camera.position.set(
+                  extrinsics.translation.x,
+                  extrinsics.translation.y,
+                  extrinsics.translation.z
+                )
+              }
+              if (this.canvas && this.renderer) {
+                this.renderer.setSize(
+                  this.canvas.width,
+                  this.canvas.height
+                )
+              }
+            }
+            break
+        }
       }
     }
   }

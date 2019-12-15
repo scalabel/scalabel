@@ -63,6 +63,8 @@ export interface CreationForm {
 export interface FormFileData {
   /** categories parsed from form file */
   categories: string[]
+  /** sensors */
+  sensors: SensorType[]
   /** attributes parsed from form file */
   attributes: Attribute[]
   /** items parsed from form file (may be incomplete) */
@@ -112,7 +114,8 @@ export const enum FormField {
   DEMO_MODE = 'demo_mode',
   CATEGORIES = 'categories',
   ATTRIBUTES = 'attributes',
-  ITEMS = 'item_file'
+  ITEMS = 'item_file',
+  SENSORS = 'sensors'
 }
 
 /* default config for env */

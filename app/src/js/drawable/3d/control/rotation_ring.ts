@@ -18,7 +18,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     this._normal = normal
 
     const lineGeometry = new THREE.BufferGeometry()
-    lineGeometry.addAttribute(
+    lineGeometry.setAttribute(
       'position',
       new THREE.Float32BufferAttribute([ 0, 0, -10, 0, 0, 10 ], 3)
     )

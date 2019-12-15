@@ -42,7 +42,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     }
 
     const lineGeometry = new THREE.BufferGeometry()
-    lineGeometry.addAttribute(
+    lineGeometry.setAttribute(
       'position',
       new THREE.Float32BufferAttribute([ 0, 0, 0, 0, 0, 1 ], 3)
     )
@@ -53,7 +53,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     this.add(this._line)
 
     const guidelineGeometry = new THREE.BufferGeometry()
-    guidelineGeometry.addAttribute(
+    guidelineGeometry.setAttribute(
       'position',
       new THREE.Float32BufferAttribute([ 0, 0, -10, 0, 0, 10 ], 3)
     )

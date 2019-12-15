@@ -1,10 +1,22 @@
 import * as THREE from 'three'
-import { ShapeTypeName } from '../../common/types'
-import { LabelType, PointCloudViewerConfigType, ShapeType, State } from '../../functional/types'
+import { LabelTypeName, ShapeTypeName } from '../../common/types'
+import { LabelType, ShapeType, State } from '../../functional/types'
+import { Vector3D } from '../../math/vector3d'
 import { getColorById } from '../util'
 import { TransformationControl } from './control/transformation_control'
 import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
+
+/** Convert string to label type name enum */
+export function labelTypeFromString (type: string): LabelTypeName {
+  switch (type) {
+    case LabelTypeName.BOX_3D:
+      return LabelTypeName.BOX_3D
+    case LabelTypeName.PLANE_3D:
+      return LabelTypeName.PLANE_3D
+  }
+  return LabelTypeName.EMPTY
+}
 
 /**
  * Abstract class for 3D drawable labels
@@ -154,9 +166,8 @@ export abstract class Label3D {
   public abstract init (
     itemIndex: number,
     category: number,
-    viewerConfig?: PointCloudViewerConfigType,
-    surfaceId?: number,
-    temporary?: boolean
+    center?: Vector3D,
+    sensors?: number[]
   ): void
 
   /**

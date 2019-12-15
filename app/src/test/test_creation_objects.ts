@@ -157,6 +157,7 @@ export const sampleFormVideo: CreationForm = {
 export const sampleFormFileData: FormFileData = {
   categories: sampleCategories,
   attributes: sampleAttributes as Attribute[],
+  sensors: [],
   items: sampleItems
 }
 
@@ -219,7 +220,8 @@ sampleItemsVideo[1].labels = [{
 export const sampleVideoFormFileData: FormFileData = {
   categories: sampleCategories,
   attributes: sampleAttributes as Attribute[],
-  items: sampleItemsVideo
+  items: sampleItemsVideo,
+  sensors: []
 }
 
 export const sampleProjectVideo: Project = {

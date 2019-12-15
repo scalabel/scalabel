@@ -178,12 +178,16 @@ test('Move axis aligned 3d bbox along z axis', () => {
 
   let state = Session.getState()
 
-  const viewerConfig =
+  let viewerConfig =
     getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
 
   Session.dispatch(moveCameraAndTarget(
     new Vector3D(), new Vector3D(), viewerId, viewerConfig
   ))
+
+  state = Session.getState()
+  viewerConfig =
+    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
   viewer.onKeyDown(spaceEvent)

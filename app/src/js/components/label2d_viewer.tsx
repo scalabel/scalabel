@@ -3,7 +3,7 @@ import * as React from 'react'
 import Session from '../common/session'
 import { Key } from '../common/types'
 import { Label2DHandler } from '../drawable/2d/label2d_handler'
-import { getCurrentViewerConfig } from '../functional/state_util'
+import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
 import { ImageViewerConfigType, State } from '../functional/types'
 import { Vector2D } from '../math/vector2d'
 import { label2dViewStyle } from '../styles/label'
@@ -157,7 +157,10 @@ export class Label2dViewer extends Viewer<Props> {
           this.controlContext = canvas.getContext('2d')
           const displayRect =
             this.display.getBoundingClientRect()
-          if (displayRect.width
+          const item = this.state.user.select.item
+          const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+          if (isFrameLoaded(this.state, item, sensor)
+            && displayRect.width
             && displayRect.height
             && this.controlContext) {
             this.updateScale(this.controlCanvas, this.controlContext, true)
@@ -174,7 +177,10 @@ export class Label2dViewer extends Viewer<Props> {
           this.labelContext = canvas.getContext('2d')
           const displayRect =
             this.display.getBoundingClientRect()
-          if (displayRect.width
+          const item = this.state.user.select.item
+          const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+          if (isFrameLoaded(this.state, item, sensor)
+            && displayRect.width
             && displayRect.height
             && this.labelContext) {
             this.updateScale(this.labelCanvas, this.labelContext, true)

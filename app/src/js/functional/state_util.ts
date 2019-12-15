@@ -33,6 +33,16 @@ export function getShape (state: State, itemIndex: number,
   return item.shapes[shapeId].shape
 }
 
+/** Check if frame is loaded */
+export function isFrameLoaded (state: State, item: number, sensor: number) {
+  return state.session.itemStatuses[item].sensorDataLoaded[sensor]
+}
+
+/** Check if current frame is loaded */
+export function isCurrentFrameLoaded (state: State, sensor: number) {
+  return isFrameLoaded(state, state.user.select.item, sensor)
+}
+
 /**
  * Check whether item is loaded
  * @param state

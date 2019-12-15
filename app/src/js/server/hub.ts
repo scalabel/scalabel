@@ -139,6 +139,13 @@ async function loadStateFromTask (
           [TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D]
       }
       break
+    case ItemTypeName.FUSION:
+      state.task.config.labelTypes =
+        [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]
+      state.task.config.policyTypes = [
+        TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D,
+        TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D
+      ]
   }
   return state
 }

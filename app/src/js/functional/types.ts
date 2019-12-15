@@ -157,7 +157,10 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
 }
 
 export interface Image3DViewerConfigType extends
-  ImageViewerConfigType, PointCloudViewerConfigType {}
+  ImageViewerConfigType {
+  /** If set, sensor id of point cloud to use as reference */
+  pointCloudSensor: number
+}
 
 export interface CameraIntrinsicsType {
   /** focal length 2d */

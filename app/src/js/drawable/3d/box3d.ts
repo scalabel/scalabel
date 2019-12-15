@@ -2,7 +2,7 @@ import _ from 'lodash'
 import * as THREE from 'three'
 
 import { makeLabel } from '../../functional/states'
-import { PointCloudViewerConfigType, ShapeType, State } from '../../functional/types'
+import { ShapeType, State } from '../../functional/types'
 
 import { Vector3D } from '../../math/vector3d'
 
@@ -35,28 +35,17 @@ export class Box3D extends Label3D {
   public init (
     itemIndex: number,
     category: number,
-    viewerConfig?: PointCloudViewerConfigType,
-    surfaceId?: number,
-    temporary?: boolean
+    center?: Vector3D,
+    sensors?: number[]
   ): void {
-    const sensors = (viewerConfig) ? [viewerConfig.sensor] : [-1]
     this._label = makeLabel({
       type: LabelTypeName.BOX_3D, id: -1, item: itemIndex,
       category: [category], sensors
     })
     this._labelId = -1
-    const center = new Vector3D()
-    if (viewerConfig) {
-      center.fromObject(viewerConfig.target)
-    }
-    if (surfaceId && surfaceId >= 0) {
-      center.z = 0.5
-      this._shape.surfaceId = surfaceId
-    }
-    this._shape.center = center
 
-    if (temporary && surfaceId && surfaceId >= 0) {
-      this._temporary = temporary
+    if (center) {
+      this._shape.center = center
     }
   }
 

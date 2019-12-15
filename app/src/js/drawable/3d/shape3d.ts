@@ -59,13 +59,13 @@ export abstract class Shape3D extends THREE.Object3D {
     this.detachControl()
     this.add(control)
     this._control = control
-    this._control.attach(this)
+    this._control.attachShape(this)
   }
 
   /** detach control */
   public detachControl () {
     if (this._control) {
-      this._control.detach()
+      this._control.detachShape()
       this.remove(this._control)
       this._control = null
     }

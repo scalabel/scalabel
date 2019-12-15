@@ -67,7 +67,6 @@ function updateTracks (): void {
   }
 
   Session.tracks = newTracks
-  Session.currentPolicyType = currentPolicyType
 }
 
 /**

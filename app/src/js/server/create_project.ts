@@ -72,13 +72,17 @@ export function parseFiles (labelType: string, files: Files)
   : Promise<types.FormFileData> {
   return Promise.all([
     parseItems(files),
+    parseSensors(files),
     parseAttributes(files, labelType),
     parseCategories(files, labelType)])
-    .then((result: [Array<Partial<ItemExport>>, Attribute[], string[]]) => {
+    .then((result: [
+      Array<Partial<ItemExport>>, SensorType[], Attribute[], string[]
+    ]) => {
       return {
         items: result[0],
-        attributes: result[1],
-        categories: result[2]
+        sensors: result[1],
+        attributes: result[2],
+        categories: result[3]
       }
     })
 }
@@ -212,6 +216,34 @@ export function parseItems (files: Files): Promise<Array<Partial<ItemExport>>> {
   }
 }
 
+/** Read sensors file */
+function readSensorsFile (path: string): Promise<SensorType[]> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
+      if (err) {
+        reject(err)
+      } else {
+        try {
+          const sensors = yaml.load(fileBytes) as SensorType[]
+          resolve(sensors)
+        } catch {
+          reject(Error('Improper formatting for sensors file'))
+        }
+      }
+    })
+  })
+}
+
+/** Parse files for sensors */
+export function parseSensors (files: Files): Promise<SensorType[]> {
+  const sensorsFile = files[types.FormField.SENSORS]
+  if (util.formFileExists(sensorsFile)) {
+    return readSensorsFile(sensorsFile.path)
+  } else {
+    return Promise.resolve([])
+  }
+}
+
 /**
  * Marshal data into project format
  */
@@ -256,6 +288,9 @@ export function createProject (
   })
 
   const sensors: {[id: number]: SensorType} = {}
+  for (const sensor of formFileData.sensors) {
+    sensors[sensor.id] = sensor
+  }
 
   // With tracking, order by videoname lexicographically and split according
   // to videoname. It should be noted that a stable sort must be used to
@@ -468,7 +503,7 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     for (let itemInd = 0; itemInd < taskSize; itemInd += 1) {
       const timestampToMatch = itemExportsBySensor[largestSensor][
         sensorMatchingIndices[largestSensor]
-      ] as number
+      ].timestamp as number
       const itemExportMap: {[id: number]: Partial<ItemExport>} = {}
       for (const key of Object.keys(sensorMatchingIndices)) {
         const sensorId = Number(key)
