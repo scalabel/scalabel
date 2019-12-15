@@ -9,6 +9,8 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
   private _normal: THREE.Vector3
   /** guideline */
   private _guideline: THREE.Line
+  /** intersection point on highlight */
+  private _highlightIntersection: THREE.Vector3
 
   constructor (normal: THREE.Vector3, color: number) {
     super(
@@ -32,6 +34,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this._normal)
     this.quaternion.copy(quaternion)
 
+    this._highlightIntersection = new THREE.Vector3()
     this.setHighlighted()
   }
 
@@ -44,6 +47,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     if (intersection && intersection.object === this) {
       { (this.material as THREE.Material).opacity = 0.9 }
       this.add(this._guideline)
+      this._highlightIntersection.copy(intersection.point)
       return true
     } else {
       { (this.material as THREE.Material).opacity = 0.65 }
@@ -91,35 +95,16 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     dragDirection.crossVectors(dragPlane.normal, normal)
     dragDirection.normalize()
 
-    // toLocal is matrix that coverts world to object frame
-    const toLocal = new THREE.Matrix4()
-    if (this.parent) {
-      toLocal.getInverse(this.parent.matrixWorld)
-    }
+    const centerToCamera = new THREE.Vector3()
+    this.getWorldPosition(centerToCamera)
+    centerToCamera.sub(newProjection.origin)
 
-    // local projection is the projection in the object frame
-    const localProjection = new THREE.Ray()
-    localProjection.copy(newProjection).applyMatrix4(toLocal)
-
-    // torusPos is the position of the center of the torus, (0, 0, 0)
-    const torusPos = new THREE.Vector3()
-    // torusPlane is aligned with the torus
-    const torusPlane = new THREE.Plane()
-    torusPlane.setFromNormalAndCoplanarPoint(this._normal, torusPos)
-
-    // torus intersection is where the projection intersects the torus plane
-    const torusIntersection = new THREE.Vector3()
-    localProjection.intersectPlane(torusPlane, torusIntersection)
-
-    // camPos is camera position in object frame
-    const camPos = new THREE.Vector3()
-    camPos.copy(newProjection.origin).applyMatrix4(toLocal)
-
-    const camToTorusCenterDistance = camPos.distanceTo(torusPos)
-    const camToTorusIntersectionDistance = camPos.distanceTo(torusIntersection)
+    const intersectionToCamera = new THREE.Vector3()
+    intersectionToCamera.copy(this._highlightIntersection)
+    intersectionToCamera.sub(newProjection.origin)
 
     // if the intersection is further away than the center, reverse direction
-    if (camToTorusIntersectionDistance > camToTorusCenterDistance) {
+    if (intersectionToCamera.length() - centerToCamera.length() > 1e-3) {
       dragDirection.negate()
     }
 
