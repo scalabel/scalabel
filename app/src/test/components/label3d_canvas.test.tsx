@@ -7,7 +7,7 @@ import { moveCamera, moveCameraAndTarget } from '../../js/action/point_cloud'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { Label3dViewer } from '../../js/components/label3d_viewer'
+import { Label3dCanvas } from '../../js/components/label3d_canvas'
 import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util'
 import { makePointCloudViewerConfig } from '../../js/functional/states'
 import { CubeType, PointCloudViewerConfigType } from '../../js/functional/types'
@@ -15,7 +15,7 @@ import { Vector3D } from '../../js/math/vector3d'
 import { testJson } from '../test_point_cloud_objects'
 import { expectVector3TypesClose } from '../util'
 
-const viewerId = 0
+const canvasId = 0
 const width = 1000
 const height = 1000
 
@@ -44,7 +44,7 @@ beforeEach(() => {
   Session.devMode = false
   initStore(testJson)
   Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
-  Session.activeViewerId = viewerId
+  Session.activeViewerId = canvasId
   Session.pointClouds.length = 0
   Session.pointClouds.push({ [-1]: new THREE.Points() })
   Session.dispatch(action.loadItem(0, -1))
@@ -53,12 +53,12 @@ beforeEach(() => {
 afterEach(cleanup)
 
 /** Set up component for testing */
-function setUpLabel3dViewer (
+function setUpLabel3dCanvas (
   paneId: number = 0
-): Label3dViewer {
-  const viewerRef: React.RefObject<Label3dViewer> = React.createRef()
+): Label3dCanvas {
+  const canvasRef: React.RefObject<Label3dCanvas> = React.createRef()
   Session.dispatch(
-    action.addViewerConfig(viewerId, makePointCloudViewerConfig(paneId))
+    action.addViewerConfig(canvasId, makePointCloudViewerConfig(paneId))
   )
 
   const display = document.createElement('div')
@@ -89,13 +89,13 @@ function setUpLabel3dViewer (
 
   render(
     <div style={{ width: `${width}px`, height: `${height}px` }}>
-      <Label3dViewer
+      <Label3dCanvas
         classes={{
           label3d_canvas: 'label3dcanvas'
         }}
         id={0}
         display={display}
-        ref={viewerRef}
+        ref={canvasRef}
       />
     </div>
   )
@@ -103,14 +103,14 @@ function setUpLabel3dViewer (
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
 
-  expect(viewerRef.current).not.toBeNull()
-  expect(viewerRef.current).not.toBeUndefined()
+  expect(canvasRef.current).not.toBeNull()
+  expect(canvasRef.current).not.toBeUndefined()
 
-  if (viewerRef.current) {
-    return viewerRef.current
+  if (canvasRef.current) {
+    return canvasRef.current
   }
 
-  throw new Error('3D viewer ref did not initialize')
+  throw new Error('3D canvas ref did not initialize')
 }
 
 /** Create mouse down event */
@@ -125,18 +125,18 @@ function mouseEvent (
 }
 
 test('Add 3d bbox', () => {
-  const viewer = setUpLabel3dViewer()
+  const canvas = setUpLabel3dCanvas()
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
 
-  viewer.onKeyDown(spaceEvent)
+  canvas.onKeyDown(spaceEvent)
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
   let cube = getShape(state, 0, 0, 0) as CubeType
-  let viewerConfig =
-    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
-  expect(viewerConfig).not.toBeNull()
-  expectVector3TypesClose(cube.center, viewerConfig.target)
+  let canvasConfig =
+    getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
+  expect(canvasConfig).not.toBeNull()
+  expectVector3TypesClose(cube.center, canvasConfig.target)
   expectVector3TypesClose(cube.orientation, { x: 0, y: 0, z: 0 })
   expectVector3TypesClose(cube.size, { x: 1, y: 1, z: 1 })
   expect(cube.anchorIndex).toEqual(0)
@@ -145,7 +145,7 @@ test('Add 3d bbox', () => {
   // make sure that the bounding box is always created at the target
   const maxVal = 100
   const position = new Vector3D()
-  position.fromObject(viewerConfig.position)
+  position.fromObject(canvasConfig.position)
   const target = new Vector3D()
   for (let i = 1; i <= 10; i += 1) {
     target[0] = Math.random() * 2 - 1
@@ -153,20 +153,20 @@ test('Add 3d bbox', () => {
     target[2] = Math.random() * 2 - 1
     target.multiplyScalar(maxVal)
     Session.dispatch(moveCameraAndTarget(
-      position, target, viewerId, viewerConfig
+      position, target, canvasId, canvasConfig
     ))
 
-    viewer.onKeyDown(spaceEvent)
+    canvas.onKeyDown(spaceEvent)
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
     cube = getShape(state, 0, i, 0) as CubeType
-    viewerConfig =
-      getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
-    expect(viewerConfig).not.toBeNull()
+    canvasConfig =
+      getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
+    expect(canvasConfig).not.toBeNull()
 
-    expectVector3TypesClose(viewerConfig.position, position)
-    expectVector3TypesClose(viewerConfig.target, target)
-    expectVector3TypesClose(cube.center, viewerConfig.target)
+    expectVector3TypesClose(canvasConfig.position, position)
+    expectVector3TypesClose(canvasConfig.target, target)
+    expectVector3TypesClose(cube.center, canvasConfig.target)
     expectVector3TypesClose(cube.orientation, { x: 0, y: 0, z: 0 })
     expectVector3TypesClose(cube.size, { x: 1, y: 1, z: 1 })
     expect(cube.anchorIndex).toEqual(0)
@@ -174,23 +174,23 @@ test('Add 3d bbox', () => {
 })
 
 test('Move axis aligned 3d bbox along z axis', () => {
-  const viewer = setUpLabel3dViewer()
+  const canvas = setUpLabel3dCanvas()
 
   let state = Session.getState()
 
-  let viewerConfig =
-    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+  let canvasConfig =
+    getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
 
   Session.dispatch(moveCameraAndTarget(
-    new Vector3D(), new Vector3D(), viewerId, viewerConfig
+    new Vector3D(), new Vector3D(), canvasId, canvasConfig
   ))
 
   state = Session.getState()
-  viewerConfig =
-    getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+  canvasConfig =
+    getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
-  viewer.onKeyDown(spaceEvent)
+  canvas.onKeyDown(spaceEvent)
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
@@ -198,20 +198,20 @@ test('Move axis aligned 3d bbox along z axis', () => {
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
-  viewer.onKeyDown(tEvent)
+  canvas.onKeyDown(tEvent)
 
   const position = new Vector3D()
   position[1] = 10
   Session.dispatch(moveCamera(
     position,
-    viewerId,
-    viewerConfig
+    canvasId,
+    canvasConfig
   ))
 
-  viewer.onMouseMove(mouseEvent(width / 2., height * 9. / 20))
-  viewer.onMouseDown(mouseEvent(width / 2., height * 9. / 20))
-  viewer.onMouseMove(mouseEvent(width / 2., height / 4.))
-  viewer.onMouseUp(mouseEvent(width / 2., height / 4.))
+  canvas.onMouseMove(mouseEvent(width / 2., height * 9. / 20))
+  canvas.onMouseDown(mouseEvent(width / 2., height * 9. / 20))
+  canvas.onMouseMove(mouseEvent(width / 2., height / 4.))
+  canvas.onMouseUp(mouseEvent(width / 2., height / 4.))
 
   state = Session.getState()
   let cube = getShape(state, 0, 0, 0) as CubeType
@@ -220,10 +220,10 @@ test('Move axis aligned 3d bbox along z axis', () => {
   expect(center[0]).toBeCloseTo(0)
   expect(center[1]).toBeCloseTo(0)
 
-  viewer.onMouseMove(mouseEvent(width / 2., height / 4.))
-  viewer.onMouseDown(mouseEvent(width / 2., height / 4.))
-  viewer.onMouseMove(mouseEvent(width / 2., height * 9 / 20))
-  viewer.onMouseUp(mouseEvent(width / 2., height * 9 / 20))
+  canvas.onMouseMove(mouseEvent(width / 2., height / 4.))
+  canvas.onMouseDown(mouseEvent(width / 2., height / 4.))
+  canvas.onMouseMove(mouseEvent(width / 2., height * 9 / 20))
+  canvas.onMouseUp(mouseEvent(width / 2., height * 9 / 20))
 
   state = Session.getState()
   cube = getShape(state, 0, 0, 0) as CubeType

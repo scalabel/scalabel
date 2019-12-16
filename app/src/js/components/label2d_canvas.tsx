@@ -19,7 +19,7 @@ import {
   updateCanvasScale
 } from '../view_config/image'
 import { Crosshair, Crosshair2D } from './crosshair'
-import { Viewer } from './viewer'
+import { DrawableCanvas } from './viewer'
 
 interface ClassType {
   /** label canvas */
@@ -40,7 +40,7 @@ interface Props {
 /**
  * Canvas Viewer
  */
-export class Label2dViewer extends Viewer<Props> {
+export class Label2dCanvas extends DrawableCanvas<Props> {
   /** The label context */
   public labelContext: CanvasRenderingContext2D | null
   /** The control context */
@@ -414,4 +414,4 @@ export class Label2dViewer extends Viewer<Props> {
   }
 }
 
-export default withStyles(label2dViewStyle, { withTheme: true })(Label2dViewer)
+export default withStyles(label2dViewStyle, { withTheme: true })(Label2dCanvas)

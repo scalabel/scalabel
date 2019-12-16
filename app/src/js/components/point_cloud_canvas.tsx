@@ -8,7 +8,7 @@ import { getCurrentViewerConfig, isCurrentItemLoaded } from '../functional/state
 import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { updateThreeCameraAndRenderer } from '../view_config/point_cloud'
-import { Viewer } from './viewer'
+import { DrawableCanvas } from './viewer'
 
 const styles = () => createStyles({
   point_cloud_canvas: {
@@ -35,7 +35,7 @@ interface Props {
 /**
  * Canvas Viewer
  */
-class PointCloudViewer extends Viewer<Props> {
+class PointCloudCanvas extends DrawableCanvas<Props> {
   /** Container */
   private display: HTMLDivElement | null
   /** Canvas to draw on */
@@ -203,4 +203,4 @@ class PointCloudViewer extends Viewer<Props> {
   }
 }
 
-export default withStyles(styles, { withTheme: true })(PointCloudViewer)
+export default withStyles(styles, { withTheme: true })(PointCloudCanvas)

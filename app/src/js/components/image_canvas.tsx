@@ -11,7 +11,7 @@ import {
   MIN_SCALE,
   updateCanvasScale
 } from '../view_config/image'
-import { Viewer } from './viewer'
+import { DrawableCanvas } from './viewer'
 
 interface ClassType {
   /** image canvas */
@@ -30,7 +30,7 @@ interface Props {
 /**
  * Canvas Viewer
  */
-export class ImageViewer extends Viewer<Props> {
+export class ImageCanvas extends DrawableCanvas<Props> {
   /** The image context */
   public imageContext: CanvasRenderingContext2D | null
 
@@ -159,4 +159,4 @@ export class ImageViewer extends Viewer<Props> {
   }
 }
 
-export default withStyles(imageViewStyle, { withTheme: true })(ImageViewer)
+export default withStyles(imageViewStyle, { withTheme: true })(ImageCanvas)

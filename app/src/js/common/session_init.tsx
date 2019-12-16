@@ -15,7 +15,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { makeTrackPolicy, Track } from './track'
-import { DataType } from './types'
+import { DataType, ViewerConfigTypeName } from './types'
 
 /**
  * Request Session state from the server
@@ -105,12 +105,12 @@ function initViewerConfigs (): void {
     ).sort()
     const id0 = sensorIds[0]
     const sensor0 = state.task.sensors[id0]
-    Session.dispatch(addViewerConfig(0, makeDefaultViewerConfig(
-      sensor0.type as DataType, 0
-    )))
-    // Session.dispatch(changeLayout(
-    //   updateObject(state.user.layout, { rootPane: makePane(1) })
-    // ))
+    const config0 = makeDefaultViewerConfig(
+      sensor0.type as ViewerConfigTypeName, 0, id0
+    )
+    if (config0) {
+      Session.dispatch(addViewerConfig(0, config0))
+    }
   }
 }
 

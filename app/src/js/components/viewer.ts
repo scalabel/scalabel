@@ -5,7 +5,7 @@ import { Component } from './component'
 /**
  * Abstract class for Canvas
  */
-export abstract class Viewer<Props> extends Component<Props> {
+export abstract class DrawableCanvas<Props> extends Component<Props> {
   /**
    * General constructor
    * @param props: component props
