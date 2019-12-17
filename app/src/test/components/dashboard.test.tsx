@@ -58,19 +58,6 @@ describe('Test dashboard functionality', () => {
     //   const exportURL = exportElem.href
     //   expect(exportURL).not.toContain('V2')
     // })
-    test('Correct tag url', () => {
-      const tagProjectMetadata = { ...sampleDashboardContents.projectMetaData }
-      tagProjectMetadata.labelTypes = ['tag']
-      const { getByTestId } = render(
-        <MuiThemeProvider theme={myTheme}>
-          <StyledSidebar projectMetaData=
-            {tagProjectMetadata}
-          />
-        </MuiThemeProvider>)
-      const exportElem = getByTestId('export-link') as HTMLLinkElement
-      const exportURL = exportElem.href
-      expect(exportURL).toContain('V2')
-    })
     describe('Test not rendering elements if vendor', () => {
       test('Hiding header elements', () => {
         const { queryByTestId } = render(

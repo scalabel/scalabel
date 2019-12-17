@@ -7,6 +7,7 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import TableBody from '@material-ui/core/TableBody'
 import Typography from '@material-ui/core/Typography'
 import React from 'react'
+import { Endpoint } from '../server/types'
 import { dashboardWindowStyles, headerStyle, listEntryStyle, sidebarStyle } from '../styles/dashboard'
 import DividedPage from './divided_page'
 
@@ -291,7 +292,7 @@ function sidebar (props: SidebarProps) {
           className={classes.link}
           color='inherit'
           href={
-            './postExportV2?project_name=' +
+            `.${Endpoint.EXPORT}?project_name=` +
             projectMetaData.name
           }
           data-testid='export-link'
