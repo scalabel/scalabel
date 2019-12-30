@@ -106,13 +106,13 @@ class Viewer2D extends DrawableViewer {
    * Handle mouse wheel
    * @param e
    */
-  protected onWheel (e: React.WheelEvent) {
+  protected onWheel (e: WheelEvent) {
     e.preventDefault()
     if (this._viewerConfig) {
       if (this.isKeyDown(types.Key.META) ||
           this.isKeyDown(types.Key.CONTROL)) {
         let zoomRatio = SCROLL_ZOOM_RATIO
-        if (e.deltaY < 0) {
+        if (-e.deltaY < 0) {
           zoomRatio = 1. / zoomRatio
         }
         const config = this._viewerConfig as ImageViewerConfigType

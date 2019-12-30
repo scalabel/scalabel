@@ -35,6 +35,8 @@ export abstract class DrawableViewer extends Component<ViewerProps> {
   protected _keyDownHandler: (e: KeyboardEvent) => void
   /** UI handler */
   protected _keyUpHandler: (e: KeyboardEvent) => void
+  /** UI Handler */
+  protected _wheelHandler: (e: WheelEvent) => void
 
   /** The hashed list of keys currently down */
   protected _keyDownMap: { [key: string]: boolean }
@@ -65,6 +67,7 @@ export abstract class DrawableViewer extends Component<ViewerProps> {
 
     this._keyDownHandler = this.onKeyDown.bind(this)
     this._keyUpHandler = this.onKeyUp.bind(this)
+    this._wheelHandler = this.onWheel.bind(this)
 
     this._keyDownMap = {}
     this._mX = 0
@@ -102,24 +105,27 @@ export abstract class DrawableViewer extends Component<ViewerProps> {
     this._item = this.state.user.select.item
 
     return (
-        <div
-          ref={(element) => {
-            if (element && this._container !== element) {
-              this._container = element
-              this.forceUpdate()
+      <div
+        ref={(element) => {
+          if (element && this._container !== element) {
+            if (this._container) {
+              this._container.removeEventListener('wheel', this._wheelHandler)
             }
-          }}
-          className={this.props.classes.viewer_container}
-          onMouseDown={ (e) => this.onMouseDown(e) }
-          onMouseUp={ (e) => this.onMouseUp(e) }
-          onMouseMove={ (e) => this.onMouseMove(e) }
-          onMouseEnter={ (e) => this.onMouseEnter(e) }
-          onMouseLeave={ (e) => this.onMouseLeave(e) }
-          onDoubleClick={ (e) => this.onDoubleClick(e) }
-          onWheel ={ (e) => this.onWheel(e) }
-        >
-          {this.getDrawableComponents()}
-        </div>
+            this._container = element
+            this._container.addEventListener('wheel', this._wheelHandler)
+            this.forceUpdate()
+          }
+        }}
+        className={this.props.classes.viewer_container}
+        onMouseDown={ (e) => this.onMouseDown(e) }
+        onMouseUp={ (e) => this.onMouseUp(e) }
+        onMouseMove={ (e) => this.onMouseMove(e) }
+        onMouseEnter={ (e) => this.onMouseEnter(e) }
+        onMouseLeave={ (e) => this.onMouseLeave(e) }
+        onDoubleClick={ (e) => this.onDoubleClick(e) }
+      >
+        {this.getDrawableComponents()}
+      </div>
     )
   }
 
@@ -201,7 +207,7 @@ export abstract class DrawableViewer extends Component<ViewerProps> {
    * Handle mouse wheel
    * @param e
    */
-  protected abstract onWheel (e: React.WheelEvent): void
+  protected abstract onWheel (e: WheelEvent): void
 
   /**
    * Handle key down

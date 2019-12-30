@@ -147,12 +147,10 @@ export const playerControlStyles = () => createStyles({
   },
   playerControl: {
     display: 'block',
-    height: '50px',
-    left: '10px',
     position: 'relative',
-    width: 'calc(100% - 40px)',
-    top: 'calc(100% - 50px)',
-    zIndex: 100
+    top: 'calc(100% - 60px)',
+    zIndex: 100,
+    background: 'rgba(34, 34, 34, 0.7)'
   },
   input: {
     background: '#000000',

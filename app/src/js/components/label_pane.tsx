@@ -158,10 +158,15 @@ class LabelPane extends Component<Props> {
       )
       // Leaf, render viewer container
       return (
-        <div>
-          {configBar}
-          {viewerFactory(viewerConfig, pane.viewerId)}
-        </div>
+          <div>
+            {
+              // Disable the config bar for now for 2D images.
+              // It will be useful if multiple data sources are present.
+              (this.state.task.config.itemType === types.ItemTypeName.IMAGE) ?
+                null : configBar
+            }
+            {viewerFactory(viewerConfig, pane.viewerId)}
+          </div>
       )
     }
 
