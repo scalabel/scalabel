@@ -170,7 +170,18 @@ export async function DashboardHandler (req: Request, res: Response) {
       }
 
       const taskOptions = []
-      for (const task of tasks) {
+      for (const emptyTask of tasks) {
+        let task
+        try {
+          // first, attempt loading previous submission
+          // TODO: Load the previous state asynchronously in dashboard
+          const state: State = await loadSavedState(
+            name, emptyTask.config.taskId
+          )
+          task = state.task
+        } catch {
+          task = emptyTask
+        }
         let numLabeledItems = 0
         let numLabels = 0
         for (const item of task.items) {
