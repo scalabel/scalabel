@@ -5,7 +5,7 @@ import { makeLabel, makePolygon } from '../../functional/states'
 import { PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
-import { blendColor, Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
+import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
 import { DASH_LINE, MIN_SIZE, OPACITY } from './common'
 import { DrawMode, Label2D } from './label2d'
 import { makeEdge2DStyle, makePathPoint2DStyle, PathPoint2D, PointType } from './path_point2d'
@@ -406,10 +406,10 @@ export class Polygon2D extends Label2D {
    * @param _start
    */
   public initTemp (state: State, _start: Vector2D): void {
+    super.initTemp(state, _start)
     this.editing = true
     this._state = Polygon2DState.DRAW
     const itemIndex = state.user.select.item
-    this._order = state.task.status.maxOrder + 1
     const labelType = this._closed ?
                 LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
     this._label = makeLabel({
@@ -417,12 +417,6 @@ export class Polygon2D extends Label2D {
       category: [state.user.select.category],
       order: this._order
     })
-    this._labelId = -1
-    this._color = getColorById(
-      state.task.status.maxLabelId + 1,
-      state.task.status.maxTrackId + 1
-    )
-    this.setSelected(true)
     this._highlightedHandle = 1
   }
 

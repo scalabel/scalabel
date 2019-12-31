@@ -98,11 +98,4 @@ export class Tag2D extends Label2D {
       }
     }
   }
-
-  /**
-   * no-op
-   */
-  public initTemp () {
-    return
-  }
 }

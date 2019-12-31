@@ -289,8 +289,17 @@ export abstract class Label2D {
    * @param {State} state
    * @param {Vector2D} start: starting coordinate of the label
    */
-  public abstract initTemp (
-    state: State, start: Vector2D): void
+  public initTemp (state: State, _start: Vector2D): void {
+    this._order = state.task.status.maxOrder + 1
+    this._labelId = -1
+    this._trackId = -1
+    this._config = state.task.config
+    this._color = getColorById(
+      state.task.status.maxLabelId + 1,
+      (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
+    )
+    this._selected = true
+  }
 
   /** Convert label state to drawable */
   public updateState (

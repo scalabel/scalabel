@@ -4,7 +4,7 @@ import { makeLabel, makeRect } from '../../functional/states'
 import { RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
-import { blendColor, Context2D, encodeControlColor, getColorById } from '../util'
+import { blendColor, Context2D, encodeControlColor } from '../util'
 import { DrawMode, Label2D } from './label2d'
 import { makePoint2DStyle, Point2D } from './point2d'
 import { makeRect2DStyle, Rect2D } from './rect2d'
@@ -261,24 +261,19 @@ export class Box2D extends Label2D {
 
   /** Initialize this label to be temporary */
   public initTemp (state: State, start: Vector2D): void {
+    super.initTemp(state, start)
     const itemIndex = state.user.select.item
-    this._order = state.task.status.maxOrder + 1
     this._label = makeLabel({
       type: LabelTypeName.BOX_2D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
       order: this._order
     })
-    this._labelId = -1
-    this._color = getColorById(
-      state.task.status.maxLabelId + 1,
-      (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
-    )
+
     const rect = makeRect({
       x1: start.x, y1: start.y, x2: start.x, y2: start.y
     })
     this.updateShapes([rect])
-    this.setSelected(true)
     this._highlightedHandle = 5
   }
 
