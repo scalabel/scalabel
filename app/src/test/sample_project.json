@@ -5,6 +5,7 @@
         "labelTypes": [
             "box2d"
         ],
+        "label2DTemplates": {},
         "taskSize": 5,
         "handlerUrl": "label",
         "pageTitle": "2D Bounding Box",

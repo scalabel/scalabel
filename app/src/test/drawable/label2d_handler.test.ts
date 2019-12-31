@@ -3,10 +3,11 @@ import _ from 'lodash'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
+import { ShapeTypeName } from '../../js/common/types'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { PolygonType, RectType } from '../../js/functional/types'
+import { Point2DType, PolygonType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { testJson } from '../test_image_objects'
@@ -1332,6 +1333,60 @@ test('2d polylines delete vertex and draw bezier curve', () => {
   expect(polyline.points[1].x).toEqual(300)
   expect(polyline.points[1].y).toEqual(0)
   expect(polyline.points[1].type).toEqual('vertex')
+})
+
+test('Draw human pose', () => {
+  const [label2dHandler] = initializeTestingObjects()
+  Session.dispatch(action.changeSelect({ labelType: 4 }))
+
+  const canvasSize = new Size2D(1000, 1000)
+  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
+  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
+  label2dHandler.onMouseMove(new Vector2D(200, 200), canvasSize, -1, 0)
+  label2dHandler.onMouseUp(new Vector2D(200, 200), -1, 0)
+
+  const state = Session.getState()
+
+  const spec = state.task.config.label2DTemplates[
+    state.task.config.labelTypes[state.user.select.labelType]
+  ]
+
+  const upperLeft = new Vector2D(Infinity, Infinity)
+  const bottomRight = new Vector2D(-Infinity, -Infinity)
+
+  for (const point of spec.nodes) {
+    upperLeft.x = Math.min(upperLeft.x, point.x)
+    upperLeft.y = Math.min(upperLeft.y, point.y)
+    bottomRight.x = Math.max(bottomRight.x, point.x)
+    bottomRight.y = Math.max(bottomRight.y, point.y)
+  }
+
+  const dimensions = new Vector2D(
+    bottomRight.x - upperLeft.x, bottomRight.y - upperLeft.y
+  )
+
+  expect(_.size(state.task.items[0].labels)).toEqual(1)
+  expect(Session.label2dList.labelList.length).toEqual(1)
+
+  const labelState = state.task.items[0].labels[0]
+  expect(labelState.shapes.length).toEqual(spec.nodes.length)
+
+  const indexedShapes = labelState.shapes.map(
+    (id: number) => state.task.items[0].shapes[id]
+  )
+
+  for (let i = 0; i < indexedShapes.length; i++) {
+    const indexed = indexedShapes[i]
+    expect(indexed.type).toEqual(ShapeTypeName.POINT_2D)
+    const point = indexed.shape as Point2DType
+    const templatePoint = spec.nodes[i]
+    expect(point.x).toBeCloseTo(
+      (templatePoint.x - upperLeft.x) / dimensions.x * 100 + 100
+    )
+    expect(point.y).toBeCloseTo(
+      (templatePoint.y - upperLeft.y) / dimensions.y * 100 + 100
+    )
+  }
 })
 
 test('Draw label2d list to canvas', () => {

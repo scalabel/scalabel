@@ -158,7 +158,8 @@ export const sampleFormFileData: FormFileData = {
   categories: sampleCategories,
   attributes: sampleAttributes as Attribute[],
   sensors: [],
-  items: sampleItems
+  items: sampleItems,
+  templates: []
 }
 
 export const sampleProjectImage: Project = {
@@ -167,6 +168,7 @@ export const sampleProjectImage: Project = {
     projectName: sampleProjectName,
     itemType: ItemTypeName.IMAGE,
     labelTypes: [LabelTypeName.BOX_2D],
+    label2DTemplates: {},
     policyTypes: [],
     taskSize: sampleTaskSize,
     tracking: false,
@@ -221,7 +223,8 @@ export const sampleVideoFormFileData: FormFileData = {
   categories: sampleCategories,
   attributes: sampleAttributes as Attribute[],
   items: sampleItemsVideo,
-  sensors: []
+  sensors: [],
+  templates: []
 }
 
 export const sampleProjectVideo: Project = {
@@ -230,6 +233,7 @@ export const sampleProjectVideo: Project = {
     projectName: sampleProjectName,
     itemType: ItemTypeName.IMAGE,
     labelTypes: [LabelTypeName.POLYGON_2D],
+    label2DTemplates: {},
     policyTypes: [],
     taskSize: sampleTaskSize,
     tracking: true,
@@ -254,6 +258,7 @@ export const sampleProjectAutolabel: Project = {
     projectName: sampleProjectName,
     itemType: ItemTypeName.IMAGE,
     labelTypes: [LabelTypeName.BOX_2D],
+    label2DTemplates: {},
     policyTypes: [],
     taskSize: sampleTaskSize,
     tracking: false,
@@ -278,6 +283,7 @@ export const sampleProjectAutolabelPolygon: Project = {
     projectName: sampleProjectName,
     itemType: ItemTypeName.IMAGE,
     labelTypes: [LabelTypeName.POLYGON_2D],
+    label2DTemplates: {},
     policyTypes: [],
     taskSize: sampleTaskSize,
     tracking: false,
@@ -302,6 +308,7 @@ export const sampleTasksImage: TaskType[] = [
       projectName: sampleProjectName,
       itemType: ItemTypeName.IMAGE,
       labelTypes: [LabelTypeName.BOX_2D],
+      label2DTemplates: {},
       policyTypes: [],
       taskSize: sampleTaskSize,
       tracking: false,
@@ -384,6 +391,7 @@ export const sampleTasksImage: TaskType[] = [
       projectName: sampleProjectName,
       itemType: ItemTypeName.IMAGE,
       labelTypes: [LabelTypeName.BOX_2D],
+      label2DTemplates: {},
       policyTypes: [],
       taskSize: sampleTaskSize,
       tracking: false,
@@ -471,6 +479,7 @@ export const sampleTasksVideo: TaskType[] = [
       labelTypes: [
         'polygon2d'
       ],
+      label2DTemplates: {},
       policyTypes: [],
       taskSize: 3,
       tracking: true,
@@ -649,6 +658,7 @@ export const sampleTasksVideo: TaskType[] = [
       labelTypes: [
         'polygon2d'
       ],
+      label2DTemplates: {},
       policyTypes: [],
       taskSize: 7,
       tracking: true,

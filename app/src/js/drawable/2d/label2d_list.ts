@@ -2,9 +2,10 @@ import _ from 'lodash'
 import { policyFromString } from '../../common/track_policies/track_policy'
 import { LabelTypeName, TrackPolicyType } from '../../common/types'
 import { makeState } from '../../functional/states'
-import { State } from '../../functional/types'
+import { Label2DTemplateType, State } from '../../functional/types'
 import { Context2D } from '../util'
 import { Box2D } from './box2d'
+import { CustomLabel2D } from './custom_label'
 import { DrawMode, Label2D } from './label2d'
 import { Polygon2D } from './polygon2d'
 import { Tag2D } from './tag2d'
@@ -13,7 +14,13 @@ import { Tag2D } from './tag2d'
  * Make a new drawable label based on the label type
  * @param {string} labelType: type of the new label
  */
-export function makeDrawableLabel2D (labelType: string): Label2D | null {
+export function makeDrawableLabel2D (
+  labelType: string,
+  labelTemplates: { [name: string]: Label2DTemplateType }
+): Label2D | null {
+  if (labelType in labelTemplates) {
+    return new CustomLabel2D(labelTemplates[labelType])
+  }
   switch (labelType) {
     case LabelTypeName.BOX_2D:
       return new Box2D()
@@ -40,6 +47,8 @@ export class Label2DList {
   private _selectedLabels: Label2D[]
   /** state */
   private _state: State
+  /** label templates */
+  private _labelTemplates: { [name: string]: Label2DTemplateType }
   /** callbacks */
   private _callbacks: Array<() => void>
 
@@ -49,6 +58,7 @@ export class Label2DList {
     this._selectedLabels = []
     this._state = makeState()
     this._callbacks = []
+    this._labelTemplates = {}
   }
 
   /**
@@ -131,6 +141,7 @@ export class Label2DList {
    */
   public updateState (state: State): void {
     this._state = state
+    this._labelTemplates = state.task.config.label2DTemplates
     const self = this
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
@@ -141,7 +152,7 @@ export class Label2DList {
     _.forEach(item.labels, (label, key) => {
       const labelId = Number(key)
       if (!(labelId in self._labels)) {
-        const newLabel = makeDrawableLabel2D(label.type)
+        const newLabel = makeDrawableLabel2D(label.type, this._labelTemplates)
         if (newLabel) {
           self._labels[labelId] = newLabel
         }

@@ -1,6 +1,6 @@
 import { AttributeToolType } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
-import { Attribute, ConfigType, SensorType } from '../functional/types'
+import { Attribute, ConfigType, Label2DTemplateType, SensorType } from '../functional/types'
 
 /**
  * Stores specifications of project
@@ -65,6 +65,8 @@ export interface FormFileData {
   categories: string[]
   /** sensors */
   sensors: SensorType[]
+  /** custom label template */
+  templates: Label2DTemplateType[]
   /** attributes parsed from form file */
   attributes: Attribute[]
   /** items parsed from form file (may be incomplete) */
@@ -115,7 +117,8 @@ export const enum FormField {
   CATEGORIES = 'categories',
   ATTRIBUTES = 'attributes',
   ITEMS = 'item_file',
-  SENSORS = 'sensors'
+  SENSORS = 'sensors',
+  LABEL_SPEC = 'label_spec'
 }
 
 /* default config for env */

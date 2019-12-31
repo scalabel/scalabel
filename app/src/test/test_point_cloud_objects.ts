@@ -14,6 +14,7 @@ export const testJson = {
       projectName: 'Redux0',
       itemType: 'pointcloud',
       labelTypes: ['box3d'],
+      label2DTemplates: {},
       policyTypes: ['linear_interpolation_box_3d'],
       tracking: false,
       taskSize: 5,

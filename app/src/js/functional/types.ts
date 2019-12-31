@@ -210,6 +210,24 @@ export interface ItemType {
   videoName: string
 }
 
+export interface Node2DType extends Point2DType {
+  /** name */
+  name: string
+  /** color */
+  color?: number[]
+}
+
+// TODO: This only supports points for now.
+// Needs to be extended to support polygons as basic part type
+export interface Label2DTemplateType {
+  /** spec name */
+  name: string
+  /** template */
+  nodes: Node2DType[]
+  /** connections between points represented as array of 2d tuples */
+  edges: Array<[number, number]>
+}
+
 export interface Attribute {
   /** Attribute tool type */
   toolType: AttributeToolType,
@@ -239,6 +257,8 @@ export interface ConfigType {
   itemType: string
   /** Label types available for the session */
   labelTypes: string[]
+  /** Custom label template */
+  label2DTemplates: { [name: string]: Label2DTemplateType }
   /** Policy types available for session */
   policyTypes: string[]
   /** Task size */

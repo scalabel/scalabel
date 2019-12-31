@@ -6,8 +6,15 @@ import { ItemTypeName, LabelTypeName } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
 import { makeSensor, makeTask, makeTrack } from '../functional/states'
 import {
-  Attribute, ConfigType,
-  ItemType, SensorType, TaskStatus, TaskType, TrackMapType } from '../functional/types'
+  Attribute,
+  ConfigType,
+  ItemType,
+  Label2DTemplateType,
+  SensorType,
+  TaskStatus,
+  TaskType,
+  TrackMapType
+} from '../functional/types'
 import { convertItemToImport } from './import'
 import Session from './server_session'
 import * as types from './types'
@@ -73,16 +80,22 @@ export function parseFiles (labelType: string, files: Files)
   return Promise.all([
     parseItems(files),
     parseSensors(files),
+    parseTemplates(files),
     parseAttributes(files, labelType),
     parseCategories(files, labelType)])
     .then((result: [
-      Array<Partial<ItemExport>>, SensorType[], Attribute[], string[]
+      Array<Partial<ItemExport>>,
+      SensorType[],
+      Label2DTemplateType[],
+      Attribute[],
+      string[]
     ]) => {
       return {
         items: result[0],
         sensors: result[1],
-        attributes: result[2],
-        categories: result[3]
+        templates: result[2],
+        attributes: result[3],
+        categories: result[4]
       }
     })
 }
@@ -244,6 +257,34 @@ export function parseSensors (files: Files): Promise<SensorType[]> {
   }
 }
 
+/** Read sensors file */
+function readTemplatesFile (path: string): Promise<Label2DTemplateType[]> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
+      if (err) {
+        reject(err)
+      } else {
+        try {
+          const templates = yaml.load(fileBytes) as Label2DTemplateType[]
+          resolve(templates)
+        } catch {
+          reject(Error('Improper formatting for sensors file'))
+        }
+      }
+    })
+  })
+}
+
+/** Parse files for sensors */
+export function parseTemplates (files: Files): Promise<Label2DTemplateType[]> {
+  const templatesFile = files[types.FormField.LABEL_SPEC]
+  if (util.formFileExists(templatesFile)) {
+    return readTemplatesFile(templatesFile.path)
+  } else {
+    return Promise.resolve([])
+  }
+}
+
 /**
  * Marshal data into project format
  */
@@ -255,6 +296,12 @@ export function createProject (
   const bundleFile = util.getBundleFile(form.labelType)
   const [itemType, tracking] = util.getTracking(form.itemType)
 
+  const templates: { [name: string]: Label2DTemplateType } = {}
+
+  for (let i = 0; i < formFileData.templates.length; i++) {
+    templates[`template${i}`] = formFileData.templates[i]
+  }
+
   /* use arbitrary values for
    * submitTime, taskId, and policyTypes
    * assign these when tasks are created
@@ -263,6 +310,7 @@ export function createProject (
     projectName: form.projectName,
     itemType,
     labelTypes: [form.labelType],
+    label2DTemplates: templates,
     taskSize: form.taskSize,
     handlerUrl,
     pageTitle: form.pageTitle,

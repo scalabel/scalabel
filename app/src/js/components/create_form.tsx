@@ -164,6 +164,7 @@ export default class CreateForm extends React.Component<Props, State> {
               </option>
               <option value={LabelTypeName.POLYLINE_2D}>Lane</option>
               <option value={LabelTypeName.BOX_3D}>3D Bounding Box</option>
+              {/* <option value={LabelTypeName.CUSTOM_2D}>Custom</option> */}
             </TextField>
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
@@ -195,6 +196,13 @@ export default class CreateForm extends React.Component<Props, State> {
                                    label={'Attributes'}
                                    form_id={FormField.ATTRIBUTES}/>
           </FormGroup>
+          {/* <FormGroup row={true} className={classes.formGroup}>
+            <StyledUpload required={false}
+                          label={'Label Specification'}
+                          form_id={FormField.LABEL_SPEC}
+                          with_json
+            />
+          </FormGroup> */}
           <FormGroup row={true} className={classes.formGroup}>
             <TextField
                     required={this.state.showTaskSize}

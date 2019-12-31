@@ -267,6 +267,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     projectName: '',
     itemType: '',
     labelTypes: [],
+    label2DTemplates: {},
     policyTypes: [],
     taskSize: 0,
     tracking: false,

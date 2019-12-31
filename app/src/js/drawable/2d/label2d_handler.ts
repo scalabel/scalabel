@@ -57,7 +57,8 @@ export class Label2DHandler {
         const state = this._state
 
         const label = makeDrawableLabel2D(
-          state.task.config.labelTypes[state.user.select.labelType]
+          state.task.config.labelTypes[state.user.select.labelType],
+          state.task.config.label2DTemplates
         )
         if (label) {
           label.initTemp(state, coord)
