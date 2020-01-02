@@ -4,7 +4,7 @@ import io from 'socket.io-client'
 import { updateTask } from '../action/common'
 import * as types from '../action/types'
 import { State } from '../functional/types'
-import { EventName } from '../server/types'
+import { EventName, RegisterMessageType, SyncActionMessageType } from '../server/types'
 import Session, { ConnectionStatus } from './session'
 
 /**
@@ -53,13 +53,13 @@ export class Synchronizer {
     this.socket = socket
 
     this.socket.on(EventName.CONNECT, () => {
+      const message: RegisterMessageType = {
+        projectName,
+        taskIndex,
+        sessionId: Session.id
+      }
       /* Send the registration message to the backend */
-      self.socket.emit(
-        EventName.REGISTER, JSON.stringify({
-          project: projectName,
-          index: taskIndex,
-          sessId: Session.id
-        }))
+      self.socket.emit(EventName.REGISTER, JSON.stringify(message))
       Session.updateStatus(ConnectionStatus.UNSAVED)
     })
 
@@ -111,13 +111,13 @@ export class Synchronizer {
         }
 
         const sessionState = Session.getState()
-        this.socket.emit(
-          EventName.ACTION_SEND, JSON.stringify({
-            taskId: sessionState.task.config.taskId,
-            project: sessionState.task.config.projectName,
-            sessId: sessionState.session.id,
-            actions: this.actionQueue
-          }))
+        const message: SyncActionMessageType = {
+          taskId: sessionState.task.config.taskId,
+          projectName: sessionState.task.config.projectName,
+          sessionId: sessionState.session.id,
+          actions: this.actionQueue
+        }
+        this.socket.emit(EventName.ACTION_SEND, JSON.stringify(message))
         this.actionQueue = []
       }
     }

@@ -1,3 +1,4 @@
+import { BaseAction } from '../action/types'
 import { AttributeToolType } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
 import { Attribute, ConfigType, Label2DTemplateType, SensorType } from '../functional/types'
@@ -71,6 +72,27 @@ export interface FormFileData {
   attributes: Attribute[]
   /** items parsed from form file (may be incomplete) */
   items: Array<Partial<ItemExport>>
+}
+
+export interface RegisterMessageType {
+  /** Project name of the socket connection */
+  projectName: string
+  /** Task index of the socket connection */
+  taskIndex: number
+  /** Current session Id */
+  sessionId: string
+}
+
+/** action type for synchronization between front and back ends */
+export interface SyncActionMessageType {
+  /** Task Id. It is supposed to be index2str(taskIndex) */
+  taskId: string
+  /** Project name */
+  projectName: string
+  /** Session Id */
+  sessionId: string
+  /** List of actions for synchronization */
+  actions: BaseAction[]
 }
 
 /**

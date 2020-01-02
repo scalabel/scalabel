@@ -49,8 +49,8 @@ export interface BaseAction {
   type: string
   /** id of the session that initiates the action */
   sessionId: string
-  /** timestamp given by backend */
-  timestamp?: string
+  /** timestamp given by backend. It is Date.now() */
+  timestamp?: number
 }
 
 export type InitSessionAction = BaseAction
