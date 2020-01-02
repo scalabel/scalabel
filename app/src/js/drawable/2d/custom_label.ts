@@ -10,9 +10,10 @@ import { Node2D } from './node2d'
 import { makePoint2DStyle, Point2D } from './point2d'
 import { makeRect2DStyle, Rect2D } from './rect2d'
 
-const DEFAULT_VIEW_RECT_STYLE = makeRect2DStyle({ lineWidth: 4 })
+const DEFAULT_VIEW_RECT_STYLE = makeRect2DStyle({ lineWidth: 4, dashed: true })
 const DEFAULT_VIEW_POINT_STYLE = makePoint2DStyle({ radius: 8 })
 const DEFAULT_VIEW_HIGH_POINT_STYLE = makePoint2DStyle({ radius: 12 })
+const DEFAULT_CONTROL_RECT_STYLE = makeRect2DStyle({ lineWidth: 8 })
 const DEFAULT_CONTROL_POINT_STYLE = makePoint2DStyle({ radius: 12 })
 const lineWidth = 4
 
@@ -56,14 +57,14 @@ export class CustomLabel2D extends Label2D {
 
     // Set proper drawing styles
     let pointStyle = makePoint2DStyle()
-    const rectStyle = _.assign(makeRect2DStyle(), DEFAULT_VIEW_RECT_STYLE)
+    let rectStyle = makeRect2DStyle()
     let highPointStyle = makePoint2DStyle()
     let assignColor: (i: number) => number[] = () => [0]
     switch (mode) {
       case DrawMode.VIEW:
         pointStyle = _.assign(pointStyle, DEFAULT_VIEW_POINT_STYLE)
         highPointStyle = _.assign(highPointStyle, DEFAULT_VIEW_HIGH_POINT_STYLE)
-        rectStyle.dashed = true
+        rectStyle = _.assign(rectStyle, DEFAULT_VIEW_RECT_STYLE)
         assignColor = (i: number): number[] => {
           // vertex
           if (
@@ -79,6 +80,7 @@ export class CustomLabel2D extends Label2D {
         pointStyle = _.assign(pointStyle, DEFAULT_CONTROL_POINT_STYLE)
         highPointStyle = _.assign(
           highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
+        rectStyle = _.assign(rectStyle, DEFAULT_CONTROL_RECT_STYLE)
         assignColor = (i: number): number[] => {
           return encodeControlColor(self._index, i)
         }
@@ -221,7 +223,7 @@ export class CustomLabel2D extends Label2D {
       const yScale =
           (coord.y - oppositeCorner.y) / (corner.y - oppositeCorner.y)
       this.scale(oppositeCorner, new Vector2D(xScale, yScale))
-    } else if (this._highlightedHandle > 0) {
+    } else if (this._highlightedHandle >= 0) {
       if (this._highlightedHandle < this._shapes.length) {
         // Move single point
         this._shapes[this._highlightedHandle].x = coord.x
