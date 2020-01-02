@@ -195,8 +195,6 @@ export default class CreateForm extends React.Component<Props, State> {
             <StyledAttributeUpload required={false}
                                    label={'Attributes'}
                                    form_id={FormField.ATTRIBUTES}/>
-          </FormGroup>
-          <FormGroup row={true} className={classes.formGroup}>
             <StyledUpload required={false}
                           label={'Label Specification'}
                           form_id={FormField.LABEL_SPEC}
