@@ -8,7 +8,7 @@ import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
 import * as path from './path'
 import Session from './server_session'
-import { EventName } from './types'
+import { EventName, RegisterMessageType, SyncActionMessageType } from './types'
 import { getSavedKey, getTaskKey,
   index2str, loadSavedState} from './util'
 
@@ -21,17 +21,17 @@ export function startSocketServer (io: socketio.Server) {
   const stores: { [key: string]: Store } = {}
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
     socket.on(EventName.REGISTER, async (rawData: string) => {
-      const data = JSON.parse(rawData)
-      const projectName = data.project
+      const data: RegisterMessageType = JSON.parse(rawData)
+      const projectName = data.projectName
 
-      const taskIndex = data.index
+      const taskIndex = data.taskIndex
       const taskId = index2str(taskIndex)
 
-      let sessId = data.sessId
+      let sessionId = data.sessionId
       // keep session id if it exists, i.e. if it is a reconnection
-      if (!sessId) {
+      if (!sessionId) {
         // new session on new load
-        sessId = uuid4()
+        sessionId = uuid4()
       }
 
       let room = path.roomName(projectName, taskId, env.sync)
@@ -52,14 +52,14 @@ export function startSocketServer (io: socketio.Server) {
           state = await loadStateFromTask(projectName, taskIndex)
         }
 
-        // update room with loaded sessId
+        // update room with loaded session Id
         room = path.roomName(projectName, taskId,
-          env.sync, sessId)
+          env.sync, sessionId)
 
         // update memory with new state
         stores[room] = configureStore(state)
       }
-      state.session.id = sessId
+      state.session.id = sessionId
       state.task.config.autosave = env.autosave
 
       // Connect socket to others in the same room
@@ -69,13 +69,13 @@ export function startSocketServer (io: socketio.Server) {
     })
 
     socket.on(EventName.ACTION_SEND, async (rawData: string) => {
-      const data = JSON.parse(rawData)
-      const projectName = data.project
+      const data: SyncActionMessageType = JSON.parse(rawData)
+      const projectName = data.projectName
       const taskId = data.taskId
-      const sessId = data.sessId
+      const sessionId = data.sessionId
       const actionList = data.actions
 
-      const room = path.roomName(projectName, taskId, env.sync, sessId)
+      const room = path.roomName(projectName, taskId, env.sync, sessionId)
 
       // For each action, update the backend store and broadcast
       for (const action of actionList) {
