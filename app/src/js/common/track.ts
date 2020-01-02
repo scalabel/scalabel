@@ -3,6 +3,7 @@ import Label3D from '../drawable/3d/label3d'
 import { ShapeType, TrackType } from '../functional/types'
 import { LinearInterpolationBox2DPolicy } from './track_policies/box2d_linear_interpolation_policy'
 import { LinearInterpolationBox3DPolicy } from './track_policies/box3d_linear_interpolation_policy'
+import { LinearInterpolationCustomLabel2DPolicy } from './track_policies/custom_label_linear_interpolation_policy'
 import { LinearInterpolationPlane3DPolicy } from './track_policies/plane3d_linear_interpolation_policy'
 import { LinearInterpolationPolygonPolicy } from './track_policies/polygon_linear_interpolation_policy'
 import { TrackPolicy } from './track_policies/track_policy'
@@ -23,6 +24,8 @@ export function makeTrackPolicy (track: Track, policyType: string) {
       return new LinearInterpolationPolygonPolicy(track)
     case TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D:
       return new LinearInterpolationPlane3DPolicy(track)
+    case TrackPolicyType.LINEAR_INTERPOLATION_CUSTOM_2D:
+      return new LinearInterpolationCustomLabel2DPolicy(track)
   }
 }
 

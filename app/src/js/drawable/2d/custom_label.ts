@@ -290,7 +290,7 @@ export class CustomLabel2D extends Label2D {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    const shapeTypes = this._shapes.map(() => ShapeTypeName.POINT_2D)
+    const shapeTypes = this._shapes.map(() => ShapeTypeName.NODE_2D)
     const shapeStates: Node2DType[] = this._shapes.map(
       (shape) => shape.toState()
     )
