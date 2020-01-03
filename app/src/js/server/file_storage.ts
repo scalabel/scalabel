@@ -46,6 +46,7 @@ export class FileStorage extends Storage {
             keys.push(keyName)
           }
         }
+        keys.sort()
         return keys
       })
   }
