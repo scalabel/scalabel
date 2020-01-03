@@ -3,7 +3,7 @@ import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
-import { CameraLockState, dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera, alignToAxis } from '../action/point_cloud'
+import { alignToAxis, CameraLockState, dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
@@ -121,37 +121,37 @@ class Viewer3D extends DrawableViewer<Props> {
         <IconButton
           className={this.props.classes.camera_button}
           onClick={() => Session.dispatch(alignToAxis(
-            this.props.id, 
-            this._viewerConfig as PointCloudViewerConfigType, 
+            this.props.id,
+            this._viewerConfig as PointCloudViewerConfigType,
             0
           ))}
           edge={'start'}
         >
-          X
+          <span style={{ color: '#ff7700' }}>X</span>
         </IconButton>
       )
       const yAxisButton = (
         <IconButton
           className={this.props.classes.camera_button}
           onClick={() => Session.dispatch(alignToAxis(
-            this.props.id, 
-            this._viewerConfig as PointCloudViewerConfigType, 
+            this.props.id,
+            this._viewerConfig as PointCloudViewerConfigType,
             1
           ))}
         >
-          Y
+          <span style={{ color: '#77ff77' }}>Y</span>
         </IconButton>
       )
       const zAxisButton = (
         <IconButton
           className={this.props.classes.camera_button}
           onClick={() => Session.dispatch(alignToAxis(
-            this.props.id, 
-            this._viewerConfig as PointCloudViewerConfigType, 
+            this.props.id,
+            this._viewerConfig as PointCloudViewerConfigType,
             2
           ))}
         >
-          Z
+          <span style={{ color: '#0088ff' }}>Z</span>
         </IconButton>
       )
       views.push(
