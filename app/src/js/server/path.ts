@@ -31,7 +31,7 @@ export function getPath (
  * Get formatted timestamp
  */
 export function getNow (): string {
-  return moment().format('YYYY-MM-DD_hh-mm-ss')
+  return moment().format('YYYY-MM-DD_HH-mm-ss')
 }
 
 /**
