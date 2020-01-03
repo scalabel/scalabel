@@ -182,7 +182,7 @@ class LabelLayout extends React.Component<Props, State> {
           <LabelPane
             pane={state.user.layout.rootPane} key={'rootPane'}
           />
-        </div> 
+        </div>
         { playerControl }
       </div >
     )
