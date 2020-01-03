@@ -163,7 +163,8 @@ export function getHandlerUrl (itemType: string, labelType: string): string {
       return HandlerUrl.LABEL
     case ItemTypeName.VIDEO:
       if (labelType === LabelTypeName.BOX_2D
-        || labelType === LabelTypeName.POLYGON_2D) {
+        || labelType === LabelTypeName.POLYGON_2D
+        || labelType === LabelTypeName.CUSTOM_2D) {
         return HandlerUrl.LABEL
       }
       return HandlerUrl.INVALID
