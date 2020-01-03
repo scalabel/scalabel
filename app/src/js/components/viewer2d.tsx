@@ -14,10 +14,12 @@ import { DrawableViewer, ViewerProps } from './drawable_viewer'
 import ImageCanvas from './image_canvas'
 import Label2dCanvas from './label2d_canvas'
 
+
+
 /**
  * Viewer for images and 2d labels
  */
-class Viewer2D extends DrawableViewer {
+class Viewer2D extends DrawableViewer<ViewerProps> {
   /**
    * Constructor
    * @param {Object} props: react props

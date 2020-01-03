@@ -388,12 +388,47 @@ export function moveRight (
  */
 export function updateLockStatus (
   viewerId: number,
-  viewerConfig: PointCloudViewerConfigType
+  viewerConfig: PointCloudViewerConfigType,
+  newLockStatus?: number
 ): types.ChangeViewerConfigAction {
-  const newLockStatus = (viewerConfig.lockStatus + 1) % 3
+  if (newLockStatus === undefined) {
+    newLockStatus = (viewerConfig.lockStatus + 1) % 3
+  }
   const config = {
     ...viewerConfig,
     lockStatus: newLockStatus
+  }
+  return {
+    type: types.CHANGE_VIEWER_CONFIG,
+    sessionId: Session.id,
+    viewerId,
+    config
+  }
+}
+
+/** Align camera to axis */
+export function alignToAxis (
+  viewerId: number,
+  viewerConfig: PointCloudViewerConfigType,
+  axis: number,
+  minDistance: number = 3
+): types.ChangeViewerConfigAction {
+  const position = (new Vector3D()).fromObject(viewerConfig.position)
+  const target = (new Vector3D()).fromObject(viewerConfig.target)
+  for (let i = 0; i < 3; i++) {
+    if (i !== axis) {
+      position[i] = target[i] + 0.01
+    } else if (Math.abs(position[i] - target[i]) < minDistance) {
+      let sign = Math.sign(position[i] - target[i])
+      if (sign === 0) {
+        sign = 1
+      }
+      position[i] = sign * minDistance + target[i]
+    }
+  }
+  const config = {
+    ...viewerConfig,
+    position: position.toObject()
   }
   return {
     type: types.CHANGE_VIEWER_CONFIG,

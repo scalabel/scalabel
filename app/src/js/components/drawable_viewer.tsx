@@ -8,14 +8,14 @@ export function viewerReactKey (id: number) {
   return `viewer${id}`
 }
 
-interface ClassType {
+export interface ViewerClassTypes {
   /** container */
   viewer_container: string
 }
 
 export interface ViewerProps {
   /** classes */
-  classes: ClassType
+  classes: ViewerClassTypes
   /** id of the viewer, for referencing viewer config in state */
   id: number
 }
@@ -23,7 +23,8 @@ export interface ViewerProps {
 /**
  * Canvas Viewer
  */
-export abstract class DrawableViewer extends Component<ViewerProps> {
+export abstract class DrawableViewer<T extends ViewerProps>
+  extends Component<T> {
   /** Moveable container */
   protected _container: HTMLDivElement | null
   /** viewer config */
@@ -55,7 +56,7 @@ export abstract class DrawableViewer extends Component<ViewerProps> {
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: ViewerProps) {
+  constructor (props: T) {
     super(props)
     this._container = null
     this._viewerId = -1

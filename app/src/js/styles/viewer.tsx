@@ -9,5 +9,18 @@ export const viewerStyles = () => createStyles({
     'outline': 'none',
     'width': '100%',
     'touch-action': 'none'
+  },
+  camera_button: {
+    'color': '#ced4da',
+    'z-index': 1001
+  },
+  camera_y_lock_icon: {
+    'z-index': 1000
+  },
+  camera_x_lock_icon: {
+    'color': '#ced4da',
+    'transform': 'rotate(90deg)',
+    'z-index': 1000,
+    'padding-top': '5px'
   }
 })

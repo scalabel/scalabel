@@ -1,20 +1,50 @@
+import { Box, Grid, IconButton } from '@material-ui/core'
+import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
-import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera } from '../action/point_cloud'
+import { CameraLockState, dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera, alignToAxis } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
 import { viewerStyles } from '../styles/viewer'
-import { DrawableViewer, ViewerProps } from './drawable_viewer'
+import { DrawableViewer, ViewerClassTypes, ViewerProps } from './drawable_viewer'
 import Label3dCanvas from './label3d_canvas'
 import PointCloudCanvas from './point_cloud_canvas'
+
+interface ClassType extends ViewerClassTypes {
+  /** camera z lock */
+  camera_y_lock_icon: string
+  /** camera x lock */
+  camera_x_lock_icon: string
+  /** button */
+  camera_button: string
+}
+
+export interface Props extends ViewerProps {
+  /** classes */
+  classes: ClassType
+  /** id of the viewer, for referencing viewer config in state */
+  id: number
+}
+
+/** Conditionally wrap box with bottom border */
+function underlineElement (element: React.ReactElement, underline?: boolean) {
+  if (underline) {
+    return (
+      <Box borderBottom={1} borderColor='grey.500'>
+        {element}
+      </Box>
+    )
+  }
+  return element
+}
 
 /**
  * Viewer for images and 2d labels
  */
-class Viewer3D extends DrawableViewer {
+class Viewer3D extends DrawableViewer<Props> {
   /** Camera for math */
   private _camera: THREE.PerspectiveCamera
   /** Raycaster */
@@ -24,7 +54,7 @@ class Viewer3D extends DrawableViewer {
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: ViewerProps) {
+  constructor (props: Props) {
     super(props)
     this._camera = new THREE.PerspectiveCamera(45, 1, 1, 1000)
     this._raycaster = new THREE.Raycaster()
@@ -50,6 +80,94 @@ class Viewer3D extends DrawableViewer {
           display={this._container}
           id={this.props.id}
         />
+      )
+
+      const yLockButton = (
+        <IconButton
+          onClick={() => this.toggleCameraLock(CameraLockState.Y_LOCKED)}
+          className={this.props.classes.camera_button}
+        >
+            {
+              underlineElement(
+                <div className={this.props.classes.camera_y_lock_icon}>
+                  <ThreeSixtyIcon />
+                </div>,
+                (
+                  this._viewerConfig as PointCloudViewerConfigType
+                ).lockStatus === CameraLockState.Y_LOCKED
+              )
+            }
+        </IconButton>
+      )
+      const xLockButton = (
+        <IconButton
+          onClick={() => this.toggleCameraLock(CameraLockState.X_LOCKED)}
+          className={this.props.classes.camera_button}
+          edge={'start'}
+        >
+            {
+              underlineElement(
+                <div className={this.props.classes.camera_x_lock_icon}>
+                  <ThreeSixtyIcon />
+                </div>,
+                (
+                  this._viewerConfig as PointCloudViewerConfigType
+                ).lockStatus === CameraLockState.X_LOCKED
+              )
+            }
+        </IconButton>
+      )
+      const xAxisButton = (
+        <IconButton
+          className={this.props.classes.camera_button}
+          onClick={() => Session.dispatch(alignToAxis(
+            this.props.id, 
+            this._viewerConfig as PointCloudViewerConfigType, 
+            0
+          ))}
+          edge={'start'}
+        >
+          X
+        </IconButton>
+      )
+      const yAxisButton = (
+        <IconButton
+          className={this.props.classes.camera_button}
+          onClick={() => Session.dispatch(alignToAxis(
+            this.props.id, 
+            this._viewerConfig as PointCloudViewerConfigType, 
+            1
+          ))}
+        >
+          Y
+        </IconButton>
+      )
+      const zAxisButton = (
+        <IconButton
+          className={this.props.classes.camera_button}
+          onClick={() => Session.dispatch(alignToAxis(
+            this.props.id, 
+            this._viewerConfig as PointCloudViewerConfigType, 
+            2
+          ))}
+        >
+          Z
+        </IconButton>
+      )
+      views.push(
+        <div>
+          <Grid
+            justify={'flex-start'}
+            container
+            direction='row'
+          >
+            {yLockButton}
+            {xLockButton}
+            {xAxisButton}
+            {yAxisButton}
+            {zAxisButton}
+          </Grid>
+        </div>
       )
     }
 
@@ -236,6 +354,19 @@ class Viewer3D extends DrawableViewer {
       return [x, y]
     }
     return [0, 0]
+  }
+
+  /** Toggle locked state */
+  private toggleCameraLock (targetState: number) {
+    const config = this._viewerConfig as PointCloudViewerConfigType
+    const newLockState =
+      (config.lockStatus === targetState) ?
+        CameraLockState.UNLOCKED : targetState
+    Session.dispatch(updateLockStatus(
+      this.props.id,
+      config,
+      newLockState
+    ))
   }
 }
 
