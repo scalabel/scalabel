@@ -1,8 +1,10 @@
 import { Box, Grid, IconButton } from '@material-ui/core'
+import LockIcon from '@material-ui/icons/Lock'
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
+import { changeViewerConfig } from '../action/common'
 import { alignToAxis, CameraLockState, dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
@@ -154,6 +156,21 @@ class Viewer3D extends DrawableViewer<Props> {
           <span style={{ color: '#0088ff' }}>Z</span>
         </IconButton>
       )
+      const synchronizationButton = (
+        <IconButton
+          className={this.props.classes.camera_button}
+          onClick={() => Session.dispatch(changeViewerConfig(
+            this.props.id,
+            {
+              ...this._viewerConfig as PointCloudViewerConfigType,
+              synchronized: (this._viewerConfig) ?
+                !this._viewerConfig.synchronized : false
+            }
+          ))}
+        >
+          {underlineElement(<LockIcon />, this._viewerConfig.synchronized)}
+        </IconButton >
+      )
       views.push(
         <div>
           <Grid
@@ -166,6 +183,7 @@ class Viewer3D extends DrawableViewer<Props> {
             {xAxisButton}
             {yAxisButton}
             {zAxisButton}
+            {synchronizationButton}
           </Grid>
         </div>
       )
@@ -282,7 +300,7 @@ class Viewer3D extends DrawableViewer<Props> {
   /** Override key handler */
   protected onKeyDown (e: KeyboardEvent): void {
     const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
-    switch (e.key) {
+    switch (e .key) {
       case types.Key.PERIOD:
         Session.dispatch(moveUp(this._viewerId, viewerConfig))
         break

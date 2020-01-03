@@ -5,13 +5,14 @@
  */
 import _ from 'lodash'
 import * as types from '../action/types'
-import { LabelTypeName } from '../common/types'
+import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
 import { makeIndexedShape, makePane, makeTrack } from './states'
 import {
   IndexedShapeType,
   ItemType,
   LabelType,
   LayoutType,
+  PointCloudViewerConfigType,
   Select,
   ShapeType,
   State,
@@ -19,7 +20,8 @@ import {
   TaskType,
   TrackMapType,
   TrackType,
-  UserType
+  UserType,
+  ViewerConfigType
 } from './types'
 import {
   assignToArray,
@@ -816,6 +818,35 @@ export function addViewerConfig (
   return updateObject(state, { user: newUser })
 }
 
+/** Handle different synchronization modes for different viewer configs */
+function handleViewerSynchronization (
+  modifiedConfig: Readonly<ViewerConfigType>,
+  config: ViewerConfigType
+): ViewerConfigType {
+  config = updateObject(config, { synchronized: modifiedConfig.synchronized })
+  if (modifiedConfig.synchronized) {
+    switch (config.type) {
+      case ViewerConfigTypeName.POINT_CLOUD:
+        const newTarget = (modifiedConfig as PointCloudViewerConfigType).target
+        const oldTarget = (config as PointCloudViewerConfigType).target
+        const position = (config as PointCloudViewerConfigType).position
+        config = updateObject(
+          config as PointCloudViewerConfigType,
+          {
+            position: {
+              x: position.x - oldTarget.x + newTarget.x,
+              y: position.y - oldTarget.y + newTarget.y,
+              z: position.z - oldTarget.z + newTarget.z
+            },
+            target: { ...newTarget }
+          }
+        )
+        break
+    }
+  }
+  return config
+}
+
 /**
  * Update viewer configs in state w/ fields in action
  * @param state
@@ -831,11 +862,22 @@ export function changeViewerConfig (
         oldConfig,
         action.config
       ) : _.cloneDeep(action.config)
-    const viewerConfigs = updateObject(
-      state.user.viewerConfigs,
-      { [action.viewerId]: newViewerConfig }
-    )
-    return updateObject(
+    const updatedViewerConfigs = { [action.viewerId]: newViewerConfig }
+    for (const key of Object.keys(state.user.viewerConfigs)) {
+      const id = Number(key)
+      if (
+        state.user.viewerConfigs[id].type === newViewerConfig.type &&
+        id !== action.viewerId
+      ) {
+        const newConfig = handleViewerSynchronization(
+          action.config, state.user.viewerConfigs[id]
+        )
+        updatedViewerConfigs[id] = newConfig
+      }
+    }
+    const viewerConfigs =
+      updateObject(state.user.viewerConfigs, updatedViewerConfigs)
+    state = updateObject(
       state,
       { user: updateObject(state.user, { viewerConfigs }) }
     )
