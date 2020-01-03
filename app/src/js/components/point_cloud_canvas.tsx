@@ -122,11 +122,14 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Override method
    * @param _state
    */
-  protected updateState (_state: State) {
+  protected updateState (state: State) {
     if (this.display !== this.props.display) {
       this.display = this.props.display
       this.forceUpdate()
     }
+    const config =
+      state.user.viewerConfigs[this.props.id] as PointCloudViewerConfigType
+    this.target.position.set(config.target.x, config.target.y, config.target.z)
   }
 
   /**
