@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import Session from '../common/session'
 import { ViewerConfigTypeName } from '../common/types'
 import { Label3DHandler } from '../drawable/3d/label3d_handler'
-import { getCurrentViewerConfig, isCurrentFrameLoaded } from '../functional/state_util'
+import { isCurrentFrameLoaded } from '../functional/state_util'
 import { Image3DViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { convertMouseToNDC } from '../view_config/point_cloud'
@@ -67,6 +67,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   private _raycaster: THREE.Raycaster
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
+  /** Flag set if data is 2d */
+  private data2d: boolean
 
   /** drawable label list */
   private _labelHandler: Label3DHandler
@@ -91,6 +93,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     this.display = null
     this.canvas = null
     this.scale = 1
+    this.data2d = false
 
     this._raycaster = new THREE.Raycaster()
     this._raycaster.near = 1.0
@@ -291,6 +294,20 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       this.forceUpdate()
     }
 
+    // const item = state.task.items[state.user.select.item]
+    // const viewerConfig = this.state.user.viewerConfigs[this.props.id]
+    // const sensorId = viewerConfig.sensor
+    // for (const key of Object.keys(item.labels)) {
+    //   const id = Number(key)
+    //   if (item.labels[id].sensors.includes(sensorId)) {
+    //     const label = Session.label3dList.get(id)
+    //     if (label) {
+    //       for (const shape of label.shapes()) {
+    //         shape.layers.enable(this.props.id)
+    //       }
+    //     }
+    //   }
+    // }
     this._labelHandler.updateState(state, state.user.select.item, this.props.id)
   }
 
@@ -324,10 +341,17 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * @param {string} componentType
    */
   private initializeRefs (component: HTMLCanvasElement | null) {
-    const sensor =
-      this.state.user.viewerConfigs[this.props.id].sensor
+    const viewerConfig = this.state.user.viewerConfigs[this.props.id]
+    const sensor = viewerConfig.sensor
     if (!component || !isCurrentFrameLoaded(this.state, sensor)) {
       return
+    }
+
+    if (viewerConfig.type === ViewerConfigTypeName.IMAGE_3D ||
+        viewerConfig.type === ViewerConfigTypeName.HOMOGRAPHY) {
+      this.data2d = true
+    } else {
+      this.data2d = false
     }
 
     if (component.nodeName === 'CANVAS') {
@@ -342,11 +366,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
         this.forceUpdate()
       }
 
-      const viewerConfig = getCurrentViewerConfig(
-        this.state, this.props.id
-      )
-      if (this.canvas && this.display &&
-          viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
+      if (this.canvas && this.display && this.data2d) {
         const img3dConfig = viewerConfig as Image3DViewerConfigType
         if (img3dConfig.viewScale >= MIN_SCALE &&
             img3dConfig.viewScale < MAX_SCALE) {

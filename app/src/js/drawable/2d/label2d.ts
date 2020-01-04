@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, ShapeTypeName } from '../../common/types'
+import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
 import { makeTaskConfig } from '../../functional/states'
 import { ConfigType, LabelType, ShapeType, State } from '../../functional/types'
@@ -104,6 +104,14 @@ export abstract class Label2D {
     return {}
   }
 
+  /** get label type */
+  public get type (): string {
+    if (this._label) {
+      return this._label.type
+    }
+    return LabelTypeName.EMPTY
+  }
+
   /** get label state */
   public get label (): LabelType {
     if (!this._label) {
@@ -115,6 +123,22 @@ export abstract class Label2D {
   /** get labelId */
   public get labelId (): number {
     return this._labelId
+  }
+
+  /** get track id */
+  public get trackId (): number {
+    if (this._label) {
+      return this._label.track
+    }
+    return -1
+  }
+
+  /** get item index */
+  public get item (): number {
+    if (this._label) {
+      return this._label.item
+    }
+    return -1
   }
 
   /** get color */
@@ -174,6 +198,18 @@ export abstract class Label2D {
   /** Whether label valid */
   public isValid (): boolean {
     return true
+  }
+
+  /** Set to manual */
+  public setManual () {
+    if (this._label) {
+      this._label.manual = true
+    }
+  }
+
+  /** Parent drawable */
+  public get parent (): Label2D | null {
+    return null
   }
 
   /**

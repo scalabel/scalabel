@@ -632,6 +632,7 @@ export const sampleTasksVideo: TaskType[] = [
     tracks: {
       0: {
         id: 0,
+        type: 'polygon2d',
         labels: {
           0: 0,
           1: 1

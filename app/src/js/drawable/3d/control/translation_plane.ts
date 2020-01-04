@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import Label3D from '../label3d'
 import { ControlUnit } from './controller'
 
 /**
@@ -55,12 +56,14 @@ export class TranslationPlane extends THREE.Mesh
    * @param newProjection
    * @param dragPlane
    */
-  public getDelta (
+  public transform (
     oldIntersection: THREE.Vector3,
     newProjection: THREE.Ray,
     _dragPlane: THREE.Plane,
-    object?: THREE.Object3D
-  ): [THREE.Vector3, THREE.Quaternion, THREE.Vector3, THREE.Vector3] {
+    labels: Label3D[],
+    _bounds: THREE.Box3,
+    local: boolean
+  ): THREE.Vector3 {
     const normal = new THREE.Vector3()
     normal.copy(this._normal)
 
@@ -86,20 +89,19 @@ export class TranslationPlane extends THREE.Mesh
     delta.copy(newIntersection)
     delta.sub(localIntersection)
 
-    if (object) {
-      delta.applyQuaternion(object.quaternion)
+    if (local) {
+      delta.applyQuaternion(labels[0].orientation)
     }
 
     if (this.parent) {
       newIntersection.applyMatrix4(this.parent.matrixWorld)
     }
 
-    return [
-      delta,
-      new THREE.Quaternion(0, 0, 0, 1),
-      new THREE.Vector3(),
-      newIntersection
-    ]
+    for (const label of labels) {
+      label.translate(delta)
+    }
+
+    return newIntersection
   }
 
   /**

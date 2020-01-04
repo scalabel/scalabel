@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Session from '../common/session'
-import { LabelTypeName, TrackPolicyType } from '../common/types'
+import { LabelTypeName } from '../common/types'
 import { Select, State } from '../functional/types'
 import { changeLabelsProps, changeSelect, deleteLabels } from './common'
 import { deleteTracks, terminateTracks } from './track'
@@ -175,23 +175,13 @@ export function unselectLabels (
 
 /** Change selected label and policy types */
 export function selectLabel3dType (
-  labelTypeName: LabelTypeName,
-  trackPolicyType: TrackPolicyType
+  labelTypeName: LabelTypeName
 ) {
   const newSelect: Partial<Select> = {}
   const labelTypes = Session.label3dList.labelTypes
   for (let i = 0; i < labelTypes.length; i++) {
     if (labelTypes[i] === labelTypeName) {
       newSelect.labelType = i
-    }
-  }
-
-  if (Session.tracking) {
-    const policyTypes = Session.label3dList.policyTypes
-    for (let i = 0; i < policyTypes.length; i++) {
-      if (policyTypes[i] === trackPolicyType) {
-        newSelect.policyType = i
-      }
     }
   }
 

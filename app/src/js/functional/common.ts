@@ -141,11 +141,13 @@ function addLabelsToItem (
         makeIndexedShape(shapeIds[i], [labelId], shapeTypes[index][i], s)
       )
     const order = taskStatus.maxOrder + 1 + index
+    const validChildren = label.children.filter((id) => id >= 0)
     label = updateObject(label, {
       id: labelId,
       item: item.index,
       order,
-      shapes: label.shapes.concat(shapeIds)
+      shapes: label.shapes.concat(shapeIds),
+      children: validChildren
     })
     newLabels[index] = label
     newLabelIds.push(labelId)
@@ -244,12 +246,13 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
  */
 function addTrackToTask (
   task: TaskType,
+  type: string,
   itemIndices: number[],
   labels: LabelType[],
   shapeTypes: string[][],
   shapes: ShapeType[][]
 ): [TaskType, TrackType, LabelType[]] {
-  const track = makeTrack(task.status.maxTrackId + 1, {})
+  const track = makeTrack(task.status.maxTrackId + 1, type, {})
   for (const label of labels) {
     label.track = track.id
   }
@@ -277,7 +280,7 @@ function addTrackToTask (
 export function addTrack (state: State, action: types.AddTrackAction): State {
   let { user } = state
   const [task,, newLabels] = addTrackToTask(
-    state.task, action.itemIndices, action.labels,
+    state.task, action.trackType, action.itemIndices, action.labels,
     action.shapeTypes, action.shapes
   )
   // select the label on the current item
@@ -396,6 +399,10 @@ function changeLabelsInItem (
   ): ItemType {
   const newLabels: {[key: number]: LabelType} = {}
   labelIds.forEach((labelId, index) => {
+    const children = props[index].children
+    if (children) {
+      props[index].children = children.filter((id) => id >= 0)
+    }
     const oldLabel = item.labels[labelId]
     // avoid changing the shape field in the label
     newLabels[labelId] = updateObject(
@@ -668,9 +675,9 @@ function deleteLabelsFromItem (
       updatedShapes[shape.id] = shape
     })
   })
-  // remove widow labels
+  // remove widow labels if label type is empty
   _.forEach(updatedLabels, (label) => {
-    if (label.children.length === 0) {
+    if (label.type === LabelTypeName.EMPTY && label.children.length === 0) {
       deletedLabels[label.id] = label
     }
   })
@@ -717,7 +724,7 @@ function deleteLabelsFromTracks (
   const deletedLabelsByTrack: TrackMapType = {}
   for (const l of labels) {
     if (!deletedLabelsByTrack.hasOwnProperty(l.track)) {
-      deletedLabelsByTrack[l.track] = makeTrack(l.track)
+      deletedLabelsByTrack[l.track] = makeTrack(l.track, l.type)
     }
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
   }

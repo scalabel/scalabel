@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import Label3D from '../label3d'
 import { ControlUnit } from './controller'
 
 /**
@@ -83,19 +84,16 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
   }
 
   /** get update vectors: [translation, rotation, scale, new intersection] */
-  public getDelta (
+  public transform (
     oldIntersection: THREE.Vector3,
     newProjection: THREE.Ray,
     dragPlane: THREE.Plane,
-    object?: THREE.Object3D
-  ): [THREE.Vector3, THREE.Quaternion, THREE.Vector3, THREE.Vector3] {
+    labels: Label3D[],
+    bounds: THREE.Box3,
+    local: boolean
+  ): THREE.Vector3 {
     const direction = new THREE.Vector3()
     direction.copy(this._direction)
-
-    // Only works in local frame
-    if (object) {
-      direction.applyQuaternion(object.quaternion)
-    }
 
     const worldDirection = new THREE.Vector3()
     worldDirection.copy(this._direction)
@@ -142,12 +140,38 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     positionDelta.copy(direction)
     positionDelta.multiplyScalar(0.5 * projectionLength)
 
-    return [
-      positionDelta,
-      new THREE.Quaternion(0, 0, 0, 1),
-      scaleDelta,
-      nextIntersection
-    ]
+    const dimensions = new THREE.Vector3()
+    dimensions.copy(bounds.max)
+    dimensions.sub(bounds.min)
+
+    const scaleFactor = new THREE.Vector3()
+    scaleFactor.copy(dimensions)
+    scaleFactor.add(scaleDelta)
+    scaleFactor.divide(dimensions)
+    scaleFactor.x = Math.abs(scaleFactor.x)
+    scaleFactor.y = Math.abs(scaleFactor.y)
+    scaleFactor.z = Math.abs(scaleFactor.z)
+
+    const center = new THREE.Vector3()
+    bounds.getCenter(center)
+
+    const anchor = new THREE.Vector3()
+    anchor.copy(direction)
+    anchor.multiply(dimensions)
+    anchor.divideScalar(-2.0)
+    anchor.add(center)
+
+    if (local) {
+      anchor.sub(labels[0].center)
+      anchor.applyQuaternion(labels[0].orientation)
+      anchor.add(labels[0].center)
+    }
+
+    for (const label of labels) {
+      label.scale(scaleFactor, anchor, local)
+    }
+
+    return nextIntersection
   }
 
   /**

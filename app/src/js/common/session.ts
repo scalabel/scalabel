@@ -8,7 +8,7 @@ import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
-import { Track } from './track'
+import { Track } from './track/track'
 
 export const enum ConnectionStatus {
   NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED

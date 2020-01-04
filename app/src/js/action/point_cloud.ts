@@ -33,7 +33,7 @@ export function moveCamera (
 ): types.ChangeViewerConfigAction {
   const config = {
     ...viewerConfig,
-    position: newPosition.toObject()
+    position: newPosition.toState()
   }
   return {
     type: types.CHANGE_VIEWER_CONFIG,
@@ -56,8 +56,8 @@ export function moveCameraAndTarget (
 ): types.ChangeViewerConfigAction {
   const config = {
     ...viewerConfig,
-    position: newPosition.toObject(),
-    target: newTarget.toObject()
+    position: newPosition.toState(),
+    target: newTarget.toState()
   }
   return {
     type: types.CHANGE_VIEWER_CONFIG,
@@ -423,8 +423,8 @@ export function alignToAxis (
   if (lockedToSelection(viewerConfig)) {
     config.lockStatus = axisIndexToSelectionLockState(axis)
   } else {
-    const position = (new Vector3D()).fromObject(viewerConfig.position)
-    const target = (new Vector3D()).fromObject(viewerConfig.target)
+    const position = (new Vector3D()).fromState(viewerConfig.position)
+    const target = (new Vector3D()).fromState(viewerConfig.target)
     for (let i = 0; i < 3; i++) {
       if (i !== axis) {
         position[i] = target[i] + 0.01
@@ -437,7 +437,7 @@ export function alignToAxis (
       }
     }
 
-    config.position = position.toObject()
+    config.position = position.toState()
   }
 
   return changeViewerConfig(viewerId, config)

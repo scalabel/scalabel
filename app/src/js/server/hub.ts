@@ -128,17 +128,17 @@ async function loadStateFromTask (
         switch (state.task.config.labelTypes[0]) {
           case LabelTypeName.BOX_2D:
             state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D]
+              [TrackPolicyType.LINEAR_INTERPOLATION]
             break
           case LabelTypeName.POLYGON_2D:
             state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_POLYGON]
+              [TrackPolicyType.LINEAR_INTERPOLATION]
             break
           case LabelTypeName.CUSTOM_2D:
             state.task.config.labelTypes[0] =
               Object.keys(state.task.config.label2DTemplates)[0]
             state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_CUSTOM_2D]
+              [TrackPolicyType.LINEAR_INTERPOLATION]
         }
       }
       break
@@ -147,16 +147,13 @@ async function loadStateFromTask (
       if (state.task.config.labelTypes.length === 1 &&
           state.task.config.labelTypes[0] === LabelTypeName.BOX_3D) {
         state.task.config.policyTypes =
-          [TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D]
+          [TrackPolicyType.LINEAR_INTERPOLATION]
       }
       break
     case ItemTypeName.FUSION:
       state.task.config.labelTypes =
         [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]
-      state.task.config.policyTypes = [
-        TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D,
-        TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D
-      ]
+      state.task.config.policyTypes = [TrackPolicyType.LINEAR_INTERPOLATION]
       break
   }
   return state

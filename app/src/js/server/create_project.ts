@@ -542,6 +542,7 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     // based on the imported labels, compute max ids
     let maxLabelId = -1
     let maxShapeId = -1
+    let maxTrackId = -1
     // max order is the total number of labels
     let maxOrder = 0
 
@@ -592,9 +593,10 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
       if (project.config.tracking) {
         for (const label of Object.values(newItem.labels)) {
           if (label.track >= 0 && !(label.track in trackMap)) {
-            trackMap[label.track] = makeTrack(label.track)
+            trackMap[label.track] = makeTrack(label.track, label.type)
           }
           trackMap[label.track].labels[label.item] = label.id
+          maxTrackId = Math.max(label.track + 1, maxTrackId)
         }
       }
 
@@ -612,7 +614,7 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
       maxLabelId,
       maxShapeId,
       maxOrder,
-      maxTrackId: -1
+      maxTrackId
     }
 
     const partialTask: Partial<TaskType> = {

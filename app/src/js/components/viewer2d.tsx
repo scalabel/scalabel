@@ -24,7 +24,7 @@ interface ClassType extends ViewerClassTypes {
   viewer_button: string
 }
 
-interface Props extends ViewerProps {
+export interface Viewer2DProps extends ViewerProps {
   /** classes */
   classes: ClassType
 }
@@ -32,12 +32,12 @@ interface Props extends ViewerProps {
 /**
  * Viewer for images and 2d labels
  */
-class Viewer2D extends DrawableViewer<Props> {
+export class Viewer2D extends DrawableViewer<Viewer2DProps> {
   /**
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: Props) {
+  constructor (props: Viewer2DProps) {
     super(props)
   }
 
