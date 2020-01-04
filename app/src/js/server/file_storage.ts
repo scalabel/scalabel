@@ -32,23 +32,22 @@ export class FileStorage extends Storage {
    * @param {string} prefix: relative path of directory
    * @param {boolean} onlyDir: whether to only return keys that are directories
    */
-  public listKeys (
+  public async listKeys (
     prefix: string, onlyDir: boolean = false): Promise<string[]> {
-    return fs.promises.readdir(this.fullDir(prefix), { withFileTypes: true })
-      .then((dirEnts: fs.Dirent[]) => {
-        const keys = []
-        for (const dirEnt of dirEnts) {
-          // if only directories, check if it's a directory
-          if (!onlyDir || dirEnt.isDirectory()) {
-            const dirName = dirEnt.name
-            // remove any file extension and prepend prefix
-            const keyName = path.join(prefix, path.parse(dirName).name)
-            keys.push(keyName)
-          }
-        }
-        keys.sort()
-        return keys
-      })
+    const dirEnts = await fs.promises.readdir(
+      this.fullDir(prefix), { withFileTypes: true })
+    const keys: string[] = []
+    for (const dirEnt of dirEnts) {
+      // if only directories, check if it's a directory
+      if (!onlyDir || dirEnt.isDirectory()) {
+        const dirName = dirEnt.name
+        // remove any file extension and prepend prefix
+        const keyName = path.join(prefix, path.parse(dirName).name)
+        keys.push(keyName)
+      }
+    }
+    keys.sort()
+    return keys
   }
 
   /**
