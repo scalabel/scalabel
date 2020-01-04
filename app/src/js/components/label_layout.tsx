@@ -16,6 +16,8 @@ interface ClassType {
   main: string
   /** interface container */
   interfaceContainer: string
+  /** pane container */
+  paneContainer: string
 }
 
 interface Props {
@@ -175,11 +177,12 @@ class LabelLayout extends React.Component<Props, State> {
     const state = Session.getState()
 
     const labelInterface = (
-      <div className={this.props.classes.interfaceContainer}
-      >
-        <LabelPane
-          pane={state.user.layout.rootPane} key={'rootPane'}
-        />
+      <div className={this.props.classes.interfaceContainer}>
+        <div className={this.props.classes.paneContainer}>
+          <LabelPane
+            pane={state.user.layout.rootPane} key={'rootPane'}
+          />
+        </div>
         { playerControl }
       </div >
     )
