@@ -200,9 +200,9 @@ export class Label3DList {
         newLabels[id].selected = false
 
         // Disable all layers. Viewers will re-enable
-        for (const shape of newLabels[id].shapes()) {
-          shape.layers.disableAll()
-        }
+        // for (const shape of newLabels[id].shapes()) {
+        //   shape.layers.disableAll()
+        // }
       }
     }
 
