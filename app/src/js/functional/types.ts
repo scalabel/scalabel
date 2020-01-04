@@ -130,9 +130,9 @@ export interface ViewerConfigType {
   sensor: number
   /** id of pane this belongs to */
   pane: number
-  /** 
-   * Set if synchronized with compatible viewer configs, 
-   * must be same type for now 
+  /**
+   * Set if synchronized with compatible viewer configs,
+   * must be same type for now
    */
   synchronized: boolean
 }
