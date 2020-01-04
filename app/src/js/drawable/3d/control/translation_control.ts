@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { BLUE, GREEN, RED } from '../common'
+import Label3D from '../label3d'
 import { Controller } from './controller'
 import { TranslationAxis } from './translation_axis'
 import { TranslationPlane } from './translation_plane'
@@ -8,8 +9,8 @@ import { TranslationPlane } from './translation_plane'
  * Groups TranslationAxis's and TranslationPlanes to perform translation ops
  */
 export class TranslationControl extends Controller {
-  constructor () {
-    super()
+  constructor (labels: Label3D[], bounds: THREE.Box3) {
+    super(labels, bounds)
     this._controlUnits = []
     this._controlUnits.push(
       new TranslationAxis(new THREE.Vector3(1, 0, 0), RED)

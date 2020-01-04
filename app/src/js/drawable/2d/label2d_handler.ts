@@ -1,11 +1,10 @@
 import _ from 'lodash'
-import { addLabel, changeLabelProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
+import { addLabel, addTrack, changeLabelProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
-import { makeTrackPolicy, Track } from '../../common/track'
+import { trackFactory } from '../../common/track/util'
 import { Key } from '../../common/types'
 import { getLinkedLabelIds } from '../../functional/common'
-import { makeTrack } from '../../functional/states'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -138,39 +137,69 @@ export class Label2DHandler {
     const valid = selectedLabel.isValid()
     const editing = selectedLabel.editing
     if (valid || editing) {
-      const [shapeIds, shapeTypes, shapeObjects] =
-        selectedLabel.shapeObjects()
+      const [shapeIds, shapeTypes, shapeStates] =
+        selectedLabel.shapeStates()
       if (valid) {
         if (selectedLabel.labelId < 0) {
         // Add new label to state
           if (Session.tracking) {
-            const newTrack = new Track()
-            newTrack.updateState(
-              makeTrack(-1),
-              makeTrackPolicy(newTrack, Session.label2dList.policyType)
+            const newTrack = trackFactory(
+              selectedLabel.type,
+              this._state.task.config.label2DTemplates
             )
-            newTrack.onLabelCreated(
-              this._selectedItemIndex, selectedLabel, [-1]
-            )
+            if (newTrack) {
+              newTrack.init(
+                this._selectedItemIndex,
+                selectedLabel,
+                Session.numItems - this._selectedItemIndex + 1
+              )
+              const indices = []
+              const labels = []
+              const types = []
+              const shapes = []
+              for (let i = 0; i < Session.numItems; i++) {
+                const label = newTrack.getLabel(i)
+                const currentTypes = []
+                const currentShapes = []
+                if (label) {
+                  const indexedShapes = newTrack.getShapes(i)
+                  for (const indexedShape of indexedShapes) {
+                    currentTypes.push(indexedShape.type)
+                    currentShapes.push(indexedShape.shape)
+                  }
+                  indices.push(i)
+                  labels.push(label)
+                  types.push(currentTypes)
+                  shapes.push(currentShapes)
+                }
+              }
+              Session.dispatch(addTrack(
+                indices,
+                newTrack.type,
+                labels,
+                types,
+                shapes
+              ))
+            }
           } else {
             const label = selectedLabel.label
             Session.dispatch(addLabel(
-              this._selectedItemIndex, label, shapeTypes, shapeObjects
+              this._selectedItemIndex, label, shapeTypes, shapeStates
             ))
           }
         } else {
         // Update existing label
           const label = selectedLabel.label
           Session.dispatch(changeShapes(
-            this._selectedItemIndex, shapeIds, shapeObjects
+            this._selectedItemIndex, shapeIds, shapeStates
           ))
           Session.dispatch(changeLabelProps(
             this._selectedItemIndex, selectedLabel.labelId, { manual: true }
           ))
           if (Session.tracking && label.track in Session.tracks) {
-            Session.tracks[label.track].onLabelUpdated(
+            Session.tracks[label.track].update(
               this._selectedItemIndex,
-              shapeObjects
+              selectedLabel
             )
           }
         }

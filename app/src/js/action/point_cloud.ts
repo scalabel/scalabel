@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { changeViewerConfig } from '../action/common'
 import Session from '../common/session'
 import { PointCloudViewerConfigType, ViewerConfigType } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
@@ -10,7 +11,15 @@ export const ZOOM_SPEED = 1.1
 export enum CameraLockState {
   UNLOCKED = 0,
   X_LOCKED = 1,
-  Y_LOCKED = 2
+  Y_LOCKED = 2,
+  SELECTION_X = 3,
+  SELECTION_Y = 4,
+  SELECTION_Z = 5
+}
+
+/** Returns whether camera lock state is locked to selected label */
+export function lockedToSelection (viewerConfig: PointCloudViewerConfigType) {
+  return viewerConfig.lockStatus >= CameraLockState.SELECTION_X
 }
 
 /**
@@ -24,7 +33,7 @@ export function moveCamera (
 ): types.ChangeViewerConfigAction {
   const config = {
     ...viewerConfig,
-    position: newPosition.toObject()
+    position: newPosition.toState()
   }
   return {
     type: types.CHANGE_VIEWER_CONFIG,
@@ -47,8 +56,8 @@ export function moveCameraAndTarget (
 ): types.ChangeViewerConfigAction {
   const config = {
     ...viewerConfig,
-    position: newPosition.toObject(),
-    target: newTarget.toObject()
+    position: newPosition.toState(),
+    target: newTarget.toState()
   }
   return {
     type: types.CHANGE_VIEWER_CONFIG,
@@ -389,21 +398,18 @@ export function moveRight (
 export function updateLockStatus (
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType,
-  newLockStatus?: number
+  newLockStatus: number
 ): types.ChangeViewerConfigAction {
-  if (newLockStatus === undefined) {
-    newLockStatus = (viewerConfig.lockStatus + 1) % 3
-  }
   const config = {
     ...viewerConfig,
     lockStatus: newLockStatus
   }
-  return {
-    type: types.CHANGE_VIEWER_CONFIG,
-    sessionId: Session.id,
-    viewerId,
-    config
-  }
+  return changeViewerConfig(viewerId, config)
+}
+
+/** Convert axis (0, 1, 2) to the selection lock state */
+function axisIndexToSelectionLockState (axis: number) {
+  return CameraLockState.SELECTION_X + axis
 }
 
 /** Align camera to axis */
@@ -413,27 +419,40 @@ export function alignToAxis (
   axis: number,
   minDistance: number = 3
 ): types.ChangeViewerConfigAction {
-  const position = (new Vector3D()).fromObject(viewerConfig.position)
-  const target = (new Vector3D()).fromObject(viewerConfig.target)
-  for (let i = 0; i < 3; i++) {
-    if (i !== axis) {
-      position[i] = target[i] + 0.01
-    } else if (Math.abs(position[i] - target[i]) < minDistance) {
-      let sign = Math.sign(position[i] - target[i])
-      if (sign === 0) {
-        sign = 1
+  const config = { ...viewerConfig }
+  if (lockedToSelection(viewerConfig)) {
+    config.lockStatus = axisIndexToSelectionLockState(axis)
+  } else {
+    const position = (new Vector3D()).fromState(viewerConfig.position)
+    const target = (new Vector3D()).fromState(viewerConfig.target)
+    for (let i = 0; i < 3; i++) {
+      if (i !== axis) {
+        position[i] = target[i] + 0.01
+      } else if (Math.abs(position[i] - target[i]) < minDistance) {
+        let sign = Math.sign(position[i] - target[i])
+        if (sign === 0) {
+          sign = 1
+        }
+        position[i] = sign * minDistance + target[i]
       }
-      position[i] = sign * minDistance + target[i]
     }
+
+    config.position = position.toState()
   }
-  const config = {
-    ...viewerConfig,
-    position: position.toObject()
+
+  return changeViewerConfig(viewerId, config)
+}
+
+/** Lock selection to camera */
+export function toggleSelectionLock (
+  viewerId: number,
+  viewerConfig: PointCloudViewerConfigType
+) {
+  const config = { ...viewerConfig }
+  if (lockedToSelection(viewerConfig)) {
+    config.lockStatus = CameraLockState.UNLOCKED
+  } else {
+    config.lockStatus = CameraLockState.SELECTION_X
   }
-  return {
-    type: types.CHANGE_VIEWER_CONFIG,
-    sessionId: Session.id,
-    viewerId,
-    config
-  }
+  return changeViewerConfig(viewerId, config)
 }

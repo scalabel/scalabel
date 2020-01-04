@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { policyFromString } from '../../common/track_policies/track_policy'
+import { policyFromString } from '../../common/track/track'
 import { LabelTypeName, TrackPolicyType } from '../../common/types'
 import { makeState } from '../../functional/states'
 import { Label2DTemplateType, State } from '../../functional/types'

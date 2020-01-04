@@ -86,6 +86,8 @@ export interface AddLabelsAction extends BaseAction {
 }
 
 export interface AddTrackAction extends BaseAction {
+  /** track type */
+  trackType: string
   /** item of the added label */
   itemIndices: number[]
   /** labels to add to each item */

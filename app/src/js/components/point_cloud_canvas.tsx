@@ -3,11 +3,8 @@ import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
 import Session from '../common/session'
-import * as types from '../common/types'
-import { getCurrentViewerConfig, isCurrentItemLoaded } from '../functional/state_util'
-import { Image3DViewerConfigType, PointCloudViewerConfigType, State } from '../functional/types'
-import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
-import { updateThreeCameraAndRenderer } from '../view_config/point_cloud'
+import { isCurrentItemLoaded } from '../functional/state_util'
+import { PointCloudViewerConfigType, State } from '../functional/types'
 import { DrawableCanvas } from './viewer'
 
 const styles = () => createStyles({
@@ -30,6 +27,8 @@ interface Props {
   display: HTMLDivElement | null
   /** viewer id */
   id: number
+  /** camera */
+  camera: THREE.PerspectiveCamera
 }
 
 /**
@@ -40,8 +39,6 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private display: HTMLDivElement | null
   /** Canvas to draw on */
   private canvas: HTMLCanvasElement | null
-  /** Current scale */
-  private scale: number
   /** ThreeJS Renderer */
   private renderer?: THREE.WebGLRenderer
   /** ThreeJS Scene object */
@@ -52,6 +49,8 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private target: THREE.AxesHelper
   /** Current point cloud for rendering */
   private pointCloud: THREE.Points | null
+  /** drawable callback */
+  private _drawableUpdateCallback: () => void
 
   /**
    * Constructor, ons subscription to store
@@ -60,7 +59,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   constructor (props: Readonly<Props>) {
     super(props)
     this.scene = new THREE.Scene()
-    this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+    this.camera = props.camera
     this.target = new THREE.AxesHelper(0.2)
     this.scene.add(this.target)
 
@@ -68,7 +67,20 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
 
     this.canvas = null
     this.display = null
-    this.scale = 1
+
+    this._drawableUpdateCallback = this.renderThree.bind(this)
+  }
+
+  /** mount callback */
+  public componentDidMount () {
+    super.componentDidMount()
+    Session.label3dList.subscribe(this._drawableUpdateCallback)
+  }
+
+  /** mount callback */
+  public componentWillUnmount () {
+    super.componentWillUnmount()
+    Session.label3dList.unsubscribe(this._drawableUpdateCallback)
   }
 
   /**
@@ -161,27 +173,6 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         this.forceUpdate()
       }
 
-      if (this.canvas && this.display) {
-        const config = getCurrentViewerConfig(this.state, this.props.id)
-        if (config && config.type === types.ViewerConfigTypeName.IMAGE_3D) {
-          if ((config as Image3DViewerConfigType).viewScale < MIN_SCALE ||
-              (config as Image3DViewerConfigType).viewScale >= MAX_SCALE) {
-            return
-          }
-          const newParams =
-            updateCanvasScale(
-              this.state,
-              this.display,
-              component,
-              null,
-              config as Image3DViewerConfigType,
-              (config as Image3DViewerConfigType).viewScale / this.scale,
-              false
-            )
-          this.scale = newParams[3]
-        }
-      }
-
       if (isCurrentItemLoaded(this.state)) {
         this.updateRenderer()
       }
@@ -193,16 +184,22 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    */
   private updateRenderer () {
     if (this.canvas && this.renderer) {
-      const config = getCurrentViewerConfig(
-        this.state, this.props.id
-      ) as PointCloudViewerConfigType
-      updateThreeCameraAndRenderer(
-        config,
-        this.camera,
-        this.canvas,
-        this.renderer
+      this.renderer.setSize(
+        this.canvas.width,
+        this.canvas.height
       )
     }
+    // if (this.canvas && this.renderer) {
+    //   const config = getCurrentViewerConfig(
+    //     this.state, this.props.id
+    //   ) as PointCloudViewerConfigType
+    //   updateThreeCameraAndRenderer(
+    //     config,
+    //     this.camera,
+    //     this.canvas,
+    //     this.renderer
+    //   )
+    // }
   }
 }
 

@@ -41,8 +41,8 @@ test('Viewer Config 3d drag test', () => {
   viewerConfigUpdater.setContainer(document.createElement('div'))
 
   Session.dispatch(moveCameraAndTarget(
-    (new Vector3D()).fromObject({ x: 0, y: 1, z: 0 }),
-    (new Vector3D()).fromObject({ x: 0, y: 0, z: 0 }),
+    (new Vector3D()).fromState({ x: 0, y: 1, z: 0 }),
+    (new Vector3D()).fromState({ x: 0, y: 0, z: 0 }),
     viewerId,
     viewerConfig
   ))

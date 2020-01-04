@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { changeViewerConfig } from '../action/common'
-import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera } from '../action/point_cloud'
+import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, zoomCamera } from '../action/point_cloud'
 import {
   MAX_SCALE,
   MIN_SCALE
@@ -8,7 +8,7 @@ import {
 
 import Session from '../common/session'
 import * as types from '../common/types'
-import { ImageViewerConfigType, PointCloudViewerConfigType, State, ViewerConfigType } from '../functional/types'
+import { HomographyViewerConfigType, ImageViewerConfigType, PointCloudViewerConfigType, State, ViewerConfigType } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
 import { SCROLL_ZOOM_RATIO } from './image'
 
@@ -305,6 +305,21 @@ export default class ViewerConfigUpdater {
           Session.dispatch(pointCloudZoomAction)
         }
         break
+      case types.ViewerConfigTypeName.HOMOGRAPHY:
+        {
+          const config = this._viewerConfig as HomographyViewerConfigType
+          let zoomRatio = SCROLL_ZOOM_RATIO
+          if (dY < 0) {
+            zoomRatio = 1. / zoomRatio
+          }
+          const newDistance = config.distance * zoomRatio
+          const newConfig = { ...config, distance: newDistance }
+          Session.dispatch(changeViewerConfig(
+            this._viewerId,
+            newConfig
+          ))
+        }
+        break
     }
   }
 
@@ -362,10 +377,6 @@ export default class ViewerConfigUpdater {
       case types.Key.D_LOW:
       case types.Key.D_UP:
         Session.dispatch(moveRight(this._viewerId, viewerConfig))
-        break
-      case types.Key.C_UP:
-      case types.Key.C_LOW:
-        Session.dispatch(updateLockStatus(this._viewerId, viewerConfig))
         break
     }
   }

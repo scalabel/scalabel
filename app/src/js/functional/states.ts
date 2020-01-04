@@ -2,8 +2,12 @@ import _ from 'lodash'
 import * as types from '../common/types'
 import {
   ConfigType, CubeType,
-  ExtrinsicsType, Image3DViewerConfigType,
-  ImageViewerConfigType, IndexedShapeType, IntrinsicsType, ItemStatus,
+  ExtrinsicsType, HomographyViewerConfigType,
+  Image3DViewerConfigType,
+  ImageViewerConfigType,
+  IndexedShapeType,
+  IntrinsicsType,
+  ItemStatus,
   ItemType,
   LabelType,
   LayoutType,
@@ -55,9 +59,9 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
  * @param {{[key: number]: number}} labels
  */
 export function makeTrack (
-  id: number, labels: {[key: number]: number} = {}
+  id: number, type: string, labels: {[key: number]: number} = {}
 ): TrackType {
-  return { id, labels }
+  return { id, type, labels }
 }
 
 /**
@@ -113,7 +117,6 @@ export function makeCube (params: Partial<CubeType> = {}): CubeType {
     size: { x: 1, y: 1, z: 1 },
     orientation: { x: 0, y: 0, z: 0 },
     anchorIndex: 0,
-    surfaceId: -1,
     ...params
   }
 }
@@ -222,15 +225,31 @@ export function makeImage3DViewerConfig (
 }
 
 /**
- * Create viewer config based on type
+ * Make homography viewer config
+ * @param pane
+ * @param sensor
+ */
+export function makeHomographyViewerConfig (
+  pane: number, sensor: number = -1, distance: number = 10
+): HomographyViewerConfigType {
+  const imageConfig = makeImageViewerConfig(pane, sensor)
+  return {
+    ...imageConfig,
+    type: types.ViewerConfigTypeName.HOMOGRAPHY,
+    pointCloudSensor: -2,
+    distance
+  }
+}
+
+/**
+ * Create default viewer config for item type
+ * @param sensors
  * @param type
  * @param pane
  * @param sensor
  */
 export function makeDefaultViewerConfig (
-  type: types.ViewerConfigTypeName,
-  pane: number,
-  sensor: number
+  type: types.ViewerConfigTypeName, pane: number = 0, sensor: number = -1
 ): ViewerConfigType | null {
   switch (type) {
     case types.ViewerConfigTypeName.IMAGE:
@@ -239,6 +258,8 @@ export function makeDefaultViewerConfig (
       return makeImage3DViewerConfig(pane, sensor)
     case types.ViewerConfigTypeName.POINT_CLOUD:
       return makePointCloudViewerConfig(pane, sensor)
+    case types.ViewerConfigTypeName.HOMOGRAPHY:
+      return makeHomographyViewerConfig(pane, sensor)
   }
   return null
 }
