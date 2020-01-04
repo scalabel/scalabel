@@ -252,7 +252,7 @@ export class Box2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }

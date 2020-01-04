@@ -5,6 +5,7 @@ import { Vector3D } from '../../math/vector3d'
 import { TransformationControl } from './control/transformation_control'
 import { Grid3D } from './grid3d'
 import Label3D from './label3d'
+import { Label3DList } from './label3d_list'
 import { Shape3D } from './shape3d'
 
 /**
@@ -14,8 +15,8 @@ export class Plane3D extends Label3D {
   /** ThreeJS object for rendering shape */
   private _shape: Grid3D
 
-  constructor () {
-    super()
+  constructor (labelList: Label3DList) {
+    super(labelList)
     this._shape = new Grid3D(this)
   }
 
@@ -80,6 +81,25 @@ export class Plane3D extends Label3D {
     return false
   }
 
+  /** Rotate */
+  public rotate (quaternion: THREE.Quaternion) {
+    this._shape.applyQuaternion(quaternion)
+  }
+
+  /** Translate */
+  public translate (delta: THREE.Vector3) {
+    this._shape.position.add(delta)
+  }
+
+  /** Scale */
+  public scale (scale: THREE.Vector3, anchor: THREE.Vector3) {
+    this._shape.scale.x *= scale.x
+    this._shape.scale.y *= scale.y
+    this._shape.position.sub(anchor)
+    this._shape.position.multiply(scale)
+    this._shape.position.add(anchor)
+  }
+
   /**
    * Expand the primitive shapes to drawable shapes
    * @param {ShapeType[]} shapes
@@ -126,7 +146,7 @@ export class Plane3D extends Label3D {
   }
 
   /** State representation of shape */
-  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }

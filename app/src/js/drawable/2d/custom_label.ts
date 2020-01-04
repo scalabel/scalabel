@@ -288,7 +288,7 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Get shape id's and shapes for updating */
-  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }

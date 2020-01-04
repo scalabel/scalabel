@@ -282,7 +282,7 @@ export abstract class Label2D {
   public abstract updateShapes (shapes: ShapeType[]): void
 
   /** Get shape id's and shapes for updating */
-  public abstract shapeObjects (): [number[], ShapeTypeName[], ShapeType[]]
+  public abstract shapeStates (): [number[], ShapeTypeName[], ShapeType[]]
 
   /**
    * Initialize this label to be temporary

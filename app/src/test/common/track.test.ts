@@ -22,7 +22,7 @@ test('box3d linear interpolation tracking', () => {
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(action.changeSelect({ policyType: 0 }))
 
-  const box = new Box3D()
+  const box = new Box3D(Session.label3dList)
   box.init(0, 0)
 
   let state = Session.getState()

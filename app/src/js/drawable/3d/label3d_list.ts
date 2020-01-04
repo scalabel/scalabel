@@ -14,13 +14,14 @@ import { Shape3D } from './shape3d'
  * @param {string} labelType: type of the new label
  */
 export function makeDrawableLabel3D (
+  labelList: Label3DList,
   labelType: string
 ): Label3D | null {
   switch (labelType) {
     case LabelTypeName.BOX_3D:
-      return new Box3D()
+      return new Box3D(labelList)
     case LabelTypeName.PLANE_3D:
-      return new Plane3D()
+      return new Plane3D(labelList)
   }
   return null
 }
@@ -48,6 +49,8 @@ export class Label3DList {
   private _activeCamera?: THREE.Camera
   /** callbacks */
   private _callbacks: Array<() => void>
+  /** New labels to be committed */
+  private _updatedLabels: Set<Label3D>
 
   constructor () {
     this.control = new TransformationControl()
@@ -59,6 +62,7 @@ export class Label3DList {
     this._raycastableShapes = []
     this._state = makeState()
     this._callbacks = []
+    this._updatedLabels = new Set()
   }
 
   /**
@@ -178,7 +182,7 @@ export class Label3DList {
       if (id in this._labels) {
         newLabels[id] = this._labels[id]
       } else {
-        const newLabel = makeDrawableLabel3D(item.labels[id].type)
+        const newLabel = makeDrawableLabel3D(this, item.labels[id].type)
         if (newLabel) {
           newLabels[id] = newLabel
         }
@@ -256,5 +260,20 @@ export class Label3DList {
   public setActiveCamera (camera: THREE.Camera) {
     this._activeCamera = camera
     this.onDrawableUpdate()
+  }
+
+  /** Get uncommitted labels */
+  public get updatedLabels (): Readonly<Set<Readonly<Label3D>>> {
+    return this._updatedLabels
+  }
+
+  /** Push updated label to array */
+  public addUpdatedLabel (label: Label3D) {
+    this._updatedLabels.add(label)
+  }
+
+  /** Clear uncommitted label list */
+  public clearUpdatedLabels () {
+    this._updatedLabels.clear()
   }
 }

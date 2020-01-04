@@ -1,11 +1,12 @@
 import { Box, Grid, IconButton } from '@material-ui/core'
 import LockIcon from '@material-ui/icons/Lock'
+import SyncIcon from '@material-ui/icons/Sync'
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
-import { changeViewerConfig } from '../action/common'
-import { alignToAxis, CameraLockState, dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera } from '../action/point_cloud'
+import { changeViewerConfig, toggleSynchronization } from '../action/common'
+import { alignToAxis, CameraLockState, dragCamera, MOUSE_CORRECTION_FACTOR, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, toggleSelectionLock, updateLockStatus, zoomCamera } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
@@ -51,6 +52,8 @@ class Viewer3D extends DrawableViewer<Props> {
   private _camera: THREE.PerspectiveCamera
   /** Raycaster */
   private _raycaster: THREE.Raycaster
+  /** Target position */
+  private _target: THREE.Vector3
 
   /**
    * Constructor
@@ -60,6 +63,26 @@ class Viewer3D extends DrawableViewer<Props> {
     super(props)
     this._camera = new THREE.PerspectiveCamera(45, 1, 1, 1000)
     this._raycaster = new THREE.Raycaster()
+    this._target = new THREE.Vector3()
+  }
+
+  /** Called when component updates */
+  public componentDidUpdate () {
+    if (this._viewerConfig) {
+      this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
+
+      if (Session.activeViewerId === this.props.id) {
+        Session.label3dList.setActiveCamera(this._camera)
+      }
+
+      this._camera.layers.set(
+        this.props.id - Math.min(
+          ...Object.keys(this.state.user.viewerConfigs).map(
+            (key) => Number(key)
+          )
+        )
+      )
+    }
   }
 
   /**
@@ -74,6 +97,7 @@ class Viewer3D extends DrawableViewer<Props> {
           key={`pointCloudCanvas${this.props.id}`}
           display={this._container}
           id={this.props.id}
+          camera={this._camera}
         />
       )
       views.push(
@@ -81,6 +105,7 @@ class Viewer3D extends DrawableViewer<Props> {
           key={`label3dCanvas${this.props.id}`}
           display={this._container}
           id={this.props.id}
+          camera={this._camera}
         />
       )
 
@@ -159,17 +184,34 @@ class Viewer3D extends DrawableViewer<Props> {
       const synchronizationButton = (
         <IconButton
           className={this.props.classes.camera_button}
-          onClick={() => Session.dispatch(changeViewerConfig(
-            this.props.id,
-            {
-              ...this._viewerConfig as PointCloudViewerConfigType,
-              synchronized: (this._viewerConfig) ?
-                !this._viewerConfig.synchronized : false
+          onClick={() => {
+            if (this._viewerConfig) {
+              Session.dispatch(toggleSynchronization(
+                this._viewerId, this._viewerConfig
+              ))
             }
-          ))}
+          }}
         >
-          {underlineElement(<LockIcon />, this._viewerConfig.synchronized)}
+          {underlineElement(<SyncIcon />, this._viewerConfig.synchronized)}
         </IconButton >
+      )
+      const selectionLockButton = (
+        <IconButton
+          className={this.props.classes.camera_button}
+          onClick={() => {
+            if (this._viewerConfig) {
+              Session.dispatch(toggleSelectionLock(
+                this._viewerId,
+                this._viewerConfig as PointCloudViewerConfigType
+              ))
+            }
+          }}
+        >
+          {underlineElement(
+            <LockIcon />,
+            (this._viewerConfig as PointCloudViewerConfigType).lockSelection
+          )}
+        </IconButton>
       )
       views.push(
         <div>
@@ -184,6 +226,7 @@ class Viewer3D extends DrawableViewer<Props> {
             {yAxisButton}
             {zAxisButton}
             {synchronizationButton}
+            {selectionLockButton}
           </Grid>
         </div>
       )
@@ -200,8 +243,14 @@ class Viewer3D extends DrawableViewer<Props> {
     const oldX = this._mX
     const oldY = this._mY
     super.onMouseMove(e)
-    if (this._mouseDown) {
+    if (this._mouseDown && this._viewerConfig) {
       if (this._mouseButton === 2) {
+        if (
+          (this._viewerConfig as PointCloudViewerConfigType).lockSelection &&
+          Session.label3dList.selectedLabel
+        ) {
+          return
+        }
         this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
         Session.dispatch(dragCamera(
           oldX,
@@ -213,16 +262,26 @@ class Viewer3D extends DrawableViewer<Props> {
           this._viewerConfig as PointCloudViewerConfigType
         ))
       } else {
-        Session.dispatch(rotateCamera(
-          oldX,
-          oldY,
-          this._mX,
-          this._mY,
-          this._viewerId,
-          this._viewerConfig as PointCloudViewerConfigType
-        ))
+        this.rotateCamera(this._mX - oldX, this._mY - oldY)
+        if (
+          Session.label3dList.selectedLabel &&
+          this._viewerConfig.type === types.ViewerConfigTypeName.POINT_CLOUD &&
+          (this._viewerConfig as PointCloudViewerConfigType).lockSelection
+        ) {
+          const theta = (this._mX - oldX) / MOUSE_CORRECTION_FACTOR
+          const quaternion = new THREE.Quaternion()
+          quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), theta)
+          Session.label3dList.selectedLabel.rotate(quaternion)
+        }
+        Session.label3dList.onDrawableUpdate()
       }
     }
+  }
+
+  /** Handle mouse up */
+  protected onMouseUp (e: React.MouseEvent) {
+    super.onMouseUp(e)
+    this.commitCamera()
   }
 
   /**
@@ -342,7 +401,7 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera.updateProjectionMatrix()
     }
 
-    const target = new THREE.Vector3(
+    this._target.set(
       config.target.x,
       config.target.y,
       config.target.z
@@ -354,7 +413,7 @@ class Viewer3D extends DrawableViewer<Props> {
     this._camera.position.x = config.position.x
     this._camera.position.y = config.position.y
     this._camera.position.z = config.position.z
-    this._camera.lookAt(target)
+    this._camera.lookAt(this._target)
   }
 
   /**
@@ -384,6 +443,72 @@ class Viewer3D extends DrawableViewer<Props> {
       this.props.id,
       config,
       newLockState
+    ))
+  }
+
+  /** Rotate camera */
+  private rotateCamera (dx: number, dy: number) {
+    if (!this._viewerConfig) {
+      return
+    }
+    const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
+    if (viewerConfig.lockStatus === CameraLockState.X_LOCKED) {
+      dx = 0
+    } else if (viewerConfig.lockStatus === CameraLockState.Y_LOCKED) {
+      dy = 0
+    }
+    const target = new THREE.Vector3(
+      this._target.x,
+      this._target.y,
+      this._target.z
+    )
+    const offset = new THREE.Vector3(
+      this._camera.position.x,
+      this._camera.position.y,
+      this._camera.position.z
+    )
+
+    offset.sub(target)
+
+    // Rotate so that positive y-axis is vertical
+    const rotVertQuat = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      new THREE.Vector3(0, 1, 0))
+    offset.applyQuaternion(rotVertQuat)
+
+    // Convert to spherical coordinates
+    const spherical = new THREE.Spherical()
+    spherical.setFromVector3(offset)
+
+    // Apply rotations
+    spherical.theta += dx / MOUSE_CORRECTION_FACTOR
+    spherical.phi += dy / MOUSE_CORRECTION_FACTOR
+
+    spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
+
+    spherical.makeSafe()
+
+    // Convert to Cartesian
+    offset.setFromSpherical(spherical)
+
+    // Rotate back to original coordinate space
+    const quatInverse = rotVertQuat.clone().inverse()
+    offset.applyQuaternion(quatInverse)
+    offset.add(target)
+
+    this._camera.position.copy(offset)
+    this._camera.lookAt(this._target)
+  }
+
+  /** Commit camera to state */
+  private commitCamera () {
+    const newConfig = {
+      ...this._viewerConfig as PointCloudViewerConfigType,
+      position: (new Vector3D()).fromThree(this._camera.position).toObject(),
+      target: (new Vector3D()).fromThree(this._target).toObject()
+    }
+    Session.dispatch(changeViewerConfig(
+      this._viewerId, newConfig
     ))
   }
 }

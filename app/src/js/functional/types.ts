@@ -159,6 +159,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   verticalAxis: Vector3Type
   /** Camera rotation lock */
   lockStatus: number
+  /** Set to lock selected label to camera axis */
+  lockSelection: boolean
 }
 
 export interface Image3DViewerConfigType extends
