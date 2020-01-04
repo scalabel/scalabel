@@ -75,13 +75,13 @@ class Viewer3D extends DrawableViewer<Props> {
         Session.label3dList.setActiveCamera(this._camera)
       }
 
-      this._camera.layers.set(
-        this.props.id - Math.min(
-          ...Object.keys(this.state.user.viewerConfigs).map(
-            (key) => Number(key)
-          )
-        )
-      )
+      // this._camera.layers.set(
+      //   this.props.id - Math.min(
+      //     ...Object.keys(this.state.user.viewerConfigs).map(
+      //       (key) => Number(key)
+      //     )
+      //   )
+      // )
     }
   }
 
@@ -359,7 +359,10 @@ class Viewer3D extends DrawableViewer<Props> {
   /** Override key handler */
   protected onKeyDown (e: KeyboardEvent): void {
     const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
-    switch (e .key) {
+    if (viewerConfig.lockSelection) {
+      return
+    }
+    switch (e.key) {
       case types.Key.PERIOD:
         Session.dispatch(moveUp(this._viewerId, viewerConfig))
         break
