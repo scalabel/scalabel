@@ -4,6 +4,7 @@ import { LabelType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { getColorById } from '../util'
 import { TransformationControl } from './control/transformation_control'
+import { Label3DList } from './label3d_list'
 import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
 
@@ -40,8 +41,10 @@ export abstract class Label3D {
   protected _color: number[]
   /** plane if attached */
   protected _plane: Plane3D | null
+  /** label list this belongs to */
+  protected _labelList: Label3DList
 
-  constructor () {
+  constructor (labelList: Label3DList) {
     this._index = -1
     this._labelId = -1
     this._trackId = -1
@@ -51,6 +54,7 @@ export abstract class Label3D {
     this._label = null
     this._color = [0, 0, 0, 1]
     this._plane = null
+    this._labelList = labelList
   }
 
   /**
@@ -89,7 +93,7 @@ export abstract class Label3D {
   }
 
   /** Get shape id's and shapes for updating */
-  public abstract shapeObjects (): [number[], ShapeTypeName[], ShapeType[]]
+  public abstract shapeStates (): [number[], ShapeTypeName[], ShapeType[]]
 
   /** highlight the label */
   public setHighlighted (intersection?: THREE.Intersection) {
@@ -158,6 +162,15 @@ export abstract class Label3D {
   public abstract onMouseMove (
     x: number, y: number, camera: THREE.Camera
   ): boolean
+
+  /** Rotate label in direction of quaternion */
+  public abstract rotate (quaternion: THREE.Quaternion): void
+
+  /** Translate label in provided direction */
+  public abstract translate (delta: THREE.Vector3): void
+
+  /** Scale label */
+  public abstract scale (scale: THREE.Vector3, anchor: THREE.Vector3): void
 
   /**
    * Initialize label

@@ -207,7 +207,7 @@ export class LinearInterpolationPlane3DPolicy extends TrackPolicy {
    */
   public onLabelCreated (
     itemIndex: number,
-    label: Label,
+    label: Readonly<Label>,
     sensors: number[]
   ) {
     label = label as Plane3D

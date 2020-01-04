@@ -10,6 +10,7 @@ import { LabelTypeName, ShapeTypeName } from '../../common/types'
 import { TransformationControl } from './control/transformation_control'
 import { Cube3D } from './cube3d'
 import { Label3D } from './label3d'
+import { Label3DList } from './label3d_list'
 import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
 
@@ -22,8 +23,8 @@ export class Box3D extends Label3D {
   /** Whether this is temporary */
   private _temporary: boolean
 
-  constructor () {
-    super()
+  constructor (labelList: Label3DList) {
+    super(labelList)
     this._shape = new Cube3D(this)
     this._temporary = false
   }
@@ -50,7 +51,7 @@ export class Box3D extends Label3D {
   }
 
   /** Indexed shapes */
-  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
@@ -137,7 +138,29 @@ export class Box3D extends Label3D {
     if (this._temporary && success) {
       this._temporary = false
     }
+    this._labelList.addUpdatedLabel(this)
     return success
+  }
+
+  /** Rotate */
+  public rotate (quaternion: THREE.Quaternion) {
+    this._shape.applyQuaternion(quaternion)
+    this._labelList.addUpdatedLabel(this)
+  }
+
+  /** Translate */
+  public translate (delta: THREE.Vector3) {
+    this._shape.position.add(delta)
+    this._labelList.addUpdatedLabel(this)
+  }
+
+  /** Scale */
+  public scale (scale: THREE.Vector3, anchor: THREE.Vector3) {
+    this._shape.scale.multiply(scale)
+    this._shape.position.sub(anchor)
+    this._shape.position.multiply(scale)
+    this._shape.position.add(anchor)
+    this._labelList.addUpdatedLabel(this)
   }
 
   /**
