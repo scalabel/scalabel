@@ -19,8 +19,12 @@ export abstract class Storage {
 
   /**
    * Lists keys in storage
+   * @param {string} prefix: relative path of directory
+   * @param {boolean} onlyDir: whether to only return keys that are directories
+   * @returns {Promise<string[]>} The keys are returned in lexical order
    */
-  public abstract listKeys (prefix: string, onlyDir: boolean): Promise<string[]>
+  public abstract async listKeys (
+    prefix: string, onlyDir: boolean): Promise<string[]>
 
   /**
    * Saves json to a key
@@ -33,7 +37,7 @@ export abstract class Storage {
   public abstract load (key: string): Promise<string>
 
   /**
-   * Deletes valus at the key
+   * Deletes values at the key
    */
   public abstract delete (key: string): Promise<void>
 }
