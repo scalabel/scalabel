@@ -15,6 +15,8 @@ export function policyFromString (
       return TrackPolicyType.LINEAR_INTERPOLATION_POLYGON
     case TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D:
       return TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D
+    case TrackPolicyType.LINEAR_INTERPOLATION_CUSTOM_2D:
+      return TrackPolicyType.LINEAR_INTERPOLATION_CUSTOM_2D
   }
 
   throw new Error(`Unrecognized policy type: ${typeName}`)

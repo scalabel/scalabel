@@ -215,6 +215,8 @@ export interface Node2DType extends Point2DType {
   name: string
   /** color */
   color?: number[]
+  /** set if hidden */
+  hidden?: boolean
 }
 
 // TODO: This only supports points for now.

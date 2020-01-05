@@ -38,6 +38,7 @@ export enum ShapeTypeName {
   GRID = 'grid',
   POINT_2D = 'point2d',
   PATH_POINT_2D = 'path_point2d',
+  NODE_2D = 'node2d',
   POLYGON_2D = 'polygon2d'
 }
 
@@ -134,7 +135,8 @@ export enum TrackPolicyType {
   LINEAR_INTERPOLATION_PLANE_3D = 'linear_interpolation_plane_3d',
   LINEAR_INTERPOLATION_BOX_2D = 'linear_interpolation_box_2d',
   LINEAR_INTERPOLATION_BOX_3D = 'linear_interpolation_box_3d',
-  LINEAR_INTERPOLATION_POLYGON = 'linear_interpolation_polygon'
+  LINEAR_INTERPOLATION_POLYGON = 'linear_interpolation_polygon',
+  LINEAR_INTERPOLATION_CUSTOM_2D = 'linear_interpolation_custom_2d'
 }
 
 export enum AttributeToolType {
