@@ -199,8 +199,7 @@ export function makePointCloudViewerConfig (
     type: types.ViewerConfigTypeName.POINT_CLOUD,
     sensor,
     pane,
-    synchronized: false,
-    lockSelection: false
+    synchronized: false
   }
 }
 
