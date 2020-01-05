@@ -120,6 +120,8 @@ class Viewer2D extends DrawableViewer {
         const newConfig = { ...config }
         if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
           newConfig.viewScale = newScale
+        } else {
+          zoomRatio = 1
         }
         if (this._container) {
           const displayLeft = zoomRatio * (this._mX + config.displayLeft) -
