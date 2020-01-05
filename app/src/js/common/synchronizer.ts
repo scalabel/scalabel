@@ -49,7 +49,10 @@ export class Synchronizer {
 
     // use the same address as http
     const syncAddress = location.origin
-    const socket = io.connect(syncAddress)
+    const socket = io.connect(
+      syncAddress,
+      { transports: ['websocket'], upgrade: false }
+    )
     this.socket = socket
 
     this.socket.on(EventName.CONNECT, () => {

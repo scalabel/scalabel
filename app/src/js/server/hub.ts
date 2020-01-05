@@ -134,6 +134,8 @@ async function loadStateFromTask (
           case LabelTypeName.CUSTOM_2D:
             state.task.config.labelTypes[0] =
               Object.keys(state.task.config.label2DTemplates)[0]
+            state.task.config.policyTypes =
+              [TrackPolicyType.LINEAR_INTERPOLATION_CUSTOM_2D]
         }
       }
       break

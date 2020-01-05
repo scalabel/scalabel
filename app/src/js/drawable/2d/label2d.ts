@@ -305,7 +305,7 @@ export abstract class Label2D {
   public updateState (
     state: State, itemIndex: number, labelId: number): void {
     const item = state.task.items[itemIndex]
-    this._label = item.labels[labelId]
+    this._label = { ...item.labels[labelId] }
     this._order = this._label.order
     this._labelId = this._label.id
     this._trackId = this._label.track

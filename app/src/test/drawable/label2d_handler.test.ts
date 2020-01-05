@@ -1377,7 +1377,7 @@ test('Draw human pose', () => {
 
   for (let i = 0; i < indexedShapes.length; i++) {
     const indexed = indexedShapes[i]
-    expect(indexed.type).toEqual(ShapeTypeName.POINT_2D)
+    expect(indexed.type).toEqual(ShapeTypeName.NODE_2D)
     const point = indexed.shape as Point2DType
     const templatePoint = spec.nodes[i]
     expect(point.x).toBeCloseTo(

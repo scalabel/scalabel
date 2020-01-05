@@ -148,9 +148,8 @@ export const playerControlStyles = () => createStyles({
   playerControl: {
     display: 'block',
     position: 'relative',
-    top: 'calc(100% - 60px)',
-    zIndex: 100,
-    background: 'rgba(34, 34, 34, 0.7)'
+    top: 'calc(100% - 55px)',
+    zIndex: 100
   },
   input: {
     background: '#000000',
@@ -177,16 +176,26 @@ export const LayoutStyles = () => createStyles({
     height: '50px'
   },
   main: {
-    height: 'calc(100% - 50px)',
+    height: 'calc(100% - 45px)',
     display: 'block',
     position: 'absolute',
     outline: 'none',
     width: '100%'
   },
   interfaceContainer: {
-    display: 'block', height: '100%',
+    display: 'block',
+    height: '100%',
     position: 'absolute',
-    outline: 'none', width: '100%', background: '#222222'
+    outline: 'none',
+    width: '100%',
+    background: '#222222'
+  },
+  paneContainer: {
+    width: '100%',
+    height: 'calc(100% - 50px)',
+    position: 'absolute',
+    top: 0,
+    left: 0
   }
 })
 

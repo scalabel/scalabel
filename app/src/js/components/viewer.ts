@@ -26,7 +26,10 @@ export abstract class DrawableCanvas<Props> extends Component<Props> {
    * Checks whether to freeze interface
    */
   public checkFreeze () {
-    return Session.status === ConnectionStatus.RECONNECTING
+    if (Session.autosave) {
+      return Session.status === ConnectionStatus.RECONNECTING
+    }
+    return false
   }
 
   /**

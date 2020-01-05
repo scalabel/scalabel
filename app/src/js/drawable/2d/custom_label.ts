@@ -1,17 +1,19 @@
 import _ from 'lodash'
-import { ShapeTypeName } from '../../common/types'
+import { Key, ShapeTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { Label2DTemplateType, Point2DType, ShapeType, State } from '../../functional/types'
+import { Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
 import { DrawMode, Label2D } from './label2d'
+import { Node2D } from './node2d'
 import { makePoint2DStyle, Point2D } from './point2d'
 import { makeRect2DStyle, Rect2D } from './rect2d'
 
-const DEFAULT_VIEW_RECT_STYLE = makeRect2DStyle({ lineWidth: 4 })
+const DEFAULT_VIEW_RECT_STYLE = makeRect2DStyle({ lineWidth: 4, dashed: true })
 const DEFAULT_VIEW_POINT_STYLE = makePoint2DStyle({ radius: 8 })
 const DEFAULT_VIEW_HIGH_POINT_STYLE = makePoint2DStyle({ radius: 12 })
+const DEFAULT_CONTROL_RECT_STYLE = makeRect2DStyle({ lineWidth: 8 })
 const DEFAULT_CONTROL_POINT_STYLE = makePoint2DStyle({ radius: 12 })
 const lineWidth = 4
 
@@ -20,7 +22,12 @@ export class CustomLabel2D extends Label2D {
   /** Label template */
   private _template: Label2DTemplateType
   /** Shapes */
-  private _shapes: Point2D[]
+  private _shapes: Node2D[]
+  /** Map between node names and colors */
+  private _colorMap: { [name: string]: number[] }
+  /** The hashed list of keys currently down */
+  private _keyDownMap: { [key: string]: boolean }
+
   /**
    * Corners for resizing,
    * order: top-left, top-right, bottom-right, bottom-left
@@ -35,6 +42,13 @@ export class CustomLabel2D extends Label2D {
     this._shapes = []
     this._bounds = new Rect2D(-1, -1, -1, -1)
     this._corners = [new Point2D(), new Point2D(), new Point2D(), new Point2D()]
+    this._colorMap = {}
+    for (const node of this._template.nodes) {
+      if (node.color) {
+        this._colorMap[node.name] = node.color
+      }
+    }
+    this._keyDownMap = {}
   }
 
   /** Draw according to template */
@@ -43,19 +57,21 @@ export class CustomLabel2D extends Label2D {
 
     // Set proper drawing styles
     let pointStyle = makePoint2DStyle()
-    const rectStyle = _.assign(makeRect2DStyle(), DEFAULT_VIEW_RECT_STYLE)
+    let rectStyle = makeRect2DStyle()
     let highPointStyle = makePoint2DStyle()
     let assignColor: (i: number) => number[] = () => [0]
     switch (mode) {
       case DrawMode.VIEW:
         pointStyle = _.assign(pointStyle, DEFAULT_VIEW_POINT_STYLE)
         highPointStyle = _.assign(highPointStyle, DEFAULT_VIEW_HIGH_POINT_STYLE)
-        rectStyle.dashed = true
+        rectStyle = _.assign(rectStyle, DEFAULT_VIEW_RECT_STYLE)
         assignColor = (i: number): number[] => {
           // vertex
-          if (i < this._template.nodes.length &&
-              this._template.nodes[i].color) {
-            return this._template.nodes[i].color as number[]
+          if (
+            i < this._shapes.length &&
+            this._shapes[i].name in this._colorMap
+          ) {
+            return this._colorMap[this._shapes[i].name]
           }
           return self._color
         }
@@ -64,6 +80,7 @@ export class CustomLabel2D extends Label2D {
         pointStyle = _.assign(pointStyle, DEFAULT_CONTROL_POINT_STYLE)
         highPointStyle = _.assign(
           highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
+        rectStyle = _.assign(rectStyle, DEFAULT_CONTROL_RECT_STYLE)
         assignColor = (i: number): number[] => {
           return encodeControlColor(self._index, i)
         }
@@ -89,6 +106,10 @@ export class CustomLabel2D extends Label2D {
       const startPoint = this._shapes[edge[0]]
       const endPoint = this._shapes[edge[1]]
 
+      if (startPoint.hidden || endPoint.hidden) {
+        continue
+      }
+
       const realStart = startPoint.clone().scale(ratio)
       const realEnd = endPoint.clone().scale(ratio)
 
@@ -107,6 +128,9 @@ export class CustomLabel2D extends Label2D {
 
     // Draw nodes
     for (let i = 0; i < this._shapes.length; i++) {
+      if (this._shapes[i].hidden) {
+        continue
+      }
       const style =
         (i === this._highlightedHandle) ? highPointStyle : pointStyle
       style.color = assignColor(i)
@@ -138,11 +162,8 @@ export class CustomLabel2D extends Label2D {
 
     // Initialize with template information
     this._shapes = []
-    for (const point of this._template.nodes) {
-      this._shapes.push(new Point2D(
-        point.x,
-        point.y
-      ))
+    for (const node of this._template.nodes) {
+      this._shapes.push(new Node2D(node))
     }
 
     // Get template bounds
@@ -165,6 +186,16 @@ export class CustomLabel2D extends Label2D {
   public onMouseDown (coord: Vector2D, handleIndex: number): boolean {
     const returnValue = super.onMouseDown(coord, handleIndex)
     this.editing = true
+
+    if (
+      (this._keyDownMap[Key.D_LOW] || this._keyDownMap[Key.D_UP]) &&
+      this._highlightedHandle < this._shapes.length
+    ) {
+      // Delete highlighted handle if d key pressed
+      this._shapes[this._highlightedHandle].hide()
+      this._highlightedHandle = -1
+    }
+
     return returnValue
   }
 
@@ -192,22 +223,24 @@ export class CustomLabel2D extends Label2D {
       const yScale =
           (coord.y - oppositeCorner.y) / (corner.y - oppositeCorner.y)
       this.scale(oppositeCorner, new Vector2D(xScale, yScale))
-    } else if (this._highlightedHandle < this._shapes.length) {
+    } else if (this._highlightedHandle >= 0) {
+      if (this._highlightedHandle < this._shapes.length) {
         // Move single point
-      this._shapes[this._highlightedHandle].x = coord.x
-      this._shapes[this._highlightedHandle].y = coord.y
-      this.updateBounds()
-    } else if (this._highlightedHandle > 0) {
+        this._shapes[this._highlightedHandle].x = coord.x
+        this._shapes[this._highlightedHandle].y = coord.y
+        this.updateBounds()
+      } else {
         // Drag shape
-      const delta = coord.clone().subtract(this._mouseDownCoord)
-      for (const shape of this._shapes) {
-        shape.x += delta.x
-        shape.y += delta.y
+        const delta = coord.clone().subtract(this._mouseDownCoord)
+        for (const shape of this._shapes) {
+          shape.x += delta.x
+          shape.y += delta.y
+        }
       }
-      this._mouseDownCoord.x = coord.x
-      this._mouseDownCoord.y = coord.y
-      this.updateBounds()
     }
+    this._mouseDownCoord.x = coord.x
+    this._mouseDownCoord.y = coord.y
+    this.updateBounds()
 
     return false
   }
@@ -220,7 +253,8 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** On key down */
-  public onKeyDown (_key: string): boolean {
+  public onKeyDown (key: string): boolean {
+    this._keyDownMap[key] = true
     return true
   }
 
@@ -228,8 +262,8 @@ export class CustomLabel2D extends Label2D {
    * handle keyboard up event
    * @param e pressed key
    */
-  public onKeyUp (_key: string): void {
-    return
+  public onKeyUp (key: string): void {
+    delete this._keyDownMap[key]
   }
 
   /**
@@ -239,15 +273,15 @@ export class CustomLabel2D extends Label2D {
   public updateShapes (shapes: ShapeType[]): void {
     if (shapes.length !== this._shapes.length) {
       this._shapes = []
-      for (const shape of shapes) {
-        const point = shape as Point2DType
-        this._shapes.push(new Point2D(point.x, point.y))
+      for (const node of shapes) {
+        this._shapes.push(new Node2D(node as Node2DType))
       }
     } else {
       for (let i = 0; i < shapes.length; i++) {
-        const point = shapes[i] as Point2DType
-        this._shapes[i].x = point.x
-        this._shapes[i].y = point.y
+        const node = shapes[i] as Node2DType
+        this._shapes[i].x = node.x
+        this._shapes[i].y = node.y
+        this._shapes[i].name = node.name
       }
     }
     this.updateBounds()
@@ -258,9 +292,9 @@ export class CustomLabel2D extends Label2D {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    const shapeTypes = this._shapes.map(() => ShapeTypeName.POINT_2D)
-    const shapeStates = this._shapes.map(
-      (shape) => ({ x: shape.x, y: shape.y })
+    const shapeTypes = this._shapes.map(() => ShapeTypeName.NODE_2D)
+    const shapeStates: Node2DType[] = this._shapes.map(
+      (shape) => shape.toState()
     )
     return [this._label.shapes, shapeTypes, shapeStates]
   }
