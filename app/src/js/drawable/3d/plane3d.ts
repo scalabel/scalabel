@@ -100,6 +100,16 @@ export class Plane3D extends Label3D {
     this._shape.position.add(anchor)
   }
 
+  /** center of box */
+  public get center (): THREE.Vector3 {
+    return this._shape.position
+  }
+
+  /** orientation of box */
+  public get orientation (): THREE.Quaternion {
+    return this._shape.quaternion
+  }
+
   /**
    * Expand the primitive shapes to drawable shapes
    * @param {ShapeType[]} shapes

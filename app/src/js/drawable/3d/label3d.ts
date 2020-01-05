@@ -172,6 +172,16 @@ export abstract class Label3D {
   /** Scale label */
   public abstract scale (scale: THREE.Vector3, anchor: THREE.Vector3): void
 
+  /** Center of label */
+  public get center (): THREE.Vector3 {
+    return new THREE.Vector3()
+  }
+
+  /** Orientation of label */
+  public get orientation (): THREE.Quaternion {
+    return new THREE.Quaternion()
+  }
+
   /**
    * Initialize label
    * @param {State} state
