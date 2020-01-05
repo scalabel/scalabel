@@ -6,7 +6,7 @@ import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
 import { changeViewerConfig, toggleSynchronization } from '../action/common'
-import { alignToAxis, CameraLockState, dragCamera, lockedToSelection, MOUSE_CORRECTION_FACTOR, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, toggleSelectionLock, updateLockStatus, zoomCamera } from '../action/point_cloud'
+import { alignToAxis, CameraLockState, lockedToSelection, MOUSE_CORRECTION_FACTOR, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, toggleSelectionLock, updateLockStatus, zoomCamera } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
@@ -261,24 +261,14 @@ class Viewer3D extends DrawableViewer<Props> {
       const lockSelection =
         lockedToSelection(this._viewerConfig as PointCloudViewerConfigType)
       if (this._mouseButton === 2) {
-        if (lockSelection) {
-          return
+        const delta = this.dragCamera(dX, dY)
+        if (lockSelection && Session.label3dList.selectedLabel) {
+          Session.label3dList.selectedLabel.translate(delta)
         }
-        Session.dispatch(dragCamera(
-          oldX,
-          oldY,
-          this._mX,
-          this._mY,
-          this._camera,
-          this._viewerId,
-          this._viewerConfig as PointCloudViewerConfigType
-        ))
       } else {
         if (lockSelection && Session.label3dList.selectedLabel) {
           const quaternion = this.rotateCameraViewDirection(dX)
-          Session.label3dList.selectedLabel.rotate(
-            quaternion
-          )
+          Session.label3dList.selectedLabel.rotate(quaternion)
         } else {
           this.rotateCameraSpherical(dX, dY)
         }
@@ -561,6 +551,21 @@ class Viewer3D extends DrawableViewer<Props> {
 
     this._camera.position.copy(offset)
     this._camera.lookAt(this._target)
+  }
+
+  /** Drag camera, returns translation */
+  private dragCamera (dx: number, dy: number): THREE.Vector3 {
+    const dragVector = new THREE.Vector3(
+      -dx / MOUSE_CORRECTION_FACTOR * 2,
+      dy / MOUSE_CORRECTION_FACTOR * 2,
+      0
+    )
+    dragVector.applyQuaternion(this._camera.quaternion)
+
+    this._camera.position.add(dragVector)
+    this._target.add(dragVector)
+
+    return dragVector
   }
 
   /** Commit camera to state */
