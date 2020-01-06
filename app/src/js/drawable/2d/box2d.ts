@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel, makeRect } from '../../functional/states'
 import { RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -17,6 +17,18 @@ const DEFAULT_VIEW_HIGH_POINT_STYLE = makePoint2DStyle({ radius: 12 })
 const DEFAULT_CONTROL_RECT_STYLE = makeRect2DStyle({ lineWidth: 10 })
 const DEFAULT_CONTROL_POINT_STYLE = makePoint2DStyle({ radius: 12 })
 const MIN_AREA = 10
+
+enum Handles {
+  EDGE = 0,
+  TOP_LEFT = 1,
+  TOP_MIDDLE = 2,
+  TOP_RIGHT = 3,
+  RIGHT_MIDDLE = 4,
+  BOTTOM_RIGHT = 5,
+  BOTTOM_MIDDLE = 6,
+  BOTTOM_LEFT = 7,
+  LEFT_MIDDLE = 8
+}
 
 /**
  * Box2d Label
@@ -43,6 +55,28 @@ export class Box2D extends Label2D {
    */
   public get shapes (): Array<Readonly<Shape>> {
     return this._shapes
+  }
+
+  /** Get cursor for use when highlighting */
+  public get highlightCursor (): string {
+    switch (this._highlightedHandle) {
+      case Handles.EDGE:
+        return Cursor.MOVE
+      case Handles.TOP_LEFT:
+      case Handles.BOTTOM_RIGHT:
+        return Cursor.NWSE_RESIZE
+      case Handles.TOP_RIGHT:
+      case Handles.BOTTOM_LEFT:
+        return Cursor.NESW_RESIZE
+      case Handles.TOP_MIDDLE:
+      case Handles.BOTTOM_MIDDLE:
+        return Cursor.NS_RESIZE
+      case Handles.LEFT_MIDDLE:
+      case Handles.RIGHT_MIDDLE:
+        return Cursor.EW_RESIZE
+    }
+
+    return super.highlightCursor
   }
 
   /** Draw the label on viewing or control canvas */
@@ -119,13 +153,13 @@ export class Box2D extends Label2D {
       // move a midpoint
       const v1 = this._shapes[1]
       const v2 = this._shapes[5]
-      if (this._highlightedHandle === 2) {
+      if (this._highlightedHandle === Handles.TOP_MIDDLE) {
         v1.y = y
-      } else if (this._highlightedHandle === 4) {
+      } else if (this._highlightedHandle === Handles.RIGHT_MIDDLE) {
         v2.x = x
-      } else if (this._highlightedHandle === 6) {
+      } else if (this._highlightedHandle === Handles.BOTTOM_MIDDLE) {
         v2.y = y
-      } else if (this._highlightedHandle === 8) {
+      } else if (this._highlightedHandle === Handles.LEFT_MIDDLE) {
         v1.x = x
       }
       x1 = Math.min(v1.x, v2.x)
@@ -133,13 +167,13 @@ export class Box2D extends Label2D {
       y1 = Math.min(v1.y, v2.y)
       y2 = Math.max(v1.y, v2.y)
       if (x === x1) {
-        this._highlightedHandle = 8
+        this._highlightedHandle = Handles.LEFT_MIDDLE
       } else if (x === x2) {
-        this._highlightedHandle = 4
+        this._highlightedHandle = Handles.RIGHT_MIDDLE
       } else if (y === y1) {
-        this._highlightedHandle = 2
+        this._highlightedHandle = Handles.TOP_MIDDLE
       } else if (y === y2) {
-        this._highlightedHandle = 6
+        this._highlightedHandle = Handles.BOTTOM_MIDDLE
       }
     } else {
       // move a vertex
@@ -150,15 +184,15 @@ export class Box2D extends Label2D {
       y2 = Math.max(y, oppVertex.y)
       if (oppVertex.x < x) {
         if (oppVertex.y < y) {
-          this._highlightedHandle = 5
+          this._highlightedHandle = Handles.BOTTOM_RIGHT
         } else {
-          this._highlightedHandle = 3
+          this._highlightedHandle = Handles.TOP_RIGHT
         }
       } else {
         if (oppVertex.y < y) {
-          this._highlightedHandle = 7
+          this._highlightedHandle = Handles.BOTTOM_LEFT
         } else {
-          this._highlightedHandle = 1
+          this._highlightedHandle = Handles.TOP_LEFT
         }
       }
     }
@@ -226,7 +260,10 @@ export class Box2D extends Label2D {
     if (this._selected && this._mouseDown && this.editing) {
       if (this._highlightedHandle > 0) {
         this.resize(coord, limit)
-      } else if (this._highlightedHandle === 0 && handleIndex === 0) {
+      } else if (
+        this._highlightedHandle === Handles.EDGE &&
+        handleIndex === 0
+      ) {
         this.move(coord, limit)
       }
       return true
@@ -274,7 +311,7 @@ export class Box2D extends Label2D {
       x1: start.x, y1: start.y, x2: start.x, y2: start.y
     })
     this.updateShapes([rect])
-    this._highlightedHandle = 5
+    this._highlightedHandle = Handles.BOTTOM_RIGHT
   }
 
   /** Get rect representation */
