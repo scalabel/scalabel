@@ -10,6 +10,7 @@ import _ from 'lodash'
 import React from 'react'
 import Session, { ConnectionStatus } from '../common/session'
 import Synchronizer from '../common/synchronizer'
+import { Key } from '../common/types'
 import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
@@ -87,6 +88,9 @@ interface Props {
  * Title bar
  */
 class TitleBar extends Component<Props> {
+  /** Listener for key down events */
+  private _keyDownListener: (e: KeyboardEvent) => void
+
   /**
    * Constructor
    * @param {Object} props: react props
@@ -97,6 +101,16 @@ class TitleBar extends Component<Props> {
     Session.applyStatusEffects = () => {
       this.forceUpdate()
     }
+    this._keyDownListener = ((e: KeyboardEvent) => {
+      if (e.key === Key.S_LOW || e.key === Key.S_UP) {
+        this.save()
+      }
+    })
+  }
+
+  /** Mount override */
+  public componentDidMount () {
+    document.addEventListener('keydown', this._keyDownListener)
   }
 
   /**
@@ -107,6 +121,7 @@ class TitleBar extends Component<Props> {
     super.componentWillUnmount()
     // De-couple the titlebar and the session
     Session.applyStatusEffects = () => { return }
+    document.removeEventListener('keydown', this._keyDownListener)
   }
 
   /**
