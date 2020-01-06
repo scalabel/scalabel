@@ -132,6 +132,11 @@ export abstract class Label2D {
     return Cursor.CROSSHAIR
   }
 
+  /** Returns whether this label is selected */
+  public get selected (): boolean {
+    return this._selected
+  }
+
   /** select the label */
   public setSelected (s: boolean) {
     this._selected = s

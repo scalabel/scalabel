@@ -130,6 +130,8 @@ export interface ViewerConfigType {
   sensor: number
   /** id of pane this belongs to */
   pane: number
+  /** whether to hide non-selected labels */
+  hideLabels: boolean
 }
 
 export interface ImageViewerConfigType extends ViewerConfigType {

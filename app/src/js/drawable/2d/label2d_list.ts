@@ -129,9 +129,16 @@ export class Label2DList {
    * @param {number} ratio: ratio: display to image size ratio
    */
   public redraw (
-      labelContext: Context2D, controlContext: Context2D, ratio: number): void {
-    this._labelList.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
-    this._labelList.forEach(
+      labelContext: Context2D,
+      controlContext: Context2D,
+      ratio: number,
+      hideLabels?: boolean
+    ): void {
+    const labelsToDraw = (hideLabels) ?
+      this._labelList.filter((label) => label.selected) :
+      this._labelList
+    labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
+    labelsToDraw.forEach(
       (v) => v.draw(controlContext, ratio, DrawMode.CONTROL)
     )
   }
