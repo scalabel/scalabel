@@ -108,7 +108,7 @@ class Viewer2D extends DrawableViewer<ViewerProps> {
    */
   protected onWheel (e: WheelEvent) {
     e.preventDefault()
-    if (this._viewerConfig) {
+    if (this._viewerConfig && this._container) {
       if (this.isKeyDown(types.Key.META) ||
           this.isKeyDown(types.Key.CONTROL)) {
         let zoomRatio = SCROLL_ZOOM_RATIO
@@ -120,15 +120,15 @@ class Viewer2D extends DrawableViewer<ViewerProps> {
         const newConfig = { ...config }
         if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
           newConfig.viewScale = newScale
+        } else {
+          zoomRatio = 1
         }
-        if (this._container) {
-          const displayLeft = zoomRatio * (this._mX + config.displayLeft) -
+        const displayLeft = zoomRatio * (this._mX + config.displayLeft) -
             this._mX
-          const displayTop = zoomRatio * (this._mY + config.displayTop) -
+        const displayTop = zoomRatio * (this._mY + config.displayTop) -
             this._mY
-          newConfig.displayLeft = displayLeft
-          newConfig.displayTop = displayTop
-        }
+        newConfig.displayLeft = displayLeft
+        newConfig.displayTop = displayTop
         Session.dispatch(changeViewerConfig(
           this._viewerId,
           newConfig
