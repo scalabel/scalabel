@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { ShapeTypeName } from '../../common/types'
+import { Cursor, ShapeTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
 import { makeTaskConfig } from '../../functional/states'
 import { ConfigType, LabelType, ShapeType, State } from '../../functional/types'
@@ -125,6 +125,11 @@ export abstract class Label2D {
   /** get whether highlighted */
   public get highlighted (): boolean {
     return this._highlighted || this._selected
+  }
+
+  /** Get cursor to use when highlighting */
+  public get highlightCursor (): string {
+    return Cursor.CROSSHAIR
   }
 
   /** select the label */
