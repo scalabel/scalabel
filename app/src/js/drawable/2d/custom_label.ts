@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { Key, ShapeTypeName } from '../../common/types'
+import { Cursor, Key, ShapeTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
 import { Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -49,6 +49,28 @@ export class CustomLabel2D extends Label2D {
       }
     }
     this._keyDownMap = {}
+  }
+
+  /** Get cursor for highlighting */
+  public get highlightCursor () {
+    if (
+      this._highlightedHandle >= 0 &&
+      this._highlightedHandle < this._shapes.length
+    ) {
+      return Cursor.DEFAULT
+    } else if (
+      this._highlightedHandle >= this._shapes.length &&
+      this._highlightedHandle < this._shapes.length + this._corners.length
+    ) {
+      const cornerIndex = this._highlightedHandle - this._shapes.length
+      if (cornerIndex % 2 === 0) {
+        return Cursor.NWSE_RESIZE
+      } else {
+        return Cursor.NESW_RESIZE
+      }
+    } else {
+      return Cursor.MOVE
+    }
   }
 
   /** Draw according to template */
