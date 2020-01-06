@@ -180,6 +180,7 @@ export function makeImageViewerConfig (
     sensor,
     pane,
     synchronized: false
+    hideLabels: false
   }
 }
 
@@ -200,6 +201,7 @@ export function makePointCloudViewerConfig (
     sensor,
     pane,
     synchronized: false
+    hideLabels: false
   }
 }
 
