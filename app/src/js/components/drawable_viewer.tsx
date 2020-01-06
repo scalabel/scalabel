@@ -97,9 +97,8 @@ export abstract class DrawableViewer extends Component<ViewerProps> {
 
   /**
    * Render function
-   * @return {React.Fragment} React fragment
    */
-  public render () {
+  public render (): React.ReactNode {
     this._viewerId = this.props.id
     this._viewerConfig = this.state.user.viewerConfigs[this._viewerId]
     this._item = this.state.user.select.item

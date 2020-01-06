@@ -69,33 +69,32 @@ export async function GetExportHandler (req: Request, res: Response) {
     let items: ItemExport[] = []
     // load the latest submission for each task to export
     for (const task of tasks) {
-      await loadSavedState(projectName, task.config.taskId)
-        .then((state: State) => {
-          items = items.concat(convertStateToExport(state))
-        })
-        .catch((err: Error) => {
-          // if state submission is not found, use an empty item
-          Logger.info(err.message)
-          for (const itemToLoad of task.items) {
-            const url = Object.values(itemToLoad.urls)[0]
-            items.push({
-              name: url,
-              url,
-              sensor: -1,
-              timestamp: projectToLoad.config.submitTime,
-              videoName: itemToLoad.videoName,
-              attributes: {},
-              labels: []
-            })
-          }
-        })
+      try {
+        const state = await loadSavedState(projectName, task.config.taskId)
+        items = items.concat(convertStateToExport(state))
+      } catch (error) {
+        Logger.info(error.message)
+        for (const itemToLoad of task.items) {
+          const url = Object.values(itemToLoad.urls)[0]
+          items.push({
+            name: url,
+            url,
+            sensor: -1,
+            timestamp: projectToLoad.config.submitTime,
+            videoName: itemToLoad.videoName,
+            attributes: {},
+            labels: []
+          })
+        }
+      }
     }
     const exportJson = JSON.stringify(items, null, '  ')
     // set relevant header and send the exported json file
     res.attachment(getExportName(projectName))
     res.end(Buffer.from(exportJson, 'binary'), 'binary')
-  } catch (err) {
-    Logger.error(err)
+  } catch (error) {
+    // TODO: Be more specific about what this error may be
+    Logger.error(error)
     res.end()
   }
 }
