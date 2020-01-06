@@ -45,8 +45,6 @@ export class Label3DList {
   private _selectedLabel: Label3D | null
   /** List of ThreeJS objects for raycasting */
   private _raycastableShapes: Readonly<Array<Readonly<Shape3D>>>
-  /** active camera */
-  private _activeCamera?: THREE.Camera
   /** callbacks */
   private _callbacks: Array<() => void>
   /** New labels to be committed */
@@ -189,7 +187,7 @@ export class Label3DList {
       }
       if (newLabels[id]) {
         newLabels[id].updateState(
-          state, state.user.select.item, id, this._activeCamera
+          state, state.user.select.item, id
         )
         for (const shape of Object.values(newLabels[id].shapes())) {
           newRaycastableShapes.push(shape)
@@ -258,7 +256,9 @@ export class Label3DList {
 
   /** Set active camera */
   public setActiveCamera (camera: THREE.Camera) {
-    this._activeCamera = camera
+    if (this._selectedLabel) {
+      this._selectedLabel.activeCamera = camera
+    }
     this.onDrawableUpdate()
   }
 

@@ -135,6 +135,11 @@ export abstract class Label3D {
     return {}
   }
 
+  /** Set active camera for label */
+  public set activeCamera (_camera: THREE.Camera) {
+    return
+  }
+
   /** Attach control */
   public abstract attachControl (control: TransformationControl): void
 
@@ -202,8 +207,7 @@ export abstract class Label3D {
   public updateState (
     state: State,
     itemIndex: number,
-    labelId: number,
-    _activeCamera?: THREE.Camera
+    labelId: number
   ): void {
     const item = state.task.items[itemIndex]
     this._label = item.labels[labelId]

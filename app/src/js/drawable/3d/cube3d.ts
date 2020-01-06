@@ -226,7 +226,7 @@ export class Cube3D extends Shape3D {
 
   /** update parameters */
   public updateState (
-    shape: ShapeType, id: number, activeCamera?: THREE.Camera
+    shape: ShapeType, id: number
   ) {
     const geometry = this._box.geometry as THREE.Geometry
     for (const face of geometry.faces) {
@@ -237,9 +237,6 @@ export class Cube3D extends Shape3D {
     this.center = (new Vector3D()).fromObject(cube.center)
     this.orientation = (new Vector3D()).fromObject(cube.orientation)
     this.size = (new Vector3D()).fromObject(cube.size)
-    if (activeCamera) {
-      this.setControlSpheres(activeCamera)
-    }
   }
 
   /**
@@ -579,7 +576,7 @@ export class Cube3D extends Shape3D {
    * Set sphere positions from normal
    * @param normal
    */
-  private setControlSpheres (camera: THREE.Camera) {
+  public setControlSpheres (camera: THREE.Camera) {
     // Find normal closest to camera
     const worldQuaternion = new THREE.Quaternion()
     this.getWorldQuaternion(worldQuaternion)

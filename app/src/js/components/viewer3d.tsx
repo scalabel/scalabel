@@ -247,6 +247,12 @@ class Viewer3D extends DrawableViewer<Props> {
     return []
   }
 
+  /** Mouse enter */
+  protected onMouseEnter (e: React.MouseEvent) {
+    super.onMouseEnter(e)
+    Session.label3dList.setActiveCamera(this._camera)
+  }
+
   /**
    * Handle mouse move
    * @param e
