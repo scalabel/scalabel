@@ -130,6 +130,11 @@ export interface ViewerConfigType {
   sensor: number
   /** id of pane this belongs to */
   pane: number
+  /**
+   * Set if synchronized with compatible viewer configs,
+   * must be same type for now
+   */
+  synchronized: boolean
   /** whether to hide non-selected labels */
   hideLabels: boolean
 }

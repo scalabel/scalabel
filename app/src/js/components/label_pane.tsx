@@ -122,6 +122,7 @@ class LabelPane extends Component<Props> {
               pane.viewerId
             ))
           }}
+          edge={'start'}
         >
           <ViewStreamIcon />
         </IconButton>
@@ -136,6 +137,7 @@ class LabelPane extends Component<Props> {
               pane.viewerId
             ))
           }}
+          edge={'start'}
         >
           <CloseIcon />
         </IconButton>
