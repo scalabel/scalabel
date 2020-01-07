@@ -179,7 +179,7 @@ export function makeImageViewerConfig (
     type: types.ViewerConfigTypeName.IMAGE,
     sensor,
     pane,
-    synchronized: false
+    synchronized: false,
     hideLabels: false
   }
 }
@@ -200,7 +200,7 @@ export function makePointCloudViewerConfig (
     type: types.ViewerConfigTypeName.POINT_CLOUD,
     sensor,
     pane,
-    synchronized: false
+    synchronized: false,
     hideLabels: false
   }
 }
