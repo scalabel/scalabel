@@ -92,7 +92,7 @@ describe('test Delete', () => {
       ref={toolbarRef}
       categories={null}
       attributes={[]}
-      labelType={'labelType'}
+      labelTypes={['labelType']}
       />
     )
     expect(toolbarRef.current).not.toBeNull()

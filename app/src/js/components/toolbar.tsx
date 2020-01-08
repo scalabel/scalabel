@@ -14,6 +14,7 @@ import { Attribute, State, TrackType } from '../functional/types'
 import { Component } from './component'
 import { makeButton } from './general_button'
 import { Category } from './toolbar_category'
+import { LabelType } from './toolbar_labelType'
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
@@ -22,7 +23,7 @@ interface Props {
   /** attributes of ToolBar */
   attributes: Attribute[]
   /** labelType of ToolBar 'box2d' | 'polygon2d' | 'lane' */
-  labelType: string
+  labelTypes: string[]
 }
 /**
  * This is ToolBar component that displays
@@ -119,9 +120,13 @@ export class ToolBar extends Component<Props> {
    * @return component
    */
   public render () {
-    const { categories, attributes } = this.props
+    const { categories, attributes, labelTypes } = this.props
     return (
       <div>
+        <ListItem style={{ textAlign: 'center' }}>
+            <LabelType labelTypes={labelTypes} headerText={'Label Types'} />
+        </ListItem>
+        <Divider variant='middle' />
         {categories !== null ? (
           <ListItem style={{ textAlign: 'center' }}>
             <Category categories={categories} headerText={'Label Category'} />

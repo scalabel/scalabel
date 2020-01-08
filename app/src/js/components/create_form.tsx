@@ -48,7 +48,7 @@ interface State {
   /** project item type */
   itemType: string
   /** project label type */
-  labelType: string[]
+  labelTypes: string[]
   /** project page title */
   pageTitle: string
   /** current instructions url */
@@ -99,7 +99,7 @@ export default class CreateForm extends React.Component<Props, State> {
     this.state = {
       projectName: '',
       itemType: '',
-      labelType: [],
+      labelTypes: [],
       pageTitle: '',
       instructionsUrl: '',
       dashboardUrl: '',
@@ -176,7 +176,7 @@ export default class CreateForm extends React.Component<Props, State> {
                 multiple
                 required
                 name={FormField.LABEL_TYPE}
-                value={this.state.labelType}
+                value={this.state.labelTypes}
                 onChange={this.handleMultiLabelChange}
                 input={<Input />}
                 renderValue={(selected) => (selected as string[]).join(', ')}
@@ -186,7 +186,7 @@ export default class CreateForm extends React.Component<Props, State> {
                 {labelTypes.map((name) => (
                   <MenuItem key={name} value={name}>
                   <Checkbox color='primary'
-                      checked={this.state.labelType.indexOf(name) > -1}/>
+                      checked={this.state.labelTypes.indexOf(name) > -1}/>
                   <ListItemText primary={name} />
                   </MenuItem>
                 ))}
@@ -374,29 +374,35 @@ export default class CreateForm extends React.Component<Props, State> {
    * handles instruction url
    * @param itemType {string}
    */
-  private handleInstructions = (labelType: string) => {
+  private handleInstructions = (labelTypes: string[]) => {
     let labelName = ''
     let instructions = ''
-    if (labelType === LabelTypeName.TAG) {
-      labelName = 'Image Tagging'
-      this.setState({ showCategoriesUpload: false })
-    } else if (labelType === LabelTypeName.BOX_2D) {
-      labelName = '2D Bounding Box'
-      instructions = 'https://www.scalabel.ai/doc/instructions/bbox.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.POLYGON_2D) {
-      labelName = '2D Segmentation'
-      instructions = 'https://www.scalabel.ai/doc/instructions/' +
-              'segmentation.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.POLYLINE_2D) {
-      labelName = '2D Lane'
-      instructions = 'https://www.scalabel.ai/doc/instructions/' +
-              'segmentation.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.BOX_3D) {
-      labelName = '3D Bounding Box'
-      this.setState({ showCategoriesUpload: true })
+    for (let i = 0; i < labelTypes.length; ++i) {
+      const labelType = labelTypes[i]
+      if (labelType === LabelTypeName.TAG) {
+        labelName += 'Image Tagging'
+        this.setState({ showCategoriesUpload: false })
+      } else if (labelType === LabelTypeName.BOX_2D) {
+        labelName += '2D Bounding Box'
+        instructions = 'https://www.scalabel.ai/doc/instructions/bbox.html'
+        this.setState({ showCategoriesUpload: true })
+      } else if (labelType === LabelTypeName.POLYGON_2D) {
+        labelName += '2D Segmentation'
+        instructions = 'https://www.scalabel.ai/doc/instructions/' +
+                'segmentation.html'
+        this.setState({ showCategoriesUpload: true })
+      } else if (labelType === LabelTypeName.POLYLINE_2D) {
+        labelName += '2D Lane'
+        instructions = 'https://www.scalabel.ai/doc/instructions/' +
+                'segmentation.html'
+        this.setState({ showCategoriesUpload: true })
+      } else if (labelType === LabelTypeName.BOX_3D) {
+        labelName += '3D Bounding Box'
+        this.setState({ showCategoriesUpload: true })
+      }
+      if (labelTypes.length > 0 && i !== (labelTypes.length - 1)) {
+        labelName += ' & '
+      }
     }
     this.setState({ pageTitle: labelName })
     this.setState({ instructionsUrl: instructions })
@@ -406,8 +412,8 @@ export default class CreateForm extends React.Component<Props, State> {
    * @param event
    */
   private handleMultiLabelChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    this.handleInstructions((event.target.value as string[])[0])
-    this.setState({ labelType: event.target.value as string[] })
+    this.handleInstructions(event.target.value as string[])
+    this.setState({ labelTypes: event.target.value as string[] })
   }
   /**
    * handles item type changing

@@ -53,7 +53,7 @@ export class Window extends React.Component<Props> {
         <ToolBar
             categories={config.categories}
             attributes={config.attributes}
-            labelType={config.labelTypes[0]}
+            labelTypes={config.labelTypes}
         />
     )
 

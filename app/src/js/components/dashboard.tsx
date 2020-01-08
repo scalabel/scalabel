@@ -265,7 +265,7 @@ function sidebar (props: SidebarProps) {
   const sidebarListItems = [
     { tag: 'Project Name', entry: projectMetaData.name },
     { tag: 'Item Type', entry: projectMetaData.itemType },
-    { tag: 'Label Type', entry: projectMetaData.labelTypes[0] },
+    { tag: 'Label Type', entry: projectMetaData.labelTypes.join(', ') },
     { tag: 'Task Size', entry: projectMetaData.taskSize },
     { tag: '# Items', entry: projectMetaData.numItems },
     { tag: '# Categories', entry: projectMetaData.numLeafCategories },
