@@ -19,12 +19,8 @@ export class FileStorage extends Storage {
    * Check if specified file exists
    * @param {string} key: relative path of file
    */
-  public hasKey (key: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      fs.pathExists(this.fullFile(key), (err, exists) => {
-        err ? reject(err) : resolve(exists)
-      })
-    })
+  public async hasKey (key: string): Promise<boolean> {
+    return fs.pathExists(this.fullFile(key))
   }
 
   /**
@@ -55,36 +51,28 @@ export class FileStorage extends Storage {
    * @param {string} key: relative path of file
    * @param {string} json: data to save
    */
-  public save (key: string, json: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const dir = this.fullDir(path.dirname(key))
-      fs.ensureDir(dir, undefined,
-        (ensureErr: NodeJS.ErrnoException | null) => {
-          // no need to reject if dir existed
-          if (ensureErr && ensureErr.code !== 'EEXIST') {
-            reject(ensureErr)
-            return
-          }
-          fs.writeFile(this.fullFile(key), json, (writeErr: Error) => {
-            if (writeErr) {
-              reject(writeErr)
-              return
-            }
-            resolve()
-          })
-        })
-    })
+  public async save (key: string, json: string): Promise<void> {
+    // TODO: Make sure undefined is the right dir options
+    try {
+      await fs.ensureDir(this.fullDir(path.dirname(key)), undefined)
+    } catch (error) {
+      // no need to reject if dir existed
+      if (error && error.code !== 'EEXIST') {
+        throw error
+      }
+    }
+    return fs.writeFile(this.fullFile(key), json)
   }
 
   /**
    * Loads fields stored at a key
    * @param {string} key: relative path of file
    */
-  public load (key: string): Promise<string> {
+  public async load (key: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      fs.readFile(this.fullFile(key), (err: Error, buf: Buffer) => {
-        if (err) {
-          reject(err)
+      fs.readFile(this.fullFile(key), (error: Error, buf: Buffer) => {
+        if (error) {
+          reject(error)
           return
         }
         resolve(buf.toString())
@@ -96,22 +84,13 @@ export class FileStorage extends Storage {
    * Deletes values at the key
    * @param {string} key: relative path of directory
    */
-  public delete (key: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const fullDir = this.fullDir(key)
-      if (fullDir !== '') {
-        fs.remove(this.fullDir(key), (err) => {
-          if (err) {
-            reject(err)
-            return
-          }
-          resolve()
-        })
-      } else {
-        // Don't delete everything
-        reject(Error('Delete failed- tried to delete home dir'))
-      }
-    })
+  public async delete (key: string): Promise<void> {
+    const fullDir = this.fullDir(key)
+    if (fullDir === '') {
+      // Don't delete everything
+      throw new Error('Delete failed: tried to delete home dir')
+    }
+    return fs.remove(this.fullDir(key))
   }
 
   /**

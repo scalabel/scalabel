@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Key, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel, makePolygon } from '../../functional/states'
 import { PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -58,6 +58,20 @@ export class Polygon2D extends Label2D {
     this._startingPoints = []
     this._keyDownMap = {}
     this._closed = closed
+  }
+
+  /** Get cursor for highlighting */
+  public get highlightCursor () {
+    if (this._state === Polygon2DState.DRAW) {
+      return Cursor.CROSSHAIR
+    } else if (
+      this._highlightedHandle > 0 &&
+      this._highlightedHandle <= this._points.length
+    ) {
+      return Cursor.DEFAULT
+    } else {
+      return Cursor.MOVE
+    }
   }
 
   /**
