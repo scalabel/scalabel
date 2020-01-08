@@ -26,7 +26,7 @@ describe('test general utility methods', () => {
 
   test('make image creation form', () => {
     const form = util.makeCreationForm(
-      'sampleName', ItemTypeName.IMAGE, LabelTypeName.BOX_2D,
+      'sampleName', ItemTypeName.IMAGE, [LabelTypeName.BOX_2D],
       'sampleTitle', 5, 'instructions.com', false
     )
     expect(form).toEqual(sampleFormImage)
@@ -52,56 +52,56 @@ describe('test general utility methods', () => {
   test('handler url selection', () => {
     // img item => label2d handler
     let handler = util.getHandlerUrl(
-      ItemTypeName.IMAGE, LabelTypeName.BOX_3D)
+      ItemTypeName.IMAGE, [LabelTypeName.BOX_3D])
     expect(handler).toBe(HandlerUrl.LABEL)
 
     // video item + box2d label => 2d handler
     handler = util.getHandlerUrl(
-      ItemTypeName.VIDEO, LabelTypeName.BOX_2D)
+      ItemTypeName.VIDEO, [LabelTypeName.BOX_2D])
     expect(handler).toBe(HandlerUrl.LABEL)
 
     // video item + other label => invalid handler
     handler = util.getHandlerUrl(
-      ItemTypeName.VIDEO, LabelTypeName.BOX_3D)
+      ItemTypeName.VIDEO, [LabelTypeName.BOX_3D])
     expect(handler).toBe(HandlerUrl.INVALID)
 
     // point cloud item + box3d label => 3d handler
     handler = util.getHandlerUrl(
-      ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D)
+      ItemTypeName.POINT_CLOUD, [LabelTypeName.BOX_3D])
     expect(handler).toBe(HandlerUrl.LABEL)
     handler = util.getHandlerUrl(
-      ItemTypeName.POINT_CLOUD_TRACKING, LabelTypeName.BOX_3D)
+      ItemTypeName.POINT_CLOUD_TRACKING, [LabelTypeName.BOX_3D])
     expect(handler).toBe(HandlerUrl.LABEL)
 
     // point cloud item + other label => invalid handler
     handler = util.getHandlerUrl(
-      ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_2D)
+      ItemTypeName.POINT_CLOUD, [LabelTypeName.BOX_2D])
     expect(handler).toBe(HandlerUrl.INVALID)
     handler = util.getHandlerUrl(
-      ItemTypeName.POINT_CLOUD_TRACKING, LabelTypeName.TAG)
+      ItemTypeName.POINT_CLOUD_TRACKING, [LabelTypeName.TAG])
     expect(handler).toBe(HandlerUrl.INVALID)
 
     // any other combinations are invalid
     handler = util.getHandlerUrl(
-      'invalid item', LabelTypeName.BOX_2D)
+      'invalid item', [LabelTypeName.BOX_2D])
     expect(handler).toBe(HandlerUrl.INVALID)
   })
 
   test('bundle file selection', () => {
     // tag label => v2 bundle
-    let bundleFile = util.getBundleFile(LabelTypeName.TAG)
+    let bundleFile = util.getBundleFile([LabelTypeName.TAG])
     expect(bundleFile).toBe(BundleFile.V2)
 
     // box2d label => v2 bundle
-    bundleFile = util.getBundleFile(LabelTypeName.BOX_2D)
+    bundleFile = util.getBundleFile([LabelTypeName.BOX_2D])
     expect(bundleFile).toBe(BundleFile.V2)
 
     // any other label => v1 bundle
-    bundleFile = util.getBundleFile(LabelTypeName.BOX_3D)
+    bundleFile = util.getBundleFile([LabelTypeName.BOX_3D])
     expect(bundleFile).toBe(BundleFile.V1)
-    bundleFile = util.getBundleFile(LabelTypeName.POLYGON_2D)
+    bundleFile = util.getBundleFile([LabelTypeName.POLYGON_2D])
     expect(bundleFile).toBe(BundleFile.V1)
-    bundleFile = util.getBundleFile('invalid label')
+    bundleFile = util.getBundleFile(['invalid label'])
     expect(bundleFile).toBe(BundleFile.V1)
   })
 

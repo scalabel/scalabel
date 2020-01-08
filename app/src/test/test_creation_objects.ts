@@ -122,7 +122,7 @@ export const sampleItems: Array<Partial<ItemExport>> = [
 export const sampleFormEmpty: CreationForm = {
   projectName: '',
   itemType: '',
-  labelType: '',
+  labelTypes:  [],
   pageTitle: '',
   taskSize: 0,
   instructions: '',
@@ -137,7 +137,7 @@ const sampleTaskSize = 5
 export const sampleFormImage: CreationForm = {
   projectName: sampleProjectName,
   itemType: ItemTypeName.IMAGE,
-  labelType: LabelTypeName.BOX_2D,
+  labelTypes: [LabelTypeName.BOX_2D],
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
   instructions: sampleInstructions,
@@ -147,7 +147,7 @@ export const sampleFormImage: CreationForm = {
 export const sampleFormVideo: CreationForm = {
   projectName: sampleProjectName,
   itemType: ItemTypeName.VIDEO,
-  labelType: LabelTypeName.POLYGON_2D,
+  labelTypes: [LabelTypeName.POLYGON_2D],
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
   instructions: sampleInstructions,
