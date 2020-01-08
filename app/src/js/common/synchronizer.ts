@@ -93,9 +93,11 @@ export class Synchronizer {
     // If backend disconnects, keep trying to reconnect
     this.socket.on(EventName.DISCONNECT, () => {
       Session.updateStatus(ConnectionStatus.RECONNECTING)
-      // On reconnect, just update store instead of re-initializing it
-      self.initStateCallback = (state: State) => {
-        Session.dispatch(updateTask(state.task))
+      if (Session.autosave) {
+        // On reconnect, just update store instead of re-initializing it
+        self.initStateCallback = (state: State) => {
+          Session.dispatch(updateTask(state.task))
+        }
       }
     })
   }
