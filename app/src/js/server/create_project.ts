@@ -42,6 +42,7 @@ export function parseForm (fields: Fields): Promise<types.CreationForm> {
   if (labelType === '') {
     return Promise.reject(Error('Please choose a label type'))
   }
+  const labelTypes: string[] = labelType.split(',')
 
   // Task size is not required for videos
   let taskSize = 1 // video case
@@ -65,7 +66,7 @@ export function parseForm (fields: Fields): Promise<types.CreationForm> {
       }
       const demoMode = fields[types.FormField.DEMO_MODE] === 'true'
       const form = util.makeCreationForm(
-        projectName, itemType, labelType, pageTitle, taskSize,
+        projectName, itemType, labelTypes, pageTitle, taskSize,
         instructions, demoMode
       )
       return form
@@ -75,14 +76,14 @@ export function parseForm (fields: Fields): Promise<types.CreationForm> {
 /**
  * Parses item, category, and attribute files from form
  */
-export function parseFiles (labelType: string, files: Files)
+export function parseFiles (labelTypes: string[], files: Files)
   : Promise<types.FormFileData> {
   return Promise.all([
     parseItems(files),
     parseSensors(files),
     parseTemplates(files),
-    parseAttributes(files, labelType),
-    parseCategories(files, labelType)])
+    parseAttributes(files, labelTypes),
+    parseCategories(files, labelTypes)])
     .then((result: [
       Array<Partial<ItemExport>>,
       SensorType[],
@@ -141,13 +142,14 @@ function readCategoriesFile (path: string): Promise<string[]> {
  * Load from category file
  * Use default if file is empty
  */
+// TODO get default Categories for multiple labelTypes
 export function parseCategories (
-  files: Files, labelType: string): Promise<string[]> {
+  files: Files, labelTypes: string[]): Promise<string[]> {
   const categoryFile = files[types.FormField.CATEGORIES]
   if (util.formFileExists(categoryFile)) {
     return readCategoriesFile(categoryFile.path)
   } else {
-    const categories = getDefaultCategories(labelType)
+    const categories = getDefaultCategories(labelTypes[0])
     return Promise.resolve(categories)
   }
 }
@@ -184,13 +186,14 @@ function readAttributesFile (path: string): Promise<Attribute[]> {
  * Load from attributes file
  * Use default if file is empty
  */
+// TODO get default Attributes for multiple labelTypes
 export function parseAttributes (
-  files: Files, labelType: string): Promise<Attribute[]> {
+  files: Files, labelTypes: string[]): Promise<Attribute[]> {
   const attributeFile = files[types.FormField.ATTRIBUTES]
   if (util.formFileExists(attributeFile)) {
     return readAttributesFile(attributeFile.path)
   } else {
-    const defaultAttributes = getDefaultAttributes(labelType)
+    const defaultAttributes = getDefaultAttributes(labelTypes[0])
     return Promise.resolve(defaultAttributes)
   }
 }
@@ -292,8 +295,8 @@ export function createProject (
   form: types.CreationForm,
   formFileData: types.FormFileData): Promise<types.Project> {
 
-  const handlerUrl = util.getHandlerUrl(form.itemType, form.labelType)
-  const bundleFile = util.getBundleFile(form.labelType)
+  const handlerUrl = util.getHandlerUrl(form.itemType, form.labelTypes)
+  const bundleFile = util.getBundleFile(form.labelTypes)
   const [itemType, tracking] = util.getTracking(form.itemType)
 
   const templates: { [name: string]: Label2DTemplateType } = {}
@@ -309,7 +312,7 @@ export function createProject (
   const config: ConfigType = {
     projectName: form.projectName,
     itemType,
-    labelTypes: [form.labelType],
+    labelTypes: form.labelTypes,
     label2DTemplates: templates,
     taskSize: form.taskSize,
     handlerUrl,

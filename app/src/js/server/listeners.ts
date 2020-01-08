@@ -113,7 +113,7 @@ export async function PostProjectHandler (req: Request, res: Response) {
       // parse form from request
       const form = await parseForm(fields)
       // parse item, category, and attribute data from the form
-      const formFileData = await parseFiles(form.labelType, files)
+      const formFileData = await parseFiles(form.labelTypes, files)
       // create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([

@@ -1,8 +1,14 @@
 import { TextField } from '@material-ui/core'
 import Button from '@material-ui/core/Button'
 import Checkbox from '@material-ui/core/Checkbox'
+import FormControl from '@material-ui/core/FormControl'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import FormGroup from '@material-ui/core/FormGroup'
+import Input from '@material-ui/core/Input'
+import InputLabel from '@material-ui/core/InputLabel'
+import ListItemText from '@material-ui/core/ListItemText'
+import MenuItem from '@material-ui/core/MenuItem'
+import Select from '@material-ui/core/Select'
 import withStyles from '@material-ui/core/styles/withStyles'
 import React, { ChangeEvent } from 'react'
 import { ItemTypeName, LabelTypeName } from '../common/types'
@@ -42,7 +48,7 @@ interface State {
   /** project item type */
   itemType: string
   /** project label type */
-  labelType: string
+  labelType: string[]
   /** project page title */
   pageTitle: string
   /** current instructions url */
@@ -63,6 +69,27 @@ interface State {
   showTaskSize: boolean
 }
 
+const labelTypes = [
+  LabelTypeName.TAG,
+  LabelTypeName.BOX_2D,
+  LabelTypeName.POLYGON_2D,
+  LabelTypeName.POLYLINE_2D,
+  LabelTypeName.BOX_3D,
+  LabelTypeName.CUSTOM_2D
+]
+
+const ITEM_HEIGHT = 48
+const ITEM_PADDING_TOP = 8
+
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250
+    }
+  }
+}
+
 /**
  * Create Project form
  */
@@ -72,7 +99,7 @@ export default class CreateForm extends React.Component<Props, State> {
     this.state = {
       projectName: '',
       itemType: '',
-      labelType: '',
+      labelType: [],
       pageTitle: '',
       instructionsUrl: '',
       dashboardUrl: '',
@@ -139,33 +166,32 @@ export default class CreateForm extends React.Component<Props, State> {
               </option>
               <option value={ItemTypeName.FUSION}>Fusion</option>
             </TextField>
-            <TextField
-                    value={this.state.labelType}
-                    select
-                    name={FormField.LABEL_TYPE}
-                    label='Label Type'
-                    onChange={this.handleLabelChange}
-                    required
-                    className={classes.selectEmpty}
-                    inputProps={{
-                      'data-testid': 'label-type'
-                    }}
-                    SelectProps={{
-                      native: true
-                    }}
-            >
-              <option/>
-              <option value={LabelTypeName.TAG} data-testid='image-tagging'>
-                Image Tagging
-              </option>
-              <option value={LabelTypeName.BOX_2D}>2D Bounding Box</option>
-              <option value={LabelTypeName.POLYGON_2D}>Instance
-                Segmentation
-              </option>
-              <option value={LabelTypeName.POLYLINE_2D}>Lane</option>
-              <option value={LabelTypeName.BOX_3D}>3D Bounding Box</option>
-              <option value={LabelTypeName.CUSTOM_2D}>Custom</option>
-            </TextField>
+            <FormControl>
+              <InputLabel id='demo-mutiple-checkbox-label'>
+                LabelTypes
+              </InputLabel>
+              <Select
+                labelId='demo-mutiple-checkbox-label'
+                id='demo-mutiple-checkbox'
+                multiple
+                required
+                name={FormField.LABEL_TYPE}
+                value={this.state.labelType}
+                onChange={this.handleMultiLabelChange}
+                input={<Input />}
+                renderValue={(selected) => (selected as string[]).join(', ')}
+                MenuProps={MenuProps}
+                className={classes.selectEmpty}
+                >
+                {labelTypes.map((name) => (
+                  <MenuItem key={name} value={name}>
+                  <Checkbox color='primary'
+                      checked={this.state.labelType.indexOf(name) > -1}/>
+                  <ListItemText primary={name} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
             <TextField
@@ -379,9 +405,9 @@ export default class CreateForm extends React.Component<Props, State> {
    * handles label changing
    * @param event
    */
-  private handleLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.handleInstructions(event.target.value)
-    this.setState({ labelType: event.target.value })
+  private handleMultiLabelChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    this.handleInstructions((event.target.value as string[])[0])
+    this.setState({ labelType: event.target.value as string[] })
   }
   /**
    * handles item type changing

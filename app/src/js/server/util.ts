@@ -78,11 +78,11 @@ export function initStorage (env: Env) {
  * With empty arguments, default is created
  */
 export function makeCreationForm (
-  projectName = '', itemType = '', labelType = '',
+  projectName = '', itemType = '', labelTypes: string[] = [],
   pageTitle = '', taskSize = 0, instructions = '', demoMode = false
 ): CreationForm {
   const form: CreationForm = {
-    projectName, itemType, labelType, pageTitle,
+    projectName, itemType, labelTypes, pageTitle,
     instructions, taskSize, demoMode
   }
   return form
@@ -157,7 +157,9 @@ export function formFileExists (file: File | undefined): boolean {
 /**
  * Gets the handler url for the project
  */
-export function getHandlerUrl (itemType: string, labelType: string): string {
+// TODO getHandlerUrl for multiple labelTypes
+export function getHandlerUrl (itemType: string, labelTypes: string[]): string {
+  const labelType = labelTypes[0]
   switch (itemType) {
     case ItemTypeName.IMAGE:
       return HandlerUrl.LABEL
@@ -187,7 +189,10 @@ export function getHandlerUrl (itemType: string, labelType: string): string {
 /**
  * Get the bundle file for the project
  */
-export function getBundleFile (labelType: string): string {
+// TODO getBundleFile for multiple labelTypes
+export function getBundleFile (labelTypes: string[]): string {
+  // depends on redux progress
+  const labelType = labelTypes[0]
   // depends on redux progress
   if (labelType === LabelTypeName.TAG || labelType === LabelTypeName.BOX_2D) {
     return BundleFile.V2

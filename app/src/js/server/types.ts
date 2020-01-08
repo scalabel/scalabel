@@ -49,7 +49,7 @@ export interface CreationForm {
   /** item type */
   itemType: string
   /** label type */
-  labelType: string
+  labelTypes: string[]
   /** title of page */
   pageTitle: string
   /** task size */
