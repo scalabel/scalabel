@@ -13,8 +13,7 @@ export const paneBarStyles = () => createStyles({
     'padding': '10px 26px 10px 12px',
     '&:focus': {
       borderRadius: 4
-    },
-    'margin-right': '5px'
+    }
   },
   icon: {
     color: '#ced4da'

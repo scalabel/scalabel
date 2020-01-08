@@ -245,20 +245,11 @@ export async function getTasksInProject (
 export async function loadSavedState (projectName: string, taskId: string):
   Promise<State> {
   const storage = Session.getStorage()
-  return storage.listKeys(getSavedKey(projectName, taskId), false)
-    .then((keys) => {
-      if (keys.length > 0) {
-        Logger.info(sprintf('Reading %s\n', keys[keys.length - 1]))
-        return storage.load(keys[keys.length - 1])
-      }
-      return Promise.reject(Error())
-    })
-    .then((fields) => {
-      return JSON.parse(fields) as State
-    })
-    .catch(() => {
-      return Promise.reject(
-        Error(sprintf('No submissions found for task number %s',
-          taskId)))
-    })
+  const keys = await storage.listKeys(getSavedKey(projectName, taskId), false)
+  if (keys.length === 0) {
+    throw new Error('No submissions found for task number ${taskId}')
+  }
+  Logger.info(sprintf('Reading %s\n', keys[keys.length - 1]))
+  const fields = await storage.load(keys[keys.length - 1])
+  return JSON.parse(fields) as State
 }
