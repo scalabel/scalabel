@@ -213,10 +213,11 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   public redraw (): boolean {
     if (this.labelCanvas !== null && this.labelContext !== null &&
       this.controlCanvas !== null && this.controlContext !== null) {
+      const config = this.state.user.viewerConfigs[this.props.id]
       clearCanvas(this.labelCanvas, this.labelContext)
       clearCanvas(this.controlCanvas, this.controlContext)
       Session.label2dList.redraw(this.labelContext, this.controlContext,
-        this.displayToImageRatio * UP_RES_RATIO)
+        this.displayToImageRatio * UP_RES_RATIO, config.hideLabels)
     }
     return true
   }
@@ -266,12 +267,6 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       return
     }
 
-    // TODO: update hovered label
-    // grabbing image
-    if (!this.isKeyDown(Key.CONTROL) && !this.isKeyDown(Key.META)) {
-      this.setDefaultCursor()
-    }
-
     if (this.crosshair.current) {
       this.crosshair.current.onMouseMove(e)
     }
@@ -287,6 +282,12 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       e.stopPropagation()
     }
     Session.label2dList.onDrawableUpdate()
+
+    if (this._labelHandler.highlightedLabel) {
+      this.setCursor(this._labelHandler.highlightedLabel.highlightCursor)
+    } else {
+      this.setDefaultCursor()
+    }
   }
 
   /**

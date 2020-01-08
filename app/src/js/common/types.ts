@@ -59,6 +59,17 @@ export enum PathPointType {
   CURVE = 'bezier' // cubic Bezier curve path points
 }
 
+export enum Cursor {
+  CROSSHAIR = 'crosshair',
+  DEFAULT = 'default',
+  EW_RESIZE = 'ew-resize',
+  NESW_RESIZE = 'nesw-resize',
+  NWSE_RESIZE = 'nwse-resize',
+  NS_RESIZE = 'ns-resize',
+  MOVE = 'move',
+  POINTER = 'pointer'
+}
+
 export enum Key {
   ESCAPE = 'Escape',
   CONTROL = 'Control',

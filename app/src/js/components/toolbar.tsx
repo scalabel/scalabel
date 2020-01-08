@@ -3,7 +3,7 @@ import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
-import { changeSelect, mergeTracks } from '../action/common'
+import { changeSelect, changeViewerConfig, mergeTracks } from '../action/common'
 import { changeSelectedLabelsAttributes, deleteSelectedLabels, deleteSelectedTracks, terminateSelectedTracks } from '../action/select'
 import { addLabelTag } from '../action/tag'
 import { renderTemplate } from '../common/label'
@@ -77,6 +77,13 @@ export class ToolBar extends Component<Props> {
           this.linkSelectedTracks(state)
         }
         break
+      case Key.H_LOW:
+      case Key.H_UP:
+        const config = {
+          ...this.state.user.viewerConfigs[Session.activeViewerId]
+        }
+        config.hideLabels = !config.hideLabels
+        Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
     }
     this._keyDownMap[e.key] = true
   }
