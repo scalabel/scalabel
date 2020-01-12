@@ -291,41 +291,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       this.forceUpdate()
     }
 
-    // const item = state.task.items[state.user.select.item]
-    // const viewerConfig = this.state.user.viewerConfigs[this.props.id]
-    // const sensorId = viewerConfig.sensor
-    // for (const key of Object.keys(item.labels)) {
-    //   const id = Number(key)
-    //   if (item.labels[id].sensors.includes(sensorId)) {
-    //     const label = Session.label3dList.get(id)
-    //     if (label) {
-    //       for (const shape of label.shapes()) {
-    //         shape.layers.enable(this.props.id)
-    //       }
-    //     }
-    //   }
-    // }
-
-    // if (this.props.id in this.state.user.viewerConfigs) {
-    //   if (viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
-    //     if (viewerConfig.sensor in this.state.task.sensors) {
-    //       const sensor = this.state.task.sensors[sensorId]
-    //       if (sensor.intrinsics &&
-    //           isCurrentFrameLoaded(state, viewerConfig.sensor)) {
-    //         const image =
-    //           Session.images[state.user.select.item][viewerConfig.sensor]
-    //         this.camera = new IntrinsicCamera(
-    //           sensor.intrinsics,
-    //           image.width,
-    //           image.height
-    //         )
-    //       }
-    //     }
-    //   } else {
-    //     this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-    //   }
-    //   this._labelHandler.camera = this.camera
-    // }
     this._labelHandler.updateState(state, state.user.select.item, this.props.id)
   }
 
@@ -418,54 +383,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
         this.canvas.height
       )
     }
-    //   const config = getCurrentViewerConfig(
-    //     this.state, this.props.id
-    //   )
-    //   if (config) {
-    //     switch (config.type) {
-    //       case ViewerConfigTypeName.POINT_CLOUD:
-    //         updateThreeCameraAndRenderer(
-    //           config as PointCloudViewerConfigType,
-    //           this.camera,
-    //           this.canvas,
-    //           this.renderer
-    //         )
-    //         break
-    //       case ViewerConfigTypeName.IMAGE_3D:
-    //         const img3dConfig = config as Image3DViewerConfigType
-    //         const sensor = img3dConfig.sensor
-    //         if (sensor in this.state.task.sensors) {
-    //           const extrinsics = this.state.task.sensors[sensor].extrinsics
-    //           this.camera.position.set(0, 0, 0)
-    //           if (extrinsics) {
-    //             this.camera.quaternion.set(
-    //               extrinsics.rotation.x,
-    //               extrinsics.rotation.y,
-    //               extrinsics.rotation.z,
-    //               extrinsics.rotation.w
-    //             )
-    //             this.camera.quaternion.multiply(
-    //               (new THREE.Quaternion()).setFromAxisAngle(
-    //                 new THREE.Vector3(1, 0, 0), Math.PI
-    //               )
-    //             )
-    //             this.camera.position.set(
-    //               extrinsics.translation.x,
-    //               extrinsics.translation.y,
-    //               extrinsics.translation.z
-    //             )
-    //           }
-    //           if (this.canvas && this.renderer) {
-    //             this.renderer.setSize(
-    //               this.canvas.width,
-    //               this.canvas.height
-    //             )
-    //           }
-    //         }
-    //         break
-    //     }
-    //   }
-    // }
   }
 }
 
