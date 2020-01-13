@@ -43,7 +43,9 @@ export class Synchronizer {
         if (Session.autosave) {
           self.sendActions()
         } else {
-          Session.updateStatus(ConnectionStatus.UNSAVED)
+          if (types.TASK_ACTION_TYPES.includes(action.type)) {
+            Session.updateStatus(ConnectionStatus.UNSAVED)
+          }
         }
       }
       return next(action)
