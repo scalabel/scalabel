@@ -10,7 +10,8 @@
             { name: 'Right Elbow', x: 8, y: 13, color: [255, 0, 0] },
             { name: 'Left Wrist', x: 2, y: 17, color: [0, 255, 0] },
             { name: 'Right Wrist', x: 8, y: 17, color: [255, 0, 0] },
-            { name: 'Pelvis', x: 5, y: 22, color: [0, 0, 255] },
+            { name: 'Left Pelvis', x: 3, y: 22, color: [0, 0, 255] },
+            { name: 'Right Pelvis', x: 7, y: 22, color: [0, 0, 255] },
             { name: 'Left Knee', x: 3, y: 30, color: [0, 255, 0] },
             { name: 'Right Knee', x: 7, y: 30, color: [255, 0, 0] },
             { name: 'Left Foot', x: 3, y: 40, color: [0, 255, 0] },
@@ -25,10 +26,11 @@
             [4, 6],
             [5, 7],
             [1, 8],
-            [8, 9],
+            [1, 9],
             [8, 10],
             [9, 11],
-            [10, 12]
+            [10, 12],
+            [11, 13]
         ]
     }
 ]
