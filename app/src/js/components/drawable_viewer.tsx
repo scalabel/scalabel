@@ -1,3 +1,4 @@
+import { Grid } from '@material-ui/core'
 import React from 'react'
 import Session from '../common/session'
 import { ViewerConfigType } from '../functional/types'
@@ -105,26 +106,35 @@ export abstract class DrawableViewer<T extends ViewerProps>
     this._item = this.state.user.select.item
 
     return (
-      <div
-        ref={(element) => {
-          if (element && this._container !== element) {
-            if (this._container) {
-              this._container.removeEventListener('wheel', this._wheelHandler)
+      <div className={this.props.classes.viewer_container}>
+        <div
+          ref={(element) => {
+            if (element && this._container !== element) {
+              if (this._container) {
+                this._container.removeEventListener('wheel', this._wheelHandler)
+              }
+              this._container = element
+              this._container.addEventListener('wheel', this._wheelHandler)
+              this.forceUpdate()
             }
-            this._container = element
-            this._container.addEventListener('wheel', this._wheelHandler)
-            this.forceUpdate()
-          }
-        }}
-        className={this.props.classes.viewer_container}
-        onMouseDown={ (e) => this.onMouseDown(e) }
-        onMouseUp={ (e) => this.onMouseUp(e) }
-        onMouseMove={ (e) => this.onMouseMove(e) }
-        onMouseEnter={ (e) => this.onMouseEnter(e) }
-        onMouseLeave={ (e) => this.onMouseLeave(e) }
-        onDoubleClick={ (e) => this.onDoubleClick(e) }
-      >
-        {this.getDrawableComponents()}
+          }}
+          className={this.props.classes.viewer_container}
+          onMouseDown={ (e) => this.onMouseDown(e) }
+          onMouseUp={ (e) => this.onMouseUp(e) }
+          onMouseMove={ (e) => this.onMouseMove(e) }
+          onMouseEnter={ (e) => this.onMouseEnter(e) }
+          onMouseLeave={ (e) => this.onMouseLeave(e) }
+          onDoubleClick={ (e) => this.onDoubleClick(e) }
+        >
+          {this.getDrawableComponents()}
+        </div>
+          <Grid
+            justify={'flex-start'}
+            container
+            direction='row'
+          >
+            { ...this.getMenuComponents() }
+          </Grid>
       </div>
     )
   }
@@ -149,6 +159,9 @@ export abstract class DrawableViewer<T extends ViewerProps>
 
   /** Get child components for rendering */
   protected abstract getDrawableComponents (): React.ReactElement[]
+
+  /** Get components for viewer menu */
+  protected abstract getMenuComponents (): React.ReactElement[]
 
   /**
    * Handle mouse down

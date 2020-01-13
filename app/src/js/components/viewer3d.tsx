@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@material-ui/core'
+import { Box, IconButton } from '@material-ui/core'
 import LockIcon from '@material-ui/icons/Lock'
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
 import { withStyles } from '@material-ui/styles'
@@ -21,7 +21,7 @@ interface ClassType extends ViewerClassTypes {
   /** camera x lock */
   camera_x_lock_icon: string
   /** button */
-  camera_button: string
+  viewer_button: string
 }
 
 export interface Props extends ViewerProps {
@@ -84,10 +84,18 @@ class Viewer3D extends DrawableViewer<Props> {
         />
       )
 
+    }
+
+    return views
+  }
+
+  /** Return menu buttons */
+  protected getMenuComponents () {
+    if (this._viewerConfig) {
       const yLockButton = (
         <IconButton
           onClick={() => this.toggleCameraLock(CameraLockState.Y_LOCKED)}
-          className={this.props.classes.camera_button}
+          className={this.props.classes.viewer_button}
         >
             {
               underlineElement(
@@ -104,7 +112,7 @@ class Viewer3D extends DrawableViewer<Props> {
       const xLockButton = (
         <IconButton
           onClick={() => this.toggleCameraLock(CameraLockState.X_LOCKED)}
-          className={this.props.classes.camera_button}
+          className={this.props.classes.viewer_button}
           edge={'start'}
         >
             {
@@ -121,7 +129,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const xAxisButton = (
         <IconButton
-          className={this.props.classes.camera_button}
+          className={this.props.classes.viewer_button}
           onClick={() => Session.dispatch(alignToAxis(
             this.props.id,
             this._viewerConfig as PointCloudViewerConfigType,
@@ -134,7 +142,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const yAxisButton = (
         <IconButton
-          className={this.props.classes.camera_button}
+          className={this.props.classes.viewer_button}
           onClick={() => Session.dispatch(alignToAxis(
             this.props.id,
             this._viewerConfig as PointCloudViewerConfigType,
@@ -146,7 +154,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const zAxisButton = (
         <IconButton
-          className={this.props.classes.camera_button}
+          className={this.props.classes.viewer_button}
           onClick={() => Session.dispatch(alignToAxis(
             this.props.id,
             this._viewerConfig as PointCloudViewerConfigType,
@@ -158,7 +166,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const synchronizationButton = (
         <IconButton
-          className={this.props.classes.camera_button}
+          className={this.props.classes.viewer_button}
           onClick={() => Session.dispatch(changeViewerConfig(
             this.props.id,
             {
@@ -171,25 +179,17 @@ class Viewer3D extends DrawableViewer<Props> {
           {underlineElement(<LockIcon />, this._viewerConfig.synchronized)}
         </IconButton >
       )
-      views.push(
-        <div>
-          <Grid
-            justify={'flex-start'}
-            container
-            direction='row'
-          >
-            {yLockButton}
-            {xLockButton}
-            {xAxisButton}
-            {yAxisButton}
-            {zAxisButton}
-            {synchronizationButton}
-          </Grid>
-        </div>
-      )
-    }
 
-    return views
+      return [
+        yLockButton,
+        xLockButton,
+        xAxisButton,
+        yAxisButton,
+        zAxisButton,
+        synchronizationButton
+      ]
+    }
+    return []
   }
 
   /**

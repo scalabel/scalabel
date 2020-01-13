@@ -176,7 +176,7 @@ export const LayoutStyles = () => createStyles({
     height: '50px'
   },
   main: {
-    height: 'calc(100% - 45px)',
+    height: 'calc(100% - 50px)',
     display: 'block',
     position: 'absolute',
     outline: 'none',
@@ -192,7 +192,7 @@ export const LayoutStyles = () => createStyles({
   },
   paneContainer: {
     width: '100%',
-    height: 'calc(100% - 50px)',
+    height: 'calc(100% - 60px)',
     position: 'absolute',
     top: 0,
     left: 0

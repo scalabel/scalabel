@@ -10,7 +10,7 @@ export const viewerStyles = () => createStyles({
     'width': '100%',
     'touch-action': 'none'
   },
-  camera_button: {
+  viewer_button: {
     'color': '#ced4da',
     'z-index': 1001
   },
