@@ -86,7 +86,10 @@ export class Synchronizer {
           // Otherwise, indicate that task action from this session was saved
           Session.updateStatus(ConnectionStatus.SAVED)
           setTimeout(() => {
-            Session.updateStatus(ConnectionStatus.UNSAVED)
+            // don't update if other effect, like dc, occurred in between
+            if (Session.status == ConnectionStatus.SAVED) {
+              Session.updateStatus(ConnectionStatus.UNSAVED)
+            }
           }, 5000)
         }
       }
