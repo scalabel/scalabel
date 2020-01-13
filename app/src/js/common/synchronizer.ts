@@ -42,10 +42,8 @@ export class Synchronizer {
         self.actionQueue.push(action)
         if (Session.autosave) {
           self.sendActions()
-        } else {
-          if (types.TASK_ACTION_TYPES.includes(action.type)) {
-            Session.updateStatus(ConnectionStatus.UNSAVED)
-          }
+        } else if (types.TASK_ACTION_TYPES.includes(action.type)) {
+          Session.updateStatus(ConnectionStatus.UNSAVED)
         }
       }
       return next(action)
@@ -89,7 +87,7 @@ export class Synchronizer {
           Session.updateStatus(ConnectionStatus.SAVED)
           setTimeout(() => {
             // don't update if other effect, like dc, occurred in between
-            if (Session.status == ConnectionStatus.SAVED) {
+            if (Session.status === ConnectionStatus.SAVED) {
               Session.updateStatus(ConnectionStatus.UNSAVED)
             }
           }, 5000)
@@ -106,8 +104,8 @@ export class Synchronizer {
           Session.dispatch(updateTask(state.task))
         }
       } else {
-        // With manual saving, want to keep unsaved changes so don't replace state
-        self.initStateCallback = () => {}
+        // With manual saving, keep unsaved changes after reconnect
+        self.initStateCallback = () => { return }
       }
     })
   }
