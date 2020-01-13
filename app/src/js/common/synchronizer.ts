@@ -71,7 +71,6 @@ export class Synchronizer {
     /* on receipt of registration back from backend
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
-      console.log('registered')
       self.initStateCallback(syncState)
       self.sendActions()
     })
@@ -112,9 +111,7 @@ export class Synchronizer {
    * Send all queued actions to the backend
    */
   public sendActions () {
-    console.log('trying to save')
     if (this.socket.connected) {
-      console.log('was connected')
       if (this.actionQueue.length > 0) {
         const taskActions = this.actionQueue.filter((action) => {
           return types.TASK_ACTION_TYPES.includes(action.type)
