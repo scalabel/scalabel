@@ -15,6 +15,8 @@ export class Synchronizer {
   public socket: SocketIOClient.Socket
   /** Actions queued to send */
   public actionQueue: types.BaseAction[]
+  /** Actions in process of being saved */
+  public saveActions: types.BaseAction[][]
   /** Timestamped action log */
   public actionLog: types.BaseAction[]
   /** Middleware to use */
@@ -29,6 +31,7 @@ export class Synchronizer {
     this.initStateCallback = initStateCallback
 
     this.actionQueue = []
+    this.saveActions = []
     this.actionLog = []
 
     const self = this
@@ -41,8 +44,10 @@ export class Synchronizer {
       if (Session.id === action.sessionId) {
         self.actionQueue.push(action)
         if (Session.autosave) {
-          self.sendActions()
-        } else if (types.TASK_ACTION_TYPES.includes(action.type)) {
+          self.sendQueuedActions()
+        } else if (types.TASK_ACTION_TYPES.includes(action.type) && 
+          Session.status !== ConnectionStatus.RECONNECTING &&
+          Session.status !== ConnectionStatus.SAVING) {
           Session.updateStatus(ConnectionStatus.UNSAVED)
         }
       }
@@ -72,22 +77,29 @@ export class Synchronizer {
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
       self.initStateCallback(syncState)
+      for (let saveActionList of this.saveActions) {
+        self.sendActions(saveActionList)
+      }
       if (Session.autosave) {
-        self.sendActions()
+        self.sendQueuedActions()
       }
     })
 
-    this.socket.on(EventName.ACTION_BROADCAST, (action: types.ActionType) => {
-      // actionLog matches backend action ordering
-      self.actionLog.push(action)
-      if (types.TASK_ACTION_TYPES.includes(action.type)) {
-        if (action.sessionId !== Session.id) {
-          // Dispatch any task actions broadcasted from other sessions
-          Session.dispatch(action)
-        } else {
-          // Otherwise, indicate that task action from this session was saved
-          Session.updateStatus(ConnectionStatus.JUST_SAVED)
-          timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
+    this.socket.on(EventName.ACTION_BROADCAST, (actionList: types.ActionType[]) => {
+      // can remove 1st set of stored actions when saving is done
+      this.saveActions.shift()
+      for (let action of actionList) {
+        // actionLog matches backend action ordering
+        self.actionLog.push(action)
+        if (types.TASK_ACTION_TYPES.includes(action.type)) {
+          if (action.sessionId !== Session.id) {
+            // Dispatch any task actions broadcasted from other sessions
+            Session.dispatch(action)
+          } else {
+            // Otherwise, indicate that task action from this session was saved
+            Session.updateStatus(ConnectionStatus.JUST_SAVED)
+            this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
+          }
         }
       }
     })
@@ -110,29 +122,29 @@ export class Synchronizer {
   /**
    * Send all queued actions to the backend
    */
-  public sendActions () {
+  public sendQueuedActions () {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
-        const taskActions = this.actionQueue.filter((action) => {
-          return types.TASK_ACTION_TYPES.includes(action.type)
-        })
-        if (taskActions.length > 0) {
-          Session.updateStatus(ConnectionStatus.SAVING)
-        }
-        // saving failed - should have a message
-        timeoutUpdateStatus(ConnectionStatus.UNSAVED, 10)
-
-        const sessionState = Session.getState()
-        const message: SyncActionMessageType = {
-          taskId: sessionState.task.config.taskId,
-          projectName: sessionState.task.config.projectName,
-          sessionId: sessionState.session.id,
-          actions: this.actionQueue
-        }
-        this.socket.emit(EventName.ACTION_SEND, JSON.stringify(message))
+        this.saveActions.push(this.actionQueue)
+        this.sendActions(this.actionQueue)
         this.actionQueue = []
       }
     }
+  }
+
+  /** 
+   * Send given actions to the backend 
+   */
+  public sendActions (actions: types.BaseAction[]) {
+    const sessionState = Session.getState()
+    const message: SyncActionMessageType = {
+      taskId: sessionState.task.config.taskId,
+      projectName: sessionState.task.config.projectName,
+      sessionId: sessionState.session.id,
+      actions: actions
+    }
+    this.socket.emit(EventName.ACTION_SEND, JSON.stringify(message))
+    Session.updateStatus(ConnectionStatus.SAVING)
   }
 
   /**

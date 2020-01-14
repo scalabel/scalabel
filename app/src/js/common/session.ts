@@ -47,6 +47,8 @@ class Session {
   public testMode: boolean
   /** Connection status for saving */
   public status: ConnectionStatus
+  /** Previous connection status */
+  public prevStatus: ConnectionStatus
   /** Number of times connection status has changed */
   public statusChangeCount: number
   /** Overwriteable function that adds side effects to state change */
@@ -62,6 +64,7 @@ class Session {
     this.trackLinking = false
     this.activeViewerId = -1
     this.status = ConnectionStatus.UNSAVED
+    this.prevStatus = ConnectionStatus.UNSAVED
     this.statusChangeCount = 0
     this.autosave = false
     // TODO: make it configurable in the url
@@ -115,6 +118,7 @@ class Session {
    * @param {ConnectionStatus} newStatus: new value of status
    */
   public updateStatus (newStatus: ConnectionStatus): ConnectionStatus {
+    this.prevStatus = this.status
     this.status = newStatus
     // update mod 1000 since only nearby differences are important, not total
     this.statusChangeCount = (this.statusChangeCount + 1) % 1000

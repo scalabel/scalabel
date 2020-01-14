@@ -76,18 +76,23 @@ export function startSocketServer (io: socketio.Server) {
       const actionList = data.actions
 
       const room = path.roomName(projectName, taskId, env.sync, sessionId)
+      
+      await sleep(5000)
 
-      // For each action, update the backend store and broadcast
-      for (const action of actionList) {
+      const taskActions = actionList.filter((action) => {
+        return types.TASK_ACTION_TYPES.includes(action.type)
+      })
+
+      // For each task action, update the backend store
+      for (const action of taskActions) {
         action.timestamp = Date.now()
-        // for task actions, update store and broadcast to room
-        if (types.TASK_ACTION_TYPES.includes(action.type)) {
-          stores[room].dispatch(action)
-          io.in(room).emit(EventName.ACTION_BROADCAST, action)
-        } else {
-          socket.emit(EventName.ACTION_BROADCAST, action)
-        }
+        stores[room].dispatch(action)
       }
+      // broadcast task actions to all other sessions in room
+      socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActions)
+      // echo everything to original session
+      socket.emit(EventName.ACTION_BROADCAST, actionList)
+
       // save task data with all updates
       const content = JSON.stringify(stores[room].getState().present)
       const filePath = path.getFileKey(getSavedKey(projectName, taskId))
@@ -158,3 +163,9 @@ async function loadStateFromTask (
   }
   return state
 }
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}  

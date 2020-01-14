@@ -175,28 +175,22 @@ class TitleBar extends Component<Props> {
     let sessionStatus: string
     let hideMessage = false
     switch (Session.status) {
-      case ConnectionStatus.SAVING: {
-        sessionStatus = 'Saving in progress...'
-        if (autosave) {
-          hideMessage = true
-        }
-        break
-      }
+      case ConnectionStatus.SAVING: 
       case ConnectionStatus.JUST_SAVED: {
-        sessionStatus = 'All progress saved.'
+        sessionStatus = this.getTextForStatus(Session.status)
         if (autosave) {
           hideMessage = true
         }
         break
       }
       case ConnectionStatus.RECONNECTING: {
-        sessionStatus = 'Trying to reconnect...'
+        sessionStatus = this.getTextForStatus(Session.status)
         break
       }
       case ConnectionStatus.SAVED:
       case ConnectionStatus.UNSAVED: {
-        // Want the SAVED status text during fade animation
-        sessionStatus = 'All progress saved.'
+        // Want the text fade animation
+        sessionStatus = this.getTextForStatus(Session.prevStatus)
         hideMessage = true
         break
       }
@@ -224,11 +218,25 @@ class TitleBar extends Component<Props> {
     )
   }
 
-  /**
-   * Save task by
-   */
+   /** Select text based on connection status */
+  private getTextForStatus (status: ConnectionStatus) {
+    switch (status) {
+      case ConnectionStatus.SAVING: {
+        return 'Saving in progress...'
+      }
+      case ConnectionStatus.RECONNECTING: {
+        return 'Trying to reconnect...'
+      }
+      case ConnectionStatus.JUST_SAVED:
+      default: {
+        return 'All progress saved.'
+      }
+    }
+  }
+
+  /** Save task */
   private save () {
-    this.props.synchronizer.sendActions()
+    this.props.synchronizer.sendQueuedActions()
   }
 }
 
