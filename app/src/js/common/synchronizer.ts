@@ -45,7 +45,7 @@ export class Synchronizer {
         self.actionQueue.push(action)
         if (Session.autosave) {
           self.sendQueuedActions()
-        } else if (types.TASK_ACTION_TYPES.includes(action.type) && 
+        } else if (types.TASK_ACTION_TYPES.includes(action.type) &&
           Session.status !== ConnectionStatus.RECONNECTING &&
           Session.status !== ConnectionStatus.SAVING) {
           Session.updateStatus(ConnectionStatus.UNSAVED)
@@ -77,7 +77,7 @@ export class Synchronizer {
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
       self.initStateCallback(syncState)
-      for (let saveActionList of this.saveActions) {
+      for (const saveActionList of this.saveActions) {
         self.sendActions(saveActionList)
       }
       if (Session.autosave) {
@@ -85,24 +85,25 @@ export class Synchronizer {
       }
     })
 
-    this.socket.on(EventName.ACTION_BROADCAST, (actionList: types.ActionType[]) => {
-      // can remove 1st set of stored actions when saving is done
-      this.saveActions.shift()
-      for (let action of actionList) {
-        // actionLog matches backend action ordering
-        self.actionLog.push(action)
-        if (types.TASK_ACTION_TYPES.includes(action.type)) {
-          if (action.sessionId !== Session.id) {
-            // Dispatch any task actions broadcasted from other sessions
-            Session.dispatch(action)
-          } else {
-            // Otherwise, indicate that task action from this session was saved
-            Session.updateStatus(ConnectionStatus.JUST_SAVED)
-            this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
+    this.socket.on(
+      EventName.ACTION_BROADCAST, (actionList: types.ActionType[]) => {
+        // can remove 1st set of stored actions when saving is done
+        this.saveActions.shift()
+        for (const action of actionList) {
+          // actionLog matches backend action ordering
+          self.actionLog.push(action)
+          if (types.TASK_ACTION_TYPES.includes(action.type)) {
+            if (action.sessionId !== Session.id) {
+              // Dispatch any task actions broadcasted from other sessions
+              Session.dispatch(action)
+            } else {
+              // Otherwise, ack indicates successful save
+              Session.updateStatus(ConnectionStatus.JUST_SAVED)
+              this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
+            }
           }
         }
-      }
-    })
+      })
 
     // If backend disconnects, keep trying to reconnect
     this.socket.on(EventName.DISCONNECT, () => {
@@ -132,16 +133,16 @@ export class Synchronizer {
     }
   }
 
-  /** 
-   * Send given actions to the backend 
+  /**
+   * Send given actions to the backend
    */
-  public sendActions (actions: types.BaseAction[]) {
+  public sendActions (actionList: types.BaseAction[]) {
     const sessionState = Session.getState()
     const message: SyncActionMessageType = {
       taskId: sessionState.task.config.taskId,
       projectName: sessionState.task.config.projectName,
       sessionId: sessionState.session.id,
-      actions: actions
+      actions: actionList
     }
     this.socket.emit(EventName.ACTION_SEND, JSON.stringify(message))
     Session.updateStatus(ConnectionStatus.SAVING)

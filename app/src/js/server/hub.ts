@@ -76,8 +76,6 @@ export function startSocketServer (io: socketio.Server) {
       const actionList = data.actions
 
       const room = path.roomName(projectName, taskId, env.sync, sessionId)
-      
-      await sleep(5000)
 
       const taskActions = actionList.filter((action) => {
         return types.TASK_ACTION_TYPES.includes(action.type)
@@ -163,9 +161,3 @@ async function loadStateFromTask (
   }
   return state
 }
-
-function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}  

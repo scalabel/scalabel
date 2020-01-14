@@ -175,7 +175,7 @@ class TitleBar extends Component<Props> {
     let sessionStatus: string
     let hideMessage = false
     switch (Session.status) {
-      case ConnectionStatus.SAVING: 
+      case ConnectionStatus.SAVING:
       case ConnectionStatus.JUST_SAVED: {
         sessionStatus = this.getTextForStatus(Session.status)
         if (autosave) {
