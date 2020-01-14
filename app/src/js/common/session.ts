@@ -11,7 +11,7 @@ import { configureStore } from './configure_store'
 import { Track } from './track'
 
 export const enum ConnectionStatus {
-  SAVED, SAVING, RECONNECTING, UNSAVED
+  JUST_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED
 }
 
 /**
@@ -47,6 +47,8 @@ class Session {
   public testMode: boolean
   /** Connection status for saving */
   public status: ConnectionStatus
+  /** Number of times connection status has changed */
+  public statusChangeCount: number
   /** Overwriteable function that adds side effects to state change */
   public applyStatusEffects: () => void
 
@@ -60,6 +62,7 @@ class Session {
     this.trackLinking = false
     this.activeViewerId = -1
     this.status = ConnectionStatus.UNSAVED
+    this.statusChangeCount = 0
     this.autosave = false
     // TODO: make it configurable in the url
     this.devMode = true
@@ -113,6 +116,8 @@ class Session {
    */
   public updateStatus (newStatus: ConnectionStatus): ConnectionStatus {
     this.status = newStatus
+    // update mod 1000 since only nearby differences are important, not total
+    this.statusChangeCount = (this.statusChangeCount + 1) % 1000
     this.applyStatusEffects()
     return newStatus
   }

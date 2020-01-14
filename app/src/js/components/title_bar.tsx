@@ -182,7 +182,7 @@ class TitleBar extends Component<Props> {
         }
         break
       }
-      case ConnectionStatus.SAVED: {
+      case ConnectionStatus.JUST_SAVED: {
         sessionStatus = 'All progress saved.'
         if (autosave) {
           hideMessage = true
@@ -193,6 +193,7 @@ class TitleBar extends Component<Props> {
         sessionStatus = 'Trying to reconnect...'
         break
       }
+      case ConnectionStatus.SAVED:
       case ConnectionStatus.UNSAVED: {
         // Want the SAVED status text during fade animation
         sessionStatus = 'All progress saved.'

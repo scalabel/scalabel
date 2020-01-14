@@ -72,7 +72,9 @@ export class Synchronizer {
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
       self.initStateCallback(syncState)
-      self.sendActions()
+      if (Session.autosave) {
+        self.sendActions()
+      }
     })
 
     this.socket.on(EventName.ACTION_BROADCAST, (action: types.ActionType) => {
@@ -84,13 +86,8 @@ export class Synchronizer {
           Session.dispatch(action)
         } else {
           // Otherwise, indicate that task action from this session was saved
-          Session.updateStatus(ConnectionStatus.SAVED)
-          setTimeout(() => {
-            // don't update if other effect, like dc, occurred in between
-            if (Session.status === ConnectionStatus.SAVED) {
-              Session.updateStatus(ConnectionStatus.UNSAVED)
-            }
-          }, 5000)
+          Session.updateStatus(ConnectionStatus.JUST_SAVED)
+          timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
         }
       }
     })
@@ -122,6 +119,8 @@ export class Synchronizer {
         if (taskActions.length > 0) {
           Session.updateStatus(ConnectionStatus.SAVING)
         }
+        // saving failed - should have a message
+        timeoutUpdateStatus(ConnectionStatus.UNSAVED, 10)
 
         const sessionState = Session.getState()
         const message: SyncActionMessageType = {
@@ -134,6 +133,19 @@ export class Synchronizer {
         this.actionQueue = []
       }
     }
+  }
+
+  /**
+   * Update status after timeout if status hasn't changed since then
+   */
+  public timeoutUpdateStatus (newStatus: ConnectionStatus, seconds: number) {
+    const statusChangeCountBefore = Session.statusChangeCount
+    setTimeout(() => {
+      // don't update if other effect occurred in between
+      if (Session.statusChangeCount === statusChangeCountBefore) {
+        Session.updateStatus(newStatus)
+      }
+    }, seconds * 1000)
   }
 }
 
