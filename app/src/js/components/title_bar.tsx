@@ -176,7 +176,7 @@ class TitleBar extends Component<Props> {
     let hideMessage = false
     switch (Session.status) {
       case ConnectionStatus.SAVING:
-      case ConnectionStatus.JUST_SAVED: {
+      case ConnectionStatus.NOTIFY_SAVED: {
         sessionStatus = this.getTextForStatus(Session.status)
         if (autosave) {
           hideMessage = true
@@ -227,7 +227,7 @@ class TitleBar extends Component<Props> {
       case ConnectionStatus.RECONNECTING: {
         return 'Trying to reconnect...'
       }
-      case ConnectionStatus.JUST_SAVED:
+      case ConnectionStatus.NOTIFY_SAVED:
       default: {
         return 'All progress saved.'
       }

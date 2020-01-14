@@ -98,7 +98,7 @@ export class Synchronizer {
               Session.dispatch(action)
             } else {
               // Otherwise, ack indicates successful save
-              Session.updateStatus(ConnectionStatus.JUST_SAVED)
+              Session.updateStatus(ConnectionStatus.NOTIFY_SAVED)
               this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
             }
           }

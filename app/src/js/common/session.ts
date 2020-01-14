@@ -11,7 +11,7 @@ import { configureStore } from './configure_store'
 import { Track } from './track'
 
 export const enum ConnectionStatus {
-  JUST_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED
+  NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED
 }
 
 /**
