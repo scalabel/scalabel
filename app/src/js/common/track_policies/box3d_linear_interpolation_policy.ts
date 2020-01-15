@@ -220,7 +220,7 @@ export class LinearInterpolationBox3DPolicy extends TrackPolicy {
    */
   public onLabelCreated (
     itemIndex: number,
-    label: Label,
+    label: Readonly<Label>,
     sensors: number[]
   ) {
     label = label as Box3D

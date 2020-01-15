@@ -30,10 +30,10 @@ export class LinearInterpolationPolygonPolicy extends TrackPolicy {
    */
   public onLabelCreated (
     itemIndex: number,
-    label: Label,
+    label: Readonly<Label>,
     sensors: number[]
   ) {
-    const polygon = (label as Polygon2D).shapeObjects()[2]
+    const polygon = (label as Polygon2D).shapeStates()[2]
     const labelObject = makeLabel({
       type: types.LabelTypeName.POLYGON_2D,
       category: label.category,
