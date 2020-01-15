@@ -286,7 +286,7 @@ export function addViewerConfig (
 }
 
 /**
- * Change viewer configs
+ * Change viewer config
  * @param configs
  */
 export function changeViewerConfig (
@@ -298,6 +298,16 @@ export function changeViewerConfig (
     viewerId,
     config
   }
+}
+
+/** Toggle viewer config synchronization */
+export function toggleSynchronization (
+  viewerId: number, config: ViewerConfigType
+) {
+  return changeViewerConfig(
+    viewerId,
+    { ...config, synchronized: !config.synchronized }
+  )
 }
 
 /** action to split pane */

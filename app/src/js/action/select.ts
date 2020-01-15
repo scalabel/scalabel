@@ -145,7 +145,11 @@ export function selectLabels (
     attributes = {}
   }
 
-  return changeSelect({ labels: selectedLabels, category, attributes })
+  return changeSelect({
+    labels: (itemIndex < 0) ? {} : selectedLabels,
+    category,
+    attributes
+  })
 }
 
 /**

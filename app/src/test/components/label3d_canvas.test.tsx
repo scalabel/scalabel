@@ -12,6 +12,7 @@ import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util
 import { makePointCloudViewerConfig } from '../../js/functional/states'
 import { CubeType, PointCloudViewerConfigType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
+import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
 import { testJson } from '../test_point_cloud_objects'
 import { expectVector3TypesClose } from '../util'
 
@@ -61,6 +62,13 @@ function setUpLabel3dCanvas (
     action.addViewerConfig(canvasId, makePointCloudViewerConfig(paneId))
   )
 
+  const camera = new THREE.PerspectiveCamera(45, 1, 1, 1000)
+
+  Session.subscribe(() => {
+    const config = Session.getState().user.viewerConfigs[canvasId]
+    updateThreeCameraAndRenderer(config as PointCloudViewerConfigType, camera)
+  })
+
   const display = document.createElement('div')
   display.getBoundingClientRect = () => {
     return {
@@ -96,6 +104,7 @@ function setUpLabel3dCanvas (
         id={0}
         display={display}
         ref={canvasRef}
+        camera={camera}
       />
     </div>
   )
