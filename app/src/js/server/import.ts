@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import { AttributeToolType, LabelTypeName, ShapeTypeName } from '../common/types'
+import { PointType } from '../drawable/2d/path_point2d'
 import { ItemExport, LabelExport } from '../functional/bdd_types'
-import { makeItem, makeLabel } from '../functional/states'
+import { makeItem, makeLabel, makePathPoint, makePolygon } from '../functional/states'
 import { Attribute, IndexedShapeType,
   ItemType, LabelType } from '../functional/types'
 
@@ -167,8 +168,18 @@ function convertLabelToImport (
     shapeData = labelExport.box2d
   } else if (labelExport.poly2d) {
     shapeType = ShapeTypeName.POLYGON_2D
-    labelType = LabelTypeName.POLYGON_2D
-    shapeData = labelExport.poly2d
+    const polyExport = labelExport.poly2d[0]
+    labelType = (polyExport.closed) ?
+      LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
+    const points = polyExport.vertices.map(
+      (vertex, i) => makePathPoint({
+        x: vertex[0],
+        y: vertex[1],
+        type: (polyExport.types[i] === 'L') ?
+          PointType.VERTEX : PointType.CURVE
+      })
+    )
+    shapeData = makePolygon({ points })
   } else if (labelExport.box3d) {
     shapeType = ShapeTypeName.CUBE
     labelType = LabelTypeName.BOX_3D
