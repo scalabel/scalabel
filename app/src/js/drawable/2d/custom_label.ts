@@ -304,6 +304,9 @@ export class CustomLabel2D extends Label2D {
         this._shapes[i].x = node.x
         this._shapes[i].y = node.y
         this._shapes[i].name = node.name
+        if (node.hidden) {
+          this._shapes[i].hide()
+        }
       }
     }
     this.updateBounds()

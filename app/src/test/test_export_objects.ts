@@ -20,7 +20,8 @@ export const sampleItemExportImage: ItemExport = {
         y2: 411.85595567867034
       },
       poly2d: null,
-      box3d: null
+      box3d: null,
+      customs: {}
     },
     {
       id: 1,
@@ -34,7 +35,8 @@ export const sampleItemExportImage: ItemExport = {
         y2: 400.88642659279776
       },
       poly2d: null,
-      box3d: null
+      box3d: null,
+      customs: {}
     },
     {
       id: 2,
@@ -48,7 +50,8 @@ export const sampleItemExportImage: ItemExport = {
         y2: 294.1828254847645
       },
       poly2d: null,
-      box3d: null
+      box3d: null,
+      customs: {}
     }
   ]
 }
@@ -75,7 +78,8 @@ export const sampleStateExportImage: ItemExport[] =
             y2: 411.85595567867034
           },
           poly2d: null,
-          box3d: null
+          box3d: null,
+          customs: {}
         },
         {
           id: 1,
@@ -89,7 +93,8 @@ export const sampleStateExportImage: ItemExport[] =
             y2: 400.88642659279776
           },
           poly2d: null,
-          box3d: null
+          box3d: null,
+          customs: {}
         },
         {
           id: 2,
@@ -103,7 +108,8 @@ export const sampleStateExportImage: ItemExport[] =
             y2: 294.1828254847645
           },
           poly2d: null,
-          box3d: null
+          box3d: null,
+          customs: {}
         }
       ]
     },
@@ -158,26 +164,17 @@ export const sampleItemExportImagePolygon: ItemExport = {
       attributes: {},
       manualShape: true,
       box2d: null,
-      poly2d: {
-        points: [
-          {
-            x: 100.9044230030514,
-            y: 100.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 200.9044230030514,
-            y: 100.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 200.9044230030514,
-            y: 200.46537396121883,
-            type: 'vertex'
-          }
-        ]
-      },
-      box3d: null
+      poly2d: [{
+        vertices: [
+            [100.9044230030514, 100.46537396121883],
+            [200.9044230030514, 100.46537396121883],
+            [200.9044230030514, 200.46537396121883]
+        ],
+        types: 'LLL',
+        closed: true
+      }],
+      box3d: null,
+      customs: {}
     },
     {
       id: 1,
@@ -185,46 +182,21 @@ export const sampleItemExportImagePolygon: ItemExport = {
       attributes: {},
       manualShape: true,
       box2d: null,
-      poly2d: {
-        points: [
-          {
-            x: 300.9044230030514,
-            y: 300.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 400.9044230030514,
-            y: 400.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 350.9044230030514,
-            y: 300.46537396121883,
-            type: 'bezier'
-          },
-          {
-            x: 325.9044230030514,
-            y: 200.46537396121883,
-            type: 'bezier'
-          },
-          {
-            x: 400.9044230030514,
-            y: 100.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 375.9044230030514,
-            y: 125.46537396121883,
-            type: 'bezier'
-          },
-          {
-            x: 325.9044230030514,
-            y: 250.46537396121883,
-            type: 'bezier'
-          }
-        ]
-      },
-      box3d: null
+      poly2d: [{
+        types: 'LLCCLCC',
+        vertices: [
+          [300.9044230030514, 300.46537396121883],
+          [400.9044230030514, 400.46537396121883],
+          [350.9044230030514, 300.46537396121883],
+          [325.9044230030514, 200.46537396121883],
+          [400.9044230030514, 100.46537396121883],
+          [375.9044230030514, 125.46537396121883],
+          [325.9044230030514, 250.46537396121883]
+        ],
+        closed: true
+      }],
+      box3d: null,
+      customs: {}
     },
     {
       id: 2,
@@ -232,36 +204,19 @@ export const sampleItemExportImagePolygon: ItemExport = {
       attributes: {},
       manualShape: true,
       box2d: null,
-      poly2d: {
-        points: [
-          {
-            x: 400.9044230030514,
-            y: 400.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 800.9044230030514,
-            y: 100.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 100.9044230030514,
-            y: 100.46537396121883,
-            type: 'vertex'
-          },
-          {
-            x: 125.9044230030514,
-            y: 120.46537396121883,
-            type: 'bezier'
-          },
-          {
-            x: 325.9044230030514,
-            y: 220.46537396121883,
-            type: 'bezier'
-          }
-        ]
-      },
-      box3d: null
+      poly2d: [{
+        types: 'LLLCC',
+        vertices: [
+          [400.9044230030514, 400.46537396121883],
+          [800.9044230030514, 100.46537396121883],
+          [100.9044230030514, 100.46537396121883],
+          [125.9044230030514, 120.46537396121883],
+          [325.9044230030514, 220.46537396121883]
+        ],
+        closed: true
+      }],
+      box3d: null,
+      customs: {}
     }
   ]
 }
@@ -282,26 +237,17 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           attributes: {},
           manualShape: true,
           box2d: null,
-          poly2d: {
-            points: [
-              {
-                x: 100.9044230030514,
-                y: 100.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 200.9044230030514,
-                y: 100.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 200.9044230030514,
-                y: 200.46537396121883,
-                type: 'vertex'
-              }
-            ]
-          },
-          box3d: null
+          poly2d: [{
+            types: 'LLL',
+            vertices: [
+              [100.9044230030514, 100.46537396121883],
+              [200.9044230030514, 100.46537396121883],
+              [200.9044230030514, 200.46537396121883]
+            ],
+            closed: true
+          }],
+          box3d: null,
+          customs: {}
         },
         {
           id: 1,
@@ -309,46 +255,21 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           attributes: {},
           manualShape: true,
           box2d: null,
-          poly2d: {
-            points: [
-              {
-                x: 300.9044230030514,
-                y: 300.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 400.9044230030514,
-                y: 400.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 350.9044230030514,
-                y: 300.46537396121883,
-                type: 'bezier'
-              },
-              {
-                x: 325.9044230030514,
-                y: 200.46537396121883,
-                type: 'bezier'
-              },
-              {
-                x: 400.9044230030514,
-                y: 100.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 375.9044230030514,
-                y: 125.46537396121883,
-                type: 'bezier'
-              },
-              {
-                x: 325.9044230030514,
-                y: 250.46537396121883,
-                type: 'bezier'
-              }
-            ]
-          },
-          box3d: null
+          poly2d: [{
+            types: 'LLCCLCC',
+            vertices: [
+              [300.9044230030514, 300.46537396121883],
+              [400.9044230030514, 400.46537396121883],
+              [350.9044230030514, 300.46537396121883],
+              [325.9044230030514, 200.46537396121883],
+              [400.9044230030514, 100.46537396121883],
+              [375.9044230030514, 125.46537396121883],
+              [325.9044230030514, 250.46537396121883]
+            ],
+            closed: true
+          }],
+          box3d: null,
+          customs: {}
         },
         {
           id: 2,
@@ -356,36 +277,19 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           attributes: {},
           manualShape: true,
           box2d: null,
-          poly2d: {
-            points: [
-              {
-                x: 400.9044230030514,
-                y: 400.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 800.9044230030514,
-                y: 100.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 100.9044230030514,
-                y: 100.46537396121883,
-                type: 'vertex'
-              },
-              {
-                x: 125.9044230030514,
-                y: 120.46537396121883,
-                type: 'bezier'
-              },
-              {
-                x: 325.9044230030514,
-                y: 220.46537396121883,
-                type: 'bezier'
-              }
-            ]
-          },
-          box3d: null
+          poly2d: [{
+            types: 'LLLCC',
+            vertices: [
+              [400.9044230030514, 400.46537396121883],
+              [800.9044230030514, 100.46537396121883],
+              [100.9044230030514, 100.46537396121883],
+              [125.9044230030514, 120.46537396121883],
+              [325.9044230030514, 220.46537396121883]
+            ],
+            closed: true
+          }],
+          box3d: null,
+          customs: {}
         }
       ]
     },

@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { AttributeToolType, BundleFile,
   DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../js/common/types'
-import { PointType } from '../js/drawable/2d/path_point2d'
 import { ItemExport } from '../js/functional/bdd_types'
 import { Attribute, TaskType } from '../js/functional/types'
 import { CreationForm, FormFileData, Project } from '../js/server/types'
@@ -195,13 +194,12 @@ sampleItemsVideo[0].labels = [{
   manualShape: true,
   box2d: null,
   box3d: null,
-  poly2d: {
-    points: [
-      { x: 0, y: 0, type: PointType.VERTEX },
-      { x: 0, y: 1, type: PointType.VERTEX },
-      { x: 1, y: 1, type: PointType.VERTEX }
-    ]
-  }
+  poly2d: [{
+    vertices: [[0, 0], [0, 1], [1, 1]],
+    types: 'LLL',
+    closed: true
+  }],
+  customs: {}
 }]
 sampleItemsVideo[1].labels = [{
   id: 0,
@@ -210,13 +208,12 @@ sampleItemsVideo[1].labels = [{
   manualShape: true,
   box2d: null,
   box3d: null,
-  poly2d: {
-    points: [
-      { x: 0, y: 0, type: PointType.VERTEX },
-      { x: 0, y: 1, type: PointType.VERTEX },
-      { x: 1, y: 1, type: PointType.VERTEX }
-    ]
-  }
+  poly2d: [{
+    vertices: [[0, 0], [0, 1], [1, 1]],
+    types: 'LLL',
+    closed: true
+  }],
+  customs: {}
 }]
 
 export const sampleVideoFormFileData: FormFileData = {
