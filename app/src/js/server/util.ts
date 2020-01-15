@@ -12,6 +12,7 @@ import Logger from './logger'
 import Session from './server_session'
 import { Storage } from './storage'
 import { CreationForm, DatabaseType, Env, MaybeError } from './types'
+import { S3Storage } from './s3_storage'
 
 /**
  * Initializes global env
@@ -40,27 +41,26 @@ export function initEnv () {
  */
 function makeStorage (
   database: string, dir: string): [MaybeError, Storage] {
-  // initialize to default values
-  const storage = new FileStorage(dir)
-  let err = null
-
   switch (database) {
     case DatabaseType.S3:
+      const storage = new S3Storage(dir)
+      storage.makeBucket()
+      return [null, storage]
     case DatabaseType.DYNAMO_DB: {
-      err = Error(sprintf(
+      const err = Error(sprintf(
         '%s storage not implemented yet, using file storage', database))
-      break
+      return [err, new FileStorage(dir)]
     }
     case DatabaseType.LOCAL: {
-      break
+      const storage = new FileStorage(dir)
+      return [null, storage]
     }
     default: {
-      err = Error(sprintf(
+      const err = Error(sprintf(
         '%s is an unknown database format, using file storage', database))
+      return [err, new FileStorage(dir)]
     }
   }
-
-  return [err, storage]
 }
 
 /**

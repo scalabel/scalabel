@@ -92,18 +92,4 @@ export class FileStorage extends Storage {
     }
     return fs.remove(this.fullDir(key))
   }
-
-  /**
-   * Makes relative path into full path
-   */
-  private fullDir (key: string): string {
-    return path.join(this.dataDir, key)
-  }
-
-  /**
-   * Makes relative path into full filename
-   */
-  private fullFile (key: string): string {
-    return this.fullDir(key + '.json')
-  }
 }
