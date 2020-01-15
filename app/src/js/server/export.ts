@@ -29,6 +29,7 @@ export function convertItemToExport (
       sensor
     }
   }
+  // TODO: Clean up the export code for naming and modularity
   for (const key of Object.keys(item.labels)) {
     const label = item.labels[Number(key)]
     const labelExport: LabelExport = {
