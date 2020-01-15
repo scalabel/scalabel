@@ -7,6 +7,9 @@ import { State } from '../functional/types'
 import { EventName, RegisterMessageType, SyncActionMessageType } from '../server/types'
 import Session, { ConnectionStatus } from './session'
 
+const CONFIRMATION_MESSAGE =
+  'You have unsaved changes that will be lost if you leave this page. '
+
 /**
  * Synchronizes data with other sessions
  */
@@ -118,6 +121,18 @@ export class Synchronizer {
         self.initStateCallback = () => { return }
       }
     })
+
+    // Add pop up to warn user when leaving with unsaved changes
+    window.onbeforeunload = (e: BeforeUnloadEvent) => {
+      if (
+        Session.status === ConnectionStatus.RECONNECTING ||
+        Session.status === ConnectionStatus.SAVING ||
+        Session.status === ConnectionStatus.UNSAVED
+      ) {
+        e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
+        return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
+      }
+    }
   }
 
   /**
