@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk'
 import * as path from 'path'
+import Logger from './logger'
 import { Storage } from './storage'
 
 /**
@@ -45,6 +46,7 @@ export class S3Storage extends Storage {
       }
       try {
         await (this.s3.createBucket(bucketParams).promise())
+        Logger.info('Waiting for bucket to be created.')
         await (this.s3.waitFor('bucketExists', bucketParams).promise())
       } catch (error) {
         return Promise.reject(error)
