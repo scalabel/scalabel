@@ -10,8 +10,8 @@ export abstract class Storage {
   /**
    * General constructor
    */
-  protected constructor (path: string) {
-    this.dataDir = path
+  protected constructor (basePath: string) {
+    this.dataDir = basePath
   }
 
   /**

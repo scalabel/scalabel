@@ -9,10 +9,10 @@ import { BundleFile, HandlerUrl, ItemTypeName, LabelTypeName } from '../common/t
 import { State, TaskType } from '../functional/types'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
+import { S3Storage } from './s3_storage'
 import Session from './server_session'
 import { Storage } from './storage'
 import { CreationForm, DatabaseType, Env, MaybeError } from './types'
-import { S3Storage } from './s3_storage'
 
 /**
  * Initializes global env
@@ -39,21 +39,25 @@ export function initEnv () {
  * @param {string} database: type of storage
  * @param {string} dir: directory name to save at
  */
-function makeStorage (
-  database: string, dir: string): [MaybeError, Storage] {
+async function makeStorage (
+  database: string, dir: string): Promise<[MaybeError, Storage]> {
   switch (database) {
     case DatabaseType.S3:
-      const storage = new S3Storage(dir)
-      storage.makeBucket()
-      return [null, storage]
+      const s3Store = new S3Storage(dir)
+      try {
+        await s3Store.makeBucket()
+        return [null, s3Store]
+      } catch (error) {
+        // if s3 fails, default to file storage
+        return [error, new FileStorage(dir)]
+      }
     case DatabaseType.DYNAMO_DB: {
       const err = Error(sprintf(
         '%s storage not implemented yet, using file storage', database))
       return [err, new FileStorage(dir)]
     }
     case DatabaseType.LOCAL: {
-      const storage = new FileStorage(dir)
-      return [null, storage]
+      return [null, new FileStorage(dir)]
     }
     default: {
       const err = Error(sprintf(
@@ -66,9 +70,9 @@ function makeStorage (
 /**
  * Initializes global storage
  */
-export function initStorage (env: Env) {
+export async function initStorage (env: Env) {
   // set up storage
-  const [err, storage] = makeStorage(env.database, env.data)
+  const [err, storage] = await makeStorage(env.database, env.data)
   Logger.error(err)
   Session.setStorage(storage)
 }

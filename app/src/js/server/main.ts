@@ -5,6 +5,7 @@ import { createServer } from 'http'
 import * as socketio from 'socket.io'
 import { startSocketServer } from './hub'
 import * as listeners from './listeners'
+import Logger from './logger'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import Session from './server_session'
 import { Endpoint } from './types'
@@ -42,23 +43,25 @@ function main () {
   const env = Session.getEnv()
 
   // init global storage
-  initStorage(env)
+  initStorage(env).then(() => {
+    // start http and socket io servers
+    const app: Application = express()
+    const httpServer = createServer(app)
+    const io = socketio(httpServer)
 
-  // start http and socket io servers
-  const app: Application = express()
-  const httpServer = createServer(app)
-  const io = socketio(httpServer)
+    // set up middleware
+    app.use(listeners.LoggingHandler)
 
-  // set up middleware
-  app.use(listeners.LoggingHandler)
+    // set up http handlers
+    startHTTPServer(app)
 
-  // set up http handlers
-  startHTTPServer(app)
+    // set up socket.io handler
+    startSocketServer(io)
 
-  // set up socket.io handler
-  startSocketServer(io)
-
-  httpServer.listen(env.port)
+    httpServer.listen(env.port)
+  }).catch((err) => {
+    Logger.error(err)
+  })
 }
 
 main()

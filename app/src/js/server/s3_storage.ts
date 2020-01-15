@@ -1,4 +1,4 @@
-import * as aws from 'aws-sdk'
+import AWS from 'aws-sdk'
 import * as path from 'path'
 import { Storage } from './storage'
 
@@ -13,12 +13,12 @@ export class S3Storage extends Storage {
   /** the path within the bucket */
   protected dataPath: string
   /** the aws s3 client */
-  protected s3: aws.s3
+  protected s3: AWS.S3
 
   /**
    * Constructor
    */
-  constructor (dataDir: string): Promise<void> {
+  constructor (dataDir: string) {
     super(dataDir)
 
     // data path should have format region:bucket/path
@@ -27,25 +27,28 @@ export class S3Storage extends Storage {
     const bucketPath = info[1].split('/')
     this.bucketName = bucketPath[0]
     this.dataPath = path.join(...bucketPath.splice(1), '/')
-    this.s3 = new aws.s3()
+    this.s3 = new AWS.S3()
   }
 
   /**
    * Init bucket
    */
   public async makeBucket (): Promise<void> {
-    //create new bucket if there isn't one already (wait until it exists)
+    // create new bucket if there isn't one already (wait until it exists)
     const hasBucket = await this.hasBucket()
     if (!hasBucket) {
       const bucketParams = {
         Bucket: this.bucketName,
         CreateBucketConfiguration: {
-          LocationConstraint: this.region,
+          LocationConstraint: this.region
         }
       }
-
-      await (this.s3.createBucket(bucketParams).promise())
-      await (this.s3.waitFor('bucketExists', bucketParams).promise())
+      try {
+        await (this.s3.createBucket(bucketParams).promise())
+        await (this.s3.waitFor('bucketExists', bucketParams).promise())
+      } catch (error) {
+        return Promise.reject(error)
+      }
     }
     return Promise.resolve()
   }
@@ -56,11 +59,15 @@ export class S3Storage extends Storage {
    */
   public async hasKey (key: string): Promise<boolean> {
     const params = {
-      Bucket: this.bucketName, 
-      Key: key 
-     }
-    const [err, _data] = await (this.s3.headObject(params).promise())
-    return err === null
+      Bucket: this.bucketName,
+      Key: key
+    }
+    try {
+      await (this.s3.headObject(params).promise())
+      return true
+    } catch (_error) {
+      return false
+    }
   }
 
   /**
@@ -69,38 +76,49 @@ export class S3Storage extends Storage {
    * @param {boolean} onlyDir: whether to only return keys that are directories
    */
   public async listKeys (
-    prefix: string, onlyDir: boolean = false): Promise<string[]> {
+    prefix: string, _onlyDir: boolean = false): Promise<string[]> {
     const fullKey = this.fullDir(prefix)
     let continuationToken = ''
 
-    let keys = []
+    const keys = []
     for (;;) {
-      let params = {
+      const params = {
         Bucket: this.bucketName,
         Key: fullKey,
         ContinuationToken: continuationToken
       }
 
-      let [err, data] = await (this.s3.listObjectsV2(params).promise())
-      if (err !== null) {
-        return Promise.reject(err) 
-      }
-      //TODO- deal with directories vs files
-      for (const key of data.Contents) {
-        // remove any file extension and prepend prefix
-        const keyName = path.join(prefix, path.parse(key.key).name)
-        keys.push(keyName)
-      }
+      try {
+        const data = await (this.s3.listObjectsV2(params).promise())
 
-      if (!data.IsTruncated) {
-        break
-      }
+        // TODO- deal with directories vs files
+        if (data.Contents) {
+          for (const key of data.Contents) {
+            // remove any file extension and prepend prefix
+            if (key.Key) {
+              const keyName = path.join(prefix, path.parse(key.Key).name)
+              keys.push(keyName)
+            }
+          }
+        }
 
-      continuationToken = data.NextContinuationToken
+        if (!data.IsTruncated) {
+          break
+        }
+
+        if (data.NextContinuationToken) {
+          continuationToken = data.NextContinuationToken
+        } else {
+          continuationToken = ''
+        }
+
+      } catch (error) {
+        return Promise.reject(error)
+      }
     }
 
     keys.sort()
-    return Promise.resolve(keys)
+    return keys
   }
 
   /**
@@ -110,12 +128,16 @@ export class S3Storage extends Storage {
    */
   public async save (key: string, json: string): Promise<void> {
     const params = {
+      Body: json,
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
-    await (this.s3.putObject(params, json).promise())
-    
-    return Promise.resolve()
+    try {
+      await (this.s3.putObject(params).promise())
+      return Promise.resolve()
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   /**
@@ -124,14 +146,18 @@ export class S3Storage extends Storage {
    */
   public async load (key: string): Promise<string> {
     const params = {
-      Bucket: this.bucketName, 
-      Key: this.fullFile(key) 
-     }
-    const [err, data] = await (this.s3.getObject(params).promise())
-    if (err !== null) {
-      return Promise.reject(err)
-    } else {
-      return Promise.resolve(data)
+      Bucket: this.bucketName,
+      Key: this.fullFile(key)
+    }
+    try {
+      const data = (await (this.s3.getObject(params).promise())).Body
+      if (data) {
+        return data.toString()
+      } else {
+        return Promise.reject(Error('No data at key'))
+      }
+    } catch (error) {
+      return Promise.reject(error)
     }
   }
 
@@ -144,10 +170,13 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullDir(key)
     }
-    await (this.s3.deleteObject(params).promise())
-    await (this.s3.waitFor('objectNotExists', params).promise())
-
-    return Promise.resolve()
+    try {
+      await (this.s3.deleteObject(params).promise())
+      await (this.s3.waitFor('objectNotExists', params).promise())
+      return Promise.resolve()
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   /**
@@ -158,14 +187,11 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName
     }
 
-    return new Promise((resolve, _reject) => {
-      this.s3.HeadBucket(params, (error: Error, _data: string) => {
-        if (error) {
-          resolve(false)
-        } else {
-          resolve(true)
-        }
-      })
-    })
-      }
+    try {
+      await (this.s3.headBucket(params).promise())
+      return true
+    } catch (error) {
+      return false
+    }
+  }
 }
