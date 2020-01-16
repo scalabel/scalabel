@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk'
+import _ from 'lodash'
 import * as path from 'path'
 import Logger from './logger'
 import { Storage } from './storage'
@@ -11,23 +12,21 @@ export class S3Storage extends Storage {
   protected region: string
   /** the bucket name */
   protected bucketName: string
-  /** the path within the bucket */
-  protected dataPath: string
   /** the aws s3 client */
   protected s3: AWS.S3
 
   /**
    * Constructor
    */
-  constructor (dataDir: string) {
+  constructor (dataPath: string) {
+    // data path should have format region:bucket/path
+    const info = dataPath.split(':')
+    const bucketPath = info[1].split('/')
+    const dataDir = path.join(...bucketPath.splice(1), '/')
     super(dataDir)
 
-    // data path should have format region:bucket/path
-    const info = dataDir.split(':')
     this.region = info[0]
-    const bucketPath = info[1].split('/')
     this.bucketName = bucketPath[0]
-    this.dataPath = path.join(...bucketPath.splice(1), '/')
     this.s3 = new AWS.S3()
   }
 
@@ -38,16 +37,19 @@ export class S3Storage extends Storage {
     // create new bucket if there isn't one already (wait until it exists)
     const hasBucket = await this.hasBucket()
     if (!hasBucket) {
-      const bucketParams = {
-        Bucket: this.bucketName,
-        CreateBucketConfiguration: {
-          LocationConstraint: this.region
-        }
-      }
       try {
-        await (this.s3.createBucket(bucketParams).promise())
+        const bucketParams = {
+          Bucket: this.bucketName,
+          CreateBucketConfiguration: {
+            LocationConstraint: this.region
+          }
+        }
+        await this.s3.createBucket(bucketParams).promise()
         Logger.info('Waiting for bucket to be created.')
-        await (this.s3.waitFor('bucketExists', bucketParams).promise())
+        const waitParams = {
+          Bucket: this.bucketName
+        }
+        await this.s3.waitFor('bucketExists', waitParams).promise()
       } catch (error) {
         return Promise.reject(error)
       }
@@ -62,10 +64,10 @@ export class S3Storage extends Storage {
   public async hasKey (key: string): Promise<boolean> {
     const params = {
       Bucket: this.bucketName,
-      Key: key
+      Key: this.fullFile(key)
     }
     try {
-      await (this.s3.headObject(params).promise())
+      await this.s3.headObject(params).promise()
       return true
     } catch (_error) {
       return false
@@ -78,28 +80,44 @@ export class S3Storage extends Storage {
    * @param {boolean} onlyDir: whether to only return keys that are directories
    */
   public async listKeys (
-    prefix: string, _onlyDir: boolean = false): Promise<string[]> {
-    const fullKey = this.fullDir(prefix)
+    prefix: string, onlyDir: boolean = false): Promise<string[]> {
+    const fullPrefix = this.fullDir(prefix)
     let continuationToken = ''
 
     const keys = []
     for (;;) {
-      const params = {
-        Bucket: this.bucketName,
-        Key: fullKey,
-        ContinuationToken: continuationToken
-      }
-
       try {
-        const data = await (this.s3.listObjectsV2(params).promise())
+        let data
+        if (continuationToken.length > 0) {
+          const params = {
+            Bucket: this.bucketName,
+            Prefix: fullPrefix,
+            ContinuationToken: continuationToken
+          }
+          data = await this.s3.listObjectsV2(params).promise()
+        } else {
+          const params = {
+            Bucket: this.bucketName,
+            Prefix: fullPrefix
+          }
+          data = await this.s3.listObjectsV2(params).promise()
+        }
 
-        // TODO- deal with directories vs files
         if (data.Contents) {
           for (const key of data.Contents) {
             // remove any file extension and prepend prefix
             if (key.Key) {
-              const keyName = path.join(prefix, path.parse(key.Key).name)
-              keys.push(keyName)
+              const noPrefix = key.Key.substr(fullPrefix.length)
+
+              // Parse to get the top level dir or file after prefix
+              const parsed = path.parse(noPrefix)
+              let keyName = parsed.name
+              if (parsed.dir.length > 0 && parsed.dir !== '/') {
+                keyName = parsed.dir.split('/')[0]
+              }
+              if (!onlyDir || parsed.ext === '') {
+                keys.push(path.join(prefix, keyName))
+              }
             }
           }
         }
@@ -110,15 +128,13 @@ export class S3Storage extends Storage {
 
         if (data.NextContinuationToken) {
           continuationToken = data.NextContinuationToken
-        } else {
-          continuationToken = ''
         }
-
       } catch (error) {
         return Promise.reject(error)
       }
     }
 
+    _.uniq(keys)
     keys.sort()
     return keys
   }
@@ -134,12 +150,10 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
-    try {
-      await (this.s3.putObject(params).promise())
-      return Promise.resolve()
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    const savePromise = this.s3.putObject(params).promise()
+    return savePromise.then(() => {
+      return
+    })
   }
 
   /**
@@ -152,7 +166,7 @@ export class S3Storage extends Storage {
       Key: this.fullFile(key)
     }
     try {
-      const data = (await (this.s3.getObject(params).promise())).Body
+      const data = (await this.s3.getObject(params).promise()).Body
       if (data) {
         return data.toString()
       } else {
@@ -168,29 +182,33 @@ export class S3Storage extends Storage {
    * @param {string} key: relative path of directory
    */
   public async delete (key: string): Promise<void> {
-    const params = {
-      Bucket: this.bucketName,
-      Key: this.fullDir(key)
+    const keys = await this.listKeys(key)
+    const promises = []
+    for (const subKey of keys) {
+      const params = {
+        Bucket: this.bucketName,
+        Key: this.fullFile(subKey)
+      }
+      const deletePromise = this.s3.deleteObject(params).promise()
+      promises.push(deletePromise.then(async () => {
+        await this.s3.waitFor('objectNotExists', params).promise()
+      }))
+      // recursively delete subdirectories
+      promises.push(this.delete(subKey))
     }
-    try {
-      await (this.s3.deleteObject(params).promise())
-      await (this.s3.waitFor('objectNotExists', params).promise())
-      return Promise.resolve()
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    return Promise.all(promises).then(() => { return })
   }
 
   /**
    * Checks if bucket exists
    */
-  private async hasBucket (): Promise<boolean> {
+  private async hasBucket (): Promise < boolean > {
     const params = {
       Bucket: this.bucketName
     }
 
     try {
-      await (this.s3.headBucket(params).promise())
+      await this.s3.headBucket(params).promise()
       return true
     } catch (error) {
       return false
