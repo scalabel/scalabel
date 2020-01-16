@@ -4,7 +4,7 @@ import { ADD_LABELS, CHANGE_SHAPES } from '../action/types'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
 import { trackFactory } from '../common/track/util'
-import { Label2DTemplateType, LabelType, ShapeType  } from '../functional/types'
+import { Label2DTemplateType, LabelType, ShapeType } from '../functional/types'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
 

@@ -280,7 +280,6 @@ export abstract class Track {
         this._shapes[index].length = this._shapes[updatedIndex].length
       }
     }
-    console.log(nextManualIndex, lastManualIndex)
   }
 
   /** Copy shape */
