@@ -496,7 +496,7 @@ export const sampleTasksVideo: TaskType[] = [
       maxLabelId: 1,
       maxShapeId: 1,
       maxOrder: 2,
-      maxTrackId: -1
+      maxTrackId: 1
     },
     items: [
       {
