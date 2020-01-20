@@ -20,8 +20,6 @@ export class Label3DHandler {
   private _highlightedLabel: Label3D | null
   /** whether mouse is down on the selected box */
   private _mouseDownOnSelection: boolean
-  /** whether the selected label is changed */
-  private _labelChanged: boolean
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
   /** viewer config */
@@ -38,7 +36,6 @@ export class Label3DHandler {
   constructor (camera: THREE.Camera) {
     this._highlightedLabel = null
     this._mouseDownOnSelection = false
-    this._labelChanged = false
     this._keyDownMap = {}
     this._viewerConfig = makePointCloudViewerConfig(-1)
     this._selectedItemIndex = -1
@@ -117,22 +114,7 @@ export class Label3DHandler {
     if (!consumed && Session.label3dList.selectedLabel) {
       Session.label3dList.selectedLabel.onMouseUp()
     }
-    if (this._labelChanged && Session.label3dList.selectedLabel) {
-      const [ids,,shapes] = Session.label3dList.selectedLabel.shapeObjects()
-      Session.dispatch(changeShapes(
-        this._selectedItemIndex,
-        ids,
-        shapes
-      ))
-      const label = Session.label3dList.selectedLabel.label
-      if (Session.tracking && label.track in Session.tracks) {
-        Session.tracks[label.track].onLabelUpdated(
-          this._selectedItemIndex,
-          shapes
-        )
-      }
-    }
-    this._labelChanged = false
+    this.commitLabels()
     return false
   }
 
@@ -148,12 +130,12 @@ export class Label3DHandler {
     raycastIntersection?: THREE.Intersection
   ): boolean {
     if (this._mouseDownOnSelection && Session.label3dList.selectedLabel) {
-      this._labelChanged = true
       if (Session.label3dList.control.attached()) {
         const consumed = Session.label3dList.control.onMouseMove(
           x, y, this._camera
         )
         if (consumed) {
+          Session.label3dList.addUpdatedLabel(Session.label3dList.selectedLabel)
           return true
         }
       }
@@ -162,6 +144,7 @@ export class Label3DHandler {
     } else {
       this.highlight(raycastIntersection)
     }
+
     return false
   }
 
@@ -173,7 +156,9 @@ export class Label3DHandler {
   public onKeyDown (e: KeyboardEvent): boolean {
     switch (e.key) {
       case Key.SPACE:
-        const label = makeDrawableLabel3D(Session.label3dList.currentLabelType)
+        const label = makeDrawableLabel3D(
+          Session.label3dList, Session.label3dList.currentLabelType
+        )
         if (label) {
           const center = new Vector3D()
           switch (this._viewerConfig.type) {
@@ -198,24 +183,8 @@ export class Label3DHandler {
             center,
             this._sensorIds
           )
-          if (label.label) {
-            const [, types, shapes] = label.shapeObjects()
-            if (Session.tracking) {
-              const newTrack = new Track()
-              newTrack.updateState(
-                makeTrack(-1),
-                makeTrackPolicy(newTrack, Session.label3dList.currentPolicyType)
-              )
-              newTrack.onLabelCreated(this._selectedItemIndex, label, [-1])
-            } else {
-              Session.dispatch(addLabel(
-                this._selectedItemIndex,
-                label.label,
-                types,
-                shapes
-              ))
-            }
-          }
+          Session.label3dList.addUpdatedLabel(label)
+          this.commitLabels()
           return true
         }
         return false
@@ -315,5 +284,46 @@ export class Label3DHandler {
         ))
       }
     }
+  }
+
+  /**
+   * Commit labels to state
+   */
+  private commitLabels () {
+    Session.label3dList.updatedLabels.forEach((drawable) => {
+      if (drawable.labelId < 0) {
+        const [, types, shapes] = drawable.shapeStates()
+        if (Session.tracking) {
+          const newTrack = new Track()
+          newTrack.updateState(
+            makeTrack(-1),
+            makeTrackPolicy(newTrack, Session.label3dList.currentPolicyType)
+          )
+          newTrack.onLabelCreated(this._selectedItemIndex, drawable, [-1])
+        } else {
+          Session.dispatch(addLabel(
+            this._selectedItemIndex,
+            drawable.label,
+            types,
+            shapes
+          ))
+        }
+      } else {
+        // Commit drawable to state
+        const [ids,,shapes] = drawable.shapeStates()
+        Session.dispatch(changeShapes(
+          this._selectedItemIndex,
+          ids,
+          shapes
+        ))
+        if (Session.tracking && drawable.label.track in Session.tracks) {
+          Session.tracks[drawable.label.track].onLabelUpdated(
+            this._selectedItemIndex,
+            shapes
+          )
+        }
+      }
+    })
+    Session.label3dList.clearUpdatedLabels()
   }
 }

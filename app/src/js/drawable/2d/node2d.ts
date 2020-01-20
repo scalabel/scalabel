@@ -13,7 +13,7 @@ export class Node2D extends Point2D {
   constructor (node: Node2DType) {
     super(node.x, node.y)
     this._name = node.name
-    this._hidden = false
+    this._hidden = Boolean(node.hidden)
   }
 
   /** Set name */

@@ -304,13 +304,16 @@ export class CustomLabel2D extends Label2D {
         this._shapes[i].x = node.x
         this._shapes[i].y = node.y
         this._shapes[i].name = node.name
+        if (node.hidden) {
+          this._shapes[i].hide()
+        }
       }
     }
     this.updateBounds()
   }
 
   /** Get shape id's and shapes for updating */
-  public shapeObjects (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }

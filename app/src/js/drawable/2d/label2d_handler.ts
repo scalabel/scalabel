@@ -138,8 +138,8 @@ export class Label2DHandler {
     const valid = selectedLabel.isValid()
     const editing = selectedLabel.editing
     if (valid || editing) {
-      const [shapeIds, shapeTypes, shapeObjects] =
-        selectedLabel.shapeObjects()
+      const [shapeIds, shapeTypes, shapeStates] =
+        selectedLabel.shapeStates()
       if (valid) {
         if (selectedLabel.labelId < 0) {
         // Add new label to state
@@ -155,14 +155,14 @@ export class Label2DHandler {
           } else {
             const label = selectedLabel.label
             Session.dispatch(addLabel(
-              this._selectedItemIndex, label, shapeTypes, shapeObjects
+              this._selectedItemIndex, label, shapeTypes, shapeStates
             ))
           }
         } else {
         // Update existing label
           const label = selectedLabel.label
           Session.dispatch(changeShapes(
-            this._selectedItemIndex, shapeIds, shapeObjects
+            this._selectedItemIndex, shapeIds, shapeStates
           ))
           Session.dispatch(changeLabelProps(
             this._selectedItemIndex, selectedLabel.labelId, { manual: true }
@@ -170,7 +170,7 @@ export class Label2DHandler {
           if (Session.tracking && label.track in Session.tracks) {
             Session.tracks[label.track].onLabelUpdated(
               this._selectedItemIndex,
-              shapeObjects
+              shapeStates
             )
           }
         }

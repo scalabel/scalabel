@@ -4,7 +4,6 @@ import {
   ExtrinsicsType,
   IntrinsicsType,
   ItemType,
-  PolygonType,
   RectType,
   TaskStatus,
   TrackType
@@ -44,6 +43,26 @@ export interface ItemExport {
   labels: LabelExport[]
 }
 
+export interface PolygonExportType {
+  /** points */
+  vertices: Array<[number, number]>
+  /** string of types */
+  types: string
+  /** closed or open polygon */
+  closed: boolean
+}
+
+export interface CustomExportType {
+  /** point positions */
+  points: Array<[number ,number]>
+  /** names of the points */
+  names: string[]
+  /** whether the points are hidden */
+  hidden: boolean[]
+  /** edges */
+  edges: Array<[number, number]>
+}
+
 export interface LabelExport {
   /** label id */
   id: number
@@ -56,7 +75,9 @@ export interface LabelExport {
   /** box2d label */
   box2d: RectType | null
   /** poly2d label */
-  poly2d: PolygonType | null
+  poly2d: PolygonExportType[] | null
   /** box3d label */
   box3d: CubeType | null
+  /** custom labels */
+  customs: { [name: string]: CustomExportType }
 }
