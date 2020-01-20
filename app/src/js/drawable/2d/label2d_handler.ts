@@ -200,6 +200,43 @@ export class Label2DHandler {
           }
         }
         break
+      case Key.B_LOW:
+      case Key.B_UP:
+        if (Session.label2dList.selectedLabels.length === 1) {
+          const selectedLabel = Session.label2dList.selectedLabels[0]
+          const labels = Session.label2dList.labelList
+          const labelIds = [selectedLabel.labelId]
+          const updatedProps = [{ order: labels[0].order }]
+          for (let i = 0; i < selectedLabel.index; i++) {
+            labelIds.push(labels[i].labelId)
+            updatedProps.push({ order: labels[i + 1].order })
+          }
+          Session.dispatch(changeLabelsProps(
+            [this._selectedItemIndex],
+            [labelIds],
+            [updatedProps]
+          ))
+        }
+        break
+      case Key.F_LOW:
+      case Key.F_UP:
+        if (Session.label2dList.selectedLabels.length === 1) {
+          e.preventDefault()
+          const selectedLabel = Session.label2dList.selectedLabels[0]
+          const labels = Session.label2dList.labelList
+          const labelIds = [selectedLabel.labelId]
+          const updatedProps = [{ order: labels[labels.length - 1].order }]
+          for (let i = labels.length - 1; i > selectedLabel.index; i--) {
+            labelIds.push(labels[i].labelId)
+            updatedProps.push({ order: labels[i - 1].order })
+          }
+          Session.dispatch(changeLabelsProps(
+            [this._selectedItemIndex],
+            [labelIds],
+            [updatedProps]
+          ))
+        }
+        break
     }
   }
 
