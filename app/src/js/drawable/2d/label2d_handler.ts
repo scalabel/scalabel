@@ -172,6 +172,34 @@ export class Label2DHandler {
         // unlinking
         this.unlinkLabels()
         break
+      case Key.ARROW_UP:
+        if (Session.label2dList.selectedLabels.length === 1) {
+          const label = Session.label2dList.selectedLabels[0]
+          const nextIndex = label.index + 1
+          if (nextIndex < Session.label2dList.labelList.length) {
+            const nextLabel = Session.label2dList.get(nextIndex)
+            Session.dispatch(changeLabelsProps(
+              [this._selectedItemIndex],
+              [[label.labelId, nextLabel.labelId]],
+              [[{ order: nextLabel.order }, { order: label.order } ]]
+            ))
+          }
+        }
+        break
+      case Key.ARROW_DOWN:
+        if (Session.label2dList.selectedLabels.length === 1) {
+          const label = Session.label2dList.selectedLabels[0]
+          const previousIndex = label.index - 1
+          if (previousIndex >= 0) {
+            const previousLabel = Session.label2dList.get(previousIndex)
+            Session.dispatch(changeLabelsProps(
+              [this._selectedItemIndex],
+              [[label.labelId, previousLabel.labelId]],
+              [[{ order: previousLabel.order }, { order: label.order } ]]
+            ))
+          }
+        }
+        break
     }
   }
 
