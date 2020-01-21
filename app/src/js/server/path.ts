@@ -61,3 +61,24 @@ export function getAbsoluteSrcPath (relativePath: string) {
 export function getExportName (projectName: string): string {
   return sprintf('%s_export_%s.json', projectName, getNow())
 }
+
+/**
+ * Get redis key for path metadata
+ */
+export function pathRedisKey (key: string) {
+  return sprintf('%s^path', key)
+}
+
+/**
+ * Get redis key for reminder metadata
+ */
+export function reminderRedisKey (key: string) {
+  return sprintf('%s^reminder', key)
+}
+
+/**
+ * Get redis base key from a metadata key
+ */
+export function getRedisBaseKey (metadataKey: string) {
+  return metadataKey.split('^')[0]
+}

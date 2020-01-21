@@ -32,3 +32,6 @@ test_data/
 
 # vscode sftp settings
 .vscode/sftp.json
+
+# redis
+*.rdb
