@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { makeTaskConfig } from '../../functional/states'
+import { makeLabel, makeTaskConfig } from '../../functional/states'
 import { ConfigType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -24,18 +24,10 @@ export interface ViewMode {
  */
 export abstract class Label2D {
   /* The members are public for testing purpose */
-  /** label id in state */
-  protected _labelId: number
-  /** track id in state */
-  protected _trackId: number
   /** index of the label */
   protected _index: number
-  /** drawing order of the label */
-  protected _order: number
   /** the corresponding label in the state */
-  protected _label: LabelType | null
-  /** drawing mode */
-  protected _viewMode: ViewMode
+  protected _label: LabelType
   /** whether the label is selected */
   protected _selected: boolean
   /** whether the label is highlighted */
@@ -57,27 +49,16 @@ export abstract class Label2D {
 
   constructor (labelList: Label2DList) {
     this._index = -1
-    this._labelId = -1
-    this._trackId = -1
     this._selected = false
     this._highlighted = false
     this._highlightedHandle = -1
-    this._order = -1
-    this._label = null
+    this._label = makeLabel()
     this._color = [0, 0, 0, 1]
-    this._viewMode = {
-      dimmed: false
-    }
     this._mouseDownCoord = new Vector2D()
     this._mouseDown = false
     this._editing = false
     this._config = makeTaskConfig()
     this._labelList = labelList
-  }
-
-  /** Set whether the label is highlighted */
-  public setViewMode (mode: Partial<ViewMode>): void {
-    this._viewMode = _.assign(this._viewMode, mode)
   }
 
   /**
@@ -126,7 +107,7 @@ export abstract class Label2D {
 
   /** get labelId */
   public get labelId (): number {
-    return this._labelId
+    return this._label.id
   }
 
   /** get track id */
@@ -181,12 +162,12 @@ export abstract class Label2D {
 
   /** return order of this label */
   public get order (): number {
-    return this._order
+    return this._label.order
   }
 
   /** set the order of this label */
   public set order (o: number) {
-    this._order = o
+    this._label.order = o
   }
 
   /** return the editing of this label */
@@ -340,9 +321,9 @@ export abstract class Label2D {
    * @param {Vector2D} start: starting coordinate of the label
    */
   public initTemp (state: State, _start: Vector2D): void {
-    this._order = state.task.status.maxOrder + 1
-    this._labelId = -1
-    this._trackId = -1
+    this.order = state.task.status.maxOrder + 1
+    this._label.id = -1
+    this._label.track = -1
     this._config = state.task.config
     this._color = getColorById(
       state.task.status.maxLabelId + 1,
@@ -356,9 +337,7 @@ export abstract class Label2D {
     state: State, itemIndex: number, labelId: number): void {
     const item = state.task.items[itemIndex]
     this._label = { ...item.labels[labelId] }
-    this._order = this._label.order
-    this._labelId = this._label.id
-    this._trackId = this._label.track
+    this.order = this._label.order
     this._config = state.task.config
     const select = state.user.select
     this._color = getColorById(

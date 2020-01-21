@@ -23,7 +23,8 @@ export class Box3D extends Label3D {
 
   constructor (labelList: Label3DList) {
     super(labelList)
-    this._shape = new Cube3D(this)
+    this._shape = new Cube3D()
+    this._temporary = false
   }
 
   /**

@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
-import { makeLabel, makePolygon } from '../../functional/states'
-import { PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
+import { makeLabel } from '../../functional/states'
+import { PathPoint2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
@@ -416,9 +416,9 @@ export class Polygon2D extends Label2D {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [
-      this._label.shapes, [ShapeTypeName.POLYGON_2D], [this.toPolygon()]
-    ]
+    const points = this.toPolygon()
+    const types = points.map(() => ShapeTypeName.POLYGON_2D)
+    return [this._label.shapes, types, points]
   }
 
   /**
@@ -436,7 +436,7 @@ export class Polygon2D extends Label2D {
     this._label = makeLabel({
       type: labelType, id: -1, item: itemIndex,
       category: [state.user.select.category],
-      order: this._order
+      order: this.order
     })
     this._highlightedHandle = 1
   }
@@ -447,38 +447,37 @@ export class Polygon2D extends Label2D {
    */
   public updateShapes (shapes: ShapeType[]): void {
     if (this._label) {
-      const polygon = shapes[0] as PolygonType
-      if (!_.isEqual(this.toPolygon(), polygon)) {
-        this._points = new Array()
-        for (const point of polygon.points) {
-          switch (point.type) {
-            case PointType.VERTEX: {
-              const currPoint =
-                new PathPoint2D(point.x, point.y, PointType.VERTEX)
-              if (this._points.length !== 0) {
-                const prevPoint = this._points[this._points.length - 1]
-                if (prevPoint.type === PointType.VERTEX) {
-                  this._points.push(this.getMidpoint(prevPoint, currPoint))
-                }
+      const points = shapes as PathPoint2DType[]
+      this._points = []
+      for (const point of points) {
+        switch (point.type) {
+          case PointType.VERTEX: {
+            const currPoint =
+              new PathPoint2D(point.x, point.y, PointType.VERTEX)
+            if (this._points.length !== 0) {
+              const prevPoint = this._points[this._points.length - 1]
+              if (prevPoint.type === PointType.VERTEX) {
+                this._points.push(this.getMidpoint(prevPoint, currPoint))
               }
-              this._points.push(currPoint)
-              break
             }
-            case PointType.CURVE: {
-              this._points.push(
-                new PathPoint2D(point.x, point.y, PointType.CURVE))
-              break
-            }
+            this._points.push(currPoint)
+            break
+          }
+          case PointType.CURVE: {
+            this._points.push(
+              new PathPoint2D(point.x, point.y, PointType.CURVE)
+            )
+            break
           }
         }
-        if (this._closed) {
-          const tmp = this._points[this._points.length - 1]
-          if (tmp.type === PointType.VERTEX) {
-            this._points.push(this.getMidpoint(tmp, this._points[0]))
-          }
-        }
-        this._state = Polygon2DState.FINISHED
       }
+      if (this._closed) {
+        const tmp = this._points[this._points.length - 1]
+        if (tmp.type === PointType.VERTEX) {
+          this._points.push(this.getMidpoint(tmp, this._points[0]))
+        }
+      }
+      this._state = Polygon2DState.FINISHED
     }
   }
 
@@ -829,13 +828,13 @@ export class Polygon2D extends Label2D {
   /**
    * convert this drawable polygon to a polygon state
    */
-  private toPolygon (): PolygonType {
-    const pathPoints: PathPoint2DType [] = new Array()
+  private toPolygon (): PathPoint2DType[] {
+    const pathPoints: PathPoint2DType[] = new Array()
     for (const point of this._points) {
       if (point.type === PointType.MID) continue
       pathPoints.push(point.toPathPoint())
     }
-    return makePolygon({ points: pathPoints })
+    return pathPoints
   }
 
   /**

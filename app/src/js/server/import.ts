@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { AttributeToolType, LabelTypeName, ShapeTypeName } from '../common/types'
 import { PointType } from '../drawable/2d/path_point2d'
 import { ItemExport, LabelExport } from '../functional/bdd_types'
-import { makeItem, makeLabel, makePathPoint, makePolygon } from '../functional/states'
+import { makeItem, makeLabel, makePathPoint } from '../functional/states'
 import { Attribute, IndexedShapeType,
   ItemType, LabelType } from '../functional/types'
 
@@ -159,13 +159,20 @@ function convertLabelToImport (
 ): [LabelType, IndexedShapeType[], number] {
   let shapeType = ShapeTypeName.UNKNOWN
   let labelType = LabelTypeName.EMPTY
-  let shapeData = null
 
-  // no polyline2d
+  const shapeImports: IndexedShapeType[] = []
+  const shapeIds: number[] = []
   if (labelExport.box2d) {
     shapeType = ShapeTypeName.RECT
     labelType = LabelTypeName.BOX_2D
-    shapeData = labelExport.box2d
+    shapeImports.push({
+      id: maxShapeId + 1,
+      label: [labelId],
+      type: shapeType,
+      shape: labelExport.box2d
+    })
+    maxShapeId++
+    shapeIds.push(shapeImports[0].id)
   } else if (labelExport.poly2d) {
     shapeType = ShapeTypeName.POLYGON_2D
     const polyExport = labelExport.poly2d[0]
@@ -179,22 +186,24 @@ function convertLabelToImport (
           PointType.VERTEX : PointType.CURVE
       })
     )
-    shapeData = makePolygon({ points })
+    for (const point of points) {
+      shapeImports.push({
+        id: maxShapeId + 1,
+        label: [labelId],
+        type: shapeType,
+        shape: point
+      })
+      maxShapeId++
+      shapeIds.push(maxShapeId)
+    }
   } else if (labelExport.box3d) {
     shapeType = ShapeTypeName.CUBE
     labelType = LabelTypeName.BOX_3D
-    shapeData = labelExport.box3d
-  }
-
-  // if the label has any shapes, import them too
-  const shapeIds: number[] = []
-  const shapeImports: IndexedShapeType[] = []
-  if (shapeData !== null) {
     shapeImports.push({
       id: maxShapeId + 1,
       label: [labelId],
       type: shapeType,
-      shape: shapeData
+      shape: labelExport.box3d
     })
     maxShapeId++
     shapeIds.push(shapeImports[0].id)

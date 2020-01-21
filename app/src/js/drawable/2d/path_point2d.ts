@@ -1,3 +1,4 @@
+import { ShapeTypeName } from '../../common/types'
 import { makePathPoint } from '../../functional/states'
 import { PathPoint2DType } from '../../functional/types'
 import { Context2D, toCssColor } from '../util'
@@ -62,6 +63,20 @@ export class PathPoint2D extends Point2D {
     x: number = 0, y: number = 0, type: PointType = PointType.VERTEX) {
     super(x, y)
     this._type = type
+  }
+
+  /** Get type name */
+  public get typeName () {
+    return ShapeTypeName.PATH_POINT_2D
+  }
+
+  /** Convert to state */
+  public toState (): PathPoint2DType {
+    return {
+      x: this.x,
+      y: this.y,
+      type: this._type
+    }
   }
 
   /** get and set type */

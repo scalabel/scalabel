@@ -167,7 +167,7 @@ export class CustomLabel2D extends Label2D {
   ) {
     super.initTemp(state, start)
     const itemIndex = state.user.select.item
-    this._order = state.task.status.maxOrder + 1
+    this.order = state.task.status.maxOrder + 1
     const templateName =
       state.task.config.labelTypes[state.user.select.labelType]
     this._label = makeLabel({
@@ -176,7 +176,7 @@ export class CustomLabel2D extends Label2D {
       item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
-      order: this._order
+      order: this.order
     })
     this._color = getColorById(
       state.task.status.maxLabelId + 1,
@@ -230,7 +230,7 @@ export class CustomLabel2D extends Label2D {
     _handleIndex: number
   ) {
     if (
-      this._labelId < 0 || (
+      this.labelId < 0 || (
         this._highlightedHandle >= this._shapes.length &&
         this._highlightedHandle < this._shapes.length + this._corners.length
       )

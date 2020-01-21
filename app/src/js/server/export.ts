@@ -1,8 +1,8 @@
 import { AttributeToolType, LabelTypeName } from '../common/types'
-import { PointType } from '../drawable/2d/path_point2d'
+// import { PathPoint2D, PointType } from '../drawable/2d/path_point2d'
 import { ItemExport, LabelExport } from '../functional/bdd_types'
 import { Attribute, ConfigType, CubeType,
-  ItemType, Node2DType, PolygonType, RectType, State } from '../functional/types'
+  ItemType, Node2DType, RectType, State } from '../functional/types'
 
 /**
  * converts single item to exportable format
@@ -50,30 +50,30 @@ export function convertItemToExport (
           const box2d = firstIndexedShape.shape as RectType
           labelExport.box2d = box2d
           break
-        case LabelTypeName.POLYGON_2D:
-        case LabelTypeName.POLYLINE_2D:
-          const poly2d = firstIndexedShape.shape as PolygonType
-          const typeCharacters = poly2d.points.map(
-            (point) => {
-              switch (point.type) {
-                case PointType.CURVE:
-                  return 'C'
-                case PointType.VERTEX:
-                  return 'L'
-              }
+        // case LabelTypeName.POLYGON_2D:
+        // case LabelTypeName.POLYLINE_2D:
+        //   const poly2d = firstIndexedShape.shape as PathPoint2D[]
+        //   const typeCharacters = poly2d.points.map(
+        //     (point) => {
+        //       switch (point.type) {
+        //         case PointType.CURVE:
+        //           return 'C'
+        //         case PointType.VERTEX:
+        //           return 'L'
+        //       }
 
-              return ''
-            }
-          )
-          const types = typeCharacters.join('')
-          const vertices: Array<[number, number]> =
-            poly2d.points.map((point) => [point.x, point.y])
-          labelExport.poly2d = [{
-            vertices,
-            types,
-            closed: label.type === LabelTypeName.POLYGON_2D
-          }]
-          break
+        //       return ''
+        //     }
+        //   )
+        //   const types = typeCharacters.join('')
+        //   const vertices: Array<[number, number]> =
+        //     poly2d.points.map((point) => [point.x, point.y])
+        //   labelExport.poly2d = [{
+        //     vertices,
+        //     types,
+        //     closed: label.type === LabelTypeName.POLYGON_2D
+        //   }]
+        //   break
         case LabelTypeName.BOX_3D:
           const poly3d = firstIndexedShape.shape as CubeType
           labelExport.box3d = poly3d

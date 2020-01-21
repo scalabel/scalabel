@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
 import { Plane3DType, ShapeType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
+import { TransformationControl } from './control/transformation_control'
 import Label3D from './label3d'
 import { Shape3D } from './shape3d'
 
@@ -12,10 +13,10 @@ export class Grid3D extends Shape3D {
   /** grid lines */
   private _lines: THREE.GridHelper
 
-  constructor (label: Label3D) {
-    super(label)
-    this._lines = new THREE.GridHelper(1, 6, 0xffffff, 0xffffff)
-    this._lines.rotation.x = -Math.PI / 2
+  constructor () {
+    super()
+    this._lines = new THREE.GridHelper(6, 6, 0xffffff, 0xffffff)
+    this._lines.rotation.x = Math.PI / 2
     this.add(this._lines)
     this.scale.x = 6
     this.scale.y = 6

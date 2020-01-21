@@ -5,7 +5,6 @@ import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
 import { projectionFromNDC } from '../../view_config/point_cloud'
 import { Grid3D } from './grid3d'
-import Label3D from './label3d'
 import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
 
@@ -47,8 +46,8 @@ export class Cube3D extends Shape3D {
    * Make box with assigned id
    * @param id
    */
-  constructor (label: Label3D) {
-    super(label)
+  constructor () {
+    super()
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
@@ -218,8 +217,6 @@ export class Cube3D extends Shape3D {
       }
 
       this.setControlSpheres(camera)
-    } else if (this._label.selected) {
-      (this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
       (this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       for (const sphere of this._controlSpheres) {

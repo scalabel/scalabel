@@ -5,8 +5,7 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { LabelTypeName } from '../../js/common/types'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
-import { makePolygon } from '../../js/functional/states'
-import { PolygonType } from '../../js/functional/types'
+import { PathPoint2DType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
 
 test('Add, change and delete polygon labels', () => {
@@ -51,8 +50,9 @@ test('Add, change and delete polygon labels', () => {
   let label = state.task.items[0].labels[labelIds[0]]
   expect(label.item).toBe(0)
   expect(label.type).toBe(LabelTypeName.POLYGON_2D)
-  const indexedShape = state.task.items[0].shapes[label.shapes[0]]
-  let shape = indexedShape.shape as PolygonType
+  const points = label.shapes.map(
+    (id) => state.task.items[0].shapes[id].shape as PathPoint2DType
+  )
   // Check label ids
   let index = 0
   _.forEach(state.task.items[0].labels, (v, i) => {
@@ -68,20 +68,20 @@ test('Add, change and delete polygon labels', () => {
     index += 1
   })
 
-  expect(shape.points[0].x).toBe(0)
-  expect(shape.points[1].x).toBe(1)
-  expect(shape.points[2].x).toBe(1)
-  expect(shape.points[3].x).toBe(0)
+  expect(points[0].x).toBe(0)
+  expect(points[1].x).toBe(1)
+  expect(points[2].x).toBe(1)
+  expect(points[3].x).toBe(0)
 
-  expect(shape.points[0].y).toBe(1)
-  expect(shape.points[1].y).toBe(1)
-  expect(shape.points[2].y).toBe(2)
-  expect(shape.points[3].y).toBe(2)
+  expect(points[0].y).toBe(1)
+  expect(points[1].y).toBe(1)
+  expect(points[2].y).toBe(2)
+  expect(points[3].y).toBe(2)
 
-  expect(shape.points[0].type).toBe('vertex')
-  expect(shape.points[1].type).toBe('vertex')
-  expect(shape.points[2].type).toBe('bezier')
-  expect(shape.points[3].type).toBe('bezier')
+  expect(points[0].type).toBe('vertex')
+  expect(points[1].type).toBe('vertex')
+  expect(points[2].type).toBe('bezier')
+  expect(points[3].type).toBe('bezier')
 
   Session.dispatch(
     action.changeLabelShape(

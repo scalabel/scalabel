@@ -1,3 +1,4 @@
+import { ShapeTypeName } from '../../common/types'
 import { Node2DType } from '../../functional/types'
 import { Point2D } from './point2d'
 
@@ -14,6 +15,22 @@ export class Node2D extends Point2D {
     super(node.x, node.y)
     this._name = node.name
     this._hidden = Boolean(node.hidden)
+  }
+
+  /** Get type name */
+  public get typeName () {
+    return ShapeTypeName.NODE_2D
+  }
+
+  /** Convert to state */
+  public toState (): Node2DType {
+    return {
+      x: this.x,
+      y: this.y,
+      name: this._name,
+      hidden: this._hidden,
+      color: this._color
+    }
   }
 
   /** Set name */
@@ -42,15 +59,5 @@ export class Node2D extends Point2D {
   /** Hide node */
   public hide () {
     this._hidden = true
-  }
-
-  /** To state representation */
-  public toState (): Node2DType {
-    return {
-      name: this._name,
-      hidden: this._hidden,
-      x: this.x,
-      y: this.y
-    }
   }
 }

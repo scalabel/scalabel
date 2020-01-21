@@ -20,7 +20,7 @@ export class Plane3D extends Label3D {
 
   constructor (labelList: Label3DList) {
     super(labelList)
-    this._shape = new Grid3D(this)
+    this._shape = new Grid3D()
     this._temporaryLabel = null
   }
 

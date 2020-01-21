@@ -1,5 +1,7 @@
-import { Vector2D } from '../../math/vector2d'
+import { ShapeTypeName } from '../../common/types'
+import { Point2DType } from '../../functional/types'
 import { Context2D, toCssColor } from '../util'
+import { Shape2D } from './shape2d'
 
 export interface Point2DStyle {
   /** radius of the point on drawing */
@@ -24,11 +26,24 @@ export function makePoint2DStyle (
 /**
  * Drawable 2D point
  */
-export class Point2D extends Vector2D {
+export class Point2D extends Shape2D {
   constructor (x: number = 0, y: number = 0) {
     super()
     this.x = x
     this.y = y
+  }
+
+  /** Get type name */
+  public get typeName () {
+    return ShapeTypeName.POINT_2D
+  }
+
+  /** Convert to state */
+  public toState (): Point2DType {
+    return {
+      x: this.x,
+      y: this.y
+    }
   }
 
   /**

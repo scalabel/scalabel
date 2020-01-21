@@ -7,7 +7,11 @@ import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { CustomLabel2D } from './custom_label'
 import { DrawMode, Label2D } from './label2d'
+import { Node2D } from './node2d'
+import { PathPoint2D } from './path_point2d'
+import { Point2D } from './point2d'
 import { Polygon2D } from './polygon2d'
+import { Rect2D } from './rect2d'
 import { Tag2D } from './tag2d'
 
 /**
@@ -35,13 +39,17 @@ export function makeDrawableLabel2D (
   return null
 }
 
+type Shape2D = Node2D | PathPoint2D | Rect2D | Point2D
+
 /**
  * List of drawable labels
  * ViewController for the labels
  */
 export class Label2DList {
-  /** Label the labels */
+  /** label id to label drawable map */
   private _labels: {[labelId: number]: Label2D}
+  /** shape id to shape drawable map */
+  private _shapes: {[shapeId: number]: Shape2D}
   /** list of the labels sorted by label order */
   private _labelList: Label2D[]
   /** selected label */
@@ -57,6 +65,7 @@ export class Label2DList {
 
   constructor () {
     this._labels = {}
+    this._shapes = {}
     this._labelList = []
     this._selectedLabels = []
     this._state = makeState()
@@ -156,9 +165,11 @@ export class Label2DList {
     const self = this
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
+
     // remove any label not in the state
     self._labels = Object.assign({} as typeof self._labels,
         _.pick(self._labels, _.keys(item.labels)))
+
     // update drawable label values
     _.forEach(item.labels, (label, key) => {
       const labelId = Number(key)
@@ -177,6 +188,7 @@ export class Label2DList {
         }
       }
     })
+
     // order the labels and assign order values
     self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
     _.forEach(self._labelList,

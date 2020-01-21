@@ -307,7 +307,7 @@ export class Box2D extends Label2D {
       type: LabelTypeName.BOX_2D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
-      order: this._order
+      order: this.order
     })
 
     const rect = makeRect({
