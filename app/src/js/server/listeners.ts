@@ -153,6 +153,7 @@ export async function DashboardHandler (req: Request, res: Response) {
   if (body) {
     try {
       const name = body.name
+      const maxIndex = body.maxIndex
       const key = getProjectKey(name)
       const fields = await Session.getStorage().load(key)
       const project = JSON.parse(fields) as types.Project
@@ -169,7 +170,11 @@ export async function DashboardHandler (req: Request, res: Response) {
       }
 
       const taskOptions = []
-      for (const emptyTask of tasks) {
+      let slicedTasks = tasks
+      if (maxIndex > 0) {
+        slicedTasks = slicedTasks.slice(0, maxIndex)
+      }
+      for (const emptyTask of slicedTasks) {
         let task
         try {
           // first, attempt loading previous submission

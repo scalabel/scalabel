@@ -7,7 +7,7 @@ import Dashboard, { DashboardContents } from './dashboard'
 /**
  * This function post requests to backend to retrieve dashboard contents
  */
-export function initDashboard (vendor?: boolean) {
+export function initDashboard (maxTaskIndex: number, vendor?: boolean) {
   let dashboardContents: DashboardContents
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = () => {
@@ -20,6 +20,7 @@ export function initDashboard (vendor?: boolean) {
         </MuiThemeProvider>
         , document.getElementById(vendor ? 'vendor-root'
           : 'dashboard-root'))
+      initDashboard(-1) // load full dashboard after first 1000 elements
     }
   }
   // get params from url path.
@@ -27,7 +28,8 @@ export function initDashboard (vendor?: boolean) {
   const projectName = searchParams.get('project_name')
   // send the request to the back end
   const request = JSON.stringify({
-    name: projectName
+    name: projectName,
+    maxIndex: maxTaskIndex
   })
   xhr.open('POST', './postDashboardContents')
   xhr.setRequestHeader('Content-Type', 'application/json')
