@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, Key, ShapeTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
+import { Label2DTemplateType, LabelType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
@@ -20,10 +20,10 @@ const lineWidth = 4
 
 /** Class for templated user-defined labels */
 export class CustomLabel2D extends Label2D {
+  /** Nodes */
+  private _nodes: Node2D[]
   /** Label template */
   private _template: Label2DTemplateType
-  /** Shapes */
-  private _shapes: Node2D[]
   /** Map between node names and colors */
   private _colorMap: { [name: string]: number[] }
   /** The hashed list of keys currently down */
@@ -39,8 +39,8 @@ export class CustomLabel2D extends Label2D {
 
   constructor (labelList: Label2DList, template: Label2DTemplateType) {
     super(labelList)
+    this._nodes = []
     this._template = template
-    this._shapes = []
     this._bounds = new Rect2D(-1, -1, -1, -1)
     this._corners = [new Point2D(), new Point2D(), new Point2D(), new Point2D()]
     this._colorMap = {}
@@ -56,14 +56,14 @@ export class CustomLabel2D extends Label2D {
   public get highlightCursor () {
     if (
       this._highlightedHandle >= 0 &&
-      this._highlightedHandle < this._shapes.length
+      this._highlightedHandle < this._nodes.length
     ) {
       return Cursor.DEFAULT
     } else if (
-      this._highlightedHandle >= this._shapes.length &&
-      this._highlightedHandle < this._shapes.length + this._corners.length
+      this._highlightedHandle >= this._nodes.length &&
+      this._highlightedHandle < this._nodes.length + this._corners.length
     ) {
-      const cornerIndex = this._highlightedHandle - this._shapes.length
+      const cornerIndex = this._highlightedHandle - this._nodes.length
       if (cornerIndex % 2 === 0) {
         return Cursor.NWSE_RESIZE
       } else {
@@ -91,10 +91,10 @@ export class CustomLabel2D extends Label2D {
         assignColor = (i: number): number[] => {
           // vertex
           if (
-            i < this._shapes.length &&
-            this._shapes[i].name in this._colorMap
+            i < this._nodes.length &&
+            this._nodes[i].name in this._colorMap
           ) {
-            return this._colorMap[this._shapes[i].name]
+            return this._colorMap[this._nodes[i].name]
           }
           return self._color
         }
@@ -112,22 +112,22 @@ export class CustomLabel2D extends Label2D {
 
     // Draw bounding box if selected
     if (this._selected) {
-      rectStyle.color = assignColor(this._shapes.length + this._corners.length)
+      rectStyle.color = assignColor(this._nodes.length + this._corners.length)
       this._bounds.draw(context, ratio, rectStyle)
 
       for (let i = 0; i < this._corners.length; i++) {
         const style =
-          (i === this._highlightedHandle - this._shapes.length) ?
+          (i === this._highlightedHandle - this._nodes.length) ?
             highPointStyle : pointStyle
-        style.color = assignColor(i + this._shapes.length)
+        style.color = assignColor(i + this._nodes.length)
         this._corners[i].draw(context, ratio, style)
       }
     }
 
     // Draw edges
     for (const edge of this._template.edges) {
-      const startPoint = this._shapes[edge[0]]
-      const endPoint = this._shapes[edge[1]]
+      const startPoint = this._nodes[edge[0]]
+      const endPoint = this._nodes[edge[1]]
 
       if (startPoint.hidden || endPoint.hidden) {
         continue
@@ -138,7 +138,7 @@ export class CustomLabel2D extends Label2D {
 
       context.save()
       context.strokeStyle = toCssColor(assignColor(
-        this._shapes.length + this._corners.length
+        this._nodes.length + this._corners.length
       ))
       context.lineWidth = lineWidth
       context.beginPath()
@@ -150,14 +150,14 @@ export class CustomLabel2D extends Label2D {
     }
 
     // Draw nodes
-    for (let i = 0; i < this._shapes.length; i++) {
-      if (this._shapes[i].hidden) {
+    for (let i = 0; i < this._nodes.length; i++) {
+      if (this._nodes[i].hidden) {
         continue
       }
       const style =
         (i === this._highlightedHandle) ? highPointStyle : pointStyle
       style.color = assignColor(i)
-      this._shapes[i].draw(context, ratio, style)
+      this._nodes[i].draw(context, ratio, style)
     }
   }
 
@@ -170,7 +170,7 @@ export class CustomLabel2D extends Label2D {
     this.order = state.task.status.maxOrder + 1
     const templateName =
       state.task.config.labelTypes[state.user.select.labelType]
-    this._label = makeLabel({
+    this._labelState = makeLabel({
       type: templateName,
       id: -1,
       item: itemIndex,
@@ -184,16 +184,16 @@ export class CustomLabel2D extends Label2D {
     )
 
     // Initialize with template information
-    this._shapes = []
+    this._nodes = []
     for (const node of this._template.nodes) {
-      this._shapes.push(new Node2D(node))
+      this._nodes.push(new Node2D(node))
     }
 
     // Get template bounds
     this.updateBounds()
 
     // Move to start
-    for (const point of this._shapes) {
+    for (const point of this._nodes) {
       point.x += start.x - this._bounds.x
       point.y += start.y - this._bounds.y
     }
@@ -201,8 +201,8 @@ export class CustomLabel2D extends Label2D {
     // Update bounds after moving
     this.updateBounds()
 
-    this.setSelected(true)
-    this._highlightedHandle = this._shapes.length + 2
+    this.selected = true
+    this._highlightedHandle = this._nodes.length + 2
   }
 
   /** Override on mouse down */
@@ -212,10 +212,10 @@ export class CustomLabel2D extends Label2D {
 
     if (
       (this._keyDownMap[Key.D_LOW] || this._keyDownMap[Key.D_UP]) &&
-      this._highlightedHandle < this._shapes.length
+      this._highlightedHandle < this._nodes.length
     ) {
       // Delete highlighted handle if d key pressed
-      this._shapes[this._highlightedHandle].hide()
+      this._nodes[this._highlightedHandle].hide()
       this._highlightedHandle = -1
     }
 
@@ -231,13 +231,13 @@ export class CustomLabel2D extends Label2D {
   ) {
     if (
       this.labelId < 0 || (
-        this._highlightedHandle >= this._shapes.length &&
-        this._highlightedHandle < this._shapes.length + this._corners.length
+        this._highlightedHandle >= this._nodes.length &&
+        this._highlightedHandle < this._nodes.length + this._corners.length
       )
     ) {
       // Calculate new scale by
       // comparing mouse coordinate against opposite corner
-      const cornerIndex = this._highlightedHandle - this._shapes.length
+      const cornerIndex = this._highlightedHandle - this._nodes.length
       const corner = this._corners[cornerIndex]
       const oppositeCornerIndex = this.getOppositeCorner(cornerIndex)
       const oppositeCorner = this._corners[oppositeCornerIndex]
@@ -245,18 +245,20 @@ export class CustomLabel2D extends Label2D {
           (coord.x - oppositeCorner.x) / (corner.x - oppositeCorner.x)
       const yScale =
           (coord.y - oppositeCorner.y) / (corner.y - oppositeCorner.y)
-      this.scale(oppositeCorner, new Vector2D(xScale, yScale))
-      this._labelList.addUpdatedLabel(this)
+      this.scale(
+        new Vector2D(oppositeCorner.x ,oppositeCorner.y),
+        new Vector2D(xScale, yScale)
+      )
     } else if (this._highlightedHandle >= 0) {
-      if (this._highlightedHandle < this._shapes.length) {
+      if (this._highlightedHandle < this._nodes.length) {
         // Move single point
-        this._shapes[this._highlightedHandle].x = coord.x
-        this._shapes[this._highlightedHandle].y = coord.y
+        this._nodes[this._highlightedHandle].x = coord.x
+        this._nodes[this._highlightedHandle].y = coord.y
         this.updateBounds()
       } else {
         // Drag shape
         const delta = coord.clone().subtract(this._mouseDownCoord)
-        for (const shape of this._shapes) {
+        for (const shape of this._nodes) {
           shape.x += delta.x
           shape.y += delta.y
         }
@@ -295,36 +297,21 @@ export class CustomLabel2D extends Label2D {
    * Expand the primitive shapes to drawable shapes
    * @param {ShapeType[]} shapes
    */
-  public updateShapes (shapes: ShapeType[]): void {
-    if (shapes.length !== this._shapes.length) {
-      this._shapes = []
-      for (const node of shapes) {
-        this._shapes.push(new Node2D(node as Node2DType))
-      }
-    } else {
-      for (let i = 0; i < shapes.length; i++) {
-        const node = shapes[i] as Node2DType
-        this._shapes[i].x = node.x
-        this._shapes[i].y = node.y
-        this._shapes[i].name = node.name
-        if (node.hidden) {
-          this._shapes[i].hide()
-        }
-      }
+  public updateState (labelState: LabelType): void {
+    super.updateState(labelState)
+    for (const shapeId of this._labelState.shapes) {
+      this._nodes.push(this._shapes[shapeId] as Node2D)
     }
     this.updateBounds()
   }
 
   /** Get shape id's and shapes for updating */
   public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
-    if (!this._label) {
-      throw new Error('Uninitialized label')
-    }
-    const shapeTypes = this._shapes.map(() => ShapeTypeName.NODE_2D)
-    const shapeStates: Node2DType[] = this._shapes.map(
+    const shapeTypes = this._nodes.map(() => ShapeTypeName.NODE_2D)
+    const shapeStates: Node2DType[] = this._nodes.map(
       (shape) => shape.toState()
     )
-    return [this._label.shapes, shapeTypes, shapeStates]
+    return [this._labelState.shapes, shapeTypes, shapeStates]
   }
 
   /** update bounds to current points */
@@ -333,7 +320,7 @@ export class CustomLabel2D extends Label2D {
       x1: Infinity, y1: Infinity, x2: -Infinity, y2: -Infinity
     }
 
-    for (const point of this._shapes) {
+    for (const point of this._nodes) {
       bounds.x1 = Math.min(point.x, bounds.x1)
       bounds.y1 = Math.min(point.y, bounds.y1)
       bounds.x2 = Math.max(point.x, bounds.x2)
@@ -372,16 +359,16 @@ export class CustomLabel2D extends Label2D {
     scale.x = newWidth / this._bounds.w
     scale.y = newHeight / this._bounds.h
 
-    for (const shape of this._shapes) {
+    for (const shape of this._nodes) {
       shape.x = (shape.x - anchor.x) * scale.x + anchor.x
       shape.y = (shape.y - anchor.y) * scale.y + anchor.y
     }
 
     // If the highlighted handle is one of the corners,
     // flip the handle if scale is negative
-    if (this._highlightedHandle >= this._shapes.length &&
-        this._highlightedHandle <= this._shapes.length + this._corners.length) {
-      const cornerIndex = this._highlightedHandle - this._shapes.length
+    if (this._highlightedHandle >= this._nodes.length &&
+        this._highlightedHandle <= this._nodes.length + this._corners.length) {
+      const cornerIndex = this._highlightedHandle - this._nodes.length
       const cornerCoords = new Vector2D(
         (1 - Math.floor(Math.abs(cornerIndex - 1.5))),
         Math.floor(cornerIndex / 2)
@@ -396,7 +383,7 @@ export class CustomLabel2D extends Label2D {
       }
 
       this._highlightedHandle = Math.abs(cornerCoords.y * 3 - cornerCoords.x) +
-        this._shapes.length
+        this._nodes.length
     }
 
     this.updateBounds()

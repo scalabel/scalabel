@@ -1,12 +1,12 @@
 
 import { ShapeType } from '../../functional/types'
-import { Vector2D } from '../../math/vector2d'
+import { Vector } from '../../math/vector'
 import Label2D from './label2d'
 
 /**
  * Base shape class
  */
-export abstract class Shape2D extends Vector2D {
+export abstract class Shape2D extends Vector {
   /** id */
   protected _id: number
   /** shape state */
@@ -16,8 +16,8 @@ export abstract class Shape2D extends Vector2D {
   /** whether highlighted */
   protected _highlighted: boolean
 
-  constructor () {
-    super()
+  constructor (dim: number) {
+    super(dim)
     this._id = -1
     this._labels = []
     this._shape = null

@@ -1,13 +1,13 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
-import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { makeLabel, makeTaskConfig } from '../../functional/states'
-import { ConfigType, LabelType, ShapeType, State } from '../../functional/types'
+import { Cursor, ShapeTypeName } from '../../common/types'
+import { makeLabel } from '../../functional/states'
+import { LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, getColorById } from '../util'
 import { Label2DList } from './label2d_list'
+import { Shape2D } from './shape2d'
 
 export enum DrawMode {
   VIEW,
@@ -27,7 +27,7 @@ export abstract class Label2D {
   /** index of the label */
   protected _index: number
   /** the corresponding label in the state */
-  protected _label: LabelType
+  protected _labelState: LabelType
   /** whether the label is selected */
   protected _selected: boolean
   /** whether the label is highlighted */
@@ -42,23 +42,29 @@ export abstract class Label2D {
   protected _mouseDownCoord: Vector2D
   /** whether the label is being editing */
   protected _editing: boolean
-  /** config */
-  protected _config: ConfigType
+  /** shapes */
+  protected _shapes: { [id: number]: Shape2D }
   /** label list */
   protected _labelList: Label2DList
+  /** parent label */
+  protected _parent: Label2D | null
+  /** child labels */
+  protected _children: Label2D []
 
   constructor (labelList: Label2DList) {
     this._index = -1
     this._selected = false
     this._highlighted = false
     this._highlightedHandle = -1
-    this._label = makeLabel()
+    this._labelState = makeLabel()
     this._color = [0, 0, 0, 1]
     this._mouseDownCoord = new Vector2D()
     this._mouseDown = false
     this._editing = false
-    this._config = makeTaskConfig()
+    this._shapes = {}
     this._labelList = labelList
+    this._parent = null
+    this._children = []
   }
 
   /**
@@ -75,55 +81,46 @@ export abstract class Label2D {
 
   /** get category */
   public get category (): number[] {
-    if (this._label && this._label.category) {
-      return this._label.category
+    if (this._labelState && this._labelState.category) {
+      return this._labelState.category
     }
     return []
   }
 
   /** get attributes */
   public get attributes (): {[key: number]: number[]} {
-    if (this._label && this._label.attributes) {
-      return this._label.attributes
+    if (this._labelState && this._labelState.attributes) {
+      return this._labelState.attributes
     }
     return {}
   }
 
   /** get label type */
   public get type (): string {
-    if (this._label) {
-      return this._label.type
-    }
-    return LabelTypeName.EMPTY
+    return this._labelState.type
   }
 
   /** get label state */
-  public get label (): LabelType {
-    if (!this._label) {
+  public get labelState (): LabelType {
+    if (!this._labelState) {
       throw new Error('Label uninitialized')
     }
-    return this._label
+    return this._labelState
   }
 
-  /** get labelId */
+  /** get label id */
   public get labelId (): number {
-    return this._label.id
+    return this._labelState.id
   }
 
   /** get track id */
   public get trackId (): number {
-    if (this._label) {
-      return this._label.track
-    }
-    return -1
+    return this._labelState.track
   }
 
   /** get item index */
   public get item (): number {
-    if (this._label) {
-      return this._label.item
-    }
-    return -1
+    return this._labelState.item
   }
 
   /** get color */
@@ -146,8 +143,8 @@ export abstract class Label2D {
     return this._selected
   }
 
-  /** select the label */
-  public setSelected (s: boolean) {
+  /** Set selected */
+  public set selected (s: boolean) {
     this._selected = s
   }
 
@@ -162,15 +159,36 @@ export abstract class Label2D {
 
   /** return order of this label */
   public get order (): number {
-    return this._label.order
+    return this._labelState.order
   }
 
   /** set the order of this label */
   public set order (o: number) {
-    this._label.order = o
+    this._labelState.order = o
   }
 
-  /** return the editing of this label */
+  /** set parent */
+  public set parent (parent: Label2D | null) {
+    this._parent = parent
+    const root = this.getRoot()
+    this._color = getColorById(root.labelId, root.trackId)
+  }
+
+  /** get parent */
+  public get parent (): Label2D | null {
+    return this._parent
+  }
+
+  /** Get top level parent */
+  public getRoot (): Label2D {
+    let label: Label2D = this
+    while (label.parent) {
+      label = label.parent
+    }
+    return label
+  }
+
+  /** return whether label is being edited */
   public get editing (): boolean {
     return this._editing
   }
@@ -190,11 +208,6 @@ export abstract class Label2D {
     if (this._label) {
       this._label.manual = true
     }
-  }
-
-  /** Parent drawable */
-  public get parent (): Label2D | null {
-    return null
   }
 
   /**
@@ -220,16 +233,17 @@ export abstract class Label2D {
     const TAG_WIDTH = 50
     const TAG_HEIGHT = 28
     const [x, y] = position
+    const config = this._labelList.config
     const self = this
     ctx.save()
-    const config = this._config
     const category = (
-      self._label &&
-      self._label.category[0] < config.categories.length &&
-      self._label.category[0] >= 0
-    ) ? config.categories[self._label.category[0]] : ''
-    const attributes = self._label && self._label.attributes ?
-                       self._label.attributes : {}
+      self._labelState &&
+      self._labelState.category[0] <
+        this._labelList.config.categories.length &&
+      self._labelState.category[0] >= 0
+    ) ? config.categories[self._labelState.category[0]] : ''
+    const attributes = self._labelState && self._labelState.attributes ?
+                       self._labelState.attributes : {}
     const words = category.split(' ')
     let tw = TAG_WIDTH
     // abbreviate tag as the first 3 chars of the last word
@@ -306,12 +320,6 @@ export abstract class Label2D {
    */
   public abstract onKeyUp (e: string): void
 
-  /**
-   * Expand the primitive shapes to drawable shapes
-   * @param {ShapeType[]} shapes
-   */
-  public abstract updateShapes (shapes: ShapeType[]): void
-
   /** Get shape id's and shapes for updating */
   public abstract shapeStates (): [number[], ShapeTypeName[], ShapeType[]]
 
@@ -322,9 +330,8 @@ export abstract class Label2D {
    */
   public initTemp (state: State, _start: Vector2D): void {
     this.order = state.task.status.maxOrder + 1
-    this._label.id = -1
-    this._label.track = -1
-    this._config = state.task.config
+    this._labelState.id = -1
+    this._labelState.track = -1
     this._color = getColorById(
       state.task.status.maxLabelId + 1,
       (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
@@ -334,19 +341,21 @@ export abstract class Label2D {
 
   /** Convert label state to drawable */
   public updateState (
-    state: State, itemIndex: number, labelId: number): void {
-    const item = state.task.items[itemIndex]
-    this._label = { ...item.labels[labelId] }
-    this.order = this._label.order
-    this._config = state.task.config
-    const select = state.user.select
-    this._color = getColorById(
-      getRootLabelId(item, labelId), getRootTrackId(item, labelId))
-    this.setSelected(
-      this._label.item in select.labels &&
-        select.labels[this._label.item].includes(labelId)
+    labelState: LabelType
+  ): void {
+    this._labelState = { ...labelState }
+    this._shapes = Object.assign(
+      {} as {[shapeId: number]: Shape2D},
+      _.pick(this._shapes, this._labelState.shapes)
     )
-    this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
+    for (const shapeId of this._labelState.shapes) {
+      if (!(shapeId in this._shapes)) {
+        const shape = this._labelList.getShape(shapeId)
+        if (shape) {
+          this._shapes[shapeId] = shape
+        }
+      }
+    }
   }
 }
 

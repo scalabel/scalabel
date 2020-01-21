@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { AttributeToolType, ShapeTypeName } from '../../common/types'
-import { Attribute, ShapeType, State } from '../../functional/types'
+import { Attribute, LabelType, ShapeType } from '../../functional/types'
 import { Context2D } from '../util'
 import { DrawMode, Label2D } from './label2d'
 import { Label2DList } from './label2d_list'
@@ -52,10 +52,9 @@ export class Tag2D extends Label2D {
   }
 
   /** Convert label state to drawable */
-  public updateState (
-    state: State, itemIndex: number, labelId: number): void {
-    super.updateState(state, itemIndex, labelId)
-    this.configAttributes = state.task.config.attributes
+  public updateState (labelState: LabelType): void {
+    super.updateState(labelState)
+    this.configAttributes = this._labelList.config.attributes
   }
 
   /**

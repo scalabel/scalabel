@@ -11,10 +11,16 @@ export class Node2D extends Point2D {
   /** Color of this node, if any */
   private _color?: number[]
 
-  constructor (node: Node2DType) {
-    super(node.x, node.y)
-    this._name = node.name
-    this._hidden = Boolean(node.hidden)
+  constructor (node?: Node2DType) {
+    if (node) {
+      super(node.x, node.y)
+      this._name = node.name
+      this._hidden = Boolean(node.hidden)
+    } else {
+      super()
+      this._name = ''
+      this._hidden = false
+    }
   }
 
   /** Get type name */

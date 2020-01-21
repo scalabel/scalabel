@@ -87,7 +87,7 @@ export abstract class Label3D {
   }
 
   /** get label state */
-  public get label (): Readonly<LabelType> {
+  public get labelState (): Readonly<LabelType> {
     if (!this._label) {
       throw new Error('Label uninitialized')
     }

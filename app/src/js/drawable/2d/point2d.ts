@@ -28,9 +28,29 @@ export function makePoint2DStyle (
  */
 export class Point2D extends Shape2D {
   constructor (x: number = 0, y: number = 0) {
-    super()
+    super(2)
     this.x = x
     this.y = y
+  }
+
+  /** get x */
+  public get x (): number {
+    return this[0]
+  }
+
+  /** set x */
+  public set x (v: number) {
+    this[0] = v
+  }
+
+  /** get y */
+  public get y (): number {
+    return this[1]
+  }
+
+  /** set x */
+  public set y (v: number) {
+    this[1] = v
   }
 
   /** Get type name */
