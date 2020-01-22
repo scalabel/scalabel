@@ -5,10 +5,11 @@ import { configureStore } from '../common/configure_store'
 import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
 import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
+import Logger from './logger'
 import * as path from './path'
 import { RedisCache } from './redis_cache'
 import Session from './server_session'
-import { EventName } from './types'
+import { EventName, RegisterMessageType, SyncActionMessageType } from './types'
 import { getSavedKey, getTaskKey,
   index2str, loadSavedState} from './util'
 
@@ -20,11 +21,19 @@ export function startSocketServer (io: socketio.Server) {
 
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
     socket.on(EventName.REGISTER, async (rawData: string) => {
-      await register(rawData, socket, cache)
+      try {
+        await register(rawData, socket, cache)
+      } catch (error) {
+        Logger.error(error)
+      }
     })
 
     socket.on(EventName.ACTION_SEND, async (rawData: string) => {
-      await actionUpdate(rawData, socket, cache, io)
+      try {
+        await actionUpdate(rawData, socket, cache)
+      } catch (error) {
+        Logger.error(error)
+      }
     })
   })
 }
@@ -34,25 +43,24 @@ export function startSocketServer (io: socketio.Server) {
  */
 async function register (
   rawData: string, socket: socketio.Socket, cache: RedisCache) {
-  const data = JSON.parse(rawData)
-  const projectName = data.project
-  const taskIndex = data.index
-  let sessId = data.sessId
-  const env = Session.getEnv()
+  const data: RegisterMessageType = JSON.parse(rawData)
+  const projectName = data.projectName
+  const taskIndex = data.taskIndex
+  let sessionId = data.sessionId
 
+  const env = Session.getEnv()
   const taskId = index2str(taskIndex)
   // keep session id if it exists, i.e. if it is a reconnection
-  if (!sessId) {
+  if (!sessionId) {
     // new session on new load
-    sessId = uuid4()
+    sessionId = uuid4()
   }
-  const room = path.roomName(projectName, taskId, env.sync, sessId)
-
-  const state = await loadState(room, projectName, taskId, cache)
-  state.session.id = sessId
+  const state = await loadState(projectName, taskId, cache)
+  state.session.id = sessionId
   state.task.config.autosave = env.autosave
 
   // Connect socket to others in the same room
+  const room = path.roomName(projectName, taskId, env.sync, sessionId)
   socket.join(room)
   // Send backend state to newly registered socket
   socket.emit(EventName.REGISTER_ACK, state)
@@ -62,48 +70,51 @@ async function register (
  * Updates the state with the action, and broadcasts action
  */
 async function actionUpdate (
-  rawData: string, socket: socketio.Socket,
-  cache: RedisCache, io: socketio.Server) {
-  const data = JSON.parse(rawData)
-  const projectName = data.project
+  rawData: string, socket: socketio.Socket, cache: RedisCache) {
+  const data: SyncActionMessageType = JSON.parse(rawData)
+  const projectName = data.projectName
   const taskId = data.taskId
-  const sessId = data.sessId
+  const sessionId = data.sessionId
   const actionList = data.actions
   const env = Session.getEnv()
 
-  const room = path.roomName(projectName, taskId, env.sync, sessId)
-  const state = await loadState(room, projectName, taskId, cache)
+  const room = path.roomName(projectName, taskId, env.sync, sessionId)
+
+  const taskActions = actionList.filter((action) => {
+    return types.TASK_ACTION_TYPES.includes(action.type)
+  })
+
+  const state = await loadState(projectName, taskId, cache)
   const store = configureStore(state)
 
-  // For each action, update the backend store and broadcast
-  for (const action of actionList) {
+  // For each task action, update the backend store
+  for (const action of taskActions) {
     action.timestamp = Date.now()
-    // for task actions, update store and broadcast to room
-    if (types.TASK_ACTION_TYPES.includes(action.type)) {
-      store.dispatch(action)
-      io.in(room).emit(EventName.ACTION_BROADCAST, action)
-    } else {
-      socket.emit(EventName.ACTION_BROADCAST, action)
-    }
+    store.dispatch(action)
   }
+
+  // broadcast task actions to all other sessions in room
+  socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActions)
+  // echo everything to original session
+  socket.emit(EventName.ACTION_BROADCAST, actionList)
 
   const newState = store.getState().present
   const stringState = JSON.stringify(newState)
-  const filePath = path.getFileKey(getSavedKey(projectName, taskId))
+  const saveKey = getSavedKey(projectName, taskId)
 
-  await cache.setExWithReminder(room, filePath, stringState)
+  await cache.setExWithReminder(saveKey, stringState)
 }
 
 /**
  * Loads state from cache if available, else memory
  */
-async function loadState (
-  room: string, projectName: string, taskId: string,
-  cache: RedisCache): Promise<State> {
+export async function loadState (
+  projectName: string, taskId: string, cache: RedisCache): Promise<State> {
   let state: State
 
   // first try to load from redis cache
-  const redisValue = await cache.get(room)
+  const saveKey = getSavedKey(projectName, taskId)
+  const redisValue = await cache.get(saveKey)
   if (redisValue) {
     state = JSON.parse(redisValue)
   } else {
@@ -124,8 +135,7 @@ async function loadState (
  * Used for first load
  */
 async function loadStateFromTask (
-  projectName: string,
-  taskId: string): Promise<State> {
+  projectName: string, taskId: string): Promise<State> {
   const key = getTaskKey(projectName, taskId)
   const fields = await Session.getStorage().load(key)
   const task = JSON.parse(fields) as TaskType
@@ -140,13 +150,26 @@ async function loadStateFromTask (
     state.session.itemStatuses.push(itemStatus)
   }
 
+  // TODO: Move this to be in front end after implementing label selector
   switch (state.task.config.itemType) {
     case ItemTypeName.IMAGE:
     case ItemTypeName.VIDEO:
-      if (state.task.config.labelTypes.length === 1 &&
-          state.task.config.labelTypes[0] === LabelTypeName.BOX_2D) {
-        state.task.config.policyTypes =
-          [TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D]
+      if (state.task.config.labelTypes.length === 1) {
+        switch (state.task.config.labelTypes[0]) {
+          case LabelTypeName.BOX_2D:
+            state.task.config.policyTypes =
+              [TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D]
+            break
+          case LabelTypeName.POLYGON_2D:
+            state.task.config.policyTypes =
+              [TrackPolicyType.LINEAR_INTERPOLATION_POLYGON]
+            break
+          case LabelTypeName.CUSTOM_2D:
+            state.task.config.labelTypes[0] =
+              Object.keys(state.task.config.label2DTemplates)[0]
+            state.task.config.policyTypes =
+              [TrackPolicyType.LINEAR_INTERPOLATION_CUSTOM_2D]
+        }
       }
       break
     case ItemTypeName.POINT_CLOUD:
@@ -156,6 +179,14 @@ async function loadStateFromTask (
         state.task.config.policyTypes =
           [TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D]
       }
+      break
+    case ItemTypeName.FUSION:
+      state.task.config.labelTypes =
+        [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]
+      state.task.config.policyTypes = [
+        TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D,
+        TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D
+      ]
       break
   }
   return state

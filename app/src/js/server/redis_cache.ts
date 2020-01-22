@@ -1,7 +1,7 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
 import Logger from './logger'
-import { getRedisBaseKey, pathRedisKey, reminderRedisKey } from './path'
+import { getFileKey, redisBaseKey, redisMetaKey, redisReminderKey } from './path'
 import Session from './server_session'
 
 /**
@@ -36,10 +36,12 @@ export class RedisCache {
     // subscribe to reminder expirations for saving
     this.sub.subscribe('__keyevent@0__:expired')
     this.sub.on('message', async (_channel: string, message: string) => {
-      const key = getRedisBaseKey(message)
-      const filePath = await this.get(pathRedisKey(key))
+      const key = redisBaseKey(message)
+      const saveKey = await this.get(redisMetaKey(key))
       const value = await this.get(key)
-      await Session.getStorage().save(filePath, value)
+      const fileKey = getFileKey(saveKey)
+      await Session.getStorage().save(fileKey, value)
+      await this.del(key)
     })
 
     this.timeout = env.redisTimeout
@@ -51,23 +53,24 @@ export class RedisCache {
    * Sets a value with timeout for flushing
    * And a reminder value with shorter timeout for saving to disk
    */
-  public async setExWithReminder (
-    key: string, filePath: string, value: string) {
-    await this.setEx(key, value, this.timeout)
-    await this.setEx(pathRedisKey(key), filePath, this.timeout)
+  public async setExWithReminder (saveKey: string, value: string) {
+    await this.setEx(saveKey, value, this.timeout)
+    await this.setEx(redisMetaKey(saveKey), saveKey, this.timeout)
 
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
-      await Session.getStorage().save(filePath, value)
+      const fileKey = getFileKey(saveKey)
+      await Session.getStorage().save(fileKey, value)
     } else {
-      const reminderKey = reminderRedisKey(key)
+      const reminderKey = redisReminderKey(saveKey)
       const numActions = parseInt(await this.get(reminderKey), 10)
       if (!numActions) {
         // new reminder, 1st action
         await this.setEx(reminderKey, '1', this.timeForWrite)
       } else if (numActions + 1 >= this.numActionsForWrite) {
         // write condition: num actions exceeded limit
-        await Session.getStorage().save(filePath, value)
+        const fileKey = getFileKey(saveKey)
+        await Session.getStorage().save(fileKey, value)
         await this.del(reminderKey)
       } else {
         // otherwise just update the action counter

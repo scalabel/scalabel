@@ -18,16 +18,6 @@ export function roomName (
 }
 
 /**
- * Builds the path for loading and saving data
- * Same directory is used for individual mode and sync mode
- */
-export function getPath (
-  dataDir: string, projectName: string, taskId: string): string {
-  return sprintf('%s/%s/saved/%s/',
-    dataDir, projectName, taskId)
-}
-
-/**
  * Get formatted timestamp
  */
 export function getNow (): string {
@@ -65,20 +55,20 @@ export function getExportName (projectName: string): string {
 /**
  * Get redis key for path metadata
  */
-export function pathRedisKey (key: string) {
+export function redisMetaKey (key: string) {
   return sprintf('%s^path', key)
 }
 
 /**
  * Get redis key for reminder metadata
  */
-export function reminderRedisKey (key: string) {
+export function redisReminderKey (key: string) {
   return sprintf('%s^reminder', key)
 }
 
 /**
  * Get redis base key from a metadata key
  */
-export function getRedisBaseKey (metadataKey: string) {
+export function redisBaseKey (metadataKey: string) {
   return metadataKey.split('^')[0]
 }

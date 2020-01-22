@@ -32,6 +32,7 @@ import {
 // TODO: add testing with the actual canvas
 
 let launchProc: child.ChildProcessWithoutNullStreams
+let redisProc: child.ChildProcessWithoutNullStreams 
 
 beforeAll(async () => {
   Session.devMode = false
@@ -41,6 +42,8 @@ beforeAll(async () => {
     '--config',
     './app/config/test_config.yml'
   ])
+  redisProc = child.spawn('redis-server')
+
   // launchProc.stdout.on('data', (data) => {
   //   process.stdout.write(data)
   // })
@@ -61,6 +64,7 @@ beforeEach(() => {
 afterEach(cleanup)
 afterAll(() => {
   launchProc.kill()
+  redisProc.kill()
   deleteTestDir()
 })
 
@@ -189,8 +193,8 @@ describe('full 2d bounding box integration test', () => {
     const exportJson = await getExport()
     const trueExportJson = getExportFromDisc()
     const noTimestampExportJson = deepDeleteTimestamp(exportJson)
-    const noTimestampTrueExportJSon = deepDeleteTimestamp(trueExportJson)
-    expect(noTimestampExportJson).toEqual(noTimestampTrueExportJSon)
+    const noTimestampTrueExportJson = deepDeleteTimestamp(trueExportJson)
+    expect(noTimestampExportJson).toEqual(noTimestampTrueExportJson)
     changeTestConfig({
       exportMode: true
     })
