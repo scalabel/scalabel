@@ -1,30 +1,28 @@
 dist: xenial
 language: node_js
 python:
-- '3.7'
+  - "3.7"
 node_js:
-- 12.11.1
+  - 12.11.1
 before_install:
-- sudo apt-get update
-- sudo apt-get install -y npm python3-pip python3-setuptools build-essential libcairo2-dev
-  libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-- npm install -g npm@latest
+  - sudo apt-get update
+  - sudo apt-get install -y npm python3-pip python3-setuptools build-essential libcairo2-dev
+    libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+  - npm install -g npm@latest
 install:
-- sudo pip3 install --upgrade pip
-- sudo pip3 install -r scripts/requirements.txt
-- npm install canvas --build-from-source
-- npm install
+  - sudo pip3 install --upgrade pip
+  - sudo pip3 install -r scripts/requirements.txt
+  - npm install canvas --build-from-source
+  - npm install
 script:
-- pylint scripts/
-- node_modules/.bin/eslint .
-- node_modules/.bin/tslint --project tsconfig.json --config tslint.json
-- node_modules/.bin/npx webpack --config webpack.config.js --mode=production
-- python3 scripts/lll.py -d server
-- npm test
+  - pylint scripts/
+  - node_modules/.bin/eslint .
+  - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
+  - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
+  - python3 scripts/lll.py -d server
+  - npm test
 branches:
   only:
-  - master
-env:
-  global:
-  - secure: ZwJh7E7WwBdS/LjvYojaTc7+IrB58mmn0pJ1SpOis1g6WmystieeRFWcuFgYKftLU6OWSVoa4l9ZgMQtBuSGDVLBat34i9Ir4d4zlMIgGILVPbx6HlDwzWwFLHmzIg7w/wm2KpvKFeibwhokjCmECcORmPSjas/ln6gDFgyImlkKz4/wXqVPamY9+wRoeybllYuK1GxuMKy8HZtZSSO14fmg8+yGKDaUUYvICfrJF0KnpckYbIUWYZKGTNpr8otoBXDvs3mvMqe+KZVrG2SPeoFBsc3ixFA4qyPueLHsw9+x1npVjv4aTjlqsmW10QEqRjyxuV2oOPFvRmwKgtR0jg39j6SwO7+Ili1H7Plgg7tqRwSAzgiMcNEY8egfh9r5TSCO1P7QUUl5qQgPjEEd2E4P9cOWeTlGUIr6Jrx5RieDHt0Yq9WOnOVhziu2/CzNDpF/0c6pfyMhESxa2Hcli4Q2zxfHwc0m/IMif5berHbqeuZBqc2vUVdpa2ieomFapcWodxFvjp/m8cx0sIXt8OOYnb0hE1GniJASNzJkCOtLcfV6q3z/GLjZVAXqe9YonZrfDkeO6txUAQiAVE8lmVCfa5XAgSivBnWtd6z5jRGkigxtwJ4HFadiefyHjuPB2+DGwFALbE52lPYZ0m9RYmUhKYxQGozZDauxIGdNgk4=
-  - secure: Vmgmxro0aMCXWROkBezdoTrn0R4MapUMRnQbPc8J1OvRK2T197IejBsHpT8IBL5I1+sR7y8Jl+WtmjsEub0woL9M/yodlwI4S6HhGNu08xwInbbGtN31ALod5KPjRoyMQcghiRrnLBnvybuwznQcbA5oxBA+4espxu9rXxE6h4Jz9L78FHuN0o3+CG2OzkBiYoDIo1Qu5ly4kVHRcq85SrZXKnqIirwklFzlh0ZR3FCGCZsf1aulI3O+eLe0SPTDtm2zh+fUc7JlIU4Hym+AUmly3Ma8IUsBAIACRDswbTHPPa/UySUpT9993Mz93kMKjbh8afGgXda69LG20o77igm9Yka/PEV+luwycAaz2ovlEwtlWHXcs69C2wMkvlQR+SbAtWn9M+8sRCA1kqi0QEGXjY7/hrPRgDTH1j2Ikq674igm/zVER0rrMyu9tZv3qhQrIBot+9eyAjmtDx7JxMNhIpfAlqUTSeYD8kJ5iqn/m11JN79qSXAYcAusvDwuN1HKcXyTJq/3kzYgu0l0WIOF2B15R3w1CbY6XRsTlLL/6n/zvJMhYetBZZH4DEgoXuKdKOqZNl3EnylakMJrrDYi3ctHiLppSOBADoqc6Dk1jPHekbNXED5lC3c0Cw4X6XnLjenO9ZORdLiD+zmuk6R/o7aiIyCk3ZpWhKn60ZE=
+    - master
+cache:
+  npm: false
