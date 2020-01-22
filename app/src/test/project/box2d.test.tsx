@@ -32,7 +32,7 @@ import {
 // TODO: add testing with the actual canvas
 
 let launchProc: child.ChildProcessWithoutNullStreams
-let redisProc: child.ChildProcessWithoutNullStreams 
+let redisProc: child.ChildProcessWithoutNullStreams
 
 beforeAll(async () => {
   Session.devMode = false

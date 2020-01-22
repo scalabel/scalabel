@@ -172,7 +172,7 @@ export async function DashboardHandler (req: Request, res: Response) {
           // first, attempt loading previous submission
           // TODO: Load the previous state asynchronously in dashboard
           const cache = new RedisCache()
-          const state = await loadState(projectName, 
+          const state = await loadState(projectName,
               emptyTask.config.taskId, cache)
           task = state.task
         } catch {
