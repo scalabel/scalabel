@@ -42,7 +42,7 @@ beforeAll(async () => {
     '--config',
     './app/config/test_config.yml'
   ])
-  redisProc = child.spawn('redis-server')
+  redisProc = child.spawn('redis-server', ['--appendonly', 'no', '--save', ''])
 
   // launchProc.stdout.on('data', (data) => {
   //   process.stdout.write(data)
