@@ -52,7 +52,7 @@ More installation and usage details can be find in our [documentation](http://ww
 
    2. Compile the code yourself (recommended if you want to customize the source code)
 
-      Install [nodejs and npm](https://nodejs.org/en/download/).
+      Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
 
       Transpile or build Javascript code
 
