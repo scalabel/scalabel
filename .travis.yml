@@ -25,3 +25,5 @@ script:
 branches:
   only:
     - master
+cache:
+    npm: false
