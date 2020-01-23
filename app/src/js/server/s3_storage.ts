@@ -37,24 +37,20 @@ export class S3Storage extends Storage {
     // create new bucket if there isn't one already (wait until it exists)
     const hasBucket = await this.hasBucket()
     if (!hasBucket) {
-      try {
-        const bucketParams = {
-          Bucket: this.bucketName,
-          CreateBucketConfiguration: {
-            LocationConstraint: this.region
-          }
+      const bucketParams = {
+        Bucket: this.bucketName,
+        CreateBucketConfiguration: {
+          LocationConstraint: this.region
         }
-        await this.s3.createBucket(bucketParams).promise()
-        Logger.info('Waiting for bucket to be created.')
-        const waitParams = {
-          Bucket: this.bucketName
-        }
-        await this.s3.waitFor('bucketExists', waitParams).promise()
-      } catch (error) {
-        return Promise.reject(error)
       }
+      await this.s3.createBucket(bucketParams).promise()
+      Logger.info('Waiting for bucket to be created.')
+      const waitParams = {
+        Bucket: this.bucketName
+      }
+      await this.s3.waitFor('bucketExists', waitParams).promise()
     }
-    return Promise.resolve()
+    return
   }
 
   /**
@@ -86,51 +82,47 @@ export class S3Storage extends Storage {
 
     const keys = []
     for (;;) {
-      try {
-        let data
-        if (continuationToken.length > 0) {
-          const params = {
-            Bucket: this.bucketName,
-            Prefix: fullPrefix,
-            ContinuationToken: continuationToken
-          }
-          data = await this.s3.listObjectsV2(params).promise()
-        } else {
-          const params = {
-            Bucket: this.bucketName,
-            Prefix: fullPrefix
-          }
-          data = await this.s3.listObjectsV2(params).promise()
+      let data
+      if (continuationToken.length > 0) {
+        const params = {
+          Bucket: this.bucketName,
+          Prefix: fullPrefix,
+          ContinuationToken: continuationToken
         }
+        data = await this.s3.listObjectsV2(params).promise()
+      } else {
+        const params = {
+          Bucket: this.bucketName,
+          Prefix: fullPrefix
+        }
+        data = await this.s3.listObjectsV2(params).promise()
+      }
 
-        if (data.Contents) {
-          for (const key of data.Contents) {
-            // remove any file extension and prepend prefix
-            if (key.Key) {
-              const noPrefix = key.Key.substr(fullPrefix.length)
+      if (data.Contents) {
+        for (const key of data.Contents) {
+          // remove any file extension and prepend prefix
+          if (key.Key) {
+            const noPrefix = key.Key.substr(fullPrefix.length)
 
-              // Parse to get the top level dir or file after prefix
-              const parsed = path.parse(noPrefix)
-              let keyName = parsed.name
-              if (parsed.dir.length > 0 && parsed.dir !== '/') {
-                keyName = parsed.dir.split('/')[0]
-              }
-              if (!onlyDir || parsed.ext === '') {
-                keys.push(path.join(prefix, keyName))
-              }
+            // Parse to get the top level dir or file after prefix
+            const parsed = path.parse(noPrefix)
+            let keyName = parsed.name
+            if (parsed.dir.length > 0 && parsed.dir !== '/') {
+              keyName = parsed.dir.split('/')[0]
+            }
+            if (!onlyDir || parsed.ext === '') {
+              keys.push(path.join(prefix, keyName))
             }
           }
         }
+      }
 
-        if (!data.IsTruncated) {
-          break
-        }
+      if (!data.IsTruncated) {
+        break
+      }
 
-        if (data.NextContinuationToken) {
-          continuationToken = data.NextContinuationToken
-        }
-      } catch (error) {
-        return Promise.reject(error)
+      if (data.NextContinuationToken) {
+        continuationToken = data.NextContinuationToken
       }
     }
 
@@ -150,10 +142,7 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
-    const savePromise = this.s3.putObject(params).promise()
-    return savePromise.then(() => {
-      return
-    })
+    return this.s3.putObject(params).promise()
   }
 
   /**
@@ -165,15 +154,13 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
-    try {
-      const data = (await this.s3.getObject(params).promise()).Body
-      if (data) {
-        return data.toString()
-      } else {
-        return Promise.reject(Error('No data at key'))
-      }
-    } catch (error) {
-      return Promise.reject(error)
+    const data = await this.s3.getObject(params).promise()
+    if (data.statusCode !== 200) {
+      return Promise.reject(Error('Key does not exist'))
+    } else if (!data || !data.Body) {
+      return Promise.reject(Error('No data at key'))
+    } else {
+      return data.Body.toString()
     }
   }
 

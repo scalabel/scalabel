@@ -40,29 +40,31 @@ export function initEnv () {
  * @param {string} dir: directory name to save at
  */
 async function makeStorage (
-  database: string, dir: string): Promise<[MaybeError, Storage]> {
+  database: string, dir: string): Promise<Storage> {
   switch (database) {
     case DatabaseType.S3:
       const s3Store = new S3Storage(dir)
       try {
         await s3Store.makeBucket()
-        return [null, s3Store]
+        return s3Store
       } catch (error) {
         // if s3 fails, default to file storage
-        return [error, new FileStorage(dir)]
+        Logger.error(Error('s3 failed, using file storage'))
+        Logger.error(error)
+        return new FileStorage(dir)
       }
     case DatabaseType.DYNAMO_DB: {
-      const err = Error(sprintf(
-        '%s storage not implemented yet, using file storage', database))
-      return [err, new FileStorage(dir)]
+      Logger.error(Error(sprintf(
+        '%s storage not implemented yet, using file storage', database)))
+      return new FileStorage(dir)
     }
     case DatabaseType.LOCAL: {
-      return [null, new FileStorage(dir)]
+      return new FileStorage(dir)
     }
     default: {
-      const err = Error(sprintf(
-        '%s is an unknown database format, using file storage', database))
-      return [err, new FileStorage(dir)]
+      Logger.error(Error(sprintf(
+        '%s is an unknown database format, using file storage', database)))
+      return new FileStorage(dir)
     }
   }
 }
@@ -72,8 +74,7 @@ async function makeStorage (
  */
 export async function initStorage (env: Env) {
   // set up storage
-  const [err, storage] = await makeStorage(env.database, env.data)
-  Logger.error(err)
+  const storage = await makeStorage(env.database, env.data)
   Session.setStorage(storage)
 }
 

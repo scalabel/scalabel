@@ -1,8 +1,8 @@
 ---
 port: 8686
-data: "./data"
+data: "us-west-2:scalabel-unit-testing/data"
 src: "."
-database: "local"
+database: "s3"
 userManagement: false
 sync: false
 autosave: false
