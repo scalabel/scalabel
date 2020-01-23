@@ -178,6 +178,11 @@ export class Track {
     this._shapes[index] = shapes
   }
 
+  /** Add updated index */
+  public addUpdatedIndex (index: number) {
+    this._updatedIndices.add(index)
+  }
+
   /** Get updated indices */
   public get updatedIndices (): Readonly<number[]> {
     return Array.from(this._updatedIndices)

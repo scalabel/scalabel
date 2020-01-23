@@ -15,20 +15,21 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
 
   /** Update */
   public update (itemIndex: number): void {
+    const indices = this._track.indices
     const currentManualIndices = this.getNearestManualIndices(itemIndex)
 
     // Backward
     if (currentManualIndices[0] >= 0) {
       this.interpolate(currentManualIndices[0], itemIndex)
     } else {
-      this.copyShapes(currentManualIndices[0], itemIndex, itemIndex)
+      this.copyShapes(indices[0], itemIndex, itemIndex)
     }
 
     // Forward
     if (currentManualIndices[1] >= 0) {
       this.interpolate(itemIndex, currentManualIndices[1])
     } else {
-      this.copyShapes(itemIndex, currentManualIndices[1], itemIndex)
+      this.copyShapes(itemIndex, indices[indices.length - 1], itemIndex)
     }
   }
 
@@ -37,9 +38,10 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
     if (!this._track.getLabel(source)) {
       return
     }
+    console.log('copy', start, end, source)
 
     const sourceShapes = this._track.getShapes(source)
-    for (let i = start; i < end; i++) {
+    for (let i = start + 1; i < end; i++) {
       const label = this._track.getLabel(i)
       if (!label) {
         continue
@@ -55,6 +57,7 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
       }
 
       this._track.setShapes(i, newShapes)
+      this._track.addUpdatedIndex(i)
     }
   }
 
@@ -62,7 +65,10 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
   protected interpolate (start: number, end: number) {
     this.calculateDeltas(start, end)
     for (let i = start + 1; i < end; i++) {
-      this.interpolateIndex(start, i)
+      if (this._track.getLabel(i)) {
+        this.interpolateIndex(start, i)
+        this._track.addUpdatedIndex(i)
+      }
     }
   }
 
