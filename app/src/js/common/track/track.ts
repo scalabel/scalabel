@@ -2,8 +2,14 @@ import _ from 'lodash'
 import Label2D from '../../drawable/2d/label2d'
 import Label3D from '../../drawable/3d/label3d'
 import { makeIndexedShape, makeTrack } from '../../functional/states'
-import { IndexedShapeType, LabelType, State, TrackType } from '../../functional/types'
+import { IndexedShapeType, Label2DTemplateType, LabelType, State, TrackType } from '../../functional/types'
 import { LabelTypeName, TrackPolicyType } from '../types'
+import { Box2DLinearInterpolationPolicy } from './policy/linear_interpolation/box2d_linear_interpolation'
+import { Box3DLinearInterpolationPolicy } from './policy/linear_interpolation/box3d_linear_interpolation'
+import { CustomLabel2DLinearInterpolationPolicy } from './policy/linear_interpolation/custom_label2d_linear_interpolation'
+import { Plane3DLinearInterpolationPolicy } from './policy/linear_interpolation/plane3d_linear_interpolation'
+import { PolygonLinearInterpolationPolicy } from './policy/linear_interpolation/polygon_linear_interpolation'
+import { TrackPolicy } from './policy/policy'
 
 export type Label = Label2D | Label3D
 
@@ -14,17 +20,59 @@ export function policyFromString (
   switch (typeName) {
     case TrackPolicyType.LINEAR_INTERPOLATION:
       return TrackPolicyType.LINEAR_INTERPOLATION
+    case TrackPolicyType.NONE:
+      return TrackPolicyType.NONE
   }
 
   throw new Error(`Unrecognized policy type: ${typeName}`)
 }
 
+/** Returns a function for creating a policy object based on the track type */
+export function policyFactoryMaker (policyType: TrackPolicyType): (
+  track: Track,
+  type: string,
+  label2DTemplates: {[name: string]: Label2DTemplateType}
+) => TrackPolicy {
+  switch (policyType) {
+    case TrackPolicyType.NONE:
+      return (track: Track) => new TrackPolicy(track)
+    case TrackPolicyType.LINEAR_INTERPOLATION:
+      return linearInterpolationPolicyFactory
+  }
+  throw new Error(`Invalid policy type ${policyType}`)
+}
+
+/** Factory for linear interpolation policies */
+export function linearInterpolationPolicyFactory (
+  track: Track,
+  type: string,
+  label2DTemplates: {[name: string]: Label2DTemplateType}
+): TrackPolicy {
+  switch (type) {
+    case LabelTypeName.BOX_2D:
+      return new Box2DLinearInterpolationPolicy(track)
+    case LabelTypeName.BOX_3D:
+      return new Box3DLinearInterpolationPolicy(track)
+    case LabelTypeName.PLANE_3D:
+      return new Plane3DLinearInterpolationPolicy(track)
+    case LabelTypeName.POLYGON_2D:
+    case LabelTypeName.POLYLINE_2D:
+      return new PolygonLinearInterpolationPolicy(track)
+  }
+  if (type in label2DTemplates) {
+    return new CustomLabel2DLinearInterpolationPolicy(track)
+  }
+  throw new Error(
+    `Linear interpolation is not supported for track type ${type}`
+  )
+}
+
 /**
  * Object representation of track
  */
-export abstract class Track {
+export class Track {
   /** policy */
-  protected _policy: TrackPolicyType
+  protected _policy: TrackPolicy
   /** track state */
   protected _track: TrackType
   /** shape map */
@@ -32,16 +80,16 @@ export abstract class Track {
   /** label map */
   protected _labels: { [index: number]: LabelType }
   /** updated indices */
-  protected _updatedIndices: number[]
+  protected _updatedIndices: Set<number>
   /** type */
   protected _type: string
 
   constructor () {
     this._track = makeTrack(-1, LabelTypeName.EMPTY)
-    this._policy = TrackPolicyType.NONE
+    this._policy = new TrackPolicy(this)
     this._shapes = {}
     this._labels = {}
-    this._updatedIndices = []
+    this._updatedIndices = new Set()
     this._type = ''
   }
 
@@ -51,9 +99,16 @@ export abstract class Track {
    */
   public updateState (state: State, id: number) {
     this._track = state.task.tracks[id]
-    this._policy = policyFromString(
+    const policyType = policyFromString(
       state.task.config.policyTypes[state.user.select.policyType]
     )
+    if (policyType !== this.policyType) {
+      this._policy = policyFactoryMaker(policyType)(
+        this,
+        this._track.type,
+        state.task.config.label2DTemplates
+      )
+    }
     const items = Object.keys(this._track.labels).map((key) => Number(key))
     this._labels = Object.assign({}, _.pick(this._labels, items))
     this._shapes = Object.assign({}, _.pick(this._shapes, items))
@@ -72,7 +127,7 @@ export abstract class Track {
    * Get track policy
    */
   public get policyType (): TrackPolicyType {
-    return this._policy
+    return this._policy.type
   }
 
   /**
@@ -85,6 +140,15 @@ export abstract class Track {
   /** Get track type */
   public get type () {
     return this._type
+  }
+
+  /** Get indices where the track has labels */
+  public get indices (): number[] {
+    return Object.keys(this._labels).map(
+      (key) => Number(key)
+    ).sort(
+      (a, b) => a - b
+    )
   }
 
   /** Get label at index */
@@ -105,14 +169,23 @@ export abstract class Track {
     return []
   }
 
+  /** Set shapes at item index */
+  public setShapes (
+    index: number,
+    shapes: IndexedShapeType[]
+  ) {
+    this._updatedIndices.add(index)
+    this._shapes[index] = shapes
+  }
+
   /** Get updated indices */
   public get updatedIndices (): Readonly<number[]> {
-    return this._updatedIndices
+    return Array.from(this._updatedIndices)
   }
 
   /** Clear updated indices */
   public clearUpdatedIndices () {
-    this._updatedIndices.length = 0
+    this._updatedIndices.clear()
   }
 
   /**
@@ -156,7 +229,7 @@ export abstract class Track {
             -1, [-1], shapeTypes[i], _.cloneDeep(shapeStates[i])
           ))
         }
-        this._updatedIndices.push(index)
+        this._updatedIndices.add(index)
       }
     }
   }
@@ -172,7 +245,7 @@ export abstract class Track {
       itemIndex in this._shapes &&
       newShapes.length === this._shapes[itemIndex].length
     ) {
-      this._updatedIndices.push(itemIndex)
+      this._updatedIndices.add(itemIndex)
       this._shapes[itemIndex].length = ids.length
       for (let i = 0; i < newShapes.length; i++) {
         this._shapes[itemIndex][i].id = ids[i]
@@ -185,109 +258,7 @@ export abstract class Track {
         ...label.label
       }
 
-      switch (this._policy) {
-        case TrackPolicyType.LINEAR_INTERPOLATION:
-          this.linearInterpolationUpdate(itemIndex)
-      }
+      this._policy.update(itemIndex)
     }
   }
-
-  /** Linear interpolate */
-  protected linearInterpolationUpdate (updatedIndex: number): void {
-    const itemIndices =
-      Object.keys(this._labels).map((key) => Number(key)).sort(
-        (a, b) => a - b
-      )
-    const itemArrayUpdatedIndex = itemIndices.indexOf(updatedIndex)
-
-    if (itemArrayUpdatedIndex < 0) {
-      return
-    }
-
-    let lastManualIndex = -1
-    for (let i = itemArrayUpdatedIndex - 1; i >= 0; i -= 1) {
-      const index = itemIndices[i]
-      this._updatedIndices.push(i)
-      if (index in this._labels) {
-        const label = this._labels[index]
-        if (label.manual) {
-          lastManualIndex = i
-          break
-        }
-      }
-    }
-
-    if (lastManualIndex >= 0) {
-      for (let i = lastManualIndex; i < itemArrayUpdatedIndex; i++) {
-        this.linearInterpolateIndex(
-          itemIndices[i],
-          itemIndices[lastManualIndex],
-          itemIndices[itemArrayUpdatedIndex]
-        )
-      }
-    } else {
-      for (let i = 0; i < itemArrayUpdatedIndex; i++) {
-        const index = itemIndices[i]
-        for (
-          let shapeIndex = 0;
-          shapeIndex < this._shapes[updatedIndex].length;
-          shapeIndex++
-        ) {
-          this._shapes[index][shapeIndex].shape =
-            _.cloneDeep(this._shapes[updatedIndex][shapeIndex].shape)
-          this._shapes[index][shapeIndex].type =
-            this._shapes[updatedIndex][shapeIndex].type
-        }
-        this._shapes[index].length = this._shapes[updatedIndex].length
-      }
-    }
-
-    // Go forward
-    let nextManualIndex = -1
-    for (let i = updatedIndex + 1; i < itemIndices.length; i += 1) {
-      const index = itemIndices[i]
-      this._updatedIndices.push(i)
-      if (index in this._labels) {
-        const label = this._labels[index]
-        if (label.manual) {
-          nextManualIndex = i
-          break
-        }
-      }
-    }
-
-    if (nextManualIndex >= 0) {
-      for (let i = itemArrayUpdatedIndex + 1; i <= nextManualIndex; i++) {
-        this.linearInterpolateIndex(
-          itemIndices[i],
-          itemIndices[itemArrayUpdatedIndex],
-          itemIndices[nextManualIndex]
-        )
-      }
-    } else {
-      for (let i = itemArrayUpdatedIndex + 1; i < itemIndices.length; i++) {
-        const index = itemIndices[i]
-        for (
-          let shapeIndex = 0;
-          shapeIndex < this._shapes[updatedIndex].length;
-          shapeIndex++
-        ) {
-          this._shapes[index][shapeIndex].shape =
-            _.cloneDeep(this._shapes[updatedIndex][shapeIndex].shape)
-          this._shapes[index][shapeIndex].type =
-            this._shapes[updatedIndex][shapeIndex].type
-        }
-        this._shapes[index].length = this._shapes[updatedIndex].length
-      }
-    }
-  }
-
-  /** Copy shape */
-
-  /** Linear interpolate shapes at index */
-  protected abstract linearInterpolateIndex (
-    itemIndex: number,
-    previousIndex: number,
-    nextIndex: number
-  ): void
 }

@@ -16,7 +16,6 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { Track } from './track/track'
-import { trackFactory } from './track/util'
 import { DataType, ViewerConfigTypeName } from './types'
 
 /**
@@ -48,12 +47,10 @@ function updateTracks (): void {
   const newTracks: {[trackId: number]: Track} = {}
   for (const key of Object.keys(state.task.tracks)) {
     const trackId = Number(key)
-    const track = state.task.tracks[trackId]
     if (trackId in Session.tracks) {
       newTracks[trackId] = Session.tracks[trackId]
     } else {
-      const newTrack =
-        trackFactory(track.type, state.task.config.label2DTemplates)
+      const newTrack = new Track()
       if (newTrack) {
         newTracks[trackId] = newTrack
       }

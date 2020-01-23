@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { addLabel, addTrack, changeLabelProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
-import { trackFactory } from '../../common/track/util'
+import { Track } from '../../common/track/track'
 import { Key } from '../../common/types'
 import { getLinkedLabelIds } from '../../functional/common'
 import { State } from '../../functional/types'
@@ -143,10 +143,7 @@ export class Label2DHandler {
         if (selectedLabel.labelId < 0) {
         // Add new label to state
           if (Session.tracking) {
-            const newTrack = trackFactory(
-              selectedLabel.type,
-              this._state.task.config.label2DTemplates
-            )
+            const newTrack = new Track()
             if (newTrack) {
               newTrack.init(
                 this._selectedItemIndex,

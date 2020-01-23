@@ -3,8 +3,7 @@ import { addTrack, changeLabelsProps } from '../action/common'
 import { ADD_LABELS, CHANGE_SHAPES } from '../action/types'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
-import { trackFactory } from '../common/track/util'
-import { Label2DTemplateType, LabelType, ShapeType } from '../functional/types'
+import { LabelType, ShapeType } from '../functional/types'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
 
@@ -12,8 +11,7 @@ import Label3D from './3d/label3d'
  * Commit labels to state
  */
 export function commitLabels (
-  updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>,
-  label2DTemplates: { [name: string]: Label2DTemplateType }
+  updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>
 ) {
   // Get labels & tracks to commit
   const updatedShapes: { [index: number]: { [id: number]: ShapeType}} = {}
@@ -68,7 +66,7 @@ export function commitLabels (
     } else {
       // New labels and tracks
       if (Session.tracking) {
-        const track = trackFactory(drawable.type, label2DTemplates)
+        const track = new Track()
         if (track) {
           let parentTrack
           if (
