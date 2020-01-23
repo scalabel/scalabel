@@ -37,31 +37,35 @@ function startHTTPServer (app: Application) {
 /**
  * Main function for backend server
  */
-function main () {
+async function main (): Promise<void> {
   // init global env
   initEnv()
   const env = Session.getEnv()
 
   // init global storage
-  initStorage(env).then(() => {
+  try {
+    await initStorage(env)
+  } catch (error) {
+    Logger.error(error)
+  }
     // start http and socket io servers
-    const app: Application = express()
-    const httpServer = createServer(app)
-    const io = socketio(httpServer)
+  const app: Application = express()
+  const httpServer = createServer(app)
+  const io = socketio(httpServer)
 
     // set up middleware
-    app.use(listeners.LoggingHandler)
+  app.use(listeners.LoggingHandler)
 
     // set up http handlers
-    startHTTPServer(app)
+  startHTTPServer(app)
 
     // set up socket.io handler
-    startSocketServer(io)
+  startSocketServer(io)
 
-    httpServer.listen(env.port)
-  }).catch((err) => {
-    Logger.error(err)
-  })
+  httpServer.listen(env.port)
+
+  return
 }
 
-main()
+// TODO: Verify this is good promise handling
+main().then().catch()
