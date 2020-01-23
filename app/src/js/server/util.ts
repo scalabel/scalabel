@@ -12,7 +12,7 @@ import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import Session from './server_session'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType, Env, MaybeError } from './types'
+import { CreationForm, DatabaseType, Env } from './types'
 
 /**
  * Initializes global env
