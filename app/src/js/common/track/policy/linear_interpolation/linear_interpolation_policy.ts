@@ -38,7 +38,6 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
     if (!this._track.getLabel(source)) {
       return
     }
-    console.log('copy', start, end, source)
 
     const sourceShapes = this._track.getShapes(source)
     for (let i = start + 1; i < end; i++) {

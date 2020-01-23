@@ -1,6 +1,7 @@
 import _ from 'lodash'
-import { addLabel, addTrack, changeLabelProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
+import { addLabel, addTrack, changeLabelProps, changeLabelsProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
+import { CHANGE_SHAPES } from '../../action/types'
 import Session from '../../common/session'
 import { Track } from '../../common/track/track'
 import { Key } from '../../common/types'
@@ -108,6 +109,7 @@ export class Label2DHandler {
     if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
       for (const label of Session.label2dList.selectedLabels) {
         label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
+        label.setManual()
       }
       return true
     } else {
@@ -187,17 +189,52 @@ export class Label2DHandler {
         } else {
         // Update existing label
           const label = selectedLabel.label
-          Session.dispatch(changeShapes(
-            this._selectedItemIndex, shapeIds, shapeStates
-          ))
-          Session.dispatch(changeLabelProps(
-            this._selectedItemIndex, selectedLabel.labelId, { manual: true }
-          ))
           if (Session.tracking && label.track in Session.tracks) {
-            Session.tracks[label.track].update(
+            const track = Session.tracks[label.track]
+            track.update(
               this._selectedItemIndex,
               selectedLabel
             )
+            const updatedIndices = []
+            const updatedLabelIds = []
+            const updatedLabels = []
+            const updatedShapeIds = []
+            const updatedShapes = []
+            for (const updatedIndex of track.updatedIndices) {
+              updatedIndices.push(updatedIndex)
+              const labelState = track.getLabel(updatedIndex)
+              if (labelState) {
+                updatedLabels.push([labelState])
+                updatedLabelIds.push([labelState.id])
+                const indexedShapes = track.getShapes(updatedIndex)
+                updatedShapes.push(indexedShapes.map(
+                    (indexedShape) => indexedShape.shape
+               ))
+                updatedShapeIds.push(
+                  indexedShapes.map((indexedShape) => indexedShape.id)
+                )
+              }
+            }
+            Session.dispatch(
+              {
+                type: CHANGE_SHAPES,
+                sessionId: Session.id,
+                itemIndices: updatedIndices,
+                shapeIds: updatedShapeIds,
+                shapes: updatedShapes
+              }
+            )
+            Session.dispatch(
+              changeLabelsProps(updatedIndices, updatedLabelIds, updatedLabels)
+            )
+            track.clearUpdatedIndices()
+          } else {
+            Session.dispatch(changeShapes(
+              this._selectedItemIndex, shapeIds, shapeStates
+            ))
+            Session.dispatch(changeLabelProps(
+              this._selectedItemIndex, selectedLabel.labelId, { manual: true }
+            ))
           }
         }
       }

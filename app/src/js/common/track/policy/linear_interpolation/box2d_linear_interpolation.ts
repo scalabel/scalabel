@@ -62,7 +62,7 @@ export class Box2DLinearInterpolationPolicy extends LinearInterpolationPolicy {
     newCenter.scale(offset)
     newCenter.add(this._initialCenter)
 
-    const newDimension = this._initialDimension.clone()
+    const newDimension = this._dimensionDelta.clone()
     newDimension.scale(offset)
     newDimension.add(this._initialDimension)
 
