@@ -1,6 +1,7 @@
 import { Theme } from '@material-ui/core'
 import { cyan } from '@material-ui/core/colors'
 import createStyles from '@material-ui/core/styles/createStyles'
+import { CSSProperties } from '@material-ui/core/styles/withStyles'
 /* Dashboard window styles */
 export const dashboardWindowStyles = (theme: Theme) =>
   createStyles({
@@ -83,7 +84,7 @@ export const dashboardStyles = (theme: Theme) => createStyles({
   labelText: {
     marginTop: theme.spacing(2)
   },
-  appBarSpacer: theme.mixins.toolbar
+  appBarSpacer: theme.mixins.toolbar as CSSProperties
 })
 /* dashboard header style */
 export const dashboardHeaderStyles = createStyles({

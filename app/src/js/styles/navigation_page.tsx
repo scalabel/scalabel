@@ -1,6 +1,7 @@
 import { Theme } from '@material-ui/core/styles'
 import createStyles from '@material-ui/core/styles/createStyles'
 import { defaultAppBar, defaultHeader } from './general'
+import { CSSProperties } from '@material-ui/core/styles/withStyles'
 
 // styles used in the create and dashboard navigation page
 export const drawerWidth = 240
@@ -35,5 +36,5 @@ export const dividedPageStyle = (theme: Theme) => createStyles({
     flexGrow: 1
   },
 
-  appBarSpacer: theme.mixins.toolbar
+  appBarSpacer: theme.mixins.toolbar as CSSProperties
 })
