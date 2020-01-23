@@ -84,6 +84,10 @@ export const dashboardStyles = (theme: Theme) => createStyles({
   labelText: {
     marginTop: theme.spacing(2)
   },
+  /** theme.mixins.toolbar is of type React.CSSProperties,
+   * but createStyles expects it
+   * to be of type CSSProperties from the import above
+   */
   appBarSpacer: theme.mixins.toolbar as CSSProperties
 })
 /* dashboard header style */
