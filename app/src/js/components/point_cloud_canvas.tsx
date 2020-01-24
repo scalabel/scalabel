@@ -60,7 +60,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     super(props)
     this.scene = new THREE.Scene()
     this.camera = props.camera
-    this.target = new THREE.AxesHelper(0.2)
+    this.target = new THREE.AxesHelper(0.5)
     this.scene.add(this.target)
 
     this.pointCloud = null

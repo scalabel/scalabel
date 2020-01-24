@@ -61,7 +61,7 @@ class Viewer3D extends DrawableViewer<Props> {
    */
   constructor (props: Props) {
     super(props)
-    this._camera = new THREE.PerspectiveCamera(45, 1, 1, 1000)
+    this._camera = new THREE.PerspectiveCamera(45, 1, 0.2, 1000)
     this._raycaster = new THREE.Raycaster()
     this._target = new THREE.Vector3()
   }
