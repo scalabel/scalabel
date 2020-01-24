@@ -206,6 +206,19 @@ export class Label3DHandler {
           LabelTypeName.BOX_3D, TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D
         ))
         return true
+      case Key.T_UP:
+      case Key.T_LOW:
+        if (this.isKeyDown(Key.SHIFT)) {
+          if (Session.label3dList.selectedLabel) {
+            const target =
+              (this._viewerConfig as PointCloudViewerConfigType).target
+            Session.label3dList.selectedLabel.move(
+              (new Vector3D()).fromObject(target).toThree()
+            )
+            e.preventDefault()
+          }
+        }
+        break
       default:
         this._keyDownMap[e.key] = true
     }
