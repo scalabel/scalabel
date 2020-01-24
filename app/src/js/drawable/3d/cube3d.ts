@@ -18,6 +18,8 @@ const faceNormals = [
   new THREE.Vector3(0, 0, -1)
 ]
 
+const DISTANCE_SCALE_CORRECTION = 7
+
 /**
  * Shape for Box3D label
  */
@@ -592,6 +594,12 @@ export class Cube3D extends Shape3D {
       }
     }
 
+    const scaleVector = new THREE.Vector3()
+    const scaleFactor = scaleVector.subVectors(
+      this.position,
+      camera.position
+    ).length() / DISTANCE_SCALE_CORRECTION
+
     for (let i = 0; i < this._controlSpheres.length; i += 1) {
       const firstSign = (i % 2 === 0) ? -1 : 1
       const secondSign = (Math.floor(i / 2) === 0) ? -1 : 1
@@ -613,6 +621,7 @@ export class Cube3D extends Shape3D {
       this._controlSpheres[i].scale.set(
         1. / this.scale.x, 1. / this.scale.y, 1. / this.scale.z
       )
+      this._controlSpheres[i].scale.multiplyScalar(scaleFactor)
     }
   }
 }
