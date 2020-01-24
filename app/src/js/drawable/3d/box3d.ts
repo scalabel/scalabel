@@ -178,6 +178,11 @@ export class Box3D extends Label3D {
     return this._shape.quaternion
   }
 
+  /** size of box */
+  public get size (): THREE.Vector3 {
+    return this._shape.scale
+  }
+
   /**
    * Highlight box
    * @param h
