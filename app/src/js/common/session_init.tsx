@@ -5,17 +5,18 @@ import ReactDOM from 'react-dom'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
-import { addViewerConfig, initSessionAction, loadItem, updateAll } from '../action/common'
+import { addViewerConfig, initSessionAction, loadItem, splitPane, updateAll, updatePane } from '../action/common'
+import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
 import Window from '../components/window'
 import { makeDefaultViewerConfig } from '../functional/states'
-import { State } from '../functional/types'
+import { PointCloudViewerConfigType, SplitType, State } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { makeTrackPolicy, Track } from './track'
-import { DataType, ViewerConfigTypeName } from './types'
+import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
  * Request Session state from the server
@@ -98,7 +99,7 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
  * Create default viewer configs if none exist
  */
 function initViewerConfigs (): void {
-  const state = Session.getState()
+  let state = Session.getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const sensorIds = Object.keys(state.task.sensors).map(
       (key) => Number(key)
@@ -110,6 +111,61 @@ function initViewerConfigs (): void {
     )
     if (config0) {
       Session.dispatch(addViewerConfig(0, config0))
+    }
+
+    // Set up default PC labeling interface
+    const paneIds = Object.keys(state.user.layout.panes)
+    if (
+      state.task.config.itemType === ItemTypeName.POINT_CLOUD &&
+      paneIds.length === 1
+    ) {
+      Session.dispatch(splitPane(Number(paneIds[0]), SplitType.HORIZONTAL, 0))
+      state = Session.getState()
+      let config =
+        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      Session.dispatch(toggleSelectionLock(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType
+      ))
+      Session.dispatch(splitPane(
+        state.user.layout.maxPaneId,
+        SplitType.VERTICAL,
+        state.user.layout.maxViewerConfigId
+      ))
+      Session.dispatch(updatePane(
+        state.user.layout.maxPaneId, { primarySize: '33%' }
+      ))
+
+      state = Session.getState()
+      config =
+        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      Session.dispatch(toggleSelectionLock(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType
+      ))
+      Session.dispatch(alignToAxis(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType,
+        1
+      ))
+      Session.dispatch(splitPane(
+        state.user.layout.maxPaneId,
+        SplitType.VERTICAL,
+        state.user.layout.maxViewerConfigId
+      ))
+
+      state = Session.getState()
+      config =
+        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      Session.dispatch(toggleSelectionLock(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType
+      ))
+      Session.dispatch(alignToAxis(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType,
+        2
+      ))
     }
   }
 }

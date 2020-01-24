@@ -454,5 +454,6 @@ export function toggleSelectionLock (
   } else {
     config.lockStatus = CameraLockState.SELECTION_X
   }
+
   return changeViewerConfig(viewerId, config)
 }

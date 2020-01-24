@@ -193,7 +193,7 @@ export function makePointCloudViewerConfig (
 ): PointCloudViewerConfigType {
   return {
     position: { x: 0.0, y: 0.0, z: 0.0 },
-    target: { x: 1.0, y: 0.0, z: 0.0 },
+    target: { x: 10.0, y: 0.0, z: 0.0 },
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
     show: true,
