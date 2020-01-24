@@ -215,7 +215,7 @@ export class Label3DHandler {
             Session.label3dList.selectedLabel.move(
               (new Vector3D()).fromObject(target).toThree()
             )
-            e.preventDefault()
+            this.commitLabels()
           }
         }
         break
