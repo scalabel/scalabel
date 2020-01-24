@@ -1,5 +1,7 @@
+import { readdir } from 'fs'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import * as util from 'util'
 import { Storage } from './storage'
 
 /**
@@ -30,7 +32,8 @@ export class FileStorage extends Storage {
    */
   public async listKeys (
     prefix: string, onlyDir: boolean = false): Promise<string[]> {
-    const dirEnts = await fs.promises.readdir(
+    const readdirPromise = util.promisify(readdir)
+    const dirEnts = await readdirPromise(
       this.fullDir(prefix), { withFileTypes: true })
     const keys: string[] = []
     for (const dirEnt of dirEnts) {

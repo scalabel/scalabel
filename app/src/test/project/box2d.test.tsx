@@ -54,7 +54,7 @@ beforeAll(async () => {
   window.alert = (): void => {
     return
   }
-  // Needed as buffer period for theserver to launch. The amount of time needed
+  // Needed as buffer period for server to launch. The amount of time needed
   // is inconsistent so this is on the convservative side.
   await sleep(2000)
 })

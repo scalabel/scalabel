@@ -12,9 +12,9 @@ export class RedisCache {
   protected client: redis.RedisClient
   /** the redis client for subscribing */
   protected sub: redis.RedisClient
-  /** the timeout for flushing a value */
+  /** the timeout in seconds for flushing a value */
   protected timeout: number
-  /** after last update, waits this long before writing back to storage */
+  /** after last update, waits this many seconds before writing to storage */
   protected timeForWrite: number
   /** writes back to storage after this number of actions for a task */
   protected numActionsForWrite: number
@@ -25,7 +25,7 @@ export class RedisCache {
   constructor () {
     const env = Session.getEnv()
     this.client = redis.createClient()
-    this.client.on('error', (err) => {
+    this.client.on('error', (err: Error) => {
       Logger.error(err)
     })
     this.client.on('ready', () => {
@@ -93,8 +93,9 @@ export class RedisCache {
    * Wrapper for redis set with expiration
    */
   public async setEx (key: string, value: string, timeout: number) {
-    const redisSetAsync = promisify(this.client.setex).bind(this.client)
-    await redisSetAsync(key, timeout, value)
+    const timeoutMs = timeout * 1000
+    const redisSetAsync = promisify(this.client.psetex).bind(this.client)
+    await redisSetAsync(key, timeoutMs, value)
   }
 
    /**
