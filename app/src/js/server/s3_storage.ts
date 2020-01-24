@@ -142,7 +142,7 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
-    return this.s3.putObject(params).promise()
+    return this.s3.putObject(params).promise().then()
   }
 
   /**
@@ -154,14 +154,16 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
-    const data = await this.s3.getObject(params).promise()
-    if (data.statusCode !== 200) {
-      return Promise.reject(Error('Key does not exist'))
-    } else if (!data || !data.Body) {
-      return Promise.reject(Error('No data at key'))
-    } else {
-      return data.Body.toString()
+
+    if (!this.hasKey(key)) {
+      return Promise.reject('Key does not exist')
     }
+    const data = await this.s3.getObject(params).promise()
+    if (!data || !data.Body) {
+      return Promise.reject(Error('No data at key'))
+    }
+
+    return data.Body.toString()
   }
 
   /**
