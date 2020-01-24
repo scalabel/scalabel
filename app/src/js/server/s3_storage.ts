@@ -71,16 +71,17 @@ export class S3Storage extends Storage {
   }
 
   /**
-   * Lists keys of files at directory specified by prefix
+   * Lists keys of files at a directory specified by prefix
+   * Split by files and directories
    * @param {string} prefix: relative path of directory
-   * @param {boolean} onlyDir: whether to only return keys that are directories
    */
-  public async listKeys (
-    prefix: string, onlyDir: boolean = false): Promise<string[]> {
+  public async listKeysOrganized (
+    prefix: string): Promise<[string[], string[]]> {
     const fullPrefix = this.fullDir(prefix)
     let continuationToken = ''
 
-    const keys = []
+    const dirKeys = []
+    const fileKeys = []
     for (;;) {
       let data
       if (continuationToken.length > 0) {
@@ -110,8 +111,11 @@ export class S3Storage extends Storage {
             if (parsed.dir.length > 0 && parsed.dir !== '/') {
               keyName = parsed.dir.split('/')[0]
             }
-            if (!onlyDir || parsed.ext === '') {
-              keys.push(path.join(prefix, keyName))
+            const finalKey = path.join(prefix, keyName)
+            if (parsed.ext === '') {
+              dirKeys.push(finalKey)
+            } else {
+              fileKeys.push(finalKey)
             }
           }
         }
@@ -126,9 +130,28 @@ export class S3Storage extends Storage {
       }
     }
 
-    _.uniq(keys)
-    keys.sort()
-    return keys
+    _.uniq(dirKeys)
+    _.uniq(fileKeys)
+    dirKeys.sort()
+    fileKeys.sort()
+    return [dirKeys, fileKeys]
+  }
+
+  /**
+   * Lists keys of files at directory specified by prefix
+   * @param {string} prefix: relative path of directory
+   * @param {boolean} onlyDir: whether to only return keys that are directories
+   */
+  public async listKeys (
+    prefix: string, onlyDir: boolean = false): Promise<string[]> {
+    const [dirKeys, fileKeys] = await this.listKeysOrganized(prefix)
+    if (onlyDir) {
+      return dirKeys
+    } else {
+      const mergeKeys = dirKeys.concat(fileKeys)
+      mergeKeys.sort()
+      return mergeKeys
+    }
   }
 
   /**
@@ -171,9 +194,12 @@ export class S3Storage extends Storage {
    * @param {string} key: relative path of directory
    */
   public async delete (key: string): Promise<void> {
-    const keys = await this.listKeys(key)
+    const [dirKeys, fileKeys] = await this.listKeysOrganized(key)
+
     const promises = []
-    for (const subKey of keys) {
+
+    // delete files
+    for (const subKey of fileKeys) {
       const params = {
         Bucket: this.bucketName,
         Key: this.fullFile(subKey)
@@ -182,9 +208,13 @@ export class S3Storage extends Storage {
       promises.push(deletePromise.then(async () => {
         await this.s3.waitFor('objectNotExists', params).promise()
       }))
-      // recursively delete subdirectories
+    }
+
+    // recursively delete subdirectories
+    for (const subKey of dirKeys) {
       promises.push(this.delete(subKey))
     }
+
     return Promise.all(promises).then(() => { return })
   }
 
