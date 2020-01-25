@@ -44,6 +44,8 @@ export interface DashboardContents {
   projectMetaData: ProjectOptions
   /** tasks */
   taskMetaDatas: TaskOptions[]
+  /** num users */
+  numUsers: number
 }
 
 interface DashboardClassType {
@@ -75,6 +77,8 @@ interface HeaderProps {
   totalTaskLabeled: number
   /** total labels */
   totalLabels: number
+  /** number of users currently editing */
+  numUsers: number
   /** if this is the vendor dashboard */
   vendor?: boolean
 }
@@ -135,6 +139,7 @@ function Dashboard (props: DashboardProps) {
   let totalLabels = 0
   const projectMetaData = props.dashboardContents.projectMetaData
   const taskMetaDatas = props.dashboardContents.taskMetaDatas
+  const numUsers = props.dashboardContents.numUsers
   const sidebarContent = (
     <StyledSidebar projectMetaData={projectMetaData} vendor={vendor} />
   )
@@ -218,6 +223,7 @@ function Dashboard (props: DashboardProps) {
   const headerContent = (
     <StyledHeader totalLabels={totalLabels}
       totalTaskLabeled={totalTaskLabeled}
+      numUsers={numUsers}
       vendor={vendor} />
   )
   /**
@@ -235,7 +241,7 @@ function Dashboard (props: DashboardProps) {
 
 /** creates the header */
 function header (props: HeaderProps) {
-  const { classes, totalLabels, totalTaskLabeled, vendor } = props
+  const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
     <React.Fragment>
       <Typography variant='h6' noWrap>
@@ -254,6 +260,11 @@ function header (props: HeaderProps) {
                       </Typography>
           <Chip label={totalLabels} className={classes.chip}
             data-testid='total-labels' />
+          <Typography variant='body1' noWrap>
+            #Users
+                      </Typography>
+          <Chip label={numUsers} className={classes.chip}
+            data-testid='num-users' />
         </React.Fragment>}
     </React.Fragment>
   )

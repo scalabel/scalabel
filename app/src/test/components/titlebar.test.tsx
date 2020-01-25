@@ -22,7 +22,7 @@ describe('Save button functionality', () => {
       emit: jest.fn()
     }
     io.connect = jest.fn().mockImplementation(() => mockSocket)
-    const synchronizer = new Synchronizer(0, 'test', () => { return })
+    const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
     // add a fake task action to be saved
     synchronizer.actionQueue.push(addLabel(0, makeLabel()))
 

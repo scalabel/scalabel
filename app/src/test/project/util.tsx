@@ -153,6 +153,7 @@ export async function projectInitSession (): Promise<Synchronizer> {
     const synchronizer = new Synchronizer(
       testConfig.taskIndex,
       testConfig.projectName,
+      'fakeId',
       (state: State) => {
         initFromJson(state, synchronizer.middleware)
         resolve(synchronizer)

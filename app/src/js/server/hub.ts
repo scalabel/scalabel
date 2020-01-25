@@ -26,6 +26,7 @@ export function startSocketServer (io: socketio.Server) {
 
       const taskIndex = data.taskIndex
       const taskId = index2str(taskIndex)
+      await registerUser(socket.id, projectName, data.userId)
 
       let sessionId = data.sessionId
       // keep session id if it exists, i.e. if it is a reconnection
@@ -96,7 +97,42 @@ export function startSocketServer (io: socketio.Server) {
       const filePath = path.getFileKey(getSavedKey(projectName, taskId))
       await Session.getStorage().save(filePath, content)
     })
+
+    socket.on(EventName.DISCONNECT, async () => {
+      await deregisterUser(socket.id)
+    })
   })
+}
+
+/**
+ * Saves the currently editing user's data
+ */
+async function registerUser (
+  socketId: string, projectName: string, userId: string) {
+  // TODO- also save a set of user IDs, and replace any old ones
+  // even if they are in a new socket
+  let userData: { [key: string]: string } = {}
+  const key = path.getUserKey(projectName)
+  if (await Session.getStorage().hasKey(key)) {
+    userData = JSON.parse(
+      await Session.getStorage().load(key))
+  }
+  userData[socketId] = userId
+  await Session.getStorage().save(key, JSON.stringify(userData))
+}
+
+/**
+ * Deletes the data of user who disconnected
+ */
+async function deregisterUser (socketId: string) {
+  // TODO- load the correct project from another file via socketId
+  const key = path.getUserKey('testUser')
+  const userData = JSON.parse(await Session.getStorage().load(key))
+  if (!userData) {
+    return
+  }
+  delete userData[socketId]
+  await Session.getStorage().save(key, JSON.stringify(userData))
 }
 
 /**
