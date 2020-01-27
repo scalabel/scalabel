@@ -5,6 +5,7 @@ import { createServer } from 'http'
 import * as socketio from 'socket.io'
 import { startSocketServer } from './hub'
 import * as listeners from './listeners'
+import Logger from './logger'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import Session from './server_session'
 import { Endpoint } from './types'
@@ -36,29 +37,35 @@ function startHTTPServer (app: Application) {
 /**
  * Main function for backend server
  */
-function main () {
+async function main (): Promise<void> {
   // init global env
   initEnv()
   const env = Session.getEnv()
 
   // init global storage
-  initStorage(env)
-
-  // start http and socket io servers
+  try {
+    await initStorage(env)
+  } catch (error) {
+    Logger.error(error)
+  }
+    // start http and socket io servers
   const app: Application = express()
   const httpServer = createServer(app)
   const io = socketio(httpServer)
 
-  // set up middleware
+    // set up middleware
   app.use(listeners.LoggingHandler)
 
-  // set up http handlers
+    // set up http handlers
   startHTTPServer(app)
 
-  // set up socket.io handler
+    // set up socket.io handler
   startSocketServer(io)
 
   httpServer.listen(env.port)
+
+  return
 }
 
-main()
+// TODO: Verify this is good promise handling
+main().then().catch()
