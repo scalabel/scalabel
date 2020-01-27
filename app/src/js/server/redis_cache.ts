@@ -22,9 +22,9 @@ export class RedisCache {
   /**
    * Create new cache
    */
-  constructor () {
+  constructor (port = 6379) {
     const env = Session.getEnv()
-    this.client = redis.createClient()
+    this.client = redis.createClient(port)
     this.client.on('error', (err: Error) => {
       Logger.error(err)
     })
@@ -32,7 +32,7 @@ export class RedisCache {
       this.client.config('SET', 'notify-keyspace-events', 'Ex')
     })
 
-    this.sub = redis.createClient()
+    this.sub = redis.createClient(port)
     // subscribe to reminder expirations for saving
     this.sub.subscribe('__keyevent@0__:expired')
     this.sub.on('message', async (_channel: string, message: string) => {
