@@ -36,5 +36,5 @@ export const dividedPageStyle = (theme: Theme) => createStyles({
     flexGrow: 1
   },
 
-  appBarSpacer: theme.mixins.toolbar as CSSProperties
+  appBarSpacer: theme.mixins.toolbar
 })

@@ -84,7 +84,7 @@ export const dashboardStyles = (theme: Theme) => createStyles({
   labelText: {
     marginTop: theme.spacing(2)
   },
-  appBarSpacer: theme.mixins.toolbar as CSSProperties
+  appBarSpacer: theme.mixins.toolbar
 })
 /* dashboard header style */
 export const dashboardHeaderStyles = createStyles({
