@@ -8,6 +8,7 @@ import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
 import { DASH_LINE, MIN_SIZE, OPACITY } from './common'
 import { DrawMode, Label2D } from './label2d'
+import { Label2DList } from './label2d_list'
 import { makeEdge2DStyle, makePathPoint2DStyle, PathPoint2D, PointType } from './path_point2d'
 
 const DEFAULT_VIEW_EDGE_STYLE = makeEdge2DStyle({ lineWidth: 4 })
@@ -50,8 +51,8 @@ export class Polygon2D extends Label2D {
   /** open or closed */
   private _closed: boolean
 
-  constructor (closed: boolean) {
-    super()
+  constructor (labelList: Label2DList, closed: boolean) {
+    super(labelList)
     this._points = []
     this._state = Polygon2DState.FREE
     this._mouseCoord = new Vector2D()
@@ -240,6 +241,7 @@ export class Polygon2D extends Label2D {
             this.midToVertex()
           }
         }
+        this._labelList.addUpdatedLabel(this)
         return true
       } else if (this._state === Polygon2DState.FINISHED &&
         this._highlightedHandle === 0 && handleIndex === 0) {
@@ -271,10 +273,12 @@ export class Polygon2D extends Label2D {
       this._state === Polygon2DState.RESHAPE) {
       // dragging point
       this.reshape(coord, _limit)
+      this._labelList.addUpdatedLabel(this)
     } else if (this._mouseDown === true &&
       this._state === Polygon2DState.MOVE) {
       // dragging edges
       this.move(coord, _limit)
+      this._labelList.addUpdatedLabel(this)
     }
     return true
   }

@@ -6,6 +6,7 @@ import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
 import { DrawMode, Label2D } from './label2d'
+import { Label2DList } from './label2d_list'
 import { Node2D } from './node2d'
 import { makePoint2DStyle, Point2D } from './point2d'
 import { makeRect2DStyle, Rect2D } from './rect2d'
@@ -36,8 +37,8 @@ export class CustomLabel2D extends Label2D {
   /** Bounds of the shape */
   private _bounds: Rect2D
 
-  constructor (template: Label2DTemplateType) {
-    super()
+  constructor (labelList: Label2DList, template: Label2DTemplateType) {
+    super(labelList)
     this._template = template
     this._shapes = []
     this._bounds = new Rect2D(-1, -1, -1, -1)
@@ -259,6 +260,7 @@ export class CustomLabel2D extends Label2D {
           shape.y += delta.y
         }
       }
+      this._labelList.addUpdatedLabel(this)
     }
     this._mouseDownCoord.x = coord.x
     this._mouseDownCoord.y = coord.y

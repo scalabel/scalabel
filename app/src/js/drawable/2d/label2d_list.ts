@@ -15,21 +15,22 @@ import { Tag2D } from './tag2d'
  * @param {string} labelType: type of the new label
  */
 export function makeDrawableLabel2D (
+  labelList: Label2DList,
   labelType: string,
   labelTemplates: { [name: string]: Label2DTemplateType }
 ): Label2D | null {
   if (labelType in labelTemplates) {
-    return new CustomLabel2D(labelTemplates[labelType])
+    return new CustomLabel2D(labelList, labelTemplates[labelType])
   }
   switch (labelType) {
     case LabelTypeName.BOX_2D:
-      return new Box2D()
+      return new Box2D(labelList)
     case LabelTypeName.TAG:
-      return new Tag2D()
+      return new Tag2D(labelList)
     case LabelTypeName.POLYGON_2D:
-      return new Polygon2D(true)
+      return new Polygon2D(labelList, true)
     case LabelTypeName.POLYLINE_2D:
-      return new Polygon2D(false)
+      return new Polygon2D(labelList, false)
   }
   return null
 }
@@ -51,6 +52,8 @@ export class Label2DList {
   private _labelTemplates: { [name: string]: Label2DTemplateType }
   /** callbacks */
   private _callbacks: Array<() => void>
+  /** New labels to be committed */
+  private _updatedLabels: Set<Label2D>
 
   constructor () {
     this._labels = {}
@@ -59,6 +62,7 @@ export class Label2DList {
     this._state = makeState()
     this._callbacks = []
     this._labelTemplates = {}
+    this._updatedLabels = new Set()
   }
 
   /**
@@ -159,7 +163,9 @@ export class Label2DList {
     _.forEach(item.labels, (label, key) => {
       const labelId = Number(key)
       if (!(labelId in self._labels)) {
-        const newLabel = makeDrawableLabel2D(label.type, this._labelTemplates)
+        const newLabel = makeDrawableLabel2D(
+          this, label.type, this._labelTemplates
+        )
         if (newLabel) {
           self._labels[labelId] = newLabel
         }
@@ -186,5 +192,20 @@ export class Label2DList {
         }
       }
     }
+  }
+
+  /** Get uncommitted labels */
+  public get updatedLabels (): Readonly<Set<Readonly<Label2D>>> {
+    return this._updatedLabels
+  }
+
+  /** Push updated label to array */
+  public addUpdatedLabel (label: Label2D) {
+    this._updatedLabels.add(label)
+  }
+
+  /** Clear uncommitted label list */
+  public clearUpdatedLabels () {
+    this._updatedLabels.clear()
   }
 }

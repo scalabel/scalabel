@@ -9,6 +9,7 @@ import { getLinkedLabelIds } from '../../functional/common'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
+import { commitLabels } from '../states'
 import { Label2D } from './label2d'
 import { makeDrawableLabel2D } from './label2d_list'
 
@@ -57,6 +58,7 @@ export class Label2DHandler {
         const state = this._state
 
         const label = makeDrawableLabel2D(
+          Session.label2dList,
           state.task.config.labelTypes[state.user.select.labelType],
           state.task.config.label2DTemplates
         )
@@ -64,6 +66,7 @@ export class Label2DHandler {
           label.initTemp(state, coord)
           Session.label2dList.selectedLabels.push(label)
           Session.label2dList.labelList.push(label)
+          Session.label2dList.addUpdatedLabel(label)
         }
 
         this._highlightedLabel = label
@@ -90,13 +93,14 @@ export class Label2DHandler {
   public onMouseUp (
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     if (this.hasSelectedLabels() && !this.isKeyDown(Key.META)) {
-      Session.label2dList.selectedLabels.forEach((selectedLabel, index) => {
+      Session.label2dList.selectedLabels.forEach((selectedLabel) => {
         selectedLabel.onMouseUp(coord)
         if (selectedLabel !== this._highlightedLabel) {
           selectedLabel.setHighlighted(false)
         }
-        this.commitLabel(index)
       })
+      commitLabels([...Session.label2dList.updatedLabels.values()])
+      Session.label2dList.clearUpdatedLabels()
     }
   }
 
@@ -128,122 +132,6 @@ export class Label2DHandler {
       }
     }
     return false
-  }
-
-  /**
-   * commit selectedLabel
-   * @param index
-   */
-  public commitLabel (index: number): void {
-    const selectedLabel = Session.label2dList.selectedLabels[index]
-    const valid = selectedLabel.isValid()
-    const editing = selectedLabel.editing
-    if (valid || editing) {
-      const [shapeIds, shapeTypes, shapeStates] =
-        selectedLabel.shapeStates()
-      if (valid) {
-        if (selectedLabel.labelId < 0) {
-        // Add new label to state
-          if (Session.tracking) {
-            const newTrack = new Track()
-            if (newTrack) {
-              newTrack.init(
-                this._selectedItemIndex,
-                selectedLabel,
-                Session.numItems - this._selectedItemIndex + 1
-              )
-              const indices = []
-              const labels = []
-              const types = []
-              const shapes = []
-              for (let i = 0; i < Session.numItems; i++) {
-                const label = newTrack.getLabel(i)
-                const currentTypes = []
-                const currentShapes = []
-                if (label) {
-                  const indexedShapes = newTrack.getShapes(i)
-                  for (const indexedShape of indexedShapes) {
-                    currentTypes.push(indexedShape.type)
-                    currentShapes.push(indexedShape.shape)
-                  }
-                  indices.push(i)
-                  labels.push(label)
-                  types.push(currentTypes)
-                  shapes.push(currentShapes)
-                }
-              }
-              Session.dispatch(addTrack(
-                indices,
-                newTrack.type,
-                labels,
-                types,
-                shapes
-              ))
-            }
-          } else {
-            const label = selectedLabel.label
-            Session.dispatch(addLabel(
-              this._selectedItemIndex, label, shapeTypes, shapeStates
-            ))
-          }
-        } else {
-        // Update existing label
-          const label = selectedLabel.label
-          if (Session.tracking && label.track in Session.tracks) {
-            const track = Session.tracks[label.track]
-            track.update(
-              this._selectedItemIndex,
-              selectedLabel
-            )
-            const updatedIndices = []
-            const updatedLabelIds = []
-            const updatedLabels = []
-            const updatedShapeIds = []
-            const updatedShapes = []
-            for (const updatedIndex of track.updatedIndices) {
-              updatedIndices.push(updatedIndex)
-              const labelState = track.getLabel(updatedIndex)
-              if (labelState) {
-                updatedLabels.push([labelState])
-                updatedLabelIds.push([labelState.id])
-                const indexedShapes = track.getShapes(updatedIndex)
-                updatedShapes.push(indexedShapes.map(
-                    (indexedShape) => indexedShape.shape
-               ))
-                updatedShapeIds.push(
-                  indexedShapes.map((indexedShape) => indexedShape.id)
-                )
-              }
-            }
-            Session.dispatch(
-              {
-                type: CHANGE_SHAPES,
-                sessionId: Session.id,
-                itemIndices: updatedIndices,
-                shapeIds: updatedShapeIds,
-                shapes: updatedShapes
-              }
-            )
-            Session.dispatch(
-              changeLabelsProps(updatedIndices, updatedLabelIds, updatedLabels)
-            )
-            track.clearUpdatedIndices()
-          } else {
-            Session.dispatch(changeShapes(
-              this._selectedItemIndex, shapeIds, shapeStates
-            ))
-            Session.dispatch(changeLabelProps(
-              this._selectedItemIndex, selectedLabel.labelId, { manual: true }
-            ))
-          }
-        }
-      }
-    } else {
-      Session.label2dList.labelList.splice(
-        Session.label2dList.labelList.length - 1,
-        1
-      )
-    }
   }
 
   /**

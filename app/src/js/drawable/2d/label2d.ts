@@ -7,6 +7,7 @@ import { ConfigType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, getColorById } from '../util'
+import { Label2DList } from './label2d_list'
 
 export enum DrawMode {
   VIEW,
@@ -51,8 +52,10 @@ export abstract class Label2D {
   protected _editing: boolean
   /** config */
   protected _config: ConfigType
+  /** label list */
+  protected _labelList: Label2DList
 
-  constructor () {
+  constructor (labelList: Label2DList) {
     this._index = -1
     this._labelId = -1
     this._trackId = -1
@@ -69,6 +72,7 @@ export abstract class Label2D {
     this._mouseDown = false
     this._editing = false
     this._config = makeTaskConfig()
+    this._labelList = labelList
   }
 
   /** Set whether the label is highlighted */
