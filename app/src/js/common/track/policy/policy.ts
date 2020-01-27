@@ -16,7 +16,7 @@ export class TrackPolicy {
   }
 
   /** Update track when labels/shapes are changed */
-  public update (_itemIndex: number): void {
+  public update (_itemIndex: number, _trackId: number): void {
     return
   }
 

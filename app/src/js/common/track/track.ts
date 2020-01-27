@@ -263,7 +263,7 @@ export class Track {
         ...label.label
       }
 
-      this._policy.update(itemIndex)
+      this._policy.update(itemIndex, this._track.id)
     }
   }
 }
