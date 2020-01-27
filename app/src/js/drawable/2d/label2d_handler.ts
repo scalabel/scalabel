@@ -90,14 +90,29 @@ export class Label2DHandler {
   public onMouseUp (
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     if (this.hasSelectedLabels() && !this.isKeyDown(Key.META)) {
+      const labelsToRemove: Label2D[] = []
       Session.label2dList.selectedLabels.forEach((selectedLabel) => {
         selectedLabel.onMouseUp(coord)
         if (selectedLabel !== this._highlightedLabel) {
           selectedLabel.setHighlighted(false)
         }
+        if (!selectedLabel.isValid() && !selectedLabel.editing) {
+          labelsToRemove.push(selectedLabel)
+        }
       })
       commitLabels([...Session.label2dList.updatedLabels.values()])
       Session.label2dList.clearUpdatedLabels()
+
+      for (const label of labelsToRemove) {
+        const labelListIndex = Session.label2dList.labelList.indexOf(label)
+        if (labelListIndex >= 0) {
+          Session.label2dList.labelList.splice(labelListIndex, 1)
+        }
+        const selectedIndex = Session.label2dList.selectedLabels.indexOf(label)
+        if (selectedIndex >= 0) {
+          Session.label2dList.selectedLabels.splice(selectedIndex, 1)
+        }
+      }
     }
   }
 
