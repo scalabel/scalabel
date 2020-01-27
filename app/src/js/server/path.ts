@@ -48,6 +48,13 @@ export function getUserKey (project: string): string {
   return sprintf('%s/userData', project)
 }
 
+/**
+ * Gets path for meta data on user
+ */
+export function getMetaKey (): string {
+  return 'metaData'
+}
+
 
 /* path to html file directories, relative to js
  * note that ../ corresponds to index.html

@@ -13,7 +13,7 @@ import {
 } from './create_project'
 import { convertStateToExport } from './export'
 import Logger from './logger'
-import { getUserKey, getExportName } from './path'
+import { getExportName, getUserKey } from './path'
 import Session from './server_session'
 import * as types from './types'
 import { getExistingProjects, getProjectKey,
@@ -203,10 +203,10 @@ export async function DashboardHandler (req: Request, res: Response) {
       let numUsers = 0
       const userKey = getUserKey(projectOptions.name)
       if (await Session.getStorage().hasKey(userKey)) {
-        const userData = JSON.parse(
+        const [, userToSockets] = JSON.parse(
           await Session.getStorage().load(userKey))
-        if (userData) {
-          numUsers = Object.keys(userData).length
+        if (userToSockets) {
+          numUsers = Object.keys(userToSockets).length
         }
       }
 

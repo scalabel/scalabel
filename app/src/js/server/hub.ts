@@ -105,34 +105,83 @@ export function startSocketServer (io: socketio.Server) {
 }
 
 /**
- * Saves the currently editing user's data
+ * Saves the current socket's user data
  */
 async function registerUser (
   socketId: string, projectName: string, userId: string) {
-  // TODO- also save a set of user IDs, and replace any old ones
-  // even if they are in a new socket
-  let userData: { [key: string]: string } = {}
+  const storage = Session.getStorage()
+
+  let socketToUser: { [key: string]: string } = {}
+  let userToSockets: { [key: string]: string[] } = {}
   const key = path.getUserKey(projectName)
-  if (await Session.getStorage().hasKey(key)) {
-    userData = JSON.parse(
-      await Session.getStorage().load(key))
+  if (await storage.hasKey(key)) {
+    [socketToUser, userToSockets] = JSON.parse(
+      await storage.load(key))
   }
-  userData[socketId] = userId
-  await Session.getStorage().save(key, JSON.stringify(userData))
+
+  // Update user data with new socket
+  let userSockets: string[] = []
+  if (userId in userToSockets) {
+    userSockets = userToSockets[userId]
+  }
+  userSockets.push(socketId)
+  userToSockets[userId] = userSockets
+  socketToUser[socketId] = userId
+
+  const writeData = JSON.stringify([socketToUser, userToSockets])
+  await storage.save(key, writeData)
+
+  // Update user metadata
+  const metaKey = path.getMetaKey()
+  let socketToProject: { [key: string]: string } = {}
+  if (await storage.hasKey(metaKey)) {
+    socketToProject = JSON.parse(await storage.load(metaKey))
+  }
+  socketToProject[socketId] = projectName
+  await storage.save(metaKey, JSON.stringify(socketToProject))
 }
 
 /**
- * Deletes the data of user who disconnected
+ * Deletes the user data of the socket that disconnected
  */
 async function deregisterUser (socketId: string) {
-  // TODO- load the correct project from another file via socketId
-  const key = path.getUserKey('testUser')
-  const userData = JSON.parse(await Session.getStorage().load(key))
-  if (!userData) {
+  const storage = Session.getStorage()
+
+  // First access the projectName via metadata
+  const metaKey = path.getMetaKey()
+  if (!(await storage.hasKey(metaKey))) {
     return
   }
-  delete userData[socketId]
-  await Session.getStorage().save(key, JSON.stringify(userData))
+  const socketToProject = JSON.parse(await storage.load(metaKey))
+  if (!(socketId in socketToProject)) {
+    return
+  }
+  const projectName = socketToProject[socketId]
+
+  // Next remove the user info for that project
+  const key = path.getUserKey(projectName)
+  if (!(await storage.hasKey(key))) {
+    return
+  }
+  const [socketToUser, userToSockets]
+    = JSON.parse(await storage.load(key))
+  if (!socketToUser || !(socketId in socketToUser)) {
+    return
+  }
+  const userId = socketToUser[socketId]
+  const socketInd = userToSockets[userId].indexOf(socketId)
+  if (socketInd > -1) {
+    // remove the socket from the user
+    userToSockets[userId].splice(socketInd, 1)
+  }
+  if (userToSockets[userId].length === 0) {
+    delete userToSockets[userId]
+  }
+
+  delete socketToUser[socketId]
+
+  const writeData = JSON.stringify([socketToUser, userToSockets])
+  await storage.save(key, writeData)
 }
 
 /**
