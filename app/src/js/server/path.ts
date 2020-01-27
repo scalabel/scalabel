@@ -55,7 +55,6 @@ export function getMetaKey (): string {
   return 'metaData'
 }
 
-
 /* path to html file directories, relative to js
  * note that ../ corresponds to index.html
  */
