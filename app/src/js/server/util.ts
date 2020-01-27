@@ -9,9 +9,10 @@ import { BundleFile, HandlerUrl, ItemTypeName, LabelTypeName } from '../common/t
 import { State, TaskType } from '../functional/types'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
+import { S3Storage } from './s3_storage'
 import Session from './server_session'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType, Env, MaybeError } from './types'
+import { CreationForm, DatabaseType, Env } from './types'
 
 /**
  * Initializes global env
@@ -38,38 +39,42 @@ export function initEnv () {
  * @param {string} database: type of storage
  * @param {string} dir: directory name to save at
  */
-function makeStorage (
-  database: string, dir: string): [MaybeError, Storage] {
-  // initialize to default values
-  const storage = new FileStorage(dir)
-  let err = null
-
+async function makeStorage (
+  database: string, dir: string): Promise<Storage> {
   switch (database) {
     case DatabaseType.S3:
+      const s3Store = new S3Storage(dir)
+      try {
+        await s3Store.makeBucket()
+        return s3Store
+      } catch (error) {
+        // if s3 fails, default to file storage
+        Logger.error(Error('s3 failed, using file storage'))
+        Logger.error(error)
+        return new FileStorage(dir)
+      }
     case DatabaseType.DYNAMO_DB: {
-      err = Error(sprintf(
-        '%s storage not implemented yet, using file storage', database))
-      break
+      Logger.error(Error(sprintf(
+        '%s storage not implemented yet, using file storage', database)))
+      return new FileStorage(dir)
     }
     case DatabaseType.LOCAL: {
-      break
+      return new FileStorage(dir)
     }
     default: {
-      err = Error(sprintf(
-        '%s is an unknown database format, using file storage', database))
+      Logger.error(Error(sprintf(
+        '%s is an unknown database format, using file storage', database)))
+      return new FileStorage(dir)
     }
   }
-
-  return [err, storage]
 }
 
 /**
  * Initializes global storage
  */
-export function initStorage (env: Env) {
+export async function initStorage (env: Env) {
   // set up storage
-  const [err, storage] = makeStorage(env.database, env.data)
-  Logger.error(err)
+  const storage = await makeStorage(env.database, env.data)
   Session.setStorage(storage)
 }
 

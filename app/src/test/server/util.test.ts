@@ -5,7 +5,7 @@ import Session from '../../js/server/server_session'
 import * as util from '../../js/server/util'
 import { sampleFormEmpty, sampleFormImage } from '../test_creation_objects'
 
-beforeAll(() => {
+beforeAll(async () => {
   // mock the file system for testing storage
   mockfs({
     'data/': {}
@@ -15,7 +15,7 @@ beforeAll(() => {
   const defaultEnv = {}
   Session.setEnv(defaultEnv)
   // init global storage
-  util.initStorage(Session.getEnv())
+  await util.initStorage(Session.getEnv())
 })
 
 describe('test general utility methods', () => {
