@@ -77,8 +77,8 @@ describe('test redis cache', () => {
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {
       await cache.setExWithReminder(key, sprintf('value%s', i))
-      // const savedKeys = await storage.listKeys('')
-      // expect(savedKeys.length).toBe(1)
+      const savedKeys = await storage.listKeys('')
+      expect(savedKeys.length).toBe(1)
     }
     await cache.setExWithReminder(key, 'value4')
     const savedKeysFinal = await storage.listKeys('')
