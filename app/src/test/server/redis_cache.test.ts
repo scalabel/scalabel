@@ -15,7 +15,7 @@ let storage: FileStorage
 
 beforeAll(async () => {
   // Default port 6379 is used in box2d integration test, so change port here
-  redisProc = child.spawn('redis-server', 
+  redisProc = child.spawn('redis-server',
     ['--appendonly', 'no', '--save', '', '--port', '6378'])
 
   // Buffer period for redis to launch
