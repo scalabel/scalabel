@@ -246,6 +246,7 @@ export class CustomLabel2D extends Label2D {
       const yScale =
           (coord.y - oppositeCorner.y) / (corner.y - oppositeCorner.y)
       this.scale(oppositeCorner, new Vector2D(xScale, yScale))
+      this._labelList.addUpdatedLabel(this)
     } else if (this._highlightedHandle >= 0) {
       if (this._highlightedHandle < this._shapes.length) {
         // Move single point

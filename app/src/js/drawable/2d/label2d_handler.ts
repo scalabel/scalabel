@@ -1,9 +1,7 @@
 import _ from 'lodash'
-import { addLabel, addTrack, changeLabelProps, changeLabelsProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
+import { linkLabels, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
-import { CHANGE_SHAPES } from '../../action/types'
 import Session from '../../common/session'
-import { Track } from '../../common/track/track'
 import { Key } from '../../common/types'
 import { getLinkedLabelIds } from '../../functional/common'
 import { State } from '../../functional/types'
@@ -66,7 +64,6 @@ export class Label2DHandler {
           label.initTemp(state, coord)
           Session.label2dList.selectedLabels.push(label)
           Session.label2dList.labelList.push(label)
-          Session.label2dList.addUpdatedLabel(label)
         }
 
         this._highlightedLabel = label

@@ -297,6 +297,9 @@ export class Polygon2D extends Label2D {
         // finish adding when it is FINISHED
         this._state = Polygon2DState.FINISHED
         this.editing = false
+        if (this.isValid()) {
+          this._labelList.addUpdatedLabel(this)
+        }
       }
     } else if (this.editing === true &&
       this._state === Polygon2DState.RESHAPE) {
