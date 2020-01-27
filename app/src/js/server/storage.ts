@@ -1,3 +1,5 @@
+import * as path from 'path'
+
 /**
  * Abstract class for storage
  */
@@ -8,8 +10,8 @@ export abstract class Storage {
   /**
    * General constructor
    */
-  protected constructor (path: string) {
-    this.dataDir = path
+  protected constructor (basePath: string) {
+    this.dataDir = basePath
   }
 
   /**
@@ -40,4 +42,18 @@ export abstract class Storage {
    * Deletes values at the key
    */
   public abstract async delete (key: string): Promise<void>
+
+  /**
+   * Makes relative path into full path
+   */
+  protected fullDir (key: string): string {
+    return path.join(this.dataDir, key)
+  }
+
+  /**
+   * Makes relative path into full filename
+   */
+  protected fullFile (key: string): string {
+    return this.fullDir(key + '.json')
+  }
 }

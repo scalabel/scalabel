@@ -20,7 +20,7 @@ import {
 } from '../test_creation_objects'
 import { sampleStateExportImage, sampleStateExportImagePolygon } from '../test_export_objects'
 
-beforeAll(() => {
+beforeAll(async () => {
   // mock the file system for saving/loading
   mockfs({
     'data/': {}
@@ -30,7 +30,7 @@ beforeAll(() => {
   const defaultEnv = {}
   Session.setEnv(defaultEnv)
   // init global storage
-  initStorage(Session.getEnv())
+  await initStorage(Session.getEnv())
 })
 
 // TODO- test that form is loaded correctly

@@ -1,0 +1,9 @@
+---
+port: 8686
+data: "us-west-2:scalabel-unit-testing/data"
+src: "."
+database: "s3"
+userManagement: false
+sync: false
+autosave: false
+...

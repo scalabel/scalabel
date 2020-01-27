@@ -11,8 +11,8 @@ export class FileStorage extends Storage {
   /**
    * Constructor
    */
-  constructor (dataPath: string) {
-    super(dataPath)
+  constructor (dataDir: string) {
+    super(dataDir)
     // do this synchronously (only once)
     fs.ensureDirSync(this.dataDir)
   }
@@ -94,19 +94,5 @@ export class FileStorage extends Storage {
       throw new Error('Delete failed: tried to delete home dir')
     }
     return fs.remove(this.fullDir(key))
-  }
-
-  /**
-   * Makes relative path into full path
-   */
-  private fullDir (key: string): string {
-    return path.join(this.dataDir, key)
-  }
-
-  /**
-   * Makes relative path into full filename
-   */
-  private fullFile (key: string): string {
-    return this.fullDir(key + '.json')
   }
 }
