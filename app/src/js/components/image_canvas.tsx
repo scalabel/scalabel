@@ -18,7 +18,7 @@ interface ClassType {
   image_canvas: string
 }
 
-interface Props {
+export interface Props {
   /** styles */
   classes: ClassType
   /** display */
@@ -32,12 +32,12 @@ interface Props {
  */
 export class ImageCanvas extends DrawableCanvas<Props> {
   /** The image context */
-  public imageContext: CanvasRenderingContext2D | null
+  protected imageContext: CanvasRenderingContext2D | null
 
   /** The image canvas */
-  private imageCanvas: HTMLCanvasElement | null
+  protected imageCanvas: HTMLCanvasElement | null
   /** The mask to hold the display */
-  private display: HTMLDivElement | null
+  protected display: HTMLDivElement | null
 
   // display variables
   /** The current scale */

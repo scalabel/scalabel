@@ -32,12 +32,6 @@ export class Cube3D extends Shape3D {
   private _color: number[]
   /** Anchor corner index */
   private _anchorIndex: number
-  /** Redux state */
-  private _center: Vector3D
-  /** Redux state */
-  private _size: Vector3D
-  /** Redux state */
-  private _orientation: Vector3D
   /** Normal of the closest face */
   private _closestFaceNormal: THREE.Vector3
   /** Control points */
@@ -46,8 +40,6 @@ export class Cube3D extends Shape3D {
   private _highlightedSphere: THREE.Mesh | null
   /** Plane shape */
   private _grid: Readonly<Grid3D> | null
-  /** Id of surface */
-  private _surfaceId: number
   /** First corner for temp init */
   private _firstCorner: Vector2D | null
 
@@ -67,6 +59,7 @@ export class Cube3D extends Shape3D {
       })
     )
     this.add(this._box)
+    this._box.geometry.computeBoundingBox()
 
     this._outline = new THREE.LineSegments(
       new THREE.EdgesGeometry(this._box.geometry),
@@ -77,10 +70,6 @@ export class Cube3D extends Shape3D {
     this._color = []
 
     this._anchorIndex = 0
-
-    this._center = new Vector3D()
-    this._size = new Vector3D()
-    this._orientation = new Vector3D()
 
     this._closestFaceNormal = new THREE.Vector3()
     this._controlSpheres = []
@@ -102,8 +91,6 @@ export class Cube3D extends Shape3D {
 
     this._grid = null
 
-    this._surfaceId = -1
-
     this._firstCorner = null
 
     this.setHighlighted()
@@ -112,54 +99,6 @@ export class Cube3D extends Shape3D {
   /** Get shape type name */
   public get typeName () {
     return ShapeTypeName.CUBE
-  }
-
-  /**
-   * Set size
-   * @param size
-   */
-  public set size (size: Vector3D) {
-    this.scale.copy(size.toThree())
-    this._size.copy(size)
-  }
-
-  /**
-   * Get size
-   */
-  public get size (): Vector3D {
-    return (new Vector3D()).fromThree(this.scale)
-  }
-
-  /**
-   * Set center position
-   * @param center
-   */
-  public set center (center: Vector3D) {
-    this.position.copy(center.toThree())
-    this._center.copy(center)
-  }
-
-  /**
-   * Get center position
-   */
-  public get center (): Vector3D {
-    return (new Vector3D()).fromThree(this.position)
-  }
-
-  /**
-   * Set orientation as euler
-   * @param orientation
-   */
-  public set orientation (orientation: Vector3D) {
-    this.rotation.setFromVector3(orientation.toThree())
-    this._orientation.copy(orientation)
-  }
-
-  /**
-   * Get orientation as euler
-   */
-  public get orientation (): Vector3D {
-    return (new Vector3D()).fromThree(this.rotation.toVector3())
   }
 
   /**
@@ -178,24 +117,48 @@ export class Cube3D extends Shape3D {
   }
 
   /**
-   * Set surface id
-   * @param id
-   */
-  public set surfaceId (id: number) {
-    this._surfaceId = id
-  }
-
-  /** Return state representation of shape */
-  /**
    * Convert to state representation
    */
-  public toObject (): ShapeType {
+  public toState (): ShapeType {
+    const worldCenter = new THREE.Vector3()
+    this.getWorldPosition(worldCenter)
+    const worldSize = new THREE.Vector3()
+    this.getWorldScale(worldSize)
+    const worldQuaternion = new THREE.Quaternion()
+    this.getWorldQuaternion(worldQuaternion)
+    const worldOrientation = new THREE.Euler()
+    worldOrientation.setFromQuaternion(worldQuaternion)
+    if (this._grid) {
+      const inverseRotation = new THREE.Quaternion()
+      inverseRotation.copy(this._grid.quaternion)
+      inverseRotation.inverse()
+
+      const gridCenter = new THREE.Vector3()
+      gridCenter.copy(worldCenter)
+      gridCenter.sub(this._grid.position)
+      gridCenter.applyQuaternion(inverseRotation)
+      gridCenter.z = 0.5 * worldSize.z
+      worldCenter.copy(gridCenter)
+      worldCenter.applyQuaternion(this._grid.quaternion)
+      worldCenter.add(this._grid.position)
+
+      const gridRotation = new THREE.Quaternion()
+      gridRotation.copy(this.quaternion)
+      gridRotation.multiply(inverseRotation)
+      const gridEuler = new THREE.Euler()
+      gridEuler.setFromQuaternion(gridRotation)
+      gridEuler.x = 0
+      gridEuler.y = 0
+      worldQuaternion.setFromEuler(gridEuler)
+      worldQuaternion.multiply(this._grid.quaternion)
+      worldOrientation.setFromQuaternion(worldQuaternion)
+    }
     return {
-      center: this.center.toObject(),
-      size: this.size.toObject(),
-      orientation: this.orientation.toObject(),
-      anchorIndex: this._anchorIndex,
-      surfaceId: this._surfaceId
+      center: (new Vector3D()).fromThree(worldCenter).toState(),
+      size: (new Vector3D()).fromThree(worldSize).toState(),
+      orientation:
+        (new Vector3D()).fromThree(worldOrientation.toVector3()).toState(),
+      anchorIndex: this._anchorIndex
     }
   }
 
@@ -212,7 +175,6 @@ export class Cube3D extends Shape3D {
    */
   public attachToPlane (plane: Plane3D) {
     this._grid = plane.shapes()[0] as Grid3D
-    this._grid.add(this)
   }
 
   /**
@@ -220,9 +182,6 @@ export class Cube3D extends Shape3D {
    * @param plane
    */
   public detachFromPlane () {
-    if (this._grid) {
-      this._grid.remove(this)
-    }
     this._grid = null
   }
 
@@ -236,9 +195,11 @@ export class Cube3D extends Shape3D {
     }
     super.updateState(shape, id)
     const cube = shape as CubeType
-    this.center = (new Vector3D()).fromObject(cube.center)
-    this.orientation = (new Vector3D()).fromObject(cube.orientation)
-    this.size = (new Vector3D()).fromObject(cube.size)
+    this.position.copy((new Vector3D()).fromState(cube.center).toThree())
+    this.rotation.copy(
+      (new Vector3D()).fromState(cube.orientation).toThreeEuler()
+    )
+    this.scale.copy((new Vector3D()).fromState(cube.size).toThree())
   }
 
   /**
@@ -322,21 +283,29 @@ export class Cube3D extends Shape3D {
     intersects: THREE.Intersection[]
   ) {
     const newIntersects: THREE.Intersection[] = []
-    if (this._control) {
-      this._control.raycast(raycaster, newIntersects)
-    }
 
     for (const sphere of this._controlSpheres) {
       sphere.raycast(raycaster, newIntersects)
     }
 
-    if (newIntersects.length === 0) {
-      this._box.raycast(raycaster, intersects)
-    } else {
+    if (newIntersects.length > 0) {
       for (const intersect of newIntersects) {
         intersects.push(intersect)
       }
+      return
     }
+
+    if (this.label.selected) {
+      this.label.labelList.control.raycast(raycaster, newIntersects)
+      if (newIntersects.length > 0) {
+        for (const intersect of newIntersects) {
+          intersects.push(intersect)
+        }
+        return
+      }
+    }
+
+    this._box.raycast(raycaster, intersects)
   }
 
   /**

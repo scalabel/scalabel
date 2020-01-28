@@ -1,14 +1,14 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { policyFromString } from '../../common/track_policies/track_policy'
+import { policyFromString } from '../../common/track/track'
 import { LabelTypeName, TrackPolicyType } from '../../common/types'
 import { makeState } from '../../functional/states'
-import { CubeType, State } from '../../functional/types'
+import { State } from '../../functional/types'
 import { Box3D } from './box3d'
 import { TransformationControl } from './control/transformation_control'
 import { Label3D, labelTypeFromString } from './label3d'
 import { Plane3D } from './plane3d'
-import { Shape3D } from './shape3d'
+
 /**
  * Make a new drawable label based on the label type
  * @param {string} labelType: type of the new label
@@ -44,7 +44,7 @@ export class Label3DList {
   /** selected label */
   private _selectedLabel: Label3D | null
   /** List of ThreeJS objects for raycasting */
-  private _raycastableShapes: Readonly<Array<Readonly<Shape3D>>>
+  private _raycastableShapes: Readonly<Array<Readonly<THREE.Object3D>>>
   /** callbacks */
   private _callbacks: Array<() => void>
   /** New labels to be committed */
@@ -57,6 +57,7 @@ export class Label3DList {
     this._raycastMap = {}
     this._selectedLabel = null
     this._scene = new THREE.Scene()
+    this._scene.add(this.control)
     this._raycastableShapes = []
     this._state = makeState()
     this._callbacks = []
@@ -154,27 +155,26 @@ export class Label3DList {
     this._state = state
 
     const newLabels: {[labelId: number]: Label3D} = {}
-    const newRaycastableShapes: Array<Readonly<Shape3D>> = []
+    const newRaycastableShapes: Array<Readonly<THREE.Object3D>> = [this.control]
     const newRaycastMap: {[id: number]: Label3D} = {}
     const item = state.task.items[state.user.select.item]
 
     if (this._selectedLabel) {
       this._selectedLabel.selected = false
-      this._selectedLabel.detachControl()
     }
     this._selectedLabel = null
 
+    // Reset control & scene
     for (const key of Object.keys(this._labels)) {
       const id = Number(key)
       if (!(id in item.labels)) {
-        this._labels[id].detachFromPlane()
-        this._labels[id].detachControl()
-
         for (const shape of Object.values(this._labels[id].shapes())) {
           this._scene.remove(shape)
         }
       }
     }
+
+    // Update & create labels
     for (const key of Object.keys(item.labels)) {
       const id = Number(key)
       if (id in this._labels) {
@@ -204,14 +204,11 @@ export class Label3DList {
       }
     }
 
-    // Attach shapes to plane
-    for (const key of Object.keys(item.labels)) {
+    // Assign parents
+    for (const key of Object.keys(newLabels)) {
       const id = Number(key)
-      if (item.labels[id].type === LabelTypeName.BOX_3D) {
-        const shape = item.shapes[item.labels[id].shapes[0]].shape as CubeType
-        if (shape.surfaceId >= 0) {
-          newLabels[id].attachToPlane(newLabels[shape.surfaceId] as Plane3D)
-        }
+      if (item.labels[id].parent in newLabels) {
+        newLabels[item.labels[id].parent].addChild(newLabels[id])
       }
     }
 
@@ -219,21 +216,29 @@ export class Label3DList {
     this._labels = newLabels
     this._raycastMap = newRaycastMap
 
+    this.control.clearLabels()
     const select = state.user.select
     if (select.item in select.labels) {
       const selectedLabelIds = select.labels[select.item]
       if (selectedLabelIds.length === 1 &&
           selectedLabelIds[0] in this._labels) {
         this._selectedLabel = this._labels[select.labels[select.item][0]]
-        this._selectedLabel.attachControl(this.control)
+        this._selectedLabel.selected = true
+        this.control.addLabel(this._selectedLabel)
       }
+    }
+
+    if (this.selectedLabel) {
+      this.control.visible = true
+    } else {
+      this.control.visible = false
     }
   }
 
   /**
    * Get raycastable list
    */
-  public get raycastableShapes (): Readonly<Array<Readonly<Shape3D>>> {
+  public get raycastableShapes (): Readonly<Array<Readonly<THREE.Object3D>>> {
     return this._raycastableShapes
   }
 
@@ -256,8 +261,8 @@ export class Label3DList {
 
   /** Set active camera */
   public setActiveCamera (camera: THREE.Camera) {
-    if (this._selectedLabel) {
-      this._selectedLabel.activeCamera = camera
+    for (const label of Object.values(this._labels)) {
+      label.activeCamera = camera
     }
     this.onDrawableUpdate()
   }

@@ -87,6 +87,10 @@ function initializeTestingObjects (
     label3dHandler.updateState(state, state.user.select.item, viewerId)
   })
 
+  Session.label3dList.subscribe(() => {
+    Session.label3dList.control.updateMatrixWorld(true)
+  })
+
   Session.dispatch(action.loadItem(0, -1))
 
   const itemIndex = 0
@@ -116,7 +120,7 @@ test('Add 3d bbox', () => {
   // make sure that the bounding box is always created at the target
   const maxVal = 100
   const position = new Vector3D()
-  position.fromObject(viewerConfig.position)
+  position.fromState(viewerConfig.position)
   const target = new Vector3D()
   for (let i = 1; i <= 10; i += 1) {
     target[0] = Math.random() * 2 - 1
@@ -175,6 +179,9 @@ test('Move axis aligned 3d bbox along z axis', () => {
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
   label3dHandler.onKeyDown(tEvent)
+  Session.label3dList.onDrawableUpdate()
+  label3dHandler.onKeyUp(tEvent)
+  Session.label3dList.onDrawableUpdate()
 
   const position = new Vector3D()
   position[1] = 10
@@ -184,9 +191,13 @@ test('Move axis aligned 3d bbox along z axis', () => {
     viewerConfig
   ))
 
+  Session.label3dList.onDrawableUpdate()
+
   state = Session.getState()
   viewerConfig =
     getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
+  camera.aspect = 1
+  camera.updateProjectionMatrix()
   updateThreeCameraAndRenderer(viewerConfig, camera)
   camera.updateMatrixWorld(true)
 
@@ -203,13 +214,15 @@ test('Move axis aligned 3d bbox along z axis', () => {
   expect(intersections.length).toBeGreaterThan(0)
 
   label3dHandler.onMouseMove(0, 0.1, intersections[0])
+  Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseDown(0, 0.1)
   label3dHandler.onMouseMove(0, 0.5)
+  Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseUp()
 
   state = Session.getState()
   let cube = getShape(state, 0, 0, 0) as CubeType
-  const center = (new Vector3D()).fromObject(cube.center)
+  const center = (new Vector3D()).fromState(cube.center)
   expect(center[2]).toBeGreaterThan(0)
   expect(center[0]).toBeCloseTo(0)
   expect(center[1]).toBeCloseTo(0)
@@ -220,8 +233,10 @@ test('Move axis aligned 3d bbox along z axis', () => {
   expect(intersections.length).toBeGreaterThan(0)
 
   label3dHandler.onMouseMove(0, 0.5, intersections[0])
+  Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseDown(0, 0.5)
   label3dHandler.onMouseMove(0, 0.1)
+  Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseUp()
 
   state = Session.getState()
@@ -232,6 +247,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
 test('Move axis aligned 3d bbox along all axes', () => {
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
   camera.aspect = 1
+  camera.updateProjectionMatrix()
 
   const [label3dHandler, viewerId] = initializeTestingObjects(camera)
 
@@ -245,6 +261,9 @@ test('Move axis aligned 3d bbox along all axes', () => {
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
   label3dHandler.onKeyDown(spaceEvent)
+  Session.label3dList.onDrawableUpdate()
+  label3dHandler.onKeyUp(spaceEvent)
+  Session.label3dList.onDrawableUpdate()
 
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
@@ -254,6 +273,9 @@ test('Move axis aligned 3d bbox along all axes', () => {
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
   label3dHandler.onKeyDown(tEvent)
+  Session.label3dList.onDrawableUpdate()
+  label3dHandler.onKeyUp(tEvent)
+  Session.label3dList.onDrawableUpdate()
 
   // Set camera to each of 6 axis aligned locations around cube
   // 0 = +x, 1 = -x, 2 = +y, 3 = -y, 4= +z, 5 = -z
@@ -272,6 +294,7 @@ test('Move axis aligned 3d bbox along all axes', () => {
       getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     updateThreeCameraAndRenderer(viewerConfig, camera)
     camera.updateMatrixWorld(true)
+    Session.label3dList.onDrawableUpdate()
 
     const raycastableShapes = Session.label3dList.raycastableShapes
 
@@ -287,8 +310,8 @@ test('Move axis aligned 3d bbox along all axes', () => {
       // Because of the view orientation, a positive movement could be along
       // a negative axis. This corrects that for testing.
       const negAxis: boolean = axis >= 2 && (camLoc === 0 || camLoc === 1)
-      const vecX = .1 * (axis >= 2 ? 1 : 0) * (neg ? -1 : 1)
-      const vecY = .1 * (axis <= 1 ? 1 : 0) * (neg ? -1 : 1)
+      const vecX = .15 * (axis >= 2 ? 1 : 0) * (neg ? -1 : 1)
+      const vecY = .15 * (axis <= 1 ? 1 : 0) * (neg ? -1 : 1)
 
       raycaster.setFromCamera(new THREE.Vector2(vecX, vecY), camera)
       let intersections = raycaster.intersectObjects(
@@ -296,13 +319,15 @@ test('Move axis aligned 3d bbox along all axes', () => {
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(vecX, vecY, intersections[0])
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseDown(vecX, vecY)
       label3dHandler.onMouseMove(5 * vecX, 5 * vecY)
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseUp()
 
       state = Session.getState()
       let cube = getShape(state, 0, 0, 0) as CubeType
-      const center = (new Vector3D()).fromObject(cube.center)
+      const center = (new Vector3D()).fromState(cube.center)
 
       // get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxis(camLoc, axis)
@@ -323,8 +348,10 @@ test('Move axis aligned 3d bbox along all axes', () => {
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(5 * vecX, 5 * vecY, intersections[0])
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseDown(5 * vecX, 5 * vecY)
       label3dHandler.onMouseMove(vecX, vecY)
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseUp()
 
       state = Session.getState()
@@ -350,12 +377,16 @@ test('Scale axis aligned 3d bbox along all axes', () => {
 
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
   label3dHandler.onKeyDown(spaceEvent)
+  Session.label3dList.onDrawableUpdate()
+  label3dHandler.onKeyUp(spaceEvent)
+  Session.label3dList.onDrawableUpdate()
 
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
   const labelId = Number(Object.keys(state.task.items[0].labels)[0])
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
+  Session.label3dList.onDrawableUpdate()
 
   const sEvent = new KeyboardEvent('keydown', { key: 'e' })
   label3dHandler.onKeyDown(sEvent)
@@ -377,6 +408,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     updateThreeCameraAndRenderer(viewerConfig, camera)
     camera.updateMatrixWorld(true)
+    Session.label3dList.onDrawableUpdate()
 
     const raycastableShapes = Session.label3dList.raycastableShapes
 
@@ -401,15 +433,17 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(vecX, vecY, intersections[0])
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseDown(vecX, vecY)
       label3dHandler.onMouseMove(5 * vecX, 5 * vecY)
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseUp()
 
       state = Session.getState()
       let cube = getShape(state, 0, 0, 0) as CubeType
 
-      const center = (new Vector3D()).fromObject(cube.center)
-      const size = (new Vector3D()).fromObject(cube.size)
+      const center = (new Vector3D()).fromState(cube.center)
+      const size = (new Vector3D()).fromState(cube.size)
 
       // get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxis(camLoc, axis)
@@ -434,8 +468,10 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(5 * vecX, 5 * vecY, intersections[0])
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseDown(5 * vecX, 5 * vecY)
       label3dHandler.onMouseMove(vecX, vecY)
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseUp()
 
       state = Session.getState()
@@ -468,6 +504,9 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
 
       const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
       label3dHandler.onKeyDown(spaceEvent)
+      Session.label3dList.onDrawableUpdate()
+      label3dHandler.onKeyUp(spaceEvent)
+      Session.label3dList.onDrawableUpdate()
 
       state = Session.getState()
       expect(_.size(state.task.items[0].labels)).toEqual(1)
@@ -477,6 +516,9 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
 
       const rEvent = new KeyboardEvent('keydown', { key: 'r' })
       label3dHandler.onKeyDown(rEvent)
+      Session.label3dList.onDrawableUpdate()
+      label3dHandler.onKeyUp(rEvent)
+      Session.label3dList.onDrawableUpdate()
 
       state = Session.getState()
       viewerConfig =
@@ -493,6 +535,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
         getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
       updateThreeCameraAndRenderer(viewerConfig, camera)
       camera.updateMatrixWorld(true)
+      Session.label3dList.onDrawableUpdate()
 
       const raycastableShapes = Session.label3dList.raycastableShapes
 
@@ -514,13 +557,15 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(vecX, vecY, intersections[0])
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseDown(vecX, vecY)
       label3dHandler.onMouseMove(2 * vecX, 2 * vecY)
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseUp()
 
       state = Session.getState()
       let cube = getShape(state, 0, 0, 0) as CubeType
-      const orientation = (new Vector3D()).fromObject(cube.orientation)
+      const orientation = (new Vector3D()).fromState(cube.orientation)
 
       // get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxisForRotation(camLoc, axis)
@@ -544,8 +589,10 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(2 * vecX, 2 * vecY, intersections[0])
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseDown(2 * vecX, 2 * vecY)
       label3dHandler.onMouseMove(vecX, vecY)
+      Session.label3dList.onDrawableUpdate()
       label3dHandler.onMouseUp()
 
       state = Session.getState()

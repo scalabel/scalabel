@@ -35,18 +35,37 @@ export function addDuplicatedTrack (
   }
   const end = Math.min(stopIndex, itemLength)
 
-  for (let index = startIndex; index < end; index += 1) {
-    trackLabels.push(_.cloneDeep(label))
-    trackShapeTypes.push(shapeTypes)
-    trackShapes.push(shapes)
-    itemIndices.push(index)
-    if (index > startIndex) {
-      trackLabels[trackLabels.length - 1].manual = false
+  const state = Session.getState()
+
+  let parentTrack: TrackType | undefined
+  if (label.parent >= 0) {
+    const item = state.task.items[label.item]
+    const parent = item.labels[label.parent]
+    if (parent.track in state.task.tracks) {
+      parentTrack = state.task.tracks[parent.track]
     }
   }
 
+  for (let index = startIndex; index < end; index += 1) {
+    const cloned = _.cloneDeep(label)
+    if (index > startIndex) {
+      cloned.manual = false
+    }
+
+    if (parentTrack && index in parentTrack.labels) {
+      cloned.parent = parentTrack.labels[index]
+    } else if (index !== cloned.item) {
+      cloned.parent = -1
+    }
+
+    trackLabels.push(cloned)
+    trackShapeTypes.push(shapeTypes)
+    trackShapes.push(shapes)
+    itemIndices.push(index)
+  }
+
   return addTrack(
-    itemIndices, trackLabels, trackShapeTypes, trackShapes
+    itemIndices, label.type, trackLabels, trackShapeTypes, trackShapes
   )
 }
 

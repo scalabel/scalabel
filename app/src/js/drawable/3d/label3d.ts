@@ -1,11 +1,11 @@
+import _ from 'lodash'
 import * as THREE from 'three'
 import { LabelTypeName, ShapeTypeName } from '../../common/types'
+import { makeLabel } from '../../functional/states'
 import { LabelType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { getColorById } from '../util'
-import { TransformationControl } from './control/transformation_control'
 import { Label3DList } from './label3d_list'
-import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
 
 /** Convert string to label type name enum */
@@ -23,55 +23,67 @@ export function labelTypeFromString (type: string): LabelTypeName {
  * Abstract class for 3D drawable labels
  */
 export abstract class Label3D {
-  /** label id in state */
-  protected _labelId: number
-  /** track id in state */
-  protected _trackId: number
-  /** index of the label */
-  protected _index: number
-  /** drawing order of the label */
-  protected _order: number
   /** the corresponding label in the state */
-  protected _label: LabelType | null
+  protected _label: LabelType
   /** whether the label is selected */
   protected _selected: boolean
   /** whether the label is highlighted */
   protected _highlighted: boolean
   /** rgba color decided by labelId */
   protected _color: number[]
-  /** plane if attached */
-  protected _plane: Plane3D | null
+  /** parent label if any */
+  protected _parent: Label3D | null
+  /** children if any */
+  protected _children: Label3D[]
+  /** Whether this is temporary */
+  protected _temporary: boolean
   /** label list this belongs to */
   protected _labelList: Label3DList
 
   constructor (labelList: Label3DList) {
-    this._index = -1
-    this._labelId = -1
-    this._trackId = -1
-    this._order = -1
+    this._label = makeLabel()
     this._selected = false
     this._highlighted = false
-    this._label = null
     this._color = [0, 0, 0, 1]
-    this._plane = null
+    this._parent = null
+    this._children = []
+    this._temporary = false
     this._labelList = labelList
   }
 
-  /**
-   * Set index of this label
-   */
-  public set index (i: number) {
-    this._index = i
+  /** Get label list */
+  public get labelList (): Readonly<Label3DList> {
+    return this._labelList
   }
 
-  /** get index */
-  public get index (): number {
-    return this._index
-  }
-
-  /** get labelId */
+  /** get label id */
   public get labelId (): number {
-    return this._labelId
+    return this._label.id
+  }
+
+  /** get track id */
+  public get trackId (): number {
+    return this._label.track
+  }
+
+  /** get item index */
+  public get item (): number {
+    return this._label.item
+  }
+
+  /** get label type */
+  public get type (): string {
+    return labelTypeFromString(this._label.type)
+  }
+
+  /** get whether label was manually drawn */
+  public get manual (): boolean {
+    return this._label.manual
+  }
+
+  /** set whether label was manually drawn */
+  public setManual () {
+    this._label.manual = true
   }
 
   /** get label state */
@@ -82,6 +94,37 @@ export abstract class Label3D {
     return this._label
   }
 
+  /** Get parent label */
+  public get parent (): Label3D | null {
+    return this._parent
+  }
+
+  /** Set parent label */
+  public set parent (parent: Label3D | null) {
+    this._parent = parent
+    if (parent && this._label) {
+      this._label.parent = parent.labelId
+    } else if (this._label) {
+      this._label.parent = -1
+    }
+  }
+
+  /** Get children */
+  public get children (): Readonly<Label3D[]> {
+    return this._children
+  }
+
+  /** Returns true if any children selected */
+  public anyChildSelected (): boolean {
+    for (const child of this.children) {
+      if (child.selected) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   /** select the label */
   public set selected (s: boolean) {
     this._selected = s
@@ -90,6 +133,11 @@ export abstract class Label3D {
   /** return whether label selected */
   public get selected (): boolean {
     return this._selected
+  }
+
+  /** Return whether this label is temporary (not committed to state) */
+  public get temporary (): boolean {
+    return this._temporary
   }
 
   /** Get shape id's and shapes for updating */
@@ -104,18 +152,32 @@ export abstract class Label3D {
     }
   }
 
-  /** Attach label to plane */
-  public attachToPlane (plane: Plane3D) {
-    if (plane === this._plane) {
-      return
+  /** add child */
+  public addChild (child: Label3D) {
+    if (child.parent !== this) {
+      if (child.parent) {
+        child.parent.removeChild(child)
+      }
+      this._children.push(child)
+      child.parent = this
+      if (this._label) {
+        this._label.children.push(child.labelId)
+      }
     }
-    this._plane = plane
   }
 
-  /** Attach label to plane */
-  public detachFromPlane () {
-    if (this._plane) {
-      this._plane = null
+  /** remove child */
+  public removeChild (child: Label3D) {
+    const index = this._children.indexOf(child)
+    if (index >= 0) {
+      this._children.splice(index, 1)
+      child.parent = null
+      if (this._label) {
+        const stateIndex = this._label.children.indexOf(child.labelId)
+        if (stateIndex >= 0) {
+          this._label.children.splice(stateIndex, 1)
+        }
+      }
     }
   }
 
@@ -140,12 +202,6 @@ export abstract class Label3D {
     return
   }
 
-  /** Attach control */
-  public abstract attachControl (control: TransformationControl): void
-
-  /** Attach control */
-  public abstract detachControl (): void
-
   /**
    * Handle mouse move
    * @param projection
@@ -169,13 +225,18 @@ export abstract class Label3D {
   ): boolean
 
   /** Rotate label in direction of quaternion */
-  public abstract rotate (quaternion: THREE.Quaternion): void
+  public abstract rotate (
+    quaternion: THREE.Quaternion,
+    anchor?: THREE.Vector3
+  ): void
 
   /** Translate label in provided direction */
   public abstract translate (delta: THREE.Vector3): void
 
   /** Scale label */
-  public abstract scale (scale: THREE.Vector3, anchor: THREE.Vector3): void
+  public abstract scale (
+    scale: THREE.Vector3, anchor: THREE.Vector3, local: boolean
+  ): void
 
   /** Move label to position, different from translate, which accepts a delta */
   public abstract move (position: THREE.Vector3): void
@@ -190,9 +251,14 @@ export abstract class Label3D {
     return new THREE.Quaternion()
   }
 
-  /** Size of label */
+  /** Size of the label */
   public get size (): THREE.Vector3 {
     return new THREE.Vector3()
+  }
+
+  /** Bounds of label */
+  public bounds (_local?: boolean): THREE.Box3 {
+    return new THREE.Box3()
   }
 
   /**
@@ -203,7 +269,8 @@ export abstract class Label3D {
     itemIndex: number,
     category: number,
     center?: Vector3D,
-    sensors?: number[]
+    sensors?: number[],
+    temporary?: boolean
   ): void
 
   /**
@@ -218,17 +285,14 @@ export abstract class Label3D {
     labelId: number
   ): void {
     const item = state.task.items[itemIndex]
-    this._label = item.labels[labelId]
-    this._labelId = this._label.id
-    this._trackId = this._label.track
-    this._color = getColorById(this._labelId, this._trackId)
+    this._label = _.cloneDeep(item.labels[labelId])
+    this._color = getColorById(this.labelId, this.trackId)
     const select = state.user.select
     if (this._label.item in select.labels &&
         select.labels[this._label.item].includes(labelId)) {
       this.selected = true
     } else {
       this.selected = false
-      this.detachControl()
     }
   }
 }

@@ -19,11 +19,10 @@ export function addBox3dLabel (
   category: number[],
   center: Vector3Type,
   size: Vector3Type,
-  orientation: Vector3Type,
-  surfaceId: number = -1
+  orientation: Vector3Type
 ): AddLabelsAction {
   // create the rect object
-  const cube = makeCube({ center, size, orientation, surfaceId })
+  const cube = makeCube({ center, size, orientation })
   const label = makeLabel({
     type: types.LabelTypeName.BOX_3D, category, sensors
   })

@@ -15,7 +15,7 @@ import { PLYLoader } from '../thirdparty/PLYLoader'
 import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
-import { makeTrackPolicy, Track } from './track'
+import { Track } from './track/track'
 import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
@@ -44,26 +44,19 @@ export function initSession (containerName: string): void {
  */
 function updateTracks (): void {
   const state = Session.getState()
-  const currentPolicyType =
-    state.task.config.policyTypes[state.user.select.policyType]
   const newTracks: {[trackId: number]: Track} = {}
   for (const key of Object.keys(state.task.tracks)) {
     const trackId = Number(key)
-    const track = state.task.tracks[trackId]
     if (trackId in Session.tracks) {
       newTracks[trackId] = Session.tracks[trackId]
-      let trackPolicy = newTracks[trackId].trackPolicy
-      if (newTracks[trackId].policyType !== currentPolicyType) {
-        const newPolicy = makeTrackPolicy(newTracks[trackId], currentPolicyType)
-        trackPolicy = newPolicy
-      }
-      newTracks[trackId].updateState(track, trackPolicy)
     } else {
-      newTracks[trackId] = new Track()
-      newTracks[trackId].updateState(
-        track,
-        makeTrackPolicy(newTracks[trackId], currentPolicyType)
-      )
+      const newTrack = new Track()
+      if (newTrack) {
+        newTracks[trackId] = newTrack
+      }
+    }
+    if (trackId in newTracks) {
+      newTracks[trackId].updateState(state, trackId)
     }
   }
 

@@ -33,6 +33,8 @@ export interface LabelType {
 export interface TrackType {
   /** ID of the track */
   id: number
+  /** type */
+  type: string
   /** labels in this track {item index: label id} */
   labels: {[key: number]: number}
 }
@@ -89,8 +91,6 @@ export interface CubeType {
   orientation: Vector3Type
   /** Anchor corner index for reshaping */
   anchorIndex: number
-  /** ID of the surface this box is attached to */
-  surfaceId: number
 }
 
 export type Point2DType = Vector2Type
@@ -167,6 +167,11 @@ export interface Image3DViewerConfigType extends
   ImageViewerConfigType {
   /** If set, sensor id of point cloud to use as reference */
   pointCloudSensor: number
+}
+
+export interface HomographyViewerConfigType extends Image3DViewerConfigType {
+  /** Distance to plane */
+  distance: number
 }
 
 export interface CameraIntrinsicsType {
