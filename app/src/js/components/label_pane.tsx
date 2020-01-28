@@ -7,7 +7,7 @@ import ViewStreamIcon from '@material-ui/icons/ViewStream'
 import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { changeViewerConfig, deletePane, splitPane, updateAll } from '../action/common'
+import { changeViewerConfig, deletePane, splitPane, updatePane } from '../action/common'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { makeDefaultViewerConfig } from '../functional/states'
@@ -183,21 +183,19 @@ class LabelPane extends Component<Props> {
     if (!pane.split) {
       throw new Error('Missing split type')
     }
-    if (!pane.primarySize) {
-      throw new Error('Missing primary size')
-    }
 
     const child1 = (<StyledLabelPane pane={pane.child1} />)
     const child2 = (<StyledLabelPane pane={pane.child2} />)
 
+    const defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
     return (
       <SplitPane
         split={pane.split}
-        minSize={`${pane.minPrimarySize}%`}
-        maxSize={`${pane.maxPrimarySize}%`}
-        size={`${pane.primarySize}%`}
+        defaultSize={defaultSize}
         primary={pane.primary}
-        onChange={() => Session.dispatch(updateAll())}
+        onChange={
+          (size) => Session.dispatch(updatePane(pane.id, { primarySize: size }))
+        }
         allowResize
         resizerClassName={this.props.classes.resizer}
       >

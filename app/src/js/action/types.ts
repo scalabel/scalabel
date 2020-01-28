@@ -3,6 +3,7 @@
  */
 import {
   LabelType,
+  PaneType,
   Select,
   ShapeType,
   SplitType,
@@ -30,6 +31,7 @@ export const MERGE_TRACKS = 'MERGE_TRACKS'
 // View Level
 export const ADD_VIEWER_CONFIG = 'ADD_VIEWER_CONFIG'
 export const CHANGE_VIEWER_CONFIG = 'CHANGE_VIEWER_CONFIG'
+export const UPDATE_PANE = 'UPDATE_PANE'
 export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
 
@@ -159,6 +161,13 @@ export interface DeleteViewerConfigAction extends BaseAction {
   viewerId: number
 }
 
+export interface UpdatePaneAction extends BaseAction {
+  /** pane id */
+  pane: number
+  /** updated properties */
+  props: Partial<PaneType>
+}
+
 export interface SplitPaneAction extends BaseAction {
   /** ID of pane to split */
   pane: number
@@ -185,6 +194,7 @@ export type UserActionType =
   ChangeSelectAction
   | ChangeViewerConfigAction
   | AddViewerConfigAction
+  | UpdatePaneAction
   | SplitPaneAction
   | DeletePaneAction
 

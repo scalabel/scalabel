@@ -153,6 +153,12 @@ export class Box3D extends Label3D {
     this._labelList.addUpdatedLabel(this)
   }
 
+  /** Move */
+  public move (position: THREE.Vector3): void {
+    this._shape.position.copy(position)
+    this._labelList.addUpdatedLabel(this)
+  }
+
   /** Translate */
   public translate (delta: THREE.Vector3) {
     this._shape.position.add(delta)
@@ -176,6 +182,11 @@ export class Box3D extends Label3D {
   /** orientation of box */
   public get orientation (): THREE.Quaternion {
     return this._shape.quaternion
+  }
+
+  /** size of box */
+  public get size (): THREE.Vector3 {
+    return this._shape.scale
   }
 
   /**

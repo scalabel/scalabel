@@ -100,6 +100,12 @@ export class Plane3D extends Label3D {
     this._shape.position.add(anchor)
   }
 
+  /** Move */
+  public move (position: THREE.Vector3): void {
+    this._shape.position.copy(position)
+    this._labelList.addUpdatedLabel(this)
+  }
+
   /** center of box */
   public get center (): THREE.Vector3 {
     return this._shape.position

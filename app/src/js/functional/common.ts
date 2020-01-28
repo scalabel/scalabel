@@ -885,6 +885,42 @@ export function changeViewerConfig (
   return state
 }
 
+/** Update existing pane */
+export function updatePane (
+  state: State, action: types.UpdatePaneAction
+) {
+  if (!(action.pane in state.user.layout.panes)) {
+    return state
+  }
+
+  const newPane = updateObject(
+    state.user.layout.panes[action.pane],
+    action.props
+  )
+
+  const newLayout = updateObject(
+    state.user.layout,
+    {
+      panes: updateObject(
+        state.user.layout.panes,
+        {
+          [action.pane]: newPane
+        }
+      )
+    }
+  )
+
+  return updateObject(
+    state,
+    {
+      user: updateObject(
+        state.user,
+        { layout: newLayout }
+      )
+    }
+  )
+}
+
 /**
  * Split existing pane into half
  * @param state
@@ -920,7 +956,6 @@ export function splitPane (
   const newPane = updateObject(oldPane, {
     viewerId: -1,
     split: action.split,
-    primarySize: 50,
     child1: child1Id,
     child2: child2Id
   })

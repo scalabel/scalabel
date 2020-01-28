@@ -1,6 +1,6 @@
 import Session from '../common/session'
-import { LabelType, Select,
-  ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
+import { LabelType, PaneType,
+  Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -308,6 +308,19 @@ export function toggleSynchronization (
     viewerId,
     { ...config, synchronized: !config.synchronized }
   )
+}
+
+/** action to updater pane */
+export function updatePane (
+  pane: number,
+  props: Partial<PaneType>
+): types.UpdatePaneAction {
+  return {
+    type: types.UPDATE_PANE,
+    sessionId: Session.id,
+    pane,
+    props
+  }
 }
 
 /** action to split pane */

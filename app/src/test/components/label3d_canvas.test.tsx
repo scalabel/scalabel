@@ -47,7 +47,7 @@ beforeEach(() => {
   Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
   Session.activeViewerId = canvasId
   Session.pointClouds.length = 0
-  Session.pointClouds.push({ [-1]: new THREE.Points() })
+  Session.pointClouds.push({ [-1]: new THREE.BufferGeometry() })
   Session.dispatch(action.loadItem(0, -1))
 })
 
