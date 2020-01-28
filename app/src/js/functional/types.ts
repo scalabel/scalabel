@@ -316,10 +316,8 @@ export interface PaneType {
    * (100% - primary width)
    */
   primary?: 'first' | 'second'
-  /**
-   * Size of primary pane in percentage.
-   */
-  primarySize?: number
+  /** Size of primary pane. */
+  primarySize?: number | string
   /** Split type, horizontal or vertical */
   split?: SplitType
   /** Min size of primary pane */

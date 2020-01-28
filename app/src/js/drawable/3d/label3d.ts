@@ -177,6 +177,9 @@ export abstract class Label3D {
   /** Scale label */
   public abstract scale (scale: THREE.Vector3, anchor: THREE.Vector3): void
 
+  /** Move label to position, different from translate, which accepts a delta */
+  public abstract move (position: THREE.Vector3): void
+
   /** Center of label */
   public get center (): THREE.Vector3 {
     return new THREE.Vector3()
