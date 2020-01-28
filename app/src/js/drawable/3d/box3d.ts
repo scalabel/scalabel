@@ -81,7 +81,7 @@ export class Box3D extends Label3D {
     } else if (this._label) {
       this._label.parent = -1
     }
-    if (parent && parent.label.type === LabelTypeName.PLANE_3D) {
+    if (parent && parent.type === LabelTypeName.PLANE_3D) {
       this._shape.attachToPlane(parent as Plane3D)
     } else {
       this._shape.detachFromPlane()

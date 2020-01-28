@@ -26,7 +26,7 @@ export function commitLabels (
         if (drawable.trackId in Session.tracks) {
           const track = Session.tracks[drawable.trackId]
           track.update(
-            drawable.label.item,
+            drawable.labelState.item,
             drawable
           )
           for (const index of track.updatedIndices) {
@@ -61,7 +61,7 @@ export function commitLabels (
           updatedLabels[drawable.item] = {}
         }
         updatedLabels[drawable.item][drawable.labelId] =
-          drawable.label
+          drawable.labelState
       }
     } else {
       // New labels and tracks
@@ -122,7 +122,7 @@ export function commitLabels (
     const types = []
     const shapes = []
     for (const label of newLabels) {
-      labels.push(label.label)
+      labels.push(label.labelState)
       const [, shapeTypes, shapeStates] = label.shapeStates()
       types.push(shapeTypes)
       shapes.push(shapeStates)

@@ -205,9 +205,7 @@ export abstract class Label2D {
 
   /** Set to manual */
   public setManual () {
-    if (this._label) {
-      this._label.manual = true
-    }
+    this._labelState.manual = true
   }
 
   /**

@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { ShapeType } from '../../functional/types'
-import { TransformationControl } from './control/transformation_control'
 
 /**
  * Base shape class
@@ -12,17 +11,30 @@ export abstract class Shape3D extends THREE.Object3D {
   protected _shape: ShapeType | null
   /** whether highlighted */
   protected _highlighted: boolean
+  /** whether selected */
+  protected _selected: boolean
 
   constructor () {
     super()
     this._id = -1
     this._shape = null
     this._highlighted = false
+    this._selected = false
   }
 
   /** Get shape id */
   public get id (): number {
     return this._id
+  }
+
+  /** Get selected */
+  public get selected (): boolean {
+    return this._selected
+  }
+
+  /** Set selected */
+  public set selected (s: boolean) {
+    this._selected = s
   }
 
   /** return shape type */

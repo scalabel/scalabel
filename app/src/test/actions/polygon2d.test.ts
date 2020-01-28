@@ -50,7 +50,7 @@ test('Add, change and delete polygon labels', () => {
   let label = state.task.items[0].labels[labelIds[0]]
   expect(label.item).toBe(0)
   expect(label.type).toBe(LabelTypeName.POLYGON_2D)
-  const points = label.shapes.map(
+  let points = label.shapes.map(
     (id) => state.task.items[0].shapes[id].shape as PathPoint2DType
   )
   // Check label ids
@@ -93,22 +93,24 @@ test('Add, change and delete polygon labels', () => {
 
   state = Session.getState()
   label = state.task.items[0].labels[label.id]
-  shape = state.task.items[0].shapes[label.shapes[0]].shape as PolygonType
+  points = label.shapes.map(
+    (id) => state.task.items[0].shapes[id].shape as PathPoint2DType
+  )
 
-  expect(shape.points[0].x).toBe(2)
-  expect(shape.points[1].x).toBe(4)
-  expect(shape.points[2].x).toBe(4)
-  expect(shape.points[3].x).toBe(2)
+  expect(points[0].x).toBe(2)
+  expect(points[1].x).toBe(4)
+  expect(points[2].x).toBe(4)
+  expect(points[3].x).toBe(2)
 
-  expect(shape.points[0].y).toBe(0)
-  expect(shape.points[1].y).toBe(0)
-  expect(shape.points[2].y).toBe(2)
-  expect(shape.points[3].y).toBe(2)
+  expect(points[0].y).toBe(0)
+  expect(points[1].y).toBe(0)
+  expect(points[2].y).toBe(2)
+  expect(points[3].y).toBe(2)
 
-  expect(shape.points[0].type).toBe('bezier')
-  expect(shape.points[1].type).toBe('bezier')
-  expect(shape.points[2].type).toBe('vertex')
-  expect(shape.points[3].type).toBe('bezier')
+  expect(points[0].type).toBe('bezier')
+  expect(points[1].type).toBe('bezier')
+  expect(points[2].type).toBe('vertex')
+  expect(points[3].type).toBe('bezier')
 
   Session.dispatch(action.deleteLabel(itemIndex, label.id))
   state = Session.getState()

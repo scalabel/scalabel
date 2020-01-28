@@ -207,7 +207,7 @@ export class Track {
     this._shapes = {}
     this._labels = {}
     this._type = label.type
-    const labelState = label.label
+    const labelState = label.labelState
     const [,shapeTypes, shapeStates] = label.shapeStates()
     for (let index = itemIndex; index < itemIndex + numItems; index ++) {
       const cloned = _.cloneDeep(labelState) as LabelType
@@ -260,7 +260,7 @@ export class Track {
 
       this._labels[itemIndex] = {
         ...this._labels[itemIndex],
-        ...label.label
+        ...label.labelState
       }
 
       this._policy.update(itemIndex, this._track.id)

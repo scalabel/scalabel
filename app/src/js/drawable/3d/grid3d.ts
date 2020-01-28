@@ -2,8 +2,6 @@ import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
 import { Plane3DType, ShapeType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
-import { TransformationControl } from './control/transformation_control'
-import Label3D from './label3d'
 import { Shape3D } from './shape3d'
 
 /**
@@ -88,7 +86,7 @@ export class Grid3D extends Shape3D {
     raycaster: THREE.Raycaster,
     intersects: THREE.Intersection[]
   ) {
-    if (this.label.selected || this.label.anyChildSelected()) {
+    if (this.selected) {
       const ray = raycaster.ray
       const normal = new THREE.Vector3(0, 0, 1)
       normal.applyEuler(this.rotation)
