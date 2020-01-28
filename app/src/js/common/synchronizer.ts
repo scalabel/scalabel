@@ -21,7 +21,7 @@ export class Synchronizer {
   /** Actions queued to send */
   public actionQueue: types.BaseAction[]
   /** Actions in process of being saved */
-  public saveActions: ActionQueueType[]
+  public saveActions: { [id: string]: ActionQueueType }
   /** Timestamped action log */
   public actionLog: types.BaseAction[]
   /** Middleware to use */
@@ -36,7 +36,7 @@ export class Synchronizer {
     this.initStateCallback = initStateCallback
 
     this.actionQueue = []
-    this.saveActions = []
+    this.saveActions = {}
     this.actionLog = []
 
     const self = this
@@ -82,7 +82,9 @@ export class Synchronizer {
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
       self.initStateCallback(syncState)
-      for (const saveActionQueue of this.saveActions) {
+      const actionQueues = Object.keys(this.saveActions).map(
+        (key) => this.saveActions[key])
+      for (const saveActionQueue of actionQueues) {
         self.sendActions(saveActionQueue)
       }
       if (Session.autosave) {
@@ -91,9 +93,14 @@ export class Synchronizer {
     })
 
     this.socket.on(
-      EventName.ACTION_BROADCAST, (actionList: types.ActionType[]) => {
-        // can remove 1st set of stored actions when saving is done
-        this.saveActions.shift()
+      EventName.ACTION_BROADCAST, (actionQueue: ActionQueueType) => {
+        // TOOD: better naming for actionQueue vs actionList
+        // can remove stored actions when they are acked
+        if (actionQueue.id in this.saveActions) {
+          delete this.saveActions[actionQueue.id]
+        }
+
+        const actionList = actionQueue.actions
         for (const action of actionList) {
           // actionLog matches backend action ordering
           self.actionLog.push(action)
@@ -118,7 +125,9 @@ export class Synchronizer {
         self.initStateCallback = (state: State) => {
           // updateTask is not a task action, so will not sync again
           Session.dispatch(updateTask(state.task))
-          for (const saveActionQueue of this.saveActions) {
+          const actionQueues = Object.keys(this.saveActions).map(
+            (key) => this.saveActions[key])
+          for (const saveActionQueue of actionQueues) {
             for (const saveAction of saveActionQueue.actions) {
               saveAction.frontendOnly = true
               Session.dispatch(saveAction)
@@ -151,11 +160,12 @@ export class Synchronizer {
   public sendQueuedActions () {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
+        const queueId = uuid4()
         const actionQueue: ActionQueueType = {
           actions: this.actionQueue,
-          id: uuid4()
+          id: queueId
         }
-        this.saveActions.push(actionQueue)
+        this.saveActions[queueId] = actionQueue
         this.sendActions(actionQueue)
         this.actionQueue = []
       }

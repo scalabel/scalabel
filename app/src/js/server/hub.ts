@@ -8,7 +8,8 @@ import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
 import * as path from './path'
 import Session from './server_session'
-import { EventName, RegisterMessageType, SyncActionMessageType } from './types'
+import { ActionQueueType, EventName, 
+  RegisterMessageType, SyncActionMessageType } from './types'
 import { getSavedKey, getTaskKey,
   index2str, loadSavedState} from './util'
 
@@ -104,9 +105,13 @@ export function startSocketServer (io: socketio.Server) {
       }
 
       // broadcast task actions to all other sessions in room
-      socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActions)
+      const taskActionMsg: ActionQueueType = {
+        actions: taskActions,
+        id: actionListId
+      }
+      socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
       // echo everything to original session
-      socket.emit(EventName.ACTION_BROADCAST, actionList)
+      socket.emit(EventName.ACTION_BROADCAST, data.actions)
     })
   })
 }
