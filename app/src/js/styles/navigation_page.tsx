@@ -1,6 +1,5 @@
 import { Theme } from '@material-ui/core/styles'
 import createStyles from '@material-ui/core/styles/createStyles'
-import { CSSProperties } from '@material-ui/core/styles/withStyles'
 import { defaultAppBar, defaultHeader } from './general'
 
 // styles used in the create and dashboard navigation page
