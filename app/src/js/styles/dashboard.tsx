@@ -1,7 +1,6 @@
 import { Theme } from '@material-ui/core'
 import { cyan } from '@material-ui/core/colors'
 import createStyles from '@material-ui/core/styles/createStyles'
-import { CSSProperties } from '@material-ui/core/styles/withStyles'
 /* Dashboard window styles */
 export const dashboardWindowStyles = (theme: Theme) =>
   createStyles({
