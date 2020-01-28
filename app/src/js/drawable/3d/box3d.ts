@@ -222,11 +222,6 @@ export class Box3D extends Label3D {
     return box
   }
 
-  /** size of box */
-  public get size (): THREE.Vector3 {
-    return this._shape.scale
-  }
-
   /**
    * Highlight box
    * @param intersection

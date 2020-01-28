@@ -217,9 +217,10 @@ export class Label3DHandler {
             const target =
               (this._viewerConfig as PointCloudViewerConfigType).target
             Session.label3dList.selectedLabel.move(
-              (new Vector3D()).fromObject(target).toThree()
+              (new Vector3D()).fromState(target).toThree()
             )
-            this.commitLabels()
+            commitLabels([...Session.label3dList.updatedLabels.values()])
+            Session.label3dList.clearUpdatedLabels()
           }
         }
         break

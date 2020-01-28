@@ -16,7 +16,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { Track } from './track/track'
-import { DataType, ViewerConfigTypeName } from './types'
+import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
  * Request Session state from the server
