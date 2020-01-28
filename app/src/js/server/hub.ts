@@ -19,6 +19,10 @@ export function startSocketServer (io: socketio.Server) {
   const env = Session.getEnv()
   // maintain a store for each task
   const stores: { [key: string]: Store } = {}
+  // TODO: move this to redis
+  // Set of ids for action queue which have been saved
+  const actionIdsSaved = new Set()
+
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
     socket.on(EventName.REGISTER, async (rawData: string) => {
       const data: RegisterMessageType = JSON.parse(rawData)
@@ -73,7 +77,8 @@ export function startSocketServer (io: socketio.Server) {
       const projectName = data.projectName
       const taskId = data.taskId
       const sessionId = data.sessionId
-      const actionList = data.actions
+      const actionList = data.actions.actions
+      const actionListId = data.actions.id
 
       const room = path.roomName(projectName, taskId, env.sync, sessionId)
 
@@ -86,15 +91,22 @@ export function startSocketServer (io: socketio.Server) {
         action.timestamp = Date.now()
         stores[room].dispatch(action)
       }
+
+      // TODO: this should surround redis interface, and be atomic transaction
+      if (!(actionListId in actionIdsSaved)) {
+        // save task data with all updates
+        if (taskActions.length > 0) {
+          const content = JSON.stringify(stores[room].getState().present)
+          const filePath = path.getFileKey(getSavedKey(projectName, taskId))
+          await Session.getStorage().save(filePath, content)
+        }
+        actionIdsSaved.add(actionListId)
+      }
+
       // broadcast task actions to all other sessions in room
       socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActions)
       // echo everything to original session
       socket.emit(EventName.ACTION_BROADCAST, actionList)
-
-      // save task data with all updates
-      const content = JSON.stringify(stores[room].getState().present)
-      const filePath = path.getFileKey(getSavedKey(projectName, taskId))
-      await Session.getStorage().save(filePath, content)
     })
   })
 }

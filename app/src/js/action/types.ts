@@ -51,6 +51,8 @@ export interface BaseAction {
   sessionId: string
   /** timestamp given by backend. It is Date.now() */
   timestamp?: number
+  /** whether to sync action, or just apply to frontend */
+  frontendOnly?: boolean
 }
 
 export type InitSessionAction = BaseAction

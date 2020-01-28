@@ -1,10 +1,12 @@
 import _ from 'lodash'
 import { Dispatch, Middleware } from 'redux'
 import io from 'socket.io-client'
+import uuid4 from 'uuid/v4'
 import { updateTask } from '../action/common'
 import * as types from '../action/types'
 import { State } from '../functional/types'
-import { EventName, RegisterMessageType, SyncActionMessageType } from '../server/types'
+import { ActionQueueType, EventName, RegisterMessageType,
+  SyncActionMessageType } from '../server/types'
 import Session, { ConnectionStatus } from './session'
 
 const CONFIRMATION_MESSAGE =
@@ -19,7 +21,7 @@ export class Synchronizer {
   /** Actions queued to send */
   public actionQueue: types.BaseAction[]
   /** Actions in process of being saved */
-  public saveActions: types.BaseAction[][]
+  public saveActions: ActionQueueType[]
   /** Timestamped action log */
   public actionLog: types.BaseAction[]
   /** Middleware to use */
@@ -44,7 +46,7 @@ export class Synchronizer {
       next: Dispatch
     ) => (action) => {
       /* Only send back actions that originated locally */
-      if (Session.id === action.sessionId) {
+      if (Session.id === action.sessionId && !action.frontendOnly) {
         self.actionQueue.push(action)
         if (Session.autosave) {
           self.sendQueuedActions()
@@ -80,8 +82,8 @@ export class Synchronizer {
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
       self.initStateCallback(syncState)
-      for (const saveActionList of this.saveActions) {
-        self.sendActions(saveActionList)
+      for (const saveActionQueue of this.saveActions) {
+        self.sendActions(saveActionQueue)
       }
       if (Session.autosave) {
         self.sendQueuedActions()
@@ -114,7 +116,14 @@ export class Synchronizer {
       if (Session.autosave) {
         // On reconnect, just update store instead of re-initializing it
         self.initStateCallback = (state: State) => {
+          // updateTask is not a task action, so will not sync again
           Session.dispatch(updateTask(state.task))
+          for (const saveActionQueue of this.saveActions) {
+            for (const saveAction of saveActionQueue.actions) {
+              saveAction.frontendOnly = true
+              Session.dispatch(saveAction)
+            }
+          }
         }
       } else {
         // With manual saving, keep unsaved changes after reconnect
@@ -137,12 +146,17 @@ export class Synchronizer {
 
   /**
    * Send all queued actions to the backend
+   * Should only call this once per action, since id shouldn't change
    */
   public sendQueuedActions () {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
-        this.saveActions.push(this.actionQueue)
-        this.sendActions(this.actionQueue)
+        const actionQueue: ActionQueueType = {
+          actions: this.actionQueue,
+          id: uuid4()
+        }
+        this.saveActions.push(actionQueue)
+        this.sendActions(actionQueue)
         this.actionQueue = []
       }
     }
@@ -151,7 +165,7 @@ export class Synchronizer {
   /**
    * Send given actions to the backend
    */
-  public sendActions (actionList: types.BaseAction[]) {
+  public sendActions (actionList: ActionQueueType) {
     const sessionState = Session.getState()
     const message: SyncActionMessageType = {
       taskId: sessionState.task.config.taskId,
