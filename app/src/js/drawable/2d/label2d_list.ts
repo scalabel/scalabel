@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { policyFromString } from '../../common/track/track'
 import { LabelTypeName, ShapeTypeName, TrackPolicyType } from '../../common/types'
 import { makeState, makeTaskConfig } from '../../functional/states'
-import { ConfigType, Label2DTemplateType, State } from '../../functional/types'
+import { ConfigType, Label2DTemplateType, ShapeType, State } from '../../functional/types'
 import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { CustomLabel2D } from './custom_label'
@@ -80,6 +80,10 @@ export class Label2DList {
   private _updatedLabels: Set<Label2D>
   /** task config */
   private _config: ConfigType
+  /** updated shapes */
+  private _updatedShapes: Set<Shape2D>
+  /** next temporary shape id */
+  private _temporaryShapeId: number
 
   constructor () {
     this._labels = {}
@@ -91,6 +95,8 @@ export class Label2DList {
     this._labelTemplates = {}
     this._updatedLabels = new Set()
     this._config = makeTaskConfig()
+    this._updatedShapes = new Set()
+    this._temporaryShapeId = -1
   }
 
   /**
@@ -197,6 +203,29 @@ export class Label2DList {
     labelsToDraw.forEach(
       (v) => v.draw(controlContext, ratio, DrawMode.CONTROL)
     )
+  }
+
+  /** Add temporary shape */
+  public makeTemporaryShape (shapeType: string, shapeState: ShapeType) {
+    const shape = makeDrawableShape2D(shapeType)
+    if (!shape) {
+      throw new Error('Invalid shape type')
+    }
+    shape.updateState(shapeState, this._temporaryShapeId)
+    this._temporaryShapeId--
+    this.addUpdatedShape(shape)
+    return shape
+  }
+
+  /** Add updated shape */
+  public addUpdatedShape (shape: Shape2D) {
+    this._updatedShapes.add(shape)
+  }
+
+  /** Clear updated shape set */
+  public clearUpdatedShapes () {
+    this._updatedShapes.clear()
+    this._temporaryShapeId = -1
   }
 
   /**

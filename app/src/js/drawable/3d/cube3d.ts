@@ -292,17 +292,9 @@ export class Cube3D extends Shape3D {
       return
     }
 
-    if (this.selected) {
-      this.label.labelList.control.raycast(raycaster, newIntersects)
-      if (newIntersects.length > 0) {
-        for (const intersect of newIntersects) {
-          intersects.push(intersect)
-        }
-        return
-      }
+    if (!this.selected) {
+      this._box.raycast(raycaster, intersects)
     }
-
-    this._box.raycast(raycaster, intersects)
   }
 
   /**

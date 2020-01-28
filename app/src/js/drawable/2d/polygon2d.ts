@@ -415,7 +415,7 @@ export class Polygon2D extends Label2D {
   /** Get shape objects for committing to state */
   public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
     const points = this.toPolygon()
-    const types = points.map(() => ShapeTypeName.POLYGON_2D)
+    const types = points.map(() => ShapeTypeName.PATH_POINT_2D)
     return [this._labelState.shapes, types, points]
   }
 

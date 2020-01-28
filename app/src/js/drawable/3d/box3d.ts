@@ -93,6 +93,17 @@ export class Box3D extends Label3D {
     return this._parent
   }
 
+  /** select the label */
+  public set selected (s: boolean) {
+    this._selected = s
+    this._shape.selected = s
+  }
+
+  /** return whether label selected */
+  public get selected (): boolean {
+    return this._selected
+  }
+
   /**
    * Return a list of the shape for inspection and testing
    */

@@ -12,7 +12,7 @@ export abstract class Shape2D extends Vector {
   /** shape state */
   protected _shape: ShapeType | null
   /** corresponding label objects */
-  protected _labels: Label2D[]
+  protected _labels: { [id: number]: Label2D }
   /** whether highlighted */
   protected _highlighted: boolean
 
@@ -29,14 +29,14 @@ export abstract class Shape2D extends Vector {
     return this._id
   }
 
-  /** Get associated label */
-  public get labels (): Label2D[] {
-    return this._labels
+  /** clear associated labels */
+  public clearLabels () {
+    this._labels = {}
   }
 
-  /** Set associated labels */
-  public set labels (labels: Label2D[]) {
-    this._labels = labels
+  /** Add associated label */
+  public associateLabel (label: Label2D) {
+    this._labels[label.labelId] = label
   }
 
   /** return shape type */

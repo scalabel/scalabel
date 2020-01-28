@@ -60,7 +60,10 @@ export class PathPoint2D extends Point2D {
   private _type: PointType
 
   constructor (
-    x: number = 0, y: number = 0, type: PointType = PointType.VERTEX) {
+    x: number = 0,
+    y: number = 0,
+    type: PointType = PointType.VERTEX
+  ) {
     super(x, y)
     this._type = type
   }
