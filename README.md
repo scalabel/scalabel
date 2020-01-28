@@ -58,13 +58,13 @@ More installation and usage details can be find in our [documentation](http://ww
 
       ```
       npm install
-      node_modules/.bin/npx webpack --config webpack.config.js --mode=production
+      node_modules/.bin/webpack --config webpack.config.js --mode=production
       ```
 
       **Note** If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
 
       ```
-      node_modules/.bin/npx webpack --watch --config webpack.config.js --mode=development
+      node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
       ```
 
 3. Prepare data directory
