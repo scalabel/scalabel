@@ -183,35 +183,12 @@ function loadImages (): void {
  */
 function loadPointClouds (): void {
   const loader = new PLYLoader()
-  const vertexShader =
-    `
-      varying float zValue;
-      void main() {
-        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-        zValue = position.z;
-        gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `
-  const fragmentShader =
-    `
-      varying float zValue;
-      uniform vec3 low;
-      uniform vec3 high;
-      vec3 getHeatMapColor(float height) {
-        float val = min(1.0, max(0.0, (height + 3.0) / 6.0));
-        return (1.0 - val) * low + val * high;
-      }
-      void main() {
-        gl_FragColor = vec4(getHeatMapColor(zValue), 1.0);
-      }
-    `
 
   const state = Session.getState()
   const items = state.task.items
   Session.pointClouds = []
   for (const item of items) {
-    const pcImageMap: {[id: number]: THREE.Points} = {}
+    const pcImageMap: {[id: number]: THREE.BufferGeometry} = {}
     Session.pointClouds.push(pcImageMap)
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
@@ -221,22 +198,7 @@ function loadPointClouds (): void {
         loader.load(
           url,
           (geometry: THREE.BufferGeometry) => {
-            const material = new THREE.ShaderMaterial({
-              uniforms: {
-                low: {
-                  value: new THREE.Color(0x0000ff)
-                },
-                high: {
-                  value: new THREE.Color(0xffff00)
-                }
-              },
-              vertexShader,
-              fragmentShader,
-              alphaTest: 1.0
-            })
-
-            const particles = new THREE.Points(geometry, material)
-            Session.pointClouds[item.index][sensorId] = particles
+            Session.pointClouds[item.index][sensorId] = geometry
 
             Session.dispatch(loadItem(item.index, sensorId))
           },

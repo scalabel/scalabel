@@ -31,6 +31,56 @@ interface Props {
   camera: THREE.PerspectiveCamera
 }
 
+const vertexShader =
+  `
+    varying vec3 worldPosition;
+    void main() {
+      vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+      gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
+      gl_Position = projectionMatrix * mvPosition;
+      worldPosition = position;
+    }
+  `
+const fragmentShader =
+  `
+    varying vec3 worldPosition;
+
+    uniform vec3 low;
+    uniform vec3 high;
+
+    uniform mat4 toSelectionFrame;
+    uniform vec3 selectionSize;
+
+    vec3 getHeatMapColor(float height) {
+      float val = min(1.0, max(0.0, (height + 3.0) / 6.0));
+      return (1.0 - val) * low + val * high;
+    }
+
+    bool pointInSelection(vec3 point) {
+      vec4 testPoint = abs(toSelectionFrame * vec4(point.xyz, 1.0));
+      vec3 halfSize = selectionSize / 2.;
+      return testPoint.x < halfSize.x &&
+        testPoint.y < halfSize.y &&
+        testPoint.z < halfSize.z;
+    }
+
+    void main() {
+      float alpha = 0.4;
+      vec3 color = getHeatMapColor(worldPosition.z);
+      if (
+        selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
+      ) {
+        if (pointInSelection(worldPosition)) {
+          alpha = 1.0;
+          color *= 1.3;
+        }
+      } else {
+        alpha = 1.0;
+      }
+      gl_FragColor = vec4(color, alpha);
+    }
+  `
+
 /**
  * Canvas Viewer
  */
@@ -48,7 +98,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   /** ThreeJS sphere mesh for indicating camera target location */
   private target: THREE.AxesHelper
   /** Current point cloud for rendering */
-  private pointCloud: THREE.Points | null
+  private pointCloud: THREE.Points
   /** drawable callback */
   private _drawableUpdateCallback: () => void
 
@@ -63,12 +113,32 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     this.target = new THREE.AxesHelper(0.2)
     this.scene.add(this.target)
 
-    this.pointCloud = null
-
     this.canvas = null
     this.display = null
 
     this._drawableUpdateCallback = this.renderThree.bind(this)
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        low: {
+          value: new THREE.Color(0x0000ff)
+        },
+        high: {
+          value: new THREE.Color(0xffff00)
+        },
+        toSelectionFrame: {
+          value: new THREE.Matrix4()
+        },
+        selectionSize: {
+          value: new THREE.Vector3()
+        }
+      },
+      vertexShader,
+      fragmentShader,
+      transparent: true
+    })
+
+    this.pointCloud = new THREE.Points(undefined, material)
   }
 
   /** mount callback */
@@ -123,7 +193,6 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         this.state.user.viewerConfigs[this.props.id].sensor
       if (item < Session.images.length && sensor in Session.pointClouds[item]) {
         this.updateRenderer()
-        this.pointCloud = Session.pointClouds[item][sensor]
         this.renderThree()
       }
     }
@@ -139,6 +208,13 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       this.display = this.props.display
       this.forceUpdate()
     }
+    const select = state.user.select
+    const item = select.item
+    const sensor =
+      this.state.user.viewerConfigs[this.props.id].sensor
+
+    this.pointCloud.geometry = Session.pointClouds[item][sensor]
+
     const config =
       state.user.viewerConfigs[this.props.id] as PointCloudViewerConfigType
     this.target.position.set(config.target.x, config.target.y, config.target.z)
@@ -148,10 +224,26 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Render ThreeJS Scene
    */
   private renderThree () {
-    if (this.renderer && this.pointCloud) {
+    if (this.renderer && this.pointCloud.geometry) {
       this.scene.children = []
       this.scene.add(this.pointCloud)
       this.scene.add(this.target)
+
+      const selectionTransform = new THREE.Matrix4()
+      const selectionSize = new THREE.Vector3()
+      if (Session.label3dList.selectedLabel) {
+        const label = Session.label3dList.selectedLabel
+        const selectionToWorld = new THREE.Matrix4()
+        selectionToWorld.makeRotationFromQuaternion(label.orientation)
+        selectionToWorld.setPosition(label.center)
+        selectionTransform.getInverse(selectionToWorld)
+        selectionSize.copy(label.size)
+      }
+
+      const material = this.pointCloud.material as THREE.ShaderMaterial
+      material.uniforms.toSelectionFrame.value = selectionTransform
+      material.uniforms.selectionSize.value = selectionSize
+
       this.renderer.render(this.scene, this.camera)
     }
   }

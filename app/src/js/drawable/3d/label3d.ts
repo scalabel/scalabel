@@ -187,6 +187,11 @@ export abstract class Label3D {
     return new THREE.Quaternion()
   }
 
+  /** Size of label */
+  public get size (): THREE.Vector3 {
+    return new THREE.Vector3()
+  }
+
   /**
    * Initialize label
    * @param {State} state

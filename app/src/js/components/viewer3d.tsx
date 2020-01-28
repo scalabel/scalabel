@@ -54,6 +54,8 @@ class Viewer3D extends DrawableViewer<Props> {
   private _raycaster: THREE.Raycaster
   /** Target position */
   private _target: THREE.Vector3
+  /** Current point cloud */
+  private _pointCloud: THREE.Points | null
 
   /**
    * Constructor
@@ -64,6 +66,7 @@ class Viewer3D extends DrawableViewer<Props> {
     this._camera = new THREE.PerspectiveCamera(45, 1, 1, 1000)
     this._raycaster = new THREE.Raycaster()
     this._target = new THREE.Vector3()
+    this._pointCloud = null
   }
 
   /** Called when component updates */
@@ -82,6 +85,11 @@ class Viewer3D extends DrawableViewer<Props> {
       //     )
       //   )
       // )
+      const item = this.state.user.select.item
+      const sensor =
+        this.state.user.viewerConfigs[this.props.id].sensor
+      this._pointCloud =
+        new THREE.Points(Session.pointClouds[item][sensor])
     }
   }
 
@@ -310,28 +318,28 @@ class Viewer3D extends DrawableViewer<Props> {
     this._raycaster.setFromCamera(
       new THREE.Vector2(NDC[0], NDC[1]), this._camera
     )
-    const pointCloud =
-      Session.pointClouds[this._item][this._viewerConfig.sensor]
 
-    const intersects = this._raycaster.intersectObject(pointCloud)
+    if (this._pointCloud) {
+      const intersects = this._raycaster.intersectObject(this._pointCloud)
 
-    if (intersects.length > 0) {
-      const newTarget = intersects[0].point
-      const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
-      Session.dispatch(moveCameraAndTarget(
-        new Vector3D(
-          viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
-          viewerConfig.position.y - viewerConfig.target.y + newTarget.y,
-          viewerConfig.position.z - viewerConfig.target.z + newTarget.z
-        ),
-        new Vector3D(
-          newTarget.x,
-          newTarget.y,
-          newTarget.z
-        ),
-        this._viewerId,
-        viewerConfig
-      ))
+      if (intersects.length > 0) {
+        const newTarget = intersects[0].point
+        const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
+        Session.dispatch(moveCameraAndTarget(
+          new Vector3D(
+            viewerConfig.position.x - viewerConfig.target.x + newTarget.x,
+            viewerConfig.position.y - viewerConfig.target.y + newTarget.y,
+            viewerConfig.position.z - viewerConfig.target.z + newTarget.z
+          ),
+          new Vector3D(
+            newTarget.x,
+            newTarget.y,
+            newTarget.z
+          ),
+          this._viewerId,
+          viewerConfig
+        ))
+      }
     }
   }
 

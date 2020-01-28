@@ -23,7 +23,7 @@ class Session {
   /** Images of the session */
   public images: Array<{[id: number]: HTMLImageElement}>
   /** Point cloud */
-  public pointClouds: Array<{[id: number]: THREE.Points}>
+  public pointClouds: Array<{[id: number]: THREE.BufferGeometry}>
   /** 2d label list */
   public label2dList: Label2DList
   /** 3d label list */
