@@ -9,7 +9,7 @@ import Logger from './logger'
 import * as path from './path'
 import { RedisCache } from './redis_cache'
 import Session from './server_session'
-import { ActionQueueType, EventName, 
+import { ActionQueueType, EventName,
   RegisterMessageType, SyncActionMessageType } from './types'
 import { getSavedKey, getTaskKey,
   index2str, loadSavedState} from './util'
@@ -20,7 +20,7 @@ import { getSavedKey, getTaskKey,
 export function startSocketServer (io: socketio.Server) {
   // TODO: move this to redis
   // Set of ids for action queue which have been saved
-  const actionIdsSaved = new Set()
+  const actionIdsSaved = new Set<string>()
   const cache = new RedisCache()
 
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
@@ -121,7 +121,7 @@ async function actionUpdate (
   // broadcast task actions to all other sessions in room
   socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
   // echo everything to original session
-  socket.emit(EventName.ACTION_BROADCAST, data.actions)  
+  socket.emit(EventName.ACTION_BROADCAST, data.actions)
 }
 
 /**
