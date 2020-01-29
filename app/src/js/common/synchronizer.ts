@@ -5,7 +5,7 @@ import uuid4 from 'uuid/v4'
 import { updateTask } from '../action/common'
 import * as types from '../action/types'
 import { State } from '../functional/types'
-import { ActionQueueType, EventName, RegisterMessageType,
+import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
 import Session, { ConnectionStatus } from './session'
 
@@ -18,11 +18,11 @@ const CONFIRMATION_MESSAGE =
 export class Synchronizer {
   /** Socket connection */
   public socket: SocketIOClient.Socket
-  /** Actions queued to send */
+  /** Actions queued to be sent to the backend */
   public actionQueue: types.BaseAction[]
-  /** Actions in process of being saved */
-  public saveActions: { [id: string]: ActionQueueType }
-  /** Timestamped action log */
+  /** Actions in the process of being saved, mapped by packet id */
+  public actionsToSave: { [id: string]: ActionPacketType }
+  /** Timestamped log for completed actions */
   public actionLog: types.BaseAction[]
   /** Middleware to use */
   public middleware: Middleware
@@ -36,7 +36,7 @@ export class Synchronizer {
     this.initStateCallback = initStateCallback
 
     this.actionQueue = []
-    this.saveActions = {}
+    this.actionsToSave = {}
     this.actionLog = []
 
     const self = this
@@ -82,10 +82,10 @@ export class Synchronizer {
        init synced state then send any queued actions */
     this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
       self.initStateCallback(syncState)
-      const actionQueues = Object.keys(this.saveActions).map(
-        (key) => this.saveActions[key])
-      for (const saveActionQueue of actionQueues) {
-        self.sendActions(saveActionQueue)
+      const actionPackets = Object.keys(this.actionsToSave).map(
+        (key) => this.actionsToSave[key])
+      for (const actionPacket of actionPackets) {
+        self.sendActions(actionPacket)
       }
       if (Session.autosave) {
         self.sendQueuedActions()
@@ -93,15 +93,13 @@ export class Synchronizer {
     })
 
     this.socket.on(
-      EventName.ACTION_BROADCAST, (actionQueue: ActionQueueType) => {
-        // TOOD: better naming for actionQueue vs actionList
+      EventName.ACTION_BROADCAST, (actionPacket: ActionPacketType) => {
         // can remove stored actions when they are acked
-        if (actionQueue.id in this.saveActions) {
-          delete this.saveActions[actionQueue.id]
+        if (actionPacket.id in this.actionsToSave) {
+          delete this.actionsToSave[actionPacket.id]
         }
 
-        const actionList = actionQueue.actions
-        for (const action of actionList) {
+        for (const action of actionPacket.actions) {
           // actionLog matches backend action ordering
           self.actionLog.push(action)
           if (types.TASK_ACTION_TYPES.includes(action.type)) {
@@ -125,15 +123,15 @@ export class Synchronizer {
         self.initStateCallback = (state: State) => {
           // updateTask is not a task action, so will not sync again
           Session.dispatch(updateTask(state.task))
-          const actionQueues = Object.keys(this.saveActions).map(
-            (key) => this.saveActions[key])
+          const actionPackets = Object.keys(this.actionsToSave).map(
+            (key) => this.actionsToSave[key])
 
           // re-apply frontend task actions after updating task from backend
-          for (const saveActionQueue of actionQueues) {
-            for (const saveAction of saveActionQueue.actions) {
-              if (types.TASK_ACTION_TYPES.includes(saveAction.type)) {
-                saveAction.frontendOnly = true
-                Session.dispatch(saveAction)
+          for (const actionPacket of actionPackets) {
+            for (const action of actionPacket.actions) {
+              if (types.TASK_ACTION_TYPES.includes(action.type)) {
+                action.frontendOnly = true
+                Session.dispatch(action)
               }
             }
           }
@@ -164,13 +162,13 @@ export class Synchronizer {
   public sendQueuedActions () {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
-        const queueId = uuid4()
-        const actionQueue: ActionQueueType = {
+        const packetId = uuid4()
+        const actionPacket: ActionPacketType = {
           actions: this.actionQueue,
-          id: queueId
+          id: packetId
         }
-        this.saveActions[queueId] = actionQueue
-        this.sendActions(actionQueue)
+        this.actionsToSave[packetId] = actionPacket
+        this.sendActions(actionPacket)
         this.actionQueue = []
       }
     }
@@ -179,13 +177,13 @@ export class Synchronizer {
   /**
    * Send given actions to the backend
    */
-  public sendActions (actionList: ActionQueueType) {
+  public sendActions (actionPacket: ActionPacketType) {
     const sessionState = Session.getState()
     const message: SyncActionMessageType = {
       taskId: sessionState.task.config.taskId,
       projectName: sessionState.task.config.projectName,
       sessionId: sessionState.session.id,
-      actions: actionList
+      actions: actionPacket
     }
     this.socket.emit(EventName.ACTION_SEND, JSON.stringify(message))
     Session.updateStatus(ConnectionStatus.SAVING)

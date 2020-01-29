@@ -98,14 +98,14 @@ export interface SyncActionMessageType {
   /** Session Id */
   sessionId: string
   /** List of actions for synchronization */
-  actions: ActionQueueType
+  actions: ActionPacketType
 }
 
-/** type for transmitted set of actions */
-export interface ActionQueueType {
-  /** actions */
+/** type for transmitted packet of actions */
+export interface ActionPacketType {
+  /** list of actions in the pakcket */
   actions: BaseAction[]
-  /** id of queue */
+  /** id of the packet */
   id: string
 }
 

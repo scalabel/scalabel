@@ -9,7 +9,7 @@ import Logger from './logger'
 import * as path from './path'
 import { RedisCache } from './redis_cache'
 import Session from './server_session'
-import { ActionQueueType, EventName,
+import { ActionPacketType, EventName,
   RegisterMessageType, SyncActionMessageType } from './types'
 import { getSavedKey, getTaskKey,
   index2str, loadSavedState} from './util'
@@ -76,14 +76,14 @@ async function actionUpdate (
   const projectName = data.projectName
   const taskId = data.taskId
   const sessionId = data.sessionId
-  const actionList = data.actions.actions
-  const actionListId = data.actions.id
+  const actions = data.actions.actions
+  const actionsId = data.actions.id
 
   const env = Session.getEnv()
 
   const room = path.roomName(projectName, taskId, env.sync, sessionId)
 
-  const taskActions = actionList.filter((action) => {
+  const taskActions = actions.filter((action) => {
     return types.TASK_ACTION_TYPES.includes(action.type)
   })
 
@@ -96,7 +96,7 @@ async function actionUpdate (
     actionIdsSaved = new Set(JSON.parse(idData))
   }
 
-  if (!actionIdsSaved.has(actionListId) && taskActions.length > 0) {
+  if (!actionIdsSaved.has(actionsId) && taskActions.length > 0) {
     const state = await loadState(projectName, taskId, cache)
     const store = configureStore(state)
 
@@ -110,16 +110,16 @@ async function actionUpdate (
     const newState = store.getState().present
     const stringState = JSON.stringify(newState)
 
-    actionIdsSaved.add(actionListId)
+    actionIdsSaved.add(actionsId)
     // convert set to a list in JSON
     const actionIdMetadata = JSON.stringify([...actionIdsSaved])
     await cache.setExWithReminder(saveKey, stringState, actionIdMetadata)
   }
 
   // broadcast task actions to all other sessions in room
-  const taskActionMsg: ActionQueueType = {
+  const taskActionMsg: ActionPacketType = {
     actions: taskActions,
-    id: actionListId
+    id: actionsId
   }
 
   // broadcast task actions to all other sessions in room
