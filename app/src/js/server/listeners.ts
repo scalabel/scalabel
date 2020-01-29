@@ -154,7 +154,7 @@ export async function DashboardHandler (req: Request, res: Response) {
       const projectName = body.name
       const project = await loadProject(projectName)
       // grab the latest submissions from all tasks
-      const tasks = await getTasksInProject(name)
+      const tasks = await getTasksInProject(projectName)
       const projectOptions: ProjectOptions = {
         name: project.config.projectName,
         itemType: project.config.itemType,

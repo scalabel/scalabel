@@ -92,7 +92,7 @@ async function actionUpdate (
   const redisMetadata = await cache.get(path.redisMetaKey(saveKey))
   let actionIdsSaved = new Set<string>()
   if (redisMetadata) {
-    actionIdsSaved = JSON.parse(redisMetadata)[1]
+    actionIdsSaved = new Set(JSON.parse(redisMetadata)[1])
   }
 
   if (!(actionListId in actionIdsSaved) && taskActions.length > 0) {
@@ -110,7 +110,8 @@ async function actionUpdate (
     const stringState = JSON.stringify(newState)
 
     actionIdsSaved.add(actionListId)
-    const actionIdMetadata = JSON.stringify(actionIdsSaved)
+    // convert set to a list in JSON
+    const actionIdMetadata = JSON.stringify([...actionIdsSaved])
     await cache.setExWithReminder(saveKey, stringState, actionIdMetadata)
   }
 
