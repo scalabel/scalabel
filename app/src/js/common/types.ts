@@ -51,6 +51,7 @@ export enum ViewerConfigTypeName {
   IMAGE = 'image',
   POINT_CLOUD = 'pointcloud',
   IMAGE_3D = 'image_3d',
+  HOMOGRAPHY = 'homography',
   UNKNOWN = 'unknown'
 }
 
@@ -143,11 +144,8 @@ export enum Key {
 }
 
 export enum TrackPolicyType {
-  LINEAR_INTERPOLATION_PLANE_3D = 'linear_interpolation_plane_3d',
-  LINEAR_INTERPOLATION_BOX_2D = 'linear_interpolation_box_2d',
-  LINEAR_INTERPOLATION_BOX_3D = 'linear_interpolation_box_3d',
-  LINEAR_INTERPOLATION_POLYGON = 'linear_interpolation_polygon',
-  LINEAR_INTERPOLATION_CUSTOM_2D = 'linear_interpolation_custom_2d'
+  NONE = 'none',
+  LINEAR_INTERPOLATION = 'linear_interpolation'
 }
 
 export enum AttributeToolType {

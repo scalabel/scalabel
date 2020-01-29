@@ -52,19 +52,19 @@ More installation and usage details can be find in our [documentation](http://ww
 
    2. Compile the code yourself (recommended if you want to customize the source code)
 
-      Install [nodejs and npm](https://nodejs.org/en/download/).
+      Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
 
       Transpile or build Javascript code
 
       ```
       npm install
-      node_modules/.bin/npx webpack --config webpack.config.js --mode=production
+      node_modules/.bin/webpack --config webpack.config.js --mode=production
       ```
 
       **Note** If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
 
       ```
-      node_modules/.bin/npx webpack --watch --config webpack.config.js --mode=development
+      node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
       ```
 
 3. Prepare data directory
@@ -86,7 +86,7 @@ More installation and usage details can be find in our [documentation](http://ww
    Otherwise
 
    ```
-   node app/dist/js/main.js --config ./data/config.yml
+   ./server.sh
    ```
 
    Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project.

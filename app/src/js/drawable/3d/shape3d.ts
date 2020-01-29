@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { ShapeType } from '../../functional/types'
-import { TransformationControl } from './control/transformation_control'
 import Label3D from './label3d'
 
 /**
@@ -15,8 +14,6 @@ export abstract class Shape3D extends THREE.Object3D {
   protected _label: Label3D
   /** whether highlighted */
   protected _highlighted: boolean
-  /** controls */
-  protected _control: TransformationControl | null
 
   constructor (label: Label3D) {
     super()
@@ -24,7 +21,6 @@ export abstract class Shape3D extends THREE.Object3D {
     this._label = label
     this._shape = null
     this._highlighted = false
-    this._control = null
   }
 
   /** Get shape id */
@@ -49,25 +45,8 @@ export abstract class Shape3D extends THREE.Object3D {
   }
 
   /** Convert shape to state representation */
-  public abstract toObject (): ShapeType
+  public abstract toState (): ShapeType
 
   /** function for setting highlight status */
   public abstract setHighlighted (intersection?: THREE.Intersection): void
-
-  /** attach control */
-  public attachControl (control: TransformationControl) {
-    this.detachControl()
-    this.add(control)
-    this._control = control
-    this._control.attachShape(this)
-  }
-
-  /** detach control */
-  public detachControl () {
-    if (this._control) {
-      this._control.detachShape()
-      this.remove(this._control)
-      this._control = null
-    }
-  }
 }

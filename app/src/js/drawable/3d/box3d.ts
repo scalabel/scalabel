@@ -7,7 +7,7 @@ import { ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 
 import { LabelTypeName, ShapeTypeName } from '../../common/types'
-import { TransformationControl } from './control/transformation_control'
+import { rotateScale } from '../../math/3d'
 import { Cube3D } from './cube3d'
 import { Label3D } from './label3d'
 import { Label3DList } from './label3d_list'
@@ -20,13 +20,10 @@ import { Shape3D } from './shape3d'
 export class Box3D extends Label3D {
   /** ThreeJS object for rendering shape */
   private _shape: Cube3D
-  /** Whether this is temporary */
-  private _temporary: boolean
 
   constructor (labelList: Label3DList) {
     super(labelList)
     this._shape = new Cube3D(this)
-    this._temporary = false
   }
 
   /**
@@ -37,16 +34,24 @@ export class Box3D extends Label3D {
     itemIndex: number,
     category: number,
     center?: Vector3D,
-    sensors?: number[]
+    sensors?: number[],
+    temporary?: boolean
   ): void {
+    if (!sensors || sensors.length === 0) {
+      sensors = [-1]
+    }
+
     this._label = makeLabel({
       type: LabelTypeName.BOX_3D, id: -1, item: itemIndex,
       category: [category], sensors
     })
-    this._labelId = -1
 
     if (center) {
-      this._shape.center = center
+      this._shape.position.copy(center.toThree())
+    }
+
+    if (temporary) {
+      this._temporary = true
     }
   }
 
@@ -63,34 +68,28 @@ export class Box3D extends Label3D {
     return [
       [this._label.shapes[0]],
       [ShapeTypeName.CUBE],
-      [this._shape.toObject()]
+      [this._shape.toState()]
     ]
   }
 
-  /** Attach label to plane */
-  public attachToPlane (plane: Plane3D) {
-    super.attachToPlane(plane)
-    this._shape.attachToPlane(plane)
+  /** Override set parent */
+  public set parent (parent: Label3D | null) {
+    this._parent = parent
+    if (parent && this._label) {
+      this._label.parent = parent.labelId
+    } else if (this._label) {
+      this._label.parent = -1
+    }
+    if (parent && parent.label.type === LabelTypeName.PLANE_3D) {
+      this._shape.attachToPlane(parent as Plane3D)
+    } else {
+      this._shape.detachFromPlane()
+    }
   }
 
-  /** Attach label to plane */
-  public detachFromPlane () {
-    this._shape.detachFromPlane()
-    super.detachFromPlane()
-  }
-
-  /**
-   * Attach control
-   */
-  public attachControl (control: TransformationControl) {
-    this._shape.attachControl(control)
-  }
-
-  /**
-   * Attach control
-   */
-  public detachControl () {
-    this._shape.detachControl()
+  /** Get parent label */
+  public get parent (): Label3D | null {
+    return this._parent
   }
 
   /**
@@ -134,13 +133,10 @@ export class Box3D extends Label3D {
     return
   }
 
-  /**
-   * Handle mouse move
-   * @param projection
-   */
+  /** Handle mouse move */
   public onMouseMove (x: number, y: number, camera: THREE.Camera) {
     const success = this._shape.drag(x, y, camera)
-    if (this._temporary && success) {
+    if (success) {
       this._temporary = false
     }
     this._labelList.addUpdatedLabel(this)
@@ -148,40 +144,87 @@ export class Box3D extends Label3D {
   }
 
   /** Rotate */
-  public rotate (quaternion: THREE.Quaternion) {
+  public rotate (quaternion: THREE.Quaternion, anchor?: THREE.Vector3) {
+    this._labelList.addUpdatedLabel(this)
     this._shape.applyQuaternion(quaternion)
+    if (anchor) {
+      const newPosition = new THREE.Vector3()
+      newPosition.copy(this._shape.position)
+      newPosition.sub(anchor)
+      newPosition.applyQuaternion(quaternion)
+      newPosition.add(anchor)
+      this._shape.position.copy(newPosition)
+    }
+  }
+
+  /** Move */
+  public move (position: THREE.Vector3): void {
+    this._shape.position.copy(position)
     this._labelList.addUpdatedLabel(this)
   }
 
   /** Translate */
   public translate (delta: THREE.Vector3) {
-    this._shape.position.add(delta)
     this._labelList.addUpdatedLabel(this)
+    this._shape.position.add(delta)
   }
 
   /** Scale */
-  public scale (scale: THREE.Vector3, anchor: THREE.Vector3) {
-    this._shape.scale.multiply(scale)
-    this._shape.position.sub(anchor)
-    this._shape.position.multiply(scale)
-    this._shape.position.add(anchor)
+  public scale (scale: THREE.Vector3, anchor: THREE.Vector3, local: boolean) {
     this._labelList.addUpdatedLabel(this)
+    const inverseRotation = new THREE.Quaternion()
+    inverseRotation.copy(this.orientation)
+    inverseRotation.inverse()
+
+    if (!local) {
+      scale = rotateScale(scale, this.orientation)
+    }
+    this._shape.scale.multiply(scale)
+
+    this._shape.position.sub(anchor)
+    this._shape.position.applyQuaternion(inverseRotation)
+    this._shape.position.multiply(scale)
+    this._shape.position.applyQuaternion(this.orientation)
+    this._shape.position.add(anchor)
   }
 
   /** center of box */
   public get center (): THREE.Vector3 {
-    return this._shape.position
+    const position = new THREE.Vector3()
+    this._shape.getWorldPosition(position)
+    return position
   }
 
   /** orientation of box */
   public get orientation (): THREE.Quaternion {
-    return this._shape.quaternion
+    const quaternion = new THREE.Quaternion()
+    this._shape.getWorldQuaternion(quaternion)
+    return quaternion
+  }
+
+  /** scale of box */
+  public get size (): THREE.Vector3 {
+    const scale = new THREE.Vector3()
+    this._shape.getWorldScale(scale)
+    return scale
+  }
+
+  /** bounds of box */
+  public bounds (local?: boolean): THREE.Box3 {
+    const box = new THREE.Box3()
+    if (!local) {
+      box.copy(this._shape.box.geometry.boundingBox)
+      this._shape.updateMatrixWorld(true)
+      box.applyMatrix4(this._shape.matrixWorld)
+    } else {
+      box.setFromCenterAndSize(this.center, this.size)
+    }
+    return box
   }
 
   /**
    * Highlight box
-   * @param h
-   * @param raycaster
+   * @param intersection
    */
   public setHighlighted (intersection?: THREE.Intersection) {
     super.setHighlighted(intersection)
@@ -207,27 +250,4 @@ export class Box3D extends Label3D {
       label.shapes[0]
     )
   }
-
-  // /**
-  //  * Add this label to state when newly created
-  //  */
-  // private addToState () {
-  //   if (this._label) {
-  //     const cube = this._shape.toCube()
-  //     if (Session.tracking && this._trackId in Session.tracks) {
-  //       Session.tracks[this._trackId].onLabelCreated(
-  //         this._label.item, this
-  //       )
-  //     } else {
-  //       Session.dispatch(addBox3dLabel(
-  //         this._label.item,
-  //         this._label.category,
-  //         cube.center,
-  //         cube.size,
-  //         cube.orientation,
-  //         cube.surfaceId
-  //       ))
-  //     }
-  //   }
-  // }
 }

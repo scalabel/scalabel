@@ -7,26 +7,50 @@ export class IntrinsicCamera extends THREE.Camera {
   public projectionMatrixInverse: THREE.Matrix4
   /** Set to true for raycaster to treat as perspective camera for projecting */
   public isPerspectiveCamera: boolean
+  /** width of the image */
+  public width: number
+  /** height of the image */
+  public height: number
+  /** Minimum distance */
+  public near: number
+  /** Maximum distance */
+  public far: number
+  /** intrinsics */
+  public intrinsics?: CameraIntrinsicsType
 
   constructor (
-    intrinsics: CameraIntrinsicsType,
-    width: number,
-    height: number,
+    width: number = 0,
+    height: number = 0,
     near: number = 0.1,
-    far: number = 1000
+    far: number = 1000,
+    intrinsics?: CameraIntrinsicsType
   ) {
     super()
-    this.projectionMatrix = new THREE.Matrix4()
-    this.projectionMatrix.set(
-      2 * intrinsics.focalLength.x / width, 0,
-        -(2 * intrinsics.focalCenter.x / width) + 1, 0,
-      0, 2 * intrinsics.focalLength.y / height,
-        (2 * intrinsics.focalCenter.y / height) - 1, 0,
-      0, 0, (near + far) / (near - far), 2 * far * near / (near - far),
-      0, 0, -1, 0
-    )
-    this.projectionMatrixInverse = new THREE.Matrix4()
-    this.projectionMatrixInverse.getInverse(this.projectionMatrix)
+    this.width = width
+    this.height = height
+    this.near = near
+    this.far = far
+    this.intrinsics = intrinsics
     this.isPerspectiveCamera = true
+    this.projectionMatrix = new THREE.Matrix4()
+    this.projectionMatrixInverse = new THREE.Matrix4()
+    this.calculateProjectionMatrix()
+  }
+
+  /** Use parameters to calculate internal projection matrix */
+  public calculateProjectionMatrix () {
+    if (this.intrinsics) {
+      this.projectionMatrix.set(
+        2 * this.intrinsics.focalLength.x / this.width, 0,
+          -(2 * this.intrinsics.focalCenter.x / this.width) + 1, 0,
+        0, 2 * this.intrinsics.focalLength.y / this.height,
+          (2 * this.intrinsics.focalCenter.y / this.height) - 1, 0,
+        0, 0,
+          (this.near + this.far) / (this.near - this.far),
+          2 * this.far * this.near / (this.near - this.far),
+        0, 0, -1, 0
+      )
+      this.projectionMatrixInverse.getInverse(this.projectionMatrix)
+    }
   }
 }

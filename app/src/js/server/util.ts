@@ -12,7 +12,7 @@ import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import Session from './server_session'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType, Env } from './types'
+import { CreationForm, DatabaseType, Env, Project } from './types'
 
 /**
  * Initializes global env
@@ -257,4 +257,14 @@ export async function loadSavedState (projectName: string, taskId: string):
   Logger.info(sprintf('Reading %s\n', keys[keys.length - 1]))
   const fields = await storage.load(keys[keys.length - 1])
   return JSON.parse(fields) as State
+}
+
+/**
+ * Loads the project
+ */
+export async function loadProject (projectName: string) {
+  const key = getProjectKey(projectName)
+  const fields = await Session.getStorage().load(key)
+  const loadedProject = JSON.parse(fields) as Project
+  return loadedProject
 }

@@ -52,7 +52,7 @@ export const formStyle = (theme: Theme) => createStyles({
 // Styles for the upload buttons
 export const uploadStyle = createStyles({
   root: {
-    width: fullWidth / 4
+    width: fullWidth / 5
   },
 
   button: {
@@ -80,7 +80,7 @@ export const uploadStyle = createStyles({
 export const attributeStyle = createStyles({
   root: {
     position: 'absolute',
-    marginLeft: fullWidth * 3 / 4
+    marginLeft: fullWidth * 4 / 5
   }
 })
 

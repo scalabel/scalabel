@@ -30,7 +30,7 @@ export function updateThreeCameraAndRenderer (
   camera.position.x = config.position.x
   camera.position.y = config.position.y
   camera.position.z = config.position.z
-  camera.lookAt((new Vector3D()).fromObject(config.target).toThree())
+  camera.lookAt((new Vector3D()).fromState(config.target).toThree())
 
   if (renderer && canvas) {
     renderer.setSize(canvas.width,

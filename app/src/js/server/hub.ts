@@ -1,4 +1,3 @@
-import { Store } from 'redux'
 import * as socketio from 'socket.io'
 import * as uuid4 from 'uuid/v4'
 import * as types from '../action/types'
@@ -6,7 +5,9 @@ import { configureStore } from '../common/configure_store'
 import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
 import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
+import Logger from './logger'
 import * as path from './path'
+import { RedisCache } from './redis_cache'
 import Session from './server_session'
 import { ActionQueueType, EventName, 
   RegisterMessageType, SyncActionMessageType } from './types'
@@ -17,103 +18,135 @@ import { getSavedKey, getTaskKey,
  * Starts socket.io handlers for saving, loading, and synchronization
  */
 export function startSocketServer (io: socketio.Server) {
-  const env = Session.getEnv()
-  // maintain a store for each task
-  const stores: { [key: string]: Store } = {}
   // TODO: move this to redis
   // Set of ids for action queue which have been saved
   const actionIdsSaved = new Set()
+  const cache = new RedisCache()
 
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
     socket.on(EventName.REGISTER, async (rawData: string) => {
-      const data: RegisterMessageType = JSON.parse(rawData)
-      const projectName = data.projectName
-
-      const taskIndex = data.taskIndex
-      const taskId = index2str(taskIndex)
-
-      let sessionId = data.sessionId
-      // keep session id if it exists, i.e. if it is a reconnection
-      if (!sessionId) {
-        // new session on new load
-        sessionId = uuid4()
+      try {
+        await register(rawData, socket, cache)
+      } catch (error) {
+        Logger.error(error)
       }
-
-      let room = path.roomName(projectName, taskId, env.sync)
-
-      let state: State
-
-      // if sync is on, try to load from memory
-      if (env.sync && room in stores) {
-        // try load from memory
-        state = stores[room].getState().present
-      } else {
-        // load from storage
-        try {
-          // first, attempt loading previous submission
-          state = await loadSavedState(projectName, taskId)
-        } catch {
-          // if no submissions exist, load from task
-          state = await loadStateFromTask(projectName, taskIndex)
-        }
-
-        // update room with loaded session Id
-        room = path.roomName(projectName, taskId,
-          env.sync, sessionId)
-
-        // update memory with new state
-        stores[room] = configureStore(state)
-      }
-      state.session.id = sessionId
-      state.task.config.autosave = env.autosave
-
-      // Connect socket to others in the same room
-      socket.join(room)
-      // Send backend state to newly registered socket
-      socket.emit(EventName.REGISTER_ACK, state)
     })
 
     socket.on(EventName.ACTION_SEND, async (rawData: string) => {
-      const data: SyncActionMessageType = JSON.parse(rawData)
-      const projectName = data.projectName
-      const taskId = data.taskId
-      const sessionId = data.sessionId
-      const actionList = data.actions.actions
-      const actionListId = data.actions.id
-
-      const room = path.roomName(projectName, taskId, env.sync, sessionId)
-
-      const taskActions = actionList.filter((action) => {
-        return types.TASK_ACTION_TYPES.includes(action.type)
-      })
-
-      // For each task action, update the backend store
-      for (const action of taskActions) {
-        action.timestamp = Date.now()
-        stores[room].dispatch(action)
+      try {
+        await actionUpdate(rawData, socket, cache, actionIdsSaved)
+      } catch (error) {
+        Logger.error(error)
       }
-
-      // TODO: this should surround redis interface, and be atomic transaction
-      if (!(actionListId in actionIdsSaved)) {
-        // save task data with all updates
-        if (taskActions.length > 0) {
-          const content = JSON.stringify(stores[room].getState().present)
-          const filePath = path.getFileKey(getSavedKey(projectName, taskId))
-          await Session.getStorage().save(filePath, content)
-        }
-        actionIdsSaved.add(actionListId)
-      }
-
-      // broadcast task actions to all other sessions in room
-      const taskActionMsg: ActionQueueType = {
-        actions: taskActions,
-        id: actionListId
-      }
-      socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
-      // echo everything to original session
-      socket.emit(EventName.ACTION_BROADCAST, data.actions)
     })
   })
+}
+
+/**
+ * Load the correct state and subscribe to redis
+ */
+async function register (
+  rawData: string, socket: socketio.Socket, cache: RedisCache) {
+  const data: RegisterMessageType = JSON.parse(rawData)
+  const projectName = data.projectName
+  const taskIndex = data.taskIndex
+  let sessionId = data.sessionId
+
+  const env = Session.getEnv()
+  const taskId = index2str(taskIndex)
+  // keep session id if it exists, i.e. if it is a reconnection
+  if (!sessionId) {
+    // new session on new load
+    sessionId = uuid4()
+  }
+  const state = await loadState(projectName, taskId, cache)
+  state.session.id = sessionId
+  state.task.config.autosave = env.autosave
+
+  // Connect socket to others in the same room
+  const room = path.roomName(projectName, taskId, env.sync, sessionId)
+  socket.join(room)
+  // Send backend state to newly registered socket
+  socket.emit(EventName.REGISTER_ACK, state)
+}
+
+/**
+ * Updates the state with the action, and broadcasts action
+ */
+async function actionUpdate (
+  rawData: string, socket: socketio.Socket,
+  cache: RedisCache, actionIdsSaved: Set<string>) {
+  const data: SyncActionMessageType = JSON.parse(rawData)
+  const projectName = data.projectName
+  const taskId = data.taskId
+  const sessionId = data.sessionId
+  const actionList = data.actions.actions
+  const actionListId = data.actions.id
+
+  const env = Session.getEnv()
+
+  const room = path.roomName(projectName, taskId, env.sync, sessionId)
+
+  const taskActions = actionList.filter((action) => {
+    return types.TASK_ACTION_TYPES.includes(action.type)
+  })
+
+  const state = await loadState(projectName, taskId, cache)
+  const store = configureStore(state)
+
+  // For each task action, update the backend store
+  // TODO: this should surround redis interface, and be atomic transaction
+  if (!(actionListId in actionIdsSaved)) {
+    // save task data with all updates
+    if (taskActions.length > 0) {
+      for (const action of taskActions) {
+        action.timestamp = Date.now()
+        store.dispatch(action)
+      }
+      const newState = store.getState().present
+      const stringState = JSON.stringify(newState)
+      const saveKey = getSavedKey(projectName, taskId)
+
+      await cache.setExWithReminder(saveKey, stringState)
+    }
+    actionIdsSaved.add(actionListId)
+  }
+
+  // broadcast task actions to all other sessions in room
+  const taskActionMsg: ActionQueueType = {
+    actions: taskActions,
+    id: actionListId
+  }
+
+  // broadcast task actions to all other sessions in room
+  socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
+  // echo everything to original session
+  socket.emit(EventName.ACTION_BROADCAST, data.actions)  
+}
+
+/**
+ * Loads state from cache if available, else memory
+ */
+export async function loadState (
+  projectName: string, taskId: string, cache: RedisCache): Promise<State> {
+  let state: State
+
+  // first try to load from redis cache
+  const saveKey = getSavedKey(projectName, taskId)
+  const redisValue = await cache.get(saveKey)
+  if (redisValue) {
+    state = JSON.parse(redisValue)
+  } else {
+    // otherwise load from storage
+    try {
+      // first, attempt loading previous submission
+      state = await loadSavedState(projectName, taskId)
+    } catch {
+      // if no submissions exist, load from task
+      state = await loadStateFromTask(projectName, taskId)
+    }
+  }
+  return state
 }
 
 /**
@@ -121,9 +154,8 @@ export function startSocketServer (io: socketio.Server) {
  * Used for first load
  */
 async function loadStateFromTask (
-  projectName: string,
-  taskIndex: number): Promise<State> {
-  const key = getTaskKey(projectName, index2str(taskIndex))
+  projectName: string, taskId: string): Promise<State> {
+  const key = getTaskKey(projectName, taskId)
   const fields = await Session.getStorage().load(key)
   const task = JSON.parse(fields) as TaskType
   const state = makeState({ task })
@@ -145,17 +177,17 @@ async function loadStateFromTask (
         switch (state.task.config.labelTypes[0]) {
           case LabelTypeName.BOX_2D:
             state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_BOX_2D]
+              [TrackPolicyType.LINEAR_INTERPOLATION]
             break
           case LabelTypeName.POLYGON_2D:
             state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_POLYGON]
+              [TrackPolicyType.LINEAR_INTERPOLATION]
             break
           case LabelTypeName.CUSTOM_2D:
             state.task.config.labelTypes[0] =
               Object.keys(state.task.config.label2DTemplates)[0]
             state.task.config.policyTypes =
-              [TrackPolicyType.LINEAR_INTERPOLATION_CUSTOM_2D]
+              [TrackPolicyType.LINEAR_INTERPOLATION]
         }
       }
       break
@@ -164,16 +196,13 @@ async function loadStateFromTask (
       if (state.task.config.labelTypes.length === 1 &&
           state.task.config.labelTypes[0] === LabelTypeName.BOX_3D) {
         state.task.config.policyTypes =
-          [TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D]
+          [TrackPolicyType.LINEAR_INTERPOLATION]
       }
       break
     case ItemTypeName.FUSION:
       state.task.config.labelTypes =
         [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]
-      state.task.config.policyTypes = [
-        TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D,
-        TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D
-      ]
+      state.task.config.policyTypes = [TrackPolicyType.LINEAR_INTERPOLATION]
       break
   }
   return state

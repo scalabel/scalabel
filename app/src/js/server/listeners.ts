@@ -6,18 +6,18 @@ import {
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { ItemExport } from '../functional/bdd_types'
-import { State, TaskType } from '../functional/types'
+import { TaskType } from '../functional/types'
 import {
   createProject, createTasks, parseFiles,
   parseForm, saveProject, saveTasks
 } from './create_project'
 import { convertStateToExport } from './export'
+import { loadState } from './hub'
 import Logger from './logger'
 import { getExportName } from './path'
-import Session from './server_session'
+import { RedisCache } from './redis_cache'
 import * as types from './types'
-import { getExistingProjects, getProjectKey,
-  getTasksInProject, loadSavedState } from './util'
+import { getExistingProjects, getTasksInProject, loadProject } from './util'
 
 /**
  * Logs requests to static or dynamic files
@@ -61,16 +61,15 @@ export async function GetExportHandler (req: Request, res: Response) {
   }
   try {
     const projectName = req.query[types.FormField.PROJECT_NAME]
-    const key = getProjectKey(projectName)
-    const fields = await Session.getStorage().load(key)
-    const projectToLoad = JSON.parse(fields) as types.Project
+    const loadedProject = await loadProject(projectName)
     // grab the latest submissions from all tasks
     const tasks = await getTasksInProject(projectName)
     let items: ItemExport[] = []
     // load the latest submission for each task to export
     for (const task of tasks) {
       try {
-        const state = await loadSavedState(projectName, task.config.taskId)
+        const cache = new RedisCache()
+        const state = await loadState(projectName, task.config.taskId, cache)
         items = items.concat(convertStateToExport(state))
       } catch (error) {
         Logger.info(error.message)
@@ -80,7 +79,7 @@ export async function GetExportHandler (req: Request, res: Response) {
             name: url,
             url,
             sensor: -1,
-            timestamp: projectToLoad.config.submitTime,
+            timestamp: loadedProject.config.submitTime,
             videoName: itemToLoad.videoName,
             attributes: {},
             labels: []
@@ -152,10 +151,8 @@ export async function DashboardHandler (req: Request, res: Response) {
   const body = req.body
   if (body) {
     try {
-      const name = body.name
-      const key = getProjectKey(name)
-      const fields = await Session.getStorage().load(key)
-      const project = JSON.parse(fields) as types.Project
+      const projectName = body.name
+      const project = await loadProject(projectName)
       // grab the latest submissions from all tasks
       const tasks = await getTasksInProject(name)
       const projectOptions: ProjectOptions = {
@@ -174,9 +171,9 @@ export async function DashboardHandler (req: Request, res: Response) {
         try {
           // first, attempt loading previous submission
           // TODO: Load the previous state asynchronously in dashboard
-          const state: State = await loadSavedState(
-            name, emptyTask.config.taskId
-          )
+          const cache = new RedisCache()
+          const state = await loadState(projectName,
+              emptyTask.config.taskId, cache)
           task = state.task
         } catch {
           task = emptyTask

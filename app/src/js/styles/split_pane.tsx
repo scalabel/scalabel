@@ -2,8 +2,7 @@ import createStyles from '@material-ui/core/styles/createStyles'
 
 export const paneBarStyles = () => createStyles({
   viewer_container_bar: {
-    position: 'absolute',
-    zIndex: 10
+    position: 'absolute'
   },
   select: {
     'backgroundColor': 'rgba(34, 34, 34, 1)',
@@ -13,14 +12,17 @@ export const paneBarStyles = () => createStyles({
     'padding': '10px 26px 10px 12px',
     '&:focus': {
       borderRadius: 4
-    }
+    },
+    'z-index': 1001
   },
   icon: {
-    color: '#ced4da'
+    'color': '#ced4da',
+    'z-index': 1001
   },
   icon90: {
-    color: '#ced4da',
-    transform: 'rotate(90deg)'
+    'color': '#ced4da',
+    'transform': 'rotate(90deg)',
+    'z-index': 1001
   }
 })
 
