@@ -18,9 +18,6 @@ import { getSavedKey, getTaskKey,
  * Starts socket.io handlers for saving, loading, and synchronization
  */
 export function startSocketServer (io: socketio.Server) {
-  // TODO: move this to redis
-  // Set of ids for action queue which have been saved
-  const actionIdsSaved = new Set<string>()
   const cache = new RedisCache()
 
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
@@ -34,7 +31,7 @@ export function startSocketServer (io: socketio.Server) {
 
     socket.on(EventName.ACTION_SEND, async (rawData: string) => {
       try {
-        await actionUpdate(rawData, socket, cache, actionIdsSaved)
+        await actionUpdate(rawData, socket, cache)
       } catch (error) {
         Logger.error(error)
       }
@@ -74,8 +71,7 @@ async function register (
  * Updates the state with the action, and broadcasts action
  */
 async function actionUpdate (
-  rawData: string, socket: socketio.Socket,
-  cache: RedisCache, actionIdsSaved: Set<string>) {
+  rawData: string, socket: socketio.Socket, cache: RedisCache) {
   const data: SyncActionMessageType = JSON.parse(rawData)
   const projectName = data.projectName
   const taskId = data.taskId
@@ -91,25 +87,31 @@ async function actionUpdate (
     return types.TASK_ACTION_TYPES.includes(action.type)
   })
 
-  const state = await loadState(projectName, taskId, cache)
-  const store = configureStore(state)
+  // Load IDs of actions that have been processed already
+  const saveKey = getSavedKey(projectName, taskId)
+  const redisMetadata = await cache.get(path.redisMetaKey(saveKey))
+  let actionIdsSaved = new Set<string>()
+  if (redisMetadata) {
+    actionIdsSaved = JSON.parse(redisMetadata)[1]
+  }
 
-  // For each task action, update the backend store
-  // TODO: this should surround redis interface, and be atomic transaction
-  if (!(actionListId in actionIdsSaved)) {
-    // save task data with all updates
-    if (taskActions.length > 0) {
-      for (const action of taskActions) {
-        action.timestamp = Date.now()
-        store.dispatch(action)
-      }
-      const newState = store.getState().present
-      const stringState = JSON.stringify(newState)
-      const saveKey = getSavedKey(projectName, taskId)
+  if (!(actionListId in actionIdsSaved) && taskActions.length > 0) {
+    const state = await loadState(projectName, taskId, cache)
+    const store = configureStore(state)
 
-      await cache.setExWithReminder(saveKey, stringState)
+    // For each task action, update the backend store
+    for (const action of taskActions) {
+      action.timestamp = Date.now()
+      store.dispatch(action)
     }
+
+    // save task data with all updates
+    const newState = store.getState().present
+    const stringState = JSON.stringify(newState)
+
     actionIdsSaved.add(actionListId)
+    const actionIdMetadata = JSON.stringify(actionIdsSaved)
+    await cache.setExWithReminder(saveKey, stringState, actionIdMetadata)
   }
 
   // broadcast task actions to all other sessions in room
@@ -135,16 +137,16 @@ export async function loadState (
   const saveKey = getSavedKey(projectName, taskId)
   const redisValue = await cache.get(saveKey)
   if (redisValue) {
-    state = JSON.parse(redisValue)
-  } else {
-    // otherwise load from storage
-    try {
-      // first, attempt loading previous submission
-      state = await loadSavedState(projectName, taskId)
-    } catch {
-      // if no submissions exist, load from task
-      state = await loadStateFromTask(projectName, taskId)
-    }
+    return JSON.parse(redisValue)
+  }
+
+  // otherwise load from storage
+  try {
+    // first, attempt loading previous submission
+    state = await loadSavedState(projectName, taskId)
+  } catch {
+    // if no submissions exist, load from task
+    state = await loadStateFromTask(projectName, taskId)
   }
   return state
 }

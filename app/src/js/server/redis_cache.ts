@@ -37,7 +37,9 @@ export class RedisCache {
     this.sub.subscribe('__keyevent@0__:expired')
     this.sub.on('message', async (_channel: string, message: string) => {
       const key = redisBaseKey(message)
-      const saveKey = await this.get(redisMetaKey(key))
+      const metadata = await this.get(redisMetaKey(key))
+      const saveKey = metadata[0]
+
       const value = await this.get(key)
       const fileKey = getFileKey(saveKey)
       await Session.getStorage().save(fileKey, value)
@@ -53,10 +55,14 @@ export class RedisCache {
    * Sets a value with timeout for flushing
    * And a reminder value with shorter timeout for saving to disk
    */
-  public async setExWithReminder (saveKey: string, value: string) {
+  public async setExWithReminder (
+    saveKey: string, value: string, metadata: string) {
+    const allMetadata = JSON.stringify([saveKey, metadata])
+    // TODO- make these atomic
     await this.setEx(saveKey, value, this.timeout)
-    await this.setEx(redisMetaKey(saveKey), saveKey, this.timeout)
+    await this.setEx(redisMetaKey(saveKey), allMetadata, this.timeout)
 
+    // Handle write back to storage
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
       const fileKey = getFileKey(saveKey)
