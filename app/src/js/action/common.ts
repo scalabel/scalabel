@@ -1,6 +1,6 @@
 import Session from '../common/session'
-import { LabelType, PaneType,
-  Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
+import { IndexedShapeType, LabelType,
+  PaneType, Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -87,16 +87,14 @@ export function loadItem (
 export function addLabel (
   itemIndex: number,
   label: LabelType,
-  shapeTypes: string[] = [],
-  shapes: ShapeType[] = []
+  shapes: IndexedShapeType[] = []
 ): types.AddLabelsAction {
   return {
     type: types.ADD_LABELS,
     sessionId: Session.id,
     itemIndices: [itemIndex],
     labels: [[label]],
-    shapeTypes: [[shapeTypes]],
-    shapes: [[shapes]]
+    indexedShapes: [shapes]
   }
 }
 

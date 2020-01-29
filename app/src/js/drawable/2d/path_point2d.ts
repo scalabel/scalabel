@@ -1,7 +1,5 @@
 import { ShapeTypeName } from '../../common/types'
-import { makePathPoint } from '../../functional/states'
-import { PathPoint2DType } from '../../functional/types'
-import { Context2D, toCssColor } from '../util'
+import { IndexedShapeType, PathPoint2DType } from '../../functional/types'
 import { Point2D } from './point2d'
 
 export enum PointType {
@@ -56,7 +54,7 @@ export function makePathPoint2DStyle (
 /** points2D for polygon */
 export class PathPoint2D extends Point2D {
 
-  /** point type */
+  /** path point state */
   private _type: PointType
 
   constructor (
@@ -73,31 +71,23 @@ export class PathPoint2D extends Point2D {
     return ShapeTypeName.PATH_POINT_2D
   }
 
-  /** Convert to state */
-  public toState (): PathPoint2DType {
-    return {
-      x: this.x,
-      y: this.y,
-      type: this._type
-    }
-  }
-
   /** get and set type */
   public get type (): PointType {
     return this._type
   }
 
+  /** Set type */
   public set type (t: PointType) {
     this._type = t
+    if (this._indexedShape) {
+      (this._indexedShape.shape as PathPoint2DType).type = t
+    }
   }
 
-  /**
-   * convert this drawable pathPoint to a pathPoint state
-   */
-  public toPathPoint (): PathPoint2DType {
-    return makePathPoint({
-      x: this.x, y: this.y, type: this.type
-    })
+  /** Update State */
+  public updateState (indexedShape: IndexedShapeType) {
+    super.updateState(indexedShape)
+    this._type = (indexedShape.shape as PathPoint2DType).type as PointType
   }
 
   /**
@@ -107,25 +97,6 @@ export class PathPoint2D extends Point2D {
   public copy (target: PathPoint2D): void {
     this.x = target.x
     this.y = target.y
-    this.type = target.type
-  }
-
-  /**
-   * Draw the point on a 2D context
-   * @param context
-   * @param ratio
-   * @param style
-   */
-  public draw (
-    context: Context2D, ratio: number, style: PathPoint2DStyle): void {
-    context.save()
-    // convert to display resolution
-    const real = this.clone().scale(ratio)
-    context.beginPath()
-    context.fillStyle = toCssColor(style.color)
-    context.arc(real.x, real.y, style.radius, 0, 2 * Math.PI, false)
-    context.closePath()
-    context.fill()
-    context.restore()
+    this._type = target.type
   }
 }

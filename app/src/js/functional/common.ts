@@ -86,14 +86,13 @@ export function updateTask (
  */
 export function addLabel (
   state: State, sessionId: string, itemIndex: number, label: LabelType,
-  shapeTypes: string[] = [], shapes: ShapeType[] = []): State {
+  indexedShapes: IndexedShapeType[] = []): State {
   const addLabelsAction: types.AddLabelsAction = {
     type: types.ADD_LABELS,
     sessionId,
     itemIndices: [itemIndex],
     labels: [[label]],
-    shapeTypes: [[shapeTypes]],
-    shapes: [[shapes]]
+    indexedShapes: [indexedShapes]
   }
   return addLabels(state, addLabelsAction)
 }
@@ -126,9 +125,11 @@ export function deleteLabelsById (
  * @param shapes
  */
 function addLabelsToItem (
-    item: ItemType, taskStatus: TaskStatus, newLabels: LabelType[],
-    shapeTypes: string[][], shapes: ShapeType[][]
-  ): [ItemType, LabelType[], TaskStatus] {
+    item: ItemType,
+    taskStatus: TaskStatus,
+    newLabels: LabelType[],
+    indexedShapes: IndexedShapeType[]
+): [ItemType, LabelType[], TaskStatus] {
   newLabels = [...newLabels]
   const newLabelIds: number[] = []
   const newShapeIds: number[] = []
@@ -186,14 +187,20 @@ function addLabelsToItem (
  * @param shapes
  */
 function addLabelstoItems (
-  items: ItemType[], taskStatus: TaskStatus, labelsToAdd: LabelType[][],
-  shapeTypes: string[][][], shapes: ShapeType[][][]
-  ): [ItemType[], LabelType[], TaskStatus] {
+  items: ItemType[],
+  taskStatus: TaskStatus,
+  labelsToAdd: LabelType[][],
+  indexedShapes: IndexedShapeType[][]
+): [ItemType[], LabelType[], TaskStatus] {
   const allNewLabels: LabelType[] = []
   items = [...items]
   items.forEach((item, index) => {
     const [newItem, newLabels, newStatus] = addLabelsToItem(
-      item, taskStatus, labelsToAdd[index], shapeTypes[index], shapes[index])
+      item,
+      taskStatus,
+      labelsToAdd[index],
+      indexedShapes[index]
+    )
     items[index] = newItem
     taskStatus = newStatus
     allNewLabels.push(...newLabels)
@@ -214,7 +221,7 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
   let items = [...task.items]
   const selectedItems = pickArray(items, action.itemIndices)
   const [newItems, newLabels, status] = addLabelstoItems(
-    selectedItems, task.status, action.labels, action.shapeTypes, action.shapes)
+    selectedItems, task.status, action.labels, action.indexedShapes)
   items = assignToArray(items, newItems, action.itemIndices)
   // Find the first new label in the selected item if the labels are created
   // by this session.

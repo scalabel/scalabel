@@ -2,6 +2,7 @@
  * Define string identifiers and interfaces of actions
  */
 import {
+  IndexedShapeType,
   LabelType,
   PaneType,
   Select,
@@ -19,6 +20,7 @@ export const UPDATE_TASK = 'UPDATE_TASK'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
+export const ADD_SHAPES = 'ADD_SHAPES'
 export const CHANGE_SHAPES = 'CHANGE_SHAPES'
 export const CHANGE_LABELS = 'CHANGE_LABELS'
 export const LINK_LABELS = 'LINK_LABELS'
@@ -81,10 +83,19 @@ export interface AddLabelsAction extends BaseAction {
   itemIndices: number[]
   /** labels to add to each item */
   labels: LabelType[][]
-  /** shape types for each label */
-  shapeTypes: string[][][]
-  /** shapes for each label */
-  shapes: ShapeType[][][]
+  /** new shapes to add to each item */
+  indexedShapes: IndexedShapeType[][]
+}
+
+export interface AddShapesAction extends BaseAction {
+  /** item of the added label */
+  itemIndices: number[]
+  /** shapes to add to each item */
+  shapes: IndexedShapeType[][]
+  /** id's of labels that need to be updated in each item */
+  labels: number[][]
+  /** new array of shape id's for each label */
+  labelShapeRefs: number[][]
 }
 
 export interface AddTrackAction extends BaseAction {

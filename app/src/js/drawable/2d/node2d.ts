@@ -4,22 +4,22 @@ import { Point2D } from './point2d'
 
 /** Points for custom labels */
 export class Node2D extends Point2D {
-  /** Name of this node */
-  private _name: string
-  /** Set if hidden */
-  private _hidden: boolean
   /** Color of this node, if any */
   private _color?: number[]
+  /** node state */
+  private _nodeState: Node2DType
 
   constructor (node?: Node2DType) {
     if (node) {
       super(node.x, node.y)
-      this._name = node.name
-      this._hidden = Boolean(node.hidden)
+      this._nodeState = node
     } else {
       super()
-      this._name = ''
-      this._hidden = false
+      this._nodeState = {
+        name: '',
+        x: 0,
+        y: 0
+      }
     }
   }
 
@@ -28,25 +28,14 @@ export class Node2D extends Point2D {
     return ShapeTypeName.NODE_2D
   }
 
-  /** Convert to state */
-  public toState (): Node2DType {
-    return {
-      x: this.x,
-      y: this.y,
-      name: this._name,
-      hidden: this._hidden,
-      color: this._color
-    }
-  }
-
   /** Set name */
   public set name (name: string) {
-    this._name = name
+    this._nodeState.name = name
   }
 
   /** Get name */
   public get name (): string {
-    return this._name
+    return this._nodeState.name
   }
 
   /** Get color */
@@ -59,11 +48,11 @@ export class Node2D extends Point2D {
 
   /** Returns true if hidden */
   public get hidden (): boolean {
-    return this._hidden
+    return Boolean(this._nodeState.hidden)
   }
 
   /** Hide node */
   public hide () {
-    this._hidden = true
+    this._nodeState.hidden = true
   }
 }

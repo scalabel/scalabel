@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { LabelType, RectType, ShapeType, State } from '../../functional/types'
+import { LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -189,7 +189,7 @@ export class Box2D extends Label2D {
       }
     }
     // update the rectangle
-    const rect = Object.values(this._shapes)[0] as Rect2D
+    const rect = this._shapes[0] as Rect2D
     rect.x = Math.min(x1, x2)
     rect.y = Math.min(y1, y2)
     rect.w = Math.min(x2 - x1)
@@ -205,7 +205,7 @@ export class Box2D extends Label2D {
    */
   public move (end: Vector2D, limit: Size2D): void {
     const [width, height] = [limit.width, limit.height]
-    const rect = Object.values(this._shapes)[0] as Rect2D
+    const rect = this._shapes[0] as Rect2D
     const delta = end.clone().subtract(this._mouseDownCoord)
     rect.x = this._startingRect.x + delta.x
     rect.y = this._startingRect.y + delta.y
@@ -236,7 +236,7 @@ export class Box2D extends Label2D {
     if (this._selected) {
       this.editing = true
       this._mouseDownCoord = coord.clone()
-      this._startingRect = (Object.values(this._shapes)[0] as Rect2D).clone()
+      this._startingRect.copy(this._shapes[0] as Rect2D)
       return true
     }
     return false
@@ -286,7 +286,11 @@ export class Box2D extends Label2D {
 
   /** Get shape objects for committing to state */
   public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
-    return [this._labelState.shapes, [ShapeTypeName.RECT], [this.toRect()]]
+    return [
+      this._labelState.shapes,
+      [ShapeTypeName.RECT],
+      [this._shapes[0].toState().shape]
+    ]
   }
 
   /** Initialize this label to be temporary */
@@ -300,21 +304,16 @@ export class Box2D extends Label2D {
       order: this.order
     })
 
-    this._shapes[-1] = new Rect2D(start.x, start.y, 0, 0)
+    this._shapes = [new Rect2D(start.x, start.y, 0, 0)]
     this._highlightedHandle = Handles.BOTTOM_RIGHT
     this.updatePoints()
-  }
-
-  /** Get rect representation */
-  public toRect (): RectType {
-    return (Object.values(this._shapes)[0] as Rect2D).toRect()
   }
 
   /**
    * to check whether the label is valid
    */
   public isValid (): boolean {
-    const rect = Object.values(this._shapes)[0] as Rect2D
+    const rect = this._shapes[0] as Rect2D
     const area = rect.w * rect.h
     if (area >= MIN_AREA) {
       return true
@@ -334,7 +333,7 @@ export class Box2D extends Label2D {
   /** Update corner and midpoint positions */
   private updatePoints () {
     const [tl, tm, tr, rm, br, bm, bl, lm] = this._points
-    const rect = Object.values(this._shapes)[0] as Rect2D
+    const rect = this._shapes[0] as Rect2D
     const x = rect.x
     const y = rect.y
     const w = rect.w

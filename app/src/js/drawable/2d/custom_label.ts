@@ -133,17 +133,20 @@ export class CustomLabel2D extends Label2D {
         continue
       }
 
-      const realStart = startPoint.clone().scale(ratio)
-      const realEnd = endPoint.clone().scale(ratio)
-
       context.save()
       context.strokeStyle = toCssColor(assignColor(
         this._nodes.length + this._corners.length
       ))
       context.lineWidth = lineWidth
       context.beginPath()
-      context.moveTo(realStart.x, realStart.y)
-      context.lineTo(realEnd.x, realEnd.y)
+      context.moveTo(
+        startPoint.x * ratio,
+        startPoint.y * ratio
+      )
+      context.lineTo(
+        endPoint.x * ratio,
+        endPoint.y * ratio
+      )
       context.closePath()
       context.stroke()
       context.restore()
@@ -299,9 +302,7 @@ export class CustomLabel2D extends Label2D {
    */
   public updateState (labelState: LabelType): void {
     super.updateState(labelState)
-    for (const shapeId of this._labelState.shapes) {
-      this._nodes.push(this._shapes[shapeId] as Node2D)
-    }
+    this._nodes = [...this._shapes as Node2D[]]
     this.updateBounds()
   }
 
@@ -309,7 +310,7 @@ export class CustomLabel2D extends Label2D {
   public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
     const shapeTypes = this._nodes.map(() => ShapeTypeName.NODE_2D)
     const shapeStates: Node2DType[] = this._nodes.map(
-      (shape) => shape.toState()
+      (shape) => shape.toState().shape as Node2DType
     )
     return [this._labelState.shapes, shapeTypes, shapeStates]
   }

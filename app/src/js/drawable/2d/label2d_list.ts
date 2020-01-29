@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { policyFromString } from '../../common/track/track'
 import { LabelTypeName, ShapeTypeName, TrackPolicyType } from '../../common/types'
 import { makeState, makeTaskConfig } from '../../functional/states'
-import { ConfigType, Label2DTemplateType, ShapeType, State } from '../../functional/types'
+import { ConfigType, Label2DTemplateType, State } from '../../functional/types'
 import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { CustomLabel2D } from './custom_label'
@@ -206,12 +206,9 @@ export class Label2DList {
   }
 
   /** Add temporary shape */
-  public makeTemporaryShape (shapeType: string, shapeState: ShapeType) {
-    const shape = makeDrawableShape2D(shapeType)
-    if (!shape) {
-      throw new Error('Invalid shape type')
-    }
-    shape.updateState(shapeState, this._temporaryShapeId)
+  public addTemporaryShape (shape: Shape2D) {
+    this._shapes[this._temporaryShapeId] = shape
+    shape.id = this._temporaryShapeId
     this._temporaryShapeId--
     this.addUpdatedShape(shape)
     return shape
@@ -245,17 +242,17 @@ export class Label2DList {
         _.pick(self._shapes, _.keys(item.shapes)))
 
     // update drawable shapes
-    _.forEach(item.shapes, (shape, key) => {
+    _.forEach(item.shapes, (indexedShape, key) => {
       const shapeId = Number(key)
       if (!(shapeId in self._shapes)) {
-        const newShape = makeDrawableShape2D(shape.type)
+        const newShape = makeDrawableShape2D(indexedShape.type)
         if (newShape) {
           self._shapes[shapeId] = newShape
         }
       }
       if (shapeId in self._shapes) {
         const drawableShape = self._shapes[shapeId]
-        drawableShape.updateState(shape.shape, shapeId)
+        drawableShape.updateState(indexedShape)
       }
     })
 

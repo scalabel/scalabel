@@ -43,7 +43,7 @@ export abstract class Label2D {
   /** whether the label is being editing */
   protected _editing: boolean
   /** shapes */
-  protected _shapes: { [id: number]: Shape2D }
+  protected _shapes: Shape2D[]
   /** label list */
   protected _labelList: Label2DList
   /** parent label */
@@ -61,7 +61,7 @@ export abstract class Label2D {
     this._mouseDownCoord = new Vector2D()
     this._mouseDown = false
     this._editing = false
-    this._shapes = {}
+    this._shapes = []
     this._labelList = labelList
     this._parent = null
     this._children = []
@@ -342,15 +342,14 @@ export abstract class Label2D {
     labelState: LabelType
   ): void {
     this._labelState = { ...labelState }
-    this._shapes = Object.assign(
-      {} as {[shapeId: number]: Shape2D},
-      _.pick(this._shapes, this._labelState.shapes)
-    )
+    this._shapes = []
     for (const shapeId of this._labelState.shapes) {
       if (!(shapeId in this._shapes)) {
         const shape = this._labelList.getShape(shapeId)
         if (shape) {
-          this._shapes[shapeId] = shape
+          this._shapes.push(shape)
+        } else {
+          throw new Error(`Could not find shape with id ${shapeId}`)
         }
       }
     }
