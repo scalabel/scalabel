@@ -6,6 +6,7 @@ import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
 import { DrawMode, Label2D } from './label2d'
+import { Label2DList } from './label2d_list'
 import { makePoint2DStyle, Point2D } from './point2d'
 import { makeRect2DStyle, Rect2D } from './rect2d'
 
@@ -39,8 +40,8 @@ export class Box2D extends Label2D {
   /** cache shape for moving */
   private _startingRect: Rect2D
 
-  constructor () {
-    super()
+  constructor (labelList: Label2DList) {
+    super(labelList)
     this._shapes = [
       new Rect2D(),
       new Point2D(), new Point2D(), new Point2D(), new Point2D(),
@@ -260,11 +261,13 @@ export class Box2D extends Label2D {
     if (this._selected && this._mouseDown && this.editing) {
       if (this._highlightedHandle > 0) {
         this.resize(coord, limit)
+        this._labelList.addUpdatedLabel(this)
       } else if (
         this._highlightedHandle === Handles.EDGE &&
         handleIndex === 0
       ) {
         this.move(coord, limit)
+        this._labelList.addUpdatedLabel(this)
       }
       return true
     }

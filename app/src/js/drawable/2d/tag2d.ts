@@ -4,6 +4,7 @@ import { AttributeToolType, ShapeTypeName } from '../../common/types'
 import { Attribute, ShapeType, State } from '../../functional/types'
 import { Context2D } from '../util'
 import { DrawMode, Label2D } from './label2d'
+import { Label2DList } from './label2d_list'
 
 /**
  * Tag2D drawable class
@@ -12,16 +13,9 @@ export class Tag2D extends Label2D {
   /** attributes for task */
   public configAttributes: Attribute[]
 
-  constructor () {
-    super()
+  constructor (labelList: Label2DList) {
+    super(labelList)
     this.configAttributes = []
-  }
-
-  /**
-   * no-op
-   */
-  public commitLabel () {
-    return false
   }
 
   /** Get shape objects for committing to state */

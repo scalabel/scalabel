@@ -1,4 +1,5 @@
 import { BLUE, GREEN, RED } from '../common'
+import Label3D from '../label3d'
 import { Controller } from './controller'
 import { ScaleAxis } from './scale_axis'
 
@@ -6,8 +7,8 @@ import { ScaleAxis } from './scale_axis'
  * perform scaling ops
  */
 export class ScaleControl extends Controller {
-  constructor () {
-    super()
+  constructor (labels: Label3D[], bounds: THREE.Box3) {
+    super(labels, bounds)
     this._controlUnits.push(
       new ScaleAxis(
         'x',
@@ -53,11 +54,6 @@ export class ScaleControl extends Controller {
     for (const unit of this._controlUnits) {
       this.add(unit)
     }
-    this._local = true
-  }
-
-  /** Toggle local/world */
-  public toggleFrame () {
     this._local = true
   }
 }

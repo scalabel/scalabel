@@ -496,7 +496,7 @@ export const sampleTasksVideo: TaskType[] = [
       maxLabelId: 1,
       maxShapeId: 1,
       maxOrder: 2,
-      maxTrackId: -1
+      maxTrackId: 1
     },
     items: [
       {
@@ -632,6 +632,7 @@ export const sampleTasksVideo: TaskType[] = [
     tracks: {
       0: {
         id: 0,
+        type: 'polygon2d',
         labels: {
           0: 0,
           1: 1
