@@ -105,10 +105,8 @@ export interface AddTrackAction extends BaseAction {
   itemIndices: number[]
   /** labels to add to each item */
   labels: LabelType[]
-  /** shape types for each label */
-  shapeTypes: string[][]
-  /** shapes for each label */
-  shapes: ShapeType[][]
+  /** shapes */
+  indexedShapes: IndexedShapeType[][]
 }
 
 export interface MergeTrackAction extends BaseAction {

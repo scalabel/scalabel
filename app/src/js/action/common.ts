@@ -109,8 +109,7 @@ export function addTrack (
   itemIndices: number[],
   trackType: string,
   labels: LabelType[],
-  shapeTypes: string[][],
-  shapes: ShapeType[][]
+  indexedShapes: IndexedShapeType[][]
 ): types.AddTrackAction {
   return {
     type: types.ADD_TRACK,
@@ -118,8 +117,7 @@ export function addTrack (
     sessionId: Session.id,
     itemIndices,
     labels,
-    shapeTypes,
-    shapes
+    indexedShapes
   }
 }
 

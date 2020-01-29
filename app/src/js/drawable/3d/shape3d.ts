@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { ShapeType } from '../../functional/types'
+import { IndexedShapeType } from '../../functional/types'
 
 /**
  * Base shape class
@@ -8,7 +8,7 @@ export abstract class Shape3D extends THREE.Object3D {
   /** id */
   protected _id: number
   /** shape state */
-  protected _shape: ShapeType | null
+  protected _indexedShape: IndexedShapeType | null
   /** whether highlighted */
   protected _highlighted: boolean
   /** whether selected */
@@ -17,14 +17,17 @@ export abstract class Shape3D extends THREE.Object3D {
   constructor () {
     super()
     this._id = -1
-    this._shape = null
+    this._indexedShape = null
     this._highlighted = false
     this._selected = false
   }
 
   /** Get shape id */
   public get id (): number {
-    return this._id
+    if (this._indexedShape) {
+      return this._indexedShape.id
+    }
+    return -1
   }
 
   /** Get selected */
@@ -42,14 +45,13 @@ export abstract class Shape3D extends THREE.Object3D {
 
   /** update parameters */
   public updateState (
-    shape: ShapeType, id: number, _activeCamera?: THREE.Camera
+    indexedShape: IndexedShapeType, _activeCamera?: THREE.Camera
   ) {
-    this._shape = shape
-    this._id = id
+    this._indexedShape = indexedShape
   }
 
   /** Convert shape to state representation */
-  public abstract toState (): ShapeType
+  public abstract toState (): IndexedShapeType
 
   /** function for setting highlight status */
   public abstract setHighlighted (intersection?: THREE.Intersection): void

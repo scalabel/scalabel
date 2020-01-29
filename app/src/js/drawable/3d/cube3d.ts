@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
-import { CubeType, ShapeType } from '../../functional/types'
+import { CubeType, IndexedShapeType } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
 import { projectionFromNDC } from '../../view_config/point_cloud'
@@ -118,7 +118,10 @@ export class Cube3D extends Shape3D {
   /**
    * Convert to state representation
    */
-  public toState (): ShapeType {
+  public toState (): IndexedShapeType {
+    if (!this._indexedShape) {
+      throw new Error('Uninitialized shape')
+    }
     const worldCenter = new THREE.Vector3()
     this.getWorldPosition(worldCenter)
     const worldSize = new THREE.Vector3()
@@ -152,12 +155,19 @@ export class Cube3D extends Shape3D {
       worldQuaternion.multiply(this._grid.quaternion)
       worldOrientation.setFromQuaternion(worldQuaternion)
     }
+    const center = (new Vector3D()).fromThree(worldCenter).toState()
+    const size = (new Vector3D()).fromThree(worldSize).toState()
+    const orientation =
+      (new Vector3D()).fromThree(worldOrientation.toVector3()).toState()
+    const anchorIndex = this._anchorIndex
     return {
-      center: (new Vector3D()).fromThree(worldCenter).toState(),
-      size: (new Vector3D()).fromThree(worldSize).toState(),
-      orientation:
-        (new Vector3D()).fromThree(worldOrientation.toVector3()).toState(),
-      anchorIndex: this._anchorIndex
+      ...this._indexedShape,
+      shape: {
+        center,
+        size,
+        orientation,
+        anchorIndex
+      }
     }
   }
 
@@ -186,14 +196,14 @@ export class Cube3D extends Shape3D {
 
   /** update parameters */
   public updateState (
-    shape: ShapeType, id: number
+    indexedShape: IndexedShapeType, activeCamera?: THREE.Camera
   ) {
     const geometry = this._box.geometry as THREE.Geometry
     for (const face of geometry.faces) {
       face.color.fromArray(this._color)
     }
-    super.updateState(shape, id)
-    const cube = shape as CubeType
+    super.updateState(indexedShape, activeCamera)
+    const cube = indexedShape.shape as CubeType
     this.position.copy((new Vector3D()).fromState(cube.center).toThree())
     this.rotation.copy(
       (new Vector3D()).fromState(cube.orientation).toThreeEuler()

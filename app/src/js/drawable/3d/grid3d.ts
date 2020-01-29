@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
-import { Plane3DType, ShapeType } from '../../functional/types'
+import { IndexedShapeType, Plane3DType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { Shape3D } from './shape3d'
 
@@ -69,11 +69,17 @@ export class Grid3D extends Shape3D {
   /**
    * Object representation
    */
-  public toState (): ShapeType {
-    return{
-      center: (new Vector3D()).fromThree(this.position).toState(),
-      orientation:
-        (new Vector3D()).fromThree(this.rotation.toVector3()).toState()
+  public toState (): IndexedShapeType {
+    if (!this._indexedShape) {
+      throw new Error('Uninitialized shape')
+    }
+    return {
+      ...this._indexedShape,
+      shape: {
+        center: (new Vector3D()).fromThree(this.position).toState(),
+        orientation:
+          (new Vector3D()).fromThree(this.rotation.toVector3()).toState()
+      }
     }
   }
 
@@ -144,10 +150,10 @@ export class Grid3D extends Shape3D {
 
   /** update parameters */
   public updateState (
-    shape: ShapeType, id: number, _activeCamera?: THREE.Camera
+    indexedShape: IndexedShapeType, activeCamera?: THREE.Camera
   ) {
-    super.updateState(shape, id)
-    const newShape = shape as Plane3DType
+    super.updateState(indexedShape, activeCamera)
+    const newShape = indexedShape.shape as Plane3DType
     this.position.copy(
       (new Vector3D()).fromState(newShape.center).toThree()
     )

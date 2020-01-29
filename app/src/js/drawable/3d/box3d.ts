@@ -69,7 +69,7 @@ export class Box3D extends Label3D {
     return [
       [this._label.shapes[0]],
       [ShapeTypeName.CUBE],
-      [this._shape.toState()]
+      [this._shape.toState().shape]
     ]
   }
 
@@ -258,8 +258,7 @@ export class Box3D extends Label3D {
     this._shape.color = this._color
     const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
-      state.task.items[itemIndex].shapes[label.shapes[0]].shape,
-      label.shapes[0]
+      state.task.items[itemIndex].shapes[label.shapes[0]]
     )
   }
 }

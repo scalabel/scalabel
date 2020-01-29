@@ -37,7 +37,6 @@ export function addLabelTag (
     return actions.addLabel(
       itemIndex,
       label,
-      [],
       []
     )
   }

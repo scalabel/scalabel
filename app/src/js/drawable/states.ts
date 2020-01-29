@@ -94,38 +94,29 @@ export function commitLabels (
     for (const track of newTracks) {
       const indices = []
       const labels = []
-      const types = []
       const shapes = []
       for (let i = 0; i < Session.numItems; i++) {
         const label = track.getLabel(i)
-        const currentTypes = []
-        const currentShapes = []
         if (label) {
           const indexedShapes = track.getShapes(i)
-          for (const indexedShape of indexedShapes) {
-            currentTypes.push(indexedShape.type)
-            currentShapes.push(indexedShape.shape)
-          }
           indices.push(i)
           labels.push(label)
-          types.push(currentTypes)
-          shapes.push(currentShapes)
+          shapes.push([...indexedShapes])
         }
       }
       Session.dispatch(addTrack(
-        indices, track.type, labels, types, shapes
+        indices, track.type, labels, shapes
       ))
     }
   } else if (!Session.tracking && newLabels.length > 0) {
     // Add new labels to state
     const labels = []
-    const types = []
     const shapes = []
     for (const label of newLabels) {
       labels.push(label.labelState)
-      const [, shapeTypes, shapeStates] = label.shapeStates()
-      types.push(shapeTypes)
-      shapes.push(shapeStates)
+      for (const shape of label.shapes()) {
+        shapes.push(shape.toState())
+      }
     }
     Session.dispatch(
       {
@@ -133,8 +124,7 @@ export function commitLabels (
         sessionId: Session.id,
         itemIndices: [newLabels[0].item],
         labels: [labels],
-        shapeTypes: [types],
-        shapes: [shapes]
+        indexedShapes: [shapes]
       }
     )
   }

@@ -6,7 +6,7 @@
 import _ from 'lodash'
 import * as types from '../action/types'
 import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
-import { makeIndexedShape, makePane, makeTrack } from './states'
+import { makePane, makeTrack } from './states'
 import {
   IndexedShapeType,
   ItemType,
@@ -127,55 +127,54 @@ export function deleteLabelsById (
 function addLabelsToItem (
     item: ItemType,
     taskStatus: TaskStatus,
-    newLabels: LabelType[],
+    labels: LabelType[],
     indexedShapes: IndexedShapeType[]
 ): [ItemType, LabelType[], TaskStatus] {
-  newLabels = [...newLabels]
+  labels = [...labels]
   const newLabelIds: number[] = []
-  const newShapeIds: number[] = []
-  const newShapes: IndexedShapeType[] = []
-  newLabels.forEach((label, index) => {
-    const newShapeId = taskStatus.maxShapeId + 1 + newShapes.length
+  const shapeIdMap: { [temporaryId: number]: number } = {}
+  const labelIdMap: { [temporaryId: number]: number } = {}
+  const newShapes: { [id: number]: IndexedShapeType } = {}
+  const newLabels: { [id: number]: LabelType } = {}
+  let maxShapeId = taskStatus.maxShapeId
+  for (const indexedShape of indexedShapes) {
+    if (indexedShape.id >= 0) {
+      throw new Error('Attempted to add shape with positive id to state')
+    }
+    shapeIdMap[indexedShape.id] = maxShapeId
+    newShapes[maxShapeId] = { ...indexedShape }
+    maxShapeId++
+  }
+  labels.forEach((label, index) => {
     const labelId = taskStatus.maxLabelId + 1 + index
-    const shapeIds = _.range(shapes[index].length).map((i) => i + newShapeId)
-    const newLabelShapes = shapes[index].map((s, i) =>
-        makeIndexedShape(shapeIds[i], [labelId], shapeTypes[index][i], s)
-      )
     const order = taskStatus.maxOrder + 1 + index
     const validChildren = label.children.filter((id) => id >= 0)
     label = updateObject(label, {
       id: labelId,
       item: item.index,
       order,
-      shapes: label.shapes.concat(shapeIds),
+      shapes:
+        label.shapes.map((id) => (id in shapeIdMap) ? shapeIdMap[id] : id),
       children: validChildren
     })
-    newLabels[index] = label
+    labels[index] = label
     newLabelIds.push(labelId)
-    newShapes.push(...newLabelShapes)
-    newShapeIds.push(...shapeIds)
   })
-  const labels = updateObject(
-    item.labels, _.zipObject(newLabelIds, newLabels))
+  const allLabels = updateObject(
+    item.labels, _.zipObject(newLabelIds, labels))
   const allShapes = updateObject(
     item.shapes,
-    _.zipObject(newShapeIds, newShapes)
+    newShapes
   )
-  item = updateObject(item, { labels, shapes: allShapes })
+  item = updateObject(item, { labels: allLabels, shapes: allShapes })
   taskStatus = updateObject(
     taskStatus,
     {
       maxLabelId: newLabelIds[newLabelIds.length - 1],
-      maxOrder: taskStatus.maxOrder + newLabels.length
+      maxOrder: taskStatus.maxOrder + labels.length
     })
-  if (newShapeIds.length !== 0) {
-    taskStatus = updateObject(
-      taskStatus,
-      {
-        maxShapeId: newShapeIds[newShapeIds.length - 1]
-      })
-  }
-  return [item, newLabels, taskStatus]
+  taskStatus = updateObject(taskStatus, { maxShapeId })
+  return [item, labels, taskStatus]
 }
 
 /**
@@ -256,19 +255,17 @@ function addTrackToTask (
   type: string,
   itemIndices: number[],
   labels: LabelType[],
-  shapeTypes: string[][],
-  shapes: ShapeType[][]
+  indexedShapes: IndexedShapeType[][]
 ): [TaskType, TrackType, LabelType[]] {
   const track = makeTrack(task.status.maxTrackId + 1, type, {})
   for (const label of labels) {
     label.track = track.id
   }
   const labelList = labels.map((l) => [l])
-  const shapeTypeList = shapeTypes.map((s) => [s])
-  const shapeList = shapes.map((s) => [s])
   const [newItems, newLabels, status] = addLabelstoItems(
     pickArray(task.items, itemIndices),
-    task.status, labelList, shapeTypeList, shapeList)
+    task.status, labelList, indexedShapes
+  )
   const items = assignToArray(task.items, newItems, itemIndices)
   newLabels.map((l) => {
     track.labels[l.item] = l.id
@@ -287,8 +284,11 @@ function addTrackToTask (
 export function addTrack (state: State, action: types.AddTrackAction): State {
   let { user } = state
   const [task,, newLabels] = addTrackToTask(
-    state.task, action.trackType, action.itemIndices, action.labels,
-    action.shapeTypes, action.shapes
+    state.task,
+    action.trackType,
+    action.itemIndices,
+    action.labels,
+    action.indexedShapes
   )
   // select the label on the current item
   if (action.sessionId === state.session.id) {

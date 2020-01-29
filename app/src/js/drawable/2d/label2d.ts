@@ -138,6 +138,11 @@ export abstract class Label2D {
     return Cursor.CROSSHAIR
   }
 
+  /** Get shape drawables */
+  public shapes (): Shape2D[] {
+    return this._shapes
+  }
+
   /** Returns whether this label is selected */
   public get selected (): boolean {
     return this._selected
