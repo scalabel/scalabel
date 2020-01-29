@@ -7,7 +7,7 @@ import ViewStreamIcon from '@material-ui/icons/ViewStream'
 import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { changeViewerConfig, deletePane, splitPane, updateAll } from '../action/common'
+import { changeViewerConfig, deletePane, splitPane, updatePane } from '../action/common'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { makeDefaultViewerConfig } from '../functional/states'
@@ -29,6 +29,40 @@ export function viewerFactory (
       return (<Viewer3D id={viewerId} key={viewerReactKey(viewerId)} />)
   }
   return null
+}
+
+/** convert string to enum */
+function viewerTypeFromString (type: string): types.ViewerConfigTypeName {
+  switch (type) {
+    case types.ViewerConfigTypeName.IMAGE:
+      return types.ViewerConfigTypeName.IMAGE
+    case types.ViewerConfigTypeName.POINT_CLOUD:
+      return types.ViewerConfigTypeName.POINT_CLOUD
+    case types.ViewerConfigTypeName.IMAGE_3D:
+      return types.ViewerConfigTypeName.IMAGE_3D
+    case types.ViewerConfigTypeName.HOMOGRAPHY:
+      return types.ViewerConfigTypeName.HOMOGRAPHY
+    default:
+      return types.ViewerConfigTypeName.UNKNOWN
+  }
+}
+
+/** Returns whether the config types are compatible */
+function viewerConfigTypesCompatible (type1: string, type2: string) {
+  let configType1 = viewerTypeFromString(type1)
+  let configType2 = viewerTypeFromString(type2)
+
+  if (configType1 === types.ViewerConfigTypeName.IMAGE_3D ||
+      configType1 === types.ViewerConfigTypeName.HOMOGRAPHY) {
+    configType1 = types.ViewerConfigTypeName.IMAGE
+  }
+
+  if (configType2 === types.ViewerConfigTypeName.IMAGE_3D ||
+      configType2 === types.ViewerConfigTypeName.HOMOGRAPHY) {
+    configType2 = types.ViewerConfigTypeName.IMAGE
+  }
+
+  return configType1 === configType2
 }
 
 interface ClassType {
@@ -71,7 +105,7 @@ class LabelPane extends Component<Props> {
             const newConfig = makeDefaultViewerConfig(
               e.target.value as types.ViewerConfigTypeName,
               viewerConfig.pane,
-              viewerConfig.sensor
+              -1
             )
             if (newConfig) {
               Session.dispatch(changeViewerConfig(
@@ -94,6 +128,38 @@ class LabelPane extends Component<Props> {
           <MenuItem value={types.ViewerConfigTypeName.IMAGE_3D}>
             Image 3D
           </MenuItem>
+          <MenuItem value={types.ViewerConfigTypeName.HOMOGRAPHY}>
+            Homography
+          </MenuItem>
+        </Select>
+      )
+
+      const viewerIdMenu = (
+        <Select
+          value={
+            viewerConfig.sensor
+          }
+          onChange={(e) => {
+            Session.dispatch(changeViewerConfig(
+              pane.viewerId,
+              { ...viewerConfig, sensor: e.target.value as number }
+            ))
+          }}
+          classes={{ select: this.props.classes.select }}
+          inputProps={{
+            classes: {
+              icon: this.props.classes.icon
+            }
+          }}
+        >
+          {Object.keys(this.state.task.sensors).filter((key) =>
+              viewerConfigTypesCompatible(
+                this.state.task.sensors[Number(key)].type,
+                viewerConfig.type
+              )
+          ).map((key) =>
+            <MenuItem value={Number(key)}>{key}</MenuItem>
+          )}
         </Select>
       )
 
@@ -143,6 +209,8 @@ class LabelPane extends Component<Props> {
         </IconButton>
       )
 
+      const numSensors = Object.keys(this.state.task.sensors).length
+
       const configBar = (
           <Grid
             justify={'flex-end'}
@@ -152,7 +220,8 @@ class LabelPane extends Component<Props> {
               container: this.props.classes.viewer_container_bar
             }}
           >
-            {viewerTypeMenu}
+            {(numSensors > 1) ? viewerTypeMenu : null}
+            {(numSensors > 1) ? viewerIdMenu : null}
             {verticalSplitButton}
             {horizontalSplitButton}
             {deleteButton}
@@ -161,12 +230,7 @@ class LabelPane extends Component<Props> {
       // Leaf, render viewer container
       return (
           <div>
-            {
-              // Disable the config bar for now for 2D images.
-              // It will be useful if multiple data sources are present.
-              (this.state.task.config.itemType === types.ItemTypeName.IMAGE) ?
-                null : configBar
-            }
+            {configBar}
             {viewerFactory(viewerConfig, pane.viewerId)}
           </div>
       )
@@ -183,21 +247,19 @@ class LabelPane extends Component<Props> {
     if (!pane.split) {
       throw new Error('Missing split type')
     }
-    if (!pane.primarySize) {
-      throw new Error('Missing primary size')
-    }
 
     const child1 = (<StyledLabelPane pane={pane.child1} />)
     const child2 = (<StyledLabelPane pane={pane.child2} />)
 
+    const defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
     return (
       <SplitPane
         split={pane.split}
-        minSize={`${pane.minPrimarySize}%`}
-        maxSize={`${pane.maxPrimarySize}%`}
-        size={`${pane.primarySize}%`}
+        defaultSize={defaultSize}
         primary={pane.primary}
-        onChange={() => Session.dispatch(updateAll())}
+        onChange={
+          (size) => Session.dispatch(updatePane(pane.id, { primarySize: size }))
+        }
         allowResize
         resizerClassName={this.props.classes.resizer}
       >

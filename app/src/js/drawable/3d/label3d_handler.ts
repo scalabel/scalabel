@@ -1,14 +1,13 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { addLabel, changeShapes } from '../../action/common'
 import { selectLabel, selectLabel3dType } from '../../action/select'
 import Session from '../../common/session'
-import { makeTrackPolicy, Track } from '../../common/track'
-import { DataType, Key, LabelTypeName, TrackPolicyType, ViewerConfigTypeName } from '../../common/types'
+import { DataType, Key, LabelTypeName, ViewerConfigTypeName } from '../../common/types'
 import { getCurrentViewerConfig } from '../../functional/state_util'
-import { makePointCloudViewerConfig, makeSensor, makeTrack } from '../../functional/states'
+import { makePointCloudViewerConfig, makeSensor } from '../../functional/states'
 import { PointCloudViewerConfigType, SensorType, State, ViewerConfigType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
+import { commitLabels } from '../states'
 import { Label3D } from './label3d'
 import { makeDrawableLabel3D } from './label3d_list'
 
@@ -59,7 +58,6 @@ export class Label3DHandler {
     this._viewerConfig =
       getCurrentViewerConfig(state, viewerId)
     this._sensorIds = Object.keys(state.task.sensors).map((key) => Number(key))
-
     if (this._viewerConfig.sensor in state.task.sensors) {
       this._sensor = state.task.sensors[this._viewerConfig.sensor]
     }
@@ -78,23 +76,16 @@ export class Label3DHandler {
    * Process mouse down action
    */
   public onMouseDown (x: number, y: number): boolean {
-    if (this._highlightedLabel &&
-        this._highlightedLabel === Session.label3dList.selectedLabel) {
+    if (Session.label3dList.control.highlighted) {
       this._mouseDownOnSelection = true
-      if (Session.label3dList.control.attached()) {
-        const consumed = Session.label3dList.control.onMouseDown(this._camera)
-        if (consumed) {
-          return false
-        }
-      }
+      Session.label3dList.control.onMouseDown(this._camera)
+      return false
     }
 
     if (this._highlightedLabel) {
       const consumed = this._highlightedLabel.onMouseDown(x, y, this._camera)
       if (consumed) {
         this._mouseDownOnSelection = true
-        // Set current label as selected label
-        this.selectHighlighted()
         return false
       }
     }
@@ -106,15 +97,23 @@ export class Label3DHandler {
    * Process mouse up action
    */
   public onMouseUp (): boolean {
-    this._mouseDownOnSelection = false
     let consumed = false
-    if (Session.label3dList.control.attached()) {
+    if (Session.label3dList.control.visible) {
       consumed = Session.label3dList.control.onMouseUp()
     }
     if (!consumed && Session.label3dList.selectedLabel) {
       Session.label3dList.selectedLabel.onMouseUp()
     }
-    this.commitLabels()
+    commitLabels([...Session.label3dList.updatedLabels.values()])
+    Session.label3dList.clearUpdatedLabels()
+    // Set current label as selected label
+    if (
+      this._mouseDownOnSelection &&
+      this._highlightedLabel !== Session.label3dList.selectedLabel
+    ) {
+      this.selectHighlighted()
+    }
+    this._mouseDownOnSelection = false
     return false
   }
 
@@ -129,17 +128,21 @@ export class Label3DHandler {
     y: number,
     raycastIntersection?: THREE.Intersection
   ): boolean {
-    if (this._mouseDownOnSelection && Session.label3dList.selectedLabel) {
-      if (Session.label3dList.control.attached()) {
-        const consumed = Session.label3dList.control.onMouseMove(
-          x, y, this._camera
-        )
-        if (consumed) {
-          Session.label3dList.addUpdatedLabel(Session.label3dList.selectedLabel)
-          return true
-        }
+    if (
+      this._mouseDownOnSelection &&
+      Session.label3dList.selectedLabel &&
+      Session.label3dList.control.visible &&
+      Session.label3dList.control.highlighted
+    ) {
+      const consumed = Session.label3dList.control.onMouseMove(
+        x, y, this._camera
+      )
+      if (consumed) {
+        return true
       }
-      Session.label3dList.selectedLabel.onMouseMove(x, y, this._camera)
+    }
+    if (this._mouseDownOnSelection && this._highlightedLabel) {
+      this._highlightedLabel.onMouseMove(x, y, this._camera)
       return true
     } else {
       this.highlight(raycastIntersection)
@@ -163,7 +166,7 @@ export class Label3DHandler {
           const center = new Vector3D()
           switch (this._viewerConfig.type) {
             case ViewerConfigTypeName.POINT_CLOUD:
-              center.fromObject(
+              center.fromState(
                 (this._viewerConfig as PointCloudViewerConfigType).target
               )
               break
@@ -173,7 +176,7 @@ export class Label3DHandler {
                 this._camera.getWorldDirection(worldDirection)
                 worldDirection.normalize()
                 worldDirection.multiplyScalar(5)
-                center.fromObject(this._sensor.extrinsics.translation)
+                center.fromState(this._sensor.extrinsics.translation)
                 center.add((new Vector3D()).fromThree(worldDirection))
               }
           }
@@ -184,7 +187,8 @@ export class Label3DHandler {
             this._sensorIds
           )
           Session.label3dList.addUpdatedLabel(label)
-          this.commitLabels()
+          commitLabels([...Session.label3dList.updatedLabels.values()])
+          Session.label3dList.clearUpdatedLabels()
           return true
         }
         return false
@@ -197,15 +201,29 @@ export class Label3DHandler {
       case Key.P_UP:
       case Key.P_LOW:
         Session.dispatch(selectLabel3dType(
-          LabelTypeName.PLANE_3D, TrackPolicyType.LINEAR_INTERPOLATION_PLANE_3D
+          LabelTypeName.PLANE_3D
         ))
         return true
       case Key.B_UP:
       case Key.B_LOW:
         Session.dispatch(selectLabel3dType(
-          LabelTypeName.BOX_3D, TrackPolicyType.LINEAR_INTERPOLATION_BOX_3D
+          LabelTypeName.BOX_3D
         ))
         return true
+      case Key.T_UP:
+      case Key.T_LOW:
+        if (this.isKeyDown(Key.SHIFT)) {
+          if (Session.label3dList.selectedLabel) {
+            const target =
+              (this._viewerConfig as PointCloudViewerConfigType).target
+            Session.label3dList.selectedLabel.move(
+              (new Vector3D()).fromState(target).toThree()
+            )
+            commitLabels([...Session.label3dList.updatedLabels.values()])
+            Session.label3dList.clearUpdatedLabels()
+          }
+        }
+        break
       default:
         this._keyDownMap[e.key] = true
     }
@@ -231,7 +249,6 @@ export class Label3DHandler {
   private highlight (intersection?: THREE.Intersection) {
     if (this._highlightedLabel) {
       this._highlightedLabel.setHighlighted()
-      Session.label3dList.control.setHighlighted()
     }
     this._highlightedLabel = null
 
@@ -242,12 +259,9 @@ export class Label3DHandler {
       if (label) {
         label.setHighlighted(intersection)
         this._highlightedLabel = label
-        if (this._highlightedLabel === Session.label3dList.selectedLabel) {
-          Session.label3dList.control.setHighlighted(intersection)
-        }
-        return
       }
     }
+    Session.label3dList.control.setHighlighted(intersection)
   }
 
   /**
@@ -284,46 +298,5 @@ export class Label3DHandler {
         ))
       }
     }
-  }
-
-  /**
-   * Commit labels to state
-   */
-  private commitLabels () {
-    Session.label3dList.updatedLabels.forEach((drawable) => {
-      if (drawable.labelId < 0) {
-        const [, types, shapes] = drawable.shapeStates()
-        if (Session.tracking) {
-          const newTrack = new Track()
-          newTrack.updateState(
-            makeTrack(-1),
-            makeTrackPolicy(newTrack, Session.label3dList.currentPolicyType)
-          )
-          newTrack.onLabelCreated(this._selectedItemIndex, drawable, [-1])
-        } else {
-          Session.dispatch(addLabel(
-            this._selectedItemIndex,
-            drawable.label,
-            types,
-            shapes
-          ))
-        }
-      } else {
-        // Commit drawable to state
-        const [ids,,shapes] = drawable.shapeStates()
-        Session.dispatch(changeShapes(
-          this._selectedItemIndex,
-          ids,
-          shapes
-        ))
-        if (Session.tracking && drawable.label.track in Session.tracks) {
-          Session.tracks[drawable.label.track].onLabelUpdated(
-            this._selectedItemIndex,
-            shapes
-          )
-        }
-      }
-    })
-    Session.label3dList.clearUpdatedLabels()
   }
 }

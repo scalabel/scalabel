@@ -51,6 +51,8 @@ export const reducer: Reducer<State> = (
       return common.addViewerConfig(
         state, action as types.AddViewerConfigAction
       )
+    case types.UPDATE_PANE:
+      return common.updatePane(state, action as types.UpdatePaneAction)
     case types.SPLIT_PANE:
       return common.splitPane(state, action as types.SplitPaneAction)
     case types.DELETE_PANE:

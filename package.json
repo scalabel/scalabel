@@ -79,7 +79,7 @@
         "@types/yargs": "^13.0.7",
         "ajv": "^6.11.0",
         "awesome-typescript-loader": "^5.2.1",
-        "aws-sdk": "^2.603.0",
+        "aws-sdk": "^2.610.0",
         "babel-eslint": "^9.0.0",
         "babel-jest": "^24.1.0",
         "babel-loader": "^8.0.4",

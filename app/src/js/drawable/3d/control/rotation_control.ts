@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { BLUE, GREEN, RED } from '../common'
+import Label3D from '../label3d'
 import { Controller } from './controller'
 import { RotationRing } from './rotation_ring'
 
@@ -7,8 +8,8 @@ import { RotationRing } from './rotation_ring'
  * perform rotation ops
  */
 export class RotationControl extends Controller {
-  constructor () {
-    super()
+  constructor (labels: Label3D[], bounds: THREE.Box3) {
+    super(labels, bounds)
     this._controlUnits.push(
       new RotationRing(
         new THREE.Vector3(1, 0, 0),

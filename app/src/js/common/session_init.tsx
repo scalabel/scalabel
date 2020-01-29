@@ -6,17 +6,18 @@ import ReactDOM from 'react-dom'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
-import { addViewerConfig, initSessionAction, loadItem, updateAll } from '../action/common'
+import { addViewerConfig, initSessionAction, loadItem, splitPane, updateAll, updatePane } from '../action/common'
+import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
 import Window from '../components/window'
 import { makeDefaultViewerConfig } from '../functional/states'
-import { State } from '../functional/types'
+import { PointCloudViewerConfigType, SplitType, State } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
-import { makeTrackPolicy, Track } from './track'
-import { DataType, ViewerConfigTypeName } from './types'
+import { Track } from './track/track'
+import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
  * Request Session state from the server
@@ -53,26 +54,19 @@ export function initSession (containerName: string): void {
  */
 function updateTracks (): void {
   const state = Session.getState()
-  const currentPolicyType =
-    state.task.config.policyTypes[state.user.select.policyType]
   const newTracks: {[trackId: number]: Track} = {}
   for (const key of Object.keys(state.task.tracks)) {
     const trackId = Number(key)
-    const track = state.task.tracks[trackId]
     if (trackId in Session.tracks) {
       newTracks[trackId] = Session.tracks[trackId]
-      let trackPolicy = newTracks[trackId].trackPolicy
-      if (newTracks[trackId].policyType !== currentPolicyType) {
-        const newPolicy = makeTrackPolicy(newTracks[trackId], currentPolicyType)
-        trackPolicy = newPolicy
-      }
-      newTracks[trackId].updateState(track, trackPolicy)
     } else {
-      newTracks[trackId] = new Track()
-      newTracks[trackId].updateState(
-        track,
-        makeTrackPolicy(newTracks[trackId], currentPolicyType)
-      )
+      const newTrack = new Track()
+      if (newTrack) {
+        newTracks[trackId] = newTrack
+      }
+    }
+    if (trackId in newTracks) {
+      newTracks[trackId].updateState(state, trackId)
     }
   }
 
@@ -108,7 +102,7 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
  * Create default viewer configs if none exist
  */
 function initViewerConfigs (): void {
-  const state = Session.getState()
+  let state = Session.getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const sensorIds = Object.keys(state.task.sensors).map(
       (key) => Number(key)
@@ -120,6 +114,61 @@ function initViewerConfigs (): void {
     )
     if (config0) {
       Session.dispatch(addViewerConfig(0, config0))
+    }
+
+    // Set up default PC labeling interface
+    const paneIds = Object.keys(state.user.layout.panes)
+    if (
+      state.task.config.itemType === ItemTypeName.POINT_CLOUD &&
+      paneIds.length === 1
+    ) {
+      Session.dispatch(splitPane(Number(paneIds[0]), SplitType.HORIZONTAL, 0))
+      state = Session.getState()
+      let config =
+        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      Session.dispatch(toggleSelectionLock(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType
+      ))
+      Session.dispatch(splitPane(
+        state.user.layout.maxPaneId,
+        SplitType.VERTICAL,
+        state.user.layout.maxViewerConfigId
+      ))
+      Session.dispatch(updatePane(
+        state.user.layout.maxPaneId, { primarySize: '33%' }
+      ))
+
+      state = Session.getState()
+      config =
+        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      Session.dispatch(toggleSelectionLock(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType
+      ))
+      Session.dispatch(alignToAxis(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType,
+        1
+      ))
+      Session.dispatch(splitPane(
+        state.user.layout.maxPaneId,
+        SplitType.VERTICAL,
+        state.user.layout.maxViewerConfigId
+      ))
+
+      state = Session.getState()
+      config =
+        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      Session.dispatch(toggleSelectionLock(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType
+      ))
+      Session.dispatch(alignToAxis(
+        state.user.layout.maxViewerConfigId,
+        config as PointCloudViewerConfigType,
+        2
+      ))
     }
   }
 }
@@ -193,35 +242,12 @@ function loadImages (): void {
  */
 function loadPointClouds (): void {
   const loader = new PLYLoader()
-  const vertexShader =
-    `
-      varying float zValue;
-      void main() {
-        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-        zValue = position.z;
-        gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `
-  const fragmentShader =
-    `
-      varying float zValue;
-      uniform vec3 low;
-      uniform vec3 high;
-      vec3 getHeatMapColor(float height) {
-        float val = min(1.0, max(0.0, (height + 3.0) / 6.0));
-        return (1.0 - val) * low + val * high;
-      }
-      void main() {
-        gl_FragColor = vec4(getHeatMapColor(zValue), 1.0);
-      }
-    `
 
   const state = Session.getState()
   const items = state.task.items
   Session.pointClouds = []
   for (const item of items) {
-    const pcImageMap: {[id: number]: THREE.Points} = {}
+    const pcImageMap: {[id: number]: THREE.BufferGeometry} = {}
     Session.pointClouds.push(pcImageMap)
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
@@ -231,22 +257,7 @@ function loadPointClouds (): void {
         loader.load(
           url,
           (geometry: THREE.BufferGeometry) => {
-            const material = new THREE.ShaderMaterial({
-              uniforms: {
-                low: {
-                  value: new THREE.Color(0x0000ff)
-                },
-                high: {
-                  value: new THREE.Color(0xffff00)
-                }
-              },
-              vertexShader,
-              fragmentShader,
-              alphaTest: 1.0
-            })
-
-            const particles = new THREE.Points(geometry, material)
-            Session.pointClouds[item.index][sensorId] = particles
+            Session.pointClouds[item.index][sensorId] = geometry
 
             Session.dispatch(loadItem(item.index, sensorId))
           },

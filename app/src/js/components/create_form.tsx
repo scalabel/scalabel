@@ -7,7 +7,7 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import React, { ChangeEvent } from 'react'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { Endpoint, FormField } from '../server/types'
-import { attributeStyle, checkboxStyle, uploadStyle } from '../styles/create'
+import { checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
 // submission timeout
@@ -192,12 +192,17 @@ export default class CreateForm extends React.Component<Props, State> {
                                   label={'Categories*'}
                                   form_id={FormField.CATEGORIES}/>
                     : null}
-            <StyledAttributeUpload required={false}
+            <StyledUpload required={false}
                                    label={'Attributes'}
                                    form_id={FormField.ATTRIBUTES}/>
             <StyledUpload required={false}
                           label={'Label Specification'}
                           form_id={FormField.LABEL_SPEC}
+                          with_json
+            />
+            <StyledUpload required={false}
+                          label={'Sensors'}
+                          form_id={FormField.SENSORS}
                           with_json
             />
           </FormGroup>
@@ -398,6 +403,3 @@ export default class CreateForm extends React.Component<Props, State> {
 }
 const StyledCheckbox = withStyles(checkboxStyle)(Checkbox)
 const StyledUpload = withStyles(uploadStyle)(UploadButton)
-/* Need to have separate class for attribute upload in the case where
-   the categories upload is hidden */
-const StyledAttributeUpload = withStyles(attributeStyle)(StyledUpload)

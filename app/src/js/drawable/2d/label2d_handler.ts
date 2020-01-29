@@ -1,14 +1,13 @@
 import _ from 'lodash'
-import { addLabel, changeLabelProps, changeShapes, linkLabels, unlinkLabels } from '../../action/common'
+import { linkLabels, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
-import { makeTrackPolicy, Track } from '../../common/track'
 import { Key } from '../../common/types'
 import { getLinkedLabelIds } from '../../functional/common'
-import { makeTrack } from '../../functional/states'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
+import { commitLabels } from '../states'
 import { Label2D } from './label2d'
 import { makeDrawableLabel2D } from './label2d_list'
 
@@ -57,6 +56,7 @@ export class Label2DHandler {
         const state = this._state
 
         const label = makeDrawableLabel2D(
+          Session.label2dList,
           state.task.config.labelTypes[state.user.select.labelType],
           state.task.config.label2DTemplates
         )
@@ -90,13 +90,29 @@ export class Label2DHandler {
   public onMouseUp (
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     if (this.hasSelectedLabels() && !this.isKeyDown(Key.META)) {
-      Session.label2dList.selectedLabels.forEach((selectedLabel, index) => {
+      const labelsToRemove: Label2D[] = []
+      Session.label2dList.selectedLabels.forEach((selectedLabel) => {
         selectedLabel.onMouseUp(coord)
         if (selectedLabel !== this._highlightedLabel) {
           selectedLabel.setHighlighted(false)
         }
-        this.commitLabel(index)
+        if (!selectedLabel.isValid() && !selectedLabel.editing) {
+          labelsToRemove.push(selectedLabel)
+        }
       })
+      commitLabels([...Session.label2dList.updatedLabels.values()])
+      Session.label2dList.clearUpdatedLabels()
+
+      for (const label of labelsToRemove) {
+        const labelListIndex = Session.label2dList.labelList.indexOf(label)
+        if (labelListIndex >= 0) {
+          Session.label2dList.labelList.splice(labelListIndex, 1)
+        }
+        const selectedIndex = Session.label2dList.selectedLabels.indexOf(label)
+        if (selectedIndex >= 0) {
+          Session.label2dList.selectedLabels.splice(selectedIndex, 1)
+        }
+      }
     }
   }
 
@@ -109,6 +125,7 @@ export class Label2DHandler {
     if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
       for (const label of Session.label2dList.selectedLabels) {
         label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
+        label.setManual()
       }
       return true
     } else {
@@ -127,60 +144,6 @@ export class Label2DHandler {
       }
     }
     return false
-  }
-
-  /**
-   * commit selectedLabel
-   * @param index
-   */
-  public commitLabel (index: number): void {
-    const selectedLabel = Session.label2dList.selectedLabels[index]
-    const valid = selectedLabel.isValid()
-    const editing = selectedLabel.editing
-    if (valid || editing) {
-      const [shapeIds, shapeTypes, shapeStates] =
-        selectedLabel.shapeStates()
-      if (valid) {
-        if (selectedLabel.labelId < 0) {
-        // Add new label to state
-          if (Session.tracking) {
-            const newTrack = new Track()
-            newTrack.updateState(
-              makeTrack(-1),
-              makeTrackPolicy(newTrack, Session.label2dList.policyType)
-            )
-            newTrack.onLabelCreated(
-              this._selectedItemIndex, selectedLabel, [-1]
-            )
-          } else {
-            const label = selectedLabel.label
-            Session.dispatch(addLabel(
-              this._selectedItemIndex, label, shapeTypes, shapeStates
-            ))
-          }
-        } else {
-        // Update existing label
-          const label = selectedLabel.label
-          Session.dispatch(changeShapes(
-            this._selectedItemIndex, shapeIds, shapeStates
-          ))
-          Session.dispatch(changeLabelProps(
-            this._selectedItemIndex, selectedLabel.labelId, { manual: true }
-          ))
-          if (Session.tracking && label.track in Session.tracks) {
-            Session.tracks[label.track].onLabelUpdated(
-              this._selectedItemIndex,
-              shapeStates
-            )
-          }
-        }
-      }
-    } else {
-      Session.label2dList.labelList.splice(
-        Session.label2dList.labelList.length - 1,
-        1
-      )
-    }
   }
 
   /**
