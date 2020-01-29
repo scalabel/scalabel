@@ -46,8 +46,9 @@ export class RedisCache {
       await this.del(key)
     })
 
-    this.timeout = env.redisTimeout
-    this.timeForWrite = env.timeForWrite
+    // convert from seconds to ms
+    this.timeout = env.redisTimeout * 1000
+    this.timeForWrite = env.timeForWrite * 1000
     this.numActionsForWrite = env.numActionsForWrite
   }
 
@@ -58,9 +59,11 @@ export class RedisCache {
   public async setExWithReminder (
     saveKey: string, value: string, metadata: string) {
     const allMetadata = JSON.stringify([saveKey, metadata])
-    // TODO- make these atomic
-    await this.setEx(saveKey, value, this.timeout)
-    await this.setEx(redisMetaKey(saveKey), allMetadata, this.timeout)
+
+    // Update value and metadata atomically
+    const keys = [saveKey, redisMetaKey(saveKey)]
+    const vals = [value, allMetadata]
+    await this.setAtomic(keys, vals, this.timeout)
 
     // Handle write back to storage
     if (this.numActionsForWrite === 1) {
@@ -90,18 +93,31 @@ export class RedisCache {
    * Wrapper for redis delete
    */
   public async del (key: string) {
-    // const redisDelete = promisify(this.client.del).bind(this.client)
-    // await redisDelete(key)
     this.client.del(key)
+  }
+
+  /**
+   * Update multiple value atomically
+   */
+  public async setAtomic (keys: string[], vals: string[], timeout: number) {
+    const multi = this.client.multi()
+    if (keys.length !== vals.length) {
+      Logger.error(Error('Keys do not match values'))
+      return
+    }
+    for (let i = 0; i < keys.length; i++) {
+      multi.psetex(keys[i], timeout, vals[i])
+    }
+    const multiExecAsync = promisify(multi.exec).bind(multi)
+    await multiExecAsync()
   }
 
   /**
    * Wrapper for redis set with expiration
    */
   public async setEx (key: string, value: string, timeout: number) {
-    const timeoutMs = timeout * 1000
     const redisSetAsync = promisify(this.client.psetex).bind(this.client)
-    await redisSetAsync(key, timeoutMs, value)
+    await redisSetAsync(key, timeout, value)
   }
 
    /**

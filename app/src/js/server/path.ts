@@ -53,10 +53,11 @@ export function getExportName (projectName: string): string {
 }
 
 /**
- * Get redis key for path metadata
+ * Get redis key for associated metadata
+ * this means data that doesn't get written back to storage
  */
 export function redisMetaKey (key: string) {
-  return sprintf('%s^path', key)
+  return sprintf('%s^meta', key)
 }
 
 /**
