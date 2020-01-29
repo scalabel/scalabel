@@ -35,6 +35,7 @@ export const UPDATE_PANE = 'UPDATE_PANE'
 export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
 
+// Note UPDATE_TASK deliberately not included
 export const TASK_ACTION_TYPES = [
   ADD_LABELS,
   CHANGE_SHAPES,
@@ -42,9 +43,7 @@ export const TASK_ACTION_TYPES = [
   LINK_LABELS,
   DELETE_LABELS,
   ADD_TRACK,
-  MERGE_TRACKS,
-  UPDATE_TASK
-]
+  MERGE_TRACKS]
 
 export interface BaseAction {
   /** type of the action */

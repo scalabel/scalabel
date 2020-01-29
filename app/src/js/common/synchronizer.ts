@@ -127,10 +127,14 @@ export class Synchronizer {
           Session.dispatch(updateTask(state.task))
           const actionQueues = Object.keys(this.saveActions).map(
             (key) => this.saveActions[key])
+
+          // re-apply frontend task actions after updating task from backend
           for (const saveActionQueue of actionQueues) {
             for (const saveAction of saveActionQueue.actions) {
-              saveAction.frontendOnly = true
-              Session.dispatch(saveAction)
+              if (types.TASK_ACTION_TYPES.includes(saveAction.type)) {
+                saveAction.frontendOnly = true
+                Session.dispatch(saveAction)
+              }
             }
           }
         }

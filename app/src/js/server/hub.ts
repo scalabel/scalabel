@@ -92,10 +92,11 @@ async function actionUpdate (
   const redisMetadata = await cache.get(path.redisMetaKey(saveKey))
   let actionIdsSaved = new Set<string>()
   if (redisMetadata) {
-    actionIdsSaved = new Set(JSON.parse(redisMetadata)[1])
+    const idData = JSON.parse(redisMetadata)[1]
+    actionIdsSaved = new Set(JSON.parse(idData))
   }
 
-  if (!(actionListId in actionIdsSaved) && taskActions.length > 0) {
+  if (!actionIdsSaved.has(actionListId) && taskActions.length > 0) {
     const state = await loadState(projectName, taskId, cache)
     const store = configureStore(state)
 
