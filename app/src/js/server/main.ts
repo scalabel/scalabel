@@ -48,18 +48,18 @@ async function main (): Promise<void> {
   } catch (error) {
     Logger.error(error)
   }
-    // start http and socket io servers
+  // start http and socket io servers
   const app: Application = express()
   const httpServer = createServer(app)
   const io = socketio(httpServer)
 
-    // set up middleware
+  // set up middleware
   app.use(listeners.LoggingHandler)
 
-    // set up http handlers
+  // set up http handlers
   startHTTPServer(app)
 
-    // set up socket.io handler
+  // set up socket.io handler
   startSocketServer(io)
 
   httpServer.listen(env.port)
