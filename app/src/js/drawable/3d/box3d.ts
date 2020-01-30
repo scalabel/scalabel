@@ -258,7 +258,7 @@ export class Box3D extends Label3D {
     this._shape.color = this._color
     const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
-      state.task.items[itemIndex].shapes[label.shapes[0]]
+      state.task.items[itemIndex].indexedShapes[label.shapes[0]]
     )
   }
 }

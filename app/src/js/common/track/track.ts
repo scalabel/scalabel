@@ -118,7 +118,7 @@ export class Track {
       this._labels[item] = label
       this._shapes[item] = []
       for (const shapeId of label.shapes) {
-        this._shapes[item].push(state.task.items[item].shapes[shapeId])
+        this._shapes[item].push(state.task.items[item].indexedShapes[shapeId])
       }
     }
   }

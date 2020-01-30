@@ -30,7 +30,7 @@ export function getShape (state: State, itemIndex: number,
                           labelId: number, shapeIndex: number): ShapeType {
   const item = state.task.items[itemIndex]
   const shapeId = item.labels[labelId].shapes[shapeIndex]
-  return item.shapes[shapeId].shape
+  return item.indexedShapes[shapeId].shape
 }
 
 /** Check if frame is loaded */

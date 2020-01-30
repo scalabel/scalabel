@@ -92,7 +92,7 @@ export function convertItemToImport (
   const itemImport = makeItem(partialItemImport)
 
   itemImport.labels = labelImports
-  itemImport.shapes = shapeImports
+  itemImport.indexedShapes = shapeImports
 
   return [itemImport, maxLabelId, maxShapeId]
 }
@@ -167,7 +167,7 @@ function convertLabelToImport (
     labelType = LabelTypeName.BOX_2D
     shapeImports.push({
       id: maxShapeId + 1,
-      label: [labelId],
+      labels: [labelId],
       type: shapeType,
       shape: labelExport.box2d
     })
@@ -189,7 +189,7 @@ function convertLabelToImport (
     for (const point of points) {
       shapeImports.push({
         id: maxShapeId + 1,
-        label: [labelId],
+        labels: [labelId],
         type: shapeType,
         shape: point
       })
@@ -201,7 +201,7 @@ function convertLabelToImport (
     labelType = LabelTypeName.BOX_3D
     shapeImports.push({
       id: maxShapeId + 1,
-      label: [labelId],
+      labels: [labelId],
       type: shapeType,
       shape: labelExport.box3d
     })

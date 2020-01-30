@@ -1,8 +1,7 @@
 import { applyMiddleware, createStore, Middleware, Reducer, Store } from 'redux'
 import undoable, { includeAction, StateWithHistory } from 'redux-undo'
 import {
-  ADD_LABELS,
-  DELETE_LABELS
+  DELETE_LABELS, UPDATE_LABELS
 } from '../action/types'
 import { makeState } from '../functional/states'
 import { State } from '../functional/types'
@@ -29,7 +28,7 @@ export function configureStore (
     limit: 20, // add a limit to history
     filter: includeAction([
       // undoable actions
-      ADD_LABELS,
+      UPDATE_LABELS,
       DELETE_LABELS
     ]),
     debug: devMode

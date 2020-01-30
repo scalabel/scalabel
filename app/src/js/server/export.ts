@@ -44,7 +44,7 @@ export function convertItemToExport (
     }
     if (label.shapes.length > 0) {
       const firstShapeId = label.shapes[0]
-      const firstIndexedShape = item.shapes[firstShapeId]
+      const firstIndexedShape = item.indexedShapes[firstShapeId]
       switch (label.type) {
         case LabelTypeName.BOX_2D:
           const box2d = firstIndexedShape.shape as RectType
@@ -84,7 +84,7 @@ export function convertItemToExport (
             const names: string[] = []
             const hidden: boolean[] = []
             for (const shapeId of label.shapes) {
-              const node = item.shapes[shapeId].shape as Node2DType
+              const node = item.indexedShapes[shapeId].shape as Node2DType
               points.push([node.x, node.y])
               names.push(node.name)
               hidden.push(Boolean(node.hidden))

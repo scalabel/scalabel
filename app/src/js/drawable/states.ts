@@ -1,9 +1,8 @@
-
-import { addTrack, changeLabelsProps } from '../action/common'
-import { ADD_LABELS, CHANGE_SHAPES } from '../action/types'
+import _ from 'lodash'
+import { updateLabelsShapesTracks } from '../action/common'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
-import { LabelType, ShapeType } from '../functional/types'
+import { IndexedShapeType, LabelType, ShapeType } from '../functional/types'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
 
@@ -13,11 +12,13 @@ import Label3D from './3d/label3d'
 export function commitLabels (
   updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>
 ) {
-  // Get labels & tracks to commit
-  const updatedShapes: { [index: number]: { [id: number]: ShapeType}} = {}
+  // Get labels, shapes, & tracks to commit
+  const itemIndices: Set<number> = new Set()
+  const updatedShapes: {
+    [index: number]: { [id: number]: IndexedShapeType}
+  } = {}
   const updatedLabels: { [index: number]: { [id: number]: LabelType}} = {}
   const newTracks: Track[] = []
-  const newLabels: Array<Readonly<Label2D | Label3D>> = []
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
     if (drawable.labelId >= 0) {
@@ -45,6 +46,7 @@ export function commitLabels (
             if (label) {
               updatedLabels[index][label.id] = label
             }
+            itemIndices.add(index)
           }
           track.clearUpdatedIndices()
         }
@@ -62,6 +64,7 @@ export function commitLabels (
         }
         updatedLabels[drawable.item][drawable.labelId] =
           drawable.labelState
+        itemIndices.add(drawable.item)
       }
     } else {
       // New labels and tracks
@@ -82,97 +85,27 @@ export function commitLabels (
             parentTrack
           )
           newTracks.push(track)
+          itemIndices.add(drawable.item)
         }
       } else {
-        newLabels.push(drawable)
+        updatedLabels[drawable.item][drawable.labelId] = drawable.labelState
+        itemIndices.add(drawable.item)
       }
     }
   })
 
-  if (Session.tracking && newTracks.length > 0) {
-    // Add new tracks to state
-    for (const track of newTracks) {
-      const indices = []
-      const labels = []
-      const shapes = []
-      for (let i = 0; i < Session.numItems; i++) {
-        const label = track.getLabel(i)
-        if (label) {
-          const indexedShapes = track.getShapes(i)
-          indices.push(i)
-          labels.push(label)
-          shapes.push([...indexedShapes])
-        }
-      }
-      Session.dispatch(addTrack(
-        indices, track.type, labels, shapes
-      ))
+  const allLabels = []
+  const allShapes = []
+  for (const index of itemIndices) {
+    if (index in updatedLabels) {
+      allLabels.push(Object.values(updatedLabels[index]))
     }
-  } else if (!Session.tracking && newLabels.length > 0) {
-    // Add new labels to state
-    const labels = []
-    const shapes = []
-    for (const label of newLabels) {
-      labels.push(label.labelState)
-      for (const shape of label.shapes()) {
-        shapes.push(shape.toState())
-      }
+    if (index in updatedShapes) {
+      allShapes.push(Object.values(updatedShapes[index]))
     }
-    Session.dispatch(
-      {
-        type: ADD_LABELS,
-        sessionId: Session.id,
-        itemIndices: [newLabels[0].item],
-        labels: [labels],
-        indexedShapes: [shapes]
-      }
-    )
   }
 
-  if (Object.keys(updatedShapes).length > 0) {
-    // Update existing shapes
-    const indices = Object.keys(updatedShapes).map((index) => Number(index))
-    const ids = []
-    const shapes = []
-    for (const index of indices) {
-      const indexIds = []
-      const indexShapes = []
-      for (const key of Object.keys(updatedShapes[index])) {
-        const shapeId = Number(key)
-        indexIds.push(shapeId)
-        indexShapes.push(updatedShapes[index][shapeId])
-      }
-      ids.push(indexIds)
-      shapes.push(indexShapes)
-    }
-    Session.dispatch(
-      {
-        type: CHANGE_SHAPES,
-        sessionId: Session.id,
-        itemIndices: indices,
-        shapeIds: ids,
-        shapes
-      }
-    )
-  }
-
-  if (Object.keys(updatedLabels).length > 0) {
-    // Update existing labels
-    const indices = Object.keys(updatedLabels).map((index) => Number(index))
-    const ids = []
-    const labels = []
-    for (const index of indices) {
-      const indexIds = []
-      const indexLabels = []
-      for (const key of Object.keys(updatedLabels[index])) {
-        const shapeId = Number(key)
-        indexIds.push(shapeId)
-        indexLabels.push(updatedLabels[index][shapeId])
-      }
-      ids.push(indexIds)
-      labels.push(indexLabels)
-    }
-    Session.dispatch(changeLabelsProps(indices, ids, labels))
-  }
-  Session.label3dList.clearUpdatedLabels()
+  Session.dispatch(updateLabelsShapesTracks(
+    Array.from(itemIndices), allLabels, allShapes, newTracks
+  ))
 }

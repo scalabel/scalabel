@@ -2,13 +2,13 @@
  * Define string identifiers and interfaces of actions
  */
 import {
-  IndexedShapeType,
-  LabelType,
   PaneType,
+  PartialIndexedShapeType,
+  PartialLabelType,
   Select,
-  ShapeType,
   SplitType,
   TaskType,
+  TrackType,
   ViewerConfigType
 } from '../functional/types'
 
@@ -19,10 +19,7 @@ export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
 
 // Item Level
-export const ADD_LABELS = 'ADD_LABELS'
-export const ADD_SHAPES = 'ADD_SHAPES'
-export const CHANGE_SHAPES = 'CHANGE_SHAPES'
-export const CHANGE_LABELS = 'CHANGE_LABELS'
+export const UPDATE_LABELS = 'UPDATE_LABELS'
 export const LINK_LABELS = 'LINK_LABELS'
 export const UNLINK_LABELS = 'UNLINK_LABELS'
 export const DELETE_LABELS = 'DELETE_LABELS'
@@ -38,9 +35,7 @@ export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
 
 export const TASK_ACTION_TYPES = [
-  ADD_LABELS,
-  CHANGE_SHAPES,
-  CHANGE_LABELS,
+  UPDATE_LABELS,
   LINK_LABELS,
   DELETE_LABELS,
   ADD_TRACK,
@@ -78,58 +73,20 @@ export interface UpdateTaskAction extends BaseAction {
   newTask: TaskType
 }
 
-export interface AddLabelsAction extends BaseAction {
-  /** item of the added label */
+export interface UpdateLabelsAction extends BaseAction {
+  /** Item indices */
   itemIndices: number[]
-  /** labels to add to each item */
-  labels: LabelType[][]
-  /** new shapes to add to each item */
-  indexedShapes: IndexedShapeType[][]
-}
-
-export interface AddShapesAction extends BaseAction {
-  /** item of the added label */
-  itemIndices: number[]
-  /** shapes to add to each item */
-  shapes: IndexedShapeType[][]
-  /** id's of labels that need to be updated in each item */
-  labels: number[][]
-  /** new array of shape id's for each label */
-  labelShapeRefs: number[][]
-}
-
-export interface AddTrackAction extends BaseAction {
-  /** track type */
-  trackType: string
-  /** item of the added label */
-  itemIndices: number[]
-  /** labels to add to each item */
-  labels: LabelType[]
-  /** shapes */
-  indexedShapes: IndexedShapeType[][]
+  /** Labels to be updated per item. Negative id means new label */
+  labels: PartialLabelType[][]
+  /** Shapes to be updated per item. Negative id means new shape */
+  indexedShapes: PartialIndexedShapeType[][]
+  /** Tracks to be added */
+  newTracks: TrackType[]
 }
 
 export interface MergeTrackAction extends BaseAction {
   /** item of the added label */
   trackIds: number[]
-}
-
-export interface ChangeShapesAction extends BaseAction {
-  /** item of the shape */
-  itemIndices: number[]
-  /** Shape ids in each item */
-  shapeIds: number[][]
-  /** properties to update for the shape */
-  shapes: Array<Array<Partial<ShapeType>>>
-}
-
-export interface ChangeLabelsAction extends BaseAction {
-  /** item of the label */
-  itemIndices: number[]
-  /** Label ID */
-  labelIds: number[][]
-  /** properties to update for the shape */
-  props: Array<Array<Partial<LabelType>>>
 }
 
 export interface LinkLabelsAction extends BaseAction {
@@ -210,12 +167,9 @@ export type UserActionType =
   | DeletePaneAction
 
 export type TaskActionType =
-  AddLabelsAction
-  | ChangeShapesAction
-  | ChangeLabelsAction
+  UpdateLabelsAction
   | DeleteLabelsAction
   | LinkLabelsAction
-  | AddTrackAction
   | MergeTrackAction
 
 export type ActionType =

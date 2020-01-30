@@ -128,10 +128,10 @@ export function makePlane (params: {} = {}): Plane3DType {
  * @param {ShapeType} shape
  */
 export function makeIndexedShape (
-    id: number, label: number[], type: string, shape: ShapeType
+    id: number, labels: number[], type: string, shape: ShapeType
   ): IndexedShapeType {
   return {
-    id, label: [...label], type, shape: { ...shape }
+    id, labels: [...labels], type, shape: { ...shape }
   }
 }
 
@@ -262,7 +262,7 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
     videoName: '',
     urls: {},
     labels: {},
-    shapes: {},
+    indexedShapes: {},
     timestamp: -1,
     ...params
   }

@@ -30,15 +30,8 @@ export const reducer: Reducer<State> = (
       return common.updateAll(state)
     case types.UPDATE_TASK:
       return common.updateTask(state, action as types.UpdateTaskAction)
-    case types.ADD_LABELS:
-      return common.addLabels(state, action as types.AddLabelsAction)
-    case types.ADD_TRACK:
-      return common.addTrack(state, action as types.AddTrackAction)
-    case types.CHANGE_SHAPES:
-      return common.changeShapes(state, action as types.ChangeShapesAction)
-    case types.CHANGE_LABELS:
-      return common.changeLabels(
-        state, action as types.ChangeLabelsAction)
+    case types.UPDATE_LABELS:
+      return common.updateLabels(state, action as types.UpdateLabelsAction)
     case types.LINK_LABELS:
       return common.linkLabels(state, action as types.LinkLabelsAction)
     case types.UNLINK_LABELS:

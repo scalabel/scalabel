@@ -4,7 +4,7 @@ import { LabelTypeName } from '../common/types'
 import { makeLabel } from '../functional/states'
 import { updateObject } from '../functional/util'
 import * as actions from './common'
-import { AddLabelsAction, ChangeLabelsAction } from './types'
+import { UpdateLabelsAction } from './types'
 
 /**
  * If tag exists for attribute, updates the label, else create a new label for
@@ -16,8 +16,7 @@ import { AddLabelsAction, ChangeLabelsAction } from './types'
 export function addLabelTag (
   attributeIndex: number,
   selectedIndex: number
-):
-  AddLabelsAction | ChangeLabelsAction {
+): UpdateLabelsAction {
   const state = Session.getState()
   const itemIndex = state.user.select.item
   const attribute = { [attributeIndex]: [selectedIndex] }
@@ -26,8 +25,9 @@ export function addLabelTag (
     const labelId = Number(_.findKey(item.labels))
     const newAttributes = updateObject(item.labels[labelId].attributes,
       attribute)
-    return actions.changeLabelProps(itemIndex, labelId,
-      { attributes: newAttributes })
+    return actions.changeLabel(
+      itemIndex, { id: labelId, attributes: newAttributes }
+    )
   } else {
     const label = makeLabel({
       type: LabelTypeName.TAG,

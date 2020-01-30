@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Session from '../common/session'
 import { LabelTypeName } from '../common/types'
 import { Select, State } from '../functional/types'
-import { changeLabelsProps, changeSelect, deleteLabels } from './common'
+import { changeLabels, changeSelect, deleteLabels } from './common'
 import { deleteTracks, terminateTracks } from './track'
 import * as types from './types'
 
@@ -60,40 +60,6 @@ export function terminateSelectedTracks (
     }
   }
   return terminateTracks(tracks, stopIndex)
-}
-
-/**
- * Change the properties of the label
- * @param {number} itemIndex
- * @param {number} labelId
- * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
- */
-export function changeSelectedLabelsAttributes (
-  state: State,
-  attributes: {[key: number]: number[]}
-  ): types.ChangeLabelsAction {
-  const select = state.user.select
-  const labelIds = Object.values(select.labels)
-  const duplicatedAttributes = labelIds.map(((_id) => ({ attributes })))
-  return changeLabelsProps([select.item], labelIds, [duplicatedAttributes])
-}
-
-/**
- * Change the properties of the label
- * @param {number} itemIndex
- * @param {number} labelId
- * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
- */
-export function changeSelectedLabelsCategories (
-  state: State,
-  category: number[]
-  ): types.ChangeLabelsAction {
-  const select = state.user.select
-  const labelIds = Object.values(select.labels)
-  const duplicatedCategories = labelIds.map(((_id) => ({ category })))
-  return changeLabelsProps([select.item], labelIds, [duplicatedCategories])
 }
 
 /**
@@ -186,4 +152,30 @@ export function selectLabel3dType (
   }
 
   return changeSelect(newSelect)
+}
+
+/**
+ * Change the properties of the label
+ */
+export function changeSelectedLabelsAttributes (
+  state: State,
+  attributes: {[key: number]: number[]}
+  ): types.UpdateLabelsAction {
+  const select = state.user.select
+  const labelIds = Object.values(select.labels[select.item])
+  const duplicatedAttributes = labelIds.map(((id) => ({ id, attributes })))
+  return changeLabels(select.item, duplicatedAttributes)
+}
+
+/**
+ * Change the properties of the label
+ */
+export function changeSelectedLabelsCategories (
+  state: State,
+  category: number[]
+  ): types.UpdateLabelsAction {
+  const select = state.user.select
+  const labelIds = Object.values(select.labels[select.item])
+  const duplicatedCategories = labelIds.map(((id) => ({ id, category })))
+  return changeLabels(select.item, duplicatedCategories)
 }

@@ -30,6 +30,13 @@ export interface LabelType {
   manual: boolean
 }
 
+export type PartialLabelType =
+  Partial<LabelType> &
+  {
+    /** Force id to be present */
+    id: number
+  }
+
 export interface TrackType {
   /** ID of the track */
   id: number
@@ -109,11 +116,22 @@ export interface IndexedShapeType {
   /** ID of the shape */
   id: number
   /** Label ID of the shape */
-  label: number[]
+  labels: number[]
   /** type string of the shape. Value from common/types.ShapeType */
   type: string
   /** Shape data */
   shape: ShapeType
+}
+
+export interface PartialIndexedShapeType {
+  /** id */
+  id: number
+  /** Associated labels */
+  labels?: number[]
+  /** type */
+  type?: string
+  /** Partial shape */
+  shape?: Partial<ShapeType>
 }
 
 export interface ViewerConfigType {
@@ -210,7 +228,7 @@ export interface ItemType {
   /** Labels of the item */
   labels: { [key: number]: LabelType } // list of label
   /** shapes of the labels on this item */
-  shapes: { [key: number]: IndexedShapeType }
+  indexedShapes: { [key: number]: IndexedShapeType }
   /** the timestamp for the item */
   timestamp: number
   /** video item belongs to */

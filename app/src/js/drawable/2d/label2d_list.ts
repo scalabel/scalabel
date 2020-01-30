@@ -239,10 +239,10 @@ export class Label2DList {
 
     // remove any shapes not in the state
     self._shapes = Object.assign({} as typeof self._shapes,
-        _.pick(self._shapes, _.keys(item.shapes)))
+        _.pick(self._shapes, _.keys(item.indexedShapes)))
 
     // update drawable shapes
-    _.forEach(item.shapes, (indexedShape, key) => {
+    _.forEach(item.indexedShapes, (indexedShape, key) => {
       const shapeId = Number(key)
       if (!(shapeId in self._shapes)) {
         const newShape = makeDrawableShape2D(indexedShape.type)

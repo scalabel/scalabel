@@ -1,6 +1,6 @@
 import Session from '../common/session'
 import { IndexedShapeType, LabelType,
-  PaneType, Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
+  PaneType, PartialIndexedShapeType, PartialLabelType, Select, SplitType, TaskType, TrackType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -88,113 +88,61 @@ export function addLabel (
   itemIndex: number,
   label: LabelType,
   shapes: IndexedShapeType[] = []
-): types.AddLabelsAction {
+): types.UpdateLabelsAction {
   return {
-    type: types.ADD_LABELS,
+    type: types.UPDATE_LABELS,
     sessionId: Session.id,
     itemIndices: [itemIndex],
     labels: [[label]],
-    indexedShapes: [shapes]
+    indexedShapes: [shapes],
+    newTracks: []
   }
 }
 
-/**
- * Add a track
- * @param itemIndices
- * @param labels
- * @param shapeTypes
- * @param shapes
- */
-export function addTrack (
-  itemIndices: number[],
-  trackType: string,
-  labels: LabelType[],
-  indexedShapes: IndexedShapeType[][]
-): types.AddTrackAction {
+/** Change labels in item */
+export function changeLabels (
+  itemIndex: number,
+  updates: PartialLabelType[]
+): types.UpdateLabelsAction {
   return {
-    type: types.ADD_TRACK,
-    trackType,
+    type: types.UPDATE_LABELS,
+    sessionId: Session.id,
+    itemIndices: [itemIndex],
+    labels: [updates],
+    indexedShapes: [],
+    newTracks: []
+  }
+}
+
+/** Change existing label */
+export function changeLabel (
+  itemIndex: number,
+  updates: PartialLabelType
+): types.UpdateLabelsAction {
+  return {
+    type: types.UPDATE_LABELS,
+    sessionId: Session.id,
+    itemIndices: [itemIndex],
+    labels: [[updates]],
+    indexedShapes: [],
+    newTracks: []
+  }
+}
+
+/** Add/Update labels, shapes, tracks */
+export function updateLabelsShapesTracks (
+  itemIndices: number[],
+  labels: PartialLabelType[][],
+  indexedShapes: PartialIndexedShapeType[][],
+  newTracks: TrackType[]
+): types.UpdateLabelsAction {
+  return {
+    type: types.UPDATE_LABELS,
     sessionId: Session.id,
     itemIndices,
     labels,
-    indexedShapes
-  }
-}
-
-/**
- * Change the shape of the label
- * @param {number} itemIndex
- * @param {number} shapeId
- * @param {Partial<ShapeType>} props
- * @return {ChangeLabelShapeAction}
- */
-export function changeShapes (
-    itemIndex: number, shapeIds: number[], shapes: Array<Partial<ShapeType>>
-  ): types.ChangeShapesAction {
-  return {
-    type: types.CHANGE_SHAPES,
-    sessionId: Session.id,
-    itemIndices: [itemIndex],
-    shapeIds: [shapeIds],
-    shapes: [shapes]
-  }
-}
-
-/**
- * Change the shape of the label
- * @param {number} itemIndex
- * @param {number} shapeId
- * @param {Partial<ShapeType>} props
- * @return {ChangeLabelShapeAction}
- */
-export function changeLabelShape (
-    itemIndex: number, shapeId: number, shape: Partial<ShapeType>
-  ): types.ChangeShapesAction {
-  return {
-    type: types.CHANGE_SHAPES,
-    sessionId: Session.id,
-    itemIndices: [itemIndex],
-    shapeIds: [[shapeId]],
-    shapes: [[shape]]
-  }
-}
-
-/**
- * Change the properties of the label
- * @param {number} itemIndex
- * @param {number} labelId
- * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
- */
-export function changeLabelProps (
-    itemIndex: number, labelId: number, props: Partial<LabelType>
-  ): types.ChangeLabelsAction {
-  return {
-    type: types.CHANGE_LABELS,
-    sessionId: Session.id,
-    itemIndices: [itemIndex],
-    labelIds: [[labelId]],
-    props: [[props ]]
-  }
-}
-
-/**
- * Change the properties of the labels
- * @param {number} itemIndex
- * @param {number} labelId
- * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
- */
-export function changeLabelsProps (
-  itemIndices: number[], labelIds: number[][],
-  props: Array<Array<Partial<LabelType>>>
-): types.ChangeLabelsAction {
-  return {
-    type: types.CHANGE_LABELS,
-    sessionId: Session.id,
-    itemIndices,
-    labelIds,
-    props
+    indexedShapes,
+    newTracks
   }
 }
 
