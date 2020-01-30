@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { Dispatch } from 'redux'
+import { Dispatch, Middleware } from 'redux'
 import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
 import { updateTask } from '../action/common'
@@ -30,6 +30,8 @@ export class Synchronizer {
   public projectName: string
   /** Index of the task */
   public taskIndex: number
+  /** Middleware executed on action dispatch */
+  public middleware: Middleware
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
@@ -51,27 +53,26 @@ export class Synchronizer {
     )
     this.socket = socket
 
-    const self = this
-    this.socket.on(EventName.CONNECT, self.connectHandler)
-    this.socket.on(EventName.REGISTER_ACK, self.registerAckHandler)
-    this.socket.on(EventName.ACTION_BROADCAST, self.actionBroadcastHandler)
-    this.socket.on(EventName.DISCONNECT, self.disconnectHandler)
-    window.onbeforeunload = self.warningPopup
-  }
+    this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))
+    this.socket.on(EventName.REGISTER_ACK, this.registerAckHandler.bind(this))
+    this.socket.on(EventName.ACTION_BROADCAST,
+      this.actionBroadcastHandler.bind(this))
+    this.socket.on(EventName.DISCONNECT, this.disconnectHandler.bind(this))
+    window.onbeforeunload = this.warningPopup.bind(this)
 
-  /**
-   * Called every time an action is dispatched to the session
-   */
-  public middleware () {
-    return (next: Dispatch) => (action: types.BaseAction) => {
+    /* Called every time an action is dispatched to the session */
+    const self = this
+    this.middleware = () => (
+      next: Dispatch
+    ) => (action: types.BaseAction) => {
       /* Only send back actions that originated locally */
       if (Session.id === action.sessionId && !action.frontendOnly) {
-        this.actionQueue.push(action)
+        self.actionQueue.push(action)
         if (Session.autosave) {
-          this.sendQueuedActions()
+          self.sendQueuedActions()
         } else if (types.TASK_ACTION_TYPES.includes(action.type) &&
-              Session.status !== ConnectionStatus.RECONNECTING &&
-              Session.status !== ConnectionStatus.SAVING) {
+          Session.status !== ConnectionStatus.RECONNECTING &&
+          Session.status !== ConnectionStatus.SAVING) {
           Session.updateStatus(ConnectionStatus.UNSAVED)
         }
       }
