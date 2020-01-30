@@ -19,11 +19,11 @@ import { Shape3D } from './shape3d'
  */
 export class Box3D extends Label3D {
   /** ThreeJS object for rendering shape */
-  private _shape: Cube3D
+  private _cube: Cube3D
 
   constructor (labelList: Label3DList) {
     super(labelList)
-    this._shape = new Cube3D()
+    this._cube = new Cube3D()
     this._temporary = false
   }
 
@@ -42,13 +42,13 @@ export class Box3D extends Label3D {
       sensors = [-1]
     }
 
-    this._label = makeLabel({
+    this._labelState = makeLabel({
       type: LabelTypeName.BOX_3D, id: -1, item: itemIndex,
       category: [category], sensors
     })
 
     if (center) {
-      this._shape.position.copy(center.toThree())
+      this._cube.position.copy(center.toThree())
     }
 
     if (temporary) {
@@ -58,33 +58,33 @@ export class Box3D extends Label3D {
 
   /** Set active camera */
   public set activeCamera (camera: THREE.Camera) {
-    this._shape.setControlSpheres(camera)
+    this._cube.setControlSpheres(camera)
   }
 
   /** Indexed shapes */
   public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
-    if (!this._label) {
+    if (!this._labelState) {
       throw new Error('Uninitialized label')
     }
     return [
-      [this._label.shapes[0]],
+      [this._labelState.shapes[0]],
       [ShapeTypeName.CUBE],
-      [this._shape.toState().shape]
+      [this._cube.toState().shape]
     ]
   }
 
   /** Override set parent */
   public set parent (parent: Label3D | null) {
     this._parent = parent
-    if (parent && this._label) {
-      this._label.parent = parent.labelId
-    } else if (this._label) {
-      this._label.parent = -1
+    if (parent && this._labelState) {
+      this._labelState.parent = parent.labelId
+    } else if (this._labelState) {
+      this._labelState.parent = -1
     }
     if (parent && parent.type === LabelTypeName.PLANE_3D) {
-      this._shape.attachToPlane(parent as Plane3D)
+      this._cube.attachToPlane(parent as Plane3D)
     } else {
-      this._shape.detachFromPlane()
+      this._cube.detachFromPlane()
     }
   }
 
@@ -96,7 +96,7 @@ export class Box3D extends Label3D {
   /** select the label */
   public set selected (s: boolean) {
     this._selected = s
-    this._shape.selected = s
+    this._cube.selected = s
   }
 
   /** return whether label selected */
@@ -108,7 +108,7 @@ export class Box3D extends Label3D {
    * Return a list of the shape for inspection and testing
    */
   public shapes (): Shape3D[] {
-    return [this._shape]
+    return [this._cube]
   }
 
   /**
@@ -116,14 +116,14 @@ export class Box3D extends Label3D {
    * @param {THREE.Scene} scene: ThreeJS Scene Object
    */
   public render (scene: THREE.Scene, camera: THREE.Camera): void {
-    this._shape.render(scene, camera)
+    this._cube.render(scene, camera)
   }
 
   /**
    * move anchor to next corner
    */
   public incrementAnchorIndex (): void {
-    this._shape.incrementAnchorIndex()
+    this._cube.incrementAnchorIndex()
   }
 
   /**
@@ -132,9 +132,9 @@ export class Box3D extends Label3D {
    */
   public onMouseDown (x: number, y: number, camera: THREE.Camera) {
     if (this._temporary) {
-      this._shape.clickInit(x, y, camera)
+      this._cube.clickInit(x, y, camera)
     }
-    return this._shape.shouldDrag()
+    return this._cube.shouldDrag()
   }
 
   /**
@@ -147,43 +147,43 @@ export class Box3D extends Label3D {
 
   /** Handle mouse move */
   public onMouseMove (x: number, y: number, camera: THREE.Camera) {
-    const success = this._shape.drag(x, y, camera)
+    const success = this._cube.drag(x, y, camera)
     if (success) {
       this._temporary = false
+      this._labelList.addUpdatedShape(this._cube)
     }
-    this._labelList.addUpdatedLabel(this)
     return success
   }
 
   /** Rotate */
   public rotate (quaternion: THREE.Quaternion, anchor?: THREE.Vector3) {
-    this._labelList.addUpdatedLabel(this)
-    this._shape.applyQuaternion(quaternion)
+    this._labelList.addUpdatedShape(this._cube)
+    this._cube.applyQuaternion(quaternion)
     if (anchor) {
       const newPosition = new THREE.Vector3()
-      newPosition.copy(this._shape.position)
+      newPosition.copy(this._cube.position)
       newPosition.sub(anchor)
       newPosition.applyQuaternion(quaternion)
       newPosition.add(anchor)
-      this._shape.position.copy(newPosition)
+      this._cube.position.copy(newPosition)
     }
   }
 
   /** Move */
   public move (position: THREE.Vector3): void {
-    this._shape.position.copy(position)
-    this._labelList.addUpdatedLabel(this)
+    this._cube.position.copy(position)
+    this._labelList.addUpdatedShape(this._cube)
   }
 
   /** Translate */
   public translate (delta: THREE.Vector3) {
-    this._labelList.addUpdatedLabel(this)
-    this._shape.position.add(delta)
+    this._labelList.addUpdatedShape(this._cube)
+    this._cube.position.add(delta)
   }
 
   /** Scale */
   public scale (scale: THREE.Vector3, anchor: THREE.Vector3, local: boolean) {
-    this._labelList.addUpdatedLabel(this)
+    this._labelList.addUpdatedShape(this._cube)
     const inverseRotation = new THREE.Quaternion()
     inverseRotation.copy(this.orientation)
     inverseRotation.inverse()
@@ -191,33 +191,33 @@ export class Box3D extends Label3D {
     if (!local) {
       scale = rotateScale(scale, this.orientation)
     }
-    this._shape.scale.multiply(scale)
+    this._cube.scale.multiply(scale)
 
-    this._shape.position.sub(anchor)
-    this._shape.position.applyQuaternion(inverseRotation)
-    this._shape.position.multiply(scale)
-    this._shape.position.applyQuaternion(this.orientation)
-    this._shape.position.add(anchor)
+    this._cube.position.sub(anchor)
+    this._cube.position.applyQuaternion(inverseRotation)
+    this._cube.position.multiply(scale)
+    this._cube.position.applyQuaternion(this.orientation)
+    this._cube.position.add(anchor)
   }
 
   /** center of box */
   public get center (): THREE.Vector3 {
     const position = new THREE.Vector3()
-    this._shape.getWorldPosition(position)
+    this._cube.getWorldPosition(position)
     return position
   }
 
   /** orientation of box */
   public get orientation (): THREE.Quaternion {
     const quaternion = new THREE.Quaternion()
-    this._shape.getWorldQuaternion(quaternion)
+    this._cube.getWorldQuaternion(quaternion)
     return quaternion
   }
 
   /** scale of box */
   public get size (): THREE.Vector3 {
     const scale = new THREE.Vector3()
-    this._shape.getWorldScale(scale)
+    this._cube.getWorldScale(scale)
     return scale
   }
 
@@ -225,9 +225,9 @@ export class Box3D extends Label3D {
   public bounds (local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
     if (!local) {
-      box.copy(this._shape.box.geometry.boundingBox)
-      this._shape.updateMatrixWorld(true)
-      box.applyMatrix4(this._shape.matrixWorld)
+      box.copy(this._cube.box.geometry.boundingBox)
+      this._cube.updateMatrixWorld(true)
+      box.applyMatrix4(this._cube.matrixWorld)
     } else {
       box.setFromCenterAndSize(this.center, this.size)
     }
@@ -240,7 +240,7 @@ export class Box3D extends Label3D {
    */
   public setHighlighted (intersection?: THREE.Intersection) {
     super.setHighlighted(intersection)
-    this._shape.setHighlighted(intersection)
+    this._cube.setHighlighted(intersection)
   }
 
   /**
@@ -255,10 +255,7 @@ export class Box3D extends Label3D {
     labelId: number
   ): void {
     super.updateState(state, itemIndex, labelId)
-    this._shape.color = this._color
-    const label = state.task.items[itemIndex].labels[labelId]
-    this._shape.updateState(
-      state.task.items[itemIndex].indexedShapes[label.shapes[0]]
-    )
+    this._cube = this._shapes[0] as Cube3D
+    this._cube.color = this._color
   }
 }

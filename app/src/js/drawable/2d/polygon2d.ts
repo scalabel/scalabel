@@ -483,6 +483,7 @@ export class Polygon2D extends Label2D {
       this._points[i].x = this._startingPoints[i].x + delta.x
       this._points[i].y = this._startingPoints[i].y + delta.y
     }
+    this.setAllShapesUpdated()
   }
 
   /**
@@ -497,6 +498,7 @@ export class Polygon2D extends Label2D {
       // First point for the polygon
       const newPoint = new PathPoint2D()
       newPoint.updateState(makeIndexedShape(
+        -1,
         -1,
         [this.labelId],
         ShapeTypeName.PATH_POINT_2D,
@@ -521,6 +523,7 @@ export class Polygon2D extends Label2D {
       this._points.push(midPoint)
       const newPoint = new PathPoint2D()
       newPoint.updateState(makeIndexedShape(
+        -1,
         -1,
         [this.labelId],
         ShapeTypeName.PATH_POINT_2D,
@@ -672,6 +675,7 @@ export class Polygon2D extends Label2D {
           (selectedLabelIndex + 2) % numPoints]
         nextPoint.copy(this.getMidpoint(point, nextVertex))
       }
+      this._labelList.addUpdatedShape(point)
     }
   }
 

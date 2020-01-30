@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { Cursor, Key, ShapeTypeName } from '../../common/types'
+import { Cursor, Key } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { Label2DTemplateType, LabelType, Node2DType, ShapeType, State } from '../../functional/types'
+import { Label2DTemplateType, LabelType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
@@ -252,6 +252,7 @@ export class CustomLabel2D extends Label2D {
         new Vector2D(oppositeCorner.x ,oppositeCorner.y),
         new Vector2D(xScale, yScale)
       )
+      this.setAllShapesUpdated()
     } else if (this._highlightedHandle >= 0) {
       if (this._highlightedHandle < this._nodes.length) {
         // Move single point
@@ -266,7 +267,7 @@ export class CustomLabel2D extends Label2D {
           shape.y += delta.y
         }
       }
-      this._labelList.addUpdatedLabel(this)
+      this.setAllShapesUpdated()
     }
     this._mouseDownCoord.x = coord.x
     this._mouseDownCoord.y = coord.y
@@ -304,15 +305,6 @@ export class CustomLabel2D extends Label2D {
     super.updateState(labelState)
     this._nodes = [...this._shapes as Node2D[]]
     this.updateBounds()
-  }
-
-  /** Get shape id's and shapes for updating */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
-    const shapeTypes = this._nodes.map(() => ShapeTypeName.NODE_2D)
-    const shapeStates: Node2DType[] = this._nodes.map(
-      (shape) => shape.toState().shape as Node2DType
-    )
-    return [this._labelState.shapes, shapeTypes, shapeStates]
   }
 
   /** update bounds to current points */

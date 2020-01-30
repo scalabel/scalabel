@@ -1,13 +1,31 @@
 import _ from 'lodash'
 import * as THREE from 'three'
 import { policyFromString } from '../../common/track/track'
-import { LabelTypeName, TrackPolicyType } from '../../common/types'
+import { LabelTypeName, ShapeTypeName, TrackPolicyType } from '../../common/types'
 import { makeState } from '../../functional/states'
 import { State } from '../../functional/types'
 import { Box3D } from './box3d'
 import { TransformationControl } from './control/transformation_control'
+import { Cube3D } from './cube3d'
+import { Grid3D } from './grid3d'
 import { Label3D, labelTypeFromString } from './label3d'
 import { Plane3D } from './plane3d'
+import { Shape3D } from './shape3d'
+
+/**
+ * Make a new drawable shape based on type
+ */
+export function makeDrawableShape3D (
+  shapeType: string
+): Shape3D | null {
+  switch (shapeType) {
+    case ShapeTypeName.CUBE:
+      return new Cube3D()
+    case ShapeTypeName.GRID:
+      return new Grid3D()
+  }
+  return null
+}
 
 /**
  * Make a new drawable label based on the label type
@@ -35,6 +53,8 @@ export class Label3DList {
 
   /** Scalabel id to labels */
   private _labels: {[labelId: number]: Label3D}
+  /** shape id to shape drawable map */
+  private _shapes: {[shapeId: number]: Shape3D}
   /** ThreeJS Object id to labels */
   private _raycastMap: {[id: number]: Label3D}
   /** Recorded state of last update */
@@ -47,13 +67,18 @@ export class Label3DList {
   private _raycastableShapes: Readonly<Array<Readonly<THREE.Object3D>>>
   /** callbacks */
   private _callbacks: Array<() => void>
-  /** New labels to be committed */
+  /** Labels to be committed */
   private _updatedLabels: Set<Label3D>
+  /** Shapes to be committed */
+  private _updatedShapes: Set<Shape3D>
+  /** next temporary shape id */
+  private _temporaryShapeId: number
 
   constructor () {
     this.control = new TransformationControl()
     this.control.layers.enableAll()
     this._labels = {}
+    this._shapes = {}
     this._raycastMap = {}
     this._selectedLabel = null
     this._scene = new THREE.Scene()
@@ -62,6 +87,8 @@ export class Label3DList {
     this._state = makeState()
     this._callbacks = []
     this._updatedLabels = new Set()
+    this._updatedShapes = new Set()
+    this._temporaryShapeId = -1
   }
 
   /**
@@ -85,9 +112,17 @@ export class Label3DList {
   }
 
   /** Get label by id */
-  public get (id: number): Label3D | null {
+  public getLabel (id: number): Label3D | null {
     if (id in this._labels) {
       return this._labels[id]
+    }
+    return null
+  }
+
+  /** Get shape by id */
+  public getShape (id: number): Shape3D | null {
+    if (id in this._shapes) {
+      return this._shapes[id]
     }
     return null
   }
@@ -154,6 +189,7 @@ export class Label3DList {
   public updateState (state: State): void {
     this._state = state
 
+    const newShapes: {[labelId: number]: Shape3D} = {}
     const newLabels: {[labelId: number]: Label3D} = {}
     const newRaycastableShapes: Array<Readonly<THREE.Object3D>> = [this.control]
     const newRaycastMap: {[id: number]: Label3D} = {}
@@ -173,6 +209,24 @@ export class Label3DList {
         }
       }
     }
+
+    for (const key of Object.keys(item.indexedShapes)) {
+      const shapeId = Number(key)
+      const indexedShape = item.indexedShapes[shapeId]
+      if (!(shapeId in this._shapes)) {
+        const newShape = makeDrawableShape3D(indexedShape.type)
+        if (newShape) {
+          newShapes[shapeId] = newShape
+        }
+      }
+      if (shapeId in this._shapes) {
+        const drawableShape = this._shapes[shapeId]
+        drawableShape.updateState(indexedShape)
+        newShapes[shapeId] = drawableShape
+      }
+    }
+
+    this._shapes = newShapes
 
     // Update & create labels
     for (const key of Object.keys(item.labels)) {
@@ -280,5 +334,30 @@ export class Label3DList {
   /** Clear uncommitted label list */
   public clearUpdatedLabels () {
     this._updatedLabels.clear()
+  }
+
+  /** Get uncommitted labels */
+  public get updatedShapes (): Readonly<Set<Readonly<Shape3D>>> {
+    return this._updatedShapes
+  }
+
+  /** Add temporary shape */
+  public addTemporaryShape (shape: Shape3D) {
+    this._shapes[this._temporaryShapeId] = shape
+    shape.id = this._temporaryShapeId
+    this._temporaryShapeId--
+    this.addUpdatedShape(shape)
+    return shape
+  }
+
+  /** Push updated label to array */
+  public addUpdatedShape (label: Shape3D) {
+    this._updatedShapes.add(label)
+  }
+
+  /** Clear uncommitted label list */
+  public clearUpdatedShapes () {
+    this._updatedShapes.clear()
+    this._temporaryShapeId = -1
   }
 }

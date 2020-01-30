@@ -196,13 +196,13 @@ export class Cube3D extends Shape3D {
 
   /** update parameters */
   public updateState (
-    indexedShape: IndexedShapeType, activeCamera?: THREE.Camera
+    indexedShape: IndexedShapeType
   ) {
     const geometry = this._box.geometry as THREE.Geometry
     for (const face of geometry.faces) {
       face.color.fromArray(this._color)
     }
-    super.updateState(indexedShape, activeCamera)
+    super.updateState(indexedShape)
     const cube = indexedShape.shape as CubeType
     this.position.copy((new Vector3D()).fromState(cube.center).toThree())
     this.rotation.copy(

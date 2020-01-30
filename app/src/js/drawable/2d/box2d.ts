@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { LabelType, ShapeType, State } from '../../functional/types'
+import { LabelType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -195,6 +195,7 @@ export class Box2D extends Label2D {
     rect.w = Math.min(x2 - x1)
     rect.h = Math.min(y2 - y1)
     this.updatePoints()
+    this.setAllShapesUpdated()
   }
 
   /**
@@ -215,6 +216,7 @@ export class Box2D extends Label2D {
     rect.w = this._startingRect.w
     rect.h = this._startingRect.h
     this.updatePoints()
+    this.setAllShapesUpdated()
   }
 
   /**
@@ -284,27 +286,27 @@ export class Box2D extends Label2D {
     return
   }
 
-  /** Get shape objects for committing to state */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
-    return [
-      this._labelState.shapes,
-      [ShapeTypeName.RECT],
-      [this._shapes[0].toState().shape]
-    ]
-  }
-
   /** Initialize this label to be temporary */
   public initTemp (state: State, start: Vector2D): void {
     super.initTemp(state, start)
+
     const itemIndex = state.user.select.item
+    const rect = new Rect2D()
+    this._labelList.addTemporaryShape(rect)
+    rect.associateLabel(this)
+    rect.x = start.x
+    rect.y = start.y
+    rect.w = 0
+    rect.h = 0
+    this._shapes = [rect]
+
     this._labelState = makeLabel({
       type: LabelTypeName.BOX_2D, id: -1, item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
-      order: this.order
+      order: this.order,
+      shapes: [this._shapes[0].id]
     })
-
-    this._shapes = [new Rect2D(start.x, start.y, 0, 0)]
     this._highlightedHandle = Handles.BOTTOM_RIGHT
     this.updatePoints()
   }

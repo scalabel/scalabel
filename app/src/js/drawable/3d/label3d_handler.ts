@@ -104,7 +104,10 @@ export class Label3DHandler {
     if (!consumed && Session.label3dList.selectedLabel) {
       Session.label3dList.selectedLabel.onMouseUp()
     }
-    commitLabels([...Session.label3dList.updatedLabels.values()])
+    commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        [...Session.label3dList.updatedShapes.values()]
+      )
     Session.label3dList.clearUpdatedLabels()
     // Set current label as selected label
     if (
@@ -187,7 +190,10 @@ export class Label3DHandler {
             this._sensorIds
           )
           Session.label3dList.addUpdatedLabel(label)
-          commitLabels([...Session.label3dList.updatedLabels.values()])
+          commitLabels(
+            [...Session.label3dList.updatedLabels.values()],
+            [...Session.label3dList.updatedShapes.values()]
+          )
           Session.label3dList.clearUpdatedLabels()
           return true
         }
@@ -219,7 +225,10 @@ export class Label3DHandler {
             Session.label3dList.selectedLabel.move(
               (new Vector3D()).fromState(target).toThree()
             )
-            commitLabels([...Session.label3dList.updatedLabels.values()])
+            commitLabels(
+              [...Session.label3dList.updatedLabels.values()],
+              [...Session.label3dList.updatedShapes.values()]
+            )
             Session.label3dList.clearUpdatedLabels()
           }
         }

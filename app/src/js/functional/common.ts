@@ -131,10 +131,21 @@ function addLabelsAndShapesToItem (
     }
   }
 
-  // Enforce immutability
-  labels = _.cloneDeep(labels)
-  indexedShapes = _.cloneDeep(indexedShapes)
-  item = updateObject(item, { labels, indexedShapes })
+  const newLabels: {[id: number]: LabelType} = {}
+  const newIndexedShapes: {[id: number]: IndexedShapeType} = {}
+  for (const label of labels) {
+    newLabels[label.id] = _.cloneDeep(label)
+  }
+  for (const indexedShape of indexedShapes) {
+    newIndexedShapes[indexedShape.id] = _.cloneDeep(indexedShape)
+  }
+
+  item = updateObject(item,
+    {
+      labels: updateObject(item.labels, newLabels),
+      indexedShapes: updateObject(item.indexedShapes, newIndexedShapes)
+    }
+  )
   return item
 }
 
@@ -194,7 +205,7 @@ export function updateLabels (
     )
     newLabels.push(newItemLabels.map((label) => {
       const newLabel = makeLabel(label)
-      const newId = maxLabelId
+      const newId = maxLabelId + 1
       labelIdMap[label.id] = newId
       newLabel.id = newId
       maxLabelId++
@@ -218,11 +229,12 @@ export function updateLabels (
       }
       const newIndexedShape = makeIndexedShape(
         indexedShape.id,
+        indexedShape.item,
         indexedShape.labels,
         indexedShape.type,
         indexedShape.shape as ShapeType
       )
-      const newId = maxShapeId
+      const newId = maxShapeId + 1
       shapeIdMap[indexedShape.id] = newId
       newIndexedShape.id = newId
       maxShapeId++
@@ -237,9 +249,10 @@ export function updateLabels (
     )
 
   const labelIdReplacer = (indexedShape: PartialIndexedShapeType) =>
-    ((indexedShape.labels) ? indexedShape.labels : []).map((labelId) =>
-    (labelId < 0) ? labelIdMap[labelId] : labelId
-  )
+    indexedShape.labels =
+      ((indexedShape.labels) ? indexedShape.labels : []).map((labelId) =>
+        (labelId < 0) ? labelIdMap[labelId] : labelId
+      )
 
   newLabels.forEach((itemLabels) => itemLabels.forEach(shapeIdReplacer))
   updatedLabels.forEach((itemLabels) => itemLabels.forEach(shapeIdReplacer))
@@ -274,8 +287,8 @@ export function updateLabels (
     selectedItems, newLabels, newIndexedShapes
   )
 
-  newItems = changeLabelsInItems(selectedItems, updatedLabels)
-  newItems = changeShapesInItems(selectedItems, updatedIndexedShapes)
+  newItems = changeLabelsInItems(newItems, updatedLabels)
+  newItems = changeShapesInItems(newItems, updatedIndexedShapes)
   items = assignToArray(items, newItems, action.itemIndices)
   // Find the first new label in the selected item if the labels are created
   // by this session.
@@ -337,7 +350,7 @@ function mergeTracksInItems (
   for (let i = 1; i < tracks.length; i += 1) {
     _.forEach(tracks[i].labels, (labelId, itemIndex) => {
       props[Number(itemIndex)].push(
-        { id: labelId, track: tracks[0].id }
+        { id: labelId, item: Number(itemIndex), track: tracks[0].id }
       )
     })
     track.labels = { ...track.labels, ...tracks[i].labels }
@@ -387,7 +400,9 @@ function changeShapesInItem (
     }
     newIndexedShapes[indexedShape.id] = newIndexedShape
   })
-  return { ...item, indexedShapes: newIndexedShapes }
+  return {
+    ...item, indexedShapes: updateObject(item.indexedShapes, newIndexedShapes)
+  }
 }
 
 /**

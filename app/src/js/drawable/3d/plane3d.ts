@@ -14,13 +14,13 @@ import { Shape3D } from './shape3d'
  */
 export class Plane3D extends Label3D {
   /** ThreeJS object for rendering shape */
-  private _shape: Grid3D
+  private _grid: Grid3D
   /** temporary shape */
   private _temporaryLabel: Label3D | null
 
   constructor (labelList: Label3DList) {
     super(labelList)
-    this._shape = new Grid3D()
+    this._grid = new Grid3D()
     this._temporaryLabel = null
   }
 
@@ -39,7 +39,7 @@ export class Plane3D extends Label3D {
    * @param {THREE.Scene} scene: ThreeJS Scene Object
    */
   public render (scene: THREE.Scene, _camera: THREE.Camera): void {
-    this._shape.render(scene)
+    this._grid.render(scene)
   }
 
   /**
@@ -48,7 +48,7 @@ export class Plane3D extends Label3D {
    */
   public setHighlighted (intersection?: THREE.Intersection) {
     super.setHighlighted(intersection)
-    this._shape.setHighlighted(intersection)
+    this._grid.setHighlighted(intersection)
   }
 
   /**
@@ -57,21 +57,21 @@ export class Plane3D extends Label3D {
    */
   public onMouseDown (x: number, y: number, camera: THREE.Camera) {
     if (
-      this._label &&
+      this._labelState &&
       (this.selected || this.anyChildSelected()) &&
       this._labelList.currentLabelType === LabelTypeName.BOX_3D
     ) {
       this._temporaryLabel = new Box3D(this._labelList)
       this._temporaryLabel.init(
-        this._label.item,
+        this._labelState.item,
         0,
         undefined,
-        this._label.sensors,
+        this._labelState.sensors,
         true
       )
       this.addChild(this._temporaryLabel)
       for (const shape of this._temporaryLabel.shapes()) {
-        this._shape.attach(shape)
+        this._grid.attach(shape)
       }
       return this._temporaryLabel.onMouseDown(x, y, camera)
     }
@@ -104,17 +104,17 @@ export class Plane3D extends Label3D {
 
   /** Rotate */
   public rotate (quaternion: THREE.Quaternion) {
-    this._labelList.addUpdatedLabel(this)
-    this._shape.applyQuaternion(quaternion)
+    this._labelList.addUpdatedShape(this._grid)
+    this._grid.applyQuaternion(quaternion)
     for (const child of this.children) {
-      child.rotate(quaternion, this._shape.position)
+      child.rotate(quaternion, this._grid.position)
     }
   }
 
   /** Translate */
   public translate (delta: THREE.Vector3) {
-    this._labelList.addUpdatedLabel(this)
-    this._shape.position.add(delta)
+    this._labelList.addUpdatedShape(this._grid)
+    this._grid.position.add(delta)
     for (const child of this.children) {
       child.translate(delta)
     }
@@ -122,42 +122,42 @@ export class Plane3D extends Label3D {
 
   /** Scale */
   public scale (scale: THREE.Vector3, anchor: THREE.Vector3) {
-    this._labelList.addUpdatedLabel(this)
-    this._shape.scale.x *= scale.x
-    this._shape.scale.y *= scale.y
-    this._shape.position.sub(anchor)
-    this._shape.position.multiply(scale)
-    this._shape.position.add(anchor)
+    this._labelList.addUpdatedShape(this._grid)
+    this._grid.scale.x *= scale.x
+    this._grid.scale.y *= scale.y
+    this._grid.position.sub(anchor)
+    this._grid.position.multiply(scale)
+    this._grid.position.add(anchor)
   }
 
   /** Move */
   public move (position: THREE.Vector3): void {
-    this._shape.position.copy(position)
-    this._labelList.addUpdatedLabel(this)
+    this._grid.position.copy(position)
+    this._labelList.addUpdatedShape(this._grid)
   }
 
   /** center of plane */
   public get center (): THREE.Vector3 {
-    return this._shape.position
+    return this._grid.position
   }
 
   /** orientation of plane */
   public get orientation (): THREE.Quaternion {
-    return this._shape.quaternion
+    return this._grid.quaternion
   }
 
   /** scale of plane */
   public get size (): THREE.Vector3 {
-    return this._shape.scale
+    return this._grid.scale
   }
 
   /** bounds of plane */
   public bounds (local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
     if (!local) {
-      box.copy(this._shape.lines.geometry.boundingBox)
-      this._shape.updateMatrixWorld(true)
-      box.applyMatrix4(this._shape.matrixWorld)
+      box.copy(this._grid.lines.geometry.boundingBox)
+      this._grid.updateMatrixWorld(true)
+      box.applyMatrix4(this._grid.matrixWorld)
     } else {
       box.setFromCenterAndSize(this.center, this.size)
     }
@@ -171,27 +171,10 @@ export class Plane3D extends Label3D {
   public updateState (
     state: State,
     itemIndex: number,
-    labelId: number,
-    activeCamera?: THREE.Camera
+    labelId: number
   ): void {
     super.updateState(state, itemIndex, labelId)
-
-    if (this._label) {
-      this._shape.updateState(
-        state.task.items[itemIndex].indexedShapes[this._label.shapes[0]],
-        activeCamera
-      )
-
-      const currentChildren = [...this._children]
-      for (const child of currentChildren) {
-        if (!this._label.children.includes(child.labelId)) {
-          this.removeChild(child)
-          for (const shape of child.shapes()) {
-            this._shape.remove(shape)
-          }
-        }
-      }
-    }
+    this._grid = this._shapes[0] as Grid3D
   }
 
   /**
@@ -204,12 +187,12 @@ export class Plane3D extends Label3D {
     center?: Vector3D,
     sensors?: number[]
   ): void {
-    this._label = makeLabel({
+    this._labelState = makeLabel({
       type: LabelTypeName.PLANE_3D, id: -1, item: itemIndex,
       category: [category], sensors
     })
     if (center) {
-      this._shape.center = center
+      this._grid.center = center
     }
   }
 
@@ -217,18 +200,18 @@ export class Plane3D extends Label3D {
    * Return a list of the shape for inspection and testing
    */
   public shapes (): Shape3D[] {
-    return [this._shape]
+    return [this._grid]
   }
 
   /** State representation of shape */
   public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
-    if (!this._label) {
+    if (!this._labelState) {
       throw new Error('Uninitialized label')
     }
     return [
-      [this._label.shapes[0]],
+      [this._labelState.shapes[0]],
       [ShapeTypeName.GRID],
-      [this._shape.toState().shape]
+      [this._grid.toState().shape]
     ]
   }
 }

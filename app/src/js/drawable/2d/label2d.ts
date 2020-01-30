@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, ShapeTypeName } from '../../common/types'
+import { Cursor } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { LabelType, ShapeType, State } from '../../functional/types'
+import { LabelType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, getColorById } from '../util'
@@ -323,9 +323,6 @@ export abstract class Label2D {
    */
   public abstract onKeyUp (e: string): void
 
-  /** Get shape id's and shapes for updating */
-  public abstract shapeStates (): [number[], ShapeTypeName[], ShapeType[]]
-
   /**
    * Initialize this label to be temporary
    * @param {State} state
@@ -357,6 +354,13 @@ export abstract class Label2D {
           throw new Error(`Could not find shape with id ${shapeId}`)
         }
       }
+    }
+  }
+
+  /** Add all shapes as updated to label list */
+  protected setAllShapesUpdated () {
+    for (const shape of this._shapes) {
+      this._labelList.addUpdatedShape(shape)
     }
   }
 }

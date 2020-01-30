@@ -35,6 +35,8 @@ export type PartialLabelType =
   {
     /** Force id to be present */
     id: number
+    /** Force item to be present */
+    item: number
   }
 
 export interface TrackType {
@@ -109,12 +111,19 @@ export interface Plane3DType {
   orientation: Vector3Type
 }
 
-export type ShapeType = RectType | CubeType |
-                        Point2DType | PathPoint2DType | Plane3DType
+export type ShapeType =
+  | RectType
+  | CubeType
+  | Point2DType
+  | PathPoint2DType
+  | Plane3DType
+  | {}
 
 export interface IndexedShapeType {
   /** ID of the shape */
   id: number
+  /** item index */
+  item: number
   /** Label ID of the shape */
   labels: number[]
   /** type string of the shape. Value from common/types.ShapeType */
@@ -126,6 +135,8 @@ export interface IndexedShapeType {
 export interface PartialIndexedShapeType {
   /** id */
   id: number
+  /** item */
+  item: number
   /** Associated labels */
   labels?: number[]
   /** type */

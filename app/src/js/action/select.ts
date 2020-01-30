@@ -163,7 +163,8 @@ export function changeSelectedLabelsAttributes (
   ): types.UpdateLabelsAction {
   const select = state.user.select
   const labelIds = Object.values(select.labels[select.item])
-  const duplicatedAttributes = labelIds.map(((id) => ({ id, attributes })))
+  const duplicatedAttributes =
+    labelIds.map(((id) => ({ id, item: select.item, attributes })))
   return changeLabels(select.item, duplicatedAttributes)
 }
 
@@ -176,6 +177,7 @@ export function changeSelectedLabelsCategories (
   ): types.UpdateLabelsAction {
   const select = state.user.select
   const labelIds = Object.values(select.labels[select.item])
-  const duplicatedCategories = labelIds.map(((id) => ({ id, category })))
+  const duplicatedCategories =
+    labelIds.map(((id) => ({ id, item: select.item, category })))
   return changeLabels(select.item, duplicatedCategories)
 }

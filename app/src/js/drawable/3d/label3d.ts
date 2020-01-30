@@ -24,7 +24,7 @@ export function labelTypeFromString (type: string): LabelTypeName {
  */
 export abstract class Label3D {
   /** the corresponding label in the state */
-  protected _label: LabelType
+  protected _labelState: LabelType
   /** whether the label is selected */
   protected _selected: boolean
   /** whether the label is highlighted */
@@ -39,9 +39,11 @@ export abstract class Label3D {
   protected _temporary: boolean
   /** label list this belongs to */
   protected _labelList: Label3DList
+  /** Shapes */
+  protected _shapes: Shape3D[]
 
   constructor (labelList: Label3DList) {
-    this._label = makeLabel()
+    this._labelState = makeLabel()
     this._selected = false
     this._highlighted = false
     this._color = [0, 0, 0, 1]
@@ -49,6 +51,7 @@ export abstract class Label3D {
     this._children = []
     this._temporary = false
     this._labelList = labelList
+    this._shapes = []
   }
 
   /** Get label list */
@@ -58,40 +61,40 @@ export abstract class Label3D {
 
   /** get label id */
   public get labelId (): number {
-    return this._label.id
+    return this._labelState.id
   }
 
   /** get track id */
   public get trackId (): number {
-    return this._label.track
+    return this._labelState.track
   }
 
   /** get item index */
   public get item (): number {
-    return this._label.item
+    return this._labelState.item
   }
 
   /** get label type */
   public get type (): string {
-    return labelTypeFromString(this._label.type)
+    return labelTypeFromString(this._labelState.type)
   }
 
   /** get whether label was manually drawn */
   public get manual (): boolean {
-    return this._label.manual
+    return this._labelState.manual
   }
 
   /** set whether label was manually drawn */
   public setManual () {
-    this._label.manual = true
+    this._labelState.manual = true
   }
 
   /** get label state */
   public get labelState (): Readonly<LabelType> {
-    if (!this._label) {
+    if (!this._labelState) {
       throw new Error('Label uninitialized')
     }
-    return this._label
+    return this._labelState
   }
 
   /** Get parent label */
@@ -102,10 +105,10 @@ export abstract class Label3D {
   /** Set parent label */
   public set parent (parent: Label3D | null) {
     this._parent = parent
-    if (parent && this._label) {
-      this._label.parent = parent.labelId
-    } else if (this._label) {
-      this._label.parent = -1
+    if (parent && this._labelState) {
+      this._labelState.parent = parent.labelId
+    } else if (this._labelState) {
+      this._labelState.parent = -1
     }
   }
 
@@ -160,8 +163,8 @@ export abstract class Label3D {
       }
       this._children.push(child)
       child.parent = this
-      if (this._label) {
-        this._label.children.push(child.labelId)
+      if (this._labelState) {
+        this._labelState.children.push(child.labelId)
       }
     }
   }
@@ -172,10 +175,10 @@ export abstract class Label3D {
     if (index >= 0) {
       this._children.splice(index, 1)
       child.parent = null
-      if (this._label) {
-        const stateIndex = this._label.children.indexOf(child.labelId)
+      if (this._labelState) {
+        const stateIndex = this._labelState.children.indexOf(child.labelId)
         if (stateIndex >= 0) {
-          this._label.children.splice(stateIndex, 1)
+          this._labelState.children.splice(stateIndex, 1)
         }
       }
     }
@@ -183,16 +186,16 @@ export abstract class Label3D {
 
   /** get category */
   public get category (): number[] {
-    if (this._label && this._label.category) {
-      return this._label.category
+    if (this._labelState && this._labelState.category) {
+      return this._labelState.category
     }
     return []
   }
 
   /** get attributes */
   public get attributes (): {[key: number]: number[]} {
-    if (this._label && this._label.attributes) {
-      return this._label.attributes
+    if (this._labelState && this._labelState.attributes) {
+      return this._labelState.attributes
     }
     return {}
   }
@@ -285,14 +288,25 @@ export abstract class Label3D {
     labelId: number
   ): void {
     const item = state.task.items[itemIndex]
-    this._label = _.cloneDeep(item.labels[labelId])
+    this._labelState = _.cloneDeep(item.labels[labelId])
     this._color = getColorById(this.labelId, this.trackId)
     const select = state.user.select
-    if (this._label.item in select.labels &&
-        select.labels[this._label.item].includes(labelId)) {
+    if (this._labelState.item in select.labels &&
+        select.labels[this._labelState.item].includes(labelId)) {
       this.selected = true
     } else {
       this.selected = false
+    }
+    this._shapes = []
+    for (const shapeId of this._labelState.shapes) {
+      if (!(shapeId in this._shapes)) {
+        const shape = this._labelList.getShape(shapeId)
+        if (shape) {
+          this._shapes.push(shape)
+        } else {
+          throw new Error(`Could not find shape with id ${shapeId}`)
+        }
+      }
     }
   }
 }

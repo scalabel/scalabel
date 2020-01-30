@@ -1,5 +1,5 @@
 import { ShapeTypeName } from '../../common/types'
-import { makeRect } from '../../functional/states'
+import { makeIndexedShape, makeRect } from '../../functional/states'
 import { IndexedShapeType, RectType } from '../../functional/types'
 import { Context2D, toCssColor } from '../util'
 import { Shape2D } from './shape2d'
@@ -33,11 +33,13 @@ export class Rect2D extends Shape2D {
   private _rectState: RectType
   constructor (x: number = 0, y: number = 0, w: number = 0, h: number = 0) {
     super()
+    this._rectState = makeRect()
+    this._indexedShape =
+      makeIndexedShape(-1, -1, [], ShapeTypeName.RECT, this._rectState)
     this.x = x
     this.y = y
     this.w = w
     this.h = h
-    this._rectState = makeRect()
   }
 
   /** type */
@@ -116,9 +118,7 @@ export class Rect2D extends Shape2D {
    */
   public updateState (indexedShape: IndexedShapeType) {
     super.updateState(indexedShape)
-    if (this._indexedShape) {
-      this._rectState = this._indexedShape.shape as RectType
-    }
+    this._rectState = this._indexedShape.shape as RectType
   }
 
   /** Copy other rect */

@@ -30,6 +30,19 @@ export abstract class Shape3D extends THREE.Object3D {
     return -1
   }
 
+  /** Set shape id */
+  public set id (id: number) {
+    this._id = id
+  }
+
+  /** Get item */
+  public get item (): number {
+    if (this._indexedShape) {
+      return this._indexedShape.item
+    }
+    return -1
+  }
+
   /** Get selected */
   public get selected (): boolean {
     return this._selected
@@ -45,7 +58,7 @@ export abstract class Shape3D extends THREE.Object3D {
 
   /** update parameters */
   public updateState (
-    indexedShape: IndexedShapeType, _activeCamera?: THREE.Camera
+    indexedShape: IndexedShapeType
   ) {
     this._indexedShape = indexedShape
   }

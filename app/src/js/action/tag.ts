@@ -26,7 +26,7 @@ export function addLabelTag (
     const newAttributes = updateObject(item.labels[labelId].attributes,
       attribute)
     return actions.changeLabel(
-      itemIndex, { id: labelId, attributes: newAttributes }
+      itemIndex, { id: labelId, item: itemIndex, attributes: newAttributes }
     )
   } else {
     const label = makeLabel({

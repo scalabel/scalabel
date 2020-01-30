@@ -150,9 +150,9 @@ export class Grid3D extends Shape3D {
 
   /** update parameters */
   public updateState (
-    indexedShape: IndexedShapeType, activeCamera?: THREE.Camera
+    indexedShape: IndexedShapeType
   ) {
-    super.updateState(indexedShape, activeCamera)
+    super.updateState(indexedShape)
     const newShape = indexedShape.shape as Plane3DType
     this.position.copy(
       (new Vector3D()).fromState(newShape.center).toThree()

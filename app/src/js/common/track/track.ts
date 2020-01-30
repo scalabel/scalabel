@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Label2D from '../../drawable/2d/label2d'
 import Label3D from '../../drawable/3d/label3d'
-import { makeIndexedShape, makeTrack } from '../../functional/states'
+import { makeTrack } from '../../functional/states'
 import { IndexedShapeType, Label2DTemplateType, LabelType, State, TrackType } from '../../functional/types'
 import { LabelTypeName, TrackPolicyType } from '../types'
 import { Box2DLinearInterpolationPolicy } from './policy/linear_interpolation/box2d_linear_interpolation'
@@ -142,6 +142,11 @@ export class Track {
     return this._type
   }
 
+  /** Get track state */
+  public get state (): Readonly<TrackType> {
+    return this._track
+  }
+
   /** Get indices where the track has labels */
   public get indices (): number[] {
     return Object.keys(this._labels).map(
@@ -208,7 +213,7 @@ export class Track {
     this._labels = {}
     this._type = label.type
     const labelState = label.labelState
-    const [,shapeTypes, shapeStates] = label.shapeStates()
+    const shapes = label.shapes()
     for (let index = itemIndex; index < itemIndex + numItems; index ++) {
       const cloned = _.cloneDeep(labelState) as LabelType
       cloned.item = -1
@@ -229,10 +234,8 @@ export class Track {
       if (cloned.item === index) {
         this._labels[index] = cloned
         this._shapes[index] = []
-        for (let i = 0; i < shapeTypes.length; i++) {
-          this._shapes[index].push(makeIndexedShape(
-            -1, [-1], shapeTypes[i], _.cloneDeep(shapeStates[i])
-          ))
+        for (const shape of shapes) {
+          this._shapes[index].push(_.cloneDeep(shape.toState()))
         }
         this._updatedIndices.add(index)
       }
@@ -245,17 +248,14 @@ export class Track {
    * @param newShapes
    */
   public update (itemIndex: number, label: Readonly<Label>): void {
-    const [ids, shapeTypes, newShapes] = label.shapeStates()
+    const shapes = label.shapes()
     if (
       itemIndex in this._shapes &&
-      newShapes.length === this._shapes[itemIndex].length
+      shapes.length === this._shapes[itemIndex].length
     ) {
       this._updatedIndices.add(itemIndex)
-      this._shapes[itemIndex].length = ids.length
-      for (let i = 0; i < newShapes.length; i++) {
-        this._shapes[itemIndex][i].id = ids[i]
-        this._shapes[itemIndex][i].type = shapeTypes[i]
-        this._shapes[itemIndex][i].shape = newShapes[i]
+      for (let i = 0; i < shapes.length; i++) {
+        this._shapes[itemIndex][i] = _.cloneDeep(shapes[i].toState())
       }
 
       this._labels[itemIndex] = {

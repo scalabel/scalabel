@@ -84,6 +84,8 @@ export class Label2DList {
   private _updatedShapes: Set<Shape2D>
   /** next temporary shape id */
   private _temporaryShapeId: number
+  /** selected item index */
+  private _selectedItemIndex: number
 
   constructor () {
     this._labels = {}
@@ -97,6 +99,7 @@ export class Label2DList {
     this._config = makeTaskConfig()
     this._updatedShapes = new Set()
     this._temporaryShapeId = -1
+    this._selectedItemIndex = -1
   }
 
   /**
@@ -208,10 +211,18 @@ export class Label2DList {
   /** Add temporary shape */
   public addTemporaryShape (shape: Shape2D) {
     this._shapes[this._temporaryShapeId] = shape
-    shape.id = this._temporaryShapeId
+    const indexedShape = shape.toState()
+    indexedShape.id = this._temporaryShapeId
+    indexedShape.item = this._selectedItemIndex
+    shape.updateState(indexedShape)
     this._temporaryShapeId--
     this.addUpdatedShape(shape)
     return shape
+  }
+
+  /** Get uncommitted labels */
+  public get updatedShapes (): Readonly<Set<Readonly<Shape2D>>> {
+    return this._updatedShapes
   }
 
   /** Add updated shape */
@@ -236,6 +247,7 @@ export class Label2DList {
     const self = this
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
+    this._selectedItemIndex = itemIndex
 
     // remove any shapes not in the state
     self._shapes = Object.assign({} as typeof self._shapes,

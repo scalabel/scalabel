@@ -100,7 +100,10 @@ export class Label2DHandler {
           labelsToRemove.push(selectedLabel)
         }
       })
-      commitLabels([...Session.label2dList.updatedLabels.values()])
+      commitLabels(
+        [...Session.label2dList.updatedLabels.values()],
+        [...Session.label2dList.updatedShapes.values()]
+      )
       Session.label2dList.clearUpdatedLabels()
 
       for (const label of labelsToRemove) {

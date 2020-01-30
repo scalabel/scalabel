@@ -128,10 +128,10 @@ export function makePlane (params: {} = {}): Plane3DType {
  * @param {ShapeType} shape
  */
 export function makeIndexedShape (
-    id: number, labels: number[], type: string, shape: ShapeType
+    id: number, item: number, labels: number[], type: string, shape: ShapeType
   ): IndexedShapeType {
   return {
-    id, labels: [...labels], type, shape: { ...shape }
+    id, item, labels: [...labels], type, shape: { ...shape }
   }
 }
 

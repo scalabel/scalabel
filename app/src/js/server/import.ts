@@ -143,7 +143,7 @@ function parseExportAttributes (
 }
 
  /**
-  * based on the label in export format, create a label in internal formt
+  * based on the label in export format, create a label in internal format
   * and update the corresponding shapes in the map
   * @param label the label in export format
   * @param shapesImport map to update, from shapeId to shape
@@ -167,6 +167,7 @@ function convertLabelToImport (
     labelType = LabelTypeName.BOX_2D
     shapeImports.push({
       id: maxShapeId + 1,
+      item,
       labels: [labelId],
       type: shapeType,
       shape: labelExport.box2d
@@ -189,6 +190,7 @@ function convertLabelToImport (
     for (const point of points) {
       shapeImports.push({
         id: maxShapeId + 1,
+        item,
         labels: [labelId],
         type: shapeType,
         shape: point
@@ -201,6 +203,7 @@ function convertLabelToImport (
     labelType = LabelTypeName.BOX_3D
     shapeImports.push({
       id: maxShapeId + 1,
+      item,
       labels: [labelId],
       type: shapeType,
       shape: labelExport.box3d

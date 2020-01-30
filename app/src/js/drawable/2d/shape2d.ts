@@ -1,5 +1,6 @@
-
+import _ from 'lodash'
 import { ShapeTypeName } from '../../common/types'
+import { makeIndexedShape } from '../../functional/states'
 import { IndexedShapeType } from '../../functional/types'
 import Label2D from './label2d'
 
@@ -10,7 +11,7 @@ export abstract class Shape2D {
   /** id */
   protected _id: number
   /** shape state */
-  protected _indexedShape: IndexedShapeType | null
+  protected _indexedShape: IndexedShapeType
   /** corresponding label objects */
   protected _labels: { [id: number]: Label2D }
   /** whether highlighted */
@@ -19,23 +20,28 @@ export abstract class Shape2D {
   constructor () {
     this._id = -1
     this._labels = []
-    this._indexedShape = null
     this._highlighted = false
+    this._indexedShape = makeIndexedShape(-1, -1, [], ShapeTypeName.UNKNOWN, {})
   }
 
   /** Get shape id */
   public get id (): number {
-    if (this._indexedShape) {
-      return this._indexedShape.id
-    }
-    return -1
+    return this._indexedShape.id
   }
 
   /** Set shape id */
   public set id (id: number) {
-    if (this._indexedShape) {
-      this._indexedShape.id = id
-    }
+    this._indexedShape.id = id
+  }
+
+  /** Get item */
+  public get item (): number {
+    return this._indexedShape.item
+  }
+
+  /** Set item */
+  public set item (item: number) {
+    this._indexedShape.item = item
   }
 
   /** clear associated labels */
@@ -45,28 +51,27 @@ export abstract class Shape2D {
 
   /** return shape type */
   public get typeName (): string {
-    if (this._indexedShape) {
-      return this._indexedShape.type
-    }
-    return ShapeTypeName.UNKNOWN
+    return this._indexedShape.type
   }
 
   /** update parameters */
   public updateState (indexedShape: IndexedShapeType) {
-    this._indexedShape = indexedShape
+    this._indexedShape = _.cloneDeep(indexedShape)
   }
 
   /** Convert shape to state representation */
   public toState (): IndexedShapeType {
-    if (this._indexedShape) {
-      return this._indexedShape
-    }
-    throw new Error('Uninitialized shape')
+    return this._indexedShape
   }
 
   /** function for setting highlight status */
   public setHighlighted (h: boolean): void {
     this._highlighted = h
+  }
+
+  /** Associate another label with this shape */
+  public associateLabel (label: Label2D) {
+    this._indexedShape.labels.push(label.labelId)
   }
 
   /** copy */
