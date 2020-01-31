@@ -282,6 +282,15 @@ export class CustomLabel2D extends Label2D {
   public onMouseUp (coord: Vector2D): boolean {
     const returnValue = super.onMouseUp(coord)
     this.editing = false
+    if (this.labelId < 0) {
+      this._shapes = [...this._nodes]
+      for (const shape of this._shapes) {
+        this._labelList.addTemporaryShape(shape)
+        shape.associateLabel(this)
+      }
+      this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
+      this._labelList.addUpdatedLabel(this)
+    }
     return returnValue
   }
 

@@ -1,5 +1,6 @@
 import { ShapeTypeName } from '../../common/types'
-import { Node2DType } from '../../functional/types'
+import { makeIndexedShape } from '../../functional/states'
+import { IndexedShapeType, Node2DType } from '../../functional/types'
 import { Point2D } from './point2d'
 
 /** Points for custom labels */
@@ -21,6 +22,8 @@ export class Node2D extends Point2D {
         y: 0
       }
     }
+    this._indexedShape =
+      makeIndexedShape(-1, -1, [], ShapeTypeName.NODE_2D, this._nodeState)
   }
 
   /** Get type name */
@@ -54,5 +57,23 @@ export class Node2D extends Point2D {
   /** Hide node */
   public hide () {
     this._nodeState.hidden = true
+  }
+
+  /** Override update state */
+  public updateState (indexedShape: IndexedShapeType) {
+    super.updateState(indexedShape)
+    this._nodeState = indexedShape.shape as Node2DType
+  }
+
+  /** To state */
+  public toState (): IndexedShapeType {
+    return {
+      ...this._indexedShape,
+      shape: {
+        ...this._nodeState,
+        x: this.x,
+        y: this.y
+      }
+    }
   }
 }
