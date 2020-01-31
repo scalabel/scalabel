@@ -44,6 +44,8 @@ export interface Env {
   timeForWrite: number
   /** write to disk every time this number of actions occurs */
   numActionsForWrite: number
+  /** Port that redis runs on */
+  redisPort: number
 }
 
 /**
@@ -162,7 +164,8 @@ export const defaultEnv: Env = {
   autosave: true,
   redisTimeout: 3600,
   timeForWrite: 600,
-  numActionsForWrite: 10
+  numActionsForWrite: 10,
+  redisPort: 6379
 }
 
 /* default categories when file is missing and label is box2D or box3D */

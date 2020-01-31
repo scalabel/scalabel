@@ -15,7 +15,8 @@ import { convertStateToExport } from './export'
 import { loadState } from './hub'
 import Logger from './logger'
 import { getExportName } from './path'
-import { RedisCache } from './redis_cache'
+import { RedisStore } from './redis_store'
+import Session from './server_session'
 import * as types from './types'
 import { getExistingProjects, getTasksInProject, loadProject } from './util'
 
@@ -68,8 +69,9 @@ export async function GetExportHandler (req: Request, res: Response) {
     // load the latest submission for each task to export
     for (const task of tasks) {
       try {
-        const cache = new RedisCache()
-        const state = await loadState(projectName, task.config.taskId, cache)
+        const env = Session.getEnv()
+        const store = new RedisStore(env.redisPort)
+        const state = await loadState(projectName, task.config.taskId, store)
         items = items.concat(convertStateToExport(state))
       } catch (error) {
         Logger.info(error.message)
@@ -154,7 +156,7 @@ export async function DashboardHandler (req: Request, res: Response) {
       const projectName = body.name
       const project = await loadProject(projectName)
       // grab the latest submissions from all tasks
-      const tasks = await getTasksInProject(name)
+      const tasks = await getTasksInProject(projectName)
       const projectOptions: ProjectOptions = {
         name: project.config.projectName,
         itemType: project.config.itemType,
@@ -171,9 +173,10 @@ export async function DashboardHandler (req: Request, res: Response) {
         try {
           // first, attempt loading previous submission
           // TODO: Load the previous state asynchronously in dashboard
-          const cache = new RedisCache()
+          const env = Session.getEnv()
+          const store = new RedisStore(env.redisPort)
           const state = await loadState(projectName,
-              emptyTask.config.taskId, cache)
+              emptyTask.config.taskId, store)
           task = state.task
         } catch {
           task = emptyTask

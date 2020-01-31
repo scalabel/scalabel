@@ -1,14 +1,14 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
 import Logger from './logger'
-import { getFileKey, redisBaseKey, redisMetaKey, redisReminderKey } from './path'
+import * as path from './path'
 import Session from './server_session'
 
 /**
- * Wraps and promisifies redis functionality for caching
+ * Wraps and promisifies redis functionality
  */
-export class RedisCache {
-  /** the redis client for caching */
+export class RedisStore {
+  /** the redis client */
   protected client: redis.RedisClient
   /** the redis client for subscribing */
   protected sub: redis.RedisClient
@@ -20,9 +20,9 @@ export class RedisCache {
   protected numActionsForWrite: number
 
   /**
-   * Create new cache
+   * Create new store
    */
-  constructor (port = 6379) {
+  constructor (port: number) {
     const env = Session.getEnv()
     this.client = redis.createClient(port)
     this.client.on('error', (err: Error) => {
@@ -36,10 +36,10 @@ export class RedisCache {
     // subscribe to reminder expirations for saving
     this.sub.subscribe('__keyevent@0__:expired')
     this.sub.on('message', async (_channel: string, message: string) => {
-      const key = redisBaseKey(message)
-      const saveKey = await this.get(redisMetaKey(key))
+      const key = path.getRedisBaseKey(message)
+      const saveKey = await this.get(path.getRedisMetaKey(key))
       const value = await this.get(key)
-      const fileKey = getFileKey(saveKey)
+      const fileKey = path.getFileKey(saveKey)
       await Session.getStorage().save(fileKey, value)
       await this.del(key)
     })
@@ -55,21 +55,21 @@ export class RedisCache {
    */
   public async setExWithReminder (saveKey: string, value: string) {
     await this.setEx(saveKey, value, this.timeout)
-    await this.setEx(redisMetaKey(saveKey), saveKey, this.timeout)
+    await this.setEx(path.getRedisMetaKey(saveKey), saveKey, this.timeout)
 
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
-      const fileKey = getFileKey(saveKey)
+      const fileKey = path.getFileKey(saveKey)
       await Session.getStorage().save(fileKey, value)
     } else {
-      const reminderKey = redisReminderKey(saveKey)
+      const reminderKey = path.getRedisReminderKey(saveKey)
       const numActions = parseInt(await this.get(reminderKey), 10)
       if (!numActions) {
         // new reminder, 1st action
         await this.setEx(reminderKey, '1', this.timeForWrite)
       } else if (numActions + 1 >= this.numActionsForWrite) {
         // write condition: num actions exceeded limit
-        const fileKey = getFileKey(saveKey)
+        const fileKey = path.getFileKey(saveKey)
         await Session.getStorage().save(fileKey, value)
         await this.del(reminderKey)
       } else {

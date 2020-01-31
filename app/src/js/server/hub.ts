@@ -7,7 +7,7 @@ import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
 import Logger from './logger'
 import * as path from './path'
-import { RedisCache } from './redis_cache'
+import { RedisStore } from './redis_store'
 import Session from './server_session'
 import { EventName, RegisterMessageType, SyncActionMessageType } from './types'
 import { getSavedKey, getTaskKey,
@@ -17,12 +17,13 @@ import { getSavedKey, getTaskKey,
  * Starts socket.io handlers for saving, loading, and synchronization
  */
 export function startSocketServer (io: socketio.Server) {
-  const cache = new RedisCache()
+  const env = Session.getEnv()
+  const store = new RedisStore(env.redisPort)
 
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
     socket.on(EventName.REGISTER, async (rawData: string) => {
       try {
-        await register(rawData, socket, cache)
+        await register(rawData, socket, store)
       } catch (error) {
         Logger.error(error)
       }
@@ -30,7 +31,7 @@ export function startSocketServer (io: socketio.Server) {
 
     socket.on(EventName.ACTION_SEND, async (rawData: string) => {
       try {
-        await actionUpdate(rawData, socket, cache)
+        await actionUpdate(rawData, socket, store)
       } catch (error) {
         Logger.error(error)
       }
@@ -42,7 +43,7 @@ export function startSocketServer (io: socketio.Server) {
  * Load the correct state and subscribe to redis
  */
 async function register (
-  rawData: string, socket: socketio.Socket, cache: RedisCache) {
+  rawData: string, socket: socketio.Socket, store: RedisStore) {
   const data: RegisterMessageType = JSON.parse(rawData)
   const projectName = data.projectName
   const taskIndex = data.taskIndex
@@ -55,12 +56,12 @@ async function register (
     // new session on new load
     sessionId = uuid4()
   }
-  const state = await loadState(projectName, taskId, cache)
+  const state = await loadState(projectName, taskId, store)
   state.session.id = sessionId
   state.task.config.autosave = env.autosave
 
   // Connect socket to others in the same room
-  const room = path.roomName(projectName, taskId, env.sync, sessionId)
+  const room = path.getRoomName(projectName, taskId, env.sync, sessionId)
   socket.join(room)
   // Send backend state to newly registered socket
   socket.emit(EventName.REGISTER_ACK, state)
@@ -70,7 +71,7 @@ async function register (
  * Updates the state with the action, and broadcasts action
  */
 async function actionUpdate (
-  rawData: string, socket: socketio.Socket, cache: RedisCache) {
+  rawData: string, socket: socketio.Socket, store: RedisStore) {
   const data: SyncActionMessageType = JSON.parse(rawData)
   const projectName = data.projectName
   const taskId = data.taskId
@@ -78,19 +79,19 @@ async function actionUpdate (
   const actionList = data.actions
   const env = Session.getEnv()
 
-  const room = path.roomName(projectName, taskId, env.sync, sessionId)
+  const room = path.getRoomName(projectName, taskId, env.sync, sessionId)
 
   const taskActions = actionList.filter((action) => {
     return types.TASK_ACTION_TYPES.includes(action.type)
   })
 
-  const state = await loadState(projectName, taskId, cache)
-  const store = configureStore(state)
+  const state = await loadState(projectName, taskId, store)
+  const stateStore = configureStore(state)
 
   // For each task action, update the backend store
   for (const action of taskActions) {
     action.timestamp = Date.now()
-    store.dispatch(action)
+    stateStore.dispatch(action)
   }
 
   // broadcast task actions to all other sessions in room
@@ -98,23 +99,23 @@ async function actionUpdate (
   // echo everything to original session
   socket.emit(EventName.ACTION_BROADCAST, actionList)
 
-  const newState = store.getState().present
+  const newState = stateStore.getState().present
   const stringState = JSON.stringify(newState)
   const saveKey = getSavedKey(projectName, taskId)
 
-  await cache.setExWithReminder(saveKey, stringState)
+  await store.setExWithReminder(saveKey, stringState)
 }
 
 /**
- * Loads state from cache if available, else memory
+ * Loads state from redis if available, else memory
  */
 export async function loadState (
-  projectName: string, taskId: string, cache: RedisCache): Promise<State> {
+  projectName: string, taskId: string, store: RedisStore): Promise<State> {
   let state: State
 
-  // first try to load from redis cache
+  // first try to load from redis
   const saveKey = getSavedKey(projectName, taskId)
-  const redisValue = await cache.get(saveKey)
+  const redisValue = await store.get(saveKey)
   if (redisValue) {
     state = JSON.parse(redisValue)
   } else {

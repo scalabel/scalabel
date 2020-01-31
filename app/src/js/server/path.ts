@@ -6,7 +6,7 @@ import { sprintf } from 'sprintf-js'
  * Converts task id to name of the room for that id
  * If sync is off, room is separated by sessionId
  */
-export function roomName (
+export function getRoomName (
   projectName: string, taskId: string,
   sync: boolean, sessionId = ''): string {
   if (sync) {
@@ -55,20 +55,20 @@ export function getExportName (projectName: string): string {
 /**
  * Get redis key for path metadata
  */
-export function redisMetaKey (key: string) {
+export function getRedisMetaKey (key: string) {
   return sprintf('%s^path', key)
 }
 
 /**
  * Get redis key for reminder metadata
  */
-export function redisReminderKey (key: string) {
+export function getRedisReminderKey (key: string) {
   return sprintf('%s^reminder', key)
 }
 
 /**
  * Get redis base key from a metadata key
  */
-export function redisBaseKey (metadataKey: string) {
+export function getRedisBaseKey (metadataKey: string) {
   return metadataKey.split('^')[0]
 }

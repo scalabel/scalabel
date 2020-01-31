@@ -9,4 +9,5 @@ autosave: false
 redisTimeout: 3600
 timeForWrite: 600
 numActionsForWrite: 10
+redisPort: 6379
 ...
