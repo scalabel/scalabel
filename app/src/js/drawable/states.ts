@@ -115,6 +115,7 @@ export function commitLabels (
     }
   }
 
+  console.log(itemIndices, allLabels, allShapes, newTracks)
   Session.dispatch(updateLabelsShapesTracks(
     Array.from(itemIndices), allLabels, allShapes, newTracks
   ))

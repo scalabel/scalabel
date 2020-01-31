@@ -71,6 +71,14 @@ export abstract class Shape2D {
     this._indexedShape.labels.push(label.labelId)
   }
 
+  /** Unasssociate another label with this shape */
+  public unassociateLabel (label: Label2D) {
+    const idIndex = this._indexedShape.labels.indexOf(label.labelId)
+    if (idIndex >= 0) {
+      this._indexedShape.labels.splice(idIndex, 1)
+    }
+  }
+
   /** copy */
   public abstract copy (shape: Shape2D): void
 }
