@@ -283,7 +283,9 @@ export abstract class Label2D {
    * Handle mouse down
    * @param coord
    */
-  public onMouseDown (coord: Vector2D, _handleIndex: number): boolean {
+  public onMouseDown (
+    coord: Vector2D, _labelIndex: number, _handleIndex: number
+  ): boolean {
     this._mouseDown = true
     if (this._selected) {
       this._mouseDownCoord = coord.clone()
@@ -346,13 +348,11 @@ export abstract class Label2D {
     this._labelState = { ...labelState }
     this._shapes = []
     for (const shapeId of this._labelState.shapes) {
-      if (!(shapeId in this._shapes)) {
-        const shape = this._labelList.getShape(shapeId)
-        if (shape) {
-          this._shapes.push(shape)
-        } else {
-          throw new Error(`Could not find shape with id ${shapeId}`)
-        }
+      const shape = this._labelList.getShape(shapeId)
+      if (shape) {
+        this._shapes.push(shape)
+      } else {
+        throw new Error(`Could not find shape with id ${shapeId}`)
       }
     }
   }

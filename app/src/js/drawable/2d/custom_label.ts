@@ -209,8 +209,10 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Override on mouse down */
-  public onMouseDown (coord: Vector2D, handleIndex: number): boolean {
-    const returnValue = super.onMouseDown(coord, handleIndex)
+  public onMouseDown (
+    coord: Vector2D, labelIndex: number, handleIndex: number
+  ): boolean {
+    const returnValue = super.onMouseDown(coord, labelIndex, handleIndex)
     this.editing = true
 
     if (

@@ -283,8 +283,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     }
     Session.label2dList.onDrawableUpdate()
 
-    if (this._labelHandler.highlightedLabel) {
-      this.setCursor(this._labelHandler.highlightedLabel.highlightCursor)
+    if (Session.label2dList.highlightedLabel) {
+      this.setCursor(Session.label2dList.highlightedLabel.highlightCursor)
     } else {
       this.setDefaultCursor()
     }

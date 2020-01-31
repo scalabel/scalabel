@@ -1,4 +1,5 @@
 import { ShapeTypeName } from '../../common/types'
+import { makeIndexedShape, makePathPoint } from '../../functional/states'
 import { IndexedShapeType, PathPoint2DType } from '../../functional/types'
 import { Point2D } from './point2d'
 
@@ -63,7 +64,10 @@ export class PathPoint2D extends Point2D {
     type: PointType = PointType.VERTEX
   ) {
     super(x, y)
+    this._indexedShape =
+      makeIndexedShape(-1, -1, [], ShapeTypeName.PATH_POINT_2D, makePathPoint())
     this._type = type
+    this.type = type
   }
 
   /** Get type name */
@@ -79,15 +83,24 @@ export class PathPoint2D extends Point2D {
   /** Set type */
   public set type (t: PointType) {
     this._type = t
-    if (this._indexedShape) {
-      (this._indexedShape.shape as PathPoint2DType).type = t
-    }
   }
 
   /** Update State */
   public updateState (indexedShape: IndexedShapeType) {
     super.updateState(indexedShape)
     this._type = (indexedShape.shape as PathPoint2DType).type as PointType
+  }
+
+  /** Convert to state representation */
+  public toState (): IndexedShapeType {
+    return {
+      ...this._indexedShape,
+      shape: {
+        x: this.x,
+        y: this.y,
+        type: this.type
+      }
+    }
   }
 
   /**

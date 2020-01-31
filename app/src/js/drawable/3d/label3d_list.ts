@@ -331,11 +331,6 @@ export class Label3DList {
     this._updatedLabels.add(label)
   }
 
-  /** Clear uncommitted label list */
-  public clearUpdatedLabels () {
-    this._updatedLabels.clear()
-  }
-
   /** Get uncommitted labels */
   public get updatedShapes (): Readonly<Set<Readonly<Shape3D>>> {
     return this._updatedShapes
@@ -356,7 +351,8 @@ export class Label3DList {
   }
 
   /** Clear uncommitted label list */
-  public clearUpdatedShapes () {
+  public clearUpdated () {
+    this._updatedLabels.clear()
     this._updatedShapes.clear()
     this._temporaryShapeId = -1
   }

@@ -62,6 +62,9 @@ export function makeDrawableShape2D (
  * ViewController for the labels
  */
 export class Label2DList {
+  /** Currently highlighted label */
+  public highlightedLabel: Label2D | null
+
   /** label id to label drawable map */
   private _labels: {[labelId: number]: Label2D}
   /** shape id to shape drawable map */
@@ -78,16 +81,17 @@ export class Label2DList {
   private _callbacks: Array<() => void>
   /** New labels to be committed */
   private _updatedLabels: Set<Label2D>
-  /** task config */
-  private _config: ConfigType
   /** updated shapes */
   private _updatedShapes: Set<Shape2D>
+  /** task config */
+  private _config: ConfigType
   /** next temporary shape id */
   private _temporaryShapeId: number
   /** selected item index */
   private _selectedItemIndex: number
 
   constructor () {
+    this.highlightedLabel = null
     this._labels = {}
     this._shapes = {}
     this._labelList = []
@@ -206,6 +210,12 @@ export class Label2DList {
     labelsToDraw.forEach(
       (v) => v.draw(controlContext, ratio, DrawMode.CONTROL)
     )
+    this.selectedLabels.forEach((label) => {
+      if (label.labelId < 0) {
+        label.draw(labelContext, ratio, DrawMode.VIEW)
+        label.draw(controlContext, ratio, DrawMode.CONTROL)
+      }
+    })
   }
 
   /** Add temporary shape */
@@ -228,12 +238,6 @@ export class Label2DList {
   /** Add updated shape */
   public addUpdatedShape (shape: Shape2D) {
     this._updatedShapes.add(shape)
-  }
-
-  /** Clear updated shape set */
-  public clearUpdatedShapes () {
-    this._updatedShapes.clear()
-    this._temporaryShapeId = -1
   }
 
   /**
@@ -286,6 +290,7 @@ export class Label2DList {
       if (labelId in self._labels) {
         const drawableLabel = self._labels[labelId]
         if (!drawableLabel.editing) {
+          drawableLabel.selected = false
           drawableLabel.updateState(item.labels[labelId])
         }
       }
@@ -297,13 +302,15 @@ export class Label2DList {
       (l: Label2D, index: number) => { l.index = index })
 
     // Set selected labels
-    this._selectedLabels = []
-    const select = state.user.select
-    if (select.item in select.labels) {
-      for (const id of select.labels[select.item]) {
-        if (id in this._labels) {
-          this._selectedLabels.push(this._labels[id])
-          this._labels[id].selected = true
+    if (!this.selectedLabels.some((label) => label.editing)) {
+      this._selectedLabels = []
+      const select = state.user.select
+      if (select.item in select.labels) {
+        for (const id of select.labels[select.item]) {
+          if (id in this._labels) {
+            this._selectedLabels.push(this._labels[id])
+            this._labels[id].selected = true
+          }
         }
       }
     }
@@ -331,7 +338,9 @@ export class Label2DList {
   }
 
   /** Clear uncommitted label list */
-  public clearUpdatedLabels () {
+  public clearUpdated () {
     this._updatedLabels.clear()
+    this._updatedShapes.clear()
+    this._temporaryShapeId = -1
   }
 }

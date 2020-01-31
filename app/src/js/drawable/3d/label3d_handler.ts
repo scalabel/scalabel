@@ -108,7 +108,7 @@ export class Label3DHandler {
         [...Session.label3dList.updatedLabels.values()],
         [...Session.label3dList.updatedShapes.values()]
       )
-    Session.label3dList.clearUpdatedLabels()
+    Session.label3dList.clearUpdated()
     // Set current label as selected label
     if (
       this._mouseDownOnSelection &&
@@ -194,7 +194,7 @@ export class Label3DHandler {
             [...Session.label3dList.updatedLabels.values()],
             [...Session.label3dList.updatedShapes.values()]
           )
-          Session.label3dList.clearUpdatedLabels()
+          Session.label3dList.clearUpdated()
           return true
         }
         return false
@@ -229,7 +229,7 @@ export class Label3DHandler {
               [...Session.label3dList.updatedLabels.values()],
               [...Session.label3dList.updatedShapes.values()]
             )
-            Session.label3dList.clearUpdatedLabels()
+            Session.label3dList.clearUpdated()
           }
         }
         break

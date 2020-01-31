@@ -8,8 +8,6 @@ import Label2D from './label2d'
  * Base shape class
  */
 export abstract class Shape2D {
-  /** id */
-  protected _id: number
   /** shape state */
   protected _indexedShape: IndexedShapeType
   /** corresponding label objects */
@@ -18,7 +16,6 @@ export abstract class Shape2D {
   protected _highlighted: boolean
 
   constructor () {
-    this._id = -1
     this._labels = []
     this._highlighted = false
     this._indexedShape = makeIndexedShape(-1, -1, [], ShapeTypeName.UNKNOWN, {})

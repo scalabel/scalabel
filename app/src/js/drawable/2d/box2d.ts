@@ -233,7 +233,7 @@ export class Box2D extends Label2D {
    * Handle mouse down
    * @param coord
    */
-  public onMouseDown (coord: Vector2D, _handleIndex: number): boolean {
+  public onMouseDown (coord: Vector2D): boolean {
     this._mouseDown = true
     if (this._selected) {
       this.editing = true
