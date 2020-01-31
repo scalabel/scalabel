@@ -201,7 +201,8 @@ export async function DashboardHandler (req: Request, res: Response) {
 
         taskOptions.push(options)
       }
-      const numUsers = await countUsers(projectOptions.name)
+      const storage = Session.getStorage()
+      const numUsers = await countUsers(projectOptions.name, storage)
 
       const contents: DashboardContents = {
         projectMetaData: projectOptions,

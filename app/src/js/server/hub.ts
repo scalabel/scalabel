@@ -18,6 +18,8 @@ import { getSavedKey, getTaskKey,
  */
 export function startSocketServer (io: socketio.Server) {
   const env = Session.getEnv()
+  const storage = Session.getStorage()
+
   // maintain a store for each task
   const stores: { [key: string]: Store } = {}
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
@@ -27,7 +29,7 @@ export function startSocketServer (io: socketio.Server) {
 
       const taskIndex = data.taskIndex
       const taskId = index2str(taskIndex)
-      await registerUser(socket.id, projectName, data.userId)
+      await registerUser(socket.id, projectName, data.userId, storage)
 
       let sessionId = data.sessionId
       // keep session id if it exists, i.e. if it is a reconnection
@@ -100,7 +102,7 @@ export function startSocketServer (io: socketio.Server) {
     })
 
     socket.on(EventName.DISCONNECT, async () => {
-      await deregisterUser(socket.id)
+      await deregisterUser(socket.id, storage)
     })
   })
 }

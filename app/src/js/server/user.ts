@@ -1,13 +1,12 @@
 import { getMetaKey, getUserKey } from './path'
-import Session from './server_session'
+import { Storage } from './storage'
 
 /**
  * Saves the current socket's user data
  */
 export async function registerUser (
-  socketId: string, projectName: string, userId: string) {
-  const storage = Session.getStorage()
-
+  socketId: string, projectName: string,
+  userId: string, storage: Storage) {
   let socketToUser: { [key: string]: string } = {}
   let userToSockets: { [key: string]: string[] } = {}
   const key = getUserKey(projectName)
@@ -41,9 +40,7 @@ export async function registerUser (
 /**
  * Deletes the user data of the socket that disconnected
  */
-export async function deregisterUser (socketId: string) {
-  const storage = Session.getStorage()
-
+export async function deregisterUser (socketId: string, storage: Storage) {
   // First access the projectName via metadata
   const metaKey = getMetaKey()
   if (!(await storage.hasKey(metaKey))) {
@@ -84,12 +81,13 @@ export async function deregisterUser (socketId: string) {
 /**
  * Counts the number of currently connected users
  */
-export async function countUsers (projectName: string): Promise<number> {
+export async function countUsers (
+  projectName: string, storage: Storage): Promise<number> {
   const userKey = getUserKey(projectName)
   let numUsers = 0
-  if (await Session.getStorage().hasKey(userKey)) {
+  if (await storage.hasKey(userKey)) {
     const [, userToSockets] = JSON.parse(
-      await Session.getStorage().load(userKey))
+      await storage.load(userKey))
     if (userToSockets) {
       numUsers = Object.keys(userToSockets).length
     }

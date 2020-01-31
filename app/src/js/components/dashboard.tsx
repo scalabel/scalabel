@@ -261,7 +261,7 @@ function header (props: HeaderProps) {
           <Chip label={totalLabels} className={classes.chip}
             data-testid='total-labels' />
           <Typography variant='body1' noWrap>
-            #Users
+            Users
                       </Typography>
           <Chip label={numUsers} className={classes.chip}
             data-testid='num-users' />
