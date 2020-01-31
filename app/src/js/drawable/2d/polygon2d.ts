@@ -199,13 +199,6 @@ export class Polygon2D extends Label2D {
     coord: Vector2D, labelIndex: number, handleIndex: number
   ): boolean {
     this._mouseDownCoord = coord.clone()
-    if (
-      (this._keyDownMap[Key.D_LOW] || this._keyDownMap[Key.D_UP]) &&
-      this._highlightedHandle < this._points.length
-    ) {
-      this.deleteVertex()
-      return true
-    }
     if (this.labelId < 0) {
       // If temporary, add new points on mouse down
       if (labelIndex === this.labelId && handleIndex === 0) {
@@ -221,18 +214,24 @@ export class Polygon2D extends Label2D {
         this._highlightedHandle++
         return true
       }
-    } else if (labelIndex === this.labelId) {
-      this.editing = true
-      this.toCache()
-
-      if (
-        this._highlightedHandle < this._points.length &&
-        this._points[this._highlightedHandle].type === PointType.MID
-      ) {
-        this.midToVertex()
+    } else if (this._highlightedHandle < this._points.length) {
+      if (this.isKeyDown(Key.D_LOW) || this.isKeyDown(Key.D_UP)) {
+        this.deleteVertex()
+      } else if (this.isKeyDown(Key.C_LOW) || this.isKeyDown(Key.C_UP)) {
+        this.lineToCurve()
+      } else {
+        if (this._points[this._highlightedHandle].type === PointType.MID) {
+          this.midToVertex()
+        }
+        this.editing = true
+        this.toCache()
       }
       return true
+    } else if (this._highlightedHandle === this._points.length) {
+      this.editing = true
+      this.toCache()
     }
+
     return false
   }
 
@@ -459,7 +458,7 @@ export class Polygon2D extends Label2D {
           previousVertexIndex = i
           break
         }
-        if (this._points[1].type !== PointType.MID) {
+        if (this._points[i].type !== PointType.MID) {
           this._points[i].unassociateLabel(this)
           this._labelList.addUpdatedShape(this._points[i])
         }
@@ -475,7 +474,7 @@ export class Polygon2D extends Label2D {
           nextVertexIndex = i
           break
         }
-        if (this._points[1].type !== PointType.MID) {
+        if (this._points[i].type !== PointType.MID) {
           this._points[i].unassociateLabel(this)
           this._labelList.addUpdatedShape(this._points[i])
         }
@@ -496,11 +495,8 @@ export class Polygon2D extends Label2D {
       newPoints.push(this._points[previousVertexIndex])
       newPoints.push(newMidPoint)
       this._points = newPoints
-      this._labelState.shapes = this._points.filter(
-        (shape) => shape.type !== PointType.MID
-      ).map((shape) => shape.id)
 
-      this._labelList.addUpdatedLabel(this)
+      this.updateShapeRef()
     }
   }
 
@@ -552,42 +548,51 @@ export class Polygon2D extends Label2D {
     this._highlightedHandle++
     this._labelList.addTemporaryShape(point)
     point.associateLabel(this)
-    this._labelState.shapes = this._points.filter(
-      (shape) => shape.type !== PointType.MID
-    ).map((shape) => shape.id)
-    this._labelList.addUpdatedLabel(this)
+    this.updateShapeRef()
   }
 
   /**
    * convert a line to a curve and vice-versa
    */
   private lineToCurve (): void {
-    const selectedLabelIndex = this._highlightedHandle - 1
-    const point = this._points[selectedLabelIndex]
-    const highlightedHandleIndex = this._highlightedHandle - 1
+    const point = this._points[this._highlightedHandle]
     switch (point.type) {
       case PointType.MID: // from midpoint to curve
         const prevPoint =
-          this._points[this.getPreviousIndex(highlightedHandleIndex)]
+          this._points[this.getPreviousIndex(this._highlightedHandle)]
         const nextPoint =
-          this._points[this.getNextIndex(highlightedHandleIndex)]
+          this._points[this.getNextIndex(this._highlightedHandle)]
         const controlPoints = this.getCurvePoints(prevPoint, nextPoint)
-        this._points[highlightedHandleIndex] = controlPoints[0]
+        this._points[this._highlightedHandle] = controlPoints[0]
+        const nextIndex = this.getNextIndex(this._highlightedHandle)
         this._points.splice(
-          this.getNextIndex(highlightedHandleIndex), 0, controlPoints[1]
+          (nextIndex === 0) ? this._points.length : nextIndex,
+          0,
+          controlPoints[1]
         )
+        for (const controlPoint of controlPoints) {
+          this._labelList.addTemporaryShape(controlPoint)
+          controlPoint.associateLabel(this)
+        }
         break
       case PointType.CURVE: // from curve to midpoint
         const newMidPointIndex =
-          (this._points[highlightedHandleIndex - 1].type === PointType.CURVE) ?
-            this.getPreviousIndex(highlightedHandleIndex) :
-            highlightedHandleIndex
-        this._points.splice(highlightedHandleIndex, 1)
-        this._points[newMidPointIndex].copy(this.getMidpoint(
+          (this._points[this._highlightedHandle - 1].type === PointType.CURVE) ?
+            this.getPreviousIndex(this._highlightedHandle) :
+            this._highlightedHandle
+
+        this._points[this._highlightedHandle].unassociateLabel(this)
+        this._points[newMidPointIndex].unassociateLabel(this)
+        this._labelList.addUpdatedShape(this._points[this._highlightedHandle])
+        this._labelList.addUpdatedShape(this._points[newMidPointIndex])
+
+        this._points.splice(this._highlightedHandle, 1)
+        this._points[newMidPointIndex] = this.getMidpoint(
           this._points[this.getNextIndex(newMidPointIndex)],
           this._points[this.getPreviousIndex(newMidPointIndex)]
-        ))
+        )
     }
+    this.updateShapeRef()
   }
 
   /**
@@ -690,5 +695,13 @@ export class Polygon2D extends Label2D {
     } else {
       return (index + 1) % this._points.length
     }
+  }
+
+  /** Remake shape id array in label state */
+  private updateShapeRef () {
+    this._labelState.shapes = this._points.filter(
+      (shape) => shape.type !== PointType.MID
+    ).map((shape) => shape.id)
+    this._labelList.addUpdatedLabel(this)
   }
 }
