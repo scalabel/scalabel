@@ -190,6 +190,9 @@ export class Label3DHandler {
             this._sensorIds
           )
           Session.label3dList.addUpdatedLabel(label)
+          for (const shape of label.shapes()) {
+            Session.label3dList.addUpdatedShape(shape)
+          }
           commitLabels(
             [...Session.label3dList.updatedLabels.values()],
             [...Session.label3dList.updatedShapes.values()]

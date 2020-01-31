@@ -22,12 +22,12 @@ export abstract class Shape2D {
   }
 
   /** Get shape id */
-  public get id (): number {
+  public get shapeId (): number {
     return this._indexedShape.id
   }
 
   /** Set shape id */
-  public set id (id: number) {
+  public set shapeId (id: number) {
     this._indexedShape.id = id
   }
 

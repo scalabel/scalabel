@@ -73,6 +73,8 @@ export class Label3DList {
   private _updatedShapes: Set<Shape3D>
   /** next temporary shape id */
   private _temporaryShapeId: number
+  /** selected item */
+  private _selectedItemIndex: number
 
   constructor () {
     this.control = new TransformationControl()
@@ -89,6 +91,7 @@ export class Label3DList {
     this._updatedLabels = new Set()
     this._updatedShapes = new Set()
     this._temporaryShapeId = -1
+    this._selectedItemIndex = -1
   }
 
   /**
@@ -282,6 +285,8 @@ export class Label3DList {
       }
     }
 
+    this._selectedItemIndex = select.item
+
     if (this.selectedLabel) {
       this.control.visible = true
     } else {
@@ -339,7 +344,10 @@ export class Label3DList {
   /** Add temporary shape */
   public addTemporaryShape (shape: Shape3D) {
     this._shapes[this._temporaryShapeId] = shape
-    shape.id = this._temporaryShapeId
+    const indexedShape = shape.toState()
+    indexedShape.id = this._temporaryShapeId
+    indexedShape.item = this._selectedItemIndex
+    shape.updateState(indexedShape)
     this._temporaryShapeId--
     this.addUpdatedShape(shape)
     return shape

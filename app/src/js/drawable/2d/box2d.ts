@@ -305,7 +305,7 @@ export class Box2D extends Label2D {
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
       order: this.order,
-      shapes: [this._shapes[0].id]
+      shapes: [this._shapes[0].shapeId]
     })
     this._highlightedHandle = Handles.BOTTOM_RIGHT
     this.updatePoints()

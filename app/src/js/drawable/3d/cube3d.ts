@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
+import { makeIndexedShape } from '../../functional/states'
 import { CubeType, IndexedShapeType } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
@@ -42,12 +43,20 @@ export class Cube3D extends Shape3D {
   /** First corner for temp init */
   private _firstCorner: Vector2D | null
 
-  /**
-   * Make box with assigned id
-   * @param id
-   */
   constructor () {
     super()
+    this._indexedShape = makeIndexedShape(
+      -1,
+      -1,
+      [],
+      ShapeTypeName.CUBE,
+      {
+        center: (new Vector3D()).toState(),
+        orientation:  (new Vector3D()).toState(),
+        size:  (new Vector3D(1, 1, 1)).toState(),
+        anchorIndex: 0
+      }
+    )
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
@@ -119,9 +128,6 @@ export class Cube3D extends Shape3D {
    * Convert to state representation
    */
   public toState (): IndexedShapeType {
-    if (!this._indexedShape) {
-      throw new Error('Uninitialized shape')
-    }
     const worldCenter = new THREE.Vector3()
     this.getWorldPosition(worldCenter)
     const worldSize = new THREE.Vector3()

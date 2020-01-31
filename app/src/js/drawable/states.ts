@@ -96,7 +96,7 @@ export function commitLabels (
     if (!(shape.item in updatedShapes)) {
       updatedShapes[shape.item] = {}
     }
-    updatedShapes[shape.item][shape.id] = shape.toState()
+    updatedShapes[shape.item][shape.shapeId] = shape.toState()
     itemIndices.add(shape.item)
   })
 

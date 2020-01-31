@@ -42,14 +42,22 @@ export class Box3D extends Label3D {
       sensors = [-1]
     }
 
-    this._labelState = makeLabel({
-      type: LabelTypeName.BOX_3D, id: -1, item: itemIndex,
-      category: [category], sensors
-    })
-
     if (center) {
       this._cube.position.copy(center.toThree())
     }
+
+    this._shapes = [this._cube]
+    this._labelList.addTemporaryShape(this._cube)
+    this._cube.associateLabel(this)
+
+    this._labelState = makeLabel({
+      type: LabelTypeName.BOX_3D,
+      id: -1,
+      item: itemIndex,
+      category: [category],
+      sensors,
+      shapes: [this._cube.shapeId]
+    })
 
     if (temporary) {
       this._temporary = true

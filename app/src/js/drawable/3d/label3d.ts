@@ -299,13 +299,11 @@ export abstract class Label3D {
     }
     this._shapes = []
     for (const shapeId of this._labelState.shapes) {
-      if (!(shapeId in this._shapes)) {
-        const shape = this._labelList.getShape(shapeId)
-        if (shape) {
-          this._shapes.push(shape)
-        } else {
-          throw new Error(`Could not find shape with id ${shapeId}`)
-        }
+      const shape = this._labelList.getShape(shapeId)
+      if (shape) {
+        this._shapes.push(shape)
+      } else {
+        throw new Error(`Could not find shape with id ${shapeId}`)
       }
     }
   }

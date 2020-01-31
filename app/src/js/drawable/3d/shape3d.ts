@@ -1,14 +1,15 @@
 import * as THREE from 'three'
+import { ShapeTypeName } from '../../common/types'
+import { makeIndexedShape } from '../../functional/states'
 import { IndexedShapeType } from '../../functional/types'
+import Label3D from './label3d'
 
 /**
  * Base shape class
  */
 export abstract class Shape3D extends THREE.Object3D {
-  /** id */
-  protected _id: number
   /** shape state */
-  protected _indexedShape: IndexedShapeType | null
+  protected _indexedShape: IndexedShapeType
   /** whether highlighted */
   protected _highlighted: boolean
   /** whether selected */
@@ -16,31 +17,24 @@ export abstract class Shape3D extends THREE.Object3D {
 
   constructor () {
     super()
-    this._id = -1
-    this._indexedShape = null
+    this._indexedShape = makeIndexedShape(-1, -1, [], ShapeTypeName.UNKNOWN, {})
     this._highlighted = false
     this._selected = false
   }
 
   /** Get shape id */
-  public get id (): number {
-    if (this._indexedShape) {
-      return this._indexedShape.id
-    }
-    return -1
+  public get shapeId (): number {
+    return this._indexedShape.id
   }
 
   /** Set shape id */
-  public set id (id: number) {
-    this._id = id
+  public set shapeId (id: number) {
+    this._indexedShape.id = id
   }
 
   /** Get item */
   public get item (): number {
-    if (this._indexedShape) {
-      return this._indexedShape.item
-    }
-    return -1
+    return this._indexedShape.item
   }
 
   /** Get selected */
@@ -61,6 +55,19 @@ export abstract class Shape3D extends THREE.Object3D {
     indexedShape: IndexedShapeType
   ) {
     this._indexedShape = indexedShape
+  }
+
+  /** Associate another label with this shape */
+  public associateLabel (label: Label3D) {
+    this._indexedShape.labels.push(label.labelId)
+  }
+
+  /** Unasssociate another label with this shape */
+  public unassociateLabel (label: Label3D) {
+    const idIndex = this._indexedShape.labels.indexOf(label.labelId)
+    if (idIndex >= 0) {
+      this._indexedShape.labels.splice(idIndex, 1)
+    }
   }
 
   /** Convert shape to state representation */

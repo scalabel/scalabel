@@ -272,7 +272,7 @@ export class Polygon2D extends Label2D {
         this._labelList.addTemporaryShape(shape)
         shape.associateLabel(this)
       }
-      this._labelState.shapes = this._shapes.map((shape) => shape.id)
+      this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
       this._labelList.addUpdatedLabel(this)
     }
     return true
@@ -701,7 +701,7 @@ export class Polygon2D extends Label2D {
   private updateShapeRef () {
     this._labelState.shapes = this._points.filter(
       (shape) => shape.type !== PointType.MID
-    ).map((shape) => shape.id)
+    ).map((shape) => shape.shapeId)
     this._labelList.addUpdatedLabel(this)
   }
 }
