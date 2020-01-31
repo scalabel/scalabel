@@ -67,10 +67,10 @@ export async function GetExportHandler (req: Request, res: Response) {
     const tasks = await getTasksInProject(projectName)
     let items: ItemExport[] = []
     // load the latest submission for each task to export
+    const env = Session.getEnv()
+    const store = new RedisStore(env.redisPort)
     for (const task of tasks) {
       try {
-        const env = Session.getEnv()
-        const store = new RedisStore(env.redisPort)
         const state = await loadState(projectName, task.config.taskId, store)
         items = items.concat(convertStateToExport(state))
       } catch (error) {
