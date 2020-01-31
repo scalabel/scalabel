@@ -268,7 +268,12 @@ export class Label2DList {
       }
       if (shapeId in self._shapes) {
         const drawableShape = self._shapes[shapeId]
-        drawableShape.updateState(indexedShape)
+        if (!indexedShape.labels.some(
+          (labelId) => labelId in self._labels &&
+          self._labels[labelId].editing
+        )) {
+          drawableShape.updateState(indexedShape)
+        }
       }
     })
 
