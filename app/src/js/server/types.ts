@@ -81,6 +81,8 @@ export interface RegisterMessageType {
   taskIndex: number
   /** Current session Id */
   sessionId: string
+  /** Current user Id */
+  userId: string
 }
 
 /** action type for synchronization between front and back ends */

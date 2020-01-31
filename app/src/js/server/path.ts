@@ -37,8 +37,22 @@ export function getNow (): string {
 /**
  * Creates path for a timestamped file
  */
-export function getFileKey (filePath: string) {
+export function getFileKey (filePath: string): string {
   return sprintf('%s/%s', filePath, getNow())
+}
+
+/**
+ * Gets path for user data
+ */
+export function getUserKey (project: string): string {
+  return sprintf('%s/userData', project)
+}
+
+/**
+ * Gets path for meta data on user
+ */
+export function getMetaKey (): string {
+  return 'metaData'
 }
 
 /* path to html file directories, relative to js

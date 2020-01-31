@@ -1,6 +1,6 @@
 import { Store } from 'redux'
-import * as socketio from 'socket.io'
-import * as uuid4 from 'uuid/v4'
+import socketio from 'socket.io'
+import uuid4 from 'uuid/v4'
 import * as types from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
@@ -9,6 +9,7 @@ import { State, TaskType } from '../functional/types'
 import * as path from './path'
 import Session from './server_session'
 import { EventName, RegisterMessageType, SyncActionMessageType } from './types'
+import { deregisterUser, registerUser } from './user'
 import { getSavedKey, getTaskKey,
   index2str, loadSavedState} from './util'
 
@@ -17,6 +18,8 @@ import { getSavedKey, getTaskKey,
  */
 export function startSocketServer (io: socketio.Server) {
   const env = Session.getEnv()
+  const storage = Session.getStorage()
+
   // maintain a store for each task
   const stores: { [key: string]: Store } = {}
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
@@ -26,6 +29,7 @@ export function startSocketServer (io: socketio.Server) {
 
       const taskIndex = data.taskIndex
       const taskId = index2str(taskIndex)
+      await registerUser(socket.id, projectName, data.userId, storage)
 
       let sessionId = data.sessionId
       // keep session id if it exists, i.e. if it is a reconnection
@@ -95,6 +99,10 @@ export function startSocketServer (io: socketio.Server) {
       const content = JSON.stringify(stores[room].getState().present)
       const filePath = path.getFileKey(getSavedKey(projectName, taskId))
       await Session.getStorage().save(filePath, content)
+    })
+
+    socket.on(EventName.DISCONNECT, async () => {
+      await deregisterUser(socket.id, storage)
     })
   })
 }

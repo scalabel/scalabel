@@ -16,6 +16,7 @@ import Logger from './logger'
 import { getExportName } from './path'
 import Session from './server_session'
 import * as types from './types'
+import { countUsers } from './user'
 import { getExistingProjects, getProjectKey,
   getTasksInProject, loadSavedState } from './util'
 
@@ -200,10 +201,13 @@ export async function DashboardHandler (req: Request, res: Response) {
 
         taskOptions.push(options)
       }
+      const storage = Session.getStorage()
+      const numUsers = await countUsers(projectOptions.name, storage)
 
       const contents: DashboardContents = {
         projectMetaData: projectOptions,
-        taskMetaDatas: taskOptions
+        taskMetaDatas: taskOptions,
+        numUsers
       }
 
       res.send(JSON.stringify(contents))
