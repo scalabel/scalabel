@@ -16,7 +16,7 @@ import {
   TrackMapType
 } from '../functional/types'
 import { convertItemToImport } from './import'
-import Session from './server_session'
+import { ProjectStore } from './project_store'
 import * as types from './types'
 import * as util from './util'
 
@@ -24,30 +24,31 @@ import * as util from './util'
  * convert fields to form and validate input
  * if invalid input is found, error is returned to user via alert
  */
-export function parseForm (fields: Fields): Promise<types.CreationForm> {
+export async function parseForm (
+  fields: Fields, projectStore: ProjectStore): Promise<types.CreationForm> {
   // Check that required fields were entered
   let projectName = fields[types.FormField.PROJECT_NAME] as string
   if (projectName === '') {
-    return Promise.reject(Error('Please create a project name'))
+    throw(Error('Please create a project name'))
   } else {
     projectName = projectName.replace(' ', '_')
   }
 
   const itemType = fields[types.FormField.ITEM_TYPE] as string
   if (itemType === '') {
-    return Promise.reject(Error('Please choose an item type'))
+    throw(Error('Please choose an item type'))
   }
 
   const labelType = fields[types.FormField.LABEL_TYPE] as string
   if (labelType === '') {
-    return Promise.reject(Error('Please choose a label type'))
+    throw(Error('Please choose a label type'))
   }
 
   // Task size is not required for videos
   let taskSize = 1 // video case
   if (fields[types.FormField.ITEM_TYPE] !== ItemTypeName.VIDEO) {
     if (fields[types.FormField.TASK_SIZE] === '') {
-      return Promise.reject(Error('Please specify a task size'))
+      throw(Error('Please specify a task size'))
     } else {
       taskSize = parseInt(fields[types.FormField.TASK_SIZE] as string, 10)
     }
@@ -58,24 +59,22 @@ export function parseForm (fields: Fields): Promise<types.CreationForm> {
   const instructions = fields[types.FormField.INSTRUCTIONS_URL] as string
 
   // Ensure project name is not already in use
-  return util.checkProjectName(projectName)
-    .then((exists: boolean) => {
-      if (exists) {
-        return Promise.reject(Error('Project name already exists.'))
-      }
-      const demoMode = fields[types.FormField.DEMO_MODE] === 'true'
-      const form = util.makeCreationForm(
-        projectName, itemType, labelType, pageTitle, taskSize,
-        instructions, demoMode
-      )
-      return form
-    })
+  const exists = await projectStore.checkProjectName(projectName)
+  if (exists) {
+    throw(Error('Project name already exists.'))
+  }
+  const demoMode = fields[types.FormField.DEMO_MODE] === 'true'
+  const form = util.makeCreationForm(
+    projectName, itemType, labelType, pageTitle, taskSize,
+    instructions, demoMode
+  )
+  return form
 }
 
 /**
  * Parses item, category, and attribute files from form
  */
-export function parseFiles (labelType: string, files: Files)
+export async function parseFiles (labelType: string, files: Files)
   : Promise<types.FormFileData> {
   return Promise.all([
     parseItems(files),
@@ -353,15 +352,6 @@ export function createProject (
 }
 
 /**
- * Save a project
- */
-export function saveProject (project: types.Project): Promise<void> {
-  const key = util.getProjectKey(project.config.projectName)
-  const data = JSON.stringify(project, null, 2)
-  return Session.getStorage().save(key, data)
-}
-
-/**
  * Create two maps for quick lookup of attribute data
  * @param configAttributes the attributes from config file
  * first RV: map from attribute name to attribute and its index
@@ -628,17 +618,4 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     tasks.push(task)
   }
   return Promise.resolve(tasks)
-}
-
-/**
- * Saves a list of tasks
- */
-export function saveTasks (tasks: TaskType[]): Promise<void[]> {
-  const promises: Array<Promise<void>> = []
-  for (const task of tasks) {
-    const key = util.getTaskKey(task.config.projectName, task.config.taskId)
-    const data = JSON.stringify(task, null, 2)
-    promises.push(Session.getStorage().save(key, data))
-  }
-  return Promise.all(promises)
 }

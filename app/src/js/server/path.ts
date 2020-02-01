@@ -67,8 +67,38 @@ export function getRedisReminderKey (key: string) {
 }
 
 /**
- * Get redis base key from a metadata key
+ * Convert redis metadata or reminder key to redis base key
  */
 export function getRedisBaseKey (metadataKey: string) {
   return metadataKey.split('^')[0]
+}
+
+/**
+ * Gets key of file with project data
+ */
+export function getProjectKey (projectName: string) {
+  return path.join(projectName, 'project')
+}
+
+/**
+ * Gets key of file with task data
+ */
+export function getTaskKey (projectName: string, taskId: string): string {
+  return path.join(getTaskDir(projectName), taskId)
+}
+
+/**
+ * Gets directory with task data for project
+ */
+export function getTaskDir (projectName: string): string {
+  return path.join(projectName, 'tasks')
+}
+
+/**
+ * Gets name of submission directory for a given task
+ * @param projectName
+ * @param task
+ */
+export function getSaveDir (projectName: string, taskId: string): string {
+  return path.join(projectName, 'saved', taskId)
 }

@@ -2,7 +2,8 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
-import { getProjectKey, getTaskKey, index2str } from '../../js/server/util'
+import { getProjectKey, getTaskKey } from '../../js/server/path'
+import { index2str } from '../../js/server/util'
 
 let storage: FileStorage
 let projectName: string

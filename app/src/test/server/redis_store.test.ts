@@ -4,8 +4,6 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
 import { RedisStore } from '../../js/server/redis_store'
-import Session from '../../js/server/server_session'
-import { defaultEnv, Env } from '../../js/server/types'
 import { sleep } from '../project/util'
 
 let redisProc: child.ChildProcessWithoutNullStreams
@@ -14,18 +12,25 @@ let defaultStore: RedisStore
 let storage: FileStorage
 // Default port 6379 is used in box2d integration test, so change port here
 let redisPort: number
+let redisTimeout: number
+let timeForWrite: number
+let numActionsForWrite: number
 
 beforeAll(async () => {
   redisPort = 6378
+  redisTimeout = 3600
+  timeForWrite = 600
+  numActionsForWrite = 10
+
   redisProc = child.spawn('redis-server',
     ['--appendonly', 'no', '--save', '', '--port', redisPort.toString()])
 
   // Buffer period for redis to launch
   await sleep(1000)
-  defaultStore = new RedisStore(redisPort)
-
+  defaultStore = new RedisStore(redisPort, redisTimeout,
+    timeForWrite, numActionsForWrite)
   storage = new FileStorage('test-data-redis')
-  Session.setStorage(storage)
+  defaultStore.initialize(storage)
 })
 
 afterAll(() => {
@@ -55,10 +60,9 @@ describe('Test redis cache', () => {
   })
 
   test('Writes back on timeout', async () => {
-    const timeLimitConfig: Env = defaultEnv
-    timeLimitConfig.timeForWrite = 0.2
-    Session.setEnv(timeLimitConfig)
-    const store = new RedisStore(redisPort)
+    const store = new RedisStore(redisPort, redisTimeout,
+      0.2, numActionsForWrite)
+    store.initialize(storage)
 
     const key = 'testKey1'
     await store.setExWithReminder(key, 'testvalue')
@@ -71,10 +75,9 @@ describe('Test redis cache', () => {
   })
 
   test('Writes back after action limit', async () => {
-    const actionLimitConfig: Env = defaultEnv
-    actionLimitConfig.numActionsForWrite = 5
-    Session.setEnv(actionLimitConfig)
-    const store = new RedisStore(redisPort)
+    const store = new RedisStore(redisPort, redisTimeout,
+      timeForWrite, 5)
+    store.initialize(storage)
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {

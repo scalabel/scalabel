@@ -4,17 +4,21 @@ import * as formidable from 'express-formidable'
 import { createServer } from 'http'
 import * as socketio from 'socket.io'
 import { startSocketServer } from './hub'
-import * as listeners from './listeners'
-import Logger from './logger'
+import { Listeners } from './listeners'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
-import Session from './server_session'
+import { ProjectStore } from './project_store'
 import { Endpoint } from './types'
-import { initEnv, initStorage } from './util'
+import { makeEnv } from './util'
 
 /**
  * Sets up http handlers
  */
-function startHTTPServer (app: Application) {
+function startHTTPServer (app: Application, projectStore: ProjectStore) {
+  const listeners = new Listeners(projectStore)
+
+  // set up middleware
+  app.use(listeners.loggingHandler)
+
   // set up static handlers for serving html
   // TODO: set up '/' endpoint
   for (const HTMLDir of HTMLDirectories) {
@@ -26,41 +30,37 @@ function startHTTPServer (app: Application) {
   app.use('/js', express.static(getAbsoluteSrcPath('/')))
 
   // set up post/get handlers
-  // TODO: set up other endpoints
-  app.get(Endpoint.GET_PROJECT_NAMES, listeners.ProjectNameHandler)
-  app.get(Endpoint.EXPORT, listeners.GetExportHandler)
+  app.get(Endpoint.GET_PROJECT_NAMES,
+    listeners.projectNameHandler.bind(listeners))
+  app.get(Endpoint.EXPORT,
+   listeners.getExportHandler.bind(listeners))
 
-  app.post(Endpoint.POST_PROJECT, formidable(), listeners.PostProjectHandler)
-  app.post(Endpoint.DASHBOARD, bodyParser.json(), listeners.DashboardHandler)
+  app.post(Endpoint.POST_PROJECT, formidable(),
+    listeners.postProjectHandler.bind(listeners))
+  app.post(Endpoint.DASHBOARD, bodyParser.json(),
+    listeners.dashboardHandler.bind(listeners))
 }
 
 /**
  * Main function for backend server
  */
 async function main (): Promise<void> {
-  // init global env
-  initEnv()
-  const env = Session.getEnv()
+  // initialize environment variables
+  const env = makeEnv()
 
-  // init global storage
-  try {
-    await initStorage(env)
-  } catch (error) {
-    Logger.error(error)
-  }
-    // start http and socket io servers
+  // initialize storage and redis
+  const projectStore = await ProjectStore.make(env)
+
+  // start http and socket io servers
   const app: Application = express()
   const httpServer = createServer(app)
   const io = socketio(httpServer)
 
-    // set up middleware
-  app.use(listeners.LoggingHandler)
+  // set up http handlers
+  startHTTPServer(app, projectStore)
 
-    // set up http handlers
-  startHTTPServer(app)
-
-    // set up socket.io handler
-  startSocketServer(io)
+  // set up socket.io handler
+  startSocketServer(io, env, projectStore)
 
   httpServer.listen(env.port)
 

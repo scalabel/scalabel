@@ -1,8 +1,9 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
+import { FileStorage } from './file_storage'
 import Logger from './logger'
 import * as path from './path'
-import Session from './server_session'
+import { Storage } from './storage'
 
 /**
  * Wraps and promisifies redis functionality
@@ -18,12 +19,19 @@ export class RedisStore {
   protected timeForWrite: number
   /** writes back to storage after this number of actions for a task */
   protected numActionsForWrite: number
+  /** storage to write back to */
+  protected storage: Storage
 
   /**
    * Create new store
    */
-  constructor (port: number) {
-    const env = Session.getEnv()
+  constructor (
+    port: number, timeout: number,
+    timeForWrite: number, numActionsForWrite: number) {
+    this.timeout = timeout
+    this.timeForWrite = timeForWrite
+    this.numActionsForWrite = numActionsForWrite
+
     this.client = redis.createClient(port)
     this.client.on('error', (err: Error) => {
       Logger.error(err)
@@ -35,42 +43,54 @@ export class RedisStore {
     this.sub = redis.createClient(port)
     // subscribe to reminder expirations for saving
     this.sub.subscribe('__keyevent@0__:expired')
-    this.sub.on('message', async (_channel: string, message: string) => {
-      const key = path.getRedisBaseKey(message)
-      const saveKey = await this.get(path.getRedisMetaKey(key))
-      const value = await this.get(key)
-      const fileKey = path.getFileKey(saveKey)
-      await Session.getStorage().save(fileKey, value)
-      await this.del(key)
+    this.sub.on('message', async (_channel: string, reminderKey: string) => {
+      const baseKey = path.getRedisBaseKey(reminderKey)
+      const saveDir = await this.get(path.getRedisMetaKey(baseKey))
+      const value = await this.get(baseKey)
+      await this.writeBackTask(saveDir, value)
+      await this.del(baseKey)
     })
 
-    this.timeout = env.redisTimeout
-    this.timeForWrite = env.timeForWrite
-    this.numActionsForWrite = env.numActionsForWrite
+    // dummy storage
+    this.storage = new FileStorage('')
+  }
+
+  /**
+   * Initializes storage to write back to
+   */
+  public initialize (storage: Storage) {
+    this.storage = storage
+  }
+
+  /**
+   * Writes back task submission to storage
+   * Task key in redis is the directory, so add a date before writing
+   */
+  public async writeBackTask (saveDir: string, value: string) {
+    const fileKey = path.getFileKey(saveDir)
+    await this.storage.save(fileKey, value)
   }
 
   /**
    * Sets a value with timeout for flushing
    * And a reminder value with shorter timeout for saving to disk
    */
-  public async setExWithReminder (saveKey: string, value: string) {
-    await this.setEx(saveKey, value, this.timeout)
-    await this.setEx(path.getRedisMetaKey(saveKey), saveKey, this.timeout)
+  public async setExWithReminder (saveDir: string, value: string) {
+    await this.setEx(saveDir, value, this.timeout)
+    await this.setEx(path.getRedisMetaKey(saveDir), saveDir, this.timeout)
 
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
-      const fileKey = path.getFileKey(saveKey)
-      await Session.getStorage().save(fileKey, value)
+      await this.writeBackTask(saveDir, value)
     } else {
-      const reminderKey = path.getRedisReminderKey(saveKey)
+      const reminderKey = path.getRedisReminderKey(saveDir)
       const numActions = parseInt(await this.get(reminderKey), 10)
       if (!numActions) {
         // new reminder, 1st action
         await this.setEx(reminderKey, '1', this.timeForWrite)
       } else if (numActions + 1 >= this.numActionsForWrite) {
         // write condition: num actions exceeded limit
-        const fileKey = path.getFileKey(saveKey)
-        await Session.getStorage().save(fileKey, value)
+        await this.writeBackTask(saveDir, value)
         await this.del(reminderKey)
       } else {
         // otherwise just update the action counter
@@ -84,8 +104,6 @@ export class RedisStore {
    * Wrapper for redis delete
    */
   public async del (key: string) {
-    // const redisDelete = promisify(this.client.del).bind(this.client)
-    // await redisDelete(key)
     this.client.del(key)
   }
 
