@@ -16,6 +16,7 @@ import { getExportName } from './path'
 import { ProjectStore } from './project_store'
 import * as types from './types'
 import { UserManager } from './user_manager'
+import { countLabels } from './util'
 
 /**
  * Wraps HTTP listeners
@@ -175,7 +176,7 @@ export class Listeners {
 
         const taskOptions = []
         for (const emptyTask of tasks) {
-          let task
+          let task: TaskType
           try {
             // first, attempt loading previous submission
             // TODO: Load the previous state asynchronously in dashboard
@@ -185,15 +186,7 @@ export class Listeners {
           } catch {
             task = emptyTask
           }
-          let numLabeledItems = 0
-          let numLabels = 0
-          for (const item of task.items) {
-            const currNumLabels = Object.keys(item.labels).length
-            if (item.labels && currNumLabels > 0) {
-              numLabeledItems++
-              numLabels += currNumLabels
-            }
-          }
+          const [numLabeledItems, numLabels] = countLabels(task)
 
           const options: TaskOptions = {
             numLabeledItems: numLabeledItems.toString(),
