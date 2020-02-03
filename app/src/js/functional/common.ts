@@ -196,8 +196,20 @@ export function updateLabels (
   // Map temporary ids to valid ids
   const labelIdMap: { [temporaryId: number]: number } = {}
   const shapeIdMap: { [temporaryId: number]: number } = {}
+  const trackIdMap: { [temporaryId: number]: number } = {}
   let maxLabelId = task.status.maxLabelId
   let maxShapeId = task.status.maxShapeId
+  let maxTrackId = task.status.maxTrackId
+
+  const newTracks = action.newTracks.map((track) => {
+    if (track.id > 0) {
+      throw new Error('Adding track with positive id')
+    }
+    trackIdMap[track.id] = maxTrackId + 1
+    track = makeTrack(maxTrackId + 1, track.type, { ...track.labels })
+    maxTrackId++
+    return track
+  })
 
   for (const itemLabels of action.labels) {
     const [newItemLabels, updatedItemLabels] = _.partition(
@@ -243,43 +255,37 @@ export function updateLabels (
     updatedIndexedShapes.push(updatedItemIndexedShapes)
   }
 
-  const shapeIdReplacer = (label: PartialLabelType) =>
+  const labelRefUpdater = (label: PartialLabelType) => {
     label.shapes = ((label.shapes) ? label.shapes : []).map(
       (shapeId) => (shapeId < 0) ? shapeIdMap[shapeId] : shapeId
     )
+    if (label.track && label.track < 0) {
+      label.track = trackIdMap[label.track]
+    }
+  }
 
-  const labelIdReplacer = (indexedShape: PartialIndexedShapeType) =>
+  const shapeRefUpdater = (indexedShape: PartialIndexedShapeType) =>
     indexedShape.labels =
       ((indexedShape.labels) ? indexedShape.labels : []).map((labelId) =>
         (labelId < 0) ? labelIdMap[labelId] : labelId
       )
 
-  newLabels.forEach((itemLabels) => itemLabels.forEach(shapeIdReplacer))
-  updatedLabels.forEach((itemLabels) => itemLabels.forEach(shapeIdReplacer))
+  newLabels.forEach((itemLabels) => itemLabels.forEach(labelRefUpdater))
+  updatedLabels.forEach((itemLabels) => itemLabels.forEach(labelRefUpdater))
 
   newIndexedShapes.forEach(
-    (itemIndexedShapes) => itemIndexedShapes.forEach(labelIdReplacer)
+    (itemIndexedShapes) => itemIndexedShapes.forEach(shapeRefUpdater)
   )
   updatedIndexedShapes.forEach(
-    (itemIndexedShapes) => itemIndexedShapes.forEach(labelIdReplacer)
+    (itemIndexedShapes) => itemIndexedShapes.forEach(shapeRefUpdater)
   )
 
-  let maxTrackId = task.status.maxTrackId
-  const newTracks = action.newTracks.map((track) => {
-    if (track.id > 0) {
-      throw new Error('Adding track with positive id')
+  newTracks.forEach((track) => Object.keys(track.labels).forEach((key) => {
+    const item = Number(key)
+    if (track.labels[item] < 0) {
+      track.labels[item] = labelIdMap[track.labels[item]]
     }
-    const newLabelIds =
-      Object.keys(track.labels).filter((key) => Number(key) < 0)
-    track = makeTrack(maxTrackId, track.type, { ...track.labels })
-    newLabelIds.forEach((key) => {
-      const id = Number(key)
-      track.labels[labelIdMap[id]] = track.labels[id]
-      delete track.labels[id]
-    })
-    maxTrackId++
-    return track
-  })
+  }))
 
   let items = [...task.items]
   const selectedItems = pickArray(items, action.itemIndices)
@@ -308,7 +314,9 @@ export function updateLabels (
       }
     }
   }
-  const status = updateObject(task.status, { maxLabelId, maxShapeId })
+  const status = updateObject(
+    task.status, { maxLabelId, maxShapeId, maxTrackId }
+  )
   task = updateObject(task, { status, items })
   task = addTracksToTask(task, newTracks)
   return { task, user, session }

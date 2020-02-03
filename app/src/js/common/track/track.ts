@@ -212,6 +212,9 @@ export class Track {
     this._shapes = {}
     this._labels = {}
     this._type = label.type
+
+    this._track = makeTrack(-1, label.type, {})
+
     const labelState = label.labelState
     const shapes = label.shapes()
     for (let index = itemIndex; index < itemIndex + numItems; index ++) {
@@ -239,6 +242,7 @@ export class Track {
         }
         this._updatedIndices.add(index)
       }
+      this._track.labels[index] = cloned.id
     }
   }
 

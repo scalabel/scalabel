@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { updateLabelsShapesTracks } from '../action/common'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
+import { makeTrack } from '../functional/states'
 import { IndexedShapeType, LabelType, TrackType } from '../functional/types'
 import Label2D from './2d/label2d'
 import { Shape2D } from './2d/shape2d'
@@ -22,74 +23,16 @@ export function commitLabels (
   } = {}
   const updatedLabels: { [index: number]: { [id: number]: LabelType}} = {}
   const newTracks: Array<Readonly<TrackType>> = []
+  let minNewLabelId = 0
+  let minNewShapeId = 0
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
-    if (drawable.labelId >= 0) {
-      // Existing labels & tracks
-      if (Session.tracking) {
-        if (drawable.trackId in Session.tracks) {
-          const track = Session.tracks[drawable.trackId]
-          track.update(
-            drawable.labelState.item,
-            drawable
-          )
-          for (const index of track.updatedIndices) {
-            if (!(index in updatedShapes)) {
-              updatedShapes[index] = {}
-            }
-            const shapes = track.getShapes(index)
-            for (const shape of shapes) {
-              updatedShapes[index][shape.id] = shape
-            }
-
-            if (!(index in updatedLabels)) {
-              updatedLabels[index] = {}
-            }
-            const label = track.getLabel(index)
-            if (label) {
-              updatedLabels[index][label.id] = label
-            }
-            itemIndices.add(index)
-          }
-          track.clearUpdatedIndices()
-        }
-      } else {
-        if (!(drawable.item in updatedLabels)) {
-          updatedLabels[drawable.item] = {}
-        }
-        updatedLabels[drawable.item][drawable.labelId] =
-          drawable.labelState
-        itemIndices.add(drawable.item)
-      }
-    } else {
-      // New labels and tracks
-      if (Session.tracking) {
-        const track = new Track()
-        if (track) {
-          let parentTrack
-          if (
-            drawable.parent &&
-            drawable.parent.trackId in Session.tracks
-          ) {
-            parentTrack = Session.tracks[drawable.parent.trackId]
-          }
-          track.init(
-            drawable.item,
-            drawable,
-            Session.numItems - drawable.item + 1,
-            parentTrack
-          )
-          newTracks.push(track.state)
-          itemIndices.add(drawable.item)
-        }
-      } else {
-        if (!(drawable.item in updatedLabels)) {
-          updatedLabels[drawable.item] = {}
-        }
-        updatedLabels[drawable.item][drawable.labelId] = drawable.labelState
-        itemIndices.add(drawable.item)
-      }
+    if (!(drawable.item in updatedLabels)) {
+      updatedLabels[drawable.item] = {}
     }
+    updatedLabels[drawable.item][drawable.labelId] = drawable.labelState
+    itemIndices.add(drawable.item)
+    minNewLabelId = Math.min(drawable.labelId, minNewLabelId)
   })
 
   updatedShapeDrawables.forEach((shape) => {
@@ -98,7 +41,96 @@ export function commitLabels (
     }
     updatedShapes[shape.item][shape.shapeId] = shape.toState()
     itemIndices.add(shape.item)
+    minNewShapeId = Math.min(shape.shapeId, minNewShapeId)
   })
+
+  if (Session.tracking) {
+    updatedLabelDrawables.forEach((drawable) => {
+      let track
+      let newTrackState
+      if (drawable.labelId >= 0) {
+        // Existing labels & tracks
+        if (drawable.trackId in Session.tracks) {
+          track = Session.tracks[drawable.trackId]
+          track.update(
+            drawable.labelState.item,
+            drawable
+          )
+        }
+      } else {
+        // New labels and tracks
+        track = new Track()
+        let parentTrack
+        if (
+          drawable.parent &&
+          drawable.parent.trackId in Session.tracks
+        ) {
+          parentTrack = Session.tracks[drawable.parent.trackId]
+        }
+        track.init(
+          drawable.item,
+          drawable,
+          Session.numItems - drawable.item,
+          parentTrack
+        )
+        newTrackState = makeTrack(
+          track.state.id,
+          track.state.type,
+          { ...track.state.labels }
+        )
+        newTracks.push(newTrackState)
+        itemIndices.add(drawable.item)
+      }
+      if (track) {
+        for (const index of track.updatedIndices) {
+          if (!(index in updatedShapes)) {
+            updatedShapes[index] = {}
+          }
+          const shapes = track.getShapes(index)
+          const shapeIds = []
+          for (const shape of shapes) {
+            if (shape.id < 0) {
+              updatedShapes[index][minNewShapeId] = {
+                ...shape,
+                id: minNewShapeId
+              }
+              shapeIds.push(minNewShapeId)
+              minNewShapeId--
+            } else {
+              updatedShapes[index][shape.id] = shape
+              shapeIds.push(shape.id)
+            }
+          }
+
+          if (!(index in updatedLabels)) {
+            updatedLabels[index] = {}
+          }
+          const label = track.getLabel(index)
+          if (label) {
+            if (label.id < 0) {
+              updatedLabels[index][minNewLabelId] = {
+                ...label,
+                shapes: shapeIds,
+                id: minNewLabelId
+              }
+
+              if (newTrackState && index in newTrackState.labels) {
+                newTrackState.labels[index] = minNewLabelId
+              }
+              minNewLabelId--
+            } else {
+              updatedLabels[index][label.id] = {
+                ...label,
+                shapes: shapeIds
+              }
+            }
+          }
+          itemIndices.add(index)
+        }
+        track.clearUpdatedIndices()
+      }
+    })
+  }
 
   const allLabels = []
   const allShapes = []
