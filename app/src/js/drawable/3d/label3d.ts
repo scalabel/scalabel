@@ -41,6 +41,8 @@ export abstract class Label3D {
   protected _labelList: Label3DList
   /** Shapes */
   protected _shapes: Shape3D[]
+  /** Set flag when editing */
+  protected _editing: boolean
 
   constructor (labelList: Label3DList) {
     this._labelState = makeLabel()
@@ -52,6 +54,7 @@ export abstract class Label3D {
     this._temporary = false
     this._labelList = labelList
     this._shapes = []
+    this._editing = false
   }
 
   /** Get label list */
@@ -87,6 +90,11 @@ export abstract class Label3D {
   /** set whether label was manually drawn */
   public setManual () {
     this._labelState.manual = true
+  }
+
+  /** Get whether label is being edited */
+  public get editing (): boolean {
+    return this._editing
   }
 
   /** get label state */

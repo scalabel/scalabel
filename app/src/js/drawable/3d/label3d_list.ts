@@ -193,7 +193,6 @@ export class Label3DList {
     const newRaycastableShapes: Array<Readonly<THREE.Object3D>> = [this.control]
     const newRaycastMap: {[id: number]: Label3D} = {}
     const item = state.task.items[state.user.select.item]
-    console.log(item)
 
     if (this.selectedLabel) {
       this.selectedLabel.selected = false
@@ -223,8 +222,16 @@ export class Label3DList {
       }
       if (shapeId in newShapes) {
         const drawableShape = newShapes[shapeId]
-        drawableShape.updateState(indexedShape)
-        newShapes[shapeId] = drawableShape
+        if (!indexedShape.labels.some(
+         (labelId) => labelId in this._labels &&
+         this._labels[labelId].editing
+        )) {
+          drawableShape.updateState(indexedShape)
+        }
+
+        newRaycastableShapes.push(drawableShape)
+        newRaycastMap[drawableShape.id] = this._labels[indexedShape.labels[0]]
+        this._scene.add(drawableShape)
       }
     }
 
@@ -245,12 +252,6 @@ export class Label3DList {
         newLabels[id].updateState(
           state, state.user.select.item, id
         )
-        for (const shape of Object.values(newLabels[id].shapes())) {
-          newRaycastableShapes.push(shape)
-          newRaycastMap[shape.id] = newLabels[id]
-          this._scene.add(shape)
-        }
-
         newLabels[id].selected = false
 
         // Disable all layers. Viewers will re-enable

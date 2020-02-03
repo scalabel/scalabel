@@ -136,6 +136,7 @@ export class Box3D extends Label3D {
     if (this._temporary) {
       this._cube.clickInit(x, y, camera)
     }
+    this._editing = true
     return this._cube.shouldDrag()
   }
 
@@ -144,7 +145,7 @@ export class Box3D extends Label3D {
    * @param projection
    */
   public onMouseUp () {
-    return
+    this._editing = false
   }
 
   /** Handle mouse move */
