@@ -362,6 +362,7 @@ export abstract class Label2D {
     for (const shape of this._shapes) {
       this._labelList.addUpdatedShape(shape)
     }
+    this._labelList.addUpdatedLabel(this)
   }
 }
 

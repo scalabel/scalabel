@@ -248,6 +248,7 @@ export class Polygon2D extends Label2D {
         point.set(coord.x, coord.y)
         if (this.labelId >= 0) {
           this._labelList.addUpdatedShape(point)
+          this._labelList.addUpdatedLabel(this)
         }
       } else if (this._highlightedHandle === this._points.length) {
         this.move(coord, _limit)
@@ -448,6 +449,7 @@ export class Polygon2D extends Label2D {
     ) {
       this._points[this._highlightedHandle].unassociateLabel(this)
       this._labelList.addUpdatedShape(this._points[this._highlightedHandle])
+      this._labelList.addUpdatedLabel(this)
       let previousVertexIndex = -1
       for (
         let i = this.getPreviousIndex(this._highlightedHandle);
@@ -585,6 +587,7 @@ export class Polygon2D extends Label2D {
         this._points[newMidPointIndex].unassociateLabel(this)
         this._labelList.addUpdatedShape(this._points[this._highlightedHandle])
         this._labelList.addUpdatedShape(this._points[newMidPointIndex])
+        this._labelList.addUpdatedLabel(this)
 
         this._points.splice(this._highlightedHandle, 1)
         this._points[newMidPointIndex] = this.getMidpoint(

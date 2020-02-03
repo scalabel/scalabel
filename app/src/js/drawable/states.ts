@@ -30,7 +30,9 @@ export function commitLabels (
     if (!(drawable.item in updatedLabels)) {
       updatedLabels[drawable.item] = {}
     }
-    updatedLabels[drawable.item][drawable.labelId] = drawable.labelState
+    if (!Session.tracking) {
+      updatedLabels[drawable.item][drawable.labelId] = drawable.labelState
+    }
     itemIndices.add(drawable.item)
     minNewLabelId = Math.min(drawable.labelId, minNewLabelId)
   })
@@ -39,7 +41,9 @@ export function commitLabels (
     if (!(shape.item in updatedShapes)) {
       updatedShapes[shape.item] = {}
     }
-    updatedShapes[shape.item][shape.shapeId] = shape.toState()
+    if (!Session.tracking) {
+      updatedShapes[shape.item][shape.shapeId] = shape.toState()
+    }
     itemIndices.add(shape.item)
     minNewShapeId = Math.min(shape.shapeId, minNewShapeId)
   })

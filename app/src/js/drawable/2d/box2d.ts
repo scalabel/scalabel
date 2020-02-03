@@ -257,11 +257,13 @@ export class Box2D extends Label2D {
         this._highlightedHandle < this._points.length
       ) {
         this.resize(coord, limit)
+        this._labelList.addUpdatedShape(this._shapes[0])
         this._labelList.addUpdatedLabel(this)
       } else if (
         this._highlightedHandle === this._points.length
       ) {
         this.move(coord, limit)
+        this._labelList.addUpdatedShape(this._shapes[0])
         this._labelList.addUpdatedLabel(this)
       }
       return true
