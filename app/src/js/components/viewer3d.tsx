@@ -56,6 +56,8 @@ class Viewer3D extends DrawableViewer<Props> {
   private _target: THREE.Vector3
   /** Current point cloud */
   private _pointCloud: THREE.Points | null
+  /** Flag set when camera is being moved */
+  private _movingCamera: boolean
 
   /**
    * Constructor
@@ -67,12 +69,15 @@ class Viewer3D extends DrawableViewer<Props> {
     this._raycaster = new THREE.Raycaster()
     this._target = new THREE.Vector3()
     this._pointCloud = null
+    this._movingCamera = false
   }
 
   /** Called when component updates */
   public componentDidUpdate () {
     if (this._viewerConfig) {
-      this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
+      if (!this._movingCamera) {
+        this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
+      }
 
       if (Session.activeViewerId === this.props.id) {
         Session.label3dList.setActiveCamera(this._camera)
@@ -262,6 +267,15 @@ class Viewer3D extends DrawableViewer<Props> {
   }
 
   /**
+   * Handle mouse down
+   * @param e
+   */
+  protected onMouseDown (e: React.MouseEvent): void {
+    super.onMouseDown(e)
+    this._movingCamera = true
+  }
+
+  /**
    * Handle mouse move
    * @param e
    */
@@ -295,6 +309,7 @@ class Viewer3D extends DrawableViewer<Props> {
   /** Handle mouse up */
   protected onMouseUp (e: React.MouseEvent) {
     super.onMouseUp(e)
+    this._movingCamera = false
     this.commitCamera()
   }
 
