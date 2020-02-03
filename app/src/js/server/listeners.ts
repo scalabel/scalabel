@@ -15,6 +15,7 @@ import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
 import * as types from './types'
+import { UserManager } from './user_manager'
 
 /**
  * Wraps HTTP listeners
@@ -22,9 +23,12 @@ import * as types from './types'
 export class Listeners {
   /** the project store */
   protected projectStore: ProjectStore
+  /** the user manager */
+  protected userManager: UserManager
 
-  constructor (projectStore: ProjectStore) {
+  constructor (projectStore: ProjectStore, userManager: UserManager) {
     this.projectStore = projectStore
+    this.userManager = userManager
   }
 
   /**
@@ -201,9 +205,11 @@ export class Listeners {
           taskOptions.push(options)
         }
 
+        const numUsers = await this.userManager.countUsers(projectOptions.name)
         const contents: DashboardContents = {
           projectMetaData: projectOptions,
-          taskMetaDatas: taskOptions
+          taskMetaDatas: taskOptions,
+          numUsers
         }
 
         res.send(JSON.stringify(contents))

@@ -1,6 +1,5 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
-import { FileStorage } from './file_storage'
 import Logger from './logger'
 import * as path from './path'
 import { Storage } from './storage'
@@ -26,11 +25,12 @@ export class RedisStore {
    * Create new store
    */
   constructor (
-    port: number, timeout: number,
-    timeForWrite: number, numActionsForWrite: number) {
+    port: number, timeout: number, timeForWrite: number,
+    numActionsForWrite: number, storage: Storage) {
     this.timeout = timeout
     this.timeForWrite = timeForWrite
     this.numActionsForWrite = numActionsForWrite
+    this.storage = storage
 
     this.client = redis.createClient(port)
     this.client.on('error', (err: Error) => {
@@ -50,16 +50,6 @@ export class RedisStore {
       await this.writeBackTask(saveDir, value)
       await this.del(baseKey)
     })
-
-    // dummy storage
-    this.storage = new FileStorage('')
-  }
-
-  /**
-   * Initializes storage to write back to
-   */
-  public initialize (storage: Storage) {
-    this.storage = storage
   }
 
   /**

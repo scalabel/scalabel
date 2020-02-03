@@ -1,5 +1,5 @@
-import * as socketio from 'socket.io'
-import * as uuid4 from 'uuid/v4'
+import socketio from 'socket.io'
+import uuid4 from 'uuid/v4'
 import * as types from '../action/types'
 import { configureStore } from '../common/configure_store'
 import Logger from './logger'
@@ -7,17 +7,19 @@ import * as path from './path'
 import { ProjectStore } from './project_store'
 import {
   Env, EventName, RegisterMessageType, SyncActionMessageType } from './types'
+import { UserManager } from './user_manager'
 import { index2str } from './util'
 
 /**
  * Starts socket.io handlers for saving, loading, and synchronization
  */
 export function startSocketServer (
-  io: socketio.Server, env: Env, projectStore: ProjectStore) {
+  io: socketio.Server, env: Env,
+  projectStore: ProjectStore, userManager: UserManager) {
   io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
     socket.on(EventName.REGISTER, async (rawData: string) => {
       try {
-        await register(rawData, socket, env, projectStore)
+        await register(rawData, socket, env, projectStore, userManager)
       } catch (error) {
         Logger.error(error)
       }
@@ -30,6 +32,10 @@ export function startSocketServer (
         Logger.error(error)
       }
     })
+
+    socket.on(EventName.DISCONNECT, async () => {
+      await userManager.deregisterUser(socket.id)
+    })
   })
 }
 
@@ -38,13 +44,14 @@ export function startSocketServer (
  */
 async function register (
   rawData: string, socket: socketio.Socket,
-  env: Env, projectStore: ProjectStore) {
+  env: Env, projectStore: ProjectStore, userManager: UserManager) {
   const data: RegisterMessageType = JSON.parse(rawData)
   const projectName = data.projectName
   const taskIndex = data.taskIndex
   let sessionId = data.sessionId
 
   const taskId = index2str(taskIndex)
+  await userManager.registerUser(socket.id, projectName, data.userId)
   // keep session id if it exists, i.e. if it is a reconnection
   if (!sessionId) {
     // new session on new load

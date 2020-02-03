@@ -26,16 +26,19 @@ export class Synchronizer {
   public middleware: Middleware
   /** The function to call after state is synced with backend */
   public initStateCallback: (state: State) => void
+  /** The user/browser id, constant across sessions */
+  public userId: string
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
-    taskIndex: number, projectName: string,
+    taskIndex: number, projectName: string, userId: string,
     initStateCallback: (state: State) => void) {
     this.initStateCallback = initStateCallback
 
     this.actionQueue = []
     this.saveActions = []
     this.actionLog = []
+    this.userId = userId
 
     const self = this
 
@@ -44,6 +47,7 @@ export class Synchronizer {
       next: Dispatch
     ) => (action) => {
       /* Only send back actions that originated locally */
+      action.userId = this.userId
       if (Session.id === action.sessionId) {
         self.actionQueue.push(action)
         if (Session.autosave) {
@@ -69,7 +73,8 @@ export class Synchronizer {
       const message: RegisterMessageType = {
         projectName,
         taskIndex,
-        sessionId: Session.id
+        sessionId: Session.id,
+        userId: this.userId
       }
       /* Send the registration message to the backend */
       self.socket.emit(EventName.REGISTER, JSON.stringify(message))

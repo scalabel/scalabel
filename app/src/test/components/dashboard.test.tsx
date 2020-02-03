@@ -65,6 +65,7 @@ describe('Test dashboard functionality', () => {
             <StyledHeader
               totalTaskLabeled={0}
               totalLabels={0}
+              numUsers={0}
               vendor={true}
             />
           </MuiThemeProvider>)
@@ -117,5 +118,6 @@ const sampleDashboardContents: DashboardContents = {
     numLabels: '0',
     submitted: true,
     handlerUrl: 'url'
-  }]
+  }],
+  numUsers: 0
 }

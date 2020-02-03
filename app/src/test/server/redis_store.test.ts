@@ -27,10 +27,9 @@ beforeAll(async () => {
 
   // Buffer period for redis to launch
   await sleep(1000)
-  defaultStore = new RedisStore(redisPort, redisTimeout,
-    timeForWrite, numActionsForWrite)
   storage = new FileStorage('test-data-redis')
-  defaultStore.initialize(storage)
+  defaultStore = new RedisStore(redisPort, redisTimeout,
+    timeForWrite, numActionsForWrite, storage)
 })
 
 afterAll(() => {
@@ -61,8 +60,7 @@ describe('Test redis cache', () => {
 
   test('Writes back on timeout', async () => {
     const store = new RedisStore(redisPort, redisTimeout,
-      0.2, numActionsForWrite)
-    store.initialize(storage)
+      0.2, numActionsForWrite, storage)
 
     const key = 'testKey1'
     await store.setExWithReminder(key, 'testvalue')
@@ -76,8 +74,7 @@ describe('Test redis cache', () => {
 
   test('Writes back after action limit', async () => {
     const store = new RedisStore(redisPort, redisTimeout,
-      timeForWrite, 5)
-    store.initialize(storage)
+      timeForWrite, 5, storage)
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {

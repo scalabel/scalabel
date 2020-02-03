@@ -53,6 +53,8 @@ export interface BaseAction {
   sessionId: string
   /** timestamp given by backend. It is Date.now() */
   timestamp?: number
+  /** id of the user that initiates the action */
+  userId?: string
 }
 
 export type InitSessionAction = BaseAction

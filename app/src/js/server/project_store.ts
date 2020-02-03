@@ -3,47 +3,26 @@ import { filterXSS } from 'xss'
 import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
 import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
-import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { getProjectKey, getSaveDir, getTaskDir, getTaskKey } from './path'
 import { RedisStore } from './redis_store'
 import { Storage } from './storage'
 import { Env, Project } from './types'
-import { makeStorage } from './util'
 
 /**
  * Wraps redis cache and storage basic functionality
  * Exposes higher level methods for writing projects, tasks, etc.
  */
 export class ProjectStore {
-  /**
-   * Creates static store then dynamically initializes with async
-   */
-  public static async make (env: Env) {
-    const projectStore = new ProjectStore(env.redisPort, env.redisTimeout,
-      env.timeForWrite, env.numActionsForWrite)
-    await projectStore.initialize(env.database, env.data)
-    return projectStore
-  }
   /** the redis store */
   protected redisStore: RedisStore
   /** the permanent storage */
   protected storage: Storage
 
-  constructor (redisPort: number, redisTimeout: number,
-               timeForWrite: number, numActionsForWrite: number) {
-    this.redisStore = new RedisStore(redisPort, redisTimeout,
-      timeForWrite, numActionsForWrite)
-    // dummy storage
-    this.storage = new FileStorage('')
-  }
-
-  /**
-   * Initializes values that require async
-   */
-  public async initialize (database: string, data: string) {
-    this.storage = await makeStorage(database, data)
-    this.redisStore.initialize(this.storage)
+  constructor (env: Env, storage: Storage) {
+    this.storage = storage
+    this.redisStore = new RedisStore(env.redisPort, env.redisTimeout,
+      env.timeForWrite, env.numActionsForWrite, this.storage)
   }
 
   /**

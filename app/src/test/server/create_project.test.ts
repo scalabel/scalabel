@@ -2,6 +2,7 @@ import mockfs from 'mock-fs'
 import { State, TaskType } from '../../js/functional/types'
 import { createProject, createTasks } from '../../js/server/create_project'
 import { convertStateToExport } from '../../js/server/export'
+import { FileStorage } from '../../js/server/file_storage'
 import { ProjectStore } from '../../js/server/project_store'
 import {
   CreationForm, defaultEnv, FormFileData, Project
@@ -33,7 +34,8 @@ beforeAll(async () => {
   // mock redis (not used in this test)
   jest.mock('../../js/server/redis_store', () => jest.fn())
 
-  projectStore = await ProjectStore.make(defaultEnv)
+  const storage = new FileStorage('data')
+  projectStore = new ProjectStore(defaultEnv, storage)
 })
 
 // TODO- test that form is loaded correctly
