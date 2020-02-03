@@ -22,14 +22,14 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
     if (currentManualIndices[0] >= 0) {
       this.interpolate(currentManualIndices[0], itemIndex)
     } else {
-      this.copyShapes(indices[0], itemIndex, itemIndex)
+      this.copyShapes(indices[0] - 1, itemIndex, itemIndex)
     }
 
     // Forward
     if (currentManualIndices[1] >= 0) {
       this.interpolate(itemIndex, currentManualIndices[1])
     } else {
-      this.copyShapes(itemIndex, indices[indices.length - 1], itemIndex)
+      this.copyShapes(itemIndex, indices[indices.length - 1] + 1, itemIndex)
     }
   }
 
