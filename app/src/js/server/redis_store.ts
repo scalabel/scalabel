@@ -3,6 +3,7 @@ import { promisify } from 'util'
 import Logger from './logger'
 import * as path from './path'
 import { Storage } from './storage'
+import { Env } from './types'
 
 /**
  * Wraps and promisifies redis functionality
@@ -24,15 +25,12 @@ export class RedisStore {
   /**
    * Create new store
    */
-  constructor (
-    port: number, timeout: number, timeForWrite: number,
-    numActionsForWrite: number, storage: Storage) {
-    this.timeout = timeout
-    this.timeForWrite = timeForWrite
-    this.numActionsForWrite = numActionsForWrite
+  constructor (env: Env, storage: Storage) {
+    this.timeout = env.redisTimeout
+    this.timeForWrite = env.timeForWrite
+    this.numActionsForWrite = env.numActionsForWrite
     this.storage = storage
-
-    this.client = redis.createClient(port)
+    this.client = redis.createClient(env.redisPort)
     this.client.on('error', (err: Error) => {
       Logger.error(err)
     })
@@ -40,7 +38,7 @@ export class RedisStore {
       this.client.config('SET', 'notify-keyspace-events', 'Ex')
     })
 
-    this.sub = redis.createClient(port)
+    this.sub = redis.createClient(env.redisPort)
     // subscribe to reminder expirations for saving
     this.sub.subscribe('__keyevent@0__:expired')
     this.sub.on('message', async (_channel: string, reminderKey: string) => {

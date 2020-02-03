@@ -4,32 +4,27 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
 import { RedisStore } from '../../js/server/redis_store'
+import { defaultEnv, Env } from '../../js/server/types'
 import { sleep } from '../project/util'
 
 let redisProc: child.ChildProcessWithoutNullStreams
 
 let defaultStore: RedisStore
 let storage: FileStorage
-// Default port 6379 is used in box2d integration test, so change port here
-let redisPort: number
-let redisTimeout: number
-let timeForWrite: number
-let numActionsForWrite: number
+let env: Env
 
 beforeAll(async () => {
-  redisPort = 6378
-  redisTimeout = 3600
-  timeForWrite = 600
-  numActionsForWrite = 10
+  // Default port 6379 is used in box2d integration test, so change port here
+  env = _.clone(defaultEnv)
+  env.redisPort = 6378
 
   redisProc = child.spawn('redis-server',
-    ['--appendonly', 'no', '--save', '', '--port', redisPort.toString()])
+    ['--appendonly', 'no', '--save', '', '--port', env.redisPort.toString()])
 
   // Buffer period for redis to launch
   await sleep(1000)
   storage = new FileStorage('test-data-redis')
-  defaultStore = new RedisStore(redisPort, redisTimeout,
-    timeForWrite, numActionsForWrite, storage)
+  defaultStore = new RedisStore(env, storage)
 })
 
 afterAll(() => {
@@ -43,7 +38,7 @@ describe('Test redis cache', () => {
     const values = _.range(5).map((v) => sprintf('value%s', v))
 
     for (let i = 0; i < 5; i++) {
-      await defaultStore.setEx(keys[i], values[i], 1000)
+      await defaultStore.setEx(keys[i], values[i], 1)
       const value = await defaultStore.get(keys[i])
       expect(value).toBe(values[i])
     }
@@ -59,22 +54,25 @@ describe('Test redis cache', () => {
   })
 
   test('Writes back on timeout', async () => {
-    const store = new RedisStore(redisPort, redisTimeout,
-      0.2, numActionsForWrite, storage)
+    const timeoutEnv = _.clone(env)
+    timeoutEnv.timeForWrite = 0.2
+    const store = new RedisStore(timeoutEnv, storage)
 
     const key = 'testKey1'
     await store.setExWithReminder(key, 'testvalue')
+
     const savedKeys = await storage.listKeys('')
     expect(savedKeys.length).toBe(0)
-
     await sleep(800)
+
     const savedKeysFinal = await storage.listKeys('')
     expect(savedKeysFinal.length).toBe(1)
   })
 
   test('Writes back after action limit', async () => {
-    const store = new RedisStore(redisPort, redisTimeout,
-      timeForWrite, 5, storage)
+    const actionEnv = _.clone(env)
+    actionEnv.numActionsForWrite = 5
+    const store = new RedisStore(actionEnv, storage)
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {

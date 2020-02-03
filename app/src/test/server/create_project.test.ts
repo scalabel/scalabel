@@ -4,6 +4,7 @@ import { createProject, createTasks } from '../../js/server/create_project'
 import { convertStateToExport } from '../../js/server/export'
 import { FileStorage } from '../../js/server/file_storage'
 import { ProjectStore } from '../../js/server/project_store'
+import { RedisStore } from '../../js/server/redis_store'
 import {
   CreationForm, defaultEnv, FormFileData, Project
 } from '../../js/server/types'
@@ -23,6 +24,10 @@ import {
   sampleStateExportImage, sampleStateExportImagePolygon
 } from '../test_export_objects'
 
+// mock redis (not used in this test)
+jest.genMockFromModule('../../js/server/redis_store')
+jest.mock('../../js/server/redis_store')
+
 let projectStore: ProjectStore
 
 beforeAll(async () => {
@@ -31,11 +36,9 @@ beforeAll(async () => {
     'data/': {}
   })
 
-  // mock redis (not used in this test)
-  jest.mock('../../js/server/redis_store', () => jest.fn())
-
   const storage = new FileStorage('data')
-  projectStore = new ProjectStore(defaultEnv, storage)
+  const redisStore = new RedisStore(defaultEnv, storage)
+  projectStore = new ProjectStore(storage, redisStore)
 })
 
 // TODO- test that form is loaded correctly

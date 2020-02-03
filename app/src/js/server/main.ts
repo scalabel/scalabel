@@ -7,6 +7,7 @@ import { startSocketServer } from './hub'
 import { Listeners } from './listeners'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
+import { RedisStore } from './redis_store'
 import { Endpoint } from './types'
 import { UserManager } from './user_manager'
 import { makeEnv, makeStorage } from './util'
@@ -52,7 +53,8 @@ async function main (): Promise<void> {
 
   // initialize storage and redis
   const storage = await makeStorage(env.database, env.data)
-  const projectStore = new ProjectStore(env, storage)
+  const redisStore = new RedisStore(env, storage)
+  const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(storage)
 
   // start http and socket io servers

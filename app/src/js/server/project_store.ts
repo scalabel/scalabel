@@ -6,7 +6,7 @@ import Logger from './logger'
 import { getProjectKey, getSaveDir, getTaskDir, getTaskKey } from './path'
 import { RedisStore } from './redis_store'
 import { Storage } from './storage'
-import { Env, Project } from './types'
+import { Project } from './types'
 import { getPolicy } from './util'
 
 /**
@@ -19,10 +19,9 @@ export class ProjectStore {
   /** the permanent storage */
   protected storage: Storage
 
-  constructor (env: Env, storage: Storage) {
+  constructor (storage: Storage, redisStore: RedisStore) {
     this.storage = storage
-    this.redisStore = new RedisStore(env.redisPort, env.redisTimeout,
-      env.timeForWrite, env.numActionsForWrite, this.storage)
+    this.redisStore = redisStore
   }
 
   /**
