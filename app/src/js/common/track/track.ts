@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import Label2D from '../../drawable/2d/label2d'
+import { Shape2D } from '../../drawable/2d/shape2d'
 import Label3D from '../../drawable/3d/label3d'
+import { Shape3D } from '../../drawable/3d/shape3d'
 import { makeTrack } from '../../functional/states'
 import { IndexedShapeType, Label2DTemplateType, LabelType, State, TrackType } from '../../functional/types'
 import { LabelTypeName, TrackPolicyType } from '../types'
@@ -254,15 +256,11 @@ export class Track {
    * @param newShapes
    */
   public update (itemIndex: number, label: Readonly<Label>): void {
-    const shapes = label.shapes()
-    if (
-      itemIndex in this._shapes &&
-      shapes.length === this._shapes[itemIndex].length
-    ) {
+    const shapes = label.shapes() as Array<Shape2D | Shape3D>
+    if (itemIndex in this._shapes) {
       this._updatedIndices.add(itemIndex)
-      for (let i = 0; i < shapes.length; i++) {
-        this._shapes[itemIndex][i] = _.cloneDeep(shapes[i].toState())
-      }
+      this._shapes[itemIndex] =
+        shapes.map((shape) => _.cloneDeep(shape.toState()))
 
       this._labels[itemIndex] = {
         ...this._labels[itemIndex],

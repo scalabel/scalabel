@@ -702,9 +702,10 @@ export class Polygon2D extends Label2D {
 
   /** Remake shape id array in label state */
   private updateShapeRef () {
-    this._labelState.shapes = this._points.filter(
-      (shape) => shape.type !== PointType.MID
-    ).map((shape) => shape.shapeId)
+    this._shapes = this._points.filter(
+      (point) => point.type !== PointType.MID
+    )
+    this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
     this._labelList.addUpdatedLabel(this)
   }
 }

@@ -47,6 +47,9 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
       }
 
       const shapes = this._track.getShapes(i)
+      if (shapes.length !== sourceShapes.length) {
+        break
+      }
       const newShapes = []
       for (let shapeIndex = 0; shapeIndex < sourceShapes.length; shapeIndex++) {
         newShapes.push({
