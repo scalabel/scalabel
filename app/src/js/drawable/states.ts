@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { updateLabelsShapesTracks } from '../action/common'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
-import { makeTrack } from '../functional/states'
+import { makeIndexedShape, makeLabel, makeTrack } from '../functional/states'
 import { IndexedShapeType, LabelType, TrackType } from '../functional/types'
 import Label2D from './2d/label2d'
 import { Shape2D } from './2d/shape2d'
@@ -58,6 +58,11 @@ export function commitLabels (
           )
         }
       } else {
+        // Remove from updated array, will be replaced by track
+        for (const shapeId of drawable.labelState.shapes) {
+          delete updatedShapes[drawable.item][shapeId]
+        }
+        delete updatedLabels[drawable.item][drawable.labelId]
         // New labels and tracks
         track = new Track()
         let parentTrack
@@ -89,17 +94,15 @@ export function commitLabels (
           const shapes = track.getShapes(index)
           const shapeIds = []
           for (const shape of shapes) {
+            const newShape = makeIndexedShape(
+              shape.id, shape.item, shape.labels, shape.type, { ...shape.shape }
+            )
             if (shape.id < 0) {
-              updatedShapes[index][minNewShapeId] = {
-                ...shape,
-                id: minNewShapeId
-              }
-              shapeIds.push(minNewShapeId)
+              newShape.id = minNewShapeId
               minNewShapeId--
-            } else {
-              updatedShapes[index][shape.id] = shape
-              shapeIds.push(shape.id)
             }
+            updatedShapes[index][newShape.id] = newShape
+            shapeIds.push(newShape.id)
           }
 
           if (!(index in updatedLabels)) {
@@ -107,23 +110,17 @@ export function commitLabels (
           }
           const label = track.getLabel(index)
           if (label) {
+            const newLabel = makeLabel(label)
+            newLabel.shapes = shapeIds
             if (label.id < 0) {
-              updatedLabels[index][minNewLabelId] = {
-                ...label,
-                shapes: shapeIds,
-                id: minNewLabelId
-              }
+              newLabel.id = minNewLabelId
 
               if (newTrackState && index in newTrackState.labels) {
                 newTrackState.labels[index] = minNewLabelId
               }
               minNewLabelId--
-            } else {
-              updatedLabels[index][label.id] = {
-                ...label,
-                shapes: shapeIds
-              }
             }
+            updatedLabels[index][newLabel.id] = newLabel
           }
           itemIndices.add(index)
         }

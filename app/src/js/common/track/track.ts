@@ -238,7 +238,9 @@ export class Track {
         this._labels[index] = cloned
         this._shapes[index] = []
         for (const shape of shapes) {
-          this._shapes[index].push(_.cloneDeep(shape.toState()))
+          const clonedShape = _.cloneDeep(shape.toState())
+          clonedShape.item = index
+          this._shapes[index].push(clonedShape)
         }
         this._updatedIndices.add(index)
       }
