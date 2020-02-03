@@ -3,7 +3,10 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { sprintf } from 'sprintf-js'
 import * as yargs from 'yargs'
-import { BundleFile, HandlerUrl, ItemTypeName, LabelTypeName } from '../common/types'
+import {
+  BundleFile, HandlerUrl, ItemTypeName,
+  LabelTypeName, TrackPolicyType } from '../common/types'
+import { Label2DTemplateType } from '../functional/types'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
@@ -113,7 +116,8 @@ export function formFileExists (file: File | undefined): boolean {
 /**
  * Gets the handler url for the project
  */
-export function getHandlerUrl (itemType: string, labelType: string): string {
+export function getHandlerUrl (
+  itemType: string, labelType: string): string {
   switch (itemType) {
     case ItemTypeName.IMAGE:
       return HandlerUrl.LABEL
@@ -166,5 +170,43 @@ export function getTracking (itemType: string): [string, boolean] {
       return [ItemTypeName.FUSION, true]
     default:
       return [itemType, false]
+  }
+}
+
+/**
+ * Chooses the policy type and label types based on item and label types
+ */
+export function getPolicy (
+  itemType: string, labelTypes: string[],
+  policyTypes: string[], templates2d: {[name: string]: Label2DTemplateType}):
+  [string[], string[]] {
+    // TODO: Move this to be in front end after implementing label selector
+  switch (itemType) {
+    case ItemTypeName.IMAGE:
+    case ItemTypeName.VIDEO:
+      if (labelTypes.length === 1) {
+        switch (labelTypes[0]) {
+          case LabelTypeName.BOX_2D:
+            return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+          case LabelTypeName.POLYGON_2D:
+            return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+          case LabelTypeName.CUSTOM_2D:
+            labelTypes[0] = Object.keys(templates2d)[0]
+            return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+        }
+      }
+      return [policyTypes, labelTypes]
+    case ItemTypeName.POINT_CLOUD:
+    case ItemTypeName.POINT_CLOUD_TRACKING:
+      if (labelTypes.length === 1 &&
+            labelTypes[0] === LabelTypeName.BOX_3D) {
+        return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+      }
+      return [policyTypes, labelTypes]
+    case ItemTypeName.FUSION:
+      return [[TrackPolicyType.LINEAR_INTERPOLATION],
+        [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]]
+    default:
+      return [policyTypes, labelTypes]
   }
 }

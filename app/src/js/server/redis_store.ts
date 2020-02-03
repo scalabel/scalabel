@@ -72,21 +72,22 @@ export class RedisStore {
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
       await this.writeBackTask(saveDir, value)
+      return
+    }
+
+    const reminderKey = path.getRedisReminderKey(saveDir)
+    const numActions = parseInt(await this.get(reminderKey), 10)
+    if (!numActions) {
+      // new reminder, 1st action
+      await this.setEx(reminderKey, '1', this.timeForWrite)
+    } else if (numActions + 1 >= this.numActionsForWrite) {
+      // write condition: num actions exceeded limit
+      await this.writeBackTask(saveDir, value)
+      await this.del(reminderKey)
     } else {
-      const reminderKey = path.getRedisReminderKey(saveDir)
-      const numActions = parseInt(await this.get(reminderKey), 10)
-      if (!numActions) {
-        // new reminder, 1st action
-        await this.setEx(reminderKey, '1', this.timeForWrite)
-      } else if (numActions + 1 >= this.numActionsForWrite) {
-        // write condition: num actions exceeded limit
-        await this.writeBackTask(saveDir, value)
-        await this.del(reminderKey)
-      } else {
-        // otherwise just update the action counter
-        const newActions = (numActions + 1).toString()
-        await this.setEx(reminderKey, newActions, this.timeForWrite)
-      }
+      // otherwise just update the action counter
+      const newActions = (numActions + 1).toString()
+      await this.setEx(reminderKey, newActions, this.timeForWrite)
     }
   }
 

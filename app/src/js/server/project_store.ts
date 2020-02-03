@@ -1,6 +1,5 @@
 import { sprintf } from 'sprintf-js'
 import { filterXSS } from 'xss'
-import { ItemTypeName, LabelTypeName, TrackPolicyType } from '../common/types'
 import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
 import Logger from './logger'
@@ -8,6 +7,7 @@ import { getProjectKey, getSaveDir, getTaskDir, getTaskKey } from './path'
 import { RedisStore } from './redis_store'
 import { Storage } from './storage'
 import { Env, Project } from './types'
+import { getPolicy } from './util'
 
 /**
  * Wraps redis cache and storage basic functionality
@@ -151,9 +151,9 @@ export class ProjectStore {
     await Promise.all(promises)
   }
 
-    /**
-     * Loads a task
-     */
+  /**
+   * Loads a task
+   */
   public async loadTask (projectName: string, taskId: string) {
     const key = getTaskKey(projectName, taskId)
     const taskData = await this.storage.load(key)
@@ -193,42 +193,12 @@ export class ProjectStore {
       state.session.itemStatuses.push(itemStatus)
     }
 
-    // TODO: Move this to be in front end after implementing label selector
-    switch (state.task.config.itemType) {
-      case ItemTypeName.IMAGE:
-      case ItemTypeName.VIDEO:
-        if (state.task.config.labelTypes.length === 1) {
-          switch (state.task.config.labelTypes[0]) {
-            case LabelTypeName.BOX_2D:
-              state.task.config.policyTypes =
-                [TrackPolicyType.LINEAR_INTERPOLATION]
-              break
-            case LabelTypeName.POLYGON_2D:
-              state.task.config.policyTypes =
-                [TrackPolicyType.LINEAR_INTERPOLATION]
-              break
-            case LabelTypeName.CUSTOM_2D:
-              state.task.config.labelTypes[0] =
-                Object.keys(state.task.config.label2DTemplates)[0]
-              state.task.config.policyTypes =
-                [TrackPolicyType.LINEAR_INTERPOLATION]
-          }
-        }
-        break
-      case ItemTypeName.POINT_CLOUD:
-      case ItemTypeName.POINT_CLOUD_TRACKING:
-        if (state.task.config.labelTypes.length === 1 &&
-            state.task.config.labelTypes[0] === LabelTypeName.BOX_3D) {
-          state.task.config.policyTypes =
-            [TrackPolicyType.LINEAR_INTERPOLATION]
-        }
-        break
-      case ItemTypeName.FUSION:
-        state.task.config.labelTypes =
-          [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]
-        state.task.config.policyTypes = [TrackPolicyType.LINEAR_INTERPOLATION]
-        break
-    }
+    const [trackPolicy, labelTypes] = getPolicy(
+      state.task.config.itemType, state.task.config.labelTypes,
+      state.task.config.policyTypes, state.task.config.label2DTemplates)
+    state.task.config.policyTypes = trackPolicy
+    state.task.config.labelTypes = labelTypes
+
     return state
   }
 }
