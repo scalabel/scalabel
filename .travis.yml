@@ -21,6 +21,8 @@ script:
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
   - python3 scripts/lll.py -d server
   - npm test
+services:
+  - redis-server
 branches:
   only:
     - master
