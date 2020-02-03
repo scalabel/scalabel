@@ -50,6 +50,10 @@ export function makeDrawableLabel3D (
 export class Label3DList {
   /** transformation control */
   public control: TransformationControl
+  /** Currently highlighted label */
+  public highlightedLabel: Label3D | null
+  /** selected label */
+  public selectedLabel: Label3D | null
 
   /** Scalabel id to labels */
   private _labels: {[labelId: number]: Label3D}
@@ -61,8 +65,6 @@ export class Label3DList {
   private _state: State
   /** Scene for rendering */
   private _scene: THREE.Scene
-  /** selected label */
-  private _selectedLabel: Label3D | null
   /** List of ThreeJS objects for raycasting */
   private _raycastableShapes: Readonly<Array<Readonly<THREE.Object3D>>>
   /** callbacks */
@@ -79,10 +81,11 @@ export class Label3DList {
   constructor () {
     this.control = new TransformationControl()
     this.control.layers.enableAll()
+    this.highlightedLabel = null
     this._labels = {}
     this._shapes = {}
     this._raycastMap = {}
-    this._selectedLabel = null
+    this.selectedLabel = null
     this._scene = new THREE.Scene()
     this._scene.add(this.control)
     this._raycastableShapes = []
@@ -138,13 +141,6 @@ export class Label3DList {
   }
 
   /**
-   * Get selected label
-   */
-  public get selectedLabel (): Label3D | null {
-    return this._selectedLabel
-  }
-
-  /**
    * Get id's of selected labels
    */
   public get selectedLabelIds (): {[index: number]: number[]} {
@@ -197,11 +193,12 @@ export class Label3DList {
     const newRaycastableShapes: Array<Readonly<THREE.Object3D>> = [this.control]
     const newRaycastMap: {[id: number]: Label3D} = {}
     const item = state.task.items[state.user.select.item]
+    console.log(item)
 
-    if (this._selectedLabel) {
-      this._selectedLabel.selected = false
+    if (this.selectedLabel) {
+      this.selectedLabel.selected = false
     }
-    this._selectedLabel = null
+    this.selectedLabel = null
 
     // Reset control & scene
     for (const key of Object.keys(this._labels)) {
@@ -221,9 +218,11 @@ export class Label3DList {
         if (newShape) {
           newShapes[shapeId] = newShape
         }
+      } else {
+        newShapes[shapeId] = this._shapes[shapeId]
       }
-      if (shapeId in this._shapes) {
-        const drawableShape = this._shapes[shapeId]
+      if (shapeId in newShapes) {
+        const drawableShape = newShapes[shapeId]
         drawableShape.updateState(indexedShape)
         newShapes[shapeId] = drawableShape
       }
@@ -279,9 +278,9 @@ export class Label3DList {
       const selectedLabelIds = select.labels[select.item]
       if (selectedLabelIds.length === 1 &&
           selectedLabelIds[0] in this._labels) {
-        this._selectedLabel = this._labels[select.labels[select.item][0]]
-        this._selectedLabel.selected = true
-        this.control.addLabel(this._selectedLabel)
+        this.selectedLabel = this._labels[select.labels[select.item][0]]
+        this.selectedLabel.selected = true
+        this.control.addLabel(this.selectedLabel)
       }
     }
 

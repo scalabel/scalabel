@@ -47,7 +47,6 @@ export class Box3D extends Label3D {
     }
 
     this._shapes = [this._cube]
-    this._labelList.addTemporaryShape(this._cube)
     this._cube.associateLabel(this)
 
     this._labelState = makeLabel({
@@ -61,6 +60,9 @@ export class Box3D extends Label3D {
 
     if (temporary) {
       this._temporary = true
+    } else {
+      this._labelList.addUpdatedLabel(this)
+      this._labelList.addTemporaryShape(this._cube)
     }
   }
 
@@ -120,14 +122,6 @@ export class Box3D extends Label3D {
   }
 
   /**
-   * Modify ThreeJS objects to draw label
-   * @param {THREE.Scene} scene: ThreeJS Scene Object
-   */
-  public render (scene: THREE.Scene, camera: THREE.Camera): void {
-    this._cube.render(scene, camera)
-  }
-
-  /**
    * move anchor to next corner
    */
   public incrementAnchorIndex (): void {
@@ -159,6 +153,7 @@ export class Box3D extends Label3D {
     if (success) {
       this._temporary = false
       this._labelList.addUpdatedShape(this._cube)
+      this._labelList.addUpdatedLabel(this)
     }
     return success
   }
@@ -166,6 +161,7 @@ export class Box3D extends Label3D {
   /** Rotate */
   public rotate (quaternion: THREE.Quaternion, anchor?: THREE.Vector3) {
     this._labelList.addUpdatedShape(this._cube)
+    this._labelList.addUpdatedLabel(this)
     this._cube.applyQuaternion(quaternion)
     if (anchor) {
       const newPosition = new THREE.Vector3()
@@ -181,17 +177,20 @@ export class Box3D extends Label3D {
   public move (position: THREE.Vector3): void {
     this._cube.position.copy(position)
     this._labelList.addUpdatedShape(this._cube)
+    this._labelList.addUpdatedLabel(this)
   }
 
   /** Translate */
   public translate (delta: THREE.Vector3) {
     this._labelList.addUpdatedShape(this._cube)
+    this._labelList.addUpdatedLabel(this)
     this._cube.position.add(delta)
   }
 
   /** Scale */
   public scale (scale: THREE.Vector3, anchor: THREE.Vector3, local: boolean) {
     this._labelList.addUpdatedShape(this._cube)
+    this._labelList.addUpdatedLabel(this)
     const inverseRotation = new THREE.Quaternion()
     inverseRotation.copy(this.orientation)
     inverseRotation.inverse()

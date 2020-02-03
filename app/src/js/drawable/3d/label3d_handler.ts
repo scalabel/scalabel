@@ -8,15 +8,12 @@ import { makePointCloudViewerConfig, makeSensor } from '../../functional/states'
 import { PointCloudViewerConfigType, SensorType, State, ViewerConfigType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { commitLabels } from '../states'
-import { Label3D } from './label3d'
 import { makeDrawableLabel3D } from './label3d_list'
 
 /**
  * Handles user interactions with labels
  */
 export class Label3DHandler {
-  /** highlighted label */
-  private _highlightedLabel: Label3D | null
   /** whether mouse is down on the selected box */
   private _mouseDownOnSelection: boolean
   /** The hashed list of keys currently down */
@@ -33,7 +30,6 @@ export class Label3DHandler {
   private _camera: THREE.Camera
 
   constructor (camera: THREE.Camera) {
-    this._highlightedLabel = null
     this._mouseDownOnSelection = false
     this._keyDownMap = {}
     this._viewerConfig = makePointCloudViewerConfig(-1)
@@ -69,7 +65,7 @@ export class Label3DHandler {
    */
   public onDoubleClick (): boolean {
     this.selectHighlighted()
-    return this._highlightedLabel !== null
+    return Session.label3dList.highlightedLabel !== null
   }
 
   /**
@@ -82,9 +78,11 @@ export class Label3DHandler {
       return false
     }
 
-    if (this._highlightedLabel) {
-      const consumed = this._highlightedLabel.onMouseDown(x, y, this._camera)
+    if (Session.label3dList.highlightedLabel) {
+      const consumed =
+        Session.label3dList.highlightedLabel.onMouseDown(x, y, this._camera)
       if (consumed) {
+        Session.label3dList.selectedLabel = Session.label3dList.highlightedLabel
         this._mouseDownOnSelection = true
         return false
       }
@@ -112,7 +110,7 @@ export class Label3DHandler {
     // Set current label as selected label
     if (
       this._mouseDownOnSelection &&
-      this._highlightedLabel !== Session.label3dList.selectedLabel
+      Session.label3dList.highlightedLabel !== Session.label3dList.selectedLabel
     ) {
       this.selectHighlighted()
     }
@@ -144,8 +142,8 @@ export class Label3DHandler {
         return true
       }
     }
-    if (this._mouseDownOnSelection && this._highlightedLabel) {
-      this._highlightedLabel.onMouseMove(x, y, this._camera)
+    if (this._mouseDownOnSelection && Session.label3dList.highlightedLabel) {
+      Session.label3dList.highlightedLabel.onMouseMove(x, y, this._camera)
       return true
     } else {
       this.highlight(raycastIntersection)
@@ -189,10 +187,6 @@ export class Label3DHandler {
             center,
             this._sensorIds
           )
-          Session.label3dList.addUpdatedLabel(label)
-          for (const shape of label.shapes()) {
-            Session.label3dList.addUpdatedShape(shape)
-          }
           commitLabels(
             [...Session.label3dList.updatedLabels.values()],
             [...Session.label3dList.updatedShapes.values()]
@@ -259,10 +253,10 @@ export class Label3DHandler {
    * @param point
    */
   private highlight (intersection?: THREE.Intersection) {
-    if (this._highlightedLabel) {
-      this._highlightedLabel.setHighlighted()
+    if (Session.label3dList.highlightedLabel) {
+      Session.label3dList.highlightedLabel.setHighlighted()
     }
-    this._highlightedLabel = null
+    Session.label3dList.highlightedLabel = null
 
     if (intersection) {
       const object = intersection.object
@@ -270,7 +264,7 @@ export class Label3DHandler {
 
       if (label) {
         label.setHighlighted(intersection)
-        this._highlightedLabel = label
+        Session.label3dList.highlightedLabel = label
       }
     }
     Session.label3dList.control.setHighlighted(intersection)
@@ -289,24 +283,25 @@ export class Label3DHandler {
    * Select highlighted label
    */
   private selectHighlighted () {
-    if (this._highlightedLabel !== null) {
+    if (Session.label3dList.highlightedLabel !== null) {
       if ((this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) &&
-          this._highlightedLabel !== Session.label3dList.selectedLabel) {
+          Session.label3dList.highlightedLabel !==
+          Session.label3dList.selectedLabel) {
         Session.dispatch(selectLabel(
           Session.label3dList.selectedLabelIds,
           this._selectedItemIndex,
-          this._highlightedLabel.labelId,
-          this._highlightedLabel.category[0],
-          this._highlightedLabel.attributes,
+          Session.label3dList.highlightedLabel.labelId,
+          Session.label3dList.highlightedLabel.category[0],
+          Session.label3dList.highlightedLabel.attributes,
           true
         ))
       } else {
         Session.dispatch(selectLabel(
           Session.label3dList.selectedLabelIds,
           this._selectedItemIndex,
-          this._highlightedLabel.labelId,
-          this._highlightedLabel.category[0],
-          this._highlightedLabel.attributes
+          Session.label3dList.highlightedLabel.labelId,
+          Session.label3dList.highlightedLabel.category[0],
+          Session.label3dList.highlightedLabel.attributes
         ))
       }
     }

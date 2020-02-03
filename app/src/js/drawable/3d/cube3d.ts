@@ -115,6 +115,10 @@ export class Cube3D extends Shape3D {
    */
   public set color (color: number[]) {
     this._color = color.map((v) => v / 255.)
+    const geometry = this._box.geometry as THREE.Geometry
+    for (const face of geometry.faces) {
+      face.color.fromArray(this._color)
+    }
   }
 
   /**
@@ -204,10 +208,6 @@ export class Cube3D extends Shape3D {
   public updateState (
     indexedShape: IndexedShapeType
   ) {
-    const geometry = this._box.geometry as THREE.Geometry
-    for (const face of geometry.faces) {
-      face.color.fromArray(this._color)
-    }
     super.updateState(indexedShape)
     const cube = indexedShape.shape as CubeType
     this.position.copy((new Vector3D()).fromState(cube.center).toThree())
