@@ -144,10 +144,11 @@
                         "manual": true
                     }
                 },
-                "shapes": {
+                "indexedShapes": {
                     "0": {
                         "id": 0,
-                        "label": [
+                        "item": 0,
+                        "labels": [
                             0
                         ],
                         "type": "rect",
@@ -160,7 +161,8 @@
                     },
                     "1": {
                         "id": 1,
-                        "label": [
+                        "item": 0,
+                        "labels": [
                             1
                         ],
                         "type": "rect",
@@ -173,7 +175,8 @@
                     },
                     "2": {
                         "id": 2,
-                        "label": [
+                        "item": 0,
+                        "labels": [
                             2
                         ],
                         "type": "rect",
@@ -195,7 +198,7 @@
                     "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg"
                 },
                 "labels": {},
-                "shapes": {},
+                "indexedShapes": {},
                 "videoName": "b"
             },
             {
@@ -206,7 +209,7 @@
                     "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg"
                 },
                 "labels": {},
-                "shapes": {},
+                "indexedShapes": {},
                 "videoName": "b"
             },
             {
@@ -217,7 +220,7 @@
                     "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg"
                 },
                 "labels": {},
-                "shapes": {},
+                "indexedShapes": {},
                 "videoName": "b"
             },
             {
@@ -228,7 +231,7 @@
                     "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg"
                 },
                 "labels": {},
-                "shapes": {},
+                "indexedShapes": {},
                 "videoName": "b"
             }
         ],
