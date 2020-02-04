@@ -1,8 +1,9 @@
 import { AttributeToolType, LabelTypeName } from '../common/types'
+import { PointType } from '../drawable/2d/path_point2d'
 // import { PathPoint2D, PointType } from '../drawable/2d/path_point2d'
 import { ItemExport, LabelExport } from '../functional/bdd_types'
 import { Attribute, ConfigType, CubeType,
-  ItemType, Node2DType, RectType, State } from '../functional/types'
+  ItemType, Node2DType, PathPoint2DType, RectType, State } from '../functional/types'
 
 /**
  * converts single item to exportable format
@@ -43,49 +44,49 @@ export function convertItemToExport (
       customs: {}
     }
     if (label.shapes.length > 0) {
-      const firstShapeId = label.shapes[0]
-      const firstIndexedShape = item.indexedShapes[firstShapeId]
       switch (label.type) {
         case LabelTypeName.BOX_2D:
-          const box2d = firstIndexedShape.shape as RectType
+          const box2d = item.indexedShapes[label.shapes[0]].shape as RectType
           labelExport.box2d = box2d
           break
-        // case LabelTypeName.POLYGON_2D:
-        // case LabelTypeName.POLYLINE_2D:
-        //   const poly2d = firstIndexedShape.shape as PathPoint2D[]
-        //   const typeCharacters = poly2d.points.map(
-        //     (point) => {
-        //       switch (point.type) {
-        //         case PointType.CURVE:
-        //           return 'C'
-        //         case PointType.VERTEX:
-        //           return 'L'
-        //       }
+        case LabelTypeName.POLYGON_2D:
+        case LabelTypeName.POLYLINE_2D:
+          const points = label.shapes.map((shapeId) =>
+            item.indexedShapes[shapeId].shape as PathPoint2DType
+          )
+          const typeCharacters = points.map(
+            (point) => {
+              switch (point.type) {
+                case PointType.CURVE:
+                  return 'C'
+                case PointType.VERTEX:
+                  return 'L'
+              }
 
-        //       return ''
-        //     }
-        //   )
-        //   const types = typeCharacters.join('')
-        //   const vertices: Array<[number, number]> =
-        //     poly2d.points.map((point) => [point.x, point.y])
-        //   labelExport.poly2d = [{
-        //     vertices,
-        //     types,
-        //     closed: label.type === LabelTypeName.POLYGON_2D
-        //   }]
-        //   break
+              return ''
+            }
+          )
+          const types = typeCharacters.join('')
+          const vertices: Array<[number, number]> =
+            points.map((point) => [point.x, point.y])
+          labelExport.poly2d = [{
+            vertices,
+            types,
+            closed: label.type === LabelTypeName.POLYGON_2D
+          }]
+          break
         case LabelTypeName.BOX_3D:
-          const poly3d = firstIndexedShape.shape as CubeType
+          const poly3d = item.indexedShapes[label.shapes[0]].shape as CubeType
           labelExport.box3d = poly3d
           break
         default:
           if (label.type in config.label2DTemplates) {
-            const points: Array<[number ,number]> = []
+            const nodes: Array<[number ,number]> = []
             const names: string[] = []
             const hidden: boolean[] = []
             for (const shapeId of label.shapes) {
               const node = item.indexedShapes[shapeId].shape as Node2DType
-              points.push([node.x, node.y])
+              nodes.push([node.x, node.y])
               names.push(node.name)
               hidden.push(Boolean(node.hidden))
             }
@@ -93,7 +94,7 @@ export function convertItemToExport (
             const template = config.label2DTemplates[label.type]
 
             labelExport.customs[template.name] = {
-              points, names, hidden, edges: template.edges
+              points: nodes, names, hidden, edges: template.edges
             }
           }
       }

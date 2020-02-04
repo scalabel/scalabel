@@ -11,10 +11,10 @@ test('Add and delete labels', () => {
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   let label = makeLabel({ item: itemIndex })
-  Session.dispatch(action.addLabel(itemIndex, label, [], []))
-  Session.dispatch(action.addLabel(itemIndex, label, [], []))
+  Session.dispatch(action.addLabel(itemIndex, label, []))
+  Session.dispatch(action.addLabel(itemIndex, label, []))
   label = makeLabel({ item: itemIndex, manual: false })
-  Session.dispatch(action.addLabel(itemIndex, label, [], []))
+  Session.dispatch(action.addLabel(itemIndex, label, []))
   let state = Session.getState()
   const labelId =
     state.task.status.maxLabelId
@@ -34,34 +34,23 @@ test('Add and delete labels', () => {
   expect(_.size(state.task.items[0].labels)).toBe(2)
 })
 
-test('Change category', () => {
-  Session.devMode = false
-  initStore(testJson)
-  const itemIndex = 0
-  Session.dispatch(action.goToItem(itemIndex))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
-  Session.dispatch(action.changeLabelProps(itemIndex, 0, { category: [2] }))
-  const state = Session.getState()
-  expect(state.task.items[0].labels[0].category[0]).toBe(2)
-})
-
 test('Link labels', () => {
   Session.devMode = false
   initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
   const label1 = Session.getState().task.status.maxLabelId
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
   const label4 = Session.getState().task.status.maxLabelId
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
   const label2 = Session.getState().task.status.maxLabelId
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
   const label3 = Session.getState().task.status.maxLabelId
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel(), []))
 
   // Link multiple labels
   let children = [label1, label2, label3]

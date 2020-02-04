@@ -23,7 +23,8 @@
                 "traffic sign",
                 "traffic light"
             ],
-            "attributes": [{
+            "attributes": [
+                {
                     "name": "Occluded",
                     "toolType": "switch",
                     "tagText": "o"
@@ -73,7 +74,8 @@
             "maxOrder": 3,
             "maxTrackId": -1
         },
-        "items": [{
+        "items": [
+            {
                 "id": 0,
                 "index": 0,
                 "timestamp": 0,
@@ -95,7 +97,9 @@
                         "parent": -1,
                         "children": [],
                         "shapes": [
-                            0
+                            0,
+                            1,
+                            2
                         ],
                         "track": -1,
                         "order": 1,
@@ -115,7 +119,13 @@
                         "parent": -1,
                         "children": [],
                         "shapes": [
-                            1
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
                         ],
                         "track": -1,
                         "order": 2,
@@ -135,117 +145,211 @@
                         "parent": -1,
                         "children": [],
                         "shapes": [
-                            2
+                            10,
+                            11,
+                            12,
+                            13,
+                            14
                         ],
                         "track": -1,
                         "order": 3,
                         "manual": true
                     }
                 },
-                "shapes": {
+                "indexedShapes": {
                     "0": {
                         "id": 0,
-                        "label": [
+                        "item": 0,
+                        "labels": [
                             0
                         ],
-                        "type": "polygon2d",
+                        "type": "path_point2d",
                         "shape": {
-                            "points": [{
-                                    "x": 100.9044230030514,
-                                    "y": 100.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 200.9044230030514,
-                                    "y": 100.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 200.9044230030514,
-                                    "y": 200.46537396121883,
-                                    "type": "vertex"
-                                }
-                            ]
+                            "x": 100.9044230030514,
+                            "y": 100.46537396121883,
+                            "type": "vertex"
                         }
                     },
                     "1": {
                         "id": 1,
-                        "label": [
-                            1
+                        "item": 0,
+                        "labels": [
+                            0
                         ],
-                        "type": "polygon2d",
+                        "type": "path_point2d",
                         "shape": {
-                            "points": [{
-                                    "x": 300.9044230030514,
-                                    "y": 300.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 400.9044230030514,
-                                    "y": 400.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 350.9044230030514,
-                                    "y": 300.46537396121883,
-                                    "type": "bezier"
-                                },
-                                {
-                                    "x": 325.9044230030514,
-                                    "y": 200.46537396121883,
-                                    "type": "bezier"
-                                },
-                                {
-                                    "x": 400.9044230030514,
-                                    "y": 100.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 375.9044230030514,
-                                    "y": 125.46537396121883,
-                                    "type": "bezier"
-                                },
-                                {
-                                    "x": 325.9044230030514,
-                                    "y": 250.46537396121883,
-                                    "type": "bezier"
-                                }
-                            ]
+                            "x": 200.9044230030514,
+                            "y": 100.46537396121883,
+                            "type": "vertex"
                         }
                     },
                     "2": {
                         "id": 2,
+                        "item": 0,
+                        "labels": [
+                            0
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 200.9044230030514,
+                            "y": 200.46537396121883,
+                            "type": "vertex"
+                        }
+                    },
+                    "3": {
+                        "id": 3,
+                        "item": 0,
+                        "label": [
+                            1
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 300.9044230030514,
+                            "y": 300.46537396121883,
+                            "type": "vertex"
+                        }
+                    },
+                    "4": {
+                        "id": 4,
+                        "item": 0,
+                        "label": [
+                            1
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 400.9044230030514,
+                            "y": 400.46537396121883,
+                            "type": "vertex"
+                        }
+                    },
+                    "5": {
+                        "id": 5,
+                        "item": 0,
+                        "label": [
+                            1
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 350.9044230030514,
+                            "y": 300.46537396121883,
+                            "type": "bezier"
+                        }
+                    },
+                    "6": {
+                        "id": 6,
+                        "item": 0,
+                        "label": [
+                            1
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 325.9044230030514,
+                            "y": 200.46537396121883,
+                            "type": "bezier"
+                        }
+                    },
+                    "7": {
+                        "id": 7,
+                        "item": 0,
+                        "label": [
+                            1
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 400.9044230030514,
+                            "y": 100.46537396121883,
+                            "type": "vertex"
+                        }
+                    },
+                    "8": {
+                        "id": 8,
+                        "item": 0,
+                        "label": [
+                            1
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 375.9044230030514,
+                            "y": 125.46537396121883,
+                            "type": "bezier"
+                        }
+                    },
+                    "9": {
+                        "id": 9,
+                        "item": 0,
+                        "label": [
+                            1
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 325.9044230030514,
+                            "y": 250.46537396121883,
+                            "type": "bezier"
+                        }
+                    },
+                    "10": {
+                        "id": 10,
+                        "item": 0,
                         "label": [
                             2
                         ],
-                        "type": "polygon2d",
+                        "type": "path_point2d",
                         "shape": {
-                            "points": [{
-                                    "x": 400.9044230030514,
-                                    "y": 400.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 800.9044230030514,
-                                    "y": 100.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 100.9044230030514,
-                                    "y": 100.46537396121883,
-                                    "type": "vertex"
-                                },
-                                {
-                                    "x": 125.9044230030514,
-                                    "y": 120.46537396121883,
-                                    "type": "bezier"
-                                },
-                                {
-                                    "x": 325.9044230030514,
-                                    "y": 220.46537396121883,
-                                    "type": "bezier"
-                                }
-                            ]
+                            "x": 400.9044230030514,
+                            "y": 400.46537396121883,
+                            "type": "vertex"
+                        }
+                    },
+                    "11": {
+                        "id": 11,
+                        "item": 0,
+                        "label": [
+                            2
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 800.9044230030514,
+                            "y": 100.46537396121883,
+                            "type": "vertex"
+                        }
+                    },
+                    "12": {
+                        "id": 12,
+                        "item": 0,
+                        "label": [
+                            2
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 100.9044230030514,
+                            "y": 100.46537396121883,
+                            "type": "vertex"
+                        }
+                    },
+                    "13": {
+                        "id": 13,
+                        "item": 0,
+                        "label": [
+                            2
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 125.9044230030514,
+                            "y": 120.46537396121883,
+                            "type": "bezier"
+                        }
+                    },
+                    "14": {
+                        "id": 14,
+                        "item": 0,
+                        "label": [
+                            2
+                        ],
+                        "type": "path_point2d",
+                        "shape": {
+                            "x": 325.9044230030514,
+                            "y": 220.46537396121883,
+                            "type": "bezier"
                         }
                     }
                 },
@@ -326,7 +430,8 @@
     "session": {
         "id": "",
         "startTime": 0,
-        "itemsStatuses": [{
+        "itemsStatuses": [
+            {
                 "sensorDataLoaded": {
                     "-1": false
                 }

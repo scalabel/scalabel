@@ -333,7 +333,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 0,
         id: 0,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 1,
         videoName: 'a'
       },
@@ -342,7 +342,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 1,
         id: 1,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 2,
         videoName: 'a'
       },
@@ -351,7 +351,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 2,
         id: 2,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 3,
         videoName: 'a'
       },
@@ -360,7 +360,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 3,
         id: 3,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 4,
         videoName: 'b'
       },
@@ -369,7 +369,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 4,
         id: 4,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 5,
         videoName: 'b'
       }
@@ -416,7 +416,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 0,
         id: 5,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 6,
         videoName: 'b'
       },
@@ -425,7 +425,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 1,
         id: 6,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 7,
         videoName: 'b'
       },
@@ -434,7 +434,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 2,
         id: 7,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 8,
         videoName: 'b'
       },
@@ -443,7 +443,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 3,
         id: 8,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 9,
         videoName: 'b'
       },
@@ -452,7 +452,7 @@ export const sampleTasksImage: TaskType[] = [
         index: 4,
         id: 9,
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 10,
         videoName: 'b'
       }
@@ -494,7 +494,7 @@ export const sampleTasksVideo: TaskType[] = [
     },
     status: {
       maxLabelId: 1,
-      maxShapeId: 1,
+      maxShapeId: 5,
       maxOrder: 2,
       maxTrackId: 1
     },
@@ -521,38 +521,51 @@ export const sampleTasksVideo: TaskType[] = [
             parent: -1,
             children: [],
             shapes: [
-              0
+              0, 1, 2
             ],
             track: 0,
             order: 0,
             manual: true
           }
         },
-        shapes: {
+        indexedShapes: {
           0: {
             id: 0,
-            label: [
+            item: 0,
+            labels: [
               0
             ],
-            type: 'polygon2d',
+            type: 'path_point2d',
             shape: {
-              points: [
-                {
-                  x: 0,
-                  y: 0,
-                  type: 'vertex'
-                },
-                {
-                  x: 0,
-                  y: 1,
-                  type: 'vertex'
-                },
-                {
-                  x: 1,
-                  y: 1,
-                  type: 'vertex'
-                }
-              ]
+              x: 0,
+              y: 0,
+              type: 'vertex'
+            }
+          },
+          1: {
+            id: 1,
+            item: 0,
+            labels: [
+              0
+            ],
+            type: 'path_point2d',
+            shape: {
+              x: 0,
+              y: 1,
+              type: 'vertex'
+            }
+          },
+          2: {
+            id: 2,
+            item: 0,
+            labels: [
+              0
+            ],
+            type: 'path_point2d',
+            shape: {
+              x: 1,
+              y: 1,
+              type: 'vertex'
             }
           }
         },
@@ -580,38 +593,51 @@ export const sampleTasksVideo: TaskType[] = [
             parent: -1,
             children: [],
             shapes: [
-              1
+              3, 4, 5
             ],
             track: 0,
             order: 0,
             manual: true
           }
         },
-        shapes: {
-          1: {
-            id: 1,
-            label: [
+        indexedShapes: {
+          3: {
+            id: 3,
+            item: 1,
+            labels: [
               1
             ],
-            type: 'polygon2d',
+            type: 'path_point2d',
             shape: {
-              points: [
-                {
-                  x: 0,
-                  y: 0,
-                  type: 'vertex'
-                },
-                {
-                  x: 0,
-                  y: 1,
-                  type: 'vertex'
-                },
-                {
-                  x: 1,
-                  y: 1,
-                  type: 'vertex'
-                }
-              ]
+              x: 0,
+              y: 0,
+              type: 'vertex'
+            }
+          },
+          4: {
+            id: 4,
+            item: 1,
+            labels: [
+              1
+            ],
+            type: 'path_point2d',
+            shape: {
+              x: 0,
+              y: 1,
+              type: 'vertex'
+            }
+          },
+          5: {
+            id: 5,
+            item: 1,
+            labels: [
+              1
+            ],
+            type: 'path_point2d',
+            shape: {
+              x: 1,
+              y: 1,
+              type: 'vertex'
             }
           }
         },
@@ -625,7 +651,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 3
       }
     ],
@@ -687,7 +713,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 4
       },
       {
@@ -698,7 +724,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 5
       },
       {
@@ -709,7 +735,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 6
       },
       {
@@ -720,7 +746,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 7
       },
       {
@@ -731,7 +757,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 8
       },
       {
@@ -742,7 +768,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 9
       },
       {
@@ -753,7 +779,7 @@ export const sampleTasksVideo: TaskType[] = [
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg'
         },
         labels: {},
-        shapes: {},
+        indexedShapes: {},
         timestamp: 10
       }
     ],

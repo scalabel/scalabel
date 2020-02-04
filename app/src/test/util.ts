@@ -1,4 +1,14 @@
-import { RectType, Vector3Type } from '../js/functional/types'
+import { PathPoint2DType, RectType, State, Vector3Type } from '../js/functional/types'
+
+/** Get polygon points */
+export function getPolygonPoints (
+  state: State, itemIndex: number, labelId: number
+): PathPoint2DType[] {
+  const item = state.task.items[itemIndex]
+  return item.labels[labelId].shapes.map(
+    (shapeId) => item.indexedShapes[shapeId].shape as PathPoint2DType
+  )
+}
 
 /**
  * Check equality between two Vector3Type objects

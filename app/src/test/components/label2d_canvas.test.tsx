@@ -7,8 +7,9 @@ import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { PolygonType, RectType } from '../../js/functional/types'
+import { RectType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
+import { getPolygonPoints } from '../util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -233,21 +234,22 @@ test('Draw 2d polygons to label2d list', () => {
      * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
      */
     state = Session.getState()
+    let item = state.task.items[0]
     expect(_.size(state.task.items[0].labels)).toEqual(1)
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points.length).toEqual(4)
-    expect(polygon.points[0].x).toEqual(10)
-    expect(polygon.points[0].y).toEqual(10)
-    expect(polygon.points[0].type).toEqual('vertex')
-    expect(polygon.points[1].x).toEqual(100)
-    expect(polygon.points[1].y).toEqual(100)
-    expect(polygon.points[1].type).toEqual('vertex')
-    expect(polygon.points[2].x).toEqual(200)
-    expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
-    expect(polygon.points[3].x).toEqual(100)
-    expect(polygon.points[3].y).toEqual(0)
-    expect(polygon.points[3].type).toEqual('vertex')
+    let points = getPolygonPoints(state, 0, 0)
+    expect(points.length).toEqual(4)
+    expect(points[0].x).toEqual(10)
+    expect(points[0].y).toEqual(10)
+    expect(points[0].type).toEqual('vertex')
+    expect(points[1].x).toEqual(100)
+    expect(points[1].y).toEqual(100)
+    expect(points[1].type).toEqual('vertex')
+    expect(points[2].x).toEqual(200)
+    expect(points[2].y).toEqual(100)
+    expect(points[2].type).toEqual('vertex')
+    expect(points[3].x).toEqual(100)
+    expect(points[3].y).toEqual(0)
+    expect(points[3].type).toEqual('vertex')
 
     // draw second polygon
     canvasRef.current.onMouseMove(mouseMoveEvent(500, 500))
@@ -275,18 +277,19 @@ test('Draw 2d polygons to label2d list', () => {
      */
 
     state = Session.getState()
-    expect(_.size(state.task.items[0].labels)).toEqual(2)
-    polygon = getShape(state, 0, 1, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(500)
-    expect(polygon.points[0].y).toEqual(500)
-    expect(polygon.points[0].type).toEqual('vertex')
-    expect(polygon.points[1].x).toEqual(600)
-    expect(polygon.points[1].y).toEqual(400)
-    expect(polygon.points[1].type).toEqual('vertex')
-    expect(polygon.points[2].x).toEqual(700)
-    expect(polygon.points[2].y).toEqual(700)
-    expect(polygon.points[2].type).toEqual('vertex')
-    expect(polygon.points.length).toEqual(3)
+    item = state.task.items[0]
+    expect(_.size(item.labels)).toEqual(2)
+    points = getPolygonPoints(state, 0, 1)
+    expect(points[0].x).toEqual(500)
+    expect(points[0].y).toEqual(500)
+    expect(points[0].type).toEqual('vertex')
+    expect(points[1].x).toEqual(600)
+    expect(points[1].y).toEqual(400)
+    expect(points[1].type).toEqual('vertex')
+    expect(points[2].x).toEqual(700)
+    expect(points[2].y).toEqual(700)
+    expect(points[2].type).toEqual('vertex')
+    expect(points.length).toEqual(3)
     // expect(Session.canvasRef.current.labelList.length).toEqual(2)
   }
 })
@@ -456,10 +459,10 @@ test('validation check for polygon2d', () => {
      */
 
     state = Session.getState()
-    const polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points[2].x).toEqual(310)
-    expect(polygon.points[2].y).toEqual(260)
-    expect(polygon.points[2].type).toEqual('vertex')
+    const points = getPolygonPoints(state, 0, 0)
+    expect(points[2].x).toEqual(310)
+    expect(points[2].y).toEqual(260)
+    expect(points[2].type).toEqual('vertex')
     /**
      * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
      */
@@ -532,10 +535,10 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(300, 100))
     canvasRef.current.onMouseUp(mouseUpEvent(300, 100))
     let state = Session.getState()
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points[2].x).toEqual(300)
-    expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
+    let points = getPolygonPoints(state, 0, 0)
+    expect(points[2].x).toEqual(300)
+    expect(points[2].y).toEqual(100)
+    expect(points[2].type).toEqual('vertex')
     /**
      * polygon 1: (10, 10) (100, 100) (300, 100) (100, 0)
      */
@@ -548,11 +551,11 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(200, 150))
     canvasRef.current.onMouseUp(mouseUpEvent(200, 150))
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points[2].x).toEqual(200)
-    expect(polygon.points[2].y).toEqual(150)
-    expect(polygon.points[2].type).toEqual('vertex')
-    expect(polygon.points.length).toEqual(5)
+    points = getPolygonPoints(state, 0, 0)
+    expect(points[2].x).toEqual(200)
+    expect(points[2].y).toEqual(150)
+    expect(points[2].type).toEqual('vertex')
+    expect(points.length).toEqual(5)
     /**
      * polygon 1: (10, 10) (100, 100) (200, 150) (300, 100) (100, 0)
      */
@@ -565,11 +568,11 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(120, 120))
     canvasRef.current.onMouseUp(mouseUpEvent(120, 120))
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(110)
-    expect(polygon.points[0].y).toEqual(110)
-    expect(polygon.points[0].type).toEqual('vertex')
-    expect(polygon.points.length).toEqual(5)
+    points = getPolygonPoints(state, 0, 0)
+    expect(points[0].x).toEqual(110)
+    expect(points[0].y).toEqual(110)
+    expect(points[0].type).toEqual('vertex')
+    expect(points.length).toEqual(5)
     /**
      * polygon 1: (110, 110) (200, 200) (300, 250) (400, 200) (200, 100)
      */
@@ -625,23 +628,23 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(_.size(state.task.items[0].labels)).toEqual(1)
     expect(Session.label2dList.labelList.length).toEqual(1)
 
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points.length).toEqual(5)
-    expect(polygon.points[0].x).toEqual(250)
-    expect(polygon.points[0].y).toEqual(100)
-    expect(polygon.points[0].type).toEqual('vertex')
-    expect(polygon.points[1].x).toEqual(300)
-    expect(polygon.points[1].y).toEqual(0)
-    expect(polygon.points[1].type).toEqual('vertex')
-    expect(polygon.points[2].x).toEqual(350)
-    expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
-    expect(polygon.points[3].x).toEqual(320)
-    expect(polygon.points[3].y).toEqual(130)
-    expect(polygon.points[3].type).toEqual('vertex')
-    expect(polygon.points[4].x).toEqual(300)
-    expect(polygon.points[4].y).toEqual(150)
-    expect(polygon.points[4].type).toEqual('vertex')
+    let points = getPolygonPoints(state, 0, 0)
+    expect(points.length).toEqual(5)
+    expect(points[0].x).toEqual(250)
+    expect(points[0].y).toEqual(100)
+    expect(points[0].type).toEqual('vertex')
+    expect(points[1].x).toEqual(300)
+    expect(points[1].y).toEqual(0)
+    expect(points[1].type).toEqual('vertex')
+    expect(points[2].x).toEqual(350)
+    expect(points[2].y).toEqual(100)
+    expect(points[2].type).toEqual('vertex')
+    expect(points[3].x).toEqual(320)
+    expect(points[3].y).toEqual(130)
+    expect(points[3].type).toEqual('vertex')
+    expect(points[4].x).toEqual(300)
+    expect(points[4].y).toEqual(150)
+    expect(points[4].type).toEqual('vertex')
 
     // delete vertex when closed
     canvasRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
@@ -659,11 +662,11 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points.length).toEqual(4)
-    expect(polygon.points[3].x).toEqual(320)
-    expect(polygon.points[3].y).toEqual(130)
-    expect(polygon.points[3].type).toEqual('vertex')
+    points = getPolygonPoints(state, 0, 0)
+    expect(points.length).toEqual(4)
+    expect(points[3].x).toEqual(320)
+    expect(points[3].y).toEqual(130)
+    expect(points[3].type).toEqual('vertex')
 
     // draw bezier curve
     canvasRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'c' }))
@@ -679,14 +682,14 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points.length).toEqual(6)
-    expect(polygon.points[3].x).toEqual(340)
-    expect(polygon.points[3].y).toEqual(110)
-    expect(polygon.points[3].type).toEqual('bezier')
-    expect(polygon.points[4].x).toEqual(330)
-    expect(polygon.points[4].y).toEqual(120)
-    expect(polygon.points[4].type).toEqual('bezier')
+    points = getPolygonPoints(state, 0, 0)
+    expect(points.length).toEqual(6)
+    expect(points[3].x).toEqual(340)
+    expect(points[3].y).toEqual(110)
+    expect(points[3].type).toEqual('bezier')
+    expect(points[4].x).toEqual(330)
+    expect(points[4].y).toEqual(120)
+    expect(points[4].type).toEqual('bezier')
 
     // drag bezier curve control points
     canvasRef.current.onMouseMove(mouseMoveEvent(340, 110))
@@ -702,17 +705,17 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points.length).toEqual(6)
-    expect(polygon.points[2].x).toEqual(350)
-    expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
-    expect(polygon.points[3].x).toEqual(340)
-    expect(polygon.points[3].y).toEqual(90)
-    expect(polygon.points[3].type).toEqual('bezier')
-    expect(polygon.points[4].x).toEqual(330)
-    expect(polygon.points[4].y).toEqual(120)
-    expect(polygon.points[4].type).toEqual('bezier')
+    points = getPolygonPoints(state, 0, 0)
+    expect(points.length).toEqual(6)
+    expect(points[2].x).toEqual(350)
+    expect(points[2].y).toEqual(100)
+    expect(points[2].type).toEqual('vertex')
+    expect(points[3].x).toEqual(340)
+    expect(points[3].y).toEqual(90)
+    expect(points[3].type).toEqual('bezier')
+    expect(points[4].x).toEqual(330)
+    expect(points[4].y).toEqual(120)
+    expect(points[4].type).toEqual('bezier')
 
     // delete vertex on bezier curve
     canvasRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
@@ -726,8 +729,8 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points.length).toEqual(3)
+    points = getPolygonPoints(state, 0, 0)
+    expect(points.length).toEqual(3)
   }
 })
 
@@ -871,15 +874,15 @@ test('2d polygons multi-select and multi-label moving', () => {
      */
 
     state = Session.getState()
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(110)
-    expect(polygon.points[0].y).toEqual(110)
-    polygon = getShape(state, 0, 1, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(600)
-    expect(polygon.points[0].y).toEqual(600)
-    polygon = getShape(state, 0, 2, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(350)
-    expect(polygon.points[0].y).toEqual(350)
+    let points = getPolygonPoints(state, 0, 0)
+    expect(points[0].x).toEqual(110)
+    expect(points[0].y).toEqual(110)
+    points = getPolygonPoints(state, 0, 1)
+    expect(points[0].x).toEqual(600)
+    expect(points[0].y).toEqual(600)
+    points = getPolygonPoints(state, 0, 2)
+    expect(points[0].x).toEqual(350)
+    expect(points[0].y).toEqual(350)
   }
 })
 
@@ -1041,15 +1044,15 @@ test('2d polygons linking labels and moving', () => {
      */
 
     state = Session.getState()
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(110)
-    expect(polygon.points[0].y).toEqual(110)
-    polygon = getShape(state, 0, 1, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(600)
-    expect(polygon.points[0].y).toEqual(600)
-    polygon = getShape(state, 0, 2, 0) as PolygonType
-    expect(polygon.points[0].x).toEqual(250)
-    expect(polygon.points[0].y).toEqual(250)
+    let points = getPolygonPoints(state, 0, 0)
+    expect(points[0].x).toEqual(110)
+    expect(points[0].y).toEqual(110)
+    points = getPolygonPoints(state, 0, 1)
+    expect(points[0].x).toEqual(600)
+    expect(points[0].y).toEqual(600)
+    points = getPolygonPoints(state, 0, 2)
+    expect(points[0].x).toEqual(250)
+    expect(points[0].y).toEqual(250)
   }
 })
 

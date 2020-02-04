@@ -175,7 +175,7 @@ function convertLabelToImport (
     maxShapeId++
     shapeIds.push(shapeImports[0].id)
   } else if (labelExport.poly2d) {
-    shapeType = ShapeTypeName.POLYGON_2D
+    shapeType = ShapeTypeName.PATH_POINT_2D
     const polyExport = labelExport.poly2d[0]
     labelType = (polyExport.closed) ?
       LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
