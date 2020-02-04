@@ -26,7 +26,14 @@ export class Tag2D extends Label2D {
   /**
    * no-op
    */
-  public onMouseMove () {
+  public drag () {
+    return false
+  }
+
+  /**
+   * no-op
+   */
+  public click () {
     return false
   }
 

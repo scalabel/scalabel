@@ -133,10 +133,9 @@ export class Box2D extends Label2D {
    * @param {Vector2D} start: starting point
    * @param {Vector2D} end: ending point
    */
-  public resize (end: Vector2D, _limit: Size2D): void {
-    const c = end
-    const x = c.x
-    const y = c.y
+  public resize (delta: Vector2D, _limit: Size2D): void {
+    const dX = delta.x
+    const dY = delta.y
     let x1
     let x2
     let y1
@@ -146,13 +145,13 @@ export class Box2D extends Label2D {
       const v1 = this._points[Handles.TOP_LEFT]
       const v2 = this._points[Handles.BOTTOM_RIGHT]
       if (this._highlightedHandle === Handles.TOP_MIDDLE) {
-        v1.y = y
+        v1.y += dY
       } else if (this._highlightedHandle === Handles.RIGHT_MIDDLE) {
-        v2.x = x
+        v2.x += dX
       } else if (this._highlightedHandle === Handles.BOTTOM_MIDDLE) {
-        v2.y = y
+        v2.y += dY
       } else if (this._highlightedHandle === Handles.LEFT_MIDDLE) {
-        v1.x = x
+        v1.x += dX
       }
       x1 = Math.min(v1.x, v2.x)
       x2 = Math.max(v1.x, v2.x)
@@ -204,10 +203,9 @@ export class Box2D extends Label2D {
    * @param {Vector2D} delta: how far the handle has been dragged
    * @param {Vector2D} limit: limit of the canvas frame
    */
-  public move (end: Vector2D, limit: Size2D): void {
+  public move (delta: Vector2D, limit: Size2D): void {
     const [width, height] = [limit.width, limit.height]
     const rect = this._shapes[0] as Rect2D
-    const delta = end.clone().subtract(this._mouseDownCoord)
     rect.x = this._startingRect.x + delta.x
     rect.y = this._startingRect.y + delta.y
     // The rect should not go outside the frame limit
@@ -219,56 +217,29 @@ export class Box2D extends Label2D {
     this.setAllShapesUpdated()
   }
 
-  /**
-   * Handle mouse up
-   * @param coord
-   */
-  public onMouseUp (_coord: Vector2D): boolean {
-    this._mouseDown = false
-    this.editing = false
-    return true
-  }
-
-  /**
-   * Handle mouse down
-   * @param coord
-   */
-  public onMouseDown (coord: Vector2D): boolean {
-    this._mouseDown = true
-    if (this._selected) {
-      this.editing = true
-      this._mouseDownCoord = coord.clone()
-      this._startingRect.copy(this._shapes[0] as Rect2D)
-      return true
-    }
-    return false
-  }
-
 /**
  * Drag the handle to a new position
  * @param {Vector2D} coord: current mouse position
  * @param {Vector2D} limit: limit of the canvas frame
  */
-  public onMouseMove (coord: Vector2D, limit: Size2D,
-                      _labelIndex: number, _handleIndex: number): boolean {
-    if (this._selected && this._mouseDown && this.editing) {
-      if (
-        this._highlightedHandle >= 0 &&
-        this._highlightedHandle < this._points.length
-      ) {
-        this.resize(coord, limit)
-        this._labelList.addUpdatedShape(this._shapes[0])
-        this._labelList.addUpdatedLabel(this)
-      } else if (
-        this._highlightedHandle === this._points.length
-      ) {
-        this.move(coord, limit)
-        this._labelList.addUpdatedShape(this._shapes[0])
-        this._labelList.addUpdatedLabel(this)
-      }
-      return true
+  public drag (delta: Vector2D, limit: Size2D): boolean {
+    if (
+      this._highlightedHandle >= 0 &&
+      this._highlightedHandle < this._points.length
+    ) {
+      this.resize(delta, limit)
+      this._labelList.addUpdatedShape(this._shapes[0])
+      this._labelList.addUpdatedLabel(this)
+    } else {
+      this.move(delta, limit)
+      this._labelList.addUpdatedShape(this._shapes[0])
+      this._labelList.addUpdatedLabel(this)
     }
+    return true
+  }
 
+  /** Click not supported */
+  public click () {
     return false
   }
 

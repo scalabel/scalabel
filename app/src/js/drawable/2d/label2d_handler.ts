@@ -21,11 +21,20 @@ export class Label2DHandler {
   private _keyDownMap: { [key: string]: boolean }
   /** index of currently selected item */
   private _selectedItemIndex: number
+  /** Set if mouse has moved */
+  private _mouseMoved: boolean
+  /** Current mouse position */
+  private _mouseCoord: Vector2D
+  /** Set if mouse is down */
+  private _mouseDown: boolean
 
   constructor () {
     this._state = Session.getState()
     this._keyDownMap = {}
     this._selectedItemIndex = -1
+    this._mouseMoved = false
+    this._mouseCoord = new Vector2D()
+    this._mouseDown = false
   }
 
   /**
@@ -34,11 +43,13 @@ export class Label2DHandler {
    * @param labelIndex
    * @param handleIndex
    */
-  public onMouseDown (
-      coord: Vector2D, labelIndex: number, handleIndex: number): boolean {
+  public onMouseDown (coord: Vector2D): boolean {
     if (!this.editingSelectedLabels()) {
       if (Session.label2dList.highlightedLabel) {
         this.selectHighlighted()
+        if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
+          return true
+        }
       } else if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
         Session.dispatch(selectLabels({}, -1, []))
         Session.label2dList.selectedLabels.length = 0
@@ -58,10 +69,11 @@ export class Label2DHandler {
       }
     }
     if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
+      this._mouseCoord.set(coord.x, coord.y)
+      this._mouseDown = true
       for (const label of Session.label2dList.selectedLabels) {
-        label.onMouseDown(coord, labelIndex, handleIndex)
+        label.editing = true
       }
-      return true
     }
     return false
   }
@@ -73,19 +85,21 @@ export class Label2DHandler {
    * @param handleIndex
    */
   public onMouseUp (
-      coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
-    if (!this.isKeyDown(Key.META)) {
-      Session.label2dList.selectedLabels.forEach((selectedLabel) => {
-        selectedLabel.onMouseUp(coord)
-        if (selectedLabel !== Session.label2dList.highlightedLabel) {
-          selectedLabel.setHighlighted(false)
-        }
-      })
-      commitLabels(
-        [...Session.label2dList.updatedLabels.values()],
-        [...Session.label2dList.updatedShapes.values()]
-      )
-      Session.label2dList.clearUpdated()
+      _coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
+    if (this._mouseDown && !this._mouseMoved) {
+      for (const label of Session.label2dList.selectedLabels) {
+        label.click()
+      }
+    }
+    this._mouseDown = false
+    this._mouseMoved = false
+    commitLabels(
+      [...Session.label2dList.updatedLabels.values()],
+      [...Session.label2dList.updatedShapes.values()]
+    )
+    Session.label2dList.clearUpdated()
+    for (const label of Session.label2dList.selectedLabels) {
+      label.editing = false
     }
   }
 
@@ -97,9 +111,12 @@ export class Label2DHandler {
       labelIndex: number, handleIndex: number): boolean {
     if (this.editingSelectedLabels()) {
       for (const label of Session.label2dList.selectedLabels) {
-        label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
+        const delta = new Vector2D(coord.x, coord.y)
+        delta.subtract(this._mouseCoord)
+        label.drag(delta)
         label.setManual()
       }
+      this._mouseCoord.set(coord.x, coord.y)
       return true
     } else {
       if (Session.label2dList.highlightedLabel) {

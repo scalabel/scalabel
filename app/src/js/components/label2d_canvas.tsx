@@ -234,10 +234,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       // get mouse position in image coordinates
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
-    if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
-      if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
-        e.stopPropagation()
-      }
+    if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
+      e.stopPropagation()
     }
 
     Session.label2dList.onDrawableUpdate()

@@ -283,35 +283,13 @@ export abstract class Label2D {
    * Handle mouse down
    * @param coord
    */
-  public onMouseDown (
-    coord: Vector2D, _labelIndex: number, _handleIndex: number
-  ): boolean {
-    this._mouseDown = true
-    if (this._selected) {
-      this._mouseDownCoord = coord.clone()
-      return true
-    }
-    return false
-  }
+  public abstract drag (delta: Vector2D, limit: Size2D): boolean
 
   /**
    * Handle mouse up
    * @param coord
    */
-  public onMouseUp (_coord: Vector2D): boolean {
-    this._mouseDown = false
-    return false
-  }
-
-  /**
-   * Process mouse move
-   * @param {Vector2D} coord: mouse coordinate
-   * @param {Size2D} limit: limit of the canvas frame
-   */
-  public abstract onMouseMove (
-    coord: Vector2D, limit: Size2D,
-    labelIndex: number, handleIndex: number
-  ): boolean
+  public abstract click (): boolean
 
   /**
    * handle keyboard down event

@@ -36,7 +36,6 @@ export function commitLabels (
     itemIndices.add(drawable.item)
     minNewLabelId = Math.min(drawable.labelId, minNewLabelId)
   })
-  console.log(updatedLabelDrawables)
 
   updatedShapeDrawables.forEach((shape) => {
     if (!(shape.item in updatedShapes)) {
