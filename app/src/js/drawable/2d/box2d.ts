@@ -33,8 +33,6 @@ enum Handles {
  * Box2d Label
  */
 export class Box2D extends Label2D {
-  /** cache shape for moving */
-  private _startingRect: Rect2D
   /** Corners and midpoints */
   private _points:
     [Point2D, Point2D, Point2D, Point2D, Point2D, Point2D, Point2D, Point2D]
@@ -45,8 +43,6 @@ export class Box2D extends Label2D {
       new Point2D(), new Point2D(), new Point2D(), new Point2D(),
       new Point2D(), new Point2D(), new Point2D(), new Point2D()
     ]
-
-    this._startingRect = new Rect2D()
   }
 
   /** Get cursor for use when highlighting */
@@ -134,66 +130,49 @@ export class Box2D extends Label2D {
    * @param {Vector2D} end: ending point
    */
   public resize (delta: Vector2D, _limit: Size2D): void {
-    const dX = delta.x
-    const dY = delta.y
-    let x1
-    let x2
-    let y1
-    let y2
+    const rect = this._shapes[0] as Rect2D
+    const highlightedPoint = this._points[this._highlightedHandle].toVector()
     if (this._highlightedHandle % 2 === 1) {
       // move a midpoint
-      const v1 = this._points[Handles.TOP_LEFT]
-      const v2 = this._points[Handles.BOTTOM_RIGHT]
-      if (this._highlightedHandle === Handles.TOP_MIDDLE) {
-        v1.y += dY
-      } else if (this._highlightedHandle === Handles.RIGHT_MIDDLE) {
-        v2.x += dX
-      } else if (this._highlightedHandle === Handles.BOTTOM_MIDDLE) {
-        v2.y += dY
-      } else if (this._highlightedHandle === Handles.LEFT_MIDDLE) {
-        v1.x += dX
-      }
-      x1 = Math.min(v1.x, v2.x)
-      x2 = Math.max(v1.x, v2.x)
-      y1 = Math.min(v1.y, v2.y)
-      y2 = Math.max(v1.y, v2.y)
-      if (x === x1) {
-        this._highlightedHandle = Handles.LEFT_MIDDLE
-      } else if (x === x2) {
-        this._highlightedHandle = Handles.RIGHT_MIDDLE
-      } else if (y === y1) {
-        this._highlightedHandle = Handles.TOP_MIDDLE
-      } else if (y === y2) {
-        this._highlightedHandle = Handles.BOTTOM_MIDDLE
+      switch (this._highlightedHandle) {
+        case Handles.LEFT_MIDDLE:
+          highlightedPoint.x += delta.x
+          rect.x += delta.x
+          rect.w -= delta.x
+          break
+        case Handles.TOP_MIDDLE:
+          highlightedPoint.y += delta.y
+          rect.y += delta.y
+          rect.h -= delta.y
+          break
+        case Handles.BOTTOM_MIDDLE:
+          highlightedPoint.y += delta.y
+          rect.h += delta.y
+          break
+        case Handles.RIGHT_MIDDLE:
+          highlightedPoint.x += delta.x
+          rect.w += delta.x
+          break
       }
     } else {
       // move a vertex
+      highlightedPoint.add(delta)
       const oppVertex = this._points[(this._highlightedHandle + 4 + 8) % 8]
-      x1 = Math.min(x, oppVertex.x)
-      x2 = Math.max(x, oppVertex.x)
-      y1 = Math.min(y, oppVertex.y)
-      y2 = Math.max(y, oppVertex.y)
-      if (oppVertex.x < x) {
-        if (oppVertex.y < y) {
-          this._highlightedHandle = Handles.BOTTOM_RIGHT
-        } else {
-          this._highlightedHandle = Handles.TOP_RIGHT
-        }
-      } else {
-        if (oppVertex.y < y) {
-          this._highlightedHandle = Handles.BOTTOM_LEFT
-        } else {
-          this._highlightedHandle = Handles.TOP_LEFT
-        }
-      }
+      rect.x = Math.min(highlightedPoint.x, oppVertex.x)
+      rect.y = Math.min(highlightedPoint.y, oppVertex.y)
+      rect.w = Math.abs(highlightedPoint.x - oppVertex.x)
+      rect.h = Math.abs(highlightedPoint.y - oppVertex.y)
     }
-    // update the rectangle
-    const rect = this._shapes[0] as Rect2D
-    rect.x = Math.min(x1, x2)
-    rect.y = Math.min(y1, y2)
-    rect.w = Math.min(x2 - x1)
-    rect.h = Math.min(y2 - y1)
     this.updatePoints()
+    let closestDistance = Infinity
+    this._points.forEach((point, index) => {
+      const difference = point.toVector().subtract(highlightedPoint)
+      const distance = difference.dot(difference)
+      if (distance < closestDistance) {
+        closestDistance = distance
+        this._highlightedHandle = index
+      }
+    })
     this.setAllShapesUpdated()
   }
 
@@ -206,13 +185,11 @@ export class Box2D extends Label2D {
   public move (delta: Vector2D, limit: Size2D): void {
     const [width, height] = [limit.width, limit.height]
     const rect = this._shapes[0] as Rect2D
-    rect.x = this._startingRect.x + delta.x
-    rect.y = this._startingRect.y + delta.y
+    rect.x += delta.x
+    rect.y += delta.y
     // The rect should not go outside the frame limit
-    rect.x = Math.min(width - this._startingRect.w, Math.max(0, rect.x))
-    rect.y = Math.min(height - this._startingRect.h, Math.max(0, rect.y))
-    rect.w = this._startingRect.w
-    rect.h = this._startingRect.h
+    rect.x = Math.min(width - rect.w, Math.max(0, rect.x))
+    rect.y = Math.min(height - rect.h, Math.max(0, rect.y))
     this.updatePoints()
     this.setAllShapesUpdated()
   }

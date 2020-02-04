@@ -36,10 +36,6 @@ export abstract class Label2D {
   protected _highlightedHandle: number
   /** rgba color decided by labelId */
   protected _color: number[]
-  /** true if mouse down */
-  protected _mouseDown: boolean
-  /** mouse coordinate when pressed down */
-  protected _mouseDownCoord: Vector2D
   /** whether the label is being editing */
   protected _editing: boolean
   /** shapes */
@@ -58,8 +54,6 @@ export abstract class Label2D {
     this._highlightedHandle = -1
     this._labelState = makeLabel()
     this._color = [0, 0, 0, 1]
-    this._mouseDownCoord = new Vector2D()
-    this._mouseDown = false
     this._editing = false
     this._shapes = []
     this._labelList = labelList
@@ -289,7 +283,7 @@ export abstract class Label2D {
    * Handle mouse up
    * @param coord
    */
-  public abstract click (): boolean
+  public abstract click (coord: Vector2D): boolean
 
   /**
    * handle keyboard down event

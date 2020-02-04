@@ -209,12 +209,7 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Override on mouse down */
-  public onMouseDown (
-    coord: Vector2D, labelIndex: number, handleIndex: number
-  ): boolean {
-    const returnValue = super.onMouseDown(coord, labelIndex, handleIndex)
-    this.editing = true
-
+  public click (_coord: Vector2D): boolean {
     if (
       (this._keyDownMap[Key.D_LOW] || this._keyDownMap[Key.D_UP]) &&
       this._highlightedHandle < this._nodes.length
@@ -224,16 +219,11 @@ export class CustomLabel2D extends Label2D {
       this._highlightedHandle = -1
     }
 
-    return returnValue
+    return this._highlightedHandle < this._nodes.length
   }
 
   /** Handle mouse move */
-  public onMouseMove (
-    coord: Vector2D,
-    _limit: Size2D,
-    _labelIndex: number,
-    _handleIndex: number
-  ) {
+  public drag (delta: Vector2D, _limit: Size2D) {
     if (
       this.labelId < 0 || (
         this._highlightedHandle >= this._nodes.length &&
@@ -246,10 +236,10 @@ export class CustomLabel2D extends Label2D {
       const corner = this._corners[cornerIndex]
       const oppositeCornerIndex = this.getOppositeCorner(cornerIndex)
       const oppositeCorner = this._corners[oppositeCornerIndex]
-      const xScale =
-          (coord.x - oppositeCorner.x) / (corner.x - oppositeCorner.x)
-      const yScale =
-          (coord.y - oppositeCorner.y) / (corner.y - oppositeCorner.y)
+      const xScale = (corner.x + delta.x - oppositeCorner.x) /
+        (corner.x - oppositeCorner.x)
+      const yScale = (corner.y + delta.y - oppositeCorner.y) /
+        (corner.y - oppositeCorner.y)
       this.scale(
         new Vector2D(oppositeCorner.x ,oppositeCorner.y),
         new Vector2D(xScale, yScale)
@@ -258,12 +248,11 @@ export class CustomLabel2D extends Label2D {
     } else if (this._highlightedHandle >= 0) {
       if (this._highlightedHandle < this._nodes.length) {
         // Move single point
-        this._nodes[this._highlightedHandle].x = coord.x
-        this._nodes[this._highlightedHandle].y = coord.y
+        this._nodes[this._highlightedHandle].x += delta.x
+        this._nodes[this._highlightedHandle].y += delta.y
         this.updateBounds()
       } else {
         // Drag shape
-        const delta = coord.clone().subtract(this._mouseDownCoord)
         for (const shape of this._nodes) {
           shape.x += delta.x
           shape.y += delta.y
@@ -271,27 +260,9 @@ export class CustomLabel2D extends Label2D {
       }
       this.setAllShapesUpdated()
     }
-    this._mouseDownCoord.x = coord.x
-    this._mouseDownCoord.y = coord.y
     this.updateBounds()
 
-    return false
-  }
-
-  /** Override on mouse up */
-  public onMouseUp (coord: Vector2D): boolean {
-    const returnValue = super.onMouseUp(coord)
-    this.editing = false
-    if (this.labelId < 0) {
-      this._shapes = [...this._nodes]
-      for (const shape of this._shapes) {
-        this._labelList.addTemporaryShape(shape)
-        shape.associateLabel(this)
-      }
-      this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
-      this._labelList.addUpdatedLabel(this)
-    }
-    return returnValue
+    return true
   }
 
   /** On key down */

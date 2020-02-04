@@ -55,9 +55,10 @@ export class Vector extends Array<number> {
   }
 
   /** dot product with another vector */
-  public dot (vector: Vector): this {
-    this.forEach((v, i, arr) => arr[i] = v * vector[i])
-    return this
+  public dot (vector: Vector): number {
+    let sum = 0
+    this.forEach((v, i) => sum += v * vector[i])
+    return sum
   }
 
   /** calculate the absolute values of the vector elements */

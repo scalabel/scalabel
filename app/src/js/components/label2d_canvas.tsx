@@ -233,8 +233,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     // Control + click for dragging
       // get mouse position in image coordinates
     const mousePos = this.getMousePos(e)
-    const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
-    if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
+    // const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
+    if (this._labelHandler.onMouseDown(mousePos)) {
       e.stopPropagation()
     }
 
@@ -367,15 +367,6 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     } else {
       return [-1, 0]
     }
-  }
-
-  /**
-   * Whether a specific key is pressed down
-   * @param {string} key - the key to check
-   * @return {boolean}
-   */
-  private isKeyDown (key: string): boolean {
-    return this._keyDownMap[key]
   }
 
   /**

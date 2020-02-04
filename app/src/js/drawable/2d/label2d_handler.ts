@@ -85,10 +85,11 @@ export class Label2DHandler {
    * @param handleIndex
    */
   public onMouseUp (
-      _coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
+    coord: Vector2D, _labelIndex: number, _handleIndex: number
+  ): void {
     if (this._mouseDown && !this._mouseMoved) {
       for (const label of Session.label2dList.selectedLabels) {
-        label.click()
+        label.click(coord)
       }
     }
     this._mouseDown = false
@@ -113,7 +114,7 @@ export class Label2DHandler {
       for (const label of Session.label2dList.selectedLabels) {
         const delta = new Vector2D(coord.x, coord.y)
         delta.subtract(this._mouseCoord)
-        label.drag(delta)
+        label.drag(delta, canvasLimit)
         label.setManual()
       }
       this._mouseCoord.set(coord.x, coord.y)

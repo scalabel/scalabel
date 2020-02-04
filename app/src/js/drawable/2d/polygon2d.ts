@@ -195,18 +195,36 @@ export class Polygon2D extends Label2D {
    * Handle mouse down
    * @param coord
    */
-  public onMouseDown (
-    coord: Vector2D, labelIndex: number, handleIndex: number
-  ): boolean {
-    this._mouseDownCoord = coord.clone()
+  public click (coord: Vector2D): boolean {
     if (this.labelId < 0) {
       // If temporary, add new points on mouse down
-      if (labelIndex === this.labelId && handleIndex === 0) {
-        this._highlightedHandle = this._points.length
-        this._points.length--
-        this.editing = false
-        return true
-      } else if (
+      if (this._highlightedHandle > 0) {
+        const diff = this._points[0].toVector().subtract(
+          this._points[this._highlightedHandle].toVector()
+        )
+        if (
+          diff.dot(diff) < DEFAULT_CONTROL_POINT_STYLE.radius *
+            DEFAULT_CONTROL_POINT_STYLE.radius
+        ) {
+          // Stop adding after clicking on first point
+          this._highlightedHandle = this._points.length
+          this._points.length--
+          this.editing = false
+          // Add temporary label for committing
+          if (this.isValid()) {
+            this._shapes =
+              this._points.filter((point) => point.type !== PointType.MID)
+            for (const shape of this._shapes) {
+              this._labelList.addTemporaryShape(shape)
+              shape.associateLabel(this)
+            }
+            this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
+            this._labelList.addUpdatedLabel(this)
+          }
+          return true
+        }
+      }
+      if (
         this._highlightedHandle < this._points.length &&
         this._highlightedHandle >= 0
       ) {
@@ -240,18 +258,17 @@ export class Polygon2D extends Label2D {
    * @param coord
    * @param _limit
    */
-  public onMouseMove (coord: Vector2D, _limit: Size2D,
-                      _labelIndex: number, _handleIndex: number): boolean {
+  public drag (delta: Vector2D, _limit: Size2D): boolean {
     if (this.editing) {
       if (this._highlightedHandle < this._points.length) {
         const point = this._points[this._highlightedHandle]
-        point.set(coord.x, coord.y)
+        point.set(point.x + delta.x, point.y + delta.y)
         if (this.labelId >= 0) {
           this._labelList.addUpdatedShape(point)
           this._labelList.addUpdatedLabel(this)
         }
-      } else if (this._highlightedHandle === this._points.length) {
-        this.move(coord, _limit)
+      } else {
+        this.move(delta, _limit)
       }
     }
     return true
@@ -262,20 +279,6 @@ export class Polygon2D extends Label2D {
    * @param coord
    */
   public onMouseUp (_coord: Vector2D): boolean {
-    if (this.editing && this.labelId >= 0) {
-      this.editing = false
-    }
-    // Add temporary label for committing
-    if (!this.editing && this.labelId < 0 && this.isValid()) {
-      this._shapes =
-        this._points.filter((point) => point.type !== PointType.MID)
-      for (const shape of this._shapes) {
-        this._labelList.addTemporaryShape(shape)
-        shape.associateLabel(this)
-      }
-      this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
-      this._labelList.addUpdatedLabel(this)
-    }
     return true
   }
 
@@ -423,8 +426,7 @@ export class Polygon2D extends Label2D {
    * @param _end
    * @param _limit
    */
-  private move (end: Vector2D, _limit: Size2D): void {
-    const delta = end.clone().subtract(this._mouseDownCoord)
+  private move (delta: Vector2D, _limit: Size2D): void {
     for (let i = 0; i < this._points.length; ++i) {
       this._points[i].x = this._startingPoints[i].x + delta.x
       this._points[i].y = this._startingPoints[i].y + delta.y
