@@ -17,7 +17,7 @@ beforeAll(() => {
       'project.json': 'project contents',
       'tasks': {
         '000000.json': '{"testField": "testValue"}',
-        '000001.json': 'contents 1'
+        '000001.json': 'content1'
       }
     }
     This is necessary because mock-fs doesn't implement the withFileTypes
@@ -32,9 +32,9 @@ beforeAll(() => {
   fs.ensureDirSync(taskDir)
   fs.writeFileSync(path.join(projectDir, '.config'), 'config contents')
   fs.writeFileSync(path.join(projectDir, 'project.json'), 'project contents')
-  const contents0 = JSON.stringify({ testField: 'testValue' })
-  fs.writeFileSync(path.join(taskDir, '000000.json'), contents0)
-  fs.writeFileSync(path.join(taskDir, '000001.json'), 'contents 1')
+  const content0 = JSON.stringify({ testField: 'testValue' })
+  fs.writeFileSync(path.join(taskDir, '000000.json'), content0)
+  fs.writeFileSync(path.join(taskDir, '000001.json'), 'content1')
 })
 
 afterAll(() => {

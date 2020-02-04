@@ -11,15 +11,36 @@ import { UserManager } from './user_manager'
 import { index2str } from './util'
 
 /**
- * Starts socket.io handlers for saving, loading, and synchronization
+ * Wraps socket.io handlers for saving, loading, and synchronization
  */
-export function startSocketServer (
-  io: socketio.Server, env: Env,
-  projectStore: ProjectStore, userManager: UserManager) {
-  io.on(EventName.CONNECTION, (socket: socketio.Socket) => {
+export class Hub {
+  /** flag for sync */
+  protected sync: boolean
+  /** flag for autosave */
+  protected autosave: boolean
+  /** the project store */
+  protected projectStore: ProjectStore
+  /** the user manager */
+  protected userManager: UserManager
+
+  constructor (
+    io: socketio.Server, env: Env,
+    projectStore: ProjectStore, userManager: UserManager) {
+    this.sync = env.sync
+    this.autosave = env.autosave
+    this.projectStore = projectStore
+    this.userManager = userManager
+
+    io.on(EventName.CONNECTION, this.registerNewSocket.bind(this))
+  }
+
+  /**
+   * Registers new socket's listeners
+   */
+  private registerNewSocket (socket: socketio.Socket) {
     socket.on(EventName.REGISTER, async (rawData: string) => {
       try {
-        await register(rawData, socket, env, projectStore, userManager)
+        await this.register(rawData, socket)
       } catch (error) {
         Logger.error(error)
       }
@@ -27,80 +48,76 @@ export function startSocketServer (
 
     socket.on(EventName.ACTION_SEND, async (rawData: string) => {
       try {
-        await actionUpdate(rawData, socket, env, projectStore)
+        await this.actionUpdate(rawData, socket)
       } catch (error) {
         Logger.error(error)
       }
     })
 
     socket.on(EventName.DISCONNECT, async () => {
-      await userManager.deregisterUser(socket.id)
+      await this.userManager.deregisterUser(socket.id)
     })
-  })
-}
-
-/**
- * Load the correct state and subscribe to redis
- */
-async function register (
-  rawData: string, socket: socketio.Socket,
-  env: Env, projectStore: ProjectStore, userManager: UserManager) {
-  const data: RegisterMessageType = JSON.parse(rawData)
-  const projectName = data.projectName
-  const taskIndex = data.taskIndex
-  let sessionId = data.sessionId
-
-  const taskId = index2str(taskIndex)
-  await userManager.registerUser(socket.id, projectName, data.userId)
-  // keep session id if it exists, i.e. if it is a reconnection
-  if (!sessionId) {
-    // new session on new load
-    sessionId = uuid4()
-  }
-  const state = await projectStore.loadState(projectName, taskId)
-  state.session.id = sessionId
-  state.task.config.autosave = env.autosave
-
-  // Connect socket to others in the same room
-  const room = path.getRoomName(projectName, taskId, env.sync, sessionId)
-  socket.join(room)
-  // Send backend state to newly registered socket
-  socket.emit(EventName.REGISTER_ACK, state)
-}
-
-/**
- * Updates the state with the action, and broadcasts action
- */
-async function actionUpdate (
-  rawData: string, socket: socketio.Socket,
-  env: Env, projectStore: ProjectStore) {
-  const data: SyncActionMessageType = JSON.parse(rawData)
-  const projectName = data.projectName
-  const taskId = data.taskId
-  const sessionId = data.sessionId
-  const actionList = data.actions
-
-  const room = path.getRoomName(projectName, taskId, env.sync, sessionId)
-
-  const taskActions = actionList.filter((action) => {
-    return types.TASK_ACTION_TYPES.includes(action.type)
-  })
-
-  const state = await projectStore.loadState(projectName, taskId)
-  const stateStore = configureStore(state)
-
-  // For each task action, update the backend store
-  for (const action of taskActions) {
-    action.timestamp = Date.now()
-    stateStore.dispatch(action)
   }
 
-  // broadcast task actions to all other sessions in room
-  socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActions)
-  // echo everything to original session
-  socket.emit(EventName.ACTION_BROADCAST, actionList)
+  /**
+   * Load the correct state and subscribe to redis
+   */
+  private async register (rawData: string, socket: socketio.Socket) {
+    const data: RegisterMessageType = JSON.parse(rawData)
+    const projectName = data.projectName
+    const taskIndex = data.taskIndex
+    let sessionId = data.sessionId
 
-  const newState = stateStore.getState().present
+    const taskId = index2str(taskIndex)
+    await this.userManager.registerUser(socket.id, projectName, data.userId)
+    // keep session id if it exists, i.e. if it is a reconnection
+    if (!sessionId) {
+      // new session on new load
+      sessionId = uuid4()
+    }
+    const state = await this.projectStore.loadState(projectName, taskId)
+    state.session.id = sessionId
+    state.task.config.autosave = this.autosave
 
-  await projectStore.saveState(newState, projectName, taskId)
+    // Connect socket to others in the same room
+    const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
+    socket.join(room)
+    // Send backend state to newly registered socket
+    socket.emit(EventName.REGISTER_ACK, state)
+  }
+
+  /**
+   * Updates the state with the action, and broadcasts action
+   */
+  private async actionUpdate (rawData: string, socket: socketio.Socket) {
+    const data: SyncActionMessageType = JSON.parse(rawData)
+    const projectName = data.projectName
+    const taskId = data.taskId
+    const sessionId = data.sessionId
+    const actionList = data.actions
+
+    const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
+
+    const taskActions = actionList.filter((action) => {
+      return types.TASK_ACTION_TYPES.includes(action.type)
+    })
+
+    const state = await this.projectStore.loadState(projectName, taskId)
+    const stateStore = configureStore(state)
+
+    // For each task action, update the backend store
+    for (const action of taskActions) {
+      action.timestamp = Date.now()
+      stateStore.dispatch(action)
+    }
+
+    // broadcast task actions to all other sessions in room
+    socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActions)
+    // echo everything to original session
+    socket.emit(EventName.ACTION_BROADCAST, actionList)
+
+    const newState = stateStore.getState().present
+
+    await this.projectStore.saveState(newState, projectName, taskId)
+  }
 }

@@ -23,10 +23,6 @@ import {
   sampleStateExportImage, sampleStateExportImagePolygon
 } from '../test_export_objects'
 
-// mock redis (not used in this test)
-jest.genMockFromModule('../../js/server/redis_store')
-jest.mock('../../js/server/redis_store')
-
 let projectStore: ProjectStore
 
 beforeAll(async () => {
