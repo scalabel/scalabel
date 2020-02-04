@@ -4,9 +4,8 @@ import { createProject, createTasks } from '../../js/server/create_project'
 import { convertStateToExport } from '../../js/server/export'
 import { FileStorage } from '../../js/server/file_storage'
 import { ProjectStore } from '../../js/server/project_store'
-import { RedisStore } from '../../js/server/redis_store'
 import {
-  CreationForm, defaultEnv, FormFileData, Project
+  CreationForm, FormFileData, Project
 } from '../../js/server/types'
 import {
   sampleFormFileData,
@@ -37,8 +36,7 @@ beforeAll(async () => {
   })
 
   const storage = new FileStorage('data')
-  const redisStore = new RedisStore(defaultEnv, storage)
-  projectStore = new ProjectStore(storage, redisStore)
+  projectStore = new ProjectStore(storage)
 })
 
 // TODO- test that form is loaded correctly

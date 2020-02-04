@@ -15,13 +15,15 @@ import { getPolicy } from './util'
  */
 export class ProjectStore {
   /** the redis store */
-  protected redisStore: RedisStore
+  protected redisStore?: RedisStore
   /** the permanent storage */
   protected storage: Storage
 
-  constructor (storage: Storage, redisStore: RedisStore) {
+  constructor (storage: Storage, redisStore?: RedisStore) {
     this.storage = storage
-    this.redisStore = redisStore
+    if (redisStore) {
+      this.redisStore = redisStore
+    }
   }
 
   /**
@@ -30,7 +32,7 @@ export class ProjectStore {
    * Otherwise immediately write back to storage
    */
   public async save (key: string, value: string, cache= true) {
-    if (cache) {
+    if (cache && this.redisStore) {
       await this.redisStore.setExWithReminder(key, value)
     } else {
       await this.storage.save(key, value)
@@ -54,7 +56,10 @@ export class ProjectStore {
 
     // first try to load from redis
     const saveDir = getSaveDir(projectName, taskId)
-    const redisValue = await this.redisStore.get(saveDir)
+    let redisValue = null
+    if (this.redisStore) {
+      redisValue = await this.redisStore.get(saveDir)
+    }
     if (redisValue) {
       state = JSON.parse(redisValue)
     } else {
