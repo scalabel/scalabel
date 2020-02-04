@@ -86,7 +86,7 @@ More installation and usage details can be find in our [documentation](http://ww
    Otherwise
 
    ```
-   ./launch_server.sh --config ./data/config.yml
+   python scripts/launch_server.py --config ./data/config.yml
    ```
 
    Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project.
