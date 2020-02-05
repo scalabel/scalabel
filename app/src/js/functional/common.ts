@@ -540,23 +540,21 @@ export function linkLabels (
   }
   const children = _.map(
     action.labelIds, (labelId) => getRootLabelId(item, labelId))
-  let newLabel: LabelType = _.cloneDeep(item.labels[children[0]])
-  newLabel.parent = -1
-  newLabel.shapes = []
-  newLabel.children = children
-  newLabel.type = LabelTypeName.EMPTY
+  const newLabel: LabelType = makeLabel({
+    id: state.task.status.maxLabelId + 1,
+    children,
+    type: LabelTypeName.EMPTY
+  })
   item = addLabelsAndShapesToItem(
     state.task.items[action.itemIndex], [newLabel], []
   )
 
   // assign the label properties
-  const newLabelId = state.task.status.maxLabelId
-  newLabel = item.labels[newLabelId]
   const labels: LabelType[] = _.map(children,
     (labelId) => _.cloneDeep(item.labels[labelId]))
 
   _.forEach(labels, (label) => {
-    label.parent = newLabelId
+    label.parent = newLabel.id
     // sync the category and attributes of the labels
     label.category = _.cloneDeep(newLabel.category)
     label.attributes = _.cloneDeep(newLabel.attributes)
@@ -573,7 +571,7 @@ export function linkLabels (
     newLabel.track = trackId
     let track = tracks[trackId]
     track = updateObject(track, { labels: updateObject(
-      track.labels, { [item.index]: newLabelId })})
+      track.labels, { [item.index]: newLabel.id })})
     tracks = updateObject(tracks, { [trackId]: track })
   }
 
@@ -581,7 +579,8 @@ export function linkLabels (
   item = updateObject(item, {
     labels: updateObject(item.labels, _.zipObject(children, labels))})
   const items = updateListItem(state.task.items, item.index, item)
-  const task = updateObject(state.task, { items, tracks })
+  const status = updateObject(state.task.status, { maxLabelId: newLabel.id })
+  const task = updateObject(state.task, { items, tracks, status })
   return { ...state, task }
 }
 
