@@ -17,7 +17,7 @@ install:
   - npm install canvas --build-from-source
   - npm install
 before_script:
-  - sudo service redis-server stop
+  - sudo redis-cli shutdown
 script:
   - pylint scripts/
   - node_modules/.bin/eslint .
