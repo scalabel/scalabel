@@ -1,5 +1,6 @@
 import { getMetaKey, getUserKey } from './path'
 import { Storage } from './storage'
+import { UserData } from './types'
 
 /**
  * Wraps interface with storage for user management
@@ -21,8 +22,9 @@ export class UserManager {
     let userToSockets: { [key: string]: string[] } = {}
     const key = getUserKey(projectName)
     if (await this.storage.hasKey(key)) {
-      [socketToUser, userToSockets] = JSON.parse(
-        await this.storage.load(key))
+      const userData = JSON.parse(await this.storage.load(key)) as UserData
+      socketToUser = userData.socketToUser
+      userToSockets = userData.userToSockets
     }
 
     // Update user data with new socket
@@ -34,7 +36,11 @@ export class UserManager {
     userToSockets[userId] = userSockets
     socketToUser[socketId] = userId
 
-    const writeData = JSON.stringify([socketToUser, userToSockets])
+    const newUserData: UserData = {
+      socketToUser,
+      userToSockets
+    }
+    const writeData = JSON.stringify(newUserData)
     await this.storage.save(key, writeData)
 
     // Update user metadata
@@ -67,8 +73,10 @@ export class UserManager {
     if (!(await this.storage.hasKey(key))) {
       return
     }
-    const [socketToUser, userToSockets]
-      = JSON.parse(await this.storage.load(key))
+    const userData = JSON.parse(await this.storage.load(key))
+    const socketToUser = userData.socketToUser
+    const userToSockets = userData.userToSockets
+
     if (!socketToUser || !(socketId in socketToUser)) {
       return
     }
@@ -84,7 +92,11 @@ export class UserManager {
 
     delete socketToUser[socketId]
 
-    const writeData = JSON.stringify([socketToUser, userToSockets])
+    const newUserData = {
+      socketToUser,
+      userToSockets
+    }
+    const writeData = JSON.stringify(newUserData)
     await this.storage.save(key, writeData)
   }
 
@@ -95,8 +107,9 @@ export class UserManager {
     const userKey = getUserKey(projectName)
     let numUsers = 0
     if (await this.storage.hasKey(userKey)) {
-      const [, userToSockets] = JSON.parse(
+      const userData = JSON.parse(
         await this.storage.load(userKey))
+      const userToSockets = userData.userToSockets
       if (userToSockets) {
         numUsers = Object.keys(userToSockets).length
       }
