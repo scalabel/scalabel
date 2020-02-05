@@ -3,10 +3,9 @@ import { policyFromString } from '../../common/track/track'
 import { LabelTypeName, ShapeTypeName, TrackPolicyType } from '../../common/types'
 import { makeState, makeTaskConfig } from '../../functional/states'
 import { ConfigType, Label2DTemplateType, State } from '../../functional/types'
-import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { CustomLabel2D } from './custom_label'
-import { DrawMode, Label2D } from './label2d'
+import { Label2D } from './label2d'
 import { Node2D } from './node2d'
 import { PathPoint2D } from './path_point2d'
 import { Point2D } from './point2d'
@@ -191,33 +190,6 @@ export class Label2DList {
     return null
   }
 
-  /**
-   * Draw label and control context
-   * @param {Context2D} labelContext
-   * @param {Context2D} controlContext
-   * @param {number} ratio: ratio: display to image size ratio
-   */
-  public redraw (
-      labelContext: Context2D,
-      controlContext: Context2D,
-      ratio: number,
-      hideLabels?: boolean
-    ): void {
-    const labelsToDraw = (hideLabels) ?
-      this._labelList.filter((label) => label.selected) :
-      this._labelList
-    labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
-    labelsToDraw.forEach(
-      (v) => v.draw(controlContext, ratio, DrawMode.CONTROL)
-    )
-    this.selectedLabels.forEach((label) => {
-      if (label.labelId < 0) {
-        label.draw(labelContext, ratio, DrawMode.VIEW)
-        label.draw(controlContext, ratio, DrawMode.CONTROL)
-      }
-    })
-  }
-
   /** Add temporary shape */
   public addTemporaryShape (shape: Shape2D) {
     this._shapes[this._temporaryShapeId] = shape
@@ -231,7 +203,7 @@ export class Label2DList {
   }
 
   /** Get uncommitted labels */
-  public get updatedShapes (): Readonly<Set<Readonly<Shape2D>>> {
+  public get updatedShapes (): Readonly<Set<Shape2D>> {
     return this._updatedShapes
   }
 
@@ -333,7 +305,7 @@ export class Label2DList {
   }
 
   /** Get uncommitted labels */
-  public get updatedLabels (): Readonly<Set<Readonly<Label2D>>> {
+  public get updatedLabels (): Readonly<Set<Label2D>> {
     return this._updatedLabels
   }
 

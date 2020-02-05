@@ -2,6 +2,7 @@ import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import Session from '../common/session'
 import { Key } from '../common/types'
+import { DrawMode } from '../drawable/2d/label2d'
 import { Label2DHandler } from '../drawable/2d/label2d_handler'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
 import { ImageViewerConfigType, State } from '../functional/types'
@@ -70,6 +71,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   private _keyUpListener: (e: KeyboardEvent) => void
   /** key down listener */
   private _keyDownListener: (e: KeyboardEvent) => void
+  /** Current mouse position */
+  private _mousePosition: Vector2D
 
   // keyboard and mouse status
   /** The hashed list of keys currently down */
@@ -102,6 +105,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
     this._keyUpListener = (e) => { this.onKeyUp(e) }
     this._keyDownListener = (e) => { this.onKeyDown(e) }
+    this._mousePosition = new Vector2D()
     this._drawableUpdateCallback = this.redraw.bind(this)
   }
 
@@ -211,13 +215,50 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
    * @return {boolean}
    */
   public redraw (): boolean {
-    if (this.labelCanvas !== null && this.labelContext !== null &&
-      this.controlCanvas !== null && this.controlContext !== null) {
+    if (
+      this.labelCanvas &&
+      this.labelContext &&
+      this.controlCanvas &&
+      this.controlContext
+    ) {
       const config = this.state.user.viewerConfigs[this.props.id]
       clearCanvas(this.labelCanvas, this.labelContext)
       clearCanvas(this.controlCanvas, this.controlContext)
-      Session.label2dList.redraw(this.labelContext, this.controlContext,
-        this.displayToImageRatio * UP_RES_RATIO, config.hideLabels)
+
+      const ratio = this.displayToImageRatio * UP_RES_RATIO
+      const labelsToDraw = (config.hideLabels) ?
+        Session.label2dList.labelList.filter((label) => label.selected) :
+        Session.label2dList.labelList
+      for (const label of labelsToDraw) {
+        label.draw(
+          this.labelContext,
+          ratio,
+          DrawMode.VIEW,
+          this._mousePosition
+        )
+        label.draw(
+          this.controlContext,
+          ratio,
+          DrawMode.CONTROL,
+          this._mousePosition
+        )
+      }
+      for (const label of Session.label2dList.selectedLabels) {
+        if (label.labelId < 0) {
+          label.draw(
+            this.labelContext,
+            ratio,
+            DrawMode.VIEW,
+            this._mousePosition
+          )
+          label.draw(
+            this.controlContext,
+            ratio,
+            DrawMode.CONTROL,
+            this._mousePosition
+          )
+        }
+      }
     }
     return true
   }
@@ -270,10 +311,10 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     }
 
     // update the currently hovered shape
-    const mousePos = this.getMousePos(e)
-    const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
+    this._mousePosition = this.getMousePos(e)
+    const [labelIndex, handleIndex] = this.fetchHandleId(this._mousePosition)
     if (this._labelHandler.onMouseMove(
-      mousePos,
+      this._mousePosition,
       getCurrentImageSize(this.state, this.props.id),
       labelIndex, handleIndex
     )) {

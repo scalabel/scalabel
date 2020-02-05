@@ -97,6 +97,11 @@ export abstract class Label3D {
     return this._editing
   }
 
+  /** Get whether label is being edited */
+  public set editing (e: boolean) {
+    this._editing = e
+  }
+
   /** get label state */
   public get labelState (): Readonly<LabelType> {
     if (!this._labelState) {

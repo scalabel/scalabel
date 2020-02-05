@@ -327,7 +327,7 @@ export class Label3DList {
   }
 
   /** Get uncommitted labels */
-  public get updatedLabels (): Readonly<Set<Readonly<Label3D>>> {
+  public get updatedLabels (): Readonly<Set<Label3D>> {
     return this._updatedLabels
   }
 
@@ -337,7 +337,7 @@ export class Label3DList {
   }
 
   /** Get uncommitted labels */
-  public get updatedShapes (): Readonly<Set<Readonly<Shape3D>>> {
+  public get updatedShapes (): Readonly<Set<Shape3D>> {
     return this._updatedShapes
   }
 

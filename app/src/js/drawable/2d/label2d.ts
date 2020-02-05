@@ -213,7 +213,9 @@ export abstract class Label2D {
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
    */
-  public abstract draw (canvas: Context2D, ratio: number, mode: DrawMode): void
+  public abstract draw (
+    canvas: Context2D, ratio: number, mode: DrawMode, mousePosition: Vector2D
+  ): void
 
   /**
    * Draw the label tag on viewing or control canvas

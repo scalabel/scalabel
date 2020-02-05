@@ -76,9 +76,11 @@ export class Polygon2D extends Label2D {
    * @param _ratio
    * @param _mode
    */
-  public draw (context: Context2D, ratio: number, mode: DrawMode): void {
+  public draw (
+    context: Context2D, ratio: number, mode: DrawMode, mousePosition: Vector2D
+  ): void {
     const self = this
-    let numPoints = self._points.length
+    const numPoints = self._points.length
 
     if (numPoints === 0) return
     let pointStyle = makePathPoint2DStyle()
@@ -138,7 +140,15 @@ export class Polygon2D extends Label2D {
     }
 
     if (this._closed) {
-      context.lineTo(begin.x, begin.y)
+      if (
+        this.labelId < 0 &&
+        this._highlightedHandle < this._points.length
+      ) {
+        const temporaryPosition = mousePosition.clone().scale(ratio)
+        context.lineTo(temporaryPosition.x, temporaryPosition.y)
+      } else {
+        context.lineTo(begin.x, begin.y)
+      }
       context.closePath()
       if (mode === DrawMode.VIEW) {
         const fillStyle = self._color.concat(OPACITY)
@@ -170,9 +180,6 @@ export class Polygon2D extends Label2D {
       context.restore()
 
       // draw points
-      if (this.labelId < 0) {
-        numPoints--
-      }
       for (let i = 0; i < numPoints; ++i) {
         const point = self._points[i]
         let style = pointStyle
@@ -199,17 +206,13 @@ export class Polygon2D extends Label2D {
     if (this.labelId < 0) {
       // If temporary, add new points on mouse down
       if (this._highlightedHandle > 0) {
-        const diff = this._points[0].toVector().subtract(
-          this._points[this._highlightedHandle].toVector()
-        )
+        const diff = this._points[0].toVector().subtract(coord)
         if (
           diff.dot(diff) < DEFAULT_CONTROL_POINT_STYLE.radius *
             DEFAULT_CONTROL_POINT_STYLE.radius
         ) {
           // Stop adding after clicking on first point
           this._highlightedHandle = this._points.length
-          this._points.length--
-          this.editing = false
           // Add temporary label for committing
           if (this.isValid()) {
             this._shapes =
@@ -224,14 +227,9 @@ export class Polygon2D extends Label2D {
           return true
         }
       }
-      if (
-        this._highlightedHandle < this._points.length &&
-        this._highlightedHandle >= 0
-      ) {
-        this._points.push(new PathPoint2D(coord.x, coord.y, PointType.VERTEX))
-        this._highlightedHandle++
-        return true
-      }
+      this._points.push(new PathPoint2D(coord.x, coord.y, PointType.VERTEX))
+      this._highlightedHandle++
+      return true
     } else if (this._highlightedHandle < this._points.length) {
       if (this.isKeyDown(Key.D_LOW) || this.isKeyDown(Key.D_UP)) {
         this.deleteVertex()
@@ -241,12 +239,10 @@ export class Polygon2D extends Label2D {
         if (this._points[this._highlightedHandle].type === PointType.MID) {
           this.midToVertex()
         }
-        this.editing = true
         this.toCache()
       }
       return true
     } else if (this._highlightedHandle === this._points.length) {
-      this.editing = true
       this.toCache()
     }
 
@@ -260,8 +256,14 @@ export class Polygon2D extends Label2D {
    */
   public drag (delta: Vector2D, _limit: Size2D): boolean {
     if (this.editing) {
-      if (this._highlightedHandle < this._points.length) {
+      if (
+        this._highlightedHandle >= 0 &&
+        this._highlightedHandle < this._points.length
+      ) {
         const point = this._points[this._highlightedHandle]
+        if (point.type === PointType.MID) {
+          this.midToVertex()
+        }
         point.set(point.x + delta.x, point.y + delta.y)
         if (this.labelId >= 0) {
           this._labelList.addUpdatedShape(point)
@@ -382,8 +384,6 @@ export class Polygon2D extends Label2D {
     this.editing = true
     const itemIndex = state.user.select.item
 
-    this._points.push(new PathPoint2D(start.x, start.y, PointType.VERTEX))
-
     const labelType = this._closed ?
                 LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
     this._labelState = makeLabel({
@@ -391,7 +391,7 @@ export class Polygon2D extends Label2D {
       category: [state.user.select.category],
       order: this.order
     })
-    this._highlightedHandle = 0
+    this._highlightedHandle = -1
   }
 
   /**
@@ -427,9 +427,9 @@ export class Polygon2D extends Label2D {
    * @param _limit
    */
   private move (delta: Vector2D, _limit: Size2D): void {
-    for (let i = 0; i < this._points.length; ++i) {
-      this._points[i].x = this._startingPoints[i].x + delta.x
-      this._points[i].y = this._startingPoints[i].y + delta.y
+    for (const point of this._points) {
+      point.x += delta.x
+      point.y += delta.y
     }
     this.setAllShapesUpdated()
   }

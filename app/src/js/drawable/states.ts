@@ -13,8 +13,8 @@ import { Shape3D } from './3d/shape3d'
  * Commit labels to state
  */
 export function commitLabels (
-  updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>,
-  updatedShapeDrawables: Array<Readonly<Shape2D | Shape3D>>
+  updatedLabelDrawables: Array<Label2D | Label3D>,
+  updatedShapeDrawables: Array<Shape2D | Shape3D>
 ) {
   // Get labels, shapes, & tracks to commit
   const itemIndices: Set<number> = new Set()
@@ -27,6 +27,7 @@ export function commitLabels (
   let minNewShapeId = 0
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
+    drawable.editing = false
     if (!(drawable.item in updatedLabels)) {
       updatedLabels[drawable.item] = {}
     }

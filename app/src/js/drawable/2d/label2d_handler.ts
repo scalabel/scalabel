@@ -10,6 +10,8 @@ import { Vector2D } from '../../math/vector2d'
 import { commitLabels } from '../states'
 import { makeDrawableLabel2D } from './label2d_list'
 
+const MOUSE_MOVE_THRESHOLD = 5
+
 /**
  * List of drawable labels
  * ViewController for the labels
@@ -99,9 +101,6 @@ export class Label2DHandler {
       [...Session.label2dList.updatedShapes.values()]
     )
     Session.label2dList.clearUpdated()
-    for (const label of Session.label2dList.selectedLabels) {
-      label.editing = false
-    }
   }
 
   /**
@@ -110,15 +109,20 @@ export class Label2DHandler {
   public onMouseMove (
       coord: Vector2D, canvasLimit: Size2D,
       labelIndex: number, handleIndex: number): boolean {
+    const delta = coord.clone().subtract(this._mouseCoord)
     if (this.editingSelectedLabels()) {
-      for (const label of Session.label2dList.selectedLabels) {
-        const delta = new Vector2D(coord.x, coord.y)
-        delta.subtract(this._mouseCoord)
-        label.drag(delta, canvasLimit)
-        label.setManual()
+      if (
+        this._mouseDown &&
+        delta.dot(delta) > MOUSE_MOVE_THRESHOLD * MOUSE_MOVE_THRESHOLD
+      ) {
+        this._mouseMoved = true
+        for (const label of Session.label2dList.selectedLabels) {
+          label.drag(delta, canvasLimit)
+          label.setManual()
+        }
+        this._mouseCoord.set(coord.x, coord.y)
+        return true
       }
-      this._mouseCoord.set(coord.x, coord.y)
-      return true
     } else {
       if (Session.label2dList.highlightedLabel) {
         Session.label2dList.highlightedLabel.setHighlighted(false)
