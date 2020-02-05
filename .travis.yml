@@ -16,6 +16,8 @@ install:
   - sudo pip3 install -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
+before_script:
+  - sudo service redis-server stop
 script:
   - pylint scripts/
   - node_modules/.bin/eslint .
