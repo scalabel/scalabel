@@ -197,8 +197,8 @@ export class CustomLabel2D extends Label2D {
 
     // Move to start
     for (const point of this._nodes) {
-      point.x += start.x - this._bounds.x
-      point.y += start.y - this._bounds.y
+      point.x = (point.x - this._bounds.x) / this._bounds.w + start.x
+      point.y = (point.y - this._bounds.y) / this._bounds.h + start.y
     }
 
     // Update bounds after moving
@@ -217,8 +217,10 @@ export class CustomLabel2D extends Label2D {
     ) {
       // Delete highlighted handle if d key pressed
       this._nodes[this._highlightedHandle].hide()
+      this._labelList.addUpdatedShape(this._nodes[this._highlightedHandle])
       this._highlightedHandle = -1
     }
+    this._labelList.addUpdatedLabel(this)
 
     return this._highlightedHandle < this._nodes.length
   }
