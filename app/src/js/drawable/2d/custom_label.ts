@@ -212,7 +212,8 @@ export class CustomLabel2D extends Label2D {
   public click (_coord: Vector2D): boolean {
     if (
       (this._keyDownMap[Key.D_LOW] || this._keyDownMap[Key.D_UP]) &&
-      this._highlightedHandle < this._nodes.length
+      this._highlightedHandle < this._nodes.length &&
+      this._highlightedHandle >= 0
     ) {
       // Delete highlighted handle if d key pressed
       this._nodes[this._highlightedHandle].hide()
@@ -244,9 +245,16 @@ export class CustomLabel2D extends Label2D {
         new Vector2D(oppositeCorner.x ,oppositeCorner.y),
         new Vector2D(xScale, yScale)
       )
-      this.setAllShapesUpdated()
-    } else if (this._highlightedHandle >= 0) {
-      if (this._highlightedHandle < this._nodes.length) {
+      this._shapes = this._nodes
+      for (const shape of this._shapes) {
+        this._labelList.addTemporaryShape(shape)
+      }
+      this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
+    } else {
+      if (
+        this._highlightedHandle >= 0 &&
+        this._highlightedHandle < this._nodes.length
+      ) {
         // Move single point
         this._nodes[this._highlightedHandle].x += delta.x
         this._nodes[this._highlightedHandle].y += delta.y
@@ -260,6 +268,7 @@ export class CustomLabel2D extends Label2D {
       }
       this.setAllShapesUpdated()
     }
+    this._labelList.addUpdatedLabel(this)
     this.updateBounds()
 
     return true
