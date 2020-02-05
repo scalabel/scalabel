@@ -23,14 +23,17 @@ export class Hub {
   /** the user manager */
   protected userManager: UserManager
 
-  constructor (
-    io: socketio.Server, env: Env,
-    projectStore: ProjectStore, userManager: UserManager) {
+  constructor (env: Env, projectStore: ProjectStore, userManager: UserManager) {
     this.sync = env.sync
     this.autosave = env.autosave
     this.projectStore = projectStore
     this.userManager = userManager
+  }
 
+  /**
+   * Listens for websocket connections
+   */
+  public listen (io: socketio.Server) {
     io.on(EventName.CONNECTION, this.registerNewSocket.bind(this))
   }
 

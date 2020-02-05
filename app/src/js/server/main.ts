@@ -3,7 +3,7 @@ import express, { Application } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
 import * as socketio from 'socket.io'
-import { startSocketServer } from './hub'
+import { Hub } from './hub'
 import { Listeners } from './listeners'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
@@ -66,7 +66,8 @@ async function main (): Promise<void> {
   startHTTPServer(app, projectStore, userManager)
 
   // set up socket.io handler
-  startSocketServer(io, env, projectStore, userManager)
+  const hub = new Hub(env, projectStore, userManager)
+  hub.listen(io)
 
   httpServer.listen(env.port)
 
