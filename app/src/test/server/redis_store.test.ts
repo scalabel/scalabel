@@ -14,7 +14,7 @@ let storage: FileStorage
 let env: Env
 
 beforeAll(async () => {
-  // Default port 6379 is used in box2d integration test, so change port here
+  // Avoid default port 6379 and port 6377 used in box2d integration test
   env = _.clone(defaultEnv)
   env.redisPort = 6378
 
@@ -22,14 +22,16 @@ beforeAll(async () => {
     ['--appendonly', 'no', '--save', '', '--port', env.redisPort.toString()])
 
   // Buffer period for redis to launch
-  await sleep(1000)
+  await sleep(1500)
   storage = new FileStorage('test-data-redis')
   defaultStore = new RedisStore(env, storage)
 })
 
-afterAll(() => {
+afterAll(async () => {
   redisProc.kill()
   fs.removeSync('test-data-redis')
+  // Buffer period or cleanup
+  await sleep(500)
 })
 
 describe('Test redis cache', () => {

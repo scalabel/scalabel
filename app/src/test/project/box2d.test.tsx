@@ -37,12 +37,18 @@ let redisProc: child.ChildProcessWithoutNullStreams
 beforeAll(async () => {
   Session.devMode = false
   Session.testMode = true
+
+  // Avoid default port 6379 and port 6378 used in redis store test
+  const redisPort = 6377
+  // port is alos changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
     './app/config/test_config.yml'
   ])
-  redisProc = child.spawn('redis-server', ['--appendonly', 'no', '--save', ''])
+
+  redisProc = child.spawn('redis-server',
+  ['--appendonly', 'no', '--save', '', '--port', redisPort.toString()])
 
   // launchProc.stdout.on('data', (data) => {
   //   process.stdout.write(data)
@@ -62,10 +68,12 @@ beforeEach(() => {
   cleanup()
 })
 afterEach(cleanup)
-afterAll(() => {
+afterAll(async () => {
   launchProc.kill()
   redisProc.kill()
   deleteTestDir()
+  // Buffer period for cleanup
+  await sleep(500)
 })
 
 describe('full 2d bounding box integration test', () => {

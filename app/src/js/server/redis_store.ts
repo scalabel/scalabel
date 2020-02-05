@@ -39,6 +39,9 @@ export class RedisStore {
     })
 
     this.sub = redis.createClient(env.redisPort)
+    this.sub.on('error', (err: Error) => {
+      Logger.error(err)
+    })
     // subscribe to reminder expirations for saving
     this.sub.subscribe('__keyevent@0__:expired')
     this.sub.on('message', async (_channel: string, reminderKey: string) => {
