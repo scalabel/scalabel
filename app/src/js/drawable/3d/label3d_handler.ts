@@ -34,7 +34,7 @@ export class Label3DHandler {
   /** Current mouse position */
   private _mousePosition: Vector2D
   /** Whether mouse moved */
-  private _mouseMoved: boolean
+  // private _mouseMoved: boolean
 
   constructor (camera: THREE.Camera) {
     this._mouseDown = false
@@ -45,7 +45,7 @@ export class Label3DHandler {
     this._sensor = makeSensor(-1, '', DataType.POINT_CLOUD)
     this._camera = camera
     this._mousePosition = new Vector2D()
-    this._mouseMoved = false
+    // this._mouseMoved = false
   }
 
   /** Set camera */
@@ -82,10 +82,6 @@ export class Label3DHandler {
    */
   public onMouseDown (): boolean {
     this._mouseDown = true
-    if (Session.label3dList.control.highlighted) {
-      Session.label3dList.control.onMouseDown(this._camera)
-      return true
-    }
 
     return false
   }
@@ -93,14 +89,13 @@ export class Label3DHandler {
   /**
    * Process mouse up action
    */
-  public onMouseUp (x: number, y: number): boolean {
-    let consumed = false
-    if (Session.label3dList.control.visible) {
-      consumed = Session.label3dList.control.onMouseUp()
-    }
-    if (!consumed && !this._mouseMoved && Session.label3dList.selectedLabel) {
-      Session.label3dList.selectedLabel.click(x, y)
-    }
+  public onMouseUp (_x: number, _y: number): boolean {
+    // if (
+    //   !this._mouseMoved &&
+    //   Session.label3dList.highlightedLabel
+    // ) {
+    //   Session.label3dList.highlightedLabel.click(x, y)
+    // }
     commitLabels(
         [...Session.label3dList.updatedLabels.values()],
         [...Session.label3dList.updatedShapes.values()]
@@ -114,7 +109,7 @@ export class Label3DHandler {
       this.selectHighlighted()
     }
     this._mouseDown = false
-    this._mouseMoved = false
+    // this._mouseMoved = false
     return false
   }
 
@@ -134,13 +129,13 @@ export class Label3DHandler {
       const dy = y - this._mousePosition.y
       if ((dx * dx + dy * dy) > MOUSE_MOVE_THRESHOLD * MOUSE_MOVE_THRESHOLD) {
         this._mousePosition.set(x, y)
-        this._mouseMoved = true
+        // this._mouseMoved = true
         if (
           Session.label3dList.control.visible &&
           Session.label3dList.control.highlighted
         ) {
-          const consumed = Session.label3dList.control.onMouseMove(
-            x, y, this._camera
+          const consumed = Session.label3dList.control.drag(
+            dx, dy, this._camera
           )
           if (consumed) {
             return true
@@ -159,9 +154,12 @@ export class Label3DHandler {
         }
       }
       return (
-        Session.label3dList.selectedLabel !== null &&
+        (Session.label3dList.control.highlighted &&
+          Session.label3dList.control.visible) ||
+        (Session.label3dList.selectedLabel !== null &&
         Session.label3dList.selectedLabel ===
           Session.label3dList.highlightedLabel
+        )
       )
     } else {
       this.highlight(raycastIntersection)

@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { Key } from '../../../common/types'
-import { projectionFromNDC } from '../../../view_config/point_cloud'
 import Label3D from '../label3d'
 import { Controller } from './controller'
 import { RotationControl } from './rotation_control'
@@ -56,13 +55,6 @@ export class TransformationControl extends THREE.Group {
   }
 
   /**
-   * Mouse down
-   */
-  public onMouseDown (camera: THREE.Camera) {
-    return this._currentController.onMouseDown(camera)
-  }
-
-  /**
    * Handle key events
    * @param e
    */
@@ -97,18 +89,10 @@ export class TransformationControl extends THREE.Group {
    * @param x: NDC
    * @param y: NDC
    */
-  public onMouseMove (x: number, y: number, camera: THREE.Camera) {
-    const projection = projectionFromNDC(x, y, camera)
-    const result = this._currentController.onMouseMove(projection)
+  public drag (dx: number, dy: number, camera: THREE.Camera) {
+    const result = this._currentController.drag(dx, dy, camera)
     this.updateBounds()
     return result
-  }
-
-  /**
-   * Mouse up
-   */
-  public onMouseUp () {
-    return this._currentController.onMouseUp()
   }
 
   /**

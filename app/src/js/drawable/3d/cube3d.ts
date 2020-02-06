@@ -357,7 +357,6 @@ export class Cube3D extends Shape3D {
     const highlightedPosition = new THREE.Vector3()
     this._highlightedSphere.getWorldPosition(highlightedPosition)
     const previousCoord = highlightedPosition.project(camera)
-    console.log(previousCoord.x + dx, previousCoord.y + dy)
 
     const projection =
       projectionFromNDC(previousCoord.x + dx, previousCoord.y + dy, camera)
