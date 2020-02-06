@@ -200,6 +200,7 @@ export class Box2D extends Label2D {
  * @param {Vector2D} limit: limit of the canvas frame
  */
   public drag (delta: Vector2D, limit: Size2D): boolean {
+    console.log(this._highlightedHandle, this._points.length)
     if (
       this._highlightedHandle >= 0 &&
       this._highlightedHandle < this._points.length

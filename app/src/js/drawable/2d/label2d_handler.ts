@@ -73,9 +73,6 @@ export class Label2DHandler {
     if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
       this._mouseCoord.set(coord.x, coord.y)
       this._mouseDown = true
-      for (const label of Session.label2dList.selectedLabels) {
-        label.editing = true
-      }
     }
     return false
   }
@@ -91,7 +88,10 @@ export class Label2DHandler {
   ): void {
     if (this._mouseDown && !this._mouseMoved) {
       for (const label of Session.label2dList.selectedLabels) {
-        label.click(coord)
+        const consumed = label.click(coord)
+        if (consumed) {
+          label.editing = true
+        }
       }
     }
     this._mouseDown = false
@@ -110,20 +110,21 @@ export class Label2DHandler {
       coord: Vector2D, canvasLimit: Size2D,
       labelIndex: number, handleIndex: number): boolean {
     const delta = coord.clone().subtract(this._mouseCoord)
-    if (this.editingSelectedLabels()) {
-      if (
-        this._mouseDown &&
-        delta.dot(delta) > MOUSE_MOVE_THRESHOLD * MOUSE_MOVE_THRESHOLD
-      ) {
-        this._mouseMoved = true
-        for (const label of Session.label2dList.selectedLabels) {
-          label.drag(delta, canvasLimit)
-          label.setManual()
+    if (
+      this._mouseDown &&
+      delta.dot(delta) > MOUSE_MOVE_THRESHOLD * MOUSE_MOVE_THRESHOLD
+    ) {
+      this._mouseMoved = true
+      for (const label of Session.label2dList.selectedLabels) {
+        const consumed = label.drag(delta, canvasLimit)
+        if (consumed) {
+          label.editing = true
         }
-        this._mouseCoord.set(coord.x, coord.y)
-        return true
+        label.setManual()
       }
-    } else {
+      this._mouseCoord.set(coord.x, coord.y)
+      return true
+    } else if (!this._mouseDown) {
       if (Session.label2dList.highlightedLabel) {
         Session.label2dList.highlightedLabel.setHighlighted(false)
         Session.label2dList.highlightedLabel =

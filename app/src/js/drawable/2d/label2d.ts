@@ -313,6 +313,7 @@ export abstract class Label2D {
       (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
     )
     this._selected = true
+    this.editing = true
   }
 
   /** Convert label state to drawable */

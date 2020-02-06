@@ -230,7 +230,10 @@ export class Polygon2D extends Label2D {
       this._points.push(new PathPoint2D(coord.x, coord.y, PointType.VERTEX))
       this._highlightedHandle++
       return true
-    } else if (this._highlightedHandle < this._points.length) {
+    } else if (
+      this._highlightedHandle >= 0 &&
+      this._highlightedHandle < this._points.length
+    ) {
       if (this.isKeyDown(Key.D_LOW) || this.isKeyDown(Key.D_UP)) {
         this.deleteVertex()
       } else if (this.isKeyDown(Key.C_LOW) || this.isKeyDown(Key.C_UP)) {
@@ -255,23 +258,24 @@ export class Polygon2D extends Label2D {
    * @param _limit
    */
   public drag (delta: Vector2D, _limit: Size2D): boolean {
-    if (this.editing) {
-      if (
-        this._highlightedHandle >= 0 &&
-        this._highlightedHandle < this._points.length
-      ) {
-        const point = this._points[this._highlightedHandle]
-        if (point.type === PointType.MID) {
-          this.midToVertex()
-        }
-        point.set(point.x + delta.x, point.y + delta.y)
-        if (this.labelId >= 0) {
-          this._labelList.addUpdatedShape(point)
-          this._labelList.addUpdatedLabel(this)
-        }
-      } else {
-        this.move(delta, _limit)
+    if (this.labelId < 0) {
+      return false
+    }
+    if (
+      this._highlightedHandle >= 0 &&
+      this._highlightedHandle < this._points.length
+    ) {
+      const point = this._points[this._highlightedHandle]
+      if (point.type === PointType.MID) {
+        this.midToVertex()
       }
+      point.set(point.x + delta.x, point.y + delta.y)
+      if (this.labelId >= 0) {
+        this._labelList.addUpdatedShape(point)
+        this._labelList.addUpdatedLabel(this)
+      }
+    } else {
+      this.move(delta, _limit)
     }
     return true
   }
