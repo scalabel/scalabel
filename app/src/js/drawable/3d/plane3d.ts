@@ -52,52 +52,41 @@ export class Plane3D extends Label3D {
   }
 
   /**
-   * Handle mouse move
-   * @param projection
+   * Handle click
    */
-  public onMouseDown (x: number, y: number, camera: THREE.Camera) {
-    if (
-      this._labelState &&
-      (this.selected || this.anyChildSelected()) &&
-      this._labelList.currentLabelType === LabelTypeName.BOX_3D
-    ) {
-      this._temporaryLabel = new Box3D(this._labelList)
-      this._temporaryLabel.init(
-        this._labelState.item,
-        0,
-        undefined,
-        this._labelState.sensors,
-        true
-      )
-      this.addChild(this._temporaryLabel)
-      for (const shape of this._temporaryLabel.shapes()) {
-        this._grid.attach(shape)
-      }
-      return this._temporaryLabel.onMouseDown(x, y, camera)
-    }
+  public click () {
     return false
   }
 
   /**
-   * Handle mouse up
+   * Handle drag
    * @param projection
    */
-  public onMouseUp () {
-    if (this._temporaryLabel) {
-      this._temporaryLabel.onMouseUp()
-      this._temporaryLabel = null
-    }
-  }
-
-  /**
-   * Handle mouse move
-   * @param projection
-   */
-  public onMouseMove (
-    x: number, y: number, camera: THREE.Camera
+  public drag (
+    dx: number, dy: number, camera: THREE.Camera
   ): boolean {
     if (this._temporaryLabel) {
-      return this._temporaryLabel.onMouseMove(x, y, camera)
+      return this._temporaryLabel.drag(dx, dy, camera)
+    } else {
+      if (
+        this._labelState &&
+        (this.selected || this.anyChildSelected()) &&
+        this._labelList.currentLabelType === LabelTypeName.BOX_3D
+      ) {
+        this._temporaryLabel = new Box3D(this._labelList)
+        this._temporaryLabel.init(
+          this._labelState.item,
+          0,
+          undefined,
+          this._labelState.sensors,
+          true
+        )
+        this.addChild(this._temporaryLabel)
+        for (const shape of this._temporaryLabel.shapes()) {
+          this._grid.attach(shape)
+        }
+        return this._temporaryLabel.drag(dx, dy, camera)
+      }
     }
     return false
   }

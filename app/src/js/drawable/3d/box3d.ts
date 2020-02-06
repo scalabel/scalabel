@@ -129,28 +129,15 @@ export class Box3D extends Label3D {
   }
 
   /**
-   * Handle mouse move
-   * @param projection
+   * Handle click
    */
-  public onMouseDown (x: number, y: number, camera: THREE.Camera) {
-    if (this._temporary) {
-      this._cube.clickInit(x, y, camera)
-    }
-    this._editing = true
-    return this._cube.shouldDrag()
-  }
-
-  /**
-   * Handle mouse up
-   * @param projection
-   */
-  public onMouseUp () {
-    this._editing = false
+  public click () {
+    return false
   }
 
   /** Handle mouse move */
-  public onMouseMove (x: number, y: number, camera: THREE.Camera) {
-    const success = this._cube.drag(x, y, camera)
+  public drag (dx: number, dy: number, camera: THREE.Camera) {
+    const success = this._cube.drag(dx, dy, camera)
     if (success) {
       this._temporary = false
       this._labelList.addUpdatedShape(this._cube)

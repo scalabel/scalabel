@@ -385,7 +385,6 @@ export class Polygon2D extends Label2D {
    */
   public initTemp (state: State, start: Vector2D): void {
     super.initTemp(state, start)
-    this.editing = true
     const itemIndex = state.user.select.item
 
     const labelType = this._closed ?

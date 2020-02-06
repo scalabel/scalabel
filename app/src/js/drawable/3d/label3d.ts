@@ -219,26 +219,16 @@ export abstract class Label3D {
   }
 
   /**
-   * Handle mouse move
-   * @param projection
+   * Drag
    */
-  public abstract onMouseDown (
-    x: number, y: number, camera: THREE.Camera
+  public abstract drag (
+    dx: number, dy: number, camera: THREE.Camera
   ): boolean
 
   /**
-   * Handle mouse up
-   * @param projection
+   * Click
    */
-  public abstract onMouseUp (): void
-
-  /**
-   * Handle mouse move
-   * @param projection
-   */
-  public abstract onMouseMove (
-    x: number, y: number, camera: THREE.Camera
-  ): boolean
+  public abstract click (x: number, y: number): boolean
 
   /** Rotate label in direction of quaternion */
   public abstract rotate (

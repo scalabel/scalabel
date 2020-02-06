@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { projectionFromNDC } from '../../../view_config/point_cloud'
 import Label3D from '../label3d'
 
 export interface ControlUnit extends THREE.Object3D {
@@ -31,10 +32,6 @@ export abstract class Controller extends THREE.Object3D {
   protected _local: boolean
   /** original intersection point */
   protected _intersectionPoint: THREE.Vector3
-  /** Plane of intersection point w/ camera direction */
-  protected _dragPlane: THREE.Plane
-  /** previous projection */
-  protected _projection: THREE.Ray
   /** labels to transform */
   protected _labels: Label3D[]
   /** bounds of the labels */
@@ -46,8 +43,6 @@ export abstract class Controller extends THREE.Object3D {
     this._local = true
     this._intersectionPoint = new THREE.Vector3()
     this._highlightedUnit = null
-    this._dragPlane = new THREE.Plane()
-    this._projection = new THREE.Ray()
     this._labels = labels
     this._bounds = bounds
   }
@@ -74,42 +69,35 @@ export abstract class Controller extends THREE.Object3D {
     }
   }
 
-  /** mouse down */
-  public onMouseDown (camera: THREE.Camera) {
+  /** mouse move */
+  public drag (dx: number, dy: number, camera: THREE.Camera) {
     if (this._highlightedUnit) {
       const normal = new THREE.Vector3()
       camera.getWorldDirection(normal)
-      this._dragPlane.setFromNormalAndCoplanarPoint(
+
+      const dragPlane = new THREE.Plane()
+      dragPlane.setFromNormalAndCoplanarPoint(
         normal,
         this._intersectionPoint
       )
-      return true
-    }
-    return false
-  }
 
-  /** mouse move */
-  public onMouseMove (projection: THREE.Ray) {
-    if (this._highlightedUnit && this._dragPlane) {
+      const previousCoord =
+        (new THREE.Vector3()).copy(this._intersectionPoint).project(camera)
+      const projection =
+        projectionFromNDC(previousCoord.x + dx, previousCoord.y + dy, camera)
+
       const newIntersection = this._highlightedUnit.transform(
         this._intersectionPoint,
         projection,
-        this._dragPlane,
+        dragPlane,
         this._labels,
         this._bounds,
         this._local
       )
 
       this._intersectionPoint.copy(newIntersection)
-      this._projection.copy(projection)
       return true
     }
-    this._projection.copy(projection)
-    return false
-  }
-
-  /** mouse up */
-  public onMouseUp () {
     return false
   }
 

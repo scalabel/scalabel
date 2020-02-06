@@ -349,8 +349,17 @@ export class Cube3D extends Shape3D {
    * Drag to mouse
    * @param projection
    */
-  public drag (x: number, y: number, camera: THREE.Camera) {
-    const projection = projectionFromNDC(x, y, camera)
+  public drag (dx: number, dy: number, camera: THREE.Camera) {
+    if (!this._highlightedSphere) {
+      return false
+    }
+
+    const highlightedPosition = new THREE.Vector3()
+    this._highlightedSphere.getWorldPosition(highlightedPosition)
+    const previousCoord = highlightedPosition.project(camera)
+
+    const projection =
+      projectionFromNDC(previousCoord.x + dx, previousCoord.y + dy, camera)
 
     this.updateMatrixWorld(true)
 
@@ -370,8 +379,7 @@ export class Cube3D extends Shape3D {
       this.setControlSpheres(camera)
 
       const delta = new THREE.Vector2(
-        x - this._firstCorner.x,
-        y - this._firstCorner.y
+        dx, dy
       )
 
       if (delta.length() < 0.01) {
@@ -430,10 +438,6 @@ export class Cube3D extends Shape3D {
       this._firstCorner = null
 
       this.visible = true
-    }
-
-    if (!this._highlightedSphere) {
-      return false
     }
 
     highlightedPlane.setFromNormalAndCoplanarPoint(

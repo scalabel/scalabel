@@ -181,17 +181,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     if (!this.canvas || this.checkFreeze()) {
       return
     }
-    const normalized = normalizeCoordinatesToCanvas(
-      e.clientX, e.clientY, this.canvas
-    )
-    const NDC = convertMouseToNDC(
-      normalized[0],
-      normalized[1],
-      this.canvas
-    )
-    const x = NDC[0]
-    const y = NDC[1]
-    if (this._labelHandler.onMouseDown(x, y)) {
+    if (this._labelHandler.onMouseDown()) {
       e.stopPropagation()
     }
   }
@@ -204,7 +194,17 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     if (!this.canvas || this.checkFreeze()) {
       return
     }
-    if (this._labelHandler.onMouseUp()) {
+    const normalized = normalizeCoordinatesToCanvas(
+      e.clientX, e.clientY, this.canvas
+    )
+    const NDC = convertMouseToNDC(
+      normalized[0],
+      normalized[1],
+      this.canvas
+    )
+    const x = NDC[0]
+    const y = NDC[1]
+    if (this._labelHandler.onMouseUp(x, y)) {
       e.stopPropagation()
     }
   }
