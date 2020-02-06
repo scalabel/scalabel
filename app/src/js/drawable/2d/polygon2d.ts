@@ -255,23 +255,21 @@ export class Polygon2D extends Label2D {
    * @param _limit
    */
   public drag (delta: Vector2D, _limit: Size2D): boolean {
-    if (this.editing) {
-      if (
-        this._highlightedHandle >= 0 &&
-        this._highlightedHandle < this._points.length
-      ) {
-        const point = this._points[this._highlightedHandle]
-        if (point.type === PointType.MID) {
-          this.midToVertex()
-        }
-        point.set(point.x + delta.x, point.y + delta.y)
-        if (this.labelId >= 0) {
-          this._labelList.addUpdatedShape(point)
-          this._labelList.addUpdatedLabel(this)
-        }
-      } else {
-        this.move(delta, _limit)
+    if (
+      this._highlightedHandle >= 0 &&
+      this._highlightedHandle < this._points.length
+    ) {
+      const point = this._points[this._highlightedHandle]
+      if (point.type === PointType.MID) {
+        this.midToVertex()
       }
+      point.set(point.x + delta.x, point.y + delta.y)
+      if (this.labelId >= 0) {
+        this._labelList.addUpdatedShape(point)
+        this._labelList.addUpdatedLabel(this)
+      }
+    } else {
+      this.move(delta, _limit)
     }
     return true
   }
@@ -381,7 +379,6 @@ export class Polygon2D extends Label2D {
    */
   public initTemp (state: State, start: Vector2D): void {
     super.initTemp(state, start)
-    this.editing = true
     const itemIndex = state.user.select.item
 
     const labelType = this._closed ?
