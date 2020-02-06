@@ -40,15 +40,15 @@ beforeAll(async () => {
 
   // Avoid default port 6379 and port 6378 used in redis store test
   const redisPort = 6377
-  // port is alos changed in test_config
+  redisProc = child.spawn('redis-server',
+    ['--appendonly', 'no', '--save', '', '--port', redisPort.toString()])
+
+  // port is lso changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
     './app/config/test_config.yml'
   ])
-
-  redisProc = child.spawn('redis-server',
-  ['--appendonly', 'no', '--save', '', '--port', redisPort.toString()])
 
   // launchProc.stdout.on('data', (data) => {
   //   process.stdout.write(data)

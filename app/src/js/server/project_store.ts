@@ -7,7 +7,7 @@ import { getProjectKey, getSaveDir, getTaskDir, getTaskKey } from './path'
 import { RedisStore } from './redis_store'
 import { Storage } from './storage'
 import { Project } from './types'
-import { getPolicy } from './util'
+import { getPolicy, safeParseJSON } from './util'
 
 /**
  * Wraps redis cache and storage basic functionality
@@ -61,7 +61,7 @@ export class ProjectStore {
       redisValue = await this.redisStore.get(saveDir)
     }
     if (redisValue) {
-      state = JSON.parse(redisValue)
+      state = safeParseJSON(redisValue)
     } else {
       // otherwise load from storage
       try {
@@ -106,7 +106,7 @@ export class ProjectStore {
   public async loadProject (projectName: string) {
     const key = getProjectKey(projectName)
     const fields = await this.storage.load(key)
-    const loadedProject = JSON.parse(fields) as Project
+    const loadedProject = safeParseJSON(fields) as Project
     return loadedProject
   }
 
@@ -130,7 +130,7 @@ export class ProjectStore {
     // iterate over all keys and load each task asynchronously
     for (const key of keys) {
       taskPromises.push(this.storage.load(key).then((fields) => {
-        return JSON.parse(fields) as TaskType
+        return safeParseJSON(fields) as TaskType
       })
       )
     }
@@ -158,10 +158,11 @@ export class ProjectStore {
   /**
    * Loads a task
    */
-  public async loadTask (projectName: string, taskId: string) {
+  public async loadTask (
+    projectName: string, taskId: string): Promise<TaskType> {
     const key = getTaskKey(projectName, taskId)
     const taskData = await this.storage.load(key)
-    const task = JSON.parse(taskData) as TaskType
+    const task = safeParseJSON(taskData) as TaskType
     return task
   }
 
@@ -176,7 +177,7 @@ export class ProjectStore {
     }
     Logger.info(sprintf('Reading %s\n', keys[keys.length - 1]))
     const fields = await this.storage.load(keys[keys.length - 1])
-    return JSON.parse(fields) as State
+    return safeParseJSON(fields) as State
   }
 
   /**
@@ -185,7 +186,7 @@ export class ProjectStore {
    */
   private async loadStateFromTask (taskKey: string): Promise<State> {
     const fields = await this.storage.load(taskKey)
-    const task = JSON.parse(fields) as TaskType
+    const task = safeParseJSON(fields) as TaskType
     const state = makeState({ task })
 
     state.session.itemStatuses = []

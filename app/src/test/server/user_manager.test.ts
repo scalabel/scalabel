@@ -1,28 +1,25 @@
+import * as fs from 'fs-extra'
 import _ from 'lodash'
 import mockfs from 'mock-fs'
 import uuid4 from 'uuid/v4'
 import { FileStorage } from '../../js/server/file_storage'
 import { UserManager } from '../../js/server/user_manager'
+import { makeProjectDir } from '../util'
 
 let userManager: UserManager
 let projectName: string
+let dataDir: string
 
 beforeAll(() => {
-  // mock the file system for testing storage
-  mockfs({
-    'data/myProject': {
-      '.config': 'config contents',
-      'project.json': 'project contents',
-      'tasks': {
-        '000000.json': '{"testField": "testValue"}',
-        '000001.json': 'contents 1'
-      }
-    }
-  })
-
   projectName = 'myProject'
-  const storage = new FileStorage('data')
+  dataDir = 'test-user-data'
+  makeProjectDir(dataDir, projectName)
+  const storage = new FileStorage(dataDir)
   userManager = new UserManager(storage)
+})
+
+afterAll(() => {
+  fs.removeSync(dataDir)
 })
 
 describe('test user management', () => {

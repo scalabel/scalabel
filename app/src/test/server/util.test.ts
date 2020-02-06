@@ -1,4 +1,3 @@
-import mockfs from 'mock-fs'
 import { BundleFile, HandlerUrl,
   ItemTypeName, LabelTypeName } from '../../js/common/types'
 import { getProjectKey, getSaveDir, getTaskKey } from '../../js/server/path'
@@ -116,8 +115,4 @@ describe('test general utility methods', () => {
     expect(itemType4).toBe(ItemTypeName.POINT_CLOUD)
     expect(tracking4).toBe(false)
   })
-})
-
-afterAll(() => {
-  mockfs.restore()
 })

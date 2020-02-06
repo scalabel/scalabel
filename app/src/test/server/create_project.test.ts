@@ -1,4 +1,4 @@
-import mockfs from 'mock-fs'
+import * as fs from 'fs-extra'
 import { State, TaskType } from '../../js/functional/types'
 import { createProject, createTasks } from '../../js/server/create_project'
 import { convertStateToExport } from '../../js/server/export'
@@ -24,15 +24,16 @@ import {
 } from '../test_export_objects'
 
 let projectStore: ProjectStore
+let dataDir: string
 
-beforeAll(async () => {
-  // mock the file system for saving/loading
-  mockfs({
-    'data/': {}
-  })
-
-  const storage = new FileStorage('data')
+beforeAll(() => {
+  dataDir = 'create-project-data'
+  const storage = new FileStorage(dataDir)
   projectStore = new ProjectStore(storage)
+})
+
+afterAll(() => {
+  fs.removeSync(dataDir)
 })
 
 // TODO- test that form is loaded correctly
@@ -140,7 +141,3 @@ async function testTaskSaving (sampleTasks: TaskType[]): Promise<void> {
     expect(loadedTask).toEqual(task)
   }
 }
-
-afterAll(() => {
-  mockfs.restore()
-})

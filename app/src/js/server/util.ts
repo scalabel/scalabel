@@ -228,3 +228,16 @@ export function countLabels (task: TaskType): [number, number] {
   }
   return [numLabeledItems, numLabels]
 }
+
+/**
+ * Loads JSON and logs error if invalid
+ */
+export function safeParseJSON (data: string) {
+  try {
+    const parsed = JSON.parse(data)
+    return parsed
+  } catch (e) {
+    Logger.error(Error('JSON parsed failed'))
+    Logger.error(e)
+  }
+}

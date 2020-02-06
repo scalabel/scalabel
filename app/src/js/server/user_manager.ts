@@ -1,6 +1,7 @@
 import { getMetaKey, getUserKey } from './path'
 import { Storage } from './storage'
 import { UserData } from './types'
+import { safeParseJSON } from './util'
 
 /**
  * Wraps interface with storage for user management
@@ -22,7 +23,8 @@ export class UserManager {
     let userToSockets: { [key: string]: string[] } = {}
     const key = getUserKey(projectName)
     if (await this.storage.hasKey(key)) {
-      const userData = JSON.parse(await this.storage.load(key)) as UserData
+      const userDataJSON = await this.storage.load(key)
+      const userData = safeParseJSON(userDataJSON) as UserData
       socketToUser = userData.socketToUser
       userToSockets = userData.userToSockets
     }
@@ -47,7 +49,8 @@ export class UserManager {
     const metaKey = getMetaKey()
     let socketToProject: { [key: string]: string } = {}
     if (await this.storage.hasKey(metaKey)) {
-      socketToProject = JSON.parse(await this.storage.load(metaKey))
+      const metaDataJSON = await this.storage.load(metaKey)
+      socketToProject = safeParseJSON(metaDataJSON)
     }
     socketToProject[socketId] = projectName
     await this.storage.save(metaKey, JSON.stringify(socketToProject))
@@ -62,7 +65,8 @@ export class UserManager {
     if (!(await this.storage.hasKey(metaKey))) {
       return
     }
-    const socketToProject = JSON.parse(await this.storage.load(metaKey))
+    const metaDataJSON = await this.storage.load(metaKey)
+    const socketToProject = safeParseJSON(metaDataJSON)
     if (!(socketId in socketToProject)) {
       return
     }
@@ -73,7 +77,8 @@ export class UserManager {
     if (!(await this.storage.hasKey(key))) {
       return
     }
-    const userData = JSON.parse(await this.storage.load(key))
+    const userDataJSON = await this.storage.load(key)
+    const userData = safeParseJSON(userDataJSON)
     const socketToUser = userData.socketToUser
     const userToSockets = userData.userToSockets
 
