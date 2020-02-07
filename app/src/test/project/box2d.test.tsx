@@ -117,16 +117,11 @@ describe('full 2d bounding box integration test', () => {
       </MuiThemeProvider>
     )
     const saveButton = getByTestId('Save')
-    const labelCanvas = createCanvas(200, 200)
-    const labelContext = labelCanvas.getContext('2d')
-    const controlCanvas = createCanvas(200, 200)
-    const controlContext = controlCanvas.getContext('2d')
     const handleIndex = 0
     const _labelIndex = -2
     let labelId = -1
     let state = Session.getState()
     const itemIndex = state.user.select.item
-    const label2dList = new Label2DList()
     const label2dHandler = new Label2DHandler()
     Session.subscribe(() => {
       const newState = Session.getState()
@@ -138,14 +133,12 @@ describe('full 2d bounding box integration test', () => {
     label2dHandler.onMouseMove(
       new Vector2D(1, 1), canvasSize, _labelIndex, handleIndex
     )
-    label2dHandler.onMouseDown(new Vector2D(1, 1), _labelIndex, handleIndex)
+    label2dHandler.onMouseDown(new Vector2D(1, 1))
     for (let i = 1; i <= 10; i += 1) {
       label2dHandler.onMouseMove(new Vector2D(i, i), canvasSize, _labelIndex,
       handleIndex)
-      label2dList.redraw(labelContext, controlContext, 1)
     }
     label2dHandler.onMouseUp(new Vector2D(10, 10), _labelIndex, handleIndex)
-    label2dList.redraw(labelContext, controlContext, 1)
     labelId += 1
 
     state = Session.getState()
@@ -159,14 +152,12 @@ describe('full 2d bounding box integration test', () => {
     label2dHandler.onMouseMove(
       new Vector2D(20, 20), canvasSize, _labelIndex, handleIndex
     )
-    label2dHandler.onMouseDown(new Vector2D(20, 20), _labelIndex, handleIndex)
+    label2dHandler.onMouseDown(new Vector2D(20, 20))
     for (let i = 20; i <= 40; i += 1) {
       label2dHandler.onMouseMove(new Vector2D(i, i), canvasSize, _labelIndex,
       handleIndex)
-      label2dList.redraw(labelContext, controlContext, 1)
     }
     label2dHandler.onMouseUp(new Vector2D(40, 40), _labelIndex, handleIndex)
-    label2dList.redraw(labelContext, controlContext, 1)
     labelId += 1
 
     state = Session.getState()

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { LabelType, State } from '../../functional/types'
+import { LabelType } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, getColorById } from '../util'
@@ -53,7 +53,7 @@ export abstract class Label2D {
     this._highlighted = false
     this._highlightedHandle = -1
     this._labelState = makeLabel()
-    this._color = [0, 0, 0, 1]
+    this._color = [0, 0, 0]
     this._editing = false
     this._shapes = []
     this._labelList = labelList
@@ -304,14 +304,22 @@ export abstract class Label2D {
    * @param {State} state
    * @param {Vector2D} start: starting coordinate of the label
    */
-  public initTemp (state: State, _start: Vector2D): void {
-    this.order = state.task.status.maxOrder + 1
+  public initTemp (
+    order: number,
+    itemIndex: number,
+    category: number[],
+    attributes: { [key: number]: number[] },
+    color: number[],
+    _start: Vector2D,
+    _templateName?: string
+  ): void {
+    this.order = order
+    this._labelState.item = itemIndex
     this._labelState.id = -1
     this._labelState.track = -1
-    this._color = getColorById(
-      state.task.status.maxLabelId + 1,
-      (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
-    )
+    this._labelState.category = category
+    this._labelState.attributes = attributes
+    this._color = color
     this._selected = true
     this.editing = true
   }

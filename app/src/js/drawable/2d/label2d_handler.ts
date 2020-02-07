@@ -8,6 +8,7 @@ import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { commitLabels } from '../states'
+import { getColorById } from '../util'
 import { makeDrawableLabel2D } from './label2d_list'
 
 const MOUSE_MOVE_THRESHOLD = 5
@@ -63,7 +64,20 @@ export class Label2DHandler {
           state.task.config.label2DTemplates
         )
         if (label) {
-          label.initTemp(state, coord)
+          const status = state.task.status
+          const color = getColorById(
+            status.maxLabelId + 1,
+            (Session.tracking) ? status.maxTrackId + 1 : -1
+          )
+          label.initTemp(
+            status.maxOrder + 1,
+            state.user.select.item,
+            [state.user.select.category],
+            state.user.select.attributes,
+            color,
+            coord,
+            state.task.config.labelTypes[state.user.select.labelType]
+          )
           Session.label2dList.selectedLabels.push(label)
         }
 

@@ -1,10 +1,9 @@
 import _ from 'lodash'
 import { Cursor, Key } from '../../common/types'
-import { makeLabel } from '../../functional/states'
-import { Label2DTemplateType, LabelType, State } from '../../functional/types'
+import { Label2DTemplateType, LabelType } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
-import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
+import { Context2D, encodeControlColor, toCssColor } from '../util'
 import { DrawMode, Label2D } from './label2d'
 import { Label2DList } from './label2d_list'
 import { Node2D } from './node2d'
@@ -166,25 +165,22 @@ export class CustomLabel2D extends Label2D {
 
   /** Temporary initialization on mouse down */
   public initTemp (
-    state: State, start: Vector2D
-  ) {
-    super.initTemp(state, start)
-    const itemIndex = state.user.select.item
-    this.order = state.task.status.maxOrder + 1
-    const templateName =
-      state.task.config.labelTypes[state.user.select.labelType]
-    this._labelState = makeLabel({
-      type: templateName,
-      id: -1,
-      item: itemIndex,
-      category: [state.user.select.category],
-      attributes: state.user.select.attributes,
-      order: this.order
-    })
-    this._color = getColorById(
-      state.task.status.maxLabelId + 1,
-      (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
+    order: number,
+    itemIndex: number,
+    category: number[],
+    attributes: { [key: number]: number[] },
+    color: number[],
+    start: Vector2D,
+    templateName?: string
+  ): void {
+    if (!templateName) {
+      throw new Error('Must provide template name when initializing custom label')
+    }
+    super.initTemp(
+      order, itemIndex, category, attributes, color, start, templateName
     )
+
+    this._labelState.type = templateName
 
     // Initialize with template information
     this._nodes = []
@@ -200,6 +196,12 @@ export class CustomLabel2D extends Label2D {
       point.x = (point.x - this._bounds.x) / this._bounds.w + start.x
       point.y = (point.y - this._bounds.y) / this._bounds.h + start.y
     }
+
+    this._shapes = this._nodes
+    for (const shape of this._shapes) {
+      this._labelList.addTemporaryShape(shape)
+    }
+    this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
 
     // Update bounds after moving
     this.updateBounds()
@@ -247,11 +249,7 @@ export class CustomLabel2D extends Label2D {
         new Vector2D(oppositeCorner.x ,oppositeCorner.y),
         new Vector2D(xScale, yScale)
       )
-      this._shapes = this._nodes
-      for (const shape of this._shapes) {
-        this._labelList.addTemporaryShape(shape)
-      }
-      this._labelState.shapes = this._shapes.map((shape) => shape.shapeId)
+      this.setAllShapesUpdated()
     } else {
       if (
         this._highlightedHandle >= 0 &&

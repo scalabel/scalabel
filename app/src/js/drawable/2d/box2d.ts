@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName } from '../../common/types'
-import { makeLabel } from '../../functional/states'
-import { LabelType, State } from '../../functional/types'
+import { LabelType } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -200,7 +199,6 @@ export class Box2D extends Label2D {
  * @param {Vector2D} limit: limit of the canvas frame
  */
   public drag (delta: Vector2D, limit: Size2D): boolean {
-    console.log(this._highlightedHandle, this._points.length)
     if (
       this._highlightedHandle >= 0 &&
       this._highlightedHandle < this._points.length
@@ -238,10 +236,16 @@ export class Box2D extends Label2D {
   }
 
   /** Initialize this label to be temporary */
-  public initTemp (state: State, start: Vector2D): void {
-    super.initTemp(state, start)
+  public initTemp (
+    order: number,
+    itemIndex: number,
+    category: number[],
+    attributes: { [key: number]: number[] },
+    color: number[],
+    start: Vector2D
+  ): void {
+    super.initTemp(order, itemIndex, category, attributes, color, start)
 
-    const itemIndex = state.user.select.item
     const rect = new Rect2D()
     this._labelList.addTemporaryShape(rect)
     rect.associateLabel(this)
@@ -251,13 +255,8 @@ export class Box2D extends Label2D {
     rect.h = 0
     this._shapes = [rect]
 
-    this._labelState = makeLabel({
-      type: LabelTypeName.BOX_2D, id: -1, item: itemIndex,
-      category: [state.user.select.category],
-      attributes: state.user.select.attributes,
-      order: this.order,
-      shapes: [this._shapes[0].shapeId]
-    })
+    this._labelState.type = LabelTypeName.BOX_2D
+    this._labelState.shapes = [this._shapes[0].shapeId]
     this._highlightedHandle = Handles.BOTTOM_RIGHT
     this.updatePoints()
   }

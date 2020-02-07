@@ -1,8 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
-import { makeLabel } from '../../functional/states'
-import { LabelType, ShapeType, State } from '../../functional/types'
+import { LabelType, ShapeType } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
@@ -383,17 +382,18 @@ export class Polygon2D extends Label2D {
    * @param _state
    * @param _start
    */
-  public initTemp (state: State, start: Vector2D): void {
-    super.initTemp(state, start)
-    const itemIndex = state.user.select.item
+  public initTemp (
+    order: number,
+    itemIndex: number,
+    category: number[],
+    attributes: { [key: number]: number[] },
+    color: number[],
+    start: Vector2D
+  ): void {
+    super.initTemp(order, itemIndex, category, attributes, color, start)
 
-    const labelType = this._closed ?
+    this._labelState.type = this._closed ?
                 LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
-    this._labelState = makeLabel({
-      type: labelType, id: -1, item: itemIndex,
-      category: [state.user.select.category],
-      order: this.order
-    })
     this._highlightedHandle = -1
   }
 
