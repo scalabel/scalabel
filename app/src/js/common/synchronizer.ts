@@ -32,10 +32,12 @@ export class Synchronizer {
   public taskIndex: number
   /** Middleware executed on action dispatch */
   public middleware: Middleware
+  /** The user/browser id, constant across sessions */
+  public userId: string
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
-    taskIndex: number, projectName: string,
+    taskIndex: number, projectName: string, userId: string,
     initStateCallback: (state: State) => void) {
     this.taskIndex = taskIndex
     this.projectName = projectName
@@ -44,6 +46,7 @@ export class Synchronizer {
     this.actionQueue = []
     this.actionsToSave = {}
     this.actionLog = []
+    this.userId = userId
 
     // use the same address as http
     const syncAddress = location.origin
@@ -65,6 +68,7 @@ export class Synchronizer {
     this.middleware = () => (
       next: Dispatch
     ) => (action: types.BaseAction) => {
+      action.userId = this.userId
       /* Only send back actions that originated locally */
       if (Session.id === action.sessionId && !action.frontendOnly) {
         self.actionQueue.push(action)
@@ -102,7 +106,8 @@ export class Synchronizer {
     const message: RegisterMessageType = {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
-      sessionId: Session.id
+      sessionId: Session.id,
+      userId: this.userId
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, JSON.stringify(message))

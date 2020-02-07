@@ -1,43 +1,23 @@
 import * as fs from 'fs-extra'
-import * as path from 'path'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
-import { getProjectKey, getTaskKey, index2str } from '../../js/server/util'
+import { getProjectKey, getTaskKey, getTestDir } from '../../js/server/path'
+import { index2str } from '../../js/server/util'
+import { makeProjectDir } from '../util'
 
 let storage: FileStorage
 let projectName: string
+let dataDir: string
 
 beforeAll(() => {
   projectName = 'myProject'
-
-  /* Configure file system with following structure:
-    'test-fs-data/myProject': {
-      '.config': 'config contents',
-      'project.json': 'project contents',
-      'tasks': {
-        '000000.json': '{"testField": "testValue"}',
-        '000001.json': 'contents 1'
-      }
-    }
-    This is necessary because mock-fs doesn't implement the withFileTypes
-      option of fs.readDir correctly
-  */
-
-  const dataDir = 'test-fs-data'
+  dataDir = getTestDir('test-fs-data')
+  makeProjectDir(dataDir, projectName)
   storage = new FileStorage(dataDir)
-  const projectDir = path.join(dataDir, projectName)
-  const taskDir = path.join(projectDir, 'tasks')
-  fs.ensureDirSync(projectDir)
-  fs.ensureDirSync(taskDir)
-  fs.writeFileSync(path.join(projectDir, '.config'), 'config contents')
-  fs.writeFileSync(path.join(projectDir, 'project.json'), 'project contents')
-  const contents0 = JSON.stringify({ testField: 'testValue' })
-  fs.writeFileSync(path.join(taskDir, '000000.json'), contents0)
-  fs.writeFileSync(path.join(taskDir, '000001.json'), 'contents 1')
 })
 
 afterAll(() => {
-  fs.removeSync('test-fs-data')
+  fs.removeSync(dataDir)
 })
 
 describe('test local file storage', () => {

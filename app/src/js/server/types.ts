@@ -44,6 +44,8 @@ export interface Env {
   timeForWrite: number
   /** write to disk every time this number of actions occurs */
   numActionsForWrite: number
+  /** Port that redis runs on */
+  redisPort: number
 }
 
 /**
@@ -87,6 +89,8 @@ export interface RegisterMessageType {
   taskIndex: number
   /** Current session Id */
   sessionId: string
+  /** Current user Id */
+  userId: string
 }
 
 /** action type for synchronization between front and back ends */
@@ -107,6 +111,24 @@ export interface ActionPacketType {
   actions: BaseAction[]
   /** id of the packet */
   id: string
+}
+
+/** user data for a project */
+export interface UserData {
+  /** map from socket to user */
+  socketToUser: { [key: string]: string }
+  /** map from user to list of socket */
+  userToSockets: { [key: string]: string[] }
+}
+
+/** metadata associated with a state */
+export interface StateMetadata {
+  /** project name */
+  projectName: string
+  /** task id */
+  taskId: string
+  /** list of action Ids that have been processed */
+  actionIds: string[]
 }
 
 /**
@@ -170,7 +192,8 @@ export const defaultEnv: Env = {
   autosave: true,
   redisTimeout: 3600,
   timeForWrite: 600,
-  numActionsForWrite: 10
+  numActionsForWrite: 10,
+  redisPort: 6379
 }
 
 /* default categories when file is missing and label is box2D or box3D */

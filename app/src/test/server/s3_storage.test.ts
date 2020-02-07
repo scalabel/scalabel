@@ -1,7 +1,8 @@
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
+import { getProjectKey, getTaskKey } from '../../js/server/path'
 import { S3Storage } from '../../js/server/s3_storage'
-import { getProjectKey, getTaskKey, index2str } from '../../js/server/util'
+import { index2str } from '../../js/server/util'
 
 beforeAll(async () => {
   await storage.makeBucket()

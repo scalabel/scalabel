@@ -1,23 +1,38 @@
 import { File } from 'formidable'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
-import * as path from 'path'
 import { sprintf } from 'sprintf-js'
-import { filterXSS } from 'xss'
 import * as yargs from 'yargs'
-import { BundleFile, HandlerUrl, ItemTypeName, LabelTypeName } from '../common/types'
-import { State, TaskType } from '../functional/types'
+import {
+  BundleFile, HandlerUrl, ItemTypeName,
+  LabelTypeName, TrackPolicyType } from '../common/types'
+import { Label2DTemplateType, TaskType } from '../functional/types'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
-import Session from './server_session'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType, Env, Project } from './types'
+import { CreationForm, DatabaseType, defaultEnv, Env } from './types'
 
 /**
- * Initializes global env
+ * Initializes backend environment variables
  */
-export function initEnv () {
+export function makeEnv (): Env {
+  /**
+   * Creates config, using defaults for missing fields
+   * Make sure user env come last to override defaults
+   */
+  const userEnv = readEnv()
+  const fullEnv = {
+    ...defaultEnv,
+    ...userEnv
+  }
+  return fullEnv
+}
+
+/**
+ * Gets values for environment from user-specified file
+ */
+export function readEnv (): Partial<Env> {
   // read the config file name from argv
   const configFlag = 'config'
   const argv = yargs
@@ -29,9 +44,8 @@ export function initEnv () {
     .argv
   const configDir: string = argv.config
 
-  // load the config into the environment
-  const config: Partial<Env> = yaml.load(fs.readFileSync(configDir, 'utf8'))
-  Session.setEnv(config)
+  // load the config file
+  return yaml.load(fs.readFileSync(configDir, 'utf8'))
 }
 
 /**
@@ -39,7 +53,7 @@ export function initEnv () {
  * @param {string} database: type of storage
  * @param {string} dir: directory name to save at
  */
-async function makeStorage (
+export async function makeStorage (
   database: string, dir: string): Promise<Storage> {
   switch (database) {
     case DatabaseType.S3:
@@ -70,15 +84,6 @@ async function makeStorage (
 }
 
 /**
- * Initializes global storage
- */
-export async function initStorage (env: Env) {
-  // set up storage
-  const storage = await makeStorage(env.database, env.data)
-  Session.setStorage(storage)
-}
-
-/**
  * Builds creation form
  * With empty arguments, default is created
  */
@@ -94,62 +99,11 @@ export function makeCreationForm (
 }
 
 /**
- * Reads projects from server's disk
- */
-export function getExistingProjects (): Promise<string[]> {
-  return Session.getStorage().listKeys('', true).then(
-    (files: string[]) => {
-      // process files into project names
-      const names = []
-      for (const f of files) {
-        // remove any xss vulnerability
-        names.push(filterXSS(f))
-      }
-      return names
-    }
-  )
-}
-
-/**
- * Gets name of json file with project data
- */
-export function getProjectKey (projectName: string) {
-  // name/project.json
-  return path.join(projectName, 'project')
-}
-
-/**
- * Gets name of json file with task data
- */
-export function getTaskKey (projectName: string, taskId: string): string {
-  // name/tasks/000001.json
-  return path.join(projectName, 'tasks', taskId)
-}
-
-/**
- * Gets name of submission directory for a given task
- * @param projectName
- * @param task
- */
-export function getSavedKey (projectName: string, taskId: string): string {
-  return path.join(projectName, 'saved', taskId)
-}
-
-/**
  * Converts index into a filename of size 6 with
  * trailing zeroes
  */
 export function index2str (index: number) {
   return index.toString().padStart(6, '0')
-}
-
-/**
- * Checks whether project name is unique
- */
-export function checkProjectName (project: string): Promise<boolean> {
-  // check if project.json exists in the project folder
-  const key = getProjectKey(project)
-  return Session.getStorage().hasKey(key)
 }
 
 /**
@@ -162,7 +116,8 @@ export function formFileExists (file: File | undefined): boolean {
 /**
  * Gets the handler url for the project
  */
-export function getHandlerUrl (itemType: string, labelType: string): string {
+export function getHandlerUrl (
+  itemType: string, labelType: string): string {
   switch (itemType) {
     case ItemTypeName.IMAGE:
       return HandlerUrl.LABEL
@@ -219,52 +174,70 @@ export function getTracking (itemType: string): [string, boolean] {
 }
 
 /**
- * gets all tasks in project sorted by index
- * @param projectName
+ * Chooses the policy type and label types based on item and label types
  */
-export async function getTasksInProject (
-  projectName: string): Promise<TaskType[]> {
-  const storage = Session.getStorage()
-  const taskPromises: Array<Promise<TaskType>> = []
-  const keys = await storage.listKeys(path.join(projectName, 'tasks'), false)
-  // iterate over all keys and load each task asynchronously
-  for (const key of keys) {
-    taskPromises.push(storage.load(key).then((fields) => {
-      return JSON.parse(fields) as TaskType
-    })
-    )
+export function getPolicy (
+  itemType: string, labelTypes: string[],
+  policyTypes: string[], templates2d: {[name: string]: Label2DTemplateType}):
+  [string[], string[]] {
+    // TODO: Move this to be in front end after implementing label selector
+  switch (itemType) {
+    case ItemTypeName.IMAGE:
+    case ItemTypeName.VIDEO:
+      if (labelTypes.length === 1) {
+        switch (labelTypes[0]) {
+          case LabelTypeName.BOX_2D:
+            return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+          case LabelTypeName.POLYGON_2D:
+            return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+          case LabelTypeName.CUSTOM_2D:
+            labelTypes[0] = Object.keys(templates2d)[0]
+            return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+        }
+      }
+      return [policyTypes, labelTypes]
+    case ItemTypeName.POINT_CLOUD:
+    case ItemTypeName.POINT_CLOUD_TRACKING:
+      if (labelTypes.length === 1 &&
+            labelTypes[0] === LabelTypeName.BOX_3D) {
+        return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+      }
+      return [policyTypes, labelTypes]
+    case ItemTypeName.FUSION:
+      return [[TrackPolicyType.LINEAR_INTERPOLATION],
+        [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]]
+    default:
+      return [policyTypes, labelTypes]
   }
-  const tasks = await Promise.all(taskPromises)
-  // sort tasks by index
-  tasks.sort((a: TaskType, b: TaskType) => {
-    return parseInt(a.config.taskId, 10) - parseInt(b.config.taskId, 10)
-  })
-  return tasks
 }
 
 /**
- * Loads the most recent state for the given task. If no such submission throw
- * an error.
- * @param stateKey
+ * Returns [numLabeledItems, numLabels]
+ * numLabeledItems is the number of items with at least 1 label in the task
+ * numLabels is the total number of labels in the task
  */
-export async function loadSavedState (projectName: string, taskId: string):
-  Promise<State> {
-  const storage = Session.getStorage()
-  const keys = await storage.listKeys(getSavedKey(projectName, taskId), false)
-  if (keys.length === 0) {
-    throw new Error('No submissions found for task number ${taskId}')
+export function countLabels (task: TaskType): [number, number] {
+  let numLabeledItems = 0
+  let numLabels = 0
+  for (const item of task.items) {
+    const currNumLabels = Object.keys(item.labels).length
+    if (item.labels && currNumLabels > 0) {
+      numLabeledItems++
+      numLabels += currNumLabels
+    }
   }
-  Logger.info(sprintf('Reading %s\n', keys[keys.length - 1]))
-  const fields = await storage.load(keys[keys.length - 1])
-  return JSON.parse(fields) as State
+  return [numLabeledItems, numLabels]
 }
 
 /**
- * Loads the project
+ * Loads JSON and logs error if invalid
  */
-export async function loadProject (projectName: string) {
-  const key = getProjectKey(projectName)
-  const fields = await Session.getStorage().load(key)
-  const loadedProject = JSON.parse(fields) as Project
-  return loadedProject
+export function safeParseJSON (data: string) {
+  try {
+    const parsed = JSON.parse(data)
+    return parsed
+  } catch (e) {
+    Logger.error(Error('JSON parsed failed'))
+    Logger.error(e)
+  }
 }

@@ -19,7 +19,7 @@ test('Item change with arrow keys', () => {
   if (config) {
     Session.dispatch(addViewerConfig(0, config))
   }
-  const synchronizer = new Synchronizer(0, '', () => { return })
+  const synchronizer = new Synchronizer(0, '', 'fakeId', () => { return })
   render(<Window synchronizer={synchronizer}></Window>)
 
   Session.dispatch(goToItem(0))

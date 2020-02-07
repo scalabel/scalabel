@@ -1,11 +1,13 @@
-import mockfs from 'mock-fs'
+import * as fs from 'fs-extra'
 import { State, TaskType } from '../../js/functional/types'
-import { createProject, createTasks,
-  saveProject, saveTasks } from '../../js/server/create_project'
+import { createProject, createTasks } from '../../js/server/create_project'
 import { convertStateToExport } from '../../js/server/export'
-import Session from '../../js/server/server_session'
-import { CreationForm, FormFileData, Project } from '../../js/server/types'
-import { getProjectKey, getTaskKey, initStorage } from '../../js/server/util'
+import { FileStorage } from '../../js/server/file_storage'
+import { getTestDir } from '../../js/server/path'
+import { ProjectStore } from '../../js/server/project_store'
+import {
+  CreationForm, FormFileData, Project
+} from '../../js/server/types'
 import {
   sampleFormFileData,
   sampleFormImage,
@@ -18,19 +20,21 @@ import {
   sampleTasksVideo,
   sampleVideoFormFileData
 } from '../test_creation_objects'
-import { sampleStateExportImage, sampleStateExportImagePolygon } from '../test_export_objects'
+import {
+  sampleStateExportImage, sampleStateExportImagePolygon
+} from '../test_export_objects'
 
-beforeAll(async () => {
-  // mock the file system for saving/loading
-  mockfs({
-    'data/': {}
-  })
+let projectStore: ProjectStore
+let dataDir: string
 
-  // init global env to default
-  const defaultEnv = {}
-  Session.setEnv(defaultEnv)
-  // init global storage
-  await initStorage(Session.getEnv())
+beforeAll(() => {
+  dataDir = getTestDir('create-project-data')
+  const storage = new FileStorage(dataDir)
+  projectStore = new ProjectStore(storage)
+})
+
+afterAll(() => {
+  fs.removeSync(dataDir)
 })
 
 // TODO- test that form is loaded correctly
@@ -115,14 +119,12 @@ async function testProjectCreation (
  * Tests that project is saved correctly
  */
 async function testProjectSaving (sampleProject: Project): Promise<void> {
-  await saveProject(sampleProject)
+  await projectStore.saveProject(sampleProject)
 
-  // check that it saved by loading it
-  const key = getProjectKey(sampleProject.config.projectName)
-  const loadedProjectData = await Session.getStorage().load(key)
+  // check that it saved correctly by loading it and comparing
+  const loadedProject = await projectStore.loadProject(
+    sampleProject.config.projectName)
 
-  // make sure what's loaded is what was saved
-  const loadedProject = JSON.parse(loadedProjectData)
   expect(loadedProject).toEqual(sampleProject)
 }
 
@@ -130,18 +132,13 @@ async function testProjectSaving (sampleProject: Project): Promise<void> {
  * Tests that task is saved correctly
  */
 async function testTaskSaving (sampleTasks: TaskType[]): Promise<void> {
-  await saveTasks(sampleTasks)
+  await projectStore.saveTasks(sampleTasks)
 
-  // check that tasks saved by loading them
+  // check that tasks saved correctly by loading them and comparing
   for (const task of sampleTasks) {
-    const key = getTaskKey(task.config.projectName, task.config.taskId)
-    const loadedTaskData = await Session.getStorage().load(key)
-    // make sure what's loaded is what was saved
-    const loadedTask = JSON.parse(loadedTaskData)
+    const projectName = task.config.projectName
+    const taskId = task.config.taskId
+    const loadedTask = await projectStore.loadTask(projectName, taskId)
     expect(loadedTask).toEqual(task)
   }
 }
-
-afterAll(() => {
-  mockfs.restore()
-})

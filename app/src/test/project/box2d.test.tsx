@@ -37,12 +37,18 @@ let redisProc: child.ChildProcessWithoutNullStreams
 beforeAll(async () => {
   Session.devMode = false
   Session.testMode = true
+
+  // Avoid default port 6379 and port 6378 used in redis store test
+  const redisPort = 6377
+  redisProc = child.spawn('redis-server',
+    ['--appendonly', 'no', '--save', '', '--port', redisPort.toString()])
+
+  // port is lso changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
     './app/config/test_config.yml'
   ])
-  redisProc = child.spawn('redis-server', ['--appendonly', 'no', '--save', ''])
 
   // launchProc.stdout.on('data', (data) => {
   //   process.stdout.write(data)
@@ -56,13 +62,13 @@ beforeAll(async () => {
   }
   // Needed as buffer period for server to launch. The amount of time needed
   // is inconsistent so this is on the convservative side.
-  await sleep(2000)
+  await sleep(1500)
 })
 beforeEach(() => {
   cleanup()
 })
 afterEach(cleanup)
-afterAll(() => {
+afterAll(async () => {
   launchProc.kill()
   redisProc.kill()
   deleteTestDir()

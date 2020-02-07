@@ -1,4 +1,5 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
+import * as Fingerprint2 from 'fingerprintjs2'
 import _ from 'lodash'
 import React from 'react'
 import ReactDOM from 'react-dom'
@@ -29,14 +30,23 @@ export function initSession (containerName: string): void {
   const projectName = searchParams.get('project_name') as string
   setListeners()
 
-  const synchronizer = new Synchronizer(
-    taskIndex,
-    projectName,
-    (state: State) => {
-      initFromJson(state, synchronizer.middleware)
-      renderDom(containerName, synchronizer)
-    }
-  )
+  setTimeout(() => {
+    Fingerprint2.get((components) => {
+      const values =
+        components.map((component) => component.value)
+      const murmur = Fingerprint2.x64hash128(values.join(''), 31)
+
+      const synchronizer = new Synchronizer(
+        taskIndex,
+        projectName,
+        murmur,
+        (state: State) => {
+          initFromJson(state, synchronizer.middleware)
+          renderDom(containerName, synchronizer)
+        }
+      )
+    })
+  }, 500)
 }
 
 /**

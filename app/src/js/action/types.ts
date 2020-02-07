@@ -55,6 +55,8 @@ export interface BaseAction {
   timestamp?: number
   /** whether to sync action, or just apply to frontend */
   frontendOnly?: boolean
+  /** id of the user that initiates the action */
+  userId?: string
 }
 
 export type InitSessionAction = BaseAction

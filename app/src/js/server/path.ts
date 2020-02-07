@@ -6,7 +6,7 @@ import { sprintf } from 'sprintf-js'
  * Converts task id to name of the room for that id
  * If sync is off, room is separated by sessionId
  */
-export function roomName (
+export function getRoomName (
   projectName: string, taskId: string,
   sync: boolean, sessionId = ''): string {
   if (sync) {
@@ -27,8 +27,29 @@ export function getNow (): string {
 /**
  * Creates path for a timestamped file
  */
-export function getFileKey (filePath: string) {
+export function getFileKey (filePath: string): string {
   return sprintf('%s/%s', filePath, getNow())
+}
+
+/**
+ * Creates a temporary directory for tests
+ */
+export function getTestDir (testName: string): string {
+  return sprintf('%s-%s', testName, getNow())
+}
+
+/**
+ * Gets path for user data
+ */
+export function getUserKey (project: string): string {
+  return sprintf('%s/userData', project)
+}
+
+/**
+ * Gets path for meta data on user
+ */
+export function getMetaKey (): string {
+  return 'metaData'
 }
 
 /* path to html file directories, relative to js
@@ -56,20 +77,50 @@ export function getExportName (projectName: string): string {
  * Get redis key for associated metadata
  * this means data that doesn't get written back to storage
  */
-export function redisMetaKey (key: string) {
+export function getRedisMetaKey (key: string) {
   return sprintf('%s^meta', key)
 }
 
 /**
  * Get redis key for reminder metadata
  */
-export function redisReminderKey (key: string) {
+export function getRedisReminderKey (key: string) {
   return sprintf('%s^reminder', key)
 }
 
 /**
- * Get redis base key from a metadata key
+ * Convert redis metadata or reminder key to redis base key
  */
-export function redisBaseKey (metadataKey: string) {
+export function getRedisBaseKey (metadataKey: string) {
   return metadataKey.split('^')[0]
+}
+
+/**
+ * Gets key of file with project data
+ */
+export function getProjectKey (projectName: string) {
+  return path.join(projectName, 'project')
+}
+
+/**
+ * Gets key of file with task data
+ */
+export function getTaskKey (projectName: string, taskId: string): string {
+  return path.join(getTaskDir(projectName), taskId)
+}
+
+/**
+ * Gets directory with task data for project
+ */
+export function getTaskDir (projectName: string): string {
+  return path.join(projectName, 'tasks')
+}
+
+/**
+ * Gets name of submission directory for a given task
+ * @param projectName
+ * @param task
+ */
+export function getSaveDir (projectName: string, taskId: string): string {
+  return path.join(projectName, 'saved', taskId)
 }

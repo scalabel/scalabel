@@ -1,14 +1,15 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
 import Logger from './logger'
-import { getFileKey, redisBaseKey, redisMetaKey, redisReminderKey } from './path'
-import Session from './server_session'
+import * as path from './path'
+import { Storage } from './storage'
+import { Env, StateMetadata } from './types'
 
 /**
- * Wraps and promisifies redis functionality for caching
+ * Wraps and promisifies redis functionality
  */
-export class RedisCache {
-  /** the redis client for caching */
+export class RedisStore {
+  /** the redis client */
   protected client: redis.RedisClient
   /** the redis client for subscribing */
   protected sub: redis.RedisClient
@@ -18,13 +19,18 @@ export class RedisCache {
   protected timeForWrite: number
   /** writes back to storage after this number of actions for a task */
   protected numActionsForWrite: number
+  /** storage to write back to */
+  protected storage: Storage
 
   /**
-   * Create new cache
+   * Create new store
    */
-  constructor (port = 6379) {
-    const env = Session.getEnv()
-    this.client = redis.createClient(port)
+  constructor (env: Env, storage: Storage) {
+    this.timeout = env.redisTimeout
+    this.timeForWrite = env.timeForWrite
+    this.numActionsForWrite = env.numActionsForWrite
+    this.storage = storage
+    this.client = redis.createClient(env.redisPort)
     this.client.on('error', (err: Error) => {
       Logger.error(err)
     })
@@ -32,24 +38,31 @@ export class RedisCache {
       this.client.config('SET', 'notify-keyspace-events', 'Ex')
     })
 
-    this.sub = redis.createClient(port)
+    this.sub = redis.createClient(env.redisPort)
+    this.sub.on('error', (err: Error) => {
+      Logger.error(err)
+    })
     // subscribe to reminder expirations for saving
     this.sub.subscribe('__keyevent@0__:expired')
-    this.sub.on('message', async (_channel: string, message: string) => {
-      const key = redisBaseKey(message)
-      const metadata = await this.get(redisMetaKey(key))
-      const saveKey = metadata[0]
+    this.sub.on('message', async (_channel: string, reminderKey: string) => {
+      const baseKey = path.getRedisBaseKey(reminderKey)
+      const metaKey = path.getRedisMetaKey(baseKey)
+      const metadata: StateMetadata = JSON.parse(await this.get(metaKey))
+      const saveDir = path.getSaveDir(metadata.projectName, metadata.taskId)
 
-      const value = await this.get(key)
-      const fileKey = getFileKey(saveKey)
-      await Session.getStorage().save(fileKey, value)
-      await this.del(key)
+      const value = await this.get(baseKey)
+      await this.writeBackTask(saveDir, value)
+      await this.del(baseKey)
     })
+  }
 
-    // convert from seconds to ms
-    this.timeout = env.redisTimeout * 1000
-    this.timeForWrite = env.timeForWrite * 1000
-    this.numActionsForWrite = env.numActionsForWrite
+  /**
+   * Writes back task submission to storage
+   * Task key in redis is the directory, so add a date before writing
+   */
+  public async writeBackTask (saveDir: string, value: string) {
+    const fileKey = path.getFileKey(saveDir)
+    await this.storage.save(fileKey, value)
   }
 
   /**
@@ -57,35 +70,32 @@ export class RedisCache {
    * And a reminder value with shorter timeout for saving to disk
    */
   public async setExWithReminder (
-    saveKey: string, value: string, metadata: string) {
-    const allMetadata = JSON.stringify([saveKey, metadata])
-
+    saveDir: string, value: string, metadata: string) {
     // Update value and metadata atomically
-    const keys = [saveKey, redisMetaKey(saveKey)]
-    const vals = [value, allMetadata]
+    const keys = [saveDir, path.getRedisMetaKey(saveDir)]
+    const vals = [value, metadata]
     await this.setAtomic(keys, vals, this.timeout)
 
     // Handle write back to storage
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
-      const fileKey = getFileKey(saveKey)
-      await Session.getStorage().save(fileKey, value)
+      await this.writeBackTask(saveDir, value)
+      return
+    }
+
+    const reminderKey = path.getRedisReminderKey(saveDir)
+    const numActions = parseInt(await this.get(reminderKey), 10)
+    if (!numActions) {
+      // new reminder, 1st action
+      await this.setEx(reminderKey, '1', this.timeForWrite)
+    } else if (numActions + 1 >= this.numActionsForWrite) {
+      // write condition: num actions exceeded limit
+      await this.writeBackTask(saveDir, value)
+      await this.del(reminderKey)
     } else {
-      const reminderKey = redisReminderKey(saveKey)
-      const numActions = parseInt(await this.get(reminderKey), 10)
-      if (!numActions) {
-        // new reminder, 1st action
-        await this.setEx(reminderKey, '1', this.timeForWrite)
-      } else if (numActions + 1 >= this.numActionsForWrite) {
-        // write condition: num actions exceeded limit
-        const fileKey = getFileKey(saveKey)
-        await Session.getStorage().save(fileKey, value)
-        await this.del(reminderKey)
-      } else {
-        // otherwise just update the action counter
-        const newActions = (numActions + 1).toString()
-        await this.setEx(reminderKey, newActions, this.timeForWrite)
-      }
+      // otherwise just update the action counter
+      const newActions = (numActions + 1).toString()
+      await this.setEx(reminderKey, newActions, this.timeForWrite)
     }
   }
 
