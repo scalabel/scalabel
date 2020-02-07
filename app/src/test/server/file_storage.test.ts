@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
-import { getProjectKey, getTaskKey } from '../../js/server/path'
+import { getProjectKey, getTaskKey, getTestDir } from '../../js/server/path'
 import { index2str } from '../../js/server/util'
 import { makeProjectDir } from '../util'
 
@@ -11,7 +11,7 @@ let dataDir: string
 
 beforeAll(() => {
   projectName = 'myProject'
-  dataDir = 'test-fs-data'
+  dataDir = getTestDir('test-fs-data')
   makeProjectDir(dataDir, projectName)
   storage = new FileStorage(dataDir)
 })

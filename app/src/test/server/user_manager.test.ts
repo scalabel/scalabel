@@ -3,6 +3,7 @@ import _ from 'lodash'
 import mockfs from 'mock-fs'
 import uuid4 from 'uuid/v4'
 import { FileStorage } from '../../js/server/file_storage'
+import { getTestDir } from '../../js/server/path'
 import { UserManager } from '../../js/server/user_manager'
 import { makeProjectDir } from '../util'
 
@@ -12,7 +13,7 @@ let dataDir: string
 
 beforeAll(() => {
   projectName = 'myProject'
-  dataDir = 'test-user-data'
+  dataDir = getTestDir('test-user-data')
   makeProjectDir(dataDir, projectName)
   const storage = new FileStorage(dataDir)
   userManager = new UserManager(storage)

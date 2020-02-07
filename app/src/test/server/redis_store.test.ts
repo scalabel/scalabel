@@ -3,6 +3,7 @@ import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
+import { getTestDir } from '../../js/server/path'
 import { RedisStore } from '../../js/server/redis_store'
 import { defaultEnv, Env } from '../../js/server/types'
 import { sleep } from '../project/util'
@@ -11,6 +12,7 @@ let redisProc: child.ChildProcessWithoutNullStreams
 
 let defaultStore: RedisStore
 let storage: FileStorage
+let dataDir: string
 let env: Env
 
 beforeAll(async () => {
@@ -22,16 +24,15 @@ beforeAll(async () => {
     ['--appendonly', 'no', '--save', '', '--port', env.redisPort.toString()])
 
   // Buffer period for redis to launch
-  await sleep(1500)
-  storage = new FileStorage('test-data-redis')
+  await sleep(1000)
+  dataDir = getTestDir('test-data-redis')
+  storage = new FileStorage(dataDir)
   defaultStore = new RedisStore(env, storage)
 })
 
 afterAll(async () => {
   redisProc.kill()
-  fs.removeSync('test-data-redis')
-  // Buffer period or cleanup
-  await sleep(500)
+  fs.removeSync(dataDir)
 })
 
 describe('Test redis cache', () => {

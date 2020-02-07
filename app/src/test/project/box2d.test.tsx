@@ -62,7 +62,7 @@ beforeAll(async () => {
   }
   // Needed as buffer period for server to launch. The amount of time needed
   // is inconsistent so this is on the convservative side.
-  await sleep(2000)
+  await sleep(1500)
 })
 beforeEach(() => {
   cleanup()
@@ -72,8 +72,6 @@ afterAll(async () => {
   launchProc.kill()
   redisProc.kill()
   deleteTestDir()
-  // Buffer period for cleanup
-  await sleep(500)
 })
 
 describe('full 2d bounding box integration test', () => {

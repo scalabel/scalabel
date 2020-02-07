@@ -3,6 +3,7 @@ import { State, TaskType } from '../../js/functional/types'
 import { createProject, createTasks } from '../../js/server/create_project'
 import { convertStateToExport } from '../../js/server/export'
 import { FileStorage } from '../../js/server/file_storage'
+import { getTestDir } from '../../js/server/path'
 import { ProjectStore } from '../../js/server/project_store'
 import {
   CreationForm, FormFileData, Project
@@ -27,7 +28,7 @@ let projectStore: ProjectStore
 let dataDir: string
 
 beforeAll(() => {
-  dataDir = 'create-project-data'
+  dataDir = getTestDir('create-project-data')
   const storage = new FileStorage(dataDir)
   projectStore = new ProjectStore(storage)
 })

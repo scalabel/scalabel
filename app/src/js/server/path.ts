@@ -32,6 +32,13 @@ export function getFileKey (filePath: string): string {
 }
 
 /**
+ * Creates a temporary directory for tests
+ */
+export function getTestDir (testName: string): string {
+  return sprintf('%s-%s', testName, getNow())
+}
+
+/**
  * Gets path for user data
  */
 export function getUserKey (project: string): string {
