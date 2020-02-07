@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { linkLabels, unlinkLabels } from '../../action/common'
+import { changeLabelsProps, linkLabels, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
 import { Key } from '../../common/types'
