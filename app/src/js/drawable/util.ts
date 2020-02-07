@@ -94,7 +94,7 @@ export type Context2D = CanvasRenderingContext2D
  * @return {[number, number]}
  */
 export function decodeControlIndex (index: number): number[] {
-  return [((index >> 12) & 1023) - 2, index & 1023]
+  return [((index >> 12) & 1023) - 2, (index & 1023) - 1]
 }
 
 /**
@@ -107,7 +107,7 @@ export function decodeControlIndex (index: number): number[] {
  */
 export function encodeControlColor (
   labelId: number, handleId: number): number[] {
-  const index = ((labelId + 2) << 12) | handleId
+  const index = ((labelId + 2) << 12) | (handleId + 1)
   return [(index >> 16) & 255, (index >> 8) & 255, (index & 255)]
 }
 

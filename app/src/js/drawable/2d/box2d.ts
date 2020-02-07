@@ -16,7 +16,7 @@ const DEFAULT_CONTROL_RECT_STYLE = makeRect2DStyle({ lineWidth: 10 })
 const DEFAULT_CONTROL_POINT_STYLE = makePoint2DStyle({ radius: 12 })
 const MIN_AREA = 10
 
-enum Handles {
+export enum Handles {
   TOP_LEFT = 0,
   TOP_MIDDLE = 1,
   TOP_RIGHT = 2,
@@ -103,7 +103,7 @@ export class Box2D extends Label2D {
 
     // Draw!!!
     const rect = Object.values(self._shapes)[0] as Rect2D
-    rectStyle.color = assignColor(this._points.length)
+    rectStyle.color = assignColor(-1)
     rect.draw(context, ratio, rectStyle)
     if (mode === DrawMode.VIEW) {
       self.drawTag(context, ratio, [rect.x, rect.y], self._color)

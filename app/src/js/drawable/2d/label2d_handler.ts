@@ -30,6 +30,8 @@ export class Label2DHandler {
   private _mouseCoord: Vector2D
   /** Set if mouse is down */
   private _mouseDown: boolean
+  /** Handle of selected label */
+  private _selectedHandle: number
 
   constructor () {
     this._state = Session.getState()
@@ -38,6 +40,7 @@ export class Label2DHandler {
     this._mouseMoved = false
     this._mouseCoord = new Vector2D()
     this._mouseDown = false
+    this._selectedHandle = -1
   }
 
   /**
@@ -129,16 +132,26 @@ export class Label2DHandler {
       delta.dot(delta) > MOUSE_MOVE_THRESHOLD * MOUSE_MOVE_THRESHOLD
     ) {
       this._mouseMoved = true
-      for (const label of Session.label2dList.selectedLabels) {
-        const consumed = label.drag(delta, canvasLimit)
+      if (this._selectedHandle >= 0 && Session.label2dList.highlightedLabel) {
+        const consumed =
+          Session.label2dList.highlightedLabel.drag(delta, canvasLimit)
         if (consumed) {
-          label.editing = true
+          Session.label2dList.highlightedLabel.editing = true
+          Session.label2dList.highlightedLabel.setManual()
         }
-        label.setManual()
+      } else {
+        for (const label of Session.label2dList.selectedLabels) {
+          const consumed = label.drag(delta, canvasLimit)
+          if (consumed) {
+            label.editing = true
+            label.setManual()
+          }
+        }
       }
       this._mouseCoord.set(coord.x, coord.y)
       return true
     } else if (!this._mouseDown) {
+      this._selectedHandle = -1
       if (Session.label2dList.highlightedLabel) {
         Session.label2dList.highlightedLabel.setHighlighted(false)
         Session.label2dList.highlightedLabel =
@@ -148,6 +161,9 @@ export class Label2DHandler {
         Session.label2dList.highlightedLabel =
           Session.label2dList.labelList[labelIndex]
         Session.label2dList.highlightedLabel.setHighlighted(true, handleIndex)
+        if (Session.label2dList.highlightedLabel.selected) {
+          this._selectedHandle = handleIndex
+        }
       }
     }
     return false

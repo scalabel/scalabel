@@ -90,6 +90,7 @@ export class CustomLabel2D extends Label2D {
         assignColor = (i: number): number[] => {
           // vertex
           if (
+            i >= 0 &&
             i < this._nodes.length &&
             this._nodes[i].name in this._colorMap
           ) {
@@ -111,7 +112,7 @@ export class CustomLabel2D extends Label2D {
 
     // Draw bounding box if selected
     if (this._selected) {
-      rectStyle.color = assignColor(this._nodes.length + this._corners.length)
+      rectStyle.color = assignColor(-1)
       this._bounds.draw(context, ratio, rectStyle)
 
       for (let i = 0; i < this._corners.length; i++) {
@@ -133,9 +134,7 @@ export class CustomLabel2D extends Label2D {
       }
 
       context.save()
-      context.strokeStyle = toCssColor(assignColor(
-        this._nodes.length + this._corners.length
-      ))
+      context.strokeStyle = toCssColor(assignColor(-1))
       context.lineWidth = lineWidth
       context.beginPath()
       context.moveTo(

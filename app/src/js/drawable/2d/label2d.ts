@@ -149,9 +149,6 @@ export abstract class Label2D {
 
   /** highlight the label */
   public setHighlighted (h: boolean, handleIndex: number = -1) {
-    if (h && handleIndex < 0) {
-      throw Error('need to highlight handle as well')
-    }
     this._highlighted = h
     this._highlightedHandle = handleIndex
   }

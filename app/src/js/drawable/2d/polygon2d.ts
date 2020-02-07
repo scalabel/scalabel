@@ -117,7 +117,7 @@ export class Polygon2D extends Label2D {
     }
 
     // draw line first
-    edgeStyle.color = assignColor(this._points.length)
+    edgeStyle.color = assignColor(-1)
     context.save()
     context.strokeStyle = toCssColor(edgeStyle.color)
     context.lineWidth = edgeStyle.lineWidth
