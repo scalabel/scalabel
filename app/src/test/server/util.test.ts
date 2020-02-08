@@ -1,22 +1,8 @@
-import mockfs from 'mock-fs'
 import { BundleFile, HandlerUrl,
   ItemTypeName, LabelTypeName } from '../../js/common/types'
-import Session from '../../js/server/server_session'
+import { getProjectKey, getSaveDir, getTaskKey } from '../../js/server/path'
 import * as util from '../../js/server/util'
 import { sampleFormEmpty, sampleFormImage } from '../test_creation_objects'
-
-beforeAll(async () => {
-  // mock the file system for testing storage
-  mockfs({
-    'data/': {}
-  })
-
-  // init global env to default
-  const defaultEnv = {}
-  Session.setEnv(defaultEnv)
-  // init global storage
-  await util.initStorage(Session.getEnv())
-})
 
 describe('test general utility methods', () => {
   test('make empty creation form', () => {
@@ -34,13 +20,13 @@ describe('test general utility methods', () => {
 
   test('file keys', () => {
     const projectName = 'testProject'
-    const projectKey = util.getProjectKey(projectName)
-    const taskKey = util.getTaskKey(projectName, '000000')
-    const savedKey = util.getSavedKey(projectName, '000000')
+    const projectKey = getProjectKey(projectName)
+    const taskKey = getTaskKey(projectName, '000000')
+    const saveDir = getSaveDir(projectName, '000000')
 
     expect(projectKey).toBe('testProject/project')
     expect(taskKey).toBe('testProject/tasks/000000')
-    expect(savedKey).toBe('testProject/saved/000000')
+    expect(saveDir).toBe('testProject/saved/000000')
   })
 
   test('index2str', () => {
@@ -129,12 +115,4 @@ describe('test general utility methods', () => {
     expect(itemType4).toBe(ItemTypeName.POINT_CLOUD)
     expect(tracking4).toBe(false)
   })
-})
-
-// TODO- test utility methods that use storage
-// describe('test utility methods that use storage', () => {
-// })
-
-afterAll(() => {
-  mockfs.restore()
 })

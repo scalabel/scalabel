@@ -4,6 +4,8 @@ python:
   - "3.7"
 node_js:
   - 12.11.1
+services:
+  - redis-server
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y npm python3-pip python3-setuptools build-essential libcairo2-dev
@@ -21,6 +23,8 @@ script:
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
   - python3 scripts/lll.py -d server
   - npm test
+services:
+  - redis-server
 branches:
   only:
     - master
