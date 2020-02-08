@@ -7,15 +7,14 @@ node_js:
 services:
   - redis-server
 before_install:
-  - sudo add-apt-repository -y ppa:deadsnakes/ppa
   - sudo apt-get update
   - sudo apt-get install -y npm build-essential libcairo2-dev
-    libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev python3.8
+    libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
     python3-pip python3-setuptools
   - npm install -g npm@latest
 install:
-  - sudo python3.8 -m pip install --upgrade pip
-  - sudo python3.8 -m pip install -r scripts/requirements.txt
+  - sudo python3 -m pip install --upgrade pip
+  - sudo python3 -m pip install -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
