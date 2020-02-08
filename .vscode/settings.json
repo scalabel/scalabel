@@ -79,6 +79,5 @@
     },
     "files.watcherExclude": {
         "node_modules": true
-    },
-    "python.pythonPath": "/Users/fy/.pyenv/versions/3.8.1/bin/python"
+    }
 }
