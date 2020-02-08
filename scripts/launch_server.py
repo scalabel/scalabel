@@ -15,6 +15,8 @@ def main() -> None:
     with open(args.config, 'r') as fp:
         config = yaml.load(fp, Loader=yaml.FullLoader)
 
+    if 'redisPort' not in config:
+        config['redisPort'] = 6379
     subprocess.Popen(
         ['redis-server', '--port', '{}'.format(config['redisPort'])])
     subprocess.call(['node', 'app/dist/js/main.js', '--config', args.config])
