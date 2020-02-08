@@ -12,8 +12,8 @@ before_install:
     libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
   - npm install -g npm@latest
 install:
-  - sudo python3 -m pip3 install --upgrade pip
-  - sudo python3 -m pip3 install -r scripts/requirements.txt
+  - sudo python3.8 -m pip install --upgrade pip
+  - sudo python3.8 -m pip install -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
@@ -21,7 +21,6 @@ script:
   - node_modules/.bin/eslint .
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
-  - python3 scripts/lll.py -d server
   - npm test
 services:
   - redis-server
