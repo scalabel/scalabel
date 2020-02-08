@@ -91,7 +91,7 @@ More installation and usage details can be find in our [documentation](http://ww
    python scripts/launch_server.py --config ./data/config.yml
    ```
 
-   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project.
+   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/.
 
 5. Get labels
 
