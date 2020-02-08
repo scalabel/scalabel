@@ -5,7 +5,7 @@ import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
 import { getTestDir } from '../../js/server/path'
 import { RedisStore } from '../../js/server/redis_store'
-import { defaultEnv, Env } from '../../js/server/types'
+import { defaultEnv, Env, StateMetadata } from '../../js/server/types'
 import { sleep } from '../project/util'
 
 let redisProc: child.ChildProcessWithoutNullStreams
@@ -14,6 +14,7 @@ let defaultStore: RedisStore
 let storage: FileStorage
 let dataDir: string
 let env: Env
+let metadataString: string
 
 beforeAll(async () => {
   // Avoid default port 6379 and port 6377 used in box2d integration test
@@ -28,6 +29,12 @@ beforeAll(async () => {
   dataDir = getTestDir('test-data-redis')
   storage = new FileStorage(dataDir)
   defaultStore = new RedisStore(env, storage)
+  const metadata: StateMetadata = {
+    projectName: 'project',
+    taskId: '000001',
+    actionIds: []
+  }
+  metadataString = JSON.stringify(metadata)
 })
 
 afterAll(async () => {
@@ -62,7 +69,7 @@ describe('Test redis cache', () => {
     const store = new RedisStore(timeoutEnv, storage)
 
     const key = 'testKey1'
-    await store.setExWithReminder(key, 'testvalue')
+    await store.setExWithReminder(key, 'testvalue', metadataString)
 
     const savedKeys = await storage.listKeys('')
     expect(savedKeys.length).toBe(0)
@@ -79,11 +86,11 @@ describe('Test redis cache', () => {
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {
-      await store.setExWithReminder(key, sprintf('value%s', i))
+      await store.setExWithReminder(key, sprintf('value%s', i), metadataString)
       const savedKeys = await storage.listKeys('')
       expect(savedKeys.length).toBe(1)
     }
-    await store.setExWithReminder(key, 'value4')
+    await store.setExWithReminder(key, 'value4', metadataString)
     const savedKeysFinal = await storage.listKeys('')
     expect(savedKeysFinal.length).toBe(2)
   })

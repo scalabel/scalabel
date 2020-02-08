@@ -127,6 +127,7 @@
         "rxjs": "^6.5.3",
         "socket.io": "^2.3.0",
         "source-map-loader": "^0.2.4",
+        "source-map-support": "^0.5.16",
         "sprintf-js": "^1.1.1",
         "terser": "3.14.1",
         "three": "^0.110.0",

@@ -139,7 +139,7 @@ export class ProjectStore {
    * Saves the project
    */
   public async saveProject (project: Project) {
-    const key = path . getProjectKey(project.config.projectName)
+    const key = path.getProjectKey(project.config.projectName)
     const data = JSON.stringify(project, null, 2)
     await this.save(key, data)
   }
