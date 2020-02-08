@@ -1,7 +1,7 @@
 dist: xenial
 language: node_js
 python:
-  - "3.7"
+  - "3.8"
 node_js:
   - 12.11.1
 services:
@@ -23,8 +23,6 @@ script:
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
   - python3 scripts/lll.py -d server
   - npm test
-services:
-  - redis-server
 branches:
   only:
     - master
