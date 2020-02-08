@@ -13,7 +13,7 @@ before_install:
   - npm install -g npm@latest
 install:
   - sudo pip3 install --upgrade pip
-  - sudo pip3 install -r scripts/requirements.txt
+  - sudo pip3 install --ignore-installed -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
