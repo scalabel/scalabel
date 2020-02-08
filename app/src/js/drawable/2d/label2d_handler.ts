@@ -173,68 +173,32 @@ export class Label2DHandler {
         this.unlinkLabels()
         break
       case Key.ARROW_UP:
+        // Only change order when one label is selected
         if (Session.label2dList.selectedLabels.length === 1) {
           const label = Session.label2dList.selectedLabels[0]
-          const nextIndex = label.index + 1
-          if (nextIndex < Session.label2dList.labelList.length) {
-            const nextLabel = Session.label2dList.get(nextIndex)
-            Session.dispatch(changeLabelsProps(
-              [this._selectedItemIndex],
-              [[label.labelId, nextLabel.labelId]],
-              [[{ order: nextLabel.order }, { order: label.order } ]]
-            ))
-          }
+          this.swapOrders(label.index, label.index + 1)
         }
         break
       case Key.ARROW_DOWN:
         if (Session.label2dList.selectedLabels.length === 1) {
           const label = Session.label2dList.selectedLabels[0]
-          const previousIndex = label.index - 1
-          if (previousIndex >= 0) {
-            const previousLabel = Session.label2dList.get(previousIndex)
-            Session.dispatch(changeLabelsProps(
-              [this._selectedItemIndex],
-              [[label.labelId, previousLabel.labelId]],
-              [[{ order: previousLabel.order }, { order: label.order } ]]
-            ))
-          }
+          this.swapOrders(label.index, label.index - 1)
         }
         break
       case Key.B_LOW:
       case Key.B_UP:
         if (Session.label2dList.selectedLabels.length === 1) {
           const selectedLabel = Session.label2dList.selectedLabels[0]
-          const labels = Session.label2dList.labelList
-          const labelIds = [selectedLabel.labelId]
-          const updatedProps = [{ order: labels[0].order }]
-          for (let i = 0; i < selectedLabel.index; i++) {
-            labelIds.push(labels[i].labelId)
-            updatedProps.push({ order: labels[i + 1].order })
-          }
-          Session.dispatch(changeLabelsProps(
-            [this._selectedItemIndex],
-            [labelIds],
-            [updatedProps]
-          ))
+          this.changeLabelOrder(selectedLabel.index, 0)
         }
         break
       case Key.F_LOW:
       case Key.F_UP:
         if (Session.label2dList.selectedLabels.length === 1) {
-          e.preventDefault()
           const selectedLabel = Session.label2dList.selectedLabels[0]
-          const labels = Session.label2dList.labelList
-          const labelIds = [selectedLabel.labelId]
-          const updatedProps = [{ order: labels[labels.length - 1].order }]
-          for (let i = labels.length - 1; i > selectedLabel.index; i--) {
-            labelIds.push(labels[i].labelId)
-            updatedProps.push({ order: labels[i - 1].order })
-          }
-          Session.dispatch(changeLabelsProps(
-            [this._selectedItemIndex],
-            [labelIds],
-            [updatedProps]
-          ))
+          this.changeLabelOrder(
+            selectedLabel.index, Session.label2dList.labelList.length - 1
+          )
         }
         break
     }
@@ -334,5 +298,55 @@ export class Label2DHandler {
     Session.dispatch(unlinkLabels(
       this._state.user.select.item, selectedLabelIdArray
     ))
+  }
+
+  /** swap label orders, given label indices */
+  private swapOrders (index1: number, index2: number) {
+    // Check that indices are valid
+    if (
+      index1 >= 0 &&
+      index2 >= 0 &&
+      index1 < Session.label2dList.labelList.length &&
+      index2 < Session.label2dList.labelList.length
+    ) {
+      const label1 = Session.label2dList.get(index1)
+      const label2 = Session.label2dList.get(index2)
+      Session.dispatch(changeLabelsProps(
+        [this._selectedItemIndex],
+        [[label1.labelId, label2.labelId]],
+        [[{ order: label2.order }, { order: label1.order } ]]
+      ))
+    }
+  }
+
+  /** move label to nth position */
+  private changeLabelOrder (index: number, newPosition: number) {
+    const labels = Session.label2dList.labelList
+    if (
+      index >= 0 &&
+      index < labels.length &&
+      newPosition >= 0 &&
+      newPosition < labels.length &&
+      index !== newPosition
+    ) {
+      const start = Math.min(index, newPosition)
+      const end = Math.max(index, newPosition)
+      const labelIds: number[] = []
+      const props = []
+      for (let i = start; i <= end; i++) {
+        labelIds.push(labels[i].labelId)
+        props.push({ order: labels[i].order })
+      }
+      if (index < newPosition) {
+        labelIds.push(labelIds.shift() as number)
+      } else {
+        labelIds.unshift(labelIds.pop() as number)
+      }
+      Session.dispatch(changeLabelsProps(
+        [this._selectedItemIndex],
+        [labelIds],
+        [props]
+      ))
+    }
   }
 }
