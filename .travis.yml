@@ -1,19 +1,19 @@
 dist: xenial
 language: node_js
 python:
-  - "3.7"
+  - "3.8"
 node_js:
   - 12.11.1
 services:
   - redis-server
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y npm python3-pip python3-setuptools build-essential libcairo2-dev
+  - sudo apt-get install -y npm build-essential libcairo2-dev
     libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
   - npm install -g npm@latest
 install:
-  - sudo pip3 install --upgrade pip
-  - sudo pip3 install -r scripts/requirements.txt
+  - sudo python3 -m pip3 install --upgrade pip
+  - sudo python3 -m pip3 install -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
