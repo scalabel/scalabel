@@ -1,24 +1,24 @@
-import mockfs from 'mock-fs'
+import * as fs from 'fs-extra'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
-import { getProjectKey, getTaskKey, index2str } from '../../js/server/util'
+import { getProjectKey, getTaskKey, getTestDir } from '../../js/server/path'
+import { index2str } from '../../js/server/util'
+import { makeProjectDir } from '../util'
+
+let storage: FileStorage
+let projectName: string
+let dataDir: string
 
 beforeAll(() => {
-  // mock the file system for testing storage
-  mockfs({
-    'data/myProject': {
-      '.config': 'config contents',
-      'project.json': 'project contents',
-      'tasks': {
-        '000000.json': '{"testField": "testValue"}',
-        '000001.json': 'contents 1'
-      }
-    }
-  })
+  projectName = 'myProject'
+  dataDir = getTestDir('test-fs-data')
+  makeProjectDir(dataDir, projectName)
+  storage = new FileStorage(dataDir)
 })
 
-const storage = new FileStorage('data')
-const projectName = 'myProject'
+afterAll(() => {
+  fs.removeSync(dataDir)
+})
 
 describe('test local file storage', () => {
   test('key existence', () => {
@@ -30,8 +30,18 @@ describe('test local file storage', () => {
     ])
   })
 
-  /* TODO: find a way to test listKeys
-   without using mock-fs, since it doesn't support dirEnt */
+  test('list keys', async () => {
+    const keys = await storage.listKeys('myProject/tasks')
+    expect(keys.length).toBe(2)
+    expect(keys).toContain('myProject/tasks/000000')
+    expect(keys).toContain('myProject/tasks/000001')
+  })
+
+  test('list keys dir only', async () => {
+    const keys = await storage.listKeys('myProject', true)
+    expect(keys.length).toBe(1)
+    expect(keys).toContain('myProject/tasks')
+  })
 
   test('load', () => {
     const taskId = index2str(0)
@@ -42,20 +52,19 @@ describe('test local file storage', () => {
     })
   })
 
-  test('save then load', () => {
+  test('save then load', async () => {
     const taskId = index2str(2)
     const key = getTaskKey(projectName, taskId)
     const fakeData = '{"testField": "testValue2"}'
-    return storage.save(key, fakeData).then(() => {
-      return Promise.all([
-        checkTaskKey(2, true),
-        checkTaskKey(3, false),
-        checkLoad(2)
-      ])
-    })
+    await storage.save(key, fakeData)
+    return Promise.all([
+      checkTaskKey(2, true),
+      checkTaskKey(3, false),
+      checkLoad(2)
+    ])
   })
 
-  test('multiple saves multiple loads', () => {
+  test('multiple saves multiple loads', async () => {
     const savePromises = []
     for (let i = 3; i < 7; i++) {
       savePromises.push(checkTaskKey(i, false))
@@ -68,35 +77,34 @@ describe('test local file storage', () => {
     savePromises.push(
       storage.save('fakeFile', `fake content`)
     )
-    return Promise.all(savePromises).then(() => {
-      const loadPromises = []
-      for (let j = 3; j < 7; j++) {
-        loadPromises.push(checkTaskKey(j, true))
-        loadPromises.push(checkLoad(j))
-      }
-      loadPromises.push(
-        storage.load('fakeFile').then((data: string) => {
-          expect(data).toBe(`fake content`)
-        })
-      )
-      return Promise.all(loadPromises)
-    })
+    await Promise.all(savePromises)
+
+    const loadPromises = []
+    for (let j = 3; j < 7; j++) {
+      loadPromises.push(checkTaskKey(j, true))
+      loadPromises.push(checkLoad(j))
+    }
+    loadPromises.push(
+      storage.load('fakeFile').then((data: string) => {
+        expect(data).toBe(`fake content`)
+      })
+    )
+    return Promise.all(loadPromises)
   })
 
-  test('delete', () => {
+  test('delete', async () => {
     const key = 'myProject/tasks'
-    return Promise.all([
+    await Promise.all([
       checkTaskKey(1, true),
       checkTaskKey(0, true)
-    ]).then(() => {
-      return storage.delete(key).then(() => {
-        return Promise.all([
-          checkTaskKey(1, false),
-          checkTaskKey(0, false)
-        ])
-      })
-    })
+    ])
 
+    await storage.delete(key)
+
+    return Promise.all([
+      checkTaskKey(1, false),
+      checkTaskKey(0, false)
+    ])
   })
 
 })
@@ -104,35 +112,27 @@ describe('test local file storage', () => {
 /**
  * tests if task with index exists
  */
-function checkTaskKey (index: number, shouldExist: boolean): Promise<void> {
+async function checkTaskKey (index: number, shouldExist: boolean) {
   const taskId = index2str(index)
   const key = getTaskKey(projectName, taskId)
-  return storage.hasKey(key).then((exists) => {
-    expect(exists).toBe(shouldExist)
-  })
+  const exists = await storage.hasKey(key)
+  expect(exists).toBe(shouldExist)
 }
 
 /**
  * tests if project key exists
  */
-function checkProjectKey (): Promise<void> {
+async function checkProjectKey () {
   const key = getProjectKey(projectName)
-  return storage.hasKey(key).then((exists) => {
-    expect(exists).toBe(true)
-  })
+  const exists = await storage.hasKey(key)
+  expect(exists).toBe(true)
 }
 
 /**
  * tests if load on an index works
  */
-function checkLoad (index: number): Promise<void> {
-  return storage.load(getTaskKey(projectName, index2str(index)))
-  .then((data: string) => {
-    const loadedData = JSON.parse(data)
-    expect(loadedData.testField).toBe(sprintf('testValue%d', index))
-  })
+async function checkLoad (index: number) {
+  const data = await storage.load(getTaskKey(projectName, index2str(index)))
+  const loadedData = JSON.parse(data)
+  expect(loadedData.testField).toBe(sprintf('testValue%d', index))
 }
-
-afterAll(() => {
-  mockfs.restore()
-})

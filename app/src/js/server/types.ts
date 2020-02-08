@@ -38,6 +38,14 @@ export interface Env {
   syncHost: string
   /** whether to save automatically */
   autosave: boolean
+  /** timeout (seconds) for clearing value from redis cache */
+  redisTimeout: number
+  /** write to disk after this time interval (seconds) since last update */
+  timeForWrite: number
+  /** write to disk every time this number of actions occurs */
+  numActionsForWrite: number
+  /** Port that redis runs on */
+  redisPort: number
 }
 
 /**
@@ -95,6 +103,14 @@ export interface SyncActionMessageType {
   sessionId: string
   /** List of actions for synchronization */
   actions: BaseAction[]
+}
+
+/** user data for a project */
+export interface UserData {
+  /** map from socket to user */
+  socketToUser: { [key: string]: string }
+  /** map from user to list of socket */
+  userToSockets: { [key: string]: string[] }
 }
 
 /**
@@ -155,7 +171,11 @@ export const defaultEnv: Env = {
   userManagement: false,
   sync: false,
   syncHost: 'http://localhost',
-  autosave: true
+  autosave: true,
+  redisTimeout: 3600,
+  timeForWrite: 600,
+  numActionsForWrite: 10,
+  redisPort: 6379
 }
 
 /* default categories when file is missing and label is box2D or box3D */

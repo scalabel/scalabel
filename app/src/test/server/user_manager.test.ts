@@ -1,28 +1,26 @@
+import * as fs from 'fs-extra'
 import _ from 'lodash'
 import mockfs from 'mock-fs'
 import uuid4 from 'uuid/v4'
-import Session from '../../js/server/server_session'
-import { Storage } from '../../js/server/storage'
-import { countUsers, deregisterUser, registerUser } from '../../js/server/user'
+import { FileStorage } from '../../js/server/file_storage'
+import { getTestDir } from '../../js/server/path'
+import { UserManager } from '../../js/server/user_manager'
+import { makeProjectDir } from '../util'
 
-let storage: Storage
+let userManager: UserManager
 let projectName: string
+let dataDir: string
 
 beforeAll(() => {
-  // mock the file system for testing storage
-  mockfs({
-    'data/myProject': {
-      '.config': 'config contents',
-      'project.json': 'project contents',
-      'tasks': {
-        '000000.json': '{"testField": "testValue"}',
-        '000001.json': 'contents 1'
-      }
-    }
-  })
-
   projectName = 'myProject'
-  storage = Session.getStorage()
+  dataDir = getTestDir('test-user-data')
+  makeProjectDir(dataDir, projectName)
+  const storage = new FileStorage(dataDir)
+  userManager = new UserManager(storage)
+})
+
+afterAll(() => {
+  fs.removeSync(dataDir)
 })
 
 describe('test user management', () => {
@@ -31,11 +29,11 @@ describe('test user management', () => {
     // note: this is not actually how user id is generated
     const userId = uuid4()
     const socketId = uuid4()
-    expect(await countUsers(projectName, storage)).toBe(0)
-    await registerUser(socketId, projectName, userId, storage)
-    expect(await countUsers(projectName, storage)).toBe(1)
-    await deregisterUser(socketId, storage)
-    expect(await countUsers(projectName, storage)).toBe(0)
+    expect(await userManager.countUsers(projectName)).toBe(0)
+    await userManager.registerUser(socketId, projectName, userId)
+    expect(await userManager.countUsers(projectName)).toBe(1)
+    await userManager.deregisterUser(socketId)
+    expect(await userManager.countUsers(projectName)).toBe(0)
   })
 
   test('user count works for multiple users', async () => {
@@ -48,19 +46,19 @@ describe('test user management', () => {
       for (let userNum = 0; userNum < numUsers; userNum++) {
         const socketId = socketIds[userNum * socketsPerUser + socketNum]
         const userId = userIds[userNum]
-        await registerUser(socketId, projectName, userId, storage)
+        await userManager.registerUser(socketId, projectName, userId)
       }
       // each iteration adds more sockets, but number of users is constant
-      expect(await countUsers(projectName, storage)).toBe(numUsers)
+      expect(await userManager.countUsers(projectName)).toBe(numUsers)
     }
 
     // remove all sockets for each user consecutively
     for (let userNum = 0; userNum < numUsers; userNum++) {
       for (let socketNum = 0; socketNum < socketsPerUser; socketNum++) {
         const socketId = socketIds[userNum * socketsPerUser + socketNum]
-        await deregisterUser(socketId, storage)
+        await userManager.deregisterUser(socketId)
       }
-      const numUsersActual = await countUsers(projectName, storage)
+      const numUsersActual = await userManager.countUsers(projectName)
       expect(numUsersActual).toBe(numUsers - 1 - userNum)
     }
   })
@@ -69,8 +67,8 @@ describe('test user management', () => {
     const projectName2 = 'testProject2'
 
     // make sure other tests clean up worked
-    expect(await countUsers(projectName, storage)).toBe(0)
-    expect(await countUsers(projectName2, storage)).toBe(0)
+    expect(await userManager.countUsers(projectName)).toBe(0)
+    expect(await userManager.countUsers(projectName2)).toBe(0)
 
     const numUsers = 2
     const numProjects = 2
@@ -80,27 +78,27 @@ describe('test user management', () => {
 
     // First put all users on 1st project
     for (let userNum = 0; userNum < numUsers; userNum++) {
-      await registerUser(
-        socketIds[userNum], projectName, userIds[userNum], storage)
+      await userManager.registerUser(
+        socketIds[userNum], projectName, userIds[userNum])
     }
-    expect(await countUsers(projectName, storage)).toBe(numUsers)
-    expect(await countUsers(projectName2, storage)).toBe(0)
+    expect(await userManager.countUsers(projectName)).toBe(numUsers)
+    expect(await userManager.countUsers(projectName2)).toBe(0)
 
     // Then move them to second project
     for (let userNum = 0; userNum < numUsers; userNum++) {
-      await deregisterUser(socketIds[userNum], storage)
-      await registerUser(socketIds[numUsers + userNum],
-        projectName2, userIds[userNum], storage)
+      await userManager.deregisterUser(socketIds[userNum])
+      await userManager.registerUser(socketIds[numUsers + userNum],
+        projectName2, userIds[userNum])
     }
-    expect(await countUsers(projectName,storage)).toBe(0)
-    expect(await countUsers(projectName2, storage)).toBe(numUsers)
+    expect(await userManager.countUsers(projectName)).toBe(0)
+    expect(await userManager.countUsers(projectName2)).toBe(numUsers)
 
     // Then cleanup
     for (let userNum = 0; userNum < numUsers; userNum++) {
-      await deregisterUser(socketIds[numUsers + userNum], storage)
+      await userManager.deregisterUser(socketIds[numUsers + userNum])
     }
-    expect(await countUsers(projectName, storage)).toBe(0)
-    expect(await countUsers(projectName2, storage)).toBe(0)
+    expect(await userManager.countUsers(projectName)).toBe(0)
+    expect(await userManager.countUsers(projectName2)).toBe(0)
   })
 })
 
