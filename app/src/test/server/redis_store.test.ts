@@ -21,7 +21,8 @@ beforeAll(async () => {
   env.redisPort = 6378
 
   redisProc = child.spawn('redis-server',
-    ['--appendonly', 'no', '--save', '', '--port', env.redisPort.toString()])
+    ['--appendonly', 'no', '--save', '', '--port', env.redisPort.toString(),
+      '--bind', '127.0.0.1', '--protected-mode', 'yes'])
 
   // Buffer period for redis to launch
   await sleep(1000)

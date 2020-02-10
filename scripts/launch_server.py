@@ -6,7 +6,8 @@ import yaml
 
 def main() -> None:
     """ main process launcher """
-    parser = argparse.ArgumentParser(description='Launch the server.')
+    parser = argparse.ArgumentParser(
+        description='Launch the server on one machine.')
     parser.add_argument(
         '--config', dest='config',
         help='path to config file', default='./data/config.yml')
@@ -18,7 +19,8 @@ def main() -> None:
     if 'redisPort' not in config:
         config['redisPort'] = 6379
     subprocess.Popen(
-        ['redis-server', '--port', '{}'.format(config['redisPort'])])
+        ['redis-server', '--port', '{}'.format(config['redisPort']),
+         '--bind', '127.0.0.1', '--protected-mode', 'yes'])
     subprocess.call(['node', 'app/dist/js/main.js', '--config', args.config])
 
 
