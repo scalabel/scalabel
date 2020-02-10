@@ -48,7 +48,7 @@ describe('Test redis cache', () => {
     const values = _.range(5).map((v) => sprintf('value%s', v))
 
     for (let i = 0; i < 5; i++) {
-      await defaultStore.setEx(keys[i], values[i], 1)
+      await defaultStore.setExWithReminder(keys[i], values[i], metadataString)
       const value = await defaultStore.get(keys[i])
       expect(value).toBe(values[i])
     }

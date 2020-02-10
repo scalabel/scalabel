@@ -59,15 +59,16 @@ export class ProjectStore {
     projectName: string, taskId: string): Promise<StateMetadata> {
     const saveDir = path.getSaveDir(projectName, taskId)
     const metaKey = path.getRedisMetaKey(saveDir)
-    let stateMetadata: StateMetadata
+    let stateMetadata: StateMetadata = {
+      projectName,
+      taskId,
+      actionIds: []
+    }
     if (this.redisStore) {
       const stringStateMetadata = await this.redisStore.get(metaKey)
-      stateMetadata = JSON.parse(stringStateMetadata)
-    } else {
-      stateMetadata = {
-        projectName,
-        taskId,
-        actionIds: []
+      const loadedMetadata = JSON.parse(stringStateMetadata)
+      if (loadedMetadata) {
+        stateMetadata = loadedMetadata
       }
     }
     return stateMetadata

@@ -75,7 +75,6 @@ export class RedisStore {
     const keys = [saveDir, path.getRedisMetaKey(saveDir)]
     const vals = [value, metadata]
     await this.setAtomic(keys, vals, this.timeout)
-
     // Handle write back to storage
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
@@ -85,6 +84,7 @@ export class RedisStore {
 
     const reminderKey = path.getRedisReminderKey(saveDir)
     const numActions = parseInt(await this.get(reminderKey), 10)
+
     if (!numActions) {
       // new reminder, 1st action
       await this.setEx(reminderKey, '1', this.timeForWrite)
@@ -116,18 +116,10 @@ export class RedisStore {
       return
     }
     for (let i = 0; i < keys.length; i++) {
-      multi.psetex(keys[i], timeout, vals[i])
+      multi.psetex(keys[i], timeout * 1000, vals[i])
     }
     const multiExecAsync = promisify(multi.exec).bind(multi)
     await multiExecAsync()
-  }
-
-  /**
-   * Wrapper for redis set with expiration
-   */
-  public async setEx (key: string, value: string, timeout: number) {
-    const redisSetAsync = promisify(this.client.psetex).bind(this.client)
-    await redisSetAsync(key, timeout, value)
   }
 
    /**
@@ -145,5 +137,14 @@ export class RedisStore {
   public async incr (key: string) {
     const redisIncrAsync = promisify(this.client.incr).bind(this.client)
     await redisIncrAsync(key)
+  }
+
+  /**
+   * Wrapper for redis set with expiration
+   * Private because calling directly will cause problems with missing metadata
+   */
+  private async setEx (key: string, value: string, timeout: number) {
+    const redisSetAsync = promisify(this.client.psetex).bind(this.client)
+    await redisSetAsync(key, timeout * 1000, value)
   }
 }
