@@ -84,7 +84,6 @@ export class RedisStore {
 
     const reminderKey = path.getRedisReminderKey(saveDir)
     const numActions = parseInt(await this.get(reminderKey), 10)
-
     if (!numActions) {
       // new reminder, 1st action
       await this.setEx(reminderKey, '1', this.timeForWrite)
@@ -110,13 +109,14 @@ export class RedisStore {
    * Update multiple value atomically
    */
   public async setAtomic (keys: string[], vals: string[], timeout: number) {
+    const timeoutMs = timeout * 1000
     const multi = this.client.multi()
     if (keys.length !== vals.length) {
       Logger.error(Error('Keys do not match values'))
       return
     }
     for (let i = 0; i < keys.length; i++) {
-      multi.psetex(keys[i], timeout * 1000, vals[i])
+      multi.psetex(keys[i], timeoutMs, vals[i])
     }
     const multiExecAsync = promisify(multi.exec).bind(multi)
     await multiExecAsync()
@@ -144,7 +144,8 @@ export class RedisStore {
    * Private because calling directly will cause problems with missing metadata
    */
   private async setEx (key: string, value: string, timeout: number) {
+    const timeoutMs = timeout * 1000
     const redisSetAsync = promisify(this.client.psetex).bind(this.client)
-    await redisSetAsync(key, timeout * 1000, value)
+    await redisSetAsync(key, timeoutMs, value)
   }
 }

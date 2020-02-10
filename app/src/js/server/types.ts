@@ -131,6 +131,14 @@ export interface StateMetadata {
   actionIds: string[]
 }
 
+/** user data for a project */
+export interface UserData {
+  /** map from socket to user */
+  socketToUser: { [key: string]: string }
+  /** map from user to list of socket */
+  userToSockets: { [key: string]: string[] }
+}
+
 /**
  * Defining the types of some general callback functions
  */

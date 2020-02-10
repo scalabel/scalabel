@@ -1,6 +1,6 @@
 autopep8
 boto3
-pyyaml
+pyyaml>=5.3
 boto3
 numpy
 pycodestyle
