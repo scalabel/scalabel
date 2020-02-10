@@ -1,7 +1,7 @@
 dist: xenial
 language: node_js
 python:
-  - "3.7"
+  - "3.8"
 node_js:
   - 12.11.1
 services:
@@ -13,7 +13,7 @@ before_install:
   - npm install -g npm@latest
 install:
   - sudo pip3 install --upgrade pip
-  - sudo pip3 install -r scripts/requirements.txt
+  - sudo pip3 install --ignore-installed -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
@@ -23,8 +23,6 @@ script:
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
   - python3 scripts/lll.py -d server
   - npm test
-services:
-  - redis-server
 branches:
   only:
     - master
