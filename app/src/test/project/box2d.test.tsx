@@ -72,6 +72,8 @@ afterAll(async () => {
   launchProc.kill()
   redisProc.kill()
   deleteTestDir()
+  // wait for server to shut down to clear port
+  await sleep(50)
 })
 
 describe('full 2d bounding box integration test', () => {

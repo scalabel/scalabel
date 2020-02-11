@@ -1,5 +1,5 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
-import * as Fingerprint2 from 'fingerprintjs2'
+import Fingerprint2 from 'fingerprintjs2'
 import _ from 'lodash'
 import React from 'react'
 import ReactDOM from 'react-dom'
