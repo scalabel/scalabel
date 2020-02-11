@@ -263,7 +263,6 @@ function loadPointClouds (maxAttempts: number = 3): void {
         }
         const onError = () => {
           attemptsMap[sensorId]++
-          console.log(attemptsMap[sensorId])
           if (attemptsMap[sensorId] === maxAttempts) {
             alert(`Point cloud at ${url} was not found.`)
           } else {
