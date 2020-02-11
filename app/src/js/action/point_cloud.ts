@@ -6,8 +6,8 @@ import { Vector3D } from '../math/vector3d'
 import * as types from './types'
 
 export const MOUSE_CORRECTION_FACTOR = 60.0
-export const MOVE_AMOUNT = 0.3
-export const ZOOM_SPEED = 1.1
+export const MOVE_AMOUNT = 0.15
+export const ZOOM_SPEED = 1.05
 export enum CameraLockState {
   UNLOCKED = 0,
   X_LOCKED = 1,
