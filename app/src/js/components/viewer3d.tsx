@@ -371,10 +371,14 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Override key handler */
   protected onKeyDown (e: KeyboardEvent): void {
-    const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
-    if (lockedToSelection(viewerConfig)) {
+    if (Session.activeViewerId !== this.props.id) {
       return
     }
+
+    const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
+    // if (lockedToSelection(viewerConfig)) {
+    //   return
+    // }
     switch (e.key) {
       case types.Key.PERIOD:
         Session.dispatch(moveUp(this._viewerId, viewerConfig))
