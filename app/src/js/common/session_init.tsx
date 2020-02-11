@@ -240,7 +240,7 @@ function loadImages (): void {
 /**
  * Load all point clouds in state
  */
-function loadPointClouds (): void {
+function loadPointClouds (maxAttempts: number = 3): void {
   const loader = new PLYLoader()
 
   const state = Session.getState()
@@ -249,24 +249,37 @@ function loadPointClouds (): void {
   for (const item of items) {
     const pcImageMap: {[id: number]: THREE.BufferGeometry} = {}
     Session.pointClouds.push(pcImageMap)
+    const attemptsMap: {[id: number]: number} = {}
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
       if (sensorId in state.task.sensors &&
           state.task.sensors[sensorId].type === DataType.POINT_CLOUD) {
         const url = item.urls[sensorId]
+        attemptsMap[sensorId] = 0
+        const onLoad = (geometry: THREE.BufferGeometry) => {
+          Session.pointClouds[item.index][sensorId] = geometry
+
+          Session.dispatch(loadItem(item.index, sensorId))
+        }
+        const onError = () => {
+          attemptsMap[sensorId]++
+          console.log(attemptsMap[sensorId])
+          if (attemptsMap[sensorId] === maxAttempts) {
+            alert(`Point cloud at ${url} was not found.`)
+          } else {
+            loader.load(
+              url,
+              onLoad,
+              () => null,
+              onError
+            )
+          }
+        }
         loader.load(
           url,
-          (geometry: THREE.BufferGeometry) => {
-            Session.pointClouds[item.index][sensorId] = geometry
-
-            Session.dispatch(loadItem(item.index, sensorId))
-          },
-
+          onLoad,
           () => null,
-
-          () => {
-            alert(`Point cloud at ${url} was not found.`)
-          }
+          onError
         )
       }
     }
