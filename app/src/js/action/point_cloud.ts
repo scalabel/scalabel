@@ -5,9 +5,12 @@ import { PointCloudViewerConfigType, ViewerConfigType } from '../functional/type
 import { Vector3D } from '../math/vector3d'
 import * as types from './types'
 
-export const MOUSE_CORRECTION_FACTOR = 60.0
-export const MOVE_AMOUNT = 0.15
-export const ZOOM_SPEED = 1.05
+export enum CameraMovementParameters {
+  MOUSE_CORRECTION_FACTOR = 60.0,
+  MOVE_AMOUNT = 0.15,
+  ZOOM_SPEED = 1.05
+}
+
 export enum CameraLockState {
   UNLOCKED = 0,
   X_LOCKED = 1,
@@ -89,9 +92,9 @@ export function zoomCamera (
     // Decrease distance from origin by amount specified
   let newRadius = spherical.radius
   if (deltaY > 0) {
-    newRadius *= ZOOM_SPEED
+    newRadius *= CameraMovementParameters.ZOOM_SPEED
   } else {
-    newRadius /= ZOOM_SPEED
+    newRadius /= CameraMovementParameters.ZOOM_SPEED
   }
     // Limit zoom to not be too close
   if (newRadius > 0.1 && newRadius < 500) {
@@ -146,8 +149,10 @@ export function rotateCamera (
   spherical.setFromVector3(offset)
 
   // Apply rotations
-  spherical.theta += (newX - initialX) / MOUSE_CORRECTION_FACTOR
-  spherical.phi += (newY - initialY) / MOUSE_CORRECTION_FACTOR
+  spherical.theta +=
+    (newX - initialX) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+  spherical.phi +=
+    (newY - initialY) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
 
   spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
 
@@ -179,8 +184,8 @@ export function dragCamera (
   viewerConfig: PointCloudViewerConfigType
 ): types.ChangeViewerConfigAction {
   const dragVector = new THREE.Vector3(
-    (initialX - newX) / MOUSE_CORRECTION_FACTOR * 2,
-    (newY - initialY) / MOUSE_CORRECTION_FACTOR * 2,
+    (initialX - newX) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR * 2,
+    (newY - initialY) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR * 2,
     0
   )
   dragVector.applyQuaternion(camera.quaternion)
@@ -213,12 +218,12 @@ export function moveUp (
     new Vector3D(
       viewerConfig.position.x,
       viewerConfig.position.y,
-      viewerConfig.position.z + MOVE_AMOUNT
+      viewerConfig.position.z + CameraMovementParameters.MOVE_AMOUNT
     ),
     new Vector3D(
       viewerConfig.target.x,
       viewerConfig.target.y,
-      viewerConfig.target.z + MOVE_AMOUNT
+      viewerConfig.target.z + CameraMovementParameters.MOVE_AMOUNT
     ),
     viewerId,
     viewerConfig
@@ -237,12 +242,12 @@ export function moveDown (
     new Vector3D(
       viewerConfig.position.x,
       viewerConfig.position.y,
-      viewerConfig.position.z - MOVE_AMOUNT
+      viewerConfig.position.z - CameraMovementParameters.MOVE_AMOUNT
     ),
     new Vector3D(
       viewerConfig.target.x,
       viewerConfig.target.y,
-      viewerConfig.target.z - MOVE_AMOUNT
+      viewerConfig.target.z - CameraMovementParameters.MOVE_AMOUNT
     ),
     viewerId,
     viewerConfig
@@ -260,8 +265,8 @@ function calculateForward (
   let forwardX = viewerConfig.target.x - viewerConfig.position.x
   let forwardY = viewerConfig.target.y - viewerConfig.position.y
   const forwardDist = Math.sqrt(forwardX * forwardX + forwardY * forwardY)
-  forwardX *= MOVE_AMOUNT / forwardDist
-  forwardY *= MOVE_AMOUNT / forwardDist
+  forwardX *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
+  forwardY *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
   return new THREE.Vector3(forwardX, forwardY, 0)
 }
 
@@ -335,7 +340,7 @@ function calculateLeft (
   const left = new THREE.Vector3()
   left.crossVectors(vertical, forward)
   left.normalize()
-  left.multiplyScalar(MOVE_AMOUNT)
+  left.multiplyScalar(CameraMovementParameters.MOVE_AMOUNT)
   return left
 }
 

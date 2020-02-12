@@ -6,7 +6,7 @@ import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
 import { changeViewerConfig, toggleSynchronization } from '../action/common'
-import { alignToAxis, CameraLockState, lockedToSelection, MOUSE_CORRECTION_FACTOR, MOVE_AMOUNT, moveCameraAndTarget, toggleSelectionLock, updateLockStatus, ZOOM_SPEED } from '../action/point_cloud'
+import { alignToAxis, CameraLockState, CameraMovementParameters, lockedToSelection, moveCameraAndTarget, toggleSelectionLock, updateLockStatus } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
@@ -55,8 +55,8 @@ function calculateForward (
   let forwardX = viewerConfig.target.x - viewerConfig.position.x
   let forwardY = viewerConfig.target.y - viewerConfig.position.y
   const forwardDist = Math.sqrt(forwardX * forwardX + forwardY * forwardY)
-  forwardX *= MOVE_AMOUNT / forwardDist
-  forwardY *= MOVE_AMOUNT / forwardDist
+  forwardX *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
+  forwardY *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
   return new THREE.Vector3(forwardX, forwardY, 0)
 }
 
@@ -80,7 +80,7 @@ function calculateLeft (
   const left = new THREE.Vector3()
   left.crossVectors(vertical, forward)
   left.normalize()
-  left.multiplyScalar(MOVE_AMOUNT)
+  left.multiplyScalar(CameraMovementParameters.MOVE_AMOUNT)
   return left
 }
 
@@ -591,7 +591,9 @@ class Viewer3D extends DrawableViewer<Props> {
     this._camera.getWorldDirection(axis)
 
     const quaternion = new THREE.Quaternion()
-    quaternion.setFromAxisAngle(axis, amount / MOUSE_CORRECTION_FACTOR)
+    quaternion.setFromAxisAngle(
+      axis, amount / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    )
 
     this._camera.applyQuaternion(quaternion)
 
@@ -633,8 +635,8 @@ class Viewer3D extends DrawableViewer<Props> {
     spherical.setFromVector3(offset)
 
     // Apply rotations
-    spherical.theta += dx / MOUSE_CORRECTION_FACTOR
-    spherical.phi += dy / MOUSE_CORRECTION_FACTOR
+    spherical.theta += dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    spherical.phi += dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
 
     spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
 
@@ -655,8 +657,8 @@ class Viewer3D extends DrawableViewer<Props> {
   /** Drag camera, returns translation */
   private dragCamera (dx: number, dy: number): THREE.Vector3 {
     const dragVector = new THREE.Vector3(
-      -dx / MOUSE_CORRECTION_FACTOR * 2,
-      dy / MOUSE_CORRECTION_FACTOR * 2,
+      -dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR * 2,
+      dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR * 2,
       0
     )
     dragVector.applyQuaternion(this._camera.quaternion)
@@ -680,9 +682,9 @@ class Viewer3D extends DrawableViewer<Props> {
         // Decrease distance from origin by amount specified
       let newRadius = spherical.radius
       if (dY > 0) {
-        newRadius *= ZOOM_SPEED
+        newRadius *= CameraMovementParameters.ZOOM_SPEED
       } else {
-        newRadius /= ZOOM_SPEED
+        newRadius /= CameraMovementParameters.ZOOM_SPEED
       }
         // Limit zoom to not be too close
       if (newRadius > 0.1 && newRadius < 500) {
@@ -701,8 +703,8 @@ class Viewer3D extends DrawableViewer<Props> {
   /** Move camera up */
   private moveUp (): void {
     if (this._viewerConfig) {
-      this._camera.position.z += MOVE_AMOUNT
-      this._target.z += MOVE_AMOUNT
+      this._camera.position.z += CameraMovementParameters.MOVE_AMOUNT
+      this._target.z += CameraMovementParameters.MOVE_AMOUNT
       Session.label3dList.onDrawableUpdate()
     }
   }
@@ -710,8 +712,8 @@ class Viewer3D extends DrawableViewer<Props> {
   /** Move camera down */
   private moveDown (): void {
     if (this._viewerConfig) {
-      this._camera.position.z -= MOVE_AMOUNT
-      this._target.z -= MOVE_AMOUNT
+      this._camera.position.z -= CameraMovementParameters.MOVE_AMOUNT
+      this._target.z -= CameraMovementParameters.MOVE_AMOUNT
       Session.label3dList.onDrawableUpdate()
     }
   }
