@@ -28,7 +28,7 @@ More installation and usage details can be find in our [documentation](http://ww
 1. Check out the code
 
    ```
-   git clone git@github.com:ucbdrive/scalabel.git
+   git clone git@github.com:scalabel/scalabel.git
    cd scalabel
    ```
 
@@ -54,6 +54,18 @@ More installation and usage details can be find in our [documentation](http://ww
 
       Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
 
+      On Mac
+
+      ```
+      brew install redis node
+      ```
+
+      On Ubuntu
+
+      ```
+      apt-get install npm nodejs redis-server
+      ```
+
       Transpile or build Javascript code
 
       ```
@@ -65,6 +77,12 @@ More installation and usage details can be find in our [documentation](http://ww
 
       ```
       node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
+      ```
+
+      Install python dependencies
+
+      ```
+      python3.8 -m pip install -U -r scripts/requirements.txt
       ```
 
 3. Prepare data directory
