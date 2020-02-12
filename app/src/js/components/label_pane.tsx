@@ -15,10 +15,10 @@ import { SplitType, ViewerConfigType } from '../functional/types'
 import { paneBarStyles, resizerStyles } from '../styles/split_pane'
 import { Component } from './component'
 import { viewerReactKey } from './drawable_viewer'
-import Viewer2D from './viewer2d'
-import Viewer3D from './viewer3d'
 import HomographyViewer from './homography_viewer'
 import Image3DViewer from './image3d_viewer'
+import Viewer2D from './viewer2d'
+import Viewer3D from './viewer3d'
 
 /** Make drawable viewer based on viewer config */
 export function viewerFactory (
