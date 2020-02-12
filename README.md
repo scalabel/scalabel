@@ -79,17 +79,19 @@ More installation and usage details can be find in our [documentation](http://ww
    If using docker,
 
    ```
-   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 scalabel/www \
-       node /opt/scalabel/app/dist/js/main.js --config /opt/scalabel/app/config/default_config.yml
+   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 6379:6379 scalabel/www \
+       python3.8 scripts/launch_server.py --config /opt/scalabel/data/config.yml
    ```
 
-   Otherwise
+   Please note to map the correct ports for both http and redis servers.
+
+   Otherwise, without using docker,
 
    ```
    python scripts/launch_server.py --config ./data/config.yml
    ```
 
-   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project.
+   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/.
 
 5. Get labels
 

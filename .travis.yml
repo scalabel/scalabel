@@ -1,19 +1,20 @@
 dist: xenial
 language: node_js
 python:
-  - "3.7"
+  - "3.8"
 node_js:
   - 12.11.1
 services:
   - redis-server
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y npm python3-pip python3-setuptools build-essential libcairo2-dev
+  - sudo apt-get install -y npm build-essential libcairo2-dev
     libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    python3-pip python3-setuptools
   - npm install -g npm@latest
 install:
-  - sudo pip3 install --upgrade pip
-  - sudo pip3 install -r scripts/requirements.txt
+  - sudo python3 -m pip install --upgrade pip
+  - sudo python3 -m pip install --ignore-installed -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
@@ -21,10 +22,7 @@ script:
   - node_modules/.bin/eslint .
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
-  - python3 scripts/lll.py -d server
   - npm test
-services:
-  - redis-server
 branches:
   only:
     - master
