@@ -7,7 +7,6 @@ import { Grid3D } from '../drawable/3d/grid3d'
 import { Plane3D } from '../drawable/3d/plane3d'
 import { isCurrentFrameLoaded, isFrameLoaded } from '../functional/state_util'
 import { HomographyViewerConfigType, State } from '../functional/types'
-import { Vector2D } from '../math/vector2d'
 import { imageViewStyle } from '../styles/label'
 import { clearCanvas, drawImageOnCanvas } from '../view_config/image'
 import { ImageCanvas, Props } from './image_canvas'
@@ -99,19 +98,6 @@ class HomographyCanvas extends ImageCanvas {
               // set canvas size
             canvas.style.height = displayRect.height + 'px'
             canvas.style.width = displayRect.width + 'px'
-
-              // set padding
-            const padding = new Vector2D(
-              Math.max(0, (displayRect.width - displayRect.width) / 2),
-              Math.max(0, (displayRect.height - displayRect.height) / 2)
-            )
-            const padX = padding.x
-            const padY = padding.y
-
-            canvas.style.left = padX + 'px'
-            canvas.style.top = padY + 'px'
-            canvas.style.right = 'auto'
-            canvas.style.bottom = 'auto'
           }
         }
       }}

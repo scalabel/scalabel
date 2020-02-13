@@ -378,9 +378,6 @@ export class Cube3D extends Shape3D {
       const planePoint = new THREE.Vector3()
       planePoint.copy(this._controlSpheres[0].position)
 
-      const plane = new THREE.Plane()
-      plane.setFromNormalAndCoplanarPoint(normal, planePoint)
-
       const initialIntersect = new THREE.Vector3()
 
       localProjection.intersectPlane(highlightedPlane, initialIntersect)
