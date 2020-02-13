@@ -331,12 +331,15 @@ export class Cube3D extends Shape3D {
       const toGrid = new THREE.Matrix4()
       toGrid.getInverse(this._grid.matrixWorld)
 
-      newPosition.applyMatrix4(toGrid)
+      // newPosition.applyMatrix4(toGrid)
       this.position.copy(newPosition)
+      this.quaternion.copy(this._grid.quaternion)
 
-      this.updateMatrixWorld(true)
+      // this._grid.attach(this)
 
-      this.visible = false
+      // this.updateMatrixWorld(true)
+
+      // this.visible = false
     }
   }
 

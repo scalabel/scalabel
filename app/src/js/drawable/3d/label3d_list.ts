@@ -165,14 +165,7 @@ export class Label3DList {
     this._selectedLabel = null
 
     // Reset control & scene
-    for (const key of Object.keys(this._labels)) {
-      const id = Number(key)
-      if (!(id in item.labels)) {
-        for (const shape of Object.values(this._labels[id].shapes())) {
-          this._scene.remove(shape)
-        }
-      }
-    }
+    this._scene.children = [this.control]
 
     // Update & create labels
     for (const key of Object.keys(item.labels)) {
