@@ -1,7 +1,6 @@
 import socketio from 'socket.io'
 import uuid4 from 'uuid/v4'
 import * as types from '../action/types'
-import { configureStore } from '../common/configure_store'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
@@ -9,7 +8,7 @@ import {
   ActionPacketType, Env, EventName,
   RegisterMessageType, StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
-import { index2str } from './util'
+import { index2str, updateState } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -114,16 +113,7 @@ export class Hub {
 
     if (!actionIdsSaved.has(actionsId) && taskActions.length > 0) {
       const state = await this.projectStore.loadState(projectName, taskId)
-      const stateStore = configureStore(state)
-
-      // For each task action, update the backend store
-      for (const action of taskActions) {
-        action.timestamp = Date.now()
-        stateStore.dispatch(action)
-      }
-
-      // save task data with all updates
-      const newState = stateStore.getState().present
+      const newState = updateState(state, taskActions)
 
       actionIdsSaved.add(actionsId)
 

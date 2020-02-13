@@ -7,6 +7,7 @@ import * as types from '../action/types'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
+import { ClientSocket } from './client_socket'
 import Session, { ConnectionStatus } from './session'
 
 const CONFIRMATION_MESSAGE =
@@ -34,7 +35,7 @@ export function makeSynchronizer (
  */
 export class Synchronizer {
   /** Socket connection */
-  public socket: SocketIOClient.Socket
+  public socket: ClientSocket
   /** Actions queued to be sent to the backend */
   public actionQueue: types.BaseAction[]
   /** Actions in the process of being saved, mapped by packet id */
@@ -55,7 +56,7 @@ export class Synchronizer {
   /* Make sure Session state is loaded before initializing this class */
   constructor (
     taskIndex: number, projectName: string, userId: string,
-    initStateCallback: (state: State) => void, socket: SocketIOClient.Socket) {
+    initStateCallback: (state: State) => void, socket: ClientSocket) {
     this.taskIndex = taskIndex
     this.projectName = projectName
     this.initStateCallback = initStateCallback
@@ -84,8 +85,7 @@ export class Synchronizer {
         self.actionQueue.push(action)
         if (Session.autosave) {
           self.sendQueuedActions()
-        } else if (types.TASK_ACTION_TYPES.includes(action.type) &&
-          Session.status !== ConnectionStatus.RECONNECTING &&
+        } else if (Session.status !== ConnectionStatus.RECONNECTING &&
           Session.status !== ConnectionStatus.SAVING) {
           Session.updateStatus(ConnectionStatus.UNSAVED)
         }
@@ -148,19 +148,24 @@ export class Synchronizer {
       delete this.actionsToSave[actionPacket.id]
     }
 
+    let containsAck = false
     for (const action of actionPacket.actions) {
       // actionLog matches backend action ordering
       this.actionLog.push(action)
-      if (types.TASK_ACTION_TYPES.includes(action.type)) {
-        if (action.sessionId !== Session.id) {
+      if (action.sessionId !== Session.id) {
+        if (types.TASK_ACTION_TYPES.includes(action.type)) {
           // Dispatch any task actions broadcasted from other sessions
           Session.dispatch(action)
-        } else {
-          // Otherwise, ack indicates successful save
-          Session.updateStatus(ConnectionStatus.NOTIFY_SAVED)
-          this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
         }
+      } else {
+        containsAck = true
       }
+    }
+
+    // Ack indicates successful save
+    if (containsAck) {
+      Session.updateStatus(ConnectionStatus.NOTIFY_SAVED)
+      this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
     }
   }
 
@@ -182,8 +187,10 @@ export class Synchronizer {
    * Called when session reconnects (with autosave)
    */
   public autosaveReconnectCallback (state: State) {
-    // updateTask is not a task action, so will not sync again
-    Session.dispatch(updateTask(state.task))
+    // Update with any backend changes that occurred during disconnect
+    const updateTaskAction = updateTask(state.task)
+    updateTaskAction.frontendOnly = true
+    Session.dispatch(updateTaskAction)
 
     // re-apply frontend task actions after updating task from backend
     for (const actionPacket of this.listActionPackets()) {
