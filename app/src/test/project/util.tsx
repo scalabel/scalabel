@@ -4,7 +4,7 @@ import * as path from 'path'
 import { ChangeEvent } from 'react'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { initFromJson } from '../../js/common/session_init'
-import { makeSynchronizer, Synchronizer } from '../../js/common/synchronizer'
+import { Synchronizer } from '../../js/common/synchronizer'
 import CreateForm from '../../js/components/create_form'
 import { ItemExport } from '../../js/functional/bdd_types'
 import { State } from '../../js/functional/types'
@@ -150,7 +150,7 @@ export function deleteTestDir (): void {
  */
 export async function projectInitSession (): Promise<Synchronizer> {
   return new Promise<Synchronizer>((resolve) => {
-    const synchronizer = makeSynchronizer(
+    const synchronizer = new Synchronizer(
       testConfig.taskIndex,
       testConfig.projectName,
       'fakeId',

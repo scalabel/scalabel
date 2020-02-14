@@ -95,4 +95,12 @@ describe('Test redis cache', () => {
     const savedKeysFinal = await storage.listKeys('')
     expect(savedKeysFinal.length).toBe(2)
   })
+
+  test('Set atomic cannot be interrupted', () => {
+    return
+  })
+
+  test('Metadata is saved correctly', () => {
+    return
+  })
 })

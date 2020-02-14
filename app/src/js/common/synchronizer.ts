@@ -7,35 +7,17 @@ import * as types from '../action/types'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
-import { ClientSocket } from './client_socket'
 import Session, { ConnectionStatus } from './session'
 
 const CONFIRMATION_MESSAGE =
   'You have unsaved changes that will be lost if you leave this page. '
 
 /**
- * Creates socket and synchronizer
- */
-export function makeSynchronizer (
-  taskIndex: number, projectName: string, userId: string,
-  initStateCallback: (state: State) => void): Synchronizer {
-  // use the same address as http
-  const syncAddress = location.origin
-  const socket = io.connect(
-    syncAddress,
-    { transports: ['websocket'], upgrade: false }
-  )
-
-  return new Synchronizer(
-    taskIndex, projectName, userId, initStateCallback, socket)
-}
-
-/**
  * Synchronizes data with other sessions
  */
 export class Synchronizer {
   /** Socket connection */
-  public socket: ClientSocket
+  public socket: SocketIOClient.Socket
   /** Actions queued to be sent to the backend */
   public actionQueue: types.BaseAction[]
   /** Actions in the process of being saved, mapped by packet id */
@@ -56,7 +38,7 @@ export class Synchronizer {
   /* Make sure Session state is loaded before initializing this class */
   constructor (
     taskIndex: number, projectName: string, userId: string,
-    initStateCallback: (state: State) => void, socket: ClientSocket) {
+    initStateCallback: (state: State) => void) {
     this.taskIndex = taskIndex
     this.projectName = projectName
     this.initStateCallback = initStateCallback
@@ -65,6 +47,13 @@ export class Synchronizer {
     this.actionsToSave = {}
     this.actionLog = []
     this.userId = userId
+
+    // use the same address as http
+    const syncAddress = location.origin
+    const socket = io.connect(
+      syncAddress,
+      { transports: ['websocket'], upgrade: false }
+    )
     this.socket = socket
 
     this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))

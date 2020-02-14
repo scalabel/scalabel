@@ -15,7 +15,7 @@ import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import { configureStore } from './configure_store'
 import Session from './session'
-import { makeSynchronizer, Synchronizer } from './synchronizer'
+import { Synchronizer } from './synchronizer'
 import { Track } from './track/track'
 import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 
@@ -36,7 +36,7 @@ export function initSession (containerName: string): void {
         components.map((component) => component.value)
       const murmur = Fingerprint2.x64hash128(values.join(''), 31)
 
-      const synchronizer = makeSynchronizer(
+      const synchronizer = new Synchronizer(
         taskIndex,
         projectName,
         murmur,

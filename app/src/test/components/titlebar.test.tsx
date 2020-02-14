@@ -4,7 +4,7 @@ import * as React from 'react'
 import io from 'socket.io-client'
 import { addLabel } from '../../js/action/common'
 import Session, { ConnectionStatus } from '../../js/common/session'
-import { makeSynchronizer } from '../../js/common/synchronizer'
+import { Synchronizer } from '../../js/common/synchronizer'
 import TitleBar from '../../js/components/title_bar'
 import { makeLabel } from '../../js/functional/states'
 import { myTheme } from '../../js/styles/theme'
@@ -22,7 +22,7 @@ describe('Save button functionality', () => {
       emit: jest.fn()
     }
     io.connect = jest.fn().mockImplementation(() => mockSocket)
-    const synchronizer = makeSynchronizer(0, 'test', 'fakeId', () => { return })
+    const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
     // add a fake task action to be saved
     synchronizer.actionQueue.push(addLabel(0, makeLabel()))
 

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { addViewerConfig, goToItem } from '../../js/action/common'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { makeSynchronizer } from '../../js/common/synchronizer'
+import { Synchronizer } from '../../js/common/synchronizer'
 import { Key, ViewerConfigTypeName } from '../../js/common/types'
 import Window from '../../js/components/window'
 import { makeDefaultViewerConfig } from '../../js/functional/states'
@@ -19,7 +19,7 @@ test('Item change with arrow keys', () => {
   if (config) {
     Session.dispatch(addViewerConfig(0, config))
   }
-  const synchronizer = makeSynchronizer(0, '', 'fakeId', () => { return })
+  const synchronizer = new Synchronizer(0, '', 'fakeId', () => { return })
   render(<Window synchronizer={synchronizer}></Window>)
 
   Session.dispatch(goToItem(0))

@@ -1,7 +1,7 @@
 import { cleanup } from '@testing-library/react'
+import io from 'socket.io-client'
 import { addBox2dLabel } from '../../js/action/box2d'
 import { BaseAction } from '../../js/action/types'
-import { DummySocket } from '../../js/common/client_socket'
 import { configureStore } from '../../js/common/configure_store'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
@@ -9,8 +9,6 @@ import { makeItem,
   makeSensor, makeState, makeTask } from '../../js/functional/states'
 import { State, TaskType } from '../../js/functional/types'
 import { updateState } from '../../js/server/util'
-
-jest.mock('socket.io-client')
 
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
@@ -114,7 +112,12 @@ function startSynchronizer (sessionId: string): Synchronizer {
   const taskIndex = 0
   const projectName = 'testProject'
   const userId = 'user'
-  const mockSocket = new DummySocket()
+  const mockSocket = {
+    on: jest.fn(),
+    connected: true,
+    emit: jest.fn()
+  }
+  io.connect = jest.fn().mockImplementation(() => mockSocket)
   const synchronizer = new Synchronizer(
     taskIndex,
     projectName,
@@ -125,8 +128,7 @@ function startSynchronizer (sessionId: string): Synchronizer {
       Session.store = configureStore(
         backendState, Session.devMode, synchronizer.middleware)
       Session.autosave = true
-    },
-    mockSocket
+    }
   )
 
   return synchronizer
