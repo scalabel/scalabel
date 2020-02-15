@@ -1,14 +1,12 @@
 import { cleanup } from '@testing-library/react'
 import io from 'socket.io-client'
-import { addBox2dLabel } from '../../js/action/box2d'
 import { BaseAction } from '../../js/action/types'
 import { configureStore } from '../../js/common/configure_store'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
-import { makeItem,
-  makeSensor, makeState, makeTask } from '../../js/functional/states'
-import { State, TaskType } from '../../js/functional/types'
+import { State } from '../../js/functional/types'
 import { updateState } from '../../js/server/util'
+import { getInitialState, getRandomBox2dAction } from '../util'
 
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
@@ -53,7 +51,7 @@ describe('Test synchronizer functionality', () => {
     expect(Session.status).toBe(ConnectionStatus.UNSAVED)
 
     // Dispatch an action to trigger a sync event
-    const frontendAction = randomBox2dAction()
+    const frontendAction = getRandomBox2dAction()
     Session.dispatch(frontendAction)
 
     // Before ack, dispatched action is queued for saving
@@ -66,7 +64,7 @@ describe('Test synchronizer functionality', () => {
     expect(Session.status).toBe(ConnectionStatus.RECONNECTING)
 
     // Reconnect, but some missed actions occured in the backend
-    const missedAction = randomBox2dAction()
+    const missedAction = getRandomBox2dAction()
     const newInitialState = updateState(initialState, [missedAction], false)
     synchronizer.registerAckHandler(newInitialState)
 
@@ -132,29 +130,4 @@ function startSynchronizer (sessionId: string): Synchronizer {
   )
 
   return synchronizer
-}
-
-/**
- * The initial backend task represents the saved data
- */
-function getInitialState (sessionId: string): State {
-  const partialTask: Partial<TaskType> = {
-    items: [makeItem({ id: 0 })],
-    sensors: { 0: makeSensor(0, '', '') }
-  }
-  const defaultTask = makeTask(partialTask)
-  const defaultState = makeState({
-    task: defaultTask
-  })
-  defaultState.session.id = sessionId
-  defaultState.task.config.autosave = true
-  return defaultState
-}
-
-/**
- * Helper function to get box2d actions
- */
-export function randomBox2dAction () {
-  return addBox2dLabel(0, 0, [], {},
-    Math.random(), Math.random(), Math.random(), Math.random())
 }

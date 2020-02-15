@@ -1,6 +1,9 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
-import { RectType, Vector3Type } from '../js/functional/types'
+import { addBox2dLabel } from '../js/action/box2d'
+import { makeItem,
+  makeSensor, makeState, makeTask } from '../js/functional/states'
+import { RectType, State, TaskType, Vector3Type } from '../js/functional/types'
 
 /**
  * Check equality between two Vector3Type objects
@@ -50,4 +53,29 @@ export function makeProjectDir (dataDir: string, projectName: string) {
   const content0 = JSON.stringify({ testField: 'testValue' })
   fs.writeFileSync(path.join(taskDir, '000000.json'), content0)
   fs.writeFileSync(path.join(taskDir, '000001.json'), 'content1')
+}
+
+/**
+ * The initial backend task represents the saved data
+ */
+export function getInitialState (sessionId: string): State {
+  const partialTask: Partial<TaskType> = {
+    items: [makeItem({ id: 0 })],
+    sensors: { 0: makeSensor(0, '', '') }
+  }
+  const defaultTask = makeTask(partialTask)
+  const defaultState = makeState({
+    task: defaultTask
+  })
+  defaultState.session.id = sessionId
+  defaultState.task.config.autosave = true
+  return defaultState
+}
+
+/**
+ * Helper function to get box2d actions
+ */
+export function getRandomBox2dAction () {
+  return addBox2dLabel(0, 0, [], {},
+    Math.random(), Math.random(), Math.random(), Math.random())
 }

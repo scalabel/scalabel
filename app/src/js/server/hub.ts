@@ -4,6 +4,7 @@ import * as types from '../action/types'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
+import { SocketServer } from './socket_server'
 import {
   ActionPacketType, Env, EventName,
   RegisterMessageType, StateMetadata, SyncActionMessageType } from './types'
@@ -40,7 +41,7 @@ export class Hub {
   /**
    * Registers new socket's listeners
    */
-  private registerNewSocket (socket: socketio.Socket) {
+  public registerNewSocket (socket: SocketServer) {
     socket.on(EventName.REGISTER, async (rawData: string) => {
       try {
         await this.register(rawData, socket)
@@ -65,7 +66,7 @@ export class Hub {
   /**
    * Load the correct state and subscribe to redis
    */
-  private async register (rawData: string, socket: socketio.Socket) {
+  public async register (rawData: string, socket: SocketServer) {
     const data: RegisterMessageType = JSON.parse(rawData)
     const projectName = data.projectName
     const taskIndex = data.taskIndex
@@ -92,7 +93,7 @@ export class Hub {
   /**
    * Updates the state with the action, and broadcasts action
    */
-  private async actionUpdate (rawData: string, socket: socketio.Socket) {
+  public async actionUpdate (rawData: string, socket: SocketServer) {
     const data: SyncActionMessageType = JSON.parse(rawData)
     const projectName = data.projectName
     const taskId = data.taskId
@@ -110,6 +111,8 @@ export class Hub {
     const redisMetadata =
       await this.projectStore.loadStateMetadata(projectName, taskId)
     const actionIdsSaved = new Set(redisMetadata.actionIds)
+    // TOOD: store timestamps in metadata
+    // TOOD: in the else, case, apply the old timestamps to the same actions
 
     if (!actionIdsSaved.has(actionsId) && taskActions.length > 0) {
       const state = await this.projectStore.loadState(projectName, taskId)
@@ -127,14 +130,17 @@ export class Hub {
         newState, projectName, taskId, stateMetadata)
     }
 
-    // broadcast task actions to all other sessions in room
-    const taskActionMsg: ActionPacketType = {
-      actions: taskActions,
-      id: actionsId
+    if (taskActions.length > 0) {
+      // broadcast task actions to all other sessions in room
+      const taskActionMsg: ActionPacketType = {
+        actions: taskActions,
+        id: actionsId
+      }
+      // broadcast task actions to all other sessions in room
+      socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
     }
-    // broadcast task actions to all other sessions in room
-    socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
     // echo everything to original session
+    console.log(data.actions)
     socket.emit(EventName.ACTION_BROADCAST, data.actions)
   }
 }

@@ -136,7 +136,8 @@ export class Synchronizer {
     if (actionPacket.id in this.actionsToSave) {
       delete this.actionsToSave[actionPacket.id]
     }
-
+    // TODO: check if actions were already acked; if so, ignore
+    // TODO: do this by comparing timestamp to latest timestamp in log
     let containsAck = false
     for (const action of actionPacket.actions) {
       // actionLog matches backend action ordering

@@ -96,6 +96,7 @@ describe('Test redis cache', () => {
     expect(savedKeysFinal.length).toBe(2)
   })
 
+  // TODO: finish these tests
   test('Set atomic cannot be interrupted', () => {
     return
   })
