@@ -1080,3 +1080,26 @@ export function deletePane (
     }
   )
 }
+
+/** sets submitted to true */
+export function submit (
+  state: State, _action: types.SubmitAction
+): State {
+  // Shallow copy of panes and modification of dictionary
+  return updateObject(
+    state,
+    {
+      task: updateObject(
+        state.task,
+        {
+          config: updateObject(
+            state.task.config, {
+              submitted: true,
+              submitTime: Date.now()
+            }
+          )
+        }
+      )
+    }
+  )
+}

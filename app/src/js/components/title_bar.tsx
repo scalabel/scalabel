@@ -8,6 +8,7 @@ import { withStyles } from '@material-ui/core/styles/index'
 import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
+import { submit } from '../action/common'
 import Session, { ConnectionStatus } from '../common/session'
 import Synchronizer from '../common/synchronizer'
 import { Key } from '../common/types'
@@ -151,12 +152,20 @@ class TitleBar extends Component<Props> {
     ]
 
     // if autosave is on, don't need manual save button
+    let submitHandler = () => { Session.dispatch(submit()) }
+    if (!autosave) {
+      submitHandler = () => {
+        Session.dispatch(submit())
+        // save after, so submit flag is also saved
+        this.save()
+      }
+    }
     if (!autosave) {
       buttonInfo.push(
         { title: 'Save', onClick: () => { this.save() }, icon: fa.faSave })
-      buttonInfo.push(
-        { title: 'Submit', onClick: () => { this.save() }, icon: fa.faCheck })
     }
+    buttonInfo.push(
+      { title: 'Submit', onClick: submitHandler, icon: fa.faCheck })
 
     const buttons = buttonInfo.map((b) => {
       const onClick = _.get(b, 'onClick', undefined)

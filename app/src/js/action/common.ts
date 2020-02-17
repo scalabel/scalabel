@@ -362,3 +362,13 @@ export function updateAll (): types.UpdateAllAction {
     sessionId: Session.id
   }
 }
+
+/**
+ * wrapper for submit action
+ */
+export function submit (): types.SubmitAction {
+  return {
+    type: types.SUBMIT,
+    sessionId: Session.id
+  }
+}
