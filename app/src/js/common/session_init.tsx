@@ -210,16 +210,18 @@ function loadData (): void {
 /**
  * Load all the images in the state
  */
-function loadImages (): void {
+function loadImages (maxAttempts: number = 3): void {
   const state = Session.getState()
   const items = state.task.items
   Session.images = []
   for (const item of items) {
     const itemImageMap: {[id: number]: HTMLImageElement} = {}
+    const attemptsMap: {[id: number]: number} = {}
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
       if (sensorId in state.task.sensors &&
           state.task.sensors[sensorId].type === DataType.IMAGE) {
+        attemptsMap[sensorId] = 0
         const url = item.urls[sensorId]
         const image = new Image()
         image.crossOrigin = 'Anonymous'
@@ -227,7 +229,13 @@ function loadImages (): void {
           Session.dispatch(loadItem(item.index, sensorId))
         }
         image.onerror = () => {
-          alert(sprintf('Failed to load image at %s', url))
+          if (attemptsMap[sensorId] === maxAttempts) {
+            // Append date to url to prevent local caching
+            image.src = `${url}#${new Date().getTime()}`
+            attemptsMap[sensorId]++
+          } else {
+            alert(sprintf('Failed to load image at %s', url))
+          }
         }
         image.src = url
         itemImageMap[sensorId] = image
