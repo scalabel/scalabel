@@ -150,12 +150,12 @@ class TitleBar extends Component<Props> {
       { title: 'Keyboard Usage', icon: fa.faQuestion },
       { title: 'Dashboard', href: dashboardLink, icon: fa.faList }
     ]
-
     // if autosave is on, don't need manual save button
     let submitHandler = () => { Session.dispatch(submit()) }
     if (!autosave) {
       submitHandler = () => {
-        Session.dispatch(submit())
+        const submitAction = submit()
+        Session.dispatch(submitAction)
         // save after, so submit flag is also saved
         this.save()
       }

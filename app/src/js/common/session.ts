@@ -101,6 +101,7 @@ class Session {
    * @param {types.ActionType} action: action description
    */
   public dispatch (action: types.ActionType): void {
+    console.log(action)
     this.store.dispatch(action)
   }
 

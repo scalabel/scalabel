@@ -89,3 +89,16 @@ test('Link labels', () => {
     expect(item.labels[label].parent).toEqual(parent1)
   }
 })
+
+test('Submit task', () => {
+  const constantDate = Date.now()
+  Date.now = jest.fn(() => {
+    return constantDate
+  })
+  Session.devMode = false
+  initStore(testJson)
+  Session.dispatch(action.submit())
+  const state = Session.getState()
+  expect(state.task.config.submitted).toBe(true)
+  expect(state.task.config.submitTime).toBe(constantDate)
+})
