@@ -28,7 +28,7 @@ More installation and usage details can be find in our [documentation](http://ww
 1. Check out the code
 
    ```
-   git clone git@github.com:ucbdrive/scalabel.git
+   git clone git@github.com:scalabel/scalabel.git
    cd scalabel
    ```
 
@@ -54,6 +54,18 @@ More installation and usage details can be find in our [documentation](http://ww
 
       Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
 
+      On Mac
+
+      ```
+      brew install redis node
+      ```
+
+      On Ubuntu
+
+      ```
+      apt-get install npm nodejs redis-server
+      ```
+
       Transpile or build Javascript code
 
       ```
@@ -65,6 +77,12 @@ More installation and usage details can be find in our [documentation](http://ww
 
       ```
       node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
+      ```
+
+      Install python dependencies
+
+      ```
+      python3.8 -m pip install -U -r scripts/requirements.txt
       ```
 
 3. Prepare data directory
@@ -79,17 +97,19 @@ More installation and usage details can be find in our [documentation](http://ww
    If using docker,
 
    ```
-   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 scalabel/www \
-       node /opt/scalabel/app/dist/js/main.js --config /opt/scalabel/app/config/default_config.yml
+   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 6379:6379 scalabel/www \
+       python3.8 scripts/launch_server.py --config /opt/scalabel/data/config.yml
    ```
 
-   Otherwise
+   Please note to map the correct ports for both http and redis servers.
+
+   Otherwise, without using docker,
 
    ```
    python scripts/launch_server.py --config ./data/config.yml
    ```
 
-   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project.
+   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/.
 
 5. Get labels
 
