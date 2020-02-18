@@ -214,6 +214,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       this.state.user.viewerConfigs[this.props.id].sensor
 
     this.pointCloud.geometry = Session.pointClouds[item][sensor]
+    this.pointCloud.layers.enableAll()
 
     const config =
       state.user.viewerConfigs[this.props.id] as PointCloudViewerConfigType

@@ -125,13 +125,13 @@ class Viewer3D extends DrawableViewer<Props> {
         Session.label3dList.setActiveCamera(this._camera)
       }
 
-      // this._camera.layers.set(
-      //   this.props.id - Math.min(
-      //     ...Object.keys(this.state.user.viewerConfigs).map(
-      //       (key) => Number(key)
-      //     )
-      //   )
-      // )
+      this._camera.layers.set(
+        this.props.id - Math.min(
+          ...Object.keys(this.state.user.viewerConfigs).map(
+            (key) => Number(key)
+          )
+        )
+      )
       const item = this.state.user.select.item
       const sensor =
         this.state.user.viewerConfigs[this.props.id].sensor

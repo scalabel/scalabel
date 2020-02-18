@@ -37,6 +37,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
 
     this._highlightIntersection = new THREE.Vector3()
     this.setHighlighted()
+    this.layers.enableAll()
   }
 
   /**

@@ -101,6 +101,24 @@ export class Cube3D extends Shape3D {
     return ShapeTypeName.CUBE
   }
 
+  /** Set visibility for viewer */
+  public setVisible (viewerId: number, v: boolean = true) {
+    super.setVisible(viewerId, v)
+    if (v) {
+      this._box.layers.enable(viewerId)
+      this._outline.layers.enable(viewerId)
+      for (const sphere of this._controlSpheres) {
+        sphere.layers.enable(viewerId)
+      }
+    } else {
+      this._box.layers.disable(viewerId)
+      this._outline.layers.disable(viewerId)
+      for (const sphere of this._controlSpheres) {
+        sphere.layers.disable(viewerId)
+      }
+    }
+  }
+
   /**
    * Set color
    * @param color
