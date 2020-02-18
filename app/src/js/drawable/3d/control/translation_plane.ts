@@ -12,7 +12,7 @@ export class TranslationPlane extends THREE.Mesh
 
   constructor (normal: THREE.Vector3, color: number) {
     super(
-      new THREE.PlaneGeometry(0.75, 0.75),
+      new THREE.PlaneGeometry(0.5, 0.5),
       new THREE.MeshBasicMaterial({
         color, side: THREE.DoubleSide, transparent: true
       })
