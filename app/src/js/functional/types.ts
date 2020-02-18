@@ -159,6 +159,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   target: Vector3Type
   /** Up direction of the camera */
   verticalAxis: Vector3Type
+  /** Whether to flip the direction of the axis locks */
+  flipAxis: boolean
   /** Camera rotation lock */
   lockStatus: number
 }

@@ -1,4 +1,5 @@
 import { Box, IconButton } from '@material-ui/core'
+import ImportExportIcon from '@material-ui/icons/ImportExport'
 import LockIcon from '@material-ui/icons/Lock'
 import SyncIcon from '@material-ui/icons/Sync'
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
@@ -265,15 +266,32 @@ class Viewer3D extends DrawableViewer<Props> {
           }
         </IconButton>
       )
+      const flipButton = (
+        <IconButton
+          className={this.props.classes.viewer_button}
+          onClick={() => {
+            const newConfig = {
+              ...config,
+              flipAxis: !config.flipAxis
+            }
+            Session.dispatch(changeViewerConfig(this.props.id, newConfig))
+          }}
+        >
+          {
+            underlineElement(
+              <ImportExportIcon />,
+              config.flipAxis
+            )
+          }
+        </IconButton>
+      )
       const synchronizationButton = (
         <IconButton
           className={this.props.classes.viewer_button}
           onClick={() => {
-            if (this._viewerConfig) {
-              Session.dispatch(toggleSynchronization(
-                this._viewerId, config
-              ))
-            }
+            Session.dispatch(toggleSynchronization(
+              this._viewerId, config
+            ))
           }}
         >
           {underlineElement(<SyncIcon />, config.synchronized)}
@@ -283,12 +301,10 @@ class Viewer3D extends DrawableViewer<Props> {
         <IconButton
           className={this.props.classes.viewer_button}
           onClick={() => {
-            if (this._viewerConfig) {
-              Session.dispatch(toggleSelectionLock(
-                this._viewerId,
-                config
-              ))
-            }
+            Session.dispatch(toggleSelectionLock(
+              this._viewerId,
+              config
+            ))
           }}
         >
           {underlineElement(
@@ -303,6 +319,7 @@ class Viewer3D extends DrawableViewer<Props> {
         xAxisButton,
         yAxisButton,
         zAxisButton,
+        flipButton,
         synchronizationButton,
         selectionLockButton
       ]
@@ -540,6 +557,10 @@ class Viewer3D extends DrawableViewer<Props> {
           up.x = 1
           forward.z = 1
           break
+      }
+
+      if (config.flipAxis) {
+        forward.multiplyScalar(-1)
       }
 
       const position = (new Vector3D()).fromState(config.position).toThree()
