@@ -338,8 +338,13 @@ class Viewer3D extends DrawableViewer<Props> {
         }
       } else {
         if (lockSelection && Session.label3dList.selectedLabel) {
-          const quaternion = this.rotateCameraViewDirection(dX)
-          Session.label3dList.selectedLabel.rotate(quaternion)
+          if (
+            this.isKeyDown(types.Key.CONTROL) ||
+            this.isKeyDown(types.Key.META)
+           ) {
+            const quaternion = this.rotateCameraViewDirection(dX)
+            Session.label3dList.selectedLabel.rotate(quaternion)
+          }
         } else {
           this.rotateCameraSpherical(dX, dY)
         }
