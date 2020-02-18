@@ -15,7 +15,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
 
   constructor (normal: THREE.Vector3, color: number) {
     super(
-      new THREE.TorusGeometry(1, .02, 32, 24),
+      new THREE.TorusGeometry(1, .07, 32, 24),
       new THREE.MeshBasicMaterial({ color, transparent: true })
    )
     this._normal = normal

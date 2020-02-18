@@ -19,7 +19,7 @@ export class TranslationAxis extends THREE.Group
   private _cone: THREE.Mesh
 
   constructor (
-    direction: THREE.Vector3, color: number, coneSize: number = 0.15
+    direction: THREE.Vector3, color: number, coneSize: number = 0.3
   ) {
     super()
     this._coneSize = coneSize

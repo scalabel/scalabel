@@ -22,7 +22,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
   constructor (axis: 'x' | 'y' | 'z',
                negate: boolean,
                color: number,
-               sideLength: number = 0.25) {
+               sideLength: number = 0.4) {
     super()
     this._axis = axis
     this._direction = new THREE.Vector3()
