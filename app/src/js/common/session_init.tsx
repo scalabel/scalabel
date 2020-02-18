@@ -269,6 +269,8 @@ function loadPointClouds (maxAttempts: number = 3): void {
 
           Session.dispatch(loadItem(item.index, sensorId))
         }
+        // TODO(fyu): need to make a unified data loader with consistent
+        // policy for all data types
         const onError = () => {
           attemptsMap[sensorId]++
           if (attemptsMap[sensorId] === maxAttempts) {
