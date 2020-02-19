@@ -3,6 +3,7 @@ import ImportExportIcon from '@material-ui/icons/ImportExport'
 import LockIcon from '@material-ui/icons/Lock'
 import SyncIcon from '@material-ui/icons/Sync'
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
+import TripOriginIcon from '@material-ui/icons/TripOrigin'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
@@ -313,6 +314,25 @@ class Viewer3D extends DrawableViewer<Props> {
           )}
         </IconButton>
       )
+      const originButton = (
+        <IconButton
+          className={this.props.classes.viewer_button}
+          onClick={() => {
+            const newConfig = {
+              ...config,
+              position: { x: 0, y: 0, z: 0 },
+              target: { x: 10, y: 0, z: 0 }
+            }
+            Session.dispatch(changeViewerConfig(
+              this.props.id,
+              newConfig
+            ))
+          }}
+        >
+          <TripOriginIcon />
+        </IconButton>
+      )
+
       return [
         yLockButton,
         xLockButton,
@@ -321,7 +341,8 @@ class Viewer3D extends DrawableViewer<Props> {
         zAxisButton,
         flipButton,
         synchronizationButton,
-        selectionLockButton
+        selectionLockButton,
+        originButton
       ]
     }
 
