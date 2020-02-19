@@ -5,12 +5,17 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    build-essential \
+    autoconf \
+    libtool \
+    pkg-config \
     software-properties-common \
     npm \
     nodejs \
     curl \
     git \
     python3.8 \
+    python3.8-dev \
     python3-pip \
     python3-setuptools \
     redis-server && \

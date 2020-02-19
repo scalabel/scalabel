@@ -34,3 +34,6 @@ test_data/
 
 # redis
 *.rdb
+
+# mypy
+.mypy_cache
