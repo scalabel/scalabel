@@ -127,8 +127,8 @@ export interface StateMetadata {
   projectName: string
   /** task id */
   taskId: string
-  /** list of action Ids that have been processed */
-  actionIds: string[]
+  /** map from processed action ids to their timestamps */
+  actionIds: { [key: string]: number[] }
 }
 
 /** user data for a project */

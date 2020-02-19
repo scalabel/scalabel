@@ -99,7 +99,7 @@ export class Hub {
     const taskId = data.taskId
     const sessionId = data.sessionId
     const actions = data.actions.actions
-    const actionsId = data.actions.id
+    const actionPacketId = data.actions.id
 
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
 
@@ -110,21 +110,19 @@ export class Hub {
     // Load IDs of actions that have been processed already
     const redisMetadata =
       await this.projectStore.loadStateMetadata(projectName, taskId)
-    const actionIdsSaved = new Set(redisMetadata.actionIds)
-    // TOOD: store timestamps in metadata
-    // TOOD: in the else, case, apply the old timestamps to the same actions
+    const actionIdsSaved = redisMetadata.actionIds
+    // TODO: in the else, case, apply the old timestamps to the same actions
 
-    if (!actionIdsSaved.has(actionsId) && taskActions.length > 0) {
+    if (!(actionPacketId in actionIdsSaved) && taskActions.length > 0) {
       const state = await this.projectStore.loadState(projectName, taskId)
       const newState = updateState(state, taskActions)
 
-      actionIdsSaved.add(actionsId)
-
       // convert set to a list in JSON
+      actionIdsSaved[actionPacketId] = timestamps
       const stateMetadata: StateMetadata = {
         projectName,
         taskId,
-        actionIds: [...actionIdsSaved]
+        actionIds: actionIdsSaved
       }
       await this.projectStore.saveState(
         newState, projectName, taskId, stateMetadata)
