@@ -2,7 +2,9 @@ autopep8
 boto3
 pyyaml>=5.3
 boto3
+mypy
 numpy
 pycodestyle
 pylint
+psutil
 colorama
