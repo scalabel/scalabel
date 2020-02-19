@@ -92,6 +92,11 @@ export class Label3DList {
     return null
   }
 
+  /** Get all labels */
+  public labels (): Readonly<Array<Readonly<Label3D>>> {
+    return Object.values(this._labels)
+  }
+
   /** Call when any drawable has been updated */
   public onDrawableUpdate (): void {
     for (const callback of this._callbacks) {
