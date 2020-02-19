@@ -101,7 +101,7 @@ More installation and usage details can be find in our [documentation](http://ww
        python3.8 scripts/launch_server.py --config /opt/scalabel/data/config.yml
    ```
 
-   Please note to map the correct ports for both http and redis servers.
+   Please note to map the correct ports for both http and redis servers. Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
 
    Otherwise, without using docker,
 
