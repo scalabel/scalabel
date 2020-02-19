@@ -18,7 +18,7 @@ const faceNormals = [
   new THREE.Vector3(0, 0, -1)
 ]
 
-const DISTANCE_SCALE_CORRECTION = 7
+const DISTANCE_SCALE_CORRECTION = 5
 
 /**
  * Shape for Box3D label
