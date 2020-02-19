@@ -97,8 +97,19 @@ test('Submit task', () => {
   })
   Session.devMode = false
   initStore(testJson)
+  // first submission
   Session.dispatch(action.submit())
-  const state = Session.getState()
-  expect(state.task.config.submitted).toBe(true)
-  expect(state.task.config.submitTime).toBe(constantDate)
+  let state = Session.getState()
+  let submissions = state.task.progress.submissions
+  expect(submissions.length).toBe(1)
+  expect(submissions[0].time).toBe(constantDate)
+  expect(submissions[0].user).toBe(state.user.id)
+
+  // second submission
+  Session.dispatch(action.submit())
+  state = Session.getState()
+  submissions = state.task.progress.submissions
+  expect(submissions.length).toBe(2)
+  expect(submissions[1].time).toBe(constantDate)
+  expect(submissions[1].user).toBe(state.user.id)
 })

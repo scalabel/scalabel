@@ -366,10 +366,13 @@ export function updateAll (): types.UpdateAllAction {
 /**
  * wrapper for submit action
  */
-export function updateProgress (): types.UpdateProgressAction {
+export function submit (): types.SubmitAction {
   return {
-    type: types.UPDATE_PROGRESS,
+    type: types.SUBMIT,
     sessionId: Session.id,
-    time: Date.now()
+    submitData: {
+      time: Date.now(),
+      user: Session.getState().user.id
+    }
   }
 }

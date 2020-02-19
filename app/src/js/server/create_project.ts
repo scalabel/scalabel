@@ -302,7 +302,7 @@ export function createProject (
   }
 
   /* use arbitrary values for
-   * submitTime, taskId, and policyTypes
+   * taskId and policyTypes
    * assign these when tasks are created
    */
   const config: ConfigType = {
@@ -318,8 +318,6 @@ export function createProject (
     categories: formFileData.categories,
     attributes: formFileData.attributes,
     taskId: '',
-    submitTime: -1,
-    submitted: false,
     tracking,
     policyTypes: [],
     demoMode: form.demoMode,
