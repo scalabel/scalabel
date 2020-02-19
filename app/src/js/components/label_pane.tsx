@@ -238,11 +238,15 @@ class LabelPane extends Component<Props> {
               container: this.props.classes.viewer_container_bar
             }}
           >
-            {(numSensors > 1) ? viewerTypeMenu : null}
-            {(numSensors > 1) ? viewerIdMenu : null}
+            <div hidden={pane.hide}>
+              {(numSensors > 1) ? viewerTypeMenu : null}
+              {(numSensors > 1) ? viewerIdMenu : null}
+            </div>
             {visibilityButton}
-            {verticalSplitButton}
-            {horizontalSplitButton}
+            <div hidden={pane.hide}>
+              {verticalSplitButton}
+              {horizontalSplitButton}
+            </div>
             {deleteButton}
           </Grid>
       )
@@ -277,12 +281,13 @@ class LabelPane extends Component<Props> {
 
     let defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
 
-    if (child1State.hide) {
+    if (child1State.hide && child2State.hide) {
+      defaultSize = '50%'
+    } else if (child1State.hide) {
       defaultSize = '50px'
     } else if (child2State.hide) {
       defaultSize = 'calc(100% - 50px)'
     }
-    console.log(defaultSize)
 
     return (
       <SplitPane
