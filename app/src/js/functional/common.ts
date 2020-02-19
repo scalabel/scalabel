@@ -16,6 +16,7 @@ import {
   PointCloudViewerConfigType,
   Select,
   ShapeType,
+  SplitType,
   State,
   TaskStatus,
   TaskType,
@@ -955,6 +956,27 @@ export function updatePane (
   )
 }
 
+/** Update children split counts upwards to root */
+function updateSplitCounts (paneId: number, panes: {[id: number]: PaneType}) {
+  let pane = panes[paneId]
+  while (pane) {
+    let parent = panes[pane.parent]
+    if (parent) {
+      parent = updateObject(parent, {
+        numHorizontalChildren: pane.numHorizontalChildren,
+        numVerticalChildren: pane.numVerticalChildren
+      })
+      if (pane.split === SplitType.HORIZONTAL) {
+        parent.numHorizontalChildren++
+      } else if (pane.split === SplitType.VERTICAL) {
+        parent.numVerticalChildren++
+      }
+      panes[parent.id] = parent
+    }
+    pane = parent
+  }
+}
+
 /**
  * Split existing pane into half
  * @param state
@@ -1005,19 +1027,23 @@ export function splitPane (
     }
   )
 
+  const newPanes = updateObject(
+    state.user.layout.panes,
+    {
+      [newPane.id]: newPane,
+      [child1Id]: child1,
+      [child2Id]: child2
+    }
+  )
+
+  updateSplitCounts(newPane.id, newPanes)
+
   const newLayout = updateObject(
     state.user.layout,
     {
       maxViewerConfigId: newViewerConfigId,
       maxPaneId: child2Id,
-      panes: updateObject(
-        state.user.layout.panes,
-        {
-          [newPane.id]: newPane,
-          [child1Id]: child1,
-          [child2Id]: child2
-        }
-      )
+      panes: newPanes
     }
   )
 
@@ -1052,7 +1078,7 @@ export function deletePane (
   // Shallow copy of panes and modification of dictionary
   const newPanes = { ...panes }
 
-  // Get id of the child that is not the pane that will be deleted
+  // Get id of the child that is not the pane to be deleted
   let newLeafId: number = -1
   if (parent.child1 === action.pane && parent.child2) {
     newLeafId = parent.child2
@@ -1090,7 +1116,10 @@ export function deletePane (
 
   delete newPanes[parentId]
   delete newPanes[action.pane]
+
   newPanes[newLeafId] = updateObject(panes[newLeafId], { parent: newParentId })
+  updateSplitCounts(newLeafId, newPanes)
+
   const updateParams: Partial<LayoutType> = { panes: newPanes }
 
   if (parentId === state.user.layout.rootPane) {

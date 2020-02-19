@@ -335,6 +335,10 @@ export interface PaneType {
   child1?: number
   /** Id of second child if not leaf */
   child2?: number
+  /** Number of children that are vertical splits */
+  numVerticalChildren: number
+  /** Number of children that are horizontal splits */
+  numHorizontalChildren: number
 }
 
 export interface LayoutType {

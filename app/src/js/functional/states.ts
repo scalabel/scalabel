@@ -342,7 +342,9 @@ export function makePane (
     maxPrimarySize,
     child1,
     child2,
-    hide: false
+    hide: false,
+    numHorizontalChildren: 0,
+    numVerticalChildren: 0
   }
 }
 

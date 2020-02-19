@@ -87,6 +87,8 @@ interface Props {
   pane: number
 }
 
+const HIDDEN_UNIT_SIZE = 50
+
 /**
  * Wrapper for SplitPane
  */
@@ -230,25 +232,25 @@ class LabelPane extends Component<Props> {
       const numSensors = Object.keys(this.state.task.sensors).length
 
       const configBar = (
-          <Grid
-            justify={'flex-end'}
-            container
-            direction='row'
-            classes={{
-              container: this.props.classes.viewer_container_bar
-            }}
-          >
-            <div hidden={pane.hide}>
-              {(numSensors > 1) ? viewerTypeMenu : null}
-              {(numSensors > 1) ? viewerIdMenu : null}
-            </div>
-            {visibilityButton}
-            <div hidden={pane.hide}>
-              {verticalSplitButton}
-              {horizontalSplitButton}
-            </div>
-            {deleteButton}
-          </Grid>
+        <Grid
+          justify={'flex-end'}
+          container
+          direction='row'
+          classes={{
+            container: this.props.classes.viewer_container_bar
+          }}
+        >
+          <div hidden={pane.hide}>
+            {(numSensors > 1) ? viewerTypeMenu : null}
+            {(numSensors > 1) ? viewerIdMenu : null}
+          </div>
+          {visibilityButton}
+          <div hidden={pane.hide}>
+            {verticalSplitButton}
+            {horizontalSplitButton}
+          </div>
+          {deleteButton}
+        </Grid>
       )
       // Leaf, render viewer container
       return (
@@ -281,12 +283,21 @@ class LabelPane extends Component<Props> {
 
     let defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
 
-    if (child1State.hide && child2State.hide) {
+    let hiddenSize = HIDDEN_UNIT_SIZE
+    if (pane.split) {
+      if (pane.split === SplitType.HORIZONTAL) {
+        hiddenSize *= pane.numHorizontalChildren + 1
+      } else {
+        hiddenSize *= pane.numVerticalChildren + 1
+      }
+    }
+
+    if (pane.hide) {
       defaultSize = '50%'
     } else if (child1State.hide) {
-      defaultSize = '50px'
+      defaultSize = `${hiddenSize}px`
     } else if (child2State.hide) {
-      defaultSize = 'calc(100% - 50px)'
+      defaultSize = `calc(100% - ${hiddenSize}px)`
     }
 
     return (
