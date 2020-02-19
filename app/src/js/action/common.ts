@@ -366,9 +366,10 @@ export function updateAll (): types.UpdateAllAction {
 /**
  * wrapper for submit action
  */
-export function submit (): types.SubmitAction {
+export function updateProgress (): types.UpdateProgressAction {
   return {
-    type: types.SUBMIT,
-    sessionId: Session.id
+    type: types.UPDATE_PROGRESS,
+    sessionId: Session.id,
+    time: Date.now()
   }
 }

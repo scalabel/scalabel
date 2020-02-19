@@ -7,6 +7,7 @@ import {
   Select,
   ShapeType,
   SplitType,
+  SubmitData,
   TaskType,
   ViewerConfigType
 } from '../functional/types'
@@ -59,8 +60,12 @@ export interface BaseAction {
   userId?: string
 }
 
-export type SubmitAction = BaseAction
 export type InitSessionAction = BaseAction
+
+export interface SubmitAction extends BaseAction {
+  /** the data for the submission */
+  submitData: SubmitData
+}
 
 export interface ChangeSelectAction extends BaseAction {
   /** partial selection */
