@@ -282,6 +282,7 @@ class LabelPane extends Component<Props> {
     } else if (child2State.hide) {
       defaultSize = 'calc(100% - 50px)'
     }
+    console.log(defaultSize)
 
     return (
       <SplitPane
@@ -292,6 +293,7 @@ class LabelPane extends Component<Props> {
           (size) => Session.dispatch(updatePane(pane.id, { primarySize: size }))
         }
         allowResize
+        size={defaultSize}
         resizerClassName={this.props.classes.resizer}
       >
         {child1}
