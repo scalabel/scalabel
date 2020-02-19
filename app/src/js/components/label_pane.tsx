@@ -4,6 +4,8 @@ import MenuItem from '@material-ui/core/MenuItem'
 import Select from '@material-ui/core/Select'
 import CloseIcon from '@material-ui/icons/Close'
 import ViewStreamIcon from '@material-ui/icons/ViewStream'
+import VisibilityIcon from '@material-ui/icons/Visibility'
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff'
 import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
@@ -163,6 +165,21 @@ class LabelPane extends Component<Props> {
         </Select>
       )
 
+      const visibilityButton = (
+        <IconButton
+          className={this.props.classes.icon}
+          onClick={() => {
+            Session.dispatch(updatePane(pane.id, { hide: !pane.hide }))
+          }}
+        >
+          {
+            (pane.hide) ?
+              <VisibilityIcon fontSize='small' /> :
+              <VisibilityOffIcon fontSize='small' />
+          }
+        </IconButton>
+      )
+
       const verticalSplitButton = (
         <IconButton
           className={this.props.classes.icon90}
@@ -173,6 +190,7 @@ class LabelPane extends Component<Props> {
               pane.viewerId
             ))
           }}
+          edge={'start'}
         >
           <ViewStreamIcon />
         </IconButton>
@@ -222,6 +240,7 @@ class LabelPane extends Component<Props> {
           >
             {(numSensors > 1) ? viewerTypeMenu : null}
             {(numSensors > 1) ? viewerIdMenu : null}
+            {visibilityButton}
             {verticalSplitButton}
             {horizontalSplitButton}
             {deleteButton}
@@ -231,7 +250,9 @@ class LabelPane extends Component<Props> {
       return (
           <div>
             {configBar}
-            {viewerFactory(viewerConfig, pane.viewerId)}
+            <div hidden={pane.hide}>
+              {viewerFactory(viewerConfig, pane.viewerId)}
+            </div>
           </div>
       )
     }
@@ -251,7 +272,17 @@ class LabelPane extends Component<Props> {
     const child1 = (<StyledLabelPane pane={pane.child1} />)
     const child2 = (<StyledLabelPane pane={pane.child2} />)
 
-    const defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
+    const child1State = this.state.user.layout.panes[pane.child1]
+    const child2State = this.state.user.layout.panes[pane.child2]
+
+    let defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
+
+    if (child1State.hide) {
+      defaultSize = '50px'
+    } else if (child2State.hide) {
+      defaultSize = 'calc(100% - 50px)'
+    }
+
     return (
       <SplitPane
         split={pane.split}

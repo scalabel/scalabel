@@ -315,6 +315,8 @@ export interface PaneType {
   parent: number
   /** If leaf, >= 0 */
   viewerId: number
+  /** Whether to hide pane */
+  hide: boolean
   /**
    * Which child is the primary pane to apply sizing to.
    * Other child is sized based on the size of the primary child
