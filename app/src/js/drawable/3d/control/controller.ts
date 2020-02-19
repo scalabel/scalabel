@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import Label3D from '../label3d'
 
 export interface ControlUnit extends THREE.Object3D {
-  /** get update vectors: [translation, rotation, scale, new intersection] */
+  /** transform labels, returns new intersection */
   transform: (
     oldIntersection: THREE.Vector3,
     newProjection: THREE.Ray,
@@ -142,4 +142,10 @@ export abstract class Controller extends THREE.Object3D {
       unit.updateScale(scale)
     }
   }
+
+  /** Apply pre-determined transformation amount based on camera direction */
+  public abstract transformDiscrete (
+    moveDirection: THREE.Vector3,
+    cameraDirection: THREE.Vector3
+  ): void
 }

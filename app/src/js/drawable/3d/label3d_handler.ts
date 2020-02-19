@@ -228,7 +228,12 @@ export class Label3DHandler {
         this._keyDownMap[e.key] = true
     }
     if (Session.label3dList.selectedLabel !== null) {
-      return Session.label3dList.control.onKeyDown(e)
+      const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
+      if (consumed) {
+        commitLabels([...Session.label3dList.updatedLabels.values()])
+        Session.label3dList.clearUpdatedLabels()
+        return true
+      }
     }
     return false
   }

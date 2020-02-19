@@ -5,6 +5,8 @@ import { Controller } from './controller'
 import { TranslationAxis } from './translation_axis'
 import { TranslationPlane } from './translation_plane'
 
+const MOVE_AMOUNT = 0.05
+
 /**
  * Groups TranslationAxis's and TranslationPlanes to perform translation ops
  */
@@ -50,6 +52,15 @@ export class TranslationControl extends Controller {
     )
     for (const unit of this._controlUnits) {
       this.add(unit)
+    }
+  }
+
+  /** Apply pre-determined transformation amount based on camera direction */
+  public transformDiscrete (direction: THREE.Vector3): void {
+    const delta = (new THREE.Vector3()).copy(direction).normalize()
+    delta.multiplyScalar(MOVE_AMOUNT)
+    for (const label of this._labels) {
+      label.translate(delta)
     }
   }
 }
