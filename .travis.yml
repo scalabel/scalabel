@@ -18,7 +18,8 @@ install:
   - npm install canvas --build-from-source
   - npm install
 script:
-  - pylint scripts/
+  - python3 -m pylint scripts/
+  - python3 -m mypy scripts/launch_server.py
   - node_modules/.bin/eslint .
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
