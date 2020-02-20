@@ -293,12 +293,8 @@ export interface ConfigType {
   attributes: Attribute[]
   /** task id */
   taskId: string
-  /** the time of last project submission */
-  submitTime: number
   /** Whether or not in demo mode */
   demoMode: boolean
-  /** Whether or not submitted */
-  submitted: boolean
   /** whether to use autosave */
   autosave: boolean
 }
@@ -367,6 +363,17 @@ export interface TaskStatus {
 
 export interface TrackMapType { [key: number]: TrackType }
 
+export interface SubmitData {
+  /** time of the submission (client side) */
+  time: number
+  /** author of the submission */
+  user: string
+}
+
+export interface Progress {
+  /** data on submissions */
+  submissions: SubmitData[]
+}
 export interface TaskType {
   /** Configurations */
   config: ConfigType
@@ -378,6 +385,8 @@ export interface TaskType {
   tracks: TrackMapType
   /** data sources */
   sensors: SensorMapType
+  /** info on task progress */
+  progress: Progress
 }
 
 export interface Select {

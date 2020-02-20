@@ -178,9 +178,7 @@ export const sampleProjectImage: Project = {
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: '',
-    submitTime: -1,
     demoMode: false,
-    submitted: false,
     autosave: true
   },
   sensors: {}
@@ -241,9 +239,7 @@ export const sampleProjectVideo: Project = {
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: '',
-    submitTime: -1,
     demoMode: true,
-    submitted: false,
     autosave: true
   },
   sensors: {}
@@ -266,9 +262,7 @@ export const sampleProjectAutolabel: Project = {
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: '',
-    submitTime: -1,
     demoMode: false,
-    submitted: false,
     autosave: true
   },
   sensors: {}
@@ -291,9 +285,7 @@ export const sampleProjectAutolabelPolygon: Project = {
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: '',
-    submitTime: -1,
     demoMode: false,
-    submitted: false,
     autosave: true
   },
   sensors: {}
@@ -316,9 +308,7 @@ export const sampleTasksImage: TaskType[] = [
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: '000000',
-      submitTime: -1,
       demoMode: false,
-      submitted: false,
       autosave: true
     },
     status: {
@@ -326,6 +316,9 @@ export const sampleTasksImage: TaskType[] = [
       maxShapeId: -1,
       maxOrder: 0,
       maxTrackId: -1
+    },
+    progress: {
+      submissions: []
     },
     items: [
       {
@@ -399,9 +392,7 @@ export const sampleTasksImage: TaskType[] = [
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: '000001',
-      submitTime: -1,
       demoMode: false,
-      submitted: false,
       autosave: true
     },
     status: {
@@ -409,6 +400,9 @@ export const sampleTasksImage: TaskType[] = [
       maxShapeId: -1,
       maxOrder: 0,
       maxTrackId: -1
+    },
+    progress: {
+      submissions: []
     },
     items: [
       {
@@ -487,9 +481,7 @@ export const sampleTasksVideo: TaskType[] = [
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: '000000',
-      submitTime: -1,
       demoMode: true,
-      submitted: false,
       autosave: true
     },
     status: {
@@ -497,6 +489,9 @@ export const sampleTasksVideo: TaskType[] = [
       maxShapeId: 1,
       maxOrder: 2,
       maxTrackId: 1
+    },
+    progress: {
+      submissions: []
     },
     items: [
       {
@@ -667,9 +662,7 @@ export const sampleTasksVideo: TaskType[] = [
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: '000001',
-      submitTime: -1,
       demoMode: true,
-      submitted: false,
       autosave: true
     },
     status: {
@@ -677,6 +670,9 @@ export const sampleTasksVideo: TaskType[] = [
       maxShapeId: -1,
       maxOrder: 0,
       maxTrackId: -1
+    },
+    progress: {
+      submissions: []
     },
     items: [
       {

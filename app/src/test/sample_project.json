@@ -59,8 +59,6 @@
             }
         ],
         "taskId": "",
-        "submitTime": -1,
-        "submitted": false,
         "tracking": false,
         "policyTypes": [],
         "demoMode": false,
