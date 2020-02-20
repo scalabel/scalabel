@@ -254,7 +254,7 @@ export class Label3DHandler {
    */
   public onKeyUp (e: KeyboardEvent) {
     delete this._keyDownMap[e.key]
-    if (Session.label3dList.selectedLabel !== null && this.isKeyDown(e.key)) {
+    if (Session.label3dList.selectedLabel !== null) {
       Session.label3dList.control.onKeyUp(e)
     }
     this._keyThrottleTimer = setTimeout(() => {

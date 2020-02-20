@@ -5,7 +5,7 @@ import Label3D from '../label3d'
 import { Controller } from './controller'
 import { ScaleAxis } from './scale_axis'
 
-const SCALE_AMOUNT = 0.025
+const SCALE_AMOUNT = 0.01
 
 /**
  * perform scaling ops
