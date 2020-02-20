@@ -45,7 +45,7 @@ export function initSession (state: State): State {
   const items = state.task.items
   const itemStatuses = session.itemStatuses.slice()
   for (let i = 0; i < itemStatuses.length; i++) {
-    const loadedMap: {[id: number]: boolean} = {}
+    const loadedMap: { [id: number]: boolean } = {}
     for (const key of Object.keys(items[i].urls)) {
       const sensorId = Number(key)
       loadedMap[sensorId] = false
@@ -126,9 +126,9 @@ export function deleteLabelsById (
  * @param shapes
  */
 function addLabelsToItem (
-    item: ItemType, taskStatus: TaskStatus, newLabels: LabelType[],
-    shapeTypes: string[][], shapes: ShapeType[][]
-  ): [ItemType, LabelType[], TaskStatus] {
+  item: ItemType, taskStatus: TaskStatus, newLabels: LabelType[],
+  shapeTypes: string[][], shapes: ShapeType[][]
+): [ItemType, LabelType[], TaskStatus] {
   newLabels = [...newLabels]
   const newLabelIds: number[] = []
   const newShapeIds: number[] = []
@@ -138,8 +138,8 @@ function addLabelsToItem (
     const labelId = taskStatus.maxLabelId + 1 + index
     const shapeIds = _.range(shapes[index].length).map((i) => i + newShapeId)
     const newLabelShapes = shapes[index].map((s, i) =>
-        makeIndexedShape(shapeIds[i], [labelId], shapeTypes[index][i], s)
-      )
+      makeIndexedShape(shapeIds[i], [labelId], shapeTypes[index][i], s)
+    )
     const order = taskStatus.maxOrder + 1 + index
     const validChildren = label.children.filter((id) => id >= 0)
     label = updateObject(label, {
@@ -188,7 +188,7 @@ function addLabelsToItem (
 function addLabelstoItems (
   items: ItemType[], taskStatus: TaskStatus, labelsToAdd: LabelType[][],
   shapeTypes: string[][][], shapes: ShapeType[][][]
-  ): [ItemType[], LabelType[], TaskStatus] {
+): [ItemType[], LabelType[], TaskStatus] {
   const allNewLabels: LabelType[] = []
   items = [...items]
   items.forEach((item, index) => {
@@ -221,7 +221,7 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
   if (action.sessionId === session.id) {
     for (const label of newLabels) {
       if (label.item === user.select.item) {
-        const selectedLabels: {[index: number]: number[]} = {}
+        const selectedLabels: { [index: number]: number[] } = {}
         selectedLabels[user.select.item] = [label.id]
         user = updateUserSelect(user, {
           labels: selectedLabels,
@@ -269,7 +269,7 @@ function addTrackToTask (
   const tracks = updateObject(task.tracks, { [track.id]: track })
   status.maxTrackId += 1
   task = { ...task, items, status, tracks }
-  return [ task, track, newLabels ]
+  return [task, track, newLabels]
 }
 
 /**
@@ -279,7 +279,7 @@ function addTrackToTask (
  */
 export function addTrack (state: State, action: types.AddTrackAction): State {
   let { user } = state
-  const [task,, newLabels] = addTrackToTask(
+  const [task, , newLabels] = addTrackToTask(
     state.task, action.trackType, action.itemIndices, action.labels,
     action.shapeTypes, action.shapes
   )
@@ -287,7 +287,7 @@ export function addTrack (state: State, action: types.AddTrackAction): State {
   if (action.sessionId === state.session.id) {
     for (const l of newLabels) {
       if (l.item === user.select.item) {
-        const selectedLabels: {[index: number]: number[]} = {}
+        const selectedLabels: { [index: number]: number[] } = {}
         selectedLabels[user.select.item] = [l.id]
         user = updateUserSelect(user, { labels: selectedLabels })
         break
@@ -376,7 +376,7 @@ function changeShapesInItems (
  * @param action
  */
 export function changeShapes (
-    state: State, action: types.ChangeShapesAction): State {
+  state: State, action: types.ChangeShapesAction): State {
   let task = state.task
   const user = state.user
   const shapeIds = action.shapeIds
@@ -396,8 +396,8 @@ function changeLabelsInItem (
   item: ItemType,
   labelIds: number[],
   props: Array<Partial<LabelType>>
-  ): ItemType {
-  const newLabels: {[key: number]: LabelType} = {}
+): ItemType {
+  const newLabels: { [key: number]: LabelType } = {}
   labelIds.forEach((labelId, index) => {
     const children = props[index].children
     if (children) {
@@ -406,7 +406,7 @@ function changeLabelsInItem (
     const oldLabel = item.labels[labelId]
     // avoid changing the shape field in the label
     newLabels[labelId] = updateObject(
-        oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
+      oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
   })
   item = updateObject(item, { labels: updateObject(item.labels, newLabels) })
   return item
@@ -506,7 +506,7 @@ export function getRootTrackId (item: ItemType, labelId: number): number {
  * @param {types.LinkLabelsAction} action
  */
 export function linkLabels (
-    state: State, action: types.LinkLabelsAction): State {
+  state: State, action: types.LinkLabelsAction): State {
   // Add a new label to the state
   let item = state.task.items[action.itemIndex]
   if (action.labelIds.length === 0) {
@@ -545,14 +545,17 @@ export function linkLabels (
   if (trackId >= 0) {
     newLabel.track = trackId
     let track = tracks[trackId]
-    track = updateObject(track, { labels: updateObject(
-      track.labels, { [item.index]: newLabelId })})
+    track = updateObject(track, {
+      labels: updateObject(
+        track.labels, { [item.index]: newLabelId })
+    })
     tracks = updateObject(tracks, { [trackId]: track })
   }
 
   // update the item
   item = updateObject(item, {
-    labels: updateObject(item.labels, _.zipObject(children, labels))})
+    labels: updateObject(item.labels, _.zipObject(children, labels))
+  })
   const items = updateListItem(state.task.items, item.index, item)
   const task = updateObject(state.task, { items, tracks })
   return { ...state, task }
@@ -610,7 +613,7 @@ export function unlinkLabels (
  * @param {types.ChangeSelectAction} action
  */
 export function changeSelect (
-    state: State, action: types.ChangeSelectAction): State {
+  state: State, action: types.ChangeSelectAction): State {
   const newSelect = updateObject(state.user.select, action.select)
   for (const key of Object.keys(newSelect.labels)) {
     const index = Number(key)
@@ -658,7 +661,7 @@ function deleteLabelsFromItem (
   const deletedLabels = pickObject(item.labels, labelIds)
 
   // find related labels and shapes
-  const updatedLabels: {[key: number]: LabelType} = {}
+  const updatedLabels: { [key: number]: LabelType } = {}
   const updatedShapes: { [key: number]: IndexedShapeType } = {}
   const deletedShapes: { [key: number]: IndexedShapeType } = {}
   _.forEach(deletedLabels, (label) => {
@@ -671,7 +674,7 @@ function deleteLabelsFromItem (
     label.shapes.forEach((shapeId) => {
       let shape = item.shapes[shapeId]
       shape = updateObject(
-          shape, { label: removeListItems(shape.label, [label.id]) })
+        shape, { label: removeListItems(shape.label, [label.id]) })
       updatedShapes[shape.id] = shape
     })
   })
@@ -768,7 +771,7 @@ export function deleteLabels (
       deletedIds.add(labelId)
     }
   }
-  const newSelectedLabels: {[index: number]: number[]} = []
+  const newSelectedLabels: { [index: number]: number[] } = []
   for (const key of Object.keys(user.select.labels)) {
     const index = Number(key)
     const newSelectedIds = []
@@ -1077,6 +1080,32 @@ export function deletePane (
         state.user,
         { layout: updateObject(state.user.layout, updateParams) }
       )
+    }
+  )
+}
+
+/** adds a new submission */
+export function submit (
+  state: State, action: types.SubmitAction
+): State {
+  const submissions =
+    [...state.task.progress.submissions, _.cloneDeep(action.submitData)]
+  const newProgress = updateObject(
+    state.task.progress,
+    {
+      submissions
+    }
+  )
+  const newTask = updateObject(
+    state.task,
+    {
+      progress: newProgress
+    }
+  )
+  return updateObject(
+    state,
+    {
+      task: newTask
     }
   )
 }
