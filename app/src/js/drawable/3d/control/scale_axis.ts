@@ -80,8 +80,8 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this._direction)
     this.applyQuaternion(quaternion)
 
-    this.layers.enableAll()
     this.setHighlighted()
+    this.layers.enableAll()
   }
 
   /** get update vectors: [translation, rotation, scale, new intersection] */

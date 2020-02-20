@@ -65,8 +65,8 @@ export class TranslationAxis extends THREE.Group
     quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), this._direction)
     this.applyQuaternion(quaternion)
 
-    this.layers.enableAll()
     this.setHighlighted()
+    this.layers.enableAll()
   }
 
   /**
