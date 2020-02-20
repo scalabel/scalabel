@@ -128,11 +128,7 @@ class Viewer3D extends DrawableViewer<Props> {
       }
 
       this._camera.layers.set(
-        this.props.id - Math.min(
-          ...Object.keys(this.state.user.viewerConfigs).map(
-            (key) => Number(key)
-          )
-        )
+        this.props.id
       )
       const item = this.state.user.select.item
       const sensor =

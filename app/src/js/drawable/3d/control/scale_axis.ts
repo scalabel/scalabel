@@ -82,6 +82,8 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
 
     this.setHighlighted()
     this.layers.enableAll()
+    this._line.layers.enableAll()
+    this._box.layers.enableAll()
   }
 
   /** get update vectors: [translation, rotation, scale, new intersection] */

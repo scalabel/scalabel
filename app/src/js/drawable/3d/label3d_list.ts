@@ -52,6 +52,7 @@ export class Label3DList {
 
   constructor () {
     this.control = new TransformationControl()
+    this.control.layers.enableAll()
     this._labels = {}
     this._raycastMap = {}
     this._selectedLabel = null

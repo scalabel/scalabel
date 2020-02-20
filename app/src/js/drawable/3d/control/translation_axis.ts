@@ -67,6 +67,8 @@ export class TranslationAxis extends THREE.Group
 
     this.setHighlighted()
     this.layers.enableAll()
+    this._line.layers.enableAll()
+    this._cone.layers.enableAll()
   }
 
   /**
