@@ -31,6 +31,8 @@ export class Label3DHandler {
   private _sensor: SensorType
   /** camera */
   private _camera: THREE.Camera
+  /** timer for throttling committing effects of key presses to state */
+  private _keyThrottleTimer: ReturnType<typeof setTimeout> | null
 
   constructor (camera: THREE.Camera) {
     this._highlightedLabel = null
@@ -41,6 +43,7 @@ export class Label3DHandler {
     this._sensorIds = []
     this._sensor = makeSensor(-1, '', DataType.POINT_CLOUD)
     this._camera = camera
+    this._keyThrottleTimer = null
   }
 
   /** Set camera */
@@ -229,6 +232,9 @@ export class Label3DHandler {
       const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
       if (consumed) {
         this._keyDownMap[e.key] = true
+        if (this._keyThrottleTimer) {
+          window.clearTimeout(this._keyThrottleTimer)
+        }
         this.timedRepeat(
           () => {
             Session.label3dList.control.onKeyDown(e, this._camera)
@@ -248,13 +254,15 @@ export class Label3DHandler {
    */
   public onKeyUp (e: KeyboardEvent) {
     delete this._keyDownMap[e.key]
-    if (Session.label3dList.selectedLabel !== null && !this.isKeyDown(e.key)) {
+    if (Session.label3dList.selectedLabel !== null && this.isKeyDown(e.key)) {
       Session.label3dList.control.onKeyUp(e)
     }
-    if (Session.label3dList.updatedLabels.size > 0) {
-      commitLabels([...Session.label3dList.updatedLabels.values()])
-      Session.label3dList.clearUpdatedLabels()
-    }
+    this._keyThrottleTimer = setTimeout(() => {
+      if (Session.label3dList.updatedLabels.size > 0) {
+        commitLabels([...Session.label3dList.updatedLabels.values()])
+        Session.label3dList.clearUpdatedLabels()
+      }
+    }, 200)
     return false
   }
 
