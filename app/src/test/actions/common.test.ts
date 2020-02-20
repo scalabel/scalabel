@@ -89,3 +89,27 @@ test('Link labels', () => {
     expect(item.labels[label].parent).toEqual(parent1)
   }
 })
+
+test('Submit task', () => {
+  const constantDate = Date.now()
+  Date.now = jest.fn(() => {
+    return constantDate
+  })
+  Session.devMode = false
+  initStore(testJson)
+  // first submission
+  Session.dispatch(action.submit())
+  let state = Session.getState()
+  let submissions = state.task.progress.submissions
+  expect(submissions.length).toBe(1)
+  expect(submissions[0].time).toBe(constantDate)
+  expect(submissions[0].user).toBe(state.user.id)
+
+  // second submission
+  Session.dispatch(action.submit())
+  state = Session.getState()
+  submissions = state.task.progress.submissions
+  expect(submissions.length).toBe(2)
+  expect(submissions[1].time).toBe(constantDate)
+  expect(submissions[1].user).toBe(state.user.id)
+})
