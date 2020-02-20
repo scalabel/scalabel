@@ -50,6 +50,8 @@ More installation and usage details can be find in our [documentation](http://ww
       docker build . -t scalabel/www
       ```
 
+      Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
+
    2. Compile the code yourself (recommended if you want to customize the source code)
 
       Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
@@ -97,7 +99,7 @@ More installation and usage details can be find in our [documentation](http://ww
    If using docker,
 
    ```
-   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 6379:6379 scalabel/www \
+   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 -p 6379:6379 scalabel/www \
        python3.8 scripts/launch_server.py --config /opt/scalabel/data/config.yml
    ```
 
