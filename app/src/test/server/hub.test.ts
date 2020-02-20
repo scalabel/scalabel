@@ -3,11 +3,10 @@ import { goToItem } from '../../js/action/common'
 import { FileStorage } from '../../js/server/file_storage'
 import { Hub } from '../../js/server/hub'
 import { ProjectStore } from '../../js/server/project_store'
-import { SocketServer } from '../../js/server/socket_server'
-import { ActionPacketType, defaultEnv, EventName,
+import { defaultEnv, EventName,
   RegisterMessageType, SyncActionMessageType } from '../../js/server/types'
 import { UserManager } from '../../js/server/user_manager'
-import { index2str, updateState } from '../../js/server/util'
+import { index2str, updateStateTimestamp } from '../../js/server/util'
 import { getInitialState, getRandomBox2dAction } from '../util'
 
 jest.mock('../../js/server/file_storage')
@@ -15,19 +14,31 @@ jest.mock('../../js/server/path')
 jest.mock('../../js/server/project_store')
 jest.mock('../../js/server/user_manager')
 
-let socketId: string
 let projectName: string
 let taskIndex: number
 let taskId: string
 let sessionId: string
 let userId: string
 let actionListId: string
-let mockSocket: SocketServer
 let mockStorage: FileStorage
 let mockProjectStore: ProjectStore
 let mockUserManager: UserManager
 let hub: Hub
-let broadcastFunc: (event: string, data: ActionPacketType) => void
+const broadcastFunc = jest.fn()
+const socketId = 'socketId'
+const mockSocket = {
+  on: jest.fn(),
+  emit: jest.fn(),
+  join: jest.fn(),
+  broadcast: {
+    to: jest.fn().mockImplementation(() => {
+      return {
+        emit: broadcastFunc
+      }
+    })
+  },
+  id: socketId
+}
 
 beforeAll(() => {
   const constantDate = Date.now()
@@ -35,28 +46,13 @@ beforeAll(() => {
     return constantDate
   })
 
-  socketId = 'socketId'
   projectName = 'testProject'
   taskIndex = 0
   taskId = index2str(taskIndex)
   sessionId = 'testSessId'
   userId = 'testUserId'
   actionListId = 'actionListId'
-  broadcastFunc = jest.fn()
 
-  mockSocket = {
-    on: jest.fn(),
-    emit: jest.fn(),
-    join: jest.fn(),
-    broadcast: {
-      to: jest.fn().mockImplementation(() => {
-        return {
-          emit: broadcastFunc
-        }
-      })
-    },
-    id: socketId
-  }
   mockStorage = new FileStorage('fakeDataDir')
   mockProjectStore = new ProjectStore(mockStorage)
   mockUserManager = new UserManager(mockStorage)
@@ -119,7 +115,7 @@ describe('Test hub functionality', () => {
 
     const rawData = JSON.stringify(data)
     await hub.actionUpdate(rawData, mockSocket)
-    const newState = updateState(getInitialState(sessionId), [action])
+    const newState = updateStateTimestamp(getInitialState(sessionId), [action])
     expect(mockProjectStore.saveState).toBeCalledWith(newState, projectName,
       taskId, newMetadata)
     expect(broadcastFunc).toBeCalledWith(
@@ -172,7 +168,7 @@ describe('Test hub functionality', () => {
     expect(broadcastFunc).toHaveBeenCalledTimes(1)
     expect(mockSocket.emit).toHaveBeenCalledTimes(1)
 
-    const newState = updateState(getInitialState(sessionId), [action])
+    const newState = updateStateTimestamp(getInitialState(sessionId), [action])
     mockProjectStore.loadState = jest.fn().mockImplementation(() => {
       return newState
     })
@@ -185,7 +181,9 @@ describe('Test hub functionality', () => {
     expect(broadcastFunc).toHaveBeenCalledTimes(2)
     expect(mockSocket.emit).toHaveBeenCalledTimes(2)
 
-    // TODO: verify that both calls to emit use actions with the same timestamps
+    // verify that the actions have the same timestamps in both emit calls
+    const calls = mockSocket.emit.mock.calls
+    expect(calls[0]).toBe(calls[1])
   })
 
   test('If crash before saving, saves again', async () => {

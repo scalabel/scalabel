@@ -9,7 +9,7 @@ import {
   ActionPacketType, Env, EventName,
   RegisterMessageType, StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
-import { index2str, updateState } from './util'
+import { index2str, updateStateTimestamp } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -111,13 +111,12 @@ export class Hub {
     const redisMetadata =
       await this.projectStore.loadStateMetadata(projectName, taskId)
     const actionIdsSaved = redisMetadata.actionIds
-    // TODO: in the else, case, apply the old timestamps to the same actions
 
     if (!(actionPacketId in actionIdsSaved) && taskActions.length > 0) {
       const state = await this.projectStore.loadState(projectName, taskId)
-      const newState = updateState(state, taskActions)
+      const [newState, timestamps] = updateStateTimestamp(state, taskActions)
 
-      // convert set to a list in JSON
+      // mark the id as saved, and store the timestamps
       actionIdsSaved[actionPacketId] = timestamps
       const stateMetadata: StateMetadata = {
         projectName,
@@ -126,19 +125,24 @@ export class Hub {
       }
       await this.projectStore.saveState(
         newState, projectName, taskId, stateMetadata)
+    } else if (taskActions.length > 0) {
+      // if actions were already saved, apply the old timestamps
+      const timestamps = actionIdsSaved[actionPacketId]
+      for (let actionInd = 0; actionInd < taskActions.length; actionInd++) {
+        taskActions[actionInd].timestamp = timestamps[actionInd]
+      }
     }
 
     if (taskActions.length > 0) {
       // broadcast task actions to all other sessions in room
       const taskActionMsg: ActionPacketType = {
         actions: taskActions,
-        id: actionsId
+        id: actionPacketId
       }
       // broadcast task actions to all other sessions in room
       socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
     }
     // echo everything to original session
-    console.log(data.actions)
     socket.emit(EventName.ACTION_BROADCAST, data.actions)
   }
 }

@@ -62,7 +62,7 @@ export class ProjectStore {
     let stateMetadata: StateMetadata = {
       projectName,
       taskId,
-      actionIds: []
+      actionIds: {}
     }
     if (this.redisStore) {
       const stringStateMetadata = await this.redisStore.get(metaKey)

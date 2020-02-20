@@ -245,17 +245,33 @@ export function safeParseJSON (data: string) {
 }
 
 /**
+ * Updates a state with a series of timestamped actions
+ */
+export function updateStateTimestamp (
+  state: State, actions: BaseAction[]): [State, number[]] {
+  const stateStore = configureStore(state)
+
+  // For each action, update the store
+  const timestamps = []
+  for (const action of actions) {
+    const time = Date.now()
+    timestamps.push(time)
+    action.timestamp = time
+    stateStore.dispatch(action)
+  }
+
+  return [stateStore.getState().present, timestamps]
+}
+
+/**
  * Updates a state with a series of actions
  */
 export function updateState (
-  state: State, actions: BaseAction[], timestamp= true) {
+  state: State, actions: BaseAction[]): State {
   const stateStore = configureStore(state)
 
-    // For each action, update the store
+  // For each action, update the store
   for (const action of actions) {
-    if (timestamp) {
-      action.timestamp = Date.now()
-    }
     stateStore.dispatch(action)
   }
 

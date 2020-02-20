@@ -33,7 +33,7 @@ beforeAll(async () => {
   const metadata: StateMetadata = {
     projectName: 'project',
     taskId: '000001',
-    actionIds: []
+    actionIds: {}
   }
   metadataString = JSON.stringify(metadata)
 })

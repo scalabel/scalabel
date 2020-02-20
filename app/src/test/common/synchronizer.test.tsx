@@ -65,11 +65,11 @@ describe('Test synchronizer functionality', () => {
 
     // Reconnect, but some missed actions occured in the backend
     const missedAction = getRandomBox2dAction()
-    const newInitialState = updateState(initialState, [missedAction], false)
+    const newInitialState = updateState(initialState, [missedAction])
     synchronizer.registerAckHandler(newInitialState)
 
     // Check that frontend state updates correctly
-    const expectedState = updateState(newInitialState, [frontendAction], false)
+    const expectedState = updateState(newInitialState, [frontendAction])
     expect(Session.getState()).toMatchObject(expectedState)
     // Also check that save is still in progress
     checkNumQueuedActions(synchronizer, 1)
