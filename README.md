@@ -50,6 +50,8 @@ More installation and usage details can be find in our [documentation](http://ww
       docker build . -t scalabel/www
       ```
 
+      Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
+
    2. Compile the code yourself (recommended if you want to customize the source code)
 
       Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
