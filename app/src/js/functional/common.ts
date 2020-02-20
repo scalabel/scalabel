@@ -211,9 +211,6 @@ function addLabelstoItems (
 export function addLabels (state: State, action: types.AddLabelsAction): State {
   let { task, user } = state
   const session = state.session
-  console.log('adding labels')
-  console.log(task.items)
-  console.log(action.itemIndices)
   let items = [...task.items]
   const selectedItems = pickArray(items, action.itemIndices)
   const [newItems, newLabels, status] = addLabelstoItems(

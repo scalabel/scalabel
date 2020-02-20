@@ -111,7 +111,6 @@ export class Hub {
     const redisMetadata =
       await this.projectStore.loadStateMetadata(projectName, taskId)
     const actionIdsSaved = redisMetadata.actionIds
-
     if (!(actionPacketId in actionIdsSaved) && taskActions.length > 0) {
       const state = await this.projectStore.loadState(projectName, taskId)
       const [newState, timestamps] = updateStateTimestamp(state, taskActions)
@@ -123,6 +122,7 @@ export class Hub {
         taskId,
         actionIds: actionIdsSaved
       }
+
       await this.projectStore.saveState(
         newState, projectName, taskId, stateMetadata)
     } else if (taskActions.length > 0) {

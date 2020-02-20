@@ -1,4 +1,5 @@
 import { cleanup } from '@testing-library/react'
+import _ from 'lodash'
 import { goToItem } from '../../js/action/common'
 import { FileStorage } from '../../js/server/file_storage'
 import { Hub } from '../../js/server/hub'
@@ -42,11 +43,6 @@ const mockSocket = {
 }
 
 beforeAll(() => {
-  // const constantDate = Date.now()
-  // Date.now = jest.fn(() => {
-  //   return constantDate
-  // })
-
   projectName = 'testProject'
   taskIndex = 0
   taskId = index2str(taskIndex)
@@ -72,10 +68,10 @@ describe('Test hub functionality', () => {
     const initialMetadata = {
       projectName,
       taskId,
-      actionIds: []
+      actionIds: {}
     }
     mockProjectStore.loadStateMetadata = jest.fn().mockImplementation(() => {
-      return initialMetadata
+      return _.cloneDeep(initialMetadata)
     })
   })
 
@@ -96,7 +92,14 @@ describe('Test hub functionality', () => {
     )
   })
 
-  test.only('Test task action update saves data and broadcasts', async () => {
+  test('Test task action update saves data and broadcasts', async () => {
+    // mock date for action timestamp
+    const constantDate = Date.now()
+    const dateFn = Date.now
+    Date.now = jest.fn(() => {
+      return constantDate
+    })
+
     // make a task action
     const action = getRandomBox2dAction()
     const data: SyncActionMessageType = {
@@ -108,6 +111,7 @@ describe('Test hub functionality', () => {
         id: actionListId
       }
     }
+
     // send the action
     const rawData = JSON.stringify(data)
     await hub.actionUpdate(rawData, mockSocket)
@@ -117,7 +121,7 @@ describe('Test hub functionality', () => {
       projectName,
       taskId,
       actionIds: {
-        actionListId: []
+        actionListId: [constantDate]
       }
     }
     const newState = updateState(getInitialState(sessionId), [action])
@@ -125,10 +129,19 @@ describe('Test hub functionality', () => {
       taskId, newMetadata)
 
     // test that actions were broadcast correctly
+    const newAction = _.cloneDeep(action)
+    newAction.timestamp = constantDate
+    const newPacket: ActionPacketType = {
+      actions: [newAction],
+      id: actionListId
+    }
     expect(broadcastFunc).toBeCalledWith(
-      EventName.ACTION_BROADCAST, data.actions)
+      EventName.ACTION_BROADCAST, newPacket)
     expect(mockSocket.emit).toBeCalledWith(
-      EventName.ACTION_BROADCAST, data.actions)
+      EventName.ACTION_BROADCAST, newPacket)
+
+    // restore the date function
+    Date.now = dateFn
   })
 
   test('Non-task action just echoes', async () => {
