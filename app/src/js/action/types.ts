@@ -7,6 +7,7 @@ import {
   Select,
   ShapeType,
   SplitType,
+  SubmitData,
   TaskType,
   ViewerConfigType
 } from '../functional/types'
@@ -16,6 +17,7 @@ export const CHANGE_SELECT = 'CHANGE_SELECT'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
+export const SUBMIT = 'SUBMIT'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -43,7 +45,8 @@ export const TASK_ACTION_TYPES = [
   DELETE_LABELS,
   ADD_TRACK,
   MERGE_TRACKS,
-  UPDATE_TASK
+  UPDATE_TASK,
+  SUBMIT
 ]
 
 export interface BaseAction {
@@ -58,6 +61,11 @@ export interface BaseAction {
 }
 
 export type InitSessionAction = BaseAction
+
+export interface SubmitAction extends BaseAction {
+  /** the data for the submission */
+  submitData: SubmitData
+}
 
 export interface ChangeSelectAction extends BaseAction {
   /** partial selection */
@@ -210,6 +218,7 @@ export type TaskActionType =
   | LinkLabelsAction
   | AddTrackAction
   | MergeTrackAction
+  | SubmitAction
 
 export type ActionType =
   SessionActionType

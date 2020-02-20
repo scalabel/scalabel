@@ -304,9 +304,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     categories: [],
     attributes: [],
     taskId: '',
-    submitTime: 0,
     demoMode: false,
-    submitted: false,
     autosave: false,
     ...params
   }
@@ -448,6 +446,9 @@ export function makeTask (params: Partial<TaskType> = {}): TaskType {
     items: [],
     tracks: {},
     sensors: {},
+    progress: {
+      submissions: []
+    },
     ...params
   }
 }
