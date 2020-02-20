@@ -5,7 +5,7 @@ import { Controller } from './controller'
 import { TranslationAxis } from './translation_axis'
 import { TranslationPlane } from './translation_plane'
 
-const MOVE_AMOUNT = 0.05
+const MOVE_AMOUNT = 0.03
 
 /**
  * Groups TranslationAxis's and TranslationPlanes to perform translation ops

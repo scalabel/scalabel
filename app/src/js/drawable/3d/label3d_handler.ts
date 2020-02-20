@@ -224,17 +224,22 @@ export class Label3DHandler {
           }
         }
         break
-      default:
-        this._keyDownMap[e.key] = true
     }
-    if (Session.label3dList.selectedLabel !== null) {
+    if (Session.label3dList.selectedLabel !== null && !this.isKeyDown(e.key)) {
       const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
       if (consumed) {
-        commitLabels([...Session.label3dList.updatedLabels.values()])
-        Session.label3dList.clearUpdatedLabels()
+        this._keyDownMap[e.key] = true
+        this.timedRepeat(
+          () => {
+            Session.label3dList.control.onKeyDown(e, this._camera)
+            Session.label3dList.onDrawableUpdate()
+          },
+          e.key
+        )
         return true
       }
     }
+    this._keyDownMap[e.key] = true
     return false
   }
 
@@ -243,6 +248,10 @@ export class Label3DHandler {
    */
   public onKeyUp (e: KeyboardEvent) {
     delete this._keyDownMap[e.key]
+    if (Session.label3dList.updatedLabels.size > 0) {
+      commitLabels([...Session.label3dList.updatedLabels.values()])
+      Session.label3dList.clearUpdatedLabels()
+    }
     return false
   }
 
@@ -302,6 +311,14 @@ export class Label3DHandler {
           this._highlightedLabel.attributes
         ))
       }
+    }
+  }
+
+  /** Repeat function as long as key is held down */
+  private timedRepeat (fn: () => void, key: string, timeout: number = 30) {
+    if (this.isKeyDown(key)) {
+      fn()
+      setTimeout(() => this.timedRepeat(fn, key, timeout), timeout)
     }
   }
 }

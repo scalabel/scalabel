@@ -92,20 +92,24 @@ export class TransformationControl extends THREE.Group {
       case Key.I_UP:
       case Key.I_LOW:
         this._currentController.transformDiscrete(up, forward)
+        this.updateBounds()
         return true
       case Key.K_UP:
       case Key.K_LOW:
         up.negate()
         this._currentController.transformDiscrete(up, forward)
+        this.updateBounds()
         return true
       case Key.J_UP:
       case Key.J_LOW:
         this._currentController.transformDiscrete(left, forward)
+        this.updateBounds()
         return true
       case Key.L_UP:
       case Key.L_LOW:
         left.negate()
         this._currentController.transformDiscrete(left, forward)
+        this.updateBounds()
         return true
     }
     return false

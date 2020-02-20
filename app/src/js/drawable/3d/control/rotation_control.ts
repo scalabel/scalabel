@@ -4,7 +4,7 @@ import Label3D from '../label3d'
 import { Controller } from './controller'
 import { RotationRing } from './rotation_ring'
 
-const ROTATION_AMOUNT = 0.1
+const ROTATION_AMOUNT = 0.05
 
 /**
  * perform rotation ops

@@ -4,7 +4,7 @@ import Label3D from '../label3d'
 import { Controller } from './controller'
 import { ScaleAxis } from './scale_axis'
 
-const SCALE_AMOUNT = 0.05
+const SCALE_AMOUNT = 0.025
 
 /**
  * perform scaling ops
@@ -61,7 +61,10 @@ export class ScaleControl extends Controller {
   }
 
   /** Apply pre-determined transformation amount based on camera direction */
-  public transformDiscrete (direction: THREE.Vector3): void {
+  public transformDiscrete (
+    direction: THREE.Vector3,
+    forward: THREE.Vector3
+  ): void {
     const center = new THREE.Vector3()
     this._bounds.getCenter(center)
     const dimensions = new THREE.Vector3()
@@ -74,7 +77,7 @@ export class ScaleControl extends Controller {
 
       let maxAxis = 0
       for (let i = 0; i < localDirection.length; i++) {
-        if (localDirection[i] > localDirection[maxAxis]) {
+        if (Math.abs(localDirection[i]) > Math.abs(localDirection[maxAxis])) {
           maxAxis = i
         }
       }
@@ -82,12 +85,13 @@ export class ScaleControl extends Controller {
       const scaleArr = [1, 1, 1]
       scaleArr[maxAxis] += SCALE_AMOUNT
 
-      const anchor = new THREE.Vector3()
-      anchor.copy(direction)
-      anchor.multiply(dimensions)
-      anchor.divideScalar(-2.0)
-      anchor.add(center)
-      label.scale((new THREE.Vector3()).fromArray(scaleArr), anchor, true)
+      const anchorDirectionArr = [0, 0, 0]
+      anchorDirectionArr[maxAxis] = Math.sign(localDirection[maxAxis])
+      if (anchorDirectionArr[maxAxis] === 0) {
+        anchorDirectionArr[maxAxis] = 1
+      }
+
+      label.scale((new THREE.Vector3()).fromArray(scaleArr), label.center, true)
     }
   }
 }
