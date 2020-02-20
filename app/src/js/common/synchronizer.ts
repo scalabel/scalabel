@@ -24,6 +24,8 @@ export class Synchronizer {
   public actionsToSave: { [id: string]: ActionPacketType }
   /** Timestamped log for completed actions */
   public actionLog: types.BaseAction[]
+  /** Log of packets that have been acked */
+  public ackedPackets: Set<string>
   /** The function to call after state is synced with backend */
   public initStateCallback: (state: State) => void
   /** Name of the project */
@@ -47,6 +49,7 @@ export class Synchronizer {
     this.actionsToSave = {}
     this.actionLog = []
     this.userId = userId
+    this.ackedPackets = new Set()
 
     // use the same address as http
     const syncAddress = location.origin
@@ -58,8 +61,18 @@ export class Synchronizer {
 
     this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))
     this.socket.on(EventName.REGISTER_ACK, this.registerAckHandler.bind(this))
+
+    // on a successful ack, update session
+    const ackHandler = () => {
+      Session.updateStatus(ConnectionStatus.NOTIFY_SAVED)
+      this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
+    }
     this.socket.on(EventName.ACTION_BROADCAST,
-      this.actionBroadcastHandler.bind(this))
+      (actionPacket: ActionPacketType) => {
+        this.actionBroadcastHandler.bind(this)(actionPacket, ackHandler)
+      }
+    )
+
     this.socket.on(EventName.DISCONNECT, this.disconnectHandler.bind(this))
     window.onbeforeunload = this.warningPopup.bind(this)
 
@@ -131,13 +144,20 @@ export class Synchronizer {
    * Called when backend sends ack for actions that were sent to be synced
    * Updates relevant queues and syncs actions from other sessions
    */
-  public actionBroadcastHandler (actionPacket: ActionPacketType) {
+  public actionBroadcastHandler (
+    actionPacket: ActionPacketType, ackCallback: () => void) {
     // remove stored actions when they are acked
     if (actionPacket.id in this.actionsToSave) {
       delete this.actionsToSave[actionPacket.id]
     }
-    // TODO: check if actions were already acked; if so, ignore
-    // TODO: do this by comparing timestamp to latest timestamp in log
+
+    // if action was already acked, ignore it
+    if (this.ackedPackets.has(actionPacket.id)) {
+      return
+    }
+    this.ackedPackets.add(actionPacket.id)
+
+    // containsAck set to true if at least one action comes from this session
     let containsAck = false
     for (const action of actionPacket.actions) {
       // actionLog matches backend action ordering
@@ -154,8 +174,7 @@ export class Synchronizer {
 
     // Ack indicates successful save
     if (containsAck) {
-      Session.updateStatus(ConnectionStatus.NOTIFY_SAVED)
-      this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
+      ackCallback()
     }
   }
 

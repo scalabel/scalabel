@@ -10,7 +10,7 @@ import { getInitialState, getRandomBox2dAction } from '../util'
 
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
-  test('Test send-ack loop', async () => {
+  test.only('Test send-ack loop', async () => {
     const sessionId = 'fakeSessId'
     const synchronizer = startSynchronizer(sessionId)
     const initialState = getInitialState(sessionId)
@@ -34,9 +34,18 @@ describe('Test synchronizer functionality', () => {
     expect(Session.status).toBe(ConnectionStatus.SAVING)
 
     // After ack arrives, no actions are queued anymore
-    synchronizer.actionBroadcastHandler(synchronizer.listActionPackets()[0])
+    const ackHandler = jest.fn()
+    const ackAction = synchronizer.listActionPackets()[0]
+    synchronizer.actionBroadcastHandler(
+      ackAction, ackHandler)
     checkNumQueuedActions(synchronizer, 0)
-    expect(Session.status).toBe(ConnectionStatus.NOTIFY_SAVED)
+    expect(ackHandler).toHaveBeenCalled()
+
+    // If second ack arrives, it is ignored
+    const newAckHandler = jest.fn()
+    synchronizer.actionBroadcastHandler(
+      ackAction, newAckHandler)
+    expect(newAckHandler).not.toHaveBeenCalled()
   })
 
   test('Test reconnection', async () => {
@@ -77,10 +86,12 @@ describe('Test synchronizer functionality', () => {
     expect(Session.status).toBe(ConnectionStatus.SAVING)
 
     // After ack arrives, no actions are queued anymore
-    synchronizer.actionBroadcastHandler(synchronizer.listActionPackets()[0])
+    const ackHandler = jest.fn()
+    synchronizer.actionBroadcastHandler(
+      synchronizer.listActionPackets()[0], ackHandler)
     expect(Session.getState()).toMatchObject(expectedState)
     checkNumQueuedActions(synchronizer, 0)
-    expect(Session.status).toBe(ConnectionStatus.NOTIFY_SAVED)
+    expect(ackHandler).toHaveBeenCalled()
   })
 })
 
