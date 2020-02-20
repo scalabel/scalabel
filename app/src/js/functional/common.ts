@@ -1088,8 +1088,8 @@ export function deletePane (
 export function submit (
   state: State, action: types.SubmitAction
 ): State {
-  const submissions = [...state.task.progress.submissions]
-  submissions.push(action.submitData)
+  const submissions =
+    [...state.task.progress.submissions, _.cloneDeep(action.submitData)]
   const newProgress = updateObject(
     state.task.progress,
     {
