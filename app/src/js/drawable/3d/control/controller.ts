@@ -39,6 +39,8 @@ export abstract class Controller extends THREE.Object3D {
   protected _labels: Label3D[]
   /** bounds of the labels */
   protected _bounds: THREE.Box3
+  /** The hashed list of keys currently down */
+  protected _keyDownMap: { [key: string]: boolean }
 
   constructor (labels: Label3D[], bounds: THREE.Box3) {
     super()
@@ -50,6 +52,7 @@ export abstract class Controller extends THREE.Object3D {
     this._projection = new THREE.Ray()
     this._labels = labels
     this._bounds = bounds
+    this._keyDownMap = {}
   }
 
   /** Returns whether this is highlighted */
@@ -143,9 +146,13 @@ export abstract class Controller extends THREE.Object3D {
     }
   }
 
-  /** Apply pre-determined transformation amount based on camera direction */
-  public abstract transformDiscrete (
-    moveDirection: THREE.Vector3,
-    cameraDirection: THREE.Vector3
-  ): void
+  /** Handle key down */
+  public keyDown (key: string, _camera: THREE.Camera): void {
+    this._keyDownMap[key] = true
+  }
+
+  /** Handle key up */
+  public keyUp (key: string): void {
+    delete this._keyDownMap[key]
+  }
 }

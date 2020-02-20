@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { Key } from '../../../common/types'
 import { BLUE, GREEN, RED } from '../common'
 import Label3D from '../label3d'
 import { Controller } from './controller'
@@ -56,7 +57,33 @@ export class TranslationControl extends Controller {
   }
 
   /** Apply pre-determined transformation amount based on camera direction */
-  public transformDiscrete (direction: THREE.Vector3): void {
+  public keyDown (key: string, camera: THREE.Camera): void {
+    super.keyDown(key, camera)
+    const direction = new THREE.Vector3()
+    const up = new THREE.Vector3(0, 1, 0)
+    up.applyQuaternion(camera.quaternion)
+    const forward = camera.getWorldDirection(new THREE.Vector3())
+    const left = (new THREE.Vector3()).crossVectors(up, forward).normalize()
+    switch (key) {
+      case Key.I_UP:
+      case Key.I_LOW:
+        direction.copy(up)
+        break
+      case Key.K_UP:
+      case Key.K_LOW:
+        direction.copy(up)
+        direction.negate()
+        break
+      case Key.J_UP:
+      case Key.J_LOW:
+        direction.copy(left)
+        break
+      case Key.L_UP:
+      case Key.L_LOW:
+        direction.copy(left)
+        direction.negate()
+        break
+    }
     const delta = (new THREE.Vector3()).copy(direction).normalize()
     delta.multiplyScalar(MOVE_AMOUNT)
     for (const label of this._labels) {

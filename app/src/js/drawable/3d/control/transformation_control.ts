@@ -67,10 +67,6 @@ export class TransformationControl extends THREE.Group {
    * @param e
    */
   public onKeyDown (e: KeyboardEvent, camera: THREE.Camera): boolean {
-    const up = new THREE.Vector3(0, 1, 0)
-    up.applyQuaternion(camera.quaternion)
-    const forward = camera.getWorldDirection(new THREE.Vector3())
-    const left = (new THREE.Vector3()).crossVectors(up, forward).normalize()
     switch (e.key) {
       case Key.Q_UP:
       case Key.Q_LOW:
@@ -91,28 +87,33 @@ export class TransformationControl extends THREE.Group {
         return true
       case Key.I_UP:
       case Key.I_LOW:
-        this._currentController.transformDiscrete(up, forward)
+        this._currentController.keyDown(e.key, camera)
         this.updateBounds()
         return true
       case Key.K_UP:
       case Key.K_LOW:
-        up.negate()
-        this._currentController.transformDiscrete(up, forward)
+        this._currentController.keyDown(e.key, camera)
         this.updateBounds()
         return true
       case Key.J_UP:
       case Key.J_LOW:
-        this._currentController.transformDiscrete(left, forward)
+        this._currentController.keyDown(e.key, camera)
         this.updateBounds()
         return true
       case Key.L_UP:
       case Key.L_LOW:
-        left.negate()
-        this._currentController.transformDiscrete(left, forward)
+        this._currentController.keyDown(e.key, camera)
         this.updateBounds()
         return true
+      case Key.SHIFT:
+        this._currentController.keyDown(e.key, camera)
     }
     return false
+  }
+
+  /** Handle key up */
+  public onKeyUp (e: KeyboardEvent) {
+    this._currentController.keyUp(e.key)
   }
 
   /**

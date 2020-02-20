@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { Key } from '../../../common/types'
 import { BLUE, GREEN, RED } from '../common'
 import Label3D from '../label3d'
 import { Controller } from './controller'
@@ -36,16 +37,26 @@ export class RotationControl extends Controller {
   }
 
   /** Apply pre-determined transformation amount based on camera direction */
-  public transformDiscrete (
-    moveDirection: THREE.Vector3,
-    cameraDirection: THREE.Vector3
+  public keyDown (
+    key: string, camera: THREE.Camera
   ): void {
-    const rotationAxis =
-      (new THREE.Vector3()).crossVectors(moveDirection, cameraDirection)
-    const quaternion = new THREE.Quaternion()
-    quaternion.setFromAxisAngle(rotationAxis, ROTATION_AMOUNT)
-    for (const label of this._labels) {
-      label.rotate(quaternion)
+    super.keyDown(key, camera)
+    let rotationAmount = ROTATION_AMOUNT
+    if (key === Key.J_LOW || key === Key.J_UP) {
+      rotationAmount *= -1
+    }
+    switch (key) {
+      case Key.J_LOW:
+      case Key.J_UP:
+      case Key.L_LOW:
+      case Key.L_UP:
+        const cameraDirection = camera.getWorldDirection(new THREE.Vector3())
+        const quaternion = new THREE.Quaternion()
+        quaternion.setFromAxisAngle(cameraDirection, rotationAmount)
+        for (const label of this._labels) {
+          label.rotate(quaternion)
+        }
+        break
     }
   }
 }

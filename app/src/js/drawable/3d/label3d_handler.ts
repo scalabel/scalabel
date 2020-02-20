@@ -248,6 +248,9 @@ export class Label3DHandler {
    */
   public onKeyUp (e: KeyboardEvent) {
     delete this._keyDownMap[e.key]
+    if (Session.label3dList.selectedLabel !== null && !this.isKeyDown(e.key)) {
+      Session.label3dList.control.onKeyUp(e)
+    }
     if (Session.label3dList.updatedLabels.size > 0) {
       commitLabels([...Session.label3dList.updatedLabels.values()])
       Session.label3dList.clearUpdatedLabels()
