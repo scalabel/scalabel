@@ -127,6 +127,10 @@ def main():
                         help='Maximum deviation from expected normal '
                              'in radians',
                         default=0.15, type=float)
+    parser.add_argument('--tracking',
+                        help='Set flag if tracking. '
+                             'Will make all ground planes have same id.',
+                        action='store_true')
 
     args = parser.parse_args()
 
@@ -139,7 +143,14 @@ def main():
     bdd_file = open(args.bdd_items, 'r')
     bdd_json = yaml.load(bdd_file)
 
-    for index, item in enumerate(bdd_json):
+    for item in bdd_json:
+        if 'labels' not in item:
+            item['labels'] = []
+
+    label_ids = [label['id'] for item in bdd_json for label in item['labels']]
+    max_label_id = max(label_ids) if len(label_ids) > 0 else 0
+
+    for item in bdd_json:
         url = item['url']
         http_response = urllib.request.urlopen(url)
         ply_data = plyfile.PlyData.read(http_response)
@@ -160,12 +171,6 @@ def main():
             continue
 
         normal, offset = results[:2]
-
-        if 'labels' not in item:
-            item['labels'] = []
-
-        ids = [label['id'] for label in item['labels']]
-        max_label_id = max(ids) if len(ids) > 0 else 0
 
         plane_label = {
             'id': max_label_id + 1,
@@ -191,6 +196,9 @@ def main():
         }
 
         item['labels'].append(plane_label)
+
+        if not args.tracking:
+            max_label_id += 1
 
     with open(args.output, 'w') as output_file:
         json.dump(bdd_json, output_file)
