@@ -172,7 +172,7 @@ class LabelPane extends Component<Props> {
                 viewerConfig.type
               )
           ).map((key) =>
-            <MenuItem 
+            <MenuItem
               key={`viewerId${key}MenuItem${pane.id}`}
               value={Number(key)}
             >{key}</MenuItem>
