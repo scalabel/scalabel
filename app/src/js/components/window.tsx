@@ -27,6 +27,10 @@ export class Window extends React.Component<Props> {
     document.addEventListener('contextmenu', (e) => {
       e.preventDefault()
     }, false)
+
+    window.addEventListener("wheel", (e) => {
+      e.preventDefault()
+    }, {passive: false})
   }
 
   /**
