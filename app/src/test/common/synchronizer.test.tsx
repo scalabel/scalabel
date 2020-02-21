@@ -5,13 +5,23 @@ import { configureStore } from '../../js/common/configure_store'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
 import { State } from '../../js/functional/types'
-import { updateState } from '../../js/server/util'
+import { ActionPacketType, SyncActionMessageType } from '../../js/server/types'
+import { index2str, updateState } from '../../js/server/util'
 import { getInitialState, getRandomBox2dAction } from '../util'
+
+let sessionId: string
+let taskIndex: number
+let projectName: string
+
+beforeAll(() => {
+  sessionId = 'fakeSessId'
+  taskIndex = 0
+  projectName = 'testProject'
+})
 
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
   test.only('Test send-ack loop', async () => {
-    const sessionId = 'fakeSessId'
     const synchronizer = startSynchronizer(sessionId)
     const initialState = getInitialState(sessionId)
     synchronizer.registerAckHandler(initialState)
@@ -37,20 +47,19 @@ describe('Test synchronizer functionality', () => {
     const ackHandler = jest.fn()
     const ackAction = synchronizer.listActionPackets()[0]
     synchronizer.actionBroadcastHandler(
-      ackAction, ackHandler)
+      packetToMessage(ackAction), ackHandler)
     checkNumQueuedActions(synchronizer, 0)
     expect(ackHandler).toHaveBeenCalled()
 
     // If second ack arrives, it is ignored
     const newAckHandler = jest.fn()
     synchronizer.actionBroadcastHandler(
-      ackAction, newAckHandler)
+      packetToMessage(ackAction), newAckHandler)
     expect(newAckHandler).not.toHaveBeenCalled()
   })
 
   test('Test reconnection', async () => {
     Session.updateStatus(ConnectionStatus.UNSAVED)
-    const sessionId = 'fakeSessId'
     const synchronizer = startSynchronizer(sessionId)
     const initialState = getInitialState(sessionId)
     synchronizer.registerAckHandler(initialState)
@@ -87,8 +96,9 @@ describe('Test synchronizer functionality', () => {
 
     // After ack arrives, no actions are queued anymore
     const ackHandler = jest.fn()
+    const ackAction = synchronizer.listActionPackets()[0]
     synchronizer.actionBroadcastHandler(
-      synchronizer.listActionPackets()[0], ackHandler)
+      packetToMessage(ackAction), ackHandler)
     expect(Session.getState()).toMatchObject(expectedState)
     checkNumQueuedActions(synchronizer, 0)
     expect(ackHandler).toHaveBeenCalled()
@@ -118,8 +128,6 @@ function checkFirstAction (sync: Synchronizer, action: BaseAction) {
  */
 function startSynchronizer (sessionId: string): Synchronizer {
   // start frontend synchronizer
-  const taskIndex = 0
-  const projectName = 'testProject'
   const userId = 'user'
   const mockSocket = {
     on: jest.fn(),
@@ -141,4 +149,16 @@ function startSynchronizer (sessionId: string): Synchronizer {
   )
 
   return synchronizer
+}
+
+/**
+ * Convert action packet to sync message
+ */
+function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
+  return {
+    actions: packet,
+    projectName,
+    sessionId,
+    taskId: index2str(taskIndex)
+  }
 }

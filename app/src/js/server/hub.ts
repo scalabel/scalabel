@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import socketio from 'socket.io'
 import uuid4 from 'uuid/v4'
 import * as types from '../action/types'
@@ -6,7 +7,7 @@ import * as path from './path'
 import { ProjectStore } from './project_store'
 import { SocketServer } from './socket_server'
 import {
-  ActionPacketType, Env, EventName,
+  Env, EventName,
   RegisterMessageType, StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
 import { index2str, updateStateTimestamp } from './util'
@@ -42,17 +43,17 @@ export class Hub {
    * Registers new socket's listeners
    */
   public registerNewSocket (socket: SocketServer) {
-    socket.on(EventName.REGISTER, async (rawData: string) => {
+    socket.on(EventName.REGISTER, async (data: RegisterMessageType) => {
       try {
-        await this.register(rawData, socket)
+        await this.register(data, socket)
       } catch (error) {
         Logger.error(error)
       }
     })
 
-    socket.on(EventName.ACTION_SEND, async (rawData: string) => {
+    socket.on(EventName.ACTION_SEND, async (data: SyncActionMessageType) => {
       try {
-        await this.actionUpdate(rawData, socket)
+        await this.actionUpdate(data, socket)
       } catch (error) {
         Logger.error(error)
       }
@@ -66,8 +67,7 @@ export class Hub {
   /**
    * Load the correct state and subscribe to redis
    */
-  public async register (rawData: string, socket: SocketServer) {
-    const data: RegisterMessageType = JSON.parse(rawData)
+  public async register (data: RegisterMessageType, socket: SocketServer) {
     const projectName = data.projectName
     const taskIndex = data.taskIndex
     let sessionId = data.sessionId
@@ -93,8 +93,8 @@ export class Hub {
   /**
    * Updates the state with the action, and broadcasts action
    */
-  public async actionUpdate (rawData: string, socket: SocketServer) {
-    const data: SyncActionMessageType = JSON.parse(rawData)
+  public async actionUpdate (
+    data: SyncActionMessageType, socket: SocketServer) {
     const projectName = data.projectName
     const taskId = data.taskId
     const sessionId = data.sessionId
@@ -135,7 +135,8 @@ export class Hub {
 
     if (taskActions.length > 0) {
       // broadcast task actions to all other sessions in room
-      const taskActionMsg: ActionPacketType = {
+      const taskActionMsg: SyncActionMessageType = _.cloneDeep(data)
+      taskActionMsg.actions = {
         actions: taskActions,
         id: actionPacketId
       }
@@ -143,6 +144,6 @@ export class Hub {
       socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
     }
     // echo everything to original session
-    socket.emit(EventName.ACTION_BROADCAST, data.actions)
+    socket.emit(EventName.ACTION_BROADCAST, data)
   }
 }

@@ -82,8 +82,7 @@ describe('Test hub functionality', () => {
       sessionId,
       userId
     }
-    const rawData = JSON.stringify(data)
-    await hub.register(rawData, mockSocket)
+    await hub.register(data, mockSocket)
     expect(mockUserManager.registerUser).toBeCalledWith(
       socketId, projectName, userId)
     expect(mockSocket.join).toBeCalled()
@@ -113,8 +112,7 @@ describe('Test hub functionality', () => {
     }
 
     // send the action
-    const rawData = JSON.stringify(data)
-    await hub.actionUpdate(rawData, mockSocket)
+    await hub.actionUpdate(data, mockSocket)
 
     // test that state/metadata updated correctly
     const newMetadata = {
@@ -136,9 +134,9 @@ describe('Test hub functionality', () => {
       id: actionListId
     }
     expect(broadcastFunc).toBeCalledWith(
-      EventName.ACTION_BROADCAST, newPacket)
+      EventName.ACTION_BROADCAST, packetToMessage(newPacket))
     expect(mockSocket.emit).toBeCalledWith(
-      EventName.ACTION_BROADCAST, newPacket)
+      EventName.ACTION_BROADCAST, packetToMessage(newPacket))
 
     // restore the date function
     Date.now = dateFn
@@ -156,12 +154,11 @@ describe('Test hub functionality', () => {
         id: actionListId
       }
     }
-    const rawData = JSON.stringify(data)
-    await hub.actionUpdate(rawData, mockSocket)
+    await hub.actionUpdate(data, mockSocket)
     expect(mockProjectStore.saveState).not.toBeCalled()
     expect(broadcastFunc).not.toBeCalled()
     expect(mockSocket.emit).toBeCalledWith(
-      EventName.ACTION_BROADCAST, data.actions)
+      EventName.ACTION_BROADCAST, data)
   })
 
   test('If saved, repeated message does not save again', async () => {
@@ -178,13 +175,12 @@ describe('Test hub functionality', () => {
     }
 
     // send message for the first time
-    const rawData = JSON.stringify(data)
-    await hub.actionUpdate(rawData, mockSocket)
+    await hub.actionUpdate(data, mockSocket)
 
     expect(mockProjectStore.saveState).toHaveBeenCalledTimes(1)
     expect(broadcastFunc).toHaveBeenCalledTimes(1)
     expect(mockSocket.emit).toHaveBeenCalledTimes(1)
-    const packet: ActionPacketType = mockSocket.emit.mock.calls[0][1]
+    const packet: ActionPacketType = mockSocket.emit.mock.calls[0][1].actions
     const timestamp = packet.actions[0].timestamp as number
 
     // send message for the second time, using updates values
@@ -203,7 +199,7 @@ describe('Test hub functionality', () => {
       return newMetadata
     })
 
-    await hub.actionUpdate(rawData, mockSocket)
+    await hub.actionUpdate(data, mockSocket)
 
     expect(mockProjectStore.saveState).toHaveBeenCalledTimes(1)
     expect(broadcastFunc).toHaveBeenCalledTimes(2)
@@ -227,17 +223,28 @@ describe('Test hub functionality', () => {
       }
     }
 
-    const rawData = JSON.stringify(data)
-    await hub.actionUpdate(rawData, mockSocket)
+    await hub.actionUpdate(data, mockSocket)
     expect(mockProjectStore.saveState).toHaveBeenCalledTimes(1)
     expect(broadcastFunc).toHaveBeenCalledTimes(1)
     expect(mockSocket.emit).toHaveBeenCalledTimes(1)
 
     // model crash by not updating state or metadata that gets loaded
-    await hub.actionUpdate(rawData, mockSocket)
+    await hub.actionUpdate(data, mockSocket)
 
     expect(mockProjectStore.saveState).toHaveBeenCalledTimes(2)
     expect(broadcastFunc).toHaveBeenCalledTimes(2)
     expect(mockSocket.emit).toHaveBeenCalledTimes(2)
   })
 })
+
+/**
+ * Convert action packet to sync message
+ */
+function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
+  return {
+    actions: packet,
+    projectName,
+    sessionId,
+    taskId: index2str(taskIndex)
+  }
+}

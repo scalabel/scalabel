@@ -1,9 +1,12 @@
 import { State } from '../functional/types'
-import { ActionPacketType } from './types'
+import { RegisterMessageType, SyncActionMessageType } from './types'
 
-type onHandlerType = (() => {}) | ((data: string) => {})
+type onHandlerType =
+  (() => {}) |
+  ((data: SyncActionMessageType) => {}) |
+  ((data: RegisterMessageType) => {})
 
-type emitDataType = ActionPacketType | State
+type emitDataType = SyncActionMessageType | State
 
 export interface SocketServer {
   /** socket id */

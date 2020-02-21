@@ -68,8 +68,8 @@ export class Synchronizer {
       this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
     }
     this.socket.on(EventName.ACTION_BROADCAST,
-      (actionPacket: ActionPacketType) => {
-        this.actionBroadcastHandler.bind(this)(actionPacket, ackHandler)
+      (message: SyncActionMessageType) => {
+        this.actionBroadcastHandler.bind(this)(message, ackHandler)
       }
     )
 
@@ -122,7 +122,7 @@ export class Synchronizer {
       userId: this.userId
     }
     /* Send the registration message to the backend */
-    this.socket.emit(EventName.REGISTER, JSON.stringify(message))
+    this.socket.emit(EventName.REGISTER, message)
     Session.updateStatus(ConnectionStatus.UNSAVED)
   }
 
@@ -145,8 +145,9 @@ export class Synchronizer {
    * Updates relevant queues and syncs actions from other sessions
    */
   public actionBroadcastHandler (
-    actionPacket: ActionPacketType, ackCallback: () => void) {
-    // remove stored actions when they are acked
+    message: SyncActionMessageType, ackCallback: () => void) {
+    const actionPacket = message.actions
+      // remove stored actions when they are acked
     if (actionPacket.id in this.actionsToSave) {
       delete this.actionsToSave[actionPacket.id]
     }
@@ -157,8 +158,6 @@ export class Synchronizer {
     }
     this.ackedPackets.add(actionPacket.id)
 
-    // containsAck set to true if at least one action comes from this session
-    let containsAck = false
     for (const action of actionPacket.actions) {
       // actionLog matches backend action ordering
       this.actionLog.push(action)
@@ -167,13 +166,12 @@ export class Synchronizer {
           // Dispatch any task actions broadcasted from other sessions
           Session.dispatch(action)
         }
-      } else {
-        containsAck = true
       }
     }
 
-    // Ack indicates successful save
-    if (containsAck) {
+    // Callback once all actions are saved
+    if (message.sessionId === Session.id
+        && Object.keys(this.actionsToSave).length === 0) {
       ackCallback()
     }
   }
@@ -251,7 +249,7 @@ export class Synchronizer {
       sessionId: sessionState.session.id,
       actions: actionPacket
     }
-    this.socket.emit(EventName.ACTION_SEND, JSON.stringify(message))
+    this.socket.emit(EventName.ACTION_SEND, message)
     Session.updateStatus(ConnectionStatus.SAVING)
   }
 
