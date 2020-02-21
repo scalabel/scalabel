@@ -5,7 +5,7 @@ export const viewerStyles = () => createStyles({
     'display': 'block',
     'height': '100%',
     'position': 'absolute',
-    'overflow': 'scroll',
+    'overflow': 'hidden',
     'outline': 'none',
     'width': '100%',
     'touch-action': 'none'
