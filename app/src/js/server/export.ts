@@ -2,7 +2,7 @@ import { AttributeToolType, LabelTypeName } from '../common/types'
 import { PointType } from '../drawable/2d/path_point2d'
 import { ItemExport, LabelExport } from '../functional/bdd_types'
 import { Attribute, ConfigType, CubeType,
-  ItemType, Node2DType, PolygonType, RectType, State } from '../functional/types'
+  ItemType, Node2DType, Plane3DType, PolygonType, RectType, State } from '../functional/types'
 
 /**
  * converts single item to exportable format
@@ -40,6 +40,7 @@ export function convertItemToExport (
       box2d: null,
       poly2d: null,
       box3d: null,
+      plane3d: null,
       customs: {}
     }
     if (label.shapes.length > 0) {
@@ -77,6 +78,10 @@ export function convertItemToExport (
         case LabelTypeName.BOX_3D:
           const poly3d = firstIndexedShape.shape as CubeType
           labelExport.box3d = poly3d
+          break
+        case LabelTypeName.PLANE_3D:
+          const plane3d = firstIndexedShape.shape as Plane3DType
+          labelExport.plane3d = plane3d
           break
         default:
           if (label.type in config.label2DTemplates) {

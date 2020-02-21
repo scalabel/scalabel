@@ -21,6 +21,7 @@ export const sampleItemExportImage: ItemExport = {
       },
       poly2d: null,
       box3d: null,
+      plane3d: null,
       customs: {}
     },
     {
@@ -36,6 +37,7 @@ export const sampleItemExportImage: ItemExport = {
       },
       poly2d: null,
       box3d: null,
+      plane3d: null,
       customs: {}
     },
     {
@@ -51,6 +53,7 @@ export const sampleItemExportImage: ItemExport = {
       },
       poly2d: null,
       box3d: null,
+      plane3d: null,
       customs: {}
     }
   ]
@@ -79,6 +82,7 @@ export const sampleStateExportImage: ItemExport[] =
           },
           poly2d: null,
           box3d: null,
+          plane3d: null,
           customs: {}
         },
         {
@@ -94,6 +98,7 @@ export const sampleStateExportImage: ItemExport[] =
           },
           poly2d: null,
           box3d: null,
+          plane3d: null,
           customs: {}
         },
         {
@@ -109,6 +114,7 @@ export const sampleStateExportImage: ItemExport[] =
           },
           poly2d: null,
           box3d: null,
+          plane3d: null,
           customs: {}
         }
       ]
@@ -174,6 +180,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
         closed: true
       }],
       box3d: null,
+      plane3d: null,
       customs: {}
     },
     {
@@ -196,6 +203,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
         closed: true
       }],
       box3d: null,
+      plane3d: null,
       customs: {}
     },
     {
@@ -216,6 +224,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
         closed: true
       }],
       box3d: null,
+      plane3d: null,
       customs: {}
     }
   ]
@@ -247,6 +256,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
             closed: true
           }],
           box3d: null,
+          plane3d: null,
           customs: {}
         },
         {
@@ -269,6 +279,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
             closed: true
           }],
           box3d: null,
+          plane3d: null,
           customs: {}
         },
         {
@@ -289,6 +300,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
             closed: true
           }],
           box3d: null,
+          plane3d: null,
           customs: {}
         }
       ]
