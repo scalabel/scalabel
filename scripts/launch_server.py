@@ -28,7 +28,7 @@ def launch() -> None:
     redis_port = 'redisPort'
     if redis_port not in config:
         config[redis_port] = 6379
-    redis_cmd = ['redis-server', 'redis.conf',
+    redis_cmd = ['redis-server', 'app/config/redis.conf',
                  '--port', '{}'.format(config[redis_port]),
                  '--bind', '127.0.0.1', '--protected-mode', 'yes']
     logger.info('Launching redis server')
