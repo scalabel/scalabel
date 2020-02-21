@@ -68,7 +68,7 @@ class Session {
     this.statusChangeCount = 0
     this.autosave = false
     // TODO: make it configurable in the url
-    this.devMode = true
+    this.devMode = false
     this.applyStatusEffects = () => { return }
     this.testMode = false
     this.store = configureStore({}, this.devMode)
