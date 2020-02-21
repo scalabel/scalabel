@@ -7,22 +7,20 @@ import json
 import urllib.request
 import sys
 
-from io import StringIO
-
 import numpy as np
 import plyfile
 import yaml
 
 
 def estimate_ground_plane(
-    points,
-    sample_size,
-    iters,
-    dist_cutoff,
-    height_cutoff,
-    expected_normal,
-    max_normal_deviation,
-    inlier_cutoff=0.15
+        points,
+        sample_size,
+        iters,
+        dist_cutoff,
+        height_cutoff,
+        expected_normal,
+        max_normal_deviation,
+        inlier_cutoff=0.15
 ):
     '''
     Detect ground in points by using RANSAC to find largest plane
@@ -62,7 +60,8 @@ def estimate_ground_plane(
         eigvals, eigvecs = np.linalg.eig(covariance)
         sample_normal = eigvecs[:, np.argmin(eigvals)]
 
-        if np.arccos(sample_normal.dot(expected_normal)) > max_normal_deviation:
+        if np.arccos(sample_normal.dot(expected_normal)) > \
+                max_normal_deviation:
             continue
 
         sample_center = np.average(sample_points, axis=0)
@@ -84,8 +83,7 @@ def estimate_ground_plane(
     if best_plane:
         return best_plane[0], best_plane[1], \
             best_plane_inliers, best_plane_outliers
-    else:
-        return None
+    return None
 
 
 def main():
@@ -155,7 +153,7 @@ def main():
         http_response = urllib.request.urlopen(url)
         ply_data = plyfile.PlyData.read(http_response)
         values = np.array([x for a in ply_data['vertex'].data for x in a])
-        points = values.reshape((values.shape[0] // 3, 3))
+        points = values.reshape((np.shape(values)[0] // 3, 3))
 
         results = estimate_ground_plane(
             points,
