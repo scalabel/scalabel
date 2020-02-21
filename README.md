@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.com/scalabel/scalabel.svg?branch=master)](https://travis-ci.com/scalabel/scalabel)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:javascript)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:python)
+![Docker Pulls](https://img.shields.io/docker/pulls/scalabel/www)
 
 [Scalabel](https://www.scalabel.ai) (pronounced "scalable") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://bair.berkeley.edu/blog/2018/05/30/bdd/) is labeled with this tool.
 
