@@ -22,7 +22,7 @@ beforeAll(() => {
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
   test.only('Test send-ack loop', async () => {
-    const synchronizer = startSynchronizer(sessionId)
+    const synchronizer = startSynchronizer()
     const initialState = getInitialState(sessionId)
     synchronizer.registerAckHandler(initialState)
 
@@ -60,7 +60,7 @@ describe('Test synchronizer functionality', () => {
 
   test('Test reconnection', async () => {
     Session.updateStatus(ConnectionStatus.UNSAVED)
-    const synchronizer = startSynchronizer(sessionId)
+    const synchronizer = startSynchronizer()
     const initialState = getInitialState(sessionId)
     synchronizer.registerAckHandler(initialState)
 
@@ -126,7 +126,7 @@ function checkFirstAction (sync: Synchronizer, action: BaseAction) {
 /**
  * Start the synchronizer being tested
  */
-function startSynchronizer (sessionId: string): Synchronizer {
+function startSynchronizer (): Synchronizer {
   // start frontend synchronizer
   const userId = 'user'
   const mockSocket = {
