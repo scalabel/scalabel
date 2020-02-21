@@ -21,7 +21,7 @@ beforeAll(() => {
 
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
-  test.only('Test send-ack loop', async () => {
+  test('Test send-ack loop', async () => {
     const synchronizer = startSynchronizer()
     const initialState = getInitialState(sessionId)
     synchronizer.registerAckHandler(initialState)

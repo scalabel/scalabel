@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import OrderedMap from 'orderedmap'
 import { Dispatch, Middleware } from 'redux'
 import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
@@ -21,7 +22,7 @@ export class Synchronizer {
   /** Actions queued to be sent to the backend */
   public actionQueue: types.BaseAction[]
   /** Actions in the process of being saved, mapped by packet id */
-  public actionsToSave: { [id: string]: ActionPacketType }
+  public actionsToSave: OrderedMap<ActionPacketType>
   /** Timestamped log for completed actions */
   public actionLog: types.BaseAction[]
   /** Log of packets that have been acked */
@@ -46,7 +47,7 @@ export class Synchronizer {
     this.initStateCallback = initStateCallback
 
     this.actionQueue = []
-    this.actionsToSave = {}
+    this.actionsToSave = OrderedMap.from()
     this.actionLog = []
     this.userId = userId
     this.ackedPackets = new Set()
@@ -147,10 +148,8 @@ export class Synchronizer {
   public actionBroadcastHandler (
     message: SyncActionMessageType, ackCallback: () => void) {
     const actionPacket = message.actions
-      // remove stored actions when they are acked
-    if (actionPacket.id in this.actionsToSave) {
-      delete this.actionsToSave[actionPacket.id]
-    }
+    // remove stored actions when they are acked
+    this.actionsToSave = this.actionsToSave.remove(actionPacket.id)
 
     // if action was already acked, ignore it
     if (this.ackedPackets.has(actionPacket.id)) {
@@ -171,7 +170,7 @@ export class Synchronizer {
 
     // Callback once all actions are saved
     if (message.sessionId === Session.id
-        && Object.keys(this.actionsToSave).length === 0) {
+        && this.actionsToSave.size === 0) {
       ackCallback()
     }
   }
@@ -198,7 +197,6 @@ export class Synchronizer {
     const updateTaskAction = updateTask(state.task)
     updateTaskAction.frontendOnly = true
     Session.dispatch(updateTaskAction)
-
     // re-apply frontend task actions after updating task from backend
     for (const actionPacket of this.listActionPackets()) {
       for (const action of actionPacket.actions) {
@@ -214,8 +212,13 @@ export class Synchronizer {
    * Converts dict of action packets to a list
    */
   public listActionPackets (): ActionPacketType[] {
-    return Object.keys(this.actionsToSave).map(
-      (key) => this.actionsToSave[key])
+    const values: ActionPacketType[] = []
+    if (this.actionsToSave.size > 0) {
+      this.actionsToSave.forEach((_key: string, value: ActionPacketType) => {
+        values.push(value)
+      })
+    }
+    return values
   }
 
   /**
@@ -230,7 +233,7 @@ export class Synchronizer {
           actions: this.actionQueue,
           id: packetId
         }
-        this.actionsToSave[packetId] = actionPacket
+        this.actionsToSave = this.actionsToSave.update(packetId, actionPacket)
         this.sendActions(actionPacket)
         this.actionQueue = []
       }
