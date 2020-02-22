@@ -1,4 +1,5 @@
 import * as fa from '@fortawesome/free-solid-svg-icons/index'
+import { sprintf } from 'sprintf-js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Grid, IconButton, Link, List,
   Table, TableCell, TableHead, TableRow } from '@material-ui/core'
@@ -10,7 +11,6 @@ import Typography from '@material-ui/core/Typography'
 import React from 'react'
 import { SubmitData } from '../functional/types'
 import { Endpoint } from '../server/types'
-import { formatDate } from '../server/util'
 import { dashboardWindowStyles, headerStyle,
   listEntryStyle, sidebarStyle } from '../styles/dashboard'
 import DividedPage from './divided_page'
@@ -174,7 +174,6 @@ function Dashboard (props: DashboardProps) {
               const latestSubmission = submissions[submissions.length - 1]
               dateString = formatDate(latestSubmission.time)
             }
-            console.log(dateString)
             totalLabels += Number(value.numLabels)
             totalTaskLabeled += Number(value.numLabeledItems) > 0 ? 1 : 0
             return (
@@ -364,6 +363,16 @@ function listEntry (props: ListEntryProps) {
       </Grid>
     </React.Fragment>
   )
+}
+
+/**
+ * Puts Date.now into print format
+ */
+function formatDate (dateNow: number): string {
+  const date = new Date(dateNow)
+  const day = date.toDateString()
+  const time = date.toTimeString()
+  return sprintf('%s %s', day, time)
 }
 
 /** export sub-components for testing */
