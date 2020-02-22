@@ -3,9 +3,10 @@ import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { FileStorage } from '../../js/server/file_storage'
-import { getTestDir } from '../../js/server/path'
+import { getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisStore } from '../../js/server/redis_store'
 import { defaultEnv, Env, StateMetadata } from '../../js/server/types'
+import { index2str } from '../../js/server/util'
 import { sleep } from '../project/util'
 
 let redisProc: child.ChildProcessWithoutNullStreams
@@ -30,12 +31,7 @@ beforeAll(async () => {
   dataDir = getTestDir('test-data-redis')
   storage = new FileStorage(dataDir)
   defaultStore = new RedisStore(env, storage)
-  const metadata: StateMetadata = {
-    projectName: 'project',
-    taskId: '000001',
-    actionIds: {}
-  }
-  metadataString = JSON.stringify(metadata)
+  metadataString = makeMetadata(1)
 })
 
 afterAll(async () => {
@@ -96,12 +92,37 @@ describe('Test redis cache', () => {
     expect(savedKeysFinal.length).toBe(2)
   })
 
-  // TODO: finish these tests
-  test('Set atomic cannot be interrupted', () => {
-    return
+  test('Set atomic executes all ops', async () => {
+    const keys = _.range(5).map((v) => sprintf('test%s', v))
+    const values = _.range(5).map((v) => sprintf('value%s', v))
+
+    await defaultStore.setAtomic(keys, values, 60)
+
+    for (let i = 0; i < 5; i++) {
+      const value = await defaultStore.get(keys[i])
+      expect(value).toBe(values[i])
+    }
   })
 
-  test('Metadata is saved correctly', () => {
-    return
+  test('Metadata is saved correctly', async () => {
+    const keys = _.range(5).map((v) => sprintf('test%s', v))
+    const values = _.range(5).map((v) => sprintf('value%s', v))
+    const metadata = _.range(5).map((v) => makeMetadata(v))
+    for (let i = 0; i < 5; i++) {
+      await defaultStore.setExWithReminder(keys[i], values[i], metadata[i])
+      const metakey = getRedisMetaKey(keys[i])
+      const metavalue = await defaultStore.get(metakey)
+      expect(metavalue).toBe(metadata[i])
+    }
   })
 })
+
+/** Makes some dummy metadata */
+function makeMetadata (taskIndex: number): string {
+  const metadata: StateMetadata = {
+    projectName: 'project',
+    taskId: index2str(taskIndex),
+    actionIds: {}
+  }
+  return JSON.stringify(metadata)
+}
