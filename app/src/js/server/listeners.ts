@@ -192,11 +192,10 @@ export class Listeners {
             task = emptyTask
           }
           const [numLabeledItems, numLabels] = countLabels(task)
-          const submitted = task.progress.submissions.length > 0
           const options: TaskOptions = {
             numLabeledItems: numLabeledItems.toString(),
             numLabels: numLabels.toString(),
-            submitted,
+            submissions: task.progress.submissions,
             handlerUrl: task.config.handlerUrl
           }
 

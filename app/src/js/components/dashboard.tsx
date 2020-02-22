@@ -1,14 +1,18 @@
 import * as fa from '@fortawesome/free-solid-svg-icons/index'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Grid, IconButton, Link, List, Table, TableCell, TableHead, TableRow } from '@material-ui/core'
+import { Grid, IconButton, Link, List,
+  Table, TableCell, TableHead, TableRow } from '@material-ui/core'
 import Chip from '@material-ui/core/Chip'
 import ListItemText from '@material-ui/core/ListItemText'
 import withStyles from '@material-ui/core/styles/withStyles'
 import TableBody from '@material-ui/core/TableBody'
 import Typography from '@material-ui/core/Typography'
 import React from 'react'
+import { SubmitData } from '../functional/types'
 import { Endpoint } from '../server/types'
-import { dashboardWindowStyles, headerStyle, listEntryStyle, sidebarStyle } from '../styles/dashboard'
+import { formatDate } from '../server/util'
+import { dashboardWindowStyles, headerStyle,
+  listEntryStyle, sidebarStyle } from '../styles/dashboard'
 import DividedPage from './divided_page'
 
 export interface ProjectOptions {
@@ -33,8 +37,8 @@ export interface TaskOptions {
   numLabeledItems: string
   /** number of labels */
   numLabels: string
-  /** if the task was submitted */
-  submitted: boolean
+  /** list of timestamped submissions */
+  submissions: SubmitData[]
   /** task link handler url */
   handlerUrl: string
 }
@@ -163,6 +167,14 @@ function Dashboard (props: DashboardProps) {
         </TableHead>
         <TableBody>
           {taskMetaDatas.map((value: TaskOptions, index) => {
+            const submissions = value.submissions
+            const submitted = submissions.length > 0
+            let dateString = ''
+            if (submitted) {
+              const latestSubmission = submissions[submissions.length - 1]
+              dateString = formatDate(latestSubmission.time)
+            }
+            console.log(dateString)
             totalLabels += Number(value.numLabels)
             totalTaskLabeled += Number(value.numLabeledItems) > 0 ? 1 : 0
             return (
@@ -187,14 +199,12 @@ function Dashboard (props: DashboardProps) {
                 >
                   {value.numLabels}
                 </TableCell>
-                <TableCell className={classes.bodyCell} align={align}>
-                  {value.submitted ? (
-                    <FontAwesomeIcon
-                      icon={fa.faCheck}
-                      size={'lg'}
-                      data-testid={'submitted-' + index.toString()}
-                    />
-                  ) : null}
+                <TableCell
+                  className={classes.bodyCell}
+                  align={align}
+                  data-testid={'submitted-' + index.toString()}
+                >
+                  {submitted ? dateString : null}
                 </TableCell>
                 <TableCell className={classes.bodyCell} align={align}>
                   <IconButton

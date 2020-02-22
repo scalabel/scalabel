@@ -241,3 +241,13 @@ export function safeParseJSON (data: string) {
     Logger.error(e)
   }
 }
+
+/**
+ * Puts Date.now into print format
+ */
+export function formatDate (dateNow: number): string {
+  const date = new Date(dateNow)
+  const day = date.toDateString()
+  const time = date.toTimeString()
+  return sprintf('%s %s', day, time)
+}
