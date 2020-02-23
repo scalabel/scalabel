@@ -139,10 +139,6 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     scaleDelta.z = Math.abs(scaleDelta.z)
     scaleDelta.multiplyScalar(projectionLength)
 
-    const positionDelta = new THREE.Vector3()
-    positionDelta.copy(direction)
-    positionDelta.multiplyScalar(0.5 * projectionLength)
-
     const dimensions = new THREE.Vector3()
     dimensions.copy(bounds.max)
     dimensions.sub(bounds.min)

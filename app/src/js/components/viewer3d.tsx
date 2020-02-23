@@ -529,8 +529,10 @@ class Viewer3D extends DrawableViewer<Props> {
   /** Override on key up */
   protected onKeyUp (e: KeyboardEvent): void {
     if (this.isKeyDown(e.key) && Session.activeViewerId === this.props.id) {
-      this._movingCamera = false
-      this.commitCamera()
+      if (this._movingCamera) {
+        this._movingCamera = false
+        this.commitCamera()
+      }
     }
     super.onKeyUp(e)
   }

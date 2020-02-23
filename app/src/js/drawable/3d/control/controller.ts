@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import Label3D from '../label3d'
 
 export interface ControlUnit extends THREE.Object3D {
-  /** get update vectors: [translation, rotation, scale, new intersection] */
+  /** transform labels, returns new intersection */
   transform: (
     oldIntersection: THREE.Vector3,
     newProjection: THREE.Ray,
@@ -39,6 +39,8 @@ export abstract class Controller extends THREE.Object3D {
   protected _labels: Label3D[]
   /** bounds of the labels */
   protected _bounds: THREE.Box3
+  /** The hashed list of keys currently down */
+  protected _keyDownMap: { [key: string]: boolean }
 
   constructor (labels: Label3D[], bounds: THREE.Box3) {
     super()
@@ -50,6 +52,7 @@ export abstract class Controller extends THREE.Object3D {
     this._projection = new THREE.Ray()
     this._labels = labels
     this._bounds = bounds
+    this._keyDownMap = {}
     this.layers.enableAll()
   }
 
@@ -142,5 +145,15 @@ export abstract class Controller extends THREE.Object3D {
     for (const unit of this._controlUnits) {
       unit.updateScale(scale)
     }
+  }
+
+  /** Handle key down */
+  public keyDown (key: string, _camera: THREE.Camera): void {
+    this._keyDownMap[key] = true
+  }
+
+  /** Handle key up */
+  public keyUp (key: string): void {
+    delete this._keyDownMap[key]
   }
 }

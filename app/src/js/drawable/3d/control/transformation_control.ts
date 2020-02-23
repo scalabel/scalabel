@@ -66,7 +66,7 @@ export class TransformationControl extends THREE.Group {
    * Handle key events
    * @param e
    */
-  public onKeyDown (e: KeyboardEvent): boolean {
+  public onKeyDown (e: KeyboardEvent, camera: THREE.Camera): boolean {
     switch (e.key) {
       case Key.Q_UP:
       case Key.Q_LOW:
@@ -85,8 +85,35 @@ export class TransformationControl extends THREE.Group {
       case Key.E_LOW:
         this.switchController(this._scaleControl)
         return true
+      case Key.I_UP:
+      case Key.I_LOW:
+        this._currentController.keyDown(e.key, camera)
+        this.updateBounds()
+        return true
+      case Key.K_UP:
+      case Key.K_LOW:
+        this._currentController.keyDown(e.key, camera)
+        this.updateBounds()
+        return true
+      case Key.J_UP:
+      case Key.J_LOW:
+        this._currentController.keyDown(e.key, camera)
+        this.updateBounds()
+        return true
+      case Key.L_UP:
+      case Key.L_LOW:
+        this._currentController.keyDown(e.key, camera)
+        this.updateBounds()
+        return true
+      case Key.SHIFT:
+        this._currentController.keyDown(e.key, camera)
     }
     return false
+  }
+
+  /** Handle key up */
+  public onKeyUp (e: KeyboardEvent) {
+    this._currentController.keyUp(e.key)
   }
 
   /**
