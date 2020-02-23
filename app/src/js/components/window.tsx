@@ -28,9 +28,9 @@ export class Window extends React.Component<Props> {
       e.preventDefault()
     }, false)
 
-    window.addEventListener("wheel", (e) => {
+    window.addEventListener('wheel', (e) => {
       e.preventDefault()
-    }, {passive: false})
+    }, { passive: false })
   }
 
   /**
