@@ -150,11 +150,13 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
         const location = (new THREE.Vector3()).copy(label.center)
         location.project(this.camera)
-        const x = (location.x + 1) * this.canvas.width / 2
-        const y = (-location.y + 1) * this.canvas.height / 2
-        this._context.font = '12px Verdana'
-        this._context.fillStyle = '#FFFFFF'
-        this._context.fillText(tag, x, y)
+        if (location.z > 0 && location.z < 1) {
+          const x = (location.x + 1) * this.canvas.width / 2
+          const y = (-location.y + 1) * this.canvas.height / 2
+          this._context.font = '12px Verdana'
+          this._context.fillStyle = '#FFFFFF'
+          this._context.fillText(tag, x, y)
+        }
       }
     }
     return true

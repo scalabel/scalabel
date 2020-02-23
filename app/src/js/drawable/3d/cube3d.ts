@@ -18,7 +18,7 @@ const faceNormals = [
   new THREE.Vector3(0, 0, -1)
 ]
 
-const DISTANCE_SCALE_CORRECTION = 7
+const DISTANCE_SCALE_CORRECTION = 5
 
 /**
  * Shape for Box3D label
@@ -99,6 +99,24 @@ export class Cube3D extends Shape3D {
   /** Get shape type name */
   public get typeName () {
     return ShapeTypeName.CUBE
+  }
+
+  /** Set visibility for viewer */
+  public setVisible (viewerId: number, v: boolean = true) {
+    super.setVisible(viewerId, v)
+    if (v) {
+      this._box.layers.enable(viewerId)
+      this._outline.layers.enable(viewerId)
+      for (const sphere of this._controlSpheres) {
+        sphere.layers.enable(viewerId)
+      }
+    } else {
+      this._box.layers.disable(viewerId)
+      this._outline.layers.disable(viewerId)
+      for (const sphere of this._controlSpheres) {
+        sphere.layers.disable(viewerId)
+      }
+    }
   }
 
   /**
@@ -331,12 +349,15 @@ export class Cube3D extends Shape3D {
       const toGrid = new THREE.Matrix4()
       toGrid.getInverse(this._grid.matrixWorld)
 
-      newPosition.applyMatrix4(toGrid)
+      // newPosition.applyMatrix4(toGrid)
       this.position.copy(newPosition)
+      this.quaternion.copy(this._grid.quaternion)
 
-      this.updateMatrixWorld(true)
+      // this._grid.attach(this)
 
-      this.visible = false
+      // this.updateMatrixWorld(true)
+
+      // this.visible = false
     }
   }
 
@@ -377,9 +398,6 @@ export class Cube3D extends Shape3D {
       normal.copy(this._closestFaceNormal)
       const planePoint = new THREE.Vector3()
       planePoint.copy(this._controlSpheres[0].position)
-
-      const plane = new THREE.Plane()
-      plane.setFromNormalAndCoplanarPoint(normal, planePoint)
 
       const initialIntersect = new THREE.Vector3()
 

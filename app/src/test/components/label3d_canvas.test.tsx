@@ -224,8 +224,8 @@ test('Move axis aligned 3d bbox along z axis', () => {
     canvasConfig
   ))
 
-  canvas.onMouseMove(mouseEvent(width / 2., height * 9. / 20))
-  canvas.onMouseDown(mouseEvent(width / 2., height * 9. / 20))
+  canvas.onMouseMove(mouseEvent(width / 2., height * 17. / 40))
+  canvas.onMouseDown(mouseEvent(width / 2., height * 17. / 40))
   canvas.onMouseMove(mouseEvent(width / 2., height / 4.))
   canvas.onMouseUp(mouseEvent(width / 2., height / 4.))
 
@@ -238,8 +238,8 @@ test('Move axis aligned 3d bbox along z axis', () => {
 
   canvas.onMouseMove(mouseEvent(width / 2., height / 4.))
   canvas.onMouseDown(mouseEvent(width / 2., height / 4.))
-  canvas.onMouseMove(mouseEvent(width / 2., height * 9 / 20))
-  canvas.onMouseUp(mouseEvent(width / 2., height * 9 / 20))
+  canvas.onMouseMove(mouseEvent(width / 2., height * 17 / 40))
+  canvas.onMouseUp(mouseEvent(width / 2., height * 17 / 40))
 
   state = Session.getState()
   cube = getShape(state, 0, 0, 0) as CubeType
