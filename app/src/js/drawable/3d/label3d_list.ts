@@ -58,6 +58,7 @@ export class Label3DList {
     this._selectedLabel = null
     this._scene = new THREE.Scene()
     this._scene.add(this.control)
+    this._scene.layers.enableAll()
     this._raycastableShapes = []
     this._state = makeState()
     this._callbacks = []
@@ -170,14 +171,7 @@ export class Label3DList {
     this._selectedLabel = null
 
     // Reset control & scene
-    for (const key of Object.keys(this._labels)) {
-      const id = Number(key)
-      if (!(id in item.labels)) {
-        for (const shape of Object.values(this._labels[id].shapes())) {
-          this._scene.remove(shape)
-        }
-      }
-    }
+    this._scene.children = [this.control]
 
     // Update & create labels
     for (const key of Object.keys(item.labels)) {
@@ -201,11 +195,6 @@ export class Label3DList {
         }
 
         newLabels[id].selected = false
-
-        // Disable all layers. Viewers will re-enable
-        // for (const shape of newLabels[id].shapes()) {
-        //   shape.layers.disableAll()
-        // }
       }
     }
 

@@ -50,6 +50,7 @@ export abstract class Controller extends THREE.Object3D {
     this._projection = new THREE.Ray()
     this._labels = labels
     this._bounds = bounds
+    this.layers.enableAll()
   }
 
   /** Returns whether this is highlighted */

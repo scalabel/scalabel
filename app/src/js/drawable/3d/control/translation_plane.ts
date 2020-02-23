@@ -24,6 +24,7 @@ export class TranslationPlane extends THREE.Mesh
     const quaternion = new THREE.Quaternion()
     quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this._normal)
     this.quaternion.copy(quaternion)
+    this.layers.enableAll()
   }
 
   /**

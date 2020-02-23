@@ -65,14 +65,14 @@ const fragmentShader =
     }
 
     void main() {
-      float alpha = 0.4;
+      float alpha = 0.7;
       vec3 color = getHeatMapColor(worldPosition.z);
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
         if (pointInSelection(worldPosition)) {
           alpha = 1.0;
-          color *= 1.3;
+          color *= 2.5;
         }
       } else {
         alpha = 1.0;
@@ -215,6 +215,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       this.state.user.viewerConfigs[this.props.id].sensor
 
     this.pointCloud.geometry = Session.pointClouds[item][sensor]
+    this.pointCloud.layers.enableAll()
 
     const config =
       state.user.viewerConfigs[this.props.id] as PointCloudViewerConfigType

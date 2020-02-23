@@ -199,6 +199,7 @@ export function makePointCloudViewerConfig (
     target: { x: 10.0, y: 0.0, z: 0.0 },
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
+    flipAxis: false,
     show: true,
     type: types.ViewerConfigTypeName.POINT_CLOUD,
     sensor,
