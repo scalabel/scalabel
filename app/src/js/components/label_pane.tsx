@@ -15,6 +15,8 @@ import { SplitType, ViewerConfigType } from '../functional/types'
 import { paneBarStyles, resizerStyles } from '../styles/split_pane'
 import { Component } from './component'
 import { viewerReactKey } from './drawable_viewer'
+import HomographyViewer from './homography_viewer'
+import Image3DViewer from './image3d_viewer'
 import Viewer2D from './viewer2d'
 import Viewer3D from './viewer3d'
 
@@ -27,6 +29,10 @@ export function viewerFactory (
       return (<Viewer2D id={viewerId} key={viewerReactKey(viewerId)} />)
     case types.ViewerConfigTypeName.POINT_CLOUD:
       return (<Viewer3D id={viewerId} key={viewerReactKey(viewerId)} />)
+    case types.ViewerConfigTypeName.IMAGE_3D:
+      return (<Image3DViewer id={viewerId} key={viewerReactKey(viewerId)} />)
+    case types.ViewerConfigTypeName.HOMOGRAPHY:
+      return (<HomographyViewer id={viewerId} key={viewerReactKey(viewerId)} />)
   }
   return null
 }

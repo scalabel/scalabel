@@ -194,6 +194,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     if (this._labelHandler.onMouseDown(x, y)) {
       e.stopPropagation()
     }
+
+    Session.label3dList.onDrawableUpdate()
   }
 
   /**
