@@ -541,12 +541,6 @@ class Viewer3D extends DrawableViewer<Props> {
       return
     }
 
-    if (this._container) {
-      this._camera.aspect = this._container.offsetWidth /
-        this._container.offsetHeight
-      this._camera.updateProjectionMatrix()
-    }
-
     this._target.set(
       config.target.x,
       config.target.y,
@@ -605,6 +599,16 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera.position.y = config.position.y
       this._camera.position.z = config.position.z
       this._camera.lookAt(this._target)
+    }
+
+    if (this._container) {
+      const oldAspect = this._camera.aspect
+      this._camera.aspect = this._container.offsetWidth /
+        this._container.offsetHeight
+      this._camera.updateProjectionMatrix()
+      if (Math.abs(this._camera.aspect - oldAspect) > 1e-3) {
+        this.forceUpdate()
+      }
     }
   }
 
