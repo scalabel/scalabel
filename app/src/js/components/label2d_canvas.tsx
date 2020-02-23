@@ -192,6 +192,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       onMouseMove={(e) => { this.onMouseMove(e) }}
     />)
     const ch = (<Crosshair
+      key='crosshair-canvas'
       display={this.display}
       innerRef={this.crosshair}
       />)

@@ -1,8 +1,11 @@
 import * as THREE from 'three'
+import { Key } from '../../../common/types'
 import { BLUE, GREEN, RED } from '../common'
 import Label3D from '../label3d'
 import { Controller } from './controller'
 import { RotationRing } from './rotation_ring'
+
+const ROTATION_AMOUNT = 0.05
 
 /**
  * perform rotation ops
@@ -30,6 +33,30 @@ export class RotationControl extends Controller {
     )
     for (const unit of this._controlUnits) {
       this.add(unit)
+    }
+  }
+
+  /** Apply pre-determined transformation amount based on camera direction */
+  public keyDown (
+    key: string, camera: THREE.Camera
+  ): void {
+    super.keyDown(key, camera)
+    let rotationAmount = ROTATION_AMOUNT
+    if (key === Key.J_LOW || key === Key.J_UP) {
+      rotationAmount *= -1
+    }
+    switch (key) {
+      case Key.J_LOW:
+      case Key.J_UP:
+      case Key.L_LOW:
+      case Key.L_UP:
+        const cameraDirection = camera.getWorldDirection(new THREE.Vector3())
+        const quaternion = new THREE.Quaternion()
+        quaternion.setFromAxisAngle(cameraDirection, rotationAmount)
+        for (const label of this._labels) {
+          label.rotate(quaternion)
+        }
+        break
     }
   }
 }
