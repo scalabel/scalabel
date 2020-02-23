@@ -53,6 +53,7 @@ export abstract class Controller extends THREE.Object3D {
     this._labels = labels
     this._bounds = bounds
     this._keyDownMap = {}
+    this.layers.enableAll()
   }
 
   /** Returns whether this is highlighted */

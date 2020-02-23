@@ -159,6 +159,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   target: Vector3Type
   /** Up direction of the camera */
   verticalAxis: Vector3Type
+  /** Whether to flip the direction of the axis locks */
+  flipAxis: boolean
   /** Camera rotation lock */
   lockStatus: number
 }
@@ -293,12 +295,8 @@ export interface ConfigType {
   attributes: Attribute[]
   /** task id */
   taskId: string
-  /** the time of last project submission */
-  submitTime: number
   /** Whether or not in demo mode */
   demoMode: boolean
-  /** Whether or not submitted */
-  submitted: boolean
   /** whether to use autosave */
   autosave: boolean
 }
@@ -315,6 +313,8 @@ export interface PaneType {
   parent: number
   /** If leaf, >= 0 */
   viewerId: number
+  /** Whether to hide pane */
+  hide: boolean
   /**
    * Which child is the primary pane to apply sizing to.
    * Other child is sized based on the size of the primary child
@@ -333,6 +333,10 @@ export interface PaneType {
   child1?: number
   /** Id of second child if not leaf */
   child2?: number
+  /** Number of children that are vertical splits */
+  numVerticalChildren: number
+  /** Number of children that are horizontal splits */
+  numHorizontalChildren: number
 }
 
 export interface LayoutType {
@@ -361,6 +365,17 @@ export interface TaskStatus {
 
 export interface TrackMapType { [key: number]: TrackType }
 
+export interface SubmitData {
+  /** time of the submission (client side) */
+  time: number
+  /** author of the submission */
+  user: string
+}
+
+export interface Progress {
+  /** data on submissions */
+  submissions: SubmitData[]
+}
 export interface TaskType {
   /** Configurations */
   config: ConfigType
@@ -372,6 +387,8 @@ export interface TaskType {
   tracks: TrackMapType
   /** data sources */
   sensors: SensorMapType
+  /** info on task progress */
+  progress: Progress
 }
 
 export interface Select {

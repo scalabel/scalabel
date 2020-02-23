@@ -3,7 +3,7 @@ import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import * as THREE from 'three'
 import Session from '../common/session'
-import { isCurrentItemLoaded } from '../functional/state_util'
+import { isCurrentFrameLoaded, isCurrentItemLoaded } from '../functional/state_util'
 import { PointCloudViewerConfigType, State } from '../functional/types'
 import { DrawableCanvas } from './viewer'
 
@@ -65,14 +65,14 @@ const fragmentShader =
     }
 
     void main() {
-      float alpha = 0.4;
+      float alpha = 0.7;
       vec3 color = getHeatMapColor(worldPosition.z);
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
         if (pointInSelection(worldPosition)) {
           alpha = 1.0;
-          color *= 1.3;
+          color *= 2.5;
         }
       } else {
         alpha = 1.0;
@@ -188,12 +188,13 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   public redraw (): boolean {
     const state = this.state
     if (isCurrentItemLoaded(state) && this.canvas) {
-      const item = state.user.select.item
       const sensor =
         this.state.user.viewerConfigs[this.props.id].sensor
-      if (item < Session.images.length && sensor in Session.pointClouds[item]) {
+      if (isCurrentFrameLoaded(this.state, sensor)) {
         this.updateRenderer()
         this.renderThree()
+      } else {
+        this.renderer?.clear()
       }
     }
     return true
@@ -214,6 +215,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       this.state.user.viewerConfigs[this.props.id].sensor
 
     this.pointCloud.geometry = Session.pointClouds[item][sensor]
+    this.pointCloud.layers.enableAll()
 
     const config =
       state.user.viewerConfigs[this.props.id] as PointCloudViewerConfigType
@@ -265,6 +267,13 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         this.forceUpdate()
       }
 
+      if (this.display) {
+        this.canvas.removeAttribute('style')
+        const displayRect = this.display.getBoundingClientRect()
+        this.canvas.width = displayRect.width
+        this.canvas.height = displayRect.height
+      }
+
       if (isCurrentItemLoaded(this.state)) {
         this.updateRenderer()
       }
@@ -281,17 +290,6 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         this.canvas.height
       )
     }
-    // if (this.canvas && this.renderer) {
-    //   const config = getCurrentViewerConfig(
-    //     this.state, this.props.id
-    //   ) as PointCloudViewerConfigType
-    //   updateThreeCameraAndRenderer(
-    //     config,
-    //     this.camera,
-    //     this.canvas,
-    //     this.renderer
-    //   )
-    // }
   }
 }
 

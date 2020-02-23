@@ -12,9 +12,11 @@ import {
   ItemType,
   LabelType,
   LayoutType,
+  PaneType,
   PointCloudViewerConfigType,
   Select,
   ShapeType,
+  SplitType,
   State,
   TaskStatus,
   TaskType,
@@ -45,7 +47,7 @@ export function initSession (state: State): State {
   const items = state.task.items
   const itemStatuses = session.itemStatuses.slice()
   for (let i = 0; i < itemStatuses.length; i++) {
-    const loadedMap: {[id: number]: boolean} = {}
+    const loadedMap: { [id: number]: boolean } = {}
     for (const key of Object.keys(items[i].urls)) {
       const sensorId = Number(key)
       loadedMap[sensorId] = false
@@ -126,9 +128,9 @@ export function deleteLabelsById (
  * @param shapes
  */
 function addLabelsToItem (
-    item: ItemType, taskStatus: TaskStatus, newLabels: LabelType[],
-    shapeTypes: string[][], shapes: ShapeType[][]
-  ): [ItemType, LabelType[], TaskStatus] {
+  item: ItemType, taskStatus: TaskStatus, newLabels: LabelType[],
+  shapeTypes: string[][], shapes: ShapeType[][]
+): [ItemType, LabelType[], TaskStatus] {
   newLabels = [...newLabels]
   const newLabelIds: number[] = []
   const newShapeIds: number[] = []
@@ -138,8 +140,8 @@ function addLabelsToItem (
     const labelId = taskStatus.maxLabelId + 1 + index
     const shapeIds = _.range(shapes[index].length).map((i) => i + newShapeId)
     const newLabelShapes = shapes[index].map((s, i) =>
-        makeIndexedShape(shapeIds[i], [labelId], shapeTypes[index][i], s)
-      )
+      makeIndexedShape(shapeIds[i], [labelId], shapeTypes[index][i], s)
+    )
     const order = taskStatus.maxOrder + 1 + index
     const validChildren = label.children.filter((id) => id >= 0)
     label = updateObject(label, {
@@ -188,7 +190,7 @@ function addLabelsToItem (
 function addLabelstoItems (
   items: ItemType[], taskStatus: TaskStatus, labelsToAdd: LabelType[][],
   shapeTypes: string[][][], shapes: ShapeType[][][]
-  ): [ItemType[], LabelType[], TaskStatus] {
+): [ItemType[], LabelType[], TaskStatus] {
   const allNewLabels: LabelType[] = []
   items = [...items]
   items.forEach((item, index) => {
@@ -221,7 +223,7 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
   if (action.sessionId === session.id) {
     for (const label of newLabels) {
       if (label.item === user.select.item) {
-        const selectedLabels: {[index: number]: number[]} = {}
+        const selectedLabels: { [index: number]: number[] } = {}
         selectedLabels[user.select.item] = [label.id]
         user = updateUserSelect(user, {
           labels: selectedLabels,
@@ -269,7 +271,7 @@ function addTrackToTask (
   const tracks = updateObject(task.tracks, { [track.id]: track })
   status.maxTrackId += 1
   task = { ...task, items, status, tracks }
-  return [ task, track, newLabels ]
+  return [task, track, newLabels]
 }
 
 /**
@@ -279,7 +281,7 @@ function addTrackToTask (
  */
 export function addTrack (state: State, action: types.AddTrackAction): State {
   let { user } = state
-  const [task,, newLabels] = addTrackToTask(
+  const [task, , newLabels] = addTrackToTask(
     state.task, action.trackType, action.itemIndices, action.labels,
     action.shapeTypes, action.shapes
   )
@@ -287,7 +289,7 @@ export function addTrack (state: State, action: types.AddTrackAction): State {
   if (action.sessionId === state.session.id) {
     for (const l of newLabels) {
       if (l.item === user.select.item) {
-        const selectedLabels: {[index: number]: number[]} = {}
+        const selectedLabels: { [index: number]: number[] } = {}
         selectedLabels[user.select.item] = [l.id]
         user = updateUserSelect(user, { labels: selectedLabels })
         break
@@ -376,7 +378,7 @@ function changeShapesInItems (
  * @param action
  */
 export function changeShapes (
-    state: State, action: types.ChangeShapesAction): State {
+  state: State, action: types.ChangeShapesAction): State {
   let task = state.task
   const user = state.user
   const shapeIds = action.shapeIds
@@ -396,8 +398,8 @@ function changeLabelsInItem (
   item: ItemType,
   labelIds: number[],
   props: Array<Partial<LabelType>>
-  ): ItemType {
-  const newLabels: {[key: number]: LabelType} = {}
+): ItemType {
+  const newLabels: { [key: number]: LabelType } = {}
   labelIds.forEach((labelId, index) => {
     const children = props[index].children
     if (children) {
@@ -406,7 +408,7 @@ function changeLabelsInItem (
     const oldLabel = item.labels[labelId]
     // avoid changing the shape field in the label
     newLabels[labelId] = updateObject(
-        oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
+      oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
   })
   item = updateObject(item, { labels: updateObject(item.labels, newLabels) })
   return item
@@ -506,7 +508,7 @@ export function getRootTrackId (item: ItemType, labelId: number): number {
  * @param {types.LinkLabelsAction} action
  */
 export function linkLabels (
-    state: State, action: types.LinkLabelsAction): State {
+  state: State, action: types.LinkLabelsAction): State {
   // Add a new label to the state
   let item = state.task.items[action.itemIndex]
   if (action.labelIds.length === 0) {
@@ -545,14 +547,17 @@ export function linkLabels (
   if (trackId >= 0) {
     newLabel.track = trackId
     let track = tracks[trackId]
-    track = updateObject(track, { labels: updateObject(
-      track.labels, { [item.index]: newLabelId })})
+    track = updateObject(track, {
+      labels: updateObject(
+        track.labels, { [item.index]: newLabelId })
+    })
     tracks = updateObject(tracks, { [trackId]: track })
   }
 
   // update the item
   item = updateObject(item, {
-    labels: updateObject(item.labels, _.zipObject(children, labels))})
+    labels: updateObject(item.labels, _.zipObject(children, labels))
+  })
   const items = updateListItem(state.task.items, item.index, item)
   const task = updateObject(state.task, { items, tracks })
   return { ...state, task }
@@ -610,7 +615,7 @@ export function unlinkLabels (
  * @param {types.ChangeSelectAction} action
  */
 export function changeSelect (
-    state: State, action: types.ChangeSelectAction): State {
+  state: State, action: types.ChangeSelectAction): State {
   const newSelect = updateObject(state.user.select, action.select)
   for (const key of Object.keys(newSelect.labels)) {
     const index = Number(key)
@@ -658,7 +663,7 @@ function deleteLabelsFromItem (
   const deletedLabels = pickObject(item.labels, labelIds)
 
   // find related labels and shapes
-  const updatedLabels: {[key: number]: LabelType} = {}
+  const updatedLabels: { [key: number]: LabelType } = {}
   const updatedShapes: { [key: number]: IndexedShapeType } = {}
   const deletedShapes: { [key: number]: IndexedShapeType } = {}
   _.forEach(deletedLabels, (label) => {
@@ -671,7 +676,7 @@ function deleteLabelsFromItem (
     label.shapes.forEach((shapeId) => {
       let shape = item.shapes[shapeId]
       shape = updateObject(
-          shape, { label: removeListItems(shape.label, [label.id]) })
+        shape, { label: removeListItems(shape.label, [label.id]) })
       updatedShapes[shape.id] = shape
     })
   })
@@ -768,7 +773,7 @@ export function deleteLabels (
       deletedIds.add(labelId)
     }
   }
-  const newSelectedLabels: {[index: number]: number[]} = []
+  const newSelectedLabels: { [index: number]: number[] } = []
   for (const key of Object.keys(user.select.labels)) {
     const index = Number(key)
     const newSelectedIds = []
@@ -892,29 +897,55 @@ export function changeViewerConfig (
   return state
 }
 
+/**
+ * Propagate hidden flag from starting pane upward through the tree
+ * A non-leaf pane is hidden iff both of its children are hidden
+ */
+function propagateHiddenPane (
+  paneId: number,
+  panes: { [id: number]: PaneType}
+) {
+  let pane = panes[paneId]
+  while (pane.parent >= 0) {
+    const parent = panes[pane.parent]
+    if (parent.child1 && parent.child2) {
+      // Set pane to be hidden if both children are hidden
+      const hide = panes[parent.child1].hide && panes[parent.child2].hide
+      panes[pane.parent] = updateObject(parent, { hide })
+      pane = panes[pane.parent]
+    } else {
+      break
+    }
+  }
+}
+
 /** Update existing pane */
 export function updatePane (
   state: State, action: types.UpdatePaneAction
 ) {
-  if (!(action.pane in state.user.layout.panes)) {
+  const panes = state.user.layout.panes
+
+  if (!(action.pane in panes)) {
     return state
   }
 
   const newPane = updateObject(
-    state.user.layout.panes[action.pane],
+    panes[action.pane],
     action.props
   )
 
+  const newPanes = updateObject(
+    panes,
+    {
+      [action.pane]: newPane
+    }
+  )
+
+  propagateHiddenPane(newPane.id, newPanes)
+
   const newLayout = updateObject(
     state.user.layout,
-    {
-      panes: updateObject(
-        state.user.layout.panes,
-        {
-          [action.pane]: newPane
-        }
-      )
-    }
+    { panes: newPanes }
   )
 
   return updateObject(
@@ -926,6 +957,27 @@ export function updatePane (
       )
     }
   )
+}
+
+/** Update children split counts upwards to root */
+function updateSplitCounts (paneId: number, panes: {[id: number]: PaneType}) {
+  let pane = panes[paneId]
+  while (pane) {
+    let parent = panes[pane.parent]
+    if (parent) {
+      parent = updateObject(parent, {
+        numHorizontalChildren: pane.numHorizontalChildren,
+        numVerticalChildren: pane.numVerticalChildren
+      })
+      if (pane.split === SplitType.HORIZONTAL) {
+        parent.numHorizontalChildren++
+      } else if (pane.split === SplitType.VERTICAL) {
+        parent.numVerticalChildren++
+      }
+      panes[parent.id] = parent
+    }
+    pane = parent
+  }
 }
 
 /**
@@ -978,19 +1030,23 @@ export function splitPane (
     }
   )
 
+  const newPanes = updateObject(
+    state.user.layout.panes,
+    {
+      [newPane.id]: newPane,
+      [child1Id]: child1,
+      [child2Id]: child2
+    }
+  )
+
+  updateSplitCounts(newPane.id, newPanes)
+
   const newLayout = updateObject(
     state.user.layout,
     {
       maxViewerConfigId: newViewerConfigId,
       maxPaneId: child2Id,
-      panes: updateObject(
-        state.user.layout.panes,
-        {
-          [newPane.id]: newPane,
-          [child1Id]: child1,
-          [child2Id]: child2
-        }
-      )
+      panes: newPanes
     }
   )
 
@@ -1025,7 +1081,7 @@ export function deletePane (
   // Shallow copy of panes and modification of dictionary
   const newPanes = { ...panes }
 
-  // Get id of the child that is not the pane that will be deleted
+  // Get id of the child that is not the pane to be deleted
   let newLeafId: number = -1
   if (parent.child1 === action.pane && parent.child2) {
     newLeafId = parent.child2
@@ -1063,7 +1119,10 @@ export function deletePane (
 
   delete newPanes[parentId]
   delete newPanes[action.pane]
+
   newPanes[newLeafId] = updateObject(panes[newLeafId], { parent: newParentId })
+  updateSplitCounts(newLeafId, newPanes)
+
   const updateParams: Partial<LayoutType> = { panes: newPanes }
 
   if (parentId === state.user.layout.rootPane) {
@@ -1077,6 +1136,32 @@ export function deletePane (
         state.user,
         { layout: updateObject(state.user.layout, updateParams) }
       )
+    }
+  )
+}
+
+/** adds a new submission */
+export function submit (
+  state: State, action: types.SubmitAction
+): State {
+  const submissions =
+    [...state.task.progress.submissions, _.cloneDeep(action.submitData)]
+  const newProgress = updateObject(
+    state.task.progress,
+    {
+      submissions
+    }
+  )
+  const newTask = updateObject(
+    state.task,
+    {
+      progress: newProgress
+    }
+  )
+  return updateObject(
+    state,
+    {
+      task: newTask
     }
   )
 }

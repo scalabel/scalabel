@@ -61,6 +61,8 @@ export const reducer: Reducer<State> = (
       return common.changeViewerConfig(
         state, action as types.ChangeViewerConfigAction
       )
+    case types.SUBMIT:
+      return common.submit(state, action as types.SubmitAction)
     default:
   }
   return state

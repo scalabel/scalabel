@@ -199,6 +199,7 @@ export function makePointCloudViewerConfig (
     target: { x: 10.0, y: 0.0, z: 0.0 },
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
+    flipAxis: false,
     show: true,
     type: types.ViewerConfigTypeName.POINT_CLOUD,
     sensor,
@@ -303,9 +304,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     categories: [],
     attributes: [],
     taskId: '',
-    submitTime: 0,
     demoMode: false,
-    submitted: false,
     autosave: false,
     ...params
   }
@@ -341,7 +340,10 @@ export function makePane (
     minPrimarySize,
     maxPrimarySize,
     child1,
-    child2
+    child2,
+    hide: false,
+    numHorizontalChildren: 0,
+    numVerticalChildren: 0
   }
 }
 
@@ -447,6 +449,9 @@ export function makeTask (params: Partial<TaskType> = {}): TaskType {
     items: [],
     tracks: {},
     sensors: {},
+    progress: {
+      submissions: []
+    },
     ...params
   }
 }
