@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.com/scalabel/scalabel.svg?branch=master)](https://travis-ci.com/scalabel/scalabel)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:javascript)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:python)
+![Docker Pulls](https://img.shields.io/docker/pulls/scalabel/www)
 
 [Scalabel](https://www.scalabel.ai) (pronounced "scalable") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://bair.berkeley.edu/blog/2018/05/30/bdd/) is labeled with this tool.
 
@@ -49,6 +50,8 @@ More installation and usage details can be find in our [documentation](http://ww
       ```
       docker build . -t scalabel/www
       ```
+
+      Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
 
    2. Compile the code yourself (recommended if you want to customize the source code)
 
@@ -97,7 +100,7 @@ More installation and usage details can be find in our [documentation](http://ww
    If using docker,
 
    ```
-   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 6379:6379 scalabel/www \
+   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 -p 6379:6379 scalabel/www \
        python3.8 scripts/launch_server.py --config /opt/scalabel/data/config.yml
    ```
 

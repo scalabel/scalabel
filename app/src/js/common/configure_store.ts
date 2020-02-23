@@ -17,7 +17,7 @@ import { reducer } from './reducer'
  */
 export function configureStore (
     initialState: Partial<State>,
-    devMode: boolean = false,
+    debug: boolean = false,
     middleware?: Middleware): Store<StateWithHistory<State>> {
   const initialHistory = {
     past: Array<State>(),
@@ -32,7 +32,7 @@ export function configureStore (
       ADD_LABELS,
       DELETE_LABELS
     ]),
-    debug: devMode
+    debug
   })
 
   if (middleware === undefined) {

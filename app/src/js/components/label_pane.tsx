@@ -106,6 +106,7 @@ class LabelPane extends Component<Props> {
       const viewerConfig = this.state.user.viewerConfigs[pane.viewerId]
       const viewerTypeMenu = (
         <Select
+          key={`viewerTypeMenu${pane.id}`}
           value={viewerConfig.type}
           onChange={(e) => {
             const newConfig = makeDefaultViewerConfig(
@@ -127,14 +128,26 @@ class LabelPane extends Component<Props> {
             }
           }}
         >
-          <MenuItem value={types.ViewerConfigTypeName.IMAGE}>Image</MenuItem>
-          <MenuItem value={types.ViewerConfigTypeName.POINT_CLOUD}>
+          <MenuItem
+            key={`imageTypeMenuItem${pane.id}`}
+            value={types.ViewerConfigTypeName.IMAGE}
+          >Image</MenuItem>
+          <MenuItem
+            key={`pcTypeMenuItem${pane.id}`}
+            value={types.ViewerConfigTypeName.POINT_CLOUD}
+          >
             Point Cloud
           </MenuItem>
-          <MenuItem value={types.ViewerConfigTypeName.IMAGE_3D}>
+          <MenuItem
+            key={`image3dTypeMenuItem${pane.id}`}
+            value={types.ViewerConfigTypeName.IMAGE_3D}
+          >
             Image 3D
           </MenuItem>
-          <MenuItem value={types.ViewerConfigTypeName.HOMOGRAPHY}>
+          <MenuItem
+            key={`homographyTypeMenuItem${pane.id}`}
+            value={types.ViewerConfigTypeName.HOMOGRAPHY}
+          >
             Homography
           </MenuItem>
         </Select>
@@ -142,6 +155,7 @@ class LabelPane extends Component<Props> {
 
       const viewerIdMenu = (
         <Select
+          key={`viewerIdMenu${pane.id}`}
           value={
             viewerConfig.sensor
           }
@@ -164,13 +178,17 @@ class LabelPane extends Component<Props> {
                 viewerConfig.type
               )
           ).map((key) =>
-            <MenuItem value={Number(key)}>{key}</MenuItem>
+            <MenuItem
+              key={`viewerId${key}MenuItem${pane.id}`}
+              value={Number(key)}
+            >{key}</MenuItem>
           )}
         </Select>
       )
 
       const verticalSplitButton = (
         <IconButton
+          key={`verticalSplitButton${pane.id}`}
           className={this.props.classes.icon90}
           onClick={() => {
             Session.dispatch(splitPane(
@@ -186,6 +204,7 @@ class LabelPane extends Component<Props> {
 
       const horizontalSplitButton = (
         <IconButton
+          key={`horizontalSplitButton${pane.id}`}
           className={this.props.classes.icon}
           onClick={() => {
             Session.dispatch(splitPane(
@@ -202,6 +221,7 @@ class LabelPane extends Component<Props> {
 
       const deleteButton = (
         <IconButton
+          key={`deleteButton${pane.id}`}
           className={this.props.classes.icon}
           onClick={() => {
             Session.dispatch(deletePane(
@@ -219,6 +239,7 @@ class LabelPane extends Component<Props> {
 
       const configBar = (
           <Grid
+            key={`paneMenu${pane.id}`}
             justify={'flex-end'}
             container
             direction='row'
@@ -254,12 +275,15 @@ class LabelPane extends Component<Props> {
       throw new Error('Missing split type')
     }
 
-    const child1 = (<StyledLabelPane pane={pane.child1} />)
-    const child2 = (<StyledLabelPane pane={pane.child2} />)
+    const child1 =
+      (<StyledLabelPane pane={pane.child1} key={`pane${pane.child1}`}/>)
+    const child2 =
+      (<StyledLabelPane pane={pane.child2} key={`pane${pane.child2}`}/>)
 
     const defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
     return (
       <SplitPane
+        key={`split${pane.id}`}
         split={pane.split}
         defaultSize={defaultSize}
         primary={pane.primary}

@@ -210,16 +210,18 @@ function loadData (): void {
 /**
  * Load all the images in the state
  */
-function loadImages (): void {
+function loadImages (maxAttempts: number = 3): void {
   const state = Session.getState()
   const items = state.task.items
   Session.images = []
   for (const item of items) {
     const itemImageMap: {[id: number]: HTMLImageElement} = {}
+    const attemptsMap: {[id: number]: number} = {}
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
       if (sensorId in state.task.sensors &&
           state.task.sensors[sensorId].type === DataType.IMAGE) {
+        attemptsMap[sensorId] = 0
         const url = item.urls[sensorId]
         const image = new Image()
         image.crossOrigin = 'Anonymous'
@@ -227,7 +229,13 @@ function loadImages (): void {
           Session.dispatch(loadItem(item.index, sensorId))
         }
         image.onerror = () => {
-          alert(sprintf('Failed to load image at %s', url))
+          if (attemptsMap[sensorId] === maxAttempts) {
+            // Append date to url to prevent local caching
+            image.src = `${url}#${new Date().getTime()}`
+            attemptsMap[sensorId]++
+          } else {
+            alert(sprintf('Failed to load image at %s', url))
+          }
         }
         image.src = url
         itemImageMap[sensorId] = image
@@ -240,7 +248,7 @@ function loadImages (): void {
 /**
  * Load all point clouds in state
  */
-function loadPointClouds (): void {
+function loadPointClouds (maxAttempts: number = 3): void {
   const loader = new PLYLoader()
 
   const state = Session.getState()
@@ -249,24 +257,38 @@ function loadPointClouds (): void {
   for (const item of items) {
     const pcImageMap: {[id: number]: THREE.BufferGeometry} = {}
     Session.pointClouds.push(pcImageMap)
+    const attemptsMap: {[id: number]: number} = {}
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
       if (sensorId in state.task.sensors &&
           state.task.sensors[sensorId].type === DataType.POINT_CLOUD) {
         const url = item.urls[sensorId]
+        attemptsMap[sensorId] = 0
+        const onLoad = (geometry: THREE.BufferGeometry) => {
+          Session.pointClouds[item.index][sensorId] = geometry
+
+          Session.dispatch(loadItem(item.index, sensorId))
+        }
+        // TODO(fyu): need to make a unified data loader with consistent
+        // policy for all data types
+        const onError = () => {
+          attemptsMap[sensorId]++
+          if (attemptsMap[sensorId] === maxAttempts) {
+            alert(`Point cloud at ${url} was not found.`)
+          } else {
+            loader.load(
+              url,
+              onLoad,
+              () => null,
+              onError
+            )
+          }
+        }
         loader.load(
           url,
-          (geometry: THREE.BufferGeometry) => {
-            Session.pointClouds[item.index][sensorId] = geometry
-
-            Session.dispatch(loadItem(item.index, sensorId))
-          },
-
+          onLoad,
           () => null,
-
-          () => {
-            alert(`Point cloud at ${url} was not found.`)
-          }
+          onError
         )
       }
     }

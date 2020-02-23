@@ -72,7 +72,6 @@ export class Listeners {
     }
     try {
       const projectName = req.query[types.FormField.PROJECT_NAME]
-      const loadedProject = await this.projectStore.loadProject(projectName)
       // grab the latest submissions from all tasks
       const tasks = await this.projectStore.getTasksInProject(projectName)
       let items: ItemExport[] = []
@@ -86,11 +85,17 @@ export class Listeners {
           Logger.info(error.message)
           for (const itemToLoad of task.items) {
             const url = Object.values(itemToLoad.urls)[0]
+            let timestamp = -1
+            const submissions = task.progress.submissions
+            if (submissions.length > 0) {
+              const latestSubmission = submissions[submissions.length - 1]
+              timestamp = latestSubmission.time
+            }
             items.push({
               name: url,
               url,
               sensor: -1,
-              timestamp: loadedProject.config.submitTime,
+              timestamp,
               videoName: itemToLoad.videoName,
               attributes: {},
               labels: []
@@ -187,11 +192,11 @@ export class Listeners {
             task = emptyTask
           }
           const [numLabeledItems, numLabels] = countLabels(task)
-
+          const submitted = task.progress.submissions.length > 0
           const options: TaskOptions = {
             numLabeledItems: numLabeledItems.toString(),
             numLabels: numLabels.toString(),
-            submitted: task.config.submitted,
+            submitted,
             handlerUrl: task.config.handlerUrl
           }
 
