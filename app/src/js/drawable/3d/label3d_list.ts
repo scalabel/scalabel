@@ -58,6 +58,7 @@ export class Label3DList {
     this._selectedLabel = null
     this._scene = new THREE.Scene()
     this._scene.add(this.control)
+    this._scene.layers.enableAll()
     this._raycastableShapes = []
     this._state = makeState()
     this._callbacks = []
@@ -194,11 +195,6 @@ export class Label3DList {
         }
 
         newLabels[id].selected = false
-
-        // Disable all layers. Viewers will re-enable
-        // for (const shape of newLabels[id].shapes()) {
-        //   shape.layers.disableAll()
-        // }
       }
     }
 

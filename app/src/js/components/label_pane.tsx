@@ -198,7 +198,7 @@ class LabelPane extends Component<Props> {
             ))
           }}
         >
-          <ViewStreamIcon />
+          <ViewStreamIcon fontSize='small' />
         </IconButton>
       )
 
@@ -215,7 +215,7 @@ class LabelPane extends Component<Props> {
           }}
           edge={'start'}
         >
-          <ViewStreamIcon />
+          <ViewStreamIcon fontSize='small' />
         </IconButton>
       )
 
@@ -231,7 +231,7 @@ class LabelPane extends Component<Props> {
           }}
           edge={'start'}
         >
-          <CloseIcon />
+          <CloseIcon fontSize='small' />
         </IconButton>
       )
 

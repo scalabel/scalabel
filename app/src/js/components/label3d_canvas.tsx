@@ -296,20 +296,23 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       this.forceUpdate()
     }
 
-    // const item = state.task.items[state.user.select.item]
-    // const viewerConfig = this.state.user.viewerConfigs[this.props.id]
-    // const sensorId = viewerConfig.sensor
-    // for (const key of Object.keys(item.labels)) {
-    //   const id = Number(key)
-    //   if (item.labels[id].sensors.includes(sensorId)) {
-    //     const label = Session.label3dList.get(id)
-    //     if (label) {
-    //       for (const shape of label.shapes()) {
-    //         shape.layers.enable(this.props.id)
-    //       }
-    //     }
-    //   }
-    // }
+    const item = state.task.items[state.user.select.item]
+    const viewerConfig = this.state.user.viewerConfigs[this.props.id]
+    const sensorId = viewerConfig.sensor
+    for (const key of Object.keys(item.labels)) {
+      const id = Number(key)
+      if (item.labels[id].sensors.includes(sensorId)) {
+        const label = Session.label3dList.get(id)
+        if (label) {
+          for (const shape of label.shapes()) {
+            shape.setVisible(
+              this.props.id,
+              !viewerConfig.hideLabels || label.selected
+            )
+          }
+        }
+      }
+    }
     this._labelHandler.updateState(state, state.user.select.item, this.props.id)
   }
 
