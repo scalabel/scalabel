@@ -159,6 +159,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   target: Vector3Type
   /** Up direction of the camera */
   verticalAxis: Vector3Type
+  /** Whether to flip the direction of the axis locks */
+  flipAxis: boolean
   /** Camera rotation lock */
   lockStatus: number
 }
@@ -311,6 +313,8 @@ export interface PaneType {
   parent: number
   /** If leaf, >= 0 */
   viewerId: number
+  /** Whether to hide pane */
+  hide: boolean
   /**
    * Which child is the primary pane to apply sizing to.
    * Other child is sized based on the size of the primary child
@@ -329,6 +333,10 @@ export interface PaneType {
   child1?: number
   /** Id of second child if not leaf */
   child2?: number
+  /** Number of children that are vertical splits */
+  numVerticalChildren: number
+  /** Number of children that are horizontal splits */
+  numHorizontalChildren: number
 }
 
 export interface LayoutType {

@@ -82,6 +82,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
     if (this._viewerConfig) {
       const zoomInButton = (
         <IconButton
+          key={`zoomIn2dButton${this.props.id}`}
           onClick={() => {
             if (this._container) {
               const rect = this._container.getBoundingClientRect()
@@ -98,6 +99,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       )
       const zoomOutButton = (
         <IconButton
+          key={`zoomOut2dButton${this.props.id}`}
           onClick={() => {
             if (this._container) {
               const rect = this._container.getBoundingClientRect()
@@ -115,6 +117,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       )
       const resetZoomButton = (
         <IconButton
+          key={`resetZoom2dButton${this.props.id}`}
           onClick={() => {
             const config = this._viewerConfig as ImageViewerConfigType
             const newConfig = { ...config }

@@ -33,5 +33,5 @@ RUN python3.8 -m pip install --upgrade pip && \
 RUN npm install -g npm@latest && npm install --max_old_space_size=8000
 
 
-RUN ./node_modules/.bin/npx webpack --config webpack.config.js --mode=production; \
+RUN ./node_modules/.bin/webpack --config webpack.config.js --mode=production; \
     rm -f app/dist/tsconfig.tsbuildinfo
