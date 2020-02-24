@@ -4,6 +4,8 @@ import MenuItem from '@material-ui/core/MenuItem'
 import Select from '@material-ui/core/Select'
 import CloseIcon from '@material-ui/icons/Close'
 import ViewStreamIcon from '@material-ui/icons/ViewStream'
+import VisibilityIcon from '@material-ui/icons/Visibility'
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff'
 import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
@@ -15,6 +17,8 @@ import { SplitType, ViewerConfigType } from '../functional/types'
 import { paneBarStyles, resizerStyles } from '../styles/split_pane'
 import { Component } from './component'
 import { viewerReactKey } from './drawable_viewer'
+import HomographyViewer from './homography_viewer'
+import Image3DViewer from './image3d_viewer'
 import Viewer2D from './viewer2d'
 import Viewer3D from './viewer3d'
 
@@ -27,6 +31,10 @@ export function viewerFactory (
       return (<Viewer2D id={viewerId} key={viewerReactKey(viewerId)} />)
     case types.ViewerConfigTypeName.POINT_CLOUD:
       return (<Viewer3D id={viewerId} key={viewerReactKey(viewerId)} />)
+    case types.ViewerConfigTypeName.IMAGE_3D:
+      return (<Image3DViewer id={viewerId} key={viewerReactKey(viewerId)} />)
+    case types.ViewerConfigTypeName.HOMOGRAPHY:
+      return (<HomographyViewer id={viewerId} key={viewerReactKey(viewerId)} />)
   }
   return null
 }
@@ -84,6 +92,8 @@ interface Props {
   /** pane id */
   pane: number
 }
+
+const HIDDEN_UNIT_SIZE = 50
 
 /**
  * Wrapper for SplitPane
@@ -180,6 +190,21 @@ class LabelPane extends Component<Props> {
         </Select>
       )
 
+      const visibilityButton = (
+        <IconButton
+          className={this.props.classes.icon}
+          onClick={() => {
+            Session.dispatch(updatePane(pane.id, { hide: !pane.hide }))
+          }}
+        >
+          {
+            (pane.hide) ?
+              <VisibilityIcon fontSize='small' /> :
+              <VisibilityOffIcon fontSize='small' />
+          }
+        </IconButton>
+      )
+
       const verticalSplitButton = (
         <IconButton
           key={`verticalSplitButton${pane.id}`}
@@ -191,8 +216,9 @@ class LabelPane extends Component<Props> {
               pane.viewerId
             ))
           }}
+          edge={'start'}
         >
-          <ViewStreamIcon />
+          <ViewStreamIcon fontSize='small' />
         </IconButton>
       )
 
@@ -209,7 +235,7 @@ class LabelPane extends Component<Props> {
           }}
           edge={'start'}
         >
-          <ViewStreamIcon />
+          <ViewStreamIcon fontSize='small' />
         </IconButton>
       )
 
@@ -225,34 +251,41 @@ class LabelPane extends Component<Props> {
           }}
           edge={'start'}
         >
-          <CloseIcon />
+          <CloseIcon fontSize='small' />
         </IconButton>
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
 
       const configBar = (
-          <Grid
-            key={`paneMenu${pane.id}`}
-            justify={'flex-end'}
-            container
-            direction='row'
-            classes={{
-              container: this.props.classes.viewer_container_bar
-            }}
-          >
+        <Grid
+          key={`paneMenu${pane.id}`}
+          justify={'flex-end'}
+          container
+          direction='row'
+          classes={{
+            container: this.props.classes.viewer_container_bar
+          }}
+        >
+          <div hidden={pane.hide}>
             {(numSensors > 1) ? viewerTypeMenu : null}
             {(numSensors > 1) ? viewerIdMenu : null}
+          </div>
+          {visibilityButton}
+          <div hidden={pane.hide}>
             {verticalSplitButton}
             {horizontalSplitButton}
-            {deleteButton}
-          </Grid>
+          </div>
+          {deleteButton}
+        </Grid>
       )
       // Leaf, render viewer container
       return (
           <div>
             {configBar}
-            {viewerFactory(viewerConfig, pane.viewerId)}
+            <div hidden={pane.hide}>
+              {viewerFactory(viewerConfig, pane.viewerId)}
+            </div>
           </div>
       )
     }
@@ -274,7 +307,28 @@ class LabelPane extends Component<Props> {
     const child2 =
       (<StyledLabelPane pane={pane.child2} key={`pane${pane.child2}`}/>)
 
-    const defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
+    const child1State = this.state.user.layout.panes[pane.child1]
+    const child2State = this.state.user.layout.panes[pane.child2]
+
+    let defaultSize = (pane.primarySize) ? pane.primarySize : '50%'
+
+    let hiddenSize = HIDDEN_UNIT_SIZE
+    if (pane.split) {
+      if (pane.split === SplitType.HORIZONTAL) {
+        hiddenSize *= pane.numHorizontalChildren + 1
+      } else {
+        hiddenSize *= pane.numVerticalChildren + 1
+      }
+    }
+
+    if (pane.hide) {
+      defaultSize = '50%'
+    } else if (child1State.hide) {
+      defaultSize = `${hiddenSize}px`
+    } else if (child2State.hide) {
+      defaultSize = `calc(100% - ${hiddenSize}px)`
+    }
+
     return (
       <SplitPane
         key={`split${pane.id}`}
@@ -285,6 +339,7 @@ class LabelPane extends Component<Props> {
           (size) => Session.dispatch(updatePane(pane.id, { primarySize: size }))
         }
         allowResize
+        size={defaultSize}
         resizerClassName={this.props.classes.resizer}
       >
         {child1}
