@@ -71,7 +71,7 @@ export class Plane3D extends Label3D {
       )
       this.addChild(this._temporaryLabel)
       for (const shape of this._temporaryLabel.shapes()) {
-        this._shape.attach(shape)
+        this._labelList.scene.add(shape)
       }
       return this._temporaryLabel.onMouseDown(x, y, camera)
     }

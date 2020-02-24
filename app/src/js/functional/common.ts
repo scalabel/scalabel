@@ -12,9 +12,11 @@ import {
   ItemType,
   LabelType,
   LayoutType,
+  PaneType,
   PointCloudViewerConfigType,
   Select,
   ShapeType,
+  SplitType,
   State,
   TaskStatus,
   TaskType,
@@ -895,29 +897,55 @@ export function changeViewerConfig (
   return state
 }
 
+/**
+ * Propagate hidden flag from starting pane upward through the tree
+ * A non-leaf pane is hidden iff both of its children are hidden
+ */
+function propagateHiddenPane (
+  paneId: number,
+  panes: { [id: number]: PaneType}
+) {
+  let pane = panes[paneId]
+  while (pane.parent >= 0) {
+    const parent = panes[pane.parent]
+    if (parent.child1 && parent.child2) {
+      // Set pane to be hidden if both children are hidden
+      const hide = panes[parent.child1].hide && panes[parent.child2].hide
+      panes[pane.parent] = updateObject(parent, { hide })
+      pane = panes[pane.parent]
+    } else {
+      break
+    }
+  }
+}
+
 /** Update existing pane */
 export function updatePane (
   state: State, action: types.UpdatePaneAction
 ) {
-  if (!(action.pane in state.user.layout.panes)) {
+  const panes = state.user.layout.panes
+
+  if (!(action.pane in panes)) {
     return state
   }
 
   const newPane = updateObject(
-    state.user.layout.panes[action.pane],
+    panes[action.pane],
     action.props
   )
 
+  const newPanes = updateObject(
+    panes,
+    {
+      [action.pane]: newPane
+    }
+  )
+
+  propagateHiddenPane(newPane.id, newPanes)
+
   const newLayout = updateObject(
     state.user.layout,
-    {
-      panes: updateObject(
-        state.user.layout.panes,
-        {
-          [action.pane]: newPane
-        }
-      )
-    }
+    { panes: newPanes }
   )
 
   return updateObject(
@@ -929,6 +957,27 @@ export function updatePane (
       )
     }
   )
+}
+
+/** Update children split counts upwards to root */
+function updateSplitCounts (paneId: number, panes: {[id: number]: PaneType}) {
+  let pane = panes[paneId]
+  while (pane) {
+    let parent = panes[pane.parent]
+    if (parent) {
+      parent = updateObject(parent, {
+        numHorizontalChildren: pane.numHorizontalChildren,
+        numVerticalChildren: pane.numVerticalChildren
+      })
+      if (pane.split === SplitType.HORIZONTAL) {
+        parent.numHorizontalChildren++
+      } else if (pane.split === SplitType.VERTICAL) {
+        parent.numVerticalChildren++
+      }
+      panes[parent.id] = parent
+    }
+    pane = parent
+  }
 }
 
 /**
@@ -981,19 +1030,23 @@ export function splitPane (
     }
   )
 
+  const newPanes = updateObject(
+    state.user.layout.panes,
+    {
+      [newPane.id]: newPane,
+      [child1Id]: child1,
+      [child2Id]: child2
+    }
+  )
+
+  updateSplitCounts(newPane.id, newPanes)
+
   const newLayout = updateObject(
     state.user.layout,
     {
       maxViewerConfigId: newViewerConfigId,
       maxPaneId: child2Id,
-      panes: updateObject(
-        state.user.layout.panes,
-        {
-          [newPane.id]: newPane,
-          [child1Id]: child1,
-          [child2Id]: child2
-        }
-      )
+      panes: newPanes
     }
   )
 
@@ -1028,7 +1081,7 @@ export function deletePane (
   // Shallow copy of panes and modification of dictionary
   const newPanes = { ...panes }
 
-  // Get id of the child that is not the pane that will be deleted
+  // Get id of the child that is not the pane to be deleted
   let newLeafId: number = -1
   if (parent.child1 === action.pane && parent.child2) {
     newLeafId = parent.child2
@@ -1066,7 +1119,10 @@ export function deletePane (
 
   delete newPanes[parentId]
   delete newPanes[action.pane]
+
   newPanes[newLeafId] = updateObject(panes[newLeafId], { parent: newParentId })
+  updateSplitCounts(newLeafId, newPanes)
+
   const updateParams: Partial<LayoutType> = { panes: newPanes }
 
   if (parentId === state.user.layout.rootPane) {
