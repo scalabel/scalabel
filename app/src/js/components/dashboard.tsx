@@ -1,5 +1,4 @@
 import * as fa from '@fortawesome/free-solid-svg-icons/index'
-import { sprintf } from 'sprintf-js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Grid, IconButton, Link, List,
   Table, TableCell, TableHead, TableRow } from '@material-ui/core'
@@ -14,6 +13,7 @@ import { Endpoint } from '../server/types'
 import { dashboardWindowStyles, headerStyle,
   listEntryStyle, sidebarStyle } from '../styles/dashboard'
 import DividedPage from './divided_page'
+import { formatDate, getSubmissionTime } from './util'
 
 export interface ProjectOptions {
   /** project name */
@@ -167,12 +167,10 @@ function Dashboard (props: DashboardProps) {
         </TableHead>
         <TableBody>
           {taskMetaDatas.map((value: TaskOptions, index) => {
-            const submissions = value.submissions
-            const submitted = submissions.length > 0
+            const time = getSubmissionTime(value.submissions)
             let dateString = ''
-            if (submitted) {
-              const latestSubmission = submissions[submissions.length - 1]
-              dateString = formatDate(latestSubmission.time)
+            if (time !== -1) {
+              dateString = formatDate(time)
             }
             totalLabels += Number(value.numLabels)
             totalTaskLabeled += Number(value.numLabeledItems) > 0 ? 1 : 0
@@ -203,7 +201,7 @@ function Dashboard (props: DashboardProps) {
                   align={align}
                   data-testid={'submitted-' + index.toString()}
                 >
-                  {submitted ? dateString : null}
+                  {dateString}
                 </TableCell>
                 <TableCell className={classes.bodyCell} align={align}>
                   <IconButton
@@ -363,16 +361,6 @@ function listEntry (props: ListEntryProps) {
       </Grid>
     </React.Fragment>
   )
-}
-
-/**
- * Puts Date.now into print format
- */
-function formatDate (dateNow: number): string {
-  const date = new Date(dateNow)
-  const day = date.toDateString()
-  const time = date.toTimeString()
-  return sprintf('%s %s', day, time)
 }
 
 /** export sub-components for testing */
