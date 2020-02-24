@@ -44,6 +44,15 @@ export abstract class Shape3D extends THREE.Object3D {
     this._id = id
   }
 
+  /** Set visibility for viewer */
+  public setVisible (viewerId: number, v: boolean = true) {
+    if (v) {
+      this.layers.enable(viewerId)
+    } else {
+      this.layers.disable(viewerId)
+    }
+  }
+
   /** Convert shape to state representation */
   public abstract toState (): ShapeType
 

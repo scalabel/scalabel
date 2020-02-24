@@ -208,14 +208,14 @@ test('Move axis aligned 3d bbox along z axis', () => {
   raycaster.far = 100.0
   raycaster.linePrecision = 0.02
 
-  raycaster.setFromCamera(new THREE.Vector2(0, 0.1), camera)
+  raycaster.setFromCamera(new THREE.Vector2(0, 0.15), camera)
   let intersections =
     raycaster.intersectObjects(raycastableShapes as unknown as THREE.Object3D[])
   expect(intersections.length).toBeGreaterThan(0)
 
-  label3dHandler.onMouseMove(0, 0.1, intersections[0])
+  label3dHandler.onMouseMove(0, 0.15, intersections[0])
   Session.label3dList.onDrawableUpdate()
-  label3dHandler.onMouseDown(0, 0.1)
+  label3dHandler.onMouseDown(0, 0.15)
   label3dHandler.onMouseMove(0, 0.5)
   Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseUp()
@@ -235,7 +235,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   label3dHandler.onMouseMove(0, 0.5, intersections[0])
   Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseDown(0, 0.5)
-  label3dHandler.onMouseMove(0, 0.1)
+  label3dHandler.onMouseMove(0, 0.15)
   Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseUp()
 

@@ -8,15 +8,16 @@ import { Listeners } from './listeners'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
 import { RedisStore } from './redis_store'
-import { Endpoint } from './types'
+import { Endpoint, ServerConfig } from './types'
 import { UserManager } from './user_manager'
-import { makeEnv, makeStorage } from './util'
+import { makeStorage, readConfig } from './util'
 
 /**
  * Sets up http handlers
  */
 function startHTTPServer (
-  app: Application, projectStore: ProjectStore, userManager: UserManager) {
+  config: ServerConfig, app: Application,
+  projectStore: ProjectStore, userManager: UserManager) {
   const listeners = new Listeners(projectStore, userManager)
 
   // set up middleware
@@ -31,6 +32,9 @@ function startHTTPServer (
 
   // set up static handlers for serving javascript
   app.use('/js', express.static(getAbsoluteSrcPath('/')))
+
+  // set up static handlers for serving items to label
+  app.use('/items', express.static(config.itemDir))
 
   // set up post/get handlers
   app.get(Endpoint.GET_PROJECT_NAMES,
@@ -49,11 +53,11 @@ function startHTTPServer (
  */
 async function main (): Promise<void> {
   // initialize environment variables
-  const env = makeEnv()
+  const config = readConfig()
 
   // initialize storage and redis
-  const storage = await makeStorage(env.database, env.data)
-  const redisStore = new RedisStore(env, storage)
+  const storage = await makeStorage(config.database, config.data)
+  const redisStore = new RedisStore(config, storage)
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(storage)
 
@@ -63,13 +67,13 @@ async function main (): Promise<void> {
   const io = socketio(httpServer)
 
   // set up http handlers
-  startHTTPServer(app, projectStore, userManager)
+  startHTTPServer(config, app, projectStore, userManager)
 
   // set up socket.io handler
-  const hub = new Hub(env, projectStore, userManager)
+  const hub = new Hub(config, projectStore, userManager)
   hub.listen(io)
 
-  httpServer.listen(env.port)
+  httpServer.listen(config.port)
 
   return
 }
