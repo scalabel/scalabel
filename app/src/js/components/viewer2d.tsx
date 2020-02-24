@@ -218,7 +218,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
 
       if (this._container) {
         const rect = this._container.getBoundingClientRect()
-        
+
         let displayLeft = zoomRatio * (offset.x + config.displayLeft) - offset.x
         let displayTop = zoomRatio * (offset.y + config.displayTop) - offset.y
         if (rect) {
