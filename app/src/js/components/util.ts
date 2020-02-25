@@ -5,7 +5,7 @@ import { SubmitData } from '../functional/types'
  */
 export function formatDate (dateNow: number): string {
   const date = new Date(dateNow)
-  return date.toLocaleString()
+  return date.toLocaleString('en-CA', { hour12: false })
 }
 
 /**
