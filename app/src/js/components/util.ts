@@ -1,4 +1,3 @@
-import { sprintf } from 'sprintf-js'
 import { SubmitData } from '../functional/types'
 
 /**
@@ -6,9 +5,7 @@ import { SubmitData } from '../functional/types'
  */
 export function formatDate (dateNow: number): string {
   const date = new Date(dateNow)
-  const day = date.toDateString()
-  const time = date.toTimeString()
-  return sprintf('%s %s', day, time)
+  return date.toLocaleString()
 }
 
 /**
