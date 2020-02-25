@@ -1,11 +1,11 @@
 import { cleanup } from '@testing-library/react'
 import _ from 'lodash'
 import { goToItem } from '../../js/action/common'
+import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { Hub } from '../../js/server/hub'
 import { ProjectStore } from '../../js/server/project_store'
-import { ActionPacketType, defaultEnv, EventName,
-  RegisterMessageType,
+import { ActionPacketType, EventName, RegisterMessageType,
   StateMetadata, SyncActionMessageType } from '../../js/server/types'
 import { UserManager } from '../../js/server/user_manager'
 import { index2str, updateState } from '../../js/server/util'
@@ -53,7 +53,7 @@ beforeAll(() => {
   mockStorage = new FileStorage('fakeDataDir')
   mockProjectStore = new ProjectStore(mockStorage)
   mockUserManager = new UserManager(mockStorage)
-  hub = new Hub(defaultEnv, mockProjectStore, mockUserManager)
+  hub = new Hub(serverConfig, mockProjectStore, mockUserManager)
 })
 
 afterEach(cleanup)

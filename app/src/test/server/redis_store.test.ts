@@ -2,10 +2,11 @@ import * as child from 'child_process'
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
+import * as defaults from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisStore } from '../../js/server/redis_store'
-import { defaultEnv, Env, StateMetadata } from '../../js/server/types'
+import { ServerConfig, StateMetadata } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
 import { sleep } from '../project/util'
 
@@ -14,23 +15,23 @@ let redisProc: child.ChildProcessWithoutNullStreams
 let defaultStore: RedisStore
 let storage: FileStorage
 let dataDir: string
-let env: Env
+let config: ServerConfig
 let metadataString: string
 
 beforeAll(async () => {
   // Avoid default port 6379 and port 6377 used in box2d integration test
-  env = _.clone(defaultEnv)
-  env.redisPort = 6378
+  config = _.clone(defaults.serverConfig)
+  config.redisPort = 6378
 
   redisProc = child.spawn('redis-server',
-    ['--appendonly', 'no', '--save', '', '--port', env.redisPort.toString(),
+    ['--appendonly', 'no', '--save', '', '--port', config.redisPort.toString(),
       '--bind', '127.0.0.1', '--protected-mode', 'yes'])
 
   // Buffer period for redis to launch
   await sleep(1000)
   dataDir = getTestDir('test-data-redis')
   storage = new FileStorage(dataDir)
-  defaultStore = new RedisStore(env, storage)
+  defaultStore = new RedisStore(config, storage)
   metadataString = makeMetadata(1)
 })
 
@@ -61,7 +62,7 @@ describe('Test redis cache', () => {
   })
 
   test('Writes back on timeout', async () => {
-    const timeoutEnv = _.clone(env)
+    const timeoutEnv = _.clone(config)
     timeoutEnv.timeForWrite = 0.2
     const store = new RedisStore(timeoutEnv, storage)
 
@@ -77,7 +78,7 @@ describe('Test redis cache', () => {
   })
 
   test('Writes back after action limit', async () => {
-    const actionEnv = _.clone(env)
+    const actionEnv = _.clone(config)
     actionEnv.numActionsForWrite = 5
     const store = new RedisStore(actionEnv, storage)
 

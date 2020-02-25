@@ -3,7 +3,7 @@ import { promisify } from 'util'
 import Logger from './logger'
 import * as path from './path'
 import { Storage } from './storage'
-import { Env, StateMetadata } from './types'
+import { ServerConfig, StateMetadata } from './types'
 
 /**
  * Wraps and promisifies redis functionality
@@ -25,7 +25,7 @@ export class RedisStore {
   /**
    * Create new store
    */
-  constructor (env: Env, storage: Storage) {
+  constructor (env: ServerConfig, storage: Storage) {
     this.timeout = env.redisTimeout
     this.timeForWrite = env.timeForWrite
     this.numActionsForWrite = env.numActionsForWrite

@@ -15,6 +15,7 @@ import {
   TaskType,
   TrackMapType
 } from '../functional/types'
+import * as defaults from './defaults'
 import { convertItemToImport } from './import'
 import { ProjectStore } from './project_store'
 import * as types from './types'
@@ -107,9 +108,9 @@ function getDefaultCategories (labelType: string): string[] {
     // TODO: add seg2d defaults (requires subcategories)
     case LabelTypeName.BOX_3D:
     case LabelTypeName.BOX_2D:
-      return types.defaultBoxCategories
+      return defaults.boxCategories
     case LabelTypeName.POLYLINE_2D:
-      return types.defaultPolyline2DCategories
+      return defaults.polyline2DCategories
     default:
       return []
   }
@@ -157,9 +158,9 @@ export function parseCategories (
 function getDefaultAttributes (labelType: string): Attribute[] {
   switch (labelType) {
     case LabelTypeName.BOX_2D:
-      return types.defaultBox2DAttributes
+      return defaults.box2DAttributes
     default:
-      return types.dummyAttributes
+      return defaults.dummyAttributes
   }
 }
 

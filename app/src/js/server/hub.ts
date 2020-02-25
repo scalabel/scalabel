@@ -7,8 +7,8 @@ import * as path from './path'
 import { ProjectStore } from './project_store'
 import { SocketServer } from './socket_server'
 import {
-  Env, EventName,
-  RegisterMessageType, StateMetadata, SyncActionMessageType } from './types'
+  EventName, RegisterMessageType, ServerConfig, 
+  StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
 import { index2str, updateStateTimestamp } from './util'
 
@@ -25,7 +25,9 @@ export class Hub {
   /** the user manager */
   protected userManager: UserManager
 
-  constructor (env: Env, projectStore: ProjectStore, userManager: UserManager) {
+  constructor (env: ServerConfig,
+               projectStore: ProjectStore,
+               userManager: UserManager) {
     this.sync = env.sync
     this.autosave = env.autosave
     this.projectStore = projectStore
