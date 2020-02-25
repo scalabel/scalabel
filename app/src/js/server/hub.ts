@@ -7,7 +7,7 @@ import * as path from './path'
 import { ProjectStore } from './project_store'
 import { SocketServer } from './socket_server'
 import {
-  EventName, RegisterMessageType, ServerConfig, 
+  EventName, RegisterMessageType, ServerConfig,
   StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
 import { index2str, updateStateTimestamp } from './util'
