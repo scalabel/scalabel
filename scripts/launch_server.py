@@ -28,10 +28,18 @@ def launch() -> None:
     redis_port = 'redisPort'
     if redis_port not in config:
         config[redis_port] = 6379
+
+    # store redis dump in current directory if no local dir is supplied
+    data = 'data'
+    database = 'database'
+    if (data not in config or
+            (database in config and config[database] != 'local')):
+        config[data] = './'
+
     redis_cmd = ['redis-server', 'app/config/redis.conf',
                  '--port', '{}'.format(config[redis_port]),
                  '--bind', '127.0.0.1',
-                 '--dir', './data',
+                 '--dir', config[data],
                  '--protected-mode', 'yes']
     logger.info('Launching redis server')
     logger.info(' '.join(redis_cmd))
