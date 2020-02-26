@@ -171,6 +171,8 @@ class Viewer3D extends DrawableViewer<Props> {
         />
       )
 
+      views.push(
+      )
     }
 
     return views
@@ -352,6 +354,17 @@ class Viewer3D extends DrawableViewer<Props> {
   }
 
   /**
+   * Handle mouse down
+   * @param e
+   */
+  protected onMouseDown (e: React.MouseEvent): void {
+    super.onMouseDown(e)
+    if (this._mouseButton !== 0) {
+      this._mouseDown = false
+    }
+  }
+
+  /**
    * Handle mouse move
    * @param e
    */
@@ -365,7 +378,7 @@ class Viewer3D extends DrawableViewer<Props> {
       this._movingCamera = true
       const lockSelection =
         lockedToSelection(this._viewerConfig as PointCloudViewerConfigType)
-      if (this._mouseButton === 2) {
+      if (this.isKeyDown(types.Key.META) || this.isKeyDown(types.Key.CONTROL)) {
         const delta = this.dragCamera(dX, dY)
         if (lockSelection && Session.label3dList.selectedLabel) {
           Session.label3dList.selectedLabel.translate(delta)
@@ -373,8 +386,7 @@ class Viewer3D extends DrawableViewer<Props> {
       } else {
         if (lockSelection && Session.label3dList.selectedLabel) {
           if (
-            this.isKeyDown(types.Key.CONTROL) ||
-            this.isKeyDown(types.Key.META)
+            this.isKeyDown(types.Key.SHIFT)
            ) {
             const quaternion = this.rotateCameraViewDirection(dX)
             Session.label3dList.selectedLabel.rotate(quaternion)

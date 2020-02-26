@@ -359,6 +359,7 @@ export function makeLayout (params: {} = {}): LayoutType {
     maxPaneId: 0,
     rootPane: 0,
     panes: { [0]: makePane(0, 0) },
+    menuPosition: { x: -1, y: -1 },
     ...params
   }
 }

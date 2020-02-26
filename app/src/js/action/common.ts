@@ -1,6 +1,6 @@
 import Session from '../common/session'
 import { LabelType, PaneType,
-  Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
+  Select, ShapeType, SplitType, TaskType, Vector2Type, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -350,6 +350,17 @@ export function deletePane (
     sessionId: Session.id,
     pane,
     viewerId
+  }
+}
+
+/** action to set context menu location */
+export function setMenuPosition (
+  menuPosition: Vector2Type
+): types.SetMenuPositionAction {
+  return {
+    type: types.SET_MENU_LOCATION,
+    sessionId: Session.id,
+    menuPosition
   }
 }
 

@@ -9,6 +9,7 @@ import {
   SplitType,
   SubmitData,
   TaskType,
+  Vector2Type,
   ViewerConfigType
 } from '../functional/types'
 
@@ -36,6 +37,7 @@ export const CHANGE_VIEWER_CONFIG = 'CHANGE_VIEWER_CONFIG'
 export const UPDATE_PANE = 'UPDATE_PANE'
 export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
+export const SET_MENU_LOCATION = 'SET_MENU_LOCATION'
 
 export const TASK_ACTION_TYPES = [
   ADD_LABELS,
@@ -196,6 +198,11 @@ export interface DeletePaneAction extends BaseAction {
   viewerId: number
 }
 
+export interface SetMenuPositionAction extends BaseAction {
+  /** menu position from top left */
+  menuPosition: Vector2Type
+}
+
 export type SessionActionType =
   InitSessionAction
   | LoadItemAction
@@ -209,6 +216,7 @@ export type UserActionType =
   | UpdatePaneAction
   | SplitPaneAction
   | DeletePaneAction
+  | SetMenuPositionAction
 
 export type TaskActionType =
   AddLabelsAction

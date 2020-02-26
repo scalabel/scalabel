@@ -4,8 +4,10 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
+import { setMenuPosition } from '../action/common'
 import Session from '../common/session'
 import { LayoutStyles } from '../styles/label'
+import { ContextMenu } from './context_menu'
 import LabelPane from './label_pane'
 import PlayerControl from './player_control'
 
@@ -71,6 +73,7 @@ class LabelLayout extends React.Component<Props, State> {
     super(props)
     this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
     Session.subscribe(this.onStateUpdated.bind(this))
+    document.onkeydown = this.disableKeyEvents
   }
 
   /**
@@ -175,13 +178,45 @@ class LabelLayout extends React.Component<Props, State> {
     />)
 
     const state = Session.getState()
+    const menuPosition = state.user.layout.menuPosition
+    const showMenu = menuPosition.x >= 0 && menuPosition.y >= 0
 
     const labelInterface = (
       <div className={this.props.classes.interfaceContainer}>
-        <div className={this.props.classes.paneContainer}>
+        <div
+          className={this.props.classes.paneContainer}
+          onMouseDown={(e) => {
+            if (e.button === 2) {
+              const rect = e.currentTarget.getBoundingClientRect()
+              Session.dispatch(setMenuPosition({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+              }))
+            } else if (showMenu) {
+              Session.dispatch(setMenuPosition(
+                { x: -1, y: -1 }
+              ))
+            }
+          }}
+        >
           <LabelPane
             pane={state.user.layout.rootPane} key={'rootPane'}
           />
+          <div
+            style={{
+              position: 'relative',
+              top: `${menuPosition.y}px`,
+              left: `${menuPosition.x}px`,
+              visibility: (showMenu) ? 'visible' : 'hidden',
+              background: 'white',
+              width: '200px'
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+            }}
+          >
+            <ContextMenu />
+          </div>
         </div>
         { playerControl }
       </div >
@@ -255,6 +290,16 @@ class LabelLayout extends React.Component<Props, State> {
           {/* End footer */}
         </React.Fragment>
     )
+  }
+
+  /** Add listener to window to stop keyboard listeners */
+  private disableKeyEvents (e: KeyboardEvent) {
+    const state = Session.getState()
+    const menuPosition = state.user.layout.menuPosition
+    const showMenu = menuPosition.x >= 0 && menuPosition.y >= 0
+    if (showMenu) {
+      e.stopImmediatePropagation()
+    }
   }
 }
 
