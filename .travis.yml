@@ -23,8 +23,6 @@ script:
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/webpack --config webpack.config.js --mode=production
   - npm test
-services:
-  - redis-server
 branches:
   only:
     - master
