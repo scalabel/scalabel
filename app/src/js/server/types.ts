@@ -99,7 +99,33 @@ export interface SyncActionMessageType {
   /** Session Id */
   sessionId: string
   /** List of actions for synchronization */
+  actions: ActionPacketType
+}
+
+/** type for transmitted packet of actions */
+export interface ActionPacketType {
+  /** list of actions in the pakcket */
   actions: BaseAction[]
+  /** id of the packet */
+  id: string
+}
+
+/** user data for a project */
+export interface UserData {
+  /** map from socket to user */
+  socketToUser: { [key: string]: string }
+  /** map from user to list of socket */
+  userToSockets: { [key: string]: string[] }
+}
+
+/** metadata associated with a state */
+export interface StateMetadata {
+  /** project name */
+  projectName: string
+  /** task id */
+  taskId: string
+  /** map from processed action ids to their timestamps */
+  actionIds: { [key: string]: number[] }
 }
 
 /** user data for a project */

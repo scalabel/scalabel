@@ -3,10 +3,12 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { sprintf } from 'sprintf-js'
 import * as yargs from 'yargs'
+import { BaseAction } from '../action/types'
+import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType } from '../common/types'
-import { Label2DTemplateType, TaskType } from '../functional/types'
+import { Label2DTemplateType, State, TaskType } from '../functional/types'
 import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
@@ -235,4 +237,38 @@ export function safeParseJSON (data: string) {
     Logger.error(Error('JSON parsed failed'))
     Logger.error(e)
   }
+}
+
+/**
+ * Updates a state with a series of timestamped actions
+ */
+export function updateStateTimestamp (
+  state: State, actions: BaseAction[]): [State, number[]] {
+  const stateStore = configureStore(state)
+
+  // For each action, update the store
+  const timestamps = []
+  for (const action of actions) {
+    const time = Date.now()
+    timestamps.push(time)
+    action.timestamp = time
+    stateStore.dispatch(action)
+  }
+
+  return [stateStore.getState().present, timestamps]
+}
+
+/**
+ * Updates a state with a series of actions
+ */
+export function updateState (
+  state: State, actions: BaseAction[]): State {
+  const stateStore = configureStore(state)
+
+  // For each action, update the store
+  for (const action of actions) {
+    stateStore.dispatch(action)
+  }
+
+  return stateStore.getState().present
 }

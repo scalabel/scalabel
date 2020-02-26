@@ -50,13 +50,13 @@ beforeAll(async () => {
     './app/config/test_config.yml'
   ])
 
-  // launchProc.stdout.on('data', (data) => {
-  //   process.stdout.write(data)
-  // })
+  launchProc.stdout.on('data', (data) => {
+    process.stdout.write(data)
+  })
 
-  // launchProc.stderr.on('data', (data) => {
-  //   process.stdout.write(data)
-  // })
+  launchProc.stderr.on('data', (data) => {
+    process.stdout.write(data)
+  })
   window.alert = (): void => {
     return
   }
@@ -72,6 +72,8 @@ afterAll(async () => {
   launchProc.kill()
   redisProc.kill()
   deleteTestDir()
+  // wait for server to shut down to clear port
+  await sleep(50)
 })
 
 describe('full 2d bounding box integration test', () => {

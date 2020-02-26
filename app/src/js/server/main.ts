@@ -2,9 +2,11 @@ import * as bodyParser from 'body-parser'
 import express, { Application } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
-import * as socketio from 'socket.io'
+import socketio from 'socket.io'
+import 'source-map-support/register'
 import { Hub } from './hub'
 import { Listeners } from './listeners'
+import Logger from './logger'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
 import { RedisStore } from './redis_store'
@@ -79,4 +81,6 @@ async function main (): Promise<void> {
 }
 
 // TODO: Verify this is good promise handling
-main().then().catch()
+main().then().catch((error: Error) => {
+  Logger.error(error)
+})
