@@ -110,14 +110,6 @@ export interface ActionPacketType {
   id: string
 }
 
-/** user data for a project */
-export interface UserData {
-  /** map from socket to user */
-  socketToUser: { [key: string]: string }
-  /** map from user to list of socket */
-  userToSockets: { [key: string]: string[] }
-}
-
 /** metadata associated with a state */
 export interface StateMetadata {
   /** project name */
@@ -128,12 +120,28 @@ export interface StateMetadata {
   actionIds: { [key: string]: number[] }
 }
 
+/**
+ * Commonly used string to string map
+ */
+export interface StringMap { [key: string]: string }
+
+/**
+ * Commonly used string to string list map
+ */
+export interface StringListMap { [key: string]: string[] }
+
 /** user data for a project */
 export interface UserData {
   /** map from socket to user */
-  socketToUser: { [key: string]: string }
+  socketToUser: StringMap
   /** map from user to list of socket */
-  userToSockets: { [key: string]: string[] }
+  userToSockets: StringListMap
+}
+
+/** metadata for all users for all projects */
+export interface UserMetadata {
+  /** map from socket to project */
+  socketToProject: StringMap
 }
 
 /**

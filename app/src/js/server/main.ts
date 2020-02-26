@@ -73,7 +73,7 @@ async function main (): Promise<void> {
 
   // set up socket.io handler
   const hub = new Hub(config, projectStore, userManager)
-  hub.listen(io)
+  await hub.listen(io)
 
   httpServer.listen(config.port)
 
