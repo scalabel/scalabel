@@ -10,6 +10,7 @@ import Logger from './logger'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
 import { RedisStore } from './redis_store'
+import { SessionManager } from './session_manager'
 import { Endpoint, ServerConfig } from './types'
 import { UserManager } from './user_manager'
 import { makeStorage, readConfig } from './util'
@@ -74,6 +75,10 @@ async function main (): Promise<void> {
   // set up socket.io handler
   const hub = new Hub(config, projectStore, userManager)
   hub.listen(io)
+
+  // set up virtual session manager
+  const sessionManager = new SessionManager(config)
+  sessionManager.listen()
 
   httpServer.listen(config.port)
 
