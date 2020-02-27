@@ -70,14 +70,22 @@ export class RedisStore {
    * And a reminder value with shorter timeout for saving to disk
    */
   public async setExWithReminder (
-    saveDir: string, value: string, metadata: string) {
+    saveDir: string, value: string, metadata: string, numActionsSaved: number) {
     // Update value and metadata atomically
     const keys = [saveDir, path.getRedisMetaKey(saveDir)]
     const vals = [value, metadata]
     await this.setAtomic(keys, vals, this.timeout)
-    // Handle write back to storage
-    if (this.numActionsForWrite === 1) {
-      // special case: always save, don't need reminder
+
+    await this.setWriteReminder(saveDir, value, numActionsSaved)
+  }
+
+  /**
+   * Handle writing back to storage
+   */
+  private async setWriteReminder (
+    saveDir: string, value: string, numActionsSaved: number) {
+    // special case: immediately write back, don't need reminder
+    if (this.numActionsForWrite <= numActionsSaved) {
       await this.writeBackTask(saveDir, value)
       return
     }
@@ -87,13 +95,13 @@ export class RedisStore {
     if (!numActions) {
       // new reminder, 1st action
       await this.setEx(reminderKey, '1', this.timeForWrite)
-    } else if (numActions + 1 >= this.numActionsForWrite) {
+    } else if (numActions + numActionsSaved >= this.numActionsForWrite) {
       // write condition: num actions exceeded limit
       await this.writeBackTask(saveDir, value)
       await this.del(reminderKey)
     } else {
       // otherwise just update the action counter
-      const newActions = (numActions + 1).toString()
+      const newActions = (numActions + numActionsSaved).toString()
       await this.setEx(reminderKey, newActions, this.timeForWrite)
     }
   }
