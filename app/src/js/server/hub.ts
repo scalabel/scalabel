@@ -25,11 +25,11 @@ export class Hub {
   /** the user manager */
   protected userManager: UserManager
 
-  constructor (env: ServerConfig,
+  constructor (config: ServerConfig,
                projectStore: ProjectStore,
                userManager: UserManager) {
-    this.sync = env.sync
-    this.autosave = env.autosave
+    this.sync = config.sync
+    this.autosave = config.autosave
     this.projectStore = projectStore
     this.userManager = userManager
   }

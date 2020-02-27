@@ -54,7 +54,7 @@ function startHTTPServer (
  * Main function for backend server
  */
 async function main (): Promise<void> {
-  // initialize environment variables
+  // initialize config
   const config = readConfig()
 
   // initialize storage and redis
