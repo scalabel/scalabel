@@ -61,7 +61,7 @@ async function main (): Promise<void> {
   const storage = await makeStorage(config.database, config.data)
   const redisStore = new RedisStore(config, storage)
   const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(storage)
+  const userManager = new UserManager(projectStore)
 
   // start http and socket io servers
   const app: Application = express()

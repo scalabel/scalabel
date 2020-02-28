@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { filterXSS } from 'xss'
 import { makeItemStatus, makeState } from '../functional/states'
@@ -6,8 +7,9 @@ import Logger from './logger'
 import * as path from './path'
 import { RedisStore } from './redis_store'
 import { Storage } from './storage'
-import { Project, StateMetadata } from './types'
-import { getPolicy, safeParseJSON } from './util'
+import { Project, StateMetadata, UserData, UserMetadata } from './types'
+import {
+  getPolicy, makeUserData, makeUserMetadata, safeParseJSON } from './util'
 
 /**
  * Wraps redis cache and storage basic functionality
@@ -191,6 +193,57 @@ export class ProjectStore {
     const taskData = await this.storage.load(key)
     const task = safeParseJSON(taskData) as TaskType
     return task
+  }
+
+  /**
+   * Load user data for the project
+   * Stored at project/userData.json
+   * If it doesn't exist, return default empty object
+   */
+  public async loadUserData (projectName: string): Promise<UserData> {
+    const key = path.getUserKey(projectName)
+    const userDataJSON = await this.storage.safeLoad(key)
+    if (userDataJSON) {
+      return safeParseJSON(userDataJSON) as UserData
+    }
+    return makeUserData(projectName)
+  }
+
+  /**
+   * Saves user data for the project
+   */
+  public async saveUserData (userData: UserData) {
+    const projectName = userData.projectName
+    const key = path.getUserKey(projectName)
+    await this.save(key, JSON.stringify(userData))
+  }
+
+  /**
+   * Loads metadata shared between all projects
+   * Stored at top level, metaData.json
+   */
+  public async loadUserMetadata (): Promise<UserMetadata> {
+    const key = path.getMetaKey()
+    const metaDataJSON = await this.storage.safeLoad(key)
+    if (!metaDataJSON) {
+      return makeUserMetadata()
+    }
+    // Handle backwards compatability
+    const userMetadata = safeParseJSON(metaDataJSON)
+    if (_.has(userMetadata, 'socketToProject')) {
+      // New code saves as an object, which allows extensions
+      return userMetadata
+    }
+    // Old code saved map of projects directly
+    return { socketToProject: userMetadata }
+  }
+
+  /**
+   * Saves metadata shared between all projects
+   */
+  public async saveUserMetadata (userMetadata: UserMetadata) {
+    const key = path.getMetaKey()
+    await this.save(key, JSON.stringify(userMetadata))
   }
 
   /**
