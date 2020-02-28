@@ -107,8 +107,10 @@ export class Label3DHandler {
     if (!consumed && Session.label3dList.selectedLabel) {
       Session.label3dList.selectedLabel.onMouseUp()
     }
-    commitLabels([...Session.label3dList.updatedLabels.values()])
-    Session.label3dList.clearUpdatedLabels()
+    if (Session.label3dList.updatedLabels.size > 0) {
+      commitLabels([...Session.label3dList.updatedLabels.values()])
+      Session.label3dList.clearUpdatedLabels()
+    }
     // Set current label as selected label
     if (
       this._mouseDownOnSelection &&

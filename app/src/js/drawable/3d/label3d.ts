@@ -256,6 +256,15 @@ export abstract class Label3D {
     return new THREE.Vector3()
   }
 
+  /** Set label center */
+  public abstract setCenter (newCenter: THREE.Vector3): void
+
+  /** Set label orientation */
+  public abstract setOrientation (newOrientation: THREE.Quaternion): void
+
+  /** Set label size */
+  public abstract setSize (newSize: THREE.Vector3): void
+
   /** Bounds of label */
   public bounds (_local?: boolean): THREE.Box3 {
     return new THREE.Box3()

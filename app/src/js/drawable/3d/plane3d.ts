@@ -151,6 +151,24 @@ export class Plane3D extends Label3D {
     return this._shape.scale
   }
 
+  /** Set label center */
+  public setCenter (newCenter: THREE.Vector3): void {
+    this._shape.position.copy(newCenter)
+    this._labelList.addUpdatedLabel(this)
+  }
+
+  /** Set label orientation */
+  public setOrientation (newOrientation: THREE.Quaternion): void {
+    this._shape.quaternion.copy(newOrientation)
+    this._labelList.addUpdatedLabel(this)
+  }
+
+  /** Set label size */
+  public setSize (newSize: THREE.Vector3): void {
+    this._shape.scale.copy(newSize)
+    this._labelList.addUpdatedLabel(this)
+  }
+
   /** bounds of plane */
   public bounds (local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()

@@ -6,6 +6,7 @@ import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import { setMenuPosition } from '../action/common'
 import Session from '../common/session'
+import { commitLabels } from '../drawable/states'
 import { LayoutStyles } from '../styles/label'
 import { ContextMenu } from './context_menu'
 import LabelPane from './label_pane'
@@ -74,6 +75,7 @@ class LabelLayout extends React.Component<Props, State> {
     this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
     Session.subscribe(this.onStateUpdated.bind(this))
     document.onkeydown = this.disableKeyEvents
+    document.onkeyup = this.disableKeyEvents
   }
 
   /**
@@ -186,6 +188,10 @@ class LabelLayout extends React.Component<Props, State> {
         <div
           className={this.props.classes.paneContainer}
           onMouseDown={(e) => {
+            if (Session.label3dList.updatedLabels.size > 0) {
+              commitLabels([...Session.label3dList.updatedLabels.values()])
+              Session.label3dList.clearUpdatedLabels()
+            }
             if (e.button === 2) {
               const rect = e.currentTarget.getBoundingClientRect()
               Session.dispatch(setMenuPosition({
@@ -209,10 +215,15 @@ class LabelLayout extends React.Component<Props, State> {
               left: `${menuPosition.x}px`,
               visibility: (showMenu) ? 'visible' : 'hidden',
               background: 'white',
-              width: '200px'
+              width: '200px',
+              zIndex: 1100
             }}
             onMouseDown={(e) => {
               e.stopPropagation()
+              if (Session.label3dList.updatedLabels.size > 0) {
+                commitLabels([...Session.label3dList.updatedLabels.values()])
+                Session.label3dList.clearUpdatedLabels()
+              }
             }}
           >
             <ContextMenu />
