@@ -51,7 +51,7 @@ function makeVector3Form (
         defaultValue={vector.z.toFixed(2)}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           const newZ = Number(e.target.value)
-          if (!isNan(newZ)) {
+          if (!isNaN(newZ)) {
             vector.z = newZ
             callback(vector)
           }

@@ -8,10 +8,10 @@ import Session from '../common/session'
 import { Key } from '../common/types'
 import { tracksOverlapping } from '../functional/track'
 import { Attribute, State, TrackType } from '../functional/types'
+import { AttributeSelector } from './attribute_selector'
 import { Component } from './component'
 import { makeButton } from './general_button'
 import { Category } from './toolbar_category'
-import { AttributeSelector } from './attribute_selector'
 
 /** This is the interface of props passed to ToolBar */
 interface Props {

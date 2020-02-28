@@ -10,9 +10,9 @@ import { changeSelect } from '../action/common'
 import { changeSelectedLabelsCategories } from '../action/select'
 import Session from '../common/session'
 import { LabelTypeName } from '../common/types'
+import Label3D from '../drawable/3d/label3d'
 import { Box3dMenu } from './ box3d_menu'
 import { AttributeSelector } from './attribute_selector'
-import Label3D from '../drawable/3d/label3d'
 
 /** Make label menu */
 function makeLabelMenu (label: Label3D) {
