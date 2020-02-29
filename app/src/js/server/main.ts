@@ -60,12 +60,20 @@ async function main (): Promise<void> {
   // initialize environment variables
   const config = readConfig()
 
-  // initialize storage and redis
+  // initialize storage
   const storage = await makeStorage(config.database, config.data)
+
+  // initialize redis
   const redisClient = new RedisClient(config)
   const redisStore = new RedisStore(config, storage, redisClient)
+  const pubSubRedisClient = new RedisClient(config)
+  const pubSub = new RedisPubSub(pubSubRedisClient)
+
+  // initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(storage)
+  const sessionManager = new SessionManager(config, pubSub)
+  sessionManager.listen()
 
   // start http and socket io servers
   const app: Application = express()
@@ -76,14 +84,8 @@ async function main (): Promise<void> {
   startHTTPServer(config, app, projectStore, userManager)
 
   // set up socket.io handler
-  const pubSubRedisClient = new RedisClient(config)
-  const pubSub = new RedisPubSub(pubSubRedisClient)
   const hub = new Hub(config, projectStore, userManager, pubSub)
   hub.listen(io)
-
-  // set up virtual session manager
-  const sessionManager = new SessionManager(config)
-  sessionManager.listen()
 
   httpServer.listen(config.port)
 

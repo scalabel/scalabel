@@ -93,7 +93,8 @@ export function makeMockClient (): KeyValueClient {
     get: jest.fn(),
     psetex: jest.fn(),
     incr: jest.fn(),
-    config: jest.fn()
+    config: jest.fn(),
+    publish: jest.fn()
   }
   return mockClient
 }

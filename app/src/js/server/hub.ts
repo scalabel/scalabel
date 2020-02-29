@@ -90,7 +90,7 @@ export class Hub {
     // Send backend state to newly registered socket
     socket.emit(EventName.REGISTER_ACK, state)
     // Notify other processes of registration
-    this.pubSub.publishRegistrationEvent(projectName, taskId)
+    this.pubSub.publishRegisterEvent(data)
   }
 
   /**

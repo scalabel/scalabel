@@ -9,7 +9,8 @@ type socketHandlerType =
 type emitDataType = SyncActionMessageType | State
 
 export type redisHandlerType =
-  ((channel: string, value: string) => {})
+  ((channel: string, value: string) => {}) |
+  ((channel: string, value: string) => void)
 
 /**
  * Generic interface for server-side socket
@@ -57,6 +58,9 @@ export interface KeyValueClient {
 
   /** Subscribe to a channel */
   subscribe (channel: string): void
+
+  /** Publish to a channel */
+  publish (channel: string, message: string): void
 
   /** Delete a value */
   del (key: string): void

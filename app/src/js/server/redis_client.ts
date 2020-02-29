@@ -38,6 +38,11 @@ export class RedisClient implements KeyValueClient {
     this.pubSub.subscribe(channel)
   }
 
+  /** Publish to a channel */
+  public publish (channel: string, message: string) {
+    this.pubSub.publish(channel, message)
+  }
+
   /** Wrapper for redis delete */
   public async del (key: string) {
     this.client.del(key)

@@ -1,4 +1,6 @@
-import { ServerConfig } from './types'
+import { RedisPubSub } from './redis_pub_sub'
+import { RegisterMessageType, ServerConfig } from './types'
+import { index2str } from './util'
 import { VirtualSession } from './virtual_session'
 
 /**
@@ -7,32 +9,49 @@ import { VirtualSession } from './virtual_session'
 export class SessionManager {
   /** env variables */
   protected config: ServerConfig
+  /** the redis message broker */
+  protected pubSub: RedisPubSub
+  /** the task indices that already have virtual sessions for each project */
+  protected registeredTasks: { [key: string]: Set<number> }
 
-  constructor (config: ServerConfig) {
+  constructor (config: ServerConfig, pubSub: RedisPubSub) {
     this.config = config
-    // store a map from task id to virtual session
+    this.pubSub = pubSub
+    // TODO: store this in redis
+    this.registeredTasks = {}
   }
 
   /**
    * Listens to redis changes
    */
   public listen () {
-    // when a new task is added to redis, create a virtual session
-    // virtual session should use socketio channels
+    this.pubSub.subscribeRegisterEvent(this.handleRegister.bind(this))
+  }
 
-    // use redis pubsub to listen to
-    // make sure its a saveDir, then extract the taskId
-    this.makeVirtualSession()
-    return
+  /**
+   * Handles registration of new sockets
+   */
+  public handleRegister (_channel: string, message: string) {
+    const data = JSON.parse(message) as RegisterMessageType
+    const projectName = data.projectName
+    const taskIndex = data.taskIndex
+    if (!(projectName in this.registeredTasks)) {
+      this.registeredTasks[projectName] = new Set<number>()
+    }
+
+    if (!this.registeredTasks[projectName].has(taskIndex)) {
+      this.registeredTasks[projectName].add(taskIndex)
+      this.makeVirtualSession(projectName, taskIndex)
+    }
   }
 
   /**
    * Create and start a new virtual session
    */
-  private makeVirtualSession () {
-    const sess = new VirtualSession()
+  private makeVirtualSession (projectName: string, taskIndex: number) {
+    const sess = new VirtualSession(projectName, index2str(taskIndex))
     sess.listen()
 
-    // should also kill the sess if number of sockets in room is 1 (0 + self)
+    // TODO: kill the sess if number of sockets in room is 1 (0 + self)
   }
 }
