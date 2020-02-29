@@ -15,15 +15,13 @@ import { getPolicy, safeParseJSON } from './util'
  */
 export class ProjectStore {
   /** the redis store */
-  protected redisStore?: RedisStore
+  protected redisStore: RedisStore
   /** the permanent storage */
   protected storage: Storage
 
-  constructor (storage: Storage, redisStore?: RedisStore) {
+  constructor (storage: Storage, redisStore: RedisStore) {
     this.storage = storage
-    if (redisStore) {
-      this.redisStore = redisStore
-    }
+    this.redisStore = redisStore
   }
 
   /**
@@ -32,7 +30,7 @@ export class ProjectStore {
    * Otherwise immediately write back to storage
    */
   public async save (key: string, value: string, cache= false, metadata= '') {
-    if (cache && this.redisStore) {
+    if (cache) {
       await this.redisStore.setExWithReminder(key, value, metadata)
     } else {
       await this.storage.save(key, value)

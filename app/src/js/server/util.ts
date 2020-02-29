@@ -2,6 +2,7 @@ import { File } from 'formidable'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { sprintf } from 'sprintf-js'
+import uuid4 from 'uuid/v4'
 import * as yargs from 'yargs'
 import { BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
@@ -101,6 +102,14 @@ export function makeCreationForm (
  */
 export function index2str (index: number) {
   return index.toString().padStart(6, '0')
+}
+
+/**
+ * Initialize new session id if its a new load
+ * If its a reconnection, keep the old session id
+ */
+export function initSessId (sessionId: string) {
+  return (sessionId ? sessionId : uuid4())
 }
 
 /**

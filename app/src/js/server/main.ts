@@ -9,6 +9,8 @@ import { Listeners } from './listeners'
 import Logger from './logger'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
+import { RedisClient } from './redis_client'
+import { RedisPubSub } from './redis_pub_sub'
 import { RedisStore } from './redis_store'
 import { SessionManager } from './session_manager'
 import { Endpoint, ServerConfig } from './types'
@@ -60,7 +62,8 @@ async function main (): Promise<void> {
 
   // initialize storage and redis
   const storage = await makeStorage(config.database, config.data)
-  const redisStore = new RedisStore(config, storage)
+  const redisClient = new RedisClient(config)
+  const redisStore = new RedisStore(config, storage, redisClient)
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(storage)
 
@@ -73,7 +76,9 @@ async function main (): Promise<void> {
   startHTTPServer(config, app, projectStore, userManager)
 
   // set up socket.io handler
-  const hub = new Hub(config, projectStore, userManager)
+  const pubSubRedisClient = new RedisClient(config)
+  const pubSub = new RedisPubSub(pubSubRedisClient)
+  const hub = new Hub(config, projectStore, userManager, pubSub)
   hub.listen(io)
 
   // set up virtual session manager

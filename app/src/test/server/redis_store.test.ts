@@ -4,7 +4,9 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import * as defaults from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
+import { KeyValueClient } from '../../js/server/interfaces'
 import { getRedisMetaKey, getTestDir } from '../../js/server/path'
+import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
@@ -17,6 +19,7 @@ let storage: FileStorage
 let dataDir: string
 let config: ServerConfig
 let metadataString: string
+let client: KeyValueClient
 
 beforeAll(async () => {
   // Avoid default port 6379 and port 6377 used in box2d integration test
@@ -31,7 +34,8 @@ beforeAll(async () => {
   await sleep(1000)
   dataDir = getTestDir('test-data-redis')
   storage = new FileStorage(dataDir)
-  defaultStore = new RedisStore(config, storage)
+  client = new RedisClient(config)
+  defaultStore = new RedisStore(config, storage, client)
   metadataString = makeMetadata(1)
 })
 
@@ -55,7 +59,7 @@ describe('Test redis cache', () => {
   test('Delete', async () => {
     const keys = _.range(5).map((v) => sprintf('test%s', v))
     for (let i = 0; i < 5; i++) {
-      await defaultStore.del(keys[i])
+      defaultStore.del(keys[i])
       const value = await defaultStore.get(keys[i])
       expect(value).toBe(null)
     }
@@ -64,7 +68,7 @@ describe('Test redis cache', () => {
   test('Writes back on timeout', async () => {
     const timeoutEnv = _.clone(config)
     timeoutEnv.timeForWrite = 0.2
-    const store = new RedisStore(timeoutEnv, storage)
+    const store = new RedisStore(timeoutEnv, storage, client)
 
     const key = 'testKey1'
     await store.setExWithReminder(key, 'testvalue', metadataString)
@@ -80,7 +84,7 @@ describe('Test redis cache', () => {
   test('Writes back after action limit', async () => {
     const actionEnv = _.clone(config)
     actionEnv.numActionsForWrite = 5
-    const store = new RedisStore(actionEnv, storage)
+    const store = new RedisStore(actionEnv, storage, client)
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {

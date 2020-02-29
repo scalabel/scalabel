@@ -161,7 +161,7 @@ export class Synchronizer {
       // actionLog matches backend action ordering
       this.actionLog.push(action)
       if (action.sessionId !== Session.id) {
-        if (types.TASK_ACTION_TYPES.includes(action.type)) {
+        if (types.isTaskAction(action)) {
           // Dispatch any task actions broadcasted from other sessions
           Session.dispatch(action)
         }
@@ -200,7 +200,7 @@ export class Synchronizer {
     // re-apply frontend task actions after updating task from backend
     for (const actionPacket of this.listActionPackets()) {
       for (const action of actionPacket.actions) {
-        if (types.TASK_ACTION_TYPES.includes(action.type)) {
+        if (types.isTaskAction(action)) {
           action.frontendOnly = true
           Session.dispatch(action)
         }

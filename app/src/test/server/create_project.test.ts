@@ -1,10 +1,12 @@
 import * as fs from 'fs-extra'
 import { State, TaskType } from '../../js/functional/types'
 import { createProject, createTasks } from '../../js/server/create_project'
+import { serverConfig } from '../../js/server/defaults'
 import { convertStateToExport } from '../../js/server/export'
 import { FileStorage } from '../../js/server/file_storage'
 import { getTestDir } from '../../js/server/path'
 import { ProjectStore } from '../../js/server/project_store'
+import { RedisStore } from '../../js/server/redis_store'
 import {
   CreationForm, FormFileData, Project
 } from '../../js/server/types'
@@ -23,6 +25,7 @@ import {
 import {
   sampleStateExportImage, sampleStateExportImagePolygon
 } from '../test_export_objects'
+import { makeMockClient } from '../util'
 
 let projectStore: ProjectStore
 let dataDir: string
@@ -30,7 +33,9 @@ let dataDir: string
 beforeAll(() => {
   dataDir = getTestDir('create-project-data')
   const storage = new FileStorage(dataDir)
-  projectStore = new ProjectStore(storage)
+  const client = makeMockClient()
+  const redisStore = new RedisStore(serverConfig, storage, client)
+  projectStore = new ProjectStore(storage, redisStore)
 })
 
 afterAll(() => {

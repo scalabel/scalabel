@@ -4,6 +4,7 @@ import { addBox2dLabel } from '../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../js/functional/states'
 import { RectType, State, TaskType, Vector3Type } from '../js/functional/types'
+import { KeyValueClient } from '../js/server/interfaces'
 
 /**
  * Check equality between two Vector3Type objects
@@ -78,4 +79,21 @@ export function getInitialState (sessionId: string): State {
 export function getRandomBox2dAction () {
   return addBox2dLabel(0, 0, [], {},
     Math.random(), Math.random(), Math.random(), Math.random())
+}
+
+/**
+ * Helper function to make a dummy KV client
+ */
+export function makeMockClient (): KeyValueClient {
+  const mockClient = {
+    on: jest.fn(),
+    subscribe: jest.fn(),
+    del: jest.fn(),
+    multi: jest.fn(),
+    get: jest.fn(),
+    psetex: jest.fn(),
+    incr: jest.fn(),
+    config: jest.fn()
+  }
+  return mockClient
 }

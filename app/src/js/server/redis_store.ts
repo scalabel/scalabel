@@ -1,18 +1,16 @@
-import * as redis from 'redis'
 import { promisify } from 'util'
+import { KeyValueClient } from './interfaces'
 import Logger from './logger'
 import * as path from './path'
 import { Storage } from './storage'
 import { ServerConfig, StateMetadata } from './types'
 
 /**
- * Wraps and promisifies redis functionality
+ * Wraps and promisifies redis key value storage functionality
  */
 export class RedisStore {
-  /** the redis client */
-  protected client: redis.RedisClient
-  /** the redis client for subscribing */
-  protected sub: redis.RedisClient
+  /** the key value client */
+  protected client: KeyValueClient
   /** the timeout in seconds for flushing a value */
   protected timeout: number
   /** after last update, waits this many seconds before writing to storage */
@@ -25,26 +23,17 @@ export class RedisStore {
   /**
    * Create new store
    */
-  constructor (env: ServerConfig, storage: Storage) {
+  constructor (env: ServerConfig, storage: Storage, client: KeyValueClient) {
     this.timeout = env.redisTimeout
     this.timeForWrite = env.timeForWrite
     this.numActionsForWrite = env.numActionsForWrite
     this.storage = storage
-    this.client = redis.createClient(env.redisPort)
-    this.client.on('error', (err: Error) => {
-      Logger.error(err)
-    })
-    this.client.on('ready', () => {
-      this.client.config('SET', 'notify-keyspace-events', 'Ex')
-    })
+    this.client = client
+    this.client.config('SET', 'notify-keyspace-events', 'Ex')
 
-    this.sub = redis.createClient(env.redisPort)
-    this.sub.on('error', (err: Error) => {
-      Logger.error(err)
-    })
     // subscribe to reminder expirations for saving
-    this.sub.subscribe('__keyevent@0__:expired')
-    this.sub.on('message', async (_channel: string, reminderKey: string) => {
+    this.client.subscribe('__keyevent@0__:expired')
+    this.client.on('message', async (_channel: string, reminderKey: string) => {
       const baseKey = path.getRedisBaseKey(reminderKey)
       const metaKey = path.getRedisMetaKey(baseKey)
       const metadata: StateMetadata = JSON.parse(await this.get(metaKey))
@@ -52,7 +41,7 @@ export class RedisStore {
 
       const value = await this.get(baseKey)
       await this.writeBackTask(saveDir, value)
-      await this.del(baseKey)
+      this.del(baseKey)
     })
   }
 
@@ -90,19 +79,12 @@ export class RedisStore {
     } else if (numActions + 1 >= this.numActionsForWrite) {
       // write condition: num actions exceeded limit
       await this.writeBackTask(saveDir, value)
-      await this.del(reminderKey)
+      this.del(reminderKey)
     } else {
       // otherwise just update the action counter
       const newActions = (numActions + 1).toString()
       await this.setEx(reminderKey, newActions, this.timeForWrite)
     }
-  }
-
-  /**
-   * Wrapper for redis delete
-   */
-  public async del (key: string) {
-    this.client.del(key)
   }
 
   /**
@@ -122,21 +104,25 @@ export class RedisStore {
     await multiExecAsync()
   }
 
+  /**
+   * Wrapper for redis delete
+   */
+  public del (key: string) {
+    this.client.del(key)
+  }
+
    /**
     * Wrapper for redis get
     */
   public async get (key: string): Promise<string> {
-    const redisGetAsync = promisify(this.client.get).bind(this.client)
-    const redisValue: string = await redisGetAsync(key)
-    return redisValue
+    return this.client.get(key)
   }
 
    /**
     * Wrapper for redis incr
     */
   public async incr (key: string) {
-    const redisIncrAsync = promisify(this.client.incr).bind(this.client)
-    await redisIncrAsync(key)
+    await this.client.incr(key)
   }
 
   /**
@@ -145,7 +131,6 @@ export class RedisStore {
    */
   private async setEx (key: string, value: string, timeout: number) {
     const timeoutMs = timeout * 1000
-    const redisSetAsync = promisify(this.client.psetex).bind(this.client)
-    await redisSetAsync(key, timeoutMs, value)
+    await this.client.psetex(key, timeoutMs, value)
   }
 }
