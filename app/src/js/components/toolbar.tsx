@@ -148,6 +148,14 @@ export class ToolBar extends Component<Props> {
             Session.dispatch(deleteSelectedLabels(this.state))
           })
           }</div>
+          <div>{makeButton('End Object Tracking', () => {
+            Session.dispatch(terminateSelectedTracks(this.state, this.state.user.select.item))
+          })
+          }</div>
+          <div>{makeButton('Track-Link', () => {
+            this.linkSelectedTracks(this.state)
+          })
+          }</div>
         </div>
       </div>
     )
