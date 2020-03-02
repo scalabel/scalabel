@@ -223,11 +223,15 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
         let displayTop = zoomRatio * (offset.y + config.displayTop) - offset.y
         if (rect) {
           if (rect.height / rect.width > ih / iw) {
+            // if the zoomed height is less than that of the display area
             if (image.width * rect.height / rect.width > ih) {
+              // set offset to 0
               displayTop = 0
             }
           } else {
+            // if the zoomed width is less than that of the display area
             if (image.height * rect.width / rect.height > iw) {
+              // set offset to 0
               displayLeft = 0
             }
           }
