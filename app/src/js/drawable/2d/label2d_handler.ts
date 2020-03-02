@@ -366,10 +366,10 @@ export class Label2DHandler {
    */
   private mergeTracks () {
     const selectedLabels = this._state.user.select.labels
-    console.log(selectedLabels)
     const selectedTracks = Object.entries(selectedLabels)
                              .map(([item, label]) =>
-                             this._state.task.items[+item].labels[label[0]].track)
+                             this._state.task.items[+item]
+                              .labels[label[0]].track)
     const tracks = selectedTracks
                     .map((trackId) => this._state.task.tracks[trackId])
     if (!tracksOverlapping(tracks)) {
