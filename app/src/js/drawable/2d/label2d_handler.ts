@@ -1,9 +1,10 @@
 import _ from 'lodash'
-import { changeLabelsProps, linkLabels, unlinkLabels } from '../../action/common'
+import { changeLabelsProps, linkLabels, mergeTracks, startLinkTrack, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
 import { Key } from '../../common/types'
 import { getLinkedLabelIds } from '../../functional/common'
+import { tracksOverlapping } from '../../functional/track'
 import { State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -165,8 +166,13 @@ export class Label2DHandler {
     }
     switch (e.key) {
       case Key.L_LOW:
-        // linking
-        this.linkLabels()
+        if (this.isKeyDown(Key.CONTROL)) {
+          // track link mode
+          Session.dispatch(startLinkTrack())
+        } else {
+          // linking
+          this.linkLabels()
+        }
         break
       case Key.L_UP:
         // unlinking
@@ -199,6 +205,11 @@ export class Label2DHandler {
           this.changeLabelOrder(
             selectedLabel.index, Session.label2dList.labelList.length - 1
           )
+        }
+        break
+      case Key.ENTER:
+        if (this._state.session.trackLinking) {
+          this.mergeTracks()
         }
         break
     }
@@ -347,6 +358,22 @@ export class Label2DHandler {
         [labelIds],
         [props]
       ))
+    }
+  }
+
+  /**
+   * Merge different tracks
+   */
+  private mergeTracks () {
+    const selectedLabels = this._state.user.select.labels
+    console.log(selectedLabels)
+    const selectedTracks = Object.entries(selectedLabels)
+                             .map(([item, label]) =>
+                             this._state.task.items[+item].labels[label[0]].track)
+    const tracks = selectedTracks
+                    .map((trackId) => this._state.task.tracks[trackId])
+    if (!tracksOverlapping(tracks)) {
+      Session.dispatch(mergeTracks(selectedTracks))
     }
   }
 }
