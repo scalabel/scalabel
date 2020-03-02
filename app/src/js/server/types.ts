@@ -43,6 +43,8 @@ export interface ServerConfig {
   numActionsForWrite: number
   /** Port that redis runs on */
   redisPort: number
+  /** Whether to use model assistance */
+  model: boolean
 }
 
 /**
@@ -136,6 +138,22 @@ export interface UserData {
   socketToUser: { [key: string]: string }
   /** map from user to list of socket */
   userToSockets: { [key: string]: string[] }
+}
+
+/** data kept by session manager */
+export interface SessionManagerData {
+  /** map from project to task id to virtual session id */
+  virtualSessionMap: { [key: string]: { [key: string]: VirtualSessionData }}
+}
+
+/** data kept by each virtual session */
+export interface VirtualSessionData {
+  /** the session id */
+  id: string
+  /** the address of the server */
+  address: string
+  /** the task index */
+  taskIndex: number
 }
 
 /**

@@ -74,8 +74,11 @@ async function main (): Promise<void> {
   // initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(storage)
-  const sessionManager = new SessionManager(config, subscriber)
-  sessionManager.listen()
+
+  if (config.model) {
+    const sessionManager = new SessionManager(config, subscriber,redisStore)
+    await sessionManager.listen()
+  }
 
   // start http and socket io servers
   const app: Application = express()

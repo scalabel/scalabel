@@ -15,6 +15,8 @@ import Logger from './logger'
  * Watches and modifies state based on what user sessions do
  */
 export class VirtualSession {
+  /** virtual session id */
+  public sessionId: string
   /** The store to save states */
   protected store: Store<StateWithHistory<State>>
   /** Socket connection */
@@ -23,8 +25,6 @@ export class VirtualSession {
   protected projectName: string
   /** id of the task */
   protected taskIndex: number
-  /** virtual session id */
-  protected sessionId: string
   /** virutal user id */
   protected userId: string
   /** Timestamped log for completed actions */
@@ -45,6 +45,7 @@ export class VirtualSession {
     )
     this.socket = socket
     this.store = configureStore({})
+
     this.actionLog = []
     this.ackedPackets = new Set()
   }

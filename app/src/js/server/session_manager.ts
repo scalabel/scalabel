@@ -1,7 +1,12 @@
 import { sprintf } from 'sprintf-js'
 import Logger from './logger'
+import { getRedisSessionManagerKey } from './path'
 import { RedisPubSub } from './redis_pub_sub'
-import { RegisterMessageType, ServerConfig } from './types'
+import { RedisStore } from './redis_store'
+import {
+  RegisterMessageType, ServerConfig,
+  SessionManagerData, VirtualSessionData } from './types'
+import { index2str } from './util'
 import { VirtualSession } from './virtual_session'
 
 /**
@@ -12,50 +17,124 @@ export class SessionManager {
   protected config: ServerConfig
   /** the redis message broker */
   protected subscriber: RedisPubSub
-  /** the task indices that already have virtual sessions for each project */
-  protected registeredTasks: { [key: string]: Set<number> }
+  /** the redis store */
+  protected redisStore: RedisStore
 
-  constructor (config: ServerConfig, subscriber: RedisPubSub) {
+  constructor (
+    config: ServerConfig, subscriber: RedisPubSub, redisStore: RedisStore) {
     this.config = config
     this.subscriber = subscriber
-    // TODO: store this in redis
-    this.registeredTasks = {}
+    this.redisStore = redisStore
   }
 
   /**
    * Listens to redis changes
    */
-  public listen () {
+  public async listen () {
+    // recreate the virtual users
+    const managerData = await this.load()
+    let virtualSessionMap = managerData.virtualSessionMap
+    virtualSessionMap = this.makeVirtualSessions(virtualSessionMap)
+    managerData.virtualSessionMap = virtualSessionMap
+    await this.save(managerData)
+
+    // listen for new real users
     this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
   }
 
   /**
    * Handles registration of new sockets
    */
-  public handleRegister (_channel: string, message: string) {
+  public async handleRegister (_channel: string, message: string) {
     const data = JSON.parse(message) as RegisterMessageType
-    const projectName = data.projectName
-    const taskIndex = data.taskIndex
-    const address = data.address
-    if (!(projectName in this.registeredTasks)) {
-      this.registeredTasks[projectName] = new Set<number>()
+
+    // create a new virtual user
+    const managerData = await this.load()
+    let virtualSessionMap = managerData.virtualSessionMap
+    virtualSessionMap = this.makeVirtualSession(
+      virtualSessionMap, data.projectName, data.taskIndex, data.address)
+    managerData.virtualSessionMap = virtualSessionMap
+    await this.save(managerData)
+  }
+
+  /**
+   * Create a single virtual session
+   * And update the session manager data appropriately
+   */
+  private makeVirtualSession (
+    sessionMap: { [key: string]: { [key: string]: VirtualSessionData }},
+    projectName: string, taskIndex: number, address: string):
+    { [key: string]: { [key: string]: VirtualSessionData }} {
+    if (!(projectName in sessionMap)) {
+      sessionMap[projectName] = {}
     }
 
-    if (!this.registeredTasks[projectName].has(taskIndex)) {
-      this.registeredTasks[projectName].add(taskIndex)
-      this.makeVirtualSession(projectName, taskIndex, address)
+    const taskId = index2str(taskIndex)
+    if (!(taskId in sessionMap[projectName])) {
+      const id = this.startVirtualSession(projectName, taskIndex, address)
+      sessionMap[projectName][taskId] = {
+        id,
+        address,
+        taskIndex
+      }
     }
+    return sessionMap
+  }
+
+  /**
+   * Create new virtual sessions for each project/task combination in the map
+   * And update the session manager data appropriately
+   */
+  private makeVirtualSessions (
+    sessionMap: { [key: string]: { [key: string]: VirtualSessionData }}):
+    { [key: string]: { [key: string]: VirtualSessionData }} {
+    for (const projectName of Object.keys(sessionMap)) {
+      const taskMap = sessionMap[projectName]
+      for (const taskId of Object.keys(taskMap)) {
+        const sessionData = taskMap[taskId]
+        const id = this.startVirtualSession(
+          projectName, sessionData.taskIndex, sessionData.address)
+        sessionMap[projectName][taskId] = {
+          id,
+          address: sessionData.address,
+          taskIndex: sessionData.taskIndex
+        }
+      }
+    }
+    return sessionMap
+  }
+
+  /**
+   * Load the session manager data from redis
+   */
+  private async load (): Promise<SessionManagerData> {
+    const key = getRedisSessionManagerKey()
+    const value = await this.redisStore.get(key)
+    if (value) {
+      return JSON.parse(value)
+    } else {
+      return { virtualSessionMap: {} }
+    }
+  }
+
+  /**
+   * Save the session manager data to redis
+   */
+  private async save (data: SessionManagerData) {
+    const key = getRedisSessionManagerKey()
+    const value = JSON.stringify(data)
+    await this.redisStore.set(key, value)
   }
 
   /**
    * Create and start a new virtual session
    */
-  private makeVirtualSession (
-    projectName: string, taskIndex: number, address: string) {
-    Logger.info(sprintf('Creating new virtual session for project \
-"%s", task %d', projectName, taskIndex))
+  private startVirtualSession (
+    projectName: string, taskIndex: number, address: string): string {
+    Logger.info(sprintf('Creating virtual session for project "%s", task %d',
+      projectName, taskIndex))
     const sess = new VirtualSession(projectName, taskIndex, address)
     sess.listen()
-    // TODO: kill the sess if number of sockets in room is 1 (0 + self)
+    return sess.sessionId
   }
 }

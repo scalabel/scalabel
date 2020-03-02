@@ -14,7 +14,8 @@ export const serverConfig: ServerConfig = {
   redisTimeout: 3600,
   timeForWrite: 600,
   numActionsForWrite: 10,
-  redisPort: 6379
+  redisPort: 6379,
+  model: false
 }
 
 /* default categories when file is missing and label is box2D or box3D */

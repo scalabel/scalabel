@@ -77,6 +77,9 @@ export interface KeyValueClient {
   /** Increment a value */
   incr (key: string): Promise<void>
 
+  /** Set value */
+  set (key: string, val: string): Promise<void>
+
   /** Modify the config */
   config (type: string, name: string, value: string): void
 }

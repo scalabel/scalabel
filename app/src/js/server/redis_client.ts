@@ -62,14 +62,20 @@ export class RedisClient implements KeyValueClient {
 
   /** Wrapper for redis psetex */
   public async psetex (key: string, timeout: number, value: string) {
-    const redisSetAsync = promisify(this.client.psetex).bind(this.client)
-    await redisSetAsync(key, timeout, value)
+    const redisSetExAsync = promisify(this.client.psetex).bind(this.client)
+    await redisSetExAsync(key, timeout, value)
   }
 
   /** Wrapper for redis incr */
   public async incr (key: string) {
     const redisIncrAsync = promisify(this.client.incr).bind(this.client)
     await redisIncrAsync(key)
+  }
+
+  /** Wrapper for redis set */
+  public async set (key: string, value: string) {
+    const redisSetAsync = promisify(this.client.set).bind(this.client)
+    await redisSetAsync(key, value)
   }
 
   /** Wrapper for redis config */

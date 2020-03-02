@@ -126,6 +126,13 @@ export class RedisStore {
   }
 
   /**
+   * Wrapper for redis set
+   */
+  public async set (key: string, value: string) {
+    await this.client.set(key, value)
+  }
+
+  /**
    * Wrapper for redis set with expiration
    * Private because calling directly will cause problems with missing metadata
    */

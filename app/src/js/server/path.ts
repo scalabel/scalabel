@@ -96,6 +96,13 @@ export function getRedisBaseKey (metadataKey: string) {
 }
 
 /**
+ * Gets the redis key for session manager data
+ */
+export function getRedisSessionManagerKey () {
+  return 'sessionManagerKey'
+}
+
+/**
  * Gets key of file with project data
  */
 export function getProjectKey (projectName: string) {
