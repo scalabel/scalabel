@@ -5,7 +5,7 @@ import { RedisPubSub } from './redis_pub_sub'
 import { RedisStore } from './redis_store'
 import {
   RegisterMessageType, ServerConfig,
-  SessionManagerData, VirtualSessionData } from './types'
+  SessionManagerData, VirtualProjectData, VirtualSessionData } from './types'
 import { index2str } from './util'
 import { VirtualSession } from './virtual_session'
 
@@ -19,12 +19,15 @@ export class SessionManager {
   protected subscriber: RedisPubSub
   /** the redis store */
   protected redisStore: RedisStore
+  /** the time in between polls that check session activity */
+  protected pollTime: number
 
   constructor (
     config: ServerConfig, subscriber: RedisPubSub, redisStore: RedisStore) {
     this.config = config
     this.subscriber = subscriber
     this.redisStore = redisStore
+    this.pollTime = 1000 * 60 * 5 // 5 minutes in ms
   }
 
   /**
@@ -33,9 +36,8 @@ export class SessionManager {
   public async listen () {
     // recreate the virtual users
     const managerData = await this.load()
-    let virtualSessionMap = managerData.virtualSessionMap
-    virtualSessionMap = this.makeVirtualSessions(virtualSessionMap)
-    managerData.virtualSessionMap = virtualSessionMap
+    managerData.projectToTasks =
+      this.makeVirtualSessions(managerData.projectToTasks)
     await this.save(managerData)
 
     // listen for new real users
@@ -50,10 +52,9 @@ export class SessionManager {
 
     // create a new virtual user
     const managerData = await this.load()
-    let virtualSessionMap = managerData.virtualSessionMap
-    virtualSessionMap = this.makeVirtualSession(
-      virtualSessionMap, data.projectName, data.taskIndex, data.address)
-    managerData.virtualSessionMap = virtualSessionMap
+    managerData.projectToTasks = this.makeVirtualSession(
+      managerData.projectToTasks, data.projectName,
+      data.taskIndex, data.address)
     await this.save(managerData)
   }
 
@@ -62,23 +63,23 @@ export class SessionManager {
    * And update the session manager data appropriately
    */
   private makeVirtualSession (
-    sessionMap: { [key: string]: { [key: string]: VirtualSessionData }},
+    projectToTasks: { [key: string]: VirtualProjectData },
     projectName: string, taskIndex: number, address: string):
-    { [key: string]: { [key: string]: VirtualSessionData }} {
-    if (!(projectName in sessionMap)) {
-      sessionMap[projectName] = {}
+    { [key: string]: VirtualProjectData } {
+    if (!(projectName in projectToTasks)) {
+      projectToTasks[projectName] = { taskToSessions: {} }
     }
 
     const taskId = index2str(taskIndex)
-    if (!(taskId in sessionMap[projectName])) {
-      const id = this.startVirtualSession(projectName, taskIndex, address)
-      sessionMap[projectName][taskId] = {
-        id,
-        address,
-        taskIndex
-      }
+    const taskToSessions = projectToTasks[projectName].taskToSessions
+    // for now, just keep one virtual user per task
+    if (!(taskId in taskToSessions) || taskToSessions[taskId].length === 0) {
+      const sessionData =
+        this.startVirtualSession(projectName, taskIndex, address)
+      taskToSessions[taskId] = [sessionData]
     }
-    return sessionMap
+    projectToTasks[projectName].taskToSessions = taskToSessions
+    return projectToTasks
   }
 
   /**
@@ -86,22 +87,21 @@ export class SessionManager {
    * And update the session manager data appropriately
    */
   private makeVirtualSessions (
-    sessionMap: { [key: string]: { [key: string]: VirtualSessionData }}):
-    { [key: string]: { [key: string]: VirtualSessionData }} {
-    for (const projectName of Object.keys(sessionMap)) {
-      const taskMap = sessionMap[projectName]
-      for (const taskId of Object.keys(taskMap)) {
-        const sessionData = taskMap[taskId]
-        const id = this.startVirtualSession(
-          projectName, sessionData.taskIndex, sessionData.address)
-        sessionMap[projectName][taskId] = {
-          id,
-          address: sessionData.address,
-          taskIndex: sessionData.taskIndex
+    projectToTasks: { [key: string]: VirtualProjectData }):
+    { [key: string]: VirtualProjectData } {
+    for (const projectName of Object.keys(projectToTasks)) {
+      const taskToSessions = projectToTasks[projectName].taskToSessions
+      for (const taskId of Object.keys(taskToSessions)) {
+        if (taskToSessions[taskId].length > 0) {
+          const sessionData = taskToSessions[taskId][0]
+          const newSessionData = this.startVirtualSession(
+            projectName, sessionData.taskIndex, sessionData.address)
+          taskToSessions[taskId] = [newSessionData]
         }
       }
+      projectToTasks[projectName].taskToSessions = taskToSessions
     }
-    return sessionMap
+    return projectToTasks
   }
 
   /**
@@ -113,7 +113,7 @@ export class SessionManager {
     if (value) {
       return JSON.parse(value)
     } else {
-      return { virtualSessionMap: {} }
+      return { projectToTasks: {} }
     }
   }
 
@@ -130,11 +130,41 @@ export class SessionManager {
    * Create and start a new virtual session
    */
   private startVirtualSession (
-    projectName: string, taskIndex: number, address: string): string {
+    projectName: string, taskIndex: number, address: string):
+    VirtualSessionData {
     Logger.info(sprintf('Creating virtual session for project "%s", task %d',
       projectName, taskIndex))
+
     const sess = new VirtualSession(projectName, taskIndex, address)
     sess.listen()
-    return sess.sessionId
+
+    const taskId = index2str(taskIndex)
+    const pollId = setInterval(async () => {
+      await this.checkSessionActivity(sess, projectName, taskId, pollId)
+    }, this.pollTime)
+
+    return {
+      id: sess.id,
+      address,
+      taskIndex
+    }
+  }
+
+  /**
+   * Kill the session if no activity since time of last poll
+   */
+  private async checkSessionActivity (
+    session: VirtualSession, projectName: string,
+    taskId: string, pollId: NodeJS.Timeout) {
+    if (session.actionCount > 0) {
+      session.actionCount = 0
+    } else {
+      session.kill()
+      clearInterval(pollId)
+      // remove the session from the manager data
+      const managerData = await this.load()
+      managerData.projectToTasks[projectName].taskToSessions[taskId] = []
+      await this.save(managerData)
+    }
   }
 }

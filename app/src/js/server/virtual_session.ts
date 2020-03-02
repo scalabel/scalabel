@@ -16,7 +16,9 @@ import Logger from './logger'
  */
 export class VirtualSession {
   /** virtual session id */
-  public sessionId: string
+  public id: string
+  /** Number of actions received via broadcast */
+  public actionCount: number
   /** The store to save states */
   protected store: Store<StateWithHistory<State>>
   /** Socket connection */
@@ -35,8 +37,9 @@ export class VirtualSession {
   constructor (projectName: string, taskIndex: number, address: string) {
     this.projectName = projectName
     this.taskIndex = taskIndex
-    this.sessionId = uuid4()
+    this.id = uuid4()
     this.userId = ''
+    this.actionCount = 0
 
     // create a socketio client
     const socket = io.connect(
@@ -68,7 +71,7 @@ export class VirtualSession {
     const message: RegisterMessageType = {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
-      sessionId: this.sessionId,
+      sessionId: this.id,
       userId: this.userId,
       address: ''
     }
@@ -98,6 +101,7 @@ export class VirtualSession {
     this.ackedPackets.add(actionPacket.id)
 
     for (const action of actionPacket.actions) {
+      this.actionCount += 1
       this.actionLog.push(action)
       Logger.info(
         sprintf('Virtual session for \
@@ -106,4 +110,12 @@ received action of type %s',
         this.projectName, this.taskIndex, action.type))
     }
   }
+
+  /**
+   * Close any external resources
+   */
+  public kill () {
+    this.socket.disconnect()
+  }
+
 }

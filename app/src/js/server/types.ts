@@ -142,8 +142,13 @@ export interface UserData {
 
 /** data kept by session manager */
 export interface SessionManagerData {
-  /** map from project to task id to virtual session id */
-  virtualSessionMap: { [key: string]: { [key: string]: VirtualSessionData }}
+  /** map from project to tasks for the project */
+  projectToTasks: { [key: string]: VirtualProjectData }
+}
+
+export interface VirtualProjectData {
+  /** map from task to virtual sessions for the task */
+  taskToSessions: { [key: string]: VirtualSessionData[] }
 }
 
 /** data kept by each virtual session */
