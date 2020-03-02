@@ -149,7 +149,9 @@ export class ToolBar extends Component<Props> {
           })
           }</div>
           <div>{makeButton('End Object Tracking', () => {
-            Session.dispatch(terminateSelectedTracks(this.state, this.state.user.select.item))
+            Session.dispatch(
+              terminateSelectedTracks(this.state, this.state.user.select.item)
+            )
           })
           }</div>
           <div>
