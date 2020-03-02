@@ -66,13 +66,15 @@ async function main (): Promise<void> {
   // initialize redis
   const redisClient = new RedisClient(config)
   const redisStore = new RedisStore(config, storage, redisClient)
-  const pubSubRedisClient = new RedisClient(config)
-  const pubSub = new RedisPubSub(pubSubRedisClient)
+  const publishClient = new RedisClient(config)
+  const publisher = new RedisPubSub(publishClient)
+  const subscribeClient = new RedisClient(config)
+  const subscriber = new RedisPubSub(subscribeClient)
 
   // initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(storage)
-  const sessionManager = new SessionManager(config, pubSub)
+  const sessionManager = new SessionManager(config, subscriber)
   sessionManager.listen()
 
   // start http and socket io servers
@@ -84,7 +86,7 @@ async function main (): Promise<void> {
   startHTTPServer(config, app, projectStore, userManager)
 
   // set up socket.io handler
-  const hub = new Hub(config, projectStore, userManager, pubSub)
+  const hub = new Hub(config, projectStore, userManager, publisher)
   hub.listen(io)
 
   httpServer.listen(config.port)

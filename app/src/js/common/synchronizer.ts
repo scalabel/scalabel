@@ -37,6 +37,8 @@ export class Synchronizer {
   public middleware: Middleware
   /** The user/browser id, constant across sessions */
   public userId: string
+  /** the server address */
+  public syncAddress: string
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
@@ -53,9 +55,9 @@ export class Synchronizer {
     this.ackedPackets = new Set()
 
     // use the same address as http
-    const syncAddress = location.origin
+    this.syncAddress = location.origin
     const socket = io.connect(
-      syncAddress,
+      this.syncAddress,
       { transports: ['websocket'], upgrade: false }
     )
     this.socket = socket
@@ -120,7 +122,8 @@ export class Synchronizer {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
       sessionId: Session.id,
-      userId: this.userId
+      userId: this.userId,
+      address: this.syncAddress
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)

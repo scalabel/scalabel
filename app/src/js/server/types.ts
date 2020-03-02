@@ -88,6 +88,8 @@ export interface RegisterMessageType {
   sessionId: string
   /** Current user Id */
   userId: string
+  /** server address */
+  address: string
 }
 
 /** action type for synchronization between front and back ends */

@@ -25,17 +25,17 @@ export class Hub {
   /** the user manager */
   protected userManager: UserManager
   /** the redis message broker */
-  protected pubSub: RedisPubSub
+  protected publisher: RedisPubSub
 
   constructor (env: ServerConfig,
                projectStore: ProjectStore,
                userManager: UserManager,
-               pubSub: RedisPubSub) {
+               publisher: RedisPubSub) {
     this.sync = env.sync
     this.autosave = env.autosave
     this.projectStore = projectStore
     this.userManager = userManager
-    this.pubSub = pubSub
+    this.publisher = publisher
   }
 
   /**
@@ -90,7 +90,7 @@ export class Hub {
     // Send backend state to newly registered socket
     socket.emit(EventName.REGISTER_ACK, state)
     // Notify other processes of registration
-    this.pubSub.publishRegisterEvent(data)
+    this.publisher.publishRegisterEvent(data)
   }
 
   /**
