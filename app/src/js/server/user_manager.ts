@@ -1,17 +1,16 @@
-import { getMetaKey, getUserKey } from './path'
-import { Storage } from './storage'
-import { UserData } from './types'
-import { safeParseJSON } from './util'
+import { ProjectStore } from './project_store'
+import { UserData, UserMetadata } from './types'
+import { makeUserData, makeUserMetadata } from './util'
 
 /**
  * Wraps interface with storage for user management
  */
 export class UserManager {
   /** the permanent storage */
-  protected storage: Storage
+  protected projectStore: ProjectStore
 
-  constructor (storage: Storage) {
-    this.storage = storage
+  constructor (projectStore: ProjectStore) {
+    this.projectStore = projectStore
   }
 
   /**
@@ -19,106 +18,149 @@ export class UserManager {
    */
   public async registerUser (
     socketId: string, projectName: string, userId: string) {
-    let socketToUser: { [key: string]: string } = {}
-    let userToSockets: { [key: string]: string[] } = {}
-    const key = getUserKey(projectName)
-    if (await this.storage.hasKey(key)) {
-      const userDataJSON = await this.storage.load(key)
-      const userData = safeParseJSON(userDataJSON) as UserData
-      socketToUser = userData.socketToUser
-      userToSockets = userData.userToSockets
-    }
+    let userData = await this.projectStore.loadUserData(projectName)
+    userData = this.addSocketToUser(userData, socketId, userId)
+    await this.projectStore.saveUserData(userData)
 
-    // Update user data with new socket
-    let userSockets: string[] = []
-    if (userId in userToSockets) {
-      userSockets = userToSockets[userId]
-    }
-    userSockets.push(socketId)
-    userToSockets[userId] = userSockets
-    socketToUser[socketId] = userId
-
-    const newUserData: UserData = {
-      socketToUser,
-      userToSockets
-    }
-    const writeData = JSON.stringify(newUserData)
-    await this.storage.save(key, writeData)
-
-    // Update user metadata
-    const metaKey = getMetaKey()
-    let socketToProject: { [key: string]: string } = {}
-    if (await this.storage.hasKey(metaKey)) {
-      const metaDataJSON = await this.storage.load(metaKey)
-      socketToProject = safeParseJSON(metaDataJSON)
-    }
-    socketToProject[socketId] = projectName
-    await this.storage.save(metaKey, JSON.stringify(socketToProject))
+    let userMetadata = await this.projectStore.loadUserMetadata()
+    userMetadata = this.addSocketToMeta(userMetadata, socketId, projectName)
+    await this.projectStore.saveUserMetadata(userMetadata)
   }
 
   /**
    * Deletes the user data of the socket that disconnected
    */
   public async deregisterUser (socketId: string) {
-    // First access the projectName via metadata
-    const metaKey = getMetaKey()
-    if (!(await this.storage.hasKey(metaKey))) {
+    // Access the projectName via metadata
+    const userMetadata = await this.projectStore.loadUserMetadata()
+    const [newUserMetadata, projectName] =
+      this.removeSocketFromMeta(userMetadata, socketId)
+    if (!projectName) {
       return
     }
-    const metaDataJSON = await this.storage.load(metaKey)
-    const socketToProject = safeParseJSON(metaDataJSON)
-    if (!(socketId in socketToProject)) {
-      return
-    }
-    const projectName = socketToProject[socketId]
+    await this.projectStore.saveUserMetadata(newUserMetadata)
 
     // Next remove the user info for that project
-    const key = getUserKey(projectName)
-    if (!(await this.storage.hasKey(key))) {
-      return
-    }
-    const userDataJSON = await this.storage.load(key)
-    const userData = safeParseJSON(userDataJSON)
-    const socketToUser = userData.socketToUser
-    const userToSockets = userData.userToSockets
-
-    if (!socketToUser || !(socketId in socketToUser)) {
-      return
-    }
-    const userId = socketToUser[socketId]
-    const socketInd = userToSockets[userId].indexOf(socketId)
-    if (socketInd > -1) {
-      // remove the socket from the user
-      userToSockets[userId].splice(socketInd, 1)
-    }
-    if (userToSockets[userId].length === 0) {
-      delete userToSockets[userId]
-    }
-
-    delete socketToUser[socketId]
-
-    const newUserData = {
-      socketToUser,
-      userToSockets
-    }
-    const writeData = JSON.stringify(newUserData)
-    await this.storage.save(key, writeData)
+    let userData = await this.projectStore.loadUserData(projectName)
+    userData = this.removeSocketFromUser(userData, socketId)
+    await this.projectStore.saveUserData(userData)
   }
 
   /**
    * Counts the number of currently connected users
    */
   public async countUsers (projectName: string): Promise<number> {
-    const userKey = getUserKey(projectName)
-    let numUsers = 0
-    if (await this.storage.hasKey(userKey)) {
-      const userData = JSON.parse(
-        await this.storage.load(userKey))
-      const userToSockets = userData.userToSockets
-      if (userToSockets) {
-        numUsers = Object.keys(userToSockets).length
-      }
+    const userData = await this.projectStore.loadUserData(projectName)
+    const userToSockets = userData.userToSockets
+    if (!userToSockets) {
+      return 0
     }
-    return numUsers
+    return Object.keys(userToSockets).length
+  }
+
+  /**
+   * Remove all active users, so all counts should be 0
+   */
+  public async clearUsers (): Promise<void> {
+    // Access the project names from the metadata
+    const userMetadata = await this.projectStore.loadUserMetadata()
+    const activeProjects = Object.values(userMetadata.socketToProject)
+
+    // Clear the metadata
+    await this.projectStore.saveUserMetadata(makeUserMetadata())
+
+    // Remove the user info for each project
+    for (const projectName of activeProjects) {
+      await this.projectStore.saveUserData(makeUserData(projectName))
+    }
+  }
+
+  /**
+   * Links socket to user and vice versa
+   */
+  private addSocketToUser (
+    userData: UserData, socketId: string, userId: string): UserData {
+    const socketToUser = userData.socketToUser
+    const userToSockets = userData.userToSockets
+
+    // Update user with new socket
+    let userSockets: string[] = []
+    if (userId in userToSockets) {
+      userSockets = userToSockets[userId]
+    }
+    userSockets.push(socketId)
+    userToSockets[userId] = userSockets
+
+    // Link socket to user
+    socketToUser[socketId] = userId
+
+    return {
+      projectName: userData.projectName,
+      socketToUser,
+      userToSockets
+    }
+  }
+
+  /**
+   * Unlinks socket and user
+   */
+  private removeSocketFromUser (
+    userData: UserData, socketId: string): UserData {
+    const socketToUser = userData.socketToUser
+    const userToSockets = userData.userToSockets
+
+    if (!socketToUser || !(socketId in socketToUser)) {
+      // socket has no associated user
+      return userData
+    }
+    // Remove map from socket to user
+    const userId = socketToUser[socketId]
+    delete socketToUser[socketId]
+
+    // Remove socket from its user's list
+    const socketInd = userToSockets[userId].indexOf(socketId)
+    if (socketInd > -1) {
+      userToSockets[userId].splice(socketInd, 1)
+    }
+
+    // Remove the user if it has no sockets left
+    if (userToSockets[userId].length === 0) {
+      delete userToSockets[userId]
+    }
+    return {
+      projectName: userData.projectName,
+      socketToUser,
+      userToSockets
+    }
+  }
+
+  /**
+   * Updates metadata by linking socket to project
+   */
+  private addSocketToMeta (
+    userMetadata: UserMetadata, socketId: string,
+    projectName: string): UserMetadata {
+    const socketToProject = userMetadata.socketToProject
+    socketToProject[socketId] = projectName
+    return { socketToProject }
+  }
+
+  /**
+   * Updates metadata by removing socket from project
+   * Returns updated metadata and the project name if it exists
+   */
+  private removeSocketFromMeta (
+    userMetadata: UserMetadata, socketId: string): [UserMetadata, string] {
+    const socketToProject = userMetadata.socketToProject
+    if (!(socketId in socketToProject)) {
+      // socket has no associated project
+      return [userMetadata, '']
+    }
+    const projectName = socketToProject[socketId]
+
+    // Remove the socket info from the metadata
+    delete socketToProject[socketId]
+
+    return [{ socketToProject }, projectName]
   }
 }

@@ -61,7 +61,7 @@ async function main (): Promise<void> {
   const storage = await makeStorage(config.database, config.data)
   const redisStore = new RedisStore(config, storage)
   const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(storage)
+  const userManager = new UserManager(projectStore)
 
   // start http and socket io servers
   const app: Application = express()
@@ -73,7 +73,7 @@ async function main (): Promise<void> {
 
   // set up socket.io handler
   const hub = new Hub(config, projectStore, userManager)
-  hub.listen(io)
+  await hub.listen(io)
 
   httpServer.listen(config.port)
 
