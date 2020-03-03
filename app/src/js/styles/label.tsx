@@ -1,9 +1,9 @@
-import { withStyles } from '@material-ui/core'
 import Box from '@material-ui/core/Box/Box'
-import Button from '@material-ui/core/Button/Button'
-import { blue } from '@material-ui/core/colors'
-import grey from '@material-ui/core/colors/grey'
-import createStyles from '@material-ui/core/styles/createStyles'
+import Button, { ButtonProps } from '@material-ui/core/Button'
+import { blue, grey } from '@material-ui/core/colors'
+import { createStyles, withStyles, WithStyles } from '@material-ui/core/styles'
+import { Omit } from '@material-ui/types'
+import React from 'react'
 
 export const categoryStyle = () => createStyles({
   root: {
@@ -53,7 +53,15 @@ export const switchStyle = () => ({
   track: {}
 })
 
-export const StyledButton = withStyles({
+export interface StyledButtonProps {
+  /**
+   * background color. 
+   * TODO: find a strict color type
+   */
+  background: string
+}
+
+const styledButtonStyle = createStyles({
   root: {
     borderRadius: 0,
     border: 0,
@@ -63,13 +71,27 @@ export const StyledButton = withStyles({
     padding: '5px 15px',
     boxShadow: '0 1px 0px 5px rgba(250, 250, 250, 1)',
     fontSize: '15px',
-    background: 'white',
+    background: (props: StyledButtonProps) => props.background,
     margin: '0px 20px'
   },
   label: {
     fontSize: '15px'
   }
-})(Button)
+})
+
+/**
+ * raw styled button
+ * @param props props
+ */
+function StyledButtonRaw (
+  props: WithStyles<typeof styledButtonStyle>
+        & Omit<ButtonProps, keyof StyledButtonProps> & StyledButtonProps
+) {
+  const { classes, background, ...other } = props
+  return <Button className={classes.root} {...other} />
+}
+
+export const StyledButton = withStyles(styledButtonStyle)(StyledButtonRaw)
 
 export const toggleButtonStyle = () => ({
   root: {

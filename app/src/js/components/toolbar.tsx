@@ -156,9 +156,9 @@ export class ToolBar extends Component<Props> {
           }</div>
           <div>
             {this.state.session.trackLinking ?
-              makeButton('Finish Track-Link', () => {
+              makeButton('Finish Track-Link', (() => {
                 this.linkSelectedTracks(this.state)
-              })
+              }), 'lightgreen')
               :
               makeButton('Track-Link', () => {
                 this.startLinkTrack()
