@@ -55,7 +55,7 @@ export const switchStyle = () => ({
 
 export interface StyledButtonProps {
   /**
-   * background color. 
+   * background color.
    * TODO: find a strict color type
    */
   background: string
