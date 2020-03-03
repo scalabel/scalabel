@@ -1,4 +1,4 @@
-import { KeyValueClient } from './interfaces'
+import { RedisClient } from './redis_client'
 import { RegisterMessageType } from './types'
 
 /**
@@ -6,14 +6,14 @@ import { RegisterMessageType } from './types'
  */
 export class RedisPubSub {
   /** the pubsub client */
-  protected client: KeyValueClient
+  protected client: RedisClient
   /** the event name for socket registration */
   protected registerEvent: string
 
   /**
    * Create new publisher and subscriber clients
    */
-  constructor (client: KeyValueClient) {
+  constructor (client: RedisClient) {
     this.client = client
     this.registerEvent = 'registerEvent'
   }

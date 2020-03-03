@@ -1,6 +1,6 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
-import { KeyValueClient, redisHandlerType, RedisMulti } from './interfaces'
+import { redisHandlerType, RedisMulti } from './interfaces'
 import Logger from './logger'
 import { ServerConfig } from './types'
 
@@ -8,7 +8,7 @@ import { ServerConfig } from './types'
  * Exposes promisified versions of the necessary methods on a redis client
  * This should implement KeyValue and PubSub interfaces
  */
-export class RedisClient implements KeyValueClient {
+export class RedisClient {
   /** The redis client for standard ops */
   protected client: redis.RedisClient
   /** The redis client for pub/sub of key events */

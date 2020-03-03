@@ -5,13 +5,14 @@ import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { Hub } from '../../js/server/hub'
 import { ProjectStore } from '../../js/server/project_store'
+import { RedisClient } from '../../js/server/redis_client'
 import { RedisPubSub } from '../../js/server/redis_pub_sub'
 import { RedisStore } from '../../js/server/redis_store'
 import { ActionPacketType, EventName, RegisterMessageType,
   StateMetadata, SyncActionMessageType } from '../../js/server/types'
 import { UserManager } from '../../js/server/user_manager'
 import { index2str, updateState } from '../../js/server/util'
-import { getInitialState, getRandomBox2dAction, makeMockClient } from '../util'
+import { getInitialState, getRandomBox2dAction } from '../util'
 
 jest.mock('../../js/server/file_storage')
 jest.mock('../../js/server/path')
@@ -53,7 +54,7 @@ beforeAll(() => {
   actionListId = 'actionListId'
 
   mockStorage = new FileStorage('fakeDataDir')
-  const client = makeMockClient()
+  const client = new RedisClient(serverConfig)
   const redisStore = new RedisStore(serverConfig, mockStorage, client)
   const pubSub = new RedisPubSub(client)
   mockProjectStore = new ProjectStore(mockStorage, redisStore)

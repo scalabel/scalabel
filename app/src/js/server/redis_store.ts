@@ -1,7 +1,7 @@
 import { promisify } from 'util'
-import { KeyValueClient } from './interfaces'
 import Logger from './logger'
 import * as path from './path'
+import { RedisClient } from './redis_client'
 import { Storage } from './storage'
 import { ServerConfig, StateMetadata } from './types'
 
@@ -10,7 +10,7 @@ import { ServerConfig, StateMetadata } from './types'
  */
 export class RedisStore {
   /** the key value client */
-  protected client: KeyValueClient
+  protected client: RedisClient
   /** the timeout in seconds for flushing a value */
   protected timeout: number
   /** after last update, waits this many seconds before writing to storage */
@@ -23,7 +23,7 @@ export class RedisStore {
   /**
    * Create new store
    */
-  constructor (env: ServerConfig, storage: Storage, client: KeyValueClient) {
+  constructor (env: ServerConfig, storage: Storage, client: RedisClient) {
     this.timeout = env.redisTimeout
     this.timeForWrite = env.timeForWrite
     this.numActionsForWrite = env.numActionsForWrite

@@ -4,7 +4,6 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import * as defaults from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
-import { KeyValueClient } from '../../js/server/interfaces'
 import { getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
@@ -19,7 +18,7 @@ let storage: FileStorage
 let dataDir: string
 let config: ServerConfig
 let metadataString: string
-let client: KeyValueClient
+let client: RedisClient
 
 beforeAll(async () => {
   // Avoid default port 6379 and port 6377 used in box2d integration test
