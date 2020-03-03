@@ -52,7 +52,7 @@ beforeAll(() => {
 
   mockStorage = new FileStorage('fakeDataDir')
   mockProjectStore = new ProjectStore(mockStorage)
-  mockUserManager = new UserManager(mockStorage)
+  mockUserManager = new UserManager(mockProjectStore)
   hub = new Hub(serverConfig, mockProjectStore, mockUserManager)
 })
 
