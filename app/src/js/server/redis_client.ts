@@ -1,6 +1,5 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
-import { redisHandlerType, RedisMulti } from './interfaces'
 import Logger from './logger'
 import { ServerConfig } from './types'
 
@@ -9,9 +8,9 @@ import { ServerConfig } from './types'
  * This should implement KeyValue and PubSub interfaces
  */
 export class RedisClient {
-  /** The redis client for standard ops */
+  /** The redis client for standard key value ops */
   protected client: redis.RedisClient
-  /** The redis client for pub/sub of key events */
+  /** The redis client for pub/sub of events */
   protected pubSub: redis.RedisClient
 
   constructor (config: ServerConfig) {
@@ -29,7 +28,8 @@ export class RedisClient {
    * Add a handler function
    * Note that the handler and subscriber must use the same client
    */
-  public on (event: string, callback: redisHandlerType) {
+  public on (event: string,
+             callback: (channel: string, value: string) => void) {
     this.pubSub.on(event, callback)
   }
 
@@ -49,7 +49,7 @@ export class RedisClient {
   }
 
     /** Start an atomic transaction */
-  public multi (): RedisMulti {
+  public multi (): redis.Multi {
     return this.client.multi()
   }
 

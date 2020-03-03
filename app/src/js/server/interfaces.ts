@@ -8,10 +8,6 @@ type socketHandlerType =
 
 type emitDataType = SyncActionMessageType | State
 
-export type redisHandlerType =
-  ((channel: string, value: string) => {}) |
-  ((channel: string, value: string) => void)
-
 /**
  * Generic interface for server-side socket
  * Socket.io implements this
@@ -37,13 +33,4 @@ export interface SocketServer {
 
   /** Add a handler function */
   on (event: string, callback: socketHandlerType): void
-}
-
-/** Redis multi object for atomic transactions */
-export interface RedisMulti {
-  /** Add a command to the transaction */
-  psetex (key: string, timeout: number, val: string): void
-
-  /** Execute the transaction */
-  exec (): void
 }

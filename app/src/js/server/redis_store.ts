@@ -6,7 +6,9 @@ import { Storage } from './storage'
 import { ServerConfig, StateMetadata } from './types'
 
 /**
- * Wraps and promisifies redis key value storage functionality
+ * Wraps high level redis functionality
+ * Including caching, atomic writes,
+ * and writing back after a set time or a set number of writes
  */
 export class RedisStore {
   /** the key value client */
@@ -41,7 +43,7 @@ export class RedisStore {
 
       const value = await this.get(baseKey)
       await this.writeBackTask(saveDir, value)
-      this.del(baseKey)
+      await this.del(baseKey)
     })
   }
 
@@ -79,7 +81,7 @@ export class RedisStore {
     } else if (numActions + 1 >= this.numActionsForWrite) {
       // write condition: num actions exceeded limit
       await this.writeBackTask(saveDir, value)
-      this.del(reminderKey)
+      await this.del(reminderKey)
     } else {
       // otherwise just update the action counter
       const newActions = (numActions + 1).toString()
@@ -107,8 +109,8 @@ export class RedisStore {
   /**
    * Wrapper for redis delete
    */
-  public del (key: string) {
-    this.client.del(key)
+  public async del (key: string) {
+    await this.client.del(key)
   }
 
    /**
