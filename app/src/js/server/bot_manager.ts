@@ -94,6 +94,9 @@ export class BotManager {
       for (const taskId of Object.keys(taskToSessions)) {
         if (taskToSessions[taskId].length > 0) {
           const sessionData = taskToSessions[taskId][0]
+          // TODO: should we reuse the old session id here?
+          // it may be important if it corresponds to some GPU resource
+          // in that case, shouldn't have to write anything either
           const newSessionData = this.startVirtualSession(
             projectName, sessionData.taskIndex, sessionData.address)
           taskToSessions[taskId] = [newSessionData]

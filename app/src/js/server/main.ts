@@ -61,6 +61,38 @@ function makeRedisPubSub (config: ServerConfig): RedisPubSub {
   const client = new RedisClient(config)
   return new RedisPubSub(client)
 }
+
+/**
+ * Starts a bot manager if config says to
+ */
+async function makeBotManager (
+  config: ServerConfig, subscriber: RedisPubSub, redisStore: RedisStore) {
+  if (config.bots) {
+    const botManager = new BotManager(config, subscriber, redisStore)
+    await botManager.listen()
+  }
+}
+
+/**
+ * Start HTTP and socket io servers
+ */
+async function startServers (
+  config: ServerConfig, projectStore: ProjectStore,
+  userManager: UserManager, publisher: RedisPubSub) {
+  const app: Application = express()
+  const httpServer = createServer(app)
+  const io = socketio(httpServer)
+
+  // set up http handlers
+  startHTTPServer(config, app, projectStore, userManager)
+
+  // set up socket.io handler
+  const hub = new Hub(config, projectStore, userManager, publisher)
+  await hub.listen(io)
+
+  httpServer.listen(config.port)
+}
+
 /**
  * Main function for backend server
  */
@@ -81,24 +113,8 @@ async function main (): Promise<void> {
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(projectStore)
 
-  if (config.model) {
-    const botManager = new BotManager(config, subscriber, redisStore)
-    await botManager.listen()
-  }
-
-  // start http and socket io servers
-  const app: Application = express()
-  const httpServer = createServer(app)
-  const io = socketio(httpServer)
-
-  // set up http handlers
-  startHTTPServer(config, app, projectStore, userManager)
-
-  // set up socket.io handler
-  const hub = new Hub(config, projectStore, userManager, publisher)
-  await hub.listen(io)
-
-  httpServer.listen(config.port)
+  await makeBotManager(config, subscriber, redisStore)
+  await startServers(config, projectStore, userManager, publisher)
 
   return
 }

@@ -2,11 +2,16 @@ import * as fs from 'fs-extra'
 import _ from 'lodash'
 import mockfs from 'mock-fs'
 import uuid4 from 'uuid/v4'
+import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { getTestDir } from '../../js/server/path'
 import { ProjectStore } from '../../js/server/project_store'
+import { RedisClient } from '../../js/server/redis_client'
+import { RedisStore } from '../../js/server/redis_store'
 import { UserManager } from '../../js/server/user_manager'
 import { makeProjectDir } from '../util'
+
+jest.mock('../../js/server/redis_client')
 
 let userManager: UserManager
 let projectName: string
@@ -19,7 +24,9 @@ beforeAll(() => {
   dataDir = getTestDir('test-user-data')
   makeProjectDir(dataDir, projectName)
   const storage = new FileStorage(dataDir)
-  const projectStore = new ProjectStore(storage)
+  const client = new RedisClient(serverConfig)
+  const redisStore = new RedisStore(serverConfig, storage, client)
+  const projectStore = new ProjectStore(storage, redisStore)
   userManager = new UserManager(projectStore)
 })
 

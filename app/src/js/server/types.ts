@@ -43,8 +43,8 @@ export interface ServerConfig {
   numActionsForWrite: number
   /** Port that redis runs on */
   redisPort: number
-  /** Whether to use model assistance */
-  model: boolean
+  /** Whether to use virtual sessions/bots for assistance */
+  bots: boolean
 }
 
 /**
@@ -151,6 +151,8 @@ export interface VirtualProjectData {
   taskToSessions: { [key: string]: VirtualSessionData[] }
 }
 
+// TODO: should only have address and taskIndex once, then list of id
+// TODO: store at redis key containing project + task for separability
 /** data kept by each virtual session */
 export interface VirtualSessionData {
   /** the session id */

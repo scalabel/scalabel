@@ -6,5 +6,5 @@ database: "local"
 userManagement: false
 sync: true
 autosave: true
-model: true
+bots: true
 ...

@@ -15,7 +15,7 @@ export const serverConfig: ServerConfig = {
   timeForWrite: 600,
   numActionsForWrite: 10,
   redisPort: 6379,
-  model: false
+  bots: false
 }
 
 /* default categories when file is missing and label is box2D or box3D */
