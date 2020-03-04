@@ -140,8 +140,8 @@ export interface UserData {
   userToSockets: { [key: string]: string[] }
 }
 
-/** data kept by session manager */
-export interface SessionManagerData {
+/** data kept by bot manager */
+export interface BotManagerData {
   /** map from project to tasks for the project */
   projectToTasks: { [key: string]: VirtualProjectData }
 }

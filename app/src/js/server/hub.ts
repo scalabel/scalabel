@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
 import * as types from '../action/types'
-import { SocketServer } from './interfaces'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
 import { RedisPubSub } from './redis_pub_sub'
+import { SocketServer } from './socket_interface'
 import {
   EventName, RegisterMessageType, ServerConfig,
   StateMetadata, SyncActionMessageType } from './types'

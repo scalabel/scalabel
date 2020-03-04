@@ -4,6 +4,7 @@ import * as formidable from 'express-formidable'
 import { createServer } from 'http'
 import socketio from 'socket.io'
 import 'source-map-support/register'
+import { BotManager } from './bot_manager'
 import { Hub } from './hub'
 import { Listeners } from './listeners'
 import Logger from './logger'
@@ -12,7 +13,6 @@ import { ProjectStore } from './project_store'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
 import { RedisStore } from './redis_store'
-import { SessionManager } from './session_manager'
 import { Endpoint, ServerConfig } from './types'
 import { UserManager } from './user_manager'
 import { makeStorage, readConfig } from './util'
@@ -54,6 +54,14 @@ function startHTTPServer (
 }
 
 /**
+ * Make a publisher or subscriber for redis
+ * Subscribers can't take other actions, so separate clients for pub and sub
+ */
+function makeRedisPubSub (config: ServerConfig): RedisPubSub {
+  const client = new RedisClient(config)
+  return new RedisPubSub(client)
+}
+/**
  * Main function for backend server
  */
 async function main (): Promise<void> {
@@ -63,21 +71,19 @@ async function main (): Promise<void> {
   // initialize storage
   const storage = await makeStorage(config.database, config.data)
 
-  // initialize redis
-  const redisClient = new RedisClient(config)
-  const redisStore = new RedisStore(config, storage, redisClient)
-  const publishClient = new RedisClient(config)
-  const publisher = new RedisPubSub(publishClient)
-  const subscribeClient = new RedisClient(config)
-  const subscriber = new RedisPubSub(subscribeClient)
+  // initialize redis- need separate clients for different roles
+  const cacheClient = new RedisClient(config)
+  const redisStore = new RedisStore(config, storage, cacheClient)
+  const publisher = makeRedisPubSub(config)
+  const subscriber = makeRedisPubSub(config)
 
   // initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(storage)
 
   if (config.model) {
-    const sessionManager = new SessionManager(config, subscriber,redisStore)
-    await sessionManager.listen()
+    const botManager = new BotManager(config, subscriber, redisStore)
+    await botManager.listen()
   }
 
   // start http and socket io servers

@@ -96,10 +96,10 @@ export function getRedisBaseKey (metadataKey: string) {
 }
 
 /**
- * Gets the redis key for session manager data
+ * Gets the redis key for bot manager data
  */
-export function getRedisSessionManagerKey () {
-  return 'sessionManagerKey'
+export function getRedisBotManagerKey () {
+  return 'botManagerKey'
 }
 
 /**

@@ -1,18 +1,18 @@
 import { sprintf } from 'sprintf-js'
 import Logger from './logger'
-import { getRedisSessionManagerKey } from './path'
+import { getRedisBotManagerKey } from './path'
 import { RedisPubSub } from './redis_pub_sub'
 import { RedisStore } from './redis_store'
 import {
-  RegisterMessageType, ServerConfig,
-  SessionManagerData, VirtualProjectData, VirtualSessionData } from './types'
+  BotManagerData, RegisterMessageType,
+  ServerConfig, VirtualProjectData, VirtualSessionData } from './types'
 import { index2str } from './util'
 import { VirtualSession } from './virtual_session'
 
 /**
  * Watches redis and spawns virtual sessions as needed
  */
-export class SessionManager {
+export class BotManager {
   /** env variables */
   protected config: ServerConfig
   /** the redis message broker */
@@ -60,7 +60,7 @@ export class SessionManager {
 
   /**
    * Create a single virtual session
-   * And update the session manager data appropriately
+   * And update the bot manager data appropriately
    */
   private makeVirtualSession (
     projectToTasks: { [key: string]: VirtualProjectData },
@@ -84,7 +84,7 @@ export class SessionManager {
 
   /**
    * Create new virtual sessions for each project/task combination in the map
-   * And update the session manager data appropriately
+   * And update the bot manager data appropriately
    */
   private makeVirtualSessions (
     projectToTasks: { [key: string]: VirtualProjectData }):
@@ -105,10 +105,10 @@ export class SessionManager {
   }
 
   /**
-   * Load the session manager data from redis
+   * Load the bot manager data from redis
    */
-  private async load (): Promise<SessionManagerData> {
-    const key = getRedisSessionManagerKey()
+  private async load (): Promise<BotManagerData> {
+    const key = getRedisBotManagerKey()
     const value = await this.redisStore.get(key)
     if (value) {
       return JSON.parse(value)
@@ -118,10 +118,10 @@ export class SessionManager {
   }
 
   /**
-   * Save the session manager data to redis
+   * Save the bot manager data to redis
    */
-  private async save (data: SessionManagerData) {
-    const key = getRedisSessionManagerKey()
+  private async save (data: BotManagerData) {
+    const key = getRedisBotManagerKey()
     const value = JSON.stringify(data)
     await this.redisStore.set(key, value)
   }
