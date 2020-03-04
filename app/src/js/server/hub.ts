@@ -25,11 +25,11 @@ export class Hub {
   /** the user manager */
   protected userManager: UserManager
 
-  constructor (env: ServerConfig,
+  constructor (config: ServerConfig,
                projectStore: ProjectStore,
                userManager: UserManager) {
-    this.sync = env.sync
-    this.autosave = env.autosave
+    this.sync = config.sync
+    this.autosave = config.autosave
     this.projectStore = projectStore
     this.userManager = userManager
   }
@@ -128,7 +128,7 @@ export class Hub {
       }
 
       await this.projectStore.saveState(
-        newState, projectName, taskId, stateMetadata)
+        newState, projectName, taskId, stateMetadata, taskActions.length)
     } else if (taskActions.length > 0) {
       // if actions were already saved, apply the old timestamps
       const timestamps = actionIdsSaved[actionPacketId]

@@ -33,9 +33,12 @@ export class ProjectStore {
    * If cache is true, saves to redis, which writes back later
    * Otherwise immediately write back to storage
    */
-  public async save (key: string, value: string, cache= false, metadata= '') {
+  public async save (
+    key: string, value: string,
+    cache= false, metadata= '', numActionsSaved= 1) {
     if (cache && this.redisStore) {
-      await this.redisStore.setExWithReminder(key, value, metadata)
+      await this.redisStore.setExWithReminder(
+        key, value, metadata, numActionsSaved)
     } else {
       await this.storage.save(key, value)
     }
@@ -46,11 +49,11 @@ export class ProjectStore {
    */
   public async saveState (
     state: State, projectName: string,
-    taskId: string, stateMetadata: StateMetadata) {
+    taskId: string, stateMetadata: StateMetadata, numActionsSaved: number) {
     const stringState = JSON.stringify(state)
     const stringMetadata = JSON.stringify(stateMetadata)
     const saveDir = path.getSaveDir(projectName, taskId)
-    await this.save(saveDir, stringState, true, stringMetadata)
+    await this.save(saveDir, stringState, true, stringMetadata, numActionsSaved)
   }
 
   /**

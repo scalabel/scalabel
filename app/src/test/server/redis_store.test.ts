@@ -17,6 +17,7 @@ let storage: FileStorage
 let dataDir: string
 let config: ServerConfig
 let metadataString: string
+let numWrites: number
 
 beforeAll(async () => {
   // Avoid default port 6379 and port 6377 used in box2d integration test
@@ -33,6 +34,8 @@ beforeAll(async () => {
   storage = new FileStorage(dataDir)
   defaultStore = new RedisStore(config, storage)
   metadataString = makeMetadata(1)
+  // numWrites used across tests that spawn files
+  numWrites = 0
 })
 
 afterAll(async () => {
@@ -41,19 +44,18 @@ afterAll(async () => {
 })
 
 describe('Test redis cache', () => {
-  test('Set and get', async () => {
+  test('Set and get and delete', async () => {
     const keys = _.range(5).map((v) => sprintf('test%s', v))
     const values = _.range(5).map((v) => sprintf('value%s', v))
 
     for (let i = 0; i < 5; i++) {
-      await defaultStore.setExWithReminder(keys[i], values[i], metadataString)
+      await defaultStore.setExWithReminder(
+        keys[i], values[i], metadataString, 1)
       const value = await defaultStore.get(keys[i])
       expect(value).toBe(values[i])
     }
-  })
 
-  test('Delete', async () => {
-    const keys = _.range(5).map((v) => sprintf('test%s', v))
+    // This also cleans up for the other tests
     for (let i = 0; i < 5; i++) {
       await defaultStore.del(keys[i])
       const value = await defaultStore.get(keys[i])
@@ -62,35 +64,41 @@ describe('Test redis cache', () => {
   })
 
   test('Writes back on timeout', async () => {
-    const timeoutEnv = _.clone(config)
-    timeoutEnv.timeForWrite = 0.2
-    const store = new RedisStore(timeoutEnv, storage)
+    const timeoutConfig = _.clone(config)
+    timeoutConfig.timeForWrite = 0.2
+    const store = new RedisStore(timeoutConfig, storage)
 
     const key = 'testKey1'
-    await store.setExWithReminder(key, 'testvalue', metadataString)
+    await store.setExWithReminder(key, 'testvalue', metadataString, 1)
 
-    const savedKeys = await storage.listKeys('')
-    expect(savedKeys.length).toBe(0)
+    await checkFileCount()
     await sleep(800)
-
-    const savedKeysFinal = await storage.listKeys('')
-    expect(savedKeysFinal.length).toBe(1)
+    await checkFileWritten()
   })
 
-  test('Writes back after action limit', async () => {
-    const actionEnv = _.clone(config)
-    actionEnv.numActionsForWrite = 5
-    const store = new RedisStore(actionEnv, storage)
+  test('Writes back after action limit with 1 action at a time', async () => {
+    const actionConfig = _.clone(config)
+    actionConfig.numActionsForWrite = 5
+    const store = new RedisStore(actionConfig, storage)
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {
-      await store.setExWithReminder(key, sprintf('value%s', i), metadataString)
-      const savedKeys = await storage.listKeys('')
-      expect(savedKeys.length).toBe(1)
+      await store.setExWithReminder(
+        key, sprintf('value%s', i), metadataString, 1)
+      // make sure no new files are created yet
+      await checkFileCount()
     }
-    await store.setExWithReminder(key, 'value4', metadataString)
-    const savedKeysFinal = await storage.listKeys('')
-    expect(savedKeysFinal.length).toBe(2)
+    await store.setExWithReminder(key, 'value4', metadataString, 1)
+    await checkFileWritten()
+  })
+
+  test('Writes back after action limit with multi action packet', async () => {
+    const actionConfig = _.clone(config)
+    actionConfig.numActionsForWrite = 5
+    const store = new RedisStore(actionConfig, storage)
+    await checkFileCount()
+    await store.setExWithReminder('key', 'value', metadataString, 5)
+    await checkFileWritten()
   })
 
   test('Set atomic executes all ops', async () => {
@@ -110,13 +118,25 @@ describe('Test redis cache', () => {
     const values = _.range(5).map((v) => sprintf('value%s', v))
     const metadata = _.range(5).map((v) => makeMetadata(v))
     for (let i = 0; i < 5; i++) {
-      await defaultStore.setExWithReminder(keys[i], values[i], metadata[i])
+      await defaultStore.setExWithReminder(keys[i], values[i], metadata[i], 1)
       const metakey = getRedisMetaKey(keys[i])
       const metavalue = await defaultStore.get(metakey)
       expect(metavalue).toBe(metadata[i])
     }
   })
 })
+
+/** Check that expected number of files exist */
+async function checkFileCount () {
+  const savedKeys = await storage.listKeys('')
+  expect(savedKeys.length).toBe(numWrites)
+}
+
+/** Check that expected number of files have been written */
+async function checkFileWritten () {
+  numWrites += 1
+  await checkFileCount()
+}
 
 /** Makes some dummy metadata */
 function makeMetadata (taskIndex: number): string {
