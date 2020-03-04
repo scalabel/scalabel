@@ -61,32 +61,13 @@ export class RedisStore {
    * And a reminder value with shorter timeout for saving to disk
    */
   public async setExWithReminder (
-    saveDir: string, value: string, metadata: string) {
+    saveDir: string, value: string, metadata: string, numActionsSaved: number) {
     // Update value and metadata atomically
     const keys = [saveDir, path.getRedisMetaKey(saveDir)]
     const vals = [value, metadata]
     await this.setAtomic(keys, vals, this.timeout)
-    // Handle write back to storage
-    if (this.numActionsForWrite === 1) {
-      // special case: always save, don't need reminder
-      await this.writeBackTask(saveDir, value)
-      return
-    }
 
-    const reminderKey = path.getRedisReminderKey(saveDir)
-    const numActions = parseInt(await this.get(reminderKey), 10)
-    if (!numActions) {
-      // new reminder, 1st action
-      await this.setEx(reminderKey, '1', this.timeForWrite)
-    } else if (numActions + 1 >= this.numActionsForWrite) {
-      // write condition: num actions exceeded limit
-      await this.writeBackTask(saveDir, value)
-      await this.del(reminderKey)
-    } else {
-      // otherwise just update the action counter
-      const newActions = (numActions + 1).toString()
-      await this.setEx(reminderKey, newActions, this.timeForWrite)
-    }
+    await this.setWriteReminder(saveDir, value, numActionsSaved)
   }
 
   /**
@@ -132,6 +113,28 @@ export class RedisStore {
    */
   public async set (key: string, value: string) {
     await this.client.set(key, value)
+  }
+
+  /**
+   * Handle writing back to storage
+   */
+  private async setWriteReminder (
+    saveDir: string, value: string, numActionsSaved: number) {
+    const reminderKey = path.getRedisReminderKey(saveDir)
+    let numActions = parseInt(await this.get(reminderKey), 10)
+    if (!numActions) {
+      numActions = 0
+    }
+    numActions += numActionsSaved
+
+    if (numActions >= this.numActionsForWrite) {
+      // write condition: num actions exceeded limit
+      await this.writeBackTask(saveDir, value)
+      await this.del(reminderKey)
+    } else {
+      // otherwise just update the action counter
+      await this.setEx(reminderKey, numActions.toString(), this.timeForWrite)
+    }
   }
 
   /**

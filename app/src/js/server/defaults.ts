@@ -1,7 +1,7 @@
 import { AttributeToolType } from '../common/types'
 import { ServerConfig } from './types'
 
-/* default config for env */
+/* default config */
 export const serverConfig: ServerConfig = {
   port: 8686,
   data: './data',

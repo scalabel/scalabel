@@ -4,6 +4,7 @@ import {
   ExtrinsicsType,
   IntrinsicsType,
   ItemType,
+  Plane3DType,
   RectType,
   TaskStatus,
   TrackType
@@ -78,6 +79,8 @@ export interface LabelExport {
   poly2d: PolygonExportType[] | null
   /** box3d label */
   box3d: CubeType | null
+  /** plane3d label */
+  plane3d: Plane3DType | null
   /** custom labels */
   customs: { [name: string]: CustomExportType }
 }

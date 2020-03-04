@@ -4,6 +4,7 @@ pyyaml>=5.3
 boto3
 mypy
 numpy
+plyfile
 pycodestyle
 pylint
 psutil

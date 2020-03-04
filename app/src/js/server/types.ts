@@ -114,14 +114,6 @@ export interface ActionPacketType {
   id: string
 }
 
-/** user data for a project */
-export interface UserData {
-  /** map from socket to user */
-  socketToUser: { [key: string]: string }
-  /** map from user to list of socket */
-  userToSockets: { [key: string]: string[] }
-}
-
 /** metadata associated with a state */
 export interface StateMetadata {
   /** project name */
@@ -134,10 +126,18 @@ export interface StateMetadata {
 
 /** user data for a project */
 export interface UserData {
+  /** project name */
+  projectName: string
   /** map from socket to user */
   socketToUser: { [key: string]: string }
   /** map from user to list of socket */
   userToSockets: { [key: string]: string[] }
+}
+
+/** metadata for all users for all projects */
+export interface UserMetadata {
+  /** map from socket to project */
+  socketToProject: { [key: string]: string }
 }
 
 /** data kept by bot manager */

@@ -65,7 +65,7 @@ function makeRedisPubSub (config: ServerConfig): RedisPubSub {
  * Main function for backend server
  */
 async function main (): Promise<void> {
-  // initialize environment variables
+  // initialize config
   const config = readConfig()
 
   // initialize storage
@@ -79,7 +79,7 @@ async function main (): Promise<void> {
 
   // initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(storage)
+  const userManager = new UserManager(projectStore)
 
   if (config.model) {
     const botManager = new BotManager(config, subscriber, redisStore)
@@ -96,7 +96,7 @@ async function main (): Promise<void> {
 
   // set up socket.io handler
   const hub = new Hub(config, projectStore, userManager, publisher)
-  hub.listen(io)
+  await hub.listen(io)
 
   httpServer.listen(config.port)
 

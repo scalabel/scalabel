@@ -58,7 +58,7 @@ beforeAll(() => {
   const redisStore = new RedisStore(serverConfig, mockStorage, client)
   const pubSub = new RedisPubSub(client)
   mockProjectStore = new ProjectStore(mockStorage, redisStore)
-  mockUserManager = new UserManager(mockStorage)
+  mockUserManager = new UserManager(mockProjectStore)
   hub = new Hub(serverConfig, mockProjectStore, mockUserManager, pubSub)
 })
 
@@ -131,7 +131,7 @@ describe('Test hub functionality', () => {
     }
     const newState = updateState(getInitialState(sessionId), [action])
     expect(mockProjectStore.saveState).toBeCalledWith(newState, projectName,
-      taskId, newMetadata)
+      taskId, newMetadata, 1)
 
     // test that actions were broadcast correctly
     const newAction = _.cloneDeep(action)
