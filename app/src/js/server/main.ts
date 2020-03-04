@@ -2,9 +2,11 @@ import * as bodyParser from 'body-parser'
 import express, { Application } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
-import * as socketio from 'socket.io'
+import socketio from 'socket.io'
+import 'source-map-support/register'
 import { Hub } from './hub'
 import { Listeners } from './listeners'
+import Logger from './logger'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
 import { RedisStore } from './redis_store'
@@ -59,7 +61,7 @@ async function main (): Promise<void> {
   const storage = await makeStorage(config.database, config.data)
   const redisStore = new RedisStore(config, storage)
   const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(storage)
+  const userManager = new UserManager(projectStore)
 
   // start http and socket io servers
   const app: Application = express()
@@ -71,7 +73,7 @@ async function main (): Promise<void> {
 
   // set up socket.io handler
   const hub = new Hub(config, projectStore, userManager)
-  hub.listen(io)
+  await hub.listen(io)
 
   httpServer.listen(config.port)
 
@@ -79,4 +81,6 @@ async function main (): Promise<void> {
 }
 
 // TODO: Verify this is good promise handling
-main().then().catch()
+main().then().catch((error: Error) => {
+  Logger.error(error)
+})

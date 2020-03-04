@@ -19,9 +19,17 @@ export class S3Storage extends Storage {
    * Constructor
    */
   constructor (dataPath: string) {
-    // data path should have format region:bucket/path
+    const errorMsg =
+      's3 data path format is incorrect; should be region:bucket/path'
+    const error = Error(errorMsg)
     const info = dataPath.split(':')
+    if (info.length < 2) {
+      throw(error)
+    }
     const bucketPath = info[1].split('/')
+    if (bucketPath.length < 2) {
+      throw(error)
+    }
     const dataDir = path.join(...bucketPath.splice(1), '/')
     super(dataDir)
 

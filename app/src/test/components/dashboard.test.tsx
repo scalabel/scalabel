@@ -4,6 +4,7 @@ import React from 'react'
 import Dashboard, {
   DashboardContents, StyledHeader, StyledSidebar
 } from '../../js/components/dashboard'
+import { SubmitData } from '../../js/functional/types'
 import { myTheme } from '../../js/styles/theme'
 
 afterEach(cleanup)
@@ -87,6 +88,10 @@ describe('Test dashboard functionality', () => {
     })
   })
 })
+const submitData: SubmitData[] = [{
+  time: 0,
+  user: 'user'
+}]
 
 const sampleDashboardContents: DashboardContents = {
   projectMetaData: {
@@ -101,22 +106,22 @@ const sampleDashboardContents: DashboardContents = {
   taskMetaDatas: [{
     numLabeledItems: '5',
     numLabels: '3',
-    submitted: true,
+    submissions: submitData,
     handlerUrl: 'url'
   }, {
     numLabeledItems: '1',
     numLabels: '2',
-    submitted: true,
+    submissions: submitData,
     handlerUrl: 'url'
   }, {
     numLabeledItems: '1',
     numLabels: '1',
-    submitted: true,
+    submissions: submitData,
     handlerUrl: 'url'
   }, {
     numLabeledItems: '0',
     numLabels: '0',
-    submitted: true,
+    submissions: submitData,
     handlerUrl: 'url'
   }],
   numUsers: 0
