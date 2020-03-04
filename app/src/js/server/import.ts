@@ -184,6 +184,10 @@ function convertLabelToImport (
     shapeType = ShapeTypeName.CUBE
     labelType = LabelTypeName.BOX_3D
     shapeData = labelExport.box3d
+  } else if (labelExport.plane3d) {
+    shapeType = ShapeTypeName.GRID
+    labelType = LabelTypeName.PLANE_3D
+    shapeData = labelExport.plane3d
   }
 
   // if the label has any shapes, import them too

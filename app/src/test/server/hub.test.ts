@@ -52,7 +52,7 @@ beforeAll(() => {
 
   mockStorage = new FileStorage('fakeDataDir')
   mockProjectStore = new ProjectStore(mockStorage)
-  mockUserManager = new UserManager(mockStorage)
+  mockUserManager = new UserManager(mockProjectStore)
   hub = new Hub(serverConfig, mockProjectStore, mockUserManager)
 })
 
@@ -124,7 +124,7 @@ describe('Test hub functionality', () => {
     }
     const newState = updateState(getInitialState(sessionId), [action])
     expect(mockProjectStore.saveState).toBeCalledWith(newState, projectName,
-      taskId, newMetadata)
+      taskId, newMetadata, 1)
 
     // test that actions were broadcast correctly
     const newAction = _.cloneDeep(action)

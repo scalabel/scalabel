@@ -44,6 +44,17 @@ export abstract class Storage {
   public abstract async delete (key: string): Promise<void>
 
   /**
+   * Loads the JSON if it exists
+   * Otherwise return something that evaluates to false
+   */
+  public async safeLoad (key: string): Promise<string> {
+    if (await this.hasKey(key)) {
+      return this.load(key)
+    }
+    return ''
+  }
+
+  /**
    * Makes relative path into full path
    */
   protected fullDir (key: string): string {

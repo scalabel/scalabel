@@ -14,7 +14,8 @@ import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType, ServerConfig } from './types'
+import { CreationForm, DatabaseType,
+  ServerConfig, UserData, UserMetadata } from './types'
 
 /**
  * Initializes backend environment variables
@@ -271,4 +272,24 @@ export function updateState (
   }
 
   return stateStore.getState().present
+}
+
+/**
+ * Builds empty user data except for project name
+ */
+export function makeUserData (projectName: string): UserData {
+  return {
+    projectName,
+    socketToUser: {},
+    userToSockets: {}
+  }
+}
+
+/**
+ * Builds empty user metadata
+ */
+export function makeUserMetadata (): UserMetadata {
+  return {
+    socketToProject: {}
+  }
 }
