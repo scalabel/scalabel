@@ -192,6 +192,7 @@ sampleItemsVideo[0].labels = [{
   manualShape: true,
   box2d: null,
   box3d: null,
+  plane3d: null,
   poly2d: [{
     vertices: [[0, 0], [0, 1], [1, 1]],
     types: 'LLL',
@@ -206,6 +207,7 @@ sampleItemsVideo[1].labels = [{
   manualShape: true,
   box2d: null,
   box3d: null,
+  plane3d: null,
   poly2d: [{
     vertices: [[0, 0], [0, 1], [1, 1]],
     types: 'LLL',
