@@ -1,13 +1,13 @@
 import { sprintf } from 'sprintf-js'
+import uuid4 from 'uuid/v4'
+import { BotUser } from './bot_user'
 import Logger from './logger'
-import { getRedisBotManagerKey } from './path'
+import { getRedisBotKey, getRedisBotSet } from './path'
+import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
-import { RedisStore } from './redis_store'
 import {
-  BotManagerData, RegisterMessageType,
-  ServerConfig, VirtualProjectData, VirtualSessionData } from './types'
-import { index2str } from './util'
-import { VirtualSession } from './virtual_session'
+  BotData, RegisterMessageType,
+  ServerConfig } from './types'
 
 /**
  * Watches redis and spawns virtual sessions as needed
@@ -17,157 +17,112 @@ export class BotManager {
   protected config: ServerConfig
   /** the redis message broker */
   protected subscriber: RedisPubSub
-  /** the redis store */
-  protected redisStore: RedisStore
+  /** the redis client for storage */
+  protected redisClient: RedisClient
   /** the time in between polls that check session activity */
   protected pollTime: number
 
   constructor (
-    config: ServerConfig, subscriber: RedisPubSub, redisStore: RedisStore) {
+    config: ServerConfig, subscriber: RedisPubSub, redisClient: RedisClient) {
     this.config = config
     this.subscriber = subscriber
-    this.redisStore = redisStore
+    this.redisClient = redisClient
     this.pollTime = 1000 * 60 * 5 // 5 minutes in ms
-  }
 
-  /**
-   * Listens to redis changes
-   */
-  public async listen () {
-    // recreate the virtual users
-    const managerData = await this.load()
-    managerData.projectToTasks =
-      this.makeVirtualSessions(managerData.projectToTasks)
-    await this.save(managerData)
-
-    // listen for new real users
+    // listen for new users
     this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
   }
 
   /**
-   * Handles registration of new sockets
+   * Recreate the virtual users stored in redis
+   */
+  public async restoreUsers () {
+    const botKeys = await this.redisClient.getSetMembers(getRedisBotSet())
+    for (const botKey of botKeys) {
+      const botData = await this.getBot(botKey)
+      this.makeBotUser(botData)
+      // todo: somehow restore the sessions for the bot user
+    }
+  }
+
+  /**
+   * Handles registration of new web sessions
    */
   public async handleRegister (_channel: string, message: string) {
     const data = JSON.parse(message) as RegisterMessageType
 
-    // create a new virtual user
-    const managerData = await this.load()
-    managerData.projectToTasks = this.makeVirtualSession(
-      managerData.projectToTasks, data.projectName,
-      data.taskIndex, data.address)
-    await this.save(managerData)
-  }
-
-  /**
-   * Create a single virtual session
-   * And update the bot manager data appropriately
-   */
-  private makeVirtualSession (
-    projectToTasks: { [key: string]: VirtualProjectData },
-    projectName: string, taskIndex: number, address: string):
-    { [key: string]: VirtualProjectData } {
-    if (!(projectName in projectToTasks)) {
-      projectToTasks[projectName] = { taskToSessions: {} }
+    if (data.bot || await this.checkBotExists(data.userId)) {
+      return
     }
 
-    const taskId = index2str(taskIndex)
-    const taskToSessions = projectToTasks[projectName].taskToSessions
-    // for now, just keep one virtual user per task
-    if (!(taskId in taskToSessions) || taskToSessions[taskId].length === 0) {
-      const sessionData =
-        this.startVirtualSession(projectName, taskIndex, address)
-      taskToSessions[taskId] = [sessionData]
+    const botData: BotData = {
+      webId: data.userId,
+      botId: uuid4(),
+      serverAddress: data.address
     }
-    projectToTasks[projectName].taskToSessions = taskToSessions
-    return projectToTasks
+
+    const bot = this.makeBotUser(botData)
+    bot.makeSession(data.projectName, data.taskIndex)
+    await this.saveBot(botData)
   }
 
   /**
-   * Create new virtual sessions for each project/task combination in the map
-   * And update the bot manager data appropriately
+   * Check if a bot for the given user has already been registered
    */
-  private makeVirtualSessions (
-    projectToTasks: { [key: string]: VirtualProjectData }):
-    { [key: string]: VirtualProjectData } {
-    for (const projectName of Object.keys(projectToTasks)) {
-      const taskToSessions = projectToTasks[projectName].taskToSessions
-      for (const taskId of Object.keys(taskToSessions)) {
-        if (taskToSessions[taskId].length > 0) {
-          const sessionData = taskToSessions[taskId][0]
-          // TODO: should we reuse the old session id here?
-          // it may be important if it corresponds to some GPU resource
-          // in that case, shouldn't have to write anything either
-          const newSessionData = this.startVirtualSession(
-            projectName, sessionData.taskIndex, sessionData.address)
-          taskToSessions[taskId] = [newSessionData]
-        }
-      }
-      projectToTasks[projectName].taskToSessions = taskToSessions
-    }
-    return projectToTasks
+  private async checkBotExists (userId: string): Promise<boolean> {
+    const key = getRedisBotKey(userId)
+    return this.redisClient.exists(key)
   }
 
   /**
-   * Load the bot manager data from redis
+   * Get the data for a bot that has been registered
    */
-  private async load (): Promise<BotManagerData> {
-    const key = getRedisBotManagerKey()
-    const value = await this.redisStore.get(key)
-    if (value) {
-      return JSON.parse(value)
-    } else {
-      return { projectToTasks: {} }
-    }
+  private async getBot (key: string): Promise<BotData> {
+    return JSON.parse(await this.redisClient.get(key))
   }
 
   /**
-   * Save the bot manager data to redis
+   * Save the data for a bot, marking it as registered
    */
-  private async save (data: BotManagerData) {
-    const key = getRedisBotManagerKey()
-    const value = JSON.stringify(data)
-    await this.redisStore.set(key, value)
+  private async saveBot (botData: BotData) {
+    const key = getRedisBotKey(botData.webId)
+    const value = JSON.stringify(botData)
+    await this.redisClient.set(key, value)
+    await this.redisClient.setAdd(getRedisBotSet(), key)
   }
 
   /**
-   * Create and start a new virtual session
+   * Delete the bot, marking it as unregistered
    */
-  private startVirtualSession (
-    projectName: string, taskIndex: number, address: string):
-    VirtualSessionData {
-    Logger.info(sprintf('Creating virtual session for project "%s", task %d',
-      projectName, taskIndex))
+  private async deleteBot (userId: string) {
+    const key = getRedisBotKey(userId)
+    await this.redisClient.del(key)
+    await this.redisClient.setRemove(getRedisBotSet(), key)
+  }
 
-    const sess = new VirtualSession(projectName, taskIndex, address)
-    sess.listen()
+  /**
+   * Create a new bot user
+   */
+  private makeBotUser (botData: BotData): BotUser {
+    Logger.info(sprintf('Creating bot for user %s', botData.webId))
+    const bot = new BotUser(botData)
 
-    const taskId = index2str(taskIndex)
     const pollId = setInterval(async () => {
-      await this.checkSessionActivity(sess, projectName, taskId, pollId)
+      await this.checkSessionActivity(bot, pollId)
     }, this.pollTime)
-
-    return {
-      id: sess.id,
-      address,
-      taskIndex
-    }
+    return bot
   }
 
   /**
    * Kill the session if no activity since time of last poll
    */
-  private async checkSessionActivity (
-    session: VirtualSession, projectName: string,
-    taskId: string, pollId: NodeJS.Timeout) {
-    if (session.actionCount > 0) {
-      session.actionCount = 0
+  private async checkSessionActivity (bot: BotUser, pollId: NodeJS.Timeout) {
+    if (bot.getActionCount() > 0) {
+      bot.resetActionCount()
     } else {
-      session.kill()
       clearInterval(pollId)
-      // remove the session from the manager data
-      const managerData = await this.load()
-      managerData.projectToTasks[projectName].taskToSessions[taskId] = []
-      await this.save(managerData)
+      await this.deleteBot(bot.webId)
+      bot.kill()
     }
   }
 }

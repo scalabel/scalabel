@@ -60,16 +60,33 @@ export class RedisClient {
     return redisValue
   }
 
+  /** Wrapper for redis exists */
+  public async exists (key: string): Promise<boolean> {
+    return this.client.exists(key)
+  }
+
+  /** Wrapper for redis set add */
+  public async setAdd (key: string, value: string) {
+    this.client.sadd(key, value)
+  }
+
+  /** Wrapper for redis set remove */
+  public async setRemove (key: string, value: string) {
+    this.client.srem(key, value)
+  }
+
+  /** Wrapper for redis set members */
+  public async getSetMembers (key: string): Promise<string[]> {
+    const redisSetMembersAsync =
+      promisify(this.client.smembers).bind(this.client)
+    const values = await redisSetMembersAsync(key)
+    return values
+  }
+
   /** Wrapper for redis psetex */
   public async psetex (key: string, timeout: number, value: string) {
     const redisSetExAsync = promisify(this.client.psetex).bind(this.client)
     await redisSetExAsync(key, timeout, value)
-  }
-
-  /** Wrapper for redis incr */
-  public async incr (key: string) {
-    const redisIncrAsync = promisify(this.client.incr).bind(this.client)
-    await redisIncrAsync(key)
   }
 
   /** Wrapper for redis set */

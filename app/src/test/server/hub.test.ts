@@ -87,7 +87,8 @@ describe('Test hub functionality', () => {
       taskIndex,
       sessionId,
       userId,
-      address: ''
+      address: '',
+      bot: false
     }
     await hub.register(data, mockSocket)
     expect(mockUserManager.registerUser).toBeCalledWith(

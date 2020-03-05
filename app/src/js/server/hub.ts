@@ -42,8 +42,6 @@ export class Hub {
    * Listens for websocket connections
    */
   public async listen (io: socketio.Server) {
-    // Clear all users in event of server reset
-    await this.userManager.clearUsers()
     io.on(EventName.CONNECTION, this.registerNewSocket.bind(this))
   }
 

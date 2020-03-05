@@ -66,10 +66,10 @@ function makeRedisPubSub (config: ServerConfig): RedisPubSub {
  * Starts a bot manager if config says to
  */
 async function makeBotManager (
-  config: ServerConfig, subscriber: RedisPubSub, redisStore: RedisStore) {
+  config: ServerConfig, subscriber: RedisPubSub, cacheClient: RedisClient) {
   if (config.bots) {
-    const botManager = new BotManager(config, subscriber, redisStore)
-    await botManager.listen()
+    const botManager = new BotManager(config, subscriber, cacheClient)
+    await botManager.restoreUsers()
   }
 }
 
@@ -112,8 +112,9 @@ async function main (): Promise<void> {
   // initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(projectStore)
+  await userManager.clearUsers()
 
-  await makeBotManager(config, subscriber, redisStore)
+  await makeBotManager(config, subscriber, cacheClient)
   await startServers(config, projectStore, userManager, publisher)
 
   return

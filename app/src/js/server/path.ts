@@ -96,10 +96,17 @@ export function getRedisBaseKey (metadataKey: string) {
 }
 
 /**
- * Gets the redis key for bot manager data
+ * Gets the redis key for the bot user
  */
-export function getRedisBotManagerKey () {
-  return 'botManagerKey'
+export function getRedisBotKey (userId: string) {
+  return sprintf('%s^botKey', userId)
+}
+
+/**
+ * The name of the set of bot user keys
+ */
+export function getRedisBotSet () {
+  return 'redisBotSetName'
 }
 
 /**

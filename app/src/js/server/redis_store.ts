@@ -88,31 +88,17 @@ export class RedisStore {
   }
 
   /**
-   * Wrapper for redis delete
+   * Wrapper for get
    */
-  public async del (key: string) {
-    await this.client.del(key)
-  }
-
-   /**
-    * Wrapper for redis get
-    */
-  public async get (key: string): Promise<string> {
+  public async get (key: string) {
     return this.client.get(key)
   }
 
-   /**
-    * Wrapper for redis incr
-    */
-  public async incr (key: string) {
-    await this.client.incr(key)
-  }
-
   /**
-   * Wrapper for redis set
+   * Wrapper for del
    */
-  public async set (key: string, value: string) {
-    await this.client.set(key, value)
+  public async del (key: string) {
+    await this.client.del(key)
   }
 
   /**

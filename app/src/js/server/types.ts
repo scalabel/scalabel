@@ -82,9 +82,9 @@ export interface FormFileData {
 }
 
 export interface RegisterMessageType {
-  /** Project name of the socket connection */
+  /** Project name of the session */
   projectName: string
-  /** Task index of the socket connection */
+  /** Task index of the session */
   taskIndex: number
   /** Current session Id */
   sessionId: string
@@ -92,6 +92,8 @@ export interface RegisterMessageType {
   userId: string
   /** server address */
   address: string
+  /** whether its a bot or not */
+  bot: boolean
 }
 
 /** action type for synchronization between front and back ends */
@@ -140,27 +142,14 @@ export interface UserMetadata {
   socketToProject: { [key: string]: string }
 }
 
-/** data kept by bot manager */
-export interface BotManagerData {
-  /** map from project to tasks for the project */
-  projectToTasks: { [key: string]: VirtualProjectData }
-}
-
-export interface VirtualProjectData {
-  /** map from task to virtual sessions for the task */
-  taskToSessions: { [key: string]: VirtualSessionData[] }
-}
-
-// TODO: should only have address and taskIndex once, then list of id
-// TODO: store at redis key containing project + task for separability
-/** data kept by each virtual session */
-export interface VirtualSessionData {
-  /** the session id */
-  id: string
-  /** the address of the server */
-  address: string
-  /** the task index */
-  taskIndex: number
+/** data kept by each bot user */
+export interface BotData {
+  /** the web user id */
+  webId: string
+  /** the bot user id */
+  botId: string
+  /** the address of the io server */
+  serverAddress: string
 }
 
 /**

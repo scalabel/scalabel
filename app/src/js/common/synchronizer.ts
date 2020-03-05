@@ -123,7 +123,8 @@ export class Synchronizer {
       taskIndex: this.taskIndex,
       sessionId: Session.id,
       userId: this.userId,
-      address: this.syncAddress
+      address: this.syncAddress,
+      bot: false
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)
