@@ -198,11 +198,6 @@ export interface DeletePaneAction extends BaseAction {
   viewerId: number
 }
 
-export interface SetMenuPositionAction extends BaseAction {
-  /** menu position from top left */
-  menuPosition: Vector2Type
-}
-
 export type SessionActionType =
   InitSessionAction
   | LoadItemAction
@@ -216,7 +211,6 @@ export type UserActionType =
   | UpdatePaneAction
   | SplitPaneAction
   | DeletePaneAction
-  | SetMenuPositionAction
 
 export type TaskActionType =
   AddLabelsAction

@@ -4,9 +4,9 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { setMenuPosition } from '../action/common'
 import Session from '../common/session'
 import { commitLabels } from '../drawable/states'
+import { Vector2Type } from '../functional/types'
 import { LayoutStyles } from '../styles/label'
 import { ContextMenu } from './context_menu'
 import LabelPane from './label_pane'
@@ -42,20 +42,13 @@ interface Props {
 
 interface State {
   /** The width of the left side bar */
-  left_size: number
+  leftSize: number
   /** The height of the center side bar */
-  center_size: number
+  centerSize: number
   /** The width of the right side bar */
-  right_size: number
-}
-
-interface LayoutState {
-  /** The width of the left side bar */
-  left_size: number
-  /** The height of the center side bar */
-  center_size: number
-  /** The width of the right side bar */
-  right_size: number
+  rightSize: number
+  /** Context menu position */
+  menuPosition: Vector2Type
 }
 
 (window as any).__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true
@@ -64,15 +57,19 @@ interface LayoutState {
  * Layout of the labeling interface
  */
 class LabelLayout extends React.Component<Props, State> {
-  /** The state of the layout */
-  public layoutState: LayoutState
-
   /**
    * @param {object} props
    */
   constructor (props: any) {
     super(props)
-    this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
+    this.setState({
+      leftSize: 0,
+      centerSize: 0,
+      rightSize: 0,
+      menuPosition: {
+        x: -1, y: -1
+      }
+    })
     Session.subscribe(this.onStateUpdated.bind(this))
     document.onkeydown = this.disableKeyEvents
     document.onkeyup = this.disableKeyEvents
@@ -82,7 +79,7 @@ class LabelLayout extends React.Component<Props, State> {
    * called on redux store update
    */
   public onStateUpdated () {
-    this.setState(this.layoutState)
+    this.setState(this.state)
   }
 
   /**
@@ -91,15 +88,15 @@ class LabelLayout extends React.Component<Props, State> {
    * @param {string} position
    */
   public handleOnChange (size: number, position: string) {
-    const layoutState = this.layoutState
-    if (position === 'left' && this.layoutState.left_size !== size) {
-      layoutState.left_size = size
-    } else if (position === 'center' && this.layoutState.center_size !== size) {
-      layoutState.center_size = size
-    } else if (position === 'right' && this.layoutState.right_size !== size) {
-      layoutState.right_size = size
+    const state = { ...this.state }
+    if (position === 'left' && this.state.leftSize !== size) {
+      state.leftSize = size
+    } else if (position === 'center' && this.state.centerSize !== size) {
+      state.centerSize = size
+    } else if (position === 'right' && this.state.rightSize !== size) {
+      state.rightSize = size
     }
-    this.setState(layoutState)
+    this.setState(state)
   }
 
   /**
@@ -115,7 +112,7 @@ class LabelLayout extends React.Component<Props, State> {
    * @param {string} primary - which component the size constraint is for
    * the second component
    * @param {string} position - left, center or right:
-   * which size to update in layoutState
+   * which size to update in state
    * @return {Component}
    */
   public optionalSplit (split: 'vertical' | 'horizontal',
@@ -194,14 +191,21 @@ class LabelLayout extends React.Component<Props, State> {
             }
             if (e.button === 2) {
               const rect = e.currentTarget.getBoundingClientRect()
-              Session.dispatch(setMenuPosition({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-              }))
+              this.setState({
+                ...this.state,
+                menuPosition: {
+                  x: e.clientX - rect.left,
+                  y: e.clientY - rect.top
+                }
+              })
             } else if (showMenu) {
-              Session.dispatch(setMenuPosition(
-                { x: -1, y: -1 }
-              ))
+              this.setState({
+                ...this.state,
+                menuPosition: {
+                  x: -1,
+                  y: -1
+                }
+              })
             }
           }}
         >

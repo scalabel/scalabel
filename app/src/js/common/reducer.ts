@@ -61,10 +61,6 @@ export const reducer: Reducer<State> = (
       return common.changeViewerConfig(
         state, action as types.ChangeViewerConfigAction
       )
-    case types.SET_MENU_LOCATION:
-      return common.setMenuPosition(
-        state, action as types.SetMenuPositionAction
-      )
     case types.SUBMIT:
       return common.submit(state, action as types.SubmitAction)
     default:

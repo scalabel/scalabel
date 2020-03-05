@@ -1140,26 +1140,6 @@ export function deletePane (
   )
 }
 
-/** Set menu location */
-export function setMenuPosition (
-  state: State, action: types.SetMenuPositionAction
-) {
-  return updateObject(
-    state,
-    {
-      user: updateObject(
-        state.user,
-        {
-          layout: updateObject(
-            state.user.layout,
-            { menuPosition: action.menuPosition }
-          )
-        }
-      )
-    }
-  )
-}
-
 /** adds a new submission */
 export function submit (
   state: State, action: types.SubmitAction

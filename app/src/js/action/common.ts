@@ -353,17 +353,6 @@ export function deletePane (
   }
 }
 
-/** action to set context menu location */
-export function setMenuPosition (
-  menuPosition: Vector2Type
-): types.SetMenuPositionAction {
-  return {
-    type: types.SET_MENU_LOCATION,
-    sessionId: Session.id,
-    menuPosition
-  }
-}
-
 /**
  * wrapper for update all action
  */

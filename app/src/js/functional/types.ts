@@ -350,8 +350,6 @@ export interface LayoutType {
   rootPane: number
   /** map between pane id and pane states */
   panes: {[id: number]: PaneType}
-  /** Position of context menu, negative for hidden */
-  menuPosition: Vector2Type
 }
 
 export interface TaskStatus {
