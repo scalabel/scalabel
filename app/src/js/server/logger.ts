@@ -10,6 +10,10 @@ class Logger {
 
   constructor () {
     this._logger = winston.createLogger({
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.prettyPrint()
+      ),
       transports: [
         new winston.transports.Console()
       ],
@@ -22,7 +26,8 @@ class Logger {
     if (err) {
       this._logger.log({
         level: 'error',
-        message: err.message
+        message: err.message,
+        trace: err.stack
       })
     }
   }

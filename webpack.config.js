@@ -145,6 +145,7 @@ let serverConfig = {
 module.exports = (env /* : Object */, argv /* : Object */) => {
   if (argv.mode === 'development') {
     config.devtool = 'source-map';
+    serverConfig.devtool = 'source-map';
   }
 
   return [config, serverConfig];

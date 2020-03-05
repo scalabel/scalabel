@@ -39,6 +39,7 @@ export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
 export const SET_MENU_LOCATION = 'SET_MENU_LOCATION'
 
+// Note UPDATE_TASK deliberately not included
 export const TASK_ACTION_TYPES = [
   ADD_LABELS,
   CHANGE_SHAPES,
@@ -47,7 +48,6 @@ export const TASK_ACTION_TYPES = [
   DELETE_LABELS,
   ADD_TRACK,
   MERGE_TRACKS,
-  UPDATE_TASK,
   SUBMIT
 ]
 
@@ -58,6 +58,8 @@ export interface BaseAction {
   sessionId: string
   /** timestamp given by backend. It is Date.now() */
   timestamp?: number
+  /** whether to sync action, or just apply to frontend */
+  frontendOnly?: boolean
   /** id of the user that initiates the action */
   userId?: string
 }

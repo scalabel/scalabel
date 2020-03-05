@@ -5,6 +5,7 @@ import {
 } from 'express'
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
+import { getSubmissionTime } from '../components/util'
 import { ItemExport } from '../functional/bdd_types'
 import { TaskType } from '../functional/types'
 import {
@@ -85,12 +86,7 @@ export class Listeners {
           Logger.info(error.message)
           for (const itemToLoad of task.items) {
             const url = Object.values(itemToLoad.urls)[0]
-            let timestamp = -1
-            const submissions = task.progress.submissions
-            if (submissions.length > 0) {
-              const latestSubmission = submissions[submissions.length - 1]
-              timestamp = latestSubmission.time
-            }
+            const timestamp = getSubmissionTime(task.progress.submissions)
             items.push({
               name: url,
               url,
@@ -192,11 +188,10 @@ export class Listeners {
             task = emptyTask
           }
           const [numLabeledItems, numLabels] = countLabels(task)
-          const submitted = task.progress.submissions.length > 0
           const options: TaskOptions = {
             numLabeledItems: numLabeledItems.toString(),
             numLabels: numLabels.toString(),
-            submitted,
+            submissions: task.progress.submissions,
             handlerUrl: task.config.handlerUrl
           }
 

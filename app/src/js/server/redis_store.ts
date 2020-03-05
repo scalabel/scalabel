@@ -3,7 +3,7 @@ import { promisify } from 'util'
 import Logger from './logger'
 import * as path from './path'
 import { Storage } from './storage'
-import { Env } from './types'
+import { ServerConfig, StateMetadata } from './types'
 
 /**
  * Wraps and promisifies redis functionality
@@ -25,7 +25,7 @@ export class RedisStore {
   /**
    * Create new store
    */
-  constructor (env: Env, storage: Storage) {
+  constructor (env: ServerConfig, storage: Storage) {
     this.timeout = env.redisTimeout
     this.timeForWrite = env.timeForWrite
     this.numActionsForWrite = env.numActionsForWrite
@@ -46,7 +46,10 @@ export class RedisStore {
     this.sub.subscribe('__keyevent@0__:expired')
     this.sub.on('message', async (_channel: string, reminderKey: string) => {
       const baseKey = path.getRedisBaseKey(reminderKey)
-      const saveDir = await this.get(path.getRedisMetaKey(baseKey))
+      const metaKey = path.getRedisMetaKey(baseKey)
+      const metadata: StateMetadata = JSON.parse(await this.get(metaKey))
+      const saveDir = path.getSaveDir(metadata.projectName, metadata.taskId)
+
       const value = await this.get(baseKey)
       await this.writeBackTask(saveDir, value)
       await this.del(baseKey)
@@ -66,10 +69,13 @@ export class RedisStore {
    * Sets a value with timeout for flushing
    * And a reminder value with shorter timeout for saving to disk
    */
-  public async setExWithReminder (saveDir: string, value: string) {
-    await this.setEx(saveDir, value, this.timeout)
-    await this.setEx(path.getRedisMetaKey(saveDir), saveDir, this.timeout)
-
+  public async setExWithReminder (
+    saveDir: string, value: string, metadata: string) {
+    // Update value and metadata atomically
+    const keys = [saveDir, path.getRedisMetaKey(saveDir)]
+    const vals = [value, metadata]
+    await this.setAtomic(keys, vals, this.timeout)
+    // Handle write back to storage
     if (this.numActionsForWrite === 1) {
       // special case: always save, don't need reminder
       await this.writeBackTask(saveDir, value)
@@ -100,12 +106,20 @@ export class RedisStore {
   }
 
   /**
-   * Wrapper for redis set with expiration
+   * Update multiple value atomically
    */
-  public async setEx (key: string, value: string, timeout: number) {
+  public async setAtomic (keys: string[], vals: string[], timeout: number) {
     const timeoutMs = timeout * 1000
-    const redisSetAsync = promisify(this.client.psetex).bind(this.client)
-    await redisSetAsync(key, timeoutMs, value)
+    const multi = this.client.multi()
+    if (keys.length !== vals.length) {
+      Logger.error(Error('Keys do not match values'))
+      return
+    }
+    for (let i = 0; i < keys.length; i++) {
+      multi.psetex(keys[i], timeoutMs, vals[i])
+    }
+    const multiExecAsync = promisify(multi.exec).bind(multi)
+    await multiExecAsync()
   }
 
    /**
@@ -123,5 +137,15 @@ export class RedisStore {
   public async incr (key: string) {
     const redisIncrAsync = promisify(this.client.incr).bind(this.client)
     await redisIncrAsync(key)
+  }
+
+  /**
+   * Wrapper for redis set with expiration
+   * Private because calling directly will cause problems with missing metadata
+   */
+  private async setEx (key: string, value: string, timeout: number) {
+    const timeoutMs = timeout * 1000
+    const redisSetAsync = promisify(this.client.psetex).bind(this.client)
+    await redisSetAsync(key, timeoutMs, value)
   }
 }

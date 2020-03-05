@@ -9,7 +9,7 @@ import { initStore } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import TitleBar from '../../js/components/title_bar'
 import { makeLabel } from '../../js/functional/states'
-import { EventName } from '../../js/server/types'
+import { EventName, SyncActionMessageType } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
 import { testJson } from '../test_image_objects'
 
@@ -126,9 +126,11 @@ describe('Submit button functionality', () => {
     expect(emitArgs[0]).toBe(EventName.ACTION_SEND)
 
     // the action message should just contain the submit action
-    const actionMessage = JSON.parse(emitArgs[1])
-    expect(actionMessage.actions.length).toBe(1)
-    expect(actionMessage.actions[0].type).toBe(SUBMIT)
+    const actionMessage: SyncActionMessageType = emitArgs[1]
+    const actionPacket = actionMessage.actions
+
+    expect(actionPacket.actions.length).toBe(1)
+    expect(actionPacket.actions[0].type).toBe(SUBMIT)
   })
 
   test('Autosave off: submit button updates flag and saves', async () => {
@@ -173,10 +175,11 @@ describe('Submit button functionality', () => {
     const emitArgs = emitCalls[0]
     expect(emitArgs.length).toBe(2)
     expect(emitArgs[0]).toBe(EventName.ACTION_SEND)
-    const actionMessage = JSON.parse(emitArgs[1])
-    expect(actionMessage.actions.length).toBe(2)
+    const actionMessage: SyncActionMessageType = emitArgs[1]
+    const actionPacket = actionMessage.actions
+    expect(actionPacket.actions.length).toBe(2)
     // the first action should be INIT_SESSION, so the second is submit
-    expect(actionMessage.actions[1].type).toBe(SUBMIT)
+    expect(actionPacket.actions[1].type).toBe(SUBMIT)
   })
 })
 

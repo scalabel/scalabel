@@ -3,37 +3,29 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { sprintf } from 'sprintf-js'
 import * as yargs from 'yargs'
+import { BaseAction } from '../action/types'
+import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType } from '../common/types'
-import { Label2DTemplateType, TaskType } from '../functional/types'
+import { Label2DTemplateType, State, TaskType } from '../functional/types'
+import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType, defaultEnv, Env } from './types'
+import { CreationForm, DatabaseType, ServerConfig } from './types'
 
 /**
  * Initializes backend environment variables
  */
-export function makeEnv (): Env {
+export function readConfig (): ServerConfig {
   /**
    * Creates config, using defaults for missing fields
    * Make sure user env come last to override defaults
    */
-  const userEnv = readEnv()
-  const fullEnv = {
-    ...defaultEnv,
-    ...userEnv
-  }
-  return fullEnv
-}
 
-/**
- * Gets values for environment from user-specified file
- */
-export function readEnv (): Partial<Env> {
-  // read the config file name from argv
+   // read the config file name from argv
   const configFlag = 'config'
   const argv = yargs
     .option(configFlag, {
@@ -45,7 +37,12 @@ export function readEnv (): Partial<Env> {
   const configDir: string = argv.config
 
   // load the config file
-  return yaml.load(fs.readFileSync(configDir, 'utf8'))
+  const userConfig = yaml.load(fs.readFileSync(configDir, 'utf8'))
+  const fullConfig = {
+    ...defaults.serverConfig,
+    ...userConfig
+  }
+  return fullConfig
 }
 
 /**
@@ -240,4 +237,38 @@ export function safeParseJSON (data: string) {
     Logger.error(Error('JSON parsed failed'))
     Logger.error(e)
   }
+}
+
+/**
+ * Updates a state with a series of timestamped actions
+ */
+export function updateStateTimestamp (
+  state: State, actions: BaseAction[]): [State, number[]] {
+  const stateStore = configureStore(state)
+
+  // For each action, update the store
+  const timestamps = []
+  for (const action of actions) {
+    const time = Date.now()
+    timestamps.push(time)
+    action.timestamp = time
+    stateStore.dispatch(action)
+  }
+
+  return [stateStore.getState().present, timestamps]
+}
+
+/**
+ * Updates a state with a series of actions
+ */
+export function updateState (
+  state: State, actions: BaseAction[]): State {
+  const stateStore = configureStore(state)
+
+  // For each action, update the store
+  for (const action of actions) {
+    stateStore.dispatch(action)
+  }
+
+  return stateStore.getState().present
 }
