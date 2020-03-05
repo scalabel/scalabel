@@ -62,6 +62,20 @@ class LabelLayout extends React.Component<Props, State> {
    */
   constructor (props: any) {
     super(props)
+    this.state = {
+      leftSize: 0,
+      centerSize: 0,
+      rightSize: 0,
+      menuPosition: {
+        x: -1, y: -1
+      }
+    }
+    document.onkeydown = this.disableKeyEvents.bind(this)
+    document.onkeyup = this.disableKeyEvents.bind(this)
+  }
+
+  /** component mount callback */
+  public componentDidMount () {
     this.setState({
       leftSize: 0,
       centerSize: 0,
@@ -70,16 +84,6 @@ class LabelLayout extends React.Component<Props, State> {
         x: -1, y: -1
       }
     })
-    Session.subscribe(this.onStateUpdated.bind(this))
-    document.onkeydown = this.disableKeyEvents
-    document.onkeyup = this.disableKeyEvents
-  }
-
-  /**
-   * called on redux store update
-   */
-  public onStateUpdated () {
-    this.setState(this.state)
   }
 
   /**
