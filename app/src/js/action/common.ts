@@ -1,6 +1,13 @@
 import Session from '../common/session'
-import { LabelType, PaneType,
-  Select, ShapeType, SplitType, TaskType, Vector2Type, ViewerConfigType } from '../functional/types'
+import {
+  LabelType,
+  PaneType,
+  Select,
+  ShapeType,
+  SplitType,
+  TaskType,
+  ViewerConfigType
+} from '../functional/types'
 import * as types from './types'
 
 /** init session */

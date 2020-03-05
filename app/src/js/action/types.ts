@@ -9,7 +9,6 @@ import {
   SplitType,
   SubmitData,
   TaskType,
-  Vector2Type,
   ViewerConfigType
 } from '../functional/types'
 

@@ -177,7 +177,7 @@ class LabelLayout extends React.Component<Props, State> {
     />)
 
     const state = Session.getState()
-    const menuPosition = state.user.layout.menuPosition
+    const menuPosition = this.state.menuPosition
     const showMenu = menuPosition.x >= 0 && menuPosition.y >= 0
 
     const labelInterface = (
@@ -309,8 +309,7 @@ class LabelLayout extends React.Component<Props, State> {
 
   /** Add listener to window to stop keyboard listeners */
   private disableKeyEvents (e: KeyboardEvent) {
-    const state = Session.getState()
-    const menuPosition = state.user.layout.menuPosition
+    const menuPosition = this.state.menuPosition
     const showMenu = menuPosition.x >= 0 && menuPosition.y >= 0
     if (showMenu) {
       e.stopImmediatePropagation()
