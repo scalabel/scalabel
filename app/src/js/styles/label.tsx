@@ -196,6 +196,14 @@ export const LayoutStyles = () => createStyles({
     position: 'absolute',
     top: 0,
     left: 0
+  },
+  contextMenuContainer: {
+    background: 'white',
+    width: '200px',
+    zIndex: 1100,
+    padding: '10px',
+    boxShadow: '5px 10px 5px',
+    borderRadius: '5px'
   }
 })
 

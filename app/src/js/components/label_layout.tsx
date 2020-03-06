@@ -21,6 +21,8 @@ interface ClassType {
   interfaceContainer: string
   /** pane container */
   paneContainer: string
+  /** context menu container */
+  contextMenuContainer: string
 }
 
 interface Props {
@@ -221,12 +223,9 @@ class LabelLayout extends React.Component<Props, State> {
               position: 'relative',
               top: `${menuPosition.y}px`,
               left: `${menuPosition.x}px`,
-              visibility: (showMenu) ? 'visible' : 'hidden',
-              background: 'white',
-              width: '200px',
-              zIndex: 1100,
-              padding: '10px'
+              visibility: (showMenu) ? 'visible' : 'hidden'
             }}
+            className={this.props.classes.contextMenuContainer}
             onMouseDown={(e) => {
               e.stopPropagation()
               if (Session.label3dList.updatedLabels.size > 0) {
