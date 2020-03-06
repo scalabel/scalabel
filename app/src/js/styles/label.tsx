@@ -202,7 +202,7 @@ export const LayoutStyles = () => createStyles({
     width: '200px',
     zIndex: 1100,
     padding: '10px',
-    boxShadow: '5px 10px 5px',
+    boxShadow: '0px 5px 8px 2px',
     borderRadius: '5px'
   }
 })
