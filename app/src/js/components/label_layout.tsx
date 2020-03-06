@@ -8,7 +8,7 @@ import Session from '../common/session'
 import { commitLabels } from '../drawable/states'
 import { Vector2Type } from '../functional/types'
 import { LayoutStyles } from '../styles/label'
-import { ContextMenu } from './context_menu'
+import ContextMenu from './context_menu'
 import LabelPane from './label_pane'
 import PlayerControl from './player_control'
 
@@ -224,7 +224,8 @@ class LabelLayout extends React.Component<Props, State> {
               visibility: (showMenu) ? 'visible' : 'hidden',
               background: 'white',
               width: '200px',
-              zIndex: 1100
+              zIndex: 1100,
+              padding: '10px'
             }}
             onMouseDown={(e) => {
               e.stopPropagation()

@@ -76,25 +76,31 @@ export class Box3dMenu extends React.Component<Props> {
     const size = label.size
     return (
       <div>
-        <FormLabel>Center</FormLabel>
-        {makeVector3Form(center, (v) => {
-          label.setCenter(v)
-          Session.label3dList.onDrawableUpdate()
-        })}
-        <FormLabel>Size</FormLabel>
-        {makeVector3Form(size, (v) => {
-          label.setSize(v)
-          Session.label3dList.onDrawableUpdate()
-        })}
-        <FormLabel>Orientation</FormLabel>
-        {makeVector3Form(orientation, (v) => {
-          label.setOrientation(
-            (new THREE.Quaternion()).setFromEuler(
-              (new THREE.Euler()).setFromVector3(v)
+        <div style={{ marginBottom: '5px' }}>
+          <FormLabel>Center</FormLabel>
+          {makeVector3Form(center, (v) => {
+            label.setCenter(v)
+            Session.label3dList.onDrawableUpdate()
+          })}
+        </div>
+        <div style={{ marginBottom: '5px' }}>
+          <FormLabel>Size</FormLabel>
+          {makeVector3Form(size, (v) => {
+            label.setSize(v)
+            Session.label3dList.onDrawableUpdate()
+          })}
+        </div>
+        <div style={{ marginBottom: '5px' }}>
+          <FormLabel>Orientation</FormLabel>
+          {makeVector3Form(orientation, (v) => {
+            label.setOrientation(
+              (new THREE.Quaternion()).setFromEuler(
+                (new THREE.Euler()).setFromVector3(v)
+              )
             )
-          )
-          Session.label3dList.onDrawableUpdate()
-        })}
+            Session.label3dList.onDrawableUpdate()
+          })}
+        </div>
       </div>
     )
   }

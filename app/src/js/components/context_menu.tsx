@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core'
+import { Grid, withStyles } from '@material-ui/core'
 import ExpansionPanel from '@material-ui/core/ExpansionPanel'
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails'
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary'
@@ -11,6 +11,7 @@ import { changeSelectedLabelsCategories } from '../action/select'
 import Session from '../common/session'
 import { LabelTypeName } from '../common/types'
 import Label3D from '../drawable/3d/label3d'
+import { contextMenuStyles } from '../styles/context_menu'
 import { Box3dMenu } from './ box3d_menu'
 import { AttributeSelector } from './attribute_selector'
 
@@ -23,15 +24,27 @@ function makeLabelMenu (label: Label3D) {
   return null
 }
 
+interface ClassType {
+  /** Category Menu */
+  categoryMenu: string
+  /** Attribute Menu */
+  attributeMenu: string
+}
+
+interface Props {
+  /** Class names */
+  classes: ClassType
+}
+
 /**
  * Function to make collapsible section with title,
  * for use with React state hook
  */
 
 /** Context menu class */
-export class ContextMenu extends React.Component {
-  constructor () {
-    super({})
+class ContextMenu extends React.Component<Props> {
+  constructor (p: Props) {
+    super(p)
   }
 
   /** Render context menu */
@@ -52,7 +65,7 @@ export class ContextMenu extends React.Component {
           options={categories}
           getOptionLabel={(x) => x}
           id='contextMenuCategories'
-          style={{ width: '100%' }}
+          className={this.props.classes.categoryMenu}
           renderInput={
             (params) =>
               <TextField
@@ -79,7 +92,7 @@ export class ContextMenu extends React.Component {
           }}
           value={(selectedLabel) ? categories[selectedLabel.category[0]] : null}
         />
-        <ExpansionPanel>
+        <ExpansionPanel className={this.props.classes.attributeMenu}>
           <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}
           >
@@ -94,3 +107,5 @@ export class ContextMenu extends React.Component {
     )
   }
 }
+
+export default withStyles(contextMenuStyles, { withTheme: true })(ContextMenu)
