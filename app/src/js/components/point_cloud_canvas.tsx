@@ -65,14 +65,15 @@ const fragmentShader =
     }
 
     void main() {
-      float alpha = 0.7;
+      float alpha = 0.5;
       vec3 color = getHeatMapColor(worldPosition.z);
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
         if (pointInSelection(worldPosition)) {
           alpha = 1.0;
-          color *= 2.5;
+          color.x *= 2.0;
+          color.yz *= 0.5;
         }
       } else {
         alpha = 1.0;
