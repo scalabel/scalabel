@@ -201,16 +201,57 @@ export class Label3DHandler {
           Session.label3dList.selectedLabelIds, -1, -1
         ))
         return true
-      case Key.P_UP:
-      case Key.P_LOW:
-        Session.dispatch(selectLabel3dType(
-          LabelTypeName.PLANE_3D
-        ))
-        return true
       case Key.B_UP:
       case Key.B_LOW:
         Session.dispatch(selectLabel3dType(
           LabelTypeName.BOX_3D
+        ))
+        return true
+      case Key.G_UP:
+      case Key.G_LOW:
+        if (Session.label3dList.selectedLabel) {
+          const pointCloud =
+            Session.pointClouds[this._selectedItemIndex][this._sensor.id]
+          const column = Session.label3dList.selectedLabel.getVerticalColumn(
+            pointCloud.attributes.position.array as number[]
+          )
+          if (column.length === 0) {
+            return true
+          }
+
+          let lowestPoint = column[0]
+          for (const point of column) {
+            if (point.z < lowestPoint.z) {
+              lowestPoint = point
+            }
+          }
+
+          const centerToLowest = (new THREE.Vector3()).copy(lowestPoint)
+          centerToLowest.sub(Session.label3dList.selectedLabel.center)
+
+          const newSize = new THREE.Vector3(
+            1,
+            1,
+            (
+              centerToLowest.length() +
+              Session.label3dList.selectedLabel.size.z / 2.
+            ) / Session.label3dList.selectedLabel.size.z
+          )
+
+          const anchor = new THREE.Vector3(0, 0, 1)
+          anchor.applyQuaternion(Session.label3dList.selectedLabel.orientation)
+          anchor.multiplyScalar(
+            Session.label3dList.selectedLabel.size.z * 0.5
+          )
+          anchor.add(Session.label3dList.selectedLabel.center)
+
+          Session.label3dList.selectedLabel.scale(newSize, anchor, true)
+        }
+        return true
+      case Key.P_UP:
+      case Key.P_LOW:
+        Session.dispatch(selectLabel3dType(
+          LabelTypeName.PLANE_3D
         ))
         return true
       case Key.T_UP:

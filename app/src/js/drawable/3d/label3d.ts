@@ -256,6 +256,32 @@ export abstract class Label3D {
     return new THREE.Vector3()
   }
 
+  /** Gets the subset of points from the input array that is contained in a
+   * vertical column created by the parameters of this label
+   */
+  public getVerticalColumn (points: number[]): THREE.Vector3[] {
+    const invQuaternion =
+      (new THREE.Quaternion()).copy(this.orientation).inverse()
+    const halfSize = this.size
+    halfSize.multiplyScalar(0.5)
+    const valid = []
+    for (let i = 0; i < points.length; i += 3) {
+      const worldPoint =
+        new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+      const point = (new THREE.Vector3()).copy(worldPoint)
+      point.sub(this.center)
+      point.applyQuaternion(invQuaternion)
+      if (
+        Math.abs(point.x) < halfSize.x &&
+        Math.abs(point.y) < halfSize.y
+      ) {
+        valid.push(worldPoint)
+      }
+    }
+
+    return valid
+  }
+
   /** Bounds of label */
   public bounds (_local?: boolean): THREE.Box3 {
     return new THREE.Box3()
