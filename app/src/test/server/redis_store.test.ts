@@ -1,8 +1,6 @@
-import * as child from 'child_process'
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import * as defaults from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisClient } from '../../js/server/redis_client'
@@ -10,8 +8,7 @@ import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
 import { sleep } from '../project/util'
-
-let redisProc: child.ChildProcessWithoutNullStreams
+import { getTestConfig } from '../util'
 
 let defaultStore: RedisStore
 let storage: FileStorage
@@ -22,28 +19,19 @@ let client: RedisClient
 let numWrites: number
 
 beforeAll(async () => {
-  // Avoid default port 6379 and port 6377 used in box2d integration test
-  config = _.clone(defaults.serverConfig)
-  config.redisPort = 6378
-
-  redisProc = child.spawn('redis-server',
-    ['--appendonly', 'no', '--save', '', '--port', config.redisPort.toString(),
-      '--bind', '127.0.0.1', '--protected-mode', 'yes'])
-
-  // Buffer period for redis to launch
-  await sleep(1000)
+  config = getTestConfig()
   dataDir = getTestDir('test-data-redis')
   storage = new FileStorage(dataDir)
   client = new RedisClient(config)
   defaultStore = new RedisStore(config, storage, client)
   metadataString = makeMetadata(1)
-  // numWrites used across tests that spawn files
+  // numWrites used as a counter across all tests that spawn files
   numWrites = 0
 })
 
 afterAll(async () => {
-  redisProc.kill()
   fs.removeSync(dataDir)
+  await client.close()
 })
 
 describe('Test redis cache', () => {

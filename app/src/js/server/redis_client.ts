@@ -79,8 +79,7 @@ export class RedisClient {
   public async getSetMembers (key: string): Promise<string[]> {
     const redisSetMembersAsync =
       promisify(this.client.smembers).bind(this.client)
-    const values = await redisSetMembersAsync(key)
-    return values
+    return redisSetMembersAsync(key)
   }
 
   /** Wrapper for redis psetex */
@@ -100,5 +99,11 @@ export class RedisClient {
     this.client.on('ready', () => {
       this.client.config(type, name, value)
     })
+  }
+
+  /** Close the connection to the server */
+  public async close () {
+    await promisify(this.client.quit).bind(this.client)()
+    await promisify(this.pubSub.quit).bind(this.pubSub)()
   }
 }

@@ -18,6 +18,8 @@ jest.mock('../../js/server/file_storage')
 jest.mock('../../js/server/path')
 jest.mock('../../js/server/project_store')
 jest.mock('../../js/server/user_manager')
+jest.mock('../../js/server/redis_client')
+jest.mock('../../js/server/redis_pub_sub')
 
 let projectName: string
 let taskIndex: number
@@ -28,6 +30,7 @@ let actionListId: string
 let mockStorage: FileStorage
 let mockProjectStore: ProjectStore
 let mockUserManager: UserManager
+let mockPubSub: RedisPubSub
 let hub: Hub
 const broadcastFunc = jest.fn()
 const socketId = 'socketId'
@@ -56,13 +59,14 @@ beforeAll(() => {
   mockStorage = new FileStorage('fakeDataDir')
   const client = new RedisClient(serverConfig)
   const redisStore = new RedisStore(serverConfig, mockStorage, client)
-  const pubSub = new RedisPubSub(client)
+  mockPubSub = new RedisPubSub(client)
   mockProjectStore = new ProjectStore(mockStorage, redisStore)
   mockUserManager = new UserManager(mockProjectStore)
-  hub = new Hub(serverConfig, mockProjectStore, mockUserManager, pubSub)
+  hub = new Hub(serverConfig, mockProjectStore, mockUserManager, mockPubSub)
 })
 
 afterEach(cleanup)
+
 describe('Test hub functionality', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -93,6 +97,7 @@ describe('Test hub functionality', () => {
     await hub.register(data, mockSocket)
     expect(mockUserManager.registerUser).toBeCalledWith(
       socketId, projectName, userId)
+    expect(mockPubSub.publishRegisterEvent).toBeCalledWith(data)
     expect(mockSocket.join).toBeCalled()
     expect(mockSocket.emit).toBeCalledWith(
       EventName.REGISTER_ACK, getInitialState(sessionId)
