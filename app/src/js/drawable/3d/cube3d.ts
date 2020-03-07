@@ -55,7 +55,7 @@ export class Cube3D extends Shape3D {
         color: 0xffffff,
         vertexColors: THREE.FaceColors,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.35
       })
     )
     this.add(this._box)
