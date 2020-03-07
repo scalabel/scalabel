@@ -37,3 +37,6 @@ test_data/
 
 # mypy
 .mypy_cache
+
+# jest coverage cache
+coverage/
