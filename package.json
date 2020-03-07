@@ -13,6 +13,10 @@
         "test": "jest"
     },
     "jest": {
+        "collectCoverage": true,
+        "collectCoverageFrom": [
+            "app/src/js/**/*.{ts,tsx}"
+        ],
         "globals": {
             "ts-jest": {
                 "tsConfig": "tsconfig.test.json"
