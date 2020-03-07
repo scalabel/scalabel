@@ -29,10 +29,11 @@ export class BotUser {
   /**
    * Make a new session for the user
    */
-  public makeSession (projectName: string, taskIndex: number) {
+  public makeSession (projectName: string, taskIndex: number): VirtualSession {
     const sess = new VirtualSession(
       this.botId, this.address, projectName, taskIndex)
     this.sessions.push(sess)
+    return sess
   }
 
   /**
