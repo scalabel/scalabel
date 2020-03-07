@@ -62,7 +62,15 @@ export class RedisClient {
 
   /** Wrapper for redis exists */
   public async exists (key: string): Promise<boolean> {
-    return this.client.exists(key)
+    return new Promise((resolve, _reject) => {
+      this.client.exists(key, (_err: Error | null, exists: number) => {
+        if (exists === 0) {
+          resolve(false)
+        } else {
+          resolve(true)
+        }
+      })
+    })
   }
 
   /** Wrapper for redis set add */

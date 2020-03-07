@@ -69,7 +69,7 @@ async function makeBotManager (
   config: ServerConfig, subscriber: RedisPubSub, cacheClient: RedisClient) {
   if (config.bots) {
     const botManager = new BotManager(config, subscriber, cacheClient)
-    await botManager.restoreUsers()
+    await botManager.listen()
   }
 }
 

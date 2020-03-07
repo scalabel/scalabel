@@ -23,53 +23,69 @@ export class BotManager {
   protected pollTime: number
 
   constructor (
-    config: ServerConfig, subscriber: RedisPubSub, redisClient: RedisClient) {
+    config: ServerConfig, subscriber: RedisPubSub,
+    redisClient: RedisClient, pollTime?: number) {
     this.config = config
     this.subscriber = subscriber
     this.redisClient = redisClient
-    this.pollTime = 1000 * 60 * 5 // 5 minutes in ms
+    if (pollTime) {
+      this.pollTime = pollTime
+    } else {
+      this.pollTime = 1000 * 60 * 5 // 5 minutes in ms
+    }
+  }
 
+  /**
+   * Listen for new users and recreate old ones
+   */
+  public async listen (): Promise<BotUser[]> {
     // listen for new users
-    this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
+    await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
+    return this.restoreUsers()
   }
 
   /**
    * Recreate the virtual users stored in redis
    */
-  public async restoreUsers () {
-    const botKeys = await this.redisClient.getSetMembers(getRedisBotSet())
-    for (const botKey of botKeys) {
-      const botData = await this.getBot(botKey)
-      this.makeBotUser(botData)
-      // todo: somehow restore the sessions for the bot user
+  public async restoreUsers (): Promise<BotUser[]> {
+    const webIds = await this.redisClient.getSetMembers(getRedisBotSet())
+    const bots = []
+    for (const webId of webIds) {
+      const botData = await this.getBot(webId)
+      bots.push(this.makeBotUser(botData))
     }
+    return bots
   }
 
   /**
    * Handles registration of new web sessions
    */
-  public async handleRegister (_channel: string, message: string) {
+  public async handleRegister (
+    _channel: string, message: string): Promise<BotUser> {
     const data = JSON.parse(message) as RegisterMessageType
-
-    if (data.bot || await this.checkBotExists(data.userId)) {
-      return
-    }
-
     const botData: BotData = {
       webId: data.userId,
-      botId: uuid4(),
+      botId: '',
       serverAddress: data.address
     }
+
+    // if bot already exists, just return a dummy bot
+    if (data.bot || await this.checkBotExists(data.userId)) {
+      return new BotUser(botData)
+    }
+
+    botData.botId = uuid4()
 
     const bot = this.makeBotUser(botData)
     bot.makeSession(data.projectName, data.taskIndex)
     await this.saveBot(botData)
+    return bot
   }
 
   /**
    * Check if a bot for the given user has already been registered
    */
-  private async checkBotExists (userId: string): Promise<boolean> {
+  public async checkBotExists (userId: string): Promise<boolean> {
     const key = getRedisBotKey(userId)
     return this.redisClient.exists(key)
   }
@@ -77,8 +93,18 @@ export class BotManager {
   /**
    * Get the data for a bot that has been registered
    */
-  private async getBot (key: string): Promise<BotData> {
+  public async getBot (userId: string): Promise<BotData> {
+    const key = getRedisBotKey(userId)
     return JSON.parse(await this.redisClient.get(key))
+  }
+
+  /**
+   * Delete the bot, marking it as unregistered
+   */
+  public async deleteBot (userId: string) {
+    const key = getRedisBotKey(userId)
+    await this.redisClient.del(key)
+    await this.redisClient.setRemove(getRedisBotSet(), key)
   }
 
   /**
@@ -88,16 +114,7 @@ export class BotManager {
     const key = getRedisBotKey(botData.webId)
     const value = JSON.stringify(botData)
     await this.redisClient.set(key, value)
-    await this.redisClient.setAdd(getRedisBotSet(), key)
-  }
-
-  /**
-   * Delete the bot, marking it as unregistered
-   */
-  private async deleteBot (userId: string) {
-    const key = getRedisBotKey(userId)
-    await this.redisClient.del(key)
-    await this.redisClient.setRemove(getRedisBotSet(), key)
+    await this.redisClient.setAdd(getRedisBotSet(), botData.webId)
   }
 
   /**

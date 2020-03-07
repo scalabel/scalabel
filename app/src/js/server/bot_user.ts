@@ -10,9 +10,9 @@ export class BotUser {
   /** bot user id */
   public botId: string
   /** address for session connections */
-  protected address: string
+  public address: string
   /** list of sessions */
-  protected sessions: VirtualSession[]
+  public sessions: VirtualSession[]
 
   constructor (botData: BotData) {
     this.webId = botData.webId
@@ -27,7 +27,7 @@ export class BotUser {
   }
 
   /**
-   * Make a new sessio nfor the user
+   * Make a new session for the user
    */
   public makeSession (projectName: string, taskIndex: number) {
     const sess = new VirtualSession(
@@ -62,6 +62,17 @@ export class BotUser {
   public kill () {
     for (const sess of this.sessions) {
       sess.kill()
+    }
+  }
+
+  /**
+   * Wraps instance variables into data object
+   */
+  public getData (): BotData {
+    return {
+      botId: this.botId,
+      webId: this.webId,
+      serverAddress: this.address
     }
   }
 }

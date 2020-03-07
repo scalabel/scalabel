@@ -29,4 +29,12 @@ describe('Test redis functions that are not tested elsewhere', () => {
     }
     expect(await client.getSetMembers(setName)).toEqual([])
   })
+
+  test('Test redis exists', async () => {
+    const key = 'testExistsKey'
+    await client.set(key, 'value')
+    expect(await client.exists(key)).toBe(true)
+    await client.del(key)
+    expect(await client.exists(key)).toBe(false)
+  })
 })
