@@ -96,7 +96,7 @@ async function startServers (
 /**
  * Main function for backend server
  */
-async function main (): Promise<void> {
+async function main () {
   // initialize config
   const config = readConfig()
 
