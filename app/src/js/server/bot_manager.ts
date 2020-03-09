@@ -1,6 +1,6 @@
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
-import { BotUser } from './bot_user'
+import { Bot } from './bot'
 import Logger from './logger'
 import { getRedisBotKey, getRedisBotSet } from './path'
 import { RedisClient } from './redis_client'
@@ -38,7 +38,7 @@ export class BotManager {
   /**
    * Listen for new users and recreate old ones
    */
-  public async listen (): Promise<BotUser[]> {
+  public async listen (): Promise<Bot[]> {
     // listen for new users
     await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
     return this.restoreUsers()
@@ -47,12 +47,12 @@ export class BotManager {
   /**
    * Recreate the virtual users stored in redis
    */
-  public async restoreUsers (): Promise<BotUser[]> {
+  public async restoreUsers (): Promise<Bot[]> {
     const webIds = await this.redisClient.getSetMembers(getRedisBotSet())
     const bots = []
     for (const webId of webIds) {
       const botData = await this.getBot(webId)
-      bots.push(this.makeBotUser(botData))
+      bots.push(this.makeBot(botData))
     }
     return bots
   }
@@ -61,7 +61,7 @@ export class BotManager {
    * Handles registration of new web sessions
    */
   public async handleRegister (
-    _channel: string, message: string): Promise<BotUser> {
+    _channel: string, message: string): Promise<Bot> {
     const data = JSON.parse(message) as RegisterMessageType
     const botData: BotData = {
       webId: data.userId,
@@ -71,12 +71,12 @@ export class BotManager {
 
     // if bot already exists, just return a dummy bot
     if (data.bot || await this.checkBotExists(data.userId)) {
-      return new BotUser(botData)
+      return new Bot(botData)
     }
 
     botData.botId = uuid4()
 
-    const bot = this.makeBotUser(botData)
+    const bot = this.makeBot(botData)
     bot.makeSession(data.projectName, data.taskIndex)
     await this.saveBot(botData)
     return bot
@@ -120,9 +120,9 @@ export class BotManager {
   /**
    * Create a new bot user
    */
-  private makeBotUser (botData: BotData): BotUser {
+  private makeBot (botData: BotData): Bot {
     Logger.info(sprintf('Creating bot for user %s', botData.webId))
-    const bot = new BotUser(botData)
+    const bot = new Bot(botData)
 
     const pollId = setInterval(async () => {
       await this.checkSessionActivity(bot, pollId)
@@ -133,7 +133,7 @@ export class BotManager {
   /**
    * Kill the session if no activity since time of last poll
    */
-  private async checkSessionActivity (bot: BotUser, pollId: NodeJS.Timeout) {
+  private async checkSessionActivity (bot: Bot, pollId: NodeJS.Timeout) {
     if (bot.getActionCount() > 0) {
       bot.resetActionCount()
     } else {

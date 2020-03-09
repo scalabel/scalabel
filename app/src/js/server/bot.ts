@@ -4,7 +4,7 @@ import { VirtualSession } from './virtual_session'
 /**
  * Manages virtual sessions for a single bot
  */
-export class BotUser {
+export class Bot {
   /** web user id */
   public webId: string
   /** bot user id */
