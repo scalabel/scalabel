@@ -100,12 +100,11 @@ export class Bot {
       return
     }
     this.ackedPackets.add(actionPacket.id)
-
     for (const action of actionPacket.actions) {
       this.actionCount += 1
       this.actionLog.push(action)
       Logger.info(
-        sprintf('Virtual session received action of type %s', action.type))
+        sprintf('Bot received action of type %s', action.type))
     }
   }
 

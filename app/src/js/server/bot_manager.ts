@@ -61,7 +61,7 @@ export class BotManager {
    * Handles registration of new web sessions
    */
   public async handleRegister (
-    _channel: string, message: string): Promise<Bot> {
+    _channel: string, message: string): Promise<BotData> {
     const data = JSON.parse(message) as RegisterMessageType
     const botData: BotData = {
       projectName: data.projectName,
@@ -70,16 +70,15 @@ export class BotManager {
       address: data.address
     }
 
-    // if bot already exists, just return a dummy bot
     if (data.bot || await this.checkBotExists(botData)) {
-      return new Bot(botData)
+      return botData
     }
 
     botData.botId = uuid4()
 
-    const bot = this.makeBot(botData)
+    this.makeBot(botData)
     await this.saveBot(botData)
-    return bot
+    return botData
   }
 
   /**

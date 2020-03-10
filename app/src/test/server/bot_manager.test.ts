@@ -67,7 +67,7 @@ describe('Test bot user manager', () => {
     // check that it was stored in redis
     expect(await botManager.checkBotExists(botData)).toBe(true)
     const redisBotData = await botManager.getBot(getRedisBotKey(botData))
-    expect(redisBotData).toEqual(bot.getData())
+    expect(redisBotData).toEqual(bot)
 
     // make sure only a dummy bot is created if you register again
     let dummyBot = await botManager.handleRegister('', message)
@@ -86,7 +86,7 @@ describe('Test bot user manager', () => {
     // test that the bot is restored correctly
     const oldBots = await botManager.restoreBots()
     expect(oldBots.length).toBe(1)
-    expect(oldBots[0].getData()).toEqual(bot.getData())
+    expect(oldBots[0].getData()).toEqual(bot)
   })
 
   test('Test deregistration after no activity', async () => {
