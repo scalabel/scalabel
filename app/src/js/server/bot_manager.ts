@@ -38,7 +38,7 @@ export class BotManager {
   /**
    * Listen for new sessions and recreate old bots
    */
-  public async listen (): Promise<Bot[]> {
+  public async listen (): Promise<BotData[]> {
     // listen for new sessions
     await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
     return this.restoreBots()
@@ -47,9 +47,9 @@ export class BotManager {
   /**
    * Recreate the bots stored in redis
    */
-  public async restoreBots (): Promise<Bot[]> {
+  public async restoreBots (): Promise<BotData[]> {
     const botKeys = await this.redisClient.getSetMembers(getRedisBotSet())
-    const bots = []
+    const bots: BotData[] = []
     for (const botKey of botKeys) {
       const botData = await this.getBot(botKey)
       bots.push(this.makeBot(botData))
@@ -63,7 +63,7 @@ export class BotManager {
   public async handleRegister (
     _channel: string, message: string): Promise<BotData> {
     const data = JSON.parse(message) as RegisterMessageType
-    const botData: BotData = {
+    let botData: BotData = {
       projectName: data.projectName,
       taskIndex: data.taskIndex,
       botId: '',
@@ -74,9 +74,7 @@ export class BotManager {
       return botData
     }
 
-    botData.botId = uuid4()
-
-    this.makeBot(botData)
+    botData = this.makeBot(botData)
     await this.saveBot(botData)
     return botData
   }
@@ -106,6 +104,13 @@ export class BotManager {
   }
 
   /**
+   * Check if bot data corresponds to a real bot
+   */
+  public checkBotCreated (botData: BotData): boolean {
+    return botData.botId !== ''
+  }
+
+  /**
    * Save the data for a bot, marking it as registered
    */
   private async saveBot (botData: BotData) {
@@ -118,15 +123,16 @@ export class BotManager {
   /**
    * Create a new bot user
    */
-  private makeBot (botData: BotData): Bot {
+  private makeBot (botData: BotData): BotData {
     Logger.info(sprintf('Creating bot for project %s, task %d',
       botData.projectName, botData.taskIndex))
     const bot = new Bot(botData)
+    botData.botId = uuid4()
 
     const pollId = setInterval(async () => {
       await this.monitorActivity(bot, pollId)
     }, this.pollTime)
-    return bot
+    return botData
   }
 
   /**

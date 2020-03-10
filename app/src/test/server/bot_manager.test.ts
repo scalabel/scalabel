@@ -12,37 +12,16 @@ let client: RedisClient
 let subClient: RedisClient
 let subscriber: RedisPubSub
 let config: ServerConfig
-let sessionId: string
-let botData: BotData
-let registerData: RegisterMessageType
 
 beforeAll(async () => {
   config = getTestConfig()
   client = new RedisClient(config)
   subClient = new RedisClient(config)
   subscriber = new RedisPubSub(subClient)
-  const projectName = 'projectName'
-  const taskIndex = 0
-  const address = 'address'
-  botData = {
-    projectName,
-    taskIndex,
-    botId: 'botId',
-    address
-  }
-  sessionId = 'sessionId'
-
-  registerData = {
-    projectName,
-    taskIndex,
-    sessionId,
-    userId: 'userId',
-    address,
-    bot: false
-  }
 })
 
 afterAll(async () => {
+  await client.close()
   await subClient.close()
 })
 
@@ -50,68 +29,99 @@ describe('Test bot user manager', () => {
   test('Test registration', async () => {
     const botManager = new BotManager(config, subscriber, client)
 
-    // make sure redis is empty initially
-    expect(await botManager.checkBotExists(botData)).toBe(false)
+    // test that different tasks create different bots
+    const goodRegisterMessages: RegisterMessageType[] = [
+      makeRegisterData('project', 0, 'user', false),
+      makeRegisterData('project', 1, 'user', false),
+      makeRegisterData('projectOther', 0, 'user', false),
+      makeRegisterData('projectOther', 2, 'user2', false)
+    ]
 
-    // register a new bot
-    registerData.bot = false
-    const message = JSON.stringify(registerData)
-    const bot = await botManager.handleRegister('', message)
+    for (const registerData of goodRegisterMessages) {
+      // make sure redis is empty initially
+      const dummyBotData = makeBotData(registerData, 'botId')
+      expect(await botManager.checkBotExists(dummyBotData)).toBe(false)
 
-    // should match register data, and generate an id
-    expect(bot.projectName).toBe(registerData.projectName)
-    expect(bot.taskIndex).toBe(registerData.taskIndex)
-    expect(bot.address).toBe(registerData.address)
-    expect(bot.botId).not.toBe('')
+      // register a new bot
+      const botData = await botManager.handleRegister(
+        '', JSON.stringify(registerData))
 
-    // check that it was stored in redis
-    expect(await botManager.checkBotExists(botData)).toBe(true)
-    const redisBotData = await botManager.getBot(getRedisBotKey(botData))
-    expect(redisBotData).toEqual(bot)
+      // should match register data, and generate an id
+      expect(botData.projectName).toBe(registerData.projectName)
+      expect(botData.taskIndex).toBe(registerData.taskIndex)
+      expect(botData.address).toBe(registerData.address)
+      expect(botManager.checkBotCreated(botData)).toBe(true)
 
-    // make sure only a dummy bot is created if you register again
-    let dummyBot = await botManager.handleRegister('', message)
-    expect(dummyBot.botId).toBe('')
-
-    // make sure only a dummy bot is created if a bot registers
-    const newRegisterData = {
-      ...registerData,
-      bot: true,
-      userId: bot.botId
+      // check that it was stored in redis
+      expect(await botManager.checkBotExists(botData)).toBe(true)
+      const redisBotData = await botManager.getBot(getRedisBotKey(botData))
+      expect(redisBotData).toEqual(botData)
     }
-    const botMessage = JSON.stringify(newRegisterData)
-    dummyBot = await botManager.handleRegister('', botMessage)
-    expect(dummyBot.botId).toBe('')
 
-    // test that the bot is restored correctly
+    // make sure only dummy bots are created for the following cases:
+    const badRegisterMessages: RegisterMessageType[] = [
+      // duplicated messages
+      goodRegisterMessages[0],
+      // same task, different user
+      makeRegisterData('project', 0, 'user2', false),
+      // bot user
+      makeRegisterData('project', 0, 'user', true)
+    ]
+    for (const registerData of badRegisterMessages) {
+      const fakeBotData = await botManager.handleRegister('',
+        JSON.stringify(registerData))
+      expect(botManager.checkBotCreated(fakeBotData)).toBe(false)
+    }
+
+    // test that the bots are restored correctly
     const oldBots = await botManager.restoreBots()
-    expect(oldBots.length).toBe(1)
-    expect(oldBots[0].getData()).toEqual(bot)
+    expect(oldBots.length).toBe(goodRegisterMessages.length)
   })
 
   test('Test deregistration after no activity', async () => {
     const msTimeout = 300
     const botManager = new BotManager(config, subscriber, client, msTimeout)
-    const projectName = 'newProject'
-    const newBotData = {
-      ...botData,
-      projectName
-    }
+    const registerData = makeRegisterData('project2', 0, 'user2', false)
+    const botData = makeBotData(registerData, 'botId')
 
     // make sure redis is empty initially
-    expect(await botManager.checkBotExists(newBotData)).toBe(false)
+    expect(await botManager.checkBotExists(botData)).toBe(false)
 
-    // register a new bot
-    const newRegisterData = {
-      ...registerData,
-      projectName
-    }
-    const message = JSON.stringify(newRegisterData)
+    const message = JSON.stringify(registerData)
     await botManager.handleRegister('', message)
-    expect(await botManager.checkBotExists(newBotData)).toBe(true)
+    expect(await botManager.checkBotExists(botData)).toBe(true)
 
     // no actions occur, so after timeout, bot should be deleted
     await sleep(1000)
-    expect(await botManager.checkBotExists(newBotData)).toBe(false)
+    expect(await botManager.checkBotExists(botData)).toBe(false)
   })
 })
+
+/**
+ * Create data for registration with some defaults
+ */
+function makeRegisterData (
+  projectName: string, taskIndex: number,
+  userId: string, bot: boolean): RegisterMessageType {
+  return {
+    projectName,
+    taskIndex,
+    sessionId: 'sessionId',
+    userId,
+    address: 'address',
+    bot
+  }
+}
+
+/**
+ * Create default data for a bot
+ */
+function makeBotData (
+  registerData: RegisterMessageType, botId: string): BotData {
+  return {
+    projectName: registerData.projectName,
+    taskIndex: registerData.taskIndex,
+    address: registerData.address,
+    botId
+  }
+}
