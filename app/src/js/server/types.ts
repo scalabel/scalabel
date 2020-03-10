@@ -144,12 +144,14 @@ export interface UserMetadata {
 
 /** data kept by each bot user */
 export interface BotData {
-  /** the web user id */
-  webId: string
+  /** the project name */
+  projectName: string
+  /** the index of the task */
+  taskIndex: number
   /** the bot user id */
   botId: string
   /** the address of the io server */
-  serverAddress: string
+  address: string
 }
 
 /**

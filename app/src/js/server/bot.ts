@@ -1,69 +1,134 @@
-import { BotData } from './types'
-import { VirtualSession } from './virtual_session'
+import { Store } from 'redux'
+import { StateWithHistory } from 'redux-undo'
+import io from 'socket.io-client'
+import { sprintf } from 'sprintf-js'
+import uuid4 from 'uuid/v4'
+import { BaseAction } from '../action/types'
+import { configureStore } from '../common/configure_store'
+import { State } from '../functional/types'
+import {
+  BotData, EventName, RegisterMessageType, SyncActionMessageType
+} from '../server/types'
+import Logger from './logger'
 
 /**
  * Manages virtual sessions for a single bot
  */
 export class Bot {
-  /** web user id */
-  public webId: string
+  /** project name */
+  public projectName: string
+  /** task index */
+  public taskIndex: number
   /** bot user id */
   public botId: string
+  /** an arbitrary session id */
+  public sessionId: string
   /** address for session connections */
   public address: string
-  /** list of sessions */
-  public sessions: VirtualSession[]
+  /** Number of actions received via broadcast */
+  public actionCount: number
+  /** The store to save state */
+  protected store: Store<StateWithHistory<State>>
+  /** Socket connection */
+  protected socket: SocketIOClient.Socket
+  /** Timestamped log for completed actions */
+  protected actionLog: BaseAction[]
+  /** Log of packets that have been acked */
+  protected ackedPackets: Set<string>
 
   constructor (botData: BotData) {
-    this.webId = botData.webId
+    this.projectName = botData.projectName
+    this.taskIndex = botData.taskIndex
     this.botId = botData.botId
-    this.address = botData.serverAddress
-    this.sessions = []
+    this.address = botData.address
+    this.sessionId = uuid4()
 
-    /*
-     * TODO: should subscribe to redis channel here,
-     * so that new session is created when user changes task or project
-     */
+    this.actionCount = 0
+
+    // create a socketio client
+    const socket = io.connect(
+      this.address,
+      { transports: ['websocket'], upgrade: false }
+    )
+    this.socket = socket
+
+    this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))
+    this.socket.on(EventName.REGISTER_ACK, this.registerAckHandler.bind(this))
+    this.socket.on(EventName.ACTION_BROADCAST,
+      this.actionBroadcastHandler.bind(this))
+
+    this.store = configureStore({})
+
+    this.actionLog = []
+    this.ackedPackets = new Set()
   }
 
   /**
-   * Make a new session for the user
+   * Called when io socket establishes a connection
+   * Registers the session with the backend, triggering a register ack
    */
-  public makeSession (projectName: string, taskIndex: number): VirtualSession {
-    const sess = new VirtualSession(
-      this.botId, this.address, projectName, taskIndex)
-    this.sessions.push(sess)
-    return sess
+  public connectHandler () {
+    const message: RegisterMessageType = {
+      projectName: this.projectName,
+      taskIndex: this.taskIndex,
+      sessionId: this.sessionId,
+      userId: this.botId,
+      address: this.address,
+      bot: true
+    }
+    /* Send the registration message to the backend */
+    this.socket.emit(EventName.REGISTER, message)
   }
 
   /**
-   * Gets the number of actions across all sessions
+   * Called when backend sends ack of registration of this session
+   * Initialized synced state
+   */
+  public registerAckHandler (syncState: State) {
+    this.store = configureStore(syncState)
+  }
+
+  /**
+   * Called when backend sends ack for actions that were sent to be synced
+   * Simply logs these actions for now
+   */
+  public actionBroadcastHandler (
+    message: SyncActionMessageType) {
+    const actionPacket = message.actions
+    // if action was already acked, ignore it
+    if (this.ackedPackets.has(actionPacket.id)) {
+      return
+    }
+    this.ackedPackets.add(actionPacket.id)
+
+    for (const action of actionPacket.actions) {
+      this.actionCount += 1
+      this.actionLog.push(action)
+      Logger.info(
+        sprintf('Virtual session received action of type %s', action.type))
+    }
+  }
+
+  /**
+   * Close any external resources
+   */
+  public kill () {
+    this.socket.disconnect()
+  }
+
+  /**
+   * Gets the number of actions for the bot
    */
   public getActionCount (): number {
-    let actionCount = 0
-    for (const sess of this.sessions) {
-      actionCount += sess.actionCount
-    }
-    return actionCount
+    return this.actionCount
   }
 
   /**
-   * Sets action counts to 0 for all sessions
+   * Sets action counts to 0 for the bot
    */
 
   public resetActionCount () {
-    for (const sess of this.sessions) {
-      sess.actionCount = 0
-    }
-  }
-
-  /**
-   * Kills all sessions
-   */
-  public kill () {
-    for (const sess of this.sessions) {
-      sess.kill()
-    }
+    this.actionCount = 0
   }
 
   /**
@@ -72,8 +137,9 @@ export class Bot {
   public getData (): BotData {
     return {
       botId: this.botId,
-      webId: this.webId,
-      serverAddress: this.address
+      projectName: this.projectName,
+      taskIndex: this.taskIndex,
+      address: this.address
     }
   }
 }
