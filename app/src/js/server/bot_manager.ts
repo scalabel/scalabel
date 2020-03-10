@@ -47,9 +47,9 @@ export class BotManager {
   /**
    * Recreate the bots stored in redis
    */
-  public async restoreBots (): Promise<BotData[]> {
+  public async restoreBots (): Promise<Bot[]> {
     const botKeys = await this.redisClient.getSetMembers(getRedisBotSet())
-    const bots: BotData[] = []
+    const bots: Bot[] = []
     for (const botKey of botKeys) {
       const botData = await this.getBot(botKey)
       bots.push(this.makeBot(botData))
@@ -63,7 +63,7 @@ export class BotManager {
   public async handleRegister (
     _channel: string, message: string): Promise<BotData> {
     const data = JSON.parse(message) as RegisterMessageType
-    let botData: BotData = {
+    const botData: BotData = {
       projectName: data.projectName,
       taskIndex: data.taskIndex,
       botId: '',
@@ -73,8 +73,9 @@ export class BotManager {
     if (data.bot || await this.checkBotExists(botData)) {
       return botData
     }
+    botData.botId = uuid4()
 
-    botData = this.makeBot(botData)
+    this.makeBot(botData)
     await this.saveBot(botData)
     return botData
   }
@@ -123,16 +124,15 @@ export class BotManager {
   /**
    * Create a new bot user
    */
-  private makeBot (botData: BotData): BotData {
+  private makeBot (botData: BotData): Bot {
     Logger.info(sprintf('Creating bot for project %s, task %d',
       botData.projectName, botData.taskIndex))
     const bot = new Bot(botData)
-    botData.botId = uuid4()
 
     const pollId = setInterval(async () => {
       await this.monitorActivity(bot, pollId)
     }, this.pollTime)
-    return botData
+    return bot
   }
 
   /**
