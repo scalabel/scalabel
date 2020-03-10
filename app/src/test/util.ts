@@ -1,9 +1,12 @@
 import * as fs from 'fs-extra'
+import * as yaml from 'js-yaml'
 import * as path from 'path'
 import { addBox2dLabel } from '../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../js/functional/states'
 import { RectType, State, TaskType, Vector3Type } from '../js/functional/types'
+import * as defaults from '../js/server/defaults'
+import { ServerConfig } from '../js/server/types'
 
 /**
  * Check equality between two Vector3Type objects
@@ -78,4 +81,24 @@ export function getInitialState (sessionId: string): State {
 export function getRandomBox2dAction () {
   return addBox2dLabel(0, 0, [], {},
     Math.random(), Math.random(), Math.random(), Math.random())
+}
+
+/**
+ * Get the path to the test config
+ */
+export function getTestConfigPath (): string {
+  return './app/config/test_config.yml'
+}
+
+/**
+ * Load the test config
+ */
+export function getTestConfig (): ServerConfig {
+  const configDir = getTestConfigPath()
+  const testConfig = yaml.load(fs.readFileSync(configDir, 'utf8'))
+  const fullConfig = {
+    ...defaults.serverConfig,
+    ...testConfig
+  }
+  return fullConfig
 }

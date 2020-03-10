@@ -43,6 +43,8 @@ export interface ServerConfig {
   numActionsForWrite: number
   /** Port that redis runs on */
   redisPort: number
+  /** Whether to use virtual sessions/bots for assistance */
+  bots: boolean
 }
 
 /**
@@ -80,14 +82,18 @@ export interface FormFileData {
 }
 
 export interface RegisterMessageType {
-  /** Project name of the socket connection */
+  /** Project name of the session */
   projectName: string
-  /** Task index of the socket connection */
+  /** Task index of the session */
   taskIndex: number
   /** Current session Id */
   sessionId: string
   /** Current user Id */
   userId: string
+  /** server address */
+  address: string
+  /** whether its a bot or not */
+  bot: boolean
 }
 
 /** action type for synchronization between front and back ends */
@@ -134,6 +140,18 @@ export interface UserData {
 export interface UserMetadata {
   /** map from socket to project */
   socketToProject: { [key: string]: string }
+}
+
+/** data kept by each bot user */
+export interface BotData {
+  /** the project name */
+  projectName: string
+  /** the index of the task */
+  taskIndex: number
+  /** the bot user id */
+  botId: string
+  /** the address of the io server */
+  address: string
 }
 
 /**

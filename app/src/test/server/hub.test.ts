@@ -5,6 +5,9 @@ import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { Hub } from '../../js/server/hub'
 import { ProjectStore } from '../../js/server/project_store'
+import { RedisClient } from '../../js/server/redis_client'
+import { RedisPubSub } from '../../js/server/redis_pub_sub'
+import { RedisStore } from '../../js/server/redis_store'
 import { ActionPacketType, EventName, RegisterMessageType,
   StateMetadata, SyncActionMessageType } from '../../js/server/types'
 import { UserManager } from '../../js/server/user_manager'
@@ -15,6 +18,8 @@ jest.mock('../../js/server/file_storage')
 jest.mock('../../js/server/path')
 jest.mock('../../js/server/project_store')
 jest.mock('../../js/server/user_manager')
+jest.mock('../../js/server/redis_client')
+jest.mock('../../js/server/redis_pub_sub')
 
 let projectName: string
 let taskIndex: number
@@ -25,6 +30,7 @@ let actionListId: string
 let mockStorage: FileStorage
 let mockProjectStore: ProjectStore
 let mockUserManager: UserManager
+let mockPubSub: RedisPubSub
 let hub: Hub
 const broadcastFunc = jest.fn()
 const socketId = 'socketId'
@@ -51,12 +57,16 @@ beforeAll(() => {
   actionListId = 'actionListId'
 
   mockStorage = new FileStorage('fakeDataDir')
-  mockProjectStore = new ProjectStore(mockStorage)
+  const client = new RedisClient(serverConfig)
+  const redisStore = new RedisStore(serverConfig, mockStorage, client)
+  mockPubSub = new RedisPubSub(client)
+  mockProjectStore = new ProjectStore(mockStorage, redisStore)
   mockUserManager = new UserManager(mockProjectStore)
-  hub = new Hub(serverConfig, mockProjectStore, mockUserManager)
+  hub = new Hub(serverConfig, mockProjectStore, mockUserManager, mockPubSub)
 })
 
 afterEach(cleanup)
+
 describe('Test hub functionality', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -80,11 +90,14 @@ describe('Test hub functionality', () => {
       projectName,
       taskIndex,
       sessionId,
-      userId
+      userId,
+      address: '',
+      bot: false
     }
     await hub.register(data, mockSocket)
     expect(mockUserManager.registerUser).toBeCalledWith(
       socketId, projectName, userId)
+    expect(mockPubSub.publishRegisterEvent).toBeCalledWith(data)
     expect(mockSocket.join).toBeCalled()
     expect(mockSocket.emit).toBeCalledWith(
       EventName.REGISTER_ACK, getInitialState(sessionId)

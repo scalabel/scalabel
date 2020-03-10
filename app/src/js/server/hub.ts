@@ -1,16 +1,16 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
-import uuid4 from 'uuid/v4'
 import * as types from '../action/types'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
-import { SocketServer } from './socket_server'
+import { RedisPubSub } from './redis_pub_sub'
+import { SocketServer } from './socket_interface'
 import {
   EventName, RegisterMessageType, ServerConfig,
   StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
-import { index2str, updateStateTimestamp } from './util'
+import { index2str, initSessId, updateStateTimestamp } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -24,22 +24,24 @@ export class Hub {
   protected projectStore: ProjectStore
   /** the user manager */
   protected userManager: UserManager
+  /** the redis message broker */
+  protected publisher: RedisPubSub
 
   constructor (config: ServerConfig,
                projectStore: ProjectStore,
-               userManager: UserManager) {
+               userManager: UserManager,
+               publisher: RedisPubSub) {
     this.sync = config.sync
     this.autosave = config.autosave
     this.projectStore = projectStore
     this.userManager = userManager
+    this.publisher = publisher
   }
 
   /**
    * Listens for websocket connections
    */
   public async listen (io: socketio.Server) {
-    // Clear all users in event of server reset
-    await this.userManager.clearUsers()
     io.on(EventName.CONNECTION, this.registerNewSocket.bind(this))
   }
 
@@ -73,16 +75,11 @@ export class Hub {
    */
   public async register (data: RegisterMessageType, socket: SocketServer) {
     const projectName = data.projectName
-    const taskIndex = data.taskIndex
-    let sessionId = data.sessionId
+    const taskId = index2str(data.taskIndex)
+    const sessionId = initSessId(data.sessionId)
 
-    const taskId = index2str(taskIndex)
     await this.userManager.registerUser(socket.id, projectName, data.userId)
-    // keep session id if it exists, i.e. if it is a reconnection
-    if (!sessionId) {
-      // new session on new load
-      sessionId = uuid4()
-    }
+
     const state = await this.projectStore.loadState(projectName, taskId)
     state.session.id = sessionId
     state.task.config.autosave = this.autosave
@@ -92,6 +89,8 @@ export class Hub {
     socket.join(room)
     // Send backend state to newly registered socket
     socket.emit(EventName.REGISTER_ACK, state)
+    // Notify other processes of registration
+    this.publisher.publishRegisterEvent(data)
   }
 
   /**
@@ -108,7 +107,7 @@ export class Hub {
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
 
     const taskActions = actions.filter((action) => {
-      return types.TASK_ACTION_TYPES.includes(action.type)
+      return types.isTaskAction(action)
     })
 
     // Load IDs of actions that have been processed already

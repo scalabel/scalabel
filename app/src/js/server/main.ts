@@ -4,11 +4,14 @@ import * as formidable from 'express-formidable'
 import { createServer } from 'http'
 import socketio from 'socket.io'
 import 'source-map-support/register'
+import { BotManager } from './bot_manager'
 import { Hub } from './hub'
 import { Listeners } from './listeners'
 import Logger from './logger'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
+import { RedisClient } from './redis_client'
+import { RedisPubSub } from './redis_pub_sub'
 import { RedisStore } from './redis_store'
 import { Endpoint, ServerConfig } from './types'
 import { UserManager } from './user_manager'
@@ -51,19 +54,31 @@ function startHTTPServer (
 }
 
 /**
- * Main function for backend server
+ * Make a publisher or subscriber for redis
+ * Subscribers can't take other actions, so separate clients for pub and sub
  */
-async function main (): Promise<void> {
-  // initialize config
-  const config = readConfig()
+function makeRedisPubSub (config: ServerConfig): RedisPubSub {
+  const client = new RedisClient(config)
+  return new RedisPubSub(client)
+}
 
-  // initialize storage and redis
-  const storage = await makeStorage(config.database, config.data)
-  const redisStore = new RedisStore(config, storage)
-  const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(projectStore)
+/**
+ * Starts a bot manager if config says to
+ */
+async function makeBotManager (
+  config: ServerConfig, subscriber: RedisPubSub, cacheClient: RedisClient) {
+  if (config.bots) {
+    const botManager = new BotManager(config, subscriber, cacheClient)
+    await botManager.listen()
+  }
+}
 
-  // start http and socket io servers
+/**
+ * Start HTTP and socket io servers
+ */
+async function startServers (
+  config: ServerConfig, projectStore: ProjectStore,
+  userManager: UserManager, publisher: RedisPubSub) {
   const app: Application = express()
   const httpServer = createServer(app)
   const io = socketio(httpServer)
@@ -72,10 +87,35 @@ async function main (): Promise<void> {
   startHTTPServer(config, app, projectStore, userManager)
 
   // set up socket.io handler
-  const hub = new Hub(config, projectStore, userManager)
+  const hub = new Hub(config, projectStore, userManager, publisher)
   await hub.listen(io)
 
   httpServer.listen(config.port)
+}
+
+/**
+ * Main function for backend server
+ */
+async function main () {
+  // initialize config
+  const config = readConfig()
+
+  // initialize storage
+  const storage = await makeStorage(config.database, config.data)
+
+  // initialize redis- need separate clients for different roles
+  const cacheClient = new RedisClient(config)
+  const redisStore = new RedisStore(config, storage, cacheClient)
+  const publisher = makeRedisPubSub(config)
+  const subscriber = makeRedisPubSub(config)
+
+  // initialize high level managers
+  const projectStore = new ProjectStore(storage, redisStore)
+  const userManager = new UserManager(projectStore)
+  await userManager.clearUsers()
+
+  await makeBotManager(config, subscriber, cacheClient)
+  await startServers(config, projectStore, userManager, publisher)
 
   return
 }

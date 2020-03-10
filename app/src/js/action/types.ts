@@ -37,8 +37,11 @@ export const UPDATE_PANE = 'UPDATE_PANE'
 export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
 
-// Note UPDATE_TASK deliberately not included
-export const TASK_ACTION_TYPES = [
+/**
+ * These are actions that should be shared between sessions/users
+ * UPDATE_TASK deliberately not included because its used for local updates
+ */
+const TASK_ACTION_TYPES = [
   ADD_LABELS,
   CHANGE_SHAPES,
   CHANGE_LABELS,
@@ -48,6 +51,13 @@ export const TASK_ACTION_TYPES = [
   MERGE_TRACKS,
   SUBMIT
 ]
+
+/**
+ * Checks if the action modifies task
+ */
+export function isTaskAction (action: BaseAction) {
+  return TASK_ACTION_TYPES.includes(action.type)
+}
 
 export interface BaseAction {
   /** type of the action */

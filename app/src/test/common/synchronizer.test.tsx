@@ -5,22 +5,41 @@ import { configureStore } from '../../js/common/configure_store'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
 import { State } from '../../js/functional/types'
-import { ActionPacketType, SyncActionMessageType } from '../../js/server/types'
+import {
+  ActionPacketType, EventName, RegisterMessageType,
+  SyncActionMessageType } from '../../js/server/types'
 import { index2str, updateState } from '../../js/server/util'
 import { getInitialState, getRandomBox2dAction } from '../util'
 
 let sessionId: string
 let taskIndex: number
 let projectName: string
+let userId: string
+const socketEmit = jest.fn()
+const mockSocket = {
+  on: jest.fn(),
+  connected: true,
+  emit: socketEmit
+}
 
 beforeAll(() => {
   sessionId = 'fakeSessId'
   taskIndex = 0
   projectName = 'testProject'
+  userId = 'fakeUserId'
 })
 
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
+  test('Test correct registration message gets sent', async () => {
+    const synchronizer = startSynchronizer()
+    synchronizer.connectHandler()
+
+    // Frontend doesn't have a session id until after registration
+    checkConnectMessage('')
+    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
+  })
+
   test('Test send-ack loop', async () => {
     const synchronizer = startSynchronizer()
     const initialState = getInitialState(sessionId)
@@ -84,6 +103,8 @@ describe('Test synchronizer functionality', () => {
     // Reconnect, but some missed actions occured in the backend
     const missedAction = getRandomBox2dAction()
     const newInitialState = updateState(initialState, [missedAction])
+    synchronizer.connectHandler()
+    checkConnectMessage(sessionId)
     synchronizer.registerAckHandler(newInitialState)
 
     // Check that frontend state updates correctly
@@ -124,16 +145,24 @@ function checkFirstAction (sync: Synchronizer, action: BaseAction) {
 }
 
 /**
- * Start the synchronizer being tested
+ * Helper function for checking that correct connection message was sent
+ */
+function checkConnectMessage (sessId: string) {
+  const expectedMessage: RegisterMessageType = {
+    projectName,
+    taskIndex,
+    sessionId: sessId,
+    userId,
+    address: location.origin,
+    bot: false
+  }
+  expect(socketEmit).toHaveBeenCalledWith(EventName.REGISTER, expectedMessage)
+}
+
+/**
+ * Start the browser synchronizer being tested
  */
 function startSynchronizer (): Synchronizer {
-  // start frontend synchronizer
-  const userId = 'user'
-  const mockSocket = {
-    on: jest.fn(),
-    connected: true,
-    emit: jest.fn()
-  }
   io.connect = jest.fn().mockImplementation(() => mockSocket)
   const synchronizer = new Synchronizer(
     taskIndex,

@@ -37,6 +37,8 @@ export class Synchronizer {
   public middleware: Middleware
   /** The user/browser id, constant across sessions */
   public userId: string
+  /** the server address */
+  public syncAddress: string
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
@@ -53,9 +55,9 @@ export class Synchronizer {
     this.ackedPackets = new Set()
 
     // use the same address as http
-    const syncAddress = location.origin
+    this.syncAddress = location.origin
     const socket = io.connect(
-      syncAddress,
+      this.syncAddress,
       { transports: ['websocket'], upgrade: false }
     )
     this.socket = socket
@@ -120,7 +122,9 @@ export class Synchronizer {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
       sessionId: Session.id,
-      userId: this.userId
+      userId: this.userId,
+      address: this.syncAddress,
+      bot: false
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)
@@ -161,7 +165,7 @@ export class Synchronizer {
       // actionLog matches backend action ordering
       this.actionLog.push(action)
       if (action.sessionId !== Session.id) {
-        if (types.TASK_ACTION_TYPES.includes(action.type)) {
+        if (types.isTaskAction(action)) {
           // Dispatch any task actions broadcasted from other sessions
           Session.dispatch(action)
         }
@@ -200,7 +204,7 @@ export class Synchronizer {
     // re-apply frontend task actions after updating task from backend
     for (const actionPacket of this.listActionPackets()) {
       for (const action of actionPacket.actions) {
-        if (types.TASK_ACTION_TYPES.includes(action.type)) {
+        if (types.isTaskAction(action)) {
           action.frontendOnly = true
           Session.dispatch(action)
         }

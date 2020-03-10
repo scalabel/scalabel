@@ -22,6 +22,8 @@
                 "tsConfig": "tsconfig.test.json"
             }
         },
+        "globalSetup": "./app/src/test/setup.ts",
+        "globalTeardown": "./app/src/test/teardown.ts",
         "roots": [
             "app/src/test"
         ],
