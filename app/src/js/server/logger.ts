@@ -7,6 +7,8 @@ import { MaybeError } from './types'
 class Logger {
   /** use winston to manage the actual prints */
   private _logger: winston.Logger
+  /** whether to mute the info logging */
+  private _silent: boolean
 
   constructor () {
     this._logger = winston.createLogger({
@@ -19,6 +21,7 @@ class Logger {
       ],
       exitOnError: false
     })
+    this._silent = false
   }
 
   /** print errors */
@@ -34,12 +37,20 @@ class Logger {
 
   /** print informative messages */
   public info (message: string): void {
-    if (message) {
+    if (message && !this._silent) {
       this._logger.log({
         level: 'info',
         message
       })
     }
+  }
+
+  /**
+   * whether to mute info logging.
+   * It can provide a clean console for unit test
+   */
+  public mute (silent: boolean = true): void {
+    this._silent = silent
   }
 }
 
