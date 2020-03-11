@@ -49,7 +49,7 @@ class Logger {
    * whether to mute info logging.
    * It can provide a clean console for unit test
    */
-  public mute (silent: boolean): void {
+  public mute (silent: boolean = true): void {
     this._silent = silent
   }
 }
