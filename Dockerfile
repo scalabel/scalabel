@@ -15,8 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.8 \
     python3.8-dev \
     python3-pip \
-    python3-setuptools \
-    redis-server
+    python3-setuptools && \
+    add-apt-repository ppa:chris-lea/redis-server && \
+    apt-get update && \
+    apt-get install redis-server -y
 
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash
 
