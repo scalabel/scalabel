@@ -79,6 +79,5 @@
     },
     "files.watcherExclude": {
         "node_modules": true
-    },
-    "python.pythonPath": "/Users/fy/.pyenv/shims/python"
+    }
 }
