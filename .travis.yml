@@ -19,7 +19,7 @@ install:
   - npm install
 script:
   - python3 -m pylint scripts/
-  - python3 -m mypy scripts/launch_server.py
+  - python3 -m mypy --strict scripts
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/webpack --config webpack.config.js --mode=production
   - npm test
