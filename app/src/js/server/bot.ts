@@ -3,9 +3,13 @@ import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
-import { BaseAction } from '../action/types'
+import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
-import { State } from '../functional/types'
+import { ShapeTypeName } from '../common/types'
+import { ItemExport } from '../functional/bdd_types'
+import { makeItemExport, makeLabelExport } from '../functional/states'
+import { PolygonType, RectType, State } from '../functional/types'
+import { polygonToExport } from '../server/export'
 import {
   BotData, EventName, RegisterMessageType, SyncActionMessageType
 } from '../server/types'
@@ -100,12 +104,76 @@ export class Bot {
       return
     }
     this.ackedPackets.add(actionPacket.id)
+
+    let modelQueries: ItemExport[] = []
     for (const action of actionPacket.actions) {
       this.actionCount += 1
       this.actionLog.push(action)
+      this.store.dispatch(action)
       Logger.info(
         sprintf('Bot received action of type %s', action.type))
+
+      const state = this.store.getState().present
+      if (action.type === ADD_LABELS) {
+        const actionQueries = this.getBDDFormatQueries(
+          state, action as AddLabelsAction)
+        modelQueries = modelQueries.concat(actionQueries)
+      }
     }
+
+    // can potentially execute model queries in parallel
+    for (const modelQuery of modelQueries) {
+      const response = 0
+      // set manualShape to false for returned actions
+      // broadcast
+    }
+  }
+
+  /**
+   * Generate BDD data format item corresponding to the action
+   */
+  public getBDDFormatQueries (
+    state: State, action: AddLabelsAction): ItemExport[] {
+    const queries: ItemExport[] = []
+    /* this only handles box2d and polygon2d actions,
+     * so we can assume a single shape
+     */
+    for (const itemIndex of action.itemIndices) {
+      const item = state.task.items[itemIndex]
+      const url = Object.values(item.urls)[0]
+      const shapeType = action.shapeTypes[0][0][0]
+      const shape = action.shapes[0][0][0]
+      switch (shapeType) {
+        case ShapeTypeName.RECT:
+          const rectLabel = makeLabelExport({
+            box2d: shape as RectType
+          })
+          const rectQuery = makeItemExport({
+            name: this.projectName,
+            url,
+            labels: [rectLabel]
+          })
+          queries.push(rectQuery)
+          break
+        case ShapeTypeName.POLYGON_2D:
+          const labelType = action.labels[0][0].type
+          const poly2d = polygonToExport(shape as PolygonType, labelType)
+          const polyLabel = makeLabelExport({
+            poly2d
+          })
+          const polyQuery = makeItemExport({
+            name: this.projectName,
+            url,
+            labels: [polyLabel]
+          })
+          queries.push(polyQuery)
+          break
+        default:
+          break
+      }
+    }
+
+    return queries
   }
 
   /**
