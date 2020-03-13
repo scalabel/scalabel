@@ -11,7 +11,6 @@ import { initStore, loadImages } from '../../js/common/session_init'
 import { ToolBar } from '../../js/components/toolbar'
 import { Category } from '../../js/components/toolbar_category'
 import { ListButton } from '../../js/components/toolbar_list_button'
-import { Viewer2D } from '../../js/components/viewer2d'
 import { makeLabel } from '../../js/functional/states'
 import { testJson } from '../test_image_objects'
 import { testJson as testTrackJson } from '../test_track_objects'
@@ -166,7 +165,7 @@ describe('test functionality for attributes with multiple values', () => {
 })
 
 describe('test track', () => {
-  test('Delete by click', () => {
+  test('Delete by click toolbar button', () => {
     Session.devMode = false
     initStore(testTrackJson)
     loadImages()
@@ -211,7 +210,7 @@ describe('test track', () => {
     expect(state.task.items[2].labels[lblInItm4]).toBeUndefined()
     expect(state.task.items[2].labels[lblInItm5]).toBeUndefined()
   })
-  test('Link by click', () => {
+  test('Merge by click toolbar button', () => {
     Session.devMode = false
     initStore(testTrackJson)
     loadImages()
