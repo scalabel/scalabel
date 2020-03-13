@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core'
+import { IconButton, List, ListItem } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import MenuItem from '@material-ui/core/MenuItem'
 import Select from '@material-ui/core/Select'
@@ -216,7 +216,6 @@ class LabelPane extends Component<Props> {
               pane.viewerId
             ))
           }}
-          edge={'start'}
         >
           <ViewStreamIcon fontSize='small' />
         </IconButton>
@@ -233,7 +232,6 @@ class LabelPane extends Component<Props> {
               pane.viewerId
             ))
           }}
-          edge={'start'}
         >
           <ViewStreamIcon fontSize='small' />
         </IconButton>
@@ -249,7 +247,6 @@ class LabelPane extends Component<Props> {
               pane.viewerId
             ))
           }}
-          edge={'start'}
         >
           <CloseIcon fontSize='small' />
         </IconButton>
@@ -271,12 +268,20 @@ class LabelPane extends Component<Props> {
             {(numSensors > 1) ? viewerTypeMenu : null}
             {(numSensors > 1) ? viewerIdMenu : null}
           </div>
-          {visibilityButton}
-          <div hidden={pane.hide}>
-            {verticalSplitButton}
-            {horizontalSplitButton}
-          </div>
-          {deleteButton}
+          <List>
+            <ListItem dense disableGutters>{deleteButton}</ListItem>
+            <ListItem dense disableGutters>
+              <div hidden={pane.hide}>
+                {verticalSplitButton}
+              </div>
+            </ListItem>
+            <ListItem dense disableGutters>
+            <div hidden={pane.hide}>
+              {horizontalSplitButton}
+            </div>
+            </ListItem>
+            <ListItem dense disableGutters>{visibilityButton}</ListItem>
+          </List>
         </Grid>
       )
       // Leaf, render viewer container

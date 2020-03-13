@@ -1,32 +1,36 @@
 import { State } from '../functional/types'
 import { RegisterMessageType, SyncActionMessageType } from './types'
 
-type onHandlerType =
+type socketHandlerType =
   (() => {}) |
   ((data: SyncActionMessageType) => {}) |
   ((data: RegisterMessageType) => {})
 
 type emitDataType = SyncActionMessageType | State
 
+/**
+ * Generic interface for server-side socket
+ * Socket.io implements this
+ */
 export interface SocketServer {
-  /** socket id */
+  /** Socket id */
   id: string
 
-  /** message broadcaster */
+  /** Message broadcaster */
   broadcast: {
-    /** object for specifying target */
+    /** Object for specifying target */
     to: (room: string) => {
-      /** message echoer */
+      /** Message echoer */
       emit: (event: string, data: emitDataType) => void
     }
   }
 
-  /** subscribe a handler */
+  /** Subscribe a handler */
   join (room: string): void
 
-  /** echo a message */
+  /** Echo a message */
   emit (event: string, data: emitDataType): void
 
-  /** add a handler funciton */
-  on (event: string, callback: onHandlerType): void
+  /** Add a handler function */
+  on (event: string, callback: socketHandlerType): void
 }

@@ -35,6 +35,11 @@ describe('test general utility methods', () => {
     expect(util.index2str(789631)).toBe('789631')
   })
 
+  test('initSessId', () => {
+    expect(util.initSessId('sampleId')).toBe('sampleId')
+    expect(util.initSessId('')).not.toBe('')
+  })
+
   test('handler url selection', () => {
     // img item => label2d handler
     let handler = util.getHandlerUrl(

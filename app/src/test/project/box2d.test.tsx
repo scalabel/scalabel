@@ -14,6 +14,7 @@ import { RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { myTheme } from '../../js/styles/theme'
+import { getTestConfigPath } from '../util'
 import {
   changeTestConfig,
   deepDeleteTimestamp,
@@ -32,22 +33,16 @@ import {
 // TODO: add testing with the actual canvas
 
 let launchProc: child.ChildProcessWithoutNullStreams
-let redisProc: child.ChildProcessWithoutNullStreams
 
 beforeAll(async () => {
   Session.devMode = false
   Session.testMode = true
 
-  // Avoid default port 6379 and port 6378 used in redis store test
-  const redisPort = 6377
-  redisProc = child.spawn('redis-server',
-    ['--appendonly', 'no', '--save', '', '--port', redisPort.toString()])
-
   // port is lso changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
-    './app/config/test_config.yml'
+    getTestConfigPath()
   ])
 
   // launchProc.stdout.on('data', (data) => {
@@ -57,6 +52,7 @@ beforeAll(async () => {
   // launchProc.stderr.on('data', (data) => {
   //   process.stdout.write(data)
   // })
+
   window.alert = (): void => {
     return
   }
@@ -70,7 +66,6 @@ beforeEach(() => {
 afterEach(cleanup)
 afterAll(async () => {
   launchProc.kill()
-  redisProc.kill()
   deleteTestDir()
   // wait for server to shut down to clear port
   await sleep(50)

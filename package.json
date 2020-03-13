@@ -13,11 +13,20 @@
         "test": "jest"
     },
     "jest": {
+        "collectCoverage": true,
+        "collectCoverageFrom": [
+            "app/src/js/**/*.{ts,tsx}"
+        ],
         "globals": {
             "ts-jest": {
                 "tsConfig": "tsconfig.test.json"
             }
         },
+        "globalSetup": "./app/src/test/setup/global_setup.ts",
+        "setupFiles": [
+            "./app/src/test/setup/local_setup.ts"
+        ],
+        "globalTeardown": "./app/src/test/setup/global_teardown.ts",
         "roots": [
             "app/src/test"
         ],
