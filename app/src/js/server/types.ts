@@ -154,6 +154,14 @@ export interface BotData {
   address: string
 }
 
+/** precomputed queries for models */
+export interface ModelQuery {
+  /** the queried item in bdd format */
+  itemExport: ItemExport
+  /** the endpoint for the query */
+  endpoint: ModelEndpoint
+}
+
 /**
  * Defining the types of some general callback functions
  */
@@ -183,6 +191,12 @@ export const enum Endpoint {
   GET_PROJECT_NAMES = '/postProjectNames',
   EXPORT = '/export',
   DASHBOARD = '/postDashboardContents'
+}
+
+/* endpoint names for python server */
+export const enum ModelEndpoint {
+  POLYGON_RNN_BASE = '/polygonRNNBase',
+  POLYGON_RNN_REFINE = 'polygonRNNRefine'
 }
 
 /* form field names */

@@ -40,3 +40,6 @@ test_data/
 
 # jest coverage cache
 coverage/
+
+# downloaded model repos
+app/src/python/polyrnn_pp/*

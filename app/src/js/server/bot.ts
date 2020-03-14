@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { Store } from 'redux'
 import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
@@ -6,12 +7,12 @@ import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
-import { ItemExport } from '../functional/bdd_types'
 import { makeItemExport, makeLabelExport } from '../functional/states'
 import { PolygonType, RectType, State } from '../functional/types'
 import { polygonToExport } from '../server/export'
 import {
-  BotData, EventName, RegisterMessageType, SyncActionMessageType
+  BotData, EventName, ModelEndpoint,
+  ModelQuery, RegisterMessageType, SyncActionMessageType
 } from '../server/types'
 import Logger from './logger'
 
@@ -39,6 +40,8 @@ export class Bot {
   protected actionLog: BaseAction[]
   /** Log of packets that have been acked */
   protected ackedPackets: Set<string>
+  /** address of model server */
+  protected modelAddress: string
 
   constructor (botData: BotData) {
     this.projectName = botData.projectName
@@ -65,6 +68,10 @@ export class Bot {
 
     this.actionLog = []
     this.ackedPackets = new Set()
+
+    // currently assume python is on the same server
+    // should put the host/port in a config
+    this.modelAddress = 'http://0.0.0.0:8080'
   }
 
   /**
@@ -96,7 +103,7 @@ export class Bot {
    * Called when backend sends ack for actions that were sent to be synced
    * Simply logs these actions for now
    */
-  public actionBroadcastHandler (
+  public async actionBroadcastHandler (
     message: SyncActionMessageType) {
     const actionPacket = message.actions
     // if action was already acked, ignore it
@@ -105,7 +112,8 @@ export class Bot {
     }
     this.ackedPackets.add(actionPacket.id)
 
-    let modelQueries: ItemExport[] = []
+    // precompute queries so they can potentially execute in parallel
+    let modelQueries: ModelQuery[] = []
     for (const action of actionPacket.actions) {
       this.actionCount += 1
       this.actionLog.push(action)
@@ -115,26 +123,37 @@ export class Bot {
 
       const state = this.store.getState().present
       if (action.type === ADD_LABELS) {
-        const actionQueries = this.getBDDFormatQueries(
+        const actionQueries = this.getModelQueries(
           state, action as AddLabelsAction)
         modelQueries = modelQueries.concat(actionQueries)
       }
     }
 
-    // can potentially execute model queries in parallel
+    // execute queries
     for (const modelQuery of modelQueries) {
-      const response = 0
-      // set manualShape to false for returned actions
-      // broadcast
+      const data = JSON.stringify(modelQuery)
+      const modelEndpoint = new URL(modelQuery.endpoint, this.modelAddress)
+      try {
+        const response = await axios.post(modelEndpoint.toString(), data)
+        Logger.info('Got a response from the model')
+        Logger.info(response.status.toString())
+        Logger.info(response.data)
+        // set manualShape to false for returned actions
+        // broadcast
+      } catch (e) {
+        Logger.info(sprintf('Query to %s failed- make sure endpoint is \
+          correct and python server is running', modelEndpoint.toString()))
+        Logger.info(e)
+      }
     }
   }
 
   /**
    * Generate BDD data format item corresponding to the action
    */
-  public getBDDFormatQueries (
-    state: State, action: AddLabelsAction): ItemExport[] {
-    const queries: ItemExport[] = []
+  public getModelQueries (
+    state: State, action: AddLabelsAction): ModelQuery[] {
+    const queries: ModelQuery[] = []
     /* this only handles box2d and polygon2d actions,
      * so we can assume a single shape
      */
@@ -148,11 +167,15 @@ export class Bot {
           const rectLabel = makeLabelExport({
             box2d: shape as RectType
           })
-          const rectQuery = makeItemExport({
+          const rectItem = makeItemExport({
             name: this.projectName,
             url,
             labels: [rectLabel]
           })
+          const rectQuery = {
+            itemExport: rectItem,
+            endpoint: ModelEndpoint.POLYGON_RNN_BASE
+          }
           queries.push(rectQuery)
           break
         case ShapeTypeName.POLYGON_2D:
@@ -161,11 +184,15 @@ export class Bot {
           const polyLabel = makeLabelExport({
             poly2d
           })
-          const polyQuery = makeItemExport({
+          const polyItem = makeItemExport({
             name: this.projectName,
             url,
             labels: [polyLabel]
           })
+          const polyQuery = {
+            itemExport: polyItem,
+            endpoint: ModelEndpoint.POLYGON_RNN_REFINE
+          }
           queries.push(polyQuery)
           break
         default:
