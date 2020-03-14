@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import { Store } from 'redux'
 import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
@@ -131,19 +131,27 @@ export class Bot {
 
     // execute queries
     for (const modelQuery of modelQueries) {
-      const data = JSON.stringify(modelQuery)
+      const data = modelQuery.itemExport
+      const config: AxiosRequestConfig = {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
       const modelEndpoint = new URL(modelQuery.endpoint, this.modelAddress)
       try {
-        const response = await axios.post(modelEndpoint.toString(), data)
+        Logger.info(sprintf('data: %s', data))
+        const response = await axios.post(
+          modelEndpoint.toString(), data, config
+        )
         Logger.info('Got a response from the model')
         Logger.info(response.status.toString())
         Logger.info(response.data)
         // set manualShape to false for returned actions
         // broadcast
       } catch (e) {
-        Logger.info(sprintf('Query to %s failed- make sure endpoint is \
-          correct and python server is running', modelEndpoint.toString()))
-        Logger.info(e)
+        Logger.info(sprintf('Query to \"%s\" failed- make sure endpoint is \
+correct and python server is running', modelEndpoint.toString()))
+        Logger.info(e.message)
       }
     }
   }
