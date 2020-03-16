@@ -210,7 +210,7 @@ function loadData (): void {
 /**
  * Load all the images in the state
  */
-function loadImages (maxAttempts: number = 3): void {
+export function loadImages (maxAttempts: number = 3): void {
   const state = Session.getState()
   const items = state.task.items
   Session.images = []
