@@ -35,7 +35,7 @@ export function goToItem (index: number): types.ChangeSelectAction {
     shapes: {}
   }
 
-  if (Session.trackLinking) {
+  if (Session.getState().session.trackLinking) {
     // if track linking is on, keep old labels selected
     newSelect = {
       item: index
@@ -374,5 +374,15 @@ export function submit (): types.SubmitAction {
       time: Date.now(),
       user: Session.getState().user.id
     }
+  }
+}
+
+/**
+ * start to link tracks
+ */
+export function startLinkTrack () {
+  return {
+    type: types.START_LINK_TRACK,
+    sessionId: Session.id
   }
 }

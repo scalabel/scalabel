@@ -3,7 +3,7 @@ import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
-import { changeSelect, changeViewerConfig, mergeTracks } from '../action/common'
+import { changeSelect, changeViewerConfig, mergeTracks, startLinkTrack } from '../action/common'
 import { changeSelectedLabelsAttributes, deleteSelectedLabels, deleteSelectedTracks, terminateSelectedTracks } from '../action/select'
 import { addLabelTag } from '../action/tag'
 import { renderTemplate } from '../common/label'
@@ -148,6 +148,23 @@ export class ToolBar extends Component<Props> {
             Session.dispatch(deleteSelectedLabels(this.state))
           })
           }</div>
+          <div>{makeButton('End Object Tracking', () => {
+            Session.dispatch(
+              terminateSelectedTracks(this.state, this.state.user.select.item)
+            )
+          })
+          }</div>
+          <div>
+            {this.state.session.trackLinking ?
+              makeButton('Finish Track-Link', (() => {
+                this.linkSelectedTracks(this.state)
+              }), 'lightgreen')
+              :
+              makeButton('Track-Link', () => {
+                this.startLinkTrack()
+              })
+            }
+          </div>
         </div>
       </div>
     )
@@ -303,11 +320,19 @@ export class ToolBar extends Component<Props> {
       for (const labelId of select.labels[index]) {
         const trackId = state.task.items[index].labels[labelId].track
         tracks.push(state.task.tracks[trackId])
+        trackIds.push(trackId)
       }
     }
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(trackIds))
     }
+  }
+
+  /**
+   * Start to link track
+   */
+  private startLinkTrack () {
+    Session.dispatch(startLinkTrack())
   }
 }

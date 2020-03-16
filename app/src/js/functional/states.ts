@@ -418,6 +418,7 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
     id: '',
     startTime: 0,
     itemStatuses: [],
+    trackLinking: false,
     ...params
   }
 }

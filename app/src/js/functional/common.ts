@@ -330,13 +330,14 @@ function mergeTracksInItems (
  */
 export function mergeTracks (
   state: State, action: types.MergeTrackAction): State {
-  let { task } = state
+  let { task, session } = state
   const mergedTracks = action.trackIds.map((trackId) => task.tracks[trackId])
   const tracks = removeObjectFields(task.tracks, action.trackIds)
   const [track, items] = mergeTracksInItems(mergedTracks, task.items)
   tracks[track.id] = track
   task = updateObject(task, { items, tracks })
-  return { ...state, task }
+  session = updateObject(session, { trackLinking: false })
+  return { ...state, task, session }
 }
 
 /**
@@ -1162,6 +1163,27 @@ export function submit (
     state,
     {
       task: newTask
+    }
+  )
+}
+
+/**
+ * Start to link track.
+ * @param state Previous state
+ */
+export function startLinkTrack (
+  state: State
+): State {
+  const newSession = updateObject(
+    state.session,
+    {
+      trackLinking: true
+    }
+  )
+  return updateObject(
+    state,
+    {
+      session: newSession
     }
   )
 }
