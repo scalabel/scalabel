@@ -6,6 +6,7 @@ import argparse
 import json
 import urllib.request
 import sys
+from typing import Any, List, Tuple, Union
 
 import numpy as np
 import plyfile
@@ -13,18 +14,19 @@ import yaml
 
 
 def estimate_ground_plane(
-        points,
-        sample_size,
-        iters,
-        dist_cutoff,
-        height_cutoff,
-        expected_normal,
-        max_normal_deviation,
-        inlier_cutoff=0.15
-):
+        points: np.ndarray,
+        sample_size: int,
+        iters: int,
+        dist_cutoff: List[float],
+        height_cutoff: List[float],
+        expected_normal: np.ndarray,
+        max_normal_deviation: float,
+        inlier_cutoff: float = 0.15
+) -> Union[None, Tuple[Any, Any, Any, Any]]:
     '''
     Detect ground in points by using RANSAC to find largest plane
     in point cloud that has normal close to what is expected
+    TODO clean the return type. We are not supposed to use Any
     '''
     assert 0 < sample_size < 1
     assert len(dist_cutoff) == 2
@@ -86,7 +88,7 @@ def estimate_ground_plane(
     return None
 
 
-def main():
+def main() -> None:
     '''
     Main function
     '''
