@@ -4,17 +4,20 @@ import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
+import { addPolygon2dLabel } from '../action/polygon2d'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
+import { PathPoint2D, PointType } from '../drawable/2d/path_point2d'
 import { makeItemExport, makeLabelExport } from '../functional/states'
 import { PolygonType, RectType, State } from '../functional/types'
 import { polygonToExport } from '../server/export'
 import {
-  BotData, EventName, ModelEndpoint,
+  ActionPacketType, BotData, EventName, ModelEndpoint,
   ModelQuery, RegisterMessageType, SyncActionMessageType
 } from '../server/types'
 import Logger from './logger'
+import { index2str } from './util'
 
 /**
  * Manages virtual sessions for a single bot
@@ -115,17 +118,19 @@ export class Bot {
     // precompute queries so they can potentially execute in parallel
     let modelQueries: ModelQuery[] = []
     for (const action of actionPacket.actions) {
-      this.actionCount += 1
-      this.actionLog.push(action)
-      this.store.dispatch(action)
-      Logger.info(
-        sprintf('Bot received action of type %s', action.type))
+      if (action.sessionId !== this.sessionId) {
+        this.actionCount += 1
+        this.actionLog.push(action)
+        this.store.dispatch(action)
+        Logger.info(
+          sprintf('Bot received action of type %s', action.type))
 
-      const state = this.store.getState().present
-      if (action.type === ADD_LABELS) {
-        const actionQueries = this.getModelQueries(
-          state, action as AddLabelsAction)
-        modelQueries = modelQueries.concat(actionQueries)
+        const state = this.store.getState().present
+        if (action.type === ADD_LABELS) {
+          const actionQueries = this.getModelQueries(
+            state, action as AddLabelsAction)
+          modelQueries = modelQueries.concat(actionQueries)
+        }
       }
     }
 
@@ -146,8 +151,38 @@ export class Bot {
         Logger.info('Got a response from the model')
         Logger.info(response.status.toString())
         Logger.info(response.data)
-        // set manualShape to false for returned actions
+
+        const polyPoints = response.data.pred as number[][]
+        const points = polyPoints.map((point: number[]) => {
+          return (new PathPoint2D(
+            point[0], point[1], PointType.VERTEX)).toPathPoint()
+        })
+        // const polygon: PolygonType = {
+        //   points
+        // }
+        // TODO-mark label.manual as false
+        // TODO- use changeShapes to broadcast in parallel
+        // const refineAction = changeLabelShape(
+        //   modelQuery.itemIndex, modelQuery.shapeId, polygon
+        // )
+
+        const refineAction = addPolygon2dLabel(
+          modelQuery.itemIndex, -1, [0], points, true
+        )
+        refineAction.sessionId = this.sessionId
+
         // broadcast
+        const actionPacketOut: ActionPacketType = {
+          actions: [refineAction],
+          id: uuid4()
+        }
+        const messageOut: SyncActionMessageType = {
+          taskId: index2str(this.taskIndex),
+          projectName: this.projectName,
+          sessionId: this.sessionId,
+          actions: actionPacketOut
+        }
+        this.socket.emit(EventName.ACTION_SEND, messageOut)
       } catch (e) {
         Logger.info(sprintf('Query to \"%s\" failed- make sure endpoint is \
 correct and python server is running', modelEndpoint.toString()))
@@ -168,6 +203,12 @@ correct and python server is running', modelEndpoint.toString()))
     for (const itemIndex of action.itemIndices) {
       const item = state.task.items[itemIndex]
       const url = Object.values(item.urls)[0]
+
+      // TODO- don't just get first one
+      const labelIndex = parseInt(Object.keys(item.labels)[0],10)
+      const labelId = item.labels[labelIndex].id
+      const shapeId = item.labels[labelId].shapes[0]
+
       const shapeType = action.shapeTypes[0][0][0]
       const shape = action.shapes[0][0][0]
       switch (shapeType) {
@@ -182,7 +223,9 @@ correct and python server is running', modelEndpoint.toString()))
           })
           const rectQuery = {
             itemExport: rectItem,
-            endpoint: ModelEndpoint.POLYGON_RNN_BASE
+            endpoint: ModelEndpoint.POLYGON_RNN_BASE,
+            shapeId,
+            itemIndex
           }
           queries.push(rectQuery)
           break
@@ -199,7 +242,9 @@ correct and python server is running', modelEndpoint.toString()))
           })
           const polyQuery = {
             itemExport: polyItem,
-            endpoint: ModelEndpoint.POLYGON_RNN_REFINE
+            endpoint: ModelEndpoint.POLYGON_RNN_REFINE,
+            shapeId,
+            itemIndex
           }
           queries.push(polyQuery)
           break

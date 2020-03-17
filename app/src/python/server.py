@@ -4,11 +4,13 @@ import logging
 import json
 import numpy as np
 import config
+import requests
 import tensorflow as tf
 from flask import Flask, request, jsonify, make_response
 from PIL import Image
 from polyrnn_pp.PolygonModel import PolygonModel
 from polyrnn_pp.EvalNet import EvalNet
+from polyrnn_pp.cityscapes import DataProvider
 
 # External PATHS
 PolyRNN_metagraph = 'polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
@@ -68,14 +70,40 @@ def predictPolygonRNNBase():
         start_time = time.time()
         data = request.get_json()
         url = data['url']
-        return url
+        labels = data['labels']
+        label = labels[0]
+        box = label['box2d']
+        x1 = box['x1']
+        x2 = box['x2']
+        y1 = box['y1']
+        y2 = box['y2']
+        points = [[x1, y1], [x2, y1], [x2, y2], [x1, y2]]
 
-        if not image_bytes:
-            return
+        try:
+            img_response = requests.get(url)
+            img = Image.open(io.BytesIO(img_response.content))
+        except:
+            return 'bad image url provided'
 
-        parsed_image = Image.open(io.BytesIO(image_bytes))
+        # crop using bbox, taken from pytorch version repo
+        opts = {
+            'img_side': 224
+        }
+        provider = DataProvider(opts, mode='tool')
+        instance = {
+            'bbox': [x1, y1, x2 - x1, y2-y1],
+            'img': np.array(img)
+        }
+        context_expansion = 0.5
+        crop_dict = provider.extract_crop(
+            {}, instance, context_expansion)
+        crop_img = crop_dict['img']
+        # result = Image.fromarray(crop_img.astype(np.uint8))
+        # result.save('cropWork.png')
+        # return 'hi'
+
         preds = [model.do_test(polySess, np.expand_dims(
-            parsed_image, axis=0), top_k) for top_k in range(_FIRST_TOP_K)]
+            crop_img, axis=0), top_k) for top_k in range(_FIRST_TOP_K)]
         preds = sorted(preds, key=lambda x: x['scores'][0], reverse=True)
 
         logger.info('Finish prediction time: {}'.format(

@@ -160,6 +160,10 @@ export interface ModelQuery {
   itemExport: ItemExport
   /** the endpoint for the query */
   endpoint: ModelEndpoint
+  /** the id of the shape created */
+  shapeId: number
+  /** the index of the item modified */
+  itemIndex: number
 }
 
 /**

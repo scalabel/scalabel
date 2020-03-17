@@ -138,9 +138,12 @@ export class Label2DList {
       ratio: number,
       hideLabels?: boolean
     ): void {
+    console.log('redrawing')
+    console.log(hideLabels)
     const labelsToDraw = (hideLabels) ?
       this._labelList.filter((label) => label.selected) :
       this._labelList
+
     labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
     labelsToDraw.forEach(
       (v) => v.draw(controlContext, ratio, DrawMode.CONTROL)
@@ -151,6 +154,7 @@ export class Label2DList {
    * update labels from the state
    */
   public updateState (state: State): void {
+    console.log('updating state')
     this._state = state
     this._labelTemplates = state.task.config.label2DTemplates
     const self = this
@@ -192,6 +196,7 @@ export class Label2DList {
         }
       }
     }
+    console.log(this._labelList)
   }
 
   /** Get uncommitted labels */

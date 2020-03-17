@@ -53,6 +53,7 @@ export class Polygon2D extends Label2D {
 
   constructor (labelList: Label2DList, closed: boolean) {
     super(labelList)
+    console.log('making new polygon')
     this._points = []
     this._state = Polygon2DState.FREE
     this._mouseCoord = new Vector2D()
@@ -125,6 +126,7 @@ export class Polygon2D extends Label2D {
     context.beginPath()
     const begin = self._points[0].clone().scale(ratio)
     context.moveTo(begin.x, begin.y)
+    console.log('points')
     for (let i = 1; i < numPoints; ++i) {
       const point = self._points[i].clone().scale(ratio)
       if (point.type === PointType.CURVE) {
@@ -135,6 +137,7 @@ export class Polygon2D extends Label2D {
           nextPoint.x, nextPoint.y, nextVertex.x, nextVertex.y)
         i = i + 2
       } else if (point.type === PointType.VERTEX) {
+        console.log('vertex')
         context.lineTo(point.x, point.y)
       }
     }
@@ -155,6 +158,7 @@ export class Polygon2D extends Label2D {
     }
     context.stroke()
     context.restore()
+    console.log('drew lines')
 
     if (mode === DrawMode.CONTROL || self._selected || self._highlighted) {
       // for bezier curve

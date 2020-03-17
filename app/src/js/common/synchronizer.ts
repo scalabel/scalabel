@@ -167,6 +167,8 @@ export class Synchronizer {
       if (action.sessionId !== Session.id) {
         if (types.isTaskAction(action)) {
           // Dispatch any task actions broadcasted from other sessions
+          console.log('frontend dispatch')
+          console.log(action.type)
           Session.dispatch(action)
         }
       }
