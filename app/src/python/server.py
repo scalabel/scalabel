@@ -98,17 +98,20 @@ def predictPolygonRNNBase():
         crop_dict = provider.extract_crop(
             {}, instance, context_expansion)
         crop_img = crop_dict['img']
-        # result = Image.fromarray(crop_img.astype(np.uint8))
-        # result.save('cropWork.png')
-        # return 'hi'
 
         preds = [model.do_test(polySess, np.expand_dims(
             crop_img, axis=0), top_k) for top_k in range(_FIRST_TOP_K)]
         preds = sorted(preds, key=lambda x: x['scores'][0], reverse=True)
+        preds = np.array(preds[0]['polys'][0])
+        start = np.array(crop_dict['starting_point'])
+
+        # translate back to image space
+        preds = [start + p * 224.0/crop_dict['scale_factor'] for p in preds]
+        preds = np.array(preds).tolist()
 
         logger.info('Finish prediction time: {}'.format(
             time.time() - start_time))
-        return make_response(jsonify({'pred': np.array(preds[0]['polys'][0]).tolist()}))
+        return make_response(jsonify({'pred': preds}))
 
 
 @app.route('/polygonRNNRefine', methods=["POST", "GET"])

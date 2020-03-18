@@ -157,17 +157,9 @@ export class Bot {
           return (new PathPoint2D(
             point[0], point[1], PointType.VERTEX)).toPathPoint()
         })
-        // const polygon: PolygonType = {
-        //   points
-        // }
-        // TODO-mark label.manual as false
-        // TODO- use changeShapes to broadcast in parallel
-        // const refineAction = changeLabelShape(
-        //   modelQuery.itemIndex, modelQuery.shapeId, polygon
-        // )
 
         const refineAction = addPolygon2dLabel(
-          modelQuery.itemIndex, -1, [0], points, true
+          modelQuery.itemIndex, -1, [0], points, true, false
         )
         refineAction.sessionId = this.sessionId
 
@@ -204,11 +196,6 @@ correct and python server is running', modelEndpoint.toString()))
       const item = state.task.items[itemIndex]
       const url = Object.values(item.urls)[0]
 
-      // TODO- don't just get first one
-      const labelIndex = parseInt(Object.keys(item.labels)[0],10)
-      const labelId = item.labels[labelIndex].id
-      const shapeId = item.labels[labelId].shapes[0]
-
       const shapeType = action.shapeTypes[0][0][0]
       const shape = action.shapes[0][0][0]
       switch (shapeType) {
@@ -224,7 +211,6 @@ correct and python server is running', modelEndpoint.toString()))
           const rectQuery = {
             itemExport: rectItem,
             endpoint: ModelEndpoint.POLYGON_RNN_BASE,
-            shapeId,
             itemIndex
           }
           queries.push(rectQuery)
@@ -243,7 +229,6 @@ correct and python server is running', modelEndpoint.toString()))
           const polyQuery = {
             itemExport: polyItem,
             endpoint: ModelEndpoint.POLYGON_RNN_REFINE,
-            shapeId,
             itemIndex
           }
           queries.push(polyQuery)
