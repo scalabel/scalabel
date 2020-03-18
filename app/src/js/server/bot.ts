@@ -4,20 +4,17 @@ import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
-import { addPolygon2dLabel } from '../action/polygon2d'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
-import { PathPoint2D, PointType } from '../drawable/2d/path_point2d'
-import { makeItemExport, makeLabelExport } from '../functional/states'
 import { PolygonType, RectType, State } from '../functional/types'
-import { polygonToExport } from '../server/export'
-import {
-  ActionPacketType, BotData, EventName, ModelEndpoint,
-  ModelQuery, RegisterMessageType, SyncActionMessageType
-} from '../server/types'
 import Logger from './logger'
-import { index2str } from './util'
+import { ModelInterface } from './model_interface'
+import {
+  ActionPacketType, BotData, EventName,
+  ModelQuery, RegisterMessageType, SyncActionMessageType
+} from './types'
+import { getPyConnFailedMsg, index2str } from './util'
 
 /**
  * Manages virtual sessions for a single bot
@@ -44,9 +41,13 @@ export class Bot {
   /** Log of packets that have been acked */
   protected ackedPackets: Set<string>
   /** address of model server */
-  protected modelAddress: string
+  protected modelAddress: URL
+  /** interface with model data type */
+  protected modelInterface: ModelInterface
+  /** the axios http config */
+  protected axiosConfig: AxiosRequestConfig
 
-  constructor (botData: BotData) {
+  constructor (botData: BotData, pyHost: string, pyPort: number) {
     this.projectName = botData.projectName
     this.taskIndex = botData.taskIndex
     this.botId = botData.botId
@@ -72,9 +73,16 @@ export class Bot {
     this.actionLog = []
     this.ackedPackets = new Set()
 
-    // currently assume python is on the same server
-    // should put the host/port in a config
-    this.modelAddress = 'http://0.0.0.0:8080'
+    this.modelAddress = new URL(pyHost)
+    this.modelAddress.port = pyPort.toString()
+
+    this.modelInterface = new ModelInterface(this.projectName, this.sessionId)
+
+    this.axiosConfig = {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
   }
 
   /**
@@ -116,8 +124,71 @@ export class Bot {
     this.ackedPackets.add(actionPacket.id)
 
     // precompute queries so they can potentially execute in parallel
-    let modelQueries: ModelQuery[] = []
-    for (const action of actionPacket.actions) {
+    const queries = this.packetToQueries(actionPacket)
+    const actions = await this.executeQueries(queries)
+    this.broadcastActions(actions)
+  }
+
+  /**
+   * Execute queries and get the resulting actions
+   */
+  public async executeQueries (
+    queries: ModelQuery[]): Promise<AddLabelsAction[]> {
+    const actions: AddLabelsAction[] = []
+    for (const query of queries) {
+      const data = query.data
+      const modelEndpoint = new URL(query.endpoint, this.modelAddress)
+      try {
+        const response = await axios.post(
+          modelEndpoint.toString(), data, this.axiosConfig
+        )
+        Logger.info(sprintf('Got a %s response from the model with data: %s',
+          response.status.toString(), response.data))
+
+        const action = this.modelInterface.makePolyAction(
+          response.data.points as number[][], query.itemIndex
+        )
+        actions.push(action)
+      } catch (e) {
+        Logger.info(getPyConnFailedMsg(modelEndpoint.toString(), e.message))
+      }
+    }
+    return actions
+  }
+
+  /**
+   * Generate BDD data format item corresponding to the action
+   * Only handles box2d/polygon2d actions, so assume a single label/shape/item
+   */
+  public actionToQuery (
+    state: State, action: AddLabelsAction): ModelQuery | null {
+    const shapeType = action.shapeTypes[0][0][0]
+    const shape = action.shapes[0][0][0]
+    const labelType = action.labels[0][0].type
+    const itemIndex = action.itemIndices[0]
+    const item = state.task.items[itemIndex]
+    const url = Object.values(item.urls)[0]
+
+    switch (shapeType) {
+      case ShapeTypeName.RECT:
+        return this.modelInterface.makeRectQuery(
+          shape as RectType, url, itemIndex
+        )
+      case ShapeTypeName.POLYGON_2D:
+        return this.modelInterface.makePolyQuery(
+          shape as PolygonType, url, itemIndex, labelType
+        )
+      default:
+        return null
+    }
+  }
+
+  /**
+   * Compute queries for the actions in the packet
+   */
+  public packetToQueries (packet: ActionPacketType): ModelQuery[] {
+    const queries: ModelQuery[] = []
+    for (const action of packet.actions) {
       if (action.sessionId !== this.sessionId) {
         this.actionCount += 1
         this.actionLog.push(action)
@@ -127,118 +198,32 @@ export class Bot {
 
         const state = this.store.getState().present
         if (action.type === ADD_LABELS) {
-          const actionQueries = this.getModelQueries(
+          const query = this.actionToQuery(
             state, action as AddLabelsAction)
-          modelQueries = modelQueries.concat(actionQueries)
+          if (query) {
+            queries.push(query)
+          }
         }
       }
     }
-
-    // execute queries
-    for (const modelQuery of modelQueries) {
-      const data = modelQuery.itemExport
-      const config: AxiosRequestConfig = {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-      const modelEndpoint = new URL(modelQuery.endpoint, this.modelAddress)
-      try {
-        Logger.info(sprintf('data: %s', data))
-        const response = await axios.post(
-          modelEndpoint.toString(), data, config
-        )
-        Logger.info('Got a response from the model')
-        Logger.info(response.status.toString())
-        Logger.info(response.data)
-
-        const polyPoints = response.data.pred as number[][]
-        const points = polyPoints.map((point: number[]) => {
-          return (new PathPoint2D(
-            point[0], point[1], PointType.VERTEX)).toPathPoint()
-        })
-
-        const refineAction = addPolygon2dLabel(
-          modelQuery.itemIndex, -1, [0], points, true, false
-        )
-        refineAction.sessionId = this.sessionId
-
-        // broadcast
-        const actionPacketOut: ActionPacketType = {
-          actions: [refineAction],
-          id: uuid4()
-        }
-        const messageOut: SyncActionMessageType = {
-          taskId: index2str(this.taskIndex),
-          projectName: this.projectName,
-          sessionId: this.sessionId,
-          actions: actionPacketOut
-        }
-        this.socket.emit(EventName.ACTION_SEND, messageOut)
-      } catch (e) {
-        Logger.info(sprintf('Query to \"%s\" failed- make sure endpoint is \
-correct and python server is running', modelEndpoint.toString()))
-        Logger.info(e.message)
-      }
-    }
+    return queries
   }
 
   /**
-   * Generate BDD data format item corresponding to the action
+   * Broadcast the synthetically generated actions
    */
-  public getModelQueries (
-    state: State, action: AddLabelsAction): ModelQuery[] {
-    const queries: ModelQuery[] = []
-    /* this only handles box2d and polygon2d actions,
-     * so we can assume a single shape
-     */
-    for (const itemIndex of action.itemIndices) {
-      const item = state.task.items[itemIndex]
-      const url = Object.values(item.urls)[0]
-
-      const shapeType = action.shapeTypes[0][0][0]
-      const shape = action.shapes[0][0][0]
-      switch (shapeType) {
-        case ShapeTypeName.RECT:
-          const rectLabel = makeLabelExport({
-            box2d: shape as RectType
-          })
-          const rectItem = makeItemExport({
-            name: this.projectName,
-            url,
-            labels: [rectLabel]
-          })
-          const rectQuery = {
-            itemExport: rectItem,
-            endpoint: ModelEndpoint.POLYGON_RNN_BASE,
-            itemIndex
-          }
-          queries.push(rectQuery)
-          break
-        case ShapeTypeName.POLYGON_2D:
-          const labelType = action.labels[0][0].type
-          const poly2d = polygonToExport(shape as PolygonType, labelType)
-          const polyLabel = makeLabelExport({
-            poly2d
-          })
-          const polyItem = makeItemExport({
-            name: this.projectName,
-            url,
-            labels: [polyLabel]
-          })
-          const polyQuery = {
-            itemExport: polyItem,
-            endpoint: ModelEndpoint.POLYGON_RNN_REFINE,
-            itemIndex
-          }
-          queries.push(polyQuery)
-          break
-        default:
-          break
-      }
+  public broadcastActions (actions: AddLabelsAction[]) {
+    const actionPacket: ActionPacketType = {
+      actions,
+      id: uuid4()
     }
-
-    return queries
+    const message: SyncActionMessageType = {
+      taskId: index2str(this.taskIndex),
+      projectName: this.projectName,
+      sessionId: this.sessionId,
+      actions: actionPacket
+    }
+    this.socket.emit(EventName.ACTION_SEND, message)
   }
 
   /**

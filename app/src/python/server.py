@@ -111,7 +111,7 @@ def predictPolygonRNNBase():
 
         logger.info('Finish prediction time: {}'.format(
             time.time() - start_time))
-        return make_response(jsonify({'pred': preds}))
+        return make_response(jsonify({'points': preds}))
 
 
 @app.route('/polygonRNNRefine', methods=["POST", "GET"])

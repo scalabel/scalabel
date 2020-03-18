@@ -31,8 +31,6 @@ export interface ServerConfig {
   userManagement: boolean
   /** Flag to enable session synchronization */
   sync: boolean
-  /** Hostname for synchronization socket */
-  syncHost: string
   /** whether to save automatically */
   autosave: boolean
   /** timeout (seconds) for clearing value from redis cache */
@@ -45,6 +43,10 @@ export interface ServerConfig {
   redisPort: number
   /** Whether to use virtual sessions/bots for assistance */
   bots: boolean
+  /** host of python server */
+  pyHost: string
+  /** port of python server */
+  pyPort: number
 }
 
 /**
@@ -156,8 +158,8 @@ export interface BotData {
 
 /** precomputed queries for models */
 export interface ModelQuery {
-  /** the queried item in bdd format */
-  itemExport: ItemExport
+  /** the data in bdd format */
+  data: ItemExport
   /** the endpoint for the query */
   endpoint: ModelEndpoint
   /** the index of the item modified */

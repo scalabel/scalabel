@@ -9,13 +9,14 @@ export const serverConfig: ServerConfig = {
   database: 'local',
   userManagement: false,
   sync: false,
-  syncHost: 'http://localhost',
   autosave: true,
   redisTimeout: 3600,
   timeForWrite: 600,
   numActionsForWrite: 10,
   redisPort: 6379,
-  bots: false
+  bots: false,
+  pyHost: 'http://0.0.0.0',
+  pyPort: 8080
 }
 
 /* default categories when file is missing and label is box2D or box3D */

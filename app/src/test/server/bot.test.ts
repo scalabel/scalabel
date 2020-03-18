@@ -28,19 +28,19 @@ beforeAll(() => {
 // Note- these tests are similar to the frontend tests for synchronizer
 describe('Test bot functionality', () => {
   test('Test data access', async () => {
-    const bot = new Bot(botData)
+    const bot = new Bot(botData, '', 0)
     expect(bot.getData()).toEqual(botData)
   })
 
   test('Test correct registration message gets sent', async () => {
-    const bot = new Bot(botData)
+    const bot = new Bot(botData, '', 0)
     bot.connectHandler()
 
     checkConnectMessage(bot.sessionId)
   })
 
   test('Test send-ack loop', async () => {
-    const bot = new Bot(botData)
+    const bot = new Bot(botData, '', 0)
 
     const packet1: ActionPacketType = {
       actions: [getRandomBox2dAction()],
@@ -57,15 +57,15 @@ describe('Test bot functionality', () => {
     expect(bot.actionCount).toBe(0)
 
     // send single action message
-    bot.actionBroadcastHandler(message1)
+    await bot.actionBroadcastHandler(message1)
     expect(bot.actionCount).toBe(1)
 
     // duplicates should be ignored
-    bot.actionBroadcastHandler(message1)
+    await bot.actionBroadcastHandler(message1)
     expect(bot.actionCount).toBe(1)
 
     // finally send a 2-action message
-    bot.actionBroadcastHandler(message2)
+    await bot.actionBroadcastHandler(message2)
     expect(bot.actionCount).toBe(3)
 
     // and reset the action count
