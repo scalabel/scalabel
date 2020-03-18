@@ -63,6 +63,8 @@ export const reducer: Reducer<State> = (
       )
     case types.SUBMIT:
       return common.submit(state, action as types.SubmitAction)
+    case types.START_LINK_TRACK:
+      return common.startLinkTrack(state)
     default:
   }
   return state

@@ -7,8 +7,11 @@ import { StyledButton } from '../styles/label'
  * @param {function} clickCallback call back function for lick
  */
 export function makeButton (name: string,
-                            clickCallback: () => void = () => { return }) {
+                            clickCallback: () => void = () => { return },
+                            bgColor: string = 'white') {
   return (
-    <StyledButton onClick={clickCallback}>{name}</StyledButton>
+  <StyledButton onClick={clickCallback} background={bgColor}>
+    {name}
+  </StyledButton>
   )
 }

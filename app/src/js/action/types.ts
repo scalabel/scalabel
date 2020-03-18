@@ -36,6 +36,7 @@ export const CHANGE_VIEWER_CONFIG = 'CHANGE_VIEWER_CONFIG'
 export const UPDATE_PANE = 'UPDATE_PANE'
 export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
+export const START_LINK_TRACK = 'START_LINK_TRACK'
 
 /**
  * These are actions that should be shared between sessions/users

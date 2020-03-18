@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 language: node_js
 python:
   - "3.8"
@@ -10,16 +10,16 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install -y npm build-essential libcairo2-dev
     libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-    python3-pip python3-setuptools
+    python3.8 python3.8-dev python3-pip python3-setuptools
   - npm install -g npm@latest
 install:
-  - sudo python3 -m pip install --upgrade pip
-  - sudo python3 -m pip install --ignore-installed -r scripts/requirements.txt
+  - sudo python3.8 -m pip install --upgrade pip
+  - sudo python3.8 -m pip install --ignore-installed -r scripts/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
-  - python3 -m pylint scripts/
-  - python3 -m mypy scripts/launch_server.py
+  - python3.8 -m pylint scripts/ scalabel
+  - python3.8 -m mypy --strict scripts scalabel
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/webpack --config webpack.config.js --mode=production
   - npm test

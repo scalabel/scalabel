@@ -441,6 +441,8 @@ export interface SessionType {
   startTime: number
   /** item statuses */
   itemStatuses: ItemStatus[]
+  /** track linking toggled */
+  trackLinking: boolean
 }
 
 export interface State {
