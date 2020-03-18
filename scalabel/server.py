@@ -11,6 +11,16 @@ from PIL import Image
 from polyrnn_pp.PolygonModel import PolygonModel
 from polyrnn_pp.EvalNet import EvalNet
 from polyrnn_pp.cityscapes import DataProvider
+from os import environ as env
+import multiprocessing
+
+PORT = int(env.get("PORT", 8080))
+DEBUG_MODE = int(env.get("DEBUG_MODE", 1))
+
+# Gunicorn config
+bind = ":" + str(PORT)
+workers = multiprocessing.cpu_count()
+threads = multiprocessing.cpu_count()
 
 # External PATHS
 PolyRNN_metagraph = 'polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
