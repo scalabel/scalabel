@@ -1,26 +1,17 @@
-import io
-import time
-import logging
-import json
-import numpy as np
-import config
-import requests
-import tensorflow as tf
-from flask import Flask, request, jsonify, make_response
-from PIL import Image
-from polyrnn_pp.PolygonModel import PolygonModel
-from polyrnn_pp.EvalNet import EvalNet
-from polyrnn_pp.cityscapes import DataProvider
 from os import environ as env
-import multiprocessing
-
-PORT = int(env.get("PORT", 8080))
-DEBUG_MODE = int(env.get("DEBUG_MODE", 1))
-
-# Gunicorn config
-bind = ":" + str(PORT)
-workers = multiprocessing.cpu_count()
-threads = multiprocessing.cpu_count()
+from polyrnn_pp.cityscapes import DataProvider
+from polyrnn_pp.EvalNet import EvalNet
+from polyrnn_pp.PolygonModel import PolygonModel
+from PIL import Image
+from flask import Flask, request, jsonify, make_response
+import tensorflow as tf
+import requests
+import numpy as np
+import json
+import logging
+import time
+import io
+import argparse
 
 # External PATHS
 PolyRNN_metagraph = 'polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
@@ -64,72 +55,100 @@ polySess = tf.Session(config=tf.ConfigProto(
 ), graph=polyGraph)
 model.saver.restore(polySess, PolyRNN_checkpoint)
 
-app = Flask(__name__)
 
-
-@app.route('/')
 def homepage():
+    """ hello world test """
     return 'Test server for PolygonRNN++\n'
 
 
-@app.route('/polygonRNNBase', methods=["POST", "GET"])
-def predictPolygonRNNBase():
-    if request.method == 'POST':
-        # we will get the file from the request
-        logger.info('Hitting prediction endpoint')
-        start_time = time.time()
-        data = request.get_json()
-        url = data['url']
-        labels = data['labels']
-        label = labels[0]
-        box = label['box2d']
-        x1 = box['x1']
-        x2 = box['x2']
-        y1 = box['y1']
-        y2 = box['y2']
-        points = [[x1, y1], [x2, y1], [x2, y2], [x1, y2]]
+def polyrnn_base():
+    """ predict rect -> polygon """
+    logger.info('Hitting prediction endpoint')
+    start_time = time.time()
+    data = request.get_json()
+    url = data['url']
+    labels = data['labels']
+    label = labels[0]
+    box = label['box2d']
+    x1 = box['x1']
+    x2 = box['x2']
+    y1 = box['y1']
+    y2 = box['y2']
 
-        try:
-            img_response = requests.get(url)
-            img = Image.open(io.BytesIO(img_response.content))
-        except:
-            return 'bad image url provided'
+    try:
+        img_response = requests.get(url)
+        img = Image.open(io.BytesIO(img_response.content))
+    except requests.exceptions.ConnectionError:
+        return 'Bad image url provided.'
 
-        # crop using bbox, taken from pytorch version repo
-        opts = {
-            'img_side': 224
-        }
-        provider = DataProvider(opts, mode='tool')
-        instance = {
-            'bbox': [x1, y1, x2 - x1, y2-y1],
-            'img': np.array(img)
-        }
-        context_expansion = 0.5
-        crop_dict = provider.extract_crop(
-            {}, instance, context_expansion)
-        crop_img = crop_dict['img']
+    # crop using bbox, taken from pytorch version repo
+    opts = {
+        'img_side': 224
+    }
+    provider = DataProvider(opts, mode='tool')
+    instance = {
+        'bbox': [x1, y1, x2 - x1, y2-y1],
+        'img': np.array(img)
+    }
+    context_expansion = 0.5
+    crop_dict = provider.extract_crop(
+        {}, instance, context_expansion)
+    crop_img = crop_dict['img']
 
-        preds = [model.do_test(polySess, np.expand_dims(
-            crop_img, axis=0), top_k) for top_k in range(_FIRST_TOP_K)]
-        preds = sorted(preds, key=lambda x: x['scores'][0], reverse=True)
-        preds = np.array(preds[0]['polys'][0])
-        start = np.array(crop_dict['starting_point'])
+    preds = [model.do_test(polySess, np.expand_dims(
+        crop_img, axis=0), top_k) for top_k in range(_FIRST_TOP_K)]
+    preds = sorted(preds, key=lambda x: x['scores'][0], reverse=True)
+    preds = np.array(preds[0]['polys'][0])
+    start = np.array(crop_dict['starting_point'])
 
-        # translate back to image space
-        preds = [start + p * 224.0/crop_dict['scale_factor'] for p in preds]
-        preds = np.array(preds).tolist()
+    # translate back to image space
+    preds = [start + p * 224.0/crop_dict['scale_factor'] for p in preds]
+    preds = np.array(preds).tolist()
 
-        logger.info('Finish prediction time: {}'.format(
-            time.time() - start_time))
-        return make_response(jsonify({'points': preds}))
+    logger.info('Time for prediction: {}'.format(
+        time.time() - start_time))
+    return make_response(jsonify({'points': preds}))
 
 
-@app.route('/polygonRNNRefine', methods=["POST", "GET"])
-def predictPolygonRNNRefine():
+def polyrnn_refine():
+    """ predict poly -> poly """
     return 'This method is not yet implemented\n'
 
 
+def create_app() -> Flask:
+    """ set up the flask app """
+    app = Flask(__name__)
+
+    # url rules should match NodeJS endpoint names
+    app.add_url_rule('/', view_func=homepage)
+    app.add_url_rule('/polygonRNNBase',
+                     view_func=polyrnn_base, methods=['POST'])
+    app.add_url_rule('/polygonRNNRefine',
+                     view_func=polyrnn_refine, methods=['POST'])
+
+    return app
+
+
+def launch() -> None:
+    """ main process launcher """
+    logger.info('Launching model server')
+    parser = argparse.ArgumentParser(
+        description='Launch the server on one machine.')
+    parser.add_argument(
+        '--host', dest='host',
+        help='server hostname', default='0.0.0.0')
+    parser.add_argument(
+        '--port', dest='port',
+        help='server port', default=8080)
+    parser.add_argument(
+        '--debugMode', dest='debugMode',
+        help='server debug mode', default=1)
+    args = parser.parse_args()
+
+    app = create_app()
+    app.run(host=args.host, debug=args.debugMode,
+            port=args.port, threaded=True, use_reloader=False)
+
+
 if __name__ == "__main__":
-    print("Starting web service")
-    app.run(host='0.0.0.0', debug=config.DEBUG_MODE,
-            port=config.PORT, threaded=True, use_reloader=False)
+    launch()
