@@ -1,59 +1,14 @@
-from os import environ as env
+import argparse
+import io
+import logging
+import time
+import numpy as np
+import requests
 from polyrnn_pp.cityscapes import DataProvider
-from polyrnn_pp.EvalNet import EvalNet
-from polyrnn_pp.PolygonModel import PolygonModel
+from polyrnn_interface import PolyrnnInterface
 from PIL import Image
 from flask import Flask, request, jsonify, make_response
 import tensorflow as tf
-import requests
-import numpy as np
-import json
-import logging
-import time
-import io
-import argparse
-
-# External PATHS
-PolyRNN_metagraph = 'polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
-PolyRNN_checkpoint = 'polyrnn_pp/models/poly/polygonplusplus.ckpt'
-EvalNet_checkpoint = 'polyrnn_pp/models/evalnet/evalnet.ckpt'
-GGNN_metagraph = 'polyrnn_pp/models/ggnn/ggnn.ckpt.meta'
-GGNN_checkpoint = 'polyrnn_pp/models/ggnn/ggnn.ckpt'
-
-# Const
-_BATCH_SIZE = 1
-_FIRST_TOP_K = 1
-
-# logging
-FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
-logging.basicConfig(format=FORMAT)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# graphs
-evalGraph = tf.Graph()
-polyGraph = tf.Graph()
-
-# Initializing and restoring the evaluator net.
-with evalGraph.as_default():
-    with tf.variable_scope("discriminator_network"):
-        evaluator = EvalNet(_BATCH_SIZE)
-        evaluator.build_graph()
-    saver = tf.train.Saver()
-
-    # Start session
-    evalSess = tf.Session(config=tf.ConfigProto(
-        allow_soft_placement=True
-    ), graph=evalGraph)
-    saver.restore(evalSess, EvalNet_checkpoint)
-
-# Initializing and restoring PolyRNN++
-model = PolygonModel(PolyRNN_metagraph, polyGraph)
-model.register_eval_fn(lambda input_: evaluator.do_test(evalSess, input_))
-polySess = tf.Session(config=tf.ConfigProto(
-    allow_soft_placement=True
-), graph=polyGraph)
-model.saver.restore(polySess, PolyRNN_checkpoint)
 
 
 def homepage():
@@ -61,8 +16,9 @@ def homepage():
     return 'Test server for PolygonRNN++\n'
 
 
-def polyrnn_base():
+def polyrnn_base(interface):
     """ predict rect -> polygon """
+    logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
     start_time = time.time()
     data = request.get_json()
@@ -95,18 +51,15 @@ def polyrnn_base():
         {}, instance, context_expansion)
     crop_img = crop_dict['img']
 
-    preds = [model.do_test(polySess, np.expand_dims(
-        crop_img, axis=0), top_k) for top_k in range(_FIRST_TOP_K)]
-    preds = sorted(preds, key=lambda x: x['scores'][0], reverse=True)
-    preds = np.array(preds[0]['polys'][0])
+    preds = interface.predict_from_rect(crop_img)
     start = np.array(crop_dict['starting_point'])
 
     # translate back to image space
     preds = [start + p * 224.0/crop_dict['scale_factor'] for p in preds]
     preds = np.array(preds).tolist()
 
-    logger.info('Time for prediction: {}'.format(
-        time.time() - start_time))
+    logger.info('Time for prediction: %s',
+                time.time() - start_time)
     return make_response(jsonify({'points': preds}))
 
 
@@ -119,10 +72,13 @@ def create_app() -> Flask:
     """ set up the flask app """
     app = Flask(__name__)
 
+    # pass to methods using closure
+    interface = PolyrnnInterface()
+
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)
     app.add_url_rule('/polygonRNNBase',
-                     view_func=polyrnn_base, methods=['POST'])
+                     view_func=lambda: polyrnn_base(interface), methods=['POST'])
     app.add_url_rule('/polygonRNNRefine',
                      view_func=polyrnn_refine, methods=['POST'])
 
@@ -131,6 +87,12 @@ def create_app() -> Flask:
 
 def launch() -> None:
     """ main process launcher """
+    # logging
+    log_format = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
+    logging.basicConfig(format=log_format)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
     logger.info('Launching model server')
     parser = argparse.ArgumentParser(
         description='Launch the server on one machine.')
@@ -146,6 +108,7 @@ def launch() -> None:
     args = parser.parse_args()
 
     app = create_app()
+
     app.run(host=args.host, debug=args.debugMode,
             port=args.port, threaded=True, use_reloader=False)
 
