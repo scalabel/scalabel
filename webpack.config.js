@@ -16,6 +16,7 @@ let config = {
     dashboard: __dirname + '/app/src/js/entries/dashboard.tsx',
     vendor: __dirname + '/app/src/js/entries/vendor.tsx',
     label: __dirname + '/app/src/js/entries/label.index.ts',
+    login: __dirname + '/app/src/js/entries/login.index.tsx',
   },
   output: {
     filename: '[name].js',
