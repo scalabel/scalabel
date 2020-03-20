@@ -4,7 +4,6 @@ import logging
 import time
 import numpy as np
 import requests
-from polyrnn_pp.cityscapes import DataProvider
 from polyrnn_interface import PolyrnnInterface
 from PIL import Image
 from flask import Flask, request, jsonify, make_response
@@ -16,7 +15,7 @@ def homepage():
     return 'Test server for PolygonRNN++\n'
 
 
-def polyrnn_base(interface):
+def polyrnn_base(polyrnn):
     """ predict rect -> polygon """
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
@@ -38,25 +37,12 @@ def polyrnn_base(interface):
         return 'Bad image url provided.'
 
     # crop using bbox, taken from pytorch version repo
-    opts = {
-        'img_side': 224
-    }
-    provider = DataProvider(opts, mode='tool')
-    instance = {
-        'bbox': [x1, y1, x2 - x1, y2-y1],
-        'img': np.array(img)
-    }
-    context_expansion = 0.5
-    crop_dict = provider.extract_crop(
-        {}, instance, context_expansion)
+    bbox = [x1, y1, x2 - x1, y2-y1]
+    crop_dict = polyrnn.bbox_to_crop(np.array(img), bbox)
     crop_img = crop_dict['img']
 
-    preds = interface.predict_from_rect(crop_img)
-    start = np.array(crop_dict['starting_point'])
-
-    # translate back to image space
-    preds = [start + p * 224.0/crop_dict['scale_factor'] for p in preds]
-    preds = np.array(preds).tolist()
+    preds = polyrnn.predict_from_rect(crop_img)
+    preds = polyrnn.rescale_output(preds, crop_dict)
 
     logger.info('Time for prediction: %s',
                 time.time() - start_time)
@@ -73,12 +59,12 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     # pass to methods using closure
-    interface = PolyrnnInterface()
+    polyrnn = PolyrnnInterface()
 
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)
     app.add_url_rule('/polygonRNNBase',
-                     view_func=lambda: polyrnn_base(interface), methods=['POST'])
+                     view_func=lambda: polyrnn_base(polyrnn), methods=['POST'])
     app.add_url_rule('/polygonRNNRefine',
                      view_func=polyrnn_refine, methods=['POST'])
 

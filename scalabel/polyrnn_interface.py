@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 from polyrnn_pp.EvalNet import EvalNet
 from polyrnn_pp.PolygonModel import PolygonModel
+from polyrnn_pp.cityscapes import DataProvider
 
 
 class PolyrnnInterface():
@@ -18,6 +19,8 @@ class PolyrnnInterface():
         # Const
         batch_size = 1
         self.first_top_k = 1
+        self.img_side = 224
+        self.context_expansion = 0.5
 
         # graphs
         eval_graph = tf.Graph()
@@ -52,3 +55,27 @@ class PolyrnnInterface():
         preds = sorted(preds, key=lambda x: x['scores'][0], reverse=True)
         preds = np.array(preds[0]['polys'][0])
         return preds
+
+    def bbox_to_crop(self, img, bbox):
+        """ create square crop around expanded bbox """
+        opts = {
+            'img_side': self.img_side
+        }
+        provider = DataProvider(opts, mode='tool')
+        instance = {
+            'bbox': bbox,
+            'img': img
+        }
+        context_expansion = 0.5
+        crop_dict = provider.extract_crop(
+            {}, instance, context_expansion)
+        return crop_dict
+
+    def rescale_output(self, preds, crop_dict):
+        """ undo the cropping transform to get original output coords """
+        start = np.array(crop_dict['starting_point'])
+
+        # translate back to image space
+        preds = [start + p * float(self.img_side) /
+                 crop_dict['scale_factor'] for p in preds]
+        return np.array(preds).tolist()
