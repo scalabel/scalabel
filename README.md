@@ -109,7 +109,7 @@ More installation and usage details can be find in our [documentation](http://ww
    Otherwise, without using docker,
 
    ```
-   python scripts/launch_server.py --config ./data/config.yml
+   python3.8 scripts/launch_server.py --config ./data/config.yml
    ```
 
    Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.

@@ -45,6 +45,21 @@ def launch() -> None:
     logger.info(' '.join(redis_cmd))
     subprocess.Popen(redis_cmd)
 
+    # launch the python server if bot option is true
+    bot = 'bots'
+    if bot in config and config[bot]:
+        py_command = ['python3.8', 'scalabel/server.py']
+        host = 'pyHost'
+        port = 'pyPort'
+        if host in config:
+            py_command += ['--host', config[host]]
+        if port in config:
+            py_command += ['--port', str(config[port])]
+
+        logger.info('Launching python server')
+        logger.info(' '.join(py_command))
+        subprocess.Popen(py_command)
+
     # Try to use all the available memory for this single instance launcher
     memory = psutil.virtual_memory()
     max_memory = int(memory.available / 1024 / 1024)

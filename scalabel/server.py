@@ -1,13 +1,15 @@
+""" Endpoints for model prediction """
 import argparse
 import io
 import logging
 import time
+from typing import Dict, List
 import numpy as np
 import requests
-from polyrnn_interface import PolyrnnInterface
+from polyrnn_dummy import PolyrnnDummy
+from polyrnn_base import PolyrnnBase
 from PIL import Image
 from flask import Flask, request, jsonify, make_response
-import tensorflow as tf
 
 
 def homepage():
@@ -15,20 +17,19 @@ def homepage():
     return 'Test server for PolygonRNN++\n'
 
 
-def polyrnn_base(polyrnn):
+def polyrnn_base(polyrnn: PolyrnnBase):
     """ predict rect -> polygon """
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
     start_time = time.time()
     data = request.get_json()
-    url = data['url']
-    labels = data['labels']
-    label = labels[0]
-    box = label['box2d']
+    url: str = data['url']
+    box: Dict[str, float] = data['labels'][0]['box2d']
     x1 = box['x1']
     x2 = box['x2']
     y1 = box['y1']
     y2 = box['y2']
+    bbox = [x1, y1, x2 - x1, y2-y1]
 
     try:
         img_response = requests.get(url)
@@ -37,11 +38,10 @@ def polyrnn_base(polyrnn):
         return 'Bad image url provided.'
 
     # crop using bbox, taken from pytorch version repo
-    bbox = [x1, y1, x2 - x1, y2-y1]
     crop_dict = polyrnn.bbox_to_crop(np.array(img), bbox)
     crop_img = crop_dict['img']
 
-    preds = polyrnn.predict_from_rect(crop_img)
+    preds: List[np.ndarray] = polyrnn.predict_from_rect(crop_img)
     preds = polyrnn.rescale_output(preds, crop_dict)
 
     logger.info('Time for prediction: %s',
@@ -59,7 +59,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     # pass to methods using closure
-    polyrnn = PolyrnnInterface()
+    polyrnn = PolyrnnDummy()
 
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)
@@ -73,9 +73,8 @@ def create_app() -> Flask:
 
 def launch() -> None:
     """ main process launcher """
-    # logging
-    log_format = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
-    logging.basicConfig(format=log_format)
+    log_f = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
+    logging.basicConfig(format=log_f)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 

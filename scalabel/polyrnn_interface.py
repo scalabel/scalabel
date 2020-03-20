@@ -1,11 +1,14 @@
+""" Interface with the polyrnn model """
 import numpy as np
 import tensorflow as tf
 from polyrnn_pp.EvalNet import EvalNet
 from polyrnn_pp.PolygonModel import PolygonModel
 from polyrnn_pp.cityscapes import DataProvider
+from polyrnn_base import PolyrnnBase
+from typing import List
 
 
-class PolyrnnInterface():
+class PolyrnnInterface(PolyrnnBase):
     """Class to interface with the PolygonRNN model"""
 
     def __init__(self):
@@ -13,8 +16,10 @@ class PolyrnnInterface():
         polyrnn_metagraph = 'polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
         polyrnn_checkpoint = 'polyrnn_pp/models/poly/polygonplusplus.ckpt'
         evalnet_checkpoint = 'polyrnn_pp/models/evalnet/evalnet.ckpt'
-        ggnn_metagraph = 'polyrnn_pp/models/ggnn/ggnn.ckpt.meta'
-        ggnn_checkpoint = 'polyrnn_pp/models/ggnn/ggnn.ckpt'
+
+        # TODO: use GGNN network for poly -> poly
+        # ggnn_metagraph = 'polyrnn_pp/models/ggnn/ggnn.ckpt.meta'
+        # ggnn_checkpoint = 'polyrnn_pp/models/ggnn/ggnn.ckpt'
 
         # Const
         batch_size = 1
@@ -71,11 +76,12 @@ class PolyrnnInterface():
             {}, instance, context_expansion)
         return crop_dict
 
-    def rescale_output(self, preds, crop_dict):
+    def rescale_output(self, preds: List[np.ndarray], crop_dict) -> List[List[float]]:
         """ undo the cropping transform to get original output coords """
         start = np.array(crop_dict['starting_point'])
 
         # translate back to image space
         preds = [start + p * float(self.img_side) /
                  crop_dict['scale_factor'] for p in preds]
+
         return np.array(preds).tolist()
