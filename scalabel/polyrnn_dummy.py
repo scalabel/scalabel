@@ -23,7 +23,8 @@ class PolyrnnDummy(PolyrnnBase):
         }
         return crop_dict
 
-    def rescale_output(self, preds: List[np.ndarray], crop_dict) -> List[List[float]]:
+    def rescale_output(self, preds: List[np.ndarray],
+                       crop_dict) -> List[List[float]]:
         """ undo the cropping to get original output coords """
         start = np.array(crop_dict['start'])
         preds = [start + p for p in preds]

@@ -6,16 +6,16 @@ import time
 from typing import Dict, List
 import numpy as np
 import requests
-from polyrnn_base import PolyrnnBase
-# try:
-from polyrnn_interface import PolyrnnInterface as Polyrnn
-# except ImportError:
-#     from polyrnn_dummy import PolyrnnDummy as Polyrnn
-from PIL import Image
 from flask import Flask, request, jsonify, make_response
+from PIL import Image
+from polyrnn_base import PolyrnnBase
+try:
+    from polyrnn_interface import PolyrnnInterface as Polyrnn
+except ImportError:
+    from polyrnn_dummy import PolyrnnDummy as Polyrnn
 
 
-def homepage():
+def homepage() -> str:
     """ hello world test """
     return 'Test server for PolygonRNN++\n'
 
@@ -52,7 +52,7 @@ def polyrnn_base(polyrnn: PolyrnnBase):
     return make_response(jsonify({'points': preds}))
 
 
-def polyrnn_refine():
+def polyrnn_refine() -> str:
     """ predict poly -> poly """
     return 'This method is not yet implemented\n'
 

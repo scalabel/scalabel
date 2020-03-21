@@ -1,5 +1,6 @@
 """ Interface with the polyrnn model """
 from typing import List
+import os
 import numpy as np
 import skimage.transform as transform
 import tensorflow as tf
@@ -13,11 +14,13 @@ class PolyrnnInterface(PolyrnnBase):
 
     def __init__(self):
         # External PATHS
-        polyrnn_metagraph = 'scalabel/polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
-        polyrnn_checkpoint = 'scalabel/polyrnn_pp/models/poly/polygonplusplus.ckpt'
-        evalnet_checkpoint = 'scalabel/polyrnn_pp/models/evalnet/evalnet.ckpt'
+        model_dir = os.path.join('scalabel', 'polyrnn_pp', 'models')
+        polyrnn_metagraph = os.path.join(
+            model_dir, 'poly', 'polygonplusplus.ckpt.meta')
+        polyrnn_checkpoint = os.path.join(
+            model_dir, 'poly', 'polygonplusplus.ckpt')
+        evalnet_checkpoint = os.path.join(model_dir, 'evalnet', 'evalnet.ckpt')
 
-        # TODO: use GGNN network for poly -> poly
         # ggnn_metagraph = 'polyrnn_pp/models/ggnn/ggnn.ckpt.meta'
         # ggnn_checkpoint = 'polyrnn_pp/models/ggnn/ggnn.ckpt'
 
@@ -105,7 +108,6 @@ class PolyrnnInterface(PolyrnnBase):
         new_img = transform.rescale(new_img, scale_factor, order=1,
                                     preserve_range=True, multichannel=True)
         new_img = new_img.astype(np.float32)
-        #assert new_img.shape == [self.opts['img_side'], self.opts['img_side'], 3]
 
         starting_point = [x_min, y_min-top_margin]
 
@@ -127,7 +129,8 @@ class PolyrnnInterface(PolyrnnBase):
 
         return return_dict
 
-    def rescale_output(self, preds: List[np.ndarray], crop_dict) -> List[List[float]]:
+    def rescale_output(self, preds: List[np.ndarray],
+                       crop_dict) -> List[List[float]]:
         """ undo the cropping transform to get original output coords """
         start = np.array(crop_dict['starting_point'])
 
