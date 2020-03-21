@@ -6,8 +6,11 @@ import time
 from typing import Dict, List
 import numpy as np
 import requests
-from polyrnn_dummy import PolyrnnDummy
 from polyrnn_base import PolyrnnBase
+# try:
+from polyrnn_interface import PolyrnnInterface as Polyrnn
+# except ImportError:
+#     from polyrnn_dummy import PolyrnnDummy as Polyrnn
 from PIL import Image
 from flask import Flask, request, jsonify, make_response
 
@@ -59,7 +62,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     # pass to methods using closure
-    polyrnn = PolyrnnDummy()
+    polyrnn = Polyrnn()
 
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)

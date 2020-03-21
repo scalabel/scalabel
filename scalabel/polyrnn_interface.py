@@ -1,11 +1,11 @@
 """ Interface with the polyrnn model """
-import numpy as np
-import tensorflow as tf
-from polyrnn_pp.EvalNet import EvalNet
-from polyrnn_pp.PolygonModel import PolygonModel
-from polyrnn_pp.cityscapes import DataProvider
-from polyrnn_base import PolyrnnBase
 from typing import List
+import numpy as np
+import skimage.transform as transform
+import tensorflow as tf
+from EvalNet import EvalNet
+from PolygonModel import PolygonModel
+from polyrnn_base import PolyrnnBase
 
 
 class PolyrnnInterface(PolyrnnBase):
@@ -13,9 +13,9 @@ class PolyrnnInterface(PolyrnnBase):
 
     def __init__(self):
         # External PATHS
-        polyrnn_metagraph = 'polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
-        polyrnn_checkpoint = 'polyrnn_pp/models/poly/polygonplusplus.ckpt'
-        evalnet_checkpoint = 'polyrnn_pp/models/evalnet/evalnet.ckpt'
+        polyrnn_metagraph = 'scalabel/polyrnn_pp/models/poly/polygonplusplus.ckpt.meta'
+        polyrnn_checkpoint = 'scalabel/polyrnn_pp/models/poly/polygonplusplus.ckpt'
+        evalnet_checkpoint = 'scalabel/polyrnn_pp/models/evalnet/evalnet.ckpt'
 
         # TODO: use GGNN network for poly -> poly
         # ggnn_metagraph = 'polyrnn_pp/models/ggnn/ggnn.ckpt.meta'
@@ -62,19 +62,70 @@ class PolyrnnInterface(PolyrnnBase):
         return preds
 
     def bbox_to_crop(self, img, bbox):
-        """ create square crop around expanded bbox """
-        opts = {
-            'img_side': self.img_side
+        """
+        Takes in image and bounding box
+        Crops to an expanded square around the bounding box
+        Source: https://github.com/fidler-lab/polyrnn-pp-pytorch
+        """
+        x0, y0, w, h = bbox
+
+        x_center = x0 + (1+w)/2.
+        y_center = y0 + (1+h)/2.
+
+        widescreen = w > h
+
+        if not widescreen:
+            img = img.transpose((1, 0, 2))
+            x_center, y_center, w, h = y_center, x_center, h, w
+
+        x_min = int(np.floor(x_center - w*(1 + self.context_expansion)/2.))
+        x_max = int(np.ceil(x_center + w*(1 + self.context_expansion)/2.))
+
+        x_min = max(0, x_min)
+        x_max = min(img.shape[1] - 1, x_max)
+
+        patch_w = x_max - x_min
+        # NOTE: Different from before
+
+        y_min = int(np.floor(y_center - patch_w / 2.))
+        y_max = y_min + patch_w
+
+        top_margin = max(0, y_min) - y_min
+
+        y_min = max(0, y_min)
+        y_max = min(img.shape[0] - 1, y_max)
+
+        scale_factor = float(self.img_side)/patch_w
+
+        patch_img = img[y_min:y_max, x_min:x_max, :]
+
+        new_img = np.zeros([patch_w, patch_w, 3], dtype=np.float32)
+        new_img[top_margin: top_margin + patch_img.shape[0], :, ] = patch_img
+
+        new_img = transform.rescale(new_img, scale_factor, order=1,
+                                    preserve_range=True, multichannel=True)
+        new_img = new_img.astype(np.float32)
+        #assert new_img.shape == [self.opts['img_side'], self.opts['img_side'], 3]
+
+        starting_point = [x_min, y_min-top_margin]
+
+        if not widescreen:
+            # Now that everything is in a square
+            # bring things back to original mode
+            new_img = new_img.transpose((1, 0, 2))
+            starting_point = [y_min-top_margin, x_min]
+
+        return_dict = {
+            'img': new_img,
+            'patch_w': patch_w,
+            'top_margin': top_margin,
+            'patch_shape': patch_img.shape,
+            'scale_factor': scale_factor,
+            'starting_point': starting_point,
+            'widescreen': widescreen
         }
-        provider = DataProvider(opts, mode='tool')
-        instance = {
-            'bbox': bbox,
-            'img': img
-        }
-        context_expansion = 0.5
-        crop_dict = provider.extract_crop(
-            {}, instance, context_expansion)
-        return crop_dict
+
+        return return_dict
 
     def rescale_output(self, preds: List[np.ndarray], crop_dict) -> List[List[float]]:
         """ undo the cropping transform to get original output coords """
