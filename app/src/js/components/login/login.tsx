@@ -1,5 +1,6 @@
 import Button from '@material-ui/core/Button'
 import Checkbox from '@material-ui/core/Checkbox'
+import CssBaseline from '@material-ui/core/CssBaseline'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Grid from '@material-ui/core/Grid'
 import Link from '@material-ui/core/Link'
@@ -7,23 +8,25 @@ import Modal from '@material-ui/core/Modal'
 import { withStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import React from 'react'
-import { loginStyle } from '../../styles/login'
+import { loginButtonStyle, loginCheckboxStyle, loginStyle, loginTextFieldStyle } from '../../styles/login'
 
 export interface ClassType {
+  /** body */
+  body: string,
   /** img */
   img: string,
   /** break */
   break: string,
   /** link */
   link: string,
+  /** intro */
+  intro: string,
   /** form */
   form: string,
-  /** submit */
-  submit: string,
+  /** checkbox */
+  checkbox: string,
   /** bdd_font */
   bdd_font: string,
-  /** scalabel_font */
-  scalabel_font: string,
   /** btn */
   btn: string
 }
@@ -58,32 +61,40 @@ class Login extends React.Component<Props, State> {
    */
   public render () {
     return (
-      <body>
+      <div className={this.props.classes.body}>
+        <CssBaseline />
         <img
           src='img/scalabel_white.svg'
+          className={this.props.classes.img}
           alt='Scalabel Logo'
           height='200' />
-        <br />
-        <p> A scalable open-sourced annotation web tool brought by
-            <a href='https://deepdrive.berkeley.edu/'> Berkeley DeepDrive </a>
+        <br className={this.props.classes.break}/>
+        <p className={this.props.classes.intro}>
+            A scalable open-sourced annotation web tool brought by
+            <Link className=
+              {this.props.classes.link + ' ' + this.props.classes.bdd_font}
+              href='https://deepdrive.berkeley.edu/'
+              variant='h6'>
+                Berkeley DeepDrive
+            </Link>
             <br />
-            For more information: <a href='http://scalabel.ai'> Scalabel.ai</a>.
+            For more information:
+            <Link className={this.props.classes.link} href='http://scalabel.ai'>
+              Scalabel.ai
+            </Link>
         </p>
-        <br />
+        <br className={this.props.classes.break}/>
         <div>
-          <button type='button' onClick={this.handleOpen}>
+          <Button className={this.props.classes.btn} onClick={this.handleOpen}>
           Login
-          </button>
+          </Button>
         </div>
         <Modal
-          aria-labelledby='simple-modal-title'
-          aria-describedby='simple-modal-description'
           open={this.state.open}
           onClose={this.handleClose}
         >
-          <form noValidate>
-            <TextField
-              variant='outlined'
+          <form className={this.props.classes.form} noValidate>
+            <LoginText
               margin='normal'
               required
               fullWidth
@@ -93,8 +104,7 @@ class Login extends React.Component<Props, State> {
               autoComplete='email'
               autoFocus
             />
-            <TextField
-              variant='outlined'
+            <LoginText
               margin='normal'
               required
               fullWidth
@@ -105,32 +115,26 @@ class Login extends React.Component<Props, State> {
               autoComplete='current-password'
             />
             <FormControlLabel
-              control={<Checkbox value='remember' color='primary' />}
+              control={<LoginCheckbox value='remember' color='secondary' />}
               label='Remember me'
+              className={this.props.classes.checkbox}
             />
-            <Button
+            <LoginButton
               type='submit'
               fullWidth
-              variant='contained'
-              color='primary'
             >
               Sign In
-            </Button>
+            </LoginButton>
             <Grid container>
               <Grid item xs>
-                <Link href='#' variant='body2'>
+                <Link href='#'>
                   Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href='#' variant='body2'>
-                  {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>
             </Grid>
           </form>
         </Modal>
-      </body>
+      </div>
     )
   }
 
@@ -150,6 +154,10 @@ class Login extends React.Component<Props, State> {
   }
 
 }
+
+const LoginText = withStyles(loginTextFieldStyle)(TextField)
+const LoginButton = withStyles(loginButtonStyle)(Button)
+const LoginCheckbox = withStyles(loginCheckboxStyle)(Checkbox)
 
 /** export Create page */
 export default withStyles(loginStyle, { withTheme: true })(Login)

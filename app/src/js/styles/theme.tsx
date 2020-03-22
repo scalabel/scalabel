@@ -1,6 +1,8 @@
 import { Mixins, MixinsOptions } from '@material-ui/core/styles/createMixins'
 import createMuiTheme, { ThemeOptions } from '@material-ui/core/styles/createMuiTheme'
 import { Palette, PaletteOptions } from '@material-ui/core/styles/createPalette'
+import 'typeface-exo-2'
+import 'typeface-lato'
 
 const titleBarHeight = 48
 
@@ -29,6 +31,18 @@ declare module '@material-ui/core/styles/createMuiTheme' {
  */
 export default function createMyTheme (_options: ThemeOptions) {
   return createMuiTheme({
+    typography: {
+      fontFamily: [
+        'Lato'
+      ].join(','),
+      body1: {
+        fontWeight: 400,
+        lineHeight: 1.5
+      },
+      h6: {
+        fontFamily: 'Exo-2'
+      }
+    },
     palette: {
       primary: {
         main: '#616161',
