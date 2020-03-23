@@ -25,4 +25,3 @@ describe('Defaults get overwritten', () => {
     expect(labelExport.box2d).toBe(null)
   })
 })
-

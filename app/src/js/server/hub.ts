@@ -103,7 +103,7 @@ export class Hub {
     const sessionId = data.sessionId
     const actions = data.actions.actions
     const actionPacketId = data.actions.id
-    
+
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
 
     const taskActions = actions.filter((action) => {

@@ -4,8 +4,8 @@ import * as path from 'path'
 import { addBox2dLabel } from '../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../js/functional/states'
-import { PathPoint2DType } from '../js/functional/types'
-import { RectType, State, TaskType, Vector3Type } from '../js/functional/types'
+import { PathPoint2DType, RectType,
+  State, TaskType, Vector3Type } from '../js/functional/types'
 import * as defaults from '../js/server/defaults'
 import { ServerConfig } from '../js/server/types'
 
