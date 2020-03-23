@@ -188,6 +188,7 @@ function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
     actions: packet,
     projectName,
     sessionId,
-    taskId: index2str(taskIndex)
+    taskId: index2str(taskIndex),
+    bot: false
   }
 }

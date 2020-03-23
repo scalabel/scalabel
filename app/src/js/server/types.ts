@@ -94,7 +94,7 @@ export interface RegisterMessageType {
   userId: string
   /** server address */
   address: string
-  /** whether its a bot or not */
+  /** whether it came from a bot or not */
   bot: boolean
 }
 
@@ -108,6 +108,8 @@ export interface SyncActionMessageType {
   sessionId: string
   /** List of actions for synchronization */
   actions: ActionPacketType
+  /** whether it came from a bot or not */
+  bot: boolean
 }
 
 /** type for transmitted packet of actions */

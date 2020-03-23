@@ -117,16 +117,21 @@ export class Bot {
   public async actionBroadcastHandler (
     message: SyncActionMessageType) {
     const actionPacket = message.actions
-    // if action was already acked, ignore it
-    if (this.ackedPackets.has(actionPacket.id)) {
+    // if action was already acked, or if action came from a bot, ignore it
+    if (this.ackedPackets.has(actionPacket.id)
+      || message.bot
+      || message.sessionId === this.sessionId) {
       return
     }
+
     this.ackedPackets.add(actionPacket.id)
 
     // precompute queries so they can potentially execute in parallel
     const queries = this.packetToQueries(actionPacket)
     const actions = await this.executeQueries(queries)
-    this.broadcastActions(actions)
+    if (actions.length > 0) {
+      this.broadcastActions(actions)
+    }
   }
 
   /**
@@ -221,7 +226,8 @@ export class Bot {
       taskId: index2str(this.taskIndex),
       projectName: this.projectName,
       sessionId: this.sessionId,
-      actions: actionPacket
+      actions: actionPacket,
+      bot: true
     }
     this.socket.emit(EventName.ACTION_SEND, message)
   }

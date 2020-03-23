@@ -4,7 +4,7 @@ import numpy as np
 from scalabel.polyrnn_base import CropData, PolyrnnBase
 
 
-class PolyrnnInterface(PolyrnnBase):
+class PolyrnnDummy(PolyrnnBase):
     """ Class for polyrnn dummy interface """
 
     def __init__(self) -> None:

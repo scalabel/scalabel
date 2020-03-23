@@ -254,7 +254,8 @@ export class Synchronizer {
       taskId: sessionState.task.config.taskId,
       projectName: sessionState.task.config.projectName,
       sessionId: sessionState.session.id,
-      actions: actionPacket
+      actions: actionPacket,
+      bot: false
     }
     this.socket.emit(EventName.ACTION_SEND, message)
     Session.updateStatus(ConnectionStatus.SAVING)
