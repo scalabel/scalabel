@@ -64,7 +64,7 @@ describe('Test bot functionality', () => {
       id: uuid4()
     }
     const message3 = packetToMessage(packet3, bot.sessionId)
-  
+
     // set up the store with register ack
     const initState = getInitialState(webId)
     bot.registerAckHandler(initState)

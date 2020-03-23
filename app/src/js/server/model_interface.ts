@@ -3,7 +3,7 @@ import { AddLabelsAction } from '../action/types'
 import { PathPoint2D, PointType } from '../drawable/2d/path_point2d'
 import { makeItemExport, makeLabelExport } from '../functional/states'
 import { PolygonType, RectType } from '../functional/types'
-import { polygonToExport } from './export'
+import { convertPolygonToExport } from './export'
 import { ModelEndpoint, ModelQuery } from './types'
 
 /**
@@ -46,7 +46,7 @@ export class ModelInterface {
   public makePolyQuery (
     poly: PolygonType, url: string,
     itemIndex: number, labelType: string): ModelQuery {
-    const poly2d = polygonToExport(poly, labelType)
+    const poly2d = convertPolygonToExport(poly, labelType)
     const label = makeLabelExport({
       poly2d
     })

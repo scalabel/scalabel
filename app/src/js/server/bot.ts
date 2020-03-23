@@ -135,86 +135,6 @@ export class Bot {
   }
 
   /**
-   * Execute queries and get the resulting actions
-   */
-  public async executeQueries (
-    queries: ModelQuery[]): Promise<AddLabelsAction[]> {
-    const actions: AddLabelsAction[] = []
-    for (const query of queries) {
-      const data = query.data
-      const modelEndpoint = new URL(query.endpoint, this.modelAddress)
-      try {
-        const response = await axios.post(
-          modelEndpoint.toString(), data, this.axiosConfig
-        )
-        Logger.info(sprintf('Got a %s response from the model with data: %s',
-          response.status.toString(), response.data))
-
-        const action = this.modelInterface.makePolyAction(
-          response.data.points as number[][], query.itemIndex
-        )
-        actions.push(action)
-      } catch (e) {
-        Logger.info(getPyConnFailedMsg(modelEndpoint.toString(), e.message))
-      }
-    }
-    return actions
-  }
-
-  /**
-   * Generate BDD data format item corresponding to the action
-   * Only handles box2d/polygon2d actions, so assume a single label/shape/item
-   */
-  public actionToQuery (
-    state: State, action: AddLabelsAction): ModelQuery | null {
-    const shapeType = action.shapeTypes[0][0][0]
-    const shape = action.shapes[0][0][0]
-    const labelType = action.labels[0][0].type
-    const itemIndex = action.itemIndices[0]
-    const item = state.task.items[itemIndex]
-    const url = Object.values(item.urls)[0]
-
-    switch (shapeType) {
-      case ShapeTypeName.RECT:
-        return this.modelInterface.makeRectQuery(
-          shape as RectType, url, itemIndex
-        )
-      case ShapeTypeName.POLYGON_2D:
-        return this.modelInterface.makePolyQuery(
-          shape as PolygonType, url, itemIndex, labelType
-        )
-      default:
-        return null
-    }
-  }
-
-  /**
-   * Compute queries for the actions in the packet
-   */
-  public packetToQueries (packet: ActionPacketType): ModelQuery[] {
-    const queries: ModelQuery[] = []
-    for (const action of packet.actions) {
-      if (action.sessionId !== this.sessionId) {
-        this.actionCount += 1
-        this.actionLog.push(action)
-        this.store.dispatch(action)
-        Logger.info(
-          sprintf('Bot received action of type %s', action.type))
-
-        const state = this.store.getState().present
-        if (action.type === ADD_LABELS) {
-          const query = this.actionToQuery(
-            state, action as AddLabelsAction)
-          if (query) {
-            queries.push(query)
-          }
-        }
-      }
-    }
-    return queries
-  }
-
-  /**
    * Broadcast the synthetically generated actions
    */
   public broadcastActions (actions: AddLabelsAction[]) {
@@ -263,6 +183,86 @@ export class Bot {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
       address: this.address
+    }
+  }
+
+  /**
+   * Execute queries and get the resulting actions
+   */
+  private async executeQueries (
+    queries: ModelQuery[]): Promise<AddLabelsAction[]> {
+    const actions: AddLabelsAction[] = []
+    for (const query of queries) {
+      const data = query.data
+      const modelEndpoint = new URL(query.endpoint, this.modelAddress)
+      try {
+        const response = await axios.post(
+          modelEndpoint.toString(), data, this.axiosConfig
+        )
+        Logger.info(sprintf('Got a %s response from the model with data: %s',
+          response.status.toString(), response.data))
+
+        const action = this.modelInterface.makePolyAction(
+          response.data.points as number[][], query.itemIndex
+        )
+        actions.push(action)
+      } catch (e) {
+        Logger.info(getPyConnFailedMsg(modelEndpoint.toString(), e.message))
+      }
+    }
+    return actions
+  }
+
+  /**
+   * Compute queries for the actions in the packet
+   */
+  private packetToQueries (packet: ActionPacketType): ModelQuery[] {
+    const queries: ModelQuery[] = []
+    for (const action of packet.actions) {
+      if (action.sessionId !== this.sessionId) {
+        this.actionCount += 1
+        this.actionLog.push(action)
+        this.store.dispatch(action)
+        Logger.info(
+          sprintf('Bot received action of type %s', action.type))
+
+        const state = this.store.getState().present
+        if (action.type === ADD_LABELS) {
+          const query = this.actionToQuery(
+            state, action as AddLabelsAction)
+          if (query) {
+            queries.push(query)
+          }
+        }
+      }
+    }
+    return queries
+  }
+
+  /**
+   * Generate BDD data format item corresponding to the action
+   * Only handles box2d/polygon2d actions, so assume a single label/shape/item
+   */
+  private actionToQuery (
+    state: State, action: AddLabelsAction): ModelQuery | null {
+    const shapeType = action.shapeTypes[0][0][0]
+    const shape = action.shapes[0][0][0]
+    const labelType = action.labels[0][0].type
+    const itemIndex = action.itemIndices[0]
+    const item = state.task.items[itemIndex]
+    const url = Object.values(item.urls)[0]
+
+    switch (shapeType) {
+      case ShapeTypeName.RECT:
+        return this.modelInterface.makeRectQuery(
+          shape as RectType, url, itemIndex
+        )
+      case ShapeTypeName.POLYGON_2D:
+        return this.modelInterface.makePolyQuery(
+          shape as PolygonType, url, itemIndex, labelType
+        )
+      default:
+        return null
     }
   }
 }

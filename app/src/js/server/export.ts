@@ -7,7 +7,7 @@ import { Attribute, ConfigType, CubeType,
 /**
  * Converts a polygon label to export format
  */
-export function polygonToExport (
+export function convertPolygonToExport (
   poly2d: PolygonType, labelType: string): PolygonExportType[] {
   const typeCharacters = poly2d.points.map(
     (point) => {
@@ -80,7 +80,7 @@ export function convertItemToExport (
           break
         case LabelTypeName.POLYGON_2D:
         case LabelTypeName.POLYLINE_2D:
-          labelExport.poly2d = polygonToExport(
+          labelExport.poly2d = convertPolygonToExport(
             firstIndexedShape.shape as PolygonType, label.type
           )
           break

@@ -141,7 +141,6 @@ export class Label2DList {
     const labelsToDraw = (hideLabels) ?
       this._labelList.filter((label) => label.selected) :
       this._labelList
-
     labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
     labelsToDraw.forEach(
       (v) => v.draw(controlContext, ratio, DrawMode.CONTROL)
