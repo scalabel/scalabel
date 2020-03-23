@@ -4,8 +4,12 @@ import numpy as np
 from scalabel.polyrnn_base import CropData, PolyrnnBase
 
 
-class PolyrnnDummy(PolyrnnBase):
+class PolyrnnInterface(PolyrnnBase):
     """ Class for polyrnn dummy interface """
+
+    def __init__(self) -> None:
+        # init method for consistent API
+        return
 
     def predict_from_rect(self, crop_img: np.ndarray) -> np.ndarray:
         """ predict rect -> dummy poly inscribed in rect """

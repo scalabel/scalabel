@@ -343,6 +343,9 @@ exclude-protected=_asdict,_fields,_replace,_source,_make
 # Deprecated modules which should not be used, separated by a comma
 deprecated-modules=regsub,TERMIOS,Bastion,rexec
 
+# Modules which may not be installed beforehand
+ignored-modules=EvalNet,PolygonModel
+
 # Create a graph of every (i.e. internal and external) dependencies in the
 # given file (report RP0402 must not be disabled)
 import-graph=

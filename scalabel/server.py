@@ -12,7 +12,7 @@ from scalabel.polyrnn_base import PolyrnnBase
 try:
     from scalabel.polyrnn_interface import PolyrnnInterface as Polyrnn
 except ImportError:
-    from scalabel.polyrnn_dummy import PolyrnnDummy as Polyrnn
+    from scalabel.polyrnn_dummy import PolyrnnDummy as Polyrnn  # type: ignore
 
 
 def homepage() -> str:
