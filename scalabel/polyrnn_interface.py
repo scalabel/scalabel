@@ -6,13 +6,13 @@ import skimage.transform as transform
 import tensorflow as tf
 from EvalNet import EvalNet
 from PolygonModel import PolygonModel
-from polyrnn_base import PolyrnnBase
+from scalabel.polyrnn_base import CropData, PolyrnnBase
 
 
 class PolyrnnInterface(PolyrnnBase):
     """Class to interface with the PolygonRNN model"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # External PATHS
         model_dir = os.path.join('scalabel', 'polyrnn_pp', 'models')
         polyrnn_metagraph = os.path.join(
@@ -56,7 +56,7 @@ class PolyrnnInterface(PolyrnnBase):
         ), graph=poly_graph)
         self.model.saver.restore(self.poly_sess, polyrnn_checkpoint)
 
-    def predict_from_rect(self, crop_img):
+    def predict_from_rect(self, crop_img: np.ndarray) -> List[np.ndarray]:
         """ predict rect -> poly """
         preds = [self.model.do_test(self.poly_sess, np.expand_dims(
             crop_img, axis=0), top_k) for top_k in range(self.first_top_k)]
@@ -64,7 +64,7 @@ class PolyrnnInterface(PolyrnnBase):
         preds = np.array(preds[0]['polys'][0])
         return preds
 
-    def bbox_to_crop(self, img, bbox):
+    def bbox_to_crop(self, img: np.ndarray, bbox: List[float]) -> CropData:
         """
         Takes in image and bounding box
         Crops to an expanded square around the bounding box
@@ -117,25 +117,17 @@ class PolyrnnInterface(PolyrnnBase):
             new_img = new_img.transpose((1, 0, 2))
             starting_point = [y_min-top_margin, x_min]
 
-        return_dict = {
-            'img': new_img,
-            'patch_w': patch_w,
-            'top_margin': top_margin,
-            'patch_shape': patch_img.shape,
-            'scale_factor': scale_factor,
-            'starting_point': starting_point,
-            'widescreen': widescreen
-        }
-
+        return_dict = CropData(img=new_img,
+                               scale_factor=scale_factor,
+                               start=np.array(starting_point))
         return return_dict
 
-    def rescale_output(self, preds: List[np.ndarray],
-                       crop_dict) -> List[List[float]]:
+    def rescale_output(self, preds: np.ndarray,
+                       crop_dict: CropData) -> List[List[float]]:
         """ undo the cropping transform to get original output coords """
-        start = np.array(crop_dict['starting_point'])
-
         # translate back to image space
-        preds = [start + p * float(self.img_side) /
-                 crop_dict['scale_factor'] for p in preds]
+        preds = crop_dict.start + float(self.img_side) / \
+            crop_dict.scale_factor * preds
 
-        return np.array(preds).tolist()
+        output: List[List[float]] = preds.tolist()
+        return output

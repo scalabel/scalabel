@@ -6,13 +6,13 @@ import time
 from typing import Dict, List
 import numpy as np
 import requests
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, Response
 from PIL import Image
-from polyrnn_base import PolyrnnBase
+from scalabel.polyrnn_base import PolyrnnBase
 try:
-    from polyrnn_interface import PolyrnnInterface as Polyrnn
+    from scalabel.polyrnn_interface import PolyrnnInterface as Polyrnn
 except ImportError:
-    from polyrnn_dummy import PolyrnnDummy as Polyrnn
+    from scalabel.polyrnn_dummy import PolyrnnDummy as Polyrnn
 
 
 def homepage() -> str:
@@ -20,7 +20,7 @@ def homepage() -> str:
     return 'Test server for PolygonRNN++\n'
 
 
-def polyrnn_base(polyrnn: PolyrnnBase):
+def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
     """ predict rect -> polygon """
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
@@ -38,18 +38,20 @@ def polyrnn_base(polyrnn: PolyrnnBase):
         img_response = requests.get(url)
         img = Image.open(io.BytesIO(img_response.content))
     except requests.exceptions.ConnectionError:
-        return 'Bad image url provided.'
+        response: Response = make_response('Bad image url provided.')
+        return response
 
     # crop using bbox, taken from pytorch version repo
     crop_dict = polyrnn.bbox_to_crop(np.array(img), bbox)
-    crop_img = crop_dict['img']
+    crop_img = crop_dict.img
 
     preds: List[np.ndarray] = polyrnn.predict_from_rect(crop_img)
     preds = polyrnn.rescale_output(preds, crop_dict)
 
     logger.info('Time for prediction: %s',
                 time.time() - start_time)
-    return make_response(jsonify({'points': preds}))
+    response = make_response(jsonify({'points': preds}))
+    return response
 
 
 def polyrnn_refine() -> str:

@@ -177,16 +177,6 @@ cp app/config/sync_config.yml data/config.yml
 
 Now you can open multiple sessions for the same project, and they will automatically synchronize the data.
 
-### Model Assisted Labeling
-
-We supply an interface to [PolygonRNN++](https://github.com/fidler-lab/polyrnn-pp). Currently, polygon predictions from bounding box labels is supported. To enable, use the bot config:
-```
-cp app/config/bot_config.yml data/config.yml
-```
-You can install PolygonRNN++ and its dependencies using the following script. It may take some time to download the models and the dependencies. Starting the server may also take longer due to model initialization.
-```
-./scripts/install_polyrnn.sh
-```
 ### More Usage Info
 
 Please go to [documentation](http://www.scalabel.ai/doc) for detailed annotation instructions and advanced usages.
