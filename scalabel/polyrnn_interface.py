@@ -4,8 +4,8 @@ import os
 import numpy as np
 import skimage.transform as transform
 import tensorflow as tf
-from EvalNet import EvalNet
-from PolygonModel import PolygonModel
+from EvalNet import EvalNet  # type: ignore
+from PolygonModel import PolygonModel  # type: ignore
 from scalabel.polyrnn_base import CropData, PolyrnnBase
 
 
