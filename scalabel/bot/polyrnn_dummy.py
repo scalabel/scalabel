@@ -1,7 +1,7 @@
 """ Dummy interface with the polyrnn model """
 from typing import List
 import numpy as np
-from scalabel.polyrnn_base import CropData, PolyrnnBase
+from .polyrnn_base import CropData, PolyrnnBase
 
 
 class PolyrnnDummy(PolyrnnBase):
