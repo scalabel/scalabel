@@ -17,6 +17,8 @@ let config = {
     vendor: __dirname + '/app/src/js/entries/vendor.tsx',
     label: __dirname + '/app/src/js/entries/label.index.ts',
     login: __dirname + '/app/src/js/entries/login.index.tsx',
+    reset: __dirname + '/app/src/js/entries/reset_password.index.tsx',
+    forget: __dirname + '/app/src/js/entries/forget_password.index.tsx',
   },
   output: {
     filename: '[name].js',

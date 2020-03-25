@@ -127,7 +127,7 @@ class Login extends React.Component<Props, State> {
             </LoginButton>
             <Grid container>
               <Grid item xs>
-                <Link href='#'>
+                <Link href='/forget_password'>
                   Forgot password?
                 </Link>
               </Grid>
