@@ -9,10 +9,10 @@ import requests
 from flask import Flask, request, jsonify, make_response, Response
 from PIL import Image
 from .polyrnn_base import PolyrnnBase
-try:
-    from .polyrnn_interface import PolyrnnInterface as Polyrnn
-except ImportError:
-    from .polyrnn_dummy import PolyrnnDummy as Polyrnn  # type: ignore
+# try:
+from .polyrnn_interface import PolyrnnInterface as Polyrnn
+# except ImportError:
+#     from .polyrnn_dummy import PolyrnnDummy as Polyrnn  # type: ignore
 
 
 def homepage() -> str:

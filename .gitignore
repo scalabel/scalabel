@@ -42,7 +42,7 @@ test_data/
 coverage/
 
 # downloaded model repos
-scalabel/polyrnn_pp/*
+scalabel/bot/polyrnn_pp/*
 
 # python cache
 __pycache__/

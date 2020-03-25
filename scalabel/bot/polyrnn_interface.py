@@ -13,7 +13,7 @@ class PolyrnnInterface(PolyrnnBase):
     """Class to interface with the PolygonRNN model"""
     def __init__(self) -> None:
         # External PATHS
-        model_dir = os.path.join('scalabel', 'polyrnn_pp', 'models')
+        model_dir = os.path.join('scalabel', 'bot', 'polyrnn_pp', 'models')
         polyrnn_metagraph = os.path.join(model_dir, 'poly',
                                          'polygonplusplus.ckpt.meta')
         polyrnn_checkpoint = os.path.join(model_dir, 'poly',
