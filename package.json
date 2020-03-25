@@ -34,6 +34,9 @@
         "roots": [
             "app/src/test"
         ],
+        "moduleNameMapper": {
+            "^typeface-(.*)": "identity-obj-proxy"
+        },
         "testURL": "http://localhost:8687",
         "transform": {
             "^.+\\.tsx?$": "ts-jest"
@@ -125,6 +128,7 @@
         "fs": "0.0.1-security",
         "fs-extra": "^8.1.0",
         "husky": "^4.2.3",
+        "identity-obj-proxy": "^3.0.0",
         "jest": "^24.9.0",
         "jest-environment-jsdom-fourteen": "^0.1.0",
         "jquery": "^3.3.1",
