@@ -73,6 +73,7 @@ export const loginStyle = (theme: Theme) => createStyles({
 
 export const loginTextFieldStyle = () => createStyles({
   root: {
+    'minHeight': '4.5rem',
     '& label.Mui-focused': {
       color: '#3B7EA1'
     },

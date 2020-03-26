@@ -6,7 +6,8 @@ import Grid from '@material-ui/core/Grid'
 import Link from '@material-ui/core/Link'
 import Modal from '@material-ui/core/Modal'
 import { withStyles } from '@material-ui/core/styles'
-import TextField from '@material-ui/core/TextField'
+import { Field, Form, Formik, FormikHelpers } from 'formik'
+import { TextField } from 'formik-material-ui'
 import React from 'react'
 import { loginButtonStyle, loginCheckboxStyle, loginStyle, loginTextFieldStyle } from '../../styles/login'
 
@@ -39,6 +40,13 @@ export interface Props {
 export interface State {
   /** boolean to force reload of the sidebar project list */
   open: boolean
+}
+
+interface Values {
+  /** email field value */
+  email: string,
+  /** password field value */
+  password: string
 }
 
 /**
@@ -93,46 +101,60 @@ class Login extends React.Component<Props, State> {
           open={this.state.open}
           onClose={this.handleClose}
         >
-          <form className={this.props.classes.form} noValidate>
-            <LoginText
-              margin='normal'
-              required
-              fullWidth
-              id='email'
-              label='Email Address'
-              name='email'
-              autoComplete='email'
-              autoFocus
-            />
-            <LoginText
-              margin='normal'
-              required
-              fullWidth
-              name='password'
-              label='Password'
-              type='password'
-              id='password'
-              autoComplete='current-password'
-            />
-            <FormControlLabel
-              control={<LoginCheckbox value='remember' color='secondary' />}
-              label='Remember me'
-              className={this.props.classes.checkbox}
-            />
-            <LoginButton
-              type='submit'
-              fullWidth
+          <Formik
+            initialValues={{
+              email: '',
+              password: ''
+            }}
+            validate={this.validate}
+            onSubmit={this.submit}
             >
-              Sign In
-            </LoginButton>
-            <Grid container>
-              <Grid item xs>
-                <Link href='/forget_password'>
-                  Forgot password?
-                </Link>
+            {({ submitForm, isSubmitting }) => (
+            <Form className={this.props.classes.form}>
+              <Field
+                component={LoginText}
+                margin='dense'
+                required
+                fullWidth
+                id='email'
+                label='Email Address'
+                name='email'
+                autoComplete='email'
+                autoFocus
+              />
+              <Field
+                component={LoginText}
+                margin='dense'
+                required
+                fullWidth
+                name='password'
+                label='Password'
+                type='password'
+                id='password'
+                autoComplete='current-password'
+              />
+              <FormControlLabel
+                control={<LoginCheckbox value='remember' color='secondary' />}
+                label='Remember me'
+                className={this.props.classes.checkbox}
+              />
+              <LoginButton
+                type='submit'
+                disabled={isSubmitting}
+                onClick={submitForm}
+                fullWidth
+              >
+                Sign In
+              </LoginButton>
+              <Grid container>
+                <Grid item xs>
+                  <Link href='/forget_password'>
+                    Forgot password?
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
-          </form>
+            </Form>)}
+          </Formik>
         </Modal>
       </div>
     )
@@ -153,6 +175,26 @@ class Login extends React.Component<Props, State> {
     this.setState({ open : false })
   }
 
+  /** field validation */
+  private validate = (values: Values) => {
+    const errors: Partial<Values> = {}
+    if (!values.email) {
+      errors.email = 'Required'
+    } else if (
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
+    ) {
+      errors.email = 'Invalid email address'
+    }
+    return errors
+  }
+
+  /** submit the form */
+  private submit = (values: Values, helper: FormikHelpers<Values>) => {
+    setTimeout(() => {
+      helper.setSubmitting(false)
+      alert(JSON.stringify(values, null, 2))
+    }, 500)
+  }
 }
 
 const LoginText = withStyles(loginTextFieldStyle)(TextField)
