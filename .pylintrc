@@ -344,7 +344,7 @@ exclude-protected=_asdict,_fields,_replace,_source,_make
 deprecated-modules=regsub,TERMIOS,Bastion,rexec
 
 # Modules which may not be installed beforehand
-ignored-modules=EvalNet,PolygonModel
+ignored-modules=Tool
 
 # Create a graph of every (i.e. internal and external) dependencies in the
 # given file (report RP0402 must not be disabled)

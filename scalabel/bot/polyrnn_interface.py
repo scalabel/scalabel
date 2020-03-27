@@ -26,7 +26,7 @@ class PolyrnnInterface(PolyrnnBase):
             'poly': np.array([[-1., -1.]])
         }
         instance = self.tool.data_loader.prepare_component(instance, component)
-        
+
         # ignore deprecation warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
