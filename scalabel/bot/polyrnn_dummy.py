@@ -7,7 +7,7 @@ from .polyrnn_base import PolyrnnBase
 class PolyrnnDummy(PolyrnnBase):
     """ Class for polyrnn dummy interface """
 
-    def __init__(self) -> None:
+    def __init__(self, _home: str) -> None:
         # init method for consistent API
         return
 
