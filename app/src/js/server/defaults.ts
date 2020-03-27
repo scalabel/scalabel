@@ -15,8 +15,8 @@ export const serverConfig: ServerConfig = {
   numActionsForWrite: 10,
   redisPort: 6379,
   bots: false,
-  pyHost: 'http://0.0.0.0',
-  pyPort: 8080
+  botHost: 'http://0.0.0.0',
+  botPort: 8080
 }
 
 /* default categories when file is missing and label is box2D or box3D */

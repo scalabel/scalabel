@@ -27,8 +27,8 @@ beforeAll(() => {
     botId: 'fakeBotId',
     address: location.origin
   }
-  host = serverConfig.pyHost
-  port = serverConfig.pyPort
+  host = serverConfig.botHost
+  port = serverConfig.botPort
   webId = 'fakeUserId'
 })
 

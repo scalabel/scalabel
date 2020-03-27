@@ -49,8 +49,8 @@ def launch() -> None:
     bot = 'bots'
     if bot in config and config[bot]:
         py_command = ['python3.8', '-m', 'scalabel.bot.server']
-        host = 'pyHost'
-        port = 'pyPort'
+        host = 'botHost'
+        port = 'botPort'
         if host in config:
             py_command += ['--host', config[host]]
         if port in config:

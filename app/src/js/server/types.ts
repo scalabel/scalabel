@@ -43,10 +43,10 @@ export interface ServerConfig {
   redisPort: number
   /** Whether to use virtual sessions/bots for assistance */
   bots: boolean
-  /** host of python server */
-  pyHost: string
-  /** port of python server */
-  pyPort: number
+  /** host of python model server */
+  botHost: string
+  /** port of python model server */
+  botPort: number
 }
 
 /**

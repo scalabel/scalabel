@@ -47,7 +47,7 @@ export class Bot {
   /** the axios http config */
   protected axiosConfig: AxiosRequestConfig
 
-  constructor (botData: BotData, pyHost: string, pyPort: number) {
+  constructor (botData: BotData, botHost: string, botPort: number) {
     this.projectName = botData.projectName
     this.taskIndex = botData.taskIndex
     this.botId = botData.botId
@@ -73,8 +73,8 @@ export class Bot {
     this.actionLog = []
     this.ackedPackets = new Set()
 
-    this.modelAddress = new URL(pyHost)
-    this.modelAddress.port = pyPort.toString()
+    this.modelAddress = new URL(botHost)
+    this.modelAddress.port = botPort.toString()
 
     this.modelInterface = new ModelInterface(this.projectName, this.sessionId)
 
