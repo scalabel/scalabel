@@ -1,7 +1,7 @@
 """ Dummy interface with the polyrnn model """
 from typing import List
 import numpy as np
-from .polyrnn_base import CropData, PolyrnnBase
+from .polyrnn_base import PolyrnnBase
 
 
 class PolyrnnDummy(PolyrnnBase):
@@ -11,25 +11,16 @@ class PolyrnnDummy(PolyrnnBase):
         # init method for consistent API
         return
 
-    def predict_from_rect(self, crop_img: np.ndarray) -> np.ndarray:
-        """ predict rect -> dummy poly inscribed in rect """
-        h, w, _ = crop_img.shape
-        preds = [[w/2.0, 0], [w, h/2.0], [w/2.0, h], [0, h/2.0]]
-        return np.array(preds)
-
-    def bbox_to_crop(self, img: np.ndarray, bbox: List[float]) -> CropData:
-        """ crop out rectangle of bbox """
+    def predict_rect_to_poly(
+            self, img: np.ndarray, bbox: List[float]) -> List[List[float]]:
+        """ predict rect -> dummy polygon """
         x0, y0, w, h = bbox
-        crop_img = img[int(y0):int(y0+h), int(x0):int(x0+w)]
-        starting_point = np.array([x0, y0])
-        crop_dict = CropData(
-            img=crop_img, start=starting_point, scale_factor=1)
-        return crop_dict
 
-    def rescale_output(self, preds: np.ndarray,
-                       crop_dict: CropData) -> List[List[float]]:
-        """ undo the cropping to get original output coords """
-        preds = crop_dict.start + preds
+        # create diamond inscribed in rectangle
+        preds = np.array([[w/2.0, 0], [w, h/2.0], [w/2.0, h], [0, h/2.0]])
+        start_point = np.array([x0, y0])
+
+        preds = start_point + preds
 
         output: List[List[float]] = preds.tolist()
         return output

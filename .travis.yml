@@ -15,14 +15,11 @@ before_install:
 install:
   - sudo python3.8 -m pip install --upgrade pip
   - sudo python3.8 -m pip install --ignore-installed -r scripts/requirements.txt
-  - sudo python3.6 -m pip install --ignore-installed -r scalabel/requirements.txt
   - npm install canvas --build-from-source
   - npm install
 script:
-  - python3.8 -m pylint scripts/
-  - python3.6 -m pylint scalabel
-  - python3.8 -m mypy --strict scripts
-  - python3.6 -m mypy --strict scalabel
+  - python3.8 -m pylint scripts/ scalabel
+  - python3.8 -m mypy --strict scripts scalabel
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - node_modules/.bin/webpack --config webpack.config.js --mode=production
   - npm test

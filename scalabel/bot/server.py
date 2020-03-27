@@ -3,16 +3,17 @@ import argparse
 import io
 import logging
 import time
-from typing import Dict, List
+from typing import Dict
+import os
 import numpy as np
 import requests
 from flask import Flask, request, jsonify, make_response, Response
 from PIL import Image
 from .polyrnn_base import PolyrnnBase
-# try:
-from .polyrnn_interface import PolyrnnInterface as Polyrnn
-# except ImportError:
-#     from .polyrnn_dummy import PolyrnnDummy as Polyrnn  # type: ignore
+try:
+    from .polyrnn_interface import PolyrnnInterface as Polyrnn
+except ImportError:
+    from .polyrnn_dummy import PolyrnnDummy as Polyrnn  # type: ignore
 
 
 def homepage() -> str:
@@ -36,17 +37,12 @@ def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
 
     try:
         img_response = requests.get(url)
-        img = Image.open(io.BytesIO(img_response.content))
     except requests.exceptions.ConnectionError:
         response: Response = make_response('Bad image url provided.')
         return response
 
-    # crop using bbox, taken from pytorch version repo
-    crop_dict = polyrnn.bbox_to_crop(np.array(img), bbox)
-    crop_img = crop_dict.img
-
-    preds: List[np.ndarray] = polyrnn.predict_from_rect(crop_img)
-    preds = polyrnn.rescale_output(preds, crop_dict)
+    img = np.array(Image.open(io.BytesIO(img_response.content)))
+    preds = polyrnn.predict_rect_to_poly(np.array(img), bbox)
 
     logger.info('Time for prediction: %s', time.time() - start_time)
     response = make_response(jsonify({'points': preds}))
@@ -61,9 +57,10 @@ def polyrnn_refine() -> str:
 def create_app() -> Flask:
     """ set up the flask app """
     app = Flask(__name__)
+    home = os.path.join('scalabel', 'bot', 'models')
 
     # pass to methods using closure
-    polyrnn = Polyrnn()
+    polyrnn = Polyrnn(home)
 
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)

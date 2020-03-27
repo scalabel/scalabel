@@ -48,7 +48,7 @@ def launch() -> None:
     # launch the python server if bot option is true
     bot = 'bots'
     if bot in config and config[bot]:
-        py_command = ['python3.6', '-m', 'scalabel.bot.server']
+        py_command = ['python3.8', '-m', 'scalabel.bot.server']
         host = 'pyHost'
         port = 'pyPort'
         if host in config:

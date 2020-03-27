@@ -200,8 +200,7 @@ export class Bot {
           modelEndpoint.toString(), data, this.axiosConfig
         )
         Logger.info(sprintf('Got a %s response from the model with data: %s',
-          response.status.toString(), response.data))
-
+          response.status.toString(), response.data.points))
         const action = this.modelInterface.makePolyAction(
           response.data.points as number[][], query.itemIndex
         )
