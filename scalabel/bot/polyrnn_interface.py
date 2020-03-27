@@ -10,9 +10,10 @@ from .polyrnn_base import PolyrnnBase
 class PolyrnnInterface(PolyrnnBase):
     """Class to interface with the PolygonRNN model"""
     def __init__(self, home: str) -> None:
-        model = os.path.join(home, 'polyrnn-pp-pytorch-small')
-        exp = os.path.join(model, 'code', 'Experiments', 'tool.json')
-        net = os.path.join(model, 'models', 'ggnn_epoch5_step14000.pth')
+        exp = os.path.join(home, 'experimental', 'fast-seg-label',
+                           'polyrnn', 'Experiments', 'tool.json')
+        net = os.path.join(home, 'experimental_models',
+                           'ggnn_epoch5_step14000.pth')
         self.tool = Tool(exp, net)
 
     def predict_rect_to_poly(

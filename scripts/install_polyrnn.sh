@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
-cd scalabel/bot/models
-# download from bitbucket
-git clone https://github.com/fidler-lab/polyrnn-pp.git
-# download models separately?
-# apply the patch
-cd polyrnn-pp
+cd scalabel/bot
+git clone https://bitbucket.org/datu-ai/experimental.git
+cd experimental/fast-seg-label
+mv polyrnn orig_code
 patch -p0 -i ../../polyrnn.patch
-cd ../../../..
-# add this to bashrc?
-export PYTHONPATH="${PYTHONPATH}:scalabel/bot/models/polyrnn-pp-pytorch-small/code"
+mv orig_code polyrnn
+cd ../..
+mkdir experimental_models
+cd experimental_models
+aws s3 cp s3://datu-public-data/models . --recursive
+cd ../../..
+export PYTHONPATH="${PYTHONPATH}:scalabel/bot/experimental/fast-seg-label/polyrnn"

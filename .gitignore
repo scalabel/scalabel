@@ -41,8 +41,9 @@ test_data/
 # jest coverage cache
 coverage/
 
-# downloaded model repos
-scalabel/bot/models/*
+# downloaded reposs and models
+scalabel/bot/experimental/*
+scalabel/bot/experimental_models/*
 
 # python cache
 __pycache__/

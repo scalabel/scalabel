@@ -57,7 +57,7 @@ def polyrnn_refine() -> str:
 def create_app() -> Flask:
     """ set up the flask app """
     app = Flask(__name__)
-    home = os.path.join('scalabel', 'bot', 'models')
+    home = os.path.join('scalabel', 'bot')
 
     # pass to methods using closure
     polyrnn = Polyrnn(home)
