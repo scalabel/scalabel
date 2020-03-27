@@ -9,6 +9,6 @@ mv orig_code polyrnn
 cd ../..
 mkdir experimental_models
 cd experimental_models
-aws s3 cp s3://datu-public-data/models . --recursive
+aws s3 cp s3://datu-s3-drive/polyrnn . --recursive
 cd ../../..
 export PYTHONPATH="${PYTHONPATH}:scalabel/bot/experimental/fast-seg-label/polyrnn"
