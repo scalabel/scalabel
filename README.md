@@ -24,7 +24,7 @@
 
 ## Try It Yourself
 
-Below is a quick way to install dependencies and launch the scalabel server.
+Below is a quick way to install dependencies and launch the Scalabel server.
 
 **Note**: You only need to do either Step 3 or 4, but not both.
 
