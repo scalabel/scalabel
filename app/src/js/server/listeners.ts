@@ -3,6 +3,7 @@ import {
   Request,
   Response
 } from 'express'
+import { Fields, Files } from 'formidable'
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
@@ -117,8 +118,20 @@ export class Listeners {
     if (req.method !== 'POST' || req.fields === undefined) {
       res.sendStatus(404)
     }
-    const fields = req.fields
-    const files = req.files
+
+    const queryArg = 'web'
+    const apiCall = queryArg in req.query && req.query[queryArg] === 'false'
+
+    let fields: Fields | undefined
+    let files: Files | undefined
+    if (apiCall) {
+      fields = req.body.fields
+      files = req.body.files
+    } else {
+      fields = req.fields
+      files = req.files
+    }
+
     if (fields !== undefined && files !== undefined) {
       try {
         // parse form from request
@@ -142,7 +155,7 @@ export class Listeners {
       }
     } else {
       // alert the user that the sent fields were illegal
-      const err = Error('illegal fields')
+      const err = Error('Illegal fields for project creation')
       Logger.error(err)
       res.send(err.message)
     }
