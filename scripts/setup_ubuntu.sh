@@ -13,7 +13,7 @@ echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Installing python dependencies
 echo [$(date +"%F %T")] ================================
 
-python3 -m pip install --user -U --ignore-installed -r ${DIR}/requirements.txt
+python3.8 -m pip install --user -U --ignore-installed -r ${DIR}/requirements.txt
 
 echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Installing node packages

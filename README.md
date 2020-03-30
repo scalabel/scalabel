@@ -72,7 +72,7 @@ Below is a quick way to install dependencies and launch the Scalabel server.
     ```
     If you are on Ubuntu, you may need to run the script with `sudo`.
     
-    Then you can use our python script to launch the server. The code requires Python 3.7 or above.
+    Then you can use our python script to launch the server. The code requires Python 3.7 or above. We use 3.8 by default.
     ```
     python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
     ```
