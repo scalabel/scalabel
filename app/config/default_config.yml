@@ -1,6 +1,7 @@
 ---
 port: 8686
-data: "./data"
+data: "./local-data/app"
+itemDir: "./local-data/items"
 src: "."
 database: "local"
 userManagement: false

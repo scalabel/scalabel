@@ -92,7 +92,7 @@ More installation and usage details can be find in our [documentation](http://ww
 
    ```
    mkdir data
-   cp app/config/default_config.yml data/config.yml
+   cp app/config/default_config.yml local-data/app/config.yml
    ```
 
 4. Launch the server
@@ -109,7 +109,7 @@ More installation and usage details can be find in our [documentation](http://ww
    Otherwise, without using docker,
 
    ```
-   python scripts/launch_server.py --config ./data/config.yml
+   python scripts/launch_server.py --config ./local-data/scalabel/config.yml
    ```
 
    Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
