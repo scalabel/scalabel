@@ -9,6 +9,7 @@ import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType } from '../common/types'
+import { ItemExport } from '../functional/bdd_types'
 import { Label2DTemplateType, State, TaskType } from '../functional/types'
 import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
@@ -300,5 +301,17 @@ export function makeUserData (projectName: string): UserData {
 export function makeUserMetadata (): UserMetadata {
   return {
     socketToProject: {}
+  }
+}
+
+/**
+ * Get item timestamp, or 0 if undefined
+ */
+export function getItemTimestamp (item: Partial<ItemExport>): number {
+  const timestamp = item.timestamp
+  if (timestamp !== undefined) {
+    return timestamp
+  } else {
+    return 0
   }
 }

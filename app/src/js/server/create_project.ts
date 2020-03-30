@@ -447,7 +447,7 @@ function partitionItemsIntoTasks (
 /**
  * Map from data source id to list of items
  */
-function partitionItemsBySensor (
+function mapSensorToItems (
   items: Array<Partial<ItemExport>>
 ): {[id: number]: Array<Partial<ItemExport>>} {
   const itemsBySensor: {[id: number]: Array<Partial<ItemExport>>} = {}
@@ -470,7 +470,8 @@ function partitionItemsBySensor (
 export function createTasks (project: types.Project): Promise<TaskType[]> {
   const sensors = project.sensors
   const itemType = project.config.itemType
-  let taskSize = project.config.taskSize
+  const taskSize = project.config.taskSize
+  const tracking = project.config.tracking
 
   const items = filterInvalidItems(
     project.items, itemType, sensors)
@@ -501,8 +502,8 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     }
   }
 
-  const taskIndices = partitionItemsIntoTasks(
-    items, project.config.tracking, taskSize)
+  const itemIndices = partitionItemsIntoTasks(
+    items, tracking, taskSize)
 
   /* create quick lookup dicts for conversion from export type
    * to external type for attributes/categories
@@ -512,26 +513,25 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   const categoryNameMap = getCategoryMap(project.config.categories)
   const tasks: TaskType[] = []
 
-  for (let i = 0; i < taskIndices.length - 1; i ++) {
-    const taskStartIndex = taskIndices[i]
-    const taskEndIndex = taskIndices[i + 1]
-    const taskItems = items.slice(taskStartIndex, taskEndIndex)
-    const itemsBySensor = partitionItemsBySensor(taskItems)
+  for (let taskIndex = 0; taskIndex < itemIndices.length - 1; taskIndex++) {
+    const itemStartIndex = itemIndices[taskIndex]
+    const itemkEndIndex = itemIndices[taskIndex + 1]
+    const taskItems = items.slice(itemStartIndex, itemkEndIndex)
+    const itemsBySensor = mapSensorToItems(taskItems)
+    const sensorIds = Object.keys(itemsBySensor).map(Number)
 
-    taskSize = 0
+    let realTaskSize = 0
     let largestSensor = -1
     const sensorMatchingIndices: {[id: number]: number} = {}
-    for (const key of Object.keys(itemsBySensor)) {
-      const sensorId = Number(key)
+    for (const sensorId of sensorIds) {
       itemsBySensor[sensorId] = _.sortBy(
         itemsBySensor[sensorId],
-        [(itemExport) => (itemExport.timestamp === undefined) ?
-          0 : itemExport.timestamp]
+        [(itemExport) => util.getItemTimestamp(itemExport)]
       )
-      taskSize = Math.max(
-        taskSize, itemsBySensor[sensorId].length
+      realTaskSize = Math.max(
+        realTaskSize, itemsBySensor[sensorId].length
       )
-      if (taskSize === itemsBySensor[sensorId].length) {
+      if (realTaskSize === itemsBySensor[sensorId].length) {
         largestSensor = sensorId
       }
       sensorMatchingIndices[sensorId] = 0
@@ -541,8 +541,8 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
      and update task size in case there aren't enough items */
     const config: ConfigType = {
       ...project.config,
-      taskSize,
-      taskId: util.index2str(i)
+      taskSize: realTaskSize,
+      taskId: util.index2str(taskIndex)
     }
 
     // based on the imported labels, compute max ids
@@ -555,7 +555,7 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     // convert from export format to internal format
     const itemsForTask: ItemType[] = []
     const trackMap: TrackMapType = {}
-    for (let itemInd = 0; itemInd < taskSize; itemInd += 1) {
+    for (let itemInd = 0; itemInd < realTaskSize; itemInd += 1) {
       const timestampToMatch = itemsBySensor[largestSensor][
         sensorMatchingIndices[largestSensor]
       ].timestamp as number
@@ -577,11 +577,8 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
       }
 
       // id is not relative to task, unlike index
-      const itemId = taskStartIndex + itemInd
-      const timestamp = (
-        (itemExportMap[largestSensor].timestamp !== undefined) ?
-          itemExportMap[largestSensor].timestamp : 0
-      ) as number
+      const itemId = itemStartIndex + itemInd
+      const timestamp = util.getItemTimestamp(itemExportMap[largestSensor])
       const [newItem, newMaxLabelId, newMaxShapeId] = convertItemToImport(
         itemExportMap[largestSensor].videoName as string,
         timestamp,
@@ -593,10 +590,10 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
         categoryNameMap,
         maxLabelId,
         maxShapeId,
-        project.config.tracking
+        tracking
       )
 
-      if (project.config.tracking) {
+      if (tracking) {
         for (const label of Object.values(newItem.labels)) {
           if (label.track >= 0 && !(label.track in trackMap)) {
             trackMap[label.track] = makeTrack(label.track, label.type)
