@@ -1,5 +1,5 @@
 import moment from 'moment'
-import * as path from 'path'
+import { join } from 'path'
 import { sprintf } from 'sprintf-js'
 import { BotData } from './types'
 import { index2str } from './util'
@@ -64,7 +64,7 @@ export const HTMLDirectories: string[] =
  * Converts relative (to js) path into absolute path
  */
 export function getAbsoluteSrcPath (relativePath: string) {
-  return path.join(__dirname, relativePath)
+  return join(__dirname, relativePath)
 }
 
 /**
@@ -117,21 +117,21 @@ export function getRedisBotSet () {
  * Gets key of file with project data
  */
 export function getProjectKey (projectName: string) {
-  return path.join(projectName, 'project')
+  return join(projectName, 'project')
 }
 
 /**
  * Gets key of file with task data
  */
 export function getTaskKey (projectName: string, taskId: string): string {
-  return path.join(getTaskDir(projectName), taskId)
+  return join(getTaskDir(projectName), taskId)
 }
 
 /**
  * Gets directory with task data for project
  */
 export function getTaskDir (projectName: string): string {
-  return path.join(projectName, 'tasks')
+  return join(projectName, 'tasks')
 }
 
 /**
@@ -140,5 +140,10 @@ export function getTaskDir (projectName: string): string {
  * @param task
  */
 export function getSaveDir (projectName: string, taskId: string): string {
-  return path.join(projectName, 'saved', taskId)
+  return join(projectName, 'saved', taskId)
 }
+
+/**
+ * API route path
+ */
+export const API_PATH = '/api'

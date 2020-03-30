@@ -45,6 +45,8 @@ export interface ServerConfig {
   redisPort: number
   /** Whether to use virtual sessions/bots for assistance */
   bots: boolean
+  /** jwt secret */
+  jwtSecret: string
 }
 
 /**

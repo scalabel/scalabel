@@ -15,7 +15,8 @@
     "strictNullChecks": true,    // enable strict null checks as a best practice
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "experimentalDecorators": true
   },
   "include": [
     "app/src"
