@@ -72,7 +72,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
     ```
     If you are on Ubuntu, you may need to run the script with `sudo`.
     
-    Then you can use our python script to launch the server. The code requires Python 3.7 or above. We use 3.8 by default.
+    Then you can use our python script to launch the server. The code requires Python 3.7 or above. Please check [how to upgrade your Python](#upgrade-python) if you don't have the right version. We use 3.8 by default.
     ```
     python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
     ```
@@ -163,9 +163,9 @@ If you are debugging the code, it is helpful to build the javascript code in dev
 node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
 ```
 
-### Upgrade Python to a newer version
+### Upgrade Python
 
-The python code requires Python3.7 and above. To install the proper Python versions, we recommend [pyenv](https://github.com/pyenv/pyenv), especially for Mac users.
+Our python code requires Python3.7 and above. To install the proper Python versions, we recommend [pyenv](https://github.com/pyenv/pyenv), especially for Mac users.
 
 Homebrew on Mac can directly install `pyenv`
 
