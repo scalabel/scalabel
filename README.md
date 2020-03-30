@@ -24,7 +24,7 @@
 
 ## Try It Yourself
 
-Below is a quick way to install dependencies and launch the Scalabel server.
+Below is a quick way to install dependencies and launch the Scalabel server. After launching the server, you can directly jump to [how to use the tool](#using-scalabel). If you want to know more about the installation process, please check [additional tips](#installation-tips).
 
 **Note**: You only need to do either Step 3 or 4, but not both.
 
@@ -87,7 +87,7 @@ Below is a quick way to install dependencies and launch the Scalabel server.
 
 More installation and usage details can be find in our [documentation](http://www.scalabel.ai/doc). It also includes Windows setup.
 
-## Tips
+## Installation Tips
 
 ### Development
 
@@ -102,6 +102,37 @@ If you are debugging the code, it is helpful to build the javascript code in dev
 
 ```
 node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
+```
+
+### Upgrade Python to a newer version
+
+The python code requires Python3.7 and above. To install the proper Python versions, we recommend [pyenv](https://github.com/pyenv/pyenv), especially for Mac users.
+
+Homebrew on Mac can directly install `pyenv`
+
+```
+brew update && brew install pyenv
+```
+Otherwise, you can follow the `pyenv` [installation tutorial](https://github.com/pyenv/pyenv#installation). Next, install Python 3.8.2
+```
+pyenv install 3.8.2
+```
+Set it as global default
+```
+pyenv global 3.8.2
+```
+Adding the new Python to your `PATH`
+
+```
+export PATH=$(pyenv root)/shims:$PATH
+```
+
+
+On Ubuntu, you can also use [`deadsnakes` ppa](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/+index) to install different versions of Python. Ubuntu 18.04 or later provides the package of Python 3.8 directly.
+
+```
+sudo apt-get update
+sudo apt-get install -y python3.8 python3.8-dev python3-pip python3-setuptools
 ```
 
 ### Redis security
