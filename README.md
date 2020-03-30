@@ -40,7 +40,7 @@ Below is a quick way to install dependencies and launch the scalabel server.
     bash scripts/setup_local_dir.sh
     ```
 
-    If you have a local folder of images or point clouds to label, you can move them to `local-data/items`. After launching the server (finishging step 3 or 4), the url for the images will be `localhost:8686/items`, assuming the port in the scalabel config is 8686. The url of the example iamge (`local-data/items/cat.webp`) is [http://localhost:8686/items/cat.webp](http://localhost:8686/items/cat.webp).
+    If you have a local folder of images or point clouds to label, you can move them to `local-data/items`. After launching the server (finishing Step 3 or 4), the url for the images will be `localhost:8686/items`, assuming the port in the scalabel config is 8686. The url of the example image (`local-data/items/cat.webp`) is [http://localhost:8686/items/cat.webp](http://localhost:8686/items/cat.webp).
 
 3. Using Docker
 
@@ -61,6 +61,7 @@ Below is a quick way to install dependencies and launch the scalabel server.
     Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
 
 4. Build the code yourself
+
     This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Max OS X and you have `apt-get` if you are on Ubuntu. Depending your OS, run the script
     ```
     bash scripts/setup_osx.sh
