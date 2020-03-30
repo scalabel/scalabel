@@ -1,6 +1,6 @@
 ---
 port: 8686
-data: "./local-data/app"
+data: "./local-data/scalabel"
 itemDir: "./local-data/items"
 src: "."
 database: "local"

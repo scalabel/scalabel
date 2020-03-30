@@ -24,7 +24,9 @@
 
 ## Try It Yourself
 
-More installation and usage details can be find in our [documentation](http://www.scalabel.ai/doc). It also includes Windows setup.
+Below is a quick way to install dependencies and launch the scalabel server.
+
+**Note**: You only need to do either Step 3 or 4, but not both.
 
 1. Check out the code
 
@@ -33,96 +35,79 @@ More installation and usage details can be find in our [documentation](http://ww
    cd scalabel
    ```
 
-2. Compile the code
+2. Prepare the local data directories
+    ```
+    bash scripts/setup_local_dir.sh
+    ```
 
-   There are two alternative ways to get the compiled code
+    If you have a local folder of images or point clouds to label, you can move them to `local-data/items`. After launching the server (finishging step 3 or 4), the url for the images will be `localhost:8686/items`, assuming the port in the scalabel config is 8686. The url of the example iamge (`local-data/items/cat.webp`) is [http://localhost:8686/items/cat.webp](http://localhost:8686/items/cat.webp).
 
-   1. Usage docker (recommended if you only need to run the code)
+3. Using Docker
 
-      Download from dockerhub
+    Download from dockerhub
 
-      ```
-      docker pull scalabel/www
-      ```
+    ```
+    docker pull scalabel/www
+    ```
 
-      or build the docker image yourself
+    Launch the server
 
-      ```
-      docker build . -t scalabel/www
-      ```
+    ```
+    docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p 8686:8686 -p 6379:6379 scalabel/www \
+        python3.8 scripts/launch_server.py \
+        --config /opt/scalabel/local-data/scalabel/config.yml
+    ```
 
-      Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
+    Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
 
-   2. Compile the code yourself (recommended if you want to customize the source code)
-
-      Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
-
-      On Mac
-
-      ```
-      brew install redis node
-      ```
-
-      On Ubuntu
-
-      ```
-      apt-get install npm nodejs redis-server
-      ```
-
-      Transpile or build Javascript code
-
-      ```
-      npm install
-      node_modules/.bin/webpack --config webpack.config.js --mode=production
-      ```
-
-      **Note** If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
-
-      ```
-      node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
-      ```
-
-      Install python dependencies
-
-      ```
-      python3.8 -m pip install -U -r scripts/requirements.txt
-      ```
-
-3. Prepare data directory
-
-   ```
-   mkdir data
-   cp app/config/default_config.yml local-data/app/config.yml
-   ```
-
-4. Launch the server
-
-   If using docker,
-
-   ```
-   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 -p 6379:6379 scalabel/www \
-       python3.8 scripts/launch_server.py --config /opt/scalabel/data/config.yml
-   ```
-
-   Please note to map the correct ports for both http and redis servers.
-
-   Otherwise, without using docker,
-
-   ```
-   python scripts/launch_server.py --config ./local-data/scalabel/config.yml
-   ```
-
-   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
+4. Build the code yourself
+    This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Max OS X and you have `apt-get` if you are on Ubuntu. Depending your OS, run the script
+    ```
+    bash scripts/setup_osx.sh
+    ```
+    or 
+    ```
+    bash scripts/setup_ubuntu.sh
+    ```
+    If you are on Ubuntu, you may need to run the script with `sudo`.
+    
+    Then you can use our python script to launch the server. The code requires Python 3.7 or above.
+    ```
+    python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
+    ```
 
 5. Get labels
 
    The collected labels can be directly downloaded from the project dashboard. The data can be follow [bdd data format](https://github.com/ucbdrive/bdd-data/blob/master/doc/format.md). After installing the requirements and setting up the paths of the [bdd data toolkit](https://github.com/ucbdrive/bdd-data), you can visualize the labels by
 
    ```
-   python3 -m bdd_data.show_labels.py -l <your_downloaded_label_path.json>
+   python3 -m bdd_data.show_labels -l <your_downloaded_label_path.json>
    ```
 
-## Usage
+More installation and usage details can be find in our [documentation](http://www.scalabel.ai/doc). It also includes Windows setup.
+
+## Tips
+
+### Development
+
+We transpile or build Javascript code
+
+```
+npm install
+node_modules/.bin/webpack --config webpack.config.js --mode=production
+```
+
+If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
+
+```
+node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
+```
+
+### Redis security
+
+   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
+
+## Using Scalabel
 
 ### Create annotation projects
 
