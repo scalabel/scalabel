@@ -62,7 +62,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
 4. Build the code yourself
 
-    This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Max OS X and you have `apt-get` if you are on Ubuntu. Depending your OS, run the script
+    This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Max OS X and you have `apt-get` if you are on Ubuntu. The code requires Python 3.7 or above. Please check [how to upgrade your Python](#upgrade-python) if you don't have the right version. We use 3.8 by default. Depending your OS, run the script
     ```
     bash scripts/setup_osx.sh
     ```
@@ -72,7 +72,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
     ```
     If you are on Ubuntu, you may need to run the script with `sudo`.
     
-    Then you can use our python script to launch the server. The code requires Python 3.7 or above. Please check [how to upgrade your Python](#upgrade-python) if you don't have the right version. We use 3.8 by default.
+    Then you can use our python script to launch the server.
     ```
     python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
     ```
