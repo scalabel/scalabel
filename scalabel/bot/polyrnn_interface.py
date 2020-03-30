@@ -11,7 +11,7 @@ class PolyrnnInterface(PolyrnnBase):
     """Class to interface with the PolygonRNN model"""
     def __init__(self, home: str) -> None:
         exp = os.path.join(home, 'experimental', 'fast-seg-label',
-                           'polyrnn', 'Experiments', 'tool.json')
+                           'polyrnn_scalabel', 'Experiments', 'tool.json')
         net = os.path.join(home, 'experimental_models',
                            'ggnn_epoch5_step14000.pth')
         self.tool = Tool(exp, net)
