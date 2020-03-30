@@ -87,58 +87,6 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
 More installation and usage details can be find in our [documentation](http://www.scalabel.ai/doc). It also includes Windows setup.
 
-## Installation Tips
-
-### Development
-
-We transpile or build Javascript code
-
-```
-npm install
-node_modules/.bin/webpack --config webpack.config.js --mode=production
-```
-
-If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
-
-```
-node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
-```
-
-### Upgrade Python to a newer version
-
-The python code requires Python3.7 and above. To install the proper Python versions, we recommend [pyenv](https://github.com/pyenv/pyenv), especially for Mac users.
-
-Homebrew on Mac can directly install `pyenv`
-
-```
-brew update && brew install pyenv
-```
-Otherwise, you can follow the `pyenv` [installation tutorial](https://github.com/pyenv/pyenv#installation). Next, install Python 3.8.2
-```
-pyenv install 3.8.2
-```
-Set it as global default
-```
-pyenv global 3.8.2
-```
-Adding the new Python to your `PATH`
-
-```
-export PATH=$(pyenv root)/shims:$PATH
-```
-
-
-On Ubuntu, you can also use [`deadsnakes` ppa](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/+index) to install different versions of Python. Ubuntu 18.04 or later provides the package of Python 3.8 directly.
-
-```
-sudo apt-get update
-sudo apt-get install -y python3.8 python3.8-dev python3-pip python3-setuptools
-```
-
-### Redis security
-
-   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
-
 ## Using Scalabel
 
 ### Create annotation projects
@@ -197,3 +145,55 @@ Now you can open multiple sessions for the same project, and they will automatic
 ### More Usage Info
 
 Please go to [documentation](http://www.scalabel.ai/doc) for detailed annotation instructions and advanced usages.
+
+## Installation Tips
+
+### Development
+
+We transpile or build Javascript code
+
+```
+npm install
+node_modules/.bin/webpack --config webpack.config.js --mode=production
+```
+
+If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
+
+```
+node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
+```
+
+### Upgrade Python to a newer version
+
+The python code requires Python3.7 and above. To install the proper Python versions, we recommend [pyenv](https://github.com/pyenv/pyenv), especially for Mac users.
+
+Homebrew on Mac can directly install `pyenv`
+
+```
+brew update && brew install pyenv
+```
+Otherwise, you can follow the `pyenv` [installation tutorial](https://github.com/pyenv/pyenv#installation). Next, install Python 3.8.2
+```
+pyenv install 3.8.2
+```
+Set it as global default
+```
+pyenv global 3.8.2
+```
+Adding the new Python to your `PATH`
+
+```
+export PATH=$(pyenv root)/shims:$PATH
+```
+
+
+On Ubuntu, you can also use [`deadsnakes` ppa](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/+index) to install different versions of Python. Ubuntu 18.04 or later provides the package of Python 3.8 directly.
+
+```
+sudo apt-get update
+sudo apt-get install -y python3.8 python3.8-dev python3-pip python3-setuptools
+```
+
+### Redis security
+
+   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
