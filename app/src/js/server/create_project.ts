@@ -1,4 +1,3 @@
-import { Fields, Files } from 'formidable'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
@@ -26,21 +25,22 @@ import * as util from './util'
  * if invalid input is found, error is returned to user via alert
  */
 export async function parseForm (
-  fields: Fields, projectStore: ProjectStore): Promise<types.CreationForm> {
+  fields: { [key: string]: string},
+  projectStore: ProjectStore): Promise<types.CreationForm> {
   // Check that required fields were entered
-  let projectName = fields[types.FormField.PROJECT_NAME] as string
+  let projectName = fields[types.FormField.PROJECT_NAME]
   if (projectName === '') {
     throw(Error('Please create a project name'))
   } else {
     projectName = projectName.replace(' ', '_')
   }
 
-  const itemType = fields[types.FormField.ITEM_TYPE] as string
+  const itemType = fields[types.FormField.ITEM_TYPE]
   if (itemType === '') {
     throw(Error('Please choose an item type'))
   }
 
-  const labelType = fields[types.FormField.LABEL_TYPE] as string
+  const labelType = fields[types.FormField.LABEL_TYPE]
   if (labelType === '') {
     throw(Error('Please choose a label type'))
   }
@@ -51,13 +51,13 @@ export async function parseForm (
     if (fields[types.FormField.TASK_SIZE] === '') {
       throw(Error('Please specify a task size'))
     } else {
-      taskSize = parseInt(fields[types.FormField.TASK_SIZE] as string, 10)
+      taskSize = parseInt(fields[types.FormField.TASK_SIZE], 10)
     }
   }
 
   // Non-required fields
-  const pageTitle = fields[types.FormField.PAGE_TITLE] as string
-  const instructions = fields[types.FormField.INSTRUCTIONS_URL] as string
+  const pageTitle = fields[types.FormField.PAGE_TITLE]
+  const instructions = fields[types.FormField.INSTRUCTIONS_URL]
 
   // Ensure project name is not already in use
   const exists = await projectStore.checkProjectName(projectName)
@@ -73,9 +73,10 @@ export async function parseForm (
 }
 
 /**
- * Parses item, category, and attribute files from form
+ * Parses item, category, and attribute files from paths
  */
-export async function parseFiles (labelType: string, files: Files)
+export async function parseFiles (
+  labelType: string, files: { [key: string]: string })
   : Promise<types.FormFileData> {
   return Promise.all([
     parseItems(files),
@@ -142,10 +143,10 @@ function readCategoriesFile (path: string): Promise<string[]> {
  * Use default if file is empty
  */
 export function parseCategories (
-  files: Files, labelType: string): Promise<string[]> {
-  const categoryFile = files[types.FormField.CATEGORIES]
-  if (util.formFileExists(categoryFile)) {
-    return readCategoriesFile(categoryFile.path)
+  files: { [key: string]: string },
+  labelType: string): Promise<string[]> {
+  if (types.FormField.CATEGORIES in files) {
+    return readCategoriesFile(files[types.FormField.CATEGORIES])
   } else {
     const categories = getDefaultCategories(labelType)
     return Promise.resolve(categories)
@@ -185,10 +186,10 @@ function readAttributesFile (path: string): Promise<Attribute[]> {
  * Use default if file is empty
  */
 export function parseAttributes (
-  files: Files, labelType: string): Promise<Attribute[]> {
-  const attributeFile = files[types.FormField.ATTRIBUTES]
-  if (util.formFileExists(attributeFile)) {
-    return readAttributesFile(attributeFile.path)
+  files: { [key: string]: string },
+  labelType: string): Promise<Attribute[]> {
+  if (types.FormField.ATTRIBUTES in files) {
+    return readAttributesFile(files[types.FormField.ATTRIBUTES])
   } else {
     const defaultAttributes = getDefaultAttributes(labelType)
     return Promise.resolve(defaultAttributes)
@@ -220,10 +221,10 @@ function readItemsFile (path: string): Promise<Array<Partial<ItemExport>>> {
  * Load from items file
  * Group by video name
  */
-export function parseItems (files: Files): Promise<Array<Partial<ItemExport>>> {
-  const itemFile = files[types.FormField.ITEMS]
-  if (util.formFileExists(itemFile)) {
-    return readItemsFile(itemFile.path)
+export function parseItems (
+  files: { [key: string]: string }): Promise<Array<Partial<ItemExport>>> {
+  if (types.FormField.ITEMS in files) {
+    return readItemsFile(files[types.FormField.ITEMS])
   } else {
     return Promise.reject(Error('No item file.'))
   }
@@ -248,10 +249,10 @@ function readSensorsFile (path: string): Promise<SensorType[]> {
 }
 
 /** Parse files for sensors */
-export function parseSensors (files: Files): Promise<SensorType[]> {
-  const sensorsFile = files[types.FormField.SENSORS]
-  if (util.formFileExists(sensorsFile)) {
-    return readSensorsFile(sensorsFile.path)
+export function parseSensors (
+  files: { [key: string]: string }): Promise<SensorType[]> {
+  if (types.FormField.SENSORS in files) {
+    return readSensorsFile(files[types.FormField.SENSORS])
   } else {
     return Promise.resolve([])
   }
@@ -276,10 +277,10 @@ function readTemplatesFile (path: string): Promise<Label2DTemplateType[]> {
 }
 
 /** Parse files for sensors */
-export function parseTemplates (files: Files): Promise<Label2DTemplateType[]> {
-  const templatesFile = files[types.FormField.LABEL_SPEC]
-  if (util.formFileExists(templatesFile)) {
-    return readTemplatesFile(templatesFile.path)
+export function parseTemplates (
+  files: { [key: string]: string }): Promise<Label2DTemplateType[]> {
+  if (files[types.FormField.LABEL_SPEC] in files) {
+    return readTemplatesFile(files[types.FormField.LABEL_SPEC])
   } else {
     return Promise.resolve([])
   }

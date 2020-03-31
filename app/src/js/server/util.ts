@@ -1,4 +1,3 @@
-import { File } from 'formidable'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { sprintf } from 'sprintf-js'
@@ -112,13 +111,6 @@ export function index2str (index: number) {
  */
 export function initSessId (sessionId: string) {
   return (sessionId ? sessionId : uuid4())
-}
-
-/**
- * Check whether form file exists
- */
-export function formFileExists (file: File | undefined): boolean {
-  return (file !== undefined && file.size !== 0)
 }
 
 /**

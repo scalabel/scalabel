@@ -3,7 +3,7 @@ import {
   Request,
   Response
 } from 'express'
-import { Fields, Files } from 'formidable'
+import { File } from 'formidable'
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
@@ -112,6 +112,15 @@ export class Listeners {
   }
 
   /**
+   * Alert the user that the sent fields were illegal
+   */
+  public badFormResponse (res: Response) {
+    const err = Error('Illegal fields for project creation')
+    Logger.error(err)
+    res.send(err.message)
+  }
+
+  /**
    * Handles posted project form data
    */
   public async postProjectHandler (req: Request, res: Response) {
@@ -119,44 +128,57 @@ export class Listeners {
       res.sendStatus(404)
     }
 
-    const queryArg = 'web'
-    const apiCall = queryArg in req.query && req.query[queryArg] === 'false'
+    const internalApi = 'internal_api'
+    const apiCall = internalApi in req.query
+      && req.query[internalApi] === 'true'
 
-    let fields: Fields | undefined
-    let files: Files | undefined
+    if (apiCall) {
+      if (req.body.fields === undefined || req.body.files === undefined) {
+        this.badFormResponse(res)
+        return
+      }
+    } else {
+      if (req.fields === undefined || req.files === undefined) {
+        this.badFormResponse(res)
+        return
+      }
+    }
+
+    let fields: { [key: string]: string }
+    let files: { [key: string]: string }
     if (apiCall) {
       fields = req.body.fields
       files = req.body.files
     } else {
-      fields = req.fields
-      files = req.files
+      fields = req.fields as { [key: string]: string}
+      const formFiles = req.files as { [key: string]: File | undefined }
+      files = {}
+      for (const key of Object.keys(formFiles)) {
+        const file = formFiles[key]
+        if (file !== undefined && file.size !== 0) {
+          files[key] = file.path
+        }
+      }
     }
 
-    if (fields !== undefined && files !== undefined) {
-      try {
-        // parse form from request
-        const form = await parseForm(fields, this.projectStore)
-        // parse item, category, and attribute data from the form
-        const formFileData = await parseFiles(form.labelType, files)
-        // create the project from the form data
-        const project = await createProject(form, formFileData)
-        await Promise.all([
-          this.projectStore.saveProject(project),
-          // create tasks then save them
-          createTasks(project).then(
-            (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
-          // save the project
-        ])
-        res.send()
-      } catch (err) {
-        Logger.error(err)
-        // alert the user that something failed
-        res.send(err.message)
-      }
-    } else {
-      // alert the user that the sent fields were illegal
-      const err = Error('Illegal fields for project creation')
+    try {
+      // parse form from request
+      const form = await parseForm(fields, this.projectStore)
+      // parse item, category, and attribute data from the form
+      const formFileData = await parseFiles(form.labelType, files)
+      // create the project from the form data
+      const project = await createProject(form, formFileData)
+      await Promise.all([
+        this.projectStore.saveProject(project),
+        // create tasks then save them
+        createTasks(project).then(
+          (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
+        // save the project
+      ])
+      res.send()
+    } catch (err) {
       Logger.error(err)
+      // alert the user that something failed
       res.send(err.message)
     }
   }
