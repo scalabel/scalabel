@@ -10,7 +10,7 @@ import { getSubmissionTime } from '../components/util'
 import { ItemExport } from '../functional/bdd_types'
 import { TaskType } from '../functional/types'
 import {
-  createProject, createTasks, parseFiles, parseForm
+  createProject, createTasks, parseFiles, parseForm, readItemsFile
 } from './create_project'
 import { convertStateToExport } from './export'
 import Logger from './logger'
@@ -121,12 +121,33 @@ export class Listeners {
   }
 
   /**
+   * Alert the user that the task creation request was illegal
+   */
+  public badTaskResponse (res: Response) {
+    const err = Error('Illegal fields for task creation')
+    Logger.error(err)
+    res.status(400).send(err.message)
+  }
+
+  /**
+   * Error if it's not a post request
+   */
+  public checkInvalidPost (req: Request, res: Response): boolean {
+    if (req.method !== 'POST') {
+      res.sendStatus(404)
+      res.end()
+      return true
+    }
+    return false
+  }
+
+  /**
    * Handles posted project from internal data
    * Items file not required
    */
   public async postProjectInternalHandler (req: Request, res: Response) {
-    if (req.method !== 'POST') {
-      res.sendStatus(404)
+    if (this.checkInvalidPost(req, res)) {
+      return
     }
 
     if (req.body === undefined ||
@@ -147,8 +168,8 @@ export class Listeners {
    * Items file required
    */
   public async postProjectHandler (req: Request, res: Response) {
-    if (req.method !== 'POST') {
-      res.sendStatus(404)
+    if (this.checkInvalidPost(req, res)) {
+      return
     }
 
     if (req.fields === undefined || req.files === undefined) {
@@ -170,12 +191,47 @@ export class Listeners {
   }
 
   /**
+   * Handles tasks being added to a project
+   */
+  public async postTasksHandler (req: Request, res: Response) {
+    if (this.checkInvalidPost(req, res)) {
+      return
+    }
+
+    if (req.body === undefined
+      || req.body.items === undefined
+      || req.body.projectName === undefined) {
+      this.badTaskResponse(res)
+      return
+    }
+
+    // read in the data
+    const items = await readItemsFile(req.body.items)
+    let project: types.Project
+    try {
+      project = await this.projectStore.loadProject(req.body.projectName)
+    } catch (err) {
+      Logger.error(err)
+      this.badTaskResponse(res)
+      return
+    }
+
+    // update the projects
+    project.items = project.items.concat(items)
+    await this.projectStore.saveProject(project)
+
+    // update the tasks
+    const tasks = await createTasks(project)
+    await this.projectStore.saveTasks(tasks)
+
+    res.sendStatus(200)
+  }
+
+  /**
    * Return dashboard info
    */
   public async dashboardHandler (req: Request, res: Response) {
-    if (req.method !== 'POST') {
-      res.sendStatus(404)
-      res.end()
+    if (this.checkInvalidPost(req, res)) {
       return
     }
 

@@ -63,6 +63,13 @@ def get_create_uri(port):
     return 'http://{}:{}/{}'.format(address, port, endpoint)
 
 
+def get_task_uri(port):
+    """ gets endpoint for task creation given the port """
+    address = '127.0.0.1'
+    endpoint = 'postTasks'
+    return 'http://{}:{}/{}'.format(address, port, endpoint)
+
+
 @pytest.mark.usefixtures(SERVER_FIXTURE_NAME)
 def test_create_project(get_config):
     """ test project creation internal API """
@@ -86,14 +93,24 @@ def test_create_project(get_config):
 
 @pytest.mark.usefixtures(SERVER_FIXTURE_NAME)
 def test_create_project_no_items(get_config):
-    """ test internal project creation API doesn't require items """
+    """ test internal project creation API allows adding items later """
     port = get_config['port']
     uri = get_create_uri(port)
+    project_name = 'other_project'
     body = {
-        'fields': get_sample_fields('other_project'),
+        'fields': get_sample_fields(project_name),
         'files': {}
     }
     response = requests.post(uri, data=json.dumps(
         body), timeout=1, headers=HEADERS)
     assert response.status_code == 200
 
+    # now add the items
+    task_uri = get_task_uri(port)
+    body = {
+        'projectName': project_name,
+        'items': 'examples/image_list.yml'
+    }
+    response = requests.post(task_uri, data=json.dumps(body),
+                             timeout=1, headers=HEADERS)
+    assert response.status_code == 200

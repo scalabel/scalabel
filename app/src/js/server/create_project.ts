@@ -199,7 +199,8 @@ export function parseAttributes (
 /**
  * Read items from yaml file at path
  */
-function readItemsFile (path: string): Promise<Array<Partial<ItemExport>>> {
+export function readItemsFile (
+  path: string): Promise<Array<Partial<ItemExport>>> {
   return new Promise((resolve, reject) => {
     fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
       if (err) {
