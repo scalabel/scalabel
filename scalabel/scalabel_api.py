@@ -39,7 +39,7 @@ class ScalabelAPI():
             body), timeout=1, headers=self.headers)
         return response
 
-    def create_default_project(self, project_name, use_items):
+    def create_default_project(self, project_name, use_items=True):
         """ Example usage for minimal project """
         fields = {
             'project_name': project_name,

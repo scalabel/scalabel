@@ -56,12 +56,11 @@ def fixture_run_server(config):
 def test_create_project(api):
     """ Test project creation internal API """
     project_name = 'internal_project'
-    use_items = True
-    response = api.create_default_project(project_name, use_items)
+    response = api.create_default_project(project_name)
     assert response.status_code == 200
 
     # test repeated name fails
-    response = api.create_default_project(project_name, use_items)
+    response = api.create_default_project(project_name)
     assert response.status_code == 400
 
 
@@ -69,8 +68,7 @@ def test_create_project(api):
 def test_create_project_no_items(api):
     """ Test internal project creation API allows adding items later """
     project_name = 'other_project'
-    use_items = False
-    response = api.create_default_project(project_name, use_items)
+    response = api.create_default_project(project_name, False)
     assert response.status_code == 200
 
     # now add the items
