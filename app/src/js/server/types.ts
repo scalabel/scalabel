@@ -179,6 +179,7 @@ export const enum DatabaseType {
 /* endpoint names for http server */
 export const enum Endpoint {
   POST_PROJECT = '/postProject',
+  POST_PROJECT_INTERNAL = '/postProjectInternal',
   GET_PROJECT_NAMES = '/getProjectNames',
   EXPORT = '/getExport',
   DASHBOARD = '/postDashboardContents',

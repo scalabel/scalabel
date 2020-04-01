@@ -38,7 +38,7 @@ beforeAll(async () => {
   Session.devMode = false
   Session.testMode = true
 
-  // port is lso changed in test_config
+  // port is also changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',

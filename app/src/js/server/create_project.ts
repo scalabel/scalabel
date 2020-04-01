@@ -76,10 +76,10 @@ export async function parseForm (
  * Parses item, category, and attribute files from paths
  */
 export async function parseFiles (
-  labelType: string, files: { [key: string]: string })
+  labelType: string, files: { [key: string]: string }, itemsRequired: boolean)
   : Promise<types.FormFileData> {
   return Promise.all([
-    parseItems(files),
+    parseItems(files, itemsRequired),
     parseSensors(files),
     parseTemplates(files),
     parseAttributes(files, labelType),
@@ -222,11 +222,16 @@ function readItemsFile (path: string): Promise<Array<Partial<ItemExport>>> {
  * Group by video name
  */
 export function parseItems (
-  files: { [key: string]: string }): Promise<Array<Partial<ItemExport>>> {
+  files: { [key: string]: string },
+  itemsRequired: boolean): Promise<Array<Partial<ItemExport>>> {
   if (types.FormField.ITEMS in files) {
     return readItemsFile(files[types.FormField.ITEMS])
   } else {
-    return Promise.reject(Error('No item file.'))
+    if (itemsRequired) {
+      return Promise.reject(Error('No item file.'))
+    } else {
+      return Promise.resolve([])
+    }
   }
 }
 

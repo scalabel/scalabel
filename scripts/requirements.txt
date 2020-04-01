@@ -7,5 +7,6 @@ numpy
 plyfile
 pycodestyle
 pylint
+pytest
 psutil
 colorama

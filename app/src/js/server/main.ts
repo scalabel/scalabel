@@ -49,6 +49,8 @@ function startHTTPServer (
 
   app.post(Endpoint.POST_PROJECT, formidable(),
     listeners.postProjectHandler.bind(listeners))
+  app.post(Endpoint.POST_PROJECT_INTERNAL, bodyParser.json(),
+    listeners.postProjectInternalHandler.bind(listeners))
   app.post(Endpoint.DASHBOARD, bodyParser.json(),
     listeners.dashboardHandler.bind(listeners))
 }

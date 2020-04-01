@@ -117,70 +117,56 @@ export class Listeners {
   public badFormResponse (res: Response) {
     const err = Error('Illegal fields for project creation')
     Logger.error(err)
-    res.send(err.message)
+    res.status(400).send(err.message)
   }
 
   /**
-   * Handles posted project form data
+   * Handles posted project from internal data
+   * Items file not required
    */
-  public async postProjectHandler (req: Request, res: Response) {
-    if (req.method !== 'POST' || req.fields === undefined) {
+  public async postProjectInternalHandler (req: Request, res: Response) {
+    if (req.method !== 'POST') {
       res.sendStatus(404)
     }
 
-    const internalApi = 'internal_api'
-    const apiCall = internalApi in req.query
-      && req.query[internalApi] === 'true'
+    if (req.body === undefined ||
+        req.body.fields === undefined ||
+        req.body.files === undefined) {
+      Logger.info(req.body)
+      Logger.info((req.body === undefined).toString())
+      this.badFormResponse(res)
+      return
+    }
 
-    if (apiCall) {
-      if (req.body.fields === undefined || req.body.files === undefined) {
-        this.badFormResponse(res)
-        return
-      }
-    } else {
-      if (req.fields === undefined || req.files === undefined) {
-        this.badFormResponse(res)
-        return
+    await this.createProjectFromDicts(
+      req.body.fields, req.body.files, false, res)
+  }
+
+  /**
+   * Handles posted project from form data
+   * Items file required
+   */
+  public async postProjectHandler (req: Request, res: Response) {
+    if (req.method !== 'POST') {
+      res.sendStatus(404)
+    }
+
+    if (req.fields === undefined || req.files === undefined) {
+      this.badFormResponse(res)
+      return
+    }
+
+    const fields = req.fields as { [key: string]: string}
+    const formFiles = req.files as { [key: string]: File | undefined }
+    const files: { [key: string]: string } = {}
+    for (const key of Object.keys(formFiles)) {
+      const file = formFiles[key]
+      if (file !== undefined && file.size !== 0) {
+        files[key] = file.path
       }
     }
 
-    let fields: { [key: string]: string }
-    let files: { [key: string]: string }
-    if (apiCall) {
-      fields = req.body.fields
-      files = req.body.files
-    } else {
-      fields = req.fields as { [key: string]: string}
-      const formFiles = req.files as { [key: string]: File | undefined }
-      files = {}
-      for (const key of Object.keys(formFiles)) {
-        const file = formFiles[key]
-        if (file !== undefined && file.size !== 0) {
-          files[key] = file.path
-        }
-      }
-    }
-
-    try {
-      // parse form from request
-      const form = await parseForm(fields, this.projectStore)
-      // parse item, category, and attribute data from the form
-      const formFileData = await parseFiles(form.labelType, files)
-      // create the project from the form data
-      const project = await createProject(form, formFileData)
-      await Promise.all([
-        this.projectStore.saveProject(project),
-        // create tasks then save them
-        createTasks(project).then(
-          (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
-        // save the project
-      ])
-      res.send()
-    } catch (err) {
-      Logger.error(err)
-      // alert the user that something failed
-      res.send(err.message)
-    }
+    await this.createProjectFromDicts(fields, files, true, res)
   }
 
   /**
@@ -245,6 +231,36 @@ export class Listeners {
         Logger.error(err)
         res.send(err.message)
       }
+    }
+  }
+
+  /**
+   * Finishes project creation using processed dicts
+   */
+  private async createProjectFromDicts (
+    fields: { [key: string]: string },
+    files: { [key: string]: string },
+    itemsRequired: boolean, res: Response) {
+    try {
+        // parse form from request
+      const form = await parseForm(fields, this.projectStore)
+        // parse item, category, and attribute data from the form
+      const formFileData = await parseFiles(
+        form.labelType, files, itemsRequired)
+        // create the project from the form data
+      const project = await createProject(form, formFileData)
+      await Promise.all([
+        this.projectStore.saveProject(project),
+          // create tasks then save them
+        createTasks(project).then(
+            (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
+          // save the project
+      ])
+      res.send()
+    } catch (err) {
+      Logger.error(err)
+        // alert the user that something failed
+      res.status(400).send(err.message)
     }
   }
 }
