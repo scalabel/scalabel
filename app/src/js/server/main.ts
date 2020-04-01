@@ -2,13 +2,15 @@ import * as bodyParser from 'body-parser'
 import express, { Application } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
+import { connect } from 'mongoose'
 import socketio from 'socket.io'
 import 'source-map-support/register'
 import { BotManager } from './bot_manager'
+import AuthController from './controllers/authController'
 import { Hub } from './hub'
 import { Listeners } from './listeners'
 import Logger from './logger'
-import { getAbsoluteSrcPath, HTMLDirectories } from './path'
+import { API_PATH, getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
@@ -51,6 +53,8 @@ function startHTTPServer (
     listeners.postProjectHandler.bind(listeners))
   app.post(Endpoint.DASHBOARD, bodyParser.json(),
     listeners.dashboardHandler.bind(listeners))
+
+  app.use(API_PATH, new AuthController(config).router)
 }
 
 /**
@@ -102,6 +106,9 @@ async function main () {
 
   // initialize storage
   const storage = await makeStorage(config.database, config.data)
+
+  // connect to local mongodb server
+  connect('mongodb://localhost').catch()
 
   // initialize redis- need separate clients for different roles
   const cacheClient = new RedisClient(config)

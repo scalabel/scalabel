@@ -1,17 +1,14 @@
-import { compare, hash } from 'bcrypt'
 import { NextFunction, Request, Response, Router } from 'express'
-import { sign } from 'jsonwebtoken'
 
-import DataStoredInToken from '../dto/dataStoredInToken'
+import bodyParser from 'body-parser'
+import CreateUserDto from '../dto/createUser'
 import ForgetPasswordDto from '../dto/forgetPassword'
 import LogInDto from '../dto/login'
 import ResetPasswordDto from '../dto/resetPassword'
-import TokenData from '../dto/tokenData'
-import { resetModel } from '../entities/reset'
-import { User, userModel } from '../entities/user'
-import { NoSuchUserException, ServerErrorException, WrongCredentialsException } from '../exceptions'
+import errorHandler from '../middlewares/errorHandler'
 import validationMiddleware from '../middlewares/validation'
-import { API_PATH } from '../path'
+
+import AuthenticationService from '../services/auth'
 import { ServerConfig } from '../types'
 
 /** Authentication controller for login and reset */
@@ -19,23 +16,43 @@ class AuthController {
 
   /** Root path for this controller */
   public path = '/auth'
-  /** Server config */
-  private config: ServerConfig
   /** Router object */
-  private router = Router()
-  /** User repo */
-  private userModel = userModel
-  /** Reset repo */
-  private resetModel = resetModel
+  public router: Router
+  /** Service */
+  private service: AuthenticationService
 
   /**
    * Create an authentication controller
    * @param {ServerConfig} config - Server config
    */
   constructor (config: ServerConfig) {
-    this.config = config
+    this.router = Router()
+    this.router.use(bodyParser.json())
+    this.service = new AuthenticationService(config)
     this.initialRoutes()
+    this.router.use(errorHandler)
   }
+
+  /**
+   * Register user
+   * @param {Request} request - request object
+   * @param {Response} response - response object
+   * @param {NextFunction} next - function
+   */
+  public registration =
+    async (request: Request, response: Response, next: NextFunction) => {
+      const userData: CreateUserDto = request.body
+      try {
+        const {
+        cookie,
+        user
+      } = await this.service.register(userData)
+        response.setHeader('Set-Cookie', [cookie])
+        response.send(user)
+      } catch (error) {
+        next(error)
+      }
+    }
 
   /**
    * Login function
@@ -43,30 +60,14 @@ class AuthController {
    * @param {Response} response - response object
    * @param {NextFunction} next - function
    */
-  public async login (
-    request: Request, response: Response, next: NextFunction) {
+  public login = (request: Request, response: Response, next: NextFunction) => {
     const logInData: LogInDto = request.body
-    this.userModel.findOne({ email: logInData.email }, async (err, user) => {
-      if (err) {
-        next(new WrongCredentialsException())
-      } else {
-        if (user) {
-          const isPasswordMatching = await compare(
-            logInData.password,
-            user.get('password', null, { getters: false })
-          )
-          if (isPasswordMatching) {
-            const tokenData = this.createToken(user)
-            response.setHeader('Set-Cookie', [this.createCookie(tokenData)])
-            response.send(user)
-          } else {
-            next(new WrongCredentialsException())
-          }
-        } else {
-          next(new WrongCredentialsException())
-        }
-      }
-    })
+    this.service.login(logInData)
+      .then((user) => {
+        const tokenData = this.service.createToken(user)
+        response.setHeader('Set-Cookie', [this.service.createCookie(tokenData)])
+        response.send(user)
+      }).catch((ex) => next(ex))
   }
 
   /**
@@ -75,26 +76,13 @@ class AuthController {
    * @param {Response} response - response object
    * @param {NextFunction} next - next function
    */
-  public resetPassword (
-    request: Request, response: Response, next: NextFunction) {
-    const resetPasswordDto: ResetPasswordDto = request.body
-    this.resetModel.findOne({ token: resetPasswordDto.token }).then((reset) => {
-      if (reset) {
-        this.userModel.findById(reset.userId).then(async (user) => {
-          if (user) {
-            const hashedPassword = await hash(resetPasswordDto.password, 10)
-            user.password = hashedPassword
-            return user.save()
-          } else {
-            next(new WrongCredentialsException())
-          }
-        }).catch(() => next(new WrongCredentialsException()))
-      } else {
-        next(new WrongCredentialsException())
-      }
-    }).then(() => response.send(200))
-    .catch(() => next(new WrongCredentialsException()))
-  }
+  public resetPassword =
+    (request: Request, response: Response, next: NextFunction) => {
+      const resetPasswordDto: ResetPasswordDto = request.body
+      this.service.resetPassword(resetPasswordDto)
+      .then((code) => response.send(code))
+      .catch((ex) => next(ex))
+    }
 
   /**
    * forget password function
@@ -102,24 +90,13 @@ class AuthController {
    * @param {Response} response - response object
    * @param {NextFunction} next - next function
    */
-  public forgetPassword (
-    request: Request, response: Response, next: NextFunction) {
-    const forgetPasswordDto: ForgetPasswordDto = request.body
-    this.userModel.findOne({ email: forgetPasswordDto.email },
-      async (err, user) => {
-        if (err) {
-          next(new ServerErrorException())
-        } else {
-          if (user) {
-            // TODO: Send email
-            response.send(200)
-          } else {
-            next(new NoSuchUserException())
-          }
-        }
-      }
-    )
-  }
+  public forgetPassword =
+    (request: Request, response: Response, next: NextFunction) => {
+      const forgetPasswordDto: ForgetPasswordDto = request.body
+      this.service.forgetPassword(forgetPasswordDto)
+      .then((code) => response.send(code))
+      .catch((ex) => next(ex))
+    }
 
   /**
    * Logout function
@@ -134,48 +111,27 @@ class AuthController {
   /**
    * Initial base routes for this controller
    */
-  private initialRoutes () {
+  private initialRoutes = () => {
     this.router.post(
-      `${API_PATH}${this.path}/login`,
+      `${this.path}/register`,
+      validationMiddleware(CreateUserDto),
+      this.registration
+    )
+    this.router.post(
+      `${this.path}/login`,
       validationMiddleware(LogInDto),
       this.login)
     this.router.post(
-      `${API_PATH}${this.path}/forget_password`,
+      `${this.path}/forget_password`,
       validationMiddleware(ForgetPasswordDto),
       this.forgetPassword)
     this.router.post(
-      `${API_PATH}${this.path}/reset_password`,
+      `${this.path}/reset_password`,
       validationMiddleware(ResetPasswordDto),
       this.resetPassword)
     this.router.post(
-      `${API_PATH}${this.path}/logout`,
+      `${this.path}/logout`,
       this.logout)
-  }
-
-  /**
-   * Create cookie
-   * @param {TokenData} tokenData - Token data
-   * @returns {string} auth cookie
-   */
-  private createCookie (tokenData: TokenData): string {
-    return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`
-  }
-
-  /**
-   * Create Token
-   * @param {User} user - user info
-   * @returns {TokenData} token info
-   */
-  private createToken (user: User): TokenData {
-    const expiresIn = 60 * 60 // an hour
-    const secret = this.config.jwtSecret
-    const dataStoredInToken: DataStoredInToken = {
-      _id: user._id
-    }
-    return {
-      expiresIn,
-      token: sign(dataStoredInToken, secret, { expiresIn })
-    }
   }
 }
 

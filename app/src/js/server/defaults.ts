@@ -15,7 +15,8 @@ export const serverConfig: ServerConfig = {
   timeForWrite: 600,
   numActionsForWrite: 10,
   redisPort: 6379,
-  bots: false
+  bots: false,
+  jwtSecret: 'E59649B17DFE09962C280E50B8BBE6073C97CF5676C909A0890899604623672D'
 }
 
 /* default categories when file is missing and label is box2D or box3D */
