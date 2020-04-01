@@ -8,6 +8,7 @@ import os
 import signal
 import json
 import shutil
+from ..scalabel_api import ScalabelAPI
 
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
@@ -15,20 +16,25 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 logger.setLevel(logging.DEBUG)
 
 CONFIG_PATH = './app/config/test_config.yml'
-HEADERS = {'Content-Type': 'application/json'}
 SERVER_FIXTURE_NAME = 'run_server'
 
 
-@pytest.fixture(name='get_config')
+@pytest.fixture(name='config')
 def fixture_get_config():
-    """ read testing config """
+    """ Read testing config """
     with open(CONFIG_PATH, 'r') as fp:
         return yaml.load(fp, Loader=yaml.FullLoader)
 
 
+@pytest.fixture(name='api')
+def fixture_get_api(config):
+    """ Get instance of scalabel api """
+    return ScalabelAPI(config['port'])
+
+
 @pytest.yield_fixture(name=SERVER_FIXTURE_NAME)
-def fixture_run_server(get_config):
-    """ setup and teardown node server """
+def fixture_run_server(config):
+    """ Setup and teardown node server """
     server_cmd = ['python3.8', 'scripts/launch_server.py',
                   '--config', CONFIG_PATH]
 
@@ -43,74 +49,30 @@ def fixture_run_server(get_config):
     process.kill()
 
     # clean up data dir
-    shutil.rmtree(get_config['data'])
-
-
-def get_sample_fields(project_name):
-    """ creates dict with required fields """
-    return {
-        'project_name': project_name,
-        'item_type': 'image',
-        'label_type': 'box2d',
-        'task_size': 10
-    }
-
-
-def get_create_uri(port):
-    """ gets endpoint for project creation given the port """
-    address = '127.0.0.1'
-    endpoint = 'postProjectInternal'
-    return 'http://{}:{}/{}'.format(address, port, endpoint)
-
-
-def get_task_uri(port):
-    """ gets endpoint for task creation given the port """
-    address = '127.0.0.1'
-    endpoint = 'postTasks'
-    return 'http://{}:{}/{}'.format(address, port, endpoint)
+    shutil.rmtree(config['data'])
 
 
 @pytest.mark.usefixtures(SERVER_FIXTURE_NAME)
-def test_create_project(get_config):
-    """ test project creation internal API """
-    port = get_config['port']
-    uri = get_create_uri(port)
-    body = {
-        'fields': get_sample_fields('internal_project'),
-        'files': {
-            'item_file': 'examples/image_list.yml'
-        }
-    }
-    response = requests.post(uri, data=json.dumps(
-        body), timeout=1, headers=HEADERS)
+def test_create_project(api):
+    """ Test project creation internal API """
+    project_name = 'internal_project'
+    use_items = True
+    response = api.create_default_project(project_name, use_items)
     assert response.status_code == 200
 
     # test repeated name fails
-    response = requests.post(uri, data=json.dumps(
-        body), timeout=1, headers=HEADERS)
+    response = api.create_default_project(project_name, use_items)
     assert response.status_code == 400
 
 
 @pytest.mark.usefixtures(SERVER_FIXTURE_NAME)
-def test_create_project_no_items(get_config):
-    """ test internal project creation API allows adding items later """
-    port = get_config['port']
-    uri = get_create_uri(port)
+def test_create_project_no_items(api):
+    """ Test internal project creation API allows adding items later """
     project_name = 'other_project'
-    body = {
-        'fields': get_sample_fields(project_name),
-        'files': {}
-    }
-    response = requests.post(uri, data=json.dumps(
-        body), timeout=1, headers=HEADERS)
+    use_items = False
+    response = api.create_default_project(project_name, use_items)
     assert response.status_code == 200
 
     # now add the items
-    task_uri = get_task_uri(port)
-    body = {
-        'projectName': project_name,
-        'items': 'examples/image_list.yml'
-    }
-    response = requests.post(task_uri, data=json.dumps(body),
-                             timeout=1, headers=HEADERS)
+    response = api.add_default_tasks(project_name)
     assert response.status_code == 200
