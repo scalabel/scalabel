@@ -7,6 +7,7 @@ import signal
 import shutil
 import pytest
 import yaml
+from urllib3.exceptions import HTTPError
 from ..scalabel_api import ScalabelAPI
 
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
@@ -39,7 +40,8 @@ def fixture_run_server(config):
 
     logger.info('Launching testing server')
     logger.info(' '.join(server_cmd))
-    process = subprocess.Popen(server_cmd, preexec_fn=os.setsid)
+    process = subprocess.Popen(  # pylint: disable=subprocess-popen-preexec-fn
+        server_cmd, preexec_fn=os.setsid)
     time.sleep(1)
     yield process
 
@@ -55,21 +57,17 @@ def fixture_run_server(config):
 def test_create_project(api):
     """ Test project creation internal API """
     project_name = 'internal_project'
-    response = api.create_default_project(project_name)
-    assert response.status_code == 200
+    api.create_default_project(project_name)
 
     # test repeated name fails
-    response = api.create_default_project(project_name)
-    assert response.status_code == 400
+    with pytest.raises(HTTPError):
+        api.create_default_project(project_name)
 
 
 @pytest.mark.usefixtures(SERVER_FIXTURE_NAME)
 def test_create_project_no_items(api):
     """ Test internal project creation API allows adding items later """
-    project_name = 'other_project'
-    response = api.create_default_project(project_name, False)
-    assert response.status_code == 200
+    project = api.create_default_project('other_project', False)
 
     # now add the items
-    response = api.add_default_tasks(project_name)
-    assert response.status_code == 200
+    project.add_default_tasks()

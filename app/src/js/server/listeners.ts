@@ -222,6 +222,7 @@ export class Listeners {
     await this.projectStore.saveProject(project)
 
     // update the tasks
+    // TODO: make sure this does not combine old and new items into tasks
     const tasks = await createTasks(project)
     await this.projectStore.saveTasks(tasks)
 
