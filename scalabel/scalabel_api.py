@@ -37,10 +37,14 @@ class ScalabelAPI():
         return ScalabelProject(fields['project_name'], self)
 
     def add_default_tasks(self, project_name: str) -> None:
+        """ Adds default item list to an existing project """
+        self.add_tasks(project_name, self.default_items)
+
+    def add_tasks(self, project_name: str, items: str) -> None:
         """ Adds tasks to an existing project """
         body = {
             'projectName': project_name,
-            'items': self.default_items
+            'items': items
         }
         uri = self.make_uri(self.add_tasks_endpoint)
         self.make_request(uri, body)
@@ -69,5 +73,9 @@ class ScalabelProject():
         self.api = api
 
     def add_default_tasks(self) -> None:
-        """ Add tasks to the project """
+        """ Add default item list to the project """
         self.api.add_default_tasks(self.name)
+
+    def add_tasks(self, items: str) -> None:
+        """ Add tasks to the project """
+        self.api.add_tasks(self.name, items)
