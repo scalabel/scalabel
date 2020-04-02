@@ -307,3 +307,10 @@ export function getItemTimestamp (item: Partial<ItemExport>): number {
     return 0
   }
 }
+
+/**
+ * Parse the project name into internal format
+ */
+export function parseProjectName (projectName: string): string {
+  return projectName.replace(' ', '_')
+}

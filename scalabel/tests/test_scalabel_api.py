@@ -1,13 +1,12 @@
+""" Test file for the scalabel api """
 import subprocess
-import requests
-import yaml
-import pytest
 import time
 import logging
 import os
 import signal
-import json
 import shutil
+import pytest
+import yaml
 from ..scalabel_api import ScalabelAPI
 
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"

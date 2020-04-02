@@ -32,7 +32,7 @@ export async function parseForm (
   if (projectName === '') {
     throw(Error('Please create a project name'))
   } else {
-    projectName = projectName.replace(' ', '_')
+    projectName = util.parseProjectName(projectName)
   }
 
   const itemType = fields[types.FormField.ITEM_TYPE]

@@ -18,7 +18,7 @@ import { getExportName } from './path'
 import { ProjectStore } from './project_store'
 import * as types from './types'
 import { UserManager } from './user_manager'
-import { countLabels } from './util'
+import { countLabels, parseProjectName } from './util'
 
 /**
  * Wraps HTTP listeners
@@ -209,7 +209,8 @@ export class Listeners {
     const items = await readItemsFile(req.body.items)
     let project: types.Project
     try {
-      project = await this.projectStore.loadProject(req.body.projectName)
+      const projectName = parseProjectName(req.body.projectName)
+      project = await this.projectStore.loadProject(projectName)
     } catch (err) {
       Logger.error(err)
       this.badTaskResponse(res)
