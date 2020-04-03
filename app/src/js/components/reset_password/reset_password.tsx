@@ -1,6 +1,7 @@
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { withStyles } from '@material-ui/core/styles'
+import { Validator } from 'class-validator'
 import { Field, Form, Formik, FormikHelpers } from 'formik'
 import { TextField } from 'formik-material-ui'
 import React from 'react'
@@ -10,7 +11,9 @@ interface Values {
   /** password field value */
   password: string,
   /** password confirm field value */
-  password1: string
+  password1: string,
+  /** server side error */
+  general: string
 }
 
 export interface ClassType {
@@ -43,12 +46,13 @@ class ResetPassword extends React.Component<Props> {
         <Formik
           initialValues={{
             password: '',
-            password1: ''
+            password1: '',
+            general: ''
           }}
           validate={this.validate}
           onSubmit={this.submit}
           >
-          {({ submitForm, isSubmitting }) => (
+          {({ submitForm, isSubmitting, errors }) => (
           <Form className={this.props.classes.form}>
             <Field
               component={LoginText}
@@ -78,6 +82,7 @@ class ResetPassword extends React.Component<Props> {
             >
               Reset Password
             </LoginButton>
+            <div style={{ color: 'red' }}>{errors.general}</div>
           </Form>)}
         </Formik>
       </div>
@@ -87,28 +92,55 @@ class ResetPassword extends React.Component<Props> {
   /** field validation */
   private validate = (values: Values) => {
     const errors: Partial<Values> = {}
-    if (!values.password) {
+    const validator = new Validator()
+    if (validator.isEmpty(values.password)) {
       errors.password = 'Required'
-    } else if (values.password.length < 6) {
+    } else if (validator.maxLength(values.password, 6)) {
       errors.password = 'At least 6 characters in length'
     }
-    if (!values.password1) {
+    if (validator.isEmpty(values.password1)) {
       errors.password1 = 'Required'
-    } else if (values.password1.length < 6) {
+    } else if (validator.maxLength(values.password1, 6)) {
       errors.password1 = 'At least 6 characters in length'
     }
-    if (values.password !== values.password1 && !errors.password1) {
+    if (validator.notEquals(values.password, values.password1)
+      && !errors.password1) {
       errors.password1 = 'Password unmatch'
     }
+
     return errors
   }
 
   /** submit the form */
   private submit = (values: Values, helper: FormikHelpers<Values>) => {
-    setTimeout(() => {
+    const result = new Map()
+    const queryParams = window.location.search.substr(1).split('&amp;')
+    queryParams.forEach((queryParam) => {
+      const item = queryParam.split('=')
+      result.set(item[0], decodeURIComponent(item[1]))
+    })
+    fetch('/api/auth/reset_password', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...values,
+        token: result.get('token')
+      })
+    })
+    .then((response) => response.json())
+    .then((data) => {
       helper.setSubmitting(false)
-      alert(JSON.stringify(values, null, 2))
-    }, 500)
+      if (data.code === 200) {
+        // TODO: Could change the following tips to a Dialog
+        helper.setFieldError('general', 'Success. Redirecting to login page...')
+        setTimeout(() => {
+          location.href = `/login`
+        }, 2000)
+      } else {
+        helper.setFieldError('general', data.message)
+      }
+    })
+    .catch(() => helper.setSubmitting(false))
   }
 }
 

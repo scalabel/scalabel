@@ -1,6 +1,7 @@
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { withStyles } from '@material-ui/core/styles'
+import { Validator } from 'class-validator'
 import { Field, Form, Formik, FormikHelpers } from 'formik'
 import { TextField } from 'formik-material-ui'
 import React from 'react'
@@ -8,7 +9,9 @@ import { loginButtonStyle, loginStyle, loginTextFieldStyle } from '../../styles/
 
 interface Values {
   /** email field value */
-  email: string
+  email: string,
+  /** server side error */
+  general: string
 }
 
 export interface ClassType {
@@ -40,12 +43,13 @@ class ForgetPassword extends React.Component<Props> {
         <CssBaseline />
         <Formik
           initialValues={{
-            email: ''
+            email: '',
+            general: ''
           }}
           validate={this.validate}
           onSubmit={this.submit}
           >
-          {({ submitForm, isSubmitting }) => (
+          {({ submitForm, isSubmitting, errors }) => (
           <Form className={this.props.classes.form}>
             <Field
               component={LoginText}
@@ -66,6 +70,7 @@ class ForgetPassword extends React.Component<Props> {
             >
               Send Recovery Email
             </LoginButton>
+            <div style={{ color: 'red' }}>{errors.general}</div>
           </Form>)}
         </Formik>
       </div>
@@ -75,11 +80,10 @@ class ForgetPassword extends React.Component<Props> {
   /** field validation */
   private validate = (values: Values) => {
     const errors: Partial<Values> = {}
-    if (!values.email) {
+    const validator = new Validator()
+    if (validator.isEmpty(values.email)) {
       errors.email = 'Required'
-    } else if (
-      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
-    ) {
+    } else if (!validator.isEmail(values.email)) {
       errors.email = 'Invalid email address'
     }
     return errors
@@ -87,10 +91,21 @@ class ForgetPassword extends React.Component<Props> {
 
   /** submit the form */
   private submit = (values: Values, helper: FormikHelpers<Values>) => {
-    setTimeout(() => {
+    fetch('/api/auth/forget_password', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values)
+    })
+    .then((response) => response.json())
+    .then((data) => {
       helper.setSubmitting(false)
-      alert(JSON.stringify(values, null, 2))
-    }, 500)
+      if (data.code === 200) {
+        location.href = `/reset_password?token=${data.data.token}`
+      } else {
+        helper.setFieldError('general', data.message)
+      }
+    })
+    .catch(() => helper.setSubmitting(false))
   }
 }
 

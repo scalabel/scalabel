@@ -16,6 +16,7 @@ function errorHandler
   response
       .status(status)
       .json({
+        status,
         message
       })
 }

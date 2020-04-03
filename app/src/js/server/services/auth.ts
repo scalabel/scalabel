@@ -1,4 +1,5 @@
 import { compare, hash } from 'bcrypt'
+import crypto from 'crypto'
 import { sign } from 'jsonwebtoken'
 import CreateUserDto from '../dto/createUser'
 import DataStoredInToken from '../dto/dataStoredInToken'
@@ -6,9 +7,9 @@ import ForgetPasswordDto from '../dto/forgetPassword'
 import LogInDto from '../dto/login'
 import ResetPasswordDto from '../dto/resetPassword'
 import TokenData from '../dto/tokenData'
-import { resetModel } from '../entities/reset'
+import { Reset, resetModel } from '../entities/reset'
 import { User, userModel } from '../entities/user'
-import { NoSuchUserException, ServerErrorException, UserExistsException, WrongCredentialsException } from '../exceptions'
+import { NoSuchUserException, ResetTokenExpiredException, ServerErrorException, UserExistsException, WrongCredentialsException } from '../exceptions'
 import { ServerConfig } from '../types'
 
 /**
@@ -88,15 +89,21 @@ class AuthenticationService {
     return new Promise<number>((resolve, reject) => {
       this.resetModel.findOne({ token: resetData.token }).then((reset) => {
         if (reset) {
+          if (reset.applied ||
+            new Date().getTime() > reset.createdAt.getTime() + 15 * 60 * 1000) {
+            reject(new ResetTokenExpiredException())
+          }
           this.userModel.findById(reset.userId).then(async (user) => {
             if (user) {
               const hashedPassword = await hash(resetData.password, 10)
               user.password = hashedPassword
+              reset.applied = true
+              reset.save().catch()
               return user.save()
             } else {
-              reject(new WrongCredentialsException())
+              reject(new ServerErrorException())
             }
-          }).catch(() => reject(new WrongCredentialsException()))
+          }).catch(() => reject(new ServerErrorException()))
         } else {
           reject(new WrongCredentialsException())
         }
@@ -110,15 +117,21 @@ class AuthenticationService {
    * @param {ForgetPasswordDto} forgetPasswordDto - forget password data
    */
   public forgetPassword = (forgetPasswordDto: ForgetPasswordDto) => {
-    return new Promise<number>((resolve, reject) => {
+    return new Promise<Reset>((resolve, reject) => {
       this.userModel.findOne({ email: forgetPasswordDto.email },
         async (err, user) => {
           if (err) {
             reject(new ServerErrorException())
           } else {
             if (user) {
-              // TODO: Send email
-              resolve(200)
+              // Call email service to send a reset email.
+              const reset = await this.resetModel.create({
+                userId: user._id,
+                token: crypto.randomBytes(64).toString('hex'),
+                applied: false,
+                createdAt: new Date()
+              })
+              resolve(reset)
             } else {
               reject(new NoSuchUserException())
             }

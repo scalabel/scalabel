@@ -3,6 +3,7 @@ export { default as AuthenticationTokenMissingException } from './authentication
 export { default as NoSuchUserException } from './noSuchUserException'
 export { default as NotAuthorizedException } from './notAuthorizedException'
 export { default as ParameterException } from './parameterException'
+export { default as ResetTokenExpiredException } from './resetTokenExpiredException'
 export { default as ServerErrorException } from './serverErrorException'
 export { default as UserExistsException } from './userExistsException'
 export { default as WrongCredentialsException } from './wrongCredentialsException'

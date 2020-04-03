@@ -1,13 +1,11 @@
-import { NextFunction, Request, Response, Router } from 'express'
-
 import bodyParser from 'body-parser'
+import { NextFunction, Request, Response, Router } from 'express'
 import CreateUserDto from '../dto/createUser'
 import ForgetPasswordDto from '../dto/forgetPassword'
 import LogInDto from '../dto/login'
 import ResetPasswordDto from '../dto/resetPassword'
 import errorHandler from '../middlewares/errorHandler'
 import validationMiddleware from '../middlewares/validation'
-
 import AuthenticationService from '../services/auth'
 import { ServerConfig } from '../types'
 
@@ -48,7 +46,10 @@ class AuthController {
         user
       } = await this.service.register(userData)
         response.setHeader('Set-Cookie', [cookie])
-        response.send(user)
+        response.json({
+          code: 200,
+          data: user
+        })
       } catch (error) {
         next(error)
       }
@@ -66,7 +67,10 @@ class AuthController {
       .then((user) => {
         const tokenData = this.service.createToken(user)
         response.setHeader('Set-Cookie', [this.service.createCookie(tokenData)])
-        response.send(user)
+        response.json({
+          code: 200,
+          data: user
+        })
       }).catch((ex) => next(ex))
   }
 
@@ -80,7 +84,9 @@ class AuthController {
     (request: Request, response: Response, next: NextFunction) => {
       const resetPasswordDto: ResetPasswordDto = request.body
       this.service.resetPassword(resetPasswordDto)
-      .then((code) => response.send(code))
+      .then(() => response.json({
+        code: 200
+      }))
       .catch((ex) => next(ex))
     }
 
@@ -94,7 +100,13 @@ class AuthController {
     (request: Request, response: Response, next: NextFunction) => {
       const forgetPasswordDto: ForgetPasswordDto = request.body
       this.service.forgetPassword(forgetPasswordDto)
-      .then((code) => response.send(code))
+      .then((reset) =>
+        response.json({
+          code: 200,
+          data: {
+            token: reset.token
+          }
+        }))
       .catch((ex) => next(ex))
     }
 

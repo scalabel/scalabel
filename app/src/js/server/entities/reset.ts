@@ -7,6 +7,8 @@ export interface Reset {
   userId: string
   /** Reset token */
   token: string
+  /** Applied */
+  applied: boolean
   /** Register time */
   createdAt: Date
 }
@@ -15,6 +17,7 @@ const resetSchema = new mongoose.Schema(
   {
     userId: String,
     token: String,
+    applied: Boolean,
     createdAt: Date
   },
   {

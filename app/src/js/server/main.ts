@@ -108,7 +108,8 @@ async function main () {
   const storage = await makeStorage(config.database, config.data)
 
   // connect to local mongodb server
-  connect('mongodb://localhost').catch()
+  // TODO: Configuration and test
+  connect('mongodb://localhost/scalabel').catch()
 
   // initialize redis- need separate clients for different roles
   const cacheClient = new RedisClient(config)

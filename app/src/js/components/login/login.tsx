@@ -6,6 +6,7 @@ import Grid from '@material-ui/core/Grid'
 import Link from '@material-ui/core/Link'
 import Modal from '@material-ui/core/Modal'
 import { withStyles } from '@material-ui/core/styles'
+import { Validator } from 'class-validator'
 import { Field, Form, Formik, FormikHelpers } from 'formik'
 import { TextField } from 'formik-material-ui'
 import React from 'react'
@@ -46,7 +47,9 @@ interface Values {
   /** email field value */
   email: string,
   /** password field value */
-  password: string
+  password: string,
+  /** server side error */
+  general: string
 }
 
 /**
@@ -101,15 +104,17 @@ class Login extends React.Component<Props, State> {
           open={this.state.open}
           onClose={this.handleClose}
         >
+          <div>
           <Formik
             initialValues={{
               email: '',
-              password: ''
+              password: '',
+              general: ''
             }}
             validate={this.validate}
             onSubmit={this.submit}
             >
-            {({ submitForm, isSubmitting }) => (
+            {({ submitForm, isSubmitting, errors }) => (
             <Form className={this.props.classes.form}>
               <Field
                 component={LoginText}
@@ -146,6 +151,7 @@ class Login extends React.Component<Props, State> {
               >
                 Sign In
               </LoginButton>
+              <div style={{ color: 'red' }}>{errors.general}</div>
               <Grid container>
                 <Grid item xs>
                   <Link href='/forget_password'>
@@ -155,6 +161,7 @@ class Login extends React.Component<Props, State> {
               </Grid>
             </Form>)}
           </Formik>
+          </div>
         </Modal>
       </div>
     )
@@ -178,11 +185,10 @@ class Login extends React.Component<Props, State> {
   /** field validation */
   private validate = (values: Values) => {
     const errors: Partial<Values> = {}
-    if (!values.email) {
+    const validator = new Validator()
+    if (validator.isEmpty(values.email)) {
       errors.email = 'Required'
-    } else if (
-      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
-    ) {
+    } else if (!validator.isEmail(values.email)) {
       errors.email = 'Invalid email address'
     }
     return errors
@@ -190,10 +196,21 @@ class Login extends React.Component<Props, State> {
 
   /** submit the form */
   private submit = (values: Values, helper: FormikHelpers<Values>) => {
-    setTimeout(() => {
+    fetch('/api/auth/login', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values)
+    })
+    .then((response) => response.json())
+    .then((data) => {
       helper.setSubmitting(false)
-      alert(JSON.stringify(values, null, 2))
-    }, 500)
+      if (data.code === 200) {
+        location.href = '/create'
+      } else {
+        helper.setFieldError('general', data.message)
+      }
+    })
+    .catch(() => helper.setSubmitting(false))
   }
 }
 
