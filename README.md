@@ -40,7 +40,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
     bash scripts/setup_local_dir.sh
     ```
 
-    If you have a local folder of images or point clouds to label, you can move them to `local-data/items`. After launching the server (finishing Step 3 or 4), the url for the images will be `localhost:8686/items`, assuming the port in the scalabel config is 8686. The url of the example image (`local-data/items/examples/cat.webp`) is [http://localhost:8686/items/examples/cat.webp](http://localhost:8686/items/examples/cat.webp). Any files in the `items` folder and subfolders will be served.
+    If you have a local folder of images or point clouds to label, you can move them to `local-data/items`. After launching the server (finishing Step 3 or 4), the url for the images will be `localhost:8686/items`, assuming the port in the scalabel config is 8686. The url of the example image (`local-data/items/examples/cat.webp`) is [http://localhost:8686/items/examples/cat.webp](http://localhost:8686/items/examples/cat.webp). Any files in the `items` folder and subfolders will be served. Files at `local-data/items/{subpath}` are available at `{hostname}/items/{subpath}`.
 
 3. Using Docker
 
