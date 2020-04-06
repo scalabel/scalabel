@@ -29,10 +29,19 @@ def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
     all_data = request.get_json()
 
     # shouldn't recompute url in a batch
-    images = []
+    # also shouldn't assume they're all the same url
+    url = all_data[0]['url']
+    try:
+        img_response = requests.get(url)
+    except requests.exceptions.ConnectionError:
+        response: Response = make_response('Bad image url provided.')
+        return response
+    img = np.array(Image.open(io.BytesIO(img_response.content)))
+ 
+    # images = []
     boxes = []
     for data in all_data:
-        url: str = data['url']
+        # url: str = data['url']
         box: Dict[str, float] = data['labels'][0]['box2d']
         x1 = box['x1']
         x2 = box['x2']
@@ -40,19 +49,19 @@ def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
         y2 = box['y2']
         bbox = [x1, y1, x2 - x1, y2 - y1]
 
-        try:
-            img_response = requests.get(url)
-        except requests.exceptions.ConnectionError:
-            response: Response = make_response('Bad image url provided.')
-            return response
+        # try:
+        #     img_response = requests.get(url)
+        # except requests.exceptions.ConnectionError:
+        #     response: Response = make_response('Bad image url provided.')
+        #     return response
 
-        img = np.array(Image.open(io.BytesIO(img_response.content)))
-        images.append(np.array(img))
+        # img = np.array(Image.open(io.BytesIO(img_response.content)))
+        # images.append(np.array(img))
         boxes.append(bbox)
-    if len(images) == 1:
-        preds = polyrnn.predict_rect_to_poly(images[0], boxes[0])
+    if len(boxes) == 1:
+        preds = polyrnn.predict_rect_to_poly(img, boxes[0])
     else:
-        preds = polyrnn.predict_rect_to_poly_batch(images, boxes)
+        preds = polyrnn.predict_rect_to_poly_batch(img, boxes)
 
 
     logger.info('Time for prediction: %s', time.time() - start_time)

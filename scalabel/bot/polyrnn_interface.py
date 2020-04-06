@@ -36,9 +36,9 @@ class PolyrnnInterface(PolyrnnBase):
         output: List[List[float]] = preds[0]
         return output
     
-    def predict_rect_to_poly_batch(self, imgs, bboxes):
+    def predict_rect_to_poly_batch(self, img, bboxes):
         instances = []
-        for (img, bbox) in zip(imgs, bboxes):
+        for bbox in bboxes:
             instance = {
                 'img': img,
                 'bbox': bbox
