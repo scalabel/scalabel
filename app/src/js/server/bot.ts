@@ -192,22 +192,29 @@ export class Bot {
   private async executeQueries (
     queries: ModelQuery[]): Promise<AddLabelsAction[]> {
     const actions: AddLabelsAction[] = []
+    const modelEndpoint = new URL(queries[0].endpoint, this.modelAddress)
+    const itemIndex = queries[0].itemIndex
+    const allData = []
     for (const query of queries) {
       const data = query.data
-      const modelEndpoint = new URL(query.endpoint, this.modelAddress)
-      try {
-        const response = await axios.post(
-          modelEndpoint.toString(), data, this.axiosConfig
-        )
-        Logger.info(sprintf('Got a %s response from the model with data: %s',
-          response.status.toString(), response.data.points))
+      allData.push(data)
+    }
+      // const modelEndpoint = new URL(query.endpoint, this.modelAddress)
+    try {
+      const response = await axios.post(
+        modelEndpoint.toString(), allData, this.axiosConfig
+      )
+      const data: number[][][] = response.data.points
+      for (const datum of data) {
         const action = this.modelInterface.makePolyAction(
-          response.data.points as number[][], query.itemIndex
+          datum, itemIndex
         )
         actions.push(action)
-      } catch (e) {
-        Logger.info(getPyConnFailedMsg(modelEndpoint.toString(), e.message))
       }
+      // Logger.info(sprintf('Got a %s response from the model with data: %s',
+      //   response.status.toString(), response.data.points))
+    } catch (e) {
+      Logger.info(getPyConnFailedMsg(modelEndpoint.toString(), e.message))
     }
     return actions
   }

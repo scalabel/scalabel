@@ -26,23 +26,34 @@ def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
     start_time = time.time()
-    data = request.get_json()
-    url: str = data['url']
-    box: Dict[str, float] = data['labels'][0]['box2d']
-    x1 = box['x1']
-    x2 = box['x2']
-    y1 = box['y1']
-    y2 = box['y2']
-    bbox = [x1, y1, x2 - x1, y2 - y1]
+    all_data = request.get_json()
 
-    try:
-        img_response = requests.get(url)
-    except requests.exceptions.ConnectionError:
-        response: Response = make_response('Bad image url provided.')
-        return response
+    # shouldn't recompute url in a batch
+    images = []
+    boxes = []
+    for data in all_data:
+        url: str = data['url']
+        box: Dict[str, float] = data['labels'][0]['box2d']
+        x1 = box['x1']
+        x2 = box['x2']
+        y1 = box['y1']
+        y2 = box['y2']
+        bbox = [x1, y1, x2 - x1, y2 - y1]
 
-    img = np.array(Image.open(io.BytesIO(img_response.content)))
-    preds = polyrnn.predict_rect_to_poly(np.array(img), bbox)
+        try:
+            img_response = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            response: Response = make_response('Bad image url provided.')
+            return response
+
+        img = np.array(Image.open(io.BytesIO(img_response.content)))
+        images.append(np.array(img))
+        boxes.append(bbox)
+    if len(images) == 1:
+        preds = polyrnn.predict_rect_to_poly(images[0], boxes[0])
+    else:
+        preds = polyrnn.predict_rect_to_poly_batch(images, boxes)
+
 
     logger.info('Time for prediction: %s', time.time() - start_time)
     response = make_response(jsonify({'points': preds}))

@@ -36,3 +36,21 @@ class PolyrnnInterface(PolyrnnBase):
         output: List[List[float]] = preds[0]
         return output
     
+    def predict_rect_to_poly_batch(self, imgs, bboxes):
+        instances = []
+        for (img, bbox) in zip(imgs, bboxes):
+            instance = {
+                'img': img,
+                'bbox': bbox
+            }
+            component = {
+                'poly': np.array([[-1., -1.]])
+            }
+            instance = self.tool.data_loader.prepare_component(instance, component)
+            instances.append(instance)
+                # ignore deprecation warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            preds = self.tool.annotate_batch(instances)
+        output: List[List[List[float]]] = preds
+        return output
