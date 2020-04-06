@@ -4,6 +4,7 @@ import argparse
 import logging
 import psutil
 import yaml
+import os
 
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
@@ -49,6 +50,7 @@ def launch() -> None:
     bot = 'bots'
     if bot in config and config[bot]:
         py_command = ['python3.8', '-m', 'scalabel.bot.server']
+
         host = 'botHost'
         port = 'botPort'
         if host in config:
@@ -56,9 +58,19 @@ def launch() -> None:
         if port in config:
             py_command += ['--port', str(config[port])]
 
+        py_env = os.environ.copy()
+        python_path = 'PYTHONPATH'
+        model_path = os.path.join(
+            'scalabel', 'bot', 'experimental',
+            'fast-seg-label', 'polyrnn_scalabel')
+        if python_path in py_env:
+            model_path = "{}:{}".format(py_env[python_path], model_path)
+        py_env[python_path] = model_path
+
         logger.info('Launching python server')
         logger.info(' '.join(py_command))
-        subprocess.Popen(py_command)
+
+        subprocess.Popen(py_command, env=py_env)
 
     # Try to use all the available memory for this single instance launcher
     memory = psutil.virtual_memory()
