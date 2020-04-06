@@ -2,9 +2,9 @@
 import subprocess
 import argparse
 import logging
+import os
 import psutil
 import yaml
-import os
 
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
