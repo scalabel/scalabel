@@ -9,10 +9,11 @@ echo [$(date +"%F %T")] ================================
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ca-certificates \
     build-essential software-properties-common
-sudo add-apt-repository ppa:chris-lea/redis-server ppa:deadsnakes/ppa
+sudo add-apt-repository -y ppa:chris-lea/redis-server ppa:deadsnakes/ppa
 curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 sudo apt-get update
-sudo apt-get install -y npm nodejs redis-server python3.8 \
+sudo apt-get install -y --no-install-recommends \
+    nodejs redis-server python3.8 \
     python3.8-dev python3-pip python3-setuptools
 
 echo [$(date +"%F %T")] ================================
