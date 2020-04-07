@@ -12,9 +12,9 @@ before_install:
     libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
   - npm install -g npm@latest
 install:
+  - ./scripts/setup_ubuntu.sh
   - npm install canvas --build-from-source
   - npm install
-  - ./scripts/setup_ubuntu.sh
 script:
   - python3.8 -m pylint scripts/ scalabel
   - python3.8 -m mypy --strict scripts scalabel
