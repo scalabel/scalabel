@@ -2,6 +2,7 @@
 import subprocess
 import argparse
 import logging
+import os
 import psutil
 import yaml
 
@@ -24,6 +25,12 @@ def launch() -> None:
 
     with open(args.config, 'r') as fp:
         config = yaml.load(fp, Loader=yaml.FullLoader)
+
+    if not os.path.exists(config['data']):
+        raise FileNotFoundError('Can not find {}'.format(config['data']))
+
+    if 'itemDir' in config and not os.path.exists(config['itemDir']):
+        raise FileNotFoundError('Can not find {}'.format(config['itemDir']))
 
     redis_port = 'redisPort'
     if redis_port not in config:
