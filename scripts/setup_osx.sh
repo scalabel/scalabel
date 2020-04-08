@@ -9,9 +9,6 @@ echo [$(date +"%F %T")] ================================
 brew install redis node python@3.8
 export PATH="/usr/local/opt/python@3.8/bin:$PATH"
 
-echo [$(date +"%F %T")] Add /usr/local/opt/python@3.8/bin to PATH in default bash config
-echo [$(date +"%F %T")] Or export PATH=\"/usr/local/opt/python@3.8/bin:\$PATH\" in the current shell
-
 echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Installing python dependencies
 echo [$(date +"%F %T")] ================================
@@ -32,3 +29,6 @@ echo [$(date +"%F %T")] ================================
 node_modules/.bin/webpack --config webpack.config.js --mode=production
 
 . ${DIR}/setup_local_dir.sh
+
+echo [$(date +"%F %T")] Add /usr/local/opt/python@3.8/bin to PATH in default bash config
+echo [$(date +"%F %T")] Or export PATH=\"/usr/local/opt/python@3.8/bin:\$PATH\" in the current shell
