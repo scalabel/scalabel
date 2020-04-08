@@ -14,13 +14,7 @@
 ## Demos
 
 - [Overview video](https://go.yf.io/scalabel-video-demo)
-- [2D Bounding box](https://go.yf.io/scalabel-demo-box2d)
-- [2D Segmentation](https://go.yf.io/scalabel-demo-seg2d)
-- [2D Bounding box tracking](https://go.yf.io/scalabel-demo-box2d-tracking)
-- [2D Segmentation tracking](https://go.yf.io/scalabel-demo-seg2d-tracking)
-- [2D Lane marking](https://go.yf.io/scalabel-demo-lane)
-- [3D Bounding box](https://go.yf.io/scalabel-demo-box3d)
-- [3D Bounding box tracking](https://go.yf.io/scalabel-demo-box3d-tracking)
+
 
 ## Try It Yourself
 
@@ -31,7 +25,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 1. Check out the code
 
    ```
-   git clone git@github.com:scalabel/scalabel.git
+   git clone https://github.com/scalabel/scalabel
    cd scalabel
    ```
 
@@ -137,7 +131,7 @@ Another use of this function is to provide further adjustment for existing label
 Use the synchronization config
 
 ```
-cp app/config/sync_config.yml data/config.yml
+cp app/config/sync_config.yml local-data/scalabel/config.yml
 ```
 
 Now you can open multiple sessions for the same project, and they will automatically synchronize the data.
