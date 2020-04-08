@@ -20,7 +20,7 @@ def homepage() -> str:
     """ hello world test """
     return 'Test server for PolygonRNN++\n'
 
-def load_images(urls) -> Dict[str, np.ndarray]:
+def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
     """ load image for each url and cache results in a dictionary """
     url_to_img = {}
     for url in urls:

@@ -8,7 +8,7 @@ class PolyrnnBase(ABC):
     @abstractmethod
     def predict_rect_to_poly(
             self,
-            imgs: List[np.ndarray], 
+            imgs: List[np.ndarray],
             bboxes: List[List[float]]) -> List[List[List[float]]]:
         """
         Predict rectangles -> polygons

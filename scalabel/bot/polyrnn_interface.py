@@ -17,7 +17,7 @@ class PolyrnnInterface(PolyrnnBase):
         self.tool = Tool(exp, net)
 
     def predict_rect_to_poly(
-            self, 
+            self,
             imgs: List[np.ndarray],
             bboxes: List[List[float]]) -> List[List[List[float]]]:
         # marshal into polyrnn codebase's format
@@ -36,6 +36,5 @@ class PolyrnnInterface(PolyrnnBase):
         # ignore deprecation warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            preds = self.tool.annotate_batch(instances)
+            preds: List[List[List[float]]] = self.tool.annotate_batch(instances)
         return preds
-        
