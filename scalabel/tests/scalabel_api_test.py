@@ -8,7 +8,7 @@ import shutil
 import pytest
 import yaml
 from urllib3.exceptions import HTTPError
-from ..scalabel_api import ScalabelAPI
+from scalabel.scalabel_api import ScalabelAPI
 
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
