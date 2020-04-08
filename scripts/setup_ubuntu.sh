@@ -36,4 +36,4 @@ echo [$(date +"%F %T")] ================================
 
 node_modules/.bin/webpack --config webpack.config.js --mode=production
 
-. ${DIR}/setup_local_dir.sh
+# . ${DIR}/setup_local_dir.sh

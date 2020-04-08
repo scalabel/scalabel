@@ -26,7 +26,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
    ```
    git clone https://github.com/scalabel/scalabel
-   cd scalabel
+   cd scalabel  
    ```
 
 2. Prepare the local data directories
