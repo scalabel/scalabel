@@ -14,115 +14,74 @@
 ## Demos
 
 - [Overview video](https://go.yf.io/scalabel-video-demo)
-- [2D Bounding box](https://go.yf.io/scalabel-demo-box2d)
-- [2D Segmentation](https://go.yf.io/scalabel-demo-seg2d)
-- [2D Bounding box tracking](https://go.yf.io/scalabel-demo-box2d-tracking)
-- [2D Segmentation tracking](https://go.yf.io/scalabel-demo-seg2d-tracking)
-- [2D Lane marking](https://go.yf.io/scalabel-demo-lane)
-- [3D Bounding box](https://go.yf.io/scalabel-demo-box3d)
-- [3D Bounding box tracking](https://go.yf.io/scalabel-demo-box3d-tracking)
+
 
 ## Try It Yourself
 
-More installation and usage details can be find in our [documentation](http://www.scalabel.ai/doc). It also includes Windows setup.
+Below is a quick way to install dependencies and launch the Scalabel server. After launching the server, you can directly jump to [how to use the tool](#using-scalabel). If you want to know more about the installation process, please check [additional tips](#installation-tips).
+
+**Note**: You only need to do either Step 3 or 4, but not both.
 
 1. Check out the code
 
    ```
-   git clone git@github.com:scalabel/scalabel.git
-   cd scalabel
+   git clone https://github.com/scalabel/scalabel
+   cd scalabel  
    ```
 
-2. Compile the code
+2. Prepare the local data directories
+    ```
+    bash scripts/setup_local_dir.sh
+    ```
 
-   There are two alternative ways to get the compiled code
+    If you have a local folder of images or point clouds to label, you can move them to `local-data/items`. After launching the server (finishing Step 3 or 4), the url for the images will be `localhost:8686/items`, assuming the port in the scalabel config is 8686. The url of the example image (`local-data/items/examples/cat.webp`) is [http://localhost:8686/items/examples/cat.webp](http://localhost:8686/items/examples/cat.webp). Any files in the `items` folder and subfolders will be served. Files at `local-data/items/{subpath}` are available at `{hostname}/items/{subpath}`.
 
-   1. Usage docker (recommended if you only need to run the code)
+3. Using Docker
 
-      Download from dockerhub
+    Download from dockerhub
 
-      ```
-      docker pull scalabel/www
-      ```
+    ```
+    docker pull scalabel/www
+    ```
 
-      or build the docker image yourself
+    Launch the server
 
-      ```
-      docker build . -t scalabel/www
-      ```
+    ```
+    docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p 8686:8686 -p 6379:6379 scalabel/www \
+        python3.8 scripts/launch_server.py \
+        --config /opt/scalabel/local-data/scalabel/config.yml
+    ```
 
-      Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
+    Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
 
-   2. Compile the code yourself (recommended if you want to customize the source code)
+4. Build the code yourself
 
-      Install [nodejs and npm](https://nodejs.org/en/download/) and [redis](https://redis.io/topics/quickstart).
-
-      On Mac
-
-      ```
-      brew install redis node
-      ```
-
-      On Ubuntu
-
-      ```
-      apt-get install npm nodejs redis-server
-      ```
-
-      Transpile or build Javascript code
-
-      ```
-      npm install
-      node_modules/.bin/webpack --config webpack.config.js --mode=production
-      ```
-
-      **Note** If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
-
-      ```
-      node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
-      ```
-
-      Install python dependencies
-
-      ```
-      python3.8 -m pip install -U -r scripts/requirements.txt
-      ```
-
-3. Prepare data directory
-
-   ```
-   mkdir data
-   cp app/config/default_config.yml data/config.yml
-   ```
-
-4. Launch the server
-
-   If using docker,
-
-   ```
-   docker run -it -v "`pwd`/data:/opt/scalabel/data" -p 8686:8686 -p 6379:6379 scalabel/www \
-       python3.8 scripts/launch_server.py --config /opt/scalabel/data/config.yml
-   ```
-
-   Please note to map the correct ports for both http and redis servers.
-
-   Otherwise, without using docker,
-
-   ```
-   python3.8 scripts/launch_server.py --config ./data/config.yml
-   ```
-
-   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
+    This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Max OS X and you have `apt-get` if you are on Ubuntu. The code requires Python 3.7 or above. Please check [how to upgrade your Python](#upgrade-python) if you don't have the right version. We use 3.8 by default. Depending your OS, run the script
+    ```
+    bash scripts/setup_osx.sh
+    ```
+    or 
+    ```
+    bash scripts/setup_ubuntu.sh
+    ```
+    If you are on Ubuntu, you may need to run the script with `sudo`.
+    
+    Then you can use our python script to launch the server.
+    ```
+    python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
+    ```
 
 5. Get labels
 
    The collected labels can be directly downloaded from the project dashboard. The data can be follow [bdd data format](https://github.com/ucbdrive/bdd-data/blob/master/doc/format.md). After installing the requirements and setting up the paths of the [bdd data toolkit](https://github.com/ucbdrive/bdd-data), you can visualize the labels by
 
    ```
-   python3 -m bdd_data.show_labels.py -l <your_downloaded_label_path.json>
+   python3 -m bdd_data.show_labels -l <your_downloaded_label_path.json>
    ```
 
-## Usage
+More installation and usage details can be find in our [documentation](http://www.scalabel.ai/doc). It also includes Windows setup.
+
+## Using Scalabel
 
 ### Create annotation projects
 
@@ -172,7 +131,7 @@ Another use of this function is to provide further adjustment for existing label
 Use the synchronization config
 
 ```
-cp app/config/sync_config.yml data/config.yml
+cp app/config/sync_config.yml local-data/scalabel/config.yml
 ```
 
 Now you can open multiple sessions for the same project, and they will automatically synchronize the data.
@@ -180,3 +139,55 @@ Now you can open multiple sessions for the same project, and they will automatic
 ### More Usage Info
 
 Please go to [documentation](http://www.scalabel.ai/doc) for detailed annotation instructions and advanced usages.
+
+## Installation Tips
+
+### Development
+
+We transpile or build Javascript code
+
+```
+npm install
+node_modules/.bin/webpack --config webpack.config.js --mode=production
+```
+
+If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
+
+```
+node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
+```
+
+### Upgrade Python
+
+Our python code requires Python3.7 and above. To install the proper Python versions, we recommend [pyenv](https://github.com/pyenv/pyenv), especially for Mac users.
+
+Homebrew on Mac can directly install `pyenv`
+
+```
+brew update && brew install pyenv
+```
+Otherwise, you can follow the `pyenv` [installation tutorial](https://github.com/pyenv/pyenv#installation). Next, install Python 3.8.2
+```
+pyenv install 3.8.2
+```
+Set it as global default
+```
+pyenv global 3.8.2
+```
+Adding the new Python to your `PATH`
+
+```
+export PATH=$(pyenv root)/shims:$PATH
+```
+
+
+On Ubuntu, you can also use [`deadsnakes` ppa](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/+index) to install different versions of Python. Ubuntu 18.04 or later provides the package of Python 3.8 directly.
+
+```
+sudo apt-get update
+sudo apt-get install -y python3.8 python3.8-dev python3-pip python3-setuptools
+```
+
+### Redis security
+
+   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
