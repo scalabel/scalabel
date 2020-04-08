@@ -17,28 +17,12 @@ class PolyrnnInterface(PolyrnnBase):
         self.tool = Tool(exp, net)
 
     def predict_rect_to_poly(
-            self, img: np.ndarray, bbox: List[float]) -> List[List[float]]:
+            self, 
+            imgs: List[np.ndarray],
+            bboxes: List[List[float]]) -> List[List[List[float]]]:
         # marshal into polyrnn codebase's format
-        instance = {
-            'img': img,
-            'bbox': bbox
-        }
-        component = {
-            'poly': np.array([[-1., -1.]])
-        }
-        instance = self.tool.data_loader.prepare_component(instance, component)
-
-        # ignore deprecation warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            preds = self.tool.annotation(instance)
-
-        output: List[List[float]] = preds[0]
-        return output
-    
-    def predict_rect_to_poly_batch(self, img, bboxes):
         instances = []
-        for bbox in bboxes:
+        for (img, bbox) in zip(imgs, bboxes):
             instance = {
                 'img': img,
                 'bbox': bbox
@@ -46,11 +30,12 @@ class PolyrnnInterface(PolyrnnBase):
             component = {
                 'poly': np.array([[-1., -1.]])
             }
-            instance = self.tool.data_loader.prepare_component(instance, component)
+            instance = self.tool.preprocess_instance(instance, component)
             instances.append(instance)
-                # ignore deprecation warnings
+
+        # ignore deprecation warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             preds = self.tool.annotate_batch(instances)
-        output: List[List[List[float]]] = preds
-        return output
+        return preds
+        

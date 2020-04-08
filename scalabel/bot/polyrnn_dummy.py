@@ -12,15 +12,15 @@ class PolyrnnDummy(PolyrnnBase):
         return
 
     def predict_rect_to_poly(
-            self, img: np.ndarray, bbox: List[float]) -> List[List[float]]:
-        """ predict rect -> dummy polygon """
-        x0, y0, w, h = bbox
-
-        # create diamond inscribed in rectangle
-        preds = np.array([[w/2.0, 0], [w, h/2.0], [w/2.0, h], [0, h/2.0]])
-        start_point = np.array([x0, y0])
-
-        preds = start_point + preds
-
-        output: List[List[float]] = preds.tolist()
+            self,
+            imgs: List[np.ndarray],
+            bboxes: List[List[float]]) -> List[List[List[float]]]:
+        """ predict rectangles -> dummy polygons """
+        output: List[List[List[float]]] = []
+        for bbox in bboxes:
+            x0, y0, w, h = bbox
+            # create diamond inscribed in rectangle
+            preds = np.array([[w/2.0, 0], [w, h/2.0], [w/2.0, h], [0, h/2.0]])
+            preds += np.array([x0, y0])
+            output.append(preds.tolist())
         return output

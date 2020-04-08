@@ -3,7 +3,7 @@ import argparse
 import io
 import logging
 import time
-from typing import Dict
+from typing import Dict, List
 import os
 import numpy as np
 import requests
@@ -20,49 +20,42 @@ def homepage() -> str:
     """ hello world test """
     return 'Test server for PolygonRNN++\n'
 
+def load_images(urls) -> Dict[str: np.ndarray]:
+    """ load image for each url and cache results in a dictionary """
+    url_to_img = {}
+    for url in urls:
+        if url not in url_to_img:
+            img_response = requests.get(url)
+            img = np.array(Image.open(io.BytesIO(img_response.content)))
+            url_to_img[url] = img
+    return url_to_img
 
 def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
     """ predict rect -> polygon """
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
     start_time = time.time()
-    all_data = request.get_json()
+    receive_data = request.get_json()
 
-    # shouldn't recompute url in a batch
-    # also shouldn't assume they're all the same url
-    url = all_data[0]['url']
     try:
-        img_response = requests.get(url)
+        url_to_img = load_images([data['url'] for data in receive_data])
     except requests.exceptions.ConnectionError:
         response: Response = make_response('Bad image url provided.')
         return response
-    img = np.array(Image.open(io.BytesIO(img_response.content)))
- 
-    # images = []
-    boxes = []
-    for data in all_data:
-        # url: str = data['url']
+
+    images: List[np.ndarray] = []
+    boxes: List[List[float]] = []
+    for data in receive_data:
         box: Dict[str, float] = data['labels'][0]['box2d']
         x1 = box['x1']
         x2 = box['x2']
         y1 = box['y1']
         y2 = box['y2']
         bbox = [x1, y1, x2 - x1, y2 - y1]
-
-        # try:
-        #     img_response = requests.get(url)
-        # except requests.exceptions.ConnectionError:
-        #     response: Response = make_response('Bad image url provided.')
-        #     return response
-
-        # img = np.array(Image.open(io.BytesIO(img_response.content)))
-        # images.append(np.array(img))
         boxes.append(bbox)
-    if len(boxes) == 1:
-        preds = polyrnn.predict_rect_to_poly(img, boxes[0])
-    else:
-        preds = polyrnn.predict_rect_to_poly_batch(img, boxes)
+        images.append(url_to_img[data['url']])
 
+    preds = polyrnn.predict_rect_to_poly(images, boxes)
 
     logger.info('Time for prediction: %s', time.time() - start_time)
     response = make_response(jsonify({'points': preds}))

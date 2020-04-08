@@ -7,6 +7,12 @@ class PolyrnnBase(ABC):
     """ Abstract class for polyrnn interface """
     @abstractmethod
     def predict_rect_to_poly(
-            self, img: np.ndarray, bbox: List[float]) -> List[List[float]]:
-        """ predict rect -> poly """
+            self,
+            imgs: List[np.ndarray], 
+            bboxes: List[List[float]]) -> List[List[List[float]]]:
+        """
+        Predict rectangles -> polygons
+        Rectangles have format [x, y, w, h]
+        Polygons have format [[x1, y1], [x2, y2], ...]
+        """
         

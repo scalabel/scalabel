@@ -201,7 +201,7 @@ export const enum Endpoint {
 
 /* endpoint names for python server */
 export const enum ModelEndpoint {
-  POLYGON_RNN_BASE = '/polygonRNNBase',
+  POLYGON_RNN_BASE = 'polygonRNNBase',
   POLYGON_RNN_REFINE = 'polygonRNNRefine'
 }
 

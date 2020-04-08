@@ -7,6 +7,7 @@ import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
+import { ItemExport } from '../functional/bdd_types'
 import { PolygonType, RectType, State } from '../functional/types'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
@@ -187,34 +188,55 @@ export class Bot {
   }
 
   /**
+   * Group the queries by their endpoints
+   */
+  private groupQueriesByEndpoint (
+    queries: ModelQuery[]): { [key: string]: ModelQuery[] } {
+    const endpointToQuery: { [key: string]: ModelQuery[] } = {}
+    for (const query of queries) {
+      if (!(query.endpoint in endpointToQuery)) {
+        endpointToQuery[query.endpoint] = []
+      }
+      endpointToQuery[query.endpoint].push(query)
+    }
+    return endpointToQuery
+  }
+
+  /**
    * Execute queries and get the resulting actions
+   * Batches the queries for each endpoint
    */
   private async executeQueries (
     queries: ModelQuery[]): Promise<AddLabelsAction[]> {
     const actions: AddLabelsAction[] = []
-    const modelEndpoint = new URL(queries[0].endpoint, this.modelAddress)
-    const itemIndex = queries[0].itemIndex
-    const allData = []
-    for (const query of queries) {
-      const data = query.data
-      allData.push(data)
-    }
-      // const modelEndpoint = new URL(query.endpoint, this.modelAddress)
-    try {
-      const response = await axios.post(
-        modelEndpoint.toString(), allData, this.axiosConfig
-      )
-      const data: number[][][] = response.data.points
-      for (const datum of data) {
-        const action = this.modelInterface.makePolyAction(
-          datum, itemIndex
-        )
-        actions.push(action)
+    const endpointToQuery = this.groupQueriesByEndpoint(queries)
+
+    // TODO: currently waits for each endpoint sequentially, can parallelize
+    for (const endpoint of Object.keys(endpointToQuery)) {
+      const modelEndpoint = new URL(endpoint, this.modelAddress)
+      const sendData: ItemExport[] = []
+      const itemIndices: number[] = []
+      for (const query of endpointToQuery[endpoint]) {
+        sendData.push(query.data)
+        itemIndices.push(query.itemIndex)
       }
-      // Logger.info(sprintf('Got a %s response from the model with data: %s',
-      //   response.status.toString(), response.data.points))
-    } catch (e) {
-      Logger.info(getPyConnFailedMsg(modelEndpoint.toString(), e.message))
+
+      try {
+        const response = await axios.post(
+          modelEndpoint.toString(), sendData, this.axiosConfig
+        )
+        Logger.info(sprintf('Got a %s response from the model with data: %s',
+          response.status.toString(), response.data.points))
+        const receiveData: number[][][] = response.data.points
+        receiveData.forEach((polyPoints: number[][], index: number) => {
+          const action = this.modelInterface.makePolyAction(
+            polyPoints, itemIndices[index]
+          )
+          actions.push(action)
+        })
+      } catch (e) {
+        Logger.info(getPyConnFailedMsg(modelEndpoint.toString(), e.message))
+      }
     }
     return actions
   }
@@ -235,7 +257,7 @@ export class Bot {
         const state = this.store.getState().present
         if (action.type === ADD_LABELS) {
           const query = this.actionToQuery(
-            state, action as AddLabelsAction)
+              state, action as AddLabelsAction)
           if (query) {
             queries.push(query)
           }
