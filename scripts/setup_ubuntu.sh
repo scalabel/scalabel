@@ -10,7 +10,8 @@ sudo apt-get update
 sudo apt-get install -y --no-install-recommends ca-certificates \
     build-essential software-properties-common curl \
     autoconf libtool pkg-config gnupg-agent git
-sudo add-apt-repository -y ppa:chris-lea/redis-server ppa:deadsnakes/ppa
+sudo add-apt-repository -y ppa:chris-lea/redis-server
+sudo add-apt-repository -y ppa:deadsnakes/ppa
 curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
