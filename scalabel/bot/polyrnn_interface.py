@@ -21,7 +21,7 @@ class PolyrnnInterface(PolyrnnBase):
             imgs: List[np.ndarray],
             bboxes: List[List[float]]) -> List[List[List[float]]]:
         # marshal into polyrnn codebase's format
-        instances = []
+        inputs = []
         for (img, bbox) in zip(imgs, bboxes):
             instance = {
                 'img': img,
@@ -31,10 +31,10 @@ class PolyrnnInterface(PolyrnnBase):
                 'poly': np.array([[-1., -1.]])
             }
             instance = self.tool.preprocess_instance(instance, component)
-            instances.append(instance)
+            inputs.append(instance)
 
         # ignore deprecation warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            preds: List[List[List[float]]] = self.tool.annotate_batch(instances)
+            preds: List[List[List[float]]] = self.tool.annotate_batch(inputs)
         return preds
