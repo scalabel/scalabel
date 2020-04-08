@@ -1,4 +1,3 @@
-import * as bodyParser from 'body-parser'
 import express, { Application } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
@@ -49,7 +48,7 @@ function startHTTPServer (
 
   app.post(Endpoint.POST_PROJECT, formidable(),
     listeners.postProjectHandler.bind(listeners))
-  app.post(Endpoint.DASHBOARD, bodyParser.json(),
+  app.post(Endpoint.DASHBOARD, express.json(),
     listeners.dashboardHandler.bind(listeners))
 }
 
