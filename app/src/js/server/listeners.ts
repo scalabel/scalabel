@@ -153,8 +153,6 @@ export class Listeners {
     if (req.body === undefined ||
         req.body.fields === undefined ||
         req.body.files === undefined) {
-      Logger.info(req.body)
-      Logger.info((req.body === undefined).toString())
       this.badFormResponse(res)
       return
     }
