@@ -9,16 +9,18 @@ import numpy as np
 import requests
 from flask import Flask, request, jsonify, make_response, Response
 from PIL import Image
-from .polyrnn_base import PolyrnnBase
+from .segmentation_base import SegmentationBase
 try:
-    from .polyrnn_interface import PolyrnnInterface as Polyrnn
+    from .segmentation_interface import SegmentationInterface as SegmentModel
 except ImportError:
-    from .polyrnn_dummy import PolyrnnDummy as Polyrnn  # type: ignore
+    from .segmentation_dummy import ( # type: ignore
+        SegmentationDummy as SegmentModel
+    )
 
 
 def homepage() -> str:
     """ hello world test """
-    return 'Test server for PolygonRNN++\n'
+    return 'Test server for segmentation\n'
 
 def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
     """ load image for each url and cache results in a dictionary """
@@ -30,7 +32,7 @@ def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
             url_to_img[url] = img
     return url_to_img
 
-def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
+def segment_base(seg_model: SegmentationBase) -> Response:
     """ predict rect -> polygon """
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
@@ -55,14 +57,14 @@ def polyrnn_base(polyrnn: PolyrnnBase) -> Response:
         boxes.append(bbox)
         images.append(url_to_img[data['url']])
 
-    preds = polyrnn.predict_rect_to_poly(images, boxes)
+    preds = seg_model.predict_rect_to_poly(images, boxes)
 
     logger.info('Time for prediction: %s', time.time() - start_time)
     response = make_response(jsonify({'points': preds}))
     return response
 
 
-def polyrnn_refine() -> str:
+def segment_refine() -> str:
     """ predict poly -> poly """
     return 'This method is not yet implemented\n'
 
@@ -73,15 +75,15 @@ def create_app() -> Flask:
     home = os.path.join('scalabel', 'bot')
 
     # pass to methods using closure
-    polyrnn = Polyrnn(home)
+    model = SegmentModel(home)
 
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)
-    app.add_url_rule('/polygonRNNBase',
-                     view_func=lambda: polyrnn_base(polyrnn),
+    app.add_url_rule('/segmentationBase',
+                     view_func=lambda: segment_base(model),
                      methods=['POST'])
-    app.add_url_rule('/polygonRNNRefine',
-                     view_func=polyrnn_refine,
+    app.add_url_rule('/segmentationRefine',
+                     view_func=segment_refine,
                      methods=['POST'])
 
     return app

@@ -1,10 +1,10 @@
-""" Abstract interface with the polyrnn model """
+""" Abstract interface for segmentation model """
 from abc import ABC, abstractmethod
 from typing import List
 import numpy as np
 
-class PolyrnnBase(ABC):
-    """ Abstract class for polyrnn interface """
+class SegmentationBase(ABC):
+    """ Abstract class for segmentation interface """
     @abstractmethod
     def predict_rect_to_poly(
             self,

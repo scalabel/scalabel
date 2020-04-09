@@ -1,11 +1,11 @@
-""" Dummy interface with the polyrnn model """
+""" Dummy interface with the segmentation model """
 from typing import List
 import numpy as np
-from .polyrnn_base import PolyrnnBase
+from .segmentation_base import SegmentationBase
 
 
-class PolyrnnDummy(PolyrnnBase):
-    """ Class for polyrnn dummy interface """
+class SegmentationDummy(SegmentationBase):
+    """ Class for segmentation dummy interface """
 
     def __init__(self, _home: str) -> None:
         # init method for consistent API

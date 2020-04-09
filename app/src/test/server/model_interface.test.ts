@@ -26,7 +26,7 @@ describe('test model interface query construction', () => {
     }
     const itemIndex = 1
     const query = modelInterface.makeRectQuery(rect, url, itemIndex)
-    expect(query.endpoint).toBe(ModelEndpoint.POLYGON_RNN_BASE)
+    expect(query.endpoint).toBe(ModelEndpoint.SEGMENTATION_BASE)
     expect(query.itemIndex).toBe(itemIndex)
 
     const itemData = query.data
@@ -45,7 +45,7 @@ describe('test model interface query construction', () => {
     const labelType = LabelTypeName.POLYGON_2D
     const query = modelInterface.makePolyQuery(
       poly2d, url, itemIndex, labelType)
-    expect(query.endpoint).toBe(ModelEndpoint.POLYGON_RNN_REFINE)
+    expect(query.endpoint).toBe(ModelEndpoint.SEGMENTATION_REFINE)
     expect(query.itemIndex).toBe(itemIndex)
 
     const itemData = query.data

@@ -1,14 +1,14 @@
-""" Interface with the polyrnn model """
+""" Interface with the segmentation model """
 from typing import List
 import os
 import warnings
 import numpy as np
 from Tool.tool import Tool  # type: ignore
-from .polyrnn_base import PolyrnnBase
+from .segmentation_base import SegmentationBase
 
 
-class PolyrnnInterface(PolyrnnBase):
-    """Class to interface with the PolygonRNN model"""
+class SegmentationInterface(SegmentationBase):
+    """Class to interface with segmentation model"""
     def __init__(self, home: str) -> None:
         exp = os.path.join(home, 'experimental', 'fast-seg-label',
                            'polyrnn_scalabel', 'Experiments', 'tool.json')
@@ -20,7 +20,7 @@ class PolyrnnInterface(PolyrnnBase):
             self,
             imgs: List[np.ndarray],
             bboxes: List[List[float]]) -> List[List[List[float]]]:
-        # marshal into polyrnn codebase's format
+        # marshal into segmentation codebase's format
         inputs = []
         for (img, bbox) in zip(imgs, bboxes):
             instance = {

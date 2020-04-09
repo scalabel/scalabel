@@ -21,7 +21,7 @@ export class ModelInterface {
   }
 
   /**
-   * Query for polygon rnn 'rect -> polygon' prediction
+   * Query for 'rect -> polygon' segmentation
    */
   public makeRectQuery (
     rect: RectType, url: string, itemIndex: number): ModelQuery {
@@ -35,13 +35,13 @@ export class ModelInterface {
     })
     return {
       data: item,
-      endpoint: ModelEndpoint.POLYGON_RNN_BASE,
+      endpoint: ModelEndpoint.SEGMENTATION_BASE,
       itemIndex
     }
   }
 
   /**
-   * Query for polygon rnn 'polygon -> polygon' prediction
+   * Query for refining 'polygon -> polygon' segmentation
    */
   public makePolyQuery (
     poly: PolygonType, url: string,
@@ -57,7 +57,7 @@ export class ModelInterface {
     })
     return {
       data: item,
-      endpoint: ModelEndpoint.POLYGON_RNN_REFINE,
+      endpoint: ModelEndpoint.SEGMENTATION_REFINE,
       itemIndex
     }
   }
