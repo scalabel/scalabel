@@ -42,6 +42,11 @@ def fixture_get_api(config: ConfigType) -> ScalabelAPI:
 def fixture_run_server(
         config: ConfigType) -> Iterator[subprocess.Popen]:  # type: ignore
     """ Setup and teardown node server """
+    # create the test dir
+    data = config['data']
+    assert isinstance(data, str)
+    os.makedirs(data)
+
     server_cmd = ['python3.8', 'scripts/launch_server.py',
                   '--config', CONFIG_PATH]
 
@@ -57,8 +62,6 @@ def fixture_run_server(
     process.kill()
 
     # clean up test data dir
-    data = config['data']
-    assert isinstance(data, str)
     shutil.rmtree(data)
 
 
