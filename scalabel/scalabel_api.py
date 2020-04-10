@@ -1,7 +1,12 @@
 """ Scalabel API """
 import json
+from typing import Dict, Mapping, Union
 import requests
 from urllib3.exceptions import HTTPError
+
+FieldsType = Mapping[str, Union[str, int]]
+FilesType = Mapping[str, str]
+BodyType = Mapping[str, Union[str, FieldsType, FilesType]]
 
 
 class LowLevelAPI():
@@ -26,7 +31,8 @@ class LowLevelAPI():
         """ Gets uri for adding tasks """
         return self.make_uri(self.add_tasks_endpoint)
 
-    def make_request(self, uri: str, body: dict) -> None:
+    def make_request(self, uri: str,
+                     body: BodyType) -> None:
         """ Makes the request to the node js server """
         response = requests.post(uri, data=json.dumps(
             body), timeout=1, headers=self.headers)
@@ -67,21 +73,25 @@ class ScalabelAPI():
         self.api = LowLevelAPI(self.port)
         self.default_items = 'examples/image_list.yml'
 
-    def create_project(self, fields: dict, files: dict) -> ScalabelProject:
+    def create_project(self,
+                       fields: FieldsType,
+                       files: FilesType) -> ScalabelProject:
         """ Project creation with full range of arguments allowed """
         body = {
             'fields': fields,
             'files': files
         }
         uri = self.api.get_create_project_uri()
-        print(uri)
         self.api.make_request(uri, body)
-        return ScalabelProject(fields['project_name'], self.port)
+
+        project_name = fields['project_name']
+        assert isinstance(project_name, str)
+        return ScalabelProject(project_name, self.port)
 
     def create_default_project(
-            self, project_name: str, use_items=True) -> ScalabelProject:
+            self, project_name: str, use_items: bool = True) -> ScalabelProject:
         """ Example usage for minimal project """
-        fields = {
+        fields: Mapping[str, Union[str, int]] = {
             'project_name': project_name,
             'item_type': 'image',
             'label_type': 'box2d',
