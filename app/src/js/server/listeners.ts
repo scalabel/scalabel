@@ -206,8 +206,9 @@ export class Listeners {
     // read in the data
     const items = await readItemsFile(req.body.items)
     let project: types.Project
+    let projectName: string
     try {
-      const projectName = parseProjectName(req.body.projectName)
+      projectName = parseProjectName(req.body.projectName)
       project = await this.projectStore.loadProject(projectName)
     } catch (err) {
       Logger.error(err)
@@ -215,13 +216,16 @@ export class Listeners {
       return
     }
 
-    // update the projects
+    // update the project with the new items
+    const itemStartNum = project.items.length
     project.items = project.items.concat(items)
     await this.projectStore.saveProject(project)
 
-    // update the tasks
-    // TODO: make sure this does not combine old and new items into tasks
-    const tasks = await createTasks(project)
+    // update the tasks, make sure not to combine old and new items
+    project.items = items
+    const oldTasks = await this.projectStore.getTasksInProject(projectName)
+    const taskStartNum = oldTasks.length
+    const tasks = await createTasks(project, taskStartNum, itemStartNum)
     await this.projectStore.saveTasks(tasks)
 
     res.sendStatus(200)

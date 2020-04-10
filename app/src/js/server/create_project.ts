@@ -473,8 +473,12 @@ function mapSensorToItems (
 /**
  * Split project into tasks
  * Each consists of the task portion of a front  end state
+ * Task and item start number are used if other tasks/items already exist
  */
-export function createTasks (project: types.Project): Promise<TaskType[]> {
+export function createTasks (
+  project: types.Project,
+  taskStartNum: number = 0,
+  itemStartNum: number = 0): Promise<TaskType[]> {
   const sensors = project.sensors
   const itemType = project.config.itemType
   const taskSize = project.config.taskSize
@@ -522,8 +526,8 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
 
   for (let taskIndex = 0; taskIndex < itemIndices.length - 1; taskIndex++) {
     const itemStartIndex = itemIndices[taskIndex]
-    const itemkEndIndex = itemIndices[taskIndex + 1]
-    const taskItems = items.slice(itemStartIndex, itemkEndIndex)
+    const itemEndIndex = itemIndices[taskIndex + 1]
+    const taskItems = items.slice(itemStartIndex, itemEndIndex)
     const itemsBySensor = mapSensorToItems(taskItems)
     const sensorIds = Object.keys(itemsBySensor).map(Number)
 
@@ -549,7 +553,7 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     const config: ConfigType = {
       ...project.config,
       taskSize: realTaskSize,
-      taskId: util.index2str(taskIndex)
+      taskId: util.index2str(taskStartNum + taskIndex)
     }
 
     // based on the imported labels, compute max ids
@@ -584,7 +588,7 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
       }
 
       // id is not relative to task, unlike index
-      const itemId = itemStartIndex + itemInd
+      const itemId = itemStartIndex + itemInd + itemStartNum
       const timestamp = util.getItemTimestamp(itemExportMap[largestSensor])
       const [newItem, newMaxLabelId, newMaxShapeId] = convertItemToImport(
         itemExportMap[largestSensor].videoName as string,
