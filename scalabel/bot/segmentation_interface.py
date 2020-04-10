@@ -16,20 +16,14 @@ class SegmentationInterface(SegmentationBase):
                            'ggnn_epoch5_step14000.pth')
         self.tool = Tool(exp, net)
 
-    def predict_rect_to_poly(
-            self,
-            imgs: List[np.ndarray],
+    def convert_rect_to_poly(
+            self, imgs: List[np.ndarray],
             bboxes: List[List[float]]) -> List[List[List[float]]]:
         # marshal into segmentation codebase's format
         inputs = []
         for (img, bbox) in zip(imgs, bboxes):
-            instance = {
-                'img': img,
-                'bbox': bbox
-            }
-            component = {
-                'poly': np.array([[-1., -1.]])
-            }
+            instance = {'img': img, 'bbox': bbox}
+            component = {'poly': np.array([[-1., -1.]])}
             instance = self.tool.preprocess_instance(instance, component)
             inputs.append(instance)
 
