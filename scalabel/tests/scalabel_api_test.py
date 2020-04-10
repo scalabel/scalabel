@@ -5,6 +5,7 @@ import logging
 import os
 import signal
 import shutil
+from typing import Iterator, Mapping, Union
 import pytest
 import yaml
 from urllib3.exceptions import HTTPError
@@ -18,22 +19,28 @@ logger.setLevel(logging.DEBUG)
 CONFIG_PATH = './app/config/test_config.yml'
 SERVER_FIXTURE_NAME = 'run_server'
 
+ConfigType = Mapping[str, Union[str, int]]
 
-@pytest.fixture(name='config')
-def fixture_get_config():
+
+@pytest.fixture(name='config')  # type: ignore
+def fixture_get_config() -> ConfigType:
     """ Read testing config """
     with open(CONFIG_PATH, 'r') as fp:
-        return yaml.load(fp, Loader=yaml.FullLoader)
+        config: ConfigType = yaml.load(fp, Loader=yaml.FullLoader)
+        return config
 
 
-@pytest.fixture(name='api')
-def fixture_get_api(config):
+@pytest.fixture(name='api')  # type: ignore
+def fixture_get_api(config: ConfigType) -> ScalabelAPI:
     """ Get instance of scalabel api """
-    return ScalabelAPI(config['port'])
+    port = config['port']
+    assert isinstance(port, int)
+    return ScalabelAPI(port)
 
 
-@pytest.yield_fixture(name=SERVER_FIXTURE_NAME)
-def fixture_run_server(config):
+@pytest.yield_fixture(name=SERVER_FIXTURE_NAME)  # type: ignore
+def fixture_run_server(
+        config: ConfigType) -> Iterator[subprocess.Popen]:  # type: ignore
     """ Setup and teardown node server """
     server_cmd = ['python3.8', 'scripts/launch_server.py',
                   '--config', CONFIG_PATH]
@@ -49,12 +56,14 @@ def fixture_run_server(config):
     os.killpg(os.getpgid(process.pid), signal.SIGTERM)
     process.kill()
 
-    # clean up data dir
-    shutil.rmtree(config['data'])
+    # clean up test data dir
+    data = config['data']
+    assert isinstance(data, str)
+    shutil.rmtree(data)
 
 
-@pytest.mark.usefixtures(SERVER_FIXTURE_NAME)
-def test_create_project(api):
+@pytest.mark.usefixtures(SERVER_FIXTURE_NAME)  # type: ignore
+def test_create_project(api: ScalabelAPI) -> None:
     """ Test project creation internal API """
     project_name = 'internal_project'
     api.create_default_project(project_name)
@@ -64,8 +73,8 @@ def test_create_project(api):
         api.create_default_project(project_name)
 
 
-@pytest.mark.usefixtures(SERVER_FIXTURE_NAME)
-def test_create_project_no_items(api):
+@pytest.mark.usefixtures(SERVER_FIXTURE_NAME)  # type: ignore
+def test_create_project_no_items(api: ScalabelAPI) -> None:
     """ Test internal project creation API allows adding items later """
     project = api.create_default_project('other_project', False)
 

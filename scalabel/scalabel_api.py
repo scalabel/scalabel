@@ -1,6 +1,6 @@
 """ Scalabel API """
 import json
-from typing import Dict, Mapping, Union
+from typing import Mapping, Union
 import requests
 from urllib3.exceptions import HTTPError
 
@@ -89,7 +89,8 @@ class ScalabelAPI():
         return ScalabelProject(project_name, self.port)
 
     def create_default_project(
-            self, project_name: str, use_items: bool = True) -> ScalabelProject:
+            self, project_name: str,
+            use_items: bool = True) -> ScalabelProject:
         """ Example usage for minimal project """
         fields: Mapping[str, Union[str, int]] = {
             'project_name': project_name,
