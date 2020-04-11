@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List
 import numpy as np
 
-class SegmentationBase(ABC):
+class SegBase(ABC):
     """ Abstract class for segmentation interface """
     @abstractmethod
     def predict_rect_to_poly(

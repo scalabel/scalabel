@@ -9,12 +9,12 @@ import numpy as np
 import requests
 from flask import Flask, request, jsonify, make_response, Response
 from PIL import Image
-from .segmentation_base import SegmentationBase
+from .seg_base import SegBase
 try:
-    from .segmentation_interface import SegmentationInterface as SegmentModel
+    from .polyrnn_adapter import PolyrnnAdapter as SegModel
 except ImportError:
-    from .segmentation_dummy import ( # type: ignore
-        SegmentationDummy as SegmentModel
+    from .seg_dummy import ( # type: ignore
+        SegDummy as SegModel
     )
 
 
@@ -32,7 +32,7 @@ def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
             url_to_img[url] = img
     return url_to_img
 
-def segment_base(seg_model: SegmentationBase) -> Response:
+def segment_base(seg_model: SegBase) -> Response:
     """ predict rect -> polygon """
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
@@ -75,7 +75,7 @@ def create_app() -> Flask:
     home = os.path.join('scalabel', 'bot')
 
     # pass to methods using closure
-    model = SegmentModel(home)
+    model = SegModel(home)
 
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)

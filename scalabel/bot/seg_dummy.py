@@ -1,10 +1,10 @@
 """ Dummy interface with the segmentation model """
 from typing import List
 import numpy as np
-from .segmentation_base import SegmentationBase
+from .seg_base import SegBase
 
 
-class SegmentationDummy(SegmentationBase):
+class SegDummy(SegBase):
     """ Class for segmentation dummy interface """
 
     def __init__(self, _home: str) -> None:

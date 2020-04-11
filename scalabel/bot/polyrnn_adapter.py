@@ -4,11 +4,11 @@ import os
 import warnings
 import numpy as np
 from Tool.tool import Tool  # type: ignore
-from .segmentation_base import SegmentationBase
+from .seg_base import SegBase
 
 
-class SegmentationInterface(SegmentationBase):
-    """Class to interface with segmentation model"""
+class PolyrnnAdapter(SegBase):
+    """Class to interface with polyrnn model"""
     def __init__(self, home: str) -> None:
         exp = os.path.join(home, 'experimental', 'fast-seg-label',
                            'polyrnn_scalabel', 'Experiments', 'tool.json')
