@@ -201,8 +201,8 @@ export const enum Endpoint {
 
 /* endpoint names for python server */
 export const enum ModelEndpoint {
-  SEGMENTATION_BASE = 'segmentationBase',
-  SEGMENTATION_REFINE = 'segmentationRefine'
+  PREDICT_POLY = 'predictPoly',
+  REFINE_POLY = 'refinePoly'
 }
 
 /* form field names */

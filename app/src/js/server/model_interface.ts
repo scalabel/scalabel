@@ -35,7 +35,7 @@ export class ModelInterface {
     })
     return {
       data: item,
-      endpoint: ModelEndpoint.SEGMENTATION_BASE,
+      endpoint: ModelEndpoint.PREDICT_POLY,
       itemIndex
     }
   }
@@ -57,7 +57,7 @@ export class ModelInterface {
     })
     return {
       data: item,
-      endpoint: ModelEndpoint.SEGMENTATION_REFINE,
+      endpoint: ModelEndpoint.REFINE_POLY,
       itemIndex
     }
   }
