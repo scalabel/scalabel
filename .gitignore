@@ -38,7 +38,7 @@ test_data/
 # jest coverage cache
 coverage/
 
-# downloaded reposs and models
+# downloaded repos and models
 scalabel/bot/experimental/*
 
 # python cache
