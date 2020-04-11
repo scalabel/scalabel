@@ -32,7 +32,7 @@ def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
             url_to_img[url] = img
     return url_to_img
 
-def segment_base(seg_model: SegBase) -> Response:
+def predict_poly(seg_model: SegBase) -> Response:
     """ predict rect -> polygon """
     logger = logging.getLogger(__name__)
     logger.info('Hitting prediction endpoint')
@@ -64,8 +64,8 @@ def segment_base(seg_model: SegBase) -> Response:
     return response
 
 
-def segment_refine() -> str:
-    """ predict poly -> poly """
+def refine_poly() -> str:
+    """ refine poly -> poly """
     return 'This method is not yet implemented\n'
 
 
@@ -79,11 +79,11 @@ def create_app() -> Flask:
 
     # url rules should match NodeJS endpoint names
     app.add_url_rule('/', view_func=homepage)
-    app.add_url_rule('/segmentationBase',
-                     view_func=lambda: segment_base(model),
+    app.add_url_rule('/predictPoly',
+                     view_func=lambda: predict_poly(model),
                      methods=['POST'])
-    app.add_url_rule('/segmentationRefine',
-                     view_func=segment_refine,
+    app.add_url_rule('/refinePoly',
+                     view_func=refine_poly,
                      methods=['POST'])
 
     return app
