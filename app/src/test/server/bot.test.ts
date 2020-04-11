@@ -1,3 +1,4 @@
+import axios from 'axios'
 import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
 import { Bot } from '../../js/server/bot'
@@ -7,6 +8,17 @@ import {
   SyncActionMessageType } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
 import { getInitialState, getRandomBox2dAction } from '../util'
+
+jest.mock('axios')
+axios.post = jest.fn().mockImplementation(() =>
+{
+  return {
+    status: 200,
+    data: {
+      points:  [[[1, 2], [3, 4]]]
+    }
+  }
+})
 
 let botData: BotData
 const socketEmit = jest.fn()
