@@ -10,17 +10,17 @@ import requests
 from flask import Flask, request, jsonify, make_response, Response
 from PIL import Image
 from .seg_base import SegBase
-# try:
-from .polyrnn_adapter import PolyrnnAdapter as SegModel
-# except ImportError:
-#     from .seg_dummy import ( # type: ignore
-#         SegDummy as SegModel
-#     )
+try:
+    from .polyrnn_adapter import PolyrnnAdapter as SegModel
+except ImportError:
+    from .seg_dummy import (  # type: ignore
+        SegDummy as SegModel)
 
 
 def homepage() -> str:
     """ hello world test """
     return 'Test server for segmentation\n'
+
 
 def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
     """ load image for each url and cache results in a dictionary """
@@ -31,6 +31,7 @@ def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
             img = np.array(Image.open(io.BytesIO(img_response.content)))
             url_to_img[url] = img
     return url_to_img
+
 
 def predict_poly(seg_model: SegBase) -> Response:
     """ predict rect -> polygon """
@@ -57,7 +58,7 @@ def predict_poly(seg_model: SegBase) -> Response:
         boxes.append(bbox)
         images.append(url_to_img[data['url']])
 
-    preds = seg_model.predict_rect_to_poly(images, boxes)
+    preds = seg_model.convert_rect_to_poly(images, boxes)
 
     logger.info('Time for prediction: %s', time.time() - start_time)
     response = make_response(jsonify({'points': preds}))
