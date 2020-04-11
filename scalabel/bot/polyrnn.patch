@@ -1,0 +1,848 @@
+Only in code/: .DS_Store
+Only in code/DataProvider: __pycache__
+diff -r -c orig_code/DataProvider/cityscapes.py code/DataProvider/cityscapes.py
+*** orig_code/DataProvider/cityscapes.py	2018-09-12 12:17:38.000000000 -0700
+--- code/DataProvider/cityscapes.py	2020-03-25 15:49:08.000000000 -0700
+***************
+*** 80,93 ****
+          """
+          self.opts = opts
+          self.mode = mode
+!         print 'Dataset Options: ', opts
+  
+          if self.mode != 'tool':
+              # in tool mode, we just use these functions
+              self.data_dir = osp.join(opts['data_dir'], split)
+              self.instances = []
+              self.read_dataset()
+!             print 'Read %d instances in %s split'%(len(self.instances), split)
+  
+      def read_dataset(self):
+          data_list = glob.glob(osp.join(self.data_dir, '*/*.json'))
+--- 80,93 ----
+          """
+          self.opts = opts
+          self.mode = mode
+!         # print 'Dataset Options: ', opts
+  
+          if self.mode != 'tool':
+              # in tool mode, we just use these functions
+              self.data_dir = osp.join(opts['data_dir'], split)
+              self.instances = []
+              self.read_dataset()
+!             # print 'Read %d instances in %s split'%(len(self.instances), split)
+  
+      def read_dataset(self):
+          data_list = glob.glob(osp.join(self.data_dir, '*/*.json'))
+***************
+*** 99,105 ****
+          pool.join()
+  
+  
+!         print "Dropped %d multi-component instances"%(np.sum([s for _,s in data]))
+  
+          self.instances = [instance for image,_ in data for instance in image]
+  
+--- 99,105 ----
+          pool.join()
+  
+  
+!         # print "Dropped %d multi-component instances"%(np.sum([s for _,s in data]))
+  
+          self.instances = [instance for image,_ in data for instance in image]
+  
+***************
+*** 232,238 ****
+  
+          return_dict = {
+              'img': img,
+-             'img_path': instance['img_path'],
+              'patch_w': crop_info['patch_w'],
+              'starting_point': crop_info['starting_point']
+          }
+--- 232,237 ----
+***************
+*** 242,248 ****
+          return return_dict
+  
+      def extract_crop(self, component, instance, context_expansion):
+!         img = utils.rgb_img_read(instance['img_path'])
+          get_poly = 'train' in self.mode or 'tool' in self.mode
+  
+          if get_poly:
+--- 241,247 ----
+          return return_dict
+  
+      def extract_crop(self, component, instance, context_expansion):
+!         img = instance['img']
+          get_poly = 'train' in self.mode or 'tool' in self.mode
+  
+          if get_poly:
+Only in code/Models/Encoder: __pycache__
+diff -r -c orig_code/Models/Encoder/ggnn_feature_encoder.py code/Models/Encoder/ggnn_feature_encoder.py
+*** orig_code/Models/Encoder/ggnn_feature_encoder.py	2018-09-12 12:17:42.000000000 -0700
+--- code/Models/Encoder/ggnn_feature_encoder.py	2020-03-25 14:43:45.000000000 -0700
+***************
+*** 26,32 ****
+              conv_final_3, bn_final_3, extract_local_feature)
+  
+      def reload(self, path):
+!         print "Reloading resnet from: ", path
+          self.resnet.load_state_dict(torch.load(path))
+  
+      def forward(self, x):
+--- 26,32 ----
+              conv_final_3, bn_final_3, extract_local_feature)
+  
+      def reload(self, path):
+!         # print "Reloading resnet from: ", path
+          self.resnet.load_state_dict(torch.load(path))
+  
+      def forward(self, x):
+diff -r -c orig_code/Models/Encoder/resnet_skip.py code/Models/Encoder/resnet_skip.py
+*** orig_code/Models/Encoder/resnet_skip.py	2018-09-12 12:17:42.000000000 -0700
+--- code/Models/Encoder/resnet_skip.py	2020-03-25 14:42:47.000000000 -0700
+***************
+*** 1,4 ****
+! from resnet import ResNet, Bottleneck
+  import torch.nn as nn
+  import torch
+  import numpy as np
+--- 1,4 ----
+! from .resnet import ResNet, Bottleneck
+  import torch.nn as nn
+  import torch
+  import numpy as np
+***************
+*** 63,69 ****
+              conv_final_3, bn_final_3)
+  
+      def reload(self, path):
+!         print "Reloading resnet from: ", path
+          self.resnet.load_state_dict(torch.load(path, map_location=lambda storage, loc: storage))
+  
+      def forward(self, x):
+--- 63,69 ----
+              conv_final_3, bn_final_3)
+  
+      def reload(self, path):
+!         # print "Reloading resnet from: ", path
+          self.resnet.load_state_dict(torch.load(path, map_location=lambda storage, loc: storage))
+  
+      def forward(self, x):
+***************
+*** 93,96 ****
+  
+  if __name__ == '__main__':
+      model = SkipResnet50()
+!     print [a.size() for a in model(torch.randn(1,3,224,224))]
+--- 93,96 ----
+  
+  if __name__ == '__main__':
+      model = SkipResnet50()
+!     # print [a.size() for a in model(torch.randn(1,3,224,224))]
+Only in code/Models/Evaluator: __pycache__
+Only in code/Models/GGNN: __pycache__
+diff -r -c orig_code/Models/GGNN/poly_ggnn.py code/Models/GGNN/poly_ggnn.py
+*** orig_code/Models/GGNN/poly_ggnn.py	2018-09-12 12:17:48.000000000 -0700
+--- code/Models/GGNN/poly_ggnn.py	2020-03-25 14:43:28.000000000 -0700
+***************
+*** 34,43 ****
+  
+  
+          if not self.use_separate_encoder:
+!             print 'Building GGNN Feature Encoder'
+              self.encoder = GgnnFeatureEncoder(input_dim=image_feature_dim, final_dim=image_feature_dim)
+          else:
+!             print 'Building GGNN Encoder'
+              self.encoder = SkipResnet50()
+              self.extract_local_feature = nn.Conv2d(
+                  in_channels = self.image_feature_dim,
+--- 34,43 ----
+  
+  
+          if not self.use_separate_encoder:
+!             # print 'Building GGNN Feature Encoder'
+              self.encoder = GgnnFeatureEncoder(input_dim=image_feature_dim, final_dim=image_feature_dim)
+          else:
+!             # print 'Building GGNN Encoder'
+              self.encoder = SkipResnet50()
+              self.extract_local_feature = nn.Conv2d(
+                  in_channels = self.image_feature_dim,
+Only in code/Models/Poly: __pycache__
+diff -r -c orig_code/Models/Poly/conv_lstm.py code/Models/Poly/conv_lstm.py
+*** orig_code/Models/Poly/conv_lstm.py	2018-09-12 12:17:44.000000000 -0700
+--- code/Models/Poly/conv_lstm.py	2020-03-25 14:43:11.000000000 -0700
+***************
+*** 524,530 ****
+                          pred = (poly[:,t]).repeat(fp_beam_size)
+                      else:
+                          expanded = True
+!                         print 'Expanded beam at time: ', t
+                          logprob, pred = torch.topk(logprobs[0,:], fp_beam_size, dim=-1)                        
+  
+                  v_prev1 = utils.class_to_grid(pred, v_prev1, self.grid_size)
+--- 524,530 ----
+                          pred = (poly[:,t]).repeat(fp_beam_size)
+                      else:
+                          expanded = True
+!                         # print 'Expanded beam at time: ', t
+                          logprob, pred = torch.topk(logprobs[0,:], fp_beam_size, dim=-1)                        
+  
+                  v_prev1 = utils.class_to_grid(pred, v_prev1, self.grid_size)
+***************
+*** 595,608 ****
+      feats = torch.ones(2, 128, 28, 28)
+      first_vertex = torch.zeros(2,)
+      first_vertex[:] = 1
+!     print first_vertex
+  
+      poly = torch.zeros(8, model.time_steps)
+      
+      import time
+      st = time.time()
+      output =  model(feats, first_vertex, poly)
+!     print 'Time Taken: ', time.time() - st
+  
+!     for k in output.keys():
+!         print k, output[k].size()
+--- 595,608 ----
+      feats = torch.ones(2, 128, 28, 28)
+      first_vertex = torch.zeros(2,)
+      first_vertex[:] = 1
+!     # print first_vertex
+  
+      poly = torch.zeros(8, model.time_steps)
+      
+      import time
+      st = time.time()
+      output =  model(feats, first_vertex, poly)
+!     # print 'Time Taken: ', time.time() - st
+  
+!     # for k in output.keys():
+!     #     print k, output[k].size()
+diff -r -c orig_code/Models/Poly/polyrnnpp.py code/Models/Poly/polyrnnpp.py
+*** orig_code/Models/Poly/polyrnnpp.py	2018-09-12 12:17:44.000000000 -0700
+--- code/Models/Poly/polyrnnpp.py	2020-03-25 14:41:29.000000000 -0700
+***************
+*** 16,40 ****
+          super(PolyRNNpp, self).__init__()
+  
+          self.opts = opts
+!         print 'Building polyrnnpp with opts:\n',opts
+          self.mode = self.opts['mode']
+          self.temperature = self.opts['temperature']
+          if 'use_correction' not in self.opts.keys():
+              self.opts['use_correction'] = False
+  
+  
+!         print 'Building encoder'
+          self.encoder = SkipResnet50()
+  
+          if 'train_encoder' in self.opts.keys() and not self.opts['train_encoder']:
+              for p in self.encoder.parameters():
+                  p.requires_grad = False
+  
+!         print 'Building first vertex network'
+          self.first_v = FirstVertex(opts, feats_channels = self.encoder.final_dim,
+              feats_dim = self.encoder.feat_size)
+  
+!         print 'Building convlstm'
+          self.conv_lstm = AttConvLSTM(
+              opts,
+              feats_channels = self.encoder.final_dim,
+--- 16,40 ----
+          super(PolyRNNpp, self).__init__()
+  
+          self.opts = opts
+!         # print 'Building polyrnnpp with opts:\n',opts
+          self.mode = self.opts['mode']
+          self.temperature = self.opts['temperature']
+          if 'use_correction' not in self.opts.keys():
+              self.opts['use_correction'] = False
+  
+  
+!         # print 'Building encoder'
+          self.encoder = SkipResnet50()
+  
+          if 'train_encoder' in self.opts.keys() and not self.opts['train_encoder']:
+              for p in self.encoder.parameters():
+                  p.requires_grad = False
+  
+!         # print 'Building first vertex network'
+          self.first_v = FirstVertex(opts, feats_channels = self.encoder.final_dim,
+              feats_dim = self.encoder.feat_size)
+  
+!         # print 'Building convlstm'
+          self.conv_lstm = AttConvLSTM(
+              opts,
+              feats_channels = self.encoder.final_dim,
+***************
+*** 49,55 ****
+                      p.requires_grad = False
+  
+          if 'use_evaluator' in self.opts and self.opts['use_evaluator']:
+!             print 'Building Evaluator'
+  
+              self.evaluator = Evaluator(
+                  feats_dim = self.encoder.feat_size,
+--- 49,55 ----
+                      p.requires_grad = False
+  
+          if 'use_evaluator' in self.opts and self.opts['use_evaluator']:
+!             # print 'Building Evaluator'
+  
+              self.evaluator = Evaluator(
+                  feats_dim = self.encoder.feat_size,
+***************
+*** 61,67 ****
+              self.evaluator = None
+  
+          if 'use_ggnn' in self.opts and self.opts['use_ggnn']:
+!             print 'Building GGNN'
+  
+              for p in self.encoder.parameters():
+                  p.requires_grad = False
+--- 61,67 ----
+              self.evaluator = None
+  
+          if 'use_ggnn' in self.opts and self.opts['use_ggnn']:
+!             # print 'Building GGNN'
+  
+              for p in self.encoder.parameters():
+                  p.requires_grad = False
+***************
+*** 197,203 ****
+                  # 0 means no intersection, -inf for intersection
+                  isect = torch.from_numpy(isect).to(torch.float32).to(device)
+                  comparison_metric = comparison_metric + isect
+!                 print comparison_metric
+  
+              comparison_metric = comparison_metric.view(batch_size, fp_beam_size, lstm_beam_size)
+              out_dict['pred_polys'] = out_dict['pred_polys'].view(batch_size, fp_beam_size, lstm_beam_size, -1)
+--- 197,203 ----
+                  # 0 means no intersection, -inf for intersection
+                  isect = torch.from_numpy(isect).to(torch.float32).to(device)
+                  comparison_metric = comparison_metric + isect
+!                 # print comparison_metric
+  
+              comparison_metric = comparison_metric.view(batch_size, fp_beam_size, lstm_beam_size)
+              out_dict['pred_polys'] = out_dict['pred_polys'].view(batch_size, fp_beam_size, lstm_beam_size, -1)
+***************
+*** 231,237 ****
+          return out_dict
+  
+      def reload(self, path, strict=False):
+!         print "Reloading full model from: ", path
+          self.load_state_dict(torch.load(path, map_location=lambda storage, loc: storage)['state_dict'],
+              strict=strict)
+          # In case we want to reload parts of the model, strict is False
+--- 231,237 ----
+          return out_dict
+  
+      def reload(self, path, strict=False):
+!         # print "Reloading full model from: ", path
+          self.load_state_dict(torch.load(path, map_location=lambda storage, loc: storage)['state_dict'],
+              strict=strict)
+          # In case we want to reload parts of the model, strict is False
+***************
+*** 251,255 ****
+  
+      output = model(x, poly)
+  
+!     for k in output.keys():
+!         print k, output[k].size()
+--- 251,255 ----
+  
+      output = model(x, poly)
+  
+!     # for k in output.keys():
+!         # print k, output[k].size()
+Only in code/Models: __pycache__
+Only in code/Tool: __pycache__
+diff -r -c orig_code/Tool/tool.py code/Tool/tool.py
+*** orig_code/Tool/tool.py	2018-09-12 12:17:50.000000000 -0700
+--- code/Tool/tool.py	2020-03-25 16:34:55.000000000 -0700
+***************
+*** 15,22 ****
+  
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  
+! app = Flask(__name__)
+! CORS(app)
+  
+  def get_args():
+      parser = argparse.ArgumentParser()
+--- 15,22 ----
+  
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  
+! # app = Flask(__name__)
+! # CORS(app)
+  
+  def get_args():
+      parser = argparse.ArgumentParser()
+***************
+*** 31,48 ****
+      return args
+  
+  def get_data_loaders(opts, DataProvider):
+!     print 'Building dataloaders'
+      data_loader = DataProvider(split='val', opts=opts['train_val'], mode='tool')
+      
+      return data_loader
+  
+  class Tool(object):
+!     def __init__(self, args):
+!         self.opts = json.load(open(args.exp, 'r'))
+!         self.image_dir = args.image_dir
+          self.data_loader = get_data_loaders(self.opts['dataset'], cityscapes.DataProvider)
+          self.model = polyrnnpp.PolyRNNpp(self.opts).to(device)
+!         self.model.reload(args.reload, strict=False)
+  
+      def get_grid_size(self, run_ggnn=True):
+          if self.opts['use_ggnn'] and run_ggnn:
+--- 31,48 ----
+      return args
+  
+  def get_data_loaders(opts, DataProvider):
+!     # print 'Building dataloaders'
+      data_loader = DataProvider(split='val', opts=opts['train_val'], mode='tool')
+      
+      return data_loader
+  
+  class Tool(object):
+!     def __init__(self, exp, model_path):
+!         self.opts = json.load(open(exp, 'r'))
+!         # self.image_dir = args.image_dir
+          self.data_loader = get_data_loaders(self.opts['dataset'], cityscapes.DataProvider)
+          self.model = polyrnnpp.PolyRNNpp(self.opts).to(device)
+!         self.model.reload(model_path, strict=False)
+  
+      def get_grid_size(self, run_ggnn=True):
+          if self.opts['use_ggnn'] and run_ggnn:
+***************
+*** 59,65 ****
+              # Add batch dimension and make torch Tensor
+  
+              output = self.model(
+!                 img, 
+                  poly=None,
+                  fp_beam_size=5,
+                  lstm_beam_size=1,
+--- 59,65 ----
+              # Add batch dimension and make torch Tensor
+  
+              output = self.model(
+!                 img,
+                  poly=None,
+                  fp_beam_size=5,
+                  lstm_beam_size=1,
+***************
+*** 127,254 ****
+          torch.cuda.empty_cache() 
+          return [poly.astype(np.int).tolist()]
+  
+! @app.route('/api/annotation', methods=['POST'])
+! def generate_annotation():
+!     start = time.time()
+!     instance = request.json
+!     component = {}
+!     component['poly'] = np.array([[-1., -1.]])
+!     instance = tool.data_loader.prepare_component(instance, component)
+!     pred_annotation = tool.annotation(instance)
+! 
+!     print "Annotation time: " + str(time.time() - start)
+! 
+!     response = jsonify(results=[pred_annotation])
+!     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+!     return response
+! 
+! @app.route('/api/annotation_and_ggnn', methods=['POST'])
+! def generate_annotation_and_ggnn():
+!     start = time.time()
+!     instance = request.json
+!     component = {}
+!     component['poly'] = np.array([[-1., -1.]])
+!     instance = tool.data_loader.prepare_component(instance, component)
+!     pred_annotation = tool.annotation(instance, run_ggnn=True)
+!     pred_annotation[0] = pred_annotation[0][::2]    
+! 
+!     print "Annotation time: " + str(time.time() - start)
+! 
+!     response = jsonify(results=[pred_annotation])
+!     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+!     return response
+! 
+! @app.route('/api/fix_poly', methods=['POST'])
+! def fix_poly_request():
+!     start = time.time()
+!     instance = request.json
+!     component = {}
+!     component['poly'] = instance['poly']
+!     instance = tool.data_loader.prepare_component(instance, component)
+!     pred_annotation = tool.fixing(instance, run_ggnn=False)
+! 
+!     print "Fixing time: " + str(time.time() - start)
+! 
+!     response = jsonify(results=[pred_annotation])
+!     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+!     return response
+! 
+! @app.route('/api/fix_poly_ggnn', methods=['POST'])
+! def fix_poly_ggnn_request():
+!     start = time.time()
+!     instance = request.json
+!     component = {}
+!     component['poly'] = instance['poly']
+!     instance = tool.data_loader.prepare_component(instance, component)
+!     pred_annotation = tool.fixing(instance, run_ggnn=True)
+!     pred_annotation[0] = pred_annotation[0][::2]    
+! 
+!     print "Fixing time: " + str(time.time() - start)
+! 
+!     response = jsonify(results=[pred_annotation])
+!     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+!     return response
+! 
+! @app.route('/api/ggnn_poly', methods=['POST'])
+! def ggnn_poly_request():
+!     start = time.time()
+!     instance = request.json
+!     component = {}
+!     component['poly'] = instance['poly']
+!     instance = tool.data_loader.prepare_component(instance, component)
+!     pred_annotation = tool.run_ggnn(instance)
+! 
+!     print "GGNN time: " + str(time.time() - start)
+! 
+!     response = jsonify(results=[pred_annotation])
+!     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+!     return response
+! 
+! @app.route('/upload_v3', methods=['POST'])
+! def upload_v3():
+!     instance = request.json
+!     url = instance['url']
+!     out_dir = tool.image_dir
+!     filename = wget.download(url, out=out_dir)
+!     response = jsonify(path=filename)
+!     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+!     return response
+! 
+! @app.route('/upload_v2', methods=['POST'])
+! def upload_v2():
+!     instance = request.json
+!     base64im = instance['image']
+!     idx = len(os.listdir(tool.image_dir))
+!     try:
+!         extension = base64im.split('/')[1].split(';')[0]
+!         t = base64im.split('/')[0].split(':')[1]
+!         assert t == 'image', 'Did not get image data!'
+          
+!         base64im = base64im.split(',')[1]
+!         out_name = os.path.join(tool.image_dir, str(idx) + '.' + extension)
+  
+!         with open(out_name, 'w') as f:
+!             f.write(base64.b64decode(base64im.encode()))
+  
+!         response = jsonify(path=out_name)
+  
+!     except Exception as e:
+!         print e
+!         response = jsonify(path='')
+  
+!     response.headers['Access-Control-Allow-Headers'] = '*'
+  
+!     return response
+      
+! if __name__ == '__main__':
+!     args = get_args()
+!     global tool
+!     tool = Tool(args)
+  
+!     app.run(host='0.0.0.0', threaded=True, port=args.port)
+--- 127,276 ----
+          torch.cuda.empty_cache() 
+          return [poly.astype(np.int).tolist()]
+  
+! # @app.route('/api/annotation', methods=['POST'])
+! # def generate_annotation():
+! #     start = time.time()
+! #     instance = request.json
+! #     component = {}
+! #     component['poly'] = np.array([[-1., -1.]])
+! #     instance = tool.data_loader.prepare_component(instance, component)
+! #     pred_annotation = tool.annotation(instance)
+! 
+! #     # print "Annotation time: " + str(time.time() - start)
+! 
+! #     response = jsonify(results=[pred_annotation])
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+! #     return response
+! 
+! # @app.route('/api/annotation', methods=['GET'])
+! # def generate_annotation():
+! #     start = time.time()
+! #     instance = {}
+! #     # would like to change to read from web instead of path
+! #     img = utils.rgb_img_read('sample.png')
+! #     instance['img'] = img
+! #     bbox = {}
+! #     bbox = [50, 100, 200, 300] # x, y, w, h
+! #     instance['bbox'] = bbox
+! #     component = {}
+! #     component['poly'] = np.array([[-1., -1.]])
+! #     instance = tool.data_loader.prepare_component(instance, component)
+! #     pred_annotation = tool.annotation(instance)
+! 
+! #     # print "Annotation time: " + str(time.time() - start)
+! 
+! #     response = jsonify(results=[pred_annotation])
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+! #     return response
+! 
+! # @app.route('/api/annotation_and_ggnn', methods=['POST'])
+! # def generate_annotation_and_ggnn():
+! #     start = time.time()
+! #     instance = request.json
+! #     component = {}
+! #     component['poly'] = np.array([[-1., -1.]])
+! #     instance = tool.data_loader.prepare_component(instance, component)
+! #     pred_annotation = tool.annotation(instance, run_ggnn=True)
+! #     pred_annotation[0] = pred_annotation[0][::2]    
+! 
+! #     # print "Annotation time: " + str(time.time() - start)
+! 
+! #     response = jsonify(results=[pred_annotation])
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+! #     return response
+! 
+! # @app.route('/api/fix_poly', methods=['POST'])
+! # def fix_poly_request():
+! #     start = time.time()
+! #     instance = request.json
+! #     component = {}
+! #     component['poly'] = instance['poly']
+! #     instance = tool.data_loader.prepare_component(instance, component)
+! #     pred_annotation = tool.fixing(instance, run_ggnn=False)
+! 
+! #     # print "Fixing time: " + str(time.time() - start)
+! 
+! #     response = jsonify(results=[pred_annotation])
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+! #     return response
+! 
+! # @app.route('/api/fix_poly_ggnn', methods=['POST'])
+! # def fix_poly_ggnn_request():
+! #     start = time.time()
+! #     instance = request.json
+! #     component = {}
+! #     component['poly'] = instance['poly']
+! #     instance = tool.data_loader.prepare_component(instance, component)
+! #     pred_annotation = tool.fixing(instance, run_ggnn=True)
+! #     pred_annotation[0] = pred_annotation[0][::2]    
+! 
+! #     # print "Fixing time: " + str(time.time() - start)
+! 
+! #     response = jsonify(results=[pred_annotation])
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+! #     return response
+! 
+! # @app.route('/api/ggnn_poly', methods=['POST'])
+! # def ggnn_poly_request():
+! #     start = time.time()
+! #     instance = request.json
+! #     component = {}
+! #     component['poly'] = instance['poly']
+! #     instance = tool.data_loader.prepare_component(instance, component)
+! #     pred_annotation = tool.run_ggnn(instance)
+! 
+! #     # print "GGNN time: " + str(time.time() - start)
+! 
+! #     response = jsonify(results=[pred_annotation])
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+! #     return response
+! 
+! # @app.route('/upload_v3', methods=['POST'])
+! # def upload_v3():
+! #     instance = request.json
+! #     url = instance['url']
+! #     out_dir = tool.image_dir
+! #     filename = wget.download(url, out=out_dir)
+! #     response = jsonify(path=filename)
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+! 
+! #     return response
+! 
+! # @app.route('/upload_v2', methods=['POST'])
+! # def upload_v2():
+! #     instance = request.json
+! #     base64im = instance['image']
+! #     idx = len(os.listdir(tool.image_dir))
+! #     try:
+! #         extension = base64im.split('/')[1].split(';')[0]
+! #         t = base64im.split('/')[0].split(':')[1]
+! #         assert t == 'image', 'Did not get image data!'
+          
+! #         base64im = base64im.split(',')[1]
+! #         out_name = os.path.join(tool.image_dir, str(idx) + '.' + extension)
+  
+! #         with open(out_name, 'w') as f:
+! #             f.write(base64.b64decode(base64im.encode()))
+  
+! #         response = jsonify(path=out_name)
+  
+! #     except Exception as e:
+! #         # print e
+! #         response = jsonify(path='')
+  
+! #     response.headers['Access-Control-Allow-Headers'] = '*'
+  
+! #     return response
+      
+! # if __name__ == '__main__':
+! #     args = get_args()
+! #     global tool
+! #     tool = Tool(args)
+  
+! #     app.run(host='0.0.0.0', threaded=True, port=args.port)
+Only in code/Utils: __pycache__
+diff -r -c orig_code/Utils/utils.py code/Utils/utils.py
+*** orig_code/Utils/utils.py	2018-09-12 12:18:02.000000000 -0700
+--- code/Utils/utils.py	2020-03-25 15:02:22.000000000 -0700
+***************
+*** 5,11 ****
+  import os
+  import numpy as np
+  from scipy.ndimage.morphology import distance_transform_cdt
+! from poly_point_isect import isect_polygon__naive_check
+  
+  
+  def check_self_intersection(poly):
+--- 5,11 ----
+  import os
+  import numpy as np
+  from scipy.ndimage.morphology import distance_transform_cdt
+! from .poly_point_isect import isect_polygon__naive_check
+  
+  
+  def check_self_intersection(poly):
+***************
+*** 285,291 ****
+          try:
+              arr_fwd_poly[:len_to_keep] = fwd_poly[:len_to_keep]
+          except ValueError:
+!             print fwd_poly
+              import ipdb;
+              ipdb.set_trace()
+  
+--- 285,291 ----
+          try:
+              arr_fwd_poly[:len_to_keep] = fwd_poly[:len_to_keep]
+          except ValueError:
+!             # print fwd_poly
+              import ipdb;
+              ipdb.set_trace()
+  
+***************
+*** 490,493 ****
+      poly = np.array([[5, 5], [8, 8], [8, 5]])
+      img = np.zeros((2, 10, 10), np.uint8)
+      img = draw_poly(img[0], poly)
+!     print img
+\ No newline at end of file
+--- 490,493 ----
+      poly = np.array([[5, 5], [8, 8], [8, 5]])
+      img = np.zeros((2, 10, 10), np.uint8)
+      img = draw_poly(img[0], poly)
+!     # print img
+\ No newline at end of file
+diff -r -c orig_code/requirements.txt code/requirements.txt
+*** orig_code/requirements.txt	2018-09-12 12:17:48.000000000 -0700
+--- code/requirements.txt	2020-03-25 14:26:04.000000000 -0700
+***************
+*** 2,35 ****
+  click==6.7
+  cloudpickle==0.5.3
+  cycler==0.10.0
+  dask==0.18.1
+  decorator==4.3.0
+  Flask==1.0.2
+  Flask-Cors==3.0.6
+! futures==3.2.0
+  itsdangerous==0.24
+  Jinja2==2.10
+  kiwisolver==1.0.1
+  Markdown==2.6.11
+! MarkupSafe==1.0
+! matplotlib==2.2.2
+  networkx==2.1
+! numpy==1.14.5
+! opencv-python==3.4.1.15
+! Pillow==5.2.0
+  protobuf==3.6.0
+  pyparsing==2.2.0
+  python-dateutil==2.7.3
+  pytz==2018.5
+! PyWavelets==0.5.2
+  scikit-image==0.14.0
+! scipy==1.1.0
+  six==1.11.0
+  subprocess32==3.5.2
+  tensorboard==1.9.0
+  tensorboardX==1.2
+  toolz==0.9.0
+! torch==0.4.0
+  torchvision==0.2.1
+  tqdm==4.23.4
+  Werkzeug==0.14.1
+--- 2,36 ----
+  click==6.7
+  cloudpickle==0.5.3
+  cycler==0.10.0
++ cython==0.29
+  dask==0.18.1
+  decorator==4.3.0
+  Flask==1.0.2
+  Flask-Cors==3.0.6
+! futures==3.1.0
+  itsdangerous==0.24
+  Jinja2==2.10
+  kiwisolver==1.0.1
+  Markdown==2.6.11
+! MarkupSafe==1.1.1
+! matplotlib==3.2.1
+  networkx==2.1
+! numpy==1.17.3
+! opencv-python==3.4.8.29
+! Pillow==6.2.1
+  protobuf==3.6.0
+  pyparsing==2.2.0
+  python-dateutil==2.7.3
+  pytz==2018.5
+! # PyWavelets==0.5.2
+  scikit-image==0.14.0
+! scipy==1.3.2
+  six==1.11.0
+  subprocess32==3.5.2
+  tensorboard==1.9.0
+  tensorboardX==1.2
+  toolz==0.9.0
+! torch==1.4.0
+  torchvision==0.2.1
+  tqdm==4.23.4
+  Werkzeug==0.14.1
+Only in code/: sample.png

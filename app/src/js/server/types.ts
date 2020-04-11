@@ -31,8 +31,6 @@ export interface ServerConfig {
   userManagement: boolean
   /** Flag to enable session synchronization */
   sync: boolean
-  /** Hostname for synchronization socket */
-  syncHost: string
   /** whether to save automatically */
   autosave: boolean
   /** timeout (seconds) for clearing value from redis cache */
@@ -45,6 +43,10 @@ export interface ServerConfig {
   redisPort: number
   /** Whether to use virtual sessions/bots for assistance */
   bots: boolean
+  /** host of python model server */
+  botHost: string
+  /** port of python model server */
+  botPort: number
 }
 
 /**
@@ -92,7 +94,7 @@ export interface RegisterMessageType {
   userId: string
   /** server address */
   address: string
-  /** whether its a bot or not */
+  /** whether it came from a bot or not */
   bot: boolean
 }
 
@@ -106,6 +108,8 @@ export interface SyncActionMessageType {
   sessionId: string
   /** List of actions for synchronization */
   actions: ActionPacketType
+  /** whether it came from a bot or not */
+  bot: boolean
 }
 
 /** type for transmitted packet of actions */
@@ -154,6 +158,16 @@ export interface BotData {
   address: string
 }
 
+/** precomputed queries for models */
+export interface ModelQuery {
+  /** the data in bdd format */
+  data: ItemExport
+  /** the endpoint for the query */
+  endpoint: ModelEndpoint
+  /** the index of the item modified */
+  itemIndex: number
+}
+
 /**
  * Defining the types of some general callback functions
  */
@@ -183,6 +197,12 @@ export const enum Endpoint {
   GET_PROJECT_NAMES = '/postProjectNames',
   EXPORT = '/export',
   DASHBOARD = '/postDashboardContents'
+}
+
+/* endpoint names for python server */
+export const enum ModelEndpoint {
+  PREDICT_POLY = 'predictPoly',
+  REFINE_POLY = 'refinePoly'
 }
 
 /* form field names */

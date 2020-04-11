@@ -269,8 +269,7 @@ generated-members=REQUEST,acl_users,aq_parent
 
 # List of decorators that create context managers from functions, such as
 # contextlib.contextmanager.
-contextmanager-decorators=contextlib.contextmanager
-
+contextmanager-decorators=contextlib.contextmanager,tensorflow.python.util.tf_contextlib.contextmanager
 
 [SPELLING]
 
@@ -343,6 +342,9 @@ exclude-protected=_asdict,_fields,_replace,_source,_make
 
 # Deprecated modules which should not be used, separated by a comma
 deprecated-modules=regsub,TERMIOS,Bastion,rexec
+
+# Modules which may not be installed beforehand
+ignored-modules=Tool
 
 # Create a graph of every (i.e. internal and external) dependencies in the
 # given file (report RP0402 must not be disabled)

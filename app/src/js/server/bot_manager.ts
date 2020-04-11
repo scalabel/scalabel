@@ -127,7 +127,7 @@ export class BotManager {
   private makeBot (botData: BotData): Bot {
     Logger.info(sprintf('Creating bot for project %s, task %d',
       botData.projectName, botData.taskIndex))
-    const bot = new Bot(botData)
+    const bot = new Bot(botData, this.config.botHost, this.config.botPort)
 
     const pollId = setInterval(async () => {
       await this.monitorActivity(bot, pollId)

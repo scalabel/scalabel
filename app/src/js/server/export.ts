@@ -1,8 +1,35 @@
 import { AttributeToolType, LabelTypeName } from '../common/types'
 import { PointType } from '../drawable/2d/path_point2d'
-import { ItemExport, LabelExport } from '../functional/bdd_types'
+import { ItemExport, LabelExport, PolygonExportType } from '../functional/bdd_types'
 import { Attribute, ConfigType, CubeType,
   ItemType, Node2DType, Plane3DType, PolygonType, RectType, State } from '../functional/types'
+
+/**
+ * Converts a polygon label to export format
+ */
+export function convertPolygonToExport (
+  poly2d: PolygonType, labelType: string): PolygonExportType[] {
+  const typeCharacters = poly2d.points.map(
+    (point) => {
+      switch (point.type) {
+        case PointType.CURVE:
+          return 'C'
+        case PointType.VERTEX:
+          return 'L'
+      }
+
+      return ''
+    }
+  )
+  const types = typeCharacters.join('')
+  const vertices: Array<[number, number]> =
+    poly2d.points.map((point) => [point.x, point.y])
+  return [{
+    vertices,
+    types,
+    closed: labelType === LabelTypeName.POLYGON_2D
+  }]
+}
 
 /**
  * converts single item to exportable format
@@ -53,27 +80,9 @@ export function convertItemToExport (
           break
         case LabelTypeName.POLYGON_2D:
         case LabelTypeName.POLYLINE_2D:
-          const poly2d = firstIndexedShape.shape as PolygonType
-          const typeCharacters = poly2d.points.map(
-            (point) => {
-              switch (point.type) {
-                case PointType.CURVE:
-                  return 'C'
-                case PointType.VERTEX:
-                  return 'L'
-              }
-
-              return ''
-            }
+          labelExport.poly2d = convertPolygonToExport(
+            firstIndexedShape.shape as PolygonType, label.type
           )
-          const types = typeCharacters.join('')
-          const vertices: Array<[number, number]> =
-            poly2d.points.map((point) => [point.x, point.y])
-          labelExport.poly2d = [{
-            vertices,
-            types,
-            closed: label.type === LabelTypeName.POLYGON_2D
-          }]
           break
         case LabelTypeName.BOX_3D:
           const poly3d = firstIndexedShape.shape as CubeType
