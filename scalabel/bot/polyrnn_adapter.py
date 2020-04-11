@@ -10,9 +10,10 @@ from .seg_base import SegBase
 class PolyrnnAdapter(SegBase):
     """Class to interface with polyrnn model"""
     def __init__(self, home: str) -> None:
-        exp = os.path.join(home, 'experimental', 'fast-seg-label',
-                           'polyrnn_scalabel', 'Experiments', 'tool.json')
-        net = os.path.join(home, 'experimental_models',
+        model_dir = os.path.join(home, 'experimental', 'fast-seg-label')
+        exp = os.path.join(model_dir, 'polyrnn_scalabel', 'Experiments', 
+                            'tool.json')
+        net = os.path.join(model_dir, 'model_weights',
                            'ggnn_epoch5_step14000.pth')
         self.tool = Tool(exp, net)
 

@@ -10,12 +10,12 @@ import requests
 from flask import Flask, request, jsonify, make_response, Response
 from PIL import Image
 from .seg_base import SegBase
-try:
-    from .polyrnn_adapter import PolyrnnAdapter as SegModel
-except ImportError:
-    from .seg_dummy import ( # type: ignore
-        SegDummy as SegModel
-    )
+# try:
+from .polyrnn_adapter import PolyrnnAdapter as SegModel
+# except ImportError:
+#     from .seg_dummy import ( # type: ignore
+#         SegDummy as SegModel
+#     )
 
 
 def homepage() -> str:

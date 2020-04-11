@@ -40,7 +40,6 @@ coverage/
 
 # downloaded reposs and models
 scalabel/bot/experimental/*
-scalabel/bot/experimental_models/*
 
 # python cache
 __pycache__/
