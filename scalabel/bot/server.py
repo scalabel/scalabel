@@ -13,14 +13,14 @@ from .segmentation_base import SegmentationBase
 try:
     from .segmentation_interface import SegmentationInterface as SegmentModel
 except ImportError:
-    from .segmentation_dummy import ( # type: ignore
-        SegmentationDummy as SegmentModel
-    )
+    from .segmentation_dummy import (  # type: ignore
+        SegmentationDummy as SegmentModel)
 
 
 def homepage() -> str:
     """ hello world test """
     return 'Test server for segmentation\n'
+
 
 def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
     """ load image for each url and cache results in a dictionary """
@@ -31,6 +31,7 @@ def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
             img = np.array(Image.open(io.BytesIO(img_response.content)))
             url_to_img[url] = img
     return url_to_img
+
 
 def segment_base(seg_model: SegmentationBase) -> Response:
     """ predict rect -> polygon """
@@ -57,7 +58,7 @@ def segment_base(seg_model: SegmentationBase) -> Response:
         boxes.append(bbox)
         images.append(url_to_img[data['url']])
 
-    preds = seg_model.predict_rect_to_poly(images, boxes)
+    preds = seg_model.convert_rect_to_poly(images, boxes)
 
     logger.info('Time for prediction: %s', time.time() - start_time)
     response = make_response(jsonify({'points': preds}))
