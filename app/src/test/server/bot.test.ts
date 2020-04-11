@@ -10,8 +10,7 @@ import { index2str } from '../../js/server/util'
 import { getInitialState, getRandomBox2dAction } from '../util'
 
 jest.mock('axios')
-axios.post = jest.fn().mockImplementation(() =>
-{
+axios.post = jest.fn().mockImplementation(() => {
   return {
     status: 200,
     data: {
