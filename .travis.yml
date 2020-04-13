@@ -20,7 +20,6 @@ script:
   - python3.8 -m mypy --strict scripts scalabel
   - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
   - npm test
-  - python3.8 -m pytest scalabel/tests
 branches:
   only:
     - master

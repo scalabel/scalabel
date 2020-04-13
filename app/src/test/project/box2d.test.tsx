@@ -48,13 +48,13 @@ beforeAll(async () => {
     getTestConfigPath()
   ])
 
-  launchProc.stdout.on('data', (data) => {
-    process.stdout.write(data)
-  })
+  // launchProc.stdout.on('data', (data) => {
+  //   process.stdout.write(data)
+  // })
 
-  launchProc.stderr.on('data', (data) => {
-    process.stdout.write(data)
-  })
+  // launchProc.stderr.on('data', (data) => {
+  //   process.stdout.write(data)
+  // })
 
   window.alert = (): void => {
     return
