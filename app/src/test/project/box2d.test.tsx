@@ -232,3 +232,15 @@ describe('full 2d bounding box integration test', () => {
       ])
   })
 })
+
+describe('2d bounding box integration test with programmatic api', () => {
+  test('Itemless project creation', async() => {
+
+    // creating twice throws an error
+    return
+  })
+
+  test('Adding items', async() => {
+    return
+  })
+})
