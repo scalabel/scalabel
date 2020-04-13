@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import * as types from '../common/types'
+import { ItemExport, LabelExport } from './bdd_types'
 import {
   ConfigType, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
@@ -279,6 +280,45 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
     labels: {},
     shapes: {},
     timestamp: -1,
+    ...params
+  }
+}
+
+/**
+ * Initialize an exportable item
+ * @param {{}} params
+ * @return {ItemExport}
+ */
+export function makeItemExport (params: Partial<ItemExport> = {}): ItemExport {
+  return {
+    name: '',
+    url: '',
+    videoName: '',
+    sensor: -1,
+    attributes: {},
+    timestamp: -1,
+    labels: [],
+    ...params
+  }
+}
+
+/**
+ * Initialize an exportable label
+ * @param {{}} params
+ * @return {ItemExport}
+ */
+export function makeLabelExport (
+  params: Partial<LabelExport> = {}): LabelExport {
+  return {
+    id: -1,
+    category: '',
+    attributes: {},
+    manualShape: true,
+    box2d: null,
+    poly2d: null,
+    box3d: null,
+    plane3d: null,
+    customs: {},
     ...params
   }
 }

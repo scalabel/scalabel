@@ -38,3 +38,9 @@ __pycache__/
 
 # jest coverage cache
 coverage/
+
+# downloaded repos and models
+scalabel/bot/experimental/*
+
+# python cache
+__pycache__/

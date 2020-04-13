@@ -8,6 +8,7 @@ import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { PolygonType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
+import { checkPathPointFields } from '../util'
 
 test('Add, change and delete polygon labels', () => {
   Session.devMode = false
@@ -15,9 +16,7 @@ test('Add, change and delete polygon labels', () => {
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(polygon2d.addPolygon2dLabel(
-    itemIndex,
-    -1,
-    [0],
+    itemIndex, -1, [0],
     [(new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(1, 1, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(1, 2, PointType.CURVE)).toPathPoint(),
@@ -25,9 +24,7 @@ test('Add, change and delete polygon labels', () => {
     true
   ))
   Session.dispatch(polygon2d.addPolygon2dLabel(
-    itemIndex,
-    -1,
-    [0],
+    itemIndex, -1, [0],
     [(new PathPoint2D(3, 4, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(4, 4, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(4, 5, PointType.CURVE)).toPathPoint(),
@@ -35,53 +32,50 @@ test('Add, change and delete polygon labels', () => {
     false
   ))
   Session.dispatch(polygon2d.addPolygon2dLabel(
-    itemIndex,
-    -1,
-    [0],
+    itemIndex, -1, [0],
     [(new PathPoint2D(10, 11, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(11, 11, PointType.VERTEX)).toPathPoint(),
       (new PathPoint2D(11, 12, PointType.CURVE)).toPathPoint(),
       (new PathPoint2D(10, 12, PointType.CURVE)).toPathPoint()],
-    true
+    true, false
   ))
   let state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toBe(3)
-  expect(_.size(state.task.items[0].shapes)).toBe(3)
-  const labelIds: number[] = _.map(state.task.items[0].labels, (l) => l.id)
-  let label = state.task.items[0].labels[labelIds[0]]
-  expect(label.item).toBe(0)
+  let item = state.task.items[itemIndex]
+  const labels = item.labels
+  const shapes = item.shapes
+  expect(_.size(labels)).toBe(3)
+  expect(_.size(shapes)).toBe(3)
+
+  const labelIds: number[] = _.map(labels, (l) => l.id)
+  let label = labels[labelIds[0]]
+  expect(label.item).toBe(itemIndex)
   expect(label.type).toBe(LabelTypeName.POLYGON_2D)
-  const indexedShape = state.task.items[0].shapes[label.shapes[0]]
+  expect(label.manual).toBe(true)
+  expect(labels[labelIds[2]].manual).toBe(false)
+
+  const indexedShape = shapes[label.shapes[0]]
   let shape = indexedShape.shape as PolygonType
   // Check label ids
   let index = 0
-  _.forEach(state.task.items[0].labels, (v, i) => {
+  _.forEach(labels, (v, i) => {
     expect(v.id).toBe(Number(i))
     expect(v.id).toBe(index)
     index += 1
   })
   // Check shape ids
   index = 0
-  _.forEach(state.task.items[0].shapes, (v, i) => {
+  _.forEach(shapes, (v, i) => {
     expect(v.id).toBe(Number(i))
     expect(v.id).toBe(index)
     index += 1
   })
 
-  expect(shape.points[0].x).toBe(0)
-  expect(shape.points[1].x).toBe(1)
-  expect(shape.points[2].x).toBe(1)
-  expect(shape.points[3].x).toBe(0)
+  let points = shape.points
 
-  expect(shape.points[0].y).toBe(1)
-  expect(shape.points[1].y).toBe(1)
-  expect(shape.points[2].y).toBe(2)
-  expect(shape.points[3].y).toBe(2)
-
-  expect(shape.points[0].type).toBe('vertex')
-  expect(shape.points[1].type).toBe('vertex')
-  expect(shape.points[2].type).toBe('bezier')
-  expect(shape.points[3].type).toBe('bezier')
+  checkPathPointFields(points[0], 0, 1, true)
+  checkPathPointFields(points[1], 1, 1, true)
+  checkPathPointFields(points[2], 1, 2, false)
+  checkPathPointFields(points[3], 0, 2, false)
 
   Session.dispatch(
     action.changeLabelShape(
@@ -92,23 +86,16 @@ test('Add, change and delete polygon labels', () => {
         (new PathPoint2D(2, 2, PointType.CURVE)).toPathPoint()]})))
 
   state = Session.getState()
-  label = state.task.items[0].labels[label.id]
-  shape = state.task.items[0].shapes[label.shapes[0]].shape as PolygonType
+  item = state.task.items[itemIndex]
+  label = item.labels[label.id]
+  shape = item.shapes[label.shapes[0]].shape as PolygonType
 
-  expect(shape.points[0].x).toBe(2)
-  expect(shape.points[1].x).toBe(4)
-  expect(shape.points[2].x).toBe(4)
-  expect(shape.points[3].x).toBe(2)
+  points = shape.points
 
-  expect(shape.points[0].y).toBe(0)
-  expect(shape.points[1].y).toBe(0)
-  expect(shape.points[2].y).toBe(2)
-  expect(shape.points[3].y).toBe(2)
-
-  expect(shape.points[0].type).toBe('bezier')
-  expect(shape.points[1].type).toBe('bezier')
-  expect(shape.points[2].type).toBe('vertex')
-  expect(shape.points[3].type).toBe('bezier')
+  checkPathPointFields(points[0], 2, 0, false)
+  checkPathPointFields(points[1], 4, 0, false)
+  checkPathPointFields(points[2], 4, 2, true)
+  checkPathPointFields(points[3], 2, 2, false)
 
   Session.dispatch(action.deleteLabel(itemIndex, label.id))
   state = Session.getState()

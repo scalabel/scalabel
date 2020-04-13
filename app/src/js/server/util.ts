@@ -314,3 +314,11 @@ export function getItemTimestamp (item: Partial<ItemExport>): number {
 export function parseProjectName (projectName: string): string {
   return projectName.replace(' ', '_')
 }
+
+/**
+ * Get connection failed error message for http request to python
+ */
+export function getPyConnFailedMsg (endpoint: string, message: string): string {
+  return sprintf('Make sure endpoint is correct and python server is \
+running; query to \"%s\" failed with message: %s', endpoint, message)
+}

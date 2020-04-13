@@ -1,8 +1,12 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import Session from '../../js/common/session'
+import { LabelTypeName } from '../../js/common/types'
+import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
+import { makePolygon } from '../../js/functional/states'
 import { State } from '../../js/functional/types'
-import { convertItemToExport, convertStateToExport } from '../../js/server/export'
+import { convertItemToExport,
+  convertPolygonToExport, convertStateToExport } from '../../js/server/export'
 import { sampleItemExportImage, sampleItemExportImagePolygon,
          sampleStateExportImage, sampleStateExportImagePolygon} from '../test_export_objects'
 
@@ -13,6 +17,19 @@ const sampleStateFile = './app/src/test/sample_state.json'
 const samplePolygonStateFile = './app/src/test/sample_state_polygon.json'
 
 describe('test export functionality across multiple labeling types', () => {
+  test('unit test for polygon export', () => {
+    const points = [
+      (new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
+      (new PathPoint2D(0, 2, PointType.CURVE)).toPathPoint()
+    ]
+    const poly2d = makePolygon({ points })
+    const labelType = LabelTypeName.POLYGON_2D
+    const polyExport = convertPolygonToExport(poly2d, labelType)
+    const polyPoint = polyExport[0]
+    expect(polyPoint.closed).toBe(true)
+    expect(polyPoint.types).toBe('LC')
+    expect(polyPoint.vertices).toEqual([[0, 1], [0, 2]])
+  })
   describe('test export functionality for bounding box', () => {
     test('single item conversion', () => {
       const state = readSampleState(sampleStateFile)
