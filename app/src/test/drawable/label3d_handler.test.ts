@@ -174,7 +174,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
-  const labelId = Number(Object.keys(state.task.items[0].labels)[0])
+  const labelId = Object.keys(state.task.items[0].labels)[0]
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
@@ -268,7 +268,7 @@ test('Move axis aligned 3d bbox along all axes', () => {
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
-  const labelId = Number(Object.keys(state.task.items[0].labels)[0])
+  const labelId = Object.keys(state.task.items[0].labels)[0]
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })

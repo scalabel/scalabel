@@ -1453,9 +1453,7 @@ test('Change label ordering', () => {
   ))
 
   let state = Session.getState()
-  const labelIds = Object.keys(state.task.items[0].labels).map(
-    (key) => Number(key)
-  ).sort((a, b) => a - b)
+  const labelIds = Object.keys(state.task.items[0].labels)
   expect(labelIds.length).toEqual(3)
   expect(state.task.items[0].labels[labelIds[0]].order).toEqual(0)
   expect(state.task.items[0].labels[labelIds[1]].order).toEqual(1)

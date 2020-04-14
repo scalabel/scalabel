@@ -1,11 +1,23 @@
 import { AttributeToolType } from '../common/types'
 
+export type IdType = string
+
+// Have to define those map because
+// we can't use alias of string as an index signature parameter type
+export interface LabelIdMap {[key: string]: LabelType}
+
+export interface IndexedShapeMap {[key: string]: IndexedShapeType}
+
+export interface ShapeIdMap {[key: string]: ShapeType}
+
+export interface TrackIdMap {[key: string]: TrackType}
+
 /**
  * Interfaces for immutable states
  */
 export interface LabelType {
   /** ID of the label */
-  id: number
+  id: IdType
   /** The item index */
   item: number
   /** Associated data sources */
@@ -17,13 +29,13 @@ export interface LabelType {
   /** Attributes */
   attributes: { [key: number]: number[] }
   /** Parent label ID */
-  parent: number
+  parent: IdType
   /** Children label IDs */
-  children: number[]
+  children: IdType[]
   /** Shape ids of the label */
-  shapes: number[]
+  shapes: IdType[]
   /** connected track */
-  track: number
+  track: IdType
   /** order of the label among all the labels */
   order: number
   /** whether the label is created manually */
@@ -32,11 +44,11 @@ export interface LabelType {
 
 export interface TrackType {
   /** ID of the track */
-  id: number
+  id: IdType
   /** type */
   type: string
   /** labels in this track {item index: label id} */
-  labels: {[key: number]: number}
+  labels: {[key: number]: IdType}
 }
 
 export interface RectType {
@@ -112,9 +124,9 @@ export type ShapeType = RectType | CubeType | PolygonType |
 
 export interface IndexedShapeType {
   /** ID of the shape */
-  id: number
+  id: IdType
   /** Label ID of the shape */
-  label: number[]
+  label: IdType[]
   /** type string of the shape. Value from common/types.ShapeType */
   type: string
   /** Shape data */
@@ -215,9 +227,9 @@ export interface ItemType {
   /** Map between data source id and url */
   urls: {[id: number]: string}
   /** Labels of the item */
-  labels: { [key: number]: LabelType } // list of label
+  labels: LabelIdMap // list of label
   /** shapes of the labels on this item */
-  shapes: { [key: number]: IndexedShapeType }
+  shapes: IndexedShapeMap
   /** the timestamp for the item */
   timestamp: number
   /** video item belongs to */
@@ -294,7 +306,7 @@ export interface ConfigType {
   /** Attributes */
   attributes: Attribute[]
   /** task id */
-  taskId: string
+  taskId: IdType
   /** Whether or not in demo mode */
   demoMode: boolean
   /** whether to use autosave */
@@ -363,7 +375,7 @@ export interface TaskStatus {
   maxTrackId: number
 }
 
-export interface TrackMapType { [key: number]: TrackType }
+export interface TrackMapType { [key: string]: TrackType }
 
 export interface SubmitData {
   /** time of the submission (client side) */
@@ -395,9 +407,9 @@ export interface Select {
   /** Currently viewed item index */
   item: number
   /** Map between item indices and label id's */
-  labels: {[index: number]: number[]}
+  labels: {[index: number]: IdType[]}
   /** Map between label id's and shape id's */
-  shapes: {[index: number]: number}
+  shapes: {[index: string]: IdType}
   /** selected category */
   category: number
   /** selected attributes */
@@ -413,7 +425,7 @@ export interface Select {
  */
 export interface UserType {
   /** user id. the worker can be a guest or registered user */
-  id: string
+  id: IdType
   /** the selection of the current user */
   select: Select
   /** interface layout */
@@ -436,7 +448,7 @@ export interface SessionType {
    * twice, they will have different session ids.
    * It is uuid of the session
    */
-  id: string
+  id: IdType
   /** Start time */
   startTime: number
   /** item statuses */

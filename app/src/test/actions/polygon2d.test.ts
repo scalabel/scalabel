@@ -58,14 +58,14 @@ test('Add, change and delete polygon labels', () => {
   // Check label ids
   let index = 0
   _.forEach(labels, (v, i) => {
-    expect(v.id).toBe(Number(i))
+    expect(v.id).toBe(i)
     expect(v.id).toBe(index)
     index += 1
   })
   // Check shape ids
   index = 0
   _.forEach(shapes, (v, i) => {
-    expect(v.id).toBe(Number(i))
+    expect(v.id).toBe(i)
     expect(v.id).toBe(index)
     index += 1
   })

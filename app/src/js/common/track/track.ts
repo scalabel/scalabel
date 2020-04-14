@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Label2D from '../../drawable/2d/label2d'
 import Label3D from '../../drawable/3d/label3d'
-import { makeIndexedShape, makeTrack } from '../../functional/states'
+import { makeDefaultId, makeIndexedShape, makeTrack } from '../../functional/states'
 import { IndexedShapeType, Label2DTemplateType, LabelType, State, TrackType } from '../../functional/types'
 import { LabelTypeName, TrackPolicyType } from '../types'
 import { Box2DLinearInterpolationPolicy } from './policy/linear_interpolation/box2d_linear_interpolation'
@@ -76,16 +76,16 @@ export class Track {
   /** track state */
   protected _track: TrackType
   /** shape map */
-  protected _shapes: { [index: number]: IndexedShapeType[] }
+  protected _shapes: { [itemIndex: number]: IndexedShapeType[] }
   /** label map */
-  protected _labels: { [index: number]: LabelType }
+  protected _labels: { [itemIndex: number]: LabelType }
   /** updated indices */
   protected _updatedIndices: Set<number>
   /** type */
   protected _type: string
 
   constructor () {
-    this._track = makeTrack(-1, LabelTypeName.EMPTY)
+    this._track = makeTrack(makeDefaultId(), LabelTypeName.EMPTY)
     this._policy = new TrackPolicy(this)
     this._shapes = {}
     this._labels = {}
@@ -231,7 +231,8 @@ export class Track {
         this._shapes[index] = []
         for (let i = 0; i < shapeTypes.length; i++) {
           this._shapes[index].push(makeIndexedShape(
-            -1, [-1], shapeTypes[i], _.cloneDeep(shapeStates[i])
+            makeDefaultId(), [makeDefaultId()], shapeTypes[i], 
+            _.cloneDeep(shapeStates[i])
           ))
         }
         this._updatedIndices.add(index)

@@ -1,13 +1,15 @@
 import * as THREE from 'three'
-import { ShapeType } from '../../functional/types'
+import { makeDefaultId } from '../../functional/states'
+import { IdType, ShapeType } from '../../functional/types'
 import Label3D from './label3d'
+import { Object3D } from './object3d'
 
 /**
  * Base shape class
  */
-export abstract class Shape3D extends THREE.Object3D {
+export abstract class Shape3D extends Object3D {
   /** id */
-  protected _id: number
+  protected _shapeId: IdType
   /** shape state */
   protected _shape: ShapeType | null
   /** corresponding label object */
@@ -17,15 +19,15 @@ export abstract class Shape3D extends THREE.Object3D {
 
   constructor (label: Label3D) {
     super()
-    this._id = -1
+    this._shapeId = makeDefaultId()
     this._label = label
     this._shape = null
     this._highlighted = false
   }
 
   /** Get shape id */
-  public get id (): number {
-    return this._id
+  public get shapeId (): IdType {
+    return this._shapeId
   }
 
   /** Get associated label */
@@ -38,10 +40,10 @@ export abstract class Shape3D extends THREE.Object3D {
 
   /** update parameters */
   public updateState (
-    shape: ShapeType, id: number, _activeCamera?: THREE.Camera
+    shape: ShapeType, id: IdType, _activeCamera?: THREE.Camera
   ) {
     this._shape = shape
-    this._id = id
+    this._shapeId = id
   }
 
   /** Set visibility for viewer */

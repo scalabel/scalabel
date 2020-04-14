@@ -28,14 +28,14 @@ test('Add, change and delete box2d labels', () => {
   // Check label ids
   let index = 0
   _.forEach(state.task.items[0].labels, (v, i) => {
-    expect(v.id).toBe(Number(i))
+    expect(v.id).toBe(i)
     expect(v.id).toBe(index)
     index += 1
   })
   // Check shape ids
   index = 0
   _.forEach(state.task.items[0].shapes, (v, i) => {
-    expect(v.id).toBe(Number(i))
+    expect(v.id).toBe(i)
     expect(v.id).toBe(index)
     index += 1
   })

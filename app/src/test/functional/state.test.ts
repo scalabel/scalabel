@@ -1,5 +1,5 @@
 import { ItemExport, LabelExport } from '../../js/functional/bdd_types'
-import { makeItemExport, makeLabelExport } from '../../js/functional/states'
+import { genLabelId, makeItemExport, makeLabelExport } from '../../js/functional/states'
 
 describe('Defaults get overwritten', () => {
   test('Item export creation',() => {
@@ -14,7 +14,7 @@ describe('Defaults get overwritten', () => {
     expect(itemExport.url).toBe('')
   })
   test('Label export creation',() => {
-    const id = 20
+    const id = genLabelId()
     const category = 'category'
     const partialLabelExport: Partial<LabelExport> = {
       id, category

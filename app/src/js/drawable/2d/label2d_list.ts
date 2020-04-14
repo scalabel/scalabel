@@ -41,7 +41,7 @@ export function makeDrawableLabel2D (
  */
 export class Label2DList {
   /** Label the labels */
-  private _labels: {[labelId: number]: Label2D}
+  private _labels: {[labelId: string]: Label2D}
   /** list of the labels sorted by label order */
   private _labelList: Label2D[]
   /** selected label */
@@ -113,7 +113,7 @@ export class Label2DList {
   /**
    * Get id's of selected labels
    */
-  public get selectedLabelIds (): {[index: number]: number[]} {
+  public get selectedLabelIds (): {[index: number]: string[]} {
     return this._state.user.select.labels
   }
 
@@ -160,8 +160,7 @@ export class Label2DList {
     self._labels = Object.assign({} as typeof self._labels,
         _.pick(self._labels, _.keys(item.labels)))
     // update drawable label values
-    _.forEach(item.labels, (label, key) => {
-      const labelId = Number(key)
+    _.forEach(item.labels, (label, labelId) => {
       if (!(labelId in self._labels)) {
         const newLabel = makeDrawableLabel2D(
           this, label.type, this._labelTemplates

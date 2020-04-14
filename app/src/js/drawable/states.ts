@@ -1,11 +1,11 @@
-
 import { addTrack, changeLabelsProps } from '../action/common'
 import { ADD_LABELS, CHANGE_SHAPES } from '../action/types'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
-import { LabelType, ShapeType } from '../functional/types'
+import { LabelIdMap, ShapeIdMap } from '../functional/types'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
+
 
 /**
  * Commit labels to state
@@ -13,14 +13,14 @@ import Label3D from './3d/label3d'
 export function commitLabels (
   updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>
 ) {
-  // Get labels & tracks to commit
-  const updatedShapes: { [index: number]: { [id: number]: ShapeType}} = {}
-  const updatedLabels: { [index: number]: { [id: number]: LabelType}} = {}
+  // Get labels & tracks to commit indexed by itemIndex
+  const updatedShapes: { [index: number]: ShapeIdMap } = {}
+  const updatedLabels: { [index: number]: LabelIdMap} = {}
   const newTracks: Track[] = []
   const newLabels: Array<Readonly<Label2D | Label3D>> = []
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
-    if (drawable.labelId >= 0) {
+    if (!drawable.temporary) {
       // Existing labels & tracks
       if (Session.tracking) {
         if (drawable.trackId in Session.tracks) {
@@ -141,26 +141,25 @@ export function commitLabels (
 
   if (Object.keys(updatedShapes).length > 0) {
     // Update existing shapes
-    const indices = Object.keys(updatedShapes).map((index) => Number(index))
-    const ids = []
+    const itemIndices = Object.keys(updatedShapes).map((index) => Number(index))
+    const shapeIds = []
     const shapes = []
-    for (const index of indices) {
-      const indexIds = []
+    for (const index of itemIndices) {
+      const itemShapeIds = []
       const indexShapes = []
-      for (const key of Object.keys(updatedShapes[index])) {
-        const shapeId = Number(key)
-        indexIds.push(shapeId)
+      for (const shapeId of Object.keys(updatedShapes[index])) {
+        itemShapeIds.push(shapeId)
         indexShapes.push(updatedShapes[index][shapeId])
       }
-      ids.push(indexIds)
+      shapeIds.push(itemShapeIds)
       shapes.push(indexShapes)
     }
     Session.dispatch(
       {
         type: CHANGE_SHAPES,
         sessionId: Session.id,
-        itemIndices: indices,
-        shapeIds: ids,
+        itemIndices,
+        shapeIds,
         shapes
       }
     )
@@ -168,21 +167,20 @@ export function commitLabels (
 
   if (Object.keys(updatedLabels).length > 0) {
     // Update existing labels
-    const indices = Object.keys(updatedLabels).map((index) => Number(index))
-    const ids = []
+    const itemIndices = Object.keys(updatedLabels).map((index) => Number(index))
+    const labelIds = []
     const labels = []
-    for (const index of indices) {
-      const indexIds = []
+    for (const index of itemIndices) {
+      const itemLabelIds = []
       const indexLabels = []
-      for (const key of Object.keys(updatedLabels[index])) {
-        const shapeId = Number(key)
-        indexIds.push(shapeId)
-        indexLabels.push(updatedLabels[index][shapeId])
+      for (const labelId of Object.keys(updatedLabels[index])) {
+        itemLabelIds.push(labelId)
+        indexLabels.push(updatedLabels[index][labelId])
       }
-      ids.push(indexIds)
+      labelIds.push(itemLabelIds)
       labels.push(indexLabels)
     }
-    Session.dispatch(changeLabelsProps(indices, ids, labels))
+    Session.dispatch(changeLabelsProps(itemIndices, labelIds, labels))
   }
   Session.label3dList.clearUpdatedLabels()
 }

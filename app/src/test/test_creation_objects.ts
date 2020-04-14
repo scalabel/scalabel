@@ -186,7 +186,7 @@ export const sampleProjectImage: Project = {
 
 const sampleItemsVideo = _.cloneDeep(sampleItems)
 sampleItemsVideo[0].labels = [{
-  id: 0,
+  id: '0',
   category: 'person',
   attributes: {},
   manualShape: true,
@@ -201,7 +201,7 @@ sampleItemsVideo[0].labels = [{
   customs: {}
 }]
 sampleItemsVideo[1].labels = [{
-  id: 0,
+  id: '0',
   category: 'person',
   attributes: {},
   manualShape: true,
@@ -505,7 +505,7 @@ export const sampleTasksVideo: TaskType[] = [
         },
         labels: {
           0: {
-            id: 0,
+            id: '0',
             item: 0,
             sensors: [
               -1
@@ -515,21 +515,21 @@ export const sampleTasksVideo: TaskType[] = [
               0
             ],
             attributes: {},
-            parent: -1,
+            parent: '',
             children: [],
             shapes: [
-              0
+              '0'
             ],
-            track: 0,
+            track: '0',
             order: 0,
             manual: true
           }
         },
         shapes: {
           0: {
-            id: 0,
+            id: '0',
             label: [
-              0
+              '0'
             ],
             type: 'polygon2d',
             shape: {
@@ -564,7 +564,7 @@ export const sampleTasksVideo: TaskType[] = [
         },
         labels: {
           1: {
-            id: 1,
+            id: '1',
             item: 1,
             sensors: [
               -1
@@ -574,21 +574,21 @@ export const sampleTasksVideo: TaskType[] = [
               0
             ],
             attributes: {},
-            parent: -1,
+            parent: '',
             children: [],
             shapes: [
-              1
+              '1'
             ],
-            track: 0,
+            track: '0',
             order: 0,
             manual: true
           }
         },
         shapes: {
           1: {
-            id: 1,
+            id: '1',
             label: [
-              1
+              '1'
             ],
             type: 'polygon2d',
             shape: {
@@ -628,11 +628,11 @@ export const sampleTasksVideo: TaskType[] = [
     ],
     tracks: {
       0: {
-        id: 0,
+        id: '0',
         type: 'polygon2d',
         labels: {
-          0: 0,
-          1: 1
+          0: '0',
+          1: '1'
         }
       }
     },

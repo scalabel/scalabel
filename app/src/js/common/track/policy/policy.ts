@@ -1,5 +1,6 @@
 import { TrackPolicyType } from '../../types'
 import { Track } from '../track'
+import { IdType } from '../../../functional/types'
 
 /** Abstract parent class for all track policies */
 export class TrackPolicy {
@@ -16,7 +17,7 @@ export class TrackPolicy {
   }
 
   /** Update track when labels/shapes are changed */
-  public update (_itemIndex: number, _trackId: number): void {
+  public update (_itemIndex: number, _trackId: IdType): void {
     return
   }
 

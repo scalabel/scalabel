@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, Key, ShapeTypeName } from '../../common/types'
-import { makeLabel } from '../../functional/states'
-import { Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
+import { genLabelId, genTrackId, makeDefaultId, makeLabel } from '../../functional/states'
+import { IdType, Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
@@ -172,16 +172,15 @@ export class CustomLabel2D extends Label2D {
       state.task.config.labelTypes[state.user.select.labelType]
     this._label = makeLabel({
       type: templateName,
-      id: -1,
+      id: genLabelId(),
       item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
       order: this._order
     })
-    this._color = getColorById(
-      state.task.status.maxLabelId + 1,
-      (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
-    )
+    this._trackId = (state.task.config.tracking) ?
+      genTrackId() : makeDefaultId()
+    this._color = getColorById(this._labelId, this._trackId)
 
     // Initialize with template information
     this._shapes = []
@@ -203,6 +202,7 @@ export class CustomLabel2D extends Label2D {
 
     this.setSelected(true)
     this._highlightedHandle = this._shapes.length + 2
+    this._temporary = true
   }
 
   /** Override on mouse down */
@@ -230,7 +230,7 @@ export class CustomLabel2D extends Label2D {
     _handleIndex: number
   ) {
     if (
-      this._labelId < 0 || (
+      this._temporary || (
         this._highlightedHandle >= this._shapes.length &&
         this._highlightedHandle < this._shapes.length + this._corners.length
       )
@@ -316,7 +316,7 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Get shape id's and shapes for updating */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }

@@ -1,9 +1,12 @@
+import { bool } from 'aws-sdk/clients/signer'
 import _ from 'lodash'
 import * as types from '../common/types'
+import { uid } from '../common/uid'
 import { ItemExport, LabelExport } from './bdd_types'
 import {
   ConfigType, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
+  IdType,
   Image3DViewerConfigType,
   ImageViewerConfigType,
   IndexedShapeType,
@@ -38,16 +41,16 @@ import {
  */
 export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return _.cloneDeep<LabelType>({
-    id: -1,
+    id: makeDefaultId(),
     item: -1,
     sensors: [-1],
     type: types.LabelTypeName.EMPTY,
     category: [],
     attributes: {},
-    parent: -1, // id
+    parent: makeDefaultId(), // id
     children: [], // ids
     shapes: [],
-    track: -1,
+    track: makeDefaultId(),
     order: 0,
     manual: true, // by default, manual is true
     ...params
@@ -57,10 +60,10 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
 /**
  * Initialize a track
  * @param {number} id
- * @param {{[key: number]: number}} labels
+ * @param {{[key: number]: string}} labels
  */
 export function makeTrack (
-  id: number, type: string, labels: {[key: number]: number} = {}
+  id: IdType, type: string, labels: {[key: number]: IdType} = {}
 ): TrackType {
   return { id, type, labels }
 }
@@ -143,7 +146,7 @@ export function makePlane (params: {} = {}): Plane3DType {
  * @param {ShapeType} shape
  */
 export function makeIndexedShape (
-    id: number, label: number[], type: string, shape: ShapeType
+    id: IdType, label: IdType[], type: string, shape: ShapeType
   ): IndexedShapeType {
   return {
     id, label: [...label], type, shape: { ...shape }
@@ -310,7 +313,7 @@ export function makeItemExport (params: Partial<ItemExport> = {}): ItemExport {
 export function makeLabelExport (
   params: Partial<LabelExport> = {}): LabelExport {
   return {
-    id: -1,
+    id: makeDefaultId(),
     category: '',
     attributes: {},
     manualShape: true,
@@ -412,7 +415,7 @@ function makeSelect (params: Partial<Select>= {}): Select {
   return {
     item: 0,
     labels: [],
-    shapes: [],
+    shapes: {},
     category: 0,
     attributes: {},
     labelType: 0,
@@ -428,7 +431,7 @@ function makeSelect (params: Partial<Select>= {}): Select {
  */
 function makeUser (params: Partial<UserType>= {}): UserType {
   return {
-    id: '',
+    id: makeDefaultId(),
     select: makeSelect(),
     layout: makeLayout(),
     viewerConfigs: [],
@@ -455,7 +458,7 @@ export function makeItemStatus (params: Partial<ItemStatus>= {}): ItemStatus {
  */
 function makeSession (params: Partial<SessionType>= {}): SessionType {
   return {
-    id: '',
+    id: makeDefaultId(),
     startTime: 0,
     itemStatuses: [],
     trackLinking: false,
@@ -508,4 +511,54 @@ export function makeState (params: Partial<State> = {}): State {
     user: makeUser(params.user),
     session: makeSession(params.session)
   }
+}
+
+/**
+ * Check whether the input ID is valid or not default
+ * @param {IdType} id
+ */
+export function isValidId (id: IdType): bool {
+  return id !== ''
+}
+
+/**
+ * Make default ID
+ */
+export function makeDefaultId (): IdType {
+  return ''
+}
+
+/**
+ * Generate new label id
+ */
+export function genLabelId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate new track id
+ */
+export function genTrackId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate new shape id
+ */
+export function genShapeId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate an integer representation with low collision for different ids
+ * This is currently a hash function
+ * @param {IdType} id
+ */
+export function id2int (s: IdType): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) {
+    // tslint:disable-next-line: no-bitwise
+    h = Math.imul(31, h) + s.charCodeAt(i) | 0
+  }
+  return h
 }

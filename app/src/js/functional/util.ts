@@ -113,11 +113,11 @@ export function removeListItems<T> (items: T[], a: T[]): T[] {
 /**
  * Pick values of keys from an object
  * @param {{[K]: T}} object
- * @param {number[]} keys
+ * @param {string[]} keys
  */
 export function pickObject<T> (
-  object: { [key: number]: T }, keys: number[]): {[key: number]: T} {
-  const newObject: { [key: number]: T } = {}
+  object: { [key: string]: T }, keys: string[]): {[key: string]: T} {
+  const newObject: { [key: string]: T } = {}
   keys.forEach((key) => {
     newObject[key] = object[key]
   })

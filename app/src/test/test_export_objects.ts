@@ -9,7 +9,7 @@ export const sampleItemExportImage: ItemExport = {
   sensor: -1,
   labels: [
     {
-      id: 0,
+      id: '0',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -25,7 +25,7 @@ export const sampleItemExportImage: ItemExport = {
       customs: {}
     },
     {
-      id: 1,
+      id: '1',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -41,7 +41,7 @@ export const sampleItemExportImage: ItemExport = {
       customs: {}
     },
     {
-      id: 2,
+      id: '2',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -70,7 +70,7 @@ export const sampleStateExportImage: ItemExport[] =
       sensor: -1,
       labels: [
         {
-          id: 0,
+          id: '0',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -86,7 +86,7 @@ export const sampleStateExportImage: ItemExport[] =
           customs: {}
         },
         {
-          id: 1,
+          id: '1',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -102,7 +102,7 @@ export const sampleStateExportImage: ItemExport[] =
           customs: {}
         },
         {
-          id: 2,
+          id: '2',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -165,7 +165,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
   sensor: -1,
   labels: [
     {
-      id: 0,
+      id: '0',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -184,7 +184,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
       customs: {}
     },
     {
-      id: 1,
+      id: '1',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -207,7 +207,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
       customs: {}
     },
     {
-      id: 2,
+      id: '2',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -241,7 +241,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
       sensor: -1,
       labels: [
         {
-          id: 0,
+          id: '0',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -260,7 +260,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           customs: {}
         },
         {
-          id: 1,
+          id: '1',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -283,7 +283,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           customs: {}
         },
         {
-          id: 2,
+          id: '2',
           category: 'person',
           attributes: {},
           manualShape: true,

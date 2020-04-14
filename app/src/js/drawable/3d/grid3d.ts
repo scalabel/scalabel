@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
-import { Plane3DType, ShapeType } from '../../functional/types'
+import { IdType, Plane3DType, ShapeType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import Label3D from './label3d'
 import { Shape3D } from './shape3d'
@@ -145,7 +145,7 @@ export class Grid3D extends Shape3D {
 
   /** update parameters */
   public updateState (
-    shape: ShapeType, id: number, _activeCamera?: THREE.Camera
+    shape: ShapeType, id: IdType, _activeCamera?: THREE.Camera
   ) {
     super.updateState(shape, id)
     const newShape = shape as Plane3DType

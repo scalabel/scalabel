@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
-import { makeLabel, makePolygon } from '../../functional/states'
-import { PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
+import { genLabelId, makeLabel, makePolygon } from '../../functional/states'
+import { IdType, PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
@@ -313,7 +313,7 @@ export class Polygon2D extends Label2D {
       this.editing = false
     }
     this._mouseDown = false
-    if (!this.isValid() && !this.editing && this.labelId >= 0) {
+    if (!this.isValid() && !this.editing && !this.temporary) {
       this._points = []
       for (const point of this._startingPoints) {
         this._points.push(point.clone())
@@ -412,7 +412,7 @@ export class Polygon2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
@@ -434,11 +434,12 @@ export class Polygon2D extends Label2D {
     const labelType = this._closed ?
                 LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
     this._label = makeLabel({
-      type: labelType, id: -1, item: itemIndex,
+      type: labelType, id: genLabelId(), item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })
     this._highlightedHandle = 1
+    this._temporary = true
   }
 
   /**

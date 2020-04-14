@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
-import { CubeType, ShapeType } from '../../functional/types'
+import { CubeType, IdType, ShapeType } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
 import { projectionFromNDC } from '../../view_config/point_cloud'
@@ -205,7 +205,7 @@ export class Cube3D extends Shape3D {
 
   /** update parameters */
   public updateState (
-    shape: ShapeType, id: number
+    shape: ShapeType, id: IdType
   ) {
     const geometry = this._box.geometry as THREE.Geometry
     for (const face of geometry.faces) {
