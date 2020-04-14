@@ -1,5 +1,6 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import { cleanup, fireEvent, render, waitForElement } from '@testing-library/react'
+import axios from 'axios'
 import { createCanvas } from 'canvas'
 import * as child from 'child_process'
 import _ from 'lodash'
@@ -13,10 +14,12 @@ import { getShape } from '../../js/functional/state_util'
 import { RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
+import { Endpoint } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { getTestConfigPath } from '../util'
+import { getTestConfig, getTestConfigPath } from '../util'
 import {
   changeTestConfig,
+  countTasks,
   deepDeleteTimestamp,
   deleteTestDir,
   getExport,
@@ -38,7 +41,7 @@ beforeAll(async () => {
   Session.devMode = false
   Session.testMode = true
 
-  // port is lso changed in test_config
+  // port is also changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
@@ -230,5 +233,56 @@ describe('full 2d bounding box integration test', () => {
       [waitForElement(() => getByTestId('hidden-buttons')),
         sleep(submissionTimeout)
       ])
+  })
+})
+
+describe('2d bounding box integration test with programmatic api', () => {
+  const axiosConfig = {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  const serverConfig = getTestConfig()
+  const response400 = 'Request failed with status code 400'
+
+  test('Itemless project creation', async () => {
+    // Make task size big enough to fit all the items in 1 task
+    const projectName = 'itemless-project'
+    const createProjectBody = {
+      fields: {
+        project_name: projectName,
+        item_type: 'image',
+        label_type: 'box2d',
+        task_size: 400
+      },
+      files: {}
+    }
+    const address = new URL('http://localhost')
+    address.port = serverConfig.port.toString()
+    address.pathname = Endpoint.POST_PROJECT_INTERNAL
+    const response = await axios.post(
+      address.toString(), createProjectBody, axiosConfig
+    )
+    expect(response.status).toBe(200)
+    expect(await countTasks(projectName)).toBe(0)
+
+    // Trying to create a project with the same name fails
+    await expect(axios.post(
+      address.toString(), createProjectBody, axiosConfig
+    )).rejects.toThrow(response400)
+
+    // Add items to the empty project; expect 1 task to be made
+    address.pathname = Endpoint.POST_TASKS
+    const addTasksBody = {
+      projectName,
+      items: 'examples/image_list.yml'
+    }
+    await axios.post(address.toString(), addTasksBody, axiosConfig)
+    expect(await countTasks(projectName)).toBe(1)
+
+    /* Add items again, check that a new task is made
+     * even though the items COULD all fit in one task     */
+    await axios.post(address.toString(), addTasksBody, axiosConfig)
+    expect(await countTasks(projectName)).toBe(2)
   })
 })

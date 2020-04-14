@@ -32,9 +32,13 @@ export class FileStorage extends Storage {
    */
   public async listKeys (
     prefix: string, onlyDir: boolean = false): Promise<string[]> {
+    const dir = this.fullDir(prefix)
+    if (!(await fs.pathExists(dir))) {
+      return Promise.resolve([])
+    }
     const readdirPromise = util.promisify(readdir)
     const dirEnts = await readdirPromise(
-      this.fullDir(prefix), { withFileTypes: true })
+      dir, { withFileTypes: true })
     const keys: string[] = []
     for (const dirEnt of dirEnts) {
       // if only directories, check if it's a directory

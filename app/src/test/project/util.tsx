@@ -1,13 +1,16 @@
 import { withStyles } from '@material-ui/core'
+import { readdir } from 'fs'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import { ChangeEvent } from 'react'
+import * as util from 'util'
 import Session, { ConnectionStatus } from '../../js/common/session'
 import { initFromJson } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import CreateForm from '../../js/components/create_form'
 import { ItemExport } from '../../js/functional/bdd_types'
 import { State } from '../../js/functional/types'
+import { getTaskDir } from '../../js/server/path'
 import { Endpoint, FormField } from '../../js/server/types'
 import { formStyle } from '../../js/styles/create'
 
@@ -199,6 +202,20 @@ export function getProjectJson () {
       'utf-8'
     )
   )
+}
+
+/**
+ * Counts created task/{i}.json file
+ */
+export async function countTasks (projectName: string) {
+  const taskDir = path.join(testConfig.testDirPath, getTaskDir(projectName))
+  if (!(await fs.pathExists(taskDir))) {
+    return 0
+  }
+
+  const readdirPromise = util.promisify(readdir)
+  const dirEnts = await readdirPromise(taskDir)
+  return dirEnts.length
 }
 
 /**

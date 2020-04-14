@@ -1,4 +1,3 @@
-import { File } from 'formidable'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { sprintf } from 'sprintf-js'
@@ -9,6 +8,7 @@ import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType } from '../common/types'
+import { ItemExport } from '../functional/bdd_types'
 import { Label2DTemplateType, State, TaskType } from '../functional/types'
 import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
@@ -111,13 +111,6 @@ export function index2str (index: number) {
  */
 export function initSessId (sessionId: string) {
   return (sessionId ? sessionId : uuid4())
-}
-
-/**
- * Check whether form file exists
- */
-export function formFileExists (file: File | undefined): boolean {
-  return (file !== undefined && file.size !== 0)
 }
 
 /**
@@ -301,6 +294,25 @@ export function makeUserMetadata (): UserMetadata {
   return {
     socketToProject: {}
   }
+}
+
+/**
+ * Get item timestamp, or 0 if undefined
+ */
+export function getItemTimestamp (item: Partial<ItemExport>): number {
+  const timestamp = item.timestamp
+  if (timestamp !== undefined) {
+    return timestamp
+  } else {
+    return 0
+  }
+}
+
+/**
+ * Parse the project name into internal format
+ */
+export function parseProjectName (projectName: string): string {
+  return projectName.replace(' ', '_')
 }
 
 /**

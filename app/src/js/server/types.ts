@@ -190,13 +190,14 @@ export const enum DatabaseType {
   LOCAL = 'local'
 }
 
-// TODO: change constants from post to get once go code is removed
 /* endpoint names for http server */
 export const enum Endpoint {
   POST_PROJECT = '/postProject',
-  GET_PROJECT_NAMES = '/postProjectNames',
-  EXPORT = '/export',
-  DASHBOARD = '/postDashboardContents'
+  POST_PROJECT_INTERNAL = '/postProjectInternal',
+  GET_PROJECT_NAMES = '/getProjectNames',
+  EXPORT = '/getExport',
+  DASHBOARD = '/postDashboardContents',
+  POST_TASKS = '/postTasks'
 }
 
 /* endpoint names for python server */

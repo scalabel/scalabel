@@ -48,6 +48,10 @@ function startHTTPServer (
 
   app.post(Endpoint.POST_PROJECT, formidable(),
     listeners.postProjectHandler.bind(listeners))
+  app.post(Endpoint.POST_PROJECT_INTERNAL, express.json(),
+    listeners.postProjectInternalHandler.bind(listeners))
+  app.post(Endpoint.POST_TASKS, express.json(),
+    listeners.postTasksHandler.bind(listeners))
   app.post(Endpoint.DASHBOARD, express.json(),
     listeners.dashboardHandler.bind(listeners))
 }
