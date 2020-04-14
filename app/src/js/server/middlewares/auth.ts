@@ -13,7 +13,7 @@ export const checkToken = (config: ServerConfig) => {
           next: NextFunction) => {
     const cookies = request.cookies
     if (cookies && cookies.Authorization) {
-      const secret = config.jwtSecret
+      const secret = config.jwtSecret || ''
       try {
         const verificationResponse =
           verify(cookies.Authorization, secret) as DataStoredInToken

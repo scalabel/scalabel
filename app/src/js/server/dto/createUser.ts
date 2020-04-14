@@ -4,13 +4,13 @@ import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
  * Create user
  */
 class CreateUserDto {
-  /** First name */
+  /** Given name */
   @IsString()
-  public firstName: string = ''
+  public givenName: string = ''
 
-  /** Last name */
+  /** Family name */
   @IsString()
-  public lastName: string = ''
+  public familyName: string = ''
 
   /** Email */
   @IsEmail()

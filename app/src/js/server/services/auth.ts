@@ -1,35 +1,70 @@
-import { compare, hash } from 'bcrypt'
-import crypto from 'crypto'
-import { sign } from 'jsonwebtoken'
 import CreateUserDto from '../dto/createUser'
-import DataStoredInToken from '../dto/dataStoredInToken'
 import ForgetPasswordDto from '../dto/forgetPassword'
 import LogInDto from '../dto/login'
 import ResetPasswordDto from '../dto/resetPassword'
-import TokenData from '../dto/tokenData'
-import { Reset, resetModel } from '../entities/reset'
-import { User, userModel } from '../entities/user'
-import { NoSuchUserException, ResetTokenExpiredException, ServerErrorException, UserExistsException, WrongCredentialsException } from '../exceptions'
+import { Reset } from '../entities/reset'
+import { User } from '../entities/user'
 import { ServerConfig } from '../types'
+import AuthenticationCognitoService from './authCognitoService'
+import AuthenticationLocalService from './authLocalService'
+
+export interface AuthenticationImpl {
+  /**
+   * Create user
+   * @param {CreateUserDto} registerData - Create user dto
+   * @param {AuthenticationImpl~registerCallback} success - Handle success
+   * @param {AuthenticationImpl~errorCallback} error - Handle error
+   */
+  register (registerData: CreateUserDto,
+            success: (user: User) => void,
+            error: (error: Error) => void): void
+  /**
+   * Login
+   * @param logInData login data
+   * @param {AuthenticationImpl~loginCallback} success - Handle success
+   * @param {AuthenticationImpl~errorCallback} error - Handle error
+   */
+  login (logInData: LogInDto,
+         success: (user: User) => void,
+         error: (error: Error) => void): void
+  /**
+   * Reset password
+   * @param {ResetPasswordDto} resetData - Reset password data
+   * @param {AuthenticationImpl~resetCallback} success - Handle success
+   * @param {AuthenticationImpl~errorCallback} error - Handle error
+   */
+  resetPassword (resetData: ResetPasswordDto,
+                 success: () => void,
+                 error: (error: Error) => void): void
+  /**
+   * Forget password logic handling
+   * @param {ForgetPasswordDto} forgetPasswordDto - forget password data
+   * @param {AuthenticationImpl~forgetCallback} success - Handle success
+   * @param {AuthenticationImpl~errorCallback} error - Handle error
+   */
+  forgetPassword (forgetPasswordDto: ForgetPasswordDto,
+                  success: (reset: Reset) => void,
+                  error: (error: Error) => void): void
+}
 
 /**
  * Authentication service
  */
 class AuthenticationService {
 
-  /** User repo */
-  private userModel = userModel
-  /** Reset repo */
-  private resetModel = resetModel
-  /** Config */
-  private config: ServerConfig
+  /** Implementation */
+  private impl: AuthenticationImpl
 
   /**
    * Create an authentication controller
    * @param {ServerConfig} config - Server config
    */
   constructor (config: ServerConfig) {
-    this.config = config
+    if (config.authProvider === 'cognito') {
+      this.impl = new AuthenticationCognitoService(config)
+    } else {
+      this.impl = new AuthenticationLocalService(config)
+    }
   }
 
   /**
@@ -37,20 +72,10 @@ class AuthenticationService {
    * @param {CreateUserDto} registerData - Create user dto
    */
   public register = async (registerData: CreateUserDto) => {
-    if (await this.userModel.findOne({ email: registerData.email }).exec()) {
-      throw new UserExistsException()
-    }
-    const hashedPassword = await hash(registerData.password, 10)
-    const user = await this.userModel.create({
-      ...registerData,
-      password: hashedPassword
+    return new Promise((resolve, reject) => {
+      this.impl.register(registerData,
+        (user) => resolve(user), (error) => reject(error))
     })
-    const tokenData = this.createToken(user)
-    const cookie = this.createCookie(tokenData)
-    return {
-      cookie,
-      user
-    }
   }
 
   /**
@@ -58,26 +83,9 @@ class AuthenticationService {
    * @param logInData login data
    */
   public login = (logInData: LogInDto) => {
-    return new Promise<User>((resolve, reject) => {
-      this.userModel.findOne({ email: logInData.email }, async (err, user) => {
-        if (err) {
-          reject(new WrongCredentialsException())
-        } else {
-          if (user) {
-            const isPasswordMatching = await compare(
-              logInData.password,
-              user.get('password', null, { getters: false })
-            )
-            if (isPasswordMatching) {
-              resolve(user)
-            } else {
-              reject(new WrongCredentialsException())
-            }
-          } else {
-            reject(new WrongCredentialsException())
-          }
-        }
-      })
+    return new Promise((resolve, reject) => {
+      this.impl.login(logInData,
+        (user) => resolve(user), (error) => reject(error))
     })
   }
 
@@ -86,29 +94,9 @@ class AuthenticationService {
    * @param {ResetPasswordDto} resetData - Reset password data
    */
   public resetPassword = (resetData: ResetPasswordDto) => {
-    return new Promise<number>((resolve, reject) => {
-      this.resetModel.findOne({ token: resetData.token }).then((reset) => {
-        if (reset) {
-          if (reset.applied ||
-            new Date().getTime() > reset.createdAt.getTime() + 15 * 60 * 1000) {
-            reject(new ResetTokenExpiredException())
-          }
-          this.userModel.findById(reset.userId).then(async (user) => {
-            if (user) {
-              const hashedPassword = await hash(resetData.password, 10)
-              user.password = hashedPassword
-              reset.applied = true
-              reset.save().catch()
-              return user.save()
-            } else {
-              reject(new ServerErrorException())
-            }
-          }).catch(() => reject(new ServerErrorException()))
-        } else {
-          reject(new WrongCredentialsException())
-        }
-      }).then(() => resolve(200))
-    .catch(() => reject(new WrongCredentialsException()))
+    return new Promise((resolve, reject) => {
+      this.impl.resetPassword(resetData,
+        () => resolve(200), (error) => reject(error))
     })
   }
 
@@ -116,55 +104,12 @@ class AuthenticationService {
    * Forget password logic handling
    * @param {ForgetPasswordDto} forgetPasswordDto - forget password data
    */
-  public forgetPassword = (forgetPasswordDto: ForgetPasswordDto) => {
-    return new Promise<Reset>((resolve, reject) => {
-      this.userModel.findOne({ email: forgetPasswordDto.email },
-        async (err, user) => {
-          if (err) {
-            reject(new ServerErrorException())
-          } else {
-            if (user) {
-              // Call email service to send a reset email.
-              const reset = await this.resetModel.create({
-                userId: user._id,
-                token: crypto.randomBytes(64).toString('hex'),
-                applied: false,
-                createdAt: new Date()
-              })
-              resolve(reset)
-            } else {
-              reject(new NoSuchUserException())
-            }
-          }
-        }
-      )
+  public forgetPassword =
+  (forgetPasswordDto: ForgetPasswordDto): Promise<Reset> => {
+    return new Promise((resolve, reject) => {
+      this.impl.forgetPassword(forgetPasswordDto,
+        (reset) => resolve(reset), (error) => reject(error))
     })
-  }
-
-  /**
-   * Create cookie
-   * @param {TokenData} tokenData - Token data
-   * @returns {string} auth cookie
-   */
-  public createCookie (tokenData: TokenData): string {
-    return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`
-  }
-
-  /**
-   * Create Token
-   * @param {User} user - user info
-   * @returns {TokenData} token info
-   */
-  public createToken = (user: User): TokenData => {
-    const expiresIn = 60 * 60 // an hour
-    const secret = this.config.jwtSecret
-    const dataStoredInToken: DataStoredInToken = {
-      _id: user._id
-    }
-    return {
-      expiresIn,
-      token: sign(dataStoredInToken, secret, { expiresIn })
-    }
   }
 }
 

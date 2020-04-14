@@ -12,7 +12,7 @@ import { TextField } from 'formik-material-ui'
 import React from 'react'
 import { loginButtonStyle, loginCheckboxStyle, loginStyle, loginTextFieldStyle } from '../../styles/login'
 
-export interface ClassType {
+interface ClassType {
   /** body */
   body: string,
   /** img */
@@ -32,13 +32,11 @@ export interface ClassType {
   /** btn */
   btn: string
 }
-
-export interface Props {
+interface Props {
   /** Create classes */
   classes: ClassType
 }
-
-export interface State {
+interface State {
   /** boolean to force reload of the sidebar project list */
   open: boolean
 }

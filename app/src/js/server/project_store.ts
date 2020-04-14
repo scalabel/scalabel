@@ -229,7 +229,7 @@ export class ProjectStore {
     if (!metaDataJSON) {
       return makeUserMetadata()
     }
-    // Handle backwards compatability
+    // Handle backwards compatibility
     const userMetadata = safeParseJSON(metaDataJSON)
     if (_.has(userMetadata, 'socketToProject')) {
       // New code saves as an object, which allows extensions

@@ -19,6 +19,7 @@ let config = {
     login: __dirname + '/app/src/js/entries/login.index.tsx',
     reset: __dirname + '/app/src/js/entries/reset_password.index.tsx',
     forget: __dirname + '/app/src/js/entries/forget_password.index.tsx',
+    access: __dirname + '/app/src/js/entries/access.index.tsx',
   },
   output: {
     filename: '[name].js',

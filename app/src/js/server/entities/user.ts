@@ -3,10 +3,10 @@ import * as mongoose from 'mongoose'
 export interface User {
   /** Mongo id */
   _id: string
-  /** First name */
-  firstName: string
-  /** Last name */
-  lastName: string
+  /** Given name */
+  givenName: string
+  /** Family name */
+  familyName: string
   /** Full name */
   fullName: string
   /** Email */
@@ -20,8 +20,8 @@ export interface User {
 const userSchema = new mongoose.Schema(
   {
     email: String,
-    firstName: String,
-    lastName: String,
+    givenName: String,
+    familyName: String,
     password: {
       type: String,
       get: (): undefined => undefined
@@ -37,12 +37,12 @@ const userSchema = new mongoose.Schema(
 )
 
 userSchema.virtual('fullName').get(function (this: {
-  /** First name */
-  firstName: string,
-  /** Last name */
-  lastName: string
+  /** Given name */
+  givenName: string,
+  /** Family name */
+  familyName: string
 }) {
-  return `${this.firstName} ${this.lastName}`
+  return `${this.givenName} ${this.familyName}`
 })
 
 export const userModel =

@@ -45,8 +45,14 @@ export interface ServerConfig {
   redisPort: number
   /** Whether to use virtual sessions/bots for assistance */
   bots: boolean
-  /** jwt secret */
-  jwtSecret: string
+  /** Auth provider */
+  authProvider: string
+  /** jwt secret, required for local auth provider */
+  jwtSecret?: string
+  /** cognito pool id, required for cognito */
+  poolId?: string
+  /** cognito client id, required for cognito */
+  clientId?: string
 }
 
 /**

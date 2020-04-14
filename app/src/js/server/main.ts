@@ -55,6 +55,17 @@ function startHTTPServer (
     listeners.dashboardHandler.bind(listeners))
 
   app.use(API_PATH, new AuthController(config).router)
+  app.get('/access/*', (req, res) => {
+    if (req.path.endsWith('js')) {
+      res.sendFile(getAbsoluteSrcPath('../js/access.js'))
+    } else if (req.path.indexOf('js') > 0) {
+      res.sendFile(getAbsoluteSrcPath(
+        '../js/' + req.path.substring(req.path.lastIndexOf('/'))
+      ))
+    } else {
+      res.sendFile(getAbsoluteSrcPath('../control/access.html'))
+    }
+  })
 }
 
 /**

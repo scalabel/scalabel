@@ -8,20 +8,22 @@ import React from 'react'
 import { loginButtonStyle, loginStyle, loginTextFieldStyle } from '../../styles/login'
 
 interface Values {
-  /** email field value */
-  email: string,
+  /** password field value */
+  password: string,
+  /** password confirm field value */
+  password1: string,
   /** server side error */
   general: string
 }
 
-export interface ClassType {
+interface ClassType {
   /** body */
   body: string,
   /** form */
   form: string,
 }
 
-export interface Props {
+interface Props {
   /** Create classes */
   classes: ClassType
 }
@@ -31,7 +33,7 @@ export interface Props {
  * @param {object} props
  * @return component
  */
-class ForgetPassword extends React.Component<Props> {
+class ResetPassword extends React.Component<Props> {
 
   /**
    * renders the create page
@@ -43,7 +45,8 @@ class ForgetPassword extends React.Component<Props> {
         <CssBaseline />
         <Formik
           initialValues={{
-            email: '',
+            password: '',
+            password1: '',
             general: ''
           }}
           validate={this.validate}
@@ -56,11 +59,20 @@ class ForgetPassword extends React.Component<Props> {
               margin='normal'
               required
               fullWidth
-              id='email'
-              label='Email Address'
-              name='email'
-              autoComplete='email'
-              autoFocus
+              name='password'
+              label='Password'
+              type='password'
+              id='password'
+            />
+            <Field
+              component={LoginText}
+              margin='normal'
+              required
+              fullWidth
+              name='password1'
+              label='Password Confirmation'
+              type='password'
+              id='password1'
             />
             <LoginButton
               type='submit'
@@ -68,7 +80,7 @@ class ForgetPassword extends React.Component<Props> {
               onClick={submitForm}
               fullWidth
             >
-              Send Recovery Email
+              Reset Password
             </LoginButton>
             <div style={{ color: 'red' }}>{errors.general}</div>
           </Form>)}
@@ -81,26 +93,49 @@ class ForgetPassword extends React.Component<Props> {
   private validate = (values: Values) => {
     const errors: Partial<Values> = {}
     const validator = new Validator()
-    if (validator.isEmpty(values.email)) {
-      errors.email = 'Required'
-    } else if (!validator.isEmail(values.email)) {
-      errors.email = 'Invalid email address'
+    if (validator.isEmpty(values.password)) {
+      errors.password = 'Required'
+    } else if (validator.maxLength(values.password, 6)) {
+      errors.password = 'At least 6 characters in length'
     }
+    if (validator.isEmpty(values.password1)) {
+      errors.password1 = 'Required'
+    } else if (validator.maxLength(values.password1, 6)) {
+      errors.password1 = 'At least 6 characters in length'
+    }
+    if (validator.notEquals(values.password, values.password1)
+      && !errors.password1) {
+      errors.password1 = 'Password unmatch'
+    }
+
     return errors
   }
 
   /** submit the form */
   private submit = (values: Values, helper: FormikHelpers<Values>) => {
-    fetch('/api/auth/forget_password', {
+    const result = new Map()
+    const queryParams = window.location.search.substr(1).split('&amp;')
+    queryParams.forEach((queryParam) => {
+      const item = queryParam.split('=')
+      result.set(item[0], decodeURIComponent(item[1]))
+    })
+    fetch('/api/auth/reset_password', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values)
+      body: JSON.stringify({
+        ...values,
+        token: result.get('token')
+      })
     })
     .then((response) => response.json())
     .then((data) => {
       helper.setSubmitting(false)
       if (data.code === 200) {
-        location.href = `/reset_password?token=${data.data.token}`
+        // TODO: Could change the following tips to a Dialog
+        helper.setFieldError('general', 'Success. Redirecting to login page...')
+        setTimeout(() => {
+          location.href = `/login`
+        }, 2000)
       } else {
         helper.setFieldError('general', data.message)
       }
@@ -113,4 +148,4 @@ const LoginText = withStyles(loginTextFieldStyle)(TextField)
 const LoginButton = withStyles(loginButtonStyle)(Button)
 
 /** export Create page */
-export default withStyles(loginStyle, { withTheme: true })(ForgetPassword)
+export default withStyles(loginStyle, { withTheme: true })(ResetPassword)

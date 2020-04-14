@@ -1,7 +1,7 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import ResetPassword from '../components/reset_password/reset_password'
+import ResetPassword from '../components/reset_password/resetPassword'
 import { myTheme } from '../styles/theme'
 
 ReactDOM.render(

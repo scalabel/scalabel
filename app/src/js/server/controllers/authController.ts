@@ -40,19 +40,12 @@ class AuthController {
   public registration =
     async (request: Request, response: Response, next: NextFunction) => {
       const userData: CreateUserDto = request.body
-      try {
-        const {
-        cookie,
-        user
-      } = await this.service.register(userData)
-        response.setHeader('Set-Cookie', [cookie])
+      this.service.register(userData).then((user) => {
         response.json({
           code: 200,
           data: user
         })
-      } catch (error) {
-        next(error)
-      }
+      }).catch((ex) => next(ex))
     }
 
   /**
@@ -65,8 +58,9 @@ class AuthController {
     const logInData: LogInDto = request.body
     this.service.login(logInData)
       .then((user) => {
-        const tokenData = this.service.createToken(user)
-        response.setHeader('Set-Cookie', [this.service.createCookie(tokenData)])
+        // const tokenData = this.service.createToken(user)
+        // response
+        //   .setHeader('Set-Cookie', [this.service.createCookie(tokenData)])
         response.json({
           code: 200,
           data: user
@@ -117,7 +111,9 @@ class AuthController {
    */
   public logout (_request: Request, response: Response) {
     response.setHeader('Set-Cookie', ['Authorization=;Max-age=0'])
-    response.send(200)
+    response.json({
+      code: 200
+    })
   }
 
   /**

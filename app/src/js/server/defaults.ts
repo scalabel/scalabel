@@ -16,7 +16,10 @@ export const serverConfig: ServerConfig = {
   numActionsForWrite: 10,
   redisPort: 6379,
   bots: false,
-  jwtSecret: 'E59649B17DFE09962C280E50B8BBE6073C97CF5676C909A0890899604623672D'
+  jwtSecret: 'E59649B17DFE09962C280E50B8BBE6073C97CF5676C909A0890899604623672D',
+  authProvider: 'cognito',
+  clientId: '6l9396aq4ml6kj03n4q0oouagq',
+  poolId: 'us-west-2_G1kAqvPa2'
 }
 
 /* default categories when file is missing and label is box2D or box3D */
