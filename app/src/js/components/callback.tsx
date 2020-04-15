@@ -39,8 +39,8 @@ class Callback extends React.Component {
   private decodeCode = () => {
     this.parseCognitoWebResponse(window.location.href) // parse the callback URL
     .then(() => this.getCognitoSession()) // get a new session
-    .then((session) => {
-      console.log(JSON.stringify(session))
+    .then((token) => {
+      sessionStorage.setItem('Authorization', token as string)
     })
     .catch()
   }
@@ -95,19 +95,7 @@ class Callback extends React.Component {
             return
           }
 
-          console.debug('Successfully got session: ' + JSON.stringify(result))
-          const session = {
-            credentials: {
-              accessToken: result.getAccessToken().getJwtToken(),
-              idToken: result.getIdToken().getJwtToken(),
-              refreshToken: result.getRefreshToken().getToken()
-            },
-            user: {
-              userName: result.getIdToken().payload['cognito:username'],
-              email: result.getIdToken().payload.email
-            }
-          }
-          resolve(session)
+          resolve(result.getAccessToken().getJwtToken())
         })
       }
     })
