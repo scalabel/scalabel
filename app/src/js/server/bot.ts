@@ -131,17 +131,19 @@ export class Bot {
     const queries = this.packetToQueries(actionPacket)
     const actions = await this.executeQueries(queries)
     if (actions.length > 0) {
-      this.broadcastActions(actions)
+      this.broadcastActions(actions, actionPacket.id)
     }
   }
 
   /**
    * Broadcast the synthetically generated actions
    */
-  public broadcastActions (actions: AddLabelsAction[]) {
+  public broadcastActions (
+    actions: AddLabelsAction[], triggerId: string) {
     const actionPacket: ActionPacketType = {
       actions,
-      id: uuid4()
+      id: uuid4(),
+      triggerId
     }
     const message: SyncActionMessageType = {
       taskId: index2str(this.taskIndex),
