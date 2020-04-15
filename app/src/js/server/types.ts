@@ -47,6 +47,12 @@ export interface ServerConfig {
   botHost: string
   /** port of python model server */
   botPort: number
+  /** region of cognito service */
+  region?: string
+  /** user pool id of cognito */
+  userPool?: string
+  /** client id of cognito */
+  clientId?: string
 }
 
 /**
@@ -114,7 +120,7 @@ export interface SyncActionMessageType {
 
 /** type for transmitted packet of actions */
 export interface ActionPacketType {
-  /** list of actions in the pakcket */
+  /** list of actions in the packet */
   actions: BaseAction[]
   /** id of the packet */
   id: string
