@@ -17,16 +17,30 @@ const CONFIRMATION_MESSAGE =
  * Synchronizes data with other sessions
  */
 export class Synchronizer {
+
+  /**
+   * Getter for number of logged (acked) actions
+   */
+  public get numLoggedActions (): number {
+    return this.actionLog.length
+  }
+
+  /**
+   * Getter for number of queued (in progress) actions
+   */
+  public get numQueuedActions (): number {
+    return this.listActionPackets().length
+  }
+
+  /**
+   * Getter for number of actions with predictions running
+   */
+  public get numActionsPendingPrediction (): number {
+    return this.actionsPendingPrediction.size
+  }
+
   /** Socket connection */
   public socket: SocketIOClient.Socket
-  /** Actions queued to be sent to the backend */
-  public actionQueue: types.BaseAction[]
-  /** Actions in the process of being saved, mapped by packet id */
-  public actionsToSave: OrderedMap<ActionPacketType>
-  /** Timestamped log for completed actions */
-  public actionLog: types.BaseAction[]
-  /** Log of packets that have been acked */
-  public ackedPackets: Set<string>
   /** The function to call after state is synced with backend */
   public initStateCallback: (state: State) => void
   /** Name of the project */
@@ -39,8 +53,16 @@ export class Synchronizer {
   public userId: string
   /** the server address */
   public syncAddress: string
+  /** Actions queued to be sent to the backend */
+  private actionQueue: types.BaseAction[]
+  /** Actions in the process of being saved, mapped by packet id */
+  private actionsToSave: OrderedMap<ActionPacketType>
+  /** Timestamped log for completed actions */
+  private actionLog: types.BaseAction[]
+  /** Log of packets that have been acked */
+  private ackedPackets: Set<string>
   /** The ids of action packets pending model predictions */
-  public actionsPendingPrediction: Set<string>
+  private actionsPendingPrediction: Set<string>
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
