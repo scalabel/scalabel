@@ -147,6 +147,21 @@ export class SessionStatus {
   }
 
   /**
+   * Check if computing
+   */
+  public checkComputing () {
+    return this.status === ConnectionStatus.COMPUTING
+  }
+
+  /**
+   * Check if model computation is done
+   */
+  public checkComputeDone () {
+    return this.status === ConnectionStatus.COMPUTE_DONE ||
+      this.status === ConnectionStatus.NOTIFY_COMPUTE_DONE
+  }
+
+  /**
    * Add a callback function for updating a display component
    */
   public addDisplayCallback (callback: () => void) {

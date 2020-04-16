@@ -12,6 +12,7 @@ import { index2str, updateState } from '../../js/server/util'
 import { getInitialState, getRandomBox2dAction } from '../util'
 
 let sessionId: string
+let botSessionId: string
 let taskIndex: number
 let projectName: string
 let userId: string
@@ -24,26 +25,33 @@ const mockSocket = {
 
 beforeAll(() => {
   sessionId = 'fakeSessId'
+  botSessionId = 'botSessId'
   taskIndex = 0
   projectName = 'testProject'
   userId = 'fakeUserId'
 })
 
+beforeEach(() => {
+  Session.bots = false
+  Session.status.setAsUnsaved()
+})
+
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
   test('Test correct registration message gets sent', async () => {
-    const synchronizer = startSynchronizer()
+    // Since this deals with registration, don't initialize the state
+    const initializeState = false
+    const synchronizer = startSynchronizer(initializeState)
     synchronizer.connectHandler()
 
     // Frontend doesn't have a session id until after registration
-    checkConnectMessage('')
+    const expectedSessId = ''
+    checkConnectMessage(expectedSessId)
     expect(Session.status.checkUnsaved()).toBe(true)
   })
 
   test('Test send-ack loop', async () => {
     const synchronizer = startSynchronizer()
-    const initialState = getInitialState(sessionId)
-    synchronizer.registerAckHandler(initialState)
 
     const dummyAction: BaseAction = {
       type: 'a',
@@ -76,12 +84,38 @@ describe('Test synchronizer functionality', () => {
     checkNumLoggedActions(synchronizer, 1)
   })
 
-  test('Test reconnection', async () => {
-    // Session.updateStatus(ConnectionStatus.UNSAVED)
-    Session.status.setAsUnsaved()
+  test('Test model prediction status', async () => {
     const synchronizer = startSynchronizer()
-    const initialState = getInitialState(sessionId)
-    synchronizer.registerAckHandler(initialState)
+    Session.bots = true
+
+    // Dispatch an add label action
+    const boxAction = getRandomBox2dAction()
+    Session.dispatch(boxAction)
+    checkNumActionsPendingPrediction(synchronizer, 1)
+
+    // After ack arrives, session status is marked as computing
+    const ackAction = synchronizer.listActionPackets()[0]
+    synchronizer.actionBroadcastHandler(
+      packetToMessage(ackAction))
+    expect(Session.status.checkComputing()).toBe(true)
+
+    // When model action arrives, it marks computation as finished
+    const modelAction = getRandomBox2dAction()
+    modelAction.sessionId = botSessionId
+
+    const modelPacket: ActionPacketType = {
+      actions: [modelAction],
+      id: 'randomId',
+      triggerId: ackAction.id
+    }
+    synchronizer.actionBroadcastHandler(
+      packetToMessageBot(modelPacket))
+    checkNumActionsPendingPrediction(synchronizer, 0)
+    expect(Session.status.checkComputeDone()).toBe(true)
+  })
+
+  test('Test reconnection', async () => {
+    const synchronizer = startSynchronizer()
 
     // Initially, no actions are queued for saving
     checkNumQueuedActions(synchronizer, 0)
@@ -101,8 +135,10 @@ describe('Test synchronizer functionality', () => {
     expect(Session.status.checkReconnecting()).toBe(true)
 
     // Reconnect, but some missed actions occured in the backend
-    const missedAction = getRandomBox2dAction()
-    const newInitialState = updateState(initialState, [missedAction])
+    const newInitialState = updateState(
+      getInitialState(sessionId),
+      [getRandomBox2dAction()]
+    )
     synchronizer.connectHandler()
     checkConnectMessage(sessionId)
     synchronizer.registerAckHandler(newInitialState)
@@ -141,6 +177,15 @@ function checkNumLoggedActions (sync: Synchronizer, num: number) {
 }
 
 /**
+ * Helper functions for checking the number of add label actions
+ * that are awaiting a response from a model
+ */
+function checkNumActionsPendingPrediction (sync: Synchronizer, num: number) {
+  expect(sync.actionsPendingPrediction.size).toBe(num)
+
+}
+
+/**
  * Helper function for checking when one action should be queued
  */
 function checkFirstAction (sync: Synchronizer, action: BaseAction) {
@@ -168,7 +213,7 @@ function checkConnectMessage (sessId: string) {
 /**
  * Start the browser synchronizer being tested
  */
-function startSynchronizer (): Synchronizer {
+function startSynchronizer (setInitialState: boolean = true): Synchronizer {
   io.connect = jest.fn().mockImplementation(() => mockSocket)
   const synchronizer = new Synchronizer(
     taskIndex,
@@ -183,6 +228,11 @@ function startSynchronizer (): Synchronizer {
     }
   )
 
+  if (setInitialState) {
+    const initialState = getInitialState(sessionId)
+    synchronizer.registerAckHandler(initialState)
+  }
+
   return synchronizer
 }
 
@@ -196,5 +246,18 @@ function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
     sessionId,
     taskId: index2str(taskIndex),
     bot: false
+  }
+}
+
+/**
+ * Convert action packet to sync message from a bot
+ */
+function packetToMessageBot (packet: ActionPacketType): SyncActionMessageType {
+  return {
+    actions: packet,
+    projectName,
+    sessionId: botSessionId,
+    taskId: index2str(taskIndex),
+    bot: true
   }
 }
