@@ -116,7 +116,7 @@ export class Synchronizer {
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)
-    Session.status.setAsUnsaved()
+    Session.status.setAsConnect()
   }
 
   /**

@@ -83,6 +83,14 @@ export class SessionStatus {
   }
 
   /**
+   * After a connect/reconnect, mark status as unsaved
+   * regardless of previous status
+   */
+  public setAsConnect () {
+    this.update(ConnectionStatus.UNSAVED)
+  }
+
+  /**
    * Mark status as computing
    */
   public setAsComputing () {
