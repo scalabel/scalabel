@@ -179,7 +179,8 @@ export const sampleProjectImage: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: false,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
@@ -242,7 +243,8 @@ export const sampleProjectVideo: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: true,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
@@ -265,7 +267,8 @@ export const sampleProjectAutolabel: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: false,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
@@ -288,7 +291,8 @@ export const sampleProjectAutolabelPolygon: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: false,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
@@ -311,7 +315,8 @@ export const sampleTasksImage: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000000',
       demoMode: false,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
       maxLabelId: -1,
@@ -395,7 +400,8 @@ export const sampleTasksImage: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000001',
       demoMode: false,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
       maxLabelId: -1,
@@ -484,7 +490,8 @@ export const sampleTasksVideo: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000000',
       demoMode: true,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
       maxLabelId: 1,
@@ -665,7 +672,8 @@ export const sampleTasksVideo: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000001',
       demoMode: true,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
       maxLabelId: -1,

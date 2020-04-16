@@ -8,7 +8,7 @@ import * as types from '../action/types'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
-import Session, { ConnectionStatus } from './session'
+import Session from './session'
 
 const CONFIRMATION_MESSAGE =
   'You have unsaved changes that will be lost if you leave this page. '
@@ -39,6 +39,8 @@ export class Synchronizer {
   public userId: string
   /** the server address */
   public syncAddress: string
+  /** The ids of action packets pending model predictions */
+  public actionsPendingPrediction: Set<string>
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
@@ -53,6 +55,7 @@ export class Synchronizer {
     this.actionLog = []
     this.userId = userId
     this.ackedPackets = new Set()
+    this.actionsPendingPrediction = new Set()
 
     // use the same address as http
     this.syncAddress = location.origin
@@ -64,18 +67,8 @@ export class Synchronizer {
 
     this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))
     this.socket.on(EventName.REGISTER_ACK, this.registerAckHandler.bind(this))
-
-    // on a successful ack, update session
-    const ackHandler = () => {
-      Session.updateStatus(ConnectionStatus.NOTIFY_SAVED)
-      this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
-    }
     this.socket.on(EventName.ACTION_BROADCAST,
-      (message: SyncActionMessageType) => {
-        this.actionBroadcastHandler.bind(this)(message, ackHandler)
-      }
-    )
-
+        this.actionBroadcastHandler.bind(this))
     this.socket.on(EventName.DISCONNECT, this.disconnectHandler.bind(this))
     window.onbeforeunload = this.warningPopup.bind(this)
 
@@ -90,9 +83,8 @@ export class Synchronizer {
         self.actionQueue.push(action)
         if (Session.autosave) {
           self.sendQueuedActions()
-        } else if (Session.status !== ConnectionStatus.RECONNECTING &&
-          Session.status !== ConnectionStatus.SAVING) {
-          Session.updateStatus(ConnectionStatus.UNSAVED)
+        } else {
+          Session.status.setAsUnsaved()
         }
       }
       return next(action)
@@ -103,11 +95,7 @@ export class Synchronizer {
    * Displays pop-up warning user when leaving with unsaved changes
    */
   public warningPopup (e: BeforeUnloadEvent) {
-    if (
-      Session.status === ConnectionStatus.RECONNECTING ||
-      Session.status === ConnectionStatus.SAVING ||
-      Session.status === ConnectionStatus.UNSAVED
-    ) {
+    if (!Session.status.isFullySaved()) {
       e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
       return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
     }
@@ -128,7 +116,7 @@ export class Synchronizer {
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)
-    Session.updateStatus(ConnectionStatus.UNSAVED)
+    Session.status.setAsUnsaved()
   }
 
   /**
@@ -149,8 +137,7 @@ export class Synchronizer {
    * Called when backend sends ack for actions that were sent to be synced
    * Updates relevant queues and syncs actions from other sessions
    */
-  public actionBroadcastHandler (
-    message: SyncActionMessageType, ackCallback: () => void) {
+  public actionBroadcastHandler (message: SyncActionMessageType) {
     const actionPacket = message.actions
     // remove stored actions when they are acked
     this.actionsToSave = this.actionsToSave.remove(actionPacket.id)
@@ -172,10 +159,23 @@ export class Synchronizer {
       }
     }
 
-    // Callback once all actions are saved
-    if (message.sessionId === Session.id
-        && this.actionsToSave.size === 0) {
-      ackCallback()
+    if (this.actionsPendingPrediction.has(actionPacket.id)) {
+      /* Original action was acked by the server
+       * This means the bot also received the action
+       * And started its prediction */
+      Session.status.setAsComputing()
+    } else if (actionPacket.triggerId !== undefined &&
+      this.actionsPendingPrediction.has(actionPacket.triggerId)) {
+      // Ack of bot action means prediction is finished
+      this.actionsPendingPrediction.delete(actionPacket.triggerId)
+      if (this.actionsPendingPrediction.size === 0) {
+        Session.status.setAsComputeDone()
+      }
+    } else if (message.sessionId === Session.id) {
+      // Once all actions being saved are acked, update the status
+      if (this.actionsToSave.size === 0) {
+        Session.status.setAsSaved()
+      }
     }
   }
 
@@ -184,7 +184,7 @@ export class Synchronizer {
    * Prepares for reconnect by updating initial callback
    */
   public disconnectHandler () {
-    Session.updateStatus(ConnectionStatus.RECONNECTING)
+    Session.status.setAsReconnecting()
     if (Session.autosave) {
       this.initStateCallback = this.autosaveReconnectCallback
     } else {
@@ -238,10 +238,29 @@ export class Synchronizer {
           id: packetId
         }
         this.actionsToSave = this.actionsToSave.update(packetId, actionPacket)
+        if (this.doesPacketTriggerModel(actionPacket)) {
+          this.actionsPendingPrediction.add(packetId)
+        }
         this.sendActions(actionPacket)
         this.actionQueue = []
       }
     }
+  }
+
+  /**
+   * Checks if the action packet contains
+   * any actions that would trigger a model query
+   */
+  public doesPacketTriggerModel (actionPacket: ActionPacketType): boolean {
+    if (!Session.bots) {
+      return false
+    }
+    for (const action of actionPacket.actions) {
+      if (action.type === types.ADD_LABELS) {
+        return true
+      }
+    }
+    return false
   }
 
   /**
@@ -258,20 +277,7 @@ export class Synchronizer {
       bot: false
     }
     this.socket.emit(EventName.ACTION_SEND, message)
-    Session.updateStatus(ConnectionStatus.SAVING)
-  }
-
-  /**
-   * Update status after timeout if status hasn't changed since then
-   */
-  public timeoutUpdateStatus (newStatus: ConnectionStatus, seconds: number) {
-    const statusChangeCountBefore = Session.statusChangeCount
-    setTimeout(() => {
-      // Don't update if other effect occurred in between
-      if (Session.statusChangeCount === statusChangeCountBefore) {
-        Session.updateStatus(newStatus)
-      }
-    }, seconds * 1000)
+    Session.status.setAsSaving()
   }
 }
 

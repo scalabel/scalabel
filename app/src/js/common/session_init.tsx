@@ -96,6 +96,7 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
   const state = Session.getState()
   Session.tracking = state.task.config.tracking
   Session.autosave = state.task.config.autosave
+  Session.bots = state.task.config.bots
 }
 
 /**

@@ -2,7 +2,7 @@ import { cleanup } from '@testing-library/react'
 import io from 'socket.io-client'
 import { BaseAction } from '../../js/action/types'
 import { configureStore } from '../../js/common/configure_store'
-import Session, { ConnectionStatus } from '../../js/common/session'
+import Session from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
 import { State } from '../../js/functional/types'
 import {
@@ -37,7 +37,7 @@ describe('Test synchronizer functionality', () => {
 
     // Frontend doesn't have a session id until after registration
     checkConnectMessage('')
-    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
+    expect(Session.status.checkUnsaved()).toBe(true)
   })
 
   test('Test send-ack loop', async () => {
@@ -52,7 +52,7 @@ describe('Test synchronizer functionality', () => {
 
     // Initially, no actions queued for saving
     checkNumQueuedActions(synchronizer, 0)
-    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
+    expect(Session.status.checkUnsaved()).toBe(true)
 
     // Dispatch an action to trigger a sync event
     Session.dispatch(dummyAction)
@@ -60,32 +60,32 @@ describe('Test synchronizer functionality', () => {
     // Before ack, dispatched action is queued for saving
     checkNumQueuedActions(synchronizer, 1)
     checkFirstAction(synchronizer, dummyAction)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    expect(Session.status.checkSaving()).toBe(true)
 
     // After ack arrives, no actions are queued anymore
-    const ackHandler = jest.fn()
     const ackAction = synchronizer.listActionPackets()[0]
     synchronizer.actionBroadcastHandler(
-      packetToMessage(ackAction), ackHandler)
+      packetToMessage(ackAction))
     checkNumQueuedActions(synchronizer, 0)
-    expect(ackHandler).toHaveBeenCalled()
+    expect(Session.status.checkSaved()).toBe(true)
+    checkNumLoggedActions(synchronizer, 1)
 
     // If second ack arrives, it is ignored
-    const newAckHandler = jest.fn()
     synchronizer.actionBroadcastHandler(
-      packetToMessage(ackAction), newAckHandler)
-    expect(newAckHandler).not.toHaveBeenCalled()
+      packetToMessage(ackAction))
+    checkNumLoggedActions(synchronizer, 1)
   })
 
   test('Test reconnection', async () => {
-    Session.updateStatus(ConnectionStatus.UNSAVED)
+    // Session.updateStatus(ConnectionStatus.UNSAVED)
+    Session.status.setAsUnsaved()
     const synchronizer = startSynchronizer()
     const initialState = getInitialState(sessionId)
     synchronizer.registerAckHandler(initialState)
 
     // Initially, no actions are queued for saving
     checkNumQueuedActions(synchronizer, 0)
-    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
+    expect(Session.status.checkUnsaved()).toBe(true)
 
     // Dispatch an action to trigger a sync event
     const frontendAction = getRandomBox2dAction()
@@ -94,11 +94,11 @@ describe('Test synchronizer functionality', () => {
     // Before ack, dispatched action is queued for saving
     checkNumQueuedActions(synchronizer, 1)
     checkFirstAction(synchronizer, frontendAction)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    expect(Session.status.checkSaving()).toBe(true)
 
     // Backend disconnects instead of acking
     synchronizer.disconnectHandler()
-    expect(Session.status).toBe(ConnectionStatus.RECONNECTING)
+    expect(Session.status.checkReconnecting()).toBe(true)
 
     // Reconnect, but some missed actions occured in the backend
     const missedAction = getRandomBox2dAction()
@@ -113,16 +113,14 @@ describe('Test synchronizer functionality', () => {
     // Also check that save is still in progress
     checkNumQueuedActions(synchronizer, 1)
     checkFirstAction(synchronizer, frontendAction)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    expect(Session.status.checkSaving()).toBe(true)
 
     // After ack arrives, no actions are queued anymore
-    const ackHandler = jest.fn()
     const ackAction = synchronizer.listActionPackets()[0]
     synchronizer.actionBroadcastHandler(
-      packetToMessage(ackAction), ackHandler)
+      packetToMessage(ackAction))
     expect(Session.getState()).toMatchObject(expectedState)
     checkNumQueuedActions(synchronizer, 0)
-    expect(ackHandler).toHaveBeenCalled()
   })
 })
 
@@ -132,6 +130,14 @@ describe('Test synchronizer functionality', () => {
 function checkNumQueuedActions (sync: Synchronizer, num: number) {
   const actionPackets = sync.listActionPackets()
   expect(actionPackets.length).toBe(num)
+}
+
+/**
+ * Helper functions for checking the number of actions logged,
+ * Which means they are confirmed as saved
+ */
+function checkNumLoggedActions (sync: Synchronizer, num: number) {
+  expect(sync.actionLog.length).toBe(num)
 }
 
 /**

@@ -1,4 +1,4 @@
-import Session, { ConnectionStatus } from '../common/session'
+import Session from '../common/session'
 import { State } from '../functional/types'
 import { Component } from './component'
 
@@ -26,7 +26,7 @@ export abstract class DrawableCanvas<Props> extends Component<Props> {
    * Checks whether to freeze interface
    */
   public checkFreeze () {
-    return Session.status === ConnectionStatus.RECONNECTING
+    return Session.status.shouldFreezeCanvas()
   }
 
   /**
