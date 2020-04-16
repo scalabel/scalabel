@@ -54,7 +54,7 @@ export class Synchronizer {
   /** the server address */
   public syncAddress: string
   /** Actions queued to be sent to the backend */
-  private actionQueue: types.BaseAction[]
+  public actionQueue: types.BaseAction[]
   /** Actions in the process of being saved, mapped by packet id */
   private actionsToSave: OrderedMap<ActionPacketType>
   /** Timestamped log for completed actions */
