@@ -4,6 +4,7 @@ import { createServer } from 'http'
 import socketio from 'socket.io'
 import 'source-map-support/register'
 import { BotManager } from './bot_manager'
+import Callback from './controller/callback'
 import { Hub } from './hub'
 import { Listeners } from './listeners'
 import Logger from './logger'
@@ -47,19 +48,25 @@ function startHTTPServer (
       auth(config) :
       (_req: Request, _res: Response, next: NextFunction) => next()
 
+  app.set('views', getAbsoluteSrcPath('../control'))
+  app.set('view engine', 'ejs')
+
+  app.use(Endpoint.CALLBACK,
+    new Callback(config).router)
+  // app.use(authMiddleWare)
   // set up post/get handlers
   app.get(Endpoint.GET_PROJECT_NAMES, authMiddleWare,
     listeners.projectNameHandler.bind(listeners))
-  app.get(Endpoint.EXPORT, authMiddleWare,
+  app.get(Endpoint.EXPORT,
    listeners.getExportHandler.bind(listeners))
 
-  app.post(Endpoint.POST_PROJECT, authMiddleWare, formidable(),
+  app.post(Endpoint.POST_PROJECT, formidable(),
     listeners.postProjectHandler.bind(listeners))
-  app.post(Endpoint.POST_PROJECT_INTERNAL, authMiddleWare, express.json(),
+  app.post(Endpoint.POST_PROJECT_INTERNAL, express.json(),
     listeners.postProjectInternalHandler.bind(listeners))
-  app.post(Endpoint.POST_TASKS, authMiddleWare, express.json(),
+  app.post(Endpoint.POST_TASKS, express.json(),
     listeners.postTasksHandler.bind(listeners))
-  app.post(Endpoint.DASHBOARD, authMiddleWare, express.json(),
+  app.post(Endpoint.DASHBOARD, express.json(),
     listeners.dashboardHandler.bind(listeners))
   app.use(errorHandler)
 }

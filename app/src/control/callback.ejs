@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Auth callback</title>
+    <script type="text/javascript">
+      sessionStorage.setItem("AccessToken", "<%= accessToken;  %>");
+      sessionStorage.setItem("IdToken", "<%= idToken;  %>");
+      sessionStorage.setItem("RefreshToken", "<%= refreshToken;  %>");
+      sessionStorage.setItem("TokenType", "<%= tokenType; %>");
+    </script>
+  </head>
+  <body></body>
+</html>

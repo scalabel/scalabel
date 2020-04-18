@@ -52,7 +52,11 @@ export interface ServerConfig {
   /** user pool id of cognito */
   userPool?: string
   /** client id of cognito */
-  clientId?: string
+  clientId?: string,
+  /** user pool base uri */
+  userPoolBaseUri?: string,
+  /** callback uri */
+  callbackUri?: string
 }
 
 /**
@@ -203,7 +207,8 @@ export const enum Endpoint {
   GET_PROJECT_NAMES = '/getProjectNames',
   EXPORT = '/getExport',
   DASHBOARD = '/postDashboardContents',
-  POST_TASKS = '/postTasks'
+  POST_TASKS = '/postTasks',
+  CALLBACK = '/callback'
 }
 
 /* endpoint names for python server */
