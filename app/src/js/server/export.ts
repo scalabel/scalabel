@@ -11,7 +11,7 @@ export function convertPolygonToExport (
   poly2d: PolygonType, labelType: string): PolygonExportType[] {
   const typeCharacters = poly2d.points.map(
     (point) => {
-      switch (point.type) {
+      switch (point.pointType) {
         case PointType.CURVE:
           return 'C'
         case PointType.VERTEX:

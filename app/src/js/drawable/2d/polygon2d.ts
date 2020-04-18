@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
-import { genLabelId, makeLabel, makePolygon } from '../../functional/states'
+import { makeLabel, makePolygon } from '../../functional/states'
 import { IdType, PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -434,7 +434,7 @@ export class Polygon2D extends Label2D {
     const labelType = this._closed ?
                 LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
     this._label = makeLabel({
-      type: labelType, id: genLabelId(), item: itemIndex,
+      type: labelType, item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })
@@ -452,7 +452,7 @@ export class Polygon2D extends Label2D {
       if (!_.isEqual(this.toPolygon(), polygon)) {
         this._points = new Array()
         for (const point of polygon.points) {
-          switch (point.type) {
+          switch (point.pointType) {
             case PointType.VERTEX: {
               const currPoint =
                 new PathPoint2D(point.x, point.y, PointType.VERTEX)

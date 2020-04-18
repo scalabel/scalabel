@@ -66,7 +66,7 @@ export interface CustomExportType {
 
 export interface LabelExport {
   /** label id */
-  id: string
+  id: string | number
   /** category */
   category: string
   /** label attributes- can be list or switch type */

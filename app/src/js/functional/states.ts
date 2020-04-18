@@ -9,7 +9,6 @@ import {
   IdType,
   Image3DViewerConfigType,
   ImageViewerConfigType,
-  IndexedShapeType,
   IntrinsicsType,
   ItemStatus,
   ItemType,
@@ -35,13 +34,14 @@ import {
 } from './types'
 
 /**
- * Initialize a label state and deep copy the parameters
+ * Initialize a label state and deep copy the parameters.
+ * Every label has an id when it is born.
  * @param {Partial<LabelType>} params
  * @return {LabelType}
  */
 export function makeLabel (params: Partial<LabelType> = {}): LabelType {
-  return _.cloneDeep<LabelType>({
-    id: makeDefaultId(),
+  return {
+    id: genLabelId(),
     item: -1,
     sensors: [-1],
     type: types.LabelTypeName.EMPTY,
@@ -54,20 +54,38 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
     order: 0,
     manual: true, // by default, manual is true
     ...params
-  })
+  }
 }
 
 /**
  * Initialize a track
- * @param {number} id
+ * Every track has an id when it is born
+ * @param {string} type label type of the track
+ * @param {number} id optional id.
  * @param {{[key: number]: string}} labels
+ * Labels can not be filled without specifying id
  */
-export function makeTrack (
-  id: IdType, type: string, labels: {[key: number]: IdType} = {}
+export function makeTrack (type: string, id: string = '',
+                           labels: {[key: number]: IdType} = {}
 ): TrackType {
+  if (!isValidId(id)) {
+    id = genTrackId()
+  }
   return { id, type, labels }
 }
 
+/**
+ * Make an empty shape
+ * Every shape has an id when it is born
+ * @param {string} shapeType type name of the shape
+ */
+function makeShape (shapeType: string = ''): ShapeType {
+  return {
+    id: genShapeId(),
+    labels: [],
+    shapeType
+  }
+}
 /**
  * Initialize a rectangle shape
  * @param {{}} params
@@ -75,6 +93,7 @@ export function makeTrack (
  */
 export function makeRect (params: Partial<RectType> = {}): RectType {
   return {
+    ...makeShape(types.ShapeTypeName.RECT),
     x1: -1,
     y1: -1,
     x2: -1,
@@ -91,6 +110,7 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
 export function makePolygon
   (params: Partial<PolygonType> = {}): PolygonType {
   return {
+    ...makeShape(types.ShapeTypeName.POLYGON_2D),
     points: [],
     ...params
   }
@@ -103,9 +123,10 @@ export function makePolygon
 export function makePathPoint (params: Partial<PathPoint2DType> = {})
 : PathPoint2DType {
   return {
+    ...makeShape(types.ShapeTypeName.PATH_POINT_2D),
     x: 0,
     y: 0,
-    type: 'vertex',
+    pointType: 'vertex',
     ...params
   }
 }
@@ -117,6 +138,7 @@ export function makePathPoint (params: Partial<PathPoint2DType> = {})
  */
 export function makeCube (params: Partial<CubeType> = {}): CubeType {
   return {
+    ...makeShape(types.ShapeTypeName.CUBE),
     center: { x: 0, y: 0, z: 0 },
     size: { x: 1, y: 1, z: 1 },
     orientation: { x: 0, y: 0, z: 0 },
@@ -132,24 +154,10 @@ export function makeCube (params: Partial<CubeType> = {}): CubeType {
  */
 export function makePlane (params: {} = {}): Plane3DType {
   return {
+    ...makeShape(types.ShapeTypeName.GRID),
     center: { x: 0, y: 0, z: 0 },
     orientation: { x: 0, y: 0, z: 0 },
     ...params
-  }
-}
-
-/**
- * Compose indexed shape
- * @param {number} id
- * @param {number[]} label
- * @param {string} type
- * @param {ShapeType} shape
- */
-export function makeIndexedShape (
-    id: IdType, label: IdType[], type: string, shape: ShapeType
-  ): IndexedShapeType {
-  return {
-    id, label: [...label], type, shape: { ...shape }
   }
 }
 
@@ -530,23 +538,23 @@ export function makeDefaultId (): IdType {
 }
 
 /**
- * Generate new label id
+ * Generate new label id. It should not be called outside this file.
  */
-export function genLabelId (): IdType {
+function genLabelId (): IdType {
   return uid()
 }
 
 /**
- * Generate new track id
+ * Generate new track id. It should not be called outside this file.
  */
-export function genTrackId (): IdType {
+function genTrackId (): IdType {
   return uid()
 }
 
 /**
- * Generate new shape id
+ * Generate new shape id. It should not be called outside this file.
  */
-export function genShapeId (): IdType {
+function genShapeId (): IdType {
   return uid()
 }
 

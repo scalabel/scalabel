@@ -6,8 +6,6 @@ export type IdType = string
 // we can't use alias of string as an index signature parameter type
 export interface LabelIdMap {[key: string]: LabelType}
 
-export interface IndexedShapeMap {[key: string]: IndexedShapeType}
-
 export interface ShapeIdMap {[key: string]: ShapeType}
 
 export interface TrackIdMap {[key: string]: TrackType}
@@ -51,7 +49,16 @@ export interface TrackType {
   labels: {[key: number]: IdType}
 }
 
-export interface RectType {
+export interface ShapeType {
+  /** ID of the shape */
+  id: IdType
+  /** Label ID of the shape */
+  labels: IdType[]
+  /** type string of the shape. Value from common/types.ShapeType */
+  shapeType: string
+}
+
+export interface RectType extends ShapeType {
   /** The x-coordinate of upper left corner */
   x1: number
   /** The y-coordinate of upper left corner */
@@ -62,7 +69,7 @@ export interface RectType {
   y2: number
 }
 
-export interface PolygonType {
+export interface PolygonType extends ShapeType {
   /** array of control points */
   points: PathPoint2DType []
 }
@@ -94,7 +101,7 @@ export interface Vector4Type {
   z: number
 }
 
-export interface CubeType {
+export interface CubeType extends ShapeType {
   /** Center of the cube */
   center: Vector3Type
   /** size */
@@ -109,26 +116,23 @@ export type Point2DType = Vector2Type
 
 export interface PathPoint2DType extends Point2DType {
   /** type of the point in the path. value from common/types.PathPointType */
-  type: string
+  pointType: string
 }
 
-export interface Plane3DType {
+export interface Plane3DType extends ShapeType {
   /** Plane origin in world */
   center: Vector3Type
   /** orientation in Euler */
   orientation: Vector3Type
 }
 
-export type ShapeType = RectType | CubeType | PolygonType |
-                        Point2DType | PathPoint2DType | Plane3DType
-
 export interface IndexedShapeType {
   /** ID of the shape */
   id: IdType
   /** Label ID of the shape */
-  label: IdType[]
+  labels: IdType[]
   /** type string of the shape. Value from common/types.ShapeType */
-  type: string
+  shapeType: string
   /** Shape data */
   shape: ShapeType
 }
@@ -229,7 +233,7 @@ export interface ItemType {
   /** Labels of the item */
   labels: LabelIdMap // list of label
   /** shapes of the labels on this item */
-  shapes: IndexedShapeMap
+  shapes: ShapeIdMap
   /** the timestamp for the item */
   timestamp: number
   /** video item belongs to */

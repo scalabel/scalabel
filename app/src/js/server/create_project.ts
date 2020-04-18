@@ -3,7 +3,7 @@ import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
-import { makeSensor, makeTask, makeTrack } from '../functional/states'
+import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
 import {
   Attribute,
   ConfigType,
@@ -560,7 +560,7 @@ export function createTasks (
     // based on the imported labels, compute max ids
     let maxLabelId = -1
     let maxShapeId = -1
-    let maxTrackId = -1
+    const maxTrackId = -1
     // max order is the total number of labels
     let maxOrder = 0
 
@@ -607,11 +607,10 @@ export function createTasks (
 
       if (tracking) {
         for (const label of Object.values(newItem.labels)) {
-          if (label.track >= 0 && !(label.track in trackMap)) {
-            trackMap[label.track] = makeTrack(label.track, label.type)
+          if (isValidId(label.track) && !(label.track in trackMap)) {
+            trackMap[label.track] = makeTrack(label.type, label.track)
           }
           trackMap[label.track].labels[label.item] = label.id
-          maxTrackId = Math.max(label.track + 1, maxTrackId)
         }
       }
 

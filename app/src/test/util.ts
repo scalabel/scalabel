@@ -42,9 +42,9 @@ export function checkPathPointFields (
   expect(point.x).toBe(x)
   expect(point.y).toBe(y)
   if (isVertexType) {
-    expect(point.type).toBe('vertex')
+    expect(point.pointType).toBe('vertex')
   } else {
-    expect(point.type).toBe('bezier')
+    expect(point.pointType).toBe('bezier')
   }
 }
 

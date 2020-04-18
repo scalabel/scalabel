@@ -6,7 +6,6 @@ import { LabelIdMap, ShapeIdMap } from '../functional/types'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
 
-
 /**
  * Commit labels to state
  */
@@ -103,7 +102,7 @@ export function commitLabels (
         if (label) {
           const indexedShapes = track.getShapes(i)
           for (const indexedShape of indexedShapes) {
-            currentTypes.push(indexedShape.type)
+            currentTypes.push(indexedShape.shapeType)
             currentShapes.push(indexedShape.shape)
           }
           indices.push(i)

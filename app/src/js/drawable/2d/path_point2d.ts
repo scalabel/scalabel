@@ -78,7 +78,7 @@ export class PathPoint2D extends Point2D {
    */
   public toPathPoint (): PathPoint2DType {
     return makePathPoint({
-      x: this.x, y: this.y, type: this.type
+      x: this.x, y: this.y, pointType: this.type
     })
   }
 

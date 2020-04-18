@@ -238,16 +238,16 @@ test('Draw 2d polygons to label2d list', () => {
     expect(polygon.points.length).toEqual(4)
     expect(polygon.points[0].x).toEqual(10)
     expect(polygon.points[0].y).toEqual(10)
-    expect(polygon.points[0].type).toEqual('vertex')
+    expect(polygon.points[0].pointType).toEqual('vertex')
     expect(polygon.points[1].x).toEqual(100)
     expect(polygon.points[1].y).toEqual(100)
-    expect(polygon.points[1].type).toEqual('vertex')
+    expect(polygon.points[1].pointType).toEqual('vertex')
     expect(polygon.points[2].x).toEqual(200)
     expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
+    expect(polygon.points[2].pointType).toEqual('vertex')
     expect(polygon.points[3].x).toEqual(100)
     expect(polygon.points[3].y).toEqual(0)
-    expect(polygon.points[3].type).toEqual('vertex')
+    expect(polygon.points[3].pointType).toEqual('vertex')
 
     // draw second polygon
     canvasRef.current.onMouseMove(mouseMoveEvent(500, 500))
@@ -279,13 +279,13 @@ test('Draw 2d polygons to label2d list', () => {
     polygon = getShape(state, 0, 1, 0) as PolygonType
     expect(polygon.points[0].x).toEqual(500)
     expect(polygon.points[0].y).toEqual(500)
-    expect(polygon.points[0].type).toEqual('vertex')
+    expect(polygon.points[0].pointType).toEqual('vertex')
     expect(polygon.points[1].x).toEqual(600)
     expect(polygon.points[1].y).toEqual(400)
-    expect(polygon.points[1].type).toEqual('vertex')
+    expect(polygon.points[1].pointType).toEqual('vertex')
     expect(polygon.points[2].x).toEqual(700)
     expect(polygon.points[2].y).toEqual(700)
-    expect(polygon.points[2].type).toEqual('vertex')
+    expect(polygon.points[2].pointType).toEqual('vertex')
     expect(polygon.points.length).toEqual(3)
     // expect(Session.canvasRef.current.labelList.length).toEqual(2)
   }
@@ -459,7 +459,7 @@ test('validation check for polygon2d', () => {
     const polygon = getShape(state, 0, 0, 0) as PolygonType
     expect(polygon.points[2].x).toEqual(310)
     expect(polygon.points[2].y).toEqual(260)
-    expect(polygon.points[2].type).toEqual('vertex')
+    expect(polygon.points[2].pointType).toEqual('vertex')
     /**
      * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
      */
@@ -535,7 +535,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     let polygon = getShape(state, 0, 0, 0) as PolygonType
     expect(polygon.points[2].x).toEqual(300)
     expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
+    expect(polygon.points[2].pointType).toEqual('vertex')
     /**
      * polygon 1: (10, 10) (100, 100) (300, 100) (100, 0)
      */
@@ -551,7 +551,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     polygon = getShape(state, 0, 0, 0) as PolygonType
     expect(polygon.points[2].x).toEqual(200)
     expect(polygon.points[2].y).toEqual(150)
-    expect(polygon.points[2].type).toEqual('vertex')
+    expect(polygon.points[2].pointType).toEqual('vertex')
     expect(polygon.points.length).toEqual(5)
     /**
      * polygon 1: (10, 10) (100, 100) (200, 150) (300, 100) (100, 0)
@@ -568,7 +568,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     polygon = getShape(state, 0, 0, 0) as PolygonType
     expect(polygon.points[0].x).toEqual(110)
     expect(polygon.points[0].y).toEqual(110)
-    expect(polygon.points[0].type).toEqual('vertex')
+    expect(polygon.points[0].pointType).toEqual('vertex')
     expect(polygon.points.length).toEqual(5)
     /**
      * polygon 1: (110, 110) (200, 200) (300, 250) (400, 200) (200, 100)
@@ -629,19 +629,19 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points.length).toEqual(5)
     expect(polygon.points[0].x).toEqual(250)
     expect(polygon.points[0].y).toEqual(100)
-    expect(polygon.points[0].type).toEqual('vertex')
+    expect(polygon.points[0].pointType).toEqual('vertex')
     expect(polygon.points[1].x).toEqual(300)
     expect(polygon.points[1].y).toEqual(0)
-    expect(polygon.points[1].type).toEqual('vertex')
+    expect(polygon.points[1].pointType).toEqual('vertex')
     expect(polygon.points[2].x).toEqual(350)
     expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
+    expect(polygon.points[2].pointType).toEqual('vertex')
     expect(polygon.points[3].x).toEqual(320)
     expect(polygon.points[3].y).toEqual(130)
-    expect(polygon.points[3].type).toEqual('vertex')
+    expect(polygon.points[3].pointType).toEqual('vertex')
     expect(polygon.points[4].x).toEqual(300)
     expect(polygon.points[4].y).toEqual(150)
-    expect(polygon.points[4].type).toEqual('vertex')
+    expect(polygon.points[4].pointType).toEqual('vertex')
 
     // delete vertex when closed
     canvasRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
@@ -663,7 +663,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points.length).toEqual(4)
     expect(polygon.points[3].x).toEqual(320)
     expect(polygon.points[3].y).toEqual(130)
-    expect(polygon.points[3].type).toEqual('vertex')
+    expect(polygon.points[3].pointType).toEqual('vertex')
 
     // draw bezier curve
     canvasRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'c' }))
@@ -683,10 +683,10 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points.length).toEqual(6)
     expect(polygon.points[3].x).toEqual(340)
     expect(polygon.points[3].y).toEqual(110)
-    expect(polygon.points[3].type).toEqual('bezier')
+    expect(polygon.points[3].pointType).toEqual('bezier')
     expect(polygon.points[4].x).toEqual(330)
     expect(polygon.points[4].y).toEqual(120)
-    expect(polygon.points[4].type).toEqual('bezier')
+    expect(polygon.points[4].pointType).toEqual('bezier')
 
     // drag bezier curve control points
     canvasRef.current.onMouseMove(mouseMoveEvent(340, 110))
@@ -706,13 +706,13 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     expect(polygon.points.length).toEqual(6)
     expect(polygon.points[2].x).toEqual(350)
     expect(polygon.points[2].y).toEqual(100)
-    expect(polygon.points[2].type).toEqual('vertex')
+    expect(polygon.points[2].pointType).toEqual('vertex')
     expect(polygon.points[3].x).toEqual(340)
     expect(polygon.points[3].y).toEqual(90)
-    expect(polygon.points[3].type).toEqual('bezier')
+    expect(polygon.points[3].pointType).toEqual('bezier')
     expect(polygon.points[4].x).toEqual(330)
     expect(polygon.points[4].y).toEqual(120)
-    expect(polygon.points[4].type).toEqual('bezier')
+    expect(polygon.points[4].pointType).toEqual('bezier')
 
     // delete vertex on bezier curve
     canvasRef.current.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))

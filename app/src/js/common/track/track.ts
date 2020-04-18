@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import Label2D from '../../drawable/2d/label2d'
 import Label3D from '../../drawable/3d/label3d'
-import { makeDefaultId, makeIndexedShape, makeTrack } from '../../functional/states'
-import { IndexedShapeType, Label2DTemplateType, LabelType, State, TrackType } from '../../functional/types'
+import { makeTrack } from '../../functional/states'
+import { Label2DTemplateType, LabelType, ShapeType, State, TrackType } from '../../functional/types'
 import { LabelTypeName, TrackPolicyType } from '../types'
 import { Box2DLinearInterpolationPolicy } from './policy/linear_interpolation/box2d_linear_interpolation'
 import { Box3DLinearInterpolationPolicy } from './policy/linear_interpolation/box3d_linear_interpolation'
@@ -76,7 +76,7 @@ export class Track {
   /** track state */
   protected _track: TrackType
   /** shape map */
-  protected _shapes: { [itemIndex: number]: IndexedShapeType[] }
+  protected _shapes: { [itemIndex: number]: ShapeType[] }
   /** label map */
   protected _labels: { [itemIndex: number]: LabelType }
   /** updated indices */
@@ -85,7 +85,7 @@ export class Track {
   protected _type: string
 
   constructor () {
-    this._track = makeTrack(makeDefaultId(), LabelTypeName.EMPTY)
+    this._track = makeTrack(LabelTypeName.EMPTY)
     this._policy = new TrackPolicy(this)
     this._shapes = {}
     this._labels = {}
@@ -162,7 +162,7 @@ export class Track {
   /** Get shapes at item index */
   public getShapes (
     index: number
-  ): Readonly<Array<Readonly<IndexedShapeType>>> {
+  ): Readonly<Array<Readonly<ShapeType>>> {
     if (index in this._shapes) {
       return this._shapes[index]
     }
@@ -172,7 +172,7 @@ export class Track {
   /** Set shapes at item index */
   public setShapes (
     index: number,
-    shapes: IndexedShapeType[]
+    shapes: ShapeType[]
   ) {
     this._updatedIndices.add(index)
     this._shapes[index] = shapes
@@ -230,10 +230,8 @@ export class Track {
         this._labels[index] = cloned
         this._shapes[index] = []
         for (let i = 0; i < shapeTypes.length; i++) {
-          this._shapes[index].push(makeIndexedShape(
-            makeDefaultId(), [makeDefaultId()], shapeTypes[i], 
-            _.cloneDeep(shapeStates[i])
-          ))
+          // TODO(fisher) make sure the shape types are correct
+          this._shapes[index].push(_.cloneDeep(shapeStates[i]))
         }
         this._updatedIndices.add(index)
       }
@@ -246,7 +244,9 @@ export class Track {
    * @param newShapes
    */
   public update (itemIndex: number, label: Readonly<Label>): void {
-    const [ids, shapeTypes, newShapes] = label.shapeStates()
+    const shapeStates = label.shapeStates()
+    const ids = shapeStates[0]
+    const newShapes = shapeStates[2]
     if (
       itemIndex in this._shapes &&
       newShapes.length === this._shapes[itemIndex].length
@@ -254,9 +254,7 @@ export class Track {
       this._updatedIndices.add(itemIndex)
       this._shapes[itemIndex].length = ids.length
       for (let i = 0; i < newShapes.length; i++) {
-        this._shapes[itemIndex][i].id = ids[i]
-        this._shapes[itemIndex][i].type = shapeTypes[i]
-        this._shapes[itemIndex][i].shape = newShapes[i]
+        this._shapes[itemIndex][i] = newShapes[i]
       }
 
       this._labels[itemIndex] = {

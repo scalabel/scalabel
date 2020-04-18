@@ -7,10 +7,8 @@ import { IdType } from 'aws-sdk/clients/workdocs'
 import _ from 'lodash'
 import * as types from '../action/types'
 import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
-import { genLabelId, genShapeId, genTrackId, isValidId,
-  makeDefaultId, makeIndexedShape, makePane, makeTrack } from './states'
+import { isValidId, makeDefaultId, makeLabel, makePane, makeTrack } from './states'
 import {
-  IndexedShapeType,
   ItemType,
   LabelType,
   LayoutType,
@@ -90,13 +88,12 @@ export function updateTask (
  */
 export function addLabel (
   state: State, sessionId: string, itemIndex: number, label: LabelType,
-  shapeTypes: string[] = [], shapes: ShapeType[] = []): State {
+  shapes: ShapeType[] = []): State {
   const addLabelsAction: types.AddLabelsAction = {
     type: types.ADD_LABELS,
     sessionId,
     itemIndices: [itemIndex],
     labels: [[label]],
-    shapeTypes: [[shapeTypes]],
     shapes: [[shapes]]
   }
   return addLabels(state, addLabelsAction)
@@ -131,29 +128,25 @@ export function deleteLabelsById (
  */
 function addLabelsToItem (
   item: ItemType, taskStatus: TaskStatus, newLabels: LabelType[],
-  shapeTypes: string[][], shapes: ShapeType[][]
+  shapes: ShapeType[][]
 ): [ItemType, LabelType[], TaskStatus] {
   newLabels = [...newLabels]
   const newLabelIds: IdType[] = []
   const newShapeIds: IdType[] = []
-  const newShapes: IndexedShapeType[] = []
+  const newShapes: ShapeType[] = []
   newLabels.forEach((label, index) => {
-    const labelId = genLabelId()
-    const shapeIds = _.range(shapes[index].length).map(() => genShapeId())
-    const newLabelShapes = shapes[index].map((s, i) =>
-      makeIndexedShape(shapeIds[i], [labelId], shapeTypes[index][i], s)
-    )
+    const shapeIds = shapes[index].map((shape) => shape.id)
+    const newLabelShapes = shapes[index].map((s) => _.cloneDeep(s))
     const order = taskStatus.maxOrder + 1 + index
     const validChildren = label.children.filter((id) => isValidId(id))
     label = updateObject(label, {
-      id: labelId,
       item: item.index,
       order,
       shapes: label.shapes.concat(shapeIds),
       children: validChildren
     })
     newLabels[index] = label
-    newLabelIds.push(labelId)
+    newLabelIds.push(label.id)
     newShapes.push(...newLabelShapes)
     newShapeIds.push(...shapeIds)
   })
@@ -182,13 +175,13 @@ function addLabelsToItem (
  */
 function addLabelstoItems (
   items: ItemType[], taskStatus: TaskStatus, labelsToAdd: LabelType[][],
-  shapeTypes: string[][][], shapes: ShapeType[][][]
+  shapes: ShapeType[][][]
 ): [ItemType[], LabelType[], TaskStatus] {
   const allNewLabels: LabelType[] = []
   items = [...items]
   items.forEach((item, index) => {
     const [newItem, newLabels, newStatus] = addLabelsToItem(
-      item, taskStatus, labelsToAdd[index], shapeTypes[index], shapes[index])
+      item, taskStatus, labelsToAdd[index], shapes[index])
     items[index] = newItem
     taskStatus = newStatus
     allNewLabels.push(...newLabels)
@@ -209,7 +202,7 @@ export function addLabels (state: State, action: types.AddLabelsAction): State {
   let items = [...task.items]
   const selectedItems = pickArray(items, action.itemIndices)
   const [newItems, newLabels, status] = addLabelstoItems(
-    selectedItems, task.status, action.labels, action.shapeTypes, action.shapes)
+    selectedItems, task.status, action.labels, action.shapes)
   items = assignToArray(items, newItems, action.itemIndices)
   // Find the first new label in the selected item if the labels are created
   // by this session.
@@ -244,19 +237,17 @@ function addTrackToTask (
   type: string,
   itemIndices: number[],
   labels: LabelType[],
-  shapeTypes: string[][],
   shapes: ShapeType[][]
 ): [TaskType, TrackType, LabelType[]] {
-  const track = makeTrack(genTrackId(), type, {})
+  const track = makeTrack(type)
   for (const label of labels) {
     label.track = track.id
   }
   const labelList = labels.map((l) => [l])
-  const shapeTypeList = shapeTypes.map((s) => [s])
   const shapeList = shapes.map((s) => [s])
   const [newItems, newLabels, status] = addLabelstoItems(
     pickArray(task.items, itemIndices),
-    task.status, labelList, shapeTypeList, shapeList)
+    task.status, labelList, shapeList)
   const items = assignToArray(task.items, newItems, itemIndices)
   newLabels.map((l) => {
     track.labels[l.item] = l.id
@@ -276,7 +267,7 @@ export function addTrack (state: State, action: types.AddTrackAction): State {
   let { user } = state
   const [task, , newLabels] = addTrackToTask(
     state.task, action.trackType, action.itemIndices, action.labels,
-    action.shapeTypes, action.shapes
+    action.shapes
   )
   // select the label on the current item
   if (action.sessionId === state.session.id) {
@@ -344,8 +335,7 @@ function changeShapesInItem (
   shapes: Array<Partial<ShapeType>>): ItemType {
   const newShapes = { ...item.shapes }
   shapeIds.forEach((shapeId, index) => {
-    newShapes[shapeId] = updateObject(newShapes[shapeId],
-      { shape: updateObject(newShapes[shapeId].shape, shapes[index]) })
+    newShapes[shapeId] = updateObject(newShapes[shapeId], shapes[index])
   })
   return { ...item, shapes: newShapes }
 }
@@ -510,16 +500,16 @@ export function linkLabels (
   }
   const children = _.map(
     action.labelIds, (labelId) => getRootLabelId(item, labelId))
-  let newLabel: LabelType = _.cloneDeep(item.labels[children[0]])
+  let newLabel: LabelType = makeLabel(item.labels[children[0]])
   newLabel.parent = makeDefaultId()
   newLabel.shapes = []
-  newLabel.children = children
+  newLabel.children = [...children]
   newLabel.type = LabelTypeName.EMPTY
   state = addLabel(state, action.sessionId, action.itemIndex, newLabel)
 
   // assign the label properties
   item = state.task.items[action.itemIndex]
-  const newLabelId = genLabelId()
+  const newLabelId = newLabel.id
   newLabel = item.labels[newLabelId]
   const labels: LabelType[] = _.map(children,
     (labelId) => _.cloneDeep(item.labels[labelId]))
@@ -658,8 +648,8 @@ function deleteLabelsFromItem (
 
   // find related labels and shapes
   const updatedLabels: { [key: string]: LabelType } = {}
-  const updatedShapes: { [key: string]: IndexedShapeType } = {}
-  const deletedShapes: { [key: string]: IndexedShapeType } = {}
+  const updatedShapes: { [key: string]: ShapeType } = {}
+  const deletedShapes: { [key: string]: ShapeType } = {}
   _.forEach(deletedLabels, (label) => {
     if (isValidId(label.parent)) {
       // TODO: consider multiple level parenting
@@ -670,7 +660,7 @@ function deleteLabelsFromItem (
     label.shapes.forEach((shapeId: IdType) => {
       let shape = item.shapes[shapeId]
       shape = updateObject(
-        shape, { label: removeListItems(shape.label, [label.id]) })
+        shape, { labels: removeListItems(shape.labels, [label.id]) })
       updatedShapes[shape.id] = shape
     })
   })
@@ -682,7 +672,7 @@ function deleteLabelsFromItem (
   })
   // remove orphan shapes
   _.forEach(updatedShapes, (shape) => {
-    if (shape.label.length === 0) {
+    if (shape.labels.length === 0) {
       deletedShapes[shape.id] = shape
     }
   })
@@ -723,7 +713,7 @@ function deleteLabelsFromTracks (
   const deletedLabelsByTrack: TrackMapType = {}
   for (const l of labels) {
     if (!deletedLabelsByTrack.hasOwnProperty(l.track)) {
-      deletedLabelsByTrack[l.track] = makeTrack(l.track, l.type)
+      deletedLabelsByTrack[l.track] = makeTrack(l.type, l.track)
     }
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
   }

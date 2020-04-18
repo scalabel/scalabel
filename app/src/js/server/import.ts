@@ -175,7 +175,7 @@ function convertLabelToImport (
       (vertex, i) => makePathPoint({
         x: vertex[0],
         y: vertex[1],
-        type: (polyExport.types[i] === 'L') ?
+        pointType: (polyExport.types[i] === 'L') ?
           PointType.VERTEX : PointType.CURVE
       })
     )
@@ -196,8 +196,8 @@ function convertLabelToImport (
   if (shapeData !== null) {
     shapeImports.push({
       id: maxShapeId + 1,
-      label: [labelId],
-      type: shapeType,
+      labels: [labelId],
+      shapeType,
       shape: shapeData
     })
     maxShapeId++

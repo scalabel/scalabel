@@ -535,10 +535,10 @@ export const sampleTasksVideo: TaskType[] = [
         shapes: {
           0: {
             id: '0',
-            label: [
+            labels: [
               '0'
             ],
-            type: 'polygon2d',
+            shapeType: 'polygon2d',
             shape: {
               points: [
                 {
@@ -594,10 +594,10 @@ export const sampleTasksVideo: TaskType[] = [
         shapes: {
           1: {
             id: '1',
-            label: [
+            labels: [
               '1'
             ],
-            type: 'polygon2d',
+            shapeType: 'polygon2d',
             shape: {
               points: [
                 {
