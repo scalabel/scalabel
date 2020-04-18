@@ -3,6 +3,7 @@ import Fingerprint2 from 'fingerprintjs2'
 import _ from 'lodash'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { Provider } from 'react-redux'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
@@ -42,7 +43,7 @@ export function initSession (containerName: string): void {
         murmur,
         (state: State) => {
           initFromJson(state, synchronizer.middleware)
-          renderDom(containerName, synchronizer)
+          renderDom(containerName)
         }
       )
     })
@@ -77,10 +78,12 @@ function updateTracks (): void {
  * Render the dom after data is laoded
  * @param containername: string name
  */
-function renderDom (containerName: string, synchronizer: Synchronizer) {
+function renderDom (containerName: string) {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
-      <Window synchronizer={synchronizer} />
+      <Provider store={Session.store}>
+        <Window/>
+      </Provider>
     </MuiThemeProvider>,
     document.getElementById(containerName))
 }

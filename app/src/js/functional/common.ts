@@ -8,6 +8,7 @@ import * as types from '../action/types'
 import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
 import { makeIndexedShape, makePane, makeTrack } from './states'
 import {
+  ConnectionStatus,
   IndexedShapeType,
   ItemType,
   LabelType,
@@ -1186,4 +1187,47 @@ export function startLinkTrack (
       session: newSession
     }
   )
+}
+
+/**
+ * Update session status, if it should be updated
+ */
+export function updateSessionStatus (
+  state: State, action: types.UpdateSessionStatusAction
+): State {
+  const newStatus = action.newStatus
+  const session = state.session
+  switch (newStatus) {
+    case ConnectionStatus.SAVING: {
+
+    }
+    default: {
+
+    }
+  }
+
+  const oldSession = state.session
+  const newSession = updateObject(
+    oldSession,
+    {
+      status: newStatus,
+      prevStatus: oldSession.status,
+      numberOfUpdates: oldSession.numberOfUpdates + 1
+    }
+  )
+  return updateObject(
+    state,
+    {
+      session: newSession
+    }
+  )
+}
+
+/**
+ * After a delay, update session status, if it should still be updated
+ */
+export function updateSessionStatusDelayed (
+  state: State, action: types.UpdateSessionStatusDelayedAction
+): State {
+  return state
 }

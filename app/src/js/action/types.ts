@@ -2,6 +2,7 @@
  * Define string identifiers and interfaces of actions
  */
 import {
+  ConnectionStatus,
   LabelType,
   PaneType,
   Select,
@@ -18,6 +19,8 @@ export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
 export const SUBMIT = 'SUBMIT'
+export const UPDATE_SESSION_STATUS = 'UPDATE_SESSION_STATUS'
+export const UPDATE_SESSION_STATUS_DELAYED = 'UPDATE_SESSION_STATUS_DELAYED'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -97,6 +100,18 @@ export type UpdateAllAction = BaseAction
 export interface UpdateTaskAction extends BaseAction {
   /** task data to use */
   newTask: TaskType
+}
+
+export interface UpdateSessionStatusAction extends BaseAction {
+  /** New status of the session */
+  newStatus: ConnectionStatus
+}
+
+export interface UpdateSessionStatusDelayedAction extends BaseAction {
+  /** New status of the session */
+  newStatus: ConnectionStatus
+  /** Time to wait before updating */
+  seconds: number
 }
 
 export interface AddLabelsAction extends BaseAction {

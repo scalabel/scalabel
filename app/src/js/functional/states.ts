@@ -2,7 +2,7 @@ import _ from 'lodash'
 import * as types from '../common/types'
 import { ItemExport, LabelExport } from './bdd_types'
 import {
-  ConfigType, CubeType,
+  ConfigType, ConnectionStatus, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
   Image3DViewerConfigType,
   ImageViewerConfigType,
@@ -460,6 +460,9 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
     startTime: 0,
     itemStatuses: [],
     trackLinking: false,
+    status: ConnectionStatus.UNSAVED,
+    prevStatus: ConnectionStatus.UNSAVED,
+    numberOfUpdates: 0,
     ...params
   }
 }
