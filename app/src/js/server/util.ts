@@ -44,7 +44,34 @@ export function readConfig (): ServerConfig {
     ...defaults.serverConfig,
     ...userConfig
   }
+  validateConfig(fullConfig)
   return fullConfig
+}
+
+/**
+ * Validate server config.
+ * Mainly focusing on user management
+ *
+ * @param {ServerConfig} config
+ */
+function validateConfig (config: ServerConfig) {
+  if (config.userManagement) {
+    if (!Object.prototype.hasOwnProperty.call(config, 'region')) {
+      throw new Error('Region missed in config ')
+    }
+    if (!Object.prototype.hasOwnProperty.call(config, 'userPool')) {
+      throw new Error('User pool missed in config')
+    }
+    if (!Object.prototype.hasOwnProperty.call(config, 'clientId')) {
+      throw new Error('Client id missed in config')
+    }
+    if (!Object.prototype.hasOwnProperty.call(config, 'userPoolBaseUri')) {
+      throw new Error('User pool base uri missed in config')
+    }
+    if (!Object.prototype.hasOwnProperty.call(config, 'callbackUri')) {
+      throw new Error('Call back uri missed in config')
+    }
+  }
 }
 
 /**
