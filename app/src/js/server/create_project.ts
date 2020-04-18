@@ -329,7 +329,8 @@ export function createProject (
     tracking,
     policyTypes: [],
     demoMode: form.demoMode,
-    autosave: true
+    autosave: true,
+    bots: false
   }
 
   // ensure that all videonames are set to default if empty

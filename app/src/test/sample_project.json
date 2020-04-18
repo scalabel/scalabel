@@ -62,7 +62,8 @@
         "tracking": false,
         "policyTypes": [],
         "demoMode": false,
-        "autosave": true
+        "autosave": true,
+        "bots": false
     },
     "items": [
         {

@@ -4,7 +4,7 @@ import * as React from 'react'
 import io from 'socket.io-client'
 import { addLabel } from '../../js/action/common'
 import { ActionType, SUBMIT } from '../../js/action/types'
-import Session, { ConnectionStatus } from '../../js/common/session'
+import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import TitleBar from '../../js/components/title_bar'
@@ -77,7 +77,7 @@ describe('Save button functionality', () => {
     )
     const saveButton = getByTestId('Save')
     fireEvent.click(saveButton)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    expect(Session.status.checkSaving()).toBe(true)
     expect(mockSocket.emit).toHaveBeenCalled()
   })
 })

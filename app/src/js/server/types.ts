@@ -118,6 +118,8 @@ export interface ActionPacketType {
   actions: BaseAction[]
   /** id of the packet */
   id: string
+  /** for bot actions, id of the action packet that triggered them */
+  triggerId?: string
 }
 
 /** metadata associated with a state */

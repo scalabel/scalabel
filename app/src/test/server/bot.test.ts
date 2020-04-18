@@ -1,6 +1,7 @@
 import axios from 'axios'
 import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
+import { AddLabelsAction } from '../../js/action/types'
 import { Bot } from '../../js/server/bot'
 import { serverConfig } from '../../js/server/defaults'
 import {
@@ -43,7 +44,7 @@ beforeAll(() => {
   webId = 'fakeUserId'
 })
 
-// Note- these tests are similar to the frontend tests for synchronizer
+// Note that these tests are similar to the frontend tests for synchronizer
 describe('Test bot functionality', () => {
   test('Test data access', async () => {
     const bot = new Bot(botData, host, port)
@@ -60,46 +61,40 @@ describe('Test bot functionality', () => {
   test('Test send-ack loop', async () => {
     const bot = new Bot(botData, host, port)
 
-    const packet1: ActionPacketType = {
-      actions: [getRandomBox2dAction()],
-      id: uuid4()
-    }
-    const message1 = packetToMessage(packet1, webId)
-    const packet2: ActionPacketType = {
-      actions: [getRandomBox2dAction(), getRandomBox2dAction()],
-      id: uuid4()
-    }
-    const message2 = packetToMessage(packet2, webId)
-    const packet3: ActionPacketType = {
-      actions: [getRandomBox2dAction()],
-      id: uuid4()
-    }
-    const message3 = packetToMessage(packet3, bot.sessionId)
+    const message1 = makeSyncMessage(1, webId)
+    const message2 = makeSyncMessage(2, webId)
+    const message3 = makeSyncMessage(1, bot.sessionId)
 
-    // set up the store with register ack
+    // Set up the store with register ack
     const initState = getInitialState(webId)
     bot.registerAckHandler(initState)
 
-    // check initial count
-    expect(bot.actionCount).toBe(0)
+    // Check initial count
+    expect(bot.getActionCount()).toBe(0)
 
-    // send single action message
+    // Send single action message
     await bot.actionBroadcastHandler(message1)
-    expect(bot.actionCount).toBe(1)
+    expect(bot.getActionCount()).toBe(1)
 
-    // duplicates should be ignored
+    // Verify that the trigger id is set correctly
+    const calls = socketEmit.mock.calls
+    const args = calls[calls.length - 1]
+    expect(args[0]).toBe(EventName.ACTION_SEND)
+    expect(args[1].actions.triggerId).toBe(message1.actions.id)
+
+    // Duplicates should be ignored
     await bot.actionBroadcastHandler(message1)
-    expect(bot.actionCount).toBe(1)
+    expect(bot.getActionCount()).toBe(1)
 
-    // send a 2-action message
+    // Send a 2-action message
     await bot.actionBroadcastHandler(message2)
-    expect(bot.actionCount).toBe(3)
+    expect(bot.getActionCount()).toBe(3)
 
-    // bot messages should be ignored
+    // Bot messages should be ignored
     await bot.actionBroadcastHandler(message3)
-    expect(bot.actionCount).toBe(3)
+    expect(bot.getActionCount()).toBe(3)
 
-    // and reset the action count
+    // Reset the action count
     bot.resetActionCount()
     expect(bot.getActionCount()).toBe(0)
   })
@@ -118,6 +113,22 @@ function checkConnectMessage (sessId: string) {
     bot: true
   }
   expect(socketEmit).toHaveBeenCalledWith(EventName.REGISTER, expectedMessage)
+}
+
+/**
+ * Create a sync message with the specified number of actions
+ */
+function makeSyncMessage (
+  numActions: number, userId: string): SyncActionMessageType {
+  const actions: AddLabelsAction[] = []
+  for (let _ = 0; _ < numActions; _++) {
+    actions.push(getRandomBox2dAction())
+  }
+  const packet: ActionPacketType = {
+    actions,
+    id: uuid4()
+  }
+  return packetToMessage(packet, userId)
 }
 
 /**

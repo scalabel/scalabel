@@ -346,6 +346,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     taskId: '',
     demoMode: false,
     autosave: false,
+    bots: false,
     ...params
   }
 }
