@@ -8,11 +8,8 @@ import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
+import { SessionStatus } from './session_status'
 import { Track } from './track/track'
-
-export const enum ConnectionStatus {
-  NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED
-}
 
 /**
  * Singleton session class
@@ -45,14 +42,10 @@ class Session {
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
   public testMode: boolean
-  /** Connection status for saving */
-  public status: ConnectionStatus
-  /** Previous connection status */
-  public prevStatus: ConnectionStatus
-  /** Number of times connection status has changed */
-  public statusChangeCount: number
-  /** Overwriteable function that adds side effects to state change */
-  public applyStatusEffects: () => void
+  /** Handler for the session status */
+  public status: SessionStatus
+  /** Whether bots are enabled */
+  public bots: boolean
 
   constructor () {
     this.images = []
@@ -63,15 +56,13 @@ class Session {
     this.tracking = true
     this.trackLinking = false
     this.activeViewerId = -1
-    this.status = ConnectionStatus.UNSAVED
-    this.prevStatus = ConnectionStatus.UNSAVED
-    this.statusChangeCount = 0
+    this.status = new SessionStatus()
     this.autosave = false
     // TODO: make it configurable in the url
     this.devMode = false
-    this.applyStatusEffects = () => { return }
     this.testMode = false
     this.store = configureStore({}, this.devMode)
+    this.bots = false
   }
 
   /**
@@ -110,20 +101,6 @@ class Session {
    */
   public subscribe (callback: () => void) {
     this.store.subscribe(callback)
-  }
-
-  /**
-   * Update the status, then call overwritable function
-   * This should update any parts of the view that depend on status
-   * @param {ConnectionStatus} newStatus: new value of status
-   */
-  public updateStatus (newStatus: ConnectionStatus): ConnectionStatus {
-    this.prevStatus = this.status
-    this.status = newStatus
-    // update mod 1000 since only nearby differences are important, not total
-    this.statusChangeCount = (this.statusChangeCount + 1) % 1000
-    this.applyStatusEffects()
-    return newStatus
   }
 }
 

@@ -311,6 +311,8 @@ export interface ConfigType {
   demoMode: boolean
   /** whether to use autosave */
   autosave: boolean
+  /** whether bots are enabled */
+  bots: boolean
 }
 
 export enum SplitType {

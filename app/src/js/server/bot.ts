@@ -31,8 +31,6 @@ export class Bot {
   public sessionId: string
   /** address for session connections */
   public address: string
-  /** Number of actions received via broadcast */
-  public actionCount: number
   /** The store to save state */
   protected store: Store<StateWithHistory<State>>
   /** Socket connection */
@@ -47,6 +45,8 @@ export class Bot {
   protected modelInterface: ModelInterface
   /** the axios http config */
   protected axiosConfig: AxiosRequestConfig
+  /** Number of actions received via broadcast */
+  private actionCount: number
 
   constructor (botData: BotData, botHost: string, botPort: number) {
     this.projectName = botData.projectName
@@ -131,17 +131,19 @@ export class Bot {
     const queries = this.packetToQueries(actionPacket)
     const actions = await this.executeQueries(queries)
     if (actions.length > 0) {
-      this.broadcastActions(actions)
+      this.broadcastActions(actions, actionPacket.id)
     }
   }
 
   /**
    * Broadcast the synthetically generated actions
    */
-  public broadcastActions (actions: AddLabelsAction[]) {
+  public broadcastActions (
+    actions: AddLabelsAction[], triggerId: string) {
     const actionPacket: ActionPacketType = {
       actions,
-      id: uuid4()
+      id: uuid4(),
+      triggerId
     }
     const message: SyncActionMessageType = {
       taskId: index2str(this.taskIndex),
