@@ -1,10 +1,10 @@
 import { makeItem } from './states'
 import {
+  IdType,
   ItemType,
   ShapeType,
   State,
-  ViewerConfigType,
-  IdType
+  ViewerConfigType
 } from './types'
 
 /**

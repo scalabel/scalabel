@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { Cursor, Key, ShapeTypeName } from '../../common/types'
-import { genLabelId, genTrackId, makeDefaultId, makeLabel } from '../../functional/states'
+import { makeDefaultId, makeLabel } from '../../functional/states'
 import { IdType, Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -172,14 +172,12 @@ export class CustomLabel2D extends Label2D {
       state.task.config.labelTypes[state.user.select.labelType]
     this._label = makeLabel({
       type: templateName,
-      id: genLabelId(),
       item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
       order: this._order
     })
-    this._trackId = (state.task.config.tracking) ?
-      genTrackId() : makeDefaultId()
+    this._trackId = makeDefaultId()
     this._color = getColorById(this._labelId, this._trackId)
 
     // Initialize with template information

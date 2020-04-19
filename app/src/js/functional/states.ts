@@ -15,6 +15,7 @@ import {
   ItemType,
   LabelType,
   LayoutType,
+  Node2DType,
   PaneType,
   PathPoint2DType,
   Plane3DType,
@@ -94,12 +95,12 @@ function makeShape (shapeType: string = ''): ShapeType {
  */
 export function makeRect (params: Partial<RectType> = {}): RectType {
   return {
-    ...makeShape(types.ShapeTypeName.RECT),
     x1: -1,
     y1: -1,
     x2: -1,
     y2: -1,
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.RECT)
   }
 }
 
@@ -111,9 +112,9 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
 export function makePolygon
   (params: Partial<PolygonType> = {}): PolygonType {
   return {
-    ...makeShape(types.ShapeTypeName.POLYGON_2D),
     points: [],
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.POLYGON_2D)
   }
 }
 
@@ -124,11 +125,11 @@ export function makePolygon
 export function makePathPoint (params: Partial<PathPoint2DType> = {})
   : PathPoint2DType {
   return {
-    ...makeShape(types.ShapeTypeName.PATH_POINT_2D),
     x: 0,
     y: 0,
     pointType: 'vertex',
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.PATH_POINT_2D)
   }
 }
 
@@ -139,12 +140,12 @@ export function makePathPoint (params: Partial<PathPoint2DType> = {})
  */
 export function makeCube (params: Partial<CubeType> = {}): CubeType {
   return {
-    ...makeShape(types.ShapeTypeName.CUBE),
     center: { x: 0, y: 0, z: 0 },
     size: { x: 1, y: 1, z: 1 },
     orientation: { x: 0, y: 0, z: 0 },
     anchorIndex: 0,
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.CUBE)
   }
 }
 
@@ -155,10 +156,25 @@ export function makeCube (params: Partial<CubeType> = {}): CubeType {
  */
 export function makePlane (params: {} = {}): Plane3DType {
   return {
-    ...makeShape(types.ShapeTypeName.GRID),
     center: { x: 0, y: 0, z: 0 },
     orientation: { x: 0, y: 0, z: 0 },
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.GRID)
+  }
+}
+
+/**
+ * Make a Node2D type
+ * @param params
+ */
+export function makeNode2d (params: Partial<Node2DType> = {}): Node2DType {
+  return {
+    name: '',
+    hidden: false,
+    x: -1,
+    y: -1,
+    ...params,
+    ...makeShape(types.ShapeTypeName.NODE_2D)
   }
 }
 
@@ -562,14 +578,15 @@ function genShapeId (): IdType {
 
 /**
  * Generate an integer representation with low collision for different ids
- * This is currently a hash function
+ * This is currently a sum of the char codes
  * @param {IdType} id
  */
 export function id2int (s: IdType): number {
   let h = 0
   for (let i = 0; i < s.length; i++) {
     // tslint:disable-next-line: no-bitwise
-    h = Math.imul(31, h) + s.charCodeAt(i) | 0
+    h = h + s.charCodeAt(i) | 0
+    // h = Math.imul(31, h) + s.charCodeAt(i) | 0
   }
   return h
 }

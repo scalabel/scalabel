@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { genLabelId, genTrackId, makeDefaultId, makeTaskConfig } from '../../functional/states'
+import { makeDefaultId, makeLabel, makeTaskConfig } from '../../functional/states'
 import { ConfigType, IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -344,9 +344,9 @@ export abstract class Label2D {
    */
   public initTemp (state: State, _start: Vector2D): void {
     this._order = state.task.status.maxOrder + 1
-    this._labelId = genLabelId()
-    this._trackId = (state.task.config.tracking) ?
-      genTrackId() : makeDefaultId()
+    this._label = makeLabel()
+    this._labelId = this._label.id
+    this._trackId = makeDefaultId()
     this._config = state.task.config
     this._color = getColorById(this._labelId, this._trackId)
     this._selected = true
@@ -371,7 +371,7 @@ export abstract class Label2D {
       this._label.item in select.labels &&
         select.labels[this._label.item].includes(labelId)
     )
-    this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
+    this.updateShapes(this._label.shapes.map((i) => item.shapes[i]))
   }
 
   /**
