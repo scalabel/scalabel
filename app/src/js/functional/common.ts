@@ -680,7 +680,7 @@ function deleteLabelsFromItem (
       deletedShapes[shape.id] = shape
     }
   })
-  console.log(updatedLabels, updatedShapes, deletedShapes)
+  // console.log(updatedLabels, deletedLabels, updatedShapes, deletedShapes)
 
   labels = removeObjectFields(updateObject(
     item.labels, updatedLabels), _.keys(deletedLabels))

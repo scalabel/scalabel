@@ -3,7 +3,8 @@ import {
   ItemType,
   ShapeType,
   State,
-  ViewerConfigType
+  ViewerConfigType,
+  IdType
 } from './types'
 
 /**
@@ -27,10 +28,10 @@ export function getCurrentItem (state: State): ItemType {
  * @param shapeIndex
  */
 export function getShape (state: State, itemIndex: number,
-                          labelId: number, shapeIndex: number): ShapeType {
+                          labelId: IdType, shapeIndex: number): ShapeType {
   const item = state.task.items[itemIndex]
   const shapeId = item.labels[labelId].shapes[shapeIndex]
-  return item.shapes[shapeId].shape
+  return item.shapes[shapeId]
 }
 
 /** Check if frame is loaded */
