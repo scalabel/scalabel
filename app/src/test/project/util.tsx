@@ -4,7 +4,7 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 import { ChangeEvent } from 'react'
 import * as util from 'util'
-import Session, { ConnectionStatus } from '../../js/common/session'
+import Session from '../../js/common/session'
 import { initFromJson } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import CreateForm from '../../js/components/create_form'
@@ -133,7 +133,7 @@ export function sleep (milliseconds: number): Promise<object> {
  */
 export function waitForSave (): Promise<object> {
   return new Promise(async (resolve) => {
-    while (Session.status !== ConnectionStatus.SAVED) {
+    while (!Session.status.checkSaved()) {
       await sleep(10)
     }
     resolve()

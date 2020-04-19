@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
 import { submit } from '../action/common'
-import Session, { ConnectionStatus } from '../common/session'
+import Session from '../common/session'
 import Synchronizer from '../common/synchronizer'
 import { Key } from '../common/types'
 import { defaultAppBar } from '../styles/general'
@@ -60,31 +60,6 @@ interface Props {
   synchronizer: Synchronizer
 }
 
-// /**
-//  * Save the current state to the server
-//  */
-// function save () {
-//   Session.updateStatusDisplay(ConnectionStatus.SAVING)
-//   const state = Session.getState()
-//   const xhr = new XMLHttpRequest()
-//   xhr.timeout = saveTimeout
-//   xhr.onreadystatechange = () => {
-//     if (xhr.readyState === 4) {
-//       if (JSON.parse(xhr.response) !== 0) {
-//         alert('Save failed.')
-//         Session.updateStatusDisplay(ConnectionStatus.UNSAVED)
-//       } else {
-//         Session.updateStatusDisplay(ConnectionStatus.SAVED)
-//         setTimeout(() => {
-//           Session.updateStatusDisplay(ConnectionStatus.UNSAVED)
-//         }, 5000)
-//       }
-//     }
-//   }
-//   xhr.open('POST', './postSaveV2')
-//   xhr.send(JSON.stringify(state))
-// }
-
 /**
  * Title bar
  */
@@ -98,10 +73,7 @@ class TitleBar extends Component<Props> {
    */
   constructor (props: Props) {
     super(props)
-    // Update the StatusMessageBox when the Session status changes
-    Session.applyStatusEffects = () => {
-      this.forceUpdate()
-    }
+    Session.status.addDisplayCallback(() => { this.forceUpdate() })
     this._keyDownListener = ((e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
         this.save()
@@ -121,7 +93,7 @@ class TitleBar extends Component<Props> {
   public componentWillUnmount () {
     super.componentWillUnmount()
     // De-couple the titlebar and the session
-    Session.applyStatusEffects = () => { return }
+    Session.status.clearDisplayCallbacks()
     document.removeEventListener('keydown', this._keyDownListener)
   }
 
@@ -181,33 +153,8 @@ class TitleBar extends Component<Props> {
       )
     })
 
-    let sessionStatus: string
-    let hideMessage = false
-    switch (Session.status) {
-      case ConnectionStatus.SAVING:
-      case ConnectionStatus.NOTIFY_SAVED: {
-        sessionStatus = this.getTextForStatus(Session.status)
-        if (autosave) {
-          hideMessage = true
-        }
-        break
-      }
-      case ConnectionStatus.RECONNECTING: {
-        sessionStatus = this.getTextForStatus(Session.status)
-        break
-      }
-      case ConnectionStatus.SAVED:
-      case ConnectionStatus.UNSAVED: {
-        // Want the text fade animation
-        sessionStatus = this.getTextForStatus(Session.prevStatus)
-        hideMessage = true
-        break
-      }
-      default: {
-        sessionStatus = 'Error occured, try refreshing.'
-        break
-      }
-    }
+    const statusText = Session.status.getStatusText()
+    const hideMessage = Session.status.shouldStatusHide(autosave)
 
     return (
       <AppBar className={classes.appBar}>
@@ -217,7 +164,7 @@ class TitleBar extends Component<Props> {
           </Typography>
           <Fade in={!hideMessage} timeout={300}>
             <StatusMessageBox>
-              {sessionStatus}
+              {statusText}
             </StatusMessageBox>
           </Fade>
           <div className={classes.grow}/>
@@ -225,22 +172,6 @@ class TitleBar extends Component<Props> {
         </Toolbar>
       </AppBar>
     )
-  }
-
-   /** Select text based on connection status */
-  private getTextForStatus (status: ConnectionStatus) {
-    switch (status) {
-      case ConnectionStatus.SAVING: {
-        return 'Saving in progress...'
-      }
-      case ConnectionStatus.RECONNECTING: {
-        return 'Trying to reconnect...'
-      }
-      case ConnectionStatus.NOTIFY_SAVED:
-      default: {
-        return 'All progress saved.'
-      }
-    }
   }
 
   /** Save task */

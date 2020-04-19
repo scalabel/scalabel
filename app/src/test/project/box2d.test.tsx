@@ -5,7 +5,7 @@ import { createCanvas } from 'canvas'
 import * as child from 'child_process'
 import _ from 'lodash'
 import * as React from 'react'
-import Session, { ConnectionStatus } from '../../js/common/session'
+import Session from '../../js/common/session'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
@@ -192,7 +192,7 @@ describe('full 2d bounding box integration test', () => {
       sleep(saveTimeout),
       waitForSave()
     ])
-    expect(Session.status).toBe(ConnectionStatus.SAVED)
+    expect(Session.status.checkSaved()).toBe(true)
   }, saveTimeout)
 
   test('test export of saved bounding boxes', async () => {

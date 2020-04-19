@@ -186,7 +186,7 @@ export class S3Storage extends Storage {
       Key: this.fullFile(key)
     }
 
-    if (!this.hasKey(key)) {
+    if (!await this.hasKey(key)) {
       return Promise.reject('Key does not exist')
     }
     const data = await this.s3.getObject(params).promise()
