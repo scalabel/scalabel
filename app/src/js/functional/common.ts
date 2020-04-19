@@ -27,7 +27,6 @@ import {
 } from './types'
 import {
   assignToArray,
-  getObjectKeys,
   pickArray,
   pickObject,
   removeListItems,
@@ -239,7 +238,7 @@ function addTrackToTask (
   labels: LabelType[],
   shapes: ShapeType[][]
 ): [TaskType, TrackType, LabelType[]] {
-  const track = makeTrack(type)
+  const track = makeTrack({ type })
   for (const label of labels) {
     label.track = track.id
   }
@@ -336,6 +335,7 @@ function changeShapesInItem (
   const newShapes = { ...item.shapes }
   shapeIds.forEach((shapeId, index) => {
     newShapes[shapeId] = updateObject(newShapes[shapeId], shapes[index])
+    newShapes[shapeId].id = shapeId
   })
   return { ...item, shapes: newShapes }
 }
@@ -640,6 +640,7 @@ export function loadItem (state: State, action: types.LoadItemAction): State {
  * Delete labels from one item
  * @param item
  * @param labelIds
+ * @returns new item and the deleted labels
  */
 function deleteLabelsFromItem (
   item: ItemType, labelIds: IdType[]): [ItemType, LabelType[]] {
@@ -658,10 +659,13 @@ function deleteLabelsFromItem (
       updatedLabels[parentLabel.id] = parentLabel
     }
     label.shapes.forEach((shapeId: IdType) => {
-      let shape = item.shapes[shapeId]
+      if (!(shapeId in updatedShapes)) {
+        updatedShapes[shapeId] = item.shapes[shapeId]
+      }
+      let shape = updatedShapes[shapeId]
       shape = updateObject(
-        shape, { labels: removeListItems(shape.labels, [label.id]) })
-      updatedShapes[shape.id] = shape
+        shape, { label: removeListItems(shape.label, [label.id]) })
+      updatedShapes[shapeId] = shape
     })
   })
   // remove widow labels if label type is empty
@@ -672,15 +676,16 @@ function deleteLabelsFromItem (
   })
   // remove orphan shapes
   _.forEach(updatedShapes, (shape) => {
-    if (shape.labels.length === 0) {
+    if (shape.label.length === 0) {
       deletedShapes[shape.id] = shape
     }
   })
+  console.log(updatedLabels, updatedShapes, deletedShapes)
 
   labels = removeObjectFields(updateObject(
-    item.labels, updatedLabels), getObjectKeys(deletedLabels))
+    item.labels, updatedLabels), _.keys(deletedLabels))
   const shapes = removeObjectFields(updateObject(
-    item.shapes, updatedShapes), getObjectKeys(deletedShapes))
+    item.shapes, updatedShapes), _.keys(deletedShapes))
   return [{ ...item, labels, shapes }, _.values(deletedLabels)]
 }
 
@@ -712,8 +717,9 @@ function deleteLabelsFromTracks (
   tracks = { ...tracks }
   const deletedLabelsByTrack: TrackMapType = {}
   for (const l of labels) {
-    if (!deletedLabelsByTrack.hasOwnProperty(l.track)) {
-      deletedLabelsByTrack[l.track] = makeTrack(l.type, l.track)
+    if (!(l.track in deletedLabelsByTrack)) {
+      // create a temporary track to contain the labels to delete
+      deletedLabelsByTrack[l.track] = makeTrack()
     }
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
   }
@@ -723,7 +729,7 @@ function deleteLabelsFromTracks (
       const newTrack = updateObject(oldTrack,
         {
           labels: removeObjectFields(
-            oldTrack.labels, getObjectKeys(track.labels))
+            oldTrack.labels, _.keys(track.labels).map((k) => Number(k)))
         })
       if (_.size(newTrack.labels) > 0) {
         tracks[trackId] = newTrack

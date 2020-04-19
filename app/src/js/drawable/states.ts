@@ -34,7 +34,7 @@ export function commitLabels (
             }
             const shapes = track.getShapes(index)
             for (const shape of shapes) {
-              updatedShapes[index][shape.id] = shape.shape
+              updatedShapes[index][shape.id] = shape
             }
 
             if (!(index in updatedLabels)) {
@@ -103,7 +103,7 @@ export function commitLabels (
           const indexedShapes = track.getShapes(i)
           for (const indexedShape of indexedShapes) {
             currentTypes.push(indexedShape.shapeType)
-            currentShapes.push(indexedShape.shape)
+            currentShapes.push(indexedShape)
           }
           indices.push(i)
           labels.push(label)
@@ -132,7 +132,6 @@ export function commitLabels (
         sessionId: Session.id,
         itemIndices: [newLabels[0].item],
         labels: [labels],
-        shapeTypes: [types],
         shapes: [shapes]
       }
     )

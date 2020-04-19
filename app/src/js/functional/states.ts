@@ -3,6 +3,7 @@ import _ from 'lodash'
 import * as types from '../common/types'
 import { uid } from '../common/uid'
 import { ItemExport, LabelExport } from './bdd_types'
+import { taskIdToString } from './id2string'
 import {
   ConfigType, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
@@ -41,7 +42,6 @@ import {
  */
 export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return {
-    id: genLabelId(),
     item: -1,
     sensors: [-1],
     type: types.LabelTypeName.EMPTY,
@@ -53,7 +53,8 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
     track: makeDefaultId(),
     order: 0,
     manual: true, // by default, manual is true
-    ...params
+    ...params,
+    id: genLabelId()
   }
 }
 
@@ -65,13 +66,13 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
  * @param {{[key: number]: string}} labels
  * Labels can not be filled without specifying id
  */
-export function makeTrack (type: string, id: string = '',
-                           labels: {[key: number]: IdType} = {}
-): TrackType {
-  if (!isValidId(id)) {
-    id = genTrackId()
+export function makeTrack (params: Partial<TrackType> = {}): TrackType {
+  return {
+    type: types.LabelTypeName.EMPTY,
+    labels: {},
+    ...params,
+    id: genTrackId()
   }
-  return { id, type, labels }
 }
 
 /**
@@ -82,7 +83,7 @@ export function makeTrack (type: string, id: string = '',
 function makeShape (shapeType: string = ''): ShapeType {
   return {
     id: genShapeId(),
-    labels: [],
+    label: [],
     shapeType
   }
 }
@@ -121,7 +122,7 @@ export function makePolygon
  * @param params
  */
 export function makePathPoint (params: Partial<PathPoint2DType> = {})
-: PathPoint2DType {
+  : PathPoint2DType {
   return {
     ...makeShape(types.ShapeTypeName.PATH_POINT_2D),
     x: 0,
@@ -496,7 +497,7 @@ function makeTaskStatus (params: Partial<TaskStatus> = {}): TaskStatus {
  * @return {TaskType}
  */
 export function makeTask (params: Partial<TaskType> = {}): TaskType {
-  return {
+  const task: TaskType = {
     config: makeTaskConfig(),
     status: makeTaskStatus(),
     items: [],
@@ -507,6 +508,7 @@ export function makeTask (params: Partial<TaskType> = {}): TaskType {
     },
     ...params
   }
+  return taskIdToString(task)
 }
 
 /**
@@ -527,7 +529,7 @@ export function makeState (params: Partial<State> = {}): State {
  * @param {IdType} id
  */
 export function isValidId (id: IdType): bool {
-  return id !== ''
+  return id !== '' && id !== '-1'
 }
 
 /**

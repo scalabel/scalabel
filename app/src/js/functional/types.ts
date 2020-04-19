@@ -53,7 +53,7 @@ export interface ShapeType {
   /** ID of the shape */
   id: IdType
   /** Label ID of the shape */
-  labels: IdType[]
+  label: IdType[]
   /** type string of the shape. Value from common/types.ShapeType */
   shapeType: string
 }
@@ -71,7 +71,7 @@ export interface RectType extends ShapeType {
 
 export interface PolygonType extends ShapeType {
   /** array of control points */
-  points: PathPoint2DType []
+  points: PathPoint2DType[]
 }
 
 export interface Vector2Type {
@@ -112,7 +112,8 @@ export interface CubeType extends ShapeType {
   anchorIndex: number
 }
 
-export type Point2DType = Vector2Type
+export interface Point2DType extends ShapeType, Vector2Type {
+}
 
 export interface PathPoint2DType extends Point2DType {
   /** type of the point in the path. value from common/types.PathPointType */
@@ -452,7 +453,7 @@ export interface SessionType {
   /**
    * a unique id for each session. When the same assignment/task is opened
    * twice, they will have different session ids.
-   * It is uuid of the session
+   * It is uid of the session
    */
   id: IdType
   /** Start time */

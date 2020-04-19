@@ -1,7 +1,8 @@
 import { LabelTypeName, ShapeTypeName } from '../common/types'
 import { makeLabel, makeRect } from '../functional/states'
+import { IdType, RectType, ShapeType } from '../functional/types'
 import * as actions from './common'
-import { AddLabelsAction } from './types'
+import { AddLabelsAction, ChangeShapesAction } from './types'
 
 /**
  * Create AddLabelAction to create a box2d label
@@ -29,4 +30,17 @@ export function addBox2dLabel (
   return actions.addLabel(
     itemIndex, label, [ShapeTypeName.RECT], [rect]
   )
+}
+
+/**
+ * A simple wrapper for changing box2d shapes
+ * @param itemIndex
+ * @param shapeId
+ * @param shape
+ */
+export function changeBox2d (
+  itemIndex: number, shapeId: IdType, shape: Partial<RectType>
+  ): ChangeShapesAction {
+  return actions.changeLabelShape(
+    itemIndex, shapeId, shape as Partial<ShapeType>)
 }

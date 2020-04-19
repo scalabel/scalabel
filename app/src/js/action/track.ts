@@ -2,8 +2,8 @@ import _ from 'lodash'
 import Session from '../common/session'
 import { isValidId, makeDefaultId } from '../functional/states'
 import { IdType, LabelType, ShapeType, TrackType } from '../functional/types'
-import { addTrack } from './common'
-import { AddTrackAction, DELETE_LABELS, DeleteLabelsAction } from './types'
+import { addTrack, deleteLabels } from './common'
+import { AddTrackAction, DeleteLabelsAction } from './types'
 
 /**
  * Add track by duplicating label from startIndex to stopIndex
@@ -93,12 +93,7 @@ export function deleteTracks (
     labelIds.push(toDelete)
   }
 
-  return {
-    type: DELETE_LABELS,
-    sessionId: Session.id,
-    itemIndices,
-    labelIds
-  }
+  return deleteLabels(itemIndices, labelIds)
 }
 
 /**
@@ -126,10 +121,5 @@ export function terminateTracks (
     labelIds.push(toDelete)
   }
 
-  return {
-    type: DELETE_LABELS,
-    sessionId: Session.id,
-    itemIndices,
-    labelIds
-  }
+  return deleteLabels(itemIndices, labelIds)
 }

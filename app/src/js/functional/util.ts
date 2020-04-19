@@ -56,17 +56,17 @@ export function addListItem<T> (items: T[], item: T): T[] {
   return items.concat([item])
 }
 
-/**
- * Get numerical keys from an object
- * @param {{[key: number]: T}} object
- */
-export function getObjectKeys<T> (object: {[key: number]: T}): number[] {
-  const keys: number[] = []
-  _.forEach(object, (_value, k) => {
-    keys.push(Number(k))
-  })
-  return keys
-}
+// /**
+//  * Get numerical keys from an object
+//  * @param {{[key: number]: T}} object
+//  */
+// export function getObjectKeys<T> (object: {[key: number]: T}): number[] {
+//   const keys: number[] = []
+//   _.forEach(object, (_value, k) => {
+//     keys.push(Number(k))
+//   })
+//   return keys
+// }
 
 /**
  * Remove fields from an object

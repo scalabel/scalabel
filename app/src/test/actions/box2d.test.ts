@@ -18,26 +18,20 @@ test('Add, change and delete box2d labels', () => {
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toBe(3)
   expect(_.size(state.task.items[0].shapes)).toBe(3)
-  const labelIds: number[] = _.map(state.task.items[0].labels, (l) => l.id)
+  const labelIds = _.map(state.task.items[0].labels, (l) => l.id)
   let label = state.task.items[0].labels[labelIds[0]]
   expect(label.item).toBe(0)
   expect(label.type).toBe(LabelTypeName.BOX_2D)
   const indexedShape = state.task.items[0].shapes[label.shapes[0]]
   expect(indexedShape.shapeType).toBe(ShapeTypeName.RECT)
-  let shape = indexedShape.shape as RectType
+  let shape = indexedShape as RectType
   // Check label ids
-  let index = 0
   _.forEach(state.task.items[0].labels, (v, i) => {
     expect(v.id).toBe(i)
-    expect(v.id).toBe(index)
-    index += 1
   })
   // Check shape ids
-  index = 0
   _.forEach(state.task.items[0].shapes, (v, i) => {
     expect(v.id).toBe(i)
-    expect(v.id).toBe(index)
-    index += 1
   })
   expect(shape.x1).toBe(1)
   expect(shape.y1).toBe(2)
@@ -45,10 +39,10 @@ test('Add, change and delete box2d labels', () => {
   expect(shape.y2).toBe(4)
 
   Session.dispatch(
-    action.changeLabelShape(itemIndex, indexedShape.id, { x1: 2, x2: 7 }))
+    box2d.changeBox2d(itemIndex, indexedShape.id, { x1: 2, x2: 7 }))
   state = Session.getState()
   label = state.task.items[0].labels[label.id]
-  shape = state.task.items[0].shapes[label.shapes[0]].shape as RectType
+  shape = state.task.items[0].shapes[label.shapes[0]] as RectType
   expect(shape.x1).toBe(2)
   expect(shape.y1).toBe(2)
   expect(shape.x2).toBe(7)
