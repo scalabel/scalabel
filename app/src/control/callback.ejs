@@ -4,10 +4,13 @@
     <meta charset="utf-8" />
     <title>Auth callback</title>
     <script type="text/javascript">
-      sessionStorage.setItem("AccessToken", "<%= accessToken;  %>");
-      sessionStorage.setItem("IdToken", "<%= idToken;  %>");
-      sessionStorage.setItem("RefreshToken", "<%= refreshToken;  %>");
-      sessionStorage.setItem("TokenType", "<%= tokenType; %>");
+      localStorage.setItem("AccessToken", "<%= accessToken;  %>");
+      localStorage.setItem("IdToken", "<%= idToken;  %>");
+      localStorage.setItem("RefreshToken", "<%= refreshToken;  %>");
+      localStorage.setItem("TokenType", "<%= tokenType; %>");
+      localStorage.setItem("URI", "<%= uri; %>");
+      localStorage.setItem("ClientID", "<%= clientId; %>");
+      window.location.href = "/create";
     </script>
   </head>
   <body></body>

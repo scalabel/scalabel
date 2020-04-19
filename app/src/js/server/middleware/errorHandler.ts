@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { HttpException } from '../exception'
+import { ServerConfig } from '../types'
 
 /**
  * Error handler
@@ -8,7 +9,7 @@ import { HttpException } from '../exception'
  * @param {Response} res - response object
  * @param {NextFunction} next - next function
  */
-const errorHandler = (
+const errorHandler = (config: ServerConfig) => (
   error: HttpException,
   _request: Request,
   response: Response,
@@ -16,10 +17,14 @@ const errorHandler = (
 ) => {
   const status = error.status || 500
   const message = error.message || 'Something went wrong'
-  response.status(status).json({
-    code: status,
+  const resData: {[k: string]: string} = {
+    code: status.toString(),
     data: message
-  })
+  }
+  if (status === 401 && config.userManagement) {
+    resData.redirect = `https://${config.userPoolBaseUri}/login?client_id=${config.clientId}&response_type=code&redirect_uri=${config.callbackUri}`
+  }
+  response.status(status).json(resData)
 }
 
 export default errorHandler

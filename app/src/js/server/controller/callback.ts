@@ -97,7 +97,9 @@ class Callback {
           accessToken: tokens.access_token,
           idToken: tokens.id_token,
           refreshToken: tokens.refresh_token,
-          tokenType: tokens.token_type
+          tokenType: tokens.token_type,
+          uri: this.config.userPoolBaseUri,
+          clientId: this.config.clientId
         })
       })
       .catch()
