@@ -328,7 +328,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg' },
         index: 0,
-        id: 0,
+        id: '0',
         labels: {},
         shapes: {},
         timestamp: 1,
@@ -337,7 +337,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg' },
         index: 1,
-        id: 1,
+        id: '1',
         labels: {},
         shapes: {},
         timestamp: 2,
@@ -346,7 +346,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg' },
         index: 2,
-        id: 2,
+        id: '2',
         labels: {},
         shapes: {},
         timestamp: 3,
@@ -355,7 +355,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg' },
         index: 3,
-        id: 3,
+        id: '3',
         labels: {},
         shapes: {},
         timestamp: 4,
@@ -364,7 +364,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg' },
         index: 4,
-        id: 4,
+        id: '4',
         labels: {},
         shapes: {},
         timestamp: 5,
@@ -410,7 +410,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg' },
         index: 0,
-        id: 5,
+        id: '5',
         labels: {},
         shapes: {},
         timestamp: 6,
@@ -419,7 +419,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg' },
         index: 1,
-        id: 6,
+        id: '6',
         labels: {},
         shapes: {},
         timestamp: 7,
@@ -428,7 +428,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg' },
         index: 2,
-        id: 7,
+        id: '7',
         labels: {},
         shapes: {},
         timestamp: 8,
@@ -437,7 +437,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg' },
         index: 3,
-        id: 8,
+        id: '8',
         labels: {},
         shapes: {},
         timestamp: 9,
@@ -446,7 +446,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg' },
         index: 4,
-        id: 9,
+        id: '9',
         labels: {},
         shapes: {},
         timestamp: 10,
@@ -495,7 +495,7 @@ export const sampleTasksVideo: TaskType[] = [
     },
     items: [
       {
-        id: 0,
+        id: '0',
         index: 0,
         videoName: 'a',
         urls: {
@@ -552,7 +552,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 1
       },
       {
-        id: 1,
+        id: '1',
         index: 1,
         videoName: 'a',
         urls: {
@@ -609,7 +609,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 2
       },
       {
-        id: 2,
+        id: '2',
         index: 2,
         videoName: 'a',
         urls: {
@@ -670,7 +670,7 @@ export const sampleTasksVideo: TaskType[] = [
     },
     items: [
       {
-        id: 3,
+        id: '3',
         index: 0,
         videoName: 'b',
         urls: {
@@ -681,7 +681,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 4
       },
       {
-        id: 4,
+        id: '4',
         index: 1,
         videoName: 'b',
         urls: {
@@ -692,7 +692,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 5
       },
       {
-        id: 5,
+        id: '5',
         index: 2,
         videoName: 'b',
         urls: {
@@ -703,7 +703,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 6
       },
       {
-        id: 6,
+        id: '6',
         index: 3,
         videoName: 'b',
         urls: {
@@ -714,7 +714,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 7
       },
       {
-        id: 7,
+        id: '7',
         index: 4,
         videoName: 'b',
         urls: {
@@ -725,7 +725,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 8
       },
       {
-        id: 8,
+        id: '8',
         index: 5,
         videoName: 'b',
         urls: {
@@ -736,7 +736,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 9
       },
       {
-        id: 9,
+        id: '9',
         index: 6,
         videoName: 'b',
         urls: {

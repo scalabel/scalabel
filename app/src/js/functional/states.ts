@@ -308,11 +308,13 @@ export function makeDefaultViewerConfig (
 /**
  * Initialize an item state
  * @param {{}} params
+ * @param {boolean} keepId Use the input param id instead of generating a new ID
  * @return {ItemType}
  */
-export function makeItem (params: Partial<ItemType> = {}): ItemType {
-  return {
-    id: -1,
+export function makeItem (params: Partial<ItemType> = {},
+                          keepId: boolean = false): ItemType {
+  const item: ItemType = {
+    id: genItemId(),
     index: 0,
     videoName: '',
     urls: {},
@@ -321,6 +323,10 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
     timestamp: -1,
     ...params
   }
+  if (!keepId) {
+    item.id = genItemId()
+  }
+  return item
 }
 
 /**
@@ -581,6 +587,13 @@ function genTrackId (): IdType {
  * Generate new shape id. It should not be called outside this file.
  */
 function genShapeId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate new item id. It should not be called outside this file.
+ */
+function genItemId (): IdType {
   return uid()
 }
 

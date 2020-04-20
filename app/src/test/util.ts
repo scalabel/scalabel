@@ -79,7 +79,7 @@ export function makeProjectDir (dataDir: string, projectName: string) {
  */
 export function getInitialState (sessionId: string): State {
   const partialTask: Partial<TaskType> = {
-    items: [makeItem({ id: 0 })],
+    items: [makeItem({ index: 0, id: '0' }, true)],
     sensors: { 0: makeSensor(0, '', '') }
   }
   const defaultTask = makeTask(partialTask)

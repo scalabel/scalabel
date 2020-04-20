@@ -232,7 +232,7 @@ export interface SensorMapType { [id: number]: SensorType }
 
 export interface ItemType {
   /** The ID of the item */
-  id: number
+  id: IdType
   /** The index of the item */
   index: number
   /** Map between data source id and url */

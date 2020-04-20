@@ -76,12 +76,12 @@ export function convertItemToImport (
   return makeItem({
     urls,
     index: itemIndex,
-    id: itemId,
+    id: itemId.toString(),
     timestamp,
     videoName,
     labels,
     shapes
-  })
+  }, true)
 }
 
 /**
