@@ -73,7 +73,7 @@ export class Listeners {
       res.end()
     }
     try {
-      const projectName = req.query[types.FormField.PROJECT_NAME]
+      const projectName = req.query[types.FormField.PROJECT_NAME] as string
       // grab the latest submissions from all tasks
       const tasks = await this.projectStore.getTasksInProject(projectName)
       let items: ItemExport[] = []
