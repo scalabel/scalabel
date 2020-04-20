@@ -1198,7 +1198,6 @@ export function updateSessionStatus (
   const newStatus = action.newStatus
 
   const oldSession = state.session
-  const prevStatus = oldSession.status
   // update mod 1000 since only nearby differences are important
   const numUpdates = (oldSession.numUpdates + 1) % 1000
 
@@ -1206,7 +1205,6 @@ export function updateSessionStatus (
     oldSession,
     {
       status: newStatus,
-      prevStatus,
       numUpdates
     }
   )

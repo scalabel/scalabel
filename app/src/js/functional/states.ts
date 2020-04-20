@@ -461,8 +461,7 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
     itemStatuses: [],
     trackLinking: false,
     status: ConnectionStatus.UNSAVED,
-    prevStatus: ConnectionStatus.UNSAVED,
-    numberOfUpdates: 0,
+    numUpdates: 0,
     ...params
   }
 }

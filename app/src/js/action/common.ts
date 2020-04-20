@@ -1,6 +1,9 @@
+import { Dispatch } from 'redux'
+import * as selector from '../common/selectors'
 import Session from '../common/session'
 import { ConnectionStatus, LabelType, PaneType,
-  Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
+  Select, ShapeType, SplitType, State,
+  TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -397,4 +400,52 @@ export function updateSessionStatus (
     newStatus: status,
     sessionId: Session.id
   }
+}
+
+/**
+ * Mark status as reconnecting
+ */
+export function setStatusToReconnecting () {
+  return updateSessionStatus(ConnectionStatus.RECONNECTING)
+}
+
+/**
+ * Mark status as saving, unless compute is ongoing
+ */
+export function setStatusToSaving () {
+  const thunk = (dispatch: Dispatch, getState: () => State) => {
+    const state = getState()
+    if (!selector.isStatusComputing(state)) {
+      dispatch(updateSessionStatus(ConnectionStatus.SAVING))
+    }
+  }
+  return thunk
+}
+
+/**
+ * Mark status as unsaved, unless some other event is in progress
+ */
+export function setStatusToUnsaved () {
+  const thunk = (dispatch: Dispatch, getState: () => State) => {
+    const state = getState()
+    if (selector.isSessionStatusStable(state)) {
+      dispatch(updateSessionStatus(ConnectionStatus.UNSAVED))
+    }
+  }
+  return thunk
+}
+
+/**
+ * After a connect/reconnect, mark status as unsaved
+ * Regardless of previous status
+ */
+export function setStatusAfterConnection () {
+  return updateSessionStatus(ConnectionStatus.UNSAVED)
+}
+
+/**
+ * Mark status as computing
+ */
+export function setAsComputing () {
+  return updateSessionStatus(ConnectionStatus.COMPUTING)
 }

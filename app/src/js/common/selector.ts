@@ -10,6 +10,36 @@ export function getConfig (state: State): ConfigType {
 }
 
 /**
+ * Get whether autosave is enabled
+ */
+export const getAutosaveFlag = createSelector(
+  [ getConfig ],
+  (config: ConfigType) => {
+    return config.autosave
+  }
+)
+
+/**
+ * Get title of main page
+ */
+export const getPageTitle = createSelector(
+  [ getConfig ],
+  (config: ConfigType) => {
+    return config.pageTitle
+  }
+)
+
+/**
+ * Get link to instructions
+ */
+export const getInstructionLink = createSelector(
+  [ getConfig ],
+  (config: ConfigType) => {
+    return config.instructionPage
+  }
+)
+
+/**
  * Get link to the dashboard
  */
 export const getDashboardLink = createSelector(
@@ -61,11 +91,9 @@ export const getStatusText = createSelector(
  * Decide whether display text should be shown based on session status
  * Return true if text should hide
  */
-export const getStatusTextHideState = createSelector(
-  [getSessionStatus, getConfig],
-  (status: ConnectionStatus, config: ConfigType) => {
-    const autosave = config.autosave
-
+export const shouldStatusTextHide = createSelector(
+  [getSessionStatus, getAutosaveFlag],
+  (status: ConnectionStatus, autosave: boolean) => {
     switch (status) {
       case ConnectionStatus.SAVING:
       case ConnectionStatus.NOTIFY_SAVED: {
@@ -84,6 +112,106 @@ export const getStatusTextHideState = createSelector(
       }
       default: {
         return false
+      }
+    }
+  }
+)
+
+/**
+ * Returns true if canvas should be frozne
+ */
+export const shouldCanvasFreeze = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    return status === ConnectionStatus.RECONNECTING
+  }
+)
+
+/**
+ * Returns true if there is unsaved work
+ */
+export const isStatusUnsaved = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    return status === ConnectionStatus.UNSAVED
+  }
+)
+
+/**
+ * Returns true if saving in progress
+ */
+export const isStatusSaving = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    return status === ConnectionStatus.SAVING
+  }
+)
+
+/**
+ * Returns true if all work is saved
+ */
+export const isStatusSaved = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    return status === ConnectionStatus.SAVED ||
+      status === ConnectionStatus.NOTIFY_SAVED
+  }
+)
+
+/**
+ * Returns true if computing in progress
+ */
+export const isStatusComputing = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    return status === ConnectionStatus.COMPUTING
+  }
+)
+
+/**
+ * Returns true if compute is done
+ */
+export const isComputeDone = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    return status === ConnectionStatus.COMPUTE_DONE ||
+      status === ConnectionStatus.NOTIFY_COMPUTE_DONE
+  }
+)
+
+/**
+ * Returns false if there could be unsaved work in progress
+ */
+export const isSessionFullySaved = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    switch (status) {
+      case ConnectionStatus.RECONNECTING:
+      case ConnectionStatus.SAVING:
+      case ConnectionStatus.UNSAVED: {
+        return false
+      }
+      default: {
+        return true
+      }
+    }
+  }
+)
+
+/**
+ * Returns false if some session status event is ongoing
+ */
+export const isSessionStatusStable = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    switch (status) {
+      case ConnectionStatus.RECONNECTING:
+      case ConnectionStatus.SAVING:
+      case ConnectionStatus.COMPUTING: {
+        return false
+      }
+      default: {
+        return true
       }
     }
   }

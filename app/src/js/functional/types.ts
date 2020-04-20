@@ -452,8 +452,6 @@ export interface SessionType {
   trackLinking: boolean
   /** Current connection status */
   status: ConnectionStatus
-  /** Previous connection status */
-  prevStatus: ConnectionStatus
   /** Number of time status has changed */
   numUpdates: number
 }

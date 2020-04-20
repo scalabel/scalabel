@@ -1,4 +1,5 @@
 import { applyMiddleware, createStore, Middleware, Reducer, Store } from 'redux'
+import thunk from 'redux-thunk'
 import undoable, { includeAction, StateWithHistory } from 'redux-undo'
 import {
   ADD_LABELS,
@@ -38,13 +39,14 @@ export function configureStore (
   if (middleware === undefined) {
     return createStore(
       undoableReducer,
-      initialHistory
+      initialHistory,
+      applyMiddleware(thunk)
     )
   } else {
     return createStore(
       undoableReducer,
       initialHistory,
-      applyMiddleware(middleware)
+      applyMiddleware(thunk, middleware)
     )
   }
 }

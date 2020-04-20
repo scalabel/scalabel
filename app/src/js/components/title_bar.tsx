@@ -10,7 +10,7 @@ import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
 import { submit } from '../action/common'
-import { getConfig, getDashboardLink } from '../common/selector'
+import * as selector from '../common/selector'
 import Session from '../common/session'
 import { Key } from '../common/types'
 import { State } from '../functional/types'
@@ -43,11 +43,15 @@ interface StateProps {
   instructionLink: string
   /** Whether to show save button or to autosave */
   autosave: boolean
+  /** Text for the status banner */
+  statusText: string
+  /** Whether to hide or show status text */
+  statusTextHide: boolean
 }
 
 interface DispatchProps {
   /** Function for submitting all progress */
-  submit: () => {}
+  submit: () => void
 }
 
 interface ButtonInfo {
@@ -78,10 +82,12 @@ function renderButton (button: ButtonInfo, titleUnit: string): JSX.Element {
   )
 }
 
+type Props = StyleProps & StateProps & DispatchProps
+
 /**
  * Title bar
  */
-class TitleBar extends Component<StyleProps & StateProps & DispatchProps> {
+class TitleBar extends Component<Props> {
   /** Listener for key down events */
   private _keyDownListener: (e: KeyboardEvent) => void
 
@@ -89,7 +95,7 @@ class TitleBar extends Component<StyleProps & StateProps & DispatchProps> {
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: StyleProps & StateProps & DispatchProps) {
+  constructor (props: Props) {
     super(props)
     this._keyDownListener = ((e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
@@ -122,6 +128,8 @@ class TitleBar extends Component<StyleProps & StateProps & DispatchProps> {
     const { instructionLink } = this.props
     const { dashboardLink } = this.props
     const { autosave } = this.props
+    const { statusText } = this.props
+    const { statusTextHide } = this.props
 
     const buttonInfo: ButtonInfo[] = [
       { title: 'Instructions', href: instructionLink, icon: fa.faInfo },
@@ -146,16 +154,13 @@ class TitleBar extends Component<StyleProps & StateProps & DispatchProps> {
 
     const buttons = buttonInfo.map((b) => renderButton(b, classes.titleUnit))
 
-    const statusText = Session.status.getStatusText()
-    const hideMessage = Session.status.shouldStatusHide(autosave)
-
     return (
       <AppBar className={classes.appBar}>
         <Toolbar>
           <Typography variant='h6' noWrap>
             {title}
           </Typography>
-          <Fade in={!hideMessage} timeout={300}>
+          <Fade in={!statusTextHide} timeout={300}>
             <StatusMessageBox>
               {statusText}
             </StatusMessageBox>
@@ -175,12 +180,13 @@ class TitleBar extends Component<StyleProps & StateProps & DispatchProps> {
 }
 
 const mapStateToProps = (state: State): StateProps => {
-  const config = getConfig(state)
   return {
-    title: config.pageTitle,
-    instructionLink: config.instructionPage,
-    dashboardLink: getDashboardLink(state),
-    autosave: config.autosave
+    title: selector.getPageTitle(state),
+    instructionLink: selector.getInstructionLink(state),
+    dashboardLink: selector.getDashboardLink(state),
+    autosave: selector.getAutosaveFlag(state),
+    statusText: selector.getStatusText(state),
+    statusTextHide: selector.shouldStatusTextHide(state)
   }
 }
 

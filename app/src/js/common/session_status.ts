@@ -9,14 +9,11 @@ import Session from './session'
 export class SessionStatus {
   /** Current connection status */
   public status: ConnectionStatus
-  /** Previous connection status */
-  public prevStatus: ConnectionStatus
   /** Number of times status has changed */
   public numberOfUpdates: number
 
   constructor () {
     this.status = ConnectionStatus.UNSAVED
-    this.prevStatus = ConnectionStatus.UNSAVED
     this.numberOfUpdates = 0
   }
 
@@ -42,51 +39,7 @@ export class SessionStatus {
       }
     }, seconds * 1000)
   }
-
-  /**
-   * Mark status as saving
-   */
-  public setAsSaving () {
-    // Computing status overrides saving status
-    if (this.status !== ConnectionStatus.COMPUTING) {
-      this.update(ConnectionStatus.SAVING)
-    }
-  }
-
-  /**
-   * Mark status as reconnecting
-   */
-  public setAsReconnecting () {
-    this.update(ConnectionStatus.RECONNECTING)
-  }
-
-  /**
-   * Mark status as unsaved
-   */
-  public setAsUnsaved () {
-    // If some other event is in progress, don't change it
-    if (this.status !== ConnectionStatus.RECONNECTING
-      && this.status !== ConnectionStatus.SAVING
-      && this.status !== ConnectionStatus.COMPUTING) {
-      this.update(ConnectionStatus.UNSAVED)
-    }
-  }
-
-  /**
-   * After a connect/reconnect, mark status as unsaved
-   * regardless of previous status
-   */
-  public setAsConnect () {
-    this.update(ConnectionStatus.UNSAVED)
-  }
-
-  /**
-   * Mark status as computing
-   */
-  public setAsComputing () {
-    this.update(ConnectionStatus.COMPUTING)
-  }
-
+  
   /**
    * Mark status as compute done
    */
@@ -105,68 +58,5 @@ export class SessionStatus {
       this.update(ConnectionStatus.NOTIFY_SAVED)
       this.waitThenUpdate(ConnectionStatus.SAVED, 5)
     }
-  }
-
-  /**
-   * Check if unsaved
-   */
-  public checkUnsaved () {
-    return this.status === ConnectionStatus.UNSAVED
-  }
-
-  /**
-   * Check if saving
-   */
-  public checkSaving () {
-    return this.status === ConnectionStatus.SAVING
-  }
-
-  /**
-   * Check if saved
-   */
-  public checkSaved () {
-    return this.status === ConnectionStatus.SAVED ||
-      this.status === ConnectionStatus.NOTIFY_SAVED
-  }
-
-  /**
-   * Check if reconnecting
-   */
-  public checkReconnecting () {
-    return this.status === ConnectionStatus.RECONNECTING
-  }
-
-  /**
-   * Check if computing
-   */
-  public checkComputing () {
-    return this.status === ConnectionStatus.COMPUTING
-  }
-
-  /**
-   * Check if model computation is done
-   */
-  public checkComputeDone () {
-    return this.status === ConnectionStatus.COMPUTE_DONE ||
-      this.status === ConnectionStatus.NOTIFY_COMPUTE_DONE
-  }
-
-  /** Return false if there could be unsaved work in progress */
-  public isFullySaved (): boolean {
-    switch (this.status) {
-      case ConnectionStatus.RECONNECTING:
-      case ConnectionStatus.SAVING:
-      case ConnectionStatus.UNSAVED: {
-        return false
-      }
-      default: {
-        return true
-      }
-    }
-  }
-
-  /** Return true if canvas should be frozen */
-  public shouldFreezeCanvas (): boolean {
-    return this.status === ConnectionStatus.RECONNECTING
   }
 }

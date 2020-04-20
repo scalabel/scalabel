@@ -137,6 +137,7 @@
         "react-test-renderer": "^16.13.1",
         "redis": "^2.8.0",
         "redux": "^4.0.4",
+        "redux-thunk": "^2.3.0",
         "redux-undo": "^1.0.1",
         "regenerator-runtime": "^0.12.1",
         "reselect": "^4.0.0",
