@@ -135,7 +135,12 @@ function addLabelsToItem (
   const newShapes: ShapeType[] = []
   newLabels.forEach((label, index) => {
     const shapeIds = shapes[index].map((shape) => shape.id)
-    const newLabelShapes = shapes[index].map((s) => _.cloneDeep(s))
+    const newLabelShapes = shapes[index].map(
+      (s) => {
+        const shape = _.cloneDeep(s)
+        shape.label.push(label.id)
+        return shape
+      })
     const order = taskStatus.maxOrder + 1 + index
     const validChildren = label.children.filter((id) => isValidId(id))
     label = updateObject(label, {

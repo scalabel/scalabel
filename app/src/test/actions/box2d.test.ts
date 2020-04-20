@@ -24,6 +24,8 @@ test('Add, change and delete box2d labels', () => {
   expect(label.type).toBe(LabelTypeName.BOX_2D)
   const indexedShape = state.task.items[0].shapes[label.shapes[0]]
   expect(indexedShape.shapeType).toBe(ShapeTypeName.RECT)
+  expect(indexedShape.label.length).toBe(1)
+  expect(indexedShape.label[0]).toBe(label.id)
   let shape = indexedShape as RectType
   // Check label ids
   _.forEach(state.task.items[0].labels, (v, i) => {
