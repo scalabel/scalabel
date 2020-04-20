@@ -8,6 +8,7 @@ import { Grid3D } from './grid3d'
 import Label3D from './label3d'
 import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
+import { makeCube } from '../../functional/states'
 
 const faceNormals = [
   new THREE.Vector3(1, 0, 0),
@@ -171,13 +172,13 @@ export class Cube3D extends Shape3D {
       worldQuaternion.multiply(this._grid.quaternion)
       worldOrientation.setFromQuaternion(worldQuaternion)
     }
-    return {
+    return makeCube({
       center: (new Vector3D()).fromThree(worldCenter).toState(),
       size: (new Vector3D()).fromThree(worldSize).toState(),
       orientation:
         (new Vector3D()).fromThree(worldOrientation.toVector3()).toState(),
       anchorIndex: this._anchorIndex
-    }
+    })
   }
 
   /**

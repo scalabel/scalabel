@@ -66,7 +66,7 @@ export function addDuplicatedTrack (
   }
 
   return addTrack(
-    itemIndices, label.type, trackLabels, trackShapeTypes, trackShapes
+    itemIndices, label.type, trackLabels, trackShapes
   )
 }
 

@@ -31,7 +31,7 @@ export function policyFromString (
 export function policyFactoryMaker (policyType: TrackPolicyType): (
   track: Track,
   type: string,
-  label2DTemplates: {[name: string]: Label2DTemplateType}
+  label2DTemplates: { [name: string]: Label2DTemplateType }
 ) => TrackPolicy {
   switch (policyType) {
     case TrackPolicyType.NONE:
@@ -46,7 +46,7 @@ export function policyFactoryMaker (policyType: TrackPolicyType): (
 export function linearInterpolationPolicyFactory (
   track: Track,
   type: string,
-  label2DTemplates: {[name: string]: Label2DTemplateType}
+  label2DTemplates: { [name: string]: Label2DTemplateType }
 ): TrackPolicy {
   switch (type) {
     case LabelTypeName.BOX_2D:
@@ -85,7 +85,7 @@ export class Track {
   protected _type: string
 
   constructor () {
-    this._track = makeTrack(LabelTypeName.EMPTY)
+    this._track = makeTrack({ type: LabelTypeName.EMPTY })
     this._policy = new TrackPolicy(this)
     this._shapes = {}
     this._labels = {}
@@ -208,8 +208,8 @@ export class Track {
     this._labels = {}
     this._type = label.type
     const labelState = label.label
-    const [,shapeTypes, shapeStates] = label.shapeStates()
-    for (let index = itemIndex; index < itemIndex + numItems; index ++) {
+    const [, shapeTypes, shapeStates] = label.shapeStates()
+    for (let index = itemIndex; index < itemIndex + numItems; index++) {
       const cloned = _.cloneDeep(labelState) as LabelType
       cloned.item = -1
       if (index > itemIndex) {

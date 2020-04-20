@@ -23,6 +23,6 @@ export function addPlaneLabel (
   const plane = makePlane({ offset, orientation })
   const label = makeLabel({ type: LabelTypeName.PLANE_3D, sensors })
   return actions.addLabel(
-    itemIndex, label, [LabelTypeName.PLANE_3D], [plane]
+    itemIndex, label, [plane]
   )
 }

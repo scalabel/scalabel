@@ -178,7 +178,7 @@ export class Plane3D extends Label3D {
 
     if (this._label) {
       this._shape.updateState(
-        state.task.items[itemIndex].shapes[this._label.shapes[0]].shape,
+        state.task.items[itemIndex].shapes[this._label.shapes[0]],
         this._label.shapes[0],
         activeCamera
       )

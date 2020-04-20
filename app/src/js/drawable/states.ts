@@ -112,7 +112,7 @@ export function commitLabels (
         }
       }
       Session.dispatch(addTrack(
-        indices, track.type, labels, types, shapes
+        indices, track.type, labels, shapes
       ))
     }
   } else if (!Session.tracking && newLabels.length > 0) {

@@ -6,7 +6,7 @@ export type IdType = string
 // we can't use alias of string as an index signature parameter type
 export interface LabelIdMap {[key: string]: LabelType}
 
-export interface ShapeIdMap {[key: string]: ShapeType}
+export interface ShapeIdMap {[key: string]: ShapeAllType}
 
 export interface TrackIdMap {[key: string]: TrackType}
 
@@ -71,7 +71,7 @@ export interface RectType extends ShapeType {
 
 export interface PolygonType extends ShapeType {
   /** array of control points */
-  points: PathPoint2DType[]
+  points: PolyPathPoint2DType[]
 }
 
 export interface Vector2Type {
@@ -112,10 +112,9 @@ export interface CubeType extends ShapeType {
   anchorIndex: number
 }
 
-export interface Point2DType extends ShapeType, Vector2Type {
-}
+export type Point2DType = Vector2Type
 
-export interface PathPoint2DType extends Point2DType {
+export interface PolyPathPoint2DType extends Vector2Type {
   /** type of the point in the path. value from common/types.PathPointType */
   pointType: string
 }
@@ -126,6 +125,9 @@ export interface Plane3DType extends ShapeType {
   /** orientation in Euler */
   orientation: Vector3Type
 }
+
+export type ShapeAllType =
+  ShapeType | RectType | CubeType | PolygonType | Plane3DType | Node2DType
 
 export interface IndexedShapeType {
   /** ID of the shape */
@@ -241,7 +243,7 @@ export interface ItemType {
   videoName: string
 }
 
-export interface Node2DType extends Point2DType {
+export interface Node2DType extends Vector2Type, ShapeType {
   /** name */
   name: string
   /** color */
@@ -372,14 +374,8 @@ export interface LayoutType {
 }
 
 export interface TaskStatus {
-  /** Max label ID */
-  maxLabelId: number
-  /** Max shape ID */
-  maxShapeId: number
   /** max order number */
   maxOrder: number
-  /** max track ID */
-  maxTrackId: number
 }
 
 export interface TrackMapType { [key: string]: TrackType }

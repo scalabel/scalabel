@@ -7,8 +7,9 @@ import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { PolygonType, RectType } from '../../js/functional/types'
+import { IdType, PolygonType, RectType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
+import { findNewLabelsFromState } from '../util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -111,14 +112,16 @@ function mouseMoveEvent (
 
 test('Draw 2d boxes to label2d list', () => {
   if (canvasRef.current) {
+    const labelIds: IdType[] = []
     // Draw first box
     canvasRef.current.onMouseMove(mouseMoveEvent(1, 1))
     canvasRef.current.onMouseDown(mouseDownEvent(1, 1))
     canvasRef.current.onMouseMove(mouseMoveEvent(50, 50))
     canvasRef.current.onMouseUp(mouseUpEvent(50, 50))
     let state = Session.getState()
+    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
     expect(_.size(state.task.items[0].labels)).toEqual(1)
-    let rect = getShape(state, 0, 0, 0) as RectType
+    let rect = getShape(state, 0, labelIds[0], 0) as RectType
     expect(rect.x1).toEqual(1)
     expect(rect.y1).toEqual(1)
     expect(rect.x2).toEqual(50)
@@ -132,8 +135,9 @@ test('Draw 2d boxes to label2d list', () => {
     canvasRef.current.onMouseUp(mouseUpEvent(70, 85))
 
     state = Session.getState()
+    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
     expect(_.size(state.task.items[0].labels)).toEqual(2)
-    rect = getShape(state, 0, 1, 0) as RectType
+    rect = getShape(state, 0, labelIds[1], 0) as RectType
     expect(rect.x1).toEqual(25)
     expect(rect.y1).toEqual(20)
     expect(rect.x2).toEqual(70)
@@ -146,8 +150,9 @@ test('Draw 2d boxes to label2d list', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(60, 70))
     canvasRef.current.onMouseUp(mouseUpEvent(60, 70))
     state = Session.getState()
+    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
     expect(_.size(state.task.items[0].labels)).toEqual(3)
-    rect = getShape(state, 0, 2, 0) as RectType
+    rect = getShape(state, 0, labelIds[2], 0) as RectType
     expect(rect.x1).toEqual(15)
     expect(rect.y1).toEqual(10)
     expect(rect.x2).toEqual(60)
@@ -161,7 +166,7 @@ test('Draw 2d boxes to label2d list', () => {
     canvasRef.current.onMouseUp(mouseUpEvent(30, 34))
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(3)
-    rect = getShape(state, 0, 1, 0) as RectType
+    rect = getShape(state, 0, labelIds[1], 0) as RectType
     expect(rect.x1).toEqual(30)
     expect(rect.y1).toEqual(34)
 
@@ -171,7 +176,7 @@ test('Draw 2d boxes to label2d list', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(90, 90))
     canvasRef.current.onMouseUp(mouseUpEvent(90, 90))
     state = Session.getState()
-    rect = getShape(state, 0, 1, 0) as RectType
+    rect = getShape(state, 0, labelIds[1], 0) as RectType
     expect(rect.x1).toEqual(70)
     expect(rect.y1).toEqual(85)
     expect(rect.x2).toEqual(90)
@@ -183,7 +188,7 @@ test('Draw 2d boxes to label2d list', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(40, 15))
     canvasRef.current.onMouseUp(mouseUpEvent(40, 15))
     state = Session.getState()
-    rect = getShape(state, 0, 2, 0) as RectType
+    rect = getShape(state, 0, labelIds[2], 0) as RectType
     expect(rect.x1).toEqual(25)
     expect(rect.y1).toEqual(15)
     expect(rect.x2).toEqual(70)
@@ -193,6 +198,7 @@ test('Draw 2d boxes to label2d list', () => {
 
 test('Draw 2d polygons to label2d list', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
 
   if (canvasRef.current) {
     // draw the first polygon
@@ -234,7 +240,8 @@ test('Draw 2d polygons to label2d list', () => {
      */
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(1)
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
+    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
+    let polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points.length).toEqual(4)
     expect(polygon.points[0].x).toEqual(10)
     expect(polygon.points[0].y).toEqual(10)
@@ -275,8 +282,9 @@ test('Draw 2d polygons to label2d list', () => {
      */
 
     state = Session.getState()
+    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
     expect(_.size(state.task.items[0].labels)).toEqual(2)
-    polygon = getShape(state, 0, 1, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[1], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(500)
     expect(polygon.points[0].y).toEqual(500)
     expect(polygon.points[0].pointType).toEqual('vertex')
@@ -293,6 +301,7 @@ test('Draw 2d polygons to label2d list', () => {
 
 test('2d polygons highlighted and selected', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
 
   if (canvasRef.current) {
     // draw first polygon
@@ -328,8 +337,9 @@ test('2d polygons highlighted and selected', () => {
     /**
      * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
     let selected = Session.label2dList.selectedLabels
-    expect(selected[0].labelId).toEqual(0)
+    expect(selected[0].labelId).toEqual(labelIds[0])
 
     // draw second polygon
     canvasRef.current.onMouseMove(mouseMoveEvent(500, 500))
@@ -364,12 +374,14 @@ test('2d polygons highlighted and selected', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(140, 140))
     canvasRef.current.onMouseUp(mouseUpEvent(140, 140))
     selected = Session.label2dList.selectedLabels
-    expect(selected[0].labelId).toEqual(0)
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
+    expect(selected[0].labelId).toEqual(labelIds[0])
   }
 })
 
 test('validation check for polygon2d', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
 
   if (canvasRef.current) {
     // draw a valid polygon
@@ -402,6 +414,8 @@ test('validation check for polygon2d', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(120, 120))
     canvasRef.current.onMouseDown(mouseDownEvent(120, 120))
     canvasRef.current.onMouseUp(mouseUpEvent(120, 120))
+
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     /**
      * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
@@ -456,7 +470,7 @@ test('validation check for polygon2d', () => {
      */
 
     state = Session.getState()
-    const polygon = getShape(state, 0, 0, 0) as PolygonType
+    const polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points[2].x).toEqual(310)
     expect(polygon.points[2].y).toEqual(260)
     expect(polygon.points[2].pointType).toEqual('vertex')
@@ -498,6 +512,7 @@ test('validation check for polygon2d', () => {
 
 test('2d polygons drag vertices, midpoints and edges', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
 
   if (canvasRef.current) {
     canvasRef.current.onMouseMove(mouseMoveEvent(10, 10))
@@ -523,6 +538,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     /**
      * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     // drag a vertex
     canvasRef.current.onMouseMove(mouseMoveEvent(200, 100))
@@ -532,7 +548,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(300, 100))
     canvasRef.current.onMouseUp(mouseUpEvent(300, 100))
     let state = Session.getState()
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
+    let polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points[2].x).toEqual(300)
     expect(polygon.points[2].y).toEqual(100)
     expect(polygon.points[2].pointType).toEqual('vertex')
@@ -548,7 +564,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(200, 150))
     canvasRef.current.onMouseUp(mouseUpEvent(200, 150))
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points[2].x).toEqual(200)
     expect(polygon.points[2].y).toEqual(150)
     expect(polygon.points[2].pointType).toEqual('vertex')
@@ -565,7 +581,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
     canvasRef.current.onMouseMove(mouseMoveEvent(120, 120))
     canvasRef.current.onMouseUp(mouseUpEvent(120, 120))
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(110)
     expect(polygon.points[0].y).toEqual(110)
     expect(polygon.points[0].pointType).toEqual('vertex')
@@ -578,6 +594,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
 
 test('2d polygons delete vertex and draw bezier curve', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
 
   if (canvasRef.current) {
     // draw a polygon and delete vertex when drawing
@@ -620,12 +637,13 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     /**
      * polygon: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     let state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(1)
     expect(Session.label2dList.labelList.length).toEqual(1)
 
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
+    let polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points.length).toEqual(5)
     expect(polygon.points[0].x).toEqual(250)
     expect(polygon.points[0].y).toEqual(100)
@@ -659,7 +677,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points.length).toEqual(4)
     expect(polygon.points[3].x).toEqual(320)
     expect(polygon.points[3].y).toEqual(130)
@@ -679,7 +697,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points.length).toEqual(6)
     expect(polygon.points[3].x).toEqual(340)
     expect(polygon.points[3].y).toEqual(110)
@@ -702,7 +720,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points.length).toEqual(6)
     expect(polygon.points[2].x).toEqual(350)
     expect(polygon.points[2].y).toEqual(100)
@@ -726,13 +744,14 @@ test('2d polygons delete vertex and draw bezier curve', () => {
      */
 
     state = Session.getState()
-    polygon = getShape(state, 0, 0, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points.length).toEqual(3)
   }
 })
 
 test('2d polygons multi-select and multi-label moving', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
 
   if (canvasRef.current) {
     // draw first polygon
@@ -753,6 +772,7 @@ test('2d polygons multi-select and multi-label moving', () => {
     /**
      * polygon 1: (10, 10) (100, 100) (200, 100)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     // draw second polygon
     canvasRef.current.onMouseMove(mouseMoveEvent(500, 500))
@@ -775,6 +795,7 @@ test('2d polygons multi-select and multi-label moving', () => {
      * polygon 1: (10, 10) (100, 100) (200, 100)
      * polygon 2: (500, 500) (600, 400) (700, 700)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     // draw third polygon
     canvasRef.current.onMouseMove(mouseMoveEvent(250, 250))
@@ -798,6 +819,7 @@ test('2d polygons multi-select and multi-label moving', () => {
      * polygon 2: (500, 500) (600, 400) (700, 700)
      * polygon 3: (250, 250) (300, 250) (350, 350)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     let state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -871,13 +893,13 @@ test('2d polygons multi-select and multi-label moving', () => {
      */
 
     state = Session.getState()
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
+    let polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(110)
     expect(polygon.points[0].y).toEqual(110)
-    polygon = getShape(state, 0, 1, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[1], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(600)
     expect(polygon.points[0].y).toEqual(600)
-    polygon = getShape(state, 0, 2, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[2], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(350)
     expect(polygon.points[0].y).toEqual(350)
   }
@@ -885,6 +907,7 @@ test('2d polygons multi-select and multi-label moving', () => {
 
 test('2d polygons linking labels and moving', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
 
   if (canvasRef.current) {
     // draw first polygon
@@ -907,6 +930,7 @@ test('2d polygons linking labels and moving', () => {
     /**
      * polygon 1: (10, 10) (100, 100) (200, 100)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     // draw second polygon
     canvasRef.current.onMouseMove(mouseMoveEvent(500, 500))
@@ -929,6 +953,7 @@ test('2d polygons linking labels and moving', () => {
      * polygon 1: (10, 10) (100, 100) (200, 100)
      * polygon 2: (500, 500) (600, 400) (700, 700)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     // draw third polygon
     canvasRef.current.onMouseMove(mouseMoveEvent(250, 250))
@@ -952,6 +977,7 @@ test('2d polygons linking labels and moving', () => {
      * polygon 2: (500, 500) (600, 400) (700, 700)
      * polygon 3: (250, 250) (300, 250) (350, 350)
      */
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     let state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -1041,13 +1067,13 @@ test('2d polygons linking labels and moving', () => {
      */
 
     state = Session.getState()
-    let polygon = getShape(state, 0, 0, 0) as PolygonType
+    let polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(110)
     expect(polygon.points[0].y).toEqual(110)
-    polygon = getShape(state, 0, 1, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[1], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(600)
     expect(polygon.points[0].y).toEqual(600)
-    polygon = getShape(state, 0, 2, 0) as PolygonType
+    polygon = getShape(state, 0, labelIds[2], 0) as PolygonType
     expect(polygon.points[0].x).toEqual(250)
     expect(polygon.points[0].y).toEqual(250)
   }

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { AttributeToolType, BundleFile,
   DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../js/common/types'
-import { ItemExport } from '../js/functional/bdd_types'
+import { ItemExport } from '../js/server/bdd_types'
 import { Attribute, TaskType } from '../js/functional/types'
 import { CreationForm, FormFileData, Project } from '../js/server/types'
 import { sampleStateExportImage, sampleStateExportImagePolygon } from './test_export_objects'
@@ -319,10 +319,7 @@ export const sampleTasksImage: TaskType[] = [
       bots: false
     },
     status: {
-      maxLabelId: -1,
-      maxShapeId: -1,
-      maxOrder: 0,
-      maxTrackId: -1
+      maxOrder: 0
     },
     progress: {
       submissions: []
@@ -404,10 +401,7 @@ export const sampleTasksImage: TaskType[] = [
       bots: false
     },
     status: {
-      maxLabelId: -1,
-      maxShapeId: -1,
-      maxOrder: 0,
-      maxTrackId: -1
+      maxOrder: 0
     },
     progress: {
       submissions: []
@@ -494,10 +488,7 @@ export const sampleTasksVideo: TaskType[] = [
       bots: false
     },
     status: {
-      maxLabelId: 1,
-      maxShapeId: 1,
-      maxOrder: 2,
-      maxTrackId: 1
+      maxOrder: 2
     },
     progress: {
       submissions: []
@@ -539,25 +530,23 @@ export const sampleTasksVideo: TaskType[] = [
               '0'
             ],
             shapeType: 'polygon2d',
-            shape: {
-              points: [
-                {
-                  x: 0,
-                  y: 0,
-                  type: 'vertex'
-                },
-                {
-                  x: 0,
-                  y: 1,
-                  type: 'vertex'
-                },
-                {
-                  x: 1,
-                  y: 1,
-                  type: 'vertex'
-                }
-              ]
-            }
+            points: [
+              {
+                x: 0,
+                y: 0,
+                pointType: 'vertex'
+              },
+              {
+                x: 0,
+                y: 1,
+                pointType: 'vertex'
+              },
+              {
+                x: 1,
+                y: 1,
+                pointType: 'vertex'
+              }
+            ]
           }
         },
         timestamp: 1
@@ -598,25 +587,23 @@ export const sampleTasksVideo: TaskType[] = [
               '1'
             ],
             shapeType: 'polygon2d',
-            shape: {
-              points: [
-                {
-                  x: 0,
-                  y: 0,
-                  type: 'vertex'
-                },
-                {
-                  x: 0,
-                  y: 1,
-                  type: 'vertex'
-                },
-                {
-                  x: 1,
-                  y: 1,
-                  type: 'vertex'
-                }
-              ]
-            }
+            points: [
+              {
+                x: 0,
+                y: 0,
+                pointType: 'vertex'
+              },
+              {
+                x: 0,
+                y: 1,
+                pointType: 'vertex'
+              },
+              {
+                x: 1,
+                y: 1,
+                pointType: 'vertex'
+              }
+            ]
           }
         },
         timestamp: 2
@@ -676,10 +663,7 @@ export const sampleTasksVideo: TaskType[] = [
       bots: false
     },
     status: {
-      maxLabelId: -1,
-      maxShapeId: -1,
-      maxOrder: 0,
-      maxTrackId: -1
+      maxOrder: 0
     },
     progress: {
       submissions: []

@@ -252,7 +252,6 @@ function addTrackToTask (
     track.labels[l.item] = l.id
   })
   const tracks = updateObject(task.tracks, { [track.id]: track })
-  status.maxTrackId += 1
   task = { ...task, items, status, tracks }
   return [task, track, newLabels]
 }

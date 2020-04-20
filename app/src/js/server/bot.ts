@@ -7,7 +7,7 @@ import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
-import { ItemExport } from '../functional/bdd_types'
+import { ItemExport } from './bdd_types'
 import { PolygonType, RectType, State } from '../functional/types'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
@@ -275,7 +275,7 @@ export class Bot {
    */
   private actionToQuery (
     state: State, action: AddLabelsAction): ModelQuery | null {
-    const shapeType = action.shapeTypes[0][0][0]
+    const shapeType = action.shapes[0][0][0].shapeType
     const shape = action.shapes[0][0][0]
     const labelType = action.labels[0][0].type
     const itemIndex = action.itemIndices[0]

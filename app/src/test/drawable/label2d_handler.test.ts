@@ -10,10 +10,11 @@ import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { IdType, LabelIdMap, Point2DType, PolygonType, RectType } from '../../js/functional/types'
+import { IdType, Point2DType, PolygonType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { testJson } from '../test_image_objects'
+import { findNewLabels } from '../util'
 
 /**
  * Initialize Session, label 3d list, label 3d handler
@@ -37,17 +38,6 @@ function initializeTestingObjects (): [Label2DHandler, number] {
   Session.dispatch(action.goToItem(itemIndex))
 
   return [label2dHandler, viewerId]
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-function findNewLabels (labels: LabelIdMap, labelIds: IdType[]): IdType[] {
-  return _.filter(
-    _.keys(labels),
-    (id) => !labelIds.includes(id))
 }
 
 test('Draw 2d boxes to label2d list', () => {

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel, makePolygon } from '../../functional/states'
-import { IdType, PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
+import { IdType, PolyPathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
@@ -831,7 +831,7 @@ export class Polygon2D extends Label2D {
    * convert this drawable polygon to a polygon state
    */
   private toPolygon (): PolygonType {
-    const pathPoints: PathPoint2DType [] = new Array()
+    const pathPoints: PolyPathPoint2DType [] = new Array()
     for (const point of this._points) {
       if (point.type === PointType.MID) continue
       pathPoints.push(point.toPathPoint())

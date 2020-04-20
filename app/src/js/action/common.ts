@@ -87,7 +87,6 @@ export function loadItem (
 export function addLabel (
   itemIndex: number,
   label: LabelType,
-  shapeTypes: string[] = [],
   shapes: ShapeType[] = []
 ): types.AddLabelsAction {
   return {
@@ -95,7 +94,6 @@ export function addLabel (
     sessionId: Session.id,
     itemIndices: [itemIndex],
     labels: [[label]],
-    shapeTypes: [[shapeTypes]],
     shapes: [[shapes]]
   }
 }
@@ -111,7 +109,6 @@ export function addTrack (
   itemIndices: number[],
   trackType: string,
   labels: LabelType[],
-  shapeTypes: string[][],
   shapes: ShapeType[][]
 ): types.AddTrackAction {
   return {
@@ -120,7 +117,6 @@ export function addTrack (
     sessionId: Session.id,
     itemIndices,
     labels,
-    shapeTypes,
     shapes
   }
 }

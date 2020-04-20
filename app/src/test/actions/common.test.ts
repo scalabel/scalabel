@@ -12,12 +12,12 @@ test('Add and delete labels', () => {
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(
-    action.addLabel(itemIndex, makeLabel(), [], []))
+    action.addLabel(itemIndex, makeLabel()))
   const manualLabel = makeLabel()
   Session.dispatch(
-    action.addLabel(itemIndex, manualLabel, [], []))
+    action.addLabel(itemIndex, manualLabel))
   let autoLabel = makeLabel({ item: itemIndex, manual: false })
-  Session.dispatch(action.addLabel(itemIndex, autoLabel, [], []))
+  Session.dispatch(action.addLabel(itemIndex, autoLabel))
   let state = Session.getState()
 
   // check setting of manual and order
@@ -42,7 +42,7 @@ test('Change category', () => {
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   const label = makeLabel()
-  Session.dispatch(action.addLabel(itemIndex, label, [], []))
+  Session.dispatch(action.addLabel(itemIndex, label))
   Session.dispatch(
     action.changeLabelProps(itemIndex, label.id, { category: [2] }))
   const state = Session.getState()
@@ -54,18 +54,18 @@ test('Link labels', () => {
   initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel()))
   const label1 = makeLabel()
-  Session.dispatch(action.addLabel(itemIndex, label1, [], []))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, label1))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel()))
   const label4 = makeLabel()
-  Session.dispatch(action.addLabel(itemIndex, label4, [], []))
+  Session.dispatch(action.addLabel(itemIndex, label4))
   const label2 = makeLabel()
-  Session.dispatch(action.addLabel(itemIndex, label2, [], []))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, label2))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel()))
   const label3 = makeLabel()
-  Session.dispatch(action.addLabel(itemIndex, label3, [], []))
-  Session.dispatch(action.addLabel(itemIndex, makeLabel(), [], []))
+  Session.dispatch(action.addLabel(itemIndex, label3))
+  Session.dispatch(action.addLabel(itemIndex, makeLabel()))
 
   // Link multiple labels
   let children = [label1.id, label2.id, label3.id]

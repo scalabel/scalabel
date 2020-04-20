@@ -1,4 +1,4 @@
-import { LabelTypeName, ShapeTypeName } from '../common/types'
+import { LabelTypeName } from '../common/types'
 import { makeLabel, makeRect } from '../functional/states'
 import { IdType, RectType, ShapeType } from '../functional/types'
 import * as actions from './common'
@@ -28,7 +28,7 @@ export function addBox2dLabel (
     type: LabelTypeName.BOX_2D, category, attributes, sensors: [sensor]
   })
   return actions.addLabel(
-    itemIndex, label, [ShapeTypeName.RECT], [rect]
+    itemIndex, label, [rect]
   )
 }
 

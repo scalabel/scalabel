@@ -1,5 +1,5 @@
 import { BaseAction } from '../action/types'
-import { ItemExport } from '../functional/bdd_types'
+import { ItemExport } from './bdd_types'
 import { Attribute, ConfigType, Label2DTemplateType, SensorType } from '../functional/types'
 
 /**

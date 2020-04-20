@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
+import { makePlane } from '../../functional/states'
 import { IdType, Plane3DType, ShapeType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import Label3D from './label3d'
@@ -71,11 +72,11 @@ export class Grid3D extends Shape3D {
    * Object representation
    */
   public toState (): ShapeType {
-    return{
+    return makePlane({
       center: (new Vector3D()).fromThree(this.position).toState(),
       orientation:
         (new Vector3D()).fromThree(this.rotation.toVector3()).toState()
-    }
+    })
   }
 
   /**

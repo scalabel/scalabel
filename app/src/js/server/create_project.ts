@@ -2,7 +2,7 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
-import { ItemExport } from '../functional/bdd_types'
+import { ItemExport } from './bdd_types'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
 import {
   Attribute,
@@ -333,7 +333,7 @@ export function createProject (
     bots: false
   }
 
-  // ensure that all videonames are set to default if empty
+  // ensure that all video names are set to default if empty
   let projectItems = formFileData.items
   projectItems.forEach((itemExport) => {
     if (itemExport.videoName === undefined) {
@@ -346,8 +346,8 @@ export function createProject (
     sensors[sensor.id] = sensor
   }
 
-  // With tracking, order by videoname lexicographically and split according
-  // to videoname. It should be noted that a stable sort must be used to
+  // With tracking, order by video name lexicographically and split according
+  // to video name. It should be noted that a stable sort must be used to
   // maintain ordering provided in the image list file
   projectItems = _.sortBy(projectItems, [(item) => item.videoName])
   const project: types.Project = {
@@ -432,7 +432,7 @@ function partitionItemsIntoTasks (
   taskSize: number): number[] {
   const taskIndices: number[] = []
   if (tracking) {
-    // partition by videoname
+    // partition by video name
     let prevVideoName: string
     items.forEach((value, index) => {
       if (value.videoName !== undefined) {
@@ -558,9 +558,6 @@ export function createTasks (
     }
 
     // based on the imported labels, compute max ids
-    let maxLabelId = -1
-    let maxShapeId = -1
-    const maxTrackId = -1
     // max order is the total number of labels
     let maxOrder = 0
 
@@ -591,7 +588,7 @@ export function createTasks (
       // id is not relative to task, unlike index
       const itemId = itemStartIndex + itemInd + itemStartNum
       const timestamp = util.getItemTimestamp(itemExportMap[largestSensor])
-      const [newItem, newMaxLabelId, newMaxShapeId] = convertItemToImport(
+      const newItem = convertItemToImport(
         itemExportMap[largestSensor].videoName as string,
         timestamp,
         itemExportMap,
@@ -600,22 +597,18 @@ export function createTasks (
         attributeNameMap,
         attributeValueMap,
         categoryNameMap,
-        maxLabelId,
-        maxShapeId,
         tracking
       )
 
       if (tracking) {
         for (const label of Object.values(newItem.labels)) {
           if (isValidId(label.track) && !(label.track in trackMap)) {
-            trackMap[label.track] = makeTrack(label.type, label.track)
+            trackMap[label.track] = makeTrack(
+              { type: label.type, id: label.track }, true)
           }
           trackMap[label.track].labels[label.item] = label.id
         }
       }
-
-      maxLabelId = newMaxLabelId
-      maxShapeId = newMaxShapeId
       maxOrder += Object.keys(newItem.labels).length
 
       itemsForTask.push(newItem)
@@ -625,10 +618,7 @@ export function createTasks (
 
     // update the num labels/shapes based on imports
     const taskStatus: TaskStatus = {
-      maxLabelId,
-      maxShapeId,
-      maxOrder,
-      maxTrackId
+      maxOrder
     }
 
     const partialTask: Partial<TaskType> = {

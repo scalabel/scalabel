@@ -2,7 +2,7 @@ import { bool } from 'aws-sdk/clients/signer'
 import _ from 'lodash'
 import * as types from '../common/types'
 import { uid } from '../common/uid'
-import { ItemExport, LabelExport } from './bdd_types'
+import { ItemExport, LabelExport } from '../server/bdd_types'
 import { taskIdToString } from './id2string'
 import {
   ConfigType, CubeType,
@@ -17,10 +17,10 @@ import {
   LayoutType,
   Node2DType,
   PaneType,
-  PathPoint2DType,
   Plane3DType,
   PointCloudViewerConfigType,
   PolygonType,
+  PolyPathPoint2DType,
   RectType,
   Select,
   SensorType,
@@ -39,10 +39,13 @@ import {
  * Initialize a label state and deep copy the parameters.
  * Every label has an id when it is born.
  * @param {Partial<LabelType>} params
+ * @param {boolean} keepId whether to keep the ID in params
  * @return {LabelType}
  */
-export function makeLabel (params: Partial<LabelType> = {}): LabelType {
-  return {
+export function makeLabel (params: Partial<LabelType> = {},
+                           keepId: boolean = false): LabelType {
+  const label: LabelType = {
+    id: genLabelId(),
     item: -1,
     sensors: [-1],
     type: types.LabelTypeName.EMPTY,
@@ -54,26 +57,33 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
     track: makeDefaultId(),
     order: 0,
     manual: true, // by default, manual is true
-    ...params,
-    id: genLabelId()
+    ...params
   }
+  if (!keepId) {
+    label.id = genLabelId()
+  }
+  return label
 }
 
 /**
  * Initialize a track
  * Every track has an id when it is born
- * @param {string} type label type of the track
- * @param {number} id optional id.
- * @param {{[key: number]: string}} labels
+ * @param {Partial<TrackType>} params
+ * @param {boolean} keepId whether to keep the ID in params
  * Labels can not be filled without specifying id
  */
-export function makeTrack (params: Partial<TrackType> = {}): TrackType {
-  return {
+export function makeTrack (params: Partial<TrackType> = {},
+                           keepId: boolean = false): TrackType {
+  const track: TrackType = {
+    id: genTrackId(),
     type: types.LabelTypeName.EMPTY,
     labels: {},
-    ...params,
-    id: genTrackId()
+    ...params
   }
+  if (!keepId) {
+    track.id = genTrackId()
+  }
+  return track
 }
 
 /**
@@ -81,11 +91,13 @@ export function makeTrack (params: Partial<TrackType> = {}): TrackType {
  * Every shape has an id when it is born
  * @param {string} shapeType type name of the shape
  */
-function makeShape (shapeType: string = ''): ShapeType {
+function makeShape (shapeType: string = '',
+                    params: Partial<ShapeType> = {}): ShapeType {
   return {
-    id: genShapeId(),
     label: [],
-    shapeType
+    shapeType,
+    ...params,
+    id: genShapeId()
   }
 }
 /**
@@ -122,14 +134,13 @@ export function makePolygon
  * Initialize a pathPoint shape
  * @param params
  */
-export function makePathPoint (params: Partial<PathPoint2DType> = {})
-  : PathPoint2DType {
+export function makePloyPathPoint (params: Partial<PolyPathPoint2DType> = {})
+  : PolyPathPoint2DType {
   return {
     x: 0,
     y: 0,
     pointType: 'vertex',
-    ...params,
-    ...makeShape(types.ShapeTypeName.PATH_POINT_2D)
+    ...params
   }
 }
 
@@ -499,10 +510,7 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
  */
 function makeTaskStatus (params: Partial<TaskStatus> = {}): TaskStatus {
   return {
-    maxLabelId: -1,
-    maxShapeId: -1,
     maxOrder: -1,
-    maxTrackId: -1,
     ...params
   }
 }
