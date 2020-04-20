@@ -107,13 +107,6 @@ export interface UpdateSessionStatusAction extends BaseAction {
   newStatus: ConnectionStatus
 }
 
-export interface UpdateSessionStatusDelayedAction extends BaseAction {
-  /** New status of the session */
-  newStatus: ConnectionStatus
-  /** Time to wait before updating */
-  seconds: number
-}
-
 export interface AddLabelsAction extends BaseAction {
   /** item of the added label */
   itemIndices: number[]
@@ -229,6 +222,7 @@ export type SessionActionType =
   | LoadItemAction
   | UpdateAllAction
   | UpdateTaskAction
+  | UpdateSessionStatusAction
 
 export type UserActionType =
   ChangeSelectAction

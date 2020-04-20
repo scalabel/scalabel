@@ -91,7 +91,6 @@ class TitleBar extends Component<StyleProps & StateProps & DispatchProps> {
    */
   constructor (props: StyleProps & StateProps & DispatchProps) {
     super(props)
-    Session.status.addDisplayCallback(() => { this.forceUpdate() })
     this._keyDownListener = ((e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
         this.save()
@@ -110,8 +109,6 @@ class TitleBar extends Component<StyleProps & StateProps & DispatchProps> {
    */
   public componentWillUnmount () {
     super.componentWillUnmount()
-    // De-couple the titlebar and the session
-    Session.status.clearDisplayCallbacks()
     document.removeEventListener('keydown', this._keyDownListener)
   }
 

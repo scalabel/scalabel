@@ -455,7 +455,7 @@ export interface SessionType {
   /** Previous connection status */
   prevStatus: ConnectionStatus
   /** Number of time status has changed */
-  numberOfUpdates: number
+  numUpdates: number
 }
 
 export interface State {

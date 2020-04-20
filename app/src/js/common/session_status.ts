@@ -1,7 +1,6 @@
-const enum ConnectionStatus {
-  NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED,
-  COMPUTING, COMPUTE_DONE, NOTIFY_COMPUTE_DONE
-}
+import { updateSessionStatus } from '../action/common'
+import { ConnectionStatus } from '../functional/types'
+import Session from './session'
 
 /**
  * Tracks and handles updates to the session status
@@ -14,14 +13,11 @@ export class SessionStatus {
   public prevStatus: ConnectionStatus
   /** Number of times status has changed */
   public numberOfUpdates: number
-  /** Callbacks for updating the display when status changes */
-  private displayCallbacks: Array<() => void>
 
   constructor () {
     this.status = ConnectionStatus.UNSAVED
     this.prevStatus = ConnectionStatus.UNSAVED
     this.numberOfUpdates = 0
-    this.displayCallbacks = []
   }
 
   /**
@@ -29,13 +25,7 @@ export class SessionStatus {
    * @param {ConnectionStatus} newStatus: new value of status
    */
   public update (newStatus: ConnectionStatus): ConnectionStatus {
-    this.prevStatus = this.status
-    this.status = newStatus
-    // update mod 1000 since only nearby differences are important, not total
-    this.numberOfUpdates = (this.numberOfUpdates + 1) % 1000
-    for (const callback of this.displayCallbacks) {
-      callback()
-    }
+    Session.dispatch(updateSessionStatus(newStatus))
     return newStatus
   }
 
@@ -159,20 +149,6 @@ export class SessionStatus {
   public checkComputeDone () {
     return this.status === ConnectionStatus.COMPUTE_DONE ||
       this.status === ConnectionStatus.NOTIFY_COMPUTE_DONE
-  }
-
-  /**
-   * Add a callback function for updating a display component
-   */
-  public addDisplayCallback (callback: () => void) {
-    this.displayCallbacks.push(callback)
-  }
-
-  /**
-   * Remove all display callbacks
-   */
-  public clearDisplayCallbacks () {
-    this.displayCallbacks = []
   }
 
   /** Select display text based on connection status */

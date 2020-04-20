@@ -1,5 +1,5 @@
 import Session from '../common/session'
-import { LabelType, PaneType,
+import { ConnectionStatus, LabelType, PaneType,
   Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
@@ -383,6 +383,18 @@ export function submit (): types.SubmitAction {
 export function startLinkTrack () {
   return {
     type: types.START_LINK_TRACK,
+    sessionId: Session.id
+  }
+}
+
+/**
+ * Update session status
+ */
+export function updateSessionStatus (
+  status: ConnectionStatus): types.UpdateSessionStatusAction {
+  return {
+    type: types.UPDATE_SESSION_STATUS,
+    newStatus: status,
     sessionId: Session.id
   }
 }

@@ -1196,23 +1196,18 @@ export function updateSessionStatus (
   state: State, action: types.UpdateSessionStatusAction
 ): State {
   const newStatus = action.newStatus
-  const session = state.session
-  switch (newStatus) {
-    case ConnectionStatus.SAVING: {
-
-    }
-    default: {
-
-    }
-  }
 
   const oldSession = state.session
+  const prevStatus = oldSession.status
+  // update mod 1000 since only nearby differences are important
+  const numUpdates = (oldSession.numUpdates + 1) % 1000
+
   const newSession = updateObject(
     oldSession,
     {
       status: newStatus,
-      prevStatus: oldSession.status,
-      numberOfUpdates: oldSession.numberOfUpdates + 1
+      prevStatus,
+      numUpdates
     }
   )
   return updateObject(
@@ -1221,13 +1216,4 @@ export function updateSessionStatus (
       session: newSession
     }
   )
-}
-
-/**
- * After a delay, update session status, if it should still be updated
- */
-export function updateSessionStatusDelayed (
-  state: State, action: types.UpdateSessionStatusDelayedAction
-): State {
-  return state
 }

@@ -68,9 +68,6 @@ export const reducer: Reducer<State> = (
     case types.UPDATE_SESSION_STATUS:
       return common.updateSessionStatus(
         state, action as types.UpdateSessionStatusAction)
-    case types.UPDATE_SESSION_STATUS_DELAYED:
-      return common.updateSessionStatusDelayed(
-        state, action as types.UpdateSessionStatusDelayedAction)
     default:
   }
   return state
