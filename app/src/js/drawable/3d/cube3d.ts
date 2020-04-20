@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../common/types'
+import { makeCube } from '../../functional/states'
 import { CubeType, IdType, ShapeType } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
@@ -8,7 +9,6 @@ import { Grid3D } from './grid3d'
 import Label3D from './label3d'
 import { Plane3D } from './plane3d'
 import { Shape3D } from './shape3d'
-import { makeCube } from '../../functional/states'
 
 const faceNormals = [
   new THREE.Vector3(1, 0, 0),

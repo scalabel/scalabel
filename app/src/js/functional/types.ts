@@ -114,6 +114,10 @@ export interface CubeType extends ShapeType {
 
 export type Point2DType = Vector2Type
 
+/**
+ * This is a point on the polygon 2d. So the point itself doesn't have an ID
+ * and it is not standalone shape
+ */
 export interface PolyPathPoint2DType extends Vector2Type {
   /** type of the point in the path. value from common/types.PathPointType */
   pointType: string

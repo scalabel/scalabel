@@ -7,8 +7,8 @@ import { File } from 'formidable'
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
-import { ItemExport } from './bdd_types'
 import { TaskType } from '../functional/types'
+import { ItemExport } from './bdd_types'
 import {
   createProject, createTasks, parseFiles, parseForm, readItemsFile
 } from './create_project'

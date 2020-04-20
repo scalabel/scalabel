@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { AttributeToolType, BundleFile,
   DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../js/common/types'
-import { ItemExport } from '../js/server/bdd_types'
 import { Attribute, TaskType } from '../js/functional/types'
+import { ItemExport } from '../js/server/bdd_types'
 import { CreationForm, FormFileData, Project } from '../js/server/types'
 import { sampleStateExportImage, sampleStateExportImagePolygon } from './test_export_objects'
 

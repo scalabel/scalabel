@@ -8,8 +8,8 @@ import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType } from '../common/types'
-import { ItemExport } from './bdd_types'
 import { Label2DTemplateType, State, TaskType } from '../functional/types'
+import { ItemExport } from './bdd_types'
 import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
 import Logger from './logger'

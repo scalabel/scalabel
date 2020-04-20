@@ -11,12 +11,12 @@ import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { Label2DList } from '../../js/drawable/2d/label2d_list'
 import { getShape } from '../../js/functional/state_util'
-import { RectType, IdType } from '../../js/functional/types'
+import { IdType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { Endpoint } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { getTestConfig, getTestConfigPath, findNewLabelsFromState } from '../util'
+import { findNewLabelsFromState, getTestConfig, getTestConfigPath } from '../util'
 import {
   changeTestConfig,
   countTasks,
