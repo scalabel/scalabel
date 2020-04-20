@@ -139,6 +139,7 @@
         "redux": "^4.0.4",
         "redux-undo": "^1.0.1",
         "regenerator-runtime": "^0.12.1",
+        "reselect": "^4.0.0",
         "rxjs": "^6.5.5",
         "socket.io": "^2.3.0",
         "source-map-loader": "^0.2.4",

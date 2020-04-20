@@ -151,58 +151,6 @@ export class SessionStatus {
       this.status === ConnectionStatus.NOTIFY_COMPUTE_DONE
   }
 
-  /** Select display text based on connection status */
-  public getStatusText (): string {
-    switch (this.status) {
-      case ConnectionStatus.SAVING: {
-        return 'Saving in progress...'
-      }
-      case ConnectionStatus.RECONNECTING: {
-        return 'Trying to reconnect...'
-      }
-      case ConnectionStatus.COMPUTING: {
-        return 'Model predictions in progress..'
-      }
-      case ConnectionStatus.COMPUTE_DONE:
-      case ConnectionStatus.NOTIFY_COMPUTE_DONE: {
-        return 'Model predictions complete.'
-      }
-      case ConnectionStatus.SAVED:
-      case ConnectionStatus.NOTIFY_SAVED: {
-        return 'All progress saved.'
-      }
-      default: {
-        return 'All progress saved.'
-      }
-    }
-  }
-
-  /** Decide whether display text should be shown */
-  public shouldStatusHide (autosave: boolean): boolean {
-    switch (this.status) {
-      case ConnectionStatus.SAVING:
-      case ConnectionStatus.NOTIFY_SAVED: {
-        if (autosave) {
-          return true
-        }
-        return false
-      }
-      case ConnectionStatus.SAVED:
-      case ConnectionStatus.UNSAVED:
-      case ConnectionStatus.COMPUTE_DONE: {
-        /**
-         * Setting hide to true achieves a fade animation
-         * since status transitions from NOTIFY_X to X
-         * but keeps the same text
-         */
-        return true
-      }
-      default: {
-        return false
-      }
-    }
-  }
-
   /** Return false if there could be unsaved work in progress */
   public isFullySaved (): boolean {
     switch (this.status) {
