@@ -90,7 +90,7 @@
         "@types/yargs": "^13.0.8",
         "ajv": "^6.12.2",
         "awesome-typescript-loader": "^5.2.1",
-        "aws-sdk": "^2.659.0",
+        "aws-sdk": "^2.655.0",
         "axios": "^0.19.2",
         "babel-eslint": "^9.0.0",
         "babel-jest": "^24.1.0",
