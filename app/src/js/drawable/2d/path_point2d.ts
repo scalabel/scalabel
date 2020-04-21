@@ -1,5 +1,5 @@
-import { makePathPoint } from '../../functional/states'
-import { PathPoint2DType } from '../../functional/types'
+import { makePolyPathPoint } from '../../functional/states'
+import { PolyPathPoint2DType } from '../../functional/types'
 import { Context2D, toCssColor } from '../util'
 import { Point2D } from './point2d'
 
@@ -76,9 +76,9 @@ export class PathPoint2D extends Point2D {
   /**
    * convert this drawable pathPoint to a pathPoint state
    */
-  public toPathPoint (): PathPoint2DType {
-    return makePathPoint({
-      x: this.x, y: this.y, type: this.type
+  public toPathPoint (): PolyPathPoint2DType {
+    return makePolyPathPoint({
+      x: this.x, y: this.y, pointType: this.type
     })
   }
 

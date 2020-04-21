@@ -28,8 +28,8 @@ export class Plane3DLinearInterpolationPolicy extends
   /** Calculate deltas */
   protected calculateDeltas (start: number, end: number) {
     const numItems = end - start
-    const firstCube = this._track.getShapes(start)[0].shape as Plane3DType
-    const lastCube = this._track.getShapes(end)[0].shape as Plane3DType
+    const firstCube = this._track.getShapes(start)[0] as Plane3DType
+    const lastCube = this._track.getShapes(end)[0] as Plane3DType
     this._initialCenter = (new Vector3D()).fromState(firstCube.center)
     this._initialOrientation =
         (new Vector3D()).fromState(firstCube.orientation)

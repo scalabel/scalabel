@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
-import { makeLabel, makeRect } from '../../functional/states'
-import { RectType, ShapeType, State } from '../../functional/types'
+import { makeDefaultId, makeLabel, makeRect } from '../../functional/states'
+import { IdType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -292,7 +292,7 @@ export class Box2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
@@ -304,7 +304,7 @@ export class Box2D extends Label2D {
     super.initTemp(state, start)
     const itemIndex = state.user.select.item
     this._label = makeLabel({
-      type: LabelTypeName.BOX_2D, id: -1, item: itemIndex,
+      type: LabelTypeName.BOX_2D, id: makeDefaultId(), item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
       order: this._order

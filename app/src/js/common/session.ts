@@ -26,7 +26,7 @@ class Session {
   /** 3d label list */
   public label3dList: Label3DList
   /** map between track id and track objects */
-  public tracks: {[trackId: number]: Track}
+  public tracks: {[trackId: string]: Track}
   /** whether tracking is enabled */
   public tracking: boolean
   /** whether track linking is enabled */

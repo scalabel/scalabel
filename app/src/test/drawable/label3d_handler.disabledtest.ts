@@ -9,11 +9,11 @@ import { initStore } from '../../js/common/session_init'
 import { Label3DHandler } from '../../js/drawable/3d/label3d_handler'
 import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util'
 import { makePointCloudViewerConfig } from '../../js/functional/states'
-import { CubeType, PointCloudViewerConfigType } from '../../js/functional/types'
+import { CubeType, IdType, PointCloudViewerConfigType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
 import { testJson } from '../test_point_cloud_objects'
-import { expectVector3TypesClose } from '../util'
+import { expectVector3TypesClose, findNewLabelsFromState } from '../util'
 
 /**
  * Get active axis given camLoc and axis
@@ -100,6 +100,7 @@ function initializeTestingObjects (
 }
 
 test('Add 3d bbox', () => {
+  const labelIds: IdType[] = []
   const [label3dHandler, viewerId] =
     initializeTestingObjects(new THREE.PerspectiveCamera(45, 1, 0.1, 1000))
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
@@ -107,7 +108,8 @@ test('Add 3d bbox', () => {
   label3dHandler.onKeyDown(spaceEvent)
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
-  let cube = getShape(state, 0, 0, 0) as CubeType
+  labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
+  let cube = getShape(state, 0, labelIds[0], 0) as CubeType
   let viewerConfig =
     getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
   expect(viewerConfig).not.toBeNull()
@@ -134,7 +136,8 @@ test('Add 3d bbox', () => {
     label3dHandler.onKeyDown(spaceEvent)
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
-    cube = getShape(state, 0, i, 0) as CubeType
+    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
+    cube = getShape(state, 0, labelIds[i], 0) as CubeType
     viewerConfig =
       getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
     expect(viewerConfig).not.toBeNull()
@@ -149,6 +152,7 @@ test('Add 3d bbox', () => {
 })
 
 test('Move axis aligned 3d bbox along z axis', () => {
+  const labelIds: IdType[] = []
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
   camera.aspect = 1
   camera.updateProjectionMatrix()
@@ -174,7 +178,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
-  const labelId = Number(Object.keys(state.task.items[0].labels)[0])
+  const labelId = Object.keys(state.task.items[0].labels)[0]
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
@@ -221,7 +225,9 @@ test('Move axis aligned 3d bbox along z axis', () => {
   label3dHandler.onMouseUp()
 
   state = Session.getState()
-  let cube = getShape(state, 0, 0, 0) as CubeType
+  expect(_.size(state.task.items[0].labels)).toEqual(1)
+  labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
+  let cube = getShape(state, 0, labelIds[0], 0) as CubeType
   const center = (new Vector3D()).fromState(cube.center)
   expect(center[2]).toBeGreaterThan(0)
   expect(center[0]).toBeCloseTo(0)
@@ -240,11 +246,12 @@ test('Move axis aligned 3d bbox along z axis', () => {
   label3dHandler.onMouseUp()
 
   state = Session.getState()
-  cube = getShape(state, 0, 0, 0) as CubeType
+  cube = getShape(state, 0, labelIds[0], 0) as CubeType
   expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
 })
 
 test('Move axis aligned 3d bbox along all axes', () => {
+  const labelIds: IdType[] = []
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
   camera.aspect = 1
   camera.updateProjectionMatrix()
@@ -267,8 +274,9 @@ test('Move axis aligned 3d bbox along all axes', () => {
 
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
+  labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
 
-  const labelId = Number(Object.keys(state.task.items[0].labels)[0])
+  const labelId = Object.keys(state.task.items[0].labels)[0]
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
@@ -326,7 +334,7 @@ test('Move axis aligned 3d bbox along all axes', () => {
       label3dHandler.onMouseUp()
 
       state = Session.getState()
-      let cube = getShape(state, 0, 0, 0) as CubeType
+      let cube = getShape(state, 0, labelIds[0], 0) as CubeType
       const center = (new Vector3D()).fromState(cube.center)
 
       // get ActiveAxis based on view point and vertical or horizontal
@@ -355,13 +363,14 @@ test('Move axis aligned 3d bbox along all axes', () => {
       label3dHandler.onMouseUp()
 
       state = Session.getState()
-      cube = getShape(state, 0, 0, 0) as CubeType
+      cube = getShape(state, 0, labelIds[0], 0) as CubeType
       expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
     }
   }
 })
 
 test('Scale axis aligned 3d bbox along all axes', () => {
+  const labelIds: IdType[] = []
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
   camera.aspect = 1
 
@@ -383,9 +392,9 @@ test('Scale axis aligned 3d bbox along all axes', () => {
 
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
+  labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
 
-  const labelId = Number(Object.keys(state.task.items[0].labels)[0])
-  Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
+  Session.dispatch(selectLabel(state.user.select.labels, 0, labelIds[0]))
   Session.label3dList.onDrawableUpdate()
 
   const sEvent = new KeyboardEvent('keydown', { key: 'e' })
@@ -440,7 +449,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       label3dHandler.onMouseUp()
 
       state = Session.getState()
-      let cube = getShape(state, 0, 0, 0) as CubeType
+      let cube = getShape(state, 0, labelIds[0], 0) as CubeType
 
       const center = (new Vector3D()).fromState(cube.center)
       const size = (new Vector3D()).fromState(cube.size)
@@ -475,7 +484,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       label3dHandler.onMouseUp()
 
       state = Session.getState()
-      cube = getShape(state, 0, 0, 0) as CubeType
+      cube = getShape(state, 0, labelIds[0], 0) as CubeType
       expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
       expectVector3TypesClose(cube.size, { x: 1, y: 1, z: 1 })
     }
@@ -483,6 +492,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
 })
 
 test('Rotate axis aligned 3d bbox around all axes', () => {
+  const labelIds: IdType[] = []
   // Set camera to each of 6 axis aligned locations around cube
   // 0 = +x, 1 = -x, 2 = +y, 3 = -y, 4= +z, 5 = -z
   for (let camLoc = 0; camLoc < 6; camLoc++) {
@@ -510,9 +520,8 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
 
       state = Session.getState()
       expect(_.size(state.task.items[0].labels)).toEqual(1)
-
-      const labelId = Number(Object.keys(state.task.items[0].labels)[0])
-      Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
+      labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
+      Session.dispatch(selectLabel(state.user.select.labels, 0, labelIds[0]))
 
       const rEvent = new KeyboardEvent('keydown', { key: 'r' })
       label3dHandler.onKeyDown(rEvent)
@@ -564,7 +573,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       label3dHandler.onMouseUp()
 
       state = Session.getState()
-      let cube = getShape(state, 0, 0, 0) as CubeType
+      let cube = getShape(state, 0, labelIds[0], 0) as CubeType
       const orientation = (new Vector3D()).fromState(cube.orientation)
 
       // get ActiveAxis based on view point and vertical or horizontal
@@ -596,7 +605,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       label3dHandler.onMouseUp()
 
       state = Session.getState()
-      cube = getShape(state, 0, 0, 0) as CubeType
+      cube = getShape(state, 0, labelIds[0], 0) as CubeType
       expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
       expectVector3TypesClose(cube.orientation, { x: 0, y: 0, z: 0 }, 1)
     }

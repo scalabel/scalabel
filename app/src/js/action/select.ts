@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Session from '../common/session'
 import { LabelTypeName } from '../common/types'
-import { Select, State } from '../functional/types'
+import { IdType, Select, State } from '../functional/types'
 import { changeLabelsProps, changeSelect, deleteLabels } from './common'
 import { deleteTracks, terminateTracks } from './track'
 import * as types from './types'
@@ -16,7 +16,7 @@ export function deleteSelectedLabels (state: State): types.DeleteLabelsAction {
   const select = state.user.select
   const itemIndices: number[] =
     Object.keys(select.labels).map((key) => Number(key))
-  const labelIds: number[][] = []
+  const labelIds: IdType[][] = []
   for (const index of itemIndices) {
     labelIds.push(select.labels[index])
   }
@@ -101,9 +101,9 @@ export function changeSelectedLabelsCategories (
  * @param {number} labelId
  */
 export function selectLabel (
-  currentSelection: {[index: number]: number[]},
+  currentSelection: {[index: number]: IdType[]},
   itemIndex: number,
-  labelId: number,
+  labelId: IdType,
   category?: number,
   attributes?: {[key: number]: number[]},
   append: boolean = false
@@ -115,12 +115,17 @@ export function selectLabel (
 
 /**
  * Select label by ID
- * @param {number} labelId
+ * @param currentSelection
+ * @param itemIndex
+ * @param labelIds
+ * @param category
+ * @param attributes
+ * @param append
  */
 export function selectLabels (
-  currentSelection: {[index: number]: number[]},
+  currentSelection: {[index: number]: IdType[]},
   itemIndex: number,
-  labelIds: number[],
+  labelIds: IdType[],
   category?: number,
   attributes?: {[key: number]: number[]},
   append: boolean = false
@@ -159,9 +164,9 @@ export function selectLabels (
  * @param labelId
  */
 export function unselectLabels (
-  currentSelection: {[index: number]: number[]},
+  currentSelection: {[index: number]: IdType[]},
   itemIndex: number,
-  labelIds: number[]
+  labelIds: IdType[]
 ) {
   const selectedLabels = _.cloneDeep(currentSelection)
   for (const labelId of labelIds) {
