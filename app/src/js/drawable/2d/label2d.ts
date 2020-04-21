@@ -23,65 +23,6 @@ export interface ViewMode {
  * Abstract class for 2D drawable labels
  */
 export abstract class Label2D {
-  /* The members are public for testing purpose */
-  /** label id in state */
-  protected _labelId: IdType
-  /** track id in state */
-  protected _trackId: IdType
-  /** index of the label */
-  protected _index: number
-  /** drawing order of the label */
-  protected _order: number
-  /** the corresponding label in the state */
-  protected _label: LabelType | null
-  /** drawing mode */
-  protected _viewMode: ViewMode
-  /** whether the label is selected */
-  protected _selected: boolean
-  /** whether the label is highlighted */
-  protected _highlighted: boolean
-  /** -1 means no handle is selected */
-  protected _highlightedHandle: number
-  /** rgba color decided by labelId */
-  protected _color: number[]
-  /** true if mouse down */
-  protected _mouseDown: boolean
-  /** mouse coordinate when pressed down */
-  protected _mouseDownCoord: Vector2D
-  /** whether the label is being editing */
-  protected _editing: boolean
-  /** config */
-  protected _config: ConfigType
-  /** label list */
-  protected _labelList: Label2DList
-  /** whether the label is temporary */
-  protected _temporary: boolean
-
-  constructor (labelList: Label2DList) {
-    this._index = -1
-    this._labelId = makeDefaultId()
-    this._trackId = makeDefaultId()
-    this._selected = false
-    this._highlighted = false
-    this._highlightedHandle = -1
-    this._order = -1
-    this._label = null
-    this._color = [0, 0, 0, 1]
-    this._viewMode = {
-      dimmed: false
-    }
-    this._mouseDownCoord = new Vector2D()
-    this._mouseDown = false
-    this._editing = false
-    this._config = makeTaskConfig()
-    this._labelList = labelList
-    this._temporary = true
-  }
-
-  /** Set whether the label is highlighted */
-  public setViewMode (mode: Partial<ViewMode>): void {
-    this._viewMode = _.assign(this._viewMode, mode)
-  }
 
   /**
    * Set index of this label
@@ -168,20 +109,6 @@ export abstract class Label2D {
     return this._selected
   }
 
-  /** select the label */
-  public setSelected (s: boolean) {
-    this._selected = s
-  }
-
-  /** highlight the label */
-  public setHighlighted (h: boolean, handleIndex: number = -1) {
-    if (h && handleIndex < 0) {
-      throw Error('need to highlight handle as well')
-    }
-    this._highlighted = h
-    this._highlightedHandle = handleIndex
-  }
-
   /** return order of this label */
   public get order (): number {
     return this._order
@@ -202,6 +129,91 @@ export abstract class Label2D {
     this._editing = e
   }
 
+  /** Parent drawable */
+  public get parent (): Label2D | null {
+    return null
+  }
+
+  /**
+   * Check whether the label is temporary
+   */
+  public get temporary (): boolean {
+    return this._temporary
+  }
+  /* The members are public for testing purpose */
+  /** label id in state */
+  protected _labelId: IdType
+  /** track id in state */
+  protected _trackId: IdType
+  /** index of the label */
+  protected _index: number
+  /** drawing order of the label */
+  protected _order: number
+  /** the corresponding label in the state */
+  protected _label: LabelType | null
+  /** drawing mode */
+  protected _viewMode: ViewMode
+  /** whether the label is selected */
+  protected _selected: boolean
+  /** whether the label is highlighted */
+  protected _highlighted: boolean
+  /** -1 means no handle is selected */
+  protected _highlightedHandle: number
+  /** rgba color decided by labelId */
+  protected _color: number[]
+  /** true if mouse down */
+  protected _mouseDown: boolean
+  /** mouse coordinate when pressed down */
+  protected _mouseDownCoord: Vector2D
+  /** whether the label is being editing */
+  protected _editing: boolean
+  /** config */
+  protected _config: ConfigType
+  /** label list */
+  protected _labelList: Label2DList
+  /** whether the label is temporary */
+  protected _temporary: boolean
+
+  constructor (labelList: Label2DList) {
+    this._index = -1
+    this._labelId = makeDefaultId()
+    this._trackId = makeDefaultId()
+    this._selected = false
+    this._highlighted = false
+    this._highlightedHandle = -1
+    this._order = -1
+    this._label = null
+    this._color = [0, 0, 0, 1]
+    this._viewMode = {
+      dimmed: false
+    }
+    this._mouseDownCoord = new Vector2D()
+    this._mouseDown = false
+    this._editing = false
+    this._config = makeTaskConfig()
+    this._labelList = labelList
+    this._temporary = true
+  }
+
+  /** Set whether the label is highlighted */
+  public setViewMode (mode: Partial<ViewMode>): void {
+    this._viewMode = _.assign(this._viewMode, mode)
+  }
+
+  /** select the label */
+  public setSelected (s: boolean) {
+    this._selected = s
+  }
+
+  /** highlight the label */
+  public setHighlighted (h: boolean, handleIndex: number = -1) {
+    if (h && handleIndex < 0) {
+      throw Error('need to highlight handle as well')
+    }
+    this._highlighted = h
+    this._highlightedHandle = handleIndex
+  }
+
   /** Whether label valid */
   public isValid (): boolean {
     return true
@@ -212,11 +224,6 @@ export abstract class Label2D {
     if (this._label) {
       this._label.manual = true
     }
-  }
-
-  /** Parent drawable */
-  public get parent (): Label2D | null {
-    return null
   }
 
   /**
@@ -342,15 +349,15 @@ export abstract class Label2D {
    * @param {State} state
    * @param {Vector2D} start: starting coordinate of the label
    */
-  public initTemp (state: State, _start: Vector2D): void {
+  public initTemp (state: State, start: Vector2D): void {
     this._order = state.task.status.maxOrder + 1
-    this._label = makeLabel()
-    this._labelId = this._label.id
-    this._trackId = makeDefaultId()
     this._config = state.task.config
-    this._color = getColorById(this._labelId, this._trackId)
     this._selected = true
     this._temporary = true
+    this._label = this.initTempLabel(state, start)
+    this._labelId = this._label.id
+    this._trackId = makeDefaultId()
+    this._color = getColorById(this._labelId, this._trackId)
   }
 
   /** Convert label state to drawable */
@@ -375,11 +382,11 @@ export abstract class Label2D {
   }
 
   /**
-   * Check whether the label is temporary
+   * Initialize the temp label content
+   * @param state
+   * @param _start
    */
-  public get temporary (): boolean {
-    return this._temporary
-  }
+  protected abstract initTempLabel (state: State, _start: Vector2D): LabelType
 }
 
 export default Label2D

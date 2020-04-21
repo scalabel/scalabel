@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeLabel, makePolygon } from '../../functional/states'
-import { IdType, PolygonType, PolyPathPoint2DType, ShapeType, State } from '../../functional/types'
+import { IdType, LabelType, PolygonType, PolyPathPoint2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
@@ -38,6 +38,20 @@ enum OrientationType {
  * polygon 2d label
  */
 export class Polygon2D extends Label2D {
+
+  /** Get cursor for highlighting */
+  public get highlightCursor () {
+    if (this._state === Polygon2DState.DRAW) {
+      return Cursor.CROSSHAIR
+    } else if (
+      this._highlightedHandle > 0 &&
+      this._highlightedHandle <= this._points.length
+    ) {
+      return Cursor.DEFAULT
+    } else {
+      return Cursor.MOVE
+    }
+  }
   /** array for vertices */
   private _points: PathPoint2D[]
   /** polygon label state */
@@ -59,20 +73,6 @@ export class Polygon2D extends Label2D {
     this._startingPoints = []
     this._keyDownMap = {}
     this._closed = closed
-  }
-
-  /** Get cursor for highlighting */
-  public get highlightCursor () {
-    if (this._state === Polygon2DState.DRAW) {
-      return Cursor.CROSSHAIR
-    } else if (
-      this._highlightedHandle > 0 &&
-      this._highlightedHandle <= this._points.length
-    ) {
-      return Cursor.DEFAULT
-    } else {
-      return Cursor.MOVE
-    }
   }
 
   /**
@@ -422,27 +422,6 @@ export class Polygon2D extends Label2D {
   }
 
   /**
-   * create new polygon label
-   * @param _state
-   * @param _start
-   */
-  public initTemp (state: State, _start: Vector2D): void {
-    super.initTemp(state, _start)
-    this.editing = true
-    this._state = Polygon2DState.DRAW
-    const itemIndex = state.user.select.item
-    const labelType = this._closed ?
-                LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
-    this._label = makeLabel({
-      type: labelType, item: itemIndex,
-      category: [state.user.select.category],
-      order: this._order
-    })
-    this._highlightedHandle = 1
-    this._temporary = true
-  }
-
-  /**
    * to update the shape of polygon
    * @param _shapes
    */
@@ -481,6 +460,26 @@ export class Polygon2D extends Label2D {
         this._state = Polygon2DState.FINISHED
       }
     }
+  }
+
+  /**
+   * create new polygon label
+   * @param _state
+   * @param _start
+   */
+  protected initTempLabel (state: State, _start: Vector2D): LabelType {
+    this.editing = true
+    this._state = Polygon2DState.DRAW
+    const itemIndex = state.user.select.item
+    const labelType = this._closed ?
+                LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
+    const label = makeLabel({
+      type: labelType, item: itemIndex,
+      category: [state.user.select.category],
+      order: this._order
+    })
+    this._highlightedHandle = 1
+    return label
   }
 
   /**

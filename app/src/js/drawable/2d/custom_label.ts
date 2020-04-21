@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, Key, ShapeTypeName } from '../../common/types'
 import { makeDefaultId, makeLabel } from '../../functional/states'
-import { IdType, Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
+import { IdType, Label2DTemplateType, LabelType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
@@ -20,6 +20,29 @@ const lineWidth = 4
 
 /** Class for templated user-defined labels */
 export class CustomLabel2D extends Label2D {
+
+  /** Get cursor for highlighting */
+  public get highlightCursor () {
+    if (
+      this._highlightedHandle >= 0 &&
+      this._highlightedHandle < this._shapes.length
+    ) {
+      return Cursor.DEFAULT
+    } else if (
+      this._highlightedHandle >= this._shapes.length &&
+      this._highlightedHandle < this._shapes.length + this._corners.length
+    ) {
+      const cornerIndex = this._highlightedHandle - this._shapes.length
+      if (cornerIndex % 2 === 0) {
+        return Cursor.NWSE_RESIZE
+      } else {
+        return Cursor.NESW_RESIZE
+      }
+    } else {
+      return Cursor.MOVE
+    }
+  }
+
   /** Label template */
   private _template: Label2DTemplateType
   /** Shapes */
@@ -50,28 +73,6 @@ export class CustomLabel2D extends Label2D {
       }
     }
     this._keyDownMap = {}
-  }
-
-  /** Get cursor for highlighting */
-  public get highlightCursor () {
-    if (
-      this._highlightedHandle >= 0 &&
-      this._highlightedHandle < this._shapes.length
-    ) {
-      return Cursor.DEFAULT
-    } else if (
-      this._highlightedHandle >= this._shapes.length &&
-      this._highlightedHandle < this._shapes.length + this._corners.length
-    ) {
-      const cornerIndex = this._highlightedHandle - this._shapes.length
-      if (cornerIndex % 2 === 0) {
-        return Cursor.NWSE_RESIZE
-      } else {
-        return Cursor.NESW_RESIZE
-      }
-    } else {
-      return Cursor.MOVE
-    }
   }
 
   /** Draw according to template */
@@ -159,48 +160,6 @@ export class CustomLabel2D extends Label2D {
       style.color = assignColor(i)
       this._shapes[i].draw(context, ratio, style)
     }
-  }
-
-  /** Temporary initialization on mouse down */
-  public initTemp (
-    state: State, start: Vector2D
-  ) {
-    super.initTemp(state, start)
-    const itemIndex = state.user.select.item
-    this._order = state.task.status.maxOrder + 1
-    const templateName =
-      state.task.config.labelTypes[state.user.select.labelType]
-    this._label = makeLabel({
-      type: templateName,
-      item: itemIndex,
-      category: [state.user.select.category],
-      attributes: state.user.select.attributes,
-      order: this._order
-    })
-    this._trackId = makeDefaultId()
-    this._color = getColorById(this._labelId, this._trackId)
-
-    // Initialize with template information
-    this._shapes = []
-    for (const node of this._template.nodes) {
-      this._shapes.push(new Node2D(node))
-    }
-
-    // Get template bounds
-    this.updateBounds()
-
-    // Move to start
-    for (const point of this._shapes) {
-      point.x += start.x - this._bounds.x
-      point.y += start.y - this._bounds.y
-    }
-
-    // Update bounds after moving
-    this.updateBounds()
-
-    this.setSelected(true)
-    this._highlightedHandle = this._shapes.length + 2
-    this._temporary = true
   }
 
   /** Override on mouse down */
@@ -323,6 +282,42 @@ export class CustomLabel2D extends Label2D {
       (shape) => shape.toState()
     )
     return [this._label.shapes, shapeTypes, shapeStates]
+  }
+
+  /** Temporary initialization on mouse down */
+  protected initTempLabel (state: State, start: Vector2D): LabelType {
+    const itemIndex = state.user.select.item
+    const templateName =
+      state.task.config.labelTypes[state.user.select.labelType]
+    const label = makeLabel({
+      type: templateName,
+      item: itemIndex,
+      category: [state.user.select.category],
+      attributes: state.user.select.attributes,
+      order: this._order
+    })
+
+    // Initialize with template information
+    this._shapes = []
+    for (const node of this._template.nodes) {
+      this._shapes.push(new Node2D(node))
+    }
+
+    // Get template bounds
+    this.updateBounds()
+
+    // Move to start
+    for (const point of this._shapes) {
+      point.x += start.x - this._bounds.x
+      point.y += start.y - this._bounds.y
+    }
+
+    // Update bounds after moving
+    this.updateBounds()
+
+    this.setSelected(true)
+    this._highlightedHandle = this._shapes.length + 2
+    return label
   }
 
   /** update bounds to current points */
