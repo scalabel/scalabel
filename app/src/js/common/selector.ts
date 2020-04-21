@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 import { sprintf } from 'sprintf-js'
-import { ConfigType, ConnectionStatus, State } from '../functional/types'
+import { ConfigType, ConnectionStatus, SessionType, State } from '../functional/types'
 
 /**
  * Load the task config
@@ -50,11 +50,31 @@ export const getDashboardLink = createSelector(
 )
 
 /**
+ * Load the session
+ */
+export function getSession (state: State): SessionType {
+  return state.session
+}
+
+/**
  * Get the status of the session
  */
-export function getSessionStatus (state: State): ConnectionStatus {
-  return state.session.status
-}
+export const getSessionStatus = createSelector(
+  [ getSession ],
+  (session: SessionType) => {
+    return session.status
+  }
+)
+
+/**
+ * Get the number of times the session status has updated
+ */
+export const getNumStatusUpdates = createSelector(
+  [ getSession ],
+  (session: SessionType) => {
+    return session.numUpdates
+  }
+)
 
 /**
  * Get display text based on the session status

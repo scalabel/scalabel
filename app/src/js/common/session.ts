@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import { Store } from 'redux'
+import { AnyAction, Dispatch, Store } from 'redux'
+import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 import { StateWithHistory } from 'redux-undo'
 import * as THREE from 'three'
 import * as types from '../action/types'
@@ -8,7 +9,6 @@ import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
-import { SessionStatus } from './session_status'
 import { Track } from './track/track'
 
 /**
@@ -16,7 +16,10 @@ import { Track } from './track/track'
  */
 class Session {
   /** The store to save states */
-  public store: Store<StateWithHistory<State>>
+  public store: Store<StateWithHistory<State>, AnyAction> & {
+    /** Thunk dispatch used for redux-thunk async actions */
+    dispatch: ThunkDispatch<State, undefined, AnyAction>;
+  }
   /** Images of the session */
   public images: Array<{[id: number]: HTMLImageElement}>
   /** Point cloud */
@@ -42,8 +45,6 @@ class Session {
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
   public testMode: boolean
-  /** Handler for the session status */
-  public status: SessionStatus
   /** Whether bots are enabled */
   public bots: boolean
 
@@ -56,7 +57,6 @@ class Session {
     this.tracking = true
     this.trackLinking = false
     this.activeViewerId = -1
-    this.status = new SessionStatus()
     this.autosave = false
     // TODO: make it configurable in the url
     this.devMode = false
@@ -88,10 +88,20 @@ class Session {
   }
 
   /**
-   * Wrapper for redux store dispatch
+   * Wrapper for redux store dispatch of actions
    * @param {types.ActionType} action: action description
    */
-  public dispatch (action: types.ActionType): void {
+  public dispatch (action: types.BaseAction) {
+    this.store.dispatch(action)
+  }
+
+  /**
+   * Wrapper for redux store dispatch of thunk actions
+   * TODO- Should be able to make this the same dispatch- fix type issues
+   * @param {types.ActionType} action: action description
+   */
+  public dispatchThunk (
+    action: ThunkAction<void, State, void, types.BaseAction>) {
     this.store.dispatch(action)
   }
 

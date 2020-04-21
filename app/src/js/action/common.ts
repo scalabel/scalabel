@@ -1,5 +1,6 @@
-import { Dispatch } from 'redux'
-import * as selector from '../common/selectors'
+import { ActionCreator, Dispatch } from 'redux'
+import { ThunkAction, ThunkDispatch } from 'redux-thunk'
+import * as selector from '../common/selector'
 import Session from '../common/session'
 import { ConnectionStatus, LabelType, PaneType,
   Select, ShapeType, SplitType, State,
@@ -409,6 +410,9 @@ export function setStatusToReconnecting () {
   return updateSessionStatus(ConnectionStatus.RECONNECTING)
 }
 
+type ThunkCreatorType =
+  ActionCreator<ThunkAction<void, State, void, types.BaseAction>>
+
 /**
  * Mark status as saving, unless compute is ongoing
  */
@@ -425,27 +429,68 @@ export function setStatusToSaving () {
 /**
  * Mark status as unsaved, unless some other event is in progress
  */
-export function setStatusToUnsaved () {
-  const thunk = (dispatch: Dispatch, getState: () => State) => {
+export const setStatusToUnsaved: ThunkCreatorType = () => {
+  return (dispatch, getState) => {
     const state = getState()
     if (selector.isSessionStatusStable(state)) {
       dispatch(updateSessionStatus(ConnectionStatus.UNSAVED))
     }
   }
-  return thunk
 }
 
 /**
  * After a connect/reconnect, mark status as unsaved
  * Regardless of previous status
  */
-export function setStatusAfterConnection () {
+export function setStatusAfterConnect () {
   return updateSessionStatus(ConnectionStatus.UNSAVED)
 }
 
 /**
  * Mark status as computing
  */
-export function setAsComputing () {
+export function setStatusToComputing () {
   return updateSessionStatus(ConnectionStatus.COMPUTING)
+}
+
+/**
+ * After 5 seconds, fade out the previous message
+ * If no other actions occurred in the meantime
+ */
+export const updateSessionStatusDelayed: ThunkCreatorType = (
+  status: ConnectionStatus, numUpdates: number) => {
+  return (dispatch, getState) => {
+    setTimeout(() => {
+      const newNumUpdates = selector.getNumStatusUpdates(getState())
+      if (numUpdates + 1 === newNumUpdates) {
+        dispatch(updateSessionStatus(status))
+      }
+    }, 5000)
+  }
+}
+
+/**
+ * Mark compute done in the status
+ */
+export const setStatusToComputeDone: ThunkCreatorType = () => {
+  return (dispatch, getState) => {
+    const numUpdates = selector.getNumStatusUpdates(getState())
+    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_COMPUTE_DONE))
+    dispatch(
+      updateSessionStatusDelayed(ConnectionStatus.COMPUTE_DONE, numUpdates)
+    )
+  }
+}
+
+/**
+ * Mark saving as done in the status
+ */
+export const setStatusToSaved: ThunkCreatorType = () => {
+  return (dispatch, getState) => {
+    const numUpdates = selector.getNumStatusUpdates(getState())
+    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_SAVED))
+    dispatch(
+      updateSessionStatusDelayed(ConnectionStatus.SAVED, numUpdates)
+    )
+  }
 }

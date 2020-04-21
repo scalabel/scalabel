@@ -3,8 +3,17 @@ import OrderedMap from 'orderedmap'
 import { Dispatch, Middleware } from 'redux'
 import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
-import { updateTask } from '../action/common'
+import {
+  setStatusAfterConnect,
+  setStatusToComputeDone,
+  setStatusToComputing,
+  setStatusToReconnecting,
+  setStatusToSaved,
+  setStatusToSaving,
+  setStatusToUnsaved,
+  updateTask } from '../action/common'
 import * as types from '../action/types'
+import { isSessionFullySaved } from '../common/selector'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
@@ -106,7 +115,7 @@ export class Synchronizer {
         if (Session.autosave) {
           self.sendQueuedActions()
         } else {
-          Session.status.setAsUnsaved()
+          Session.dispatchThunk(setStatusToUnsaved())
         }
       }
       return next(action)
@@ -117,7 +126,8 @@ export class Synchronizer {
    * Displays pop-up warning user when leaving with unsaved changes
    */
   public warningPopup (e: BeforeUnloadEvent) {
-    if (!Session.status.isFullySaved()) {
+    const state = Session.getState()
+    if (!isSessionFullySaved(state)) {
       e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
       return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
     }
@@ -138,7 +148,7 @@ export class Synchronizer {
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)
-    Session.status.setAsConnect()
+    Session.dispatch(setStatusAfterConnect())
   }
 
   /**
@@ -185,18 +195,18 @@ export class Synchronizer {
       /* Original action was acked by the server
        * This means the bot also received the action
        * And started its prediction */
-      Session.status.setAsComputing()
+      Session.dispatch(setStatusToComputing())
     } else if (actionPacket.triggerId !== undefined &&
       this.actionsPendingPrediction.has(actionPacket.triggerId)) {
       // Ack of bot action means prediction is finished
       this.actionsPendingPrediction.delete(actionPacket.triggerId)
       if (this.actionsPendingPrediction.size === 0) {
-        Session.status.setAsComputeDone()
+        Session.dispatchThunk(setStatusToComputeDone())
       }
     } else if (message.sessionId === Session.id) {
       // Once all actions being saved are acked, update the status
       if (this.actionsToSave.size === 0) {
-        Session.status.setAsSaved()
+        Session.dispatchThunk(setStatusToSaved())
       }
     }
   }
@@ -206,7 +216,7 @@ export class Synchronizer {
    * Prepares for reconnect by updating initial callback
    */
   public disconnectHandler () {
-    Session.status.setAsReconnecting()
+    Session.dispatch(setStatusToReconnecting())
     if (Session.autosave) {
       this.initStateCallback = this.autosaveReconnectCallback
     } else {
@@ -299,7 +309,7 @@ export class Synchronizer {
       bot: false
     }
     this.socket.emit(EventName.ACTION_SEND, message)
-    Session.status.setAsSaving()
+    Session.dispatchThunk(setStatusToSaving())
   }
 }
 
