@@ -134,7 +134,7 @@ export function makePolygon
  * Initialize a pathPoint shape
  * @param params
  */
-export function makePloyPathPoint (params: Partial<PolyPathPoint2DType> = {})
+export function makePolyPathPoint (params: Partial<PolyPathPoint2DType> = {})
   : PolyPathPoint2DType {
   return {
     x: 0,
