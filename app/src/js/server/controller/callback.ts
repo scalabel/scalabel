@@ -92,7 +92,8 @@ class Callback {
     _next: NextFunction
   ) => {
     if (this.config.userManagement) {
-      this.exchangeCode(request.query.code).then((tokens: TokenSet) => {
+      this.exchangeCode(request.query.code as string)
+      .then((tokens: TokenSet) => {
         response.render('callback', {
           accessToken: tokens.access_token,
           idToken: tokens.id_token,
