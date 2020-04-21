@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { policyFromString } from '../../common/track/track'
 import { LabelTypeName, TrackPolicyType } from '../../common/types'
 import { makeState } from '../../functional/states'
-import { State } from '../../functional/types'
+import { IdType, State } from '../../functional/types'
 import { Box3D } from './box3d'
 import { TransformationControl } from './control/transformation_control'
 import { Label3D, labelTypeFromString } from './label3d'
@@ -34,7 +34,7 @@ export class Label3DList {
   public control: TransformationControl
 
   /** Scalabel id to labels */
-  private _labels: {[labelId: number]: Label3D}
+  private _labels: {[labelId: string]: Label3D}
   /** ThreeJS Object id to labels */
   private _raycastMap: {[id: number]: Label3D}
   /** Recorded state of last update */
@@ -115,7 +115,7 @@ export class Label3DList {
   /**
    * Get id's of selected labels
    */
-  public get selectedLabelIds (): {[index: number]: number[]} {
+  public get selectedLabelIds (): {[index: number]: IdType[]} {
     return this._state.user.select.labels
   }
 
@@ -160,9 +160,9 @@ export class Label3DList {
   public updateState (state: State): void {
     this._state = state
 
-    const newLabels: {[labelId: number]: Label3D} = {}
+    const newLabels: {[labelId: string]: Label3D} = {}
     const newRaycastableShapes: Array<Readonly<THREE.Object3D>> = [this.control]
-    const newRaycastMap: {[id: number]: Label3D} = {}
+    const newRaycastMap: {[id: string]: Label3D} = {}
     const item = state.task.items[state.user.select.item]
 
     if (this._selectedLabel) {
@@ -175,7 +175,7 @@ export class Label3DList {
 
     // Update & create labels
     for (const key of Object.keys(item.labels)) {
-      const id = Number(key)
+      const id = key
       if (id in this._labels) {
         newLabels[id] = this._labels[id]
       } else {

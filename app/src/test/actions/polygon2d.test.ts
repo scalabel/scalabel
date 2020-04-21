@@ -46,30 +46,22 @@ test('Add, change and delete polygon labels', () => {
   expect(_.size(labels)).toBe(3)
   expect(_.size(shapes)).toBe(3)
 
-  const labelIds: number[] = _.map(labels, (l) => l.id)
+  const labelIds = _.map(labels, (l) => l.id)
   let label = labels[labelIds[0]]
   expect(label.item).toBe(itemIndex)
   expect(label.type).toBe(LabelTypeName.POLYGON_2D)
   expect(label.manual).toBe(true)
   expect(labels[labelIds[2]].manual).toBe(false)
 
-  const indexedShape = shapes[label.shapes[0]]
-  let shape = indexedShape.shape as PolygonType
-  // Check label ids
-  let index = 0
   _.forEach(labels, (v, i) => {
-    expect(v.id).toBe(Number(i))
-    expect(v.id).toBe(index)
-    index += 1
+    expect(v.id).toBe(i)
   })
   // Check shape ids
-  index = 0
   _.forEach(shapes, (v, i) => {
-    expect(v.id).toBe(Number(i))
-    expect(v.id).toBe(index)
-    index += 1
+    expect(v.id).toBe(i)
   })
 
+  let shape = shapes[label.shapes[0]] as PolygonType
   let points = shape.points
 
   checkPathPointFields(points[0], 0, 1, true)
@@ -79,7 +71,7 @@ test('Add, change and delete polygon labels', () => {
 
   Session.dispatch(
     action.changeLabelShape(
-      itemIndex, indexedShape.id, makePolygon({ points:
+      itemIndex, shape.id, makePolygon({ points:
       [(new PathPoint2D(2, 0, PointType.CURVE)).toPathPoint(),
         (new PathPoint2D(4, 0, PointType.CURVE)).toPathPoint(),
         (new PathPoint2D(4, 2, PointType.VERTEX)).toPathPoint(),
@@ -88,7 +80,7 @@ test('Add, change and delete polygon labels', () => {
   state = Session.getState()
   item = state.task.items[itemIndex]
   label = item.labels[label.id]
-  shape = item.shapes[label.shapes[0]].shape as PolygonType
+  shape = item.shapes[label.shapes[0]] as PolygonType
 
   points = shape.points
 
@@ -98,7 +90,7 @@ test('Add, change and delete polygon labels', () => {
   checkPathPointFields(points[3], 2, 2, false)
 
   Session.dispatch(action.deleteLabel(itemIndex, label.id))
-  state = Session.getState()
-  expect(_.size(state.task.items[itemIndex].labels)).toBe(2)
-  expect(_.size(state.task.items[itemIndex].shapes)).toBe(2)
+  item = Session.getState().task.items[itemIndex]
+  expect(_.size(item.labels)).toBe(2)
+  expect(_.size(item.shapes)).toBe(2)
 })

@@ -203,7 +203,7 @@ Then, the server can be accessed at `http://localhost:8686`. You can now check o
 
 ### Cognito Integration
 
-Scalabel could integrate with [AWS Cognito](https://aws.amazon.com/cognito/). You can use Cognito to manage users. Once you have set up Cognito (See official tutoral [here](https://docs.aws.amazon.com/cognito/latest/developerguide/tutorials.html)), go to config file, fill the properties like below.
+Scalabel could integrate with [AWS Cognito](https://aws.amazon.com/cognito/). You can use Cognito to manage users. Once you have set up Cognito (See official tutorial [here](https://docs.aws.amazon.com/cognito/latest/developerguide/tutorials.html)), go to config file, fill the properties like below.
 
 ```yaml
 userManagement: true //If set to true, then the following configs are required
@@ -219,3 +219,7 @@ callbackUri: "http://localhost:8686/callback"
 - clientID: App Client ID - You can find it in [General settings] -> [App clients] or [App integration] -> [App client settings]
 - userPoolBaseUri: App Domain - You can find it in [App integration] -> [Domain name]
 - callbackUri: Must exact as what you filled in [App integration] -> [App client settings]
+
+### Backward compatibility
+
+We are doing our best to make sure that our system can be stable and the internal data can be reused in the new updates. At the same time, we are also iterating on the internal design so that it can be more efficient and versatile. In some cases, we have to break the backward compatibility for the internal data storage. When this happens to your project, you can export the labels from the old project and import them to the new project with the new code. We definitely hope you can enjoy the new features we constantly add to Scalabel.

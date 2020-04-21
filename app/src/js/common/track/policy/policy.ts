@@ -1,3 +1,4 @@
+import { IdType } from '../../../functional/types'
 import { TrackPolicyType } from '../../types'
 import { Track } from '../track'
 
@@ -16,7 +17,7 @@ export class TrackPolicy {
   }
 
   /** Update track when labels/shapes are changed */
-  public update (_itemIndex: number, _trackId: number): void {
+  public update (_itemIndex: number, _trackId: IdType): void {
     return
   }
 

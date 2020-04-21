@@ -1,14 +1,12 @@
 import {
   ConfigType,
-  CubeType,
   ExtrinsicsType,
   IntrinsicsType,
   ItemType,
-  Plane3DType,
-  RectType,
   TaskStatus,
-  TrackType
-} from './types'
+  TrackType,
+  Vector3Type
+} from '../functional/types'
 
 export interface TaskData {
   /** task config data that's constant throughout a session */
@@ -53,6 +51,33 @@ export interface PolygonExportType {
   closed: boolean
 }
 
+export interface Box2DType {
+    /** The x-coordinate of upper left corner */
+  x1: number
+    /** The y-coordinate of upper left corner */
+  y1: number
+    /** The x-coordinate of lower right corner */
+  x2: number
+    /** The y-coordinate of lower right corner */
+  y2: number
+}
+
+export interface Box3DType {
+  /** Center of the cube */
+  center: Vector3Type
+  /** size */
+  size: Vector3Type
+  /** orientation */
+  orientation: Vector3Type
+}
+
+export interface Plane3DType {
+  /** Plane origin in world */
+  center: Vector3Type
+  /** orientation in Euler */
+  orientation: Vector3Type
+}
+
 export interface CustomExportType {
   /** point positions */
   points: Array<[number ,number]>
@@ -66,7 +91,7 @@ export interface CustomExportType {
 
 export interface LabelExport {
   /** label id */
-  id: number
+  id: string | number
   /** category */
   category: string
   /** label attributes- can be list or switch type */
@@ -74,11 +99,11 @@ export interface LabelExport {
   /** if shape was manual */
   manualShape: boolean
   /** box2d label */
-  box2d: RectType | null
+  box2d: Box2DType | null
   /** poly2d label */
   poly2d: PolygonExportType[] | null
   /** box3d label */
-  box3d: CubeType | null
+  box3d: Box3DType | null
   /** plane3d label */
   plane3d: Plane3DType | null
   /** custom labels */

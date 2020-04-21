@@ -1,3 +1,4 @@
+import { makeNode2d } from '../../functional/states'
 import { Node2DType } from '../../functional/types'
 import { Point2D } from './point2d'
 
@@ -46,11 +47,11 @@ export class Node2D extends Point2D {
 
   /** To state representation */
   public toState (): Node2DType {
-    return {
+    return makeNode2d({
       name: this._name,
       hidden: this._hidden,
       x: this.x,
       y: this.y
-    }
+    })
   }
 }

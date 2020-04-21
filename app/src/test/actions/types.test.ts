@@ -10,7 +10,7 @@ test('Test task action checker', () => {
   const taskActions: BaseAction[] = [
     addLabel(0, makeLabel()),
     linkLabels(0, []),
-    addTrack([], '', [], [], []),
+    addTrack([], '', [], []),
     submit()
   ]
   for (const taskAction of taskActions) {

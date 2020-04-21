@@ -2,6 +2,7 @@
  * Define string identifiers and interfaces of actions
  */
 import {
+  IdType,
   LabelType,
   PaneType,
   Select,
@@ -64,13 +65,13 @@ export interface BaseAction {
   /** type of the action */
   type: string
   /** id of the session that initiates the action */
-  sessionId: string
+  sessionId: IdType
   /** timestamp given by backend. It is Date.now() */
   timestamp?: number
   /** whether to sync action, or just apply to frontend */
   frontendOnly?: boolean
   /** id of the user that initiates the action */
-  userId?: string
+  userId?: IdType
 }
 
 export type InitSessionAction = BaseAction
@@ -104,8 +105,6 @@ export interface AddLabelsAction extends BaseAction {
   itemIndices: number[]
   /** labels to add to each item */
   labels: LabelType[][]
-  /** shape types for each label */
-  shapeTypes: string[][][]
   /** shapes for each label */
   shapes: ShapeType[][][]
 }
@@ -117,22 +116,20 @@ export interface AddTrackAction extends BaseAction {
   itemIndices: number[]
   /** labels to add to each item */
   labels: LabelType[]
-  /** shape types for each label */
-  shapeTypes: string[][]
   /** shapes for each label */
   shapes: ShapeType[][]
 }
 
 export interface MergeTrackAction extends BaseAction {
   /** item of the added label */
-  trackIds: number[]
+  trackIds: IdType[]
 }
 
 export interface ChangeShapesAction extends BaseAction {
   /** item of the shape */
   itemIndices: number[]
   /** Shape ids in each item */
-  shapeIds: number[][]
+  shapeIds: IdType[][]
   /** properties to update for the shape */
   shapes: Array<Array<Partial<ShapeType>>>
 }
@@ -141,7 +138,7 @@ export interface ChangeLabelsAction extends BaseAction {
   /** item of the label */
   itemIndices: number[]
   /** Label ID */
-  labelIds: number[][]
+  labelIds: IdType[][]
   /** properties to update for the shape */
   props: Array<Array<Partial<LabelType>>>
 }
@@ -150,21 +147,21 @@ export interface LinkLabelsAction extends BaseAction {
   /** item of the labels */
   itemIndex: number,
   /** ids of the labels to link */
-  labelIds: number[]
+  labelIds: IdType[]
 }
 
 export interface UnlinkLabelsAction extends BaseAction {
   /** item of the labels */
   itemIndex: number,
   /** ids of the labels to unlink */
-  labelIds: number[]
+  labelIds: IdType[]
 }
 
 export interface DeleteLabelsAction extends BaseAction {
   /** item of the label */
   itemIndices: number[]
   /** ID of label to be deleted */
-  labelIds: number[][]
+  labelIds: IdType[][]
 }
 
 export interface AddViewerConfigAction extends BaseAction {
