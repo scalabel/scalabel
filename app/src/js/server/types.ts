@@ -15,6 +15,25 @@ export interface Project {
 }
 
 /**
+ * Cognito server config
+ *
+ * @export
+ * @interface CognitoConfig
+ */
+export interface CognitoConfig {
+  /** region of cognito service */
+  region: string
+  /** user pool id of cognito */
+  userPool: string
+  /** client id of cognito */
+  clientId: string,
+  /** user pool base uri */
+  userPoolBaseUri: string,
+  /** callback uri */
+  callbackUri: string
+}
+
+/**
  * Information for backend environment variables
  * Populated using configuration file
  */
@@ -47,16 +66,8 @@ export interface ServerConfig {
   botHost: string
   /** port of python model server */
   botPort: number
-  /** region of cognito service */
-  region?: string
-  /** user pool id of cognito */
-  userPool?: string
-  /** client id of cognito */
-  clientId?: string,
-  /** user pool base uri */
-  userPoolBaseUri?: string,
-  /** callback uri */
-  callbackUri?: string
+  /** cognito settings */
+  cognito?: CognitoConfig
 }
 
 /**

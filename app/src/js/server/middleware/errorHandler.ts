@@ -21,8 +21,8 @@ const errorHandler = (config: ServerConfig) => (
     code: status.toString(),
     data: message
   }
-  if (status === 401 && config.userManagement) {
-    resData.redirect = `https://${config.userPoolBaseUri}/login?client_id=${config.clientId}&response_type=code&redirect_uri=${config.callbackUri}`
+  if (status === 401 && config.userManagement && config.cognito) {
+    resData.redirect = `https://${config.cognito.userPoolBaseUri}/login?client_id=${config.cognito.clientId}&response_type=code&redirect_uri=${config.cognito.callbackUri}`
   }
   response.status(status).json(resData)
 }

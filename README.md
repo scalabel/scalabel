@@ -207,11 +207,12 @@ Scalabel could integrate with [AWS Cognito](https://aws.amazon.com/cognito/). Yo
 
 ```yaml
 userManagement: true //If set to true, then the following configs are required
-region: "us-west-2"
-userPool: "us-west-2_tgxuoXZdf"
-clientId: "52i44u3c7fapmec4oaqto4lk121"
-userPoolBaseUri: "scalabel.auth.us-west-2.amazoncognito.com"
-callbackUri: "http://localhost:8686/callback"
+cognito:
+  region: "us-west-2"
+  userPool: "us-west-2_tgxuoXZdf"
+  clientId: "52i44u3c7fapmec4oaqto4lk121"
+  userPoolBaseUri: "scalabel.auth.us-west-2.amazoncognito.com"
+  callbackUri: "http://localhost:8686/callback"
 ```
 
 - region: Region of your cognito service.

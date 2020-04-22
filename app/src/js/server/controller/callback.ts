@@ -91,7 +91,7 @@ class Callback {
     response: Response,
     _next: NextFunction
   ) => {
-    if (this.config.userManagement) {
+    if (this.config.userManagement && this.config.cognito) {
       this.exchangeCode(request.query.code as string)
       .then((tokens: TokenSet) => {
         response.render('callback', {
@@ -99,8 +99,8 @@ class Callback {
           idToken: tokens.id_token,
           refreshToken: tokens.refresh_token,
           tokenType: tokens.token_type,
-          uri: this.config.userPoolBaseUri,
-          clientId: this.config.clientId
+          uri: this.config.cognito!.userPoolBaseUri,
+          clientId: this.config.cognito!.clientId
         })
       })
       .catch()
@@ -121,12 +121,12 @@ class Callback {
     return new Promise((resolve, reject) => {
       const postData = querystring.stringify({
         grant_type: 'authorization_code',
-        client_id: this.config.clientId,
-        redirect_uri: this.config.callbackUri,
+        client_id: this.config.cognito!.clientId,
+        redirect_uri: this.config.cognito!.callbackUri,
         code
       })
       const config = {
-        host: this.config.userPoolBaseUri,
+        host: this.config.cognito!.userPoolBaseUri,
         path: '/oauth2/token',
         method: 'POST',
         headers: {
