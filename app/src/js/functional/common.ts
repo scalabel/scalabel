@@ -8,7 +8,6 @@ import * as types from '../action/types'
 import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
 import { makeIndexedShape, makePane, makeTrack } from './states'
 import {
-  ConnectionStatus,
   IndexedShapeType,
   ItemType,
   LabelType,

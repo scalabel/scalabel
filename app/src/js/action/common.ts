@@ -1,5 +1,5 @@
 import { ActionCreator, Dispatch } from 'redux'
-import { ThunkAction, ThunkDispatch } from 'redux-thunk'
+import { ThunkAction } from 'redux-thunk'
 import * as selector from '../common/selector'
 import Session from '../common/session'
 import { ConnectionStatus, LabelType, PaneType,

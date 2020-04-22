@@ -1,11 +1,12 @@
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import * as THREE from 'three'
 import Session from '../common/session'
 import { isCurrentFrameLoaded, isCurrentItemLoaded } from '../functional/state_util'
 import { PointCloudViewerConfigType, State } from '../functional/types'
-import { DrawableCanvas } from './viewer'
+import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 
 const styles = () => createStyles({
   point_cloud_canvas: {
@@ -20,7 +21,7 @@ interface ClassType {
   point_cloud_canvas: string
 }
 
-interface Props {
+interface Props extends DrawableProps {
   /** CSS class */
   classes: ClassType
   /** container */
@@ -294,4 +295,5 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   }
 }
 
-export default withStyles(styles, { withTheme: true })(PointCloudCanvas)
+const styledCanvas = withStyles(styles, { withTheme: true })(PointCloudCanvas)
+export default connect(mapStateToDrawableProps)(styledCanvas)

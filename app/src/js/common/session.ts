@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { AnyAction, Dispatch, Store } from 'redux'
+import { AnyAction, Store } from 'redux'
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 import { StateWithHistory } from 'redux-undo'
 import * as THREE from 'three'
@@ -91,7 +91,7 @@ class Session {
    * Wrapper for redux store dispatch of actions
    * @param {types.ActionType} action: action description
    */
-  public dispatch (action: types.BaseAction) {
+  public dispatch (action: types.ActionType) {
     this.store.dispatch(action)
   }
 
@@ -101,7 +101,7 @@ class Session {
    * @param {types.ActionType} action: action description
    */
   public dispatchThunk (
-    action: ThunkAction<void, State, void, types.BaseAction>) {
+    action: ThunkAction<void, State, void, types.ActionType>) {
     this.store.dispatch(action)
   }
 

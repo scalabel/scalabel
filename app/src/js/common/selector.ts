@@ -141,9 +141,9 @@ export const shouldStatusTextHide = createSelector(
  * Returns true if canvas should be frozne
  */
 export const shouldCanvasFreeze = createSelector(
-  [getSessionStatus],
-  (status: ConnectionStatus) => {
-    return status === ConnectionStatus.RECONNECTING
+  [getSessionStatus, getAutosaveFlag],
+  (status: ConnectionStatus, autosave: boolean) => {
+    return status === ConnectionStatus.RECONNECTING && autosave
   }
 )
 

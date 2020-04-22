@@ -1,11 +1,23 @@
-import Session from '../common/session'
+import { shouldCanvasFreeze } from '../common/selector'
 import { State } from '../functional/types'
 import { Component } from './component'
+
+export interface DrawableProps {
+  /** Whether the canvas should freeze */
+  shouldFreeze: boolean
+}
+
+export const mapStateToDrawableProps = (state: State): DrawableProps => {
+  return {
+    shouldFreeze: shouldCanvasFreeze(state)
+  }
+}
 
 /**
  * Abstract class for Canvas
  */
-export abstract class DrawableCanvas<Props> extends Component<Props> {
+export abstract class DrawableCanvas<
+  Props extends DrawableProps> extends Component<Props> {
   /**
    * General constructor
    * @param props: component props
@@ -26,7 +38,7 @@ export abstract class DrawableCanvas<Props> extends Component<Props> {
    * Checks whether to freeze interface
    */
   public checkFreeze () {
-    return Session.autosave && Session.status.shouldFreezeCanvas()
+    return this.props.shouldFreeze
   }
 
   /**
