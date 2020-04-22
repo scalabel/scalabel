@@ -12,11 +12,15 @@ import { connect } from 'react-redux'
 import { submit } from '../action/common'
 import * as selector from '../common/selector'
 import Session from '../common/session'
+import { Synchronizer } from '../common/synchronizer'
 import { Key } from '../common/types'
 import { State } from '../functional/types'
 import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
+
+// how long to wait until saving times out
+export const saveTimeout = 20000
 
 interface ClassType {
   /** App bar class */
@@ -54,6 +58,11 @@ interface DispatchProps {
   submit: () => void
 }
 
+interface DependencyProps {
+  /** Syncrhonizer for saving */
+  synchronizer: Synchronizer
+}
+
 interface ButtonInfo {
   /** Name */
   title: string,
@@ -82,7 +91,7 @@ function renderButton (button: ButtonInfo, titleUnit: string): JSX.Element {
   )
 }
 
-type Props = StyleProps & StateProps & DispatchProps
+type Props = StyleProps & StateProps & DispatchProps & DependencyProps
 
 /**
  * Title bar
@@ -174,7 +183,7 @@ class TitleBar extends Component<Props> {
 
   /** Save task */
   private save () {
-    // this.props.synchronizer.sendQueuedActions()
+    this.props.synchronizer.sendQueuedActions()
     return
   }
 }

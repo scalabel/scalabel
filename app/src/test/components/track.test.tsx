@@ -66,6 +66,7 @@ function setUpLabel2dCanvas (width: number, height: number) {
         id={0}
         display={display}
         ref={canvasRef}
+        shouldFreeze={false}
       />
     </div>
   )

@@ -43,7 +43,7 @@ export function initSession (containerName: string): void {
         murmur,
         (state: State) => {
           initFromJson(state, synchronizer.middleware)
-          renderDom(containerName)
+          renderDom(containerName, synchronizer)
         }
       )
     })
@@ -78,11 +78,13 @@ function updateTracks (): void {
  * Render the dom after data is laoded
  * @param containername: string name
  */
-function renderDom (containerName: string) {
+function renderDom (containerName: string, synchronizer: Synchronizer) {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
       <Provider store={Session.store}>
-        <Window/>
+        <Window
+          synchronizer={synchronizer}
+        />
       </Provider>
     </MuiThemeProvider>,
     document.getElementById(containerName))

@@ -200,6 +200,16 @@ export const isComputeDone = createSelector(
 )
 
 /**
+ * Returns true if reconnection is in progress
+ */
+export const isStatusReconnecting = createSelector(
+  [getSessionStatus],
+  (status: ConnectionStatus) => {
+    return status === ConnectionStatus.RECONNECTING
+  }
+)
+
+/**
  * Returns false if there could be unsaved work in progress
  */
 export const isSessionFullySaved = createSelector(

@@ -411,7 +411,7 @@ export function setStatusToReconnecting () {
 }
 
 type ThunkCreatorType =
-  ActionCreator<ThunkAction<void, State, void, types.BaseAction>>
+  ActionCreator<ThunkAction<void, State, void, types.ActionType>>
 
 /**
  * Mark status as saving, unless compute is ongoing

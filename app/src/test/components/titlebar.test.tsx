@@ -4,6 +4,7 @@ import * as React from 'react'
 import io from 'socket.io-client'
 import { addLabel } from '../../js/action/common'
 import { ActionType, SUBMIT } from '../../js/action/types'
+import { isStatusSaving } from '../../js/common/selector'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
@@ -37,10 +38,6 @@ describe('Save button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
           synchronizer={synchronizer}
         />
       </MuiThemeProvider>
@@ -67,17 +64,13 @@ describe('Save button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
           synchronizer={synchronizer}
         />
       </MuiThemeProvider>
     )
     const saveButton = getByTestId('Save')
     fireEvent.click(saveButton)
-    expect(Session.status.checkSaving()).toBe(true)
+    expect(isStatusSaving(Session.getState())).toBe(true)
     expect(mockSocket.emit).toHaveBeenCalled()
   })
 })
@@ -99,10 +92,6 @@ describe('Submit button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
           synchronizer={synchronizer}
         />
       </MuiThemeProvider>
@@ -149,10 +138,6 @@ describe('Submit button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
           synchronizer={synchronizer}
         />
       </MuiThemeProvider>

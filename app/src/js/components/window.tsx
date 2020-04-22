@@ -1,16 +1,24 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { getConfig } from '../common/selector'
+import { Synchronizer } from '../common/synchronizer'
 import { ConfigType, State } from '../functional/types'
 import LabelLayout from './label_layout'
 import TitleBar from './title_bar'
 // $FlowFixMe
 import { ToolBar } from './toolbar'
 
-interface Props {
+interface StateProps {
   /** config variables */
   config: ConfigType
 }
+
+interface DependencyProps {
+  /** synchronizer for saving */
+  synchronizer: Synchronizer
+}
+
+type Props = StateProps & DependencyProps
 
 /**
  * Manage the whole window
@@ -42,7 +50,9 @@ export class Window extends React.Component<Props> {
 
     // get all the components
     const titleBar = (
-        <TitleBar/>
+        <TitleBar
+          synchronizer={this.props.synchronizer}
+        />
     )
 
     const leftSidebar1 = (
@@ -69,7 +79,7 @@ export class Window extends React.Component<Props> {
   }
 }
 
-const mapStateToProps = (state: State): Props => {
+const mapStateToProps = (state: State): StateProps => {
   return {
     config: getConfig(state)
   }
