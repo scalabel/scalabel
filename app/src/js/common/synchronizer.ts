@@ -110,7 +110,8 @@ export class Synchronizer {
     ) => (action: types.BaseAction) => {
       action.userId = this.userId
       /* Only send back actions that originated locally */
-      if (Session.id === action.sessionId && !action.frontendOnly) {
+      if (Session.id === action.sessionId && !action.frontendOnly &&
+        !types.isSessionAction(action)) {
         self.actionQueue.push(action)
         if (Session.autosave) {
           self.sendQueuedActions()
@@ -126,8 +127,7 @@ export class Synchronizer {
    * Displays pop-up warning user when leaving with unsaved changes
    */
   public warningPopup (e: BeforeUnloadEvent) {
-    const state = Session.getState()
-    if (!isSessionFullySaved(state)) {
+    if (!isSessionFullySaved(Session.store.getState())) {
       e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
       return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
     }

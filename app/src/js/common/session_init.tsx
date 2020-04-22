@@ -30,7 +30,6 @@ export function initSession (containerName: string): void {
   const taskIndex = parseInt(searchParams.get('task_index') as string, 10)
   const projectName = searchParams.get('project_name') as string
   setListeners()
-
   setTimeout(() => {
     Fingerprint2.get((components) => {
       const values =

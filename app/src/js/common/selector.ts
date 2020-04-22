@@ -1,3 +1,4 @@
+import { StateWithHistory } from 'redux-undo'
 import { createSelector } from 'reselect'
 import { sprintf } from 'sprintf-js'
 import { ConfigType, ConnectionStatus, SessionType, State } from '../functional/types'
@@ -5,8 +6,8 @@ import { ConfigType, ConnectionStatus, SessionType, State } from '../functional/
 /**
  * Load the task config
  */
-export function getConfig (state: State): ConfigType {
-  return state.task.config
+export function getConfig (state: StateWithHistory<State>): ConfigType {
+  return state.present.task.config
 }
 
 /**
@@ -52,8 +53,8 @@ export const getDashboardLink = createSelector(
 /**
  * Load the session
  */
-export function getSession (state: State): SessionType {
-  return state.session
+export function getSession (state: StateWithHistory<State>): SessionType {
+  return state.present.session
 }
 
 /**

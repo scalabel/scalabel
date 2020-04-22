@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { StateWithHistory } from 'redux-undo'
 import { getConfig } from '../common/selector'
 import { Synchronizer } from '../common/synchronizer'
 import { ConfigType, State } from '../functional/types'
@@ -79,7 +80,7 @@ export class Window extends React.Component<Props> {
   }
 }
 
-const mapStateToProps = (state: State): StateProps => {
+const mapStateToProps = (state: StateWithHistory<State>): StateProps => {
   return {
     config: getConfig(state)
   }

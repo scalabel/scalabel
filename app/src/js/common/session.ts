@@ -18,7 +18,7 @@ class Session {
   /** The store to save states */
   public store: Store<StateWithHistory<State>, AnyAction> & {
     /** Thunk dispatch used for redux-thunk async actions */
-    dispatch: ThunkDispatch<State, undefined, AnyAction>;
+    dispatch: ThunkDispatch<StateWithHistory<State>, undefined, AnyAction>;
   }
   /** Images of the session */
   public images: Array<{[id: number]: HTMLImageElement}>
@@ -101,7 +101,8 @@ class Session {
    * @param {types.ActionType} action: action description
    */
   public dispatchThunk (
-    action: ThunkAction<void, State, void, types.ActionType>) {
+    action: ThunkAction<
+      void, StateWithHistory<State>, void, types.ActionType>) {
     this.store.dispatch(action)
   }
 

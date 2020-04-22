@@ -1,5 +1,6 @@
-import { ActionCreator, Dispatch } from 'redux'
+import { ActionCreator } from 'redux'
 import { ThunkAction } from 'redux-thunk'
+import { StateWithHistory } from 'redux-undo'
 import * as selector from '../common/selector'
 import Session from '../common/session'
 import { ConnectionStatus, LabelType, PaneType,
@@ -411,19 +412,18 @@ export function setStatusToReconnecting () {
 }
 
 type ThunkCreatorType =
-  ActionCreator<ThunkAction<void, State, void, types.ActionType>>
+  ActionCreator<
+  ThunkAction<void, StateWithHistory<State>, void, types.ActionType>>
 
 /**
  * Mark status as saving, unless compute is ongoing
  */
-export function setStatusToSaving () {
-  const thunk = (dispatch: Dispatch, getState: () => State) => {
-    const state = getState()
-    if (!selector.isStatusComputing(state)) {
+export const setStatusToSaving: ThunkCreatorType = () => {
+  return (dispatch, getState) => {
+    if (!selector.isStatusComputing(getState())) {
       dispatch(updateSessionStatus(ConnectionStatus.SAVING))
     }
   }
-  return thunk
 }
 
 /**
@@ -431,8 +431,7 @@ export function setStatusToSaving () {
  */
 export const setStatusToUnsaved: ThunkCreatorType = () => {
   return (dispatch, getState) => {
-    const state = getState()
-    if (selector.isSessionStatusStable(state)) {
+    if (selector.isSessionStatusStable(getState())) {
       dispatch(updateSessionStatus(ConnectionStatus.UNSAVED))
     }
   }

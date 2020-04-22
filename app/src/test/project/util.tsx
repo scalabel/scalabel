@@ -134,7 +134,7 @@ export function sleep (milliseconds: number): Promise<object> {
  */
 export function waitForSave (): Promise<object> {
   return new Promise(async (resolve) => {
-    while (!isStatusSaved(Session.getState())) {
+    while (!isStatusSaved(Session.store.getState())) {
       await sleep(10)
     }
     resolve()

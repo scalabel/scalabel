@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
+import { StateWithHistory } from 'redux-undo'
 import { submit } from '../action/common'
 import * as selector from '../common/selector'
 import Session from '../common/session'
@@ -188,7 +189,7 @@ class TitleBar extends Component<Props> {
   }
 }
 
-const mapStateToProps = (state: State): StateProps => {
+const mapStateToProps = (state: StateWithHistory<State>): StateProps => {
   return {
     title: selector.getPageTitle(state),
     instructionLink: selector.getInstructionLink(state),

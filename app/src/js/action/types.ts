@@ -63,6 +63,21 @@ export function isTaskAction (action: BaseAction) {
   return TASK_ACTION_TYPES.includes(action.type)
 }
 
+/**
+ * These are actions that should not be broadcast beyond the session
+ */
+const SESSION_ACTION_TYPES = [
+  UPDATE_SESSION_STATUS,
+  UPDATE_SESSION_STATUS_DELAYED
+]
+
+/**
+ * Checks if the action modifies session
+ */
+export function isSessionAction (action: BaseAction) {
+  return SESSION_ACTION_TYPES.includes(action.type)
+}
+
 export interface BaseAction {
   /** type of the action */
   type: string

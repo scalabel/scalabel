@@ -44,13 +44,16 @@ export function configureStore (
     return createStore(
       undoableReducer,
       initialHistory,
-      applyMiddleware(thunk as ThunkMiddleware<State, BaseAction>)
+      applyMiddleware(
+        thunk as ThunkMiddleware<StateWithHistory<State>, BaseAction>)
     )
   } else {
     return createStore(
       undoableReducer,
       initialHistory,
-      applyMiddleware(thunk as ThunkMiddleware<State, BaseAction>, middleware)
+      applyMiddleware(
+        thunk as ThunkMiddleware<StateWithHistory<State>, BaseAction>,
+        middleware)
     )
   }
 }

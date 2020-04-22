@@ -1,3 +1,4 @@
+import { StateWithHistory } from 'redux-undo'
 import { shouldCanvasFreeze } from '../common/selector'
 import { State } from '../functional/types'
 import { Component } from './component'
@@ -7,7 +8,8 @@ export interface DrawableProps {
   shouldFreeze: boolean
 }
 
-export const mapStateToDrawableProps = (state: State): DrawableProps => {
+export const mapStateToDrawableProps = (
+  state: StateWithHistory<State>): DrawableProps => {
   return {
     shouldFreeze: shouldCanvasFreeze(state)
   }
