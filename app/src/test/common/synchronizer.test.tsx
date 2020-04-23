@@ -36,7 +36,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   Session.bots = false
-  Session.dispatchThunk(setStatusToUnsaved())
+  Session.dispatch(setStatusToUnsaved())
 })
 
 afterEach(cleanup)

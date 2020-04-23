@@ -91,19 +91,14 @@ class Session {
    * Wrapper for redux store dispatch of actions
    * @param {types.ActionType} action: action description
    */
-  public dispatch (action: types.ActionType) {
-    this.store.dispatch(action)
-  }
-
-  /**
-   * Wrapper for redux store dispatch of thunk actions
-   * TODO- Should be able to make this the same dispatch- fix type issues
-   * @param {types.ActionType} action: action description
-   */
-  public dispatchThunk (
-    action: ThunkAction<
-      void, StateWithHistory<State>, void, types.ActionType>) {
-    this.store.dispatch(action)
+  public dispatch (action: types.ActionType | ThunkAction<
+    void, StateWithHistory<State>, void, types.ActionType>) {
+    if (action.hasOwnProperty('type')) {
+      this.store.dispatch(action as types.ActionType)
+    } else {
+      this.store.dispatch(action as ThunkAction<
+        void, StateWithHistory<State>, void, types.ActionType>)
+    }
   }
 
   /**

@@ -116,7 +116,7 @@ export class Synchronizer {
         if (Session.autosave) {
           self.sendQueuedActions()
         } else {
-          Session.dispatchThunk(setStatusToUnsaved())
+          Session.dispatch(setStatusToUnsaved())
         }
       }
       return next(action)
@@ -201,12 +201,12 @@ export class Synchronizer {
       // Ack of bot action means prediction is finished
       this.actionsPendingPrediction.delete(actionPacket.triggerId)
       if (this.actionsPendingPrediction.size === 0) {
-        Session.dispatchThunk(setStatusToComputeDone())
+        Session.dispatch(setStatusToComputeDone())
       }
     } else if (message.sessionId === Session.id) {
       // Once all actions being saved are acked, update the status
       if (this.actionsToSave.size === 0) {
-        Session.dispatchThunk(setStatusToSaved())
+        Session.dispatch(setStatusToSaved())
       }
     }
   }
@@ -309,7 +309,7 @@ export class Synchronizer {
       bot: false
     }
     this.socket.emit(EventName.ACTION_SEND, message)
-    Session.dispatchThunk(setStatusToSaving())
+    Session.dispatch(setStatusToSaving())
   }
 }
 
