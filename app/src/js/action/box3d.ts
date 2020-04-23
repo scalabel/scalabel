@@ -28,6 +28,6 @@ export function addBox3dLabel (
   })
 
   return addLabel(
-    itemIndex, label, [types.ShapeTypeName.CUBE], [cube]
+    itemIndex, label, [cube]
   )
 }

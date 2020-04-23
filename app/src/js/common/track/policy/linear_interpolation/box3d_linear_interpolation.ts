@@ -33,8 +33,8 @@ export class Box3DLinearInterpolationPolicy extends LinearInterpolationPolicy {
   /** Calculate deltas */
   protected calculateDeltas (start: number, end: number) {
     const numItems = end - start
-    const firstCube = this._track.getShapes(start)[0].shape as CubeType
-    const lastCube = this._track.getShapes(end)[0].shape as CubeType
+    const firstCube = this._track.getShapes(start)[0] as CubeType
+    const lastCube = this._track.getShapes(end)[0] as CubeType
     this._initialCenter = (new Vector3D()).fromState(firstCube.center)
     this._initialOrientation =
         (new Vector3D()).fromState(firstCube.orientation)

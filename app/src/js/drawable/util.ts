@@ -1,4 +1,6 @@
 import { sprintf } from 'sprintf-js'
+import { id2int, isValidId } from '../functional/states'
+import { IdType } from '../functional/types'
 
 // constants
 const COLOR_PALETTE = [
@@ -61,12 +63,13 @@ function pickColorPalette (index: number): number[] {
 
 /**
  * Convert numerical id to color value in range of [0, 255]
- * @param {number} labelId
- * @param {number} trackId
+ * @param {IdType} labelId
+ * @param {IdType} trackId
  * @return {number[]}
  */
-export function getColorById (labelId: number, trackId: number): number[] {
-  return pickColorPalette((trackId >= 0) ? trackId : labelId)
+export function getColorById (labelId: IdType, trackId: IdType): number[] {
+  const id = (isValidId(trackId)) ? trackId : labelId
+  return pickColorPalette(id2int(id))
 }
 
 /**

@@ -27,8 +27,8 @@ export class Box2DLinearInterpolationPolicy extends LinearInterpolationPolicy {
   /** Calculate deltas */
   protected calculateDeltas (start: number, end: number) {
     const numItems = end - start
-    const firstRect = this._track.getShapes(start)[0].shape as RectType
-    const lastRect = this._track.getShapes(end)[0].shape as RectType
+    const firstRect = this._track.getShapes(start)[0] as RectType
+    const lastRect = this._track.getShapes(end)[0] as RectType
     this._initialCenter = new Vector2D(
       (firstRect.x1 + firstRect.x2) / 2.,
       (firstRect.y1 + firstRect.y2) / 2.

@@ -3,8 +3,8 @@ import { ThunkAction } from 'redux-thunk'
 import { StateWithHistory } from 'redux-undo'
 import * as selector from '../common/selector'
 import Session from '../common/session'
-import { ConnectionStatus, LabelType, PaneType,
-  Select, ShapeType, SplitType, State,
+import { ConnectionStatus, IdType, LabelType,
+  PaneType, Select, ShapeType, SplitType, State,
   TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
@@ -92,7 +92,6 @@ export function loadItem (
 export function addLabel (
   itemIndex: number,
   label: LabelType,
-  shapeTypes: string[] = [],
   shapes: ShapeType[] = []
 ): types.AddLabelsAction {
   return {
@@ -100,7 +99,6 @@ export function addLabel (
     sessionId: Session.id,
     itemIndices: [itemIndex],
     labels: [[label]],
-    shapeTypes: [[shapeTypes]],
     shapes: [[shapes]]
   }
 }
@@ -116,7 +114,6 @@ export function addTrack (
   itemIndices: number[],
   trackType: string,
   labels: LabelType[],
-  shapeTypes: string[][],
   shapes: ShapeType[][]
 ): types.AddTrackAction {
   return {
@@ -125,7 +122,6 @@ export function addTrack (
     sessionId: Session.id,
     itemIndices,
     labels,
-    shapeTypes,
     shapes
   }
 }
@@ -138,7 +134,7 @@ export function addTrack (
  * @return {ChangeLabelShapeAction}
  */
 export function changeShapes (
-    itemIndex: number, shapeIds: number[], shapes: Array<Partial<ShapeType>>
+    itemIndex: number, shapeIds: IdType[], shapes: Array<Partial<ShapeType>>
   ): types.ChangeShapesAction {
   return {
     type: types.CHANGE_SHAPES,
@@ -157,7 +153,7 @@ export function changeShapes (
  * @return {ChangeLabelShapeAction}
  */
 export function changeLabelShape (
-    itemIndex: number, shapeId: number, shape: Partial<ShapeType>
+    itemIndex: number, shapeId: IdType, shape: Partial<ShapeType>
   ): types.ChangeShapesAction {
   return {
     type: types.CHANGE_SHAPES,
@@ -176,7 +172,7 @@ export function changeLabelShape (
  * @return {ChangeLabelPropsAction}
  */
 export function changeLabelProps (
-    itemIndex: number, labelId: number, props: Partial<LabelType>
+    itemIndex: number, labelId: IdType, props: Partial<LabelType>
   ): types.ChangeLabelsAction {
   return {
     type: types.CHANGE_LABELS,
@@ -195,7 +191,7 @@ export function changeLabelProps (
  * @return {ChangeLabelPropsAction}
  */
 export function changeLabelsProps (
-  itemIndices: number[], labelIds: number[][],
+  itemIndices: number[], labelIds: IdType[][],
   props: Array<Array<Partial<LabelType>>>
 ): types.ChangeLabelsAction {
   return {
@@ -213,7 +209,7 @@ export function changeLabelsProps (
  * @param {[]number} labelIds labels to link
  */
 export function linkLabels (
-    itemIndex: number, labelIds: number[]): types.LinkLabelsAction {
+    itemIndex: number, labelIds: IdType[]): types.LinkLabelsAction {
   return {
     type: types.LINK_LABELS,
     sessionId: Session.id,
@@ -228,7 +224,7 @@ export function linkLabels (
  * @param {[]number} labelIds labels to unlink
  */
 export function unlinkLabels (
-    itemIndex: number, labelIds: number[]): types.UnlinkLabelsAction {
+    itemIndex: number, labelIds: IdType[]): types.UnlinkLabelsAction {
   return {
     type: types.UNLINK_LABELS,
     sessionId: Session.id,
@@ -241,7 +237,7 @@ export function unlinkLabels (
  * Merge tracks
  * @param trackIds
  */
-export function mergeTracks (trackIds: number[]): types.MergeTrackAction {
+export function mergeTracks (trackIds: IdType[]): types.MergeTrackAction {
   return {
     type: types.MERGE_TRACKS,
     sessionId: Session.id,
@@ -256,7 +252,7 @@ export function mergeTracks (trackIds: number[]): types.MergeTrackAction {
  * @return {DeleteLabelAction}
  */
 export function deleteLabel (
-    itemIndex: number, labelId: number): types.DeleteLabelsAction {
+    itemIndex: number, labelId: IdType): types.DeleteLabelsAction {
   return deleteLabels([itemIndex], [[labelId]])
 }
 
@@ -267,7 +263,7 @@ export function deleteLabel (
  * @return {types.DeleteLabelsAction}
  */
 export function deleteLabels (
-  itemIndices: number[], labelIds: number[][]): types.DeleteLabelsAction {
+  itemIndices: number[], labelIds: IdType[][]): types.DeleteLabelsAction {
   return {
     type: types.DELETE_LABELS,
     sessionId: Session.id,

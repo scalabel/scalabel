@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import Session from '../common/session'
-import { LabelType, ShapeType, TrackType } from '../functional/types'
-import { addTrack } from './common'
-import { AddTrackAction, DELETE_LABELS, DeleteLabelsAction } from './types'
+import { isValidId, makeDefaultId } from '../functional/states'
+import { IdType, LabelType, ShapeType, TrackType } from '../functional/types'
+import { addTrack, deleteLabels } from './common'
+import { AddTrackAction, DeleteLabelsAction } from './types'
 
 /**
  * Add track by duplicating label from startIndex to stopIndex
@@ -38,7 +39,7 @@ export function addDuplicatedTrack (
   const state = Session.getState()
 
   let parentTrack: TrackType | undefined
-  if (label.parent >= 0) {
+  if (isValidId(label.parent)) {
     const item = state.task.items[label.item]
     const parent = item.labels[label.parent]
     if (parent.track in state.task.tracks) {
@@ -55,7 +56,7 @@ export function addDuplicatedTrack (
     if (parentTrack && index in parentTrack.labels) {
       cloned.parent = parentTrack.labels[index]
     } else if (index !== cloned.item) {
-      cloned.parent = -1
+      cloned.parent = makeDefaultId()
     }
 
     trackLabels.push(cloned)
@@ -65,7 +66,7 @@ export function addDuplicatedTrack (
   }
 
   return addTrack(
-    itemIndices, label.type, trackLabels, trackShapeTypes, trackShapes
+    itemIndices, label.type, trackLabels, trackShapes
   )
 }
 
@@ -82,7 +83,7 @@ export function deleteTracks (
   const labelIds = []
 
   for (let index = 0; index < itemLength; index++) {
-    const toDelete: number[] = []
+    const toDelete: IdType[] = []
     for (const track of tracks) {
       if (index in track.labels) {
         toDelete.push(track.labels[index])
@@ -92,12 +93,7 @@ export function deleteTracks (
     labelIds.push(toDelete)
   }
 
-  return {
-    type: DELETE_LABELS,
-    sessionId: Session.id,
-    itemIndices,
-    labelIds
-  }
+  return deleteLabels(itemIndices, labelIds)
 }
 
 /**
@@ -115,7 +111,7 @@ export function terminateTracks (
   const labelIds = []
 
   for (let index = lastIndex + 1; index < itemLength; index++) {
-    const toDelete: number[] = []
+    const toDelete: IdType[] = []
     for (const track of tracks) {
       if (index in track.labels) {
         toDelete.push(track.labels[index])
@@ -125,10 +121,5 @@ export function terminateTracks (
     labelIds.push(toDelete)
   }
 
-  return {
-    type: DELETE_LABELS,
-    sessionId: Session.id,
-    itemIndices,
-    labelIds
-  }
+  return deleteLabels(itemIndices, labelIds)
 }

@@ -7,8 +7,8 @@ import { File } from 'formidable'
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
-import { ItemExport } from '../functional/bdd_types'
 import { TaskType } from '../functional/types'
+import { ItemExport } from './bdd_types'
 import {
   createProject, createTasks, parseFiles, parseForm, readItemsFile
 } from './create_project'
@@ -73,7 +73,7 @@ export class Listeners {
       res.end()
     }
     try {
-      const projectName = req.query[types.FormField.PROJECT_NAME]
+      const projectName = req.query[types.FormField.PROJECT_NAME] as string
       // grab the latest submissions from all tasks
       const tasks = await this.projectStore.getTasksInProject(projectName)
       let items: ItemExport[] = []

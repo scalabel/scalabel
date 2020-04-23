@@ -5,10 +5,14 @@ import { LabelTypeName } from '../../js/common/types'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { State } from '../../js/functional/types'
-import { convertItemToExport,
-  convertPolygonToExport, convertStateToExport } from '../../js/server/export'
-import { sampleItemExportImage, sampleItemExportImagePolygon,
-         sampleStateExportImage, sampleStateExportImagePolygon} from '../test_export_objects'
+import {
+  convertItemToExport,
+  convertPolygonToExport, convertStateToExport
+} from '../../js/server/export'
+import {
+  sampleItemExportImage, sampleItemExportImagePolygon,
+  sampleStateExportImage, sampleStateExportImagePolygon
+} from '../test_export_objects'
 
 beforeAll(() => {
   Session.devMode = false
@@ -44,28 +48,28 @@ describe('test export functionality across multiple labeling types', () => {
         expect(exportedState).toEqual(sampleStateExportImage)
       })
   }),
-  describe('test export functionality for segmentation', () => {
-    test('single item conversion', () => {
-      const state = readSampleState(samplePolygonStateFile)
-      const config = state.task.config
-      const item = state.task.items[0]
-      const itemExport = convertItemToExport(config, item)[0]
-      expect(itemExport).toEqual(sampleItemExportImagePolygon)
+    describe('test export functionality for segmentation', () => {
+      test('single item conversion', () => {
+        const state = readSampleState(samplePolygonStateFile)
+        const config = state.task.config
+        const item = state.task.items[0]
+        const itemExport = convertItemToExport(config, item)[0]
+        expect(itemExport).toEqual(sampleItemExportImagePolygon)
+      }),
+        test('full state export with empty items', () => {
+          const state = readSampleState(samplePolygonStateFile)
+          const exportedState = convertStateToExport(state)
+          expect(exportedState).toEqual(sampleStateExportImagePolygon)
+        })
     }),
-    test('full state export with empty items', () => {
-      const state = readSampleState(samplePolygonStateFile)
-      const exportedState = convertStateToExport(state)
-      expect(exportedState).toEqual(sampleStateExportImagePolygon)
+    describe('test export functionality for tracking', () => {
+      test('single item conversion', () => {
+        return
+      }),
+        test('full state export including empty items', () => {
+          return
+        })
     })
-  }),
-  describe('test export functionality for tracking', () => {
-    test('single item conversion', () => {
-      return
-    }),
-    test('full state export including empty items', () => {
-      return
-    })
-  })
 })
 
 /**

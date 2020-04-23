@@ -103,22 +103,21 @@ describe('test Delete', () => {
     }
     for (let itemIndex = 0; itemIndex < 3; itemIndex += 1) {
       Session.dispatch(action.goToItem(itemIndex))
-      const label = makeLabel({ item: itemIndex })
+      Session.dispatch(action.addLabel(itemIndex, makeLabel()))
+      const label = makeLabel()
       Session.dispatch(action.addLabel(itemIndex, label))
-      Session.dispatch(action.addLabel(itemIndex, label))
-      const secondLabelId = Session.getState().task.status.maxLabelId
-      Session.dispatch(action.addLabel(itemIndex, label))
-      Session.dispatch(action.addLabel(itemIndex, label))
+      Session.dispatch(action.addLabel(itemIndex, makeLabel()))
+      Session.dispatch(action.addLabel(itemIndex, makeLabel()))
       fireEvent.keyDown(document, { key: 'Backspace' })
       let item = Session.getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(3)
-      expect(secondLabelId in item.labels).toBe(true)
+      expect(label.id in item.labels).toBe(true)
       Session.dispatch(selectLabel(
-        Session.getState().user.select.labels, itemIndex, secondLabelId))
+        Session.getState().user.select.labels, itemIndex, label.id))
       fireEvent.keyDown(document, { key: 'Backspace' })
       item = Session.getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(2)
-      expect(secondLabelId in item.labels).toBe(false)
+      expect(label.id in item.labels).toBe(false)
     }
   })
 })
@@ -195,7 +194,7 @@ describe('test track', () => {
     expect(_.size(state.task.items[2].labels)).toBe(3)
     expect(_.size(state.task.items[2].shapes)).toBe(3)
     Session.dispatch(selectLabel(
-      Session.getState().user.select.labels, 1, 70))
+      Session.getState().user.select.labels, 1, trackLabels[1]))
     fireEvent(
       getByText('End Object Tracking'),
       new MouseEvent('click', {
@@ -213,7 +212,6 @@ describe('test track', () => {
   test('Merge by click toolbar button', () => {
     Session.devMode = false
     initStore(testTrackJson)
-    loadImages()
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
     const { getByText } = render(
     <ToolBar
@@ -233,10 +231,10 @@ describe('test track', () => {
     let state = Session.getState()
     expect(_.size(state.task.tracks[2].labels)).toBe(4)
     expect(_.size(state.task.tracks[9].labels)).toBe(1)
-    expect(state.task.items[5].labels[203].track).toEqual(9)
+    expect(state.task.items[5].labels['203'].track).toEqual('9')
 
     Session.dispatch(selectLabel(
-      Session.getState().user.select.labels, 3, 49))
+      Session.getState().user.select.labels, 3, '49'))
     fireEvent(
       getByText('Track-Link'),
       new MouseEvent('click', {
@@ -247,7 +245,7 @@ describe('test track', () => {
 
     Session.dispatch(action.goToItem(5))
     Session.dispatch(selectLabel(
-      Session.getState().user.select.labels, 5, 203))
+      Session.getState().user.select.labels, 5, '203'))
     fireEvent(
       getByText('Finish Track-Link'),
       new MouseEvent('click', {
@@ -257,8 +255,8 @@ describe('test track', () => {
     )
 
     state = Session.getState()
-    expect(_.size(state.task.tracks[2].labels)).toBe(5)
-    expect(state.task.tracks[9]).toBeUndefined()
-    expect(state.task.items[5].labels[203].track).toEqual(2)
+    expect(_.size(state.task.tracks['2'].labels)).toBe(5)
+    expect(state.task.tracks['9']).toBeUndefined()
+    expect(state.task.items[5].labels['203'].track).toEqual('2')
   })
 })

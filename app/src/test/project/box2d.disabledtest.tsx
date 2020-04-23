@@ -13,12 +13,12 @@ import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { Label2DList } from '../../js/drawable/2d/label2d_list'
 import { getShape } from '../../js/functional/state_util'
-import { RectType } from '../../js/functional/types'
+import { IdType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { Endpoint } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { getTestConfig, getTestConfigPath } from '../util'
+import { findNewLabelsFromState, getTestConfig, getTestConfigPath } from '../util'
 import {
   changeTestConfig,
   countTasks,
@@ -117,6 +117,7 @@ describe('full 2d bounding box integration test', () => {
     // Spawn a canvas and draw labels on this canvas
     // Uses similar code to drawable tests
     const synchronizer = await projectInitSession()
+    const labelIds: IdType[] = []
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
@@ -133,7 +134,6 @@ describe('full 2d bounding box integration test', () => {
     const controlContext = controlCanvas.getContext('2d')
     const handleIndex = 0
     const _labelIndex = -2
-    let labelId = -1
     let state = Session.getState()
     const itemIndex = state.user.select.item
     const label2dList = new Label2DList()
@@ -156,11 +156,11 @@ describe('full 2d bounding box integration test', () => {
     }
     label2dHandler.onMouseUp(new Vector2D(10, 10), _labelIndex, handleIndex)
     label2dList.redraw(labelContext, controlContext, 1)
-    labelId += 1
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     state = Session.getState()
     expect(_.size(state.task.items[itemIndex].labels)).toEqual(1)
-    let rect = getShape(state, itemIndex, labelId, 0) as RectType
+    let rect = getShape(state, itemIndex, labelIds[0], 0) as RectType
     expect(rect.x1).toEqual(1)
     expect(rect.y1).toEqual(1)
     expect(rect.x2).toEqual(10)
@@ -177,11 +177,11 @@ describe('full 2d bounding box integration test', () => {
     }
     label2dHandler.onMouseUp(new Vector2D(40, 40), _labelIndex, handleIndex)
     label2dList.redraw(labelContext, controlContext, 1)
-    labelId += 1
 
     state = Session.getState()
     expect(_.size(state.task.items[itemIndex].labels)).toEqual(2)
-    rect = getShape(state, itemIndex, labelId, 0) as RectType
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
+    rect = getShape(state, itemIndex, labelIds[1], 0) as RectType
     expect(rect.x1).toEqual(20)
     expect(rect.y1).toEqual(20)
     expect(rect.x2).toEqual(40)

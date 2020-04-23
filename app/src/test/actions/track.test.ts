@@ -26,8 +26,8 @@ test('Test tracks ops', () => {
   expect(_.size(state.task.items[2].shapes)).toBe(2)
 
   // merge tracks
-  const toMergeTrack1 = 2
-  const toMergeTrack2 = 9
+  const toMergeTrack1 = '2'
+  const toMergeTrack2 = '9'
   const continueItemIdx = 5
   expect(_.size(state.task.tracks)).toBe(4)
   const labelId = state.task.tracks[toMergeTrack2].labels[continueItemIdx]

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { LabelTypeName, ShapeTypeName } from '../../common/types'
-import { makeLabel } from '../../functional/states'
-import { ShapeType, State } from '../../functional/types'
+import { makeDefaultId, makeLabel } from '../../functional/states'
+import { IdType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { Box3D } from './box3d'
 import { Grid3D } from './grid3d'
@@ -171,14 +171,14 @@ export class Plane3D extends Label3D {
   public updateState (
     state: State,
     itemIndex: number,
-    labelId: number,
+    labelId: IdType,
     activeCamera?: THREE.Camera
   ): void {
     super.updateState(state, itemIndex, labelId)
 
     if (this._label) {
       this._shape.updateState(
-        state.task.items[itemIndex].shapes[this._label.shapes[0]].shape,
+        state.task.items[itemIndex].shapes[this._label.shapes[0]],
         this._label.shapes[0],
         activeCamera
       )
@@ -206,7 +206,7 @@ export class Plane3D extends Label3D {
     sensors?: number[]
   ): void {
     this._label = makeLabel({
-      type: LabelTypeName.PLANE_3D, id: -1, item: itemIndex,
+      type: LabelTypeName.PLANE_3D, id: makeDefaultId(), item: itemIndex,
       category: [category], sensors
     })
     if (center) {
@@ -222,7 +222,7 @@ export class Plane3D extends Label3D {
   }
 
   /** State representation of shape */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }

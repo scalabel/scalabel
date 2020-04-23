@@ -190,4 +190,9 @@ sudo apt-get install -y python3.8 python3.8-dev python3-pip python3-setuptools
 
 ### Redis security
 
-   Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
+Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
+
+
+### Backward compatibility
+
+We are doing our best to make sure that our system can be stable and the internal data can be reused in the new updates. At the same time, we are also iterating on the internal design so that it can be more efficient and versatile. In some cases, we have to break the backward compatibility for the internal data storage. When this happens to your project, you can export the labels from the old project and import them to the new project with the new code. We definitely hope you can enjoy the new features we constantly add to Scalabel.
