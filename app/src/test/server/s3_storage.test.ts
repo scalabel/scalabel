@@ -7,7 +7,7 @@ import { index2str } from '../../js/server/util'
 beforeAll(async () => {
   await storage.makeBucket()
 
-  // add some keys to set up the bucket
+  // add keys to set up the bucket
   let keys = [
     'project',
     'tasks/000000',
