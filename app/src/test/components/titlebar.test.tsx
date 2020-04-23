@@ -113,6 +113,8 @@ describe('Submit button functionality', () => {
     )
 
     const dispatchSpy = jest.spyOn(Session, 'dispatch')
+    dispatchSpy.mockClear()
+
     const submitButton = getByTestId('Submit')
     fireEvent.click(submitButton)
     checkSubmitDispatch(dispatchSpy)
@@ -160,6 +162,8 @@ describe('Submit button functionality', () => {
       </MuiThemeProvider>
     )
     const dispatchSpy = jest.spyOn(Session, 'dispatch')
+    dispatchSpy.mockClear()
+
     const submitButton = getByTestId('Submit')
     fireEvent.click(submitButton)
 
@@ -192,9 +196,8 @@ function checkSubmitDispatch
   (dispatchSpy: jest.SpyInstance<void, [ActionType | ThunkAction<
     void, StateWithHistory<State>, void, ActionType>]>) {
   expect(dispatchSpy).toHaveBeenCalled()
-  // Check type, instead of HaveBeenCalledWith, because userId may change
-  const dispatchCalls = dispatchSpy.mock.calls
-  const dispatchAction = dispatchCalls[dispatchCalls.length - 1][
+  const dispatchAction = dispatchSpy.mock.calls[0][
     0] as ActionType
+  // Check type, instead of HaveBeenCalledWith, because userId may change
   expect(dispatchAction.type).toBe(SUBMIT)
 }
