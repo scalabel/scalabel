@@ -68,7 +68,8 @@ export function isTaskAction (action: BaseAction) {
  */
 const SESSION_ACTION_TYPES = [
   UPDATE_SESSION_STATUS,
-  UPDATE_SESSION_STATUS_DELAYED
+  UPDATE_SESSION_STATUS_DELAYED,
+  CHANGE_SELECT
 ]
 
 /**
