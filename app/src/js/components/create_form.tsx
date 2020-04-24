@@ -5,6 +5,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 import FormGroup from '@material-ui/core/FormGroup'
 import withStyles from '@material-ui/core/styles/withStyles'
 import React, { ChangeEvent } from 'react'
+import { getAuth } from '../common/service'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { Endpoint, FormField } from '../server/types'
 import { checkboxStyle, uploadStyle } from '../styles/create'
@@ -346,6 +347,10 @@ export default class CreateForm extends React.Component<Props, State> {
       }
     }
     x.open('POST', Endpoint.POST_PROJECT)
+    const auth = getAuth()
+    if (auth) {
+      x.setRequestHeader('Authorization', auth)
+    }
     const formData = this.getFormData(event)
     x.send(formData)
   }

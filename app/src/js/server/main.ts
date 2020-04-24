@@ -1,12 +1,15 @@
-import express, { Application } from 'express'
+import express, { Application, NextFunction, Request, Response } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
 import socketio from 'socket.io'
 import 'source-map-support/register'
 import { BotManager } from './bot_manager'
+import Callback from './controller/callback'
 import { Hub } from './hub'
 import { Listeners } from './listeners'
 import Logger from './logger'
+import auth from './middleware/cognitoAuth'
+import errorHandler from './middleware/errorHandler'
 import { getAbsoluteSrcPath, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
 import { RedisClient } from './redis_client'
@@ -40,20 +43,32 @@ function startHTTPServer (
   // set up static handlers for serving items to label
   app.use('/items', express.static(config.itemDir))
 
+  const authMiddleWare =
+    config.userManagement ?
+      auth(config) :
+      (_req: Request, _res: Response, next: NextFunction) => next()
+
+  app.set('views', getAbsoluteSrcPath('../control'))
+  app.set('view engine', 'ejs')
+
+  app.use(Endpoint.CALLBACK,
+    new Callback(config).router)
+
   // set up post/get handlers
-  app.get(Endpoint.GET_PROJECT_NAMES,
+  app.get(Endpoint.GET_PROJECT_NAMES, authMiddleWare,
     listeners.projectNameHandler.bind(listeners))
-  app.get(Endpoint.EXPORT,
+  app.get(Endpoint.EXPORT, authMiddleWare,
    listeners.getExportHandler.bind(listeners))
 
-  app.post(Endpoint.POST_PROJECT, formidable(),
+  app.post(Endpoint.POST_PROJECT, authMiddleWare, formidable(),
     listeners.postProjectHandler.bind(listeners))
-  app.post(Endpoint.POST_PROJECT_INTERNAL, express.json(),
+  app.post(Endpoint.POST_PROJECT_INTERNAL, authMiddleWare, express.json(),
     listeners.postProjectInternalHandler.bind(listeners))
-  app.post(Endpoint.POST_TASKS, express.json(),
+  app.post(Endpoint.POST_TASKS, authMiddleWare, express.json(),
     listeners.postTasksHandler.bind(listeners))
-  app.post(Endpoint.DASHBOARD, express.json(),
+  app.post(Endpoint.DASHBOARD, authMiddleWare, express.json(),
     listeners.dashboardHandler.bind(listeners))
+  app.use(errorHandler(config))
 }
 
 /**
