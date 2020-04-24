@@ -12,7 +12,7 @@
     "scripts": {
         "build": "webpack --config webpack.config.js --mode=production",
         "watch-dev": "webpack --watch --config webpack.config.js --mode=development",
-        "serve": "node app/dist/js/main.js --config ./local-data/config.yml",
+        "serve": "python3 scripts/launch_server.py --config local-data/scalabel/config.yml",
         "lint": "tslint --project tsconfig.json --config tslint.json",
         "test": "jest"
     },
