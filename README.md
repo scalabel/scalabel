@@ -15,7 +15,6 @@
 
 - [Overview video](https://go.yf.io/scalabel-video-demo)
 
-
 ## Try It Yourself
 
 Below is a quick way to install dependencies and launch the Scalabel server. After launching the server, you can directly jump to [how to use the tool](#using-scalabel). If you want to know more about the installation process, please check [additional tips](#installation-tips).
@@ -24,13 +23,14 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
 1. Check out the code
 
-   ```
-   git clone https://github.com/scalabel/scalabel
-   cd scalabel  
-   ```
+    ```shell
+    git clone https://github.com/scalabel/scalabel
+    cd scalabel
+    ```
 
 2. Prepare the local data directories
-    ```
+
+    ```shell
     bash scripts/setup_local_dir.sh
     ```
 
@@ -40,13 +40,13 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
     Download from dockerhub
 
-    ```
+    ```shell
     docker pull scalabel/www
     ```
 
     Launch the server
 
-    ```
+    ```shell
     docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p 8686:8686 -p 6379:6379 scalabel/www \
         python3.8 scripts/launch_server.py \
         --config /opt/scalabel/local-data/scalabel/config.yml
@@ -57,27 +57,32 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 4. Build the code yourself
 
     This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Max OS X and you have `apt-get` if you are on Ubuntu. The code requires Python 3.7 or above. Please check [how to upgrade your Python](#upgrade-python) if you don't have the right version. We use 3.8 by default. Depending your OS, run the script
-    ```
+
+    ```shell
     bash scripts/setup_osx.sh
     ```
-    or 
-    ```
+
+    or
+
+    ```shell
     bash scripts/setup_ubuntu.sh
     ```
+
     If you are on Ubuntu, you may need to run the script with `sudo`.
-    
+
     Then you can use our python script to launch the server.
-    ```
+
+    ```shell
     python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
     ```
 
 5. Get labels
 
-   The collected labels can be directly downloaded from the project dashboard. The data can be follow [bdd data format](https://github.com/ucbdrive/bdd-data/blob/master/doc/format.md). After installing the requirements and setting up the paths of the [bdd data toolkit](https://github.com/ucbdrive/bdd-data), you can visualize the labels by
+    The collected labels can be directly downloaded from the project dashboard. The data can be follow [bdd data format](https://github.com/ucbdrive/bdd-data/blob/master/doc/format.md). After installing the requirements and setting up the paths of the [bdd data toolkit](https://github.com/ucbdrive/bdd-data), you can visualize the labels by
 
-   ```
-   python3 -m bdd_data.show_labels -l <your_downloaded_label_path.json>
-   ```
+    ```shell
+    python3 -m bdd_data.show_labels -l <your_downloaded_label_path.json>
+    ```
 
 More installation and usage details can be find in our [documentation](http://www.scalabel.ai/doc). It also includes Windows setup.
 
@@ -130,7 +135,7 @@ Another use of this function is to provide further adjustment for existing label
 
 Use the synchronization config
 
-```
+```shell
 cp app/config/sync_config.yml local-data/scalabel/config.yml
 ```
 
@@ -146,14 +151,14 @@ Please go to [documentation](http://www.scalabel.ai/doc) for detailed annotation
 
 We transpile or build Javascript code
 
-```
+```shell
 npm install
 node_modules/.bin/webpack --config webpack.config.js --mode=production
 ```
 
 If you are debugging the code, it is helpful to build the javascript code in development mode, in which you can trace the javascript source code in your browser debugger. `--watch` tells webpack to monitor the code changes and recompile automatically.
 
-```
+```shell
 node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
 ```
 
@@ -163,35 +168,58 @@ Our python code requires Python3.7 and above. To install the proper Python versi
 
 Homebrew on Mac can directly install `pyenv`
 
-```
+```shell
 brew update && brew install pyenv
 ```
+
 Otherwise, you can follow the `pyenv` [installation tutorial](https://github.com/pyenv/pyenv#installation). Next, install Python 3.8.2
-```
+
+```shell
 pyenv install 3.8.2
 ```
+
 Set it as global default
-```
+
+```shell
 pyenv global 3.8.2
 ```
+
 Adding the new Python to your `PATH`
 
-```
+```shell
 export PATH=$(pyenv root)/shims:$PATH
 ```
 
-
 On Ubuntu, you can also use [`deadsnakes` ppa](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/+index) to install different versions of Python. Ubuntu 18.04 or later provides the package of Python 3.8 directly.
 
-```
+```shell
 sudo apt-get update
 sudo apt-get install -y python3.8 python3.8-dev python3-pip python3-setuptools
 ```
 
 ### Redis security
 
-Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following https://redis.io/topics/security/. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
+Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following <https://redis.io/topics/security/>. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
 
+### Cognito Integration
+
+Scalabel could integrate with [AWS Cognito](https://aws.amazon.com/cognito/). You can use Cognito to manage users. Once you have set up Cognito (See official tutorial [here](https://docs.aws.amazon.com/cognito/latest/developerguide/tutorials.html)), go to config file, fill the properties like below.
+
+```yaml
+userManagement: true //If set to true, then the following configs are required
+cognito:
+  region: "us-west-2"
+  userPool: "us-west-2_tgxuoXZdf"
+  clientId: "52i44u3c7fapmec4oaqto4lk121"
+  userPoolBaseUri: "scalabel.auth.us-west-2.amazoncognito.com"
+  callbackUri: "http://localhost:8686/callback"
+```
+
+- region: Region of your cognito service.
+- userPool: Pool ID - You can find it in [General Settings]
+- clientID: App Client ID - You can find it in [General settings] -> [App clients] or [App integration] -> [App client settings]
+- userPoolBaseUri: App Domain - You can find it in [App integration] -> [Domain name]
+- callbackUri: Must exact as what you filled in [App integration] -> [App client settings]
 
 ### Backward compatibility
 
