@@ -34,4 +34,7 @@ jobs:
     - name: Build
       run: node_modules/.bin/webpack --config webpack.config.js --mode=production
     - name: Test
+      env:
+         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: npm test
