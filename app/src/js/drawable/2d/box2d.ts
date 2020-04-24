@@ -32,6 +32,16 @@ enum Handles {
 }
 
 /**
+ * Compare two rectangles
+ * @param r1
+ * @param r2
+ */
+function equalRects (r1: RectType, r2: RectType): boolean {
+  return r1.x1 === r2.x2 && r1.x2 === r2.x2 &&
+    r1.y1 === r2.y1 && r1.y2 === r2.y2
+}
+
+/**
  * Box2d Label
  */
 export class Box2D extends Label2D {
@@ -319,7 +329,7 @@ export class Box2D extends Label2D {
   /** Convert label state to drawable */
   public updateShapes (shapes: ShapeType[]): void {
     const rect = shapes[0] as RectType
-    if (!_.isEqual(this.toRect(), rect)) {
+    if (!equalRects(this.toRect(), rect)) {
       this.updateShapeValues(rect)
     }
   }
