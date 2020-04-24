@@ -16,8 +16,8 @@ import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType,
-  ServerConfig, UserData, UserMetadata } from './types'
+import { CognitoConfig, CreationForm,
+  DatabaseType, ServerConfig, UserData, UserMetadata } from './types'
 
 /**
  * Initializes backend environment variables
@@ -50,6 +50,32 @@ export function readConfig (): ServerConfig {
 }
 
 /**
+ * Validate cognito config
+ * @param cognito
+ */
+function validateCognitoConfig (cognito: CognitoConfig | undefined) {
+  if (cognito) {
+    if (!_.has(cognito, 'region')) {
+      throw new Error('Region missed in config ')
+    }
+    if (!_.has(cognito, 'userPool')) {
+      throw new Error('User pool missed in config')
+    }
+    if (!_.has(cognito, 'clientId')) {
+      throw new Error('Client id missed in config')
+    }
+    if (!_.has(cognito, 'userPoolBaseUri')) {
+      throw new Error('User pool base uri missed in config')
+    }
+    if (!_.has(cognito, 'callbackUri')) {
+      throw new Error('Call back uri missed in config')
+    }
+  } else {
+    throw new Error('Cognito setting missed in config')
+  }
+}
+
+/**
  * Validate server config.
  * Mainly focusing on user management
  *
@@ -57,25 +83,7 @@ export function readConfig (): ServerConfig {
  */
 function validateConfig (config: ServerConfig) {
   if (config.userManagement) {
-    if (config.cognito) {
-      if (!_.has(config.cognito, 'region')) {
-        throw new Error('Region missed in config ')
-      }
-      if (!_.has(config.cognito, 'userPool')) {
-        throw new Error('User pool missed in config')
-      }
-      if (!_.has(config.cognito, 'clientId')) {
-        throw new Error('Client id missed in config')
-      }
-      if (!_.has(config.cognito, 'userPoolBaseUri')) {
-        throw new Error('User pool base uri missed in config')
-      }
-      if (!_.has(config.cognito, 'callbackUri')) {
-        throw new Error('Call back uri missed in config')
-      }
-    } else {
-      throw new Error('Cognito setting missed in config')
-    }
+    validateCognitoConfig(config.cognito)
   }
 }
 
