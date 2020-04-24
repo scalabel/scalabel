@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x]
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -27,8 +27,6 @@ jobs:
     - uses: shogo82148/actions-setup-redis@v1
       with:
         redis-version: '5.x'
-    - name: Install libraries
-      run: sudo apt-get install -y npm build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
     - name: Install node packages
       run: npm ci
     - name: Lint
