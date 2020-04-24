@@ -1,4 +1,5 @@
 import { Endpoint } from '../server/types'
+import Cognito from './cognito'
 
 /**
  * This function post request to backend to retrieve required data to display
@@ -13,13 +14,33 @@ export function requestData<DataType> (url: string,
   let data!: DataType[]
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-      data = JSON.parse(xhr.responseText)
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        data = JSON.parse(xhr.responseText)
+      } else if (xhr.status === 401) {
+        const res = JSON.parse(xhr.responseText)
+        window.location.href = res.redirect
+      }
     }
   }
   xhr.open(method, url, async)
+  const auth = getAuth()
+  if (auth) {
+    xhr.setRequestHeader('Authorization', auth)
+  }
   xhr.send(null)
   return data
+}
+
+/**
+ * Get auth status
+ *
+ * @export
+ * @returns
+ */
+export function getAuth () {
+  // Check auth info
+  return Cognito.getAuth()
 }
 
 /**

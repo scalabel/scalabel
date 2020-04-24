@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
+import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
 import * as yargs from 'yargs'
@@ -15,8 +16,8 @@ import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType,
-  ServerConfig, UserData, UserMetadata } from './types'
+import { CognitoConfig, CreationForm,
+  DatabaseType, ServerConfig, UserData, UserMetadata } from './types'
 
 /**
  * Initializes backend environment variables
@@ -44,7 +45,46 @@ export function readConfig (): ServerConfig {
     ...defaults.serverConfig,
     ...userConfig
   }
+  validateConfig(fullConfig)
   return fullConfig
+}
+
+/**
+ * Validate cognito config
+ * @param cognito
+ */
+function validateCognitoConfig (cognito: CognitoConfig | undefined) {
+  if (cognito) {
+    if (!_.has(cognito, 'region')) {
+      throw new Error('Region missed in config ')
+    }
+    if (!_.has(cognito, 'userPool')) {
+      throw new Error('User pool missed in config')
+    }
+    if (!_.has(cognito, 'clientId')) {
+      throw new Error('Client id missed in config')
+    }
+    if (!_.has(cognito, 'userPoolBaseUri')) {
+      throw new Error('User pool base uri missed in config')
+    }
+    if (!_.has(cognito, 'callbackUri')) {
+      throw new Error('Call back uri missed in config')
+    }
+  } else {
+    throw new Error('Cognito setting missed in config')
+  }
+}
+
+/**
+ * Validate server config.
+ * Mainly focusing on user management
+ *
+ * @param {ServerConfig} config
+ */
+function validateConfig (config: ServerConfig) {
+  if (config.userManagement) {
+    validateCognitoConfig(config.cognito)
+  }
 }
 
 /**
