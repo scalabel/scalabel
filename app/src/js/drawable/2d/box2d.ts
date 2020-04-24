@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeDefaultId, makeLabel, makeRect } from '../../functional/states'
-import { IdType, RectType, ShapeType, State, LabelType } from '../../functional/types'
+import { IdType, LabelType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -298,7 +298,6 @@ export class Box2D extends Label2D {
     }
     return [this._label.shapes, [ShapeTypeName.RECT], [this.toRect()]]
   }
-
   /** Get rect representation */
   public toRect (): RectType {
     return (this._shapes[0] as Rect2D).toRect()
@@ -319,11 +318,9 @@ export class Box2D extends Label2D {
 
   /** Convert label state to drawable */
   public updateShapes (shapes: ShapeType[]): void {
-    if (this._label !== null) {
-      const rect = shapes[0] as RectType
-      if (!_.isEqual(this.toRect(), rect)) {
-        this.updateShapeValues(rect)
-      }
+    const rect = shapes[0] as RectType
+    if (!_.isEqual(this.toRect(), rect)) {
+      this.updateShapeValues(rect)
     }
   }
 
@@ -356,7 +353,6 @@ export class Box2D extends Label2D {
     const w = rect.x2 - rect.x1
     const h = rect.y2 - rect.y1
     rect2d.set(x, y, w, h)
-
     // vertices
     tl.set(x, y)
     tr.set(x + w, y)

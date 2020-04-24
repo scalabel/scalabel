@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { makeDefaultId, makeLabel, makeTaskConfig } from '../../functional/states'
+import { makeDefaultId, makeTaskConfig } from '../../functional/states'
 import { ConfigType, IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -23,6 +23,61 @@ export interface ViewMode {
  * Abstract class for 2D drawable labels
  */
 export abstract class Label2D {
+
+  /* The members are public for testing purpose */
+  /** label id in state */
+  protected _labelId: IdType
+  /** track id in state */
+  protected _trackId: IdType
+  /** index of the label */
+  protected _index: number
+  /** drawing order of the label */
+  protected _order: number
+  /** the corresponding label in the state */
+  protected _label: LabelType | null
+  /** drawing mode */
+  protected _viewMode: ViewMode
+  /** whether the label is selected */
+  protected _selected: boolean
+  /** whether the label is highlighted */
+  protected _highlighted: boolean
+  /** -1 means no handle is selected */
+  protected _highlightedHandle: number
+  /** rgba color decided by labelId */
+  protected _color: number[]
+  /** true if mouse down */
+  protected _mouseDown: boolean
+  /** mouse coordinate when pressed down */
+  protected _mouseDownCoord: Vector2D
+  /** whether the label is being editing */
+  protected _editing: boolean
+  /** config */
+  protected _config: ConfigType
+  /** label list */
+  protected _labelList: Label2DList
+  /** whether the label is temporary */
+  protected _temporary: boolean
+
+  constructor (labelList: Label2DList) {
+    this._index = -1
+    this._labelId = makeDefaultId()
+    this._trackId = makeDefaultId()
+    this._selected = false
+    this._highlighted = false
+    this._highlightedHandle = -1
+    this._order = -1
+    this._label = null
+    this._color = [0, 0, 0, 1]
+    this._viewMode = {
+      dimmed: false
+    }
+    this._mouseDownCoord = new Vector2D()
+    this._mouseDown = false
+    this._editing = false
+    this._config = makeTaskConfig()
+    this._labelList = labelList
+    this._temporary = true
+  }
 
   /**
    * Set index of this label
@@ -139,60 +194,6 @@ export abstract class Label2D {
    */
   public get temporary (): boolean {
     return this._temporary
-  }
-  /* The members are public for testing purpose */
-  /** label id in state */
-  protected _labelId: IdType
-  /** track id in state */
-  protected _trackId: IdType
-  /** index of the label */
-  protected _index: number
-  /** drawing order of the label */
-  protected _order: number
-  /** the corresponding label in the state */
-  protected _label: LabelType | null
-  /** drawing mode */
-  protected _viewMode: ViewMode
-  /** whether the label is selected */
-  protected _selected: boolean
-  /** whether the label is highlighted */
-  protected _highlighted: boolean
-  /** -1 means no handle is selected */
-  protected _highlightedHandle: number
-  /** rgba color decided by labelId */
-  protected _color: number[]
-  /** true if mouse down */
-  protected _mouseDown: boolean
-  /** mouse coordinate when pressed down */
-  protected _mouseDownCoord: Vector2D
-  /** whether the label is being editing */
-  protected _editing: boolean
-  /** config */
-  protected _config: ConfigType
-  /** label list */
-  protected _labelList: Label2DList
-  /** whether the label is temporary */
-  protected _temporary: boolean
-
-  constructor (labelList: Label2DList) {
-    this._index = -1
-    this._labelId = makeDefaultId()
-    this._trackId = makeDefaultId()
-    this._selected = false
-    this._highlighted = false
-    this._highlightedHandle = -1
-    this._order = -1
-    this._label = null
-    this._color = [0, 0, 0, 1]
-    this._viewMode = {
-      dimmed: false
-    }
-    this._mouseDownCoord = new Vector2D()
-    this._mouseDown = false
-    this._editing = false
-    this._config = makeTaskConfig()
-    this._labelList = labelList
-    this._temporary = true
   }
 
   /** Set whether the label is highlighted */

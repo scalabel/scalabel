@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import { Cursor, Key, ShapeTypeName } from '../../common/types'
-import { makeDefaultId, makeLabel } from '../../functional/states'
+import { makeLabel } from '../../functional/states'
 import { IdType, Label2DTemplateType, LabelType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
-import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
+import { Context2D, encodeControlColor, toCssColor } from '../util'
 import { DrawMode, Label2D } from './label2d'
 import { Label2DList } from './label2d_list'
 import { Node2D } from './node2d'
@@ -20,28 +20,6 @@ const lineWidth = 4
 
 /** Class for templated user-defined labels */
 export class CustomLabel2D extends Label2D {
-
-  /** Get cursor for highlighting */
-  public get highlightCursor () {
-    if (
-      this._highlightedHandle >= 0 &&
-      this._highlightedHandle < this._shapes.length
-    ) {
-      return Cursor.DEFAULT
-    } else if (
-      this._highlightedHandle >= this._shapes.length &&
-      this._highlightedHandle < this._shapes.length + this._corners.length
-    ) {
-      const cornerIndex = this._highlightedHandle - this._shapes.length
-      if (cornerIndex % 2 === 0) {
-        return Cursor.NWSE_RESIZE
-      } else {
-        return Cursor.NESW_RESIZE
-      }
-    } else {
-      return Cursor.MOVE
-    }
-  }
 
   /** Label template */
   private _template: Label2DTemplateType
@@ -73,6 +51,28 @@ export class CustomLabel2D extends Label2D {
       }
     }
     this._keyDownMap = {}
+  }
+
+  /** Get cursor for highlighting */
+  public get highlightCursor () {
+    if (
+      this._highlightedHandle >= 0 &&
+      this._highlightedHandle < this._shapes.length
+    ) {
+      return Cursor.DEFAULT
+    } else if (
+      this._highlightedHandle >= this._shapes.length &&
+      this._highlightedHandle < this._shapes.length + this._corners.length
+    ) {
+      const cornerIndex = this._highlightedHandle - this._shapes.length
+      if (cornerIndex % 2 === 0) {
+        return Cursor.NWSE_RESIZE
+      } else {
+        return Cursor.NESW_RESIZE
+      }
+    } else {
+      return Cursor.MOVE
+    }
   }
 
   /** Draw according to template */

@@ -39,19 +39,6 @@ enum OrientationType {
  */
 export class Polygon2D extends Label2D {
 
-  /** Get cursor for highlighting */
-  public get highlightCursor () {
-    if (this._state === Polygon2DState.DRAW) {
-      return Cursor.CROSSHAIR
-    } else if (
-      this._highlightedHandle > 0 &&
-      this._highlightedHandle <= this._points.length
-    ) {
-      return Cursor.DEFAULT
-    } else {
-      return Cursor.MOVE
-    }
-  }
   /** array for vertices */
   private _points: PathPoint2D[]
   /** polygon label state */
@@ -73,6 +60,20 @@ export class Polygon2D extends Label2D {
     this._startingPoints = []
     this._keyDownMap = {}
     this._closed = closed
+  }
+
+  /** Get cursor for highlighting */
+  public get highlightCursor () {
+    if (this._state === Polygon2DState.DRAW) {
+      return Cursor.CROSSHAIR
+    } else if (
+      this._highlightedHandle > 0 &&
+      this._highlightedHandle <= this._points.length
+    ) {
+      return Cursor.DEFAULT
+    } else {
+      return Cursor.MOVE
+    }
   }
 
   /**
