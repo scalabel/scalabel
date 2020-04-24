@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
+import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
 import * as yargs from 'yargs'
@@ -57,21 +58,19 @@ export function readConfig (): ServerConfig {
 function validateConfig (config: ServerConfig) {
   if (config.userManagement) {
     if (config.cognito) {
-      if (!Object.prototype.hasOwnProperty.call(config.cognito, 'region')) {
+      if (!_.has(config.cognito, 'region')) {
         throw new Error('Region missed in config ')
       }
-      if (!Object.prototype.hasOwnProperty.call(config.cognito, 'userPool')) {
+      if (!_.has(config.cognito, 'userPool')) {
         throw new Error('User pool missed in config')
       }
-      if (!Object.prototype.hasOwnProperty.call(config.cognito, 'clientId')) {
+      if (!_.has(config.cognito, 'clientId')) {
         throw new Error('Client id missed in config')
       }
-      if (!Object.prototype.hasOwnProperty.call(
-        config.cognito, 'userPoolBaseUri')) {
+      if (!_.has(config.cognito, 'userPoolBaseUri')) {
         throw new Error('User pool base uri missed in config')
       }
-      if (!Object.prototype.hasOwnProperty.call(
-        config.cognito, 'callbackUri')) {
+      if (!_.has(config.cognito, 'callbackUri')) {
         throw new Error('Call back uri missed in config')
       }
     } else {
