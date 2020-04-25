@@ -4,17 +4,16 @@ import _ from 'lodash'
 import * as React from 'react'
 import { Provider } from 'react-redux'
 import { ThunkAction } from 'redux-thunk'
-import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
 import { addLabel } from '../../js/action/common'
 import { ActionType, SUBMIT } from '../../js/action/types'
+import { ReduxState } from '../../js/common/configure_store'
 import { isStatusSaving } from '../../js/common/selector'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import TitleBar from '../../js/components/title_bar'
 import { makeLabel } from '../../js/functional/states'
-import { State } from '../../js/functional/types'
 import { EventName, SyncActionMessageType } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
 import { testJson } from '../test_image_objects'
@@ -194,7 +193,7 @@ describe('Submit button functionality', () => {
  */
 function checkSubmitDispatch
   (dispatchSpy: jest.SpyInstance<void, [ActionType | ThunkAction<
-    void, StateWithHistory<State>, void, ActionType>]>) {
+    void, ReduxState, void, ActionType>]>) {
   expect(dispatchSpy).toHaveBeenCalled()
   const dispatchAction = dispatchSpy.mock.calls[0][
     0] as ActionType

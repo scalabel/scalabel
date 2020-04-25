@@ -1,12 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { StateWithHistory } from 'redux-undo'
+import { ReduxState } from '../common/configure_store'
 import { getConfig } from '../common/selector'
 import { Synchronizer } from '../common/synchronizer'
-import { ConfigType, State } from '../functional/types'
+import { ConfigType } from '../functional/types'
 import LabelLayout from './label_layout'
 import TitleBar from './title_bar'
-// $FlowFixMe
 import { ToolBar } from './toolbar'
 
 interface StateProps {
@@ -80,7 +79,7 @@ export class Window extends React.Component<Props> {
   }
 }
 
-const mapStateToProps = (state: StateWithHistory<State>): StateProps => {
+const mapStateToProps = (state: ReduxState): StateProps => {
   return {
     config: getConfig(state)
   }

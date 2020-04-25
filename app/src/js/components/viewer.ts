@@ -1,4 +1,4 @@
-import { StateWithHistory } from 'redux-undo'
+import { ReduxState } from '../common/configure_store'
 import { shouldCanvasFreeze } from '../common/selector'
 import { State } from '../functional/types'
 import { Component } from './component'
@@ -9,7 +9,7 @@ export interface DrawableProps {
 }
 
 export const mapStateToDrawableProps = (
-  state: StateWithHistory<State>): DrawableProps => {
+  state: ReduxState): DrawableProps => {
   return {
     shouldFreeze: shouldCanvasFreeze(state)
   }

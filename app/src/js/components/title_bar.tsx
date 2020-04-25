@@ -9,13 +9,12 @@ import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { StateWithHistory } from 'redux-undo'
 import { submit } from '../action/common'
+import { ReduxState } from '../common/configure_store'
 import * as selector from '../common/selector'
 import Session from '../common/session'
 import { Synchronizer } from '../common/synchronizer'
 import { Key } from '../common/types'
-import { State } from '../functional/types'
 import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
@@ -85,8 +84,8 @@ function renderButton (button: ButtonInfo, titleUnit: string): JSX.Element {
   return (
     <Tooltip title={button.title} key={button.title}>
       <IconButton className={titleUnit} onClick={onClick}
-                  href={href} target={target} data-testid={button.title}>
-        <FontAwesomeIcon icon={button.icon} size='xs'/>
+        href={href} target={target} data-testid={button.title}>
+        <FontAwesomeIcon icon={button.icon} size='xs' />
       </IconButton>
     </Tooltip>
   )
@@ -175,7 +174,7 @@ class TitleBar extends Component<Props> {
               {statusText}
             </StatusMessageBox>
           </Fade>
-          <div className={classes.grow}/>
+          <div className={classes.grow} />
           {buttons}
         </Toolbar>
       </AppBar>
@@ -189,7 +188,7 @@ class TitleBar extends Component<Props> {
   }
 }
 
-const mapStateToProps = (state: StateWithHistory<State>): StateProps => {
+const mapStateToProps = (state: ReduxState): StateProps => {
   return {
     title: selector.getPageTitle(state),
     instructionLink: selector.getInstructionLink(state),

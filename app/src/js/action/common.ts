@@ -1,10 +1,10 @@
 import { ActionCreator } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { StateWithHistory } from 'redux-undo'
+import { ReduxState } from '../common/configure_store'
 import * as selector from '../common/selector'
 import Session from '../common/session'
 import { ConnectionStatus, IdType, LabelType,
-  PaneType, Select, ShapeType, SplitType, State,
+  PaneType, Select, ShapeType, SplitType,
   TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
@@ -409,7 +409,7 @@ export function setStatusToReconnecting () {
 
 type ThunkCreatorType =
   ActionCreator<
-  ThunkAction<void, StateWithHistory<State>, void, types.ActionType>>
+  ThunkAction<void, ReduxState, void, types.ActionType>>
 
 /**
  * Mark status as saving, unless compute is ongoing

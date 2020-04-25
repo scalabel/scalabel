@@ -1,5 +1,5 @@
 import { AnyAction, applyMiddleware, createStore, Middleware, Reducer, Store } from 'redux'
-import thunk, { ThunkDispatch, ThunkMiddleware } from 'redux-thunk'
+import thunk, { ThunkDispatch } from 'redux-thunk'
 import undoable, { includeAction, StateWithHistory } from 'redux-undo'
 import {
   ADD_LABELS,
@@ -10,17 +10,20 @@ import { makeState } from '../functional/states'
 import { State } from '../functional/types'
 import { reducer } from './reducer'
 
+export type ReduxState = StateWithHistory<State>
+export type ReduxStore = Store<ReduxState, AnyAction>
+
 /**
  * Configure the main store for the state
  * @param {Partial<State>} json: initial state
  * @param {boolean} devMode: whether to turn on dev mode
  * @param {Middleware} middleware: optional middleware for redux
- * @return {Store<StateWithHistory<State>>}
+ * @return {Store<ReduxState>}
  */
 export function configureStore (
     initialState: Partial<State>,
     debug: boolean = false,
-    middleware?: Middleware): Store<StateWithHistory<State>, AnyAction> & {
+    middleware?: Middleware): ReduxStore & {
       /** Thunk dispatch used for redux-thunk async actions */
       dispatch: ThunkDispatch<State, undefined, BaseAction>;
     } {
@@ -30,7 +33,7 @@ export function configureStore (
     future: Array<State>()
   }
 
-  const undoableReducer: Reducer<StateWithHistory<State>> = undoable(reducer, {
+  const undoableReducer: Reducer<ReduxState> = undoable(reducer, {
     limit: 20, // add a limit to history
     filter: includeAction([
       // undoable actions
@@ -44,16 +47,13 @@ export function configureStore (
     return createStore(
       undoableReducer,
       initialHistory,
-      applyMiddleware(
-        thunk as ThunkMiddleware<StateWithHistory<State>, BaseAction>)
+      applyMiddleware(thunk)
     )
   } else {
     return createStore(
       undoableReducer,
       initialHistory,
-      applyMiddleware(
-        thunk as ThunkMiddleware<StateWithHistory<State>, BaseAction>,
-        middleware)
+      applyMiddleware(thunk, middleware)
     )
   }
 }

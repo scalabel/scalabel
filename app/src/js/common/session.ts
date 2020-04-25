@@ -1,14 +1,13 @@
 import _ from 'lodash'
-import { AnyAction, Store } from 'redux'
+import { AnyAction } from 'redux'
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
-import { StateWithHistory } from 'redux-undo'
 import * as THREE from 'three'
 import * as types from '../action/types'
 import { Window } from '../components/window'
 import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
-import { configureStore } from './configure_store'
+import { configureStore, ReduxState, ReduxStore } from './configure_store'
 import { Track } from './track/track'
 
 /**
@@ -16,9 +15,9 @@ import { Track } from './track/track'
  */
 class Session {
   /** The store to save states */
-  public store: Store<StateWithHistory<State>, AnyAction> & {
+  public store: ReduxStore & {
     /** Thunk dispatch used for redux-thunk async actions */
-    dispatch: ThunkDispatch<StateWithHistory<State>, undefined, AnyAction>;
+    dispatch: ThunkDispatch<ReduxState, undefined, AnyAction>;
   }
   /** Images of the session */
   public images: Array<{[id: number]: HTMLImageElement}>
@@ -92,12 +91,12 @@ class Session {
    * @param {types.ActionType} action: action description
    */
   public dispatch (action: types.ActionType | ThunkAction<
-    void, StateWithHistory<State>, void, types.ActionType>) {
+    void, ReduxState, void, types.ActionType>) {
     if (action.hasOwnProperty('type')) {
       this.store.dispatch(action as types.ActionType)
     } else {
       this.store.dispatch(action as ThunkAction<
-        void, StateWithHistory<State>, void, types.ActionType>)
+        void, ReduxState, void, types.ActionType>)
     }
   }
 
