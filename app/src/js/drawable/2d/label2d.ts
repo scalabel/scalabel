@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { makeDefaultId, makeLabel, makeTaskConfig } from '../../functional/states'
+import { makeDefaultId, makeTaskConfig } from '../../functional/states'
 import { ConfigType, IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -23,6 +23,7 @@ export interface ViewMode {
  * Abstract class for 2D drawable labels
  */
 export abstract class Label2D {
+
   /* The members are public for testing purpose */
   /** label id in state */
   protected _labelId: IdType
@@ -76,11 +77,6 @@ export abstract class Label2D {
     this._config = makeTaskConfig()
     this._labelList = labelList
     this._temporary = true
-  }
-
-  /** Set whether the label is highlighted */
-  public setViewMode (mode: Partial<ViewMode>): void {
-    this._viewMode = _.assign(this._viewMode, mode)
   }
 
   /**
@@ -168,20 +164,6 @@ export abstract class Label2D {
     return this._selected
   }
 
-  /** select the label */
-  public setSelected (s: boolean) {
-    this._selected = s
-  }
-
-  /** highlight the label */
-  public setHighlighted (h: boolean, handleIndex: number = -1) {
-    if (h && handleIndex < 0) {
-      throw Error('need to highlight handle as well')
-    }
-    this._highlighted = h
-    this._highlightedHandle = handleIndex
-  }
-
   /** return order of this label */
   public get order (): number {
     return this._order
@@ -202,6 +184,37 @@ export abstract class Label2D {
     this._editing = e
   }
 
+  /** Parent drawable */
+  public get parent (): Label2D | null {
+    return null
+  }
+
+  /**
+   * Check whether the label is temporary
+   */
+  public get temporary (): boolean {
+    return this._temporary
+  }
+
+  /** Set whether the label is highlighted */
+  public setViewMode (mode: Partial<ViewMode>): void {
+    this._viewMode = _.assign(this._viewMode, mode)
+  }
+
+  /** select the label */
+  public setSelected (s: boolean) {
+    this._selected = s
+  }
+
+  /** highlight the label */
+  public setHighlighted (h: boolean, handleIndex: number = -1) {
+    if (h && handleIndex < 0) {
+      throw Error('need to highlight handle as well')
+    }
+    this._highlighted = h
+    this._highlightedHandle = handleIndex
+  }
+
   /** Whether label valid */
   public isValid (): boolean {
     return true
@@ -212,11 +225,6 @@ export abstract class Label2D {
     if (this._label) {
       this._label.manual = true
     }
-  }
-
-  /** Parent drawable */
-  public get parent (): Label2D | null {
-    return null
   }
 
   /**
@@ -342,15 +350,15 @@ export abstract class Label2D {
    * @param {State} state
    * @param {Vector2D} start: starting coordinate of the label
    */
-  public initTemp (state: State, _start: Vector2D): void {
+  public initTemp (state: State, start: Vector2D): void {
     this._order = state.task.status.maxOrder + 1
-    this._label = makeLabel()
-    this._labelId = this._label.id
-    this._trackId = makeDefaultId()
     this._config = state.task.config
-    this._color = getColorById(this._labelId, this._trackId)
     this._selected = true
     this._temporary = true
+    this._label = this.initTempLabel(state, start)
+    this._labelId = this._label.id
+    this._trackId = makeDefaultId()
+    this._color = getColorById(this._labelId, this._trackId)
   }
 
   /** Convert label state to drawable */
@@ -375,11 +383,11 @@ export abstract class Label2D {
   }
 
   /**
-   * Check whether the label is temporary
+   * Initialize the temp label content
+   * @param state
+   * @param _start
    */
-  public get temporary (): boolean {
-    return this._temporary
-  }
+  protected abstract initTempLabel (state: State, _start: Vector2D): LabelType
 }
 
 export default Label2D
