@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
 import { makeDefaultId, makeLabel, makeRect } from '../../functional/states'
-import { IdType, RectType, ShapeType, State } from '../../functional/types'
+import { IdType, LabelType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -32,24 +32,19 @@ enum Handles {
 }
 
 /**
+ * Compare two rectangles
+ * @param r1
+ * @param r2
+ */
+function equalRects (r1: RectType, r2: RectType): boolean {
+  return r1.x1 === r2.x2 && r1.x2 === r2.x2 &&
+    r1.y1 === r2.y1 && r1.y2 === r2.y2
+}
+
+/**
  * Box2d Label
  */
 export class Box2D extends Label2D {
-  /** list of shapes for this box 2d */
-  private _shapes: Shape[]
-  /** cache shape for moving */
-  private _startingRect: Rect2D
-
-  constructor (labelList: Label2DList) {
-    super(labelList)
-    this._shapes = [
-      new Rect2D(),
-      new Point2D(), new Point2D(), new Point2D(), new Point2D(),
-      new Point2D(), new Point2D(), new Point2D(), new Point2D()
-    ]
-
-    this._startingRect = new Rect2D()
-  }
 
   /**
    * Return a list of the shape for inspection and testing
@@ -78,6 +73,21 @@ export class Box2D extends Label2D {
     }
 
     return super.highlightCursor
+  }
+  /** list of shapes for this box 2d */
+  private _shapes: Shape[]
+  /** cache shape for moving */
+  private _startingRect: Rect2D
+
+  constructor (labelList: Label2DList) {
+    super(labelList)
+    this._shapes = [
+      new Rect2D(),
+      new Point2D(), new Point2D(), new Point2D(), new Point2D(),
+      new Point2D(), new Point2D(), new Point2D(), new Point2D()
+    ]
+
+    this._startingRect = new Rect2D()
   }
 
   /** Draw the label on viewing or control canvas */
@@ -298,25 +308,6 @@ export class Box2D extends Label2D {
     }
     return [this._label.shapes, [ShapeTypeName.RECT], [this.toRect()]]
   }
-
-  /** Initialize this label to be temporary */
-  public initTemp (state: State, start: Vector2D): void {
-    super.initTemp(state, start)
-    const itemIndex = state.user.select.item
-    this._label = makeLabel({
-      type: LabelTypeName.BOX_2D, id: makeDefaultId(), item: itemIndex,
-      category: [state.user.select.category],
-      attributes: state.user.select.attributes,
-      order: this._order
-    })
-
-    const rect = makeRect({
-      x1: start.x, y1: start.y, x2: start.x, y2: start.y
-    })
-    this.updateShapes([rect])
-    this._highlightedHandle = Handles.BOTTOM_RIGHT
-  }
-
   /** Get rect representation */
   public toRect (): RectType {
     return (this._shapes[0] as Rect2D).toRect()
@@ -337,12 +328,28 @@ export class Box2D extends Label2D {
 
   /** Convert label state to drawable */
   public updateShapes (shapes: ShapeType[]): void {
-    if (this._label !== null) {
-      const rect = shapes[0] as RectType
-      if (!_.isEqual(this.toRect(), rect)) {
-        this.updateShapeValues(rect)
-      }
+    const rect = shapes[0] as RectType
+    if (!equalRects(this.toRect(), rect)) {
+      this.updateShapeValues(rect)
     }
+  }
+
+  /** Initialize this label to be temporary */
+  protected initTempLabel (state: State, start: Vector2D): LabelType {
+    const itemIndex = state.user.select.item
+    const label = makeLabel({
+      type: LabelTypeName.BOX_2D, id: makeDefaultId(), item: itemIndex,
+      category: [state.user.select.category],
+      attributes: state.user.select.attributes,
+      order: this._order
+    })
+
+    const rect = makeRect({
+      x1: start.x, y1: start.y, x2: start.x, y2: start.y
+    })
+    this.updateShapes([rect])
+    this._highlightedHandle = Handles.BOTTOM_RIGHT
+    return label
   }
 
   /**
@@ -356,7 +363,6 @@ export class Box2D extends Label2D {
     const w = rect.x2 - rect.x1
     const h = rect.y2 - rect.y1
     rect2d.set(x, y, w, h)
-
     // vertices
     tl.set(x, y)
     tr.set(x + w, y)
