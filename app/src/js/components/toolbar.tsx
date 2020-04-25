@@ -148,23 +148,29 @@ export class ToolBar extends Component<Props> {
             Session.dispatch(deleteSelectedLabels(this.state))
           })
           }</div>
-          <div>{makeButton('End Object Tracking', () => {
-            Session.dispatch(
-              terminateSelectedTracks(this.state, this.state.user.select.item)
-            )
-          })
-          }</div>
-          <div>
-            {this.state.session.trackLinking ?
-              makeButton('Finish Track-Link', (() => {
-                this.linkSelectedTracks(this.state)
-              }), 'lightgreen')
-              :
-              makeButton('Track-Link', () => {
-                this.startLinkTrack()
-              })
-            }
-          </div>
+          {
+            this.state.task.config.tracking &&
+            <div>{makeButton('End Object Tracking', () => {
+              Session.dispatch(
+                terminateSelectedTracks(this.state, this.state.user.select.item)
+              )
+            })
+            }</div>
+          }
+          {
+            this.state.task.config.tracking &&
+            <div>
+              {this.state.session.trackLinking ?
+                makeButton('Finish Track-Link', (() => {
+                  this.linkSelectedTracks(this.state)
+                }), 'lightgreen')
+                :
+                makeButton('Track-Link', () => {
+                  this.startLinkTrack()
+                })
+              }
+            </div>
+          }
         </div>
       </div>
     )
