@@ -67,7 +67,7 @@ export function mouseUp (label2d: Label2dCanvas, x: number, y: number) {
  * @param x
  * @param y
  */
-export function click (label2d: Label2dCanvas, x: number, y: number) {
+export function mouseClick (label2d: Label2dCanvas, x: number, y: number) {
   mouseDown(label2d, x, y)
   mouseUp(label2d, x, y)
 }
@@ -78,9 +78,9 @@ export function click (label2d: Label2dCanvas, x: number, y: number) {
  * @param x
  * @param y
  */
-export function moveClick (label2d: Label2dCanvas, x: number, y: number) {
+export function mouseMoveClick (label2d: Label2dCanvas, x: number, y: number) {
   mouseMove(label2d, x, y)
-  click(label2d, x, y)
+  mouseClick(label2d, x, y)
 }
 
 /**
@@ -108,7 +108,7 @@ export function keyUp (label2d: Label2dCanvas, key: string) {
  */
 export function drawPolygon (label2d: Label2dCanvas, points: number[][]) {
   for (const p of points) {
-    moveClick(label2d, p[0], p[1])
+    mouseMoveClick(label2d, p[0], p[1])
   }
-  moveClick(label2d, points[0][0], points[0][1])
+  mouseMoveClick(label2d, points[0][0], points[0][1])
 }

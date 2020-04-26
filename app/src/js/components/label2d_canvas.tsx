@@ -195,13 +195,13 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       key='crosshair-canvas'
       display={this.display}
       innerRef={this.crosshair}
-      />)
+    />)
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
       controlCanvas = React.cloneElement(controlCanvas,
-         { height: displayRect.height, width: displayRect.width })
+        { height: displayRect.height, width: displayRect.width })
       labelCanvas = React.cloneElement(labelCanvas,
-         { height: displayRect.height, width: displayRect.width })
+        { height: displayRect.height, width: displayRect.width })
     }
 
     return [ch, controlCanvas, labelCanvas]
@@ -232,7 +232,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       return
     }
     // Control + click for dragging
-      // get mouse position in image coordinates
+    // get mouse position in image coordinates
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
@@ -403,15 +403,15 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         this.displayToImageRatio,
         this.scale
       ] =
-      updateCanvasScale(
-        this.state,
-        this.display,
-        canvas,
-        context,
-        imgConfig,
-        imgConfig.viewScale / this.scale,
-        upRes
-      )
+        updateCanvasScale(
+          this.state,
+          this.display,
+          canvas,
+          context,
+          imgConfig,
+          imgConfig.viewScale / this.scale,
+          upRes
+        )
     }
   }
 }

@@ -10,7 +10,7 @@ import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, PolygonType, RectType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
 import { findNewLabelsFromState } from '../util'
-import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseUp, moveClick } from './label2d_canvas_util'
+import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -193,7 +193,7 @@ test('Draw 2d polygons to label2d list', () => {
     mouseUp(label2d, 100, 0)
 
     mouseMove(label2d, 10, 10)
-    moveClick(label2d, 10, 10)
+    mouseMoveClick(label2d, 10, 10)
     /**
      * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
      */
@@ -410,21 +410,21 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   if (canvasRef.current) {
     const label2d = canvasRef.current
     // draw a polygon and delete vertex when drawing
-    moveClick(label2d, 200, 100)
+    mouseMoveClick(label2d, 200, 100)
     keyDown(label2d, 'd')
     keyUp(label2d, 'd')
-    moveClick(label2d, 250, 100)
-    moveClick(label2d, 300, 0)
-    moveClick(label2d, 350, 100)
-    moveClick(label2d, 300, 200)
+    mouseMoveClick(label2d, 250, 100)
+    mouseMoveClick(label2d, 300, 0)
+    mouseMoveClick(label2d, 350, 100)
+    mouseMoveClick(label2d, 300, 200)
     mouseMove(label2d, 320, 130)
     mouseMove(label2d, 320, 130)
     keyDown(label2d, 'd')
     keyUp(label2d, 'd')
     mouseDown(label2d, 320, 130)
     mouseUp(label2d, 320, 130)
-    moveClick(label2d, 300, 150)
-    moveClick(label2d, 250, 100)
+    mouseMoveClick(label2d, 300, 150)
+    mouseMoveClick(label2d, 250, 100)
 
     /**
      * polygon: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
@@ -460,7 +460,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     mouseDown(label2d, 275, 125)
     mouseUp(label2d, 2750, 1250)
     mouseMove(label2d, 300, 150)
-    moveClick(label2d, 300, 150)
+    mouseMoveClick(label2d, 300, 150)
     keyUp(label2d, 'd')
     /**
      * polygon: (250, 100) (300, 0) (350, 100) (320, 130)
@@ -476,7 +476,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
     // draw bezier curve
     keyDown(label2d, 'c')
     mouseMove(label2d, 335, 115)
-    moveClick(label2d, 335, 115)
+    mouseMoveClick(label2d, 335, 115)
     keyUp(label2d, 'c')
     /**
      * polygon: (250, 100) (300, 0) (350, 100)
@@ -522,7 +522,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
 
     // delete vertex on bezier curve
     keyDown(label2d, 'd')
-    moveClick(label2d, 350, 100)
+    mouseMoveClick(label2d, 350, 100)
     keyUp(label2d, 'd')
     /**
      * polygon: (250, 100) (300, 0) (320, 130)
@@ -569,7 +569,7 @@ test('2d polygons multi-select and multi-label moving', () => {
     expect(_.size(state.task.items[0].labels)).toEqual(3)
 
     // select label 1
-    moveClick(label2d, 600, 600)
+    mouseMoveClick(label2d, 600, 600)
 
     state = Session.getState()
     expect(state.user.select.labels[0].length).toEqual(1)
@@ -579,8 +579,8 @@ test('2d polygons multi-select and multi-label moving', () => {
 
     // select label 1, 2, 3
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 300, 250)
-    moveClick(label2d, 50, 50)
+    mouseMoveClick(label2d, 300, 250)
+    mouseMoveClick(label2d, 50, 50)
     keyUp(label2d, 'Meta')
 
     state = Session.getState()
@@ -589,7 +589,7 @@ test('2d polygons multi-select and multi-label moving', () => {
 
     // unselect label 3
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 300, 250)
+    mouseMoveClick(label2d, 300, 250)
     keyUp(label2d, 'Meta')
     mouseMove(label2d, 0, 0)
 
@@ -600,7 +600,7 @@ test('2d polygons multi-select and multi-label moving', () => {
 
     // select three labels
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 300, 250)
+    mouseMoveClick(label2d, 300, 250)
     keyUp(label2d, 'Meta')
 
     state = Session.getState()
@@ -669,9 +669,9 @@ test('2d polygons linking labels and moving', () => {
     expect(_.size(state.task.items[0].labels)).toEqual(3)
 
     // select label 2 and 0
-    moveClick(label2d, 300, 300)
+    mouseMoveClick(label2d, 300, 300)
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 100, 100)
+    mouseMoveClick(label2d, 100, 100)
     keyUp(label2d, 'Meta')
     /**
      * polygon 1: (10, 10) (100, 100) (200, 100)
@@ -688,9 +688,9 @@ test('2d polygons linking labels and moving', () => {
     expect(Session.label2dList.selectedLabels[1].labelId).toEqual(0)
 
     // select label 1 and 2
-    moveClick(label2d, 600, 600)
+    mouseMoveClick(label2d, 600, 600)
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 50, 50)
+    mouseMoveClick(label2d, 50, 50)
     keyUp(label2d, 'Meta')
 
     // link label 1 and 2
@@ -711,8 +711,8 @@ test('2d polygons linking labels and moving', () => {
     )
 
     // reselect label 1 and 2
-    moveClick(label2d, 300, 250)
-    moveClick(label2d, 50, 50)
+    mouseMoveClick(label2d, 300, 250)
+    mouseMoveClick(label2d, 50, 50)
 
     state = Session.getState()
     expect(state.user.select.labels[0].length).toEqual(2)
@@ -778,7 +778,7 @@ test('2d polygons unlinking', () => {
 
     // select polygon 1 and 3
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 100, 100)
+    mouseMoveClick(label2d, 100, 100)
     keyUp(label2d, 'Meta')
 
     // link polygon 1 and 3
@@ -799,9 +799,9 @@ test('2d polygons unlinking', () => {
      */
 
     // select polygon 1, 2, 3
-    moveClick(label2d, 550, 550)
+    mouseMoveClick(label2d, 550, 550)
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 100, 100)
+    mouseMoveClick(label2d, 100, 100)
     keyUp(label2d, 'Meta')
 
     // unlink polygon 1 and 3
@@ -819,7 +819,7 @@ test('2d polygons unlinking', () => {
 
     // unselect polygon 1
     keyDown(label2d, 'Meta')
-    moveClick(label2d, 100, 100)
+    mouseMoveClick(label2d, 100, 100)
     keyUp(label2d, 'Meta')
 
     // link polygon 2 and 3
