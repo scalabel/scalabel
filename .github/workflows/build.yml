@@ -48,7 +48,10 @@ jobs:
         with:
           redis-version: "5.x"
       - name: Install node packages
-        run: npm ci
+        run: |
+          # add library dependencies for canvas package in case we need to compile from source
+          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+          npm ci
       - name: Lint
         run: node_modules/.bin/tslint --project tsconfig.json --config tslint.json
       - name: Test
