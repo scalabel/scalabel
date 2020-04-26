@@ -41,9 +41,7 @@
         "testEnvironment": "jest-environment-jsdom-fourteen"
     },
     "husky": {
-        "hooks": {
-            "pre-commit": "npm run lint"
-        }
+        "hooks": {}
     },
     "babel": {
         "presets": [

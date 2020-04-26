@@ -10,17 +10,10 @@ import { Vector2D } from '../../js/math/vector2d'
  */
 export function drawPolygon (
   label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][]) {
-  let v: Vector2D
   for (const p of points) {
-    v = new Vector2D(p[0], p[1])
-    label2dHandler.onMouseMove(v, canvasSize, -1, 0)
-    label2dHandler.onMouseDown(v, -1, 0)
-    label2dHandler.onMouseUp(v, -1, 0)
+    mouseMoveClick(label2dHandler, p[0], p[1], canvasSize, -1, 0)
   }
-  v = new Vector2D(points[0][0], points[0][1])
-  label2dHandler.onMouseMove(v, canvasSize, -1, 1)
-  label2dHandler.onMouseDown(v, -1, 1)
-  label2dHandler.onMouseUp(v, -1, 1)
+  mouseMoveClick(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 1)
 }
 
 /**
