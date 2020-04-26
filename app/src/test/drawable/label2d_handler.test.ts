@@ -397,7 +397,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   keyClick(label2dHandler, 'd')
   mouseClick(label2dHandler, 320, 130, -1, 0)
   mouseMoveClick(label2dHandler, 300, 150, canvasSize, -1, 0)
-  mouseMoveClick(label2dHandler, 250, 100, canvasSize, -1, 0)
+  mouseMoveClick(label2dHandler, 250, 100, canvasSize, -1, 1)
 
   /**
    * polygon: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
