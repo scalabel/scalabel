@@ -40,6 +40,27 @@ function initializeTestingObjects (): [Label2DHandler, number] {
   return [label2dHandler, viewerId]
 }
 
+/**
+ * Create a polygon based on the input vertices
+ * @param label2dHandler
+ * @param canvasSize
+ * @param points
+ */
+function drawPolygon (
+  label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][]) {
+  let v: Vector2D
+  for (const p of points) {
+    v = new Vector2D(p[0], p[1])
+    label2dHandler.onMouseMove(v, canvasSize, -1, 0)
+    label2dHandler.onMouseDown(v, -1, 0)
+    label2dHandler.onMouseUp(v, -1, 0)
+  }
+  v = new Vector2D(points[0][0], points[0][1])
+  label2dHandler.onMouseMove(v, canvasSize, -1, 1)
+  label2dHandler.onMouseDown(v, -1, 1)
+  label2dHandler.onMouseUp(v, -1, 1)
+}
+
 test('Draw 2d boxes to label2d list', () => {
   const [label2dHandler] = initializeTestingObjects()
 
@@ -233,24 +254,8 @@ test('2d polygons highlighted and selected', () => {
 
   // draw first polygon
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseMove(new Vector2D(120, 120), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(120, 120), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(120, 120), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(210, 210), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(210, 210), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(210, 210), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(310, 260), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(310, 260), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(310, 260), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(410, 210), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(410, 210), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(410, 210), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(210, 110), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(210, 110), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(210, 110), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(120, 120), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(120, 120), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(120, 120), -1, 1)
+  drawPolygon(label2dHandler, canvasSize,
+    [[120, 120], [210, 210], [310, 260], [410, 210], [210, 110]])
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
    */
@@ -260,18 +265,7 @@ test('2d polygons highlighted and selected', () => {
   expect(selected[0].labelId).toEqual(labelIds[0])
 
   // draw second polygon
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(600, 400), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(700, 700), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
    * polygon 2: (500, 500) (600, 400) (700, 700)
@@ -312,24 +306,8 @@ test('validation check for polygon2d', () => {
 
   // draw a valid polygon
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseMove(new Vector2D(120, 120), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(120, 120), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(120, 120), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(210, 210), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(210, 210), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(210, 210), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(310, 260), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(310, 260), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(310, 260), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(410, 210), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(410, 210), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(410, 210), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(210, 110), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(210, 110), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(210, 110), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(120, 120), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(120, 120), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(120, 120), -1, 1)
+  drawPolygon(label2dHandler, canvasSize,
+    [[120, 120], [210, 210], [310, 260], [410, 210], [210, 110]])
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
    */
@@ -337,21 +315,8 @@ test('validation check for polygon2d', () => {
     Session.getState().task.items[0].labels, labelIds)[0])
 
   // draw one invalid polygon
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(400, 300), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(400, 300), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(400, 300), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 200), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 200), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 200), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 0), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 0), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 0), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 1)
+  drawPolygon(label2dHandler, canvasSize,
+    [[200, 100], [400, 300], [300, 200], [300, 0]])
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
    * polygon 2: (200, 100) (400, 300) (300, 200) (300, 0) invalid
@@ -383,18 +348,7 @@ test('validation check for polygon2d', () => {
     Session.getState().task.items[0].labels, [])[0])
 
   // draw a too small polygon
-  label2dHandler.onMouseMove(new Vector2D(0, 0), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(0, 0), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(0, 0), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(1, 0), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(1, 0), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(1, 0), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(0, 1), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(0, 1), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(0, 1), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(0, 0), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(0, 0), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(0, 0), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[0, 0], [1, 0], [0, 1]])
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
    * polygon 2: (0, 0) (1, 0) (0, 1) too small, invalid
@@ -411,21 +365,8 @@ test('2d polygons drag vertices, midpoints and edges', () => {
 
   // draw a polygon
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 0), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 0), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 0), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
+  drawPolygon(label2dHandler, canvasSize,
+    [[10, 10], [100, 100], [200, 100], [100, 0]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
    */
@@ -484,34 +425,8 @@ test('2d polygons delete vertex and draw bezier curve', () => {
 
   // draw a polygon and delete vertex when drawing
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
-  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
-  label2dHandler.onMouseMove(new Vector2D(250, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(250, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(250, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 0), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 0), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 0), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(350, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(350, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(350, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 200), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 200), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 200), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(320, 130), canvasSize, -1, 0)
-  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
-  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
-  label2dHandler.onMouseDown(new Vector2D(320, 130), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(320, 130), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 150), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 150), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 150), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(250, 100), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(250, 100), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(250, 100), -1, 1)
+  drawPolygon(label2dHandler, canvasSize,
+    [[250, 100], [300, 0], [350, 100], [320, 130], [300, 150]])
   /**
    * polygon: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
    */
@@ -628,17 +543,7 @@ test('2d polygons multi-select and multi-label moving', () => {
 
   // draw first polygon
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    */
@@ -646,38 +551,16 @@ test('2d polygons multi-select and multi-label moving', () => {
     Session.getState().task.items[0].labels, labelIds)[0])
 
   // draw second polygon
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(600, 400), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(700, 700), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    * polygon 2: (500, 500) (600, 400) (700, 700)
    */
   labelIds.push(findNewLabels(
-    Session.getState().task.items[0].labels, labelIds)[0])
+      Session.getState().task.items[0].labels, labelIds)[0])
 
-  // draw third polygon
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(350, 350), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 1)
+    // draw third polygon
+  drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    * polygon 2: (500, 500) (600, 400) (700, 700)
@@ -767,14 +650,8 @@ test('2d polygons linking labels and moving', () => {
 
   // draw first polygon
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
+
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
@@ -782,18 +659,7 @@ test('2d polygons linking labels and moving', () => {
    */
 
   // draw second polygon
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(600, 400), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(700, 700), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
@@ -802,18 +668,7 @@ test('2d polygons linking labels and moving', () => {
    */
 
   // draw third polygon
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(350, 350), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
@@ -941,52 +796,20 @@ test('2d polygons unlinking', () => {
 
   // draw first polygon
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    */
 
   // draw second polygon
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(600, 400), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(700, 700), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    * polygon 2: (500, 500) (600, 400) (700, 700)
    */
 
   // draw third polygon
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(350, 350), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    * polygon 2: (500, 500) (600, 400) (700, 700)
@@ -1074,17 +897,7 @@ test('2d polyline creating', () => {
 
   // draw first polyline
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
@@ -1092,18 +905,7 @@ test('2d polyline creating', () => {
    */
 
   // draw second polyline
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(600, 400), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(600, 400), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(700, 700), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(700, 700), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(500, 500), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(500, 500), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(500, 500), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
@@ -1112,18 +914,7 @@ test('2d polyline creating', () => {
    */
 
   // draw third polyline
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 250), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 250), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(350, 350), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(350, 350), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(250, 250), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(250, 250), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(250, 250), -1, 1)
+  drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
@@ -1167,21 +958,8 @@ test('2d polylines drag vertices, midpoints and edges', () => {
 
   // draw a polyline
   const canvasSize = new Size2D(1000, 1000)
-  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(200, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(200, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(100, 0), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(100, 0), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(100, 0), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(10, 10), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(10, 10), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(10, 10), -1, 1)
+  drawPolygon(label2dHandler, canvasSize,
+    [[10, 10], [100, 100], [200, 100], [100, 0]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
@@ -1252,29 +1030,8 @@ test('2d polylines delete vertex and draw bezier curve', () => {
   label2dHandler.onMouseDown(new Vector2D(200, 100), -1, 0)
   label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
   label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
-  label2dHandler.onMouseMove(new Vector2D(250, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(250, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(250, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 0), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 0), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 0), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(350, 100), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(350, 100), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(350, 100), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 200), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 200), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 200), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(320, 130), canvasSize, -1, 0)
-  label2dHandler.onKeyDown(new KeyboardEvent('keydown', { key: 'd' }))
-  label2dHandler.onKeyUp(new KeyboardEvent('keyup', { key: 'd' }))
-  label2dHandler.onMouseDown(new Vector2D(320, 130), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(320, 130), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(300, 150), canvasSize, -1, 0)
-  label2dHandler.onMouseDown(new Vector2D(300, 150), -1, 0)
-  label2dHandler.onMouseUp(new Vector2D(300, 150), -1, 0)
-  label2dHandler.onMouseMove(new Vector2D(250, 100), canvasSize, -1, 1)
-  label2dHandler.onMouseDown(new Vector2D(250, 100), -1, 1)
-  label2dHandler.onMouseUp(new Vector2D(250, 100), -1, 1)
+  drawPolygon(label2dHandler, canvasSize,
+    [[250, 100], [300, 0], [350, 100], [320, 130], [300, 150]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
   /**
