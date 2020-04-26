@@ -13,7 +13,7 @@ import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, Point2DType, PolygonType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
-import { drawPolygon, keyClick, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp } from '../drawable/label2d_handler_util'
+import { drawPolygon, keyClick, keyDown, keyUp, mouseClick, mouseDown, mouseMove, mouseMoveClick, mouseUp } from '../drawable/label2d_handler_util'
 import { testJson } from '../test_image_objects'
 import { findNewLabels } from '../util'
 
@@ -387,8 +387,18 @@ test('2d polygons delete vertex and draw bezier curve', () => {
 
   // draw a polygon and delete vertex when drawing
   const canvasSize = new Size2D(1000, 1000)
-  drawPolygon(label2dHandler, canvasSize,
-    [[250, 100], [300, 0], [350, 100], [320, 130], [300, 150]])
+  mouseMoveClick(label2dHandler, 200, 100, canvasSize, -1, 0)
+  keyClick(label2dHandler, 'd')
+  mouseMoveClick(label2dHandler, 250, 100, canvasSize, -1, 0)
+  mouseMoveClick(label2dHandler, 300, 0, canvasSize, -1, 0)
+  mouseMoveClick(label2dHandler, 350, 100, canvasSize, -1, 0)
+  mouseMoveClick(label2dHandler, 300, 200, canvasSize, -1, 0)
+  mouseMove(label2dHandler, 320, 130, canvasSize, -1, 0)
+  keyClick(label2dHandler, 'd')
+  mouseClick(label2dHandler, 320, 130, -1, 0)
+  mouseMoveClick(label2dHandler, 300, 150, canvasSize, -1, 0)
+  mouseMoveClick(label2dHandler, 250, 100, canvasSize, -1, 0)
+
   /**
    * polygon: (250, 100) (300, 0) (350, 100) (320, 130) (300, 150)
    */
