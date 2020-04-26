@@ -295,7 +295,7 @@ function sidebar (props: SidebarProps) {
         <ListItemText
           key={value.tag}
           className={!(index % 2) ?
-            '${classes.listItem} ${classes.coloredListItem}' : classes.listItem}
+            `${classes.listItem} ${classes.coloredListItem}` : classes.listItem}
           primary={
             <StyledListEntry tag={value.tag} entry={value.entry} />
           }
