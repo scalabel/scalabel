@@ -1,8 +1,7 @@
 import AWS from 'aws-sdk'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
-import * as serverPath from '../../js/server/path'
-import { getProjectKey, getTaskKey } from '../../js/server/path'
+import { getProjectKey, getTaskKey, hostname, now } from '../../js/server/path'
 import { S3Storage } from '../../js/server/s3_storage'
 import { index2str } from '../../js/server/util'
 
@@ -30,7 +29,7 @@ beforeAll(async () => {
   }
 })
 
-storageName = `${serverPath.hostname()}_${serverPath.now()}`
+storageName = `${hostname()}_${now()}`
 const storage = new S3Storage(`${bucketRegion}:${bucketName}/${storageName}`)
 
 describe('test s3 storage', () => {
