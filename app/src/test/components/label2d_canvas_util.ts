@@ -58,7 +58,7 @@ export function mouseDown (label2d: Label2dCanvas, x: number, y: number) {
  * @param y
  */
 export function mouseUp (label2d: Label2dCanvas, x: number, y: number) {
-  label2d.onMouseDown(mouseUpEvent(x, y))
+  label2d.onMouseUp(mouseUpEvent(x, y))
 }
 
 /**
