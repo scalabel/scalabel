@@ -1,8 +1,16 @@
+import AWS from 'aws-sdk'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
+import * as serverPath from '../../js/server/path'
 import { getProjectKey, getTaskKey } from '../../js/server/path'
 import { S3Storage } from '../../js/server/s3_storage'
 import { index2str } from '../../js/server/util'
+
+export const s3 = new AWS.S3()
+const bucketRegion = 'us-west-2'
+const bucketName = 'scalabel-unit-testing'
+const projectName = 'test'
+let storageName = ''
 
 beforeAll(async () => {
   await storage.makeBucket()
@@ -14,7 +22,7 @@ beforeAll(async () => {
     'tasks/000001'
   ]
 
-  keys = keys.map((key) => path.join('myProject', key))
+  keys = keys.map((key) => path.join(projectName, key))
   const fakeData = '{"testField": "testValue"}'
 
   for (const key of keys) {
@@ -22,8 +30,8 @@ beforeAll(async () => {
   }
 })
 
-const storage = new S3Storage('us-west-2:scalabel-unit-testing/data')
-const projectName = 'myProject'
+storageName = `${serverPath.hostname()}_${serverPath.now()}`
+const storage = new S3Storage(`${bucketRegion}:${bucketName}/${storageName}`)
 
 describe('test s3 storage', () => {
   test('key existence', () => {
@@ -93,7 +101,7 @@ describe('test s3 storage', () => {
   })
 
   test('delete', () => {
-    const key = 'myProject/tasks'
+    const key = `${projectName}/tasks`
     return Promise.all([
       checkTaskKey(1, true),
       checkTaskKey(0, true)
@@ -113,6 +121,16 @@ describe('test s3 storage', () => {
 afterAll(async () => {
   // cleanup: delete all keys that were created
   await storage.delete('')
+  // delete the temporary folder
+  const deleteParams = {
+    Bucket: bucketName,
+    Delete: { Objects: [
+      { Key: path.join(storageName, projectName, 'project.json') },
+      { Key: path.join(storageName, projectName) },
+      { Key: storageName }
+    ] }
+  }
+  await s3.deleteObjects(deleteParams).promise()
 })
 
 /**
