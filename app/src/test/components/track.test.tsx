@@ -8,7 +8,7 @@ import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask, testJson } from '../test_states/test_track_objects'
-import { mouseDown, mouseMove, mouseUp } from './label2d_canvas_util'
+import { drawBox } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -41,7 +41,7 @@ function setUpLabel2dCanvas (width: number, height: number) {
       right: 0,
       x: 0,
       y: 0,
-      toJSON:  () => {
+      toJSON: () => {
         return {
           width,
           height,
@@ -111,16 +111,45 @@ describe('Test track', () => {
   test('Add track', () => {
     initStore(emptyTrackingTask)
     const getState = Session.getSimpleStore().getState
+    const dispatch = Session.getSimpleStore().dispatch
+
     const label2d = canvasRef.current as Label2dCanvas
     const trackIds = new TrackCollector(getState)
+    const numItems = getState().task.items.length
+
+    dispatch(action.goToItem(0))
     // Draw first box
-    mouseMove(label2d, 1, 1)
-    mouseDown(label2d, 1, 1)
-    mouseMove(label2d, 50, 50)
-    mouseUp(label2d, 50, 50)
-    const state = Session.getState()
-    expect(_.size(state.task.tracks)).toEqual(1)
+    drawBox(label2d, 1, 1, 50, 50)
+    let state = getState()
     trackIds.collect()
+    expect(_.size(state.task.tracks)).toEqual(1)
+    // check whether the track is propagated to the other frames
+    expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(numItems)
+    expect(_.size(state.task.items[numItems - 1].labels)).toEqual(1)
+    expect(_.size(state.task.items[numItems - 1].shapes)).toEqual(1)
+
+    drawBox(label2d, 19, 20, 30, 29)
+    state = getState()
+    trackIds.collect()
+    expect(_.size(state.task.tracks)).toEqual(2)
+    expect(_.size(state.task.items[numItems - 2].labels)).toEqual(2)
+    expect(_.size(state.task.items[numItems - 2].shapes)).toEqual(2)
+
+    drawBox(label2d, 100, 20, 80, 100)
+    state = getState()
+    trackIds.collect()
+    expect(_.size(state.task.tracks)).toEqual(3)
+    expect(_.size(state.task.items[numItems - 3].labels)).toEqual(3)
+    expect(_.size(state.task.items[numItems - 3].shapes)).toEqual(3)
+
+    drawBox(label2d, 500, 500, 80, 100)
+    state = getState()
+    trackIds.collect()
+    expect(_.size(state.task.tracks)).toEqual(4)
+    expect(_.size(state.task.items[numItems - 4].labels)).toEqual(4)
+    expect(_.size(state.task.items[numItems - 4].shapes)).toEqual(4)
+
+    dispatch(action.goToItem(1))
   })
 
   test('Terminate track by key', () => {

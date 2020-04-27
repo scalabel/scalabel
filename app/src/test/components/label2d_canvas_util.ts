@@ -58,7 +58,7 @@ export function mouseDown (label2d: Label2dCanvas, x: number, y: number) {
  * @param y
  */
 export function mouseUp (label2d: Label2dCanvas, x: number, y: number) {
-  label2d.onMouseDown(mouseUpEvent(x, y))
+  label2d.onMouseUp(mouseUpEvent(x, y))
 }
 
 /**
@@ -111,4 +111,22 @@ export function drawPolygon (label2d: Label2dCanvas, points: number[][]) {
     mouseMoveClick(label2d, p[0], p[1])
   }
   mouseMoveClick(label2d, points[0][0], points[0][1])
+}
+
+/**
+ * Test driver to draw a box
+ * @param label2d
+ * @param x1
+ * @param y1
+ * @param x2
+ * @param y2
+ */
+export function drawBox (
+  label2d: Label2dCanvas, x1: number, y1: number, x2: number, y2: number) {
+  mouseMove(label2d, x1, y1)
+  mouseDown(label2d, x1, y1)
+  // move to a middle point first for more testing
+  mouseMove(label2d, (x1 + x2) / 2, (y1 + y2) / 2)
+  mouseMove(label2d, x2, y2)
+  mouseUp(label2d, x2, y2)
 }
