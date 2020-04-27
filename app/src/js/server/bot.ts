@@ -1,11 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { Store } from 'redux'
-import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
-import { configureStore } from '../common/configure_store'
+import { configureStore, ReduxStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
 import { PolygonType, RectType, State } from '../functional/types'
 import { ItemExport } from './bdd_types'
@@ -32,7 +30,7 @@ export class Bot {
   /** address for session connections */
   public address: string
   /** The store to save state */
-  protected store: Store<StateWithHistory<State>>
+  protected store: ReduxStore
   /** Socket connection */
   protected socket: SocketIOClient.Socket
   /** Timestamped log for completed actions */

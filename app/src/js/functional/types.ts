@@ -446,6 +446,11 @@ export interface ItemStatus {
   sensorDataLoaded: {[id: number]: boolean}
 }
 
+export const enum ConnectionStatus {
+  NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED,
+  COMPUTING, COMPUTE_DONE, NOTIFY_COMPUTE_DONE
+}
+
 /**
  * Information for this particular session
  */
@@ -458,20 +463,24 @@ export interface SessionType {
   id: IdType
   /** Start time */
   startTime: number
-  /** item statuses */
+  /** Item statuses */
   itemStatuses: ItemStatus[]
-  /** track linking toggled */
+  /** Track linking toggled */
   trackLinking: boolean
+  /** Current connection status */
+  status: ConnectionStatus
+  /** Number of time status has changed */
+  numUpdates: number
 }
 
 export interface State {
   /**
-   * task config and labels. It is irrelevant who makes the labels and other
+   * Task config and labels. It is irrelevant who makes the labels and other
    * content in task
    */
   task: TaskType
-  /** user information that can be persistent across sessions */
+  /** User information that can be persistent across sessions */
   user: UserType
-  /** info particular to this session */
+  /** Info particular to this session */
   session: SessionType
 }
