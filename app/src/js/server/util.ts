@@ -362,3 +362,11 @@ export function getPyConnFailedMsg (endpoint: string, message: string): string {
   return sprintf('Make sure endpoint is correct and python server is \
 running; query to \"%s\" failed with message: %s', endpoint, message)
 }
+
+/**
+ * helper function to force javascript to sleep
+ * @param milliseconds
+ */
+export function sleep (milliseconds: number): Promise<object> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds))
+}
