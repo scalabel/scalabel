@@ -1,6 +1,7 @@
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import * as THREE from 'three'
 import Session from '../common/session'
 import { ViewerConfigTypeName } from '../common/types'
@@ -8,7 +9,7 @@ import { isCurrentFrameLoaded } from '../functional/state_util'
 import { makeTaskConfig } from '../functional/states'
 import { ConfigType, Image3DViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
-import { DrawableCanvas } from './viewer'
+import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 
 const styles = () => createStyles({
   tag3d_canvas: {
@@ -24,7 +25,7 @@ interface ClassType {
   tag3d_canvas: string
 }
 
-interface Props {
+interface Props extends DrawableProps {
   /** CSS class */
   classes: ClassType
   /** container */
@@ -225,4 +226,6 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   }
 }
 
-export default withStyles(styles, { withTheme: true })(Tag3dCanvas)
+const styledCanvas = withStyles(
+  styles, { withTheme: true })(Tag3dCanvas)
+export default connect(mapStateToDrawableProps)(styledCanvas)

@@ -1,5 +1,6 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import Session from '../common/session'
 import { Key } from '../common/types'
 import { Label2DHandler } from '../drawable/2d/label2d_handler'
@@ -19,7 +20,7 @@ import {
   updateCanvasScale
 } from '../view_config/image'
 import { Crosshair, Crosshair2D } from './crosshair'
-import { DrawableCanvas } from './viewer'
+import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 
 interface ClassType {
   /** label canvas */
@@ -28,7 +29,7 @@ interface ClassType {
   control_canvas: string
 }
 
-interface Props {
+interface Props extends DrawableProps {
   /** styles */
   classes: ClassType
   /** display */
@@ -416,4 +417,6 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   }
 }
 
-export default withStyles(label2dViewStyle, { withTheme: true })(Label2dCanvas)
+const styledCanvas = withStyles(
+  label2dViewStyle, { withTheme: true })(Label2dCanvas)
+export default connect(mapStateToDrawableProps)(styledCanvas)
