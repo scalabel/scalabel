@@ -8,6 +8,7 @@ import React, { ChangeEvent } from 'react'
 import { getAuth } from '../common/service'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { Endpoint, FormField } from '../server/types'
+import { getInstructionsLink, getPageTitle } from '../shared/util'
 import { checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
@@ -359,29 +360,21 @@ export default class CreateForm extends React.Component<Props, State> {
    * @param itemType {string}
    */
   private handleInstructions = (labelType: string) => {
-    let labelName = ''
-    let instructions = ''
-    if (labelType === LabelTypeName.TAG) {
-      labelName = 'Image Tagging'
-      this.setState({ showCategoriesUpload: false })
-    } else if (labelType === LabelTypeName.BOX_2D) {
-      labelName = '2D Bounding Box'
-      instructions = 'https://www.scalabel.ai/doc/instructions/bbox.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.POLYGON_2D) {
-      labelName = '2D Segmentation'
-      instructions = 'https://www.scalabel.ai/doc/instructions/' +
-              'segmentation.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.POLYLINE_2D) {
-      labelName = '2D Lane'
-      instructions = 'https://www.scalabel.ai/doc/instructions/' +
-              'segmentation.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.BOX_3D) {
-      labelName = '3D Bounding Box'
-      this.setState({ showCategoriesUpload: true })
+    switch (labelType) {
+      case LabelTypeName.TAG:
+        this.setState({ showCategoriesUpload: false })
+        break
+      case LabelTypeName.BOX_2D:
+      case LabelTypeName.POLYGON_2D:
+      case LabelTypeName.POLYLINE_2D:
+      case LabelTypeName.BOX_3D:
+        this.setState({ showCategoriesUpload: true })
+        break
     }
+
+    const instructions = getInstructionsLink(labelType)
+    const labelName = getPageTitle(labelType)
+
     this.setState({ pageTitle: labelName })
     this.setState({ instructionsUrl: instructions })
   }
