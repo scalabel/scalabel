@@ -5,7 +5,7 @@ import { LabelTypeName } from '../common/types'
  * Create the link to the labeling instructions
  */
 function makeInstructionsLink (pageName: string) {
-  return sprintf('https://www.scalabel.ai/doc/instructions/{}.html', pageName)
+  return sprintf('https://www.scalabel.ai/doc/instructions/%s.html', pageName)
 }
 
 /**
