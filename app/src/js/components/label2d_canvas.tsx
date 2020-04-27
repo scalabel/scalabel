@@ -224,6 +224,17 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   }
 
   /**
+   * Clear canvas
+   */
+  public clear (): void {
+    if (this.labelCanvas !== null && this.labelContext !== null &&
+      this.controlCanvas !== null && this.controlContext !== null) {
+      clearCanvas(this.labelCanvas, this.labelContext)
+      clearCanvas(this.controlCanvas, this.controlContext)
+    }
+  }
+
+  /**
    * Callback function when mouse is down
    * @param {MouseEvent} e - event
    */

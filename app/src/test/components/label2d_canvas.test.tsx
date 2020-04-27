@@ -1,4 +1,4 @@
-import { cleanup, render } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import _ from 'lodash'
 import * as React from 'react'
 import * as action from '../../js/action/common'
@@ -15,11 +15,12 @@ import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mous
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
 beforeEach(() => {
-  cleanup()
+  expect(canvasRef.current).not.toBeNull()
+  canvasRef.current?.clear()
   initStore(testJson)
 })
 
-afterEach(cleanup)
+// afterEach(cleanup)
 
 beforeAll(() => {
   Session.devMode = false
