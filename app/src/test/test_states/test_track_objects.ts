@@ -659,3 +659,207 @@ export const testJson = {
     }]
   }
 }
+
+export const emptyTrackingTask = {
+  task: {
+    config: {
+      projectName: 'Test3',
+      itemType: 'image',
+      labelTypes: ['box2d'],
+      label2DTemplates: {},
+      taskSize: 6,
+      handlerUrl: 'label',
+      pageTitle: '2D Bounding Box',
+      instructionPage: 'https://www.scalabel.ai/doc/instructions/bbox.html',
+      bundleFile: 'image_v2.js',
+      categories: ['person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bike', 'traffic sign', 'traffic light'],
+      attributes: [{
+        name: 'Occluded',
+        toolType: 'switch',
+        tagText: 'o',
+        tagSuffixes: [],
+        tagPrefix: '',
+        values: [],
+        buttonColors: []
+      }, {
+        name: 'Truncated',
+        toolType: 'switch',
+        tagText: 't',
+        tagSuffixes: [],
+        tagPrefix: '',
+        values: [],
+        buttonColors: []
+      }, {
+        name: 'Traffic Color Light',
+        toolType: 'list',
+        tagText: 't',
+        tagSuffixes: ['', 'g', 'y', 'r'],
+        tagPrefix: '',
+        values: ['NA', 'G', 'Y', 'R'],
+        buttonColors: ['white', 'green', 'yellow', 'red']
+      }],
+      taskId: '000000',
+      tracking: true,
+      policyTypes: ['linear_interpolation'],
+      demoMode: false,
+      autosave: true
+    },
+    status: {
+      maxLabelId: 222,
+      maxShapeId: 219,
+      maxOrder: 223,
+      maxTrackId: 9
+    },
+    items: [{
+      id: '0',
+      index: 0,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg'
+      },
+      labels: {
+
+      },
+      shapes: {
+
+      },
+      timestamp: 0
+    }, {
+      id: '1',
+      index: 1,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg'
+      },
+      labels: {
+
+      },
+      shapes: {
+
+      },
+      timestamp: 0
+    }, {
+      id: '2',
+      index: 2,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg'
+      },
+      labels: {
+
+      },
+      shapes: {
+
+      },
+      timestamp: 0
+    }, {
+      id: '3',
+      index: 3,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg'
+      },
+      labels: {
+
+      },
+      shapes: {
+
+      },
+      timestamp: 0
+    }, {
+      id: '4',
+      index: 4,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg'
+      },
+      labels: {
+
+      },
+      shapes: {
+      },
+      timestamp: 0
+    }, {
+      id: '5',
+      index: 5,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg'
+      },
+      labels: {},
+      shapes: {},
+      timestamp: 0
+    }],
+    tracks: {
+
+    },
+    sensors: {
+      '-1': {
+        id: -1,
+        name: 'default',
+        type: 'image'
+      }
+    },
+    progress: {
+      submissions: []
+    }
+  },
+  user: {
+    id: '',
+    select: {
+      item: 0,
+      labels: [],
+      shapes: [],
+      category: 0,
+      attributes: {},
+      labelType: 0,
+      policyType: 0
+    },
+    layout: {
+      toolbarWidth: 200,
+      maxViewerConfigId: 0,
+      maxPaneId: 0,
+      rootPane: 0,
+      panes: {
+        0: {
+          id: 0,
+          viewerId: 0,
+          parent: -1,
+          hide: false,
+          numHorizontalChildren: 0,
+          numVerticalChildren: 0
+        }
+      }
+    },
+    viewerConfigs: []
+  },
+  session: {
+    id: '',
+    startTime: 0,
+    itemStatuses: [{
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }, {
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }, {
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }, {
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }, {
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }, {
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }]
+  }
+}

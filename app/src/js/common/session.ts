@@ -9,6 +9,7 @@ import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
 import { SessionStatus } from './session_status'
+import { SimpleStore } from './simple_store'
 import { Track } from './track/track'
 
 /**
@@ -71,6 +72,13 @@ class Session {
    */
   public getState (): State {
     return this.store.getState().present
+  }
+
+  /**
+   * Get a simple store instance type for use without Session
+   */
+  public getSimpleStore (): SimpleStore {
+    return new SimpleStore(this.getState.bind(this), this.dispatch.bind(this))
   }
 
   /**

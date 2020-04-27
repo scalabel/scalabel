@@ -13,7 +13,7 @@ import { CubeType, IdType, PointCloudViewerConfigType } from '../../js/functiona
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
 import { testJson } from '../test_point_cloud_objects'
-import { expectVector3TypesClose, findNewLabelsFromState } from '../util'
+import { expectVector3TypesClose, findNewLabelsFromState } from '../server/util/util'
 
 /**
  * Get active axis given camLoc and axis

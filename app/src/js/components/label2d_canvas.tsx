@@ -212,15 +212,25 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
    * @return {boolean}
    */
   public redraw (): boolean {
+    this.clear()
     if (this.labelCanvas !== null && this.labelContext !== null &&
       this.controlCanvas !== null && this.controlContext !== null) {
       const config = this.state.user.viewerConfigs[this.props.id]
-      clearCanvas(this.labelCanvas, this.labelContext)
-      clearCanvas(this.controlCanvas, this.controlContext)
       Session.label2dList.redraw(this.labelContext, this.controlContext,
         this.displayToImageRatio * UP_RES_RATIO, config.hideLabels)
     }
     return true
+  }
+
+  /**
+   * Clear canvas
+   */
+  public clear (): void {
+    if (this.labelCanvas !== null && this.labelContext !== null &&
+      this.controlCanvas !== null && this.controlContext !== null) {
+      clearCanvas(this.labelCanvas, this.labelContext)
+      clearCanvas(this.controlCanvas, this.controlContext)
+    }
   }
 
   /**

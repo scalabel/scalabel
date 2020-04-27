@@ -10,7 +10,7 @@ import {
   ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
 import { index2str, updateState } from '../../js/server/util'
-import { getInitialState, getRandomBox2dAction } from '../util'
+import { getInitialState, getRandomBox2dAction } from '../server/util/util'
 
 let sessionId: string
 let botSessionId: string

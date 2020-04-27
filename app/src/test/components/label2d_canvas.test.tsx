@@ -8,8 +8,8 @@ import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, PolygonType, RectType } from '../../js/functional/types'
+import { findNewLabelsFromState } from '../server/util/util'
 import { testJson } from '../test_image_objects'
-import { findNewLabelsFromState } from '../util'
 import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
@@ -82,6 +82,7 @@ function setUpLabel2dCanvas (width: number, height: number) {
 }
 
 test('Draw 2d boxes to label2d list', () => {
+  expect(canvasRef.current).not.toBeNull()
   if (canvasRef.current) {
     const labelIds: IdType[] = []
     const label2d = canvasRef.current

@@ -8,7 +8,7 @@ import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
 import { sleep } from '../project/util'
-import { getTestConfig } from '../util'
+import { getTestConfig } from './util/util'
 
 let defaultStore: RedisStore
 let storage: FileStorage
