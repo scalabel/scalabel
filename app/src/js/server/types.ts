@@ -119,6 +119,12 @@ export interface RegisterMessageType {
   bot: boolean
 }
 
+export interface TimingInfo {
+  /** The time, Date.now() */
+  time: number
+  /** The name of the function/service */
+  name: string
+}
 /** action type for synchronization between front and back ends */
 export interface SyncActionMessageType {
   /** Task Id. It is supposed to be index2str(taskIndex) */
@@ -131,6 +137,8 @@ export interface SyncActionMessageType {
   actions: ActionPacketType
   /** whether it came from a bot or not */
   bot: boolean
+  /** timing data associated with the message */
+  timingData: TimingInfo[]
 }
 
 /** type for transmitted packet of actions */

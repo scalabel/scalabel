@@ -8,6 +8,7 @@ import * as types from '../action/types'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
+// import { addTimingData } from '../server/util'
 import Session from './session'
 
 const CONFIRMATION_MESSAGE =
@@ -169,6 +170,8 @@ export class Synchronizer {
       return
     }
     this.ackedPackets.add(actionPacket.id)
+    // console.log(addTimingData(message.timingData))
+    // console.log(message.timingData)
 
     for (const action of actionPacket.actions) {
       // actionLog matches backend action ordering
@@ -291,12 +294,14 @@ export class Synchronizer {
    */
   public sendActions (actionPacket: ActionPacketType) {
     const sessionState = Session.getState()
+
     const message: SyncActionMessageType = {
       taskId: sessionState.task.config.taskId,
       projectName: sessionState.task.config.projectName,
       sessionId: sessionState.session.id,
       actions: actionPacket,
-      bot: false
+      bot: false,
+      timingData: []
     }
     this.socket.emit(EventName.ACTION_SEND, message)
     Session.status.setAsSaving()

@@ -13,9 +13,9 @@ import Logger from './logger'
 import { ModelInterface } from './model_interface'
 import {
   ActionPacketType, BotData, EventName,
-  ModelQuery, RegisterMessageType, SyncActionMessageType
+  ModelQuery, RegisterMessageType, SyncActionMessageType, TimingInfo
 } from './types'
-import { getPyConnFailedMsg, index2str } from './util'
+import { addTimingData, getPyConnFailedMsg, index2str } from './util'
 
 /**
  * Manages virtual sessions for a single bot
@@ -118,6 +118,8 @@ export class Bot {
   public async actionBroadcastHandler (
     message: SyncActionMessageType) {
     const actionPacket = message.actions
+    let timingData = addTimingData(message.timingData)
+
     // if action was already acked, or if action came from a bot, ignore it
     if (this.ackedPackets.has(actionPacket.id)
       || message.bot
@@ -131,7 +133,8 @@ export class Bot {
     const queries = this.packetToQueries(actionPacket)
     const actions = await this.executeQueries(queries)
     if (actions.length > 0) {
-      this.broadcastActions(actions, actionPacket.id)
+      timingData = addTimingData(timingData)
+      this.broadcastActions(actions, actionPacket.id, timingData)
     }
   }
 
@@ -139,7 +142,8 @@ export class Bot {
    * Broadcast the synthetically generated actions
    */
   public broadcastActions (
-    actions: AddLabelsAction[], triggerId: string) {
+    actions: AddLabelsAction[],
+    triggerId: string, timingData: TimingInfo[]) {
     const actionPacket: ActionPacketType = {
       actions,
       id: uuid4(),
@@ -150,7 +154,8 @@ export class Bot {
       projectName: this.projectName,
       sessionId: this.sessionId,
       actions: actionPacket,
-      bot: true
+      bot: true,
+      timingData
     }
     this.socket.emit(EventName.ACTION_SEND, message)
   }

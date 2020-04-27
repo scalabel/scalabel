@@ -10,7 +10,7 @@ import {
   EventName, RegisterMessageType, ServerConfig,
   StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
-import { index2str, initSessId, updateStateTimestamp } from './util'
+import { addTimingData, index2str, initSessId, updateStateTimestamp } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -108,6 +108,7 @@ export class Hub {
     const actions = data.actions.actions
     const actionPacketId = data.actions.id
     const triggerId = data.actions.triggerId
+    const timingData = addTimingData(data.timingData)
 
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
 
@@ -140,6 +141,8 @@ export class Hub {
         taskActions[actionInd].timestamp = timestamps[actionInd]
       }
     }
+
+    data.timingData = addTimingData(timingData)
 
     if (taskActions.length > 0) {
       // broadcast task actions to all other sessions in room

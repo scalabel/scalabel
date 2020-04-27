@@ -236,7 +236,8 @@ function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
     projectName,
     sessionId,
     taskId: index2str(taskIndex),
-    bot: false
+    bot: false,
+    timingData: []
   }
 }
 
@@ -249,6 +250,7 @@ function packetToMessageBot (packet: ActionPacketType): SyncActionMessageType {
     projectName,
     sessionId: botSessionId,
     taskId: index2str(taskIndex),
-    bot: true
+    bot: true,
+    timingData: []
   }
 }
