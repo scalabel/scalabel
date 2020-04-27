@@ -21,7 +21,6 @@ export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
 export const SUBMIT = 'SUBMIT'
 export const UPDATE_SESSION_STATUS = 'UPDATE_SESSION_STATUS'
-export const UPDATE_SESSION_STATUS_DELAYED = 'UPDATE_SESSION_STATUS_DELAYED'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -69,7 +68,6 @@ export function isTaskAction (action: BaseAction) {
  */
 const SESSION_ACTION_TYPES = [
   UPDATE_SESSION_STATUS,
-  UPDATE_SESSION_STATUS_DELAYED,
   CHANGE_SELECT
 ]
 
