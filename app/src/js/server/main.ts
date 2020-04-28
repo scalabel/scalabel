@@ -4,7 +4,6 @@ import * as formidable from 'express-formidable'
 import { createServer } from 'http'
 import socketio from 'socket.io'
 import 'source-map-support/register'
-import { sprintf } from 'sprintf-js'
 import { BotManager } from './bot_manager'
 import Callback from './controller/callback'
 import { Hub } from './hub'
@@ -104,7 +103,7 @@ async function launchRedisServer (config: ServerConfig) {
 
   const redisProc = child.spawn('redis-server', [
     getRedisConf(),
-    '--port', sprintf('%s', config.redisPort),
+    '--port', `${config.redisPort}`,
     '--bind', '127.0.0.1',
     '--dir', redisDir,
     '--protected-mode', 'yes']
@@ -146,7 +145,7 @@ async function startServers (
  */
 async function main () {
   // initialize config
-  const config = readConfig()
+  const config = await readConfig()
 
   // start the redis server
   await launchRedisServer(config)

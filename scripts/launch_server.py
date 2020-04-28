@@ -26,12 +26,6 @@ def launch() -> None:
     with open(args.config, 'r') as fp:
         config = yaml.load(fp, Loader=yaml.FullLoader)
 
-    if not os.path.exists(config['data']):
-        raise FileNotFoundError('Can not find {}'.format(config['data']))
-
-    if 'itemDir' in config and not os.path.exists(config['itemDir']):
-        raise FileNotFoundError('Can not find {}'.format(config['itemDir']))
-
     # launch the python server if bot option is true
     bot = 'bots'
     if bot in config and config[bot]:

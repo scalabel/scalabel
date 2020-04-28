@@ -22,7 +22,7 @@ import { CognitoConfig, CreationForm,
 /**
  * Initializes backend environment variables
  */
-export function readConfig (): ServerConfig {
+export async function readConfig (): Promise<ServerConfig> {
   /**
    * Creates config, using defaults for missing fields
    * Make sure user env come last to override defaults
@@ -45,7 +45,7 @@ export function readConfig (): ServerConfig {
     ...defaults.serverConfig,
     ...userConfig
   }
-  validateConfig(fullConfig)
+  await validateConfig(fullConfig)
   return fullConfig
 }
 
@@ -81,7 +81,15 @@ function validateCognitoConfig (cognito: CognitoConfig | undefined) {
  *
  * @param {ServerConfig} config
  */
-function validateConfig (config: ServerConfig) {
+async function validateConfig (config: ServerConfig) {
+  if (!(await fs.pathExists(config.data))) {
+    throw new Error(`Cannot find ${config.data}`)
+  }
+
+  if (!(await fs.pathExists(config.itemDir))) {
+    throw new Error(`Cannot find ${config.itemDir}`)
+  }
+
   if (config.userManagement) {
     validateCognitoConfig(config.cognito)
   }
