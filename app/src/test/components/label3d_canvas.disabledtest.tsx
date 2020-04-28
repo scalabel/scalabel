@@ -13,8 +13,8 @@ import { makePointCloudViewerConfig } from '../../js/functional/states'
 import { CubeType, PointCloudViewerConfigType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
-import { testJson } from '../test_point_cloud_objects'
 import { expectVector3TypesClose } from '../server/util/util'
+import { testJson } from '../test_point_cloud_objects'
 
 const canvasId = 0
 const width = 1000
@@ -112,6 +112,7 @@ function setUpLabel3dCanvas (
         display={display}
         ref={canvasRef}
         camera={camera}
+        shouldFreeze={false}
       />
     </div>
   )

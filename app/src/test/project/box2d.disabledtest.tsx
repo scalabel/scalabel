@@ -5,6 +5,8 @@ import { createCanvas } from 'canvas'
 import * as child from 'child_process'
 import _ from 'lodash'
 import * as React from 'react'
+import { Provider } from 'react-redux'
+import { isStatusSaved } from '../../js/common/selector'
 import Session from '../../js/common/session'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
@@ -118,13 +120,11 @@ describe('full 2d bounding box integration test', () => {
     const labelIds: IdType[] = []
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
-        <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave = {Session.autosave}
-          synchronizer = {synchronizer}
-        />
+        <Provider store={Session.store}>
+          <TitleBar
+            synchronizer={synchronizer}
+          />
+        </Provider>
       </MuiThemeProvider>
     )
     const saveButton = getByTestId('Save')
@@ -192,7 +192,7 @@ describe('full 2d bounding box integration test', () => {
       sleep(saveTimeout),
       waitForSave()
     ])
-    expect(Session.status.checkSaved()).toBe(true)
+    expect(isStatusSaved(Session.store.getState())).toBe(true)
   }, saveTimeout)
 
   test('test export of saved bounding boxes', async () => {

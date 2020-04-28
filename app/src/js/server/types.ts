@@ -84,8 +84,8 @@ export interface CreationForm {
   pageTitle: string
   /** task size */
   taskSize: number
-  /** instructions link */
-  instructions: string
+  /** instruction url */
+  instructionUrl: string
   /** whether demo mode is true */
   demoMode: boolean
 }

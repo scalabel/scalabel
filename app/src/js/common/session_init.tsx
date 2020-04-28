@@ -3,6 +3,7 @@ import Fingerprint2 from 'fingerprintjs2'
 import _ from 'lodash'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { Provider } from 'react-redux'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
@@ -29,7 +30,6 @@ export function initSession (containerName: string): void {
   const taskIndex = parseInt(searchParams.get('task_index') as string, 10)
   const projectName = searchParams.get('project_name') as string
   setListeners()
-
   setTimeout(() => {
     Fingerprint2.get((components) => {
       const values =
@@ -80,7 +80,11 @@ function updateTracks (): void {
 function renderDom (containerName: string, synchronizer: Synchronizer) {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
-      <Window synchronizer={synchronizer} />
+      <Provider store={Session.store}>
+        <Window
+          synchronizer={synchronizer}
+        />
+      </Provider>
     </MuiThemeProvider>,
     document.getElementById(containerName))
 }

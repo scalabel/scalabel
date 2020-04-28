@@ -8,6 +8,7 @@ import React, { ChangeEvent } from 'react'
 import { getAuth } from '../common/service'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { Endpoint, FormField } from '../server/types'
+import { getInstructionUrl, getPageTitle } from '../shared/util'
 import { checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
@@ -46,8 +47,8 @@ interface State {
   labelType: string
   /** project page title */
   pageTitle: string
-  /** current instructions url */
-  instructionsUrl: string
+  /** current instruction url */
+  instructionUrl: string
   /** dashboard url, change with version update */
   dashboardUrl: string
   /** vendor url, change with version update */
@@ -75,7 +76,7 @@ export default class CreateForm extends React.Component<Props, State> {
       itemType: '',
       labelType: '',
       pageTitle: '',
-      instructionsUrl: '',
+      instructionUrl: '',
       dashboardUrl: '',
       vendorUrl: '',
       showAdvancedOptions: false,
@@ -234,7 +235,7 @@ export default class CreateForm extends React.Component<Props, State> {
                     inputProps={{
                       'data-testid': 'instructions'
                     }}
-                    value={this.state.instructionsUrl}
+                    value={this.state.instructionUrl}
             />
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
@@ -359,38 +360,37 @@ export default class CreateForm extends React.Component<Props, State> {
    * @param itemType {string}
    */
   private handleInstructions = (labelType: string) => {
-    let labelName = ''
-    let instructions = ''
-    if (labelType === LabelTypeName.TAG) {
-      labelName = 'Image Tagging'
-      this.setState({ showCategoriesUpload: false })
-    } else if (labelType === LabelTypeName.BOX_2D) {
-      labelName = '2D Bounding Box'
-      instructions = 'https://www.scalabel.ai/doc/instructions/bbox.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.POLYGON_2D) {
-      labelName = '2D Segmentation'
-      instructions = 'https://www.scalabel.ai/doc/instructions/' +
-              'segmentation.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.POLYLINE_2D) {
-      labelName = '2D Lane'
-      instructions = 'https://www.scalabel.ai/doc/instructions/' +
-              'segmentation.html'
-      this.setState({ showCategoriesUpload: true })
-    } else if (labelType === LabelTypeName.BOX_3D) {
-      labelName = '3D Bounding Box'
-      this.setState({ showCategoriesUpload: true })
+    switch (labelType) {
+      case LabelTypeName.TAG:
+        this.setState({ showCategoriesUpload: false })
+        break
+      case LabelTypeName.BOX_2D:
+      case LabelTypeName.POLYGON_2D:
+      case LabelTypeName.POLYLINE_2D:
+      case LabelTypeName.BOX_3D:
+        this.setState({ showCategoriesUpload: true })
+        break
     }
-    this.setState({ pageTitle: labelName })
-    this.setState({ instructionsUrl: instructions })
+
+    const instructionUrl = getInstructionUrl(labelType)
+    this.setState({ instructionUrl })
   }
+
+  /**
+   * handles page title
+   */
+  private handlePageTitle = (labelType: string, itemType: string) => {
+    const pageTitle = getPageTitle(labelType, itemType)
+    this.setState({ pageTitle })
+  }
+
   /**
    * handles label changing
    * @param event
    */
   private handleLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.handleInstructions(event.target.value)
+    this.handlePageTitle(event.target.value, this.state.itemType)
     this.setState({ labelType: event.target.value })
   }
   /**
@@ -399,6 +399,8 @@ export default class CreateForm extends React.Component<Props, State> {
    */
   private handleItemTypeChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({ itemType: event.target.value })
+    this.handlePageTitle(this.state.labelType, event.target.value)
+
     if (event.target.value === 'video') {
       this.setState({ showTaskSize: false })
     } else {

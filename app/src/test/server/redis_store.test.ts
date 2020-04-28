@@ -63,7 +63,7 @@ describe('Test redis cache', () => {
     await store.setExWithReminder(key, 'testvalue', metadataString, 1)
 
     await checkFileCount()
-    await sleep(800)
+    await sleep(1200)
     await checkFileWritten()
   })
 
