@@ -128,11 +128,11 @@ export async function makeStorage (
  */
 export function makeCreationForm (
   projectName = '', itemType = '', labelType = '',
-  pageTitle = '', taskSize = 0, instructions = '', demoMode = false
+  pageTitle = '', taskSize = 0, instructionUrl = '', demoMode = false
 ): CreationForm {
   const form: CreationForm = {
     projectName, itemType, labelType, pageTitle,
-    instructions, taskSize, demoMode
+    instructionUrl, taskSize, demoMode
   }
   return form
 }
@@ -193,23 +193,6 @@ export function getBundleFile (labelType: string): string {
     return BundleFile.V2
   } else {
     return BundleFile.V1
-  }
-}
-
-/**
- * Get whether tracking is on
- * and change item type accordingly
- */
-export function getTracking (itemType: string): [string, boolean] {
-  switch (itemType) {
-    case ItemTypeName.VIDEO:
-      return [ItemTypeName.IMAGE, true]
-    case ItemTypeName.POINT_CLOUD_TRACKING:
-      return [ItemTypeName.POINT_CLOUD, true]
-    case ItemTypeName.FUSION:
-      return [ItemTypeName.FUSION, true]
-    default:
-      return [itemType, false]
   }
 }
 
