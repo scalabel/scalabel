@@ -8,7 +8,7 @@ import React, { ChangeEvent } from 'react'
 import { getAuth } from '../common/service'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { Endpoint, FormField } from '../server/types'
-import { getInstructionsLink, getPageTitle } from '../shared/util'
+import { getInstructionUrl, getPageTitle } from '../shared/util'
 import { checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
@@ -47,8 +47,8 @@ interface State {
   labelType: string
   /** project page title */
   pageTitle: string
-  /** current instructions url */
-  instructionsUrl: string
+  /** current instruction url */
+  instructionUrl: string
   /** dashboard url, change with version update */
   dashboardUrl: string
   /** vendor url, change with version update */
@@ -76,7 +76,7 @@ export default class CreateForm extends React.Component<Props, State> {
       itemType: '',
       labelType: '',
       pageTitle: '',
-      instructionsUrl: '',
+      instructionUrl: '',
       dashboardUrl: '',
       vendorUrl: '',
       showAdvancedOptions: false,
@@ -235,7 +235,7 @@ export default class CreateForm extends React.Component<Props, State> {
                     inputProps={{
                       'data-testid': 'instructions'
                     }}
-                    value={this.state.instructionsUrl}
+                    value={this.state.instructionUrl}
             />
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
@@ -372,11 +372,11 @@ export default class CreateForm extends React.Component<Props, State> {
         break
     }
 
-    const instructions = getInstructionsLink(labelType)
-    const labelName = getPageTitle(labelType)
+    const instructionUrl = getInstructionUrl(labelType)
+    const pageTitle = getPageTitle(labelType)
 
-    this.setState({ pageTitle: labelName })
-    this.setState({ instructionsUrl: instructions })
+    this.setState({ pageTitle })
+    this.setState({ instructionUrl })
   }
   /**
    * handles label changing

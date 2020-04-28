@@ -128,11 +128,11 @@ export async function makeStorage (
  */
 export function makeCreationForm (
   projectName = '', itemType = '', labelType = '',
-  pageTitle = '', taskSize = 0, instructions = '', demoMode = false
+  pageTitle = '', taskSize = 0, instructionUrl = '', demoMode = false
 ): CreationForm {
   const form: CreationForm = {
     projectName, itemType, labelType, pageTitle,
-    instructions, taskSize, demoMode
+    instructionUrl, taskSize, demoMode
   }
   return form
 }

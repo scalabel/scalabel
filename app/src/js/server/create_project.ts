@@ -13,7 +13,7 @@ import {
   TaskType,
   TrackMapType
 } from '../functional/types'
-import { getInstructionsLink, getPageTitle } from '../shared/util'
+import { getInstructionUrl, getPageTitle } from '../shared/util'
 import { ItemExport } from './bdd_types'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'
@@ -58,7 +58,7 @@ export async function parseForm (
 
   // Derived fields
   const pageTitle = getPageTitle(labelType)
-  const instructions = getInstructionsLink(labelType)
+  const instructionUrl = getInstructionUrl(labelType)
 
   // Ensure project name is not already in use
   const exists = await projectStore.checkProjectName(projectName)
@@ -68,7 +68,7 @@ export async function parseForm (
   const demoMode = fields[types.FormField.DEMO_MODE] === 'true'
   const form = util.makeCreationForm(
     projectName, itemType, labelType, pageTitle, taskSize,
-    instructions, demoMode
+    instructionUrl, demoMode
   )
   return form
 }
@@ -322,7 +322,7 @@ export function createProject (
     taskSize: form.taskSize,
     handlerUrl,
     pageTitle: form.pageTitle,
-    instructionPage: form.instructions,
+    instructionPage: form.instructionUrl,
     bundleFile,
     categories: formFileData.categories,
     attributes: formFileData.attributes,

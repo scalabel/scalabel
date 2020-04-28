@@ -4,21 +4,21 @@ import { LabelTypeName } from '../common/types'
 /**
  * Create the link to the labeling instructions
  */
-function makeInstructionsLink (pageName: string) {
+function makeInstructionUrl (pageName: string) {
   return sprintf('https://www.scalabel.ai/doc/instructions/%s.html', pageName)
 }
 
 /**
- * Select the correct instructions link for the given label type
+ * Select the correct instruction url for the given label type
  */
-export function getInstructionsLink (labelType: string) {
+export function getInstructionUrl (labelType: string) {
   switch (labelType) {
     case LabelTypeName.BOX_2D: {
-      return makeInstructionsLink('bbox')
+      return makeInstructionUrl('bbox')
     }
     case LabelTypeName.POLYGON_2D:
     case LabelTypeName.POLYLINE_2D: {
-      return makeInstructionsLink('segmentation')
+      return makeInstructionUrl('segmentation')
     }
     default: {
       return ''
