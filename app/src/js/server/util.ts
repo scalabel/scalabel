@@ -197,23 +197,6 @@ export function getBundleFile (labelType: string): string {
 }
 
 /**
- * Get whether tracking is on
- * and change item type accordingly
- */
-export function getTracking (itemType: string): [string, boolean] {
-  switch (itemType) {
-    case ItemTypeName.VIDEO:
-      return [ItemTypeName.IMAGE, true]
-    case ItemTypeName.POINT_CLOUD_TRACKING:
-      return [ItemTypeName.POINT_CLOUD, true]
-    case ItemTypeName.FUSION:
-      return [ItemTypeName.FUSION, true]
-    default:
-      return [itemType, false]
-  }
-}
-
-/**
  * Chooses the policy type and label types based on item and label types
  */
 export function getPolicy (

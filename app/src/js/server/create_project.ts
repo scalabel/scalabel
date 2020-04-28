@@ -13,7 +13,7 @@ import {
   TaskType,
   TrackMapType
 } from '../functional/types'
-import { getInstructionUrl, getPageTitle } from '../shared/util'
+import { getInstructionUrl, getPageTitle, getTracking } from '../shared/util'
 import { ItemExport } from './bdd_types'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'
@@ -57,7 +57,7 @@ export async function parseForm (
   }
 
   // Derived fields
-  const pageTitle = getPageTitle(labelType)
+  const pageTitle = getPageTitle(labelType, itemType)
   const instructionUrl = getInstructionUrl(labelType)
 
   // Ensure project name is not already in use
@@ -302,7 +302,7 @@ export function createProject (
 
   const handlerUrl = util.getHandlerUrl(form.itemType, form.labelType)
   const bundleFile = util.getBundleFile(form.labelType)
-  const [itemType, tracking] = util.getTracking(form.itemType)
+  const [itemType, tracking] = getTracking(form.itemType)
 
   const templates: { [name: string]: Label2DTemplateType } = {}
 

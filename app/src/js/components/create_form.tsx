@@ -373,17 +373,24 @@ export default class CreateForm extends React.Component<Props, State> {
     }
 
     const instructionUrl = getInstructionUrl(labelType)
-    const pageTitle = getPageTitle(labelType)
-
-    this.setState({ pageTitle })
     this.setState({ instructionUrl })
   }
+
+  /**
+   * handles page title
+   */
+  private handlePageTitle = (labelType: string, itemType: string) => {
+    const pageTitle = getPageTitle(labelType, itemType)
+    this.setState({ pageTitle })
+  }
+
   /**
    * handles label changing
    * @param event
    */
   private handleLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.handleInstructions(event.target.value)
+    this.handlePageTitle(event.target.value, this.state.itemType)
     this.setState({ labelType: event.target.value })
   }
   /**
@@ -392,6 +399,8 @@ export default class CreateForm extends React.Component<Props, State> {
    */
   private handleItemTypeChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({ itemType: event.target.value })
+    this.handlePageTitle(this.state.labelType, event.target.value)
+
     if (event.target.value === 'video') {
       this.setState({ showTaskSize: false })
     } else {
