@@ -33,7 +33,7 @@ beforeAll(() => {
   for (let i = 0; i < getState().task.items.length; i++) {
     dispatch(action.loadItem(i, -1))
   }
-  setUpLabel2dCanvas(Session.dispatch.bind(Session), canvasRef, 1000, 1000)
+  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000)
 })
 
 test('Draw 2d boxes to label2d list', () => {
@@ -95,6 +95,7 @@ test('Draw 2d boxes to label2d list', () => {
   rect = getShape(state, 0, labelIds[1], 0) as RectType
   expect(rect.x1).toEqual(70)
   expect(rect.y1).toEqual(85)
+
   expect(rect.x2).toEqual(90)
   expect(rect.y2).toEqual(90)
 
