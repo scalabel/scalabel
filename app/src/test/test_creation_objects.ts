@@ -124,7 +124,7 @@ export const sampleFormEmpty: CreationForm = {
   labelType: '',
   pageTitle: '',
   taskSize: 0,
-  instructions: '',
+  instructionUrl: '',
   demoMode: false
 }
 
@@ -139,7 +139,7 @@ export const sampleFormImage: CreationForm = {
   labelType: LabelTypeName.BOX_2D,
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
-  instructions: sampleInstructions,
+  instructionUrl: sampleInstructions,
   demoMode: false
 }
 
@@ -149,7 +149,7 @@ export const sampleFormVideo: CreationForm = {
   labelType: LabelTypeName.POLYGON_2D,
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
-  instructions: sampleInstructions,
+  instructionUrl: sampleInstructions,
   demoMode: true
 }
 
