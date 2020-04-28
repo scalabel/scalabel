@@ -130,10 +130,6 @@ export function normalizeMouseCoordinates (
   // limit the mouse within the image
   x = Math.max(0, Math.min(x, canvasWidth))
   y = Math.max(0, Math.min(y, canvasHeight))
-  // console.log('normalizeMouseCoordinates ' +
-  // `${displayToImageRatio} ${clientX} ${clientY} ${canvasHeight}
-  // ${canvasWidth} ${x} ${y} ${displayRect.x} ${displayRect.y}
-  // ${offsetX} ${offsetY}`)
 
   // return in the image coordinates
   return new Vector2D(x / displayToImageRatio,
@@ -164,8 +160,6 @@ export function imageDataToHandleId (data: Uint8ClampedArray) {
   }
   // finding the mode of the data array to deal with anti-aliasing
   const hoveredIndex = mode(arr) as number
-  // console.log('imageDataToHandleId ' + hoveredIndex + ' ' +
-  // decodeControlIndex(hoveredIndex))
   return decodeControlIndex(hoveredIndex)
 }
 
