@@ -70,11 +70,12 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
     If you are on Ubuntu, you may need to run the script with `sudo`.
 
-    Then you can use our python script to launch the server.
+    Then you can launch the server using node:
 
     ```shell
-    python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
+    node app/dist/js/main.js --config ./local-data/scalabel/config.yml --max-old-space-size=8192
     ```
+     Depending on your system, you may also have to increase the memory limit from 8192 (8 GB).
 
 5. Get labels
 
@@ -140,6 +141,13 @@ cp app/config/sync_config.yml local-data/scalabel/config.yml
 ```
 
 Now you can open multiple sessions for the same project, and they will automatically synchronize the data.
+
+### Other
+
+Some to-be-released features can be enabled by launching the server with the following python script:
+```shell
+python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
+```
 
 ### More Usage Info
 

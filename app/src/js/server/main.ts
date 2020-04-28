@@ -116,8 +116,8 @@ async function launchRedisServer (config: ServerConfig) {
     process.stdout.write(data)
   })
 
-  // wait 500 ms before trying to connect to the server
-  await sleep(500)
+  // wait 1 s before trying to connect to the server
+  await sleep(1000)
 }
 
 /**
