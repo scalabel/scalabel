@@ -153,20 +153,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       key='control-canvas'
       className={classes.control_canvas}
       ref={(canvas) => {
-        if (canvas && this.display) {
-          this.controlCanvas = canvas
-          this.controlContext = canvas.getContext('2d')
-          const displayRect =
-            this.display.getBoundingClientRect()
-          const item = this.state.user.select.item
-          const sensor = this.state.user.viewerConfigs[this.props.id].sensor
-          console.log('isFrameLoaded ' + isFrameLoaded(this.state, item, sensor) + ` ${displayRect.width} ${displayRect.height} `)
-          if (isFrameLoaded(this.state, item, sensor)
-            && displayRect.width
-            && displayRect.height
-            && this.controlContext) {
-            this.updateScale(this.controlCanvas, this.controlContext, true)
-          }
+        if (canvas) {
+          this.updateCanvas(canvas, true)
         }
       }}
     />)
@@ -174,19 +162,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       key='label2d-canvas'
       className={classes.label2d_canvas}
       ref={(canvas) => {
-        if (canvas && this.display) {
-          this.labelCanvas = canvas
-          this.labelContext = canvas.getContext('2d')
-          const displayRect =
-            this.display.getBoundingClientRect()
-          const item = this.state.user.select.item
-          const sensor = this.state.user.viewerConfigs[this.props.id].sensor
-          if (isFrameLoaded(this.state, item, sensor)
-            && displayRect.width
-            && displayRect.height
-            && this.labelContext) {
-            this.updateScale(this.labelCanvas, this.labelContext, true)
-          }
+        if (canvas) {
+          this.updateCanvas(canvas, false)
         }
       }}
       onMouseDown={(e) => { this.onMouseDown(e) }}
@@ -206,12 +183,6 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         { height: displayRect.height, width: displayRect.width })
     }
 
-    console.log('After rendring ' + [
-      this.canvasWidth,
-      this.canvasHeight,
-      this.displayToImageRatio,
-      this.scale
-    ])
     return [ch, controlCanvas, labelCanvas]
   }
 
@@ -253,7 +224,6 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     // Control + click for dragging
     // get mouse position in image coordinates
     const mousePos = this.getMousePos(e)
-    console.log(e.clientX, e.clientY, mousePos)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
       if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
@@ -348,7 +318,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   /**
    * notify state is updated
    */
-  protected updateState (state: State): void {
+  public updateState (state: State): void {
     if (this.display !== this.props.display) {
       this.display = this.props.display
       this.forceUpdate()
@@ -365,7 +335,6 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   private getMousePos (e: React.MouseEvent<HTMLCanvasElement>): Vector2D {
     if (this.display && this.labelCanvas) {
       return normalizeMouseCoordinates(
-        this.display,
         this.labelCanvas,
         this.canvasWidth,
         this.canvasHeight,
@@ -402,6 +371,35 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   }
 
   /**
+   * Update the canvas dimentions from the htmlcanvas element
+   * @param canva
+   */
+  private updateCanvas (canvas: HTMLCanvasElement, isContorl: boolean) {
+    const context = canvas.getContext('2d')
+    if (!context) {
+      return
+    }
+    if (canvas && this.display) {
+      if (isContorl) {
+        this.controlCanvas = canvas
+        this.controlContext = context
+      } else {
+        this.labelCanvas = canvas
+        this.labelContext = context
+      }
+      const displayRect =
+        this.display.getBoundingClientRect()
+      const item = this.state.user.select.item
+      const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+      if (isFrameLoaded(this.state, item, sensor)
+        && displayRect.width
+        && displayRect.height) {
+        this.updateScale(canvas, context, true)
+      }
+    }
+  }
+
+  /**
    * Set the scale of the image in the display
    * @param {object} canvas
    * @param {boolean} upRes
@@ -432,12 +430,6 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
           imgConfig.viewScale / this.scale,
           upRes
         )
-      console.log([
-        this.canvasWidth,
-        this.canvasHeight,
-        this.displayToImageRatio,
-        this.scale
-      ])
     }
   }
 }

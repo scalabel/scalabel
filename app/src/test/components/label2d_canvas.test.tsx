@@ -1,4 +1,4 @@
-import { cleanup, render } from '@testing-library/react'
+import { cleanup } from '@testing-library/react'
 import _ from 'lodash'
 import * as React from 'react'
 import * as action from '../../js/action/common'

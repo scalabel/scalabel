@@ -94,25 +94,6 @@ export function clearCanvas (canvas: HTMLCanvasElement,
 }
 
 /**
- * Get the coordinates of the upper left corner of the image canvas
- * @return {Vector2D} the x and y coordinates
- */
-export function getVisibleCanvasCoords (
-  display: HTMLDivElement,
-  canvas: HTMLCanvasElement
-): Vector2D {
-  if (display && canvas) {
-    const displayRect = display.getBoundingClientRect()
-    const imgRect = canvas.getBoundingClientRect()
-    console.log('getVisibleCanvasCoords ' + imgRect.x + ' ' + displayRect.x + ' ' + canvas.getBoundingClientRect())
-    console.log('getVisibleCanvasCoords ' + canvas.getBoundingClientRect() + display.getBoundingClientRect())
-
-    return new Vector2D(displayRect.x - imgRect.x, displayRect.y - imgRect.y)
-  }
-  return new Vector2D(0, 0)
-}
-
-/**
  * Normalize mouse x & y to canvas coordinates
  * @param display
  * @param canvas
@@ -123,7 +104,6 @@ export function getVisibleCanvasCoords (
  * @param clientY
  */
 export function normalizeMouseCoordinates (
-  display: HTMLDivElement,
   canvas: HTMLCanvasElement,
   canvasWidth: number,
   canvasHeight: number,
@@ -131,16 +111,29 @@ export function normalizeMouseCoordinates (
   clientX: number,
   clientY: number
 ) {
-  const [offsetX, offsetY] =
-    getVisibleCanvasCoords(display, canvas)
-  const displayRect = display.getBoundingClientRect()
-  let x = clientX - displayRect.x + offsetX
-  let y = clientY - displayRect.y + offsetY
+  // TODO(fyu): There is a rounding error between canvas.clientHeight
+  //  and canvasHeight
+  let offsetX = canvas.offsetLeft
+  let offsetY = canvas.offsetTop
+  const canvasBoundingRect = canvas.getBoundingClientRect()
+  // Test if the bounding client is defined
+  // If the bounding client is not defined, it can still return DOMRect, but the
+  // values are undefined.
+  // tslint:disable-next-line: strict-type-predicates
+  if (canvasBoundingRect.x !== undefined) {
+    offsetX = canvasBoundingRect.x
+    offsetY = canvasBoundingRect.y
+  }
+  let x = clientX - offsetX
+  let y = clientY - offsetY
 
   // limit the mouse within the image
   x = Math.max(0, Math.min(x, canvasWidth))
   y = Math.max(0, Math.min(y, canvasHeight))
-  console.log('normalizeMouseCoordinates ' + `${displayToImageRatio} ${clientX} ${clientY} ${canvasHeight} ${canvasWidth} ${x} ${y} ${displayRect.x} ${displayRect.y} ${offsetX} ${offsetY}`)
+  // console.log('normalizeMouseCoordinates ' +
+  // `${displayToImageRatio} ${clientX} ${clientY} ${canvasHeight}
+  // ${canvasWidth} ${x} ${y} ${displayRect.x} ${displayRect.y}
+  // ${offsetX} ${offsetY}`)
 
   // return in the image coordinates
   return new Vector2D(x / displayToImageRatio,
@@ -171,6 +164,8 @@ export function imageDataToHandleId (data: Uint8ClampedArray) {
   }
   // finding the mode of the data array to deal with anti-aliasing
   const hoveredIndex = mode(arr) as number
+  // console.log('imageDataToHandleId ' + hoveredIndex + ' ' +
+  // decodeControlIndex(hoveredIndex))
   return decodeControlIndex(hoveredIndex)
 }
 

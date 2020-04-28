@@ -111,6 +111,9 @@ export function decodeControlIndex (index: number): number[] {
 export function encodeControlColor (
   labelId: number, handleId: number): number[] {
   const index = ((labelId + 2) << 12) | handleId
+  // if (labelId > -1) {
+  //   console.log('encodeControlColor ' + labelId + ' ' + handleId)
+  // }
   return [(index >> 16) & 255, (index >> 8) & 255, (index & 255)]
 }
 
