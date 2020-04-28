@@ -104,6 +104,9 @@ export function getVisibleCanvasCoords (
   if (display && canvas) {
     const displayRect = display.getBoundingClientRect()
     const imgRect = canvas.getBoundingClientRect()
+    console.log('getVisibleCanvasCoords ' + imgRect.x + ' ' + displayRect.x + ' ' + canvas.getBoundingClientRect())
+    console.log('getVisibleCanvasCoords ' + canvas.getBoundingClientRect() + display.getBoundingClientRect())
+
     return new Vector2D(displayRect.x - imgRect.x, displayRect.y - imgRect.y)
   }
   return new Vector2D(0, 0)
@@ -137,6 +140,7 @@ export function normalizeMouseCoordinates (
   // limit the mouse within the image
   x = Math.max(0, Math.min(x, canvasWidth))
   y = Math.max(0, Math.min(y, canvasHeight))
+  console.log('normalizeMouseCoordinates ' + `${displayToImageRatio} ${clientX} ${clientY} ${canvasHeight} ${canvasWidth} ${x} ${y} ${displayRect.x} ${displayRect.y} ${offsetX} ${offsetY}`)
 
   // return in the image coordinates
   return new Vector2D(x / displayToImageRatio,

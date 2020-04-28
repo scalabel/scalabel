@@ -6,11 +6,10 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
-import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, PolygonType, RectType } from '../../js/functional/types'
 import { testJson } from '../test_image_objects'
 import { findNewLabelsFromState } from '../util'
-import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp } from './label2d_canvas_util'
+import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp, setUpLabel2dCanvas } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -27,60 +26,8 @@ beforeAll(() => {
   initStore(testJson)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
-  setUpLabel2dCanvas(1000, 1000)
+  setUpLabel2dCanvas(Session.dispatch.bind(Session), canvasRef, 1000, 1000)
 })
-
-/** Set up component for testing */
-function setUpLabel2dCanvas (width: number, height: number) {
-  Session.dispatch(action.addViewerConfig(0, makeImageViewerConfig(0)))
-
-  const display = document.createElement('div')
-  display.getBoundingClientRect = () => {
-    return {
-      width,
-      height,
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      x: 0,
-      y: 0,
-      toJSON: () => {
-        return {
-          width,
-          height,
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          x: 0,
-          y: 0
-        }
-      }
-    }
-  }
-
-  render(
-    <div style={{ width: `${width}px`, height: `${height}px` }}>
-      <Label2dCanvas
-        classes={{
-          label2d_canvas: 'label2dcanvas',
-          control_canvas: 'controlcanvas'
-        }}
-        id={0}
-        display={display}
-        ref={canvasRef}
-        shouldFreeze={false}
-      />
-    </div>
-  )
-
-  const itemIndex = 0
-  Session.dispatch(action.goToItem(itemIndex))
-
-  expect(canvasRef.current).not.toBeNull()
-  expect(canvasRef.current).not.toBeUndefined()
-}
 
 test('Draw 2d boxes to label2d list', () => {
   if (canvasRef.current) {

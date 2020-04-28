@@ -160,6 +160,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
             this.display.getBoundingClientRect()
           const item = this.state.user.select.item
           const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+          console.log('isFrameLoaded ' + isFrameLoaded(this.state, item, sensor) + ` ${displayRect.width} ${displayRect.height} `)
           if (isFrameLoaded(this.state, item, sensor)
             && displayRect.width
             && displayRect.height
@@ -205,6 +206,12 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         { height: displayRect.height, width: displayRect.width })
     }
 
+    console.log('After rendring ' + [
+      this.canvasWidth,
+      this.canvasHeight,
+      this.displayToImageRatio,
+      this.scale
+    ])
     return [ch, controlCanvas, labelCanvas]
   }
 
@@ -225,6 +232,17 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   }
 
   /**
+   * Clear canvas
+   */
+  public clear (): void {
+    if (this.labelCanvas !== null && this.labelContext !== null &&
+      this.controlCanvas !== null && this.controlContext !== null) {
+      clearCanvas(this.labelCanvas, this.labelContext)
+      clearCanvas(this.controlCanvas, this.controlContext)
+    }
+  }
+
+  /**
    * Callback function when mouse is down
    * @param {MouseEvent} e - event
    */
@@ -235,6 +253,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     // Control + click for dragging
     // get mouse position in image coordinates
     const mousePos = this.getMousePos(e)
+    console.log(e.clientX, e.clientY, mousePos)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
       if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
@@ -413,6 +432,12 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
           imgConfig.viewScale / this.scale,
           upRes
         )
+      console.log([
+        this.canvasWidth,
+        this.canvasHeight,
+        this.displayToImageRatio,
+        this.scale
+      ])
     }
   }
 }
