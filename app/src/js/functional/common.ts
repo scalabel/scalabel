@@ -684,7 +684,6 @@ function deleteLabelsFromItem (
       deletedShapes[shape.id] = shape
     }
   })
-  // console.log(updatedLabels, deletedLabels, updatedShapes, deletedShapes)
 
   labels = removeObjectFields(updateObject(
     item.labels, updatedLabels), _.keys(deletedLabels))
@@ -1170,6 +1169,33 @@ export function startLinkTrack (
     state.session,
     {
       trackLinking: true
+    }
+  )
+  return updateObject(
+    state,
+    {
+      session: newSession
+    }
+  )
+}
+
+/**
+ * Update session status, if it should be updated
+ */
+export function updateSessionStatus (
+  state: State, action: types.UpdateSessionStatusAction
+): State {
+  const newStatus = action.newStatus
+
+  const oldSession = state.session
+  // update mod 1000 since only nearby differences are important
+  const numUpdates = (oldSession.numUpdates + 1) % 1000
+
+  const newSession = updateObject(
+    oldSession,
+    {
+      status: newStatus,
+      numUpdates
     }
   )
   return updateObject(

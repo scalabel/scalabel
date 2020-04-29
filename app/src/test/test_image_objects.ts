@@ -56,6 +56,7 @@ export const testJson = {
       pageTitle: 'Image Tagging Labeling Tool',
       instructionPage: 'undefined',
       demoMode: false,
+      autosave: false,
       bundleFile: 'image_v2.js',
       categories: ['1', '2', '3'],
       attributes: [
