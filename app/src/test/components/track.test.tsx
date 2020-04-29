@@ -1,12 +1,15 @@
+import { fireEvent, render } from '@testing-library/react'
 import _ from 'lodash'
 import React from 'react'
 import * as action from '../../js/action/common'
+import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
+import { ToolBar } from '../../js/components/toolbar'
 // import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
-import { drawBox2DTracks, keyClick, mouseClick, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -41,6 +44,21 @@ test('Basic track operations', () => {
   const label2d = canvasRef.current as Label2dCanvas
   const numItems = getState().task.items.length
 
+  const toolbarRef: React.Ref<ToolBar> = React.createRef()
+  const { getByText } = render(
+    <ToolBar
+      ref={toolbarRef}
+      categories={null}
+      attributes={[]}
+      labelType={'labelType'}
+      />
+    )
+  expect(toolbarRef.current).not.toBeNull()
+  expect(toolbarRef.current).not.toBeUndefined()
+  if (toolbarRef.current) {
+    toolbarRef.current.componentDidMount()
+  }
+
   const itemIndices = [0, 2, 4, 6]
   const numLabels = [1, 1, 2, 2, 3, 3, 4, 4]
   const boxes = [
@@ -65,64 +83,42 @@ test('Basic track operations', () => {
 
   // Terminate the track by key
   dispatch(action.goToItem(1))
-  mouseClick(label2d, 1, 30)
-  keyClick(label2d, ['Control', 'E'])
+  mouseMoveClick(label2d, 1, 30)
+  fireEvent(
+    getByText('End Object Tracking'),
+    new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true
+    })
+  )
   state = getState()
+  expect(_.size(state.task.items[2].labels)).toEqual(1)
   expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(2)
+
+  // Merge tracks
+  dispatch(action.goToItem(1))
+  mouseMoveClick(label2d, 1, 30)
+  state = getState()
+  fireEvent(
+    getByText('Track-Link'),
+    new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true
+    })
+  )
+
+  dispatch(action.goToItem(4))
+  Session.dispatch(selectLabel(
+    state.user.select.labels, 4,
+    state.task.tracks[trackIds[2]].labels[4]))
+  state = getState()
+  fireEvent(
+    getByText('Finish Track-Link'),
+    new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true
+    })
+  )
+  state = getState()
+  expect(_.size(state.task.tracks)).toEqual(3)
 })
-
-// test('Terminate track by key', () => {
-//   initStore(testJson)
-//   const label2d = canvasRef.current as Label2dCanvas
-//   Session.dispatch(action.goToItem(1))
-//   let state = Session.getState()
-//   const trackLabels = state.task.tracks[3].labels
-//   const lblInItm2 = trackLabels[2]
-//   const lblInItm3 = trackLabels[3]
-//   const lblInItm4 = trackLabels[4]
-//   const lblInItm5 = trackLabels[5]
-//   expect(_.size(state.task.tracks[3].labels)).toBe(6)
-//   expect(_.size(state.task.items[2].labels)).toBe(3)
-//   expect(_.size(state.task.items[2].shapes)).toBe(3)
-//   label2d.onMouseDown(mouseDownEvent(835, 314))
-//   label2d.onMouseUp(mouseUpEvent(835, 314))
-//   label2d.onKeyDown(keyDownEvent('Control'))
-//   label2d.onKeyDown(keyDownEvent('E'))
-//   label2d.onKeyUp(keyUpEvent('E'))
-//   label2d.onKeyUp(keyUpEvent('Control'))
-
-//   state = Session.getState()
-//   expect(_.size(state.task.tracks[3].labels)).toBe(2)
-//   expect(state.task.items[2].labels[lblInItm2]).toBeUndefined()
-//   expect(state.task.items[2].labels[lblInItm3]).toBeUndefined()
-//   expect(state.task.items[2].labels[lblInItm4]).toBeUndefined()
-//   expect(state.task.items[2].labels[lblInItm5]).toBeUndefined()
-// })
-
-// test('Merge track by key', () => {
-//   initStore(testJson)
-//   const label2d = canvasRef.current as Label2dCanvas
-//   Session.dispatch(action.goToItem(3))
-//   let state = Session.getState()
-//   expect(_.size(state.task.tracks[2].labels)).toBe(4)
-//   expect(_.size(state.task.tracks[9].labels)).toBe(1)
-//   expect(state.task.items[5].labels[203].track).toEqual(9)
-
-//   label2d.onMouseDown(mouseDownEvent(925, 397))
-//   label2d.onMouseUp(mouseUpEvent(925, 397))
-//   label2d.onKeyDown(keyDownEvent('Control'))
-//   label2d.onKeyDown(keyDownEvent('L'))
-//   label2d.onKeyUp(keyUpEvent('L'))
-//   label2d.onKeyUp(keyUpEvent('Control'))
-
-//   Session.dispatch(action.goToItem(5))
-//   label2d.onMouseDown(mouseDownEvent(931, 300))
-//   label2d.onMouseUp(mouseUpEvent(931, 300))
-//   label2d.onKeyDown(keyDownEvent('Enter'))
-//   label2d.onKeyUp(keyUpEvent('Enter'))
-
-//   state = Session.getState()
-//   expect(_.size(state.task.tracks[2].labels)).toBe(5)
-//   expect(state.task.tracks[9]).toBeUndefined()
-//   expect(state.task.items[5].labels[203].track).toEqual(2)
-// })

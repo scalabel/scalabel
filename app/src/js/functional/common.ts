@@ -722,7 +722,7 @@ function deleteLabelsFromTracks (
   for (const l of labels) {
     if (!(l.track in deletedLabelsByTrack)) {
       // create a temporary track to contain the labels to delete
-      deletedLabelsByTrack[l.track] = makeTrack()
+      deletedLabelsByTrack[l.track] = makeTrack({ id: l.track }, true)
     }
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
   }
