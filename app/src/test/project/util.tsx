@@ -4,6 +4,7 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 import { ChangeEvent } from 'react'
 import * as util from 'util'
+import { isStatusSaved } from '../../js/common/selector'
 import Session from '../../js/common/session'
 import { initFromJson } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
@@ -133,7 +134,7 @@ export function sleep (milliseconds: number): Promise<object> {
  */
 export function waitForSave (): Promise<object> {
   return new Promise(async (resolve) => {
-    while (!Session.status.checkSaved()) {
+    while (!isStatusSaved(Session.store.getState())) {
       await sleep(10)
     }
     resolve()

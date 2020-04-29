@@ -1,5 +1,6 @@
 import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import * as THREE from 'three'
 import Session from '../common/session'
 import { LabelTypeName } from '../common/types'
@@ -10,6 +11,7 @@ import { HomographyViewerConfigType, State } from '../functional/types'
 import { imageViewStyle } from '../styles/label'
 import { clearCanvas, drawImageOnCanvas } from '../view_config/image'
 import { ImageCanvas, Props } from './image_canvas'
+import { mapStateToDrawableProps } from './viewer'
 
 /** Get basis matrix for use with homography */
 function getBasisMatrix (homogeneousPoints: THREE.Vector3[]) {
@@ -295,6 +297,6 @@ class HomographyCanvas extends ImageCanvas {
   }
 }
 
-export default withStyles(
-  imageViewStyle, { withTheme: true }
-)(HomographyCanvas)
+const styledCanvas = withStyles(
+  imageViewStyle, { withTheme: true })(HomographyCanvas)
+export default connect(mapStateToDrawableProps)(styledCanvas)
