@@ -6,7 +6,7 @@ import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 // import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
-import { drawBox2DTracks, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { drawBox2DTracks, keyClick, mouseClick, setUpLabel2dCanvas } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -41,9 +41,8 @@ test('Basic track operations', () => {
   const label2d = canvasRef.current as Label2dCanvas
   const numItems = getState().task.items.length
 
-  // test adding tracks
-  const itemIndices = [0, 0, 1, 2]
-  const numLabels = [2, 3, 4, 4, 4, 4, 4, 4]
+  const itemIndices = [0, 2, 4, 6]
+  const numLabels = [1, 1, 2, 2, 3, 3, 4, 4]
   const boxes = [
     [1, 1, 50, 50],
     [19, 20, 30, 29],
@@ -51,8 +50,9 @@ test('Basic track operations', () => {
     [500, 500, 80, 100]
   ]
 
+  // test adding tracks
   const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
-  const state = getState()
+  let state = getState()
   expect(_.size(state.task.tracks)).toEqual(4)
   itemIndices.forEach((itemIndex, i) => {
     expect(_.size(state.task.tracks[trackIds[i]].labels)).toEqual(
@@ -62,6 +62,13 @@ test('Basic track operations', () => {
       expect(_.size(item.shapes)).toEqual(numLabels[index])
     })
   })
+
+  // Terminate the track by key
+  dispatch(action.goToItem(1))
+  mouseClick(label2d, 1, 30)
+  keyClick(label2d, ['Control', 'E'])
+  state = getState()
+  expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(2)
 })
 
 // test('Terminate track by key', () => {

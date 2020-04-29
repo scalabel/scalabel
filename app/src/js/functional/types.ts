@@ -382,8 +382,6 @@ export interface TaskStatus {
   maxOrder: number
 }
 
-export interface TrackMapType { [key: string]: TrackType }
-
 export interface SubmitData {
   /** time of the submission (client side) */
   time: number
@@ -403,7 +401,7 @@ export interface TaskType {
   /** Items */
   items: ItemType[]
   /** tracks */
-  tracks: TrackMapType
+  tracks: TrackIdMap
   /** data sources */
   sensors: SensorMapType
   /** info on task progress */

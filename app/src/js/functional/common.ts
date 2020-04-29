@@ -20,7 +20,7 @@ import {
   State,
   TaskStatus,
   TaskType,
-  TrackMapType,
+  TrackIdMap,
   TrackType,
   UserType,
   ViewerConfigType
@@ -715,10 +715,10 @@ function deleteLabelsFromItems (
  * @param labels
  */
 function deleteLabelsFromTracks (
-  tracks: TrackMapType, labels: LabelType[]
-): TrackMapType {
+  tracks: TrackIdMap, labels: LabelType[]
+): TrackIdMap {
   tracks = { ...tracks }
-  const deletedLabelsByTrack: TrackMapType = {}
+  const deletedLabelsByTrack: TrackIdMap = {}
   for (const l of labels) {
     if (!(l.track in deletedLabelsByTrack)) {
       // create a temporary track to contain the labels to delete

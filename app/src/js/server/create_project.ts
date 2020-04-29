@@ -11,7 +11,7 @@ import {
   SensorType,
   TaskStatus,
   TaskType,
-  TrackMapType
+  TrackIdMap
 } from '../functional/types'
 import { getInstructionUrl, getPageTitle, getTracking } from '../shared/util'
 import { ItemExport } from './bdd_types'
@@ -564,7 +564,7 @@ export function createTasks (
 
     // convert from export format to internal format
     const itemsForTask: ItemType[] = []
-    const trackMap: TrackMapType = {}
+    const trackMap: TrackIdMap = {}
     for (let itemInd = 0; itemInd < realTaskSize; itemInd += 1) {
       const timestampToMatch = itemsBySensor[largestSensor][
         sensorMatchingIndices[largestSensor]

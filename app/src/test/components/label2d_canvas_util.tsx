@@ -108,6 +108,18 @@ export function keyUp (label2d: Label2dCanvas, key: string) {
 }
 
 /**
+ * Click a key. keys is an array for combo key stroks
+ */
+export function keyClick (label2d: Label2dCanvas, keys: string[]) {
+  keys.forEach((key) => {
+    keyDown(label2d, key)
+  })
+  keys.reverse().forEach((key) => {
+    keyUp(label2d, key)
+  })
+}
+
+/**
  * Test driver to draw a polygon on label2d canvas
  * @param label2d
  * @param points
