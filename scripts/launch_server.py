@@ -26,7 +26,10 @@ def launch() -> None:
     with open(args.config, 'r') as fp:
         config = yaml.load(fp, Loader=yaml.FullLoader)
 
-    if not os.path.exists(config['data']):
+    database = 'local'
+    if 'database' in config:
+        database = config['database']
+    if database == 'local' and not os.path.exists(config['data']):
         raise FileNotFoundError('Can not find {}'.format(config['data']))
 
     if 'itemDir' in config and not os.path.exists(config['itemDir']):
@@ -66,9 +69,8 @@ def launch() -> None:
 
         py_env = os.environ.copy()
         python_path = 'PYTHONPATH'
-        model_path = os.path.join(
-            'scalabel', 'bot', 'experimental',
-            'fast-seg-label', 'polyrnn_scalabel')
+        model_path = os.path.join('scalabel', 'bot', 'experimental',
+                                  'fast-seg-label', 'polyrnn_scalabel')
         if python_path in py_env:
             model_path = "{}:{}".format(py_env[python_path], model_path)
         py_env[python_path] = model_path
