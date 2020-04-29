@@ -3,7 +3,7 @@ from typing import List
 import os
 import warnings
 import numpy as np
-from Tool.tool import Tool  # type: ignore
+from Tool.tool import Tool  # type: ignore # pylint: disable=import-error
 from .seg_base import SegBase
 
 
