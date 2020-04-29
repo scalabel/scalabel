@@ -6,7 +6,7 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
-import { IdType, PolygonType, RectType } from '../../js/functional/types'
+import { IdType, PolygonType } from '../../js/functional/types'
 import { findNewLabelsFromState } from '../server/util/util'
 import { testJson } from '../test_image_objects'
 import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp, setUpLabel2dCanvas } from './label2d_canvas_util'
@@ -27,94 +27,6 @@ beforeAll(() => {
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
   setUpLabel2dCanvas(Session.dispatch.bind(Session), canvasRef, 1000, 1000)
-})
-
-test('Draw 2d boxes to label2d list', () => {
-  expect(canvasRef.current).not.toBeNull()
-  if (canvasRef.current) {
-    const labelIds: IdType[] = []
-    const label2d = canvasRef.current
-    // Draw first box
-    mouseMove(label2d, 1, 1)
-    mouseDown(label2d, 1, 1)
-    mouseMove(label2d, 50, 50)
-    mouseUp(label2d, 50, 50)
-    let state = Session.getState()
-    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
-    expect(_.size(state.task.items[0].labels)).toEqual(1)
-    let rect = getShape(state, 0, labelIds[0], 0) as RectType
-    expect(rect.x1).toEqual(1)
-    expect(rect.y1).toEqual(1)
-    expect(rect.x2).toEqual(50)
-    expect(rect.y2).toEqual(50)
-
-    // Second box
-    mouseMove(label2d, 25, 20)
-    mouseDown(label2d, 25, 20)
-    mouseMove(label2d, 15, 15)
-    mouseMove(label2d, 70, 85)
-    mouseUp(label2d, 70, 85)
-
-    state = Session.getState()
-    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
-    expect(_.size(state.task.items[0].labels)).toEqual(2)
-    rect = getShape(state, 0, labelIds[1], 0) as RectType
-    expect(rect.x1).toEqual(25)
-    expect(rect.y1).toEqual(20)
-    expect(rect.x2).toEqual(70)
-    expect(rect.y2).toEqual(85)
-
-    // third box
-    mouseMove(label2d, 15, 10)
-    mouseDown(label2d, 15, 10)
-    mouseMove(label2d, 23, 24)
-    mouseMove(label2d, 60, 70)
-    mouseUp(label2d, 60, 70)
-    state = Session.getState()
-    labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
-    expect(_.size(state.task.items[0].labels)).toEqual(3)
-    rect = getShape(state, 0, labelIds[2], 0) as RectType
-    expect(rect.x1).toEqual(15)
-    expect(rect.y1).toEqual(10)
-    expect(rect.x2).toEqual(60)
-    expect(rect.y2).toEqual(70)
-
-    // resize the second box
-    mouseMove(label2d, 25, 20)
-    mouseDown(label2d, 25, 20)
-    mouseMove(label2d, 15, 18)
-    mouseMove(label2d, 30, 34)
-    mouseUp(label2d, 30, 34)
-    state = Session.getState()
-    expect(_.size(state.task.items[0].labels)).toEqual(3)
-    rect = getShape(state, 0, labelIds[1], 0) as RectType
-    expect(rect.x1).toEqual(30)
-    expect(rect.y1).toEqual(34)
-
-    // flip top left and bottom right corner
-    mouseMove(label2d, 30, 34)
-    mouseDown(label2d, 30, 34)
-    mouseMove(label2d, 90, 90)
-    mouseUp(label2d, 90, 90)
-    state = Session.getState()
-    rect = getShape(state, 0, labelIds[1], 0) as RectType
-    expect(rect.x1).toEqual(70)
-    expect(rect.y1).toEqual(85)
-    expect(rect.x2).toEqual(90)
-    expect(rect.y2).toEqual(90)
-
-    // move
-    mouseMove(label2d, 30, 10)
-    mouseDown(label2d, 30, 10)
-    mouseMove(label2d, 40, 15)
-    mouseUp(label2d, 40, 15)
-    state = Session.getState()
-    rect = getShape(state, 0, labelIds[2], 0) as RectType
-    expect(rect.x1).toEqual(25)
-    expect(rect.y1).toEqual(15)
-    expect(rect.x2).toEqual(70)
-    expect(rect.y2).toEqual(75)
-  }
 })
 
 test('Draw 2d polygons to label2d list', () => {
