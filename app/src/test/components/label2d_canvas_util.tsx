@@ -2,8 +2,10 @@ import { render } from '@testing-library/react'
 import * as React from 'react'
 import * as action from '../../js/action/common'
 import { ActionType } from '../../js/action/types'
+import { SimpleStore } from '../../js/common/simple_store'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { makeImageViewerConfig } from '../../js/functional/states'
+import { TrackCollector } from '../server/util/track_collector'
 
 /** Create mouse down event */
 function mouseDownEvent (
@@ -133,6 +135,27 @@ export function drawBox2D (
   mouseMove(label2d, (x1 + x2) / 2, (y1 + y2) / 2)
   mouseMove(label2d, x2, y2)
   mouseUp(label2d, x2, y2)
+}
+
+/**
+ * Draw a sequences of bounding box 2D tracks
+ * @param label2d 2d canvas
+ * @param state state store
+ * @param itemIndices the item indices of those boses
+ * @param boxes corners coordinates in [x1, y1, x2, y2] for each box
+ */
+export function drawBox2DTracks (
+  label2d: Label2dCanvas, store: SimpleStore,
+  itemIndices: number[], boxes: number[][]
+): TrackCollector {
+  const trackIds = new TrackCollector(store.getter())
+  itemIndices.forEach((itemIndex, boxIndex) => {
+    store.dispatch(action.goToItem(itemIndex))
+    const b = boxes[boxIndex]
+    drawBox2D(label2d, b[0], b[1], b[2], b[3])
+    trackIds.collect()
+  })
+  return trackIds
 }
 
 /** Set up component for testing */

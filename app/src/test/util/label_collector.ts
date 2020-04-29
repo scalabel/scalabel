@@ -1,7 +1,6 @@
-import { IdType, State } from '../../js/functional/types'
+import { getStateFunc } from '../../js/common/simple_store'
+import { IdType } from '../../js/functional/types'
 import { findNewLabelsFromState } from '../server/util/util'
-
-type getStateFunc = () => State
 
 /**
  * Collect the states from the current state

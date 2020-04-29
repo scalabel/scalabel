@@ -17,4 +17,18 @@ export class SimpleStore {
     this.getState = getState
     this.dispatch = dispatch
   }
+
+  /**
+   * Get the standalone state accessor function
+   */
+  public getter (): getStateFunc {
+    return this.getState.bind(this)
+  }
+
+  /**
+   * Get the standalone state dispatch function
+   */
+  public dispatcher (): dispatchFunc {
+    return this.dispatch.bind(this)
+  }
 }

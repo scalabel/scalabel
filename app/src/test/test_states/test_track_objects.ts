@@ -667,7 +667,7 @@ export const emptyTrackingTask = {
       itemType: 'image',
       labelTypes: ['box2d'],
       label2DTemplates: {},
-      taskSize: 6,
+      taskSize: 8,
       handlerUrl: 'label',
       pageTitle: '2D Bounding Box',
       instructionPage: 'https://www.scalabel.ai/doc/instructions/bbox.html',
@@ -789,6 +789,26 @@ export const emptyTrackingTask = {
       labels: {},
       shapes: {},
       timestamp: 0
+    }, {
+      id: '6',
+      index: 6,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg'
+      },
+      labels: {},
+      shapes: {},
+      timestamp: 0
+    }, {
+      id: '7',
+      index: 7,
+      videoName: '',
+      urls: {
+        '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg'
+      },
+      labels: {},
+      shapes: {},
+      timestamp: 0
     }],
     tracks: {
 
@@ -837,6 +857,14 @@ export const emptyTrackingTask = {
     id: '',
     startTime: 0,
     itemStatuses: [{
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }, {
+      sensorDataLoaded: {
+        '-1': false
+      }
+    }, {
       sensorDataLoaded: {
         '-1': false
       }
