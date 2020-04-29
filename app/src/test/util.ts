@@ -105,7 +105,7 @@ export function getRandomBox2dAction () {
  */
 export function getRandomModelPoly () {
   const points = []
-  for (let _ = 0; _++; _ < 5) {
+  for (let i = 0; i++; i < 5) {
     points.push([Math.random(), Math.random()])
   }
   return points
