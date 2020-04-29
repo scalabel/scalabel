@@ -114,23 +114,35 @@ export class Bot {
    * Simply logs these actions for now
    */
   public async actionBroadcastHandler (
-    message: SyncActionMessageType) {
+    message: SyncActionMessageType): Promise<AddLabelsAction[]> {
     const actionPacket = message.actions
     // if action was already acked, or if action came from a bot, ignore it
     if (this.ackedPackets.has(actionPacket.id)
       || message.bot
       || message.sessionId === this.sessionId) {
-      return
+      return []
     }
 
     this.ackedPackets.add(actionPacket.id)
 
     // precompute queries so they can potentially execute in parallel
     const queries = this.packetToQueries(actionPacket)
+
+    // send the queries for execution on the model server
     const actions = await this.executeQueries(queries)
+
+    // dispatch the predicted actions locally
+    for (const action of actions) {
+      this.store.dispatch(action)
+    }
+
+    // broadcast the predicted actions to other session
     if (actions.length > 0) {
       this.broadcastActions(actions, actionPacket.id)
     }
+
+    // return actions for testing purposes
+    return actions
   }
 
   /**
@@ -185,6 +197,13 @@ export class Bot {
       taskIndex: this.taskIndex,
       address: this.address
     }
+  }
+
+  /**
+   * Get the current redux state
+   */
+  public getState (): State {
+    return this.store.getState().present
   }
 
   /**

@@ -100,6 +100,18 @@ export function getRandomBox2dAction () {
 }
 
 /**
+ * Helper function to generate points of a polygon
+ * In the format returned by the model server
+ */
+export function getRandomModelPoly () {
+  const points = []
+  for (let _ = 0; _++; _ < 5) {
+    points.push([Math.random(), Math.random()])
+  }
+  return points
+}
+
+/**
  * Get the path to the test config
  */
 export function getTestConfigPath (): string {
