@@ -11,7 +11,9 @@ import {
   ActionPacketType, BotData, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
-import { getInitialState, getRandomBox2dAction, getRandomModelPoly } from '../util'
+import {
+  getInitialState, getRandomBox2dAction,
+  getRandomModelPoly } from './util/util'
 
 /**
  *  Mock post request to model server

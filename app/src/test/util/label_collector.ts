@@ -1,7 +1,6 @@
-import { IdType, State } from '../../js/functional/types'
-import { findNewLabelsFromState } from '../util'
-
-type getStateFunc = () => State
+import { getStateFunc } from '../../js/common/simple_store'
+import { IdType } from '../../js/functional/types'
+import { findNewLabelsFromState } from '../server/util/util'
 
 /**
  * Collect the states from the current state
@@ -17,10 +16,11 @@ export class LabelCollector extends Array<IdType> {
   }
 
   /** Collect the latest tracks from the state */
-  public collect () {
+  public collect (): number {
     const state = this._getState()
     const trackIds = findNewLabelsFromState(
       state, state.user.select.item, this)
     this.push(...trackIds)
+    return this.length
   }
 }

@@ -188,7 +188,7 @@ export class Label3DList {
         newLabels[id].updateState(
           state, state.user.select.item, id
         )
-        for (const shape of Object.values(newLabels[id].shapes())) {
+        for (const shape of Object.values(newLabels[id].internalShapes())) {
           newRaycastableShapes.push(shape)
           newRaycastMap[shape.id] = newLabels[id]
           this._scene.add(shape)

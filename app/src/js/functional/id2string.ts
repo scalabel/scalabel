@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType, TaskType, TrackMapType, TrackType } from './types'
+import { ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType, TaskType, TrackIdMap, TrackType } from './types'
 
 /**
  * Convert the Ids in the task to string
@@ -16,8 +16,8 @@ export function taskIdToString (task: TaskType): TaskType {
  * Convert the Ids in the tracks to string
  * @param tracks
  */
-function tracksIdToString (tracks: TrackMapType): TrackMapType {
-  const newTracks: TrackMapType = {}
+function tracksIdToString (tracks: TrackIdMap): TrackIdMap {
+  const newTracks: TrackIdMap = {}
   _.forEach(tracks, (track, trackId) => {
     newTracks[trackId.toString()] = trackIdToString(track)
   })
