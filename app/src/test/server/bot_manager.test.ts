@@ -6,7 +6,7 @@ import { RedisPubSub } from '../../js/server/redis_pub_sub'
 import {
   BotData, RegisterMessageType, ServerConfig } from '../../js/server/types'
 import { sleep } from '../project/util'
-import { getTestConfig } from '../util'
+import { getTestConfig } from './util/util'
 
 let client: RedisClient
 let subClient: RedisClient

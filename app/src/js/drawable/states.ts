@@ -17,6 +17,8 @@ export function commitLabels (
   const updatedLabels: { [index: number]: LabelIdMap} = {}
   const newTracks: Track[] = []
   const newLabels: Array<Readonly<Label2D | Label3D>> = []
+  const state = Session.getState()
+  const numItems = state.task.items.length
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
     if (!drawable.temporary) {
@@ -77,7 +79,7 @@ export function commitLabels (
           track.init(
             drawable.item,
             drawable,
-            Session.numItems - drawable.item + 1,
+            numItems - drawable.item + 1,
             parentTrack
           )
           newTracks.push(track)
@@ -95,7 +97,7 @@ export function commitLabels (
       const labels = []
       const types = []
       const shapes = []
-      for (let i = 0; i < Session.numItems; i++) {
+      for (let i = 0; i < numItems; i++) {
         const label = track.getLabel(i)
         const currentTypes = []
         const currentShapes = []

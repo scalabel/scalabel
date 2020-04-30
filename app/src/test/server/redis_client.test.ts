@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { RedisClient } from '../../js/server/redis_client'
-import { getTestConfig } from '../util'
+import { getTestConfig } from './util/util'
 
 let client: RedisClient
 

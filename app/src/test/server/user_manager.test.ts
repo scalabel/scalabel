@@ -9,7 +9,7 @@ import { ProjectStore } from '../../js/server/project_store'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
 import { UserManager } from '../../js/server/user_manager'
-import { makeProjectDir } from '../util'
+import { makeProjectDir } from './util/util'
 
 jest.mock('../../js/server/redis_client')
 
