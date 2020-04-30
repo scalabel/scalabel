@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { AttributeToolType, ShapeTypeName } from '../../common/types'
+import { AttributeToolType } from '../../common/types'
 import { Attribute, IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D } from '../util'
@@ -20,8 +20,8 @@ export class Tag2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
-    return [[], [], []]
+  public shapes (): ShapeType[] {
+    return []
   }
 
   /**

@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, Key, LabelTypeName } from '../../common/types'
 import { makeLabel, makePolygon } from '../../functional/states'
-import { IdType, LabelType, PolygonType, PolyPathPoint2DType, ShapeType, State } from '../../functional/types'
+import { LabelType, PolygonType, PolyPathPoint2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
@@ -413,13 +413,21 @@ export class Polygon2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [
-      this._label.shapes, [ShapeTypeName.POLYGON_2D], [this.toPolygon()]
-    ]
+    /**
+     * This is a temporary solution for assigning the correct ID to the shapes
+     * We should initialize the shape when the temporary label is created.
+     * Also store the shape id properly so that the generated shape state has
+     * the right id directly.
+     */
+    const polygon = this.toPolygon()
+    if (!this._temporary) {
+      polygon.id = this._label.shapes[0]
+    }
+    return [polygon]
   }
 
   /**

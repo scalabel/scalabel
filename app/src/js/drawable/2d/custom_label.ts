@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { Cursor, Key, ShapeTypeName } from '../../common/types'
+import { Cursor, Key } from '../../common/types'
 import { makeLabel } from '../../functional/states'
-import { IdType, Label2DTemplateType, LabelType, Node2DType, ShapeType, State } from '../../functional/types'
+import { Label2DTemplateType, LabelType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, toCssColor } from '../util'
@@ -273,15 +273,25 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Get shape id's and shapes for updating */
-  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    const shapeTypes = this._shapes.map(() => ShapeTypeName.NODE_2D)
+    /**
+     * This is a temporary solution for assigning the correct ID to the shapes
+     * We should initialize the shape when the temporary label is created.
+     * Also store the shape id properly so that the generated shape state has
+     * the right id directly.
+     */
     const shapeStates: Node2DType[] = this._shapes.map(
       (shape) => shape.toState()
     )
-    return [this._label.shapes, shapeTypes, shapeStates]
+    if (!this._temporary) {
+      for (let i = 0; i < shapeStates.length; i++) {
+        shapeStates[i].id = this._label.shapes[i]
+      }
+    }
+    return shapeStates
   }
 
   /** Temporary initialization on mouse down */

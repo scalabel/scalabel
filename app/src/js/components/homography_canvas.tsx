@@ -210,7 +210,7 @@ class HomographyCanvas extends ImageCanvas {
           )
           const extrinsicQuaternionInverse = extrinsicQuaternion.inverse()
 
-          const grid = this._plane.shapes()[0] as Grid3D
+          const grid = this._plane.internalShapes()[0] as Grid3D
 
           const sourcePoints = []
           for (let y = 0.5; y >= -0.5; y--) {
