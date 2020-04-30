@@ -54,9 +54,10 @@ describe('Test redis cache', () => {
     }
   })
 
-  test('Writes back on timeout', async () => {
+  test.only('Writes back on timeout', async () => {
     const timeoutConfig = _.clone(config)
     timeoutConfig.timeForWrite = 0.2
+    timeoutConfig.redisTimeout = 0.4
     const store = new RedisStore(timeoutConfig, storage, client)
 
     const key = 'testKey1'

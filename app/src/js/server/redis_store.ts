@@ -36,6 +36,13 @@ export class RedisStore {
     // subscribe to reminder expirations for saving
     this.client.subscribe('__keyevent@0__:expired')
     this.client.on('message', async (_channel: string, reminderKey: string) => {
+      /**
+       * Check that the key is from a reminder expiring
+       * Not from a normal key or meta key expiring
+       */
+      if (!path.checkRedisReminderKey(reminderKey)) {
+        return
+      }
       const baseKey = path.getRedisBaseKey(reminderKey)
       const metaKey = path.getRedisMetaKey(baseKey)
       const metadata: StateMetadata = JSON.parse(await this.get(metaKey))
