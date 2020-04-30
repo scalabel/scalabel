@@ -82,12 +82,13 @@ function validateCognitoConfig (cognito: CognitoConfig | undefined) {
  * @param {ServerConfig} config
  */
 async function validateConfig (config: ServerConfig) {
-  if (!(await fs.pathExists(config.data))) {
-    throw new Error(`Cannot find ${config.data}`)
-  }
-
-  if (!(await fs.pathExists(config.itemDir))) {
-    throw new Error(`Cannot find ${config.itemDir}`)
+  if (config.database === DatabaseType.LOCAL) {
+    if (!(await fs.pathExists(config.data))) {
+      throw new Error(`Cannot find ${config.data}`)
+    }
+    if (!(await fs.pathExists(config.itemDir))) {
+      throw new Error(`Cannot find ${config.itemDir}`)
+    }
   }
 
   if (config.userManagement) {

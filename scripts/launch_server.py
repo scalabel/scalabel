@@ -40,9 +40,8 @@ def launch() -> None:
 
         py_env = os.environ.copy()
         python_path = 'PYTHONPATH'
-        model_path = os.path.join(
-            'scalabel', 'bot', 'experimental',
-            'fast-seg-label', 'polyrnn_scalabel')
+        model_path = os.path.join('scalabel', 'bot', 'experimental',
+                                  'fast-seg-label', 'polyrnn_scalabel')
         if python_path in py_env:
             model_path = "{}:{}".format(py_env[python_path], model_path)
         py_env[python_path] = model_path
