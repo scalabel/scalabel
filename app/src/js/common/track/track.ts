@@ -208,7 +208,7 @@ export class Track {
     this._labels = {}
     this._type = label.type
     const labelState = label.label
-    const [, shapeTypes, shapeStates] = label.shapeStates()
+    const shapeStates = label.shapes()
     for (let index = itemIndex; index < itemIndex + numItems; index++) {
       const cloned = _.cloneDeep(labelState) as LabelType
       cloned.item = -1
@@ -229,9 +229,9 @@ export class Track {
       if (cloned.item === index) {
         this._labels[index] = cloned
         this._shapes[index] = []
-        for (let i = 0; i < shapeTypes.length; i++) {
+        for (const shape of shapeStates) {
           // TODO(fisher) make sure the shape types are correct
-          this._shapes[index].push(_.cloneDeep(shapeStates[i]))
+          this._shapes[index].push(_.cloneDeep(shape))
         }
         this._updatedIndices.add(index)
       }
@@ -244,15 +244,14 @@ export class Track {
    * @param newShapes
    */
   public update (itemIndex: number, label: Readonly<Label>): void {
-    const shapeStates = label.shapeStates()
-    const ids = shapeStates[0]
-    const newShapes = shapeStates[2]
+    const shapeStates = label.shapes()
+    const newShapes = shapeStates
     if (
       itemIndex in this._shapes &&
       newShapes.length === this._shapes[itemIndex].length
     ) {
       this._updatedIndices.add(itemIndex)
-      this._shapes[itemIndex].length = ids.length
+      this._shapes[itemIndex].length = shapeStates.length
       for (let i = 0; i < newShapes.length; i++) {
         this._shapes[itemIndex][i] = newShapes[i]
       }

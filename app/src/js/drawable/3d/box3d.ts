@@ -6,7 +6,7 @@ import { IdType, ShapeType, State } from '../../functional/types'
 
 import { Vector3D } from '../../math/vector3d'
 
-import { LabelTypeName, ShapeTypeName } from '../../common/types'
+import { LabelTypeName } from '../../common/types'
 import { rotateScale } from '../../math/3d'
 import { Cube3D } from './cube3d'
 import { Label3D } from './label3d'
@@ -61,15 +61,15 @@ export class Box3D extends Label3D {
   }
 
   /** Indexed shapes */
-  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [
-      [this._label.shapes[0]],
-      [ShapeTypeName.CUBE],
-      [this._shape.toState()]
-    ]
+    const box = this._shape.toState()
+    if (!this._temporary) {
+      box.id = this._label.shapes[0]
+    }
+    return [box]
   }
 
   /** Override set parent */
@@ -95,7 +95,7 @@ export class Box3D extends Label3D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public shapes (): Shape3D[] {
+  public internalShapes (): Shape3D[] {
     return [this._shape]
   }
 

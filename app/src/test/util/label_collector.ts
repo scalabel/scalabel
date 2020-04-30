@@ -16,10 +16,11 @@ export class LabelCollector extends Array<IdType> {
   }
 
   /** Collect the latest tracks from the state */
-  public collect () {
+  public collect (): number {
     const state = this._getState()
     const trackIds = findNewLabelsFromState(
       state, state.user.select.item, this)
     this.push(...trackIds)
+    return this.length
   }
 }

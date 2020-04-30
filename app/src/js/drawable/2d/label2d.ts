@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
 import { makeDefaultId, makeTaskConfig } from '../../functional/states'
 import { ConfigType, IdType, LabelType, ShapeType, State } from '../../functional/types'
@@ -343,7 +343,7 @@ export abstract class Label2D {
   public abstract updateShapes (shapes: ShapeType[]): void
 
   /** Get shape id's and shapes for updating */
-  public abstract shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]]
+  public abstract shapes (): ShapeType[]
 
   /**
    * Initialize this label to be temporary
