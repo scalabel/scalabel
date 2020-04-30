@@ -2,10 +2,12 @@ import { render } from '@testing-library/react'
 import * as React from 'react'
 import * as action from '../../js/action/common'
 import { ActionType } from '../../js/action/types'
-import { SimpleStore } from '../../js/common/simple_store'
+import { getStateFunc, SimpleStore } from '../../js/common/simple_store'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { makeImageViewerConfig } from '../../js/functional/states'
+import { IdType } from '../../js/functional/types'
 import { TrackCollector } from '../server/util/track_collector'
+import { LabelCollector } from '../util/label_collector'
 
 /** Create mouse down event */
 function mouseDownEvent (
@@ -108,38 +110,29 @@ export function keyUp (label2d: Label2dCanvas, key: string) {
 }
 
 /**
- * Click a key. keys is an array for combo key stroks
- */
-export function keyClick (label2d: Label2dCanvas, keys: string[]) {
-  keys.forEach((key) => {
-    keyDown(label2d, key)
-  })
-  keys.reverse().forEach((key) => {
-    keyUp(label2d, key)
-  })
-}
-
-/**
  * Test driver to draw a polygon on label2d canvas
  * @param label2d
  * @param points
  */
 export function drawPolygon (label2d: Label2dCanvas, points: number[][]) {
-  for (const p of points) {
-    mouseMoveClick(label2d, p[0], p[1])
+  const draw = () => {
+    for (const p of points) {
+      mouseMoveClick(label2d, p[0], p[1])
+    }
+    mouseMoveClick(label2d, points[0][0], points[0][1])
   }
-  mouseMoveClick(label2d, points[0][0], points[0][1])
+  draw()
 }
 
 /**
- * Test driver to draw a box
+ * Drag from point to point
  * @param label2d
  * @param x1
  * @param y1
  * @param x2
  * @param y2
  */
-export function drawBox2D (
+export function drag (
   label2d: Label2dCanvas, x1: number, y1: number, x2: number, y2: number) {
   mouseMove(label2d, x1, y1)
   mouseDown(label2d, x1, y1)
@@ -147,6 +140,32 @@ export function drawBox2D (
   mouseMove(label2d, (x1 + x2) / 2, (y1 + y2) / 2)
   mouseMove(label2d, x2, y2)
   mouseUp(label2d, x2, y2)
+}
+
+/**
+ * Test driver to draw a box
+ * @param label2d
+ * @param getState state accessor. it can be null, where the return vaule is ''
+ * @param x1
+ * @param y1
+ * @param x2
+ * @param y2
+ * @returns The id of the new label drawn on thecanvas
+ */
+export function drawBox2D (
+  label2d: Label2dCanvas, getState: getStateFunc | null,
+  x1: number, y1: number, x2: number, y2: number): IdType {
+  if (getState !== null) {
+    const boxIds = new LabelCollector(getState)
+    const start = boxIds.collect()
+    drag(label2d, x1, y1, x2, y2)
+    boxIds.collect()
+    expect(boxIds.length).toEqual(start + 1)
+    return boxIds[start]
+  } else {
+    drag(label2d, x1, y1, x2, y2)
+    return ''
+  }
 }
 
 /**
@@ -164,9 +183,10 @@ export function drawBox2DTracks (
   itemIndices.forEach((itemIndex, boxIndex) => {
     store.dispatch(action.goToItem(itemIndex))
     const b = boxes[boxIndex]
-    drawBox2D(label2d, b[0], b[1], b[2], b[3])
+    drawBox2D(label2d, null, b[0], b[1], b[2], b[3])
     trackIds.collect()
   })
+  expect(trackIds.length).toEqual(itemIndices.length)
   return trackIds
 }
 

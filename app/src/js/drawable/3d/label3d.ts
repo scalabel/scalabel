@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { LabelTypeName, ShapeTypeName } from '../../common/types'
+import { LabelTypeName } from '../../common/types'
 import { makeDefaultId, makeLabel } from '../../functional/states'
 import { IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
@@ -141,7 +141,7 @@ export abstract class Label3D {
   }
 
   /** Get shape id's and shapes for updating */
-  public abstract shapeStates (): [string[], ShapeTypeName[], ShapeType[]]
+  public abstract shapes (): ShapeType[]
 
   /** highlight the label */
   public setHighlighted (intersection?: THREE.Intersection) {
@@ -276,7 +276,7 @@ export abstract class Label3D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public abstract shapes (): Shape3D[]
+  public abstract internalShapes (): Shape3D[]
 
   /** Convert label state to drawable */
   public updateState (

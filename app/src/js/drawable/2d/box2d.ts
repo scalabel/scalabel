@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../common/types'
 import { makeDefaultId, makeLabel, makeRect } from '../../functional/states'
-import { IdType, LabelType, RectType, ShapeType, State } from '../../functional/types'
+import { LabelType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -49,7 +49,7 @@ export class Box2D extends Label2D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public get shapes (): Array<Readonly<Shape>> {
+  public get internalShapes (): Array<Readonly<Shape>> {
     return this._shapes
   }
 
@@ -255,7 +255,7 @@ export class Box2D extends Label2D {
     if (this._selected) {
       this.editing = true
       this._mouseDownCoord = coord.clone()
-      this._startingRect = (this.shapes[0] as Rect2D).clone()
+      this._startingRect = (this._shapes[0] as Rect2D).clone()
       return true
     }
     return false
@@ -302,12 +302,23 @@ export class Box2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [this._label.shapes, [ShapeTypeName.RECT], [this.toRect()]]
+    /**
+     * This is a temporary solution for assigning the correct ID to the shapes
+     * We should initialize the shape when the temporary label is created.
+     * Also store the shape id properly so that the generated shape state has
+     * the right id directly.
+     */
+    const box = this.toRect()
+    if (!this._temporary) {
+      box.id = this._label.shapes[0]
+    }
+    return [box]
   }
+
   /** Get rect representation */
   public toRect (): RectType {
     return (this._shapes[0] as Rect2D).toRect()

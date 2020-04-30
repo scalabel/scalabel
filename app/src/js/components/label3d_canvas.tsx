@@ -305,7 +305,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       if (item.labels[id].sensors.includes(sensorId)) {
         const label = Session.label3dList.get(id)
         if (label) {
-          for (const shape of label.shapes()) {
+          for (const shape of label.internalShapes()) {
             shape.setVisible(
               this.props.id,
               !viewerConfig.hideLabels || label.selected
