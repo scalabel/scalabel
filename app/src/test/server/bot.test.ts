@@ -8,7 +8,7 @@ import {
   ActionPacketType, BotData, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
-import { getInitialState, getRandomBox2dAction } from '../util'
+import { getInitialState, getRandomBox2dAction } from './util/util'
 
 jest.mock('axios')
 axios.post = jest.fn().mockImplementation(() => {

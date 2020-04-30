@@ -59,7 +59,7 @@ export function terminateSelectedTracks (
       }
     }
   }
-  return terminateTracks(tracks, stopIndex)
+  return terminateTracks(tracks, stopIndex, state.task.items.length)
 }
 
 /**

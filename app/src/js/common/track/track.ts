@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Label2D from '../../drawable/2d/label2d'
 import Label3D from '../../drawable/3d/label3d'
 import { makeTrack } from '../../functional/states'
-import { Label2DTemplateType, LabelType, ShapeType, State, TrackType } from '../../functional/types'
+import { IdType, Label2DTemplateType, LabelType, ShapeType, State, TrackType } from '../../functional/types'
 import { LabelTypeName, TrackPolicyType } from '../types'
 import { Box2DLinearInterpolationPolicy } from './policy/linear_interpolation/box2d_linear_interpolation'
 import { Box3DLinearInterpolationPolicy } from './policy/linear_interpolation/box3d_linear_interpolation'
@@ -97,7 +97,7 @@ export class Track {
    * Run when state is updated
    * @param state
    */
-  public updateState (state: State, id: number) {
+  public updateState (state: State, id: IdType) {
     this._track = state.task.tracks[id]
     const policyType = policyFromString(
       state.task.config.policyTypes[state.user.select.policyType]

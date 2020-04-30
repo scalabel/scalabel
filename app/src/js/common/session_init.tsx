@@ -54,9 +54,8 @@ export function initSession (containerName: string): void {
  */
 function updateTracks (): void {
   const state = Session.getState()
-  const newTracks: {[trackId: number]: Track} = {}
-  for (const key of Object.keys(state.task.tracks)) {
-    const trackId = Number(key)
+  const newTracks: {[trackId: string]: Track} = {}
+  for (const trackId of Object.keys(state.task.tracks)) {
     if (trackId in Session.tracks) {
       newTracks[trackId] = Session.tracks[trackId]
     } else {
