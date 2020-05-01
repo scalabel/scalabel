@@ -18,7 +18,7 @@ import { RedisPubSub } from './redis_pub_sub'
 import { RedisStore } from './redis_store'
 import { Endpoint, ServerConfig } from './types'
 import { UserManager } from './user_manager'
-import { makeStorage, readConfig, sleep } from './util'
+import { makeStorage, readConfig } from './util'
 
 /**
  * Sets up http handlers
@@ -115,9 +115,6 @@ async function launchRedisServer (config: ServerConfig) {
   redisProc.stderr.on('data', (data) => {
     process.stdout.write(data)
   })
-
-  // wait 1 s before trying to connect to the server
-  await sleep(1000)
 }
 
 /**
