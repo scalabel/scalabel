@@ -446,6 +446,13 @@ export function setStatusToReconnecting () {
   return updateSessionStatus(ConnectionStatus.RECONNECTING)
 }
 
+/**
+ * Mark status as submitting
+ */
+export function setStatusToSubmitting () {
+  return updateSessionStatus(ConnectionStatus.SUBMITTING)
+}
+
 type ThunkCreatorType =
   ActionCreator<
   ThunkAction<void, ReduxState, void, types.ActionType>>
@@ -525,6 +532,19 @@ export const setStatusToSaved: ThunkCreatorType = () => {
     dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_SAVED))
     dispatch(
       updateSessionStatusDelayed(ConnectionStatus.SAVED, numUpdates)
+    )
+  }
+}
+
+/**
+ * Mark submitting as done in the status
+ */
+export const setStatusToSubmitted: ThunkCreatorType = () => {
+  return (dispatch, getState) => {
+    const numUpdates = selector.getNumStatusUpdates(getState())
+    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_SUBMITTED))
+    dispatch(
+      updateSessionStatusDelayed(ConnectionStatus.SUBMITTED, numUpdates)
     )
   }
 }
