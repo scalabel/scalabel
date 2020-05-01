@@ -4,8 +4,8 @@ import { DatabaseType, ServerConfig } from './types'
 /* default config */
 export const serverConfig: ServerConfig = {
   port: 8686,
-  data: './data',
-  itemDir: './items',
+  data: './',
+  itemDir: '',
   database: DatabaseType.LOCAL,
   userManagement: false,
   sync: false,

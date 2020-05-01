@@ -86,7 +86,7 @@ async function validateConfig (config: ServerConfig) {
     if (!(await fs.pathExists(config.data))) {
       throw new Error(`Cannot find ${config.data}`)
     }
-    if (!(await fs.pathExists(config.itemDir))) {
+    if (config.itemDir && !(await fs.pathExists(config.itemDir))) {
       throw new Error(`Cannot find ${config.itemDir}`)
     }
   }
