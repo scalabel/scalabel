@@ -47,7 +47,7 @@ export let testConfig: TestConfig = {
   taskIndex: 0,
   examplePath: './examples/',
   testDirPath: './test_data/',
-  samplePath: './app/src/test/',
+  samplePath: './app/src/test/test_states',
   sampleExportFilename: 'sample_export.json',
   sampleProjectJsonFilename: 'sample_project.json',
   itemListFilename: 'image_list.yml',

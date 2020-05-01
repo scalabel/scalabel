@@ -1,4 +1,4 @@
-import { ItemExport } from '../js/server/bdd_types'
+import { ItemExport } from '../../js/server/bdd_types'
 
 export const sampleItemExportImage: ItemExport = {
   name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',

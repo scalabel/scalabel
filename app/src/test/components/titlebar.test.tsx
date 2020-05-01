@@ -16,7 +16,7 @@ import TitleBar from '../../js/components/title_bar'
 import { makeLabel } from '../../js/functional/states'
 import { EventName, SyncActionMessageType } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 beforeEach(() => {
   cleanup()
