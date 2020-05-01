@@ -511,40 +511,40 @@ export const updateSessionStatusDelayed: ThunkCreatorType = (
 }
 
 /**
+ * Update submission banner and trigger fadeout animation
+ */
+export const setStatusForBanner: ThunkCreatorType = (
+  notifyStatus: ConnectionStatus, fadeStatus: ConnectionStatus
+) => {
+  return (dispatch, getState) => {
+    const numUpdates = selector.getNumStatusUpdates(getState())
+    dispatch(updateSessionStatus(notifyStatus))
+    dispatch(
+      updateSessionStatusDelayed(fadeStatus, numUpdates)
+    )
+  }
+}
+
+/**
  * Mark compute done in the status
  */
 export const setStatusToComputeDone: ThunkCreatorType = () => {
-  return (dispatch, getState) => {
-    const numUpdates = selector.getNumStatusUpdates(getState())
-    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_COMPUTE_DONE))
-    dispatch(
-      updateSessionStatusDelayed(ConnectionStatus.COMPUTE_DONE, numUpdates)
-    )
-  }
+  return setStatusForBanner(ConnectionStatus.NOTIFY_COMPUTE_DONE,
+    ConnectionStatus.COMPUTE_DONE)
 }
 
 /**
  * Mark saving as done in the status
  */
 export const setStatusToSaved: ThunkCreatorType = () => {
-  return (dispatch, getState) => {
-    const numUpdates = selector.getNumStatusUpdates(getState())
-    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_SAVED))
-    dispatch(
-      updateSessionStatusDelayed(ConnectionStatus.SAVED, numUpdates)
-    )
-  }
+  return setStatusForBanner(ConnectionStatus.NOTIFY_SAVED,
+    ConnectionStatus.SAVED)
 }
 
 /**
  * Mark submitting as done in the status
  */
 export const setStatusToSubmitted: ThunkCreatorType = () => {
-  return (dispatch, getState) => {
-    const numUpdates = selector.getNumStatusUpdates(getState())
-    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_SUBMITTED))
-    dispatch(
-      updateSessionStatusDelayed(ConnectionStatus.SUBMITTED, numUpdates)
-    )
-  }
+  return setStatusForBanner(ConnectionStatus.NOTIFY_SUBMITTED,
+    ConnectionStatus.SUBMITTED)
 }
