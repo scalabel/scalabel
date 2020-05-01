@@ -157,3 +157,10 @@ export function getTaskDir (projectName: string): string {
 export function getSaveDir (projectName: string, taskId: string): string {
   return path.join(projectName, 'saved', taskId)
 }
+
+/**
+ * Gets path to redis config
+ */
+export function getRedisConf (): string {
+  return path.join('app', 'config', 'redis.conf')
+}
