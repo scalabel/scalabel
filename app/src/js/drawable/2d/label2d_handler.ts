@@ -218,6 +218,9 @@ export class Label2DHandler {
   /** Update state */
   public updateState (state: State) {
     this._state = state
+    if (this._selectedItemIndex !== state.user.select.item) {
+      this._highlightedLabel = null
+    }
     this._selectedItemIndex = state.user.select.item
   }
 

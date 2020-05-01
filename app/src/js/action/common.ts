@@ -104,6 +104,26 @@ export function addLabel (
 }
 
 /**
+ * Add labels to a single item
+ * @param itemIndex
+ * @param labels
+ * @param shapes
+ */
+export function addLabelsToItem (
+  itemIndex: number,
+  labels: LabelType[],
+  shapes: ShapeType[][] = []
+): types.AddLabelsAction {
+  return {
+    type: types.ADD_LABELS,
+    sessionId: Session.id,
+    itemIndices: [itemIndex],
+    labels: [labels],
+    shapes: [shapes]
+  }
+}
+
+/**
  * Add a track
  * @param itemIndices
  * @param labels
@@ -142,6 +162,25 @@ export function changeShapes (
     itemIndices: [itemIndex],
     shapeIds: [shapeIds],
     shapes: [shapes]
+  }
+}
+
+/**
+ * Change shapes in items
+ * @param itemIndices
+ * @param shapeIds
+ * @param shapes
+ */
+export function changeShapesInItems (
+  itemIndices: number[], shapeIds: IdType[][],
+  shapes: Array<Array<Partial<ShapeType>>>
+): types.ChangeShapesAction {
+  return {
+    type: types.CHANGE_SHAPES,
+    sessionId: Session.id,
+    itemIndices,
+    shapeIds,
+    shapes
   }
 }
 
