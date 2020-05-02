@@ -10,8 +10,10 @@ import {
   setStatusToReconnecting,
   setStatusToSaved,
   setStatusToSaving,
+  setStatusToSubmitted,
+  setStatusToSubmitting,
   setStatusToUnsaved,
-  updateTask } from '../action/common'
+  updateTask} from '../action/common'
 import * as types from '../action/types'
 import { isSessionFullySaved } from '../common/selector'
 import { State } from '../functional/types'
@@ -204,8 +206,10 @@ export class Synchronizer {
         Session.dispatch(setStatusToComputeDone())
       }
     } else if (message.sessionId === Session.id) {
-      // Once all actions being saved are acked, update the status
-      if (this.actionsToSave.size === 0) {
+      if (types.hasSubmitAction(actionPacket.actions)) {
+        Session.dispatch(setStatusToSubmitted())
+      } else if (this.actionsToSave.size === 0) {
+        // Once all actions being saved are acked, update the save status
         Session.dispatch(setStatusToSaved())
       }
     }
@@ -309,7 +313,11 @@ export class Synchronizer {
       bot: false
     }
     this.socket.emit(EventName.ACTION_SEND, message)
-    Session.dispatch(setStatusToSaving())
+    if (types.hasSubmitAction(actionPacket.actions)) {
+      Session.dispatch(setStatusToSubmitting())
+    } else {
+      Session.dispatch(setStatusToSaving())
+    }
   }
 }
 
