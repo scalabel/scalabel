@@ -13,7 +13,7 @@ import {
   setStatusToSubmitted,
   setStatusToSubmitting,
   setStatusToUnsaved,
-  updateTask} from '../action/common'
+  updateTask} from '../action/common'../functional/selector
 import * as types from '../action/types'
 import { isSessionFullySaved } from '../common/selector'
 import { State } from '../functional/types'
