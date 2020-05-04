@@ -12,7 +12,7 @@ import { ToolBar } from '../../js/components/toolbar'
 import { Category } from '../../js/components/toolbar_category'
 import { ListButton } from '../../js/components/toolbar_list_button'
 import { makeLabel } from '../../js/functional/states'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 import { testJson as testTrackJson } from '../test_states/test_track_objects'
 
 let handleToggleWasCalled: boolean = false

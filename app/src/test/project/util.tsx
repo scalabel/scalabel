@@ -4,11 +4,11 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 import { ChangeEvent } from 'react'
 import * as util from 'util'
-import { isStatusSaved } from '../../js/common/selector'
 import Session from '../../js/common/session'
 import { initFromJson } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import CreateForm from '../../js/components/create_form'
+import { isStatusSaved } from '../../js/functional/selector'
 import { State } from '../../js/functional/types'
 import { ItemExport } from '../../js/server/bdd_types'
 import { getTaskDir } from '../../js/server/path'
@@ -47,7 +47,7 @@ export let testConfig: TestConfig = {
   taskIndex: 0,
   examplePath: './examples/',
   testDirPath: './test_data/',
-  samplePath: './app/src/test/',
+  samplePath: './app/src/test/test_states',
   sampleExportFilename: 'sample_export.json',
   sampleProjectJsonFilename: 'sample_project.json',
   itemListFilename: 'image_list.yml',

@@ -5,7 +5,7 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { LabelTypeName, ShapeTypeName } from '../../js/common/types'
 import { RectType } from '../../js/functional/types'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 test('Add, change and delete box2d labels', () => {
   Session.devMode = false

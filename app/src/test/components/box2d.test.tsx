@@ -6,7 +6,7 @@ import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { RectType } from '../../js/functional/types'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 import { drag, drawBox2D, setUpLabel2dCanvas } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
