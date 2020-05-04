@@ -1,8 +1,8 @@
 import { ActionCreator } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { ReduxState } from '../common/configure_store'
-import * as selector from '../functional/selector'
 import Session from '../common/session'
+import * as selector from '../functional/selector'
 import { ConnectionStatus, IdType, LabelType,
   PaneType, Select, ShapeType, SplitType,
   TaskType, ViewerConfigType } from '../functional/types'
