@@ -83,8 +83,8 @@
                     "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg"
                 },
                 "labels": {
-                    "0": {
-                        "id": "0",
+                    "longId": {
+                        "id": "longId",
                         "item": 0,
                         "sensors": [
                             -1
