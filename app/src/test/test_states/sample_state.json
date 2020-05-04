@@ -76,7 +76,7 @@
         },
         "items": [
             {
-                "id": 0,
+                "id": "longItemId",
                 "index": 0,
                 "timestamp": 0,
                 "urls": {
@@ -84,7 +84,7 @@
                 },
                 "labels": {
                     "longId": {
-                        "id": "longId",
+                        "id": "longLabelId",
                         "item": 0,
                         "sensors": [
                             -1
@@ -137,7 +137,7 @@
                         "parent": -1,
                         "children": [],
                         "shapes": [
-                            2
+                            "longShapeId"
                         ],
                         "track": -1,
                         "order": 3,
@@ -148,7 +148,7 @@
                     "0": {
                         "id": "0",
                         "label": [
-                            "0"
+                            "longLabelId"
                         ],
                         "shapeType": "rect",
                         "x1": 317.9044230030514,
@@ -167,8 +167,8 @@
                         "x2": 752.6966667703645,
                         "y2": 400.88642659279776
                     },
-                    "2": {
-                        "id": "2",
+                    "longShapeId": {
+                        "id": "longShapeId",
                         "label": [
                             "2"
                         ],

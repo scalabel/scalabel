@@ -76,7 +76,7 @@
         },
         "items": [
             {
-                "id": 0,
+                "id": "longPolyItemId",
                 "index": 0,
                 "timestamp": 0,
                 "urls": {
@@ -123,8 +123,8 @@
                         "order": 2,
                         "manual": true
                     },
-                    "2": {
-                        "id": "2",
+                    "longPolyLabelId": {
+                        "id": "longPolyLabelId",
                         "item": 0,
                         "sensors": [
                             -1
@@ -137,7 +137,7 @@
                         "parent": -1,
                         "children": [],
                         "shapes": [
-                            2
+                            "longPolyShapeId"
                         ],
                         "track": -1,
                         "order": 3,
@@ -213,10 +213,10 @@
                             }
                         ]
                     },
-                    "2": {
-                        "id": "2",
+                    "longPolyShapeId": {
+                        "id": "longPolyShapeId",
                         "label": [
-                            "2"
+                            "longPolyLabelId"
                         ],
                         "shapeType": "polygon2d",
                         "points": [

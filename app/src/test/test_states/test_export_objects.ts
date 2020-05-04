@@ -41,7 +41,7 @@ export const sampleItemExportImage: ItemExport = {
       customs: {}
     },
     {
-      id: 'longId',
+      id: 'longLabelId',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -102,7 +102,7 @@ export const sampleStateExportImage: ItemExport[] =
           customs: {}
         },
         {
-          id: 'longId',
+          id: 'longLabelId',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -207,7 +207,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
       customs: {}
     },
     {
-      id: '2',
+      id: 'longPolyLabelId',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -283,7 +283,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           customs: {}
         },
         {
-          id: '2',
+          id: 'longPolyLabelId',
           category: 'person',
           attributes: {},
           manualShape: true,
