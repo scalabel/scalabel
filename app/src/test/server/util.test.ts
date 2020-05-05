@@ -3,7 +3,7 @@ import { BundleFile, HandlerUrl,
 import { getProjectKey, getSaveDir, getTaskKey } from '../../js/server/path'
 import * as util from '../../js/server/util'
 import { getTracking } from '../../js/shared/util'
-import { sampleFormEmpty, sampleFormImage } from '../test_creation_objects'
+import { sampleFormEmpty, sampleFormImage } from '../test_states/test_creation_objects'
 
 describe('test general utility methods', () => {
   test('make empty creation form', () => {

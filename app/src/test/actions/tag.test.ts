@@ -3,7 +3,7 @@ import { goToItem } from '../../js/action/common'
 import * as tag from '../../js/action/tag'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 test('Add and change tag for image label', () => {
   Session.devMode = false

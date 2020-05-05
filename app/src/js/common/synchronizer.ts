@@ -15,7 +15,7 @@ import {
   setStatusToUnsaved,
   updateTask} from '../action/common'
 import * as types from '../action/types'
-import { isSessionFullySaved } from '../common/selector'
+import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'

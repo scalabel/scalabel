@@ -8,7 +8,7 @@ import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { IdType, PolygonType } from '../../js/functional/types'
 import { findNewLabelsFromState } from '../server/util/util'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp, setUpLabel2dCanvas } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
