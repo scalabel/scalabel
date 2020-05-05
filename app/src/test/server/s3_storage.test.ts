@@ -42,6 +42,20 @@ describe('test s3 storage', () => {
     ])
   })
 
+  test('list keys', async () => {
+    // Top level keys
+    let keys = await storage.listKeys('test')
+    expect(keys).toStrictEqual(['test/project', 'test/tasks'])
+
+    // Top level (dir only)
+    keys = await storage.listKeys('test', true)
+    expect(keys).toStrictEqual(['test/tasks'])
+
+    // Task keys
+    keys = await storage.listKeys('test/tasks')
+    expect(keys).toStrictEqual(['test/tasks/000000', 'test/tasks/000001'])
+  })
+
   test('load', () => {
     const taskId = index2str(0)
     const key = getTaskKey(projectName, taskId)

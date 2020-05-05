@@ -107,8 +107,8 @@ export class S3Storage extends Storage {
     const fullPrefix = this.fullDir(prefix)
     let continuationToken = ''
 
-    const dirKeys = []
-    const fileKeys = []
+    let dirKeys = []
+    let fileKeys = []
     for (;;) {
       let data
       if (continuationToken.length > 0) {
@@ -135,11 +135,18 @@ export class S3Storage extends Storage {
             // Parse to get the top level dir or file after prefix
             const parsed = path.parse(noPrefix)
             let keyName = parsed.name
+            let isDir = false
             if (parsed.dir.length > 0 && parsed.dir !== '/') {
-              keyName = parsed.dir.split('/')[0]
+              const split = parsed.dir.split('/')
+              keyName = split[0]
+              if (keyName === '') {
+                // This handles the case of extra leading slash: '/dirname'
+                keyName = split[1]
+              }
+              isDir = true
             }
             const finalKey = path.join(prefix, keyName)
-            if (parsed.ext === '') {
+            if (isDir) {
               dirKeys.push(finalKey)
             } else {
               fileKeys.push(finalKey)
@@ -157,8 +164,8 @@ export class S3Storage extends Storage {
       }
     }
 
-    _.uniq(dirKeys)
-    _.uniq(fileKeys)
+    dirKeys = _.uniq(dirKeys)
+    fileKeys = _.uniq(fileKeys)
     dirKeys.sort()
     fileKeys.sort()
     return [dirKeys, fileKeys]
