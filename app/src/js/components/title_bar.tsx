@@ -108,6 +108,7 @@ class TitleBar extends Component<Props> {
     super(props)
     this._keyDownListener = ((e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
+        e.preventDefault()
         this.save()
       }
     })

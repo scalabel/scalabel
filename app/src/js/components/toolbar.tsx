@@ -4,7 +4,7 @@ import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
 import { changeSelect, changeViewerConfig, mergeTracks, startLinkTrack } from '../action/common'
-import { changeSelectedLabelsAttributes, deleteSelectedLabels, deleteSelectedTracks, terminateSelectedTracks } from '../action/select'
+import { changeSelectedLabelsAttributes, terminateSelectedTracks } from '../action/select'
 import { addLabelTag } from '../action/tag'
 import { renderTemplate } from '../common/label'
 import Session from '../common/session'
@@ -55,18 +55,7 @@ export class ToolBar extends Component<Props> {
     switch (e.key) {
       case Key.BACKSPACE:
         if (Object.keys(select.labels).length > 0) {
-          const controlDown =
-            this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)
-          if (controlDown && this.isKeyDown(Key.SHIFT)) {
-            // Delete track
-            Session.dispatch(deleteSelectedTracks(state))
-          } else if (controlDown) {
-            // Terminate track
-            Session.dispatch(terminateSelectedTracks(state, select.item))
-          } else {
-            // delete labels
-            Session.dispatch(deleteSelectedLabels(state))
-          }
+          Session.dispatch(terminateSelectedTracks(state, select.item))
         }
         break
       case Key.L_LOW:
@@ -79,6 +68,7 @@ export class ToolBar extends Component<Props> {
         break
       case Key.H_LOW:
       case Key.H_UP:
+        e.preventDefault()
         const config = {
           ...this.state.user.viewerConfigs[Session.activeViewerId]
         }
@@ -145,18 +135,10 @@ export class ToolBar extends Component<Props> {
         </List>
         <div>
           <div>{makeButton('Delete', () => {
-            Session.dispatch(deleteSelectedLabels(this.state))
+            Session.dispatch(terminateSelectedTracks(
+              this.state, this.state.user.select.item))
           })
           }</div>
-          {
-            this.state.task.config.tracking &&
-            <div>{makeButton('End Object Tracking', () => {
-              Session.dispatch(
-                terminateSelectedTracks(this.state, this.state.user.select.item)
-              )
-            })
-            }</div>
-          }
           {
             this.state.task.config.tracking &&
             <div>
