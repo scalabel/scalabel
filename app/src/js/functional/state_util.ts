@@ -7,6 +7,8 @@ import {
   ViewerConfigType
 } from './types'
 
+// TODO- move these to selector file and use hierarchical structure
+
 /**
  * Get the current item from state
  * @param {State} state

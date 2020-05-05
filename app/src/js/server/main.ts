@@ -1,3 +1,4 @@
+import * as child from 'child_process'
 import express, { Application, NextFunction, Request, Response } from 'express'
 import * as formidable from 'express-formidable'
 import { createServer } from 'http'
@@ -10,7 +11,7 @@ import { Listeners } from './listeners'
 import Logger from './logger'
 import auth from './middleware/cognitoAuth'
 import errorHandler from './middleware/errorHandler'
-import { getAbsoluteSrcPath, HTMLDirectories } from './path'
+import { getAbsoluteSrcPath, getRedisConf, HTMLDirectories } from './path'
 import { ProjectStore } from './project_store'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
@@ -92,6 +93,31 @@ async function makeBotManager (
 }
 
 /**
+ * Launch the redis server
+ */
+async function launchRedisServer (config: ServerConfig) {
+  let redisDir = './'
+  if (config.database === 'local') {
+    redisDir = config.data
+  }
+
+  const redisProc = child.spawn('redis-server', [
+    getRedisConf(),
+    '--port', `${config.redisPort}`,
+    '--bind', '127.0.0.1',
+    '--dir', redisDir,
+    '--protected-mode', 'yes']
+  )
+  redisProc.stdout.on('data', (data) => {
+    process.stdout.write(data)
+  })
+
+  redisProc.stderr.on('data', (data) => {
+    process.stdout.write(data)
+  })
+}
+
+/**
  * Start HTTP and socket io servers
  */
 async function startServers (
@@ -116,12 +142,18 @@ async function startServers (
  */
 async function main () {
   // initialize config
-  const config = readConfig()
+  const config = await readConfig()
+
+  // start the redis server
+  await launchRedisServer(config)
 
   // initialize storage
   const storage = await makeStorage(config.database, config.data)
 
-  // initialize redis- need separate clients for different roles
+  /**
+   * Connect to redis server with clients
+   * Need separate clients for different roles
+   */
   const cacheClient = new RedisClient(config)
   const redisStore = new RedisStore(config, storage, cacheClient)
   const publisher = makeRedisPubSub(config)

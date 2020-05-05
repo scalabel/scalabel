@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect'
 import { sprintf } from 'sprintf-js'
-import { ConfigType, ConnectionStatus, SessionType } from '../functional/types'
-import { ReduxState } from './configure_store'
+import { ReduxState } from '../common/configure_store'
+import { ConfigType, ConnectionStatus, SessionType } from './types'
 
 /**
  * Load the task config
@@ -93,9 +93,16 @@ export const getStatusText = createSelector(
       case ConnectionStatus.COMPUTING: {
         return 'Model predictions in progress..'
       }
+      case ConnectionStatus.SUBMITTING: {
+        return 'Submitting...'
+      }
       case ConnectionStatus.COMPUTE_DONE:
       case ConnectionStatus.NOTIFY_COMPUTE_DONE: {
         return 'Model predictions complete.'
+      }
+      case ConnectionStatus.SUBMITTED:
+      case ConnectionStatus.NOTIFY_SUBMITTED: {
+        return 'Submission complete.'
       }
       case ConnectionStatus.SAVED:
       case ConnectionStatus.NOTIFY_SAVED: {
@@ -123,7 +130,8 @@ export const shouldStatusTextHide = createSelector(
       }
       case ConnectionStatus.SAVED:
       case ConnectionStatus.UNSAVED:
-      case ConnectionStatus.COMPUTE_DONE: {
+      case ConnectionStatus.COMPUTE_DONE:
+      case ConnectionStatus.SUBMITTED: {
         /**
          * Setting hide to true achieves a fade animation
          * since status transitions from NOTIFY_X to X

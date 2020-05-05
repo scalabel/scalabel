@@ -64,6 +64,18 @@ export function isTaskAction (action: BaseAction) {
 }
 
 /**
+ * Checks if the action list contains a submit action
+ */
+export function hasSubmitAction (actions: BaseAction[]): boolean {
+  for (const action of actions) {
+    if (action.type === SUBMIT) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
  * These are actions that should not be broadcast beyond the session
  */
 const SESSION_ACTION_TYPES = [

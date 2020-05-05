@@ -48,15 +48,16 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
     ```shell
     docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p 8686:8686 -p 6379:6379 scalabel/www \
-        python3.8 scripts/launch_server.py \
-        --config /opt/scalabel/local-data/scalabel/config.yml
+        node app/dist/js/main.js \
+        --config /opt/scalabel/local-data/scalabel/config.yml \
+        --max-old-space-size=8192
     ```
 
     Depending on your system, you may also have to increase docker's memory limit (8 GB should be sufficient).
 
 4. Build the code yourself
 
-    This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Max OS X and you have `apt-get` if you are on Ubuntu. The code requires Python 3.7 or above. Please check [how to upgrade your Python](#upgrade-python) if you don't have the right version. We use 3.8 by default. Depending your OS, run the script
+    This is an alternative to using docker. We assume you have already installed [Homebrew](https://brew.sh/) if you are using Mac OS X and you have `apt-get` if you are on Ubuntu. The code requires Python 3.7 or above. Please check [how to upgrade your Python](#upgrade-python) if you don't have the right version. We use 3.8 by default. Depending your OS, run the script
 
     ```shell
     bash scripts/setup_osx.sh
@@ -70,11 +71,12 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
     If you are on Ubuntu, you may need to run the script with `sudo`.
 
-    Then you can use our python script to launch the server.
+    Then you can launch the server using node:
 
     ```shell
-    python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
+    node app/dist/js/main.js --config ./local-data/scalabel/config.yml --max-old-space-size=8192
     ```
+     Depending on your system, you may also have to increase the memory limit from 8192 (8 GB).
 
 5. Get labels
 
@@ -140,6 +142,13 @@ cp app/config/sync_config.yml local-data/scalabel/config.yml
 ```
 
 Now you can open multiple sessions for the same project, and they will automatically synchronize the data.
+
+### Other
+
+Some to-be-released features can be enabled by launching the server with the following python script:
+```shell
+python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
+```
 
 ### More Usage Info
 

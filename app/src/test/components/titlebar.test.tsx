@@ -8,15 +8,15 @@ import io from 'socket.io-client'
 import { addLabel } from '../../js/action/common'
 import { ActionType, SUBMIT } from '../../js/action/types'
 import { ReduxState } from '../../js/common/configure_store'
-import { isStatusSaving } from '../../js/common/selector'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import TitleBar from '../../js/components/title_bar'
+import { isStatusSaving } from '../../js/functional/selector'
 import { makeLabel } from '../../js/functional/states'
 import { EventName, SyncActionMessageType } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 beforeEach(() => {
   cleanup()
