@@ -4,7 +4,7 @@ import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
 import { changeSelect, changeViewerConfig, mergeTracks, startLinkTrack } from '../action/common'
-import { changeSelectedLabelsAttributes, terminateSelectedTracks } from '../action/select'
+import { changeSelectedLabelsAttributes, deleteSelectedLabels, terminateSelectedTracks } from '../action/select'
 import { addLabelTag } from '../action/tag'
 import { renderTemplate } from '../common/label'
 import Session from '../common/session'
@@ -50,20 +50,16 @@ export class ToolBar extends Component<Props> {
    * @param {keyboardEvent} e
    */
   public onKeyDown (e: KeyboardEvent) {
-    const state = this.state
-    const select = state.user.select
     switch (e.key) {
       case Key.BACKSPACE:
-        if (Object.keys(select.labels).length > 0) {
-          Session.dispatch(terminateSelectedTracks(state, select.item))
-        }
+        this.deletePressed()
         break
       case Key.L_LOW:
       case Key.L_UP:
         // TODO: Move labels up to task level (out of items) and
         // label drawables to Session so that we don't have to search for labels
         if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
-          this.linkSelectedTracks(state)
+          this.linkSelectedTracks(this.state)
         }
         break
       case Key.H_LOW:
@@ -135,8 +131,7 @@ export class ToolBar extends Component<Props> {
         </List>
         <div>
           <div>{makeButton('Delete', () => {
-            Session.dispatch(terminateSelectedTracks(
-              this.state, this.state.user.select.item))
+            this.deletePressed()
           })
           }</div>
           {
@@ -156,6 +151,23 @@ export class ToolBar extends Component<Props> {
         </div>
       </div>
     )
+  }
+
+  /**
+   * handler for the delete button/key
+   * @param {string} alignment
+   */
+  private deletePressed () {
+    const select = this.state.user.select
+    if (Object.keys(select.labels).length > 0) {
+      const item = this.state.task.items[select.item]
+      if (item.labels[Object.values(select.labels)[0][0]].track) {
+        Session.dispatch(terminateSelectedTracks(
+          this.state, select.item))
+      } else {
+        Session.dispatch(deleteSelectedLabels(this.state))
+      }
+    }
   }
 
   /**
