@@ -129,6 +129,27 @@ describe('test s3 storage', () => {
 
   })
 
+  test.skip('list more than 1000 items', async () => {
+    // First save the items
+    const startInd = 100
+    const subDir = 'bigDir'
+    const prefix = path.join(projectName, subDir)
+
+    const promises = []
+    const fileNames = []
+    for (let i = startInd; i < startInd + 1000; i++) {
+      const taskId = index2str(i)
+      fileNames.push(taskId)
+      const key = path.join(prefix, taskId)
+      const fakeData = '{"testField": "testValue"}'
+      promises.push(storage.save(key, fakeData))
+    }
+    await Promise.all(promises)
+
+    const keys = await storage.listKeys(prefix)
+    expect(keys).toStrictEqual(fileNames.map(
+      (name) => path.join(prefix, name)))
+  })
 })
 
 afterAll(async () => {
