@@ -2,7 +2,8 @@ import { BundleFile, HandlerUrl,
   ItemTypeName, LabelTypeName } from '../../js/common/types'
 import { getProjectKey, getSaveDir, getTaskKey } from '../../js/server/path'
 import * as util from '../../js/server/util'
-import { sampleFormEmpty, sampleFormImage } from '../test_creation_objects'
+import { getTracking } from '../../js/shared/util'
+import { sampleFormEmpty, sampleFormImage } from '../test_states/test_creation_objects'
 
 describe('test general utility methods', () => {
   test('make empty creation form', () => {
@@ -33,6 +34,11 @@ describe('test general utility methods', () => {
     expect(util.index2str(100)).toBe('000100')
     expect(util.index2str(5)).toBe('000005')
     expect(util.index2str(789631)).toBe('789631')
+  })
+
+  test('initSessId', () => {
+    expect(util.initSessId('sampleId')).toBe('sampleId')
+    expect(util.initSessId('')).not.toBe('')
   })
 
   test('handler url selection', () => {
@@ -93,25 +99,22 @@ describe('test general utility methods', () => {
 
   test('tracking selection', () => {
     // video => true
-    const [itemType1, tracking1]
-    = util.getTracking(ItemTypeName.VIDEO)
+    const [itemType1, tracking1] = getTracking(ItemTypeName.VIDEO)
     expect(itemType1).toBe(ItemTypeName.IMAGE)
     expect(tracking1).toBe(true)
 
     // point cloud => true
-    const [itemType2, tracking2] = util.getTracking(
+    const [itemType2, tracking2] = getTracking(
       ItemTypeName.POINT_CLOUD_TRACKING)
     expect(itemType2).toBe(ItemTypeName.POINT_CLOUD)
     expect(tracking2).toBe(true)
 
     // any other item => false
-    const [itemType3, tracking3] =
-    util.getTracking(ItemTypeName.IMAGE)
+    const [itemType3, tracking3] = getTracking(ItemTypeName.IMAGE)
     expect(itemType3).toBe(ItemTypeName.IMAGE)
     expect(tracking3).toBe(false)
 
-    const [itemType4, tracking4] =
-    util.getTracking(ItemTypeName.POINT_CLOUD)
+    const [itemType4, tracking4] = getTracking(ItemTypeName.POINT_CLOUD)
     expect(itemType4).toBe(ItemTypeName.POINT_CLOUD)
     expect(tracking4).toBe(false)
   })

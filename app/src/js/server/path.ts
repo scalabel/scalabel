@@ -1,6 +1,9 @@
 import moment from 'moment'
+import * as os from 'os'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
+import { BotData } from './types'
+import { index2str } from './util'
 
 /**
  * Converts task id to name of the room for that id
@@ -20,22 +23,29 @@ export function getRoomName (
 /**
  * Get formatted timestamp
  */
-export function getNow (): string {
+export function now (): string {
   return moment().format('YYYY-MM-DD_HH-mm-ss')
+}
+
+/**
+ * Read hostname from os
+ */
+export function hostname (): string {
+  return os.hostname()
 }
 
 /**
  * Creates path for a timestamped file
  */
 export function getFileKey (filePath: string): string {
-  return sprintf('%s/%s', filePath, getNow())
+  return sprintf('%s/%s', filePath, now())
 }
 
 /**
  * Creates a temporary directory for tests
  */
 export function getTestDir (testName: string): string {
-  return sprintf('%s-%s', testName, getNow())
+  return sprintf('%s-%s', testName, now())
 }
 
 /**
@@ -70,28 +80,52 @@ export function getAbsoluteSrcPath (relativePath: string) {
  * @param {string} projectName
  */
 export function getExportName (projectName: string): string {
-  return sprintf('%s_export_%s.json', projectName, getNow())
+  return sprintf('%s_export_%s.json', projectName, now())
 }
 
 /**
- * Get redis key for path metadata
+ * Get redis key for associated metadata
+ * this means data that doesn't get written back to storage
  */
 export function getRedisMetaKey (key: string) {
-  return sprintf('%s^path', key)
+  return sprintf('%s:meta', key)
 }
 
 /**
  * Get redis key for reminder metadata
  */
 export function getRedisReminderKey (key: string) {
-  return sprintf('%s^reminder', key)
+  return sprintf('%s:reminder', key)
 }
 
 /**
  * Convert redis metadata or reminder key to redis base key
  */
 export function getRedisBaseKey (metadataKey: string) {
-  return metadataKey.split('^')[0]
+  return metadataKey.split(':')[0]
+}
+
+/**
+ * Check redis key is a reminder key
+ */
+export function checkRedisReminderKey (key: string): boolean {
+  return key.split(':')[1] === 'reminder'
+}
+
+/**
+ * Gets the redis key used by bots for the task
+ */
+export function getRedisBotKey (botData: BotData) {
+  const projectName = botData.projectName
+  const taskId = index2str(botData.taskIndex)
+  return sprintf('%s:%s:botKey', projectName, taskId)
+}
+
+/**
+ * The name of the set of bot user keys
+ */
+export function getRedisBotSet () {
+  return 'redisBotSetName'
 }
 
 /**
@@ -122,4 +156,11 @@ export function getTaskDir (projectName: string): string {
  */
 export function getSaveDir (projectName: string, taskId: string): string {
   return path.join(projectName, 'saved', taskId)
+}
+
+/**
+ * Gets path to redis config
+ */
+export function getRedisConf (): string {
+  return path.join('app', 'config', 'redis.conf')
 }

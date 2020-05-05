@@ -4,7 +4,7 @@ import { selectLabel, selectLabel3dType } from '../../action/select'
 import Session from '../../common/session'
 import { DataType, Key, LabelTypeName, ViewerConfigTypeName } from '../../common/types'
 import { getCurrentViewerConfig } from '../../functional/state_util'
-import { makePointCloudViewerConfig, makeSensor } from '../../functional/states'
+import { makeDefaultId, makePointCloudViewerConfig, makeSensor } from '../../functional/states'
 import { PointCloudViewerConfigType, SensorType, State, ViewerConfigType } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { commitLabels } from '../states'
@@ -198,7 +198,7 @@ export class Label3DHandler {
       case Key.ESCAPE:
       case Key.ENTER:
         Session.dispatch(selectLabel(
-          Session.label3dList.selectedLabelIds, -1, -1
+          Session.label3dList.selectedLabelIds, -1, makeDefaultId()
         ))
         return true
       case Key.P_UP:

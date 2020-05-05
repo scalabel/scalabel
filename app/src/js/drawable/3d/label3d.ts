@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { LabelTypeName, ShapeTypeName } from '../../common/types'
-import { makeLabel } from '../../functional/states'
-import { LabelType, ShapeType, State } from '../../functional/types'
+import { LabelTypeName } from '../../common/types'
+import { makeDefaultId, makeLabel } from '../../functional/states'
+import { IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { getColorById } from '../util'
 import { Label3DList } from './label3d_list'
@@ -57,12 +57,12 @@ export abstract class Label3D {
   }
 
   /** get label id */
-  public get labelId (): number {
+  public get labelId (): IdType {
     return this._label.id
   }
 
   /** get track id */
-  public get trackId (): number {
+  public get trackId (): IdType {
     return this._label.track
   }
 
@@ -105,7 +105,7 @@ export abstract class Label3D {
     if (parent && this._label) {
       this._label.parent = parent.labelId
     } else if (this._label) {
-      this._label.parent = -1
+      this._label.parent = makeDefaultId()
     }
   }
 
@@ -141,7 +141,7 @@ export abstract class Label3D {
   }
 
   /** Get shape id's and shapes for updating */
-  public abstract shapeStates (): [number[], ShapeTypeName[], ShapeType[]]
+  public abstract shapes (): ShapeType[]
 
   /** highlight the label */
   public setHighlighted (intersection?: THREE.Intersection) {
@@ -276,13 +276,13 @@ export abstract class Label3D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public abstract shapes (): Shape3D[]
+  public abstract internalShapes (): Shape3D[]
 
   /** Convert label state to drawable */
   public updateState (
     state: State,
     itemIndex: number,
-    labelId: number
+    labelId: IdType
   ): void {
     const item = state.task.items[itemIndex]
     this._label = _.cloneDeep(item.labels[labelId])

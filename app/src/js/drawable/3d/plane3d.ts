@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { LabelTypeName, ShapeTypeName } from '../../common/types'
-import { makeLabel } from '../../functional/states'
-import { ShapeType, State } from '../../functional/types'
+import { LabelTypeName } from '../../common/types'
+import { makeDefaultId, makeLabel } from '../../functional/states'
+import { IdType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { Box3D } from './box3d'
 import { Grid3D } from './grid3d'
@@ -70,7 +70,7 @@ export class Plane3D extends Label3D {
         true
       )
       this.addChild(this._temporaryLabel)
-      for (const shape of this._temporaryLabel.shapes()) {
+      for (const shape of this._temporaryLabel.internalShapes()) {
         this._labelList.scene.add(shape)
       }
       return this._temporaryLabel.onMouseDown(x, y, camera)
@@ -171,14 +171,14 @@ export class Plane3D extends Label3D {
   public updateState (
     state: State,
     itemIndex: number,
-    labelId: number,
+    labelId: IdType,
     activeCamera?: THREE.Camera
   ): void {
     super.updateState(state, itemIndex, labelId)
 
     if (this._label) {
       this._shape.updateState(
-        state.task.items[itemIndex].shapes[this._label.shapes[0]].shape,
+        state.task.items[itemIndex].shapes[this._label.shapes[0]],
         this._label.shapes[0],
         activeCamera
       )
@@ -187,7 +187,7 @@ export class Plane3D extends Label3D {
       for (const child of currentChildren) {
         if (!this._label.children.includes(child.labelId)) {
           this.removeChild(child)
-          for (const shape of child.shapes()) {
+          for (const shape of child.internalShapes()) {
             this._shape.remove(shape)
           }
         }
@@ -206,7 +206,7 @@ export class Plane3D extends Label3D {
     sensors?: number[]
   ): void {
     this._label = makeLabel({
-      type: LabelTypeName.PLANE_3D, id: -1, item: itemIndex,
+      type: LabelTypeName.PLANE_3D, id: makeDefaultId(), item: itemIndex,
       category: [category], sensors
     })
     if (center) {
@@ -217,19 +217,26 @@ export class Plane3D extends Label3D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public shapes (): Shape3D[] {
+  public internalShapes (): Shape3D[] {
     return [this._shape]
   }
 
   /** State representation of shape */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [
-      [this._label.shapes[0]],
-      [ShapeTypeName.GRID],
-      [this._shape.toState()]
-    ]
+    /**
+     * This is a temporary solution for assigning the correct ID to the shapes
+     * We should initialize the shape when the temporary label is created.
+     * Also store the shape id properly so that the generated shape state has
+     * the right id directly.
+     */
+    const shape = this._shape.toState()
+    if (!this._temporary) {
+      shape.id = this._label.shapes[0]
+    }
+    return [shape]
+
   }
 }

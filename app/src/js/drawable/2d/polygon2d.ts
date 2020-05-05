@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, Key, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, Key, LabelTypeName } from '../../common/types'
 import { makeLabel, makePolygon } from '../../functional/states'
-import { PathPoint2DType, PolygonType, ShapeType, State } from '../../functional/types'
+import { LabelType, PolygonType, PolyPathPoint2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
@@ -38,6 +38,7 @@ enum OrientationType {
  * polygon 2d label
  */
 export class Polygon2D extends Label2D {
+
   /** array for vertices */
   private _points: PathPoint2D[]
   /** polygon label state */
@@ -313,7 +314,7 @@ export class Polygon2D extends Label2D {
       this.editing = false
     }
     this._mouseDown = false
-    if (!this.isValid() && !this.editing && this.labelId >= 0) {
+    if (!this.isValid() && !this.editing && !this.temporary) {
       this._points = []
       for (const point of this._startingPoints) {
         this._points.push(point.clone())
@@ -412,33 +413,21 @@ export class Polygon2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [
-      this._label.shapes, [ShapeTypeName.POLYGON_2D], [this.toPolygon()]
-    ]
-  }
-
-  /**
-   * create new polygon label
-   * @param _state
-   * @param _start
-   */
-  public initTemp (state: State, _start: Vector2D): void {
-    super.initTemp(state, _start)
-    this.editing = true
-    this._state = Polygon2DState.DRAW
-    const itemIndex = state.user.select.item
-    const labelType = this._closed ?
-                LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
-    this._label = makeLabel({
-      type: labelType, id: -1, item: itemIndex,
-      category: [state.user.select.category],
-      order: this._order
-    })
-    this._highlightedHandle = 1
+    /**
+     * This is a temporary solution for assigning the correct ID to the shapes
+     * We should initialize the shape when the temporary label is created.
+     * Also store the shape id properly so that the generated shape state has
+     * the right id directly.
+     */
+    const polygon = this.toPolygon()
+    if (!this._temporary) {
+      polygon.id = this._label.shapes[0]
+    }
+    return [polygon]
   }
 
   /**
@@ -451,7 +440,7 @@ export class Polygon2D extends Label2D {
       if (!_.isEqual(this.toPolygon(), polygon)) {
         this._points = new Array()
         for (const point of polygon.points) {
-          switch (point.type) {
+          switch (point.pointType) {
             case PointType.VERTEX: {
               const currPoint =
                 new PathPoint2D(point.x, point.y, PointType.VERTEX)
@@ -480,6 +469,26 @@ export class Polygon2D extends Label2D {
         this._state = Polygon2DState.FINISHED
       }
     }
+  }
+
+  /**
+   * create new polygon label
+   * @param _state
+   * @param _start
+   */
+  protected initTempLabel (state: State, _start: Vector2D): LabelType {
+    this.editing = true
+    this._state = Polygon2DState.DRAW
+    const itemIndex = state.user.select.item
+    const labelType = this._closed ?
+                LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
+    const label = makeLabel({
+      type: labelType, item: itemIndex,
+      category: [state.user.select.category],
+      order: this._order
+    })
+    this._highlightedHandle = 1
+    return label
   }
 
   /**
@@ -830,7 +839,7 @@ export class Polygon2D extends Label2D {
    * convert this drawable polygon to a polygon state
    */
   private toPolygon (): PolygonType {
-    const pathPoints: PathPoint2DType [] = new Array()
+    const pathPoints: PolyPathPoint2DType [] = new Array()
     for (const point of this._points) {
       if (point.type === PointType.MID) continue
       pathPoints.push(point.toPathPoint())

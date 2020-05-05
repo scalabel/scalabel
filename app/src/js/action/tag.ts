@@ -22,8 +22,8 @@ export function addLabelTag (
   const itemIndex = state.user.select.item
   const attribute = { [attributeIndex]: [selectedIndex] }
   const item = state.task.items[itemIndex]
-  if (_.size(item.labels) > 0) {
-    const labelId = Number(_.findKey(item.labels))
+  const labelId = _.findKey(item.labels)
+  if (labelId !== undefined) {
     const newAttributes = updateObject(item.labels[labelId].attributes,
       attribute)
     return actions.changeLabelProps(itemIndex, labelId,
@@ -37,7 +37,6 @@ export function addLabelTag (
     return actions.addLabel(
       itemIndex,
       label,
-      [],
       []
     )
   }

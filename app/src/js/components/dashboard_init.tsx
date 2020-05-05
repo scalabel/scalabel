@@ -1,6 +1,8 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { getAuth } from '../common/service'
+import { Endpoint } from '../server/types'
 import { myTheme } from '../styles/theme'
 import Dashboard, { DashboardContents } from './dashboard'
 
@@ -29,7 +31,12 @@ export function initDashboard (vendor?: boolean) {
   const request = JSON.stringify({
     name: projectName
   })
-  xhr.open('POST', './postDashboardContents')
+
+  xhr.open('POST', Endpoint.DASHBOARD)
   xhr.setRequestHeader('Content-Type', 'application/json')
+  const auth = getAuth()
+  if (auth) {
+    xhr.setRequestHeader('Authorization', auth)
+  }
   xhr.send(request)
 }

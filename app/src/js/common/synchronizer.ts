@@ -1,11 +1,25 @@
 import _ from 'lodash'
+import OrderedMap from 'orderedmap'
 import { Dispatch, Middleware } from 'redux'
 import io from 'socket.io-client'
-import { updateTask } from '../action/common'
+import uuid4 from 'uuid/v4'
+import {
+  setStatusAfterConnect,
+  setStatusToComputeDone,
+  setStatusToComputing,
+  setStatusToReconnecting,
+  setStatusToSaved,
+  setStatusToSaving,
+  setStatusToSubmitted,
+  setStatusToSubmitting,
+  setStatusToUnsaved,
+  updateTask} from '../action/common'
 import * as types from '../action/types'
+import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
-import { EventName, RegisterMessageType, SyncActionMessageType } from '../server/types'
-import Session, { ConnectionStatus } from './session'
+import { ActionPacketType, EventName, RegisterMessageType,
+  SyncActionMessageType } from '../server/types'
+import Session from './session'
 
 const CONFIRMATION_MESSAGE =
   'You have unsaved changes that will be lost if you leave this page. '
@@ -14,171 +28,296 @@ const CONFIRMATION_MESSAGE =
  * Synchronizes data with other sessions
  */
 export class Synchronizer {
+
+  /**
+   * Getter for number of logged (acked) actions
+   */
+  public get numLoggedActions (): number {
+    return this.actionLog.length
+  }
+
+  /**
+   * Getter for number of queued (in progress) actions
+   */
+  public get numQueuedActions (): number {
+    return this.listActionPackets().length
+  }
+
+  /**
+   * Getter for number of actions with predictions running
+   */
+  public get numActionsPendingPrediction (): number {
+    return this.actionsPendingPrediction.size
+  }
+
   /** Socket connection */
   public socket: SocketIOClient.Socket
-  /** Actions queued to send */
-  public actionQueue: types.BaseAction[]
-  /** Actions in process of being saved */
-  public saveActions: types.BaseAction[][]
-  /** Timestamped action log */
-  public actionLog: types.BaseAction[]
-  /** Middleware to use */
-  public middleware: Middleware
   /** The function to call after state is synced with backend */
   public initStateCallback: (state: State) => void
+  /** Name of the project */
+  public projectName: string
+  /** Index of the task */
+  public taskIndex: number
+  /** Middleware executed on action dispatch */
+  public middleware: Middleware
   /** The user/browser id, constant across sessions */
   public userId: string
+  /** the server address */
+  public syncAddress: string
+  /** Actions queued to be sent to the backend */
+  public actionQueue: types.BaseAction[]
+  /** Actions in the process of being saved, mapped by packet id */
+  private actionsToSave: OrderedMap<ActionPacketType>
+  /** Timestamped log for completed actions */
+  private actionLog: types.BaseAction[]
+  /** Log of packets that have been acked */
+  private ackedPackets: Set<string>
+  /** The ids of action packets pending model predictions */
+  private actionsPendingPrediction: Set<string>
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
     taskIndex: number, projectName: string, userId: string,
     initStateCallback: (state: State) => void) {
+    this.taskIndex = taskIndex
+    this.projectName = projectName
     this.initStateCallback = initStateCallback
 
     this.actionQueue = []
-    this.saveActions = []
+    this.actionsToSave = OrderedMap.from()
     this.actionLog = []
     this.userId = userId
-
-    const self = this
-
-    /* sync every time an action is dispatched */
-    this.middleware = () => (
-      next: Dispatch
-    ) => (action) => {
-      /* Only send back actions that originated locally */
-      action.userId = this.userId
-      if (Session.id === action.sessionId) {
-        self.actionQueue.push(action)
-        if (Session.autosave) {
-          self.sendQueuedActions()
-        } else if (types.TASK_ACTION_TYPES.includes(action.type) &&
-          Session.status !== ConnectionStatus.RECONNECTING &&
-          Session.status !== ConnectionStatus.SAVING) {
-          Session.updateStatus(ConnectionStatus.UNSAVED)
-        }
-      }
-      return next(action)
-    }
+    this.ackedPackets = new Set()
+    this.actionsPendingPrediction = new Set()
 
     // use the same address as http
-    const syncAddress = location.origin
+    this.syncAddress = location.origin
     const socket = io.connect(
-      syncAddress,
+      this.syncAddress,
       { transports: ['websocket'], upgrade: false }
     )
     this.socket = socket
 
-    this.socket.on(EventName.CONNECT, () => {
-      const message: RegisterMessageType = {
-        projectName,
-        taskIndex,
-        sessionId: Session.id,
-        userId: this.userId
-      }
-      /* Send the registration message to the backend */
-      self.socket.emit(EventName.REGISTER, JSON.stringify(message))
-      Session.updateStatus(ConnectionStatus.UNSAVED)
-    })
+    this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))
+    this.socket.on(EventName.REGISTER_ACK, this.registerAckHandler.bind(this))
+    this.socket.on(EventName.ACTION_BROADCAST,
+        this.actionBroadcastHandler.bind(this))
+    this.socket.on(EventName.DISCONNECT, this.disconnectHandler.bind(this))
+    window.onbeforeunload = this.warningPopup.bind(this)
 
-    /* on receipt of registration back from backend
-       init synced state then send any queued actions */
-    this.socket.on(EventName.REGISTER_ACK, (syncState: State) => {
-      self.initStateCallback(syncState)
-      for (const saveActionList of this.saveActions) {
-        self.sendActions(saveActionList)
-      }
-      if (Session.autosave) {
-        self.sendQueuedActions()
-      }
-    })
-
-    this.socket.on(
-      EventName.ACTION_BROADCAST, (actionList: types.ActionType[]) => {
-        // can remove 1st set of stored actions when saving is done
-        this.saveActions.shift()
-        for (const action of actionList) {
-          // actionLog matches backend action ordering
-          self.actionLog.push(action)
-          if (types.TASK_ACTION_TYPES.includes(action.type)) {
-            if (action.sessionId !== Session.id) {
-              // Dispatch any task actions broadcasted from other sessions
-              Session.dispatch(action)
-            } else {
-              // Otherwise, ack indicates successful save
-              Session.updateStatus(ConnectionStatus.NOTIFY_SAVED)
-              this.timeoutUpdateStatus(ConnectionStatus.SAVED, 5)
-            }
-          }
+    /* Called every time an action is dispatched to the session */
+    const self = this
+    this.middleware = () => (
+      next: Dispatch
+    ) => (action: types.BaseAction) => {
+      action.userId = this.userId
+      /* Only send back actions that originated locally */
+      if (Session.id === action.sessionId && !action.frontendOnly &&
+        !types.isSessionAction(action)) {
+        self.actionQueue.push(action)
+        if (Session.autosave) {
+          self.sendQueuedActions()
+        } else {
+          Session.dispatch(setStatusToUnsaved())
         }
-      })
-
-    // If backend disconnects, keep trying to reconnect
-    this.socket.on(EventName.DISCONNECT, () => {
-      Session.updateStatus(ConnectionStatus.RECONNECTING)
-      if (Session.autosave) {
-        // On reconnect, just update store instead of re-initializing it
-        self.initStateCallback = (state: State) => {
-          Session.dispatch(updateTask(state.task))
-        }
-      } else {
-        // With manual saving, keep unsaved changes after reconnect
-        self.initStateCallback = () => { return }
       }
-    })
+      return next(action)
+    }
+  }
 
-    // Add pop up to warn user when leaving with unsaved changes
-    window.onbeforeunload = (e: BeforeUnloadEvent) => {
-      if (
-        Session.status === ConnectionStatus.RECONNECTING ||
-        Session.status === ConnectionStatus.SAVING ||
-        Session.status === ConnectionStatus.UNSAVED
-      ) {
-        e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
-        return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
+  /**
+   * Displays pop-up warning user when leaving with unsaved changes
+   */
+  public warningPopup (e: BeforeUnloadEvent) {
+    if (!isSessionFullySaved(Session.store.getState())) {
+      e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
+      return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
+    }
+  }
+
+  /**
+   * Called when io socket establishes a connection
+   * Registers the session with the backend, triggering a register ack
+   */
+  public connectHandler () {
+    const message: RegisterMessageType = {
+      projectName: this.projectName,
+      taskIndex: this.taskIndex,
+      sessionId: Session.id,
+      userId: this.userId,
+      address: this.syncAddress,
+      bot: false
+    }
+    /* Send the registration message to the backend */
+    this.socket.emit(EventName.REGISTER, message)
+    Session.dispatch(setStatusAfterConnect())
+  }
+
+  /**
+   * Called when backend sends ack of registration of this session
+   * Initialized synced state, and sends any queued actions
+   */
+  public registerAckHandler (syncState: State) {
+    this.initStateCallback(syncState)
+    for (const actionPacket of this.listActionPackets()) {
+      this.sendActions(actionPacket)
+    }
+    if (Session.autosave) {
+      this.sendQueuedActions()
+    }
+  }
+
+  /**
+   * Called when backend sends ack for actions that were sent to be synced
+   * Updates relevant queues and syncs actions from other sessions
+   */
+  public actionBroadcastHandler (message: SyncActionMessageType) {
+    const actionPacket = message.actions
+    // remove stored actions when they are acked
+    this.actionsToSave = this.actionsToSave.remove(actionPacket.id)
+
+    // if action was already acked, ignore it
+    if (this.ackedPackets.has(actionPacket.id)) {
+      return
+    }
+    this.ackedPackets.add(actionPacket.id)
+
+    for (const action of actionPacket.actions) {
+      // actionLog matches backend action ordering
+      this.actionLog.push(action)
+      if (action.sessionId !== Session.id) {
+        if (types.isTaskAction(action)) {
+          // Dispatch any task actions broadcasted from other sessions
+          Session.dispatch(action)
+        }
+      }
+    }
+
+    if (this.actionsPendingPrediction.has(actionPacket.id)) {
+      /* Original action was acked by the server
+       * This means the bot also received the action
+       * And started its prediction */
+      Session.dispatch(setStatusToComputing())
+    } else if (actionPacket.triggerId !== undefined &&
+      this.actionsPendingPrediction.has(actionPacket.triggerId)) {
+      // Ack of bot action means prediction is finished
+      this.actionsPendingPrediction.delete(actionPacket.triggerId)
+      if (this.actionsPendingPrediction.size === 0) {
+        Session.dispatch(setStatusToComputeDone())
+      }
+    } else if (message.sessionId === Session.id) {
+      if (types.hasSubmitAction(actionPacket.actions)) {
+        Session.dispatch(setStatusToSubmitted())
+      } else if (this.actionsToSave.size === 0) {
+        // Once all actions being saved are acked, update the save status
+        Session.dispatch(setStatusToSaved())
       }
     }
   }
 
   /**
+   * Called when session disconnects from backend
+   * Prepares for reconnect by updating initial callback
+   */
+  public disconnectHandler () {
+    Session.dispatch(setStatusToReconnecting())
+    if (Session.autosave) {
+      this.initStateCallback = this.autosaveReconnectCallback
+    } else {
+      // With manual saving, keep unsaved changes after reconnect
+      this.initStateCallback = () => { return }
+    }
+  }
+
+  /**
+   * Called when session reconnects (with autosave)
+   */
+  public autosaveReconnectCallback (state: State) {
+    // Update with any backend changes that occurred during disconnect
+    const updateTaskAction = updateTask(state.task)
+    updateTaskAction.frontendOnly = true
+    Session.dispatch(updateTaskAction)
+    // re-apply frontend task actions after updating task from backend
+    for (const actionPacket of this.listActionPackets()) {
+      for (const action of actionPacket.actions) {
+        if (types.isTaskAction(action)) {
+          action.frontendOnly = true
+          Session.dispatch(action)
+        }
+      }
+    }
+  }
+
+  /**
+   * Converts dict of action packets to a list
+   */
+  public listActionPackets (): ActionPacketType[] {
+    const values: ActionPacketType[] = []
+    if (this.actionsToSave.size > 0) {
+      this.actionsToSave.forEach((_key: string, value: ActionPacketType) => {
+        values.push(value)
+      })
+    }
+    return values
+  }
+
+  /**
    * Send all queued actions to the backend
+   * Should only call this once per action, since id shouldn't change
    */
   public sendQueuedActions () {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
-        this.saveActions.push(this.actionQueue)
-        this.sendActions(this.actionQueue)
+        const packetId = uuid4()
+        const actionPacket: ActionPacketType = {
+          actions: this.actionQueue,
+          id: packetId
+        }
+        this.actionsToSave = this.actionsToSave.update(packetId, actionPacket)
+        if (this.doesPacketTriggerModel(actionPacket)) {
+          this.actionsPendingPrediction.add(packetId)
+        }
+        this.sendActions(actionPacket)
         this.actionQueue = []
       }
     }
   }
 
   /**
-   * Send given actions to the backend
+   * Checks if the action packet contains
+   * any actions that would trigger a model query
    */
-  public sendActions (actionList: types.BaseAction[]) {
+  public doesPacketTriggerModel (actionPacket: ActionPacketType): boolean {
+    if (!Session.bots) {
+      return false
+    }
+    for (const action of actionPacket.actions) {
+      if (action.type === types.ADD_LABELS) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /**
+   * Send given action packet to the backend
+   * Can be called multiple times if previous attempts aren't acked
+   */
+  public sendActions (actionPacket: ActionPacketType) {
     const sessionState = Session.getState()
     const message: SyncActionMessageType = {
       taskId: sessionState.task.config.taskId,
       projectName: sessionState.task.config.projectName,
       sessionId: sessionState.session.id,
-      actions: actionList
+      actions: actionPacket,
+      bot: false
     }
-    this.socket.emit(EventName.ACTION_SEND, JSON.stringify(message))
-    Session.updateStatus(ConnectionStatus.SAVING)
-  }
-
-  /**
-   * Update status after timeout if status hasn't changed since then
-   */
-  public timeoutUpdateStatus (newStatus: ConnectionStatus, seconds: number) {
-    const statusChangeCountBefore = Session.statusChangeCount
-    setTimeout(() => {
-      // don't update if other effect occurred in between
-      if (Session.statusChangeCount === statusChangeCountBefore) {
-        Session.updateStatus(newStatus)
-      }
-    }, seconds * 1000)
+    this.socket.emit(EventName.ACTION_SEND, message)
+    if (types.hasSubmitAction(actionPacket.actions)) {
+      Session.dispatch(setStatusToSubmitting())
+    } else {
+      Session.dispatch(setStatusToSaving())
+    }
   }
 }
 

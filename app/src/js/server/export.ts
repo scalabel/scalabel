@@ -1,8 +1,38 @@
+import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../common/types'
 import { PointType } from '../drawable/2d/path_point2d'
-import { ItemExport, LabelExport } from '../functional/bdd_types'
-import { Attribute, ConfigType, CubeType,
-  ItemType, Node2DType, PolygonType, RectType, State } from '../functional/types'
+import { Attribute, ConfigType,
+  ItemType, Node2DType, PolygonType, State
+} from '../functional/types'
+import { transformBox2D, transformBox3D, transformPlane3D } from './bdd_type_transformers'
+import { ItemExport, LabelExport, PolygonExportType } from './bdd_types'
+
+/**
+ * Converts a polygon label to export format
+ */
+export function convertPolygonToExport (
+  poly2d: PolygonType, labelType: string): PolygonExportType[] {
+  const typeCharacters = poly2d.points.map(
+    (point) => {
+      switch (point.pointType) {
+        case PointType.CURVE:
+          return 'C'
+        case PointType.VERTEX:
+          return 'L'
+      }
+
+      return ''
+    }
+  )
+  const types = typeCharacters.join('')
+  const vertices: Array<[number, number]> =
+    poly2d.points.map((point) => [point.x, point.y])
+  return [{
+    vertices,
+    types,
+    closed: labelType === LabelTypeName.POLYGON_2D
+  }]
+}
 
 /**
  * converts single item to exportable format
@@ -31,7 +61,7 @@ export function convertItemToExport (
   }
   // TODO: Clean up the export code for naming and modularity
   for (const key of Object.keys(item.labels)) {
-    const label = item.labels[Number(key)]
+    const label = item.labels[key]
     const labelExport: LabelExport = {
       id: label.id,
       category: config.categories[label.category[0]],
@@ -40,43 +70,27 @@ export function convertItemToExport (
       box2d: null,
       poly2d: null,
       box3d: null,
+      plane3d: null,
       customs: {}
     }
     if (label.shapes.length > 0) {
-      const firstShapeId = label.shapes[0]
-      const firstIndexedShape = item.shapes[firstShapeId]
+      const shapeId0 = label.shapes[0]
+      const shape0 = item.shapes[shapeId0]
       switch (label.type) {
         case LabelTypeName.BOX_2D:
-          const box2d = firstIndexedShape.shape as RectType
-          labelExport.box2d = box2d
+          labelExport.box2d = transformBox2D(shape0)
           break
         case LabelTypeName.POLYGON_2D:
         case LabelTypeName.POLYLINE_2D:
-          const poly2d = firstIndexedShape.shape as PolygonType
-          const typeCharacters = poly2d.points.map(
-            (point) => {
-              switch (point.type) {
-                case PointType.CURVE:
-                  return 'C'
-                case PointType.VERTEX:
-                  return 'L'
-              }
-
-              return ''
-            }
+          labelExport.poly2d = convertPolygonToExport(
+            shape0 as PolygonType, label.type
           )
-          const types = typeCharacters.join('')
-          const vertices: Array<[number, number]> =
-            poly2d.points.map((point) => [point.x, point.y])
-          labelExport.poly2d = [{
-            vertices,
-            types,
-            closed: label.type === LabelTypeName.POLYGON_2D
-          }]
           break
         case LabelTypeName.BOX_3D:
-          const poly3d = firstIndexedShape.shape as CubeType
-          labelExport.box3d = poly3d
+          labelExport.box3d = transformBox3D(shape0)
+          break
+        case LabelTypeName.PLANE_3D:
+          labelExport.plane3d = transformPlane3D(shape0)
           break
         default:
           if (label.type in config.label2DTemplates) {
@@ -84,7 +98,7 @@ export function convertItemToExport (
             const names: string[] = []
             const hidden: boolean[] = []
             for (const shapeId of label.shapes) {
-              const node = item.shapes[shapeId].shape as Node2DType
+              const node = item.shapes[shapeId] as Node2DType
               points.push([node.x, node.y])
               names.push(node.name)
               hidden.push(Boolean(node.hidden))

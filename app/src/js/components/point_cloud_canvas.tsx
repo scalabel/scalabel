@@ -1,11 +1,12 @@
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import * as THREE from 'three'
 import Session from '../common/session'
 import { isCurrentFrameLoaded, isCurrentItemLoaded } from '../functional/state_util'
 import { PointCloudViewerConfigType, State } from '../functional/types'
-import { DrawableCanvas } from './viewer'
+import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 
 const styles = () => createStyles({
   point_cloud_canvas: {
@@ -20,7 +21,7 @@ interface ClassType {
   point_cloud_canvas: string
 }
 
-interface Props {
+interface Props extends DrawableProps {
   /** CSS class */
   classes: ClassType
   /** container */
@@ -65,14 +66,15 @@ const fragmentShader =
     }
 
     void main() {
-      float alpha = 0.7;
+      float alpha = 0.5;
       vec3 color = getHeatMapColor(worldPosition.z);
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
         if (pointInSelection(worldPosition)) {
           alpha = 1.0;
-          color *= 2.5;
+          color.x *= 2.0;
+          color.yz *= 0.5;
         }
       } else {
         alpha = 1.0;
@@ -293,4 +295,5 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   }
 }
 
-export default withStyles(styles, { withTheme: true })(PointCloudCanvas)
+const styledCanvas = withStyles(styles, { withTheme: true })(PointCloudCanvas)
+export default connect(mapStateToDrawableProps)(styledCanvas)

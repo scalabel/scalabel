@@ -3,14 +3,14 @@ import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
 import React from 'react'
-import { changeSelect, changeViewerConfig, mergeTracks } from '../action/common'
+import { changeSelect, changeViewerConfig, mergeTracks, startLinkTrack } from '../action/common'
 import { changeSelectedLabelsAttributes, deleteSelectedLabels, deleteSelectedTracks, terminateSelectedTracks } from '../action/select'
 import { addLabelTag } from '../action/tag'
 import { renderTemplate } from '../common/label'
 import Session from '../common/session'
 import { Key, LabelTypeName } from '../common/types'
 import { tracksOverlapping } from '../functional/track'
-import { Attribute, State, TrackType } from '../functional/types'
+import { Attribute, IdType, State, TrackType } from '../functional/types'
 import { Component } from './component'
 import { makeButton } from './general_button'
 import { Category } from './toolbar_category'
@@ -148,6 +148,29 @@ export class ToolBar extends Component<Props> {
             Session.dispatch(deleteSelectedLabels(this.state))
           })
           }</div>
+          {
+            this.state.task.config.tracking &&
+            <div>{makeButton('End Object Tracking', () => {
+              Session.dispatch(
+                terminateSelectedTracks(this.state, this.state.user.select.item)
+              )
+            })
+            }</div>
+          }
+          {
+            this.state.task.config.tracking &&
+            <div>
+              {this.state.session.trackLinking ?
+                makeButton('Finish Track-Link', (() => {
+                  this.linkSelectedTracks(this.state)
+                }), 'lightgreen')
+                :
+                makeButton('Track-Link', () => {
+                  this.startLinkTrack()
+                })
+              }
+            </div>
+          }
         </div>
       </div>
     )
@@ -296,18 +319,26 @@ export class ToolBar extends Component<Props> {
   private linkSelectedTracks (state: State) {
     const select = state.user.select
     const tracks: TrackType[] = []
-    const trackIds: number[] = []
+    const trackIds: IdType[] = []
 
     for (const key of Object.keys(select.labels)) {
       const index = Number(key)
       for (const labelId of select.labels[index]) {
         const trackId = state.task.items[index].labels[labelId].track
         tracks.push(state.task.tracks[trackId])
+        trackIds.push(trackId)
       }
     }
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(trackIds))
     }
+  }
+
+  /**
+   * Start to link track
+   */
+  private startLinkTrack () {
+    Session.dispatch(startLinkTrack())
   }
 }

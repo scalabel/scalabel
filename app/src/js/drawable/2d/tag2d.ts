@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { AttributeToolType, ShapeTypeName } from '../../common/types'
-import { Attribute, ShapeType, State } from '../../functional/types'
+import { AttributeToolType } from '../../common/types'
+import { Attribute, IdType, LabelType, ShapeType, State } from '../../functional/types'
+import { Vector2D } from '../../math/vector2d'
 import { Context2D } from '../util'
 import { DrawMode, Label2D } from './label2d'
 import { Label2DList } from './label2d_list'
@@ -19,8 +20,8 @@ export class Tag2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
-    return [[], [], []]
+  public shapes (): ShapeType[] {
+    return []
   }
 
   /**
@@ -53,7 +54,7 @@ export class Tag2D extends Label2D {
 
   /** Convert label state to drawable */
   public updateState (
-    state: State, itemIndex: number, labelId: number): void {
+    state: State, itemIndex: number, labelId: IdType): void {
     super.updateState(state, itemIndex, labelId)
     this.configAttributes = state.task.config.attributes
   }
@@ -91,5 +92,14 @@ export class Tag2D extends Label2D {
         context.fillText(abbr[i], 5, 40 + i * 35)
       }
     }
+  }
+
+  /**
+   * no op
+   * @param state
+   * @param _start
+   */
+  protected initTempLabel (_state: State, _start: Vector2D): LabelType {
+    throw new Error('Method not implemented.')
   }
 }

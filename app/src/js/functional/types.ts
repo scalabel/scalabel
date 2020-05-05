@@ -1,11 +1,21 @@
 import { AttributeToolType } from '../common/types'
 
+export type IdType = string
+
+// Have to define those map because
+// we can't use alias of string as an index signature parameter type
+export interface LabelIdMap {[key: string]: LabelType}
+
+export interface ShapeIdMap {[key: string]: ShapeAllType}
+
+export interface TrackIdMap {[key: string]: TrackType}
+
 /**
  * Interfaces for immutable states
  */
 export interface LabelType {
   /** ID of the label */
-  id: number
+  id: IdType
   /** The item index */
   item: number
   /** Associated data sources */
@@ -17,13 +27,13 @@ export interface LabelType {
   /** Attributes */
   attributes: { [key: number]: number[] }
   /** Parent label ID */
-  parent: number
+  parent: IdType
   /** Children label IDs */
-  children: number[]
+  children: IdType[]
   /** Shape ids of the label */
-  shapes: number[]
+  shapes: IdType[]
   /** connected track */
-  track: number
+  track: IdType
   /** order of the label among all the labels */
   order: number
   /** whether the label is created manually */
@@ -32,14 +42,23 @@ export interface LabelType {
 
 export interface TrackType {
   /** ID of the track */
-  id: number
+  id: IdType
   /** type */
   type: string
   /** labels in this track {item index: label id} */
-  labels: {[key: number]: number}
+  labels: {[key: number]: IdType}
 }
 
-export interface RectType {
+export interface ShapeType {
+  /** ID of the shape */
+  id: IdType
+  /** Label ID of the shape */
+  label: IdType[]
+  /** type string of the shape. Value from common/types.ShapeType */
+  shapeType: string
+}
+
+export interface RectType extends ShapeType {
   /** The x-coordinate of upper left corner */
   x1: number
   /** The y-coordinate of upper left corner */
@@ -50,9 +69,9 @@ export interface RectType {
   y2: number
 }
 
-export interface PolygonType {
+export interface PolygonType extends ShapeType {
   /** array of control points */
-  points: PathPoint2DType []
+  points: PolyPathPoint2DType[]
 }
 
 export interface Vector2Type {
@@ -82,7 +101,7 @@ export interface Vector4Type {
   z: number
 }
 
-export interface CubeType {
+export interface CubeType extends ShapeType {
   /** Center of the cube */
   center: Vector3Type
   /** size */
@@ -95,28 +114,37 @@ export interface CubeType {
 
 export type Point2DType = Vector2Type
 
-export interface PathPoint2DType extends Point2DType {
+export interface PathPoint2DType extends Vector2Type, ShapeType {
   /** type of the point in the path. value from common/types.PathPointType */
-  type: string
+  pointType: string
 }
 
-export interface Plane3DType {
+/**
+ * This is a point on the polygon 2d. So the point itself doesn't have an ID
+ * and it is not standalone shape
+ */
+export interface PolyPathPoint2DType extends Vector2Type {
+  /** type of the point in the path. value from common/types.PathPointType */
+  pointType: string
+}
+
+export interface Plane3DType extends ShapeType {
   /** Plane origin in world */
   center: Vector3Type
   /** orientation in Euler */
   orientation: Vector3Type
 }
 
-export type ShapeType = RectType | CubeType | PolygonType |
-                        Point2DType | PathPoint2DType | Plane3DType
+export type ShapeAllType =
+  ShapeType | RectType | CubeType | PolygonType | Plane3DType | Node2DType
 
 export interface IndexedShapeType {
   /** ID of the shape */
-  id: number
+  id: IdType
   /** Label ID of the shape */
-  label: number[]
+  labels: IdType[]
   /** type string of the shape. Value from common/types.ShapeType */
-  type: string
+  shapeType: string
   /** Shape data */
   shape: ShapeType
 }
@@ -209,22 +237,22 @@ export interface SensorMapType { [id: number]: SensorType }
 
 export interface ItemType {
   /** The ID of the item */
-  id: number
+  id: IdType
   /** The index of the item */
   index: number
   /** Map between data source id and url */
   urls: {[id: number]: string}
   /** Labels of the item */
-  labels: { [key: number]: LabelType } // list of label
+  labels: LabelIdMap // list of label
   /** shapes of the labels on this item */
-  shapes: { [key: number]: IndexedShapeType }
+  shapes: ShapeIdMap
   /** the timestamp for the item */
   timestamp: number
   /** video item belongs to */
   videoName: string
 }
 
-export interface Node2DType extends Point2DType {
+export interface Node2DType extends Vector2Type, ShapeType {
   /** name */
   name: string
   /** color */
@@ -294,11 +322,13 @@ export interface ConfigType {
   /** Attributes */
   attributes: Attribute[]
   /** task id */
-  taskId: string
+  taskId: IdType
   /** Whether or not in demo mode */
   demoMode: boolean
   /** whether to use autosave */
   autosave: boolean
+  /** whether bots are enabled */
+  bots: boolean
 }
 
 export enum SplitType {
@@ -353,17 +383,9 @@ export interface LayoutType {
 }
 
 export interface TaskStatus {
-  /** Max label ID */
-  maxLabelId: number
-  /** Max shape ID */
-  maxShapeId: number
   /** max order number */
   maxOrder: number
-  /** max track ID */
-  maxTrackId: number
 }
-
-export interface TrackMapType { [key: number]: TrackType }
 
 export interface SubmitData {
   /** time of the submission (client side) */
@@ -384,7 +406,7 @@ export interface TaskType {
   /** Items */
   items: ItemType[]
   /** tracks */
-  tracks: TrackMapType
+  tracks: TrackIdMap
   /** data sources */
   sensors: SensorMapType
   /** info on task progress */
@@ -395,9 +417,9 @@ export interface Select {
   /** Currently viewed item index */
   item: number
   /** Map between item indices and label id's */
-  labels: {[index: number]: number[]}
+  labels: {[index: number]: IdType[]}
   /** Map between label id's and shape id's */
-  shapes: {[index: number]: number}
+  shapes: {[index: string]: IdType}
   /** selected category */
   category: number
   /** selected attributes */
@@ -413,7 +435,7 @@ export interface Select {
  */
 export interface UserType {
   /** user id. the worker can be a guest or registered user */
-  id: string
+  id: IdType
   /** the selection of the current user */
   select: Select
   /** interface layout */
@@ -427,6 +449,12 @@ export interface ItemStatus {
   sensorDataLoaded: {[id: number]: boolean}
 }
 
+export const enum ConnectionStatus {
+  NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED,
+  COMPUTING, COMPUTE_DONE, NOTIFY_COMPUTE_DONE,
+  SUBMITTING, SUBMITTED, NOTIFY_SUBMITTED
+}
+
 /**
  * Information for this particular session
  */
@@ -434,23 +462,29 @@ export interface SessionType {
   /**
    * a unique id for each session. When the same assignment/task is opened
    * twice, they will have different session ids.
-   * It is uuid of the session
+   * It is uid of the session
    */
-  id: string
+  id: IdType
   /** Start time */
   startTime: number
-  /** item statuses */
+  /** Item statuses */
   itemStatuses: ItemStatus[]
+  /** Track linking toggled */
+  trackLinking: boolean
+  /** Current connection status */
+  status: ConnectionStatus
+  /** Number of time status has changed */
+  numUpdates: number
 }
 
 export interface State {
   /**
-   * task config and labels. It is irrelevant who makes the labels and other
+   * Task config and labels. It is irrelevant who makes the labels and other
    * content in task
    */
   task: TaskType
-  /** user information that can be persistent across sessions */
+  /** User information that can be persistent across sessions */
   user: UserType
-  /** info particular to this session */
+  /** Info particular to this session */
   session: SessionType
 }

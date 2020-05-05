@@ -2,21 +2,32 @@ import * as fs from 'fs-extra'
 import _ from 'lodash'
 import mockfs from 'mock-fs'
 import uuid4 from 'uuid/v4'
+import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { getTestDir } from '../../js/server/path'
+import { ProjectStore } from '../../js/server/project_store'
+import { RedisClient } from '../../js/server/redis_client'
+import { RedisStore } from '../../js/server/redis_store'
 import { UserManager } from '../../js/server/user_manager'
-import { makeProjectDir } from '../util'
+import { makeProjectDir } from './util/util'
+
+jest.mock('../../js/server/redis_client')
 
 let userManager: UserManager
 let projectName: string
+let projectName2: string
 let dataDir: string
 
 beforeAll(() => {
   projectName = 'myProject'
+  projectName2 = 'myProject2'
   dataDir = getTestDir('test-user-data')
   makeProjectDir(dataDir, projectName)
   const storage = new FileStorage(dataDir)
-  userManager = new UserManager(storage)
+  const client = new RedisClient(serverConfig)
+  const redisStore = new RedisStore(serverConfig, storage, client)
+  const projectStore = new ProjectStore(storage, redisStore)
+  userManager = new UserManager(projectStore)
 })
 
 afterAll(() => {
@@ -26,7 +37,7 @@ afterAll(() => {
 describe('test user management', () => {
 
   test('user count works for single user', async () => {
-    // note: this is not actually how user id is generated
+    // note: this is not actually how user ids are generated
     const userId = uuid4()
     const socketId = uuid4()
     expect(await userManager.countUsers(projectName)).toBe(0)
@@ -64,8 +75,6 @@ describe('test user management', () => {
   })
 
   test('user count works for multiple projects', async () => {
-    const projectName2 = 'testProject2'
-
     // make sure other tests clean up worked
     expect(await userManager.countUsers(projectName)).toBe(0)
     expect(await userManager.countUsers(projectName2)).toBe(0)
@@ -97,6 +106,31 @@ describe('test user management', () => {
     for (let userNum = 0; userNum < numUsers; userNum++) {
       await userManager.deregisterUser(socketIds[numUsers + userNum])
     }
+    expect(await userManager.countUsers(projectName)).toBe(0)
+    expect(await userManager.countUsers(projectName2)).toBe(0)
+  })
+
+  test('clearing users resets all counts', async () => {
+    // make sure other tests clean up worked
+    expect(await userManager.countUsers(projectName)).toBe(0)
+    expect(await userManager.countUsers(projectName2)).toBe(0)
+
+    const numUsers = 2
+    const numProjects = 2
+    const userIds = _.range(numUsers).map(() => uuid4())
+    // first 2 socket ids correspond to first project, etc.
+    const socketIds = _.range(numUsers * numProjects).map(() => uuid4())
+
+    // Put 1 user on each project
+    await userManager.registerUser(
+      socketIds[0], projectName, userIds[0])
+    await userManager.registerUser(
+      socketIds[1], projectName2, userIds[1])
+    expect(await userManager.countUsers(projectName)).toBe(1)
+    expect(await userManager.countUsers(projectName2)).toBe(1)
+
+    // Then test that clearing works
+    await userManager.clearUsers()
     expect(await userManager.countUsers(projectName)).toBe(0)
     expect(await userManager.countUsers(projectName2)).toBe(0)
   })

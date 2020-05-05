@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import * as THREE from 'three'
 
-import { makeLabel } from '../../functional/states'
-import { ShapeType, State } from '../../functional/types'
+import { makeDefaultId, makeLabel } from '../../functional/states'
+import { IdType, ShapeType, State } from '../../functional/types'
 
 import { Vector3D } from '../../math/vector3d'
 
-import { LabelTypeName, ShapeTypeName } from '../../common/types'
+import { LabelTypeName } from '../../common/types'
 import { rotateScale } from '../../math/3d'
 import { Cube3D } from './cube3d'
 import { Label3D } from './label3d'
@@ -42,7 +42,7 @@ export class Box3D extends Label3D {
     }
 
     this._label = makeLabel({
-      type: LabelTypeName.BOX_3D, id: -1, item: itemIndex,
+      type: LabelTypeName.BOX_3D, id: makeDefaultId(), item: itemIndex,
       category: [category], sensors
     })
 
@@ -61,15 +61,15 @@ export class Box3D extends Label3D {
   }
 
   /** Indexed shapes */
-  public shapeStates (): [number[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [
-      [this._label.shapes[0]],
-      [ShapeTypeName.CUBE],
-      [this._shape.toState()]
-    ]
+    const box = this._shape.toState()
+    if (!this._temporary) {
+      box.id = this._label.shapes[0]
+    }
+    return [box]
   }
 
   /** Override set parent */
@@ -78,7 +78,7 @@ export class Box3D extends Label3D {
     if (parent && this._label) {
       this._label.parent = parent.labelId
     } else if (this._label) {
-      this._label.parent = -1
+      this._label.parent = makeDefaultId()
     }
     if (parent && parent.label.type === LabelTypeName.PLANE_3D) {
       this._shape.attachToPlane(parent as Plane3D)
@@ -95,7 +95,7 @@ export class Box3D extends Label3D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public shapes (): Shape3D[] {
+  public internalShapes (): Shape3D[] {
     return [this._shape]
   }
 
@@ -240,13 +240,13 @@ export class Box3D extends Label3D {
   public updateState (
     state: State,
     itemIndex: number,
-    labelId: number
+    labelId: IdType
   ): void {
     super.updateState(state, itemIndex, labelId)
     this._shape.color = this._color
     const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
-      state.task.items[itemIndex].shapes[label.shapes[0]].shape,
+      state.task.items[itemIndex].shapes[label.shapes[0]],
       label.shapes[0]
     )
   }

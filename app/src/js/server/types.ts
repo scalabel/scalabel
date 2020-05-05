@@ -1,7 +1,6 @@
 import { BaseAction } from '../action/types'
-import { AttributeToolType } from '../common/types'
-import { ItemExport } from '../functional/bdd_types'
 import { Attribute, ConfigType, Label2DTemplateType, SensorType } from '../functional/types'
+import { ItemExport } from './bdd_types'
 
 /**
  * Stores specifications of project
@@ -16,26 +15,41 @@ export interface Project {
 }
 
 /**
+ * Cognito server config
+ *
+ * @export
+ * @interface CognitoConfig
+ */
+export interface CognitoConfig {
+  /** region of cognito service */
+  region: string
+  /** user pool id of cognito */
+  userPool: string
+  /** client id of cognito */
+  clientId: string,
+  /** user pool base uri */
+  userPoolBaseUri: string,
+  /** callback uri */
+  callbackUri: string
+}
+
+/**
  * Information for backend environment variables
  * Populated using configuration file
  */
-export interface Env {
+export interface ServerConfig {
   /** Port that server listens on */
   port: number
-  /** Directory data is saved to and loaded from */
+  /** Where annotation logs and submissions are saved and loaded */
   data: string
-  /** Base directory path */
-  src: string
-  /** Path from base dir to compiled src code */
-  appSubDir: string
+  /** Directory of local images and point clouds for annotation */
+  itemDir: string
   /** Database storage method */
   database: string
   /** Flag to enable user management */
   userManagement: boolean
   /** Flag to enable session synchronization */
   sync: boolean
-  /** Hostname for synchronization socket */
-  syncHost: string
   /** whether to save automatically */
   autosave: boolean
   /** timeout (seconds) for clearing value from redis cache */
@@ -46,6 +60,14 @@ export interface Env {
   numActionsForWrite: number
   /** Port that redis runs on */
   redisPort: number
+  /** Whether to use virtual sessions/bots for assistance */
+  bots: boolean
+  /** host of python model server */
+  botHost: string
+  /** port of python model server */
+  botPort: number
+  /** cognito settings */
+  cognito?: CognitoConfig
 }
 
 /**
@@ -62,8 +84,8 @@ export interface CreationForm {
   pageTitle: string
   /** task size */
   taskSize: number
-  /** instructions link */
-  instructions: string
+  /** instruction url */
+  instructionUrl: string
   /** whether demo mode is true */
   demoMode: boolean
 }
@@ -83,14 +105,18 @@ export interface FormFileData {
 }
 
 export interface RegisterMessageType {
-  /** Project name of the socket connection */
+  /** Project name of the session */
   projectName: string
-  /** Task index of the socket connection */
+  /** Task index of the session */
   taskIndex: number
   /** Current session Id */
   sessionId: string
   /** Current user Id */
   userId: string
+  /** server address */
+  address: string
+  /** whether it came from a bot or not */
+  bot: boolean
 }
 
 /** action type for synchronization between front and back ends */
@@ -102,15 +128,67 @@ export interface SyncActionMessageType {
   /** Session Id */
   sessionId: string
   /** List of actions for synchronization */
+  actions: ActionPacketType
+  /** whether it came from a bot or not */
+  bot: boolean
+}
+
+/** type for transmitted packet of actions */
+export interface ActionPacketType {
+  /** list of actions in the packet */
   actions: BaseAction[]
+  /** id of the packet */
+  id: string
+  /** for bot actions, id of the action packet that triggered them */
+  triggerId?: string
+}
+
+/** metadata associated with a state */
+export interface StateMetadata {
+  /** project name */
+  projectName: string
+  /** task id */
+  taskId: string
+  /** map from processed action ids to their timestamps */
+  actionIds: { [key: string]: number[] }
 }
 
 /** user data for a project */
 export interface UserData {
+  /** project name */
+  projectName: string
   /** map from socket to user */
   socketToUser: { [key: string]: string }
   /** map from user to list of socket */
   userToSockets: { [key: string]: string[] }
+}
+
+/** metadata for all users for all projects */
+export interface UserMetadata {
+  /** map from socket to project */
+  socketToProject: { [key: string]: string }
+}
+
+/** data kept by each bot user */
+export interface BotData {
+  /** the project name */
+  projectName: string
+  /** the index of the task */
+  taskIndex: number
+  /** the bot user id */
+  botId: string
+  /** the address of the io server */
+  address: string
+}
+
+/** precomputed queries for models */
+export interface ModelQuery {
+  /** the data in bdd format */
+  data: ItemExport
+  /** the endpoint for the query */
+  endpoint: ModelEndpoint
+  /** the index of the item modified */
+  itemIndex: number
 }
 
 /**
@@ -135,13 +213,21 @@ export const enum DatabaseType {
   LOCAL = 'local'
 }
 
-// TODO: change constants from post to get once go code is removed
 /* endpoint names for http server */
 export const enum Endpoint {
   POST_PROJECT = '/postProject',
-  GET_PROJECT_NAMES = '/postProjectNames',
-  EXPORT = '/export',
-  DASHBOARD = '/postDashboardContents'
+  POST_PROJECT_INTERNAL = '/postProjectInternal',
+  GET_PROJECT_NAMES = '/getProjectNames',
+  EXPORT = '/getExport',
+  DASHBOARD = '/postDashboardContents',
+  POST_TASKS = '/postTasks',
+  CALLBACK = '/callback'
+}
+
+/* endpoint names for python server */
+export const enum ModelEndpoint {
+  PREDICT_POLY = 'predictPoly',
+  REFINE_POLY = 'refinePoly'
 }
 
 /* form field names */
@@ -160,90 +246,3 @@ export const enum FormField {
   SENSORS = 'sensors',
   LABEL_SPEC = 'label_spec'
 }
-
-/* default config for env */
-export const defaultEnv: Env = {
-  port: 8686,
-  data: './data',
-  src: '.',
-  appSubDir: 'app/dist',
-  database: 'local',
-  userManagement: false,
-  sync: false,
-  syncHost: 'http://localhost',
-  autosave: true,
-  redisTimeout: 3600,
-  timeForWrite: 600,
-  numActionsForWrite: 10,
-  redisPort: 6379
-}
-
-/* default categories when file is missing and label is box2D or box3D */
-export const defaultBoxCategories = [
-  'person',
-  'rider',
-  'car',
-  'truck',
-  'bus',
-  'train',
-  'motor',
-  'bike',
-  'traffic sign',
-  'traffic light'
-]
-
-/* default categories when file is missing and label is polyline2d */
-export const defaultPolyline2DCategories = [
-  'road curb',
-  'double white',
-  'double yellow',
-  'double other',
-  'single white',
-  'single yellow',
-  'single other',
-  'crosswalk'
-]
-
-// TODO: add default seg2d categories once nested categories are supported
-
-/* default attributes when file is missing and label is box2D */
-export const defaultBox2DAttributes = [
-  {
-    name: 'Occluded',
-    toolType: AttributeToolType.SWITCH,
-    tagText: 'o',
-    tagSuffixes: [],
-    tagPrefix: '',
-    values: [],
-    buttonColors: []
-  },
-  {
-    name: 'Truncated',
-    toolType: AttributeToolType.SWITCH,
-    tagText: 't',
-    tagSuffixes: [],
-    tagPrefix: '',
-    values: [],
-    buttonColors: []
-  },
-  {
-    name: 'Traffic Color Light',
-    toolType: AttributeToolType.LIST,
-    tagText: 't',
-    tagSuffixes: ['', 'g', 'y', 'r'],
-    tagPrefix: '',
-    values: ['NA', 'G', 'Y', 'R'],
-    buttonColors: ['white', 'green', 'yellow', 'red']
-  }
-]
-
-/* default attributes when file is missing and no other defaults exist */
-export const dummyAttributes = [{
-  name: '',
-  toolType: AttributeToolType.NONE,
-  tagText: '',
-  tagSuffixes: [],
-  values: [],
-  tagPrefix: '',
-  buttonColors: []
-}]

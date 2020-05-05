@@ -1,39 +1,34 @@
-import { File } from 'formidable'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
+import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
+import uuid4 from 'uuid/v4'
 import * as yargs from 'yargs'
+import { BaseAction } from '../action/types'
+import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType } from '../common/types'
-import { Label2DTemplateType, TaskType } from '../functional/types'
+import { Label2DTemplateType, State, TaskType } from '../functional/types'
+import { ItemExport } from './bdd_types'
+import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
-import { CreationForm, DatabaseType, defaultEnv, Env } from './types'
+import { CognitoConfig, CreationForm,
+  DatabaseType, ServerConfig, UserData, UserMetadata } from './types'
 
 /**
  * Initializes backend environment variables
  */
-export function makeEnv (): Env {
+export async function readConfig (): Promise<ServerConfig> {
   /**
    * Creates config, using defaults for missing fields
    * Make sure user env come last to override defaults
    */
-  const userEnv = readEnv()
-  const fullEnv = {
-    ...defaultEnv,
-    ...userEnv
-  }
-  return fullEnv
-}
 
-/**
- * Gets values for environment from user-specified file
- */
-export function readEnv (): Partial<Env> {
-  // read the config file name from argv
+   // read the config file name from argv
   const configFlag = 'config'
   const argv = yargs
     .option(configFlag, {
@@ -45,7 +40,60 @@ export function readEnv (): Partial<Env> {
   const configDir: string = argv.config
 
   // load the config file
-  return yaml.load(fs.readFileSync(configDir, 'utf8'))
+  const userConfig = yaml.load(fs.readFileSync(configDir, 'utf8'))
+  const fullConfig = {
+    ...defaults.serverConfig,
+    ...userConfig
+  }
+  await validateConfig(fullConfig)
+  return fullConfig
+}
+
+/**
+ * Validate cognito config
+ * @param cognito
+ */
+function validateCognitoConfig (cognito: CognitoConfig | undefined) {
+  if (cognito) {
+    if (!_.has(cognito, 'region')) {
+      throw new Error('Region missed in config ')
+    }
+    if (!_.has(cognito, 'userPool')) {
+      throw new Error('User pool missed in config')
+    }
+    if (!_.has(cognito, 'clientId')) {
+      throw new Error('Client id missed in config')
+    }
+    if (!_.has(cognito, 'userPoolBaseUri')) {
+      throw new Error('User pool base uri missed in config')
+    }
+    if (!_.has(cognito, 'callbackUri')) {
+      throw new Error('Call back uri missed in config')
+    }
+  } else {
+    throw new Error('Cognito setting missed in config')
+  }
+}
+
+/**
+ * Validate server config.
+ * Mainly focusing on user management
+ *
+ * @param {ServerConfig} config
+ */
+async function validateConfig (config: ServerConfig) {
+  if (config.database === DatabaseType.LOCAL) {
+    if (!(await fs.pathExists(config.data))) {
+      throw new Error(`Cannot find ${config.data}`)
+    }
+    if (config.itemDir && !(await fs.pathExists(config.itemDir))) {
+      throw new Error(`Cannot find ${config.itemDir}`)
+    }
+  }
+
+  if (config.userManagement) {
+    validateCognitoConfig(config.cognito)
+  }
 }
 
 /**
@@ -89,11 +137,11 @@ export async function makeStorage (
  */
 export function makeCreationForm (
   projectName = '', itemType = '', labelType = '',
-  pageTitle = '', taskSize = 0, instructions = '', demoMode = false
+  pageTitle = '', taskSize = 0, instructionUrl = '', demoMode = false
 ): CreationForm {
   const form: CreationForm = {
     projectName, itemType, labelType, pageTitle,
-    instructions, taskSize, demoMode
+    instructionUrl, taskSize, demoMode
   }
   return form
 }
@@ -107,10 +155,11 @@ export function index2str (index: number) {
 }
 
 /**
- * Check whether form file exists
+ * Initialize new session id if its a new load
+ * If its a reconnection, keep the old session id
  */
-export function formFileExists (file: File | undefined): boolean {
-  return (file !== undefined && file.size !== 0)
+export function initSessId (sessionId: string) {
+  return (sessionId ? sessionId : uuid4())
 }
 
 /**
@@ -153,23 +202,6 @@ export function getBundleFile (labelType: string): string {
     return BundleFile.V2
   } else {
     return BundleFile.V1
-  }
-}
-
-/**
- * Get whether tracking is on
- * and change item type accordingly
- */
-export function getTracking (itemType: string): [string, boolean] {
-  switch (itemType) {
-    case ItemTypeName.VIDEO:
-      return [ItemTypeName.IMAGE, true]
-    case ItemTypeName.POINT_CLOUD_TRACKING:
-      return [ItemTypeName.POINT_CLOUD, true]
-    case ItemTypeName.FUSION:
-      return [ItemTypeName.FUSION, true]
-    default:
-      return [itemType, false]
   }
 }
 
@@ -240,4 +272,93 @@ export function safeParseJSON (data: string) {
     Logger.error(Error('JSON parsed failed'))
     Logger.error(e)
   }
+}
+
+/**
+ * Updates a state with a series of timestamped actions
+ */
+export function updateStateTimestamp (
+  state: State, actions: BaseAction[]): [State, number[]] {
+  const stateStore = configureStore(state)
+
+  // For each action, update the store
+  const timestamps = []
+  for (const action of actions) {
+    const time = Date.now()
+    timestamps.push(time)
+    action.timestamp = time
+    stateStore.dispatch(action)
+  }
+
+  return [stateStore.getState().present, timestamps]
+}
+
+/**
+ * Updates a state with a series of actions
+ */
+export function updateState (
+  state: State, actions: BaseAction[]): State {
+  const stateStore = configureStore(state)
+
+  // For each action, update the store
+  for (const action of actions) {
+    stateStore.dispatch(action)
+  }
+
+  return stateStore.getState().present
+}
+
+/**
+ * Builds empty user data except for project name
+ */
+export function makeUserData (projectName: string): UserData {
+  return {
+    projectName,
+    socketToUser: {},
+    userToSockets: {}
+  }
+}
+
+/**
+ * Builds empty user metadata
+ */
+export function makeUserMetadata (): UserMetadata {
+  return {
+    socketToProject: {}
+  }
+}
+
+/**
+ * Get item timestamp, or 0 if undefined
+ */
+export function getItemTimestamp (item: Partial<ItemExport>): number {
+  const timestamp = item.timestamp
+  if (timestamp !== undefined) {
+    return timestamp
+  } else {
+    return 0
+  }
+}
+
+/**
+ * Parse the project name into internal format
+ */
+export function parseProjectName (projectName: string): string {
+  return projectName.replace(' ', '_')
+}
+
+/**
+ * Get connection failed error message for http request to python
+ */
+export function getPyConnFailedMsg (endpoint: string, message: string): string {
+  return sprintf('Make sure endpoint is correct and python server is \
+running; query to \"%s\" failed with message: %s', endpoint, message)
+}
+
+/**
+ * helper function to force javascript to sleep
+ * @param milliseconds
+ */
+export function sleep (milliseconds: number): Promise<object> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }

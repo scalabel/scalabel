@@ -1,22 +1,31 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import { cleanup, fireEvent, render } from '@testing-library/react'
+import _ from 'lodash'
 import * as React from 'react'
+import { Provider } from 'react-redux'
+import { ThunkAction } from 'redux-thunk'
 import io from 'socket.io-client'
 import { addLabel } from '../../js/action/common'
 import { ActionType, SUBMIT } from '../../js/action/types'
-import Session, { ConnectionStatus } from '../../js/common/session'
+import { ReduxState } from '../../js/common/configure_store'
+import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
 import TitleBar from '../../js/components/title_bar'
+import { isStatusSaving } from '../../js/functional/selector'
 import { makeLabel } from '../../js/functional/states'
-import { EventName } from '../../js/server/types'
+import { EventName, SyncActionMessageType } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 beforeEach(() => {
   cleanup()
 })
 afterEach(cleanup)
+
+// need a different reference so selectors don't cache results
+const testJsonAutosave = _.cloneDeep(testJson)
+testJsonAutosave.task.config.autosave = true
 
 describe('Save button functionality', () => {
   test('Autosave on: no save button', async () => {
@@ -27,7 +36,7 @@ describe('Save button functionality', () => {
     }
     io.connect = jest.fn().mockImplementation(() => mockSocket)
     const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
-    initStore(testJson, synchronizer.middleware)
+    initStore(testJsonAutosave, synchronizer.middleware)
     Session.autosave = true
 
     // add a fake task action to be saved
@@ -36,13 +45,11 @@ describe('Save button functionality', () => {
     // only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
-        <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
-          synchronizer={synchronizer}
-        />
+        <Provider store={Session.store}>
+          <TitleBar
+            synchronizer={synchronizer}
+          />
+        </Provider>
       </MuiThemeProvider>
     )
     // Autosave on -> no save button
@@ -66,18 +73,16 @@ describe('Save button functionality', () => {
     // only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
-        <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
-          synchronizer={synchronizer}
-        />
+        <Provider store={Session.store}>
+          <TitleBar
+            synchronizer={synchronizer}
+          />
+        </Provider>
       </MuiThemeProvider>
     )
     const saveButton = getByTestId('Save')
     fireEvent.click(saveButton)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    expect(isStatusSaving(Session.store.getState())).toBe(true)
     expect(mockSocket.emit).toHaveBeenCalled()
   })
 })
@@ -93,22 +98,22 @@ describe('Submit button functionality', () => {
     }
     io.connect = jest.fn().mockImplementation(() => mockSocket)
     const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
-    initStore(testJson, synchronizer.middleware)
+    initStore(testJsonAutosave, synchronizer.middleware)
 
     // only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
-        <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
-          synchronizer={synchronizer}
-        />
+        <Provider store={Session.store}>
+          <TitleBar
+            synchronizer={synchronizer}
+          />
+        </Provider>
       </MuiThemeProvider>
     )
 
     const dispatchSpy = jest.spyOn(Session, 'dispatch')
+    dispatchSpy.mockClear()
+
     const submitButton = getByTestId('Submit')
     fireEvent.click(submitButton)
     checkSubmitDispatch(dispatchSpy)
@@ -126,9 +131,11 @@ describe('Submit button functionality', () => {
     expect(emitArgs[0]).toBe(EventName.ACTION_SEND)
 
     // the action message should just contain the submit action
-    const actionMessage = JSON.parse(emitArgs[1])
-    expect(actionMessage.actions.length).toBe(1)
-    expect(actionMessage.actions[0].type).toBe(SUBMIT)
+    const actionMessage: SyncActionMessageType = emitArgs[1]
+    const actionPacket = actionMessage.actions
+
+    expect(actionPacket.actions.length).toBe(1)
+    expect(actionPacket.actions[0].type).toBe(SUBMIT)
   })
 
   test('Autosave off: submit button updates flag and saves', async () => {
@@ -146,16 +153,16 @@ describe('Submit button functionality', () => {
     // only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
-        <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave={Session.autosave}
-          synchronizer={synchronizer}
-        />
+        <Provider store={Session.store}>
+          <TitleBar
+            synchronizer={synchronizer}
+          />
+        </Provider>
       </MuiThemeProvider>
     )
     const dispatchSpy = jest.spyOn(Session, 'dispatch')
+    dispatchSpy.mockClear()
+
     const submitButton = getByTestId('Submit')
     fireEvent.click(submitButton)
 
@@ -173,10 +180,11 @@ describe('Submit button functionality', () => {
     const emitArgs = emitCalls[0]
     expect(emitArgs.length).toBe(2)
     expect(emitArgs[0]).toBe(EventName.ACTION_SEND)
-    const actionMessage = JSON.parse(emitArgs[1])
-    expect(actionMessage.actions.length).toBe(2)
+    const actionMessage: SyncActionMessageType = emitArgs[1]
+    const actionPacket = actionMessage.actions
+    expect(actionPacket.actions.length).toBe(2)
     // the first action should be INIT_SESSION, so the second is submit
-    expect(actionMessage.actions[1].type).toBe(SUBMIT)
+    expect(actionPacket.actions[1].type).toBe(SUBMIT)
   })
 })
 
@@ -184,10 +192,11 @@ describe('Submit button functionality', () => {
  * Checks that submit action was dispatched
  */
 function checkSubmitDispatch
-  (dispatchSpy: jest.SpyInstance<void, [ActionType]>) {
+  (dispatchSpy: jest.SpyInstance<void, [ActionType | ThunkAction<
+    void, ReduxState, void, ActionType>]>) {
   expect(dispatchSpy).toHaveBeenCalled()
+  const dispatchAction = dispatchSpy.mock.calls[0][
+    0] as ActionType
   // Check type, instead of HaveBeenCalledWith, because userId may change
-  const dispatchCalls = dispatchSpy.mock.calls
-  const dispatchAction = dispatchCalls[dispatchCalls.length - 1][0]
   expect(dispatchAction.type).toBe(SUBMIT)
 }
