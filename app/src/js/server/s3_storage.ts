@@ -140,7 +140,7 @@ export class S3Storage extends Storage {
               const split = parsed.dir.split('/')
               keyName = split[0]
               if (keyName === '') {
-                // This handles the case of extra leading slash: '/dirname'
+                // This handles the case of an extra leading slash: '/dirname'
                 keyName = split[1]
               }
               isDir = true

@@ -129,6 +129,9 @@ describe('test s3 storage', () => {
 
   })
 
+  /**
+   * Expensive test, so disabled by default
+   */
   test.skip('list more than 1000 items', async () => {
     // First save the items
     const startInd = 100
@@ -137,7 +140,7 @@ describe('test s3 storage', () => {
 
     const promises = []
     const fileNames = []
-    for (let i = startInd; i < startInd + 1000; i++) {
+    for (let i = startInd; i < startInd + 1500; i++) {
       const taskId = index2str(i)
       fileNames.push(taskId)
       const key = path.join(prefix, taskId)
@@ -149,7 +152,7 @@ describe('test s3 storage', () => {
     const keys = await storage.listKeys(prefix)
     expect(keys).toStrictEqual(fileNames.map(
       (name) => path.join(prefix, name)))
-  })
+  }, 40000)
 })
 
 afterAll(async () => {
@@ -165,7 +168,7 @@ afterAll(async () => {
     ] }
   }
   await s3.deleteObjects(deleteParams).promise()
-})
+}, 20000)
 
 /**
  * tests if task with index exists
