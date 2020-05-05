@@ -82,10 +82,10 @@ test('Basic track operations', () => {
   })
 
   // Terminate the track by key
-  dispatch(action.goToItem(1))
+  dispatch(action.goToItem(2))
   mouseMoveClick(label2d, 1, 30)
   fireEvent(
-    getByText('End Object Tracking'),
+    getByText('Delete'),
     new MouseEvent('click', {
       bubbles: true,
       cancelable: true
@@ -93,7 +93,25 @@ test('Basic track operations', () => {
   )
   state = getState()
   expect(_.size(state.task.items[2].labels)).toEqual(1)
+  expect(_.size(state.task.items[1].labels)).toEqual(1)
   expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(2)
+
+  // Delete the track by key
+  dispatch(action.goToItem(6))
+  expect(_.size(state.task.items[6].labels)).toEqual(3)
+  Session.dispatch(selectLabel(
+    state.user.select.labels, 6,
+    state.task.tracks[trackIds[3]].labels[6]))
+  fireEvent(
+    getByText('Delete'),
+    new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true
+    })
+  )
+  state = getState()
+  expect(_.size(state.task.items[6].labels)).toEqual(2)
+  expect(_.size(state.task.tracks)).toEqual(3)
 
   // Merge tracks
   dispatch(action.goToItem(1))
@@ -120,5 +138,5 @@ test('Basic track operations', () => {
     })
   )
   state = getState()
-  expect(_.size(state.task.tracks)).toEqual(3)
+  expect(_.size(state.task.tracks)).toEqual(2)
 })
