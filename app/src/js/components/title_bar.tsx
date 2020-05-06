@@ -8,10 +8,13 @@ import { withStyles } from '@material-ui/core/styles/index'
 import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
+import { connect } from 'react-redux'
 import { submit } from '../action/common'
+import { ReduxState } from '../common/configure_store'
 import Session from '../common/session'
-import Synchronizer from '../common/synchronizer'
+import { Synchronizer } from '../common/synchronizer'
 import { Key } from '../common/types'
+import * as selector from '../functional/selector'
 import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
@@ -19,46 +22,76 @@ import { Component } from './component'
 // how long to wait until saving times out
 export const saveTimeout = 20000
 
-const styles = (theme: Theme) => createStyles({
-  appBar: {
-    ...defaultAppBar,
-    position: 'relative',
-    height: '100%'
-  },
-  grow: {
-    flexGrow: 1
-  },
-  titleUnit: {
-    color: '#bbbbbb',
-    margin: theme.spacing(0) * 0.5
-  }
-})
-
 interface ClassType {
-  /** app bar class */
+  /** App bar class */
   appBar: string,
-  /** grow class for spacing */
+  /** Grow class for spacing */
   grow: string,
-  /** title unit class */
+  /** Title unit class */
   titleUnit: string
 }
 
-interface Props {
+interface StyleProps {
   /** Styles of TitleBar */
   classes: ClassType
   /** Theme of TitleBar */
   theme: Theme
-  /** title of TitleBar */
+}
+
+interface StateProps {
+  /** Title of TitleBar */
   title: string
-  /** dashboardLink of TitleBar */
+  /** DashboardLink of TitleBar */
   dashboardLink: string
-  /** instructionLink of TitleBar */
+  /** InstructionLink of TitleBar */
   instructionLink: string
-  /** whether to show save button or to autosave */
+  /** Whether to show save button or to autosave */
   autosave: boolean
-  /** synchronizer */
+  /** Text for the status banner */
+  statusText: string
+  /** Whether to hide or show status text */
+  statusTextHide: boolean
+}
+
+interface DispatchProps {
+  /** Function for submitting all progress */
+  submit: () => void
+}
+
+interface DependencyProps {
+  /** Syncrhonizer for saving */
   synchronizer: Synchronizer
 }
+
+interface ButtonInfo {
+  /** Name */
+  title: string,
+  /** Icon */
+  icon: fa.IconDefinition,
+  /** Link */
+  href?: string,
+  /** Listener  */
+  onClick?: () => void
+}
+
+/**
+ * Convert info of a button to a renderable button
+ */
+function renderButton (button: ButtonInfo, titleUnit: string): JSX.Element {
+  const onClick = _.get(button, 'onClick', undefined)
+  const href = _.get(button, 'href', '#')
+  const target = ('href' in button ? 'view_window' : '_self')
+  return (
+    <Tooltip title={button.title} key={button.title}>
+      <IconButton className={titleUnit} onClick={onClick}
+        href={href} target={target} data-testid={button.title}>
+        <FontAwesomeIcon icon={button.icon} size='xs' />
+      </IconButton>
+    </Tooltip>
+  )
+}
+
+type Props = StyleProps & StateProps & DispatchProps & DependencyProps
 
 /**
  * Title bar
@@ -73,7 +106,6 @@ class TitleBar extends Component<Props> {
    */
   constructor (props: Props) {
     super(props)
-    Session.status.addDisplayCallback(() => { this.forceUpdate() })
     this._keyDownListener = ((e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
         this.save()
@@ -92,8 +124,6 @@ class TitleBar extends Component<Props> {
    */
   public componentWillUnmount () {
     super.componentWillUnmount()
-    // De-couple the titlebar and the session
-    Session.status.clearDisplayCallbacks()
     document.removeEventListener('keydown', this._keyDownListener)
   }
 
@@ -107,54 +137,31 @@ class TitleBar extends Component<Props> {
     const { instructionLink } = this.props
     const { dashboardLink } = this.props
     const { autosave } = this.props
+    const { statusText } = this.props
+    const { statusTextHide } = this.props
 
-    const buttonInfo: Array<{
-      /** Name */
-      title: string,
-      /** Icon */
-      icon: fa.IconDefinition,
-      /** Link */
-      href?: string,
-      /** Listener  */
-      onClick?: () => void
-    }> = [
+    const buttonInfo: ButtonInfo[] = [
       { title: 'Instructions', href: instructionLink, icon: fa.faInfo },
       { title: 'Keyboard Usage', icon: fa.faQuestion },
       { title: 'Dashboard', href: dashboardLink, icon: fa.faList }
     ]
-    // if autosave is on, don't need manual save button
-    let submitHandler = () => { Session.dispatch(submit()) }
-    if (!autosave) {
-      submitHandler = () => {
-        const submitAction = submit()
-        Session.dispatch(submitAction)
-        // save after, so submit flag is also saved
+
+    const submitHandler = () => {
+      this.props.submit()
+      // save after submitting, so submit flag is also saved
+      if (!autosave) {
         this.save()
       }
-    }
-    if (!autosave) {
-      buttonInfo.push(
-        { title: 'Save', onClick: () => { this.save() }, icon: fa.faSave })
     }
     buttonInfo.push(
       { title: 'Submit', onClick: submitHandler, icon: fa.faCheck })
 
-    const buttons = buttonInfo.map((b) => {
-      const onClick = _.get(b, 'onClick', undefined)
-      const href = _.get(b, 'href', '#')
-      const target = ('href' in b ? 'view_window' : '_self')
-      return (
-              <Tooltip title={b.title} key={b.title}>
-                <IconButton className={classes.titleUnit} onClick={onClick}
-                            href={href} target={target} data-testid={b.title}>
-                  <FontAwesomeIcon icon={b.icon} size='xs'/>
-                </IconButton>
-              </Tooltip>
-      )
-    })
+    if (!autosave) {
+      buttonInfo.push(
+        { title: 'Save', onClick: () => { this.save() }, icon: fa.faSave })
+    }
 
-    const statusText = Session.status.getStatusText()
-    const hideMessage = Session.status.shouldStatusHide(autosave)
+    const buttons = buttonInfo.map((b) => renderButton(b, classes.titleUnit))
 
     return (
       <AppBar className={classes.appBar}>
@@ -162,12 +169,12 @@ class TitleBar extends Component<Props> {
           <Typography variant='h6' noWrap>
             {title}
           </Typography>
-          <Fade in={!hideMessage} timeout={300}>
+          <Fade in={!statusTextHide} timeout={300}>
             <StatusMessageBox>
               {statusText}
             </StatusMessageBox>
           </Fade>
-          <div className={classes.grow}/>
+          <div className={classes.grow} />
           {buttons}
         </Toolbar>
       </AppBar>
@@ -177,7 +184,41 @@ class TitleBar extends Component<Props> {
   /** Save task */
   private save () {
     this.props.synchronizer.sendQueuedActions()
+    return
   }
 }
 
-export default withStyles(styles, { withTheme: true })(TitleBar)
+const mapStateToProps = (state: ReduxState): StateProps => {
+  return {
+    title: selector.getPageTitle(state),
+    instructionLink: selector.getInstructionLink(state),
+    dashboardLink: selector.getDashboardLink(state),
+    autosave: selector.getAutosaveFlag(state),
+    statusText: selector.getStatusText(state),
+    statusTextHide: selector.shouldStatusTextHide(state)
+  }
+}
+
+const mapDispatchToProps = () => {
+  return {
+    submit: () => Session.dispatch(submit())
+  }
+}
+
+const styles = (theme: Theme) => createStyles({
+  appBar: {
+    ...defaultAppBar,
+    position: 'relative',
+    height: '100%'
+  },
+  grow: {
+    flexGrow: 1
+  },
+  titleUnit: {
+    color: '#bbbbbb',
+    margin: theme.spacing(0) * 0.5
+  }
+})
+
+const styledBar = withStyles(styles, { withTheme: true })(TitleBar)
+export default connect(mapStateToProps, mapDispatchToProps)(styledBar)

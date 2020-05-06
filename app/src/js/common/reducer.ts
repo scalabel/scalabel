@@ -65,6 +65,9 @@ export const reducer: Reducer<State> = (
       return common.submit(state, action as types.SubmitAction)
     case types.START_LINK_TRACK:
       return common.startLinkTrack(state)
+    case types.UPDATE_SESSION_STATUS:
+      return common.updateSessionStatus(
+        state, action as types.UpdateSessionStatusAction)
     default:
   }
   return state

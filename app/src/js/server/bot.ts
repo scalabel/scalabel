@@ -1,11 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { Store } from 'redux'
-import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
-import { configureStore } from '../common/configure_store'
+import { configureStore, ReduxStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
 import { PolygonType, RectType, State } from '../functional/types'
 import { ItemExport } from './bdd_types'
@@ -32,7 +30,7 @@ export class Bot {
   /** address for session connections */
   public address: string
   /** The store to save state */
-  protected store: Store<StateWithHistory<State>>
+  protected store: ReduxStore
   /** Socket connection */
   protected socket: SocketIOClient.Socket
   /** Timestamped log for completed actions */
@@ -116,7 +114,7 @@ export class Bot {
    * Simply logs these actions for now
    */
   public async actionBroadcastHandler (
-    message: SyncActionMessageType) {
+    message: SyncActionMessageType): Promise<AddLabelsAction[]> {
     const actionPacket = message.actions
     let timingData = addTimingData(message.timingData)
 
@@ -124,18 +122,30 @@ export class Bot {
     if (this.ackedPackets.has(actionPacket.id)
       || message.bot
       || message.sessionId === this.sessionId) {
-      return
+      return []
     }
 
     this.ackedPackets.add(actionPacket.id)
 
     // precompute queries so they can potentially execute in parallel
     const queries = this.packetToQueries(actionPacket)
+
+    // send the queries for execution on the model server
     const actions = await this.executeQueries(queries)
+
+    // dispatch the predicted actions locally
+    for (const action of actions) {
+      this.store.dispatch(action)
+    }
+
+    // broadcast the predicted actions to other session
     if (actions.length > 0) {
       timingData = addTimingData(timingData)
       this.broadcastActions(actions, actionPacket.id, timingData)
     }
+
+    // return actions for testing purposes
+    return actions
   }
 
   /**
@@ -192,6 +202,13 @@ export class Bot {
       taskIndex: this.taskIndex,
       address: this.address
     }
+  }
+
+  /**
+   * Get the current redux state
+   */
+  public getState (): State {
+    return this.store.getState().present
   }
 
   /**

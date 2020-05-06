@@ -7,8 +7,8 @@ import { LabelTypeName } from '../../js/common/types'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { PolygonType } from '../../js/functional/types'
-import { testJson } from '../test_image_objects'
-import { checkPathPointFields } from '../util'
+import { checkPathPointFields } from '../server/util/util'
+import { testJson } from '../test_states/test_image_objects'
 
 test('Add, change and delete polygon labels', () => {
   Session.devMode = false

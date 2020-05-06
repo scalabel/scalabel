@@ -114,6 +114,11 @@ export interface CubeType extends ShapeType {
 
 export type Point2DType = Vector2Type
 
+export interface PathPoint2DType extends Vector2Type, ShapeType {
+  /** type of the point in the path. value from common/types.PathPointType */
+  pointType: string
+}
+
 /**
  * This is a point on the polygon 2d. So the point itself doesn't have an ID
  * and it is not standalone shape
@@ -382,8 +387,6 @@ export interface TaskStatus {
   maxOrder: number
 }
 
-export interface TrackMapType { [key: string]: TrackType }
-
 export interface SubmitData {
   /** time of the submission (client side) */
   time: number
@@ -403,7 +406,7 @@ export interface TaskType {
   /** Items */
   items: ItemType[]
   /** tracks */
-  tracks: TrackMapType
+  tracks: TrackIdMap
   /** data sources */
   sensors: SensorMapType
   /** info on task progress */
@@ -446,6 +449,12 @@ export interface ItemStatus {
   sensorDataLoaded: {[id: number]: boolean}
 }
 
+export const enum ConnectionStatus {
+  NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED,
+  COMPUTING, COMPUTE_DONE, NOTIFY_COMPUTE_DONE,
+  SUBMITTING, SUBMITTED, NOTIFY_SUBMITTED
+}
+
 /**
  * Information for this particular session
  */
@@ -458,20 +467,24 @@ export interface SessionType {
   id: IdType
   /** Start time */
   startTime: number
-  /** item statuses */
+  /** Item statuses */
   itemStatuses: ItemStatus[]
-  /** track linking toggled */
+  /** Track linking toggled */
   trackLinking: boolean
+  /** Current connection status */
+  status: ConnectionStatus
+  /** Number of time status has changed */
+  numUpdates: number
 }
 
 export interface State {
   /**
-   * task config and labels. It is irrelevant who makes the labels and other
+   * Task config and labels. It is irrelevant who makes the labels and other
    * content in task
    */
   task: TaskType
-  /** user information that can be persistent across sessions */
+  /** User information that can be persistent across sessions */
   user: UserType
-  /** info particular to this session */
+  /** Info particular to this session */
   session: SessionType
 }

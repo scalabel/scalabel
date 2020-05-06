@@ -5,7 +5,7 @@ import { uid } from '../common/uid'
 import { ItemExport, LabelExport } from '../server/bdd_types'
 import { taskIdToString } from './id2string'
 import {
-  ConfigType, CubeType,
+  ConfigType, ConnectionStatus, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
   IdType,
   Image3DViewerConfigType,
@@ -17,6 +17,7 @@ import {
   LayoutType,
   Node2DType,
   PaneType,
+  PathPoint2DType,
   Plane3DType,
   PointCloudViewerConfigType,
   PolygonType,
@@ -131,14 +132,30 @@ export function makePolygon
 }
 
 /**
+ * Initialize a polygon
+ * @param {{}} params
+ * @return {PolygonType}
+ */
+export function makePathPoint2D (
+    params: Partial<PathPoint2DType> = {}): PathPoint2DType {
+  return {
+    x: -1,
+    y: -1,
+    pointType: 'vertex',
+    ...params,
+    ...makeShape(types.ShapeTypeName.PATH_POINT_2D)
+  }
+}
+
+/**
  * Initialize a pathPoint shape
  * @param params
  */
 export function makePolyPathPoint (params: Partial<PolyPathPoint2DType> = {})
   : PolyPathPoint2DType {
   return {
-    x: 0,
-    y: 0,
+    x: -1,
+    y: -1,
     pointType: 'vertex',
     ...params
   }
@@ -505,6 +522,8 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
     startTime: 0,
     itemStatuses: [],
     trackLinking: false,
+    status: ConnectionStatus.UNSAVED,
+    numUpdates: 0,
     ...params
   }
 }

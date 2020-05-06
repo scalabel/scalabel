@@ -1,6 +1,11 @@
+import { ActionCreator } from 'redux'
+import { ThunkAction } from 'redux-thunk'
+import { ReduxState } from '../common/configure_store'
 import Session from '../common/session'
-import { IdType, LabelType,
-  PaneType, Select, ShapeType, SplitType, TaskType, ViewerConfigType } from '../functional/types'
+import * as selector from '../functional/selector'
+import { ConnectionStatus, IdType, LabelType,
+  PaneType, Select, ShapeType, SplitType,
+  TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -99,6 +104,26 @@ export function addLabel (
 }
 
 /**
+ * Add labels to a single item
+ * @param itemIndex
+ * @param labels
+ * @param shapes
+ */
+export function addLabelsToItem (
+  itemIndex: number,
+  labels: LabelType[],
+  shapes: ShapeType[][] = []
+): types.AddLabelsAction {
+  return {
+    type: types.ADD_LABELS,
+    sessionId: Session.id,
+    itemIndices: [itemIndex],
+    labels: [labels],
+    shapes: [shapes]
+  }
+}
+
+/**
  * Add a track
  * @param itemIndices
  * @param labels
@@ -137,6 +162,25 @@ export function changeShapes (
     itemIndices: [itemIndex],
     shapeIds: [shapeIds],
     shapes: [shapes]
+  }
+}
+
+/**
+ * Change shapes in items
+ * @param itemIndices
+ * @param shapeIds
+ * @param shapes
+ */
+export function changeShapesInItems (
+  itemIndices: number[], shapeIds: IdType[][],
+  shapes: Array<Array<Partial<ShapeType>>>
+): types.ChangeShapesAction {
+  return {
+    type: types.CHANGE_SHAPES,
+    sessionId: Session.id,
+    itemIndices,
+    shapeIds,
+    shapes
   }
 }
 
@@ -381,4 +425,126 @@ export function startLinkTrack () {
     type: types.START_LINK_TRACK,
     sessionId: Session.id
   }
+}
+
+/**
+ * Update session status
+ */
+export function updateSessionStatus (
+  status: ConnectionStatus): types.UpdateSessionStatusAction {
+  return {
+    type: types.UPDATE_SESSION_STATUS,
+    newStatus: status,
+    sessionId: Session.id
+  }
+}
+
+/**
+ * Mark status as reconnecting
+ */
+export function setStatusToReconnecting () {
+  return updateSessionStatus(ConnectionStatus.RECONNECTING)
+}
+
+/**
+ * Mark status as submitting
+ */
+export function setStatusToSubmitting () {
+  return updateSessionStatus(ConnectionStatus.SUBMITTING)
+}
+
+type ThunkCreatorType =
+  ActionCreator<
+  ThunkAction<void, ReduxState, void, types.ActionType>>
+
+/**
+ * Mark status as saving, unless compute is ongoing
+ */
+export const setStatusToSaving: ThunkCreatorType = () => {
+  return (dispatch, getState) => {
+    if (!selector.isStatusComputing(getState())) {
+      dispatch(updateSessionStatus(ConnectionStatus.SAVING))
+    }
+  }
+}
+
+/**
+ * Mark status as unsaved, unless some other event is in progress
+ */
+export const setStatusToUnsaved: ThunkCreatorType = () => {
+  return (dispatch, getState) => {
+    if (selector.isSessionStatusStable(getState())) {
+      dispatch(updateSessionStatus(ConnectionStatus.UNSAVED))
+    }
+  }
+}
+
+/**
+ * After a connect/reconnect, mark status as unsaved
+ * Regardless of previous status
+ */
+export function setStatusAfterConnect () {
+  return updateSessionStatus(ConnectionStatus.UNSAVED)
+}
+
+/**
+ * Mark status as computing
+ */
+export function setStatusToComputing () {
+  return updateSessionStatus(ConnectionStatus.COMPUTING)
+}
+
+/**
+ * After 5 seconds, fade out the previous message
+ * If no other actions occurred in the meantime
+ */
+export const updateSessionStatusDelayed: ThunkCreatorType = (
+  status: ConnectionStatus, numUpdates: number) => {
+  return (dispatch, getState) => {
+    setTimeout(() => {
+      const newNumUpdates = selector.getNumStatusUpdates(getState())
+      if (numUpdates + 1 === newNumUpdates) {
+        dispatch(updateSessionStatus(status))
+      }
+    }, 5000)
+  }
+}
+
+/**
+ * Update submission banner and trigger fadeout animation
+ */
+export const setStatusForBanner: ThunkCreatorType = (
+  notifyStatus: ConnectionStatus, fadeStatus: ConnectionStatus
+) => {
+  return (dispatch, getState) => {
+    const numUpdates = selector.getNumStatusUpdates(getState())
+    dispatch(updateSessionStatus(notifyStatus))
+    dispatch(
+      updateSessionStatusDelayed(fadeStatus, numUpdates)
+    )
+  }
+}
+
+/**
+ * Mark compute done in the status
+ */
+export const setStatusToComputeDone: ThunkCreatorType = () => {
+  return setStatusForBanner(ConnectionStatus.NOTIFY_COMPUTE_DONE,
+    ConnectionStatus.COMPUTE_DONE)
+}
+
+/**
+ * Mark saving as done in the status
+ */
+export const setStatusToSaved: ThunkCreatorType = () => {
+  return setStatusForBanner(ConnectionStatus.NOTIFY_SAVED,
+    ConnectionStatus.SAVED)
+}
+
+/**
+ * Mark submitting as done in the status
+ */
+export const setStatusToSubmitted: ThunkCreatorType = () => {
+  return setStatusForBanner(ConnectionStatus.NOTIFY_SUBMITTED,
+    ConnectionStatus.SUBMITTED)
 }

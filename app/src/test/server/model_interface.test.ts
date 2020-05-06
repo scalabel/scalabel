@@ -5,7 +5,7 @@ import { PolygonType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
 import { ModelEndpoint } from '../../js/server/types'
-import { checkPathPointFields } from '../util'
+import { checkPathPointFields } from './util/util'
 
 let modelInterface: ModelInterface
 let projectName: string

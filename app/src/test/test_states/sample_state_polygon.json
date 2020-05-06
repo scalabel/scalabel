@@ -4,12 +4,12 @@
             "projectName": "2dImage",
             "itemType": "image",
             "labelTypes": [
-                "box2d"
+                "polygon2d"
             ],
             "taskSize": 5,
             "handlerUrl": "label",
-            "pageTitle": "2D Bounding Box",
-            "instructionPage": "https://www.scalabel.ai/doc/instructions/bbox.html",
+            "pageTitle": "2D Segmentation",
+            "instructionPage": "https://www.scalabel.ai/doc/instructions/segmentation.html",
             "bundleFile": "image_v2.js",
             "categories": [
                 "person",
@@ -63,7 +63,7 @@
             "submitted": false,
             "tracking": false,
             "policyTypes": [
-                "linear_interpolation_box_2d"
+                ""
             ],
             "demoMode": false,
             "autosave": false
@@ -76,7 +76,7 @@
         },
         "items": [
             {
-                "id": 0,
+                "id": "longPolyItemId",
                 "index": 0,
                 "timestamp": 0,
                 "urls": {
@@ -89,7 +89,7 @@
                         "sensors": [
                             -1
                         ],
-                        "type": "box2d",
+                        "type": "polygon2d",
                         "category": [
                             0
                         ],
@@ -109,7 +109,7 @@
                         "sensors": [
                             -1
                         ],
-                        "type": "box2d",
+                        "type": "polygon2d",
                         "category": [
                             0
                         ],
@@ -123,13 +123,13 @@
                         "order": 2,
                         "manual": true
                     },
-                    "2": {
-                        "id": "2",
+                    "longPolyLabelId": {
+                        "id": "longPolyLabelId",
                         "item": 0,
                         "sensors": [
                             -1
                         ],
-                        "type": "box2d",
+                        "type": "polygon2d",
                         "category": [
                             0
                         ],
@@ -137,7 +137,7 @@
                         "parent": -1,
                         "children": [],
                         "shapes": [
-                            2
+                            "longPolyShapeId"
                         ],
                         "track": -1,
                         "order": 3,
@@ -150,33 +150,102 @@
                         "label": [
                             "0"
                         ],
-                        "shapeType": "rect",
-                        "x1": 317.9044230030514,
-                        "y1": 192.46537396121883,
-                        "x2": 676.9071930861539,
-                        "y2": 411.85595567867034
+                        "shapeType": "polygon2d",
+                        "points": [
+                            {
+                                "x": 100.9044230030514,
+                                "y": 100.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 200.9044230030514,
+                                "y": 100.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 200.9044230030514,
+                                "y": 200.46537396121883,
+                                "pointType": "vertex"
+                            }
+                        ]
                     },
                     "1": {
                         "id": "1",
                         "label": [
                             "1"
                         ],
-                        "shapeType": "rect",
-                        "x1": 459.5110712024974,
-                        "y1": 276.2326869806094,
-                        "x2": 752.6966667703645,
-                        "y2": 400.88642659279776
+                        "shapeType": "polygon2d",
+                        "points": [
+                            {
+                                "x": 300.9044230030514,
+                                "y": 300.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 400.9044230030514,
+                                "y": 400.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 350.9044230030514,
+                                "y": 300.46537396121883,
+                                "pointType": "bezier"
+                            },
+                            {
+                                "x": 325.9044230030514,
+                                "y": 200.46537396121883,
+                                "pointType": "bezier"
+                            },
+                            {
+                                "x": 400.9044230030514,
+                                "y": 100.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 375.9044230030514,
+                                "y": 125.46537396121883,
+                                "pointType": "bezier"
+                            },
+                            {
+                                "x": 325.9044230030514,
+                                "y": 250.46537396121883,
+                                "pointType": "bezier"
+                            }
+                        ]
                     },
-                    "2": {
-                        "id": "2",
+                    "longPolyShapeId": {
+                        "id": "longPolyShapeId",
                         "label": [
-                            "2"
+                            "longPolyLabelId"
                         ],
-                        "shapeType": "rect",
-                        "x1": 746.7132872689795,
-                        "y1": 137.61772853185596,
-                        "x2": 1018.9570545819988,
-                        "y2": 294.1828254847645
+                        "shapeType": "polygon2d",
+                        "points": [
+                            {
+                                "x": 400.9044230030514,
+                                "y": 400.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 800.9044230030514,
+                                "y": 100.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 100.9044230030514,
+                                "y": 100.46537396121883,
+                                "pointType": "vertex"
+                            },
+                            {
+                                "x": 125.9044230030514,
+                                "y": 120.46537396121883,
+                                "pointType": "bezier"
+                            },
+                            {
+                                "x": 325.9044230030514,
+                                "y": 220.46537396121883,
+                                "pointType": "bezier"
+                            }
+                        ]
                     }
                 },
                 "videoName": "b"

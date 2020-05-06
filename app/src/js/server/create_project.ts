@@ -11,8 +11,9 @@ import {
   SensorType,
   TaskStatus,
   TaskType,
-  TrackMapType
+  TrackIdMap
 } from '../functional/types'
+import { getInstructionUrl, getPageTitle, getTracking } from '../shared/util'
 import { ItemExport } from './bdd_types'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'
@@ -55,9 +56,9 @@ export async function parseForm (
     }
   }
 
-  // Non-required fields
-  const pageTitle = fields[types.FormField.PAGE_TITLE]
-  const instructions = fields[types.FormField.INSTRUCTIONS_URL]
+  // Derived fields
+  const pageTitle = getPageTitle(labelType, itemType)
+  const instructionUrl = getInstructionUrl(labelType)
 
   // Ensure project name is not already in use
   const exists = await projectStore.checkProjectName(projectName)
@@ -67,7 +68,7 @@ export async function parseForm (
   const demoMode = fields[types.FormField.DEMO_MODE] === 'true'
   const form = util.makeCreationForm(
     projectName, itemType, labelType, pageTitle, taskSize,
-    instructions, demoMode
+    instructionUrl, demoMode
   )
   return form
 }
@@ -301,7 +302,7 @@ export function createProject (
 
   const handlerUrl = util.getHandlerUrl(form.itemType, form.labelType)
   const bundleFile = util.getBundleFile(form.labelType)
-  const [itemType, tracking] = util.getTracking(form.itemType)
+  const [itemType, tracking] = getTracking(form.itemType)
 
   const templates: { [name: string]: Label2DTemplateType } = {}
 
@@ -321,7 +322,7 @@ export function createProject (
     taskSize: form.taskSize,
     handlerUrl,
     pageTitle: form.pageTitle,
-    instructionPage: form.instructions,
+    instructionPage: form.instructionUrl,
     bundleFile,
     categories: formFileData.categories,
     attributes: formFileData.attributes,
@@ -563,7 +564,7 @@ export function createTasks (
 
     // convert from export format to internal format
     const itemsForTask: ItemType[] = []
-    const trackMap: TrackMapType = {}
+    const trackMap: TrackIdMap = {}
     for (let itemInd = 0; itemInd < realTaskSize; itemInd += 1) {
       const timestampToMatch = itemsBySensor[largestSensor][
         sensorMatchingIndices[largestSensor]

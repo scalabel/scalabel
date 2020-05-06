@@ -1,24 +1,38 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
 import { AddLabelsAction } from '../../js/action/types'
+import { configureStore, ReduxStore } from '../../js/common/configure_store'
+import { State } from '../../js/functional/types'
+import { ItemExport } from '../../js/server/bdd_types'
 import { Bot } from '../../js/server/bot'
 import { serverConfig } from '../../js/server/defaults'
 import {
   ActionPacketType, BotData, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
-import { getInitialState, getRandomBox2dAction } from '../util'
+import {
+  getInitialState, getRandomBox2dAction,
+  getRandomModelPoly } from './util/util'
 
+/**
+ *  Mock post request to model server
+ * They should return the same number of prediction actions as request actions
+ */
 jest.mock('axios')
-axios.post = jest.fn().mockImplementation(() => {
-  return {
-    status: 200,
-    data: {
-      points:  [[[1, 2], [3, 4]]]
+axios.post = jest.fn().mockImplementation(
+  (_endpoint: string, data: ItemExport[], _config: AxiosRequestConfig) => {
+    const points = []
+    for (const _ of data) {
+      points.push(getRandomModelPoly())
     }
-  }
-})
+    return {
+      status: 200,
+      data: {
+        points
+      }
+    }
+  })
 
 let botData: BotData
 const socketEmit = jest.fn()
@@ -30,22 +44,26 @@ const mockSocket = {
 let host: string
 let port: number
 let webId: string
+let projectName: string
+let initialState: State
 
 beforeAll(() => {
   io.connect = jest.fn().mockImplementation(() => mockSocket)
+  projectName = 'testProject'
   botData = {
     taskIndex: 0,
-    projectName: 'testProject',
+    projectName,
     botId: 'fakeBotId',
     address: location.origin
   }
   host = serverConfig.botHost
   port = serverConfig.botPort
   webId = 'fakeUserId'
+  initialState = getInitialState(webId)
 })
 
 // Note that these tests are similar to the frontend tests for synchronizer
-describe('Test bot functionality', () => {
+describe('Test simple bot functionality', () => {
   test('Test data access', async () => {
     const bot = new Bot(botData, host, port)
     expect(bot.getData()).toEqual(botData)
@@ -57,42 +75,94 @@ describe('Test bot functionality', () => {
 
     checkConnectMessage(bot.sessionId)
   })
+})
 
-  test('Test send-ack loop', async () => {
-    const bot = new Bot(botData, host, port)
-
-    const message1 = makeSyncMessage(1, webId)
-    const message2 = makeSyncMessage(2, webId)
-    const message3 = makeSyncMessage(1, bot.sessionId)
-
-    // Set up the store with register ack
-    const initState = getInitialState(webId)
-    bot.registerAckHandler(initState)
+describe('Test bot send-ack loop', () => {
+  test('Test single packet prediction', async () => {
+    const bot = setUpBot()
+    const numActions = 5
+    const message = makeSyncMessage(numActions, webId)
 
     // Check initial count
     expect(bot.getActionCount()).toBe(0)
 
-    // Send single action message
-    await bot.actionBroadcastHandler(message1)
-    expect(bot.getActionCount()).toBe(1)
+    // Send the action packet
+    const botActions = await bot.actionBroadcastHandler(message)
+    expect(bot.getActionCount()).toBe(numActions)
+    expect(botActions.length).toBe(numActions)
 
     // Verify that the trigger id is set correctly
     const calls = socketEmit.mock.calls
     const args = calls[calls.length - 1]
     expect(args[0]).toBe(EventName.ACTION_SEND)
-    expect(args[1].actions.triggerId).toBe(message1.actions.id)
+    expect(args[1].actions.triggerId).toBe(message.actions.id)
+  })
 
-    // Duplicates should be ignored
-    await bot.actionBroadcastHandler(message1)
-    expect(bot.getActionCount()).toBe(1)
+  test('Test duplicate actions are ignored', async () => {
+    const bot = setUpBot()
+    const numActions = 5
+    const message = makeSyncMessage(numActions, webId)
 
-    // Send a 2-action message
-    await bot.actionBroadcastHandler(message2)
-    expect(bot.getActionCount()).toBe(3)
+    // Check initial count
+    expect(bot.getActionCount()).toBe(0)
 
-    // Bot messages should be ignored
-    await bot.actionBroadcastHandler(message3)
-    expect(bot.getActionCount()).toBe(3)
+    // Send the action packet
+    let botActions = await bot.actionBroadcastHandler(message)
+    expect(bot.getActionCount()).toBe(numActions)
+    expect(botActions.length).toBe(numActions)
+
+    // Send the duplicate packet
+    botActions = await bot.actionBroadcastHandler(message)
+    expect(bot.getActionCount()).toBe(numActions)
+    expect(botActions.length).toBe(0)
+  })
+
+  test('Test bot actions are ignored', async () => {
+    const bot = setUpBot()
+    const numActions = 5
+    const botMessage = makeSyncMessage(numActions, bot.sessionId)
+
+    // Check initial count
+    expect(bot.getActionCount()).toBe(0)
+
+    // Send the bot action packet
+    const botActions = await bot.actionBroadcastHandler(botMessage)
+    expect(bot.getActionCount()).toBe(0)
+    expect(botActions.length).toBe(0)
+  })
+
+  test('Test bot store updates correctly', async () => {
+    const bot = setUpBot()
+    const expectedStore = configureStore(initialState)
+
+    // Check initial count
+    expect(bot.getActionCount()).toBe(0)
+
+    // Make the messages
+    const numMessages = 5
+    const messages = []
+    const actionsPerMessage = []
+    for (let _ = 0 ; _ < numMessages ; _++) {
+      // random int from 1 to 10
+      const numActions = 1 + Math.floor(Math.random() * 10)
+      actionsPerMessage.push(numActions)
+      messages.push(makeSyncMessage(numActions, webId))
+    }
+
+    let totalActions = 0
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i]
+      const numActions = actionsPerMessage[i]
+      const botActions = await bot.actionBroadcastHandler(message)
+      updateExpectedStore(expectedStore, message, botActions)
+
+      totalActions += numActions
+      expect(bot.getActionCount()).toBe(totalActions)
+      expect(botActions.length).toBe(numActions)
+    }
+
+    // Check the final store
+    expect(expectedStore.getState().present).toStrictEqual(bot.getState())
 
     // Reset the action count
     bot.resetActionCount()
@@ -100,6 +170,31 @@ describe('Test bot functionality', () => {
   })
 })
 
+/**
+ * Creates the bot and initializes its store using the register handler
+ */
+function setUpBot () {
+  const bot = new Bot(botData, host, port)
+  bot.registerAckHandler(initialState)
+  return bot
+}
+
+/**
+ * Helper function to update the expected store with
+ * the incoming actions and the outgoing predictions
+ */
+function updateExpectedStore (
+  store: ReduxStore, message: SyncActionMessageType,
+  botActions: AddLabelsAction[]) {
+  // Apply incoming actions
+  for (const action of message.actions.actions) {
+    store.dispatch(action)
+  }
+  // Apply outgoing predictions
+  for (const botAction of botActions) {
+    store.dispatch(botAction)
+  }
+}
 /**
  * Helper function for checking that correct connection message was sent
  */

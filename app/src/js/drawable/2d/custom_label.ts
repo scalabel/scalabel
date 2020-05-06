@@ -1,10 +1,10 @@
 import _ from 'lodash'
-import { Cursor, Key, ShapeTypeName } from '../../common/types'
-import { makeDefaultId, makeLabel } from '../../functional/states'
-import { IdType, Label2DTemplateType, Node2DType, ShapeType, State } from '../../functional/types'
+import { Cursor, Key } from '../../common/types'
+import { makeLabel } from '../../functional/states'
+import { Label2DTemplateType, LabelType, Node2DType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
-import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
+import { Context2D, encodeControlColor, toCssColor } from '../util'
 import { DrawMode, Label2D } from './label2d'
 import { Label2DList } from './label2d_list'
 import { Node2D } from './node2d'
@@ -20,6 +20,7 @@ const lineWidth = 4
 
 /** Class for templated user-defined labels */
 export class CustomLabel2D extends Label2D {
+
   /** Label template */
   private _template: Label2DTemplateType
   /** Shapes */
@@ -161,48 +162,6 @@ export class CustomLabel2D extends Label2D {
     }
   }
 
-  /** Temporary initialization on mouse down */
-  public initTemp (
-    state: State, start: Vector2D
-  ) {
-    super.initTemp(state, start)
-    const itemIndex = state.user.select.item
-    this._order = state.task.status.maxOrder + 1
-    const templateName =
-      state.task.config.labelTypes[state.user.select.labelType]
-    this._label = makeLabel({
-      type: templateName,
-      item: itemIndex,
-      category: [state.user.select.category],
-      attributes: state.user.select.attributes,
-      order: this._order
-    })
-    this._trackId = makeDefaultId()
-    this._color = getColorById(this._labelId, this._trackId)
-
-    // Initialize with template information
-    this._shapes = []
-    for (const node of this._template.nodes) {
-      this._shapes.push(new Node2D(node))
-    }
-
-    // Get template bounds
-    this.updateBounds()
-
-    // Move to start
-    for (const point of this._shapes) {
-      point.x += start.x - this._bounds.x
-      point.y += start.y - this._bounds.y
-    }
-
-    // Update bounds after moving
-    this.updateBounds()
-
-    this.setSelected(true)
-    this._highlightedHandle = this._shapes.length + 2
-    this._temporary = true
-  }
-
   /** Override on mouse down */
   public onMouseDown (coord: Vector2D, handleIndex: number): boolean {
     const returnValue = super.onMouseDown(coord, handleIndex)
@@ -314,15 +273,61 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Get shape id's and shapes for updating */
-  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    const shapeTypes = this._shapes.map(() => ShapeTypeName.NODE_2D)
+    /**
+     * This is a temporary solution for assigning the correct ID to the shapes
+     * We should initialize the shape when the temporary label is created.
+     * Also store the shape id properly so that the generated shape state has
+     * the right id directly.
+     */
     const shapeStates: Node2DType[] = this._shapes.map(
       (shape) => shape.toState()
     )
-    return [this._label.shapes, shapeTypes, shapeStates]
+    if (!this._temporary) {
+      for (let i = 0; i < shapeStates.length; i++) {
+        shapeStates[i].id = this._label.shapes[i]
+      }
+    }
+    return shapeStates
+  }
+
+  /** Temporary initialization on mouse down */
+  protected initTempLabel (state: State, start: Vector2D): LabelType {
+    const itemIndex = state.user.select.item
+    const templateName =
+      state.task.config.labelTypes[state.user.select.labelType]
+    const label = makeLabel({
+      type: templateName,
+      item: itemIndex,
+      category: [state.user.select.category],
+      attributes: state.user.select.attributes,
+      order: this._order
+    })
+
+    // Initialize with template information
+    this._shapes = []
+    for (const node of this._template.nodes) {
+      this._shapes.push(new Node2D(node))
+    }
+
+    // Get template bounds
+    this.updateBounds()
+
+    // Move to start
+    for (const point of this._shapes) {
+      point.x += start.x - this._bounds.x
+      point.y += start.y - this._bounds.y
+    }
+
+    // Update bounds after moving
+    this.updateBounds()
+
+    this.setSelected(true)
+    this._highlightedHandle = this._shapes.length + 2
+    return label
   }
 
   /** update bounds to current points */

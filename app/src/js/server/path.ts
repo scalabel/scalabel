@@ -1,4 +1,5 @@
 import moment from 'moment'
+import * as os from 'os'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
 import { BotData } from './types'
@@ -22,22 +23,29 @@ export function getRoomName (
 /**
  * Get formatted timestamp
  */
-export function getNow (): string {
+export function now (): string {
   return moment().format('YYYY-MM-DD_HH-mm-ss')
+}
+
+/**
+ * Read hostname from os
+ */
+export function hostname (): string {
+  return os.hostname()
 }
 
 /**
  * Creates path for a timestamped file
  */
 export function getFileKey (filePath: string): string {
-  return sprintf('%s/%s', filePath, getNow())
+  return sprintf('%s/%s', filePath, now())
 }
 
 /**
  * Creates a temporary directory for tests
  */
 export function getTestDir (testName: string): string {
-  return sprintf('%s-%s', testName, getNow())
+  return sprintf('%s-%s', testName, now())
 }
 
 /**
@@ -72,7 +80,7 @@ export function getAbsoluteSrcPath (relativePath: string) {
  * @param {string} projectName
  */
 export function getExportName (projectName: string): string {
-  return sprintf('%s_export_%s.json', projectName, getNow())
+  return sprintf('%s_export_%s.json', projectName, now())
 }
 
 /**
@@ -95,6 +103,13 @@ export function getRedisReminderKey (key: string) {
  */
 export function getRedisBaseKey (metadataKey: string) {
   return metadataKey.split(':')[0]
+}
+
+/**
+ * Check redis key is a reminder key
+ */
+export function checkRedisReminderKey (key: string): boolean {
+  return key.split(':')[1] === 'reminder'
 }
 
 /**
@@ -141,4 +156,11 @@ export function getTaskDir (projectName: string): string {
  */
 export function getSaveDir (projectName: string, taskId: string): string {
   return path.join(projectName, 'saved', taskId)
+}
+
+/**
+ * Gets path to redis config
+ */
+export function getRedisConf (): string {
+  return path.join('app', 'config', 'redis.conf')
 }

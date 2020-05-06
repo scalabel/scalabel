@@ -2,6 +2,7 @@
  * Define string identifiers and interfaces of actions
  */
 import {
+  ConnectionStatus,
   IdType,
   LabelType,
   PaneType,
@@ -19,6 +20,7 @@ export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
 export const SUBMIT = 'SUBMIT'
+export const UPDATE_SESSION_STATUS = 'UPDATE_SESSION_STATUS'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -61,6 +63,33 @@ export function isTaskAction (action: BaseAction) {
   return TASK_ACTION_TYPES.includes(action.type)
 }
 
+/**
+ * Checks if the action list contains a submit action
+ */
+export function hasSubmitAction (actions: BaseAction[]): boolean {
+  for (const action of actions) {
+    if (action.type === SUBMIT) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * These are actions that should not be broadcast beyond the session
+ */
+const SESSION_ACTION_TYPES = [
+  UPDATE_SESSION_STATUS,
+  CHANGE_SELECT
+]
+
+/**
+ * Checks if the action modifies session
+ */
+export function isSessionAction (action: BaseAction) {
+  return SESSION_ACTION_TYPES.includes(action.type)
+}
+
 export interface BaseAction {
   /** type of the action */
   type: string
@@ -98,6 +127,11 @@ export type UpdateAllAction = BaseAction
 export interface UpdateTaskAction extends BaseAction {
   /** task data to use */
   newTask: TaskType
+}
+
+export interface UpdateSessionStatusAction extends BaseAction {
+  /** New status of the session */
+  newStatus: ConnectionStatus
 }
 
 export interface AddLabelsAction extends BaseAction {
@@ -211,6 +245,7 @@ export type SessionActionType =
   | LoadItemAction
   | UpdateAllAction
   | UpdateTaskAction
+  | UpdateSessionStatusAction
 
 export type UserActionType =
   ChangeSelectAction

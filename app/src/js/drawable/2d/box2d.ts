@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../common/types'
 import { makeDefaultId, makeLabel, makeRect } from '../../functional/states'
-import { IdType, RectType, ShapeType, State } from '../../functional/types'
+import { LabelType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -32,29 +32,24 @@ enum Handles {
 }
 
 /**
+ * Compare two rectangles
+ * @param r1
+ * @param r2
+ */
+function equalRects (r1: RectType, r2: RectType): boolean {
+  return r1.x1 === r2.x2 && r1.x2 === r2.x2 &&
+    r1.y1 === r2.y1 && r1.y2 === r2.y2
+}
+
+/**
  * Box2d Label
  */
 export class Box2D extends Label2D {
-  /** list of shapes for this box 2d */
-  private _shapes: Shape[]
-  /** cache shape for moving */
-  private _startingRect: Rect2D
-
-  constructor (labelList: Label2DList) {
-    super(labelList)
-    this._shapes = [
-      new Rect2D(),
-      new Point2D(), new Point2D(), new Point2D(), new Point2D(),
-      new Point2D(), new Point2D(), new Point2D(), new Point2D()
-    ]
-
-    this._startingRect = new Rect2D()
-  }
 
   /**
    * Return a list of the shape for inspection and testing
    */
-  public get shapes (): Array<Readonly<Shape>> {
+  public get internalShapes (): Array<Readonly<Shape>> {
     return this._shapes
   }
 
@@ -78,6 +73,21 @@ export class Box2D extends Label2D {
     }
 
     return super.highlightCursor
+  }
+  /** list of shapes for this box 2d */
+  private _shapes: Shape[]
+  /** cache shape for moving */
+  private _startingRect: Rect2D
+
+  constructor (labelList: Label2DList) {
+    super(labelList)
+    this._shapes = [
+      new Rect2D(),
+      new Point2D(), new Point2D(), new Point2D(), new Point2D(),
+      new Point2D(), new Point2D(), new Point2D(), new Point2D()
+    ]
+
+    this._startingRect = new Rect2D()
   }
 
   /** Draw the label on viewing or control canvas */
@@ -245,7 +255,7 @@ export class Box2D extends Label2D {
     if (this._selected) {
       this.editing = true
       this._mouseDownCoord = coord.clone()
-      this._startingRect = (this.shapes[0] as Rect2D).clone()
+      this._startingRect = (this._shapes[0] as Rect2D).clone()
       return true
     }
     return false
@@ -292,29 +302,21 @@ export class Box2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapeStates (): [IdType[], ShapeTypeName[], ShapeType[]] {
+  public shapes (): ShapeType[] {
     if (!this._label) {
       throw new Error('Uninitialized label')
     }
-    return [this._label.shapes, [ShapeTypeName.RECT], [this.toRect()]]
-  }
-
-  /** Initialize this label to be temporary */
-  public initTemp (state: State, start: Vector2D): void {
-    super.initTemp(state, start)
-    const itemIndex = state.user.select.item
-    this._label = makeLabel({
-      type: LabelTypeName.BOX_2D, id: makeDefaultId(), item: itemIndex,
-      category: [state.user.select.category],
-      attributes: state.user.select.attributes,
-      order: this._order
-    })
-
-    const rect = makeRect({
-      x1: start.x, y1: start.y, x2: start.x, y2: start.y
-    })
-    this.updateShapes([rect])
-    this._highlightedHandle = Handles.BOTTOM_RIGHT
+    /**
+     * This is a temporary solution for assigning the correct ID to the shapes
+     * We should initialize the shape when the temporary label is created.
+     * Also store the shape id properly so that the generated shape state has
+     * the right id directly.
+     */
+    const box = this.toRect()
+    if (!this._temporary) {
+      box.id = this._label.shapes[0]
+    }
+    return [box]
   }
 
   /** Get rect representation */
@@ -337,12 +339,28 @@ export class Box2D extends Label2D {
 
   /** Convert label state to drawable */
   public updateShapes (shapes: ShapeType[]): void {
-    if (this._label !== null) {
-      const rect = shapes[0] as RectType
-      if (!_.isEqual(this.toRect(), rect)) {
-        this.updateShapeValues(rect)
-      }
+    const rect = shapes[0] as RectType
+    if (!equalRects(this.toRect(), rect)) {
+      this.updateShapeValues(rect)
     }
+  }
+
+  /** Initialize this label to be temporary */
+  protected initTempLabel (state: State, start: Vector2D): LabelType {
+    const itemIndex = state.user.select.item
+    const label = makeLabel({
+      type: LabelTypeName.BOX_2D, id: makeDefaultId(), item: itemIndex,
+      category: [state.user.select.category],
+      attributes: state.user.select.attributes,
+      order: this._order
+    })
+
+    const rect = makeRect({
+      x1: start.x, y1: start.y, x2: start.x, y2: start.y
+    })
+    this.updateShapes([rect])
+    this._highlightedHandle = Handles.BOTTOM_RIGHT
+    return label
   }
 
   /**
@@ -356,7 +374,6 @@ export class Box2D extends Label2D {
     const w = rect.x2 - rect.x1
     const h = rect.y2 - rect.y1
     rect2d.set(x, y, w, h)
-
     // vertices
     tl.set(x, y)
     tr.set(x + w, y)

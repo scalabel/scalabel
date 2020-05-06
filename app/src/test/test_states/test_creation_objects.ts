@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { AttributeToolType, BundleFile,
-  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../js/common/types'
-import { Attribute, TaskType } from '../js/functional/types'
-import { ItemExport } from '../js/server/bdd_types'
-import { CreationForm, FormFileData, Project } from '../js/server/types'
+  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../../js/common/types'
+import { Attribute, TaskType } from '../../js/functional/types'
+import { ItemExport } from '../../js/server/bdd_types'
+import { CreationForm, FormFileData, Project } from '../../js/server/types'
 import { sampleStateExportImage, sampleStateExportImagePolygon } from './test_export_objects'
 
 const sampleCategories: string[] = [
@@ -124,7 +124,7 @@ export const sampleFormEmpty: CreationForm = {
   labelType: '',
   pageTitle: '',
   taskSize: 0,
-  instructions: '',
+  instructionUrl: '',
   demoMode: false
 }
 
@@ -139,7 +139,7 @@ export const sampleFormImage: CreationForm = {
   labelType: LabelTypeName.BOX_2D,
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
-  instructions: sampleInstructions,
+  instructionUrl: sampleInstructions,
   demoMode: false
 }
 
@@ -149,7 +149,7 @@ export const sampleFormVideo: CreationForm = {
   labelType: LabelTypeName.POLYGON_2D,
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
-  instructions: sampleInstructions,
+  instructionUrl: sampleInstructions,
   demoMode: true
 }
 

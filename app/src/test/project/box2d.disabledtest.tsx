@@ -5,18 +5,20 @@ import { createCanvas } from 'canvas'
 import * as child from 'child_process'
 import _ from 'lodash'
 import * as React from 'react'
+import { Provider } from 'react-redux'
 import Session from '../../js/common/session'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { Label2DList } from '../../js/drawable/2d/label2d_list'
+import { isStatusSaved } from '../../js/functional/selector'
 import { getShape } from '../../js/functional/state_util'
 import { IdType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { Endpoint } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { findNewLabelsFromState, getTestConfig, getTestConfigPath } from '../util'
+import { findNewLabelsFromState, getTestConfig, getTestConfigPath } from '../server/util/util'
 import {
   changeTestConfig,
   countTasks,
@@ -118,13 +120,11 @@ describe('full 2d bounding box integration test', () => {
     const labelIds: IdType[] = []
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
-        <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave = {Session.autosave}
-          synchronizer = {synchronizer}
-        />
+        <Provider store={Session.store}>
+          <TitleBar
+            synchronizer={synchronizer}
+          />
+        </Provider>
       </MuiThemeProvider>
     )
     const saveButton = getByTestId('Save')
@@ -192,7 +192,7 @@ describe('full 2d bounding box integration test', () => {
       sleep(saveTimeout),
       waitForSave()
     ])
-    expect(Session.status.checkSaved()).toBe(true)
+    expect(isStatusSaved(Session.store.getState())).toBe(true)
   }, saveTimeout)
 
   test('test export of saved bounding boxes', async () => {

@@ -20,7 +20,7 @@ import {
   State,
   TaskStatus,
   TaskType,
-  TrackMapType,
+  TrackIdMap,
   TrackType,
   UserType,
   ViewerConfigType
@@ -684,7 +684,6 @@ function deleteLabelsFromItem (
       deletedShapes[shape.id] = shape
     }
   })
-  // console.log(updatedLabels, deletedLabels, updatedShapes, deletedShapes)
 
   labels = removeObjectFields(updateObject(
     item.labels, updatedLabels), _.keys(deletedLabels))
@@ -716,14 +715,14 @@ function deleteLabelsFromItems (
  * @param labels
  */
 function deleteLabelsFromTracks (
-  tracks: TrackMapType, labels: LabelType[]
-): TrackMapType {
+  tracks: TrackIdMap, labels: LabelType[]
+): TrackIdMap {
   tracks = { ...tracks }
-  const deletedLabelsByTrack: TrackMapType = {}
+  const deletedLabelsByTrack: TrackIdMap = {}
   for (const l of labels) {
     if (!(l.track in deletedLabelsByTrack)) {
       // create a temporary track to contain the labels to delete
-      deletedLabelsByTrack[l.track] = makeTrack()
+      deletedLabelsByTrack[l.track] = makeTrack({ id: l.track }, true)
     }
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
   }
@@ -1170,6 +1169,33 @@ export function startLinkTrack (
     state.session,
     {
       trackLinking: true
+    }
+  )
+  return updateObject(
+    state,
+    {
+      session: newSession
+    }
+  )
+}
+
+/**
+ * Update session status, if it should be updated
+ */
+export function updateSessionStatus (
+  state: State, action: types.UpdateSessionStatusAction
+): State {
+  const newStatus = action.newStatus
+
+  const oldSession = state.session
+  // update mod 1000 since only nearby differences are important
+  const numUpdates = (oldSession.numUpdates + 1) % 1000
+
+  const newSession = updateObject(
+    oldSession,
+    {
+      status: newStatus,
+      numUpdates
     }
   )
   return updateObject(

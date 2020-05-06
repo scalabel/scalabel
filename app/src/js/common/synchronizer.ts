@@ -3,8 +3,19 @@ import OrderedMap from 'orderedmap'
 import { Dispatch, Middleware } from 'redux'
 import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
-import { updateTask } from '../action/common'
+import {
+  setStatusAfterConnect,
+  setStatusToComputeDone,
+  setStatusToComputing,
+  setStatusToReconnecting,
+  setStatusToSaved,
+  setStatusToSaving,
+  setStatusToSubmitted,
+  setStatusToSubmitting,
+  setStatusToUnsaved,
+  updateTask} from '../action/common'
 import * as types from '../action/types'
+import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
@@ -102,12 +113,13 @@ export class Synchronizer {
     ) => (action: types.BaseAction) => {
       action.userId = this.userId
       /* Only send back actions that originated locally */
-      if (Session.id === action.sessionId && !action.frontendOnly) {
+      if (Session.id === action.sessionId && !action.frontendOnly &&
+        !types.isSessionAction(action)) {
         self.actionQueue.push(action)
         if (Session.autosave) {
           self.sendQueuedActions()
         } else {
-          Session.status.setAsUnsaved()
+          Session.dispatch(setStatusToUnsaved())
         }
       }
       return next(action)
@@ -118,7 +130,7 @@ export class Synchronizer {
    * Displays pop-up warning user when leaving with unsaved changes
    */
   public warningPopup (e: BeforeUnloadEvent) {
-    if (!Session.status.isFullySaved()) {
+    if (!isSessionFullySaved(Session.store.getState())) {
       e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
       return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
     }
@@ -139,7 +151,7 @@ export class Synchronizer {
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)
-    Session.status.setAsConnect()
+    Session.dispatch(setStatusAfterConnect())
   }
 
   /**
@@ -188,18 +200,20 @@ export class Synchronizer {
       /* Original action was acked by the server
        * This means the bot also received the action
        * And started its prediction */
-      Session.status.setAsComputing()
+      Session.dispatch(setStatusToComputing())
     } else if (actionPacket.triggerId !== undefined &&
       this.actionsPendingPrediction.has(actionPacket.triggerId)) {
       // Ack of bot action means prediction is finished
       this.actionsPendingPrediction.delete(actionPacket.triggerId)
       if (this.actionsPendingPrediction.size === 0) {
-        Session.status.setAsComputeDone()
+        Session.dispatch(setStatusToComputeDone())
       }
     } else if (message.sessionId === Session.id) {
-      // Once all actions being saved are acked, update the status
-      if (this.actionsToSave.size === 0) {
-        Session.status.setAsSaved()
+      if (types.hasSubmitAction(actionPacket.actions)) {
+        Session.dispatch(setStatusToSubmitted())
+      } else if (this.actionsToSave.size === 0) {
+        // Once all actions being saved are acked, update the save status
+        Session.dispatch(setStatusToSaved())
       }
     }
   }
@@ -209,7 +223,7 @@ export class Synchronizer {
    * Prepares for reconnect by updating initial callback
    */
   public disconnectHandler () {
-    Session.status.setAsReconnecting()
+    Session.dispatch(setStatusToReconnecting())
     if (Session.autosave) {
       this.initStateCallback = this.autosaveReconnectCallback
     } else {
@@ -304,7 +318,11 @@ export class Synchronizer {
       timingData: []
     }
     this.socket.emit(EventName.ACTION_SEND, message)
-    Session.status.setAsSaving()
+    if (types.hasSubmitAction(actionPacket.actions)) {
+      Session.dispatch(setStatusToSubmitting())
+    } else {
+      Session.dispatch(setStatusToSaving())
+    }
   }
 }
 
