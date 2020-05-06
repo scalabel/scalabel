@@ -54,7 +54,7 @@ export class S3Storage extends Storage {
       new AWS.ProcessCredentials()]
 
     this.s3 = new AWS.S3({ credentialProvider: chain,
-      httpOptions: { connectTimeout: 2000 }, maxRetries: 5 })
+      httpOptions: { connectTimeout: 10000 }, maxRetries: 5 })
   }
 
   /**
