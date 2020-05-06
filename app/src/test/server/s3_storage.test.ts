@@ -42,6 +42,20 @@ describe('test s3 storage', () => {
     ])
   })
 
+  test('list keys', async () => {
+    // Top level keys
+    let keys = await storage.listKeys('test')
+    expect(keys).toStrictEqual(['test/project', 'test/tasks'])
+
+    // Top level (dir only)
+    keys = await storage.listKeys('test', true)
+    expect(keys).toStrictEqual(['test/tasks'])
+
+    // Task keys
+    keys = await storage.listKeys('test/tasks')
+    expect(keys).toStrictEqual(['test/tasks/000000', 'test/tasks/000001'])
+  })
+
   test('load', () => {
     const taskId = index2str(0)
     const key = getTaskKey(projectName, taskId)
@@ -115,6 +129,30 @@ describe('test s3 storage', () => {
 
   })
 
+  /**
+   * Expensive test, so disabled by default
+   */
+  test.skip('list more than 1000 items', async () => {
+    // First save the items
+    const startInd = 100
+    const subDir = 'bigDir'
+    const prefix = path.join(projectName, subDir)
+
+    const promises = []
+    const fileNames = []
+    for (let i = startInd; i < startInd + 1500; i++) {
+      const taskId = index2str(i)
+      fileNames.push(taskId)
+      const key = path.join(prefix, taskId)
+      const fakeData = '{"testField": "testValue"}'
+      promises.push(storage.save(key, fakeData))
+    }
+    await Promise.all(promises)
+
+    const keys = await storage.listKeys(prefix)
+    expect(keys).toStrictEqual(fileNames.map(
+      (name) => path.join(prefix, name)))
+  }, 40000)
 })
 
 afterAll(async () => {
@@ -130,7 +168,7 @@ afterAll(async () => {
     ] }
   }
   await s3.deleteObjects(deleteParams).promise()
-})
+}, 20000)
 
 /**
  * tests if task with index exists

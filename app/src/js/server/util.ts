@@ -105,13 +105,14 @@ export async function makeStorage (
   database: string, dir: string): Promise<Storage> {
   switch (database) {
     case DatabaseType.S3:
-      const s3Store = new S3Storage(dir)
       try {
+        const s3Store = new S3Storage(dir)
         await s3Store.makeBucket()
         return s3Store
       } catch (error) {
-        // if s3 fails, default to file storage
-        Logger.error(Error('s3 failed, using file storage'))
+        // If s3 fails, default to file storage
+        error.message = `s3 failed, using file storage
+        ${error.message}`
         Logger.error(error)
         return new FileStorage(dir)
       }
