@@ -222,8 +222,9 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
         let displayLeft = zoomRatio * (offset.x + config.displayLeft) - offset.x
         let displayTop = zoomRatio * (offset.y + config.displayTop) - offset.y
         // The difference between the display area and the displayed image in
-        // aspect ratio gives rise to blank regions. Expected behavior is zooming
-        // to center when the blank region exists, or zoom to the cursor otherwise.
+        // aspect ratio gives rise to blank regions. Expected behavior
+        // is zooming to the center when the blank region exists,
+        // or zooming to the cursor otherwise.
         if (rect) {
           if (rect.height / rect.width > ih / iw) {
             // zoomed height < that of the display area, blanks on top/bottom
