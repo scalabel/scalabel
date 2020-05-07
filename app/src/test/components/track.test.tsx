@@ -7,6 +7,7 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
+import { Attribute } from '../../js/functional/types'
 // import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
 import { drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
@@ -199,5 +200,55 @@ describe('basic track ops', () => {
     )
     state = getState()
     expect(_.size(state.task.tracks)).toEqual(3)
+  })
+
+  test('Changing attributes and categories of tracks', () => {
+    const label2d = canvasRef.current as Label2dCanvas
+
+    const toolbarRef: React.Ref<ToolBar> = React.createRef()
+    const { getByText, getByTestId } = render(
+      <ToolBar
+        ref={toolbarRef}
+        categories={emptyTrackingTask.task.config.categories}
+        attributes={emptyTrackingTask.task.config.attributes as Attribute[]}
+        labelType={'labelType'}
+      />
+    )
+    expect(toolbarRef.current).not.toBeNull()
+    expect(toolbarRef.current).not.toBeUndefined()
+    if (toolbarRef.current) {
+      toolbarRef.current.componentDidMount()
+    }
+
+    const itemIndices = [0]
+    const boxes = [
+      [1, 1, 50, 50]
+    ]
+
+    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+
+    // Changing category
+    dispatch(action.goToItem(2))
+    mouseMoveClick(label2d, 1, 30)
+    fireEvent(
+      getByText('car'),
+      new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true
+      })
+    )
+    dispatch(action.goToItem(1))
+    let state = getState()
+    const labelId = state.task.tracks[trackIds[0]].labels[3]
+    expect(state.task.items[3].labels[labelId].category).toEqual([2])
+
+    // Changing attributes
+    dispatch(action.goToItem(2))
+    mouseMoveClick(label2d, 1, 30)
+    const switchBtn = getByTestId('switch-button-Occluded')
+    switchBtn.click()
+    fireEvent.change(switchBtn, { target: { checked: '' } })
+    state = getState()
+    dispatch(action.goToItem(1))
   })
 })
