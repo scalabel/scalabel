@@ -6,6 +6,8 @@ import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore, ReduxStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
 import { PolygonType, RectType, State } from '../functional/types'
+import { NodeName } from '../shared/types'
+import { addEntryTime, addExitTime } from '../shared/util'
 import { ItemExport } from './bdd_types'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
@@ -13,7 +15,7 @@ import {
   ActionPacketType, BotData, EventName,
   ModelQuery, RegisterMessageType, SyncActionMessageType, TimingInfo
 } from './types'
-import { addTimingData, getPyConnFailedMsg, index2str } from './util'
+import { getPyConnFailedMsg, index2str } from './util'
 
 /**
  * Manages virtual sessions for a single bot
@@ -115,8 +117,8 @@ export class Bot {
    */
   public async actionBroadcastHandler (
     message: SyncActionMessageType): Promise<AddLabelsAction[]> {
+    let timingData = addEntryTime(message.timingData, NodeName.BOT)
     const actionPacket = message.actions
-    let timingData = addTimingData(message.timingData)
 
     // if action was already acked, or if action came from a bot, ignore it
     if (this.ackedPackets.has(actionPacket.id)
@@ -140,7 +142,7 @@ export class Bot {
 
     // broadcast the predicted actions to other session
     if (actions.length > 0) {
-      timingData = addTimingData(timingData)
+      timingData = addExitTime(message.timingData, NodeName.BOT)
       this.broadcastActions(actions, actionPacket.id, timingData)
     }
 

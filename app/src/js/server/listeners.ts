@@ -295,6 +295,25 @@ export class Listeners {
   }
 
   /**
+   * Saves the timing data that was downloaded
+   */
+  public async downloadTimesHandler (req: Request, res: Response) {
+    if (this.checkInvalidPost(req, res)) {
+      return
+    }
+
+    const body = req.body
+    if (body === undefined) {
+      this.badFormResponse(res)
+      return
+    }
+    console.log(body)
+    const timingData = body.data
+    await this.projectStore.save(
+      `timing_data-${Date.now()}`, JSON.stringify(timingData))
+  }
+
+  /**
    * Finishes project creation using processed dicts
    */
   private async createProjectFromDicts (

@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
 import * as types from '../action/types'
+import { NodeName } from '../shared/types'
+import { addEntryTime, addExitTime } from '../shared/util'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
@@ -10,7 +12,7 @@ import {
   EventName, RegisterMessageType, ServerConfig,
   StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
-import { addTimingData, index2str, initSessId, updateStateTimestamp } from './util'
+import { index2str, initSessId, updateStateTimestamp } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -102,13 +104,14 @@ export class Hub {
    */
   public async actionUpdate (
     data: SyncActionMessageType, socket: SocketServer) {
+    const timingData = addEntryTime(data.timingData, NodeName.HUB)
+
     const projectName = data.projectName
     const taskId = data.taskId
     const sessionId = data.sessionId
     const actions = data.actions.actions
     const actionPacketId = data.actions.id
     const triggerId = data.actions.triggerId
-    const timingData = addTimingData(data.timingData)
 
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
 
@@ -142,8 +145,7 @@ export class Hub {
       }
     }
 
-    data.timingData = addTimingData(timingData)
-
+    data.timingData = addExitTime(timingData, NodeName.HUB)
     if (taskActions.length > 0) {
       // broadcast task actions to all other sessions in room
       const taskActionMsg: SyncActionMessageType = _.cloneDeep(data)

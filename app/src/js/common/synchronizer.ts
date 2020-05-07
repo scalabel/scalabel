@@ -15,11 +15,13 @@ import {
   setStatusToUnsaved,
   updateTask} from '../action/common'
 import * as types from '../action/types'
+import { getAuth } from '../common/service'
 import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
-import { ActionPacketType, EventName, RegisterMessageType,
-  SyncActionMessageType } from '../server/types'
-// import { addTimingData } from '../server/util'
+import { ActionPacketType, Endpoint, EventName, RegisterMessageType,
+  SyncActionMessageType, TimingInfo } from '../server/types'
+import { NodeName } from '../shared/types'
+import { addEntryTime, addExitTime } from '../shared/util'
 import Session from './session'
 
 const CONFIRMATION_MESSAGE =
@@ -75,6 +77,8 @@ export class Synchronizer {
   private ackedPackets: Set<string>
   /** The ids of action packets pending model predictions */
   private actionsPendingPrediction: Set<string>
+  /** Log of the timing data */
+  private timingData: TimingInfo[][]
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
@@ -90,6 +94,7 @@ export class Synchronizer {
     this.userId = userId
     this.ackedPackets = new Set()
     this.actionsPendingPrediction = new Set()
+    this.timingData = []
 
     // use the same address as http
     this.syncAddress = location.origin
@@ -173,6 +178,8 @@ export class Synchronizer {
    * Updates relevant queues and syncs actions from other sessions
    */
   public actionBroadcastHandler (message: SyncActionMessageType) {
+    const timingData = addEntryTime(message.timingData, NodeName.SYNCHRONIZER)
+
     const actionPacket = message.actions
     // remove stored actions when they are acked
     this.actionsToSave = this.actionsToSave.remove(actionPacket.id)
@@ -182,8 +189,7 @@ export class Synchronizer {
       return
     }
     this.ackedPackets.add(actionPacket.id)
-    // console.log(addTimingData(message.timingData))
-    // console.log(message.timingData)
+    this.timingData.push(timingData)
 
     for (const action of actionPacket.actions) {
       // actionLog matches backend action ordering
@@ -315,7 +321,7 @@ export class Synchronizer {
       sessionId: sessionState.session.id,
       actions: actionPacket,
       bot: false,
-      timingData: []
+      timingData: addExitTime([], NodeName.SYNCHRONIZER)
     }
     this.socket.emit(EventName.ACTION_SEND, message)
     if (types.hasSubmitAction(actionPacket.actions)) {
@@ -323,6 +329,27 @@ export class Synchronizer {
     } else {
       Session.dispatch(setStatusToSaving())
     }
+  }
+
+  /**
+   * Use to download timing data for debugging
+   */
+  public downloadTimingData () {
+    const xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        return
+      }
+    }
+    xhr.open('POST', Endpoint.DOWNLOAD_TIMES)
+    xhr.setRequestHeader('Content-Type', 'application/json')
+    const auth = getAuth()
+    if (auth) {
+      xhr.setRequestHeader('Authorization', auth)
+    }
+    xhr.send(JSON.stringify({
+      data: this.timingData
+    }))
   }
 }
 

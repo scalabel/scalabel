@@ -2,7 +2,6 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import * as stackTrace from 'stack-trace'
 import uuid4 from 'uuid/v4'
 import * as yargs from 'yargs'
 import { BaseAction } from '../action/types'
@@ -18,8 +17,7 @@ import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
 import { CognitoConfig, CreationForm,
-  DatabaseType, ServerConfig, TimingInfo,
-  UserData, UserMetadata } from './types'
+  DatabaseType, ServerConfig, UserData, UserMetadata } from './types'
 
 /**
  * Initializes backend environment variables
@@ -356,18 +354,6 @@ export function parseProjectName (projectName: string): string {
 export function getPyConnFailedMsg (endpoint: string, message: string): string {
   return sprintf('Make sure endpoint is correct and python server is \
 running; query to \"%s\" failed with message: %s', endpoint, message)
-}
-
-/**
- * Add a data point to the timing data
- */
-export function addTimingData (timingData: TimingInfo[]) {
-  const name = stackTrace.get()[0].getFileName()
-  timingData.push({
-    time: Date.now(),
-    name
-  })
-  return timingData
 }
 
 /** helper function to force javascript to sleep

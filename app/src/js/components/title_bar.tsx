@@ -161,6 +161,16 @@ class TitleBar extends Component<Props> {
         { title: 'Save', onClick: () => { this.save() }, icon: fa.faSave })
     }
 
+    const debugMode = true
+    if (debugMode) {
+      buttonInfo.push(
+        { title: 'Download times',
+          onClick: () => { this.props.synchronizer.downloadTimingData() },
+          icon: fa.faDownload
+        }
+      )
+    }
+
     const buttons = buttonInfo.map((b) => renderButton(b, classes.titleUnit))
 
     return (

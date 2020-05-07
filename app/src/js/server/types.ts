@@ -124,6 +124,8 @@ export interface TimingInfo {
   time: number
   /** The name of the function/service */
   name: string
+  /** Whether exiting (sending) or entering (receiving) a node/service */
+  exiting: boolean
 }
 /** action type for synchronization between front and back ends */
 export interface SyncActionMessageType {
@@ -229,7 +231,8 @@ export const enum Endpoint {
   EXPORT = '/getExport',
   DASHBOARD = '/postDashboardContents',
   POST_TASKS = '/postTasks',
-  CALLBACK = '/callback'
+  CALLBACK = '/callback',
+  DOWNLOAD_TIMES = '/downloadTimes'
 }
 
 /* endpoint names for python server */

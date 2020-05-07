@@ -175,10 +175,5 @@
         "winston": "^3.2.0",
         "xss": "^1.0.6",
         "yargs": "^14.2.3"
-    },
-    "dependencies": {
-        "@types/stack-trace": "0.0.29",
-        "caller-id": "^0.1.0",
-        "stack-trace": "0.0.10"
     }
 }

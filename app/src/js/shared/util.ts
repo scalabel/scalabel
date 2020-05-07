@@ -1,5 +1,6 @@
 import { sprintf } from 'sprintf-js'
 import { ItemTypeName, LabelTypeName } from '../common/types'
+import { TimingInfo } from '../server/types'
 
 /**
  * Get whether tracking is on
@@ -74,4 +75,30 @@ export function getPageTitle (labelType: string, itemType: string) {
     title = sprintf('%s Tracking', title)
   }
   return title
+}
+
+/**
+ * Add a data point to the existing timing data
+ * Use this function when exiting a node/service, i.e. sending a request
+ */
+export function addExitTime (timingData: TimingInfo[], name: string) {
+  timingData.push({
+    time: Date.now(),
+    name,
+    exiting: true
+  })
+  return timingData
+}
+
+/**
+ * Add a data point to the existing timing data
+ * Use this function when entering a node/service, i.e. receiving a request
+ */
+export function addEntryTime (timingData: TimingInfo[], name: string) {
+  timingData.push({
+    time: Date.now(),
+    name,
+    exiting: false
+  })
+  return timingData
 }

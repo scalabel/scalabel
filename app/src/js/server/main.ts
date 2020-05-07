@@ -69,6 +69,8 @@ function startHTTPServer (
     listeners.postTasksHandler.bind(listeners))
   app.post(Endpoint.DASHBOARD, authMiddleWare, express.json(),
     listeners.dashboardHandler.bind(listeners))
+  app.post(Endpoint.DOWNLOAD_TIMES, authMiddleWare, express.json(),
+    listeners.downloadTimesHandler.bind(listeners))
   app.use(errorHandler(config))
 }
 
