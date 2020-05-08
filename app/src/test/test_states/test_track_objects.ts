@@ -1,5 +1,3 @@
-import { AttributeToolType } from '../../js/common/types'
-
 export const testJson = {
   task: {
     config: {
@@ -15,7 +13,7 @@ export const testJson = {
       categories: ['person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bike', 'traffic sign', 'traffic light'],
       attributes: [{
         name: 'Occluded',
-        toolType: AttributeToolType.SWITCH,
+        toolType: 'switch',
         tagText: 'o',
         tagSuffixes: [],
         tagPrefix: '',
@@ -23,7 +21,7 @@ export const testJson = {
         buttonColors: []
       }, {
         name: 'Truncated',
-        toolType: AttributeToolType.SWITCH,
+        toolType: 'switch',
         tagText: 't',
         tagSuffixes: [],
         tagPrefix: '',
@@ -31,7 +29,7 @@ export const testJson = {
         buttonColors: []
       }, {
         name: 'Traffic Light Color',
-        toolType: AttributeToolType.LIST,
+        toolType: 'list',
         tagText: 't',
         tagSuffixes: ['', 'g', 'y', 'r'],
         tagPrefix: '',
