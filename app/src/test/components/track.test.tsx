@@ -2,7 +2,6 @@ import { fireEvent, render } from '@testing-library/react'
 import _ from 'lodash'
 import React from 'react'
 import * as action from '../../js/action/common'
-import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
@@ -101,9 +100,7 @@ describe('basic track ops', () => {
     // Delete the track by button
     dispatch(action.goToItem(6))
     expect(_.size(state.task.items[6].labels)).toEqual(3)
-    Session.dispatch(selectLabel(
-      state.user.select.labels, 6,
-      state.task.tracks[trackIds[3]].labels[6]))
+    mouseMoveClick(label2d, 500, 500)
     fireEvent(
       getByText('Delete'),
       new MouseEvent('click', {
@@ -117,9 +114,7 @@ describe('basic track ops', () => {
 
     // Terminate the track by key
     dispatch(action.goToItem(1))
-    Session.dispatch(selectLabel(
-      state.user.select.labels, 1,
-      state.task.tracks[trackIds[0]].labels[1]))
+    mouseMoveClick(label2d, 1, 1)
     fireEvent.keyDown(document, { key: 'Backspace' })
     state = getState()
     expect(_.size(state.task.items[1].labels)).toEqual(0)
@@ -128,9 +123,7 @@ describe('basic track ops', () => {
 
     // Delete the track by key
     dispatch(action.goToItem(0))
-    Session.dispatch(selectLabel(
-      state.user.select.labels, 0,
-      state.task.tracks[trackIds[0]].labels[0]))
+    mouseMoveClick(label2d, 1, 1)
     fireEvent.keyDown(document, { key: 'Backspace' })
     state = getState()
     expect(_.size(state.task.items[0].labels)).toEqual(0)
@@ -163,7 +156,7 @@ describe('basic track ops', () => {
       [500, 500, 80, 100]
     ]
 
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    drawBox2DTracks(label2d, store, itemIndices, boxes)
 
     // Terminate the track by button
     dispatch(action.goToItem(2))
@@ -187,9 +180,7 @@ describe('basic track ops', () => {
     )
 
     dispatch(action.goToItem(4))
-    Session.dispatch(selectLabel(
-      state.user.select.labels, 4,
-      state.task.tracks[trackIds[2]].labels[4]))
+    mouseMoveClick(label2d, 100, 20)
     state = getState()
     fireEvent(
       getByText('Finish Track-Link'),
