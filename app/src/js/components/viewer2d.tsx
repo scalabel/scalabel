@@ -208,19 +208,47 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
     const newConfig = { ...config }
     if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
       newConfig.viewScale = newScale
-    } else {
-      zoomRatio = 1
+
+      const item = this.state.user.select.item
+      const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+      const image = Session.images[item][sensor]
+
+      const iw = image.width * newScale
+      const ih = image.height * newScale
+
+      if (this._container) {
+        const rect = this._container.getBoundingClientRect()
+
+        let displayLeft = zoomRatio * (offset.x + config.displayLeft) - offset.x
+        let displayTop = zoomRatio * (offset.y + config.displayTop) - offset.y
+        // The difference between the display area and the displayed image in
+        // aspect ratio gives rise to blank regions. Expected behavior
+        // is zooming to the center when the blank region exists,
+        // or zooming to the cursor otherwise.
+        if (rect) {
+          if (rect.height / rect.width > ih / iw) {
+            // zoomed height < that of the display area, blanks on top/bottom
+            if (image.width * rect.height / rect.width > ih) {
+              // set offset to 0
+              displayTop = 0
+            }
+          } else {
+            // zoomed width < that of the display area, blanks on sides
+            if (image.height * rect.width / rect.height > iw) {
+              // set offset to 0
+              displayLeft = 0
+            }
+          }
+        }
+        newConfig.displayLeft = displayLeft
+        newConfig.displayTop = displayTop
+      }
+
+      Session.dispatch(changeViewerConfig(
+        this._viewerId,
+        newConfig
+      ))
     }
-    const displayLeft = zoomRatio * (offset.x + config.displayLeft) -
-        offset.x
-    const displayTop = zoomRatio * (offset.y + config.displayTop) -
-        offset.y
-    newConfig.displayLeft = displayLeft
-    newConfig.displayTop = displayTop
-    Session.dispatch(changeViewerConfig(
-      this._viewerId,
-      newConfig
-    ))
   }
 }
 

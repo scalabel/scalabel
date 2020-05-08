@@ -19,8 +19,11 @@ export class S3Storage extends Storage {
    * Constructor
    */
   constructor (dataPath: string) {
+    // Check s3 data path
     const errorMsg =
-      's3 data path format is incorrect; should be region:bucket/path'
+      `s3 data path format is incorrect:
+       Got:       ${dataPath}
+       Should be: region:bucket/path`
     const error = Error(errorMsg)
     const info = dataPath.split(':')
     if (info.length < 2) {
@@ -35,14 +38,30 @@ export class S3Storage extends Storage {
 
     this.region = info[0]
     this.bucketName = bucketPath[0]
-    this.s3 = new AWS.S3()
+
+    /**
+     * To prevent requests hanging from invalid credentials,
+     * Only check local credential services (not EC2/ECS ones)
+     * See here for the difference from default:
+     * https://docs.aws.amazon.com/AWSJavaScriptSDK/
+     * latest/AWS/CredentialProviderChain.html
+     */
+    const chain = new AWS.CredentialProviderChain()
+    chain.providers = [
+      new AWS.EnvironmentCredentials('AWS'),
+      new AWS.EnvironmentCredentials('AMAZON'),
+      new AWS.SharedIniFileCredentials(),
+      new AWS.ProcessCredentials()]
+
+    this.s3 = new AWS.S3({ credentialProvider: chain,
+      httpOptions: { connectTimeout: 10000 }, maxRetries: 5 })
   }
 
   /**
    * Init bucket
    */
   public async makeBucket (): Promise<void> {
-    // create new bucket if there isn't one already (wait until it exists)
+    // Create new bucket if there isn't one already (wait until it exists)
     const hasBucket = await this.hasBucket()
     if (!hasBucket) {
       const bucketParams = {
@@ -88,8 +107,8 @@ export class S3Storage extends Storage {
     const fullPrefix = this.fullDir(prefix)
     let continuationToken = ''
 
-    const dirKeys = []
-    const fileKeys = []
+    let dirKeys = []
+    let fileKeys = []
     for (;;) {
       let data
       if (continuationToken.length > 0) {
@@ -116,11 +135,18 @@ export class S3Storage extends Storage {
             // Parse to get the top level dir or file after prefix
             const parsed = path.parse(noPrefix)
             let keyName = parsed.name
+            let isDir = false
             if (parsed.dir.length > 0 && parsed.dir !== '/') {
-              keyName = parsed.dir.split('/')[0]
+              const split = parsed.dir.split('/')
+              keyName = split[0]
+              if (keyName === '') {
+                // This handles the case of an extra leading slash: '/dirname'
+                keyName = split[1]
+              }
+              isDir = true
             }
             const finalKey = path.join(prefix, keyName)
-            if (parsed.ext === '') {
+            if (isDir) {
               dirKeys.push(finalKey)
             } else {
               fileKeys.push(finalKey)
@@ -138,8 +164,8 @@ export class S3Storage extends Storage {
       }
     }
 
-    _.uniq(dirKeys)
-    _.uniq(fileKeys)
+    dirKeys = _.uniq(dirKeys)
+    fileKeys = _.uniq(fileKeys)
     dirKeys.sort()
     fileKeys.sort()
     return [dirKeys, fileKeys]
