@@ -41,7 +41,7 @@ beforeAll(() => {
 })
 
 describe('basic track ops', () => {
-  test('Termination and deletion of tracks', () => {
+  test('Adding and deleting tracks', () => {
     const label2d = canvasRef.current as Label2dCanvas
     const numItems = getState().task.items.length
 
