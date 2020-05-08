@@ -60,7 +60,6 @@ class SwitchButton extends Component<Props> {
               true : (getAlignmentIndex(name) > 0)
               : (value > 0)}
             onChange={() => onChange(name)}
-            data-testid={'switch-button-' + name}
           />
         </ListItemSecondaryAction>
       </ListItem>

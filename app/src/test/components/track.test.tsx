@@ -206,7 +206,7 @@ describe('basic track ops', () => {
     const label2d = canvasRef.current as Label2dCanvas
 
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
-    const { getByText, getByTestId } = render(
+    const { getByText, getAllByRole } = render(
       <ToolBar
         ref={toolbarRef}
         categories={emptyTrackingTask.task.config.categories}
@@ -243,12 +243,15 @@ describe('basic track ops', () => {
     expect(state.task.items[3].labels[labelId].category).toEqual([2])
 
     // Changing attributes
+    // Attribute should be propagated to the end of each track
     dispatch(action.goToItem(2))
     mouseMoveClick(label2d, 1, 30)
-    const switchBtn = getByTestId('switch-button-Occluded')
+    const switchBtn = getAllByRole('checkbox')[0]
     switchBtn.click()
-    fireEvent.change(switchBtn, { target: { checked: '' } })
     state = getState()
-    dispatch(action.goToItem(1))
+    expect(state.task.items[2].labels[labelId].attributes[0]).toEqual([1])
+    expect(state.task.items[3].labels[labelId].attributes[0]).toEqual([1])
+    expect(state.task.items[2].labels[labelId].attributes[1]).toEqual([0])
+    expect(state.task.items[2].labels[labelId].attributes[2]).toEqual([0])
   })
 })
