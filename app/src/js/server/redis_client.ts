@@ -17,14 +17,16 @@ export class RedisClient {
     this.client = redis.createClient(config.redisPort)
     this.pubSub = redis.createClient(config.redisPort)
 
-    if (withLogging) {
-      this.client.on('error', (err: Error) => {
+    this.client.on('error', (err: Error) => {
+      if (withLogging) {
         Logger.error(err)
-      })
-      this.pubSub.on('error', (err: Error) => {
+      }
+    })
+    this.pubSub.on('error', (err: Error) => {
+      if (withLogging) {
         Logger.error(err)
-      })
-    }
+      }
+    })
   }
 
   /**
