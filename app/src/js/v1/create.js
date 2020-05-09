@@ -29,7 +29,9 @@ function getUrlParam(parameter, defaultvalue) {
   return urlparameter;
 }
 
+// JQuery => wait for the document to be ready.
 $(document).ready(function() {
+  // Create the dashboard and vendor html elements?
   let dashboard = $('#go_to_dashboard');
   let vendor = $('#go_to_vendor_dashboard');
   dashboard.hide();
@@ -70,6 +72,8 @@ $(document).ready(function() {
   for (let i = 1; i < labelSelect.options.length; i++) {
     labelSelect.options[i].disabled = true;
   }
+
+  // Change the contents in all the Select menu based on itemSelect.value
   itemSelect.onchange = function() {
     // disable all label options
     for (let i = 1; i < labelSelect.options.length; i++) {

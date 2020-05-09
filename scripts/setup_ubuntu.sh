@@ -35,6 +35,7 @@ echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Compiling source code
 echo [$(date +"%F %T")] ================================
 
-node_modules/.bin/webpack --config webpack.config.js --mode=production
+node_modules/.bin/webpack --watch --config webpack.config.js --mode=development
+# node_modules/.bin/webpack --config webpack.config.js --mode=production
 
 # . ${DIR}/setup_local_dir.sh

@@ -43,3 +43,9 @@ scalabel/bot/experimental/*
 
 # python cache
 __pycache__/
+
+# vscode workspace
+*.code-workspace
+
+# local test folders
+data/
