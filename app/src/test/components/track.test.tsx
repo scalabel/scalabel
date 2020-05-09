@@ -2,6 +2,7 @@ import { fireEvent, render } from '@testing-library/react'
 import _ from 'lodash'
 import React from 'react'
 import * as action from '../../js/action/common'
+import {selectLabel} from '../../js/action/select'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
@@ -100,7 +101,9 @@ describe('basic track ops', () => {
     // Delete the track by button
     dispatch(action.goToItem(6))
     expect(_.size(state.task.items[6].labels)).toEqual(3)
-    mouseMoveClick(label2d, 500, 500)
+    Session.dispatch(selectLabel(
+    state.user.select.labels, 6,
+      state.task.tracks[trackIds[3]].labels[6]))
     fireEvent(
       getByText('Delete'),
       new MouseEvent('click', {
@@ -114,7 +117,9 @@ describe('basic track ops', () => {
 
     // Terminate the track by key
     dispatch(action.goToItem(1))
-    mouseMoveClick(label2d, 1, 1)
+    Session.dispatch(selectLabel(
+    state.user.select.labels, 1,
+      state.task.tracks[trackIds[0]].labels[1]))
     fireEvent.keyDown(document, { key: 'Backspace' })
     state = getState()
     expect(_.size(state.task.items[1].labels)).toEqual(0)
@@ -123,7 +128,9 @@ describe('basic track ops', () => {
 
     // Delete the track by key
     dispatch(action.goToItem(0))
-    mouseMoveClick(label2d, 1, 1)
+    Session.dispatch(selectLabel(
+    state.user.select.labels, 0,
+      state.task.tracks[trackIds[0]].labels[0]))
     fireEvent.keyDown(document, { key: 'Backspace' })
     state = getState()
     expect(_.size(state.task.items[0].labels)).toEqual(0)
@@ -134,7 +141,7 @@ describe('basic track ops', () => {
     const label2d = canvasRef.current as Label2dCanvas
 
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
-    const { getByText } = render(
+    const { getAllByText } = render(
       <ToolBar
         ref={toolbarRef}
         categories={null}
@@ -156,23 +163,28 @@ describe('basic track ops', () => {
       [500, 500, 80, 100]
     ]
 
-    drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
 
     // Terminate the track by button
+    let state = getState()
     dispatch(action.goToItem(2))
-    mouseMoveClick(label2d, 1, 30)
+    Session.dispatch(selectLabel(
+      state.user.select.labels, 2,
+      state.task.tracks[trackIds[0]].labels[2]))
     fireEvent(
-      getByText('Delete'),
+      getAllByText('Delete')[1],
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true
       })
     )
     dispatch(action.goToItem(1))
-    mouseMoveClick(label2d, 1, 30)
-    let state = getState()
+    state = getState()
+    Session.dispatch(selectLabel(
+      state.user.select.labels, 1,
+      state.task.tracks[trackIds[0]].labels[1]))
     fireEvent(
-      getByText('Track-Link'),
+      getAllByText('Track-Link')[0],
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true
@@ -180,10 +192,12 @@ describe('basic track ops', () => {
     )
 
     dispatch(action.goToItem(4))
-    mouseMoveClick(label2d, 100, 20)
+    Session.dispatch(selectLabel(
+      state.user.select.labels, 4,
+      state.task.tracks[trackIds[2]].labels[4]))
     state = getState()
     fireEvent(
-      getByText('Finish Track-Link'),
+      getAllByText('Finish Track-Link')[0],
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true
