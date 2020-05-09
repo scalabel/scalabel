@@ -1,22 +1,27 @@
+import { bool } from 'aws-sdk/clients/signer'
 import _ from 'lodash'
 import * as types from '../common/types'
-import { ItemExport, LabelExport } from './bdd_types'
+import { uid } from '../common/uid'
+import { ItemExport, LabelExport } from '../server/bdd_types'
+import { taskIdToString } from './id2string'
 import {
-  ConfigType, CubeType,
+  ConfigType, ConnectionStatus, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
+  IdType,
   Image3DViewerConfigType,
   ImageViewerConfigType,
-  IndexedShapeType,
   IntrinsicsType,
   ItemStatus,
   ItemType,
   LabelType,
   LayoutType,
+  Node2DType,
   PaneType,
   PathPoint2DType,
   Plane3DType,
   PointCloudViewerConfigType,
   PolygonType,
+  PolyPathPoint2DType,
   RectType,
   Select,
   SensorType,
@@ -32,39 +37,70 @@ import {
 } from './types'
 
 /**
- * Initialize a label state and deep copy the parameters
+ * Initialize a label state and deep copy the parameters.
+ * Every label has an id when it is born.
  * @param {Partial<LabelType>} params
+ * @param {boolean} keepId whether to keep the ID in params
  * @return {LabelType}
  */
-export function makeLabel (params: Partial<LabelType> = {}): LabelType {
-  return _.cloneDeep<LabelType>({
-    id: -1,
+export function makeLabel (params: Partial<LabelType> = {},
+                           keepId: boolean = false): LabelType {
+  const label: LabelType = {
+    id: genLabelId(),
     item: -1,
     sensors: [-1],
     type: types.LabelTypeName.EMPTY,
     category: [],
     attributes: {},
-    parent: -1, // id
+    parent: makeDefaultId(), // id
     children: [], // ids
     shapes: [],
-    track: -1,
+    track: makeDefaultId(),
     order: 0,
     manual: true, // by default, manual is true
     ...params
-  })
+  }
+  if (!keepId) {
+    label.id = genLabelId()
+  }
+  return label
 }
 
 /**
  * Initialize a track
- * @param {number} id
- * @param {{[key: number]: number}} labels
+ * Every track has an id when it is born
+ * @param {Partial<TrackType>} params
+ * @param {boolean} keepId whether to keep the ID in params
+ * Labels can not be filled without specifying id
  */
-export function makeTrack (
-  id: number, type: string, labels: {[key: number]: number} = {}
-): TrackType {
-  return { id, type, labels }
+export function makeTrack (params: Partial<TrackType> = {},
+                           keepId: boolean = false): TrackType {
+  const track: TrackType = {
+    id: genTrackId(),
+    type: types.LabelTypeName.EMPTY,
+    labels: {},
+    ...params
+  }
+  if (!keepId) {
+    track.id = genTrackId()
+  }
+  return track
 }
 
+/**
+ * Make an empty shape
+ * Every shape has an id when it is born
+ * @param {string} shapeType type name of the shape
+ */
+function makeShape (shapeType: string = '',
+                    params: Partial<ShapeType> = {}): ShapeType {
+  return {
+    label: [],
+    shapeType,
+    ...params,
+    id: genShapeId()
+  }
+}
 /**
  * Initialize a rectangle shape
  * @param {{}} params
@@ -76,7 +112,8 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
     y1: -1,
     x2: -1,
     y2: -1,
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.RECT)
   }
 }
 
@@ -89,7 +126,24 @@ export function makePolygon
   (params: Partial<PolygonType> = {}): PolygonType {
   return {
     points: [],
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.POLYGON_2D)
+  }
+}
+
+/**
+ * Initialize a polygon
+ * @param {{}} params
+ * @return {PolygonType}
+ */
+export function makePathPoint2D (
+    params: Partial<PathPoint2DType> = {}): PathPoint2DType {
+  return {
+    x: -1,
+    y: -1,
+    pointType: 'vertex',
+    ...params,
+    ...makeShape(types.ShapeTypeName.PATH_POINT_2D)
   }
 }
 
@@ -97,12 +151,12 @@ export function makePolygon
  * Initialize a pathPoint shape
  * @param params
  */
-export function makePathPoint (params: Partial<PathPoint2DType> = {})
-: PathPoint2DType {
+export function makePolyPathPoint (params: Partial<PolyPathPoint2DType> = {})
+  : PolyPathPoint2DType {
   return {
-    x: 0,
-    y: 0,
-    type: 'vertex',
+    x: -1,
+    y: -1,
+    pointType: 'vertex',
     ...params
   }
 }
@@ -118,7 +172,8 @@ export function makeCube (params: Partial<CubeType> = {}): CubeType {
     size: { x: 1, y: 1, z: 1 },
     orientation: { x: 0, y: 0, z: 0 },
     anchorIndex: 0,
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.CUBE)
   }
 }
 
@@ -131,22 +186,23 @@ export function makePlane (params: {} = {}): Plane3DType {
   return {
     center: { x: 0, y: 0, z: 0 },
     orientation: { x: 0, y: 0, z: 0 },
-    ...params
+    ...params,
+    ...makeShape(types.ShapeTypeName.GRID)
   }
 }
 
 /**
- * Compose indexed shape
- * @param {number} id
- * @param {number[]} label
- * @param {string} type
- * @param {ShapeType} shape
+ * Make a Node2D type
+ * @param params
  */
-export function makeIndexedShape (
-    id: number, label: number[], type: string, shape: ShapeType
-  ): IndexedShapeType {
+export function makeNode2d (params: Partial<Node2DType> = {}): Node2DType {
   return {
-    id, label: [...label], type, shape: { ...shape }
+    name: '',
+    hidden: false,
+    x: -1,
+    y: -1,
+    ...params,
+    ...makeShape(types.ShapeTypeName.NODE_2D)
   }
 }
 
@@ -269,11 +325,13 @@ export function makeDefaultViewerConfig (
 /**
  * Initialize an item state
  * @param {{}} params
+ * @param {boolean} keepId Use the input param id instead of generating a new ID
  * @return {ItemType}
  */
-export function makeItem (params: Partial<ItemType> = {}): ItemType {
-  return {
-    id: -1,
+export function makeItem (params: Partial<ItemType> = {},
+                          keepId: boolean = false): ItemType {
+  const item: ItemType = {
+    id: genItemId(),
     index: 0,
     videoName: '',
     urls: {},
@@ -282,6 +340,10 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
     timestamp: -1,
     ...params
   }
+  if (!keepId) {
+    item.id = genItemId()
+  }
+  return item
 }
 
 /**
@@ -310,7 +372,7 @@ export function makeItemExport (params: Partial<ItemExport> = {}): ItemExport {
 export function makeLabelExport (
   params: Partial<LabelExport> = {}): LabelExport {
   return {
-    id: -1,
+    id: makeDefaultId(),
     category: '',
     attributes: {},
     manualShape: true,
@@ -346,6 +408,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     taskId: '',
     demoMode: false,
     autosave: false,
+    bots: false,
     ...params
   }
 }
@@ -412,7 +475,7 @@ function makeSelect (params: Partial<Select>= {}): Select {
   return {
     item: 0,
     labels: [],
-    shapes: [],
+    shapes: {},
     category: 0,
     attributes: {},
     labelType: 0,
@@ -428,7 +491,7 @@ function makeSelect (params: Partial<Select>= {}): Select {
  */
 function makeUser (params: Partial<UserType>= {}): UserType {
   return {
-    id: '',
+    id: makeDefaultId(),
     select: makeSelect(),
     layout: makeLayout(),
     viewerConfigs: [],
@@ -455,10 +518,12 @@ export function makeItemStatus (params: Partial<ItemStatus>= {}): ItemStatus {
  */
 function makeSession (params: Partial<SessionType>= {}): SessionType {
   return {
-    id: '',
+    id: makeDefaultId(),
     startTime: 0,
     itemStatuses: [],
     trackLinking: false,
+    status: ConnectionStatus.UNSAVED,
+    numUpdates: 0,
     ...params
   }
 }
@@ -470,10 +535,7 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
  */
 function makeTaskStatus (params: Partial<TaskStatus> = {}): TaskStatus {
   return {
-    maxLabelId: -1,
-    maxShapeId: -1,
     maxOrder: -1,
-    maxTrackId: -1,
     ...params
   }
 }
@@ -484,7 +546,7 @@ function makeTaskStatus (params: Partial<TaskStatus> = {}): TaskStatus {
  * @return {TaskType}
  */
 export function makeTask (params: Partial<TaskType> = {}): TaskType {
-  return {
+  const task: TaskType = {
     config: makeTaskConfig(),
     status: makeTaskStatus(),
     items: [],
@@ -495,6 +557,7 @@ export function makeTask (params: Partial<TaskType> = {}): TaskType {
     },
     ...params
   }
+  return taskIdToString(task)
 }
 
 /**
@@ -508,4 +571,62 @@ export function makeState (params: Partial<State> = {}): State {
     user: makeUser(params.user),
     session: makeSession(params.session)
   }
+}
+
+/**
+ * Check whether the input ID is valid or not default
+ * @param {IdType} id
+ */
+export function isValidId (id: IdType): bool {
+  return id !== '' && id !== '-1'
+}
+
+/**
+ * Make default ID
+ */
+export function makeDefaultId (): IdType {
+  return ''
+}
+
+/**
+ * Generate new label id. It should not be called outside this file.
+ */
+function genLabelId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate new track id. It should not be called outside this file.
+ */
+function genTrackId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate new shape id. It should not be called outside this file.
+ */
+function genShapeId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate new item id. It should not be called outside this file.
+ */
+function genItemId (): IdType {
+  return uid()
+}
+
+/**
+ * Generate an integer representation with low collision for different ids
+ * This is currently a sum of the char codes
+ * @param {IdType} id
+ */
+export function id2int (s: IdType): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) {
+    // tslint:disable-next-line: no-bitwise
+    h = h + s.charCodeAt(i) | 0
+    // h = Math.imul(31, h) + s.charCodeAt(i) | 0
+  }
+  return h
 }

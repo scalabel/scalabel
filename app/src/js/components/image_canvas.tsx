@@ -1,5 +1,6 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import Session from '../common/session'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
 import { ImageViewerConfigType, State } from '../functional/types'
@@ -11,14 +12,14 @@ import {
   MIN_SCALE,
   updateCanvasScale
 } from '../view_config/image'
-import { DrawableCanvas } from './viewer'
+import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 
 interface ClassType {
   /** image canvas */
   image_canvas: string
 }
 
-export interface Props {
+export interface Props extends DrawableProps {
   /** styles */
   classes: ClassType
   /** display */
@@ -159,4 +160,6 @@ export class ImageCanvas extends DrawableCanvas<Props> {
   }
 }
 
-export default withStyles(imageViewStyle, { withTheme: true })(ImageCanvas)
+const styledCanvas = withStyles(
+  imageViewStyle, { withTheme: true })(ImageCanvas)
+export default connect(mapStateToDrawableProps)(styledCanvas)

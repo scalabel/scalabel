@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisPubSub } from '../../js/server/redis_pub_sub'
 import { RegisterMessageType } from '../../js/server/types'
-import { getTestConfig } from '../util'
+import { getTestConfig } from './util/util'
 
 let pubClient: RedisClient
 let publisher: RedisPubSub

@@ -1,11 +1,25 @@
-import Session, { ConnectionStatus } from '../common/session'
+import { ReduxState } from '../common/configure_store'
+import { shouldCanvasFreeze } from '../functional/selector'
 import { State } from '../functional/types'
 import { Component } from './component'
+
+export interface DrawableProps {
+  /** Whether the canvas should freeze */
+  shouldFreeze: boolean
+}
+
+export const mapStateToDrawableProps = (
+  state: ReduxState): DrawableProps => {
+  return {
+    shouldFreeze: shouldCanvasFreeze(state)
+  }
+}
 
 /**
  * Abstract class for Canvas
  */
-export abstract class DrawableCanvas<Props> extends Component<Props> {
+export abstract class DrawableCanvas<
+  Props extends DrawableProps> extends Component<Props> {
   /**
    * General constructor
    * @param props: component props
@@ -26,10 +40,7 @@ export abstract class DrawableCanvas<Props> extends Component<Props> {
    * Checks whether to freeze interface
    */
   public checkFreeze () {
-    if (Session.autosave) {
-      return Session.status === ConnectionStatus.RECONNECTING
-    }
-    return false
+    return this.props.shouldFreeze
   }
 
   /**

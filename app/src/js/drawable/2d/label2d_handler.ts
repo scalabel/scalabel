@@ -5,7 +5,7 @@ import Session from '../../common/session'
 import { Key } from '../../common/types'
 import { getLinkedLabelIds } from '../../functional/common'
 import { tracksOverlapping } from '../../functional/track'
-import { State } from '../../functional/types'
+import { IdType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { commitLabels } from '../states'
@@ -218,6 +218,9 @@ export class Label2DHandler {
   /** Update state */
   public updateState (state: State) {
     this._state = state
+    if (this._selectedItemIndex !== state.user.select.item) {
+      this._highlightedLabel = null
+    }
     this._selectedItemIndex = state.user.select.item
   }
 
@@ -342,16 +345,22 @@ export class Label2DHandler {
     ) {
       const start = Math.min(index, newPosition)
       const end = Math.max(index, newPosition)
-      const labelIds: number[] = []
+      const labelIds: IdType[] = []
       const props = []
       for (let i = start; i <= end; i++) {
         labelIds.push(labels[i].labelId)
         props.push({ order: labels[i].order })
       }
       if (index < newPosition) {
-        labelIds.push(labelIds.shift() as number)
+        const labelId = labelIds.shift()
+        if (labelId !== undefined) {
+          labelIds.push(labelId)
+        }
       } else {
-        labelIds.unshift(labelIds.pop() as number)
+        const labelId = labelIds.pop()
+        if (labelId !== undefined) {
+          labelIds.unshift(labelId)
+        }
       }
       Session.dispatch(changeLabelsProps(
         [this._selectedItemIndex],

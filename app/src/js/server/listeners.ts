@@ -3,13 +3,14 @@ import {
   Request,
   Response
 } from 'express'
+import { File } from 'formidable'
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
-import { ItemExport } from '../functional/bdd_types'
 import { TaskType } from '../functional/types'
+import { ItemExport } from './bdd_types'
 import {
-  createProject, createTasks, parseFiles, parseForm
+  createProject, createTasks, parseFiles, parseForm, readItemsFile
 } from './create_project'
 import { convertStateToExport } from './export'
 import Logger from './logger'
@@ -17,7 +18,7 @@ import { getExportName } from './path'
 import { ProjectStore } from './project_store'
 import * as types from './types'
 import { UserManager } from './user_manager'
-import { countLabels } from './util'
+import { countLabels, parseProjectName } from './util'
 
 /**
  * Wraps HTTP listeners
@@ -72,7 +73,7 @@ export class Listeners {
       res.end()
     }
     try {
-      const projectName = req.query[types.FormField.PROJECT_NAME]
+      const projectName = req.query[types.FormField.PROJECT_NAME] as string
       // grab the latest submissions from all tasks
       const tasks = await this.projectStore.getTasksInProject(projectName)
       let items: ItemExport[] = []
@@ -111,50 +112,130 @@ export class Listeners {
   }
 
   /**
-   * Handles posted project form data
+   * Alert the user that the sent fields were illegal
+   */
+  public badFormResponse (res: Response) {
+    const err = Error('Illegal fields for project creation')
+    Logger.error(err)
+    res.status(400).send(err.message)
+  }
+
+  /**
+   * Alert the user that the task creation request was illegal
+   */
+  public badTaskResponse (res: Response) {
+    const err = Error('Illegal fields for task creation')
+    Logger.error(err)
+    res.status(400).send(err.message)
+  }
+
+  /**
+   * Error if it's not a post request
+   */
+  public checkInvalidPost (req: Request, res: Response): boolean {
+    if (req.method !== 'POST') {
+      res.sendStatus(404)
+      res.end()
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Handles posted project from internal data
+   * Items file not required
+   */
+  public async postProjectInternalHandler (req: Request, res: Response) {
+    if (this.checkInvalidPost(req, res)) {
+      return
+    }
+
+    if (req.body === undefined ||
+        req.body.fields === undefined ||
+        req.body.files === undefined) {
+      this.badFormResponse(res)
+      return
+    }
+
+    await this.createProjectFromDicts(
+      req.body.fields, req.body.files, false, res)
+  }
+
+  /**
+   * Handles posted project from form data
+   * Items file required
    */
   public async postProjectHandler (req: Request, res: Response) {
-    if (req.method !== 'POST' || req.fields === undefined) {
-      res.sendStatus(404)
+    if (this.checkInvalidPost(req, res)) {
+      return
     }
-    const fields = req.fields
-    const files = req.files
-    if (fields !== undefined && files !== undefined) {
-      try {
-        // parse form from request
-        const form = await parseForm(fields, this.projectStore)
-        // parse item, category, and attribute data from the form
-        const formFileData = await parseFiles(form.labelType, files)
-        // create the project from the form data
-        const project = await createProject(form, formFileData)
-        await Promise.all([
-          this.projectStore.saveProject(project),
-          // create tasks then save them
-          createTasks(project).then(
-            (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
-          // save the project
-        ])
-        res.send()
-      } catch (err) {
-        Logger.error(err)
-        // alert the user that something failed
-        res.send(err.message)
+
+    if (req.fields === undefined || req.files === undefined) {
+      this.badFormResponse(res)
+      return
+    }
+
+    const fields = req.fields as { [key: string]: string}
+    const formFiles = req.files as { [key: string]: File | undefined }
+    const files: { [key: string]: string } = {}
+    for (const key of Object.keys(formFiles)) {
+      const file = formFiles[key]
+      if (file !== undefined && file.size !== 0) {
+        files[key] = file.path
       }
-    } else {
-      // alert the user that the sent fields were illegal
-      const err = Error('illegal fields')
-      Logger.error(err)
-      res.send(err.message)
     }
+
+    await this.createProjectFromDicts(fields, files, true, res)
+  }
+
+  /**
+   * Handles tasks being added to a project
+   */
+  public async postTasksHandler (req: Request, res: Response) {
+    if (this.checkInvalidPost(req, res)) {
+      return
+    }
+
+    if (req.body === undefined
+      || req.body.items === undefined
+      || req.body.projectName === undefined) {
+      this.badTaskResponse(res)
+      return
+    }
+
+    // read in the data
+    const items = await readItemsFile(req.body.items)
+    let project: types.Project
+    let projectName: string
+    try {
+      projectName = parseProjectName(req.body.projectName)
+      project = await this.projectStore.loadProject(projectName)
+    } catch (err) {
+      Logger.error(err)
+      this.badTaskResponse(res)
+      return
+    }
+
+    // update the project with the new items
+    const itemStartNum = project.items.length
+    project.items = project.items.concat(items)
+    await this.projectStore.saveProject(project)
+
+    // update the tasks, make sure not to combine old and new items
+    project.items = items
+    const oldTasks = await this.projectStore.getTasksInProject(projectName)
+    const taskStartNum = oldTasks.length
+    const tasks = await createTasks(project, taskStartNum, itemStartNum)
+    await this.projectStore.saveTasks(tasks)
+
+    res.sendStatus(200)
   }
 
   /**
    * Return dashboard info
    */
   public async dashboardHandler (req: Request, res: Response) {
-    if (req.method !== 'POST') {
-      res.sendStatus(404)
-      res.end()
+    if (this.checkInvalidPost(req, res)) {
       return
     }
 
@@ -210,6 +291,36 @@ export class Listeners {
         Logger.error(err)
         res.send(err.message)
       }
+    }
+  }
+
+  /**
+   * Finishes project creation using processed dicts
+   */
+  private async createProjectFromDicts (
+    fields: { [key: string]: string },
+    files: { [key: string]: string },
+    itemsRequired: boolean, res: Response) {
+    try {
+        // parse form from request
+      const form = await parseForm(fields, this.projectStore)
+        // parse item, category, and attribute data from the form
+      const formFileData = await parseFiles(
+        form.labelType, files, itemsRequired)
+        // create the project from the form data
+      const project = await createProject(form, formFileData)
+      await Promise.all([
+        this.projectStore.saveProject(project),
+          // create tasks then save them
+        createTasks(project).then(
+            (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
+          // save the project
+      ])
+      res.send()
+    } catch (err) {
+      Logger.error(err)
+        // alert the user that something failed
+      res.status(400).send(err.message)
     }
   }
 }

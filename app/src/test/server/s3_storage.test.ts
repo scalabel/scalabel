@@ -1,20 +1,27 @@
+import AWS from 'aws-sdk'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
-import { getProjectKey, getTaskKey } from '../../js/server/path'
+import { getProjectKey, getTaskKey, hostname, now } from '../../js/server/path'
 import { S3Storage } from '../../js/server/s3_storage'
 import { index2str } from '../../js/server/util'
+
+export const s3 = new AWS.S3()
+const bucketRegion = 'us-west-2'
+const bucketName = 'scalabel-unit-testing'
+const projectName = 'test'
+let storageName = ''
 
 beforeAll(async () => {
   await storage.makeBucket()
 
-  // add some keys to set up the bucket
+  // add keys to set up the bucket
   let keys = [
     'project',
     'tasks/000000',
     'tasks/000001'
   ]
 
-  keys = keys.map((key) => path.join('myProject', key))
+  keys = keys.map((key) => path.join(projectName, key))
   const fakeData = '{"testField": "testValue"}'
 
   for (const key of keys) {
@@ -22,8 +29,8 @@ beforeAll(async () => {
   }
 })
 
-const storage = new S3Storage('us-west-2:scalabel-unit-testing/data')
-const projectName = 'myProject'
+storageName = `${hostname()}_${now()}`
+const storage = new S3Storage(`${bucketRegion}:${bucketName}/${storageName}`)
 
 describe('test s3 storage', () => {
   test('key existence', () => {
@@ -33,6 +40,20 @@ describe('test s3 storage', () => {
       checkTaskKey(2, false),
       checkProjectKey()
     ])
+  })
+
+  test('list keys', async () => {
+    // Top level keys
+    let keys = await storage.listKeys('test')
+    expect(keys).toStrictEqual(['test/project', 'test/tasks'])
+
+    // Top level (dir only)
+    keys = await storage.listKeys('test', true)
+    expect(keys).toStrictEqual(['test/tasks'])
+
+    // Task keys
+    keys = await storage.listKeys('test/tasks')
+    expect(keys).toStrictEqual(['test/tasks/000000', 'test/tasks/000001'])
   })
 
   test('load', () => {
@@ -93,7 +114,7 @@ describe('test s3 storage', () => {
   })
 
   test('delete', () => {
-    const key = 'myProject/tasks'
+    const key = `${projectName}/tasks`
     return Promise.all([
       checkTaskKey(1, true),
       checkTaskKey(0, true)
@@ -108,12 +129,46 @@ describe('test s3 storage', () => {
 
   })
 
+  /**
+   * Expensive test, so disabled by default
+   */
+  test.skip('list more than 1000 items', async () => {
+    // First save the items
+    const startInd = 100
+    const subDir = 'bigDir'
+    const prefix = path.join(projectName, subDir)
+
+    const promises = []
+    const fileNames = []
+    for (let i = startInd; i < startInd + 1500; i++) {
+      const taskId = index2str(i)
+      fileNames.push(taskId)
+      const key = path.join(prefix, taskId)
+      const fakeData = '{"testField": "testValue"}'
+      promises.push(storage.save(key, fakeData))
+    }
+    await Promise.all(promises)
+
+    const keys = await storage.listKeys(prefix)
+    expect(keys).toStrictEqual(fileNames.map(
+      (name) => path.join(prefix, name)))
+  }, 40000)
 })
 
 afterAll(async () => {
   // cleanup: delete all keys that were created
   await storage.delete('')
-})
+  // delete the temporary folder
+  const deleteParams = {
+    Bucket: bucketName,
+    Delete: { Objects: [
+      { Key: path.join(storageName, projectName, 'project.json') },
+      { Key: path.join(storageName, projectName) },
+      { Key: storageName }
+    ] }
+  }
+  await s3.deleteObjects(deleteParams).promise()
+}, 20000)
 
 /**
  * tests if task with index exists

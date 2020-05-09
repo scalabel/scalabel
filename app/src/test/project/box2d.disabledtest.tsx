@@ -1,22 +1,27 @@
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import { cleanup, fireEvent, render, waitForElement } from '@testing-library/react'
+import axios from 'axios'
 import { createCanvas } from 'canvas'
 import * as child from 'child_process'
 import _ from 'lodash'
 import * as React from 'react'
-import Session, { ConnectionStatus } from '../../js/common/session'
+import { Provider } from 'react-redux'
+import Session from '../../js/common/session'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { Label2DList } from '../../js/drawable/2d/label2d_list'
+import { isStatusSaved } from '../../js/functional/selector'
 import { getShape } from '../../js/functional/state_util'
-import { RectType } from '../../js/functional/types'
+import { IdType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
+import { Endpoint } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { getTestConfigPath } from '../util'
+import { findNewLabelsFromState, getTestConfig, getTestConfigPath } from '../server/util/util'
 import {
   changeTestConfig,
+  countTasks,
   deepDeleteTimestamp,
   deleteTestDir,
   getExport,
@@ -38,7 +43,7 @@ beforeAll(async () => {
   Session.devMode = false
   Session.testMode = true
 
-  // port is lso changed in test_config
+  // port is also changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
@@ -112,15 +117,14 @@ describe('full 2d bounding box integration test', () => {
     // Spawn a canvas and draw labels on this canvas
     // Uses similar code to drawable tests
     const synchronizer = await projectInitSession()
+    const labelIds: IdType[] = []
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
-        <TitleBar
-          title={'title'}
-          instructionLink={'instructionLink'}
-          dashboardLink={'dashboardLink'}
-          autosave = {Session.autosave}
-          synchronizer = {synchronizer}
-        />
+        <Provider store={Session.store}>
+          <TitleBar
+            synchronizer={synchronizer}
+          />
+        </Provider>
       </MuiThemeProvider>
     )
     const saveButton = getByTestId('Save')
@@ -130,7 +134,6 @@ describe('full 2d bounding box integration test', () => {
     const controlContext = controlCanvas.getContext('2d')
     const handleIndex = 0
     const _labelIndex = -2
-    let labelId = -1
     let state = Session.getState()
     const itemIndex = state.user.select.item
     const label2dList = new Label2DList()
@@ -153,11 +156,11 @@ describe('full 2d bounding box integration test', () => {
     }
     label2dHandler.onMouseUp(new Vector2D(10, 10), _labelIndex, handleIndex)
     label2dList.redraw(labelContext, controlContext, 1)
-    labelId += 1
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
 
     state = Session.getState()
     expect(_.size(state.task.items[itemIndex].labels)).toEqual(1)
-    let rect = getShape(state, itemIndex, labelId, 0) as RectType
+    let rect = getShape(state, itemIndex, labelIds[0], 0) as RectType
     expect(rect.x1).toEqual(1)
     expect(rect.y1).toEqual(1)
     expect(rect.x2).toEqual(10)
@@ -174,11 +177,11 @@ describe('full 2d bounding box integration test', () => {
     }
     label2dHandler.onMouseUp(new Vector2D(40, 40), _labelIndex, handleIndex)
     label2dList.redraw(labelContext, controlContext, 1)
-    labelId += 1
 
     state = Session.getState()
     expect(_.size(state.task.items[itemIndex].labels)).toEqual(2)
-    rect = getShape(state, itemIndex, labelId, 0) as RectType
+    labelIds.push(findNewLabelsFromState(Session.getState(), 0, labelIds)[0])
+    rect = getShape(state, itemIndex, labelIds[1], 0) as RectType
     expect(rect.x1).toEqual(20)
     expect(rect.y1).toEqual(20)
     expect(rect.x2).toEqual(40)
@@ -189,7 +192,7 @@ describe('full 2d bounding box integration test', () => {
       sleep(saveTimeout),
       waitForSave()
     ])
-    expect(Session.status).toBe(ConnectionStatus.SAVED)
+    expect(isStatusSaved(Session.store.getState())).toBe(true)
   }, saveTimeout)
 
   test('test export of saved bounding boxes', async () => {
@@ -230,5 +233,56 @@ describe('full 2d bounding box integration test', () => {
       [waitForElement(() => getByTestId('hidden-buttons')),
         sleep(submissionTimeout)
       ])
+  })
+})
+
+describe('2d bounding box integration test with programmatic api', () => {
+  const axiosConfig = {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  const serverConfig = getTestConfig()
+  const response400 = 'Request failed with status code 400'
+
+  test('Itemless project creation', async () => {
+    // Make task size big enough to fit all the items in 1 task
+    const projectName = 'itemless-project'
+    const createProjectBody = {
+      fields: {
+        project_name: projectName,
+        item_type: 'image',
+        label_type: 'box2d',
+        task_size: 400
+      },
+      files: {}
+    }
+    const address = new URL('http://localhost')
+    address.port = serverConfig.port.toString()
+    address.pathname = Endpoint.POST_PROJECT_INTERNAL
+    const response = await axios.post(
+      address.toString(), createProjectBody, axiosConfig
+    )
+    expect(response.status).toBe(200)
+    expect(await countTasks(projectName)).toBe(0)
+
+    // Trying to create a project with the same name fails
+    await expect(axios.post(
+      address.toString(), createProjectBody, axiosConfig
+    )).rejects.toThrow(response400)
+
+    // Add items to the empty project; expect 1 task to be made
+    address.pathname = Endpoint.POST_TASKS
+    const addTasksBody = {
+      projectName,
+      items: 'examples/image_list.yml'
+    }
+    await axios.post(address.toString(), addTasksBody, axiosConfig)
+    expect(await countTasks(projectName)).toBe(1)
+
+    /* Add items again, check that a new task is made
+     * even though the items COULD all fit in one task     */
+    await axios.post(address.toString(), addTasksBody, axiosConfig)
+    expect(await countTasks(projectName)).toBe(2)
   })
 })

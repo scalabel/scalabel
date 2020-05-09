@@ -1,6 +1,7 @@
 import createStyles from '@material-ui/core/styles/createStyles'
 import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import * as THREE from 'three'
 import Session from '../common/session'
 import { ViewerConfigTypeName } from '../common/types'
@@ -9,7 +10,7 @@ import { isCurrentFrameLoaded } from '../functional/state_util'
 import { Image3DViewerConfigType, State } from '../functional/types'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { convertMouseToNDC } from '../view_config/point_cloud'
-import { DrawableCanvas } from './viewer'
+import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 
 const styles = () => createStyles({
   label3d_canvas: {
@@ -24,7 +25,7 @@ interface ClassType {
   label3d_canvas: string
 }
 
-interface Props {
+interface Props extends DrawableProps {
   /** CSS class */
   classes: ClassType
   /** container */
@@ -304,7 +305,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       if (item.labels[id].sensors.includes(sensorId)) {
         const label = Session.label3dList.get(id)
         if (label) {
-          for (const shape of label.shapes()) {
+          for (const shape of label.internalShapes()) {
             shape.setVisible(
               this.props.id,
               !viewerConfig.hideLabels || label.selected
@@ -411,4 +412,5 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   }
 }
 
-export default withStyles(styles, { withTheme: true })(Label3dCanvas)
+const styledCanvas = withStyles(styles, { withTheme: true })(Label3dCanvas)
+export default connect(mapStateToDrawableProps)(styledCanvas)

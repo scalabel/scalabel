@@ -1,11 +1,11 @@
 import { LabelTypeName } from '../../js/common/types'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
-import { makePolygon } from '../../js/functional/states'
+import { makePolygon, makeRect } from '../../js/functional/states'
 import { PolygonType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
 import { ModelEndpoint } from '../../js/server/types'
-import { checkPathPointFields } from '../util'
+import { checkPathPointFields } from './util/util'
 
 let modelInterface: ModelInterface
 let projectName: string
@@ -21,9 +21,9 @@ beforeAll(() => {
 
 describe('test model interface query construction', () => {
   test('rect query construction', () => {
-    const rect: RectType = {
+    const rect: RectType = makeRect({
       x1: 5, y1: 2, x2: 6, y2: 10
-    }
+    })
     const itemIndex = 1
     const query = modelInterface.makeRectQuery(rect, url, itemIndex)
     expect(query.endpoint).toBe(ModelEndpoint.PREDICT_POLY)

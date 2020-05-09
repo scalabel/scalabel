@@ -3,6 +3,7 @@ import Fingerprint2 from 'fingerprintjs2'
 import _ from 'lodash'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { Provider } from 'react-redux'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
@@ -29,7 +30,6 @@ export function initSession (containerName: string): void {
   const taskIndex = parseInt(searchParams.get('task_index') as string, 10)
   const projectName = searchParams.get('project_name') as string
   setListeners()
-
   setTimeout(() => {
     Fingerprint2.get((components) => {
       const values =
@@ -54,9 +54,8 @@ export function initSession (containerName: string): void {
  */
 function updateTracks (): void {
   const state = Session.getState()
-  const newTracks: {[trackId: number]: Track} = {}
-  for (const key of Object.keys(state.task.tracks)) {
-    const trackId = Number(key)
+  const newTracks: {[trackId: string]: Track} = {}
+  for (const trackId of Object.keys(state.task.tracks)) {
     if (trackId in Session.tracks) {
       newTracks[trackId] = Session.tracks[trackId]
     } else {
@@ -80,7 +79,11 @@ function updateTracks (): void {
 function renderDom (containerName: string, synchronizer: Synchronizer) {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
-      <Window synchronizer={synchronizer} />
+      <Provider store={Session.store}>
+        <Window
+          synchronizer={synchronizer}
+        />
+      </Provider>
     </MuiThemeProvider>,
     document.getElementById(containerName))
 }
@@ -96,6 +99,7 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
   const state = Session.getState()
   Session.tracking = state.task.config.tracking
   Session.autosave = state.task.config.autosave
+  Session.bots = state.task.config.bots
 }
 
 /**

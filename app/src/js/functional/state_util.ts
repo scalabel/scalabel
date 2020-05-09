@@ -1,10 +1,13 @@
 import { makeItem } from './states'
 import {
+  IdType,
   ItemType,
   ShapeType,
   State,
   ViewerConfigType
 } from './types'
+
+// TODO- move these to selector file and use hierarchical structure
 
 /**
  * Get the current item from state
@@ -27,10 +30,10 @@ export function getCurrentItem (state: State): ItemType {
  * @param shapeIndex
  */
 export function getShape (state: State, itemIndex: number,
-                          labelId: number, shapeIndex: number): ShapeType {
+                          labelId: IdType, shapeIndex: number): ShapeType {
   const item = state.task.items[itemIndex]
   const shapeId = item.labels[labelId].shapes[shapeIndex]
-  return item.shapes[shapeId].shape
+  return item.shapes[shapeId]
 }
 
 /** Check if frame is loaded */

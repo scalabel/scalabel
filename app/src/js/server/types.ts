@@ -1,6 +1,6 @@
 import { BaseAction } from '../action/types'
-import { ItemExport } from '../functional/bdd_types'
 import { Attribute, ConfigType, Label2DTemplateType, SensorType } from '../functional/types'
+import { ItemExport } from './bdd_types'
 
 /**
  * Stores specifications of project
@@ -12,6 +12,25 @@ export interface Project {
   config: ConfigType
   /** map between data source id and data sources */
   sensors: {[id: number]: SensorType}
+}
+
+/**
+ * Cognito server config
+ *
+ * @export
+ * @interface CognitoConfig
+ */
+export interface CognitoConfig {
+  /** region of cognito service */
+  region: string
+  /** user pool id of cognito */
+  userPool: string
+  /** client id of cognito */
+  clientId: string,
+  /** user pool base uri */
+  userPoolBaseUri: string,
+  /** callback uri */
+  callbackUri: string
 }
 
 /**
@@ -47,6 +66,8 @@ export interface ServerConfig {
   botHost: string
   /** port of python model server */
   botPort: number
+  /** cognito settings */
+  cognito?: CognitoConfig
 }
 
 /**
@@ -63,8 +84,8 @@ export interface CreationForm {
   pageTitle: string
   /** task size */
   taskSize: number
-  /** instructions link */
-  instructions: string
+  /** instruction url */
+  instructionUrl: string
   /** whether demo mode is true */
   demoMode: boolean
 }
@@ -114,10 +135,12 @@ export interface SyncActionMessageType {
 
 /** type for transmitted packet of actions */
 export interface ActionPacketType {
-  /** list of actions in the pakcket */
+  /** list of actions in the packet */
   actions: BaseAction[]
   /** id of the packet */
   id: string
+  /** for bot actions, id of the action packet that triggered them */
+  triggerId?: string
 }
 
 /** metadata associated with a state */
@@ -190,13 +213,15 @@ export const enum DatabaseType {
   LOCAL = 'local'
 }
 
-// TODO: change constants from post to get once go code is removed
 /* endpoint names for http server */
 export const enum Endpoint {
   POST_PROJECT = '/postProject',
-  GET_PROJECT_NAMES = '/postProjectNames',
-  EXPORT = '/export',
-  DASHBOARD = '/postDashboardContents'
+  POST_PROJECT_INTERNAL = '/postProjectInternal',
+  GET_PROJECT_NAMES = '/getProjectNames',
+  EXPORT = '/getExport',
+  DASHBOARD = '/postDashboardContents',
+  POST_TASKS = '/postTasks',
+  CALLBACK = '/callback'
 }
 
 /* endpoint names for python server */

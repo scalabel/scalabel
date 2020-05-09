@@ -2,6 +2,8 @@
  * Define string identifiers and interfaces of actions
  */
 import {
+  ConnectionStatus,
+  IdType,
   LabelType,
   PaneType,
   Select,
@@ -18,6 +20,7 @@ export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
 export const SUBMIT = 'SUBMIT'
+export const UPDATE_SESSION_STATUS = 'UPDATE_SESSION_STATUS'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -60,17 +63,44 @@ export function isTaskAction (action: BaseAction) {
   return TASK_ACTION_TYPES.includes(action.type)
 }
 
+/**
+ * Checks if the action list contains a submit action
+ */
+export function hasSubmitAction (actions: BaseAction[]): boolean {
+  for (const action of actions) {
+    if (action.type === SUBMIT) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * These are actions that should not be broadcast beyond the session
+ */
+const SESSION_ACTION_TYPES = [
+  UPDATE_SESSION_STATUS,
+  CHANGE_SELECT
+]
+
+/**
+ * Checks if the action modifies session
+ */
+export function isSessionAction (action: BaseAction) {
+  return SESSION_ACTION_TYPES.includes(action.type)
+}
+
 export interface BaseAction {
   /** type of the action */
   type: string
   /** id of the session that initiates the action */
-  sessionId: string
+  sessionId: IdType
   /** timestamp given by backend. It is Date.now() */
   timestamp?: number
   /** whether to sync action, or just apply to frontend */
   frontendOnly?: boolean
   /** id of the user that initiates the action */
-  userId?: string
+  userId?: IdType
 }
 
 export type InitSessionAction = BaseAction
@@ -99,13 +129,16 @@ export interface UpdateTaskAction extends BaseAction {
   newTask: TaskType
 }
 
+export interface UpdateSessionStatusAction extends BaseAction {
+  /** New status of the session */
+  newStatus: ConnectionStatus
+}
+
 export interface AddLabelsAction extends BaseAction {
   /** item of the added label */
   itemIndices: number[]
   /** labels to add to each item */
   labels: LabelType[][]
-  /** shape types for each label */
-  shapeTypes: string[][][]
   /** shapes for each label */
   shapes: ShapeType[][][]
 }
@@ -117,22 +150,20 @@ export interface AddTrackAction extends BaseAction {
   itemIndices: number[]
   /** labels to add to each item */
   labels: LabelType[]
-  /** shape types for each label */
-  shapeTypes: string[][]
   /** shapes for each label */
   shapes: ShapeType[][]
 }
 
 export interface MergeTrackAction extends BaseAction {
   /** item of the added label */
-  trackIds: number[]
+  trackIds: IdType[]
 }
 
 export interface ChangeShapesAction extends BaseAction {
   /** item of the shape */
   itemIndices: number[]
   /** Shape ids in each item */
-  shapeIds: number[][]
+  shapeIds: IdType[][]
   /** properties to update for the shape */
   shapes: Array<Array<Partial<ShapeType>>>
 }
@@ -141,7 +172,7 @@ export interface ChangeLabelsAction extends BaseAction {
   /** item of the label */
   itemIndices: number[]
   /** Label ID */
-  labelIds: number[][]
+  labelIds: IdType[][]
   /** properties to update for the shape */
   props: Array<Array<Partial<LabelType>>>
 }
@@ -150,21 +181,21 @@ export interface LinkLabelsAction extends BaseAction {
   /** item of the labels */
   itemIndex: number,
   /** ids of the labels to link */
-  labelIds: number[]
+  labelIds: IdType[]
 }
 
 export interface UnlinkLabelsAction extends BaseAction {
   /** item of the labels */
   itemIndex: number,
   /** ids of the labels to unlink */
-  labelIds: number[]
+  labelIds: IdType[]
 }
 
 export interface DeleteLabelsAction extends BaseAction {
   /** item of the label */
   itemIndices: number[]
   /** ID of label to be deleted */
-  labelIds: number[][]
+  labelIds: IdType[][]
 }
 
 export interface AddViewerConfigAction extends BaseAction {
@@ -214,6 +245,7 @@ export type SessionActionType =
   | LoadItemAction
   | UpdateAllAction
   | UpdateTaskAction
+  | UpdateSessionStatusAction
 
 export type UserActionType =
   ChangeSelectAction

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { RedisClient } from '../../js/server/redis_client'
-import { getTestConfig } from '../util'
+import { getTestConfig } from './util/util'
 
 let client: RedisClient
 
@@ -11,6 +11,19 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await client.close()
+})
+
+describe('Test that redis clients catch errors', () => {
+  test('Test connecting to non-existent redis server', async () => {
+    const config = getTestConfig()
+    config.redisPort = 6385
+    try {
+      const failClient = new RedisClient(config)
+      await failClient.close()
+    } catch (e) {
+      throw(e)
+    }
+  })
 })
 
 describe('Test redis functions that are not tested elsewhere', () => {

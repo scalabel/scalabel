@@ -20,12 +20,12 @@ import {
   sampleProjectImage,
   sampleProjectVideo,
   sampleTasksImage,
-  sampleTasksVideo,
+  // sampleTasksVideo,
   sampleVideoFormFileData
-} from '../test_creation_objects'
+} from '../test_states/test_creation_objects'
 import {
   sampleStateExportImage, sampleStateExportImagePolygon
-} from '../test_export_objects'
+} from '../test_states/test_export_objects'
 
 jest.mock('../../js/server/redis_client')
 
@@ -75,11 +75,12 @@ describe('test task.json creation', () => {
     })
   })
 
-  test('test tracking creation', async () => {
-    return createTasks(sampleProjectVideo).then((tasks) => {
-      expect(tasks).toEqual(sampleTasksVideo)
-    })
-  })
+  // TODO: Rewrite the track creation testing
+  // test('test tracking creation', async () => {
+  //   return createTasks(sampleProjectVideo).then((tasks) => {
+  //     expect(tasks).toEqual(sampleTasksVideo)
+  //   })
+  // })
   test('task saving', () => {
     return testTaskSaving(sampleTasksImage)
   })

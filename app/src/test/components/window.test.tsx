@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import * as React from 'react'
+import { Provider } from 'react-redux'
 import { addViewerConfig, goToItem } from '../../js/action/common'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
@@ -7,7 +8,7 @@ import { Synchronizer } from '../../js/common/synchronizer'
 import { Key, ViewerConfigTypeName } from '../../js/common/types'
 import Window from '../../js/components/window'
 import { makeDefaultViewerConfig } from '../../js/functional/states'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 afterEach(cleanup)
 
@@ -20,7 +21,9 @@ test('Item change with arrow keys', () => {
     Session.dispatch(addViewerConfig(0, config))
   }
   const synchronizer = new Synchronizer(0, '', 'fakeId', () => { return })
-  render(<Window synchronizer={synchronizer}></Window>)
+  render(<Provider store={Session.store}>
+      <Window synchronizer={synchronizer}/>
+    </Provider>)
 
   Session.dispatch(goToItem(0))
 

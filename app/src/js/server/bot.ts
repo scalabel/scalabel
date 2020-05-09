@@ -1,14 +1,12 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { Store } from 'redux'
-import { StateWithHistory } from 'redux-undo'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
-import { configureStore } from '../common/configure_store'
+import { configureStore, ReduxStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
-import { ItemExport } from '../functional/bdd_types'
 import { PolygonType, RectType, State } from '../functional/types'
+import { ItemExport } from './bdd_types'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
 import {
@@ -31,10 +29,8 @@ export class Bot {
   public sessionId: string
   /** address for session connections */
   public address: string
-  /** Number of actions received via broadcast */
-  public actionCount: number
   /** The store to save state */
-  protected store: Store<StateWithHistory<State>>
+  protected store: ReduxStore
   /** Socket connection */
   protected socket: SocketIOClient.Socket
   /** Timestamped log for completed actions */
@@ -47,6 +43,8 @@ export class Bot {
   protected modelInterface: ModelInterface
   /** the axios http config */
   protected axiosConfig: AxiosRequestConfig
+  /** Number of actions received via broadcast */
+  private actionCount: number
 
   constructor (botData: BotData, botHost: string, botPort: number) {
     this.projectName = botData.projectName
@@ -116,32 +114,46 @@ export class Bot {
    * Simply logs these actions for now
    */
   public async actionBroadcastHandler (
-    message: SyncActionMessageType) {
+    message: SyncActionMessageType): Promise<AddLabelsAction[]> {
     const actionPacket = message.actions
     // if action was already acked, or if action came from a bot, ignore it
     if (this.ackedPackets.has(actionPacket.id)
       || message.bot
       || message.sessionId === this.sessionId) {
-      return
+      return []
     }
 
     this.ackedPackets.add(actionPacket.id)
 
     // precompute queries so they can potentially execute in parallel
     const queries = this.packetToQueries(actionPacket)
+
+    // send the queries for execution on the model server
     const actions = await this.executeQueries(queries)
-    if (actions.length > 0) {
-      this.broadcastActions(actions)
+
+    // dispatch the predicted actions locally
+    for (const action of actions) {
+      this.store.dispatch(action)
     }
+
+    // broadcast the predicted actions to other session
+    if (actions.length > 0) {
+      this.broadcastActions(actions, actionPacket.id)
+    }
+
+    // return actions for testing purposes
+    return actions
   }
 
   /**
    * Broadcast the synthetically generated actions
    */
-  public broadcastActions (actions: AddLabelsAction[]) {
+  public broadcastActions (
+    actions: AddLabelsAction[], triggerId: string) {
     const actionPacket: ActionPacketType = {
       actions,
-      id: uuid4()
+      id: uuid4(),
+      triggerId
     }
     const message: SyncActionMessageType = {
       taskId: index2str(this.taskIndex),
@@ -185,6 +197,13 @@ export class Bot {
       taskIndex: this.taskIndex,
       address: this.address
     }
+  }
+
+  /**
+   * Get the current redux state
+   */
+  public getState (): State {
+    return this.store.getState().present
   }
 
   /**
@@ -273,7 +292,7 @@ export class Bot {
    */
   private actionToQuery (
     state: State, action: AddLabelsAction): ModelQuery | null {
-    const shapeType = action.shapeTypes[0][0][0]
+    const shapeType = action.shapes[0][0][0].shapeType
     const shape = action.shapes[0][0][0]
     const labelType = action.labels[0][0].type
     const itemIndex = action.itemIndices[0]

@@ -22,6 +22,7 @@ test_data/
 
 #python
 .pyc
+__pycache__/
 
 # pytype
 .pytype

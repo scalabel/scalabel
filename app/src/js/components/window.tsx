@@ -1,16 +1,24 @@
 import React from 'react'
-import Path from '../common/path'
-import Session from '../common/session'
-import Synchronizer from '../common/synchronizer'
+import { connect } from 'react-redux'
+import { ReduxState } from '../common/configure_store'
+import { Synchronizer } from '../common/synchronizer'
+import { getConfig } from '../functional/selector'
+import { ConfigType } from '../functional/types'
 import LabelLayout from './label_layout'
 import TitleBar from './title_bar'
-// $FlowFixMe
 import { ToolBar } from './toolbar'
 
-interface Props {
-  /** global synchronizer for backend */
+interface StateProps {
+  /** config variables */
+  config: ConfigType
+}
+
+interface DependencyProps {
+  /** synchronizer for saving */
   synchronizer: Synchronizer
 }
+
+type Props = StateProps & DependencyProps
 
 /**
  * Manage the whole window
@@ -38,18 +46,12 @@ export class Window extends React.Component<Props> {
    * @return {React.Fragment}
    */
   public render () {
-    const state = Session.getState()
-
-    const config = state.task.config
+    const config = this.props.config
 
     // get all the components
     const titleBar = (
         <TitleBar
-            title={config.pageTitle}
-            instructionLink={state.task.config.instructionPage}
-            dashboardLink={Path.vendorDashboard()}
-            autosave={config.autosave}
-            synchronizer={this.props.synchronizer}
+          synchronizer={this.props.synchronizer}
         />
     )
 
@@ -77,4 +79,9 @@ export class Window extends React.Component<Props> {
   }
 }
 
-export default Window
+const mapStateToProps = (state: ReduxState): StateProps => {
+  return {
+    config: getConfig(state)
+  }
+}
+export default connect(mapStateToProps)(Window)

@@ -18,6 +18,8 @@ import { index2str, initSessId, updateStateTimestamp } from './util'
 export class Hub {
   /** flag for sync */
   protected sync: boolean
+  /** flag for bots */
+  protected bots: boolean
   /** flag for autosave */
   protected autosave: boolean
   /** the project store */
@@ -33,6 +35,7 @@ export class Hub {
                publisher: RedisPubSub) {
     this.sync = config.sync
     this.autosave = config.autosave
+    this.bots = config.bots
     this.projectStore = projectStore
     this.userManager = userManager
     this.publisher = publisher
@@ -83,6 +86,7 @@ export class Hub {
     const state = await this.projectStore.loadState(projectName, taskId)
     state.session.id = sessionId
     state.task.config.autosave = this.autosave
+    state.task.config.bots = this.bots
 
     // Connect socket to others in the same room
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
@@ -103,6 +107,7 @@ export class Hub {
     const sessionId = data.sessionId
     const actions = data.actions.actions
     const actionPacketId = data.actions.id
+    const triggerId = data.actions.triggerId
 
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
 
@@ -141,7 +146,8 @@ export class Hub {
       const taskActionMsg: SyncActionMessageType = _.cloneDeep(data)
       taskActionMsg.actions = {
         actions: taskActions,
-        id: actionPacketId
+        id: actionPacketId,
+        triggerId
       }
       // broadcast task actions to all other sessions in room
       socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)

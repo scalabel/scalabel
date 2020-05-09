@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, LabelTypeName, ShapeTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { makeTaskConfig } from '../../functional/states'
-import { ConfigType, LabelType, ShapeType, State } from '../../functional/types'
+import { makeDefaultId, makeTaskConfig } from '../../functional/states'
+import { ConfigType, IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, getColorById } from '../util'
@@ -23,11 +23,12 @@ export interface ViewMode {
  * Abstract class for 2D drawable labels
  */
 export abstract class Label2D {
+
   /* The members are public for testing purpose */
   /** label id in state */
-  protected _labelId: number
+  protected _labelId: IdType
   /** track id in state */
-  protected _trackId: number
+  protected _trackId: IdType
   /** index of the label */
   protected _index: number
   /** drawing order of the label */
@@ -54,11 +55,13 @@ export abstract class Label2D {
   protected _config: ConfigType
   /** label list */
   protected _labelList: Label2DList
+  /** whether the label is temporary */
+  protected _temporary: boolean
 
   constructor (labelList: Label2DList) {
     this._index = -1
-    this._labelId = -1
-    this._trackId = -1
+    this._labelId = makeDefaultId()
+    this._trackId = makeDefaultId()
     this._selected = false
     this._highlighted = false
     this._highlightedHandle = -1
@@ -73,11 +76,7 @@ export abstract class Label2D {
     this._editing = false
     this._config = makeTaskConfig()
     this._labelList = labelList
-  }
-
-  /** Set whether the label is highlighted */
-  public setViewMode (mode: Partial<ViewMode>): void {
-    this._viewMode = _.assign(this._viewMode, mode)
+    this._temporary = true
   }
 
   /**
@@ -125,16 +124,16 @@ export abstract class Label2D {
   }
 
   /** get labelId */
-  public get labelId (): number {
+  public get labelId (): IdType {
     return this._labelId
   }
 
   /** get track id */
-  public get trackId (): number {
+  public get trackId (): IdType {
     if (this._label) {
       return this._label.track
     }
-    return -1
+    return makeDefaultId()
   }
 
   /** get item index */
@@ -165,20 +164,6 @@ export abstract class Label2D {
     return this._selected
   }
 
-  /** select the label */
-  public setSelected (s: boolean) {
-    this._selected = s
-  }
-
-  /** highlight the label */
-  public setHighlighted (h: boolean, handleIndex: number = -1) {
-    if (h && handleIndex < 0) {
-      throw Error('need to highlight handle as well')
-    }
-    this._highlighted = h
-    this._highlightedHandle = handleIndex
-  }
-
   /** return order of this label */
   public get order (): number {
     return this._order
@@ -199,6 +184,37 @@ export abstract class Label2D {
     this._editing = e
   }
 
+  /** Parent drawable */
+  public get parent (): Label2D | null {
+    return null
+  }
+
+  /**
+   * Check whether the label is temporary
+   */
+  public get temporary (): boolean {
+    return this._temporary
+  }
+
+  /** Set whether the label is highlighted */
+  public setViewMode (mode: Partial<ViewMode>): void {
+    this._viewMode = _.assign(this._viewMode, mode)
+  }
+
+  /** select the label */
+  public setSelected (s: boolean) {
+    this._selected = s
+  }
+
+  /** highlight the label */
+  public setHighlighted (h: boolean, handleIndex: number = -1) {
+    if (h && handleIndex < 0) {
+      throw Error('need to highlight handle as well')
+    }
+    this._highlighted = h
+    this._highlightedHandle = handleIndex
+  }
+
   /** Whether label valid */
   public isValid (): boolean {
     return true
@@ -209,11 +225,6 @@ export abstract class Label2D {
     if (this._label) {
       this._label.manual = true
     }
-  }
-
-  /** Parent drawable */
-  public get parent (): Label2D | null {
-    return null
   }
 
   /**
@@ -332,34 +343,35 @@ export abstract class Label2D {
   public abstract updateShapes (shapes: ShapeType[]): void
 
   /** Get shape id's and shapes for updating */
-  public abstract shapeStates (): [number[], ShapeTypeName[], ShapeType[]]
+  public abstract shapes (): ShapeType[]
 
   /**
    * Initialize this label to be temporary
    * @param {State} state
    * @param {Vector2D} start: starting coordinate of the label
    */
-  public initTemp (state: State, _start: Vector2D): void {
+  public initTemp (state: State, start: Vector2D): void {
     this._order = state.task.status.maxOrder + 1
-    this._labelId = -1
-    this._trackId = -1
     this._config = state.task.config
-    this._color = getColorById(
-      state.task.status.maxLabelId + 1,
-      (state.task.config.tracking) ? state.task.status.maxTrackId + 1 : -1
-    )
     this._selected = true
+    this._temporary = true
+    this._label = this.initTempLabel(state, start)
+    this._labelId = this._label.id
+    this._trackId = makeDefaultId()
+    this._color = getColorById(this._labelId, this._trackId)
   }
 
   /** Convert label state to drawable */
   public updateState (
-    state: State, itemIndex: number, labelId: number): void {
+    state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
     this._label = { ...item.labels[labelId] }
     this._order = this._label.order
     this._labelId = this._label.id
     this._trackId = this._label.track
     this._config = state.task.config
+    // None of the labels in the state is temporary
+    this._temporary = false
     const select = state.user.select
     this._color = getColorById(
       getRootLabelId(item, labelId), getRootTrackId(item, labelId))
@@ -367,8 +379,15 @@ export abstract class Label2D {
       this._label.item in select.labels &&
         select.labels[this._label.item].includes(labelId)
     )
-    this.updateShapes(this._label.shapes.map((i) => item.shapes[i].shape))
+    this.updateShapes(this._label.shapes.map((i) => item.shapes[i]))
   }
+
+  /**
+   * Initialize the temp label content
+   * @param state
+   * @param _start
+   */
+  protected abstract initTempLabel (state: State, _start: Vector2D): LabelType
 }
 
 export default Label2D

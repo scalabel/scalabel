@@ -1,4 +1,4 @@
-import { ItemExport } from '../js/functional/bdd_types'
+import { ItemExport } from '../../js/server/bdd_types'
 
 export const sampleItemExportImage: ItemExport = {
   name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg',
@@ -9,23 +9,7 @@ export const sampleItemExportImage: ItemExport = {
   sensor: -1,
   labels: [
     {
-      id: 0,
-      category: 'person',
-      attributes: {},
-      manualShape: true,
-      box2d: {
-        x1: 317.9044230030514,
-        y1: 192.46537396121883,
-        x2: 676.9071930861539,
-        y2: 411.85595567867034
-      },
-      poly2d: null,
-      box3d: null,
-      plane3d: null,
-      customs: {}
-    },
-    {
-      id: 1,
+      id: '1',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -41,7 +25,7 @@ export const sampleItemExportImage: ItemExport = {
       customs: {}
     },
     {
-      id: 2,
+      id: '2',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -50,6 +34,22 @@ export const sampleItemExportImage: ItemExport = {
         y1: 137.61772853185596,
         x2: 1018.9570545819988,
         y2: 294.1828254847645
+      },
+      poly2d: null,
+      box3d: null,
+      plane3d: null,
+      customs: {}
+    },
+    {
+      id: 'longLabelId',
+      category: 'person',
+      attributes: {},
+      manualShape: true,
+      box2d: {
+        x1: 317.9044230030514,
+        y1: 192.46537396121883,
+        x2: 676.9071930861539,
+        y2: 411.85595567867034
       },
       poly2d: null,
       box3d: null,
@@ -70,23 +70,7 @@ export const sampleStateExportImage: ItemExport[] =
       sensor: -1,
       labels: [
         {
-          id: 0,
-          category: 'person',
-          attributes: {},
-          manualShape: true,
-          box2d: {
-            x1: 317.9044230030514,
-            y1: 192.46537396121883,
-            x2: 676.9071930861539,
-            y2: 411.85595567867034
-          },
-          poly2d: null,
-          box3d: null,
-          plane3d: null,
-          customs: {}
-        },
-        {
-          id: 1,
+          id: '1',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -102,7 +86,7 @@ export const sampleStateExportImage: ItemExport[] =
           customs: {}
         },
         {
-          id: 2,
+          id: '2',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -111,6 +95,22 @@ export const sampleStateExportImage: ItemExport[] =
             y1: 137.61772853185596,
             x2: 1018.9570545819988,
             y2: 294.1828254847645
+          },
+          poly2d: null,
+          box3d: null,
+          plane3d: null,
+          customs: {}
+        },
+        {
+          id: 'longLabelId',
+          category: 'person',
+          attributes: {},
+          manualShape: true,
+          box2d: {
+            x1: 317.9044230030514,
+            y1: 192.46537396121883,
+            x2: 676.9071930861539,
+            y2: 411.85595567867034
           },
           poly2d: null,
           box3d: null,
@@ -165,7 +165,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
   sensor: -1,
   labels: [
     {
-      id: 0,
+      id: '0',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -184,7 +184,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
       customs: {}
     },
     {
-      id: 1,
+      id: '1',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -207,7 +207,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
       customs: {}
     },
     {
-      id: 2,
+      id: 'longPolyLabelId',
       category: 'person',
       attributes: {},
       manualShape: true,
@@ -241,7 +241,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
       sensor: -1,
       labels: [
         {
-          id: 0,
+          id: '0',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -260,7 +260,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           customs: {}
         },
         {
-          id: 1,
+          id: '1',
           category: 'person',
           attributes: {},
           manualShape: true,
@@ -283,7 +283,7 @@ export const sampleStateExportImagePolygon: ItemExport[] =
           customs: {}
         },
         {
-          id: 2,
+          id: 'longPolyLabelId',
           category: 'person',
           attributes: {},
           manualShape: true,

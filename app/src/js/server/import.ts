@@ -1,15 +1,14 @@
 import _ from 'lodash'
-import { AttributeToolType, LabelTypeName, ShapeTypeName } from '../common/types'
+import { AttributeToolType, LabelTypeName } from '../common/types'
 import { PointType } from '../drawable/2d/path_point2d'
-import { ItemExport, LabelExport } from '../functional/bdd_types'
-import { makeItem, makeLabel, makePathPoint, makePolygon } from '../functional/states'
-import { Attribute, IndexedShapeType,
-  ItemType, LabelType } from '../functional/types'
+import { makeCube, makeItem, makeLabel, makePlane, makePolygon, makePolyPathPoint, makeRect } from '../functional/states'
+import { Attribute, IdType, ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType } from '../functional/types'
+import { ItemExport, LabelExport } from './bdd_types'
 
 /**
  * Converts single exported item to frontend state format
  * @param item the item in export format
- * @param itemInd the item index (relative to task)
+ * @param itemIndex the item index (relative to task)
  * @param itemId the item id (relative to project)
  * @param attributesNameMap look up an attribute and its index from its name
  * @param attributeValueMap look up an attribute value's index
@@ -19,28 +18,26 @@ export function convertItemToImport (
   videoName: string,
   timestamp: number,
   itemExportMap: {[id: number]: Partial<ItemExport>},
-  itemInd: number, itemId: number,
+  itemIndex: number, itemId: number,
   attributeNameMap: {[key: string]: [number, Attribute]},
   attributeValueMap: {[key: string]: number},
   categoryNameMap: {[key: string]: number},
-  maxLabelId: number,
-  maxShapeId: number,
   tracking: boolean
-): [ItemType, number, number] {
+): ItemType {
   const urls: {[id: number]: string} = {}
 
-  const labelExportIdToImportId: { [key: number]: number} = {}
-  const labelImports: { [key: number]: LabelType } = {}
-  const shapeImports: { [key: number]: IndexedShapeType } = {}
+  const labels: LabelIdMap = {}
+  const shapes: ShapeIdMap = {}
   for (const key of Object.keys(itemExportMap)) {
     const sensorId = Number(key)
     urls[sensorId] = itemExportMap[sensorId].url as string
     const labelsExport = itemExportMap[sensorId].labels
     if (labelsExport) {
       for (const labelExport of labelsExport) {
-        if (tracking && labelExport.id in labelExportIdToImportId) {
-          const labelId = labelExportIdToImportId[labelExport.id]
-          labelImports[labelId].sensors.push(sensorId)
+        const labelId = labelExport.id.toString()
+        // Each label may appear in multiple sensors
+        if (tracking && labelExport.id in labels) {
+          labels[labelId].sensors.push(sensorId)
           continue
         }
 
@@ -55,46 +52,36 @@ export function convertItemToImport (
           attributeValueMap
         )
 
-        const [labelImport, indexedShapeImports, newMaxShapeId] =
+        const [importedLabel, importedShapes] =
           convertLabelToImport(
             labelExport,
-            maxLabelId + 1,
-            itemInd,
-            maxShapeId,
+            itemIndex,
             sensorId,
             categories,
             attributes
           )
 
         if (tracking) {
-          labelImport.track = labelExport.id
+          importedLabel.track = labelExport.id.toString()
         }
 
-        labelExportIdToImportId[labelExport.id] = labelImport.id
-        labelImports[maxLabelId + 1] = labelImport
-        for (const indexedShape of indexedShapeImports) {
-          shapeImports[indexedShape.id] = indexedShape
+        labels[labelId] = importedLabel
+        for (const indexedShape of importedShapes) {
+          shapes[indexedShape.id] = indexedShape
         }
-
-        maxShapeId = newMaxShapeId
-        maxLabelId++
       }
     }
   }
 
-  const partialItemImport: Partial<ItemType> = {
+  return makeItem({
     urls,
-    index: itemInd,
-    id: itemId,
-    timestamp
-  }
-  partialItemImport.videoName = videoName
-  const itemImport = makeItem(partialItemImport)
-
-  itemImport.labels = labelImports
-  itemImport.shapes = shapeImports
-
-  return [itemImport, maxLabelId, maxShapeId]
+    index: itemIndex,
+    id: itemId.toString(),
+    timestamp,
+    videoName,
+    labels,
+    shapes
+  }, true)
 }
 
 /**
@@ -143,65 +130,57 @@ function parseExportAttributes (
 }
 
  /**
-  * based on the label in export format, create a label in internal formt
+  * based on the label in export format, create a label in internal format
   * and update the corresponding shapes in the map
   * @param label the label in export format
   * @param shapesImport map to update, from shapeId to shape
   */
 function convertLabelToImport (
   labelExport: LabelExport,
-  labelId: number,
   item: number,
-  maxShapeId: number,
   sensorId: number,
   category?: number[],
   attributes?: {[key: number]: number[]}
-): [LabelType, IndexedShapeType[], number] {
-  let shapeType = ShapeTypeName.UNKNOWN
+): [LabelType, ShapeType[]] {
   let labelType = LabelTypeName.EMPTY
-  let shapeData = null
+  let shapeData: null | ShapeType = null
+  const labelId = labelExport.id.toString()
 
-  // no polyline2d
+  /**
+   * Convert each import shape based on their type
+   * TODO: no polyline2d
+   */
   if (labelExport.box2d) {
-    shapeType = ShapeTypeName.RECT
     labelType = LabelTypeName.BOX_2D
-    shapeData = labelExport.box2d
+    shapeData = makeRect(labelExport.box2d)
   } else if (labelExport.poly2d) {
-    shapeType = ShapeTypeName.POLYGON_2D
     const polyExport = labelExport.poly2d[0]
     labelType = (polyExport.closed) ?
       LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
     const points = polyExport.vertices.map(
-      (vertex, i) => makePathPoint({
+      (vertex, i) => makePolyPathPoint({
         x: vertex[0],
         y: vertex[1],
-        type: (polyExport.types[i] === 'L') ?
+        pointType: (polyExport.types[i] === 'L') ?
           PointType.VERTEX : PointType.CURVE
       })
     )
     shapeData = makePolygon({ points })
   } else if (labelExport.box3d) {
-    shapeType = ShapeTypeName.CUBE
     labelType = LabelTypeName.BOX_3D
-    shapeData = labelExport.box3d
+    shapeData = makeCube(labelExport.box3d)
   } else if (labelExport.plane3d) {
-    shapeType = ShapeTypeName.GRID
     labelType = LabelTypeName.PLANE_3D
-    shapeData = labelExport.plane3d
+    shapeData = makePlane(labelExport.plane3d)
   }
 
   // if the label has any shapes, import them too
-  const shapeIds: number[] = []
-  const shapeImports: IndexedShapeType[] = []
+  const shapeIds: IdType[] = []
+  const shapeImports: ShapeType[] = []
   if (shapeData !== null) {
-    shapeImports.push({
-      id: maxShapeId + 1,
-      label: [labelId],
-      type: shapeType,
-      shape: shapeData
-    })
-    maxShapeId++
-    shapeIds.push(shapeImports[0].id)
+    shapeData.label.push(labelId)
+    shapeIds.push(shapeData.id)
+    shapeImports.push(shapeData)
   }
 
   const labelImport = makeLabel({
@@ -213,7 +192,7 @@ function convertLabelToImport (
     category,
     attributes,
     sensors: [sensorId]
-  })
+  }, true)
 
-  return [labelImport, shapeImports, maxShapeId]
+  return [labelImport, shapeImports]
 }

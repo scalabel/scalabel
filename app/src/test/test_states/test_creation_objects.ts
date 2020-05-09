@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { AttributeToolType, BundleFile,
-  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../js/common/types'
-import { ItemExport } from '../js/functional/bdd_types'
-import { Attribute, TaskType } from '../js/functional/types'
-import { CreationForm, FormFileData, Project } from '../js/server/types'
+  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../../js/common/types'
+import { Attribute, TaskType } from '../../js/functional/types'
+import { ItemExport } from '../../js/server/bdd_types'
+import { CreationForm, FormFileData, Project } from '../../js/server/types'
 import { sampleStateExportImage, sampleStateExportImagePolygon } from './test_export_objects'
 
 const sampleCategories: string[] = [
@@ -124,7 +124,7 @@ export const sampleFormEmpty: CreationForm = {
   labelType: '',
   pageTitle: '',
   taskSize: 0,
-  instructions: '',
+  instructionUrl: '',
   demoMode: false
 }
 
@@ -139,7 +139,7 @@ export const sampleFormImage: CreationForm = {
   labelType: LabelTypeName.BOX_2D,
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
-  instructions: sampleInstructions,
+  instructionUrl: sampleInstructions,
   demoMode: false
 }
 
@@ -149,7 +149,7 @@ export const sampleFormVideo: CreationForm = {
   labelType: LabelTypeName.POLYGON_2D,
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
-  instructions: sampleInstructions,
+  instructionUrl: sampleInstructions,
   demoMode: true
 }
 
@@ -179,14 +179,15 @@ export const sampleProjectImage: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: false,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
 
 const sampleItemsVideo = _.cloneDeep(sampleItems)
 sampleItemsVideo[0].labels = [{
-  id: 0,
+  id: '0',
   category: 'person',
   attributes: {},
   manualShape: true,
@@ -201,7 +202,7 @@ sampleItemsVideo[0].labels = [{
   customs: {}
 }]
 sampleItemsVideo[1].labels = [{
-  id: 0,
+  id: '0',
   category: 'person',
   attributes: {},
   manualShape: true,
@@ -242,7 +243,8 @@ export const sampleProjectVideo: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: true,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
@@ -265,7 +267,8 @@ export const sampleProjectAutolabel: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: false,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
@@ -288,7 +291,8 @@ export const sampleProjectAutolabelPolygon: Project = {
     attributes: sampleAttributes as Attribute[],
     taskId: '',
     demoMode: false,
-    autosave: true
+    autosave: true,
+    bots: false
   },
   sensors: {}
 }
@@ -311,13 +315,11 @@ export const sampleTasksImage: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000000',
       demoMode: false,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
-      maxLabelId: -1,
-      maxShapeId: -1,
-      maxOrder: 0,
-      maxTrackId: -1
+      maxOrder: 0
     },
     progress: {
       submissions: []
@@ -326,7 +328,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg' },
         index: 0,
-        id: 0,
+        id: '0',
         labels: {},
         shapes: {},
         timestamp: 1,
@@ -335,7 +337,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg' },
         index: 1,
-        id: 1,
+        id: '1',
         labels: {},
         shapes: {},
         timestamp: 2,
@@ -344,7 +346,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg' },
         index: 2,
-        id: 2,
+        id: '2',
         labels: {},
         shapes: {},
         timestamp: 3,
@@ -353,7 +355,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg' },
         index: 3,
-        id: 3,
+        id: '3',
         labels: {},
         shapes: {},
         timestamp: 4,
@@ -362,7 +364,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg' },
         index: 4,
-        id: 4,
+        id: '4',
         labels: {},
         shapes: {},
         timestamp: 5,
@@ -395,13 +397,11 @@ export const sampleTasksImage: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000001',
       demoMode: false,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
-      maxLabelId: -1,
-      maxShapeId: -1,
-      maxOrder: 0,
-      maxTrackId: -1
+      maxOrder: 0
     },
     progress: {
       submissions: []
@@ -410,7 +410,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg' },
         index: 0,
-        id: 5,
+        id: '5',
         labels: {},
         shapes: {},
         timestamp: 6,
@@ -419,7 +419,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg' },
         index: 1,
-        id: 6,
+        id: '6',
         labels: {},
         shapes: {},
         timestamp: 7,
@@ -428,7 +428,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg' },
         index: 2,
-        id: 7,
+        id: '7',
         labels: {},
         shapes: {},
         timestamp: 8,
@@ -437,7 +437,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg' },
         index: 3,
-        id: 8,
+        id: '8',
         labels: {},
         shapes: {},
         timestamp: 9,
@@ -446,7 +446,7 @@ export const sampleTasksImage: TaskType[] = [
       {
         urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg' },
         index: 4,
-        id: 9,
+        id: '9',
         labels: {},
         shapes: {},
         timestamp: 10,
@@ -484,20 +484,18 @@ export const sampleTasksVideo: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000000',
       demoMode: true,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
-      maxLabelId: 1,
-      maxShapeId: 1,
-      maxOrder: 2,
-      maxTrackId: 1
+      maxOrder: 2
     },
     progress: {
       submissions: []
     },
     items: [
       {
-        id: 0,
+        id: '0',
         index: 0,
         videoName: 'a',
         urls: {
@@ -505,7 +503,7 @@ export const sampleTasksVideo: TaskType[] = [
         },
         labels: {
           0: {
-            id: 0,
+            id: '0',
             item: 0,
             sensors: [
               -1
@@ -515,48 +513,46 @@ export const sampleTasksVideo: TaskType[] = [
               0
             ],
             attributes: {},
-            parent: -1,
+            parent: '',
             children: [],
             shapes: [
-              0
+              '0'
             ],
-            track: 0,
+            track: '0',
             order: 0,
             manual: true
           }
         },
         shapes: {
           0: {
-            id: 0,
+            id: '0',
             label: [
-              0
+              '0'
             ],
-            type: 'polygon2d',
-            shape: {
-              points: [
-                {
-                  x: 0,
-                  y: 0,
-                  type: 'vertex'
-                },
-                {
-                  x: 0,
-                  y: 1,
-                  type: 'vertex'
-                },
-                {
-                  x: 1,
-                  y: 1,
-                  type: 'vertex'
-                }
-              ]
-            }
+            shapeType: 'polygon2d',
+            points: [
+              {
+                x: 0,
+                y: 0,
+                pointType: 'vertex'
+              },
+              {
+                x: 0,
+                y: 1,
+                pointType: 'vertex'
+              },
+              {
+                x: 1,
+                y: 1,
+                pointType: 'vertex'
+              }
+            ]
           }
         },
         timestamp: 1
       },
       {
-        id: 1,
+        id: '1',
         index: 1,
         videoName: 'a',
         urls: {
@@ -564,7 +560,7 @@ export const sampleTasksVideo: TaskType[] = [
         },
         labels: {
           1: {
-            id: 1,
+            id: '1',
             item: 1,
             sensors: [
               -1
@@ -574,48 +570,46 @@ export const sampleTasksVideo: TaskType[] = [
               0
             ],
             attributes: {},
-            parent: -1,
+            parent: '',
             children: [],
             shapes: [
-              1
+              '1'
             ],
-            track: 0,
+            track: '0',
             order: 0,
             manual: true
           }
         },
         shapes: {
           1: {
-            id: 1,
+            id: '1',
             label: [
-              1
+              '1'
             ],
-            type: 'polygon2d',
-            shape: {
-              points: [
-                {
-                  x: 0,
-                  y: 0,
-                  type: 'vertex'
-                },
-                {
-                  x: 0,
-                  y: 1,
-                  type: 'vertex'
-                },
-                {
-                  x: 1,
-                  y: 1,
-                  type: 'vertex'
-                }
-              ]
-            }
+            shapeType: 'polygon2d',
+            points: [
+              {
+                x: 0,
+                y: 0,
+                pointType: 'vertex'
+              },
+              {
+                x: 0,
+                y: 1,
+                pointType: 'vertex'
+              },
+              {
+                x: 1,
+                y: 1,
+                pointType: 'vertex'
+              }
+            ]
           }
         },
         timestamp: 2
       },
       {
-        id: 2,
+        id: '2',
         index: 2,
         videoName: 'a',
         urls: {
@@ -628,11 +622,11 @@ export const sampleTasksVideo: TaskType[] = [
     ],
     tracks: {
       0: {
-        id: 0,
+        id: '0',
         type: 'polygon2d',
         labels: {
-          0: 0,
-          1: 1
+          0: '0',
+          1: '1'
         }
       }
     },
@@ -665,20 +659,18 @@ export const sampleTasksVideo: TaskType[] = [
       attributes: sampleAttributes as Attribute[],
       taskId: '000001',
       demoMode: true,
-      autosave: true
+      autosave: true,
+      bots: false
     },
     status: {
-      maxLabelId: -1,
-      maxShapeId: -1,
-      maxOrder: 0,
-      maxTrackId: -1
+      maxOrder: 0
     },
     progress: {
       submissions: []
     },
     items: [
       {
-        id: 3,
+        id: '3',
         index: 0,
         videoName: 'b',
         urls: {
@@ -689,7 +681,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 4
       },
       {
-        id: 4,
+        id: '4',
         index: 1,
         videoName: 'b',
         urls: {
@@ -700,7 +692,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 5
       },
       {
-        id: 5,
+        id: '5',
         index: 2,
         videoName: 'b',
         urls: {
@@ -711,7 +703,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 6
       },
       {
-        id: 6,
+        id: '6',
         index: 3,
         videoName: 'b',
         urls: {
@@ -722,7 +714,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 7
       },
       {
-        id: 7,
+        id: '7',
         index: 4,
         videoName: 'b',
         urls: {
@@ -733,7 +725,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 8
       },
       {
-        id: 8,
+        id: '8',
         index: 5,
         videoName: 'b',
         urls: {
@@ -744,7 +736,7 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 9
       },
       {
-        id: 9,
+        id: '9',
         index: 6,
         videoName: 'b',
         urls: {

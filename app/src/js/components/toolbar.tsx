@@ -10,7 +10,7 @@ import { renderTemplate } from '../common/label'
 import Session from '../common/session'
 import { Key, LabelTypeName } from '../common/types'
 import { tracksOverlapping } from '../functional/track'
-import { Attribute, State, TrackType } from '../functional/types'
+import { Attribute, IdType, State, TrackType } from '../functional/types'
 import { Component } from './component'
 import { makeButton } from './general_button'
 import { Category } from './toolbar_category'
@@ -148,23 +148,29 @@ export class ToolBar extends Component<Props> {
             Session.dispatch(deleteSelectedLabels(this.state))
           })
           }</div>
-          <div>{makeButton('End Object Tracking', () => {
-            Session.dispatch(
-              terminateSelectedTracks(this.state, this.state.user.select.item)
-            )
-          })
-          }</div>
-          <div>
-            {this.state.session.trackLinking ?
-              makeButton('Finish Track-Link', (() => {
-                this.linkSelectedTracks(this.state)
-              }), 'lightgreen')
-              :
-              makeButton('Track-Link', () => {
-                this.startLinkTrack()
-              })
-            }
-          </div>
+          {
+            this.state.task.config.tracking &&
+            <div>{makeButton('End Object Tracking', () => {
+              Session.dispatch(
+                terminateSelectedTracks(this.state, this.state.user.select.item)
+              )
+            })
+            }</div>
+          }
+          {
+            this.state.task.config.tracking &&
+            <div>
+              {this.state.session.trackLinking ?
+                makeButton('Finish Track-Link', (() => {
+                  this.linkSelectedTracks(this.state)
+                }), 'lightgreen')
+                :
+                makeButton('Track-Link', () => {
+                  this.startLinkTrack()
+                })
+              }
+            </div>
+          }
         </div>
       </div>
     )
@@ -313,7 +319,7 @@ export class ToolBar extends Component<Props> {
   private linkSelectedTracks (state: State) {
     const select = state.user.select
     const tracks: TrackType[] = []
-    const trackIds: number[] = []
+    const trackIds: IdType[] = []
 
     for (const key of Object.keys(select.labels)) {
       const index = Number(key)

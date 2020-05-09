@@ -1,17 +1,21 @@
 import { cleanup } from '@testing-library/react'
 import io from 'socket.io-client'
-import { BaseAction } from '../../js/action/types'
+import uuid4 from 'uuid/v4'
+import { setStatusToUnsaved } from '../../js/action/common'
+import { AddLabelsAction } from '../../js/action/types'
 import { configureStore } from '../../js/common/configure_store'
-import Session, { ConnectionStatus } from '../../js/common/session'
+import Session from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
+import * as selector from '../../js/functional/selector'
 import { State } from '../../js/functional/types'
 import {
   ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
 import { index2str, updateState } from '../../js/server/util'
-import { getInitialState, getRandomBox2dAction } from '../util'
+import { getInitialState, getRandomBox2dAction } from '../server/util/util'
 
 let sessionId: string
+let botSessionId: string
 let taskIndex: number
 let projectName: string
 let userId: string
@@ -24,128 +28,169 @@ const mockSocket = {
 
 beforeAll(() => {
   sessionId = 'fakeSessId'
+  botSessionId = 'botSessId'
   taskIndex = 0
   projectName = 'testProject'
   userId = 'fakeUserId'
 })
 
+beforeEach(() => {
+  Session.bots = false
+  Session.dispatch(setStatusToUnsaved())
+})
+
 afterEach(cleanup)
 describe('Test synchronizer functionality', () => {
   test('Test correct registration message gets sent', async () => {
-    const synchronizer = startSynchronizer()
-    synchronizer.connectHandler()
+    // Since this deals with registration, don't initialize the state
+    const initializeState = false
+    const sync = startSynchronizer(initializeState)
+    sync.connectHandler()
 
     // Frontend doesn't have a session id until after registration
-    checkConnectMessage('')
-    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
+    const expectedSessId = ''
+    checkConnectMessage(expectedSessId)
+    expect(selector.isStatusUnsaved(Session.store.getState())).toBe(true)
   })
 
   test('Test send-ack loop', async () => {
-    const synchronizer = startSynchronizer()
-    const initialState = getInitialState(sessionId)
-    synchronizer.registerAckHandler(initialState)
-
-    const dummyAction: BaseAction = {
-      type: 'a',
-      sessionId
-    }
-
-    // Initially, no actions queued for saving
-    checkNumQueuedActions(synchronizer, 0)
-    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
-
-    // Dispatch an action to trigger a sync event
-    Session.dispatch(dummyAction)
-
-    // Before ack, dispatched action is queued for saving
-    checkNumQueuedActions(synchronizer, 1)
-    checkFirstAction(synchronizer, dummyAction)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    const sync = startSynchronizer()
+    dispatchAndCheckActions(sync, 1)
 
     // After ack arrives, no actions are queued anymore
-    const ackHandler = jest.fn()
-    const ackAction = synchronizer.listActionPackets()[0]
-    synchronizer.actionBroadcastHandler(
-      packetToMessage(ackAction), ackHandler)
-    checkNumQueuedActions(synchronizer, 0)
-    expect(ackHandler).toHaveBeenCalled()
+    const ackPackets = sendAcks(sync)
+    expect(sync.numQueuedActions).toBe(0)
+    expect(sync.numLoggedActions).toBe(1)
+    expect(selector.isStatusSaved(Session.store.getState())).toBe(true)
 
     // If second ack arrives, it is ignored
-    const newAckHandler = jest.fn()
-    synchronizer.actionBroadcastHandler(
-      packetToMessage(ackAction), newAckHandler)
-    expect(newAckHandler).not.toHaveBeenCalled()
+    sync.actionBroadcastHandler(
+      packetToMessage(ackPackets[0]))
+    expect(sync.numLoggedActions).toBe(1)
+  })
+
+  test('Test model prediction status', async () => {
+    const sync = startSynchronizer()
+    Session.bots = true
+
+    dispatchAndCheckActions(sync, 2)
+
+    // After acks arrive, session status is marked as computing
+    const ackPackets = sendAcks(sync)
+    expect(selector.isStatusComputing(Session.store.getState())).toBe(true)
+
+    // Mark computation as finished when all model actions arrive
+    const modelPackets = []
+    for (const ackPacket of ackPackets) {
+      const modelAction = getRandomBox2dAction()
+      modelAction.sessionId = botSessionId
+      const modelPacket: ActionPacketType = {
+        actions: [modelAction],
+        id: uuid4(),
+        triggerId: ackPacket.id
+      }
+
+      modelPackets.push(modelPacket)
+    }
+
+    sync.actionBroadcastHandler(
+      packetToMessageBot(modelPackets[0]))
+    expect(sync.numActionsPendingPrediction).toBe(1)
+    expect(selector.isComputeDone(Session.store.getState())).toBe(false)
+
+    sync.actionBroadcastHandler(
+      packetToMessageBot(modelPackets[1]))
+    expect(sync.numActionsPendingPrediction).toBe(0)
+    expect(selector.isComputeDone(Session.store.getState())).toBe(true)
   })
 
   test('Test reconnection', async () => {
-    Session.updateStatus(ConnectionStatus.UNSAVED)
-    const synchronizer = startSynchronizer()
-    const initialState = getInitialState(sessionId)
-    synchronizer.registerAckHandler(initialState)
-
-    // Initially, no actions are queued for saving
-    checkNumQueuedActions(synchronizer, 0)
-    expect(Session.status).toBe(ConnectionStatus.UNSAVED)
-
-    // Dispatch an action to trigger a sync event
-    const frontendAction = getRandomBox2dAction()
-    Session.dispatch(frontendAction)
-
-    // Before ack, dispatched action is queued for saving
-    checkNumQueuedActions(synchronizer, 1)
-    checkFirstAction(synchronizer, frontendAction)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    const sync = startSynchronizer()
+    const frontendActions = dispatchAndCheckActions(sync, 1)
 
     // Backend disconnects instead of acking
-    synchronizer.disconnectHandler()
-    expect(Session.status).toBe(ConnectionStatus.RECONNECTING)
+    sync.disconnectHandler()
+    expect(selector.isStatusReconnecting(Session.store.getState())).toBe(true)
 
     // Reconnect, but some missed actions occured in the backend
-    const missedAction = getRandomBox2dAction()
-    const newInitialState = updateState(initialState, [missedAction])
-    synchronizer.connectHandler()
+    const newInitialState = updateState(
+      getInitialState(sessionId),
+      [getRandomBox2dAction()]
+    )
+    sync.connectHandler()
     checkConnectMessage(sessionId)
-    synchronizer.registerAckHandler(newInitialState)
+    sync.registerAckHandler(newInitialState)
 
-    // Check that frontend state updates correctly
-    const expectedState = updateState(newInitialState, [frontendAction])
-    expect(Session.getState()).toMatchObject(expectedState)
+    /**
+     * Check that frontend state updates correctly
+     * Except for session state, which will change because of status effects
+     */
+    const expectedState = updateState(newInitialState, frontendActions)
+    expect(Session.getState().task).toMatchObject(expectedState.task)
+    expect(Session.getState().user).toMatchObject(expectedState.user)
     // Also check that save is still in progress
-    checkNumQueuedActions(synchronizer, 1)
-    checkFirstAction(synchronizer, frontendAction)
-    expect(Session.status).toBe(ConnectionStatus.SAVING)
+    expect(sync.numQueuedActions).toBe(1)
+    checkActionsAreQueued(sync, frontendActions)
+    expect(selector.isStatusSaving(Session.store.getState())).toBe(true)
 
     // After ack arrives, no actions are queued anymore
-    const ackHandler = jest.fn()
-    const ackAction = synchronizer.listActionPackets()[0]
-    synchronizer.actionBroadcastHandler(
-      packetToMessage(ackAction), ackHandler)
-    expect(Session.getState()).toMatchObject(expectedState)
-    checkNumQueuedActions(synchronizer, 0)
-    expect(ackHandler).toHaveBeenCalled()
+    sendAcks(sync)
+    expect(Session.getState().task).toMatchObject(expectedState.task)
+    expect(Session.getState().user).toMatchObject(expectedState.user)
+    expect(sync.numQueuedActions).toBe(0)
+    expect(sync.numLoggedActions).toBe(1)
   })
 })
 
 /**
- * Helper function for checking the number of actions waiting to be saved
+ * Dispatch and check the effects of a single add label action
  */
-function checkNumQueuedActions (sync: Synchronizer, num: number) {
-  const actionPackets = sync.listActionPackets()
-  expect(actionPackets.length).toBe(num)
+function dispatchAndCheckActions (
+  sync: Synchronizer, numActions: number): AddLabelsAction[] {
+  // Dispatch actions to trigger sync events
+  const actions: AddLabelsAction[] = []
+  for (let _ = 0; _ < numActions; _++) {
+    const action = getRandomBox2dAction()
+    Session.dispatch(action)
+    actions.push(action)
+  }
+
+  // Verify the synchronizer state before ack arrives
+  expect(sync.numQueuedActions).toBe(numActions)
+  checkActionsAreQueued(sync, actions)
+  expect(selector.isStatusSaving(Session.store.getState())).toBe(true)
+  if (Session.bots) {
+    expect(sync.numActionsPendingPrediction).toBe(numActions)
+  }
+  return actions
 }
 
 /**
- * Helper function for checking when one action should be queued
+ * Acks all the waiting packets
  */
-function checkFirstAction (sync: Synchronizer, action: BaseAction) {
+function sendAcks (sync: Synchronizer): ActionPacketType[] {
   const actionPackets = sync.listActionPackets()
-  const actions = actionPackets[0].actions
-  expect(actions.length).toBe(1)
-  expect(actions[0]).toBe(action)
+  for (const actionPacket of actionPackets) {
+    sync.actionBroadcastHandler(
+      packetToMessage(actionPacket))
+  }
+  return actionPackets
 }
 
 /**
- * Helper function for checking that correct connection message was sent
+ * Check that the action has been be queued
+ */
+function checkActionsAreQueued (
+  sync: Synchronizer, actions: AddLabelsAction[]) {
+  const actionPackets = sync.listActionPackets()
+  expect(actionPackets.length).toBe(actions.length)
+  for (let i = 0; i < actions.length; i++) {
+    expect(actionPackets[i].actions[0]).toBe(actions[i])
+  }
+}
+
+/**
+ * Checkthat correct connection message was sent
  */
 function checkConnectMessage (sessId: string) {
   const expectedMessage: RegisterMessageType = {
@@ -162,7 +207,7 @@ function checkConnectMessage (sessId: string) {
 /**
  * Start the browser synchronizer being tested
  */
-function startSynchronizer (): Synchronizer {
+function startSynchronizer (setInitialState: boolean = true): Synchronizer {
   io.connect = jest.fn().mockImplementation(() => mockSocket)
   const synchronizer = new Synchronizer(
     taskIndex,
@@ -177,6 +222,15 @@ function startSynchronizer (): Synchronizer {
     }
   )
 
+  if (setInitialState) {
+    const initialState = getInitialState(sessionId)
+    synchronizer.registerAckHandler(initialState)
+  }
+
+  // Initially, no actions are queued for saving
+  expect(synchronizer.numQueuedActions).toBe(0)
+  expect(selector.isStatusUnsaved(Session.store.getState())).toBe(true)
+
   return synchronizer
 }
 
@@ -190,5 +244,18 @@ function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
     sessionId,
     taskId: index2str(taskIndex),
     bot: false
+  }
+}
+
+/**
+ * Convert action packet to sync message from a bot
+ */
+function packetToMessageBot (packet: ActionPacketType): SyncActionMessageType {
+  return {
+    actions: packet,
+    projectName,
+    sessionId: botSessionId,
+    taskId: index2str(taskIndex),
+    bot: true
   }
 }

@@ -3,7 +3,7 @@ import { goToItem } from '../../js/action/common'
 import * as tag from '../../js/action/tag'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 test('Add and change tag for image label', () => {
   Session.devMode = false
@@ -18,8 +18,11 @@ test('Add and change tag for image label', () => {
     selectedIndices[0]))
   let state = Session.getState()
   let itemLabels = state.task.items[0].labels
+  let sample = _.sample(itemLabels)
   expect(_.size(itemLabels)).toBe(1)
-  expect(itemLabels[0].attributes).toStrictEqual(actualAttributes)
+  if (sample !== undefined) {
+    expect(sample.attributes).toStrictEqual(actualAttributes)
+  }
   // Change selected value for attribute 0
   selectedIndices[0] = 1
   actualAttributes[attributeIndices[0]] = [selectedIndices[0]]
@@ -28,7 +31,10 @@ test('Add and change tag for image label', () => {
   state = Session.getState()
   itemLabels = state.task.items[0].labels
   expect(_.size(itemLabels)).toBe(1)
-  expect(itemLabels[0].attributes).toStrictEqual(actualAttributes)
+  sample = _.sample(itemLabels)
+  if (sample !== undefined) {
+    expect(sample.attributes).toStrictEqual(actualAttributes)
+  }
   // Add a new attribute
   selectedIndices[1] = 1
   attributeIndices[1] = 3
@@ -38,5 +44,8 @@ test('Add and change tag for image label', () => {
   state = Session.getState()
   itemLabels = state.task.items[0].labels
   expect(_.size(itemLabels)).toBe(1)
-  expect(itemLabels[0].attributes).toStrictEqual(actualAttributes)
+  sample = _.sample(itemLabels)
+  if (sample !== undefined) {
+    expect(sample.attributes).toStrictEqual(actualAttributes)
+  }
 })

@@ -13,8 +13,8 @@ import { makePointCloudViewerConfig } from '../../js/functional/states'
 import { CubeType, PointCloudViewerConfigType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
-import { testJson } from '../test_point_cloud_objects'
-import { expectVector3TypesClose } from '../util'
+import { expectVector3TypesClose } from '../server/util/util'
+import { testJson } from '../test_states/test_point_cloud_objects'
 
 const canvasId = 0
 const width = 1000
@@ -112,6 +112,7 @@ function setUpLabel3dCanvas (
         display={display}
         ref={canvasRef}
         camera={camera}
+        shouldFreeze={false}
       />
     </div>
   )
@@ -148,7 +149,7 @@ test('Add 3d bbox', () => {
   canvas.onKeyDown(spaceEvent)
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
-  let cube = getShape(state, 0, 0, 0) as CubeType
+  let cube = getShape(state, 0, '0', 0) as CubeType
   let canvasConfig =
     getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
   expect(canvasConfig).not.toBeNull()
@@ -175,7 +176,7 @@ test('Add 3d bbox', () => {
     canvas.onKeyDown(spaceEvent)
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
-    cube = getShape(state, 0, i, 0) as CubeType
+    cube = getShape(state, 0, i.toString(), 0) as CubeType
     canvasConfig =
       getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
     expect(canvasConfig).not.toBeNull()
@@ -210,7 +211,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
-  const labelId = Number(Object.keys(state.task.items[0].labels)[0])
+  const labelId = Object.keys(state.task.items[0].labels)[0]
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
   const tEvent = new KeyboardEvent('keydown', { key: 't' })
@@ -230,7 +231,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   canvas.onMouseUp(mouseEvent(width / 2., height / 4.))
 
   state = Session.getState()
-  let cube = getShape(state, 0, 0, 0) as CubeType
+  let cube = getShape(state, 0, '0', 0) as CubeType
   const center = (new Vector3D()).fromState(cube.center)
   expect(center[2]).toBeGreaterThan(0)
   expect(center[0]).toBeCloseTo(0)
@@ -242,6 +243,6 @@ test('Move axis aligned 3d bbox along z axis', () => {
   canvas.onMouseUp(mouseEvent(width / 2., height * 17 / 40))
 
   state = Session.getState()
-  cube = getShape(state, 0, 0, 0) as CubeType
+  cube = getShape(state, 0, '0', 0) as CubeType
   expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
 })
