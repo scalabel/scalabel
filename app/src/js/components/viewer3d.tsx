@@ -694,8 +694,9 @@ class Viewer3D extends DrawableViewer<Props> {
     spherical.setFromVector3(offset)
 
     // Apply rotations
-    spherical.theta += dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
-    spherical.phi += dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    // TODO(julin): make this movement customizable?
+    spherical.theta -= dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    spherical.phi -= dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
 
     spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
 
