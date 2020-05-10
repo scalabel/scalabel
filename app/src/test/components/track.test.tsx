@@ -172,7 +172,7 @@ describe('basic track ops', () => {
       state.user.select.labels, 2,
       state.task.tracks[trackIds[0]].labels[2]))
     fireEvent(
-      getAllByText('Delete')[1],
+      getAllByText('Delete')[0],
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true
@@ -192,10 +192,10 @@ describe('basic track ops', () => {
     )
 
     dispatch(action.goToItem(4))
+    state = getState()
     Session.dispatch(selectLabel(
       state.user.select.labels, 4,
       state.task.tracks[trackIds[2]].labels[4]))
-    state = getState()
     fireEvent(
       getAllByText('Finish Track-Link')[0],
       new MouseEvent('click', {
