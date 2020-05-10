@@ -75,7 +75,34 @@ export function changeSelectedLabelsAttributes (
   ): types.ChangeLabelsAction {
   const select = state.user.select
   const labelIds = Object.values(select.labels)
-  const duplicatedAttributes = labelIds.map(((_id) => ({ attributes })))
+  let duplicatedAttributes = []
+  // tracking: propagate attributes to the end
+  const selectedItem = state.task.items[select.item]
+  if (selectedItem.labels[labelIds[0][0]].track) {
+    const labelsInTracks: { [key: number]: string[] } = {}
+    for (const labelId of labelIds[0]) {
+      const track = state.task.tracks[selectedItem.labels[labelId].track]
+      for (const itemIndex of Object.keys(track.labels).map(Number)) {
+        // only propagate attributes to the subsequent frames
+        if (itemIndex < select.item) {
+          continue
+        }
+        if (itemIndex in labelsInTracks &&
+          !(track.labels[itemIndex] in labelsInTracks[itemIndex])) {
+          labelsInTracks[itemIndex].push(track.labels[itemIndex])
+        } else {
+          labelsInTracks[itemIndex] = [track.labels[itemIndex]]
+        }
+      }
+    }
+    for (const value of Object.values(labelsInTracks)) {
+      duplicatedAttributes.push(value.map(((_id) => ({ attributes }))))
+    }
+    return changeLabelsProps(Object.keys(labelsInTracks).map(Number),
+      Object.values(labelsInTracks),
+      duplicatedAttributes)
+  }
+  duplicatedAttributes = labelIds.map(((_id) => ({ attributes })))
   return changeLabelsProps([select.item], labelIds, [duplicatedAttributes])
 }
 
@@ -92,7 +119,30 @@ export function changeSelectedLabelsCategories (
   ): types.ChangeLabelsAction {
   const select = state.user.select
   const labelIds = Object.values(select.labels)
-  const duplicatedCategories = labelIds.map(((_id) => ({ category })))
+  let duplicatedCategories = []
+  // tracking: changes the category for the entire lifespan
+  const selectedItem = state.task.items[select.item]
+  if (selectedItem.labels[labelIds[0][0]].track) {
+    const labelsInTracks: { [key: number]: string[] } = {}
+    for (const labelId of labelIds[0]) {
+      const track = state.task.tracks[selectedItem.labels[labelId].track]
+      for (const itemIndex of Object.keys(track.labels).map(Number)) {
+        if (itemIndex in labelsInTracks &&
+          !(track.labels[itemIndex] in labelsInTracks[itemIndex])) {
+          labelsInTracks[itemIndex].push(track.labels[itemIndex])
+        } else {
+          labelsInTracks[itemIndex] = [track.labels[itemIndex]]
+        }
+      }
+    }
+    for (const value of Object.values(labelsInTracks)) {
+      duplicatedCategories.push(value.map(((_id) => ({ category }))))
+    }
+    return changeLabelsProps(Object.keys(labelsInTracks).map(Number),
+      Object.values(labelsInTracks),
+      duplicatedCategories)
+  }
+  duplicatedCategories = labelIds.map(((_id) => ({ category })))
   return changeLabelsProps([select.item], labelIds, [duplicatedCategories])
 }
 
