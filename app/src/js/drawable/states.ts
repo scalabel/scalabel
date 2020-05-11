@@ -2,16 +2,19 @@ import { addLabel, addLabelsToItem, addTrack, changeLabelsProps, changeShapesInI
 import { deleteTracks, terminateTracks } from '../action/track'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
-import { LabelIdMap, ShapeIdMap, ShapeType } from '../functional/types'
+import { LabelIdMap, ShapeIdMap } from '../functional/types'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
+
+interface ItemLabelIdMap { [index: number]: LabelIdMap }
+interface ItemShapeIdMap { [index: number]: ShapeIdMap }
 
 /**
  * Commit changed shapes to state
  *
- * @param {{ [index: number]: ShapeIdMap }} updatedShapes
+ * @param {ItemShapeIdMap} updatedShapes
  */
-function commitShapesToState (updatedShapes: { [index: number]: ShapeIdMap }) {
+function commitShapesToState (updatedShapes: ItemShapeIdMap) {
   if (Object.keys(updatedShapes).length === 0) {
     return
   }
@@ -35,9 +38,9 @@ function commitShapesToState (updatedShapes: { [index: number]: ShapeIdMap }) {
 /**
  * Commit changed labels to state
  *
- * @param {{ [index: number]: LabelIdMap}} updatedLabels
+ * @param {ItemLabelIdMap} updatedLabels
  */
-function commitLabelsToState (updatedLabels: { [index: number]: LabelIdMap}) {
+function commitLabelsToState (updatedLabels: ItemLabelIdMap) {
   if (Object.keys(updatedLabels).length === 0) {
     return
   }
@@ -62,13 +65,15 @@ function commitLabelsToState (updatedLabels: { [index: number]: LabelIdMap}) {
  * Update track from a label
  *
  * @param {(Readonly<Label2D> | Readonly<Label3D>)} drawable
+ * @param {ItemLabelIdMap} updatedLabels
+ * @param {ItemShapeIdMap} updatedShapes
  */
-function updateTrack (drawable: Readonly<Label2D> | Readonly<Label3D>) {
+function updateTrack (drawable: Readonly<Label2D> | Readonly<Label3D>,
+                      updatedLabels: ItemLabelIdMap,
+                      updatedShapes: ItemShapeIdMap) {
   if (!(drawable.trackId in Session.tracks)) {
     return
   }
-  const updatedShapes: { [index: number]: ShapeIdMap } = {}
-  const updatedLabels: { [index: number]: LabelIdMap} = {}
   const track = Session.tracks[drawable.trackId]
   track.update(drawable.label.item, drawable)
 
@@ -90,24 +95,30 @@ function updateTrack (drawable: Readonly<Label2D> | Readonly<Label3D>) {
     }
   })
   track.clearUpdatedIndices()
-  commitShapesToState(updatedShapes)
-  commitLabelsToState(updatedLabels)
 }
 
 /**
  * Update a single label
  *
  * @param {(Readonly<Label2D> | Readonly<Label3D>)} drawable
+ * @param {ItemLabelIdMap} updatedLabels
+ * @param {ItemShapeIdMap} updatedShapes
  */
-function updateLabel (drawable: Readonly<Label2D> | Readonly<Label3D>) {
+function updateLabel (drawable: Readonly<Label2D> | Readonly<Label3D>,
+                      updatedLabels: ItemLabelIdMap,
+                      updatedShapes: ItemShapeIdMap) {
   const shapes = drawable.shapes()
-  const updatedShapes: { [index: number]: ShapeIdMap } = { [drawable.item]: {} }
-  const updatedLabels: { [index: number]: LabelIdMap} = { [drawable.item]: {} }
-  shapes.forEach((shape: ShapeType) =>
-    updatedShapes[drawable.item][shape.id] = shape)
+  if (!(drawable.item in updatedShapes)) {
+    updatedShapes[drawable.item] = {}
+  }
+  for (const shape of shapes) {
+    updatedShapes[drawable.item][shape.id] = shape
+  }
+
+  if (!(drawable.item in updatedLabels)) {
+    updatedLabels[drawable.item] = {}
+  }
   updatedLabels[drawable.item][drawable.labelId] = drawable.label
-  commitShapesToState(updatedShapes)
-  commitLabelsToState(updatedLabels)
 }
 
 /**
@@ -189,6 +200,8 @@ export function commit2DLabels (
 ) {
   const state = Session.getState()
   const numItems = state.task.items.length
+  const updatedShapes: ItemShapeIdMap = {}
+  const updatedLabels: ItemLabelIdMap = {}
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
     if (drawable.isValid()) {
@@ -196,9 +209,9 @@ export function commit2DLabels (
       if (!drawable.temporary) {
         // existing drawable
         if (Session.tracking) {
-          updateTrack(drawable)
+          updateTrack(drawable, updatedLabels, updatedShapes)
         } else {
-          updateLabel(drawable)
+          updateLabel(drawable, updatedLabels, updatedShapes)
         }
       } else {
         // new drawable
@@ -223,6 +236,8 @@ export function commit2DLabels (
       // new invalid drawable should be dropped. nothing happens.
     }
   })
+  commitLabelsToState(updatedLabels)
+  commitShapesToState(updatedShapes)
 }
 
 /**
@@ -233,8 +248,8 @@ export function commitLabels (
   updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>
 ) {
   // Get labels & tracks to commit indexed by itemIndex
-  const updatedShapes: { [index: number]: ShapeIdMap } = {}
-  const updatedLabels: { [index: number]: LabelIdMap} = {}
+  const updatedShapes: ItemShapeIdMap = {}
+  const updatedLabels: ItemLabelIdMap = {}
   const newTracks: Track[] = []
   const newLabels: Array<Readonly<Label2D | Label3D>> = []
   const state = Session.getState()
