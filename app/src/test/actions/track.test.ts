@@ -22,9 +22,11 @@ test('Test tracks ops', () => {
     track.terminateTracks([state.task.tracks[trackIdx]],
       itemIndex, _.size(state.task.items)))
   state = Session.getState()
-  expect(_.size(state.task.tracks[trackIdx].labels)).toBe(2)
-  expect(_.size(state.task.items[2].labels)).toBe(2)
-  expect(_.size(state.task.items[2].shapes)).toBe(2)
+  expect(_.size(state.task.tracks[trackIdx].labels)).toBe(1)
+  expect(_.size(state.task.items[1].labels)).toBe(2)
+  expect(_.size(state.task.items[1].shapes)).toBe(2)
+  expect(_.size(state.task.items[0].labels)).toBe(3)
+  expect(_.size(state.task.items[0].shapes)).toBe(3)
 
   // merge tracks
   const toMergeTrack1 = '2'
