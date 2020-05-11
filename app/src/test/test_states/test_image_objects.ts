@@ -57,6 +57,7 @@ export const testJson = {
       instructionPage: 'undefined',
       demoMode: false,
       autosave: false,
+      bots: false,
       bundleFile: 'image_v2.js',
       categories: ['1', '2', '3'],
       attributes: [
@@ -213,7 +214,9 @@ export const testJson = {
         name: 'default',
         type: 'image'
       }
-    }
+    },
+    status: 'testStatus',
+    progress: []
   }
 }
 
