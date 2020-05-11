@@ -14,12 +14,13 @@
     - G
     - Y
     - R
-  tagPrefix: t
+  tagPrefix: ""
   tagSuffixes:
     - ""
     - g
     - y
     - r
+  tagText: t
   buttonColors:
     - white
     - green
