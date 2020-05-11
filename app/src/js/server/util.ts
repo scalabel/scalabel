@@ -22,7 +22,7 @@ import { CognitoConfig, CreationForm,
 /**
  * Initializes backend environment variables
  */
-export function readConfig (): ServerConfig {
+export async function readConfig (): Promise<ServerConfig> {
   /**
    * Creates config, using defaults for missing fields
    * Make sure user env come last to override defaults
@@ -45,7 +45,7 @@ export function readConfig (): ServerConfig {
     ...defaults.serverConfig,
     ...userConfig
   }
-  validateConfig(fullConfig)
+  await validateConfig(fullConfig)
   return fullConfig
 }
 
@@ -81,7 +81,16 @@ function validateCognitoConfig (cognito: CognitoConfig | undefined) {
  *
  * @param {ServerConfig} config
  */
-function validateConfig (config: ServerConfig) {
+async function validateConfig (config: ServerConfig) {
+  if (config.database === DatabaseType.LOCAL) {
+    if (!(await fs.pathExists(config.data))) {
+      throw new Error(`Cannot find ${config.data}`)
+    }
+    if (config.itemDir && !(await fs.pathExists(config.itemDir))) {
+      throw new Error(`Cannot find ${config.itemDir}`)
+    }
+  }
+
   if (config.userManagement) {
     validateCognitoConfig(config.cognito)
   }
@@ -96,13 +105,14 @@ export async function makeStorage (
   database: string, dir: string): Promise<Storage> {
   switch (database) {
     case DatabaseType.S3:
-      const s3Store = new S3Storage(dir)
       try {
+        const s3Store = new S3Storage(dir)
         await s3Store.makeBucket()
         return s3Store
       } catch (error) {
-        // if s3 fails, default to file storage
-        Logger.error(Error('s3 failed, using file storage'))
+        // If s3 fails, default to file storage
+        error.message = `s3 failed, using file storage
+        ${error.message}`
         Logger.error(error)
         return new FileStorage(dir)
       }
@@ -344,4 +354,12 @@ export function parseProjectName (projectName: string): string {
 export function getPyConnFailedMsg (endpoint: string, message: string): string {
   return sprintf('Make sure endpoint is correct and python server is \
 running; query to \"%s\" failed with message: %s', endpoint, message)
+}
+
+/**
+ * helper function to force javascript to sleep
+ * @param milliseconds
+ */
+export function sleep (milliseconds: number): Promise<object> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }

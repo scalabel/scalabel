@@ -8,6 +8,7 @@ import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore, ReduxState, ReduxStore } from './configure_store'
+import { SimpleStore } from './simple_store'
 import { Track } from './track/track'
 
 /**
@@ -70,6 +71,13 @@ class Session {
    */
   public getState (): State {
     return this.store.getState().present
+  }
+
+  /**
+   * Get a simple store instance type for use without Session
+   */
+  public getSimpleStore (): SimpleStore {
+    return new SimpleStore(this.getState.bind(this), this.dispatch.bind(this))
   }
 
   /**

@@ -1,5 +1,4 @@
-import { addTrack, changeLabelsProps } from '../action/common'
-import { ADD_LABELS, CHANGE_SHAPES } from '../action/types'
+import { addLabelsToItem, addTrack, changeLabelsProps, changeShapesInItems } from '../action/common'
 import Session from '../common/session'
 import { Track } from '../common/track/track'
 import { LabelIdMap, ShapeIdMap } from '../functional/types'
@@ -17,6 +16,8 @@ export function commitLabels (
   const updatedLabels: { [index: number]: LabelIdMap} = {}
   const newTracks: Track[] = []
   const newLabels: Array<Readonly<Label2D | Label3D>> = []
+  const state = Session.getState()
+  const numItems = state.task.items.length
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
     if (!drawable.temporary) {
@@ -48,12 +49,12 @@ export function commitLabels (
           track.clearUpdatedIndices()
         }
       } else {
-        const [ids,,shapes] = drawable.shapeStates()
+        const shapes = drawable.shapes()
         if (!(drawable.item in updatedShapes)) {
           updatedShapes[drawable.item] = {}
         }
-        for (let i = 0; i < ids.length; i++) {
-          updatedShapes[drawable.item][ids[i]] = shapes[i]
+        for (const shape of shapes) {
+          updatedShapes[drawable.item][shape.id] = shape
         }
 
         if (!(drawable.item in updatedLabels)) {
@@ -77,7 +78,7 @@ export function commitLabels (
           track.init(
             drawable.item,
             drawable,
-            Session.numItems - drawable.item + 1,
+            numItems - drawable.item + 1,
             parentTrack
           )
           newTracks.push(track)
@@ -95,7 +96,7 @@ export function commitLabels (
       const labels = []
       const types = []
       const shapes = []
-      for (let i = 0; i < Session.numItems; i++) {
+      for (let i = 0; i < numItems; i++) {
         const label = track.getLabel(i)
         const currentTypes = []
         const currentShapes = []
@@ -118,22 +119,13 @@ export function commitLabels (
   } else if (!Session.tracking && newLabels.length > 0) {
     // Add new labels to state
     const labels = []
-    const types = []
     const shapes = []
     for (const label of newLabels) {
       labels.push(label.label)
-      const [, shapeTypes, shapeStates] = label.shapeStates()
-      types.push(shapeTypes)
+      const shapeStates = label.shapes()
       shapes.push(shapeStates)
     }
-    Session.dispatch(
-      {
-        type: ADD_LABELS,
-        sessionId: Session.id,
-        itemIndices: [newLabels[0].item],
-        labels: [labels],
-        shapes: [shapes]
-      }
+    Session.dispatch(addLabelsToItem(newLabels[0].item, labels, shapes)
     )
   }
 
@@ -152,15 +144,7 @@ export function commitLabels (
       shapeIds.push(itemShapeIds)
       shapes.push(indexShapes)
     }
-    Session.dispatch(
-      {
-        type: CHANGE_SHAPES,
-        sessionId: Session.id,
-        itemIndices,
-        shapeIds,
-        shapes
-      }
-    )
+    Session.dispatch(changeShapesInItems(itemIndices, shapeIds, shapes))
   }
 
   if (Object.keys(updatedLabels).length > 0) {

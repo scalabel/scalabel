@@ -12,8 +12,8 @@ import { ToolBar } from '../../js/components/toolbar'
 import { Category } from '../../js/components/toolbar_category'
 import { ListButton } from '../../js/components/toolbar_list_button'
 import { makeLabel } from '../../js/functional/states'
-import { testJson } from '../test_image_objects'
-import { testJson as testTrackJson } from '../test_track_objects'
+import { testJson } from '../test_states/test_image_objects'
+import { testJson as testTrackJson } from '../test_states/test_track_objects'
 
 let handleToggleWasCalled: boolean = false
 const testValues = ['NA', 'A', 'B', 'C']
@@ -196,14 +196,14 @@ describe('test track', () => {
     Session.dispatch(selectLabel(
       Session.getState().user.select.labels, 1, trackLabels[1]))
     fireEvent(
-      getByText('End Object Tracking'),
+      getByText('Delete'),
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true
       })
     )
     state = Session.getState()
-    expect(_.size(state.task.tracks[3].labels)).toBe(2)
+    expect(_.size(state.task.tracks[3].labels)).toBe(1)
     expect(state.task.items[2].labels[lblInItm2]).toBeUndefined()
     expect(state.task.items[2].labels[lblInItm3]).toBeUndefined()
     expect(state.task.items[2].labels[lblInItm4]).toBeUndefined()

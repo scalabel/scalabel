@@ -26,32 +26,6 @@ def launch() -> None:
     with open(args.config, 'r') as fp:
         config = yaml.load(fp, Loader=yaml.FullLoader)
 
-    if not os.path.exists(config['data']):
-        raise FileNotFoundError('Can not find {}'.format(config['data']))
-
-    if 'itemDir' in config and not os.path.exists(config['itemDir']):
-        raise FileNotFoundError('Can not find {}'.format(config['itemDir']))
-
-    redis_port = 'redisPort'
-    if redis_port not in config:
-        config[redis_port] = 6379
-
-    # store redis dump in current directory if no local dir is supplied
-    data = 'data'
-    database = 'database'
-    if (data not in config
-            or (database in config and config[database] != 'local')):
-        config[data] = './'
-
-    redis_cmd = [
-        'redis-server', 'app/config/redis.conf', '--port',
-        '{}'.format(config[redis_port]), '--bind', '127.0.0.1', '--dir',
-        config[data], '--protected-mode', 'yes'
-    ]
-    logger.info('Launching redis server')
-    logger.info(' '.join(redis_cmd))
-    subprocess.Popen(redis_cmd)
-
     # launch the python server if bot option is true
     bot = 'bots'
     if bot in config and config[bot]:
@@ -66,9 +40,8 @@ def launch() -> None:
 
         py_env = os.environ.copy()
         python_path = 'PYTHONPATH'
-        model_path = os.path.join(
-            'scalabel', 'bot', 'experimental',
-            'fast-seg-label', 'polyrnn_scalabel')
+        model_path = os.path.join('scalabel', 'bot', 'experimental',
+                                  'fast-seg-label', 'polyrnn_scalabel')
         if python_path in py_env:
             model_path = "{}:{}".format(py_env[python_path], model_path)
         py_env[python_path] = model_path

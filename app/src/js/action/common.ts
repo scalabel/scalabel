@@ -1,8 +1,8 @@
 import { ActionCreator } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { ReduxState } from '../common/configure_store'
-import * as selector from '../common/selector'
 import Session from '../common/session'
+import * as selector from '../functional/selector'
 import { ConnectionStatus, IdType, LabelType,
   PaneType, Select, ShapeType, SplitType,
   TaskType, ViewerConfigType } from '../functional/types'
@@ -104,6 +104,26 @@ export function addLabel (
 }
 
 /**
+ * Add labels to a single item
+ * @param itemIndex
+ * @param labels
+ * @param shapes
+ */
+export function addLabelsToItem (
+  itemIndex: number,
+  labels: LabelType[],
+  shapes: ShapeType[][] = []
+): types.AddLabelsAction {
+  return {
+    type: types.ADD_LABELS,
+    sessionId: Session.id,
+    itemIndices: [itemIndex],
+    labels: [labels],
+    shapes: [shapes]
+  }
+}
+
+/**
  * Add a track
  * @param itemIndices
  * @param labels
@@ -142,6 +162,25 @@ export function changeShapes (
     itemIndices: [itemIndex],
     shapeIds: [shapeIds],
     shapes: [shapes]
+  }
+}
+
+/**
+ * Change shapes in items
+ * @param itemIndices
+ * @param shapeIds
+ * @param shapes
+ */
+export function changeShapesInItems (
+  itemIndices: number[], shapeIds: IdType[][],
+  shapes: Array<Array<Partial<ShapeType>>>
+): types.ChangeShapesAction {
+  return {
+    type: types.CHANGE_SHAPES,
+    sessionId: Session.id,
+    itemIndices,
+    shapeIds,
+    shapes
   }
 }
 
@@ -407,6 +446,13 @@ export function setStatusToReconnecting () {
   return updateSessionStatus(ConnectionStatus.RECONNECTING)
 }
 
+/**
+ * Mark status as submitting
+ */
+export function setStatusToSubmitting () {
+  return updateSessionStatus(ConnectionStatus.SUBMITTING)
+}
+
 type ThunkCreatorType =
   ActionCreator<
   ThunkAction<void, ReduxState, void, types.ActionType>>
@@ -465,27 +511,40 @@ export const updateSessionStatusDelayed: ThunkCreatorType = (
 }
 
 /**
+ * Update submission banner and trigger fadeout animation
+ */
+export const setStatusForBanner: ThunkCreatorType = (
+  notifyStatus: ConnectionStatus, fadeStatus: ConnectionStatus
+) => {
+  return (dispatch, getState) => {
+    const numUpdates = selector.getNumStatusUpdates(getState())
+    dispatch(updateSessionStatus(notifyStatus))
+    dispatch(
+      updateSessionStatusDelayed(fadeStatus, numUpdates)
+    )
+  }
+}
+
+/**
  * Mark compute done in the status
  */
 export const setStatusToComputeDone: ThunkCreatorType = () => {
-  return (dispatch, getState) => {
-    const numUpdates = selector.getNumStatusUpdates(getState())
-    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_COMPUTE_DONE))
-    dispatch(
-      updateSessionStatusDelayed(ConnectionStatus.COMPUTE_DONE, numUpdates)
-    )
-  }
+  return setStatusForBanner(ConnectionStatus.NOTIFY_COMPUTE_DONE,
+    ConnectionStatus.COMPUTE_DONE)
 }
 
 /**
  * Mark saving as done in the status
  */
 export const setStatusToSaved: ThunkCreatorType = () => {
-  return (dispatch, getState) => {
-    const numUpdates = selector.getNumStatusUpdates(getState())
-    dispatch(updateSessionStatus(ConnectionStatus.NOTIFY_SAVED))
-    dispatch(
-      updateSessionStatusDelayed(ConnectionStatus.SAVED, numUpdates)
-    )
-  }
+  return setStatusForBanner(ConnectionStatus.NOTIFY_SAVED,
+    ConnectionStatus.SAVED)
+}
+
+/**
+ * Mark submitting as done in the status
+ */
+export const setStatusToSubmitted: ThunkCreatorType = () => {
+  return setStatusForBanner(ConnectionStatus.NOTIFY_SUBMITTED,
+    ConnectionStatus.SUBMITTED)
 }

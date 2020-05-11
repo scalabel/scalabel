@@ -106,6 +106,13 @@ export function getRedisBaseKey (metadataKey: string) {
 }
 
 /**
+ * Check redis key is a reminder key
+ */
+export function checkRedisReminderKey (key: string): boolean {
+  return key.split(':')[1] === 'reminder'
+}
+
+/**
  * Gets the redis key used by bots for the task
  */
 export function getRedisBotKey (botData: BotData) {
@@ -149,4 +156,11 @@ export function getTaskDir (projectName: string): string {
  */
 export function getSaveDir (projectName: string, taskId: string): string {
   return path.join(projectName, 'saved', taskId)
+}
+
+/**
+ * Gets path to redis config
+ */
+export function getRedisConf (): string {
+  return path.join('app', 'config', 'redis.conf')
 }

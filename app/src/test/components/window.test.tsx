@@ -8,7 +8,7 @@ import { Synchronizer } from '../../js/common/synchronizer'
 import { Key, ViewerConfigTypeName } from '../../js/common/types'
 import Window from '../../js/components/window'
 import { makeDefaultViewerConfig } from '../../js/functional/states'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 
 afterEach(cleanup)
 

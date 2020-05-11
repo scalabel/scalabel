@@ -11,10 +11,10 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { submit } from '../action/common'
 import { ReduxState } from '../common/configure_store'
-import * as selector from '../common/selector'
 import Session from '../common/session'
 import { Synchronizer } from '../common/synchronizer'
 import { Key } from '../common/types'
+import * as selector from '../functional/selector'
 import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
@@ -108,6 +108,7 @@ class TitleBar extends Component<Props> {
     super(props)
     this._keyDownListener = ((e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
+        e.preventDefault()
         this.save()
       }
     })

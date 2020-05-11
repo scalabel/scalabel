@@ -13,14 +13,19 @@ export class RedisClient {
   /** The redis client for pub/sub of events */
   protected pubSub: redis.RedisClient
 
-  constructor (config: ServerConfig) {
+  constructor (config: ServerConfig, withLogging = false) {
     this.client = redis.createClient(config.redisPort)
-    this.client.on('error', (err: Error) => {
-      Logger.error(err)
-    })
     this.pubSub = redis.createClient(config.redisPort)
+
+    this.client.on('error', (err: Error) => {
+      if (withLogging) {
+        Logger.error(err)
+      }
+    })
     this.pubSub.on('error', (err: Error) => {
-      Logger.error(err)
+      if (withLogging) {
+        Logger.error(err)
+      }
     })
   }
 

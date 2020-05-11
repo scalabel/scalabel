@@ -3,7 +3,7 @@ import * as action from '../../js/action/common'
 import * as track from '../../js/action/track'
 import Session from '../../js/common/session'
 import { initStore, loadImages } from '../../js/common/session_init'
-import { testJson } from '../test_track_objects'
+import { testJson } from '../test_states/test_track_objects'
 
 test('Test tracks ops', () => {
   Session.devMode = false
@@ -19,11 +19,14 @@ test('Test tracks ops', () => {
   const trackIdx = 3
   expect(_.size(state.task.tracks[trackIdx].labels)).toBe(6)
   Session.dispatch(
-    track.terminateTracks([state.task.tracks[trackIdx]], itemIndex))
+    track.terminateTracks([state.task.tracks[trackIdx]],
+      itemIndex, _.size(state.task.items)))
   state = Session.getState()
-  expect(_.size(state.task.tracks[trackIdx].labels)).toBe(2)
-  expect(_.size(state.task.items[2].labels)).toBe(2)
-  expect(_.size(state.task.items[2].shapes)).toBe(2)
+  expect(_.size(state.task.tracks[trackIdx].labels)).toBe(1)
+  expect(_.size(state.task.items[1].labels)).toBe(2)
+  expect(_.size(state.task.items[1].shapes)).toBe(2)
+  expect(_.size(state.task.items[0].labels)).toBe(3)
+  expect(_.size(state.task.items[0].shapes)).toBe(3)
 
   // merge tracks
   const toMergeTrack1 = '2'

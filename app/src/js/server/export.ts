@@ -61,7 +61,7 @@ export function convertItemToExport (
   }
   // TODO: Clean up the export code for naming and modularity
   for (const key of Object.keys(item.labels)) {
-    const label = item.labels[Number(key)]
+    const label = item.labels[key]
     const labelExport: LabelExport = {
       id: label.id,
       category: config.categories[label.category[0]],

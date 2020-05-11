@@ -22,10 +22,10 @@ import {
   sampleTasksImage,
   // sampleTasksVideo,
   sampleVideoFormFileData
-} from '../test_creation_objects'
+} from '../test_states/test_creation_objects'
 import {
   sampleStateExportImage, sampleStateExportImagePolygon
-} from '../test_export_objects'
+} from '../test_states/test_export_objects'
 
 jest.mock('../../js/server/redis_client')
 

@@ -14,8 +14,8 @@ import { IdType, Point2DType, PolygonType, RectType } from '../../js/functional/
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { drawPolygon, keyClick, keyDown, keyUp, mouseClick, mouseDown, mouseMove, mouseMoveClick, mouseUp } from '../drawable/label2d_handler_util'
-import { testJson } from '../test_image_objects'
-import { findNewLabels } from '../util'
+import { findNewLabels } from '../server/util/util'
+import { testJson } from '../test_states/test_image_objects'
 
 /**
  * Initialize Session, label 3d list, label 3d handler

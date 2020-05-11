@@ -193,7 +193,7 @@ export class Cube3D extends Shape3D {
    * @param plane
    */
   public attachToPlane (plane: Plane3D) {
-    this._grid = plane.shapes()[0] as Grid3D
+    this._grid = plane.internalShapes()[0] as Grid3D
   }
 
   /**

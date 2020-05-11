@@ -8,7 +8,7 @@ import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
 import { index2str } from '../../js/server/util'
 import { sleep } from '../project/util'
-import { getTestConfig } from '../util'
+import { getTestConfig } from './util/util'
 
 let defaultStore: RedisStore
 let storage: FileStorage
@@ -57,6 +57,7 @@ describe('Test redis cache', () => {
   test('Writes back on timeout', async () => {
     const timeoutConfig = _.clone(config)
     timeoutConfig.timeForWrite = 0.2
+    timeoutConfig.redisTimeout = 0.8
     const store = new RedisStore(timeoutConfig, storage, client)
 
     const key = 'testKey1'

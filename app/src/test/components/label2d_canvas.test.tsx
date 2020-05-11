@@ -6,7 +6,7 @@ import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { PolygonType } from '../../js/functional/types'
-import { testJson } from '../test_image_objects'
+import { testJson } from '../test_states/test_image_objects'
 import { LabelCollector } from '../util/label_collector'
 import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp, setUpLabel2dCanvas } from './label2d_canvas_util'
 

@@ -103,14 +103,13 @@ export function deleteTracks (
  */
 export function terminateTracks (
   tracks: TrackType[],
-  lastIndex: number
+  firstIndexToDelete: number,
+  numItems: number
 ): DeleteLabelsAction {
-  const itemLength = Session.numItems
-
   const itemIndices = []
   const labelIds = []
 
-  for (let index = lastIndex + 1; index < itemLength; index++) {
+  for (let index = firstIndexToDelete; index < numItems; index++) {
     const toDelete: IdType[] = []
     for (const track of tracks) {
       if (index in track.labels) {

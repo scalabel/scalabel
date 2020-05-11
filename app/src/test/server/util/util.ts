@@ -2,13 +2,13 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import * as path from 'path'
-import { addBox2dLabel } from '../js/action/box2d'
+import { addBox2dLabel } from '../../../js/action/box2d'
 import { makeItem,
-  makeSensor, makeState, makeTask } from '../js/functional/states'
+  makeSensor, makeState, makeTask } from '../../../js/functional/states'
 import { IdType, LabelIdMap,
-  PolyPathPoint2DType, RectType, State, TaskType, Vector3Type } from '../js/functional/types'
-import * as defaults from '../js/server/defaults'
-import { ServerConfig } from '../js/server/types'
+  PolyPathPoint2DType, RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
+import * as defaults from '../../../js/server/defaults'
+import { ServerConfig } from '../../../js/server/types'
 
 /**
  * Check equality between two Vector3Type objects
@@ -100,6 +100,18 @@ export function getRandomBox2dAction () {
 }
 
 /**
+ * Helper function to generate points of a polygon
+ * In the format returned by the model server
+ */
+export function getRandomModelPoly () {
+  const points = []
+  for (let i = 0; i++; i < 5) {
+    points.push([Math.random(), Math.random()])
+  }
+  return points
+}
+
+/**
  * Get the path to the test config
  */
 export function getTestConfigPath (): string {
@@ -142,4 +154,17 @@ export function findNewLabelsFromState (
   return _.filter(
   _.keys(labels),
   (id) => !labelIds.includes(id))
+}
+
+/**
+ * Find the new label that is not already in the labelIds
+ * @param labels
+ * @param labelIds
+ */
+export function findNewTracksFromState (
+  state: State, trackIds: IdType[]): IdType[] {
+  const tracks = state.task.tracks
+  return _.filter(
+    _.keys(tracks),
+  (id) => !trackIds.includes(id))
 }
