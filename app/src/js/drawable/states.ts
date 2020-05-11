@@ -168,7 +168,7 @@ function terminateTrackFromDrawable (
   if (drawable.item === 0) {
     Session.dispatch(deleteTracks([track]))
   } else {
-    Session.dispatch(terminateTracks([track], drawable.item - 1, numItems))
+    Session.dispatch(terminateTracks([track], drawable.item, numItems))
   }
 }
 
@@ -196,21 +196,17 @@ export function commit2DLabels (
       if (!drawable.temporary) {
         // existing drawable
         if (Session.tracking) {
-          console.log('update track')
           updateTrack(drawable)
         } else {
-          console.log('update label')
           updateLabel(drawable)
         }
       } else {
         // new drawable
         if (Session.tracking) {
           // add track
-          console.log('add track')
           addNewTrack(drawable, numItems)
         } else {
           // add labels
-          console.log('add label')
           addNewLabel(drawable)
         }
       }
@@ -219,16 +215,12 @@ export function commit2DLabels (
       if (!drawable.temporary) {
         // existing drawable
         if (Session.tracking) {
-          console.log('terminate track')
           terminateTrackFromDrawable(drawable, numItems)
         } else {
-          console.log('delete label')
           deleteInvalidLabel(drawable)
         }
-      } else {
-      // new invalid drawable should be dropped. nothing happens.
-        console.log('invalid new creature')
       }
+      // new invalid drawable should be dropped. nothing happens.
     }
   })
 }
