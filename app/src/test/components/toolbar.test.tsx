@@ -196,14 +196,14 @@ describe('test track', () => {
     Session.dispatch(selectLabel(
       Session.getState().user.select.labels, 1, trackLabels[1]))
     fireEvent(
-      getByText('End Object Tracking'),
+      getByText('Delete'),
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true
       })
     )
     state = Session.getState()
-    expect(_.size(state.task.tracks[3].labels)).toBe(2)
+    expect(_.size(state.task.tracks[3].labels)).toBe(1)
     expect(state.task.items[2].labels[lblInItm2]).toBeUndefined()
     expect(state.task.items[2].labels[lblInItm3]).toBeUndefined()
     expect(state.task.items[2].labels[lblInItm4]).toBeUndefined()
