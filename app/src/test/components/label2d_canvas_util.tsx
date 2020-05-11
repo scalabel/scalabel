@@ -192,7 +192,7 @@ export function drawBox2DTracks (
 
 /** Set up component for testing */
 export function setUpLabel2dCanvas (
-    dispatch: (actoin: ActionType) => void,
+    dispatch: (action: ActionType) => void,
     canvasRef: React.RefObject<Label2dCanvas>,
     width: number, height: number) {
   dispatch(action.addViewerConfig(0, makeImageViewerConfig(0)))

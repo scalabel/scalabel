@@ -64,7 +64,7 @@ function commitLabelsToState (updatedLabels: { [index: number]: LabelIdMap}) {
  * @param {(Readonly<Label2D> | Readonly<Label3D>)} drawable
  */
 function updateTrack (drawable: Readonly<Label2D> | Readonly<Label3D>) {
-  if (!Session.tracks.hasOwnProperty(drawable.trackId)) {
+  if (!(drawable.trackId in Session.tracks)) {
     return
   }
   const updatedShapes: { [index: number]: ShapeIdMap } = {}
@@ -106,6 +106,8 @@ function updateLabel (drawable: Readonly<Label2D> | Readonly<Label3D>) {
   shapes.forEach((shape: ShapeType) =>
     updatedShapes[drawable.item][shape.id] = shape)
   updatedLabels[drawable.item][drawable.labelId] = drawable.label
+  commitShapesToState(updatedShapes)
+  commitLabelsToState(updatedLabels)
 }
 
 /**
@@ -194,17 +196,21 @@ export function commit2DLabels (
       if (!drawable.temporary) {
         // existing drawable
         if (Session.tracking) {
+          console.log('update track')
           updateTrack(drawable)
         } else {
+          console.log('update label')
           updateLabel(drawable)
         }
       } else {
         // new drawable
         if (Session.tracking) {
           // add track
+          console.log('add track')
           addNewTrack(drawable, numItems)
         } else {
           // add labels
+          console.log('add label')
           addNewLabel(drawable)
         }
       }
@@ -213,12 +219,16 @@ export function commit2DLabels (
       if (!drawable.temporary) {
         // existing drawable
         if (Session.tracking) {
+          console.log('terminate track')
           terminateTrackFromDrawable(drawable, numItems)
         } else {
+          console.log('delete label')
           deleteInvalidLabel(drawable)
         }
-      }
+      } else {
       // new invalid drawable should be dropped. nothing happens.
+        console.log('invalid new creature')
+      }
     }
   })
 }

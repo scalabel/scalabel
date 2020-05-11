@@ -49,7 +49,7 @@ export const testJson = {
       maxTrackId: 9
     },
     items: [{
-      id: 0,
+      id: '0',
       index: 0,
       videoName: '',
       urls: {
@@ -57,7 +57,7 @@ export const testJson = {
       },
       labels: {
         23: {
-          id: 23,
+          id: '23',
           item: 0,
           sensors: [-1],
           type: 'box2d',
@@ -65,13 +65,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [23],
-          track: 1,
+          shapes: ['23'],
+          track: '1',
           order: 24,
           manual: true
         },
         46: {
-          id: 46,
+          id: '46',
           item: 0,
           sensors: [-1],
           type: 'box2d',
@@ -79,13 +79,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [46],
-          track: 2,
+          shapes: ['46'],
+          track: '2',
           order: 47,
           manual: true
         },
         69: {
-          id: 69,
+          id: '69',
           item: 0,
           sensors: [-1],
           type: 'box2d',
@@ -93,16 +93,16 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [69],
-          track: 3,
+          shapes: ['69'],
+          track: '3',
           order: 70,
           manual: true
         }
       },
       shapes: {
         23: {
-          id: 23,
-          label: [23],
+          id: '23',
+          label: ['23'],
           type: 'rect',
           shape: {
             x1: 0,
@@ -112,8 +112,8 @@ export const testJson = {
           }
         },
         46: {
-          id: 46,
-          label: [46],
+          id: '46',
+          label: ['46'],
           type: 'rect',
           shape: {
             x1: 950.5391221374047,
@@ -123,8 +123,8 @@ export const testJson = {
           }
         },
         69: {
-          id: 69,
-          label: [69],
+          id: '69',
+          label: ['69'],
           type: 'rect',
           shape: {
             x1: 835.1192748091603,
@@ -136,7 +136,7 @@ export const testJson = {
       },
       timestamp: 0
     }, {
-      id: 1,
+      id: '1',
       index: 1,
       videoName: '',
       urls: {
@@ -144,7 +144,7 @@ export const testJson = {
       },
       labels: {
         24: {
-          id: 24,
+          id: '24',
           item: 1,
           sensors: [-1],
           type: 'box2d',
@@ -152,13 +152,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [24],
-          track: 1,
+          shapes: ['24'],
+          track: '1',
           order: 25,
           manual: false
         },
         47: {
-          id: 47,
+          id: '47',
           item: 1,
           sensors: [-1],
           type: 'box2d',
@@ -166,13 +166,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [47],
-          track: 2,
+          shapes: ['47'],
+          track: '2',
           order: 48,
           manual: false
         },
         70: {
-          id: 70,
+          id: '70',
           item: 1,
           sensors: [-1],
           type: 'box2d',
@@ -180,16 +180,16 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [70],
-          track: 3,
+          shapes: ['70'],
+          track: '3',
           order: 71,
           manual: false
         }
       },
       shapes: {
         24: {
-          id: 24,
-          label: [24],
+          id: '24',
+          label: ['24'],
           type: 'rect',
           shape: {
             x1: 0,
@@ -199,8 +199,8 @@ export const testJson = {
           }
         },
         47: {
-          id: 47,
-          label: [47],
+          id: '47',
+          label: ['47'],
           type: 'rect',
           shape: {
             x1: 942.2948473282444,
@@ -210,8 +210,8 @@ export const testJson = {
           }
         },
         70: {
-          id: 70,
-          label: [70],
+          id: '70',
+          label: ['70'],
           type: 'rect',
           shape: {
             x1: 835.1192748091603,
@@ -223,7 +223,7 @@ export const testJson = {
       },
       timestamp: 0
     }, {
-      id: 2,
+      id: '2',
       index: 2,
       videoName: '',
       urls: {
@@ -231,7 +231,7 @@ export const testJson = {
       },
       labels: {
         25: {
-          id: 25,
+          id: '25',
           item: 2,
           sensors: [-1],
           type: 'box2d',
@@ -239,13 +239,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [25],
-          track: 1,
+          shapes: ['25'],
+          track: '1',
           order: 26,
           manual: false
         },
         48: {
-          id: 48,
+          id: '48',
           item: 2,
           sensors: [-1],
           type: 'box2d',
@@ -253,13 +253,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [48],
-          track: 2,
+          shapes: ['48'],
+          track: '2',
           order: 49,
           manual: false
         },
         71: {
-          id: 71,
+          id: '71',
           item: 2,
           sensors: [-1],
           type: 'box2d',
@@ -267,16 +267,16 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [71],
-          track: 3,
+          shapes: ['71'],
+          track: '3',
           order: 72,
           manual: false
         }
       },
       shapes: {
         25: {
-          id: 25,
-          label: [25],
+          id: '25',
+          label: ['25'],
           type: 'rect',
           shape: {
             x1: 0,
@@ -286,8 +286,8 @@ export const testJson = {
           }
         },
         48: {
-          id: 48,
-          label: [48],
+          id: '48',
+          label: ['48'],
           type: 'rect',
           shape: {
             x1: 934.0505725190841,
@@ -297,8 +297,8 @@ export const testJson = {
           }
         },
         71: {
-          id: 71,
-          label: [71],
+          id: '71',
+          label: ['71'],
           type: 'rect',
           shape: {
             x1: 835.1192748091603,
@@ -310,7 +310,7 @@ export const testJson = {
       },
       timestamp: 0
     }, {
-      id: 3,
+      id: '3',
       index: 3,
       videoName: '',
       urls: {
@@ -318,7 +318,7 @@ export const testJson = {
       },
       labels: {
         26: {
-          id: 26,
+          id: '26',
           item: 3,
           sensors: [-1],
           type: 'box2d',
@@ -326,13 +326,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [26],
-          track: 1,
+          shapes: ['26'],
+          track: '1',
           order: 27,
           manual: false
         },
         49: {
-          id: 49,
+          id: '49',
           item: 3,
           sensors: [-1],
           type: 'box2d',
@@ -340,13 +340,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [49],
-          track: 2,
+          shapes: ['49'],
+          track: '2',
           order: 50,
           manual: false
         },
         72: {
-          id: 72,
+          id: '72',
           item: 3,
           sensors: [-1],
           type: 'box2d',
@@ -354,16 +354,16 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [72],
-          track: 3,
+          shapes: ['72'],
+          track: '3',
           order: 73,
           manual: false
         }
       },
       shapes: {
         26: {
-          id: 26,
-          label: [26],
+          id: '26',
+          label: ['26'],
           type: 'rect',
           shape: {
             x1: 0,
@@ -373,8 +373,8 @@ export const testJson = {
           }
         },
         49: {
-          id: 49,
-          label: [49],
+          id: '49',
+          label: ['49'],
           type: 'rect',
           shape: {
             x1: 925.8062977099238,
@@ -384,8 +384,8 @@ export const testJson = {
           }
         },
         72: {
-          id: 72,
-          label: [72],
+          id: '72',
+          label: ['72'],
           type: 'rect',
           shape: {
             x1: 835.1192748091603,
@@ -397,7 +397,7 @@ export const testJson = {
       },
       timestamp: 0
     }, {
-      id: 4,
+      id: '4',
       index: 4,
       videoName: '',
       urls: {
@@ -405,7 +405,7 @@ export const testJson = {
       },
       labels: {
         27: {
-          id: 27,
+          id: '27',
           item: 4,
           sensors: [-1],
           type: 'box2d',
@@ -413,13 +413,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [27],
-          track: 1,
+          shapes: ['27'],
+          track: '1',
           order: 28,
           manual: false
         },
         73: {
-          id: 73,
+          id: '73',
           item: 4,
           sensors: [-1],
           type: 'box2d',
@@ -427,16 +427,16 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [73],
-          track: 3,
+          shapes: ['73'],
+          track: '3',
           order: 74,
           manual: false
         }
       },
       shapes: {
         27: {
-          id: 27,
-          label: [27],
+          id: '27',
+          label: ['27'],
           type: 'rect',
           shape: {
             x1: 0,
@@ -446,8 +446,8 @@ export const testJson = {
           }
         },
         73: {
-          id: 73,
-          label: [73],
+          id: '73',
+          label: ['73'],
           type: 'rect',
           shape: {
             x1: 835.1192748091603,
@@ -459,7 +459,7 @@ export const testJson = {
       },
       timestamp: 0
     }, {
-      id: 5,
+      id: '5',
       index: 5,
       videoName: '',
       urls: {
@@ -467,7 +467,7 @@ export const testJson = {
       },
       labels: {
         28: {
-          id: 28,
+          id: '28',
           item: 5,
           sensors: [-1],
           type: 'box2d',
@@ -475,13 +475,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [28],
-          track: 1,
+          shapes: ['28'],
+          track: '1',
           order: 29,
           manual: false
         },
         74: {
-          id: 74,
+          id: '74',
           item: 5,
           sensors: [-1],
           type: 'box2d',
@@ -489,13 +489,13 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [74],
-          track: 3,
+          shapes: ['74'],
+          track: '3',
           order: 75,
           manual: false
         },
         203: {
-          id: 203,
+          id: '203',
           item: 5,
           sensors: [-1],
           type: 'box2d',
@@ -503,16 +503,16 @@ export const testJson = {
           attributes: {},
           parent: -1,
           children: [],
-          shapes: [202],
-          track: 9,
+          shapes: ['202'],
+          track: '9',
           order: 204,
           manual: true
         }
       },
       shapes: {
         28: {
-          id: 28,
-          label: [28],
+          id: '28',
+          label: ['28'],
           type: 'rect',
           shape: {
             x1: 0,
@@ -522,8 +522,8 @@ export const testJson = {
           }
         },
         74: {
-          id: 74,
-          label: [74],
+          id: '74',
+          label: ['74'],
           type: 'rect',
           shape: {
             x1: 835.1192748091603,
@@ -533,8 +533,8 @@ export const testJson = {
           }
         },
         202: {
-          id: 202,
-          label: [203],
+          id: '202',
+          label: ['203'],
           type: 'rect',
           shape: {
             x1: 931.3024809160306,
@@ -548,44 +548,44 @@ export const testJson = {
     }],
     tracks: {
       1: {
-        id: 1,
+        id: '1',
         type: 'box2d',
         labels: {
-          0: 23,
-          1: 24,
-          2: 25,
-          3: 26,
-          4: 27,
-          5: 28
+          0: '23',
+          1: '24',
+          2: '25',
+          3: '26',
+          4: '27',
+          5: '28'
         }
       },
       2: {
-        id: 2,
+        id: '2',
         type: 'box2d',
         labels: {
-          0: 46,
-          1: 47,
-          2: 48,
-          3: 49
+          0: '46',
+          1: '47',
+          2: '48',
+          3: '49'
         }
       },
       3: {
-        id: 3,
+        id: '3',
         type: 'box2d',
         labels: {
-          0: 69,
-          1: 70,
-          2: 71,
-          3: 72,
-          4: 73,
-          5: 74
+          0: '69',
+          1: '70',
+          2: '71',
+          3: '72',
+          4: '73',
+          5: '74'
         }
       },
       9: {
-        id: 9,
+        id: '9',
         type: 'box2d',
         labels: {
-          5: 203
+          5: '203'
         }
       }
     },

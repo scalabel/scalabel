@@ -52,7 +52,7 @@ export function initSession (containerName: string): void {
 /**
  * Update session objects with new state
  */
-function updateTracks (): void {
+export function updateTracks (): void {
   const state = Session.getState()
   const newTracks: {[trackId: string]: Track} = {}
   for (const trackId of Object.keys(state.task.tracks)) {
