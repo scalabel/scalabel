@@ -12,7 +12,10 @@ import { reducer } from './reducer'
 
 export type ReduxState = StateWithHistory<State>
 export type ReduxStore = Store<ReduxState, AnyAction>
-
+export type FullStore = ReduxStore & {
+  /** Thunk dispatch used for redux-thunk async actions */
+  dispatch: ThunkDispatch<State, undefined, BaseAction>;
+}
 /**
  * Configure the main store for the state
  * @param {Partial<State>} json: initial state
@@ -23,10 +26,7 @@ export type ReduxStore = Store<ReduxState, AnyAction>
 export function configureStore (
     initialState: Partial<State>,
     debug: boolean = false,
-    middleware?: Middleware): ReduxStore & {
-      /** Thunk dispatch used for redux-thunk async actions */
-      dispatch: ThunkDispatch<State, undefined, BaseAction>;
-    } {
+    middleware?: Middleware): FullStore {
   const initialHistory = {
     past: Array<State>(),
     present: makeState(initialState),

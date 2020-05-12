@@ -34,8 +34,6 @@ export interface LabelType {
   shapes: IdType[]
   /** connected track */
   track: IdType
-  /** order of the label among all the labels */
-  order: number
   /** whether the label is created manually */
   manual: boolean
 }

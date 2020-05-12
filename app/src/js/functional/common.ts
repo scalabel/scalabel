@@ -141,11 +141,9 @@ function addLabelsToItem (
         shape.label.push(label.id)
         return shape
       })
-    const order = taskStatus.maxOrder + 1 + index
     const validChildren = label.children.filter((id) => isValidId(id))
     label = updateObject(label, {
       item: item.index,
-      order,
       shapes: label.shapes.concat(shapeIds),
       children: validChildren
     })
@@ -338,8 +336,11 @@ function changeShapesInItem (
   shapes: Array<Partial<ShapeType>>): ItemType {
   const newShapes = { ...item.shapes }
   shapeIds.forEach((shapeId, index) => {
-    newShapes[shapeId] = updateObject(newShapes[shapeId], shapes[index])
-    newShapes[shapeId].id = shapeId
+    // Don't change a non-existent shape
+    if (shapeId in newShapes) {
+      newShapes[shapeId] = updateObject(newShapes[shapeId], shapes[index])
+      newShapes[shapeId].id = shapeId
+    }
   })
   return { ...item, shapes: newShapes }
 }

@@ -31,8 +31,6 @@ export abstract class Label2D {
   protected _trackId: IdType
   /** index of the label */
   protected _index: number
-  /** drawing order of the label */
-  protected _order: number
   /** the corresponding label in the state */
   protected _label: LabelType | null
   /** drawing mode */
@@ -65,7 +63,6 @@ export abstract class Label2D {
     this._selected = false
     this._highlighted = false
     this._highlightedHandle = -1
-    this._order = -1
     this._label = null
     this._color = [0, 0, 0, 1]
     this._viewMode = {
@@ -162,16 +159,6 @@ export abstract class Label2D {
   /** Returns whether this label is selected */
   public get selected (): boolean {
     return this._selected
-  }
-
-  /** return order of this label */
-  public get order (): number {
-    return this._order
-  }
-
-  /** set the order of this label */
-  public set order (o: number) {
-    this._order = o
   }
 
   /** return the editing of this label */
@@ -351,7 +338,6 @@ export abstract class Label2D {
    * @param {Vector2D} start: starting coordinate of the label
    */
   public initTemp (state: State, start: Vector2D): void {
-    this._order = state.task.status.maxOrder + 1
     this._config = state.task.config
     this._selected = true
     this._temporary = true
@@ -366,7 +352,6 @@ export abstract class Label2D {
     state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
     this._label = { ...item.labels[labelId] }
-    this._order = this._label.order
     this._labelId = this._label.id
     this._trackId = this._label.track
     this._config = state.task.config

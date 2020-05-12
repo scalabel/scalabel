@@ -485,7 +485,6 @@ export class Polygon2D extends Label2D {
     const label = makeLabel({
       type: labelType, item: itemIndex,
       category: [state.user.select.category],
-      order: this._order
     })
     this._highlightedHandle = 1
     return label

@@ -4,36 +4,39 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { makeLabel } from '../../js/functional/states'
 import { LabelType } from '../../js/functional/types'
+import { makeRandomRect } from '../server/util/util'
 import { testJson } from '../test_states/test_image_objects'
 
-test('Add and delete labels', () => {
+test('Add and delete labels and their shapes', () => {
   Session.devMode = false
   initStore(testJson)
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(
-    action.addLabel(itemIndex, makeLabel()))
+    action.addLabel(itemIndex, makeLabel(), [makeRandomRect()]))
   const manualLabel = makeLabel()
   Session.dispatch(
-    action.addLabel(itemIndex, manualLabel))
+    action.addLabel(itemIndex, manualLabel, [makeRandomRect()]))
   let autoLabel = makeLabel({ item: itemIndex, manual: false })
-  Session.dispatch(action.addLabel(itemIndex, autoLabel))
+  Session.dispatch(
+    action.addLabel(itemIndex, autoLabel, [makeRandomRect()]))
   let state = Session.getState()
 
-  // check setting of manual and order
+  // check setting of manual
   const label1 = state.task.items[0].labels[manualLabel.id]
   expect(label1.manual).toBe(true)
   expect(label1.item).toBe(0)
   autoLabel = state.task.items[0].labels[autoLabel.id]
   expect(autoLabel.item).toBe(0)
   expect(autoLabel.manual).toBe(false)
-  expect(label1.order < autoLabel.order).toBe(true)
 
   // check deleting label
   expect(_.size(state.task.items[0].labels)).toBe(3)
+  expect(_.size(state.task.items[0].shapes)).toBe(3)
   Session.dispatch(action.deleteLabel(itemIndex, autoLabel.id))
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toBe(2)
+  expect(_.size(state.task.items[0].shapes)).toBe(2)
 })
 
 test('Change category', () => {

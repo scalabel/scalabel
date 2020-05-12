@@ -519,7 +519,6 @@ export const sampleTasksVideo: TaskType[] = [
               '0'
             ],
             track: '0',
-            order: 0,
             manual: true
           }
         },
@@ -576,7 +575,6 @@ export const sampleTasksVideo: TaskType[] = [
               '1'
             ],
             track: '0',
-            order: 0,
             manual: true
           }
         },

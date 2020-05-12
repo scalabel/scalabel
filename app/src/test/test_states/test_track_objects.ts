@@ -67,7 +67,6 @@ export const testJson = {
           children: [],
           shapes: [23],
           track: 1,
-          order: 24,
           manual: true
         },
         46: {
@@ -81,7 +80,6 @@ export const testJson = {
           children: [],
           shapes: [46],
           track: 2,
-          order: 47,
           manual: true
         },
         69: {
@@ -95,7 +93,6 @@ export const testJson = {
           children: [],
           shapes: [69],
           track: 3,
-          order: 70,
           manual: true
         }
       },
@@ -154,7 +151,6 @@ export const testJson = {
           children: [],
           shapes: [24],
           track: 1,
-          order: 25,
           manual: false
         },
         47: {
@@ -168,7 +164,6 @@ export const testJson = {
           children: [],
           shapes: [47],
           track: 2,
-          order: 48,
           manual: false
         },
         70: {
@@ -182,7 +177,6 @@ export const testJson = {
           children: [],
           shapes: [70],
           track: 3,
-          order: 71,
           manual: false
         }
       },
@@ -241,7 +235,6 @@ export const testJson = {
           children: [],
           shapes: [25],
           track: 1,
-          order: 26,
           manual: false
         },
         48: {
@@ -255,7 +248,6 @@ export const testJson = {
           children: [],
           shapes: [48],
           track: 2,
-          order: 49,
           manual: false
         },
         71: {
@@ -269,7 +261,6 @@ export const testJson = {
           children: [],
           shapes: [71],
           track: 3,
-          order: 72,
           manual: false
         }
       },
@@ -328,7 +319,6 @@ export const testJson = {
           children: [],
           shapes: [26],
           track: 1,
-          order: 27,
           manual: false
         },
         49: {
@@ -342,7 +332,6 @@ export const testJson = {
           children: [],
           shapes: [49],
           track: 2,
-          order: 50,
           manual: false
         },
         72: {
@@ -356,7 +345,6 @@ export const testJson = {
           children: [],
           shapes: [72],
           track: 3,
-          order: 73,
           manual: false
         }
       },
@@ -415,7 +403,6 @@ export const testJson = {
           children: [],
           shapes: [27],
           track: 1,
-          order: 28,
           manual: false
         },
         73: {
@@ -429,7 +416,6 @@ export const testJson = {
           children: [],
           shapes: [73],
           track: 3,
-          order: 74,
           manual: false
         }
       },
@@ -477,7 +463,6 @@ export const testJson = {
           children: [],
           shapes: [28],
           track: 1,
-          order: 29,
           manual: false
         },
         74: {
@@ -491,7 +476,6 @@ export const testJson = {
           children: [],
           shapes: [74],
           track: 3,
-          order: 75,
           manual: false
         },
         203: {
@@ -505,7 +489,6 @@ export const testJson = {
           children: [],
           shapes: [202],
           track: 9,
-          order: 204,
           manual: true
         }
       },

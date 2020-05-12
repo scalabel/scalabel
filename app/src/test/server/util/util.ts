@@ -3,7 +3,7 @@ import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import * as path from 'path'
 import { addBox2dLabel } from '../../../js/action/box2d'
-import { makeItem,
+import { makeItem, makeRect,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
 import { IdType, LabelIdMap,
   PolyPathPoint2DType, RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
@@ -97,6 +97,18 @@ export function getInitialState (sessionId: string): State {
 export function getRandomBox2dAction () {
   return addBox2dLabel(0, 0, [], {},
     Math.random(), Math.random(), Math.random(), Math.random())
+}
+
+/**
+ * Helper function to make rectangles
+ */
+export function makeRandomRect () {
+  return makeRect({
+    x1: Math.random(),
+    y1: Math.random(),
+    x2: Math.random(),
+    y2: Math.random()
+  })
 }
 
 /**

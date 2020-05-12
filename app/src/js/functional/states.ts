@@ -56,7 +56,6 @@ export function makeLabel (params: Partial<LabelType> = {},
     children: [], // ids
     shapes: [],
     track: makeDefaultId(),
-    order: 0,
     manual: true, // by default, manual is true
     ...params
   }

@@ -303,8 +303,7 @@ export class CustomLabel2D extends Label2D {
       type: templateName,
       item: itemIndex,
       category: [state.user.select.category],
-      attributes: state.user.select.attributes,
-      order: this._order
+      attributes: state.user.select.attributes
     })
 
     // Initialize with template information

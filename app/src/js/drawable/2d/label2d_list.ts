@@ -177,7 +177,7 @@ export class Label2DList {
       }
     })
     // order the labels and assign order values
-    self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
+    self._labelList = _.values(self._labels)
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })
     this._selectedLabels = []

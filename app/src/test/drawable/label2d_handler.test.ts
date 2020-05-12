@@ -1,13 +1,10 @@
 import { createCanvas } from 'canvas'
 import _ from 'lodash'
 import * as action from '../../js/action/common'
-import { addPolygon2dLabel } from '../../js/action/polygon2d'
-import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
-import { Key, ShapeTypeName } from '../../js/common/types'
+import { ShapeTypeName } from '../../js/common/types'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
-import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, Point2DType, PolygonType, RectType } from '../../js/functional/types'
@@ -1160,82 +1157,4 @@ test('Draw label2d list to canvas', () => {
   expect(rect.y1).toEqual(1)
   expect(rect.x2).toEqual(10)
   expect(rect.y2).toEqual(10)
-})
-
-test('Change label ordering', () => {
-  const [label2dHandler] = initializeTestingObjects()
-  Session.dispatch(addPolygon2dLabel(
-    0,
-    -1,
-    [0],
-    [(new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(1, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(1, 2, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(0, 2, PointType.CURVE)).toPathPoint()],
-    true
-  ))
-  Session.dispatch(addPolygon2dLabel(
-    0,
-    -1,
-    [0],
-    [(new PathPoint2D(3, 4, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(4, 4, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(4, 5, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(3, 5, PointType.CURVE)).toPathPoint()],
-    false
-  ))
-  Session.dispatch(addPolygon2dLabel(
-    0,
-    -1,
-    [0],
-    [(new PathPoint2D(10, 11, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(11, 11, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(11, 12, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(10, 12, PointType.CURVE)).toPathPoint()],
-    true
-  ))
-
-  let state = Session.getState()
-  const labelIds = Object.keys(state.task.items[0].labels)
-  expect(labelIds.length).toEqual(3)
-  expect(state.task.items[0].labels[labelIds[0]].order).toEqual(0)
-  expect(state.task.items[0].labels[labelIds[1]].order).toEqual(1)
-  expect(state.task.items[0].labels[labelIds[2]].order).toEqual(2)
-
-  // Move last label back
-  Session.dispatch(selectLabel(state.user.select.labels, 0, labelIds[2]))
-
-  keyClick(label2dHandler, Key.ARROW_DOWN)
-
-  state = Session.getState()
-  expect(state.task.items[0].labels[labelIds[0]].order).toEqual(0)
-  expect(state.task.items[0].labels[labelIds[1]].order).toEqual(2)
-  expect(state.task.items[0].labels[labelIds[2]].order).toEqual(1)
-
-  // Move first label forward
-  Session.dispatch(selectLabel(state.user.select.labels, 0, labelIds[0]))
-  keyClick(label2dHandler, Key.ARROW_UP)
-
-  state = Session.getState()
-  expect(state.task.items[0].labels[labelIds[0]].order).toEqual(1)
-  expect(state.task.items[0].labels[labelIds[1]].order).toEqual(2)
-  expect(state.task.items[0].labels[labelIds[2]].order).toEqual(0)
-
-  // Move label in front to back
-  Session.dispatch(selectLabel(state.user.select.labels, 0, labelIds[1]))
-  keyClick(label2dHandler, Key.B_LOW)
-
-  state = Session.getState()
-  expect(state.task.items[0].labels[labelIds[0]].order).toEqual(2)
-  expect(state.task.items[0].labels[labelIds[1]].order).toEqual(0)
-  expect(state.task.items[0].labels[labelIds[2]].order).toEqual(1)
-
-  // Move label in back to front
-  Session.dispatch(selectLabel(state.user.select.labels, 0, labelIds[1]))
-  keyClick(label2dHandler, Key.F_LOW)
-
-  state = Session.getState()
-  expect(state.task.items[0].labels[labelIds[0]].order).toEqual(1)
-  expect(state.task.items[0].labels[labelIds[1]].order).toEqual(2)
-  expect(state.task.items[0].labels[labelIds[2]].order).toEqual(0)
 })

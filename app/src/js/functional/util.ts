@@ -119,7 +119,9 @@ export function pickObject<T> (
   object: { [key: string]: T }, keys: string[]): {[key: string]: T} {
   const newObject: { [key: string]: T } = {}
   keys.forEach((key) => {
-    newObject[key] = object[key]
+    if (key in object) {
+      newObject[key] = object[key]
+    }
   })
   return newObject
 }
