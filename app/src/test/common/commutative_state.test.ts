@@ -27,7 +27,7 @@ describe('Test actions are commutative (for the task)', () => {
   test('Changing the same shape, when change is independent', () => {
     const [storeA, storeB, , shapeId] = makeStoresWithBox()
 
-    // Make two independent changes to the 2d box
+    // Make two independent changes to the 2d box shape
     const actionA = box2d.changeBox2d(itemIndex, shapeId, { x1: 0, y1: 0 })
     const actionB = box2d.changeBox2d(itemIndex, shapeId, { x2: 10, y2: 10 })
     commutativeDispatch(storeA, storeB, actionA, actionB)
@@ -40,6 +40,26 @@ describe('Test actions are commutative (for the task)', () => {
     expect(rect.y1).toBe(0)
     expect(rect.x2).toBe(10)
     expect(rect.y2).toBe(10)
+  })
+
+  test('Changing the same label, when change is independent', () => {
+    const [storeA, storeB, labelId] = makeStoresWithBox()
+
+    // Make two independent changes to the 2d box label
+    const actionA = action.changeLabelProps(itemIndex, labelId, {
+      category: [5, 3]
+    })
+    const actionB = action.changeLabelProps(itemIndex, labelId, {
+      attributes: { 1: [2, 3] }
+    })
+    commutativeDispatch(storeA, storeB, actionA, actionB)
+
+    // Check tasks are equal, and have the correct label
+    checkTasksEqual(storeA, storeB)
+    const item = storeA.getState().present.task.items[itemIndex]
+    const label = item.labels[labelId]
+    expect(label.category).toStrictEqual([5, 3])
+    expect(label.attributes).toStrictEqual({ 1: [2, 3] })
   })
 
   test('Deleting a box twice causes no errors', () => {
@@ -56,14 +76,30 @@ describe('Test actions are commutative (for the task)', () => {
     expect(_.size(item.shapes)).toBe(0)
   })
 
-  test(`Deleting and changing a shape
-    results in deletion with no errors`, () => {
+  test('Deleting and changing a shape results in deletion', () => {
     const [storeA, storeB, labelId, shapeId] = makeStoresWithBox()
 
     const deleteAction = action.deleteLabel(itemIndex, labelId)
-    const changeAction = box2d.changeBox2d(itemIndex, shapeId, { x1: 0, y1: 0 })
+    const changeShapeAction = box2d.changeBox2d(
+      itemIndex, shapeId, { x1: 0, y1: 0 })
 
-    commutativeDispatch(storeA, storeB, deleteAction, changeAction)
+    commutativeDispatch(storeA, storeB, deleteAction, changeShapeAction)
+
+    // Check tasks are equal, and neither has any labels or shapes
+    checkTasksEqual(storeA, storeB)
+    const item = storeA.getState().present.task.items[itemIndex]
+    expect(_.size(item.labels)).toBe(0)
+    expect(_.size(item.shapes)).toBe(0)
+  })
+
+  test('Deleting and changing a label results in deletion', () => {
+    const [storeA, storeB, labelId] = makeStoresWithBox()
+
+    const deleteAction = action.deleteLabel(itemIndex, labelId)
+    const changeLabelAction = action.changeLabelProps(itemIndex, labelId, {
+      category: [5, 3]
+    })
+    commutativeDispatch(storeA, storeB, deleteAction, changeLabelAction)
 
     // Check tasks are equal, and neither has any labels or shapes
     checkTasksEqual(storeA, storeB)

@@ -394,10 +394,13 @@ function changeLabelsInItem (
     if (children) {
       props[index].children = children.filter((id) => isValidId(id))
     }
-    const oldLabel = item.labels[labelId]
-    // avoid changing the shape field in the label
-    newLabels[labelId] = updateObject(
-      oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
+    // Don't change nonexistent label
+    if (labelId in item.labels) {
+      const oldLabel = item.labels[labelId]
+      // avoid changing the shape field in the label
+      newLabels[labelId] = updateObject(
+        oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
+    }
   })
   item = updateObject(item, { labels: updateObject(item.labels, newLabels) })
   return item
