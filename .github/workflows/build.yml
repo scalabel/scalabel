@@ -28,8 +28,8 @@ jobs:
           pip install --ignore-installed -r scripts/requirements.txt
       - name: Lint with pylint and mypy
         run: |
-          python3 -m pylint scripts/ scalabel
-          python3 -m mypy --strict scripts scalabel
+          python3 -m pylint scalabel
+          python3 -m mypy --strict scalabel
 
   nodejs:
     runs-on: ubuntu-latest
