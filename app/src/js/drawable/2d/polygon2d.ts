@@ -484,7 +484,7 @@ export class Polygon2D extends Label2D {
                 LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
     const label = makeLabel({
       type: labelType, item: itemIndex,
-      category: [state.user.select.category],
+      category: [state.user.select.category]
     })
     this._highlightedHandle = 1
     return label
