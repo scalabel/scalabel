@@ -147,7 +147,7 @@ Now you can open multiple sessions for the same project, and they will automatic
 
 Some to-be-released features can be enabled by launching the server with the following python script:
 ```shell
-python3.8 scripts/launch_server.py --config ./local-data/scalabel/config.yml
+python3.8 -m scalabel.tools.launch_server --config ./local-data/scalabel/config.yml
 ```
 
 ### More Usage Info
