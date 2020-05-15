@@ -50,7 +50,6 @@ export class RedisStore {
 
       const value = await this.get(baseKey)
       await this.writeBackTask(saveDir, value)
-      await this.del(baseKey)
     })
   }
 
