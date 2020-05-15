@@ -45,9 +45,15 @@ test('Add new valid drawable track', () => {
 
     const currentState = Session.getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(4)
+    const savedLabels = currentState.task.items[0].labels
+    let savedLabelId = ''
+    for (const labelId of Object.keys(savedLabels)) {
+      if (labelId.length === 16) {
+        savedLabelId = labelId
+      }
+    }
     // Verify label is added
-    expect(currentState.task.items[0].labels[label.labelId]).not.toBeUndefined()
-    const savedLabel = currentState.task.items[0].labels[label.labelId]
+    const savedLabel = currentState.task.items[0].labels[savedLabelId]
     // Verify label's shape is added
     expect(currentState.task.items[0].shapes[savedLabel.shapes[0]])
       .not.toBeUndefined()
@@ -84,7 +90,6 @@ test('Add new invalid drawable track', () => {
 
     const currentState = Session.getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(3)
-    expect(currentState.task.items[0].labels[label.labelId]).toBeUndefined()
     expect(_.size(currentState.task.items[0].shapes))
       .toEqual(_.size(state.task.items[0].shapes))
     expect(_.size(currentState.task.tracks)).toEqual(4)
