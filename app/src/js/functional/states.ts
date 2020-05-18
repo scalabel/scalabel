@@ -591,7 +591,7 @@ export function makeDefaultId (): IdType {
 /**
  * Generate new label id. It should not be called outside this file.
  */
-function genLabelId (): IdType {
+export function genLabelId (): IdType {
   return uid()
 }
 
@@ -605,7 +605,7 @@ function genTrackId (): IdType {
 /**
  * Generate new shape id. It should not be called outside this file.
  */
-function genShapeId (): IdType {
+export function genShapeId (): IdType {
   return uid()
 }
 

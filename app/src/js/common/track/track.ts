@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Label2D from '../../drawable/2d/label2d'
 import Label3D from '../../drawable/3d/label3d'
-import { makeTrack } from '../../functional/states'
+import { genLabelId, genShapeId, makeTrack } from '../../functional/states'
 import { IdType, Label2DTemplateType, LabelType, ShapeType, State, TrackType } from '../../functional/types'
 import { LabelTypeName, TrackPolicyType } from '../types'
 import { Box2DLinearInterpolationPolicy } from './policy/linear_interpolation/box2d_linear_interpolation'
@@ -211,6 +211,7 @@ export class Track {
     const shapeStates = label.shapes()
     for (let index = itemIndex; index < itemIndex + numItems; index++) {
       const cloned = _.cloneDeep(labelState) as LabelType
+      cloned.id = genLabelId()
       cloned.item = -1
       if (index > itemIndex) {
         cloned.manual = false
@@ -231,7 +232,9 @@ export class Track {
         this._shapes[index] = []
         for (const shape of shapeStates) {
           // TODO(fisher) make sure the shape types are correct
-          this._shapes[index].push(_.cloneDeep(shape))
+          const clonedShape = _.cloneDeep(shape)
+          clonedShape.id = genShapeId()
+          this._shapes[index].push(clonedShape)
         }
         this._updatedIndices.add(index)
       }

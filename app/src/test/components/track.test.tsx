@@ -244,8 +244,9 @@ describe('basic track ops', () => {
     )
     dispatch(action.goToItem(1))
     let state = getState()
-    const labelId = state.task.tracks[trackIds[0]].labels[3]
-    expect(state.task.items[3].labels[labelId].category).toEqual([2])
+    const labelIdIn2 = state.task.tracks[trackIds[0]].labels[2]
+    const labelIdIn3 = state.task.tracks[trackIds[0]].labels[3]
+    expect(state.task.items[3].labels[labelIdIn3].category).toEqual([2])
 
     // Changing attributes
     // Attribute should be propagated to the end of each track
@@ -254,9 +255,9 @@ describe('basic track ops', () => {
     const switchBtn = getAllByRole('checkbox')[0]
     switchBtn.click()
     state = getState()
-    expect(state.task.items[2].labels[labelId].attributes[0]).toEqual([1])
-    expect(state.task.items[3].labels[labelId].attributes[0]).toEqual([1])
-    expect(state.task.items[2].labels[labelId].attributes[1]).toEqual([0])
-    expect(state.task.items[2].labels[labelId].attributes[2]).toEqual([0])
+    expect(state.task.items[2].labels[labelIdIn2].attributes[0]).toEqual([1])
+    expect(state.task.items[3].labels[labelIdIn3].attributes[0]).toEqual([1])
+    expect(state.task.items[2].labels[labelIdIn2].attributes[1]).toEqual([0])
+    expect(state.task.items[2].labels[labelIdIn2].attributes[2]).toEqual([0])
   })
 })
