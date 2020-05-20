@@ -262,7 +262,8 @@ export function makePointCloudViewerConfig (
     sensor,
     pane,
     synchronized: false,
-    hideLabels: false
+    hideLabels: false,
+    cameraRotateDir: false
   }
 }
 
