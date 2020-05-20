@@ -263,13 +263,11 @@ export class Polygon2D extends Label2D {
    * @param _limit
    */
   public onMouseMove (coord: Vector2D, _limit: Size2D,
-                      labelIndex: number, handleIndex: number): boolean {
+                      _labelIndex: number, handleIndex: number): boolean {
     if (this._state === Polygon2DState.DRAW) {
       // move to add vertex
       this._mouseCoord = coord.clone()
-      if (labelIndex === this._index) {
-        this._highlightedHandle = handleIndex
-      }
+      this._highlightedHandle = handleIndex
     } else if (this._mouseDown === true &&
       this._state === Polygon2DState.RESHAPE) {
       // dragging point
