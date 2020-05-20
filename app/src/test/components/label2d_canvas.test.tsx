@@ -42,9 +42,7 @@ test('Draw 2d polygons to label2d list', () => {
   const label2d = canvasRef.current as Label2dCanvas
   // draw the first polygon
   mouseMoveClick(label2d, 10, 10)
-  mouseMove(label2d, 100, 100)
   mouseMoveClick(label2d, 100, 100)
-  mouseMove(label2d, 200, 100)
   mouseMoveClick(label2d, 200, 100)
   /**
    * drawing the first polygon
@@ -54,9 +52,7 @@ test('Draw 2d polygons to label2d list', () => {
   expect(_.size(state.task.items[0].labels)).toEqual(0)
 
   // drag when drawing
-  mouseMove(label2d, 100, 0)
   mouseMoveClick(label2d, 100, 0)
-  mouseMove(label2d, 10, 10)
   mouseMoveClick(label2d, 10, 10)
 
   /**
@@ -101,7 +97,6 @@ test('Draw 2d polygons to label2d list', () => {
   expect(polygon.points[2].y).toEqual(700)
   expect(polygon.points[2].pointType).toEqual('vertex')
   expect(polygon.points.length).toEqual(3)
-  // expect(Session.canvasRef.current.labelList.length).toEqual(2)
 })
 
 test('2d polygons highlighted and selected', () => {
@@ -128,9 +123,7 @@ test('2d polygons highlighted and selected', () => {
 
   // change selected label
   mouseMove(label2d, 120, 120)
-  mouseMove(label2d, 120, 120)
   mouseDown(label2d, 120, 120)
-  mouseMove(label2d, 140, 140)
   mouseMove(label2d, 140, 140)
   mouseUp(label2d, 140, 140)
   selected = Session.label2dList.selectedLabels
@@ -166,9 +159,7 @@ test('validation check for polygon2d', () => {
 
   // drag the polygon to an invalid shape
   mouseMove(label2d, 310, 260)
-  mouseMove(label2d, 310, 260)
   mouseDown(label2d, 310, 260)
-  mouseMove(label2d, 310, 0)
   mouseMove(label2d, 310, 0)
   mouseUp(label2d, 310, 0)
 
@@ -212,9 +203,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
 
   // drag a vertex
   mouseMove(label2d, 200, 100)
-  mouseMove(label2d, 200, 100)
   mouseDown(label2d, 200, 100)
-  mouseMove(label2d, 300, 100)
   mouseMove(label2d, 300, 100)
   mouseUp(label2d, 300, 100)
   let state = Session.getState()
@@ -228,9 +217,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
 
   // drag midpoints
   mouseMove(label2d, 200, 100)
-  mouseMove(label2d, 200, 100)
   mouseDown(label2d, 200, 100)
-  mouseMove(label2d, 200, 150)
   mouseMove(label2d, 200, 150)
   mouseUp(label2d, 200, 150)
   state = Session.getState()
@@ -245,9 +232,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
 
   // drag edges
   mouseMove(label2d, 20, 20)
-  mouseMove(label2d, 20, 20)
   mouseDown(label2d, 20, 20)
-  mouseMove(label2d, 120, 120)
   mouseMove(label2d, 120, 120)
   mouseUp(label2d, 120, 120)
   state = Session.getState()
@@ -270,23 +255,16 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   mouseMoveClick(label2d, 200, 100)
   keyDown(label2d, 'd')
   keyUp(label2d, 'd')
-  mouseMove(label2d, 250, 100)
   mouseMoveClick(label2d, 250, 100)
-  mouseMove(label2d, 300, 0)
   mouseMoveClick(label2d, 300, 0)
-  mouseMove(label2d, 350, 100)
   mouseMoveClick(label2d, 350, 100)
-  mouseMove(label2d, 300, 200)
   mouseMoveClick(label2d, 300, 200)
-  mouseMove(label2d, 320, 130)
   mouseMove(label2d, 320, 130)
   keyDown(label2d, 'd')
   keyUp(label2d, 'd')
   mouseDown(label2d, 320, 130)
   mouseUp(label2d, 320, 130)
-  mouseMove(label2d, 320, 130)
   mouseMoveClick(label2d, 300, 150)
-  mouseMove(label2d, 250, 100)
   mouseMoveClick(label2d, 250, 100)
 
   /**
@@ -319,10 +297,8 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   // delete vertex when closed
   keyDown(label2d, 'd')
   mouseMove(label2d, 275, 125)
-  mouseMove(label2d, 275, 125)
   mouseDown(label2d, 275, 125)
   mouseUp(label2d, 2750, 1250)
-  mouseMove(label2d, 300, 150)
   mouseMoveClick(label2d, 300, 150)
   keyUp(label2d, 'd')
   /**
@@ -338,7 +314,6 @@ test('2d polygons delete vertex and draw bezier curve', () => {
 
   // draw bezier curve
   keyDown(label2d, 'c')
-  mouseMove(label2d, 335, 115)
   mouseMoveClick(label2d, 335, 115)
   keyUp(label2d, 'c')
   /**
@@ -359,9 +334,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
 
     // drag bezier curve control points
   mouseMove(label2d, 340, 110)
-  mouseMove(label2d, 340, 110)
   mouseDown(label2d, 340, 110)
-  mouseMove(label2d, 340, 90)
   mouseMove(label2d, 340, 90)
   mouseUp(label2d, 340, 90)
     /**
@@ -470,11 +443,8 @@ test('2d polygons multi-select and multi-label moving', () => {
 
   // move
   mouseMove(label2d, 20, 20)
-  mouseMove(label2d, 20, 20)
   mouseDown(label2d, 20, 20)
   mouseMove(label2d, 60, 60)
-  mouseMove(label2d, 60, 60)
-  mouseMove(label2d, 120, 120)
   mouseMove(label2d, 120, 120)
   mouseUp(label2d, 120, 120)
   /**
@@ -579,11 +549,8 @@ test('2d polygons linking labels and moving', () => {
 
   // moving group 1
   mouseMove(label2d, 20, 20)
-  mouseMove(label2d, 20, 20)
   mouseDown(label2d, 20, 20)
   mouseMove(label2d, 60, 60)
-  mouseMove(label2d, 60, 60)
-  mouseMove(label2d, 120, 120)
   mouseMove(label2d, 120, 120)
   mouseUp(label2d, 120, 120)
   /**
