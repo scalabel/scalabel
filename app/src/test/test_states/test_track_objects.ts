@@ -28,7 +28,7 @@ export const testJson = {
         values: [],
         buttonColors: []
       }, {
-        name: 'Traffic Color Light',
+        name: 'Traffic Light Color',
         toolType: 'list',
         tagText: 't',
         tagSuffixes: ['', 'g', 'y', 'r'],
