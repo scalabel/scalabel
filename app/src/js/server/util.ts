@@ -92,7 +92,7 @@ async function validateConfig (config: ServerConfig) {
   }
 
   // Redis validation
-  if (config.timeForWrite + 1.5 < config.redisTimeout) {
+  if (!(config.timeForWrite + 1.5 < config.redisTimeout)) {
     throw new Error(`Redis timeForWrite must be at least 1.5 seconds earlier than redisTimeout
       to ensure that write occurs before value is erased`)
   }
