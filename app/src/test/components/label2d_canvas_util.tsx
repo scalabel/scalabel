@@ -115,13 +115,8 @@ export function keyUp (label2d: Label2dCanvas, key: string) {
  * @param points
  */
 export function drawPolygon (label2d: Label2dCanvas, points: number[][]) {
-  const draw = () => {
-    for (const p of points) {
-      mouseMoveClick(label2d, p[0], p[1])
-    }
-    mouseMoveClick(label2d, points[0][0], points[0][1])
-  }
-  draw()
+  points.forEach((p) => mouseMoveClick(label2d, p[0], p[1]))
+  mouseMoveClick(label2d, points[0][0], points[0][1])
 }
 
 /**
