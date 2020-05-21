@@ -92,8 +92,8 @@ export function makeTrack (params: Partial<TrackType> = {},
  * Every shape has an id when it is born
  * @param {string} shapeType type name of the shape
  */
-function makeShape (shapeType: string = '',
-                    params: Partial<ShapeType> = {}): ShapeType {
+export function makeShape (shapeType: string = '',
+                           params: Partial<ShapeType> = {}): ShapeType {
   return {
     label: [],
     shapeType,
@@ -591,7 +591,7 @@ export function makeDefaultId (): IdType {
 /**
  * Generate new label id. It should not be called outside this file.
  */
-export function genLabelId (): IdType {
+function genLabelId (): IdType {
   return uid()
 }
 
@@ -605,7 +605,7 @@ function genTrackId (): IdType {
 /**
  * Generate new shape id. It should not be called outside this file.
  */
-export function genShapeId (): IdType {
+function genShapeId (): IdType {
   return uid()
 }
 
