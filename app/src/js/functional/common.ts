@@ -250,10 +250,7 @@ function addTrackToTask (
   labels: LabelType[],
   shapes: ShapeType[][]
 ): [TaskType, TrackType, LabelType[]] {
-  const track = makeTrack({ type })
-  for (const label of labels) {
-    label.track = track.id
-  }
+  const track = makeTrack({ type, id: labels[0].track }, true)
   const labelList = labels.map((l) => [l])
   const shapeList = shapes.map((s) => [s])
   const [newItems, newLabels, status] = addLabelstoItems(
