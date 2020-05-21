@@ -55,7 +55,7 @@
     "editor.detectIndentation": false,
     "editor.formatOnSave": true,
     // python settings
-    "python.formatting.provider": "yapf",
+    // "python.formatting.provider": "autopep8",
     "python.linting.pylintEnabled": true,
     "tslint.configFile": "tslint.json",
     // Enabgle golangci to automatically check for issues in go code

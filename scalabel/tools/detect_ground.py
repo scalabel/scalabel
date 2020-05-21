@@ -6,23 +6,27 @@ import argparse
 import json
 import urllib.request
 import sys
-from typing import Any, List, Tuple, Union
+from typing import List, Tuple, Union
 
 import numpy as np
 import plyfile
-import yaml
+from tqdm import tqdm
+
+# Define the ground return type
+GroundOutputType = Union[None, Tuple[np.ndarray, float, np.ndarray,
+                                     np.ndarray]]
 
 
 def estimate_ground_plane(
         points: np.ndarray,
-        sample_size: int,
+        sample_size: float,
         iters: int,
         dist_cutoff: List[float],
         height_cutoff: List[float],
         expected_normal: np.ndarray,
         max_normal_deviation: float,
-        inlier_cutoff: float = 0.15
-) -> Union[None, Tuple[Any, Any, Any, Any]]:
+        inlier_cutoff: float = 0.15) \
+            -> GroundOutputType:
     '''
     Detect ground in points by using RANSAC to find largest plane
     in point cloud that has normal close to what is expected
@@ -33,18 +37,15 @@ def estimate_ground_plane(
     assert len(height_cutoff) == 2
 
     depths = np.linalg.norm(points, axis=-1)
-    height_filtered = np.logical_and(
-        points[:, 2] > height_cutoff[0],
-        points[:, 2] < height_cutoff[1]
-    )
-    dist_filtered = np.logical_and(
-        depths < dist_cutoff[1], depths > dist_cutoff[0]
-    )
+    height_filtered = np.logical_and(points[:, 2] > height_cutoff[0],
+                                     points[:, 2] < height_cutoff[1])
+    dist_filtered = np.logical_and(depths < dist_cutoff[1],
+                                   depths > dist_cutoff[0])
     valid_indices = np.logical_and(height_filtered, dist_filtered)
     valid_points = points[valid_indices]
     point_indices = np.arange(valid_points.shape[0])
 
-    num_samples = int(sample_size * valid_points.shape[0])
+    num_samples = int(round(sample_size * valid_points.shape[0]))
 
     max_inliers = 0
     best_plane = None
@@ -52,9 +53,9 @@ def estimate_ground_plane(
     best_plane_outliers = None
 
     for _ in range(iters):
-        sample_indices = np.random.choice(
-            point_indices, size=num_samples, replace=False
-        )
+        sample_indices = np.random.choice(point_indices,
+                                          size=num_samples,
+                                          replace=False)
         sample_points = valid_points[sample_indices]
 
         # Use PCA to estimate normal
@@ -95,41 +96,52 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description='Find ground plane and write it to PLY file')
     parser.add_argument('--bdd_items',
-                        help='Input BDD Data yaml file',
+                        help='Input BDD Data json file',
                         required=True)
     parser.add_argument('--output',
-                        help='Output BDD Data yaml file',
+                        help='Output BDD Data json file',
                         required=True)
     parser.add_argument('--iterations',
                         help='Number of iterations to run for RANSAC.',
-                        default=20, type=int)
+                        default=20,
+                        type=int)
     parser.add_argument('--sample_size',
                         help='Fraction of points to use as sample',
-                        default=0.1, type=float)
-    parser.add_argument('--min_dist', help='Minimum distance of points from '
-                                           'origin to be considered valid',
-                        default=3, type=float)
-    parser.add_argument('--max_dist', help='Maximum distance of points from '
-                                           'origin to be considered valid',
-                        default=25, type=float)
+                        default=0.1,
+                        type=float)
+    parser.add_argument('--min_dist',
+                        help='Minimum distance of points from '
+                        'origin to be considered valid',
+                        default=3.,
+                        type=float)
+    parser.add_argument('--max_dist',
+                        help='Maximum distance of points from '
+                        'origin to be considered valid',
+                        default=25.,
+                        type=float)
     parser.add_argument('--min_height',
                         help='Minimum height of points, value '
-                             'on z-axis to be considered valid',
-                        default=-2, type=float)
+                        'on z-axis to be considered valid',
+                        default=-2.,
+                        type=float)
     parser.add_argument('--max_height',
                         help='Maximum height of points, value '
                         'on z-axis to be considered valid',
-                        default=-1, type=float)
+                        default=-1.,
+                        type=float)
     parser.add_argument('--expected_normal',
                         help='Expected normal of the ground plane',
-                        nargs='+', default=[0, 0, 1], type=float)
+                        nargs='+',
+                        default=[0, 0, 1],
+                        type=float)
     parser.add_argument('--max_normal_deviation',
                         help='Maximum deviation from expected normal '
-                             'in radians',
-                        default=0.15, type=float)
+                        'in radians',
+                        default=0.15,
+                        type=float)
     parser.add_argument('--tracking',
                         help='Set flag if tracking. '
-                             'Will make all ground planes have same id.',
+                        'Will make all ground planes have same id.',
                         action='store_true')
 
     args = parser.parse_args()
@@ -140,32 +152,35 @@ def main() -> None:
 
     expected_normal = np.array(args.expected_normal)
 
-    bdd_file = open(args.bdd_items, 'r')
-    bdd_json = yaml.load(bdd_file)
+    with open(args.bdd_items, 'r') as bdd_file:
+        bdd_json = json.load(bdd_file)
+    if not isinstance(bdd_json, list):
+        raise ValueError("[Error] Contents in the json file are not in" + \
+            " valid label format.")
 
     for item in bdd_json:
-        if 'labels' not in item:
+        if 'labels' not in item.keys():
             item['labels'] = []
 
     label_ids = [label['id'] for item in bdd_json for label in item['labels']]
-    max_label_id = max(label_ids) if len(label_ids) > 0 else 0
+    max_label_id = max(label_ids) if label_ids else 0
 
-    for item in bdd_json:
+    for item in tqdm(bdd_json, ascii=True):
         url = item['url']
         http_response = urllib.request.urlopen(url)
         ply_data = plyfile.PlyData.read(http_response)
-        values = np.array([x for a in ply_data['vertex'].data for x in a])
-        points = values.reshape((np.shape(values)[0] // 3, 3))
+        points = np.concatenate([
+            ply_data["vertex"]["x"][..., None],
+            ply_data["vertex"]["y"][..., None], 
+            ply_data["vertex"]["z"][..., None]
+        ], axis=-1)
 
-        results = estimate_ground_plane(
-            points,
-            args.sample_size,
-            args.iterations,
-            [args.min_dist, args.max_dist],
-            [args.min_height, args.max_height],
-            expected_normal,
-            args.max_normal_deviation
-        )
+        results = estimate_ground_plane(points, args.sample_size,
+                                        args.iterations,
+                                        [args.min_dist, args.max_dist],
+                                        [args.min_height, args.max_height],
+                                        expected_normal,
+                                        args.max_normal_deviation)
 
         if not results:
             continue
