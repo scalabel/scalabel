@@ -92,8 +92,8 @@ export function makeTrack (params: Partial<TrackType> = {},
  * Every shape has an id when it is born
  * @param {string} shapeType type name of the shape
  */
-function makeShape (shapeType: string = '',
-                    params: Partial<ShapeType> = {}): ShapeType {
+export function makeShape (shapeType: string = '',
+                           params: Partial<ShapeType> = {}): ShapeType {
   return {
     label: [],
     shapeType,
