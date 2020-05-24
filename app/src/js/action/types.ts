@@ -91,16 +91,18 @@ export function isSessionAction (action: BaseAction) {
 }
 
 export interface BaseAction {
+  /** unique id for the action */
+  actionId: IdType
   /** type of the action */
   type: string
   /** id of the session that initiates the action */
   sessionId: IdType
   /** timestamp given by backend. It is Date.now() */
-  timestamp?: number
+  timestamp: number
   /** whether to sync action, or just apply to frontend */
   frontendOnly?: boolean
   /** id of the user that initiates the action */
-  userId?: IdType
+  userId: IdType
 }
 
 export type InitSessionAction = BaseAction
