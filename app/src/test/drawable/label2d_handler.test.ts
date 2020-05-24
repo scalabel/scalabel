@@ -500,6 +500,45 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   expect(polygon.points.length).toEqual(3)
 })
 
+test('2d polygon select and moving', () => {
+  const [label2dHandler] = initializeTestingObjects()
+  Session.dispatch(action.changeSelect({ labelType: 1 }))
+  const labelIds: IdType[] = []
+
+  // draw first polygon
+  const canvasSize = new Size2D(1000, 1000)
+  drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
+  /**
+   * polygon 1: (10, 10) (100, 100) (200, 100)
+   */
+  labelIds.push(findNewLabels(
+    Session.getState().task.items[0].labels, labelIds)[0])
+
+  let state = Session.getState()
+  expect(_.size(state.task.items[0].labels)).toEqual(1)
+  // select label 1
+  mouseMoveClick(label2dHandler, 50, 50, canvasSize, 0, 0)
+
+  state = Session.getState()
+  expect(state.user.select.labels[0].length).toEqual(1)
+  expect(state.user.select.labels[0][0]).toEqual(labelIds[0])
+  const label2dlist = Session.label2dList
+  expect(label2dlist.selectedLabels.length).toEqual(1)
+  expect(label2dlist.selectedLabels[0].labelId).toEqual(labelIds[0])
+
+  mouseMove(label2dHandler, 20, 20, canvasSize, 0, 0)
+  mouseDown(label2dHandler, 20, 20, 0, 0)
+  mouseMove(label2dHandler, 60, 60, canvasSize, 0, 0)
+  mouseMove(label2dHandler, 120, 120, canvasSize, 0, 0)
+
+  mouseUp(label2dHandler, 120, 120, 0, 0)
+
+  state = Session.getState()
+  const polygon = getShape(state, 0, labelIds[0], 0) as PolygonType
+  expect(polygon.points[0].x).toEqual(110)
+  expect(polygon.points[0].y).toEqual(110)
+})
+
 test('2d polygons multi-select and multi-label moving', () => {
   const [label2dHandler] = initializeTestingObjects()
   Session.dispatch(action.changeSelect({ labelType: 1 }))

@@ -40,7 +40,7 @@ export abstract class LinearInterpolationPolicy extends TrackPolicy {
     }
 
     const sourceShapes = this._track.getShapes(source)
-    for (let i = start + 1; i < end; i++) {
+    for (let i = start + 1; i <= end; i++) {
       const label = this._track.getLabel(i)
       if (!label) {
         continue

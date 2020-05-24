@@ -3,9 +3,8 @@
         "config": {
             "projectName": "2dImage",
             "itemType": "image",
-            "labelTypes": [
-                "box2d"
-            ],
+            "labelTypes": ["box2d"],
+            "label2DTemplates": {},
             "taskSize": 5,
             "handlerUrl": "label",
             "pageTitle": "2D Bounding Box",
@@ -37,34 +36,17 @@
                 {
                     "name": "Traffic Light Color",
                     "toolType": "list",
-                    "values": [
-                        "NA",
-                        "G",
-                        "Y",
-                        "R"
-                    ],
+                    "values": ["NA", "G", "Y", "R"],
                     "tagPrefix": "t",
-                    "tagSuffixes": [
-                        "",
-                        "g",
-                        "y",
-                        "r"
-                    ],
-                    "buttonColors": [
-                        "white",
-                        "green",
-                        "yellow",
-                        "red"
-                    ]
+                    "tagSuffixes": ["", "g", "y", "r"],
+                    "buttonColors": ["white", "green", "yellow", "red"]
                 }
             ],
             "taskId": "000000",
             "submitTime": -1,
             "submitted": false,
             "tracking": false,
-            "policyTypes": [
-                "linear_interpolation_box_2d"
-            ],
+            "policyTypes": ["linear_interpolation_box_2d"],
             "demoMode": false,
             "autosave": false
         },
@@ -86,19 +68,13 @@
                     "longId": {
                         "id": "longLabelId",
                         "item": 0,
-                        "sensors": [
-                            -1
-                        ],
+                        "sensors": [-1],
                         "type": "box2d",
-                        "category": [
-                            0
-                        ],
+                        "category": [0],
                         "attributes": {},
                         "parent": -1,
                         "children": [],
-                        "shapes": [
-                            0
-                        ],
+                        "shapes": [0],
                         "track": -1,
                         "order": 1,
                         "manual": true
@@ -106,19 +82,13 @@
                     "1": {
                         "id": "1",
                         "item": 0,
-                        "sensors": [
-                            -1
-                        ],
+                        "sensors": [-1],
                         "type": "box2d",
-                        "category": [
-                            0
-                        ],
+                        "category": [0],
                         "attributes": {},
                         "parent": -1,
                         "children": [],
-                        "shapes": [
-                            1
-                        ],
+                        "shapes": [1],
                         "track": -1,
                         "order": 2,
                         "manual": true
@@ -126,19 +96,13 @@
                     "2": {
                         "id": "2",
                         "item": 0,
-                        "sensors": [
-                            -1
-                        ],
+                        "sensors": [-1],
                         "type": "box2d",
-                        "category": [
-                            0
-                        ],
+                        "category": [0],
                         "attributes": {},
                         "parent": -1,
                         "children": [],
-                        "shapes": [
-                            "longShapeId"
-                        ],
+                        "shapes": ["longShapeId"],
                         "track": -1,
                         "order": 3,
                         "manual": true
@@ -147,9 +111,7 @@
                 "shapes": {
                     "0": {
                         "id": "0",
-                        "label": [
-                            "longLabelId"
-                        ],
+                        "label": ["longLabelId"],
                         "shapeType": "rect",
                         "x1": 317.9044230030514,
                         "y1": 192.46537396121883,
@@ -158,9 +120,7 @@
                     },
                     "1": {
                         "id": "1",
-                        "label": [
-                            "1"
-                        ],
+                        "label": ["1"],
                         "shapeType": "rect",
                         "x1": 459.5110712024974,
                         "y1": 276.2326869806094,
@@ -169,9 +129,7 @@
                     },
                     "longShapeId": {
                         "id": "longShapeId",
-                        "label": [
-                            "2"
-                        ],
+                        "label": ["2"],
                         "shapeType": "rect",
                         "x1": 746.7132872689795,
                         "y1": 137.61772853185596,
@@ -256,7 +214,7 @@
     "session": {
         "id": "",
         "startTime": 0,
-        "itemsStatuses": [
+        "itemStatuses": [
             {
                 "sensorDataLoaded": {
                     "-1": false

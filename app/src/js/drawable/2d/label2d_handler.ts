@@ -8,7 +8,7 @@ import { tracksOverlapping } from '../../functional/track'
 import { IdType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
-import { commitLabels } from '../states'
+import { commit2DLabels } from '../states'
 import { Label2D } from './label2d'
 import { makeDrawableLabel2D } from './label2d_list'
 
@@ -101,7 +101,7 @@ export class Label2DHandler {
           labelsToRemove.push(selectedLabel)
         }
       })
-      commitLabels([...Session.label2dList.updatedLabels.values()])
+      commit2DLabels([...Session.label2dList.updatedLabels.values()])
       Session.label2dList.clearUpdatedLabels()
 
       for (const label of labelsToRemove) {
