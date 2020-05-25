@@ -186,9 +186,10 @@ def main() -> None:
         ply_data = plyfile.PlyData.read(http_response)
         points = np.concatenate([
             ply_data["vertex"]["x"][..., None],
-            ply_data["vertex"]["y"][..., None], 
-            ply_data["vertex"]["z"][..., None]
-        ], axis=-1)
+            ply_data["vertex"]["y"][..., None], ply_data["vertex"]["z"][...,
+                                                                        None]
+        ],
+                                axis=-1)
 
         results = estimate_ground_plane(points, args.sample_size,
                                         args.iterations,

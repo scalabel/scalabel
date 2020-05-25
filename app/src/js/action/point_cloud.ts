@@ -469,7 +469,7 @@ export function toggleRotation (
   viewerConfig: PointCloudViewerConfigType
 ) {
   // Spread the original config
-  const config = {...viewerConfig }
+  const config = { ...viewerConfig }
   if (viewerConfig.cameraRotateDir) {
     config.cameraRotateDir = false
   } else {

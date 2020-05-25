@@ -1,17 +1,15 @@
 import { Box, IconButton } from '@material-ui/core'
-// Experimental by julin.
-import { Menu, Button, FormControlLabel, Switch, MenuItem } from '@material-ui/core';
 import ImportExportIcon from '@material-ui/icons/ImportExport'
 import LockIcon from '@material-ui/icons/Lock'
 import SyncIcon from '@material-ui/icons/Sync'
+import ThreeDRotationSharpIcon from '@material-ui/icons/ThreeDRotationSharp'
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
 import TripOriginIcon from '@material-ui/icons/TripOrigin'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
 import { changeViewerConfig, toggleSynchronization } from '../action/common'
-import { alignToAxis, CameraLockState, CameraMovementParameters, lockedToSelection, moveCameraAndTarget, updateLockStatus } from '../action/point_cloud'
-import { toggleRotation } from '../action/point_cloud'
+import { alignToAxis, CameraLockState, CameraMovementParameters, lockedToSelection, moveCameraAndTarget, toggleRotation, updateLockStatus } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
@@ -345,61 +343,12 @@ class Viewer3D extends DrawableViewer<Props> {
         >
           {
             underlineElement(
-              <span style={{ color: '#ff7700' }}>==</span>,
+              <ThreeDRotationSharpIcon />,
               config.cameraRotateDir === true
             )
           }
         </IconButton>
       )
-
-      // Drop down menu for some simple config
-      // const [anchorEl, setAnchorEl] = React.useState(false);
-
-      // const handleClick = (event: React.MouseEvent) => {
-      //   setAnchorEl(event.relatedTarget)
-      // }
-
-      // const handleClose = () => {
-      //   setAnchorEl(null)
-      // }
-
-      // const viewerConfigMenu = (
-      //   <div>
-      //     <Button
-      //       aria-controls='simple-menu'
-      //       aria-haspopup='true'
-      //       // onClick={handleClick}
-      //     >
-      //       Viewer Setting
-      //     </Button>
-      //     <Menu
-      //       id='viewer-conf-menu'
-      //       // anchorEl={anchorEl}
-      //       keepMounted
-      //       open={Boolean(anchorEl)}
-      //       onClose={handleClose}
-      //     >
-      //     <MenuItem>
-      //       <FormControlLabel
-      //         value='rotateFlip'
-      //         control={<Switch color='primary' />}
-      //         label='Rotate Flip'
-      //         labelPlacement='start'
-      //         onChange={(e: React.ChangeEvent) => {
-      //           const newConfig = {
-      //             ...config,
-      //             cameraRotateDir: e.target.checked
-      //           }
-      //           Session.dispatch(changeViewerConfig(
-      //             this.props.id,
-      //             newConfig
-      //           ))
-      //         }}
-      //       />
-      //     </MenuItem>
-      //     </Menu>
-      //   </div>
-      // )
 
       return [
         yLockButton,
