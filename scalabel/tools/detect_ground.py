@@ -6,8 +6,10 @@ import argparse
 import json
 import urllib.request
 import sys
+import os
 from typing import List, Tuple, Union
 
+import yaml
 import numpy as np
 import plyfile
 from tqdm import tqdm
@@ -96,10 +98,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description='Find ground plane and write it to PLY file')
     parser.add_argument('--bdd_items',
-                        help='Input BDD Data json file',
+                        help='Input BDD Data json / yaml file',
                         required=True)
     parser.add_argument('--output',
-                        help='Output BDD Data json file',
+                        help='Output BDD Data json / yaml file',
                         required=True)
     parser.add_argument('--iterations',
                         help='Number of iterations to run for RANSAC.',
@@ -152,20 +154,33 @@ def main() -> None:
 
     expected_normal = np.array(args.expected_normal)
 
+    # Check file extensions
+    supported_ext = [".yaml", ".json"]
+    if not os.path.splitext(args.bdd_items)[-1] in supported_ext:
+        raise ValueError("[Error] Argument --bdd_items should be either" + \
+            " a json or a yaml file.")
+    if not os.path.splitext(args.output)[-1] in supported_ext:
+        raise ValueError("[Error] Argument --output should be either" + \
+            " a json or a yaml file.")
+
     with open(args.bdd_items, 'r') as bdd_file:
-        bdd_json = json.load(bdd_file)
-    if not isinstance(bdd_json, list):
+        if os.path.splitext(args.bdd_items)[-1] == ".json":
+            bdd_data = json.load(bdd_file)
+        else:
+            bdd_data = yaml.safe_load(bdd_file)
+
+    if not isinstance(bdd_data, list):
         raise ValueError("[Error] Contents in the json file are not in" + \
             " valid label format.")
 
-    for item in bdd_json:
+    for item in bdd_data:
         if 'labels' not in item.keys():
             item['labels'] = []
 
-    label_ids = [label['id'] for item in bdd_json for label in item['labels']]
+    label_ids = [label['id'] for item in bdd_data for label in item['labels']]
     max_label_id = max(label_ids) if label_ids else 0
 
-    for item in tqdm(bdd_json, ascii=True):
+    for item in tqdm(bdd_data, ascii=True):
         url = item['url']
         http_response = urllib.request.urlopen(url)
         ply_data = plyfile.PlyData.read(http_response)
@@ -216,7 +231,10 @@ def main() -> None:
             max_label_id += 1
 
     with open(args.output, 'w') as output_file:
-        json.dump(bdd_json, output_file)
+        if os.path.splitext(args.output)[-1] == ".json":
+            json.dump(bdd_data, output_file)
+        else:
+            yaml.safe_dump(bdd_data, output_file)
 
 
 if __name__ == '__main__':

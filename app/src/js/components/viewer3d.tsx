@@ -1,4 +1,6 @@
 import { Box, IconButton } from '@material-ui/core'
+// Experimental by julin.
+import { Menu, Button, FormControlLabel, Switch, MenuItem } from '@material-ui/core';
 import ImportExportIcon from '@material-ui/icons/ImportExport'
 import LockIcon from '@material-ui/icons/Lock'
 import SyncIcon from '@material-ui/icons/Sync'
@@ -8,7 +10,8 @@ import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
 import { changeViewerConfig, toggleSynchronization } from '../action/common'
-import { alignToAxis, CameraLockState, CameraMovementParameters, lockedToSelection, moveCameraAndTarget, toggleSelectionLock, updateLockStatus } from '../action/point_cloud'
+import { alignToAxis, CameraLockState, CameraMovementParameters, lockedToSelection, moveCameraAndTarget, updateLockStatus } from '../action/point_cloud'
+import { toggleRotation } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
@@ -298,7 +301,7 @@ class Viewer3D extends DrawableViewer<Props> {
         <IconButton
           className={this.props.classes.viewer_button}
           onClick={() => {
-            Session.dispatch(toggleSelectionLock(
+            Session.dispatch(toggleRotation(
               this._viewerId,
               config
             ))
@@ -329,6 +332,75 @@ class Viewer3D extends DrawableViewer<Props> {
         </IconButton>
       )
 
+      const viewerConfigButton = (
+        <IconButton
+          className={this.props.classes.viewer_button}
+          onClick={() => {
+            Session.dispatch(toggleRotation(
+              this.props.id,
+              config
+            ))
+          }}
+          edge={'start'}
+        >
+          {
+            underlineElement(
+              <span style={{ color: '#ff7700' }}>==</span>,
+              config.cameraRotateDir === true
+            )
+          }
+        </IconButton>
+      )
+
+      // Drop down menu for some simple config
+      // const [anchorEl, setAnchorEl] = React.useState(false);
+
+      // const handleClick = (event: React.MouseEvent) => {
+      //   setAnchorEl(event.relatedTarget)
+      // }
+
+      // const handleClose = () => {
+      //   setAnchorEl(null)
+      // }
+
+      // const viewerConfigMenu = (
+      //   <div>
+      //     <Button
+      //       aria-controls='simple-menu'
+      //       aria-haspopup='true'
+      //       // onClick={handleClick}
+      //     >
+      //       Viewer Setting
+      //     </Button>
+      //     <Menu
+      //       id='viewer-conf-menu'
+      //       // anchorEl={anchorEl}
+      //       keepMounted
+      //       open={Boolean(anchorEl)}
+      //       onClose={handleClose}
+      //     >
+      //     <MenuItem>
+      //       <FormControlLabel
+      //         value='rotateFlip'
+      //         control={<Switch color='primary' />}
+      //         label='Rotate Flip'
+      //         labelPlacement='start'
+      //         onChange={(e: React.ChangeEvent) => {
+      //           const newConfig = {
+      //             ...config,
+      //             cameraRotateDir: e.target.checked
+      //           }
+      //           Session.dispatch(changeViewerConfig(
+      //             this.props.id,
+      //             newConfig
+      //           ))
+      //         }}
+      //       />
+      //     </MenuItem>
+      //     </Menu>
+      //   </div>
+      // )
+
       return [
         yLockButton,
         xLockButton,
@@ -338,7 +410,8 @@ class Viewer3D extends DrawableViewer<Props> {
         flipButton,
         synchronizationButton,
         selectionLockButton,
-        originButton
+        originButton,
+        viewerConfigButton
       ]
     }
 
@@ -694,8 +767,14 @@ class Viewer3D extends DrawableViewer<Props> {
     spherical.setFromVector3(offset)
 
     // Apply rotations
-    spherical.theta += dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
-    spherical.phi += dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    // TODO(julin): make this movement customizable
+    if (viewerConfig.cameraRotateDir === false) {
+      spherical.theta -= dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+      spherical.phi -= dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    } else {
+      spherical.theta += dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+      spherical.phi += dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    }
 
     spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
 
