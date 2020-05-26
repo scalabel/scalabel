@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { changeLabelsProps, linkLabels, mergeTracks, startLinkTrack, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
@@ -298,19 +297,17 @@ export class Label2DHandler {
 
   /** link selected labels */
   private linkLabels (): void {
-    const selectedLabelIdArray = _.map(
-      Session.label2dList.selectedLabels, (label) => label.labelId)
     Session.dispatch(linkLabels(
-      this._state.user.select.item, selectedLabelIdArray
+      this._state.user.select.item,
+      Session.label2dList.selectedLabels.map((label) => label.labelId)
     ))
   }
 
   /** unlink selected labels */
   private unlinkLabels (): void {
-    const selectedLabelIdArray = _.map(
-      Session.label2dList.selectedLabels, (label) => label.labelId)
     Session.dispatch(unlinkLabels(
-      this._state.user.select.item, selectedLabelIdArray
+      this._state.user.select.item,
+      Session.label2dList.selectedLabels.map((label) => label.labelId)
     ))
   }
 

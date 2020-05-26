@@ -210,8 +210,7 @@ export class Track {
     for (let index = itemIndex; index < itemIndex + numItems; index++) {
       const cloned = makeLabel(labelState, false)
       cloned.item = -1
-      // Use the original label id as track id to prevent color change
-      cloned.track = labelState.id
+      cloned.track = this.id
       if (index > itemIndex) {
         cloned.manual = false
       }

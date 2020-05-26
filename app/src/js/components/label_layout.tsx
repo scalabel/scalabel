@@ -127,6 +127,7 @@ class LabelLayout extends React.Component<Props, State> {
             <SplitPane split={split} minSize={min}
                        defaultSize={dflt}
                        maxSize={max} primary={primary}
+                       pane1Style={{ overflowY: 'scroll', overflowX: 'hidden' }}
                        onChange={(size) => {
                          this.handleOnChange(size, position)
                        }}>
