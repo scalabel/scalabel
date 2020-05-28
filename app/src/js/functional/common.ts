@@ -662,6 +662,24 @@ export function unlinkLabels (
  */
 export function changeSelect (
   state: State, action: types.ChangeSelectAction): State {
+  // keep selected label selected in new items in tracking mode
+  if (state.task.config.tracking) {
+    if (action.select.labels) {
+      for (const key of Object.keys(state.user.select.labels)) {
+        const index = Number(key)
+        const selectedLabelIds = state.user.select.labels[index]
+        const newItem = action.select.item || 0
+        const newLabelId = selectedLabelIds.map((labelId) => {
+          const track = state.task.items[index].labels[labelId].track
+          return state.task.tracks[track].labels[newItem]
+        })
+        if (!action.select.labels) {
+          action.select.labels = {}
+        }
+        action.select.labels[newItem] = newLabelId
+      }
+    }
+  }
   const newSelect = updateObject(state.user.select, action.select)
   for (const key of Object.keys(newSelect.labels)) {
     const index = Number(key)

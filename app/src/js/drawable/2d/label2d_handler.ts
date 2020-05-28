@@ -50,7 +50,9 @@ export class Label2DHandler {
         this.selectHighlighted()
       } else {
         Session.dispatch(selectLabels(
-          {}, -1, []
+          {}, -1, [],
+          this._state.user.select.category,
+          this._state.user.select.attributes
         ))
         Session.label2dList.selectedLabels.length = 0
         const state = this._state
