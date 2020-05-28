@@ -707,6 +707,9 @@ export function loadItem (state: State, action: types.LoadItemAction): State {
 function deleteLabelsFromItem (
   item: ItemType, labelIds: IdType[]): [ItemType, LabelType[]] {
   let labels = item.labels
+  labelIds = labelIds.concat(
+    ...labelIds.map((labelId) => item.labels[labelId].children))
+
   const deletedLabels = pickObject(item.labels, labelIds)
 
   // find related labels and shapes
@@ -716,7 +719,9 @@ function deleteLabelsFromItem (
   _.forEach(deletedLabels, (label) => {
     if (isValidId(label.parent)) {
       // TODO: consider multiple level parenting
-      const parentLabel = _.cloneDeep(labels[label.parent])
+      const parentLabel = label.parent in updatedLabels
+                          ? updatedLabels[label.parent]
+                          : _.cloneDeep(labels[label.parent])
       parentLabel.children = removeListItems(parentLabel.children, [label.id])
       updatedLabels[parentLabel.id] = parentLabel
     }

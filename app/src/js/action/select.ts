@@ -38,7 +38,7 @@ export function deleteSelectedTracks (state: State): types.DeleteLabelsAction {
       }
     }
   }
-  return deleteTracks(tracks)
+  return deleteTracks(_.uniq(tracks))
 }
 
 /**
@@ -59,7 +59,7 @@ export function terminateSelectedTracks (
       }
     }
   }
-  return terminateTracks(tracks, stopIndex, state.task.items.length)
+  return terminateTracks(_.uniq(tracks), stopIndex, state.task.items.length)
 }
 
 /**
