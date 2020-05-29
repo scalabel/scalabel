@@ -202,6 +202,7 @@ export function selectLabels (
 
   return changeSelect({
     labels: (itemIndex < 0) ? {} : selectedLabels,
+    item: itemIndex,
     category,
     attributes
   })
