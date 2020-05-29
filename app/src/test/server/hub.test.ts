@@ -11,7 +11,8 @@ import { RedisStore } from '../../js/server/redis_store'
 import { ActionPacketType, EventName, RegisterMessageType,
   StateMetadata, SyncActionMessageType } from '../../js/server/types'
 import { UserManager } from '../../js/server/user_manager'
-import { index2str, updateState } from '../../js/server/util'
+import { updateState } from '../../js/server/util'
+import { index2str } from '../../js/shared/util'
 import { getInitialState, getRandomBox2dAction } from './util/util'
 
 jest.mock('../../js/server/file_storage')

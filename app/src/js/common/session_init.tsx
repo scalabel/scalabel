@@ -7,11 +7,12 @@ import { Provider } from 'react-redux'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
-import { addViewerConfig, initSessionAction, loadItem, splitPane, updateAll, updatePane } from '../action/common'
+import { addViewerConfig, initSessionAction, loadItem, setStatusAfterConnect, splitPane, updateAll, updatePane } from '../action/common'
 import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
 import Window from '../components/window'
 import { makeDefaultViewerConfig } from '../functional/states'
 import { PointCloudViewerConfigType, SplitType, State } from '../functional/types'
+import { EventName, RegisterMessageType } from '../server/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import { configureStore } from './configure_store'
@@ -34,17 +35,52 @@ export function initSession (containerName: string): void {
     Fingerprint2.get((components) => {
       const values =
         components.map((component) => component.value)
-      const murmur = Fingerprint2.x64hash128(values.join(''), 31)
+      const userId = Fingerprint2.x64hash128(values.join(''), 31)
 
-      const synchronizer = new Synchronizer(
-        taskIndex,
-        projectName,
-        murmur,
-        (state: State) => {
+      const socket = io.connect(
+        location.origin,
+        { transports: ['websocket'], upgrade: false }
+      )
+      socket.on(EventName.CONNECT, () => {
+        const message: RegisterMessageType = {
+          projectName,
+          taskIndex,
+          sessionId: '',
+          userId,
+          address: location.origin,
+          bot: false
+        }
+        /* Send the registration message to the backend */
+        socket.emit(EventName.REGISTER, message)
+        Session.dispatch(setStatusAfterConnect())
+      })
+
+      let firstTime = true
+      socket.on(EventName.REGISTER_ACK, (state: State) => {
+        if (firstTime) {
+          firstTime = false
+
+          // ideally has a refrence to the store
+          // issue is middleware
+
+          // middleware before store
+          // store before sync
+          // sendActions + queue before middleware
+          // --> must remove those from sync
+          // - can access store in middleware
+
+          const synchronizer = new Synchronizer(
+            socket,
+            taskIndex,
+            projectName,
+            userId,
+            state.task.config.autosave,
+            state.task.config.bots
+          )
           initFromJson(state, synchronizer.middleware)
           renderDom(containerName, synchronizer)
         }
-      )
+      })
     })
   }, 500)
 }

@@ -75,3 +75,11 @@ export function getPageTitle (labelType: string, itemType: string) {
   }
   return title
 }
+
+/**
+ * Converts index into a filename of size 6 with
+ * trailing zeroes
+ */
+export function index2str (index: number) {
+  return index.toString().padStart(6, '0')
+}

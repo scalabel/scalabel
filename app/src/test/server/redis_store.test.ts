@@ -6,7 +6,7 @@ import { getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
-import { index2str } from '../../js/server/util'
+import { index2str } from '../../js/shared/util'
 import { sleep } from '../project/util'
 import { getTestConfig } from './util/util'
 

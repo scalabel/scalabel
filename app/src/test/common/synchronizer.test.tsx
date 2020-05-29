@@ -11,7 +11,8 @@ import { State } from '../../js/functional/types'
 import {
   ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
-import { index2str, updateState } from '../../js/server/util'
+import { updateState } from '../../js/server/util'
+import { index2str } from '../../js/shared/util'
 import { getInitialState, getRandomBox2dAction } from '../server/util/util'
 
 let sessionId: string

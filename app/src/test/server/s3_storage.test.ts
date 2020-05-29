@@ -3,7 +3,7 @@ import * as path from 'path'
 import { sprintf } from 'sprintf-js'
 import { getProjectKey, getTaskKey, hostname, now } from '../../js/server/path'
 import { S3Storage } from '../../js/server/s3_storage'
-import { index2str } from '../../js/server/util'
+import { index2str } from '../../js/shared/util'
 
 export const s3 = new AWS.S3()
 const bucketRegion = 'us-west-2'

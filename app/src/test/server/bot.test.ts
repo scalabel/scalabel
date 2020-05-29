@@ -10,7 +10,7 @@ import { serverConfig } from '../../js/server/defaults'
 import {
   ActionPacketType, BotData, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
-import { index2str } from '../../js/server/util'
+import { index2str } from '../../js/shared/util'
 import {
   getInitialState, getRandomBox2dAction,
   getRandomModelPoly } from './util/util'

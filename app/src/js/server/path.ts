@@ -2,8 +2,8 @@ import moment from 'moment'
 import * as os from 'os'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
+import { index2str } from '../shared/util'
 import { BotData } from './types'
-import { index2str } from './util'
 
 /**
  * Converts task id to name of the room for that id

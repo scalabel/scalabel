@@ -154,14 +154,6 @@ export function makeCreationForm (
 }
 
 /**
- * Converts index into a filename of size 6 with
- * trailing zeroes
- */
-export function index2str (index: number) {
-  return index.toString().padStart(6, '0')
-}
-
-/**
  * Initialize new session id if its a new load
  * If its a reconnection, keep the old session id
  */

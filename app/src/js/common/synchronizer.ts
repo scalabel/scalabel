@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import OrderedMap from 'orderedmap'
 import { Dispatch, Middleware } from 'redux'
-import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
 import {
   setStatusAfterConnect,
@@ -19,6 +18,7 @@ import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
+import { index2str } from '../shared/util'
 import Session from './session'
 
 const CONFIRMATION_MESSAGE =
@@ -52,8 +52,6 @@ export class Synchronizer {
 
   /** Socket connection */
   public socket: SocketIOClient.Socket
-  /** The function to call after state is synced with backend */
-  public initStateCallback: (state: State) => void
   /** Name of the project */
   public projectName: string
   /** Index of the task */
@@ -62,8 +60,6 @@ export class Synchronizer {
   public middleware: Middleware
   /** The user/browser id, constant across sessions */
   public userId: string
-  /** the server address */
-  public syncAddress: string
   /** Actions queued to be sent to the backend */
   public actionQueue: types.BaseAction[]
   /** Actions in the process of being saved, mapped by packet id */
@@ -74,14 +70,21 @@ export class Synchronizer {
   private ackedPackets: Set<string>
   /** The ids of action packets pending model predictions */
   private actionsPendingPrediction: Set<string>
+  /** flag for autosave */
+  private autosave: boolean
+  /** flag for bots */
+  private bots: boolean
 
   /* Make sure Session state is loaded before initializing this class */
   constructor (
+    socket: SocketIOClient.Socket,
     taskIndex: number, projectName: string, userId: string,
-    initStateCallback: (state: State) => void) {
+    autosave: boolean, bots: boolean) {
+    this.socket = socket
     this.taskIndex = taskIndex
     this.projectName = projectName
-    this.initStateCallback = initStateCallback
+    this.autosave = autosave
+    this.bots = bots
 
     this.actionQueue = []
     this.actionsToSave = OrderedMap.from()
@@ -89,14 +92,6 @@ export class Synchronizer {
     this.userId = userId
     this.ackedPackets = new Set()
     this.actionsPendingPrediction = new Set()
-
-    // use the same address as http
-    this.syncAddress = location.origin
-    const socket = io.connect(
-      this.syncAddress,
-      { transports: ['websocket'], upgrade: false }
-    )
-    this.socket = socket
 
     this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))
     this.socket.on(EventName.REGISTER_ACK, this.registerAckHandler.bind(this))
@@ -115,7 +110,7 @@ export class Synchronizer {
       if (Session.id === action.sessionId && !action.frontendOnly &&
         !types.isSessionAction(action)) {
         self.actionQueue.push(action)
-        if (Session.autosave) {
+        if (this.autosave) {
           self.sendQueuedActions()
         } else {
           Session.dispatch(setStatusToUnsaved())
@@ -145,7 +140,7 @@ export class Synchronizer {
       taskIndex: this.taskIndex,
       sessionId: Session.id,
       userId: this.userId,
-      address: this.syncAddress,
+      address: location.origin,
       bot: false
     }
     /* Send the registration message to the backend */
@@ -157,12 +152,27 @@ export class Synchronizer {
    * Called when backend sends ack of registration of this session
    * Initialized synced state, and sends any queued actions
    */
-  public registerAckHandler (syncState: State) {
-    this.initStateCallback(syncState)
+  public registerAckHandler (state: State) {
+    if (this.autosave) {
+      // Update with any backend changes that occurred during disconnect
+      const updateTaskAction = updateTask(state.task)
+      updateTaskAction.frontendOnly = true
+      Session.dispatch(updateTaskAction)
+      // re-apply frontend task actions after updating task from backend
+      for (const actionPacket of this.listActionPackets()) {
+        for (const action of actionPacket.actions) {
+          if (types.isTaskAction(action)) {
+            action.frontendOnly = true
+            Session.dispatch(action)
+          }
+        }
+      }
+    }
+
     for (const actionPacket of this.listActionPackets()) {
       this.sendActions(actionPacket)
     }
-    if (Session.autosave) {
+    if (this.autosave) {
       this.sendQueuedActions()
     }
   }
@@ -217,35 +227,9 @@ export class Synchronizer {
 
   /**
    * Called when session disconnects from backend
-   * Prepares for reconnect by updating initial callback
    */
   public disconnectHandler () {
     Session.dispatch(setStatusToReconnecting())
-    if (Session.autosave) {
-      this.initStateCallback = this.autosaveReconnectCallback
-    } else {
-      // With manual saving, keep unsaved changes after reconnect
-      this.initStateCallback = () => { return }
-    }
-  }
-
-  /**
-   * Called when session reconnects (with autosave)
-   */
-  public autosaveReconnectCallback (state: State) {
-    // Update with any backend changes that occurred during disconnect
-    const updateTaskAction = updateTask(state.task)
-    updateTaskAction.frontendOnly = true
-    Session.dispatch(updateTaskAction)
-    // re-apply frontend task actions after updating task from backend
-    for (const actionPacket of this.listActionPackets()) {
-      for (const action of actionPacket.actions) {
-        if (types.isTaskAction(action)) {
-          action.frontendOnly = true
-          Session.dispatch(action)
-        }
-      }
-    }
   }
 
   /**
@@ -288,7 +272,7 @@ export class Synchronizer {
    * any actions that would trigger a model query
    */
   public doesPacketTriggerModel (actionPacket: ActionPacketType): boolean {
-    if (!Session.bots) {
+    if (!this.bots) {
       return false
     }
     for (const action of actionPacket.actions) {
@@ -304,11 +288,10 @@ export class Synchronizer {
    * Can be called multiple times if previous attempts aren't acked
    */
   public sendActions (actionPacket: ActionPacketType) {
-    const sessionState = Session.getState()
     const message: SyncActionMessageType = {
-      taskId: sessionState.task.config.taskId,
-      projectName: sessionState.task.config.projectName,
-      sessionId: sessionState.session.id,
+      taskId: index2str(this.taskIndex),
+      projectName: this.projectName,
+      sessionId: Session.id,
       actions: actionPacket,
       bot: false
     }
