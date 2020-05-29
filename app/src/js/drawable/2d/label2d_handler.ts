@@ -105,6 +105,11 @@ export class Label2DHandler {
       commit2DLabels([...Session.label2dList.updatedLabels.values()])
       Session.label2dList.clearUpdatedLabels()
 
+      if (this._highlightedLabel && !this._highlightedLabel.isValid()) {
+        this._highlightedLabel.setHighlighted(false)
+        this._highlightedLabel = null
+      }
+
       for (const label of labelsToRemove) {
         const labelListIndex = Session.label2dList.labelList.indexOf(label)
         if (labelListIndex >= 0) {

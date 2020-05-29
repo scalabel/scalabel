@@ -54,14 +54,6 @@ export class ToolBar extends Component<Props> {
       case Key.BACKSPACE:
         this.deletePressed()
         break
-      case Key.L_LOW:
-      case Key.L_UP:
-        // TODO: Move labels up to task level (out of items) and
-        // label drawables to Session so that we don't have to search for labels
-        if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
-          this.linkSelectedTracks(this.state)
-        }
-        break
       case Key.H_LOW:
       case Key.H_UP:
         e.preventDefault()
@@ -295,15 +287,6 @@ export class ToolBar extends Component<Props> {
       }
     }
     return attributeIndex
-  }
-
-  /**
-   * Whether a specific key is pressed down
-   * @param {string} key - the key to check
-   * @return {boolean}
-   */
-  private isKeyDown (key: string): boolean {
-    return this._keyDownMap[key]
   }
 
   /**
