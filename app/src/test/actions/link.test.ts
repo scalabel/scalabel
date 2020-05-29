@@ -81,12 +81,12 @@ describe('Test link labels', () => {
 
     for (let i = 0; i < state.task.items.length; i++) {
       if (i in track1Labels) {
-        expect(newTrackLabels[i]).not.toContain(track1Labels[i])
+        expect(newTrackLabels[i]).not.toEqual(track1Labels[i])
         label1 = state.task.items[i].labels[track1Labels[i]]
         expect(newTrackLabels[i]).toEqual(label1.parent)
       }
       if (i in track2Labels) {
-        expect(newTrackLabels[i]).not.toContain(track2Labels[i])
+        expect(newTrackLabels[i]).not.toEqual(track2Labels[i])
         label2 = state.task.items[i].labels[track2Labels[i]]
         expect(newTrackLabels[i]).toEqual(label2.parent)
       }
