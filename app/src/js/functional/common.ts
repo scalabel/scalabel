@@ -670,8 +670,11 @@ export function changeSelect (
         const selectedLabelIds = state.user.select.labels[index]
         const newItem = action.select.item || 0
         const newLabelId = selectedLabelIds.map((labelId) => {
-          const track = state.task.items[index].labels[labelId].track
-          return state.task.tracks[track].labels[newItem]
+          if (labelId in state.task.items[index].labels) {
+            const track = state.task.items[index].labels[labelId].track
+            return state.task.tracks[track].labels[newItem]
+          }
+          return ''
         }).filter(Boolean)
         if (newLabelId.length > 0) {
           if (!action.select.labels) {
