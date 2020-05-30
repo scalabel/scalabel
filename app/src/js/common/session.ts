@@ -8,7 +8,7 @@ import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore, ReduxState, ReduxStore } from './configure_store'
-import { SimpleStore } from './simple_store'
+import { getStateFunc, SimpleStore } from './simple_store'
 import { Track } from './track/track'
 
 /**
@@ -117,4 +117,13 @@ class Session {
   }
 }
 
-export default new Session()
+const session = new Session()
+
+/**
+ * extract state getter from the session
+ */
+export function getStateGetter (): getStateFunc {
+  return session.getSimpleStore().getter()
+}
+
+export default session

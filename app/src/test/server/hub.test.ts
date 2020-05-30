@@ -52,7 +52,7 @@ beforeAll(() => {
   projectName = 'testProject'
   taskIndex = 0
   taskId = index2str(taskIndex)
-  sessionId = 'testSessId'
+  sessionId = 'testSessionId'
   userId = 'testUserId'
   actionListId = 'actionListId'
 
@@ -197,7 +197,7 @@ describe('Test hub functionality', () => {
     expect(broadcastFunc).toHaveBeenCalledTimes(1)
     expect(mockSocket.emit).toHaveBeenCalledTimes(1)
     const packet: ActionPacketType = mockSocket.emit.mock.calls[0][1].actions
-    const timestamp = packet.actions[0].timestamp as number
+    const timestamp = packet.actions[0].timestamp
 
     // send message for the second time, using updates values
     const newState = updateState(getInitialState(sessionId), [action])

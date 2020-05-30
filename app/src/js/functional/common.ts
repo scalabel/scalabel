@@ -7,6 +7,7 @@ import { IdType } from 'aws-sdk/clients/workdocs'
 import _ from 'lodash'
 import * as types from '../action/types'
 import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
+import { uid } from '../common/uid'
 import { isValidId, makeDefaultId, makeLabel, makePane, makeTrack } from './states'
 import {
   ItemType,
@@ -86,11 +87,14 @@ export function updateTask (
  * @return {State}
  */
 export function addLabel (
-  state: State, sessionId: string, itemIndex: number, label: LabelType,
+  state: State, itemIndex: number, label: LabelType,
   shapes: ShapeType[] = []): State {
   const addLabelsAction: types.AddLabelsAction = {
+    actionId: uid(),
     type: types.ADD_LABELS,
-    sessionId,
+    sessionId: state.session.id,
+    userId: state.user.id,
+    timestamp: Date.now(),
     itemIndices: [itemIndex],
     labels: [[label]],
     shapes: [[shapes]]
@@ -106,11 +110,14 @@ export function addLabel (
  * @return {State}
  */
 export function deleteLabelsById (
-  state: State, sessionId: string, itemIndex: number, labelIds: IdType[])
+  state: State, itemIndex: number, labelIds: IdType[])
   : State {
   const deleteLabelsAction: types.DeleteLabelsAction = {
     type: types.DELETE_LABELS,
-    sessionId,
+    actionId: uid(),
+    sessionId: state.session.id,
+    userId: state.user.id,
+    timestamp: Date.now(),
     itemIndices: [itemIndex],
     labelIds: [labelIds]
   }
@@ -509,7 +516,7 @@ export function linkLabels (
   newLabel.shapes = []
   newLabel.children = [...children]
   newLabel.type = LabelTypeName.EMPTY
-  state = addLabel(state, action.sessionId, action.itemIndex, newLabel)
+  state = addLabel(state, action.itemIndex, newLabel)
 
   // assign the label properties
   item = state.task.items[action.itemIndex]
@@ -594,7 +601,7 @@ export function unlinkLabels (
     updateObject(state.task.items[action.itemIndex], { labels }))
   const task = updateObject(state.task, { items })
   return deleteLabelsById(updateObject(state, { task }),
-    action.sessionId, action.itemIndex, deleteLabelList)
+    action.itemIndex, deleteLabelList)
 }
 
 /**
