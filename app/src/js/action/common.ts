@@ -6,8 +6,9 @@ import { getStateFunc } from '../common/simple_store'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
 import { ConnectionStatus, IdType, LabelType,
-  PaneType, Select, ShapeType, SplitType,
+  PaneType, Select, ShapeType, SplitType, State,
   TaskType, ViewerConfigType } from '../functional/types'
+import { SyncActionMessageType } from '../server/types'
 import * as types from './types'
 
 let getState = getStateGetter()
@@ -421,6 +422,40 @@ export function submit (): types.SubmitAction {
  */
 export function startLinkTrack () {
   return makeBaseAction(types.START_LINK_TRACK)
+}
+
+/**
+ * Finish session registration by loading backend state
+ */
+export function registerSession (state: State) {
+  return {
+    ...makeBaseAction(types.REGISTER_SESSION),
+    state
+  }
+}
+
+/**
+ * Handle broadcasted message contains one or more actions
+ */
+export function receiveBroadcast (message: SyncActionMessageType) {
+  return {
+    ...makeBaseAction(types.RECEIVE_BROADCAST),
+    message
+  }
+}
+
+/**
+ * Handle session connection
+ */
+export function connect () {
+  return makeBaseAction(types.CONNECT)
+}
+
+/**
+ * Handle session disconnection
+ */
+export function disconnect () {
+  return makeBaseAction(types.DISCONNECT)
 }
 
 /**

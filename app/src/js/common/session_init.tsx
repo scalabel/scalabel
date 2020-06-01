@@ -7,40 +7,58 @@ import { Provider } from 'react-redux'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
-import { addViewerConfig, initSessionAction, loadItem, setStatusAfterConnect, splitPane, updateAll, updatePane } from '../action/common'
+import { addViewerConfig, connect, disconnect, initSessionAction,
+  loadItem, receiveBroadcast, registerSession, setStatusAfterConnect,
+  splitPane, updateAll, updatePane } from '../action/common'
 import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
 import Window from '../components/window'
 import { makeDefaultViewerConfig } from '../functional/states'
 import { PointCloudViewerConfigType, SplitType, State } from '../functional/types'
-import { EventName, RegisterMessageType } from '../server/types'
+import { EventName, RegisterMessageType, SyncActionMessageType } from '../server/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
-import { configureStore } from './configure_store'
+import { configureStore, ReduxStore } from './configure_store'
 import Session from './session'
+import { makeSyncMiddleware } from './sync_middleware'
 import { Synchronizer } from './synchronizer'
 import { Track } from './track/track'
-import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
+import { DataType, ItemTypeName, QueryArg, ViewerConfigTypeName } from './types'
 
 /**
  * Request Session state from the server
  * @param {string} containerName - the name of the container
  */
 export function initSession (containerName: string): void {
-  // get params from url path. These uniquely identify a SAT.
+  // Get params from url path. These uniquely identify a labeling task
   const searchParams = new URLSearchParams(window.location.search)
-  const taskIndex = parseInt(searchParams.get('task_index') as string, 10)
-  const projectName = searchParams.get('project_name') as string
-  setListeners()
+  const taskIndex = parseInt(
+    searchParams.get(QueryArg.TASK_INDEX) as string, 10)
+  const projectName = searchParams.get(QueryArg.PROJECT_NAME) as string
+
+  // Wait for a second before getting the user fingerprint
   setTimeout(() => {
     Fingerprint2.get((components) => {
       const values =
         components.map((component) => component.value)
       const userId = Fingerprint2.x64hash128(values.join(''), 31)
 
+      // Create middleware for handling sync actions
       const socket = io.connect(
         location.origin,
         { transports: ['websocket'], upgrade: false }
       )
+      const synchronizer = new Synchronizer(
+        socket, taskIndex, projectName, userId)
+      const syncMiddleware = makeSyncMiddleware(synchronizer)
+
+      // Override Session store to include the sync middleware
+      const store = configureStore({}, Session.devMode, syncMiddleware)
+      Session.store = store
+
+      // Start the listeners that convert socket events to sync actions
+      startSocketListeners(store, socket)
+      setListeners(store)
+
       socket.on(EventName.CONNECT, () => {
         const message: RegisterMessageType = {
           projectName,
@@ -69,6 +87,11 @@ export function initSession (containerName: string): void {
           // --> must remove those from sync
           // - can access store in middleware
 
+          // TODO: create empty store initially to support consistent event handling
+
+          // 1. Define handler which dispatches action for each socket event
+          // 2, Create synchronizer for handling each event
+          // 3. Middleware(sync) routes handler actions to sync methods
           const synchronizer = new Synchronizer(
             socket,
             taskIndex,
@@ -77,12 +100,32 @@ export function initSession (containerName: string): void {
             state.task.config.autosave,
             state.task.config.bots
           )
+          // should overwrite the state via an action (keep the same store)
           initFromJson(state, synchronizer.middleware)
           renderDom(containerName, synchronizer)
         }
       })
     })
   }, 500)
+}
+
+/**
+ * Connect socket events to Redux actions
+ */
+export function startSocketListeners (
+  store: ReduxStore, socket: SocketIOClient.Socket) {
+  socket.on(EventName.CONNECT, () => {
+    store.dispatch(connect())
+  })
+  socket.on(EventName.DISCONNECT, () => {
+    store.dispatch(disconnect())
+  })
+  socket.on(EventName.REGISTER_ACK, (state: State) => {
+    store.dispatch(registerSession(state))
+  })
+  socket.on(EventName.ACTION_BROADCAST, (message: SyncActionMessageType) => {
+    store.dispatch(receiveBroadcast(message))
+  })
 }
 
 /**
@@ -231,11 +274,11 @@ export function initFromJson (stateJson: {}, middleware?: Middleware): void {
 /**
  * Set listeners for the html body
  */
-function setListeners () {
+function setListeners (store: ReduxStore) {
   const body = document.getElementsByTagName('BODY') as
     HTMLCollectionOf<HTMLElement>
   body[0].onresize = () => {
-    Session.dispatch(updateAll())
+    store.dispatch(updateAll())
   }
 }
 

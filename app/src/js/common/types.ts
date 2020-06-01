@@ -154,3 +154,8 @@ export enum AttributeToolType {
   LONG_LIST = 'longList',
   NONE = ''
 }
+
+export enum QueryArg {
+  PROJECT_NAME = 'project_name',
+  TASK_INDEX = 'task_index'
+}

@@ -70,21 +70,13 @@ export class Synchronizer {
   private ackedPackets: Set<string>
   /** The ids of action packets pending model predictions */
   private actionsPendingPrediction: Set<string>
-  /** flag for autosave */
-  private autosave: boolean
-  /** flag for bots */
-  private bots: boolean
 
-  /* Make sure Session state is loaded before initializing this class */
   constructor (
     socket: SocketIOClient.Socket,
-    taskIndex: number, projectName: string, userId: string,
-    autosave: boolean, bots: boolean) {
+    taskIndex: number, projectName: string, userId: string) {
     this.socket = socket
     this.taskIndex = taskIndex
     this.projectName = projectName
-    this.autosave = autosave
-    this.bots = bots
 
     this.actionQueue = []
     this.actionsToSave = OrderedMap.from()
@@ -93,11 +85,6 @@ export class Synchronizer {
     this.ackedPackets = new Set()
     this.actionsPendingPrediction = new Set()
 
-    this.socket.on(EventName.CONNECT, this.connectHandler.bind(this))
-    this.socket.on(EventName.REGISTER_ACK, this.registerAckHandler.bind(this))
-    this.socket.on(EventName.ACTION_BROADCAST,
-        this.actionBroadcastHandler.bind(this))
-    this.socket.on(EventName.DISCONNECT, this.disconnectHandler.bind(this))
     window.onbeforeunload = this.warningPopup.bind(this)
 
     /* Called every time an action is dispatched to the session */
@@ -131,21 +118,19 @@ export class Synchronizer {
   }
 
   /**
-   * Called when io socket establishes a connection
    * Registers the session with the backend, triggering a register ack
    */
-  public connectHandler () {
+  public sendConnectionMessage (sessionId: string) {
     const message: RegisterMessageType = {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
-      sessionId: Session.id,
+      sessionId,
       userId: this.userId,
       address: location.origin,
       bot: false
     }
     /* Send the registration message to the backend */
     this.socket.emit(EventName.REGISTER, message)
-    Session.dispatch(setStatusAfterConnect())
   }
 
   /**
@@ -163,6 +148,7 @@ export class Synchronizer {
         for (const action of actionPacket.actions) {
           if (types.isTaskAction(action)) {
             action.frontendOnly = true
+            // simplify this with a group dispatch
             Session.dispatch(action)
           }
         }

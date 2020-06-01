@@ -8,6 +8,7 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import TableBody from '@material-ui/core/TableBody'
 import Typography from '@material-ui/core/Typography'
 import React from 'react'
+import { QueryArg} from '../common/types'
 import { SubmitData } from '../functional/types'
 import { Endpoint } from '../server/types'
 import { dashboardWindowStyles, headerStyle,
@@ -208,12 +209,9 @@ function Dashboard (props: DashboardProps) {
                     className={classes.linkButton}
                     color='inherit'
                     href={
-                      './' +
-                      value.handlerUrl +
-                      '?project_name=' +
-                      projectMetaData.name +
-                      '&task_index=' +
-                      index
+                      `./${value.handlerUrl}` +
+                      `?${QueryArg.PROJECT_NAME}=${projectMetaData.name}` +
+                      `&${QueryArg.TASK_INDEX}=${index}`
                     }
                     data-testid={'task-link-' + index.toString()}
                   >

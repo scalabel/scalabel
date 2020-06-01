@@ -9,10 +9,13 @@ import {
   Select,
   ShapeType,
   SplitType,
+  State,
   SubmitData,
   TaskType,
   ViewerConfigType
 } from '../functional/types'
+
+import { SyncActionMessageType } from '../server/types'
 
 export const INIT_SESSION = 'INIT_SESSION'
 export const CHANGE_SELECT = 'CHANGE_SELECT'
@@ -41,6 +44,12 @@ export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
 export const START_LINK_TRACK = 'START_LINK_TRACK'
 
+// Sync based events
+export const REGISTER_SESSION = 'REGISTER_SESSION'
+export const RECEIVE_BROADCAST = 'RECEIVE_BROADCAST'
+export const CONNECT = 'CONNECT'
+export const DISCONNECT = 'DISCONNECT'
+
 /**
  * These are actions that should be shared between sessions/users
  * UPDATE_TASK deliberately not included because its used for local updates
@@ -61,6 +70,23 @@ const TASK_ACTION_TYPES = [
  */
 export function isTaskAction (action: BaseAction) {
   return TASK_ACTION_TYPES.includes(action.type)
+}
+
+/**
+ * These are actions dispatched as a result of socket events
+ */
+const SYNC_ACTION_TYPES = [
+  REGISTER_SESSION,
+  RECEIVE_BROADCAST,
+  CONNECT,
+  DISCONNECT
+]
+
+/**
+ * Checks if the action is based off of a socket event
+ */
+export function isSyncAction (action: BaseAction) {
+  return SYNC_ACTION_TYPES.includes(action.type)
 }
 
 /**
@@ -242,12 +268,34 @@ export interface DeletePaneAction extends BaseAction {
   viewerId: number
 }
 
+export interface RegisterSessionAction extends BaseAction {
+  /** Initial state received from the backend */
+  initialState: State
+}
+
+export interface ReceiveBroadcastAction extends BaseAction {
+  /** The message containing the broadcasted action/actions */
+  message: SyncActionMessageType
+}
+
+export type ConnectAction = BaseAction
+
+export type DisconnectAction = BaseAction
+
+// These actions are used as event-based messages, not to update state
+export type SyncActionType =
+  RegisterSessionAction
+  | ReceiveBroadcastAction
+  | ConnectAction
+  | DisconnectAction
+
 export type SessionActionType =
   InitSessionAction
   | LoadItemAction
   | UpdateAllAction
   | UpdateTaskAction
   | UpdateSessionStatusAction
+  | SyncActionType
 
 export type UserActionType =
   ChangeSelectAction
