@@ -739,7 +739,7 @@ export class Polygon2D extends Label2D {
         const controlPoints = this.getCurvePoints(prevPoint, nextPoint)
         this._points[highlightedHandleIndex] = controlPoints[0]
         this._points.splice(
-          this.getNextIndex(highlightedHandleIndex), 0, controlPoints[1]
+          highlightedHandleIndex + 1, 0, controlPoints[1]
         )
         break
       case PointType.CURVE: // from curve to midpoint

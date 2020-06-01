@@ -21,6 +21,6 @@ export class PolygonLinearInterpolationPolicy extends
     start: number,
     index: number
   ): void {
-    this.copyShapes(index - 1, index + 1, start)
+    this.copyShapes(index - 1, index, start)
   }
 }
