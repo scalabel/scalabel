@@ -105,11 +105,6 @@ export class Label2DHandler {
       commit2DLabels([...Session.label2dList.updatedLabels.values()])
       Session.label2dList.clearUpdatedLabels()
 
-      if (this._highlightedLabel && !this._highlightedLabel.isValid()) {
-        this._highlightedLabel.setHighlighted(false)
-        this._highlightedLabel = null
-      }
-
       for (const label of labelsToRemove) {
         const labelListIndex = Session.label2dList.labelList.indexOf(label)
         if (labelListIndex >= 0) {
@@ -268,7 +263,9 @@ export class Label2DHandler {
   private selectHighlighted (): void {
     if (this._highlightedLabel !== null) {
       const item = this._state.task.items[this._state.user.select.item]
-      const labelIds = getLinkedLabelIds(item, this._highlightedLabel.labelId)
+      const labelIds = this._highlightedLabel.isValid()
+                       ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
+                       : [this._highlightedLabel.labelId]
       const highlightedAlreadySelected =
         Session.label2dList.selectedLabels.includes(
           this._highlightedLabel
