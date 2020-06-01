@@ -129,7 +129,7 @@ export class Polygon2D extends Label2D {
     for (let i = 1; i < numPoints; ++i) {
       const point = self._points[i].clone().scale(ratio)
       if (point.type === PointType.CURVE) {
-        const nextPoint = self._points[i + 1].clone().scale(ratio)
+        const nextPoint = self._points[(i + 1) % numPoints].clone().scale(ratio)
         const nextVertex =
           self._points[(i + 2) % numPoints].clone().scale(ratio)
         context.bezierCurveTo(point.x, point.y,
