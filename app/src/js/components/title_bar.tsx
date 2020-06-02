@@ -9,10 +9,9 @@ import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { submit } from '../action/common'
+import { save, submit } from '../action/common'
 import { ReduxState } from '../common/configure_store'
 import Session from '../common/session'
-import { Synchronizer } from '../common/synchronizer'
 import { Key } from '../common/types'
 import * as selector from '../functional/selector'
 import { defaultAppBar } from '../styles/general'
@@ -54,13 +53,10 @@ interface StateProps {
 }
 
 interface DispatchProps {
-  /** Function for submitting all progress */
+  /** Triggers save to server */
+  save: () => void
+  /** Adds submission to the state */
   submit: () => void
-}
-
-interface DependencyProps {
-  /** Syncrhonizer for saving */
-  synchronizer: Synchronizer
 }
 
 interface ButtonInfo {
@@ -91,7 +87,7 @@ function renderButton (button: ButtonInfo, titleUnit: string): JSX.Element {
   )
 }
 
-type Props = StyleProps & StateProps & DispatchProps & DependencyProps
+type Props = StyleProps & StateProps & DispatchProps
 
 /**
  * Title bar
@@ -109,7 +105,7 @@ class TitleBar extends Component<Props> {
     this._keyDownListener = ((e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
         e.preventDefault()
-        this.save()
+        this.props.save()
       }
     })
   }
@@ -151,15 +147,16 @@ class TitleBar extends Component<Props> {
       this.props.submit()
       // save after submitting, so submit flag is also saved
       if (!autosave) {
-        this.save()
+        this.props.save()
       }
     }
     buttonInfo.push(
       { title: 'Submit', onClick: submitHandler, icon: fa.faCheck })
 
     if (!autosave) {
+      const saveHandler = () => { this.props.save() }
       buttonInfo.push(
-        { title: 'Save', onClick: () => { this.save() }, icon: fa.faSave })
+        { title: 'Save', onClick: saveHandler, icon: fa.faSave })
     }
 
     const buttons = buttonInfo.map((b) => renderButton(b, classes.titleUnit))
@@ -181,12 +178,6 @@ class TitleBar extends Component<Props> {
       </AppBar>
     )
   }
-
-  /** Save task */
-  private save () {
-    this.props.synchronizer.sendQueuedActions()
-    return
-  }
 }
 
 const mapStateToProps = (state: ReduxState): StateProps => {
@@ -202,6 +193,7 @@ const mapStateToProps = (state: ReduxState): StateProps => {
 
 const mapDispatchToProps = () => {
   return {
+    save: () => Session.dispatch(save()),
     submit: () => Session.dispatch(submit())
   }
 }

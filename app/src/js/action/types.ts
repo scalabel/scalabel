@@ -22,6 +22,7 @@ export const CHANGE_SELECT = 'CHANGE_SELECT'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
+export const UPDATE_STATE = 'UPDATE_STATE'
 export const SUBMIT = 'SUBMIT'
 export const UPDATE_SESSION_STATUS = 'UPDATE_SESSION_STATUS'
 
@@ -49,6 +50,7 @@ export const REGISTER_SESSION = 'REGISTER_SESSION'
 export const RECEIVE_BROADCAST = 'RECEIVE_BROADCAST'
 export const CONNECT = 'CONNECT'
 export const DISCONNECT = 'DISCONNECT'
+export const SAVE = 'SAVE'
 
 /**
  * These are actions that should be shared between sessions/users
@@ -79,7 +81,8 @@ const SYNC_ACTION_TYPES = [
   REGISTER_SESSION,
   RECEIVE_BROADCAST,
   CONNECT,
-  DISCONNECT
+  DISCONNECT,
+  SAVE
 ]
 
 /**
@@ -153,8 +156,13 @@ export interface LoadItemAction extends BaseAction {
 export type UpdateAllAction = BaseAction
 
 export interface UpdateTaskAction extends BaseAction {
-  /** task data to use */
+  /** Task data to use */
   newTask: TaskType
+}
+
+export interface UpdateStateAction extends BaseAction {
+  /** Initial state data */
+  newState: State
 }
 
 export interface UpdateSessionStatusAction extends BaseAction {
@@ -282,18 +290,22 @@ export type ConnectAction = BaseAction
 
 export type DisconnectAction = BaseAction
 
+export type SaveAction = BaseAction
+
 // These actions are used as event-based messages, not to update state
 export type SyncActionType =
   RegisterSessionAction
   | ReceiveBroadcastAction
   | ConnectAction
   | DisconnectAction
+  | SaveAction
 
 export type SessionActionType =
   InitSessionAction
   | LoadItemAction
   | UpdateAllAction
   | UpdateTaskAction
+  | UpdateStateAction
   | UpdateSessionStatusAction
   | SyncActionType
 

@@ -41,13 +41,23 @@ export function initSessionAction (): types.InitSessionAction {
   return makeBaseAction(types.INIT_SESSION)
 }
 
-/** update task data
+/** Update task data
  * @param {TaskType} newTask
  */
 export function updateTask (newTask: TaskType): types.UpdateTaskAction {
   return {
     ...makeBaseAction(types.UPDATE_TASK),
     newTask
+  }
+}
+
+/** Initialize state data
+ * @param {TaskType} newTask
+ */
+export function updateState (newState: State): types.UpdateStateAction {
+  return {
+    ...makeBaseAction(types.UPDATE_STATE),
+    newState
   }
 }
 
@@ -456,6 +466,13 @@ export function connect () {
  */
 export function disconnect () {
   return makeBaseAction(types.DISCONNECT)
+}
+
+/**
+ * Trigger save to server
+ */
+export function save () {
+  return makeBaseAction(types.SAVE)
 }
 
 /**

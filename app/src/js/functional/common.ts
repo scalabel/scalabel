@@ -80,6 +80,17 @@ export function updateTask (
 }
 
 /**
+ * Override the original state with the new state
+ * @param {State} state: current state
+ * @param {types.UpdateStateAction} action
+ */
+export function updateState (
+  state: State,
+  action: types.UpdateStateAction): State {
+  return _.merge(state, _.cloneDeep(action.newState))
+}
+
+/**
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
  * @param {State} state: current state
