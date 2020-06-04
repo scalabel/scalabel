@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import Session from '../common/session'
 import { Key } from '../common/types'
 import { Label2DHandler } from '../drawable/2d/label2d_handler'
+import { Label2DList } from '../drawable/2d/label2d_list'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
 import { ImageViewerConfigType, State } from '../functional/types'
 import { Vector2D } from '../math/vector2d'
@@ -48,6 +49,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   public controlContext: CanvasRenderingContext2D | null
 
   /** drawable label list */
+  private _labelList: Label2DList
+  /** drawing action handler */
   private _labelHandler: Label2DHandler
   /** The label canvas */
   private labelCanvas: HTMLCanvasElement | null
@@ -98,7 +101,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     this.labelContext = null
     this.labelCanvas = null
     this.display = this.props.display
-    this._labelHandler = new Label2DHandler()
+    this._labelList = Session.label2dList
+    this._labelHandler = new Label2DHandler(this._labelList)
     this.crosshair = React.createRef()
 
     this._keyUpListener = (e) => { this.onKeyUp(e) }
@@ -113,7 +117,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     super.componentDidMount()
     document.addEventListener('keydown', this._keyDownListener)
     document.addEventListener('keyup', this._keyUpListener)
-    Session.label2dList.subscribe(this._drawableUpdateCallback)
+    this._labelList.subscribe(this._drawableUpdateCallback)
   }
 
   /**
@@ -123,7 +127,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     super.componentWillUnmount()
     document.removeEventListener('keydown', this._keyDownListener)
     document.removeEventListener('keyup', this._keyUpListener)
-    Session.label2dList.unsubscribe(this._drawableUpdateCallback)
+    this._labelList.unsubscribe(this._drawableUpdateCallback)
   }
 
   /**
@@ -195,7 +199,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     if (this.labelCanvas !== null && this.labelContext !== null &&
       this.controlCanvas !== null && this.controlContext !== null) {
       const config = this.state.user.viewerConfigs[this.props.id]
-      Session.label2dList.redraw(this.labelContext, this.controlContext,
+      this._labelList.redraw(this.labelContext, this.controlContext,
         this.displayToImageRatio * UP_RES_RATIO, config.hideLabels)
     }
     return true
@@ -227,7 +231,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
       e.stopPropagation()
     }
-    Session.label2dList.onDrawableUpdate()
+    this._labelList.onDrawableUpdate()
   }
 
   /**
@@ -242,7 +246,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     this._labelHandler.onMouseUp(mousePos, labelIndex, handleIndex)
-    Session.label2dList.onDrawableUpdate()
+    this._labelList.onDrawableUpdate()
   }
 
   /**
@@ -268,7 +272,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     )) {
       e.stopPropagation()
     }
-    Session.label2dList.onDrawableUpdate()
+    this._labelList.onDrawableUpdate()
 
     if (this._labelHandler.highlightedLabel) {
       this.setCursor(this._labelHandler.highlightedLabel.highlightCursor)
@@ -289,7 +293,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     const key = e.key
     this._keyDownMap[key] = true
     this._labelHandler.onKeyDown(e)
-    Session.label2dList.onDrawableUpdate()
+    this._labelList.onDrawableUpdate()
   }
 
   /**
@@ -308,7 +312,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       this.setDefaultCursor()
     }
     this._labelHandler.onKeyUp(e)
-    Session.label2dList.onDrawableUpdate()
+    this._labelList.onDrawableUpdate()
   }
 
   /**

@@ -137,7 +137,7 @@ describe('full 2d bounding box integration test', () => {
     let state = Session.getState()
     const itemIndex = state.user.select.item
     const label2dList = new Label2DList()
-    const label2dHandler = new Label2DHandler()
+    const label2dHandler = new Label2DHandler(Session.label2dList)
     Session.subscribe(() => {
       const newState = Session.getState()
       Session.label2dList.updateState(newState)

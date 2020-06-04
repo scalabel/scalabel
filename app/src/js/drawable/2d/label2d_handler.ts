@@ -10,13 +10,15 @@ import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { commit2DLabels } from '../states'
 import { Label2D } from './label2d'
-import { makeDrawableLabel2D } from './label2d_list'
+import { Label2DList, makeDrawableLabel2D } from './label2d_list'
 
 /**
  * List of drawable labels
  * ViewController for the labels
  */
 export class Label2DHandler {
+  /** drawable label list */
+  private _labelList: Label2DList
   /** Recorded state of last update */
   private _state: State
   /** highlighted label */
@@ -26,11 +28,12 @@ export class Label2DHandler {
   /** index of currently selected item */
   private _selectedItemIndex: number
 
-  constructor () {
+  constructor (labelList: Label2DList) {
     this._highlightedLabel = null
     this._state = Session.getState()
     this._keyDownMap = {}
     this._selectedItemIndex = -1
+    this._labelList = labelList
   }
 
   /** get highlightedLabel for state inspection */
@@ -53,18 +56,19 @@ export class Label2DHandler {
         Session.dispatch(selectLabels(
           {}, -1, []
         ))
-        Session.label2dList.selectedLabels.length = 0
+        this._labelList.selectedLabels.length = 0
         const state = this._state
-
+        // TODO: Refactor the relation between handler, label list and label
         const label = makeDrawableLabel2D(
-          Session.label2dList,
+          this._labelList,
           state.task.config.labelTypes[state.user.select.labelType],
           state.task.config.label2DTemplates
         )
         if (label) {
           label.initTemp(state, coord)
-          Session.label2dList.selectedLabels.push(label)
-          Session.label2dList.labelList.push(label)
+          this._labelList.selectedLabels.push(label)
+          this._labelList.labelList.push(label)
+          label.onMouseDown(coord, handleIndex)
         }
 
         this._highlightedLabel = label
@@ -72,11 +76,16 @@ export class Label2DHandler {
     }
     if (this.hasSelectedLabels() &&
         !this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
-      for (const label of Session.label2dList.selectedLabels) {
+      for (const label of this._labelList.selectedLabels) {
         if (label !== this._highlightedLabel) {
           label.setHighlighted(true, 0)
         }
-        label.onMouseDown(coord, handleIndex)
+        // If the label is temporary, it has been called mouse down when it is
+        // created. Somehow, Meta key can appear randomly after the session is
+        // idle for a while, which will cause this code segmentation unexecuted
+        if (!label.temporary) {
+          label.onMouseDown(coord, handleIndex)
+        }
       }
     }
     return true
@@ -92,7 +101,7 @@ export class Label2DHandler {
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     if (this.hasSelectedLabels() && !this.isKeyDown(Key.META)) {
       const labelsToRemove: Label2D[] = []
-      Session.label2dList.selectedLabels.forEach((selectedLabel) => {
+      this._labelList.selectedLabels.forEach((selectedLabel) => {
         selectedLabel.onMouseUp(coord)
         if (selectedLabel !== this._highlightedLabel) {
           selectedLabel.setHighlighted(false)
@@ -101,17 +110,17 @@ export class Label2DHandler {
           labelsToRemove.push(selectedLabel)
         }
       })
-      commit2DLabels([...Session.label2dList.updatedLabels.values()])
-      Session.label2dList.clearUpdatedLabels()
+      commit2DLabels([...this._labelList.popUpdatedLabels()])
+      this._labelList.clearUpdatedLabels()
 
       for (const label of labelsToRemove) {
-        const labelListIndex = Session.label2dList.labelList.indexOf(label)
+        const labelListIndex = this._labelList.labelList.indexOf(label)
         if (labelListIndex >= 0) {
-          Session.label2dList.labelList.splice(labelListIndex, 1)
+          this._labelList.labelList.splice(labelListIndex, 1)
         }
-        const selectedIndex = Session.label2dList.selectedLabels.indexOf(label)
+        const selectedIndex = this._labelList.selectedLabels.indexOf(label)
         if (selectedIndex >= 0) {
-          Session.label2dList.selectedLabels.splice(selectedIndex, 1)
+          this._labelList.selectedLabels.splice(selectedIndex, 1)
         }
       }
     }
@@ -124,7 +133,7 @@ export class Label2DHandler {
       coord: Vector2D, canvasLimit: Size2D,
       labelIndex: number, handleIndex: number): boolean {
     if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
-      for (const label of Session.label2dList.selectedLabels) {
+      for (const label of this._labelList.selectedLabels) {
         label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
         label.setManual()
       }
@@ -132,11 +141,11 @@ export class Label2DHandler {
     } else {
       if (labelIndex >= 0) {
         if (!this._highlightedLabel) {
-          this._highlightedLabel = Session.label2dList.labelList[labelIndex]
+          this._highlightedLabel = this._labelList.labelList[labelIndex]
         }
         if (this._highlightedLabel.index !== labelIndex) {
           this._highlightedLabel.setHighlighted(false)
-          this._highlightedLabel = Session.label2dList.labelList[labelIndex]
+          this._highlightedLabel = this._labelList.labelList[labelIndex]
         }
         this._highlightedLabel.setHighlighted(true, handleIndex)
       } else if (this._highlightedLabel !== null) {
@@ -153,15 +162,15 @@ export class Label2DHandler {
    */
   public onKeyDown (e: KeyboardEvent): void {
     this._keyDownMap[e.key] = true
-    for (const selectedLabel of Session.label2dList.selectedLabels) {
+    for (const selectedLabel of this._labelList.selectedLabels) {
       if (!selectedLabel.onKeyDown(e.key)) {
-        Session.label2dList.labelList.splice(
-          Session.label2dList.labelList.indexOf(
-            Session.label2dList.selectedLabels[0]
+        this._labelList.labelList.splice(
+          this._labelList.labelList.indexOf(
+            this._labelList.selectedLabels[0]
           ),
           1
         )
-        Session.label2dList.selectedLabels.length = 0
+        this._labelList.selectedLabels.length = 0
       }
     }
     switch (e.key) {
@@ -180,30 +189,30 @@ export class Label2DHandler {
         break
       case Key.ARROW_UP:
         // Only change order when one label is selected
-        if (Session.label2dList.selectedLabels.length === 1) {
-          const label = Session.label2dList.selectedLabels[0]
+        if (this._labelList.selectedLabels.length === 1) {
+          const label = this._labelList.selectedLabels[0]
           this.swapOrders(label.index, label.index + 1)
         }
         break
       case Key.ARROW_DOWN:
-        if (Session.label2dList.selectedLabels.length === 1) {
-          const label = Session.label2dList.selectedLabels[0]
+        if (this._labelList.selectedLabels.length === 1) {
+          const label = this._labelList.selectedLabels[0]
           this.swapOrders(label.index, label.index - 1)
         }
         break
       case Key.B_LOW:
       case Key.B_UP:
-        if (Session.label2dList.selectedLabels.length === 1) {
-          const selectedLabel = Session.label2dList.selectedLabels[0]
+        if (this._labelList.selectedLabels.length === 1) {
+          const selectedLabel = this._labelList.selectedLabels[0]
           this.changeLabelOrder(selectedLabel.index, 0)
         }
         break
       case Key.F_LOW:
       case Key.F_UP:
-        if (Session.label2dList.selectedLabels.length === 1) {
-          const selectedLabel = Session.label2dList.selectedLabels[0]
+        if (this._labelList.selectedLabels.length === 1) {
+          const selectedLabel = this._labelList.selectedLabels[0]
           this.changeLabelOrder(
-            selectedLabel.index, Session.label2dList.labelList.length - 1
+            selectedLabel.index, this._labelList.labelList.length - 1
           )
         }
         break
@@ -230,19 +239,19 @@ export class Label2DHandler {
    */
   public onKeyUp (e: KeyboardEvent): void {
     delete this._keyDownMap[e.key]
-    for (const selectedLabel of Session.label2dList.selectedLabels) {
+    for (const selectedLabel of this._labelList.selectedLabels) {
       selectedLabel.onKeyUp(e.key)
     }
   }
 
   /** returns whether selectedLabels is empty */
   private hasSelectedLabels (): boolean {
-    return Session.label2dList.selectedLabels.length !== 0
+    return this._labelList.selectedLabels.length !== 0
   }
 
   /** returns whether selectedLabels is editing */
   private isEditingSelectedLabels (): boolean {
-    for (const label of Session.label2dList.selectedLabels) {
+    for (const label of this._labelList.selectedLabels) {
       if (label.editing) {
         return true
       }
@@ -264,19 +273,19 @@ export class Label2DHandler {
       const item = this._state.task.items[this._state.user.select.item]
       const labelIds = getLinkedLabelIds(item, this._highlightedLabel.labelId)
       const highlightedAlreadySelected =
-        Session.label2dList.selectedLabels.includes(
+        this._labelList.selectedLabels.includes(
           this._highlightedLabel
         )
       if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
         if (highlightedAlreadySelected) {
           Session.dispatch(unselectLabels(
-            Session.label2dList.selectedLabelIds,
+            this._labelList.selectedLabelIds,
             this._selectedItemIndex,
             labelIds
           ))
         } else {
           Session.dispatch(selectLabels(
-            Session.label2dList.selectedLabelIds,
+            this._labelList.selectedLabelIds,
             this._selectedItemIndex,
             labelIds,
             this._highlightedLabel.category[0],
@@ -286,7 +295,7 @@ export class Label2DHandler {
         }
       } else if (!highlightedAlreadySelected) {
         Session.dispatch(selectLabels(
-          Session.label2dList.selectedLabelIds,
+          this._labelList.selectedLabelIds,
           this._selectedItemIndex,
           labelIds,
           this._highlightedLabel.category[0],
@@ -299,7 +308,7 @@ export class Label2DHandler {
   /** link selected labels */
   private linkLabels (): void {
     const selectedLabelIdArray = _.map(
-      Session.label2dList.selectedLabels, (label) => label.labelId)
+      this._labelList.selectedLabels, (label) => label.labelId)
     Session.dispatch(linkLabels(
       this._state.user.select.item, selectedLabelIdArray
     ))
@@ -308,7 +317,7 @@ export class Label2DHandler {
   /** unlink selected labels */
   private unlinkLabels (): void {
     const selectedLabelIdArray = _.map(
-      Session.label2dList.selectedLabels, (label) => label.labelId)
+      this._labelList.selectedLabels, (label) => label.labelId)
     Session.dispatch(unlinkLabels(
       this._state.user.select.item, selectedLabelIdArray
     ))
@@ -320,11 +329,11 @@ export class Label2DHandler {
     if (
       index1 >= 0 &&
       index2 >= 0 &&
-      index1 < Session.label2dList.labelList.length &&
-      index2 < Session.label2dList.labelList.length
+      index1 < this._labelList.labelList.length &&
+      index2 < this._labelList.labelList.length
     ) {
-      const label1 = Session.label2dList.get(index1)
-      const label2 = Session.label2dList.get(index2)
+      const label1 = this._labelList.get(index1)
+      const label2 = this._labelList.get(index2)
       Session.dispatch(changeLabelsProps(
         [this._selectedItemIndex],
         [[label1.labelId, label2.labelId]],
@@ -335,7 +344,7 @@ export class Label2DHandler {
 
   /** move label to nth position */
   private changeLabelOrder (index: number, newPosition: number) {
-    const labels = Session.label2dList.labelList
+    const labels = this._labelList.labelList
     if (
       index >= 0 &&
       index < labels.length &&

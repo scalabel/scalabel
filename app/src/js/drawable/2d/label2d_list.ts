@@ -151,6 +151,9 @@ export class Label2DList {
    * update labels from the state
    */
   public updateState (state: State): void {
+    if (this._updatedLabels.size > 0) {
+      return
+    }
     this._state = state
     this._labelTemplates = state.task.config.label2DTemplates
     const self = this
@@ -194,8 +197,10 @@ export class Label2DList {
   }
 
   /** Get uncommitted labels */
-  public get updatedLabels (): Readonly<Set<Readonly<Label2D>>> {
-    return this._updatedLabels
+  public popUpdatedLabels (): Label2D[] {
+    const labels = [...this._updatedLabels.values()]
+    this._updatedLabels.clear()
+    return labels
   }
 
   /** Push updated label to array */
