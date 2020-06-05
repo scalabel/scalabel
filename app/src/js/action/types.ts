@@ -3,6 +3,7 @@
  */
 import {
   ConnectionStatus,
+  DeepPartialState,
   IdType,
   LabelType,
   PaneType,
@@ -162,7 +163,7 @@ export interface UpdateTaskAction extends BaseAction {
 
 export interface UpdateStateAction extends BaseAction {
   /** Initial state data */
-  newState: State
+  newState: DeepPartialState
 }
 
 export interface UpdateSessionStatusAction extends BaseAction {

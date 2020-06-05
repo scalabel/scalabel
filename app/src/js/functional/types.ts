@@ -488,3 +488,9 @@ export interface State {
   /** Info particular to this session */
   session: SessionType
 }
+
+type RecursivePartial<T> = {
+  [P in keyof T]?: RecursivePartial<T[P]>;
+}
+
+export type DeepPartialState = RecursivePartial<State>

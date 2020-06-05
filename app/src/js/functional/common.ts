@@ -37,7 +37,7 @@ import {
 } from './util'
 
 /**
- * Initialize state
+ * Initialize session component of state
  * @param {State} state
  * @return {State}
  */

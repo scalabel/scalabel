@@ -13,7 +13,7 @@ import {
   TaskType,
   TrackIdMap
 } from '../functional/types'
-import { getInstructionUrl, getPageTitle, getTracking } from '../shared/util'
+import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../shared/util'
 import { ItemExport } from './bdd_types'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'
@@ -555,7 +555,7 @@ export function createTasks (
     const config: ConfigType = {
       ...project.config,
       taskSize: realTaskSize,
-      taskId: util.index2str(taskStartNum + taskIndex)
+      taskId: index2str(taskStartNum + taskIndex)
     }
 
     // based on the imported labels, compute max ids

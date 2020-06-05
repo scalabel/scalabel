@@ -52,7 +52,7 @@ function handleNormalAction (
 
 export const makeSyncMiddleware = (synchronizer: Synchronizer) => {
   const syncMiddleware: Middleware<ReduxState> = (
-    { dispatch, getState }: MiddlewareAPI<Dispatch, ReduxState>) => {
+    { getState }: MiddlewareAPI<Dispatch, ReduxState>) => {
 
     return (next: Dispatch) => (action: types.BaseAction) => {
       const state = getState().present
@@ -61,10 +61,6 @@ export const makeSyncMiddleware = (synchronizer: Synchronizer) => {
         // Handle socket events
         handleSyncAction(action, synchronizer, state)
         return action
-      } else if (action.type === types.UPDATE_STATE) {
-        const returnValue = next(action)
-        setupSession()
-        return returnValue
       } else {
         handleNormalAction(action, synchronizer, state)
         return next(action)

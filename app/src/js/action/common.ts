@@ -2,10 +2,11 @@ import { ActionCreator } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { ReduxState } from '../common/configure_store'
 import { getStateGetter } from '../common/session'
+import { setupSession } from '../common/session_setup'
 import { getStateFunc } from '../common/simple_store'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
-import { ConnectionStatus, IdType, LabelType,
+import { ConnectionStatus, DeepPartialState, IdType, LabelType,
   PaneType, Select, ShapeType, SplitType, State,
   TaskType, ViewerConfigType } from '../functional/types'
 import { SyncActionMessageType } from '../server/types'
@@ -25,14 +26,16 @@ export function setActionStateGetter (getter: getStateFunc) {
  * Make the base action that can be extended by the other actions
  * @param type
  */
-export function makeBaseAction (type: string): types.BaseAction {
+export function makeBaseAction (
+  type: string, frontendOnly: boolean = false): types.BaseAction {
   const state = getState()
   return {
     actionId: uid(),
     type,
     sessionId: state.session.id,
     userId: state.user.id,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    frontendOnly
   }
 }
 
@@ -46,7 +49,7 @@ export function initSessionAction (): types.InitSessionAction {
  */
 export function updateTask (newTask: TaskType): types.UpdateTaskAction {
   return {
-    ...makeBaseAction(types.UPDATE_TASK),
+    ...makeBaseAction(types.UPDATE_TASK, true),
     newTask
   }
 }
@@ -54,9 +57,10 @@ export function updateTask (newTask: TaskType): types.UpdateTaskAction {
 /** Initialize state data
  * @param {TaskType} newTask
  */
-export function updateState (newState: State): types.UpdateStateAction {
+export function updateState (
+  newState: DeepPartialState): types.UpdateStateAction {
   return {
-    ...makeBaseAction(types.UPDATE_STATE),
+    ...makeBaseAction(types.UPDATE_STATE, true),
     newState
   }
 }
@@ -594,4 +598,12 @@ export const setStatusToSaved: ThunkCreatorType = () => {
 export const setStatusToSubmitted: ThunkCreatorType = () => {
   return setStatusForBanner(ConnectionStatus.NOTIFY_SUBMITTED,
     ConnectionStatus.SUBMITTED)
+}
+
+export const initFrontendState: ThunkCreatorType = (
+  state: State, shouldInitViews: boolean) => {
+  return (dispatch) => {
+    dispatch(updateState(state))
+    setupSession(shouldInitViews)
+  }
 }

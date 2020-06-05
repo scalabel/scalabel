@@ -1,4 +1,7 @@
-export const testJson = {
+import { DeepPartialState } from '../../js/functional/types'
+
+// Enforce 2 nodes per edge
+export const testJson: DeepPartialState = {
   session: {
     itemStatuses: [
       { sensorDataLoaded: {} },
@@ -151,12 +154,7 @@ export const testJson = {
       startTime: 1539820189,
       submitTime: 0
     },
-    current: {
-      item: -1,
-      label: -1,
-      labelType: 0,
-      maxLabelId: -1,
-      maxShapeId: -1,
+    status: {
       maxOrder: -1
     },
     items: [
@@ -213,6 +211,12 @@ export const testJson = {
         name: 'default',
         type: 'image'
       }
+    }
+  },
+  user: {
+    select: {
+      item: -1,
+      labelType: 0
     }
   }
 }

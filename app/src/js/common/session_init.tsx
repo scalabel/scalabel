@@ -27,7 +27,10 @@ export function initSession (containerName: string): void {
     searchParams.get(QueryArg.TASK_INDEX) as string, 10)
   const projectName = searchParams.get(QueryArg.PROJECT_NAME) as string
 
-  // Wait for a second before getting the user fingerprint
+  /**
+   * Wait for page to load to ensure consistent fingerprint
+   * See docs at https://github.com/Valve/fingerprintjs2
+   */
   setTimeout(() => {
     Fingerprint2.get((components) => {
       const values =

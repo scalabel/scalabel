@@ -6,6 +6,7 @@ import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore, ReduxStore } from '../common/configure_store'
 import { ShapeTypeName } from '../common/types'
 import { PolygonType, RectType, State } from '../functional/types'
+import { index2str } from '../shared/util'
 import { ItemExport } from './bdd_types'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
@@ -13,7 +14,7 @@ import {
   ActionPacketType, BotData, EventName,
   ModelQuery, RegisterMessageType, SyncActionMessageType
 } from './types'
-import { getPyConnFailedMsg, index2str } from './util'
+import { getPyConnFailedMsg } from './util'
 
 /**
  * Manages virtual sessions for a single bot

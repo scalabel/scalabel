@@ -2,6 +2,7 @@ import _ from 'lodash'
 import OrderedMap from 'orderedmap'
 import uuid4 from 'uuid/v4'
 import {
+  initFrontendState,
   setStatusAfterConnect,
   setStatusToComputeDone,
   setStatusToComputing,
@@ -11,7 +12,6 @@ import {
   setStatusToSubmitted,
   setStatusToSubmitting,
   setStatusToUnsaved,
-  updateState,
   updateTask} from '../action/common'
 import * as types from '../action/types'
 import { isSessionFullySaved } from '../functional/selector'
@@ -136,15 +136,11 @@ export class Synchronizer {
     state: State, autosave: boolean, sessionId: string, bots: boolean) {
     if (!this.registeredOnce) {
       this.registeredOnce = true
-      const initStateAction = updateState(state)
-      initStateAction.frontendOnly = true
-      Session.dispatch(initStateAction)
+      Session.dispatch(initFrontendState(state, true))
     } else {
       if (autosave) {
         // Update with any backend changes that occurred during disconnect
-        const updateTaskAction = updateTask(state.task)
-        updateTaskAction.frontendOnly = true
-        Session.dispatch(updateTaskAction)
+        Session.dispatch(updateTask(state.task))
 
         // Re-apply frontend task actions after updating task from backend
         for (const actionPacket of this.listActionPackets()) {

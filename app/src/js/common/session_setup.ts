@@ -11,21 +11,23 @@ import { Track } from './track/track'
 import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
- * After the state is initialized, set up the rest of the sessio
+ * After the state is initialized, set up the rest of the session
  */
-export function setupSession () {
+export function setupSession (shouldInitViews: boolean) {
   Session.dispatch(initSessionAction())
   const state = Session.getState()
   Session.tracking = state.task.config.tracking
   Session.autosave = state.task.config.autosave
   Session.bots = state.task.config.bots
 
-  initViewerConfigs()
-  loadData()
-  Session.subscribe(updateTracks)
-  Session.dispatch(updateAll())
-  Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
-  Session.subscribe(() => Session.label2dList.updateState(Session.getState()))
+  if (shouldInitViews) {
+    initViewerConfigs()
+    loadData()
+    Session.subscribe(updateTracks)
+    Session.dispatch(updateAll())
+    Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
+    Session.subscribe(() => Session.label2dList.updateState(Session.getState()))
+  }
 }
 
 /**
