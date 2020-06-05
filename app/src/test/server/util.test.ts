@@ -1,8 +1,8 @@
 import { BundleFile, HandlerUrl,
   ItemTypeName, LabelTypeName } from '../../js/common/types'
+import { getTracking } from '../../js/common/util'
 import { getProjectKey, getSaveDir, getTaskKey } from '../../js/server/path'
 import * as util from '../../js/server/util'
-import { getTracking } from '../../js/shared/util'
 import { sampleFormEmpty, sampleFormImage } from '../test_states/test_creation_objects'
 
 describe('test general utility methods', () => {
@@ -28,12 +28,6 @@ describe('test general utility methods', () => {
     expect(projectKey).toBe('testProject/project')
     expect(taskKey).toBe('testProject/tasks/000000')
     expect(saveDir).toBe('testProject/saved/000000')
-  })
-
-  test('index2str', () => {
-    expect(util.index2str(100)).toBe('000100')
-    expect(util.index2str(5)).toBe('000005')
-    expect(util.index2str(789631)).toBe('789631')
   })
 
   test('initSessId', () => {

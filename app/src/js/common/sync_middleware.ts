@@ -2,7 +2,6 @@ import { Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import * as types from '../action/types'
 import { State } from '../functional/types'
 import { ReduxState } from './configure_store'
-import { setupSession } from './session_setup'
 import { Synchronizer } from './synchronizer'
 
 /**

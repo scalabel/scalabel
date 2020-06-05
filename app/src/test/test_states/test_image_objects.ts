@@ -1,3 +1,4 @@
+import { AttributeToolType } from '../../js/common/types'
 import { DeepPartialState } from '../../js/functional/types'
 
 // Enforce 2 nodes per edge
@@ -9,11 +10,11 @@ export const testJson: DeepPartialState = {
       { sensorDataLoaded: {} },
       { sensorDataLoaded: {} },
       { sensorDataLoaded: {} }
-    ]
+    ],
+    startTime: 1539820189
   },
   task: {
     config: {
-      assignmentId: 'e6015077-aad9-4e60-a5ed-dbccf931a049',
       projectName: 'Redux0',
       itemType: 'image',
       labelTypes:
@@ -65,7 +66,7 @@ export const testJson: DeepPartialState = {
       attributes: [
         {
           name: 'Weather',
-          toolType: 'list',
+          toolType:  AttributeToolType.LIST,
           tagText: '',
           tagPrefix: 'w',
           tagSuffixes: [
@@ -98,7 +99,7 @@ export const testJson: DeepPartialState = {
         },
         {
           name: 'Scene',
-          toolType: 'list',
+          toolType: AttributeToolType.LIST,
           tagText: '',
           tagPrefix: 's',
           tagSuffixes: [
@@ -131,7 +132,7 @@ export const testJson: DeepPartialState = {
         },
         {
           name: 'Timeofday',
-          toolType: 'list',
+          toolType: AttributeToolType.LIST,
           tagText: '',
           tagPrefix: 't',
           tagSuffixes: ['', 'day', 'n', 'daw'],
@@ -149,59 +150,56 @@ export const testJson: DeepPartialState = {
           ]
         }
       ],
-      taskId: '000000',
-      workerId: 'default_worker',
-      startTime: 1539820189,
-      submitTime: 0
+      taskId: '000000'
     },
     status: {
       maxOrder: -1
     },
     items: [
       {
-        id: 0,
+        id: 'id0',
         index: 0,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com/' +
             'scalabel-public/demo/frames/intersection-0000051.jpg'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 1,
+        id: 'id1',
         index: 1,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
             'demo/frames/intersection-0000052.jpg'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 2,
+        id: 'id2',
         index: 2,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
             'demo/frames/intersection-0000053.jpg'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 3,
+        id: 'id3',
         index: 3,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
             'demo/frames/intersection-0000054.jpg'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 4,
+        id: 'ABC_alphabeticallyOutOfOrderID',
         index: 4,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/' +
             'demo/frames/intersection-0000055.jpg'
         },
-        labels: []
+        labels: {}
       }
     ],
     tracks: {},
@@ -211,6 +209,9 @@ export const testJson: DeepPartialState = {
         name: 'default',
         type: 'image'
       }
+    },
+    progress: {
+      submissions: []
     }
   },
   user: {

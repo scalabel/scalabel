@@ -1,12 +1,12 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
+import { index2str } from '../../js/common/util'
 import { FileStorage } from '../../js/server/file_storage'
 import { getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
-import { index2str } from '../../js/shared/util'
 import { sleep } from '../project/util'
 import { getTestConfig } from './util/util'
 

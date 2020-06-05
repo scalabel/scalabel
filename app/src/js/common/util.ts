@@ -1,5 +1,5 @@
 import { sprintf } from 'sprintf-js'
-import { ItemTypeName, LabelTypeName } from '../common/types'
+import { ItemTypeName, LabelTypeName } from './types'
 
 /**
  * Get whether tracking is on

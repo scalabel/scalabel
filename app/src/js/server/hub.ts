@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
 import * as types from '../action/types'
-import { index2str } from '../shared/util'
+import { index2str } from '../common/util'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'

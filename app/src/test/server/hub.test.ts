@@ -1,6 +1,7 @@
 import { cleanup } from '@testing-library/react'
 import _ from 'lodash'
 import { goToItem } from '../../js/action/common'
+import { index2str } from '../../js/common/util'
 import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { Hub } from '../../js/server/hub'
@@ -12,7 +13,6 @@ import { ActionPacketType, EventName, RegisterMessageType,
   StateMetadata, SyncActionMessageType } from '../../js/server/types'
 import { UserManager } from '../../js/server/user_manager'
 import { updateState } from '../../js/server/util'
-import { index2str } from '../../js/shared/util'
 import { getInitialState, getRandomBox2dAction } from './util/util'
 
 jest.mock('../../js/server/file_storage')

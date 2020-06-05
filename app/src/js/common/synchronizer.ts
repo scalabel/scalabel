@@ -18,8 +18,8 @@ import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
-import { index2str } from '../shared/util'
 import Session from './session'
+import { index2str } from './util'
 
 const CONFIRMATION_MESSAGE =
   'You have unsaved changes that will be lost if you leave this page. '

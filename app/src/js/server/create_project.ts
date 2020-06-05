@@ -2,6 +2,7 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
+import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../common/util'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
 import {
   Attribute,
@@ -13,7 +14,6 @@ import {
   TaskType,
   TrackIdMap
 } from '../functional/types'
-import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../shared/util'
 import { ItemExport } from './bdd_types'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'

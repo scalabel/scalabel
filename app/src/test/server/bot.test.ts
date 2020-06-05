@@ -3,6 +3,7 @@ import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
 import { AddLabelsAction } from '../../js/action/types'
 import { configureStore, ReduxStore } from '../../js/common/configure_store'
+import { index2str } from '../../js/common/util'
 import { State } from '../../js/functional/types'
 import { ItemExport } from '../../js/server/bdd_types'
 import { Bot } from '../../js/server/bot'
@@ -10,7 +11,6 @@ import { serverConfig } from '../../js/server/defaults'
 import {
   ActionPacketType, BotData, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
-import { index2str } from '../../js/shared/util'
 import {
   getInitialState, getRandomBox2dAction,
   getRandomModelPoly } from './util/util'

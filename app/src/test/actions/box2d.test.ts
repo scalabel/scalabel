@@ -10,9 +10,7 @@ import { testJson } from '../test_states/test_image_objects'
 
 test('Add, change and delete box2d labels', () => {
   // Reset the session for testing
-  // remove devMode makes this simpler
-  Session.devMode = false
-  Session.store = configureStore({}, Session.devMode)
+  Session.store = configureStore({})
   Session.dispatch(action.initFrontendState(testJson, false))
 
   // Parameters for item index and number of labels to add
@@ -30,8 +28,8 @@ test('Add, change and delete box2d labels', () => {
   expect(_.size(item.labels)).toBe(numLabels)
   expect(_.size(item.shapes)).toBe(numLabels)
 
-  // Check 1st label/shape has correct properties
-  // TODO: why map ID first?
+  // Check a random label/shape for the correct properties
+  // TODO: why map ID first? (order not guaranteed)
   const labelIds = _.map(item.labels, (l) => l.id)
   let label = item.labels[labelIds[0]]
   expect(label.item).toBe(itemIndex)
