@@ -42,11 +42,7 @@ function handleNormalAction (
   const sessionId = state.session.id
   const autosave = state.task.config.autosave
   const bots = state.task.config.bots
-
-  if (sessionId === action.sessionId && !action.frontendOnly &&
-      !types.isSessionAction(action)) {
-    synchronizer.logAction(action, autosave, sessionId, bots)
-  }
+  synchronizer.logAction(action, autosave, sessionId, bots)
 }
 
 export const makeSyncMiddleware = (synchronizer: Synchronizer) => {

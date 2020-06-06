@@ -2,7 +2,6 @@ import { ActionCreator } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { ReduxState } from '../common/configure_store'
 import { getStateGetter } from '../common/session'
-import { setupSession } from '../common/session_setup'
 import { getStateFunc } from '../common/simple_store'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
@@ -598,12 +597,4 @@ export const setStatusToSaved: ThunkCreatorType = () => {
 export const setStatusToSubmitted: ThunkCreatorType = () => {
   return setStatusForBanner(ConnectionStatus.NOTIFY_SUBMITTED,
     ConnectionStatus.SUBMITTED)
-}
-
-export const initFrontendState: ThunkCreatorType = (
-  state: State, shouldInitViews: boolean) => {
-  return (dispatch) => {
-    dispatch(updateState(state))
-    setupSession(shouldInitViews)
-  }
 }

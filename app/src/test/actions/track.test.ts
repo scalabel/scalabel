@@ -2,13 +2,13 @@ import _ from 'lodash'
 import * as action from '../../js/action/common'
 import * as track from '../../js/action/track'
 import Session from '../../js/common/session'
-import { initStore, loadImages } from '../../js/common/session_init'
+import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 
 test('Test tracks ops', () => {
-  Session.devMode = false
-  initStore(testJson)
-  loadImages()
+  setupTestStore(testJson)
+  // TODO- verify if loading images is necessary
+  // loadImages()
 
   // terminate tracks
   const itemIndex = 1

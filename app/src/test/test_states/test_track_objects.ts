@@ -1,4 +1,7 @@
-export const testJson = {
+import { AttributeToolType } from '../../js/common/types'
+import { DeepPartialState } from '../../js/functional/types'
+
+export const testJson: DeepPartialState = {
   task: {
     config: {
       projectName: 'Test3',
@@ -13,7 +16,7 @@ export const testJson = {
       categories: ['person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bike', 'traffic sign', 'traffic light'],
       attributes: [{
         name: 'Occluded',
-        toolType: 'switch',
+        toolType: AttributeToolType.SWITCH,
         tagText: 'o',
         tagSuffixes: [],
         tagPrefix: '',
@@ -21,7 +24,7 @@ export const testJson = {
         buttonColors: []
       }, {
         name: 'Truncated',
-        toolType: 'switch',
+        toolType: AttributeToolType.SWITCH,
         tagText: 't',
         tagSuffixes: [],
         tagPrefix: '',
@@ -29,7 +32,7 @@ export const testJson = {
         buttonColors: []
       }, {
         name: 'Traffic Light Color',
-        toolType: 'list',
+        toolType: AttributeToolType.LIST,
         tagText: 't',
         tagSuffixes: ['', 'g', 'y', 'r'],
         tagPrefix: '',
@@ -43,10 +46,7 @@ export const testJson = {
       autosave: true
     },
     status: {
-      maxLabelId: 222,
-      maxShapeId: 219,
-      maxOrder: 223,
-      maxTrackId: 9
+      maxOrder: 223
     },
     items: [{
       id: '0',
@@ -56,42 +56,42 @@ export const testJson = {
         '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg'
       },
       labels: {
-        23: {
-          id: '23',
+        id23: {
+          id: 'id23',
           item: 0,
           sensors: [-1],
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['23'],
           track: '1',
           order: 24,
           manual: true
         },
-        46: {
-          id: '46',
+        id46: {
+          id: 'id46',
           item: 0,
           sensors: [-1],
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['46'],
           track: '2',
           order: 47,
           manual: true
         },
-        69: {
-          id: '69',
+        id69: {
+          id: 'id69',
           item: 0,
           sensors: [-1],
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['69'],
           track: '3',
@@ -100,38 +100,32 @@ export const testJson = {
         }
       },
       shapes: {
-        23: {
-          id: '23',
+        id23: {
+          id: 'id23',
           label: ['23'],
-          type: 'rect',
-          shape: {
-            x1: 0,
-            y1: 298.1679389312977,
-            x2: 145.3482824427481,
-            y2: 651.2977099236641
-          }
+          shapeType: 'rect',
+          x1: 0,
+          y1: 298.1679389312977,
+          x2: 145.3482824427481,
+          y2: 651.2977099236641
         },
-        46: {
-          id: '46',
+        id46: {
+          id: 'id46',
           label: ['46'],
-          type: 'rect',
-          shape: {
-            x1: 950.5391221374047,
-            y1: 287.17557251908397,
-            x2: 1021.9895038167939,
-            y2: 478.1679389312977
-          }
+          shapeType: 'rect',
+          x1: 950.5391221374047,
+          y1: 287.17557251908397,
+          x2: 1021.9895038167939,
+          y2: 478.1679389312977
         },
-        69: {
-          id: '69',
+        id69: {
+          id: 'id69',
           label: ['69'],
-          type: 'rect',
-          shape: {
-            x1: 835.1192748091603,
-            y1: 314.65648854961836,
-            x2: 861.2261450381679,
-            y2: 406.71755725190843
-          }
+          shapeType: 'rect',
+          x1: 835.1192748091603,
+          y1: 314.65648854961836,
+          x2: 861.2261450381679,
+          y2: 406.71755725190843
         }
       },
       timestamp: 0
@@ -150,7 +144,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['24'],
           track: '1',
@@ -164,7 +158,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['47'],
           track: '2',
@@ -178,7 +172,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['70'],
           track: '3',
@@ -190,35 +184,29 @@ export const testJson = {
         24: {
           id: '24',
           label: ['24'],
-          type: 'rect',
-          shape: {
-            x1: 0,
-            y1: 298.1679389312977,
-            x2: 145.3482824427481,
-            y2: 651.2977099236641
-          }
+          shapeType: 'rect',
+          x1: 0,
+          y1: 298.1679389312977,
+          x2: 145.3482824427481,
+          y2: 651.2977099236641
         },
         47: {
           id: '47',
           label: ['47'],
-          type: 'rect',
-          shape: {
-            x1: 942.2948473282444,
-            y1: 323.9312977099237,
-            x2: 1013.7452290076336,
-            y2: 514.9236641221374
-          }
+          shapeType: 'rect',
+          x1: 942.2948473282444,
+          y1: 323.9312977099237,
+          x2: 1013.7452290076336,
+          y2: 514.9236641221374
         },
         70: {
           id: '70',
           label: ['70'],
-          type: 'rect',
-          shape: {
-            x1: 835.1192748091603,
-            y1: 314.65648854961836,
-            x2: 861.2261450381679,
-            y2: 406.71755725190843
-          }
+          shapeType: 'rect',
+          x1: 835.1192748091603,
+          y1: 314.65648854961836,
+          x2: 861.2261450381679,
+          y2: 406.71755725190843
         }
       },
       timestamp: 0
@@ -237,7 +225,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['25'],
           track: '1',
@@ -251,7 +239,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['48'],
           track: '2',
@@ -265,7 +253,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['71'],
           track: '3',
@@ -277,35 +265,29 @@ export const testJson = {
         25: {
           id: '25',
           label: ['25'],
-          type: 'rect',
-          shape: {
-            x1: 0,
-            y1: 298.1679389312977,
-            x2: 145.3482824427481,
-            y2: 651.2977099236641
-          }
+          shapeType: 'rect',
+          x1: 0,
+          y1: 298.1679389312977,
+          x2: 145.3482824427481,
+          y2: 651.2977099236641
         },
         48: {
           id: '48',
           label: ['48'],
-          type: 'rect',
-          shape: {
-            x1: 934.0505725190841,
-            y1: 360.68702290076334,
-            x2: 1005.5009541984733,
-            y2: 551.679389312977
-          }
+          shapeType: 'rect',
+          x1: 934.0505725190841,
+          y1: 360.68702290076334,
+          x2: 1005.5009541984733,
+          y2: 551.679389312977
         },
         71: {
           id: '71',
           label: ['71'],
-          type: 'rect',
-          shape: {
-            x1: 835.1192748091603,
-            y1: 314.65648854961836,
-            x2: 861.2261450381679,
-            y2: 406.71755725190843
-          }
+          shapeType: 'rect',
+          x1: 835.1192748091603,
+          y1: 314.65648854961836,
+          x2: 861.2261450381679,
+          y2: 406.71755725190843
         }
       },
       timestamp: 0
@@ -324,7 +306,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['26'],
           track: '1',
@@ -338,7 +320,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['49'],
           track: '2',
@@ -352,7 +334,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['72'],
           track: '3',
@@ -364,35 +346,29 @@ export const testJson = {
         26: {
           id: '26',
           label: ['26'],
-          type: 'rect',
-          shape: {
-            x1: 0,
-            y1: 298.1679389312977,
-            x2: 145.3482824427481,
-            y2: 651.2977099236641
-          }
+          shapeType: 'rect',
+          x1: 0,
+          y1: 298.1679389312977,
+          x2: 145.3482824427481,
+          y2: 651.2977099236641
         },
         49: {
           id: '49',
           label: ['49'],
-          type: 'rect',
-          shape: {
-            x1: 925.8062977099238,
-            y1: 397.4427480916031,
-            x2: 997.256679389313,
-            y2: 588.4351145038167
-          }
+          shapeType: 'rect',
+          x1: 925.8062977099238,
+          y1: 397.4427480916031,
+          x2: 997.256679389313,
+          y2: 588.4351145038167
         },
         72: {
           id: '72',
           label: ['72'],
-          type: 'rect',
-          shape: {
-            x1: 835.1192748091603,
-            y1: 314.65648854961836,
-            x2: 861.2261450381679,
-            y2: 406.71755725190843
-          }
+          shapeType: 'rect',
+          x1: 835.1192748091603,
+          y1: 314.65648854961836,
+          x2: 861.2261450381679,
+          y2: 406.71755725190843
         }
       },
       timestamp: 0
@@ -411,7 +387,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['27'],
           track: '1',
@@ -425,7 +401,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['73'],
           track: '3',
@@ -437,24 +413,20 @@ export const testJson = {
         27: {
           id: '27',
           label: ['27'],
-          type: 'rect',
-          shape: {
-            x1: 0,
-            y1: 298.1679389312977,
-            x2: 145.3482824427481,
-            y2: 651.2977099236641
-          }
+          shapeType: 'rect',
+          x1: 0,
+          y1: 298.1679389312977,
+          x2: 145.3482824427481,
+          y2: 651.2977099236641
         },
         73: {
           id: '73',
           label: ['73'],
-          type: 'rect',
-          shape: {
-            x1: 835.1192748091603,
-            y1: 314.65648854961836,
-            x2: 861.2261450381679,
-            y2: 406.71755725190843
-          }
+          shapeType: 'rect',
+          x1: 835.1192748091603,
+          y1: 314.65648854961836,
+          x2: 861.2261450381679,
+          y2: 406.71755725190843
         }
       },
       timestamp: 0
@@ -473,7 +445,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['28'],
           track: '1',
@@ -487,7 +459,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['74'],
           track: '3',
@@ -501,7 +473,7 @@ export const testJson = {
           type: 'box2d',
           category: [0],
           attributes: {},
-          parent: -1,
+          parent: '',
           children: [],
           shapes: ['202'],
           track: '9',
@@ -513,35 +485,29 @@ export const testJson = {
         28: {
           id: '28',
           label: ['28'],
-          type: 'rect',
-          shape: {
-            x1: 0,
-            y1: 298.1679389312977,
-            x2: 145.3482824427481,
-            y2: 651.2977099236641
-          }
+          shapeType: 'rect',
+          x1: 0,
+          y1: 298.1679389312977,
+          x2: 145.3482824427481,
+          y2: 651.2977099236641
         },
         74: {
           id: '74',
           label: ['74'],
-          type: 'rect',
-          shape: {
-            x1: 835.1192748091603,
-            y1: 314.65648854961836,
-            x2: 861.2261450381679,
-            y2: 406.71755725190843
-          }
+          shapeType: 'rect',
+          x1: 835.1192748091603,
+          y1: 314.65648854961836,
+          x2: 861.2261450381679,
+          y2: 406.71755725190843
         },
         202: {
           id: '202',
           label: ['203'],
-          type: 'rect',
-          shape: {
-            x1: 931.3024809160306,
-            y1: 300.91603053435114,
-            x2: 989.0124045801527,
-            y2: 501.5267175572519
-          }
+          shapeType: 'rect',
+          x1: 931.3024809160306,
+          y1: 300.91603053435114,
+          x2: 989.0124045801527,
+          y2: 501.5267175572519
         }
       },
       timestamp: 0
@@ -551,7 +517,7 @@ export const testJson = {
         id: '1',
         type: 'box2d',
         labels: {
-          0: '23',
+          0: 'id23',
           1: '24',
           2: '25',
           3: '26',
@@ -563,7 +529,7 @@ export const testJson = {
         id: '2',
         type: 'box2d',
         labels: {
-          0: '46',
+          0: 'id46',
           1: '47',
           2: '48',
           3: '49'
@@ -573,7 +539,7 @@ export const testJson = {
         id: '3',
         type: 'box2d',
         labels: {
-          0: '69',
+          0: 'id69',
           1: '70',
           2: '71',
           3: '72',
@@ -604,8 +570,8 @@ export const testJson = {
     id: '',
     select: {
       item: 0,
-      labels: [],
-      shapes: [],
+      labels: {},
+      shapes: {},
       category: 0,
       attributes: {},
       labelType: 0,
@@ -660,7 +626,7 @@ export const testJson = {
   }
 }
 
-export const emptyTrackingTask = {
+export const emptyTrackingTask: DeepPartialState = {
   task: {
     config: {
       projectName: 'Test3',
@@ -675,7 +641,7 @@ export const emptyTrackingTask = {
       categories: ['person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bike', 'traffic sign', 'traffic light'],
       attributes: [{
         name: 'Occluded',
-        toolType: 'switch',
+        toolType: AttributeToolType.SWITCH,
         tagText: 'o',
         tagSuffixes: [],
         tagPrefix: '',
@@ -683,7 +649,7 @@ export const emptyTrackingTask = {
         buttonColors: []
       }, {
         name: 'Truncated',
-        toolType: 'switch',
+        toolType: AttributeToolType.SWITCH,
         tagText: 't',
         tagSuffixes: [],
         tagPrefix: '',
@@ -691,7 +657,7 @@ export const emptyTrackingTask = {
         buttonColors: []
       }, {
         name: 'Traffic Color Light',
-        toolType: 'list',
+        toolType: AttributeToolType.LIST,
         tagText: 't',
         tagSuffixes: ['', 'g', 'y', 'r'],
         tagPrefix: '',
@@ -705,10 +671,7 @@ export const emptyTrackingTask = {
       autosave: true
     },
     status: {
-      maxLabelId: 222,
-      maxShapeId: 219,
-      maxOrder: 223,
-      maxTrackId: 9
+      maxOrder: 223
     },
     items: [{
       id: '0',
@@ -828,8 +791,8 @@ export const emptyTrackingTask = {
     id: '',
     select: {
       item: 0,
-      labels: [],
-      shapes: [],
+      labels: {},
+      shapes: {},
       category: 0,
       attributes: {},
       labelType: 0,

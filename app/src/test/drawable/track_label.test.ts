@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
-import { initStore, updateTracks } from '../../js/common/session_init'
+import { updateTracks } from '../../js/common/session_setup'
 import { Label2DList, makeDrawableLabel2D } from '../../js/drawable/2d/label2d_list'
 import { commit2DLabels } from '../../js/drawable/states'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
+import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 
 const getState = Session.getState.bind(Session)
@@ -15,7 +16,8 @@ const dispatch = Session.dispatch.bind(Session)
 
 beforeAll(() => {
   Session.devMode = false
-  initStore(testJson)
+  // TODO- check if this init store is necessary
+  // initStore(testJson)
   Session.images.length = 0
   for (let i = 0; i < getState().task.items.length; i++) {
     Session.images.push({ [-1]: new Image(1000, 1000) })
@@ -26,8 +28,8 @@ beforeAll(() => {
 })
 
 test('Add new valid drawable track', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   dispatch(action.goToItem(0))
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -71,8 +73,8 @@ test('Add new valid drawable track', () => {
 })
 
 test('Add new invalid drawable track', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   dispatch(action.goToItem(0))
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -97,9 +99,9 @@ test('Add new invalid drawable track', () => {
 })
 
 test('Update existing drawable of a track', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
   updateTracks()
+
   dispatch(action.goToItem(1))
   const state = Session.getState()
   expect(_.size(state.task.items[1].labels)).toEqual(3)
@@ -138,8 +140,7 @@ test('Update existing drawable of a track', () => {
 })
 
 test('Update existing drawable of a track to invalid, from page 1', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
   updateTracks()
 
   // Terminate current track
@@ -182,8 +183,7 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
 })
 
 test('Update existing drawable of a track to invalid, from page 0', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
   updateTracks()
 
   // Terminate current track

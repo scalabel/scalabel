@@ -3,16 +3,14 @@ import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
 import { setStatusToUnsaved } from '../../js/action/common'
 import { AddLabelsAction } from '../../js/action/types'
-import { configureStore } from '../../js/common/configure_store'
 import Session from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
+import { index2str } from '../../js/common/util'
 import * as selector from '../../js/functional/selector'
-import { State } from '../../js/functional/types'
 import {
   ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../../js/server/types'
 import { updateState } from '../../js/server/util'
-import { index2str } from '../../js/shared/util'
 import { getInitialState, getRandomBox2dAction } from '../server/util/util'
 
 let sessionId: string
@@ -20,6 +18,8 @@ let botSessionId: string
 let taskIndex: number
 let projectName: string
 let userId: string
+let bots: boolean
+let autosave: boolean
 const socketEmit = jest.fn()
 const mockSocket = {
   on: jest.fn(),
@@ -33,10 +33,11 @@ beforeAll(() => {
   taskIndex = 0
   projectName = 'testProject'
   userId = 'fakeUserId'
+  bots = false
+  autosave = true
 })
 
 beforeEach(() => {
-  Session.bots = false
   Session.dispatch(setStatusToUnsaved())
 })
 
@@ -46,7 +47,7 @@ describe('Test synchronizer functionality', () => {
     // Since this deals with registration, don't initialize the state
     const initializeState = false
     const sync = startSynchronizer(initializeState)
-    sync.connectHandler()
+    sync.sendConnectionMessage('')
 
     // Frontend doesn't have a session id until after registration
     const expectedSessId = ''
@@ -65,7 +66,7 @@ describe('Test synchronizer functionality', () => {
     expect(selector.isStatusSaved(Session.store.getState())).toBe(true)
 
     // If second ack arrives, it is ignored
-    sync.actionBroadcastHandler(
+    sync.handleBroadcast(
       packetToMessage(ackPackets[0]))
     expect(sync.numLoggedActions).toBe(1)
   })
@@ -94,12 +95,12 @@ describe('Test synchronizer functionality', () => {
       modelPackets.push(modelPacket)
     }
 
-    sync.actionBroadcastHandler(
+    sync.handleBroadcast(
       packetToMessageBot(modelPackets[0]))
     expect(sync.numActionsPendingPrediction).toBe(1)
     expect(selector.isComputeDone(Session.store.getState())).toBe(false)
 
-    sync.actionBroadcastHandler(
+    sync.handleBroadcast(
       packetToMessageBot(modelPackets[1]))
     expect(sync.numActionsPendingPrediction).toBe(0)
     expect(selector.isComputeDone(Session.store.getState())).toBe(true)
@@ -110,7 +111,7 @@ describe('Test synchronizer functionality', () => {
     const frontendActions = dispatchAndCheckActions(sync, 1)
 
     // Backend disconnects instead of acking
-    sync.disconnectHandler()
+    sync.handleDisconnect()
     expect(selector.isStatusReconnecting(Session.store.getState())).toBe(true)
 
     // Reconnect, but some missed actions occured in the backend
@@ -118,9 +119,9 @@ describe('Test synchronizer functionality', () => {
       getInitialState(sessionId),
       [getRandomBox2dAction()]
     )
-    sync.connectHandler()
+    sync.sendConnectionMessage(sessionId)
     checkConnectMessage(sessionId)
-    sync.registerAckHandler(newInitialState)
+    sync.finishRegistration(newInitialState, autosave, sessionId, bots)
 
     /**
      * Check that frontend state updates correctly
@@ -152,7 +153,7 @@ function dispatchAndCheckActions (
   const actions: AddLabelsAction[] = []
   for (let _ = 0; _ < numActions; _++) {
     const action = getRandomBox2dAction()
-    Session.dispatch(action)
+    sync.logAction(action, autosave, sessionId, bots)
     actions.push(action)
   }
 
@@ -172,7 +173,7 @@ function dispatchAndCheckActions (
 function sendAcks (sync: Synchronizer): ActionPacketType[] {
   const actionPackets = sync.listActionPackets()
   for (const actionPacket of actionPackets) {
-    sync.actionBroadcastHandler(
+    sync.handleBroadcast(
       packetToMessage(actionPacket))
   }
   return actionPackets
@@ -211,21 +212,18 @@ function checkConnectMessage (sessId: string) {
 function startSynchronizer (setInitialState: boolean = true): Synchronizer {
   io.connect = jest.fn().mockImplementation(() => mockSocket)
   const synchronizer = new Synchronizer(
+    mockSocket as any,
     taskIndex,
     projectName,
-    userId,
-    (backendState: State) => {
-      backendState.session.id = sessionId
-      backendState.task.config.autosave = true
-      Session.store = configureStore(
-        backendState, Session.devMode, synchronizer.middleware)
-      Session.autosave = true
-    }
+    userId
   )
 
   if (setInitialState) {
     const initialState = getInitialState(sessionId)
-    synchronizer.registerAckHandler(initialState)
+    synchronizer.finishRegistration(initialState,
+      initialState.task.config.autosave,
+      initialState.session.id,
+      initialState.task.config.bots)
   }
 
   // Initially, no actions are queued for saving

@@ -1,19 +1,22 @@
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
 import { addViewerConfig, initSessionAction, loadItem,
-  splitPane, updateAll, updatePane } from '../action/common'
+  splitPane, updateAll, updatePane, updateState } from '../action/common'
 import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
 import { makeDefaultViewerConfig } from '../functional/states'
-import { PointCloudViewerConfigType, SplitType } from '../functional/types'
+import { DeepPartialState, PointCloudViewerConfigType, SplitType } from '../functional/types'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import Session from './session'
 import { Track } from './track/track'
 import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
- * After the state is initialized, set up the rest of the session
+ * Initialize state, then set up the rest of the session
  */
-export function setupSession (shouldInitViews: boolean) {
+export function setupSession (
+  newState: DeepPartialState, shouldInitViews: boolean = true) {
+  Session.dispatch(updateState(newState))
+
   Session.dispatch(initSessionAction())
   const state = Session.getState()
   Session.tracking = state.task.config.tracking

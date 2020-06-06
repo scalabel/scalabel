@@ -4,7 +4,6 @@ import * as action from '../../js/action/common'
 import { addPolygon2dLabel } from '../../js/action/polygon2d'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Key, ShapeTypeName } from '../../js/common/types'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
@@ -13,6 +12,7 @@ import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, Point2DType, PolygonType, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
+import { setupTestStore } from '../components/util'
 import { drawPolygon, keyClick, keyDown, keyUp, mouseClick, mouseDown, mouseMove, mouseMoveClick, mouseUp } from '../drawable/label2d_handler_util'
 import { findNewLabels } from '../server/util/util'
 import { testJson } from '../test_states/test_image_objects'
@@ -21,8 +21,8 @@ import { testJson } from '../test_states/test_image_objects'
  * Initialize Session, label 3d list, label 3d handler
  */
 function initializeTestingObjects (): [Label2DHandler, number] {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   Session.dispatch(action.addViewerConfig(1, makeImageViewerConfig(0)))
   const viewerId = 1
 

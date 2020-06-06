@@ -2,7 +2,6 @@ import _ from 'lodash'
 import OrderedMap from 'orderedmap'
 import uuid4 from 'uuid/v4'
 import {
-  initFrontendState,
   setStatusAfterConnect,
   setStatusToComputeDone,
   setStatusToComputing,
@@ -19,6 +18,7 @@ import { State } from '../functional/types'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
 import Session from './session'
+import { setupSession } from './session_setup'
 import { index2str } from './util'
 
 const CONFIRMATION_MESSAGE =
@@ -90,15 +90,20 @@ export class Synchronizer {
   }
 
   /**
-   * Log a new local action
+   * Log a new action that should be synced
+   * Actions from other session, frontendOnly actions,
+   * or actions on non-shared state are not synced
    */
   public logAction (action: types.BaseAction, autosave: boolean,
                     sessionId: string, bots: boolean) {
-    this.actionQueue.push(action)
-    if (autosave) {
-      this.sendQueuedActions(sessionId, bots)
-    } else {
-      Session.dispatch(setStatusToUnsaved())
+    if (sessionId === action.sessionId && !action.frontendOnly &&
+      !types.isSessionAction(action)) {
+      this.actionQueue.push(action)
+      if (autosave) {
+        this.sendQueuedActions(sessionId, bots)
+      } else {
+        Session.dispatch(setStatusToUnsaved())
+      }
     }
   }
 
@@ -136,7 +141,7 @@ export class Synchronizer {
     state: State, autosave: boolean, sessionId: string, bots: boolean) {
     if (!this.registeredOnce) {
       this.registeredOnce = true
-      Session.dispatch(initFrontendState(state, true))
+      setupSession(state)
     } else {
       if (autosave) {
         // Update with any backend changes that occurred during disconnect

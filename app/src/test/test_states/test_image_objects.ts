@@ -1,7 +1,6 @@
 import { AttributeToolType } from '../../js/common/types'
 import { DeepPartialState } from '../../js/functional/types'
 
-// Enforce 2 nodes per edge
 export const testJson: DeepPartialState = {
   session: {
     itemStatuses: [

@@ -1,14 +1,14 @@
 import _ from 'lodash'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { makeLabel } from '../../js/functional/states'
 import { LabelType } from '../../js/functional/types'
+import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 
 test('Add and delete labels', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(
@@ -21,24 +21,25 @@ test('Add and delete labels', () => {
   let state = Session.getState()
 
   // check setting of manual and order
-  const label1 = state.task.items[0].labels[manualLabel.id]
+  const labels = state.task.items[itemIndex].labels
+  const label1 = labels[manualLabel.id]
   expect(label1.manual).toBe(true)
   expect(label1.item).toBe(0)
-  autoLabel = state.task.items[0].labels[autoLabel.id]
+  autoLabel = labels[autoLabel.id]
   expect(autoLabel.item).toBe(0)
   expect(autoLabel.manual).toBe(false)
   expect(label1.order < autoLabel.order).toBe(true)
+  expect(_.size(labels)).toBe(3)
 
   // check deleting label
-  expect(_.size(state.task.items[0].labels)).toBe(3)
   Session.dispatch(action.deleteLabel(itemIndex, autoLabel.id))
   state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toBe(2)
+  expect(_.size(state.task.items[itemIndex].labels)).toBe(2)
 })
 
 test('Change category', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   const label = makeLabel()
@@ -46,12 +47,12 @@ test('Change category', () => {
   Session.dispatch(
     action.changeLabelProps(itemIndex, label.id, { category: [2] }))
   const state = Session.getState()
-  expect(state.task.items[0].labels[label.id].category[0]).toBe(2)
+  expect(state.task.items[itemIndex].labels[label.id].category[0]).toBe(2)
 })
 
 test('Link labels', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(action.addLabel(itemIndex, makeLabel()))
@@ -105,8 +106,8 @@ test('Submit task', () => {
   Date.now = jest.fn(() => {
     return constantDate
   })
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   // first submission
   Session.dispatch(action.submit())
   let state = Session.getState()
