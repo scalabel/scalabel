@@ -4,6 +4,7 @@ import _ from 'lodash'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
+import io from 'socket.io-client'
 import { connect, disconnect, receiveBroadcast, registerSession,
   updateAll } from '../action/common'
 import Window from '../components/window'
@@ -17,7 +18,7 @@ import { Synchronizer } from './synchronizer'
 import { QueryArg } from './types'
 
 /**
- * Request Session state from the server
+ * Main function- initiates frontend session
  * @param {string} containerName - the name of the container
  */
 export function initSession (containerName: string): void {
@@ -36,27 +37,35 @@ export function initSession (containerName: string): void {
       const values =
         components.map((component) => component.value)
       const userId = Fingerprint2.x64hash128(values.join(''), 31)
-
-      // Create middleware for handling sync actions
-      const socket = io.connect(
-        location.origin,
-        { transports: ['websocket'], upgrade: false }
-      )
-      const synchronizer = new Synchronizer(
-        socket, taskIndex, projectName, userId)
-      const syncMiddleware = makeSyncMiddleware(synchronizer)
-
-      // Initialize empty store
-      const store = configureStore({}, Session.devMode, syncMiddleware)
-      Session.store = store
-      renderDom(containerName, store)
-
-      // Start the listeners that convert socket events to sync actions
-      // This will handle loading the initial state data
-      startSocketListeners(store, socket)
-      setListeners(store)
+      initGenericSession(taskIndex, projectName, userId, containerName)
     })
   }, 500)
+}
+
+/**
+ * Inits session given the parameters
+ */
+export function initGenericSession (
+  taskIndex: number, projectName: string,
+  userId: string, containerName: string) {
+  // Create middleware for handling sync actions
+  const socket = io.connect(
+    location.origin,
+    { transports: ['websocket'], upgrade: false }
+  )
+  const synchronizer = new Synchronizer(
+    socket, taskIndex, projectName, userId)
+  const syncMiddleware = makeSyncMiddleware(synchronizer)
+
+  // Initialize empty store
+  const store = configureStore({}, Session.devMode, syncMiddleware)
+  Session.store = store
+  renderDom(containerName, store)
+
+  // Start the listeners that convert socket events to sync actions
+  // This will handle loading the initial state data
+  startSocketListeners(store, socket)
+  setListeners(store)
 }
 
 /**

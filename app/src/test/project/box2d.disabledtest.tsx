@@ -7,6 +7,7 @@ import _ from 'lodash'
 import * as React from 'react'
 import { Provider } from 'react-redux'
 import Session from '../../js/common/session'
+import { initGenericSession } from '../../js/common/session_init'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
@@ -28,7 +29,6 @@ import {
   getExportFromDisc,
   getProjectJson,
   getProjectJsonFromDisc,
-  projectInitSession,
   sleep,
   StyledIntegrationForm,
   testConfig,
@@ -116,14 +116,14 @@ describe('full 2d bounding box integration test', () => {
   test('test 2d-bounding-box annotation and save to disc', async () => {
     // Spawn a canvas and draw labels on this canvas
     // Uses similar code to drawable tests
-    const synchronizer = await projectInitSession()
+    initGenericSession(
+      testConfig.taskIndex, testConfig.projectName, 'fakeId', '')
+
     const labelIds: IdType[] = []
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar
-            synchronizer={synchronizer}
-          />
+          <TitleBar/>
         </Provider>
       </MuiThemeProvider>
     )
