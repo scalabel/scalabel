@@ -1,6 +1,5 @@
 import * as THREE from 'three'
-import { changeViewerConfig } from '../action/common'
-import Session from '../common/session'
+import { changeViewerConfig, makeBaseAction } from '../action/common'
 import { PointCloudViewerConfigType, ViewerConfigType } from '../functional/types'
 import { Vector3D } from '../math/vector3d'
 import * as types from './types'
@@ -39,8 +38,7 @@ export function moveCamera (
     position: newPosition.toState()
   }
   return {
-    type: types.CHANGE_VIEWER_CONFIG,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_VIEWER_CONFIG),
     viewerId,
     config
   }
@@ -63,8 +61,7 @@ export function moveCameraAndTarget (
     target: newTarget.toState()
   }
   return {
-    type: types.CHANGE_VIEWER_CONFIG,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_VIEWER_CONFIG),
     viewerId,
     config
   }

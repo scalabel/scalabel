@@ -1,19 +1,43 @@
 import { ActionCreator } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { ReduxState } from '../common/configure_store'
-import Session from '../common/session'
+import { getStateGetter } from '../common/session'
+import { getStateFunc } from '../common/simple_store'
+import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
 import { ConnectionStatus, IdType, LabelType,
   PaneType, Select, ShapeType, SplitType,
   TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
+let getState = getStateGetter()
+
+/**
+ * Set the state getter for actions
+ * @param getter
+ */
+export function setActionStateGetter (getter: getStateFunc) {
+  getState = getter
+}
+
+/**
+ * Make the base action that can be extended by the other actions
+ * @param type
+ */
+export function makeBaseAction (type: string): types.BaseAction {
+  const state = getState()
+  return {
+    actionId: uid(),
+    type,
+    sessionId: state.session.id,
+    userId: state.user.id,
+    timestamp: Date.now()
+  }
+}
+
 /** init session */
 export function initSessionAction (): types.InitSessionAction {
-  return {
-    type: types.INIT_SESSION,
-    sessionId: Session.id
-  }
+  return makeBaseAction(types.INIT_SESSION)
 }
 
 /** update task data
@@ -21,9 +45,8 @@ export function initSessionAction (): types.InitSessionAction {
  */
 export function updateTask (newTask: TaskType): types.UpdateTaskAction {
   return {
-    type: types.UPDATE_TASK,
-    newTask,
-    sessionId: Session.id
+    ...makeBaseAction(types.UPDATE_TASK),
+    newTask
   }
 }
 
@@ -40,7 +63,7 @@ export function goToItem (index: number): types.ChangeSelectAction {
     shapes: {}
   }
 
-  if (Session.getState().session.trackLinking) {
+  if (getState().session.trackLinking) {
     // if track linking is on, keep old labels selected
     newSelect = {
       item: index
@@ -48,8 +71,7 @@ export function goToItem (index: number): types.ChangeSelectAction {
   }
 
   return {
-    type: types.CHANGE_SELECT,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_SELECT),
     select: newSelect
   }
 }
@@ -61,8 +83,7 @@ export function goToItem (index: number): types.ChangeSelectAction {
 export function changeSelect (
     select: Partial<Select>): types.ChangeSelectAction {
   return {
-    type: types.CHANGE_SELECT,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_SELECT),
     select
   }
 }
@@ -75,8 +96,7 @@ export function loadItem (
   sensorId: number
 ): types.LoadItemAction {
   return {
-    type: types.LOAD_ITEM,
-    sessionId: Session.id,
+    ...makeBaseAction(types.LOAD_ITEM),
     itemIndex,
     sensorId
   }
@@ -95,8 +115,7 @@ export function addLabel (
   shapes: ShapeType[] = []
 ): types.AddLabelsAction {
   return {
-    type: types.ADD_LABELS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.ADD_LABELS),
     itemIndices: [itemIndex],
     labels: [[label]],
     shapes: [[shapes]]
@@ -115,8 +134,7 @@ export function addLabelsToItem (
   shapes: ShapeType[][] = []
 ): types.AddLabelsAction {
   return {
-    type: types.ADD_LABELS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.ADD_LABELS),
     itemIndices: [itemIndex],
     labels: [labels],
     shapes: [shapes]
@@ -137,9 +155,8 @@ export function addTrack (
   shapes: ShapeType[][]
 ): types.AddTrackAction {
   return {
-    type: types.ADD_TRACK,
+    ...makeBaseAction(types.ADD_TRACK),
     trackType,
-    sessionId: Session.id,
     itemIndices,
     labels,
     shapes
@@ -157,8 +174,7 @@ export function changeShapes (
     itemIndex: number, shapeIds: IdType[], shapes: Array<Partial<ShapeType>>
   ): types.ChangeShapesAction {
   return {
-    type: types.CHANGE_SHAPES,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_SHAPES),
     itemIndices: [itemIndex],
     shapeIds: [shapeIds],
     shapes: [shapes]
@@ -176,8 +192,7 @@ export function changeShapesInItems (
   shapes: Array<Array<Partial<ShapeType>>>
 ): types.ChangeShapesAction {
   return {
-    type: types.CHANGE_SHAPES,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_SHAPES),
     itemIndices,
     shapeIds,
     shapes
@@ -195,8 +210,7 @@ export function changeLabelShape (
     itemIndex: number, shapeId: IdType, shape: Partial<ShapeType>
   ): types.ChangeShapesAction {
   return {
-    type: types.CHANGE_SHAPES,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_SHAPES),
     itemIndices: [itemIndex],
     shapeIds: [[shapeId]],
     shapes: [[shape]]
@@ -214,8 +228,7 @@ export function changeLabelProps (
     itemIndex: number, labelId: IdType, props: Partial<LabelType>
   ): types.ChangeLabelsAction {
   return {
-    type: types.CHANGE_LABELS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_LABELS),
     itemIndices: [itemIndex],
     labelIds: [[labelId]],
     props: [[props ]]
@@ -234,8 +247,7 @@ export function changeLabelsProps (
   props: Array<Array<Partial<LabelType>>>
 ): types.ChangeLabelsAction {
   return {
-    type: types.CHANGE_LABELS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_LABELS),
     itemIndices,
     labelIds,
     props
@@ -250,8 +262,7 @@ export function changeLabelsProps (
 export function linkLabels (
     itemIndex: number, labelIds: IdType[]): types.LinkLabelsAction {
   return {
-    type: types.LINK_LABELS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.LINK_LABELS),
     itemIndex,
     labelIds
   }
@@ -265,8 +276,7 @@ export function linkLabels (
 export function unlinkLabels (
     itemIndex: number, labelIds: IdType[]): types.UnlinkLabelsAction {
   return {
-    type: types.UNLINK_LABELS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.UNLINK_LABELS),
     itemIndex,
     labelIds
   }
@@ -278,8 +288,7 @@ export function unlinkLabels (
  */
 export function mergeTracks (trackIds: IdType[]): types.MergeTrackAction {
   return {
-    type: types.MERGE_TRACKS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.MERGE_TRACKS),
     trackIds
   }
 }
@@ -304,8 +313,7 @@ export function deleteLabel (
 export function deleteLabels (
   itemIndices: number[], labelIds: IdType[][]): types.DeleteLabelsAction {
   return {
-    type: types.DELETE_LABELS,
-    sessionId: Session.id,
+    ...makeBaseAction(types.DELETE_LABELS),
     itemIndices,
     labelIds
   }
@@ -320,8 +328,7 @@ export function addViewerConfig (
   config: ViewerConfigType
 ): types.AddViewerConfigAction {
   return {
-    type: types.ADD_VIEWER_CONFIG,
-    sessionId: Session.id,
+    ...makeBaseAction(types.ADD_VIEWER_CONFIG),
     id,
     config
   }
@@ -335,8 +342,7 @@ export function changeViewerConfig (
   viewerId: number, config: ViewerConfigType
 ): types.ChangeViewerConfigAction {
   return {
-    type: types.CHANGE_VIEWER_CONFIG,
-    sessionId: Session.id,
+    ...makeBaseAction(types.CHANGE_VIEWER_CONFIG),
     viewerId,
     config
   }
@@ -358,8 +364,7 @@ export function updatePane (
   props: Partial<PaneType>
 ): types.UpdatePaneAction {
   return {
-    type: types.UPDATE_PANE,
-    sessionId: Session.id,
+    ...makeBaseAction(types.UPDATE_PANE),
     pane,
     props
   }
@@ -372,8 +377,7 @@ export function splitPane (
   viewerId: number
 ): types.SplitPaneAction {
   return {
-    type: types.SPLIT_PANE,
-    sessionId: Session.id,
+    ...makeBaseAction(types.SPLIT_PANE),
     pane,
     split,
     viewerId
@@ -386,8 +390,7 @@ export function deletePane (
   viewerId: number
 ): types.DeletePaneAction {
   return {
-    type: types.DELETE_PANE,
-    sessionId: Session.id,
+    ...makeBaseAction(types.DELETE_PANE),
     pane,
     viewerId
   }
@@ -397,10 +400,7 @@ export function deletePane (
  * wrapper for update all action
  */
 export function updateAll (): types.UpdateAllAction {
-  return {
-    type: types.UPDATE_ALL,
-    sessionId: Session.id
-  }
+  return makeBaseAction(types.UPDATE_ALL)
 }
 
 /**
@@ -408,11 +408,10 @@ export function updateAll (): types.UpdateAllAction {
  */
 export function submit (): types.SubmitAction {
   return {
-    type: types.SUBMIT,
-    sessionId: Session.id,
+    ...makeBaseAction(types.SUBMIT),
     submitData: {
       time: Date.now(),
-      user: Session.getState().user.id
+      user: getState().user.id
     }
   }
 }
@@ -421,10 +420,7 @@ export function submit (): types.SubmitAction {
  * start to link tracks
  */
 export function startLinkTrack () {
-  return {
-    type: types.START_LINK_TRACK,
-    sessionId: Session.id
-  }
+  return makeBaseAction(types.START_LINK_TRACK)
 }
 
 /**
@@ -433,9 +429,8 @@ export function startLinkTrack () {
 export function updateSessionStatus (
   status: ConnectionStatus): types.UpdateSessionStatusAction {
   return {
-    type: types.UPDATE_SESSION_STATUS,
-    newStatus: status,
-    sessionId: Session.id
+    ...makeBaseAction(types.UPDATE_SESSION_STATUS),
+    newStatus: status
   }
 }
 
@@ -461,8 +456,8 @@ type ThunkCreatorType =
  * Mark status as saving, unless compute is ongoing
  */
 export const setStatusToSaving: ThunkCreatorType = () => {
-  return (dispatch, getState) => {
-    if (!selector.isStatusComputing(getState())) {
+  return (dispatch, localGetState) => {
+    if (!selector.isStatusComputing(localGetState())) {
       dispatch(updateSessionStatus(ConnectionStatus.SAVING))
     }
   }
@@ -472,8 +467,8 @@ export const setStatusToSaving: ThunkCreatorType = () => {
  * Mark status as unsaved, unless some other event is in progress
  */
 export const setStatusToUnsaved: ThunkCreatorType = () => {
-  return (dispatch, getState) => {
-    if (selector.isSessionStatusStable(getState())) {
+  return (dispatch, localGetState) => {
+    if (selector.isSessionStatusStable(localGetState())) {
       dispatch(updateSessionStatus(ConnectionStatus.UNSAVED))
     }
   }
@@ -500,9 +495,9 @@ export function setStatusToComputing () {
  */
 export const updateSessionStatusDelayed: ThunkCreatorType = (
   status: ConnectionStatus, numUpdates: number) => {
-  return (dispatch, getState) => {
+  return (dispatch, localGetState) => {
     setTimeout(() => {
-      const newNumUpdates = selector.getNumStatusUpdates(getState())
+      const newNumUpdates = selector.getNumStatusUpdates(localGetState())
       if (numUpdates + 1 === newNumUpdates) {
         dispatch(updateSessionStatus(status))
       }
@@ -516,8 +511,8 @@ export const updateSessionStatusDelayed: ThunkCreatorType = (
 export const setStatusForBanner: ThunkCreatorType = (
   notifyStatus: ConnectionStatus, fadeStatus: ConnectionStatus
 ) => {
-  return (dispatch, getState) => {
-    const numUpdates = selector.getNumStatusUpdates(getState())
+  return (dispatch, localGetState) => {
+    const numUpdates = selector.getNumStatusUpdates(localGetState())
     dispatch(updateSessionStatus(notifyStatus))
     dispatch(
       updateSessionStatusDelayed(fadeStatus, numUpdates)
