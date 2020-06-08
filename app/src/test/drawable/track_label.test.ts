@@ -15,9 +15,8 @@ const getState = Session.getState.bind(Session)
 const dispatch = Session.dispatch.bind(Session)
 
 beforeAll(() => {
-  Session.devMode = false
-  // TODO- check if this init store is necessary
-  // initStore(testJson)
+  setupTestStore(testJson)
+
   Session.images.length = 0
   for (let i = 0; i < getState().task.items.length; i++) {
     Session.images.push({ [-1]: new Image(1000, 1000) })
@@ -27,9 +26,11 @@ beforeAll(() => {
   dispatch(action.goToItem(0))
 })
 
-test('Add new valid drawable track', () => {
+beforeEach(() => {
   setupTestStore(testJson)
+})
 
+test('Add new valid drawable track', () => {
   dispatch(action.goToItem(0))
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -73,8 +74,6 @@ test('Add new valid drawable track', () => {
 })
 
 test('Add new invalid drawable track', () => {
-  setupTestStore(testJson)
-
   dispatch(action.goToItem(0))
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -99,7 +98,6 @@ test('Add new invalid drawable track', () => {
 })
 
 test('Update existing drawable of a track', () => {
-  setupTestStore(testJson)
   updateTracks()
 
   dispatch(action.goToItem(1))
@@ -140,7 +138,6 @@ test('Update existing drawable of a track', () => {
 })
 
 test('Update existing drawable of a track to invalid, from page 1', () => {
-  setupTestStore(testJson)
   updateTracks()
 
   // Terminate current track
@@ -183,7 +180,6 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
 })
 
 test('Update existing drawable of a track to invalid, from page 0', () => {
-  setupTestStore(testJson)
   updateTracks()
 
   // Terminate current track

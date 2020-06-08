@@ -14,9 +14,12 @@ const data = JSON.parse(fs.readFileSync('./app/src/test/test_states/sample_state
 const getState = Session.getState.bind(Session)
 const dispatch = Session.dispatch.bind(Session)
 
+beforeEach(() => {
+  setupTestStore(data)
+})
+
 beforeAll(() => {
-  // TODO- check if setup is necessary here
-  // setupTestStore(data)
+  setupTestStore(data)
 
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
@@ -28,8 +31,6 @@ beforeAll(() => {
 })
 
 test('Add new valid drawable', () => {
-  setupTestStore(data)
-
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   const label2dlist = new Label2DList()
@@ -59,8 +60,6 @@ test('Add new valid drawable', () => {
 })
 
 test('Add new invalid drawable', () => {
-  setupTestStore(data)
-
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   const label2dlist = new Label2DList()
@@ -84,8 +83,6 @@ test('Add new invalid drawable', () => {
 })
 
 test('Update existing drawable', () => {
-  setupTestStore(data)
-
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   // label coord is [459, 276][752, 400]
@@ -110,8 +107,6 @@ test('Update existing drawable', () => {
 })
 
 test('Update existing drawable to invalid', () => {
-  setupTestStore(data)
-
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   // label coord is [459, 276][752, 400]

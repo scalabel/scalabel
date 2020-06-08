@@ -25,8 +25,7 @@ beforeEach(() => {
 })
 
 beforeAll(() => {
-  // TODO- check if this initStore is necessary
-  // initStore(testJson)
+  setupTestStore(testJson)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
   for (let i = 0; i < getState().task.items.length; i++) {

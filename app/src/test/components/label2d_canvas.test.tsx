@@ -5,10 +5,10 @@ import Session from '../../js/common/session'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { PolygonType } from '../../js/functional/types'
+import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 import { LabelCollector } from '../util/label_collector'
 import { drawPolygon, keyDown, keyUp, mouseDown, mouseMove, mouseMoveClick, mouseUp, setUpLabel2dCanvas } from './label2d_canvas_util'
-import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 const getState = Session.getState.bind(Session)
@@ -17,8 +17,7 @@ const dispatch = Session.dispatch.bind(Session)
 beforeEach(() => {
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
-  // TODO: verify this initStore is unnecessary
-  // initStore(testJson)
+  setupTestStore(testJson)
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
     canvasRef.current?.updateState(getState())

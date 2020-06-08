@@ -456,6 +456,7 @@ export function changeLabels (
  */
 export function getRootLabelId (item: ItemType, labelId: IdType): string {
   let parent = item.labels[labelId].parent
+
   while (isValidId(parent)) {
     labelId = parent
     parent = item.labels[labelId].parent

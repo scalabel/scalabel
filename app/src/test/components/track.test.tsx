@@ -28,9 +28,7 @@ beforeEach(() => {
 })
 
 beforeAll(() => {
-  Session.devMode = false
-  // TODO- check if this initStore is necessary
-  // initStore(emptyTrackingTask)
+  setupTestStore(emptyTrackingTask)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
   // mock loading every item to make sure the canvas can be successfully

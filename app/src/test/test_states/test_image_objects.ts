@@ -215,7 +215,7 @@ export const testJson: DeepPartialState = {
   },
   user: {
     select: {
-      item: -1,
+      item: 0,
       labelType: 0
     }
   }

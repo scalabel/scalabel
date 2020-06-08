@@ -65,7 +65,7 @@ export const testJson: DeepPartialState = {
           attributes: {},
           parent: '',
           children: [],
-          shapes: ['23'],
+          shapes: ['id23'],
           track: '1',
           order: 24,
           manual: true
@@ -79,7 +79,7 @@ export const testJson: DeepPartialState = {
           attributes: {},
           parent: '',
           children: [],
-          shapes: ['46'],
+          shapes: ['id46'],
           track: '2',
           order: 47,
           manual: true
@@ -93,7 +93,7 @@ export const testJson: DeepPartialState = {
           attributes: {},
           parent: '',
           children: [],
-          shapes: ['69'],
+          shapes: ['id69'],
           track: '3',
           order: 70,
           manual: true
@@ -102,7 +102,7 @@ export const testJson: DeepPartialState = {
       shapes: {
         id23: {
           id: 'id23',
-          label: ['23'],
+          label: ['id23'],
           shapeType: 'rect',
           x1: 0,
           y1: 298.1679389312977,
@@ -111,7 +111,7 @@ export const testJson: DeepPartialState = {
         },
         id46: {
           id: 'id46',
-          label: ['46'],
+          label: ['id46'],
           shapeType: 'rect',
           x1: 950.5391221374047,
           y1: 287.17557251908397,
@@ -120,7 +120,7 @@ export const testJson: DeepPartialState = {
         },
         id69: {
           id: 'id69',
-          label: ['69'],
+          label: ['id69'],
           shapeType: 'rect',
           x1: 835.1192748091603,
           y1: 314.65648854961836,
