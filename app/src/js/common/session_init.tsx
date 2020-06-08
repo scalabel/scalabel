@@ -90,4 +90,3 @@ function setListeners (store: ReduxStore) {
     store.dispatch(updateAll())
   }
 }
-

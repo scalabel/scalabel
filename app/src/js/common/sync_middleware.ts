@@ -7,7 +7,7 @@ import { Synchronizer } from './synchronizer'
 /**
  * Handles actions related to socket.io and synchronization
  */
-function handleSyncAction  (
+function handleSyncAction (
   action: types.BaseAction, synchronizer: Synchronizer, state: State) {
   switch (action.type) {
     case types.REGISTER_SESSION:

@@ -15,5 +15,3 @@ describe('Test shared utility methods', () => {
     )
   })
 })
-
-// TODO: move to common

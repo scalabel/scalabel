@@ -8,7 +8,7 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import TableBody from '@material-ui/core/TableBody'
 import Typography from '@material-ui/core/Typography'
 import React from 'react'
-import { QueryArg} from '../common/types'
+import { QueryArg } from '../common/types'
 import { SubmitData } from '../functional/types'
 import { Endpoint } from '../server/types'
 import { dashboardWindowStyles, headerStyle,
