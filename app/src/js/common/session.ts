@@ -59,7 +59,7 @@ class Session {
     this.activeViewerId = -1
     this.autosave = false
     // TODO: make it configurable in the url
-    this.devMode = false
+    this.devMode = true
     this.testMode = false
     this.store = configureStore({}, this.devMode)
     this.bots = false

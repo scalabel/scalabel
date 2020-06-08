@@ -1,4 +1,5 @@
 import { AnyAction, applyMiddleware, createStore, Middleware, Reducer, Store } from 'redux'
+import { createLogger } from 'redux-logger'
 import thunk, { ThunkDispatch } from 'redux-thunk'
 import undoable, { includeAction, StateWithHistory } from 'redux-undo'
 import {
@@ -40,20 +41,24 @@ export function configureStore (
       ADD_LABELS,
       DELETE_LABELS
     ]),
-    debug
+    debug: false
   })
 
-  if (middleware === undefined) {
-    return createStore(
-      undoableReducer,
-      initialHistory,
-      applyMiddleware(thunk)
-    )
-  } else {
-    return createStore(
-      undoableReducer,
-      initialHistory,
-      applyMiddleware(thunk, middleware)
-    )
+  const allMiddleware: Middleware[] = [thunk]
+
+  if (debug) {
+    const logger = createLogger({
+      collapsed: true
+    })
+    allMiddleware.push(logger)
   }
+  if (middleware) {
+    allMiddleware.push(middleware)
+  }
+
+  return createStore(
+    undoableReducer,
+    initialHistory,
+    applyMiddleware(...allMiddleware)
+  )
 }
