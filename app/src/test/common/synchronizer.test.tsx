@@ -18,7 +18,6 @@ let botSessionId: string
 let taskIndex: number
 let projectName: string
 let userId: string
-let bots: boolean
 let autosave: boolean
 const socketEmit = jest.fn()
 const mockSocket = {
@@ -33,7 +32,6 @@ beforeAll(() => {
   taskIndex = 0
   projectName = 'testProject'
   userId = 'fakeUserId'
-  bots = false
   autosave = true
 })
 
@@ -73,9 +71,8 @@ describe('Test synchronizer functionality', () => {
 
   test('Test model prediction status', async () => {
     const sync = startSynchronizer()
-    Session.bots = true
 
-    dispatchAndCheckActions(sync, 2)
+    dispatchAndCheckActions(sync, 2, true)
 
     // After acks arrive, session status is marked as computing
     const ackPackets = sendAcks(sync)
@@ -121,7 +118,7 @@ describe('Test synchronizer functionality', () => {
     )
     sync.sendConnectionMessage(sessionId)
     checkConnectMessage(sessionId)
-    sync.finishRegistration(newInitialState, autosave, sessionId, bots)
+    sync.finishRegistration(newInitialState, autosave, sessionId, false)
 
     /**
      * Check that frontend state updates correctly
@@ -148,7 +145,8 @@ describe('Test synchronizer functionality', () => {
  * Dispatch and check the effects of a single add label action
  */
 function dispatchAndCheckActions (
-  sync: Synchronizer, numActions: number): AddLabelsAction[] {
+  sync: Synchronizer, numActions: number,
+  bots: boolean = false): AddLabelsAction[] {
   // Dispatch actions to trigger sync events
   const actions: AddLabelsAction[] = []
   for (let _ = 0; _ < numActions; _++) {
@@ -161,7 +159,7 @@ function dispatchAndCheckActions (
   expect(sync.numQueuedActions).toBe(numActions)
   checkActionsAreQueued(sync, actions)
   expect(selector.isStatusSaving(Session.store.getState())).toBe(true)
-  if (Session.bots) {
+  if (bots) {
     expect(sync.numActionsPendingPrediction).toBe(numActions)
   }
   return actions

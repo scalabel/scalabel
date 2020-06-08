@@ -70,13 +70,17 @@ export class Synchronizer {
   private actionsPendingPrediction: Set<string>
   /** Flag for initial registration completion */
   private registeredOnce: boolean
+  /** Name of the DOM container */
+  private containerName: string
 
   constructor (
     socket: SocketIOClient.Socket,
-    taskIndex: number, projectName: string, userId: string) {
+    taskIndex: number, projectName: string,
+    userId: string, containerName: string= '') {
     this.socket = socket
     this.taskIndex = taskIndex
     this.projectName = projectName
+    this.containerName = containerName
 
     this.actionQueue = []
     this.actionsToSave = OrderedMap.from()
@@ -141,7 +145,7 @@ export class Synchronizer {
     state: State, autosave: boolean, sessionId: string, bots: boolean) {
     if (!this.registeredOnce) {
       this.registeredOnce = true
-      setupSession(state)
+      setupSession(state, this.containerName)
     } else {
       if (autosave) {
         // Update with any backend changes that occurred during disconnect

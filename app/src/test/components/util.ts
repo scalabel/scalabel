@@ -10,7 +10,7 @@ import { DeepPartialState } from '../../js/functional/types'
  */
 export function setupTestStore (state: DeepPartialState) {
   Session.store = configureStore({})
-  setupSession(state, false)
+  setupSession(state, '', false)
 }
 
 /**
@@ -21,5 +21,5 @@ export function setupTestStoreWithMiddleware (
   const syncMiddleware = makeSyncMiddleware(synchronizer)
 
   Session.store = configureStore({}, false, syncMiddleware)
-  setupSession(state, false)
+  setupSession(state, '', false)
 }

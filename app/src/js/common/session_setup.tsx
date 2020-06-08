@@ -1,11 +1,18 @@
+import { MuiThemeProvider } from '@material-ui/core/styles'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { Provider } from 'react-redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
 import { addViewerConfig, initSessionAction, loadItem,
   splitPane, updateAll, updatePane, updateState } from '../action/common'
 import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
+import Window from '../components/window'
 import { makeDefaultViewerConfig } from '../functional/states'
 import { DeepPartialState, PointCloudViewerConfigType, SplitType } from '../functional/types'
+import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
+import { ReduxStore } from './configure_store'
 import Session from './session'
 import { Track } from './track/track'
 import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
@@ -14,7 +21,8 @@ import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
  * Initialize state, then set up the rest of the session
  */
 export function setupSession (
-  newState: DeepPartialState, shouldInitViews: boolean = true) {
+  newState: DeepPartialState,
+  containerName: string = '', shouldInitViews: boolean = true) {
   Session.dispatch(updateState(newState))
 
   Session.dispatch(initSessionAction())
@@ -30,7 +38,23 @@ export function setupSession (
     Session.dispatch(updateAll())
     Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
     Session.subscribe(() => Session.label2dList.updateState(Session.getState()))
+    renderDom(containerName, Session.store)
   }
+}
+
+/**
+ * Render the dom after data is loaded
+ * @param containername: string name
+ */
+function renderDom (
+  containerName: string, store: ReduxStore) {
+  ReactDOM.render(
+    <MuiThemeProvider theme={myTheme}>
+      <Provider store={store}>
+        <Window/>
+      </Provider>
+    </MuiThemeProvider>,
+    document.getElementById(containerName))
 }
 
 /**

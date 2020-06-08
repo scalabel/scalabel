@@ -440,17 +440,18 @@ export function startLinkTrack () {
 /**
  * Finish session registration by loading backend state
  */
-export function registerSession (state: State) {
+export function registerSession (state: State): types.RegisterSessionAction {
   return {
     ...makeBaseAction(types.REGISTER_SESSION),
-    state
+    initialState: state
   }
 }
 
 /**
  * Handle broadcasted message contains one or more actions
  */
-export function receiveBroadcast (message: SyncActionMessageType) {
+export function receiveBroadcast (
+  message: SyncActionMessageType): types.ReceiveBroadcastAction {
   return {
     ...makeBaseAction(types.RECEIVE_BROADCAST),
     message
@@ -460,21 +461,21 @@ export function receiveBroadcast (message: SyncActionMessageType) {
 /**
  * Handle session connection
  */
-export function connect () {
+export function connect (): types.ConnectAction {
   return makeBaseAction(types.CONNECT)
 }
 
 /**
  * Handle session disconnection
  */
-export function disconnect () {
+export function disconnect (): types.DisconnectAction {
   return makeBaseAction(types.DISCONNECT)
 }
 
 /**
  * Trigger save to server
  */
-export function save () {
+export function save (): types.SaveAction {
   return makeBaseAction(types.SAVE)
 }
 
