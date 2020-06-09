@@ -31,7 +31,7 @@ export function setupSession (
   Session.autosave = state.task.config.autosave
   Session.bots = state.task.config.bots
 
-  if (shouldInitViews) {
+  if (shouldInitViews && containerName !== '') {
     initViewerConfigs()
     loadData()
     Session.subscribe(updateTracks)
