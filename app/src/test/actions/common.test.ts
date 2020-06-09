@@ -3,7 +3,7 @@ import * as action from '../../js/action/common'
 import { configureStore } from '../../js/common/configure_store'
 import Session from '../../js/common/session'
 import { makeLabel } from '../../js/functional/states'
-import { LabelType } from '../../js/functional/types'
+import { LabelType, State } from '../../js/functional/types'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 
@@ -132,18 +132,27 @@ describe('High level operations', () => {
 
   test('Update state', () => {
     Session.store = configureStore({})
+    const initialState = Session.getState()
+
     Session.dispatch(action.updateState(testJson))
     const newState = Session.getState()
 
     // Any properties specified in testJson should exist on newState
-    expect(newState.task.config.projectName).toBe('Redux0')
-    expect(newState.task.items.length).toBe(5)
-    expect(newState.user.select.item).toBe(0)
-    expect(newState.session.startTime).toBe(1539820189)
+    expect(newState.task.config.projectName).toBe(
+      (testJson as State).task.config.projectName)
+    expect(newState.task.items.length).toBe(
+      (testJson as State).task.items.length)
+    expect(newState.user.select.item).toBe(
+      (testJson as State).user.select.item)
+    expect(newState.session.startTime).toBe(
+      (testJson as State).session.startTime)
 
     // Properties not specified should keep their default values
-    expect(newState.session.trackLinking).toBe(false)
-    expect(newState.task.config.autosave).toBe(false)
-    expect(newState.task.config.bots).toBe(false)
+    expect(newState.session.trackLinking).toBe(
+      initialState.session.trackLinking)
+    expect(newState.task.config.autosave).toBe(
+      initialState.task.config.autosave)
+    expect(newState.task.config.bots).toBe(
+      initialState.task.config.bots)
   })
 })

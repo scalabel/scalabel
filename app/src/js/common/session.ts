@@ -38,8 +38,6 @@ class Session {
   public activeViewerId: number
   /** The window component */
   public window?: Window
-  /** Whether autosave is enabled */
-  public autosave: boolean
   /**
    * If in dev mode, redux logging is enabled
    * Dev mode can be enabled by appending the query arg "?dev"
@@ -48,8 +46,6 @@ class Session {
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
   public testMode: boolean
-  /** Whether bots are enabled */
-  public bots: boolean
 
   constructor () {
     this.images = []
@@ -60,11 +56,9 @@ class Session {
     this.tracking = true
     this.trackLinking = false
     this.activeViewerId = -1
-    this.autosave = false
     this.devMode = false
     this.testMode = false
     this.store = configureStore({}, this.devMode)
-    this.bots = false
   }
 
   /**

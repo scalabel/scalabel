@@ -30,8 +30,6 @@ export function setupSession (
   Session.dispatch(initSessionAction())
   const state = Session.getState()
   Session.tracking = state.task.config.tracking
-  Session.autosave = state.task.config.autosave
-  Session.bots = state.task.config.bots
 
   // Unless in testing mode, update views
   if (shouldInitViews && containerName !== '') {
