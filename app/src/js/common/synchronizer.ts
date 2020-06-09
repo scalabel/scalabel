@@ -15,6 +15,7 @@ import {
 import * as types from '../action/types'
 import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
+import { SocketClient } from '../server/socket_interface'
 import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
 import Session from './session'
@@ -51,7 +52,7 @@ export class Synchronizer {
   }
 
   /** Socket connection */
-  public socket: SocketIOClient.Socket
+  public socket: SocketClient
   /** Name of the project */
   public projectName: string
   /** Index of the task */
@@ -74,7 +75,7 @@ export class Synchronizer {
   private containerName: string
 
   constructor (
-    socket: SocketIOClient.Socket,
+    socket: SocketClient,
     taskIndex: number, projectName: string,
     userId: string, containerName: string= '') {
     this.socket = socket

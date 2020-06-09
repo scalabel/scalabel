@@ -34,3 +34,17 @@ export interface SocketServer {
   /** Add a handler function */
   on (event: string, callback: socketHandlerType): void
 }
+
+type clientEmitType = SyncActionMessageType | RegisterMessageType
+
+/**
+ * Generic interface for frontend socket
+ * Socket.io implements this
+ */
+export interface SocketClient {
+  /** Connection status */
+  connected: boolean
+
+  /** Message sending */
+  emit (event: string, data: clientEmitType): void
+}

@@ -21,7 +21,6 @@ let userId: string
 let autosave: boolean
 const socketEmit = jest.fn()
 const mockSocket = {
-  on: jest.fn(),
   connected: true,
   emit: socketEmit
 }
@@ -210,7 +209,7 @@ function checkConnectMessage (sessId: string) {
 function startSynchronizer (setInitialState: boolean = true): Synchronizer {
   io.connect = jest.fn().mockImplementation(() => mockSocket)
   const synchronizer = new Synchronizer(
-    mockSocket as any,
+    mockSocket,
     taskIndex,
     projectName,
     userId

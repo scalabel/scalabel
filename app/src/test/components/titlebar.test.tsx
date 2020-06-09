@@ -43,12 +43,11 @@ describe('Save button functionality', () => {
 
   test('Autosave off: save button triggers save action', async () => {
     const mockSocket = {
-      on: jest.fn(),
       connected: true,
       emit: jest.fn()
     }
     const synchronizer = new Synchronizer(
-      mockSocket as any, 0, 'test', 'fakeId')
+      mockSocket, 0, 'test', 'fakeId')
 
     testJsonAutosave.task.config.autosave = false
     setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
@@ -79,7 +78,7 @@ describe('Submit button functionality', () => {
       emit: jest.fn()
     }
     const synchronizer = new Synchronizer(
-      mockSocket as any, 0, 'test', 'fakeId')
+      mockSocket, 0, 'test', 'fakeId')
 
     testJsonAutosave.task.config.autosave = true
     setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
@@ -127,7 +126,7 @@ describe('Submit button functionality', () => {
       emit: jest.fn()
     }
     const synchronizer = new Synchronizer(
-      mockSocket as any, 0, 'test', 'fakeId')
+      mockSocket, 0, 'test', 'fakeId')
 
     testJsonAutosave.task.config.autosave = false
     setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
