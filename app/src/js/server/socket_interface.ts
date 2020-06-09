@@ -6,11 +6,10 @@ type socketHandlerType =
   ((data: SyncActionMessageType) => {}) |
   ((data: RegisterMessageType) => {})
 
-type emitDataType = SyncActionMessageType | State
+type serverEmitType = SyncActionMessageType | State
 
 /**
- * Generic interface for server-side socket
- * Socket.io implements this
+ * Interface for subset of socket.io functionality used by the server
  */
 export interface SocketServer {
   /** Socket id */
@@ -21,7 +20,7 @@ export interface SocketServer {
     /** Object for specifying target */
     to: (room: string) => {
       /** Message echoer */
-      emit: (event: string, data: emitDataType) => void
+      emit: (event: string, data: serverEmitType) => void
     }
   }
 
@@ -29,7 +28,7 @@ export interface SocketServer {
   join (room: string): void
 
   /** Echo a message */
-  emit (event: string, data: emitDataType): void
+  emit (event: string, data: serverEmitType): void
 
   /** Add a handler function */
   on (event: string, callback: socketHandlerType): void
@@ -38,8 +37,7 @@ export interface SocketServer {
 type clientEmitType = SyncActionMessageType | RegisterMessageType
 
 /**
- * Generic interface for frontend socket
- * Socket.io implements this
+ * Interface for subset of socket.io functionality used by the frontend
  */
 export interface SocketClient {
   /** Connection status */

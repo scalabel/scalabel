@@ -76,7 +76,8 @@ export function isTaskAction (action: BaseAction) {
 }
 
 /**
- * These are actions dispatched as a result of socket events
+ * These actions are intercepted by sync middleware, not used to update state
+ * They trigger an interaction with the backend
  */
 const SYNC_ACTION_TYPES = [
   REGISTER_SESSION,
@@ -87,7 +88,7 @@ const SYNC_ACTION_TYPES = [
 ]
 
 /**
- * Checks if the action is based off of a socket event
+ * Checks if the action should be intercepted by the sync middleware
  */
 export function isSyncAction (action: BaseAction) {
   return SYNC_ACTION_TYPES.includes(action.type)
@@ -106,7 +107,7 @@ export function hasSubmitAction (actions: BaseAction[]): boolean {
 }
 
 /**
- * These are actions that should not be broadcast beyond the session
+ * These actions should not be broadcast outside the local session
  */
 const SESSION_ACTION_TYPES = [
   UPDATE_SESSION_STATUS,
@@ -293,7 +294,9 @@ export type DisconnectAction = BaseAction
 
 export type SaveAction = BaseAction
 
-// These actions are used as event-based messages, not to update state
+/**
+ * These actions are event-driven messages intercepted by the sync middleware
+ */
 export type SyncActionType =
   RegisterSessionAction
   | ReceiveBroadcastAction

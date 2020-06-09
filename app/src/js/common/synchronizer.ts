@@ -20,7 +20,7 @@ import { ActionPacketType, EventName, RegisterMessageType,
   SyncActionMessageType } from '../server/types'
 import Session from './session'
 import { setupSession } from './session_setup'
-import { index2str } from './util'
+import { doesPacketTriggerModel, index2str } from './util'
 
 const CONFIRMATION_MESSAGE =
   'You have unsaved changes that will be lost if you leave this page. '
@@ -259,30 +259,13 @@ export class Synchronizer {
         }
         this.actionsPendingSave =
           this.actionsPendingSave.update(packet.id, packet)
-        if (this.doesPacketTriggerModel(packet, bots)) {
+        if (doesPacketTriggerModel(packet, bots)) {
           this.actionsPendingPrediction.add(packet.id)
         }
         this.sendActions(packet, sessionId)
         this.actionQueue = []
       }
     }
-  }
-
-  /**
-   * Checks if the action packet contains
-   * any actions that would trigger a model query
-   */
-  public doesPacketTriggerModel (
-    actionPacket: ActionPacketType, bots: boolean): boolean {
-    if (!bots) {
-      return false
-    }
-    for (const action of actionPacket.actions) {
-      if (action.type === types.ADD_LABELS) {
-        return true
-      }
-    }
-    return false
   }
 
   /**

@@ -5,7 +5,7 @@ import { ReduxState } from './configure_store'
 import { Synchronizer } from './synchronizer'
 
 /**
- * Handles actions related to socket.io and synchronization
+ * Handle actions that trigger a backend interaction instead of a state update
  */
 function handleSyncAction (
   action: types.BaseAction, synchronizer: Synchronizer, state: State) {
@@ -35,7 +35,7 @@ function handleSyncAction (
 }
 
 /**
- * Handles autosaving of a normal action
+ * Store normal user actions for saving, either now (auto) or later (manual)
  */
 function handleNormalAction (
   action: types.BaseAction, synchronizer: Synchronizer, state: State) {
