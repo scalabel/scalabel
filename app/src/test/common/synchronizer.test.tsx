@@ -1,5 +1,4 @@
 import { cleanup } from '@testing-library/react'
-import io from 'socket.io-client'
 import uuid4 from 'uuid/v4'
 import { setStatusToUnsaved } from '../../js/action/common'
 import { AddLabelsAction } from '../../js/action/types'
@@ -207,7 +206,6 @@ function checkConnectMessage (sessId: string) {
  * Start the browser synchronizer being tested
  */
 function startSynchronizer (setInitialState: boolean = true): Synchronizer {
-  io.connect = jest.fn().mockImplementation(() => mockSocket)
   const synchronizer = new Synchronizer(
     mockSocket,
     taskIndex,

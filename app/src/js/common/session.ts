@@ -40,7 +40,7 @@ class Session {
   public window?: Window
   /** Whether autosave is enabled */
   public autosave: boolean
-  /** Dev mode */
+  /** Dev mode- enables redux logging */
   public devMode: boolean
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
