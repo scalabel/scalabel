@@ -40,7 +40,6 @@ import {
 let launchProc: child.ChildProcessWithoutNullStreams
 
 beforeAll(async () => {
-  Session.devMode = false
   Session.testMode = true
 
   // port is also changed in test_config

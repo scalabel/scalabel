@@ -21,7 +21,7 @@ export function initSession (containerName: string): void {
   const taskIndex = parseInt(
     searchParams.get(QueryArg.TASK_INDEX) as string, 10)
   const projectName = searchParams.get(QueryArg.PROJECT_NAME) as string
-  Session.devMode = searchParams.has(QueryArg.DEV_MODE)
+  const devMode = searchParams.has(QueryArg.DEV_MODE)
 
   /**
    * Wait for page to load to ensure consistent fingerprint
@@ -32,7 +32,7 @@ export function initSession (containerName: string): void {
       const values =
         components.map((component) => component.value)
       const userId = Fingerprint2.x64hash128(values.join(''), 31)
-      initSessionForTask(taskIndex, projectName, userId, containerName)
+      initSessionForTask(taskIndex, projectName, userId, containerName, devMode)
     })
   }, 500)
 }
@@ -42,7 +42,7 @@ export function initSession (containerName: string): void {
  */
 export function initSessionForTask (
   taskIndex: number, projectName: string,
-  userId: string, containerName: string) {
+  userId: string, containerName: string, devMode: boolean) {
 
   // Initialize socket connection to the backend
   const socket = io.connect(
@@ -56,7 +56,7 @@ export function initSessionForTask (
   const syncMiddleware = makeSyncMiddleware(synchronizer)
 
   // Initialize empty store
-  const store = configureStore({}, Session.devMode, syncMiddleware)
+  const store = configureStore({}, devMode, syncMiddleware)
   Session.store = store
 
   // Start the listeners that convert socket.io events to Redux actions

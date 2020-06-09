@@ -23,7 +23,7 @@ export type ReduxStore = Store<ReduxState, AnyAction>
  */
 export function configureStore (
     initialState: Partial<State>,
-    debug: boolean = false,
+    devMode: boolean = false,
     middleware?: Middleware): ReduxStore & {
       /** Thunk dispatch used for redux-thunk async actions */
       dispatch: ThunkDispatch<State, undefined, BaseAction>;
@@ -41,12 +41,16 @@ export function configureStore (
       ADD_LABELS,
       DELETE_LABELS
     ]),
-    debug: false
+    debug: false // disable default debug since it misses sync actions
   })
 
   const allMiddleware: Middleware[] = [thunk]
 
-  if (debug) {
+  /**
+   * If in dev mode, redux logging of normal and sync actions is enabled
+   * Dev mode can be enabled by appending the query arg "?dev"
+   */
+  if (devMode) {
     const logger = createLogger({
       collapsed: true
     })

@@ -38,11 +38,6 @@ class Session {
   public activeViewerId: number
   /** The window component */
   public window?: Window
-  /**
-   * If in dev mode, redux logging is enabled
-   * Dev mode can be enabled by appending the query arg "?dev"
-   */
-  public devMode: boolean
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
   public testMode: boolean
@@ -56,9 +51,8 @@ class Session {
     this.tracking = true
     this.trackLinking = false
     this.activeViewerId = -1
-    this.devMode = false
     this.testMode = false
-    this.store = configureStore({}, this.devMode)
+    this.store = configureStore({})
   }
 
   /**
