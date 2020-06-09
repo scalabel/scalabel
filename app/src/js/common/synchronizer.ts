@@ -38,10 +38,10 @@ export class Synchronizer {
   }
 
   /**
-   * Getter for number of queued (in progress) actions
+   * Get number of actions in the process of being saved
    */
-  public get numQueuedActions (): number {
-    return this.listActionPackets().length
+  public get numActionsPendingSave (): number {
+    return this.actionsPendingSave.size
   }
 
   /**
@@ -61,8 +61,11 @@ export class Synchronizer {
   public userId: string
   /** Actions queued to be sent to the backend */
   public actionQueue: types.BaseAction[]
-  /** Actions in the process of being saved, mapped by packet id */
-  private actionsToSave: OrderedMap<ActionPacketType>
+  /**
+   * Actions in the process of being saved, mapped by packet id
+   * OrderedMap ensures that resending keeps the same order
+   */
+  private actionsPendingSave: OrderedMap<ActionPacketType>
   /** Timestamped log for completed actions */
   private actionLog: types.BaseAction[]
   /** Log of packets that have been acked */
@@ -84,7 +87,7 @@ export class Synchronizer {
     this.containerName = containerName
 
     this.actionQueue = []
-    this.actionsToSave = OrderedMap.from()
+    this.actionsPendingSave = OrderedMap.from()
     this.actionLog = []
     this.userId = userId
     this.ackedPackets = new Set()
@@ -95,17 +98,16 @@ export class Synchronizer {
   }
 
   /**
-   * Log a new action that should be synced
-   * Actions from other session, frontendOnly actions,
-   * or actions on non-shared state are not synced
+   * Queue a new action for saving
    */
-  public logAction (action: types.BaseAction, autosave: boolean,
-                    sessionId: string, bots: boolean) {
+  public queueActionForSaving (action: types.BaseAction, autosave: boolean,
+                               sessionId: string, bots: boolean) {
+    // Exclude actions from other sessions and actions on non-shared state
     if (sessionId === action.sessionId && !action.frontendOnly &&
       !types.isSessionAction(action)) {
       this.actionQueue.push(action)
       if (autosave) {
-        this.sendQueuedActions(sessionId, bots)
+        this.save(sessionId, bots)
       } else {
         Session.dispatch(setStatusToUnsaved())
       }
@@ -145,15 +147,17 @@ export class Synchronizer {
   public finishRegistration (
     state: State, autosave: boolean, sessionId: string, bots: boolean) {
     if (!this.registeredOnce) {
+      // One-time setup after first registration
       this.registeredOnce = true
       setupSession(state, this.containerName)
     } else {
+      // Get the local session in-sync after a disconnect/reconnect
       if (autosave) {
         // Update with any backend changes that occurred during disconnect
         Session.dispatch(updateTask(state.task))
 
         // Re-apply frontend task actions after updating task from backend
-        for (const actionPacket of this.listActionPackets()) {
+        for (const actionPacket of this.listActionsPendingSave()) {
           for (const action of actionPacket.actions) {
             if (types.isTaskAction(action)) {
               action.frontendOnly = true
@@ -163,11 +167,11 @@ export class Synchronizer {
         }
       }
 
-      for (const actionPacket of this.listActionPackets()) {
+      for (const actionPacket of this.listActionsPendingSave()) {
         this.sendActions(actionPacket, sessionId)
       }
       if (autosave) {
-        this.sendQueuedActions(sessionId, bots)
+        this.save(sessionId, bots)
       }
     }
   }
@@ -178,10 +182,10 @@ export class Synchronizer {
    */
   public handleBroadcast (message: SyncActionMessageType) {
     const actionPacket = message.actions
-    // remove stored actions when they are acked
-    this.actionsToSave = this.actionsToSave.remove(actionPacket.id)
+    // Remove stored actions when they are acked
+    this.actionsPendingSave = this.actionsPendingSave.remove(actionPacket.id)
 
-    // if action was already acked, ignore it
+    // If action was already acked, ignore it
     if (this.ackedPackets.has(actionPacket.id)) {
       return
     }
@@ -213,7 +217,7 @@ export class Synchronizer {
     } else if (message.sessionId === Session.id) {
       if (types.hasSubmitAction(actionPacket.actions)) {
         Session.dispatch(setStatusToSubmitted())
-      } else if (this.actionsToSave.size === 0) {
+      } else if (this.actionsPendingSave.size === 0) {
         // Once all actions being saved are acked, update the save status
         Session.dispatch(setStatusToSaved())
       }
@@ -228,30 +232,33 @@ export class Synchronizer {
   }
 
   /**
-   * Converts dict of action packets to a list
+   * Converts ordered map of action packets to a list
+   * Order of the list should match the order in which keys were added
    */
-  public listActionPackets (): ActionPacketType[] {
+  public listActionsPendingSave (): ActionPacketType[] {
     const values: ActionPacketType[] = []
-    if (this.actionsToSave.size > 0) {
-      this.actionsToSave.forEach((_key: string, value: ActionPacketType) => {
-        values.push(value)
-      })
+    if (this.actionsPendingSave.size > 0) {
+      this.actionsPendingSave.forEach(
+        (_key: string, value: ActionPacketType) => {
+          values.push(value)
+        })
     }
     return values
   }
 
   /**
    * Send all queued actions to the backend
-   * Transfers actions from queue to saveQueue
+   * and move actions to actionsPendingSave
    */
-  public sendQueuedActions (sessionId: string, bots: boolean) {
+  public save (sessionId: string, bots: boolean) {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
         const packet: ActionPacketType = {
           actions: this.actionQueue,
           id: uuid4()
         }
-        this.actionsToSave = this.actionsToSave.update(packet.id, packet)
+        this.actionsPendingSave =
+          this.actionsPendingSave.update(packet.id, packet)
         if (this.doesPacketTriggerModel(packet, bots)) {
           this.actionsPendingPrediction.add(packet.id)
         }

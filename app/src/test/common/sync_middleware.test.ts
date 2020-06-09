@@ -73,7 +73,7 @@ describe('Test sync middleware routes actions to synchronizer', () => {
 
   test('Handles save', () => {
     const sync = setupSync(true)
-    const saveSpy = jest.spyOn(sync, 'sendQueuedActions')
+    const saveSpy = jest.spyOn(sync, 'save')
 
     Session.dispatch(action.save())
 
@@ -101,9 +101,9 @@ describe('Test sync middleware routes actions to synchronizer', () => {
     expect(broadcastSpy).toBeCalledWith(message)
   })
 
-  test('Handles logging of normal actions', () => {
+  test('Queues normal actions for saving', () => {
     const sync = setupSync(true)
-    const logSpy = jest.spyOn(sync, 'logAction')
+    const logSpy = jest.spyOn(sync, 'queueActionForSaving')
 
     const addBoxAction = getRandomBox2dAction()
     Session.dispatch(addBoxAction)

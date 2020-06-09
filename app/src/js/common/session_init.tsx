@@ -12,7 +12,7 @@ import { Synchronizer } from './synchronizer'
 import { QueryArg } from './types'
 
 /**
- * Main function- initiates frontend session
+ * Main function for initiating the frontend session
  * @param {string} containerName - the name of the container
  */
 export function initSession (containerName: string): void {
@@ -21,6 +21,7 @@ export function initSession (containerName: string): void {
   const taskIndex = parseInt(
     searchParams.get(QueryArg.TASK_INDEX) as string, 10)
   const projectName = searchParams.get(QueryArg.PROJECT_NAME) as string
+  Session.devMode = searchParams.has(QueryArg.DEV_MODE)
 
   /**
    * Wait for page to load to ensure consistent fingerprint
@@ -31,22 +32,25 @@ export function initSession (containerName: string): void {
       const values =
         components.map((component) => component.value)
       const userId = Fingerprint2.x64hash128(values.join(''), 31)
-      initGenericSession(taskIndex, projectName, userId, containerName)
+      initSessionForTask(taskIndex, projectName, userId, containerName)
     })
   }, 500)
 }
 
 /**
- * Inits session given the parameters
+ * Initializes a frontend session given the task's identifying information
  */
-export function initGenericSession (
+export function initSessionForTask (
   taskIndex: number, projectName: string,
   userId: string, containerName: string) {
-  // Create middleware for handling sync actions
+
+  // Initialize socket connection to the backend
   const socket = io.connect(
     location.origin,
     { transports: ['websocket'], upgrade: false }
   )
+
+  // Create middleware for handling socket.io-based actions
   const synchronizer = new Synchronizer(
     socket, taskIndex, projectName, userId, containerName)
   const syncMiddleware = makeSyncMiddleware(synchronizer)
@@ -55,16 +59,18 @@ export function initGenericSession (
   const store = configureStore({}, Session.devMode, syncMiddleware)
   Session.store = store
 
-  // Start the listeners that convert socket events to sync actions
-  // This will handle loading the initial state data
-  startSocketListeners(store, socket)
-  setListeners(store)
+  // Start the listeners that convert socket.io events to Redux actions
+  // These listeners will handle loading of the initial state data
+  setSocketListeners(store, socket)
+
+  // Set HTML listeners
+  setBodyListeners(store)
 }
 
 /**
  * Connect socket events to Redux actions
  */
-export function startSocketListeners (
+export function setSocketListeners (
   store: ReduxStore, socket: SocketIOClient.Socket) {
   socket.on(EventName.CONNECT, () => {
     store.dispatch(connect())
@@ -81,9 +87,9 @@ export function startSocketListeners (
 }
 
 /**
- * Set listeners for the html body
+ * Set listeners for the HTML body
  */
-function setListeners (store: ReduxStore) {
+function setBodyListeners (store: ReduxStore) {
   const body = document.getElementsByTagName('BODY') as
     HTMLCollectionOf<HTMLElement>
   body[0].onresize = () => {

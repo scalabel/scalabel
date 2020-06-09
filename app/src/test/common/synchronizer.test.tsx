@@ -57,7 +57,7 @@ describe('Test synchronizer functionality', () => {
 
     // After ack arrives, no actions are queued anymore
     const ackPackets = sendAcks(sync)
-    expect(sync.numQueuedActions).toBe(0)
+    expect(sync.numActionsPendingSave).toBe(0)
     expect(sync.numLoggedActions).toBe(1)
     expect(selector.isStatusSaved(Session.store.getState())).toBe(true)
 
@@ -125,16 +125,17 @@ describe('Test synchronizer functionality', () => {
     const expectedState = updateState(newInitialState, frontendActions)
     expect(Session.getState().task).toMatchObject(expectedState.task)
     expect(Session.getState().user).toMatchObject(expectedState.user)
+
     // Also check that save is still in progress
-    expect(sync.numQueuedActions).toBe(1)
-    checkActionsAreQueued(sync, frontendActions)
+    expect(sync.numActionsPendingSave).toBe(1)
+    checkActionsAreSaving(sync, frontendActions)
     expect(selector.isStatusSaving(Session.store.getState())).toBe(true)
 
     // After ack arrives, no actions are queued anymore
     sendAcks(sync)
     expect(Session.getState().task).toMatchObject(expectedState.task)
     expect(Session.getState().user).toMatchObject(expectedState.user)
-    expect(sync.numQueuedActions).toBe(0)
+    expect(sync.numActionsPendingSave).toBe(0)
     expect(sync.numLoggedActions).toBe(1)
   })
 })
@@ -149,13 +150,13 @@ function dispatchAndCheckActions (
   const actions: AddLabelsAction[] = []
   for (let _ = 0; _ < numActions; _++) {
     const action = getRandomBox2dAction()
-    sync.logAction(action, autosave, sessionId, bots)
+    sync.queueActionForSaving(action, autosave, sessionId, bots)
     actions.push(action)
   }
 
   // Verify the synchronizer state before ack arrives
-  expect(sync.numQueuedActions).toBe(numActions)
-  checkActionsAreQueued(sync, actions)
+  expect(sync.numActionsPendingSave).toBe(numActions)
+  checkActionsAreSaving(sync, actions)
   expect(selector.isStatusSaving(Session.store.getState())).toBe(true)
   if (bots) {
     expect(sync.numActionsPendingPrediction).toBe(numActions)
@@ -167,7 +168,7 @@ function dispatchAndCheckActions (
  * Acks all the waiting packets
  */
 function sendAcks (sync: Synchronizer): ActionPacketType[] {
-  const actionPackets = sync.listActionPackets()
+  const actionPackets = sync.listActionsPendingSave()
   for (const actionPacket of actionPackets) {
     sync.handleBroadcast(
       packetToMessage(actionPacket))
@@ -176,11 +177,11 @@ function sendAcks (sync: Synchronizer): ActionPacketType[] {
 }
 
 /**
- * Check that the action has been be queued
+ * Check that the actions were sent to the backend for saving
  */
-function checkActionsAreQueued (
+function checkActionsAreSaving (
   sync: Synchronizer, actions: AddLabelsAction[]) {
-  const actionPackets = sync.listActionPackets()
+  const actionPackets = sync.listActionsPendingSave()
   expect(actionPackets.length).toBe(actions.length)
   for (let i = 0; i < actions.length; i++) {
     expect(actionPackets[i].actions[0]).toBe(actions[i])
@@ -222,7 +223,7 @@ function startSynchronizer (setInitialState: boolean = true): Synchronizer {
   }
 
   // Initially, no actions are queued for saving
-  expect(synchronizer.numQueuedActions).toBe(0)
+  expect(synchronizer.numActionsPendingSave).toBe(0)
   expect(selector.isStatusUnsaved(Session.store.getState())).toBe(true)
 
   return synchronizer

@@ -28,7 +28,7 @@ function handleSyncAction (
       synchronizer.handleBroadcast(message)
       break
     case types.SAVE:
-      synchronizer.sendQueuedActions(
+      synchronizer.save(
         state.session.id, state.task.config.bots)
       break
   }
@@ -42,7 +42,7 @@ function handleNormalAction (
   const sessionId = state.session.id
   const autosave = state.task.config.autosave
   const bots = state.task.config.bots
-  synchronizer.logAction(action, autosave, sessionId, bots)
+  synchronizer.queueActionForSaving(action, autosave, sessionId, bots)
 }
 
 export const makeSyncMiddleware = (synchronizer: Synchronizer) => {
@@ -53,10 +53,11 @@ export const makeSyncMiddleware = (synchronizer: Synchronizer) => {
       const state = getState().present
 
       if (types.isSyncAction(action)) {
-        // Handle socket events
+        // Intercept socket.io-based actions (don't call next)
         handleSyncAction(action, synchronizer, state)
         return action
       } else {
+        // Process normal actions for saving, then run them with next
         handleNormalAction(action, synchronizer, state)
         return next(action)
       }

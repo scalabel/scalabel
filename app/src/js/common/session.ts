@@ -58,7 +58,6 @@ class Session {
     this.trackLinking = false
     this.activeViewerId = -1
     this.autosave = false
-    // TODO: make it configurable in the url
     this.devMode = false
     this.testMode = false
     this.store = configureStore({}, this.devMode)

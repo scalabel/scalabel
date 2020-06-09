@@ -23,14 +23,17 @@ import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
 export function setupSession (
   newState: DeepPartialState,
   containerName: string = '', shouldInitViews: boolean = true) {
+  // Update with the state from the backend
   Session.dispatch(updateState(newState))
 
+  // Update session properties
   Session.dispatch(initSessionAction())
   const state = Session.getState()
   Session.tracking = state.task.config.tracking
   Session.autosave = state.task.config.autosave
   Session.bots = state.task.config.bots
 
+  // Unless in testing mode, update views
   if (shouldInitViews && containerName !== '') {
     initViewerConfigs()
     loadData()
