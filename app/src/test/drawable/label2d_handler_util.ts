@@ -1,4 +1,7 @@
+import * as action from '../../js/action/common'
+import Session from '../../js/common/session'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
+import { RectCoords } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 
@@ -14,6 +17,34 @@ export function drawPolygon (
     mouseMoveClick(label2dHandler, p[0], p[1], canvasSize, -1, 0)
   }
   mouseMoveClick(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 1)
+}
+
+/**
+ * Do mouse movements to draw a 2d box with specified coords
+ * Optionally interrupt with some other action
+ */
+export function draw2DBox (
+  label2dHandler: Label2DHandler, canvasSize: Size2D,
+  coords: RectCoords, interrupt: boolean= false) {
+  const x1 = coords.x1
+  const x2 = coords.x2
+  const y1 = coords.y1
+  const y2 = 5
+  // First corner
+  mouseMove(label2dHandler, x1, y1, canvasSize, -1, 0)
+  mouseDown(label2dHandler, x1, y1, -1, 0)
+
+  // Some rando intermediate move
+  mouseMove(label2dHandler,
+    x1 + Math.random() * 5, y1 - Math.random() * 5, canvasSize, -1, 0)
+
+  if (interrupt) {
+    Session.dispatch(action.setStatusToSaved())
+  }
+
+  // Last corner
+  mouseMove(label2dHandler, x2, y2, canvasSize, -1, 0)
+  mouseUp(label2dHandler, x2, y2, -1, 0)
 }
 
 /**

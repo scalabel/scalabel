@@ -8,14 +8,21 @@ import { initStore } from '../../js/common/session_init'
 import { Key, ShapeTypeName } from '../../js/common/types'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
-import { getShape } from '../../js/functional/state_util'
+import { getNumLabels, getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { IdType, Point2DType, PolygonType, RectType } from '../../js/functional/types'
+import { IdType, Point2DType, PolygonType, RectCoords, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
-import { drawPolygon, keyClick, keyDown, keyUp, mouseClick, mouseDown, mouseMove, mouseMoveClick, mouseUp } from '../drawable/label2d_handler_util'
-import { findNewLabels } from '../server/util/util'
+import { draw2DBox, drawPolygon, keyClick, keyDown, keyUp,
+  mouseClick, mouseDown, mouseMove, mouseMoveClick, mouseUp } from '../drawable/label2d_handler_util'
+import { findNewLabels, findNewLabelsFromState } from '../server/util/util'
 import { testJson } from '../test_states/test_image_objects'
+
+let itemIndex: number
+
+beforeAll(() => {
+  itemIndex = 0
+})
 
 /**
  * Initialize Session, label 3d list, label 3d handler
@@ -34,94 +41,97 @@ function initializeTestingObjects (): [Label2DHandler, number] {
   })
 
   Session.dispatch(action.loadItem(0, -1))
-
-  const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
 
   return [label2dHandler, viewerId]
 }
 
-test('Draw 2d boxes to label2d list', () => {
-  const [label2dHandler] = initializeTestingObjects()
+/**
+ * Check that the box was committed to the state correctly
+ * @param numLabels: The number of labels added to the item
+ * @param coords: The expected coords
+ * @return {string}: The id of the new box label
+ */
+function checkBoxDrawn (
+  numLabels: number, coords: RectCoords, labelIds: IdType[]): string {
+  const state = Session.getState()
 
-  const labelIds: IdType[] = []
-  // Draw first box
-  const canvasSize = new Size2D(100, 100)
-  mouseMove(label2dHandler, 1, 1, canvasSize, -1, 0)
-  mouseDown(label2dHandler, 1, 1, -1, 0)
-  mouseMove(label2dHandler, 10, 10, canvasSize, -1, 0)
-  mouseUp(label2dHandler, 10, 10, -1, 0)
-  let state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toEqual(1)
-  labelIds.push(findNewLabels(state.task.items[0].labels, labelIds)[0])
-  let rect = getShape(state, 0, labelIds[0], 0) as RectType
-  expect(rect).toMatchObject({ x1: 1, y1: 1, x2: 10, y2: 10 })
-
-  // Second box
-  mouseMove(label2dHandler, 19, 20, canvasSize, -1, 0)
-  mouseDown(label2dHandler, 19, 20, -1, 0)
-  mouseMove(label2dHandler, 25, 25, canvasSize, -1, 0)
-  mouseMove(label2dHandler, 30, 29, canvasSize, -1, 0)
-  mouseUp(label2dHandler, 30, 29, -1, 0)
-
-  state = Session.getState()
   // Make sure a new label is added
-  expect(_.size(state.task.items[0].labels)).toEqual(2)
+  expect(getNumLabels(state, itemIndex)).toEqual(numLabels)
+
   // Find the new label
-  labelIds.push(findNewLabels(state.task.items[0].labels, labelIds)[0])
-  rect = getShape(state, 0, labelIds[1], 0) as RectType
-  expect(rect).toMatchObject({ x1: 19, y1: 20, x2: 30, y2: 29 })
+  const newLabelId = findNewLabelsFromState(state, itemIndex, labelIds)[0]
 
-  // third box
-  mouseMove(label2dHandler, 4, 5, canvasSize, -1, 0)
-  mouseDown(label2dHandler, 4, 5, -1, 0)
-  mouseMove(label2dHandler, 15, 15, canvasSize, -1, 0)
-  mouseMove(label2dHandler, 23, 24, canvasSize, -1, 0)
-  mouseUp(label2dHandler, 23, 24, -1, 0)
-  state = Session.getState()
-  // Make sure a new label is added
-  expect(_.size(state.task.items[0].labels)).toEqual(3)
-  labelIds.push(findNewLabels(state.task.items[0].labels, labelIds)[0])
-  rect = getShape(state, 0, labelIds[2], 0) as RectType
-  expect(rect).toMatchObject({ x1: 4, y1: 5, x2: 23, y2: 24 })
+  // Check the shape
+  const rect = getShape(state, itemIndex, newLabelId, 0) as RectType
+  expect(rect).toMatchObject(coords)
 
-  // resize the second box
-  mouseMove(label2dHandler, 19, 20, canvasSize, 1, 1)
-  mouseDown(label2dHandler, 19, 20, 1, 1)
-  mouseMove(label2dHandler, 15, 18, canvasSize, -1, 0)
-  mouseMove(label2dHandler, 16, 17, canvasSize, -1, 0)
-  mouseUp(label2dHandler, 16, 17, -1, 0)
-  state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toEqual(3)
-  rect = getShape(state, 0, labelIds[1], 0) as RectType
-  expect(rect).toMatchObject({ x1: 16, y1: 17 })
+  return newLabelId
+}
 
-  // flip top left and bottom right corner
-  mouseMove(label2dHandler, 16, 17, canvasSize, 1, 1)
-  mouseDown(label2dHandler, 16, 17, 1, 1)
-  mouseMove(label2dHandler, 42, 43, canvasSize, -1, 0)
-  mouseUp(label2dHandler, 40, 41, -1, 0)
-  state = Session.getState()
-  rect = getShape(state, 0, labelIds[1], 0) as RectType
-  expect(rect).toMatchObject({ x1: 30, y1: 29, x2: 42, y2: 43 })
+describe.only('2D box', () => {
+  test('Draw 2d boxes to label2d list', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(100, 100)
+    const labelIds: IdType[] = []
 
-  // move
-  mouseMove(label2dHandler, 32, 31, canvasSize, 1, 0)
-  mouseDown(label2dHandler, 32, 31, 1, 0)
-  mouseMove(label2dHandler, 36, 32, canvasSize, -1, 0)
-  mouseUp(label2dHandler, 36, 32, -1, 0)
-  state = Session.getState()
-  rect = getShape(state, 0, labelIds[1], 0) as RectType
-  expect(rect).toMatchObject({ x1: 34, y1: 30, x2: 46, y2: 44 })
+    // Draw first box
+    const rect1Coords = { x1: 1, y1: 1, x2: 10, y2: 10 }
+    draw2DBox(label2dHandler, canvasSize, rect1Coords)
+    labelIds.push(checkBoxDrawn(1, rect1Coords, labelIds))
 
-  // delete label
-  Session.dispatch(action.deleteLabel(0, labelIds[1]))
-  const labelList = Session.label2dList.labelList
-  expect(labelList.length).toEqual(2)
-  expect(labelList[0].index).toEqual(0)
-  expect(labelList[0].labelId).toEqual(labelIds[0])
-  expect(labelList[1].index).toEqual(1)
-  expect(labelList[1].labelId).toEqual(labelIds[2])
+    // Second box
+    const rect2Coords = { x1: 19, y1: 20, x2: 30, y2: 29 }
+    draw2DBox(label2dHandler, canvasSize, rect2Coords)
+    labelIds.push(checkBoxDrawn(2, rect2Coords, labelIds))
+
+    // third box
+    const rect3Coords = { x1: 4, y1: 5, x2: 23, y2: 24 }
+    draw2DBox(label2dHandler, canvasSize, rect3Coords)
+    labelIds.push(checkBoxDrawn(3, rect3Coords, labelIds))
+
+    // resize the second box
+    mouseMove(label2dHandler, 19, 20, canvasSize, 1, 1)
+    mouseDown(label2dHandler, 19, 20, 1, 1)
+    mouseMove(label2dHandler, 15, 18, canvasSize, -1, 0)
+    mouseMove(label2dHandler, 16, 17, canvasSize, -1, 0)
+    mouseUp(label2dHandler, 16, 17, -1, 0)
+    let state = Session.getState()
+    expect(_.size(state.task.items[0].labels)).toEqual(3)
+    let rect = getShape(state, 0, labelIds[1], 0) as RectType
+    expect(rect).toMatchObject({ x1: 16, y1: 17 })
+
+    // flip top left and bottom right corner
+    mouseMove(label2dHandler, 16, 17, canvasSize, 1, 1)
+    mouseDown(label2dHandler, 16, 17, 1, 1)
+    mouseMove(label2dHandler, 42, 43, canvasSize, -1, 0)
+    mouseUp(label2dHandler, 40, 41, -1, 0)
+    state = Session.getState()
+    rect = getShape(state, 0, labelIds[1], 0) as RectType
+    expect(rect).toMatchObject({ x1: 30, y1: 29, x2: 42, y2: 43 })
+
+    // move
+    mouseMove(label2dHandler, 32, 31, canvasSize, 1, 0)
+    mouseDown(label2dHandler, 32, 31, 1, 0)
+    mouseMove(label2dHandler, 36, 32, canvasSize, -1, 0)
+    mouseUp(label2dHandler, 36, 32, -1, 0)
+    state = Session.getState()
+    rect = getShape(state, 0, labelIds[1], 0) as RectType
+    expect(rect).toMatchObject({ x1: 34, y1: 30, x2: 46, y2: 44 })
+
+    // delete label
+    Session.dispatch(action.deleteLabel(0, labelIds[1]))
+    const labelList = Session.label2dList.labelList
+    expect(labelList.length).toEqual(2)
+    expect(labelList[0].index).toEqual(0)
+    expect(labelList[0].labelId).toEqual(labelIds[0])
+    expect(labelList[1].index).toEqual(1)
+    expect(labelList[1].labelId).toEqual(labelIds[2])
+  })
+
+  test('Draw 2D boxes with interruption', () => {
+    return
+  })
 })
 
 test('Draw 2d polygons to label2d list', () => {

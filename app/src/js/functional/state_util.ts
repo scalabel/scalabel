@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { makeItem } from './states'
 import {
   IdType,
@@ -20,6 +21,15 @@ export function getCurrentItem (state: State): ItemType {
   } else {
     return state.task.items[state.user.select.item]
   }
+}
+
+/**
+ * Get the number of labels on the item
+ * @param state
+ * @param itemIndex
+ */
+export function getNumLabels (state: State, itemIndex: number) {
+  return _.size(state.task.items[itemIndex].labels)
 }
 
 /**

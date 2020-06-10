@@ -58,6 +58,17 @@ export interface ShapeType {
   shapeType: string
 }
 
+export interface RectCoords {
+  /** The x-coordinate of upper left corner */
+  x1: number
+  /** The y-coordinate of upper left corner */
+  y1: number
+  /** The x-coordinate of lower right corner */
+  x2: number
+  /** The y-coordinate of lower right corner */
+  y2: number
+}
+
 export interface RectType extends ShapeType {
   /** The x-coordinate of upper left corner */
   x1: number
