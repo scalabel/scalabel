@@ -116,7 +116,7 @@ describe('full 2d bounding box integration test', () => {
     // Spawn a canvas and draw labels on this canvas
     // Uses similar code to drawable tests
     initSessionForTask(
-      testConfig.taskIndex, testConfig.projectName, 'fakeId', '')
+      testConfig.taskIndex, testConfig.projectName, 'fakeId', '', false)
 
     const labelIds: IdType[] = []
     const { getByTestId } = render(
