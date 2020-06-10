@@ -205,7 +205,7 @@ describe('Draw 2D boxes to label2d list', () => {
   })
 })
 
-describe.only('Draw 2d polygons to label2d list', () => {
+describe('Draw 2d polygons to label2d list', () => {
   // Samples polygon vertices to use for tests
   const vertices: number[][][] = [
     [[10, 10], [100, 100], [200, 100], [100, 0]],
@@ -253,11 +253,22 @@ describe.only('Draw 2d polygons to label2d list', () => {
     expect(Session.label2dList.labelList.length).toEqual(2)
   })
 
-  // test('Draw polygons with interrupting actions', () => {
-  //   const [label2dHandler] = initializeTestingObjects()
-  //   const canvasSize = new Size2D(1000, 1000)
-  //   Session.dispatch(action.changeSelect({ labelType: 1 }))
-  // })
+  test.only('Draw polygons with interrupting actions', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(1000, 1000)
+    const interrupt = true
+    Session.dispatch(action.changeSelect({ labelType: 1 }))
+
+    const labelIds: IdType[] = []
+
+    drawPolygon(label2dHandler, canvasSize, vertices[0], interrupt)
+    labelIds.push(checkPolyDrawn(1, vertices[0], labelIds))
+
+    drawPolygonByDragging(label2dHandler, canvasSize, vertices[1], interrupt)
+    labelIds.push(checkPolyDrawn(2, vertices[1], labelIds))
+
+    expect(Session.label2dList.labelList.length).toEqual(2)
+  })
 })
 
 test('2d polygons highlighted and selected', () => {
