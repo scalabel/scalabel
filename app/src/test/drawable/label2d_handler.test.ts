@@ -14,7 +14,8 @@ import { IdType, Point2DType, PolygonType, RectCoords, RectType } from '../../js
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { draw2DBox, drawPolygon, keyClick, keyDown, keyUp,
-  mouseClick, mouseDown, mouseMove, mouseMoveClick, mouseUp } from '../drawable/label2d_handler_util'
+  mouseClick, mouseDown, mouseMove, mouseMoveClick,
+  mouseUp, move2DBox, resize2DBox } from '../drawable/label2d_handler_util'
 import { findNewLabels, findNewLabelsFromState } from '../server/util/util'
 import { testJson } from '../test_states/test_image_objects'
 
@@ -69,55 +70,26 @@ function checkBoxDrawn (
   return newLabelId
 }
 
-describe.only('2D box', () => {
-  test('Draw 2d boxes to label2d list', () => {
+describe.only('Draw 2D boxes to label2d list', () => {
+  // Samples box2D coords to use for tests
+  const boxCoords: RectCoords[] = [
+    { x1: 1, y1: 1, x2: 10, y2: 10 },
+    { x1: 19, y1: 20, x2: 30, y2: 29 },
+    { x1: 4, y1: 5, x2: 23, y2: 24 }
+  ]
+
+  test('Add and delete boxes', () => {
     const [label2dHandler] = initializeTestingObjects()
     const canvasSize = new Size2D(100, 100)
     const labelIds: IdType[] = []
 
-    // Draw first box
-    const rect1Coords = { x1: 1, y1: 1, x2: 10, y2: 10 }
-    draw2DBox(label2dHandler, canvasSize, rect1Coords)
-    labelIds.push(checkBoxDrawn(1, rect1Coords, labelIds))
-
-    // Second box
-    const rect2Coords = { x1: 19, y1: 20, x2: 30, y2: 29 }
-    draw2DBox(label2dHandler, canvasSize, rect2Coords)
-    labelIds.push(checkBoxDrawn(2, rect2Coords, labelIds))
-
-    // third box
-    const rect3Coords = { x1: 4, y1: 5, x2: 23, y2: 24 }
-    draw2DBox(label2dHandler, canvasSize, rect3Coords)
-    labelIds.push(checkBoxDrawn(3, rect3Coords, labelIds))
-
-    // resize the second box
-    mouseMove(label2dHandler, 19, 20, canvasSize, 1, 1)
-    mouseDown(label2dHandler, 19, 20, 1, 1)
-    mouseMove(label2dHandler, 15, 18, canvasSize, -1, 0)
-    mouseMove(label2dHandler, 16, 17, canvasSize, -1, 0)
-    mouseUp(label2dHandler, 16, 17, -1, 0)
-    let state = Session.getState()
-    expect(_.size(state.task.items[0].labels)).toEqual(3)
-    let rect = getShape(state, 0, labelIds[1], 0) as RectType
-    expect(rect).toMatchObject({ x1: 16, y1: 17 })
-
-    // flip top left and bottom right corner
-    mouseMove(label2dHandler, 16, 17, canvasSize, 1, 1)
-    mouseDown(label2dHandler, 16, 17, 1, 1)
-    mouseMove(label2dHandler, 42, 43, canvasSize, -1, 0)
-    mouseUp(label2dHandler, 40, 41, -1, 0)
-    state = Session.getState()
-    rect = getShape(state, 0, labelIds[1], 0) as RectType
-    expect(rect).toMatchObject({ x1: 30, y1: 29, x2: 42, y2: 43 })
-
-    // move
-    mouseMove(label2dHandler, 32, 31, canvasSize, 1, 0)
-    mouseDown(label2dHandler, 32, 31, 1, 0)
-    mouseMove(label2dHandler, 36, 32, canvasSize, -1, 0)
-    mouseUp(label2dHandler, 36, 32, -1, 0)
-    state = Session.getState()
-    rect = getShape(state, 0, labelIds[1], 0) as RectType
-    expect(rect).toMatchObject({ x1: 34, y1: 30, x2: 46, y2: 44 })
+    // Draw and check each box
+    for (let boxNum = 0; boxNum < boxCoords.length; boxNum++) {
+      const coords = boxCoords[boxNum]
+      draw2DBox(label2dHandler, canvasSize, coords)
+      const numLabels = boxNum + 1
+      labelIds.push(checkBoxDrawn(numLabels, coords, labelIds))
+    }
 
     // delete label
     Session.dispatch(action.deleteLabel(0, labelIds[1]))
@@ -129,8 +101,64 @@ describe.only('2D box', () => {
     expect(labelList[1].labelId).toEqual(labelIds[2])
   })
 
-  test('Draw 2D boxes with interruption', () => {
-    return
+  test('Add boxes with interrupting actions', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(100, 100)
+    const labelIds: IdType[] = []
+    const interrupt = true
+
+    // Draw and check each box
+    for (let boxNum = 0; boxNum < boxCoords.length; boxNum++) {
+      const coords = boxCoords[boxNum]
+      draw2DBox(label2dHandler, canvasSize, coords, interrupt)
+      const numLabels = boxNum + 1
+      labelIds.push(checkBoxDrawn(numLabels, coords, labelIds))
+    }
+  })
+
+  test('Resize and move boxes', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(100, 100)
+    const labelIds: IdType[] = []
+
+    // Draw each box
+    for (let boxNum = 0; boxNum < boxCoords.length; boxNum++) {
+      const coords = boxCoords[boxNum]
+      draw2DBox(label2dHandler, canvasSize, coords)
+      const numLabels = boxNum + 1
+      labelIds.push(checkBoxDrawn(numLabels, coords, labelIds))
+    }
+
+    // resize the second box
+    const boxIndex = 1
+    const originalCoords = boxCoords[boxIndex]
+    let moveCoords = {
+      x1: originalCoords.x1, y1: originalCoords.y1, x2: 16, y2: 17}
+    resize2DBox(label2dHandler, canvasSize, moveCoords, boxIndex)
+
+    let state = Session.getState()
+    expect(getNumLabels(state, itemIndex)).toEqual(3)
+    let rect = getShape(state, itemIndex, labelIds[boxIndex], 0) as RectType
+    expect(rect).toMatchObject({ x1: 16, y1: 17, x2: 30, y2: 29 })
+
+    // flip top left and bottom right corners
+    moveCoords = {
+      x1: moveCoords.x2, y1: moveCoords.y2, x2: 42, y2: 43
+    }
+    resize2DBox(label2dHandler, canvasSize, moveCoords, boxIndex)
+    state = Session.getState()
+    rect = getShape(state, itemIndex, labelIds[boxIndex], 0) as RectType
+    expect(rect).toMatchObject({ x1: 30, y1: 29, x2: 42, y2: 43 })
+
+    // move the entire box +4x and -1y
+    moveCoords = {
+      x1: 32, y1: 31, x2: 36, y2: 32
+    }
+    move2DBox(label2dHandler, canvasSize, moveCoords, boxIndex)
+
+    state = Session.getState()
+    rect = getShape(state, itemIndex, labelIds[boxIndex], 0) as RectType
+    expect(rect).toMatchObject({ x1: 34, y1: 30, x2: 46, y2: 44 })
   })
 })
 

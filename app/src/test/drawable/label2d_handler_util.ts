@@ -20,21 +20,25 @@ export function drawPolygon (
 }
 
 /**
- * Do mouse movements to draw a 2d box with specified coords
- * Optionally interrupt with some other action
+ * Make mouse movements to do some 2d box operation
+ * @param coords: coords for starting and ending clicks
+ * @param labelIndex: if not -1, specifies changing an existing label
+ * @param interrupt: if enabled, interrupt the operation with another action
  */
-export function draw2DBox (
+function do2DBoxOperation (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: RectCoords, interrupt: boolean= false) {
+  coords: RectCoords, labelIndex: number, handleIndex: number,
+  interrupt: boolean= false) {
   const x1 = coords.x1
   const x2 = coords.x2
   const y1 = coords.y1
-  const y2 = 5
-  // First corner
-  mouseMove(label2dHandler, x1, y1, canvasSize, -1, 0)
-  mouseDown(label2dHandler, x1, y1, -1, 0)
+  const y2 = coords.y2
 
-  // Some rando intermediate move
+  // First point
+  mouseMove(label2dHandler, x1, y1, canvasSize, labelIndex, handleIndex)
+  mouseDown(label2dHandler, x1, y1, labelIndex, handleIndex)
+
+  // Some random intermediate move
   mouseMove(label2dHandler,
     x1 + Math.random() * 5, y1 - Math.random() * 5, canvasSize, -1, 0)
 
@@ -42,9 +46,46 @@ export function draw2DBox (
     Session.dispatch(action.setStatusToSaved())
   }
 
-  // Last corner
+  // Last point
   mouseMove(label2dHandler, x2, y2, canvasSize, -1, 0)
-  mouseUp(label2dHandler, x2, y2, -1, 0)
+  // Mouse up doesn't need to be exactly at the point
+  mouseUp(label2dHandler,
+    x2 + Math.random(), y2 - Math.random(), -1, 0)
+}
+
+/**
+ * Make mouse movements to add the 2D box
+ * @param coords: the coordinates of the new box
+ */
+export function draw2DBox (
+  label2dHandler: Label2DHandler, canvasSize: Size2D,
+  coords: RectCoords, interrupt: boolean= false) {
+  do2DBoxOperation(label2dHandler, canvasSize, coords, -1, 0, interrupt)
+}
+
+/**
+ * Make mouse movements to resize the 2D box
+ * @param coords: x1/y1 is the existing point, x2/y2 is the new point
+ * @param labelIndex: the index of the label to move
+ */
+export function resize2DBox (
+  label2dHandler: Label2DHandler, canvasSize: Size2D,
+  coords: RectCoords, labelIndex: number, interrupt: boolean= false) {
+  do2DBoxOperation(
+    label2dHandler, canvasSize, coords, labelIndex, labelIndex, interrupt)
+}
+
+/**
+ * Make mouse movements to move the 2D box
+ * @param coords: x1/y1 is the existing point, x2/y2 is the new point
+ * @param labelIndex: the index of the label to move
+ */
+export function move2DBox (
+  label2dHandler: Label2DHandler, canvasSize: Size2D,
+  coords: RectCoords, labelIndex: number, interrupt: boolean= false) {
+  // Handle index of 0 represents a move instead of a resize
+  do2DBoxOperation(
+    label2dHandler, canvasSize, coords, labelIndex, 0, interrupt)
 }
 
 /**
