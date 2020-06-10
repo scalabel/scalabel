@@ -189,7 +189,7 @@ export function drawBox2DTracks (
 export function setUpLabel2dCanvas (
     dispatch: (action: ActionType) => void,
     canvasRef: React.RefObject<Label2dCanvas>,
-    width: number, height: number) {
+    width: number, height: number, tracking: boolean = false) {
   dispatch(action.addViewerConfig(0, makeImageViewerConfig(0)))
 
   const display = document.createElement('div')
@@ -229,6 +229,7 @@ export function setUpLabel2dCanvas (
         display={display}
         ref={canvasRef}
         shouldFreeze={false}
+        tracking={tracking}
       />
     </div>
   )

@@ -25,11 +25,7 @@ export function setupSession (
   containerName: string = '', shouldInitViews: boolean = true) {
   // Update with the state from the backend
   Session.dispatch(updateState(newState))
-
-  // Update session properties
   Session.dispatch(initSessionAction())
-  const state = Session.getState()
-  Session.tracking = state.task.config.tracking
 
   // Unless in testing mode, update views
   if (shouldInitViews && containerName !== '') {

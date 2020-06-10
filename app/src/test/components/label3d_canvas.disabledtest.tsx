@@ -112,6 +112,7 @@ function setUpLabel3dCanvas (
         ref={canvasRef}
         camera={camera}
         shouldFreeze={false}
+        tracking={false}
       />
     </div>
   )

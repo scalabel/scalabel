@@ -30,10 +30,6 @@ class Session {
   public label3dList: Label3DList
   /** map between track id and track objects */
   public tracks: {[trackId: string]: Track}
-  /** whether tracking is enabled */
-  public tracking: boolean
-  /** whether track linking is enabled */
-  public trackLinking: boolean
   /** id of the viewer that the mouse is currently hovering over */
   public activeViewerId: number
   /** The window component */
@@ -48,8 +44,6 @@ class Session {
     this.label2dList = new Label2DList()
     this.label3dList = new Label3DList()
     this.tracks = {}
-    this.tracking = true
-    this.trackLinking = false
     this.activeViewerId = -1
     this.testMode = false
     this.store = configureStore({})

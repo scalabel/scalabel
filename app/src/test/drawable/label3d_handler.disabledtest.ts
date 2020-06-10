@@ -80,7 +80,7 @@ function initializeTestingObjects (
   Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig(-1)))
   const viewerId = 1
 
-  const label3dHandler = new Label3DHandler(camera)
+  const label3dHandler = new Label3DHandler(camera, false)
   Session.subscribe(() => {
     const state = Session.getState()
     Session.label3dList.updateState(state)

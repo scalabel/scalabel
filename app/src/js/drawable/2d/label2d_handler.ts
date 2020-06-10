@@ -17,23 +17,26 @@ import { Label2DList, makeDrawableLabel2D } from './label2d_list'
  * ViewController for the labels
  */
 export class Label2DHandler {
-  /** drawable label list */
+  /** Drawable label list */
   private _labelList: Label2DList
   /** Recorded state of last update */
   private _state: State
-  /** highlighted label */
+  /** Highlighted label */
   private _highlightedLabel: Label2D | null
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
-  /** index of currently selected item */
+  /** Index of currently selected item */
   private _selectedItemIndex: number
+  /** Whether tracking is enabled */
+  private _tracking: boolean
 
-  constructor (labelList: Label2DList) {
+  constructor (labelList: Label2DList, tracking: boolean) {
     this._highlightedLabel = null
     this._state = Session.getState()
     this._keyDownMap = {}
     this._selectedItemIndex = -1
     this._labelList = labelList
+    this._tracking = tracking
   }
 
   /** get highlightedLabel for state inspection */
@@ -110,7 +113,7 @@ export class Label2DHandler {
           labelsToRemove.push(selectedLabel)
         }
       })
-      commit2DLabels([...this._labelList.popUpdatedLabels()])
+      commit2DLabels([...this._labelList.popUpdatedLabels()], this._tracking)
       this._labelList.clearUpdatedLabels()
 
       for (const label of labelsToRemove) {

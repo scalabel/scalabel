@@ -36,7 +36,7 @@ beforeAll(() => {
   for (let i = 0; i < getState().task.items.length; i++) {
     dispatch(action.loadItem(i, -1))
   }
-  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000)
+  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000, true)
 })
 
 describe('basic track ops', () => {
