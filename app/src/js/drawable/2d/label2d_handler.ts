@@ -176,15 +176,15 @@ export class Label2DHandler {
     switch (e.key) {
       case Key.L_LOW:
         if (this.isKeyDown(Key.CONTROL)) {
-          // track link mode
+          // Track link mode
           Session.dispatch(startLinkTrack())
         } else {
-          // linking
+          // Linking
           this.linkLabels()
         }
         break
       case Key.L_UP:
-        // unlinking
+        // Unlinking
         this.unlinkLabels()
         break
       case Key.ARROW_UP:

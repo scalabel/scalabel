@@ -37,7 +37,7 @@ afterAll(() => {
 describe('test user management', () => {
 
   test('user count works for single user', async () => {
-    // note: this is not actually how user ids are generated
+    // Note: this is not actually how user ids are generated
     const userId = uuid4()
     const socketId = uuid4()
     expect(await userManager.countUsers(projectName)).toBe(0)
@@ -51,7 +51,7 @@ describe('test user management', () => {
     const numUsers = 3
     const socketsPerUser = 3
     const userIds = _.range(numUsers).map(() => uuid4())
-    // first 3 socket ids correspond to first user, etc.
+    // First 3 socket ids correspond to first user, etc.
     const socketIds = _.range(numUsers * socketsPerUser).map(() => uuid4())
     for (let socketNum = 0; socketNum < socketsPerUser; socketNum++) {
       for (let userNum = 0; userNum < numUsers; userNum++) {
@@ -59,11 +59,11 @@ describe('test user management', () => {
         const userId = userIds[userNum]
         await userManager.registerUser(socketId, projectName, userId)
       }
-      // each iteration adds more sockets, but number of users is constant
+      // Each iteration adds more sockets, but number of users is constant
       expect(await userManager.countUsers(projectName)).toBe(numUsers)
     }
 
-    // remove all sockets for each user consecutively
+    // Remove all sockets for each user consecutively
     for (let userNum = 0; userNum < numUsers; userNum++) {
       for (let socketNum = 0; socketNum < socketsPerUser; socketNum++) {
         const socketId = socketIds[userNum * socketsPerUser + socketNum]
@@ -75,14 +75,14 @@ describe('test user management', () => {
   })
 
   test('user count works for multiple projects', async () => {
-    // make sure other tests clean up worked
+    // Make sure other tests clean up worked
     expect(await userManager.countUsers(projectName)).toBe(0)
     expect(await userManager.countUsers(projectName2)).toBe(0)
 
     const numUsers = 2
     const numProjects = 2
     const userIds = _.range(numUsers).map(() => uuid4())
-    // first 2 socket ids correspond to first project, etc.
+    // First 2 socket ids correspond to first project, etc.
     const socketIds = _.range(numUsers * numProjects).map(() => uuid4())
 
     // First put all users on 1st project
@@ -111,14 +111,14 @@ describe('test user management', () => {
   })
 
   test('clearing users resets all counts', async () => {
-    // make sure other tests clean up worked
+    // Make sure other tests clean up worked
     expect(await userManager.countUsers(projectName)).toBe(0)
     expect(await userManager.countUsers(projectName2)).toBe(0)
 
     const numUsers = 2
     const numProjects = 2
     const userIds = _.range(numUsers).map(() => uuid4())
-    // first 2 socket ids correspond to first project, etc.
+    // First 2 socket ids correspond to first project, etc.
     const socketIds = _.range(numUsers * numProjects).map(() => uuid4())
 
     // Put 1 user on each project

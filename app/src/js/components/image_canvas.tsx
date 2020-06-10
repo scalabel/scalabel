@@ -40,7 +40,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
   /** The mask to hold the display */
   protected display: HTMLDivElement | null
 
-  // display variables
+  // Display variables
   /** The current scale */
   private scale: number
 
@@ -51,9 +51,9 @@ export class ImageCanvas extends DrawableCanvas<Props> {
   constructor (props: Readonly<Props>) {
     super(props)
 
-    // constants
+    // Constants
 
-    // initialization
+    // Initialization
     this.scale = 1
     this.imageContext = null
     this.imageCanvas = null
@@ -110,7 +110,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
           item < Session.images.length &&
           sensor in Session.images[item]) {
         const image = Session.images[item][sensor]
-        // redraw imageCanvas
+        // Redraw imageCanvas
         drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
       } else {
         clearCanvas(this.imageCanvas, this.imageContext)

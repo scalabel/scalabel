@@ -20,7 +20,7 @@ import {
   sampleProjectImage,
   sampleProjectVideo,
   sampleTasksImage,
-  // sampleTasksVideo,
+  // SampleTasksVideo,
   sampleVideoFormFileData
 } from '../test_states/test_creation_objects'
 import {
@@ -89,7 +89,7 @@ describe('test task.json creation', () => {
 describe('create with auto labels', () => {
   test('import then export', () => {
     return createTasks(sampleProjectAutolabel).then((tasks) => {
-      // only 1 task should be created
+      // Only 1 task should be created
       const state: Partial<State> = {
         task: tasks[0]
       }
@@ -99,7 +99,7 @@ describe('create with auto labels', () => {
   })
   test('import then export for polygon', () => {
     return createTasks(sampleProjectAutolabelPolygon).then((tasks) => {
-      // only 1 task should be created
+      // Only 1 task should be created
       const state: Partial<State> = {
         task: tasks[0]
       }
@@ -129,7 +129,7 @@ async function testProjectCreation (
 async function testProjectSaving (sampleProject: Project): Promise<void> {
   await projectStore.saveProject(sampleProject)
 
-  // check that it saved correctly by loading it and comparing
+  // Check that it saved correctly by loading it and comparing
   const loadedProject = await projectStore.loadProject(
     sampleProject.config.projectName)
 
@@ -142,7 +142,7 @@ async function testProjectSaving (sampleProject: Project): Promise<void> {
 async function testTaskSaving (sampleTasks: TaskType[]): Promise<void> {
   await projectStore.saveTasks(sampleTasks)
 
-  // check that tasks saved correctly by loading them and comparing
+  // Check that tasks saved correctly by loading them and comparing
   for (const task of sampleTasks) {
     const projectName = task.config.projectName
     const taskId = task.config.taskId

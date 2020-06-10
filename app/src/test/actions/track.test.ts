@@ -10,7 +10,7 @@ test('Test tracks ops', () => {
   initStore(testJson)
   loadImages()
 
-  // terminate tracks
+  // Terminate tracks
   const itemIndex = 1
   Session.dispatch(action.goToItem(itemIndex))
   let state = Session.getState()
@@ -28,7 +28,7 @@ test('Test tracks ops', () => {
   expect(_.size(state.task.items[0].labels)).toBe(3)
   expect(_.size(state.task.items[0].shapes)).toBe(3)
 
-  // merge tracks
+  // Merge tracks
   const toMergeTrack1 = '2'
   const toMergeTrack2 = '9'
   const continueItemIdx = 5

@@ -83,7 +83,7 @@ export class ProjectStore {
   public async loadState (projectName: string, taskId: string): Promise<State> {
     let state: State
 
-    // first try to load from redis
+    // First try to load from redis
     const saveDir = path.getSaveDir(projectName, taskId)
     let redisValue = null
     if (this.redisStore) {
@@ -92,12 +92,12 @@ export class ProjectStore {
     if (redisValue) {
       state = safeParseJSON(redisValue)
     } else {
-      // otherwise load from storage
+      // Otherwise load from storage
       try {
-        // first, attempt loading previous submission
+        // First, attempt loading previous submission
         state = await this.loadSavedState(saveDir)
       } catch {
-        // if no submissions exist, load from task
+        // If no submissions exist, load from task
         const taskKey = path.getTaskKey(projectName, taskId)
         state = await this.loadStateFromTask(taskKey)
       }
@@ -109,7 +109,7 @@ export class ProjectStore {
    * Checks whether project name is unique
    */
   public checkProjectName (projectName: string): Promise<boolean> {
-    // check if project.json exists in the project folder
+    // Check if project.json exists in the project folder
     const key = path.getProjectKey(projectName)
     return this.storage.hasKey(key)
   }
@@ -120,10 +120,10 @@ export class ProjectStore {
   public async getExistingProjects (): Promise<string[]> {
     const files = await this.storage.listKeys('', true)
 
-    // process files into project names
+    // Process files into project names
     const names = []
     for (const f of files) {
-      // remove any xss vulnerability
+      // Remove any xss vulnerability
       names.push(filterXSS(f))
     }
     return names
@@ -157,7 +157,7 @@ export class ProjectStore {
     const taskPromises: Array<Promise<TaskType>> = []
     const taskDir = path.getTaskDir(projectName)
     const keys = await this.storage.listKeys(taskDir, false)
-    // iterate over all keys and load each task asynchronously
+    // Iterate over all keys and load each task asynchronously
     for (const key of keys) {
       taskPromises.push(this.storage.load(key).then((fields) => {
         return safeParseJSON(fields) as TaskType
@@ -165,7 +165,7 @@ export class ProjectStore {
       )
     }
     const tasks = await Promise.all(taskPromises)
-    // sort tasks by index
+    // Sort tasks by index
     tasks.sort((a: TaskType, b: TaskType) => {
       return parseInt(a.config.taskId, 10) - parseInt(b.config.taskId, 10)
     })

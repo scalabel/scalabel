@@ -262,7 +262,7 @@ export abstract class Label2D {
                        self._label.attributes : {}
     const words = category.split(' ')
     let tw = TAG_WIDTH
-    // abbreviate tag as the first 3 chars of the last word
+    // Abbreviate tag as the first 3 chars of the last word
     let abbr = words[words.length - 1].substring(0, 3)
 
     for (const attributeId of Object.keys(attributes)) {

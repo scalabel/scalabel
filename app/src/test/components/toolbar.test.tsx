@@ -53,7 +53,7 @@ describe('Toolbar category setting', () => {
     expect(selectedValued.getAttribute('value')).toEqual('A')
     const radio = getByLabelText('A')
     fireEvent.change(radio, { target: { value: 'B' } })
-    // expect state to be changed
+    // Expect state to be changed
     expect(radio.getAttribute('value')).toBe('B')
   })
 

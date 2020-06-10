@@ -90,7 +90,7 @@ export class Synchronizer {
     this.ackedPackets = new Set()
     this.actionsPendingPrediction = new Set()
 
-    // use the same address as http
+    // Use the same address as http
     this.syncAddress = location.origin
     const socket = io.connect(
       this.syncAddress,
@@ -173,17 +173,17 @@ export class Synchronizer {
    */
   public actionBroadcastHandler (message: SyncActionMessageType) {
     const actionPacket = message.actions
-    // remove stored actions when they are acked
+    // Remove stored actions when they are acked
     this.actionsToSave = this.actionsToSave.remove(actionPacket.id)
 
-    // if action was already acked, ignore it
+    // If action was already acked, ignore it
     if (this.ackedPackets.has(actionPacket.id)) {
       return
     }
     this.ackedPackets.add(actionPacket.id)
 
     for (const action of actionPacket.actions) {
-      // actionLog matches backend action ordering
+      // ActionLog matches backend action ordering
       this.actionLog.push(action)
       if (action.sessionId !== Session.id) {
         if (types.isTaskAction(action)) {
@@ -237,7 +237,7 @@ export class Synchronizer {
     const updateTaskAction = updateTask(state.task)
     updateTaskAction.frontendOnly = true
     Session.dispatch(updateTaskAction)
-    // re-apply frontend task actions after updating task from backend
+    // Re-apply frontend task actions after updating task from backend
     for (const actionPacket of this.listActionPackets()) {
       for (const action of actionPacket.actions) {
         if (types.isTaskAction(action)) {

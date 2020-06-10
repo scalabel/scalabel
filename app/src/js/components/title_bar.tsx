@@ -19,7 +19,7 @@ import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
 
-// how long to wait until saving times out
+// How long to wait until saving times out
 export const saveTimeout = 20000
 
 interface ClassType {
@@ -149,7 +149,7 @@ class TitleBar extends Component<Props> {
 
     const submitHandler = () => {
       this.props.submit()
-      // save after submitting, so submit flag is also saved
+      // Save after submitting, so submit flag is also saved
       if (!autosave) {
         this.save()
       }

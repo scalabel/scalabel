@@ -98,12 +98,12 @@ function parseExportAttributes (
   {[key: number]: number[] } {
   const labelAttributes: {[key: number]: number[]} = {}
   Object.entries(attributesExport).forEach(([name, attributeList]) => {
-    // get the config attribute that matches the exported attribute name
+    // Get the config attribute that matches the exported attribute name
     if (name in attributeNameMap) {
       const [configIndex, currentAttribute] = attributeNameMap[name]
-      // load the attribute based on its type
+      // Load the attribute based on its type
       if (currentAttribute.toolType === AttributeToolType.SWITCH) {
-        // boolean attribute case- only two choices, not a list
+        // Boolean attribute case- only two choices, not a list
         let value = 0
         const attributeVal = attributeList as boolean
         if (attributeVal === true) {
@@ -112,11 +112,11 @@ function parseExportAttributes (
         labelAttributes[configIndex] = [value]
       } else if (currentAttribute.toolType === AttributeToolType.LIST
         || currentAttribute.toolType === AttributeToolType.LONG_LIST) {
-        // list attribute case- can choose multiple values
+        // List attribute case- can choose multiple values
         const selectedIndices: number[] = []
         const attributeValues = attributeList as string[]
         attributeValues.forEach((value: string) => {
-          // get the index of the selected value
+          // Get the index of the selected value
           const valueIndex = attributeValueMap[value]
           if (valueIndex !== -1) {
             selectedIndices.push(valueIndex)
@@ -174,7 +174,7 @@ function convertLabelToImport (
     shapeData = makePlane(labelExport.plane3d)
   }
 
-  // if the label has any shapes, import them too
+  // If the label has any shapes, import them too
   const shapeIds: IdType[] = []
   const shapeImports: ShapeType[] = []
   if (shapeData !== null) {

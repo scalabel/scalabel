@@ -42,7 +42,7 @@ import {
  * @return {State}
  */
 export function initSession (state: State): State {
-  // initialize state
+  // Initialize state
   let session = state.session
   const items = state.task.items
   const itemStatuses = session.itemStatuses.slice()
@@ -279,7 +279,7 @@ export function addTrack (state: State, action: types.AddTrackAction): State {
     state.task, action.trackType, action.itemIndices, action.labels,
     action.shapes
   )
-  // select the label on the current item
+  // Select the label on the current item
   if (action.sessionId === state.session.id) {
     for (const l of newLabels) {
       if (l.item === user.select.item) {
@@ -401,7 +401,7 @@ function changeLabelsInItem (
       props[index].children = children.filter((id) => isValidId(id))
     }
     const oldLabel = item.labels[labelId]
-    // avoid changing the shape field in the label
+    // Avoid changing the shape field in the label
     newLabels[labelId] = updateObject(
       oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
   })
@@ -518,7 +518,7 @@ export function linkLabels (
   newLabel.type = LabelTypeName.EMPTY
   state = addLabel(state, action.itemIndex, newLabel)
 
-  // assign the label properties
+  // Assign the label properties
   item = state.task.items[action.itemIndex]
   const newLabelId = newLabel.id
   newLabel = item.labels[newLabelId]
@@ -527,12 +527,12 @@ export function linkLabels (
 
   _.forEach(labels, (label) => {
     label.parent = newLabelId
-    // sync the category and attributes of the labels
+    // Sync the category and attributes of the labels
     label.category = _.cloneDeep(newLabel.category)
     label.attributes = _.cloneDeep(newLabel.attributes)
   })
 
-  // update track information
+  // Update track information
   let tracks = state.task.tracks
   let trackId = makeDefaultId()
   for (const label of labels) {
@@ -549,7 +549,7 @@ export function linkLabels (
     tracks = updateObject(tracks, { [trackId]: track })
   }
 
-  // update the item
+  // Update the item
   item = updateObject(item, {
     labels: updateObject(item.labels, _.zipObject(children, labels))
   })
@@ -658,7 +658,7 @@ function deleteLabelsFromItem (
   let labels = item.labels
   const deletedLabels = pickObject(item.labels, labelIds)
 
-  // find related labels and shapes
+  // Find related labels and shapes
   const updatedLabels: { [key: string]: LabelType } = {}
   const updatedShapes: { [key: string]: ShapeType } = {}
   const deletedShapes: { [key: string]: ShapeType } = {}
@@ -679,13 +679,13 @@ function deleteLabelsFromItem (
       updatedShapes[shapeId] = shape
     })
   })
-  // remove widow labels if label type is empty
+  // Remove widow labels if label type is empty
   _.forEach(updatedLabels, (label) => {
     if (label.type === LabelTypeName.EMPTY && label.children.length === 0) {
       deletedLabels[label.id] = label
     }
   })
-  // remove orphan shapes
+  // Remove orphan shapes
   _.forEach(updatedShapes, (shape) => {
     if (shape.label.length === 0) {
       deletedShapes[shape.id] = shape
@@ -728,7 +728,7 @@ function deleteLabelsFromTracks (
   const deletedLabelsByTrack: TrackIdMap = {}
   for (const l of labels) {
     if (!(l.track in deletedLabelsByTrack)) {
-      // create a temporary track to contain the labels to delete
+      // Create a temporary track to contain the labels to delete
       deletedLabelsByTrack[l.track] = makeTrack({ id: l.track }, true)
     }
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
@@ -1195,7 +1195,7 @@ export function updateSessionStatus (
   const newStatus = action.newStatus
 
   const oldSession = state.session
-  // update mod 1000 since only nearby differences are important
+  // Update mod 1000 since only nearby differences are important
   const numUpdates = (oldSession.numUpdates + 1) % 1000
 
   const newSession = updateObject(

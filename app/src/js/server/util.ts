@@ -28,7 +28,7 @@ export async function readConfig (): Promise<ServerConfig> {
    * Make sure user env come last to override defaults
    */
 
-   // read the config file name from argv
+   // Read the config file name from argv
   const configFlag = 'config'
   const argv = yargs
     .option(configFlag, {
@@ -39,7 +39,7 @@ export async function readConfig (): Promise<ServerConfig> {
     .argv
   const configDir: string = argv.config
 
-  // load the config file
+  // Load the config file
   const userConfig = yaml.load(fs.readFileSync(configDir, 'utf8'))
   const fullConfig = {
     ...defaults.serverConfig,
@@ -204,7 +204,7 @@ export function getHandlerUrl (
  * Get the bundle file for the project
  */
 export function getBundleFile (labelType: string): string {
-  // depends on redux progress
+  // Depends on redux progress
   if (labelType === LabelTypeName.TAG || labelType === LabelTypeName.BOX_2D) {
     return BundleFile.V2
   } else {

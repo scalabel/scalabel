@@ -118,7 +118,7 @@ export class Polygon2D extends Label2D {
         break
     }
 
-    // draw line first
+    // Draw line first
     edgeStyle.color = assignColor(0)
     context.save()
     context.strokeStyle = toCssColor(edgeStyle.color)
@@ -158,7 +158,7 @@ export class Polygon2D extends Label2D {
     context.restore()
 
     if (mode === DrawMode.CONTROL || self._selected || self._highlighted) {
-      // for bezier curve
+      // For bezier curve
       context.save()
       context.setLineDash(DASH_LINE)
       context.beginPath()
@@ -176,7 +176,7 @@ export class Polygon2D extends Label2D {
       context.closePath()
       context.restore()
 
-      // draw points
+      // Draw points
       if (self._state === Polygon2DState.DRAW) {
         const tmpPoint = new PathPoint2D(self._mouseCoord.x, self._mouseCoord.y)
         const tmpStyle = pointStyle
@@ -219,26 +219,26 @@ export class Polygon2D extends Label2D {
       this._mouseDownCoord = coord.clone()
       if (this._state === Polygon2DState.FINISHED &&
           this._highlightedHandle < 0) {
-        // not click edge or point
+        // Not click edge or point
         return true
       } else if (this._state === Polygon2DState.FINISHED &&
         this._highlightedHandle > 0) {
-        // click point
+        // Click point
         this._state = Polygon2DState.RESHAPE
         this.editing = true
         if (this.isKeyDown(Key.C_UP) || this.isKeyDown(Key.C_LOW)) {
-          // convert line to bezier curve
+          // Convert line to bezier curve
           this.lineToCurve()
         } else if (this.isKeyDown(Key.D_UP) || this.isKeyDown(Key.D_LOW)) {
-          // delete vertex
+          // Delete vertex
           this.toCache()
           this.deleteVertex()
         } else {
-          // drag vertex or midpoint
+          // Drag vertex or midpoint
           this.toCache()
           if (this._points[this._highlightedHandle - 1].type ===
               PointType.MID) {
-            // drag midpoint: convert midpoint to vertex first
+            // Drag midpoint: convert midpoint to vertex first
             this.midToVertex()
           }
         }
@@ -246,7 +246,7 @@ export class Polygon2D extends Label2D {
         return true
       } else if (this._state === Polygon2DState.FINISHED &&
         this._highlightedHandle === 0 && handleIndex === 0) {
-        // drag edges
+        // Drag edges
         this._state = Polygon2DState.MOVE
         this.editing = true
         this.toCache()
@@ -265,17 +265,17 @@ export class Polygon2D extends Label2D {
   public onMouseMove (coord: Vector2D, _limit: Size2D,
                       _labelIndex: number, handleIndex: number): boolean {
     if (this._state === Polygon2DState.DRAW) {
-      // move to add vertex
+      // Move to add vertex
       this._mouseCoord = coord.clone()
       this._highlightedHandle = handleIndex
     } else if (this._mouseDown === true &&
       this._state === Polygon2DState.RESHAPE) {
-      // dragging point
+      // Dragging point
       this.reshape(coord, _limit)
       this._labelList.addUpdatedLabel(this)
     } else if (this._mouseDown === true &&
       this._state === Polygon2DState.MOVE) {
-      // dragging edges
+      // Dragging edges
       this.move(coord, _limit)
       this._labelList.addUpdatedLabel(this)
     }
@@ -290,10 +290,10 @@ export class Polygon2D extends Label2D {
     this._mouseCoord = coord.clone()
     if (this.editing === true &&
       this._state === Polygon2DState.DRAW) {
-      // add vertex
+      // Add vertex
       const isFinished = this.addVertex(coord)
       if (isFinished) {
-        // finish adding when it is FINISHED
+        // Finish adding when it is FINISHED
         this._state = Polygon2DState.FINISHED
         this.editing = false
         if (this.isValid()) {
@@ -302,12 +302,12 @@ export class Polygon2D extends Label2D {
       }
     } else if (this.editing === true &&
       this._state === Polygon2DState.RESHAPE) {
-      // finish dragging point
+      // Finish dragging point
       this._state = Polygon2DState.FINISHED
       this.editing = false
     } else if (this.editing === true &&
       this._state === Polygon2DState.MOVE) {
-      // finish dragging edges
+      // Finish dragging edges
       this._state = Polygon2DState.FINISHED
       this.editing = false
     }
@@ -527,7 +527,7 @@ export class Polygon2D extends Label2D {
       }
       closed = true
     } else {
-      // add a new vertex and the new mid point on the new edge
+      // Add a new vertex and the new mid point on the new edge
       const point2 = this._points[this._points.length - 1]
       const midPoint = this.getMidpoint(point2, coord)
       this._points.push(midPoint)
@@ -654,7 +654,7 @@ export class Polygon2D extends Label2D {
     point.x = end.clone().x
     point.y = end.clone().y
 
-    // change corresponding midpoint
+    // Change corresponding midpoint
     if (point.type === PointType.VERTEX) {
       const numPoints = this._points.length
       const selectedLabelIndex = this._highlightedHandle - 1
@@ -731,7 +731,7 @@ export class Polygon2D extends Label2D {
     const point = this._points[selectedLabelIndex]
     const highlightedHandleIndex = this._highlightedHandle - 1
     switch (point.type) {
-      case PointType.MID: // from midpoint to curve
+      case PointType.MID: // From midpoint to curve
         const prevPoint =
           this._points[this.getPreviousIndex(highlightedHandleIndex)]
         const nextPoint =
@@ -742,7 +742,7 @@ export class Polygon2D extends Label2D {
           this.getNextIndex(highlightedHandleIndex), 0, controlPoints[1]
         )
         break
-      case PointType.CURVE: // from curve to midpoint
+      case PointType.CURVE: // From curve to midpoint
         const newMidPointIndex =
           (this._points[highlightedHandleIndex - 1].type === PointType.CURVE) ?
             this.getPreviousIndex(highlightedHandleIndex) :

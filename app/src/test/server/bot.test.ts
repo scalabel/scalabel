@@ -143,7 +143,7 @@ describe('Test bot send-ack loop', () => {
     const messages = []
     const actionsPerMessage = []
     for (let _ = 0 ; _ < numMessages ; _++) {
-      // random int from 1 to 10
+      // Random int from 1 to 10
       const numActions = 1 + Math.floor(Math.random() * 10)
       actionsPerMessage.push(numActions)
       messages.push(makeSyncMessage(numActions, webId))

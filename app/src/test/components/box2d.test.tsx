@@ -60,7 +60,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x2).toEqual(70)
   expect(rect.y2).toEqual(85)
 
-  // third box
+  // Third box
   labelIds.push(drawBox2D(label2d, getState, 15, 10, 60, 70))
   state = getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -70,7 +70,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x2).toEqual(60)
   expect(rect.y2).toEqual(70)
 
-  // resize the second box
+  // Resize the second box
   drag(label2d, 25, 20, 30, 34)
   state = getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
@@ -78,14 +78,14 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x1).toEqual(30)
   expect(rect.y1).toEqual(34)
 
-  // move the resized second box
+  // Move the resized second box
   drag(label2d, 30, 50, 40, 60)
   state = getState()
   rect = getShape(state, 0, labelIds[1], 0) as RectType
   expect(rect.x1).toEqual(40)
   expect(rect.y1).toEqual(44)
 
-  // flip top left and bottom right corner
+  // Flip top left and bottom right corner
   drag(label2d, 40, 44, 100, 100)
   state = getState()
   rect = getShape(state, 0, labelIds[1], 0) as RectType
@@ -94,7 +94,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x2).toEqual(100)
   expect(rect.y2).toEqual(100)
 
-  // move the third box
+  // Move the third box
   drag(label2d, 30, 10, 40, 15)
   state = getState()
   rect = getShape(state, 0, labelIds[2], 0) as RectType
@@ -104,7 +104,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.y2).toEqual(75)
 })
 
-// test('Switch box order', () => {
+// Test('Switch box order', () => {
 //   const label2d = canvasRef.current as Label2dCanvas
 //   drawBox2D(label2d, getState, 1, 1, 50, 50)
 //   // TODO: add the test

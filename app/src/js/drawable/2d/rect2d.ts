@@ -89,7 +89,7 @@ export class Rect2D extends Vector {
   public draw (
     context: Context2D, ratio: number, style: Rect2DStyle): void {
     context.save()
-    // convert to display resolution
+    // Convert to display resolution
     const real = this.clone().scale(ratio)
     context.strokeStyle = toCssColor(style.color)
     if (style.dashed) {
