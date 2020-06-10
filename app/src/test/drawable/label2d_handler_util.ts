@@ -6,17 +6,58 @@ import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 
 /**
- * Create a polygon based on the input vertices
+ * Create a polygon by clicking at each point in sequence
  * @param label2dHandler
  * @param canvasSize
- * @param points
+ * @param points: the input vertices
  */
 export function drawPolygon (
-  label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][]) {
+  label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][],
+  interrupt: boolean = false) {
   for (const p of points) {
     mouseMoveClick(label2dHandler, p[0], p[1], canvasSize, -1, 0)
+    if (interrupt) {
+      Session.dispatch(action.setStatusToSaved())
+    }
   }
+
+  // Handler index of 1 marks the end of the polygon
   mouseMoveClick(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 1)
+}
+
+/**
+ * Create a polygon by dragging between each pair of subsequent points
+ * @param label2dHandler
+ * @param canvasSize
+ * @param points: the input vertices
+ */
+export function drawPolygonByDragging (
+  label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][],
+  interrupt: boolean = false) {
+  // Start by clicking at the first point
+  mouseMoveClick(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 0)
+
+  // Then press down to start dragging
+  mouseMove(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 0)
+  mouseDown(label2dHandler, points[0][0], points[0][1], -1, 0)
+
+  for (const p of points.slice(1)) {
+    // Drag to the next point before lifting mouse
+    mouseMove(label2dHandler, p[0], p[1], canvasSize, -1, 0)
+    mouseUp(label2dHandler, p[0], p[1], -1, 0)
+
+    if (interrupt) {
+      Session.dispatch(action.setStatusToSaved())
+    }
+
+    // Click to prepare for the next line
+    mouseDown(label2dHandler, p[0], p[1], -1, 0)
+  }
+
+  // Lift up at the first point
+  // Handler index of 1 marks the end of the polygon
+  mouseMove(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 1)
+  mouseUp(label2dHandler, points[0][0], points[0][1], -1, 1)
 }
 
 /**

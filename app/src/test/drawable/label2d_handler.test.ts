@@ -13,7 +13,7 @@ import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, Point2DType, PolygonType, RectCoords, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
-import { draw2DBox, drawPolygon, keyClick, keyDown, keyUp,
+import { draw2DBox, drawPolygon, drawPolygonByDragging, keyClick, keyDown, keyUp,
   mouseClick, mouseDown, mouseMove, mouseMoveClick,
   mouseUp, move2DBox, resize2DBox } from '../drawable/label2d_handler_util'
 import { findNewLabels, findNewLabelsFromState } from '../server/util/util'
@@ -60,6 +60,24 @@ function checkBoxCoords (
 }
 
 /**
+ * Check that the polygon's vertices are correct
+ * @param polyId: Id of the polygon
+ * @param coords: List of vertices of the polygon
+ */
+function checkPolyCoords (
+  polyId: IdType, coords: number[][]) {
+  const state = Session.getState()
+  const points = (getShape(state, 0, polyId, 0) as PolygonType).points
+  expect(points.length).toEqual(coords.length)
+  for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
+    expect(points[pointIndex]).toMatchObject(
+      { x: coords[pointIndex][0],
+        y: coords[pointIndex][1],
+        pointType: 'vertex' })
+  }
+}
+
+/**
  * Check that the box was committed to the state correctly
  * @param numLabels: The number of labels added to the item
  * @param coords: The expected coords
@@ -77,6 +95,28 @@ function checkBoxDrawn (
 
   // Check the shape
   checkBoxCoords(newLabelId, coords)
+
+  return newLabelId
+}
+
+/**
+ * Check that the polygon was committed to the state correctly
+ * @param numLabels: The number of labels added to the item
+ * @param coords: The expected vertices
+ * @return {string}: The id of the new box label
+ */
+function checkPolyDrawn (
+  numLabels: number, coords: number[][], labelIds: IdType[]): string {
+  const state = Session.getState()
+
+  // Make sure a new label is added
+  expect(getNumLabels(state, itemIndex)).toEqual(numLabels)
+
+  // Find the new label
+  const newLabelId = findNewLabelsFromState(state, itemIndex, labelIds)[0]
+
+  // Check the shape
+  checkPolyCoords(newLabelId, coords)
 
   return newLabelId
 }
@@ -165,60 +205,59 @@ describe('Draw 2D boxes to label2d list', () => {
   })
 })
 
-test('Draw 2d polygons to label2d list', () => {
-  const [label2dHandler] = initializeTestingObjects()
-  const canvasSize = new Size2D(1000, 1000)
-  Session.dispatch(action.changeSelect({ labelType: 1 }))
+describe.only('Draw 2d polygons to label2d list', () => {
+  // Samples polygon vertices to use for tests
+  const vertices: number[][][] = [
+    [[10, 10], [100, 100], [200, 100], [100, 0]],
+    [[500, 500], [600, 400], [700, 700]]
+  ]
 
-  // draw the first polygon
-  mouseMoveClick(label2dHandler, 10, 10, canvasSize, -1, 0)
-  mouseMoveClick(label2dHandler, 100, 100, canvasSize, -1, 0)
-  mouseMoveClick(label2dHandler, 200, 100, canvasSize, -1, 0)
-  /**
-   * drawing the first polygon
-   * polygon 1: (10, 10) (100, 100) (200, 100)
-   */
-  let state = Session.getState()
-  const labelIds: IdType[] = []
-  expect(_.size(state.task.items[0].labels)).toEqual(0)
+  test('Draw polygon with a mix of clicking and dragging', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(1000, 1000)
+    Session.dispatch(action.changeSelect({ labelType: 1 }))
 
-  // drag when drawing
-  mouseMove(label2dHandler, 200, 10, canvasSize, -1, 0)
-  mouseDown(label2dHandler, 200, 10, -1, 0)
-  mouseMove(label2dHandler, 100, 0, canvasSize, -1, 0)
-  mouseUp(label2dHandler, 100, 0, -1, 0)
-  mouseMoveClick(label2dHandler, 10, 10, canvasSize, -1, 1)
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
-   */
+    // draw the first points by clicking
+    mouseMoveClick(label2dHandler, 10, 10, canvasSize, -1, 0)
+    mouseMoveClick(label2dHandler, 100, 100, canvasSize, -1, 0)
+    mouseMoveClick(label2dHandler, 200, 100, canvasSize, -1, 0)
 
-  state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toEqual(1)
-  labelIds.push(findNewLabels(state.task.items[0].labels, labelIds)[0])
-  let points = (getShape(state, 0, labelIds[0], 0) as PolygonType).points
-  expect(points.length).toEqual(4)
-  expect(points[0]).toMatchObject({ x: 10, y: 10, pointType: 'vertex' })
-  expect(points[1]).toMatchObject({ x: 100, y: 100, pointType: 'vertex' })
-  expect(points[2]).toMatchObject({ x: 200, y: 100, pointType: 'vertex' })
-  expect(points[3]).toMatchObject({ x: 100, y: 0, pointType: 'vertex' })
+    // Check that polygon isn't added to state until it's finished
+    expect(getNumLabels(Session.getState(), itemIndex)).toEqual(0)
 
- // draw second polygon
-  drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
+    // drag when drawing the last point
+    mouseMove(label2dHandler, 200, 10, canvasSize, -1, 0)
+    mouseDown(label2dHandler, 200, 10, -1, 0)
+    mouseMove(label2dHandler, 100, 0, canvasSize, -1, 0)
+    mouseUp(label2dHandler, 100, 0, -1, 0)
+    mouseMoveClick(label2dHandler, 10, 10, canvasSize, -1, 1)
+    /**
+     * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
+     */
+    checkPolyDrawn(1, vertices[0], [])
+  })
 
-  /**
-   * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
-   * polygon 2: (500, 500) (600, 400) (700, 700)
-   */
+  test('Draw multiple polygons', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(1000, 1000)
+    Session.dispatch(action.changeSelect({ labelType: 1 }))
 
-  state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toEqual(2)
-  labelIds.push(findNewLabels(state.task.items[0].labels, labelIds)[0])
-  points = (getShape(state, 0, labelIds[1], 0) as PolygonType).points
-  expect(points.length).toEqual(3)
-  expect(points[0]).toMatchObject({ x: 500, y: 500, pointType: 'vertex' })
-  expect(points[1]).toMatchObject({ x: 600, y: 400, pointType: 'vertex' })
-  expect(points[2]).toMatchObject({ x: 700, y: 700, pointType: 'vertex' })
-  expect(Session.label2dList.labelList.length).toEqual(2)
+    const labelIds: IdType[] = []
+
+    drawPolygon(label2dHandler, canvasSize, vertices[0])
+    labelIds.push(checkPolyDrawn(1, vertices[0], labelIds))
+
+    drawPolygonByDragging(label2dHandler, canvasSize, vertices[1])
+    labelIds.push(checkPolyDrawn(2, vertices[1], labelIds))
+
+    expect(Session.label2dList.labelList.length).toEqual(2)
+  })
+
+  // test('Draw polygons with interrupting actions', () => {
+  //   const [label2dHandler] = initializeTestingObjects()
+  //   const canvasSize = new Size2D(1000, 1000)
+  //   Session.dispatch(action.changeSelect({ labelType: 1 }))
+  // })
 })
 
 test('2d polygons highlighted and selected', () => {
