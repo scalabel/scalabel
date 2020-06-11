@@ -44,7 +44,7 @@ function getAuth (): string {
         localStorage.setItem('TokenType', data.token_type)
         result = '' + data.token_type + ' ' + data.access_token
       } else {
-        throw new Error('Refresh token error')
+        return ''
       }
     }
     xhr.send(Array.from(
