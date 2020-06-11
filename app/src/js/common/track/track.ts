@@ -210,6 +210,7 @@ export class Track {
     for (let index = itemIndex; index < itemIndex + numItems; index++) {
       const cloned = makeLabel(labelState, false)
       cloned.item = -1
+      cloned.track = label.trackId
       if (index > itemIndex) {
         cloned.manual = false
       }
