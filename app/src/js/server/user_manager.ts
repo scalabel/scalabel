@@ -11,9 +11,9 @@ export class UserManager {
   /** whether to apply hotfix that disables user management */
   private disable: boolean
 
-  constructor (projectStore: ProjectStore, disable: boolean = false) {
+  constructor (projectStore: ProjectStore, userManagement: boolean = true) {
     this.projectStore = projectStore
-    this.disable = disable
+    this.disable = !userManagement
   }
 
   /**

@@ -66,8 +66,6 @@ export interface ServerConfig {
   botHost: string
   /** port of python model server */
   botPort: number
-  /** whether to temporarily disable user manager due to metadata.json bug */
-  userManagerDisable: boolean
   /** cognito settings */
   cognito?: CognitoConfig
 }
