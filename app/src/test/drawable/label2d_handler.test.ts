@@ -235,7 +235,7 @@ describe('Draw 2d polygons to label2d list', () => {
     expect(Session.label2dList.labelList.length).toEqual(2)
   })
 
-  test.skip('Draw polygons with interrupting actions', () => {
+  test('Draw polygons with interrupting actions', () => {
     const [label2dHandler] = initializeTestingObjects()
     const canvasSize = new Size2D(1000, 1000)
     const interrupt = true

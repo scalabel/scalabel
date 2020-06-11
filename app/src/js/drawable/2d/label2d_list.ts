@@ -151,9 +151,11 @@ export class Label2DList {
    * update labels from the state
    */
   public updateState (state: State): void {
-    if (this._updatedLabels.size > 0) {
+    // don't interrupt ongoing editing
+    if (this._selectedLabels.length > 0 && this.selectedLabels[0].editing) {
       return
     }
+
     this._state = state
     this._labelTemplates = state.task.config.label2DTemplates
     const self = this
