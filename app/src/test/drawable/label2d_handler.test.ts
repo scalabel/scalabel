@@ -78,13 +78,14 @@ function checkPolyCoords (
 }
 
 /**
- * Check that the box was committed to the state correctly
+ * Check that the shape was committed to the state correctly
  * @param numLabels: The number of labels added to the item
  * @param coords: The expected coords
  * @return {string}: The id of the new box label
  */
-function checkBoxDrawn (
-  numLabels: number, coords: RectCoords, labelIds: IdType[]): string {
+function checkShapeDrawn (
+  numLabels: number, coords: RectCoords | number[][],
+  labelIds: IdType[]): string {
   const state = Session.getState()
 
   // Make sure a new label is added
@@ -94,29 +95,11 @@ function checkBoxDrawn (
   const newLabelId = findNewLabelsFromState(state, itemIndex, labelIds)[0]
 
   // Check the shape
-  checkBoxCoords(newLabelId, coords)
-
-  return newLabelId
-}
-
-/**
- * Check that the polygon was committed to the state correctly
- * @param numLabels: The number of labels added to the item
- * @param coords: The expected vertices
- * @return {string}: The id of the new box label
- */
-function checkPolyDrawn (
-  numLabels: number, coords: number[][], labelIds: IdType[]): string {
-  const state = Session.getState()
-
-  // Make sure a new label is added
-  expect(getNumLabels(state, itemIndex)).toEqual(numLabels)
-
-  // Find the new label
-  const newLabelId = findNewLabelsFromState(state, itemIndex, labelIds)[0]
-
-  // Check the shape
-  checkPolyCoords(newLabelId, coords)
+  if (coords.hasOwnProperty('x1')) {
+    checkBoxCoords(newLabelId, coords as RectCoords)
+  } else {
+    checkPolyCoords(newLabelId, coords as number[][])
+  }
 
   return newLabelId
 }
@@ -139,7 +122,7 @@ describe('Draw 2D boxes to label2d list', () => {
       const coords = boxCoords[boxNum]
       draw2DBox(label2dHandler, canvasSize, coords)
       const numLabels = boxNum + 1
-      labelIds.push(checkBoxDrawn(numLabels, coords, labelIds))
+      labelIds.push(checkShapeDrawn(numLabels, coords, labelIds))
     }
 
     // delete label
@@ -163,7 +146,7 @@ describe('Draw 2D boxes to label2d list', () => {
       const coords = boxCoords[boxNum]
       draw2DBox(label2dHandler, canvasSize, coords, interrupt)
       const numLabels = boxNum + 1
-      labelIds.push(checkBoxDrawn(numLabels, coords, labelIds))
+      labelIds.push(checkShapeDrawn(numLabels, coords, labelIds))
     }
   })
 
@@ -177,7 +160,7 @@ describe('Draw 2D boxes to label2d list', () => {
       const coords = boxCoords[boxNum]
       draw2DBox(label2dHandler, canvasSize, coords)
       const numLabels = boxNum + 1
-      labelIds.push(checkBoxDrawn(numLabels, coords, labelIds))
+      labelIds.push(checkShapeDrawn(numLabels, coords, labelIds))
     }
 
     // resize the second box
@@ -231,10 +214,9 @@ describe('Draw 2d polygons to label2d list', () => {
     mouseMove(label2dHandler, 100, 0, canvasSize, -1, 0)
     mouseUp(label2dHandler, 100, 0, -1, 0)
     mouseMoveClick(label2dHandler, 10, 10, canvasSize, -1, 1)
-    /**
-     * polygon 1: (10, 10) (100, 100) (200, 100) (100, 0)
-     */
-    checkPolyDrawn(1, vertices[0], [])
+
+    // should match the first sample polygon
+    checkShapeDrawn(1, vertices[0], [])
   })
 
   test('Draw multiple polygons', () => {
@@ -245,15 +227,15 @@ describe('Draw 2d polygons to label2d list', () => {
     const labelIds: IdType[] = []
 
     drawPolygon(label2dHandler, canvasSize, vertices[0])
-    labelIds.push(checkPolyDrawn(1, vertices[0], labelIds))
+    labelIds.push(checkShapeDrawn(1, vertices[0], labelIds))
 
     drawPolygonByDragging(label2dHandler, canvasSize, vertices[1])
-    labelIds.push(checkPolyDrawn(2, vertices[1], labelIds))
+    labelIds.push(checkShapeDrawn(2, vertices[1], labelIds))
 
     expect(Session.label2dList.labelList.length).toEqual(2)
   })
 
-  test.only('Draw polygons with interrupting actions', () => {
+  test.skip('Draw polygons with interrupting actions', () => {
     const [label2dHandler] = initializeTestingObjects()
     const canvasSize = new Size2D(1000, 1000)
     const interrupt = true
@@ -262,10 +244,10 @@ describe('Draw 2d polygons to label2d list', () => {
     const labelIds: IdType[] = []
 
     drawPolygon(label2dHandler, canvasSize, vertices[0], interrupt)
-    labelIds.push(checkPolyDrawn(1, vertices[0], labelIds))
+    labelIds.push(checkShapeDrawn(1, vertices[0], labelIds))
 
     drawPolygonByDragging(label2dHandler, canvasSize, vertices[1], interrupt)
-    labelIds.push(checkPolyDrawn(2, vertices[1], labelIds))
+    labelIds.push(checkShapeDrawn(2, vertices[1], labelIds))
 
     expect(Session.label2dList.labelList.length).toEqual(2)
   })
