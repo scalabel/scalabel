@@ -16,7 +16,8 @@ export const serverConfig: ServerConfig = {
   redisPort: 6379,
   bots: false,
   botHost: 'http://0.0.0.0',
-  botPort: 8080
+  botPort: 8080,
+  userManagerDisable: true
 }
 
 /* default categories when file is missing and label is box2D or box3D */

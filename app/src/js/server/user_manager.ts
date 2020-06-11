@@ -8,9 +8,12 @@ import { makeUserData, makeUserMetadata } from './util'
 export class UserManager {
   /** the permanent storage */
   protected projectStore: ProjectStore
+  /** whether to apply hotfix that disables user management */
+  private disable: boolean
 
-  constructor (projectStore: ProjectStore) {
+  constructor (projectStore: ProjectStore, disable: boolean = false) {
     this.projectStore = projectStore
+    this.disable = disable
   }
 
   /**
@@ -18,6 +21,9 @@ export class UserManager {
    */
   public async registerUser (
     socketId: string, projectName: string, userId: string) {
+    if (this.disable) {
+      return
+    }
     let userData = await this.projectStore.loadUserData(projectName)
     userData = this.addSocketToUser(userData, socketId, userId)
     await this.projectStore.saveUserData(userData)
@@ -31,6 +37,9 @@ export class UserManager {
    * Deletes the user data of the socket that disconnected
    */
   public async deregisterUser (socketId: string) {
+    if (this.disable) {
+      return
+    }
     // Access the projectName via metadata
     const userMetadata = await this.projectStore.loadUserMetadata()
     const [newUserMetadata, projectName] =
@@ -50,6 +59,9 @@ export class UserManager {
    * Counts the number of currently connected users
    */
   public async countUsers (projectName: string): Promise<number> {
+    if (this.disable) {
+      return 0
+    }
     const userData = await this.projectStore.loadUserData(projectName)
     const userToSockets = userData.userToSockets
     if (!userToSockets) {
@@ -62,6 +74,9 @@ export class UserManager {
    * Remove all active users, so all counts should be 0
    */
   public async clearUsers (): Promise<void> {
+    if (this.disable) {
+      return
+    }
     // Access the project names from the metadata
     const userMetadata = await this.projectStore.loadUserMetadata()
     const activeProjects = Object.values(userMetadata.socketToProject)
