@@ -5,10 +5,19 @@ import Session from '../../js/common/session'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 
+const getState = Session.getState.bind(Session)
+const dispatch = Session.dispatch.bind(Session)
+
+beforeAll(() => {
+  Session.images.length = 0
+  Session.images.push({ [-1]: new Image(1000, 1000) })
+  for (let i = 0; i < getState().task.items.length; i++) {
+    dispatch(action.loadItem(i, -1))
+  }
+})
+
 test('Test tracks ops', () => {
   setupTestStore(testJson)
-  // TODO- verify if loading images is necessary
-  // loadImages()
 
   // terminate tracks
   const itemIndex = 1

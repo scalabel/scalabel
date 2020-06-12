@@ -161,7 +161,7 @@ async function main () {
 
   // initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(projectStore)
+  const userManager = new UserManager(projectStore, config.userManagement)
   await userManager.clearUsers()
 
   await makeBotManager(config, subscriber, cacheClient)

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, LabelTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { makeDefaultId, makeTaskConfig } from '../../functional/states'
+import { makeDefaultId, makeTaskConfig, makeTrack } from '../../functional/states'
 import { ConfigType, IdType, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
@@ -357,7 +357,11 @@ export abstract class Label2D {
     this._temporary = true
     this._label = this.initTempLabel(state, start)
     this._labelId = this._label.id
-    this._trackId = makeDefaultId()
+    if (state.task.config.tracking) {
+      const track = makeTrack()
+      this._label.track = track.id
+    }
+    this._trackId = this._label.track
     this._color = getColorById(this._labelId, this._trackId)
   }
 

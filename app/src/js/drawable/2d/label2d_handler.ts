@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { changeLabelsProps, linkLabels, mergeTracks, startLinkTrack, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
@@ -57,7 +56,9 @@ export class Label2DHandler {
         this.selectHighlighted()
       } else {
         Session.dispatch(selectLabels(
-          {}, -1, []
+          {}, -1, [],
+          this._state.user.select.category,
+          this._state.user.select.attributes
         ))
         this._labelList.selectedLabels.length = 0
         const state = this._state
@@ -274,7 +275,9 @@ export class Label2DHandler {
   private selectHighlighted (): void {
     if (this._highlightedLabel !== null) {
       const item = this._state.task.items[this._state.user.select.item]
-      const labelIds = getLinkedLabelIds(item, this._highlightedLabel.labelId)
+      const labelIds = this._highlightedLabel.isValid()
+                       ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
+                       : [this._highlightedLabel.labelId]
       const highlightedAlreadySelected =
         this._labelList.selectedLabels.includes(
           this._highlightedLabel
@@ -310,19 +313,17 @@ export class Label2DHandler {
 
   /** link selected labels */
   private linkLabels (): void {
-    const selectedLabelIdArray = _.map(
-      this._labelList.selectedLabels, (label) => label.labelId)
     Session.dispatch(linkLabels(
-      this._state.user.select.item, selectedLabelIdArray
+      this._state.user.select.item,
+      this._labelList.selectedLabels.map((label) => label.labelId)
     ))
   }
 
   /** unlink selected labels */
   private unlinkLabels (): void {
-    const selectedLabelIdArray = _.map(
-      this._labelList.selectedLabels, (label) => label.labelId)
     Session.dispatch(unlinkLabels(
-      this._state.user.select.item, selectedLabelIdArray
+      this._state.user.select.item,
+      this._labelList.selectedLabels.map((label) => label.labelId)
     ))
   }
 
