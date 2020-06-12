@@ -1,7 +1,7 @@
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
-import { RectCoords } from '../../js/functional/types'
+import { SimpleRect } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 
@@ -68,7 +68,7 @@ export function drawPolygonByDragging (
  */
 function do2DBoxOperation (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: RectCoords, labelIndex: number, handleIndex: number,
+  coords: SimpleRect, labelIndex: number, handleIndex: number,
   interrupt: boolean= false) {
   const x1 = coords.x1
   const x2 = coords.x2
@@ -100,7 +100,7 @@ function do2DBoxOperation (
  */
 export function draw2DBox (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: RectCoords, interrupt: boolean= false) {
+  coords: SimpleRect, interrupt: boolean= false) {
   do2DBoxOperation(label2dHandler, canvasSize, coords, -1, 0, interrupt)
 }
 
@@ -111,7 +111,7 @@ export function draw2DBox (
  */
 export function resize2DBox (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: RectCoords, labelIndex: number, interrupt: boolean= false) {
+  coords: SimpleRect, labelIndex: number, interrupt: boolean= false) {
   do2DBoxOperation(
     label2dHandler, canvasSize, coords, labelIndex, labelIndex, interrupt)
 }
@@ -123,7 +123,7 @@ export function resize2DBox (
  */
 export function move2DBox (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: RectCoords, labelIndex: number, interrupt: boolean= false) {
+  coords: SimpleRect, labelIndex: number, interrupt: boolean= false) {
   // Handle index of 0 represents a move instead of a resize
   do2DBoxOperation(
     label2dHandler, canvasSize, coords, labelIndex, 0, interrupt)

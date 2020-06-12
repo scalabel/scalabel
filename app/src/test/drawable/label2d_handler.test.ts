@@ -10,7 +10,7 @@ import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { getNumLabels, getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { IdType, Point2DType, PolygonType, RectCoords, RectType } from '../../js/functional/types'
+import { IdType, Point2DType, PolygonType, SimpleRect, RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { draw2DBox, drawPolygon, drawPolygonByDragging, keyClick, keyDown, keyUp,
@@ -53,7 +53,7 @@ function initializeTestingObjects (): [Label2DHandler, number] {
  * @param coords: Coords of the box
  */
 function checkBoxCoords (
-  boxId: IdType, coords: RectCoords) {
+  boxId: IdType, coords: SimpleRect) {
   const state = Session.getState()
   const rect = getShape(state, itemIndex, boxId, 0) as RectType
   expect(rect).toMatchObject(coords)
@@ -84,7 +84,7 @@ function checkPolyCoords (
  * @return {string}: The id of the new box label
  */
 function checkShapeDrawn (
-  numLabels: number, coords: RectCoords | number[][],
+  numLabels: number, coords: SimpleRect | number[][],
   labelIds: IdType[]): string {
   const state = Session.getState()
 
@@ -96,7 +96,7 @@ function checkShapeDrawn (
 
   // Check the shape
   if (coords.hasOwnProperty('x1')) {
-    checkBoxCoords(newLabelId, coords as RectCoords)
+    checkBoxCoords(newLabelId, coords as SimpleRect)
   } else {
     checkPolyCoords(newLabelId, coords as number[][])
   }
@@ -106,7 +106,7 @@ function checkShapeDrawn (
 
 describe('Draw 2D boxes to label2d list', () => {
   // Samples box2D coords to use for tests
-  const boxCoords: RectCoords[] = [
+  const boxCoords: SimpleRect[] = [
     { x1: 1, y1: 1, x2: 10, y2: 10 },
     { x1: 19, y1: 20, x2: 30, y2: 29 },
     { x1: 4, y1: 5, x2: 23, y2: 24 }

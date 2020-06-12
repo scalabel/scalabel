@@ -1,3 +1,4 @@
+import { expectRectTypesClose } from '../../test/server/util/util'
 import { AttributeToolType } from '../common/types'
 
 export type IdType = string
@@ -58,7 +59,7 @@ export interface ShapeType {
   shapeType: string
 }
 
-export interface RectCoords {
+export interface SimpleRect {
   /** The x-coordinate of upper left corner */
   x1: number
   /** The y-coordinate of upper left corner */
@@ -69,16 +70,7 @@ export interface RectCoords {
   y2: number
 }
 
-export interface RectType extends ShapeType {
-  /** The x-coordinate of upper left corner */
-  x1: number
-  /** The y-coordinate of upper left corner */
-  y1: number
-  /** The x-coordinate of lower right corner */
-  x2: number
-  /** The y-coordinate of lower right corner */
-  y2: number
-}
+export interface RectType extends ShapeType, SimpleRect {}
 
 export interface PolygonType extends ShapeType {
   /** array of control points */
