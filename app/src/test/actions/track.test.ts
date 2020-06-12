@@ -2,14 +2,23 @@ import _ from 'lodash'
 import * as action from '../../js/action/common'
 import * as track from '../../js/action/track'
 import Session from '../../js/common/session'
-import { initStore, loadImages } from '../../js/common/session_init'
+import { initStore } from '../../js/common/session_init'
 import { testJson } from '../test_states/test_track_objects'
 
-test('Test tracks ops', () => {
+const getState = Session.getState.bind(Session)
+const dispatch = Session.dispatch.bind(Session)
+
+beforeAll(() => {
   Session.devMode = false
   initStore(testJson)
-  loadImages()
+  Session.images.length = 0
+  Session.images.push({ [-1]: new Image(1000, 1000) })
+  for (let i = 0; i < getState().task.items.length; i++) {
+    dispatch(action.loadItem(i, -1))
+  }
+})
 
+test('Test tracks ops', () => {
   // Terminate tracks
   const itemIndex = 1
   Session.dispatch(action.goToItem(itemIndex))
