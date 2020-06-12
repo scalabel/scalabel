@@ -1,4 +1,3 @@
-import { expectRectTypesClose } from '../../test/server/util/util'
 import { AttributeToolType } from '../common/types'
 
 export type IdType = string
