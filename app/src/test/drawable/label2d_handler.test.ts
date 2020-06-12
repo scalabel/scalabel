@@ -10,7 +10,7 @@ import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { getNumLabels, getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { IdType, Point2DType, PolygonType, SimpleRect, RectType } from '../../js/functional/types'
+import { IdType, Point2DType, PolygonType, RectType, SimpleRect } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { draw2DBox, drawPolygon, drawPolygonByDragging, keyClick, keyDown, keyUp,
