@@ -11,8 +11,9 @@ import { Vector2D } from '../../js/math/vector2d'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 
-const getState = Session.getState.bind(Session)
-const dispatch = Session.dispatch.bind(Session)
+const store = Session.getSimpleStore()
+const getState = store.getter()
+const dispatch = store.dispatcher()
 let tracking: boolean
 
 beforeAll(() => {
@@ -34,7 +35,7 @@ beforeEach(() => {
 
 test('Add new valid drawable track', () => {
   dispatch(action.goToItem(0))
-  const state = Session.getState()
+  const state = getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   expect(_.size(state.task.tracks)).toEqual(4)
   const label2dlist = new Label2DList()
@@ -48,7 +49,7 @@ test('Add new valid drawable track', () => {
 
     commit2DLabels([label], tracking)
 
-    const currentState = Session.getState()
+    const currentState = getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(4)
     const savedLabels = currentState.task.items[0].labels
     let savedLabelId = ''
@@ -77,7 +78,7 @@ test('Add new valid drawable track', () => {
 
 test('Add new invalid drawable track', () => {
   dispatch(action.goToItem(0))
-  const state = Session.getState()
+  const state = getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   expect(_.size(state.task.tracks)).toEqual(4)
   const label2dlist = new Label2DList()
@@ -91,7 +92,7 @@ test('Add new invalid drawable track', () => {
 
     commit2DLabels([label], tracking)
 
-    const currentState = Session.getState()
+    const currentState = getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(3)
     expect(_.size(currentState.task.items[0].shapes))
       .toEqual(_.size(state.task.items[0].shapes))
@@ -100,10 +101,10 @@ test('Add new invalid drawable track', () => {
 })
 
 test('Update existing drawable of a track', () => {
-  updateTracks()
+  updateTracks(getState())
 
   dispatch(action.goToItem(1))
-  const state = Session.getState()
+  const state = getState()
   expect(_.size(state.task.items[1].labels)).toEqual(3)
   // label coord is [835, 314][861, 406]
   const label2dList = new Label2DList()
@@ -119,7 +120,7 @@ test('Update existing drawable of a track', () => {
 
   commit2DLabels([label], tracking)
 
-  const currentState = Session.getState()
+  const currentState = getState()
   const newLabel = currentState.task.items[1].labels['70']
   const rect = currentState.task.items[1].shapes[newLabel.shapes[0]] as RectType
   // expect the label resized is changed
@@ -140,11 +141,11 @@ test('Update existing drawable of a track', () => {
 })
 
 test('Update existing drawable of a track to invalid, from page 1', () => {
-  updateTracks()
+  updateTracks(getState())
 
   // Terminate current track
   dispatch(action.goToItem(1))
-  const state = Session.getState()
+  const state = getState()
   expect(_.size(state.task.items[1].labels)).toEqual(3)
   // label coord is [835, 314][861, 406]
   const label2dList = new Label2DList()
@@ -162,7 +163,7 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
 
   commit2DLabels([label], tracking)
 
-  const currentState = Session.getState()
+  const currentState = getState()
   const newLabel = currentState.task.items[1].labels['70']
   expect(newLabel).toBeUndefined() // expect the resized label is gone
   for (const itemId of Object.keys(oldTrackLabels)) {
@@ -182,11 +183,11 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
 })
 
 test('Update existing drawable of a track to invalid, from page 0', () => {
-  updateTracks()
+  updateTracks(getState())
 
   // Terminate current track
   dispatch(action.goToItem(0))
-  const state = Session.getState()
+  const state = getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   // label coord is [835, 314][861, 406]
   const label2dList = new Label2DList()
@@ -204,7 +205,7 @@ test('Update existing drawable of a track to invalid, from page 0', () => {
 
   commit2DLabels([label], tracking)
 
-  const currentState = Session.getState()
+  const currentState = getState()
   const newLabel = currentState.task.items[0].labels['69']
   expect(newLabel).toBeUndefined() // expect the resized label is gone
   for (const itemId of Object.keys(oldTrackLabels)) {
