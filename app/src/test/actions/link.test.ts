@@ -1,8 +1,8 @@
 import fs from 'fs-extra'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { makeLabel } from '../../js/functional/states'
+import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 
 const getState = Session.getState.bind(Session)
@@ -10,15 +10,15 @@ const dispatch = Session.dispatch.bind(Session)
 const data = JSON.parse(fs.readFileSync('./app/src/test/test_states/sample_state.json', 'utf8'))
 
 beforeEach(() => {
-  initStore(testJson)
+  setupTestStore(testJson)
+
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
   })
 })
 
 beforeAll(() => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
   for (let i = 0; i < getState().task.items.length; i++) {
@@ -28,7 +28,7 @@ beforeAll(() => {
 
 describe('Test link labels', () => {
   test('Link labels without track', () => {
-    initStore(data)
+    setupTestStore(data)
     dispatch(action.goToItem(1))
     let label1 = makeLabel()
     let label2 = makeLabel()

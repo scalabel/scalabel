@@ -92,7 +92,7 @@ export function updateTracks (state: State): void {
 /**
  * Load all the images in the state
  */
-export function loadImages (
+function loadImages (
   getState: getStateFunc, dispatch: dispatchFunc,
   maxAttempts: number = 3): void {
   const state = getState()
