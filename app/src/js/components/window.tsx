@@ -40,7 +40,7 @@ export class Window extends React.Component<Props> {
   public render () {
     const config = this.props.config
 
-    // get all the components
+    // Get all the components
     const titleBar = (
         <TitleBar/>
     )

@@ -31,7 +31,7 @@ beforeAll(() => {
   setupTestStore(emptyTrackingTask)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
-  // mock loading every item to make sure the canvas can be successfully
+  // Mock loading every item to make sure the canvas can be successfully
   // initialized
   for (let i = 0; i < getState().task.items.length; i++) {
     dispatch(action.loadItem(i, -1))
@@ -68,7 +68,7 @@ describe('basic track ops', () => {
       [500, 500, 80, 100]
     ]
 
-    // test adding tracks
+    // Test adding tracks
     const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
     let state = getState()
     expect(_.size(state.task.tracks)).toEqual(4)

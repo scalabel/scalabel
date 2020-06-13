@@ -56,7 +56,7 @@ export class Bot {
 
     this.actionCount = 0
 
-    // create a socketio client
+    // Create a socketio client
     const socket = io.connect(
       this.address,
       { transports: ['websocket'], upgrade: false }
@@ -117,7 +117,7 @@ export class Bot {
   public async actionBroadcastHandler (
     message: SyncActionMessageType): Promise<AddLabelsAction[]> {
     const actionPacket = message.actions
-    // if action was already acked, or if action came from a bot, ignore it
+    // If action was already acked, or if action came from a bot, ignore it
     if (this.ackedPackets.has(actionPacket.id)
       || message.bot
       || message.sessionId === this.sessionId) {
@@ -126,23 +126,23 @@ export class Bot {
 
     this.ackedPackets.add(actionPacket.id)
 
-    // precompute queries so they can potentially execute in parallel
+    // Precompute queries so they can potentially execute in parallel
     const queries = this.packetToQueries(actionPacket)
 
-    // send the queries for execution on the model server
+    // Send the queries for execution on the model server
     const actions = await this.executeQueries(queries)
 
-    // dispatch the predicted actions locally
+    // Dispatch the predicted actions locally
     for (const action of actions) {
       this.store.dispatch(action)
     }
 
-    // broadcast the predicted actions to other session
+    // Broadcast the predicted actions to other session
     if (actions.length > 0) {
       this.broadcastActions(actions, actionPacket.id)
     }
 
-    // return actions for testing purposes
+    // Return actions for testing purposes
     return actions
   }
 

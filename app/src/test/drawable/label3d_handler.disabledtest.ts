@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-// import * as THREE from 'three'
+// Import * as THREE from 'three'
 import * as action from '../../js/action/common'
 import { moveCamera, moveCameraAndTarget } from '../../js/action/point_cloud'
 import { selectLabel } from '../../js/action/select'
@@ -337,7 +337,7 @@ test('Move axis aligned 3d bbox along all axes', () => {
       let cube = getShape(state, 0, labelIds[0], 0) as CubeType
       const center = (new Vector3D()).fromState(cube.center)
 
-      // get ActiveAxis based on view point and vertical or horizontal
+      // Get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxis(camLoc, axis)
       for (let i = 0; i < 3; i++) {
         if (i !== activeAxis) {
@@ -454,9 +454,9 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       const center = (new Vector3D()).fromState(cube.center)
       const size = (new Vector3D()).fromState(cube.size)
 
-      // get ActiveAxis based on view point and vertical or horizontal
+      // Get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxis(camLoc, axis)
-      // expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
+      // ExpectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
 
       for (let i = 0; i < 3; i++) {
         if (i !== activeAxis) {
@@ -576,7 +576,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       let cube = getShape(state, 0, labelIds[0], 0) as CubeType
       const orientation = (new Vector3D()).fromState(cube.orientation)
 
-      // get ActiveAxis based on view point and vertical or horizontal
+      // Get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxisForRotation(camLoc, axis)
       expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
       expectVector3TypesClose(cube.size, { x: 1, y: 1, z: 1 })

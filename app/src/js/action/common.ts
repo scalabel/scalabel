@@ -68,7 +68,7 @@ export function updateState (
  * @return {types.ChangeSelectAction}
  */
 export function goToItem (index: number): types.ChangeSelectAction {
-  // normally, unselect labels when item changes
+  // Normally, unselect labels when item changes
   let newSelect: Partial<Select> = {
     item: index,
     labels: {},
@@ -76,7 +76,7 @@ export function goToItem (index: number): types.ChangeSelectAction {
   }
 
   if (getState().session.trackLinking) {
-    // if track linking is on, keep old labels selected
+    // If track linking is on, keep old labels selected
     newSelect = {
       item: index
     }

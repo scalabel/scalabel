@@ -106,14 +106,14 @@ describe('Test hub functionality', () => {
   })
 
   test('Test task action update saves data and broadcasts', async () => {
-    // mock date for action timestamp
+    // Mock date for action timestamp
     const constantDate = Date.now()
     const dateFn = Date.now
     Date.now = jest.fn(() => {
       return constantDate
     })
 
-    // make a task action
+    // Make a task action
     const action = getRandomBox2dAction()
     const data: SyncActionMessageType = {
       projectName,
@@ -126,10 +126,10 @@ describe('Test hub functionality', () => {
       bot: false
     }
 
-    // send the action
+    // Send the action
     await hub.actionUpdate(data, mockSocket)
 
-    // test that state/metadata updated correctly
+    // Test that state/metadata updated correctly
     const newMetadata = {
       projectName,
       taskId,
@@ -141,7 +141,7 @@ describe('Test hub functionality', () => {
     expect(mockProjectStore.saveState).toBeCalledWith(newState, projectName,
       taskId, newMetadata, 1)
 
-    // test that actions were broadcast correctly
+    // Test that actions were broadcast correctly
     const newAction = _.cloneDeep(action)
     newAction.timestamp = constantDate
     const newPacket: ActionPacketType = {
@@ -153,12 +153,12 @@ describe('Test hub functionality', () => {
     expect(mockSocket.emit).toBeCalledWith(
       EventName.ACTION_BROADCAST, packetToMessage(newPacket))
 
-    // restore the date function
+    // Restore the date function
     Date.now = dateFn
   })
 
   test('Non-task action just echoes', async () => {
-    // make a non-task action
+    // Make a non-task action
     const action = goToItem(0)
     const data: SyncActionMessageType = {
       projectName,
@@ -178,7 +178,7 @@ describe('Test hub functionality', () => {
   })
 
   test('If saved, repeated message does not save again', async () => {
-    // make a task action
+    // Make a task action
     const action = getRandomBox2dAction()
     const data: SyncActionMessageType = {
       projectName,
@@ -191,7 +191,7 @@ describe('Test hub functionality', () => {
       bot: false
     }
 
-    // send message for the first time
+    // Send message for the first time
     await hub.actionUpdate(data, mockSocket)
 
     expect(mockProjectStore.saveState).toHaveBeenCalledTimes(1)
@@ -200,7 +200,7 @@ describe('Test hub functionality', () => {
     const packet: ActionPacketType = mockSocket.emit.mock.calls[0][1].actions
     const timestamp = packet.actions[0].timestamp
 
-    // send message for the second time, using updates values
+    // Send message for the second time, using updates values
     const newState = updateState(getInitialState(sessionId), [action])
     const newMetadata: StateMetadata = {
       projectName,
@@ -222,13 +222,13 @@ describe('Test hub functionality', () => {
     expect(broadcastFunc).toHaveBeenCalledTimes(2)
     expect(mockSocket.emit).toHaveBeenCalledTimes(2)
 
-    // verify that the actions have the same timestamps in both emit calls
+    // Verify that the actions have the same timestamps in both emit calls
     const calls = mockSocket.emit.mock.calls
     expect(calls[0]).toStrictEqual(calls[1])
   })
 
   test('If crash before saving, saves again', async () => {
-    // make a task action
+    // Make a task action
     const action = getRandomBox2dAction()
     const data: SyncActionMessageType = {
       projectName,
@@ -246,7 +246,7 @@ describe('Test hub functionality', () => {
     expect(broadcastFunc).toHaveBeenCalledTimes(1)
     expect(mockSocket.emit).toHaveBeenCalledTimes(1)
 
-    // model crash by not updating state or metadata that gets loaded
+    // Model crash by not updating state or metadata that gets loaded
     await hub.actionUpdate(data, mockSocket)
 
     expect(mockProjectStore.saveState).toHaveBeenCalledTimes(2)

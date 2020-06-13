@@ -25,7 +25,7 @@ beforeAll(async () => {
   client = new RedisClient(config)
   defaultStore = new RedisStore(config, storage, client)
   metadataString = makeMetadata(1)
-  // numWrites used as a counter across all tests that spawn files
+  // NumWrites used as a counter across all tests that spawn files
   numWrites = 0
 })
 
@@ -77,7 +77,7 @@ describe('Test redis cache', () => {
     for (let i = 0; i < 4; i++) {
       await store.setExWithReminder(
         key, sprintf('value%s', i), metadataString, 1)
-      // make sure no new files are created yet
+      // Make sure no new files are created yet
       await checkFileCount()
     }
     await store.setExWithReminder(key, 'value4', metadataString, 1)

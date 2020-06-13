@@ -198,7 +198,7 @@ export class Synchronizer {
     this.ackedPackets.add(actionPacket.id)
 
     for (const action of actionPacket.actions) {
-      // actionLog matches backend action ordering
+      // ActionLog matches backend action ordering
       this.actionLog.push(action)
       if (action.sessionId !== sessionId) {
         if (types.isTaskAction(action)) {

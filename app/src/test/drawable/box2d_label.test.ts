@@ -40,10 +40,10 @@ test('Add new valid drawable', () => {
   expect(label).not.toBeNull()
   if (label) {
     label.initTemp(state, new Vector2D(10, 10))
-    // new labels can ignore selected or highlighted property
+    // New labels can ignore selected or highlighted property
     // _handleIndex is actually not used, put a random
     label.onMouseDown(new Vector2D(10, 10), 1)
-    // mouse move is essential
+    // Mouse move is essential
     // labelIndex and handleIndex is actually not used here, put a random
     label.onMouseMove(new Vector2D(20, 20), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(20, 20))
@@ -70,7 +70,7 @@ test('Add new invalid drawable', () => {
   if (label) {
     label.initTemp(state, new Vector2D(10, 10))
     label.onMouseDown(new Vector2D(10, 10), 1)
-    // mouse move is essential
+    // Mouse move is essential
     label.onMouseMove(new Vector2D(12, 12), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(12, 12))
 
@@ -87,7 +87,7 @@ test('Add new invalid drawable', () => {
 test('Update existing drawable', () => {
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
-  // label coord is [459, 276][752, 400]
+  // Label coord is [459, 276][752, 400]
   const label2dList = new Label2DList()
   label2dList.updateState(state)
   const label = label2dList.get(1)
@@ -95,7 +95,7 @@ test('Update existing drawable', () => {
   label.setSelected(true)
   label.setHighlighted(true, 5) // Handles.BOTTOM_RIGHT
   label.onMouseDown(new Vector2D(752, 400), 1)
-  // mouse move is essential
+  // Mouse move is essential
   label.onMouseMove(new Vector2D(700, 300), new Size2D(1000, 1000), 1, 2)
   label.onMouseUp(new Vector2D(700, 300))
 
@@ -111,7 +111,7 @@ test('Update existing drawable', () => {
 test('Update existing drawable to invalid', () => {
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
-  // label coord is [459, 276][752, 400]
+  // Label coord is [459, 276][752, 400]
   const label2dList = new Label2DList()
   label2dList.updateState(state)
   const label = label2dList.get(1)
@@ -122,7 +122,7 @@ test('Update existing drawable to invalid', () => {
   label.setSelected(true)
   label.setHighlighted(true, 5) // Handles.BOTTOM_RIGHT
   label.onMouseDown(new Vector2D(752, 400), 1)
-  // mouse move is essential
+  // Mouse move is essential
   label.onMouseMove(new Vector2D(460, 280), new Size2D(1000, 1000), 1, 2)
   label.onMouseUp(new Vector2D(460, 280))
 

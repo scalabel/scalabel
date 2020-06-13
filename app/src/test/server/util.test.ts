@@ -36,22 +36,22 @@ describe('test general utility methods', () => {
   })
 
   test('handler url selection', () => {
-    // img item => label2d handler
+    // Img item => label2d handler
     let handler = util.getHandlerUrl(
       ItemTypeName.IMAGE, LabelTypeName.BOX_3D)
     expect(handler).toBe(HandlerUrl.LABEL)
 
-    // video item + box2d label => 2d handler
+    // Video item + box2d label => 2d handler
     handler = util.getHandlerUrl(
       ItemTypeName.VIDEO, LabelTypeName.BOX_2D)
     expect(handler).toBe(HandlerUrl.LABEL)
 
-    // video item + other label => invalid handler
+    // Video item + other label => invalid handler
     handler = util.getHandlerUrl(
       ItemTypeName.VIDEO, LabelTypeName.BOX_3D)
     expect(handler).toBe(HandlerUrl.INVALID)
 
-    // point cloud item + box3d label => 3d handler
+    // Point cloud item + box3d label => 3d handler
     handler = util.getHandlerUrl(
       ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D)
     expect(handler).toBe(HandlerUrl.LABEL)
@@ -59,7 +59,7 @@ describe('test general utility methods', () => {
       ItemTypeName.POINT_CLOUD_TRACKING, LabelTypeName.BOX_3D)
     expect(handler).toBe(HandlerUrl.LABEL)
 
-    // point cloud item + other label => invalid handler
+    // Point cloud item + other label => invalid handler
     handler = util.getHandlerUrl(
       ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_2D)
     expect(handler).toBe(HandlerUrl.INVALID)
@@ -67,22 +67,22 @@ describe('test general utility methods', () => {
       ItemTypeName.POINT_CLOUD_TRACKING, LabelTypeName.TAG)
     expect(handler).toBe(HandlerUrl.INVALID)
 
-    // any other combinations are invalid
+    // Any other combinations are invalid
     handler = util.getHandlerUrl(
       'invalid item', LabelTypeName.BOX_2D)
     expect(handler).toBe(HandlerUrl.INVALID)
   })
 
   test('bundle file selection', () => {
-    // tag label => v2 bundle
+    // Tag label => v2 bundle
     let bundleFile = util.getBundleFile(LabelTypeName.TAG)
     expect(bundleFile).toBe(BundleFile.V2)
 
-    // box2d label => v2 bundle
+    // Box2d label => v2 bundle
     bundleFile = util.getBundleFile(LabelTypeName.BOX_2D)
     expect(bundleFile).toBe(BundleFile.V2)
 
-    // any other label => v1 bundle
+    // Any other label => v1 bundle
     bundleFile = util.getBundleFile(LabelTypeName.BOX_3D)
     expect(bundleFile).toBe(BundleFile.V1)
     bundleFile = util.getBundleFile(LabelTypeName.POLYGON_2D)
@@ -92,18 +92,18 @@ describe('test general utility methods', () => {
   })
 
   test('tracking selection', () => {
-    // video => true
+    // Video => true
     const [itemType1, tracking1] = getTracking(ItemTypeName.VIDEO)
     expect(itemType1).toBe(ItemTypeName.IMAGE)
     expect(tracking1).toBe(true)
 
-    // point cloud => true
+    // Point cloud => true
     const [itemType2, tracking2] = getTracking(
       ItemTypeName.POINT_CLOUD_TRACKING)
     expect(itemType2).toBe(ItemTypeName.POINT_CLOUD)
     expect(tracking2).toBe(true)
 
-    // any other item => false
+    // Any other item => false
     const [itemType3, tracking3] = getTracking(ItemTypeName.IMAGE)
     expect(itemType3).toBe(ItemTypeName.IMAGE)
     expect(tracking3).toBe(false)

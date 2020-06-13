@@ -14,7 +14,7 @@ let storageName = ''
 beforeAll(async () => {
   await storage.makeBucket()
 
-  // add keys to set up the bucket
+  // Add keys to set up the bucket
   let keys = [
     'project',
     'tasks/000000',
@@ -156,9 +156,9 @@ describe('test s3 storage', () => {
 })
 
 afterAll(async () => {
-  // cleanup: delete all keys that were created
+  // Cleanup: delete all keys that were created
   await storage.delete('')
-  // delete the temporary folder
+  // Delete the temporary folder
   const deleteParams = {
     Bucket: bucketName,
     Delete: { Objects: [

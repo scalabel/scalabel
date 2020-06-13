@@ -22,7 +22,7 @@ describe('Label operations', () => {
     Session.dispatch(action.addLabel(itemIndex, autoLabel))
     let state = Session.getState()
 
-    // check setting of manual and order
+    // Check setting of manual and order
     const labels = state.task.items[itemIndex].labels
     const label1 = labels[manualLabel.id]
     expect(label1.manual).toBe(true)
@@ -33,7 +33,7 @@ describe('Label operations', () => {
     expect(label1.order < autoLabel.order).toBe(true)
     expect(_.size(labels)).toBe(3)
 
-    // check deleting label
+    // Check deleting label
     Session.dispatch(action.deleteLabel(itemIndex, autoLabel.id))
     state = Session.getState()
     expect(_.size(state.task.items[itemIndex].labels)).toBe(2)
@@ -84,7 +84,7 @@ describe('Label operations', () => {
       expect(item.labels[label].parent).toEqual(parent1.id)
     }
 
-    // test recursive linking
+    // Test recursive linking
     children = [label1.id, label4.id]
     Session.dispatch(action.linkLabels(itemIndex, children))
     state = Session.getState()
@@ -113,7 +113,7 @@ describe('High level operations', () => {
     })
     setupTestStore(testJson)
 
-    // first submission
+    // First submission
     Session.dispatch(action.submit())
     let state = Session.getState()
     let submissions = state.task.progress.submissions
@@ -121,7 +121,7 @@ describe('High level operations', () => {
     expect(submissions[0].time).toBe(constantDate)
     expect(submissions[0].user).toBe(state.user.id)
 
-    // second submission
+    // Second submission
     Session.dispatch(action.submit())
     state = Session.getState()
     submissions = state.task.progress.submissions

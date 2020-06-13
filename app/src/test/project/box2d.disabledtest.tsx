@@ -42,18 +42,18 @@ let launchProc: child.ChildProcessWithoutNullStreams
 beforeAll(async () => {
   Session.testMode = true
 
-  // port is also changed in test_config
+  // Port is also changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
     getTestConfigPath()
   ])
 
-  // launchProc.stdout.on('data', (data) => {
+  // LaunchProc.stdout.on('data', (data) => {
   //   process.stdout.write(data)
   // })
 
-  // launchProc.stderr.on('data', (data) => {
+  // LaunchProc.stderr.on('data', (data) => {
   //   process.stdout.write(data)
   // })
 
@@ -71,7 +71,7 @@ afterEach(cleanup)
 afterAll(async () => {
   launchProc.kill()
   deleteTestDir()
-  // wait for server to shut down to clear port
+  // Wait for server to shut down to clear port
   await sleep(50)
 })
 
@@ -82,7 +82,7 @@ describe('full 2d bounding box integration test', () => {
         <StyledIntegrationForm />
       </MuiThemeProvider>
     )
-    // change project meta-data
+    // Change project meta-data
     const projectNameInput = getByTestId('project-name') as HTMLInputElement
     fireEvent.change(projectNameInput, { target: { value:
       testConfig.projectName } })
@@ -96,7 +96,7 @@ describe('full 2d bounding box integration test', () => {
     const tasksizeInput = getByTestId('tasksize-input') as HTMLInputElement
     fireEvent.change(tasksizeInput, { target: { value: '5' } })
     expect(tasksizeInput.value).toBe('5')
-    // submit the project
+    // Submit the project
     const submitButton = getByTestId('submit-button')
     fireEvent.click(submitButton)
     await Promise.race(
@@ -185,7 +185,7 @@ describe('full 2d bounding box integration test', () => {
     expect(rect.y1).toEqual(20)
     expect(rect.x2).toEqual(40)
     expect(rect.y2).toEqual(40)
-    // save to disc
+    // Save to disc
     fireEvent.click(saveButton)
     await Promise.race([
       sleep(saveTimeout),
@@ -211,7 +211,7 @@ describe('full 2d bounding box integration test', () => {
         <StyledIntegrationForm />
       </MuiThemeProvider>
     )
-    // change project meta-data
+    // Change project meta-data
     const projectNameInput = getByTestId('project-name') as HTMLInputElement
     fireEvent.change(projectNameInput, { target: { value:
       testConfig.projectName + '_exported' } })
@@ -225,7 +225,7 @@ describe('full 2d bounding box integration test', () => {
     const tasksizeInput = getByTestId('tasksize-input') as HTMLInputElement
     fireEvent.change(tasksizeInput, { target: { value: '5' } })
     expect(tasksizeInput.value).toBe('5')
-    // submit the project
+    // Submit the project
     const submitButton = getByTestId('submit-button')
     fireEvent.click(submitButton)
     await Promise.race(

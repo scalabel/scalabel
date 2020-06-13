@@ -78,7 +78,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x2).toEqual(30)
   expect(rect.y2).toEqual(29)
 
-  // third box
+  // Third box
   mouseMove(label2dHandler, 4, 5, canvasSize, -1, 0)
   mouseDown(label2dHandler, 4, 5, -1, 0)
   mouseMove(label2dHandler, 15, 15, canvasSize, -1, 0)
@@ -94,7 +94,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x2).toEqual(23)
   expect(rect.y2).toEqual(24)
 
-  // resize the second box
+  // Resize the second box
   mouseMove(label2dHandler, 19, 20, canvasSize, 1, 1)
   mouseDown(label2dHandler, 19, 20, 1, 1)
   mouseMove(label2dHandler, 15, 18, canvasSize, -1, 0)
@@ -106,7 +106,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x1).toEqual(16)
   expect(rect.y1).toEqual(17)
 
-  // flip top left and bottom right corner
+  // Flip top left and bottom right corner
   mouseMove(label2dHandler, 16, 17, canvasSize, 1, 1)
   mouseDown(label2dHandler, 16, 17, 1, 1)
   mouseMove(label2dHandler, 42, 43, canvasSize, -1, 0)
@@ -118,7 +118,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x2).toEqual(42)
   expect(rect.y2).toEqual(43)
 
-  // move
+  // Move
   mouseMove(label2dHandler, 32, 31, canvasSize, 1, 0)
   mouseDown(label2dHandler, 32, 31, 1, 0)
   mouseMove(label2dHandler, 36, 32, canvasSize, -1, 0)
@@ -130,7 +130,7 @@ test('Draw 2d boxes to label2d list', () => {
   expect(rect.x2).toEqual(46)
   expect(rect.y2).toEqual(44)
 
-  // delete label
+  // Delete label
   Session.dispatch(action.deleteLabel(0, labelIds[1]))
   expect(Session.label2dList.labelList.length).toEqual(2)
   expect(Session.label2dList.labelList[0].index).toEqual(0)
@@ -142,7 +142,7 @@ test('Draw 2d boxes to label2d list', () => {
 test('Draw 2d polygons to label2d list', () => {
   const [label2dHandler] = initializeTestingObjects()
   Session.dispatch(action.changeSelect({ labelType: 1 }))
-  // draw the first polygon
+  // Draw the first polygon
   const canvasSize = new Size2D(1000, 1000)
   mouseMoveClick(label2dHandler, 10, 10, canvasSize, -1, 0)
   mouseMoveClick(label2dHandler, 100, 100, canvasSize, -1, 0)
@@ -155,7 +155,7 @@ test('Draw 2d polygons to label2d list', () => {
   const labelIds: IdType[] = []
   expect(_.size(state.task.items[0].labels)).toEqual(0)
 
-  // drag when drawing
+  // Drag when drawing
   mouseMove(label2dHandler, 200, 10, canvasSize, -1, 0)
   mouseDown(label2dHandler, 200, 10, -1, 0)
   mouseMove(label2dHandler, 100, 0, canvasSize, -1, 0)
@@ -183,7 +183,7 @@ test('Draw 2d polygons to label2d list', () => {
   expect(polygon.points[3].y).toEqual(0)
   expect(polygon.points[3].pointType).toEqual('vertex')
 
-  // draw second polygon
+  // Draw second polygon
   drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
 
   /**
@@ -214,7 +214,7 @@ test('2d polygons highlighted and selected', () => {
 
   const labelIds: IdType[] = []
 
-  // draw first polygon
+  // Draw first polygon
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize,
     [[120, 120], [210, 210], [310, 260], [410, 210], [210, 110]])
@@ -226,7 +226,7 @@ test('2d polygons highlighted and selected', () => {
     Session.getState().task.items[0].labels, labelIds)[0])
   expect(selected[0].labelId).toEqual(labelIds[0])
 
-  // draw second polygon
+  // Draw second polygon
   drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
@@ -236,7 +236,7 @@ test('2d polygons highlighted and selected', () => {
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
 
-  // change highlighted label
+  // Change highlighted label
   mouseMove(label2dHandler, 130, 130, canvasSize, 0, 0)
   let highlighted = label2dHandler.highlightedLabel
   selected = Session.label2dList.selectedLabels
@@ -249,7 +249,7 @@ test('2d polygons highlighted and selected', () => {
   }
   expect(selected[0].labelId).toEqual(labelIds[1])
 
-  // change selected label
+  // Change selected label
   mouseDown(label2dHandler, 130, 130, 0, 0)
   mouseMove(label2dHandler, 140, 140, canvasSize, 0, 0)
   mouseUp(label2dHandler, 140, 140, 0, 0)
@@ -266,7 +266,7 @@ test('validation check for polygon2d', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
   const labelIds: IdType[] = []
 
-  // draw a valid polygon
+  // Draw a valid polygon
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize,
     [[120, 120], [210, 210], [310, 260], [410, 210], [210, 110]])
@@ -276,7 +276,7 @@ test('validation check for polygon2d', () => {
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
 
-  // draw one invalid polygon
+  // Draw one invalid polygon
   drawPolygon(label2dHandler, canvasSize,
     [[200, 100], [400, 300], [300, 200], [300, 0]])
   /**
@@ -288,7 +288,7 @@ test('validation check for polygon2d', () => {
   expect(_.size(state.task.items[0].labels)).toEqual(1)
   expect(Session.label2dList.labelList.length).toEqual(1)
 
-  // drag the polygon to an invalid shape
+  // Drag the polygon to an invalid shape
   mouseMove(label2dHandler, 310, 260, canvasSize, 0, 5)
   mouseDown(label2dHandler, 310, 260, 0, 5)
   mouseMove(label2dHandler, 310, 0, canvasSize, 0, 5)
@@ -309,7 +309,7 @@ test('validation check for polygon2d', () => {
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, [])[0])
 
-  // draw a too small polygon
+  // Draw a too small polygon
   drawPolygon(label2dHandler, canvasSize, [[0, 0], [1, 0], [0, 1]])
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
@@ -325,7 +325,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
   const labelIds: IdType[] = []
 
-  // draw a polygon
+  // Draw a polygon
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize,
     [[10, 10], [100, 100], [200, 100], [100, 0]])
@@ -335,7 +335,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
 
-  // drag a vertex
+  // Drag a vertex
   mouseMove(label2dHandler, 200, 100, canvasSize, 0, 5)
   mouseDown(label2dHandler, 200, 100, 0, 5)
   mouseMove(label2dHandler, 300, 100, canvasSize, 0, 5)
@@ -349,7 +349,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
    * polygon 1: (10, 10) (100, 100) (300, 100) (100, 0)
    */
 
-  // drag midpoints
+  // Drag midpoints
   mouseMove(label2dHandler, 200, 100, canvasSize, 0, 4)
   mouseDown(label2dHandler, 200, 100, 0, 4)
   mouseMove(label2dHandler, 200, 150, canvasSize, 0, 5)
@@ -364,7 +364,7 @@ test('2d polygons drag vertices, midpoints and edges', () => {
    * polygon 1: (10, 10) (100, 100) (200, 150) (300, 100) (100, 0)
    */
 
-  // drag edges
+  // Drag edges
   mouseMove(label2dHandler, 20, 20, canvasSize, 0, 0)
   mouseDown(label2dHandler, 20, 20, 0, 0)
   mouseMove(label2dHandler, 120, 120, canvasSize, 0, 0)
@@ -385,7 +385,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
   const labelIds: IdType[] = []
 
-  // draw a polygon and delete vertex when drawing
+  // Draw a polygon and delete vertex when drawing
   const canvasSize = new Size2D(1000, 1000)
   mouseMoveClick(label2dHandler, 200, 100, canvasSize, -1, 0)
   keyClick(label2dHandler, 'd')
@@ -427,7 +427,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   expect(polygon.points[4].y).toEqual(150)
   expect(polygon.points[4].pointType).toEqual('vertex')
 
-  // delete vertex when closed
+  // Delete vertex when closed
   keyDown(label2dHandler, 'd')
   mouseMoveClick(label2dHandler, 275, 125, canvasSize, 0, 10)
   mouseMoveClick(label2dHandler, 300, 150, canvasSize, 0, 9)
@@ -443,7 +443,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   expect(polygon.points[3].y).toEqual(130)
   expect(polygon.points[3].pointType).toEqual('vertex')
 
-  // draw bezier curve
+  // Draw bezier curve
   keyDown(label2dHandler, 'c')
   mouseMoveClick(label2dHandler, 335, 115, canvasSize, 0, 6)
   keyUp(label2dHandler, 'c')
@@ -463,7 +463,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   expect(polygon.points[4].y).toEqual(120)
   expect(polygon.points[4].pointType).toEqual('bezier')
 
-  // drag bezier curve control points
+  // Drag bezier curve control points
   mouseMove(label2dHandler, 340, 110, canvasSize, 0, 6)
   mouseDown(label2dHandler, 340, 110, 0, 6)
   mouseMove(label2dHandler, 340, 90, canvasSize, 0, 6)
@@ -487,7 +487,7 @@ test('2d polygons delete vertex and draw bezier curve', () => {
   expect(polygon.points[4].y).toEqual(120)
   expect(polygon.points[4].pointType).toEqual('bezier')
 
-  // delete vertex on bezier curve
+  // Delete vertex on bezier curve
   keyDown(label2dHandler, 'd')
   mouseMoveClick(label2dHandler, 350, 100, canvasSize, 0, 5)
   keyUp(label2dHandler, 'd')
@@ -505,7 +505,7 @@ test('2d polygon select and moving', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
   const labelIds: IdType[] = []
 
-  // draw first polygon
+  // Draw first polygon
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
   /**
@@ -516,7 +516,7 @@ test('2d polygon select and moving', () => {
 
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
-  // select label 1
+  // Select label 1
   mouseMoveClick(label2dHandler, 50, 50, canvasSize, 0, 0)
 
   state = Session.getState()
@@ -544,7 +544,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
   const labelIds: IdType[] = []
 
-  // draw first polygon
+  // Draw first polygon
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
   /**
@@ -553,7 +553,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
 
-  // draw second polygon
+  // Draw second polygon
   drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
@@ -562,7 +562,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
 
-  // draw third polygon
+  // Draw third polygon
   drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
@@ -575,7 +575,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
 
-  // select label 1
+  // Select label 1
   mouseMoveClick(label2dHandler, 600, 600, canvasSize, 1, 0)
 
   state = Session.getState()
@@ -584,7 +584,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   expect(Session.label2dList.selectedLabels.length).toEqual(1)
   expect(Session.label2dList.selectedLabels[0].labelId).toEqual(labelIds[1])
 
-  // select label 1, 2, 3
+  // Select label 1, 2, 3
   keyDown(label2dHandler, 'Meta')
   mouseMoveClick(label2dHandler, 300, 250, canvasSize, 2, 2)
   mouseMoveClick(label2dHandler, 50, 50, canvasSize, 0, 0)
@@ -594,7 +594,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   expect(state.user.select.labels[0].length).toEqual(3)
   expect(Session.label2dList.selectedLabels.length).toEqual(3)
 
-  // unselect label 3
+  // Unselect label 3
   keyDown(label2dHandler, 'Meta')
   mouseMoveClick(label2dHandler, 300, 250, canvasSize, 2, 2)
   keyUp(label2dHandler, 'Meta')
@@ -603,7 +603,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   expect(state.user.select.labels[0].length).toEqual(2)
   expect(Session.label2dList.selectedLabels.length).toEqual(2)
 
-  // select three labels
+  // Select three labels
   keyDown(label2dHandler, 'Meta')
   mouseMoveClick(label2dHandler, 300, 250, canvasSize, 2, 2)
   keyUp(label2dHandler, 'Meta')
@@ -612,7 +612,7 @@ test('2d polygons multi-select and multi-label moving', () => {
   expect(state.user.select.labels[0].length).toEqual(3)
   expect(Session.label2dList.selectedLabels.length).toEqual(3)
 
-  // move
+  // Move
   mouseMove(label2dHandler, 20, 20, canvasSize, 0, 0)
   mouseDown(label2dHandler, 20, 20, 0, 0)
   mouseMove(label2dHandler, 60, 60, canvasSize, 0, 0)
@@ -641,7 +641,7 @@ test('2d polygons linking labels and moving', () => {
   Session.dispatch(action.changeSelect({ labelType: 1 }))
   const labelIds: IdType[] = []
 
-  // draw first polygon
+  // Draw first polygon
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
 
@@ -651,7 +651,7 @@ test('2d polygons linking labels and moving', () => {
    * polygon 1: (10, 10) (100, 100) (200, 100)
    */
 
-  // draw second polygon
+  // Draw second polygon
   drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
@@ -660,7 +660,7 @@ test('2d polygons linking labels and moving', () => {
    * polygon 2: (500, 500) (600, 400) (700, 700)
    */
 
-  // draw third polygon
+  // Draw third polygon
   drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
@@ -673,7 +673,7 @@ test('2d polygons linking labels and moving', () => {
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
 
-  // select label 2 and 0
+  // Select label 2 and 0
   mouseMoveClick(label2dHandler, 300, 300, canvasSize, 2, 0)
   keyDown(label2dHandler, 'Meta')
   mouseMoveClick(label2dHandler, 100, 100, canvasSize, 0, 2)
@@ -692,13 +692,13 @@ test('2d polygons linking labels and moving', () => {
   expect(Session.label2dList.selectedLabels[0].labelId).toEqual(labelIds[2])
   expect(Session.label2dList.selectedLabels[1].labelId).toEqual(labelIds[0])
 
-  // select label 1 and 2
+  // Select label 1 and 2
   mouseMoveClick(label2dHandler, 600, 600, canvasSize, 1, 0)
   keyDown(label2dHandler, 'Meta')
   mouseMoveClick(label2dHandler, 50, 50, canvasSize, 0, 0)
   keyUp(label2dHandler, 'Meta')
 
-  // link label 1 and 2
+  // Link label 1 and 2
   keyClick(label2dHandler, 'l')
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
@@ -714,7 +714,7 @@ test('2d polygons linking labels and moving', () => {
     Session.label2dList.labelList[1].color
   )
 
-  // reselect label 1 and 2
+  // Reselect label 1 and 2
   mouseMoveClick(label2dHandler, 300, 250, canvasSize, 2, 2)
   mouseMoveClick(label2dHandler, 50, 50, canvasSize, 0, 0)
 
@@ -722,7 +722,7 @@ test('2d polygons linking labels and moving', () => {
   expect(state.user.select.labels[0].length).toEqual(2)
   expect(Session.label2dList.selectedLabels.length).toEqual(2)
 
-  // moving group 1
+  // Moving group 1
   mouseMove(label2dHandler, 20, 20, canvasSize, 0, 0)
   mouseDown(label2dHandler, 20, 20, 0, 0)
   mouseMove(label2dHandler, 60, 60, canvasSize, 0, 0)
@@ -746,7 +746,7 @@ test('2d polygons linking labels and moving', () => {
   expect(polygon.points[0].x).toEqual(250)
   expect(polygon.points[0].y).toEqual(250)
 
-  // reshape for one label in group
+  // Reshape for one label in group
   mouseMove(label2dHandler, 110, 110, canvasSize, 0, 1)
   mouseDown(label2dHandler, 110, 110, 0, 1)
   mouseMove(label2dHandler, 100, 100, canvasSize, 0, 1)
@@ -774,21 +774,21 @@ test('2d polygons unlinking', () => {
   const [label2dHandler] = initializeTestingObjects()
   Session.dispatch(action.changeSelect({ labelType: 1 }))
 
-  // draw first polygon
+  // Draw first polygon
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    */
 
-  // draw second polygon
+  // Draw second polygon
   drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
    * polygon 2: (500, 500) (600, 400) (700, 700)
    */
 
-  // draw third polygon
+  // Draw third polygon
   drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
@@ -799,12 +799,12 @@ test('2d polygons unlinking', () => {
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
 
-  // select polygon 1 and 3
+  // Select polygon 1 and 3
   keyDown(label2dHandler, 'Meta')
   mouseMoveClick(label2dHandler, 100, 100, canvasSize, 0, 2)
   keyUp(label2dHandler, 'Meta')
 
-  // link polygon 1 and 3
+  // Link polygon 1 and 3
   keyClick(label2dHandler, 'l')
 
   state = Session.getState()
@@ -820,13 +820,13 @@ test('2d polygons unlinking', () => {
    * group 1: polygon 1, 3
    */
 
-  // select polygon 1, 2, 3
+  // Select polygon 1, 2, 3
   mouseMoveClick(label2dHandler, 550, 550, canvasSize, 1, 0)
   keyDown(label2dHandler, 'Meta')
   mouseMoveClick(label2dHandler, 100, 100, canvasSize, 0, 2)
   keyUp(label2dHandler, 'Meta')
 
-  // unlink polygon 1 and 3
+  // Unlink polygon 1 and 3
   keyClick(label2dHandler, 'L')
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
@@ -838,14 +838,14 @@ test('2d polygons unlinking', () => {
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   expect(_.size(Session.label2dList.labelList)).toEqual(3)
 
-  // unselect polygon 1
+  // Unselect polygon 1
   keyDown(label2dHandler, 'Meta')
   mouseMove(label2dHandler, 100, 100, canvasSize, 0, 2)
   mouseDown(label2dHandler, 100, 100, 0, 2)
   mouseUp(label2dHandler, 100, 100, 0, 2)
   keyUp(label2dHandler, 'Meta')
 
-  // link polygon 2 and 3
+  // Link polygon 2 and 3
   keyClick(label2dHandler, 'l')
   /**
    * polygon 1: (10, 10) (100, 100) (200, 100)
@@ -866,7 +866,7 @@ test('2d polyline creating', () => {
   Session.dispatch(action.changeSelect({ labelType: 3 }))
   const labelIds: IdType[] = []
 
-  // draw first polyline
+  // Draw first polyline
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize, [[10, 10], [100, 100], [200, 100]])
   labelIds.push(findNewLabels(
@@ -875,7 +875,7 @@ test('2d polyline creating', () => {
    * polyline 1: (10, 10) (100, 100) (200, 100)
    */
 
-  // draw second polyline
+  // Draw second polyline
   drawPolygon(label2dHandler, canvasSize, [[500, 500], [600, 400], [700, 700]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
@@ -884,7 +884,7 @@ test('2d polyline creating', () => {
    * polyline 2: (500, 500) (600, 400) (700, 700)
    */
 
-  // draw third polyline
+  // Draw third polyline
   drawPolygon(label2dHandler, canvasSize, [[250, 250], [300, 250], [350, 350]])
   labelIds.push(findNewLabels(
     Session.getState().task.items[0].labels, labelIds)[0])
@@ -927,7 +927,7 @@ test('2d polylines drag vertices, midpoints and edges', () => {
   Session.dispatch(action.changeSelect({ labelType: 3 }))
   const labelIds: IdType[] = []
 
-  // draw a polyline
+  // Draw a polyline
   const canvasSize = new Size2D(1000, 1000)
   drawPolygon(label2dHandler, canvasSize,
     [[10, 10], [100, 100], [200, 100], [100, 0]])
@@ -937,7 +937,7 @@ test('2d polylines drag vertices, midpoints and edges', () => {
    * polyline 1: (10, 10) (100, 100) (200, 100) (100, 0)
    */
 
-  // drag a vertex
+  // Drag a vertex
   mouseMove(label2dHandler, 200, 100, canvasSize, 0, 5)
   mouseDown(label2dHandler, 200, 100, 0, 5)
   mouseMove(label2dHandler, 300, 100, canvasSize, 0, 5)
@@ -958,7 +958,7 @@ test('2d polylines drag vertices, midpoints and edges', () => {
    * polyline 1: (50, 50) (100, 100) (300, 100) (100, 0)
    */
 
-  // drag midpoints
+  // Drag midpoints
   mouseMove(label2dHandler, 200, 100, canvasSize, 0, 4)
   mouseDown(label2dHandler, 200, 100, 0, 4)
   mouseMove(label2dHandler, 200, 150, canvasSize, 0, 5)
@@ -973,7 +973,7 @@ test('2d polylines drag vertices, midpoints and edges', () => {
    * polyline 1: (50, 50) (100, 100) (200, 150) (300, 100) (100, 0)
    */
 
-  // drag edges
+  // Drag edges
   mouseMove(label2dHandler, 70, 70, canvasSize, 0, 0)
   mouseDown(label2dHandler, 70, 70, 0, 0)
   mouseMove(label2dHandler, 170, 170, canvasSize, 0, 0)
@@ -994,7 +994,7 @@ test('2d polylines delete vertex and draw bezier curve', () => {
   Session.dispatch(action.changeSelect({ labelType: 3 }))
   const labelIds: IdType[] = []
 
-  // draw a polyline and delete vertex when drawing
+  // Draw a polyline and delete vertex when drawing
   const canvasSize = new Size2D(1000, 1000)
   mouseMove(label2dHandler, 200, 100, canvasSize, -1, 0)
   mouseUp(label2dHandler, 200, 100, -1, 0)
@@ -1030,7 +1030,7 @@ test('2d polylines delete vertex and draw bezier curve', () => {
   expect(polyline.points[4].y).toEqual(150)
   expect(polyline.points[4].pointType).toEqual('vertex')
 
-  // delete vertex when closed
+  // Delete vertex when closed
   keyDown(label2dHandler, 'd')
   mouseMoveClick(label2dHandler, 325, 50, canvasSize, 0, 4)
   mouseMoveClick(label2dHandler, 300, 150, canvasSize, 0, 9)
@@ -1049,7 +1049,7 @@ test('2d polylines delete vertex and draw bezier curve', () => {
   expect(polyline.points[0].y).toEqual(100)
   expect(polyline.points[0].pointType).toEqual('vertex')
 
-  // draw bezier curve
+  // Draw bezier curve
   keyDown(label2dHandler, 'c')
   mouseMoveClick(label2dHandler, 335, 115, canvasSize, 0, 6)
   keyUp(label2dHandler, 'c')
@@ -1069,7 +1069,7 @@ test('2d polylines delete vertex and draw bezier curve', () => {
   expect(polyline.points[4].y).toEqual(120)
   expect(polyline.points[4].pointType).toEqual('bezier')
 
-  // drag bezier curve control points
+  // Drag bezier curve control points
   mouseMove(label2dHandler, 340, 110, canvasSize, 0, 6)
   mouseDown(label2dHandler, 340, 110, 0, 6)
   mouseMove(label2dHandler, 340, 90, canvasSize, 0, 6)
@@ -1096,7 +1096,7 @@ test('2d polylines delete vertex and draw bezier curve', () => {
   expect(polyline.points[5].y).toEqual(130)
   expect(polyline.points[5].pointType).toEqual('vertex')
 
-  // delete vertex on bezier curve
+  // Delete vertex on bezier curve
   keyDown(label2dHandler, 'd')
   mouseMove(label2dHandler, 350, 100, canvasSize, 0, 5)
   mouseDown(label2dHandler, 350, 100, 0, 5)

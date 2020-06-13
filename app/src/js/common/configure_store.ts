@@ -26,9 +26,9 @@ export function configureStore (
   }
 
   const undoableReducer: Reducer<ReduxState> = undoable(reducer, {
-    limit: 20, // add a limit to history
+    limit: 20, // Add a limit to history
     filter: includeAction([
-      // undoable actions
+      // Undoable actions
       ADD_LABELS,
       DELETE_LABELS
     ]),

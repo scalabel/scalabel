@@ -205,35 +205,35 @@ export function commit2DLabels (
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
     if (drawable.isValid()) {
-      // valid drawable
+      // Valid drawable
       if (!drawable.temporary) {
-        // existing drawable
+        // Existing drawable
         if (tracking) {
           updateTrack(drawable, updatedLabels, updatedShapes)
         } else {
           updateLabel(drawable, updatedLabels, updatedShapes)
         }
       } else {
-        // new drawable
+        // New drawable
         if (tracking) {
-          // add track
+          // Add track
           addNewTrack(drawable, numItems)
         } else {
-          // add labels
+          // Add labels
           addNewLabel(drawable)
         }
       }
     } else {
-      // invalid drawable
+      // Invalid drawable
       if (!drawable.temporary) {
-        // existing drawable
+        // Existing drawable
         if (tracking) {
           terminateTrackFromDrawable(drawable, numItems)
         } else {
           deleteInvalidLabel(drawable)
         }
       }
-      // new invalid drawable should be dropped. nothing happens.
+      // New invalid drawable should be dropped. nothing happens.
     }
   })
   commitLabelsToState(updatedLabels)

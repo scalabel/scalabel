@@ -47,7 +47,7 @@ export async function parseForm (
   }
 
   // Task size is not required for videos
-  let taskSize = 1 // video case
+  let taskSize = 1 // Video case
   if (fields[types.FormField.ITEM_TYPE] !== ItemTypeName.VIDEO) {
     if (fields[types.FormField.TASK_SIZE] === '') {
       throw(Error('Please specify a task size'))
@@ -209,7 +209,7 @@ export function readItemsFile (
         return
       }
       try {
-        // might not have all fields defined, so use partial
+        // Might not have all fields defined, so use partial
         const items = yaml.load(fileBytes) as Array<Partial<ItemExport>>
         resolve(items)
       } catch {
@@ -334,7 +334,7 @@ export function createProject (
     bots: false
   }
 
-  // ensure that all video names are set to default if empty
+  // Ensure that all video names are set to default if empty
   let projectItems = formFileData.items
   projectItems.forEach((itemExport) => {
     if (itemExport.videoName === undefined) {
@@ -372,9 +372,9 @@ function getAttributeMaps (
   const attributeValueMap: {[key: string]: number} = {}
   for (let attrInd = 0; attrInd < configAttributes.length; attrInd++) {
     const configAttribute = configAttributes[attrInd]
-    // map attribute name to its index and its value
+    // Map attribute name to its index and its value
     attributeNameMap[configAttribute.name] = [attrInd, configAttribute]
-    // map attribute values to their indices (if its a list)
+    // Map attribute values to their indices (if its a list)
     if (configAttribute.toolType === 'list') {
       const values = configAttribute.values
       for (let valueInd = 0; valueInd < values.length; valueInd++) {
@@ -395,7 +395,7 @@ function getCategoryMap (
   configCategories: string[]): {[key: string]: number} {
   const categoryNameMap: {[key: string]: number} = {}
   for (let catInd = 0; catInd < configCategories.length; catInd++) {
-    // map category names to their indices
+    // Map category names to their indices
     const category = configCategories[catInd]
     categoryNameMap[category] = catInd
   }
@@ -433,7 +433,7 @@ function partitionItemsIntoTasks (
   taskSize: number): number[] {
   const taskIndices: number[] = []
   if (tracking) {
-    // partition by video name
+    // Partition by video name
     let prevVideoName: string
     items.forEach((value, index) => {
       if (value.videoName !== undefined) {
@@ -444,7 +444,7 @@ function partitionItemsIntoTasks (
       }
     })
   } else {
-    // partition uniformly
+    // Partition uniformly
     for (let i = 0; i < items.length; i += taskSize) {
       taskIndices.push(i)
     }
@@ -489,7 +489,7 @@ export function createTasks (
   const items = filterInvalidItems(
     project.items, itemType, sensors)
 
-  // update sensor info
+  // Update sensor info
   if (itemType !== ItemTypeName.FUSION) {
     sensors[-1] = makeSensor(-1, 'default', itemType)
     let maxSensorId =
@@ -558,11 +558,11 @@ export function createTasks (
       taskId: index2str(taskStartNum + taskIndex)
     }
 
-    // based on the imported labels, compute max ids
+    // Based on the imported labels, compute max ids
     // max order is the total number of labels
     let maxOrder = 0
 
-    // convert from export format to internal format
+    // Convert from export format to internal format
     const itemsForTask: ItemType[] = []
     const trackMap: TrackIdMap = {}
     for (let itemInd = 0; itemInd < realTaskSize; itemInd += 1) {
@@ -586,7 +586,7 @@ export function createTasks (
         itemExportMap[sensorId] = itemExports[newIndex]
       }
 
-      // id is not relative to task, unlike index
+      // Id is not relative to task, unlike index
       const itemId = itemStartIndex + itemInd + itemStartNum
       const timestamp = util.getItemTimestamp(itemExportMap[largestSensor])
       const newItem = convertItemToImport(
@@ -617,7 +617,7 @@ export function createTasks (
       sensorMatchingIndices[largestSensor]++
     }
 
-    // update the num labels/shapes based on imports
+    // Update the num labels/shapes based on imports
     const taskStatus: TaskStatus = {
       maxOrder
     }

@@ -12,7 +12,7 @@ import { Endpoint, FormField } from '../server/types'
 import { checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
-// submission timeout
+// Submission timeout
 export const submissionTimeout = 5000
 interface ClassType {
   /** root class */

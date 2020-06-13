@@ -2,7 +2,7 @@ import { Theme } from '@material-ui/core/styles'
 import createStyles from '@material-ui/core/styles/createStyles'
 import { defaultAppBar, defaultHeader } from './general'
 
-// styles used in the create and dashboard navigation page
+// Styles used in the create and dashboard navigation page
 export const drawerWidth = 240
 
 export const headerPageStyle = (theme: Theme) => createStyles({

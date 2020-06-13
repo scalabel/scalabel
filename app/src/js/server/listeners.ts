@@ -74,10 +74,10 @@ export class Listeners {
     }
     try {
       const projectName = req.query[types.FormField.PROJECT_NAME] as string
-      // grab the latest submissions from all tasks
+      // Grab the latest submissions from all tasks
       const tasks = await this.projectStore.getTasksInProject(projectName)
       let items: ItemExport[] = []
-      // load the latest submission for each task to export
+      // Load the latest submission for each task to export
       for (const task of tasks) {
         try {
           const taskId = task.config.taskId
@@ -101,7 +101,7 @@ export class Listeners {
         }
       }
       const exportJson = JSON.stringify(items, null, '  ')
-      // set relevant header and send the exported json file
+      // Set relevant header and send the exported json file
       res.attachment(getExportName(projectName))
       res.end(Buffer.from(exportJson, 'binary'), 'binary')
     } catch (error) {
@@ -203,7 +203,7 @@ export class Listeners {
       return
     }
 
-    // read in the data
+    // Read in the data
     const items = await readItemsFile(req.body.items)
     let project: types.Project
     let projectName: string
@@ -216,12 +216,12 @@ export class Listeners {
       return
     }
 
-    // update the project with the new items
+    // Update the project with the new items
     const itemStartNum = project.items.length
     project.items = project.items.concat(items)
     await this.projectStore.saveProject(project)
 
-    // update the tasks, make sure not to combine old and new items
+    // Update the tasks, make sure not to combine old and new items
     project.items = items
     const oldTasks = await this.projectStore.getTasksInProject(projectName)
     const taskStartNum = oldTasks.length
@@ -244,7 +244,7 @@ export class Listeners {
       try {
         const projectName = body.name
         const project = await this.projectStore.loadProject(projectName)
-        // grab the latest submissions from all tasks
+        // Grab the latest submissions from all tasks
         const tasks = await this.projectStore.getTasksInProject(projectName)
         const projectOptions: ProjectOptions = {
           name: project.config.projectName,
@@ -260,7 +260,7 @@ export class Listeners {
         for (const emptyTask of tasks) {
           let task: TaskType
           try {
-            // first, attempt loading previous submission
+            // First, attempt loading previous submission
             // TODO: Load the previous state asynchronously in dashboard
             const taskId = emptyTask.config.taskId
             const state = await this.projectStore.loadState(projectName, taskId)
@@ -302,24 +302,24 @@ export class Listeners {
     files: { [key: string]: string },
     itemsRequired: boolean, res: Response) {
     try {
-        // parse form from request
+        // Parse form from request
       const form = await parseForm(fields, this.projectStore)
-        // parse item, category, and attribute data from the form
+        // Parse item, category, and attribute data from the form
       const formFileData = await parseFiles(
         form.labelType, files, itemsRequired)
-        // create the project from the form data
+        // Create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([
         this.projectStore.saveProject(project),
-          // create tasks then save them
+          // Create tasks then save them
         createTasks(project).then(
             (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
-          // save the project
+          // Save the project
       ])
       res.send()
     } catch (err) {
       Logger.error(err)
-        // alert the user that something failed
+        // Alert the user that something failed
       res.status(400).send(err.message)
     }
   }
