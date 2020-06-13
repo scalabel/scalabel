@@ -46,7 +46,7 @@ class ToggleButtons extends React.Component<Props> {
     alignment: string
   ) => {
     this.props.handleAttributeToggle(this.props.name, alignment)
-    // re-render to get correct alignment
+    // Re-render to get correct alignment
     this.setState({})
   }
 

@@ -23,7 +23,7 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-// need a different reference so selectors don't cache results
+// Need a different reference so selectors don't cache results
 const testJsonAutosave = _.cloneDeep(testJson)
 testJsonAutosave.task.config.autosave = true
 
@@ -39,10 +39,10 @@ describe('Save button functionality', () => {
     initStore(testJsonAutosave, synchronizer.middleware)
     Session.autosave = true
 
-    // add a fake task action to be saved
+    // Add a fake task action to be saved
     synchronizer.actionQueue.push(addLabel(0, makeLabel()))
 
-    // only need to test save button for manual saving
+    // Only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
@@ -67,10 +67,10 @@ describe('Save button functionality', () => {
     initStore(testJson, synchronizer.middleware)
     Session.autosave = false
 
-    // add a fake task action to be saved
+    // Add a fake task action to be saved
     synchronizer.actionQueue.push(addLabel(0, makeLabel()))
 
-    // only need to test save button for manual saving
+    // Only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
@@ -100,7 +100,7 @@ describe('Submit button functionality', () => {
     const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
     initStore(testJsonAutosave, synchronizer.middleware)
 
-    // only need to test save button for manual saving
+    // Only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
@@ -118,19 +118,19 @@ describe('Submit button functionality', () => {
     fireEvent.click(submitButton)
     checkSubmitDispatch(dispatchSpy)
 
-    // autosave is on, so the dispatch will trigger a save
+    // Autosave is on, so the dispatch will trigger a save
     expect(mockSocket.emit).toHaveBeenCalled()
     const emitCalls = mockSocket.emit.mock.calls
 
     // 2 calls: 1 for init session, 1 for submit
     expect(emitCalls.length).toBe(2)
 
-    // each call has 2 args: event name and action message
+    // Each call has 2 args: event name and action message
     const emitArgs = emitCalls[1]
     expect(emitArgs.length).toBe(2)
     expect(emitArgs[0]).toBe(EventName.ACTION_SEND)
 
-    // the action message should just contain the submit action
+    // The action message should just contain the submit action
     const actionMessage: SyncActionMessageType = emitArgs[1]
     const actionPacket = actionMessage.actions
 
@@ -150,7 +150,7 @@ describe('Submit button functionality', () => {
     const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
     initStore(testJson, synchronizer.middleware)
 
-    // only need to test save button for manual saving
+    // Only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
@@ -166,24 +166,24 @@ describe('Submit button functionality', () => {
     const submitButton = getByTestId('Submit')
     fireEvent.click(submitButton)
 
-    // check that submit action was dispatched
+    // Check that submit action was dispatched
     checkSubmitDispatch(dispatchSpy)
 
-    // make sure that the submit action was saved
+    // Make sure that the submit action was saved
     expect(mockSocket.emit).toHaveBeenCalled()
     const emitCalls = mockSocket.emit.mock.calls
 
     // 1 call: initSession and submit actions are saved together
     expect(emitCalls.length).toBe(1)
 
-    // each call has 2 args: event name and action message
+    // Each call has 2 args: event name and action message
     const emitArgs = emitCalls[0]
     expect(emitArgs.length).toBe(2)
     expect(emitArgs[0]).toBe(EventName.ACTION_SEND)
     const actionMessage: SyncActionMessageType = emitArgs[1]
     const actionPacket = actionMessage.actions
     expect(actionPacket.actions.length).toBe(2)
-    // the first action should be INIT_SESSION, so the second is submit
+    // The first action should be INIT_SESSION, so the second is submit
     expect(actionPacket.actions[1].type).toBe(SUBMIT)
   })
 })

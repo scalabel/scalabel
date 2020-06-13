@@ -230,7 +230,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     if (this.parent) {
       const direction = new THREE.Vector3()
       direction.copy(this._direction)
-      // direction.applyQuaternion(worldQuaternion.inverse())
+      // Direction.applyQuaternion(worldQuaternion.inverse())
 
       const newScale = Math.abs(direction.dot(worldScale)) * 3. / 4.
 

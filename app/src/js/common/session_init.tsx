@@ -25,7 +25,7 @@ import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
  * @param {string} containerName - the name of the container
  */
 export function initSession (containerName: string): void {
-  // get params from url path. These uniquely identify a SAT.
+  // Get params from url path. These uniquely identify a SAT.
   const searchParams = new URLSearchParams(window.location.search)
   const taskIndex = parseInt(searchParams.get('task_index') as string, 10)
   const projectName = searchParams.get('project_name') as string

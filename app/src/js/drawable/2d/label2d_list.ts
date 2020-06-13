@@ -159,10 +159,10 @@ export class Label2DList {
     const self = this
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
-    // remove any label not in the state
+    // Remove any label not in the state
     self._labels = Object.assign({} as typeof self._labels,
         _.pick(self._labels, _.keys(item.labels)))
-    // update drawable label values
+    // Update drawable label values
     _.forEach(item.labels, (label, labelId) => {
       if (!(labelId in self._labels)) {
         const newLabel = makeDrawableLabel2D(
@@ -179,7 +179,7 @@ export class Label2DList {
         }
       }
     })
-    // order the labels and assign order values
+    // Order the labels and assign order values
     self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })

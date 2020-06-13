@@ -29,7 +29,7 @@ describe('Test bot user manager', () => {
   test('Test registration', async () => {
     const botManager = new BotManager(config, subscriber, client)
 
-    // test that different tasks create different bots
+    // Test that different tasks create different bots
     const goodRegisterMessages: RegisterMessageType[] = [
       makeRegisterData('project', 0, 'user', false),
       makeRegisterData('project', 1, 'user', false),
@@ -38,33 +38,33 @@ describe('Test bot user manager', () => {
     ]
 
     for (const registerData of goodRegisterMessages) {
-      // make sure redis is empty initially
+      // Make sure redis is empty initially
       const dummyBotData = makeBotData(registerData, 'botId')
       expect(await botManager.checkBotExists(dummyBotData)).toBe(false)
 
-      // register a new bot
+      // Register a new bot
       const botData = await botManager.handleRegister(
         '', JSON.stringify(registerData))
 
-      // should match register data, and generate an id
+      // Should match register data, and generate an id
       expect(botData.projectName).toBe(registerData.projectName)
       expect(botData.taskIndex).toBe(registerData.taskIndex)
       expect(botData.address).toBe(registerData.address)
       expect(botManager.checkBotCreated(botData)).toBe(true)
 
-      // check that it was stored in redis
+      // Check that it was stored in redis
       expect(await botManager.checkBotExists(botData)).toBe(true)
       const redisBotData = await botManager.getBot(getRedisBotKey(botData))
       expect(redisBotData).toEqual(botData)
     }
 
-    // make sure only dummy bots are created for the following cases:
+    // Make sure only dummy bots are created for the following cases:
     const badRegisterMessages: RegisterMessageType[] = [
-      // duplicated messages
+      // Duplicated messages
       goodRegisterMessages[0],
-      // same task, different user
+      // Same task, different user
       makeRegisterData('project', 0, 'user2', false),
-      // bot user
+      // Bot user
       makeRegisterData('project', 0, 'user', true)
     ]
     for (const registerData of badRegisterMessages) {
@@ -73,7 +73,7 @@ describe('Test bot user manager', () => {
       expect(botManager.checkBotCreated(fakeBotData)).toBe(false)
     }
 
-    // test that the bots are restored correctly
+    // Test that the bots are restored correctly
     const oldBots = await botManager.restoreBots()
     expect(oldBots.length).toBe(goodRegisterMessages.length)
   })
@@ -84,14 +84,14 @@ describe('Test bot user manager', () => {
     const registerData = makeRegisterData('project2', 0, 'user2', false)
     const botData = makeBotData(registerData, 'botId')
 
-    // make sure redis is empty initially
+    // Make sure redis is empty initially
     expect(await botManager.checkBotExists(botData)).toBe(false)
 
     const message = JSON.stringify(registerData)
     await botManager.handleRegister('', message)
     expect(await botManager.checkBotExists(botData)).toBe(true)
 
-    // no actions occur, so after timeout, bot should be deleted
+    // No actions occur, so after timeout, bot should be deleted
     await sleep(1000)
     expect(await botManager.checkBotExists(botData)).toBe(false)
   })

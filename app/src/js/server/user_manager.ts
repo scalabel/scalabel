@@ -125,7 +125,7 @@ export class UserManager {
     const userToSockets = userData.userToSockets
 
     if (!socketToUser || !(socketId in socketToUser)) {
-      // socket has no associated user
+      // Socket has no associated user
       return userData
     }
     // Remove map from socket to user
@@ -168,7 +168,7 @@ export class UserManager {
     userMetadata: UserMetadata, socketId: string): [UserMetadata, string] {
     const socketToProject = userMetadata.socketToProject
     if (!(socketId in socketToProject)) {
-      // socket has no associated project
+      // Socket has no associated project
       return [userMetadata, '']
     }
     const projectName = socketToProject[socketId]

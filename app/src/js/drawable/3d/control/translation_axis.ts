@@ -194,7 +194,7 @@ export class TranslationAxis extends THREE.Group
     if (this.parent) {
       const direction = new THREE.Vector3()
       direction.copy(this._direction)
-      // direction.applyQuaternion(worldQuaternion.inverse())
+      // Direction.applyQuaternion(worldQuaternion.inverse())
 
       const newScale = Math.abs(direction.dot(worldScale)) * 3. / 4.
 

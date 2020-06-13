@@ -57,7 +57,7 @@ export enum ViewerConfigTypeName {
 
 export enum PathPointType {
   LINE = 'line',
-  CURVE = 'bezier' // cubic Bezier curve path points
+  CURVE = 'bezier' // Cubic Bezier curve path points
 }
 
 export enum Cursor {

@@ -4,7 +4,7 @@ import Logger from '../../js/server/logger'
 module.exports = async () => {
   Logger.info('Info logger is muted for concise test status report. ' +
               'The switch is in test/setup/local_setup.ts')
-  // make sure this matches the redis port in test_config.yml
+  // Make sure this matches the redis port in test_config.yml
   const redisProc = child.spawn('redis-server', ['--appendonly', 'no',
     '--save', '', '--port', '6378', '--bind', '127.0.0.1',
     '--protected-mode', 'yes', '--loglevel', 'warning'])

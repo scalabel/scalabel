@@ -197,7 +197,7 @@ class LabelLayout extends React.Component<Props, State> {
           <main className={classes.main}>
             {
               this.optionalSplit('vertical',
-                // left sidebar
+                // Left sidebar
                 this.optionalSplit('horizontal',
                   leftSidebar1,
                   leftSidebar2,
@@ -210,7 +210,7 @@ class LabelLayout extends React.Component<Props, State> {
                 ),
 
                 this.optionalSplit('vertical',
-                  // center
+                  // Center
                   this.optionalSplit('horizontal',
                     labelInterface,
                     bottomBar,
@@ -223,7 +223,7 @@ class LabelLayout extends React.Component<Props, State> {
                     'center'
                   ),
 
-                  // right sidebar
+                  // Right sidebar
                   this.optionalSplit('horizontal',
                     rightSidebar1,
                     rightSidebar2,

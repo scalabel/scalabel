@@ -103,7 +103,7 @@ test('Update existing drawable of a track', () => {
   dispatch(action.goToItem(1))
   const state = Session.getState()
   expect(_.size(state.task.items[1].labels)).toEqual(3)
-  // label coord is [835, 314][861, 406]
+  // Label coord is [835, 314][861, 406]
   const label2dList = new Label2DList()
   label2dList.updateState(state)
   const label = label2dList.get(2)
@@ -111,7 +111,7 @@ test('Update existing drawable of a track', () => {
   label.setSelected(true)
   label.setHighlighted(true, 5) // Handles.BOTTOM_RIGHT
   label.onMouseDown(new Vector2D(861, 406), 1)
-  // mouse move is essential
+  // Mouse move is essential
   label.onMouseMove(new Vector2D(850, 350), new Size2D(1200, 1200), 1, 2)
   label.onMouseUp(new Vector2D(850, 350))
 
@@ -120,7 +120,7 @@ test('Update existing drawable of a track', () => {
   const currentState = Session.getState()
   const newLabel = currentState.task.items[1].labels['70']
   const rect = currentState.task.items[1].shapes[newLabel.shapes[0]] as RectType
-  // expect the label resized is changed
+  // Expect the label resized is changed
   expect(rect.x2).toEqual(850)
   expect(rect.y2).toEqual(350)
   const trackLabels = currentState.task.tracks[newLabel.track].labels
@@ -130,7 +130,7 @@ test('Update existing drawable of a track', () => {
       const item = currentState.task.items[itemIdIdx]
       const pageLabel = item.labels[trackLabels[itemIdIdx]]
       const pageRect = item.shapes[pageLabel.shapes[0]] as RectType
-      // expect all labels in the track afterward is changed
+      // Expect all labels in the track afterward is changed
       expect(pageRect.x2).toEqual(850)
       expect(pageRect.y2).toEqual(350)
     }
@@ -146,7 +146,7 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
   dispatch(action.goToItem(1))
   const state = Session.getState()
   expect(_.size(state.task.items[1].labels)).toEqual(3)
-  // label coord is [835, 314][861, 406]
+  // Label coord is [835, 314][861, 406]
   const label2dList = new Label2DList()
   label2dList.updateState(state)
   const label = label2dList.get(2)
@@ -154,7 +154,7 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
   label.setSelected(true)
   label.setHighlighted(true, 5) // Handles.BOTTOM_RIGHT
   label.onMouseDown(new Vector2D(861, 406), 1)
-  // mouse move is essential
+  // Mouse move is essential
   label.onMouseMove(new Vector2D(837, 315), new Size2D(1200, 1200), 1, 2)
   label.onMouseUp(new Vector2D(837, 315))
   const trackId = label.trackId
@@ -164,18 +164,18 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
 
   const currentState = Session.getState()
   const newLabel = currentState.task.items[1].labels['70']
-  expect(newLabel).toBeUndefined() // expect the resized label is gone
+  expect(newLabel).toBeUndefined() // Expect the resized label is gone
   for (const itemId of Object.keys(oldTrackLabels)) {
     const itemIdIdx = Number(itemId)
     if (itemIdIdx >= 1) {
       const item = currentState.task.items[itemIdIdx]
       const pageLabel = item.labels[oldTrackLabels[itemIdIdx]]
-      // expect every label in the track afterward is gone
+      // Expect every label in the track afterward is gone
       expect(pageLabel).toBeUndefined()
     }
   }
   const currentTrack = currentState.task.tracks[trackId]
-  // expect the label in first page is still exists
+  // Expect the label in first page is still exists
   expect(_.size(currentTrack.labels)).toEqual(1)
   expect(currentState.task.items[0].labels[oldTrackLabels[0]])
     .not.toBeUndefined()
@@ -190,7 +190,7 @@ test('Update existing drawable of a track to invalid, from page 0', () => {
   dispatch(action.goToItem(0))
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
-  // label coord is [835, 314][861, 406]
+  // Label coord is [835, 314][861, 406]
   const label2dList = new Label2DList()
   label2dList.updateState(state)
   const label = label2dList.get(2)
@@ -198,7 +198,7 @@ test('Update existing drawable of a track to invalid, from page 0', () => {
   label.setSelected(true)
   label.setHighlighted(true, 5) // Handles.BOTTOM_RIGHT
   label.onMouseDown(new Vector2D(861, 406), 1)
-  // mouse move is essential
+  // Mouse move is essential
   label.onMouseMove(new Vector2D(837, 315), new Size2D(1200, 1200), 1, 2)
   label.onMouseUp(new Vector2D(837, 315))
   const trackId = label.trackId
@@ -208,15 +208,15 @@ test('Update existing drawable of a track to invalid, from page 0', () => {
 
   const currentState = Session.getState()
   const newLabel = currentState.task.items[0].labels['69']
-  expect(newLabel).toBeUndefined() // expect the resized label is gone
+  expect(newLabel).toBeUndefined() // Expect the resized label is gone
   for (const itemId of Object.keys(oldTrackLabels)) {
     const itemIdIdx = Number(itemId)
     const item = currentState.task.items[itemIdIdx]
     const pageLabel = item.labels[oldTrackLabels[itemIdIdx]]
-    // expect every label in the track afterward is gone
+    // Expect every label in the track afterward is gone
     expect(pageLabel).toBeUndefined()
   }
   const currentTrack = currentState.task.tracks[trackId]
-  // expect the label in first page is still exists
+  // Expect the label in first page is still exists
   expect(currentTrack).toBeUndefined()
 })

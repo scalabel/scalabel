@@ -40,7 +40,7 @@ export class Point2D extends Vector2D {
   public draw (
     context: Context2D, ratio: number, style: Point2DStyle): void {
     context.save()
-    // convert to display resolution
+    // Convert to display resolution
     const real = this.clone().scale(ratio)
     context.beginPath()
     context.fillStyle = toCssColor(style.color)
