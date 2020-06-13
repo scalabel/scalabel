@@ -32,7 +32,7 @@ export function configureStore (
       ADD_LABELS,
       DELETE_LABELS
     ]),
-    debug: false // disable default debug since it misses sync actions
+    debug: false // Disable default debug since it misses sync actions
   })
 
   const allMiddleware: Middleware[] = [thunk]
