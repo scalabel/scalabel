@@ -12,7 +12,7 @@ import { getInstructionUrl, getPageTitle } from '../shared/util'
 import { checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
-// submission timeout
+// Submission timeout
 export const submissionTimeout = 5000
 interface ClassType {
   /** root class */

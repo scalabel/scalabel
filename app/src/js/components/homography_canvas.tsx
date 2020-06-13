@@ -97,7 +97,7 @@ class HomographyCanvas extends ImageCanvas {
             && displayRect.height
             && isFrameLoaded(this.state, item, sensor)
             && this.imageContext) {
-              // set canvas size
+              // Set canvas size
             canvas.style.height = displayRect.height + 'px'
             canvas.style.width = displayRect.width + 'px'
           }
@@ -128,7 +128,7 @@ class HomographyCanvas extends ImageCanvas {
           item < Session.images.length &&
           sensor in Session.images[item]) {
         this._image = Session.images[item][sensor]
-        // redraw imageCanvas
+        // Redraw imageCanvas
         if (this._plane) {
           this.drawHomography()
         } else {
@@ -261,9 +261,9 @@ class HomographyCanvas extends ImageCanvas {
             const src = new THREE.Vector3(
               dstX / this.imageCanvas.width, dstY / this.imageCanvas.height, 1
             )
-            // src.applyMatrix3(this._intrinsicInverse)
+            // Src.applyMatrix3(this._intrinsicInverse)
             src.applyMatrix3(homographyInverse)
-            // src.applyMatrix3(this._intrinsicProjection)
+            // Src.applyMatrix3(this._intrinsicProjection)
             src.multiplyScalar(1. / src.z)
 
             const srcX = Math.floor(

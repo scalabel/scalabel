@@ -21,7 +21,7 @@ export function addBox3dLabel (
   size: Vector3Type,
   orientation: Vector3Type
 ): AddLabelsAction {
-  // create the rect object
+  // Create the rect object
   const cube = makeCube({ center, size, orientation })
   const label = makeLabel({
     type: types.LabelTypeName.BOX_3D, category, sensors

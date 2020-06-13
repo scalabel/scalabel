@@ -100,7 +100,7 @@ export class Grid3D extends Shape3D {
         // DO NOT REMOVE: Used for checking whether ray intersects within the
         // bounds of the grid. Code below assumes grid is boundless
 
-        // const worldToPlane = new THREE.Matrix4()
+        // Const worldToPlane = new THREE.Matrix4()
         // worldToPlane.getInverse(this.matrixWorld)
         // const intersectionPlane = new THREE.Vector3()
         // intersectionPlane.copy(intersection)

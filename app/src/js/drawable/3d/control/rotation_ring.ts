@@ -107,7 +107,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     intersectionToCamera.copy(this._highlightIntersection)
     intersectionToCamera.sub(newProjection.origin)
 
-    // if the intersection is further away than the center, reverse direction
+    // If the intersection is further away than the center, reverse direction
     if (intersectionToCamera.length() - centerToCamera.length() > 1e-3) {
       dragDirection.negate()
     }

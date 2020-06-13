@@ -245,7 +245,7 @@ export interface ItemType {
   /** Map between data source id and url */
   urls: {[id: number]: string}
   /** Labels of the item */
-  labels: LabelIdMap // list of label
+  labels: LabelIdMap // List of label
   /** shapes of the labels on this item */
   shapes: ShapeIdMap
   /** the timestamp for the item */

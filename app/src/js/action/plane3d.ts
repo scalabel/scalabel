@@ -19,7 +19,7 @@ export function addPlaneLabel (
   offset: Vector3Type,
   orientation: Vector3Type
 ): AddLabelsAction {
-  // create the rect object
+  // Create the rect object
   const plane = makePlane({ offset, orientation })
   const label = makeLabel({ type: LabelTypeName.PLANE_3D, sensors })
   return actions.addLabel(

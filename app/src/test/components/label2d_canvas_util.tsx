@@ -131,7 +131,7 @@ export function drag (
   label2d: Label2dCanvas, x1: number, y1: number, x2: number, y2: number) {
   mouseMove(label2d, x1, y1)
   mouseDown(label2d, x1, y1)
-  // move to a middle point first for more testing
+  // Move to a middle point first for more testing
   mouseMove(label2d, (x1 + x2) / 2, (y1 + y2) / 2)
   mouseMove(label2d, x2, y2)
   mouseUp(label2d, x2, y2)

@@ -39,7 +39,7 @@ export class BotManager {
    * Listen for new sessions and recreate old bots
    */
   public async listen (): Promise<BotData[]> {
-    // listen for new sessions
+    // Listen for new sessions
     await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
     return this.restoreBots()
   }
