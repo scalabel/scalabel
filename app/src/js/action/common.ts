@@ -1,8 +1,6 @@
-import { ActionCreator } from 'redux'
-import { ThunkAction } from 'redux-thunk'
-import { ReduxState } from '../common/configure_store'
 import { getStateGetter } from '../common/session'
 import { getStateFunc } from '../common/simple_store'
+import { ThunkCreatorType } from '../common/types'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
 import { ConnectionStatus, DeepPartialState, IdType, LabelType,
@@ -503,10 +501,6 @@ export function setStatusToReconnecting () {
 export function setStatusToSubmitting () {
   return updateSessionStatus(ConnectionStatus.SUBMITTING)
 }
-
-type ThunkCreatorType =
-  ActionCreator<
-  ThunkAction<void, ReduxState, void, types.ActionType>>
 
 /**
  * Mark status as saving, unless compute is ongoing

@@ -5,11 +5,11 @@ import { connect, disconnect, receiveBroadcast, registerSession,
   updateAll } from '../action/common'
 import { State } from '../functional/types'
 import { EventName, SyncActionMessageType } from '../server/types'
-import { configureStore, ReduxStore } from './configure_store'
+import { configureStore } from './configure_store'
 import Session from './session'
 import { makeSyncMiddleware } from './sync_middleware'
 import { Synchronizer } from './synchronizer'
-import { QueryArg } from './types'
+import { FullStore, QueryArg } from './types'
 
 /**
  * Main function for initiating the frontend session
@@ -71,7 +71,7 @@ export function initSessionForTask (
  * Connect socket events to Redux actions
  */
 export function setSocketListeners (
-  store: ReduxStore, socket: SocketIOClient.Socket) {
+  store: FullStore, socket: SocketIOClient.Socket) {
   socket.on(EventName.CONNECT, () => {
     store.dispatch(connect())
   })
@@ -89,7 +89,7 @@ export function setSocketListeners (
 /**
  * Set listeners for the HTML body
  */
-function setBodyListeners (store: ReduxStore) {
+function setBodyListeners (store: FullStore) {
   const body = document.getElementsByTagName('BODY') as
     HTMLCollectionOf<HTMLElement>
   body[0].onresize = () => {

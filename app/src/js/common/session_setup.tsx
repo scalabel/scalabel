@@ -12,11 +12,10 @@ import { makeDefaultViewerConfig } from '../functional/states'
 import { DeepPartialState, PointCloudViewerConfigType, SplitType, State } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
-import { ReduxStore } from './configure_store'
 import Session from './session'
 import { dispatchFunc, getStateFunc } from './simple_store'
 import { Track } from './track/track'
-import { DataType, ItemTypeName, ViewerConfigTypeName } from './types'
+import { DataType, FullStore, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
  * Initialize state, then set up the rest of the session
@@ -49,7 +48,7 @@ export function setupSession (
  * @param containername: string name
  */
 function renderDom (
-  containerName: string, store: ReduxStore) {
+  containerName: string, store: FullStore) {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
       <Provider store={store}>

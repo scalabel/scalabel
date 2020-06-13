@@ -1,25 +1,21 @@
 import _ from 'lodash'
-import { AnyAction } from 'redux'
-import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 import * as THREE from 'three'
 import * as types from '../action/types'
 import { Window } from '../components/window'
 import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
-import { configureStore, ReduxState, ReduxStore } from './configure_store'
+import { configureStore } from './configure_store'
 import { getStateFunc, SimpleStore } from './simple_store'
 import { Track } from './track/track'
+import { FullStore, ThunkActionType } from './types'
 
 /**
  * Singleton session class
  */
 class Session {
   /** The store to save states */
-  public store: ReduxStore & {
-    /** Thunk dispatch used for redux-thunk async actions */
-    dispatch: ThunkDispatch<ReduxState, undefined, AnyAction>;
-  }
+  public store: FullStore
   /** Images of the session */
   public images: Array<{[id: number]: HTMLImageElement}>
   /** Point cloud */
@@ -82,13 +78,11 @@ class Session {
    * Wrapper for redux store dispatch of actions
    * @param {types.ActionType} action: action description
    */
-  public dispatch (action: types.ActionType | ThunkAction<
-    void, ReduxState, void, types.ActionType>) {
+  public dispatch (action: types.ActionType | ThunkActionType) {
     if (action.hasOwnProperty('type')) {
       this.store.dispatch(action as types.ActionType)
     } else {
-      this.store.dispatch(action as ThunkAction<
-        void, ReduxState, void, types.ActionType>)
+      this.store.dispatch(action as ThunkActionType)
     }
   }
 

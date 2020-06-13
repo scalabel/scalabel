@@ -4,6 +4,7 @@ import { setStatusToUnsaved } from '../../js/action/common'
 import { AddLabelsAction } from '../../js/action/types'
 import Session from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
+import { ThunkDispatchType } from '../../js/common/types'
 import { index2str } from '../../js/common/util'
 import * as selector from '../../js/functional/selector'
 import {
@@ -33,6 +34,9 @@ beforeAll(() => {
   autosave = true
 })
 
+const dispatch: ThunkDispatchType = Session.dispatch.bind(
+  Session) as ThunkDispatchType
+
 beforeEach(() => {
   Session.dispatch(setStatusToUnsaved())
 })
@@ -43,7 +47,7 @@ describe('Test synchronizer functionality', () => {
     // Since this deals with registration, don't initialize the state
     const initializeState = false
     const sync = startSynchronizer(initializeState)
-    sync.sendConnectionMessage('')
+    sync.sendConnectionMessage('', dispatch)
 
     // Frontend doesn't have a session id until after registration
     const expectedSessId = ''
@@ -63,7 +67,7 @@ describe('Test synchronizer functionality', () => {
 
     // If second ack arrives, it is ignored
     sync.handleBroadcast(
-      packetToMessage(ackPackets[0]))
+      packetToMessage(ackPackets[0]), sessionId, dispatch)
     expect(sync.numLoggedActions).toBe(1)
   })
 
@@ -91,12 +95,12 @@ describe('Test synchronizer functionality', () => {
     }
 
     sync.handleBroadcast(
-      packetToMessageBot(modelPackets[0]))
+      packetToMessageBot(modelPackets[0]), sessionId, dispatch)
     expect(sync.numActionsPendingPrediction).toBe(1)
     expect(selector.isComputeDone(Session.store.getState())).toBe(false)
 
     sync.handleBroadcast(
-      packetToMessageBot(modelPackets[1]))
+      packetToMessageBot(modelPackets[1]), sessionId, dispatch)
     expect(sync.numActionsPendingPrediction).toBe(0)
     expect(selector.isComputeDone(Session.store.getState())).toBe(true)
   })
@@ -106,7 +110,7 @@ describe('Test synchronizer functionality', () => {
     const frontendActions = dispatchAndCheckActions(sync, 1)
 
     // Backend disconnects instead of acking
-    sync.handleDisconnect()
+    sync.handleDisconnect(dispatch)
     expect(selector.isStatusReconnecting(Session.store.getState())).toBe(true)
 
     // Reconnect, but some missed actions occured in the backend
@@ -114,9 +118,10 @@ describe('Test synchronizer functionality', () => {
       getInitialState(sessionId),
       [getRandomBox2dAction()]
     )
-    sync.sendConnectionMessage(sessionId)
+    sync.sendConnectionMessage(sessionId, dispatch)
     checkConnectMessage(sessionId)
-    sync.finishRegistration(newInitialState, autosave, sessionId, false)
+    sync.finishRegistration(
+      newInitialState, autosave, sessionId, false, dispatch)
 
     /**
      * Check that frontend state updates correctly
@@ -150,7 +155,7 @@ function dispatchAndCheckActions (
   const actions: AddLabelsAction[] = []
   for (let _ = 0; _ < numActions; _++) {
     const action = getRandomBox2dAction()
-    sync.queueActionForSaving(action, autosave, sessionId, bots)
+    sync.queueActionForSaving(action, autosave, sessionId, bots, dispatch)
     actions.push(action)
   }
 
@@ -171,7 +176,7 @@ function sendAcks (sync: Synchronizer): ActionPacketType[] {
   const actionPackets = sync.listActionsPendingSave()
   for (const actionPacket of actionPackets) {
     sync.handleBroadcast(
-      packetToMessage(actionPacket))
+      packetToMessage(actionPacket), sessionId, dispatch)
   }
   return actionPackets
 }
@@ -219,7 +224,8 @@ function startSynchronizer (setInitialState: boolean = true): Synchronizer {
     synchronizer.finishRegistration(initialState,
       initialState.task.config.autosave,
       initialState.session.id,
-      initialState.task.config.bots)
+      initialState.task.config.bots,
+      dispatch)
   }
 
   // Initially, no actions are queued for saving

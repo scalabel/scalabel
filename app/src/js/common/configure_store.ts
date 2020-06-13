@@ -1,18 +1,12 @@
-import { AnyAction, applyMiddleware, createStore, Middleware, Reducer, Store } from 'redux'
+import { applyMiddleware, createStore, Middleware, Reducer } from 'redux'
 import { createLogger } from 'redux-logger'
-import thunk, { ThunkDispatch } from 'redux-thunk'
-import undoable, { includeAction, StateWithHistory } from 'redux-undo'
-import {
-  ADD_LABELS,
-  BaseAction,
-  DELETE_LABELS
-} from '../action/types'
+import thunk from 'redux-thunk'
+import undoable, { includeAction } from 'redux-undo'
+import { ADD_LABELS, DELETE_LABELS } from '../action/types'
 import { makeState } from '../functional/states'
 import { State } from '../functional/types'
 import { reducer } from './reducer'
-
-export type ReduxState = StateWithHistory<State>
-export type ReduxStore = Store<ReduxState, AnyAction>
+import { FullStore, ReduxState } from './types'
 
 /**
  * Configure the main store for the state
@@ -24,10 +18,7 @@ export type ReduxStore = Store<ReduxState, AnyAction>
 export function configureStore (
     initialState: Partial<State>,
     devMode: boolean = false,
-    middleware?: Middleware): ReduxStore & {
-      /** Thunk dispatch used for redux-thunk async actions */
-      dispatch: ThunkDispatch<State, undefined, BaseAction>;
-    } {
+    middleware?: Middleware): FullStore {
   const initialHistory = {
     past: Array<State>(),
     present: makeState(initialState),
