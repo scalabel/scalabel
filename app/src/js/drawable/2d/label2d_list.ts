@@ -151,7 +151,7 @@ export class Label2DList {
    * update labels from the state
    */
   public updateState (state: State): void {
-    // don't interrupt ongoing editing
+    // Don't interrupt ongoing editing
     if (this._selectedLabels.length > 0 && this.selectedLabels[0].editing) {
       return
     }
