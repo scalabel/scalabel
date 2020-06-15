@@ -303,7 +303,15 @@ function mergeTracksInItems (
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
   const props: Array<Array<Partial<LabelType>>> = _.range(
     items.length).map(() => [])
-  const prop: Partial<LabelType> = { track: tracks[0].id }
+
+  const firstLabelId = tracks[0].labels[items[0].index]
+  const firstLabel = items[0].labels[firstLabelId]
+
+  const prop: Partial<LabelType> = {
+    track: tracks[0].id,
+    category: firstLabel.category
+  }
+
   const track = _.cloneDeep(tracks[0])
   for (let i = 1; i < tracks.length; i += 1) {
     _.forEach(tracks[i].labels, (labelId, itemIndex) => {
