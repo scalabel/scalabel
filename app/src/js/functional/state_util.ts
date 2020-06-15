@@ -1,9 +1,11 @@
+import _ from 'lodash'
 import { makeItem } from './states'
 import {
   IdType,
   ItemType,
   ShapeType,
   State,
+  TrackType,
   ViewerConfigType
 } from './types'
 
@@ -20,6 +22,86 @@ export function getCurrentItem (state: State): ItemType {
   } else {
     return state.task.items[state.user.select.item]
   }
+}
+
+/**
+ * Get the number of labels on the item
+ * @param state
+ * @param itemIndex
+ */
+export function getNumLabels (state: State, itemIndex: number) {
+  return _.size(state.task.items[itemIndex].labels)
+}
+
+/**
+ * Get the number of shapes on the item
+ * @param state
+ * @param itemIndex
+ */
+export function getNumShapes (state: State, itemIndex: number) {
+  return _.size(state.task.items[itemIndex].labels)
+}
+
+/**
+ * Get the track with the specified id
+ * @param state
+ * @param trackIndex
+ */
+export function getTrack (state: State, trackId: string) {
+  return state.task.tracks[trackId]
+}
+
+/**
+ * Get the total number of tracks
+ * @param state
+ */
+export function getNumTracks (state: State) {
+  return _.size(state.task.tracks)
+}
+
+/**
+ * Get the total number of items
+ * @param state
+ */
+export function getNumItems (state: State) {
+  return _.size(state.task.items)
+}
+
+/**
+ * Get the number of labels associated with the track
+ * @param track
+ */
+export function getNumLabelsForTrack (track: TrackType) {
+  return _.size(track.labels)
+}
+
+/**
+ * Get the id of the label in the track at the specified item
+ * @param state
+ * @param trackIdx
+ * @param itemIdx
+ */
+export function getLabelInTrack (
+  state: State, trackId: string, itemIdx: number) {
+  return state.task.tracks[trackId].labels[itemIdx]
+}
+
+/**
+ * Get all labels that are currently selected
+ * @param state
+ */
+export function getSelectedLabels (state: State) {
+  return state.user.select.labels
+}
+
+/**
+ * Get the category of the specified label
+ * @param state
+ * @param itemIdx
+ * @param labelId
+ */
+export function getCategory (state: State, itemIndex: number, labelId: IdType) {
+  return state.task.items[itemIndex].labels[labelId].category
 }
 
 /**
