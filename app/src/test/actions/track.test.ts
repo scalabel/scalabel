@@ -47,4 +47,23 @@ test('Test tracks ops', () => {
   state = Session.getState()
   expect(_.size(state.task.tracks)).toBe(3)
   expect(state.task.tracks[toMergeTrack1].labels[continueItemIdx]).toBe(labelId)
+  // ^^ make these have different categories before merging
+
+  // Test selection is maintained
+  // The merged track has labels at items 0-3, and 5
+  Session.dispatch(action.goToItem(2))
+  state = getState()
+  const labelId2 = state.task.tracks[toMergeTrack1].labels[2]
+  const labelId3 = state.task.tracks[toMergeTrack1].labels[3]
+  const labelId5 = state.task.tracks[toMergeTrack1].labels[5]
+  Session.dispatch(action.changeSelect(
+    { labels: { 2: [labelId2] } }
+  ))
+  expect(getState().user.select.labels).toStrictEqual({ 2: [labelId2] })
+  Session.dispatch(action.goToItem(3))
+  expect(getState().user.select.labels).toStrictEqual({ 3: [labelId3] })
+  Session.dispatch(action.goToItem(4))
+  expect(getState().user.select.labels).toStrictEqual({})
+  Session.dispatch(action.goToItem(5))
+  expect(getState().user.select.labels).toStrictEqual({ 5: [labelId5] })
 })
