@@ -5,11 +5,8 @@ import * as path from 'path'
 import { ChangeEvent } from 'react'
 import * as util from 'util'
 import Session from '../../js/common/session'
-import { initFromJson } from '../../js/common/session_init'
-import { Synchronizer } from '../../js/common/synchronizer'
 import CreateForm from '../../js/components/create_form'
 import { isStatusSaved } from '../../js/functional/selector'
-import { State } from '../../js/functional/types'
 import { ItemExport } from '../../js/server/bdd_types'
 import { getTaskDir } from '../../js/server/path'
 import { Endpoint, FormField } from '../../js/server/types'
@@ -147,23 +144,6 @@ export function waitForSave (): Promise<object> {
 export function deleteTestDir (): void {
   fs.removeSync(testConfig.testDirPath)
   return
-}
-
-/**
- * init session for integration test
- */
-export async function projectInitSession (): Promise<Synchronizer> {
-  return new Promise<Synchronizer>((resolve) => {
-    const synchronizer = new Synchronizer(
-      testConfig.taskIndex,
-      testConfig.projectName,
-      'fakeId',
-      (state: State) => {
-        initFromJson(state, synchronizer.middleware)
-        resolve(synchronizer)
-      }
-    )
-  })
 }
 
 /**

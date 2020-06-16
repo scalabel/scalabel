@@ -1,17 +1,12 @@
-import { AnyAction, applyMiddleware, createStore, Middleware, Reducer, Store } from 'redux'
-import thunk, { ThunkDispatch } from 'redux-thunk'
-import undoable, { includeAction, StateWithHistory } from 'redux-undo'
-import {
-  ADD_LABELS,
-  BaseAction,
-  DELETE_LABELS
-} from '../action/types'
+import { applyMiddleware, createStore, Middleware, Reducer } from 'redux'
+import { createLogger } from 'redux-logger'
+import thunk from 'redux-thunk'
+import undoable, { includeAction } from 'redux-undo'
+import { ADD_LABELS, DELETE_LABELS } from '../action/types'
 import { makeState } from '../functional/states'
 import { State } from '../functional/types'
 import { reducer } from './reducer'
-
-export type ReduxState = StateWithHistory<State>
-export type ReduxStore = Store<ReduxState, AnyAction>
+import { FullStore, ReduxState } from './types'
 
 /**
  * Configure the main store for the state
@@ -22,11 +17,8 @@ export type ReduxStore = Store<ReduxState, AnyAction>
  */
 export function configureStore (
     initialState: Partial<State>,
-    debug: boolean = false,
-    middleware?: Middleware): ReduxStore & {
-      /** Thunk dispatch used for redux-thunk async actions */
-      dispatch: ThunkDispatch<State, undefined, BaseAction>;
-    } {
+    devMode: boolean = false,
+    middleware?: Middleware): FullStore {
   const initialHistory = {
     past: Array<State>(),
     present: makeState(initialState),
@@ -40,20 +32,28 @@ export function configureStore (
       ADD_LABELS,
       DELETE_LABELS
     ]),
-    debug
+    debug: false // Disable default debug since it misses sync actions
   })
 
-  if (middleware === undefined) {
-    return createStore(
-      undoableReducer,
-      initialHistory,
-      applyMiddleware(thunk)
-    )
-  } else {
-    return createStore(
-      undoableReducer,
-      initialHistory,
-      applyMiddleware(thunk, middleware)
-    )
+  const allMiddleware: Middleware[] = [thunk]
+
+  /**
+   * If in dev mode, redux logging of normal and sync actions is enabled
+   * Dev mode can be enabled by appending the query arg "?dev"
+   */
+  if (devMode) {
+    const logger = createLogger({
+      collapsed: true
+    })
+    allMiddleware.push(logger)
   }
+  if (middleware) {
+    allMiddleware.push(middleware)
+  }
+
+  return createStore(
+    undoableReducer,
+    initialHistory,
+    applyMiddleware(...allMiddleware)
+  )
 }

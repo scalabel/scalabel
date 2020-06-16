@@ -1,5 +1,7 @@
 import { sprintf } from 'sprintf-js'
-import { ItemTypeName, LabelTypeName } from '../common/types'
+import { ADD_LABELS } from '../action/types'
+import { ActionPacketType } from '../server/types'
+import { ItemTypeName, LabelTypeName } from './types'
 
 /**
  * Get whether tracking is on
@@ -74,4 +76,29 @@ export function getPageTitle (labelType: string, itemType: string) {
     title = sprintf('%s Tracking', title)
   }
   return title
+}
+
+/**
+ * Converts index into a filename of size 6 with
+ * trailing zeroes
+ */
+export function index2str (index: number) {
+  return index.toString().padStart(6, '0')
+}
+
+/**
+ * Checks if the action packet contains
+ * any actions that would trigger a model query
+ */
+export function doesPacketTriggerModel (
+  actionPacket: ActionPacketType, bots: boolean): boolean {
+  if (!bots) {
+    return false
+  }
+  for (const action of actionPacket.actions) {
+    if (action.type === ADD_LABELS) {
+      return true
+    }
+  }
+  return false
 }

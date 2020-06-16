@@ -37,7 +37,7 @@ import {
 } from './util'
 
 /**
- * Initialize state
+ * Initialize session component of state
  * @param {State} state
  * @return {State}
  */
@@ -77,6 +77,17 @@ export function updateTask (
   state: State,
   action: types.UpdateTaskAction): State {
   return updateObject(state, { task: _.cloneDeep(action.newTask) })
+}
+
+/**
+ * Override the original state with the new state
+ * @param {State} state: current state
+ * @param {types.UpdateStateAction} action
+ */
+export function updateState (
+  state: State,
+  action: types.UpdateStateAction): State {
+  return _.merge(state, _.cloneDeep(action.newState))
 }
 
 /**
@@ -452,6 +463,7 @@ export function changeLabels (
  */
 export function getRootLabelId (item: ItemType, labelId: IdType): string {
   let parent = item.labels[labelId].parent
+
   while (isValidId(parent)) {
     labelId = parent
     parent = item.labels[labelId].parent

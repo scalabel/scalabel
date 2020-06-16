@@ -7,13 +7,13 @@ import { create } from 'react-test-renderer'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { ToolBar } from '../../js/components/toolbar'
 import { Category } from '../../js/components/toolbar_category'
 import { ListButton } from '../../js/components/toolbar_list_button'
 import { makeLabel } from '../../js/functional/states'
 import { testJson } from '../test_states/test_image_objects'
 import { testJson as testTrackJson } from '../test_states/test_track_objects'
+import { setupTestStore } from './util'
 
 let handleToggleWasCalled: boolean = false
 const testValues = ['NA', 'A', 'B', 'C']
@@ -88,8 +88,8 @@ describe('Toolbar category setting', () => {
 
 describe('test Delete', () => {
   test('Delete by keyboard', () => {
-    Session.devMode = false
-    initStore(testJson)
+    setupTestStore(testJson)
+
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
     render(
     <ToolBar
@@ -168,13 +168,13 @@ describe('test functionality for attributes with multiple values', () => {
 
 describe('test track', () => {
   test('Delete by click toolbar button', () => {
-    Session.devMode = false
-    initStore(testTrackJson)
+    setupTestStore(testTrackJson)
     Session.images.length = 0
     Session.images.push({ [-1]: new Image(1000, 1000) })
     for (let i = 0; i < getState().task.items.length; i++) {
       dispatch(action.loadItem(i, -1))
     }
+
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
     const { getByText } = render(
     <ToolBar
@@ -216,8 +216,8 @@ describe('test track', () => {
     expect(state.task.items[2].labels[lblInItm5]).toBeUndefined()
   })
   test('Merge by click toolbar button', () => {
-    Session.devMode = false
-    initStore(testTrackJson)
+    setupTestStore(testTrackJson)
+
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
     const { getByText } = render(
     <ToolBar

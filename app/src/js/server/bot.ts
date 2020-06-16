@@ -3,8 +3,9 @@ import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
 import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
-import { configureStore, ReduxStore } from '../common/configure_store'
-import { ShapeTypeName } from '../common/types'
+import { configureStore } from '../common/configure_store'
+import { ReduxStore, ShapeTypeName } from '../common/types'
+import { index2str } from '../common/util'
 import { PolygonType, RectType, State } from '../functional/types'
 import { ItemExport } from './bdd_types'
 import Logger from './logger'
@@ -13,7 +14,7 @@ import {
   ActionPacketType, BotData, EventName,
   ModelQuery, RegisterMessageType, SyncActionMessageType
 } from './types'
-import { getPyConnFailedMsg, index2str } from './util'
+import { getPyConnFailedMsg } from './util'
 
 /**
  * Manages virtual sessions for a single bot

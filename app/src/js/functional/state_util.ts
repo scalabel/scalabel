@@ -76,6 +76,16 @@ export function getNumLabelsForTrack (track: TrackType) {
 }
 
 /**
+ * Get the number of labels for the track with the given id
+ * @param state
+ * @param trackId
+ */
+export function getNumLabelsForTrackId (state: State, trackId: IdType) {
+  const track = getTrack(state, trackId)
+  return getNumLabelsForTrack(track)
+}
+
+/**
  * Get the id of the label in the track at the specified item
  * @param state
  * @param trackIdx

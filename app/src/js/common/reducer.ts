@@ -30,6 +30,8 @@ export const reducer: Reducer<State> = (
       return common.updateAll(state)
     case types.UPDATE_TASK:
       return common.updateTask(state, action as types.UpdateTaskAction)
+    case types.UPDATE_STATE:
+      return common.updateState(state, action as types.UpdateStateAction)
     case types.ADD_LABELS:
       return common.addLabels(state, action as types.AddLabelsAction)
     case types.ADD_TRACK:

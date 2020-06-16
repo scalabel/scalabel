@@ -4,19 +4,19 @@ import _ from 'lodash'
 import * as React from 'react'
 import { Provider } from 'react-redux'
 import { ThunkAction } from 'redux-thunk'
-import io from 'socket.io-client'
 import { addLabel } from '../../js/action/common'
 import { ActionType, SUBMIT } from '../../js/action/types'
-import { ReduxState } from '../../js/common/configure_store'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Synchronizer } from '../../js/common/synchronizer'
+import { ReduxState } from '../../js/common/types'
 import TitleBar from '../../js/components/title_bar'
 import { isStatusSaving } from '../../js/functional/selector'
 import { makeLabel } from '../../js/functional/states'
+import { State } from '../../js/functional/types'
 import { EventName, SyncActionMessageType } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
 import { testJson } from '../test_states/test_image_objects'
+import { setupTestStore, setupTestStoreWithMiddleware } from './util'
 
 beforeEach(() => {
   cleanup()
@@ -24,48 +24,33 @@ beforeEach(() => {
 afterEach(cleanup)
 
 // Need a different reference so selectors don't cache results
-const testJsonAutosave = _.cloneDeep(testJson)
-testJsonAutosave.task.config.autosave = true
+const testJsonAutosave = _.cloneDeep(testJson) as State
 
 describe('Save button functionality', () => {
   test('Autosave on: no save button', async () => {
-    const mockSocket = {
-      on: jest.fn(),
-      connected: true,
-      emit: jest.fn()
-    }
-    io.connect = jest.fn().mockImplementation(() => mockSocket)
-    const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
-    initStore(testJsonAutosave, synchronizer.middleware)
-    Session.autosave = true
+    testJsonAutosave.task.config.autosave = true
+    setupTestStore(testJsonAutosave)
 
-    // Add a fake task action to be saved
-    synchronizer.actionQueue.push(addLabel(0, makeLabel()))
-
-    // Only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar
-            synchronizer={synchronizer}
-          />
+          <TitleBar/>
         </Provider>
       </MuiThemeProvider>
     )
-    // Autosave on -> no save button
     expect(() => { getByTestId('Save') }).toThrow(Error)
   })
 
-  test('Autosave off: save button saves and updates status', async () => {
+  test('Autosave off: save button triggers save action', async () => {
     const mockSocket = {
-      on: jest.fn(),
       connected: true,
       emit: jest.fn()
     }
-    io.connect = jest.fn().mockImplementation(() => mockSocket)
-    const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
-    initStore(testJson, synchronizer.middleware)
-    Session.autosave = false
+    const synchronizer = new Synchronizer(
+      mockSocket, 0, 'test', 'fakeId')
+
+    testJsonAutosave.task.config.autosave = false
+    setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
 
     // Add a fake task action to be saved
     synchronizer.actionQueue.push(addLabel(0, makeLabel()))
@@ -74,9 +59,7 @@ describe('Save button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar
-            synchronizer={synchronizer}
-          />
+          <TitleBar/>
         </Provider>
       </MuiThemeProvider>
     )
@@ -89,24 +72,22 @@ describe('Save button functionality', () => {
 
 describe('Submit button functionality', () => {
   test('Autosave on: submit button just updates flag', async () => {
-    Session.autosave = true
-
     const mockSocket = {
       on: jest.fn(),
       connected: true,
       emit: jest.fn()
     }
-    io.connect = jest.fn().mockImplementation(() => mockSocket)
-    const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
-    initStore(testJsonAutosave, synchronizer.middleware)
+    const synchronizer = new Synchronizer(
+      mockSocket, 0, 'test', 'fakeId')
+
+    testJsonAutosave.task.config.autosave = true
+    setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
 
     // Only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar
-            synchronizer={synchronizer}
-          />
+          <TitleBar/>
         </Provider>
       </MuiThemeProvider>
     )
@@ -139,24 +120,22 @@ describe('Submit button functionality', () => {
   })
 
   test('Autosave off: submit button updates flag and saves', async () => {
-    Session.autosave = false
-
     const mockSocket = {
       on: jest.fn(),
       connected: true,
       emit: jest.fn()
     }
-    io.connect = jest.fn().mockImplementation(() => mockSocket)
-    const synchronizer = new Synchronizer(0, 'test', 'fakeId', () => { return })
-    initStore(testJson, synchronizer.middleware)
+    const synchronizer = new Synchronizer(
+      mockSocket, 0, 'test', 'fakeId')
+
+    testJsonAutosave.task.config.autosave = false
+    setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
 
     // Only need to test save button for manual saving
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar
-            synchronizer={synchronizer}
-          />
+          <TitleBar/>
         </Provider>
       </MuiThemeProvider>
     )

@@ -196,7 +196,7 @@ function deleteInvalidLabel (drawable: Readonly<Label2D> | Readonly<Label3D>) {
  * Commit 2D labels to state
  */
 export function commit2DLabels (
-  updatedLabelDrawables: Array<Readonly<Label2D>>
+  updatedLabelDrawables: Array<Readonly<Label2D>>, tracking: boolean
 ) {
   const state = Session.getState()
   const numItems = state.task.items.length
@@ -208,14 +208,14 @@ export function commit2DLabels (
       // Valid drawable
       if (!drawable.temporary) {
         // Existing drawable
-        if (Session.tracking) {
+        if (tracking) {
           updateTrack(drawable, updatedLabels, updatedShapes)
         } else {
           updateLabel(drawable, updatedLabels, updatedShapes)
         }
       } else {
         // New drawable
-        if (Session.tracking) {
+        if (tracking) {
           // Add track
           addNewTrack(drawable, numItems)
         } else {
@@ -227,7 +227,7 @@ export function commit2DLabels (
       // Invalid drawable
       if (!drawable.temporary) {
         // Existing drawable
-        if (Session.tracking) {
+        if (tracking) {
           terminateTrackFromDrawable(drawable, numItems)
         } else {
           deleteInvalidLabel(drawable)
@@ -245,7 +245,7 @@ export function commit2DLabels (
  */
 // TODO: Check 3d approach to revise following method
 export function commitLabels (
-  updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>
+  updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>, tracking: boolean
 ) {
   // Get labels & tracks to commit indexed by itemIndex
   const updatedShapes: ItemShapeIdMap = {}
@@ -258,7 +258,7 @@ export function commitLabels (
     drawable.setManual()
     if (!drawable.temporary) {
       // Existing labels & tracks
-      if (Session.tracking) {
+      if (tracking) {
         if (drawable.trackId in Session.tracks) {
           const track = Session.tracks[drawable.trackId]
           track.update(
@@ -301,7 +301,7 @@ export function commitLabels (
       }
     } else {
       // New labels and tracks
-      if (Session.tracking) {
+      if (tracking) {
         const track = new Track()
         if (track) {
           let parentTrack
@@ -325,7 +325,7 @@ export function commitLabels (
     }
   })
 
-  if (Session.tracking && newTracks.length > 0) {
+  if (tracking && newTracks.length > 0) {
     // Add new tracks to state
     for (const track of newTracks) {
       const indices = []
@@ -352,7 +352,7 @@ export function commitLabels (
         indices, track.type, labels, shapes
       ))
     }
-  } else if (!Session.tracking && newLabels.length > 0) {
+  } else if (!tracking && newLabels.length > 0) {
     // Add new labels to state
     const labels = []
     const shapes = []
