@@ -2,12 +2,12 @@ import _ from 'lodash'
 import * as React from 'react'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { getShape } from '../../js/functional/state_util'
 import { RectType } from '../../js/functional/types'
 import { testJson } from '../test_states/test_image_objects'
 import { drag, drawBox2D, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -17,7 +17,7 @@ const dispatch = Session.dispatch.bind(Session)
 beforeEach(() => {
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
-  initStore(testJson)
+  setupTestStore(testJson)
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
     canvasRef.current?.updateState(getState())
@@ -25,8 +25,7 @@ beforeEach(() => {
 })
 
 beforeAll(() => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
   for (let i = 0; i < getState().task.items.length; i++) {

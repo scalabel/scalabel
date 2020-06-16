@@ -2,21 +2,27 @@ import fs from 'fs-extra'
 import _ from 'lodash'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Label2DList, makeDrawableLabel2D } from '../../js/drawable/2d/label2d_list'
 import { commit2DLabels } from '../../js/drawable/states'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { RectType } from '../../js/functional/types'
+import { RectType, State } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
+import { setupTestStore } from '../components/util'
 
 const data = JSON.parse(fs.readFileSync('./app/src/test/test_states/sample_state.json', 'utf8'))
 const getState = Session.getState.bind(Session)
 const dispatch = Session.dispatch.bind(Session)
+let tracking: boolean
+
+beforeEach(() => {
+  setupTestStore(data)
+})
 
 beforeAll(() => {
-  Session.devMode = false
-  initStore(data)
+  setupTestStore(data)
+  tracking = (data as State).task.config.tracking
+
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
   for (let i = 0; i < getState().task.items.length; i++) {
@@ -27,8 +33,6 @@ beforeAll(() => {
 })
 
 test('Add new valid drawable', () => {
-  Session.devMode = false
-  initStore(data)
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   const label2dlist = new Label2DList()
@@ -44,7 +48,7 @@ test('Add new valid drawable', () => {
     label.onMouseMove(new Vector2D(20, 20), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(20, 20))
 
-    commit2DLabels([label])
+    commit2DLabels([label], tracking)
 
     const currentState = Session.getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(4)
@@ -58,8 +62,6 @@ test('Add new valid drawable', () => {
 })
 
 test('Add new invalid drawable', () => {
-  Session.devMode = false
-  initStore(data)
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   const label2dlist = new Label2DList()
@@ -72,7 +74,7 @@ test('Add new invalid drawable', () => {
     label.onMouseMove(new Vector2D(12, 12), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(12, 12))
 
-    commit2DLabels([label])
+    commit2DLabels([label], tracking)
 
     const currentState = Session.getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(3)
@@ -83,8 +85,6 @@ test('Add new invalid drawable', () => {
 })
 
 test('Update existing drawable', () => {
-  Session.devMode = false
-  initStore(data)
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   // Label coord is [459, 276][752, 400]
@@ -99,7 +99,7 @@ test('Update existing drawable', () => {
   label.onMouseMove(new Vector2D(700, 300), new Size2D(1000, 1000), 1, 2)
   label.onMouseUp(new Vector2D(700, 300))
 
-  commit2DLabels([label])
+  commit2DLabels([label], tracking)
 
   const currentState = Session.getState()
   const newLabel = currentState.task.items[0].labels['1']
@@ -109,8 +109,6 @@ test('Update existing drawable', () => {
 })
 
 test('Update existing drawable to invalid', () => {
-  Session.devMode = false
-  initStore(data)
   const state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(3)
   // Label coord is [459, 276][752, 400]
@@ -128,7 +126,7 @@ test('Update existing drawable to invalid', () => {
   label.onMouseMove(new Vector2D(460, 280), new Size2D(1000, 1000), 1, 2)
   label.onMouseUp(new Vector2D(460, 280))
 
-  commit2DLabels([label])
+  commit2DLabels([label], tracking)
 
   const currentState = Session.getState()
   expect(currentState.task.items[0].labels['1']).toBeUndefined()

@@ -4,13 +4,12 @@ import React from 'react'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
-import { Attribute } from '../../js/functional/types'
-// Import { TrackCollector } from '../server/util/track_collector'
+import { State } from '../../js/functional/types'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
 import { drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -21,7 +20,7 @@ const dispatch = store.dispatcher()
 beforeEach(() => {
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
-  initStore(emptyTrackingTask)
+  setupTestStore(emptyTrackingTask)
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
     canvasRef.current?.updateState(getState())
@@ -29,8 +28,7 @@ beforeEach(() => {
 })
 
 beforeAll(() => {
-  Session.devMode = false
-  initStore(emptyTrackingTask)
+  setupTestStore(emptyTrackingTask)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
   // Mock loading every item to make sure the canvas can be successfully
@@ -38,7 +36,7 @@ beforeAll(() => {
   for (let i = 0; i < getState().task.items.length; i++) {
     dispatch(action.loadItem(i, -1))
   }
-  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000)
+  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000, true)
 })
 
 describe('basic track ops', () => {
@@ -214,8 +212,8 @@ describe('basic track ops', () => {
     const { getByText, getAllByRole } = render(
       <ToolBar
         ref={toolbarRef}
-        categories={emptyTrackingTask.task.config.categories}
-        attributes={emptyTrackingTask.task.config.attributes as Attribute[]}
+        categories={(emptyTrackingTask as State).task.config.categories}
+        attributes={(emptyTrackingTask as State).task.config.attributes}
         labelType={'labelType'}
       />
     )

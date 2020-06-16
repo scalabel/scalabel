@@ -259,15 +259,5 @@ class LabelLayout extends React.Component<Props, State> {
   }
 }
 
-// LabelLayout.propTypes = {
-//   titleBar: PropTypes.object.isRequired,
-//   leftSidebar1: PropTypes.object.isRequired,
-//   leftSidebar2: PropTypes.object,
-//   main: PropTypes.object.isRequired,
-//   bottomBar: PropTypes.object,
-//   rightSidebar1: PropTypes.object,
-//   rightSidebar2: PropTypes.object,
-// };
-
 export default withStyles(
   LayoutStyles, { withTheme: true })(LabelLayout)

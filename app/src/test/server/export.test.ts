@@ -1,6 +1,5 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
-import Session from '../../js/common/session'
 import { LabelTypeName } from '../../js/common/types'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { makePolygon } from '../../js/functional/states'
@@ -14,9 +13,6 @@ import {
   sampleStateExportImage, sampleStateExportImagePolygon
 } from '../test_states/test_export_objects'
 
-beforeAll(() => {
-  Session.devMode = false
-})
 const sampleStateFile = './app/src/test/test_states/sample_state.json'
 const samplePolygonStateFile = './app/src/test/test_states/sample_state_polygon.json'
 

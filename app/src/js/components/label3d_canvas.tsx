@@ -89,7 +89,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     super(props)
     this.camera = props.camera
 
-    this._labelHandler = new Label3DHandler(this.camera)
+    this._labelHandler = new Label3DHandler(this.camera, this.props.tracking)
 
     this.display = null
     this.canvas = null

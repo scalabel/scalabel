@@ -6,7 +6,6 @@ import * as action from '../../js/action/common'
 import { moveCamera, moveCameraAndTarget } from '../../js/action/point_cloud'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Label3dCanvas } from '../../js/components/label3d_canvas'
 import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util'
 import { makePointCloudViewerConfig } from '../../js/functional/states'
@@ -15,6 +14,7 @@ import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
 import { expectVector3TypesClose } from '../server/util/util'
 import { testJson } from '../test_states/test_point_cloud_objects'
+import { setupTestStore } from './util'
 
 const canvasId = 0
 const width = 1000
@@ -42,8 +42,7 @@ jest.mock('three', () => {
 })
 
 beforeEach(() => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
   Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
   Session.activeViewerId = canvasId
   Session.pointClouds.length = 0
@@ -113,6 +112,7 @@ function setUpLabel3dCanvas (
         ref={canvasRef}
         camera={camera}
         shouldFreeze={false}
+        tracking={false}
       />
     </div>
   )

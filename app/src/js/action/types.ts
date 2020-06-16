@@ -3,22 +3,27 @@
  */
 import {
   ConnectionStatus,
+  DeepPartialState,
   IdType,
   LabelType,
   PaneType,
   Select,
   ShapeType,
   SplitType,
+  State,
   SubmitData,
   TaskType,
   ViewerConfigType
 } from '../functional/types'
+
+import { SyncActionMessageType } from '../server/types'
 
 export const INIT_SESSION = 'INIT_SESSION'
 export const CHANGE_SELECT = 'CHANGE_SELECT'
 export const LOAD_ITEM = 'LOAD_ITEM'
 export const UPDATE_ALL = 'UPDATE_ALL'
 export const UPDATE_TASK = 'UPDATE_TASK'
+export const UPDATE_STATE = 'UPDATE_STATE'
 export const SUBMIT = 'SUBMIT'
 export const UPDATE_SESSION_STATUS = 'UPDATE_SESSION_STATUS'
 
@@ -40,6 +45,13 @@ export const UPDATE_PANE = 'UPDATE_PANE'
 export const SPLIT_PANE = 'SPLIT_PANE'
 export const DELETE_PANE = 'DELETE_PANE'
 export const START_LINK_TRACK = 'START_LINK_TRACK'
+
+// Sync based events
+export const REGISTER_SESSION = 'REGISTER_SESSION'
+export const RECEIVE_BROADCAST = 'RECEIVE_BROADCAST'
+export const CONNECT = 'CONNECT'
+export const DISCONNECT = 'DISCONNECT'
+export const SAVE = 'SAVE'
 
 /**
  * These are actions that should be shared between sessions/users
@@ -64,6 +76,25 @@ export function isTaskAction (action: BaseAction) {
 }
 
 /**
+ * These actions are intercepted by sync middleware, not used to update state
+ * They trigger an interaction with the backend
+ */
+const SYNC_ACTION_TYPES = [
+  REGISTER_SESSION,
+  RECEIVE_BROADCAST,
+  CONNECT,
+  DISCONNECT,
+  SAVE
+]
+
+/**
+ * Checks if the action should be intercepted by the sync middleware
+ */
+export function isSyncAction (action: BaseAction) {
+  return SYNC_ACTION_TYPES.includes(action.type)
+}
+
+/**
  * Checks if the action list contains a submit action
  */
 export function hasSubmitAction (actions: BaseAction[]): boolean {
@@ -76,7 +107,7 @@ export function hasSubmitAction (actions: BaseAction[]): boolean {
 }
 
 /**
- * These are actions that should not be broadcast beyond the session
+ * These actions should not be broadcast outside the local session
  */
 const SESSION_ACTION_TYPES = [
   UPDATE_SESSION_STATUS,
@@ -127,8 +158,13 @@ export interface LoadItemAction extends BaseAction {
 export type UpdateAllAction = BaseAction
 
 export interface UpdateTaskAction extends BaseAction {
-  /** task data to use */
+  /** Task data to use */
   newTask: TaskType
+}
+
+export interface UpdateStateAction extends BaseAction {
+  /** Initial state data */
+  newState: DeepPartialState
 }
 
 export interface UpdateSessionStatusAction extends BaseAction {
@@ -242,12 +278,40 @@ export interface DeletePaneAction extends BaseAction {
   viewerId: number
 }
 
+export interface RegisterSessionAction extends BaseAction {
+  /** Initial state received from the backend */
+  initialState: State
+}
+
+export interface ReceiveBroadcastAction extends BaseAction {
+  /** The message containing the broadcasted action/actions */
+  message: SyncActionMessageType
+}
+
+export type ConnectAction = BaseAction
+
+export type DisconnectAction = BaseAction
+
+export type SaveAction = BaseAction
+
+/**
+ * These actions are event-driven messages intercepted by the sync middleware
+ */
+export type SyncActionType =
+  RegisterSessionAction
+  | ReceiveBroadcastAction
+  | ConnectAction
+  | DisconnectAction
+  | SaveAction
+
 export type SessionActionType =
   InitSessionAction
   | LoadItemAction
   | UpdateAllAction
   | UpdateTaskAction
+  | UpdateStateAction
   | UpdateSessionStatusAction
+  | SyncActionType
 
 export type UserActionType =
   ChangeSelectAction

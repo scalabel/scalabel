@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
 import * as types from '../action/types'
+import { index2str } from '../common/util'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
@@ -10,7 +11,7 @@ import {
   EventName, RegisterMessageType, ServerConfig,
   StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
-import { index2str, initSessId, updateStateTimestamp } from './util'
+import { initSessId, updateStateTimestamp } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization

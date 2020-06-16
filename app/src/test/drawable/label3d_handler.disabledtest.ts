@@ -5,13 +5,13 @@ import * as action from '../../js/action/common'
 import { moveCamera, moveCameraAndTarget } from '../../js/action/point_cloud'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Label3DHandler } from '../../js/drawable/3d/label3d_handler'
 import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util'
 import { makePointCloudViewerConfig } from '../../js/functional/states'
 import { CubeType, IdType, PointCloudViewerConfigType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
+import { setupTestStore } from '../components/util'
 import { expectVector3TypesClose, findNewLabelsFromState } from '../server/util/util'
 import { testJson } from '../test_states/test_point_cloud_objects'
 
@@ -75,12 +75,12 @@ function getActiveAxisForRotation (camLoc: number, axis: number) {
 function initializeTestingObjects (
   camera: THREE.Camera
 ): [Label3DHandler, number] {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig(-1)))
   const viewerId = 1
 
-  const label3dHandler = new Label3DHandler(camera)
+  const label3dHandler = new Label3DHandler(camera, false)
   Session.subscribe(() => {
     const state = Session.getState()
     Session.label3dList.updateState(state)

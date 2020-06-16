@@ -490,3 +490,14 @@ export interface State {
   /** Info particular to this session */
   session: SessionType
 }
+
+// Make properties optional at all levels of nested object
+type RecursivePartial<T> = {
+  [P in keyof T]?: RecursivePartial<T[P]>;
+}
+
+/**
+ * State where all properties are optiona
+ * Used for initialization with test objects
+ */
+export type DeepPartialState = RecursivePartial<State>
