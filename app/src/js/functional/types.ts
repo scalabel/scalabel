@@ -58,7 +58,7 @@ export interface ShapeType {
   shapeType: string
 }
 
-export interface RectType extends ShapeType {
+export interface SimpleRect {
   /** The x-coordinate of upper left corner */
   x1: number
   /** The y-coordinate of upper left corner */
@@ -68,6 +68,8 @@ export interface RectType extends ShapeType {
   /** The y-coordinate of lower right corner */
   y2: number
 }
+
+export interface RectType extends ShapeType, SimpleRect {}
 
 export interface PolygonType extends ShapeType {
   /** array of control points */
