@@ -114,7 +114,6 @@ describe('Test tracking operations', () => {
     const state = getState()
     const labelId2 = getLabelInTrack(state, track1, 2)
     const labelId3 = getLabelInTrack(state, track1, 3)
-    const labelId5 = getLabelInTrack(state, track1, 5)
 
     // Select the label in the track at item 2
     dispatch(action.goToItem(2))
@@ -126,8 +125,10 @@ describe('Test tracking operations', () => {
     expect(getSelectedLabels(getState())).toStrictEqual({ 3: [labelId3] })
     dispatch(action.goToItem(4))
     expect(getSelectedLabels(getState())).toStrictEqual({})
+
+    // For simplicity, deselect a track when there are gaps in it
     dispatch(action.goToItem(5))
-    expect(getSelectedLabels(getState())).toStrictEqual({ 5: [labelId5] })
+    expect(getSelectedLabels(getState())).toStrictEqual({})
   })
 
   test('Changing category after linking', () => {
