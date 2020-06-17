@@ -176,7 +176,6 @@ export const playerControlStyles = () => createStyles({
   input: {
     background: '#000000',
     color: 'green',
-    direction: 'rtl',
     width: '50px',
     fontWeight: 500,
     left: '-1px',
