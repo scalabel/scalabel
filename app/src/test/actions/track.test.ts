@@ -30,9 +30,6 @@ beforeEach(() => {
 
 /**
  * Helper function to change the category of the label
- * @param itemIndex
- * @param labelId
- * @param category
  */
 function changeCategory (itemIndex: number, labelId: IdType, category: number) {
   // First select the label
@@ -42,6 +39,22 @@ function changeCategory (itemIndex: number, labelId: IdType, category: number) {
   // Then change its category
   dispatch(action.changeSelect({ category }))
   dispatch(changeSelectedLabelsCategories(getState(), [category]))
+}
+
+/**
+ * Helper function to check the category of the label in the state
+ */
+function checkCategory (itemIndex: number, labelId: IdType, category: number) {
+  expect(getCategory(getState(), itemIndex, labelId)).
+    toStrictEqual([category])
+}
+
+/**
+ * Helper function to check the number of total tracks in the state
+ */
+function checkNumTracks (numTracks: number) {
+  expect(getNumTracks(getState())).toBe(numTracks)
+
 }
 
 describe('Test tracking operations', () => {
@@ -77,7 +90,7 @@ describe('Test tracking operations', () => {
     const toMergeTrack2 = '9' // Has a label at item 5
     const continueItemIdx = 5
     let state = getState()
-    expect(getNumTracks(state)).toBe(originalNumTracks)
+    checkNumTracks(originalNumTracks)
     const labelId = getLabelInTrack(state, toMergeTrack2, continueItemIdx)
 
     dispatch(action.mergeTracks([toMergeTrack1, toMergeTrack2]))
@@ -85,7 +98,7 @@ describe('Test tracking operations', () => {
     // Check that the tracks were merged
     // The 1st track should have the 2nd track's label
     state = getState()
-    expect(getNumTracks(state)).toBe(originalNumTracks - 1)
+    checkNumTracks(originalNumTracks - 1)
     expect(
       getLabelInTrack(state, toMergeTrack1, continueItemIdx)).toBe(labelId)
   })
@@ -94,7 +107,7 @@ describe('Test tracking operations', () => {
     // First merge the tracks
     const track1 = '2' // Has labels at items 0-3
     const track2 = '9' // Has a label at item 5
-    expect(getNumTracks(getState())).toBe(originalNumTracks)
+    checkNumTracks(originalNumTracks)
     dispatch(action.mergeTracks([track1, track2]))
 
     // Get the label ids of the merged track
@@ -123,73 +136,60 @@ describe('Test tracking operations', () => {
     const track1ItemIndex = 3
     const track2 = '9' // Has a label at item 5
     const track2ItemIndex = 5
-    expect(getNumTracks(getState())).toBe(originalNumTracks)
+    checkNumTracks(originalNumTracks)
     dispatch(action.mergeTracks([track1, track2]))
 
     // Check the initial categories
-    let state = getState()
+    const state = getState()
     const track1LabelId = getLabelInTrack(state, track1, track1ItemIndex)
     const track2LabelId = getLabelInTrack(state, track1, track2ItemIndex)
     const initialCategory = 0
-    expect(getCategory(state, track1ItemIndex, track1LabelId)).
-      toStrictEqual([initialCategory])
-    expect(getCategory(state, track2ItemIndex, track2LabelId))
-      .toStrictEqual([initialCategory])
+    checkCategory(track1ItemIndex, track1LabelId, initialCategory)
+    checkCategory(track2ItemIndex, track2LabelId, initialCategory)
 
+    // Categories of all labels in linked track should change
     const newCategory = 1
     changeCategory(track1ItemIndex, track1LabelId, newCategory)
-
-    // Check category of labels in merged track
-    state = getState()
-    expect(getCategory(state, track1ItemIndex, track1LabelId)).
-      toStrictEqual([newCategory])
-    expect(getCategory(state, track2ItemIndex, track2LabelId)).
-      toStrictEqual([newCategory])
+    checkCategory(track1ItemIndex, track1LabelId, newCategory)
+    checkCategory(track2ItemIndex, track2LabelId, newCategory)
   })
 
-  test('Linking with different categories', () => {
-    // Check the initial categories
+  test('Linking tracks with different categories', () => {
     const track1 = '2' // Has labels at items 0-3
     const track1ItemIndex = 3
     const track2 = '9' // Has a label at item 5
     const track2ItemIndex = 5
 
-    let state = getState()
-    expect(getNumTracks(getState())).toBe(originalNumTracks)
+    // Check the initial categories
+    const state = getState()
+    checkNumTracks(originalNumTracks)
     const track1LabelId = getLabelInTrack(state, track1, track1ItemIndex)
     const track2LabelId = getLabelInTrack(state, track2, track2ItemIndex)
     const initialCategory = 0
-    expect(getCategory(state, track1ItemIndex, track1LabelId)).
-      toStrictEqual([initialCategory])
-    expect(getCategory(state, track2ItemIndex, track2LabelId)).
-      toStrictEqual([initialCategory])
+    checkCategory(track1ItemIndex, track1LabelId, initialCategory)
+    checkCategory(track2ItemIndex, track2LabelId, initialCategory)
 
     // Change the category for the first track
     const newCategory = 1
     changeCategory(track1ItemIndex, track1LabelId, newCategory)
-    state = getState()
-    expect(getCategory(state, track1ItemIndex, track1LabelId)).
-      toStrictEqual([newCategory])
-    expect(getCategory(state, track2ItemIndex, track2LabelId)).
-      toStrictEqual([initialCategory])
+    checkCategory(track1ItemIndex, track1LabelId, newCategory)
+    checkCategory(track2ItemIndex, track2LabelId, initialCategory)
 
     // Merge the tracks
     dispatch(action.mergeTracks([track1, track2]))
-    state = getState()
-    expect(getCategory(state, track1ItemIndex, track1LabelId)).
-      toStrictEqual([newCategory])
-    expect(getCategory(state, track2ItemIndex, track2LabelId)).
-      toStrictEqual([newCategory])
+    checkCategory(track1ItemIndex, track1LabelId, newCategory)
+    checkCategory(track2ItemIndex, track2LabelId, newCategory)
   })
 
   test('Linking single frame tracks', () => {
     const originalTrackIds = ['1', '2', '3', '9']
     const newTrackIds = []
+    const maxItem = 5
 
     dispatch(action.goToItem(0))
-    for (let itemIndex = 0; itemIndex < 5; itemIndex++) {
+    for (let itemIndex = 0; itemIndex < maxItem; itemIndex++) {
       // Start and terminate a track on succesive frames
-      const range = _.range(itemIndex, 6)
+      const range = _.range(itemIndex, maxItem + 1)
       const labels = range.map(() => makeLabel({ track: `id${itemIndex}` }))
       const shapes = range.map(() => [makeShape()])
       dispatch(action.addTrack(
@@ -201,19 +201,21 @@ describe('Test tracking operations', () => {
         newTrackIds.concat(originalTrackIds))[0]
       newTrackIds.push(trackId)
       const currentTrack = getTrack(getState(), trackId)
-      expect(getNumLabelsForTrackId(getState(), trackId)).toBe(6 - itemIndex)
+      expect(getNumLabelsForTrackId(getState(), trackId)).toBe(
+        maxItem + 1 - itemIndex)
+
       dispatch(
         track.terminateTracks([currentTrack],
           itemIndex + 1, getNumItems(getState())))
       expect(getNumLabelsForTrackId(getState(), trackId)).toBe(1)
     }
-    expect(getNumTracks(getState())).toBe(originalNumTracks + 5)
+    checkNumTracks(originalNumTracks + maxItem)
 
     // Test linking all the 1 frame tracks
     dispatch(action.mergeTracks(newTrackIds))
 
     const state = getState()
-    expect(getNumTracks(state)).toBe(originalNumTracks + 1)
+    checkNumTracks(originalNumTracks + 1)
     expect(getNumLabelsForTrackId(state, newTrackIds[0])).toBe(5)
   })
 })
