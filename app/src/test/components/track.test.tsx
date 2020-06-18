@@ -10,7 +10,9 @@ import { ToolBar } from '../../js/components/toolbar'
 import { Attribute } from '../../js/functional/types'
 // import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
-import { drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas, drag } from './label2d_canvas_util'
+import { getShape } from '../../js/functional/state_util'
+import { RectType } from '../../js/functional/types'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -259,5 +261,83 @@ describe('basic track ops', () => {
     expect(state.task.items[3].labels[labelIdIn3].attributes[0]).toEqual([1])
     expect(state.task.items[2].labels[labelIdIn2].attributes[1]).toEqual([0])
     expect(state.task.items[2].labels[labelIdIn2].attributes[2]).toEqual([0])
+  })
+
+  test('Changing shapes and locations of tracks', () => {
+    const label2d = canvasRef.current as Label2dCanvas
+
+    const itemIndices = [0, 2]
+    const boxes = [
+      [10, 20, 50, 60],
+      [100, 110, 200, 300]
+    ]
+
+    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+
+    // Changing shape
+    dispatch(action.goToItem(4))
+    drag(label2d, 10, 20, 15, 25)
+    let state = getState()
+    // Shapes starting from item 4 should change
+    for (let i = 4; i < 8; ++i) {
+      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
+      const rect = getShape(state, i, labelIdInk, 0) as RectType
+      expect(rect.x1).toEqual(15)
+      expect(rect.y1).toEqual(25)
+      expect(rect.x2).toEqual(50)
+      expect(rect.y2).toEqual(60)
+    }
+    // Shapes before item 4 should not change
+    for (let i = 0; i < 4; ++i) {
+      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
+      const rect = getShape(state, i, labelIdInk, 0) as RectType
+      expect(rect.x1).toEqual(10)
+      expect(rect.y1).toEqual(20)
+      expect(rect.x2).toEqual(50)
+      expect(rect.y2).toEqual(60)
+    }
+    dispatch(action.goToItem(6))
+    drag(label2d, 50, 60, 55, 65)
+    state = getState()
+    // Shapes should change only between item 6 to 8
+    for (let i = 6; i < 8; ++i) {
+      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
+      const rect = getShape(state, i, labelIdInk, 0) as RectType
+      expect(rect.x1).toEqual(15)
+      expect(rect.y1).toEqual(25)
+      expect(rect.x2).toEqual(55)
+      expect(rect.y2).toEqual(65)
+    }
+    for (let i = 4; i < 6; ++i) {
+      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
+      const rect = getShape(state, i, labelIdInk, 0) as RectType
+      expect(rect.x1).toEqual(15)
+      expect(rect.y1).toEqual(25)
+      expect(rect.x2).toEqual(50)
+      expect(rect.y2).toEqual(60)
+    }
+    // Changing location
+    dispatch(action.goToItem(5))
+    drag(label2d, 110, 110, 210, 210)  // (100, 100) translation
+    state = getState()
+    // Locations starting from item 5 should change
+    for (let i = 5; i < 8; ++i) {
+      const labelIdInk = state.task.tracks[trackIds[1]].labels[i]
+      const rect = getShape(state, i, labelIdInk, 0) as RectType
+      expect(rect.x1).toEqual(200)
+      expect(rect.y1).toEqual(210)
+      expect(rect.x2).toEqual(300)
+      expect(rect.y2).toEqual(400)
+    }
+    // Locations before item 5 should not change
+    for (let i = 2; i < 5; ++i) {
+      const labelIdInk = state.task.tracks[trackIds[1]].labels[i]
+      const rect = getShape(state, i, labelIdInk, 0) as RectType
+      expect(rect.x1).toEqual(100)
+      expect(rect.y1).toEqual(110)
+      expect(rect.x2).toEqual(200)
+      expect(rect.y2).toEqual(300)
+    }
+
   })
 })
