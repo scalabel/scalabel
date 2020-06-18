@@ -327,6 +327,5 @@ describe('basic track ops', () => {
         state.task.tracks[trackIds[1]].labels[i],
         { x1: 100 + diff, y1: 110 + diff, x2: 200 + diff, y2: 300 + diff }, i)
     }
-
   })
 })

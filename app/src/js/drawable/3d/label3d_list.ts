@@ -86,7 +86,7 @@ export class Label3DList {
   }
 
   /** Get label by id */
-  public get (id: number): Label3D | null {
+  public get (id: string): Label3D | null {
     if (id in this._labels) {
       return this._labels[id]
     }
@@ -200,7 +200,7 @@ export class Label3DList {
 
     // Assign parents
     for (const key of Object.keys(newLabels)) {
-      const id = Number(key)
+      const id = key
       if (item.labels[id].parent in newLabels) {
         newLabels[item.labels[id].parent].addChild(newLabels[id])
       }

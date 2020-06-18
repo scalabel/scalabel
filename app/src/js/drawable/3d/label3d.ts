@@ -47,7 +47,7 @@ export abstract class Label3D {
     this._color = [0, 0, 0, 1]
     this._parent = null
     this._children = []
-    this._temporary = false
+    this._temporary = true
     this._labelList = labelList
   }
 

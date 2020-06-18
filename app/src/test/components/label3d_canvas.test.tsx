@@ -149,7 +149,8 @@ test('Add 3d bbox', () => {
   canvas.onKeyDown(spaceEvent)
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
-  let cube = getShape(state, 0, '0', 0) as CubeType
+  let labelId = Object.keys(state.task.items[0].labels)[0]
+  let cube = getShape(state, 0, labelId, 0) as CubeType
   let canvasConfig =
     getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
   expect(canvasConfig).not.toBeNull()
@@ -164,6 +165,8 @@ test('Add 3d bbox', () => {
   const position = new Vector3D()
   position.fromState(canvasConfig.position)
   const target = new Vector3D()
+  let visited = new Set<string>()
+  visited.add(labelId)
   for (let i = 1; i <= 10; i += 1) {
     target[0] = Math.random() * 2 - 1
     target[1] = Math.random() * 2 - 1
@@ -176,7 +179,13 @@ test('Add 3d bbox', () => {
     canvas.onKeyDown(spaceEvent)
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
-    cube = getShape(state, 0, i.toString(), 0) as CubeType
+    Object.keys(state.task.items[0].labels).forEach(id => {
+      if (!visited.has(id)) {
+        labelId = id
+        visited.add(id)
+      }
+    });
+    cube = getShape(state, 0, labelId, 0) as CubeType
     canvasConfig =
       getCurrentViewerConfig(state, canvasId) as PointCloudViewerConfigType
     expect(canvasConfig).not.toBeNull()
@@ -231,7 +240,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   canvas.onMouseUp(mouseEvent(width / 2., height / 4.))
 
   state = Session.getState()
-  let cube = getShape(state, 0, '0', 0) as CubeType
+  let cube = getShape(state, 0, labelId, 0) as CubeType
   const center = (new Vector3D()).fromState(cube.center)
   expect(center[2]).toBeGreaterThan(0)
   expect(center[0]).toBeCloseTo(0)
@@ -243,6 +252,6 @@ test('Move axis aligned 3d bbox along z axis', () => {
   canvas.onMouseUp(mouseEvent(width / 2., height * 17 / 40))
 
   state = Session.getState()
-  cube = getShape(state, 0, '0', 0) as CubeType
+  cube = getShape(state, 0, labelId, 0) as CubeType
   expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
 })
