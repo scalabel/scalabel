@@ -151,18 +151,20 @@ export class Label2DList {
    * update labels from the state
    */
   public updateState (state: State): void {
-    if (this._updatedLabels.size > 0) {
+    // Don't interrupt ongoing editing
+    if (this._selectedLabels.length > 0 && this.selectedLabels[0].editing) {
       return
     }
+
     this._state = state
     this._labelTemplates = state.task.config.label2DTemplates
     const self = this
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
-    // remove any label not in the state
+    // Remove any label not in the state
     self._labels = Object.assign({} as typeof self._labels,
         _.pick(self._labels, _.keys(item.labels)))
-    // update drawable label values
+    // Update drawable label values
     _.forEach(item.labels, (label, labelId) => {
       if (!(labelId in self._labels)) {
         const newLabel = makeDrawableLabel2D(
@@ -179,7 +181,7 @@ export class Label2DList {
         }
       }
     })
-    // order the labels and assign order values
+    // Order the labels and assign order values
     self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
     _.forEach(self._labelList,
       (l: Label2D, index: number) => { l.index = index })

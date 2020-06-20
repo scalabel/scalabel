@@ -1,4 +1,7 @@
-export const testJson = {
+import { AttributeToolType } from '../../js/common/types'
+import { DeepPartialState } from '../../js/functional/types'
+
+export const testJson: DeepPartialState = {
   session: {
     itemStatuses: [
       { sensorDataLoaded: {} },
@@ -6,11 +9,11 @@ export const testJson = {
       { sensorDataLoaded: {} },
       { sensorDataLoaded: {} },
       { sensorDataLoaded: {} }
-    ]
+    ],
+    startTime: 1539820189
   },
   task: {
     config: {
-      assignmentId: 'e6015077-aad9-4e60-a5ed-dbccf931a049',
       projectName: 'Redux0',
       itemType: 'pointcloud',
       labelTypes: ['box3d'],
@@ -23,69 +26,65 @@ export const testJson = {
       instructionPage: 'undefined',
       demoMode: false,
       bundleFile: 'label.js',
-      categories: null,
       attributes: [
         {
           name: 'Occluded',
-          toolType: 'switch',
+          toolType: AttributeToolType.SWITCH,
           tagText: 'o'
         },
         {
           name: 'Truncated',
-          toolType: 'switch',
+          toolType: AttributeToolType.SWITCH,
           tagText: 't'
         }
       ],
-      taskId: '000000',
-      workerId: 'default_worker',
-      startTime: 1539820189,
-      submitTime: 0
+      taskId: '000000'
     },
     items: [
       {
-        id: 0,
+        id: 'id0',
         index: 0,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com' +
             '/scalabel-public/demo/luminar/1525401598139528987.ply'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 1,
+        id: '1',
         index: 1,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401599138308593.ply'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 2,
+        id: 'id2',
         index: 2,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com' +
             '/scalabel-public/demo/luminar/1525401600135798773.ply'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 3,
+        id: 'id3',
         index: 3,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401601134108834.ply'
         },
-        labels: []
+        labels: {}
       },
       {
-        id: 4,
+        id: 'abc',
         index: 4,
         urls: {
           '-1': 'https://s3-us-west-2.amazonaws.com' +
           '/scalabel-public/demo/luminar/1525401602133158775.ply'
         },
-        labels: []
+        labels: {}
       }
     ],
     tracks: {},
@@ -95,6 +94,9 @@ export const testJson = {
         name: 'default',
         type: 'pointcloud'
       }
+    },
+    progress: {
+      submissions: []
     }
   }
 }

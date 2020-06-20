@@ -227,15 +227,15 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
         // or zooming to the cursor otherwise.
         if (rect) {
           if (rect.height / rect.width > ih / iw) {
-            // zoomed height < that of the display area, blanks on top/bottom
+            // Zoomed height < that of the display area, blanks on top/bottom
             if (image.width * rect.height / rect.width > ih) {
-              // set offset to 0
+              // Set offset to 0
               displayTop = 0
             }
           } else {
-            // zoomed width < that of the display area, blanks on sides
+            // Zoomed width < that of the display area, blanks on sides
             if (image.height * rect.width / rect.height > iw) {
-              // set offset to 0
+              // Set offset to 0
               displayLeft = 0
             }
           }

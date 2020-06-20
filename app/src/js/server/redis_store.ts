@@ -33,7 +33,7 @@ export class RedisStore {
     this.client = client
     this.client.config('SET', 'notify-keyspace-events', 'Ex')
 
-    // subscribe to reminder expirations for saving
+    // Subscribe to reminder expirations for saving
     this.client.subscribe('__keyevent@0__:expired')
     this.client.on('message', async (_channel: string, reminderKey: string) => {
       /**
@@ -120,11 +120,11 @@ export class RedisStore {
     numActions += numActionsSaved
 
     if (numActions >= this.numActionsForWrite) {
-      // write condition: num actions exceeded limit
+      // Write condition: num actions exceeded limit
       await this.writeBackTask(saveDir, value)
       await this.del(reminderKey)
     } else {
-      // otherwise just update the action counter
+      // Otherwise just update the action counter
       await this.setEx(reminderKey, numActions.toString(), this.timeForWrite)
     }
   }

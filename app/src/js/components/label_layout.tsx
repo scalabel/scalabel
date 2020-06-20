@@ -127,6 +127,7 @@ class LabelLayout extends React.Component<Props, State> {
             <SplitPane split={split} minSize={min}
                        defaultSize={dflt}
                        maxSize={max} primary={primary}
+                       pane1Style={{ overflowY: 'scroll', overflowX: 'hidden' }}
                        onChange={(size) => {
                          this.handleOnChange(size, position)
                        }}>
@@ -196,7 +197,7 @@ class LabelLayout extends React.Component<Props, State> {
           <main className={classes.main}>
             {
               this.optionalSplit('vertical',
-                // left sidebar
+                // Left sidebar
                 this.optionalSplit('horizontal',
                   leftSidebar1,
                   leftSidebar2,
@@ -209,7 +210,7 @@ class LabelLayout extends React.Component<Props, State> {
                 ),
 
                 this.optionalSplit('vertical',
-                  // center
+                  // Center
                   this.optionalSplit('horizontal',
                     labelInterface,
                     bottomBar,
@@ -222,7 +223,7 @@ class LabelLayout extends React.Component<Props, State> {
                     'center'
                   ),
 
-                  // right sidebar
+                  // Right sidebar
                   this.optionalSplit('horizontal',
                     rightSidebar1,
                     rightSidebar2,
@@ -257,16 +258,6 @@ class LabelLayout extends React.Component<Props, State> {
     )
   }
 }
-
-// LabelLayout.propTypes = {
-//   titleBar: PropTypes.object.isRequired,
-//   leftSidebar1: PropTypes.object.isRequired,
-//   leftSidebar2: PropTypes.object,
-//   main: PropTypes.object.isRequired,
-//   bottomBar: PropTypes.object,
-//   rightSidebar1: PropTypes.object,
-//   rightSidebar2: PropTypes.object,
-// };
 
 export default withStyles(
   LayoutStyles, { withTheme: true })(LabelLayout)

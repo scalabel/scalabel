@@ -13,7 +13,7 @@ export class FileStorage extends Storage {
    */
   constructor (dataDir: string) {
     super(dataDir)
-    // do this synchronously (only once)
+    // Do this synchronously (only once)
     fs.ensureDirSync(this.dataDir)
   }
 
@@ -41,10 +41,10 @@ export class FileStorage extends Storage {
       dir, { withFileTypes: true })
     const keys: string[] = []
     for (const dirEnt of dirEnts) {
-      // if only directories, check if it's a directory
+      // If only directories, check if it's a directory
       if (!onlyDir || dirEnt.isDirectory()) {
         const dirName = dirEnt.name
-        // remove any file extension and prepend prefix
+        // Remove any file extension and prepend prefix
         const keyName = path.join(prefix, path.parse(dirName).name)
         keys.push(keyName)
       }
@@ -63,7 +63,7 @@ export class FileStorage extends Storage {
     try {
       await fs.ensureDir(this.fullDir(path.dirname(key)), undefined)
     } catch (error) {
-      // no need to reject if dir existed
+      // No need to reject if dir existed
       if (error && error.code !== 'EEXIST') {
         throw error
       }

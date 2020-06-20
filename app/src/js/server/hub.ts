@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
 import * as types from '../action/types'
+import { index2str } from '../common/util'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
@@ -10,7 +11,7 @@ import {
   EventName, RegisterMessageType, ServerConfig,
   StateMetadata, SyncActionMessageType } from './types'
 import { UserManager } from './user_manager'
-import { index2str, initSessId, updateStateTimestamp } from './util'
+import { initSessId, updateStateTimestamp } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -123,7 +124,7 @@ export class Hub {
       const state = await this.projectStore.loadState(projectName, taskId)
       const [newState, timestamps] = updateStateTimestamp(state, taskActions)
 
-      // mark the id as saved, and store the timestamps
+      // Mark the id as saved, and store the timestamps
       actionIdsSaved[actionPacketId] = timestamps
       const stateMetadata: StateMetadata = {
         projectName,
@@ -134,7 +135,7 @@ export class Hub {
       await this.projectStore.saveState(
         newState, projectName, taskId, stateMetadata, taskActions.length)
     } else if (taskActions.length > 0) {
-      // if actions were already saved, apply the old timestamps
+      // If actions were already saved, apply the old timestamps
       const timestamps = actionIdsSaved[actionPacketId]
       for (let actionInd = 0; actionInd < taskActions.length; actionInd++) {
         taskActions[actionInd].timestamp = timestamps[actionInd]
@@ -142,17 +143,17 @@ export class Hub {
     }
 
     if (taskActions.length > 0) {
-      // broadcast task actions to all other sessions in room
+      // Broadcast task actions to all other sessions in room
       const taskActionMsg: SyncActionMessageType = _.cloneDeep(data)
       taskActionMsg.actions = {
         actions: taskActions,
         id: actionPacketId,
         triggerId
       }
-      // broadcast task actions to all other sessions in room
+      // Broadcast task actions to all other sessions in room
       socket.broadcast.to(room).emit(EventName.ACTION_BROADCAST, taskActionMsg)
     }
-    // echo everything to original session
+    // Echo everything to original session
     socket.emit(EventName.ACTION_BROADCAST, data)
   }
 }

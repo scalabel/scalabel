@@ -10,7 +10,7 @@ interface ClassType {
   coloredListItem: string
 }
 
-// props for project list
+// Props for project list
 interface ProjectListProps {
   /** Project List classes */
   classes: ClassType

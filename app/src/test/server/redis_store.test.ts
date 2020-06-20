@@ -1,12 +1,12 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
+import { index2str } from '../../js/common/util'
 import { FileStorage } from '../../js/server/file_storage'
 import { getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
-import { index2str } from '../../js/server/util'
 import { sleep } from '../project/util'
 import { getTestConfig } from './util/util'
 
@@ -25,7 +25,7 @@ beforeAll(async () => {
   client = new RedisClient(config)
   defaultStore = new RedisStore(config, storage, client)
   metadataString = makeMetadata(1)
-  // numWrites used as a counter across all tests that spawn files
+  // NumWrites used as a counter across all tests that spawn files
   numWrites = 0
 })
 
@@ -77,7 +77,7 @@ describe('Test redis cache', () => {
     for (let i = 0; i < 4; i++) {
       await store.setExWithReminder(
         key, sprintf('value%s', i), metadataString, 1)
-      // make sure no new files are created yet
+      // Make sure no new files are created yet
       await checkFileCount()
     }
     await store.setExWithReminder(key, 'value4', metadataString, 1)

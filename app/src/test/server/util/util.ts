@@ -94,8 +94,8 @@ export function getInitialState (sessionId: string): State {
 /**
  * Helper function to get box2d actions
  */
-export function getRandomBox2dAction () {
-  return addBox2dLabel(0, 0, [], {},
+export function getRandomBox2dAction (itemIndex: number = 0) {
+  return addBox2dLabel(itemIndex, 0, [], {},
     Math.random(), Math.random(), Math.random(), Math.random())
 }
 

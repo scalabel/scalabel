@@ -121,7 +121,7 @@ export const listButtonStyle = () => ({
   buttonGroup: {
     width: '100%',
     display: 'flex',
-    // needed to prevent compiler from complaining about types
+    // Needed to prevent compiler from complaining about types
     flexWrap: 'wrap' as ('wrap')
   },
   primary: {
@@ -176,7 +176,6 @@ export const playerControlStyles = () => createStyles({
   input: {
     background: '#000000',
     color: 'green',
-    direction: 'rtl',
     width: '50px',
     fontWeight: 500,
     left: '-1px',

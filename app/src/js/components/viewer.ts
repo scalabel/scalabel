@@ -1,4 +1,4 @@
-import { ReduxState } from '../common/configure_store'
+import { ReduxState } from '../common/types'
 import { shouldCanvasFreeze } from '../functional/selector'
 import { State } from '../functional/types'
 import { Component } from './component'
@@ -6,12 +6,15 @@ import { Component } from './component'
 export interface DrawableProps {
   /** Whether the canvas should freeze */
   shouldFreeze: boolean
+  /** Whether tracking is enabled */
+  tracking: boolean
 }
 
 export const mapStateToDrawableProps = (
   state: ReduxState): DrawableProps => {
   return {
-    shouldFreeze: shouldCanvasFreeze(state)
+    shouldFreeze: shouldCanvasFreeze(state),
+    tracking: state.present.task.config.tracking
   }
 }
 

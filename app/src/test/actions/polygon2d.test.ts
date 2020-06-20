@@ -2,17 +2,17 @@ import _ from 'lodash'
 import * as action from '../../js/action/common'
 import * as polygon2d from '../../js/action/polygon2d'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { LabelTypeName } from '../../js/common/types'
 import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { PolygonType } from '../../js/functional/types'
+import { setupTestStore } from '../components/util'
 import { checkPathPointFields } from '../server/util/util'
 import { testJson } from '../test_states/test_image_objects'
 
 test('Add, change and delete polygon labels', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(polygon2d.addPolygon2dLabel(

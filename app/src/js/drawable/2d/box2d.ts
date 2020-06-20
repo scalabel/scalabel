@@ -106,10 +106,10 @@ export class Box2D extends Label2D {
         rectStyle = _.assign(rectStyle, DEFAULT_VIEW_RECT_STYLE)
         assignColor = (i: number): number[] => {
           if (i % 2 === 0 && i > 0) {
-            // midpoint
+            // Midpoint
             return blendColor(self._color, [255, 255, 255], 0.7)
           } else {
-            // vertex
+            // Vertex
             return self._color
           }
         }
@@ -161,7 +161,7 @@ export class Box2D extends Label2D {
     let y1
     let y2
     if (this._highlightedHandle % 2 === 0) {
-      // move a midpoint
+      // Move a midpoint
       const v1 = this._shapes[1]
       const v2 = this._shapes[5]
       if (this._highlightedHandle === Handles.TOP_MIDDLE) {
@@ -187,7 +187,7 @@ export class Box2D extends Label2D {
         this._highlightedHandle = Handles.BOTTOM_MIDDLE
       }
     } else {
-      // move a vertex
+      // Move a vertex
       const oppVertex = this._shapes[(this._highlightedHandle + 4 + 8) % 8]
       x1 = Math.min(x, oppVertex.x)
       x2 = Math.max(x, oppVertex.x)
@@ -207,7 +207,7 @@ export class Box2D extends Label2D {
         }
       }
     }
-    // update the rectangle
+    // Update the rectangle
     const rect = (this._shapes[0] as Rect2D).toRect()
     rect.x1 = x1
     rect.y1 = y1
@@ -374,13 +374,13 @@ export class Box2D extends Label2D {
     const w = rect.x2 - rect.x1
     const h = rect.y2 - rect.y1
     rect2d.set(x, y, w, h)
-    // vertices
+    // Vertices
     tl.set(x, y)
     tr.set(x + w, y)
     bl.set(x, y + h)
     br.set(x + w, y + h)
 
-    // midpoints
+    // Midpoints
     tm.set(x + w / 2, y)
     bm.set(x + w / 2, y + h)
     lm.set(x, y + h / 2)

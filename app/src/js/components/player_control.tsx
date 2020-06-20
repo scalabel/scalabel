@@ -196,10 +196,10 @@ class PlayerControl extends Component<Props> {
    */
   private togglePlay () {
 
-    // switch the play status
+    // Switch the play status
     this.playing = !this.playing
 
-    // update the icon and play/pause the vid
+    // Update the icon and play/pause the vid
     if (this.playing) {
       this.intervalId = window.setInterval(() => {
         if (this.currentFrame < this.numFrames) {

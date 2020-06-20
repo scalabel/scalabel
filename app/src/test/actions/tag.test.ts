@@ -2,12 +2,12 @@ import _ from 'lodash'
 import { goToItem } from '../../js/action/common'
 import * as tag from '../../js/action/tag'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
+import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 
 test('Add and change tag for image label', () => {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   const itemIndex = 0
   Session.dispatch(goToItem(itemIndex))
   const attributeIndices = [0]
@@ -16,20 +16,22 @@ test('Add and change tag for image label', () => {
   actualAttributes[attributeIndices[0]] = [selectedIndices[0]]
   Session.dispatch(tag.addLabelTag(attributeIndices[0],
     selectedIndices[0]))
+
   let state = Session.getState()
-  let itemLabels = state.task.items[0].labels
+  let itemLabels = state.task.items[itemIndex].labels
   let sample = _.sample(itemLabels)
   expect(_.size(itemLabels)).toBe(1)
   if (sample !== undefined) {
     expect(sample.attributes).toStrictEqual(actualAttributes)
   }
+
   // Change selected value for attribute 0
   selectedIndices[0] = 1
   actualAttributes[attributeIndices[0]] = [selectedIndices[0]]
   Session.dispatch(tag.addLabelTag(attributeIndices[0],
     selectedIndices[0]))
   state = Session.getState()
-  itemLabels = state.task.items[0].labels
+  itemLabels = state.task.items[itemIndex].labels
   expect(_.size(itemLabels)).toBe(1)
   sample = _.sample(itemLabels)
   if (sample !== undefined) {
@@ -42,7 +44,7 @@ test('Add and change tag for image label', () => {
   Session.dispatch(tag.addLabelTag(attributeIndices[1],
     selectedIndices[1]))
   state = Session.getState()
-  itemLabels = state.task.items[0].labels
+  itemLabels = state.task.items[itemIndex].labels
   expect(_.size(itemLabels)).toBe(1)
   sample = _.sample(itemLabels)
   if (sample !== undefined) {

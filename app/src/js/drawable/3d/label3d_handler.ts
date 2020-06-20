@@ -33,8 +33,10 @@ export class Label3DHandler {
   private _camera: THREE.Camera
   /** timer for throttling committing effects of key presses to state */
   private _keyThrottleTimer: ReturnType<typeof setTimeout> | null
+  /** Whether tracking is enabled */
+  private _tracking: boolean
 
-  constructor (camera: THREE.Camera) {
+  constructor (camera: THREE.Camera, tracking: boolean) {
     this._highlightedLabel = null
     this._mouseDownOnSelection = false
     this._keyDownMap = {}
@@ -44,6 +46,7 @@ export class Label3DHandler {
     this._sensor = makeSensor(-1, '', DataType.POINT_CLOUD)
     this._camera = camera
     this._keyThrottleTimer = null
+    this._tracking = tracking
   }
 
   /** Set camera */
@@ -107,7 +110,8 @@ export class Label3DHandler {
     if (!consumed && Session.label3dList.selectedLabel) {
       Session.label3dList.selectedLabel.onMouseUp()
     }
-    commitLabels([...Session.label3dList.updatedLabels.values()])
+    commitLabels(
+      [...Session.label3dList.updatedLabels.values()], this._tracking)
     Session.label3dList.clearUpdatedLabels()
     // Set current label as selected label
     if (
@@ -190,7 +194,8 @@ export class Label3DHandler {
             this._sensorIds
           )
           Session.label3dList.addUpdatedLabel(label)
-          commitLabels([...Session.label3dList.updatedLabels.values()])
+          commitLabels(
+            [...Session.label3dList.updatedLabels.values()], this._tracking)
           Session.label3dList.clearUpdatedLabels()
           return true
         }
@@ -222,7 +227,8 @@ export class Label3DHandler {
             Session.label3dList.selectedLabel.move(
               (new Vector3D()).fromState(target).toThree()
             )
-            commitLabels([...Session.label3dList.updatedLabels.values()])
+            commitLabels(
+              [...Session.label3dList.updatedLabels.values()], this._tracking)
             Session.label3dList.clearUpdatedLabels()
           }
         }
@@ -259,7 +265,8 @@ export class Label3DHandler {
     }
     this._keyThrottleTimer = setTimeout(() => {
       if (Session.label3dList.updatedLabels.size > 0) {
-        commitLabels([...Session.label3dList.updatedLabels.values()])
+        commitLabels(
+          [...Session.label3dList.updatedLabels.values()], this._tracking)
         Session.label3dList.clearUpdatedLabels()
       }
     }, 200)

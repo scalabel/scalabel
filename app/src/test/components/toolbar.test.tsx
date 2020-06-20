@@ -7,17 +7,20 @@ import { create } from 'react-test-renderer'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore, loadImages } from '../../js/common/session_init'
 import { ToolBar } from '../../js/components/toolbar'
 import { Category } from '../../js/components/toolbar_category'
 import { ListButton } from '../../js/components/toolbar_list_button'
 import { makeLabel } from '../../js/functional/states'
 import { testJson } from '../test_states/test_image_objects'
 import { testJson as testTrackJson } from '../test_states/test_track_objects'
+import { setupTestStore } from './util'
 
 let handleToggleWasCalled: boolean = false
 const testValues = ['NA', 'A', 'B', 'C']
 const selected: {[key: string]: string} = {}
+
+const getState = Session.getState.bind(Session)
+const dispatch = Session.dispatch.bind(Session)
 
 /**
  * dummy attribute toggle function to test if the correct toggle action was
@@ -53,7 +56,7 @@ describe('Toolbar category setting', () => {
     expect(selectedValued.getAttribute('value')).toEqual('A')
     const radio = getByLabelText('A')
     fireEvent.change(radio, { target: { value: 'B' } })
-    // expect state to be changed
+    // Expect state to be changed
     expect(radio.getAttribute('value')).toBe('B')
   })
 
@@ -85,8 +88,8 @@ describe('Toolbar category setting', () => {
 
 describe('test Delete', () => {
   test('Delete by keyboard', () => {
-    Session.devMode = false
-    initStore(testJson)
+    setupTestStore(testJson)
+
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
     render(
     <ToolBar
@@ -102,20 +105,20 @@ describe('test Delete', () => {
       toolbarRef.current.componentDidMount()
     }
     for (let itemIndex = 0; itemIndex < 3; itemIndex += 1) {
-      Session.dispatch(action.goToItem(itemIndex))
-      Session.dispatch(action.addLabel(itemIndex, makeLabel()))
+      dispatch(action.goToItem(itemIndex))
+      dispatch(action.addLabel(itemIndex, makeLabel()))
       const label = makeLabel()
-      Session.dispatch(action.addLabel(itemIndex, label))
-      Session.dispatch(action.addLabel(itemIndex, makeLabel()))
-      Session.dispatch(action.addLabel(itemIndex, makeLabel()))
+      dispatch(action.addLabel(itemIndex, label))
+      dispatch(action.addLabel(itemIndex, makeLabel()))
+      dispatch(action.addLabel(itemIndex, makeLabel()))
       fireEvent.keyDown(document, { key: 'Backspace' })
-      let item = Session.getState().task.items[itemIndex]
+      let item = getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(3)
       expect(label.id in item.labels).toBe(true)
-      Session.dispatch(selectLabel(
-        Session.getState().user.select.labels, itemIndex, label.id))
+      dispatch(selectLabel(
+        getState().user.select.labels, itemIndex, label.id))
       fireEvent.keyDown(document, { key: 'Backspace' })
-      item = Session.getState().task.items[itemIndex]
+      item = getState().task.items[itemIndex]
       expect(_.size(item.labels)).toBe(2)
       expect(label.id in item.labels).toBe(false)
     }
@@ -165,9 +168,13 @@ describe('test functionality for attributes with multiple values', () => {
 
 describe('test track', () => {
   test('Delete by click toolbar button', () => {
-    Session.devMode = false
-    initStore(testTrackJson)
-    loadImages()
+    setupTestStore(testTrackJson)
+    Session.images.length = 0
+    Session.images.push({ [-1]: new Image(1000, 1000) })
+    for (let i = 0; i < getState().task.items.length; i++) {
+      dispatch(action.loadItem(i, -1))
+    }
+
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
     const { getByText } = render(
     <ToolBar
@@ -183,8 +190,8 @@ describe('test track', () => {
       toolbarRef.current.componentDidMount()
     }
 
-    Session.dispatch(action.goToItem(1))
-    let state = Session.getState()
+    dispatch(action.goToItem(1))
+    let state = getState()
     const trackLabels = state.task.tracks[3].labels
     const lblInItm2 = trackLabels[2]
     const lblInItm3 = trackLabels[3]
@@ -193,8 +200,7 @@ describe('test track', () => {
     expect(_.size(state.task.tracks[3].labels)).toBe(6)
     expect(_.size(state.task.items[2].labels)).toBe(3)
     expect(_.size(state.task.items[2].shapes)).toBe(3)
-    Session.dispatch(selectLabel(
-      Session.getState().user.select.labels, 1, trackLabels[1]))
+    dispatch(selectLabel(getState().user.select.labels, 1, trackLabels[1]))
     fireEvent(
       getByText('Delete'),
       new MouseEvent('click', {
@@ -202,7 +208,7 @@ describe('test track', () => {
         cancelable: true
       })
     )
-    state = Session.getState()
+    state = getState()
     expect(_.size(state.task.tracks[3].labels)).toBe(1)
     expect(state.task.items[2].labels[lblInItm2]).toBeUndefined()
     expect(state.task.items[2].labels[lblInItm3]).toBeUndefined()
@@ -210,8 +216,8 @@ describe('test track', () => {
     expect(state.task.items[2].labels[lblInItm5]).toBeUndefined()
   })
   test('Merge by click toolbar button', () => {
-    Session.devMode = false
-    initStore(testTrackJson)
+    setupTestStore(testTrackJson)
+
     const toolbarRef: React.Ref<ToolBar> = React.createRef()
     const { getByText } = render(
     <ToolBar
@@ -227,14 +233,13 @@ describe('test track', () => {
       toolbarRef.current.componentDidMount()
     }
 
-    Session.dispatch(action.goToItem(3))
-    let state = Session.getState()
+    dispatch(action.goToItem(3))
+    let state = getState()
     expect(_.size(state.task.tracks[2].labels)).toBe(4)
     expect(_.size(state.task.tracks[9].labels)).toBe(1)
     expect(state.task.items[5].labels['203'].track).toEqual('9')
 
-    Session.dispatch(selectLabel(
-      Session.getState().user.select.labels, 3, '49'))
+    dispatch(selectLabel(getState().user.select.labels, 3, '49'))
     fireEvent(
       getByText('Track-Link'),
       new MouseEvent('click', {
@@ -243,9 +248,8 @@ describe('test track', () => {
       })
     )
 
-    Session.dispatch(action.goToItem(5))
-    Session.dispatch(selectLabel(
-      Session.getState().user.select.labels, 5, '203'))
+    dispatch(action.goToItem(5))
+    dispatch(selectLabel(getState().user.select.labels, 5, '203'))
     fireEvent(
       getByText('Finish Track-Link'),
       new MouseEvent('click', {
@@ -254,7 +258,7 @@ describe('test track', () => {
       })
     )
 
-    state = Session.getState()
+    state = getState()
     expect(_.size(state.task.tracks['2'].labels)).toBe(5)
     expect(state.task.tracks['9']).toBeUndefined()
     expect(state.task.items[5].labels['203'].track).toEqual('2')

@@ -132,7 +132,7 @@ function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
     const attribute = configAttributes[index]
     if (attribute.toolType === AttributeToolType.LIST
         || attribute.toolType === AttributeToolType.LONG_LIST) {
-      // list attribute case- check whether each value is applied
+      // List attribute case- check whether each value is applied
       const selectedValues: string[] = []
       attributeList.forEach((valueIndex) => {
         if (valueIndex in attribute.values) {
@@ -141,7 +141,7 @@ function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
       })
       exportAttributes[attribute.name] = selectedValues
     } else if (attribute.toolType === AttributeToolType.SWITCH) {
-      // boolean attribute case- should be a single boolean in the list
+      // Boolean attribute case- should be a single boolean in the list
       let value = false
       if (attributeList.length > 0) {
         const attributeVal = attributeList[0]

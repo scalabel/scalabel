@@ -58,7 +58,7 @@ export interface ShapeType {
   shapeType: string
 }
 
-export interface RectType extends ShapeType {
+export interface SimpleRect {
   /** The x-coordinate of upper left corner */
   x1: number
   /** The y-coordinate of upper left corner */
@@ -68,6 +68,8 @@ export interface RectType extends ShapeType {
   /** The y-coordinate of lower right corner */
   y2: number
 }
+
+export interface RectType extends ShapeType, SimpleRect {}
 
 export interface PolygonType extends ShapeType {
   /** array of control points */
@@ -245,7 +247,7 @@ export interface ItemType {
   /** Map between data source id and url */
   urls: {[id: number]: string}
   /** Labels of the item */
-  labels: LabelIdMap // list of label
+  labels: LabelIdMap // List of label
   /** shapes of the labels on this item */
   shapes: ShapeIdMap
   /** the timestamp for the item */
@@ -490,3 +492,14 @@ export interface State {
   /** Info particular to this session */
   session: SessionType
 }
+
+// Make properties optional at all levels of nested object
+type RecursivePartial<T> = {
+  [P in keyof T]?: RecursivePartial<T[P]>;
+}
+
+/**
+ * State where all properties are optiona
+ * Used for initialization with test objects
+ */
+export type DeepPartialState = RecursivePartial<State>

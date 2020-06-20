@@ -28,20 +28,20 @@ function startHTTPServer (
   projectStore: ProjectStore, userManager: UserManager) {
   const listeners = new Listeners(projectStore, userManager)
 
-  // set up middleware
+  // Set up middleware
   app.use(listeners.loggingHandler)
 
-  // set up static handlers for serving html
+  // Set up static handlers for serving html
   // TODO: set up '/' endpoint
   for (const HTMLDir of HTMLDirectories) {
     app.use(express.static(
       getAbsoluteSrcPath(HTMLDir), { extensions: ['html'] }))
   }
 
-  // set up static handlers for serving javascript
+  // Set up static handlers for serving javascript
   app.use('/js', express.static(getAbsoluteSrcPath('/')))
 
-  // set up static handlers for serving items to label
+  // Set up static handlers for serving items to label
   app.use('/items', express.static(config.itemDir))
 
   const authMiddleWare =
@@ -55,7 +55,7 @@ function startHTTPServer (
   app.use(Endpoint.CALLBACK,
     new Callback(config).router)
 
-  // set up post/get handlers
+  // Set up post/get handlers
   app.get(Endpoint.GET_PROJECT_NAMES, authMiddleWare,
     listeners.projectNameHandler.bind(listeners))
   app.get(Endpoint.EXPORT, authMiddleWare,
@@ -127,10 +127,10 @@ async function startServers (
   const httpServer = createServer(app)
   const io = socketio(httpServer)
 
-  // set up http handlers
+  // Set up http handlers
   startHTTPServer(config, app, projectStore, userManager)
 
-  // set up socket.io handler
+  // Set up socket.io handler
   const hub = new Hub(config, projectStore, userManager, publisher)
   await hub.listen(io)
 
@@ -141,13 +141,13 @@ async function startServers (
  * Main function for backend server
  */
 async function main () {
-  // initialize config
+  // Initialize config
   const config = await readConfig()
 
-  // start the redis server
+  // Start the redis server
   await launchRedisServer(config)
 
-  // initialize storage
+  // Initialize storage
   const storage = await makeStorage(config.database, config.data)
 
   /**
@@ -159,9 +159,9 @@ async function main () {
   const publisher = makeRedisPubSub(config)
   const subscriber = makeRedisPubSub(config)
 
-  // initialize high level managers
+  // Initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(projectStore)
+  const userManager = new UserManager(projectStore, config.userManagement)
   await userManager.clearUsers()
 
   await makeBotManager(config, subscriber, cacheClient)

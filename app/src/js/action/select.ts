@@ -38,7 +38,7 @@ export function deleteSelectedTracks (state: State): types.DeleteLabelsAction {
       }
     }
   }
-  return deleteTracks(tracks)
+  return deleteTracks(_.uniq(tracks))
 }
 
 /**
@@ -59,7 +59,7 @@ export function terminateSelectedTracks (
       }
     }
   }
-  return terminateTracks(tracks, stopIndex, state.task.items.length)
+  return terminateTracks(_.uniq(tracks), stopIndex, state.task.items.length)
 }
 
 /**
@@ -76,14 +76,14 @@ export function changeSelectedLabelsAttributes (
   const select = state.user.select
   const labelIds = Object.values(select.labels)
   let duplicatedAttributes = []
-  // tracking: propagate attributes to the end
+  // Tracking: propagate attributes to the end
   const selectedItem = state.task.items[select.item]
   if (selectedItem.labels[labelIds[0][0]].track) {
     const labelsInTracks: { [key: number]: string[] } = {}
     for (const labelId of labelIds[0]) {
       const track = state.task.tracks[selectedItem.labels[labelId].track]
       for (const itemIndex of Object.keys(track.labels).map(Number)) {
-        // only propagate attributes to the subsequent frames
+        // Only propagate attributes to the subsequent frames
         if (itemIndex < select.item) {
           continue
         }
@@ -120,7 +120,7 @@ export function changeSelectedLabelsCategories (
   const select = state.user.select
   const labelIds = Object.values(select.labels)
   let duplicatedCategories = []
-  // tracking: changes the category for the entire lifespan
+  // Tracking: changes the category for the entire lifespan
   const selectedItem = state.task.items[select.item]
   if (selectedItem.labels[labelIds[0][0]].track) {
     const labelsInTracks: { [key: number]: string[] } = {}
@@ -202,6 +202,7 @@ export function selectLabels (
 
   return changeSelect({
     labels: (itemIndex < 0) ? {} : selectedLabels,
+    item: itemIndex,
     category,
     attributes
   })
