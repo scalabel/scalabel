@@ -193,6 +193,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   flipAxis: boolean
   /** Camera rotation lock */
   lockStatus: number
+  /** Camera rotation direction */
+  cameraRotateDir?: boolean
 }
 
 export interface Image3DViewerConfigType extends

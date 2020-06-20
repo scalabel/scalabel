@@ -177,5 +177,8 @@
         "winston": "^3.2.0",
         "xss": "^1.0.6",
         "yargs": "^14.2.3"
+    },
+    "dependencies": {
+        "jshint": "^2.11.1"
     }
 }
