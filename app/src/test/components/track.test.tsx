@@ -4,10 +4,11 @@ import React from 'react'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
+import { updateTracks } from '../../js/common/session_setup'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
 import { getShape } from '../../js/functional/state_util'
-import { Attribute, RectType } from '../../js/functional/types'
+import { RectType, State } from '../../js/functional/types'
 // Import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
 import { drag, drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
@@ -26,6 +27,7 @@ beforeEach(() => {
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
     canvasRef.current?.updateState(getState())
+    updateTracks(getState())
   })
 })
 
@@ -276,8 +278,6 @@ describe('basic track ops', () => {
     dispatch(action.goToItem(4))
     drag(label2d, 10, 20, 15, 25)
     let state = getState()
-    console.log(state.task.items[4].labels)
-    console.log(state.task.items[4].shapes)
     // Shapes starting from item 4 should change
     for (let i = 4; i < 8; ++i) {
       const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
