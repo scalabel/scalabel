@@ -7,12 +7,11 @@ import Session from '../../js/common/session'
 import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
-import { Attribute } from '../../js/functional/types'
+import { getShape } from '../../js/functional/state_util'
+import { Attribute, RectType } from '../../js/functional/types'
 // import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
-import { drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas, drag } from './label2d_canvas_util'
-import { getShape } from '../../js/functional/state_util'
-import { RectType } from '../../js/functional/types'
+import { drag, drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -104,7 +103,7 @@ describe('basic track ops', () => {
     dispatch(action.goToItem(6))
     expect(_.size(state.task.items[6].labels)).toEqual(3)
     Session.dispatch(selectLabel(
-    state.user.select.labels, 6,
+      state.user.select.labels, 6,
       state.task.tracks[trackIds[3]].labels[6]))
     fireEvent(
       getByText('Delete'),
@@ -120,7 +119,7 @@ describe('basic track ops', () => {
     // Terminate the track by key
     dispatch(action.goToItem(1))
     Session.dispatch(selectLabel(
-    state.user.select.labels, 1,
+      state.user.select.labels, 1,
       state.task.tracks[trackIds[0]].labels[1]))
     fireEvent.keyDown(document, { key: 'Backspace' })
     state = getState()
@@ -131,7 +130,7 @@ describe('basic track ops', () => {
     // Delete the track by key
     dispatch(action.goToItem(0))
     Session.dispatch(selectLabel(
-    state.user.select.labels, 0,
+      state.user.select.labels, 0,
       state.task.tracks[trackIds[0]].labels[0]))
     fireEvent.keyDown(document, { key: 'Backspace' })
     state = getState()
@@ -278,6 +277,8 @@ describe('basic track ops', () => {
     dispatch(action.goToItem(4))
     drag(label2d, 10, 20, 15, 25)
     let state = getState()
+    console.log(state.task.items[4].labels)
+    console.log(state.task.items[4].shapes)
     // Shapes starting from item 4 should change
     for (let i = 4; i < 8; ++i) {
       const labelIdInk = state.task.tracks[trackIds[0]].labels[i]

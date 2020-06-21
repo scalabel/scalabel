@@ -137,6 +137,7 @@ export class Label2DHandler {
       for (const label of this._labelList.selectedLabels) {
         label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
         label.setManual()
+        console.log(coord + ' ' + labelIndex + ' ' + handleIndex)
       }
       return true
     } else {
