@@ -45,6 +45,9 @@ scalabel/bot/experimental/*
 # python cache
 __pycache__/
 
+# python virtual environment
+env/
+
 # local data folder
 data/
 
