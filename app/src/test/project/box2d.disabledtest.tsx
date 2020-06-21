@@ -7,6 +7,7 @@ import _ from 'lodash'
 import * as React from 'react'
 import { Provider } from 'react-redux'
 import Session from '../../js/common/session'
+import { initSessionForTask } from '../../js/common/session_init'
 import { submissionTimeout } from '../../js/components/create_form'
 import TitleBar, { saveTimeout } from '../../js/components/title_bar'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
@@ -28,7 +29,6 @@ import {
   getExportFromDisc,
   getProjectJson,
   getProjectJsonFromDisc,
-  projectInitSession,
   sleep,
   StyledIntegrationForm,
   testConfig,
@@ -40,21 +40,20 @@ import {
 let launchProc: child.ChildProcessWithoutNullStreams
 
 beforeAll(async () => {
-  Session.devMode = false
   Session.testMode = true
 
-  // port is also changed in test_config
+  // Port is also changed in test_config
   launchProc = child.spawn('node', [
     'app/dist/js/main.js',
     '--config',
     getTestConfigPath()
   ])
 
-  // launchProc.stdout.on('data', (data) => {
+  // LaunchProc.stdout.on('data', (data) => {
   //   process.stdout.write(data)
   // })
 
-  // launchProc.stderr.on('data', (data) => {
+  // LaunchProc.stderr.on('data', (data) => {
   //   process.stdout.write(data)
   // })
 
@@ -72,7 +71,7 @@ afterEach(cleanup)
 afterAll(async () => {
   launchProc.kill()
   deleteTestDir()
-  // wait for server to shut down to clear port
+  // Wait for server to shut down to clear port
   await sleep(50)
 })
 
@@ -83,7 +82,7 @@ describe('full 2d bounding box integration test', () => {
         <StyledIntegrationForm />
       </MuiThemeProvider>
     )
-    // change project meta-data
+    // Change project meta-data
     const projectNameInput = getByTestId('project-name') as HTMLInputElement
     fireEvent.change(projectNameInput, { target: { value:
       testConfig.projectName } })
@@ -97,7 +96,7 @@ describe('full 2d bounding box integration test', () => {
     const tasksizeInput = getByTestId('tasksize-input') as HTMLInputElement
     fireEvent.change(tasksizeInput, { target: { value: '5' } })
     expect(tasksizeInput.value).toBe('5')
-    // submit the project
+    // Submit the project
     const submitButton = getByTestId('submit-button')
     fireEvent.click(submitButton)
     await Promise.race(
@@ -116,14 +115,14 @@ describe('full 2d bounding box integration test', () => {
   test('test 2d-bounding-box annotation and save to disc', async () => {
     // Spawn a canvas and draw labels on this canvas
     // Uses similar code to drawable tests
-    const synchronizer = await projectInitSession()
+    initSessionForTask(
+      testConfig.taskIndex, testConfig.projectName, 'fakeId', '', false)
+
     const labelIds: IdType[] = []
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar
-            synchronizer={synchronizer}
-          />
+          <TitleBar/>
         </Provider>
       </MuiThemeProvider>
     )
@@ -137,7 +136,7 @@ describe('full 2d bounding box integration test', () => {
     let state = Session.getState()
     const itemIndex = state.user.select.item
     const label2dList = new Label2DList()
-    const label2dHandler = new Label2DHandler(Session.label2dList)
+    const label2dHandler = new Label2DHandler(Session.label2dList, false)
     Session.subscribe(() => {
       const newState = Session.getState()
       Session.label2dList.updateState(newState)
@@ -186,7 +185,7 @@ describe('full 2d bounding box integration test', () => {
     expect(rect.y1).toEqual(20)
     expect(rect.x2).toEqual(40)
     expect(rect.y2).toEqual(40)
-    // save to disc
+    // Save to disc
     fireEvent.click(saveButton)
     await Promise.race([
       sleep(saveTimeout),
@@ -212,7 +211,7 @@ describe('full 2d bounding box integration test', () => {
         <StyledIntegrationForm />
       </MuiThemeProvider>
     )
-    // change project meta-data
+    // Change project meta-data
     const projectNameInput = getByTestId('project-name') as HTMLInputElement
     fireEvent.change(projectNameInput, { target: { value:
       testConfig.projectName + '_exported' } })
@@ -226,7 +225,7 @@ describe('full 2d bounding box integration test', () => {
     const tasksizeInput = getByTestId('tasksize-input') as HTMLInputElement
     fireEvent.change(tasksizeInput, { target: { value: '5' } })
     expect(tasksizeInput.value).toBe('5')
-    // submit the project
+    // Submit the project
     const submitButton = getByTestId('submit-button')
     fireEvent.click(submitButton)
     await Promise.race(

@@ -52,12 +52,12 @@ export function makeLabel (params: Partial<LabelType> = {},
     type: types.LabelTypeName.EMPTY,
     category: [],
     attributes: {},
-    parent: makeDefaultId(), // id
-    children: [], // ids
+    parent: makeDefaultId(), // Id
+    children: [], // Ids
     shapes: [],
     track: makeDefaultId(),
     order: 0,
-    manual: true, // by default, manual is true
+    manual: true, // By default, manual is true
     ...params
   }
   if (!keepId) {
@@ -262,7 +262,8 @@ export function makePointCloudViewerConfig (
     sensor,
     pane,
     synchronized: false,
-    hideLabels: false
+    hideLabels: false,
+    cameraRotateDir: false
   }
 }
 
@@ -401,7 +402,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
     tracking: false,
     handlerUrl: '',
     pageTitle: '',
-    instructionPage: '', // instruction url
+    instructionPage: '', // Instruction url
     bundleFile: '',
     categories: [],
     attributes: [],
@@ -626,7 +627,7 @@ export function id2int (s: IdType): number {
   for (let i = 0; i < s.length; i++) {
     // tslint:disable-next-line: no-bitwise
     h = h + s.charCodeAt(i) | 0
-    // h = Math.imul(31, h) + s.charCodeAt(i) | 0
+    // H = Math.imul(31, h) + s.charCodeAt(i) | 0
   }
   return h
 }

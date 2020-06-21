@@ -90,7 +90,7 @@ export class CustomLabel2D extends Label2D {
         highPointStyle = _.assign(highPointStyle, DEFAULT_VIEW_HIGH_POINT_STYLE)
         rectStyle = _.assign(rectStyle, DEFAULT_VIEW_RECT_STYLE)
         assignColor = (i: number): number[] => {
-          // vertex
+          // Vertex
           if (
             i < this._shapes.length &&
             this._shapes[i].name in this._colorMap

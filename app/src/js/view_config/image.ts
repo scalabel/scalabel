@@ -7,7 +7,7 @@ import { ImageViewerConfigType, State } from '../functional/types'
 import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'
 
-// display export constants
+// Display export constants
 /** The maximum scale */
 export const MAX_SCALE = 3.0
 /** The minimum scale */
@@ -89,7 +89,7 @@ export function drawImageOnCanvas (
  */
 export function clearCanvas (canvas: HTMLCanvasElement,
                              context: CanvasRenderingContext2D) {
-  // clear context
+  // Clear context
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
 
@@ -127,11 +127,11 @@ export function normalizeMouseCoordinates (
   let x = clientX - offsetX
   let y = clientY - offsetY
 
-  // limit the mouse within the image
+  // Limit the mouse within the image
   x = Math.max(0, Math.min(x, canvasWidth))
   y = Math.max(0, Math.min(y, canvasHeight))
 
-  // return in the image coordinates
+  // Return in the image coordinates
   return new Vector2D(x / displayToImageRatio,
     y / displayToImageRatio)
 }
@@ -158,7 +158,7 @@ export function imageDataToHandleId (data: Uint8ClampedArray) {
     const color = rgbToIndex(Array.from(data.slice(i * 4, i * 4 + 3)))
     arr.push(color)
   }
-  // finding the mode of the data array to deal with anti-aliasing
+  // Finding the mode of the data array to deal with anti-aliasing
   const hoveredIndex = mode(arr) as number
   return decodeControlIndex(hoveredIndex)
 }
@@ -187,7 +187,7 @@ export function updateCanvasScale (
     context.scale(zoomRatio, zoomRatio)
   }
 
-  // resize canvas
+  // Resize canvas
   const item = getCurrentItem(state)
   const image = Session.images[item.index][config.sensor]
   const ratio = image.width / image.height
@@ -205,7 +205,7 @@ export function updateCanvasScale (
     displayToImageRatio = canvasWidth / image.width
   }
 
-  // set canvas resolution
+  // Set canvas resolution
   if (upRes) {
     canvas.height = canvasHeight * UP_RES_RATIO
     canvas.width = canvasWidth * UP_RES_RATIO
@@ -214,11 +214,11 @@ export function updateCanvasScale (
     canvas.width = canvasWidth
   }
 
-  // set canvas size
+  // Set canvas size
   canvas.style.height = canvasHeight + 'px'
   canvas.style.width = canvasWidth + 'px'
 
-  // set padding
+  // Set padding
   const padding = new Vector2D(
     Math.max(0, (displayRect.width - canvasWidth) / 2),
     Math.max(0, (displayRect.height - canvasHeight) / 2))

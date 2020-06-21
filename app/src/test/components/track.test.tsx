@@ -4,14 +4,14 @@ import React from 'react'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
 import { getShape } from '../../js/functional/state_util'
 import { Attribute, RectType } from '../../js/functional/types'
-// import { TrackCollector } from '../server/util/track_collector'
+// Import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
 import { drag, drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -22,7 +22,7 @@ const dispatch = store.dispatcher()
 beforeEach(() => {
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
-  initStore(emptyTrackingTask)
+  setupTestStore(emptyTrackingTask)
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
     canvasRef.current?.updateState(getState())
@@ -30,16 +30,15 @@ beforeEach(() => {
 })
 
 beforeAll(() => {
-  Session.devMode = false
-  initStore(emptyTrackingTask)
+  setupTestStore(emptyTrackingTask)
   Session.images.length = 0
   Session.images.push({ [-1]: new Image(1000, 1000) })
-  // mock loading every item to make sure the canvas can be successfully
+  // Mock loading every item to make sure the canvas can be successfully
   // initialized
   for (let i = 0; i < getState().task.items.length; i++) {
     dispatch(action.loadItem(i, -1))
   }
-  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000)
+  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000, true)
 })
 
 describe('basic track ops', () => {
@@ -71,7 +70,7 @@ describe('basic track ops', () => {
       [500, 500, 80, 100]
     ]
 
-    // test adding tracks
+    // Test adding tracks
     const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
     let state = getState()
     expect(_.size(state.task.tracks)).toEqual(4)
@@ -215,8 +214,8 @@ describe('basic track ops', () => {
     const { getByText, getAllByRole } = render(
       <ToolBar
         ref={toolbarRef}
-        categories={emptyTrackingTask.task.config.categories}
-        attributes={emptyTrackingTask.task.config.attributes as Attribute[]}
+        categories={(emptyTrackingTask as State).task.config.categories}
+        attributes={(emptyTrackingTask as State).task.config.attributes}
         labelType={'labelType'}
       />
     )

@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 import { sprintf } from 'sprintf-js'
-import { ReduxState } from '../common/configure_store'
+import { ReduxState } from '../common/types'
 import { ConfigType, ConnectionStatus, SessionType } from './types'
 
 /**

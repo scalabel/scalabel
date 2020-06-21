@@ -7,12 +7,12 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import React, { ChangeEvent } from 'react'
 import { getAuth } from '../common/service'
 import { ItemTypeName, LabelTypeName } from '../common/types'
+import { getInstructionUrl, getPageTitle } from '../common/util'
 import { Endpoint, FormField } from '../server/types'
-import { getInstructionUrl, getPageTitle } from '../shared/util'
 import { checkboxStyle, uploadStyle } from '../styles/create'
 import UploadButton from './upload_button'
 
-// submission timeout
+// Submission timeout
 export const submissionTimeout = 5000
 interface ClassType {
   /** root class */

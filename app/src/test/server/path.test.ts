@@ -14,14 +14,14 @@ test('Test redis keys', () => {
     path.getRedisReminderKey(baseKey),
     path.getRedisBotKey(botData)
   ]
-  // condition 1- should get original key back with getRedisBaseKey
+  // Condition 1- should get original key back with getRedisBaseKey
   for (const extendedKey of extendedKeys) {
     expect(path.getRedisBaseKey(extendedKey)).toBe(baseKey)
   }
 
-  // condition 2- no two keys should be  the same
+  // Condition 2- no two keys should be  the same
   const allKeys = [...extendedKeys, baseKey, path.getRedisBotSet()]
-  // set will filter to unique elements
+  // Set will filter to unique elements
   expect(allKeys.length).toBe(new Set(allKeys).size)
 
 })

@@ -128,7 +128,7 @@ export class S3Storage extends Storage {
 
       if (data.Contents) {
         for (const key of data.Contents) {
-          // remove any file extension and prepend prefix
+          // Remove any file extension and prepend prefix
           if (key.Key) {
             const noPrefix = key.Key.substr(fullPrefix.length)
 
@@ -232,7 +232,7 @@ export class S3Storage extends Storage {
 
     const promises = []
 
-    // delete files
+    // Delete files
     for (const subKey of fileKeys) {
       const params = {
         Bucket: this.bucketName,
@@ -244,7 +244,7 @@ export class S3Storage extends Storage {
       }))
     }
 
-    // recursively delete subdirectories
+    // Recursively delete subdirectories
     for (const subKey of dirKeys) {
       promises.push(this.delete(subKey))
     }

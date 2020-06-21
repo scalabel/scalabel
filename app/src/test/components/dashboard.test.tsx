@@ -48,7 +48,7 @@ describe('Test dashboard functionality', () => {
     })
   })
   describe('Test dashboard sidebar links', () => {
-    // test('Correct non-tag url', () => {
+    // Test('Correct non-tag url', () => {
     //   const { getByTestId } = render(
     //     <MuiThemeProvider theme={myTheme}>
     //       <StyledSidebar projectMetaData=

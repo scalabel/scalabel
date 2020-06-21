@@ -1,3 +1,26 @@
+import { ActionCreator, AnyAction, Store } from 'redux'
+import { ThunkAction, ThunkDispatch } from 'redux-thunk'
+import { StateWithHistory } from 'redux-undo'
+import { BaseAction } from '../action/types'
+import { State } from '../functional/types'
+
+/**
+ * Types for redux state and dispatch
+ */
+
+// Types for basic undoable store
+export type ReduxState = StateWithHistory<State>
+export type ReduxStore = Store<ReduxState, AnyAction>
+
+// Thunk-types extend the dispatch of the store to functions
+export type ThunkDispatchType = ThunkDispatch<ReduxState, undefined, BaseAction>
+export type FullStore = ReduxStore & {
+  /** Thunk dispatch used for redux-thunk async actions */
+  dispatch: ThunkDispatchType
+}
+export type ThunkActionType = ThunkAction<void, ReduxState, void, BaseAction>
+export type ThunkCreatorType = ActionCreator<ThunkActionType>
+
 /**
  * Constant type definition
  */
@@ -57,7 +80,7 @@ export enum ViewerConfigTypeName {
 
 export enum PathPointType {
   LINE = 'line',
-  CURVE = 'bezier' // cubic Bezier curve path points
+  CURVE = 'bezier' // Cubic Bezier curve path points
 }
 
 export enum Cursor {
@@ -153,4 +176,10 @@ export enum AttributeToolType {
   LIST = 'list',
   LONG_LIST = 'longList',
   NONE = ''
+}
+
+export enum QueryArg {
+  PROJECT_NAME = 'project_name',
+  TASK_INDEX = 'task_index',
+  DEV_MODE = 'dev'
 }

@@ -459,3 +459,19 @@ export function toggleSelectionLock (
 
   return changeViewerConfig(viewerId, config)
 }
+
+/** Toggle drag rotation direction */
+export function toggleRotation (
+  viewerId: number,
+  viewerConfig: PointCloudViewerConfigType
+) {
+  // Spread the original config
+  const config = { ...viewerConfig }
+  if (viewerConfig.cameraRotateDir) {
+    config.cameraRotateDir = false
+  } else {
+    config.cameraRotateDir = true
+  }
+
+  return changeViewerConfig(viewerId, config)
+}

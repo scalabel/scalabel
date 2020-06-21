@@ -2,13 +2,14 @@ import { Box, IconButton } from '@material-ui/core'
 import ImportExportIcon from '@material-ui/icons/ImportExport'
 import LockIcon from '@material-ui/icons/Lock'
 import SyncIcon from '@material-ui/icons/Sync'
+import ThreeDRotationSharpIcon from '@material-ui/icons/ThreeDRotationSharp'
 import ThreeSixtyIcon from '@material-ui/icons/ThreeSixty'
 import TripOriginIcon from '@material-ui/icons/TripOrigin'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import * as THREE from 'three'
 import { changeViewerConfig, toggleSynchronization } from '../action/common'
-import { alignToAxis, CameraLockState, CameraMovementParameters, lockedToSelection, moveCameraAndTarget, toggleSelectionLock, updateLockStatus } from '../action/point_cloud'
+import { alignToAxis, CameraLockState, CameraMovementParameters, lockedToSelection, moveCameraAndTarget, toggleRotation, updateLockStatus } from '../action/point_cloud'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { PointCloudViewerConfigType } from '../functional/types'
@@ -298,7 +299,7 @@ class Viewer3D extends DrawableViewer<Props> {
         <IconButton
           className={this.props.classes.viewer_button}
           onClick={() => {
-            Session.dispatch(toggleSelectionLock(
+            Session.dispatch(toggleRotation(
               this._viewerId,
               config
             ))
@@ -329,6 +330,26 @@ class Viewer3D extends DrawableViewer<Props> {
         </IconButton>
       )
 
+      const viewerConfigButton = (
+        <IconButton
+          className={this.props.classes.viewer_button}
+          onClick={() => {
+            Session.dispatch(toggleRotation(
+              this.props.id,
+              config
+            ))
+          }}
+          edge={'start'}
+        >
+          {
+            underlineElement(
+              <ThreeDRotationSharpIcon />,
+              config.cameraRotateDir === true
+            )
+          }
+        </IconButton>
+      )
+
       return [
         yLockButton,
         xLockButton,
@@ -338,7 +359,8 @@ class Viewer3D extends DrawableViewer<Props> {
         flipButton,
         synchronizationButton,
         selectionLockButton,
-        originButton
+        originButton,
+        viewerConfigButton
       ]
     }
 
@@ -694,8 +716,14 @@ class Viewer3D extends DrawableViewer<Props> {
     spherical.setFromVector3(offset)
 
     // Apply rotations
-    spherical.theta += dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
-    spherical.phi += dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    // TODO(julin): make this movement customizable
+    if (viewerConfig.cameraRotateDir === false) {
+      spherical.theta -= dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+      spherical.phi -= dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    } else {
+      spherical.theta += dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+      spherical.phi += dy / CameraMovementParameters.MOUSE_CORRECTION_FACTOR
+    }
 
     spherical.phi = Math.max(0, Math.min(Math.PI, spherical.phi))
 

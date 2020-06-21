@@ -2,7 +2,7 @@ import { sprintf } from 'sprintf-js'
 import { id2int, isValidId } from '../functional/states'
 import { IdType } from '../functional/types'
 
-// constants
+// Constants
 const COLOR_PALETTE = [
   [31, 119, 180],
   [174, 199, 232],

@@ -1,8 +1,8 @@
 import * as fs from 'fs-extra'
 import { sprintf } from 'sprintf-js'
+import { index2str } from '../../js/common/util'
 import { FileStorage } from '../../js/server/file_storage'
 import { getProjectKey, getTaskKey, getTestDir } from '../../js/server/path'
-import { index2str } from '../../js/server/util'
 import { makeProjectDir } from './util/util'
 
 let storage: FileStorage

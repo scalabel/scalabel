@@ -59,7 +59,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   /** The mask to hold the display */
   private display: HTMLDivElement | null
 
-  // display variables
+  // Display variables
   /** The current scale */
   private scale: number
   /** The canvas height */
@@ -75,7 +75,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   /** key down listener */
   private _keyDownListener: (e: KeyboardEvent) => void
 
-  // keyboard and mouse status
+  // Keyboard and mouse status
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
   /** drawable callback */
@@ -88,9 +88,9 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
   constructor (props: Readonly<Props>) {
     super(props)
 
-    // constants
+    // Constants
 
-    // initialization
+    // Initialization
     this._keyDownMap = {}
     this.scale = 1
     this.canvasHeight = 0
@@ -102,7 +102,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     this.labelCanvas = null
     this.display = this.props.display
     this._labelList = Session.label2dList
-    this._labelHandler = new Label2DHandler(this._labelList)
+    this._labelHandler = new Label2DHandler(
+      this._labelList, this.props.tracking)
     this.crosshair = React.createRef()
 
     this._keyUpListener = (e) => { this.onKeyUp(e) }
@@ -262,7 +263,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       this.crosshair.current.onMouseMove(e)
     }
 
-    // update the currently hovered shape
+    // Update the currently hovered shape
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     if (this._labelHandler.onMouseMove(

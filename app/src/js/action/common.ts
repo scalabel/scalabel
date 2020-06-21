@@ -1,13 +1,12 @@
-import { ActionCreator } from 'redux'
-import { ThunkAction } from 'redux-thunk'
-import { ReduxState } from '../common/configure_store'
 import { getStateGetter } from '../common/session'
 import { getStateFunc } from '../common/simple_store'
+import { ThunkCreatorType } from '../common/types'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
-import { ConnectionStatus, IdType, LabelType,
-  PaneType, Select, ShapeType, SplitType,
+import { ConnectionStatus, DeepPartialState, IdType, LabelType,
+  PaneType, Select, ShapeType, SplitType, State,
   TaskType, ViewerConfigType } from '../functional/types'
+import { SyncActionMessageType } from '../server/types'
 import * as types from './types'
 
 let getState = getStateGetter()
@@ -24,14 +23,16 @@ export function setActionStateGetter (getter: getStateFunc) {
  * Make the base action that can be extended by the other actions
  * @param type
  */
-export function makeBaseAction (type: string): types.BaseAction {
+export function makeBaseAction (
+  type: string, frontendOnly: boolean = false): types.BaseAction {
   const state = getState()
   return {
     actionId: uid(),
     type,
     sessionId: state.session.id,
     userId: state.user.id,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    frontendOnly
   }
 }
 
@@ -40,13 +41,24 @@ export function initSessionAction (): types.InitSessionAction {
   return makeBaseAction(types.INIT_SESSION)
 }
 
-/** update task data
+/** Update task data
  * @param {TaskType} newTask
  */
 export function updateTask (newTask: TaskType): types.UpdateTaskAction {
   return {
-    ...makeBaseAction(types.UPDATE_TASK),
+    ...makeBaseAction(types.UPDATE_TASK, true),
     newTask
+  }
+}
+
+/** Initialize state data
+ * @param {TaskType} newTask
+ */
+export function updateState (
+  newState: DeepPartialState): types.UpdateStateAction {
+  return {
+    ...makeBaseAction(types.UPDATE_STATE, true),
+    newState
   }
 }
 
@@ -56,7 +68,7 @@ export function updateTask (newTask: TaskType): types.UpdateTaskAction {
  * @return {types.ChangeSelectAction}
  */
 export function goToItem (index: number): types.ChangeSelectAction {
-  // normally, unselect labels when item changes
+  // Normally, unselect labels when item changes
   let newSelect: Partial<Select> = {
     item: index,
     labels: {},
@@ -64,7 +76,7 @@ export function goToItem (index: number): types.ChangeSelectAction {
   }
 
   if (getState().session.trackLinking) {
-    // if track linking is on, keep old labels selected
+    // If track linking is on, keep old labels selected
     newSelect = {
       item: index
     }
@@ -424,6 +436,48 @@ export function startLinkTrack () {
 }
 
 /**
+ * Finish session registration by loading backend state
+ */
+export function registerSession (state: State): types.RegisterSessionAction {
+  return {
+    ...makeBaseAction(types.REGISTER_SESSION),
+    initialState: state
+  }
+}
+
+/**
+ * Handle broadcasted message contains one or more actions
+ */
+export function receiveBroadcast (
+  message: SyncActionMessageType): types.ReceiveBroadcastAction {
+  return {
+    ...makeBaseAction(types.RECEIVE_BROADCAST),
+    message
+  }
+}
+
+/**
+ * Handle session connection
+ */
+export function connect (): types.ConnectAction {
+  return makeBaseAction(types.CONNECT)
+}
+
+/**
+ * Handle session disconnection
+ */
+export function disconnect (): types.DisconnectAction {
+  return makeBaseAction(types.DISCONNECT)
+}
+
+/**
+ * Trigger save to server
+ */
+export function save (): types.SaveAction {
+  return makeBaseAction(types.SAVE)
+}
+
+/**
  * Update session status
  */
 export function updateSessionStatus (
@@ -447,10 +501,6 @@ export function setStatusToReconnecting () {
 export function setStatusToSubmitting () {
   return updateSessionStatus(ConnectionStatus.SUBMITTING)
 }
-
-type ThunkCreatorType =
-  ActionCreator<
-  ThunkAction<void, ReduxState, void, types.ActionType>>
 
 /**
  * Mark status as saving, unless compute is ongoing

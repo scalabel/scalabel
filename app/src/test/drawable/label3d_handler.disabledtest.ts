@@ -1,17 +1,17 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-// import * as THREE from 'three'
+// Import * as THREE from 'three'
 import * as action from '../../js/action/common'
 import { moveCamera, moveCameraAndTarget } from '../../js/action/point_cloud'
 import { selectLabel } from '../../js/action/select'
 import Session from '../../js/common/session'
-import { initStore } from '../../js/common/session_init'
 import { Label3DHandler } from '../../js/drawable/3d/label3d_handler'
 import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util'
 import { makePointCloudViewerConfig } from '../../js/functional/states'
 import { CubeType, IdType, PointCloudViewerConfigType } from '../../js/functional/types'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
+import { setupTestStore } from '../components/util'
 import { expectVector3TypesClose, findNewLabelsFromState } from '../server/util/util'
 import { testJson } from '../test_states/test_point_cloud_objects'
 
@@ -75,12 +75,12 @@ function getActiveAxisForRotation (camLoc: number, axis: number) {
 function initializeTestingObjects (
   camera: THREE.Camera
 ): [Label3DHandler, number] {
-  Session.devMode = false
-  initStore(testJson)
+  setupTestStore(testJson)
+
   Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig(-1)))
   const viewerId = 1
 
-  const label3dHandler = new Label3DHandler(camera)
+  const label3dHandler = new Label3DHandler(camera, false)
   Session.subscribe(() => {
     const state = Session.getState()
     Session.label3dList.updateState(state)
@@ -337,7 +337,7 @@ test('Move axis aligned 3d bbox along all axes', () => {
       let cube = getShape(state, 0, labelIds[0], 0) as CubeType
       const center = (new Vector3D()).fromState(cube.center)
 
-      // get ActiveAxis based on view point and vertical or horizontal
+      // Get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxis(camLoc, axis)
       for (let i = 0; i < 3; i++) {
         if (i !== activeAxis) {
@@ -454,9 +454,9 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       const center = (new Vector3D()).fromState(cube.center)
       const size = (new Vector3D()).fromState(cube.size)
 
-      // get ActiveAxis based on view point and vertical or horizontal
+      // Get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxis(camLoc, axis)
-      // expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
+      // ExpectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
 
       for (let i = 0; i < 3; i++) {
         if (i !== activeAxis) {
@@ -576,7 +576,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       let cube = getShape(state, 0, labelIds[0], 0) as CubeType
       const orientation = (new Vector3D()).fromState(cube.orientation)
 
-      // get ActiveAxis based on view point and vertical or horizontal
+      // Get ActiveAxis based on view point and vertical or horizontal
       const activeAxis = getActiveAxisForRotation(camLoc, axis)
       expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
       expectVector3TypesClose(cube.size, { x: 1, y: 1, z: 1 })

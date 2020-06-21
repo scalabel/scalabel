@@ -131,7 +131,7 @@ export function drag (
   label2d: Label2dCanvas, x1: number, y1: number, x2: number, y2: number) {
   mouseMove(label2d, x1, y1)
   mouseDown(label2d, x1, y1)
-  // move to a middle point first for more testing
+  // Move to a middle point first for more testing
   mouseMove(label2d, (x1 + x2) / 2, (y1 + y2) / 2)
   mouseMove(label2d, x2, y2)
   mouseUp(label2d, x2, y2)
@@ -189,7 +189,7 @@ export function drawBox2DTracks (
 export function setUpLabel2dCanvas (
     dispatch: (action: ActionType) => void,
     canvasRef: React.RefObject<Label2dCanvas>,
-    width: number, height: number) {
+    width: number, height: number, tracking: boolean = false) {
   dispatch(action.addViewerConfig(0, makeImageViewerConfig(0)))
 
   const display = document.createElement('div')
@@ -229,6 +229,7 @@ export function setUpLabel2dCanvas (
         display={display}
         ref={canvasRef}
         shouldFreeze={false}
+        tracking={tracking}
       />
     </div>
   )

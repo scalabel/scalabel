@@ -24,10 +24,10 @@ export function initDashboard (vendor?: boolean) {
           : 'dashboard-root'))
     }
   }
-  // get params from url path.
+  // Get params from url path.
   const searchParams = new URLSearchParams(window.location.search)
   const projectName = searchParams.get('project_name')
-  // send the request to the back end
+  // Send the request to the back end
   const request = JSON.stringify({
     name: projectName
   })
