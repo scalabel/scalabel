@@ -2,6 +2,7 @@ import { changeLabelsProps, linkLabels, mergeTracks, startLinkTrack, unlinkLabel
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
 import { Key } from '../../common/types'
+import { addVisibilityListener } from '../../components/util'
 import { getLinkedLabelIds } from '../../functional/common'
 import { tracksOverlapping } from '../../functional/track'
 import { IdType, State } from '../../functional/types'
@@ -36,6 +37,8 @@ export class Label2DHandler {
     this._selectedItemIndex = -1
     this._labelList = labelList
     this._tracking = tracking
+
+    addVisibilityListener(this.onVisibilityChange.bind(this))
   }
 
   /** get highlightedLabel for state inspection */
@@ -246,6 +249,15 @@ export class Label2DHandler {
     for (const selectedLabel of this._labelList.selectedLabels) {
       selectedLabel.onKeyUp(e.key)
     }
+  }
+
+  /**
+   * Handling function for canvas visibility change
+   * @param _isVisible
+   */
+  public onVisibilityChange (_isVisible: boolean): void {
+    delete this._keyDownMap[Key.META]
+    delete this._keyDownMap[Key.CONTROL]
   }
 
   /** returns whether selectedLabels is empty */
