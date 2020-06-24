@@ -163,18 +163,19 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         }
       }}
     />)
-    let labelCanvas = (<canvas
-      key='label2d-canvas'
-      className={classes.label2d_canvas}
-      ref={(canvas) => {
-        if (canvas) {
-          this.updateCanvas(canvas, false)
-        }
-      }}
-      onMouseDown={(e) => { this.onMouseDown(e) }}
-      onMouseUp={(e) => { this.onMouseUp(e) }}
-      onMouseMove={(e) => { this.onMouseMove(e) }}
-    />)
+    let labelCanvas = (
+        <canvas
+          key='label2d-canvas'
+          className={classes.label2d_canvas}
+          ref={(canvas) => {
+            if (canvas) {
+              this.updateCanvas(canvas, false)
+            }
+          }}
+          onMouseDown={(e) => { this.onMouseDown(e) }}
+          onMouseUp={(e) => { this.onMouseUp(e) }}
+          onMouseMove={(e) => { this.onMouseMove(e) }}
+        />)
     const ch = (<Crosshair
       key='crosshair-canvas'
       display={this.display}
