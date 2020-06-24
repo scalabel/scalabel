@@ -1,28 +1,44 @@
 import * as action from '../../js/action/common'
-import Session from '../../js/common/session'
+import { dispatch, getState } from '../../js/common/session'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
-import { SimpleRect } from '../../js/functional/types'
+import { IdType, INVALID_ID, SimpleRect } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
+import { LabelCollector } from '../util/label_collector'
 
 /**
  * Create a polygon by clicking at each point in sequence
  * @param label2dHandler
  * @param canvasSize
  * @param points: the input vertices
+ * @param interrupt: add an interrupt saving action
+ * @param valid: whether the polygon is valid
  */
 export function drawPolygon (
   label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][],
-  interrupt: boolean = false) {
+  interrupt: boolean = false, valid: boolean = true): IdType {
+  const labelIds = new LabelCollector(getState)
+  const start = labelIds.collect()
+
   for (const p of points) {
     mouseMoveClick(label2dHandler, p[0], p[1], canvasSize, -1, 0)
     if (interrupt) {
-      Session.dispatch(action.setStatusToSaved())
+      dispatch(action.setStatusToSaved())
     }
   }
 
   // Handler index of 1 marks the end of the polygon
   mouseMoveClick(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 1)
+
+  const total = labelIds.collect()
+  if (valid) {
+    expect(labelIds.length).toEqual(start + 1)
+  }
+  if (total > start) {
+    return labelIds[total - 1]
+  } else {
+    return INVALID_ID
+  }
 }
 
 /**
@@ -30,10 +46,15 @@ export function drawPolygon (
  * @param label2dHandler
  * @param canvasSize
  * @param points: the input vertices
+ * @param interrupt: add an interrupt saving action
+ * @param valid: whether the polygon is valid
  */
 export function drawPolygonByDragging (
   label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][],
-  interrupt: boolean = false) {
+  interrupt: boolean = false, valid: boolean = true) {
+  const labelIds = new LabelCollector(getState)
+  const start = labelIds.collect()
+
   // Start by clicking at the first point
   mouseMoveClick(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 0)
 
@@ -47,7 +68,7 @@ export function drawPolygonByDragging (
     mouseUp(label2dHandler, p[0], p[1], -1, 0)
 
     if (interrupt) {
-      Session.dispatch(action.setStatusToSaved())
+      dispatch(action.setStatusToSaved())
     }
 
     // Click to prepare for the next line
@@ -58,6 +79,16 @@ export function drawPolygonByDragging (
   // Handler index of 1 marks the end of the polygon
   mouseMove(label2dHandler, points[0][0], points[0][1], canvasSize, -1, 1)
   mouseUp(label2dHandler, points[0][0], points[0][1], -1, 1)
+
+  const total = labelIds.collect()
+  if (valid) {
+    expect(labelIds.length).toEqual(start + 1)
+  }
+  if (total > start) {
+    return labelIds[total - 1]
+  } else {
+    return INVALID_ID
+  }
 }
 
 /**
@@ -66,7 +97,7 @@ export function drawPolygonByDragging (
  * @param labelIndex: if not -1, specifies changing an existing label
  * @param interrupt: if enabled, interrupt the operation with another action
  */
-function do2DBoxOperation (
+function doBox2DOperation (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
   coords: SimpleRect, labelIndex: number, handleIndex: number,
   interrupt: boolean= false) {
@@ -84,7 +115,7 @@ function do2DBoxOperation (
     x1 + Math.random() * 5, y1 - Math.random() * 5, canvasSize, -1, 0)
 
   if (interrupt) {
-    Session.dispatch(action.setStatusToSaved())
+    dispatch(action.setStatusToSaved())
   }
 
   // Last point
@@ -98,10 +129,15 @@ function do2DBoxOperation (
  * Make mouse movements to add the 2D box
  * @param coords: the coordinates of the new box
  */
-export function draw2DBox (
+export function drawBox2D (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: SimpleRect, interrupt: boolean= false) {
-  do2DBoxOperation(label2dHandler, canvasSize, coords, -1, 0, interrupt)
+  coords: SimpleRect, interrupt: boolean= false): IdType {
+  const boxIds = new LabelCollector(getState)
+  const start = boxIds.collect()
+  doBox2DOperation(label2dHandler, canvasSize, coords, -1, 0, interrupt)
+  boxIds.collect()
+  expect(boxIds.length).toEqual(start + 1)
+  return boxIds[start]
 }
 
 /**
@@ -109,10 +145,10 @@ export function draw2DBox (
  * @param coords: x1/y1 is the existing point, x2/y2 is the new point
  * @param labelIndex: the index of the label to move
  */
-export function resize2DBox (
+export function resizeBox2D (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
   coords: SimpleRect, labelIndex: number, interrupt: boolean= false) {
-  do2DBoxOperation(
+  doBox2DOperation(
     label2dHandler, canvasSize, coords, labelIndex, labelIndex, interrupt)
 }
 
@@ -121,11 +157,11 @@ export function resize2DBox (
  * @param coords: x1/y1 is the existing point, x2/y2 is the new point
  * @param labelIndex: the index of the label to move
  */
-export function move2DBox (
+export function moveBox2D (
   label2dHandler: Label2DHandler, canvasSize: Size2D,
   coords: SimpleRect, labelIndex: number, interrupt: boolean= false) {
   // Handle index of 0 represents a move instead of a resize
-  do2DBoxOperation(
+  doBox2DOperation(
     label2dHandler, canvasSize, coords, labelIndex, 0, interrupt)
 }
 

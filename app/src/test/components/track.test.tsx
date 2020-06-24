@@ -3,22 +3,18 @@ import _ from 'lodash'
 import React from 'react'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
-import Session from '../../js/common/session'
+import Session, { dispatch, getState, getStore } from '../../js/common/session'
 import { updateTracks } from '../../js/common/session_setup'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
-import { getShape } from '../../js/functional/state_util'
-import { RectType, State } from '../../js/functional/types'
+import { State } from '../../js/functional/types'
 // Import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
+import { checkBox2D } from '../util/shape'
 import { drag, drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
 import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
-
-const store = Session.getSimpleStore()
-const getState = store.getter()
-const dispatch = store.dispatcher()
 
 beforeEach(() => {
   expect(canvasRef.current).not.toBeNull()
@@ -73,7 +69,7 @@ describe('basic track ops', () => {
     ]
 
     // Test adding tracks
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
     let state = getState()
     expect(_.size(state.task.tracks)).toEqual(4)
     itemIndices.forEach((itemIndex, i) => {
@@ -165,7 +161,7 @@ describe('basic track ops', () => {
       [500, 500, 80, 100]
     ]
 
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
     // Terminate the track by button
     let state = getState()
@@ -232,7 +228,7 @@ describe('basic track ops', () => {
       [1, 1, 50, 50]
     ]
 
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
     // Changing category
     dispatch(action.goToItem(2))
@@ -272,7 +268,7 @@ describe('basic track ops', () => {
       [100, 110, 200, 300]
     ]
 
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
     // Changing shape
     dispatch(action.goToItem(4))
@@ -280,41 +276,29 @@ describe('basic track ops', () => {
     let state = getState()
     // Shapes starting from item 4 should change
     for (let i = 4; i < 8; ++i) {
-      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
-      const rect = getShape(state, i, labelIdInk, 0) as RectType
-      expect(rect.x1).toEqual(15)
-      expect(rect.y1).toEqual(25)
-      expect(rect.x2).toEqual(50)
-      expect(rect.y2).toEqual(60)
+      checkBox2D(
+        state.task.tracks[trackIds[0]].labels[i],
+        { x1: 15, y1: 25, x2: 50, y2: 60 }, i)
     }
     // Shapes before item 4 should not change
     for (let i = 0; i < 4; ++i) {
-      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
-      const rect = getShape(state, i, labelIdInk, 0) as RectType
-      expect(rect.x1).toEqual(10)
-      expect(rect.y1).toEqual(20)
-      expect(rect.x2).toEqual(50)
-      expect(rect.y2).toEqual(60)
+      checkBox2D(
+        state.task.tracks[trackIds[0]].labels[i],
+        { x1: 10, y1: 20, x2: 50, y2: 60 }, i)
     }
     dispatch(action.goToItem(6))
     drag(label2d, 50, 60, 55, 65)
     state = getState()
     // Shapes should change only between item 6 to 8
     for (let i = 6; i < 8; ++i) {
-      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
-      const rect = getShape(state, i, labelIdInk, 0) as RectType
-      expect(rect.x1).toEqual(15)
-      expect(rect.y1).toEqual(25)
-      expect(rect.x2).toEqual(55)
-      expect(rect.y2).toEqual(65)
+      checkBox2D(
+        state.task.tracks[trackIds[0]].labels[i],
+        { x1: 15, y1: 25, x2: 55, y2: 65 }, i)
     }
     for (let i = 4; i < 6; ++i) {
-      const labelIdInk = state.task.tracks[trackIds[0]].labels[i]
-      const rect = getShape(state, i, labelIdInk, 0) as RectType
-      expect(rect.x1).toEqual(15)
-      expect(rect.y1).toEqual(25)
-      expect(rect.x2).toEqual(50)
-      expect(rect.y2).toEqual(60)
+      checkBox2D(
+        state.task.tracks[trackIds[0]].labels[i],
+        { x1: 15, y1: 25, x2: 50, y2: 60 }, i)
     }
     // Changing location
     dispatch(action.goToItem(5))
@@ -322,21 +306,15 @@ describe('basic track ops', () => {
     state = getState()
     // Locations starting from item 5 should change
     for (let i = 5; i < 8; ++i) {
-      const labelIdInk = state.task.tracks[trackIds[1]].labels[i]
-      const rect = getShape(state, i, labelIdInk, 0) as RectType
-      expect(rect.x1).toEqual(200)
-      expect(rect.y1).toEqual(210)
-      expect(rect.x2).toEqual(300)
-      expect(rect.y2).toEqual(400)
+      checkBox2D(
+        state.task.tracks[trackIds[1]].labels[i],
+        { x1: 200, y1: 210, x2: 300, y2: 400 }, i)
     }
     // Locations before item 5 should not change
     for (let i = 2; i < 5; ++i) {
-      const labelIdInk = state.task.tracks[trackIds[1]].labels[i]
-      const rect = getShape(state, i, labelIdInk, 0) as RectType
-      expect(rect.x1).toEqual(100)
-      expect(rect.y1).toEqual(110)
-      expect(rect.x2).toEqual(200)
-      expect(rect.y2).toEqual(300)
+      checkBox2D(
+        state.task.tracks[trackIds[1]].labels[i],
+        { x1: 100, y1: 110, x2: 200, y2: 300 }, i)
     }
 
   })

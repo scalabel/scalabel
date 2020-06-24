@@ -13,7 +13,7 @@ import { DeepPartialState, PointCloudViewerConfigType, SplitType, State } from '
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import Session from './session'
-import { dispatchFunc, getStateFunc } from './simple_store'
+import { DispatchFunc, GetStateFunc } from './simple_store'
 import { Track } from './track/track'
 import { DataType, FullStore, ItemTypeName, ViewerConfigTypeName } from './types'
 
@@ -61,7 +61,7 @@ function renderDom (
 /**
  * Load labeling data initialization function
  */
-function loadData (getState: getStateFunc, dispatch: dispatchFunc): void {
+function loadData (getState: GetStateFunc, dispatch: DispatchFunc): void {
   loadImages(getState, dispatch)
   loadPointClouds(getState, dispatch)
 }
@@ -92,7 +92,7 @@ export function updateTracks (state: State): void {
  * Load all the images in the state
  */
 function loadImages (
-  getState: getStateFunc, dispatch: dispatchFunc,
+  getState: GetStateFunc, dispatch: DispatchFunc,
   maxAttempts: number = 3): void {
   const state = getState()
   const items = state.task.items
@@ -132,7 +132,7 @@ function loadImages (
  * Load all point clouds in state
  */
 function loadPointClouds (
-  getState: getStateFunc, dispatch: dispatchFunc,
+  getState: GetStateFunc, dispatch: DispatchFunc,
   maxAttempts: number = 3): void {
   const loader = new PLYLoader()
 
@@ -184,7 +184,7 @@ function loadPointClouds (
  * Create default viewer configs if none exist
  */
 function initViewerConfigs (
-  getState: getStateFunc, dispatch: dispatchFunc): void {
+  getState: GetStateFunc, dispatch: DispatchFunc): void {
   let state = getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const sensorIds = Object.keys(state.task.sensors).map(

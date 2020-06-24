@@ -1,24 +1,18 @@
 import _ from 'lodash'
 import * as action from '../../js/action/common'
-import Session from '../../js/common/session'
+import Session, { dispatch, getState } from '../../js/common/session'
 import { updateTracks } from '../../js/common/session_setup'
 import { Label2DList, makeDrawableLabel2D } from '../../js/drawable/2d/label2d_list'
 import { commit2DLabels } from '../../js/drawable/states'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { RectType, State } from '../../js/functional/types'
+import { RectType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 
-const store = Session.getSimpleStore()
-const getState = store.getter()
-const dispatch = store.dispatcher()
-let tracking: boolean
-
 beforeAll(() => {
   setupTestStore(testJson)
-  tracking = (testJson as State).task.config.tracking
 
   Session.images.length = 0
   for (let i = 0; i < getState().task.items.length; i++) {
@@ -47,7 +41,7 @@ test('Add new valid drawable track', () => {
     label.onMouseMove(new Vector2D(20, 20), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(20, 20))
 
-    commit2DLabels([label], tracking)
+    commit2DLabels([label], state.task.config.tracking)
 
     const currentState = getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(4)
@@ -90,7 +84,7 @@ test('Add new invalid drawable track', () => {
     label.onMouseMove(new Vector2D(12, 12), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(12, 12))
 
-    commit2DLabels([label], tracking)
+    commit2DLabels([label], state.task.config.tracking)
 
     const currentState = getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(3)
@@ -118,7 +112,7 @@ test('Update existing drawable of a track', () => {
   label.onMouseMove(new Vector2D(850, 350), new Size2D(1200, 1200), 1, 2)
   label.onMouseUp(new Vector2D(850, 350))
 
-  commit2DLabels([label], tracking)
+  commit2DLabels([label], state.task.config.tracking)
 
   const currentState = getState()
   const newLabel = currentState.task.items[1].labels['70']
@@ -161,7 +155,7 @@ test('Update existing drawable of a track to invalid, from page 1', () => {
   const trackId = label.trackId
   const oldTrackLabels = state.task.tracks[trackId].labels
 
-  commit2DLabels([label], tracking)
+  commit2DLabels([label], state.task.config.tracking)
 
   const currentState = getState()
   const newLabel = currentState.task.items[1].labels['70']
@@ -203,7 +197,7 @@ test('Update existing drawable of a track to invalid, from page 0', () => {
   const trackId = label.trackId
   const oldTrackLabels = state.task.tracks[trackId].labels
 
-  commit2DLabels([label], tracking)
+  commit2DLabels([label], state.task.config.tracking)
 
   const currentState = getState()
   const newLabel = currentState.task.items[0].labels['69']

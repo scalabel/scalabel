@@ -1,5 +1,5 @@
 import { IdType } from 'aws-sdk/clients/workdocs'
-import { getStateFunc } from '../../../js/common/simple_store'
+import { GetStateFunc } from '../../../js/common/simple_store'
 import { findNewTracksFromState } from './util'
 
 /**
@@ -8,9 +8,9 @@ import { findNewTracksFromState } from './util'
 export class TrackCollector extends Array<IdType> {
 
   /** access the state */
-  private _getState: getStateFunc
+  private _getState: GetStateFunc
 
-  constructor (getState: getStateFunc) {
+  constructor (getState: GetStateFunc) {
     super()
     this._getState = getState
   }

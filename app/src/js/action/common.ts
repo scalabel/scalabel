@@ -1,5 +1,5 @@
 import { getStateGetter } from '../common/session'
-import { getStateFunc } from '../common/simple_store'
+import { GetStateFunc } from '../common/simple_store'
 import { ThunkCreatorType } from '../common/types'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
@@ -15,7 +15,7 @@ let getState = getStateGetter()
  * Set the state getter for actions
  * @param getter
  */
-export function setActionStateGetter (getter: getStateFunc) {
+export function setActionStateGetter (getter: GetStateFunc) {
   getState = getter
 }
 

@@ -6,7 +6,7 @@ import * as React from 'react'
 import { create } from 'react-test-renderer'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
-import Session from '../../js/common/session'
+import Session, { dispatch, getState } from '../../js/common/session'
 import { ToolBar } from '../../js/components/toolbar'
 import { Category } from '../../js/components/toolbar_category'
 import { ListButton } from '../../js/components/toolbar_list_button'
@@ -18,9 +18,6 @@ import { setupTestStore } from './util'
 let handleToggleWasCalled: boolean = false
 const testValues = ['NA', 'A', 'B', 'C']
 const selected: {[key: string]: string} = {}
-
-const getState = Session.getState.bind(Session)
-const dispatch = Session.dispatch.bind(Session)
 
 /**
  * dummy attribute toggle function to test if the correct toggle action was

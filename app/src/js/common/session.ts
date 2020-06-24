@@ -6,7 +6,7 @@ import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
-import { getStateFunc, SimpleStore } from './simple_store'
+import { GetStateFunc, SimpleStore } from './simple_store'
 import { Track } from './track/track'
 import { FullStore, ThunkActionType } from './types'
 
@@ -100,8 +100,29 @@ const session = new Session()
 /**
  * extract state getter from the session
  */
-export function getStateGetter (): getStateFunc {
+export function getStateGetter (): GetStateFunc {
   return session.getSimpleStore().getter()
+}
+
+/**
+ * Get state from the global session instance
+ */
+export function getState (): State {
+  return session.getState()
+}
+
+/**
+ * Dispatch the action to the global session instance
+ */
+export function dispatch (action: types.ActionType | ThunkActionType): void {
+  return session.dispatch(action)
+}
+
+/**
+ * Get the simple store object
+ */
+export function getStore (): SimpleStore {
+  return session.getSimpleStore()
 }
 
 export default session

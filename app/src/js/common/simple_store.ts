@@ -1,19 +1,19 @@
 import { ActionType } from '../action/types'
 import { State } from '../functional/types'
 
-export type getStateFunc = () => State
-export type dispatchFunc = (actoin: ActionType) => void
+export type GetStateFunc = () => State
+export type DispatchFunc = (actoin: ActionType) => void
 
 /**
  * Simple store wrapper class
  */
 export class SimpleStore {
   /** get state function */
-  public getState: getStateFunc
+  public getState: GetStateFunc
   /** dispatch action function */
-  public dispatch: dispatchFunc
+  public dispatch: DispatchFunc
 
-  constructor (getState: getStateFunc, dispatch: dispatchFunc) {
+  constructor (getState: GetStateFunc, dispatch: DispatchFunc) {
     this.getState = getState
     this.dispatch = dispatch
   }
@@ -21,14 +21,14 @@ export class SimpleStore {
   /**
    * Get the standalone state accessor function
    */
-  public getter (): getStateFunc {
+  public getter (): GetStateFunc {
     return this.getState.bind(this)
   }
 
   /**
    * Get the standalone state dispatch function
    */
-  public dispatcher (): dispatchFunc {
+  public dispatcher (): DispatchFunc {
     return this.dispatch.bind(this)
   }
 }
