@@ -2,7 +2,7 @@ import { changeLabelsProps, linkLabels, mergeTracks, startLinkTrack, unlinkLabel
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
 import { Key } from '../../common/types'
-import { addVisibilityListener } from '../../components/util'
+import { addVisibilityListener } from '../../common/window'
 import { getLinkedLabelIds } from '../../functional/common'
 import { tracksOverlapping } from '../../functional/track'
 import { IdType, State } from '../../functional/types'
