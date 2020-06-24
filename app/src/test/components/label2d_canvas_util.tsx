@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import * as React from 'react'
 import * as action from '../../js/action/common'
 import { ActionType } from '../../js/action/types'
-import { getStateFunc, SimpleStore } from '../../js/common/simple_store'
+import { GetStateFunc, SimpleStore } from '../../js/common/simple_store'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType } from '../../js/functional/types'
@@ -148,7 +148,7 @@ export function drag (
  * @returns The id of the new label drawn on thecanvas
  */
 export function drawBox2D (
-  label2d: Label2dCanvas, getState: getStateFunc | null,
+  label2d: Label2dCanvas, getState: GetStateFunc | null,
   x1: number, y1: number, x2: number, y2: number): IdType {
   if (getState !== null) {
     const boxIds = new LabelCollector(getState)

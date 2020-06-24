@@ -11,6 +11,7 @@ import {
   Image3DViewerConfigType,
   ImageViewerConfigType,
   IntrinsicsType,
+  INVALID_ID,
   ItemStatus,
   ItemType,
   LabelType,
@@ -579,14 +580,14 @@ export function makeState (params: Partial<State> = {}): State {
  * @param {IdType} id
  */
 export function isValidId (id: IdType): bool {
-  return id !== '' && id !== '-1'
+  return id !== INVALID_ID && id !== '-1'
 }
 
 /**
  * Make default ID
  */
 export function makeDefaultId (): IdType {
-  return ''
+  return INVALID_ID
 }
 
 /**

@@ -1,4 +1,4 @@
-import { getStateFunc } from '../../js/common/simple_store'
+import { GetStateFunc } from '../../js/common/simple_store'
 import { IdType } from '../../js/functional/types'
 import { findNewLabelsFromState } from '../server/util/util'
 
@@ -8,9 +8,9 @@ import { findNewLabelsFromState } from '../server/util/util'
 export class LabelCollector extends Array<IdType> {
 
   /** access the state */
-  private _getState: getStateFunc
+  private _getState: GetStateFunc
 
-  constructor (getState: getStateFunc) {
+  constructor (getState: GetStateFunc) {
     super()
     this._getState = getState
   }

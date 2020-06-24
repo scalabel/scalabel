@@ -1,6 +1,7 @@
 import { AttributeToolType } from '../common/types'
 
 export type IdType = string
+export const INVALID_ID: IdType = ''
 
 // Have to define those map because
 // we can't use alias of string as an index signature parameter type
