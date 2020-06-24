@@ -14,6 +14,8 @@ import { testJson } from '../test_states/test_track_objects'
 const store = Session.getSimpleStore()
 const getState = store.getter()
 const dispatch = store.dispatcher()
+// TODO: Remove tracking global variable. This should be done after
+// label list and label refactoring.
 let tracking: boolean
 
 beforeAll(() => {
