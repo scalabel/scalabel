@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import * as React from 'react'
 import * as action from '../../js/action/common'
-import Session from '../../js/common/session'
+import Session, { dispatch, getState } from '../../js/common/session'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { testJson } from '../test_states/test_image_objects'
 import { checkBox2D } from '../util/shape'
@@ -9,9 +9,6 @@ import { drag, drawBox2D, setUpLabel2dCanvas } from './label2d_canvas_util'
 import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
-
-const getState = Session.getState.bind(Session)
-const dispatch = Session.dispatch.bind(Session)
 
 beforeEach(() => {
   expect(canvasRef.current).not.toBeNull()

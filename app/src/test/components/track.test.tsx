@@ -3,7 +3,7 @@ import _ from 'lodash'
 import React from 'react'
 import * as action from '../../js/action/common'
 import { selectLabel } from '../../js/action/select'
-import Session from '../../js/common/session'
+import Session, { dispatch, getState, getStore } from '../../js/common/session'
 import { updateTracks } from '../../js/common/session_setup'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
@@ -15,10 +15,6 @@ import { drag, drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './lab
 import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
-
-const store = Session.getSimpleStore()
-const getState = store.getter()
-const dispatch = store.dispatcher()
 
 beforeEach(() => {
   expect(canvasRef.current).not.toBeNull()
@@ -73,7 +69,7 @@ describe('basic track ops', () => {
     ]
 
     // Test adding tracks
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
     let state = getState()
     expect(_.size(state.task.tracks)).toEqual(4)
     itemIndices.forEach((itemIndex, i) => {
@@ -165,7 +161,7 @@ describe('basic track ops', () => {
       [500, 500, 80, 100]
     ]
 
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
     // Terminate the track by button
     let state = getState()
@@ -232,7 +228,7 @@ describe('basic track ops', () => {
       [1, 1, 50, 50]
     ]
 
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
     // Changing category
     dispatch(action.goToItem(2))
@@ -272,7 +268,7 @@ describe('basic track ops', () => {
       [100, 110, 200, 300]
     ]
 
-    const trackIds = drawBox2DTracks(label2d, store, itemIndices, boxes)
+    const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
     // Changing shape
     dispatch(action.goToItem(4))

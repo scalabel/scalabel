@@ -118,4 +118,11 @@ export function dispatch (action: types.ActionType | ThunkActionType): void {
   return session.dispatch(action)
 }
 
+/**
+ * Get the simple store object
+ */
+export function getStore (): SimpleStore {
+  return session.getSimpleStore()
+}
+
 export default session
