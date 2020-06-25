@@ -170,18 +170,20 @@ export class Synchronizer {
     } else {
       // Get the local session in-sync after a disconnect/reconnect
       if (autosave) {
+        const actions: types.BaseAction[] = []
         // Update with any backend changes that occurred during disconnect
-        dispatch(updateTask(state.task))
+        actions.push(updateTask(state.task))
 
         // Re-apply frontend task actions after updating task from backend
         for (const actionPacket of this.listActionsPendingSave()) {
           for (const action of actionPacket.actions) {
             if (types.isTaskAction(action)) {
               action.frontendOnly = true
-              dispatch(action)
+              actions.push(action)
             }
           }
         }
+        dispatch(makeSequential(actions))
       }
 
       for (const actionPacket of this.listActionsPendingSave()) {
