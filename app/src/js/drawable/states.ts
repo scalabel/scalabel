@@ -240,7 +240,7 @@ export function commit2DLabels (
   })
   actions.push(commitLabelsToState(updatedLabels))
   actions.push(commitShapesToState(updatedShapes))
-  dispatch(makeSequential(actions))
+  dispatch(makeSequential(actions, true))
 }
 
 /**

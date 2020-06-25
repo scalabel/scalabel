@@ -609,7 +609,11 @@ export const setStatusToSubmitted: ThunkCreatorType = () => {
  * Merge actions into an sequential action
  */
 export function makeSequential (
-  actions: types.BaseAction[]): types.SequentialAction {
+  actions: types.BaseAction[], removeNull: boolean = false)
+    : types.SequentialAction {
+  if (removeNull) {
+    actions = actions.filter((a) => (a.type !== types.NULL))
+  }
   return {
     ...makeBaseAction(types.SEQUENTIAL),
     actions
