@@ -1,6 +1,7 @@
-import { addLabel, addLabelsToItem, addTrack, changeLabelsProps, changeShapesInItems, deleteLabel } from '../action/common'
+import { addLabel, addLabelsToItem, addTrack, changeLabelsProps, changeShapesInItems, deleteLabel, makeNullAction, makeSequential } from '../action/common'
 import { deleteTracks, terminateTracks } from '../action/track'
-import Session from '../common/session'
+import { BaseAction } from '../action/types'
+import Session, { dispatch, getState } from '../common/session'
 import { Track } from '../common/track/track'
 import { LabelIdMap, ShapeIdMap } from '../functional/types'
 import Label2D from './2d/label2d'
@@ -16,7 +17,7 @@ interface ItemShapeIdMap { [index: number]: ShapeIdMap }
  */
 function commitShapesToState (updatedShapes: ItemShapeIdMap) {
   if (Object.keys(updatedShapes).length === 0) {
-    return
+    return makeNullAction('no shape to commit')
   }
   // Update existing shapes
   const itemIndices = Object.keys(updatedShapes).map((index) => Number(index))
@@ -32,7 +33,7 @@ function commitShapesToState (updatedShapes: ItemShapeIdMap) {
     shapeIds.push(itemShapeIds)
     shapes.push(indexShapes)
   }
-  Session.dispatch(changeShapesInItems(itemIndices, shapeIds, shapes))
+  return changeShapesInItems(itemIndices, shapeIds, shapes)
 }
 
 /**
@@ -42,7 +43,7 @@ function commitShapesToState (updatedShapes: ItemShapeIdMap) {
  */
 function commitLabelsToState (updatedLabels: ItemLabelIdMap) {
   if (Object.keys(updatedLabels).length === 0) {
-    return
+    return makeNullAction('no label to commit')
   }
   // Update existing labels
   const itemIndices = Object.keys(updatedLabels).map((index) => Number(index))
@@ -58,7 +59,7 @@ function commitLabelsToState (updatedLabels: ItemLabelIdMap) {
     labelIds.push(itemLabelIds)
     labels.push(indexLabels)
   }
-  Session.dispatch(changeLabelsProps(itemIndices, labelIds, labels))
+  return changeLabelsProps(itemIndices, labelIds, labels)
 }
 
 /**
@@ -154,7 +155,7 @@ function addNewTrack (drawable: Readonly<Label2D> | Readonly<Label3D>,
       shapes.push(indexedShapes.map((s) => s))
     }
   }
-  Session.dispatch(addTrack(indices, track.type, labels, shapes))
+  return addTrack(indices, track.type, labels, shapes)
 }
 
 /**
@@ -163,7 +164,7 @@ function addNewTrack (drawable: Readonly<Label2D> | Readonly<Label3D>,
  * @param {(Readonly<Label2D> | Readonly<Label3D>)} drawable
  */
 function addNewLabel (drawable: Readonly<Label2D> | Readonly<Label3D>) {
-  Session.dispatch(addLabel(drawable.item, drawable.label, drawable.shapes()))
+  return addLabel(drawable.item, drawable.label, drawable.shapes())
 }
 
 /**
@@ -175,11 +176,11 @@ function addNewLabel (drawable: Readonly<Label2D> | Readonly<Label3D>) {
 function terminateTrackFromDrawable (
   drawable: Readonly<Label2D> | Readonly<Label3D>,
   numItems: number) {
-  const track = Session.getState().task.tracks[drawable.label.track]
+  const track = getState().task.tracks[drawable.label.track]
   if (drawable.item === 0) {
-    Session.dispatch(deleteTracks([track]))
+    return deleteTracks([track])
   } else {
-    Session.dispatch(terminateTracks([track], drawable.item, numItems))
+    return terminateTracks([track], drawable.item, numItems)
   }
 }
 
@@ -189,19 +190,20 @@ function terminateTrackFromDrawable (
  * @param {(Readonly<Label2D> | Readonly<Label3D>)} drawable
  */
 function deleteInvalidLabel (drawable: Readonly<Label2D> | Readonly<Label3D>) {
-  Session.dispatch(deleteLabel(drawable.item, drawable.labelId))
+  return deleteLabel(drawable.item, drawable.labelId)
 }
 
 /**
  * Commit 2D labels to state
  */
 export function commit2DLabels (
-  updatedLabelDrawables: Array<Readonly<Label2D>>, tracking: boolean
-) {
-  const state = Session.getState()
+  updatedLabelDrawables: Array<Readonly<Label2D>>) {
+  const state = getState()
   const numItems = state.task.items.length
   const updatedShapes: ItemShapeIdMap = {}
   const updatedLabels: ItemLabelIdMap = {}
+  const tracking = state.task.config.tracking
+  const actions: BaseAction[] = []
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
     if (drawable.isValid()) {
@@ -217,10 +219,10 @@ export function commit2DLabels (
         // New drawable
         if (tracking) {
           // Add track
-          addNewTrack(drawable, numItems)
+          actions.push(addNewTrack(drawable, numItems))
         } else {
           // Add labels
-          addNewLabel(drawable)
+          actions.push(addNewLabel(drawable))
         }
       }
     } else {
@@ -228,16 +230,17 @@ export function commit2DLabels (
       if (!drawable.temporary) {
         // Existing drawable
         if (tracking) {
-          terminateTrackFromDrawable(drawable, numItems)
+          actions.push(terminateTrackFromDrawable(drawable, numItems))
         } else {
-          deleteInvalidLabel(drawable)
+          actions.push(deleteInvalidLabel(drawable))
         }
       }
       // New invalid drawable should be dropped. nothing happens.
     }
   })
-  commitLabelsToState(updatedLabels)
-  commitShapesToState(updatedShapes)
+  actions.push(commitLabelsToState(updatedLabels))
+  actions.push(commitShapesToState(updatedShapes))
+  dispatch(makeSequential(actions))
 }
 
 /**
@@ -252,8 +255,9 @@ export function commitLabels (
   const updatedLabels: ItemLabelIdMap = {}
   const newTracks: Track[] = []
   const newLabels: Array<Readonly<Label2D | Label3D>> = []
-  const state = Session.getState()
+  const state = getState()
   const numItems = state.task.items.length
+  const actions: BaseAction[] = []
   updatedLabelDrawables.forEach((drawable) => {
     drawable.setManual()
     if (!drawable.temporary) {
@@ -348,7 +352,7 @@ export function commitLabels (
           shapes.push(currentShapes)
         }
       }
-      Session.dispatch(addTrack(
+      actions.push(addTrack(
         indices, track.type, labels, shapes
       ))
     }
@@ -361,11 +365,11 @@ export function commitLabels (
       const shapeStates = label.shapes()
       shapes.push(shapeStates)
     }
-    Session.dispatch(addLabelsToItem(newLabels[0].item, labels, shapes)
-    )
+    actions.push(addLabelsToItem(newLabels[0].item, labels, shapes))
   }
 
-  commitShapesToState(updatedShapes)
-  commitLabelsToState(updatedLabels)
+  actions.push(commitShapesToState(updatedShapes))
+  actions.push(commitLabelsToState(updatedLabels))
   Session.label3dList.clearUpdatedLabels()
+  dispatch(makeSequential(actions))
 }

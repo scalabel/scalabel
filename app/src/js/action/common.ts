@@ -36,6 +36,17 @@ export function makeBaseAction (
   }
 }
 
+/**
+ * Make a null action
+ * @param message
+ */
+export function makeNullAction (message: string = ''): types.NullAction {
+  return {
+    ...makeBaseAction(types.NULL),
+    message
+  }
+}
+
 /** init session */
 export function initSessionAction (): types.InitSessionAction {
   return makeBaseAction(types.INIT_SESSION)
@@ -592,4 +603,15 @@ export const setStatusToSaved: ThunkCreatorType = () => {
 export const setStatusToSubmitted: ThunkCreatorType = () => {
   return setStatusForBanner(ConnectionStatus.NOTIFY_SUBMITTED,
     ConnectionStatus.SUBMITTED)
+}
+
+/**
+ * Merge actions into an sequential action
+ */
+export function makeSequential (
+  actions: types.BaseAction[]): types.SequentialAction {
+  return {
+    ...makeBaseAction(types.SEQUENTIAL),
+    actions
+  }
 }

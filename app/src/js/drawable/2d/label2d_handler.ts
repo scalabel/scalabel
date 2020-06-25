@@ -27,16 +27,13 @@ export class Label2DHandler {
   private _keyDownMap: { [key: string]: boolean }
   /** Index of currently selected item */
   private _selectedItemIndex: number
-  /** Whether tracking is enabled */
-  private _tracking: boolean
 
-  constructor (labelList: Label2DList, tracking: boolean) {
+  constructor (labelList: Label2DList) {
     this._highlightedLabel = null
     this._state = Session.getState()
     this._keyDownMap = {}
     this._selectedItemIndex = -1
     this._labelList = labelList
-    this._tracking = tracking
 
     addVisibilityListener(this.onVisibilityChange.bind(this))
   }
@@ -117,7 +114,7 @@ export class Label2DHandler {
           labelsToRemove.push(selectedLabel)
         }
       })
-      commit2DLabels([...this._labelList.popUpdatedLabels()], this._tracking)
+      commit2DLabels([...this._labelList.popUpdatedLabels()])
       this._labelList.clearUpdatedLabels()
 
       for (const label of labelsToRemove) {
