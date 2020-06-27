@@ -8,8 +8,9 @@ import _ from 'lodash'
 import * as types from '../action/types'
 import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
 import { uid } from '../common/uid'
-import { isValidId, makeDefaultId, makeLabel, makePane, makeTrack } from './states'
+import { isValidId, makeLabel, makePane, makeTrack } from './states'
 import {
+  INVALID_ID,
   ItemType,
   LabelType,
   LayoutType,
@@ -534,7 +535,7 @@ function createParentLabel (
 
   // Make parent label
   const parentLabel: LabelType = makeLabel(label)
-  parentLabel.parent = makeDefaultId()
+  parentLabel.parent = INVALID_ID
   parentLabel.shapes = []
   parentLabel.children = [...idList]
   if (trackId) {
@@ -647,7 +648,7 @@ export function unlinkLabels (
     let label = _.cloneDeep(labels[labelId])
     let parentId = label.parent
     let parentLabel
-    label.parent = makeDefaultId()
+    label.parent = INVALID_ID
     labels[labelId] = label
 
     while (isValidId(parentId)) {
@@ -664,7 +665,7 @@ export function unlinkLabels (
       } else if (label.type === LabelTypeName.EMPTY) {
         deleteLabelList.push(labelId)
       } else {
-        label.parent = makeDefaultId()
+        label.parent = INVALID_ID
       }
     }
   }

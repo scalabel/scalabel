@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { LabelTypeName } from '../../common/types'
-import { makeDefaultId, makeLabel } from '../../functional/states'
-import { IdType, ShapeType, State } from '../../functional/types'
+import { makeLabel } from '../../functional/states'
+import { IdType, INVALID_ID, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { Box3D } from './box3d'
 import { Grid3D } from './grid3d'
@@ -206,7 +206,7 @@ export class Plane3D extends Label3D {
     sensors?: number[]
   ): void {
     this._label = makeLabel({
-      type: LabelTypeName.PLANE_3D, id: makeDefaultId(), item: itemIndex,
+      type: LabelTypeName.PLANE_3D, id: INVALID_ID, item: itemIndex,
       category: [category], sensors
     })
     if (center) {

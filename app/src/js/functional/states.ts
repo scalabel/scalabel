@@ -53,10 +53,10 @@ export function makeLabel (params: Partial<LabelType> = {},
     type: types.LabelTypeName.EMPTY,
     category: [],
     attributes: {},
-    parent: makeDefaultId(), // Id
+    parent: INVALID_ID, // Id
     children: [], // Ids
     shapes: [],
-    track: makeDefaultId(),
+    track: INVALID_ID,
     order: 0,
     manual: true, // By default, manual is true
     ...params
@@ -374,7 +374,7 @@ export function makeItemExport (params: Partial<ItemExport> = {}): ItemExport {
 export function makeLabelExport (
   params: Partial<LabelExport> = {}): LabelExport {
   return {
-    id: makeDefaultId(),
+    id: INVALID_ID,
     category: '',
     attributes: {},
     manualShape: true,
@@ -493,7 +493,7 @@ function makeSelect (params: Partial<Select>= {}): Select {
  */
 function makeUser (params: Partial<UserType>= {}): UserType {
   return {
-    id: makeDefaultId(),
+    id: INVALID_ID,
     select: makeSelect(),
     layout: makeLayout(),
     viewerConfigs: [],
@@ -520,7 +520,7 @@ export function makeItemStatus (params: Partial<ItemStatus>= {}): ItemStatus {
  */
 function makeSession (params: Partial<SessionType>= {}): SessionType {
   return {
-    id: makeDefaultId(),
+    id: INVALID_ID,
     startTime: 0,
     itemStatuses: [],
     trackLinking: false,
@@ -581,13 +581,6 @@ export function makeState (params: Partial<State> = {}): State {
  */
 export function isValidId (id: IdType): bool {
   return id !== INVALID_ID && id !== '-1'
-}
-
-/**
- * Make default ID
- */
-export function makeDefaultId (): IdType {
-  return INVALID_ID
 }
 
 /**
