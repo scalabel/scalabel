@@ -100,7 +100,7 @@
                         "shapes": [
                             0
                         ],
-                        "track": -1,
+                        "track": "-1",
                         "order": 1,
                         "manual": true
                     },
@@ -120,7 +120,7 @@
                         "shapes": [
                             1
                         ],
-                        "track": -1,
+                        "track": "-1",
                         "order": 2,
                         "manual": true
                     },
@@ -140,7 +140,7 @@
                         "shapes": [
                             "longShapeId"
                         ],
-                        "track": -1,
+                        "track": "-1",
                         "order": 3,
                         "manual": true
                     }
