@@ -29,7 +29,7 @@ function initializeTestingObjects (): [Label2DHandler, number] {
   dispatch(action.addViewerConfig(1, makeImageViewerConfig(0)))
   const viewerId = 1
 
-  const label2dHandler = new Label2DHandler(Session.label2dList, false)
+  const label2dHandler = new Label2DHandler(Session.label2dList)
   Session.subscribe(() => {
     const state = getState()
     Session.label2dList.updateState(state)

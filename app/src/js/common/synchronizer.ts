@@ -2,6 +2,7 @@ import _ from 'lodash'
 import OrderedMap from 'orderedmap'
 import uuid4 from 'uuid/v4'
 import {
+  makeSequential,
   setStatusAfterConnect,
   setStatusToComputeDone,
   setStatusToComputing,
@@ -104,10 +105,22 @@ export class Synchronizer {
   public queueActionForSaving (action: types.BaseAction, autosave: boolean,
                                sessionId: string, bots: boolean,
                                dispatch: ThunkDispatchType) {
-    // Exclude actions from other sessions and actions on non-shared state
-    if (sessionId === action.sessionId && !action.frontendOnly &&
-      !types.isSessionAction(action)) {
-      this.actionQueue.push(action)
+    const shouldBeSaved = (a: types.BaseAction) => {
+      return sessionId === action.sessionId && !a.frontendOnly &&
+        !types.isSessionAction(a)
+    }
+    const actions: types.BaseAction[] = []
+    if (action.type === types.SEQUENTIAL) {
+      actions.push(...(action as types.SequentialAction).actions.filter(
+        (a: types.BaseAction) => shouldBeSaved(a)
+      ))
+    } else {
+      if (shouldBeSaved(action)) {
+        actions.push(action)
+      }
+    }
+    if (actions.length > 0) {
+      this.actionQueue.push(...actions)
       if (autosave) {
         this.save(sessionId, bots, dispatch)
       } else {
@@ -157,18 +170,20 @@ export class Synchronizer {
     } else {
       // Get the local session in-sync after a disconnect/reconnect
       if (autosave) {
+        const actions: types.BaseAction[] = []
         // Update with any backend changes that occurred during disconnect
-        dispatch(updateTask(state.task))
+        actions.push(updateTask(state.task))
 
         // Re-apply frontend task actions after updating task from backend
         for (const actionPacket of this.listActionsPendingSave()) {
           for (const action of actionPacket.actions) {
             if (types.isTaskAction(action)) {
               action.frontendOnly = true
-              dispatch(action)
+              actions.push(action)
             }
           }
         }
+        dispatch(makeSequential(actions))
       }
 
       for (const actionPacket of this.listActionsPendingSave()) {
@@ -191,6 +206,8 @@ export class Synchronizer {
     // Remove stored actions when they are acked
     this.actionsPendingSave = this.actionsPendingSave.remove(actionPacket.id)
 
+    const actions: types.BaseAction[] = []
+
     // If action was already acked, ignore it
     if (this.ackedPackets.has(actionPacket.id)) {
       return
@@ -203,7 +220,7 @@ export class Synchronizer {
       if (action.sessionId !== sessionId) {
         if (types.isTaskAction(action)) {
           // Dispatch any task actions broadcasted from other sessions
-          dispatch(action)
+          actions.push(action)
         }
       }
     }
@@ -212,7 +229,7 @@ export class Synchronizer {
       /* Original action was acked by the server
        * This means the bot also received the action
        * And started its prediction */
-      dispatch(setStatusToComputing())
+      actions.push(setStatusToComputing())
     } else if (actionPacket.triggerId !== undefined &&
       this.actionsPendingPrediction.has(actionPacket.triggerId)) {
       // Ack of bot action means prediction is finished
@@ -228,6 +245,7 @@ export class Synchronizer {
         dispatch(setStatusToSaved())
       }
     }
+    dispatch(makeSequential(actions))
   }
 
   /**

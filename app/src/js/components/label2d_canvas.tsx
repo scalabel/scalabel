@@ -102,8 +102,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     this.labelCanvas = null
     this.display = this.props.display
     this._labelList = Session.label2dList
-    this._labelHandler = new Label2DHandler(
-      this._labelList, this.props.tracking)
+    this._labelHandler = new Label2DHandler(this._labelList)
     this.crosshair = React.createRef()
 
     this._keyUpListener = (e) => { this.onKeyUp(e) }

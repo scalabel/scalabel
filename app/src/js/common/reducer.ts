@@ -5,20 +5,11 @@ import { makeState } from '../functional/states'
 import { State } from '../functional/types'
 
 /**
- * Reducer
- * @param {State} currentState
- * @param {AnyAction} action
- * @return {State}
+ * Process one action
+ * @param state
+ * @param action
  */
-export const reducer: Reducer<State> = (
-    currentState: State = makeState(),
-    action: AnyAction): State => {
-  // Appending actions to action array
-  // const newActions = currentState.actions.slice();
-  // newActions.push(action);
-  // const state = {...currentState, actions: newActions};
-  const state = currentState
-  // Apply reducers to state
+function reduceOne (state: State, action: types.BaseAction): State {
   switch (action.type) {
     case types.INIT_SESSION:
       return common.initSession(state)
@@ -70,7 +61,29 @@ export const reducer: Reducer<State> = (
     case types.UPDATE_SESSION_STATUS:
       return common.updateSessionStatus(
         state, action as types.UpdateSessionStatusAction)
+    case types.NULL:
+      return state
     default:
+  }
+  return state
+}
+
+/**
+ * Reducer
+ * @param {State} currentState
+ * @param {AnyAction} action
+ * @return {State}
+ */
+export const reducer: Reducer<State> = (
+    currentState: State = makeState(),
+    action: AnyAction): State => {
+  let state = currentState
+  if (action.type === types.SEQUENTIAL) {
+    (action as types.SequentialAction).actions.forEach((element) => {
+      state = reduceOne(state, element)
+    })
+  } else {
+    state = reduceOne(state, action as types.BaseAction)
   }
   return state
 }

@@ -9,7 +9,8 @@ import { RedisPubSub } from './redis_pub_sub'
 import { SocketServer } from './socket_interface'
 import {
   EventName, RegisterMessageType, ServerConfig,
-  StateMetadata, SyncActionMessageType } from './types'
+  StateMetadata, SyncActionMessageType
+} from './types'
 import { UserManager } from './user_manager'
 import { initSessId, updateStateTimestamp } from './util'
 
@@ -115,6 +116,9 @@ export class Hub {
     const taskActions = actions.filter((action) => {
       return types.isTaskAction(action)
     })
+
+    Logger.info(`Received ${actions.length} actions and ` +
+                `${taskActions.length} task actions from Session ${sessionId}`)
 
     // Load IDs of actions that have been processed already
     const redisMetadata =

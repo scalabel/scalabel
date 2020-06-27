@@ -26,6 +26,7 @@ export const UPDATE_TASK = 'UPDATE_TASK'
 export const UPDATE_STATE = 'UPDATE_STATE'
 export const SUBMIT = 'SUBMIT'
 export const UPDATE_SESSION_STATUS = 'UPDATE_SESSION_STATUS'
+export const NULL = 'NULL'
 
 // Item Level
 export const ADD_LABELS = 'ADD_LABELS'
@@ -52,6 +53,9 @@ export const RECEIVE_BROADCAST = 'RECEIVE_BROADCAST'
 export const CONNECT = 'CONNECT'
 export const DISCONNECT = 'DISCONNECT'
 export const SAVE = 'SAVE'
+
+// A sequence of actions
+export const SEQUENTIAL = 'SEQUENTIAL'
 
 /**
  * These are actions that should be shared between sessions/users
@@ -134,6 +138,11 @@ export interface BaseAction {
   frontendOnly?: boolean
   /** id of the user that initiates the action */
   userId: IdType
+}
+
+export interface NullAction extends BaseAction {
+  /** an optional message describing the null action */
+  message: string
 }
 
 export type InitSessionAction = BaseAction
@@ -294,6 +303,11 @@ export type DisconnectAction = BaseAction
 
 export type SaveAction = BaseAction
 
+export interface SequentialAction extends BaseAction {
+  /** actions in this sequence */
+  actions: BaseAction[]
+}
+
 /**
  * These actions are event-driven messages intercepted by the sync middleware
  */
@@ -335,3 +349,4 @@ export type ActionType =
   SessionActionType
   | UserActionType
   | TaskActionType
+  | SequentialAction

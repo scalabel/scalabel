@@ -45,7 +45,7 @@ test('Add new valid drawable', () => {
     label.onMouseMove(new Vector2D(20, 20), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(20, 20))
 
-    commit2DLabels([label], state.task.config.tracking)
+    commit2DLabels([label])
 
     const currentState = Session.getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(4)
@@ -71,7 +71,7 @@ test('Add new invalid drawable', () => {
     label.onMouseMove(new Vector2D(12, 12), new Size2D(1000, 1000), 1, 2)
     label.onMouseUp(new Vector2D(12, 12))
 
-    commit2DLabels([label], state.task.config.tracking)
+    commit2DLabels([label])
 
     const currentState = Session.getState()
     expect(_.size(currentState.task.items[0].labels)).toEqual(3)
@@ -96,7 +96,7 @@ test('Update existing drawable', () => {
   label.onMouseMove(new Vector2D(700, 300), new Size2D(1000, 1000), 1, 2)
   label.onMouseUp(new Vector2D(700, 300))
 
-  commit2DLabels([label], state.task.config.tracking)
+  commit2DLabels([label])
 
   const currentState = Session.getState()
   const newLabel = currentState.task.items[0].labels['1']
@@ -123,7 +123,7 @@ test('Update existing drawable to invalid', () => {
   label.onMouseMove(new Vector2D(460, 280), new Size2D(1000, 1000), 1, 2)
   label.onMouseUp(new Vector2D(460, 280))
 
-  commit2DLabels([label], state.task.config.tracking)
+  commit2DLabels([label])
 
   const currentState = Session.getState()
   expect(currentState.task.items[0].labels['1']).toBeUndefined()
