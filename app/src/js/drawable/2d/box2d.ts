@@ -10,8 +10,6 @@ import { Label2DList } from './label2d_list'
 import { makePoint2DStyle, Point2D } from './point2d'
 import { makeRect2DStyle, Rect2D } from './rect2d'
 
-type Shape = Rect2D | Point2D
-
 const DEFAULT_VIEW_RECT_STYLE = makeRect2DStyle({ lineWidth: 4 })
 const DEFAULT_VIEW_POINT_STYLE = makePoint2DStyle({ radius: 8 })
 const DEFAULT_VIEW_HIGH_POINT_STYLE = makePoint2DStyle({ radius: 12 })
@@ -45,12 +43,19 @@ function equalRects (r1: RectType, r2: RectType): boolean {
  * Box2d Label
  */
 export class Box2D extends Label2D {
+  /** rect shape of the box 2d */
+  private _rect: Rect2D
+  /** 8 control points */
+  private _controlPoints: Point2D[]
+  /** cache shape for moving */
+  private _startingRect: Rect2D
 
-  /**
-   * Return a list of the shape for inspection and testing
-   */
-  public get internalShapes (): Array<Readonly<Shape>> {
-    return this._shapes
+  constructor (labelList: Label2DList) {
+    super(labelList)
+    this._rect = new Rect2D()
+    this._controlPoints = _.range(8).map(() => new Point2D())
+
+    this._startingRect = new Rect2D()
   }
 
   /** Get cursor for use when highlighting */
@@ -71,23 +76,7 @@ export class Box2D extends Label2D {
       case Handles.RIGHT_MIDDLE:
         return Cursor.EW_RESIZE
     }
-
     return super.highlightCursor
-  }
-  /** list of shapes for this box 2d */
-  private _shapes: Shape[]
-  /** cache shape for moving */
-  private _startingRect: Rect2D
-
-  constructor (labelList: Label2DList) {
-    super(labelList)
-    this._shapes = [
-      new Rect2D(),
-      new Point2D(), new Point2D(), new Point2D(), new Point2D(),
-      new Point2D(), new Point2D(), new Point2D(), new Point2D()
-    ]
-
-    this._startingRect = new Rect2D()
   }
 
   /** Draw the label on viewing or control canvas */
@@ -126,11 +115,11 @@ export class Box2D extends Label2D {
     }
 
     // Draw!!!
-    const rect = self._shapes[0] as Rect2D
+    const rect = self._rect
     rectStyle.color = assignColor(0)
     rect.draw(context, ratio, rectStyle)
     if (mode === DrawMode.VIEW) {
-      self.drawTag(context, ratio, [rect.x, rect.y], self._color)
+      self.drawTag(context, ratio, [rect.x1, rect.y1], self._color)
     }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       for (let i = 1; i <= 8; i += 1) {
@@ -141,7 +130,7 @@ export class Box2D extends Label2D {
           style = pointStyle
         }
         style.color = assignColor(i)
-        const point = self._shapes[i] as Point2D
+        const point = self._controlPoints[i - 1]
         point.draw(context, ratio, style)
       }
     }
@@ -162,8 +151,8 @@ export class Box2D extends Label2D {
     let y2
     if (this._highlightedHandle % 2 === 0) {
       // Move a midpoint
-      const v1 = this._shapes[1]
-      const v2 = this._shapes[5]
+      const v1 = this._controlPoints[0]
+      const v2 = this._controlPoints[4]
       if (this._highlightedHandle === Handles.TOP_MIDDLE) {
         v1.y = y
       } else if (this._highlightedHandle === Handles.RIGHT_MIDDLE) {
@@ -188,7 +177,8 @@ export class Box2D extends Label2D {
       }
     } else {
       // Move a vertex
-      const oppVertex = this._shapes[(this._highlightedHandle + 4 + 8) % 8]
+      const oppVertex =
+        this._controlPoints[(this._highlightedHandle + 12) % 8 - 1]
       x1 = Math.min(x, oppVertex.x)
       x2 = Math.max(x, oppVertex.x)
       y1 = Math.min(y, oppVertex.y)
@@ -208,7 +198,7 @@ export class Box2D extends Label2D {
       }
     }
     // Update the rectangle
-    const rect = (this._shapes[0] as Rect2D).toRect()
+    const rect = this._rect.shape()
     rect.x1 = x1
     rect.y1 = y1
     rect.x2 = x2
@@ -224,15 +214,17 @@ export class Box2D extends Label2D {
    */
   public move (end: Vector2D, limit: Size2D): void {
     const [width, height] = [limit.width, limit.height]
-    const rect = (this._shapes[0] as Rect2D).toRect()
+    const rect = this._rect.shape()
     const delta = end.clone().subtract(this._mouseDownCoord)
-    rect.x1 = this._startingRect.x + delta.x
-    rect.y1 = this._startingRect.y + delta.y
+    rect.x1 = this._startingRect.x1 + delta.x
+    rect.y1 = this._startingRect.y1 + delta.y
     // The rect should not go outside the frame limit
-    rect.x1 = Math.min(width - this._startingRect.w, Math.max(0, rect.x1))
-    rect.y1 = Math.min(height - this._startingRect.h, Math.max(0, rect.y1))
-    rect.x2 = rect.x1 + this._startingRect.w
-    rect.y2 = rect.y1 + this._startingRect.h
+    rect.x1 = Math.min(width - this._startingRect.width(),
+                       Math.max(0, rect.x1))
+    rect.y1 = Math.min(height - this._startingRect.height(),
+                       Math.max(0, rect.y1))
+    rect.x2 = rect.x1 + this._startingRect.width()
+    rect.y2 = rect.y1 + this._startingRect.height()
     this.updateShapeValues(rect)
   }
 
@@ -255,17 +247,17 @@ export class Box2D extends Label2D {
     if (this._selected) {
       this.editing = true
       this._mouseDownCoord = coord.clone()
-      this._startingRect = (this._shapes[0] as Rect2D).clone()
+      this._startingRect = this._rect.clone()
       return true
     }
     return false
   }
 
-/**
- * Drag the handle to a new position
- * @param {Vector2D} coord: current mouse position
- * @param {Vector2D} limit: limit of the canvas frame
- */
+  /**
+   * Drag the handle to a new position
+   * @param {Vector2D} coord: current mouse position
+   * @param {Vector2D} limit: limit of the canvas frame
+   */
   public onMouseMove (coord: Vector2D, limit: Size2D,
                       _labelIndex: number, handleIndex: number): boolean {
     if (this._selected && this._mouseDown && this.editing) {
@@ -313,23 +305,20 @@ export class Box2D extends Label2D {
      * the right id directly.
      */
     const box = this.toRect()
-    if (!this._temporary) {
-      box.id = this._label.shapes[0]
-    }
     return [box]
   }
 
   /** Get rect representation */
   public toRect (): RectType {
-    return (this._shapes[0] as Rect2D).toRect()
+    return this._rect.shape()
   }
 
   /**
    * to check whether the label is valid
    */
   public isValid (): boolean {
-    const rect = this._shapes[0] as Rect2D
-    const area = rect.w * rect.h
+    const rect = this._rect
+    const area = rect.width() * rect.height()
     if (area >= MIN_AREA) {
       return true
     } else {
@@ -368,12 +357,12 @@ export class Box2D extends Label2D {
    * @param {RectType} rect
    */
   private updateShapeValues (rect: RectType): void {
-    const [rect2d, tl, tm, tr, rm, br, bm, bl, lm] = this._shapes
-    const x = rect.x1
-    const y = rect.y1
-    const w = rect.x2 - rect.x1
-    const h = rect.y2 - rect.y1
-    rect2d.set(x, y, w, h)
+    this._rect.set(rect)
+    const [tl, tm, tr, rm, br, bm, bl, lm] = this._controlPoints
+    const x = this._rect.x1
+    const y = this._rect.y1
+    const w = this._rect.width()
+    const h = this._rect.height()
     // Vertices
     tl.set(x, y)
     tr.set(x + w, y)

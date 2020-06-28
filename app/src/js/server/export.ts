@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../common/types'
-import { PointType } from '../drawable/2d/path_point2d'
+import { PointType } from '../drawable/2d/poly_path_point2d'
 import { isValidId } from '../functional/states'
 import { Attribute, ConfigType,
   ItemType, Node2DType, PolygonType, State
