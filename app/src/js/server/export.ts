@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../common/types'
 import { PointType } from '../drawable/2d/path_point2d'
+import { isValidId } from '../functional/states'
 import { Attribute, ConfigType,
   ItemType, Node2DType, PolygonType, State
 } from '../functional/types'
@@ -111,6 +112,10 @@ export function convertItemToExport (
             }
           }
       }
+    }
+    if (isValidId(label.track)) {
+      // If the label is in a track, use id of the track as label id
+      labelExport.id = label.track
     }
     for (const sensor of label.sensors) {
       itemExports[sensor].labels.push(labelExport)

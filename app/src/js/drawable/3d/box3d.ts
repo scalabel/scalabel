@@ -1,8 +1,7 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-
-import { makeDefaultId, makeLabel } from '../../functional/states'
-import { IdType, ShapeType, State } from '../../functional/types'
+import { makeLabel } from '../../functional/states'
+import { IdType, INVALID_ID, ShapeType, State } from '../../functional/types'
 
 import { Vector3D } from '../../math/vector3d'
 
@@ -42,7 +41,7 @@ export class Box3D extends Label3D {
     }
 
     this._label = makeLabel({
-      type: LabelTypeName.BOX_3D, id: makeDefaultId(), item: itemIndex,
+      type: LabelTypeName.BOX_3D, id: INVALID_ID, item: itemIndex,
       category: [category], sensors
     })
 
@@ -78,7 +77,7 @@ export class Box3D extends Label3D {
     if (parent && this._label) {
       this._label.parent = parent.labelId
     } else if (this._label) {
-      this._label.parent = makeDefaultId()
+      this._label.parent = INVALID_ID
     }
     if (parent && parent.label.type === LabelTypeName.PLANE_3D) {
       this._shape.attachToPlane(parent as Plane3D)

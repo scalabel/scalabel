@@ -2,8 +2,8 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { Cursor, LabelTypeName } from '../../common/types'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
-import { makeDefaultId, makeTaskConfig, makeTrack } from '../../functional/states'
-import { ConfigType, IdType, LabelType, ShapeType, State } from '../../functional/types'
+import { makeTaskConfig, makeTrack } from '../../functional/states'
+import { ConfigType, IdType, INVALID_ID, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, getColorById } from '../util'
@@ -60,8 +60,8 @@ export abstract class Label2D {
 
   constructor (labelList: Label2DList) {
     this._index = -1
-    this._labelId = makeDefaultId()
-    this._trackId = makeDefaultId()
+    this._labelId = INVALID_ID
+    this._trackId = INVALID_ID
     this._selected = false
     this._highlighted = false
     this._highlightedHandle = -1
@@ -133,7 +133,7 @@ export abstract class Label2D {
     if (this._label) {
       return this._label.track
     }
-    return makeDefaultId()
+    return INVALID_ID
   }
 
   /** get item index */

@@ -1,6 +1,5 @@
 import * as THREE from 'three'
-import { makeDefaultId } from '../../functional/states'
-import { IdType, ShapeType } from '../../functional/types'
+import { IdType, INVALID_ID, ShapeType } from '../../functional/types'
 import Label3D from './label3d'
 import { Object3D } from './object3d'
 
@@ -19,7 +18,7 @@ export abstract class Shape3D extends Object3D {
 
   constructor (label: Label3D) {
     super()
-    this._shapeId = makeDefaultId()
+    this._shapeId = INVALID_ID
     this._label = label
     this._shape = null
     this._highlighted = false

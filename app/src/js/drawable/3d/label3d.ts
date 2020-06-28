@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import * as THREE from 'three'
 import { LabelTypeName } from '../../common/types'
-import { makeDefaultId, makeLabel } from '../../functional/states'
-import { IdType, LabelType, ShapeType, State } from '../../functional/types'
+import { makeLabel } from '../../functional/states'
+import { IdType, INVALID_ID, LabelType, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'
 import { getColorById } from '../util'
 import { Label3DList } from './label3d_list'
@@ -105,7 +105,7 @@ export abstract class Label3D {
     if (parent && this._label) {
       this._label.parent = parent.labelId
     } else if (this._label) {
-      this._label.parent = makeDefaultId()
+      this._label.parent = INVALID_ID
     }
   }
 

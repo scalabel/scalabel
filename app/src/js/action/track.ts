@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Session from '../common/session'
-import { isValidId, makeDefaultId } from '../functional/states'
-import { IdType, LabelType, ShapeType, TrackType } from '../functional/types'
+import { isValidId } from '../functional/states'
+import { IdType, INVALID_ID, LabelType, ShapeType, TrackType } from '../functional/types'
 import { addTrack, deleteLabels } from './common'
 import { AddTrackAction, DeleteLabelsAction } from './types'
 
@@ -56,7 +56,7 @@ export function addDuplicatedTrack (
     if (parentTrack && index in parentTrack.labels) {
       cloned.parent = parentTrack.labels[index]
     } else if (index !== cloned.item) {
-      cloned.parent = makeDefaultId()
+      cloned.parent = INVALID_ID
     }
 
     trackLabels.push(cloned)

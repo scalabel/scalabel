@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName } from '../../common/types'
-import { makeDefaultId, makeLabel, makeRect } from '../../functional/states'
-import { LabelType, RectType, ShapeType, State } from '../../functional/types'
+import { makeLabel, makeRect } from '../../functional/states'
+import { INVALID_ID, LabelType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -349,7 +349,7 @@ export class Box2D extends Label2D {
   protected initTempLabel (state: State, start: Vector2D): LabelType {
     const itemIndex = state.user.select.item
     const label = makeLabel({
-      type: LabelTypeName.BOX_2D, id: makeDefaultId(), item: itemIndex,
+      type: LabelTypeName.BOX_2D, id: INVALID_ID, item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
       order: this._order

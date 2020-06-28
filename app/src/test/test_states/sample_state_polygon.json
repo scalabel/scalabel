@@ -94,12 +94,12 @@
                             0
                         ],
                         "attributes": {},
-                        "parent": -1,
+                        "parent": "-1",
                         "children": [],
                         "shapes": [
                             0
                         ],
-                        "track": -1,
+                        "track": "-1",
                         "order": 1,
                         "manual": true
                     },
@@ -114,12 +114,12 @@
                             0
                         ],
                         "attributes": {},
-                        "parent": -1,
+                        "parent": "-1",
                         "children": [],
                         "shapes": [
                             1
                         ],
-                        "track": -1,
+                        "track": "-1",
                         "order": 2,
                         "manual": true
                     },
@@ -134,12 +134,12 @@
                             0
                         ],
                         "attributes": {},
-                        "parent": -1,
+                        "parent": "-1",
                         "children": [],
                         "shapes": [
                             "longPolyShapeId"
                         ],
-                        "track": -1,
+                        "track": "-1",
                         "order": 3,
                         "manual": true
                     }
