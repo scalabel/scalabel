@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../common/types'
-import { PointType } from '../drawable/2d/path_point2d'
+import { PointType } from '../drawable/2d/poly_path_point2d'
 import { makeCube, makeItem, makeLabel, makePlane, makePolygon, makePolyPathPoint, makeRect } from '../functional/states'
 import { Attribute, IdType, ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType } from '../functional/types'
 import { ItemExport, LabelExport } from './bdd_types'

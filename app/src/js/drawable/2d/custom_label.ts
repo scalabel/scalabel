@@ -42,7 +42,7 @@ export class CustomLabel2D extends Label2D {
     super(labelList)
     this._template = template
     this._shapes = []
-    this._bounds = new Rect2D(-1, -1, -1, -1)
+    this._bounds = new Rect2D()
     this._corners = [new Point2D(), new Point2D(), new Point2D(), new Point2D()]
     this._colorMap = {}
     for (const node of this._template.nodes) {
@@ -318,8 +318,8 @@ export class CustomLabel2D extends Label2D {
 
     // Move to start
     for (const point of this._shapes) {
-      point.x += start.x - this._bounds.x
-      point.y += start.y - this._bounds.y
+      point.x += start.x - this._bounds.x1
+      point.y += start.y - this._bounds.y1
     }
 
     // Update bounds after moving
@@ -343,16 +343,17 @@ export class CustomLabel2D extends Label2D {
       bounds.y2 = Math.max(point.y, bounds.y2)
     }
 
-    this._bounds.x = bounds.x1
-    this._bounds.y = bounds.y1
-    this._bounds.w = bounds.x2 - bounds.x1
-    this._bounds.h = bounds.y2 - bounds.y1
+    this._bounds.x1 = bounds.x1
+    this._bounds.y1 = bounds.y1
+    this._bounds.x2 = bounds.x2
+    this._bounds.y2 = bounds.y2
 
     for (let i = 0; i < 4; i++) {
-      this._corners[i].x = this._bounds.x
-      this._corners[i].y = this._bounds.y
-      this._corners[i].x += this._bounds.w * (1 - Math.floor(Math.abs(i - 1.5)))
-      this._corners[i].y += this._bounds.h * Math.floor(i / 2)
+      this._corners[i].x = this._bounds.x1
+      this._corners[i].y = this._bounds.y1
+      this._corners[i].x +=
+        this._bounds.width() * (1 - Math.floor(Math.abs(i - 1.5)))
+      this._corners[i].y += this._bounds.height() * Math.floor(i / 2)
     }
   }
 
@@ -363,17 +364,18 @@ export class CustomLabel2D extends Label2D {
     if (widthSign === 0) {
       widthSign = 1
     }
-    const newWidth = Math.max(Math.abs(scale.x * this._bounds.w), 1) * widthSign
+    const newWidth =
+      Math.max(Math.abs(scale.x * this._bounds.width()), 1) * widthSign
 
     let heightSign = Math.sign(scale.y)
     if (heightSign === 0) {
       heightSign = 1
     }
     const newHeight =
-      Math.max(Math.abs(scale.y * this._bounds.h), 1) * heightSign
+      Math.max(Math.abs(scale.y * this._bounds.height()), 1) * heightSign
 
-    scale.x = newWidth / this._bounds.w
-    scale.y = newHeight / this._bounds.h
+    scale.x = newWidth / this._bounds.width()
+    scale.y = newHeight / this._bounds.height()
 
     for (const shape of this._shapes) {
       shape.x = (shape.x - anchor.x) * scale.x + anchor.x

@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { makeRect } from '../../functional/states'
 import { RectType } from '../../functional/types'
 import { Vector } from '../../math/vector'
@@ -27,57 +28,90 @@ export function makeRect2DStyle (
 }
 
 /** Drawable rectangle */
-export class Rect2D extends Vector {
-  constructor (x: number = 0, y: number = 0, w: number = 0, h: number = 0) {
-    super(4)
-    this.x = x
-    this.y = y
-    this.w = w
-    this.h = h
+export class Rect2D {
+  /** The shape of the rect */
+  private _rect: RectType
+
+  constructor (rect: RectType | null = null) {
+    if (rect === null) {
+      this._rect = makeRect()
+    } else {
+      this._rect = _.cloneDeep(rect)
+    }
   }
 
-  public get x (): number {
-    return this[0]
+  public get x1 (): number {
+    return this._rect.x1
   }
 
   /** set x */
-  public set x (v: number) {
-    this[0] = v
+  public set x1 (v: number) {
+    this._rect.x1 = v
   }
 
   /** get y */
-  public get y (): number {
-    return this[1]
+  public get y1 (): number {
+    return this._rect.y1
   }
 
-  /** set x */
-  public set y (v: number) {
-    this[1] = v
+  /** set y */
+  public set y1 (v: number) {
+    this._rect.y1 = v
   }
 
-  public get w (): number {
-    return this[2]
+  public get x2 (): number {
+    return this._rect.x2
   }
 
-  /** set x */
-  public set w (v: number) {
-    this[2] = v
+  /** set w */
+  public set x2 (v: number) {
+    this._rect.x2 = v
   }
 
-  /** get y */
-  public get h (): number {
-    return this[3]
+  /** get h */
+  public get y2 (): number {
+    return this._rect.y2
   }
 
-  /** set x */
-  public set h (v: number) {
-    this[3] = v
+  /** set h */
+  public set y2 (v: number) {
+    this._rect.y2 = v
   }
 
-  /** convert this drawable rect to a rect state */
-  public toRect (): RectType {
-    return makeRect({
-      x1: this.x, y1: this.y, x2: this.x + this.w, y2: this.y + this.h})
+  /**
+   * Width of the rect
+   */
+  public width (): number {
+    return this.x2 - this.x1
+  }
+
+  /**
+   * Height of the rect
+   */
+  public height (): number {
+    return this.y2 - this.y1
+  }
+
+  /**
+   * Set the shape to the new rect
+   * @param rect
+   */
+  public set (rect: RectType): void {
+    this._rect = _.cloneDeep(rect)
+  }
+
+  /**
+   * Make a copy of the object
+   */
+  public clone (): Rect2D {
+    return new Rect2D(this._rect)
+  }
+
+  /**
+   * Return a copy of the shape
+   */
+  public shape (): RectType {
+    return _.cloneDeep(this._rect)
   }
 
   /**
@@ -90,13 +124,22 @@ export class Rect2D extends Vector {
     context: Context2D, ratio: number, style: Rect2DStyle): void {
     context.save()
     // Convert to display resolution
-    const real = this.clone().scale(ratio)
+    const real = this.vector().scale(ratio)
     context.strokeStyle = toCssColor(style.color)
     if (style.dashed) {
       context.setLineDash([6, 2])
     }
     context.lineWidth = style.lineWidth
-    context.strokeRect(real.x, real.y, real.w, real.h)
+    context.strokeRect(real[0], real[1], real[2], real[3])
     context.restore()
+  }
+
+  /**
+   * Convert to vector for drawing
+   */
+  private vector (): Vector {
+    const v = new Vector(4)
+    v.set(this.x1, this.y1, this.width(), this.height())
+    return v
   }
 }
