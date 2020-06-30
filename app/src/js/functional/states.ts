@@ -59,7 +59,7 @@ export function makeLabel (params: Partial<LabelType> = {},
     track: INVALID_ID,
     order: 0,
     manual: true, // By default, manual is true
-    ...params
+    ..._.cloneDeep(params)
   }
   if (!keepId) {
     label.id = genLabelId()
