@@ -19,6 +19,7 @@ import {
   Node2DType,
   PaneType,
   PathPoint2DType,
+  PathPointType,
   Plane3DType,
   PointCloudViewerConfigType,
   PolygonType,
@@ -142,9 +143,9 @@ export function makePathPoint2D (
   return {
     x: -1,
     y: -1,
-    pointType: 'vertex',
-    ...params,
-    ...makeShape(types.ShapeTypeName.PATH_POINT_2D)
+    pointType: PathPointType.UNKNOWN,
+    ...makeShape(types.ShapeTypeName.PATH_POINT_2D),
+    ...params
   }
 }
 

@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { LabelTypeName } from '../../js/common/types'
-import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
+import { PolyPathPoint2D, PointType } from '../../js/drawable/2d/poly_path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { State } from '../../js/functional/types'
 import {
@@ -19,8 +19,8 @@ const samplePolygonStateFile = './app/src/test/test_states/sample_state_polygon.
 describe('test export functionality across multiple labeling types', () => {
   test('unit test for polygon export', () => {
     const points = [
-      (new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(0, 2, PointType.CURVE)).toPathPoint()
+      (new PolyPathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(0, 2, PointType.CURVE)).toPathPoint()
     ]
     const poly2d = makePolygon({ points })
     const labelType = LabelTypeName.POLYGON_2D

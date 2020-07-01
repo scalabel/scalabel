@@ -53,7 +53,7 @@ export function makePathPoint2DStyle (
 }
 
 /** points2D for polygon */
-export class PolyPathPoint2D extends Point2D {
+export class PathPoint2D extends Point2D {
 
   /** point type */
   private _type: PointType
@@ -86,7 +86,7 @@ export class PolyPathPoint2D extends Point2D {
    * pass the value to the current point
    * @param target
    */
-  public copy (target: PolyPathPoint2D): void {
+  public copy (target: PathPoint2D): void {
     this.x = target.x
     this.y = target.y
     this.type = target.type

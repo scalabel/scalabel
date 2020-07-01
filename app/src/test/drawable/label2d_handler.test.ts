@@ -6,7 +6,7 @@ import { selectLabel } from '../../js/action/select'
 import Session, { dispatch, getState } from '../../js/common/session'
 import { Key, ShapeTypeName } from '../../js/common/types'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
-import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
+import { PolyPathPoint2D, PointType } from '../../js/drawable/2d/poly_path_point2d'
 import { getNumLabels, getShape } from '../../js/functional/state_util'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, Point2DType, PolygonType, RectType, SimpleRect } from '../../js/functional/types'
@@ -1110,30 +1110,30 @@ test('Change label ordering', () => {
     0,
     -1,
     [0],
-    [(new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(1, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(1, 2, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(0, 2, PointType.CURVE)).toPathPoint()],
+    [(new PolyPathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(1, 1, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(1, 2, PointType.CURVE)).toPathPoint(),
+      (new PolyPathPoint2D(0, 2, PointType.CURVE)).toPathPoint()],
     true
   ))
   dispatch(addPolygon2dLabel(
     0,
     -1,
     [0],
-    [(new PathPoint2D(3, 4, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(4, 4, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(4, 5, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(3, 5, PointType.CURVE)).toPathPoint()],
+    [(new PolyPathPoint2D(3, 4, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(4, 4, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(4, 5, PointType.CURVE)).toPathPoint(),
+      (new PolyPathPoint2D(3, 5, PointType.CURVE)).toPathPoint()],
     false
   ))
   dispatch(addPolygon2dLabel(
     0,
     -1,
     [0],
-    [(new PathPoint2D(10, 11, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(11, 11, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(11, 12, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(10, 12, PointType.CURVE)).toPathPoint()],
+    [(new PolyPathPoint2D(10, 11, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(11, 11, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(11, 12, PointType.CURVE)).toPathPoint(),
+      (new PolyPathPoint2D(10, 12, PointType.CURVE)).toPathPoint()],
     true
   ))
 

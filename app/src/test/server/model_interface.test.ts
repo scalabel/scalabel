@@ -1,5 +1,5 @@
 import { LabelTypeName } from '../../js/common/types'
-import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
+import { PolyPathPoint2D, PointType } from '../../js/drawable/2d/poly_path_point2d'
 import { makePolygon, makeRect } from '../../js/functional/states'
 import { PolygonType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
@@ -37,8 +37,8 @@ describe('test model interface query construction', () => {
 
   test('poly query construction', () => {
     const points = [
-      (new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(5, 3, PointType.VERTEX)).toPathPoint()
+      (new PolyPathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(5, 3, PointType.VERTEX)).toPathPoint()
     ]
     const poly2d = makePolygon({ points })
     const itemIndex = 0

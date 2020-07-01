@@ -3,7 +3,7 @@ import * as action from '../../js/action/common'
 import * as polygon2d from '../../js/action/polygon2d'
 import Session from '../../js/common/session'
 import { LabelTypeName } from '../../js/common/types'
-import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
+import { PolyPathPoint2D, PointType } from '../../js/drawable/2d/poly_path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { PolygonType } from '../../js/functional/types'
 import { setupTestStore } from '../components/util'
@@ -17,26 +17,26 @@ test('Add, change and delete polygon labels', () => {
   Session.dispatch(action.goToItem(itemIndex))
   Session.dispatch(polygon2d.addPolygon2dLabel(
     itemIndex, -1, [0],
-    [(new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(1, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(1, 2, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(0, 2, PointType.CURVE)).toPathPoint()],
+    [(new PolyPathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(1, 1, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(1, 2, PointType.CURVE)).toPathPoint(),
+      (new PolyPathPoint2D(0, 2, PointType.CURVE)).toPathPoint()],
     true
   ))
   Session.dispatch(polygon2d.addPolygon2dLabel(
     itemIndex, -1, [0],
-    [(new PathPoint2D(3, 4, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(4, 4, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(4, 5, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(3, 5, PointType.CURVE)).toPathPoint()],
+    [(new PolyPathPoint2D(3, 4, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(4, 4, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(4, 5, PointType.CURVE)).toPathPoint(),
+      (new PolyPathPoint2D(3, 5, PointType.CURVE)).toPathPoint()],
     false
   ))
   Session.dispatch(polygon2d.addPolygon2dLabel(
     itemIndex, -1, [0],
-    [(new PathPoint2D(10, 11, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(11, 11, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(11, 12, PointType.CURVE)).toPathPoint(),
-      (new PathPoint2D(10, 12, PointType.CURVE)).toPathPoint()],
+    [(new PolyPathPoint2D(10, 11, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(11, 11, PointType.VERTEX)).toPathPoint(),
+      (new PolyPathPoint2D(11, 12, PointType.CURVE)).toPathPoint(),
+      (new PolyPathPoint2D(10, 12, PointType.CURVE)).toPathPoint()],
     true, false
   ))
   let state = Session.getState()
@@ -72,10 +72,10 @@ test('Add, change and delete polygon labels', () => {
   Session.dispatch(
     action.changeLabelShape(
       itemIndex, shape.id, makePolygon({ points:
-      [(new PathPoint2D(2, 0, PointType.CURVE)).toPathPoint(),
-        (new PathPoint2D(4, 0, PointType.CURVE)).toPathPoint(),
-        (new PathPoint2D(4, 2, PointType.VERTEX)).toPathPoint(),
-        (new PathPoint2D(2, 2, PointType.CURVE)).toPathPoint()]})))
+      [(new PolyPathPoint2D(2, 0, PointType.CURVE)).toPathPoint(),
+        (new PolyPathPoint2D(4, 0, PointType.CURVE)).toPathPoint(),
+        (new PolyPathPoint2D(4, 2, PointType.VERTEX)).toPathPoint(),
+        (new PolyPathPoint2D(2, 2, PointType.CURVE)).toPathPoint()]})))
 
   state = Session.getState()
   item = state.task.items[itemIndex]

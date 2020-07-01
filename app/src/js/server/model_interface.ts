@@ -1,6 +1,6 @@
 import { addPolygon2dLabel } from '../action/polygon2d'
 import { AddLabelsAction } from '../action/types'
-import { PathPoint2D, PointType } from '../drawable/2d/path_point2d'
+import { PolyPathPoint2D, PointType } from '../drawable/2d/poly_path_point2d'
 import { makeItemExport, makeLabelExport } from '../functional/states'
 import { PolygonType, RectType } from '../functional/types'
 import { convertPolygonToExport } from './export'
@@ -68,7 +68,7 @@ export class ModelInterface {
   public makePolyAction (
     polyPoints: number[][], itemIndex: number): AddLabelsAction {
     const points = polyPoints.map((point: number[]) => {
-      return (new PathPoint2D(
+      return (new PolyPathPoint2D(
           point[0], point[1], PointType.VERTEX)).toPathPoint()
     })
 

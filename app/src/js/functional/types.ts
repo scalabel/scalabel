@@ -117,9 +117,16 @@ export interface CubeType extends ShapeType {
 
 export type Point2DType = Vector2Type
 
+export enum PathPointType {
+  UNKNOWN = 'null',
+  LINE = 'line',
+  CURVE = 'beizer',
+  MID = 'mid'
+}
+
 export interface PathPoint2DType extends Vector2Type, ShapeType {
   /** type of the point in the path. value from common/types.PathPointType */
-  pointType: string
+  pointType: PathPointType
 }
 
 /**
