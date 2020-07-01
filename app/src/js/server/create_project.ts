@@ -213,7 +213,12 @@ export function readItemsFile (
         const items = yaml.load(fileBytes) as Array<Partial<ItemExport>>
         resolve(items)
       } catch {
-        reject(Error('Improper formatting for items file'))
+        try {
+          const items = JSON.parse(fileBytes) as Array<Partial<ItemExport>>
+          resolve(items)
+        } catch {
+          reject(Error('Improper formatting for items file'))
+        }
       }
     })
   })
