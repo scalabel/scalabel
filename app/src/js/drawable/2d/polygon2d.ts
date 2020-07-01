@@ -207,7 +207,8 @@ export class Polygon2D extends Label2D {
       }
     }
 
-    if (mode === DrawMode.VIEW) {
+    // Adjusting the tag while drawing is distracting; wait until shape is done
+    if (mode === DrawMode.VIEW && self._state !== Polygon2DState.DRAW) {
       self.drawTag(context, ratio, this.getCentroid(), self._color)
     }
   }
