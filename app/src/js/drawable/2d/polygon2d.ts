@@ -206,6 +206,10 @@ export class Polygon2D extends Label2D {
         }
       }
     }
+
+    if (mode === DrawMode.VIEW) {
+      self.drawTag(context, ratio, this.getCentroid(), self._color)
+    }
   }
 
   /**
@@ -843,6 +847,21 @@ export class Polygon2D extends Label2D {
       pathPoints.push(point.toPathPoint())
     }
     return makePolygon({ points: pathPoints })
+  }
+
+  /**
+   * Get the centroid of the drawable polygon
+   */
+  private getCentroid (): [number, number] {
+    const points = this.toPolygon().points
+    const centroid: [number, number] = [0.0, 0.0]
+    for (const p of points) {
+      centroid[0] += p.x
+      centroid[1] += p.y
+    }
+    centroid[0] /= points.length
+    centroid[1] /= points.length
+    return centroid
   }
 
   /**
