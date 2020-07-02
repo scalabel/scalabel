@@ -11,8 +11,8 @@ import {
 import { makeLabel, makeShape } from '../../js/functional/states'
 import { IdType } from '../../js/functional/types'
 import { setupTestStore } from '../components/util'
-import { findNewTracksFromState } from '../server/util/util'
 import { testJson } from '../test_states/test_track_objects'
+import { findNewTracksFromState } from '../util/state'
 
 const getState = Session.getState.bind(Session)
 const dispatch = Session.dispatch.bind(Session)

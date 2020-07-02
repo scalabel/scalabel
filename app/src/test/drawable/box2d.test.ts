@@ -5,10 +5,12 @@ import Session, { dispatch, getState } from '../../js/common/session'
 import { Label2DList, makeDrawableLabel2D } from '../../js/drawable/2d/label2d_list'
 import { commit2DLabels } from '../../js/drawable/states'
 import { makeImageViewerConfig } from '../../js/functional/states'
-import { RectType } from '../../js/functional/types'
+import { IdType, RectType, SimpleRect } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { setupTestStore } from '../components/util'
+import { checkBox2D } from '../util/shape'
+import { drawBox2D, initializeTestingObjects, moveBox2D, resizeBox2D } from './util'
 
 const data = JSON.parse(fs.readFileSync(
   './app/src/test/test_states/sample_state.json', 'utf8'))
@@ -127,4 +129,83 @@ test('Update existing drawable to invalid', () => {
 
   const currentState = Session.getState()
   expect(currentState.task.items[0].labels['1']).toBeUndefined()
+})
+
+describe('Draw 2D boxes to label2d list', () => {
+  // Samples box2D coords to use for tests
+  const boxCoords: SimpleRect[] = [
+    { x1: 1, y1: 1, x2: 10, y2: 10 },
+    { x1: 19, y1: 20, x2: 30, y2: 29 },
+    { x1: 4, y1: 5, x2: 23, y2: 24 }
+  ]
+
+  test('Add and delete boxes', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(100, 100)
+    const labelIds: IdType[] = []
+
+    // Draw and check each box
+    for (const coords of boxCoords) {
+      const labelId = drawBox2D(label2dHandler, canvasSize, coords)
+      checkBox2D(labelId, coords)
+      labelIds.push(labelId)
+    }
+
+    // Delete label
+    dispatch(action.deleteLabel(0, labelIds[1]))
+    const labelList = Session.label2dList.labelList
+    expect(labelList.length).toEqual(2)
+    expect(labelList[0].index).toEqual(0)
+    expect(labelList[0].labelId).toEqual(labelIds[0])
+    expect(labelList[1].index).toEqual(1)
+    expect(labelList[1].labelId).toEqual(labelIds[2])
+  })
+
+  test('Add boxes with interrupting actions', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(100, 100)
+    const interrupt = true
+
+    // Draw and check each box
+    for (const coords of boxCoords) {
+      const labelId = drawBox2D(label2dHandler, canvasSize, coords, interrupt)
+      checkBox2D(labelId, coords)
+    }
+  })
+
+  test('Resize and move boxes', () => {
+    const [label2dHandler] = initializeTestingObjects()
+    const canvasSize = new Size2D(100, 100)
+    const labelIds: IdType[] = []
+
+    // Draw each box
+    for (const coords of boxCoords) {
+      const labelId = drawBox2D(label2dHandler, canvasSize, coords)
+      checkBox2D(labelId, coords)
+      labelIds.push(labelId)
+    }
+
+    // Resize the second box
+    const boxIndex = 1
+    const boxId = labelIds[boxIndex]
+    const originalCoords = boxCoords[boxIndex]
+    let moveCoords = {
+      x1: originalCoords.x1, y1: originalCoords.y1, x2: 16, y2: 17}
+    resizeBox2D(label2dHandler, canvasSize, moveCoords, boxIndex)
+    checkBox2D(boxId, { x1: 16, y1: 17, x2: 30, y2: 29 })
+
+    // Flip top left and bottom right corners
+    moveCoords = {
+      x1: moveCoords.x2, y1: moveCoords.y2, x2: 42, y2: 43
+    }
+    resizeBox2D(label2dHandler, canvasSize, moveCoords, boxIndex)
+    checkBox2D(boxId, { x1: 30, y1: 29, x2: 42, y2: 43 })
+
+    // Move the entire box +4x and -1y
+    moveCoords = {
+      x1: 32, y1: 31, x2: 36, y2: 32
+    }
+    moveBox2D(label2dHandler, canvasSize, moveCoords, boxIndex)
+    checkBox2D(boxId, { x1: 34, y1: 30, x2: 46, y2: 44 })
+  })
 })

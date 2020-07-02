@@ -1,7 +1,7 @@
 import { LabelTypeName } from '../../js/common/types'
-import { PolyPathPoint2D, PointType } from '../../js/drawable/2d/poly_path_point2d'
+import { PointType, PolyPathPoint2D } from '../../js/drawable/2d/poly_path_point2d'
 import { makePolygon, makeRect } from '../../js/functional/states'
-import { PolygonType, RectType } from '../../js/functional/types'
+import { PathPoint2DType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
 import { ModelEndpoint } from '../../js/server/types'
@@ -67,8 +67,7 @@ describe('test model interface action translation', () => {
     const label = action.labels[0][0]
     expect(label.manual).toBe(false)
 
-    const shape = action.shapes[0][0][0] as PolygonType
-    const points = shape.points
+    const points = action.shapes[0][0] as PathPoint2DType[]
     checkPathPointFields(points[0], 1, 5, true)
     checkPathPointFields(points[1], 100, -5, true)
   })

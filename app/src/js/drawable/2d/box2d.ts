@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName } from '../../common/types'
 import { makeLabel, makeRect } from '../../functional/states'
-import { INVALID_ID, LabelType, RectType, ShapeType, State } from '../../functional/types'
+import { LabelType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'
@@ -35,7 +35,7 @@ enum Handles {
  * @param r2
  */
 function equalRects (r1: RectType, r2: RectType): boolean {
-  return r1.x1 === r2.x2 && r1.x2 === r2.x2 &&
+  return r1.x1 === r2.x1 && r1.x2 === r2.x2 &&
     r1.y1 === r2.y1 && r1.y2 === r2.y2
 }
 
@@ -338,15 +338,15 @@ export class Box2D extends Label2D {
   protected initTempLabel (state: State, start: Vector2D): LabelType {
     const itemIndex = state.user.select.item
     const label = makeLabel({
-      type: LabelTypeName.BOX_2D, id: INVALID_ID, item: itemIndex,
+      type: LabelTypeName.BOX_2D, item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
       order: this._order
     })
-
     const rect = makeRect({
-      x1: start.x, y1: start.y, x2: start.x, y2: start.y
+      x1: start.x, y1: start.y, x2: start.x, y2: start.y, label: [label.id]
     })
+    label.shapes = [rect.id]
     this.updateShapes([rect])
     this._highlightedHandle = Handles.BOTTOM_RIGHT
     return label

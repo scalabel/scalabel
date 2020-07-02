@@ -241,8 +241,8 @@ export class Polygon2D extends Label2D {
         } else if (this.isKeyDown(Key.D_UP) || this.isKeyDown(Key.D_LOW)) {
           // Delete vertex
           // Disable deletion for now
-          // this.toCache()
-          // this.deleteVertex()
+          this.toCache()
+          this.deleteVertex()
         } else {
           // Drag vertex or midpoint
           this.toCache()
@@ -502,14 +502,23 @@ export class Polygon2D extends Label2D {
    * Update the label with the current set of shapes
    */
   private UpdateLabelShapes () {
-    if (this._label === null)  {
+    if (this._label === null) {
       return
     }
-    this._label.shapes = []
+    const vertices = this.getVertices()
+    this._label.shapes = vertices.map((v) => v.id)
+  }
+
+  /**
+   * Get vertices of the polygon
+   */
+  private getVertices () {
+    const vertices: PathPoint2D[] = []
     for (const point of this._points) {
       if (point.type === PathPointType.MID) continue
-      this._label.shapes.push(point.id)
+      vertices.push(point)
     }
+    return vertices
   }
 
   /**

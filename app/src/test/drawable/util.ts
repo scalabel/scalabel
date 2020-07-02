@@ -1,10 +1,15 @@
 import * as action from '../../js/action/common'
 import { dispatch, getState } from '../../js/common/session'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
+import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, INVALID_ID, SimpleRect } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
+import Session from '../../js/common/session'
+import { setupTestStore } from '../components/util'
+import { testJson } from '../test_states/test_image_objects'
 import { LabelCollector } from '../util/label_collector'
+
 
 /**
  * Create a polygon by clicking at each point in sequence
@@ -263,3 +268,26 @@ export function keyClick (label2d: Label2DHandler, key: string) {
   keyDown(label2d, key)
   keyUp(label2d, key)
 }
+
+/**
+ * Initialize Session, label 2d list, label 2d handler
+ */
+export function initializeTestingObjects (): [Label2DHandler, number] {
+  setupTestStore(testJson)
+
+  dispatch(action.addViewerConfig(1, makeImageViewerConfig(0)))
+  const viewerId = 1
+
+  const label2dHandler = new Label2DHandler(Session.label2dList)
+  Session.subscribe(() => {
+    const state = getState()
+    Session.label2dList.updateState(state)
+    label2dHandler.updateState(state)
+  })
+
+  dispatch(action.loadItem(0, -1))
+  dispatch(action.goToItem(0))
+
+  return [label2dHandler, viewerId]
+}
+

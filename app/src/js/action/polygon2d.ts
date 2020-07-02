@@ -1,6 +1,6 @@
 import { LabelTypeName } from '../common/types'
-import { makeLabel, makePolygon } from '../functional/states'
-import { PathPoint2DType } from '../functional/types'
+import { makeLabel, makePathPoint2D } from '../functional/states'
+import { SimplePathPoint2DType } from '../functional/types'
 import * as actions from './common'
 import { AddLabelsAction } from './types'
 
@@ -16,7 +16,7 @@ export function addPolygon2dLabel (
   itemIndex: number,
   sensor: number,
   category: number[],
-  points: PathPoint2DType[],
+  points: SimplePathPoint2DType[],
   closed: boolean,
   manual = true
 )
@@ -26,5 +26,7 @@ export function addPolygon2dLabel (
   const label = makeLabel({
     type: labelType, category, sensors: [sensor], manual
   })
-  return actions.addLabel(itemIndex, label, points)
+  const shapes = points.map((p) => makePathPoint2D({ ...p, label: [label.id] }))
+  label.shapes = shapes.map((s) => s.id)
+  return actions.addLabel(itemIndex, label, shapes)
 }

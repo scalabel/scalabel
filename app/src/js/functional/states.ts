@@ -35,7 +35,8 @@ import {
   TaskType,
   TrackType,
   UserType,
-  ViewerConfigType
+  ViewerConfigType,
+  SimplePathPoint2DType
 } from './types'
 
 /**
@@ -99,8 +100,8 @@ export function makeShape (shapeType: string = '',
   return {
     label: [],
     shapeType,
-    ...params,
-    id: genShapeId()
+    id: genShapeId(),
+    ...params
   }
 }
 /**
@@ -114,8 +115,8 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
     y1: -1,
     x2: -1,
     y2: -1,
-    ...params,
-    ...makeShape(types.ShapeTypeName.RECT)
+    ...makeShape(types.ShapeTypeName.RECT),
+    ...params
   }
 }
 
@@ -128,8 +129,8 @@ export function makePolygon
   (params: Partial<PolygonType> = {}): PolygonType {
   return {
     points: [],
-    ...params,
-    ...makeShape(types.ShapeTypeName.POLYGON_2D)
+    ...makeShape(types.ShapeTypeName.POLYGON_2D),
+    ...params
   }
 }
 
@@ -147,6 +148,17 @@ export function makePathPoint2D (
     ...makeShape(types.ShapeTypeName.PATH_POINT_2D),
     ...params
   }
+}
+
+/**
+ * Driver function to make a simple path point
+ * @param x
+ * @param y
+ * @param pointType
+ */
+export function makeSimplePathPoint2D (
+  x: number, y: number, pointType: PathPointType): SimplePathPoint2DType {
+  return { x, y, pointType }
 }
 
 /**
@@ -174,8 +186,8 @@ export function makeCube (params: Partial<CubeType> = {}): CubeType {
     size: { x: 1, y: 1, z: 1 },
     orientation: { x: 0, y: 0, z: 0 },
     anchorIndex: 0,
-    ...params,
-    ...makeShape(types.ShapeTypeName.CUBE)
+    ...makeShape(types.ShapeTypeName.CUBE),
+    ...params
   }
 }
 
@@ -188,8 +200,8 @@ export function makePlane (params: {} = {}): Plane3DType {
   return {
     center: { x: 0, y: 0, z: 0 },
     orientation: { x: 0, y: 0, z: 0 },
-    ...params,
-    ...makeShape(types.ShapeTypeName.GRID)
+    ...makeShape(types.ShapeTypeName.GRID),
+    ...params
   }
 }
 
@@ -203,8 +215,8 @@ export function makeNode2d (params: Partial<Node2DType> = {}): Node2DType {
     hidden: false,
     x: -1,
     y: -1,
-    ...params,
-    ...makeShape(types.ShapeTypeName.NODE_2D)
+    ...makeShape(types.ShapeTypeName.NODE_2D),
+    ...params
   }
 }
 

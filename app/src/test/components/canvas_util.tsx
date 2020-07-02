@@ -6,8 +6,8 @@ import { GetStateFunc, SimpleStore } from '../../js/common/simple_store'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType } from '../../js/functional/types'
-import { TrackCollector } from '../server/util/track_collector'
 import { LabelCollector } from '../util/label_collector'
+import { TrackCollector } from '../util/track_collector'
 
 /** Create mouse down event */
 function mouseDownEvent (

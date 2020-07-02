@@ -5,8 +5,7 @@ import * as path from 'path'
 import { addBox2dLabel } from '../../../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
-import { IdType, LabelIdMap,
-  PolyPathPoint2DType, RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
+import { PolyPathPoint2DType, RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
 import * as defaults from '../../../js/server/defaults'
 import { ServerConfig } from '../../../js/server/types'
 
@@ -43,9 +42,9 @@ export function checkPathPointFields (
   expect(point.x).toBe(x)
   expect(point.y).toBe(y)
   if (isVertexType) {
-    expect(point.pointType).toBe('vertex')
+    expect(point.pointType).toBe('line')
   } else {
-    expect(point.pointType).toBe('bezier')
+    expect(point.pointType).toBe('beizer')
   }
 }
 
@@ -129,42 +128,4 @@ export function getTestConfig (): ServerConfig {
     ...testConfig
   }
   return fullConfig
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewLabels (
-    labels: LabelIdMap, labelIds: IdType[]): IdType[] {
-  return _.filter(
-    _.keys(labels),
-    (id) => !labelIds.includes(id))
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewLabelsFromState (
-    state: State, itemIndex: number, labelIds: IdType[]): IdType[] {
-  const labels = state.task.items[itemIndex].labels
-  return _.filter(
-  _.keys(labels),
-  (id) => !labelIds.includes(id))
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewTracksFromState (
-  state: State, trackIds: IdType[]): IdType[] {
-  const tracks = state.task.tracks
-  return _.filter(
-    _.keys(tracks),
-  (id) => !trackIds.includes(id))
 }

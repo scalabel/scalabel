@@ -1,7 +1,7 @@
 import { getState } from '../../js/common/session'
 import { GetStateFunc } from '../../js/common/simple_store'
-import { getShape } from '../../js/functional/state_util'
-import { IdType, PolygonType, SimpleRect } from '../../js/functional/types'
+import { getShape, getShapes } from '../../js/functional/state_util'
+import { IdType, PathPoint2DType, SimpleRect } from '../../js/functional/types'
 
 /**
  * Check that the box's coords are correct
@@ -37,12 +37,16 @@ export function checkPolygon (
   if (itemIndex < 0) {
     itemIndex = state.user.select.item
   }
-  const points = (getShape(state, 0, labelId, 0) as PolygonType).points
+  const points = getShapes(state, itemIndex, labelId) as PathPoint2DType[]
+  if (points.length !== coords.length) {
+    console.log(points)
+    console.log(coords)
+  }
   expect(points.length).toEqual(coords.length)
   for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
     expect(points[pointIndex]).toMatchObject(
       { x: coords[pointIndex][0],
         y: coords[pointIndex][1],
-        pointType: 'vertex' })
+        pointType: 'line' })
   }
 }

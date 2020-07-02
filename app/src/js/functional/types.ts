@@ -120,14 +120,16 @@ export type Point2DType = Vector2Type
 export enum PathPointType {
   UNKNOWN = 'null',
   LINE = 'line',
-  CURVE = 'beizer',
+  CURVE = 'bezier',
   MID = 'mid'
 }
 
-export interface PathPoint2DType extends Vector2Type, ShapeType {
-  /** type of the point in the path. value from common/types.PathPointType */
+export interface SimplePathPoint2DType extends Vector2Type {
+  /** type of the point in the path. */
   pointType: PathPointType
 }
+
+export interface PathPoint2DType extends SimplePathPoint2DType, ShapeType {}
 
 /**
  * This is a point on the polygon 2d. So the point itself doesn't have an ID
