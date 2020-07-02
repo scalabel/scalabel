@@ -178,3 +178,24 @@ export function getCurrentViewerConfig (
   }
   throw new Error(`Viewer id ${viewerId} not found`)
 }
+
+/**
+ * Get the tracks and ids of all selected tracks
+ * Selected tracks can be in the same item, or different items (linking)
+ */
+export function getSelectedTracks (state: State): [TrackType[], IdType[]] {
+  const select = state.user.select
+  const tracks: TrackType[] = []
+  const trackIds: IdType[] = []
+
+  for (const key of Object.keys(select.labels)) {
+    const index = Number(key)
+    for (const labelId of select.labels[index]) {
+      const trackId = state.task.items[index].labels[labelId].track
+      tracks.push(state.task.tracks[trackId])
+      trackIds.push(trackId)
+    }
+  }
+
+  return [tracks, trackIds]
+}

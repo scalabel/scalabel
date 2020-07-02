@@ -9,8 +9,9 @@ import { addLabelTag } from '../action/tag'
 import { renderTemplate } from '../common/label'
 import Session from '../common/session'
 import { Key, LabelTypeName } from '../common/types'
+import { getSelectedTracks } from '../functional/state_util'
 import { tracksOverlapping } from '../functional/track'
-import { Attribute, IdType, State, TrackType } from '../functional/types'
+import { Attribute, State } from '../functional/types'
 import { Component } from './component'
 import { makeButton } from './general_button'
 import { Category } from './toolbar_category'
@@ -294,18 +295,7 @@ export class ToolBar extends Component<Props> {
    * @param state
    */
   private linkSelectedTracks (state: State) {
-    const select = state.user.select
-    const tracks: TrackType[] = []
-    const trackIds: IdType[] = []
-
-    for (const key of Object.keys(select.labels)) {
-      const index = Number(key)
-      for (const labelId of select.labels[index]) {
-        const trackId = state.task.items[index].labels[labelId].track
-        tracks.push(state.task.tracks[trackId])
-        trackIds.push(trackId)
-      }
-    }
+    const [tracks, trackIds] = getSelectedTracks(state)
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(trackIds))
