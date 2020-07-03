@@ -4,6 +4,7 @@ import Session from '../../common/session'
 import { Key } from '../../common/types'
 import { addVisibilityListener } from '../../common/window'
 import { getLinkedLabelIds } from '../../functional/common'
+import { getSelectedTracks } from '../../functional/state_util'
 import { tracksOverlapping } from '../../functional/track'
 import { IdType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
@@ -396,15 +397,9 @@ export class Label2DHandler {
    * Merge different tracks
    */
   private mergeTracks () {
-    const selectedLabels = this._state.user.select.labels
-    const selectedTracks = Object.entries(selectedLabels)
-                             .map(([item, label]) =>
-                             this._state.task.items[+item]
-                              .labels[label[0]].track)
-    const tracks = selectedTracks
-                    .map((trackId) => this._state.task.tracks[trackId])
+    const tracks = getSelectedTracks(this._state)
     if (!tracksOverlapping(tracks)) {
-      Session.dispatch(mergeTracks(selectedTracks))
+      Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     }
   }
 }
