@@ -37,10 +37,7 @@ test('Add, change and delete box2d labels', () => {
   expect(indexedShape.label[0]).toBe(label.id)
 
   let shape = indexedShape as RectType
-  expect(shape.x1).toBe(1)
-  expect(shape.y1).toBe(2)
-  expect(shape.x2).toBe(3)
-  expect(shape.y2).toBe(4)
+  expect(shape).toMatchObject({ x1: 1, y1: 2, x2: 3, y2: 4 })
 
   // Check label ids
   _.forEach(item.labels, (v, i) => {
@@ -56,10 +53,7 @@ test('Add, change and delete box2d labels', () => {
   item = Session.getState().task.items[itemIndex]
   label = item.labels[label.id]
   shape = item.shapes[label.shapes[0]] as RectType
-  expect(shape.x1).toBe(2)
-  expect(shape.y1).toBe(2)
-  expect(shape.x2).toBe(7)
-  expect(shape.y2).toBe(4)
+  expect(shape).toMatchObject({ x1: 2, y1: 2, x2: 7, y2: 4 })
 
   Session.dispatch(action.deleteLabel(itemIndex, label.id))
   item = Session.getState().task.items[itemIndex]

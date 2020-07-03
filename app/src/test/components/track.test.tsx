@@ -11,7 +11,7 @@ import { State } from '../../js/functional/types'
 // Import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
 import { checkBox2D } from '../util/shape'
-import { drag, drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { drag, drawBox2DTracks, mouseMoveClick, setUpLabel2dCanvas } from './canvas_util'
 import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()

@@ -1,6 +1,6 @@
 import { IdType } from 'aws-sdk/clients/workdocs'
-import { GetStateFunc } from '../../../js/common/simple_store'
-import { findNewTracksFromState } from './util'
+import { GetStateFunc } from '../../js/common/simple_store'
+import { findNewTracksFromState } from '../util/state'
 
 /**
  * Collect the states from the current state
