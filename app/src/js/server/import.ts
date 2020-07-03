@@ -1,8 +1,7 @@
 import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../common/types'
-import { PointType } from '../drawable/2d/poly_path_point2d'
-import { makeCube, makeItem, makeLabel, makePlane, makePolygon, makePolyPathPoint, makeRect } from '../functional/states'
-import { Attribute, IdType, ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType } from '../functional/types'
+import { makeCube, makeItem, makeLabel, makePathPoint2D, makePlane, makeRect } from '../functional/states'
+import { Attribute, IdType, ItemType, LabelIdMap, LabelType, PathPointType, ShapeIdMap, ShapeType } from '../functional/types'
 import { ItemExport, LabelExport } from './bdd_types'
 
 /**
@@ -143,7 +142,7 @@ function convertLabelToImport (
   attributes?: {[key: number]: number[]}
 ): [LabelType, ShapeType[]] {
   let labelType = LabelTypeName.EMPTY
-  let shapeData: null | ShapeType = null
+  let shapes: null | ShapeType[] = null
   const labelId = labelExport.id.toString()
 
   /**
@@ -152,35 +151,36 @@ function convertLabelToImport (
    */
   if (labelExport.box2d) {
     labelType = LabelTypeName.BOX_2D
-    shapeData = makeRect(labelExport.box2d)
+    shapes = [makeRect(labelExport.box2d)]
   } else if (labelExport.poly2d) {
     const polyExport = labelExport.poly2d[0]
     labelType = (polyExport.closed) ?
       LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
-    const points = polyExport.vertices.map(
-      (vertex, i) => makePolyPathPoint({
+    shapes = polyExport.vertices.map(
+      (vertex, i) => makePathPoint2D({
         x: vertex[0],
         y: vertex[1],
         pointType: (polyExport.types[i] === 'L') ?
-          PointType.VERTEX : PointType.CURVE
+          PathPointType.LINE : PathPointType.CURVE
       })
     )
-    shapeData = makePolygon({ points })
   } else if (labelExport.box3d) {
     labelType = LabelTypeName.BOX_3D
-    shapeData = makeCube(labelExport.box3d)
+    shapes = [makeCube(labelExport.box3d)]
   } else if (labelExport.plane3d) {
     labelType = LabelTypeName.PLANE_3D
-    shapeData = makePlane(labelExport.plane3d)
+    shapes = [makePlane(labelExport.plane3d)]
   }
 
   // If the label has any shapes, import them too
   const shapeIds: IdType[] = []
   const shapeImports: ShapeType[] = []
-  if (shapeData !== null) {
-    shapeData.label.push(labelId)
-    shapeIds.push(shapeData.id)
-    shapeImports.push(shapeData)
+  if (shapes !== null) {
+    _.forEach(shapes, (s) => {
+      s.label.push(labelId)
+      shapeIds.push(s.id)
+      shapeImports.push(s)
+    })
   }
 
   const labelImport = makeLabel({

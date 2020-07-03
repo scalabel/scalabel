@@ -4,8 +4,8 @@ import { ThunkCreatorType } from '../common/types'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
 import { ConnectionStatus, DeepPartialState, IdType, LabelType,
-  PaneType, Select, ShapeType, SplitType, State,
-  TaskType, ViewerConfigType } from '../functional/types'
+  PaneType, Select, ShapeAllType, ShapeType, SplitType,
+  State, TaskType, ViewerConfigType } from '../functional/types'
 import { SyncActionMessageType } from '../server/types'
 import * as types from './types'
 
@@ -194,7 +194,7 @@ export function addTrack (
  * @return {ChangeLabelShapeAction}
  */
 export function changeShapes (
-    itemIndex: number, shapeIds: IdType[], shapes: Array<Partial<ShapeType>>
+    itemIndex: number, shapeIds: IdType[], shapes: Array<Partial<ShapeAllType>>
   ): types.ChangeShapesAction {
   return {
     ...makeBaseAction(types.CHANGE_SHAPES),

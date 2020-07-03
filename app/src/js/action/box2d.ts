@@ -23,10 +23,11 @@ export function addBox2dLabel (
   x: number, y: number, w: number, h: number
 ): AddLabelsAction {
   // Create the rect object
-  const rect = makeRect({ x1: x, y1: y, x2: w, y2: h })
   const label = makeLabel({
     type: LabelTypeName.BOX_2D, category, attributes, sensors: [sensor]
   })
+  const rect = makeRect({ x1: x, y1: y, x2: w, y2: h, label: [label.id] })
+  label.shapes = [rect.id]
   return actions.addLabel(
     itemIndex, label, [rect]
   )

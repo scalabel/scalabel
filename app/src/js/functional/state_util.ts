@@ -128,6 +128,18 @@ export function getShape (state: State, itemIndex: number,
   return item.shapes[shapeId]
 }
 
+/**
+ * Retrieve shapes from the state
+ * @param state
+ * @param itemIndex
+ * @param labelId
+ */
+export function getShapes (state: State, itemIndex: number,
+                           labelId: IdType): ShapeType[] {
+  const item = state.task.items[itemIndex]
+  return item.labels[labelId].shapes.map((s) => item.shapes[s])
+}
+
 /** Check if frame is loaded */
 export function isFrameLoaded (state: State, item: number, sensor: number) {
   return state.session.itemStatuses[item].sensorDataLoaded[sensor]

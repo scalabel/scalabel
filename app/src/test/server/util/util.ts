@@ -5,8 +5,7 @@ import * as path from 'path'
 import { addBox2dLabel } from '../../../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
-import { IdType, LabelIdMap,
-  PolyPathPoint2DType, RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
+import { RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
 import * as defaults from '../../../js/server/defaults'
 import { ServerConfig } from '../../../js/server/types'
 
@@ -33,20 +32,6 @@ export function expectRectTypesClose (
   expect(r1.x2).toBeCloseTo(r2.x2, num)
   expect(r1.y1).toBeCloseTo(r2.y1, num)
   expect(r1.y2).toBeCloseTo(r2.y2, num)
-}
-
-/**
- * Check that the path point has the correct field values
- */
-export function checkPathPointFields (
-  point: PolyPathPoint2DType, x: number, y: number, isVertexType: boolean) {
-  expect(point.x).toBe(x)
-  expect(point.y).toBe(y)
-  if (isVertexType) {
-    expect(point.pointType).toBe('vertex')
-  } else {
-    expect(point.pointType).toBe('bezier')
-  }
 }
 
 /**
@@ -129,42 +114,4 @@ export function getTestConfig (): ServerConfig {
     ...testConfig
   }
   return fullConfig
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewLabels (
-    labels: LabelIdMap, labelIds: IdType[]): IdType[] {
-  return _.filter(
-    _.keys(labels),
-    (id) => !labelIds.includes(id))
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewLabelsFromState (
-    state: State, itemIndex: number, labelIds: IdType[]): IdType[] {
-  const labels = state.task.items[itemIndex].labels
-  return _.filter(
-  _.keys(labels),
-  (id) => !labelIds.includes(id))
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewTracksFromState (
-  state: State, trackIds: IdType[]): IdType[] {
-  const tracks = state.task.tracks
-  return _.filter(
-    _.keys(tracks),
-  (id) => !trackIds.includes(id))
 }

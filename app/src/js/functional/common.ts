@@ -154,18 +154,13 @@ function addLabelsToItem (
   const newShapes: ShapeType[] = []
   newLabels.forEach((label, index) => {
     const shapeIds = shapes[index].map((shape) => shape.id)
-    const newLabelShapes = shapes[index].map(
-      (s) => {
-        const shape = _.cloneDeep(s)
-        shape.label.push(label.id)
-        return shape
-      })
+    const newLabelShapes = _.cloneDeep(shapes[index])
     const order = taskStatus.maxOrder + 1 + index
     const validChildren = label.children.filter((id) => isValidId(id))
     label = updateObject(label, {
       item: item.index,
       order,
-      shapes: label.shapes.concat(shapeIds),
+      // Shapes: label.shapes.concat(shapeIds),
       children: validChildren
     })
     newLabels[index] = label
@@ -414,17 +409,39 @@ function changeLabelsInItem (
   props: Array<Partial<LabelType>>
 ): ItemType {
   const newLabels: { [key: string]: LabelType } = {}
+  const allShapes = item.shapes
+  const allDeletedShapes: IdType[] = []
+  const allChangedShapes: { [key: string]: ShapeType } = {}
   labelIds.forEach((labelId, index) => {
     const children = props[index].children
     if (children) {
       props[index].children = children.filter((id) => isValidId(id))
     }
     const oldLabel = item.labels[labelId]
-    // Avoid changing the shape field in the label
-    newLabels[labelId] = updateObject(
-      oldLabel, { ..._.cloneDeep(props[index]), shapes: oldLabel.shapes })
+    const newLabel = updateObject(
+      oldLabel, _.cloneDeep(props[index]))
+    newLabels[labelId] = newLabel
+    // Find the shapes to change and delete from the old label
+    const newLabelShapeIds = new Set(newLabel.shapes)
+    const changedShapeIds = _.filter(
+      oldLabel.shapes, (s) => !newLabelShapeIds.has(s))
+    const changedShapes = changedShapeIds.map(
+      (s) => (_.cloneDeep(allShapes[s])))
+    _.forEach(changedShapes, (s) => {
+      s.label = removeListItems(s.label, [oldLabel.id])
+      if (s.label.length === 0) {
+        allDeletedShapes.push(s.id)
+      } else {
+        allChangedShapes[s.id] = s
+      }
+    })
   })
-  item = updateObject(item, { labels: updateObject(item.labels, newLabels) })
+  item = updateObject(
+    item, {
+      labels: updateObject(item.labels, newLabels),
+      shapes: updateObject(
+        removeObjectFields(allShapes, allDeletedShapes), allChangedShapes)
+    })
   return item
 }
 

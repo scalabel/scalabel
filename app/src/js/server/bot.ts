@@ -6,7 +6,7 @@ import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ReduxStore, ShapeTypeName } from '../common/types'
 import { index2str } from '../common/util'
-import { PolygonType, RectType, State } from '../functional/types'
+import { PathPoint2DType, RectType, State } from '../functional/types'
 import { ItemExport } from './bdd_types'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
@@ -294,7 +294,7 @@ export class Bot {
   private actionToQuery (
     state: State, action: AddLabelsAction): ModelQuery | null {
     const shapeType = action.shapes[0][0][0].shapeType
-    const shape = action.shapes[0][0][0]
+    const shapes = action.shapes[0][0]
     const labelType = action.labels[0][0].type
     const itemIndex = action.itemIndices[0]
     const item = state.task.items[itemIndex]
@@ -303,11 +303,11 @@ export class Bot {
     switch (shapeType) {
       case ShapeTypeName.RECT:
         return this.modelInterface.makeRectQuery(
-          shape as RectType, url, itemIndex
+          shapes[0] as RectType, url, itemIndex
         )
       case ShapeTypeName.POLYGON_2D:
         return this.modelInterface.makePolyQuery(
-          shape as PolygonType, url, itemIndex, labelType
+          shapes as PathPoint2DType[], url, itemIndex, labelType
         )
       default:
         return null
