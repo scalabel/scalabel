@@ -1,7 +1,6 @@
 import { LabelTypeName } from '../../js/common/types'
-import { PointType, PolyPathPoint2D } from '../../js/drawable/2d/poly_path_point2d'
-import { makePolygon, makeRect } from '../../js/functional/states'
-import { PathPoint2DType, RectType } from '../../js/functional/types'
+import { makePathPoint2D, makeRect } from '../../js/functional/states'
+import { PathPoint2DType, PathPointType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
 import { ModelEndpoint } from '../../js/server/types'
@@ -36,14 +35,13 @@ describe('test model interface query construction', () => {
 
   test('poly query construction', () => {
     const points = [
-      (new PolyPathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
-      (new PolyPathPoint2D(5, 3, PointType.VERTEX)).toPathPoint()
+      makePathPoint2D({ x: 0, y: 1, pointType: PathPointType.LINE }),
+      makePathPoint2D({ x: 5, y: 3, pointType: PathPointType.LINE })
     ]
-    const poly2d = makePolygon({ points })
     const itemIndex = 0
     const labelType = LabelTypeName.POLYGON_2D
     const query = modelInterface.makePolyQuery(
-      poly2d, url, itemIndex, labelType)
+      points, url, itemIndex, labelType)
     expect(query.endpoint).toBe(ModelEndpoint.REFINE_POLY)
     expect(query.itemIndex).toBe(itemIndex)
 
@@ -51,7 +49,7 @@ describe('test model interface query construction', () => {
     expect(itemData.name).toBe(projectName)
     expect(itemData.url).toBe(url)
 
-    const expectedPoly = convertPolygonToExport(poly2d, labelType)
+    const expectedPoly = convertPolygonToExport(points, labelType)
     expect(itemData.labels[0].poly2d).toEqual(expectedPoly)
   })
 })

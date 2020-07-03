@@ -1,7 +1,7 @@
 import { addPolygon2dLabel } from '../action/polygon2d'
 import { AddLabelsAction } from '../action/types'
 import { makeItemExport, makeLabelExport, makeSimplePathPoint2D } from '../functional/states'
-import { PathPointType, PolygonType, RectType } from '../functional/types'
+import { PathPoint2DType, PathPointType, RectType } from '../functional/types'
 import { convertPolygonToExport } from './export'
 import { ModelEndpoint, ModelQuery } from './types'
 
@@ -43,9 +43,9 @@ export class ModelInterface {
    * Query for refining 'polygon -> polygon' segmentation
    */
   public makePolyQuery (
-    poly: PolygonType, url: string,
+    points: PathPoint2DType[], url: string,
     itemIndex: number, labelType: string): ModelQuery {
-    const poly2d = convertPolygonToExport(poly, labelType)
+    const poly2d = convertPolygonToExport(points, labelType)
     const label = makeLabelExport({
       poly2d
     })
