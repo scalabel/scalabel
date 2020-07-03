@@ -3,6 +3,7 @@ import * as action from '../../js/action/common'
 import * as polygon2d from '../../js/action/polygon2d'
 import { dispatch, getState } from '../../js/common/session'
 import { LabelTypeName } from '../../js/common/types'
+import { getShapes } from '../../js/functional/state_util'
 import { makeSimplePathPoint2D } from '../../js/functional/states'
 import { PathPoint2DType, PathPointType } from '../../js/functional/types'
 import { setupTestStore } from '../components/util'
@@ -37,15 +38,15 @@ test('Add, change and delete polygon labels', () => {
       (makeSimplePathPoint2D(10, 12, PathPointType.LINE))],
     true, false
   ))
-  const state = getState()
-  const item = state.task.items[itemIndex]
+  let state = getState()
+  let item = state.task.items[itemIndex]
   const labels = item.labels
   const shapes = item.shapes
   expect(_.size(labels)).toBe(3)
   expect(_.size(shapes)).toBe(12)
 
   const labelIds = _.map(labels, (l) => l.id)
-  const label = labels[labelIds[0]]
+  let label = labels[labelIds[0]]
   expect(label.item).toBe(itemIndex)
   expect(label.type).toBe(LabelTypeName.POLYGON_2D)
   expect(label.manual).toBe(true)
@@ -59,8 +60,8 @@ test('Add, change and delete polygon labels', () => {
     expect(v.id).toBe(i)
   })
 
-  const points = label.shapes.map((s) => shapes[s]) as PathPoint2DType[]
   const labelId = labelIds[0]
+  let points = getShapes(state, itemIndex, labelId) as PathPoint2DType[]
   expect(points[0]).toMatchObject(
     { label: [labelId], x: 0, y: 1, pointType: 'line' })
   expect(points[1]).toMatchObject(
@@ -70,28 +71,31 @@ test('Add, change and delete polygon labels', () => {
   expect(points[3]).toMatchObject(
     { label: [labelId], x: 0, y: 2, pointType: 'bezier' })
 
-  // Dispatch(
-  //   action.changeLabelShape(
-  //     itemIndex, shape.id, makePolygon({ points:
-  //     [(makeSimplePathPoint2D(2, 0, PathPointType.LINE)),
-  //       (makeSimplePathPoint2D(4, 0, PathPointType.LINE)),
-  //       (makeSimplePathPoint2D(4, 2, PathPointType.LINE)),
-  //       (makeSimplePathPoint2D(2, 2, PathPointType.LINE))]})))
+  dispatch(
+    action.changeShapes(
+      itemIndex, points.map((p) => p.id),
+      [(makeSimplePathPoint2D(2, 0, PathPointType.LINE)),
+        (makeSimplePathPoint2D(4, 0, PathPointType.LINE)),
+        (makeSimplePathPoint2D(4, 2, PathPointType.LINE)),
+        (makeSimplePathPoint2D(2, 2, PathPointType.LINE))]))
 
-  // State = getState()
-  // item = state.task.items[itemIndex]
-  // label = item.labels[label.id]
-  // shape = item.shapes[label.shapes[0]] as PolygonType
+  state = getState()
+  item = state.task.items[itemIndex]
+  label = item.labels[label.id]
+  // Shape = item.shapes[label.shapes[0]] as PolygonType
+  points = getShapes(state, itemIndex, labelId) as PathPoint2DType[]
 
-  // Points = shape.points
+  expect(points[0]).toMatchObject(
+    { label: [labelId], x: 2, y: 0, pointType: 'line' })
+  expect(points[1]).toMatchObject(
+    { label: [labelId], x: 4, y: 0, pointType: 'line' })
+  expect(points[2]).toMatchObject(
+    { label: [labelId], x: 4, y: 2, pointType: 'line' })
+  expect(points[3]).toMatchObject(
+    { label: [labelId], x: 2, y: 2, pointType: 'line' })
 
-  // CheckPathPointFields(points[0], 2, 0, false)
-  // checkPathPointFields(points[1], 4, 0, false)
-  // checkPathPointFields(points[2], 4, 2, true)
-  // checkPathPointFields(points[3], 2, 2, false)
-
-  // Dispatch(action.deleteLabel(itemIndex, label.id))
-  // item = getState().task.items[itemIndex]
-  // expect(_.size(item.labels)).toBe(2)
-  // expect(_.size(item.shapes)).toBe(2)
+  dispatch(action.deleteLabel(itemIndex, label.id))
+  item = getState().task.items[itemIndex]
+  expect(_.size(item.labels)).toBe(2)
+  expect(_.size(item.shapes)).toBe(8)
 })

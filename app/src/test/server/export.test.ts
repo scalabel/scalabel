@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { LabelTypeName } from '../../js/common/types'
-import { PolyPathPoint2D, PointType } from '../../js/drawable/2d/poly_path_point2d'
+import { PointType, PolyPathPoint2D } from '../../js/drawable/2d/poly_path_point2d'
 import { makePolygon } from '../../js/functional/states'
 import { State } from '../../js/functional/types'
 import {

@@ -7,8 +7,8 @@ import { Size2D } from '../../js/math/size2d'
 import { checkPolygon } from '../util/shape'
 import { findNewLabels, findNewLabelsFromState } from '../util/state'
 import {
-  drawPolygon, drawPolygonByDragging, initializeTestingObjects, keyClick, keyDown,
-  keyUp, mouseClick, mouseDown, mouseMove,
+  drawPolygon, drawPolygonByDragging, initializeTestingObjects, keyClick,
+  keyDown, keyUp, mouseClick, mouseDown, mouseMove,
   mouseMoveClick, mouseUp
 } from './util'
 
@@ -173,9 +173,8 @@ test('validation check for polygon2d', () => {
 
   state = getState()
   const points = getShapes(state, 0, labelIds[0]) as PathPoint2DType[]
-  expect(points[2].x).toEqual(310)
-  expect(points[2].y).toEqual(260)
-  expect(points[2].pointType).toEqual('line')
+  expect(points[2]).toMatchObject({ x: 310, y: 260, pointType: 'line' })
+
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
    */

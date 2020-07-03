@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import * as action from '../../js/action/common'
 import Session, { dispatch, getState } from '../../js/common/session'
 import { ShapeTypeName } from '../../js/common/types'
@@ -7,10 +8,9 @@ import { IdType, Point2DType } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { setupTestStore } from '../components/util'
-import { findNewLabels } from '../util/state'
 import { testJson } from '../test_states/test_image_objects'
+import { findNewLabels } from '../util/state'
 import { mouseDown, mouseMove, mouseUp } from './util'
-import _ from 'lodash'
 
 /**
  * Initialize Session, label 2d list, label 2d handler

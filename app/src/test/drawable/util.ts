@@ -1,15 +1,13 @@
 import * as action from '../../js/action/common'
-import { dispatch, getState } from '../../js/common/session'
+import Session, { dispatch, getState } from '../../js/common/session'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, INVALID_ID, SimpleRect } from '../../js/functional/types'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
-import Session from '../../js/common/session'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 import { LabelCollector } from '../util/label_collector'
-
 
 /**
  * Create a polygon by clicking at each point in sequence
@@ -290,4 +288,3 @@ export function initializeTestingObjects (): [Label2DHandler, number] {
 
   return [label2dHandler, viewerId]
 }
-

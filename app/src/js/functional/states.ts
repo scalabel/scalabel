@@ -29,14 +29,14 @@ import {
   SensorType,
   SessionType,
   ShapeType,
+  SimplePathPoint2DType,
   SplitType,
   State,
   TaskStatus,
   TaskType,
   TrackType,
   UserType,
-  ViewerConfigType,
-  SimplePathPoint2DType
+  ViewerConfigType
 } from './types'
 
 /**

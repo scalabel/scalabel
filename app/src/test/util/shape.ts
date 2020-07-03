@@ -38,10 +38,6 @@ export function checkPolygon (
     itemIndex = state.user.select.item
   }
   const points = getShapes(state, itemIndex, labelId) as PathPoint2DType[]
-  if (points.length !== coords.length) {
-    console.log(points)
-    console.log(coords)
-  }
   expect(points.length).toEqual(coords.length)
   for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
     expect(points[pointIndex]).toMatchObject(

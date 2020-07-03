@@ -5,7 +5,6 @@ import { PathPoint2DType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
 import { ModelEndpoint } from '../../js/server/types'
-import { checkPathPointFields } from './util/util'
 
 let modelInterface: ModelInterface
 let projectName: string
@@ -68,7 +67,7 @@ describe('test model interface action translation', () => {
     expect(label.manual).toBe(false)
 
     const points = action.shapes[0][0] as PathPoint2DType[]
-    checkPathPointFields(points[0], 1, 5, true)
-    checkPathPointFields(points[1], 100, -5, true)
+    expect(points[0]).toMatchObject({ x: 1, y: 5, pointType: 'line' })
+    expect(points[1]).toMatchObject({ x: 100, y: - 5, pointType: 'line' })
   })
 })
