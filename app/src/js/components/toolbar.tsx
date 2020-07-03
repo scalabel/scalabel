@@ -295,10 +295,10 @@ export class ToolBar extends Component<Props> {
    * @param state
    */
   private linkSelectedTracks (state: State) {
-    const [tracks, trackIds] = getSelectedTracks(state)
+    const tracks = getSelectedTracks(state)
 
     if (!tracksOverlapping(tracks)) {
-      Session.dispatch(mergeTracks(trackIds))
+      Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     }
   }
 

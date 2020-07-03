@@ -397,9 +397,9 @@ export class Label2DHandler {
    * Merge different tracks
    */
   private mergeTracks () {
-    const [tracks, trackIds] = getSelectedTracks(this._state)
+    const tracks = getSelectedTracks(this._state)
     if (!tracksOverlapping(tracks)) {
-      Session.dispatch(mergeTracks(trackIds))
+      Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     }
   }
 }

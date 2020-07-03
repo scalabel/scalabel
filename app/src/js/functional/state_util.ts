@@ -195,19 +195,17 @@ export function getCurrentViewerConfig (
  * Get the tracks and ids of all selected tracks
  * Selected tracks can be in the same item, or different items (linking)
  */
-export function getSelectedTracks (state: State): [TrackType[], IdType[]] {
+export function getSelectedTracks (state: State): TrackType[] {
   const selectedLabels = getSelectedLabels(state)
   const tracks: TrackType[] = []
-  const trackIds: IdType[] = []
 
   for (const key of Object.keys(selectedLabels)) {
     const itemIndex = Number(key)
     for (const labelId of selectedLabels[itemIndex]) {
       const trackId = state.task.items[itemIndex].labels[labelId].track
       tracks.push(getTrack(state, trackId))
-      trackIds.push(trackId)
     }
   }
 
-  return [tracks, trackIds]
+  return tracks
 }
