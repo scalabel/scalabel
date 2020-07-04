@@ -3,6 +3,7 @@ import { sprintf } from 'sprintf-js'
 import { index2str } from '../../js/common/util'
 import { FileStorage } from '../../js/server/file_storage'
 import { getProjectKey, getTaskKey, getTestDir } from '../../js/server/path'
+import { STORAGE_FOLDERS, StorageStructure } from '../../js/server/storage'
 import { makeProjectDir } from './util/util'
 
 let storage: FileStorage
@@ -21,6 +22,16 @@ afterAll(() => {
 })
 
 describe('test local file storage', () => {
+  test('make dir', async () => {
+    for (const f of STORAGE_FOLDERS) {
+      await storage.mkdir(f)
+      expect(await fs.pathExists(storage.fullDir(f))).toBe(true)
+      const file = `${f}/test`
+      await storage.save(file, '')
+      expect(await storage.hasKey(file)).toBe(true)
+    }
+  })
+
   test('key existence', () => {
     return Promise.all([
       checkTaskKey(0, true),
@@ -31,16 +42,18 @@ describe('test local file storage', () => {
   })
 
   test('list keys', async () => {
-    const keys = await storage.listKeys('myProject/tasks')
+    const keys = await storage.listKeys(
+      `${StorageStructure.PROJECT}/myProject/tasks`)
     expect(keys.length).toBe(2)
-    expect(keys).toContain('myProject/tasks/000000')
-    expect(keys).toContain('myProject/tasks/000001')
+    expect(keys).toContain(`projects/myProject/tasks/000000`)
+    expect(keys).toContain(`projects/myProject/tasks/000001`)
   })
 
   test('list keys dir only', async () => {
-    const keys = await storage.listKeys('myProject', true)
+    const keys = await storage.listKeys(
+      `${StorageStructure.PROJECT}/myProject`, true)
     expect(keys.length).toBe(1)
-    expect(keys).toContain('myProject/tasks')
+    expect(keys).toContain(`projects/myProject/tasks`)
   })
 
   test('load', () => {
@@ -93,7 +106,7 @@ describe('test local file storage', () => {
   })
 
   test('delete', async () => {
-    const key = 'myProject/tasks'
+    const key = `${StorageStructure.PROJECT}/myProject/tasks`
     await Promise.all([
       checkTaskKey(1, true),
       checkTaskKey(0, true)

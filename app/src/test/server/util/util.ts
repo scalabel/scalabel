@@ -7,6 +7,7 @@ import { makeItem,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
 import { RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
 import * as defaults from '../../../js/server/defaults'
+import { StorageStructure } from '../../../js/server/storage'
 import { ServerConfig } from '../../../js/server/types'
 
 /**
@@ -48,7 +49,7 @@ export function expectRectTypesClose (
  *   option of fs.readDir correctly; and has flakiness issues
  */
 export function makeProjectDir (dataDir: string, projectName: string) {
-  const projectDir = path.join(dataDir, projectName)
+  const projectDir = path.join(dataDir, StorageStructure.PROJECT, projectName)
   const taskDir = path.join(projectDir, 'tasks')
   fs.ensureDirSync(projectDir)
   fs.ensureDirSync(taskDir)
