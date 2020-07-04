@@ -140,6 +140,7 @@ export async function makeStorage (
       storage = new FileStorage(dir)
     }
   }
+  // Create the initial folder structure
   STORAGE_FOLDERS.map((f) => storage.mkdir(f))
   return storage
 }
