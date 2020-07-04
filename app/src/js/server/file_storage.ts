@@ -99,4 +99,12 @@ export class FileStorage extends Storage {
     }
     return fs.remove(this.fullDir(key))
   }
+
+  /**
+   * make an empty folder object on s3
+   * @param key
+   */
+  public async mkdir (key: string): Promise<void> {
+    await fs.ensureDir(this.fullDir(key))
+  }
 }

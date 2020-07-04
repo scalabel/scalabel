@@ -4,6 +4,7 @@ import * as formidable from 'express-formidable'
 import { createServer } from 'http'
 import socketio from 'socket.io'
 import 'source-map-support/register'
+import { removeListItems } from '../functional/util'
 import { BotManager } from './bot_manager'
 import Callback from './controller/callback'
 import { Hub } from './hub'
@@ -16,6 +17,7 @@ import { ProjectStore } from './project_store'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
 import { RedisStore } from './redis_store'
+import { Storage, STORAGE_FOLDERS, StorageStructure } from './storage'
 import { Endpoint, ServerConfig } from './types'
 import { UserManager } from './user_manager'
 import { makeStorage, readConfig } from './util'
@@ -138,17 +140,36 @@ async function startServers (
 }
 
 /**
+ * Check wether there is legacy project folders in storage
+ * @param storage
+ */
+async function checkLegacyProjectFolders (storage: Storage) {
+  let folders = await storage.listKeys('', true)
+  folders = removeListItems(
+    folders, STORAGE_FOLDERS)
+  if (folders.length > 0) {
+    Logger.info(`Detected legacy project names [${folders.toString()}] ` +
+    `under the scalabel folder. ` +
+    `Please move them to the ${StorageStructure.PROJECT}/ folder and ` +
+    `relaunch scalabel.`)
+    process.exit(1)
+  }
+}
+
+/**
  * Main function for backend server
  */
 async function main () {
   // Initialize config
   const config = await readConfig()
 
-  // Start the redis server
-  await launchRedisServer(config)
-
   // Initialize storage
   const storage = await makeStorage(config.database, config.data)
+
+  await checkLegacyProjectFolders(storage)
+
+  // Start the redis server
+  await launchRedisServer(config)
 
   /**
    * Connect to redis server with clients

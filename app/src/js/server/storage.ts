@@ -1,5 +1,12 @@
 import * as path from 'path'
 
+export enum StorageStructure {
+  PROJECT = 'projects',
+  USER = 'users'
+}
+
+export const STORAGE_FOLDERS = [StorageStructure.PROJECT, StorageStructure.USER]
+
 /**
  * Abstract class for storage
  */
@@ -44,6 +51,12 @@ export abstract class Storage {
   public abstract async delete (key: string): Promise<void>
 
   /**
+   * Create a new folder
+   * @param key
+   */
+  public abstract async mkdir (key: string): Promise<void>
+
+  /**
    * Loads the JSON if it exists
    * Otherwise return something that evaluates to false
    */
@@ -57,14 +70,14 @@ export abstract class Storage {
   /**
    * Makes relative path into full path
    */
-  protected fullDir (key: string): string {
+  public fullDir (key: string): string {
     return path.join(this.dataDir, key)
   }
 
   /**
    * Makes relative path into full filename
    */
-  protected fullFile (key: string): string {
+  public fullFile (key: string): string {
     return this.fullDir(key + '.json')
   }
 }

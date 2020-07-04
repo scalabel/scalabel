@@ -15,7 +15,7 @@ import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
-import { Storage } from './storage'
+import { Storage, STORAGE_FOLDERS } from './storage'
 import { CognitoConfig, CreationForm,
   DatabaseType, ServerConfig, UserData, UserMetadata } from './types'
 
@@ -109,33 +109,39 @@ async function validateConfig (config: ServerConfig) {
  */
 export async function makeStorage (
   database: string, dir: string): Promise<Storage> {
+  let storage: Storage
   switch (database) {
     case DatabaseType.S3:
       try {
         const s3Store = new S3Storage(dir)
         await s3Store.makeBucket()
-        return s3Store
+        storage = s3Store
       } catch (error) {
         // If s3 fails, default to file storage
         error.message = `s3 failed, using file storage
         ${error.message}`
         Logger.error(error)
-        return new FileStorage(dir)
+        storage = new FileStorage(dir)
       }
+      break
     case DatabaseType.DYNAMO_DB: {
       Logger.error(Error(sprintf(
         '%s storage not implemented yet, using file storage', database)))
-      return new FileStorage(dir)
+      storage = new FileStorage(dir)
+      break
     }
     case DatabaseType.LOCAL: {
-      return new FileStorage(dir)
+      storage = new FileStorage(dir)
+      break
     }
     default: {
       Logger.error(Error(sprintf(
         '%s is an unknown database format, using file storage', database)))
-      return new FileStorage(dir)
+      storage = new FileStorage(dir)
     }
   }
+  STORAGE_FOLDERS.map((f) => storage.mkdir(f))
+  return storage
 }
 
 /**

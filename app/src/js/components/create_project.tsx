@@ -59,8 +59,7 @@ class Create extends React.Component<Props, State> {
                 >
                 </ListItemText>
               </ListItem>
-              <ProjectList
-                      refresh={this.state.reloadProjects}/>
+              <ProjectList refresh={this.state.reloadProjects}/>
             </List>
     )
     this.mainContent = (

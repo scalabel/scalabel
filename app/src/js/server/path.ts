@@ -3,6 +3,7 @@ import * as os from 'os'
 import * as path from 'path'
 import { sprintf } from 'sprintf-js'
 import { index2str } from '../common/util'
+import { StorageStructure } from './storage'
 import { BotData } from './types'
 
 /**
@@ -80,7 +81,7 @@ export function getAbsoluteSrcPath (relativePath: string) {
  * @param {string} projectName
  */
 export function getExportName (projectName: string): string {
-  return sprintf('%s_export_%s.json', projectName, now())
+  return `${projectName}_export_${now()}.json`
 }
 
 /**
@@ -88,14 +89,14 @@ export function getExportName (projectName: string): string {
  * this means data that doesn't get written back to storage
  */
 export function getRedisMetaKey (key: string) {
-  return sprintf('%s:meta', key)
+  return `${key}:meta`
 }
 
 /**
  * Get redis key for reminder metadata
  */
 export function getRedisReminderKey (key: string) {
-  return sprintf('%s:reminder', key)
+  return `${key}:reminder`
 }
 
 /**
@@ -132,7 +133,7 @@ export function getRedisBotSet () {
  * Gets key of file with project data
  */
 export function getProjectKey (projectName: string) {
-  return path.join(projectName, 'project')
+  return path.join(StorageStructure.PROJECT, projectName, 'project')
 }
 
 /**
@@ -146,7 +147,7 @@ export function getTaskKey (projectName: string, taskId: string): string {
  * Gets directory with task data for project
  */
 export function getTaskDir (projectName: string): string {
-  return path.join(projectName, 'tasks')
+  return path.join(StorageStructure.PROJECT, projectName, 'tasks')
 }
 
 /**
@@ -155,7 +156,7 @@ export function getTaskDir (projectName: string): string {
  * @param task
  */
 export function getSaveDir (projectName: string, taskId: string): string {
-  return path.join(projectName, 'saved', taskId)
+  return path.join(StorageStructure.PROJECT, projectName, 'saved', taskId)
 }
 
 /**
