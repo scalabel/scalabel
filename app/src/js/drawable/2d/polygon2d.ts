@@ -215,6 +215,9 @@ export class Polygon2D extends Label2D {
         }
       }
     }
+    if (mode === DrawMode.VIEW && self._state !== Polygon2DState.DRAW) {
+      self.drawTag(context, ratio, this.getCentroid(), self._color)
+    }
   }
 
   /**
@@ -519,6 +522,26 @@ export class Polygon2D extends Label2D {
       vertices.push(point)
     }
     return vertices
+  }
+
+  /**
+   * Get the centroid of the drawable polygon
+   */
+  private getCentroid (): Vector2D {
+    const points = this.getVertices()
+    let centroid = new Vector2D(0, 0)
+    if (this._closed) {
+      // Polygon center
+      centroid = _.reduce(
+        points, (sum, p) => sum.add(p.vector()), centroid)
+      centroid.scale(1. / points.length)
+    } else {
+      // Put the centroid between the middle two points
+      const index = Math.floor((points.length - 1) / 2)
+      centroid.add(points[index].vector().scale(2)).add(
+        points[index + 1].vector()).scale(1. / 3)
+    }
+    return centroid
   }
 
   /**
