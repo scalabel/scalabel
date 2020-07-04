@@ -10,8 +10,6 @@ let storage: FileStorage
 let projectName: string
 let dataDir: string
 
-const PROJECT_DIR = StorageStructure.PROJECT
-
 beforeAll(() => {
   projectName = 'myProject'
   dataDir = getTestDir('test-fs-data')
@@ -45,17 +43,17 @@ describe('test local file storage', () => {
 
   test('list keys', async () => {
     const keys = await storage.listKeys(
-      `${PROJECT_DIR}/myProject/tasks`)
+      `${StorageStructure.PROJECT}/myProject/tasks`)
     expect(keys.length).toBe(2)
-    expect(keys).toContain(`${PROJECT_DIR}/myProject/tasks/000000`)
-    expect(keys).toContain(`${PROJECT_DIR}/myProject/tasks/000001`)
+    expect(keys).toContain(`projects/myProject/tasks/000000`)
+    expect(keys).toContain(`projects/myProject/tasks/000001`)
   })
 
   test('list keys dir only', async () => {
     const keys = await storage.listKeys(
-      `${PROJECT_DIR}/myProject`, true)
+      `${StorageStructure.PROJECT}/myProject`, true)
     expect(keys.length).toBe(1)
-    expect(keys).toContain(`${PROJECT_DIR}/myProject/tasks`)
+    expect(keys).toContain(`projects/myProject/tasks`)
   })
 
   test('load', () => {
@@ -108,7 +106,7 @@ describe('test local file storage', () => {
   })
 
   test('delete', async () => {
-    const key = `${PROJECT_DIR}/myProject/tasks`
+    const key = `${StorageStructure.PROJECT}/myProject/tasks`
     await Promise.all([
       checkTaskKey(1, true),
       checkTaskKey(0, true)

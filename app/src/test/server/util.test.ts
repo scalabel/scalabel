@@ -25,12 +25,12 @@ describe('test general utility methods', () => {
     const taskKey = getTaskKey(projectName, '000000')
     const saveDir = getSaveDir(projectName, '000000')
 
-    expect(projectKey).toBe('testProject/project')
-    expect(taskKey).toBe('testProject/tasks/000000')
-    expect(saveDir).toBe('testProject/saved/000000')
+    expect(projectKey).toBe('projects/testProject/project')
+    expect(taskKey).toBe('projects/testProject/tasks/000000')
+    expect(saveDir).toBe('projects/testProject/saved/000000')
   })
 
-  test('initSessId', () => {
+  test('Init session id', () => {
     expect(util.initSessId('sampleId')).toBe('sampleId')
     expect(util.initSessId('')).not.toBe('')
   })
