@@ -15,9 +15,9 @@ export class FileStorage extends Storage {
   constructor (dataDir: string) {
     super(dataDir)
     // Do this synchronously (only once)
-    Logger.info(`Checking scalabel data dir ${dataDir}. ` +
+    Logger.info(`Using scalabel data dir ${dataDir}. ` +
       `If it doesn't exist, it will be created`)
-    fs.ensureDirSync(this.dataDir)
+    fs.ensureDirSync(this._dataDir)
   }
 
   /**

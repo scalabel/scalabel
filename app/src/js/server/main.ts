@@ -148,10 +148,11 @@ async function checkLegacyProjectFolders (storage: Storage) {
   folders = removeListItems(
     folders, STORAGE_FOLDERS)
   if (folders.length > 0) {
+    const cmd = `cd ${storage.dataDir}; mv ${''.concat(...folders.map((f) => f + ' '))} ${StorageStructure.PROJECT}; cd ../..`
     Logger.info(`Detected legacy project names [${folders.toString()}] ` +
     `under the scalabel folder. ` +
     `Please move them to the ${StorageStructure.PROJECT}/ folder and ` +
-    `relaunch scalabel.`)
+    `relaunch scalabel. You can run command "${cmd}" to move the folders.`)
     process.exit(1)
   }
 }

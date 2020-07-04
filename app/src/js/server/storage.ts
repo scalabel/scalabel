@@ -12,13 +12,20 @@ export const STORAGE_FOLDERS = [StorageStructure.PROJECT, StorageStructure.USER]
  */
 export abstract class Storage {
   /** the data directory */
-  protected dataDir: string
+  protected _dataDir: string
 
   /**
    * General constructor
    */
   protected constructor (basePath: string) {
-    this.dataDir = basePath
+    this._dataDir = basePath
+  }
+
+  /**
+   * Get the internal data dir
+   */
+  public get dataDir (): string {
+    return this._dataDir
   }
 
   /**
@@ -71,7 +78,7 @@ export abstract class Storage {
    * Makes relative path into full path
    */
   public fullDir (key: string): string {
-    return path.join(this.dataDir, key)
+    return path.join(this._dataDir, key)
   }
 
   /**
