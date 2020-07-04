@@ -83,11 +83,9 @@ function validateCognitoConfig (cognito: CognitoConfig | undefined) {
  */
 async function validateConfig (config: ServerConfig) {
   if (config.database === DatabaseType.LOCAL) {
-    if (!(await fs.pathExists(config.data))) {
-      throw new Error(`Cannot find ${config.data}`)
-    }
     if (config.itemDir && !(await fs.pathExists(config.itemDir))) {
-      throw new Error(`Cannot find ${config.itemDir}`)
+      Logger.info(`Item dir ${config.itemDir} does not exist. Creating it`)
+      fs.ensureDirSync(config.itemDir)
     }
   }
 
@@ -118,8 +116,7 @@ export async function makeStorage (
         storage = s3Store
       } catch (error) {
         // If s3 fails, default to file storage
-        error.message = `s3 failed, using file storage
-        ${error.message}`
+        error.message = `s3 failed, using file storage ${error.message}`
         Logger.error(error)
         storage = new FileStorage(dir)
       }
