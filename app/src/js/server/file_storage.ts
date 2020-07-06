@@ -2,6 +2,7 @@ import { readdir } from 'fs'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as util from 'util'
+import Logger from './logger'
 import { Storage } from './storage'
 
 /**
@@ -14,7 +15,9 @@ export class FileStorage extends Storage {
   constructor (dataDir: string) {
     super(dataDir)
     // Do this synchronously (only once)
-    fs.ensureDirSync(this.dataDir)
+    Logger.info(`Using scalabel data dir ${dataDir}. ` +
+      `If it doesn't exist, it will be created`)
+    fs.ensureDirSync(this._dataDir)
   }
 
   /**
@@ -98,5 +101,13 @@ export class FileStorage extends Storage {
       throw new Error('Delete failed: tried to delete home dir')
     }
     return fs.remove(this.fullDir(key))
+  }
+
+  /**
+   * make an empty folder object on s3
+   * @param key
+   */
+  public async mkdir (key: string): Promise<void> {
+    await fs.ensureDir(this.fullDir(key))
   }
 }

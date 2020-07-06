@@ -238,13 +238,13 @@ export abstract class Label2D {
   /**
    * Draw the label tag on viewing or control canvas
    * @param {Context2D} ctx
-   * @param {[number, number]} position
+   * @param {Vector2D} position
    * @param {number} ratio
    * @param {number[]} fillStyle
    */
   public drawTag (ctx: Context2D,
                   ratio: number,
-                  position: [number, number],
+                  position: Vector2D,
                   fillStyle: number[]
                   ) {
     const TAG_WIDTH = 50
@@ -369,7 +369,7 @@ export abstract class Label2D {
   public updateState (
     state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
-    this._label = { ...item.labels[labelId] }
+    this._label = _.cloneDeep(item.labels[labelId])
     this._order = this._label.order
     this._labelId = this._label.id
     this._trackId = this._label.track

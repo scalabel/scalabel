@@ -5,9 +5,9 @@ import * as path from 'path'
 import { addBox2dLabel } from '../../../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
-import { IdType, LabelIdMap,
-  PolyPathPoint2DType, RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
+import { RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
 import * as defaults from '../../../js/server/defaults'
+import { StorageStructure } from '../../../js/server/storage'
 import { ServerConfig } from '../../../js/server/types'
 
 /**
@@ -36,20 +36,6 @@ export function expectRectTypesClose (
 }
 
 /**
- * Check that the path point has the correct field values
- */
-export function checkPathPointFields (
-  point: PolyPathPoint2DType, x: number, y: number, isVertexType: boolean) {
-  expect(point.x).toBe(x)
-  expect(point.y).toBe(y)
-  if (isVertexType) {
-    expect(point.pointType).toBe('vertex')
-  } else {
-    expect(point.pointType).toBe('bezier')
-  }
-}
-
-/**
  * Spawn a temporary folder with the following project structure:
  *  'test-fs-data/myProject': {
  *     '.config': 'config contents',
@@ -63,7 +49,7 @@ export function checkPathPointFields (
  *   option of fs.readDir correctly; and has flakiness issues
  */
 export function makeProjectDir (dataDir: string, projectName: string) {
-  const projectDir = path.join(dataDir, projectName)
+  const projectDir = path.join(dataDir, StorageStructure.PROJECT, projectName)
   const taskDir = path.join(projectDir, 'tasks')
   fs.ensureDirSync(projectDir)
   fs.ensureDirSync(taskDir)
@@ -129,42 +115,4 @@ export function getTestConfig (): ServerConfig {
     ...testConfig
   }
   return fullConfig
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewLabels (
-    labels: LabelIdMap, labelIds: IdType[]): IdType[] {
-  return _.filter(
-    _.keys(labels),
-    (id) => !labelIds.includes(id))
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewLabelsFromState (
-    state: State, itemIndex: number, labelIds: IdType[]): IdType[] {
-  const labels = state.task.items[itemIndex].labels
-  return _.filter(
-  _.keys(labels),
-  (id) => !labelIds.includes(id))
-}
-
-/**
- * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
- */
-export function findNewTracksFromState (
-  state: State, trackIds: IdType[]): IdType[] {
-  const tracks = state.task.tracks
-  return _.filter(
-    _.keys(tracks),
-  (id) => !trackIds.includes(id))
 }

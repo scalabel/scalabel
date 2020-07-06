@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../common/types'
-import { PointType } from '../drawable/2d/poly_path_point2d'
 import { isValidId } from '../functional/states'
 import { Attribute, ConfigType,
-  ItemType, Node2DType, PolygonType, State
+  ItemType, Node2DType, PathPoint2DType, PathPointType, State
 } from '../functional/types'
 import { transformBox2D, transformBox3D, transformPlane3D } from './bdd_type_transformers'
 import { ItemExport, LabelExport, PolygonExportType } from './bdd_types'
@@ -12,13 +11,13 @@ import { ItemExport, LabelExport, PolygonExportType } from './bdd_types'
  * Converts a polygon label to export format
  */
 export function convertPolygonToExport (
-  poly2d: PolygonType, labelType: string): PolygonExportType[] {
-  const typeCharacters = poly2d.points.map(
+  pathPoints: PathPoint2DType[], labelType: string): PolygonExportType[] {
+  const typeCharacters = pathPoints.map(
     (point) => {
       switch (point.pointType) {
-        case PointType.CURVE:
+        case PathPointType.CURVE:
           return 'C'
-        case PointType.VERTEX:
+        case PathPointType.LINE:
           return 'L'
       }
 
@@ -27,7 +26,7 @@ export function convertPolygonToExport (
   )
   const types = typeCharacters.join('')
   const vertices: Array<[number, number]> =
-    poly2d.points.map((point) => [point.x, point.y])
+    pathPoints.map((point) => [point.x, point.y])
   return [{
     vertices,
     types,
@@ -84,7 +83,8 @@ export function convertItemToExport (
         case LabelTypeName.POLYGON_2D:
         case LabelTypeName.POLYLINE_2D:
           labelExport.poly2d = convertPolygonToExport(
-            shape0 as PolygonType, label.type
+            label.shapes.map((s) => item.shapes[s]) as PathPoint2DType[],
+            label.type
           )
           break
         case LabelTypeName.BOX_3D:

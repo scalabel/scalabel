@@ -97,7 +97,9 @@
                         "parent": "-1",
                         "children": [],
                         "shapes": [
-                            0
+                            "00",
+                            "01",
+                            "02"
                         ],
                         "track": "-1",
                         "order": 1,
@@ -117,7 +119,13 @@
                         "parent": "-1",
                         "children": [],
                         "shapes": [
-                            1
+                            "10",
+                            "11",
+                            "12",
+                            "13",
+                            "14",
+                            "15",
+                            "16"
                         ],
                         "track": "-1",
                         "order": 2,
@@ -137,7 +145,11 @@
                         "parent": "-1",
                         "children": [],
                         "shapes": [
-                            "longPolyShapeId"
+                            "longPolyShapeId0",
+                            "longPolyShapeId1",
+                            "longPolyShapeId2",
+                            "longPolyShapeId3",
+                            "longPolyShapeId4"
                         ],
                         "track": "-1",
                         "order": 3,
@@ -145,107 +157,155 @@
                     }
                 },
                 "shapes": {
-                    "0": {
-                        "id": "0",
+                    "00": {
+                        "id": "00",
                         "label": [
                             "0"
                         ],
-                        "shapeType": "polygon2d",
-                        "points": [
-                            {
-                                "x": 100.9044230030514,
-                                "y": 100.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 200.9044230030514,
-                                "y": 100.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 200.9044230030514,
-                                "y": 200.46537396121883,
-                                "pointType": "vertex"
-                            }
-                        ]
+                        "shapeType": "path_point2d",
+                        "x": 100,
+                        "y": 100,
+                        "pointType": "line"
                     },
-                    "1": {
-                        "id": "1",
+                    "01": {
+                        "id": "01",
+                        "label": [
+                            "0"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 200,
+                        "y": 100,
+                        "pointType": "line"
+                    },
+                    "02": {
+                        "id": "02",
+                        "label": [
+                            "0"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 200,
+                        "y": 200,
+                        "pointType": "line"
+                    },
+                    "10": {
+                        "id": "10",
                         "label": [
                             "1"
                         ],
-                        "shapeType": "polygon2d",
-                        "points": [
-                            {
-                                "x": 300.9044230030514,
-                                "y": 300.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 400.9044230030514,
-                                "y": 400.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 350.9044230030514,
-                                "y": 300.46537396121883,
-                                "pointType": "bezier"
-                            },
-                            {
-                                "x": 325.9044230030514,
-                                "y": 200.46537396121883,
-                                "pointType": "bezier"
-                            },
-                            {
-                                "x": 400.9044230030514,
-                                "y": 100.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 375.9044230030514,
-                                "y": 125.46537396121883,
-                                "pointType": "bezier"
-                            },
-                            {
-                                "x": 325.9044230030514,
-                                "y": 250.46537396121883,
-                                "pointType": "bezier"
-                            }
-                        ]
+                        "shapeType": "path_point2d",
+                        "x": 300,
+                        "y": 300,
+                        "pointType": "line"
                     },
-                    "longPolyShapeId": {
-                        "id": "longPolyShapeId",
+                    "11": {
+                        "id": "11",
+                        "label": [
+                            "1"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 400,
+                        "y": 400,
+                        "pointType": "line"
+                    },
+                    "12": {
+                        "id": "12",
+                        "label": [
+                            "1"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 350,
+                        "y": 300,
+                        "pointType": "bezier"
+                    },
+                    "13": {
+                        "id": "13",
+                        "label": [
+                            "1"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 325,
+                        "y": 200,
+                        "pointType": "bezier"
+                    },
+                    "14": {
+                        "id": "14",
+                        "label": [
+                            "1"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 400,
+                        "y": 100,
+                        "pointType": "line"
+                    },
+                    "15": {
+                        "id": "15",
+                        "label": [
+                            "1"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 375,
+                        "y": 125,
+                        "pointType": "bezier"
+                    },
+                    "16": {
+                        "id": "16",
+                        "label": [
+                            "1"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 325,
+                        "y": 250,
+                        "pointType": "bezier"
+                    },
+                    "longPolyShapeId0": {
+                        "id": "longPolyShapeId0",
                         "label": [
                             "longPolyLabelId"
                         ],
-                        "shapeType": "polygon2d",
-                        "points": [
-                            {
-                                "x": 400.9044230030514,
-                                "y": 400.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 800.9044230030514,
-                                "y": 100.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 100.9044230030514,
-                                "y": 100.46537396121883,
-                                "pointType": "vertex"
-                            },
-                            {
-                                "x": 125.9044230030514,
-                                "y": 120.46537396121883,
-                                "pointType": "bezier"
-                            },
-                            {
-                                "x": 325.9044230030514,
-                                "y": 220.46537396121883,
-                                "pointType": "bezier"
-                            }
-                        ]
+                        "shapeType": "path_point2d",
+                        "x": 400,
+                        "y": 400,
+                        "pointType": "line"
+                    },
+                    "longPolyShapeId1": {
+                        "id": "longPolyShapeId1",
+                        "label": [
+                            "longPolyLabelId"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 800,
+                        "y": 100,
+                        "pointType": "line"
+                    },
+                    "longPolyShapeId2": {
+                        "id": "longPolyShapeId2",
+                        "label": [
+                            "longPolyLabelId"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 100,
+                        "y": 100,
+                        "pointType": "line"
+                    },
+                    "longPolyShapeId3": {
+                        "id": "longPolyShapeId3",
+                        "label": [
+                            "longPolyLabelId"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 125,
+                        "y": 120,
+                        "pointType": "bezier"
+                    },
+                    "longPolyShapeId4": {
+                        "id": "longPolyShapeId4",
+                        "label": [
+                            "longPolyLabelId"
+                        ],
+                        "shapeType": "path_point2d",
+                        "x": 325,
+                        "y": 220,
+                        "pointType": "bezier"
                     }
                 },
                 "videoName": "b"

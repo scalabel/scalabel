@@ -19,7 +19,8 @@ import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { Endpoint } from '../../js/server/types'
 import { myTheme } from '../../js/styles/theme'
-import { findNewLabelsFromState, getTestConfig, getTestConfigPath } from '../server/util/util'
+import { getTestConfig, getTestConfigPath } from '../server/util/util'
+import { findNewLabelsFromState } from '../util/state'
 import {
   changeTestConfig,
   countTasks,

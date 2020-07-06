@@ -1,11 +1,9 @@
 import { LabelTypeName } from '../../js/common/types'
-import { PathPoint2D, PointType } from '../../js/drawable/2d/path_point2d'
-import { makePolygon, makeRect } from '../../js/functional/states'
-import { PolygonType, RectType } from '../../js/functional/types'
+import { makePathPoint2D, makeRect } from '../../js/functional/states'
+import { PathPoint2DType, PathPointType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
 import { ModelEndpoint } from '../../js/server/types'
-import { checkPathPointFields } from './util/util'
 
 let modelInterface: ModelInterface
 let projectName: string
@@ -37,14 +35,13 @@ describe('test model interface query construction', () => {
 
   test('poly query construction', () => {
     const points = [
-      (new PathPoint2D(0, 1, PointType.VERTEX)).toPathPoint(),
-      (new PathPoint2D(5, 3, PointType.VERTEX)).toPathPoint()
+      makePathPoint2D({ x: 0, y: 1, pointType: PathPointType.LINE }),
+      makePathPoint2D({ x: 5, y: 3, pointType: PathPointType.LINE })
     ]
-    const poly2d = makePolygon({ points })
     const itemIndex = 0
     const labelType = LabelTypeName.POLYGON_2D
     const query = modelInterface.makePolyQuery(
-      poly2d, url, itemIndex, labelType)
+      points, url, itemIndex, labelType)
     expect(query.endpoint).toBe(ModelEndpoint.REFINE_POLY)
     expect(query.itemIndex).toBe(itemIndex)
 
@@ -52,7 +49,7 @@ describe('test model interface query construction', () => {
     expect(itemData.name).toBe(projectName)
     expect(itemData.url).toBe(url)
 
-    const expectedPoly = convertPolygonToExport(poly2d, labelType)
+    const expectedPoly = convertPolygonToExport(points, labelType)
     expect(itemData.labels[0].poly2d).toEqual(expectedPoly)
   })
 })
@@ -67,9 +64,8 @@ describe('test model interface action translation', () => {
     const label = action.labels[0][0]
     expect(label.manual).toBe(false)
 
-    const shape = action.shapes[0][0][0] as PolygonType
-    const points = shape.points
-    checkPathPointFields(points[0], 1, 5, true)
-    checkPathPointFields(points[1], 100, -5, true)
+    const points = action.shapes[0][0] as PathPoint2DType[]
+    expect(points[0]).toMatchObject({ x: 1, y: 5, pointType: 'line' })
+    expect(points[1]).toMatchObject({ x: 100, y: - 5, pointType: 'line' })
   })
 })

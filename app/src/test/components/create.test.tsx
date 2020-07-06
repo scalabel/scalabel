@@ -48,8 +48,9 @@ describe('Test create page functionality', () => {
       expect(pageTitle.value).toBe('2D Segmentation')
       fireEvent.change(select, { target: { value: 'polyline2d' } })
       expect(pageTitle.value).toBe('2D Lane')
-      fireEvent.change(select, { target: { value: 'box3d' } })
-      expect(pageTitle.value).toBe('3D Bounding Box')
+      // Box 3D is disabled for now
+      // FireEvent.change(select, { target: { value: 'box3d' } })
+      // expect(pageTitle.value).toBe('3D Bounding Box')
     })
     test('Proper instructions', () => {
       const { getByTestId } = render(

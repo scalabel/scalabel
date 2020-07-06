@@ -5,7 +5,7 @@ import Session, { dispatch, getState } from '../../js/common/session'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { testJson } from '../test_states/test_image_objects'
 import { checkBox2D } from '../util/shape'
-import { drag, drawBox2D, setUpLabel2dCanvas } from './label2d_canvas_util'
+import { drag, drawBox2D, setUpLabel2dCanvas } from './canvas_util'
 import { setupTestStore } from './util'
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()

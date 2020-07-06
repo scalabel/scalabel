@@ -253,6 +253,18 @@ export class S3Storage extends Storage {
   }
 
   /**
+   * make an empty folder object on s3
+   * @param key
+   */
+  public async mkdir (key: string): Promise<void> {
+    const params = {
+      Bucket: this.bucketName,
+      Key: this.fullDir(key) + '/'
+    }
+    return this.s3.putObject(params).promise().then()
+  }
+
+  /**
    * Checks if bucket exists
    */
   private async hasBucket (): Promise < boolean > {

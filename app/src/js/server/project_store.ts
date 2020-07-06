@@ -6,7 +6,7 @@ import { State, TaskType } from '../functional/types'
 import Logger from './logger'
 import * as path from './path'
 import { RedisStore } from './redis_store'
-import { Storage } from './storage'
+import { Storage, StorageStructure } from './storage'
 import { Project, StateMetadata, UserData, UserMetadata } from './types'
 import {
   getPolicy, makeUserData, makeUserMetadata, safeParseJSON } from './util'
@@ -118,14 +118,12 @@ export class ProjectStore {
    * Reads projects from server's disk
    */
   public async getExistingProjects (): Promise<string[]> {
-    const files = await this.storage.listKeys('', true)
-
-    // Process files into project names
-    const names = []
-    for (const f of files) {
-      // Remove any xss vulnerability
-      names.push(filterXSS(f))
-    }
+    // All new projects will be in the projects/ sub folder
+    const files = await this.storage.listKeys(StorageStructure.PROJECT, true)
+    // Remove any xss vulnerability
+    const names = files.map((f) => filterXSS(
+      f.slice(StorageStructure.PROJECT.length + 1)))
+    Logger.info(`Found ${names.length} projects`)
     return names
   }
 

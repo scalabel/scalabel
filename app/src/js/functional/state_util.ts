@@ -128,6 +128,18 @@ export function getShape (state: State, itemIndex: number,
   return item.shapes[shapeId]
 }
 
+/**
+ * Retrieve shapes from the state
+ * @param state
+ * @param itemIndex
+ * @param labelId
+ */
+export function getShapes (state: State, itemIndex: number,
+                           labelId: IdType): ShapeType[] {
+  const item = state.task.items[itemIndex]
+  return item.labels[labelId].shapes.map((s) => item.shapes[s])
+}
+
 /** Check if frame is loaded */
 export function isFrameLoaded (state: State, item: number, sensor: number) {
   return state.session.itemStatuses[item].sensorDataLoaded[sensor]
@@ -177,4 +189,23 @@ export function getCurrentViewerConfig (
     return state.user.viewerConfigs[viewerId]
   }
   throw new Error(`Viewer id ${viewerId} not found`)
+}
+
+/**
+ * Get the tracks and ids of all selected tracks
+ * Selected tracks can be in the same item, or different items (linking)
+ */
+export function getSelectedTracks (state: State): TrackType[] {
+  const selectedLabels = getSelectedLabels(state)
+  const tracks: TrackType[] = []
+
+  for (const key of Object.keys(selectedLabels)) {
+    const itemIndex = Number(key)
+    for (const labelId of selectedLabels[itemIndex]) {
+      const trackId = state.task.items[itemIndex].labels[labelId].track
+      tracks.push(getTrack(state, trackId))
+    }
+  }
+
+  return tracks
 }

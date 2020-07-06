@@ -4,14 +4,17 @@ import { sprintf } from 'sprintf-js'
 import { index2str } from '../../js/common/util'
 import { getProjectKey, getTaskKey, hostname, now } from '../../js/server/path'
 import { S3Storage } from '../../js/server/s3_storage'
+import { STORAGE_FOLDERS, StorageStructure } from '../../js/server/storage'
 
-export const s3 = new AWS.S3()
+const s3 = new AWS.S3()
+const projectName = 'test'
+const storageName = `${hostname()}_${now()}`
 const bucketRegion = 'us-west-2'
 const bucketName = 'scalabel-unit-testing'
-const projectName = 'test'
-let storageName = ''
+let storage: S3Storage
 
 beforeAll(async () => {
+  storage = new S3Storage(`${bucketRegion}:${bucketName}/${storageName}`)
   await storage.makeBucket()
 
   // Add keys to set up the bucket
@@ -21,7 +24,8 @@ beforeAll(async () => {
     'tasks/000001'
   ]
 
-  keys = keys.map((key) => path.join(projectName, key))
+  keys = keys.map((key) => path.join(
+    StorageStructure.PROJECT, projectName, key))
   const fakeData = '{"testField": "testValue"}'
 
   for (const key of keys) {
@@ -29,10 +33,42 @@ beforeAll(async () => {
   }
 })
 
-storageName = `${hostname()}_${now()}`
-const storage = new S3Storage(`${bucketRegion}:${bucketName}/${storageName}`)
+/**
+ * Get relative project directory in the storage
+ * @param projectName
+ */
+function getProjectDir (name: string) {
+  return `${StorageStructure.PROJECT}/${name}`
+}
+
+/**
+ * Check wether the path exist on s3
+ */
+async function pathExists (key: string) {
+  const params = {
+    Bucket: bucketName,
+    Key: key
+  }
+  try {
+    await s3.headObject(params).promise()
+    return true
+  } catch (_error) {
+    return false
+  }
+}
 
 describe('test s3 storage', () => {
+  test('make dir', async () => {
+    for (const f of STORAGE_FOLDERS) {
+      await storage.mkdir(f)
+      expect(await pathExists(storage.fullDir(f) + '/')).toBe(true)
+      const file = `${f}/empty`
+      await storage.save(file, 'test')
+      expect(await storage.hasKey(file)).toBe(true)
+      await storage.delete(file)
+    }
+  })
+
   test('key existence', () => {
     return Promise.all([
       checkTaskKey(0, true),
@@ -44,16 +80,18 @@ describe('test s3 storage', () => {
 
   test('list keys', async () => {
     // Top level keys
-    let keys = await storage.listKeys('test')
-    expect(keys).toStrictEqual(['test/project', 'test/tasks'])
+    let keys = await storage.listKeys(getProjectDir('test'))
+    expect(keys).toStrictEqual([
+      getProjectDir('test/project'), getProjectDir('test/tasks')])
 
     // Top level (dir only)
-    keys = await storage.listKeys('test', true)
-    expect(keys).toStrictEqual(['test/tasks'])
+    keys = await storage.listKeys(getProjectDir('test'), true)
+    expect(keys).toStrictEqual([getProjectDir('test/tasks')])
 
     // Task keys
-    keys = await storage.listKeys('test/tasks')
-    expect(keys).toStrictEqual(['test/tasks/000000', 'test/tasks/000001'])
+    keys = await storage.listKeys(getProjectDir('test/tasks'))
+    expect(keys).toStrictEqual([getProjectDir('test/tasks/000000'),
+      getProjectDir('test/tasks/000001')])
   })
 
   test('load', () => {
@@ -114,7 +152,7 @@ describe('test s3 storage', () => {
   })
 
   test('delete', () => {
-    const key = `${projectName}/tasks`
+    const key = getProjectDir(`${ projectName }/tasks`)
     return Promise.all([
       checkTaskKey(1, true),
       checkTaskKey(0, true)
@@ -159,15 +197,16 @@ afterAll(async () => {
   // Cleanup: delete all keys that were created
   await storage.delete('')
   // Delete the temporary folder
-  const deleteParams = {
-    Bucket: bucketName,
-    Delete: { Objects: [
-      { Key: path.join(storageName, projectName, 'project.json') },
-      { Key: path.join(storageName, projectName) },
-      { Key: storageName }
-    ] }
+  let folders: string[] = STORAGE_FOLDERS.map((f) => f.toString())
+  folders = folders.map((f) => path.join(storageName, f) + '/')
+  folders.push(storageName + '/')
+  for (const folder of folders) {
+    const params = {
+      Bucket: bucketName,
+      Key: folder
+    }
+    await s3.deleteObject(params).promise()
   }
-  await s3.deleteObjects(deleteParams).promise()
 }, 20000)
 
 /**
