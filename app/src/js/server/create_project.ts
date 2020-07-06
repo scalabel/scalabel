@@ -210,7 +210,8 @@ export function readItemsFile (
       }
       try {
         // Might not have all fields defined, so use partial
-        const items = yaml.load(fileBytes) as Array<Partial<ItemExport>>
+        const items =
+          yaml.safeLoad(fileBytes, { json: true }) as Array<Partial<ItemExport>>
         resolve(items)
       } catch {
         reject(Error('Improper formatting for items file'))
