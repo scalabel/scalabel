@@ -192,7 +192,7 @@ function convertLabelToImport (
     category,
     attributes,
     sensors: [sensorId]
-  }, true)
+  }, false)
 
   return [labelImport, shapeImports]
 }

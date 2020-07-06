@@ -259,7 +259,7 @@ function addTrackToTask (
   labels: LabelType[],
   shapes: ShapeType[][]
 ): [TaskType, TrackType, LabelType[]] {
-  const track = makeTrack({ type, id: labels[0].track }, true)
+  const track = makeTrack({ type, id: labels[0].track }, false)
   const labelList = labels.map((l) => [l])
   const shapeList = shapes.map((s) => [s])
   const [newItems, newLabels, status] = addLabelstoItems(
@@ -440,7 +440,7 @@ function changeLabelsInItem (
     item, {
       labels: updateObject(item.labels, newLabels),
       shapes: updateObject(
-        removeObjectFields(allShapes, allDeletedShapes), allChangedShapes)
+      removeObjectFields(allShapes, allDeletedShapes), allChangedShapes)
     })
   return item
 }
@@ -847,7 +847,7 @@ function deleteLabelsFromTracks (
   for (const l of labels) {
     if (!(l.track in deletedLabelsByTrack)) {
       // Create a temporary track to contain the labels to delete
-      deletedLabelsByTrack[l.track] = makeTrack({ id: l.track }, true)
+      deletedLabelsByTrack[l.track] = makeTrack({ id: l.track }, false)
     }
     deletedLabelsByTrack[l.track].labels[l.item] = l.id
   }

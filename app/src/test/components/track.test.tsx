@@ -7,7 +7,7 @@ import Session, { dispatch, getState, getStore } from '../../js/common/session'
 import { updateTracks } from '../../js/common/session_setup'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { ToolBar } from '../../js/components/toolbar'
-import { State } from '../../js/functional/types'
+import { IdType, State } from '../../js/functional/types'
 // Import { TrackCollector } from '../server/util/track_collector'
 import { emptyTrackingTask } from '../test_states/test_track_objects'
 import { checkBox2D } from '../util/shape'
@@ -71,6 +71,7 @@ describe('basic track ops', () => {
     // Test adding tracks
     const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
     let state = getState()
+    const shapeIds = new Set<IdType>()
     expect(_.size(state.task.tracks)).toEqual(4)
     itemIndices.forEach((itemIndex, i) => {
       expect(_.size(state.task.tracks[trackIds[i]].labels)).toEqual(
@@ -78,6 +79,13 @@ describe('basic track ops', () => {
       state.task.items.forEach((item, index) => {
         expect(_.size(item.labels)).toEqual(numLabels[index])
         expect(_.size(item.shapes)).toEqual(numLabels[index])
+      })
+    })
+    // Check all the shapes have unique IDs
+    state.task.items.forEach((item) => {
+      _.forEach(item.shapes, (_s, id) => {
+        expect(shapeIds.has(id)).toBeFalsy()
+        shapeIds.add(id)
       })
     })
 
