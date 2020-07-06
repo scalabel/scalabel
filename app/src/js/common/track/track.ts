@@ -208,7 +208,7 @@ export class Track {
     const labelState = label.label
     const shapeStates = label.shapes()
     for (let index = itemIndex; index < itemIndex + numItems; index++) {
-      const cloned = makeLabel(_.cloneDeep(labelState), true)
+      const cloned = makeLabel(labelState, true)
       cloned.item = -1
       cloned.track = label.trackId
       if (index > itemIndex) {
@@ -229,7 +229,6 @@ export class Track {
         cloned.shapes = []
         this._shapes[index] = []
         for (const shape of shapeStates) {
-          // TODO(fisher) make sure the shape types are correct
           const newShape = makeShape(shape.shapeType, shape)
           this._shapes[index].push(newShape)
           cloned.shapes.push(newShape.id)
