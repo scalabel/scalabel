@@ -116,14 +116,14 @@ export function makeShape (shapeType: string = '',
  * @param {{}} params
  * @return {RectType}
  */
-export function makeRect (params: Partial<RectType> = {}): RectType {
+export function makeRect (
+    params: Partial<RectType> = {}, newId: bool = true): RectType {
   return {
     x1: -1,
     y1: -1,
     x2: -1,
     y2: -1,
-    ...makeShape(types.ShapeTypeName.RECT),
-    ...params
+    ...makeShape(types.ShapeTypeName.RECT, params, newId)
   }
 }
 

@@ -1,3 +1,4 @@
+import { makeRect } from '../../../../functional/states'
 import { RectType } from '../../../../functional/types'
 import { Vector2D } from '../../../../math/vector2d'
 import { Track } from '../../track'
@@ -68,15 +69,13 @@ export class Box2DLinearInterpolationPolicy extends LinearInterpolationPolicy {
 
     const shapes = this._track.getShapes(index)
     const newShapes = [
-      {
+      makeRect({
         ...shapes[0],
-        shape: {
-          x1: newCenter.x - newDimension.x / 2.,
-          x2: newCenter.x + newDimension.x / 2.,
-          y1: newCenter.y - newDimension.y / 2.,
-          y2: newCenter.y + newDimension.y / 2.
-        }
-      }
+        x1: newCenter.x - newDimension.x / 2.,
+        x2: newCenter.x + newDimension.x / 2.,
+        y1: newCenter.y - newDimension.y / 2.,
+        y2: newCenter.y + newDimension.y / 2.
+      }, false)
     ]
 
     this._track.setShapes(index, newShapes)

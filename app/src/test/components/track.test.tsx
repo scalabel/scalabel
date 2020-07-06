@@ -288,11 +288,12 @@ describe('basic track ops', () => {
         state.task.tracks[trackIds[0]].labels[i],
         { x1: 15, y1: 25, x2: 50, y2: 60 }, i)
     }
-    // Shapes before item 4 should not change
+    // Shapes before item 4 should be linearly interpolated
     for (let i = 0; i < 4; ++i) {
+      const diff = i * 1.25
       checkBox2D(
         state.task.tracks[trackIds[0]].labels[i],
-        { x1: 10, y1: 20, x2: 50, y2: 60 }, i)
+        { x1: 10 + diff, y1: 20 + diff, x2: 50, y2: 60 }, i)
     }
     dispatch(action.goToItem(6))
     drag(label2d, 50, 60, 55, 65)
@@ -304,25 +305,27 @@ describe('basic track ops', () => {
         { x1: 15, y1: 25, x2: 55, y2: 65 }, i)
     }
     for (let i = 4; i < 6; ++i) {
+      const diff = (i - 4) * 2.5
       checkBox2D(
         state.task.tracks[trackIds[0]].labels[i],
-        { x1: 15, y1: 25, x2: 50, y2: 60 }, i)
+        { x1: 15, y1: 25, x2: 50 + diff, y2: 60 + diff }, i)
     }
     // Changing location
     dispatch(action.goToItem(5))
-    drag(label2d, 110, 110, 210, 210)  // (100, 100) translation
+    drag(label2d, 110, 110, 200, 200)  // (90, 90) translation
     state = getState()
     // Locations starting from item 5 should change
     for (let i = 5; i < 8; ++i) {
       checkBox2D(
         state.task.tracks[trackIds[1]].labels[i],
-        { x1: 200, y1: 210, x2: 300, y2: 400 }, i)
+        { x1: 190, y1: 200, x2: 290, y2: 390 }, i)
     }
-    // Locations before item 5 should not change
+    // Locations before item 5 should be interpolated
     for (let i = 2; i < 5; ++i) {
+      const diff = (i - 2) * 30
       checkBox2D(
         state.task.tracks[trackIds[1]].labels[i],
-        { x1: 100, y1: 110, x2: 200, y2: 300 }, i)
+        { x1: 100 + diff, y1: 110 + diff, x2: 200 + diff, y2: 300 + diff }, i)
     }
 
   })
