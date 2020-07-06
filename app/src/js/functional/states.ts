@@ -43,11 +43,11 @@ import {
  * Initialize a label state and deep copy the parameters.
  * Every label has an id when it is born.
  * @param {Partial<LabelType>} params
- * @param {boolean} keepId whether to keep the ID in params
+ * @param {boolean} newId create new id even if it is in params
  * @return {LabelType}
  */
 export function makeLabel (params: Partial<LabelType> = {},
-                           keepId: boolean = false): LabelType {
+                           newId: boolean = true): LabelType {
   const label: LabelType = {
     id: genLabelId(),
     item: -1,
@@ -63,7 +63,7 @@ export function makeLabel (params: Partial<LabelType> = {},
     manual: true, // By default, manual is true
     ..._.cloneDeep(params)
   }
-  if (!keepId) {
+  if (newId && params.id !== undefined) {
     label.id = genLabelId()
   }
   return label
@@ -73,18 +73,18 @@ export function makeLabel (params: Partial<LabelType> = {},
  * Initialize a track
  * Every track has an id when it is born
  * @param {Partial<TrackType>} params
- * @param {boolean} keepId whether to keep the ID in params
+ * @param {boolean} newId create new id even if it is in params
  * Labels can not be filled without specifying id
  */
 export function makeTrack (params: Partial<TrackType> = {},
-                           keepId: boolean = false): TrackType {
+                           newId: boolean = true): TrackType {
   const track: TrackType = {
     id: genTrackId(),
     type: types.LabelTypeName.EMPTY,
     labels: {},
     ...params
   }
-  if (!keepId) {
+  if (newId && params.id !== undefined) {
     track.id = genTrackId()
   }
   return track
@@ -94,15 +94,22 @@ export function makeTrack (params: Partial<TrackType> = {},
  * Make an empty shape
  * Every shape has an id when it is born
  * @param {string} shapeType type name of the shape
+ * @param {boolean} newId create new id even if it is in params
+ * @param {bool} new
  */
 export function makeShape (shapeType: string = '',
-                           params: Partial<ShapeType> = {}): ShapeType {
-  return {
+                           params: Partial<ShapeType> = {},
+                           newId: bool = true): ShapeType {
+  const shape = {
     label: [],
     shapeType,
     id: genShapeId(),
     ...params
   }
+  if (newId && params.id !== undefined) {
+    shape.id = genShapeId()
+  }
+  return shape
 }
 /**
  * Initialize a rectangle shape

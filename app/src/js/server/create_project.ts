@@ -606,7 +606,7 @@ export function createTasks (
         for (const label of Object.values(newItem.labels)) {
           if (isValidId(label.track) && !(label.track in trackMap)) {
             trackMap[label.track] = makeTrack(
-              { type: label.type, id: label.track }, true)
+              { type: label.type, id: label.track }, false)
           }
           trackMap[label.track].labels[label.item] = label.id
         }
