@@ -2,7 +2,7 @@
 
 ---
 
-[![Build Status](https://travis-ci.com/scalabel/scalabel.svg?branch=master)](https://travis-ci.com/scalabel/scalabel)
+![Build & Test](https://github.com/scalabel/scalabel/workflows/Build%20&%20Test/badge.svg?branch=master)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:javascript)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:python)
 ![Docker Pulls](https://img.shields.io/docker/pulls/scalabel/www)
@@ -210,7 +210,7 @@ sudo apt-get install -y python3.8 python3.8-dev python3-pip python3-setuptools
 
 Then, the server can be accessed at `http://localhost:8686`. You can now check out [example usage](#example-usage) to create your first annotation project. Please make sure secure your redis server following <https://redis.io/topics/security/>. By default redis will backup to local file storage, so ensure you have enough disk space or disable backups inside redis.conf.
 
-### Cognito Integration
+<!-- ### Cognito Integration
 
 Scalabel could integrate with [AWS Cognito](https://aws.amazon.com/cognito/). You can use Cognito to manage users. Once you have set up Cognito (See official tutorial [here](https://docs.aws.amazon.com/cognito/latest/developerguide/tutorials.html)), go to config file, fill the properties like below.
 
@@ -222,7 +222,7 @@ cognito:
   clientId: "52i44u3c7fapmec4oaqto4lk121"
   userPoolBaseUri: "scalabel.auth.us-west-2.amazoncognito.com"
   callbackUri: "http://localhost:8686/callback"
-```
+``` -->
 
 - region: Region of your cognito service.
 - userPool: Pool ID - You can find it in [General Settings]
