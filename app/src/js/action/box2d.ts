@@ -1,6 +1,6 @@
 import { LabelTypeName } from '../common/types'
 import { makeLabel, makeRect } from '../functional/states'
-import { IdType, RectType, ShapeType } from '../functional/types'
+import { IdType, RectType, ShapeType, SimpleRect } from '../functional/types'
 import * as actions from './common'
 import { AddLabelsAction, ChangeShapesAction } from './types'
 
@@ -20,13 +20,13 @@ export function addBox2dLabel (
   sensor: number,
   category: number[],
   attributes: {[key: number]: number[]},
-  x: number, y: number, w: number, h: number
+  box: SimpleRect
 ): AddLabelsAction {
   // Create the rect object
   const label = makeLabel({
     type: LabelTypeName.BOX_2D, category, attributes, sensors: [sensor]
   })
-  const rect = makeRect({ x1: x, y1: y, x2: w, y2: h, label: [label.id] })
+  const rect = makeRect({ ...box, label: [label.id] })
   label.shapes = [rect.id]
   return actions.addLabel(
     itemIndex, label, [rect]
