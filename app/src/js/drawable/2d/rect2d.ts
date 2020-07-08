@@ -3,6 +3,7 @@ import { makeRect } from '../../functional/states'
 import { RectType } from '../../functional/types'
 import { Vector } from '../../math/vector'
 import { Context2D, toCssColor } from '../util'
+import { OPACITY } from './common'
 
 export interface Rect2DStyle {
   /** line width of the rect sides */
@@ -131,6 +132,9 @@ export class Rect2D {
     }
     context.lineWidth = style.lineWidth
     context.strokeRect(real[0], real[1], real[2], real[3])
+    const fillStyle = style.color.concat(OPACITY)
+    context.fillStyle = toCssColor(fillStyle)
+    context.fillRect(real[0], real[1], real[2], real[3])
     context.restore()
   }
 
