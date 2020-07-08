@@ -311,8 +311,9 @@ function mergeTracksInItems (
   const props: Array<Array<Partial<LabelType>>> = _.range(
     items.length).map(() => [])
 
-  const firstLabelId = tracks[0].labels[items[0].index]
-  const firstLabel = items[0].labels[firstLabelId]
+  const firstItem = Number(Object.keys(tracks[0].labels)[0])
+  const firstLabelId = tracks[0].labels[firstItem]
+  const firstLabel = items[firstItem].labels[firstLabelId]
 
   const prop: Partial<LabelType> = {
     track: tracks[0].id,
