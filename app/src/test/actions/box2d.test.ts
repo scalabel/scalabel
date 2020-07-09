@@ -17,7 +17,8 @@ test('Add, change and delete box2d labels', () => {
   // Add the labels to the item
   Session.dispatch(action.goToItem(itemIndex))
   for (let i = 0; i < numLabels; i++) {
-    Session.dispatch(box2d.addBox2dLabel(itemIndex, -1, [0], {}, 1, 2, 3, 4))
+    Session.dispatch(box2d.addBox2dLabel(
+      itemIndex, -1, [0], {}, { x1: 1, y1: 2, x2: 3, y2: 4 }))
   }
 
   // Check the labels were added

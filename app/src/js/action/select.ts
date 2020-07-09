@@ -96,14 +96,15 @@ export function changeSelectedLabelsAttributes (
       }
     }
     for (const value of Object.values(labelsInTracks)) {
-      duplicatedAttributes.push(value.map(((_id) => ({ attributes }))))
+      duplicatedAttributes.push(value.map((_id) => ({ attributes })))
     }
     return changeLabelsProps(Object.keys(labelsInTracks).map(Number),
       Object.values(labelsInTracks),
       duplicatedAttributes)
   }
-  duplicatedAttributes = labelIds.map(((_id) => ({ attributes })))
-  return changeLabelsProps([select.item], labelIds, [duplicatedAttributes])
+  duplicatedAttributes = labelIds.map((arr) =>
+                            arr.map((_id) => ({ attributes })))
+  return changeLabelsProps([select.item], labelIds, duplicatedAttributes)
 }
 
 /**
@@ -136,14 +137,14 @@ export function changeSelectedLabelsCategories (
       }
     }
     for (const value of Object.values(labelsInTracks)) {
-      duplicatedCategories.push(value.map(((_id) => ({ category }))))
+      duplicatedCategories.push(value.map((_id) => ({ category })))
     }
     return changeLabelsProps(Object.keys(labelsInTracks).map(Number),
       Object.values(labelsInTracks),
       duplicatedCategories)
   }
-  duplicatedCategories = labelIds.map(((_id) => ({ category })))
-  return changeLabelsProps([select.item], labelIds, [duplicatedCategories])
+  duplicatedCategories = labelIds.map((arr) => arr.map((_id) => ({ category })))
+  return changeLabelsProps([select.item], labelIds, duplicatedCategories)
 }
 
 /**

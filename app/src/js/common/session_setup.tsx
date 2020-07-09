@@ -14,7 +14,7 @@ import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import Session from './session'
 import { DispatchFunc, GetStateFunc } from './simple_store'
-import { Track } from './track/track'
+import { Track } from './track'
 import { DataType, FullStore, ItemTypeName, ViewerConfigTypeName } from './types'
 
 /**
