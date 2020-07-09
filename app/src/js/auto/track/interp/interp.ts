@@ -3,8 +3,8 @@
  */
 
 import _ from 'lodash'
-import { makeShape } from '../../functional/states'
-import { LabelType, ShapeType } from '../../functional/types'
+import { makeShape } from '../../../functional/states'
+import { LabelType, ShapeType } from '../../../functional/types'
 
 /**
  * Assign shape content from src to target and return the new shape
@@ -66,7 +66,7 @@ export function getAutoLabelRange (
 /**
  * Base class for interpolation
  */
-export abstract class TrackInterp {
+export class TrackInterp {
   /**
    * Main method for interpolation. It assumes labels are sorted by itemIndex
    * In the future, we may change this function to async for model-assisted
@@ -76,7 +76,24 @@ export abstract class TrackInterp {
    * @param labels
    * @param shapes
    */
-  public abstract interp (
+  public interp (
      newLabel: LabelType, newShape: ShapeType[],
-     labels: LabelType[], shapes: ShapeType[][]): ShapeType[][]
+     allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
+    const [labelIndex, manual0, manual1] = getAutoLabelRange(
+        newLabel, allLabels)
+      // Copy the double array
+    const newShapes = allShapes.map((shapes) => shapes.map((s) => s))
+    newShapes[labelIndex] = newShape
+    if (manual0 === -1) {
+      assignShapesInRange(0, labelIndex, newShape, newShapes)
+    } else {
+      assignShapesInRange(manual0 + 1, labelIndex, newShape, newShapes)
+    }
+    if (manual1 === -1) {
+      assignShapesInRange(labelIndex + 1, newShapes.length, newShape, newShapes)
+    } else {
+      assignShapesInRange(labelIndex + 1, manual1, newShape, newShapes)
+    }
+    return newShapes
+  }
 }
