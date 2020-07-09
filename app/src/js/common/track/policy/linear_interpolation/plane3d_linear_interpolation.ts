@@ -1,7 +1,7 @@
 
 import { Plane3DType } from '../../../../functional/types'
 import { Vector3D } from '../../../../math/vector3d'
-import { Track } from '../../track'
+import { Track } from '../../../track'
 import { LinearInterpolationPolicy } from './linear_interpolation_policy'
 
 /**

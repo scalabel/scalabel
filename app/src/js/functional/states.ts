@@ -104,7 +104,7 @@ export function makeShape (shapeType: string = '',
     label: [],
     shapeType,
     id: genShapeId(),
-    ...params
+    ..._.cloneDeep(params)
   }
   if (newId && params.id !== undefined) {
     shape.id = genShapeId()
