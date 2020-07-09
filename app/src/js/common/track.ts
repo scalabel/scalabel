@@ -1,16 +1,11 @@
 import _ from 'lodash'
-import Label2D from '../../drawable/2d/label2d'
-import Label3D from '../../drawable/3d/label3d'
-import { makeLabel, makeShape, makeTrack } from '../../functional/states'
-import { IdType, Label2DTemplateType, LabelType, ShapeType, State, TrackType } from '../../functional/types'
-import { LabelTypeName, TrackPolicyType } from '../types'
-import { Box2DLinearInterpolationPolicy } from './policy/linear_interpolation/box2d_linear_interpolation'
-import { Box3DLinearInterpolationPolicy } from './policy/linear_interpolation/box3d_linear_interpolation'
-import { CustomLabel2DLinearInterpolationPolicy } from './policy/linear_interpolation/custom_label2d_linear_interpolation'
-import { Plane3DLinearInterpolationPolicy } from './policy/linear_interpolation/plane3d_linear_interpolation'
-import { PolygonLinearInterpolationPolicy } from './policy/linear_interpolation/polygon_linear_interpolation'
-import { TrackPolicy } from './policy/policy'
-
+import { TrackInterp } from '../auto/track/interp/interp'
+import { Box2DLinearInterp } from '../auto/track/interp/linear/box2d'
+import Label2D from '../drawable/2d/label2d'
+import Label3D from '../drawable/3d/label3d'
+import { makeLabel, makeShape, makeTrack } from '../functional/states'
+import { IdType, LabelType, ShapeType, State, TrackType } from '../functional/types'
+import { LabelTypeName, TrackPolicyType } from './types'
 export type Label = Label2D | Label3D
 
 /** Convert policy type name to enum */
@@ -28,14 +23,11 @@ export function policyFromString (
 }
 
 /** Returns a function for creating a policy object based on the track type */
-export function policyFactoryMaker (policyType: TrackPolicyType): (
-  track: Track,
-  type: string,
-  label2DTemplates: { [name: string]: Label2DTemplateType }
-) => TrackPolicy {
+function policyFactoryMaker (policyType: TrackPolicyType
+    ): (type: string) => TrackInterp {
   switch (policyType) {
     case TrackPolicyType.NONE:
-      return (track: Track) => new TrackPolicy(track)
+      return (_type: string) => new TrackInterp()
     case TrackPolicyType.LINEAR_INTERPOLATION:
       return linearInterpolationPolicyFactory
   }
@@ -43,28 +35,15 @@ export function policyFactoryMaker (policyType: TrackPolicyType): (
 }
 
 /** Factory for linear interpolation policies */
-export function linearInterpolationPolicyFactory (
-  track: Track,
-  type: string,
-  label2DTemplates: { [name: string]: Label2DTemplateType }
-): TrackPolicy {
+function linearInterpolationPolicyFactory (
+  type: string
+): TrackInterp {
   switch (type) {
     case LabelTypeName.BOX_2D:
-      return new Box2DLinearInterpolationPolicy(track)
-    case LabelTypeName.BOX_3D:
-      return new Box3DLinearInterpolationPolicy(track)
-    case LabelTypeName.PLANE_3D:
-      return new Plane3DLinearInterpolationPolicy(track)
-    case LabelTypeName.POLYGON_2D:
-    case LabelTypeName.POLYLINE_2D:
-      return new PolygonLinearInterpolationPolicy(track)
+      return new Box2DLinearInterp()
+    default:
+      throw new Error(`Unknown policy type ${type}`)
   }
-  if (type in label2DTemplates) {
-    return new CustomLabel2DLinearInterpolationPolicy(track)
-  }
-  throw new Error(
-    `Linear interpolation is not supported for track type ${type}`
-  )
 }
 
 /**
@@ -72,7 +51,7 @@ export function linearInterpolationPolicyFactory (
  */
 export class Track {
   /** policy */
-  protected _policy: TrackPolicy
+  protected _policy: TrackInterp
   /** track state */
   protected _track: TrackType
   /** shape map */
@@ -83,14 +62,17 @@ export class Track {
   protected _updatedIndices: Set<number>
   /** type */
   protected _type: string
+  /** tracking policy type */
+  protected _policyType: string
 
   constructor () {
     this._track = makeTrack({ type: LabelTypeName.EMPTY })
-    this._policy = new TrackPolicy(this)
+    this._policy = new TrackInterp()
     this._shapes = {}
     this._labels = {}
     this._updatedIndices = new Set()
     this._type = ''
+    this._policyType = ''
   }
 
   /**
@@ -102,14 +84,13 @@ export class Track {
     const policyType = policyFromString(
       state.task.config.policyTypes[state.user.select.policyType]
     )
-    if (policyType !== this.policyType) {
+    if (policyType !== this._policyType) {
+      this._policyType = policyType
       this._policy = policyFactoryMaker(policyType)(
-        this,
-        this._track.type,
-        state.task.config.label2DTemplates
+        this._track.type
       )
     }
-    const items = Object.keys(this._track.labels).map((key) => Number(key))
+    const items = _.keys(this._track.labels).map((key) => Number(key))
     this._labels = Object.assign({}, _.pick(this._labels, items))
     this._shapes = Object.assign({}, _.pick(this._shapes, items))
     for (const item of items) {
@@ -119,13 +100,6 @@ export class Track {
       this._shapes[item] =
         label.shapes.map((shapeId) => state.task.items[item].shapes[shapeId])
     }
-  }
-
-  /**
-   * Get track policy
-   */
-  public get policyType (): TrackPolicyType {
-    return this._policy.type
   }
 
   /**
@@ -245,14 +219,13 @@ export class Track {
    * @param newShapes
    */
   public update (itemIndex: number, label: Readonly<Label>): void {
-    const shapeStates = label.shapes()
-    const newShapes = shapeStates
+    const newShapes = label.shapes()
     if (
       itemIndex in this._shapes &&
       newShapes.length === this._shapes[itemIndex].length
     ) {
       this._updatedIndices.add(itemIndex)
-      this._shapes[itemIndex].length = shapeStates.length
+      this._shapes[itemIndex].length = newShapes.length
       for (let i = 0; i < newShapes.length; i++) {
         this._shapes[itemIndex][i] = newShapes[i]
       }
@@ -262,7 +235,17 @@ export class Track {
         ...label.label
       }
 
-      this._policy.update(itemIndex, this._track.id)
+      const itemIndices = _.keys(this._labels).map((k) => Number(k))
+      const labels = itemIndices.map((i) => this._labels[i])
+      const shapes = itemIndices.map((i) => this._shapes[i])
+      const newAllShapes = this._policy.interp(
+        this._labels[itemIndex], newShapes, labels, shapes)
+      for (let i = 0; i < itemIndices.length; i += 1) {
+        if (newAllShapes[i] !== shapes[i]) {
+          this._updatedIndices.add(itemIndices[i])
+          this._shapes[itemIndices[i]] = newAllShapes[i]
+        }
+      }
     }
   }
 }

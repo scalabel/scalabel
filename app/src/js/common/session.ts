@@ -7,7 +7,7 @@ import { Label3DList } from '../drawable/3d/label3d_list'
 import { State } from '../functional/types'
 import { configureStore } from './configure_store'
 import { GetStateFunc, SimpleStore } from './simple_store'
-import { Track } from './track/track'
+import { Track } from './track'
 import { FullStore, ThunkActionType } from './types'
 
 /**
