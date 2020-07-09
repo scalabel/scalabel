@@ -2,7 +2,7 @@ import { addLabel, addLabelsToItem, addTrack, changeLabelsProps, changeShapesInI
 import { deleteTracks, terminateTracks } from '../action/track'
 import { BaseAction } from '../action/types'
 import Session, { dispatch, getState } from '../common/session'
-import { Track } from '../common/track/track'
+import { Track } from '../common/track'
 import { LabelIdMap, ShapeIdMap } from '../functional/types'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'

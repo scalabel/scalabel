@@ -183,14 +183,16 @@ export class Label2DHandler {
         if (this.isKeyDown(Key.CONTROL)) {
           // Track link mode
           Session.dispatch(startLinkTrack())
-        } else {
+        } else if (!this._state.task.config.tracking) {
           // Linking
           this.linkLabels()
         }
         break
       case Key.L_UP:
-        // Unlinking
-        this.unlinkLabels()
+        if (!this._state.task.config.tracking) {
+          // Unlinking
+          this.unlinkLabels()
+        }
         break
       case Key.ARROW_UP:
         // Only change order when one label is selected

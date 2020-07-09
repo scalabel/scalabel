@@ -82,7 +82,8 @@ export function getInitialState (sessionId: string): State {
  */
 export function getRandomBox2dAction (itemIndex: number = 0) {
   return addBox2dLabel(itemIndex, 0, [], {},
-    Math.random(), Math.random(), Math.random(), Math.random())
+    { x1: Math.random(), y1: Math.random(),
+      x2: Math.random(), y2: Math.random() })
 }
 
 /**

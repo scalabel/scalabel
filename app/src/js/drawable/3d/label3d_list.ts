@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import { policyFromString } from '../../common/track/track'
+import { policyFromString } from '../../common/track'
 import { LabelTypeName, TrackPolicyType } from '../../common/types'
 import { makeState } from '../../functional/states'
 import { IdType, State } from '../../functional/types'
