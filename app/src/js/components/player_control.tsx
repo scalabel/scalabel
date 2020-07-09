@@ -173,11 +173,16 @@ class PlayerControl extends Component<Props> {
   private handleSliderChange (_event: ChangeEvent<{}>,
                               newValue: number | number[]) {
     if (Array.isArray(newValue)) {
-      this.currentFrame = newValue[0]
+      if (this.currentFrame !== newValue[0]) {
+        this.currentFrame = newValue[0]
+        goToItemWithIndex(this.currentFrame)
+      }
     } else {
-      this.currentFrame = newValue
+      if (this.currentFrame !== newValue) {
+        this.currentFrame = newValue
+        goToItemWithIndex(this.currentFrame)
+      }
     }
-    goToItemWithIndex(this.currentFrame)
   }
 
   /**
