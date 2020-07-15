@@ -114,7 +114,7 @@ export class CustomLabel2D extends Label2D {
     // Draw bounding box if selected
     if (this._selected) {
       rectStyle.color = assignColor(this._shapes.length + this._corners.length)
-      this._bounds.draw(context, ratio, rectStyle)
+      this._bounds.draw(context, ratio, rectStyle, mode)
 
       for (let i = 0; i < this._corners.length; i++) {
         const style =

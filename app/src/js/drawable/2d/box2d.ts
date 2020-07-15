@@ -117,7 +117,7 @@ export class Box2D extends Label2D {
     // Draw!!!
     const rect = self._rect
     rectStyle.color = assignColor(0)
-    rect.draw(context, ratio, rectStyle)
+    rect.draw(context, ratio, rectStyle, mode)
     if (mode === DrawMode.VIEW) {
       self.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), self._color)
     }

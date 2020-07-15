@@ -4,6 +4,7 @@ import { RectType } from '../../functional/types'
 import { Vector } from '../../math/vector'
 import { Context2D, toCssColor } from '../util'
 import { OPACITY } from './common'
+import { DrawMode } from './label2d'
 
 export interface Rect2DStyle {
   /** line width of the rect sides */
@@ -120,9 +121,11 @@ export class Rect2D {
    * @param {Context2D} context
    * @param {number} ratio: display to image ratio
    * @param {RectStyle} style
+   * @param {DrawMode} mode: View mode will fill the rect with opacity color
    */
   public draw (
-    context: Context2D, ratio: number, style: Rect2DStyle): void {
+    context: Context2D, ratio: number,
+    style: Rect2DStyle, mode: DrawMode): void {
     context.save()
     // Convert to display resolution
     const real = this.vector().scale(ratio)
@@ -132,9 +135,11 @@ export class Rect2D {
     }
     context.lineWidth = style.lineWidth
     context.strokeRect(real[0], real[1], real[2], real[3])
-    const fillStyle = style.color.concat(OPACITY)
-    context.fillStyle = toCssColor(fillStyle)
-    context.fillRect(real[0], real[1], real[2], real[3])
+    if (mode === DrawMode.VIEW) {
+      const fillStyle = style.color.concat(OPACITY)
+      context.fillStyle = toCssColor(fillStyle)
+      context.fillRect(real[0], real[1], real[2], real[3])
+    }
     context.restore()
   }
 
