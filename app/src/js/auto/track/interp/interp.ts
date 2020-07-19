@@ -29,16 +29,14 @@ export function assignShapesInRange (
     shape: ShapeType[], shapes: ShapeType[][]): ShapeType[][] {
   shapes = [...shapes]
   for (let i = start; i < end; i += 1) {
-    let newShapes = []
     if (shape.length === shapes[i].length) {
       // When the shape and shapes[i] has the same length, simply copy the array
       // elements and preserving the shape ids.
-      newShapes = shape.map((s, j) => assignShape(s, shapes[i][j]))
+      shapes[i] = shape.map((s, j) => assignShape(s, shapes[i][j]))
     } else {
       // If the lengths don't match, create a new array of shapes
-      newShapes = shape.map((s) => makeShape(s.shapeType, s))
+      shapes[i] = shape.map((s) => makeShape(s.shapeType, s))
     }
-    shapes[i] = newShapes
   }
   return shapes
 }

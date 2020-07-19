@@ -36,11 +36,13 @@ function linearInterpPoints (
     } else {
       shape = _.cloneDeep(shape)
     }
+    const dist = labels[i].item - labels[0].item
     for (let j = 0; j < first.length; j += 1) {
-      shape[j].x = diffs[j].x * j + first[j].x
-      shape[j].y = diffs[j].y * j + first[j].y
+      shape[j].x = diffs[j].x * dist + first[j].x
+      shape[j].y = diffs[j].y * dist + first[j].y
     }
     newShapes[i] = shape
+    // Console.log(shape, diffs, first)
   }
   return newShapes
 }

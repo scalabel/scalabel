@@ -30,6 +30,9 @@
         "setupFiles": [
             "./app/src/test/setup/local_setup.ts"
         ],
+        "setupFilesAfterEnv": [
+            "./app/src/test/setup/setup_jest_after_env.ts"
+        ],
         "globalTeardown": "./app/src/test/setup/global_teardown.ts",
         "roots": [
             "app/src/test"

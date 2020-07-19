@@ -24,10 +24,11 @@ function linearInterpBoxes (
   }
   for (let i = 1; i < newShapes.length - 1; i += 1) {
     const shape = newShapes[i]
-    shape.x1 = diff.x1 * i + first.x1
-    shape.y1 = diff.y1 * i + first.y1
-    shape.x2 = diff.x2 * i + first.x2
-    shape.y2 = diff.y2 * i + first.y2
+    const dist = labels[i].item - labels[0].item
+    shape.x1 = diff.x1 * dist + first.x1
+    shape.y1 = diff.y1 * dist + first.y1
+    shape.x2 = diff.x2 * dist + first.x2
+    shape.y2 = diff.y2 * dist + first.y2
   }
   return newShapes
 }

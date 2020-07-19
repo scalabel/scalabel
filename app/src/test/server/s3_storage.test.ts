@@ -10,7 +10,7 @@ const s3 = new AWS.S3()
 const projectName = 'test'
 const storageName = `${hostname()}_${now()}`
 const bucketRegion = 'us-west-2'
-const bucketName = 'scalabel-unit-testing'
+const bucketName = 'scalabel-unit-test'
 let storage: S3Storage
 
 beforeAll(async () => {
