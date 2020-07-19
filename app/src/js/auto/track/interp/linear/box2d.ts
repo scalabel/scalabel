@@ -9,7 +9,7 @@ import { assignShapesInRange, getAutoLabelRange, TrackInterp } from '../interp'
  */
 function linearInterpBoxes (
     labels: LabelType[], shapes: RectType[]): RectType[] {
-  const newShapes = shapes.map((s) => _.cloneDeep(s))
+  const newShapes = _.cloneDeep(shapes)
   if (newShapes.length <= 2) {
     return newShapes
   }
@@ -24,10 +24,11 @@ function linearInterpBoxes (
   }
   for (let i = 1; i < newShapes.length - 1; i += 1) {
     const shape = newShapes[i]
-    shape.x1 = diff.x1 * i + first.x1
-    shape.y1 = diff.y1 * i + first.y1
-    shape.x2 = diff.x2 * i + first.x2
-    shape.y2 = diff.y2 * i + first.y2
+    const dist = labels[i].item - labels[0].item
+    shape.x1 = diff.x1 * dist + first.x1
+    shape.y1 = diff.y1 * dist + first.y1
+    shape.x2 = diff.x2 * dist + first.x2
+    shape.y2 = diff.y2 * dist + first.y2
   }
   return newShapes
 }
@@ -42,14 +43,16 @@ function linearInterpBoxes (
  */
 function linearInterpBoxesInRange (
     start: number, end: number,
-    allLabels: LabelType[], allShapes: ShapeType[][]): void {
+    allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
+  allShapes = [...allShapes]
   let boxes = allShapes.slice(
     start, end + 1).map((s) => s[0]) as RectType[]
   const labels = allLabels.slice(start, end + 1)
   boxes = linearInterpBoxes(labels, boxes)
   for (let i = start + 1; i < end; i += 1) {
-    allShapes[i][0] = boxes[i - start]
+    allShapes[i] = [boxes[i - start]]
   }
+  return allShapes
 }
 
 /**
@@ -68,18 +71,22 @@ export class Box2DLinearInterp extends TrackInterp {
     allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
     const [labelIndex, manual0, manual1] = getAutoLabelRange(
       newLabel, allLabels)
-    // Copy the double array
-    const newShapes = allShapes.map((shapes) => shapes.map((s) => s))
-    newShapes[labelIndex] = newShape
+    // Copy the array
+    let newShapes = [...allShapes]
+    // Let newShapes = allShapes.map((shapes) => [...shapes]
+    newShapes[labelIndex] = _.cloneDeep(newShape)
     if (manual0 === -1) {
-      assignShapesInRange(0, labelIndex, newShape, newShapes)
+      newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
     } else {
-      linearInterpBoxesInRange(manual0, labelIndex, allLabels, newShapes)
+      newShapes = linearInterpBoxesInRange(
+        manual0, labelIndex, allLabels, newShapes)
     }
     if (manual1 === -1) {
-      assignShapesInRange(labelIndex + 1, newShapes.length, newShape, newShapes)
+      newShapes = assignShapesInRange(
+        labelIndex + 1, newShapes.length, newShape, newShapes)
     } else {
-      linearInterpBoxesInRange(labelIndex, manual1, allLabels, newShapes)
+      newShapes = linearInterpBoxesInRange(
+        labelIndex, manual1, allLabels, newShapes)
     }
     return newShapes
   }

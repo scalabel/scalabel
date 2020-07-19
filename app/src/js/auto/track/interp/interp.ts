@@ -26,12 +26,19 @@ function assignShape (src: ShapeType, target: ShapeType): ShapeType {
  */
 export function assignShapesInRange (
     start: number, end: number,
-    shape: ShapeType[], shapes: ShapeType[][]) {
+    shape: ShapeType[], shapes: ShapeType[][]): ShapeType[][] {
+  shapes = [...shapes]
   for (let i = start; i < end; i += 1) {
-    for (let j = 0; j < shapes[i].length; j += 1) {
-      shapes[i][j] = assignShape(shape[j], shapes[i][j])
+    if (shape.length === shapes[i].length) {
+      // When the shape and shapes[i] has the same length, simply copy the array
+      // elements and preserving the shape ids.
+      shapes[i] = shape.map((s, j) => assignShape(s, shapes[i][j]))
+    } else {
+      // If the lengths don't match, create a new array of shapes
+      shapes[i] = shape.map((s) => makeShape(s.shapeType, s))
     }
   }
+  return shapes
 }
 
 /**
@@ -68,9 +75,11 @@ export function getAutoLabelRange (
  */
 export class TrackInterp {
   /**
-   * Main method for interpolation. It assumes labels are sorted by itemIndex
+   * Main method for interpolation. It assumes labels are sorted by itemIndex.
+   * In the returned shapes array, if the label is not changed, the shape array
+   * reference is also kept.
    * In the future, we may change this function to async for model-assisted
-   * interpolation
+   * interpolation.
    * @param newLabel
    * @param newShape
    * @param labels
@@ -82,17 +91,20 @@ export class TrackInterp {
     const [labelIndex, manual0, manual1] = getAutoLabelRange(
         newLabel, allLabels)
       // Copy the double array
-    const newShapes = allShapes.map((shapes) => shapes.map((s) => s))
+    let newShapes = allShapes.map((shapes) => shapes.map((s) => s))
     newShapes[labelIndex] = newShape
     if (manual0 === -1) {
-      assignShapesInRange(0, labelIndex, newShape, newShapes)
+      newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
     } else {
-      assignShapesInRange(manual0 + 1, labelIndex, newShape, newShapes)
+      newShapes = assignShapesInRange(
+        manual0 + 1, labelIndex, newShape, newShapes)
     }
     if (manual1 === -1) {
-      assignShapesInRange(labelIndex + 1, newShapes.length, newShape, newShapes)
+      newShapes = assignShapesInRange(
+        labelIndex + 1, newShapes.length, newShape, newShapes)
     } else {
-      assignShapesInRange(labelIndex + 1, manual1, newShape, newShapes)
+      newShapes = assignShapesInRange(
+        labelIndex + 1, manual1, newShape, newShapes)
     }
     return newShapes
   }
