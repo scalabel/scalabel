@@ -45,10 +45,17 @@ export class RedisStore {
       }
       const baseKey = path.getRedisBaseKey(reminderKey)
       const metaKey = path.getRedisMetaKey(baseKey)
-      const metadata: StateMetadata = JSON.parse(await this.get(metaKey))
+      const metaValue = await this.get(metaKey)
+      if (metaValue === null) {
+        throw new Error(`Failed to get metaKey ${metaKey}`)
+      }
+      const metadata: StateMetadata = JSON.parse(metaValue)
       const saveDir = path.getSaveDir(metadata.projectName, metadata.taskId)
 
       const value = await this.get(baseKey)
+      if (value === null) {
+        throw new Error(`Failed to get baseKey ${value}`)
+      }
       await this.writeBackTask(saveDir, value)
     })
   }
@@ -112,10 +119,11 @@ export class RedisStore {
    */
   private async setWriteReminder (
     saveDir: string, value: string, numActionsSaved: number) {
+    let numActions = 0
     const reminderKey = path.getRedisReminderKey(saveDir)
-    let numActions = parseInt(await this.get(reminderKey), 10)
-    if (!numActions) {
-      numActions = 0
+    const redisValue = await this.get(reminderKey)
+    if (redisValue !== null) {
+      numActions = parseInt(redisValue, 10)
     }
     numActions += numActionsSaved
 
