@@ -59,9 +59,9 @@ export class RedisClient {
   }
 
   /** Wrapper for redis get */
-  public async get (key: string): Promise<string> {
+  public async get (key: string): Promise<string | null> {
     const redisGetAsync = promisify(this.client.get).bind(this.client)
-    const redisValue: string = await redisGetAsync(key)
+    const redisValue: string | null = await redisGetAsync(key)
     return redisValue
   }
 

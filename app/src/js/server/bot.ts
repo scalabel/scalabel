@@ -1,10 +1,10 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
-import uuid4 from 'uuid/v4'
 import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import { ReduxStore, ShapeTypeName } from '../common/types'
+import { uid } from '../common/uid'
 import { index2str } from '../common/util'
 import { PathPoint2DType, RectType, State } from '../functional/types'
 import { ItemExport } from './bdd_types'
@@ -52,7 +52,7 @@ export class Bot {
     this.taskIndex = botData.taskIndex
     this.botId = botData.botId
     this.address = botData.address
-    this.sessionId = uuid4()
+    this.sessionId = uid()
 
     this.actionCount = 0
 
@@ -153,7 +153,7 @@ export class Bot {
     actions: AddLabelsAction[], triggerId: string) {
     const actionPacket: ActionPacketType = {
       actions,
-      id: uuid4(),
+      id: uid(),
       triggerId
     }
     const message: SyncActionMessageType = {

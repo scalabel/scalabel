@@ -2,13 +2,13 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import uuid4 from 'uuid/v4'
 import * as yargs from 'yargs'
 import { BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType } from '../common/types'
+import { uid } from '../common/uid'
 import { Label2DTemplateType, State, TaskType } from '../functional/types'
 import { ItemExport } from './bdd_types'
 import * as defaults from './defaults'
@@ -161,8 +161,8 @@ export function makeCreationForm (
  * Initialize new session id if its a new load
  * If its a reconnection, keep the old session id
  */
-export function initSessId (sessionId: string) {
-  return (sessionId ? sessionId : uuid4())
+export function initSessionId (sessionId: string) {
+  return (sessionId ? sessionId : uid())
 }
 
 /**

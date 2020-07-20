@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
 import mockfs from 'mock-fs'
-import uuid4 from 'uuid/v4'
+import { uid } from '../../js/common/uid'
 import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { getTestDir } from '../../js/server/path'
@@ -38,8 +38,8 @@ describe('test user management', () => {
 
   test('user count works for single user', async () => {
     // Note: this is not actually how user ids are generated
-    const userId = uuid4()
-    const socketId = uuid4()
+    const userId = uid()
+    const socketId = uid()
     expect(await userManager.countUsers(projectName)).toBe(0)
     await userManager.registerUser(socketId, projectName, userId)
     expect(await userManager.countUsers(projectName)).toBe(1)
@@ -50,9 +50,9 @@ describe('test user management', () => {
   test('user count works for multiple users', async () => {
     const numUsers = 3
     const socketsPerUser = 3
-    const userIds = _.range(numUsers).map(() => uuid4())
+    const userIds = _.range(numUsers).map(() => uid())
     // First 3 socket ids correspond to first user, etc.
-    const socketIds = _.range(numUsers * socketsPerUser).map(() => uuid4())
+    const socketIds = _.range(numUsers * socketsPerUser).map(() => uid())
     for (let socketNum = 0; socketNum < socketsPerUser; socketNum++) {
       for (let userNum = 0; userNum < numUsers; userNum++) {
         const socketId = socketIds[userNum * socketsPerUser + socketNum]
@@ -81,9 +81,9 @@ describe('test user management', () => {
 
     const numUsers = 2
     const numProjects = 2
-    const userIds = _.range(numUsers).map(() => uuid4())
+    const userIds = _.range(numUsers).map(() => uid())
     // First 2 socket ids correspond to first project, etc.
-    const socketIds = _.range(numUsers * numProjects).map(() => uuid4())
+    const socketIds = _.range(numUsers * numProjects).map(() => uid())
 
     // First put all users on 1st project
     for (let userNum = 0; userNum < numUsers; userNum++) {
@@ -117,9 +117,9 @@ describe('test user management', () => {
 
     const numUsers = 2
     const numProjects = 2
-    const userIds = _.range(numUsers).map(() => uuid4())
+    const userIds = _.range(numUsers).map(() => uid())
     // First 2 socket ids correspond to first project, etc.
-    const socketIds = _.range(numUsers * numProjects).map(() => uuid4())
+    const socketIds = _.range(numUsers * numProjects).map(() => uid())
 
     // Put 1 user on each project
     await userManager.registerUser(

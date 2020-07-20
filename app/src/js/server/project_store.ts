@@ -69,6 +69,10 @@ export class ProjectStore {
     }
     if (this.redisStore) {
       const stringStateMetadata = await this.redisStore.get(metaKey)
+      if (stringStateMetadata === null) {
+        // TODO: principled error handling for state loading
+        return stateMetadata
+      }
       const loadedMetadata = JSON.parse(stringStateMetadata)
       if (loadedMetadata) {
         stateMetadata = loadedMetadata

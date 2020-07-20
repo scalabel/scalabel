@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import OrderedMap from 'orderedmap'
-import uuid4 from 'uuid/v4'
 import {
   makeSequential,
   setStatusAfterConnect,
@@ -22,6 +21,7 @@ import { ActionPacketType, EventName, RegisterMessageType,
 import Session from './session'
 import { setupSession } from './session_setup'
 import { ThunkDispatchType } from './types'
+import { uid } from './uid'
 import { doesPacketTriggerModel, index2str } from './util'
 
 const CONFIRMATION_MESSAGE =
@@ -279,7 +279,7 @@ export class Synchronizer {
       if (this.actionQueue.length > 0) {
         const packet: ActionPacketType = {
           actions: this.actionQueue,
-          id: uuid4()
+          id: uid()
         }
         this.actionsPendingSave =
           this.actionsPendingSave.update(packet.id, packet)

@@ -1,9 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
-import uuid4 from 'uuid/v4'
 import { AddLabelsAction } from '../../js/action/types'
 import { configureStore } from '../../js/common/configure_store'
 import { ReduxStore } from '../../js/common/types'
+import { uid } from '../../js/common/uid'
 import { index2str } from '../../js/common/util'
 import { State } from '../../js/functional/types'
 import { ItemExport } from '../../js/server/bdd_types'
@@ -222,7 +222,7 @@ function makeSyncMessage (
   }
   const packet: ActionPacketType = {
     actions,
-    id: uuid4()
+    id: uid()
   }
   return packetToMessage(packet, userId)
 }

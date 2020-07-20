@@ -1,5 +1,5 @@
 import { sprintf } from 'sprintf-js'
-import uuid4 from 'uuid/v4'
+import { uid } from '../common/uid'
 import { Bot } from './bot'
 import Logger from './logger'
 import { getRedisBotKey, getRedisBotSet } from './path'
@@ -73,7 +73,7 @@ export class BotManager {
     if (data.bot || await this.checkBotExists(botData)) {
       return botData
     }
-    botData.botId = uuid4()
+    botData.botId = uid()
 
     this.makeBot(botData)
     await this.saveBot(botData)
@@ -92,7 +92,11 @@ export class BotManager {
    * Get the data for a bot that has been registered
    */
   public async getBot (key: string): Promise<BotData> {
-    return JSON.parse(await this.redisClient.get(key))
+    const data = await this.redisClient.get(key)
+    if (data === null) {
+      throw new Error(`Failed to get bot ${key}`)
+    }
+    return JSON.parse(data)
   }
 
   /**

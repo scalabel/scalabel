@@ -12,7 +12,7 @@ import {
   StateMetadata, SyncActionMessageType
 } from './types'
 import { UserManager } from './user_manager'
-import { initSessId, updateStateTimestamp } from './util'
+import { initSessionId, updateStateTimestamp } from './util'
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -81,7 +81,7 @@ export class Hub {
   public async register (data: RegisterMessageType, socket: SocketServer) {
     const projectName = data.projectName
     const taskId = index2str(data.taskIndex)
-    const sessionId = initSessId(data.sessionId)
+    const sessionId = initSessionId(data.sessionId)
 
     await this.userManager.registerUser(socket.id, projectName, data.userId)
 
@@ -116,9 +116,12 @@ export class Hub {
     const taskActions = actions.filter((action) => {
       return types.isTaskAction(action)
     })
+    const actionTypes = Array.from(
+      new Set(actions.map((a) => a.type)).values())
 
     Logger.info(`Received ${actions.length} actions and ` +
-                `${taskActions.length} task actions from Session ${sessionId}`)
+                `${taskActions.length} task actions from Session ` +
+                `${sessionId}. The action types are ${actionTypes}.`)
 
     // Load IDs of actions that have been processed already
     const redisMetadata =
