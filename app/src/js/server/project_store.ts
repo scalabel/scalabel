@@ -69,6 +69,9 @@ export class ProjectStore {
     }
     if (this.redisStore) {
       const stringStateMetadata = await this.redisStore.get(metaKey)
+      if (stringStateMetadata === null) {
+        throw new Error(`Failed to get state meta data ${metaKey}`)
+      }
       const loadedMetadata = JSON.parse(stringStateMetadata)
       if (loadedMetadata) {
         stateMetadata = loadedMetadata

@@ -92,7 +92,11 @@ export class BotManager {
    * Get the data for a bot that has been registered
    */
   public async getBot (key: string): Promise<BotData> {
-    return JSON.parse(await this.redisClient.get(key))
+    const data = await this.redisClient.get(key)
+    if (data === null) {
+      throw new Error(`Failed to get bot ${key}`)
+    }
+    return JSON.parse(data)
   }
 
   /**
