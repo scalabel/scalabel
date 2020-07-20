@@ -61,8 +61,12 @@ export class RedisClient {
   /** Wrapper for redis get */
   public async get (key: string): Promise<string> {
     const redisGetAsync = promisify(this.client.get).bind(this.client)
-    const redisValue: string = await redisGetAsync(key)
-    return redisValue
+    const redisValue: string | null = await redisGetAsync(key)
+    if (redisValue === null) {
+      throw new Error(`Failed to get ${key} from redis`)
+    } else {
+      return redisValue
+    }
   }
 
   /** Wrapper for redis exists */
