@@ -31,8 +31,8 @@ describe('test general utility methods', () => {
   })
 
   test('Init session id', () => {
-    expect(util.initSessId('sampleId')).toBe('sampleId')
-    expect(util.initSessId('')).not.toBe('')
+    expect(util.initSessionId('sampleId')).toBe('sampleId')
+    expect(util.initSessionId('')).not.toBe('')
   })
 
   test('handler url selection', () => {

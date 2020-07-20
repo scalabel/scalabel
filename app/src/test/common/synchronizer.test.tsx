@@ -1,10 +1,10 @@
 import { cleanup } from '@testing-library/react'
-import uuid4 from 'uuid/v4'
 import { setStatusToUnsaved } from '../../js/action/common'
 import { AddLabelsAction } from '../../js/action/types'
 import Session from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
 import { ThunkDispatchType } from '../../js/common/types'
+import { uid } from '../../js/common/uid'
 import { index2str } from '../../js/common/util'
 import * as selector from '../../js/functional/selector'
 import {
@@ -87,7 +87,7 @@ describe('Test synchronizer functionality', () => {
       modelAction.sessionId = botSessionId
       const modelPacket: ActionPacketType = {
         actions: [modelAction],
-        id: uuid4(),
+        id: uid(),
         triggerId: ackPacket.id
       }
 
