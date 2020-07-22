@@ -57,8 +57,8 @@ beforeAll(() => {
     botId: 'fakeBotId',
     address: location.origin
   }
-  host = serverConfig.botHost
-  port = serverConfig.botPort
+  host = serverConfig.bot.host
+  port = serverConfig.bot.port
   webId = 'fakeUserId'
   initialState = getInitialState(webId)
 })

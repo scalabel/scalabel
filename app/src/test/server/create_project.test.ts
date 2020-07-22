@@ -35,8 +35,8 @@ let dataDir: string
 beforeAll(() => {
   dataDir = getTestDir('create-project-data')
   const storage = new FileStorage(dataDir)
-  const client = new RedisClient(serverConfig)
-  const redisStore = new RedisStore(serverConfig, storage, client)
+  const client = new RedisClient(serverConfig.redis)
+  const redisStore = new RedisStore(serverConfig.redis, storage, client)
   projectStore = new ProjectStore(storage, redisStore)
 })
 

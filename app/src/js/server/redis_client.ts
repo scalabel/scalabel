@@ -1,7 +1,7 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
 import Logger from './logger'
-import { ServerConfig } from './types'
+import { RedisConfig } from './types'
 
 /**
  * Exposes promisified versions of the necessary methods on a redis client
@@ -13,9 +13,9 @@ export class RedisClient {
   /** The redis client for pub/sub of events */
   protected pubSub: redis.RedisClient
 
-  constructor (config: ServerConfig, withLogging = false) {
-    this.client = redis.createClient(config.redisPort)
-    this.pubSub = redis.createClient(config.redisPort)
+  constructor (config: RedisConfig, withLogging = false) {
+    this.client = redis.createClient(config.port)
+    this.pubSub = redis.createClient(config.port)
 
     this.client.on('error', (err: Error) => {
       if (withLogging) {

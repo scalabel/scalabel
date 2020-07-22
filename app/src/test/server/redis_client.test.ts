@@ -6,7 +6,7 @@ import { getTestConfig } from './util/util'
 let client: RedisClient
 
 beforeAll(async () => {
-  client = new RedisClient(getTestConfig())
+  client = new RedisClient(getTestConfig().redis)
 })
 
 afterAll(async () => {
@@ -16,9 +16,9 @@ afterAll(async () => {
 describe('Test that redis clients catch errors', () => {
   test('Test connecting to non-existent redis server', async () => {
     const config = getTestConfig()
-    config.redisPort = 6385
+    config.redis.port = 6385
     try {
-      const failClient = new RedisClient(config)
+      const failClient = new RedisClient(config.redis)
       await failClient.close()
     } catch (e) {
       throw(e)

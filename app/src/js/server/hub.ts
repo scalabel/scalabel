@@ -37,7 +37,7 @@ export class Hub {
                publisher: RedisPubSub) {
     this.sync = config.sync
     this.autosave = config.autosave
-    this.bots = config.bots
+    this.bots = config.bot.on
     this.projectStore = projectStore
     this.userManager = userManager
     this.publisher = publisher

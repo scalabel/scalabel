@@ -14,6 +14,26 @@ export interface Project {
   sensors: {[id: number]: SensorType}
 }
 
+export interface RedisConfig {
+  /** timeout (seconds) for clearing value from redis cache */
+  timeout: number
+  /** write to disk after this time interval (seconds) since last update */
+  timeForWrite: number
+  /** write to disk every time this number of actions occurs */
+  numActionsForWrite: number
+  /** Port that redis runs on */
+  port: number
+}
+
+export interface BotConfig {
+  /** Whether to use virtual sessions/bots for assistance */
+  on: boolean
+  /** host of python model server */
+  host: string
+  /** port of python model server */
+  port: number
+}
+
 /**
  * Cognito server config
  *
@@ -52,20 +72,10 @@ export interface ServerConfig {
   sync: boolean
   /** whether to save automatically */
   autosave: boolean
-  /** timeout (seconds) for clearing value from redis cache */
-  redisTimeout: number
-  /** write to disk after this time interval (seconds) since last update */
-  timeForWrite: number
-  /** write to disk every time this number of actions occurs */
-  numActionsForWrite: number
-  /** Port that redis runs on */
-  redisPort: number
-  /** Whether to use virtual sessions/bots for assistance */
-  bots: boolean
-  /** host of python model server */
-  botHost: string
-  /** port of python model server */
-  botPort: number
+  /** redis config */
+  redis: RedisConfig
+  /** Bot config */
+  bot: BotConfig
   /** cognito settings */
   cognito?: CognitoConfig
 }

@@ -15,8 +15,8 @@ let config: ServerConfig
 
 beforeAll(async () => {
   config = getTestConfig()
-  client = new RedisClient(config)
-  subClient = new RedisClient(config)
+  client = new RedisClient(config.redis)
+  subClient = new RedisClient(config.redis)
   subscriber = new RedisPubSub(subClient)
 })
 
@@ -27,7 +27,7 @@ afterAll(async () => {
 
 describe('Test bot user manager', () => {
   test('Test registration', async () => {
-    const botManager = new BotManager(config, subscriber, client)
+    const botManager = new BotManager(config.bot, subscriber, client)
 
     // Test that different tasks create different bots
     const goodRegisterMessages: RegisterMessageType[] = [
@@ -80,7 +80,7 @@ describe('Test bot user manager', () => {
 
   test('Test deregistration after no activity', async () => {
     const msTimeout = 300
-    const botManager = new BotManager(config, subscriber, client, msTimeout)
+    const botManager = new BotManager(config.bot, subscriber, client, msTimeout)
     const registerData = makeRegisterData('project2', 0, 'user2', false)
     const botData = makeBotData(registerData, 'botId')
 

@@ -11,8 +11,8 @@ let subscriber: RedisPubSub
 
 beforeAll(async () => {
   const config = getTestConfig()
-  pubClient = new RedisClient(config)
-  subClient = new RedisClient(config)
+  pubClient = new RedisClient(config.redis)
+  subClient = new RedisClient(config.redis)
   publisher = new RedisPubSub(pubClient)
   subscriber = new RedisPubSub(subClient)
 })

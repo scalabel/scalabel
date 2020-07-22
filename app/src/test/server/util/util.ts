@@ -1,14 +1,13 @@
 import * as fs from 'fs-extra'
-import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import * as path from 'path'
 import { addBox2dLabel } from '../../../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
 import { RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
-import * as defaults from '../../../js/server/defaults'
 import { StorageStructure } from '../../../js/server/storage'
 import { ServerConfig } from '../../../js/server/types'
+import { parseConfig } from '../../../js/server/util'
 
 /**
  * Check equality between two Vector3Type objects
@@ -109,11 +108,6 @@ export function getTestConfigPath (): string {
  * Load the test config
  */
 export function getTestConfig (): ServerConfig {
-  const configDir = getTestConfigPath()
-  const testConfig = yaml.load(fs.readFileSync(configDir, 'utf8'))
-  const fullConfig = {
-    ...defaults.serverConfig,
-    ...testConfig
-  }
-  return fullConfig
+  const configPath = getTestConfigPath()
+  return parseConfig(configPath)
 }

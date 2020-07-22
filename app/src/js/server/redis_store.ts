@@ -3,7 +3,7 @@ import Logger from './logger'
 import * as path from './path'
 import { RedisClient } from './redis_client'
 import { Storage } from './storage'
-import { ServerConfig, StateMetadata } from './types'
+import { RedisConfig, StateMetadata } from './types'
 
 /**
  * Wraps high level redis functionality
@@ -25,8 +25,8 @@ export class RedisStore {
   /**
    * Create new store
    */
-  constructor (config: ServerConfig, storage: Storage, client: RedisClient) {
-    this.timeout = config.redisTimeout
+  constructor (config: RedisConfig, storage: Storage, client: RedisClient) {
+    this.timeout = config.timeout
     this.timeForWrite = config.timeForWrite
     this.numActionsForWrite = config.numActionsForWrite
     this.storage = storage

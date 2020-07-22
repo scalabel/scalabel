@@ -22,8 +22,8 @@ beforeAll(async () => {
   config = getTestConfig()
   dataDir = getTestDir('test-data-redis')
   storage = new FileStorage(dataDir)
-  client = new RedisClient(config)
-  defaultStore = new RedisStore(config, storage, client)
+  client = new RedisClient(config.redis)
+  defaultStore = new RedisStore(config.redis, storage, client)
   metadataString = makeMetadata(1)
   // NumWrites used as a counter across all tests that spawn files
   numWrites = 0
@@ -56,22 +56,22 @@ describe('Test redis cache', () => {
 
   test('Writes back on timeout', async () => {
     const timeoutConfig = _.clone(config)
-    timeoutConfig.timeForWrite = 0.2
-    timeoutConfig.redisTimeout = 2.0
-    const store = new RedisStore(timeoutConfig, storage, client)
+    timeoutConfig.redis.timeForWrite = 0.2
+    timeoutConfig.redis.timeout = 2.0
+    const store = new RedisStore(timeoutConfig.redis, storage, client)
 
     const key = 'testKey1'
     await store.setExWithReminder(key, 'testvalue', metadataString, 1)
 
     await checkFileCount()
-    await sleep((timeoutConfig.redisTimeout + 0.5) * 1000)
+    await sleep((timeoutConfig.redis.timeout + 0.5) * 1000)
     await checkFileWritten()
   })
 
   test('Writes back after action limit with 1 action at a time', async () => {
     const actionConfig = _.clone(config)
-    actionConfig.numActionsForWrite = 5
-    const store = new RedisStore(actionConfig, storage, client)
+    actionConfig.redis.numActionsForWrite = 5
+    const store = new RedisStore(actionConfig.redis, storage, client)
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {
@@ -86,8 +86,8 @@ describe('Test redis cache', () => {
 
   test('Writes back after action limit with multi action packet', async () => {
     const actionConfig = _.clone(config)
-    actionConfig.numActionsForWrite = 5
-    const store = new RedisStore(actionConfig, storage, client)
+    actionConfig.redis.numActionsForWrite = 5
+    const store = new RedisStore(actionConfig.redis, storage, client)
     await checkFileCount()
     await store.setExWithReminder('key', 'value', metadataString, 5)
     await checkFileWritten()
