@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - uses: shogo82148/actions-setup-redis@v1.0.1
+      - uses: shogo82148/actions-setup-redis@v1
         with:
           redis-version: "5.x"
       - name: Install node packages
