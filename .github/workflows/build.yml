@@ -37,6 +37,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x, 13.x, 14.x]
+        redis: ['6.x', '5.x']
 
     steps:
       - uses: actions/checkout@v2
@@ -46,7 +47,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - uses: shogo82148/actions-setup-redis@v1
         with:
-          redis-version: "5.x"
+          redis-version: ${{ matrix.redis }}
       - name: Install node packages
         run: |
           # add library dependencies for canvas package in case we need to compile from source
