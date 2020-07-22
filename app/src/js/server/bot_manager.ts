@@ -6,15 +6,15 @@ import { getRedisBotKey, getRedisBotSet } from './path'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
 import {
-  BotData, RegisterMessageType,
-  ServerConfig } from './types'
+  BotConfig, BotData,
+  RegisterMessageType} from './types'
 
 /**
  * Watches redis and spawns virtual sessions as needed
  */
 export class BotManager {
   /** env variables */
-  protected config: ServerConfig
+  protected config: BotConfig
   /** the redis message broker */
   protected subscriber: RedisPubSub
   /** the redis client for storage */
@@ -23,7 +23,7 @@ export class BotManager {
   protected pollTime: number
 
   constructor (
-    config: ServerConfig, subscriber: RedisPubSub,
+    config: BotConfig, subscriber: RedisPubSub,
     redisClient: RedisClient, pollTime?: number) {
     this.config = config
     this.subscriber = subscriber
@@ -131,7 +131,8 @@ export class BotManager {
   private makeBot (botData: BotData): Bot {
     Logger.info(sprintf('Creating bot for project %s, task %d',
       botData.projectName, botData.taskIndex))
-    const bot = new Bot(botData, this.config.botHost, this.config.botPort)
+    const bot = new Bot(
+      botData, this.config.host, this.config.port)
 
     const pollId = setInterval(async () => {
       await this.monitorActivity(bot, pollId)

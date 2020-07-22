@@ -6,5 +6,6 @@ src: "."
 database: "local"
 userManagement: false
 sync: true
-bots: true
+bot:
+    on: true
 ...

@@ -37,15 +37,35 @@ export async function readConfig (): Promise<ServerConfig> {
     .demandOption(configFlag)
     .string(configFlag)
     .argv
-  const configDir: string = argv.config
+  const configPath: string = argv.config
+  const config = parseConfig(configPath)
+  await validateConfig(config)
+  return config
+}
 
+/**
+ * Load and parse the config file
+ * @param configPath
+ */
+export function parseConfig (configPath: string): ServerConfig {
   // Load the config file
-  const userConfig = yaml.load(fs.readFileSync(configDir, 'utf8'))
+  const userConfig = yaml.load(fs.readFileSync(configPath, 'utf8'))
+  const objectFields = ['redis', 'bot']
+
+  // Set the default object fields
+  objectFields.map((field) => {
+    if (_.has(userConfig, field)) {
+      _.set(userConfig, field, {
+        ..._.get(defaults.serverConfig, field),
+        ..._.get(userConfig, field)
+      })
+    }
+  })
+
   const fullConfig = {
     ...defaults.serverConfig,
     ...userConfig
   }
-  await validateConfig(fullConfig)
   return fullConfig
 }
 
@@ -90,7 +110,7 @@ async function validateConfig (config: ServerConfig) {
   }
 
   // Redis validation
-  if (!(config.timeForWrite + 1.5 < config.redisTimeout)) {
+  if (!(config.redis.timeForWrite + 1.5 < config.redis.timeout)) {
     throw new Error(`Redis timeForWrite must be at least 1.5 seconds earlier than redisTimeout
       to ensure that write occurs before value is erased`)
   }

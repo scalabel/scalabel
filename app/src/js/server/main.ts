@@ -79,7 +79,7 @@ function startHTTPServer (
  * Subscribers can't take other actions, so separate clients for pub and sub
  */
 function makeRedisPubSub (config: ServerConfig): RedisPubSub {
-  const client = new RedisClient(config)
+  const client = new RedisClient(config.redis)
   return new RedisPubSub(client)
 }
 
@@ -88,8 +88,8 @@ function makeRedisPubSub (config: ServerConfig): RedisPubSub {
  */
 async function makeBotManager (
   config: ServerConfig, subscriber: RedisPubSub, cacheClient: RedisClient) {
-  if (config.bots) {
-    const botManager = new BotManager(config, subscriber, cacheClient)
+  if (config.bot.on) {
+    const botManager = new BotManager(config.bot, subscriber, cacheClient)
     await botManager.listen()
   }
 }
@@ -105,7 +105,7 @@ async function launchRedisServer (config: ServerConfig) {
 
   const redisProc = child.spawn('redis-server', [
     getRedisConf(),
-    '--port', `${config.redisPort}`,
+    '--port', `${config.redis.port}`,
     '--bind', '127.0.0.1',
     '--dir', redisDir,
     '--protected-mode', 'yes']
@@ -176,8 +176,8 @@ async function main () {
    * Connect to redis server with clients
    * Need separate clients for different roles
    */
-  const cacheClient = new RedisClient(config)
-  const redisStore = new RedisStore(config, storage, cacheClient)
+  const cacheClient = new RedisClient(config.redis)
+  const redisStore = new RedisStore(config.redis, storage, cacheClient)
   const publisher = makeRedisPubSub(config)
   const subscriber = makeRedisPubSub(config)
 

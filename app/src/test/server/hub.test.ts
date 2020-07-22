@@ -58,8 +58,8 @@ beforeAll(() => {
   actionListId = 'actionListId'
 
   mockStorage = new FileStorage('fakeDataDir')
-  const client = new RedisClient(serverConfig)
-  const redisStore = new RedisStore(serverConfig, mockStorage, client)
+  const client = new RedisClient(serverConfig.redis)
+  const redisStore = new RedisStore(serverConfig.redis, mockStorage, client)
   mockPubSub = new RedisPubSub(client)
   mockProjectStore = new ProjectStore(mockStorage, redisStore)
   mockUserManager = new UserManager(mockProjectStore)

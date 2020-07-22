@@ -10,13 +10,17 @@ export const serverConfig: ServerConfig = {
   userManagement: false,
   sync: false,
   autosave: true,
-  redisTimeout: 3600,
-  timeForWrite: 600,
-  numActionsForWrite: 10,
-  redisPort: 6379,
-  bots: false,
-  botHost: 'http://0.0.0.0',
-  botPort: 8080
+  redis: {
+    timeout: 3600,
+    timeForWrite: 600,
+    numActionsForWrite: 10,
+    port: 6379
+  },
+  bot: {
+    on: false,
+    host: 'http://0.0.0.0',
+    port: 8080
+  }
 }
 
 /* default categories when file is missing and label is box2D or box3D */

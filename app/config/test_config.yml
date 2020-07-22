@@ -6,4 +6,5 @@ database: "local"
 userManagement: false
 sync: false
 autosave: false
-redisPort: 6378
+redis:
+    port: 6378
