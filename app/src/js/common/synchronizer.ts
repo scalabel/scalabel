@@ -132,10 +132,14 @@ export class Synchronizer {
   /**
    * Displays pop-up warning user when leaving with unsaved changes
    */
-  public warningPopup (e: BeforeUnloadEvent) {
-    if (!isSessionFullySaved(Session.store.getState())) {
+  public warningPopup (e: BeforeUnloadEvent): string | null {
+    const state = Session.getState()
+    const reduxState = Session.store.getState()
+    if (!state.task.config.autosave && !isSessionFullySaved(reduxState)) {
       e.returnValue = CONFIRMATION_MESSAGE // Gecko + IE
       return CONFIRMATION_MESSAGE // Gecko + Webkit, Safari, Chrome etc.
+    } else {
+      return null
     }
   }
 
