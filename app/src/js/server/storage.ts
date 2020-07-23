@@ -29,6 +29,14 @@ export abstract class Storage {
   }
 
   /**
+   * Extension of the key when it is stored
+   * Only file and s3 storages are supported now, so return .json directly
+   */
+  public keyExt (): string {
+    return '.json'
+  }
+
+  /**
    * Check if storage has key
    */
   public abstract async hasKey (key: string): Promise<boolean>
@@ -85,6 +93,6 @@ export abstract class Storage {
    * Makes relative path into full filename
    */
   public fullFile (key: string): string {
-    return this.fullDir(key + '.json')
+    return this.fullDir(key + this.keyExt())
   }
 }

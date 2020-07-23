@@ -14,7 +14,13 @@ class Logger {
     this._logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.timestamp(),
-        winston.format.prettyPrint()
+        winston.format.printf(({ level, message, label, timestamp }) => {
+          let labelString = ''
+          if (label !== undefined) {
+            labelString = `[${label}] `
+          }
+          return `${timestamp} ${labelString}${level}: ${message}`
+        })
       ),
       transports: [
         new winston.transports.Console()

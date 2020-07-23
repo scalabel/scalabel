@@ -5,6 +5,8 @@ import { RedisClient } from './redis_client'
 import { Storage } from './storage'
 import { RedisConfig, StateMetadata } from './types'
 
+const MAX_HISTORIES = 3
+
 /**
  * Wraps high level redis functionality
  * Including caching, atomic writes,
@@ -36,27 +38,7 @@ export class RedisStore {
     // Subscribe to reminder expirations for saving
     this.client.subscribe('__keyevent@0__:expired')
     this.client.on('message', async (_channel: string, reminderKey: string) => {
-      /**
-       * Check that the key is from a reminder expiring
-       * Not from a normal key or meta key expiring
-       */
-      if (!path.checkRedisReminderKey(reminderKey)) {
-        return
-      }
-      const baseKey = path.getRedisBaseKey(reminderKey)
-      const metaKey = path.getRedisMetaKey(baseKey)
-      const metaValue = await this.get(metaKey)
-      if (metaValue === null) {
-        throw new Error(`Failed to get metaKey ${metaKey}`)
-      }
-      const metadata: StateMetadata = JSON.parse(metaValue)
-      const saveDir = path.getSaveDir(metadata.projectName, metadata.taskId)
-
-      const value = await this.get(baseKey)
-      if (value === null) {
-        throw new Error(`Failed to get baseKey ${value}`)
-      }
-      await this.writeBackTask(saveDir, value)
+      await this.processExpiredKey(reminderKey)
     })
   }
 
@@ -67,6 +49,14 @@ export class RedisStore {
   public async writeBackTask (saveDir: string, value: string) {
     const fileKey = path.getFileKey(saveDir)
     await this.storage.save(fileKey, value)
+    // Check whether there are more than MAX_HISTORIES entries in the folder
+    // If so, delete the old ones
+    const keys = await this.storage.listKeys(saveDir, false)
+    for (let i = 0; i < keys.length - MAX_HISTORIES; i += 1) {
+      await this.storage.delete(keys[i] + this.storage.keyExt())
+    }
+    Logger.info(`Writing back to ${fileKey} and ` +
+      `deleting ${Math.max(keys.length - MAX_HISTORIES, 0)} historical keys`)
   }
 
   /**
@@ -79,7 +69,6 @@ export class RedisStore {
     const keys = [saveDir, path.getRedisMetaKey(saveDir)]
     const vals = [value, metadata]
     await this.setAtomic(keys, vals, this.timeout)
-
     await this.setWriteReminder(saveDir, value, numActionsSaved)
   }
 
@@ -103,8 +92,20 @@ export class RedisStore {
   /**
    * Wrapper for get
    */
-  public async get (key: string) {
-    return this.client.get(key)
+  public async get (key: string): Promise<string | null> {
+    let result = await this.client.get(key)
+    if (result === null && key.search(':') === -1) {
+      // If the key doesn't exit in redis, it may be evicted. Try the storage.
+      const dir = this.storage.fullDir(key)
+      Logger.info(`Failed to get the key ${key}. Searching ${dir} in storage`)
+      const keys = await this.storage.listKeys(key, false)
+      if (keys.length > 0) {
+        result = await this.storage.load(keys[keys.length - 1])
+        Logger.info(`Found ${key} in storage. Saving in redis.`)
+        await this.setWriteReminder(key, result, 0)
+      }
+    }
+    return result
   }
 
   /**
@@ -112,6 +113,30 @@ export class RedisStore {
    */
   public async del (key: string) {
     await this.client.del(key)
+  }
+
+  /**
+   * Check that the key is from a reminder expiring
+   * Not from a normal key or meta key expiring
+   */
+  private async processExpiredKey (reminderKey: string) {
+    if (!path.checkRedisReminderKey(reminderKey)) {
+      return
+    }
+    const baseKey = path.getRedisBaseKey(reminderKey)
+    const metaKey = path.getRedisMetaKey(baseKey)
+    const metaValue = await this.get(metaKey)
+    if (metaValue === null) {
+      throw new Error(`Failed to get metaKey ${metaKey}`)
+    }
+    const metadata: StateMetadata = JSON.parse(metaValue)
+    const saveDir = path.getSaveDir(metadata.projectName, metadata.taskId)
+
+    const value = await this.get(baseKey)
+    if (value === null) {
+      throw new Error(`Failed to get baseKey ${value}`)
+    }
+    await this.writeBackTask(saveDir, value)
   }
 
   /**
