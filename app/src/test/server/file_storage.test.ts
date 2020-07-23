@@ -21,105 +21,102 @@ afterAll(() => {
   fs.removeSync(dataDir)
 })
 
-describe('test local file storage', () => {
-  test('make dir', async () => {
-    for (const f of STORAGE_FOLDERS) {
-      await storage.mkdir(f)
-      expect(await fs.pathExists(storage.fullDir(f))).toBe(true)
-      const file = `${f}/test`
-      await storage.save(file, '')
-      expect(await storage.hasKey(file)).toBe(true)
-    }
-  })
+test('make dir', async () => {
+  for (const f of STORAGE_FOLDERS) {
+    await storage.mkdir(f)
+    expect(await fs.pathExists(storage.fullDir(f))).toBe(true)
+    const file = `${f}/test`
+    await storage.save(file, '')
+    expect(await storage.hasKey(file)).toBe(true)
+  }
+})
 
-  test('key existence', () => {
-    return Promise.all([
-      checkTaskKey(0, true),
-      checkTaskKey(1, true),
-      checkTaskKey(2, false),
-      checkProjectKey()
-    ])
-  })
+test('key existence', () => {
+  return Promise.all([
+    checkTaskKey(0, true),
+    checkTaskKey(1, true),
+    checkTaskKey(2, false),
+    checkProjectKey()
+  ])
+})
 
-  test('list keys', async () => {
-    const keys = await storage.listKeys(
-      `${StorageStructure.PROJECT}/myProject/tasks`)
-    expect(keys.length).toBe(2)
-    expect(keys).toContain(`projects/myProject/tasks/000000`)
-    expect(keys).toContain(`projects/myProject/tasks/000001`)
-  })
+test('list keys', async () => {
+  const keys = await storage.listKeys(
+    `${StorageStructure.PROJECT}/myProject/tasks`)
+  expect(keys.length).toBe(2)
+  expect(keys).toContain(`projects/myProject/tasks/000000`)
+  expect(keys).toContain(`projects/myProject/tasks/000001`)
+})
 
-  test('list keys dir only', async () => {
-    const keys = await storage.listKeys(
-      `${StorageStructure.PROJECT}/myProject`, true)
-    expect(keys.length).toBe(1)
-    expect(keys).toContain(`projects/myProject/tasks`)
-  })
+test('list keys dir only', async () => {
+  const keys = await storage.listKeys(
+    `${StorageStructure.PROJECT}/myProject`, true)
+  expect(keys.length).toBe(1)
+  expect(keys).toContain(`projects/myProject/tasks`)
+})
 
-  test('load', () => {
-    const taskId = index2str(0)
-    const key = getTaskKey(projectName, taskId)
-    return storage.load(key).then((data: string) => {
-      const loadedData = JSON.parse(data)
-      expect(loadedData.testField).toBe('testValue')
-    })
+test('load', () => {
+  const taskId = index2str(0)
+  const key = getTaskKey(projectName, taskId)
+  return storage.load(key).then((data: string) => {
+    const loadedData = JSON.parse(data)
+    expect(loadedData.testField).toBe('testValue')
   })
+})
 
-  test('save then load', async () => {
-    const taskId = index2str(2)
-    const key = getTaskKey(projectName, taskId)
-    const fakeData = '{"testField": "testValue2"}'
-    await storage.save(key, fakeData)
-    return Promise.all([
-      checkTaskKey(2, true),
-      checkTaskKey(3, false),
-      checkLoad(2)
-    ])
-  })
+test('save then load', async () => {
+  const taskId = index2str(2)
+  const key = getTaskKey(projectName, taskId)
+  const fakeData = '{"testField": "testValue2"}'
+  await storage.save(key, fakeData)
+  return Promise.all([
+    checkTaskKey(2, true),
+    checkTaskKey(3, false),
+    checkLoad(2)
+  ])
+})
 
-  test('multiple saves multiple loads', async () => {
-    const savePromises = []
-    for (let i = 3; i < 7; i++) {
-      savePromises.push(checkTaskKey(i, false))
-      savePromises.push(
-        storage.save(getTaskKey(projectName, index2str(i)),
-         sprintf('{"testField": "testValue%d"}', i)
-        )
-      )
-    }
+test('multiple saves multiple loads', async () => {
+  const savePromises = []
+  for (let i = 3; i < 7; i++) {
+    savePromises.push(checkTaskKey(i, false))
     savePromises.push(
-      storage.save('fakeFile', `fake content`)
+      storage.save(getTaskKey(projectName, index2str(i)),
+        sprintf('{"testField": "testValue%d"}', i)
+      )
     )
-    await Promise.all(savePromises)
+  }
+  savePromises.push(
+    storage.save('fakeFile', `fake content`)
+  )
+  await Promise.all(savePromises)
 
-    const loadPromises = []
-    for (let j = 3; j < 7; j++) {
-      loadPromises.push(checkTaskKey(j, true))
-      loadPromises.push(checkLoad(j))
-    }
-    loadPromises.push(
-      storage.load('fakeFile').then((data: string) => {
-        expect(data).toBe(`fake content`)
-      })
-    )
-    return Promise.all(loadPromises)
-  })
+  const loadPromises = []
+  for (let j = 3; j < 7; j++) {
+    loadPromises.push(checkTaskKey(j, true))
+    loadPromises.push(checkLoad(j))
+  }
+  loadPromises.push(
+    storage.load('fakeFile').then((data: string) => {
+      expect(data).toBe(`fake content`)
+    })
+  )
+  return Promise.all(loadPromises)
+})
 
-  test('delete', async () => {
-    const key = `${StorageStructure.PROJECT}/myProject/tasks`
-    await Promise.all([
-      checkTaskKey(1, true),
-      checkTaskKey(0, true)
-    ])
+test('delete', async () => {
+  const key = `${StorageStructure.PROJECT}/myProject/tasks`
+  await Promise.all([
+    checkTaskKey(1, true),
+    checkTaskKey(0, true)
+  ])
 
-    await storage.delete(key)
+  await storage.delete(key)
 
-    return Promise.all([
-      checkTaskKey(1, false),
-      checkTaskKey(0, false)
-    ])
-  })
-
+  return Promise.all([
+    checkTaskKey(1, false),
+    checkTaskKey(0, false)
+  ])
 })
 
 /**

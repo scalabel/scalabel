@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { index2str } from '../../js/common/util'
 import { FileStorage } from '../../js/server/file_storage'
-import { getRedisMetaKey, getTestDir } from '../../js/server/path'
+import { getFileKey, getRedisMetaKey, getTestDir } from '../../js/server/path'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
 import { ServerConfig, StateMetadata } from '../../js/server/types'
@@ -114,6 +114,28 @@ describe('Test redis cache', () => {
       const metakey = getRedisMetaKey(keys[i])
       const metavalue = await defaultStore.get(metakey)
       expect(metavalue).toBe(metadata[i])
+    }
+  })
+
+  test('Check storage if key is not in redis store', async () => {
+    const keys = _.range(5).map((v) => sprintf('testGet%s', v))
+    const values = _.range(5).map((v) => sprintf('value%s', v))
+
+    for (let i = 0; i < 5; i++) {
+      await defaultStore.setExWithReminder(
+        keys[i], values[i], metadataString, 1)
+      const fileKey = getFileKey(keys[i])
+      await storage.save(fileKey, values[i])
+      await defaultStore.del(keys[i])
+    }
+    for (let i = 0; i < 5; i++) {
+      const value = await defaultStore.get(keys[i])
+      expect(value).toBe(values[i])
+    }
+
+    // This also cleans up for the other tests
+    for (let i = 0; i < 5; i++) {
+      await defaultStore.del(keys[i])
     }
   })
 })
