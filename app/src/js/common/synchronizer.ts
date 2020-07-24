@@ -249,7 +249,9 @@ export class Synchronizer {
         dispatch(setStatusToSaved())
       }
     }
-    dispatch(makeSequential(actions))
+    if (actions.length > 0) {
+      dispatch(makeSequential(actions))
+    }
   }
 
   /**
