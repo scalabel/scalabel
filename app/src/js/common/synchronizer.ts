@@ -120,7 +120,6 @@ export class Synchronizer {
       }
     }
     if (actions.length > 0) {
-      console.log(`saving ${actions.length} actions`)
       this.actionQueue.push(...actions)
       if (autosave) {
         this.save(sessionId, bots, dispatch)
