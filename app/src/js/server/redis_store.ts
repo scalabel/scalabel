@@ -3,7 +3,7 @@ import Logger from './logger'
 import * as path from './path'
 import { RedisClient } from './redis_client'
 import { Storage } from './storage'
-import { RedisConfig, StateMetadata } from './types'
+import { RedisConfig } from './types'
 
 const MAX_HISTORIES = 3
 
@@ -124,19 +124,12 @@ export class RedisStore {
       return
     }
     const baseKey = path.getRedisBaseKey(reminderKey)
-    const metaKey = path.getRedisMetaKey(baseKey)
-    const metaValue = await this.get(metaKey)
-    if (metaValue === null) {
-      throw new Error(`Failed to get metaKey ${metaKey}`)
-    }
-    const metadata: StateMetadata = JSON.parse(metaValue)
-    const saveDir = path.getSaveDir(metadata.projectName, metadata.taskId)
-
     const value = await this.get(baseKey)
     if (value === null) {
-      throw new Error(`Failed to get baseKey ${value}`)
+      Logger.error(new Error(`Failed to get baseKey ${value}`))
+      return
     }
-    await this.writeBackTask(saveDir, value)
+    await this.writeBackTask(baseKey, value)
   }
 
   /**
