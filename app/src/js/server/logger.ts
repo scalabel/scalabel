@@ -1,4 +1,5 @@
 import winston from 'winston'
+import { hostname, now } from './path'
 import { MaybeError } from './types'
 
 /**
@@ -13,13 +14,15 @@ class Logger {
   constructor () {
     this._logger = winston.createLogger({
       format: winston.format.combine(
-        winston.format.timestamp(),
+        winston.format.timestamp({
+          format: now
+        }),
         winston.format.printf(({ level, message, label, timestamp }) => {
           let labelString = ''
           if (label !== undefined) {
             labelString = `[${label}] `
           }
-          return `${timestamp} ${labelString}${level}: ${message}`
+          return `${hostname()}:${process.pid}:${timestamp} ${labelString}${level}: ${message}`
         })
       ),
       transports: [
