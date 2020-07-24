@@ -106,7 +106,7 @@ export class Synchronizer {
                                sessionId: string, bots: boolean,
                                dispatch: ThunkDispatchType) {
     const shouldBeSaved = (a: types.BaseAction) => {
-      return sessionId === action.sessionId && !a.frontendOnly &&
+      return sessionId === a.sessionId && !a.frontendOnly &&
         !types.isSessionAction(a)
     }
     const actions: types.BaseAction[] = []
@@ -120,6 +120,7 @@ export class Synchronizer {
       }
     }
     if (actions.length > 0) {
+      console.log(`saving ${actions.length} actions`)
       this.actionQueue.push(...actions)
       if (autosave) {
         this.save(sessionId, bots, dispatch)
