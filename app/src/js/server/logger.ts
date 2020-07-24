@@ -28,7 +28,7 @@ class Logger {
       transports: [
         new winston.transports.Console()
       ],
-      exitOnError: false
+      exitOnError: true
     })
     this._silent = false
   }
