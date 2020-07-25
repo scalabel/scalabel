@@ -11,8 +11,8 @@ import { Key, LabelTypeName } from '../common/types'
 import { getSelectedTracks } from '../functional/state_util'
 import { tracksOverlapping } from '../functional/track'
 import { Attribute, State } from '../functional/types'
+import { makeButton } from './button'
 import { Component } from './component'
-import { makeButton } from './general_button'
 import { Category } from './toolbar_category'
 
 /** This is the interface of props passed to ToolBar */

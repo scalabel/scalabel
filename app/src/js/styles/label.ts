@@ -1,9 +1,5 @@
-import Box from '@material-ui/core/Box/Box'
-import Button, { ButtonProps } from '@material-ui/core/Button'
 import { blue, grey } from '@material-ui/core/colors'
-import { createStyles, withStyles, WithStyles } from '@material-ui/core/styles'
-import { Omit } from '@material-ui/types'
-import React from 'react'
+import { createStyles } from '@material-ui/core/styles'
 
 export const categoryStyle = () => createStyles({
   root: {
@@ -56,7 +52,7 @@ export interface StyledButtonProps {
   background: string
 }
 
-const styledButtonStyle = createStyles({
+export const styledButtonStyle = createStyles({
   root: {
     borderRadius: 0,
     border: 0,
@@ -73,20 +69,6 @@ const styledButtonStyle = createStyles({
     fontSize: '15px'
   }
 })
-
-/**
- * raw styled button
- * @param props props
- */
-function StyledButtonRaw (
-  props: WithStyles<typeof styledButtonStyle>
-        & Omit<ButtonProps, keyof StyledButtonProps> & StyledButtonProps
-) {
-  const { classes, background, ...other } = props
-  return <Button className={classes.root} {...other} />
-}
-
-export const StyledButton = withStyles(styledButtonStyle)(StyledButtonRaw)
 
 export const toggleButtonStyle = () => ({
   root: {
@@ -215,14 +197,3 @@ export const LayoutStyles = () => createStyles({
     left: 0
   }
 })
-
-export const StatusMessageBox = withStyles({
-  root: {
-    padding: '3px',
-    fontSize: 'fontSize',
-    background: '#909090',
-    marginLeft: '40px',
-    borderRadius: '2px',
-    color: 'black'
-  }
-})(Box)
