@@ -102,7 +102,7 @@ export class RedisStore {
       if (keys.length > 0) {
         result = await this.storage.load(keys[keys.length - 1])
         Logger.info(`Found ${key} in storage. Saving in redis.`)
-        await this.setWriteReminder(key, result, 0)
+        this.set(key, result).then().catch()
       }
     }
     return result
@@ -162,5 +162,14 @@ export class RedisStore {
   private async setEx (key: string, value: string, timeout: number) {
     const timeoutMs = timeout * 1000
     await this.client.psetex(key, timeoutMs, value)
+  }
+
+  /**
+   * Direct wrapper of redis set
+   * @param key
+   * @param value
+   */
+  private async set (key: string, value: string) {
+    await this.client.set(key, value)
   }
 }
