@@ -180,8 +180,5 @@
         "winston": "^3.3.3",
         "xss": "^1.0.7",
         "yargs": "^14.2.3"
-    },
-    "dependencies": {
-        "jshint": "^2.11.1"
     }
 }
