@@ -20,16 +20,11 @@ export const categoryStyle = () => createStyles({
   primary: {
     fontSize: '15px'
   },
-  checkbox: {
-    'color': grey[600],
-    '&$checked': {
-      color: blue[500]
-    },
-    'fontSize': '15px',
-    'margin': '-10px',
-    'marginRight': '-5px'
-  },
-  checked: {}
+  button: {
+    height: 30,
+    textTransform: 'none',
+    color: 'black'
+  }
 })
 
 export const switchStyle = () => ({

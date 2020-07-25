@@ -1,5 +1,5 @@
 import { ListItemText } from '@material-ui/core'
-import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel'
+import ToggleButton from '@material-ui/lab/ToggleButton'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import _ from 'lodash'
 import * as React from 'react'
@@ -47,14 +47,17 @@ afterEach(cleanup)
 
 describe('Toolbar category setting', () => {
   test('Category selection', () => {
-    const { getByLabelText } = render(
-      <Category categories={['A', 'B']} headerText={'Label Category'} />)
-    const selectedValued = getByLabelText(/A/i)
-    expect(selectedValued.getAttribute('value')).toEqual('A')
-    const radio = getByLabelText('A')
-    fireEvent.change(radio, { target: { value: 'B' } })
-    // Expect state to be changed
-    expect(radio.getAttribute('value')).toBe('B')
+    setupTestStore(testJson)
+    const { getByText } = render(
+      <Category categories={['A', 'B', 'C']} headerText={'Label Category'} />)
+    let button = getByText('B')
+    expect(button).toBeInTheDocument()
+    fireEvent.click(button)
+    expect(getState().user.select.category).toBe(1)
+    button = getByText('C')
+    expect(button).toBeInTheDocument()
+    fireEvent.click(button)
+    expect(getState().user.select.category).toBe(2)
   })
 
   test('Test elements in Category', () => {
@@ -71,7 +74,7 @@ describe('Toolbar category setting', () => {
     const category = create(
       <Category categories={['OnlyCategory']} headerText={'Label Category'} />)
     const root = category.root
-    expect(root.findByType(FormControlLabel).props.label)
+    expect(root.findByType(ToggleButton).props.children)
       .toBe('OnlyCategory')
   })
 

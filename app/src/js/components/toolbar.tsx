@@ -1,4 +1,3 @@
-import Divider from '@material-ui/core/Divider'
 import List from '@material-ui/core/List/List'
 import ListItem from '@material-ui/core/ListItem'
 import _ from 'lodash'
@@ -106,7 +105,6 @@ export class ToolBar extends Component<Props> {
             <Category categories={categories} headerText={'Label Category'} />
           </ListItem>
         ) : null}
-        <Divider variant='middle' />
         <List>
           {attributes.map((element: Attribute) =>
             (<React.Fragment key = {element.name}>
