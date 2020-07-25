@@ -14,8 +14,8 @@ import Session from '../common/session'
 import { Key, ReduxState } from '../common/types'
 import * as selector from '../functional/selector'
 import { defaultAppBar } from '../styles/general'
-import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
+import { StatusMessageBox } from './message_box'
 
 // How long to wait until saving times out
 export const saveTimeout = 20000
