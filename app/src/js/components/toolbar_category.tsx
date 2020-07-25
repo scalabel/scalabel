@@ -69,7 +69,6 @@ class MultipleSelect extends Component<Props> {
             exclusive
             onChange={handleChange}
             value={getState().user.select.category}
-            size='small'
             color='primary'
             aria-label='vertical outlined primary button group'>
             {categories.map((name: string, index: number) => (
