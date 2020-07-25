@@ -21,7 +21,6 @@ import HomographyViewer from './homography_viewer'
 import Image3DViewer from './image3d_viewer'
 import Viewer2D from './viewer2d'
 import Viewer3D from './viewer3d'
-import { ItemTypeName } from '../common/types'
 
 /** Make drawable viewer based on viewer config */
 export function viewerFactory (
@@ -254,7 +253,8 @@ class LabelPane extends Component<Props> {
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
-      const imageOnly = this.state.task.config.itemType === ItemTypeName.IMAGE
+      const imageOnly =
+        this.state.task.config.itemType === types.ItemTypeName.IMAGE
       let paneControl: JSX.Element
       if (imageOnly) {
         paneControl = <></>
