@@ -74,7 +74,9 @@ class MultipleSelect extends Component<Props> {
             aria-label='vertical outlined primary button group'>
             {categories.map((name: string, index: number) => (
               <ToggleButton className={classes.button}
-                key={`category-${name}`} value={index}> {name} </ToggleButton>
+                key={`category-${name}`} value={index}>
+                  {name}
+              </ToggleButton>
             ))}
           </ToggleButtonGroup>
         </FormControl>
