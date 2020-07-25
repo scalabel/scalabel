@@ -106,7 +106,7 @@ export class Synchronizer {
                                sessionId: string, bots: boolean,
                                dispatch: ThunkDispatchType) {
     const shouldBeSaved = (a: types.BaseAction) => {
-      return sessionId === action.sessionId && !a.frontendOnly &&
+      return sessionId === a.sessionId && !a.frontendOnly &&
         !types.isSessionAction(a)
     }
     const actions: types.BaseAction[] = []
@@ -249,7 +249,9 @@ export class Synchronizer {
         dispatch(setStatusToSaved())
       }
     }
-    dispatch(makeSequential(actions))
+    if (actions.length > 0) {
+      dispatch(makeSequential(actions))
+    }
   }
 
   /**
