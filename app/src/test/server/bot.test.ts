@@ -5,13 +5,14 @@ import { configureStore } from '../../js/common/configure_store'
 import { ReduxStore } from '../../js/common/types'
 import { uid } from '../../js/common/uid'
 import { index2str } from '../../js/common/util'
+import { EventName } from '../../js/const/connection'
 import { State } from '../../js/functional/types'
-import { ItemExport } from '../../js/server/bdd_types'
 import { Bot } from '../../js/server/bot'
 import { serverConfig } from '../../js/server/defaults'
+import { ItemExport } from '../../js/types/bdd'
 import {
-  ActionPacketType, BotData, EventName, RegisterMessageType,
-  SyncActionMessageType } from '../../js/server/types'
+  ActionPacketType, BotData, RegisterMessageType,
+  SyncActionMessageType } from '../../js/types/message'
 import {
   getInitialState, getRandomBox2dAction,
   getRandomModelPoly } from './util/util'

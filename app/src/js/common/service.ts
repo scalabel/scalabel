@@ -1,4 +1,4 @@
-import { Endpoint } from '../server/types'
+import { Endpoint } from '../const/connection'
 import Cognito from './cognito'
 
 /**

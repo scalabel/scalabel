@@ -6,11 +6,12 @@ import { ChangeEvent } from 'react'
 import * as util from 'util'
 import Session from '../../js/common/session'
 import CreateForm from '../../js/components/create_form'
+import { Endpoint } from '../../js/const/connection'
+import { FormField } from '../../js/const/project'
 import { isStatusSaved } from '../../js/functional/selector'
-import { ItemExport } from '../../js/server/bdd_types'
 import { getTaskDir } from '../../js/server/path'
-import { Endpoint, FormField } from '../../js/server/types'
 import { formStyle } from '../../js/styles/create'
+import { ItemExport } from '../../js/types/bdd'
 
 export interface TestConfig {
   /** project name for current test */

@@ -3,8 +3,8 @@ import { BotManager } from '../../js/server/bot_manager'
 import { getRedisBotKey } from '../../js/server/path'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisPubSub } from '../../js/server/redis_pub_sub'
-import {
-  BotData, RegisterMessageType, ServerConfig } from '../../js/server/types'
+import { ServerConfig } from '../../js/types/config'
+import { BotData, RegisterMessageType } from '../../js/types/message'
 import { sleep } from '../project/util'
 import { getTestConfig } from './util/util'
 

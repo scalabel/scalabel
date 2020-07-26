@@ -2,7 +2,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { getAuth } from '../common/service'
-import { Endpoint } from '../server/types'
+import { Endpoint } from '../const/connection'
 import { myTheme } from '../styles/theme'
 import Dashboard, { DashboardContents } from './dashboard'
 

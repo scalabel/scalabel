@@ -1,5 +1,5 @@
+import { RegisterMessageType } from '../types/message'
 import { RedisClient } from './redis_client'
-import { RegisterMessageType } from './types'
 
 /**
  * Wraps redis pub/sub functionality

@@ -1,13 +1,14 @@
 import { sprintf } from 'sprintf-js'
 import { uid } from '../common/uid'
+import { BotConfig } from '../types/config'
+import {
+  BotData,
+  RegisterMessageType} from '../types/message'
 import { Bot } from './bot'
 import Logger from './logger'
 import { getRedisBotKey, getRedisBotSet } from './path'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
-import {
-  BotConfig, BotData,
-  RegisterMessageType} from './types'
 
 /**
  * Watches redis and spawns virtual sessions as needed

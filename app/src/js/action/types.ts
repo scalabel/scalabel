@@ -15,8 +15,7 @@ import {
   TaskType,
   ViewerConfigType
 } from '../functional/types'
-
-import { SyncActionMessageType } from '../server/types'
+import { SyncActionMessageType } from '../types/message'
 
 export const INIT_SESSION = 'INIT_SESSION'
 export const CHANGE_SELECT = 'CHANGE_SELECT'

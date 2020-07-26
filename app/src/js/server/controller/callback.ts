@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import https from 'https'
 import querystring from 'querystring'
+import { ServerConfig } from '../../types/config'
 import errorHandler from '../middleware/errorHandler'
-import { ServerConfig } from '../types'
 
 /**
  * Token set for exchange

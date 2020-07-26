@@ -5,7 +5,6 @@ itemDir: "./local-data/items"
 src: "."
 database: "local"
 userManagement: false
-sync: true
 bot:
     on: true
 ...

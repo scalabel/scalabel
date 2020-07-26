@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
+import { ServerConfig } from '../../types/config'
 import { HttpException } from '../exception'
-import { ServerConfig } from '../types'
 
 /**
  * Error handler

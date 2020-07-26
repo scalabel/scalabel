@@ -2,15 +2,15 @@ import _ from 'lodash'
 import socketio from 'socket.io'
 import * as types from '../action/types'
 import { index2str } from '../common/util'
+import { EventName } from '../const/connection'
+import { ServerConfig } from '../types/config'
+import { RegisterMessageType, SyncActionMessageType } from '../types/message'
+import { StateMetadata } from '../types/project'
 import Logger from './logger'
 import * as path from './path'
 import { ProjectStore } from './project_store'
 import { RedisPubSub } from './redis_pub_sub'
 import { SocketServer } from './socket_interface'
-import {
-  EventName, RegisterMessageType, ServerConfig,
-  StateMetadata, SyncActionMessageType
-} from './types'
 import { UserManager } from './user_manager'
 import { initSessionId, updateStateTimestamp } from './util'
 
@@ -120,8 +120,8 @@ export class Hub {
       new Set(actions.map((a) => a.type)).values())
 
     Logger.debug(`Received ${actions.length} actions and ` +
-                 `${taskActions.length} task actions from Session ` +
-                 `${sessionId}. The action types are ${actionTypes}.`)
+      `${taskActions.length} task actions from Session ` +
+      `${sessionId}. The action types are ${actionTypes}.`)
 
     // Load IDs of actions that have been processed already
     const redisMetadata =

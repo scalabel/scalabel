@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'express-jwt'
 import jwksRsa from 'jwks-rsa'
-
-import { ServerConfig } from '../types'
+import { ServerConfig } from '../../types/config'
 
 const auth = (config: ServerConfig) => {
   if (config.cognito) {

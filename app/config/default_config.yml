@@ -5,5 +5,4 @@ itemDir: "./local-data/items"
 src: "."
 database: "local"
 userManagement: false
-sync: false
 ...

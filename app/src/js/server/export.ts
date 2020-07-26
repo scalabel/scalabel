@@ -4,8 +4,8 @@ import { isValidId } from '../functional/states'
 import { Attribute, ConfigType,
   ItemType, Node2DType, PathPoint2DType, PathPointType, State
 } from '../functional/types'
+import { ItemExport, LabelExport, PolygonExportType } from '../types/bdd'
 import { transformBox2D, transformBox3D, transformPlane3D } from './bdd_type_transformers'
-import { ItemExport, LabelExport, PolygonExportType } from './bdd_types'
 
 /**
  * Converts a polygon label to export format

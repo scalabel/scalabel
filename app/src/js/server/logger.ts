@@ -1,6 +1,6 @@
 import winston from 'winston'
+import { MaybeError } from '../types/common'
 import { hostname, now } from './path'
-import { MaybeError } from './types'
 
 /**
  * Logger for console messages

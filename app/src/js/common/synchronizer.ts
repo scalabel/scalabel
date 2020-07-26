@@ -13,11 +13,12 @@ import {
   setStatusToUnsaved,
   updateTask} from '../action/common'
 import * as types from '../action/types'
+import { EventName } from '../const/connection'
 import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
 import { SocketClient } from '../server/socket_interface'
-import { ActionPacketType, EventName, RegisterMessageType,
-  SyncActionMessageType } from '../server/types'
+import { ActionPacketType, RegisterMessageType,
+  SyncActionMessageType } from '../types/message'
 import Session from './session'
 import { setupSession } from './session_setup'
 import { ThunkDispatchType } from './types'
