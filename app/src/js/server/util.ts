@@ -7,7 +7,8 @@ import { BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
-  LabelTypeName, TrackPolicyType } from '../common/types'
+  LabelTypeName, TrackPolicyType
+} from '../common/types'
 import { uid } from '../common/uid'
 import { Label2DTemplateType, State, TaskType } from '../functional/types'
 import { ItemExport } from './bdd_types'
@@ -16,8 +17,10 @@ import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
 import { Storage, STORAGE_FOLDERS } from './storage'
-import { CognitoConfig, CreationForm,
-  DatabaseType, ServerConfig, UserData, UserMetadata } from './types'
+import {
+  CognitoConfig, CreationForm,
+  DatabaseType, ServerConfig, UserData, UserMetadata
+} from './types'
 
 /**
  * Initializes backend environment variables
@@ -28,15 +31,22 @@ export async function readConfig (): Promise<ServerConfig> {
    * Make sure user env come last to override defaults
    */
 
-   // Read the config file name from argv
-  const configFlag = 'config'
+  // Read the config file name from argv
   const argv = yargs
-    .option(configFlag, {
-      describe: 'Config file path.'
+    .options({
+      config: {
+        type: 'string', demandOption: true,
+        describe: 'Config file path.'
+      },
+      dev: {
+        type: 'boolean', default: false,
+        describe: 'Turn on developer mode'
+      }
     })
-    .demandOption(configFlag)
-    .string(configFlag)
     .argv
+  if (argv.dev) {
+    Logger.setLogLevel('debug')
+  }
   const configPath: string = argv.config
   const config = parseConfig(configPath)
   await validateConfig(config)
@@ -233,9 +243,9 @@ export function getBundleFile (labelType: string): string {
  */
 export function getPolicy (
   itemType: string, labelTypes: string[],
-  policyTypes: string[], templates2d: {[name: string]: Label2DTemplateType}):
+  policyTypes: string[], templates2d: { [name: string]: Label2DTemplateType }):
   [string[], string[]] {
-    // TODO: Move this to be in front end after implementing label selector
+  // TODO: Move this to be in front end after implementing label selector
   switch (itemType) {
     case ItemTypeName.IMAGE:
     case ItemTypeName.VIDEO:
@@ -254,13 +264,13 @@ export function getPolicy (
     case ItemTypeName.POINT_CLOUD:
     case ItemTypeName.POINT_CLOUD_TRACKING:
       if (labelTypes.length === 1 &&
-            labelTypes[0] === LabelTypeName.BOX_3D) {
+        labelTypes[0] === LabelTypeName.BOX_3D) {
         return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
       }
       return [policyTypes, labelTypes]
     case ItemTypeName.FUSION:
       return [[TrackPolicyType.LINEAR_INTERPOLATION],
-        [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]]
+      [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]]
     default:
       return [policyTypes, labelTypes]
   }

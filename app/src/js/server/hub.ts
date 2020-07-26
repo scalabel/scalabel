@@ -119,9 +119,9 @@ export class Hub {
     const actionTypes = Array.from(
       new Set(actions.map((a) => a.type)).values())
 
-    Logger.info(`Received ${actions.length} actions and ` +
-                `${taskActions.length} task actions from Session ` +
-                `${sessionId}. The action types are ${actionTypes}.`)
+    Logger.debug(`Received ${actions.length} actions and ` +
+                 `${taskActions.length} task actions from Session ` +
+                 `${sessionId}. The action types are ${actionTypes}.`)
 
     // Load IDs of actions that have been processed already
     const redisMetadata =

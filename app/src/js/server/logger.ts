@@ -10,8 +10,12 @@ class Logger {
   private _logger: winston.Logger
   /** whether to mute the info logging */
   private _silent: boolean
+  /** log transports */
+  private transport: winston.transport
 
   constructor () {
+    this.transport = new winston.transports.Console({ level: 'info' })
+
     this._logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.timestamp({
@@ -26,11 +30,16 @@ class Logger {
         })
       ),
       transports: [
-        new winston.transports.Console()
+        this.transport
       ],
       exitOnError: true
     })
     this._silent = false
+  }
+
+  /** set log verbose level */
+  public setLogLevel (level: string): void {
+    this.transport.level = level
   }
 
   /** print errors */
@@ -49,6 +58,16 @@ class Logger {
     if (message && !this._silent) {
       this._logger.log({
         level: 'info',
+        message
+      })
+    }
+  }
+
+    /** print informative messages */
+  public debug (message: string): void {
+    if (message && !this._silent) {
+      this._logger.log({
+        level: 'debug',
         message
       })
     }
