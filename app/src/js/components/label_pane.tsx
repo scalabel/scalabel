@@ -10,7 +10,7 @@ import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import { changeViewerConfig, deletePane, splitPane, updatePane } from '../action/common'
-import Session from '../common/session'
+import { dispatch } from '../common/session'
 import * as types from '../common/types'
 import { makeDefaultViewerConfig } from '../functional/states'
 import { SplitType, ViewerConfigType } from '../functional/types'
@@ -119,7 +119,7 @@ class LabelPane extends Component<Props> {
               -1
             )
             if (newConfig) {
-              Session.dispatch(changeViewerConfig(
+              dispatch(changeViewerConfig(
                 pane.viewerId,
                 newConfig
               ))
@@ -164,7 +164,7 @@ class LabelPane extends Component<Props> {
             viewerConfig.sensor
           }
           onChange={(e) => {
-            Session.dispatch(changeViewerConfig(
+            dispatch(changeViewerConfig(
               pane.viewerId,
               { ...viewerConfig, sensor: e.target.value as number }
             ))
@@ -194,7 +194,7 @@ class LabelPane extends Component<Props> {
         <IconButton
           className={this.props.classes.icon}
           onClick={() => {
-            Session.dispatch(updatePane(pane.id, { hide: !pane.hide }))
+            dispatch(updatePane(pane.id, { hide: !pane.hide }))
           }}
         >
           {
@@ -210,7 +210,7 @@ class LabelPane extends Component<Props> {
           key={`verticalSplitButton${pane.id}`}
           className={this.props.classes.icon90}
           onClick={() => {
-            Session.dispatch(splitPane(
+            dispatch(splitPane(
               pane.id,
               SplitType.VERTICAL,
               pane.viewerId
@@ -226,7 +226,7 @@ class LabelPane extends Component<Props> {
           key={`horizontalSplitButton${pane.id}`}
           className={this.props.classes.icon}
           onClick={() => {
-            Session.dispatch(splitPane(
+            dispatch(splitPane(
               pane.id,
               SplitType.HORIZONTAL,
               pane.viewerId
@@ -242,7 +242,7 @@ class LabelPane extends Component<Props> {
           key={`deleteButton${pane.id}`}
           className={this.props.classes.icon}
           onClick={() => {
-            Session.dispatch(deletePane(
+            dispatch(deletePane(
               pane.id,
               pane.viewerId
             ))
@@ -253,6 +253,27 @@ class LabelPane extends Component<Props> {
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
+      const imageOnly =
+        this.state.task.config.itemType === types.ItemTypeName.IMAGE
+      let paneControl: JSX.Element
+      if (imageOnly) {
+        paneControl = <></>
+      } else {
+        paneControl = (<List>
+          <ListItem dense disableGutters>{deleteButton}</ListItem>
+          <ListItem dense disableGutters>
+            <div hidden={pane.hide}>
+              {verticalSplitButton}
+            </div>
+          </ListItem>
+          <ListItem dense disableGutters>
+          <div hidden={pane.hide}>
+            {horizontalSplitButton}
+          </div>
+          </ListItem>
+          <ListItem dense disableGutters>{visibilityButton}</ListItem>
+        </List>)
+      }
 
       const configBar = (
         <Grid
@@ -268,20 +289,7 @@ class LabelPane extends Component<Props> {
             {(numSensors > 1) ? viewerTypeMenu : null}
             {(numSensors > 1) ? viewerIdMenu : null}
           </div>
-          <List>
-            <ListItem dense disableGutters>{deleteButton}</ListItem>
-            <ListItem dense disableGutters>
-              <div hidden={pane.hide}>
-                {verticalSplitButton}
-              </div>
-            </ListItem>
-            <ListItem dense disableGutters>
-            <div hidden={pane.hide}>
-              {horizontalSplitButton}
-            </div>
-            </ListItem>
-            <ListItem dense disableGutters>{visibilityButton}</ListItem>
-          </List>
+          {paneControl}
         </Grid>
       )
       // Leaf, render viewer container
@@ -341,7 +349,7 @@ class LabelPane extends Component<Props> {
         defaultSize={defaultSize}
         primary={pane.primary}
         onChange={
-          (size) => Session.dispatch(updatePane(pane.id, { primarySize: size }))
+          (size) => dispatch(updatePane(pane.id, { primarySize: size }))
         }
         allowResize
         size={defaultSize}
