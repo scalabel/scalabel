@@ -138,7 +138,8 @@ async function startServers (
   const hub = new Hub(config, projectStore, userManager, publisher)
   await hub.listen(io)
 
-  httpServer.listen(config.port)
+  Logger.info(`Starting HTTP server at Port ${config.http.port}`)
+  httpServer.listen(config.http.port)
 }
 
 /**
@@ -194,7 +195,6 @@ async function main () {
   return
 }
 
-// TODO: Verify this is good promise handling
 main().then().catch((error: Error) => {
   Logger.error(error)
 })

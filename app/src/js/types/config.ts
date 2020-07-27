@@ -70,13 +70,36 @@ export interface StorageConfig {
   itemDir: string
 }
 
+export interface HttpConfig {
+  /** Port that server listens on */
+  port: number
+}
+
 /**
  * Information for backend environment variables
  * Populated using configuration file
  */
 export interface ServerConfig {
-  /** Port that server listens on */
-  port: number
+  /** http server configuratoin */
+  http: HttpConfig
+  /** storage configuration */
+  storage: StorageConfig
+  /** User management config */
+  user: UserConfig
+  /** server mode configuration */
+  mode: ModeConfig
+  /** redis config */
+  redis: RedisConfig
+  /** Bot config */
+  bot: BotConfig
+  /** cognito settings */
+  cognito?: CognitoConfig
+
+  /**
+   * Port that server listens on
+   * DEPRECATED: use http.port
+   */
+  port?: number
   /**
    * Where annotation logs and submissions are saved and loaded.
    * DEPRECATED: use storage.data
@@ -92,16 +115,4 @@ export interface ServerConfig {
    * DEPRECATED: use storage.type
    */
   database?: StorageType
-  /** storage configuration */
-  storage: StorageConfig
-  /** User management config */
-  user: UserConfig
-  /** server mode configuration */
-  mode: ModeConfig
-  /** redis config */
-  redis: RedisConfig
-  /** Bot config */
-  bot: BotConfig
-  /** cognito settings */
-  cognito?: CognitoConfig
 }

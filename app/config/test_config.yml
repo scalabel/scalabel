@@ -1,5 +1,6 @@
 ---
-port: 8687
+http:
+    port: 8687
 storage:
     data: "./test_data"
     database: "local"

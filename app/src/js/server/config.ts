@@ -53,11 +53,13 @@ export function parseConfig (configPath: string): ServerConfig {
   // Load the config file
   const userConfig: Partial<ServerConfig> =
     yaml.load(fs.readFileSync(configPath, 'utf8'))
-  const objectFields = ['redis', 'bot', 'storage', 'user', 'mode']
-
-  const storage = _.clone(defaults.serverConfig.storage)
 
   // Check the deprecated fields for backward compatibility
+  const storage = _.clone(defaults.serverConfig.storage)
+  const http = _.clone(defaults.serverConfig.http)
+  if (userConfig.port) {
+    http.port = userConfig.port
+  }
   if (userConfig.data) {
     storage.data = userConfig.data
   }
@@ -67,10 +69,12 @@ export function parseConfig (configPath: string): ServerConfig {
   if (userConfig.database) {
     storage.type = userConfig.database
   }
-  userConfig.storage = storage
+  // Use the correct fields are set, still give them higher priority
+  userConfig.http = { ...http, ...userConfig.http }
+  userConfig.storage = { ...storage, ...userConfig.storage }
 
   // Set the default object fields
-  objectFields.map((field) => {
+  _.keys(defaults.serverConfig).map((field) => {
     if (_.has(userConfig, field)) {
       _.set(userConfig, field, {
         ..._.get(defaults.serverConfig, field),

@@ -4,7 +4,9 @@ import { ServerConfig } from '../types/config'
 
 /* default config */
 export const serverConfig: ServerConfig = {
-  port: 8686,
+  http: {
+    port:  8686
+  },
   storage: {
     type: StorageType.LOCAL,
     data: './',
