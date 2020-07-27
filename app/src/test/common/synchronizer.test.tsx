@@ -6,11 +6,12 @@ import { Synchronizer } from '../../js/common/synchronizer'
 import { ThunkDispatchType } from '../../js/common/types'
 import { uid } from '../../js/common/uid'
 import { index2str } from '../../js/common/util'
+import { EventName } from '../../js/const/connection'
 import * as selector from '../../js/functional/selector'
-import {
-  ActionPacketType, EventName, RegisterMessageType,
-  SyncActionMessageType } from '../../js/server/types'
 import { updateState } from '../../js/server/util'
+import {
+  ActionPacketType, RegisterMessageType,
+  SyncActionMessageType } from '../../js/types/message'
 import { getInitialState, getRandomBox2dAction } from '../server/util/util'
 
 let sessionId: string

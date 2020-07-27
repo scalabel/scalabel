@@ -2,6 +2,7 @@ import { cleanup } from '@testing-library/react'
 import _ from 'lodash'
 import { goToItem } from '../../js/action/common'
 import { index2str } from '../../js/common/util'
+import { EventName } from '../../js/const/connection'
 import { serverConfig } from '../../js/server/defaults'
 import { FileStorage } from '../../js/server/file_storage'
 import { Hub } from '../../js/server/hub'
@@ -9,10 +10,12 @@ import { ProjectStore } from '../../js/server/project_store'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisPubSub } from '../../js/server/redis_pub_sub'
 import { RedisStore } from '../../js/server/redis_store'
-import { ActionPacketType, EventName, RegisterMessageType,
-  StateMetadata, SyncActionMessageType } from '../../js/server/types'
 import { UserManager } from '../../js/server/user_manager'
 import { updateState } from '../../js/server/util'
+import {
+  ActionPacketType, RegisterMessageType, SyncActionMessageType
+} from '../../js/types/message'
+import { StateMetadata } from '../../js/types/project'
 import { getInitialState, getRandomBox2dAction } from './util/util'
 
 jest.mock('../../js/server/file_storage')

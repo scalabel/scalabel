@@ -1,7 +1,7 @@
 import * as redis from 'redis'
 import { promisify } from 'util'
+import { RedisConfig } from '../types/config'
 import Logger from './logger'
-import { RedisConfig } from './types'
 
 /**
  * Exposes promisified versions of the necessary methods on a redis client

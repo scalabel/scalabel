@@ -1,5 +1,5 @@
 import { State } from '../functional/types'
-import { RegisterMessageType, SyncActionMessageType } from './types'
+import { RegisterMessageType, SyncActionMessageType } from '../types/message'
 
 type socketHandlerType =
   (() => {}) |

@@ -7,8 +7,10 @@ import { File } from 'formidable'
 import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
+import { FormField } from '../const/project'
 import { TaskType } from '../functional/types'
-import { ItemExport } from './bdd_types'
+import { ItemExport } from '../types/bdd'
+import { Project } from '../types/project'
 import {
   createProject, createTasks, parseFiles, parseForm, readItemsFile
 } from './create_project'
@@ -16,7 +18,6 @@ import { convertStateToExport } from './export'
 import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
-import * as types from './types'
 import { UserManager } from './user_manager'
 import { countLabels, parseProjectName } from './util'
 
@@ -73,7 +74,7 @@ export class Listeners {
       res.end()
     }
     try {
-      const projectName = req.query[types.FormField.PROJECT_NAME] as string
+      const projectName = req.query[FormField.PROJECT_NAME] as string
       // Grab the latest submissions from all tasks
       const tasks = await this.projectStore.getTasksInProject(projectName)
       let items: ItemExport[] = []
@@ -205,7 +206,7 @@ export class Listeners {
 
     // Read in the data
     const items = await readItemsFile(req.body.items)
-    let project: types.Project
+    let project: Project
     let projectName: string
     try {
       projectName = parseProjectName(req.body.projectName)

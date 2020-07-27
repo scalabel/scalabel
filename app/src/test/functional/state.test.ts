@@ -1,5 +1,5 @@
 import { makeItemExport, makeLabel, makeLabelExport } from '../../js/functional/states'
-import { ItemExport, LabelExport } from '../../js/server/bdd_types'
+import { ItemExport, LabelExport } from '../../js/types/bdd'
 
 describe('Defaults get overwritten', () => {
   test('Item export creation',() => {

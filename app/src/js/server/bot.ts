@@ -6,14 +6,15 @@ import { configureStore } from '../common/configure_store'
 import { ReduxStore, ShapeTypeName } from '../common/types'
 import { uid } from '../common/uid'
 import { index2str } from '../common/util'
+import { EventName } from '../const/connection'
 import { PathPoint2DType, RectType, State } from '../functional/types'
-import { ItemExport } from './bdd_types'
+import { ItemExport } from '../types/bdd'
+import {
+  ActionPacketType, BotData,
+  ModelQuery, RegisterMessageType, SyncActionMessageType
+} from '../types/message'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
-import {
-  ActionPacketType, BotData, EventName,
-  ModelQuery, RegisterMessageType, SyncActionMessageType
-} from './types'
 import { getPyConnFailedMsg } from './util'
 
 /**

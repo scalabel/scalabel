@@ -1,9 +1,9 @@
 import { promisify } from 'util'
+import { RedisConfig } from '../types/config'
 import Logger from './logger'
 import * as path from './path'
 import { RedisClient } from './redis_client'
 import { Storage } from './storage'
-import { RedisConfig } from './types'
 
 const MAX_HISTORIES = 3
 

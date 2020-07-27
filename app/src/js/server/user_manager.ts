@@ -1,5 +1,5 @@
+import { UserData, UserMetadata } from '../types/project'
 import { ProjectStore } from './project_store'
-import { UserData, UserMetadata } from './types'
 import { makeUserData, makeUserMetadata } from './util'
 
 /**

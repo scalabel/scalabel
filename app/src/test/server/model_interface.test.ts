@@ -1,9 +1,9 @@
 import { LabelTypeName } from '../../js/common/types'
+import { ModelEndpoint } from '../../js/const/connection'
 import { makePathPoint2D, makeRect } from '../../js/functional/states'
 import { PathPoint2DType, PathPointType, RectType } from '../../js/functional/types'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
-import { ModelEndpoint } from '../../js/server/types'
 
 let modelInterface: ModelInterface
 let projectName: string

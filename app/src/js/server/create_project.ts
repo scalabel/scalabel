@@ -3,6 +3,7 @@ import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../common/util'
+import { FormField } from '../const/project'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
 import {
   Attribute,
@@ -14,11 +15,12 @@ import {
   TaskType,
   TrackIdMap
 } from '../functional/types'
-import { ItemExport } from './bdd_types'
+import { ItemExport } from '../types/bdd'
+import { MaybeError } from '../types/common'
+import { CreationForm, FormFileData, Project } from '../types/project'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'
 import { ProjectStore } from './project_store'
-import * as types from './types'
 import * as util from './util'
 
 /**
@@ -27,32 +29,32 @@ import * as util from './util'
  */
 export async function parseForm (
   fields: { [key: string]: string},
-  projectStore: ProjectStore): Promise<types.CreationForm> {
+  projectStore: ProjectStore): Promise<CreationForm> {
   // Check that required fields were entered
-  let projectName = fields[types.FormField.PROJECT_NAME]
+  let projectName = fields[FormField.PROJECT_NAME]
   if (projectName === '') {
     throw(Error('Please create a project name'))
   } else {
     projectName = util.parseProjectName(projectName)
   }
 
-  const itemType = fields[types.FormField.ITEM_TYPE]
+  const itemType = fields[FormField.ITEM_TYPE]
   if (itemType === '') {
     throw(Error('Please choose an item type'))
   }
 
-  const labelType = fields[types.FormField.LABEL_TYPE]
+  const labelType = fields[FormField.LABEL_TYPE]
   if (labelType === '') {
     throw(Error('Please choose a label type'))
   }
 
   // Task size is not required for videos
   let taskSize = 1 // Video case
-  if (fields[types.FormField.ITEM_TYPE] !== ItemTypeName.VIDEO) {
-    if (fields[types.FormField.TASK_SIZE] === '') {
+  if (fields[FormField.ITEM_TYPE] !== ItemTypeName.VIDEO) {
+    if (fields[FormField.TASK_SIZE] === '') {
       throw(Error('Please specify a task size'))
     } else {
-      taskSize = parseInt(fields[types.FormField.TASK_SIZE], 10)
+      taskSize = parseInt(fields[FormField.TASK_SIZE], 10)
     }
   }
 
@@ -65,7 +67,7 @@ export async function parseForm (
   if (exists) {
     throw(Error('Project name already exists.'))
   }
-  const demoMode = fields[types.FormField.DEMO_MODE] === 'true'
+  const demoMode = fields[FormField.DEMO_MODE] === 'true'
   const form = util.makeCreationForm(
     projectName, itemType, labelType, pageTitle, taskSize,
     instructionUrl, demoMode
@@ -78,7 +80,7 @@ export async function parseForm (
  */
 export async function parseFiles (
   labelType: string, files: { [key: string]: string }, itemsRequired: boolean)
-  : Promise<types.FormFileData> {
+  : Promise<FormFileData> {
   return Promise.all([
     parseItems(files, itemsRequired),
     parseSensors(files),
@@ -123,7 +125,7 @@ function getDefaultCategories (labelType: string): string[] {
  */
 function readCategoriesFile (path: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: types.MaybeError, file: string) => {
+    fs.readFile(path, 'utf8', (err: MaybeError, file: string) => {
       if (err) {
         reject(err)
         return
@@ -146,8 +148,8 @@ function readCategoriesFile (path: string): Promise<string[]> {
 export function parseCategories (
   files: { [key: string]: string },
   labelType: string): Promise<string[]> {
-  if (types.FormField.CATEGORIES in files) {
-    return readCategoriesFile(files[types.FormField.CATEGORIES])
+  if (FormField.CATEGORIES in files) {
+    return readCategoriesFile(files[FormField.CATEGORIES])
   } else {
     const categories = getDefaultCategories(labelType)
     return Promise.resolve(categories)
@@ -171,7 +173,7 @@ function getDefaultAttributes (labelType: string): Attribute[] {
  */
 function readAttributesFile (path: string): Promise<Attribute[]> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
+    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
       if (err) {
         reject(err)
         return
@@ -189,8 +191,8 @@ function readAttributesFile (path: string): Promise<Attribute[]> {
 export function parseAttributes (
   files: { [key: string]: string },
   labelType: string): Promise<Attribute[]> {
-  if (types.FormField.ATTRIBUTES in files) {
-    return readAttributesFile(files[types.FormField.ATTRIBUTES])
+  if (FormField.ATTRIBUTES in files) {
+    return readAttributesFile(files[FormField.ATTRIBUTES])
   } else {
     const defaultAttributes = getDefaultAttributes(labelType)
     return Promise.resolve(defaultAttributes)
@@ -203,7 +205,7 @@ export function parseAttributes (
 export function readItemsFile (
   path: string): Promise<Array<Partial<ItemExport>>> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
+    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
       if (err) {
         reject(err)
         return
@@ -227,8 +229,8 @@ export function readItemsFile (
 export function parseItems (
   files: { [key: string]: string },
   itemsRequired: boolean): Promise<Array<Partial<ItemExport>>> {
-  if (types.FormField.ITEMS in files) {
-    return readItemsFile(files[types.FormField.ITEMS])
+  if (FormField.ITEMS in files) {
+    return readItemsFile(files[FormField.ITEMS])
   } else {
     if (itemsRequired) {
       return Promise.reject(Error('No item file.'))
@@ -241,7 +243,7 @@ export function parseItems (
 /** Read sensors file */
 function readSensorsFile (path: string): Promise<SensorType[]> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
+    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
       if (err) {
         reject(err)
       } else {
@@ -259,8 +261,8 @@ function readSensorsFile (path: string): Promise<SensorType[]> {
 /** Parse files for sensors */
 export function parseSensors (
   files: { [key: string]: string }): Promise<SensorType[]> {
-  if (types.FormField.SENSORS in files) {
-    return readSensorsFile(files[types.FormField.SENSORS])
+  if (FormField.SENSORS in files) {
+    return readSensorsFile(files[FormField.SENSORS])
   } else {
     return Promise.resolve([])
   }
@@ -269,7 +271,7 @@ export function parseSensors (
 /** Read sensors file */
 function readTemplatesFile (path: string): Promise<Label2DTemplateType[]> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: types.MaybeError, fileBytes: string) => {
+    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
       if (err) {
         reject(err)
       } else {
@@ -287,8 +289,8 @@ function readTemplatesFile (path: string): Promise<Label2DTemplateType[]> {
 /** Parse files for sensors */
 export function parseTemplates (
   files: { [key: string]: string }): Promise<Label2DTemplateType[]> {
-  if (files[types.FormField.LABEL_SPEC] in files) {
-    return readTemplatesFile(files[types.FormField.LABEL_SPEC])
+  if (files[FormField.LABEL_SPEC] in files) {
+    return readTemplatesFile(files[FormField.LABEL_SPEC])
   } else {
     return Promise.resolve([])
   }
@@ -298,8 +300,8 @@ export function parseTemplates (
  * Marshal data into project format
  */
 export function createProject (
-  form: types.CreationForm,
-  formFileData: types.FormFileData): Promise<types.Project> {
+  form: CreationForm,
+  formFileData: FormFileData): Promise<Project> {
 
   const handlerUrl = util.getHandlerUrl(form.itemType, form.labelType)
   const bundleFile = util.getBundleFile(form.labelType)
@@ -352,7 +354,7 @@ export function createProject (
   // to video name. It should be noted that a stable sort must be used to
   // maintain ordering provided in the image list file
   projectItems = _.sortBy(projectItems, [(item) => item.videoName])
-  const project: types.Project = {
+  const project: Project = {
     config,
     items: projectItems,
     sensors
@@ -479,7 +481,7 @@ function mapSensorToItems (
  * Task and item start number are used if other tasks/items already exist
  */
 export function createTasks (
-  project: types.Project,
+  project: Project,
   taskStartNum: number = 0,
   itemStartNum: number = 0): Promise<TaskType[]> {
   const sensors = project.sensors

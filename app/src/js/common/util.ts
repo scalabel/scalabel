@@ -1,6 +1,6 @@
 import { sprintf } from 'sprintf-js'
 import { ADD_LABELS } from '../action/types'
-import { ActionPacketType } from '../server/types'
+import { ActionPacketType } from '../types/message'
 import { ItemTypeName, LabelTypeName } from './types'
 
 /**

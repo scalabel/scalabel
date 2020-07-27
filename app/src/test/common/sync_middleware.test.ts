@@ -5,7 +5,7 @@ import Session from '../../js/common/session'
 import { makeSyncMiddleware } from '../../js/common/sync_middleware'
 import { Synchronizer } from '../../js/common/synchronizer'
 import { State } from '../../js/functional/types'
-import { SyncActionMessageType } from '../../js/server/types'
+import { SyncActionMessageType } from '../../js/types/message'
 import { getRandomBox2dAction } from '../server/util/util'
 import { testJson } from '../test_states/test_image_objects'
 

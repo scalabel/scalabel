@@ -6,7 +6,7 @@ import * as selector from '../functional/selector'
 import { ConnectionStatus, DeepPartialState, IdType, LabelType,
   PaneType, Select, ShapeAllType, ShapeType, SplitType,
   State, TaskType, ViewerConfigType } from '../functional/types'
-import { SyncActionMessageType } from '../server/types'
+import { SyncActionMessageType } from '../types/message'
 import * as types from './types'
 
 let getState = getStateGetter()

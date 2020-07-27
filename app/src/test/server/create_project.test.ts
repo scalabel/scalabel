@@ -10,7 +10,7 @@ import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
 import {
   CreationForm, FormFileData, Project
-} from '../../js/server/types'
+} from '../../js/types/project'
 import {
   sampleFormFileData,
   sampleFormImage,

@@ -3,11 +3,11 @@ import { sprintf } from 'sprintf-js'
 import { filterXSS } from 'xss'
 import { makeItemStatus, makeState } from '../functional/states'
 import { State, TaskType } from '../functional/types'
+import { Project, StateMetadata, UserData, UserMetadata } from '../types/project'
 import Logger from './logger'
 import * as path from './path'
 import { RedisStore } from './redis_store'
 import { Storage, StorageStructure } from './storage'
-import { Project, StateMetadata, UserData, UserMetadata } from './types'
 import {
   getPolicy, makeUserData, makeUserMetadata, safeParseJSON } from './util'
 

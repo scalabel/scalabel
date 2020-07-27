@@ -5,9 +5,9 @@ import { addBox2dLabel } from '../../../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
 import { RectType, State, TaskType, Vector3Type } from '../../../js/functional/types'
+import { parseConfig } from '../../../js/server/config'
 import { StorageStructure } from '../../../js/server/storage'
-import { ServerConfig } from '../../../js/server/types'
-import { parseConfig } from '../../../js/server/util'
+import { ServerConfig } from '../../../js/types/config'
 
 /**
  * Check equality between two Vector3Type objects

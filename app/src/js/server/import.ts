@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../common/types'
 import { makeCube, makeItem, makeLabel, makePathPoint2D, makePlane, makeRect } from '../functional/states'
 import { Attribute, IdType, ItemType, LabelIdMap, LabelType, PathPointType, ShapeIdMap, ShapeType } from '../functional/types'
-import { ItemExport, LabelExport } from './bdd_types'
+import { ItemExport, LabelExport } from '../types/bdd'
 
 /**
  * Converts single exported item to frontend state format
