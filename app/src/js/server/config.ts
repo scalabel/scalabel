@@ -2,7 +2,7 @@ import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import * as yargs from 'yargs'
-import { DatabaseType } from '../const/config'
+import { StorageType } from '../const/config'
 import { CognitoConfig, ServerConfig } from '../types/config'
 import * as defaults from './defaults'
 import Logger from './logger'
@@ -39,7 +39,7 @@ export async function readConfig (): Promise<ServerConfig> {
      * If command line dev is set to true,
      * it overrides the config file setting
      */
-    config.dev = true
+    config.mode.dev = true
   }
   await validateConfig(config)
   return config
@@ -51,8 +51,23 @@ export async function readConfig (): Promise<ServerConfig> {
  */
 export function parseConfig (configPath: string): ServerConfig {
   // Load the config file
-  const userConfig = yaml.load(fs.readFileSync(configPath, 'utf8'))
-  const objectFields = ['redis', 'bot']
+  const userConfig: Partial<ServerConfig> =
+    yaml.load(fs.readFileSync(configPath, 'utf8'))
+  const objectFields = ['redis', 'bot', 'storage', 'user', 'mode']
+
+  const storage = _.clone(defaults.serverConfig.storage)
+
+  // Check the deprecated fields for backward compatibility
+  if (userConfig.data) {
+    storage.data = userConfig.data
+  }
+  if (userConfig.itemDir) {
+    storage.itemDir = userConfig.itemDir
+  }
+  if (userConfig.database) {
+    storage.type = userConfig.database
+  }
+  userConfig.storage = storage
 
   // Set the default object fields
   objectFields.map((field) => {
@@ -104,10 +119,11 @@ function validateCognitoConfig (cognito: CognitoConfig | undefined) {
  * @param {ServerConfig} config
  */
 async function validateConfig (config: ServerConfig) {
-  if (config.database === DatabaseType.LOCAL) {
-    if (config.itemDir && !(await fs.pathExists(config.itemDir))) {
-      Logger.info(`Item dir ${config.itemDir} does not exist. Creating it`)
-      fs.ensureDirSync(config.itemDir)
+  if (config.storage.type === StorageType.LOCAL) {
+    if (config.storage.itemDir &&
+        !(await fs.pathExists(config.storage.itemDir))) {
+      Logger.info(`Item dir ${config.storage.itemDir} does not exist. Creating it`)
+      fs.ensureDirSync(config.storage.itemDir)
     }
   }
 
@@ -117,7 +133,7 @@ async function validateConfig (config: ServerConfig) {
       to ensure that write occurs before value is erased`)
   }
 
-  if (config.userManagement) {
+  if (config.user.on) {
     validateCognitoConfig(config.cognito)
   }
 }

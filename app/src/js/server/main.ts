@@ -46,10 +46,10 @@ function startHTTPServer (
   app.use('/js', express.static(getAbsoluteSrcPath('/')))
 
   // Set up static handlers for serving items to label
-  app.use('/items', express.static(config.itemDir))
+  app.use('/items', express.static(config.storage.itemDir))
 
   const authMiddleWare =
-    config.userManagement ?
+    config.user.on ?
       auth(config) :
       (_req: Request, _res: Response, next: NextFunction) => next()
 
@@ -101,8 +101,8 @@ async function makeBotManager (
  */
 async function launchRedisServer (config: ServerConfig) {
   let redisDir = './'
-  if (config.database === 'local') {
-    redisDir = config.data
+  if (config.storage.type === 'local') {
+    redisDir = config.storage.data
   }
 
   const redisProc = child.spawn('redis-server', [
@@ -167,7 +167,7 @@ async function main () {
   const config = await readConfig()
 
   // Initialize storage
-  const storage = await makeStorage(config.database, config.data)
+  const storage = await makeStorage(config.storage.type, config.storage.data)
 
   await checkLegacyProjectFolders(storage)
 
@@ -185,7 +185,7 @@ async function main () {
 
   // Initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
-  const userManager = new UserManager(projectStore, config.userManagement)
+  const userManager = new UserManager(projectStore, config.user.on)
   await userManager.clearUsers()
 
   await makeBotManager(config, subscriber, cacheClient)

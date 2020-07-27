@@ -1,8 +1,9 @@
 ---
 port: 8686
-data: "./local-data/scalabel"
-itemDir: "./local-data/items"
-database: "local"
+storage:
+    data: "./local-data/scalabel"
+    itemDir: "./local-data/items"
+    type: "local"
 bot:
     on: true
 ...

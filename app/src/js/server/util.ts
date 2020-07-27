@@ -8,7 +8,7 @@ import {
   LabelTypeName, TrackPolicyType
 } from '../common/types'
 import { uid } from '../common/uid'
-import { DatabaseType } from '../const/config'
+import { StorageType } from '../const/config'
 import { Label2DTemplateType, State, TaskType } from '../functional/types'
 import { ItemExport } from '../types/bdd'
 import { CreationForm, UserData, UserMetadata } from '../types/project'
@@ -26,7 +26,7 @@ export async function makeStorage (
   database: string, dir: string): Promise<Storage> {
   let storage: Storage
   switch (database) {
-    case DatabaseType.S3:
+    case StorageType.S3:
       try {
         const s3Store = new S3Storage(dir)
         await s3Store.makeBucket()
@@ -38,13 +38,13 @@ export async function makeStorage (
         storage = new FileStorage(dir)
       }
       break
-    case DatabaseType.DYNAMO_DB: {
+    case StorageType.DYNAMO_DB: {
       Logger.error(Error(sprintf(
         '%s storage not implemented yet, using file storage', database)))
       storage = new FileStorage(dir)
       break
     }
-    case DatabaseType.LOCAL: {
+    case StorageType.LOCAL: {
       storage = new FileStorage(dir)
       break
     }

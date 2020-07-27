@@ -1,5 +1,5 @@
 import { AttributeToolType } from '../common/types'
-import { DatabaseType } from '../const/config'
+import { StorageType } from '../const/config'
 import { ServerConfig } from '../types/config'
 
 /* default config */
@@ -7,11 +7,21 @@ export const serverConfig: ServerConfig = {
   port: 8686,
   data: './',
   itemDir: '',
-  database: DatabaseType.LOCAL,
-  userManagement: false,
-  sync: true,
-  autosave: true,
-  dev: false,
+  database: StorageType.LOCAL,
+  storage: {
+    type: StorageType.LOCAL,
+    data: './',
+    itemDir: ''
+  },
+  user: {
+    on: false
+  },
+  mode: {
+    sync: true,
+    autosave: true,
+    dev: false,
+    demo: false
+  },
   redis: {
     timeout: 3600,
     timeForWrite: 600,
