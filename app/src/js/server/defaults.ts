@@ -5,9 +5,6 @@ import { ServerConfig } from '../types/config'
 /* default config */
 export const serverConfig: ServerConfig = {
   port: 8686,
-  data: './',
-  itemDir: '',
-  database: StorageType.LOCAL,
   storage: {
     type: StorageType.LOCAL,
     data: './',
