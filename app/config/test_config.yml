@@ -1,9 +1,11 @@
 ---
-port: 8687
-data: "./test_data"
-database: "local"
-userManagement: false
-sync: false
-autosave: false
+http:
+    port: 8687
+storage:
+    data: "./test_data"
+    database: "local"
+mode:
+    sync: false
+    autosave: false
 redis:
     port: 6378

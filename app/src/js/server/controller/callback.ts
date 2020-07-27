@@ -91,7 +91,7 @@ class Callback {
     response: Response,
     _next: NextFunction
   ) => {
-    if (this.config.userManagement && this.config.cognito) {
+    if (this.config.user.on && this.config.cognito) {
       this.exchangeCode(request.query.code as string)
       .then((tokens: TokenSet) => {
         response.render('callback', {

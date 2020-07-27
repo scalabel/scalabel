@@ -258,7 +258,7 @@ describe('2d bounding box integration test with programmatic api', () => {
       files: {}
     }
     const address = new URL('http://localhost')
-    address.port = serverConfig.port.toString()
+    address.port = serverConfig.http.port.toString()
     address.pathname = Endpoint.POST_PROJECT_INTERNAL
     const response = await axios.post(
       address.toString(), createProjectBody, axiosConfig

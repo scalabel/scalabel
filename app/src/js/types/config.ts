@@ -1,10 +1,12 @@
+import { StorageType } from '../const/config'
+
 export interface RedisConfig {
   /** timeout (seconds) for clearing value from redis cache */
   timeout: number
   /** write to disk after this time interval (seconds) since last update */
-  timeForWrite: number
+  writebackTime: number
   /** write to disk every time this number of actions occurs */
-  numActionsForWrite: number
+  writebackActions: number
   /** Port that redis runs on */
   port: number
 }
@@ -37,31 +39,80 @@ export interface CognitoConfig {
   callbackUri: string
 }
 
-/**
- * Information for backend environment variables
- * Populated using configuration file
- */
-export interface ServerConfig {
-  /** Port that server listens on */
-  port: number
-  /** Where annotation logs and submissions are saved and loaded */
-  data: string
-  /** Directory of local images and point clouds for annotation */
-  itemDir: string
-  /** Database storage method */
-  database: string
-  /** Flag to enable user management */
-  userManagement: boolean
+export interface ModeConfig {
   /** Flag to enable session synchronization */
   sync: boolean
   /** whether to save automatically */
   autosave: boolean
   /** turn on developer mode */
   dev: boolean
+  /** launch server in demo mode */
+  demo: boolean
+}
+
+/**
+ * Configuration for user management system
+ */
+export interface UserConfig {
+  /** turn on user management system */
+  on: boolean
+}
+
+/**
+ * Configuration for file and database storage
+ */
+export interface StorageConfig {
+  /** type of the storage */
+  type: StorageType
+  /** storage path for scalabel system output */
+  data: string
+  /** Directory of local images and point clouds for annotation */
+  itemDir: string
+}
+
+export interface HttpConfig {
+  /** Port that server listens on */
+  port: number
+}
+
+/**
+ * Information for backend environment variables
+ * Populated using configuration file
+ */
+export interface ServerConfig {
+  /** http server configuratoin */
+  http: HttpConfig
+  /** storage configuration */
+  storage: StorageConfig
+  /** User management config */
+  user: UserConfig
+  /** server mode configuration */
+  mode: ModeConfig
   /** redis config */
   redis: RedisConfig
   /** Bot config */
   bot: BotConfig
   /** cognito settings */
   cognito?: CognitoConfig
+
+  /**
+   * Port that server listens on
+   * DEPRECATED: use http.port
+   */
+  port?: number
+  /**
+   * Where annotation logs and submissions are saved and loaded.
+   * DEPRECATED: use storage.data
+   */
+  data?: string
+  /**
+   * Directory of local images and point clouds for annotation
+   * DEPRECATED: use storage.itemDir
+   */
+  itemDir?: string
+  /**
+   * Database storage method
+   * DEPRECATED: use storage.type
+   */
+  database?: StorageType
 }
