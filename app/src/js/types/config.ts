@@ -4,9 +4,9 @@ export interface RedisConfig {
   /** timeout (seconds) for clearing value from redis cache */
   timeout: number
   /** write to disk after this time interval (seconds) since last update */
-  timeForWrite: number
+  writebackTime: number
   /** write to disk every time this number of actions occurs */
-  numActionsForWrite: number
+  writebackActions: number
   /** Port that redis runs on */
   port: number
 }

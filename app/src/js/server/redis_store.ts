@@ -29,8 +29,8 @@ export class RedisStore {
    */
   constructor (config: RedisConfig, storage: Storage, client: RedisClient) {
     this.timeout = config.timeout
-    this.timeForWrite = config.timeForWrite
-    this.numActionsForWrite = config.numActionsForWrite
+    this.timeForWrite = config.writebackTime
+    this.numActionsForWrite = config.writebackActions
     this.storage = storage
     this.client = client
     this.client.config('SET', 'notify-keyspace-events', 'Ex')

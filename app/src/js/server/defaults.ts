@@ -23,8 +23,8 @@ export const serverConfig: ServerConfig = {
   },
   redis: {
     timeout: 3600,
-    timeForWrite: 600,
-    numActionsForWrite: 32,
+    writebackTime: 600,
+    writebackActions: 32,
     port: 6379
   },
   bot: {

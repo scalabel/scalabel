@@ -57,7 +57,7 @@ describe('Test redis cache', () => {
 
   test('Writes back on timeout', async () => {
     const timeoutConfig = _.clone(config)
-    timeoutConfig.redis.timeForWrite = 0.2
+    timeoutConfig.redis.writebackTime = 0.2
     timeoutConfig.redis.timeout = 2.0
     const store = new RedisStore(timeoutConfig.redis, storage, client)
 
@@ -71,7 +71,7 @@ describe('Test redis cache', () => {
 
   test('Writes back after action limit with 1 action at a time', async () => {
     const actionConfig = _.clone(config)
-    actionConfig.redis.numActionsForWrite = 5
+    actionConfig.redis.writebackActions = 5
     const store = new RedisStore(actionConfig.redis, storage, client)
 
     const key = 'testKey2'
@@ -87,7 +87,7 @@ describe('Test redis cache', () => {
 
   test('Writes back after action limit with multi action packet', async () => {
     const actionConfig = _.clone(config)
-    actionConfig.redis.numActionsForWrite = 5
+    actionConfig.redis.writebackActions = 5
     const store = new RedisStore(actionConfig.redis, storage, client)
     await checkFileCount()
     await store.setExWithReminder('key', 'value', metadataString, 5)
