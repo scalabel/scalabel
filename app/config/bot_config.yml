@@ -2,9 +2,7 @@
 port: 8686
 data: "./local-data/scalabel"
 itemDir: "./local-data/items"
-src: "."
 database: "local"
-userManagement: false
 bot:
     on: true
 ...

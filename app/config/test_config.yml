@@ -1,7 +1,6 @@
 ---
 port: 8687
 data: "./test_data"
-src: "."
 database: "local"
 userManagement: false
 sync: false
