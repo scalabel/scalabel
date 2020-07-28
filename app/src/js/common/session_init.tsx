@@ -4,7 +4,7 @@ import io from 'socket.io-client'
 import { connect, disconnect, receiveBroadcast, registerSession,
   updateAll } from '../action/common'
 import { EventName } from '../const/connection'
-import { State } from '../functional/types'
+import { State } from '../types/functional'
 import { SyncActionMessageType } from '../types/message'
 import { configureStore } from './configure_store'
 import Session from './session'

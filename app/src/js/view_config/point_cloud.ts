@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { PointCloudViewerConfigType } from '../functional/types'
+import { PointCloudViewerConfigType } from '../types/functional'
 import { Vector3D } from '../math/vector3d'
 
 /**

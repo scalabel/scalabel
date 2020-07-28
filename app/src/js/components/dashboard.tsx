@@ -10,7 +10,7 @@ import Typography from '@material-ui/core/Typography'
 import React from 'react'
 import { QueryArg } from '../const/common'
 import { Endpoint } from '../const/connection'
-import { SubmitData } from '../functional/types'
+import { SubmitData } from '../types/functional'
 import { dashboardWindowStyles, headerStyle,
   listEntryStyle, sidebarStyle } from '../styles/dashboard'
 import DividedPage from './divided_page'

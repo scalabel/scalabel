@@ -37,7 +37,7 @@ import {
   TrackType,
   UserType,
   ViewerConfigType
-} from './types'
+} from '../types/functional'
 
 /**
  * Initialize a label state and deep copy the parameters.

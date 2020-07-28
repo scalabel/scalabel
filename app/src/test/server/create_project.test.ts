@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra'
-import { State, TaskType } from '../../js/functional/types'
+import { State, TaskType } from '../../js/types/functional'
 import { createProject, createTasks } from '../../js/server/create_project'
 import { serverConfig } from '../../js/server/defaults'
 import { convertStateToExport } from '../../js/server/export'

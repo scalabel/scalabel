@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Session from '../common/session'
 import { isValidId } from '../functional/states'
-import { IdType, INVALID_ID, LabelType, ShapeType, TrackType } from '../functional/types'
+import { IdType, INVALID_ID, LabelType, ShapeType, TrackType } from '../types/functional'
 import { addTrack, deleteLabels } from './common'
 import { AddTrackAction, DeleteLabelsAction } from '../types/action'
 

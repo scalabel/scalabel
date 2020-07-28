@@ -7,7 +7,7 @@ import Session from '../common/session'
 import { ViewerConfigTypeName } from '../const/common'
 import { isCurrentFrameLoaded } from '../functional/state_util'
 import { makeTaskConfig } from '../functional/states'
-import { ConfigType, Image3DViewerConfigType, State } from '../functional/types'
+import { ConfigType, Image3DViewerConfigType, State } from '../types/functional'
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
 import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 

@@ -1,5 +1,5 @@
 import { Attribute, ConfigType, Label2DTemplateType, SensorType
-} from '../functional/types'
+} from '../types/functional'
 import { ItemExport } from './bdd'
 
 /**

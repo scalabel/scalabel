@@ -1,5 +1,5 @@
 import { ActionType } from '../types/action'
-import { State } from '../functional/types'
+import { State } from '../types/functional'
 
 export type GetStateFunc = () => State
 export type DispatchFunc = (actoin: ActionType) => void

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { LabelTypeName } from '../../const/common'
 import { makeLabel } from '../../functional/states'
-import { IdType, INVALID_ID, ShapeType, State } from '../../functional/types'
+import { IdType, INVALID_ID, ShapeType, State } from '../../types/functional'
 import { Vector3D } from '../../math/vector3d'
 import { Box3D } from './box3d'
 import { Grid3D } from './grid3d'

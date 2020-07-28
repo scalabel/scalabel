@@ -8,7 +8,7 @@ import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
 import { FormField } from '../const/project'
-import { TaskType } from '../functional/types'
+import { TaskType } from '../types/functional'
 import { ItemExport } from '../types/bdd'
 import { Project } from '../types/project'
 import {

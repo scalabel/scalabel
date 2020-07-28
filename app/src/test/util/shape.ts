@@ -1,7 +1,7 @@
 import { getState } from '../../js/common/session'
 import { GetStateFunc } from '../../js/common/simple_store'
 import { getShape, getShapes } from '../../js/functional/state_util'
-import { IdType, PathPoint2DType, SimpleRect } from '../../js/functional/types'
+import { IdType, PathPoint2DType, SimpleRect } from '../../js/types/functional'
 
 /**
  * Check that the box's coords are correct

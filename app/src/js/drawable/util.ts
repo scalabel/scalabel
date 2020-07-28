@@ -1,6 +1,6 @@
 import { sprintf } from 'sprintf-js'
 import { id2int, isValidId } from '../functional/states'
-import { IdType } from '../functional/types'
+import { IdType } from '../types/functional'
 
 // Constants
 const COLOR_PALETTE = [

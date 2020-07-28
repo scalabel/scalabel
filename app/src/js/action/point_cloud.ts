@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { changeViewerConfig, makeBaseAction } from '../action/common'
-import { PointCloudViewerConfigType, ViewerConfigType } from '../functional/types'
+import { PointCloudViewerConfigType, ViewerConfigType } from '../types/functional'
 import { Vector3D } from '../math/vector3d'
 import * as actionTypes from '../types/action'
 import * as actionConsts from '../const/action'

@@ -5,7 +5,7 @@ import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
 import { ConnectionStatus, DeepPartialState, IdType, LabelType,
   PaneType, Select, ShapeAllType, ShapeType, SplitType,
-  State, TaskType, ViewerConfigType } from '../functional/types'
+  State, TaskType, ViewerConfigType } from '../types/functional'
 import { SyncActionMessageType } from '../types/message'
 import * as actionConsts from '../const/action'
 import * as actionTypes from '../types/action'

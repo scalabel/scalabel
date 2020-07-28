@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { addBox2dLabel } from '../../../../js/action/box2d'
 import { TrackInterp } from '../../../../js/auto/track/interp/interp'
 import { dispatch, getState } from '../../../../js/common/session'
-import { LabelType, RectType, SimpleRect } from '../../../../js/functional/types'
+import { LabelType, RectType, SimpleRect } from '../../../../js/types/functional'
 import { setupTestStore } from '../../../components/util'
 import { emptyTrackingTask } from '../../../test_states/test_track_objects'
 

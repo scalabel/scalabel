@@ -1,4 +1,4 @@
-import { IdType } from '../../../functional/types'
+import { IdType } from '../../../types/functional'
 import { Track } from '../../track'
 import { TrackPolicyType } from '../../../const/common'
 

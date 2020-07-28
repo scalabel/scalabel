@@ -4,7 +4,7 @@ import React from 'react'
 import Dashboard, {
   DashboardContents, StyledHeader, StyledSidebar
 } from '../../js/components/dashboard'
-import { SubmitData } from '../../js/functional/types'
+import { SubmitData } from '../../js/types/functional'
 import { myTheme } from '../../js/styles/theme'
 
 afterEach(cleanup)

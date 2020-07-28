@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect'
 import { sprintf } from 'sprintf-js'
 import { ReduxState } from '../types/common'
-import { ConfigType, ConnectionStatus, SessionType } from './types'
+import { ConfigType, ConnectionStatus, SessionType } from '../types/functional'
 
 /**
  * Load the task config

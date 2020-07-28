@@ -6,7 +6,7 @@ import { Key } from '../const/common'
 import { Label2DHandler } from '../drawable/2d/label2d_handler'
 import { Label2DList } from '../drawable/2d/label2d_list'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
-import { ImageViewerConfigType, State } from '../functional/types'
+import { ImageViewerConfigType, State } from '../types/functional'
 import { Vector2D } from '../math/vector2d'
 import { label2dViewStyle } from '../styles/label'
 import {

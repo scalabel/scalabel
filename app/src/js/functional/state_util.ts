@@ -7,7 +7,7 @@ import {
   State,
   TrackType,
   ViewerConfigType
-} from './types'
+} from '../types/functional'
 
 // TODO- move these to selector file and use hierarchical structure
 

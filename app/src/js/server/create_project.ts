@@ -14,7 +14,7 @@ import {
   TaskStatus,
   TaskType,
   TrackIdMap
-} from '../functional/types'
+} from '../types/functional'
 import { ItemExport } from '../types/bdd'
 import { MaybeError } from '../types/common'
 import { CreationForm, FormFileData, Project } from '../types/project'

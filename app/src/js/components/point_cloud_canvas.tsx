@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import * as THREE from 'three'
 import Session from '../common/session'
 import { isCurrentFrameLoaded, isCurrentItemLoaded } from '../functional/state_util'
-import { PointCloudViewerConfigType, State } from '../functional/types'
+import { PointCloudViewerConfigType, State } from '../types/functional'
 import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
 
 const styles = () => createStyles({

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { LabelType, RectType, ShapeType, SimpleRect } from '../../../../functional/types'
+import { LabelType, RectType, ShapeType, SimpleRect } from '../../../../types/functional'
 import { assignShapesInRange, getAutoLabelRange, TrackInterp } from '../interp'
 
 /**

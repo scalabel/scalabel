@@ -3,7 +3,7 @@ import { deleteTracks, terminateTracks } from '../action/track'
 import { BaseAction } from '../types/action'
 import Session, { dispatch, getState } from '../common/session'
 import { Track } from '../common/track'
-import { LabelIdMap, ShapeIdMap } from '../functional/types'
+import { LabelIdMap, ShapeIdMap } from '../types/functional'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
 

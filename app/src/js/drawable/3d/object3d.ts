@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { IdType, INVALID_ID } from '../../functional/types'
+import { IdType, INVALID_ID } from '../../types/functional'
 
 /**
  * Basic class for object 3d so that we can assign the ids

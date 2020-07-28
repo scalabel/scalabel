@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { IdType, LabelIdMap, State } from '../../js/functional/types'
+import { IdType, LabelIdMap, State } from '../../js/types/functional'
 
 /**
  * Find the new label that is not already in the labelIds

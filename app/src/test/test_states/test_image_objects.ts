@@ -1,5 +1,5 @@
 import { AttributeToolType } from '../../js/const/common'
-import { DeepPartialState } from '../../js/functional/types'
+import { DeepPartialState } from '../../js/types/functional'
 
 export const testJson: DeepPartialState = {
   session: {

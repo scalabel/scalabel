@@ -1,4 +1,4 @@
-import { CubeType } from '../../../../functional/types'
+import { CubeType } from '../../../../types/functional'
 import { Vector3D } from '../../../../math/vector3d'
 import { Track } from '../../../track'
 import { LinearInterpolationPolicy } from './linear_interpolation_policy'

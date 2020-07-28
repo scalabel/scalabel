@@ -9,7 +9,7 @@ import { ShapeTypeName } from '../const/common'
 import { uid } from '../common/uid'
 import { index2str } from '../common/util'
 import { EventName } from '../const/connection'
-import { PathPoint2DType, RectType, State } from '../functional/types'
+import { PathPoint2DType, RectType, State } from '../types/functional'
 import { ItemExport } from '../types/bdd'
 import {
   ActionPacketType, BotData,

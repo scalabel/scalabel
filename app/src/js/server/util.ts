@@ -9,7 +9,7 @@ import {
 } from '../const/common'
 import { uid } from '../common/uid'
 import { StorageType } from '../const/config'
-import { Label2DTemplateType, State, TaskType } from '../functional/types'
+import { Label2DTemplateType, State, TaskType } from '../types/functional'
 import { ItemExport } from '../types/bdd'
 import { CreationForm, UserData, UserMetadata } from '../types/project'
 import { FileStorage } from './file_storage'

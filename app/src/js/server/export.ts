@@ -3,7 +3,7 @@ import { AttributeToolType, LabelTypeName } from '../const/common'
 import { isValidId } from '../functional/states'
 import { Attribute, ConfigType,
   ItemType, Node2DType, PathPoint2DType, PathPointType, State
-} from '../functional/types'
+} from '../types/functional'
 import { ItemExport, LabelExport, PolygonExportType } from '../types/bdd'
 import { transformBox2D, transformBox3D, transformPlane3D } from './bdd_type_transformers'
 

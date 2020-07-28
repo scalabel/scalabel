@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Session from '../common/session'
-import { State as StateType } from '../functional/types'
+import { State as StateType } from '../types/functional'
 
 /**
  * Root class of our components

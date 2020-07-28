@@ -2,7 +2,7 @@ import { ActionCreator, AnyAction, Store } from 'redux'
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 import { StateWithHistory } from 'redux-undo'
 import { BaseAction } from '../types/action'
-import { State } from '../functional/types'
+import { State } from '../types/functional'
 
 /**
  * Defining the types of some general callback functions

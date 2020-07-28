@@ -16,7 +16,7 @@ import * as actionConsts from '../const/action'
 import * as actionTypes from '../types/action'
 import { EventName } from '../const/connection'
 import { isSessionFullySaved } from '../functional/selector'
-import { State } from '../functional/types'
+import { State } from '../types/functional'
 import { SocketClient } from '../server/socket_interface'
 import { ActionPacketType, RegisterMessageType,
   SyncActionMessageType } from '../types/message'

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { isValidId, makePathPoint2D } from '../../functional/states'
-import { IdType, PathPoint2DType, PathPointType } from '../../functional/types'
+import { IdType, PathPoint2DType, PathPointType } from '../../types/functional'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, toCssColor } from '../util'
 

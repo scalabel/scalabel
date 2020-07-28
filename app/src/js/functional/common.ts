@@ -27,7 +27,7 @@ import {
   TrackType,
   UserType,
   ViewerConfigType
-} from './types'
+} from '../types/functional'
 import {
   assignToArray,
   pickArray,

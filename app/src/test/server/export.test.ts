@@ -2,7 +2,7 @@ import * as fs from 'fs-extra'
 import _ from 'lodash'
 import { LabelTypeName } from '../../js/const/common'
 import { makePathPoint2D } from '../../js/functional/states'
-import { PathPointType, State } from '../../js/functional/types'
+import { PathPointType, State } from '../../js/types/functional'
 import {
   convertItemToExport,
   convertPolygonToExport, convertStateToExport

@@ -14,7 +14,7 @@ import {
   SubmitData,
   TaskType,
   ViewerConfigType
-} from '../functional/types'
+} from '../types/functional'
 
 export interface BaseAction {
   /** unique id for the action */

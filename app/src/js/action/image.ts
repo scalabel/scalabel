@@ -1,4 +1,4 @@
-import { ImageViewerConfigType } from '../functional/types'
+import { ImageViewerConfigType } from '../types/functional'
 import {
   MAX_SCALE,
   MIN_SCALE

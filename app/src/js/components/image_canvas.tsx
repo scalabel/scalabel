@@ -3,7 +3,7 @@ import * as React from 'react'
 import { connect } from 'react-redux'
 import Session from '../common/session'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
-import { ImageViewerConfigType, State } from '../functional/types'
+import { ImageViewerConfigType, State } from '../types/functional'
 import { imageViewStyle } from '../styles/label'
 import {
   clearCanvas,

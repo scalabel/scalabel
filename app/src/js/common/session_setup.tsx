@@ -9,7 +9,7 @@ import { addViewerConfig, initSessionAction, loadItem,
 import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
 import Window from '../components/window'
 import { makeDefaultViewerConfig } from '../functional/states'
-import { DeepPartialState, PointCloudViewerConfigType, SplitType, State } from '../functional/types'
+import { DeepPartialState, PointCloudViewerConfigType, SplitType, State } from '../types/functional'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
 import Session from './session'

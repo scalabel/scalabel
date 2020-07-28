@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { Cursor, LabelTypeName } from '../../const/common'
 import { makeLabel, makeRect } from '../../functional/states'
-import { LabelType, RectType, ShapeType, State } from '../../functional/types'
+import { LabelType, RectType, ShapeType, State } from '../../types/functional'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { blendColor, Context2D, encodeControlColor } from '../util'

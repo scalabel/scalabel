@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { ShapeTypeName } from '../../const/common'
 import { makeCube } from '../../functional/states'
-import { CubeType, IdType, ShapeType } from '../../functional/types'
+import { CubeType, IdType, ShapeType } from '../../types/functional'
 import { Vector2D } from '../../math/vector2d'
 import { Vector3D } from '../../math/vector3d'
 import { projectionFromNDC } from '../../view_config/point_cloud'

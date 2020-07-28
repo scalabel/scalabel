@@ -1,5 +1,5 @@
 import { ShapeTypeName } from '../const/common'
-import * as types from '../functional/types'
+import * as types from '../types/functional'
 import * as bdd from '../types/bdd'
 
 /**

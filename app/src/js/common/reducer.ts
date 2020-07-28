@@ -3,7 +3,7 @@ import * as actionConsts from '../const/action'
 import * as actionTypes from '../types/action'
 import * as common from '../functional/common'
 import { makeState } from '../functional/states'
-import { State } from '../functional/types'
+import { State } from '../types/functional'
 
 /**
  * Process one action

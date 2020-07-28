@@ -13,7 +13,7 @@ import { changeViewerConfig, deletePane, splitPane, updatePane } from '../action
 import { dispatch } from '../common/session'
 import * as types from '../const/common'
 import { makeDefaultViewerConfig } from '../functional/states'
-import { SplitType, ViewerConfigType } from '../functional/types'
+import { SplitType, ViewerConfigType } from '../types/functional'
 import { paneBarStyles, resizerStyles } from '../styles/split_pane'
 import { Component } from './component'
 import { viewerReactKey } from './drawable_viewer'

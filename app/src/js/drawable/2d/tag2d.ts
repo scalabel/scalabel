@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
 import { AttributeToolType } from '../../const/common'
-import { Attribute, IdType, LabelType, ShapeType, State } from '../../functional/types'
+import { Attribute, IdType, LabelType, ShapeType, State } from '../../types/functional'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D } from '../util'
 import { DrawMode, Label2D } from './label2d'
