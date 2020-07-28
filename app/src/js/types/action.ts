@@ -15,6 +15,7 @@ import {
   TaskType,
   ViewerConfigType
 } from '../types/functional'
+import { SyncActionMessageType } from './message'
 
 export interface BaseAction {
   /** unique id for the action */
