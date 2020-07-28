@@ -1,6 +1,6 @@
 import { cleanup } from '@testing-library/react'
 import { setStatusToUnsaved } from '../../js/action/common'
-import { AddLabelsAction } from '../../js/action/types'
+import { AddLabelsAction } from '../../js/types/action'
 import Session from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
 import { ThunkDispatchType } from '../../js/common/types'

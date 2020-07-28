@@ -4,7 +4,7 @@ import {
   MIN_SCALE
 } from '../view_config/image'
 import { changeViewerConfig } from './common'
-import * as types from './types'
+import * as actionTypes from '../types/action'
 
 /**
  * Zoom the image
@@ -22,7 +22,7 @@ export function zoomImage (
   zoomRatio: number,
   viewerId: number,
   config: ImageViewerConfigType
-): types.ChangeViewerConfigAction | null {
+): actionTypes.ChangeViewerConfigAction | null {
   const newScale = config.viewScale * zoomRatio
   if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
     const newConfig = {

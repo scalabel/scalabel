@@ -4,7 +4,7 @@ import { LabelTypeName } from '../common/types'
 import { makeLabel } from '../functional/states'
 import { updateObject } from '../functional/util'
 import * as actions from './common'
-import { AddLabelsAction, ChangeLabelsAction } from './types'
+import { AddLabelsAction, ChangeLabelsAction } from '../types/action'
 
 /**
  * If tag exists for attribute, updates the label, else create a new label for

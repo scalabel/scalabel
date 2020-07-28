@@ -1,4 +1,4 @@
-import { ActionType } from '../action/types'
+import { ActionType } from '../types/action'
 import { State } from '../functional/types'
 
 export type GetStateFunc = () => State

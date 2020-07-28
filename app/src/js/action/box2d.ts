@@ -2,7 +2,7 @@ import { LabelTypeName } from '../common/types'
 import { makeLabel, makeRect } from '../functional/states'
 import { IdType, RectType, ShapeType, SimpleRect } from '../functional/types'
 import * as actions from './common'
-import { AddLabelsAction, ChangeShapesAction } from './types'
+import { AddLabelsAction, ChangeShapesAction } from '../types/action'
 
 /**
  * Create AddLabelAction to create a box2d label

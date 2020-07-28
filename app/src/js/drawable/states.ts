@@ -1,6 +1,6 @@
 import { addLabel, addLabelsToItem, addTrack, changeLabelsProps, changeShapesInItems, deleteLabel, makeNullAction, makeSequential } from '../action/common'
 import { deleteTracks, terminateTracks } from '../action/track'
-import { BaseAction } from '../action/types'
+import { BaseAction } from '../types/action'
 import Session, { dispatch, getState } from '../common/session'
 import { Track } from '../common/track'
 import { LabelIdMap, ShapeIdMap } from '../functional/types'

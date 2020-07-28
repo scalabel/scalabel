@@ -12,7 +12,8 @@ import {
   setStatusToSubmitting,
   setStatusToUnsaved,
   updateTask} from '../action/common'
-import * as types from '../action/types'
+import * as actionConsts from '../const/action'
+import * as actionTypes from '../types/action'
 import { EventName } from '../const/connection'
 import { isSessionFullySaved } from '../functional/selector'
 import { State } from '../functional/types'
@@ -63,14 +64,14 @@ export class Synchronizer {
   /** The user/browser id, constant across sessions */
   public userId: string
   /** Actions queued to be sent to the backend */
-  public actionQueue: types.BaseAction[]
+  public actionQueue: actionTypes.BaseAction[]
   /**
    * Actions in the process of being saved, mapped by packet id
    * OrderedMap ensures that resending keeps the same order
    */
   private actionsPendingSave: OrderedMap<ActionPacketType>
   /** Timestamped log for completed actions */
-  private actionLog: types.BaseAction[]
+  private actionLog: actionTypes.BaseAction[]
   /** Log of packets that have been acked */
   private ackedPackets: Set<string>
   /** The ids of action packets pending model predictions */
@@ -103,17 +104,17 @@ export class Synchronizer {
   /**
    * Queue a new action for saving
    */
-  public queueActionForSaving (action: types.BaseAction, autosave: boolean,
+  public queueActionForSaving (action: actionTypes.BaseAction, autosave: boolean,
                                sessionId: string, bots: boolean,
                                dispatch: ThunkDispatchType) {
-    const shouldBeSaved = (a: types.BaseAction) => {
+    const shouldBeSaved = (a: actionTypes.BaseAction) => {
       return sessionId === a.sessionId && !a.frontendOnly &&
-        !types.isSessionAction(a)
+        !actionConsts.isSessionAction(a)
     }
-    const actions: types.BaseAction[] = []
-    if (action.type === types.SEQUENTIAL) {
-      actions.push(...(action as types.SequentialAction).actions.filter(
-        (a: types.BaseAction) => shouldBeSaved(a)
+    const actions: actionTypes.BaseAction[] = []
+    if (action.type === actionConsts.SEQUENTIAL) {
+      actions.push(...(action as actionTypes.SequentialAction).actions.filter(
+        (a: actionTypes.BaseAction) => shouldBeSaved(a)
       ))
     } else {
       if (shouldBeSaved(action)) {
@@ -175,14 +176,14 @@ export class Synchronizer {
     } else {
       // Get the local session in-sync after a disconnect/reconnect
       if (autosave) {
-        const actions: types.BaseAction[] = []
+        const actions: actionTypes.BaseAction[] = []
         // Update with any backend changes that occurred during disconnect
         actions.push(updateTask(state.task))
 
         // Re-apply frontend task actions after updating task from backend
         for (const actionPacket of this.listActionsPendingSave()) {
           for (const action of actionPacket.actions) {
-            if (types.isTaskAction(action)) {
+            if (actionConsts.isTaskAction(action)) {
               action.frontendOnly = true
               actions.push(action)
             }
@@ -211,7 +212,7 @@ export class Synchronizer {
     // Remove stored actions when they are acked
     this.actionsPendingSave = this.actionsPendingSave.remove(actionPacket.id)
 
-    const actions: types.BaseAction[] = []
+    const actions: actionTypes.BaseAction[] = []
 
     // If action was already acked, ignore it
     if (this.ackedPackets.has(actionPacket.id)) {
@@ -223,7 +224,7 @@ export class Synchronizer {
       // ActionLog matches backend action ordering
       this.actionLog.push(action)
       if (action.sessionId !== sessionId) {
-        if (types.isTaskAction(action)) {
+        if (actionConsts.isTaskAction(action)) {
           // Dispatch any task actions broadcasted from other sessions
           actions.push(action)
         }
@@ -243,7 +244,7 @@ export class Synchronizer {
         dispatch(setStatusToComputeDone())
       }
     } else if (message.sessionId === sessionId) {
-      if (types.hasSubmitAction(actionPacket.actions)) {
+      if (actionConsts.hasSubmitAction(actionPacket.actions)) {
         dispatch(setStatusToSubmitted())
       } else if (this.actionsPendingSave.size === 0) {
         // Once all actions being saved are acked, update the save status
@@ -314,7 +315,7 @@ export class Synchronizer {
       bot: false
     }
     this.socket.emit(EventName.ACTION_SEND, message)
-    if (types.hasSubmitAction(actionPacket.actions)) {
+    if (actionConsts.hasSubmitAction(actionPacket.actions)) {
       dispatch(setStatusToSubmitting())
     } else {
       dispatch(setStatusToSaving())

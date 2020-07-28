@@ -1,4 +1,4 @@
-import { BaseAction } from '../action/types'
+import { BaseAction } from '../types/action'
 import { ModelEndpoint } from '../const/connection'
 import { ItemExport } from './bdd'
 

@@ -5,7 +5,8 @@
  */
 import { IdType } from 'aws-sdk/clients/workdocs'
 import _ from 'lodash'
-import * as types from '../action/types'
+import * as actionConsts from '../const/action'
+import * as actionTypes from '../types/action'
 import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
 import { uid } from '../common/uid'
 import { isValidId, makeLabel, makePane, makeTrack } from './states'
@@ -72,22 +73,22 @@ function updateUserSelect (user: UserType, pselect: Partial<Select>): UserType {
 /**
  * Update the task in state
  * @param {State} state: current state
- * @param {types.UpdateTaskAction} action
+ * @param {actionTypes.UpdateTaskAction} action
  */
 export function updateTask (
   state: State,
-  action: types.UpdateTaskAction): State {
+  action: actionTypes.UpdateTaskAction): State {
   return updateObject(state, { task: _.cloneDeep(action.newTask) })
 }
 
 /**
  * Override the original state with the new state
  * @param {State} state: current state
- * @param {types.UpdateStateAction} action
+ * @param {actionTypes.UpdateStateAction} action
  */
 export function updateState (
   state: State,
-  action: types.UpdateStateAction): State {
+  action: actionTypes.UpdateStateAction): State {
   return _.merge(state, _.cloneDeep(action.newState))
 }
 
@@ -95,15 +96,15 @@ export function updateState (
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
  * @param {State} state: current state
- * @param {types.AddLabelAction} action
+ * @param {actionTypes.AddLabelAction} action
  * @return {State}
  */
 export function addLabel (
   state: State, itemIndex: number, label: LabelType,
   shapes: ShapeType[] = []): State {
-  const addLabelsAction: types.AddLabelsAction = {
+  const addLabelsAction: actionTypes.AddLabelsAction = {
     actionId: uid(),
-    type: types.ADD_LABELS,
+    type: actionConsts.ADD_LABELS,
     sessionId: state.session.id,
     userId: state.user.id,
     timestamp: Date.now(),
@@ -118,14 +119,14 @@ export function addLabel (
  * Delete parent label. The ids of label will be updated according to
  * the current state.
  * @param {State} state: current state
- * @param {types.DeleteLabelAction} action
+ * @param {actionTypes.DeleteLabelAction} action
  * @return {State}
  */
 export function deleteLabelsById (
   state: State, itemIndex: number, labelIds: IdType[])
   : State {
-  const deleteLabelsAction: types.DeleteLabelsAction = {
-    type: types.DELETE_LABELS,
+  const deleteLabelsAction: actionTypes.DeleteLabelsAction = {
+    type: actionConsts.DELETE_LABELS,
     actionId: uid(),
     sessionId: state.session.id,
     userId: state.user.id,
@@ -211,10 +212,10 @@ function addLabelstoItems (
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
  * @param {State} state: current state
- * @param {types.AddLabelsAction} action
+ * @param {actionTypes.AddLabelsAction} action
  * @return {State}
  */
-export function addLabels (state: State, action: types.AddLabelsAction): State {
+export function addLabels (state: State, action: actionTypes.AddLabelsAction): State {
   let { task, user } = state
   const session = state.session
   let items = [...task.items]
@@ -277,9 +278,9 @@ function addTrackToTask (
 /**
  * Add track action
  * @param {State} state
- * @param {types.AddTrackAction} action
+ * @param {actionTypes.AddTrackAction} action
  */
-export function addTrack (state: State, action: types.AddTrackAction): State {
+export function addTrack (state: State, action: actionTypes.AddTrackAction): State {
   let { user } = state
   const [task, , newLabels] = addTrackToTask(
     state.task, action.trackType, action.itemIndices, action.labels,
@@ -338,7 +339,7 @@ function mergeTracksInItems (
  * @param action
  */
 export function mergeTracks (
-  state: State, action: types.MergeTrackAction): State {
+  state: State, action: actionTypes.MergeTrackAction): State {
   let { task, session } = state
   const mergedTracks = action.trackIds.map((trackId) => task.tracks[trackId])
   const tracks = removeObjectFields(task.tracks, action.trackIds)
@@ -388,7 +389,7 @@ function changeShapesInItems (
  * @param action
  */
 export function changeShapes (
-  state: State, action: types.ChangeShapesAction): State {
+  state: State, action: actionTypes.ChangeShapesAction): State {
   let task = state.task
   const user = state.user
   const shapeIds = action.shapeIds
@@ -467,7 +468,7 @@ function changeLabelsInItems (
  * @param action
  */
 export function changeLabels (
-  state: State, action: types.ChangeLabelsAction): State {
+  state: State, action: actionTypes.ChangeLabelsAction): State {
   let items = pickArray(state.task.items, action.itemIndices)
   items = changeLabelsInItems(items, action.labelIds, action.props)
   items = assignToArray(state.task.items, items, action.itemIndices)
@@ -601,10 +602,10 @@ function createParentLabel (
  * Link labels on the same item
  * The new label properties are the same as label1 in action
  * @param {State} state
- * @param {types.LinkLabelsAction} action
+ * @param {actionTypes.LinkLabelsAction} action
  */
 export function linkLabels (
-  state: State, action: types.LinkLabelsAction): State {
+  state: State, action: actionTypes.LinkLabelsAction): State {
   // No selection or only 1 item selected will not get linked
   if (action.labelIds.length < 2) {
     return state
@@ -651,10 +652,10 @@ export function linkLabels (
 /**
  * Unlink labels on the same item
  * @param {State} state
- * @param {types.UnlinkLabelsAction} action
+ * @param {actionTypes.UnlinkLabelsAction} action
  */
 export function unlinkLabels (
-  state: State, action: types.UnlinkLabelsAction): State {
+  state: State, action: actionTypes.UnlinkLabelsAction): State {
   if (action.labelIds.length < 1) {
     return state
   }
@@ -697,10 +698,10 @@ export function unlinkLabels (
 /**
  * Update the user selection
  * @param {State} state
- * @param {types.ChangeSelectAction} action
+ * @param {actionTypes.ChangeSelectAction} action
  */
 export function changeSelect (
-  state: State, action: types.ChangeSelectAction): State {
+  state: State, action: actionTypes.ChangeSelectAction): State {
   // Keep selected label selected in new items in tracking mode
   if (state.task.config.tracking
       && state.user.select.item !== action.select.item) {
@@ -741,10 +742,10 @@ export function changeSelect (
 /**
  * Signify a new item is loaded
  * @param {State} state
- * @param {types.LoadItemAction} action
+ * @param {actionTypes.LoadItemAction} action
  * @return {State}
  */
-export function loadItem (state: State, action: types.LoadItemAction): State {
+export function loadItem (state: State, action: actionTypes.LoadItemAction): State {
   const itemIndex = action.itemIndex
   let session = state.session
   session = updateObject(session, {
@@ -876,7 +877,7 @@ function deleteLabelsFromTracks (
  * @param action
  */
 export function deleteLabels (
-  state: State, action: types.DeleteLabelsAction): State {
+  state: State, action: actionTypes.DeleteLabelsAction): State {
   const [newItems, deletedLabels] = deleteLabelsFromItems(
     pickArray(state.task.items, action.itemIndices), action.labelIds)
   const items = assignToArray(
@@ -935,7 +936,7 @@ export function updateAll (state: State): State {
  * @param action
  */
 export function addViewerConfig (
-  state: State, action: types.AddViewerConfigAction
+  state: State, action: actionTypes.AddViewerConfigAction
 ) {
   const newViewerConfigs = {
     ...state.user.viewerConfigs,
@@ -983,7 +984,7 @@ function handleViewerSynchronization (
  * @param action
  */
 export function changeViewerConfig (
-  state: State, action: types.ChangeViewerConfigAction
+  state: State, action: actionTypes.ChangeViewerConfigAction
 ): State {
   if (action.viewerId in state.user.viewerConfigs) {
     const oldConfig = state.user.viewerConfigs[action.viewerId]
@@ -1039,7 +1040,7 @@ function propagateHiddenPane (
 
 /** Update existing pane */
 export function updatePane (
-  state: State, action: types.UpdatePaneAction
+  state: State, action: actionTypes.UpdatePaneAction
 ) {
   const panes = state.user.layout.panes
 
@@ -1104,7 +1105,7 @@ function updateSplitCounts (paneId: number, panes: {[id: number]: PaneType}) {
  * @param action
  */
 export function splitPane (
-  state: State, action: types.SplitPaneAction
+  state: State, action: actionTypes.SplitPaneAction
 ): State {
   if (!(action.pane in state.user.layout.panes)) {
     return state
@@ -1181,7 +1182,7 @@ export function splitPane (
 
 /** delete pane from state */
 export function deletePane (
-  state: State, action: types.DeletePaneAction
+  state: State, action: actionTypes.DeletePaneAction
 ): State {
   const panes = state.user.layout.panes
   if (action.pane === state.user.layout.rootPane || !(action.pane in panes)) {
@@ -1260,7 +1261,7 @@ export function deletePane (
 
 /** adds a new submission */
 export function submit (
-  state: State, action: types.SubmitAction
+  state: State, action: actionTypes.SubmitAction
 ): State {
   const submissions =
     [...state.task.progress.submissions, _.cloneDeep(action.submitData)]
@@ -1309,7 +1310,7 @@ export function startLinkTrack (
  * Update session status, if it should be updated
  */
 export function updateSessionStatus (
-  state: State, action: types.UpdateSessionStatusAction
+  state: State, action: actionTypes.UpdateSessionStatusAction
 ): State {
   const newStatus = action.newStatus
 

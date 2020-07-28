@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
 import * as React from 'react'
 import * as action from '../../js/action/common'
-import { ActionType } from '../../js/action/types'
+import { ActionType } from '../../js/types/action'
 import { GetStateFunc, SimpleStore } from '../../js/common/simple_store'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { makeImageViewerConfig } from '../../js/functional/states'

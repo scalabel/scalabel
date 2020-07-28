@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
-import { AddLabelsAction } from '../../js/action/types'
+import { AddLabelsAction } from '../../js/types/action'
 import { configureStore } from '../../js/common/configure_store'
 import { ReduxStore } from '../../js/common/types'
 import { uid } from '../../js/common/uid'

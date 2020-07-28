@@ -1,7 +1,7 @@
 
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { BaseAction } from '../action/types'
+import { BaseAction } from '../types/action'
 import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,

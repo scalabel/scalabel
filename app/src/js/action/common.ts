@@ -7,7 +7,8 @@ import { ConnectionStatus, DeepPartialState, IdType, LabelType,
   PaneType, Select, ShapeAllType, ShapeType, SplitType,
   State, TaskType, ViewerConfigType } from '../functional/types'
 import { SyncActionMessageType } from '../types/message'
-import * as types from './types'
+import * as actionConsts from '../const/action'
+import * as actionTypes from '../types/action'
 
 let getState = getStateGetter()
 
@@ -24,7 +25,7 @@ export function setActionStateGetter (getter: GetStateFunc) {
  * @param type
  */
 export function makeBaseAction (
-  type: string, frontendOnly: boolean = false): types.BaseAction {
+  type: string, frontendOnly: boolean = false): actionTypes.BaseAction {
   const state = getState()
   return {
     actionId: uid(),
@@ -40,24 +41,24 @@ export function makeBaseAction (
  * Make a null action
  * @param message
  */
-export function makeNullAction (message: string = ''): types.NullAction {
+export function makeNullAction (message: string = ''): actionTypes.NullAction {
   return {
-    ...makeBaseAction(types.NULL),
+    ...makeBaseAction(actionConsts.NULL),
     message
   }
 }
 
 /** init session */
-export function initSessionAction (): types.InitSessionAction {
-  return makeBaseAction(types.INIT_SESSION)
+export function initSessionAction (): actionTypes.InitSessionAction {
+  return makeBaseAction(actionConsts.INIT_SESSION)
 }
 
 /** Update task data
  * @param {TaskType} newTask
  */
-export function updateTask (newTask: TaskType): types.UpdateTaskAction {
+export function updateTask (newTask: TaskType): actionTypes.UpdateTaskAction {
   return {
-    ...makeBaseAction(types.UPDATE_TASK, true),
+    ...makeBaseAction(actionConsts.UPDATE_TASK, true),
     newTask
   }
 }
@@ -66,9 +67,9 @@ export function updateTask (newTask: TaskType): types.UpdateTaskAction {
  * @param {TaskType} newTask
  */
 export function updateState (
-  newState: DeepPartialState): types.UpdateStateAction {
+  newState: DeepPartialState): actionTypes.UpdateStateAction {
   return {
-    ...makeBaseAction(types.UPDATE_STATE, true),
+    ...makeBaseAction(actionConsts.UPDATE_STATE, true),
     newState
   }
 }
@@ -76,9 +77,9 @@ export function updateState (
 /**
  * Go to item at index
  * @param {number} index
- * @return {types.ChangeSelectAction}
+ * @return {actionTypes.ChangeSelectAction}
  */
-export function goToItem (index: number): types.ChangeSelectAction {
+export function goToItem (index: number): actionTypes.ChangeSelectAction {
   // Normally, unselect labels when item changes
   let newSelect: Partial<Select> = {
     item: index,
@@ -94,7 +95,7 @@ export function goToItem (index: number): types.ChangeSelectAction {
   }
 
   return {
-    ...makeBaseAction(types.CHANGE_SELECT),
+    ...makeBaseAction(actionConsts.CHANGE_SELECT),
     select: newSelect
   }
 }
@@ -104,9 +105,9 @@ export function goToItem (index: number): types.ChangeSelectAction {
  * @param select
  */
 export function changeSelect (
-    select: Partial<Select>): types.ChangeSelectAction {
+    select: Partial<Select>): actionTypes.ChangeSelectAction {
   return {
-    ...makeBaseAction(types.CHANGE_SELECT),
+    ...makeBaseAction(actionConsts.CHANGE_SELECT),
     select
   }
 }
@@ -117,9 +118,9 @@ export function changeSelect (
 export function loadItem (
   itemIndex: number,
   sensorId: number
-): types.LoadItemAction {
+): actionTypes.LoadItemAction {
   return {
-    ...makeBaseAction(types.LOAD_ITEM),
+    ...makeBaseAction(actionConsts.LOAD_ITEM),
     itemIndex,
     sensorId
   }
@@ -136,9 +137,9 @@ export function addLabel (
   itemIndex: number,
   label: LabelType,
   shapes: ShapeType[] = []
-): types.AddLabelsAction {
+): actionTypes.AddLabelsAction {
   return {
-    ...makeBaseAction(types.ADD_LABELS),
+    ...makeBaseAction(actionConsts.ADD_LABELS),
     itemIndices: [itemIndex],
     labels: [[label]],
     shapes: [[shapes]]
@@ -155,9 +156,9 @@ export function addLabelsToItem (
   itemIndex: number,
   labels: LabelType[],
   shapes: ShapeType[][] = []
-): types.AddLabelsAction {
+): actionTypes.AddLabelsAction {
   return {
-    ...makeBaseAction(types.ADD_LABELS),
+    ...makeBaseAction(actionConsts.ADD_LABELS),
     itemIndices: [itemIndex],
     labels: [labels],
     shapes: [shapes]
@@ -176,9 +177,9 @@ export function addTrack (
   trackType: string,
   labels: LabelType[],
   shapes: ShapeType[][]
-): types.AddTrackAction {
+): actionTypes.AddTrackAction {
   return {
-    ...makeBaseAction(types.ADD_TRACK),
+    ...makeBaseAction(actionConsts.ADD_TRACK),
     trackType,
     itemIndices,
     labels,
@@ -195,9 +196,9 @@ export function addTrack (
  */
 export function changeShapes (
     itemIndex: number, shapeIds: IdType[], shapes: Array<Partial<ShapeAllType>>
-  ): types.ChangeShapesAction {
+  ): actionTypes.ChangeShapesAction {
   return {
-    ...makeBaseAction(types.CHANGE_SHAPES),
+    ...makeBaseAction(actionConsts.CHANGE_SHAPES),
     itemIndices: [itemIndex],
     shapeIds: [shapeIds],
     shapes: [shapes]
@@ -213,9 +214,9 @@ export function changeShapes (
 export function changeShapesInItems (
   itemIndices: number[], shapeIds: IdType[][],
   shapes: Array<Array<Partial<ShapeType>>>
-): types.ChangeShapesAction {
+): actionTypes.ChangeShapesAction {
   return {
-    ...makeBaseAction(types.CHANGE_SHAPES),
+    ...makeBaseAction(actionConsts.CHANGE_SHAPES),
     itemIndices,
     shapeIds,
     shapes
@@ -231,9 +232,9 @@ export function changeShapesInItems (
  */
 export function changeLabelShape (
     itemIndex: number, shapeId: IdType, shape: Partial<ShapeType>
-  ): types.ChangeShapesAction {
+  ): actionTypes.ChangeShapesAction {
   return {
-    ...makeBaseAction(types.CHANGE_SHAPES),
+    ...makeBaseAction(actionConsts.CHANGE_SHAPES),
     itemIndices: [itemIndex],
     shapeIds: [[shapeId]],
     shapes: [[shape]]
@@ -249,9 +250,9 @@ export function changeLabelShape (
  */
 export function changeLabelProps (
     itemIndex: number, labelId: IdType, props: Partial<LabelType>
-  ): types.ChangeLabelsAction {
+  ): actionTypes.ChangeLabelsAction {
   return {
-    ...makeBaseAction(types.CHANGE_LABELS),
+    ...makeBaseAction(actionConsts.CHANGE_LABELS),
     itemIndices: [itemIndex],
     labelIds: [[labelId]],
     props: [[props ]]
@@ -268,9 +269,9 @@ export function changeLabelProps (
 export function changeLabelsProps (
   itemIndices: number[], labelIds: IdType[][],
   props: Array<Array<Partial<LabelType>>>
-): types.ChangeLabelsAction {
+): actionTypes.ChangeLabelsAction {
   return {
-    ...makeBaseAction(types.CHANGE_LABELS),
+    ...makeBaseAction(actionConsts.CHANGE_LABELS),
     itemIndices,
     labelIds,
     props
@@ -283,9 +284,9 @@ export function changeLabelsProps (
  * @param {[]number} labelIds labels to link
  */
 export function linkLabels (
-    itemIndex: number, labelIds: IdType[]): types.LinkLabelsAction {
+    itemIndex: number, labelIds: IdType[]): actionTypes.LinkLabelsAction {
   return {
-    ...makeBaseAction(types.LINK_LABELS),
+    ...makeBaseAction(actionConsts.LINK_LABELS),
     itemIndex,
     labelIds
   }
@@ -297,9 +298,9 @@ export function linkLabels (
  * @param {[]number} labelIds labels to unlink
  */
 export function unlinkLabels (
-    itemIndex: number, labelIds: IdType[]): types.UnlinkLabelsAction {
+    itemIndex: number, labelIds: IdType[]): actionTypes.UnlinkLabelsAction {
   return {
-    ...makeBaseAction(types.UNLINK_LABELS),
+    ...makeBaseAction(actionConsts.UNLINK_LABELS),
     itemIndex,
     labelIds
   }
@@ -309,9 +310,9 @@ export function unlinkLabels (
  * Merge tracks
  * @param trackIds
  */
-export function mergeTracks (trackIds: IdType[]): types.MergeTrackAction {
+export function mergeTracks (trackIds: IdType[]): actionTypes.MergeTrackAction {
   return {
-    ...makeBaseAction(types.MERGE_TRACKS),
+    ...makeBaseAction(actionConsts.MERGE_TRACKS),
     trackIds
   }
 }
@@ -323,7 +324,7 @@ export function mergeTracks (trackIds: IdType[]): types.MergeTrackAction {
  * @return {DeleteLabelAction}
  */
 export function deleteLabel (
-    itemIndex: number, labelId: IdType): types.DeleteLabelsAction {
+    itemIndex: number, labelId: IdType): actionTypes.DeleteLabelsAction {
   return deleteLabels([itemIndex], [[labelId]])
 }
 
@@ -331,12 +332,12 @@ export function deleteLabel (
  * Delete all the input labels
  * @param {number[]} itemIndices
  * @param {number[][]} labelIds
- * @return {types.DeleteLabelsAction}
+ * @return {actionTypes.DeleteLabelsAction}
  */
 export function deleteLabels (
-  itemIndices: number[], labelIds: IdType[][]): types.DeleteLabelsAction {
+  itemIndices: number[], labelIds: IdType[][]): actionTypes.DeleteLabelsAction {
   return {
-    ...makeBaseAction(types.DELETE_LABELS),
+    ...makeBaseAction(actionConsts.DELETE_LABELS),
     itemIndices,
     labelIds
   }
@@ -349,9 +350,9 @@ export function deleteLabels (
 export function addViewerConfig (
   id: number,
   config: ViewerConfigType
-): types.AddViewerConfigAction {
+): actionTypes.AddViewerConfigAction {
   return {
-    ...makeBaseAction(types.ADD_VIEWER_CONFIG),
+    ...makeBaseAction(actionConsts.ADD_VIEWER_CONFIG),
     id,
     config
   }
@@ -363,9 +364,9 @@ export function addViewerConfig (
  */
 export function changeViewerConfig (
   viewerId: number, config: ViewerConfigType
-): types.ChangeViewerConfigAction {
+): actionTypes.ChangeViewerConfigAction {
   return {
-    ...makeBaseAction(types.CHANGE_VIEWER_CONFIG),
+    ...makeBaseAction(actionConsts.CHANGE_VIEWER_CONFIG),
     viewerId,
     config
   }
@@ -385,9 +386,9 @@ export function toggleSynchronization (
 export function updatePane (
   pane: number,
   props: Partial<PaneType>
-): types.UpdatePaneAction {
+): actionTypes.UpdatePaneAction {
   return {
-    ...makeBaseAction(types.UPDATE_PANE),
+    ...makeBaseAction(actionConsts.UPDATE_PANE),
     pane,
     props
   }
@@ -398,9 +399,9 @@ export function splitPane (
   pane: number,
   split: SplitType,
   viewerId: number
-): types.SplitPaneAction {
+): actionTypes.SplitPaneAction {
   return {
-    ...makeBaseAction(types.SPLIT_PANE),
+    ...makeBaseAction(actionConsts.SPLIT_PANE),
     pane,
     split,
     viewerId
@@ -411,9 +412,9 @@ export function splitPane (
 export function deletePane (
   pane: number,
   viewerId: number
-): types.DeletePaneAction {
+): actionTypes.DeletePaneAction {
   return {
-    ...makeBaseAction(types.DELETE_PANE),
+    ...makeBaseAction(actionConsts.DELETE_PANE),
     pane,
     viewerId
   }
@@ -422,16 +423,16 @@ export function deletePane (
 /**
  * wrapper for update all action
  */
-export function updateAll (): types.UpdateAllAction {
-  return makeBaseAction(types.UPDATE_ALL)
+export function updateAll (): actionTypes.UpdateAllAction {
+  return makeBaseAction(actionConsts.UPDATE_ALL)
 }
 
 /**
  * wrapper for submit action
  */
-export function submit (): types.SubmitAction {
+export function submit (): actionTypes.SubmitAction {
   return {
-    ...makeBaseAction(types.SUBMIT),
+    ...makeBaseAction(actionConsts.SUBMIT),
     submitData: {
       time: Date.now(),
       user: getState().user.id
@@ -443,15 +444,15 @@ export function submit (): types.SubmitAction {
  * start to link tracks
  */
 export function startLinkTrack () {
-  return makeBaseAction(types.START_LINK_TRACK)
+  return makeBaseAction(actionConsts.START_LINK_TRACK)
 }
 
 /**
  * Finish session registration by loading backend state
  */
-export function registerSession (state: State): types.RegisterSessionAction {
+export function registerSession (state: State): actionTypes.RegisterSessionAction {
   return {
-    ...makeBaseAction(types.REGISTER_SESSION),
+    ...makeBaseAction(actionConsts.REGISTER_SESSION),
     initialState: state
   }
 }
@@ -460,9 +461,9 @@ export function registerSession (state: State): types.RegisterSessionAction {
  * Handle broadcasted message contains one or more actions
  */
 export function receiveBroadcast (
-  message: SyncActionMessageType): types.ReceiveBroadcastAction {
+  message: SyncActionMessageType): actionTypes.ReceiveBroadcastAction {
   return {
-    ...makeBaseAction(types.RECEIVE_BROADCAST),
+    ...makeBaseAction(actionConsts.RECEIVE_BROADCAST),
     message
   }
 }
@@ -470,31 +471,31 @@ export function receiveBroadcast (
 /**
  * Handle session connection
  */
-export function connect (): types.ConnectAction {
-  return makeBaseAction(types.CONNECT)
+export function connect (): actionTypes.ConnectAction {
+  return makeBaseAction(actionConsts.CONNECT)
 }
 
 /**
  * Handle session disconnection
  */
-export function disconnect (): types.DisconnectAction {
-  return makeBaseAction(types.DISCONNECT)
+export function disconnect (): actionTypes.DisconnectAction {
+  return makeBaseAction(actionConsts.DISCONNECT)
 }
 
 /**
  * Trigger save to server
  */
-export function save (): types.SaveAction {
-  return makeBaseAction(types.SAVE)
+export function save (): actionTypes.SaveAction {
+  return makeBaseAction(actionConsts.SAVE)
 }
 
 /**
  * Update session status
  */
 export function updateSessionStatus (
-  status: ConnectionStatus): types.UpdateSessionStatusAction {
+  status: ConnectionStatus): actionTypes.UpdateSessionStatusAction {
   return {
-    ...makeBaseAction(types.UPDATE_SESSION_STATUS),
+    ...makeBaseAction(actionConsts.UPDATE_SESSION_STATUS),
     newStatus: status
   }
 }
@@ -609,13 +610,13 @@ export const setStatusToSubmitted: ThunkCreatorType = () => {
  * Merge actions into an sequential action
  */
 export function makeSequential (
-  actions: types.BaseAction[], removeNull: boolean = false)
-    : types.SequentialAction {
+  actions: actionTypes.BaseAction[], removeNull: boolean = false)
+    : actionTypes.SequentialAction {
   if (removeNull) {
-    actions = actions.filter((a) => (a.type !== types.NULL))
+    actions = actions.filter((a) => (a.type !== actionConsts.NULL))
   }
   return {
-    ...makeBaseAction(types.SEQUENTIAL),
+    ...makeBaseAction(actionConsts.SEQUENTIAL),
     actions
   }
 }

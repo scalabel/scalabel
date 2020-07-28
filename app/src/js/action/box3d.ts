@@ -2,7 +2,7 @@ import * as types from '../common/types'
 import { makeCube, makeLabel } from '../functional/states'
 import { Vector3Type } from '../functional/types'
 import { addLabel } from './common'
-import { AddLabelsAction } from './types'
+import { AddLabelsAction } from '../types/action'
 
 /**
  * Create AddLabelAction to create a box3d label

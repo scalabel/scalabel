@@ -1,7 +1,8 @@
 import {
   addLabel, addTrack, initSessionAction,
   linkLabels, splitPane, submit, updateTask } from '../../js/action/common'
-import { BaseAction, isTaskAction } from '../../js/action/types'
+import { BaseAction } from '../../js/types/action'
+import { isTaskAction } from '../../js/const/action'
 import { makeLabel, makeTask } from '../../js/functional/states'
 import { SplitType } from '../../js/functional/types'
 

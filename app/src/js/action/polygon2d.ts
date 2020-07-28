@@ -2,7 +2,7 @@ import { LabelTypeName } from '../common/types'
 import { makeLabel, makePathPoint2D } from '../functional/states'
 import { SimplePathPoint2DType } from '../functional/types'
 import * as actions from './common'
-import { AddLabelsAction } from './types'
+import { AddLabelsAction } from '../types/action'
 
 /**
  * Create AddLabelAction to create a polygon2d label
