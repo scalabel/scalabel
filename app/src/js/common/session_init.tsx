@@ -10,7 +10,8 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { makeSyncMiddleware } from './sync_middleware'
 import { Synchronizer } from './synchronizer'
-import { FullStore, QueryArg } from './types'
+import { FullStore } from '../types/common'
+import { QueryArg } from '../const/common'
 
 /**
  * Main function for initiating the frontend session

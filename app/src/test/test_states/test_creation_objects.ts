@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { AttributeToolType, BundleFile,
-  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../../js/common/types'
+  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../../js/const/common'
 import { Attribute, TaskType } from '../../js/functional/types'
 import { ItemExport } from '../../js/types/bdd'
 import { CreationForm, FormFileData, Project } from '../../js/types/project'

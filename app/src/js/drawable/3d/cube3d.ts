@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { ShapeTypeName } from '../../common/types'
+import { ShapeTypeName } from '../../const/common'
 import { makeCube } from '../../functional/states'
 import { CubeType, IdType, ShapeType } from '../../functional/types'
 import { Vector2D } from '../../math/vector2d'

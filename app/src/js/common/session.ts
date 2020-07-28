@@ -8,7 +8,7 @@ import { State } from '../functional/types'
 import { configureStore } from './configure_store'
 import { GetStateFunc, SimpleStore } from './simple_store'
 import { Track } from './track'
-import { FullStore, ThunkActionType } from './types'
+import { FullStore, ThunkActionType } from '../types/common'
 
 /**
  * Singleton session class

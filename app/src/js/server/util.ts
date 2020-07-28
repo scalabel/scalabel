@@ -6,7 +6,7 @@ import { configureStore } from '../common/configure_store'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType
-} from '../common/types'
+} from '../const/common'
 import { uid } from '../common/uid'
 import { StorageType } from '../const/config'
 import { Label2DTemplateType, State, TaskType } from '../functional/types'

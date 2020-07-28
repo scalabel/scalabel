@@ -7,7 +7,7 @@ import { IdType } from 'aws-sdk/clients/workdocs'
 import _ from 'lodash'
 import * as actionConsts from '../const/action'
 import * as actionTypes from '../types/action'
-import { LabelTypeName, ViewerConfigTypeName } from '../common/types'
+import { LabelTypeName, ViewerConfigTypeName } from '../const/common'
 import { uid } from '../common/uid'
 import { isValidId, makeLabel, makePane, makeTrack } from './states'
 import {

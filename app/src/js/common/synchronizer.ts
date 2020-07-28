@@ -22,7 +22,7 @@ import { ActionPacketType, RegisterMessageType,
   SyncActionMessageType } from '../types/message'
 import Session from './session'
 import { setupSession } from './session_setup'
-import { ThunkDispatchType } from './types'
+import { ThunkDispatchType } from '../types/common'
 import { uid } from './uid'
 import { doesPacketTriggerModel, index2str } from './util'
 

@@ -1,7 +1,7 @@
 import { changeLabelsProps, linkLabels, mergeTracks, startLinkTrack, unlinkLabels } from '../../action/common'
 import { selectLabels, unselectLabels } from '../../action/select'
 import Session from '../../common/session'
-import { Key } from '../../common/types'
+import { Key } from '../../const/common'
 import { addVisibilityListener } from '../../common/window'
 import { getLinkedLabelIds } from '../../functional/common'
 import { getSelectedTracks } from '../../functional/state_util'

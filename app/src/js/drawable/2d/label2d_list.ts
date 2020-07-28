@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { policyFromString } from '../../common/track'
-import { LabelTypeName, TrackPolicyType } from '../../common/types'
+import { LabelTypeName, TrackPolicyType } from '../../const/common'
 import { makeState } from '../../functional/states'
 import { Label2DTemplateType, State } from '../../functional/types'
 import { Context2D } from '../util'

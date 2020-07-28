@@ -1,7 +1,7 @@
 import * as React from 'react'
 import EventListener, { withOptions } from 'react-event-listener'
 import Session from '../common/session'
-import { LabelTypeName } from '../common/types'
+import { LabelTypeName } from '../const/common'
 
 type mouseEventListener = (e: MouseEvent) => void
 

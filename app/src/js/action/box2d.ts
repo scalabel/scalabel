@@ -1,4 +1,4 @@
-import { LabelTypeName } from '../common/types'
+import { LabelTypeName } from '../const/common'
 import { makeLabel, makeRect } from '../functional/states'
 import { IdType, RectType, ShapeType, SimpleRect } from '../functional/types'
 import * as actions from './common'

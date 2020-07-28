@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { LabelTypeName } from '../../common/types'
+import { LabelTypeName } from '../../const/common'
 import { makeLabel } from '../../functional/states'
 import { IdType, INVALID_ID, ShapeType, State } from '../../functional/types'
 import { Vector3D } from '../../math/vector3d'

@@ -1,4 +1,4 @@
-import { AttributeToolType } from '../common/types'
+import { AttributeToolType } from '../const/common'
 
 export type IdType = string
 export const INVALID_ID: IdType = ''

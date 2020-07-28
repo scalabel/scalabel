@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import * as action from '../../js/action/common'
 import Session, { dispatch, getState } from '../../js/common/session'
-import { ShapeTypeName } from '../../js/common/types'
+import { ShapeTypeName } from '../../js/const/common'
 import { Label2DHandler } from '../../js/drawable/2d/label2d_handler'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { IdType, Point2DType } from '../../js/functional/types'

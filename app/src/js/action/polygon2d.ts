@@ -1,4 +1,4 @@
-import { LabelTypeName } from '../common/types'
+import { LabelTypeName } from '../const/common'
 import { makeLabel, makePathPoint2D } from '../functional/states'
 import { SimplePathPoint2DType } from '../functional/types'
 import * as actions from './common'

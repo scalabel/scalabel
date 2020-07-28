@@ -1,4 +1,4 @@
-import { LabelTypeName } from '../common/types'
+import { LabelTypeName } from '../const/common'
 import { makeLabel, makePlane } from '../functional/states'
 import { Vector3Type } from '../functional/types'
 import * as actions from './common'

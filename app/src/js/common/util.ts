@@ -1,7 +1,7 @@
 import { sprintf } from 'sprintf-js'
 import { ADD_LABELS } from '../const/action'
 import { ActionPacketType } from '../types/message'
-import { ItemTypeName, LabelTypeName } from './types'
+import { ItemTypeName, LabelTypeName } from './const/common'
 
 /**
  * Get whether tracking is on

@@ -1,5 +1,5 @@
 import { Track } from '../../../track'
-import { TrackPolicyType } from '../../../types'
+import { TrackPolicyType } from '../../../../const/common'
 import { TrackPolicy } from '../policy'
 
 /** Parent class for linear interpolation policy types */

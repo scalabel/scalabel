@@ -6,7 +6,7 @@ import Label2D from '../drawable/2d/label2d'
 import Label3D from '../drawable/3d/label3d'
 import { makeLabel, makeShape, makeTrack } from '../functional/states'
 import { IdType, LabelType, ShapeType, State, TrackType } from '../functional/types'
-import { LabelTypeName, TrackPolicyType } from './types'
+import { LabelTypeName, TrackPolicyType } from './const/common'
 export type Label = Label2D | Label3D
 
 /** Convert policy type name to enum */

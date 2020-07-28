@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { AttributeToolType, LabelTypeName } from '../common/types'
+import { AttributeToolType, LabelTypeName } from '../const/common'
 import { makeCube, makeItem, makeLabel, makePathPoint2D, makePlane, makeRect } from '../functional/states'
 import { Attribute, IdType, ItemType, LabelIdMap, LabelType, PathPointType, ShapeIdMap, ShapeType } from '../functional/types'
 import { ItemExport, LabelExport } from '../types/bdd'

@@ -3,7 +3,7 @@ import * as actionConsts from '../const/action'
 import * as actionTypes from '../types/action'
 import { State } from '../functional/types'
 import { Synchronizer } from './synchronizer'
-import { ReduxState, ThunkDispatchType } from './types'
+import { ReduxState, ThunkDispatchType } from '../types/common'
 
 /**
  * Handle actions that trigger a backend interaction instead of a state update

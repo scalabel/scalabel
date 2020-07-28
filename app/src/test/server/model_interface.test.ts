@@ -1,4 +1,4 @@
-import { LabelTypeName } from '../../js/common/types'
+import { LabelTypeName } from '../../js/const/common'
 import { ModelEndpoint } from '../../js/const/connection'
 import { makePathPoint2D, makeRect } from '../../js/functional/states'
 import { PathPoint2DType, PathPointType, RectType } from '../../js/functional/types'

@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { ReduxState } from '../common/types'
+import { ReduxState } from '../types/common'
 import { getConfig } from '../functional/selector'
 import { ConfigType } from '../functional/types'
 import LabelLayout from './label_layout'

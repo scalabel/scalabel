@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
-import { LabelTypeName } from '../../js/common/types'
+import { LabelTypeName } from '../../js/const/common'
 import { makePathPoint2D } from '../../js/functional/states'
 import { PathPointType, State } from '../../js/functional/types'
 import {

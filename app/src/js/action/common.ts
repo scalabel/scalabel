@@ -1,6 +1,6 @@
 import { getStateGetter } from '../common/session'
 import { GetStateFunc } from '../common/simple_store'
-import { ThunkCreatorType } from '../common/types'
+import { ThunkCreatorType } from '../types/common'
 import { uid } from '../common/uid'
 import * as selector from '../functional/selector'
 import { ConnectionStatus, DeepPartialState, IdType, LabelType,

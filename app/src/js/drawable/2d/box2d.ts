@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { Cursor, LabelTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../const/common'
 import { makeLabel, makeRect } from '../../functional/states'
 import { LabelType, RectType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'

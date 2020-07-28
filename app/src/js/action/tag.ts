@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Session from '../common/session'
-import { LabelTypeName } from '../common/types'
+import { LabelTypeName } from '../const/common'
 import { makeLabel } from '../functional/states'
 import { updateObject } from '../functional/util'
 import * as actions from './common'

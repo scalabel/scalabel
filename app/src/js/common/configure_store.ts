@@ -6,7 +6,7 @@ import { ADD_LABELS, DELETE_LABELS } from '../const/action'
 import { makeState } from '../functional/states'
 import { State } from '../functional/types'
 import { reducer } from './reducer'
-import { FullStore, ReduxState } from './types'
+import { FullStore, ReduxState } from '../types/common'
 
 /**
  * Configure the main store for the state

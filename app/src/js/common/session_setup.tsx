@@ -15,7 +15,8 @@ import { PLYLoader } from '../thirdparty/PLYLoader'
 import Session from './session'
 import { DispatchFunc, GetStateFunc } from './simple_store'
 import { Track } from './track'
-import { DataType, FullStore, ItemTypeName, ViewerConfigTypeName } from './types'
+import { DataType, ItemTypeName, ViewerConfigTypeName } from '../const/common'
+import { FullStore } from '../types/common'
 
 /**
  * Initialize state, then set up the rest of the session

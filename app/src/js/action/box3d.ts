@@ -1,4 +1,4 @@
-import * as types from '../common/types'
+import * as types from '../const/common'
 import { makeCube, makeLabel } from '../functional/states'
 import { Vector3Type } from '../functional/types'
 import { addLabel } from './common'

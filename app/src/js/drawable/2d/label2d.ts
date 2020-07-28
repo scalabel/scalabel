@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, LabelTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../const/common'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
 import { makeTaskConfig, makeTrack } from '../../functional/states'
 import { ConfigType, IdType, INVALID_ID, LabelType, ShapeType, State } from '../../functional/types'

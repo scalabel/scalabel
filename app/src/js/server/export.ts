@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { AttributeToolType, LabelTypeName } from '../common/types'
+import { AttributeToolType, LabelTypeName } from '../const/common'
 import { isValidId } from '../functional/states'
 import { Attribute, ConfigType,
   ItemType, Node2DType, PathPoint2DType, PathPointType, State

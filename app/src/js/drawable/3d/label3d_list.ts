@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import * as THREE from 'three'
 import { policyFromString } from '../../common/track'
-import { LabelTypeName, TrackPolicyType } from '../../common/types'
+import { LabelTypeName, TrackPolicyType } from '../../const/common'
 import { makeState } from '../../functional/states'
 import { IdType, State } from '../../functional/types'
 import { Box3D } from './box3d'

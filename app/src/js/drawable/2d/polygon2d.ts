@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, Key, LabelTypeName } from '../../common/types'
+import { Cursor, Key, LabelTypeName } from '../../const/common'
 import { makeLabel } from '../../functional/states'
 import { LabelType, PathPoint2DType, PathPointType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'

@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
-import { ItemTypeName, LabelTypeName } from '../common/types'
+import { ItemTypeName, LabelTypeName } from '../const/common'
 import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../common/util'
 import { FormField } from '../const/project'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
