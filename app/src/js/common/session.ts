@@ -1,14 +1,14 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import * as actionTypes from '../types/action'
 import { Window } from '../components/window'
 import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
+import * as actionTypes from '../types/action'
+import { FullStore, ThunkActionType } from '../types/common'
 import { State } from '../types/functional'
 import { configureStore } from './configure_store'
 import { GetStateFunc, SimpleStore } from './simple_store'
 import { Track } from './track'
-import { FullStore, ThunkActionType } from '../types/common'
 
 /**
  * Singleton session class
@@ -114,7 +114,8 @@ export function getState (): State {
 /**
  * Dispatch the action to the global session instance
  */
-export function dispatch (action: actionTypes.ActionType | ThunkActionType): void {
+export function dispatch (action: actionTypes.ActionType | ThunkActionType):
+  void {
   return session.dispatch(action)
 }
 

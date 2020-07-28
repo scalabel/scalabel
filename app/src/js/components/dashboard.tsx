@@ -10,9 +10,9 @@ import Typography from '@material-ui/core/Typography'
 import React from 'react'
 import { QueryArg } from '../const/common'
 import { Endpoint } from '../const/connection'
-import { SubmitData } from '../types/functional'
 import { dashboardWindowStyles, headerStyle,
   listEntryStyle, sidebarStyle } from '../styles/dashboard'
+import { SubmitData } from '../types/functional'
 import DividedPage from './divided_page'
 import { formatDate, getSubmissionTime } from './util'
 

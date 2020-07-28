@@ -1,4 +1,4 @@
-import { BaseAction } from "../types/action"
+import { BaseAction } from '../types/action'
 
 export const INIT_SESSION = 'INIT_SESSION'
 export const CHANGE_SELECT = 'CHANGE_SELECT'

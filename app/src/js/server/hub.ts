@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
-import * as actionConsts from '../const/action'
 import { index2str } from '../common/util'
+import * as actionConsts from '../const/action'
 import { EventName } from '../const/connection'
 import { ServerConfig } from '../types/config'
 import { RegisterMessageType, SyncActionMessageType } from '../types/message'

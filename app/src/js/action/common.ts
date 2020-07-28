@@ -1,14 +1,14 @@
 import { getStateGetter } from '../common/session'
 import { GetStateFunc } from '../common/simple_store'
-import { ThunkCreatorType } from '../types/common'
 import { uid } from '../common/uid'
+import * as actionConsts from '../const/action'
 import * as selector from '../functional/selector'
+import * as actionTypes from '../types/action'
+import { ThunkCreatorType } from '../types/common'
 import { ConnectionStatus, DeepPartialState, IdType, LabelType,
   PaneType, Select, ShapeAllType, ShapeType, SplitType,
   State, TaskType, ViewerConfigType } from '../types/functional'
 import { SyncActionMessageType } from '../types/message'
-import * as actionConsts from '../const/action'
-import * as actionTypes from '../types/action'
 
 let getState = getStateGetter()
 
@@ -450,7 +450,9 @@ export function startLinkTrack () {
 /**
  * Finish session registration by loading backend state
  */
-export function registerSession (state: State): actionTypes.RegisterSessionAction {
+export function registerSession (
+  state: State
+): actionTypes.RegisterSessionAction {
   return {
     ...makeBaseAction(actionConsts.REGISTER_SESSION),
     initialState: state

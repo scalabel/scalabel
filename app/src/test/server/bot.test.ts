@@ -1,15 +1,15 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
-import { AddLabelsAction } from '../../js/types/action'
 import { configureStore } from '../../js/common/configure_store'
-import { ReduxStore } from '../../js/types/common'
 import { uid } from '../../js/common/uid'
 import { index2str } from '../../js/common/util'
 import { EventName } from '../../js/const/connection'
-import { State } from '../../js/types/functional'
 import { Bot } from '../../js/server/bot'
 import { serverConfig } from '../../js/server/defaults'
+import { AddLabelsAction } from '../../js/types/action'
 import { ItemExport } from '../../js/types/bdd'
+import { ReduxStore } from '../../js/types/common'
+import { State } from '../../js/types/functional'
 import {
   ActionPacketType, BotData, RegisterMessageType,
   SyncActionMessageType } from '../../js/types/message'

@@ -1,6 +1,6 @@
+import { getTracking } from '../../js/common/util'
 import { BundleFile, HandlerUrl,
   ItemTypeName, LabelTypeName } from '../../js/const/common'
-import { getTracking } from '../../js/common/util'
 import { getProjectKey, getSaveDir, getTaskKey } from '../../js/server/path'
 import * as util from '../../js/server/util'
 import { sampleFormEmpty, sampleFormImage } from '../test_states/test_creation_objects'

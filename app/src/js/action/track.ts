@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import Session from '../common/session'
 import { isValidId } from '../functional/states'
+import { AddTrackAction, DeleteLabelsAction } from '../types/action'
 import { IdType, INVALID_ID, LabelType, ShapeType, TrackType } from '../types/functional'
 import { addTrack, deleteLabels } from './common'
-import { AddTrackAction, DeleteLabelsAction } from '../types/action'
 
 /**
  * Add track by duplicating label from startIndex to stopIndex

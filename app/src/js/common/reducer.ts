@@ -1,8 +1,8 @@
 import { AnyAction, Reducer } from 'redux'
 import * as actionConsts from '../const/action'
-import * as actionTypes from '../types/action'
 import * as common from '../functional/common'
 import { makeState } from '../functional/states'
+import * as actionTypes from '../types/action'
 import { State } from '../types/functional'
 
 /**
@@ -15,7 +15,9 @@ function reduceOne (state: State, action: actionTypes.BaseAction): State {
     case actionConsts.INIT_SESSION:
       return common.initSession(state)
     case actionConsts.CHANGE_SELECT:
-      return common.changeSelect(state, action as actionTypes.ChangeSelectAction)
+      return common.changeSelect(
+        state, action as actionTypes.ChangeSelectAction
+      )
     case actionConsts.LOAD_ITEM:
       return common.loadItem(state, action as actionTypes.LoadItemAction)
     case actionConsts.UPDATE_ALL:
@@ -29,18 +31,24 @@ function reduceOne (state: State, action: actionTypes.BaseAction): State {
     case actionConsts.ADD_TRACK:
       return common.addTrack(state, action as actionTypes.AddTrackAction)
     case actionConsts.CHANGE_SHAPES:
-      return common.changeShapes(state, action as actionTypes.ChangeShapesAction)
+      return common.changeShapes(
+        state, action as actionTypes.ChangeShapesAction
+      )
     case actionConsts.CHANGE_LABELS:
       return common.changeLabels(
         state, action as actionTypes.ChangeLabelsAction)
     case actionConsts.LINK_LABELS:
       return common.linkLabels(state, action as actionTypes.LinkLabelsAction)
     case actionConsts.UNLINK_LABELS:
-      return common.unlinkLabels(state, action as actionTypes.UnlinkLabelsAction)
+      return common.unlinkLabels(
+        state, action as actionTypes.UnlinkLabelsAction
+      )
     case actionConsts.MERGE_TRACKS:
       return common.mergeTracks(state, action as actionTypes.MergeTrackAction)
     case actionConsts.DELETE_LABELS:
-      return common.deleteLabels(state, action as actionTypes.DeleteLabelsAction)
+      return common.deleteLabels(
+        state, action as actionTypes.DeleteLabelsAction
+      )
     case actionConsts.ADD_VIEWER_CONFIG:
       return common.addViewerConfig(
         state, action as actionTypes.AddViewerConfigAction
@@ -61,7 +69,8 @@ function reduceOne (state: State, action: actionTypes.BaseAction): State {
       return common.startLinkTrack(state)
     case actionConsts.UPDATE_SESSION_STATUS:
       return common.updateSessionStatus(
-        state, action as actionTypes.UpdateSessionStatusAction)
+        state, action as actionTypes.UpdateSessionStatusAction
+      )
     case actionConsts.NULL:
       return state
     default:
@@ -79,7 +88,7 @@ export const reducer: Reducer<State> = (
     currentState: State = makeState(),
     action: AnyAction): State => {
   let state = currentState
-  if (action.type === actionTypes.SEQUENTIAL) {
+  if (action.type === actionConsts.SEQUENTIAL) {
     (action as actionTypes.SequentialAction).actions.forEach((element) => {
       state = reduceOne(state, element)
     })

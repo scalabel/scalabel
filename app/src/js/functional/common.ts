@@ -5,11 +5,10 @@
  */
 import { IdType } from 'aws-sdk/clients/workdocs'
 import _ from 'lodash'
-import * as actionConsts from '../const/action'
-import * as actionTypes from '../types/action'
-import { LabelTypeName, ViewerConfigTypeName } from '../const/common'
 import { uid } from '../common/uid'
-import { isValidId, makeLabel, makePane, makeTrack } from './states'
+import * as actionConsts from '../const/action'
+import { LabelTypeName, ViewerConfigTypeName } from '../const/common'
+import * as actionTypes from '../types/action'
 import {
   INVALID_ID,
   ItemType,
@@ -28,6 +27,7 @@ import {
   UserType,
   ViewerConfigType
 } from '../types/functional'
+import { isValidId, makeLabel, makePane, makeTrack } from './states'
 import {
   assignToArray,
   pickArray,
@@ -215,7 +215,10 @@ function addLabelstoItems (
  * @param {actionTypes.AddLabelsAction} action
  * @return {State}
  */
-export function addLabels (state: State, action: actionTypes.AddLabelsAction): State {
+export function addLabels (
+  state: State,
+  action: actionTypes.AddLabelsAction
+): State {
   let { task, user } = state
   const session = state.session
   let items = [...task.items]
@@ -280,7 +283,10 @@ function addTrackToTask (
  * @param {State} state
  * @param {actionTypes.AddTrackAction} action
  */
-export function addTrack (state: State, action: actionTypes.AddTrackAction): State {
+export function addTrack (
+  state: State,
+  action: actionTypes.AddTrackAction
+): State {
   let { user } = state
   const [task, , newLabels] = addTrackToTask(
     state.task, action.trackType, action.itemIndices, action.labels,
@@ -745,7 +751,10 @@ export function changeSelect (
  * @param {actionTypes.LoadItemAction} action
  * @return {State}
  */
-export function loadItem (state: State, action: actionTypes.LoadItemAction): State {
+export function loadItem (
+  state: State,
+  action: actionTypes.LoadItemAction
+): State {
   const itemIndex = action.itemIndex
   let session = state.session
   session = updateObject(session, {

@@ -8,15 +8,15 @@ import { addViewerConfig, initSessionAction, loadItem,
   splitPane, updateAll, updatePane, updateState } from '../action/common'
 import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
 import Window from '../components/window'
+import { DataType, ItemTypeName, ViewerConfigTypeName } from '../const/common'
 import { makeDefaultViewerConfig } from '../functional/states'
-import { DeepPartialState, PointCloudViewerConfigType, SplitType, State } from '../types/functional'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
+import { FullStore } from '../types/common'
+import { DeepPartialState, PointCloudViewerConfigType, SplitType, State } from '../types/functional'
 import Session from './session'
 import { DispatchFunc, GetStateFunc } from './simple_store'
 import { Track } from './track'
-import { DataType, ItemTypeName, ViewerConfigTypeName } from '../const/common'
-import { FullStore } from '../types/common'
 
 /**
  * Initialize state, then set up the rest of the session

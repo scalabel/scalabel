@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { ReduxState } from '../types/common'
 import { getConfig } from '../functional/selector'
+import { ReduxState } from '../types/common'
 import { ConfigType } from '../types/functional'
 import LabelLayout from './label_layout'
 import TitleBar from './title_bar'

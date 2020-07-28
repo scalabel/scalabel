@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import Session from '../common/session'
 import { LabelTypeName } from '../const/common'
+import * as actionTypes from '../types/action'
 import { IdType, Select, State } from '../types/functional'
 import { changeLabelsProps, changeSelect, deleteLabels } from './common'
 import { deleteTracks, terminateTracks } from './track'
-import * as actionTypes from '../types/action'
 
 /**
  * Delete given label
@@ -12,7 +12,9 @@ import * as actionTypes from '../types/action'
  * @param {number} labelId
  * @return {DeleteLabelAction}
  */
-export function deleteSelectedLabels (state: State): actionTypes.DeleteLabelsAction {
+export function deleteSelectedLabels (
+  state: State
+): actionTypes.DeleteLabelsAction {
   const select = state.user.select
   const itemIndices: number[] =
     Object.keys(select.labels).map((key) => Number(key))
@@ -26,7 +28,9 @@ export function deleteSelectedLabels (state: State): actionTypes.DeleteLabelsAct
 /**
  * Delete tracks corresponding to selected labels
  */
-export function deleteSelectedTracks (state: State): actionTypes.DeleteLabelsAction {
+export function deleteSelectedTracks (
+  state: State
+): actionTypes.DeleteLabelsAction {
   const select = state.user.select
   const tracks = []
   for (const key of Object.keys(select.labels)) {

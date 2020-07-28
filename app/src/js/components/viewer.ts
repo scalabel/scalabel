@@ -1,5 +1,5 @@
-import { ReduxState } from '../types/common'
 import { shouldCanvasFreeze } from '../functional/selector'
+import { ReduxState } from '../types/common'
 import { State } from '../types/functional'
 import { Component } from './component'
 

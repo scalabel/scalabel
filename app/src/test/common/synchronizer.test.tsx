@@ -1,14 +1,14 @@
 import { cleanup } from '@testing-library/react'
 import { setStatusToUnsaved } from '../../js/action/common'
-import { AddLabelsAction } from '../../js/types/action'
 import Session from '../../js/common/session'
 import { Synchronizer } from '../../js/common/synchronizer'
-import { ThunkDispatchType } from '../../js/types/common'
 import { uid } from '../../js/common/uid'
 import { index2str } from '../../js/common/util'
 import { EventName } from '../../js/const/connection'
 import * as selector from '../../js/functional/selector'
 import { updateState } from '../../js/server/util'
+import { AddLabelsAction } from '../../js/types/action'
+import { ThunkDispatchType } from '../../js/types/common'
 import {
   ActionPacketType, RegisterMessageType,
   SyncActionMessageType } from '../../js/types/message'

@@ -1,9 +1,8 @@
 import { bool } from 'aws-sdk/clients/signer'
 import _ from 'lodash'
-import * as types from '../const/common'
 import { uid } from '../common/uid'
+import * as types from '../const/common'
 import { ItemExport, LabelExport } from '../types/bdd'
-import { taskIdToString } from './id2string'
 import {
   ConfigType, ConnectionStatus, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
@@ -38,6 +37,7 @@ import {
   UserType,
   ViewerConfigType
 } from '../types/functional'
+import { taskIdToString } from './id2string'
 
 /**
  * Initialize a label state and deep copy the parameters.

@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import { AttributeToolType, LabelTypeName } from '../const/common'
 import { isValidId } from '../functional/states'
+import { ItemExport, LabelExport, PolygonExportType } from '../types/bdd'
 import { Attribute, ConfigType,
   ItemType, Node2DType, PathPoint2DType, PathPointType, State
 } from '../types/functional'
-import { ItemExport, LabelExport, PolygonExportType } from '../types/bdd'
 import { transformBox2D, transformBox3D, transformPlane3D } from './bdd_type_transformers'
 
 /**

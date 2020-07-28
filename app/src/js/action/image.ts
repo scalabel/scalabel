@@ -1,10 +1,10 @@
+import * as actionTypes from '../types/action'
 import { ImageViewerConfigType } from '../types/functional'
 import {
   MAX_SCALE,
   MIN_SCALE
 } from '../view_config/image'
 import { changeViewerConfig } from './common'
-import * as actionTypes from '../types/action'
 
 /**
  * Zoom the image

@@ -1,6 +1,6 @@
+import { TrackPolicyType } from '../../../const/common'
 import { IdType } from '../../../types/functional'
 import { Track } from '../../track'
-import { TrackPolicyType } from '../../../const/common'
 
 /** Abstract parent class for all track policies */
 export class TrackPolicy {

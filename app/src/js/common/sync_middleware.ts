@@ -1,9 +1,9 @@
 import { Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import * as actionConsts from '../const/action'
 import * as actionTypes from '../types/action'
+import { ReduxState, ThunkDispatchType } from '../types/common'
 import { State } from '../types/functional'
 import { Synchronizer } from './synchronizer'
-import { ReduxState, ThunkDispatchType } from '../types/common'
 
 /**
  * Handle actions that trigger a backend interaction instead of a state update
@@ -13,7 +13,8 @@ function handleSyncAction (
   state: State, dispatch: ThunkDispatchType) {
   switch (action.type) {
     case actionConsts.REGISTER_SESSION:
-      const initialState = (action as actionTypes.RegisterSessionAction).initialState
+      const initialState =
+        (action as actionTypes.RegisterSessionAction).initialState
       synchronizer.finishRegistration(initialState,
         initialState.task.config.autosave,
         initialState.session.id,

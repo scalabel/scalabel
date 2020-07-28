@@ -4,10 +4,10 @@ import * as path from 'path'
 import { addBox2dLabel } from '../../../js/action/box2d'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../../../js/functional/states'
-import { RectType, State, TaskType, Vector3Type } from '../../../js/types/functional'
 import { parseConfig } from '../../../js/server/config'
 import { StorageStructure } from '../../../js/server/storage'
 import { ServerConfig } from '../../../js/types/config'
+import { RectType, State, TaskType, Vector3Type } from '../../../js/types/functional'
 
 /**
  * Check equality between two Vector3Type objects

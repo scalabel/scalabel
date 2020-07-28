@@ -1,10 +1,12 @@
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
-import { ItemTypeName, LabelTypeName } from '../const/common'
 import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../common/util'
+import { ItemTypeName, LabelTypeName } from '../const/common'
 import { FormField } from '../const/project'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
+import { ItemExport } from '../types/bdd'
+import { MaybeError } from '../types/common'
 import {
   Attribute,
   ConfigType,
@@ -15,8 +17,6 @@ import {
   TaskType,
   TrackIdMap
 } from '../types/functional'
-import { ItemExport } from '../types/bdd'
-import { MaybeError } from '../types/common'
 import { CreationForm, FormFileData, Project } from '../types/project'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'

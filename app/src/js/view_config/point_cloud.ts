@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { PointCloudViewerConfigType } from '../types/functional'
 import { Vector3D } from '../math/vector3d'
+import { PointCloudViewerConfigType } from '../types/functional'
 
 /**
  * Update ThreeJS rendering objects with viewer config params

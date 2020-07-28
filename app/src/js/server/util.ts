@@ -1,16 +1,16 @@
 
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { BaseAction } from '../types/action'
 import { configureStore } from '../common/configure_store'
+import { uid } from '../common/uid'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType
 } from '../const/common'
-import { uid } from '../common/uid'
 import { StorageType } from '../const/config'
-import { Label2DTemplateType, State, TaskType } from '../types/functional'
+import { BaseAction } from '../types/action'
 import { ItemExport } from '../types/bdd'
+import { Label2DTemplateType, State, TaskType } from '../types/functional'
 import { CreationForm, UserData, UserMetadata } from '../types/project'
 import { FileStorage } from './file_storage'
 import Logger from './logger'

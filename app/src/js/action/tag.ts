@@ -3,8 +3,8 @@ import Session from '../common/session'
 import { LabelTypeName } from '../const/common'
 import { makeLabel } from '../functional/states'
 import { updateObject } from '../functional/util'
-import * as actions from './common'
 import { AddLabelsAction, ChangeLabelsAction } from '../types/action'
+import * as actions from './common'
 
 /**
  * If tag exists for attribute, updates the label, else create a new label for

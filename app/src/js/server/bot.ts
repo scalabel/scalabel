@@ -1,16 +1,16 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
-import { ADD_LABELS } from '../const/action'
-import { AddLabelsAction, BaseAction } from '../types/action'
 import { configureStore } from '../common/configure_store'
-import { ReduxStore } from '../types/common'
-import { ShapeTypeName } from '../const/common'
 import { uid } from '../common/uid'
 import { index2str } from '../common/util'
+import { ADD_LABELS } from '../const/action'
+import { ShapeTypeName } from '../const/common'
 import { EventName } from '../const/connection'
-import { PathPoint2DType, RectType, State } from '../types/functional'
+import { AddLabelsAction, BaseAction } from '../types/action'
 import { ItemExport } from '../types/bdd'
+import { ReduxStore } from '../types/common'
+import { PathPoint2DType, RectType, State } from '../types/functional'
 import {
   ActionPacketType, BotData,
   ModelQuery, RegisterMessageType, SyncActionMessageType

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { makeRect } from '../../functional/states'
-import { RectType } from '../../types/functional'
 import { Vector } from '../../math/vector'
+import { RectType } from '../../types/functional'
 import { Context2D, toCssColor } from '../util'
 
 export interface Rect2DStyle {

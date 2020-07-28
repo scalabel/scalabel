@@ -4,9 +4,9 @@ import thunk from 'redux-thunk'
 import undoable, { includeAction } from 'redux-undo'
 import { ADD_LABELS, DELETE_LABELS } from '../const/action'
 import { makeState } from '../functional/states'
+import { FullStore, ReduxState } from '../types/common'
 import { State } from '../types/functional'
 import { reducer } from './reducer'
-import { FullStore, ReduxState } from '../types/common'
 
 /**
  * Configure the main store for the state

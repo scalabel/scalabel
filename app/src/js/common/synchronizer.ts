@@ -13,16 +13,16 @@ import {
   setStatusToUnsaved,
   updateTask} from '../action/common'
 import * as actionConsts from '../const/action'
-import * as actionTypes from '../types/action'
 import { EventName } from '../const/connection'
 import { isSessionFullySaved } from '../functional/selector'
-import { State } from '../types/functional'
 import { SocketClient } from '../server/socket_interface'
+import * as actionTypes from '../types/action'
+import { ThunkDispatchType } from '../types/common'
+import { State } from '../types/functional'
 import { ActionPacketType, RegisterMessageType,
   SyncActionMessageType } from '../types/message'
 import Session from './session'
 import { setupSession } from './session_setup'
-import { ThunkDispatchType } from '../types/common'
 import { uid } from './uid'
 import { doesPacketTriggerModel, index2str } from './util'
 
@@ -104,9 +104,11 @@ export class Synchronizer {
   /**
    * Queue a new action for saving
    */
-  public queueActionForSaving (action: actionTypes.BaseAction, autosave: boolean,
-                               sessionId: string, bots: boolean,
-                               dispatch: ThunkDispatchType) {
+  public queueActionForSaving (
+    action: actionTypes.BaseAction, autosave: boolean,
+    sessionId: string, bots: boolean,
+    dispatch: ThunkDispatchType
+  ) {
     const shouldBeSaved = (a: actionTypes.BaseAction) => {
       return sessionId === a.sessionId && !a.frontendOnly &&
         !actionConsts.isSessionAction(a)
