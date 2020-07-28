@@ -2,7 +2,7 @@
 import {sprintf} from 'sprintf-js';
 import * as types from '../action/types';
 import type {ImageViewerConfigType,
-  ItemType, State} from '../functional/types';
+  ItemType, State} from '../types/functional';
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 /* :: import {BaseController} from '../controllers/base_controller'; */

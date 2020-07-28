@@ -1,4 +1,4 @@
-import { BaseAction } from '../types/action'
+import { BaseAction as actionConsts } from '../types/action'
 
 export const INIT_SESSION = 'INIT_SESSION'
 export const CHANGE_SELECT = 'CHANGE_SELECT'
@@ -56,7 +56,7 @@ const TASK_ACTION_TYPES = [
 /**
  * Checks if the action modifies task
  */
-export function isTaskAction (action: BaseAction) {
+export function isTaskAction (action: actionConsts) {
   return TASK_ACTION_TYPES.includes(action.type)
 }
 
@@ -75,14 +75,14 @@ const SYNC_ACTION_TYPES = [
 /**
  * Checks if the action should be intercepted by the sync middleware
  */
-export function isSyncAction (action: BaseAction) {
+export function isSyncAction (action: actionConsts) {
   return SYNC_ACTION_TYPES.includes(action.type)
 }
 
 /**
  * Checks if the action list contains a submit action
  */
-export function hasSubmitAction (actions: BaseAction[]): boolean {
+export function hasSubmitAction (actions: actionConsts[]): boolean {
   for (const action of actions) {
     if (action.type === SUBMIT) {
       return true
@@ -102,6 +102,6 @@ const SESSION_ACTION_TYPES = [
 /**
  * Checks if the action modifies session
  */
-export function isSessionAction (action: BaseAction) {
+export function isSessionAction (action: actionConsts) {
   return SESSION_ACTION_TYPES.includes(action.type)
 }

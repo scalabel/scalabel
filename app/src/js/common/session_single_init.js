@@ -22,7 +22,7 @@ import {
 import {
     BaseController,
 } from '../controllers/base_controller';
-import * as types from '../action/types';
+import * as actionConsts from '../const/action'
 
 import Session from './session_single';
 
@@ -94,7 +94,7 @@ function initImageLabelingSingle(): void {
         // tagViewer.setScale(tagViewer.scale);
         // tagViewer.redraw();
         self.dispatch({
-            type: types.UPDATE_ALL,
+            type: actionConsts.UPDATE_ALL,
         });
     };
 
@@ -103,7 +103,7 @@ function initImageLabelingSingle(): void {
     if (increaseButton) {
         increaseButton.onclick = function() {
             self.dispatch({
-                type: types.IMAGE_ZOOM,
+                type: actionConsts.IMAGE_ZOOM,
                 ratio: 1.05,
             });
         };
@@ -112,7 +112,7 @@ function initImageLabelingSingle(): void {
     if (decreaseButton) {
         decreaseButton.onclick = function() {
             self.dispatch({
-                type: types.IMAGE_ZOOM,
+                type: actionConsts.IMAGE_ZOOM,
                 ratio: 1.0 / 1.05,
             });
         };
