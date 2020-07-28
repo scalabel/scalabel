@@ -346,7 +346,7 @@ function calculateLeft (
  * Move camera left
  * @param viewerConfig
  */
-export function moveLeft (types3.
+export function moveLeft (
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
