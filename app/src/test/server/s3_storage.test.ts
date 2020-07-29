@@ -1,6 +1,5 @@
 import AWS from 'aws-sdk'
 import * as path from 'path'
-import { sprintf } from 'sprintf-js'
 import { index2str } from '../../js/common/util'
 import { getProjectKey, getTaskKey, hostname, now } from '../../js/server/path'
 import { S3Storage } from '../../js/server/s3_storage'
@@ -127,7 +126,7 @@ describe('test s3 storage', () => {
       for (let i = 3; i < 7; i++) {
         savePromises.push(
           storage.save(getTaskKey(projectName, index2str(i)),
-            sprintf('{"testField": "testValue%d"}', i)
+            `{"testField": "testValue${i}"}`
           )
         )
       }
@@ -238,6 +237,6 @@ function checkLoad (index: number): Promise<void> {
   return storage.load(getTaskKey(projectName, index2str(index)))
     .then((data: string) => {
       const loadedData = JSON.parse(data)
-      expect(loadedData.testField).toBe(sprintf('testValue%d', index))
+      expect(loadedData.testField).toBe(`testValue${index}`)
     })
 }
