@@ -1,5 +1,5 @@
-import { BaseAction } from '../action/types'
 import { ModelEndpoint } from '../const/connection'
+import { BaseAction } from '../types/action'
 import { ItemExport } from './bdd'
 
 export interface RegisterMessageType {

@@ -1,14 +1,14 @@
 import _ from 'lodash'
 import * as THREE from 'three'
-import * as types from '../action/types'
 import { Window } from '../components/window'
 import { Label2DList } from '../drawable/2d/label2d_list'
 import { Label3DList } from '../drawable/3d/label3d_list'
-import { State } from '../functional/types'
+import * as actionTypes from '../types/action'
+import { FullStore, ThunkActionType } from '../types/redux'
+import { State } from '../types/state'
 import { configureStore } from './configure_store'
 import { GetStateFunc, SimpleStore } from './simple_store'
 import { Track } from './track'
-import { FullStore, ThunkActionType } from './types'
 
 /**
  * Singleton session class
@@ -76,11 +76,11 @@ class Session {
 
   /**
    * Wrapper for redux store dispatch of actions
-   * @param {types.ActionType} action: action description
+   * @param {actionTypes.ActionType} action: action description
    */
-  public dispatch (action: types.ActionType | ThunkActionType) {
+  public dispatch (action: actionTypes.ActionType | ThunkActionType) {
     if (action.hasOwnProperty('type')) {
-      this.store.dispatch(action as types.ActionType)
+      this.store.dispatch(action as actionTypes.ActionType)
     } else {
       this.store.dispatch(action as ThunkActionType)
     }
@@ -114,7 +114,8 @@ export function getState (): State {
 /**
  * Dispatch the action to the global session instance
  */
-export function dispatch (action: types.ActionType | ThunkActionType): void {
+export function dispatch (action: actionTypes.ActionType | ThunkActionType):
+  void {
   return session.dispatch(action)
 }
 

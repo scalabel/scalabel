@@ -9,7 +9,7 @@ import _ from 'lodash'
 import React, { ChangeEvent } from 'react'
 import { goToItem } from '../action/common'
 import Session from '../common/session'
-import { Key } from '../common/types'
+import { Key } from '../const/common'
 import { playerControlStyles } from '../styles/label'
 import { Component } from './component'
 

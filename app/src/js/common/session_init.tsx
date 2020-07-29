@@ -3,14 +3,15 @@ import _ from 'lodash'
 import io from 'socket.io-client'
 import { connect, disconnect, receiveBroadcast, registerSession,
   updateAll } from '../action/common'
+import { QueryArg } from '../const/common'
 import { EventName } from '../const/connection'
-import { State } from '../functional/types'
 import { SyncActionMessageType } from '../types/message'
+import { FullStore } from '../types/redux'
+import { State } from '../types/state'
 import { configureStore } from './configure_store'
 import Session from './session'
 import { makeSyncMiddleware } from './sync_middleware'
 import { Synchronizer } from './synchronizer'
-import { FullStore, QueryArg } from './types'
 
 /**
  * Main function for initiating the frontend session

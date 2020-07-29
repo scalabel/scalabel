@@ -1,9 +1,9 @@
 import { addLabel, addLabelsToItem, addTrack, changeLabelsProps, changeShapesInItems, deleteLabel, makeNullAction, makeSequential } from '../action/common'
 import { deleteTracks, terminateTracks } from '../action/track'
-import { BaseAction } from '../action/types'
 import Session, { dispatch, getState } from '../common/session'
 import { Track } from '../common/track'
-import { LabelIdMap, ShapeIdMap } from '../functional/types'
+import { BaseAction } from '../types/action'
+import { LabelIdMap, ShapeIdMap } from '../types/state'
 import Label2D from './2d/label2d'
 import Label3D from './3d/label3d'
 

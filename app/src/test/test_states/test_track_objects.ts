@@ -1,5 +1,5 @@
-import { AttributeToolType } from '../../js/common/types'
-import { DeepPartialState } from '../../js/functional/types'
+import { AttributeToolType } from '../../js/const/common'
+import { DeepPartialState } from '../../js/types/state'
 
 export const testJson: DeepPartialState = {
   task: {

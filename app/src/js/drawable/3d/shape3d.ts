@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { IdType, INVALID_ID, ShapeType } from '../../functional/types'
+import { IdType, INVALID_ID, ShapeType } from '../../types/state'
 import Label3D from './label3d'
 import { Object3D } from './object3d'
 

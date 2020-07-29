@@ -6,10 +6,10 @@ import { withStyles } from '@material-ui/styles'
 import React from 'react'
 import { changeViewerConfig } from '../action/common'
 import Session from '../common/session'
-import * as types from '../common/types'
-import { ImageViewerConfigType } from '../functional/types'
+import * as types from '../const/common'
 import { Vector2D } from '../math/vector2d'
 import { viewerStyles } from '../styles/viewer'
+import { ImageViewerConfigType } from '../types/state'
 import {
   MAX_SCALE,
   MIN_SCALE,

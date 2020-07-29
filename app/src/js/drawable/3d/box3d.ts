@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import * as THREE from 'three'
 import { makeLabel } from '../../functional/states'
-import { IdType, INVALID_ID, ShapeType, State } from '../../functional/types'
+import { IdType, INVALID_ID, ShapeType, State } from '../../types/state'
 
 import { Vector3D } from '../../math/vector3d'
 
-import { LabelTypeName } from '../../common/types'
+import { LabelTypeName } from '../../const/common'
 import { rotateScale } from '../../math/3d'
 import { Cube3D } from './cube3d'
 import { Label3D } from './label3d'

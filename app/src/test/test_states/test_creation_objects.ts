@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { AttributeToolType, BundleFile,
-  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../../js/common/types'
-import { Attribute, TaskType } from '../../js/functional/types'
+  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../../js/const/common'
 import { ItemExport } from '../../js/types/bdd'
 import { CreationForm, FormFileData, Project } from '../../js/types/project'
+import { Attribute, TaskType } from '../../js/types/state'
 import { sampleStateExportImage, sampleStateExportImagePolygon } from './test_export_objects'
 
 const sampleCategories: string[] = [

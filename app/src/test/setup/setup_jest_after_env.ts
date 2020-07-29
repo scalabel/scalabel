@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { PathPoint2DType, SimplePathPoint2DType } from '../../js/functional/types'
+import { PathPoint2DType, SimplePathPoint2DType } from '../../js/types/state'
 
 declare global {
   namespace jest {

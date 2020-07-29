@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType, TaskType, TrackIdMap, TrackType } from './types'
+import { ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType, TaskType, TrackIdMap, TrackType } from '../types/state'
 
 /**
  * Convert the Ids in the task to string

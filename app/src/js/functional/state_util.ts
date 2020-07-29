@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { makeItem } from './states'
 import {
   IdType,
   ItemType,
@@ -7,7 +6,8 @@ import {
   State,
   TrackType,
   ViewerConfigType
-} from './types'
+} from '../types/state'
+import { makeItem } from './states'
 
 // TODO- move these to selector file and use hierarchical structure
 

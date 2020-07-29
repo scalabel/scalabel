@@ -4,8 +4,8 @@ import React from 'react'
 import Dashboard, {
   DashboardContents, StyledHeader, StyledSidebar
 } from '../../js/components/dashboard'
-import { SubmitData } from '../../js/functional/types'
 import { myTheme } from '../../js/styles/theme'
+import { SubmitData } from '../../js/types/state'
 
 afterEach(cleanup)
 describe('Test dashboard functionality', () => {

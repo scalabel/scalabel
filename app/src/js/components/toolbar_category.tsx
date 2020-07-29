@@ -6,9 +6,9 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 import * as React from 'react'
 import { changeSelect, makeSequential } from '../action/common'
 import { changeSelectedLabelsCategories } from '../action/select'
-import { BaseAction } from '../action/types'
 import { dispatch, getState } from '../common/session'
 import { categoryStyle } from '../styles/label'
+import { BaseAction } from '../types/action'
 import { Component } from './component'
 
 /**

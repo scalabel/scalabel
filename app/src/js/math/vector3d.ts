@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Vector3Type } from '../functional/types'
+import { Vector3Type } from '../types/state'
 import { Vector } from './vector'
 
 /** 2D vector */
