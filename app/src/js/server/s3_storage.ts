@@ -27,11 +27,11 @@ export class S3Storage extends Storage {
     const error = Error(errorMsg)
     const info = dataPath.split(':')
     if (info.length < 2) {
-      throw(error)
+      throw (error)
     }
     const bucketPath = info[1].split('/')
     if (bucketPath.length < 2) {
-      throw(error)
+      throw (error)
     }
     const dataDir = path.join(...bucketPath.splice(1), '/')
     super(dataDir)
@@ -53,8 +53,10 @@ export class S3Storage extends Storage {
       new AWS.SharedIniFileCredentials(),
       new AWS.ProcessCredentials()]
 
-    this.s3 = new AWS.S3({ credentialProvider: chain,
-      httpOptions: { connectTimeout: 10000 }, maxRetries: 5 })
+    this.s3 = new AWS.S3({
+      credentialProvider: chain,
+      httpOptions: { connectTimeout: 10000 }, maxRetries: 5
+    })
   }
 
   /**
@@ -70,14 +72,25 @@ export class S3Storage extends Storage {
           LocationConstraint: this.region
         }
       }
-      await this.s3.createBucket(bucketParams).promise()
-      Logger.info('Waiting for bucket to be created.')
-      const waitParams = {
-        Bucket: this.bucketName
+      Logger.info(`Creating Bucket ${this.bucketName}`)
+      try {
+        await this.s3.createBucket(bucketParams).promise()
+      } catch (error) {
+        Logger.error(error)
       }
-      await this.s3.waitFor('bucketExists', waitParams).promise()
     }
     return
+  }
+
+  /**
+   * Remove the bucket
+   */
+  public async removeBucket (): Promise<void> {
+    const params = {
+      Bucket: this.bucketName
+    }
+    Logger.info(`Deleting Bucket ${this.bucketName}`)
+    await this.s3.deleteBucket(params).promise()
   }
 
   /**
@@ -109,7 +122,7 @@ export class S3Storage extends Storage {
 
     let dirKeys = []
     let fileKeys = []
-    for (;;) {
+    for (; ;) {
       let data
       if (continuationToken.length > 0) {
         const params = {
@@ -267,7 +280,7 @@ export class S3Storage extends Storage {
   /**
    * Checks if bucket exists
    */
-  private async hasBucket (): Promise < boolean > {
+  private async hasBucket (): Promise<boolean> {
     const params = {
       Bucket: this.bucketName
     }

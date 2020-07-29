@@ -10,7 +10,7 @@ const s3 = new AWS.S3()
 const projectName = 'test'
 const storageName = `${hostname()}_${now()}`
 const bucketRegion = 'us-west-2'
-const bucketName = 'scalabel-unit-test'
+const bucketName = `scalabel-test-tmp-${Date.now()}`
 let storage: S3Storage
 
 beforeAll(async () => {
@@ -127,7 +127,7 @@ describe('test s3 storage', () => {
       for (let i = 3; i < 7; i++) {
         savePromises.push(
           storage.save(getTaskKey(projectName, index2str(i)),
-           sprintf('{"testField": "testValue%d"}', i)
+            sprintf('{"testField": "testValue%d"}', i)
           )
         )
       }
@@ -152,7 +152,7 @@ describe('test s3 storage', () => {
   })
 
   test('delete', () => {
-    const key = getProjectDir(`${ projectName }/tasks`)
+    const key = getProjectDir(`${projectName}/tasks`)
     return Promise.all([
       checkTaskKey(1, true),
       checkTaskKey(0, true)
@@ -207,6 +207,7 @@ afterAll(async () => {
     }
     await s3.deleteObject(params).promise()
   }
+  await storage.removeBucket()
 }, 20000)
 
 /**
@@ -235,8 +236,8 @@ function checkProjectKey (): Promise<void> {
  */
 function checkLoad (index: number): Promise<void> {
   return storage.load(getTaskKey(projectName, index2str(index)))
-  .then((data: string) => {
-    const loadedData = JSON.parse(data)
-    expect(loadedData.testField).toBe(sprintf('testValue%d', index))
-  })
+    .then((data: string) => {
+      const loadedData = JSON.parse(data)
+      expect(loadedData.testField).toBe(sprintf('testValue%d', index))
+    })
 }
