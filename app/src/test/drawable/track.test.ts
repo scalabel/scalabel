@@ -7,7 +7,7 @@ import { commit2DLabels } from '../../js/drawable/states'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
-import { RectType } from '../../js/types/functional'
+import { RectType } from '../../js/types/state'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 

@@ -2,8 +2,8 @@ import { addPolygon2dLabel } from '../action/polygon2d'
 import { ModelEndpoint } from '../const/connection'
 import { makeItemExport, makeLabelExport, makeSimplePathPoint2D } from '../functional/states'
 import { AddLabelsAction } from '../types/action'
-import { PathPoint2DType, PathPointType, RectType } from '../types/functional'
 import { ModelQuery } from '../types/message'
+import { PathPoint2DType, PathPointType, RectType } from '../types/state'
 import { convertPolygonToExport } from './export'
 
 /**

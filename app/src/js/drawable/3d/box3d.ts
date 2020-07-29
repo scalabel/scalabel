@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import * as THREE from 'three'
 import { makeLabel } from '../../functional/states'
-import { IdType, INVALID_ID, ShapeType, State } from '../../types/functional'
+import { IdType, INVALID_ID, ShapeType, State } from '../../types/state'
 
 import { Vector3D } from '../../math/vector3d'
 

@@ -9,8 +9,8 @@ import { DashboardContents, ProjectOptions, TaskOptions } from '../components/da
 import { getSubmissionTime } from '../components/util'
 import { FormField } from '../const/project'
 import { ItemExport } from '../types/bdd'
-import { TaskType } from '../types/functional'
 import { Project } from '../types/project'
+import { TaskType } from '../types/state'
 import {
   createProject, createTasks, parseFiles, parseForm, readItemsFile
 } from './create_project'

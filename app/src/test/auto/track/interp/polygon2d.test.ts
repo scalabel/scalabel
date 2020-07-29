@@ -3,7 +3,7 @@ import { addPolygon2dLabel } from '../../../../js/action/polygon2d'
 import { TrackInterp } from '../../../../js/auto/track/interp/interp'
 import { Points2DLinearInterp } from '../../../../js/auto/track/interp/linear/points2d'
 import { dispatch, getState } from '../../../../js/common/session'
-import { LabelType, PathPoint2DType, PathPointType, SimplePathPoint2DType } from '../../../../js/types/functional'
+import { LabelType, PathPoint2DType, PathPointType, SimplePathPoint2DType } from '../../../../js/types/state'
 import { setupTestStore } from '../../../components/util'
 import { emptyTrackingTask } from '../../../test_states/test_track_objects'
 

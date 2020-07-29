@@ -5,7 +5,7 @@ import { dispatch, getState } from '../../js/common/session'
 import { LabelTypeName } from '../../js/const/common'
 import { getShapes } from '../../js/functional/state_util'
 import { makeSimplePathPoint2D } from '../../js/functional/states'
-import { PathPoint2DType, PathPointType } from '../../js/types/functional'
+import { PathPoint2DType, PathPointType } from '../../js/types/state'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 

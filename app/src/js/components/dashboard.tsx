@@ -12,7 +12,7 @@ import { QueryArg } from '../const/common'
 import { Endpoint } from '../const/connection'
 import { dashboardWindowStyles, headerStyle,
   listEntryStyle, sidebarStyle } from '../styles/dashboard'
-import { SubmitData } from '../types/functional'
+import { SubmitData } from '../types/state'
 import DividedPage from './divided_page'
 import { formatDate, getSubmissionTime } from './util'
 

@@ -4,8 +4,8 @@ import thunk from 'redux-thunk'
 import undoable, { includeAction } from 'redux-undo'
 import { ADD_LABELS, DELETE_LABELS } from '../const/action'
 import { makeState } from '../functional/states'
-import { FullStore, ReduxState } from '../types/common'
-import { State } from '../types/functional'
+import { FullStore, ReduxState } from '../types/redux'
+import { State } from '../types/state'
 import { reducer } from './reducer'
 
 /**

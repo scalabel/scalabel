@@ -8,7 +8,7 @@ import { Label2DList } from '../drawable/2d/label2d_list'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
 import { Vector2D } from '../math/vector2d'
 import { label2dViewStyle } from '../styles/label'
-import { ImageViewerConfigType, State } from '../types/functional'
+import { ImageViewerConfigType, State } from '../types/state'
 import {
   clearCanvas,
   getCurrentImageSize,

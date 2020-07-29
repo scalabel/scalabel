@@ -9,7 +9,7 @@ import {
   getNumShapes, getNumTracks, getSelectedLabels, getTrack
 } from '../../js/functional/state_util'
 import { makeLabel, makeShape } from '../../js/functional/states'
-import { IdType } from '../../js/types/functional'
+import { IdType } from '../../js/types/state'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_track_objects'
 import { findNewTracksFromState } from '../util/state'

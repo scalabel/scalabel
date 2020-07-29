@@ -1,7 +1,7 @@
 import * as types from '../const/common'
 import { makeCube, makeLabel } from '../functional/states'
 import { AddLabelsAction } from '../types/action'
-import { Vector3Type } from '../types/functional'
+import { Vector3Type } from '../types/state'
 import { addLabel } from './common'
 
 /**

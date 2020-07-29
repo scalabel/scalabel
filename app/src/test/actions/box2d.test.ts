@@ -3,7 +3,7 @@ import * as box2d from '../../js/action/box2d'
 import * as action from '../../js/action/common'
 import Session from '../../js/common/session'
 import { LabelTypeName, ShapeTypeName } from '../../js/const/common'
-import { RectType } from '../../js/types/functional'
+import { RectType } from '../../js/types/state'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 

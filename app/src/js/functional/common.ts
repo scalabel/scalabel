@@ -26,7 +26,7 @@ import {
   TrackType,
   UserType,
   ViewerConfigType
-} from '../types/functional'
+} from '../types/state'
 import { isValidId, makeLabel, makePane, makeTrack } from './states'
 import {
   assignToArray,

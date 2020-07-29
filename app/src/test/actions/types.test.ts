@@ -4,7 +4,7 @@ import {
 import { isTaskAction } from '../../js/const/action'
 import { makeLabel, makeTask } from '../../js/functional/states'
 import { BaseAction } from '../../js/types/action'
-import { SplitType } from '../../js/types/functional'
+import { SplitType } from '../../js/types/state'
 
 test('Test task action checker', () => {
   // Test some subset of task actions

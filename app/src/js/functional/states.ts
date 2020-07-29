@@ -36,7 +36,7 @@ import {
   TrackType,
   UserType,
   ViewerConfigType
-} from '../types/functional'
+} from '../types/state'
 import { taskIdToString } from './id2string'
 
 /**

@@ -1,5 +1,5 @@
 import * as actionTypes from '../types/action'
-import { ImageViewerConfigType } from '../types/functional'
+import { ImageViewerConfigType } from '../types/state'
 import {
   MAX_SCALE,
   MIN_SCALE

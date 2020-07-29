@@ -1,4 +1,4 @@
-import { SubmitData } from '../types/functional'
+import { SubmitData } from '../types/state'
 
 /**
  * Puts Date.now into dashboard display format

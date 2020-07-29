@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { ShapeTypeName } from '../../const/common'
 import { makePlane } from '../../functional/states'
 import { Vector3D } from '../../math/vector3d'
-import { IdType, Plane3DType, ShapeType } from '../../types/functional'
+import { IdType, Plane3DType, ShapeType } from '../../types/state'
 import Label3D from './label3d'
 import { Shape3D } from './shape3d'
 

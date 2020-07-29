@@ -4,11 +4,11 @@ import { uid } from '../common/uid'
 import * as actionConsts from '../const/action'
 import * as selector from '../functional/selector'
 import * as actionTypes from '../types/action'
-import { ThunkCreatorType } from '../types/common'
+import { SyncActionMessageType } from '../types/message'
+import { ThunkCreatorType } from '../types/redux'
 import { ConnectionStatus, DeepPartialState, IdType, LabelType,
   PaneType, Select, ShapeAllType, ShapeType, SplitType,
-  State, TaskType, ViewerConfigType } from '../types/functional'
-import { SyncActionMessageType } from '../types/message'
+  State, TaskType, ViewerConfigType } from '../types/state'
 
 let getState = getStateGetter()
 

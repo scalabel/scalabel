@@ -3,7 +3,7 @@ import * as action from '../../js/action/common'
 import Session, { dispatch, getState } from '../../js/common/session'
 import { getNumLabels, getShapes } from '../../js/functional/state_util'
 import { Size2D } from '../../js/math/size2d'
-import { IdType, PathPoint2DType } from '../../js/types/functional'
+import { IdType, PathPoint2DType } from '../../js/types/state'
 import { checkPolygon } from '../util/shape'
 import { findNewLabels, findNewLabelsFromState } from '../util/state'
 import {

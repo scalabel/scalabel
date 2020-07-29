@@ -8,11 +8,11 @@ import { Bot } from '../../js/server/bot'
 import { serverConfig } from '../../js/server/defaults'
 import { AddLabelsAction } from '../../js/types/action'
 import { ItemExport } from '../../js/types/bdd'
-import { ReduxStore } from '../../js/types/common'
-import { State } from '../../js/types/functional'
 import {
   ActionPacketType, BotData, RegisterMessageType,
   SyncActionMessageType } from '../../js/types/message'
+import { ReduxStore } from '../../js/types/redux'
+import { State } from '../../js/types/state'
 import {
   getInitialState, getRandomBox2dAction,
   getRandomModelPoly } from './util/util'

@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { CameraIntrinsicsType } from '../../types/functional'
+import { CameraIntrinsicsType } from '../../types/state'
 
 /** Camera for rendering with calibrated intrinsics */
 export class IntrinsicCamera extends THREE.Camera {

@@ -4,7 +4,7 @@
 
 import _ from 'lodash'
 import { makeShape } from '../../../functional/states'
-import { LabelType, ShapeType } from '../../../types/functional'
+import { LabelType, ShapeType } from '../../../types/state'
 
 /**
  * Assign shape content from src to target and return the new shape

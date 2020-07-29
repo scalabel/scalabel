@@ -9,7 +9,7 @@ import Session from '../common/session'
 import * as types from '../const/common'
 import { Vector2D } from '../math/vector2d'
 import { viewerStyles } from '../styles/viewer'
-import { ImageViewerConfigType } from '../types/functional'
+import { ImageViewerConfigType } from '../types/state'
 import {
   MAX_SCALE,
   MIN_SCALE,

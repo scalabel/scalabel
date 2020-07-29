@@ -5,7 +5,7 @@ import {
 } from '../functional/state_util'
 import { Size2D } from '../math/size2d'
 import { Vector2D } from '../math/vector2d'
-import { ImageViewerConfigType, State } from '../types/functional'
+import { ImageViewerConfigType, State } from '../types/state'
 
 // Display export constants
 /** The maximum scale */

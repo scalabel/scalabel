@@ -7,6 +7,7 @@ import { FormField } from '../const/project'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
 import { ItemExport } from '../types/bdd'
 import { MaybeError } from '../types/common'
+import { CreationForm, FormFileData, Project } from '../types/project'
 import {
   Attribute,
   ConfigType,
@@ -16,8 +17,7 @@ import {
   TaskStatus,
   TaskType,
   TrackIdMap
-} from '../types/functional'
-import { CreationForm, FormFileData, Project } from '../types/project'
+} from '../types/state'
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'
 import { ProjectStore } from './project_store'

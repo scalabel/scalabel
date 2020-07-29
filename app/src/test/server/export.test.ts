@@ -6,7 +6,7 @@ import {
   convertItemToExport,
   convertPolygonToExport, convertStateToExport
 } from '../../js/server/export'
-import { PathPointType, State } from '../../js/types/functional'
+import { PathPointType, State } from '../../js/types/state'
 import {
   sampleItemExportImage, sampleItemExportImagePolygon,
   sampleStateExportImage, sampleStateExportImagePolygon

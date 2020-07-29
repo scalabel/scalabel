@@ -1,6 +1,6 @@
 import { ShapeTypeName } from '../const/common'
 import * as bdd from '../types/bdd'
-import * as types from '../types/functional'
+import * as types from '../types/state'
 
 /**
  * Transform internal rect to export 2d box

@@ -1,6 +1,6 @@
-import { Attribute, ConfigType, Label2DTemplateType, SensorType
-} from '../types/functional'
 import { ItemExport } from './bdd'
+import { Attribute, ConfigType, Label2DTemplateType, SensorType
+} from './state'
 
 /**
  * Stores specifications of project

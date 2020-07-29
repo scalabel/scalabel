@@ -7,10 +7,10 @@ import { getTestDir } from '../../js/server/path'
 import { ProjectStore } from '../../js/server/project_store'
 import { RedisClient } from '../../js/server/redis_client'
 import { RedisStore } from '../../js/server/redis_store'
-import { State, TaskType } from '../../js/types/functional'
 import {
   CreationForm, FormFileData, Project
 } from '../../js/types/project'
+import { State, TaskType } from '../../js/types/state'
 import {
   sampleFormFileData,
   sampleFormImage,

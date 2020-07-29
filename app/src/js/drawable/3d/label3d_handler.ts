@@ -6,7 +6,7 @@ import { DataType, Key, LabelTypeName, ViewerConfigTypeName } from '../../const/
 import { getCurrentViewerConfig } from '../../functional/state_util'
 import { makePointCloudViewerConfig, makeSensor } from '../../functional/states'
 import { Vector3D } from '../../math/vector3d'
-import { INVALID_ID, PointCloudViewerConfigType, SensorType, State, ViewerConfigType } from '../../types/functional'
+import { INVALID_ID, PointCloudViewerConfigType, SensorType, State, ViewerConfigType } from '../../types/state'
 import { commitLabels } from '../states'
 import { Label3D } from './label3d'
 import { makeDrawableLabel3D } from './label3d_list'

@@ -8,10 +8,10 @@ import { EventName } from '../../js/const/connection'
 import * as selector from '../../js/functional/selector'
 import { updateState } from '../../js/server/util'
 import { AddLabelsAction } from '../../js/types/action'
-import { ThunkDispatchType } from '../../js/types/common'
 import {
   ActionPacketType, RegisterMessageType,
   SyncActionMessageType } from '../../js/types/message'
+import { ThunkDispatchType } from '../../js/types/redux'
 import { getInitialState, getRandomBox2dAction } from '../server/util/util'
 
 let sessionId: string

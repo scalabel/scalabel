@@ -3,7 +3,7 @@ import { ModelEndpoint } from '../../js/const/connection'
 import { makePathPoint2D, makeRect } from '../../js/functional/states'
 import { convertPolygonToExport } from '../../js/server/export'
 import { ModelInterface } from '../../js/server/model_interface'
-import { PathPoint2DType, PathPointType, RectType } from '../../js/types/functional'
+import { PathPoint2DType, PathPointType, RectType } from '../../js/types/state'
 
 let modelInterface: ModelInterface
 let projectName: string

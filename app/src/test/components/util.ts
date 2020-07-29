@@ -3,7 +3,7 @@ import Session from '../../js/common/session'
 import { setupSession } from '../../js/common/session_setup'
 import { makeSyncMiddleware } from '../../js/common/sync_middleware'
 import { Synchronizer } from '../../js/common/synchronizer'
-import { DeepPartialState } from '../../js/types/functional'
+import { DeepPartialState } from '../../js/types/state'
 
 /**
  * Reset the session for testing

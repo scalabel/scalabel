@@ -9,12 +9,12 @@ import { ShapeTypeName } from '../const/common'
 import { EventName } from '../const/connection'
 import { AddLabelsAction, BaseAction } from '../types/action'
 import { ItemExport } from '../types/bdd'
-import { ReduxStore } from '../types/common'
-import { PathPoint2DType, RectType, State } from '../types/functional'
 import {
   ActionPacketType, BotData,
   ModelQuery, RegisterMessageType, SyncActionMessageType
 } from '../types/message'
+import { ReduxStore } from '../types/redux'
+import { PathPoint2DType, RectType, State } from '../types/state'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
 import { getPyConnFailedMsg } from './util'

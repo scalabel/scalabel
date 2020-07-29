@@ -1,7 +1,7 @@
 import { LabelTypeName } from '../const/common'
 import { makeLabel, makeRect } from '../functional/states'
 import { AddLabelsAction, ChangeShapesAction } from '../types/action'
-import { IdType, RectType, ShapeType, SimpleRect } from '../types/functional'
+import { IdType, RectType, ShapeType, SimpleRect } from '../types/state'
 import * as actions from './common'
 
 /**

@@ -6,7 +6,7 @@ import Session from '../../js/common/session'
 import Window from '../../js/components/window'
 import { Key, ViewerConfigTypeName } from '../../js/const/common'
 import { makeDefaultViewerConfig } from '../../js/functional/states'
-import { State } from '../../js/types/functional'
+import { State } from '../../js/types/state'
 import { testJson } from '../test_states/test_image_objects'
 import { setupTestStore } from './util'
 

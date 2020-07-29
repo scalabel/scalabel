@@ -14,7 +14,7 @@ import Session from '../common/session'
 import { Key } from '../const/common'
 import * as selector from '../functional/selector'
 import { defaultAppBar } from '../styles/general'
-import { ReduxState } from '../types/common'
+import { ReduxState } from '../types/redux'
 import { Component } from './component'
 import { StatusMessageBox } from './message_box'
 

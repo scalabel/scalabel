@@ -1,4 +1,4 @@
-import { TrackType } from '../types/functional'
+import { TrackType } from '../types/state'
 
 /**
  * Check if tracks overlap in items

@@ -18,7 +18,7 @@ import { getShape } from '../../js/functional/state_util'
 import { Size2D } from '../../js/math/size2d'
 import { Vector2D } from '../../js/math/vector2d'
 import { myTheme } from '../../js/styles/theme'
-import { IdType, RectType } from '../../js/types/functional'
+import { IdType, RectType } from '../../js/types/state'
 import { getTestConfig, getTestConfigPath } from '../server/util/util'
 import { findNewLabelsFromState } from '../util/state'
 import {

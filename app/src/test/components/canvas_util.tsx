@@ -5,7 +5,7 @@ import { GetStateFunc, SimpleStore } from '../../js/common/simple_store'
 import { Label2dCanvas } from '../../js/components/label2d_canvas'
 import { makeImageViewerConfig } from '../../js/functional/states'
 import { ActionType } from '../../js/types/action'
-import { IdType } from '../../js/types/functional'
+import { IdType } from '../../js/types/state'
 import { LabelCollector } from '../util/label_collector'
 import { TrackCollector } from '../util/track_collector'
 

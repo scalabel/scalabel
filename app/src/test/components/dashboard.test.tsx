@@ -5,7 +5,7 @@ import Dashboard, {
   DashboardContents, StyledHeader, StyledSidebar
 } from '../../js/components/dashboard'
 import { myTheme } from '../../js/styles/theme'
-import { SubmitData } from '../../js/types/functional'
+import { SubmitData } from '../../js/types/state'
 
 afterEach(cleanup)
 describe('Test dashboard functionality', () => {

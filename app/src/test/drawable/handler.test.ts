@@ -7,7 +7,7 @@ import { Key } from '../../js/const/common'
 import { getShape } from '../../js/functional/state_util'
 import { makeSimplePathPoint2D } from '../../js/functional/states'
 import { Size2D } from '../../js/math/size2d'
-import { IdType, PathPointType } from '../../js/types/functional'
+import { IdType, PathPointType } from '../../js/types/state'
 import { findNewLabels } from '../util/state'
 import { initializeTestingObjects, keyClick, mouseDown, mouseMove, mouseUp } from './util'
 

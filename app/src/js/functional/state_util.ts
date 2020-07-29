@@ -6,7 +6,7 @@ import {
   State,
   TrackType,
   ViewerConfigType
-} from '../types/functional'
+} from '../types/state'
 import { makeItem } from './states'
 
 // TODO- move these to selector file and use hierarchical structure

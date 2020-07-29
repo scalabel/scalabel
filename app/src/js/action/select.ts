@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Session from '../common/session'
 import { LabelTypeName } from '../const/common'
 import * as actionTypes from '../types/action'
-import { IdType, Select, State } from '../types/functional'
+import { IdType, Select, State } from '../types/state'
 import { changeLabelsProps, changeSelect, deleteLabels } from './common'
 import { deleteTracks, terminateTracks } from './track'
 

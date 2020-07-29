@@ -1,5 +1,5 @@
 import { makeNode2d } from '../../functional/states'
-import { Node2DType } from '../../types/functional'
+import { Node2DType } from '../../types/state'
 import { Point2D } from './point2d'
 
 /** Points for custom labels */

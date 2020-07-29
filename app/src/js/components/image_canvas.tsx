@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import Session from '../common/session'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
 import { imageViewStyle } from '../styles/label'
-import { ImageViewerConfigType, State } from '../types/functional'
+import { ImageViewerConfigType, State } from '../types/state'
 import {
   clearCanvas,
   drawImageOnCanvas,

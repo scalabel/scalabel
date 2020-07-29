@@ -1,6 +1,7 @@
 /**
  * Define string identifiers and interfaces of actions
  */
+import { SyncActionMessageType } from './message'
 import {
   ConnectionStatus,
   DeepPartialState,
@@ -14,8 +15,7 @@ import {
   SubmitData,
   TaskType,
   ViewerConfigType
-} from '../types/functional'
-import { SyncActionMessageType } from './message'
+} from './state'
 
 export interface BaseAction {
   /** unique id for the action */

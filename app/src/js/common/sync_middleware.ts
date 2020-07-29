@@ -1,8 +1,8 @@
 import { Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import * as actionConsts from '../const/action'
 import * as actionTypes from '../types/action'
-import { ReduxState, ThunkDispatchType } from '../types/common'
-import { State } from '../types/functional'
+import { ReduxState, ThunkDispatchType } from '../types/redux'
+import { State } from '../types/state'
 import { Synchronizer } from './synchronizer'
 
 /**

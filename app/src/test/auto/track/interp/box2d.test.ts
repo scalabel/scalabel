@@ -3,7 +3,7 @@ import { addBox2dLabel } from '../../../../js/action/box2d'
 import { TrackInterp } from '../../../../js/auto/track/interp/interp'
 import { Box2DLinearInterp } from '../../../../js/auto/track/interp/linear/box2d'
 import { dispatch, getState } from '../../../../js/common/session'
-import { LabelType, RectType, SimpleRect } from '../../../../js/types/functional'
+import { LabelType, RectType, SimpleRect } from '../../../../js/types/state'
 import { setupTestStore } from '../../../components/util'
 import { emptyTrackingTask } from '../../../test_states/test_track_objects'
 

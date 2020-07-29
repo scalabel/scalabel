@@ -3,7 +3,7 @@ import { changeViewerConfig, makeBaseAction } from '../action/common'
 import * as actionConsts from '../const/action'
 import { Vector3D } from '../math/vector3d'
 import * as actionTypes from '../types/action'
-import { PointCloudViewerConfigType, ViewerConfigType } from '../types/functional'
+import { PointCloudViewerConfigType, ViewerConfigType } from '../types/state'
 
 export enum CameraMovementParameters {
   MOUSE_CORRECTION_FACTOR = 60.0,
