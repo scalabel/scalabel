@@ -1,8 +1,8 @@
 // @flow
 import {sprintf} from 'sprintf-js';
-import * as types from '../action/types';
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
+import * as types from '../const/action';
 import type {ImageViewerConfigType,
   ItemType, State} from '../types/state';
 /* :: import {BaseController} from '../controllers/base_controller'; */
