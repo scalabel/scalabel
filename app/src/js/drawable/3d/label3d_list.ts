@@ -246,7 +246,6 @@ export class Label3DList {
     while (obj.parent && !(obj.id in this._raycastMap)) {
       obj = obj.parent
     }
-
     if (obj.id in this._raycastMap) {
       return this._raycastMap[obj.id]
     }

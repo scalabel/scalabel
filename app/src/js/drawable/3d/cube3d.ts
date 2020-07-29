@@ -43,6 +43,8 @@ export class Cube3D extends Shape3D {
   private _grid: Readonly<Grid3D> | null
   /** First corner for temp init */
   private _firstCorner: Vector2D | null
+  /** internal shape state */
+  private _cubeShape: CubeType
 
   /**
    * Make box with assigned id
@@ -94,6 +96,8 @@ export class Cube3D extends Shape3D {
 
     this._firstCorner = null
 
+    this._cubeShape = makeCube()
+
     this.setHighlighted()
   }
 
@@ -135,6 +139,11 @@ export class Cube3D extends Shape3D {
     return this._box
   }
 
+  /** get the shape id */
+  public get shapeId (): IdType {
+    return this._cubeShape.id
+  }
+
   /**
    * Convert to state representation
    */
@@ -172,13 +181,13 @@ export class Cube3D extends Shape3D {
       worldQuaternion.multiply(this._grid.quaternion)
       worldOrientation.setFromQuaternion(worldQuaternion)
     }
-    return makeCube({
-      center: (new Vector3D()).fromThree(worldCenter).toState(),
-      size: (new Vector3D()).fromThree(worldSize).toState(),
-      orientation:
-        (new Vector3D()).fromThree(worldOrientation.toVector3()).toState(),
-      anchorIndex: this._anchorIndex
-    })
+    const cube = this._cubeShape
+    cube.center = (new Vector3D()).fromThree(worldCenter).toState()
+    cube.size = (new Vector3D()).fromThree(worldSize).toState()
+    cube.orientation =
+      (new Vector3D()).fromThree(worldOrientation.toVector3()).toState()
+    cube.anchorIndex = this._anchorIndex
+    return cube
   }
 
   /**

@@ -42,7 +42,7 @@ export class Box3D extends Label3D {
 
     this._label = makeLabel({
       type: LabelTypeName.BOX_3D, id: INVALID_ID, item: itemIndex,
-      category: [category], sensors
+      category: [category], sensors, shapes: [this._shape.shapeId]
     })
 
     if (center) {
