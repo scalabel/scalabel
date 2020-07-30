@@ -12,8 +12,8 @@ export class FileStorage extends Storage {
   /**
    * Constructor
    */
-  constructor (dataDir: string) {
-    super(dataDir)
+  constructor (dataDir: string, useRelativePaths = false) {
+    super(dataDir, useRelativePaths)
     // Do this synchronously (only once)
     Logger.info(`Using scalabel data dir ${dataDir}. ` +
       `If it doesn't exist, it will be created`)

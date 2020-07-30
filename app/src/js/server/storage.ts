@@ -13,12 +13,15 @@ export const STORAGE_FOLDERS = [StorageStructure.PROJECT, StorageStructure.USER]
 export abstract class Storage {
   /** the data directory */
   protected _dataDir: string
+  /** whether to use keys as paths directly */
+  protected _useRelativePaths: boolean
 
   /**
    * General constructor
    */
-  protected constructor (basePath: string) {
+  protected constructor (basePath: string, useRelativePaths: boolean) {
     this._dataDir = basePath
+    this._useRelativePaths = useRelativePaths
   }
 
   /**
@@ -93,6 +96,9 @@ export abstract class Storage {
    * Makes relative path into full filename
    */
   public fullFile (key: string): string {
+    if (this._useRelativePaths) {
+      return key
+    }
     return this.fullDir(key + this.keyExt())
   }
 }
