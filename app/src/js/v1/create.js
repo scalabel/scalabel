@@ -1,5 +1,4 @@
 import 'bootstrap-switch';
-import {sprintf} from 'sprintf-js';
 
 /**
  * get url variables
@@ -56,7 +55,7 @@ $(document).ready(function() {
       }
     };
     let version = getUrlParam('v', 'v1');
-    x.open('POST', sprintf('./postProject?v=%s', version));
+    x.open('POST', `./postProject?v=${version}`);
     // eslint-disable-next-line
     x.send(new FormData(this));
   });

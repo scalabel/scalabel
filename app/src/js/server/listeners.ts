@@ -4,7 +4,6 @@ import {
   Response
 } from 'express'
 import { File } from 'formidable'
-import { sprintf } from 'sprintf-js'
 import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
 import { FormField } from '../const/project'
@@ -40,7 +39,7 @@ export class Listeners {
    */
   public loggingHandler (
     req: Request, _res: Response, next: NextFunction) {
-    const log = sprintf('Requesting %s', req.originalUrl)
+    const log = `Requesting ${req.originalUrl}`
     Logger.info(log)
     next()
   }

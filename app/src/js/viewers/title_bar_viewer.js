@@ -1,4 +1,3 @@
-import {sprintf} from 'sprintf-js';
 import Session from '../common/session_single.js';
 import {BaseViewer} from './base_viewer';
 /* :: import {TitleBarController} from '../controllers/title_bar_controller'; */
@@ -57,28 +56,31 @@ export class TitleBarViewer extends BaseViewer {
     let numLabels = state.items[currItem].labels.length;
     let labelCount = document.getElementById('label-count');
     if (labelCount) {
-      labelCount.textContent = sprintf('%d', numLabels);
+      labelCount.textContent = `${numLabels}`;
     }
     let pageCount = document.getElementById('page-count');
     if (pageCount) {
-      pageCount.textContent =
-        sprintf('%s', (currItem) % state.items.length + 1);
+      pageCount.textContent = `${(currItem) % state.items.length + 1}`;
     }
     let totalPageCount = document.getElementById('total-page-count');
     if (totalPageCount) {
-      totalPageCount.textContent = sprintf('/ %s', state.items.length);
+      totalPageCount.textContent = `/ ${state.items.length}`;
     }
 
     let assistantViewIcon = document.getElementById('assistant-view-btn');
     if (assistantViewIcon) {
       if (this.state.layout.assistantView) {
-        assistantViewIcon.innerHTML = sprintf('<i %s %s></i>',
-            'class="far fa-window-maximize"',
-            'style="width: 15px; height: 15px"');
+        assistantViewIcon.innerHTML =
+          `<i
+          class="far fa-window-maximize" 
+          style="width: 15px; height: 15px">
+          </i>`
       } else {
-        assistantViewIcon.innerHTML = sprintf('<i %s %s></i>',
-            'class="fas fa-columns"',
-            'style="width: 15px; height: 15px"');
+        assistantViewIcon.innerHTML =
+          `<i 
+          class="fas fa-columns"
+          style="width: 15px; height: 15px">
+          </i>`
       }
     }
     return true;

@@ -1,7 +1,4 @@
 /* flow */
-
-import {sprintf} from 'sprintf-js';
-
 $(document).ready(function() {
   let tds = document.getElementById('main_table').getElementsByTagName('td');
   let totalTaskLabeled = 0;
@@ -22,9 +19,8 @@ $(document).ready(function() {
     }
   }
   document.getElementById('totalTaskLabeled').textContent =
-      sprintf('%d', totalTaskLabeled);
-  document.getElementById('totalLabels').textContent =
-      sprintf('%d', totalLabels);
+      `${totalTaskLabeled}`;
+  document.getElementById('totalLabels').textContent = `${totalLabels}`;
 
   $('body').show();
   if (document.getElementById('label_type').innerText === 'tag') {

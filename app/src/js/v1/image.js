@@ -1,7 +1,6 @@
 import {SatItem, SatLabel, pickColorPalette} from './sat';
 import {hiddenStyleColor, mode, rgb} from './utils';
 import {UP_RES_RATIO} from './shape';
-import {sprintf} from 'sprintf-js';
 import $ from 'jquery';
 
 // constants
@@ -204,7 +203,7 @@ SatImage.prototype.updateLabelCount = function() {
       }
     }
   }
-  document.getElementById('label-count').textContent = sprintf('%s', numLabels);
+  document.getElementById('label-count').textContent = `${numLabels}`;
 };
 
 /**
@@ -536,9 +535,9 @@ SatImage.prototype.setActive = function(active) {
 
   // image counter
   document.getElementById('page-count').textContent =
-      sprintf('%s', (this.index) % this.sat.items.length + 1);
+   `${(this.index) % this.sat.items.length + 1}`;
   document.getElementById('total-page-count').textContent =
-      sprintf('/ %s', this.sat.items.length);
+      `/ ${this.sat.items.length}`;
 
   self.redraw();
   self.updateLabelCount();

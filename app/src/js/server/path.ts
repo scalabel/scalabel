@@ -1,7 +1,6 @@
 import moment from 'moment'
 import * as os from 'os'
 import * as path from 'path'
-import { sprintf } from 'sprintf-js'
 import { index2str } from '../common/util'
 import { BotData } from '../types/message'
 import { StorageStructure } from './storage'
@@ -14,10 +13,9 @@ export function getRoomName (
   projectName: string, taskId: string,
   sync: boolean, sessionId = ''): string {
   if (sync) {
-    return sprintf('project%s-task%s', projectName, taskId)
+    return `project${projectName}-task${taskId}`
   } else {
-    return sprintf('project%s-task%s-session%s',
-      projectName, taskId, sessionId)
+    return `project${projectName}-task${taskId}-session${sessionId}`
   }
 }
 
@@ -39,21 +37,21 @@ export function hostname (): string {
  * Creates path for a timestamped file
  */
 export function getFileKey (filePath: string): string {
-  return sprintf('%s/%s', filePath, now())
+  return `${filePath}/${now()}`
 }
 
 /**
  * Creates a temporary directory for tests
  */
 export function getTestDir (testName: string): string {
-  return sprintf('%s-%s', testName, now())
+  return `${testName}-${now()}`
 }
 
 /**
  * Gets path for user data
  */
 export function getUserKey (project: string): string {
-  return sprintf('%s/userData', project)
+  return `${project}/userData`
 }
 
 /**
@@ -119,7 +117,7 @@ export function checkRedisReminderKey (key: string): boolean {
 export function getRedisBotKey (botData: BotData) {
   const projectName = botData.projectName
   const taskId = index2str(botData.taskIndex)
-  return sprintf('%s:%s:botKey', projectName, taskId)
+  return `${projectName}:${taskId}:botKey`
 }
 
 /**

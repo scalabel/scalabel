@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { Cursor, Key, LabelTypeName } from '../../const/common'
 import { makeLabel } from '../../functional/states'
 import { Size2D } from '../../math/size2d'
@@ -551,7 +550,7 @@ export class Polygon2D extends Label2D {
    */
   private move (end: Vector2D, _limit: Size2D): void {
     if (this._highlightedHandle !== 0) {
-      throw new Error(sprintf('not operation move'))
+      throw new Error(`not operation move`)
     }
     const delta = end.clone().subtract(this._mouseDownCoord)
     for (let i = 0; i < this._points.length; ++i) {
@@ -768,7 +767,7 @@ export class Polygon2D extends Label2D {
     const selectedLabelIndex = this._highlightedHandle - 1
     const point = this._points[selectedLabelIndex]
     if (point.type !== PathPointType.MID) {
-      throw new Error(sprintf('not a midpoint'))
+      throw new Error(`not a midpoint`)
     }
     const prevPoint =
       this._points[this.getPreviousIndex(selectedLabelIndex)]

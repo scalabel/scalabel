@@ -2,7 +2,6 @@ import $ from 'jquery';
 import Session from '../common/session_single';
 import {BaseViewer} from './base_viewer';
 /* :: import {ToolboxController} from '../controllers/toolbox_controller'; */
-import {sprintf} from 'sprintf-js';
 import 'bootstrap-switch';
 
 /**
@@ -41,16 +40,22 @@ export class ToolboxViewer extends BaseViewer {
         // $FlowFixMe
         $('#custom_attribute_' + attributes[i].name).bootstrapSwitch();
       } else if (attributes[i].toolType === 'list') {
-        let listOuterHtml = sprintf('<span>%s</span>', attributes[i].name);
-        listOuterHtml += '<div id="radios" class="btn-group ';
-        listOuterHtml += 'attribute-btns" data-toggle="buttons">';
+        let listOuterHtml = 
+        `<span>${attributes[i].name}</span>
+        <div
+        id="radios"
+        class="btn-group attribute-btns"
+        data-toggle="buttons">
+        `;
         for (let j = 0; j < attributes[i].values.length; j++) {
           listOuterHtml +=
-              '<button id="custom_attributeselector_' + i + '-' + j +
-              '" class="btn btn-raised btn-attribute btn-' +
-              attributes[i].buttonColors[j] +
-              '"> <input type="radio"/>' + attributes[i].values[j] +
-              '</button>';
+              `<button 
+              id="custom_attributeselector_${i}-${j}"
+              class="btn btn-raised btn-attribute 
+              btn-${attributes[i].buttonColors[j]}">
+              <input type="radio"/>
+              ${attributes[i].values[j]}
+              </button>`;
         }
         attributeInput.outerHTML = listOuterHtml;
       } else {

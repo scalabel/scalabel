@@ -2,7 +2,6 @@ import $ from 'jquery';
 import {BaseViewer} from './base_viewer';
 /* :: import {BaseController} from '../controllers/base_controller'; */
 import type {ImageViewerConfigType} from '../functional/types';
-import {sprintf} from 'sprintf-js';
 import Session from '../common/session_single';
 
 /**
@@ -39,8 +38,8 @@ export class BaseViewer2D extends BaseViewer {
     // necessary variables
     let divCanvasName = 'div-canvas';
     if (canvasSuffix !== '') {
-      divCanvasName = sprintf('%s-%s', divCanvasName, canvasSuffix);
-      canvasId = sprintf('%s-%s', canvasId, canvasSuffix);
+      divCanvasName = `${divCanvasName}-${canvasSuffix}`;
+      canvasId = `${canvasId}-${canvasSuffix}`;
     }
     let divCanvas = document.getElementById(divCanvasName);
     if (divCanvas) {
@@ -282,7 +281,7 @@ export class BaseViewer2D extends BaseViewer {
     } else {
       newWidth = this.isAssistantView ? 0 : windowSize;
     }
-    this.divCanvas.style.width = sprintf('%dpx', newWidth);
+    this.divCanvas.style.width = `${newWidth}px`;
     this.setCanvasSize(config);
   }
 
@@ -292,10 +291,10 @@ export class BaseViewer2D extends BaseViewer {
    */
   setCanvasSize(config: ImageViewerConfigType): void {
     let rectDiv = this.divCanvas.getBoundingClientRect();
-    this.canvas.style.height = sprintf('%dpx',
-        Math.round(rectDiv.height * config.viewScale));
-    this.canvas.style.width = sprintf('%dpx',
-        Math.round(rectDiv.width * config.viewScale));
+    this.canvas.style.height =
+      `${Math.round(rectDiv.height * config.viewScale)}px`;
+    this.canvas.style.width = 
+      `${Math.round(rectDiv.width * config.viewScale)}px`;
 
     this.canvas.width = rectDiv.width * config.viewScale;
     this.canvas.height = rectDiv.height * config.viewScale;

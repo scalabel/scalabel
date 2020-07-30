@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { filterXSS } from 'xss'
 import { makeItemStatus, makeState } from '../functional/states'
 import { Project, StateMetadata, UserData, UserMetadata } from '../types/project'
@@ -256,9 +255,9 @@ export class ProjectStore {
   private async loadSavedState (saveDir: string): Promise<State> {
     const keys = await this.storage.listKeys(saveDir, false)
     if (keys.length === 0) {
-      throw new Error(sprintf('No submissions found in dir %s', saveDir))
+      throw new Error(`No submissions found in dir ${saveDir}`)
     }
-    Logger.info(sprintf('Reading %s\n', keys[keys.length - 1]))
+    Logger.info(`Reading ${keys[keys.length - 1]}\n`)
     const fields = await this.storage.load(keys[keys.length - 1])
     return safeParseJSON(fields) as State
   }

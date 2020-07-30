@@ -1,6 +1,5 @@
 
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { configureStore } from '../common/configure_store'
 import { uid } from '../common/uid'
 import {
@@ -39,8 +38,8 @@ export async function makeStorage (
       }
       break
     case StorageType.DYNAMO_DB: {
-      Logger.error(Error(sprintf(
-        '%s storage not implemented yet, using file storage', database)))
+      Logger.error(Error(
+        `${database} storage not implemented yet, using file storage`))
       storage = new FileStorage(dir)
       break
     }
@@ -49,8 +48,8 @@ export async function makeStorage (
       break
     }
     default: {
-      Logger.error(Error(sprintf(
-        '%s is an unknown database format, using file storage', database)))
+      Logger.error(Error(
+        `${database} is an unknown database format, using file storage`))
       storage = new FileStorage(dir)
     }
   }
@@ -271,8 +270,8 @@ export function parseProjectName (projectName: string): string {
  * Get connection failed error message for http request to python
  */
 export function getPyConnFailedMsg (endpoint: string, message: string): string {
-  return sprintf('Make sure endpoint is correct and python server is \
-running; query to \"%s\" failed with message: %s', endpoint, message)
+  return `Make sure endpoint is correct and python server is \
+running; query to \"${endpoint}\" failed with message: ${message}`
 }
 
 /**
