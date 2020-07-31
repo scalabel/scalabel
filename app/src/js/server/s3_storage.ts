@@ -18,7 +18,7 @@ export class S3Storage extends Storage {
   /**
    * Constructor
    */
-  constructor (dataPath: string, useRelativePaths = false) {
+  constructor (dataPath: string) {
     // Check s3 data path
     const errorMsg =
       `s3 data path format is incorrect:
@@ -34,7 +34,7 @@ export class S3Storage extends Storage {
       throw (error)
     }
     const dataDir = path.join(...bucketPath.splice(1), '/')
-    super(dataDir, useRelativePaths)
+    super(dataDir)
 
     this.region = info[0]
     this.bucketName = bucketPath[0]

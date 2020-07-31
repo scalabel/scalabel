@@ -13,15 +13,15 @@ export const STORAGE_FOLDERS = [StorageStructure.PROJECT, StorageStructure.USER]
 export abstract class Storage {
   /** the data directory */
   protected _dataDir: string
-  /** whether to use keys as paths directly */
-  protected _useRelativePaths: boolean
+  /** the file extension to use */
+  protected _extension: string
 
   /**
    * General constructor
    */
-  protected constructor (basePath: string, useRelativePaths: boolean) {
+  protected constructor (basePath: string) {
     this._dataDir = basePath
-    this._useRelativePaths = useRelativePaths
+    this._extension = '.json'
   }
 
   /**
@@ -32,11 +32,19 @@ export abstract class Storage {
   }
 
   /**
+   * Change the file extension for different file types
+   * Can set to empty string if the keys already include extensions
+   */
+  public setExt (newExt: string) {
+    this._extension = newExt
+  }
+
+  /**
    * Extension of the key when it is stored
-   * Only file and s3 storages are supported now, so return .json directly
+   * Default is json, but it can be modified with setExt
    */
   public keyExt (): string {
-    return '.json'
+    return this._extension
   }
 
   /**
@@ -96,9 +104,6 @@ export abstract class Storage {
    * Makes relative path into full filename
    */
   public fullFile (key: string): string {
-    if (this._useRelativePaths) {
-      return key
-    }
     return this.fullDir(key + this.keyExt())
   }
 }

@@ -12,7 +12,7 @@ import { ItemExport } from '../types/bdd'
 import { Project } from '../types/project'
 import { TaskType } from '../types/state'
 import {
-  createProject, createTasks, parseFiles, parseForm, readFile
+  createProject, createTasks, parseFiles, parseForm, readConfig
 } from './create_project'
 import { convertStateToExport } from './export'
 import { FileStorage } from './file_storage'
@@ -166,9 +166,10 @@ export class Listeners {
      * to access the item/category/attribute files
      */
     const s3Path = req.body.fields.s3_path as string
-    const storage = new S3Storage(s3Path, true)
+    const storage = new S3Storage(s3Path)
+    storage.setExt('')
     await this.createProjectFromDicts(
-      req.body.fields, req.body.files, storage, false, res)
+      storage, req.body.fields, req.body.files, false, res)
   }
 
   /**
@@ -195,8 +196,9 @@ export class Listeners {
       }
     }
 
-    const storage = new FileStorage('', true)
-    await this.createProjectFromDicts(fields, files, storage, true, res)
+    const storage = new FileStorage('')
+    storage.setExt('')
+    await this.createProjectFromDicts(storage, fields, files, true, res)
   }
 
   /**
@@ -215,9 +217,10 @@ export class Listeners {
     }
 
     // Read in the data
-    const storage = new FileStorage('', true)
-    const items = await readFile<Array<Partial<ItemExport>>>(
-      req.body.items, storage)
+    const storage = new FileStorage('')
+    storage.setExt('')
+    const items = await readConfig<Array<Partial<ItemExport>>>(
+      storage, req.body.items, [])
     let project: Project
     let projectName: string
     try {
@@ -311,16 +314,15 @@ export class Listeners {
    * Finishes project creation using processed dicts
    */
   private async createProjectFromDicts (
-    fields: { [key: string]: string },
+    storage: Storage, fields: { [key: string]: string },
     files: { [key: string]: string },
-    storage: Storage,
     itemsRequired: boolean, res: Response) {
     try {
         // Parse form from request
       const form = await parseForm(fields, this.projectStore)
         // Parse item, category, and attribute data from the form
       const formFileData = await parseFiles(
-        form.labelType, files, storage, itemsRequired)
+        storage, form.labelType, files, itemsRequired)
         // Create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([

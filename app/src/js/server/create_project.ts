@@ -8,7 +8,6 @@ import { ItemExport } from '../types/bdd'
 import { CreationForm, FormFileData, Project } from '../types/project'
 import {
   Attribute,
-  Category,
   ConfigType,
   ItemType,
   Label2DTemplateType,
@@ -75,26 +74,33 @@ export async function parseForm (
   return form
 }
 
+/** Format of the category in the config file */
+type Categories = Array<{
+  /** Name of the category */
+  name: string
+}>
+
 /**
  * Parses item, category, and attribute files from paths
  */
 export async function parseFiles (
-  labelType: string, files: { [key: string]: string },
-  storage: Storage, itemsRequired: boolean)
+  storage: Storage, labelType: string, files: { [key: string]: string },
+  itemsRequired: boolean)
   : Promise<FormFileData> {
-  const items = parseItems(files, itemsRequired, storage)
+  const items = parseItems(storage, files, itemsRequired)
 
-  const categories: Promise<Category[]> = readFileWithDefault(
-    files, FormField.CATEGORIES, getDefaultCategories(labelType), storage)
+  const categories: Promise<Categories> = readConfig(storage,
+    _.get(files, FormField.CATEGORIES),
+    getDefaultCategories(labelType))
 
-  const sensors: Promise<SensorType[]> = readFileWithDefault(
-    files, FormField.SENSORS, [], storage)
+  const sensors: Promise<SensorType[]> = readConfig(storage,
+    _.get(files, FormField.SENSORS), [])
 
-  const templates: Promise<Label2DTemplateType[]> = readFileWithDefault(
-    files, FormField.LABEL_SPEC, [], storage)
+  const templates: Promise<Label2DTemplateType[]> = readConfig(storage,
+    _.get(files, FormField.LABEL_SPEC), [])
 
-  const attributes = readFileWithDefault(files, FormField.ATTRIBUTES,
-    getDefaultAttributes(labelType), storage)
+  const attributes = readConfig(storage, _.get(files, FormField.ATTRIBUTES),
+    getDefaultAttributes(labelType))
 
   return Promise.all([items, sensors, templates, attributes, categories])
     .then((result: [
@@ -102,7 +108,7 @@ export async function parseFiles (
       SensorType[],
       Label2DTemplateType[],
       Attribute[],
-      Category[]
+      Categories
     ]) => {
       const categoriesData = result[4]
       const categoriesList = []
@@ -119,32 +125,31 @@ export async function parseFiles (
     })
 }
 
-/** Read and parse a yaml or json file of arbitrary type. */
-export async function readFile<T> (path: string, storage: Storage): Promise<T> {
-  const file = await storage.load(path)
+/**
+ * Read the config file, for example items or attributes
+ * Can be in json or yaml format
+ * If the path is undefined or empty, use the default
+ */
+export async function readConfig<T> (
+  storage: Storage, filePath: string | undefined,
+  defaultValue: T): Promise<T> {
+  if (!filePath) {
+    return defaultValue
+  }
+
+  const file = await storage.load(filePath)
   try {
     const fileData = yaml.safeLoad(file, { json: true }) as unknown as T
     return fileData
   } catch {
-    throw Error(`Improper formatting for file: ${path}`)
-  }
-}
-
-/** Read the config file if its path exists, otherwise get default */
-export async function readFileWithDefault<T> (
-  files: { [key: string]: string }, fileKey: string,
-  defaultValue: T, storage: Storage): Promise<T> {
-  if (fileKey in files) {
-    return readFile<T>(files[fileKey], storage)
-  } else {
-    return defaultValue
+    throw new Error(`Improper formatting for file: ${filePath}`)
   }
 }
 
 /**
  * Get default categories if they weren't provided
  */
-function getDefaultCategories (labelType: string): Category[] {
+function getDefaultCategories (labelType: string): Categories {
   switch (labelType) {
     // TODO: add seg2d defaults (requires subcategories)
     case LabelTypeName.BOX_3D:
@@ -173,13 +178,13 @@ function getDefaultAttributes (labelType: string): Attribute[] {
  * Load from items file, grouped by video name
  */
 export async function parseItems (
-  files: { [key: string]: string }, itemsRequired: boolean,
-  storage: Storage): Promise<Array<Partial<ItemExport>>> {
+  storage: Storage, files: { [key: string]: string },
+  itemsRequired: boolean): Promise<Array<Partial<ItemExport>>> {
   if (FormField.ITEMS in files) {
-    return readFile(files[FormField.ITEMS], storage)
+    return readConfig(storage, files[FormField.ITEMS], [])
   } else {
     if (itemsRequired) {
-      throw Error('No item file.')
+      throw new Error('No item file.')
     } else {
       return []
     }

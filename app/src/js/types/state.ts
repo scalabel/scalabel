@@ -303,11 +303,6 @@ export interface Attribute {
   buttonColors: string[]
 }
 
-export interface Category {
-  /** Name of the category */
-  name: string
-}
-
 /*
   Those properties are not changed during the lifetime of a session.
   It also make SatProps smaller. When in doubt; put the props in config in favor
