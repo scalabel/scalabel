@@ -1,5 +1,4 @@
 import * as fs from 'fs-extra'
-import { State, TaskType } from '../../js/functional/types'
 import { createProject, createTasks } from '../../js/server/create_project'
 import { serverConfig } from '../../js/server/defaults'
 import { convertStateToExport } from '../../js/server/export'
@@ -11,6 +10,7 @@ import { RedisStore } from '../../js/server/redis_store'
 import {
   CreationForm, FormFileData, Project
 } from '../../js/types/project'
+import { State, TaskType } from '../../js/types/state'
 import {
   sampleFormFileData,
   sampleFormImage,

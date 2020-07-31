@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Key } from '../../../common/types'
+import { Key } from '../../../const/common'
 import { BLUE, GREEN, RED } from '../common'
 import Label3D from '../label3d'
 import { Controller } from './controller'

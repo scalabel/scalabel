@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { makePathPoint2D } from '../../../../functional/states'
-import { LabelType, PathPoint2DType, PathPointType, ShapeType, SimplePathPoint2DType } from '../../../../functional/types'
+import { LabelType, PathPoint2DType, PathPointType, ShapeType, SimplePathPoint2DType } from '../../../../types/state'
 import { assignShapesInRange, getAutoLabelRange, TrackInterp } from '../interp'
 
 /**

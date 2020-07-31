@@ -1,8 +1,8 @@
-import { LabelTypeName } from '../common/types'
+import { LabelTypeName } from '../const/common'
 import { makeLabel, makeRect } from '../functional/states'
-import { IdType, RectType, ShapeType, SimpleRect } from '../functional/types'
+import { AddLabelsAction, ChangeShapesAction } from '../types/action'
+import { IdType, RectType, ShapeType, SimpleRect } from '../types/state'
 import * as actions from './common'
-import { AddLabelsAction, ChangeShapesAction } from './types'
 
 /**
  * Create AddLabelAction to create a box2d label

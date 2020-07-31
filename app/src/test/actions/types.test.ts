@@ -1,9 +1,10 @@
 import {
   addLabel, addTrack, initSessionAction,
   linkLabels, splitPane, submit, updateTask } from '../../js/action/common'
-import { BaseAction, isTaskAction } from '../../js/action/types'
+import { isTaskAction } from '../../js/const/action'
 import { makeLabel, makeTask } from '../../js/functional/states'
-import { SplitType } from '../../js/functional/types'
+import { BaseAction } from '../../js/types/action'
+import { SplitType } from '../../js/types/state'
 
 test('Test task action checker', () => {
   // Test some subset of task actions

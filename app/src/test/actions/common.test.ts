@@ -3,7 +3,7 @@ import * as action from '../../js/action/common'
 import { configureStore } from '../../js/common/configure_store'
 import Session from '../../js/common/session'
 import { makeLabel } from '../../js/functional/states'
-import { LabelType, State } from '../../js/functional/types'
+import { LabelType, State } from '../../js/types/state'
 import { setupTestStore } from '../components/util'
 import { testJson } from '../test_states/test_image_objects'
 

@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import { sprintf } from 'sprintf-js'
-import { Cursor, LabelTypeName } from '../../common/types'
+import { Cursor, LabelTypeName } from '../../const/common'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
 import { makeTaskConfig, makeTrack } from '../../functional/states'
-import { ConfigType, IdType, INVALID_ID, LabelType, ShapeType, State } from '../../functional/types'
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
+import { ConfigType, IdType, INVALID_ID, LabelType, ShapeType, State } from '../../types/state'
 import { Context2D, getColorById } from '../util'
 import { Label2DList } from './label2d_list'
 

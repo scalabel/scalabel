@@ -1,6 +1,6 @@
-import { ReduxState } from '../common/types'
 import { shouldCanvasFreeze } from '../functional/selector'
-import { State } from '../functional/types'
+import { ReduxState } from '../types/redux'
+import { State } from '../types/state'
 import { Component } from './component'
 
 export interface DrawableProps {

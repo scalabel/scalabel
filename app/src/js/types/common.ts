@@ -1,4 +1,3 @@
-
 /**
  * Defining the types of some general callback functions
  */

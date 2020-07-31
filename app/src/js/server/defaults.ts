@@ -1,4 +1,4 @@
-import { AttributeToolType } from '../common/types'
+import { AttributeToolType } from '../const/common'
 import { StorageType } from '../const/config'
 import { ServerConfig } from '../types/config'
 

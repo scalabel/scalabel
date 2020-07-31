@@ -2,13 +2,13 @@ import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Session from '../common/session'
-import { Key } from '../common/types'
+import { Key } from '../const/common'
 import { Label2DHandler } from '../drawable/2d/label2d_handler'
 import { Label2DList } from '../drawable/2d/label2d_list'
 import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
-import { ImageViewerConfigType, State } from '../functional/types'
 import { Vector2D } from '../math/vector2d'
 import { label2dViewStyle } from '../styles/label'
+import { ImageViewerConfigType, State } from '../types/state'
 import {
   clearCanvas,
   getCurrentImageSize,

@@ -1,5 +1,5 @@
 import { GetStateFunc } from '../../js/common/simple_store'
-import { IdType } from '../../js/functional/types'
+import { IdType } from '../../js/types/state'
 import { findNewLabelsFromState } from '../util/state'
 
 /**

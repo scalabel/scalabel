@@ -8,11 +8,11 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import TableBody from '@material-ui/core/TableBody'
 import Typography from '@material-ui/core/Typography'
 import React from 'react'
-import { QueryArg } from '../common/types'
+import { QueryArg } from '../const/common'
 import { Endpoint } from '../const/connection'
-import { SubmitData } from '../functional/types'
 import { dashboardWindowStyles, headerStyle,
   listEntryStyle, sidebarStyle } from '../styles/dashboard'
+import { SubmitData } from '../types/state'
 import DividedPage from './divided_page'
 import { formatDate, getSubmissionTime } from './util'
 

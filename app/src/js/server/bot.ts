@@ -1,18 +1,20 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
 import { sprintf } from 'sprintf-js'
-import { ADD_LABELS, AddLabelsAction, BaseAction } from '../action/types'
 import { configureStore } from '../common/configure_store'
-import { ReduxStore, ShapeTypeName } from '../common/types'
 import { uid } from '../common/uid'
 import { index2str } from '../common/util'
+import { ADD_LABELS } from '../const/action'
+import { ShapeTypeName } from '../const/common'
 import { EventName } from '../const/connection'
-import { PathPoint2DType, RectType, State } from '../functional/types'
+import { AddLabelsAction, BaseAction } from '../types/action'
 import { ItemExport } from '../types/bdd'
 import {
   ActionPacketType, BotData,
   ModelQuery, RegisterMessageType, SyncActionMessageType
 } from '../types/message'
+import { ReduxStore } from '../types/redux'
+import { PathPoint2DType, RectType, State } from '../types/state'
 import Logger from './logger'
 import { ModelInterface } from './model_interface'
 import { getPyConnFailedMsg } from './util'

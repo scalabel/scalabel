@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import Session from '../common/session'
-import { LabelTypeName } from '../common/types'
-import { IdType, Select, State } from '../functional/types'
+import { LabelTypeName } from '../const/common'
+import * as actionTypes from '../types/action'
+import { IdType, Select, State } from '../types/state'
 import { changeLabelsProps, changeSelect, deleteLabels } from './common'
 import { deleteTracks, terminateTracks } from './track'
-import * as types from './types'
 
 /**
  * Delete given label
@@ -12,7 +12,9 @@ import * as types from './types'
  * @param {number} labelId
  * @return {DeleteLabelAction}
  */
-export function deleteSelectedLabels (state: State): types.DeleteLabelsAction {
+export function deleteSelectedLabels (
+  state: State
+): actionTypes.DeleteLabelsAction {
   const select = state.user.select
   const itemIndices: number[] =
     Object.keys(select.labels).map((key) => Number(key))
@@ -26,7 +28,9 @@ export function deleteSelectedLabels (state: State): types.DeleteLabelsAction {
 /**
  * Delete tracks corresponding to selected labels
  */
-export function deleteSelectedTracks (state: State): types.DeleteLabelsAction {
+export function deleteSelectedTracks (
+  state: State
+): actionTypes.DeleteLabelsAction {
   const select = state.user.select
   const tracks = []
   for (const key of Object.keys(select.labels)) {
@@ -47,7 +51,7 @@ export function deleteSelectedTracks (state: State): types.DeleteLabelsAction {
 export function terminateSelectedTracks (
   state: State,
   stopIndex: number
-): types.DeleteLabelsAction {
+): actionTypes.DeleteLabelsAction {
   const select = state.user.select
   const tracks = []
   for (const key of Object.keys(select.labels)) {
@@ -72,7 +76,7 @@ export function terminateSelectedTracks (
 export function changeSelectedLabelsAttributes (
   state: State,
   attributes: {[key: number]: number[]}
-  ): types.ChangeLabelsAction {
+  ): actionTypes.ChangeLabelsAction {
   const select = state.user.select
   const labelIds = Object.values(select.labels)
   let duplicatedAttributes = []
@@ -117,7 +121,7 @@ export function changeSelectedLabelsAttributes (
 export function changeSelectedLabelsCategories (
   state: State,
   category: number[]
-  ): types.ChangeLabelsAction {
+  ): actionTypes.ChangeLabelsAction {
   const select = state.user.select
   const labelIds = Object.values(select.labels)
   let duplicatedCategories = []
@@ -158,7 +162,7 @@ export function selectLabel (
   category?: number,
   attributes?: {[key: number]: number[]},
   append: boolean = false
-): types.ChangeSelectAction {
+): actionTypes.ChangeSelectAction {
   return selectLabels(
     currentSelection, itemIndex, [labelId], category, attributes, append
   )
@@ -180,7 +184,7 @@ export function selectLabels (
   category?: number,
   attributes?: {[key: number]: number[]},
   append: boolean = false
-): types.ChangeSelectAction {
+): actionTypes.ChangeSelectAction {
   const selectedLabels = _.cloneDeep(currentSelection)
   const newLabelIds = (append && itemIndex in selectedLabels) ?
     selectedLabels[itemIndex] : []

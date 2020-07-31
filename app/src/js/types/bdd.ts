@@ -6,7 +6,7 @@ import {
   TaskStatus,
   TrackType,
   Vector3Type
-} from '../functional/types'
+} from './state'
 
 export interface TaskData {
   /** task config data that's constant throughout a session */

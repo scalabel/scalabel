@@ -1,5 +1,5 @@
 import { makePolyPathPoint } from '../../functional/states'
-import { PolyPathPoint2DType } from '../../functional/types'
+import { PolyPathPoint2DType } from '../../types/state'
 import { Context2D, toCssColor } from '../util'
 import { Point2D } from './point2d'
 

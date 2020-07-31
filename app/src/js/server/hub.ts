@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import socketio from 'socket.io'
-import * as types from '../action/types'
 import { index2str } from '../common/util'
+import * as actionConsts from '../const/action'
 import { EventName } from '../const/connection'
 import { ServerConfig } from '../types/config'
 import { RegisterMessageType, SyncActionMessageType } from '../types/message'
@@ -114,7 +114,7 @@ export class Hub {
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
 
     const taskActions = actions.filter((action) => {
-      return types.isTaskAction(action)
+      return actionConsts.isTaskAction(action)
     })
     const actionTypes = Array.from(
       new Set(actions.map((a) => a.type)).values())

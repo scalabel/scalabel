@@ -1,8 +1,8 @@
-import * as types from '../common/types'
+import * as types from '../const/common'
 import { makeCube, makeLabel } from '../functional/states'
-import { Vector3Type } from '../functional/types'
+import { AddLabelsAction } from '../types/action'
+import { Vector3Type } from '../types/state'
 import { addLabel } from './common'
-import { AddLabelsAction } from './types'
 
 /**
  * Create AddLabelAction to create a box3d label

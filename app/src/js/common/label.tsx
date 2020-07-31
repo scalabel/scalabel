@@ -3,7 +3,7 @@ import React from 'react'
 import { Category } from '../components/toolbar_category'
 import { ListButton } from '../components/toolbar_list_button'
 import { SwitchBtn } from '../components/toolbar_switch'
-import { AttributeToolType } from './types'
+import { AttributeToolType } from '../const/common'
 
 /**
  * This is renderTemplate function that renders the category.
