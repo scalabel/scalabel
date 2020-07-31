@@ -12,9 +12,10 @@ import { TaskType } from '../functional/types'
 import { ItemExport } from '../types/bdd'
 import { Project } from '../types/project'
 import {
-  createProject, createTasks, parseFiles, parseForm, readItemsFile
+  createProject, createTasks, parseFiles, parseForm, readFile
 } from './create_project'
 import { convertStateToExport } from './export'
+import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
@@ -205,7 +206,9 @@ export class Listeners {
     }
 
     // Read in the data
-    const items = await readItemsFile(req.body.items)
+    const storage = new FileStorage('', true)
+    const items = await readFile<Array<Partial<ItemExport>>>(
+      req.body.items, storage)
     let project: Project
     let projectName: string
     try {

@@ -1,4 +1,3 @@
-import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
@@ -16,7 +15,6 @@ import {
   TrackIdMap
 } from '../functional/types'
 import { ItemExport } from '../types/bdd'
-import { MaybeError } from '../types/common'
 import { CreationForm, FormFileData, Project } from '../types/project'
 import * as defaults from './defaults'
 import { FileStorage } from './file_storage'
@@ -123,7 +121,7 @@ function getDefaultCategories (labelType: string): string[] {
 }
 
 /** Read and parse a yaml or json file of arbitrary type. */
-async function readFile<T> (path: string, storage: Storage): Promise<T> {
+export async function readFile<T> (path: string, storage: Storage): Promise<T> {
   const file = await storage.load(path)
   try {
     const fileData = yaml.safeLoad(file, { json: true }) as unknown as T
@@ -543,9 +541,9 @@ export function createTasks (
 
       if (tracking) {
         for (const label of Object.values(newItem.labels)) {
-          if (isValidId(label.track) && !(label.track             {
+          if (isValidId(label.track) && !(label.track in trackMap)) {
             trackMap[label.track] = makeTrack(
-              { type: label.type, id: label          lse)
+              { type: label.type, id: label.track }, false)
           }
           trackMap[label.track].labels[label.item] = label.id
         }
