@@ -6,6 +6,7 @@ import { FormField } from '../const/project'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
 import {
   Attribute,
+  Category,
   ConfigType,
   ItemType,
   Label2DTemplateType,
@@ -81,43 +82,43 @@ export async function parseForm (
 export async function parseFiles (
   labelType: string, files: { [key: string]: string }, itemsRequired: boolean)
   : Promise<FormFileData> {
-  return Promise.all([
-    parseItems(files, itemsRequired),
-    parseSensors(files),
-    parseTemplates(files),
-    parseAttributes(files, labelType),
-    parseCategories(files, labelType)])
+  const storage = new FileStorage('', true)
+
+  const items = parseItems(files, itemsRequired, storage)
+
+  const categories: Promise<Category[]> = getFile(
+    files, FormField.CATEGORIES, getDefaultCategories(labelType), storage)
+
+  const sensors: Promise<SensorType[]> = getFile(
+    files, FormField.SENSORS, [], storage)
+
+  const templates: Promise<Label2DTemplateType[]> = getFile(
+    files, FormField.LABEL_SPEC, [], storage)
+
+  const attributes = getFile(files, FormField.ATTRIBUTES,
+    getDefaultAttributes(labelType), storage)
+
+  return Promise.all([items, sensors, templates, attributes, categories])
     .then((result: [
       Array<Partial<ItemExport>>,
       SensorType[],
       Label2DTemplateType[],
       Attribute[],
-      string[]
+      Category[]
     ]) => {
+      const categoriesData = result[4]
+      const categoriesList = []
+      for (const category of categoriesData) {
+        categoriesList.push(category.name)
+      }
       return {
         items: result[0],
         sensors: result[1],
         templates: result[2],
         attributes: result[3],
-        categories: result[4]
+        categories: categoriesList
       }
     })
-}
-
-/**
- * Get default attributes if they weren't provided
- */
-function getDefaultCategories (labelType: string): string[] {
-  switch (labelType) {
-    // TODO: add seg2d defaults (requires subcategories)
-    case LabelTypeName.BOX_3D:
-    case LabelTypeName.BOX_2D:
-      return defaults.boxCategories
-    case LabelTypeName.POLYLINE_2D:
-      return defaults.polyline2DCategories
-    default:
-      return []
-  }
 }
 
 /** Read and parse a yaml or json file of arbitrary type. */
@@ -131,36 +132,30 @@ export async function readFile<T> (path: string, storage: Storage): Promise<T> {
   }
 }
 
-interface FileCategory {
-  /** name of the category */
-  name: string
-}
-
-/**
- * Read categories from yaml file at path
- */
-async function readCategoriesFile (
-  path: string, storage: Storage): Promise<string[]> {
-  const categories = await readFile<FileCategory[]>(path, storage)
-  const categoriesList = []
-  for (const category of categories) {
-    categoriesList.push(category.name)
-  }
-  return categoriesList
-}
-
-/**
- * Load from category file
- * Use default if file is empty
- */
-export async function parseCategories (
-  files: { [key: string]: string },
-  labelType: string): Promise<string[]> {
-  const storage = new FileStorage('', true)
-  if (FormField.CATEGORIES in files) {
-    return readCategoriesFile(files[FormField.CATEGORIES], storage)
+/** Read the config file if its path exists, otherwise get default */
+export async function getFile<T> (
+  files: { [key: string]: string }, fileKey: string,
+  defaultValue: T, storage: Storage): Promise<T> {
+  if (fileKey in files) {
+    return readFile<T>(files[fileKey], storage)
   } else {
-    return getDefaultCategories(labelType)
+    return defaultValue
+  }
+}
+
+/**
+ * Get default categories if they weren't provided
+ */
+function getDefaultCategories (labelType: string): Category[] {
+  switch (labelType) {
+    // TODO: add seg2d defaults (requires subcategories)
+    case LabelTypeName.BOX_3D:
+    case LabelTypeName.BOX_2D:
+      return defaults.boxCategories
+    case LabelTypeName.POLYLINE_2D:
+      return defaults.polyline2DCategories
+    default:
+      return []
   }
 }
 
@@ -177,27 +172,11 @@ function getDefaultAttributes (labelType: string): Attribute[] {
 }
 
 /**
- * Load from attributes file
- * Use default if file is empty
- */
-export async function parseAttributes (
-  files: { [key: string]: string },
-  labelType: string): Promise<Attribute[]> {
-  const storage = new FileStorage('', true)
-  if (FormField.ATTRIBUTES in files) {
-    return readFile(files[FormField.ATTRIBUTES], storage)
-  } else {
-    return getDefaultAttributes(labelType)
-  }
-}
-
-/**
  * Load from items file, grouped by video name
  */
 export async function parseItems (
-  files: { [key: string]: string },
-  itemsRequired: boolean): Promise<Array<Partial<ItemExport>>> {
-  const storage = new FileStorage('', true)
+  files: { [key: string]: string }, itemsRequired: boolean,
+  storage: Storage): Promise<Array<Partial<ItemExport>>> {
   if (FormField.ITEMS in files) {
     return readFile(files[FormField.ITEMS], storage)
   } else {
@@ -206,28 +185,6 @@ export async function parseItems (
     } else {
       return []
     }
-  }
-}
-
-/** Parse files for sensors */
-export async function parseSensors (
-  files: { [key: string]: string }): Promise<SensorType[]> {
-  const storage = new FileStorage('', true)
-  if (FormField.SENSORS in files) {
-    return readFile(files[FormField.SENSORS], storage)
-  } else {
-    return []
-  }
-}
-
-/** Parse files for sensors */
-export async function parseTemplates (
-  files: { [key: string]: string }): Promise<Label2DTemplateType[]> {
-  const storage = new FileStorage('', true)
-  if (files[FormField.LABEL_SPEC] in files) {
-    return readFile(files[FormField.LABEL_SPEC], storage)
-  } else {
-    return []
   }
 }
 
