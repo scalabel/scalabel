@@ -19,6 +19,7 @@ import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
+import { Storage } from './storage'
 import { UserManager } from './user_manager'
 import { countLabels, parseProjectName } from './util'
 
@@ -145,7 +146,7 @@ export class Listeners {
 
   /**
    * Handles posted project from internal data
-   * Items file not required
+   * Items file not required, since items can be added later
    */
   public async postProjectInternalHandler (req: Request, res: Response) {
     if (this.checkInvalidPost(req, res)) {
@@ -158,9 +159,9 @@ export class Listeners {
       this.badFormResponse(res)
       return
     }
-
+    const storage = new FileStorage('', true)
     await this.createProjectFromDicts(
-      req.body.fields, req.body.files, false, res)
+      req.body.fields, req.body.files, storage, false, res)
   }
 
   /**
@@ -187,7 +188,8 @@ export class Listeners {
       }
     }
 
-    await this.createProjectFromDicts(fields, files, true, res)
+    const storage = new FileStorage('', true)
+    await this.createProjectFromDicts(fields, files, storage, true, res)
   }
 
   /**
@@ -304,13 +306,14 @@ export class Listeners {
   private async createProjectFromDicts (
     fields: { [key: string]: string },
     files: { [key: string]: string },
+    storage: Storage,
     itemsRequired: boolean, res: Response) {
     try {
         // Parse form from request
       const form = await parseForm(fields, this.projectStore)
         // Parse item, category, and attribute data from the form
       const formFileData = await parseFiles(
-        form.labelType, files, itemsRequired)
+        form.labelType, files, storage, itemsRequired)
         // Create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([

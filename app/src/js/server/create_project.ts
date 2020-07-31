@@ -18,7 +18,6 @@ import {
 import { ItemExport } from '../types/bdd'
 import { CreationForm, FormFileData, Project } from '../types/project'
 import * as defaults from './defaults'
-import { FileStorage } from './file_storage'
 import { convertItemToImport } from './import'
 import { ProjectStore } from './project_store'
 import { Storage } from './storage'
@@ -80,22 +79,21 @@ export async function parseForm (
  * Parses item, category, and attribute files from paths
  */
 export async function parseFiles (
-  labelType: string, files: { [key: string]: string }, itemsRequired: boolean)
+  labelType: string, files: { [key: string]: string },
+  storage: Storage, itemsRequired: boolean)
   : Promise<FormFileData> {
-  const storage = new FileStorage('', true)
-
   const items = parseItems(files, itemsRequired, storage)
 
-  const categories: Promise<Category[]> = getFile(
+  const categories: Promise<Category[]> = readFileWithDefault(
     files, FormField.CATEGORIES, getDefaultCategories(labelType), storage)
 
-  const sensors: Promise<SensorType[]> = getFile(
+  const sensors: Promise<SensorType[]> = readFileWithDefault(
     files, FormField.SENSORS, [], storage)
 
-  const templates: Promise<Label2DTemplateType[]> = getFile(
+  const templates: Promise<Label2DTemplateType[]> = readFileWithDefault(
     files, FormField.LABEL_SPEC, [], storage)
 
-  const attributes = getFile(files, FormField.ATTRIBUTES,
+  const attributes = readFileWithDefault(files, FormField.ATTRIBUTES,
     getDefaultAttributes(labelType), storage)
 
   return Promise.all([items, sensors, templates, attributes, categories])
@@ -133,7 +131,7 @@ export async function readFile<T> (path: string, storage: Storage): Promise<T> {
 }
 
 /** Read the config file if its path exists, otherwise get default */
-export async function getFile<T> (
+export async function readFileWithDefault<T> (
   files: { [key: string]: string }, fileKey: string,
   defaultValue: T, storage: Storage): Promise<T> {
   if (fileKey in files) {
