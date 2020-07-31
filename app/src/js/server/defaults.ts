@@ -35,7 +35,7 @@ export const serverConfig: ServerConfig = {
 }
 
 /* default categories when file is missing and label is box2D or box3D */
-export const boxCategories = [
+const boxCategoriesList = [
   'person',
   'rider',
   'car',
@@ -47,9 +47,11 @@ export const boxCategories = [
   'traffic sign',
   'traffic light'
 ]
+export const boxCategories = boxCategoriesList.map(
+  (category) => ({ name: category }))
 
 /* default categories when file is missing and label is polyline2d */
-export const polyline2DCategories = [
+export const polyline2DCategoriesList = [
   'road curb',
   'double white',
   'double yellow',
@@ -59,6 +61,8 @@ export const polyline2DCategories = [
   'single other',
   'crosswalk'
 ]
+export const polyline2DCategories = polyline2DCategoriesList.map(
+  (category) => ({ name: category }))
 
 // TODO: add default seg2d categories once nested categories are supported
 

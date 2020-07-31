@@ -1,4 +1,3 @@
-import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../common/util'
@@ -6,7 +5,6 @@ import { ItemTypeName, LabelTypeName } from '../const/common'
 import { FormField } from '../const/project'
 import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
 import { ItemExport } from '../types/bdd'
-import { MaybeError } from '../types/common'
 import { CreationForm, FormFileData, Project } from '../types/project'
 import {
   Attribute,
@@ -21,6 +19,7 @@ import {
 import * as defaults from './defaults'
 import { convertItemToImport } from './import'
 import { ProjectStore } from './project_store'
+import { Storage } from './storage'
 import * as util from './util'
 
 /**
@@ -75,39 +74,82 @@ export async function parseForm (
   return form
 }
 
+/** Format of the category in the config file */
+type Categories = Array<{
+  /** Name of the category */
+  name: string
+}>
+
 /**
  * Parses item, category, and attribute files from paths
  */
 export async function parseFiles (
-  labelType: string, files: { [key: string]: string }, itemsRequired: boolean)
+  storage: Storage, labelType: string, files: { [key: string]: string },
+  itemsRequired: boolean)
   : Promise<FormFileData> {
-  return Promise.all([
-    parseItems(files, itemsRequired),
-    parseSensors(files),
-    parseTemplates(files),
-    parseAttributes(files, labelType),
-    parseCategories(files, labelType)])
+  const items = parseItems(storage, files, itemsRequired)
+
+  const categories: Promise<Categories> = readConfig(storage,
+    _.get(files, FormField.CATEGORIES),
+    getDefaultCategories(labelType))
+
+  const sensors: Promise<SensorType[]> = readConfig(storage,
+    _.get(files, FormField.SENSORS), [])
+
+  const templates: Promise<Label2DTemplateType[]> = readConfig(storage,
+    _.get(files, FormField.LABEL_SPEC), [])
+
+  const attributes = readConfig(storage, _.get(files, FormField.ATTRIBUTES),
+    getDefaultAttributes(labelType))
+
+  return Promise.all([items, sensors, templates, attributes, categories])
     .then((result: [
       Array<Partial<ItemExport>>,
       SensorType[],
       Label2DTemplateType[],
       Attribute[],
-      string[]
+      Categories
     ]) => {
+      const categoriesData = result[4]
+      const categoriesList = []
+      for (const category of categoriesData) {
+        categoriesList.push(category.name)
+      }
       return {
         items: result[0],
         sensors: result[1],
         templates: result[2],
         attributes: result[3],
-        categories: result[4]
+        categories: categoriesList
       }
     })
 }
 
 /**
- * Get default attributes if they weren't provided
+ * Read the config file, for example items or attributes
+ * Can be in json or yaml format
+ * If the path is undefined or empty, use the default
  */
-function getDefaultCategories (labelType: string): string[] {
+export async function readConfig<T> (
+  storage: Storage, filePath: string | undefined,
+  defaultValue: T): Promise<T> {
+  if (!filePath) {
+    return defaultValue
+  }
+
+  const file = await storage.load(filePath)
+  try {
+    const fileData = yaml.safeLoad(file, { json: true }) as unknown as T
+    return fileData
+  } catch {
+    throw new Error(`Improper formatting for file: ${filePath}`)
+  }
+}
+
+/**
+ * Get default categories if they weren't provided
+ */
+function getDefaultCategories (labelType: string): Categories {
   switch (labelType) {
     // TODO: add seg2d defaults (requires subcategories)
     case LabelTypeName.BOX_3D:
@@ -117,42 +159,6 @@ function getDefaultCategories (labelType: string): string[] {
       return defaults.polyline2DCategories
     default:
       return []
-  }
-}
-
-/**
- * Read categories from yaml file at path
- */
-function readCategoriesFile (path: string): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: MaybeError, file: string) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      // TODO: support subcategories
-      const categories = yaml.load(file)
-      const categoriesList = []
-      for (const category of categories) {
-        categoriesList.push(category.name)
-      }
-      resolve(categoriesList)
-    })
-  })
-}
-
-/**
- * Load from category file
- * Use default if file is empty
- */
-export function parseCategories (
-  files: { [key: string]: string },
-  labelType: string): Promise<string[]> {
-  if (FormField.CATEGORIES in files) {
-    return readCategoriesFile(files[FormField.CATEGORIES])
-  } else {
-    const categories = getDefaultCategories(labelType)
-    return Promise.resolve(categories)
   }
 }
 
@@ -169,130 +175,19 @@ function getDefaultAttributes (labelType: string): Attribute[] {
 }
 
 /**
- * Read attributes from yaml file at path
+ * Load from items file, grouped by video name
  */
-function readAttributesFile (path: string): Promise<Attribute[]> {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      const attributes = yaml.load(fileBytes)
-      resolve(attributes)
-    })
-  })
-}
-
-/**
- * Load from attributes file
- * Use default if file is empty
- */
-export function parseAttributes (
-  files: { [key: string]: string },
-  labelType: string): Promise<Attribute[]> {
-  if (FormField.ATTRIBUTES in files) {
-    return readAttributesFile(files[FormField.ATTRIBUTES])
-  } else {
-    const defaultAttributes = getDefaultAttributes(labelType)
-    return Promise.resolve(defaultAttributes)
-  }
-}
-
-/**
- * Read items from yaml file at path
- */
-export function readItemsFile (
-  path: string): Promise<Array<Partial<ItemExport>>> {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      try {
-        // Might not have all fields defined, so use partial
-        const items =
-          yaml.safeLoad(fileBytes, { json: true }) as Array<Partial<ItemExport>>
-        resolve(items)
-      } catch {
-        reject(Error('Improper formatting for items file'))
-      }
-    })
-  })
-}
-
-/**
- * Load from items file
- * Group by video name
- */
-export function parseItems (
-  files: { [key: string]: string },
+export async function parseItems (
+  storage: Storage, files: { [key: string]: string },
   itemsRequired: boolean): Promise<Array<Partial<ItemExport>>> {
   if (FormField.ITEMS in files) {
-    return readItemsFile(files[FormField.ITEMS])
+    return readConfig(storage, files[FormField.ITEMS], [])
   } else {
     if (itemsRequired) {
-      return Promise.reject(Error('No item file.'))
+      throw new Error('No item file.')
     } else {
-      return Promise.resolve([])
+      return []
     }
-  }
-}
-
-/** Read sensors file */
-function readSensorsFile (path: string): Promise<SensorType[]> {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
-      if (err) {
-        reject(err)
-      } else {
-        try {
-          const sensors = yaml.load(fileBytes) as SensorType[]
-          resolve(sensors)
-        } catch {
-          reject(Error('Improper formatting for sensors file'))
-        }
-      }
-    })
-  })
-}
-
-/** Parse files for sensors */
-export function parseSensors (
-  files: { [key: string]: string }): Promise<SensorType[]> {
-  if (FormField.SENSORS in files) {
-    return readSensorsFile(files[FormField.SENSORS])
-  } else {
-    return Promise.resolve([])
-  }
-}
-
-/** Read sensors file */
-function readTemplatesFile (path: string): Promise<Label2DTemplateType[]> {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: MaybeError, fileBytes: string) => {
-      if (err) {
-        reject(err)
-      } else {
-        try {
-          const templates = yaml.load(fileBytes) as Label2DTemplateType[]
-          resolve(templates)
-        } catch {
-          reject(Error('Improper formatting for sensors file'))
-        }
-      }
-    })
-  })
-}
-
-/** Parse files for sensors */
-export function parseTemplates (
-  files: { [key: string]: string }): Promise<Label2DTemplateType[]> {
-  if (files[FormField.LABEL_SPEC] in files) {
-    return readTemplatesFile(files[FormField.LABEL_SPEC])
-  } else {
-    return Promise.resolve([])
   }
 }
 
