@@ -19,6 +19,7 @@ import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
+import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
 import { UserManager } from './user_manager'
 import { countLabels, parseProjectName } from './util'
@@ -159,7 +160,13 @@ export class Listeners {
       this.badFormResponse(res)
       return
     }
-    const storage = new FileStorage('', true)
+
+    /**
+     * Use the region/bucket specified in the request
+     * to access the item/category/attribute files
+     */
+    const s3Path = req.body.fields.s3_path as string
+    const storage = new S3Storage(s3Path, true)
     await this.createProjectFromDicts(
       req.body.fields, req.body.files, storage, false, res)
   }
