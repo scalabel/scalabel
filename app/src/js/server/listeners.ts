@@ -11,12 +11,15 @@ import { ItemExport } from '../types/bdd'
 import { Project } from '../types/project'
 import { TaskType } from '../types/state'
 import {
-  createProject, createTasks, parseFiles, parseForm, readItemsFile
+  createProject, createTasks, parseFiles, parseForm, readConfig
 } from './create_project'
 import { convertStateToExport } from './export'
+import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
+import { S3Storage } from './s3_storage'
+import { Storage } from './storage'
 import { UserManager } from './user_manager'
 import { countLabels, parseProjectName } from './util'
 
@@ -143,7 +146,7 @@ export class Listeners {
 
   /**
    * Handles posted project from internal data
-   * Items file not required
+   * Items file not required, since items can be added later
    */
   public async postProjectInternalHandler (req: Request, res: Response) {
     if (this.checkInvalidPost(req, res)) {
@@ -157,8 +160,15 @@ export class Listeners {
       return
     }
 
+    /**
+     * Use the region/bucket specified in the request
+     * to access the item/category/attribute files
+     */
+    const s3Path = req.body.fields.s3_path as string
+    const storage = new S3Storage(s3Path)
+    storage.setExt('')
     await this.createProjectFromDicts(
-      req.body.fields, req.body.files, false, res)
+      storage, req.body.fields, req.body.files, false, res)
   }
 
   /**
@@ -185,7 +195,9 @@ export class Listeners {
       }
     }
 
-    await this.createProjectFromDicts(fields, files, true, res)
+    const storage = new FileStorage('')
+    storage.setExt('')
+    await this.createProjectFromDicts(storage, fields, files, true, res)
   }
 
   /**
@@ -204,7 +216,10 @@ export class Listeners {
     }
 
     // Read in the data
-    const items = await readItemsFile(req.body.items)
+    const storage = new FileStorage('')
+    storage.setExt('')
+    const items = await readConfig<Array<Partial<ItemExport>>>(
+      storage, req.body.items, [])
     let project: Project
     let projectName: string
     try {
@@ -298,7 +313,7 @@ export class Listeners {
    * Finishes project creation using processed dicts
    */
   private async createProjectFromDicts (
-    fields: { [key: string]: string },
+    storage: Storage, fields: { [key: string]: string },
     files: { [key: string]: string },
     itemsRequired: boolean, res: Response) {
     try {
@@ -306,7 +321,7 @@ export class Listeners {
       const form = await parseForm(fields, this.projectStore)
         // Parse item, category, and attribute data from the form
       const formFileData = await parseFiles(
-        form.labelType, files, itemsRequired)
+        storage, form.labelType, files, itemsRequired)
         // Create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([
