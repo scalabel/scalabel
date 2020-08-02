@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { Cursor, LabelTypeName } from '../../const/common'
 import { getRootLabelId, getRootTrackId } from '../../functional/common'
 import { makeTaskConfig, makeTrack } from '../../functional/states'
@@ -282,12 +281,11 @@ export abstract class Label2D {
       }
     }
 
-    ctx.fillStyle = sprintf('rgb(%d, %d, %d)',
-      fillStyle[0], fillStyle[1], fillStyle[2])
+    ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
     ctx.fillRect(x * ratio, y * ratio - TAG_HEIGHT,
                  tw, TAG_HEIGHT)
     ctx.fillStyle = 'rgb(0,0,0)'
-    ctx.font = sprintf('%dpx Verdana', 20)
+    ctx.font = `${20}px Verdana`
     ctx.fillText(abbr, (x * ratio + 6), (y * ratio - 6))
     ctx.restore()
   }

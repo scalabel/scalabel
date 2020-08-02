@@ -1,5 +1,3 @@
-import {sprintf} from 'sprintf-js';
-
 export const FONT_SIZE = 13;
 
 /**
@@ -9,7 +7,7 @@ export const FONT_SIZE = 13;
  * @return {string} the rgba string.
  */
 export function rgba(color, alpha) {
-  return sprintf('rgba(%d, %d, %d, %f)', color[0], color[1], color[2], alpha);
+  return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
 }
 
 /**
@@ -18,7 +16,7 @@ export function rgba(color, alpha) {
  * @return {string} the rgb string.
  */
 export function rgb(color) {
-  return sprintf('rgb(%d, %d, %d)', color[0], color[1], color[2]);
+  return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
 /**

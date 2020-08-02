@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import io from 'socket.io-client'
-import { sprintf } from 'sprintf-js'
 import { configureStore } from '../common/configure_store'
 import { uid } from '../common/uid'
 import { index2str } from '../common/util'
@@ -248,8 +247,8 @@ export class Bot {
         const response = await axios.post(
           modelEndpoint.toString(), sendData, this.axiosConfig
         )
-        Logger.info(sprintf('Got a %s response from the model with data: %s',
-          response.status.toString(), response.data.points))
+        Logger.info(
+          `Got a ${response.status.toString()} response from the model with data: ${response.data.points}`)
         const receiveData: number[][][] = response.data.points
         receiveData.forEach((polyPoints: number[][], index: number) => {
           const action = this.modelInterface.makePolyAction(
@@ -275,7 +274,7 @@ export class Bot {
         this.actionLog.push(action)
         this.store.dispatch(action)
         Logger.info(
-          sprintf('Bot received action of type %s', action.type))
+          `Bot received action of type ${action.type}`)
 
         const state = this.store.getState().present
         if (action.type === ADD_LABELS) {

@@ -1,5 +1,4 @@
 import { createSelector } from 'reselect'
-import { sprintf } from 'sprintf-js'
 import { ReduxState } from '../types/redux'
 import { ConfigType, ConnectionStatus, SessionType } from '../types/state'
 
@@ -46,7 +45,7 @@ export const getInstructionLink = createSelector(
 export const getDashboardLink = createSelector(
   [ getConfig ],
   (config: ConfigType) => {
-    return sprintf('/vendor?project_name=%s', config.projectName)
+    return `/vendor?project_name=${config.projectName}`
   }
 )
 

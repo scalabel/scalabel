@@ -1,5 +1,4 @@
 import * as fs from 'fs-extra'
-import { sprintf } from 'sprintf-js'
 import { index2str } from '../../js/common/util'
 import { FileStorage } from '../../js/server/file_storage'
 import { getProjectKey, getTaskKey, getTestDir } from '../../js/server/path'
@@ -82,7 +81,7 @@ test('multiple saves multiple loads', async () => {
     savePromises.push(checkTaskKey(i, false))
     savePromises.push(
       storage.save(getTaskKey(projectName, index2str(i)),
-        sprintf('{"testField": "testValue%d"}', i)
+        `{"testField": "testValue${i}"}`
       )
     )
   }
@@ -144,5 +143,5 @@ async function checkProjectKey () {
 async function checkLoad (index: number) {
   const data = await storage.load(getTaskKey(projectName, index2str(index)))
   const loadedData = JSON.parse(data)
-  expect(loadedData.testField).toBe(sprintf('testValue%d', index))
+  expect(loadedData.testField).toBe(`testValue${index}`)
 }

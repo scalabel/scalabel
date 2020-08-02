@@ -1,4 +1,3 @@
-import { sprintf } from 'sprintf-js'
 import { uid } from '../common/uid'
 import { BotConfig } from '../types/config'
 import {
@@ -130,8 +129,8 @@ export class BotManager {
    * Create a new bot user
    */
   private makeBot (botData: BotData): Bot {
-    Logger.info(sprintf('Creating bot for project %s, task %d',
-      botData.projectName, botData.taskIndex))
+    Logger.info(
+      `Creating bot for project ${botData.projectName}, task ${botData.taskIndex}`)
     const bot = new Bot(
       botData, this.config.host, this.config.port)
 

@@ -1,5 +1,4 @@
 // @flow
-import {sprintf} from 'sprintf-js';
 import _ from 'lodash';
 import {makeImageViewerConfig} from '../functional/states';
 import * as types from '../const/action';
@@ -107,7 +106,7 @@ class Session {
           config: config});
       };
       image.onerror = function() {
-        alert(sprintf('Image %s was not found.', url));
+        alert(`Image ${url} was not found.`);
       };
       image.src = url;
     }

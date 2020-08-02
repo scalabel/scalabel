@@ -1,6 +1,5 @@
 import * as fs from 'fs-extra'
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { index2str } from '../../js/common/util'
 import { FileStorage } from '../../js/server/file_storage'
 import { getFileKey, getRedisMetaKey, getTestDir } from '../../js/server/path'
@@ -37,8 +36,8 @@ afterAll(async () => {
 
 describe('Test redis cache', () => {
   test('Set and get and delete', async () => {
-    const keys = _.range(5).map((v) => sprintf('test%s', v))
-    const values = _.range(5).map((v) => sprintf('value%s', v))
+    const keys = _.range(5).map((v) => `test${v}`)
+    const values = _.range(5).map((v) => `value${v}`)
 
     for (let i = 0; i < 5; i++) {
       await defaultStore.setExWithReminder(
@@ -76,8 +75,7 @@ describe('Test redis cache', () => {
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {
-      await store.setExWithReminder(
-        key, sprintf('value%s', i), metadataString, 1)
+      await store.setExWithReminder(key, `value${i}`, metadataString, 1)
       // Make sure no new files are created yet
       await checkFileCount()
     }
@@ -95,8 +93,8 @@ describe('Test redis cache', () => {
   })
 
   test('Set atomic executes all ops', async () => {
-    const keys = _.range(5).map((v) => sprintf('test%s', v))
-    const values = _.range(5).map((v) => sprintf('value%s', v))
+    const keys = _.range(5).map((v) => `test${v}`)
+    const values = _.range(5).map((v) => `value${v}`)
 
     await defaultStore.setAtomic(keys, values, 60)
 
@@ -107,8 +105,8 @@ describe('Test redis cache', () => {
   })
 
   test('Metadata is saved correctly', async () => {
-    const keys = _.range(5).map((v) => sprintf('test%s', v))
-    const values = _.range(5).map((v) => sprintf('value%s', v))
+    const keys = _.range(5).map((v) => `test${v}`)
+    const values = _.range(5).map((v) => `value${v}`)
     const metadata = _.range(5).map((v) => makeMetadata(v))
     for (let i = 0; i < 5; i++) {
       await defaultStore.setExWithReminder(keys[i], values[i], metadata[i], 1)
@@ -119,8 +117,8 @@ describe('Test redis cache', () => {
   })
 
   test('Check storage if key is not in redis store', async () => {
-    const keys = _.range(5).map((v) => sprintf('testGet%s', v))
-    const values = _.range(5).map((v) => sprintf('value%s', v))
+    const keys = _.range(5).map((v) => `testGet${v}`)
+    const values = _.range(5).map((v) => `value${v}`)
 
     for (let i = 0; i < 5; i++) {
       await defaultStore.setExWithReminder(

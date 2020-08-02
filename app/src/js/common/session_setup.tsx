@@ -2,7 +2,6 @@ import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
-import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
 import { addViewerConfig, initSessionAction, loadItem,
   splitPane, updateAll, updatePane, updateState } from '../action/common'
@@ -118,7 +117,7 @@ function loadImages (
             image.src = `${url}#${new Date().getTime()}`
             attemptsMap[sensorId]++
           } else {
-            alert(sprintf('Failed to load image at %s', url))
+            alert(`Failed to load image at ${url}`)
           }
         }
         image.src = url

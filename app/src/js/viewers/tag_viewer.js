@@ -1,5 +1,4 @@
 import {BaseViewer2D} from './image_base_viewer';
-import {sprintf} from 'sprintf-js';
 /* :: import {BaseController} from '../controllers/base_controller'; */
 
 /**
@@ -43,8 +42,8 @@ export class TagViewer extends BaseViewer2D {
     let attributes = this.state.config.attributes;
     for (let i = 0; i < attributes.length; i++) {
       if (activeTags && activeTags[i]) {
-        abbr.push(sprintf('  %s: %s', attributes[i].name,
-                          attributes[i].values[activeTags[i]]));
+        abbr.push(
+          `  ${attributes[i].name}: ${attributes[i].values[activeTags[i]]}`);
       }
     }
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);

@@ -1,4 +1,3 @@
-import { sprintf } from 'sprintf-js'
 import { id2int, isValidId } from '../functional/states'
 import { IdType } from '../types/state'
 
@@ -78,12 +77,11 @@ export function getColorById (labelId: IdType, trackId: IdType): number[] {
  */
 export function toCssColor (color: number[]): string {
   if (color.length === 3) {
-    return sprintf('rgb(%d, %d, %d)', color[0], color[1], color[2])
+    return `rgb(${color[0]}, ${color[1]}, ${color[2]})`
   } else if (color.length === 4) {
-    return sprintf('rgba(%d, %d, %d, %f)',
-                   color[0], color[1], color[2], color[3])
+    return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`
   } else {
-    throw new Error(sprintf('color argument has wrong length %d', color.length))
+    throw new Error(`color argument has wrong length ${color.length}`)
   }
 }
 

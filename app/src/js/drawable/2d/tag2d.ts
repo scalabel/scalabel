@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { AttributeToolType } from '../../const/common'
 import { Vector2D } from '../../math/vector2d'
 import { Attribute, IdType, LabelType, ShapeType, State } from '../../types/state'
@@ -73,12 +72,12 @@ export class Tag2D extends Label2D {
           const selectedAttribute = this.configAttributes[key]
           if (selectedAttribute.toolType === AttributeToolType.SWITCH) {
             if (selectedIndex === 1) {
-              abbr.push(sprintf(' %s: %s', selectedAttribute.name,
-                selectedAttribute.tagText))
+              abbr.push(
+                ` ${selectedAttribute.name}: ${selectedAttribute.tagText}`)
             }
           } else {
-            abbr.push(sprintf('  %s: %s', selectedAttribute.name,
-              selectedAttribute.values[selectedIndex]))
+            abbr.push(
+              `  ${selectedAttribute.name}: ${selectedAttribute.values[selectedIndex]}`)
           }
         }
       }

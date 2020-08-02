@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { sprintf } from 'sprintf-js'
 import { RedisClient } from '../../js/server/redis_client'
 import { getTestConfig } from './util/util'
 
@@ -29,7 +28,7 @@ describe('Test that redis clients catch errors', () => {
 describe('Test redis functions that are not tested elsewhere', () => {
   test('Test redis sets', async () => {
     const setName = 'redisSet'
-    const memberKeys = _.range(5).map((v) => sprintf('key%s', v))
+    const memberKeys = _.range(5).map((v) => `key${v}`)
     for (const memberKey of memberKeys) {
       await client.setAdd(setName, memberKey)
     }

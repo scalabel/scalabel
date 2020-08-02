@@ -1,5 +1,3 @@
-import {sprintf} from 'sprintf-js';
-
 /**
  * @param {Object.<string, array>} data - map from category to data
  * @return {Object.<string, number>} - map from category to average
@@ -104,12 +102,12 @@ function processDataAfterCompletion(
     // wait until all sessions complete to aggregate data
     if (window.allTimingData.roundTrip.length === window.numSessions) {
         let allAvgTimes = datasToAverages(window.allTimingData);
-        let numSessions = sprintf('%d sessions', window.numSessions);
-        let numMessages = sprintf('%d messages', window.numMessages);
-        let experimentType = sprintf('Initializing %s', numSessions);
+        let numSessions = `${window.numSessions} sessions`;
+        let numMessages = `${window.numMessages} messages`;
+        let experimentType = `Initializing ${numSessions}`;
         if (testType !== 'init') {
-            experimentType = sprintf('Speed test with %s, %s per session',
-                numSessions, numMessages);
+            experimentType = 
+              `Speed test with ${numSessions}, ${numMessages} per session`;
         }
 
         addRowToTable(allAvgTimes, experimentType);
@@ -250,7 +248,7 @@ function sendData(sessionIndex: number) {
   let message = (messageElement: HTMLTextAreaElement).value;
 
   window.websockets[sessionIndex].send(JSON.stringify({
-    message: sprintf('%s%d', message, sessionIndex),
+    message: `${message}${sessionIndex}`,
     startTime: window.performance.now().toString(),
   }));
 }

@@ -1,4 +1,3 @@
-import { sprintf } from 'sprintf-js'
 import { ADD_LABELS } from '../const/action'
 import { ItemTypeName, LabelTypeName } from '../const/common'
 import { ActionPacketType } from '../types/message'
@@ -24,7 +23,7 @@ export function getTracking (itemType: string): [string, boolean] {
  * Create the link to the labeling instructions
  */
 function makeInstructionUrl (pageName: string) {
-  return sprintf('https://www.scalabel.ai/doc/instructions/%s.html', pageName)
+  return `https://www.scalabel.ai/doc/instructions/${pageName}.html`
 }
 
 /**
@@ -73,7 +72,7 @@ export function getPageTitle (labelType: string, itemType: string) {
       break
   }
   if (tracking) {
-    title = sprintf('%s Tracking', title)
+    title = `${title} Tracking`
   }
   return title
 }
