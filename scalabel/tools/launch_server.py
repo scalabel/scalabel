@@ -55,7 +55,7 @@ def launch() -> None:
     memory = psutil.virtual_memory()
     max_memory = int(memory.available / 1024 / 1024)
     node_cmd = [
-        'node', 'app/dist/js/main.js', '--config', args.config,
+        'node', 'app/dist/main.js', '--config', args.config,
         '--max-old-space-size={}'.format(max_memory)
     ]
     logger.info('Launching nodejs')

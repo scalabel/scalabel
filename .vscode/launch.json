@@ -36,7 +36,7 @@
             "runtimeExecutable": "/usr/local/bin/node",
             "runtimeArgs": [
                 "--inspect-brk=9229",
-                "app/dist/js/main.js",
+                "app/dist/main.js",
                 "--config",
                 "./local-data/scalabel/config.yml"
             ],
