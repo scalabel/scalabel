@@ -1,7 +1,6 @@
 /* global module __dirname process */
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
-const webpack = require('webpack');
 
 let config = {
   devtool: '',
