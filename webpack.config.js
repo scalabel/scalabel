@@ -29,26 +29,23 @@ let config = {
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
     }),
-    new CopyWebpackPlugin([{
-      from: __dirname + '/app/html',
-      to: __dirname + '/app/dist/html',
-    },
-    {
-      from: __dirname + '/app/img',
-      to: __dirname + '/app/dist/img',
-    },
-    {
-      from: __dirname + '/app/index.html',
-      to: __dirname + '/app/dist/index.html',
-    },
-    {
-      from: __dirname + '/app/favicon.ico',
-      to: __dirname + '/app/dist/favicon.ico',
-    },
-    {
-      from: __dirname + '/app/dev',
-      to: __dirname + '/app/dist/dev',
-    },
+    new CopyWebpackPlugin([
+      {
+        from: __dirname + '/app/html',
+        to: __dirname + '/app/dist/html',
+      },
+      {
+        from: __dirname + '/app/css',
+        to: __dirname + '/app/dist/css',
+      },
+      {
+        from: __dirname + '/app/img',
+        to: __dirname + '/app/dist/img',
+      },
+      {
+        from: __dirname + '/app/dev',
+        to: __dirname + '/app/dist/dev',
+      },
     ]),
   ],
   performance: {

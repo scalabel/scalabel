@@ -64,8 +64,7 @@ export function getMetaKey (): string {
 /* path to html file directories, relative to js
  * note that ../ corresponds to index.html
  */
-export const HTMLDirectories: string[] =
-  ['../html', '../']
+export const HTMLDirectories: string[] =  ['../html']
 
 /**
  * Converts relative (to js) path into absolute path

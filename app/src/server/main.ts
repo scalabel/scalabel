@@ -42,8 +42,12 @@ function startHTTPServer (
       getAbsoluteSrcPath(HTMLDir), { extensions: ['html'] }))
   }
 
-  // Set up static handlers for serving javascript
+  // Set up handlers for serving static files
+  app.use('/img', express.static(getAbsoluteSrcPath('/img')))
+  app.use('/css', express.static(getAbsoluteSrcPath('/css')))
   app.use('/js', express.static(getAbsoluteSrcPath('/js')))
+  app.use('/favicon.ico',
+          express.static(getAbsoluteSrcPath('/img/favicon.ico')))
 
   // Set up static handlers for serving items to label
   app.use('/items', express.static(config.storage.itemDir))
@@ -53,7 +57,7 @@ function startHTTPServer (
       auth(config) :
       (_req: Request, _res: Response, next: NextFunction) => next()
 
-  app.set('views', getAbsoluteSrcPath('control'))
+  app.set('views', getAbsoluteSrcPath('html'))
   app.set('view engine', 'ejs')
 
   app.use(Endpoint.CALLBACK,
