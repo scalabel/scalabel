@@ -8,7 +8,7 @@ let config = {
     create: __dirname + '/app/src/entries/create.tsx',
     worker: __dirname + '/app/src/entries/worker.tsx',
     admin: __dirname + '/app/src/entries/admin.tsx',
-    speed_test: __dirname + '/app/src/dev/speed_test.js',
+    // speed_test: __dirname + '/app/src/dev/speed_test.js',
     dashboard: __dirname + '/app/src/entries/dashboard.tsx',
     vendor: __dirname + '/app/src/entries/vendor.tsx',
     label: __dirname + '/app/src/entries/label.index.ts',
@@ -52,26 +52,16 @@ let config = {
     hints: false,
   },
   resolve: {
-    // changed from extensions: [".js", ".jsx"]
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
   module: {
-    rules: [{
-      test: /\.t(s|sx)$/,
-      use: {
-        loader: 'awesome-typescript-loader',
-      },
-    },
-    {
-      test: /\.js$/,
-      exclude: /(node_modules|bower_components)/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env', '@babel/preset-flow'],
+    rules: [
+      {
+        test: /\.t(s|sx)$/,
+        use: {
+          loader: 'awesome-typescript-loader',
         },
-      },
-    },
+      }
     ],
   },
 };
