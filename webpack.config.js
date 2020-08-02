@@ -6,28 +6,19 @@ const webpack = require('webpack');
 let config = {
   devtool: '',
   entry: {
-    create: __dirname + '/app/src/js/entries/create.tsx',
-    image: __dirname + '/app/src/js/v1/image.index.js',
-    image_v2: __dirname + '/app/src/js/entries/image.index.js',
-    worker: __dirname + '/app/src/js/entries/worker.tsx',
-    admin: __dirname + '/app/src/js/entries/admin.tsx',
-    point_cloud: __dirname + '/app/src/js/v1/point_cloud/point_cloud.index.js',
-    speed_test: __dirname + '/app/src/js/dev/speed_test.js',
-    dashboard: __dirname + '/app/src/js/entries/dashboard.tsx',
-    vendor: __dirname + '/app/src/js/entries/vendor.tsx',
-    label: __dirname + '/app/src/js/entries/label.index.ts',
+    create: __dirname + '/app/src/entries/create.tsx',
+    worker: __dirname + '/app/src/entries/worker.tsx',
+    admin: __dirname + '/app/src/entries/admin.tsx',
+    speed_test: __dirname + '/app/src/dev/speed_test.js',
+    dashboard: __dirname + '/app/src/entries/dashboard.tsx',
+    vendor: __dirname + '/app/src/entries/vendor.tsx',
+    label: __dirname + '/app/src/entries/label.index.ts',
   },
   output: {
     filename: '[name].js',
     path: __dirname + '/app/dist/js/',
   },
   plugins: [
-    new webpack.ProvidePlugin({
-      '$': 'jquery',
-      'jQuery': 'jquery',
-      'window.jQuery': 'jquery',
-      'Popper': ['popper.js', 'default'],
-    }),
     new CircularDependencyPlugin({
       // exclude detection of files based on a RegExp
       exclude: /node_modules/,
@@ -40,31 +31,23 @@ let config = {
       cwd: process.cwd(),
     }),
     new CopyWebpackPlugin([{
-      from: __dirname + '/app/src/annotation',
-      to: __dirname + '/app/dist/annotation',
+      from: __dirname + '/app/html',
+      to: __dirname + '/app/dist/html',
     },
     {
-      from: __dirname + '/app/src/control',
-      to: __dirname + '/app/dist/control',
-    },
-    {
-      from: __dirname + '/app/src/css',
-      to: __dirname + '/app/dist/css',
-    },
-    {
-      from: __dirname + '/app/src/img',
+      from: __dirname + '/app/img',
       to: __dirname + '/app/dist/img',
     },
     {
-      from: __dirname + '/app/src/index.html',
+      from: __dirname + '/app/index.html',
       to: __dirname + '/app/dist/index.html',
     },
     {
-      from: __dirname + '/app/src/favicon.ico',
+      from: __dirname + '/app/favicon.ico',
       to: __dirname + '/app/dist/favicon.ico',
     },
     {
-      from: __dirname + '/app/src/dev',
+      from: __dirname + '/app/dev',
       to: __dirname + '/app/dist/dev',
     },
     ]),
@@ -103,11 +86,11 @@ let serverConfig = {
   externals: [nodeExternals()],
   devtool: '',
   entry: {
-    main: __dirname + '/app/src/js/server/main.ts',
+    main: __dirname + '/app/src/server/main.ts',
   },
   output: {
     filename: '[name].js',
-    path: __dirname + '/app/dist/js/',
+    path: __dirname + '/app/dist/',
   },
   plugins: [
     new CircularDependencyPlugin({

@@ -48,7 +48,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
 
     ```shell
     docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p 8686:8686 -p 6379:6379 scalabel/www \
-        node app/dist/js/main.js \
+        node app/dist/main.js \
         --config /opt/scalabel/local-data/scalabel/config.yml \
         --max-old-space-size=8192
     ```
@@ -74,7 +74,7 @@ Below is a quick way to install dependencies and launch the Scalabel server. Aft
     Then you can launch the server using node:
 
     ```shell
-    node app/dist/js/main.js --config ./local-data/scalabel/config.yml --max-old-space-size=8192
+    node app/dist/main.js --config ./local-data/scalabel/config.yml --max-old-space-size=8192
     ```
      Depending on your system, you may also have to increase the memory limit from 8192 (8 GB).
 

@@ -12,30 +12,30 @@
     "scripts": {
         "build": "webpack --config webpack.config.js --mode=production",
         "watch-dev": "webpack --watch --config webpack.config.js --mode=development",
-        "serve": "node app/dist/js/main.js --config ./local-data/scalabel/config.yml --max-old-space-size=8192",
+        "serve": "node app/dist/main.js --config ./local-data/scalabel/config.yml --max-old-space-size=8192",
         "lint": "tslint --project tsconfig.json --config tslint.json",
         "test": "jest"
     },
     "jest": {
         "collectCoverage": true,
         "collectCoverageFrom": [
-            "app/src/js/**/*.{ts,tsx}"
+            "app/src/**/*.{ts,tsx}"
         ],
         "globals": {
             "ts-jest": {
                 "tsConfig": "tsconfig.test.json"
             }
         },
-        "globalSetup": "./app/src/test/setup/global_setup.ts",
+        "globalSetup": "./app/test/setup/global_setup.ts",
         "setupFiles": [
-            "./app/src/test/setup/local_setup.ts"
+            "./app/test/setup/local_setup.ts"
         ],
         "setupFilesAfterEnv": [
-            "./app/src/test/setup/setup_jest_after_env.ts"
+            "./app/test/setup/setup_jest_after_env.ts"
         ],
-        "globalTeardown": "./app/src/test/setup/global_teardown.ts",
+        "globalTeardown": "./app/test/setup/global_teardown.ts",
         "roots": [
-            "app/src/test"
+            "app/test"
         ],
         "testURL": "http://localhost:8687",
         "transform": {
