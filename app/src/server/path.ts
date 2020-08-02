@@ -64,12 +64,12 @@ export function getMetaKey (): string {
 /* path to html file directories, relative to js
  * note that ../ corresponds to index.html
  */
-export const HTMLDirectories: string[] =  ['../html']
+export const HTML_DIRS: string[] = ['../html']
 
 /**
  * Converts relative (to js) path into absolute path
  */
-export function getAbsoluteSrcPath (relativePath: string) {
+export function getAbsSrcPath (relativePath: string) {
   return path.join(__dirname, relativePath)
 }
 

@@ -15,7 +15,7 @@ import { Listeners } from './listeners'
 import Logger from './logger'
 import auth from './middleware/cognitoAuth'
 import errorHandler from './middleware/errorHandler'
-import { getAbsoluteSrcPath, getRedisConf, HTMLDirectories } from './path'
+import { getAbsSrcPath, getRedisConf, HTML_DIRS } from './path'
 import { ProjectStore } from './project_store'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
@@ -37,17 +37,16 @@ function startHTTPServer (
 
   // Set up static handlers for serving html
   // TODO: set up '/' endpoint
-  for (const HTMLDir of HTMLDirectories) {
+  for (const HTMLDir of HTML_DIRS) {
     app.use(express.static(
-      getAbsoluteSrcPath(HTMLDir), { extensions: ['html'] }))
+      getAbsSrcPath(HTMLDir), { extensions: ['html'] }))
   }
 
   // Set up handlers for serving static files
-  app.use('/img', express.static(getAbsoluteSrcPath('/img')))
-  app.use('/css', express.static(getAbsoluteSrcPath('/css')))
-  app.use('/js', express.static(getAbsoluteSrcPath('/js')))
-  app.use('/favicon.ico',
-          express.static(getAbsoluteSrcPath('/img/favicon.ico')))
+  app.use('/img', express.static(getAbsSrcPath('/img')))
+  app.use('/css', express.static(getAbsSrcPath('/css')))
+  app.use('/js', express.static(getAbsSrcPath('/js')))
+  app.use('/favicon.ico', express.static(getAbsSrcPath('/img/favicon.ico')))
 
   // Set up static handlers for serving items to label
   app.use('/items', express.static(config.storage.itemDir))
@@ -57,7 +56,7 @@ function startHTTPServer (
       auth(config) :
       (_req: Request, _res: Response, next: NextFunction) => next()
 
-  app.set('views', getAbsoluteSrcPath('html'))
+  app.set('views', getAbsSrcPath('html'))
   app.set('view engine', 'ejs')
 
   app.use(Endpoint.CALLBACK,
