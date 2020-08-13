@@ -27,16 +27,12 @@ export function initDashboard (vendor?: boolean) {
   // Get params from url path.
   const searchParams = new URLSearchParams(window.location.search)
   const projectName = searchParams.get('project_name')
-  // Send the request to the back end
-  const request = JSON.stringify({
-    name: projectName
-  })
 
-  xhr.open('POST', Endpoint.DASHBOARD)
+  xhr.open('GET', `${Endpoint.DASHBOARD}?name=${projectName}`)
   xhr.setRequestHeader('Content-Type', 'application/json')
   const auth = getAuth()
   if (auth) {
     xhr.setRequestHeader('Authorization', auth)
   }
-  xhr.send(request)
+  xhr.send()
 }

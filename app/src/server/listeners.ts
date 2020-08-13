@@ -71,10 +71,10 @@ export class Listeners {
    * Handles posting export
    */
   public async getExportHandler (req: Request, res: Response) {
-    if (req.method !== 'GET' || req.query === {}) {
-      res.sendStatus(404)
-      res.end()
+    if (this.checkInvalidGet(req, res)) {
+      return
     }
+
     try {
       const projectName = req.query[FormField.PROJECT_NAME] as string
       // Grab the latest submissions from all tasks
@@ -137,6 +137,21 @@ export class Listeners {
    */
   public checkInvalidPost (req: Request, res: Response): boolean {
     if (req.method !== 'POST') {
+      res.sendStatus(404)
+      res.end()
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Error if it's not a get request
+   * By default, also requires non-empty queryArg parameters
+   */
+  public checkInvalidGet (
+    req: Request, res: Response,
+    requireParam: boolean= true): boolean {
+    if (req.method !== 'GET' || (requireParam && req.query === {})) {
       res.sendStatus(404)
       res.end()
       return true
@@ -250,62 +265,59 @@ export class Listeners {
    * Return dashboard info
    */
   public async dashboardHandler (req: Request, res: Response) {
-    if (this.checkInvalidPost(req, res)) {
+    if (this.checkInvalidGet(req, res)) {
       return
     }
-
-    const body = req.body
-    if (body) {
-      try {
-        const projectName = body.name
-        const project = await this.projectStore.loadProject(projectName)
-        // Grab the latest submissions from all tasks
-        const tasks = await this.projectStore.getTasksInProject(projectName)
-        const projectOptions: ProjectOptions = {
-          name: project.config.projectName,
-          itemType: project.config.itemType,
-          labelTypes: project.config.labelTypes,
-          taskSize: project.config.taskSize,
-          numItems: project.items.length,
-          numLeafCategories: project.config.categories.length,
-          numAttributes: project.config.attributes.length
-        }
-
-        const taskOptions = []
-        for (const emptyTask of tasks) {
-          let task: TaskType
-          try {
-            // First, attempt loading previous submission
-            // TODO: Load the previous state asynchronously in dashboard
-            const taskId = emptyTask.config.taskId
-            const state = await this.projectStore.loadState(projectName, taskId)
-            task = state.task
-          } catch {
-            task = emptyTask
-          }
-          const [numLabeledItems, numLabels] = countLabels(task)
-          const options: TaskOptions = {
-            numLabeledItems: numLabeledItems.toString(),
-            numLabels: numLabels.toString(),
-            submissions: task.progress.submissions,
-            handlerUrl: task.config.handlerUrl
-          }
-
-          taskOptions.push(options)
-        }
-
-        const numUsers = await this.userManager.countUsers(projectOptions.name)
-        const contents: DashboardContents = {
-          projectMetaData: projectOptions,
-          taskMetaDatas: taskOptions,
-          numUsers
-        }
-
-        res.send(JSON.stringify(contents))
-      } catch (err) {
-        Logger.error(err)
-        res.send(err.message)
+    try {
+      const projectName = req.query.name as string
+      console.log(projectName)
+      const project = await this.projectStore.loadProject(projectName)
+      // Grab the latest submissions from all tasks
+      const tasks = await this.projectStore.getTasksInProject(projectName)
+      const projectOptions: ProjectOptions = {
+        name: project.config.projectName,
+        itemType: project.config.itemType,
+        labelTypes: project.config.labelTypes,
+        taskSize: project.config.taskSize,
+        numItems: project.items.length,
+        numLeafCategories: project.config.categories.length,
+        numAttributes: project.config.attributes.length
       }
+
+      const taskOptions = []
+      for (const emptyTask of tasks) {
+        let task: TaskType
+        try {
+          // First, attempt loading previous submission
+          // TODO: Load the previous state asynchronously in dashboard
+          const taskId = emptyTask.config.taskId
+          const state = await this.projectStore.loadState(projectName, taskId)
+          task = state.task
+        } catch {
+          task = emptyTask
+        }
+        const [numLabeledItems, numLabels] = countLabels(task)
+        const options: TaskOptions = {
+          numLabeledItems: numLabeledItems.toString(),
+          numLabels: numLabels.toString(),
+          submissions: task.progress.submissions,
+          handlerUrl: task.config.handlerUrl
+        }
+
+        taskOptions.push(options)
+      }
+
+      const numUsers = await this.userManager.countUsers(projectOptions.name)
+      const contents: DashboardContents = {
+        projectMetaData: projectOptions,
+        taskMetaDatas: taskOptions,
+        numUsers
+      }
+
+      res.send(JSON.stringify(contents))
+    } catch (err) {
+      Logger.error(err)
+      res.send(err.message)
     }
   }
 

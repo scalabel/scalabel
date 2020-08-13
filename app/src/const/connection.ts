@@ -10,7 +10,7 @@ export const enum Endpoint {
   POST_PROJECT_INTERNAL = '/postProjectInternal',
   GET_PROJECT_NAMES = '/getProjectNames',
   EXPORT = '/getExport',
-  DASHBOARD = '/postDashboardContents',
+  DASHBOARD = '/getDashboardContents',
   POST_TASKS = '/postTasks',
   CALLBACK = '/callback'
 }
