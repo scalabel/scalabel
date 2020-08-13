@@ -156,8 +156,7 @@ export class Listeners {
     if (req.body === undefined ||
         req.body.fields === undefined ||
         req.body.files === undefined) {
-      this.badFormResponse(res)
-      return
+      return this.badFormResponse(res)
     }
 
     /**
@@ -165,7 +164,13 @@ export class Listeners {
      * to access the item/category/attribute files
      */
     const s3Path = req.body.fields.s3_path as string
-    const storage = new S3Storage(s3Path)
+    let storage: Storage
+    try {
+      storage = new S3Storage(s3Path)
+    } catch (err) {
+      Logger.error(err)
+      return this.badFormResponse(res)
+    }
     storage.setExt('')
     await this.createProjectFromDicts(
       storage, req.body.fields, req.body.files, false, res)
