@@ -247,6 +247,22 @@ export class Listeners {
   }
 
   /**
+   * Get the labeling stats
+   */
+  public async statsHandler (req: Request, res: Response) {
+    if (req.method !== 'GET' || req.query === {}) {
+      res.sendStatus(404)
+      res.end()
+    }
+    const name = req.query.name as string
+    const contents = {
+      name,
+      message: 'good'
+    }
+    res.send(JSON.stringify(contents))
+  }
+
+  /**
    * Return dashboard info
    */
   public async dashboardHandler (req: Request, res: Response) {

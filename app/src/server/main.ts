@@ -67,6 +67,8 @@ function startHTTPServer (
     listeners.projectNameHandler.bind(listeners))
   app.get(Endpoint.EXPORT, authMiddleWare,
    listeners.getExportHandler.bind(listeners))
+  app.get(Endpoint.STATS, authMiddleWare,
+    listeners.statsHandler.bind(listeners))
 
   app.post(Endpoint.POST_PROJECT, authMiddleWare, formidable(),
     listeners.postProjectHandler.bind(listeners))

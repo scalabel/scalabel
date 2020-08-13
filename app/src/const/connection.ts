@@ -12,7 +12,8 @@ export const enum Endpoint {
   EXPORT = '/getExport',
   DASHBOARD = '/postDashboardContents',
   POST_TASKS = '/postTasks',
-  CALLBACK = '/callback'
+  CALLBACK = '/callback',
+  STATS = '/stats'
 }
 
 /* socket.io event names */
