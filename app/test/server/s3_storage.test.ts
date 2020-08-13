@@ -104,7 +104,8 @@ describe('test s3 storage', () => {
 
   test('loading nonexistent key', async () => {
     await storage.load('not_a_real_key').catch((e: Error) => {
-      expect(e.message).toEqual('Key does not exist')
+      expect(e.message).toEqual(
+        `Key '${storageName}/not_a_real_key.json' does not exist`)
     })
   })
 
