@@ -259,6 +259,14 @@ export class Listeners {
       name,
       message: 'good'
     }
+    /**
+     * {category: count}
+     * [{attribute1Options: count}, ...]
+     * Total number of detections
+     * Total number of images with a detection
+     * Number of submitted tasks
+     * Static info- num images, num tasks
+     */
     res.send(JSON.stringify(contents))
   }
 
