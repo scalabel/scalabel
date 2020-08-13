@@ -220,13 +220,13 @@ export class S3Storage extends Storage {
    * @param {string} key: relative path of file
    */
   public async load (key: string): Promise<string> {
-    const params = {
+    const params: AWS.S3.GetObjectRequest = {
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
 
     if (!await this.hasKey(key)) {
-      return Promise.reject('Key does not exist')
+      return Promise.reject(Error('Key does not exist'))
     }
     const data = await this.s3.getObject(params).promise()
     if (!data || !data.Body) {
