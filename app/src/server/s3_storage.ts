@@ -226,11 +226,11 @@ export class S3Storage extends Storage {
     }
 
     if (!await this.hasKey(key)) {
-      return Promise.reject(Error('Key does not exist'))
+      return Promise.reject(Error(`Key '${params.Key}' does not exist`))
     }
     const data = await this.s3.getObject(params).promise()
     if (!data || !data.Body) {
-      return Promise.reject(Error('No data at key'))
+      return Promise.reject(Error(`No data at key '${params.Key}'`))
     }
 
     return data.Body.toString()

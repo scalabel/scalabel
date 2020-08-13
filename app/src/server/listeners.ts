@@ -186,8 +186,7 @@ export class Listeners {
     }
 
     if (req.fields === undefined || req.files === undefined) {
-      this.badFormResponse(res)
-      return
+      return this.badFormResponse(res)
     }
 
     const fields = req.fields as { [key: string]: string}
