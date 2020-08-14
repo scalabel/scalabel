@@ -63,6 +63,12 @@ describe('Simple stat functions', () => {
   test('Count submissions', () => {
     expect(stats.getNumSubmissions(allTasks))
   })
+
+  test('Category counts', () => {
+    expect(stats.getCategoryCounts(allTasks)).toStrictEqual({
+      a: 2
+    })
+  })
 })
 
 describe('Stat aggregation', () => {
@@ -83,7 +89,10 @@ describe('Stat aggregation', () => {
       numLabeledItems: 3,
       numItems: 5,
       numSubmittedTasks: 1,
-      numTasks: 2
+      numTasks: 2,
+      categoryCounts: {
+        a: 2
+      }
     })
   })
 })
