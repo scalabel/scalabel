@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import { ProjectOptions, TaskOptions } from '../components/dashboard'
+import { AttributeToolType } from '../const/common'
 import { Project } from '../types/project'
-import { TaskType } from '../types/state'
+import { Attribute, LabelType, TaskType } from '../types/state'
 
 /**
  * Extract ProjectOption from a Project
@@ -81,61 +82,135 @@ export function getNumSubmissions (tasks: TaskType[]) {
 }
 
 /**
- * Get the number of labels with each category
+ * Initialize the label counts for each attribute to 0
+ * @param attributes list of possible attributes
+ * @returns map of attribute counts initialized to 0
  */
-export function getCategoryCounts (tasks: TaskType[]) {
+function initAttributeCount (attributes: Attribute[]): AttributeCounts {
+  const attributeCounts: AttributeCounts = {}
+  for (const attribute of attributes) {
+    const count: { [key: string]: number } = {}
+    if (attribute.toolType === AttributeToolType.SWITCH) {
+      count.false = 0
+      count.true = 0
+    } else {
+      for (const value of attribute.values) {
+        count[value] = 0
+      }
+    }
+
+    attributeCounts[attribute.name] = count
+  }
+  return attributeCounts
+}
+
+/**
+ * Initialize classification stats
+ * @param categories list of possible categories
+ * @param attributes list of possible attributes
+ * @return map of category and attribute counts initialized to 0
+ */
+function initClassificationStats (
+  categories: string[], attributes: Attribute[]):
+  ClassificationStats {
+  const result: ClassificationStats = {}
+  for (const category of categories) {
+    result[category] = {
+      count: 0,
+      attributeCounts: initAttributeCount(attributes)
+    }
+  }
+  return result
+}
+
+/**
+ * Get the value of an attribute given the index in the value list
+ */
+function getAttributeValue (attribute: Attribute, index: number) {
+  if (attribute.toolType === AttributeToolType.SWITCH) {
+    return index === 1 ? 'true' : 'false'
+  }
+  return attribute.values[index]
+}
+
+/**
+ * Update the classification stats with the given label
+ * @param stats the stats so far
+ * @param label the new label
+ * @param categories the list of possible categories
+ * @param attributes the list of possible attributes
+ */
+function updateClassificationStats (
+  stats: ClassificationStats, label: LabelType,
+  categories: string[], attributes: Attribute[]): ClassificationStats {
+  const result = stats
+  for (const categoryIndex of label.category) {
+    const categoryName = categories[categoryIndex]
+    result[categoryName].count += 1
+    for (const attributeKey of Object.keys(label.attributes)) {
+      const attributeIndex = Number(attributeKey)
+      const attr = attributes[attributeIndex]
+
+      for (const attributeValueIndex of label.attributes[attributeIndex]) {
+        const value = getAttributeValue(attr, attributeValueIndex)
+        result[categoryName].attributeCounts[attr.name][value] += 1
+      }
+    }
+  }
+  return result
+}
+
+/**
+ * Get the label breakdown by class
+ */
+export function getClassificationStats (
+  tasks: TaskType[]): ClassificationStats {
   if (tasks.length === 0) {
     return {}
   }
 
-  const categories = tasks[0].config.categories
-  const totalCounts: { [key: string]: number } = {}
-  for (const category of categories) {
-    totalCounts[category] = 0
-  }
+  const config = tasks[0].config
+  const categories = config.categories
+  const attributes = config.attributes
+
+  let result = initClassificationStats(categories, attributes)
 
   for (const task of tasks) {
     for (const item of task.items) {
       for (const label of Object.values(item.labels)) {
-        for (const categoryIndex of label.category) {
-          totalCounts[categories[categoryIndex]] += 1
-        }
+        result = updateClassificationStats(
+          result, label, categories, attributes)
       }
     }
   }
-  return totalCounts
+  return result
+}
+
+/** the number of labels for each attribute type/value */
+interface AttributeCounts {
+  [name: string]: { [value: string]: number}
 }
 
 /**
- * Get the number of labels with each value for each attribute
+ * Stats for a single category
  */
-export function getAttributeCounts (tasks: TaskType[]) {
-  if (tasks.length === 0) {
-    return {}
-  }
-
-  const attributes = tasks[0].config.attributes
-  const totalCounts: { [key: string]: { [key: string]: number }} = {}
-  for (const attribute of attributes) {
-    const attributeCounts: { [key: string]: number } = {}
-    for (const value of attribute.values) {
-      attributeCounts[value] = 0
-    }
-    totalCounts[attribute.name] = attributeCounts
-  }
-
-  // For (const task of tasks) {
-  //   for (const item of task.items) {
-  //     for (const label of Object.values(item.labels)) {
-  //       for (const categoryIndex of label.category) {
-  //         totalCounts[categories[categoryIndex]] += 1
-  //       }
-  //     }
-  //   }
-  // }
-  return totalCounts
+interface CategoryStats {
+  /** the number of labels with the category */
+  count: number
+  /** the counts for each attribute within the category */
+  attributeCounts: AttributeCounts
 }
 
+/**
+ * Stats for all classification categories
+ */
+export interface ClassificationStats {
+  [name: string]: CategoryStats
+}
+
+/**
+ * Stats for all the tasks of a project
+ */
 interface ProjectStats {
   /** the total number of labels */
   numLabels: number
@@ -147,10 +222,8 @@ interface ProjectStats {
   numSubmittedTasks: number
   /** the total number of tasks */
   numTasks: number
-  /** map from category name to count */
-  categoryCounts: { [key: string]: number }
-  /** map from attribute name, to counts for each value of the attribute */
-  attributeCounts: { [key: string]: { [key: string]: number }}
+  /** stats for the classification of the labels */
+  classificationStats: ClassificationStats
 }
 /**
  * Get the stats for a collection of tasks from a project
@@ -162,7 +235,6 @@ export function getProjectStats (tasks: TaskType[]): ProjectStats {
     numItems: getNumItems(tasks),
     numSubmittedTasks: getNumSubmissions(tasks),
     numTasks: tasks.length,
-    categoryCounts: getCategoryCounts(tasks),
-    attributeCounts: getAttributeCounts(tasks)
+    classificationStats: getClassificationStats(tasks)
   }
 }
