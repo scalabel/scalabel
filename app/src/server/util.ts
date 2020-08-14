@@ -2,7 +2,6 @@
 import _ from 'lodash'
 import { configureStore } from '../common/configure_store'
 import { uid } from '../common/uid'
-import { ProjectOptions, TaskOptions } from '../components/dashboard'
 import {
   BundleFile, HandlerUrl, ItemTypeName,
   LabelTypeName, TrackPolicyType
@@ -10,8 +9,8 @@ import {
 import { StorageType } from '../const/config'
 import { BaseAction } from '../types/action'
 import { ItemExport } from '../types/bdd'
-import { CreationForm, Project, UserData, UserMetadata } from '../types/project'
-import { Label2DTemplateType, State, TaskType } from '../types/state'
+import { CreationForm, UserData, UserMetadata } from '../types/project'
+import { Label2DTemplateType, State } from '../types/state'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
@@ -72,21 +71,6 @@ export function makeCreationForm (
     instructionUrl, taskSize, demoMode
   }
   return form
-}
-
-/**
- * Extract ProjectOption from a Project
- */
-export function getProjectOptions (project: Project): ProjectOptions {
-  return {
-    name: project.config.projectName,
-    itemType: project.config.itemType,
-    labelTypes: project.config.labelTypes,
-    taskSize: project.config.taskSize,
-    numItems: project.items.length,
-    numLeafCategories: project.config.categories.length,
-    numAttributes: project.config.attributes.length
-  }
 }
 
 /**
@@ -175,37 +159,6 @@ export function getPolicy (
       [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]]
     default:
       return [policyTypes, labelTypes]
-  }
-}
-
-/**
- * Returns [numLabeledItems, numLabels]
- * numLabeledItems is the number of items with at least 1 label in the task
- * numLabels is the total number of labels in the task
- */
-function countLabels (task: TaskType): [number, number] {
-  let numLabeledItems = 0
-  let numLabels = 0
-  for (const item of task.items) {
-    const currNumLabels = Object.keys(item.labels).length
-    if (item.labels && currNumLabels > 0) {
-      numLabeledItems++
-      numLabels += currNumLabels
-    }
-  }
-  return [numLabeledItems, numLabels]
-}
-
-/**
- * Extracts TaskOptions from a Task
- */
-export function getTaskOptions (task: TaskType): TaskOptions {
-  const [numLabeledItems, numLabels] = countLabels(task)
-  return {
-    numLabeledItems: numLabeledItems.toString(),
-    numLabels: numLabels.toString(),
-    submissions: task.progress.submissions,
-    handlerUrl: task.config.handlerUrl
   }
 }
 

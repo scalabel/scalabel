@@ -20,9 +20,10 @@ import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
 import { S3Storage } from './s3_storage'
+import { getProjectOptions, getTaskOptions } from './stats'
 import { Storage } from './storage'
 import { UserManager } from './user_manager'
-import { getProjectOptions, getTaskOptions, parseProjectName } from './util'
+import { parseProjectName } from './util'
 
 /**
  * Wraps HTTP listeners
@@ -266,15 +267,26 @@ export class Listeners {
    * Get the labeling stats
    */
   public async statsHandler (req: Request, res: Response) {
-    if (req.method !== 'GET' || req.query === {}) {
-      res.sendStatus(404)
-      res.end()
+    if (this.checkInvalidGet(req, res)) {
+      return
     }
-    const name = req.query.name as string
-    const contents = {
-      name,
-      message: 'good'
+
+    try {
+      const projectName = req.query.name as string
+      const savedTasks = await this.projectStore.loadTaskStates(
+        projectName)
+      const taskStats = _.map(savedTasks, (x) => x)
+      const contents = {
+        name,
+        message: 'good'
+      }
+      res.send(JSON.stringify(contents))
+
+    } catch (err) {
+      Logger.error(err)
+      res.send(err.message)
     }
+
     /**
      * {category: count}
      * [{attribute1Options: count}, ...]
@@ -283,7 +295,6 @@ export class Listeners {
      * Number of submitted tasks
      * Static info- num images, num tasks
      */
-    res.send(JSON.stringify(contents))
   }
 
   /**
