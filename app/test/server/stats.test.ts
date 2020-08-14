@@ -1,4 +1,4 @@
-import { makeItem, makeLabel, makeTask } from '../../src/functional/states'
+import { makeItem, makeLabel, makeTask, makeTaskConfig } from '../../src/functional/states'
 import * as stats from '../../src/server/stats'
 import { TaskType } from '../../src/types/state'
 
@@ -7,40 +7,51 @@ let sampleTask2: TaskType
 let allTasks: TaskType[]
 
 beforeAll(() => {
-  sampleTask1 = makeTask()
-  sampleTask1.items = [
-    makeItem({
-      labels: {
-        0: makeLabel(),
-        1: makeLabel()
-      }}),
-    makeItem(),
-    makeItem({
-      labels: {
-        2: makeLabel(),
-        3: makeLabel()
-      }
-    })
+  const config = makeTaskConfig()
+  config.categories = [
+    'a', 'b', 'c'
   ]
-  sampleTask1.progress = {
-    submissions: [
-      { time: 55, user: 'sampleUser ' }
+
+  sampleTask1 = makeTask({
+    config,
+    items: [
+      makeItem({
+        labels: {
+          0: makeLabel({ category: [1] }),
+          1: makeLabel({ category: [0] })
+        }}),
+      makeItem(),
+      makeItem({
+        labels: {
+          2: makeLabel(),
+          3: makeLabel({ category: [2] })
+        }
+      })
+    ],
+    progress: {
+      submissions: [
+        { time: 55, user: 'sampleUser ' }
+      ]
+    }
+  })
+
+  sampleTask2 = makeTask({
+    config,
+    items: [
+      makeItem(),
+      makeItem({
+        labels: {
+          4: makeLabel(),
+          5: makeLabel({ category: [1] }),
+          6: makeLabel({ category: [1] })
+        }
+      })
     ]
-  }
+  })
 
-  sampleTask2 = makeTask()
-  sampleTask2.items = [
-    makeItem(),
-    makeItem({
-      labels: {
-        4: makeLabel(),
-        5: makeLabel(),
-        6: makeLabel()
-      }
-    })
-  ]
+  const itemlessTask = makeTask({ config })
 
-  allTasks = [sampleTask1, sampleTask2]
+  allTasks = [sampleTask1, sampleTask2, itemlessTask]
 })
 
 describe('Simple stat functions', () => {
@@ -66,8 +77,14 @@ describe('Simple stat functions', () => {
 
   test('Category counts', () => {
     expect(stats.getCategoryCounts(allTasks)).toStrictEqual({
-      a: 2
+      a: 1,
+      b: 3,
+      c: 1
     })
+  })
+
+  test('Attribute counts', () => {
+    expect(stats.getAttributeCounts(allTasks)).toStrictEqual({})
   })
 })
 
@@ -89,10 +106,25 @@ describe('Stat aggregation', () => {
       numLabeledItems: 3,
       numItems: 5,
       numSubmittedTasks: 1,
-      numTasks: 2,
+      numTasks: 3,
       categoryCounts: {
-        a: 2
-      }
+        a: 1,
+        b: 3,
+        c: 1
+      },
+      attributeCounts: {}
+    })
+  })
+
+  test('Project stats empty task list', () => {
+    expect(stats.getProjectStats([])).toStrictEqual({
+      numLabels: 0,
+      numLabeledItems: 0,
+      numItems: 0,
+      numSubmittedTasks: 0,
+      numTasks: 0,
+      categoryCounts: {},
+      attributeCounts: {}
     })
   })
 })

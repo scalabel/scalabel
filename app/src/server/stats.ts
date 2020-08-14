@@ -84,28 +84,58 @@ export function getNumSubmissions (tasks: TaskType[]) {
  * Get the number of labels with each category
  */
 export function getCategoryCounts (tasks: TaskType[]) {
-  // TODO: get real counts, get 0 even if category missing
-  const countsByTask = tasks.map((_task) => {
-    const dict: { [key: string]: number } = {}
-    dict.a = 1
-    return dict
-  })
+  if (tasks.length === 0) {
+    return {}
+  }
+
+  const categories = tasks[0].config.categories
   const totalCounts: { [key: string]: number } = {}
-  for (const taskCount of countsByTask) {
-    for (const key of Object.keys(taskCount)) {
-      if (!(key in totalCounts)) {
-        totalCounts[key] = 0
+  for (const category of categories) {
+    totalCounts[category] = 0
+  }
+
+  for (const task of tasks) {
+    for (const item of task.items) {
+      for (const label of Object.values(item.labels)) {
+        for (const categoryIndex of label.category) {
+          totalCounts[categories[categoryIndex]] += 1
+        }
       }
-      totalCounts[key] += taskCount[key]
     }
   }
   return totalCounts
 }
 
 /**
- * {category: count}
- * [{attribute1Options: count}, ...]
+ * Get the number of labels with each value for each attribute
  */
+export function getAttributeCounts (tasks: TaskType[]) {
+  if (tasks.length === 0) {
+    return {}
+  }
+
+  const attributes = tasks[0].config.attributes
+  const totalCounts: { [key: string]: { [key: string]: number }} = {}
+  for (const attribute of attributes) {
+    const attributeCounts: { [key: string]: number } = {}
+    for (const value of attribute.values) {
+      attributeCounts[value] = 0
+    }
+    totalCounts[attribute.name] = attributeCounts
+  }
+
+  // For (const task of tasks) {
+  //   for (const item of task.items) {
+  //     for (const label of Object.values(item.labels)) {
+  //       for (const categoryIndex of label.category) {
+  //         totalCounts[categories[categoryIndex]] += 1
+  //       }
+  //     }
+  //   }
+  // }
+  return totalCounts
+}
+
 interface ProjectStats {
   /** the total number of labels */
   numLabels: number
@@ -119,6 +149,8 @@ interface ProjectStats {
   numTasks: number
   /** map from category name to count */
   categoryCounts: { [key: string]: number }
+  /** map from attribute name, to counts for each value of the attribute */
+  attributeCounts: { [key: string]: { [key: string]: number }}
 }
 /**
  * Get the stats for a collection of tasks from a project
@@ -130,6 +162,7 @@ export function getProjectStats (tasks: TaskType[]): ProjectStats {
     numItems: getNumItems(tasks),
     numSubmittedTasks: getNumSubmissions(tasks),
     numTasks: tasks.length,
-    categoryCounts: getCategoryCounts(tasks)
+    categoryCounts: getCategoryCounts(tasks),
+    attributeCounts: getAttributeCounts(tasks)
   }
 }

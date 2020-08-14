@@ -20,7 +20,7 @@ import Logger from './logger'
 import { getExportName } from './path'
 import { ProjectStore } from './project_store'
 import { S3Storage } from './s3_storage'
-import { getProjectOptions, getTaskOptions } from './stats'
+import { getProjectOptions, getProjectStats, getTaskOptions } from './stats'
 import { Storage } from './storage'
 import { UserManager } from './user_manager'
 import { parseProjectName } from './util'
@@ -273,14 +273,10 @@ export class Listeners {
 
     try {
       const projectName = req.query.name as string
-      // Const savedTasks = await this.projectStore.loadTaskStates(
-      //   projectName)
-      // const taskStats = _.map(savedTasks, (x) => x)
-      const contents = {
-        name: projectName,
-        message: 'good'
-      }
-      res.send(JSON.stringify(contents))
+      const savedTasks = await this.projectStore.loadTaskStates(
+        projectName)
+      const stats = getProjectStats(savedTasks)
+      res.send(JSON.stringify(stats))
 
     } catch (err) {
       Logger.error(err)
