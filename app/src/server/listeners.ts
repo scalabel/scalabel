@@ -286,15 +286,6 @@ export class Listeners {
       Logger.error(err)
       res.send(err.message)
     }
-
-    /**
-     * {category: count}
-     * [{attribute1Options: count}, ...]
-     * Total number of detections
-     * Total number of images with a detection
-     * Number of submitted tasks
-     * Static info- num images, num tasks
-     */
   }
 
   /**

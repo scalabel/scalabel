@@ -4,6 +4,7 @@ import { TaskType } from '../../src/types/state'
 
 let sampleTask1: TaskType
 let sampleTask2: TaskType
+let allTasks: TaskType[]
 
 beforeAll(() => {
   sampleTask1 = makeTask()
@@ -38,19 +39,29 @@ beforeAll(() => {
       }
     })
   ]
+
+  allTasks = [sampleTask1, sampleTask2]
 })
 
 describe('Simple stat functions', () => {
   test('Count labels', () => {
     expect(stats.countLabelsTask(sampleTask1)).toBe(4)
     expect(stats.countLabelsTask(sampleTask2)).toBe(3)
-    expect(stats.countLabelsProject([sampleTask1, sampleTask2])).toBe(7)
+    expect(stats.countLabelsProject(allTasks)).toBe(7)
   })
 
   test('Count labeled images', () => {
     expect(stats.countLabeledItemsTask(sampleTask1)).toBe(2)
     expect(stats.countLabeledItemsTask(sampleTask2)).toBe(1)
-    expect(stats.countLabeledItemsProject([sampleTask1, sampleTask2])).toBe(3)
+    expect(stats.countLabeledItemsProject(allTasks)).toBe(3)
+  })
+
+  test('Count items', () => {
+    expect(stats.getNumItems(allTasks)).toBe(5)
+  })
+
+  test('Count submissions', () => {
+    expect(stats.getNumSubmissions(allTasks))
   })
 })
 
@@ -63,6 +74,16 @@ describe('Stat aggregation', () => {
         { time: 55, user: 'sampleUser ' }
       ],
       handlerUrl: ''
+    })
+  })
+
+  test('Project stats', () => {
+    expect(stats.getProjectStats(allTasks)).toStrictEqual({
+      numLabels: 7,
+      numLabeledItems: 3,
+      numItems: 5,
+      numSubmittedTasks: 1,
+      numTasks: 2
     })
   })
 })
