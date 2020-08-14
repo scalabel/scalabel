@@ -53,3 +53,16 @@ describe('Simple stat functions', () => {
     expect(stats.countLabeledItemsProject([sampleTask1, sampleTask2])).toBe(3)
   })
 })
+
+describe('Stat aggregation', () => {
+  test('Task options', () => {
+    expect(stats.getTaskOptions(sampleTask1)).toStrictEqual({
+      numLabeledItems: '2',
+      numLabels: '4',
+      submissions: [
+        { time: 55, user: 'sampleUser ' }
+      ],
+      handlerUrl: ''
+    })
+  })
+})
