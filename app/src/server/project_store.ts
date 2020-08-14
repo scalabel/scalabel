@@ -174,6 +174,20 @@ export class ProjectStore {
   }
 
   /**
+   * Get all of the latest task data for the project
+   * If there is no saved data, returns the initial data for that task
+   */
+  public async getSavedTasks (projectName: string): Promise<TaskType[]> {
+    const tasks = await this.getTasksInProject(projectName)
+
+    const savedStatePromises = _.map(tasks, (emptyTask) =>
+      this.loadState(projectName, emptyTask.config.taskId))
+    const savedStates = await Promise.all(savedStatePromises)
+    const savedTasks = _.map(savedStates, (state) => state.task)
+    return savedTasks
+  }
+
+  /**
    * Saves a list of tasks
    */
   public async saveTasks (tasks: TaskType[]) {

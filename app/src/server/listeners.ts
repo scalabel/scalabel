@@ -4,7 +4,8 @@ import {
   Response
 } from 'express'
 import { File } from 'formidable'
-import { DashboardContents, ProjectOptions, TaskOptions } from '../components/dashboard'
+import _ from 'lodash'
+import { DashboardContents, TaskOptions } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
 import { FormField } from '../const/project'
 import { ItemExport } from '../types/bdd'
@@ -21,7 +22,7 @@ import { ProjectStore } from './project_store'
 import { S3Storage } from './s3_storage'
 import { Storage } from './storage'
 import { UserManager } from './user_manager'
-import { countLabels, parseProjectName } from './util'
+import { getProjectOptions, getTaskOptions, parseProjectName } from './util'
 
 /**
  * Wraps HTTP listeners
@@ -268,48 +269,20 @@ export class Listeners {
     if (this.checkInvalidGet(req, res)) {
       return
     }
+
     try {
       const projectName = req.query.name as string
-      console.log(projectName)
+
       const project = await this.projectStore.loadProject(projectName)
-      // Grab the latest submissions from all tasks
-      const tasks = await this.projectStore.getTasksInProject(projectName)
-      const projectOptions: ProjectOptions = {
-        name: project.config.projectName,
-        itemType: project.config.itemType,
-        labelTypes: project.config.labelTypes,
-        taskSize: project.config.taskSize,
-        numItems: project.items.length,
-        numLeafCategories: project.config.categories.length,
-        numAttributes: project.config.attributes.length
-      }
+      const projectMetaData = getProjectOptions(project)
 
-      const taskOptions = []
-      for (const emptyTask of tasks) {
-        let task: TaskType
-        try {
-          // First, attempt loading previous submission
-          // TODO: Load the previous state asynchronously in dashboard
-          const taskId = emptyTask.config.taskId
-          const state = await this.projectStore.loadState(projectName, taskId)
-          task = state.task
-        } catch {
-          task = emptyTask
-        }
-        const [numLabeledItems, numLabels] = countLabels(task)
-        const options: TaskOptions = {
-          numLabeledItems: numLabeledItems.toString(),
-          numLabels: numLabels.toString(),
-          submissions: task.progress.submissions,
-          handlerUrl: task.config.handlerUrl
-        }
+      const savedTasks = await this.projectStore.getSavedTasks(
+        projectName)
+      const taskOptions = _.map(savedTasks, getTaskOptions)
 
-        taskOptions.push(options)
-      }
-
-      const numUsers = await this.userManager.countUsers(projectOptions.name)
+      const numUsers = await this.userManager.countUsers(projectName)
       const contents: DashboardContents = {
-        projectMetaData: projectOptions,
+        projectMetaData,
         taskMetaDatas: taskOptions,
         numUsers
       }
