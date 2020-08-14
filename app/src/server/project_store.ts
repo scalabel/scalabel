@@ -174,10 +174,11 @@ export class ProjectStore {
   }
 
   /**
-   * Get all of the latest task data for the project
-   * If there is no saved data, returns the initial data for that task
+   * Get the latest state for each task in the project
+   * Check redis first, then memory
+   * If there is no saved state for a task, returns the initial task
    */
-  public async getSavedTasks (projectName: string): Promise<TaskType[]> {
+  public async loadTaskStates (projectName: string): Promise<TaskType[]> {
     const tasks = await this.getTasksInProject(projectName)
 
     const savedStatePromises = _.map(tasks, (emptyTask) =>
@@ -244,7 +245,7 @@ export class ProjectStore {
     if (!metaDataJSON) {
       return makeUserMetadata()
     }
-    // Handle backwards compatability
+    // Handle backwards compatibility
     const userMetadata = safeParseJSON(metaDataJSON)
     if (_.has(userMetadata, 'socketToProject')) {
       // New code saves as an object, which allows extensions

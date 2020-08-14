@@ -5,7 +5,7 @@ import {
 } from 'express'
 import { File } from 'formidable'
 import _ from 'lodash'
-import { DashboardContents, TaskOptions } from '../components/dashboard'
+import { DashboardContents } from '../components/dashboard'
 import { getSubmissionTime } from '../components/util'
 import { FormField } from '../const/project'
 import { ItemExport } from '../types/bdd'
@@ -276,7 +276,7 @@ export class Listeners {
       const project = await this.projectStore.loadProject(projectName)
       const projectMetaData = getProjectOptions(project)
 
-      const savedTasks = await this.projectStore.getSavedTasks(
+      const savedTasks = await this.projectStore.loadTaskStates(
         projectName)
       const taskOptions = _.map(savedTasks, getTaskOptions)
 
