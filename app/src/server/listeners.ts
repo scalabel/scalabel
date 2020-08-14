@@ -273,11 +273,11 @@ export class Listeners {
 
     try {
       const projectName = req.query.name as string
-      const savedTasks = await this.projectStore.loadTaskStates(
-        projectName)
-      const taskStats = _.map(savedTasks, (x) => x)
+      // Const savedTasks = await this.projectStore.loadTaskStates(
+      //   projectName)
+      // const taskStats = _.map(savedTasks, (x) => x)
       const contents = {
-        name,
+        name: projectName,
         message: 'good'
       }
       res.send(JSON.stringify(contents))

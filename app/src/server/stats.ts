@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { ProjectOptions, TaskOptions } from '../components/dashboard'
 import { Project } from '../types/project'
 import { TaskType } from '../types/state'
@@ -18,28 +19,42 @@ export function getProjectOptions (project: Project): ProjectOptions {
 }
 
 /**
- * Returns [numLabeledItems, numLabels]
- * numLabeledItems is the number of items with at least 1 label in the task
- * numLabels is the total number of labels in the task
+ * Returns the total number of labels in the task
  */
-export function countLabels (task: TaskType): [number, number] {
-  let numLabeledItems = 0
-  let numLabels = 0
-  for (const item of task.items) {
-    const currNumLabels = Object.keys(item.labels).length
-    if (item.labels && currNumLabels > 0) {
-      numLabeledItems++
-      numLabels += currNumLabels
-    }
-  }
-  return [numLabeledItems, numLabels]
+export function countLabelsTask (task: TaskType): number {
+  const numPerItem = _.map(task.items, (item) => _.size(item.labels))
+  return _.sum(numPerItem)
+}
+
+/**
+ * Returns the number of items with at least 1 label in the task
+ */
+export function countLabeledItemsTask (task: TaskType): number {
+  const numPerItem = _.map(task.items, (item) => _.size(item.labels))
+  return _.filter(numPerItem, (x) => x > 0).length
+}
+
+/**
+ * Returns the total number of labels in the project
+ */
+export function countLabelsProject (tasks: TaskType[]): number {
+  return _.sum(_.map(tasks, countLabelsTask))
+}
+
+/**
+ * Returns the number of items with at least 1 label in the project
+ */
+export function countLabeledItemsProject (tasks: TaskType[]): number {
+  return _.sum(_.map(tasks, countLabeledItemsTask))
+
 }
 
 /**
  * Extracts TaskOptions from a Task
  */
 export function getTaskOptions (task: TaskType): TaskOptions {
-  const [numLabeledItems, numLabels] = countLabels(task)
+  const numLabeledItems = countLabeledItemsTask(task)
+  const numLabels = countLabelsTask(task)
   return {
     numLabeledItems: numLabeledItems.toString(),
     numLabels: numLabels.toString(),
