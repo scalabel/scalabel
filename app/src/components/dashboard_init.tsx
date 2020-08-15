@@ -2,6 +2,8 @@ import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { getAuth } from '../common/service'
+import { handleInvalidPage } from '../common/util'
+import { QueryArg } from '../const/common'
 import { Endpoint } from '../const/connection'
 import { myTheme } from '../styles/theme'
 import Dashboard, { DashboardContents } from './dashboard'
@@ -11,6 +13,16 @@ import Dashboard, { DashboardContents } from './dashboard'
  */
 export function initDashboard (vendor?: boolean) {
   let dashboardContents: DashboardContents
+  // Get params from url path.
+  const searchParams = new URLSearchParams(window.location.search)
+  const projectName = searchParams.get(QueryArg.PROJECT_NAME)
+  if (projectName === null) {
+    return handleInvalidPage()
+  }
+  // Send the request to the back end
+  const request = JSON.stringify({
+    name: projectName
+  })
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -24,13 +36,6 @@ export function initDashboard (vendor?: boolean) {
           : 'dashboard-root'))
     }
   }
-  // Get params from url path.
-  const searchParams = new URLSearchParams(window.location.search)
-  const projectName = searchParams.get('project_name')
-  // Send the request to the back end
-  const request = JSON.stringify({
-    name: projectName
-  })
 
   xhr.open('POST', Endpoint.DASHBOARD)
   xhr.setRequestHeader('Content-Type', 'application/json')
