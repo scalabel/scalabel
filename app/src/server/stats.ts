@@ -87,21 +87,20 @@ export function getNumSubmissions (tasks: TaskType[]) {
  * @returns map of attribute counts initialized to 0
  */
 function initAttributeCount (attributes: Attribute[]): AttributeCounts {
-  const attributeCounts: AttributeCounts = {}
-  for (const attribute of attributes) {
-    const count: { [key: string]: number } = {}
-    if (attribute.toolType === AttributeToolType.SWITCH) {
-      count.false = 0
-      count.true = 0
-    } else {
-      for (const value of attribute.values) {
-        count[value] = 0
+  const attributesByName = _.keyBy(attributes, (attribute) => attribute.name)
+  return _.mapValues(attributesByName,
+    (attribute) => {
+      if (attribute.toolType === AttributeToolType.SWITCH) {
+        return {
+          false: 0,
+          true: 0
+        }
       }
+      return _.zipObject(
+        attribute.values,
+        _.times(attribute.values.length, _.constant(0)))
     }
-
-    attributeCounts[attribute.name] = count
-  }
-  return attributeCounts
+  )
 }
 
 /**
@@ -113,14 +112,14 @@ function initAttributeCount (attributes: Attribute[]): AttributeCounts {
 function initClassificationStats (
   categories: string[], attributes: Attribute[]):
   ClassificationStats {
-  const result: ClassificationStats = {}
-  for (const category of categories) {
-    result[category] = {
-      count: 0,
-      attributeCounts: initAttributeCount(attributes)
-    }
-  }
-  return result
+  const categoriesByName = _.keyBy(categories)
+  return _.mapValues(categoriesByName,
+    (_category) => {
+      return {
+        count: 0,
+        attributeCounts: initAttributeCount(attributes)
+      }
+    })
 }
 
 /**
