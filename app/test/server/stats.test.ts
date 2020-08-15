@@ -147,6 +147,19 @@ describe('Simple stat functions', () => {
 })
 
 describe('Stat aggregation', () => {
+  const constantDate = Date.now()
+  const dateFn = Date.now
+
+  beforeAll(() => {
+    Date.now = jest.fn(() => {
+      return constantDate
+    })
+  })
+
+  afterAll(() => {
+    Date.now = dateFn
+  })
+
   test('Task options', () => {
     expect(stats.getTaskOptions(sampleTask1)).toStrictEqual({
       numLabeledItems: '2',
@@ -165,7 +178,8 @@ describe('Stat aggregation', () => {
       numItems: 5,
       numSubmittedTasks: 1,
       numTasks: 3,
-      classificationStats: expectedClassificationStats
+      classificationStats: expectedClassificationStats,
+      timestamp: constantDate
     })
   })
 
@@ -176,7 +190,8 @@ describe('Stat aggregation', () => {
       numItems: 0,
       numSubmittedTasks: 0,
       numTasks: 0,
-      classificationStats: {}
+      classificationStats: {},
+      timestamp: constantDate
     })
   })
 })

@@ -224,6 +224,8 @@ interface ProjectStats {
   numTasks: number
   /** stats for the classification of the labels */
   classificationStats: ClassificationStats
+  /** the time of retrieval for the stats */
+  timestamp: number
 }
 /**
  * Get the stats for a collection of tasks from a project
@@ -235,6 +237,7 @@ export function getProjectStats (tasks: TaskType[]): ProjectStats {
     numItems: getNumItems(tasks),
     numSubmittedTasks: getNumSubmissions(tasks),
     numTasks: tasks.length,
-    classificationStats: getClassificationStats(tasks)
+    classificationStats: getClassificationStats(tasks),
+    timestamp: Date.now()
   }
 }
