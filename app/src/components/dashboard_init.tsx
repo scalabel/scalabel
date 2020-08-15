@@ -2,6 +2,8 @@ import { MuiThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { getAuth } from '../common/service'
+import { handleInvalidPage } from '../common/util'
+import { QueryArg } from '../const/common'
 import { Endpoint } from '../const/connection'
 import { myTheme } from '../styles/theme'
 import Dashboard, { DashboardContents } from './dashboard'
@@ -26,7 +28,10 @@ export function initDashboard (vendor?: boolean) {
   }
   // Get params from url path.
   const searchParams = new URLSearchParams(window.location.search)
-  const projectName = searchParams.get('project_name')
+  const projectName = searchParams.get(QueryArg.PROJECT_NAME)
+  if (projectName === null) {
+    return handleInvalidPage()
+  }
   // Send the request to the back end
   const request = JSON.stringify({
     name: projectName

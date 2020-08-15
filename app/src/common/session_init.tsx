@@ -12,14 +12,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { makeSyncMiddleware } from './sync_middleware'
 import { Synchronizer } from './synchronizer'
-
-/**
- * Handle invalid page request
- */
-function handleInvalidPage (): void {
-  window.location.replace(window.location.host)
-  return
-}
+import { handleInvalidPage } from './util'
 
 /**
  * Main function for initiating the frontend session
