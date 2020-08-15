@@ -14,15 +14,29 @@ import { makeSyncMiddleware } from './sync_middleware'
 import { Synchronizer } from './synchronizer'
 
 /**
+ * Handle invalid page request
+ */
+function handleInvalidPage (): void {
+  window.location.replace(window.location.host)
+  return
+}
+
+/**
  * Main function for initiating the frontend session
  * @param {string} containerName - the name of the container
  */
 export function initSession (containerName: string): void {
   // Get params from url path. These uniquely identify a labeling task
   const searchParams = new URLSearchParams(window.location.search)
-  const taskIndex = parseInt(
-    searchParams.get(QueryArg.TASK_INDEX) as string, 10)
-  const projectName = searchParams.get(QueryArg.PROJECT_NAME) as string
+  const projectName = searchParams.get(QueryArg.PROJECT_NAME)
+  if (projectName === null) {
+    return handleInvalidPage()
+  }
+  const taskIndexParam = searchParams.get(QueryArg.TASK_INDEX)
+  let taskIndex = 0
+  if (taskIndexParam !== null) {
+    taskIndex = parseInt(taskIndexParam, 10)
+  }
   const devMode = searchParams.has(QueryArg.DEV_MODE)
 
   /**
