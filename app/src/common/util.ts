@@ -6,7 +6,7 @@ import { ActionPacketType } from '../types/message'
  * Handle invalid page request
  */
 export function handleInvalidPage (): void {
-  window.location.replace(window.location.host)
+  window.location.replace(window.location.origin)
   return
 }
 
