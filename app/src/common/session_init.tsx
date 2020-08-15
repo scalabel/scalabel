@@ -21,7 +21,7 @@ export function initSession (containerName: string): void {
   // Get params from url path. These uniquely identify a labeling task
   const searchParams = new URLSearchParams(window.location.search)
   const taskIndex = parseInt(
-    searchParams.get(QueryArg.TASK_INDEX), 10)
+    searchParams.get(QueryArg.TASK_INDEX) as string, 10)
   const projectName = searchParams.get(QueryArg.PROJECT_NAME) as string
   const devMode = searchParams.has(QueryArg.DEV_MODE)
 
