@@ -7,6 +7,7 @@ import {
   LabelTypeName, TrackPolicyType
 } from '../const/common'
 import { StorageType } from '../const/config'
+import { STORAGE_FOLDERS } from '../const/storage'
 import { BaseAction } from '../types/action'
 import { ItemExport } from '../types/bdd'
 import { CreationForm, UserData, UserMetadata } from '../types/project'
@@ -14,7 +15,7 @@ import { Label2DTemplateType, State, TaskType } from '../types/state'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
-import { Storage, STORAGE_FOLDERS } from './storage'
+import { Storage } from './storage'
 
 /**
  * Initialize storage

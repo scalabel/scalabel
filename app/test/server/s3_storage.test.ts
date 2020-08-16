@@ -1,9 +1,9 @@
 import AWS from 'aws-sdk'
 import * as path from 'path'
 import { index2str } from '../../src/common/util'
+import { STORAGE_FOLDERS, StorageStructure } from '../../src/const/storage'
 import { getProjectKey, getTaskKey, hostname, now } from '../../src/server/path'
 import { S3Storage } from '../../src/server/s3_storage'
-import { STORAGE_FOLDERS, StorageStructure } from '../../src/server/storage'
 
 const s3 = new AWS.S3()
 const projectName = 'test'

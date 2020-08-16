@@ -6,7 +6,7 @@ export interface RedisConfig {
   /** write to disk after this time interval (seconds) since last update */
   writebackTime: number
   /** write to disk every time this number of actions occurs */
-  writebackActions: number
+  writebackCount: number
   /** Port that redis runs on */
   port: number
 }

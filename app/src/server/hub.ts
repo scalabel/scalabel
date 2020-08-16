@@ -140,7 +140,7 @@ export class Hub {
       }
 
       await this.projectStore.saveState(
-        newState, projectName, taskId, stateMetadata, taskActions.length)
+        newState, projectName, taskId, stateMetadata)
     } else if (taskActions.length > 0) {
       // If actions were already saved, apply the old timestamps
       const timestamps = actionIdsSaved[actionPacketId]
