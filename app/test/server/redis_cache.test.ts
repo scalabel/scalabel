@@ -95,7 +95,7 @@ describe('Test redis cache', () => {
     const keys = _.range(5).map((v) => `test${v}`)
     const values = _.range(5).map((v) => `value${v}`)
 
-    await defaultStore.setMulti(keys, values, 60)
+    await defaultStore.setMulti(keys, values)
 
     for (let i = 0; i < 5; i++) {
       const value = await defaultStore.get(keys[i])

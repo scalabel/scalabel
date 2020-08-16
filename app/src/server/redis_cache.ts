@@ -114,6 +114,7 @@ export class RedisCache {
    * @param value
    */
   public async set (key: string, value: string): Promise<void> {
+    Logger.debug(`Redis cache set ${key}`)
     await this.setMulti([key], [value])
   }
 
