@@ -118,7 +118,10 @@ beforeAll(() => {
         }
       }
     },
-    attribute: {}
+    attribute: {
+      'Occluded': { false: 0, true: 0 },
+      'Traffic light color': { 'N/A': 0, 'G': 0, 'Y': 0, 'R': 0 }
+    }
   }
 })
 

@@ -104,7 +104,7 @@ function initAttributeStats (attributes: Attribute[]): AttributeStats {
 }
 
 /**
- * Initialize classification stats
+ * Initialize category stats
  * @param categories list of possible categories
  * @param attributes list of possible attributes
  * @return map of category and attribute counts initialized to 0
@@ -133,34 +133,47 @@ function getAttributeValue (attribute: Attribute, index: number) {
 }
 
 /**
- * Update the classification stats with the given label
+ * Updates the attribute stats with given label
+ * Modifies the stats in place
+ */
+function updateAttributeStats (
+  stats: AttributeStats, label: LabelType,
+  attributes: Attribute[]) {
+  const attributeIndices = _.map(
+    Object.keys(label.attributes), (attributeKey) => Number(attributeKey))
+
+  for (const attributeIndex of attributeIndices) {
+    const attribute = attributes[attributeIndex]
+    const values = label.attributes[attributeIndex].map(
+      (valueIndex) => getAttributeValue(attribute, valueIndex))
+
+    for (const value of values) {
+      stats[attribute.name][value] += 1
+    }
+  }
+}
+
+/**
+ * Update the category stats with the given label
  * @param stats the stats so far
  * @param label the new label
  * @param categories the list of possible categories
  * @param attributes the list of possible attributes
+ * Modifies the stats in place
  */
 function updateCategoryStats (
   stats: CategoryStats, label: LabelType,
-  categories: string[], attributes: Attribute[]): CategoryStats {
-  const result = stats
-  for (const categoryIndex of label.category) {
-    const categoryName = categories[categoryIndex]
-    result[categoryName].count += 1
-    for (const attributeKey of Object.keys(label.attributes)) {
-      const attributeIndex = Number(attributeKey)
-      const attr = attributes[attributeIndex]
-
-      for (const attributeValueIndex of label.attributes[attributeIndex]) {
-        const value = getAttributeValue(attr, attributeValueIndex)
-        result[categoryName].attribute[attr.name][value] += 1
-      }
-    }
+  categories: string[], attributes: Attribute[]) {
+  const categoryNames = label.category.map(
+    (categoryIndex) => categories[categoryIndex])
+  for (const categoryName of categoryNames) {
+    stats[categoryName].count += 1
+    updateAttributeStats(stats[categoryName].attribute, label, attributes)
   }
-  return result
 }
 
 /**
- * Get the label breakdown by class
+ * Get the stats breakdown for all labels
  */
 export function getLabelStats (
   tasks: TaskType[]): LabelStats {
@@ -172,19 +185,20 @@ export function getLabelStats (
   const categories = config.categories
   const attributes = config.attributes
 
-  let result = initCategoryStats(categories, attributes)
+  const categoryStats = initCategoryStats(categories, attributes)
+  const attributeStats = initAttributeStats(attributes)
 
-  for (const task of tasks) {
-    for (const item of task.items) {
-      for (const label of Object.values(item.labels)) {
-        result = updateCategoryStats(
-          result, label, categories, attributes)
-      }
-    }
+  const items = _.flatMap(tasks, (task) => task.items)
+  const labels = _.flatMap(items, (item) => Object.values(item.labels))
+
+  for (const label of labels) {
+    updateCategoryStats(
+      categoryStats, label, categories, attributes)
   }
+
   return {
-    category: result,
-    attribute: {}
+    category: categoryStats,
+    attribute: attributeStats
   }
 }
 
@@ -200,7 +214,7 @@ interface CategoryStats {
   [name: string]: {
     /** the number of labels with the category */
     count: number
-    /** the counts for each attribute within the category */
+    /** the counts for each attribute within that category */
     attribute: AttributeStats
   }
 }
