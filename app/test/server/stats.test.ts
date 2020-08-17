@@ -119,8 +119,8 @@ beforeAll(() => {
       }
     },
     attribute: {
-      'Occluded': { false: 0, true: 0 },
-      'Traffic light color': { 'N/A': 0, 'G': 0, 'Y': 0, 'R': 0 }
+      'Occluded': { false: 2, true: 4 },
+      'Traffic light color': { 'N/A': 1, 'G': 1, 'Y': 3, 'R': 2 }
     }
   }
 })

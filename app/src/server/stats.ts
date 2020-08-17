@@ -194,6 +194,7 @@ export function getLabelStats (
   for (const label of labels) {
     updateCategoryStats(
       categoryStats, label, categories, attributes)
+    updateAttributeStats(attributeStats, label, attributes)
   }
 
   return {
