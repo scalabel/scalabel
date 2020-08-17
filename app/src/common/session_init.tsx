@@ -12,6 +12,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { makeSyncMiddleware } from './sync_middleware'
 import { Synchronizer } from './synchronizer'
+import { handleInvalidPage } from './util'
 
 /**
  * Main function for initiating the frontend session
@@ -20,9 +21,15 @@ import { Synchronizer } from './synchronizer'
 export function initSession (containerName: string): void {
   // Get params from url path. These uniquely identify a labeling task
   const searchParams = new URLSearchParams(window.location.search)
-  const taskIndex = parseInt(
-    searchParams.get(QueryArg.TASK_INDEX) as string, 10)
-  const projectName = searchParams.get(QueryArg.PROJECT_NAME) as string
+  const projectName = searchParams.get(QueryArg.PROJECT_NAME)
+  if (projectName === null) {
+    return handleInvalidPage()
+  }
+  const taskIndexParam = searchParams.get(QueryArg.TASK_INDEX)
+  let taskIndex = 0
+  if (taskIndexParam !== null) {
+    taskIndex = parseInt(taskIndexParam, 10)
+  }
   const devMode = searchParams.has(QueryArg.DEV_MODE)
 
   /**

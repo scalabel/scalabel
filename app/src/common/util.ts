@@ -3,6 +3,14 @@ import { ItemTypeName, LabelTypeName } from '../const/common'
 import { ActionPacketType } from '../types/message'
 
 /**
+ * Handle invalid page request
+ */
+export function handleInvalidPage (): void {
+  window.location.replace(window.location.origin)
+  return
+}
+
+/**
  * Get whether tracking is on
  * Also get the new item type
  */

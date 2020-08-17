@@ -3,5 +3,6 @@ http:
     port: 8686
 storage:
     data: "us-west-2:scalabel-unit-testing/data"
-    database: "s3"
+    type: "s3"
+    itemDir: "./"
 ...
