@@ -6,7 +6,7 @@ import { TaskType } from '../../src/types/state'
 let sampleTask1: TaskType
 let sampleTask2: TaskType
 let allTasks: TaskType[]
-let expectedClassificationStats: stats.ClassificationStats
+let expectedLabelStats: stats.LabelStats
 
 beforeAll(() => {
   const config = makers.makeTaskConfig({
@@ -94,28 +94,31 @@ beforeAll(() => {
   const itemlessTask = makers.makeTask({ config })
 
   allTasks = [sampleTask1, sampleTask2, itemlessTask]
-  expectedClassificationStats = {
-    'car': {
-      count: 2,
-      attributeCounts: {
-        'Occluded': { false: 2, true: 0 },
-        'Traffic light color': { 'N/A': 0, 'G': 0, 'Y': 1, 'R': 2 }
+  expectedLabelStats = {
+    category: {
+      'car': {
+        count: 2,
+        attribute: {
+          'Occluded': { false: 2, true: 0 },
+          'Traffic light color': { 'N/A': 0, 'G': 0, 'Y': 1, 'R': 2 }
+        }
+      },
+      'person': {
+        count: 3,
+        attribute: {
+          'Occluded': { false: 0, true: 3 },
+          'Traffic light color': { 'N/A': 1, 'G': 0, 'Y': 2, 'R': 0 }
+        }
+      },
+      'traffic light': {
+        count: 2,
+        attribute: {
+          'Occluded': { false: 1, true: 1 },
+          'Traffic light color': { 'N/A': 0, 'G': 1, 'Y': 1, 'R': 1 }
+        }
       }
     },
-    'person': {
-      count: 3,
-      attributeCounts: {
-        'Occluded': { false: 0, true: 3 },
-        'Traffic light color': { 'N/A': 1, 'G': 0, 'Y': 2, 'R': 0 }
-      }
-    },
-    'traffic light': {
-      count: 2,
-      attributeCounts: {
-        'Occluded': { false: 1, true: 1 },
-        'Traffic light color': { 'N/A': 0, 'G': 1, 'Y': 1, 'R': 1 }
-      }
-    }
+    attribute: {}
   }
 })
 
@@ -141,8 +144,8 @@ describe('Simple stat functions', () => {
   })
 
   test('Category counts', () => {
-    expect(stats.getClassificationStats(allTasks)).toStrictEqual(
-      expectedClassificationStats)
+    expect(stats.getLabelStats(allTasks)).toStrictEqual(
+      expectedLabelStats)
   })
 })
 
@@ -178,7 +181,7 @@ describe('Stat aggregation', () => {
       numItems: 5,
       numSubmittedTasks: 1,
       numTasks: 3,
-      classificationStats: expectedClassificationStats,
+      labelStats: expectedLabelStats,
       timestamp: constantDate
     })
   })
@@ -190,7 +193,7 @@ describe('Stat aggregation', () => {
       numItems: 0,
       numSubmittedTasks: 0,
       numTasks: 0,
-      classificationStats: {},
+      labelStats: { category: {}, attribute: {} },
       timestamp: constantDate
     })
   })

@@ -86,7 +86,7 @@ export function getNumSubmissions (tasks: TaskType[]) {
  * @param attributes list of possible attributes
  * @returns map of attribute counts initialized to 0
  */
-function initAttributeCount (attributes: Attribute[]): AttributeCounts {
+function initAttributeStats (attributes: Attribute[]): AttributeStats {
   const attributesByName = _.keyBy(attributes, (attribute) => attribute.name)
   return _.mapValues(attributesByName,
     (attribute) => {
@@ -109,15 +109,15 @@ function initAttributeCount (attributes: Attribute[]): AttributeCounts {
  * @param attributes list of possible attributes
  * @return map of category and attribute counts initialized to 0
  */
-function initClassificationStats (
+function initCategoryStats (
   categories: string[], attributes: Attribute[]):
-  ClassificationStats {
+  CategoryStats {
   const categoriesByName = _.keyBy(categories)
   return _.mapValues(categoriesByName,
     (_category) => {
       return {
         count: 0,
-        attributeCounts: initAttributeCount(attributes)
+        attribute: initAttributeStats(attributes)
       }
     })
 }
@@ -139,9 +139,9 @@ function getAttributeValue (attribute: Attribute, index: number) {
  * @param categories the list of possible categories
  * @param attributes the list of possible attributes
  */
-function updateClassificationStats (
-  stats: ClassificationStats, label: LabelType,
-  categories: string[], attributes: Attribute[]): ClassificationStats {
+function updateCategoryStats (
+  stats: CategoryStats, label: LabelType,
+  categories: string[], attributes: Attribute[]): CategoryStats {
   const result = stats
   for (const categoryIndex of label.category) {
     const categoryName = categories[categoryIndex]
@@ -152,7 +152,7 @@ function updateClassificationStats (
 
       for (const attributeValueIndex of label.attributes[attributeIndex]) {
         const value = getAttributeValue(attr, attributeValueIndex)
-        result[categoryName].attributeCounts[attr.name][value] += 1
+        result[categoryName].attribute[attr.name][value] += 1
       }
     }
   }
@@ -162,49 +162,57 @@ function updateClassificationStats (
 /**
  * Get the label breakdown by class
  */
-export function getClassificationStats (
-  tasks: TaskType[]): ClassificationStats {
+export function getLabelStats (
+  tasks: TaskType[]): LabelStats {
   if (tasks.length === 0) {
-    return {}
+    return { category: {}, attribute: {} }
   }
 
   const config = tasks[0].config
   const categories = config.categories
   const attributes = config.attributes
 
-  let result = initClassificationStats(categories, attributes)
+  let result = initCategoryStats(categories, attributes)
 
   for (const task of tasks) {
     for (const item of task.items) {
       for (const label of Object.values(item.labels)) {
-        result = updateClassificationStats(
+        result = updateCategoryStats(
           result, label, categories, attributes)
       }
     }
   }
-  return result
+  return {
+    category: result,
+    attribute: {}
+  }
 }
 
 /** the number of labels for each attribute type/value */
-interface AttributeCounts {
+interface AttributeStats {
   [name: string]: { [value: string]: number}
 }
 
 /**
- * Stats for a single category
+ * Stats for label counts by category
  */
 interface CategoryStats {
-  /** the number of labels with the category */
-  count: number
-  /** the counts for each attribute within the category */
-  attributeCounts: AttributeCounts
+  [name: string]: {
+    /** the number of labels with the category */
+    count: number
+    /** the counts for each attribute within the category */
+    attribute: AttributeStats
+  }
 }
 
 /**
- * Stats for all classification categories
+ * Stats for label counts by different metrics
  */
-export interface ClassificationStats {
-  [name: string]: CategoryStats
+export interface LabelStats {
+  /** counts for each  category */
+  category: CategoryStats
+  /** counts for each attribute */
+  attribute: AttributeStats
 }
 
 /**
@@ -221,8 +229,8 @@ interface ProjectStats {
   numSubmittedTasks: number
   /** the total number of tasks */
   numTasks: number
-  /** stats for the classification of the labels */
-  classificationStats: ClassificationStats
+  /** stats for the labels */
+  labelStats: LabelStats
   /** the time of retrieval for the stats */
   timestamp: number
 }
@@ -236,7 +244,7 @@ export function getProjectStats (tasks: TaskType[]): ProjectStats {
     numItems: getNumItems(tasks),
     numSubmittedTasks: getNumSubmissions(tasks),
     numTasks: tasks.length,
-    classificationStats: getClassificationStats(tasks),
+    labelStats: getLabelStats(tasks),
     timestamp: Date.now()
   }
 }
