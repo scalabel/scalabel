@@ -22,7 +22,6 @@ export const serverConfig: ServerConfig = {
     demo: false
   },
   redis: {
-    timeout: 3600,
     writebackTime: 300,
     writebackCount: 32,
     port: 6379

@@ -131,12 +131,6 @@ async function validateConfig (config: ServerConfig) {
     }
   }
 
-  // Redis validation
-  if (!(config.redis.writebackTime + 1.5 < config.redis.timeout)) {
-    throw new Error(`Redis timeForWrite must be at least 1.5 seconds earlier than redisTimeout
-      to ensure that write occurs before value is erased`)
-  }
-
   if (config.user.on) {
     validateCognitoConfig(config.cognito)
   }

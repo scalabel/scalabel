@@ -21,8 +21,6 @@ function isTempKey (key: string): boolean {
 export class RedisCache {
   /** the key value client */
   protected client: RedisClient
-  /** the timeout in seconds for flushing a value */
-  protected timeout: number
   /** after last update, waits this many seconds before writing to storage */
   protected writebackTime: number
   /** Cache writing limit before writing to storage */
@@ -34,7 +32,6 @@ export class RedisCache {
    * Create new store
    */
   constructor (config: RedisConfig, storage: Storage, client: RedisClient) {
-    this.timeout = config.timeout
     this.writebackTime = config.writebackTime
     this.writebackCount = config.writebackCount
     this.storage = storage
@@ -109,7 +106,6 @@ export class RedisCache {
 
   /**
    * Cache key value
-   * If the limit or timeout is 0, it means no limit or timeout
    * @param key
    * @param value
    */

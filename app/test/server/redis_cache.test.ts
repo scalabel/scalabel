@@ -54,14 +54,13 @@ describe('Test redis cache', () => {
   test('Writes back on timeout', async () => {
     const timeoutConfig = _.clone(config)
     timeoutConfig.redis.writebackTime = 0.2
-    timeoutConfig.redis.timeout = 2.0
     const store = new RedisCache(timeoutConfig.redis, storage, client)
 
     const key = 'testKey1'
     await store.set(key, 'testvalue')
 
     await checkFileCount()
-    await sleep((timeoutConfig.redis.timeout + 0.5) * 1000)
+    await sleep(1000)
     await checkFileWritten()
   })
 
