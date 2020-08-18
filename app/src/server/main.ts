@@ -62,11 +62,15 @@ function startHTTPServer (
   app.use(Endpoint.CALLBACK,
     new Callback(config).router)
 
-  // Set up post/get handlers
+  // Set up get and post handlers
   app.get(Endpoint.GET_PROJECT_NAMES, authMiddleWare,
     listeners.projectNameHandler.bind(listeners))
   app.get(Endpoint.EXPORT, authMiddleWare,
    listeners.getExportHandler.bind(listeners))
+  app.get(Endpoint.STATS, authMiddleWare,
+    listeners.statsHandler.bind(listeners))
+  app.get(Endpoint.DASHBOARD, authMiddleWare,
+   listeners.dashboardHandler.bind(listeners))
 
   app.post(Endpoint.POST_PROJECT, authMiddleWare, formidable(),
     listeners.postProjectHandler.bind(listeners))
@@ -74,8 +78,6 @@ function startHTTPServer (
     listeners.postProjectInternalHandler.bind(listeners))
   app.post(Endpoint.POST_TASKS, authMiddleWare, express.json(),
     listeners.postTasksHandler.bind(listeners))
-  app.post(Endpoint.DASHBOARD, authMiddleWare, express.json(),
-    listeners.dashboardHandler.bind(listeners))
   app.use(errorHandler(config))
 }
 
