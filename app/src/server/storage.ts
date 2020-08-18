@@ -1,11 +1,7 @@
 import * as path from 'path'
-
-export enum StorageStructure {
-  PROJECT = 'projects',
-  USER = 'users'
-}
-
-export const STORAGE_FOLDERS = [StorageStructure.PROJECT, StorageStructure.USER]
+import { MAX_HISTORIES } from '../const/storage'
+import Logger from './logger'
+import * as pathUtil from './path'
 
 /**
  * Abstract class for storage
@@ -91,6 +87,41 @@ export abstract class Storage {
       return this.load(key)
     }
     return ''
+  }
+
+  /**
+   * Save the key with history backup. The key is treated as a folder or prefix
+   * With this function, we can save MAX_HISTORIES in the folder indexed by key
+   * The goal is to be robust to possible failures when using disks or
+   * network drives. If database is used as the storage, this backup may not be
+   * useful.
+   * @param key
+   * @param value
+   */
+  public async saveWithBackup (key: string, value: string): Promise<void> {
+    const fileKey = pathUtil.getFileKey(key)
+    await this.save(fileKey, value)
+    // Check whether there are more than MAX_HISTORIES entries in the folder
+    // If so, delete the old ones
+    const keys = await this.listKeys(key, false)
+    for (let i = 0; i < keys.length - MAX_HISTORIES; i += 1) {
+      await this.delete(keys[i] + this.keyExt())
+    }
+    Logger.info(`Saving ${fileKey} and ` +
+      `deleting ${Math.max(keys.length - MAX_HISTORIES, 0)} historical keys`)
+  }
+
+  /**
+   * Get the value from
+   * @param key
+   */
+  public async getWithBackup (key: string): Promise<string | null> {
+    const keys = await this.listKeys(key, false)
+    if (keys.length > 0) {
+      return this.load(keys[keys.length - 1])
+    } else {
+      return null
+    }
   }
 
   /**

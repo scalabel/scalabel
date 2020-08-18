@@ -2,8 +2,8 @@ import moment from 'moment'
 import * as os from 'os'
 import * as path from 'path'
 import { index2str } from '../common/util'
+import { StorageStructure } from '../const/storage'
 import { BotData } from '../types/message'
-import { StorageStructure } from './storage'
 
 /**
  * Converts task id to name of the room for that id

@@ -5,8 +5,8 @@ import { convertStateToExport } from '../../src/server/export'
 import { FileStorage } from '../../src/server/file_storage'
 import { getTestDir } from '../../src/server/path'
 import { ProjectStore } from '../../src/server/project_store'
+import { RedisCache } from '../../src/server/redis_cache'
 import { RedisClient } from '../../src/server/redis_client'
-import { RedisStore } from '../../src/server/redis_store'
 import {
   CreationForm, FormFileData, Project
 } from '../../src/types/project'
@@ -36,7 +36,7 @@ beforeAll(() => {
   dataDir = getTestDir('create-project-data')
   const storage = new FileStorage(dataDir)
   const client = new RedisClient(serverConfig.redis)
-  const redisStore = new RedisStore(serverConfig.redis, storage, client)
+  const redisStore = new RedisCache(serverConfig.redis, storage, client)
   projectStore = new ProjectStore(storage, redisStore)
 })
 

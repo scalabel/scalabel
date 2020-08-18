@@ -7,9 +7,9 @@ import { serverConfig } from '../../src/server/defaults'
 import { FileStorage } from '../../src/server/file_storage'
 import { Hub } from '../../src/server/hub'
 import { ProjectStore } from '../../src/server/project_store'
+import { RedisCache } from '../../src/server/redis_cache'
 import { RedisClient } from '../../src/server/redis_client'
 import { RedisPubSub } from '../../src/server/redis_pub_sub'
-import { RedisStore } from '../../src/server/redis_store'
 import { UserManager } from '../../src/server/user_manager'
 import { updateState } from '../../src/server/util'
 import {
@@ -62,7 +62,7 @@ beforeAll(() => {
 
   mockStorage = new FileStorage('fakeDataDir')
   const client = new RedisClient(serverConfig.redis)
-  const redisStore = new RedisStore(serverConfig.redis, mockStorage, client)
+  const redisStore = new RedisCache(serverConfig.redis, mockStorage, client)
   mockPubSub = new RedisPubSub(client)
   mockProjectStore = new ProjectStore(mockStorage, redisStore)
   mockUserManager = new UserManager(mockProjectStore)
@@ -142,7 +142,7 @@ describe('Test hub functionality', () => {
     }
     const newState = updateState(getInitialState(sessionId), [action])
     expect(mockProjectStore.saveState).toBeCalledWith(newState, projectName,
-      taskId, newMetadata, 1)
+      taskId, newMetadata)
 
     // Test that actions were broadcast correctly
     const newAction = _.cloneDeep(action)

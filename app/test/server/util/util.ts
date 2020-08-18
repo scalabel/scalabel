@@ -2,10 +2,10 @@ import * as fs from 'fs-extra'
 import _ from 'lodash'
 import * as path from 'path'
 import { addBox2dLabel } from '../../../src/action/box2d'
+import { StorageStructure } from '../../../src/const/storage'
 import { makeItem,
   makeSensor, makeState, makeTask } from '../../../src/functional/states'
 import { parseConfig } from '../../../src/server/config'
-import { StorageStructure } from '../../../src/server/storage'
 import { ServerConfig } from '../../../src/types/config'
 import { RectType, State, TaskType, Vector3Type } from '../../../src/types/state'
 

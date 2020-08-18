@@ -1,12 +1,16 @@
 import { StorageType } from '../const/config'
 
 export interface RedisConfig {
-  /** timeout (seconds) for clearing value from redis cache */
-  timeout: number
-  /** write to disk after this time interval (seconds) since last update */
+  /**
+   * Write to disk after this time interval (seconds) since last update.
+   * If there is a new update, the countdown will restart.
+   */
   writebackTime: number
-  /** write to disk every time this number of actions occurs */
-  writebackActions: number
+  /**
+   * Write to disk every time this number of saving (setting) to redis on
+   * a key.
+   */
+  writebackCount: number
   /** Port that redis runs on */
   port: number
 }

@@ -5,6 +5,7 @@ import { createServer } from 'http'
 import socketio from 'socket.io'
 import 'source-map-support/register'
 import { Endpoint } from '../const/connection'
+import { STORAGE_FOLDERS, StorageStructure } from '../const/storage'
 import { removeListItems } from '../functional/util'
 import { ServerConfig } from '../types/config'
 import { BotManager } from './bot_manager'
@@ -17,10 +18,10 @@ import auth from './middleware/cognitoAuth'
 import errorHandler from './middleware/errorHandler'
 import { getAbsSrcPath, getRedisConf, HTML_DIRS } from './path'
 import { ProjectStore } from './project_store'
+import { RedisCache } from './redis_cache'
 import { RedisClient } from './redis_client'
 import { RedisPubSub } from './redis_pub_sub'
-import { RedisStore } from './redis_store'
-import { Storage, STORAGE_FOLDERS, StorageStructure } from './storage'
+import { Storage } from './storage'
 import { UserManager } from './user_manager'
 import { makeStorage } from './util'
 
@@ -185,7 +186,7 @@ async function main () {
    * Need separate clients for different roles
    */
   const cacheClient = new RedisClient(config.redis)
-  const redisStore = new RedisStore(config.redis, storage, cacheClient)
+  const redisStore = new RedisCache(config.redis, storage, cacheClient)
   const publisher = makeRedisPubSub(config)
   const subscriber = makeRedisPubSub(config)
 

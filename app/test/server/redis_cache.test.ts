@@ -3,18 +3,17 @@ import _ from 'lodash'
 import { index2str } from '../../src/common/util'
 import { FileStorage } from '../../src/server/file_storage'
 import { getFileKey, getRedisMetaKey, getTestDir } from '../../src/server/path'
+import { RedisCache } from '../../src/server/redis_cache'
 import { RedisClient } from '../../src/server/redis_client'
-import { RedisStore } from '../../src/server/redis_store'
 import { ServerConfig } from '../../src/types/config'
 import { StateMetadata } from '../../src/types/project'
 import { sleep } from '../project/util'
 import { getTestConfig } from './util/util'
 
-let defaultStore: RedisStore
+let defaultStore: RedisCache
 let storage: FileStorage
 let dataDir: string
 let config: ServerConfig
-let metadataString: string
 let client: RedisClient
 let numWrites: number
 
@@ -23,8 +22,7 @@ beforeAll(async () => {
   dataDir = getTestDir('test-data-redis')
   storage = new FileStorage(dataDir)
   client = new RedisClient(config.redis)
-  defaultStore = new RedisStore(config.redis, storage, client)
-  metadataString = makeMetadata(1)
+  defaultStore = new RedisCache(config.redis, storage, client)
   // NumWrites used as a counter across all tests that spawn files
   numWrites = 0
 })
@@ -40,8 +38,7 @@ describe('Test redis cache', () => {
     const values = _.range(5).map((v) => `value${v}`)
 
     for (let i = 0; i < 5; i++) {
-      await defaultStore.setExWithReminder(
-        keys[i], values[i], metadataString, 1)
+      await defaultStore.set(keys[i], values[i])
       const value = await defaultStore.get(keys[i])
       expect(value).toBe(values[i])
     }
@@ -57,38 +54,39 @@ describe('Test redis cache', () => {
   test('Writes back on timeout', async () => {
     const timeoutConfig = _.clone(config)
     timeoutConfig.redis.writebackTime = 0.2
-    timeoutConfig.redis.timeout = 2.0
-    const store = new RedisStore(timeoutConfig.redis, storage, client)
+    const store = new RedisCache(timeoutConfig.redis, storage, client)
 
     const key = 'testKey1'
-    await store.setExWithReminder(key, 'testvalue', metadataString, 1)
+    await store.set(key, 'testvalue')
 
     await checkFileCount()
-    await sleep((timeoutConfig.redis.timeout + 0.5) * 1000)
+    await sleep(1000)
     await checkFileWritten()
   })
 
   test('Writes back after action limit with 1 action at a time', async () => {
     const actionConfig = _.clone(config)
-    actionConfig.redis.writebackActions = 5
-    const store = new RedisStore(actionConfig.redis, storage, client)
+    actionConfig.redis.writebackCount = 5
+    const store = new RedisCache(actionConfig.redis, storage, client)
 
     const key = 'testKey2'
     for (let i = 0; i < 4; i++) {
-      await store.setExWithReminder(key, `value${i}`, metadataString, 1)
+      await store.set(key, `value${i}`)
       // Make sure no new files are created yet
       await checkFileCount()
     }
-    await store.setExWithReminder(key, 'value4', metadataString, 1)
+    await store.set(key, 'value4')
     await checkFileWritten()
   })
 
   test('Writes back after action limit with multi action packet', async () => {
     const actionConfig = _.clone(config)
-    actionConfig.redis.writebackActions = 5
-    const store = new RedisStore(actionConfig.redis, storage, client)
+    actionConfig.redis.writebackCount = 5
+    const store = new RedisCache(actionConfig.redis, storage, client)
     await checkFileCount()
-    await store.setExWithReminder('key', 'value', metadataString, 5)
+    for (let i = 0; i < 5; i += 1) {
+      await store.set('key', 'value')
+    }
     await checkFileWritten()
   })
 
@@ -96,7 +94,7 @@ describe('Test redis cache', () => {
     const keys = _.range(5).map((v) => `test${v}`)
     const values = _.range(5).map((v) => `value${v}`)
 
-    await defaultStore.setAtomic(keys, values, 60)
+    await defaultStore.setMulti(keys, values)
 
     for (let i = 0; i < 5; i++) {
       const value = await defaultStore.get(keys[i])
@@ -109,8 +107,9 @@ describe('Test redis cache', () => {
     const values = _.range(5).map((v) => `value${v}`)
     const metadata = _.range(5).map((v) => makeMetadata(v))
     for (let i = 0; i < 5; i++) {
-      await defaultStore.setExWithReminder(keys[i], values[i], metadata[i], 1)
+      await defaultStore.set(keys[i], values[i])
       const metakey = getRedisMetaKey(keys[i])
+      await defaultStore.set(metakey, metadata[i])
       const metavalue = await defaultStore.get(metakey)
       expect(metavalue).toBe(metadata[i])
     }
@@ -121,8 +120,7 @@ describe('Test redis cache', () => {
     const values = _.range(5).map((v) => `value${v}`)
 
     for (let i = 0; i < 5; i++) {
-      await defaultStore.setExWithReminder(
-        keys[i], values[i], metadataString, 1)
+      await defaultStore.set(keys[i], values[i])
       const fileKey = getFileKey(keys[i])
       await storage.save(fileKey, values[i])
       await defaultStore.del(keys[i])

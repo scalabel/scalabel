@@ -1,12 +1,13 @@
 import _ from 'lodash'
 import { filterXSS } from 'xss'
+import { StorageStructure } from '../const/storage'
 import { makeItemStatus, makeState } from '../functional/states'
 import { Project, StateMetadata, UserData, UserMetadata } from '../types/project'
 import { State, TaskType } from '../types/state'
 import Logger from './logger'
 import * as path from './path'
-import { RedisStore } from './redis_store'
-import { Storage, StorageStructure } from './storage'
+import { RedisCache } from './redis_cache'
+import { Storage } from './storage'
 import {
   getPolicy, makeUserData, makeUserMetadata, safeParseJSON } from './util'
 
@@ -16,11 +17,11 @@ import {
  */
 export class ProjectStore {
   /** the redis store */
-  protected redisStore: RedisStore
+  protected redisStore: RedisCache
   /** the permanent storage */
   protected storage: Storage
 
-  constructor (storage: Storage, redisStore: RedisStore) {
+  constructor (storage: Storage, redisStore: RedisCache) {
     this.storage = storage
     this.redisStore = redisStore
   }
@@ -32,10 +33,11 @@ export class ProjectStore {
    */
   public async save (
     key: string, value: string,
-    cache= false, metadata= '', numActionsSaved= 1) {
+    cache= false, metadata= '') {
     if (cache) {
-      await this.redisStore.setExWithReminder(
-        key, value, metadata, numActionsSaved)
+      const metaKey = path.getRedisMetaKey(key)
+      await this.redisStore.set(key, value)
+      await this.redisStore.set(metaKey, metadata)
     } else {
       await this.storage.save(key, value)
     }
@@ -46,11 +48,11 @@ export class ProjectStore {
    */
   public async saveState (
     state: State, projectName: string,
-    taskId: string, stateMetadata: StateMetadata, numActionsSaved: number) {
+    taskId: string, stateMetadata: StateMetadata) {
     const stringState = JSON.stringify(state)
     const stringMetadata = JSON.stringify(stateMetadata)
     const saveDir = path.getSaveDir(projectName, taskId)
-    await this.save(saveDir, stringState, true, stringMetadata, numActionsSaved)
+    await this.save(saveDir, stringState, true, stringMetadata)
   }
 
   /**

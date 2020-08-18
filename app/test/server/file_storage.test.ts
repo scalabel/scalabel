@@ -1,8 +1,8 @@
 import * as fs from 'fs-extra'
 import { index2str } from '../../src/common/util'
+import { STORAGE_FOLDERS, StorageStructure } from '../../src/const/storage'
 import { FileStorage } from '../../src/server/file_storage'
 import { getProjectKey, getTaskKey, getTestDir } from '../../src/server/path'
-import { STORAGE_FOLDERS, StorageStructure } from '../../src/server/storage'
 import { makeProjectDir } from './util/util'
 
 let storage: FileStorage
