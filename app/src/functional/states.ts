@@ -4,6 +4,7 @@ import { uid } from '../common/uid'
 import * as types from '../const/common'
 import { ItemExport, LabelExport } from '../types/bdd'
 import {
+  Attribute,
   ConfigType, ConnectionStatus, CubeType,
   ExtrinsicsType, HomographyViewerConfigType,
   IdType,
@@ -344,6 +345,21 @@ export function makeDefaultViewerConfig (
   return null
 }
 
+/**
+ * Make a default attribute
+ */
+export function makeAttribute (params: Partial<Attribute> = {}): Attribute {
+  return {
+    toolType: types.AttributeToolType.SWITCH,
+    name: '',
+    values: [],
+    tagText: '',
+    tagPrefix: '',
+    tagSuffixes: [],
+    buttonColors: [],
+    ...params
+  }
+}
 /**
  * Initialize an item state
  * @param {{}} params

@@ -11,7 +11,7 @@ import { STORAGE_FOLDERS } from '../const/storage'
 import { BaseAction } from '../types/action'
 import { ItemExport } from '../types/bdd'
 import { CreationForm, UserData, UserMetadata } from '../types/project'
-import { Label2DTemplateType, State, TaskType } from '../types/state'
+import { Label2DTemplateType, State } from '../types/state'
 import { FileStorage } from './file_storage'
 import Logger from './logger'
 import { S3Storage } from './s3_storage'
@@ -161,24 +161,6 @@ export function getPolicy (
     default:
       return [policyTypes, labelTypes]
   }
-}
-
-/**
- * Returns [numLabeledItems, numLabels]
- * numLabeledItems is the number of items with at least 1 label in the task
- * numLabels is the total number of labels in the task
- */
-export function countLabels (task: TaskType): [number, number] {
-  let numLabeledItems = 0
-  let numLabels = 0
-  for (const item of task.items) {
-    const currNumLabels = Object.keys(item.labels).length
-    if (item.labels && currNumLabels > 0) {
-      numLabeledItems++
-      numLabels += currNumLabels
-    }
-  }
-  return [numLabeledItems, numLabels]
 }
 
 /**

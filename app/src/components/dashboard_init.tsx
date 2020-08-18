@@ -19,10 +19,7 @@ export function initDashboard (vendor?: boolean) {
   if (projectName === null) {
     return handleInvalidPage()
   }
-  // Send the request to the back end
-  const request = JSON.stringify({
-    name: projectName
-  })
+
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -37,11 +34,11 @@ export function initDashboard (vendor?: boolean) {
     }
   }
 
-  xhr.open('POST', Endpoint.DASHBOARD)
+  xhr.open('GET', `${Endpoint.DASHBOARD}?name=${projectName}`)
   xhr.setRequestHeader('Content-Type', 'application/json')
   const auth = getAuth()
   if (auth) {
     xhr.setRequestHeader('Authorization', auth)
   }
-  xhr.send(request)
+  xhr.send()
 }
