@@ -30,6 +30,7 @@ jobs:
         run: |
           python3 -m pylint scalabel
           python3 -m mypy --strict scalabel
+          python3 -m black --check scalabel
 
   nodejs:
     runs-on: ubuntu-latest

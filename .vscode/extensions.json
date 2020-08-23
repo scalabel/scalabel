@@ -13,9 +13,9 @@
         "ms-azuretools.vscode-docker",
         "ms-python.python",
         "ms-vscode.cpptools",
-        "ms-vscode.Go",
         "ms-vscode.vscode-typescript-tslint-plugin",
         "wayou.vscode-todo-highlight",
-        "Zignd.html-css-class-completion"
+        "Zignd.html-css-class-completion",
+        "github.vscode-pull-request-github"
     ]
 }
