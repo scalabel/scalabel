@@ -1,20 +1,21 @@
-""" Dummy interface with the segmentation model """
+"""Dummy interface with the segmentation model."""
 from typing import List
 import numpy as np
 from .seg_base import SegBase
 
 
 class SegDummy(SegBase):
-    """ Class for segmentation dummy interface """
+    """Dummy segmentation interface."""
 
     def __init__(self, _home: str) -> None:
+        """Initialize."""
         # init method for consistent API
         return
 
     def convert_rect_to_poly(
         self, imgs: List[np.ndarray], bboxes: List[List[float]]
     ) -> List[List[List[float]]]:
-        """ predict rectangles -> dummy polygons """
+        """Predict rectangles -> dummy polygons."""
         output: List[List[List[float]]] = []
         for bbox in bboxes:
             x0, y0, w, h = bbox

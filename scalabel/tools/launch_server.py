@@ -1,4 +1,4 @@
-""" launches node and redis on a single instance with one node process """
+"""launches node and redis on a single instance with one node process."""
 import subprocess
 import argparse
 import logging
@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)
 
 
 def launch() -> None:
-    """ main process launcher """
+    """Launch scalabel processes."""
     logger.info("Launching Scalabel server")
     parser = argparse.ArgumentParser(
         description="Launch the server on one machine."

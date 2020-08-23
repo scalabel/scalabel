@@ -1,4 +1,4 @@
-"""
+"""Prepare the data folder and list.
 
 Convert videos or images to a data folder and an image list that can be
 directly used for creating scalabel projects
@@ -17,7 +17,7 @@ import yaml
 
 
 def parse_arguments() -> argparse.Namespace:
-    "parse arguments"
+    """Parse arguments."""
     parser = argparse.ArgumentParser(description="prepare data")
     parser.add_argument(
         "--input",
@@ -59,14 +59,14 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def check_video_format(name: str) -> bool:
-    "only accept mov, avi, and mp4"
+    """Accept only mov, avi, and mp4."""
     if name.endswith((".mov", ".avi", ".mp4")):
         return True
     return False
 
 
 def prepare_data(args: argparse.Namespace) -> Union[str, None]:
-    "break one or a list of videos into frames"
+    """Break one or a list of videos into frames."""
     if args.s3:
         s3_setup(args)
 
@@ -140,10 +140,7 @@ def prepare_data(args: argparse.Namespace) -> Union[str, None]:
 
 
 def upload_files_to_s3(args: argparse.Namespace) -> None:
-    """send the files to s3
-
-        :param args: bla x
-    """
+    """Send the files to s3."""
     s3 = boto3.resource("s3")
     bn = args.bucket_name
     file_list = glob.glob(join(args.tar_dir, "*"))
@@ -165,7 +162,7 @@ def upload_files_to_s3(args: argparse.Namespace) -> None:
 
 
 def s3_setup(args: argparse.Namespace) -> None:
-    """optionaly store the data on s3"""
+    """Store optionaly the data on s3."""
     args.bucket_name, args.s3_folder = (
         args.s3.split("/")[0],
         "/".join(args.s3.split("/")[1:]),
@@ -182,7 +179,7 @@ def s3_setup(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    """ main function """
+    """Run main function."""
     args = parse_arguments()
     if args.tar_dir:
         if args.scratch and os.path.exists(args.tar_dir):
