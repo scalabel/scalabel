@@ -23,7 +23,7 @@ opencv-python>=4.2.0.34
 Pillow>=7.1.1
 plyfile
 psutil>=5.7.0
-pycodestyle
+pydocstyle
 pylint
 pyparsing>=2.4.7
 python-dateutil>=2.8.1

@@ -1,4 +1,4 @@
-""" Interface with the segmentation model """
+"""Interface with the segmentation model."""
 from typing import List
 import os
 import warnings
@@ -8,9 +8,10 @@ from .seg_base import SegBase
 
 
 class PolyrnnAdapter(SegBase):
-    """Class to interface with polyrnn model"""
+    """Class to interface with polyrnn model."""
 
     def __init__(self, home: str) -> None:
+        """Initialize."""
         model_dir = os.path.join(home, "experimental", "fast-seg-label")
         exp = os.path.join(
             model_dir, "polyrnn_scalabel", "Experiments", "tool.json"
@@ -23,6 +24,7 @@ class PolyrnnAdapter(SegBase):
     def convert_rect_to_poly(
         self, imgs: List[np.ndarray], bboxes: List[List[float]]
     ) -> List[List[List[float]]]:
+        """Convert rectangles to polygons."""
         # marshal into segmentation codebase's format
         inputs = []
         for (img, bbox) in zip(imgs, bboxes):

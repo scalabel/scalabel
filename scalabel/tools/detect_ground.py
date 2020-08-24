@@ -1,4 +1,5 @@
-"""
+"""Detecting ground in point clouds.
+
 Script for detecting ground in point clouds and writing it back to the PLY file
 """
 
@@ -30,10 +31,10 @@ def estimate_ground_plane(
     max_normal_deviation: float,
     inlier_cutoff: float = 0.15,
 ) -> GroundOutputType:
-    """
+    """Detect ground plane in the point cloud using RANSAC.
+
     Detect ground in points by using RANSAC to find largest plane
     in point cloud that has normal close to what is expected
-    TODO clean the return type. We are not supposed to use Any
     """
     assert 0 < sample_size < 1
     assert len(dist_cutoff) == 2
@@ -102,9 +103,7 @@ def estimate_ground_plane(
 
 
 def main() -> None:
-    """
-    Main function
-    """
+    """Run."""
     parser = argparse.ArgumentParser(
         description="Find ground plane and write it to PLY file"
     )

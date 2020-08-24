@@ -1,4 +1,4 @@
-""" Endpoints for model prediction """
+"""Endpoints for model prediction."""
 import argparse
 import io
 import logging
@@ -20,12 +20,12 @@ except ImportError:
 
 
 def homepage() -> str:
-    """ hello world test """
+    """Test hello world."""
     return "Test server for segmentation\n"
 
 
 def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
-    """ load image for each url and cache results in a dictionary """
+    """Load image for each url and cache results in a dictionary."""
     url_to_img = {}
     for url in urls:
         if url not in url_to_img:
@@ -36,7 +36,7 @@ def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
 
 
 def predict_poly(seg_model: SegBase) -> Response:
-    """ predict rect -> polygon """
+    """Predict rect -> polygon."""
     logger = logging.getLogger(__name__)
     logger.info("Hitting prediction endpoint")
     start_time = time.time()
@@ -68,12 +68,12 @@ def predict_poly(seg_model: SegBase) -> Response:
 
 
 def refine_poly() -> str:
-    """ refine poly -> poly """
+    """Refine poly -> poly."""
     return "This method is not yet implemented\n"
 
 
 def create_app() -> Flask:
-    """ set up the flask app """
+    """Set up the flask app."""
     app = Flask(__name__)
     home = os.path.join("scalabel", "bot")
 
@@ -91,7 +91,7 @@ def create_app() -> Flask:
 
 
 def launch() -> None:
-    """ main process launcher """
+    """Launch processes."""
     log_f = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
     logging.basicConfig(format=log_f)
     logger = logging.getLogger(__name__)
