@@ -114,6 +114,7 @@ export class Label3DHandler {
       [...Session.label3dList.updatedLabels.values()], this._tracking)
     Session.label3dList.clearUpdatedLabels()
     // Set current label as selected label
+    // debugger;
     if (
       this._mouseDownOnSelection &&
       this._highlightedLabel !== Session.label3dList.selectedLabel
@@ -196,6 +197,7 @@ export class Label3DHandler {
           Session.label3dList.addUpdatedLabel(label)
           commitLabels(
             [...Session.label3dList.updatedLabels.values()], this._tracking)
+          //debugger;
           Session.label3dList.clearUpdatedLabels()
           return true
         }
@@ -286,6 +288,7 @@ export class Label3DHandler {
 
     if (intersection) {
       const object = intersection.object
+      // debugger;
       const label = Session.label3dList.getLabelFromRaycastedObject3D(object)
 
       if (label) {

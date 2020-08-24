@@ -187,6 +187,7 @@ export class Cube3D extends Shape3D {
     cube.orientation =
       (new Vector3D()).fromThree(worldOrientation.toVector3()).toState()
     cube.anchorIndex = this._anchorIndex
+
     return cube
   }
 
@@ -221,6 +222,7 @@ export class Cube3D extends Shape3D {
     for (const face of geometry.faces) {
       face.color.fromArray(this._color)
     }
+    //debugger;
     super.updateState(shape, id)
     const cube = shape as CubeType
     this.position.copy((new Vector3D()).fromState(cube.center).toThree())
@@ -228,6 +230,8 @@ export class Cube3D extends Shape3D {
       (new Vector3D()).fromState(cube.orientation).toThreeEuler()
     )
     this.scale.copy((new Vector3D()).fromState(cube.size).toThree())
+    // Also update the _cubeShape
+    this._cubeShape = cube
   }
 
   /**

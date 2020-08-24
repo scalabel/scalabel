@@ -157,6 +157,7 @@ export function addLabelsToItem (
   labels: LabelType[],
   shapes: ShapeType[][] = []
 ): actionTypes.AddLabelsAction {
+  // debugger;
   return {
     ...makeBaseAction(actionConsts.ADD_LABELS),
     itemIndices: [itemIndex],

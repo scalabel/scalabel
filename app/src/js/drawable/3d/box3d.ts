@@ -244,9 +244,11 @@ export class Box3D extends Label3D {
     super.updateState(state, itemIndex, labelId)
     this._shape.color = this._color
     const label = state.task.items[itemIndex].labels[labelId]
+    //debugger;
     this._shape.updateState(
       state.task.items[itemIndex].shapes[label.shapes[0]],
       label.shapes[0]
     )
+    //debugger;
   }
 }

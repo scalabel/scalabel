@@ -365,9 +365,11 @@ export function commitLabels (
       const shapeStates = label.shapes()
       shapes.push(shapeStates)
     }
+    //debugger;
     actions.push(addLabelsToItem(newLabels[0].item, labels, shapes))
   }
 
+  // debugger;
   actions.push(commitShapesToState(updatedShapes))
   actions.push(commitLabelsToState(updatedLabels))
   Session.label3dList.clearUpdatedLabels()

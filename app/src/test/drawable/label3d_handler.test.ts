@@ -174,11 +174,14 @@ test('Move axis aligned 3d bbox along z axis', () => {
     getCurrentViewerConfig(state, viewerId) as PointCloudViewerConfigType
   updateThreeCameraAndRenderer(viewerConfig, camera)
 
+  //debugger;
   const spaceEvent = new KeyboardEvent('keydown', { key: ' ' })
   label3dHandler.onKeyDown(spaceEvent)
+  //debugger;
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
+  //debugger;
   const labelId = Object.keys(state.task.items[0].labels)[0]
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
@@ -222,8 +225,10 @@ test('Move axis aligned 3d bbox along z axis', () => {
   Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseDown(0, 0.15)
   label3dHandler.onMouseMove(0, 0.5)
+  //debugger;
   Session.label3dList.onDrawableUpdate()
   label3dHandler.onMouseUp()
+  //debugger;
 
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
@@ -493,13 +498,13 @@ test('Scale axis aligned 3d bbox along all axes', () => {
 })
 
 test('Rotate axis aligned 3d bbox around all axes', () => {
-  const labelIds: IdType[] = []
   // Set camera to each of 6 axis aligned locations around cube
   // 0 = +x, 1 = -x, 2 = +y, 3 = -y, 4= +z, 5 = -z
   for (let camLoc = 0; camLoc < 6; camLoc++) {
     // From each axis aligned view there is vertical and horizontal axis.
     // Try positive and negative directions. 0 = +v, 1 = -v, 2 = +h, 3 = -h
     for (let axis = 0; axis < 4; axis++) {
+      const labelIds: IdType[] = []
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
       camera.aspect = 1
 

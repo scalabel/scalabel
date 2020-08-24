@@ -123,6 +123,7 @@ export function getCategory (state: State, itemIndex: number, labelId: IdType) {
  */
 export function getShape (state: State, itemIndex: number,
                           labelId: IdType, shapeIndex: number): ShapeType {
+  // debugger;
   const item = state.task.items[itemIndex]
   const shapeId = item.labels[labelId].shapes[shapeIndex]
   return item.shapes[shapeId]
