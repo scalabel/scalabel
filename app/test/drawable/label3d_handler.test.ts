@@ -493,13 +493,14 @@ test('Scale axis aligned 3d bbox along all axes', () => {
 })
 
 test('Rotate axis aligned 3d bbox around all axes', () => {
-  const labelIds: IdType[] = []
   // Set camera to each of 6 axis aligned locations around cube
   // 0 = +x, 1 = -x, 2 = +y, 3 = -y, 4= +z, 5 = -z
   for (let camLoc = 0; camLoc < 6; camLoc++) {
     // From each axis aligned view there is vertical and horizontal axis.
     // Try positive and negative directions. 0 = +v, 1 = -v, 2 = +h, 3 = -h
     for (let axis = 0; axis < 4; axis++) {
+      // Re-initialize labelIds (no labels from previous round).
+      const labelIds: IdType[] = []
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
       camera.aspect = 1
 

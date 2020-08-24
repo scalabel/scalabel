@@ -301,7 +301,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     const viewerConfig = this.state.user.viewerConfigs[this.props.id]
     const sensorId = viewerConfig.sensor
     for (const key of Object.keys(item.labels)) {
-      const id = Number(key)
+      const id = key
       if (item.labels[id].sensors.includes(sensorId)) {
         const label = Session.label3dList.get(id)
         if (label) {
