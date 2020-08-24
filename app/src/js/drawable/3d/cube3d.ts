@@ -222,7 +222,6 @@ export class Cube3D extends Shape3D {
     for (const face of geometry.faces) {
       face.color.fromArray(this._color)
     }
-    //debugger;
     super.updateState(shape, id)
     const cube = shape as CubeType
     this.position.copy((new Vector3D()).fromState(cube.center).toThree())

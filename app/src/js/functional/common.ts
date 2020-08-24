@@ -176,7 +176,6 @@ function addLabelsToItem (
     _.zipObject(newShapeIds, newShapes)
   )
   item = updateObject(item, { labels, shapes: allShapes })
-  // debugger;
   taskStatus = updateObject(
     taskStatus,
     {
@@ -206,7 +205,6 @@ function addLabelstoItems (
     taskStatus = newStatus
     allNewLabels.push(...newLabels)
   })
-  // debugger;
   return [items, allNewLabels, taskStatus]
 }
 
@@ -234,7 +232,6 @@ export function addLabels (
     for (const label of newLabels) {
       if (label.item === user.select.item) {
         if (label.children.length === 0) { // Skip virtual parent label
-          // debugger;
           const selectedLabels: { [index: number]: IdType[] } = {}
           selectedLabels[user.select.item] = [label.id]
           user = updateUserSelect(user, {

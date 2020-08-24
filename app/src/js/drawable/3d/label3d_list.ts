@@ -173,7 +173,6 @@ export class Label3DList {
     // Reset control & scene
     this._scene.children = [this.control]
 
-    //debugger;
     // Update & create labels
     for (const key of Object.keys(item.labels)) {
       const id = key
@@ -198,7 +197,6 @@ export class Label3DList {
         newLabels[id].selected = false
       }
     }
-    //debugger;
 
     // Assign parents
     for (const key of Object.keys(newLabels)) {
@@ -245,7 +243,6 @@ export class Label3DList {
   public getLabelFromRaycastedObject3D (
     obj: THREE.Object3D
   ): Label3D | null {
-    // debugger;
     // Fetch the ids in this._raycastableShapes
     const shapeIdList: number[] = []
     for (const shape of this._raycastableShapes) {
