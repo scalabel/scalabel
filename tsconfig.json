@@ -16,7 +16,6 @@
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
-        "allowUnreachableCode": true, // [Add by julin for debugging]
     },
     "include": [
         "app/src"
