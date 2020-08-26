@@ -1,7 +1,8 @@
 """Prepare the data folder and list.
 
 Convert videos or images to a data folder and an image list that can be
-directly used for creating scalabel projects
+directly used for creating scalabel projects. Assume all the images are in
+`.jpg` format.
 """
 from __future__ import annotations
 import argparse
@@ -11,14 +12,18 @@ from os.path import join
 import shutil
 from subprocess import Popen, PIPE, STDOUT
 from typing import Union
+from dataclasses import dataclass
 
 import boto3
+from tqdm import tqdm
 import yaml
+
+from scalabel.common.logger import logger
 
 
 def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
-    parser = argparse.ArgumentParser(description="prepare data")
+    parser = argparse.ArgumentParser(description="Prepare data")
     parser.add_argument(
         "--input",
         "-i",
@@ -27,11 +32,11 @@ def parse_arguments() -> argparse.Namespace:
         help="path to the video/images to be processed",
     )
     parser.add_argument(
-        "--tar-dir",
-        "-t",
+        "--out-dir",
+        "-o",
         type=str,
         default="",
-        help="target folder to save the frames",
+        help="output folder to save the frames",
     )
     parser.add_argument(
         "--fps", "-f", type=int, default=5, help="the target frame rate."
@@ -42,16 +47,33 @@ def parse_arguments() -> argparse.Namespace:
 
     # Specify S3 bucket path
     parser.add_argument(
-        "--s3", type=str, default="", help="bucket-name/subfolder"
+        "--s3",
+        type=str,
+        default="",
+        help="Specify S3 bucket path in bucket-name/subfolder",
     )
 
     # Output webroot. Ignore it if you are using s3
     parser.add_argument(
-        "--web-root",
-        "-w",
+        "--url-root",
         type=str,
         default="",
-        help="webroot used as prefix in the yaml file",
+        help="Url root used as prefix in the yaml file. "
+        "Ignore it if you are using s3.",
+    )
+
+    parser.add_argument(
+        "--start-time",
+        type=int,
+        default=0,
+        help="The starting time of extracting frames in seconds.",
+    )
+
+    parser.add_argument(
+        "--max-frames",
+        type=int,
+        default=-1,
+        help="Max number of output frames for each video.",
     )
 
     args = parser.parse_args()
@@ -65,133 +87,182 @@ def check_video_format(name: str) -> bool:
     return False
 
 
-def prepare_data(args: argparse.Namespace) -> Union[str, None]:
-    """Break one or a list of videos into frames."""
-    if args.s3:
-        s3_setup(args)
-
-    if isinstance(args.input, list):
-        print("processing {} video(s) ...".format(len(args.input)))
-        if glob.glob(join(args.tar_dir, "*.jpg")):
-            print(
-                "[ERROR] Target folder is not empty. "
-                "Please specify an empty folder"
+def check_args(args: argparse.Namespace) -> None:
+    """Validate input arguments."""
+    if glob.glob(join(args.out_dir, "*.jpg")):
+        logger.error(
+            "Target folder is not empty. Please specify an empty folder"
+        )
+        return None
+    for p in args.input:
+        if not (os.path.isdir(p) or os.path.isfile(p)):
+            logger.error(
+                "Invalid `input` value `%s`. Neither file nor directory ", p,
             )
             return None
+    return None
 
-        for i in range(len(args.input)):
-            vf = args.input[i]
 
-            if os.path.isdir(vf):
-                print("Loading all existing images in folder {}".format(vf))
-                args.tar_dir = vf
+def process_video(
+    filepath: str, fps: int, start_time: int, max_frames: int, out_dir: str
+) -> None:
+    """Break one video into a folder of images."""
+    if not check_video_format(filepath):
+        logger.warning("Ignore invalid file %s", filepath)
+        return
 
-            elif os.path.isfile(vf):
-                if not check_video_format(vf):
-                    print("[WARNING] Ignore invalid file {}".format(vf))
-                    continue
+    if not os.path.exists(filepath):
+        logger.warning("%s does not exist", filepath)
+        return
+    cmd_args = ["-i {} -r {} -qscale:v 2".format(filepath, fps)]
+    if start_time > 0:
+        cmd_args.append("-ss {}".format(start_time))
+    if max_frames > 0:
+        cmd_args.append("-frames:v {}".format(max_frames))
+    video_name = os.path.splitext(os.path.split(filepath)[1])[0]
+    out_dir = join(out_dir, video_name)
+    os.makedirs(out_dir)
+    cmd = "ffmpeg {0} {1}/{2}-%07d.jpg".format(
+        " ".join(cmd_args), out_dir, video_name
+    )
+    logger.info("RUNNING %s", cmd)
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
+    p.wait()
 
-                if not os.path.exists(vf):
-                    print("[WARNING] {} does not exist".format(vf))
-                    continue
 
-                cmd = "ffmpeg -i {} -r {} -qscale:v 2 {}/{}-%07d.jpg".format(
-                    vf,
-                    args.fps,
-                    args.tar_dir,
-                    os.path.splitext(os.path.split(vf)[1])[0],
-                )
-                print("[RUNNING]", cmd)
-                p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-                p.wait()
-            else:
-                print(
-                    "[ERROR] Invalid `input` value `{}`. Neither file "
-                    "nor directory ".format(vf)
-                )
-                return None
+def copy_images(in_path: str, out_path: str) -> None:
+    """Copy images to the output folder with proper video name."""
+    file_list = glob.glob(join(in_path, "**/*.jpg"), recursive=True)
+    in_path_parts = os.path.split(in_path)
+    if len(in_path_parts) > 0 and len(in_path_parts[-1]) > 0:
+        video_name = in_path_parts[-1]
+    else:
+        video_name = "default"
+    out_dir = join(out_path, video_name)
+    os.makedirs(out_dir)
+    logger.info("Copying %s to %s", in_path, out_dir)
+    for image_path in tqdm(file_list):
+        image_name = os.path.split(image_path)[-1]
+        shutil.copyfile(image_path, join(out_dir, image_name))
+
+
+def prepare_data(args: argparse.Namespace) -> Union[str, None]:
+    """Break one or a list of videos into frames."""
+    url_root = args.url_root
+    if args.s3:
+        url_root = s3_setup(args.s3)
+
+    logger.info("processing %d video(s) ...", len(args.input))
+
+    for i in range(len(args.input)):
+        filepath = args.input[i]
+
+        if os.path.isdir(filepath):
+            copy_images(filepath, args.out_dir)
+
+        elif os.path.isfile(filepath):
+            process_video(
+                filepath,
+                args.fps,
+                args.start_time,
+                args.max_frames,
+                args.out_dir,
+            )
 
     # create the yaml file
-    file_list = sorted(glob.glob(join(args.tar_dir, "*.jpg")))
+    file_list = sorted(glob.glob(join(args.out_dir, "*/*.jpg")))
 
     yaml_items = [
         {
             "url": (
                 os.path.abspath(img)
-                if not args.web_root
-                else join(args.web_root, os.path.basename(img))
+                if not url_root
+                else join(url_root, img.split("/")[-2], os.path.basename(img))
             ),
-            "videoName": "{}".format(
-                "-".join(os.path.split(img)[-1].split("-")[:-1])
-            ),
+            "videoName": img.split("/")[-2],
         }
         for img in file_list
     ]
 
-    output = join(args.tar_dir, "image_list.yml")
+    output = join(args.out_dir, "image_list.yml")
     with open(output, "w") as f:
         yaml.dump(yaml_items, f)
 
     # upload to s3 if needed
     if args.s3:
-        upload_files_to_s3(args)
+        upload_files_to_s3(args.s3, args.out_dir)
 
     return output
 
 
-def upload_files_to_s3(args: argparse.Namespace) -> None:
+@dataclass
+class S3Param:
+    """S3 parameters."""
+
+    bucket: str
+    folder: str
+
+
+def parse_s3_path(s3_path: str) -> S3Param:
+    """Parse s3 input path into s3 param."""
+    return S3Param(
+        bucket=s3_path.split("/")[0], folder="/".join(s3_path.split("/")[1:]),
+    )
+
+
+def upload_files_to_s3(s3_path: str, out_dir: str) -> None:
     """Send the files to s3."""
     s3 = boto3.resource("s3")
-    bn = args.bucket_name
-    file_list = glob.glob(join(args.tar_dir, "*"))
-    for f in file_list:
+    s3_param = parse_s3_path(s3_path)
+    file_list = glob.glob(join(out_dir, "**/*.jpg"), recursive=True)
+    logger.info(
+        "Uploading %d files to s3 %s:%s",
+        len(file_list),
+        s3_param.bucket,
+        s3_param.folder,
+    )
+    for f in tqdm(file_list):
         try:
             # pylint is added here because it thinks boto3.resource is a string
-            s3.Bucket(bn).upload_file(
+            s3.Bucket(s3_param.bucket).upload_file(
                 f,
-                join(
-                    args.s3_folder,  # pylint: disable=no-member
-                    os.path.basename(f),
-                ),
+                join(s3_param.folder, f[len(out_dir) + 1 :]),
                 ExtraArgs={"ACL": "public-read"},
             )
         except boto3.exceptions.S3UploadFailedError as e:
-            print("[ERROR] s3 bucket is not properly configured")
-            print("[ERROR]", e)
+            logger.error("s3 bucket is not properly configured %s", e)
             break
 
 
-def s3_setup(args: argparse.Namespace) -> None:
+def s3_setup(s3_path: str) -> str:
     """Store optionaly the data on s3."""
-    args.bucket_name, args.s3_folder = (
-        args.s3.split("/")[0],
-        "/".join(args.s3.split("/")[1:]),
-    )
+    s3_param = parse_s3_path(s3_path)
     s3 = boto3.resource("s3")
-    bn = args.bucket_name
-    region = s3.meta.client.get_bucket_location(Bucket=bn)[
+    region = s3.meta.client.get_bucket_location(Bucket=s3_param.bucket)[
         "LocationConstraint"
     ]
 
-    args.web_root = join(
-        "https://s3-{}.amazonaws.com".format(region), bn, args.s3_folder
+    return join(
+        "https://s3-{}.amazonaws.com".format(region),
+        s3_param.bucket,
+        s3_param.folder,
     )
 
 
 def main() -> None:
     """Run main function."""
     args = parse_arguments()
-    if args.tar_dir:
-        if args.scratch and os.path.exists(args.tar_dir):
-            print("[INFO] Remove existing target directory")
-            shutil.rmtree(args.tar_dir)
-        os.makedirs(args.tar_dir)
+    if args.out_dir:
+        if args.scratch and os.path.exists(args.out_dir):
+            logger.info("Remove existing target directory")
+            shutil.rmtree(args.out_dir)
+        os.makedirs(args.out_dir)
 
     output = prepare_data(args)
     if output is not None:
-        print("[SUCCESS] The configuration file saved at {}".format(output))
+        logger.info("The configuration file saved at %s", output)
     else:
-        print("[FAIL] Rerun the code.")
+        logger.info("Rerun the code.")
 
 
 if __name__ == "__main__":
