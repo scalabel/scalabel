@@ -31,7 +31,10 @@ def parse_arguments() -> argparse.Namespace:
         help="path to the input bdd100k format files",
     )
     parser.add_argument(
-        "--output", "-o", type=str, help="path to the output file ",
+        "--output",
+        "-o",
+        type=str,
+        help="path to the output file ",
     )
 
     args = parser.parse_args()

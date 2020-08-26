@@ -97,7 +97,8 @@ def check_args(args: argparse.Namespace) -> None:
     for p in args.input:
         if not (os.path.isdir(p) or os.path.isfile(p)):
             logger.error(
-                "Invalid `input` value `%s`. Neither file nor directory ", p,
+                "Invalid `input` value `%s`. Neither file nor directory ",
+                p,
             )
             return None
     return None
@@ -206,7 +207,8 @@ class S3Param:
 def parse_s3_path(s3_path: str) -> S3Param:
     """Parse s3 input path into s3 param."""
     return S3Param(
-        bucket=s3_path.split("/")[0], folder="/".join(s3_path.split("/")[1:]),
+        bucket=s3_path.split("/")[0],
+        folder="/".join(s3_path.split("/")[1:]),
     )
 
 
