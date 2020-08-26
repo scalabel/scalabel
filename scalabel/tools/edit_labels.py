@@ -1,15 +1,4 @@
-"""Edit the label and image list files in BDD100K format.
-
-Example Usage:
-
-Add url prefix to the name field in the frames and assign it to the url field
-
-```
-python3 -m scalabel.tools.edit_labels --add-url localhost:8686/items -i \
-    input.json -o output.json
-```
-
-"""
+"""Edit the label and image list files in BDD100K format."""
 
 import argparse
 import json
