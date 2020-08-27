@@ -61,6 +61,7 @@
     "python.linting.pydocstyleArgs": [
         "--convention=google"
     ],
+    "python.pythonPath": "python3",
     "tslint.configFile": "tslint.json",
     "spellright.language": [
         "en"
@@ -77,5 +78,6 @@
     },
     "files.watcherExclude": {
         "node_modules": true
-    }
+    },
+    "restructuredtext.confPath": "${workspaceFolder}/doc/src"
 }
