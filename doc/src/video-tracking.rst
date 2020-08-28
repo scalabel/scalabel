@@ -9,7 +9,9 @@ In the labeling interface of video tracking, move the slider around to move acro
 .. raw:: html
 
     <video width="600" controls autoplay loop>
-        <source src="https://www.scalabel.ai/media/doc/videos/box2d_tracking_slider.gif.mp4" type="video/mp4">
+        <source
+            src="https://www.scalabel.ai/media/doc/videos/box2d_tracking_slider.gif.mp4"
+            type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
