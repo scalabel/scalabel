@@ -38,8 +38,8 @@ list, you can do
         -i ~/Downloads/dancing.mp4  --fps 3 -o dancing-s3 \
         --s3 scalabel-public/demo/dancing
 
-Please refer to the `doc
-<http://boto3.readthedocs.io/en/latest/guide/s3-example-creating-buckets.html>`__
+Please refer to the `s3 doc
+<http://boto3.readthedocs.io/en/latest/guide/s3-example-creating-buckets.html>`_
 to configure your S3 bucket.
 
 

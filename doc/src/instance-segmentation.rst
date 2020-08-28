@@ -58,5 +58,5 @@ Drivable Area
 
 Similarly as other instance segmentation tasks, you can annotate the
 drivable area in the image. Details about the drivable area can be found
-in this `blog <http://bair.berkeley.edu/blog/2018/05/30/bdd/>`__.
+in this `blog <http://bair.berkeley.edu/blog/2018/05/30/bdd/>`_.
 

@@ -59,7 +59,7 @@ Adding the new Python to your `PATH`
 
 
 On Ubuntu, you can also use
-`deadsnakes ppa <https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/+index>`
+`deadsnakes ppa <https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/+index>`_
 to install different versions of Python. Ubuntu 18.04 or later provides the
 package of Python 3.8 directly.
 

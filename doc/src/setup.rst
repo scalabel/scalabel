@@ -47,8 +47,8 @@ jump to :ref:`quick-start`.
 
         docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p \
             8686:8686 -p 6379:6379 scalabel/www \
-            node app/dist/main.js \ --config
-            /opt/scalabel/local-data/scalabel/config.yml \
+            node app/dist/main.js \
+            --config /opt/scalabel/local-data/scalabel/config.yml \
             --max-old-space-size=8192
 
 
@@ -58,8 +58,8 @@ jump to :ref:`quick-start`.
 4.  Build the code yourself
 
     This is an alternative to using docker. We assume you have already installed
-    [Homebrew](https://brew.sh/) if you are using Mac OS X and you have
-    `apt-get` if you are on Ubuntu. The code requires Python 3.7 or above.
+    `Homebrew <https://brew.sh/>`_ if you are using Mac OS X and you have
+    ``apt-get`` if you are on Ubuntu. The code requires Python 3.7 or above.
     Please check [how to upgrade your Python](#upgrade-python) if you don't have
     the right version. We use 3.8 by default. Depending your OS, run the script
 
@@ -90,11 +90,11 @@ jump to :ref:`quick-start`.
 5.  Get labels
 
     The collected labels can be directly downloaded from the project dashboard.
-    The data can be follow [bdd data
-    format](https://github.com/ucbdrive/bdd-data/blob/master/doc/format.md).
-    After installing the requirements and setting up the paths of the [bdd data
-    toolkit](https://github.com/ucbdrive/bdd-data), you can visualize the labels
-    by
+    The data can be follow
+    `BDD100K format <https://github.com/ucbdrive/bdd100k/blob/master/doc/format.md>`_.
+    After installing the requirements and setting up the paths of the
+    `BDD100K toolkit <https://github.com/ucbdrive/bdd-data>`_,
+    you can visualize the labels by
 
     .. code-block:: bash
     
