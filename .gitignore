@@ -53,3 +53,9 @@ data/
 
 # vscode workspace configuration
 *.code-workspace
+
+# sphinx build folder
+_build/
+
+# media files are not in this repo
+doc/media

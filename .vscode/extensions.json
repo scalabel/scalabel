@@ -16,6 +16,7 @@
         "ms-vscode.vscode-typescript-tslint-plugin",
         "wayou.vscode-todo-highlight",
         "Zignd.html-css-class-completion",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "stkb.rewrap"
     ]
 }
