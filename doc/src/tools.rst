@@ -1,12 +1,17 @@
-Python Tools 
+Python Tools
 ===================
 
 prepare_data
 -------------------
 
-``prepare_data`` converts videos or images to a data folder and an image list that can be directly used for creating Scalabel projects. Assume all the images are in `.jpg` format.
+``prepare_data`` converts videos or images to a data folder and an image list
+that can be directly used for creating Scalabel projects. Assume all the images
+are in ``.jpg`` format.
 
-You can download our testing video at https://scalabel-public.s3-us-west-2.amazonaws.com/demo/dancing.mp4. The video was from `Youtube <https://www.youtube.com/watch?v=-ZTsgbrdoI8>`_ with Creative Commons Attribution license.
+You can download our testing video at
+https://scalabel-public.s3-us-west-2.amazonaws.com/demo/dancing.mp4. The video
+was from `Youtube <https://www.youtube.com/watch?v=-ZTsgbrdoI8>`_ with Creative
+Commons Attribution license.
 
 Convert video to a folder of images and generate the image list:
 
@@ -18,8 +23,11 @@ Convert video to a folder of images and generate the image list:
 
 
 The above command also starts extracting the frames from the 5th second and
-stops at 100th frame. The extraction fps is 3 and it is assumed that the
-images are served from the `items` dir. The command will also generate ``image_list.yml`` in the output folder. It will be ready to be used in the Scalabel project creation. You can put multiple videos after ``-i`` to process those videos togther and put all the images in the ``image_list.yml``
+stops at 100th frame. The extraction fps is 3 and it is assumed that the images
+are served from the `items` dir. The command will also generate
+``image_list.yml`` in the output folder. It will be ready to be used in the
+Scalabel project creation. You can put multiple videos after ``-i`` to process
+those videos togther and put all the images in the ``image_list.yml``
 
 If you want to upload the images to the s3 and generate the corresponding image
 list, you can do
@@ -30,14 +38,16 @@ list, you can do
         -i ~/Downloads/dancing.mp4  --fps 3 -o dancing-s3 \
         --s3 scalabel-public/demo/dancing
 
-Please refer to the
-`doc <http://boto3.readthedocs.io/en/latest/guide/s3-example-creating-buckets.html>`__
+Please refer to the `doc
+<http://boto3.readthedocs.io/en/latest/guide/s3-example-creating-buckets.html>`__
 to configure your S3 bucket.
 
 
-We also support multiple inputs, as well as image folder. The command below
-will read the images from the folder `dancing-s3` and copy them to the output
-folder before breaking down the video. The script will think we will create a frame list of two videos. The images in the generated list will be assigned to one of two video names.
+We also support multiple inputs, as well as image folder. The command below will
+read the images from the folder `dancing-s3` and copy them to the output folder
+before breaking down the video. The script will think we will create a frame
+list of two videos. The images in the generated list will be assigned to one of
+two video names.
 
 .. code-block:: bash
 
