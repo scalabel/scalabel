@@ -1,4 +1,6 @@
-Project Creation
+.. _quick-start:
+
+Quick Start
 ------------------------------------------
 
 

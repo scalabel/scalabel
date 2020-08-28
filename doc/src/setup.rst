@@ -1,4 +1,4 @@
-Quick Setup
+Install
 ~~~~~~~~~~~~~~
 
 You can either set up the tool with the provided docker image or build the
@@ -6,9 +6,8 @@ tool by yourself. Once you have the tool set up, you can open
 http://localhost:8686 to create your annotation project. 
 Below is a quick way to install dependencies and launch the Scalabel server.
 After launching the server, you can directly jump to
-[how to use the tool](#using-scalabel).
-If you want to know more about the installation process,
-please check [additional tips](#installation-tips).
+:ref:`quick-start`.
+
 
 **Note**: You only need to do either Step 3 or 4, but not both.
 
@@ -25,7 +24,7 @@ please check [additional tips](#installation-tips).
 
         bash scripts/setup_local_dir.sh
 
-    If you have a local folder of images or point clouds to label, you can move them to `local-data/items`. After launching the server (finishing Step 3 or 4), the url for the images will be `localhost:8686/items`, assuming the port in the scalabel config is 8686. The url of the example image (`local-data/items/examples/cat.webp`) is [http://localhost:8686/items/examples/cat.webp](http://localhost:8686/items/examples/cat.webp). Any files in the `items` folder and subfolders will be served. Files at `local-data/items/{subpath}` are available at `{hostname}/items/{subpath}`.
+    If you have a local folder of images or point clouds to label, you can move them to ``local-data/items``. After launching the server (finishing Step 3 or 4), the url for the images will be http://localhost:8686/items, assuming the port in the scalabel config is 8686. The url of the example image ``local-data/items/examples/cat.webp`` is http://localhost:8686/items/examples/cat.webp. Any files in the `items` folder and subfolders will be served. Files at ``local-data/items/{subpath}`` are available at ``{hostname}/items/{subpath}``.
 
 3.  Using Docker
 

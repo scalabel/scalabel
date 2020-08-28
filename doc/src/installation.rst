@@ -1,4 +1,4 @@
-Installatoin Tips 
+Installation Tips 
 ====================
 
 Development
