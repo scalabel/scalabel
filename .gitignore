@@ -53,3 +53,6 @@ data/
 
 # vscode workspace configuration
 *.code-workspace
+
+# sphinx build folder
+_build/
