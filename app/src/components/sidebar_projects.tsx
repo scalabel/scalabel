@@ -1,9 +1,9 @@
-import { Grid, Link } from '@material-ui/core'
-import ListItem from '@material-ui/core/ListItem'
-import { withStyles } from '@material-ui/core/styles'
-import React from 'react'
-import { getProjects, toProject } from '../common/service'
-import { projectListStyle } from '../styles/create'
+import { Grid, Link } from "@material-ui/core"
+import ListItem from "@material-ui/core/ListItem"
+import { withStyles } from "@material-ui/core/styles"
+import React from "react"
+import { getProjects, toProject } from "../common/service"
+import { projectListStyle } from "../styles/create"
 
 interface ClassType {
   /** style for a colored entry */
@@ -27,13 +27,11 @@ interface ProjectListState {
  *  submission
  * @param props
  */
-class ProjectList extends React.Component
-        <ProjectListProps, ProjectListState> {
-
+class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   /** receive data from backend */
   private projectsToExpress = getProjects()
 
-  public constructor (props: ProjectListProps) {
+  public constructor(props: ProjectListProps) {
     super(props)
     this.state = {
       reloadProjects: props.refresh
@@ -45,7 +43,7 @@ class ProjectList extends React.Component
    * and then changes state to force a reload of this component
    * @param props
    */
-  public componentWillReceiveProps (props: ProjectListProps) {
+  public componentWillReceiveProps(props: ProjectListProps) {
     const { refresh } = this.props
     if (props.refresh !== refresh) {
       this.projectsToExpress = getProjects()
@@ -56,31 +54,33 @@ class ProjectList extends React.Component
   /**
    * renders project list
    */
-  public render () {
+  public render() {
     const { classes } = this.props
     return (
-            <div>
-              {this.projectsToExpress.map((project, index) => (
-                      <ListItem button
-                                key={project}
-                                alignItems='center'
-                                className={!(index % 2) ?
-                                        classes.coloredListItem : ''}>
-                        < Grid container justify='center'>
-                          <Link
-                                  component='button'
-                                  variant='body2'
-                                  color='inherit'
-                                  onClick={() => {
-                                    toProject(project)
-                                  }}
-                          >
-                            {project}
-                          </Link>
-                        </Grid>
-                      </ListItem>
-              ))}
-            </div>)
+      <div>
+        {this.projectsToExpress.map((project, index) => (
+          <ListItem
+            button
+            key={project}
+            alignItems="center"
+            className={!(index % 2) ? classes.coloredListItem : ""}
+          >
+            <Grid container justify="center">
+              <Link
+                component="button"
+                variant="body2"
+                color="inherit"
+                onClick={() => {
+                  toProject(project)
+                }}
+              >
+                {project}
+              </Link>
+            </Grid>
+          </ListItem>
+        ))}
+      </div>
+    )
   }
 }
 

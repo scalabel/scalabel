@@ -1,21 +1,27 @@
-import { createCanvas } from 'canvas'
-import _ from 'lodash'
-import { addPolygon2dLabel } from '../../src/action/polygon2d'
-import { selectLabel } from '../../src/action/select'
-import Session, { dispatch, getState } from '../../src/common/session'
-import { Key } from '../../src/const/common'
-import { getShape } from '../../src/functional/state_util'
-import { makeSimplePathPoint2D } from '../../src/functional/states'
-import { Size2D } from '../../src/math/size2d'
-import { IdType, PathPointType } from '../../src/types/state'
-import { findNewLabels } from '../util/state'
-import { initializeTestingObjects, keyClick, mouseDown, mouseMove, mouseUp } from './util'
+import { createCanvas } from "canvas"
+import _ from "lodash"
+import { addPolygon2dLabel } from "../../src/action/polygon2d"
+import { selectLabel } from "../../src/action/select"
+import Session, { dispatch, getState } from "../../src/common/session"
+import { Key } from "../../src/const/common"
+import { getShape } from "../../src/functional/state_util"
+import { makeSimplePathPoint2D } from "../../src/functional/states"
+import { Size2D } from "../../src/math/size2d"
+import { IdType, PathPointType } from "../../src/types/state"
+import { findNewLabels } from "../util/state"
+import {
+  initializeTestingObjects,
+  keyClick,
+  mouseDown,
+  mouseMove,
+  mouseUp
+} from "./util"
 
-test('Draw label2d list to canvas', () => {
+test("Draw label2d list to canvas", () => {
   const labelCanvas = createCanvas(200, 200)
-  const labelContext = labelCanvas.getContext('2d')
+  const labelContext = labelCanvas.getContext("2d")
   const controlCanvas = createCanvas(200, 200)
-  const controlContext = controlCanvas.getContext('2d')
+  const controlContext = controlCanvas.getContext("2d")
   const labelIds: IdType[] = []
 
   const [label2dHandler] = initializeTestingObjects()
@@ -32,44 +38,55 @@ test('Draw label2d list to canvas', () => {
 
   const state = getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
-  labelIds.push(findNewLabels(
-    getState().task.items[0].labels, labelIds)[0])
+  labelIds.push(findNewLabels(getState().task.items[0].labels, labelIds)[0])
   const rect = getShape(state, 0, labelIds[0], 0)
   expect(rect).toMatchObject({ x1: 1, y1: 1, x2: 10, y2: 10 })
 })
 
-test('Change label ordering', () => {
+test("Change label ordering", () => {
   const [label2dHandler] = initializeTestingObjects()
-  dispatch(addPolygon2dLabel(
-    0,
-    -1,
-    [0],
-    [makeSimplePathPoint2D(0, 1, PathPointType.LINE),
-      makeSimplePathPoint2D(1, 1, PathPointType.LINE),
-      makeSimplePathPoint2D(1, 2, PathPointType.CURVE),
-      makeSimplePathPoint2D(0, 2, PathPointType.CURVE)],
-    true
-  ))
-  dispatch(addPolygon2dLabel(
-    0,
-    -1,
-    [0],
-    [makeSimplePathPoint2D(3, 4, PathPointType.LINE),
-      makeSimplePathPoint2D(4, 4, PathPointType.LINE),
-      makeSimplePathPoint2D(4, 5, PathPointType.CURVE),
-      makeSimplePathPoint2D(3, 5, PathPointType.CURVE)],
-    false
-  ))
-  dispatch(addPolygon2dLabel(
-    0,
-    -1,
-    [0],
-    [makeSimplePathPoint2D(10, 11, PathPointType.LINE),
-      makeSimplePathPoint2D(11, 11, PathPointType.LINE),
-      makeSimplePathPoint2D(11, 12, PathPointType.CURVE),
-      makeSimplePathPoint2D(10, 12, PathPointType.CURVE)],
-    true
-  ))
+  dispatch(
+    addPolygon2dLabel(
+      0,
+      -1,
+      [0],
+      [
+        makeSimplePathPoint2D(0, 1, PathPointType.LINE),
+        makeSimplePathPoint2D(1, 1, PathPointType.LINE),
+        makeSimplePathPoint2D(1, 2, PathPointType.CURVE),
+        makeSimplePathPoint2D(0, 2, PathPointType.CURVE)
+      ],
+      true
+    )
+  )
+  dispatch(
+    addPolygon2dLabel(
+      0,
+      -1,
+      [0],
+      [
+        makeSimplePathPoint2D(3, 4, PathPointType.LINE),
+        makeSimplePathPoint2D(4, 4, PathPointType.LINE),
+        makeSimplePathPoint2D(4, 5, PathPointType.CURVE),
+        makeSimplePathPoint2D(3, 5, PathPointType.CURVE)
+      ],
+      false
+    )
+  )
+  dispatch(
+    addPolygon2dLabel(
+      0,
+      -1,
+      [0],
+      [
+        makeSimplePathPoint2D(10, 11, PathPointType.LINE),
+        makeSimplePathPoint2D(11, 11, PathPointType.LINE),
+        makeSimplePathPoint2D(11, 12, PathPointType.CURVE),
+        makeSimplePathPoint2D(10, 12, PathPointType.CURVE)
+      ],
+      true
+    )
+  )
 
   let state = getState()
   let labels = state.task.items[0].labels

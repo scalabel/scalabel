@@ -1,11 +1,11 @@
-import { createSelector } from 'reselect'
-import { ReduxState } from '../types/redux'
-import { ConfigType, ConnectionStatus, SessionType } from '../types/state'
+import { createSelector } from "reselect"
+import { ReduxState } from "../types/redux"
+import { ConfigType, ConnectionStatus, SessionType } from "../types/state"
 
 /**
  * Load the task config
  */
-export function getConfig (state: ReduxState): ConfigType {
+export function getConfig(state: ReduxState): ConfigType {
   return state.present.task.config
 }
 
@@ -13,7 +13,7 @@ export function getConfig (state: ReduxState): ConfigType {
  * Get whether autosave is enabled
  */
 export const getAutosaveFlag = createSelector(
-  [ getConfig ],
+  [getConfig],
   (config: ConfigType) => {
     return config.autosave
   }
@@ -23,7 +23,7 @@ export const getAutosaveFlag = createSelector(
  * Get title of main page
  */
 export const getPageTitle = createSelector(
-  [ getConfig ],
+  [getConfig],
   (config: ConfigType) => {
     return config.pageTitle
   }
@@ -33,7 +33,7 @@ export const getPageTitle = createSelector(
  * Get link to instructions
  */
 export const getInstructionLink = createSelector(
-  [ getConfig ],
+  [getConfig],
   (config: ConfigType) => {
     return config.instructionPage
   }
@@ -43,7 +43,7 @@ export const getInstructionLink = createSelector(
  * Get link to the dashboard
  */
 export const getDashboardLink = createSelector(
-  [ getConfig ],
+  [getConfig],
   (config: ConfigType) => {
     return `/vendor?project_name=${config.projectName}`
   }
@@ -52,7 +52,7 @@ export const getDashboardLink = createSelector(
 /**
  * Load the session
  */
-export function getSession (state: ReduxState): SessionType {
+export function getSession(state: ReduxState): SessionType {
   return state.present.session
 }
 
@@ -60,7 +60,7 @@ export function getSession (state: ReduxState): SessionType {
  * Get the status of the session
  */
 export const getSessionStatus = createSelector(
-  [ getSession ],
+  [getSession],
   (session: SessionType) => {
     return session.status
   }
@@ -70,7 +70,7 @@ export const getSessionStatus = createSelector(
  * Get the number of times the session status has updated
  */
 export const getNumStatusUpdates = createSelector(
-  [ getSession ],
+  [getSession],
   (session: SessionType) => {
     return session.numUpdates
   }
@@ -80,35 +80,35 @@ export const getNumStatusUpdates = createSelector(
  * Get display text based on the session status
  */
 export const getStatusText = createSelector(
-  [ getSessionStatus ],
+  [getSessionStatus],
   (status: ConnectionStatus) => {
     switch (status) {
       case ConnectionStatus.SAVING: {
-        return 'Saving in progress...'
+        return "Saving in progress..."
       }
       case ConnectionStatus.RECONNECTING: {
-        return 'Trying to reconnect...'
+        return "Trying to reconnect..."
       }
       case ConnectionStatus.COMPUTING: {
-        return 'Model predictions in progress..'
+        return "Model predictions in progress.."
       }
       case ConnectionStatus.SUBMITTING: {
-        return 'Submitting...'
+        return "Submitting..."
       }
       case ConnectionStatus.COMPUTE_DONE:
       case ConnectionStatus.NOTIFY_COMPUTE_DONE: {
-        return 'Model predictions complete.'
+        return "Model predictions complete."
       }
       case ConnectionStatus.SUBMITTED:
       case ConnectionStatus.NOTIFY_SUBMITTED: {
-        return 'Submission complete.'
+        return "Submission complete."
       }
       case ConnectionStatus.SAVED:
       case ConnectionStatus.NOTIFY_SAVED: {
-        return 'All progress saved.'
+        return "All progress saved."
       }
       default: {
-        return 'All progress saved.'
+        return "All progress saved."
       }
     }
   }
@@ -181,8 +181,10 @@ export const isStatusSaving = createSelector(
 export const isStatusSaved = createSelector(
   [getSessionStatus],
   (status: ConnectionStatus) => {
-    return status === ConnectionStatus.SAVED ||
+    return (
+      status === ConnectionStatus.SAVED ||
       status === ConnectionStatus.NOTIFY_SAVED
+    )
   }
 )
 
@@ -202,8 +204,10 @@ export const isStatusComputing = createSelector(
 export const isComputeDone = createSelector(
   [getSessionStatus],
   (status: ConnectionStatus) => {
-    return status === ConnectionStatus.COMPUTE_DONE ||
+    return (
+      status === ConnectionStatus.COMPUTE_DONE ||
       status === ConnectionStatus.NOTIFY_COMPUTE_DONE
+    )
   }
 )
 

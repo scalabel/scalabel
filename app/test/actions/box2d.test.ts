@@ -1,13 +1,13 @@
-import _ from 'lodash'
-import * as box2d from '../../src/action/box2d'
-import * as action from '../../src/action/common'
-import Session from '../../src/common/session'
-import { LabelTypeName, ShapeTypeName } from '../../src/const/common'
-import { RectType } from '../../src/types/state'
-import { setupTestStore } from '../components/util'
-import { testJson } from '../test_states/test_image_objects'
+import _ from "lodash"
+import * as box2d from "../../src/action/box2d"
+import * as action from "../../src/action/common"
+import Session from "../../src/common/session"
+import { LabelTypeName, ShapeTypeName } from "../../src/const/common"
+import { RectType } from "../../src/types/state"
+import { setupTestStore } from "../components/util"
+import { testJson } from "../test_states/test_image_objects"
 
-test('Add, change and delete box2d labels', () => {
+test("Add, change and delete box2d labels", () => {
   setupTestStore(testJson)
 
   // Parameters for item index and number of labels to add
@@ -17,8 +17,15 @@ test('Add, change and delete box2d labels', () => {
   // Add the labels to the item
   Session.dispatch(action.goToItem(itemIndex))
   for (let i = 0; i < numLabels; i++) {
-    Session.dispatch(box2d.addBox2dLabel(
-      itemIndex, -1, [0], {}, { x1: 1, y1: 2, x2: 3, y2: 4 }))
+    Session.dispatch(
+      box2d.addBox2dLabel(
+        itemIndex,
+        -1,
+        [0],
+        {},
+        { x1: 1, y1: 2, x2: 3, y2: 4 }
+      )
+    )
   }
 
   // Check the labels were added
@@ -50,7 +57,8 @@ test('Add, change and delete box2d labels', () => {
   })
 
   Session.dispatch(
-    box2d.changeBox2d(itemIndex, indexedShape.id, { x1: 2, x2: 7 }))
+    box2d.changeBox2d(itemIndex, indexedShape.id, { x1: 2, x2: 7 })
+  )
   item = Session.getState().task.items[itemIndex]
   label = item.labels[label.id]
   shape = item.shapes[label.shapes[0]] as RectType

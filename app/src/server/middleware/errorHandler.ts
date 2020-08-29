@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'express'
-import { ServerConfig } from '../../types/config'
-import { HttpException } from '../exception'
+import { NextFunction, Request, Response } from "express"
+import { ServerConfig } from "../../types/config"
+import { HttpException } from "../exception"
 
 /**
  * Error handler
@@ -16,8 +16,8 @@ const errorHandler = (config: ServerConfig) => (
   _next: NextFunction
 ) => {
   const status = error.status || 500
-  const message = error.message || 'Something went wrong'
-  const resData: {[k: string]: string} = {
+  const message = error.message || "Something went wrong"
+  const resData: { [k: string]: string } = {
     code: status.toString(),
     data: message
   }

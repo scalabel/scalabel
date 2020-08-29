@@ -1,9 +1,9 @@
-import * as THREE from 'three'
-import { Key } from '../../../const/common'
-import { BLUE, GREEN, RED } from '../common'
-import Label3D from '../label3d'
-import { Controller } from './controller'
-import { ScaleAxis } from './scale_axis'
+import * as THREE from "three"
+import { Key } from "../../../const/common"
+import { BLUE, GREEN, RED } from "../common"
+import Label3D from "../label3d"
+import { Controller } from "./controller"
+import { ScaleAxis } from "./scale_axis"
 
 const SCALE_AMOUNT = 0.01
 
@@ -11,50 +11,14 @@ const SCALE_AMOUNT = 0.01
  * perform scaling ops
  */
 export class ScaleControl extends Controller {
-  constructor (labels: Label3D[], bounds: THREE.Box3) {
+  constructor(labels: Label3D[], bounds: THREE.Box3) {
     super(labels, bounds)
-    this._controlUnits.push(
-      new ScaleAxis(
-        'x',
-        false,
-        RED
-      )
-    )
-    this._controlUnits.push(
-      new ScaleAxis(
-        'y',
-        false,
-        GREEN
-      )
-    )
-    this._controlUnits.push(
-      new ScaleAxis(
-        'z',
-        false,
-        BLUE
-      )
-    )
-    this._controlUnits.push(
-      new ScaleAxis(
-        'x',
-        true,
-        RED
-      )
-    )
-    this._controlUnits.push(
-      new ScaleAxis(
-        'y',
-        true,
-        GREEN
-      )
-    )
-    this._controlUnits.push(
-      new ScaleAxis(
-        'z',
-        true,
-        BLUE
-      )
-    )
+    this._controlUnits.push(new ScaleAxis("x", false, RED))
+    this._controlUnits.push(new ScaleAxis("y", false, GREEN))
+    this._controlUnits.push(new ScaleAxis("z", false, BLUE))
+    this._controlUnits.push(new ScaleAxis("x", true, RED))
+    this._controlUnits.push(new ScaleAxis("y", true, GREEN))
+    this._controlUnits.push(new ScaleAxis("z", true, BLUE))
     for (const unit of this._controlUnits) {
       this.add(unit)
     }
@@ -62,15 +26,13 @@ export class ScaleControl extends Controller {
   }
 
   /** Apply pre-determined transformation amount based on camera direction */
-  public keyDown (
-    key: string, camera: THREE.Camera
-  ): void {
+  public keyDown(key: string, camera: THREE.Camera): void {
     super.keyDown(key, camera)
     const direction = new THREE.Vector3()
     const up = new THREE.Vector3(0, 1, 0)
     up.applyQuaternion(camera.quaternion)
     const forward = camera.getWorldDirection(new THREE.Vector3())
-    const left = (new THREE.Vector3()).crossVectors(up, forward).normalize()
+    const left = new THREE.Vector3().crossVectors(up, forward).normalize()
     switch (key) {
       case Key.I_UP:
       case Key.I_LOW:
@@ -103,9 +65,11 @@ export class ScaleControl extends Controller {
     dimensions.copy(this._bounds.max)
     dimensions.sub(this._bounds.min)
     for (const label of this._labels) {
-      const inverseQuaternion = (new THREE.Quaternion()).copy(label.orientation)
-      const localDirection = (new THREE.Vector3()).copy(direction)
-        .applyQuaternion(inverseQuaternion).toArray()
+      const inverseQuaternion = new THREE.Quaternion().copy(label.orientation)
+      const localDirection = new THREE.Vector3()
+        .copy(direction)
+        .applyQuaternion(inverseQuaternion)
+        .toArray()
 
       let maxAxis = 0
       for (let i = 0; i < localDirection.length; i++) {
@@ -117,7 +81,7 @@ export class ScaleControl extends Controller {
       const scaleArr = [1, 1, 1]
       scaleArr[maxAxis] += scaleDelta
 
-      const scaleFactor = (new THREE.Vector3()).fromArray(scaleArr)
+      const scaleFactor = new THREE.Vector3().fromArray(scaleArr)
 
       const anchorDirection = [0, 0, 0]
       anchorDirection[maxAxis] = Math.sign(localDirection[maxAxis])
@@ -125,7 +89,7 @@ export class ScaleControl extends Controller {
         anchorDirection[maxAxis] = 1
       }
 
-      const anchor = (new THREE.Vector3()).fromArray(anchorDirection)
+      const anchor = new THREE.Vector3().fromArray(anchorDirection)
       anchor.multiply(dimensions)
       anchor.divideScalar(-2.0)
       anchor.add(center)

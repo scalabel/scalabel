@@ -1,8 +1,8 @@
-import { Grid, TextField } from '@material-ui/core'
-import Button from '@material-ui/core/Button'
-import FormControl from '@material-ui/core/FormControl'
-import React, { ChangeEvent } from 'react'
-import Session from '../common/session'
+import { Grid, TextField } from "@material-ui/core"
+import Button from "@material-ui/core/Button"
+import FormControl from "@material-ui/core/FormControl"
+import React, { ChangeEvent } from "react"
+import Session from "../common/session"
 
 interface ClassType {
   /** root class */
@@ -19,7 +19,6 @@ interface ClassType {
 
   /** grid for button and textfield */
   grid: string
-
 }
 
 interface Props {
@@ -42,78 +41,83 @@ interface Props {
 interface State {
   /** filename string */
   filename: string
-
 }
 
 /**
  * Upload file button
  */
 export default class UploadButton extends React.Component<Props, State> {
-
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props)
-    this.state = { filename: 'No file chosen' }
+    this.state = { filename: "No file chosen" }
   }
 
   /**
    * renders the upload button
    * currently uses native validation
    */
-  public render () {
+  public render() {
     const { classes } = this.props
     return (
       <div className={classes.root}>
-        <label id={this.props.form_id + '_label'}
-         htmlFor={this.props.form_id + '-grid'}>
-         {this.props.label}
+        <label
+          id={this.props.form_id + "_label"}
+          htmlFor={this.props.form_id + "-grid"}
+        >
+          {this.props.label}
         </label>
         <Grid
           container
-          id = {this.props.form_id + '-grid'}
-          direction='row'
-          alignItems='center'
-          className={classes.grid}>
+          id={this.props.form_id + "-grid"}
+          direction="row"
+          alignItems="center"
+          className={classes.grid}
+        >
           <FormControl>
             <input
-              type='file'
-              required={
-                Session.testMode ? false : this.props.required }
-              id={this.props.form_id} name={this.props.form_id}
-                   data-testid = {this.props.form_id}
+              type="file"
+              required={Session.testMode ? false : this.props.required}
+              id={this.props.form_id}
+              name={this.props.form_id}
+              data-testid={this.props.form_id}
               style={{
-                position: 'absolute',
-                width: '1px',
-                height: '1px',
-                padding: '0',
-                margin: '-1px',
-                overflow: 'hidden',
-                clip: 'rect(0,0,0,0)',
-                border: '0'
+                position: "absolute",
+                width: "1px",
+                height: "1px",
+                padding: "0",
+                margin: "-1px",
+                overflow: "hidden",
+                clip: "rect(0,0,0,0)",
+                border: "0"
               }}
               onChange={(event) => this.handleFileChange(event)}
-              accept={this.props.with_json ?
-                      '.json, .yml, .yaml' : '.yml, .yaml'} />
+              accept={
+                this.props.with_json ? ".json, .yml, .yaml" : ".yml, .yaml"
+              }
+            />
             <label htmlFor={this.props.form_id}>
               <Button
-                variant='contained'
-                component='span'
+                variant="contained"
+                component="span"
                 className={classes.button}
-                id='test'
+                id="test"
               >
                 Choose File
               </Button>
             </label>
           </FormControl>
-          <TextField value={this.state.filename}
+          <TextField
+            value={this.state.filename}
             className={classes.textField}
             InputProps={{
               classes: {
                 input: classes.filenameText
               },
               inputProps: {
-                'data-testid': this.props.form_id + '_filename'
+                "data-testid": this.props.form_id + "_filename"
               }
-            }} />
+            }}
+          />
         </Grid>
       </div>
     )
@@ -123,7 +127,9 @@ export default class UploadButton extends React.Component<Props, State> {
    * Handle filename change
    * @param event
    */
-  private handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  private readonly handleFileChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files) {
       if (!Session.testMode) {
         this.setState({ filename: event.target.files[0].name })

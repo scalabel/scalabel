@@ -1,5 +1,5 @@
-import * as THREE from 'three'
-import { CameraIntrinsicsType } from '../../types/state'
+import * as THREE from "three"
+import { CameraIntrinsicsType } from "../../types/state"
 
 /** Camera for rendering with calibrated intrinsics */
 export class IntrinsicCamera extends THREE.Camera {
@@ -18,7 +18,7 @@ export class IntrinsicCamera extends THREE.Camera {
   /** intrinsics */
   public intrinsics?: CameraIntrinsicsType
 
-  constructor (
+  constructor(
     width: number = 0,
     height: number = 0,
     near: number = 0.1,
@@ -38,17 +38,25 @@ export class IntrinsicCamera extends THREE.Camera {
   }
 
   /** Use parameters to calculate internal projection matrix */
-  public calculateProjectionMatrix () {
+  public calculateProjectionMatrix() {
     if (this.intrinsics) {
       this.projectionMatrix.set(
-        2 * this.intrinsics.focalLength.x / this.width, 0,
-          -(2 * this.intrinsics.focalCenter.x / this.width) + 1, 0,
-        0, 2 * this.intrinsics.focalLength.y / this.height,
-          (2 * this.intrinsics.focalCenter.y / this.height) - 1, 0,
-        0, 0,
-          (this.near + this.far) / (this.near - this.far),
-          2 * this.far * this.near / (this.near - this.far),
-        0, 0, -1, 0
+        (2 * this.intrinsics.focalLength.x) / this.width,
+        0,
+        -((2 * this.intrinsics.focalCenter.x) / this.width) + 1,
+        0,
+        0,
+        (2 * this.intrinsics.focalLength.y) / this.height,
+        (2 * this.intrinsics.focalCenter.y) / this.height - 1,
+        0,
+        0,
+        0,
+        (this.near + this.far) / (this.near - this.far),
+        (2 * this.far * this.near) / (this.near - this.far),
+        0,
+        0,
+        -1,
+        0
       )
       this.projectionMatrixInverse.getInverse(this.projectionMatrix)
     }

@@ -1,24 +1,24 @@
-import { MuiThemeProvider } from '@material-ui/core/styles'
-import { cleanup, fireEvent, render } from '@testing-library/react'
-import _ from 'lodash'
-import * as React from 'react'
-import { Provider } from 'react-redux'
-import { ThunkAction } from 'redux-thunk'
-import { addLabel } from '../../src/action/common'
-import Session from '../../src/common/session'
-import { Synchronizer } from '../../src/common/synchronizer'
-import TitleBar from '../../src/components/title_bar'
-import { SUBMIT } from '../../src/const/action'
-import { EventName } from '../../src/const/connection'
-import { isStatusSaving } from '../../src/functional/selector'
-import { makeLabel } from '../../src/functional/states'
-import { myTheme } from '../../src/styles/theme'
-import { ActionType } from '../../src/types/action'
-import { SyncActionMessageType } from '../../src/types/message'
-import { ReduxState } from '../../src/types/redux'
-import { State } from '../../src/types/state'
-import { testJson } from '../test_states/test_image_objects'
-import { setupTestStore, setupTestStoreWithMiddleware } from './util'
+import { MuiThemeProvider } from "@material-ui/core/styles"
+import { cleanup, fireEvent, render } from "@testing-library/react"
+import _ from "lodash"
+import * as React from "react"
+import { Provider } from "react-redux"
+import { ThunkAction } from "redux-thunk"
+import { addLabel } from "../../src/action/common"
+import Session from "../../src/common/session"
+import { Synchronizer } from "../../src/common/synchronizer"
+import TitleBar from "../../src/components/title_bar"
+import { SUBMIT } from "../../src/const/action"
+import { EventName } from "../../src/const/connection"
+import { isStatusSaving } from "../../src/functional/selector"
+import { makeLabel } from "../../src/functional/states"
+import { myTheme } from "../../src/styles/theme"
+import { ActionType } from "../../src/types/action"
+import { SyncActionMessageType } from "../../src/types/message"
+import { ReduxState } from "../../src/types/redux"
+import { State } from "../../src/types/state"
+import { testJson } from "../test_states/test_image_objects"
+import { setupTestStore, setupTestStoreWithMiddleware } from "./util"
 
 beforeEach(() => {
   cleanup()
@@ -28,28 +28,29 @@ afterEach(cleanup)
 // Need a different reference so selectors don't cache results
 const testJsonAutosave = _.cloneDeep(testJson) as State
 
-describe('Save button functionality', () => {
-  test('Autosave on: no save button', async () => {
+describe("Save button functionality", () => {
+  test("Autosave on: no save button", async () => {
     testJsonAutosave.task.config.autosave = true
     setupTestStore(testJsonAutosave)
 
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar/>
+          <TitleBar />
         </Provider>
       </MuiThemeProvider>
     )
-    expect(() => { getByTestId('Save') }).toThrow(Error)
+    expect(() => {
+      getByTestId("Save")
+    }).toThrow(Error)
   })
 
-  test('Autosave off: save button triggers save action', async () => {
+  test("Autosave off: save button triggers save action", async () => {
     const mockSocket = {
       connected: true,
       emit: jest.fn()
     }
-    const synchronizer = new Synchronizer(
-      mockSocket, 0, 'test', 'fakeId')
+    const synchronizer = new Synchronizer(mockSocket, 0, "test", "fakeId")
 
     testJsonAutosave.task.config.autosave = false
     setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
@@ -61,26 +62,25 @@ describe('Save button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar/>
+          <TitleBar />
         </Provider>
       </MuiThemeProvider>
     )
-    const saveButton = getByTestId('Save')
+    const saveButton = getByTestId("Save")
     fireEvent.click(saveButton)
     expect(isStatusSaving(Session.store.getState())).toBe(true)
     expect(mockSocket.emit).toHaveBeenCalled()
   })
 })
 
-describe('Submit button functionality', () => {
-  test('Autosave on: submit button just updates flag', async () => {
+describe("Submit button functionality", () => {
+  test("Autosave on: submit button just updates flag", async () => {
     const mockSocket = {
       on: jest.fn(),
       connected: true,
       emit: jest.fn()
     }
-    const synchronizer = new Synchronizer(
-      mockSocket, 0, 'test', 'fakeId')
+    const synchronizer = new Synchronizer(mockSocket, 0, "test", "fakeId")
 
     testJsonAutosave.task.config.autosave = true
     setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
@@ -89,15 +89,15 @@ describe('Submit button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar/>
+          <TitleBar />
         </Provider>
       </MuiThemeProvider>
     )
 
-    const dispatchSpy = jest.spyOn(Session, 'dispatch')
+    const dispatchSpy = jest.spyOn(Session, "dispatch")
     dispatchSpy.mockClear()
 
-    const submitButton = getByTestId('Submit')
+    const submitButton = getByTestId("Submit")
     fireEvent.click(submitButton)
     checkSubmitDispatch(dispatchSpy)
 
@@ -121,14 +121,13 @@ describe('Submit button functionality', () => {
     expect(actionPacket.actions[0].type).toBe(SUBMIT)
   })
 
-  test('Autosave off: submit button updates flag and saves', async () => {
+  test("Autosave off: submit button updates flag and saves", async () => {
     const mockSocket = {
       on: jest.fn(),
       connected: true,
       emit: jest.fn()
     }
-    const synchronizer = new Synchronizer(
-      mockSocket, 0, 'test', 'fakeId')
+    const synchronizer = new Synchronizer(mockSocket, 0, "test", "fakeId")
 
     testJsonAutosave.task.config.autosave = false
     setupTestStoreWithMiddleware(testJsonAutosave, synchronizer)
@@ -137,14 +136,14 @@ describe('Submit button functionality', () => {
     const { getByTestId } = render(
       <MuiThemeProvider theme={myTheme}>
         <Provider store={Session.store}>
-          <TitleBar/>
+          <TitleBar />
         </Provider>
       </MuiThemeProvider>
     )
-    const dispatchSpy = jest.spyOn(Session, 'dispatch')
+    const dispatchSpy = jest.spyOn(Session, "dispatch")
     dispatchSpy.mockClear()
 
-    const submitButton = getByTestId('Submit')
+    const submitButton = getByTestId("Submit")
     fireEvent.click(submitButton)
 
     // Check that submit action was dispatched
@@ -172,12 +171,14 @@ describe('Submit button functionality', () => {
 /**
  * Checks that submit action was dispatched
  */
-function checkSubmitDispatch
-  (dispatchSpy: jest.SpyInstance<void, [ActionType | ThunkAction<
-    void, ReduxState, void, ActionType>]>) {
+function checkSubmitDispatch(
+  dispatchSpy: jest.SpyInstance<
+    void,
+    [ActionType | ThunkAction<void, ReduxState, void, ActionType>]
+  >
+) {
   expect(dispatchSpy).toHaveBeenCalled()
-  const dispatchAction = dispatchSpy.mock.calls[0][
-    0] as ActionType
+  const dispatchAction = dispatchSpy.mock.calls[0][0] as ActionType
   // Check type, instead of HaveBeenCalledWith, because userId may change
   expect(dispatchAction.type).toBe(SUBMIT)
 }

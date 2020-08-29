@@ -1,7 +1,7 @@
 /**
  * Define string identifiers and interfaces of actions
  */
-import { SyncActionMessageType } from './message'
+import { SyncActionMessageType } from "./message"
 import {
   ConnectionStatus,
   DeepPartialState,
@@ -15,7 +15,7 @@ import {
   SubmitData,
   TaskType,
   ViewerConfigType
-} from './state'
+} from "./state"
 
 export interface BaseAction {
   /** unique id for the action */
@@ -118,14 +118,14 @@ export interface ChangeLabelsAction extends BaseAction {
 
 export interface LinkLabelsAction extends BaseAction {
   /** item of the labels */
-  itemIndex: number,
+  itemIndex: number
   /** ids of the labels to link */
   labelIds: IdType[]
 }
 
 export interface UnlinkLabelsAction extends BaseAction {
   /** item of the labels */
-  itemIndex: number,
+  itemIndex: number
   /** ids of the labels to unlink */
   labelIds: IdType[]
 }
@@ -204,14 +204,14 @@ export interface SequentialAction extends BaseAction {
  * These actions are event-driven messages intercepted by the sync middleware
  */
 export type SyncActionType =
-  RegisterSessionAction
+  | RegisterSessionAction
   | ReceiveBroadcastAction
   | ConnectAction
   | DisconnectAction
   | SaveAction
 
 export type SessionActionType =
-  InitSessionAction
+  | InitSessionAction
   | LoadItemAction
   | UpdateAllAction
   | UpdateTaskAction
@@ -220,7 +220,7 @@ export type SessionActionType =
   | SyncActionType
 
 export type UserActionType =
-  ChangeSelectAction
+  | ChangeSelectAction
   | ChangeViewerConfigAction
   | AddViewerConfigAction
   | UpdatePaneAction
@@ -228,7 +228,7 @@ export type UserActionType =
   | DeletePaneAction
 
 export type TaskActionType =
-  AddLabelsAction
+  | AddLabelsAction
   | ChangeShapesAction
   | ChangeLabelsAction
   | DeleteLabelsAction
@@ -238,7 +238,7 @@ export type TaskActionType =
   | SubmitAction
 
 export type ActionType =
-  SessionActionType
+  | SessionActionType
   | UserActionType
   | TaskActionType
   | SequentialAction

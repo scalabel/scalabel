@@ -1,29 +1,29 @@
+import { NextFunction, Request, Response } from "express"
+import { File } from "formidable"
+import _ from "lodash"
+import { DashboardContents } from "../components/dashboard"
+import { getSubmissionTime } from "../components/util"
+import { FormField } from "../const/project"
+import { ItemExport } from "../types/bdd"
+import { Project } from "../types/project"
+import { TaskType } from "../types/state"
 import {
-  NextFunction,
-  Request,
-  Response
-} from 'express'
-import { File } from 'formidable'
-import _ from 'lodash'
-import { DashboardContents } from '../components/dashboard'
-import { getSubmissionTime } from '../components/util'
-import { FormField } from '../const/project'
-import { ItemExport } from '../types/bdd'
-import { Project } from '../types/project'
-import { TaskType } from '../types/state'
-import {
-  createProject, createTasks, parseFiles, parseForm, readConfig
-} from './create_project'
-import { convertStateToExport } from './export'
-import { FileStorage } from './file_storage'
-import Logger from './logger'
-import { getExportName } from './path'
-import { ProjectStore } from './project_store'
-import { S3Storage } from './s3_storage'
-import { getProjectOptions, getProjectStats, getTaskOptions } from './stats'
-import { Storage } from './storage'
-import { UserManager } from './user_manager'
-import { parseProjectName } from './util'
+  createProject,
+  createTasks,
+  parseFiles,
+  parseForm,
+  readConfig
+} from "./create_project"
+import { convertStateToExport } from "./export"
+import { FileStorage } from "./file_storage"
+import Logger from "./logger"
+import { getExportName } from "./path"
+import { ProjectStore } from "./project_store"
+import { S3Storage } from "./s3_storage"
+import { getProjectOptions, getProjectStats, getTaskOptions } from "./stats"
+import { Storage } from "./storage"
+import { UserManager } from "./user_manager"
+import { parseProjectName } from "./util"
 
 /**
  * Wraps HTTP listeners
@@ -34,7 +34,7 @@ export class Listeners {
   /** the user manager */
   protected userManager: UserManager
 
-  constructor (projectStore: ProjectStore, userManager: UserManager) {
+  constructor(projectStore: ProjectStore, userManager: UserManager) {
     this.projectStore = projectStore
     this.userManager = userManager
   }
@@ -42,8 +42,7 @@ export class Listeners {
   /**
    * Logs requests to static or dynamic files
    */
-  public loggingHandler (
-    req: Request, _res: Response, next: NextFunction) {
+  public loggingHandler(req: Request, _res: Response, next: NextFunction) {
     const log = `Requesting ${req.originalUrl}`
     Logger.info(log)
     next()
@@ -52,9 +51,9 @@ export class Listeners {
   /**
    * Handles getting all projects' names
    */
-  public async projectNameHandler (_req: Request, res: Response) {
+  public async projectNameHandler(_req: Request, res: Response) {
     let projects: string[]
-    const defaultProjects = ['No existing project']
+    const defaultProjects = ["No existing project"]
     try {
       projects = await this.projectStore.getExistingProjects()
       if (projects.length === 0) {
@@ -72,7 +71,7 @@ export class Listeners {
   /**
    * Handles posting export
    */
-  public async getExportHandler (req: Request, res: Response) {
+  public async getExportHandler(req: Request, res: Response) {
     if (this.checkInvalidGet(req, res)) {
       return
     }
@@ -105,10 +104,10 @@ export class Listeners {
           }
         }
       }
-      const exportJson = JSON.stringify(items, null, '  ')
+      const exportJson = JSON.stringify(items, null, "  ")
       // Set relevant header and send the exported json file
       res.attachment(getExportName(projectName))
-      res.end(Buffer.from(exportJson, 'binary'), 'binary')
+      res.end(Buffer.from(exportJson, "binary"), "binary")
     } catch (error) {
       // TODO: Be more specific about what this error may be
       Logger.error(error)
@@ -119,8 +118,8 @@ export class Listeners {
   /**
    * Alert the user that the sent fields were illegal
    */
-  public badFormResponse (res: Response) {
-    const err = Error('Illegal fields for project creation')
+  public badFormResponse(res: Response) {
+    const err = Error("Illegal fields for project creation")
     Logger.error(err)
     res.status(400).send(err.message)
   }
@@ -128,8 +127,8 @@ export class Listeners {
   /**
    * Alert the user that the task creation request was illegal
    */
-  public badTaskResponse (res: Response) {
-    const err = Error('Illegal fields for task creation')
+  public badTaskResponse(res: Response) {
+    const err = Error("Illegal fields for task creation")
     Logger.error(err)
     res.status(400).send(err.message)
   }
@@ -137,8 +136,8 @@ export class Listeners {
   /**
    * Error if it's not a post request
    */
-  public checkInvalidPost (req: Request, res: Response): boolean {
-    if (req.method !== 'POST') {
+  public checkInvalidPost(req: Request, res: Response): boolean {
+    if (req.method !== "POST") {
       res.sendStatus(404)
       res.end()
       return true
@@ -150,10 +149,12 @@ export class Listeners {
    * Error if it's not a get request
    * By default, also requires non-empty queryArg parameters
    */
-  public checkInvalidGet (
-    req: Request, res: Response,
-    requireParam: boolean= true): boolean {
-    if (req.method !== 'GET' || (requireParam && req.query === {})) {
+  public checkInvalidGet(
+    req: Request,
+    res: Response,
+    requireParam: boolean = true
+  ): boolean {
+    if (req.method !== "GET" || (requireParam && req.query === {})) {
       res.sendStatus(404)
       res.end()
       return true
@@ -165,14 +166,16 @@ export class Listeners {
    * Handles posted project from internal data
    * Items file not required, since items can be added later
    */
-  public async postProjectInternalHandler (req: Request, res: Response) {
+  public async postProjectInternalHandler(req: Request, res: Response) {
     if (this.checkInvalidPost(req, res)) {
       return
     }
 
-    if (req.body === undefined ||
-        req.body.fields === undefined ||
-        req.body.files === undefined) {
+    if (
+      req.body === undefined ||
+      req.body.fields === undefined ||
+      req.body.files === undefined
+    ) {
       return this.badFormResponse(res)
     }
 
@@ -188,16 +191,21 @@ export class Listeners {
       Logger.error(err)
       return this.badFormResponse(res)
     }
-    storage.setExt('')
+    storage.setExt("")
     await this.createProjectFromDicts(
-      storage, req.body.fields, req.body.files, false, res)
+      storage,
+      req.body.fields,
+      req.body.files,
+      false,
+      res
+    )
   }
 
   /**
    * Handles posted project from form data
    * Items file required
    */
-  public async postProjectHandler (req: Request, res: Response) {
+  public async postProjectHandler(req: Request, res: Response) {
     if (this.checkInvalidPost(req, res)) {
       return
     }
@@ -206,7 +214,7 @@ export class Listeners {
       return this.badFormResponse(res)
     }
 
-    const fields = req.fields as { [key: string]: string}
+    const fields = req.fields as { [key: string]: string }
     const formFiles = req.files as { [key: string]: File | undefined }
     const files: { [key: string]: string } = {}
     for (const key of Object.keys(formFiles)) {
@@ -216,31 +224,36 @@ export class Listeners {
       }
     }
 
-    const storage = new FileStorage('')
-    storage.setExt('')
+    const storage = new FileStorage("")
+    storage.setExt("")
     await this.createProjectFromDicts(storage, fields, files, true, res)
   }
 
   /**
    * Handles tasks being added to a project
    */
-  public async postTasksHandler (req: Request, res: Response) {
+  public async postTasksHandler(req: Request, res: Response) {
     if (this.checkInvalidPost(req, res)) {
       return
     }
 
-    if (req.body === undefined
-      || req.body.items === undefined
-      || req.body.projectName === undefined) {
+    if (
+      req.body === undefined ||
+      req.body.items === undefined ||
+      req.body.projectName === undefined
+    ) {
       this.badTaskResponse(res)
       return
     }
 
     // Read in the data
-    const storage = new FileStorage('')
-    storage.setExt('')
+    const storage = new FileStorage("")
+    storage.setExt("")
     const items = await readConfig<Array<Partial<ItemExport>>>(
-      storage, req.body.items, [])
+      storage,
+      req.body.items,
+      []
+    )
     let project: Project
     let projectName: string
     try {
@@ -270,18 +283,16 @@ export class Listeners {
   /**
    * Get the labeling stats
    */
-  public async statsHandler (req: Request, res: Response) {
+  public async statsHandler(req: Request, res: Response) {
     if (this.checkInvalidGet(req, res)) {
       return
     }
 
     try {
       const projectName = req.query.name as string
-      const savedTasks = await this.projectStore.loadTaskStates(
-        projectName)
+      const savedTasks = await this.projectStore.loadTaskStates(projectName)
       const stats = getProjectStats(savedTasks)
       res.send(JSON.stringify(stats))
-
     } catch (err) {
       Logger.error(err)
       res.send(err.message)
@@ -291,7 +302,7 @@ export class Listeners {
   /**
    * Return dashboard info
    */
-  public async dashboardHandler (req: Request, res: Response) {
+  public async dashboardHandler(req: Request, res: Response) {
     if (this.checkInvalidGet(req, res)) {
       return
     }
@@ -302,8 +313,7 @@ export class Listeners {
       const project = await this.projectStore.loadProject(projectName)
       const projectMetaData = getProjectOptions(project)
 
-      const savedTasks = await this.projectStore.loadTaskStates(
-        projectName)
+      const savedTasks = await this.projectStore.loadTaskStates(projectName)
       const taskOptions = _.map(savedTasks, getTaskOptions)
 
       const numUsers = await this.userManager.countUsers(projectName)
@@ -323,29 +333,37 @@ export class Listeners {
   /**
    * Finishes project creation using processed dicts
    */
-  private async createProjectFromDicts (
-    storage: Storage, fields: { [key: string]: string },
+  private async createProjectFromDicts(
+    storage: Storage,
+    fields: { [key: string]: string },
     files: { [key: string]: string },
-    itemsRequired: boolean, res: Response) {
+    itemsRequired: boolean,
+    res: Response
+  ) {
     try {
-        // Parse form from request
+      // Parse form from request
       const form = await parseForm(fields, this.projectStore)
-        // Parse item, category, and attribute data from the form
+      // Parse item, category, and attribute data from the form
       const formFileData = await parseFiles(
-        storage, form.labelType, files, itemsRequired)
-        // Create the project from the form data
+        storage,
+        form.labelType,
+        files,
+        itemsRequired
+      )
+      // Create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([
         this.projectStore.saveProject(project),
-          // Create tasks then save them
-        createTasks(project).then(
-            (tasks: TaskType[]) => this.projectStore.saveTasks(tasks))
-          // Save the project
+        // Create tasks then save them
+        createTasks(project).then((tasks: TaskType[]) =>
+          this.projectStore.saveTasks(tasks)
+        )
+        // Save the project
       ])
       res.send()
     } catch (err) {
       Logger.error(err)
-        // Alert the user that something failed
+      // Alert the user that something failed
       res.status(400).send(err.message)
     }
   }

@@ -1,17 +1,17 @@
-import { withStyles } from '@material-ui/core'
-import { readdir } from 'fs'
-import * as fs from 'fs-extra'
-import * as path from 'path'
-import { ChangeEvent } from 'react'
-import * as util from 'util'
-import Session from '../../src/common/session'
-import CreateForm from '../../src/components/create_form'
-import { Endpoint } from '../../src/const/connection'
-import { FormField } from '../../src/const/project'
-import { isStatusSaved } from '../../src/functional/selector'
-import { getTaskDir } from '../../src/server/path'
-import { formStyle } from '../../src/styles/create'
-import { ItemExport } from '../../src/types/bdd'
+import { withStyles } from "@material-ui/core"
+import { readdir } from "fs"
+import * as fs from "fs-extra"
+import * as path from "path"
+import { ChangeEvent } from "react"
+import * as util from "util"
+import Session from "../../src/common/session"
+import CreateForm from "../../src/components/create_form"
+import { Endpoint } from "../../src/const/connection"
+import { FormField } from "../../src/const/project"
+import { isStatusSaved } from "../../src/functional/selector"
+import { getTaskDir } from "../../src/server/path"
+import { formStyle } from "../../src/styles/create"
+import { ItemExport } from "../../src/types/bdd"
 
 export interface TestConfig {
   /** project name for current test */
@@ -41,17 +41,17 @@ export interface TestConfig {
 }
 
 export let testConfig: TestConfig = {
-  projectName: 'integration-test',
+  projectName: "integration-test",
   taskIndex: 0,
-  examplePath: './examples/',
-  testDirPath: './test_data/',
-  samplePath: './app/test/test_states',
-  sampleExportFilename: 'sample_export.json',
-  sampleProjectJsonFilename: 'sample_project.json',
-  itemListFilename: 'image_list.yml',
-  categoriesFilename: 'categories.yml',
-  attributesFilename: 'bbox_attributes.yml',
-  projectFilename: 'project.json',
+  examplePath: "./examples/",
+  testDirPath: "./test_data/",
+  samplePath: "./app/test/test_states",
+  sampleExportFilename: "sample_export.json",
+  sampleProjectJsonFilename: "sample_project.json",
+  itemListFilename: "image_list.yml",
+  categoriesFilename: "categories.yml",
+  attributesFilename: "bbox_attributes.yml",
+  projectFilename: "project.json",
   exportMode: false
 }
 
@@ -59,7 +59,7 @@ export let testConfig: TestConfig = {
  * changes current test config to newConfig
  * @param newConfig
  */
-export function changeTestConfig (newConfig: Partial<TestConfig>) {
+export function changeTestConfig(newConfig: Partial<TestConfig>) {
   testConfig = {
     ...testConfig,
     ...newConfig
@@ -70,12 +70,12 @@ export function changeTestConfig (newConfig: Partial<TestConfig>) {
  * helper function to get example file from disc
  * @param filename
  */
-function getExampleFileFromDisc (
+function getExampleFileFromDisc(
   filename: string,
   examplePath = testConfig.examplePath
 ): File {
   const fileAsString = fs.readFileSync(examplePath + filename, {
-    encoding: 'utf8'
+    encoding: "utf8"
   })
   return new File([fileAsString], filename)
 }
@@ -83,11 +83,11 @@ function getExampleFileFromDisc (
 /**
  * gets true export data from disc
  */
-export function getExportFromDisc () {
+export function getExportFromDisc() {
   return JSON.parse(
     fs.readFileSync(
       path.join(testConfig.samplePath, testConfig.sampleExportFilename),
-      'utf8'
+      "utf8"
     )
   )
 }
@@ -95,11 +95,11 @@ export function getExportFromDisc () {
 /**
  * gets true project data from disc
  */
-export function getProjectJsonFromDisc () {
+export function getProjectJsonFromDisc() {
   return JSON.parse(
     fs.readFileSync(
       path.join(testConfig.samplePath, testConfig.sampleProjectJsonFilename),
-      'utf-8'
+      "utf-8"
     )
   )
 }
@@ -108,8 +108,8 @@ export function getProjectJsonFromDisc () {
  * deep deletes timestamp from given data
  * @param data
  */
-// tslint:disable-next-line: no-any
-export function deepDeleteTimestamp (data: ItemExport[]): any[] {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function deepDeleteTimestamp(data: ItemExport[]): any[] {
   const copy = JSON.parse(JSON.stringify(data))
   for (const entry of copy) {
     if (entry) {
@@ -123,14 +123,14 @@ export function deepDeleteTimestamp (data: ItemExport[]): any[] {
  * helper function to force javascript to sleep
  * @param milliseconds
  */
-export function sleep (milliseconds: number): Promise<object> {
+export function sleep(milliseconds: number): Promise<object> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
 
 /**
  * helper function to wait for backend to save
  */
-export function waitForSave (): Promise<object> {
+export function waitForSave(): Promise<object> {
   return new Promise(async (resolve) => {
     while (!isStatusSaved(Session.store.getState())) {
       await sleep(10)
@@ -142,16 +142,15 @@ export function waitForSave (): Promise<object> {
 /**
  * Deletes the generetaed test directory
  */
-export function deleteTestDir (): void {
+export function deleteTestDir(): void {
   fs.removeSync(testConfig.testDirPath)
-  return
 }
 
 /**
  * gets exported annotations as a string
  */
-export async function getExport (): Promise<ItemExport[]> {
-  return new Promise<ItemExport[]>((resolve, reject) => {
+export async function getExport(): Promise<ItemExport[]> {
+  return await new Promise<ItemExport[]>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
@@ -164,11 +163,16 @@ export async function getExport (): Promise<ItemExport[]> {
           })
         }
       } else {
-        return
       }
     }
-    xhr.open('GET', Endpoint.EXPORT + '?' +
-    FormField.PROJECT_NAME + '=' + testConfig.projectName)
+    xhr.open(
+      "GET",
+      Endpoint.EXPORT +
+        "?" +
+        FormField.PROJECT_NAME +
+        "=" +
+        testConfig.projectName
+    )
     xhr.send()
   })
 }
@@ -176,12 +180,15 @@ export async function getExport (): Promise<ItemExport[]> {
 /**
  * gets created project.json file
  */
-export function getProjectJson () {
+export function getProjectJson() {
   return JSON.parse(
     fs.readFileSync(
-      path.join(testConfig.testDirPath, testConfig.projectName,
-        testConfig.projectFilename),
-      'utf-8'
+      path.join(
+        testConfig.testDirPath,
+        testConfig.projectName,
+        testConfig.projectFilename
+      ),
+      "utf-8"
     )
   )
 }
@@ -189,7 +196,7 @@ export function getProjectJson () {
 /**
  * Counts created task/{i}.json file
  */
-export async function countTasks (projectName: string) {
+export async function countTasks(projectName: string) {
   const taskDir = path.join(testConfig.testDirPath, getTaskDir(projectName))
   if (!(await fs.pathExists(taskDir))) {
     return 0
@@ -208,7 +215,7 @@ class IntegrationCreateForm extends CreateForm {
    * over writes create form get form data to input files into ajax request
    * @param event
    */
-  protected getFormData (event: ChangeEvent<HTMLFormElement>): FormData {
+  protected getFormData(event: ChangeEvent<HTMLFormElement>): FormData {
     let itemFilePath: string
     let itemFilename: string
     if (testConfig.exportMode) {
@@ -219,20 +226,16 @@ class IntegrationCreateForm extends CreateForm {
       itemFilename = testConfig.itemListFilename
     }
     const itemFile = getExampleFileFromDisc(itemFilename, itemFilePath)
-    const categoriesFile = getExampleFileFromDisc(
-      testConfig.categoriesFilename
-    )
-    const attributesFile = getExampleFileFromDisc(
-      testConfig.attributesFilename
-    )
+    const categoriesFile = getExampleFileFromDisc(testConfig.categoriesFilename)
+    const attributesFile = getExampleFileFromDisc(testConfig.attributesFilename)
     const formData = new FormData(event.target)
-    formData.delete('item_file')
-    formData.append('item_file', itemFile, itemFile.name)
-    formData.delete('sensors_file')
-    formData.delete('categories')
-    formData.append('categories', categoriesFile, categoriesFile.name)
-    formData.delete('attributes')
-    formData.append('attributes', attributesFile, attributesFile.name)
+    formData.delete("item_file")
+    formData.append("item_file", itemFile, itemFile.name)
+    formData.delete("sensors_file")
+    formData.delete("categories")
+    formData.append("categories", categoriesFile, categoriesFile.name)
+    formData.delete("attributes")
+    formData.append("attributes", attributesFile, attributesFile.name)
 
     return formData
   }

@@ -1,9 +1,15 @@
-import _ from 'lodash'
-import Session from '../common/session'
-import { isValidId } from '../functional/states'
-import { AddTrackAction, DeleteLabelsAction } from '../types/action'
-import { IdType, INVALID_ID, LabelType, ShapeType, TrackType } from '../types/state'
-import { addTrack, deleteLabels } from './common'
+import _ from "lodash"
+import Session from "../common/session"
+import { isValidId } from "../functional/states"
+import { AddTrackAction, DeleteLabelsAction } from "../types/action"
+import {
+  IdType,
+  INVALID_ID,
+  LabelType,
+  ShapeType,
+  TrackType
+} from "../types/state"
+import { addTrack, deleteLabels } from "./common"
 
 /**
  * Add track by duplicating label from startIndex to stopIndex
@@ -13,7 +19,7 @@ import { addTrack, deleteLabels } from './common'
  * @param startIndex
  * @param stopIndex
  */
-export function addDuplicatedTrack (
+export function addDuplicatedTrack(
   label: LabelType,
   shapeTypes: string[],
   shapes: ShapeType[],
@@ -65,18 +71,14 @@ export function addDuplicatedTrack (
     itemIndices.push(index)
   }
 
-  return addTrack(
-    itemIndices, label.type, trackLabels, trackShapes
-  )
+  return addTrack(itemIndices, label.type, trackLabels, trackShapes)
 }
 
 /**
  * Delete all labels from track & track
  * @param trackId
  */
-export function deleteTracks (
-  tracks: TrackType[]
-): DeleteLabelsAction {
+export function deleteTracks(tracks: TrackType[]): DeleteLabelsAction {
   const itemLength = Session.numItems
 
   const itemIndices = []
@@ -101,7 +103,7 @@ export function deleteTracks (
  * @param track
  * @param lastIndex
  */
-export function terminateTracks (
+export function terminateTracks(
   tracks: TrackType[],
   firstIndexToDelete: number,
   numItems: number

@@ -1,7 +1,7 @@
-import { AttributeToolType } from '../../src/const/common'
-import * as makers from '../../src/functional/states'
-import * as stats from '../../src/server/stats'
-import { TaskType } from '../../src/types/state'
+import { AttributeToolType } from "../../src/const/common"
+import * as makers from "../../src/functional/states"
+import * as stats from "../../src/server/stats"
+import { TaskType } from "../../src/types/state"
 
 let sampleTask1: TaskType
 let sampleTask2: TaskType
@@ -10,17 +10,15 @@ let expectedLabelStats: stats.LabelStats
 
 beforeAll(() => {
   const config = makers.makeTaskConfig({
-    categories: [
-      'car', 'person', 'traffic light'
-    ],
+    categories: ["car", "person", "traffic light"],
     attributes: [
       makers.makeAttribute({
-        name: 'Occluded'
+        name: "Occluded"
       }),
       makers.makeAttribute({
-        name: 'Traffic light color',
+        name: "Traffic light color",
         toolType: AttributeToolType.LIST,
-        values: ['N/A', 'G', 'Y', 'R']
+        values: ["N/A", "G", "Y", "R"]
       })
     ]
   })
@@ -33,37 +31,41 @@ beforeAll(() => {
           0: makers.makeLabel({
             category: [1],
             attributes: {
-              0: [1], 1: [2]
+              0: [1],
+              1: [2]
             }
           }),
           1: makers.makeLabel({
             category: [0],
             attributes: {
-              0: [0], 1: [3]
+              0: [0],
+              1: [3]
             }
           })
-        }}),
+        }
+      }),
       makers.makeItem(),
       makers.makeItem({
         labels: {
           2: makers.makeLabel({
             category: [1],
             attributes: {
-              0: [1], 1: [0]
-            }}),
+              0: [1],
+              1: [0]
+            }
+          }),
           3: makers.makeLabel({
             category: [2],
             attributes: {
-              0: [1], 1: [1]
+              0: [1],
+              1: [1]
             }
           })
         }
       })
     ],
     progress: {
-      submissions: [
-        { time: 55, user: 'sampleUser ' }
-      ]
+      submissions: [{ time: 55, user: "sampleUser " }]
     }
   })
 
@@ -77,13 +79,15 @@ beforeAll(() => {
           5: makers.makeLabel({
             category: [1],
             attributes: {
-              0: [1], 1: [2]
+              0: [1],
+              1: [2]
             }
           }),
           6: makers.makeLabel({
             category: [2, 0],
             attributes: {
-              0: [0], 1: [3, 2]
+              0: [0],
+              1: [3, 2]
             }
           })
         }
@@ -96,63 +100,62 @@ beforeAll(() => {
   allTasks = [sampleTask1, sampleTask2, itemlessTask]
   expectedLabelStats = {
     category: {
-      'car': {
+      car: {
         count: 2,
         attribute: {
-          'Occluded': { false: 2, true: 0 },
-          'Traffic light color': { 'N/A': 0, 'G': 0, 'Y': 1, 'R': 2 }
+          Occluded: { false: 2, true: 0 },
+          "Traffic light color": { "N/A": 0, G: 0, Y: 1, R: 2 }
         }
       },
-      'person': {
+      person: {
         count: 3,
         attribute: {
-          'Occluded': { false: 0, true: 3 },
-          'Traffic light color': { 'N/A': 1, 'G': 0, 'Y': 2, 'R': 0 }
+          Occluded: { false: 0, true: 3 },
+          "Traffic light color": { "N/A": 1, G: 0, Y: 2, R: 0 }
         }
       },
-      'traffic light': {
+      "traffic light": {
         count: 2,
         attribute: {
-          'Occluded': { false: 1, true: 1 },
-          'Traffic light color': { 'N/A': 0, 'G': 1, 'Y': 1, 'R': 1 }
+          Occluded: { false: 1, true: 1 },
+          "Traffic light color": { "N/A": 0, G: 1, Y: 1, R: 1 }
         }
       }
     },
     attribute: {
-      'Occluded': { false: 2, true: 4 },
-      'Traffic light color': { 'N/A': 1, 'G': 1, 'Y': 3, 'R': 2 }
+      Occluded: { false: 2, true: 4 },
+      "Traffic light color": { "N/A": 1, G: 1, Y: 3, R: 2 }
     }
   }
 })
 
-describe('Simple stat functions', () => {
-  test('Count labels', () => {
+describe("Simple stat functions", () => {
+  test("Count labels", () => {
     expect(stats.countLabelsTask(sampleTask1)).toBe(4)
     expect(stats.countLabelsTask(sampleTask2)).toBe(3)
     expect(stats.countLabelsProject(allTasks)).toBe(7)
   })
 
-  test('Count labeled images', () => {
+  test("Count labeled images", () => {
     expect(stats.countLabeledItemsTask(sampleTask1)).toBe(2)
     expect(stats.countLabeledItemsTask(sampleTask2)).toBe(1)
     expect(stats.countLabeledItemsProject(allTasks)).toBe(3)
   })
 
-  test('Count items', () => {
+  test("Count items", () => {
     expect(stats.getNumItems(allTasks)).toBe(5)
   })
 
-  test('Count submissions', () => {
+  test("Count submissions", () => {
     expect(stats.getNumSubmissions(allTasks))
   })
 
-  test('Category counts', () => {
-    expect(stats.getLabelStats(allTasks)).toStrictEqual(
-      expectedLabelStats)
+  test("Category counts", () => {
+    expect(stats.getLabelStats(allTasks)).toStrictEqual(expectedLabelStats)
   })
 })
 
-describe('Stat aggregation', () => {
+describe("Stat aggregation", () => {
   const constantDate = Date.now()
   const dateFn = Date.now
 
@@ -166,18 +169,16 @@ describe('Stat aggregation', () => {
     Date.now = dateFn
   })
 
-  test('Task options', () => {
+  test("Task options", () => {
     expect(stats.getTaskOptions(sampleTask1)).toStrictEqual({
-      numLabeledItems: '2',
-      numLabels: '4',
-      submissions: [
-        { time: 55, user: 'sampleUser ' }
-      ],
-      handlerUrl: ''
+      numLabeledItems: "2",
+      numLabels: "4",
+      submissions: [{ time: 55, user: "sampleUser " }],
+      handlerUrl: ""
     })
   })
 
-  test('Project stats', () => {
+  test("Project stats", () => {
     expect(stats.getProjectStats(allTasks)).toStrictEqual({
       numLabels: 7,
       numLabeledItems: 3,
@@ -189,7 +190,7 @@ describe('Stat aggregation', () => {
     })
   })
 
-  test('Project stats empty task list', () => {
+  test("Project stats empty task list", () => {
     expect(stats.getProjectStats([])).toStrictEqual({
       numLabels: 0,
       numLabeledItems: 0,

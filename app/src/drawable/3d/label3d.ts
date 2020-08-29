@@ -1,15 +1,21 @@
-import _ from 'lodash'
-import * as THREE from 'three'
-import { LabelTypeName } from '../../const/common'
-import { makeLabel } from '../../functional/states'
-import { Vector3D } from '../../math/vector3d'
-import { IdType, INVALID_ID, LabelType, ShapeType, State } from '../../types/state'
-import { getColorById } from '../util'
-import { Label3DList } from './label3d_list'
-import { Shape3D } from './shape3d'
+import _ from "lodash"
+import * as THREE from "three"
+import { LabelTypeName } from "../../const/common"
+import { makeLabel } from "../../functional/states"
+import { Vector3D } from "../../math/vector3d"
+import {
+  IdType,
+  INVALID_ID,
+  LabelType,
+  ShapeType,
+  State
+} from "../../types/state"
+import { getColorById } from "../util"
+import { Label3DList } from "./label3d_list"
+import { Shape3D } from "./shape3d"
 
 /** Convert string to label type name enum */
-export function labelTypeFromString (type: string): LabelTypeName {
+export function labelTypeFromString(type: string): LabelTypeName {
   switch (type) {
     case LabelTypeName.BOX_3D:
       return LabelTypeName.BOX_3D
@@ -40,7 +46,7 @@ export abstract class Label3D {
   /** label list this belongs to */
   protected _labelList: Label3DList
 
-  constructor (labelList: Label3DList) {
+  constructor(labelList: Label3DList) {
     this._label = makeLabel()
     this._selected = false
     this._highlighted = false
@@ -52,55 +58,55 @@ export abstract class Label3D {
   }
 
   /** Get label list */
-  public get labelList (): Readonly<Label3DList> {
+  public get labelList(): Readonly<Label3DList> {
     return this._labelList
   }
 
   /** get label id */
-  public get labelId (): IdType {
+  public get labelId(): IdType {
     return this._label.id
   }
 
   /** get track id */
-  public get trackId (): IdType {
+  public get trackId(): IdType {
     return this._label.track
   }
 
   /** get item index */
-  public get item (): number {
+  public get item(): number {
     return this._label.item
   }
 
   /** get label type */
-  public get type (): string {
+  public get type(): string {
     return labelTypeFromString(this._label.type)
   }
 
   /** get whether label was manually drawn */
-  public get manual (): boolean {
+  public get manual(): boolean {
     return this._label.manual
   }
 
   /** set whether label was manually drawn */
-  public setManual () {
+  public setManual() {
     this._label.manual = true
   }
 
   /** get label state */
-  public get label (): Readonly<LabelType> {
+  public get label(): Readonly<LabelType> {
     if (!this._label) {
-      throw new Error('Label uninitialized')
+      throw new Error("Label uninitialized")
     }
     return this._label
   }
 
   /** Get parent label */
-  public get parent (): Label3D | null {
+  public get parent(): Label3D | null {
     return this._parent
   }
 
   /** Set parent label */
-  public set parent (parent: Label3D | null) {
+  public set parent(parent: Label3D | null) {
     this._parent = parent
     if (parent && this._label) {
       this._label.parent = parent.labelId
@@ -110,12 +116,12 @@ export abstract class Label3D {
   }
 
   /** Get children */
-  public get children (): Readonly<Label3D[]> {
+  public get children(): Readonly<Label3D[]> {
     return this._children
   }
 
   /** Returns true if any children selected */
-  public anyChildSelected (): boolean {
+  public anyChildSelected(): boolean {
     for (const child of this.children) {
       if (child.selected) {
         return true
@@ -126,25 +132,25 @@ export abstract class Label3D {
   }
 
   /** select the label */
-  public set selected (s: boolean) {
+  public set selected(s: boolean) {
     this._selected = s
   }
 
   /** return whether label selected */
-  public get selected (): boolean {
+  public get selected(): boolean {
     return this._selected
   }
 
   /** Return whether this label is temporary (not committed to state) */
-  public get temporary (): boolean {
+  public get temporary(): boolean {
     return this._temporary
   }
 
   /** Get shape id's and shapes for updating */
-  public abstract shapes (): ShapeType[]
+  public abstract shapes(): ShapeType[]
 
   /** highlight the label */
-  public setHighlighted (intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection) {
     if (intersection) {
       this._highlighted = true
     } else {
@@ -153,7 +159,7 @@ export abstract class Label3D {
   }
 
   /** add child */
-  public addChild (child: Label3D) {
+  public addChild(child: Label3D) {
     if (child.parent !== this) {
       if (child.parent) {
         child.parent.removeChild(child)
@@ -167,7 +173,7 @@ export abstract class Label3D {
   }
 
   /** remove child */
-  public removeChild (child: Label3D) {
+  public removeChild(child: Label3D) {
     const index = this._children.indexOf(child)
     if (index >= 0) {
       this._children.splice(index, 1)
@@ -182,7 +188,7 @@ export abstract class Label3D {
   }
 
   /** get category */
-  public get category (): number[] {
+  public get category(): number[] {
     if (this._label && this._label.category) {
       return this._label.category
     }
@@ -190,7 +196,7 @@ export abstract class Label3D {
   }
 
   /** get attributes */
-  public get attributes (): {[key: number]: number[]} {
+  public get attributes(): { [key: number]: number[] } {
     if (this._label && this._label.attributes) {
       return this._label.attributes
     }
@@ -198,66 +204,70 @@ export abstract class Label3D {
   }
 
   /** Set active camera for label */
-  public set activeCamera (_camera: THREE.Camera) {
-    return
-  }
+  public set activeCamera(_camera: THREE.Camera) {}
 
   /**
    * Handle mouse move
    * @param projection
    */
-  public abstract onMouseDown (
-    x: number, y: number, camera: THREE.Camera
+  public abstract onMouseDown(
+    x: number,
+    y: number,
+    camera: THREE.Camera
   ): boolean
 
   /**
    * Handle mouse up
    * @param projection
    */
-  public abstract onMouseUp (): void
+  public abstract onMouseUp(): void
 
   /**
    * Handle mouse move
    * @param projection
    */
-  public abstract onMouseMove (
-    x: number, y: number, camera: THREE.Camera
+  public abstract onMouseMove(
+    x: number,
+    y: number,
+    camera: THREE.Camera
   ): boolean
 
   /** Rotate label in direction of quaternion */
-  public abstract rotate (
+  public abstract rotate(
     quaternion: THREE.Quaternion,
     anchor?: THREE.Vector3
   ): void
 
   /** Translate label in provided direction */
-  public abstract translate (delta: THREE.Vector3): void
+  public abstract translate(delta: THREE.Vector3): void
 
   /** Scale label */
-  public abstract scale (
-    scale: THREE.Vector3, anchor: THREE.Vector3, local: boolean
+  public abstract scale(
+    scale: THREE.Vector3,
+    anchor: THREE.Vector3,
+    local: boolean
   ): void
 
   /** Move label to position, different from translate, which accepts a delta */
-  public abstract move (position: THREE.Vector3): void
+  public abstract move(position: THREE.Vector3): void
 
   /** Center of label */
-  public get center (): THREE.Vector3 {
+  public get center(): THREE.Vector3 {
     return new THREE.Vector3()
   }
 
   /** Orientation of label */
-  public get orientation (): THREE.Quaternion {
+  public get orientation(): THREE.Quaternion {
     return new THREE.Quaternion()
   }
 
   /** Size of the label */
-  public get size (): THREE.Vector3 {
+  public get size(): THREE.Vector3 {
     return new THREE.Vector3()
   }
 
   /** Bounds of label */
-  public bounds (_local?: boolean): THREE.Box3 {
+  public bounds(_local?: boolean): THREE.Box3 {
     return new THREE.Box3()
   }
 
@@ -265,7 +275,7 @@ export abstract class Label3D {
    * Initialize label
    * @param {State} state
    */
-  public abstract init (
+  public abstract init(
     itemIndex: number,
     category: number,
     center?: Vector3D,
@@ -276,20 +286,18 @@ export abstract class Label3D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public abstract internalShapes (): Shape3D[]
+  public abstract internalShapes(): Shape3D[]
 
   /** Convert label state to drawable */
-  public updateState (
-    state: State,
-    itemIndex: number,
-    labelId: IdType
-  ): void {
+  public updateState(state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
     this._label = _.cloneDeep(item.labels[labelId])
     this._color = getColorById(this.labelId, this.trackId)
     const select = state.user.select
-    if (this._label.item in select.labels &&
-        select.labels[this._label.item].includes(labelId)) {
+    if (
+      this._label.item in select.labels &&
+      select.labels[this._label.item].includes(labelId)
+    ) {
       this.selected = true
     } else {
       this.selected = false

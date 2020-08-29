@@ -1,17 +1,23 @@
-import { changeLabelsProps, linkLabels, mergeTracks, startLinkTrack, unlinkLabels } from '../../action/common'
-import { selectLabels, unselectLabels } from '../../action/select'
-import Session from '../../common/session'
-import { addVisibilityListener } from '../../common/window'
-import { Key } from '../../const/common'
-import { getLinkedLabelIds } from '../../functional/common'
-import { getSelectedTracks } from '../../functional/state_util'
-import { tracksOverlapping } from '../../functional/track'
-import { Size2D } from '../../math/size2d'
-import { Vector2D } from '../../math/vector2d'
-import { IdType, State } from '../../types/state'
-import { commit2DLabels } from '../states'
-import { Label2D } from './label2d'
-import { Label2DList, makeDrawableLabel2D } from './label2d_list'
+import {
+  changeLabelsProps,
+  linkLabels,
+  mergeTracks,
+  startLinkTrack,
+  unlinkLabels
+} from "../../action/common"
+import { selectLabels, unselectLabels } from "../../action/select"
+import Session from "../../common/session"
+import { addVisibilityListener } from "../../common/window"
+import { Key } from "../../const/common"
+import { getLinkedLabelIds } from "../../functional/common"
+import { getSelectedTracks } from "../../functional/state_util"
+import { tracksOverlapping } from "../../functional/track"
+import { Size2D } from "../../math/size2d"
+import { Vector2D } from "../../math/vector2d"
+import { IdType, State } from "../../types/state"
+import { commit2DLabels } from "../states"
+import { Label2D } from "./label2d"
+import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
 
 /**
  * List of drawable labels
@@ -19,7 +25,7 @@ import { Label2DList, makeDrawableLabel2D } from './label2d_list'
  */
 export class Label2DHandler {
   /** Drawable label list */
-  private _labelList: Label2DList
+  private readonly _labelList: Label2DList
   /** Recorded state of last update */
   private _state: State
   /** Highlighted label */
@@ -29,7 +35,7 @@ export class Label2DHandler {
   /** Index of currently selected item */
   private _selectedItemIndex: number
 
-  constructor (labelList: Label2DList) {
+  constructor(labelList: Label2DList) {
     this._highlightedLabel = null
     this._state = Session.getState()
     this._keyDownMap = {}
@@ -40,7 +46,7 @@ export class Label2DHandler {
   }
 
   /** get highlightedLabel for state inspection */
-  public get highlightedLabel (): Label2D | null {
+  public get highlightedLabel(): Label2D | null {
     return this._highlightedLabel
   }
 
@@ -50,17 +56,24 @@ export class Label2DHandler {
    * @param labelIndex
    * @param handleIndex
    */
-  public onMouseDown (
-      coord: Vector2D, _labelIndex: number, handleIndex: number): boolean {
+  public onMouseDown(
+    coord: Vector2D,
+    _labelIndex: number,
+    handleIndex: number
+  ): boolean {
     if (!this.hasSelectedLabels() || !this.isEditingSelectedLabels()) {
       if (this._highlightedLabel) {
         this.selectHighlighted()
       } else {
-        Session.dispatch(selectLabels(
-          {}, -1, [],
-          this._state.user.select.category,
-          this._state.user.select.attributes
-        ))
+        Session.dispatch(
+          selectLabels(
+            {},
+            -1,
+            [],
+            this._state.user.select.category,
+            this._state.user.select.attributes
+          )
+        )
         this._labelList.selectedLabels.length = 0
         const state = this._state
         // TODO: Refactor the relation between handler, label list and label
@@ -79,8 +92,11 @@ export class Label2DHandler {
         this._highlightedLabel = label
       }
     }
-    if (this.hasSelectedLabels() &&
-        !this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
+    if (
+      this.hasSelectedLabels() &&
+      !this.isKeyDown(Key.META) &&
+      !this.isKeyDown(Key.CONTROL)
+    ) {
       for (const label of this._labelList.selectedLabels) {
         if (label !== this._highlightedLabel) {
           label.setHighlighted(true, 0)
@@ -102,8 +118,11 @@ export class Label2DHandler {
    * @param labelIndex
    * @param handleIndex
    */
-  public onMouseUp (
-      coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
+  public onMouseUp(
+    coord: Vector2D,
+    _labelIndex: number,
+    _handleIndex: number
+  ): void {
     if (this.hasSelectedLabels() && !this.isKeyDown(Key.META)) {
       const labelsToRemove: Label2D[] = []
       this._labelList.selectedLabels.forEach((selectedLabel) => {
@@ -134,9 +153,12 @@ export class Label2DHandler {
   /**
    * Process mouse move action
    */
-  public onMouseMove (
-      coord: Vector2D, canvasLimit: Size2D,
-      labelIndex: number, handleIndex: number): boolean {
+  public onMouseMove(
+    coord: Vector2D,
+    canvasLimit: Size2D,
+    labelIndex: number,
+    handleIndex: number
+  ): boolean {
     if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
       for (const label of this._labelList.selectedLabels) {
         label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
@@ -165,14 +187,12 @@ export class Label2DHandler {
    * Handle keyboard down events
    * @param e
    */
-  public onKeyDown (e: KeyboardEvent): void {
+  public onKeyDown(e: KeyboardEvent): void {
     this._keyDownMap[e.key] = true
     for (const selectedLabel of this._labelList.selectedLabels) {
       if (!selectedLabel.onKeyDown(e.key)) {
         this._labelList.labelList.splice(
-          this._labelList.labelList.indexOf(
-            this._labelList.selectedLabels[0]
-          ),
+          this._labelList.labelList.indexOf(this._labelList.selectedLabels[0]),
           1
         )
         this._labelList.selectedLabels.length = 0
@@ -219,7 +239,8 @@ export class Label2DHandler {
         if (this._labelList.selectedLabels.length === 1) {
           const selectedLabel = this._labelList.selectedLabels[0]
           this.changeLabelOrder(
-            selectedLabel.index, this._labelList.labelList.length - 1
+            selectedLabel.index,
+            this._labelList.labelList.length - 1
           )
         }
         break
@@ -232,7 +253,7 @@ export class Label2DHandler {
   }
 
   /** Update state */
-  public updateState (state: State) {
+  public updateState(state: State) {
     this._state = state
     if (this._selectedItemIndex !== state.user.select.item) {
       this._highlightedLabel = null
@@ -244,7 +265,7 @@ export class Label2DHandler {
    * Handle keyboard up events
    * @param e
    */
-  public onKeyUp (e: KeyboardEvent): void {
+  public onKeyUp(e: KeyboardEvent): void {
     delete this._keyDownMap[e.key]
     for (const selectedLabel of this._labelList.selectedLabels) {
       selectedLabel.onKeyUp(e.key)
@@ -255,18 +276,18 @@ export class Label2DHandler {
    * Handling function for canvas visibility change
    * @param _isVisible
    */
-  public onVisibilityChange (_isVisible: boolean): void {
+  public onVisibilityChange(_isVisible: boolean): void {
     delete this._keyDownMap[Key.META]
     delete this._keyDownMap[Key.CONTROL]
   }
 
   /** returns whether selectedLabels is empty */
-  private hasSelectedLabels (): boolean {
+  private hasSelectedLabels(): boolean {
     return this._labelList.selectedLabels.length !== 0
   }
 
   /** returns whether selectedLabels is editing */
-  private isEditingSelectedLabels (): boolean {
+  private isEditingSelectedLabels(): boolean {
     for (const label of this._labelList.selectedLabels) {
       if (label.editing) {
         return true
@@ -279,68 +300,77 @@ export class Label2DHandler {
    * Whether a specific key is pressed down
    * @param key - the key to check
    */
-  private isKeyDown (key: Key): boolean {
+  private isKeyDown(key: Key): boolean {
     return this._keyDownMap[key]
   }
 
   /** Select highlighted label, if any */
-  private selectHighlighted (): void {
+  private selectHighlighted(): void {
     if (this._highlightedLabel !== null) {
       const item = this._state.task.items[this._state.user.select.item]
       const labelIds = this._highlightedLabel.isValid()
-                       ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
-                       : [this._highlightedLabel.labelId]
-      const highlightedAlreadySelected =
-        this._labelList.selectedLabels.includes(
-          this._highlightedLabel
-        )
+        ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
+        : [this._highlightedLabel.labelId]
+      const highlightedAlreadySelected = this._labelList.selectedLabels.includes(
+        this._highlightedLabel
+      )
       if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
         if (highlightedAlreadySelected) {
-          Session.dispatch(unselectLabels(
-            this._labelList.selectedLabelIds,
-            this._selectedItemIndex,
-            labelIds
-          ))
+          Session.dispatch(
+            unselectLabels(
+              this._labelList.selectedLabelIds,
+              this._selectedItemIndex,
+              labelIds
+            )
+          )
         } else {
-          Session.dispatch(selectLabels(
+          Session.dispatch(
+            selectLabels(
+              this._labelList.selectedLabelIds,
+              this._selectedItemIndex,
+              labelIds,
+              this._highlightedLabel.category[0],
+              this._highlightedLabel.attributes,
+              true
+            )
+          )
+        }
+      } else if (!highlightedAlreadySelected) {
+        Session.dispatch(
+          selectLabels(
             this._labelList.selectedLabelIds,
             this._selectedItemIndex,
             labelIds,
             this._highlightedLabel.category[0],
-            this._highlightedLabel.attributes,
-            true
-          ))
-        }
-      } else if (!highlightedAlreadySelected) {
-        Session.dispatch(selectLabels(
-          this._labelList.selectedLabelIds,
-          this._selectedItemIndex,
-          labelIds,
-          this._highlightedLabel.category[0],
-          this._highlightedLabel.attributes
-        ))
+            this._highlightedLabel.attributes
+          )
+        )
       }
     }
   }
 
   /** link selected labels */
-  private linkLabels (): void {
-    Session.dispatch(linkLabels(
-      this._state.user.select.item,
-      this._labelList.selectedLabels.map((label) => label.labelId)
-    ))
+  private linkLabels(): void {
+    Session.dispatch(
+      linkLabels(
+        this._state.user.select.item,
+        this._labelList.selectedLabels.map((label) => label.labelId)
+      )
+    )
   }
 
   /** unlink selected labels */
-  private unlinkLabels (): void {
-    Session.dispatch(unlinkLabels(
-      this._state.user.select.item,
-      this._labelList.selectedLabels.map((label) => label.labelId)
-    ))
+  private unlinkLabels(): void {
+    Session.dispatch(
+      unlinkLabels(
+        this._state.user.select.item,
+        this._labelList.selectedLabels.map((label) => label.labelId)
+      )
+    )
   }
 
   /** swap label orders, given label indices */
-  private swapOrders (index1: number, index2: number) {
+  private swapOrders(index1: number, index2: number) {
     // Check that indices are valid
     if (
       index1 >= 0 &&
@@ -350,16 +380,18 @@ export class Label2DHandler {
     ) {
       const label1 = this._labelList.get(index1)
       const label2 = this._labelList.get(index2)
-      Session.dispatch(changeLabelsProps(
-        [this._selectedItemIndex],
-        [[label1.labelId, label2.labelId]],
-        [[{ order: label2.order }, { order: label1.order } ]]
-      ))
+      Session.dispatch(
+        changeLabelsProps(
+          [this._selectedItemIndex],
+          [[label1.labelId, label2.labelId]],
+          [[{ order: label2.order }, { order: label1.order }]]
+        )
+      )
     }
   }
 
   /** move label to nth position */
-  private changeLabelOrder (index: number, newPosition: number) {
+  private changeLabelOrder(index: number, newPosition: number) {
     const labels = this._labelList.labelList
     if (
       index >= 0 &&
@@ -387,18 +419,16 @@ export class Label2DHandler {
           labelIds.unshift(labelId)
         }
       }
-      Session.dispatch(changeLabelsProps(
-        [this._selectedItemIndex],
-        [labelIds],
-        [props]
-      ))
+      Session.dispatch(
+        changeLabelsProps([this._selectedItemIndex], [labelIds], [props])
+      )
     }
   }
 
   /**
    * Merge different tracks
    */
-  private mergeTracks () {
+  private mergeTracks() {
     const tracks = getSelectedTracks(this._state)
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))

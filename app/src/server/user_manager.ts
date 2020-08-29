@@ -1,6 +1,6 @@
-import { UserData, UserMetadata } from '../types/project'
-import { ProjectStore } from './project_store'
-import { makeUserData, makeUserMetadata } from './util'
+import { UserData, UserMetadata } from "../types/project"
+import { ProjectStore } from "./project_store"
+import { makeUserData, makeUserMetadata } from "./util"
 
 /**
  * Wraps interface with storage for user management
@@ -9,9 +9,9 @@ export class UserManager {
   /** the permanent storage */
   protected projectStore: ProjectStore
   /** whether to apply hotfix that disables user management */
-  private disable: boolean
+  private readonly disable: boolean
 
-  constructor (projectStore: ProjectStore, userManagement: boolean = true) {
+  constructor(projectStore: ProjectStore, userManagement: boolean = true) {
     this.projectStore = projectStore
     this.disable = !userManagement
   }
@@ -19,8 +19,11 @@ export class UserManager {
   /**
    * Saves the current socket's user data
    */
-  public async registerUser (
-    socketId: string, projectName: string, userId: string) {
+  public async registerUser(
+    socketId: string,
+    projectName: string,
+    userId: string
+  ) {
     if (this.disable) {
       return
     }
@@ -36,14 +39,16 @@ export class UserManager {
   /**
    * Deletes the user data of the socket that disconnected
    */
-  public async deregisterUser (socketId: string) {
+  public async deregisterUser(socketId: string) {
     if (this.disable) {
       return
     }
     // Access the projectName via metadata
     const userMetadata = await this.projectStore.loadUserMetadata()
-    const [newUserMetadata, projectName] =
-      this.removeSocketFromMeta(userMetadata, socketId)
+    const [newUserMetadata, projectName] = this.removeSocketFromMeta(
+      userMetadata,
+      socketId
+    )
     if (!projectName) {
       return
     }
@@ -58,7 +63,7 @@ export class UserManager {
   /**
    * Counts the number of currently connected users
    */
-  public async countUsers (projectName: string): Promise<number> {
+  public async countUsers(projectName: string): Promise<number> {
     if (this.disable) {
       return 0
     }
@@ -73,7 +78,7 @@ export class UserManager {
   /**
    * Remove all active users, so all counts should be 0
    */
-  public async clearUsers (): Promise<void> {
+  public async clearUsers(): Promise<void> {
     if (this.disable) {
       return
     }
@@ -93,8 +98,11 @@ export class UserManager {
   /**
    * Links socket to user and vice versa
    */
-  private addSocketToUser (
-    userData: UserData, socketId: string, userId: string): UserData {
+  private addSocketToUser(
+    userData: UserData,
+    socketId: string,
+    userId: string
+  ): UserData {
     const socketToUser = userData.socketToUser
     const userToSockets = userData.userToSockets
 
@@ -119,8 +127,7 @@ export class UserManager {
   /**
    * Unlinks socket and user
    */
-  private removeSocketFromUser (
-    userData: UserData, socketId: string): UserData {
+  private removeSocketFromUser(userData: UserData, socketId: string): UserData {
     const socketToUser = userData.socketToUser
     const userToSockets = userData.userToSockets
 
@@ -152,9 +159,11 @@ export class UserManager {
   /**
    * Updates metadata by linking socket to project
    */
-  private addSocketToMeta (
-    userMetadata: UserMetadata, socketId: string,
-    projectName: string): UserMetadata {
+  private addSocketToMeta(
+    userMetadata: UserMetadata,
+    socketId: string,
+    projectName: string
+  ): UserMetadata {
     const socketToProject = userMetadata.socketToProject
     socketToProject[socketId] = projectName
     return { socketToProject }
@@ -164,12 +173,14 @@ export class UserManager {
    * Updates metadata by removing socket from project
    * Returns updated metadata and the project name if it exists
    */
-  private removeSocketFromMeta (
-    userMetadata: UserMetadata, socketId: string): [UserMetadata, string] {
+  private removeSocketFromMeta(
+    userMetadata: UserMetadata,
+    socketId: string
+  ): [UserMetadata, string] {
     const socketToProject = userMetadata.socketToProject
     if (!(socketId in socketToProject)) {
       // Socket has no associated project
-      return [userMetadata, '']
+      return [userMetadata, ""]
     }
     const projectName = socketToProject[socketId]
 

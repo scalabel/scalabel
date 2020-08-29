@@ -1,17 +1,23 @@
 import {
-  addLabel, addTrack, initSessionAction,
-  linkLabels, splitPane, submit, updateTask } from '../../src/action/common'
-import { isTaskAction } from '../../src/const/action'
-import { makeLabel, makeTask } from '../../src/functional/states'
-import { BaseAction } from '../../src/types/action'
-import { SplitType } from '../../src/types/state'
+  addLabel,
+  addTrack,
+  initSessionAction,
+  linkLabels,
+  splitPane,
+  submit,
+  updateTask
+} from "../../src/action/common"
+import { isTaskAction } from "../../src/const/action"
+import { makeLabel, makeTask } from "../../src/functional/states"
+import { BaseAction } from "../../src/types/action"
+import { SplitType } from "../../src/types/state"
 
-test('Test task action checker', () => {
+test("Test task action checker", () => {
   // Test some subset of task actions
   const taskActions: BaseAction[] = [
     addLabel(0, makeLabel()),
     linkLabels(0, []),
-    addTrack([], '', [], []),
+    addTrack([], "", [], []),
     submit()
   ]
   for (const taskAction of taskActions) {

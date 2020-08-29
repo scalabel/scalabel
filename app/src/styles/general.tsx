@@ -1,4 +1,4 @@
-import { myTheme } from './theme'
+import { myTheme } from "./theme"
 
 // General styles which are used for in components across all pages
 

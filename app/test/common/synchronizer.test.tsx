@@ -1,18 +1,20 @@
-import { cleanup } from '@testing-library/react'
-import { setStatusToUnsaved } from '../../src/action/common'
-import Session from '../../src/common/session'
-import { Synchronizer } from '../../src/common/synchronizer'
-import { uid } from '../../src/common/uid'
-import { index2str } from '../../src/common/util'
-import { EventName } from '../../src/const/connection'
-import * as selector from '../../src/functional/selector'
-import { updateState } from '../../src/server/util'
-import { AddLabelsAction } from '../../src/types/action'
+import { cleanup } from "@testing-library/react"
+import { setStatusToUnsaved } from "../../src/action/common"
+import Session from "../../src/common/session"
+import { Synchronizer } from "../../src/common/synchronizer"
+import { uid } from "../../src/common/uid"
+import { index2str } from "../../src/common/util"
+import { EventName } from "../../src/const/connection"
+import * as selector from "../../src/functional/selector"
+import { updateState } from "../../src/server/util"
+import { AddLabelsAction } from "../../src/types/action"
 import {
-  ActionPacketType, RegisterMessageType,
-  SyncActionMessageType } from '../../src/types/message'
-import { ThunkDispatchType } from '../../src/types/redux'
-import { getInitialState, getRandomBox2dAction } from '../server/util/util'
+  ActionPacketType,
+  RegisterMessageType,
+  SyncActionMessageType
+} from "../../src/types/message"
+import { ThunkDispatchType } from "../../src/types/redux"
+import { getInitialState, getRandomBox2dAction } from "../server/util/util"
 
 let sessionId: string
 let botSessionId: string
@@ -27,36 +29,37 @@ const mockSocket = {
 }
 
 beforeAll(() => {
-  sessionId = 'fakeSessId'
-  botSessionId = 'botSessId'
+  sessionId = "fakeSessId"
+  botSessionId = "botSessId"
   taskIndex = 0
-  projectName = 'testProject'
-  userId = 'fakeUserId'
+  projectName = "testProject"
+  userId = "fakeUserId"
   autosave = true
 })
 
 const dispatch: ThunkDispatchType = Session.dispatch.bind(
-  Session) as ThunkDispatchType
+  Session
+) as ThunkDispatchType
 
 beforeEach(() => {
   Session.dispatch(setStatusToUnsaved())
 })
 
 afterEach(cleanup)
-describe('Test synchronizer functionality', () => {
-  test('Test correct registration message gets sent', async () => {
+describe("Test synchronizer functionality", () => {
+  test("Test correct registration message gets sent", async () => {
     // Since this deals with registration, don't initialize the state
     const initializeState = false
     const sync = startSynchronizer(initializeState)
-    sync.sendConnectionMessage('', dispatch)
+    sync.sendConnectionMessage("", dispatch)
 
     // Frontend doesn't have a session id until after registration
-    const expectedSessId = ''
+    const expectedSessId = ""
     checkConnectMessage(expectedSessId)
     expect(selector.isStatusUnsaved(Session.store.getState())).toBe(true)
   })
 
-  test('Test send-ack loop', async () => {
+  test("Test send-ack loop", async () => {
     const sync = startSynchronizer()
     dispatchAndCheckActions(sync, 1)
 
@@ -67,12 +70,11 @@ describe('Test synchronizer functionality', () => {
     expect(selector.isStatusSaved(Session.store.getState())).toBe(true)
 
     // If second ack arrives, it is ignored
-    sync.handleBroadcast(
-      packetToMessage(ackPackets[0]), sessionId, dispatch)
+    sync.handleBroadcast(packetToMessage(ackPackets[0]), sessionId, dispatch)
     expect(sync.numLoggedActions).toBe(1)
   })
 
-  test('Test model prediction status', async () => {
+  test("Test model prediction status", async () => {
     const sync = startSynchronizer()
 
     dispatchAndCheckActions(sync, 2, true)
@@ -96,17 +98,23 @@ describe('Test synchronizer functionality', () => {
     }
 
     sync.handleBroadcast(
-      packetToMessageBot(modelPackets[0]), sessionId, dispatch)
+      packetToMessageBot(modelPackets[0]),
+      sessionId,
+      dispatch
+    )
     expect(sync.numActionsPendingPrediction).toBe(1)
     expect(selector.isComputeDone(Session.store.getState())).toBe(false)
 
     sync.handleBroadcast(
-      packetToMessageBot(modelPackets[1]), sessionId, dispatch)
+      packetToMessageBot(modelPackets[1]),
+      sessionId,
+      dispatch
+    )
     expect(sync.numActionsPendingPrediction).toBe(0)
     expect(selector.isComputeDone(Session.store.getState())).toBe(true)
   })
 
-  test('Test reconnection', async () => {
+  test("Test reconnection", async () => {
     const sync = startSynchronizer()
     const frontendActions = dispatchAndCheckActions(sync, 1)
 
@@ -115,14 +123,18 @@ describe('Test synchronizer functionality', () => {
     expect(selector.isStatusReconnecting(Session.store.getState())).toBe(true)
 
     // Reconnect, but some missed actions occured in the backend
-    const newInitialState = updateState(
-      getInitialState(sessionId),
-      [getRandomBox2dAction()]
-    )
+    const newInitialState = updateState(getInitialState(sessionId), [
+      getRandomBox2dAction()
+    ])
     sync.sendConnectionMessage(sessionId, dispatch)
     checkConnectMessage(sessionId)
     sync.finishRegistration(
-      newInitialState, autosave, sessionId, false, dispatch)
+      newInitialState,
+      autosave,
+      sessionId,
+      false,
+      dispatch
+    )
 
     /**
      * Check that frontend state updates correctly
@@ -149,9 +161,11 @@ describe('Test synchronizer functionality', () => {
 /**
  * Dispatch and check the effects of a single add label action
  */
-function dispatchAndCheckActions (
-  sync: Synchronizer, numActions: number,
-  bots: boolean = false): AddLabelsAction[] {
+function dispatchAndCheckActions(
+  sync: Synchronizer,
+  numActions: number,
+  bots: boolean = false
+): AddLabelsAction[] {
   // Dispatch actions to trigger sync events
   const actions: AddLabelsAction[] = []
   for (let _ = 0; _ < numActions; _++) {
@@ -173,11 +187,10 @@ function dispatchAndCheckActions (
 /**
  * Acks all the waiting packets
  */
-function sendAcks (sync: Synchronizer): ActionPacketType[] {
+function sendAcks(sync: Synchronizer): ActionPacketType[] {
   const actionPackets = sync.listActionsPendingSave()
   for (const actionPacket of actionPackets) {
-    sync.handleBroadcast(
-      packetToMessage(actionPacket), sessionId, dispatch)
+    sync.handleBroadcast(packetToMessage(actionPacket), sessionId, dispatch)
   }
   return actionPackets
 }
@@ -185,8 +198,7 @@ function sendAcks (sync: Synchronizer): ActionPacketType[] {
 /**
  * Check that the actions were sent to the backend for saving
  */
-function checkActionsAreSaving (
-  sync: Synchronizer, actions: AddLabelsAction[]) {
+function checkActionsAreSaving(sync: Synchronizer, actions: AddLabelsAction[]) {
   const actionPackets = sync.listActionsPendingSave()
   expect(actionPackets.length).toBe(actions.length)
   for (let i = 0; i < actions.length; i++) {
@@ -197,7 +209,7 @@ function checkActionsAreSaving (
 /**
  * Checkthat correct connection message was sent
  */
-function checkConnectMessage (sessId: string) {
+function checkConnectMessage(sessId: string) {
   const expectedMessage: RegisterMessageType = {
     projectName,
     taskIndex,
@@ -212,7 +224,7 @@ function checkConnectMessage (sessId: string) {
 /**
  * Start the browser synchronizer being tested
  */
-function startSynchronizer (setInitialState: boolean = true): Synchronizer {
+function startSynchronizer(setInitialState: boolean = true): Synchronizer {
   const synchronizer = new Synchronizer(
     mockSocket,
     taskIndex,
@@ -222,11 +234,13 @@ function startSynchronizer (setInitialState: boolean = true): Synchronizer {
 
   if (setInitialState) {
     const initialState = getInitialState(sessionId)
-    synchronizer.finishRegistration(initialState,
+    synchronizer.finishRegistration(
+      initialState,
       initialState.task.config.autosave,
       initialState.session.id,
       initialState.task.config.bots,
-      dispatch)
+      dispatch
+    )
   }
 
   // Initially, no actions are queued for saving
@@ -239,7 +253,7 @@ function startSynchronizer (setInitialState: boolean = true): Synchronizer {
 /**
  * Convert action packet to sync message
  */
-function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
+function packetToMessage(packet: ActionPacketType): SyncActionMessageType {
   return {
     actions: packet,
     projectName,
@@ -252,7 +266,7 @@ function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
 /**
  * Convert action packet to sync message from a bot
  */
-function packetToMessageBot (packet: ActionPacketType): SyncActionMessageType {
+function packetToMessageBot(packet: ActionPacketType): SyncActionMessageType {
   return {
     actions: packet,
     projectName,

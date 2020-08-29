@@ -1,40 +1,48 @@
-import axios, { AxiosRequestConfig } from 'axios'
-import io from 'socket.io-client'
-import { configureStore } from '../../src/common/configure_store'
-import { uid } from '../../src/common/uid'
-import { index2str } from '../../src/common/util'
-import { EventName } from '../../src/const/connection'
-import { Bot } from '../../src/server/bot'
-import { serverConfig } from '../../src/server/defaults'
-import { AddLabelsAction } from '../../src/types/action'
-import { ItemExport } from '../../src/types/bdd'
+import axios, { AxiosRequestConfig } from "axios"
+import io from "socket.io-client"
+import { configureStore } from "../../src/common/configure_store"
+import { uid } from "../../src/common/uid"
+import { index2str } from "../../src/common/util"
+import { EventName } from "../../src/const/connection"
+import { Bot } from "../../src/server/bot"
+import { serverConfig } from "../../src/server/defaults"
+import { AddLabelsAction } from "../../src/types/action"
+import { ItemExport } from "../../src/types/bdd"
 import {
-  ActionPacketType, BotData, RegisterMessageType,
-  SyncActionMessageType } from '../../src/types/message'
-import { ReduxStore } from '../../src/types/redux'
-import { State } from '../../src/types/state'
+  ActionPacketType,
+  BotData,
+  RegisterMessageType,
+  SyncActionMessageType
+} from "../../src/types/message"
+import { ReduxStore } from "../../src/types/redux"
+import { State } from "../../src/types/state"
 import {
-  getInitialState, getRandomBox2dAction,
-  getRandomModelPoly } from './util/util'
+  getInitialState,
+  getRandomBox2dAction,
+  getRandomModelPoly
+} from "./util/util"
 
 /**
  *  Mock post request to model server
  * They should return the same number of prediction actions as request actions
  */
-jest.mock('axios')
-axios.post = jest.fn().mockImplementation(
-  (_endpoint: string, data: ItemExport[], _config: AxiosRequestConfig) => {
-    const points = []
-    for (const _ of data) {
-      points.push(getRandomModelPoly())
-    }
-    return {
-      status: 200,
-      data: {
-        points
+jest.mock("axios")
+axios.post = jest
+  .fn()
+  .mockImplementation(
+    (_endpoint: string, data: ItemExport[], _config: AxiosRequestConfig) => {
+      const points = []
+      for (const _ of data) {
+        points.push(getRandomModelPoly())
+      }
+      return {
+        status: 200,
+        data: {
+          points
+        }
       }
     }
-  })
+  )
 
 let botData: BotData
 const socketEmit = jest.fn()
@@ -51,27 +59,27 @@ let initialState: State
 
 beforeAll(() => {
   io.connect = jest.fn().mockImplementation(() => mockSocket)
-  projectName = 'testProject'
+  projectName = "testProject"
   botData = {
     taskIndex: 0,
     projectName,
-    botId: 'fakeBotId',
+    botId: "fakeBotId",
     address: location.origin
   }
   host = serverConfig.bot.host
   port = serverConfig.bot.port
-  webId = 'fakeUserId'
+  webId = "fakeUserId"
   initialState = getInitialState(webId)
 })
 
 // Note that these tests are similar to the frontend tests for synchronizer
-describe('Test simple bot functionality', () => {
-  test('Test data access', async () => {
+describe("Test simple bot functionality", () => {
+  test("Test data access", async () => {
     const bot = new Bot(botData, host, port)
     expect(bot.getData()).toEqual(botData)
   })
 
-  test('Test correct registration message gets sent', async () => {
+  test("Test correct registration message gets sent", async () => {
     const bot = new Bot(botData, host, port)
     bot.connectHandler()
 
@@ -79,8 +87,8 @@ describe('Test simple bot functionality', () => {
   })
 })
 
-describe('Test bot send-ack loop', () => {
-  test('Test single packet prediction', async () => {
+describe("Test bot send-ack loop", () => {
+  test("Test single packet prediction", async () => {
     const bot = setUpBot()
     const numActions = 5
     const message = makeSyncMessage(numActions, webId)
@@ -100,7 +108,7 @@ describe('Test bot send-ack loop', () => {
     expect(args[1].actions.triggerId).toBe(message.actions.id)
   })
 
-  test('Test duplicate actions are ignored', async () => {
+  test("Test duplicate actions are ignored", async () => {
     const bot = setUpBot()
     const numActions = 5
     const message = makeSyncMessage(numActions, webId)
@@ -119,7 +127,7 @@ describe('Test bot send-ack loop', () => {
     expect(botActions.length).toBe(0)
   })
 
-  test('Test bot actions are ignored', async () => {
+  test("Test bot actions are ignored", async () => {
     const bot = setUpBot()
     const numActions = 5
     const botMessage = makeSyncMessage(numActions, bot.sessionId)
@@ -133,7 +141,7 @@ describe('Test bot send-ack loop', () => {
     expect(botActions.length).toBe(0)
   })
 
-  test('Test bot store updates correctly', async () => {
+  test("Test bot store updates correctly", async () => {
     const bot = setUpBot()
     const expectedStore = configureStore(initialState)
 
@@ -144,7 +152,7 @@ describe('Test bot send-ack loop', () => {
     const numMessages = 5
     const messages = []
     const actionsPerMessage = []
-    for (let _ = 0 ; _ < numMessages ; _++) {
+    for (let _ = 0; _ < numMessages; _++) {
       // Random int from 1 to 10
       const numActions = 1 + Math.floor(Math.random() * 10)
       actionsPerMessage.push(numActions)
@@ -175,7 +183,7 @@ describe('Test bot send-ack loop', () => {
 /**
  * Creates the bot and initializes its store using the register handler
  */
-function setUpBot () {
+function setUpBot() {
   const bot = new Bot(botData, host, port)
   bot.registerAckHandler(initialState)
   return bot
@@ -185,9 +193,11 @@ function setUpBot () {
  * Helper function to update the expected store with
  * the incoming actions and the outgoing predictions
  */
-function updateExpectedStore (
-  store: ReduxStore, message: SyncActionMessageType,
-  botActions: AddLabelsAction[]) {
+function updateExpectedStore(
+  store: ReduxStore,
+  message: SyncActionMessageType,
+  botActions: AddLabelsAction[]
+) {
   // Apply incoming actions
   for (const action of message.actions.actions) {
     store.dispatch(action)
@@ -200,7 +210,7 @@ function updateExpectedStore (
 /**
  * Helper function for checking that correct connection message was sent
  */
-function checkConnectMessage (sessId: string) {
+function checkConnectMessage(sessId: string) {
   const expectedMessage: RegisterMessageType = {
     projectName: botData.projectName,
     taskIndex: botData.taskIndex,
@@ -215,8 +225,10 @@ function checkConnectMessage (sessId: string) {
 /**
  * Create a sync message with the specified number of actions
  */
-function makeSyncMessage (
-  numActions: number, userId: string): SyncActionMessageType {
+function makeSyncMessage(
+  numActions: number,
+  userId: string
+): SyncActionMessageType {
   const actions: AddLabelsAction[] = []
   for (let _ = 0; _ < numActions; _++) {
     actions.push(getRandomBox2dAction())
@@ -231,8 +243,10 @@ function makeSyncMessage (
 /**
  * Convert action packet to sync message
  */
-function packetToMessage (
-  packet: ActionPacketType, sessionId: string): SyncActionMessageType {
+function packetToMessage(
+  packet: ActionPacketType,
+  sessionId: string
+): SyncActionMessageType {
   return {
     actions: packet,
     projectName: botData.projectName,

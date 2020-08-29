@@ -1,6 +1,5 @@
-import { ItemExport } from './bdd'
-import { Attribute, ConfigType, Label2DTemplateType, SensorType
-} from './state'
+import { ItemExport } from "./bdd"
+import { Attribute, ConfigType, Label2DTemplateType, SensorType } from "./state"
 
 /**
  * Stores specifications of project
@@ -11,7 +10,7 @@ export interface Project {
   /** frontend config */
   config: ConfigType
   /** map between data source id and data sources */
-  sensors: {[id: number]: SensorType}
+  sensors: { [id: number]: SensorType }
 }
 
 /**

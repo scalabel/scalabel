@@ -1,30 +1,30 @@
-import * as fa from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AppBar, IconButton, Toolbar, Tooltip } from '@material-ui/core'
-import Fade from '@material-ui/core/Fade'
-import { Theme, withStyles } from '@material-ui/core/styles'
-import createStyles from '@material-ui/core/styles/createStyles'
-import Typography from '@material-ui/core/Typography'
-import _ from 'lodash'
-import React from 'react'
-import { connect } from 'react-redux'
-import { save, submit } from '../action/common'
-import Session from '../common/session'
-import { Key } from '../const/common'
-import * as selector from '../functional/selector'
-import { defaultAppBar } from '../styles/general'
-import { ReduxState } from '../types/redux'
-import { Component } from './component'
-import { StatusMessageBox } from './message_box'
+import * as fa from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { AppBar, IconButton, Toolbar, Tooltip } from "@material-ui/core"
+import Fade from "@material-ui/core/Fade"
+import { Theme, withStyles } from "@material-ui/core/styles"
+import createStyles from "@material-ui/core/styles/createStyles"
+import Typography from "@material-ui/core/Typography"
+import _ from "lodash"
+import React from "react"
+import { connect } from "react-redux"
+import { save, submit } from "../action/common"
+import Session from "../common/session"
+import { Key } from "../const/common"
+import * as selector from "../functional/selector"
+import { defaultAppBar } from "../styles/general"
+import { ReduxState } from "../types/redux"
+import { Component } from "./component"
+import { StatusMessageBox } from "./message_box"
 
 // How long to wait until saving times out
 export const saveTimeout = 20000
 
 interface ClassType {
   /** App bar class */
-  appBar: string,
+  appBar: string
   /** Grow class for spacing */
-  grow: string,
+  grow: string
   /** Title unit class */
   titleUnit: string
 }
@@ -60,11 +60,11 @@ interface DispatchProps {
 
 interface ButtonInfo {
   /** Name */
-  title: string,
+  title: string
   /** Icon */
-  icon: fa.IconDefinition,
+  icon: fa.IconDefinition
   /** Link */
-  href?: string,
+  href?: string
   /** Listener  */
   onClick?: () => void
 }
@@ -72,15 +72,20 @@ interface ButtonInfo {
 /**
  * Convert info of a button to a renderable button
  */
-function renderButton (button: ButtonInfo, titleUnit: string): JSX.Element {
-  const onClick = _.get(button, 'onClick', undefined)
-  const href = _.get(button, 'href', '#')
-  const target = ('href' in button ? 'view_window' : '_self')
+function renderButton(button: ButtonInfo, titleUnit: string): JSX.Element {
+  const onClick = _.get(button, "onClick", undefined)
+  const href = _.get(button, "href", "#")
+  const target = "href" in button ? "view_window" : "_self"
   return (
     <Tooltip title={button.title} key={button.title}>
-      <IconButton className={titleUnit} onClick={onClick}
-        href={href} target={target} data-testid={button.title}>
-        <FontAwesomeIcon icon={button.icon} size='xs' />
+      <IconButton
+        className={titleUnit}
+        onClick={onClick}
+        href={href}
+        target={target}
+        data-testid={button.title}
+      >
+        <FontAwesomeIcon icon={button.icon} size="xs" />
       </IconButton>
     </Tooltip>
   )
@@ -93,41 +98,41 @@ type Props = StyleProps & StateProps & DispatchProps
  */
 class TitleBar extends Component<Props> {
   /** Listener for key down events */
-  private _keyDownListener: (e: KeyboardEvent) => void
+  private readonly _keyDownListener: (e: KeyboardEvent) => void
 
   /**
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props)
-    this._keyDownListener = ((e: KeyboardEvent) => {
+    this._keyDownListener = (e: KeyboardEvent) => {
       if (e.key === Key.S_LOW || e.key === Key.S_UP) {
         e.preventDefault()
         this.props.save()
       }
-    })
+    }
   }
 
   /** Mount override */
-  public componentDidMount () {
-    document.addEventListener('keydown', this._keyDownListener)
+  public componentDidMount() {
+    document.addEventListener("keydown", this._keyDownListener)
   }
 
   /**
    * Unmount
    * Disables asynchronous callbacks
    */
-  public componentWillUnmount () {
+  public componentWillUnmount() {
     super.componentWillUnmount()
-    document.removeEventListener('keydown', this._keyDownListener)
+    document.removeEventListener("keydown", this._keyDownListener)
   }
 
   /**
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render () {
+  public render() {
     const { classes } = this.props
     const { title } = this.props
     const { instructionLink } = this.props
@@ -137,9 +142,9 @@ class TitleBar extends Component<Props> {
     const { statusTextHide } = this.props
 
     const buttonInfo: ButtonInfo[] = [
-      { title: 'Instructions', href: instructionLink, icon: fa.faInfo },
-      { title: 'Keyboard Usage', icon: fa.faQuestion },
-      { title: 'Dashboard', href: dashboardLink, icon: fa.faList }
+      { title: "Instructions", href: instructionLink, icon: fa.faInfo },
+      { title: "Keyboard Usage", icon: fa.faQuestion },
+      { title: "Dashboard", href: dashboardLink, icon: fa.faList }
     ]
 
     const submitHandler = () => {
@@ -149,13 +154,17 @@ class TitleBar extends Component<Props> {
         this.props.save()
       }
     }
-    buttonInfo.push(
-      { title: 'Submit', onClick: submitHandler, icon: fa.faCheck })
+    buttonInfo.push({
+      title: "Submit",
+      onClick: submitHandler,
+      icon: fa.faCheck
+    })
 
     if (!autosave) {
-      const saveHandler = () => { this.props.save() }
-      buttonInfo.push(
-        { title: 'Save', onClick: saveHandler, icon: fa.faSave })
+      const saveHandler = () => {
+        this.props.save()
+      }
+      buttonInfo.push({ title: "Save", onClick: saveHandler, icon: fa.faSave })
     }
 
     const buttons = buttonInfo.map((b) => renderButton(b, classes.titleUnit))
@@ -163,13 +172,11 @@ class TitleBar extends Component<Props> {
     return (
       <AppBar className={classes.appBar}>
         <Toolbar>
-          <Typography variant='h6' noWrap>
+          <Typography variant="h6" noWrap>
             {title}
           </Typography>
           <Fade in={!statusTextHide} timeout={300}>
-            <StatusMessageBox>
-              {statusText}
-            </StatusMessageBox>
+            <StatusMessageBox>{statusText}</StatusMessageBox>
           </Fade>
           <div className={classes.grow} />
           {buttons}
@@ -197,20 +204,21 @@ const mapDispatchToProps = () => {
   }
 }
 
-const styles = (theme: Theme) => createStyles({
-  appBar: {
-    ...defaultAppBar,
-    position: 'relative',
-    height: '100%'
-  },
-  grow: {
-    flexGrow: 1
-  },
-  titleUnit: {
-    color: '#bbbbbb',
-    margin: theme.spacing(0) * 0.5
-  }
-})
+const styles = (theme: Theme) =>
+  createStyles({
+    appBar: {
+      ...defaultAppBar,
+      position: "relative",
+      height: "100%"
+    },
+    grow: {
+      flexGrow: 1
+    },
+    titleUnit: {
+      color: "#bbbbbb",
+      margin: theme.spacing(0) * 0.5
+    }
+  })
 
 const styledBar = withStyles(styles, { withTheme: true })(TitleBar)
 export default connect(mapStateToProps, mapDispatchToProps)(styledBar)

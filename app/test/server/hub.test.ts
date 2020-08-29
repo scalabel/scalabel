@@ -1,29 +1,31 @@
-import { cleanup } from '@testing-library/react'
-import _ from 'lodash'
-import { goToItem } from '../../src/action/common'
-import { index2str } from '../../src/common/util'
-import { EventName } from '../../src/const/connection'
-import { serverConfig } from '../../src/server/defaults'
-import { FileStorage } from '../../src/server/file_storage'
-import { Hub } from '../../src/server/hub'
-import { ProjectStore } from '../../src/server/project_store'
-import { RedisCache } from '../../src/server/redis_cache'
-import { RedisClient } from '../../src/server/redis_client'
-import { RedisPubSub } from '../../src/server/redis_pub_sub'
-import { UserManager } from '../../src/server/user_manager'
-import { updateState } from '../../src/server/util'
+import { cleanup } from "@testing-library/react"
+import _ from "lodash"
+import { goToItem } from "../../src/action/common"
+import { index2str } from "../../src/common/util"
+import { EventName } from "../../src/const/connection"
+import { serverConfig } from "../../src/server/defaults"
+import { FileStorage } from "../../src/server/file_storage"
+import { Hub } from "../../src/server/hub"
+import { ProjectStore } from "../../src/server/project_store"
+import { RedisCache } from "../../src/server/redis_cache"
+import { RedisClient } from "../../src/server/redis_client"
+import { RedisPubSub } from "../../src/server/redis_pub_sub"
+import { UserManager } from "../../src/server/user_manager"
+import { updateState } from "../../src/server/util"
 import {
-  ActionPacketType, RegisterMessageType, SyncActionMessageType
-} from '../../src/types/message'
-import { StateMetadata } from '../../src/types/project'
-import { getInitialState, getRandomBox2dAction } from './util/util'
+  ActionPacketType,
+  RegisterMessageType,
+  SyncActionMessageType
+} from "../../src/types/message"
+import { StateMetadata } from "../../src/types/project"
+import { getInitialState, getRandomBox2dAction } from "./util/util"
 
-jest.mock('../../src/server/file_storage')
-jest.mock('../../src/server/path')
-jest.mock('../../src/server/project_store')
-jest.mock('../../src/server/user_manager')
-jest.mock('../../src/server/redis_client')
-jest.mock('../../src/server/redis_pub_sub')
+jest.mock("../../src/server/file_storage")
+jest.mock("../../src/server/path")
+jest.mock("../../src/server/project_store")
+jest.mock("../../src/server/user_manager")
+jest.mock("../../src/server/redis_client")
+jest.mock("../../src/server/redis_pub_sub")
 
 let projectName: string
 let taskIndex: number
@@ -37,7 +39,7 @@ let mockUserManager: UserManager
 let mockPubSub: RedisPubSub
 let hub: Hub
 const broadcastFunc = jest.fn()
-const socketId = 'socketId'
+const socketId = "socketId"
 const mockSocket = {
   on: jest.fn(),
   emit: jest.fn(),
@@ -53,14 +55,14 @@ const mockSocket = {
 }
 
 beforeAll(() => {
-  projectName = 'testProject'
+  projectName = "testProject"
   taskIndex = 0
   taskId = index2str(taskIndex)
-  sessionId = 'testSessionId'
-  userId = 'testUserId'
-  actionListId = 'actionListId'
+  sessionId = "testSessionId"
+  userId = "testUserId"
+  actionListId = "actionListId"
 
-  mockStorage = new FileStorage('fakeDataDir')
+  mockStorage = new FileStorage("fakeDataDir")
   const client = new RedisClient(serverConfig.redis)
   const redisStore = new RedisCache(serverConfig.redis, mockStorage, client)
   mockPubSub = new RedisPubSub(client)
@@ -71,7 +73,7 @@ beforeAll(() => {
 
 afterEach(cleanup)
 
-describe('Test hub functionality', () => {
+describe("Test hub functionality", () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
@@ -89,26 +91,30 @@ describe('Test hub functionality', () => {
     })
   })
 
-  test('Test registration', async () => {
+  test("Test registration", async () => {
     const data: RegisterMessageType = {
       projectName,
       taskIndex,
       sessionId,
       userId,
-      address: '',
+      address: "",
       bot: false
     }
     await hub.register(data, mockSocket)
     expect(mockUserManager.registerUser).toBeCalledWith(
-      socketId, projectName, userId)
+      socketId,
+      projectName,
+      userId
+    )
     expect(mockPubSub.publishRegisterEvent).toBeCalledWith(data)
     expect(mockSocket.join).toBeCalled()
     expect(mockSocket.emit).toBeCalledWith(
-      EventName.REGISTER_ACK, getInitialState(sessionId)
+      EventName.REGISTER_ACK,
+      getInitialState(sessionId)
     )
   })
 
-  test('Test task action update saves data and broadcasts', async () => {
+  test("Test task action update saves data and broadcasts", async () => {
     // Mock date for action timestamp
     const constantDate = Date.now()
     const dateFn = Date.now
@@ -141,8 +147,12 @@ describe('Test hub functionality', () => {
       }
     }
     const newState = updateState(getInitialState(sessionId), [action])
-    expect(mockProjectStore.saveState).toBeCalledWith(newState, projectName,
-      taskId, newMetadata)
+    expect(mockProjectStore.saveState).toBeCalledWith(
+      newState,
+      projectName,
+      taskId,
+      newMetadata
+    )
 
     // Test that actions were broadcast correctly
     const newAction = _.cloneDeep(action)
@@ -152,15 +162,19 @@ describe('Test hub functionality', () => {
       id: actionListId
     }
     expect(broadcastFunc).toBeCalledWith(
-      EventName.ACTION_BROADCAST, packetToMessage(newPacket))
+      EventName.ACTION_BROADCAST,
+      packetToMessage(newPacket)
+    )
     expect(mockSocket.emit).toBeCalledWith(
-      EventName.ACTION_BROADCAST, packetToMessage(newPacket))
+      EventName.ACTION_BROADCAST,
+      packetToMessage(newPacket)
+    )
 
     // Restore the date function
     Date.now = dateFn
   })
 
-  test('Non-task action just echoes', async () => {
+  test("Non-task action just echoes", async () => {
     // Make a non-task action
     const action = goToItem(0)
     const data: SyncActionMessageType = {
@@ -176,11 +190,10 @@ describe('Test hub functionality', () => {
     await hub.actionUpdate(data, mockSocket)
     expect(mockProjectStore.saveState).not.toBeCalled()
     expect(broadcastFunc).not.toBeCalled()
-    expect(mockSocket.emit).toBeCalledWith(
-      EventName.ACTION_BROADCAST, data)
+    expect(mockSocket.emit).toBeCalledWith(EventName.ACTION_BROADCAST, data)
   })
 
-  test('If saved, repeated message does not save again', async () => {
+  test("If saved, repeated message does not save again", async () => {
     // Make a task action
     const action = getRandomBox2dAction()
     const data: SyncActionMessageType = {
@@ -230,7 +243,7 @@ describe('Test hub functionality', () => {
     expect(calls[0]).toStrictEqual(calls[1])
   })
 
-  test('If crash before saving, saves again', async () => {
+  test("If crash before saving, saves again", async () => {
     // Make a task action
     const action = getRandomBox2dAction()
     const data: SyncActionMessageType = {
@@ -261,7 +274,7 @@ describe('Test hub functionality', () => {
 /**
  * Convert action packet to sync message
  */
-function packetToMessage (packet: ActionPacketType): SyncActionMessageType {
+function packetToMessage(packet: ActionPacketType): SyncActionMessageType {
   return {
     actions: packet,
     projectName,

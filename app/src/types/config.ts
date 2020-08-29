@@ -1,4 +1,4 @@
-import { StorageType } from '../const/config'
+import { StorageType } from "../const/config"
 
 export interface RedisConfig {
   /**
@@ -36,9 +36,9 @@ export interface CognitoConfig {
   /** user pool id of cognito */
   userPool: string
   /** client id of cognito */
-  clientId: string,
+  clientId: string
   /** user pool base uri */
-  userPoolBaseUri: string,
+  userPoolBaseUri: string
   /** callback uri */
   callbackUri: string
 }

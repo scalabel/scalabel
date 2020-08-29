@@ -1,14 +1,14 @@
-import * as fs from 'fs-extra'
-import _ from 'lodash'
-import { index2str } from '../../src/common/util'
-import { FileStorage } from '../../src/server/file_storage'
-import { getFileKey, getRedisMetaKey, getTestDir } from '../../src/server/path'
-import { RedisCache } from '../../src/server/redis_cache'
-import { RedisClient } from '../../src/server/redis_client'
-import { ServerConfig } from '../../src/types/config'
-import { StateMetadata } from '../../src/types/project'
-import { sleep } from '../project/util'
-import { getTestConfig } from './util/util'
+import * as fs from "fs-extra"
+import _ from "lodash"
+import { index2str } from "../../src/common/util"
+import { FileStorage } from "../../src/server/file_storage"
+import { getFileKey, getRedisMetaKey, getTestDir } from "../../src/server/path"
+import { RedisCache } from "../../src/server/redis_cache"
+import { RedisClient } from "../../src/server/redis_client"
+import { ServerConfig } from "../../src/types/config"
+import { StateMetadata } from "../../src/types/project"
+import { sleep } from "../project/util"
+import { getTestConfig } from "./util/util"
 
 let defaultStore: RedisCache
 let storage: FileStorage
@@ -19,7 +19,7 @@ let numWrites: number
 
 beforeAll(async () => {
   config = getTestConfig()
-  dataDir = getTestDir('test-data-redis')
+  dataDir = getTestDir("test-data-redis")
   storage = new FileStorage(dataDir)
   client = new RedisClient(config.redis)
   defaultStore = new RedisCache(config.redis, storage, client)
@@ -32,8 +32,8 @@ afterAll(async () => {
   await client.close()
 })
 
-describe('Test redis cache', () => {
-  test('Set and get and delete', async () => {
+describe("Test redis cache", () => {
+  test("Set and get and delete", async () => {
     const keys = _.range(5).map((v) => `test${v}`)
     const values = _.range(5).map((v) => `value${v}`)
 
@@ -51,46 +51,46 @@ describe('Test redis cache', () => {
     }
   })
 
-  test('Writes back on timeout', async () => {
+  test("Writes back on timeout", async () => {
     const timeoutConfig = _.clone(config)
     timeoutConfig.redis.writebackTime = 0.2
     const store = new RedisCache(timeoutConfig.redis, storage, client)
 
-    const key = 'testKey1'
-    await store.set(key, 'testvalue')
+    const key = "testKey1"
+    await store.set(key, "testvalue")
 
     await checkFileCount()
     await sleep(1000)
     await checkFileWritten()
   })
 
-  test('Writes back after action limit with 1 action at a time', async () => {
+  test("Writes back after action limit with 1 action at a time", async () => {
     const actionConfig = _.clone(config)
     actionConfig.redis.writebackCount = 5
     const store = new RedisCache(actionConfig.redis, storage, client)
 
-    const key = 'testKey2'
+    const key = "testKey2"
     for (let i = 0; i < 4; i++) {
       await store.set(key, `value${i}`)
       // Make sure no new files are created yet
       await checkFileCount()
     }
-    await store.set(key, 'value4')
+    await store.set(key, "value4")
     await checkFileWritten()
   })
 
-  test('Writes back after action limit with multi action packet', async () => {
+  test("Writes back after action limit with multi action packet", async () => {
     const actionConfig = _.clone(config)
     actionConfig.redis.writebackCount = 5
     const store = new RedisCache(actionConfig.redis, storage, client)
     await checkFileCount()
     for (let i = 0; i < 5; i += 1) {
-      await store.set('key', 'value')
+      await store.set("key", "value")
     }
     await checkFileWritten()
   })
 
-  test('Set atomic executes all ops', async () => {
+  test("Set atomic executes all ops", async () => {
     const keys = _.range(5).map((v) => `test${v}`)
     const values = _.range(5).map((v) => `value${v}`)
 
@@ -102,7 +102,7 @@ describe('Test redis cache', () => {
     }
   })
 
-  test('Metadata is saved correctly', async () => {
+  test("Metadata is saved correctly", async () => {
     const keys = _.range(5).map((v) => `test${v}`)
     const values = _.range(5).map((v) => `value${v}`)
     const metadata = _.range(5).map((v) => makeMetadata(v))
@@ -115,7 +115,7 @@ describe('Test redis cache', () => {
     }
   })
 
-  test('Check storage if key is not in redis store', async () => {
+  test("Check storage if key is not in redis store", async () => {
     const keys = _.range(5).map((v) => `testGet${v}`)
     const values = _.range(5).map((v) => `value${v}`)
 
@@ -138,21 +138,21 @@ describe('Test redis cache', () => {
 })
 
 /** Check that expected number of files exist */
-async function checkFileCount () {
-  const savedKeys = await storage.listKeys('')
+async function checkFileCount() {
+  const savedKeys = await storage.listKeys("")
   expect(savedKeys.length).toBe(numWrites)
 }
 
 /** Check that expected number of files have been written */
-async function checkFileWritten () {
+async function checkFileWritten() {
   numWrites += 1
   await checkFileCount()
 }
 
 /** Makes some dummy metadata */
-function makeMetadata (taskIndex: number): string {
+function makeMetadata(taskIndex: number): string {
   const metadata: StateMetadata = {
-    projectName: 'project',
+    projectName: "project",
     taskId: index2str(taskIndex),
     actionIds: {}
   }

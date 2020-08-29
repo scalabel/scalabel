@@ -1,24 +1,29 @@
-import { withStyles } from '@material-ui/core/styles'
-import createStyles from '@material-ui/core/styles/createStyles'
-import * as React from 'react'
-import { connect } from 'react-redux'
-import * as THREE from 'three'
-import Session from '../common/session'
-import { ViewerConfigTypeName } from '../const/common'
-import { isCurrentFrameLoaded } from '../functional/state_util'
-import { makeTaskConfig } from '../functional/states'
-import { ConfigType, Image3DViewerConfigType, State } from '../types/state'
-import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from '../view_config/image'
-import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
+import { withStyles } from "@material-ui/core/styles"
+import createStyles from "@material-ui/core/styles/createStyles"
+import * as React from "react"
+import { connect } from "react-redux"
+import * as THREE from "three"
+import Session from "../common/session"
+import { ViewerConfigTypeName } from "../const/common"
+import { isCurrentFrameLoaded } from "../functional/state_util"
+import { makeTaskConfig } from "../functional/states"
+import { ConfigType, Image3DViewerConfigType, State } from "../types/state"
+import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from "../view_config/image"
+import {
+  DrawableCanvas,
+  DrawableProps,
+  mapStateToDrawableProps
+} from "./viewer"
 
-const styles = () => createStyles({
-  tag3d_canvas: {
-    'position': 'absolute',
-    'height': '100%',
-    'width': '100%',
-    'pointer-events': 'none'
-  }
-})
+const styles = () =>
+  createStyles({
+    tag3d_canvas: {
+      position: "absolute",
+      height: "100%",
+      width: "100%",
+      "pointer-events": "none"
+    }
+  })
 
 interface ClassType {
   /** CSS canvas name */
@@ -49,20 +54,20 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   /** Current scale */
   private scale: number
   /** ThreeJS Camera */
-  private camera: THREE.Camera
+  private readonly camera: THREE.Camera
   /** Flag set if data is 2d */
   private data2d: boolean
   /** task config */
   private _config: ConfigType
 
   /** drawable callback */
-  private _drawableUpdateCallback: () => void
+  private readonly _drawableUpdateCallback: () => void
 
   /**
    * Constructor, ons subscription to store
    * @param {Object} props: react props
    */
-  constructor (props: Readonly<Props>) {
+  constructor(props: Readonly<Props>) {
     super(props)
     this.camera = props.camera
 
@@ -79,7 +84,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   /**
    * Mount callback
    */
-  public componentDidMount () {
+  public componentDidMount() {
     super.componentDidMount()
     Session.label3dList.subscribe(this._drawableUpdateCallback)
   }
@@ -87,7 +92,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   /**
    * Unmount callback
    */
-  public componentWillUnmount () {
+  public componentWillUnmount() {
     super.componentWillUnmount()
     Session.label3dList.unsubscribe(this._drawableUpdateCallback)
   }
@@ -96,21 +101,25 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render () {
+  public render() {
     const { classes } = this.props
 
-    let canvas = (<canvas
-      key={`tag3d-canvas-${this.props.id}`}
-      className={classes.tag3d_canvas}
-      ref={(ref) => { this.initializeRefs(ref) }}
-    />)
+    let canvas = (
+      <canvas
+        key={`tag3d-canvas-${this.props.id}`}
+        className={classes.tag3d_canvas}
+        ref={(ref) => {
+          this.initializeRefs(ref)
+        }}
+      />
+    )
 
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
-      canvas = React.cloneElement(
-        canvas,
-        { height: displayRect.height, width: displayRect.width }
-      )
+      canvas = React.cloneElement(canvas, {
+        height: displayRect.height,
+        width: displayRect.width
+      })
     }
 
     return canvas
@@ -120,42 +129,45 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
    * Handles canvas redraw
    * @return {boolean}
    */
-  public redraw (): boolean {
+  public redraw(): boolean {
     if (this.canvas && this._context) {
       const labels = Session.label3dList.labels()
       this._context.clearRect(0, 0, this.canvas.width, this.canvas.height)
       for (const label of labels) {
-        const category = (
+        const category =
           label.category.length >= 1 &&
           label.category[0] < this._config.categories.length &&
           label.category[0] >= 0
-        ) ? this._config.categories[label.category[0]] : ''
+            ? this._config.categories[label.category[0]]
+            : ""
         const attributes = label.attributes
-        const words = category.split(' ')
+        const words = category.split(" ")
         let tag = words[words.length - 1]
 
         for (const attributeId of Object.keys(attributes)) {
           const attribute = this._config.attributes[Number(attributeId)]
-          if (attribute.toolType === 'switch') {
+          if (attribute.toolType === "switch") {
             if (attributes[Number(attributeId)][0] > 0) {
-              tag += ',' + attribute.tagText
+              tag += "," + attribute.tagText
             }
-          } else if (attribute.toolType === 'list') {
-            if (attribute &&
-              attributes[Number(attributeId)][0] > 0) {
-              tag += ',' + attribute.tagText + ':' +
-                  attribute.tagSuffixes[attributes[Number(attributeId)][0]]
+          } else if (attribute.toolType === "list") {
+            if (attribute && attributes[Number(attributeId)][0] > 0) {
+              tag +=
+                "," +
+                attribute.tagText +
+                ":" +
+                attribute.tagSuffixes[attributes[Number(attributeId)][0]]
             }
           }
         }
 
-        const location = (new THREE.Vector3()).copy(label.center)
+        const location = new THREE.Vector3().copy(label.center)
         location.project(this.camera)
         if (location.z > 0 && location.z < 1) {
-          const x = (location.x + 1) * this.canvas.width / 2
-          const y = (-location.y + 1) * this.canvas.height / 2
-          this._context.font = '12px Verdana'
-          this._context.fillStyle = '#FFFFFF'
+          const x = ((location.x + 1) * this.canvas.width) / 2
+          const y = ((-location.y + 1) * this.canvas.height) / 2
+          this._context.font = "12px Verdana"
+          this._context.fillStyle = "#FFFFFF"
           this._context.fillText(tag, x, y)
         }
       }
@@ -166,7 +178,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   /**
    * notify state is updated
    */
-  protected updateState (state: State): void {
+  protected updateState(state: State): void {
     if (this.display !== this.props.display) {
       this._config = { ...state.task.config }
       this.display = this.props.display
@@ -179,45 +191,48 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */
-  private initializeRefs (component: HTMLCanvasElement | null) {
+  private initializeRefs(component: HTMLCanvasElement | null) {
     const viewerConfig = this.state.user.viewerConfigs[this.props.id]
     const sensor = viewerConfig.sensor
     if (!component || !isCurrentFrameLoaded(this.state, sensor)) {
       return
     }
 
-    if (viewerConfig.type === ViewerConfigTypeName.IMAGE_3D ||
-        viewerConfig.type === ViewerConfigTypeName.HOMOGRAPHY) {
+    if (
+      viewerConfig.type === ViewerConfigTypeName.IMAGE_3D ||
+      viewerConfig.type === ViewerConfigTypeName.HOMOGRAPHY
+    ) {
       this.data2d = true
     } else {
       this.data2d = false
     }
 
-    if (component.nodeName === 'CANVAS') {
+    if (component.nodeName === "CANVAS") {
       if (this.canvas !== component) {
         this.canvas = component
-        this._context = this.canvas.getContext('2d')
+        this._context = this.canvas.getContext("2d")
         this.forceUpdate()
       }
 
       if (this.canvas && this.display && this.data2d) {
         const img3dConfig = viewerConfig as Image3DViewerConfigType
-        if (img3dConfig.viewScale >= MIN_SCALE &&
-            img3dConfig.viewScale < MAX_SCALE) {
-          const newParams =
-            updateCanvasScale(
-              this.state,
-              this.display,
-              this.canvas,
-              null,
-              img3dConfig,
-              img3dConfig.viewScale / this.scale,
-              false
-            )
+        if (
+          img3dConfig.viewScale >= MIN_SCALE &&
+          img3dConfig.viewScale < MAX_SCALE
+        ) {
+          const newParams = updateCanvasScale(
+            this.state,
+            this.display,
+            this.canvas,
+            null,
+            img3dConfig,
+            img3dConfig.viewScale / this.scale,
+            false
+          )
           this.scale = newParams[3]
         }
       } else if (this.display) {
-        this.canvas.removeAttribute('style')
+        this.canvas.removeAttribute("style")
         const displayRect = this.display.getBoundingClientRect()
         this.canvas.width = displayRect.width
         this.canvas.height = displayRect.height
@@ -226,6 +241,5 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   }
 }
 
-const styledCanvas = withStyles(
-  styles, { withTheme: true })(Tag3dCanvas)
+const styledCanvas = withStyles(styles, { withTheme: true })(Tag3dCanvas)
 export default connect(mapStateToDrawableProps)(styledCanvas)

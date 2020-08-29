@@ -1,0 +1,21 @@
+{
+    "extends": [
+        "plugin:prettier/recommended",
+        "standard-with-typescript",
+        "prettier",
+        "prettier/@typescript-eslint",
+        "prettier/react",
+        "prettier/standard"
+    ],
+    "plugins": [
+        "@typescript-eslint",
+        "react",
+        "standard"
+      ],
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    },
+    "rules": {
+        "prettier/prettier": "error"
+    }
+}

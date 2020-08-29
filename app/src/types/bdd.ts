@@ -6,15 +6,15 @@ import {
   TaskStatus,
   TrackType,
   Vector3Type
-} from './state'
+} from "./state"
 
 export interface TaskData {
   /** task config data that's constant throughout a session */
-  config: ConfigType,
+  config: ConfigType
   /** current status of task */
-  status: TaskStatus,
+  status: TaskStatus
   /** items in task */
-  Items: ItemType[],
+  Items: ItemType[]
   /** tracks for task */
   Tracks: TrackType
 }
@@ -52,13 +52,13 @@ export interface PolygonExportType {
 }
 
 export interface Box2DType {
-    /** The x-coordinate of upper left corner */
+  /** The x-coordinate of upper left corner */
   x1: number
-    /** The y-coordinate of upper left corner */
+  /** The y-coordinate of upper left corner */
   y1: number
-    /** The x-coordinate of lower right corner */
+  /** The x-coordinate of lower right corner */
   x2: number
-    /** The y-coordinate of lower right corner */
+  /** The y-coordinate of lower right corner */
   y2: number
 }
 
@@ -80,7 +80,7 @@ export interface Plane3DType {
 
 export interface CustomExportType {
   /** point positions */
-  points: Array<[number ,number]>
+  points: Array<[number, number]>
   /** names of the points */
   names: string[]
   /** whether the points are hidden */
@@ -95,7 +95,7 @@ export interface LabelExport {
   /** category */
   category: string
   /** label attributes- can be list or switch type */
-  attributes: { [key: string]: (string[] | boolean) }
+  attributes: { [key: string]: string[] | boolean }
   /** if shape was manual */
   manualShape: boolean
   /** box2d label */

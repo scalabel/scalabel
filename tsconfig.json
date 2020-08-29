@@ -18,7 +18,8 @@
         "skipLibCheck": true,
     },
     "include": [
-        "app/src"
+        "app/src",
+        "app/test"
     ],
     "typeRoots": [
         "./node_modules/@types"

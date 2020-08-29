@@ -1,12 +1,12 @@
-import { makePolyPathPoint } from '../../functional/states'
-import { PolyPathPoint2DType } from '../../types/state'
-import { Context2D, toCssColor } from '../util'
-import { Point2D } from './point2d'
+import { makePolyPathPoint } from "../../functional/states"
+import { PolyPathPoint2DType } from "../../types/state"
+import { Context2D, toCssColor } from "../util"
+import { Point2D } from "./point2d"
 
 export enum PointType {
-  VERTEX = 'vertex',
-  MID = 'mid',
-  CURVE = 'bezier'
+  VERTEX = "vertex",
+  MID = "mid",
+  CURVE = "bezier"
 }
 
 export interface Edge2DStyle {
@@ -22,8 +22,7 @@ export interface Edge2DStyle {
  * Generate Edge2D style with default parameters
  * @param style
  */
-export function makeEdge2DStyle (
-  style: Partial<Edge2DStyle> = {}): Edge2DStyle {
+export function makeEdge2DStyle(style: Partial<Edge2DStyle> = {}): Edge2DStyle {
   return {
     lineWidth: 1,
     color: [0, 0, 0, 1],
@@ -43,8 +42,9 @@ export interface PathPoint2DStyle {
  * Generate PathPoint2D style with default parameters
  * @param style
  */
-export function makePathPoint2DStyle (
-    style: Partial<PathPoint2DStyle> = {}): PathPoint2DStyle {
+export function makePathPoint2DStyle(
+  style: Partial<PathPoint2DStyle> = {}
+): PathPoint2DStyle {
   return {
     radius: 1,
     color: [0, 0, 0],
@@ -54,31 +54,35 @@ export function makePathPoint2DStyle (
 
 /** points2D for polygon */
 export class PolyPathPoint2D extends Point2D {
-
   /** point type */
   private _type: PointType
 
-  constructor (
-    x: number = 0, y: number = 0, type: PointType = PointType.VERTEX) {
+  constructor(
+    x: number = 0,
+    y: number = 0,
+    type: PointType = PointType.VERTEX
+  ) {
     super(x, y)
     this._type = type
   }
 
   /** get and set type */
-  public get type (): PointType {
+  public get type(): PointType {
     return this._type
   }
 
-  public set type (t: PointType) {
+  public set type(t: PointType) {
     this._type = t
   }
 
   /**
    * convert this drawable pathPoint to a pathPoint state
    */
-  public toPathPoint (): PolyPathPoint2DType {
+  public toPathPoint(): PolyPathPoint2DType {
     return makePolyPathPoint({
-      x: this.x, y: this.y, pointType: this.type
+      x: this.x,
+      y: this.y,
+      pointType: this.type
     })
   }
 
@@ -86,7 +90,7 @@ export class PolyPathPoint2D extends Point2D {
    * pass the value to the current point
    * @param target
    */
-  public copy (target: PolyPathPoint2D): void {
+  public copy(target: PolyPathPoint2D): void {
     this.x = target.x
     this.y = target.y
     this.type = target.type
@@ -98,8 +102,11 @@ export class PolyPathPoint2D extends Point2D {
    * @param ratio
    * @param style
    */
-  public draw (
-    context: Context2D, ratio: number, style: PathPoint2DStyle): void {
+  public draw(
+    context: Context2D,
+    ratio: number,
+    style: PathPoint2DStyle
+  ): void {
     context.save()
     // Convert to display resolution
     const real = this.clone().scale(ratio)

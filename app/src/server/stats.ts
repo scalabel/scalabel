@@ -1,13 +1,13 @@
-import _ from 'lodash'
-import { ProjectOptions, TaskOptions } from '../components/dashboard'
-import { AttributeToolType } from '../const/common'
-import { Project } from '../types/project'
-import { Attribute, LabelType, TaskType } from '../types/state'
+import _ from "lodash"
+import { ProjectOptions, TaskOptions } from "../components/dashboard"
+import { AttributeToolType } from "../const/common"
+import { Project } from "../types/project"
+import { Attribute, LabelType, TaskType } from "../types/state"
 
 /**
  * Extract ProjectOption from a Project
  */
-export function getProjectOptions (project: Project): ProjectOptions {
+export function getProjectOptions(project: Project): ProjectOptions {
   return {
     name: project.config.projectName,
     itemType: project.config.itemType,
@@ -22,7 +22,7 @@ export function getProjectOptions (project: Project): ProjectOptions {
 /**
  * Returns the total number of labels in the task
  */
-export function countLabelsTask (task: TaskType): number {
+export function countLabelsTask(task: TaskType): number {
   const numPerItem = task.items.map((item) => _.size(item.labels))
   return _.sum(numPerItem)
 }
@@ -30,7 +30,7 @@ export function countLabelsTask (task: TaskType): number {
 /**
  * Returns the number of items with at least 1 label in the task
  */
-export function countLabeledItemsTask (task: TaskType): number {
+export function countLabeledItemsTask(task: TaskType): number {
   const labeledItems = task.items.filter((item) => _.size(item.labels) > 0)
   return labeledItems.length
 }
@@ -38,22 +38,21 @@ export function countLabeledItemsTask (task: TaskType): number {
 /**
  * Returns the total number of labels in the project
  */
-export function countLabelsProject (tasks: TaskType[]): number {
+export function countLabelsProject(tasks: TaskType[]): number {
   return _.sum(tasks.map(countLabelsTask))
 }
 
 /**
  * Returns the number of items with at least 1 label in the project
  */
-export function countLabeledItemsProject (tasks: TaskType[]): number {
+export function countLabeledItemsProject(tasks: TaskType[]): number {
   return _.sum(tasks.map(countLabeledItemsTask))
-
 }
 
 /**
  * Extracts TaskOptions from a Task
  */
-export function getTaskOptions (task: TaskType): TaskOptions {
+export function getTaskOptions(task: TaskType): TaskOptions {
   const numLabeledItems = countLabeledItemsTask(task)
   const numLabels = countLabelsTask(task)
   return {
@@ -67,7 +66,7 @@ export function getTaskOptions (task: TaskType): TaskOptions {
 /**
  * Get the total number of items across all tasks
  */
-export function getNumItems (tasks: TaskType[]) {
+export function getNumItems(tasks: TaskType[]) {
   const itemsPerTask = tasks.map((task) => task.items.length)
   return _.sum(itemsPerTask)
 }
@@ -75,9 +74,10 @@ export function getNumItems (tasks: TaskType[]) {
 /**
  * Get the number of tasks with a submission
  */
-export function getNumSubmissions (tasks: TaskType[]) {
-  const submittedTasks = tasks.filter((task) =>
-    task.progress.submissions.length > 0)
+export function getNumSubmissions(tasks: TaskType[]) {
+  const submittedTasks = tasks.filter(
+    (task) => task.progress.submissions.length > 0
+  )
   return submittedTasks.length
 }
 
@@ -86,21 +86,20 @@ export function getNumSubmissions (tasks: TaskType[]) {
  * @param attributes list of possible attributes
  * @returns map of attribute counts initialized to 0
  */
-function initAttributeStats (attributes: Attribute[]): AttributeStats {
+function initAttributeStats(attributes: Attribute[]): AttributeStats {
   const attributesByName = _.keyBy(attributes, (attribute) => attribute.name)
-  return _.mapValues(attributesByName,
-    (attribute) => {
-      if (attribute.toolType === AttributeToolType.SWITCH) {
-        return {
-          false: 0,
-          true: 0
-        }
+  return _.mapValues(attributesByName, (attribute) => {
+    if (attribute.toolType === AttributeToolType.SWITCH) {
+      return {
+        false: 0,
+        true: 0
       }
-      return _.zipObject(
-        attribute.values,
-        _.times(attribute.values.length, _.constant(0)))
     }
-  )
+    return _.zipObject(
+      attribute.values,
+      _.times(attribute.values.length, _.constant(0))
+    )
+  })
 }
 
 /**
@@ -109,25 +108,25 @@ function initAttributeStats (attributes: Attribute[]): AttributeStats {
  * @param attributes list of possible attributes
  * @return map of category and attribute counts initialized to 0
  */
-function initCategoryStats (
-  categories: string[], attributes: Attribute[]):
-  CategoryStats {
+function initCategoryStats(
+  categories: string[],
+  attributes: Attribute[]
+): CategoryStats {
   const categoriesByName = _.keyBy(categories)
-  return _.mapValues(categoriesByName,
-    (_category) => {
-      return {
-        count: 0,
-        attribute: initAttributeStats(attributes)
-      }
-    })
+  return _.mapValues(categoriesByName, (_category) => {
+    return {
+      count: 0,
+      attribute: initAttributeStats(attributes)
+    }
+  })
 }
 
 /**
  * Get the value of an attribute given the index in the value list
  */
-function getAttributeValue (attribute: Attribute, index: number) {
+function getAttributeValue(attribute: Attribute, index: number) {
   if (attribute.toolType === AttributeToolType.SWITCH) {
-    return index === 1 ? 'true' : 'false'
+    return index === 1 ? "true" : "false"
   }
   return attribute.values[index]
 }
@@ -136,16 +135,21 @@ function getAttributeValue (attribute: Attribute, index: number) {
  * Updates the attribute stats with given label
  * Modifies the stats in place
  */
-function updateAttributeStats (
-  stats: AttributeStats, label: LabelType,
-  attributes: Attribute[]) {
+function updateAttributeStats(
+  stats: AttributeStats,
+  label: LabelType,
+  attributes: Attribute[]
+) {
   const attributeIndices = _.map(
-    Object.keys(label.attributes), (attributeKey) => Number(attributeKey))
+    Object.keys(label.attributes),
+    (attributeKey) => Number(attributeKey)
+  )
 
   for (const attributeIndex of attributeIndices) {
     const attribute = attributes[attributeIndex]
-    const values = label.attributes[attributeIndex].map(
-      (valueIndex) => getAttributeValue(attribute, valueIndex))
+    const values = label.attributes[attributeIndex].map((valueIndex) =>
+      getAttributeValue(attribute, valueIndex)
+    )
 
     for (const value of values) {
       stats[attribute.name][value] += 1
@@ -161,11 +165,15 @@ function updateAttributeStats (
  * @param attributes the list of possible attributes
  * Modifies the stats in place
  */
-function updateCategoryStats (
-  stats: CategoryStats, label: LabelType,
-  categories: string[], attributes: Attribute[]) {
+function updateCategoryStats(
+  stats: CategoryStats,
+  label: LabelType,
+  categories: string[],
+  attributes: Attribute[]
+) {
   const categoryNames = label.category.map(
-    (categoryIndex) => categories[categoryIndex])
+    (categoryIndex) => categories[categoryIndex]
+  )
   for (const categoryName of categoryNames) {
     stats[categoryName].count += 1
     updateAttributeStats(stats[categoryName].attribute, label, attributes)
@@ -175,8 +183,7 @@ function updateCategoryStats (
 /**
  * Get the stats breakdown for all labels
  */
-export function getLabelStats (
-  tasks: TaskType[]): LabelStats {
+export function getLabelStats(tasks: TaskType[]): LabelStats {
   if (tasks.length === 0) {
     return { category: {}, attribute: {} }
   }
@@ -192,8 +199,7 @@ export function getLabelStats (
   const labels = _.flatMap(items, (item) => Object.values(item.labels))
 
   for (const label of labels) {
-    updateCategoryStats(
-      categoryStats, label, categories, attributes)
+    updateCategoryStats(categoryStats, label, categories, attributes)
     updateAttributeStats(attributeStats, label, attributes)
   }
 
@@ -205,7 +211,7 @@ export function getLabelStats (
 
 /** the number of labels for each attribute type/value */
 interface AttributeStats {
-  [name: string]: { [value: string]: number}
+  [name: string]: { [value: string]: number }
 }
 
 /**
@@ -252,7 +258,7 @@ interface ProjectStats {
 /**
  * Get the stats for a collection of tasks from a project
  */
-export function getProjectStats (tasks: TaskType[]): ProjectStats {
+export function getProjectStats(tasks: TaskType[]): ProjectStats {
   return {
     numLabels: countLabelsProject(tasks),
     numLabeledItems: countLabeledItemsProject(tasks),

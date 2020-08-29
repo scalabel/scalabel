@@ -1,13 +1,13 @@
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemText from '@material-ui/core/ListItemText'
-import { withStyles } from '@material-ui/core/styles'
-import Typography from '@material-ui/core/Typography'
-import React, { ReactNode } from 'react'
-import { createStyle, formStyle } from '../styles/create'
-import CreateForm from './create_form'
-import DividedPage from './divided_page'
-import ProjectList from './sidebar_projects'
+import List from "@material-ui/core/List"
+import ListItem from "@material-ui/core/ListItem"
+import ListItemText from "@material-ui/core/ListItemText"
+import { withStyles } from "@material-ui/core/styles"
+import Typography from "@material-ui/core/Typography"
+import React, { ReactNode } from "react"
+import { createStyle, formStyle } from "../styles/create"
+import CreateForm from "./create_form"
+import DividedPage from "./divided_page"
+import ProjectList from "./sidebar_projects"
 
 export interface ClassType {
   /** list header (existing projects) */
@@ -43,27 +43,29 @@ class Create extends React.Component<Props, State> {
    */
   private readonly mainContent: ReactNode
 
-  public constructor (props: Props) {
+  public constructor(props: Props) {
     super(props)
     this.state = {
       reloadProjects: false
     }
-    this.headerContent = (<Typography variant='h6' noWrap>
-      Open or create project
-    </Typography>)
+    this.headerContent = (
+      <Typography variant="h6" noWrap>
+        Open or create project
+      </Typography>
+    )
     this.sidebarContent = (
-            <List>
-              <ListItem>
-                <ListItemText primary={'Existing Projects'}
-                              className={this.props.classes.listHeader}
-                >
-                </ListItemText>
-              </ListItem>
-              <ProjectList refresh={this.state.reloadProjects}/>
-            </List>
+      <List>
+        <ListItem>
+          <ListItemText
+            primary={"Existing Projects"}
+            className={this.props.classes.listHeader}
+          ></ListItemText>
+        </ListItem>
+        <ProjectList refresh={this.state.reloadProjects} />
+      </List>
     )
     this.mainContent = (
-            <StyledForm projectReloadCallback={this.projectReloadCallback}/>
+      <StyledForm projectReloadCallback={this.projectReloadCallback} />
     )
   }
 
@@ -71,13 +73,15 @@ class Create extends React.Component<Props, State> {
    * renders the create page
    * @return component
    */
-  public render () {
+  public render() {
     return (
-            <DividedPage children={{
-              headerContent: this.headerContent,
-              sidebarContent: this.sidebarContent,
-              mainContent: this.mainContent
-            }}/>
+      <DividedPage
+        children={{
+          headerContent: this.headerContent,
+          sidebarContent: this.sidebarContent,
+          mainContent: this.mainContent
+        }}
+      />
     )
   }
 
@@ -85,10 +89,9 @@ class Create extends React.Component<Props, State> {
    * callback used to force a state change to reload the project
    * list
    */
-  private projectReloadCallback = () => {
-    this.setState({ reloadProjects : !this.state.reloadProjects })
+  private readonly projectReloadCallback = () => {
+    this.setState({ reloadProjects: !this.state.reloadProjects })
   }
-
 }
 
 const StyledForm = withStyles(formStyle)(CreateForm)

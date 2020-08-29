@@ -1,8 +1,9 @@
-import * as THREE from 'three'
+import * as THREE from "three"
 
 /** Get axis aligned scale in coordinate frame rotated by quaternion */
-export function rotateScale (
-  scale: THREE.Vector3, quaternion: THREE.Quaternion
+export function rotateScale(
+  scale: THREE.Vector3,
+  quaternion: THREE.Quaternion
 ) {
   const rotatedScaleArray = [1, 1, 1]
 

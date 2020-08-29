@@ -1,12 +1,12 @@
-import { ListItemText } from '@material-ui/core'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import { withStyles } from '@material-ui/core/styles'
-import ToggleButton from '@material-ui/lab/ToggleButton'
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
-import _ from 'lodash'
-import React from 'react'
-import { listButtonStyle, toggleButtonStyle } from '../styles/label'
+import { ListItemText } from "@material-ui/core"
+import List from "@material-ui/core/List"
+import ListItem from "@material-ui/core/ListItem"
+import { withStyles } from "@material-ui/core/styles"
+import ToggleButton from "@material-ui/lab/ToggleButton"
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup"
+import _ from "lodash"
+import React from "react"
+import { listButtonStyle, toggleButtonStyle } from "../styles/label"
 
 interface ClassType {
   /** root class */
@@ -51,29 +51,28 @@ class ToggleButtons extends React.Component<Props> {
   }
 
   /** render function of ToggleButtons */
-  public render () {
+  public render() {
     const { name, classes, values } = this.props
     const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton)
     return (
-      <List style={{ width: '100%', padding: '0px' }}>
+      <List style={{ width: "100%", padding: "0px" }}>
         <ListItemText
-          style={{ textAlign: 'center', width: '100%' }}
+          style={{ textAlign: "center", width: "100%" }}
           classes={{ primary: classes.primary }}
           primary={name}
         />
-        <ListItem style={{ width: '100%' }} dense={true}>
+        <ListItem style={{ width: "100%" }} dense={true}>
           <div
             className={classes.toggleContainer}
             style={{
-              marginRight: 'auto',
-              marginLeft: 'auto'
+              marginRight: "auto",
+              marginLeft: "auto"
             }}
           >
             <ToggleButtonGroup
               className={classes.buttonGroup}
               value={
-                this.props.values[this.props.getAlignmentIndex(
-                  this.props.name)]
+                this.props.values[this.props.getAlignmentIndex(this.props.name)]
               }
               exclusive
               onChange={this.handleAlignment}
@@ -83,10 +82,10 @@ class ToggleButtons extends React.Component<Props> {
                   className={classes.toggleButton}
                   value={element}
                   key={element}
-                  data-testid={'toggle-button-' + element}
+                  data-testid={"toggle-button-" + element}
                 >
-                  {' '}
-                  {element}{' '}
+                  {" "}
+                  {element}{" "}
                 </ToggleBtn>
               ))}
             </ToggleButtonGroup>

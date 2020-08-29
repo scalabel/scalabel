@@ -1,18 +1,16 @@
-import _ from 'lodash'
-import { TrackInterp } from '../auto/track/interp/interp'
-import { Box2DLinearInterp } from '../auto/track/interp/linear/box2d'
-import { Points2DLinearInterp } from '../auto/track/interp/linear/points2d'
-import { LabelTypeName, TrackPolicyType } from '../const/common'
-import Label2D from '../drawable/2d/label2d'
-import Label3D from '../drawable/3d/label3d'
-import { makeLabel, makeShape, makeTrack } from '../functional/states'
-import { IdType, LabelType, ShapeType, State, TrackType } from '../types/state'
+import _ from "lodash"
+import { TrackInterp } from "../auto/track/interp/interp"
+import { Box2DLinearInterp } from "../auto/track/interp/linear/box2d"
+import { Points2DLinearInterp } from "../auto/track/interp/linear/points2d"
+import { LabelTypeName, TrackPolicyType } from "../const/common"
+import Label2D from "../drawable/2d/label2d"
+import Label3D from "../drawable/3d/label3d"
+import { makeLabel, makeShape, makeTrack } from "../functional/states"
+import { IdType, LabelType, ShapeType, State, TrackType } from "../types/state"
 export type Label = Label2D | Label3D
 
 /** Convert policy type name to enum */
-export function policyFromString (
-  typeName: string
-): TrackPolicyType {
+export function policyFromString(typeName: string): TrackPolicyType {
   switch (typeName) {
     case TrackPolicyType.LINEAR_INTERPOLATION:
       return TrackPolicyType.LINEAR_INTERPOLATION
@@ -24,8 +22,9 @@ export function policyFromString (
 }
 
 /** Returns a function for creating a policy object based on the track type */
-function policyFactoryMaker (policyType: TrackPolicyType
-    ): (type: string) => TrackInterp {
+function policyFactoryMaker(
+  policyType: TrackPolicyType
+): (type: string) => TrackInterp {
   switch (policyType) {
     case TrackPolicyType.NONE:
       return (_type: string) => new TrackInterp()
@@ -36,9 +35,7 @@ function policyFactoryMaker (policyType: TrackPolicyType
 }
 
 /** Factory for linear interpolation policies */
-function linearInterpolationPolicyFactory (
-  type: string
-): TrackInterp {
+function linearInterpolationPolicyFactory(type: string): TrackInterp {
   switch (type) {
     case LabelTypeName.BOX_2D:
       return new Box2DLinearInterp()
@@ -69,30 +66,28 @@ export class Track {
   /** tracking policy type */
   protected _policyType: string
 
-  constructor () {
+  constructor() {
     this._track = makeTrack({ type: LabelTypeName.EMPTY })
     this._policy = new TrackInterp()
     this._shapes = {}
     this._labels = {}
     this._updatedIndices = new Set()
-    this._type = ''
-    this._policyType = ''
+    this._type = ""
+    this._policyType = ""
   }
 
   /**
    * Run when state is updated
    * @param state
    */
-  public updateState (state: State, id: IdType) {
+  public updateState(state: State, id: IdType) {
     this._track = state.task.tracks[id]
     const policyType = policyFromString(
       state.task.config.policyTypes[state.user.select.policyType]
     )
     if (policyType !== this._policyType) {
       this._policyType = policyType
-      this._policy = policyFactoryMaker(policyType)(
-        this._track.type
-      )
+      this._policy = policyFactoryMaker(policyType)(this._track.type)
     }
     const items = _.keys(this._track.labels).map((key) => Number(key))
     this._labels = Object.assign({}, _.pick(this._labels, items))
@@ -101,34 +96,33 @@ export class Track {
       const labelId = this._track.labels[item]
       const label = state.task.items[item].labels[labelId]
       this._labels[item] = label
-      this._shapes[item] =
-        label.shapes.map((shapeId) => state.task.items[item].shapes[shapeId])
+      this._shapes[item] = label.shapes.map(
+        (shapeId) => state.task.items[item].shapes[shapeId]
+      )
     }
   }
 
   /**
    * Get track id
    */
-  public get id () {
+  public get id() {
     return this._track.id
   }
 
   /** Get track type */
-  public get type () {
+  public get type() {
     return this._type
   }
 
   /** Get indices where the track has labels */
-  public get indices (): number[] {
-    return Object.keys(this._labels).map(
-      (key) => Number(key)
-    ).sort(
-      (a, b) => a - b
-    )
+  public get indices(): number[] {
+    return Object.keys(this._labels)
+      .map((key) => Number(key))
+      .sort((a, b) => a - b)
   }
 
   /** Get label at index */
-  public getLabel (index: number): Readonly<LabelType> | null {
+  public getLabel(index: number): Readonly<LabelType> | null {
     if (index in this._labels) {
       return this._labels[index]
     }
@@ -136,9 +130,7 @@ export class Track {
   }
 
   /** Get shapes at item index */
-  public getShapes (
-    index: number
-  ): Readonly<Array<Readonly<ShapeType>>> {
+  public getShapes(index: number): Readonly<Array<Readonly<ShapeType>>> {
     if (index in this._shapes) {
       return this._shapes[index]
     }
@@ -146,26 +138,23 @@ export class Track {
   }
 
   /** Set shapes at item index */
-  public setShapes (
-    index: number,
-    shapes: ShapeType[]
-  ) {
+  public setShapes(index: number, shapes: ShapeType[]) {
     this._updatedIndices.add(index)
     this._shapes[index] = shapes
   }
 
   /** Add updated index */
-  public addUpdatedIndex (index: number) {
+  public addUpdatedIndex(index: number) {
     this._updatedIndices.add(index)
   }
 
   /** Get updated indices */
-  public get updatedIndices (): Readonly<number[]> {
+  public get updatedIndices(): Readonly<number[]> {
     return Array.from(this._updatedIndices)
   }
 
   /** Clear updated indices */
-  public clearUpdatedIndices () {
+  public clearUpdatedIndices() {
     this._updatedIndices.clear()
   }
 
@@ -174,7 +163,7 @@ export class Track {
    * @param itemIndex
    * @param label
    */
-  public init (
+  public init(
     itemIndex: number,
     label: Readonly<Label>,
     numItems: number,
@@ -222,7 +211,7 @@ export class Track {
    * @param itemIndex
    * @param newShapes
    */
-  public update (itemIndex: number, label: Readonly<Label>): void {
+  public update(itemIndex: number, label: Readonly<Label>): void {
     const newShapes = label.shapes()
     if (
       itemIndex in this._shapes &&
@@ -243,7 +232,11 @@ export class Track {
       const labels = itemIndices.map((i) => this._labels[i])
       const shapes = itemIndices.map((i) => this._shapes[i])
       const newAllShapes = this._policy.interp(
-        this._labels[itemIndex], newShapes, labels, shapes)
+        this._labels[itemIndex],
+        newShapes,
+        labels,
+        shapes
+      )
       for (let i = 0; i < itemIndices.length; i += 1) {
         if (newAllShapes[i] !== shapes[i]) {
           this._updatedIndices.add(itemIndices[i])

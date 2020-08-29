@@ -1,24 +1,29 @@
-import Fingerprint2 from 'fingerprintjs2'
-import _ from 'lodash'
-import io from 'socket.io-client'
-import { connect, disconnect, receiveBroadcast, registerSession,
-  updateAll } from '../action/common'
-import { QueryArg } from '../const/common'
-import { EventName } from '../const/connection'
-import { SyncActionMessageType } from '../types/message'
-import { FullStore } from '../types/redux'
-import { State } from '../types/state'
-import { configureStore } from './configure_store'
-import Session from './session'
-import { makeSyncMiddleware } from './sync_middleware'
-import { Synchronizer } from './synchronizer'
-import { handleInvalidPage } from './util'
+import Fingerprint2 from "fingerprintjs2"
+import _ from "lodash"
+import io from "socket.io-client"
+import {
+  connect,
+  disconnect,
+  receiveBroadcast,
+  registerSession,
+  updateAll
+} from "../action/common"
+import { QueryArg } from "../const/common"
+import { EventName } from "../const/connection"
+import { SyncActionMessageType } from "../types/message"
+import { FullStore } from "../types/redux"
+import { State } from "../types/state"
+import { configureStore } from "./configure_store"
+import Session from "./session"
+import { makeSyncMiddleware } from "./sync_middleware"
+import { Synchronizer } from "./synchronizer"
+import { handleInvalidPage } from "./util"
 
 /**
  * Main function for initiating the frontend session
  * @param {string} containerName - the name of the container
  */
-export function initSession (containerName: string): void {
+export function initSession(containerName: string): void {
   // Get params from url path. These uniquely identify a labeling task
   const searchParams = new URLSearchParams(window.location.search)
   const projectName = searchParams.get(QueryArg.PROJECT_NAME)
@@ -38,9 +43,8 @@ export function initSession (containerName: string): void {
    */
   setTimeout(() => {
     Fingerprint2.get((components) => {
-      const values =
-        components.map((component) => component.value)
-      const userId = Fingerprint2.x64hash128(values.join(''), 31)
+      const values = components.map((component) => component.value)
+      const userId = Fingerprint2.x64hash128(values.join(""), 31)
       initSessionForTask(taskIndex, projectName, userId, containerName, devMode)
     })
   }, 500)
@@ -49,19 +53,27 @@ export function initSession (containerName: string): void {
 /**
  * Initializes a frontend session given the task's identifying information
  */
-export function initSessionForTask (
-  taskIndex: number, projectName: string,
-  userId: string, containerName: string, devMode: boolean) {
-
+export function initSessionForTask(
+  taskIndex: number,
+  projectName: string,
+  userId: string,
+  containerName: string,
+  devMode: boolean
+) {
   // Initialize socket connection to the backend
-  const socket = io.connect(
-    location.origin,
-    { transports: ['websocket'], upgrade: false }
-  )
+  const socket = io.connect(location.origin, {
+    transports: ["websocket"],
+    upgrade: false
+  })
 
   // Create middleware for handling socket.io-based actions
   const synchronizer = new Synchronizer(
-    socket, taskIndex, projectName, userId, containerName)
+    socket,
+    taskIndex,
+    projectName,
+    userId,
+    containerName
+  )
   const syncMiddleware = makeSyncMiddleware(synchronizer)
 
   // Initialize empty store
@@ -79,8 +91,10 @@ export function initSessionForTask (
 /**
  * Connect socket events to Redux actions
  */
-export function setSocketListeners (
-  store: FullStore, socket: SocketIOClient.Socket) {
+export function setSocketListeners(
+  store: FullStore,
+  socket: SocketIOClient.Socket
+) {
   socket.on(EventName.CONNECT, () => {
     store.dispatch(connect())
   })
@@ -98,9 +112,10 @@ export function setSocketListeners (
 /**
  * Set listeners for the HTML body
  */
-function setBodyListeners (store: FullStore) {
-  const body = document.getElementsByTagName('BODY') as
-    HTMLCollectionOf<HTMLElement>
+function setBodyListeners(store: FullStore) {
+  const body = document.getElementsByTagName("BODY") as HTMLCollectionOf<
+    HTMLElement
+  >
   body[0].onresize = () => {
     store.dispatch(updateAll())
   }

@@ -1,6 +1,6 @@
 /** general vector class */
 export class Vector extends Array<number> {
-  constructor (dim: number = 0) {
+  constructor(dim: number = 0) {
     super(dim)
   }
 
@@ -8,7 +8,7 @@ export class Vector extends Array<number> {
    * Set the values of this vector
    * @param {number[]} args: list of numbers to fill
    */
-  public set (...args: number[]): this {
+  public set(...args: number[]): this {
     for (let i = 0; i < this.length && i < args.length; i += 1) {
       this[i] = args[i]
     }
@@ -16,60 +16,60 @@ export class Vector extends Array<number> {
   }
 
   /** clone the current vector */
-  public clone (): this {
+  public clone(): this {
     const newVector = Object.create(this)
     Object.assign(newVector, Array.from(this))
     return newVector
   }
 
   /** negate the values */
-  public negate (): this {
-    this.forEach((v, i, arr) => arr[i] = - v)
+  public negate(): this {
+    this.forEach((v, i, arr) => (arr[i] = -v))
     return this
   }
 
   /** scale the whole vector */
-  public scale (s: number): this {
-    this.forEach((v, i, arr) => arr[i] = v * s)
+  public scale(s: number): this {
+    this.forEach((v, i, arr) => (arr[i] = v * s))
     return this
   }
 
   /** add a number or vector */
-  public add (s: number | Vector): this {
-    if (typeof s === 'number') {
-      this.forEach((v, i, arr) => arr[i] = v + s)
+  public add(s: number | Vector): this {
+    if (typeof s === "number") {
+      this.forEach((v, i, arr) => (arr[i] = v + s))
     } else {
-      this.forEach((v, i, arr) => arr[i] = v + s[i])
+      this.forEach((v, i, arr) => (arr[i] = v + s[i]))
     }
     return this
   }
 
   /** subtract a number or vector */
-  public subtract (s: number | Vector): this {
-    if (typeof s === 'number') {
-      this.forEach((v, i, arr) => arr[i] = v - s)
+  public subtract(s: number | Vector): this {
+    if (typeof s === "number") {
+      this.forEach((v, i, arr) => (arr[i] = v - s))
     } else {
-      this.forEach((v, i, arr) => arr[i] = v - s[i])
+      this.forEach((v, i, arr) => (arr[i] = v - s[i]))
     }
     return this
   }
 
   /** dot product with another vector */
-  public dot (vector: Vector): this {
-    this.forEach((v, i, arr) => arr[i] = v * vector[i])
+  public dot(vector: Vector): this {
+    this.forEach((v, i, arr) => (arr[i] = v * vector[i]))
     return this
   }
 
   /** calculate the absolute values of the vector elements */
-  public abs (): this {
-    this.forEach((v, i, arr) => arr[i] = Math.abs(v))
+  public abs(): this {
+    this.forEach((v, i, arr) => (arr[i] = Math.abs(v)))
     return this
   }
 
   /** product of the elements */
-  public prod (): number {
+  public prod(): number {
     let p = 1
-    this.forEach((v) => p *= v)
+    this.forEach((v) => (p *= v))
     return p
   }
 }

@@ -1,7 +1,7 @@
-import { shouldCanvasFreeze } from '../functional/selector'
-import { ReduxState } from '../types/redux'
-import { State } from '../types/state'
-import { Component } from './component'
+import { shouldCanvasFreeze } from "../functional/selector"
+import { ReduxState } from "../types/redux"
+import { State } from "../types/state"
+import { Component } from "./component"
 
 export interface DrawableProps {
   /** Whether the canvas should freeze */
@@ -10,8 +10,7 @@ export interface DrawableProps {
   tracking: boolean
 }
 
-export const mapStateToDrawableProps = (
-  state: ReduxState): DrawableProps => {
+export const mapStateToDrawableProps = (state: ReduxState): DrawableProps => {
   return {
     shouldFreeze: shouldCanvasFreeze(state),
     tracking: state.present.task.config.tracking
@@ -22,19 +21,20 @@ export const mapStateToDrawableProps = (
  * Abstract class for Canvas
  */
 export abstract class DrawableCanvas<
-  Props extends DrawableProps> extends Component<Props> {
+  Props extends DrawableProps
+> extends Component<Props> {
   /**
    * General constructor
    * @param props: component props
    */
-  protected constructor (props: Readonly<Props>) {
+  protected constructor(props: Readonly<Props>) {
     super(props)
   }
 
   /**
    * Execute when component state is updated
    */
-  public componentDidUpdate () {
+  public componentDidUpdate() {
     this.updateState(this.state)
     this.redraw()
   }
@@ -42,7 +42,7 @@ export abstract class DrawableCanvas<
   /**
    * Checks whether to freeze interface
    */
-  public checkFreeze () {
+  public checkFreeze() {
     return this.props.shouldFreeze
   }
 
@@ -51,10 +51,10 @@ export abstract class DrawableCanvas<
    * It should always fetch the current state from this.state
    * instead of Session
    */
-  public abstract redraw (): boolean
+  public abstract redraw(): boolean
 
   /**
    * notify state is updated
    */
-  protected abstract updateState (state: State): void
+  protected abstract updateState(state: State): void
 }

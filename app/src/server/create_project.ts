@@ -1,11 +1,21 @@
-import * as yaml from 'js-yaml'
-import _ from 'lodash'
-import { getInstructionUrl, getPageTitle, getTracking, index2str } from '../common/util'
-import { ItemTypeName, LabelTypeName } from '../const/common'
-import { FormField } from '../const/project'
-import { isValidId, makeSensor, makeTask, makeTrack } from '../functional/states'
-import { ItemExport } from '../types/bdd'
-import { CreationForm, FormFileData, Project } from '../types/project'
+import * as yaml from "js-yaml"
+import _ from "lodash"
+import {
+  getInstructionUrl,
+  getPageTitle,
+  getTracking,
+  index2str
+} from "../common/util"
+import { ItemTypeName, LabelTypeName } from "../const/common"
+import { FormField } from "../const/project"
+import {
+  isValidId,
+  makeSensor,
+  makeTask,
+  makeTrack
+} from "../functional/states"
+import { ItemExport } from "../types/bdd"
+import { CreationForm, FormFileData, Project } from "../types/project"
 import {
   Attribute,
   ConfigType,
@@ -15,43 +25,44 @@ import {
   TaskStatus,
   TaskType,
   TrackIdMap
-} from '../types/state'
-import * as defaults from './defaults'
-import { convertItemToImport } from './import'
-import { ProjectStore } from './project_store'
-import { Storage } from './storage'
-import * as util from './util'
+} from "../types/state"
+import * as defaults from "./defaults"
+import { convertItemToImport } from "./import"
+import { ProjectStore } from "./project_store"
+import { Storage } from "./storage"
+import * as util from "./util"
 
 /**
  * convert fields to form and validate input
  * if invalid input is found, error is returned to user via alert
  */
-export async function parseForm (
-  fields: { [key: string]: string},
-  projectStore: ProjectStore): Promise<CreationForm> {
+export async function parseForm(
+  fields: { [key: string]: string },
+  projectStore: ProjectStore
+): Promise<CreationForm> {
   // Check that required fields were entered
   let projectName = fields[FormField.PROJECT_NAME]
-  if (projectName === '') {
-    throw(Error('Please create a project name'))
+  if (projectName === "") {
+    throw Error("Please create a project name")
   } else {
     projectName = util.parseProjectName(projectName)
   }
 
   const itemType = fields[FormField.ITEM_TYPE]
-  if (itemType === '') {
-    throw(Error('Please choose an item type'))
+  if (itemType === "") {
+    throw Error("Please choose an item type")
   }
 
   const labelType = fields[FormField.LABEL_TYPE]
-  if (labelType === '') {
-    throw(Error('Please choose a label type'))
+  if (labelType === "") {
+    throw Error("Please choose a label type")
   }
 
   // Task size is not required for videos
   let taskSize = 1 // Video case
   if (fields[FormField.ITEM_TYPE] !== ItemTypeName.VIDEO) {
-    if (fields[FormField.TASK_SIZE] === '') {
-      throw(Error('Please specify a task size'))
+    if (fields[FormField.TASK_SIZE] === "") {
+      throw Error("Please specify a task size")
     } else {
       taskSize = parseInt(fields[FormField.TASK_SIZE], 10)
     }
@@ -64,12 +75,17 @@ export async function parseForm (
   // Ensure project name is not already in use
   const exists = await projectStore.checkProjectName(projectName)
   if (exists) {
-    throw(Error('Project name already exists.'))
+    throw Error("Project name already exists.")
   }
-  const demoMode = fields[FormField.DEMO_MODE] === 'true'
+  const demoMode = fields[FormField.DEMO_MODE] === "true"
   const form = util.makeCreationForm(
-    projectName, itemType, labelType, pageTitle, taskSize,
-    instructionUrl, demoMode
+    projectName,
+    itemType,
+    labelType,
+    pageTitle,
+    taskSize,
+    instructionUrl,
+    demoMode
   )
   return form
 }
@@ -83,33 +99,54 @@ type Categories = Array<{
 /**
  * Parses item, category, and attribute files from paths
  */
-export async function parseFiles (
-  storage: Storage, labelType: string, files: { [key: string]: string },
-  itemsRequired: boolean)
-  : Promise<FormFileData> {
+export async function parseFiles(
+  storage: Storage,
+  labelType: string,
+  files: { [key: string]: string },
+  itemsRequired: boolean
+): Promise<FormFileData> {
   const items = parseItems(storage, files, itemsRequired)
 
-  const categories: Promise<Categories> = readConfig(storage,
+  const categories: Promise<Categories> = readConfig(
+    storage,
     _.get(files, FormField.CATEGORIES),
-    getDefaultCategories(labelType))
+    getDefaultCategories(labelType)
+  )
 
-  const sensors: Promise<SensorType[]> = readConfig(storage,
-    _.get(files, FormField.SENSORS), [])
+  const sensors: Promise<SensorType[]> = readConfig(
+    storage,
+    _.get(files, FormField.SENSORS),
+    []
+  )
 
-  const templates: Promise<Label2DTemplateType[]> = readConfig(storage,
-    _.get(files, FormField.LABEL_SPEC), [])
+  const templates: Promise<Label2DTemplateType[]> = readConfig(
+    storage,
+    _.get(files, FormField.LABEL_SPEC),
+    []
+  )
 
-  const attributes = readConfig(storage, _.get(files, FormField.ATTRIBUTES),
-    getDefaultAttributes(labelType))
+  const attributes = readConfig(
+    storage,
+    _.get(files, FormField.ATTRIBUTES),
+    getDefaultAttributes(labelType)
+  )
 
-  return Promise.all([items, sensors, templates, attributes, categories])
-    .then((result: [
-      Array<Partial<ItemExport>>,
-      SensorType[],
-      Label2DTemplateType[],
-      Attribute[],
-      Categories
-    ]) => {
+  return await Promise.all([
+    items,
+    sensors,
+    templates,
+    attributes,
+    categories
+  ]).then(
+    (
+      result: [
+        Array<Partial<ItemExport>>,
+        SensorType[],
+        Label2DTemplateType[],
+        Attribute[],
+        Categories
+      ]
+    ) => {
       const categoriesData = result[4]
       const categoriesList = []
       for (const category of categoriesData) {
@@ -122,7 +159,8 @@ export async function parseFiles (
         attributes: result[3],
         categories: categoriesList
       }
-    })
+    }
+  )
 }
 
 /**
@@ -130,16 +168,18 @@ export async function parseFiles (
  * Can be in json or yaml format
  * If the path is undefined or empty, use the default
  */
-export async function readConfig<T> (
-  storage: Storage, filePath: string | undefined,
-  defaultValue: T): Promise<T> {
+export async function readConfig<T>(
+  storage: Storage,
+  filePath: string | undefined,
+  defaultValue: T
+): Promise<T> {
   if (!filePath) {
     return defaultValue
   }
 
   const file = await storage.load(filePath)
   try {
-    const fileData = yaml.safeLoad(file, { json: true }) as unknown as T
+    const fileData = (yaml.safeLoad(file, { json: true }) as unknown) as T
     return fileData
   } catch {
     throw new Error(`Improper formatting for file: ${filePath}`)
@@ -149,7 +189,7 @@ export async function readConfig<T> (
 /**
  * Get default categories if they weren't provided
  */
-function getDefaultCategories (labelType: string): Categories {
+function getDefaultCategories(labelType: string): Categories {
   switch (labelType) {
     // TODO: add seg2d defaults (requires subcategories)
     case LabelTypeName.BOX_3D:
@@ -165,7 +205,7 @@ function getDefaultCategories (labelType: string): Categories {
 /**
  * Get default attributes if they weren't provided
  */
-function getDefaultAttributes (labelType: string): Attribute[] {
+function getDefaultAttributes(labelType: string): Attribute[] {
   switch (labelType) {
     case LabelTypeName.BOX_2D:
       return defaults.box2DAttributes
@@ -177,14 +217,16 @@ function getDefaultAttributes (labelType: string): Attribute[] {
 /**
  * Load from items file, grouped by video name
  */
-export async function parseItems (
-  storage: Storage, files: { [key: string]: string },
-  itemsRequired: boolean): Promise<Array<Partial<ItemExport>>> {
+export async function parseItems(
+  storage: Storage,
+  files: { [key: string]: string },
+  itemsRequired: boolean
+): Promise<Array<Partial<ItemExport>>> {
   if (FormField.ITEMS in files) {
-    return readConfig(storage, files[FormField.ITEMS], [])
+    return await readConfig(storage, files[FormField.ITEMS], [])
   } else {
     if (itemsRequired) {
-      throw new Error('No item file.')
+      throw new Error("No item file.")
     } else {
       return []
     }
@@ -194,10 +236,10 @@ export async function parseItems (
 /**
  * Marshal data into project format
  */
-export function createProject (
+export function createProject(
   form: CreationForm,
-  formFileData: FormFileData): Promise<Project> {
-
+  formFileData: FormFileData
+): Promise<Project> {
   const handlerUrl = util.getHandlerUrl(form.itemType, form.labelType)
   const bundleFile = util.getBundleFile(form.labelType)
   const [itemType, tracking] = getTracking(form.itemType)
@@ -224,7 +266,7 @@ export function createProject (
     bundleFile,
     categories: formFileData.categories,
     attributes: formFileData.attributes,
-    taskId: '',
+    taskId: "",
     tracking,
     policyTypes: [],
     demoMode: form.demoMode,
@@ -236,11 +278,11 @@ export function createProject (
   let projectItems = formFileData.items
   projectItems.forEach((itemExport) => {
     if (itemExport.videoName === undefined) {
-      itemExport.videoName = ''
+      itemExport.videoName = ""
     }
   })
 
-  const sensors: {[id: number]: SensorType} = {}
+  const sensors: { [id: number]: SensorType } = {}
   for (const sensor of formFileData.sensors) {
     sensors[sensor.id] = sensor
   }
@@ -263,17 +305,17 @@ export function createProject (
  * first RV: map from attribute name to attribute and its index
  * second RV: map from attribute value to its index within that attribute
  */
-function getAttributeMaps (
-  configAttributes: Attribute[]):
-  [{[key: string]: [number, Attribute]}, {[key: string]: number}] {
-  const attributeNameMap: {[key: string]: [number, Attribute]} = {}
-  const attributeValueMap: {[key: string]: number} = {}
+function getAttributeMaps(
+  configAttributes: Attribute[]
+): [{ [key: string]: [number, Attribute] }, { [key: string]: number }] {
+  const attributeNameMap: { [key: string]: [number, Attribute] } = {}
+  const attributeValueMap: { [key: string]: number } = {}
   for (let attrInd = 0; attrInd < configAttributes.length; attrInd++) {
     const configAttribute = configAttributes[attrInd]
     // Map attribute name to its index and its value
     attributeNameMap[configAttribute.name] = [attrInd, configAttribute]
     // Map attribute values to their indices (if its a list)
-    if (configAttribute.toolType === 'list') {
+    if (configAttribute.toolType === "list") {
       const values = configAttribute.values
       for (let valueInd = 0; valueInd < values.length; valueInd++) {
         const value = values[valueInd]
@@ -289,9 +331,8 @@ function getAttributeMaps (
  * @param configCategories the categories from config file
  * returns a map from category value to its index
  */
-function getCategoryMap (
-  configCategories: string[]): {[key: string]: number} {
-  const categoryNameMap: {[key: string]: number} = {}
+function getCategoryMap(configCategories: string[]): { [key: string]: number } {
+  const categoryNameMap: { [key: string]: number } = {}
   for (let catInd = 0; catInd < configCategories.length; catInd++) {
     // Map category names to their indices
     const category = configCategories[catInd]
@@ -304,20 +345,22 @@ function getCategoryMap (
  * Filter invalid items, condition depends on whether labeling fusion data
  * Items are in export format
  */
-function filterInvalidItems (
-  items: Array<Partial<ItemExport>>, itemType: string,
-  sensors: { [id: number]: SensorType}): Array<Partial<ItemExport>> {
+function filterInvalidItems(
+  items: Array<Partial<ItemExport>>,
+  itemType: string,
+  sensors: { [id: number]: SensorType }
+): Array<Partial<ItemExport>> {
   if (itemType === ItemTypeName.FUSION) {
-    return items.filter((itemExport) =>
-      itemExport.dataType === undefined &&
-      itemExport.sensor !== undefined &&
-      itemExport.timestamp !== undefined &&
-      itemExport.sensor in sensors
+    return items.filter(
+      (itemExport) =>
+        itemExport.dataType === undefined &&
+        itemExport.sensor !== undefined &&
+        itemExport.timestamp !== undefined &&
+        itemExport.sensor in sensors
     )
   } else {
-    return items.filter((itemExport) =>
-      !itemExport.dataType ||
-      itemExport.dataType === itemType
+    return items.filter(
+      (itemExport) => !itemExport.dataType || itemExport.dataType === itemType
     )
   }
 }
@@ -326,9 +369,11 @@ function filterInvalidItems (
  * Partitions the item into tasks
  * Returns list of task indices in format [start, stop) for every task
  */
-function partitionItemsIntoTasks (
-  items: Array<Partial<ItemExport>>, tracking: boolean,
-  taskSize: number): number[] {
+function partitionItemsIntoTasks(
+  items: Array<Partial<ItemExport>>,
+  tracking: boolean,
+  taskSize: number
+): number[] {
   const taskIndices: number[] = []
   if (tracking) {
     // Partition by video name
@@ -354,10 +399,10 @@ function partitionItemsIntoTasks (
 /**
  * Map from data source id to list of items
  */
-function mapSensorToItems (
+function mapSensorToItems(
   items: Array<Partial<ItemExport>>
-): {[id: number]: Array<Partial<ItemExport>>} {
-  const itemsBySensor: {[id: number]: Array<Partial<ItemExport>>} = {}
+): { [id: number]: Array<Partial<ItemExport>> } {
+  const itemsBySensor: { [id: number]: Array<Partial<ItemExport>> } = {}
   for (const item of items) {
     const sensorId = item.sensor
     if (sensorId !== undefined) {
@@ -375,28 +420,29 @@ function mapSensorToItems (
  * Each consists of the task portion of a front  end state
  * Task and item start number are used if other tasks/items already exist
  */
-export function createTasks (
+export function createTasks(
   project: Project,
   taskStartNum: number = 0,
-  itemStartNum: number = 0): Promise<TaskType[]> {
+  itemStartNum: number = 0
+): Promise<TaskType[]> {
   const sensors = project.sensors
   const itemType = project.config.itemType
   const taskSize = project.config.taskSize
   const tracking = project.config.tracking
 
-  const items = filterInvalidItems(
-    project.items, itemType, sensors)
+  const items = filterInvalidItems(project.items, itemType, sensors)
 
   // Update sensor info
   if (itemType !== ItemTypeName.FUSION) {
-    sensors[-1] = makeSensor(-1, 'default', itemType)
-    let maxSensorId =
-      Math.max(...Object.keys(sensors).map((key) => Number(key)))
+    sensors[-1] = makeSensor(-1, "default", itemType)
+    let maxSensorId = Math.max(
+      ...Object.keys(sensors).map((key) => Number(key))
+    )
     for (const itemExport of items) {
       if (itemExport.dataType) {
         sensors[maxSensorId + 1] = makeSensor(
           maxSensorId,
-          '',
+          "",
           itemExport.dataType,
           itemExport.intrinsics,
           itemExport.extrinsics
@@ -413,14 +459,14 @@ export function createTasks (
     }
   }
 
-  const itemIndices = partitionItemsIntoTasks(
-    items, tracking, taskSize)
+  const itemIndices = partitionItemsIntoTasks(items, tracking, taskSize)
 
   /* create quick lookup dicts for conversion from export type
    * to external type for attributes/categories
    * this avoids lots of indexof calls which slows down creation */
   const [attributeNameMap, attributeValueMap] = getAttributeMaps(
-    project.config.attributes)
+    project.config.attributes
+  )
   const categoryNameMap = getCategoryMap(project.config.categories)
   const tasks: TaskType[] = []
 
@@ -433,15 +479,12 @@ export function createTasks (
 
     let realTaskSize = 0
     let largestSensor = -1
-    const sensorMatchingIndices: {[id: number]: number} = {}
+    const sensorMatchingIndices: { [id: number]: number } = {}
     for (const sensorId of sensorIds) {
-      itemsBySensor[sensorId] = _.sortBy(
-        itemsBySensor[sensorId],
-        [(itemExport) => util.getItemTimestamp(itemExport)]
-      )
-      realTaskSize = Math.max(
-        realTaskSize, itemsBySensor[sensorId].length
-      )
+      itemsBySensor[sensorId] = _.sortBy(itemsBySensor[sensorId], [
+        (itemExport) => util.getItemTimestamp(itemExport)
+      ])
+      realTaskSize = Math.max(realTaskSize, itemsBySensor[sensorId].length)
       if (realTaskSize === itemsBySensor[sensorId].length) {
         largestSensor = sensorId
       }
@@ -467,16 +510,19 @@ export function createTasks (
       const timestampToMatch = itemsBySensor[largestSensor][
         sensorMatchingIndices[largestSensor]
       ].timestamp as number
-      const itemExportMap: {[id: number]: Partial<ItemExport>} = {}
+      const itemExportMap: { [id: number]: Partial<ItemExport> } = {}
       for (const key of Object.keys(sensorMatchingIndices)) {
         const sensorId = Number(key)
         let newIndex = sensorMatchingIndices[sensorId]
         const itemExports = itemsBySensor[sensorId]
-        while (newIndex < itemExports.length - 1 &&
-               Math.abs(itemExports[newIndex + 1].timestamp as number -
-                        timestampToMatch) <
-               Math.abs(itemExports[newIndex].timestamp as number -
-                        timestampToMatch)
+        while (
+          newIndex < itemExports.length - 1 &&
+          Math.abs(
+            (itemExports[newIndex + 1].timestamp as number) - timestampToMatch
+          ) <
+            Math.abs(
+              (itemExports[newIndex].timestamp as number) - timestampToMatch
+            )
         ) {
           newIndex++
         }
@@ -503,7 +549,9 @@ export function createTasks (
         for (const label of Object.values(newItem.labels)) {
           if (isValidId(label.track) && !(label.track in trackMap)) {
             trackMap[label.track] = makeTrack(
-              { type: label.type, id: label.track }, false)
+              { type: label.type, id: label.track },
+              false
+            )
           }
           trackMap[label.track].labels[label.item] = label.id
         }

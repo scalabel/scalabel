@@ -1,9 +1,9 @@
-import AppBar from '@material-ui/core/AppBar'
-import CssBaseline from '@material-ui/core/CssBaseline'
-import { withStyles } from '@material-ui/core/styles'
-import Toolbar from '@material-ui/core/Toolbar'
-import React, { ReactNode } from 'react'
-import { headerPageStyle } from '../styles/navigation_page'
+import AppBar from "@material-ui/core/AppBar"
+import CssBaseline from "@material-ui/core/CssBaseline"
+import { withStyles } from "@material-ui/core/styles"
+import Toolbar from "@material-ui/core/Toolbar"
+import React, { ReactNode } from "react"
+import { headerPageStyle } from "../styles/navigation_page"
 
 export interface ClassType {
   /** root class */
@@ -29,20 +29,16 @@ export interface HeaderPageProps {
  * @param props
  * @constructor
  */
-function HeaderPage (props: HeaderPageProps) {
+function HeaderPage(props: HeaderPageProps) {
   const { classes, children } = props
   return (
-          <div className={classes.root}>
-            <CssBaseline/>
-            <AppBar
-                    className={classes.appBar}
-            >
-              <Toolbar>
-                {children.headerContent}
-              </Toolbar>
-            </AppBar>
-            {children.pageContent}
-          </div>
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar className={classes.appBar}>
+        <Toolbar>{children.headerContent}</Toolbar>
+      </AppBar>
+      {children.pageContent}
+    </div>
   )
 }
 

@@ -1,18 +1,25 @@
-import _ from 'lodash'
-import * as action from '../../src/action/common'
-import { changeSelectedLabelsCategories } from '../../src/action/select'
-import * as track from '../../src/action/track'
-import Session from '../../src/common/session'
+import _ from "lodash"
+import * as action from "../../src/action/common"
+import { changeSelectedLabelsCategories } from "../../src/action/select"
+import * as track from "../../src/action/track"
+import Session from "../../src/common/session"
 import {
-  getCategory, getLabelInTrack, getNumItems, getNumLabels, getNumLabelsForTrack,
+  getCategory,
+  getLabelInTrack,
+  getNumItems,
+  getNumLabels,
+  getNumLabelsForTrack,
   getNumLabelsForTrackId,
-  getNumShapes, getNumTracks, getSelectedLabels, getTrack
-} from '../../src/functional/state_util'
-import { makeLabel, makeShape } from '../../src/functional/states'
-import { IdType } from '../../src/types/state'
-import { setupTestStore } from '../components/util'
-import { testJson } from '../test_states/test_track_objects'
-import { findNewTracksFromState } from '../util/state'
+  getNumShapes,
+  getNumTracks,
+  getSelectedLabels,
+  getTrack
+} from "../../src/functional/state_util"
+import { makeLabel, makeShape } from "../../src/functional/states"
+import { IdType } from "../../src/types/state"
+import { setupTestStore } from "../components/util"
+import { testJson } from "../test_states/test_track_objects"
+import { findNewTracksFromState } from "../util/state"
 
 const getState = Session.getState.bind(Session)
 const dispatch = Session.dispatch.bind(Session)
@@ -31,7 +38,7 @@ beforeEach(() => {
 /**
  * Helper function to change the category of the label
  */
-function changeCategory (itemIndex: number, labelId: IdType, category: number) {
+function changeCategory(itemIndex: number, labelId: IdType, category: number) {
   // First select the label
   dispatch(action.goToItem(itemIndex))
   dispatch(action.changeSelect({ labels: { [itemIndex]: [labelId] } }))
@@ -44,21 +51,19 @@ function changeCategory (itemIndex: number, labelId: IdType, category: number) {
 /**
  * Helper function to check the category of the label in the state
  */
-function checkCategory (itemIndex: number, labelId: IdType, category: number) {
-  expect(getCategory(getState(), itemIndex, labelId)).
-    toStrictEqual([category])
+function checkCategory(itemIndex: number, labelId: IdType, category: number) {
+  expect(getCategory(getState(), itemIndex, labelId)).toStrictEqual([category])
 }
 
 /**
  * Helper function to check the number of total tracks in the state
  */
-function checkNumTracks (numTracks: number) {
+function checkNumTracks(numTracks: number) {
   expect(getNumTracks(getState())).toBe(numTracks)
-
 }
 
-describe('Test tracking operations', () => {
-  test('Track termination', () => {
+describe("Test tracking operations", () => {
+  test("Track termination", () => {
     // Check the initial state
     const itemIndex = 1
     dispatch(action.goToItem(itemIndex))
@@ -67,12 +72,10 @@ describe('Test tracking operations', () => {
     expect(getNumShapes(state, 2)).toBe(3)
 
     // Terminate a track
-    const trackId = '3'
+    const trackId = "3"
     let track3 = getTrack(state, trackId)
     expect(getNumLabelsForTrack(track3)).toBe(6)
-    dispatch(
-      track.terminateTracks([track3],
-        itemIndex, getNumItems(state)))
+    dispatch(track.terminateTracks([track3], itemIndex, getNumItems(state)))
 
     // Check that the track was terminated
     state = getState()
@@ -84,10 +87,10 @@ describe('Test tracking operations', () => {
     expect(getNumShapes(state, 0)).toBe(3)
   })
 
-  test('Track linking', () => {
+  test("Track linking", () => {
     // Check initial state
-    const toMergeTrack1 = '2' // Has labels at items 0-3
-    const toMergeTrack2 = '9' // Has a label at item 5
+    const toMergeTrack1 = "2" // Has labels at items 0-3
+    const toMergeTrack2 = "9" // Has a label at item 5
     const continueItemIdx = 5
     let state = getState()
     checkNumTracks(originalNumTracks)
@@ -99,14 +102,13 @@ describe('Test tracking operations', () => {
     // The 1st track should have the 2nd track's label
     state = getState()
     checkNumTracks(originalNumTracks - 1)
-    expect(
-      getLabelInTrack(state, toMergeTrack1, continueItemIdx)).toBe(labelId)
+    expect(getLabelInTrack(state, toMergeTrack1, continueItemIdx)).toBe(labelId)
   })
 
-  test('Selecting after linking', () => {
+  test("Selecting after linking", () => {
     // First merge the tracks
-    const track1 = '2' // Has labels at items 0-3
-    const track2 = '9' // Has a label at item 5
+    const track1 = "2" // Has labels at items 0-3
+    const track2 = "9" // Has a label at item 5
     checkNumTracks(originalNumTracks)
     dispatch(action.mergeTracks([track1, track2]))
 
@@ -131,11 +133,11 @@ describe('Test tracking operations', () => {
     expect(getSelectedLabels(getState())).toStrictEqual({})
   })
 
-  test('Changing category after linking', () => {
+  test("Changing category after linking", () => {
     // First merge the tracks
-    const track1 = '2' // Has labels at items 0-3
+    const track1 = "2" // Has labels at items 0-3
     const track1ItemIndex = 3
-    const track2 = '9' // Has a label at item 5
+    const track2 = "9" // Has a label at item 5
     const track2ItemIndex = 5
     checkNumTracks(originalNumTracks)
     dispatch(action.mergeTracks([track1, track2]))
@@ -155,10 +157,10 @@ describe('Test tracking operations', () => {
     checkCategory(track2ItemIndex, track2LabelId, newCategory)
   })
 
-  test('Linking tracks with different categories', () => {
-    const track1 = '2' // Has labels at items 0-3
+  test("Linking tracks with different categories", () => {
+    const track1 = "2" // Has labels at items 0-3
     const track1ItemIndex = 3
-    const track2 = '9' // Has a label at item 5
+    const track2 = "9" // Has a label at item 5
     const track2ItemIndex = 5
 
     // Check the initial categories
@@ -182,8 +184,8 @@ describe('Test tracking operations', () => {
     checkCategory(track2ItemIndex, track2LabelId, newCategory)
   })
 
-  test('Linking single frame tracks', () => {
-    const originalTrackIds = ['1', '2', '3', '9']
+  test("Linking single frame tracks", () => {
+    const originalTrackIds = ["1", "2", "3", "9"]
     const newTrackIds = []
     const maxItem = 5
 
@@ -193,21 +195,26 @@ describe('Test tracking operations', () => {
       const range = _.range(itemIndex, maxItem + 1)
       const labels = range.map(() => makeLabel({ track: `id${itemIndex}` }))
       const shapes = range.map(() => [makeShape()])
-      dispatch(action.addTrack(
-        range, '', labels, shapes
-      ))
+      dispatch(action.addTrack(range, "", labels, shapes))
       dispatch(action.goToItem(itemIndex + 1))
 
-      const trackId: string = findNewTracksFromState(getState(),
-        newTrackIds.concat(originalTrackIds))[0]
+      const trackId: string = findNewTracksFromState(
+        getState(),
+        newTrackIds.concat(originalTrackIds)
+      )[0]
       newTrackIds.push(trackId)
       const currentTrack = getTrack(getState(), trackId)
       expect(getNumLabelsForTrackId(getState(), trackId)).toBe(
-        maxItem + 1 - itemIndex)
+        maxItem + 1 - itemIndex
+      )
 
       dispatch(
-        track.terminateTracks([currentTrack],
-          itemIndex + 1, getNumItems(getState())))
+        track.terminateTracks(
+          [currentTrack],
+          itemIndex + 1,
+          getNumItems(getState())
+        )
+      )
       expect(getNumLabelsForTrackId(getState(), trackId)).toBe(1)
     }
     checkNumTracks(originalNumTracks + maxItem)

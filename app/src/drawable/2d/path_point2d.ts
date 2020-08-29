@@ -1,8 +1,8 @@
-import _ from 'lodash'
-import { isValidId, makePathPoint2D } from '../../functional/states'
-import { Vector2D } from '../../math/vector2d'
-import { IdType, PathPoint2DType, PathPointType } from '../../types/state'
-import { Context2D, toCssColor } from '../util'
+import _ from "lodash"
+import { isValidId, makePathPoint2D } from "../../functional/states"
+import { Vector2D } from "../../math/vector2d"
+import { IdType, PathPoint2DType, PathPointType } from "../../types/state"
+import { Context2D, toCssColor } from "../util"
 
 export interface PathPoint2DStyle {
   /** radius of the point on drawing */
@@ -24,8 +24,7 @@ export interface Edge2DStyle {
  * Generate Edge2D style with default parameters
  * @param style
  */
-export function makeEdge2DStyle (
-  style: Partial<Edge2DStyle> = {}): Edge2DStyle {
+export function makeEdge2DStyle(style: Partial<Edge2DStyle> = {}): Edge2DStyle {
   return {
     lineWidth: 1,
     color: [0, 0, 0, 1],
@@ -38,8 +37,9 @@ export function makeEdge2DStyle (
  * Generate PathPoint2D style with default parameters
  * @param style
  */
-export function makePathPoint2DStyle (
-    style: Partial<PathPoint2DStyle> = {}): PathPoint2DStyle {
+export function makePathPoint2DStyle(
+  style: Partial<PathPoint2DStyle> = {}
+): PathPoint2DStyle {
   return {
     radius: 1,
     color: [0, 0, 0],
@@ -53,15 +53,17 @@ export function makePathPoint2DStyle (
  * @param y
  * @param pointType
  */
-export function makeDrawablePathPoint2D (
-  x: number, y: number, pointType: PathPointType,
-  labelId: IdType | undefined) {
+export function makeDrawablePathPoint2D(
+  x: number,
+  y: number,
+  pointType: PathPointType,
+  labelId: IdType | undefined
+) {
   const label: IdType[] = []
   if (labelId && isValidId(labelId)) {
     label.push(labelId)
   }
-  return new PathPoint2D(makePathPoint2D(
-    { x, y, pointType, label }))
+  return new PathPoint2D(makePathPoint2D({ x, y, pointType, label }))
 }
 
 /**
@@ -75,7 +77,7 @@ export class PathPoint2D {
    */
   private _point: PathPoint2DType
 
-  constructor (point: PathPoint2DType | null = null) {
+  constructor(point: PathPoint2DType | null = null) {
     if (point === null) {
       this._point = makePathPoint2D()
     } else {
@@ -86,64 +88,64 @@ export class PathPoint2D {
   /**
    * Access the path point type
    */
-  public get type (): PathPointType {
+  public get type(): PathPointType {
     return this._point.pointType
   }
 
   /**
    * Set type
    */
-  public set type (t: PathPointType) {
+  public set type(t: PathPointType) {
     this._point.pointType = t
   }
 
   /**
    * Access x
    */
-  public get x (): number {
+  public get x(): number {
     return this._point.x
   }
 
-  public set x (v: number) {
+  public set x(v: number) {
     this._point.x = v
   }
 
   /**
    * Access y
    */
-  public get y (): number {
+  public get y(): number {
     return this._point.y
   }
 
-  public set y (v: number) {
+  public set y(v: number) {
     this._point.y = v
   }
 
   /**
    * Get point id
    */
-  public get id (): IdType {
+  public get id(): IdType {
     return this._point.id
   }
 
   /**
    * Return a copy of the shape
    */
-  public shape (): PathPoint2DType {
+  public shape(): PathPoint2DType {
     return _.cloneDeep(this._point)
   }
 
   /**
    * Convert the point to a vector for easy numeric manipulation
    */
-  public vector (): Vector2D {
+  public vector(): Vector2D {
     return new Vector2D(this._point.x, this._point.y)
   }
 
   /**
    * Make a copy of this
    */
-  public clone (): PathPoint2D {
+  public clone(): PathPoint2D {
     return new PathPoint2D(this._point)
   }
 
@@ -151,7 +153,7 @@ export class PathPoint2D {
    * Copy from another point
    * @param p
    */
-  public copy (p: PathPoint2D) {
+  public copy(p: PathPoint2D) {
     this._point = p.shape()
   }
 
@@ -161,8 +163,11 @@ export class PathPoint2D {
    * @param ratio
    * @param style
    */
-  public draw (
-    context: Context2D, ratio: number, style: PathPoint2DStyle): void {
+  public draw(
+    context: Context2D,
+    ratio: number,
+    style: PathPoint2DStyle
+  ): void {
     context.save()
     // Convert to display resolution
     const real = this.vector().scale(ratio)

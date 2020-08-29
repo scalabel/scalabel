@@ -1,8 +1,8 @@
-import Drawer from '@material-ui/core/Drawer'
-import { withStyles } from '@material-ui/core/styles'
-import React, { ReactNode } from 'react'
-import { dividedPageStyle } from '../styles/navigation_page'
-import HeaderPage from './header_page'
+import Drawer from "@material-ui/core/Drawer"
+import { withStyles } from "@material-ui/core/styles"
+import React, { ReactNode } from "react"
+import { dividedPageStyle } from "../styles/navigation_page"
+import HeaderPage from "./header_page"
 
 export interface ClassType {
   /** sidebar class */
@@ -36,33 +36,34 @@ export interface DividedPageProps {
  * @param props
  * @constructor
  */
-function DividedPage (props: DividedPageProps) {
+function DividedPage(props: DividedPageProps) {
   const { classes, children } = props
   const mainPageContent = (
-          <React.Fragment>
-            <Drawer
-                    className={classes.drawer}
-                    variant='permanent'
-                    anchor='left'
-                    classes={{
-                      paper: classes.drawerPaper
-                    }}
-            >
-              <div className={classes.drawerHeader}/>
-              {children.sidebarContent}
-            </Drawer>
-            <main className={classes.content}>
-              <div className={classes.appBarSpacer}/>
-              {children.mainContent}
-            </main>
-          </React.Fragment>
+    <React.Fragment>
+      <Drawer
+        className={classes.drawer}
+        variant="permanent"
+        anchor="left"
+        classes={{
+          paper: classes.drawerPaper
+        }}
+      >
+        <div className={classes.drawerHeader} />
+        {children.sidebarContent}
+      </Drawer>
+      <main className={classes.content}>
+        <div className={classes.appBarSpacer} />
+        {children.mainContent}
+      </main>
+    </React.Fragment>
   )
   return (
-          <HeaderPage children={{
-            headerContent: children.headerContent,
-            pageContent: mainPageContent
-          }}
-          />
+    <HeaderPage
+      children={{
+        headerContent: children.headerContent,
+        pageContent: mainPageContent
+      }}
+    />
   )
 }
 

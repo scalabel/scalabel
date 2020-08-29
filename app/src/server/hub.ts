@@ -1,18 +1,18 @@
-import _ from 'lodash'
-import socketio from 'socket.io'
-import { index2str } from '../common/util'
-import * as actionConsts from '../const/action'
-import { EventName } from '../const/connection'
-import { ServerConfig } from '../types/config'
-import { RegisterMessageType, SyncActionMessageType } from '../types/message'
-import { StateMetadata } from '../types/project'
-import Logger from './logger'
-import * as path from './path'
-import { ProjectStore } from './project_store'
-import { RedisPubSub } from './redis_pub_sub'
-import { SocketServer } from './socket_interface'
-import { UserManager } from './user_manager'
-import { initSessionId, updateStateTimestamp } from './util'
+import _ from "lodash"
+import socketio from "socket.io"
+import { index2str } from "../common/util"
+import * as actionConsts from "../const/action"
+import { EventName } from "../const/connection"
+import { ServerConfig } from "../types/config"
+import { RegisterMessageType, SyncActionMessageType } from "../types/message"
+import { StateMetadata } from "../types/project"
+import Logger from "./logger"
+import * as path from "./path"
+import { ProjectStore } from "./project_store"
+import { RedisPubSub } from "./redis_pub_sub"
+import { SocketServer } from "./socket_interface"
+import { UserManager } from "./user_manager"
+import { initSessionId, updateStateTimestamp } from "./util"
 
 /**
  * Wraps socket.io handlers for saving, loading, and synchronization
@@ -31,10 +31,12 @@ export class Hub {
   /** the redis message broker */
   protected publisher: RedisPubSub
 
-  constructor (config: ServerConfig,
-               projectStore: ProjectStore,
-               userManager: UserManager,
-               publisher: RedisPubSub) {
+  constructor(
+    config: ServerConfig,
+    projectStore: ProjectStore,
+    userManager: UserManager,
+    publisher: RedisPubSub
+  ) {
     this.sync = config.mode.sync
     this.autosave = config.mode.autosave
     this.bots = config.bot.on
@@ -46,14 +48,14 @@ export class Hub {
   /**
    * Listens for websocket connections
    */
-  public async listen (io: socketio.Server) {
+  public async listen(io: socketio.Server) {
     io.on(EventName.CONNECTION, this.registerNewSocket.bind(this))
   }
 
   /**
    * Registers new socket's listeners
    */
-  public registerNewSocket (socket: SocketServer) {
+  public registerNewSocket(socket: SocketServer) {
     socket.on(EventName.REGISTER, async (data: RegisterMessageType) => {
       try {
         await this.register(data, socket)
@@ -78,7 +80,7 @@ export class Hub {
   /**
    * Load the correct state and subscribe to redis
    */
-  public async register (data: RegisterMessageType, socket: SocketServer) {
+  public async register(data: RegisterMessageType, socket: SocketServer) {
     const projectName = data.projectName
     const taskId = index2str(data.taskIndex)
     const sessionId = initSessionId(data.sessionId)
@@ -102,8 +104,7 @@ export class Hub {
   /**
    * Updates the state with the action, and broadcasts action
    */
-  public async actionUpdate (
-    data: SyncActionMessageType, socket: SocketServer) {
+  public async actionUpdate(data: SyncActionMessageType, socket: SocketServer) {
     const projectName = data.projectName
     const taskId = data.taskId
     const sessionId = data.sessionId
@@ -116,16 +117,19 @@ export class Hub {
     const taskActions = actions.filter((action) => {
       return actionConsts.isTaskAction(action)
     })
-    const actionTypes = Array.from(
-      new Set(actions.map((a) => a.type)).values())
+    const actionTypes = Array.from(new Set(actions.map((a) => a.type)).values())
 
-    Logger.debug(`Received ${actions.length} actions and ` +
-      `${taskActions.length} task actions from Session ` +
-      `${sessionId}. The action types are ${actionTypes}.`)
+    Logger.debug(
+      `Received ${actions.length} actions and ` +
+        `${taskActions.length} task actions from Session ` +
+        `${sessionId}. The action types are ${actionTypes}.`
+    )
 
     // Load IDs of actions that have been processed already
-    const redisMetadata =
-      await this.projectStore.loadStateMetadata(projectName, taskId)
+    const redisMetadata = await this.projectStore.loadStateMetadata(
+      projectName,
+      taskId
+    )
     const actionIdsSaved = redisMetadata.actionIds
     if (!(actionPacketId in actionIdsSaved) && taskActions.length > 0) {
       const state = await this.projectStore.loadState(projectName, taskId)
@@ -140,7 +144,11 @@ export class Hub {
       }
 
       await this.projectStore.saveState(
-        newState, projectName, taskId, stateMetadata)
+        newState,
+        projectName,
+        taskId,
+        stateMetadata
+      )
     } else if (taskActions.length > 0) {
       // If actions were already saved, apply the old timestamps
       const timestamps = actionIdsSaved[actionPacketId]

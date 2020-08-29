@@ -1,14 +1,14 @@
-import * as THREE from 'three'
-import { ShapeTypeName } from '../../const/common'
-import { makeCube } from '../../functional/states'
-import { Vector2D } from '../../math/vector2d'
-import { Vector3D } from '../../math/vector3d'
-import { CubeType, IdType, ShapeType } from '../../types/state'
-import { projectionFromNDC } from '../../view_config/point_cloud'
-import { Grid3D } from './grid3d'
-import Label3D from './label3d'
-import { Plane3D } from './plane3d'
-import { Shape3D } from './shape3d'
+import * as THREE from "three"
+import { ShapeTypeName } from "../../const/common"
+import { makeCube } from "../../functional/states"
+import { Vector2D } from "../../math/vector2d"
+import { Vector3D } from "../../math/vector3d"
+import { CubeType, IdType, ShapeType } from "../../types/state"
+import { projectionFromNDC } from "../../view_config/point_cloud"
+import { Grid3D } from "./grid3d"
+import Label3D from "./label3d"
+import { Plane3D } from "./plane3d"
+import { Shape3D } from "./shape3d"
 
 const faceNormals = [
   new THREE.Vector3(1, 0, 0),
@@ -26,17 +26,17 @@ const DISTANCE_SCALE_CORRECTION = 5
  */
 export class Cube3D extends Shape3D {
   /** Box faces */
-  private _box: THREE.Mesh
+  private readonly _box: THREE.Mesh
   /** Outline ThreeJS object */
-  private _outline: THREE.LineSegments
+  private readonly _outline: THREE.LineSegments
   /** Color */
   private _color: number[]
   /** Anchor corner index */
   private _anchorIndex: number
   /** Normal of the closest face */
-  private _closestFaceNormal: THREE.Vector3
+  private readonly _closestFaceNormal: THREE.Vector3
   /** Control points */
-  private _controlSpheres: THREE.Mesh[]
+  private readonly _controlSpheres: THREE.Mesh[]
   /** Highlighted control point */
   private _highlightedSphere: THREE.Mesh | null
   /** Plane shape */
@@ -50,7 +50,7 @@ export class Cube3D extends Shape3D {
    * Make box with assigned id
    * @param id
    */
-  constructor (label: Label3D) {
+  constructor(label: Label3D) {
     super(label)
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
@@ -77,14 +77,16 @@ export class Cube3D extends Shape3D {
     this._closestFaceNormal = new THREE.Vector3()
     this._controlSpheres = []
     for (let i = 0; i < 4; i += 1) {
-      this._controlSpheres.push(new THREE.Mesh(
-        new THREE.SphereGeometry(0.05, 16, 12),
-        new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          transparent: true,
-          opacity: 0.3
-        })
-      ))
+      this._controlSpheres.push(
+        new THREE.Mesh(
+          new THREE.SphereGeometry(0.05, 16, 12),
+          new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.3
+          })
+        )
+      )
       this.add(this._controlSpheres[i])
       this._controlSpheres[i].visible = false
     }
@@ -102,12 +104,12 @@ export class Cube3D extends Shape3D {
   }
 
   /** Get shape type name */
-  public get typeName () {
+  public get typeName() {
     return ShapeTypeName.CUBE
   }
 
   /** Set visibility for viewer */
-  public setVisible (viewerId: number, v: boolean = true) {
+  public setVisible(viewerId: number, v: boolean = true) {
     super.setVisible(viewerId, v)
     if (v) {
       this._box.layers.enable(viewerId)
@@ -128,26 +130,26 @@ export class Cube3D extends Shape3D {
    * Set color
    * @param color
    */
-  public set color (color: number[]) {
-    this._color = color.map((v) => v / 255.)
+  public set color(color: number[]) {
+    this._color = color.map((v) => v / 255)
   }
 
   /**
    * Get ThreeJS box
    */
-  public get box (): THREE.Mesh {
+  public get box(): THREE.Mesh {
     return this._box
   }
 
   /** get the shape id */
-  public get shapeId (): IdType {
+  public get shapeId(): IdType {
     return this._cubeShape.id
   }
 
   /**
    * Convert to state representation
    */
-  public toState (): ShapeType {
+  public toState(): ShapeType {
     const worldCenter = new THREE.Vector3()
     this.getWorldPosition(worldCenter)
     const worldSize = new THREE.Vector3()
@@ -182,10 +184,11 @@ export class Cube3D extends Shape3D {
       worldOrientation.setFromQuaternion(worldQuaternion)
     }
     const cube = this._cubeShape
-    cube.center = (new Vector3D()).fromThree(worldCenter).toState()
-    cube.size = (new Vector3D()).fromThree(worldSize).toState()
-    cube.orientation =
-      (new Vector3D()).fromThree(worldOrientation.toVector3()).toState()
+    cube.center = new Vector3D().fromThree(worldCenter).toState()
+    cube.size = new Vector3D().fromThree(worldSize).toState()
+    cube.orientation = new Vector3D()
+      .fromThree(worldOrientation.toVector3())
+      .toState()
     cube.anchorIndex = this._anchorIndex
 
     return cube
@@ -194,7 +197,7 @@ export class Cube3D extends Shape3D {
   /**
    * move anchor to next corner
    */
-  public incrementAnchorIndex (): void {
+  public incrementAnchorIndex(): void {
     this._anchorIndex = (this._anchorIndex + 1) % 8
   }
 
@@ -202,7 +205,7 @@ export class Cube3D extends Shape3D {
    * attach to plane
    * @param plane
    */
-  public attachToPlane (plane: Plane3D) {
+  public attachToPlane(plane: Plane3D) {
     this._grid = plane.internalShapes()[0] as Grid3D
   }
 
@@ -210,25 +213,23 @@ export class Cube3D extends Shape3D {
    * attach to plane
    * @param plane
    */
-  public detachFromPlane () {
+  public detachFromPlane() {
     this._grid = null
   }
 
   /** update parameters */
-  public updateState (
-    shape: ShapeType, id: IdType
-  ) {
+  public updateState(shape: ShapeType, id: IdType) {
     const geometry = this._box.geometry as THREE.Geometry
     for (const face of geometry.faces) {
       face.color.fromArray(this._color)
     }
     super.updateState(shape, id)
     const cube = shape as CubeType
-    this.position.copy((new Vector3D()).fromState(cube.center).toThree())
+    this.position.copy(new Vector3D().fromState(cube.center).toThree())
     this.rotation.copy(
-      (new Vector3D()).fromState(cube.orientation).toThreeEuler()
+      new Vector3D().fromState(cube.orientation).toThreeEuler()
     )
-    this.scale.copy((new Vector3D()).fromState(cube.size).toThree())
+    this.scale.copy(new Vector3D().fromState(cube.size).toThree())
     // Also update the _cubeShape
     this._cubeShape = cube
   }
@@ -237,22 +238,19 @@ export class Cube3D extends Shape3D {
    * Add to scene for rendering
    * @param scene
    */
-  public render (scene: THREE.Scene,
-                 camera: THREE.Camera): void {
+  public render(scene: THREE.Scene, camera: THREE.Camera): void {
     if (this._highlighted) {
-      (this._outline.material as THREE.LineBasicMaterial).color.set(0xff0000)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xff0000)
       for (const sphere of this._controlSpheres) {
         sphere.visible = true
-        sphere.scale.set(
-          1. / this.scale.x, 1. / this.scale.y, 1. / this.scale.z
-        )
+        sphere.scale.set(1 / this.scale.x, 1 / this.scale.y, 1 / this.scale.z)
       }
 
       this.setControlSpheres(camera)
     } else if (this._label.selected) {
-      (this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
-      (this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       for (const sphere of this._controlSpheres) {
         sphere.visible = false
       }
@@ -276,26 +274,32 @@ export class Cube3D extends Shape3D {
   }
 
   /** Set highlighted */
-  public setHighlighted (intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection) {
     for (const sphere of this._controlSpheres) {
-      { (sphere.material as THREE.Material).opacity = 0.3 }
-      { (sphere.material as THREE.Material).needsUpdate = true }
+      {
+        ;(sphere.material as THREE.Material).opacity = 0.3
+      }
+      {
+        ;(sphere.material as THREE.Material).needsUpdate = true
+      }
       sphere.visible = true
     }
     this._highlightedSphere = null
     if (intersection) {
-      (this._outline.material as THREE.LineBasicMaterial).color.set(0xff0000)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xff0000)
       this._highlighted = true
 
       for (const sphere of this._controlSpheres) {
         if (intersection.object === sphere) {
           this._highlightedSphere = sphere
-          { (sphere.material as THREE.Material).opacity = 0.8 }
+          {
+            ;(sphere.material as THREE.Material).opacity = 0.8
+          }
           break
         }
       }
     } else {
-      (this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       this._highlighted = false
 
       for (const sphere of this._controlSpheres) {
@@ -309,10 +313,7 @@ export class Cube3D extends Shape3D {
    * @param raycaster
    * @param intersects
    */
-  public raycast (
-    raycaster: THREE.Raycaster,
-    intersects: THREE.Intersection[]
-  ) {
+  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
     const newIntersects: THREE.Intersection[] = []
 
     for (const sphere of this._controlSpheres) {
@@ -345,7 +346,7 @@ export class Cube3D extends Shape3D {
    * @param y
    * @param camera
    */
-  public clickInit (x: number, y: number, camera: THREE.Camera) {
+  public clickInit(x: number, y: number, camera: THREE.Camera) {
     if (this._grid) {
       this._firstCorner = new Vector2D(x, y)
       const projection = projectionFromNDC(x, y, camera)
@@ -378,7 +379,7 @@ export class Cube3D extends Shape3D {
    * Drag to mouse
    * @param projection
    */
-  public drag (x: number, y: number, camera: THREE.Camera) {
+  public drag(x: number, y: number, camera: THREE.Camera) {
     const projection = projectionFromNDC(x, y, camera)
 
     this.updateMatrixWorld(true)
@@ -477,7 +478,8 @@ export class Cube3D extends Shape3D {
       gridNormal.z = 1
       const gridPlane = new THREE.Plane()
       gridPlane.setFromNormalAndCoplanarPoint(
-        gridNormal, this._highlightedSphere.position
+        gridNormal,
+        this._highlightedSphere.position
       )
 
       const newHighlightedLocalPosition = new THREE.Vector3()
@@ -559,9 +561,7 @@ export class Cube3D extends Shape3D {
     this.scale.add(scaleDelta)
 
     for (const sphere of this._controlSpheres) {
-      sphere.scale.set(
-        1. / this.scale.x, 1. / this.scale.y, 1. / this.scale.z
-      )
+      sphere.scale.set(1 / this.scale.x, 1 / this.scale.y, 1 / this.scale.z)
     }
 
     return true
@@ -570,7 +570,7 @@ export class Cube3D extends Shape3D {
   /**
    * Returns true if control sphere is highlighted
    */
-  public shouldDrag (): boolean {
+  public shouldDrag(): boolean {
     return this._highlightedSphere !== null || this._firstCorner !== null
   }
 
@@ -578,7 +578,7 @@ export class Cube3D extends Shape3D {
    * Set sphere positions from normal
    * @param normal
    */
-  public setControlSpheres (camera: THREE.Camera) {
+  public setControlSpheres(camera: THREE.Camera) {
     // Find normal closest to camera
     const worldQuaternion = new THREE.Quaternion()
     this.getWorldQuaternion(worldQuaternion)
@@ -595,31 +595,38 @@ export class Cube3D extends Shape3D {
     }
 
     const scaleVector = new THREE.Vector3()
-    const scaleFactor = scaleVector.subVectors(
-      this.position,
-      camera.position
-    ).length() / DISTANCE_SCALE_CORRECTION
+    const scaleFactor =
+      scaleVector.subVectors(this.position, camera.position).length() /
+      DISTANCE_SCALE_CORRECTION
 
     for (let i = 0; i < this._controlSpheres.length; i += 1) {
-      const firstSign = (i % 2 === 0) ? -1 : 1
-      const secondSign = (Math.floor(i / 2) === 0) ? -1 : 1
+      const firstSign = i % 2 === 0 ? -1 : 1
+      const secondSign = Math.floor(i / 2) === 0 ? -1 : 1
       if (this._closestFaceNormal.x !== 0) {
         this._controlSpheres[i].position.set(
-          this._closestFaceNormal.x, firstSign, secondSign
+          this._closestFaceNormal.x,
+          firstSign,
+          secondSign
         )
       } else if (this._closestFaceNormal.y !== 0) {
         this._controlSpheres[i].position.set(
-           firstSign, this._closestFaceNormal.y, secondSign
+          firstSign,
+          this._closestFaceNormal.y,
+          secondSign
         )
       } else {
         this._controlSpheres[i].position.set(
-           firstSign, secondSign, this._closestFaceNormal.z
+          firstSign,
+          secondSign,
+          this._closestFaceNormal.z
         )
       }
       this._controlSpheres[i].position.multiplyScalar(0.5)
 
       this._controlSpheres[i].scale.set(
-        1. / this.scale.x, 1. / this.scale.y, 1. / this.scale.z
+        1 / this.scale.x,
+        1 / this.scale.y,
+        1 / this.scale.z
       )
       this._controlSpheres[i].scale.multiplyScalar(scaleFactor)
     }

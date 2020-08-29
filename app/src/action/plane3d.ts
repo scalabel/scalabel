@@ -1,8 +1,8 @@
-import { LabelTypeName } from '../const/common'
-import { makeLabel, makePlane } from '../functional/states'
-import { AddLabelsAction } from '../types/action'
-import { Vector3Type } from '../types/state'
-import * as actions from './common'
+import { LabelTypeName } from "../const/common"
+import { makeLabel, makePlane } from "../functional/states"
+import { AddLabelsAction } from "../types/action"
+import { Vector3Type } from "../types/state"
+import * as actions from "./common"
 
 /**
  * Create AddLabelAction to create a box3d label
@@ -13,7 +13,7 @@ import * as actions from './common'
  * @param {number} orientation
  * @return {AddLabelAction}
  */
-export function addPlaneLabel (
+export function addPlaneLabel(
   itemIndex: number,
   sensors: number[],
   offset: Vector3Type,
@@ -22,7 +22,5 @@ export function addPlaneLabel (
   // Create the rect object
   const plane = makePlane({ offset, orientation })
   const label = makeLabel({ type: LabelTypeName.PLANE_3D, sensors })
-  return actions.addLabel(
-    itemIndex, label, [plane]
-  )
+  return actions.addLabel(itemIndex, label, [plane])
 }
