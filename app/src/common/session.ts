@@ -1,4 +1,3 @@
-import _ from "lodash"
 import * as THREE from "three"
 import { Window } from "../components/window"
 import { Label2DList } from "../drawable/2d/label2d_list"
@@ -78,7 +77,7 @@ class Session {
    * Wrapper for redux store dispatch of actions
    * @param {actionTypes.ActionType} action: action description
    */
-  public dispatch(action: actionTypes.ActionType | ThunkActionType) {
+  public dispatch(action: actionTypes.ActionType | ThunkActionType): void {
     if (action.hasOwnProperty("type")) {
       this.store.dispatch(action as actionTypes.ActionType)
     } else {
@@ -90,7 +89,7 @@ class Session {
    * Subscribe all the controllers to the states
    * @param {Function} callback: view component
    */
-  public subscribe(callback: () => void) {
+  public subscribe(callback: () => void): void {
     this.store.subscribe(callback)
   }
 }

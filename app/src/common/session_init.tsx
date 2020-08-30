@@ -1,5 +1,4 @@
 import Fingerprint2 from "fingerprintjs2"
-import _ from "lodash"
 import io from "socket.io-client"
 import {
   connect,
@@ -59,7 +58,7 @@ export function initSessionForTask(
   userId: string,
   containerName: string,
   devMode: boolean
-) {
+): void {
   // Initialize socket connection to the backend
   const socket = io.connect(location.origin, {
     transports: ["websocket"],
@@ -94,7 +93,7 @@ export function initSessionForTask(
 export function setSocketListeners(
   store: FullStore,
   socket: SocketIOClient.Socket
-) {
+): void {
   socket.on(EventName.CONNECT, () => {
     store.dispatch(connect())
   })
@@ -112,7 +111,7 @@ export function setSocketListeners(
 /**
  * Set listeners for the HTML body
  */
-function setBodyListeners(store: FullStore) {
+function setBodyListeners(store: FullStore): void {
   const body = document.getElementsByTagName("BODY") as HTMLCollectionOf<
     HTMLElement
   >

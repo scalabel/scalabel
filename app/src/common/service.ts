@@ -40,7 +40,7 @@ export function requestData<DataType>(
  * @export
  * @returns
  */
-export function getAuth() {
+export function getAuth(): string {
   // Check auth info
   return Cognito.getAuth()
 }

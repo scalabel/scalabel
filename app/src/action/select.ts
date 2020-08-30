@@ -238,7 +238,7 @@ export function unselectLabels(
   currentSelection: { [index: number]: IdType[] },
   itemIndex: number,
   labelIds: IdType[]
-) {
+): actionTypes.ChangeSelectAction {
   const selectedLabels = _.cloneDeep(currentSelection)
   for (const labelId of labelIds) {
     const idIndex = selectedLabels[itemIndex].indexOf(labelId)
@@ -250,7 +250,9 @@ export function unselectLabels(
 }
 
 /** Change selected label and policy types */
-export function selectLabel3dType(labelTypeName: LabelTypeName) {
+export function selectLabel3dType(
+  labelTypeName: LabelTypeName
+): actionTypes.ChangeSelectAction {
   const newSelect: Partial<Select> = {}
   const labelTypes = Session.label3dList.labelTypes
   for (let i = 0; i < labelTypes.length; i++) {

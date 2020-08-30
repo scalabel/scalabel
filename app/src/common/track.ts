@@ -80,7 +80,7 @@ export class Track {
    * Run when state is updated
    * @param state
    */
-  public updateState(state: State, id: IdType) {
+  public updateState(state: State, id: IdType): void {
     this._track = state.task.tracks[id]
     const policyType = policyFromString(
       state.task.config.policyTypes[state.user.select.policyType]
@@ -105,12 +105,12 @@ export class Track {
   /**
    * Get track id
    */
-  public get id() {
+  public get id(): IdType {
     return this._track.id
   }
 
   /** Get track type */
-  public get type() {
+  public get type(): string {
     return this._type
   }
 
@@ -138,13 +138,13 @@ export class Track {
   }
 
   /** Set shapes at item index */
-  public setShapes(index: number, shapes: ShapeType[]) {
+  public setShapes(index: number, shapes: ShapeType[]): void {
     this._updatedIndices.add(index)
     this._shapes[index] = shapes
   }
 
   /** Add updated index */
-  public addUpdatedIndex(index: number) {
+  public addUpdatedIndex(index: number): void {
     this._updatedIndices.add(index)
   }
 
@@ -154,7 +154,7 @@ export class Track {
   }
 
   /** Clear updated indices */
-  public clearUpdatedIndices() {
+  public clearUpdatedIndices(): void {
     this._updatedIndices.clear()
   }
 

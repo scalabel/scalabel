@@ -29,14 +29,14 @@ export function getTracking(itemType: string): [string, boolean] {
 /**
  * Create the link to the labeling instructions
  */
-function makeInstructionUrl(pageName: string) {
+function makeInstructionUrl(pageName: string): string {
   return `https://www.scalabel.ai/doc/instructions/${pageName}.html`
 }
 
 /**
  * Select the correct instruction url for the given label type
  */
-export function getInstructionUrl(labelType: string) {
+export function getInstructionUrl(labelType: string): string {
   switch (labelType) {
     case LabelTypeName.BOX_2D: {
       return makeInstructionUrl("bbox")
@@ -54,7 +54,7 @@ export function getInstructionUrl(labelType: string) {
 /**
  * Select the correct page title for given label type
  */
-export function getPageTitle(labelType: string, itemType: string) {
+export function getPageTitle(labelType: string, itemType: string): string {
   const [, tracking] = getTracking(itemType)
 
   let title: string
@@ -88,7 +88,7 @@ export function getPageTitle(labelType: string, itemType: string) {
  * Converts index into a filename of size 6 with
  * trailing zeroes
  */
-export function index2str(index: number) {
+export function index2str(index: number): string {
   return index.toString().padStart(6, "0")
 }
 

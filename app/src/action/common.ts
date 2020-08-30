@@ -27,7 +27,7 @@ let getState = getStateGetter()
  * Set the state getter for actions
  * @param getter
  */
-export function setActionStateGetter(getter: GetStateFunc) {
+export function setActionStateGetter(getter: GetStateFunc): void {
   getState = getter
 }
 
@@ -408,7 +408,7 @@ export function changeViewerConfig(
 export function toggleSynchronization(
   viewerId: number,
   config: ViewerConfigType
-) {
+): actionTypes.ChangeViewerConfigAction {
   return changeViewerConfig(viewerId, {
     ...config,
     synchronized: !config.synchronized
@@ -476,7 +476,7 @@ export function submit(): actionTypes.SubmitAction {
 /**
  * start to link tracks
  */
-export function startLinkTrack() {
+export function startLinkTrack(): actionTypes.BaseAction {
   return makeBaseAction(actionConsts.START_LINK_TRACK)
 }
 
@@ -540,14 +540,14 @@ export function updateSessionStatus(
 /**
  * Mark status as reconnecting
  */
-export function setStatusToReconnecting() {
+export function setStatusToReconnecting(): actionTypes.UpdateSessionStatusAction {
   return updateSessionStatus(ConnectionStatus.RECONNECTING)
 }
 
 /**
  * Mark status as submitting
  */
-export function setStatusToSubmitting() {
+export function setStatusToSubmitting(): actionTypes.UpdateSessionStatusAction {
   return updateSessionStatus(ConnectionStatus.SUBMITTING)
 }
 
@@ -577,14 +577,14 @@ export const setStatusToUnsaved: ThunkCreatorType = () => {
  * After a connect/reconnect, mark status as unsaved
  * Regardless of previous status
  */
-export function setStatusAfterConnect() {
+export function setStatusAfterConnect(): actionTypes.UpdateSessionStatusAction {
   return updateSessionStatus(ConnectionStatus.UNSAVED)
 }
 
 /**
  * Mark status as computing
  */
-export function setStatusToComputing() {
+export function setStatusToComputing(): actionTypes.UpdateSessionStatusAction {
   return updateSessionStatus(ConnectionStatus.COMPUTING)
 }
 

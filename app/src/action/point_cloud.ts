@@ -21,7 +21,9 @@ export enum CameraLockState {
 }
 
 /** Returns whether camera lock state is locked to selected label */
-export function lockedToSelection(viewerConfig: PointCloudViewerConfigType) {
+export function lockedToSelection(
+  viewerConfig: PointCloudViewerConfigType
+): boolean {
   return viewerConfig.lockStatus >= CameraLockState.SELECTION_X
 }
 
@@ -422,7 +424,7 @@ export function updateLockStatus(
 }
 
 /** Convert axis (0, 1, 2) to the selection lock state */
-function axisIndexToSelectionLockState(axis: number) {
+function axisIndexToSelectionLockState(axis: number): number {
   return CameraLockState.SELECTION_X + axis
 }
 
@@ -461,7 +463,7 @@ export function alignToAxis(
 export function toggleSelectionLock(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-) {
+): actionTypes.ChangeViewerConfigAction {
   const config = { ...viewerConfig }
   if (lockedToSelection(viewerConfig)) {
     config.lockStatus = CameraLockState.UNLOCKED
@@ -476,7 +478,7 @@ export function toggleSelectionLock(
 export function toggleRotation(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-) {
+): actionTypes.ChangeViewerConfigAction {
   // Spread the original config
   const config = { ...viewerConfig }
   if (viewerConfig.cameraRotateDir) {

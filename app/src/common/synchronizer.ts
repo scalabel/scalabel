@@ -1,4 +1,3 @@
-import _ from "lodash"
 import OrderedMap from "orderedmap"
 import {
   makeSequential,
@@ -116,8 +115,8 @@ export class Synchronizer {
     sessionId: string,
     bots: boolean,
     dispatch: ThunkDispatchType
-  ) {
-    const shouldBeSaved = (a: actionTypes.BaseAction) => {
+  ): void {
+    const shouldBeSaved = (a: actionTypes.BaseAction): boolean => {
       return (
         sessionId === a.sessionId &&
         !a.frontendOnly &&
@@ -163,7 +162,7 @@ export class Synchronizer {
   /**
    * Registers the session with the backend, triggering a register ack
    */
-  public sendConnectionMessage(sessionId: string, dispatch: ThunkDispatchType) {
+  public sendConnectionMessage(sessionId: string, dispatch: ThunkDispatchType): void {
     const message: RegisterMessageType = {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
@@ -186,7 +185,7 @@ export class Synchronizer {
     sessionId: string,
     bots: boolean,
     dispatch: ThunkDispatchType
-  ) {
+  ): void {
     if (!this.registeredOnce) {
       // One-time setup after first registration
       this.registeredOnce = true
@@ -227,7 +226,7 @@ export class Synchronizer {
     message: SyncActionMessageType,
     sessionId: string,
     dispatch: ThunkDispatchType
-  ) {
+  ): void {
     const actionPacket = message.actions
     // Remove stored actions when they are acked
     this.actionsPendingSave = this.actionsPendingSave.remove(actionPacket.id)
@@ -281,7 +280,7 @@ export class Synchronizer {
   /**
    * Called when session disconnects from backend
    */
-  public handleDisconnect(dispatch: ThunkDispatchType) {
+  public handleDisconnect(dispatch: ThunkDispatchType): void {
     dispatch(setStatusToReconnecting())
   }
 
@@ -305,7 +304,7 @@ export class Synchronizer {
    * Send all queued actions to the backend
    * and move actions to actionsPendingSave
    */
-  public save(sessionId: string, bots: boolean, dispatch: ThunkDispatchType) {
+  public save(sessionId: string, bots: boolean, dispatch: ThunkDispatchType): void {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
         const packet: ActionPacketType = {
@@ -333,7 +332,7 @@ export class Synchronizer {
     actionPacket: ActionPacketType,
     sessionId: string,
     dispatch: ThunkDispatchType
-  ) {
+  ): void {
     const message: SyncActionMessageType = {
       taskId: index2str(this.taskIndex),
       projectName: this.projectName,

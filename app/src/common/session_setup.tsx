@@ -36,7 +36,7 @@ export function setupSession(
   newState: DeepPartialState,
   containerName: string = "",
   shouldInitViews: boolean = true
-) {
+): void {
   const store = Session.getSimpleStore()
   const dispatch = store.dispatcher()
   const getState = store.getter()
@@ -61,7 +61,7 @@ export function setupSession(
  * Render the dom after data is loaded
  * @param containername: string name
  */
-function renderDom(containerName: string, store: FullStore) {
+function renderDom(containerName: string, store: FullStore): void {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
       <Provider store={store}>
@@ -171,14 +171,14 @@ function loadPointClouds(
       ) {
         const url = item.urls[sensorId]
         attemptsMap[sensorId] = 0
-        const onLoad = (geometry: THREE.BufferGeometry) => {
+        const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
 
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent
         // policy for all data types
-        const onError = () => {
+        const onError = (): void => {
           attemptsMap[sensorId]++
           if (attemptsMap[sensorId] === maxAttempts) {
             alert(`Point cloud at ${url} was not found.`)

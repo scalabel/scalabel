@@ -13,7 +13,7 @@ function handleSyncAction(
   synchronizer: Synchronizer,
   state: State,
   dispatch: ThunkDispatchType
-) {
+): void {
   switch (action.type) {
     case actionConsts.REGISTER_SESSION:
       const initialState = (action as actionTypes.RegisterSessionAction)
@@ -50,7 +50,7 @@ function handleNormalAction(
   synchronizer: Synchronizer,
   state: State,
   dispatch: ThunkDispatchType
-) {
+): void {
   const sessionId = state.session.id
   const autosave = state.task.config.autosave
   const bots = state.task.config.bots
