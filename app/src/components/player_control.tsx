@@ -5,7 +5,6 @@ import Grid from "@material-ui/core/Grid"
 import Input from "@material-ui/core/Input"
 import Slider from "@material-ui/core/Slider"
 import { withStyles } from "@material-ui/core/styles"
-import _ from "lodash"
 import React, { ChangeEvent } from "react"
 import { goToItem } from "../action/common"
 import Session from "../common/session"
@@ -30,14 +29,14 @@ interface Props {
   /** Styles of TitleBar */
   classes: ClassType
   /** Number of frames */
-  num_frames: number
+  numFrames: number
 }
 
 /**
  * Go to the next Item
  * @param {number} index
  */
-function goToItemWithIndex(index: number) {
+function goToItemWithIndex(index: number): void {
   Session.dispatch(goToItem(index - 1))
 }
 
@@ -62,15 +61,15 @@ class PlayerControl extends Component<Props> {
     this.playing = false
     this.currentFrame = 1
     this.intervalId = -1
-    const { num_frames } = this.props
-    this.numFrames = num_frames
+    const { numFrames } = this.props
+    this.numFrames = numFrames
     this._keyDownListener = this.onKeyDown.bind(this)
   }
 
   /**
    * Mount callback
    */
-  public componentDidMount() {
+  public componentDidMount(): void {
     super.componentDidMount()
     document.addEventListener("keydown", this._keyDownListener)
   }
@@ -78,7 +77,7 @@ class PlayerControl extends Component<Props> {
   /**
    * Unmount callback
    */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     document.removeEventListener("keydown", this._keyDownListener)
   }
@@ -87,7 +86,7 @@ class PlayerControl extends Component<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): React.ReactFragment {
     const { classes } = this.props
     let playIcon
     if (this.playing) {
@@ -178,7 +177,7 @@ class PlayerControl extends Component<Props> {
   private handleSliderChange(
     _event: ChangeEvent<{}>,
     newValue: number | number[]
-  ) {
+  ): void {
     if (Array.isArray(newValue)) {
       if (this.currentFrame !== newValue[0]) {
         this.currentFrame = newValue[0]
@@ -198,7 +197,7 @@ class PlayerControl extends Component<Props> {
    */
   private handleInputChange(
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
+  ): void {
     const value = Number(event.target.value)
     this.currentFrame = Math.max(Math.min(value, this.numFrames), 1)
     goToItemWithIndex(this.currentFrame)
@@ -207,7 +206,7 @@ class PlayerControl extends Component<Props> {
   /**
    * Callback function for clicking play/pause
    */
-  private togglePlay() {
+  private togglePlay(): void {
     // Switch the play status
     this.playing = !this.playing
 
@@ -228,7 +227,7 @@ class PlayerControl extends Component<Props> {
   }
 
   /** Listen to key down */
-  private onKeyDown(e: KeyboardEvent) {
+  private onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
       case Key.ARROW_LEFT:
         this.currentFrame = Math.max(this.currentFrame - 1, 1)

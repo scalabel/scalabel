@@ -4,7 +4,6 @@ import ListItem from "@material-ui/core/ListItem"
 import { withStyles } from "@material-ui/core/styles"
 import ToggleButton from "@material-ui/lab/ToggleButton"
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup"
-import _ from "lodash"
 import React from "react"
 import { listButtonStyle, toggleButtonStyle } from "../styles/label"
 
@@ -44,14 +43,14 @@ class ToggleButtons extends React.Component<Props> {
   public handleAlignment = (
     _event: React.MouseEvent<HTMLElement>,
     alignment: string
-  ) => {
+  ): void => {
     this.props.handleAttributeToggle(this.props.name, alignment)
     // Re-render to get correct alignment
     this.setState({})
   }
 
   /** render function of ToggleButtons */
-  public render() {
+  public render(): JSX.Element {
     const { name, classes, values } = this.props
     const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton)
     return (

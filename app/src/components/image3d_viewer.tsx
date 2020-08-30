@@ -27,7 +27,7 @@ class Image3DViewer extends Viewer2D {
   }
 
   /** Component update function */
-  public componentDidUpdate() {
+  public componentDidUpdate(): void {
     if (this._viewerConfig) {
       const img3dConfig = this._viewerConfig as Image3DViewerConfigType
       const sensor = img3dConfig.sensor

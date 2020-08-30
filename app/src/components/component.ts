@@ -26,14 +26,14 @@ export abstract class Component<Props> extends React.Component<
   /**
    * after mounting, set flag to allow for rendering and state updates
    */
-  public componentDidMount() {
+  public componentDidMount(): void {
     this._isMounted = true
   }
 
   /**
    * after unmounting, set flag so no state updates are possible
    */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     this._isMounted = false
   }
 

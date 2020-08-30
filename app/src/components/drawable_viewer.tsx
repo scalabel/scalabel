@@ -5,7 +5,7 @@ import { ViewerConfigType } from "../types/state"
 import { Component } from "./component"
 
 /** Generate string to use for react component key */
-export function viewerReactKey(id: number) {
+export function viewerReactKey(id: number): string {
   return `viewer${id}`
 }
 
@@ -83,7 +83,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
   /**
    * Run when component mounts
    */
-  public componentDidMount() {
+  public componentDidMount(): void {
     super.componentDidMount()
     document.addEventListener("keydown", this._keyDownHandler)
     document.addEventListener("keyup", this._keyUpHandler)
@@ -92,7 +92,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
   /**
    * Run when component unmounts
    */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     document.removeEventListener("keydown", this._keyDownHandler)
     document.removeEventListener("keyup", this._keyUpHandler)
@@ -203,7 +203,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
    * Handle mouse leave
    * @param e
    */
-  protected onMouseEnter(_e: React.MouseEvent) {
+  protected onMouseEnter(_e: React.MouseEvent): void {
     Session.activeViewerId = this.props.id
   }
 

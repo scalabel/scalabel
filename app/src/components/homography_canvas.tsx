@@ -14,7 +14,7 @@ import { ImageCanvas, Props } from "./image_canvas"
 import { mapStateToDrawableProps } from "./viewer"
 
 /** Get basis matrix for use with homography */
-function getBasisMatrix(homogeneousPoints: THREE.Vector3[]) {
+function getBasisMatrix(homogeneousPoints: THREE.Vector3[]): THREE.Matrix3 {
   const homogeneousMatrix = new THREE.Matrix3()
 
   for (let i = 0; i < 3; i++) {
@@ -80,7 +80,7 @@ class HomographyCanvas extends ImageCanvas {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): JSX.Element {
     const { classes } = this.props
     let imageCanvas = (
       <canvas
@@ -254,7 +254,7 @@ class HomographyCanvas extends ImageCanvas {
   /**
    * Draw image with birds eye view homography
    */
-  private drawHomography() {
+  private drawHomography(): void {
     if (this.imageCanvas && this.imageContext && this._imageData) {
       if (this._plane && this._image) {
         const homographyData = this.imageContext.createImageData(

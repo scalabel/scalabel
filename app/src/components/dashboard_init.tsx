@@ -11,7 +11,7 @@ import Dashboard, { DashboardContents } from "./dashboard"
 /**
  * This function post requests to backend to retrieve dashboard contents
  */
-export function initDashboard(vendor?: boolean) {
+export function initDashboard(vendor?: boolean): [string, boolean] | void {
   let dashboardContents: DashboardContents
   // Get params from url path.
   const searchParams = new URLSearchParams(window.location.search)

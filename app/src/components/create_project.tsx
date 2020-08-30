@@ -89,7 +89,7 @@ class Create extends React.Component<Props, State> {
    * callback used to force a state change to reload the project
    * list
    */
-  private readonly projectReloadCallback = () => {
+  private readonly projectReloadCallback = (): void => {
     this.setState({ reloadProjects: !this.state.reloadProjects })
   }
 }

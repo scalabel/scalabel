@@ -11,7 +11,7 @@ export function formatDate(dateNow: number): string {
 /**
  * Extract timestamp of latest submission; -1 if not submitted
  */
-export function getSubmissionTime(submissions: SubmitData[]) {
+export function getSubmissionTime(submissions: SubmitData[]): number {
   if (submissions.length > 0) {
     const latestSubmission = submissions[submissions.length - 1]
     return latestSubmission.time

@@ -45,7 +45,7 @@ export class Window extends React.Component<Props> {
    * Function to render the interface
    * @return {React.Fragment}
    */
-  public render() {
+  public render(): React.ReactFragment {
     const config = this.props.config
 
     // Get all the components

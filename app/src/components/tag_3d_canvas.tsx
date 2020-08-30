@@ -84,7 +84,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   /**
    * Mount callback
    */
-  public componentDidMount() {
+  public componentDidMount(): void {
     super.componentDidMount()
     Session.label3dList.subscribe(this._drawableUpdateCallback)
   }
@@ -92,7 +92,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   /**
    * Unmount callback
    */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     Session.label3dList.unsubscribe(this._drawableUpdateCallback)
   }
@@ -101,7 +101,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): JSX.Element {
     const { classes } = this.props
 
     let canvas = (
@@ -191,7 +191,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */
-  private initializeRefs(component: HTMLCanvasElement | null) {
+  private initializeRefs(component: HTMLCanvasElement | null): void {
     const viewerConfig = this.state.user.viewerConfigs[this.props.id]
     const sensor = viewerConfig.sensor
     if (!component || !isCurrentFrameLoaded(this.state, sensor)) {

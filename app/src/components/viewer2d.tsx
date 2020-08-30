@@ -45,7 +45,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents() {
+  protected getDrawableComponents(): Array<React.ReactElement> {
     if (this._container && this._viewerConfig) {
       this._container.scrollTop = (this
         ._viewerConfig as ImageViewerConfigType).displayTop
@@ -78,7 +78,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getMenuComponents() {
+  protected getMenuComponents(): Array<JSX.Element> | [] {
     if (this._viewerConfig) {
       const zoomInButton = (
         <IconButton
@@ -141,7 +141,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Handle mouse move
    * @param e
    */
-  protected onMouseMove(e: React.MouseEvent) {
+  protected onMouseMove(e: React.MouseEvent): void {
     const oldX = this._mX
     const oldY = this._mY
     super.onMouseMove(e)
@@ -165,19 +165,19 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Handle double click
    * @param e
    */
-  protected onDoubleClick() {}
+  protected onDoubleClick(): void {}
 
   /**
    * Handle mouse leave
    * @param e
    */
-  protected onMouseLeave() {}
+  protected onMouseLeave(): void {}
 
   /**
    * Handle mouse wheel
    * @param e
    */
-  protected onWheel(e: WheelEvent) {
+  protected onWheel(e: WheelEvent): void {
     e.preventDefault()
     if (this._viewerConfig && this._container) {
       if (this.isKeyDown(types.Key.META) || this.isKeyDown(types.Key.CONTROL)) {
@@ -191,7 +191,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
   }
 
   /** Zoom */
-  protected zoom(zoomRatio: number, offset: Vector2D) {
+  protected zoom(zoomRatio: number, offset: Vector2D): void {
     const config = this._viewerConfig as ImageViewerConfigType
     const newScale = config.viewScale * zoomRatio
     const newConfig = { ...config }

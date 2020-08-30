@@ -329,7 +329,7 @@ export default class CreateForm extends React.Component<Props, State> {
    * Handles submission event
    * @param event
    */
-  private readonly handleSubmit = (event: ChangeEvent<HTMLFormElement>) => {
+  private readonly handleSubmit = (event: ChangeEvent<HTMLFormElement>): void => {
     event.preventDefault()
     const that = this
     const x = new XMLHttpRequest()
@@ -373,7 +373,7 @@ export default class CreateForm extends React.Component<Props, State> {
    * handles instruction url
    * @param itemType {string}
    */
-  private readonly handleInstructions = (labelType: string) => {
+  private readonly handleInstructions = (labelType: string): void => {
     switch (labelType) {
       case LabelTypeName.TAG:
         this.setState({ showCategoriesUpload: false })
@@ -393,7 +393,7 @@ export default class CreateForm extends React.Component<Props, State> {
   /**
    * handles page title
    */
-  private readonly handlePageTitle = (labelType: string, itemType: string) => {
+  private readonly handlePageTitle = (labelType: string, itemType: string): void => {
     const pageTitle = getPageTitle(labelType, itemType)
     this.setState({ pageTitle })
   }
@@ -404,7 +404,7 @@ export default class CreateForm extends React.Component<Props, State> {
    */
   private readonly handleLabelChange = (
     event: ChangeEvent<HTMLInputElement>
-  ) => {
+  ): void => {
     this.handleInstructions(event.target.value)
     this.handlePageTitle(event.target.value, this.state.itemType)
     this.setState({ labelType: event.target.value })
@@ -416,7 +416,7 @@ export default class CreateForm extends React.Component<Props, State> {
    */
   private readonly handleItemTypeChange = (
     event: ChangeEvent<HTMLInputElement>
-  ) => {
+  ): void => {
     this.setState({ itemType: event.target.value })
     this.handlePageTitle(this.state.labelType, event.target.value)
 

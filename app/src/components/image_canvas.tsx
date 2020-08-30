@@ -68,7 +68,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): JSX.Element {
     const { classes } = this.props
     let imageCanvas = (
       <canvas
@@ -147,7 +147,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
     canvas: HTMLCanvasElement,
     context: CanvasRenderingContext2D,
     upRes: boolean
-  ) {
+  ): void {
     if (!this.display) {
       return
     }

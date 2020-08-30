@@ -34,7 +34,7 @@ export abstract class DrawableCanvas<
   /**
    * Execute when component state is updated
    */
-  public componentDidUpdate() {
+  public componentDidUpdate(): void {
     this.updateState(this.state)
     this.redraw()
   }
@@ -42,7 +42,7 @@ export abstract class DrawableCanvas<
   /**
    * Checks whether to freeze interface
    */
-  public checkFreeze() {
+  public checkFreeze(): boolean {
     return this.props.shouldFreeze
   }
 

@@ -123,7 +123,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   /**
    * Mount callback
    */
-  public componentDidMount() {
+  public componentDidMount(): void {
     super.componentDidMount()
     document.addEventListener("keydown", this._keyDownListener)
     document.addEventListener("keyup", this._keyUpListener)
@@ -133,7 +133,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   /**
    * Unmount callback
    */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     document.removeEventListener("keydown", this._keyDownListener)
     document.removeEventListener("keyup", this._keyUpListener)
@@ -144,7 +144,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): JSX.Element {
     const { classes } = this.props
 
     let canvas = (
@@ -201,7 +201,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Handle mouse down
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
-  public onMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
+  public onMouseDown(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (!this.canvas || this.checkFreeze()) {
       return
     }
@@ -224,7 +224,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Handle mouse up
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
-  public onMouseUp(e: React.MouseEvent<HTMLCanvasElement>) {
+  public onMouseUp(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (!this.canvas || this.checkFreeze()) {
       return
     }
@@ -237,7 +237,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Handle mouse move
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
-  public onMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
+  public onMouseMove(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (!this.canvas || this.checkFreeze()) {
       return
     }
@@ -281,7 +281,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Handle keyboard events
    * @param {KeyboardEvent} e
    */
-  public onKeyDown(e: KeyboardEvent) {
+  public onKeyDown(e: KeyboardEvent): void {
     if (this.checkFreeze() || Session.activeViewerId !== this.props.id) {
       return
     }
@@ -297,7 +297,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Handle keyboard events
    * @param {KeyboardEvent} e
    */
-  public onKeyUp(e: KeyboardEvent) {
+  public onKeyUp(e: KeyboardEvent): void {
     if (this.checkFreeze() || Session.activeViewerId !== this.props.id) {
       return
     }
@@ -341,7 +341,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   /**
    * Render ThreeJS Scene
    */
-  private renderThree() {
+  private renderThree(): void {
     const state = this.state
     const sensor = this.state.user.viewerConfigs[this.props.id].sensor
     if (this.renderer && isCurrentFrameLoaded(state, sensor)) {
@@ -355,7 +355,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Handle double click
    * @param _e
    */
-  private onDoubleClick(e: React.MouseEvent<HTMLCanvasElement>) {
+  private onDoubleClick(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (this._labelHandler.onDoubleClick()) {
       e.stopPropagation()
     }
@@ -366,7 +366,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */
-  private initializeRefs(component: HTMLCanvasElement | null) {
+  private initializeRefs(component: HTMLCanvasElement | null): void {
     const viewerConfig = this.state.user.viewerConfigs[this.props.id]
     const sensor = viewerConfig.sensor
     if (!component || !isCurrentFrameLoaded(this.state, sensor)) {
@@ -425,7 +425,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   /**
    * Update rendering constants
    */
-  private updateRenderer() {
+  private updateRenderer(): void {
     if (this.canvas && this.renderer) {
       this.renderer.setSize(this.canvas.width, this.canvas.height)
     }

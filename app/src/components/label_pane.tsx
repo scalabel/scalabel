@@ -62,7 +62,7 @@ function viewerTypeFromString(type: string): types.ViewerConfigTypeName {
 }
 
 /** Returns whether the config types are compatible */
-function viewerConfigTypesCompatible(type1: string, type2: string) {
+function viewerConfigTypesCompatible(type1: string, type2: string): boolean {
   let configType1 = viewerTypeFromString(type1)
   let configType2 = viewerTypeFromString(type2)
 

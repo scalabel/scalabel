@@ -56,7 +56,7 @@ export default class UploadButton extends React.Component<Props, State> {
    * renders the upload button
    * currently uses native validation
    */
-  public render() {
+  public render(): JSX.Element {
     const { classes } = this.props
     return (
       <div className={classes.root}>
@@ -129,7 +129,7 @@ export default class UploadButton extends React.Component<Props, State> {
    */
   private readonly handleFileChange = (
     event: ChangeEvent<HTMLInputElement>
-  ) => {
+  ): void => {
     if (event.target.files) {
       if (!Session.testMode) {
         this.setState({ filename: event.target.files[0].name })

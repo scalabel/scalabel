@@ -1,5 +1,4 @@
 import { withStyles } from "@material-ui/core/styles"
-import _ from "lodash"
 import React from "react"
 import { label2dViewStyle } from "../styles/label"
 
@@ -127,7 +126,7 @@ export class Crosshair2D extends React.Component<Props, State> {
     displayY: number,
     displayW: number,
     displayH: number
-  ) {
+  ): void {
     this.setState({
       x,
       y,
@@ -141,7 +140,7 @@ export class Crosshair2D extends React.Component<Props, State> {
   /**
    * update crosshair when mouse moves
    */
-  public onMouseMove(e: React.MouseEvent<HTMLElement>) {
+  public onMouseMove(e: React.MouseEvent<HTMLElement>): void {
     if (this.props.display && this != null) {
       const rect = this.props.display.getBoundingClientRect()
       this.updateCrosshair(

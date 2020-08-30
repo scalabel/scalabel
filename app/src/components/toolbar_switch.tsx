@@ -42,7 +42,7 @@ class SwitchButton extends Component<Props> {
   /**
    * SwitchButton render function
    */
-  public render() {
+  public render(): JSX.Element {
     const { onChange, name, value, getAlignmentIndex, classes } = this.props
 
     return (

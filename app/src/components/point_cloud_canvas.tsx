@@ -150,13 +150,13 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   }
 
   /** mount callback */
-  public componentDidMount() {
+  public componentDidMount(): void {
     super.componentDidMount()
     Session.label3dList.subscribe(this._drawableUpdateCallback)
   }
 
   /** mount callback */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     Session.label3dList.unsubscribe(this._drawableUpdateCallback)
   }
@@ -165,7 +165,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): JSX.Element {
     const { classes } = this.props
 
     let canvas = (
@@ -213,7 +213,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Override method
    * @param _state
    */
-  protected updateState(state: State) {
+  protected updateState(state: State): void {
     if (this.display !== this.props.display) {
       this.display = this.props.display
       this.forceUpdate()
@@ -234,7 +234,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   /**
    * Render ThreeJS Scene
    */
-  private renderThree() {
+  private renderThree(): void {
     if (this.renderer && this.pointCloud.geometry) {
       this.scene.children = []
       this.scene.add(this.pointCloud)
@@ -264,7 +264,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */
-  private initializeRefs(component: HTMLCanvasElement | null) {
+  private initializeRefs(component: HTMLCanvasElement | null): void {
     if (!component) {
       return
     }
@@ -293,7 +293,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   /**
    * Update rendering constants
    */
-  private updateRenderer() {
+  private updateRenderer(): void {
     if (this.canvas && this.renderer) {
       this.renderer.setSize(this.canvas.width, this.canvas.height)
     }

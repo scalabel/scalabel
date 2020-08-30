@@ -76,7 +76,7 @@ class LabelLayout extends React.Component<Props, State> {
   /**
    * called on redux store update
    */
-  public onStateUpdated() {
+  public onStateUpdated(): void {
     this.setState(this.layoutState)
   }
 
@@ -85,7 +85,7 @@ class LabelLayout extends React.Component<Props, State> {
    * @param {number} size
    * @param {string} position
    */
-  public handleOnChange(size: number, position: string) {
+  public handleOnChange(size: number, position: string): void {
     const layoutState = this.layoutState
     if (position === "left" && this.layoutState.left_size !== size) {
       layoutState.left_size = size
@@ -152,7 +152,7 @@ class LabelLayout extends React.Component<Props, State> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): React.ReactFragment {
     const {
       titleBar,
       leftSidebar1,
@@ -178,7 +178,7 @@ class LabelLayout extends React.Component<Props, State> {
     const playerControl = (
       <PlayerControl
         key="player-control"
-        num_frames={Session.getState().task.items.length}
+        numFrames={Session.getState().task.items.length}
       />
     )
 

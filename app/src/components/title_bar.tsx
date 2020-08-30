@@ -115,7 +115,7 @@ class TitleBar extends Component<Props> {
   }
 
   /** Mount override */
-  public componentDidMount() {
+  public componentDidMount(): void {
     document.addEventListener("keydown", this._keyDownListener)
   }
 
@@ -123,7 +123,7 @@ class TitleBar extends Component<Props> {
    * Unmount
    * Disables asynchronous callbacks
    */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     document.removeEventListener("keydown", this._keyDownListener)
   }
@@ -132,7 +132,7 @@ class TitleBar extends Component<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render() {
+  public render(): React.ReactFragment {
     const { classes } = this.props
     const { title } = this.props
     const { instructionLink } = this.props
@@ -147,7 +147,7 @@ class TitleBar extends Component<Props> {
       { title: "Dashboard", href: dashboardLink, icon: fa.faList }
     ]
 
-    const submitHandler = () => {
+    const submitHandler = (): void => {
       this.props.submit()
       // Save after submitting, so submit flag is also saved
       if (!autosave) {
@@ -161,7 +161,7 @@ class TitleBar extends Component<Props> {
     })
 
     if (!autosave) {
-      const saveHandler = () => {
+      const saveHandler = (): void => {
         this.props.save()
       }
       buttonInfo.push({ title: "Save", onClick: saveHandler, icon: fa.faSave })

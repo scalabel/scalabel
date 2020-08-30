@@ -58,19 +58,19 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
    * Handle double click
    * @param e
    */
-  protected onDoubleClick() {}
+  protected onDoubleClick(): void {}
 
   /**
    * Handle mouse leave
    * @param e
    */
-  protected onMouseLeave() {}
+  protected onMouseLeave(): void {}
 
   /**
    * Handle mouse wheel
    * @param e
    */
-  protected onWheel(e: WheelEvent) {
+  protected onWheel(e: WheelEvent): void {
     e.preventDefault()
     const config = this._viewerConfig as HomographyViewerConfigType
     let zoomRatio = SCROLL_ZOOM_RATIO

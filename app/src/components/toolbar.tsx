@@ -58,7 +58,7 @@ export class ToolBar extends Component<Props> {
    * handles keyDown Events
    * @param {keyboardEvent} e
    */
-  public onKeyDown(e: KeyboardEvent) {
+  public onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
       case Key.BACKSPACE:
         this.deletePressed()
@@ -79,14 +79,14 @@ export class ToolBar extends Component<Props> {
    * Key up handler
    * @param e
    */
-  public onKeyUp(e: KeyboardEvent) {
+  public onKeyUp(e: KeyboardEvent): void {
     delete this._keyDownMap[e.key]
   }
 
   /**
    * Add keyDown Event Listener
    */
-  public componentDidMount() {
+  public componentDidMount(): void {
     super.componentDidMount()
     document.addEventListener("keydown", this._keyDownHandler)
     document.addEventListener("keyup", this._keyUpHandler)
@@ -95,7 +95,7 @@ export class ToolBar extends Component<Props> {
   /**
    * Remove keyDown Event Listener
    */
-  public componentWillUnmount() {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     document.removeEventListener("keydown", this._keyDownHandler)
     document.removeEventListener("keyup", this._keyUpHandler)
@@ -105,7 +105,7 @@ export class ToolBar extends Component<Props> {
    * ToolBar render function
    * @return component
    */
-  public render() {
+  public render(): JSX.Element {
     const { categories, attributes } = this.props
     return (
       <div>
@@ -158,7 +158,7 @@ export class ToolBar extends Component<Props> {
    * handler for the delete button/key
    * @param {string} alignment
    */
-  private deletePressed() {
+  private deletePressed(): void {
     const select = this.state.user.select
     if (Object.keys(select.labels).length > 0) {
       const item = this.state.task.items[select.item]
@@ -174,7 +174,7 @@ export class ToolBar extends Component<Props> {
    * handles tag attribute toggle, dispatching the addLabelTag action
    * @param {string} alignment
    */
-  private handleAttributeToggle(toggleName: string, alignment: string) {
+  private handleAttributeToggle(toggleName: string, alignment: string): void {
     const state = this.state
     const allAttributes = state.task.config.attributes
     const attributeIndex = this.getAttributeIndex(allAttributes, toggleName)
@@ -207,7 +207,7 @@ export class ToolBar extends Component<Props> {
    * This function updates the checked list of switch buttons.
    * @param {string} switchName
    */
-  private handleToggle(switchName: string) {
+  private handleToggle(switchName: string): void {
     const state = this.state
     const allAttributes = state.task.config.attributes
     const toggleIndex = this.getAttributeIndex(allAttributes, switchName)
@@ -305,7 +305,7 @@ export class ToolBar extends Component<Props> {
    * Link selected tracks
    * @param state
    */
-  private linkSelectedTracks(state: State) {
+  private linkSelectedTracks(state: State): void {
     const tracks = getSelectedTracks(state)
 
     if (!tracksOverlapping(tracks)) {
@@ -316,7 +316,7 @@ export class ToolBar extends Component<Props> {
   /**
    * Start to link track
    */
-  private startLinkTrack() {
+  private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
   }
 }

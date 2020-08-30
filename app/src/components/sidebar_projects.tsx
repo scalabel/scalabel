@@ -43,7 +43,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
    * and then changes state to force a reload of this component
    * @param props
    */
-  public componentWillReceiveProps(props: ProjectListProps) {
+  public componentWillReceiveProps(props: ProjectListProps): void {
     const { refresh } = this.props
     if (props.refresh !== refresh) {
       this.projectsToExpress = getProjects()
@@ -54,7 +54,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   /**
    * renders project list
    */
-  public render() {
+  public render(): JSX.Element {
     const { classes } = this.props
     return (
       <div>

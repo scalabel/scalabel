@@ -18,7 +18,7 @@ import { Component } from "./component"
 function handleChange(
   _event: React.MouseEvent<HTMLElement>,
   categoryIndex: number | null
-) {
+): void {
   const state = getState()
   if (categoryIndex !== null) {
     const actions: BaseAction[] = []
@@ -63,7 +63,7 @@ class MultipleSelect extends Component<Props> {
     categories: string[],
     classes: ClassType,
     headerText: string
-  ) {
+  ): JSX.Element {
     return (
       <div>
         <FormControl className={classes.formControl}>
@@ -97,7 +97,7 @@ class MultipleSelect extends Component<Props> {
   /**
    * MultipleSelect render function
    */
-  public render() {
+  public render(): null | JSX.Element {
     const { categories } = this.props
     const { classes } = this.props
     const { headerText } = this.props
