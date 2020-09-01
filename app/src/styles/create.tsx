@@ -1,10 +1,10 @@
-import { Theme } from "@material-ui/core/styles"
+import { Theme, StyleRules } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 
 const fullWidth = 700
 
 // Styles for the create page
-export const createStyle = () =>
+export const createStyle = (): StyleRules<"listHeader", {}> =>
   createStyles({
     listHeader: {
       textAlign: "center"
@@ -12,7 +12,9 @@ export const createStyle = () =>
   })
 
 // Styles for sidebar project list
-export const projectListStyle = (theme: Theme) =>
+export const projectListStyle = (
+  theme: Theme
+): StyleRules<"coloredListItem", {}> =>
   createStyles({
     coloredListItem: {
       backgroundColor: theme.palette.secondary.light
@@ -20,7 +22,18 @@ export const projectListStyle = (theme: Theme) =>
   })
 
 // Styles for the create form
-export const formStyle = (theme: Theme) =>
+export const formStyle = (
+  theme: Theme
+): StyleRules<
+  | "hidden"
+  | "root"
+  | "fullWidthText"
+  | "halfWidthText"
+  | "formGroup"
+  | "selectEmpty"
+  | "submitButton",
+  {}
+> =>
   createStyles({
     root: {
       paddingLeft: theme.spacing(3),
@@ -87,7 +100,9 @@ export const attributeStyle = createStyles({
   }
 })
 
-export const checkboxStyle = (theme: Theme) =>
+export const checkboxStyle = (
+  theme: Theme
+): StyleRules<"root" | "checked", {}> =>
   createStyles({
     root: {
       "&$checked": {

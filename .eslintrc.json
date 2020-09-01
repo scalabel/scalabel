@@ -13,6 +13,7 @@
     "project": "./tsconfig.json"
   },
   "rules": {
+    "spaced-comment": ["error", "always"],
     "prettier/prettier": "error",
     "@typescript-eslint/no-unused-vars": [
       "error",

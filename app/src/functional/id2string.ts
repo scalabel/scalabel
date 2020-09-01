@@ -120,8 +120,7 @@ function shapeIdToString(shape: ShapeType): ShapeType {
     newShape = { ...newShape, ...shapeInfo }
   }
   if ("shape" in newShape) {
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    delete newShape.shape
+    delete (newShape as any).shape
   }
   return newShape
 }

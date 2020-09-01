@@ -1,8 +1,10 @@
-import { Theme } from "@material-ui/core"
+import { Theme, StyleRules } from "@material-ui/core"
 import { cyan } from "@material-ui/core/colors"
 import createStyles from "@material-ui/core/styles/createStyles"
 /* Dashboard window styles */
-export const dashboardWindowStyles = (theme: Theme) =>
+export const dashboardWindowStyles = (
+  theme: Theme
+): StyleRules<"row" | "root" | "linkButton" | "headerCell" | "bodyCell", {}> =>
   createStyles({
     root: {
       paddingLeft: theme.spacing(2),
@@ -25,7 +27,7 @@ export const dashboardWindowStyles = (theme: Theme) =>
       paddingBottom: 0
     }
   })
-export const headerStyle = (theme: Theme) =>
+export const headerStyle = (theme: Theme): StyleRules<"grow" | "chip", {}> =>
   createStyles({
     grow: {
       flexGrow: 1
@@ -35,7 +37,9 @@ export const headerStyle = (theme: Theme) =>
       marginLeft: theme.spacing(1)
     }
   })
-export const sidebarStyle = (theme: Theme) =>
+export const sidebarStyle = (
+  theme: Theme
+): StyleRules<"listRoot" | "listItem" | "coloredListItem" | "link", {}> =>
   createStyles({
     listRoot: {
       marginTop: theme.spacing(2),
@@ -56,7 +60,10 @@ export const sidebarStyle = (theme: Theme) =>
       marginTop: theme.spacing(2)
     }
   })
-export const listEntryStyle = () =>
+export const listEntryStyle = (): StyleRules<
+  "listTag" | "listEntry" | "listContainer",
+  {}
+> =>
   createStyles({
     listTag: {
       textAlign: "right",
@@ -69,8 +76,10 @@ export const listEntryStyle = () =>
       margin: 0
     }
   })
-/* styles for worker and admin dashboard */
-export const dashboardStyles = (theme: Theme) =>
+/* Styles for worker and admin dashboard */
+export const dashboardStyles = (
+  theme: Theme
+): StyleRules<"adminRoot" | "workerRoot" | "labelText" | "appBarSpacer", {}> =>
   createStyles({
     adminRoot: {
       paddingLeft: theme.spacing(3),
@@ -86,14 +95,16 @@ export const dashboardStyles = (theme: Theme) =>
     },
     appBarSpacer: theme.mixins.toolbar
   })
-/* dashboard header style */
+/* Dashboard header style */
 export const dashboardHeaderStyles = createStyles({
   title: {
     flexGrow: 1
   }
 })
-/* tableStyles */
-export const tableStyles = (theme: Theme) =>
+/* TableStyles */
+export const tableStyles = (
+  theme: Theme
+): StyleRules<"row" | "root" | "headerCell", {}> =>
   createStyles({
     root: {},
     headerCell: {
@@ -105,8 +116,10 @@ export const tableStyles = (theme: Theme) =>
       background: theme.palette.common.white
     }
   })
-/* tableCellStyles */
-export const tableCellStyles = (theme: Theme) =>
+/* TableCellStyles */
+export const tableCellStyles = (
+  theme: Theme
+): StyleRules<"head" | "body", {}> =>
   createStyles({
     head: {
       backgroundColor: theme.palette.primary.dark,

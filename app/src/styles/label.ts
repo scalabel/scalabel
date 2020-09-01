@@ -1,7 +1,10 @@
 import { blue, grey } from "@material-ui/core/colors"
-import { createStyles } from "@material-ui/core/styles"
+import { createStyles, StyleRules } from "@material-ui/core/styles"
 
-export const categoryStyle = () =>
+export const categoryStyle = (): StyleRules<
+  "root" | "button" | "formControl" | "primary",
+  {}
+> =>
   createStyles({
     root: {
       display: "flex",
@@ -24,30 +27,34 @@ export const categoryStyle = () =>
     }
   })
 
-export const switchStyle = () => ({
-  root: {
-    width: "100%",
-    maxWidth: 360
-  },
-  primary: {
-    fontSize: "15px"
-  },
-  switchBase: {
-    color: grey[400],
-    "&$checked": {
-      color: grey[500],
-      "& + $track": {
-        backgroundColor: blue[700]
+export const switchStyle = (): StyleRules<
+  "root" | "primary" | "switchBase" | "checked" | "track",
+  {}
+> =>
+  createStyles({
+    root: {
+      width: "100%",
+      maxWidth: 360
+    },
+    primary: {
+      fontSize: "15px"
+    },
+    switchBase: {
+      color: grey[400],
+      "&$checked": {
+        color: grey[500],
+        "& + $track": {
+          backgroundColor: blue[700]
+        }
       }
-    }
-  },
-  checked: {},
-  track: {}
-})
+    },
+    checked: {},
+    track: {}
+  })
 
 export interface StyledButtonProps {
   /**
-   * background color.
+   * Background color.
    * TODO: find a strict color type
    */
   background: string
@@ -71,46 +78,54 @@ export const styledButtonStyle = createStyles({
   }
 })
 
-export const toggleButtonStyle = () => ({
-  root: {
-    color: "rgba(0, 0, 0, 0.38)",
-    height: "28px",
-    padding: "1px 2px",
-    fontSize: "15px",
-    minWidth: "28px",
-    borderRadius: "2px"
-  },
-  label: {
-    fontSize: "11px"
-  }
-})
+export const toggleButtonStyle = (): StyleRules<"root" | "label"> =>
+  createStyles({
+    root: {
+      color: "rgba(0, 0, 0, 0.38)",
+      height: "28px",
+      padding: "1px 2px",
+      fontSize: "15px",
+      minWidth: "28px",
+      borderRadius: "2px"
+    },
+    label: {
+      fontSize: "11px"
+    }
+  })
 
-export const listButtonStyle = () => ({
-  root: {
-    padding: "0px",
-    height: "28px"
-  },
-  toggleContainer: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    background: "rgba(250,250,250,0)"
-  },
-  buttonGroup: {
-    width: "100%",
-    display: "flex",
-    // Needed to prevent compiler from complaining about types
-    flexWrap: "wrap" as "wrap"
-  },
-  primary: {
-    fontSize: "15px"
-  },
-  toggleButton: {
-    flexGrow: 1
-  }
-})
+export const listButtonStyle = (): StyleRules<
+  "root" | "toggleContainer" | "buttonGroup" | "primary" | "toggleButton",
+  {}
+> =>
+  createStyles({
+    root: {
+      padding: "0px",
+      height: "28px"
+    },
+    toggleContainer: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      background: "rgba(250,250,250,0)"
+    },
+    buttonGroup: {
+      width: "100%",
+      display: "flex",
+      // Needed to prevent compiler from complaining about types
+      flexWrap: "wrap" as "wrap"
+    },
+    primary: {
+      fontSize: "15px"
+    },
+    toggleButton: {
+      flexGrow: 1
+    }
+  })
 
-export const label2dViewStyle = () =>
+export const label2dViewStyle = (): StyleRules<
+  "label2d_canvas" | "control_canvas" | "hair",
+  {}
+> =>
   createStyles({
     label2d_canvas: {
       position: "absolute",
@@ -133,7 +148,7 @@ export const label2dViewStyle = () =>
     }
   })
 
-export const imageViewStyle = () =>
+export const imageViewStyle = (): StyleRules<"image_canvas", {}> =>
   createStyles({
     image_canvas: {
       position: "absolute",
@@ -141,7 +156,10 @@ export const imageViewStyle = () =>
     }
   })
 
-export const playerControlStyles = () =>
+export const playerControlStyles = (): StyleRules<
+  "button" | "underline" | "playerControl" | "input" | "slider",
+  {}
+> =>
   createStyles({
     button: {
       color: "#bbbbbb",
@@ -174,7 +192,10 @@ export const playerControlStyles = () =>
     }
   })
 
-export const LayoutStyles = () =>
+export const LayoutStyles = (): StyleRules<
+  "titleBar" | "main" | "interfaceContainer" | "paneContainer",
+  {}
+> =>
   createStyles({
     titleBar: {
       height: "50px"

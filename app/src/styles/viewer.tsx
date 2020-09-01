@@ -1,6 +1,12 @@
-import { createStyles } from "@material-ui/core"
+import { createStyles, StyleRules } from "@material-ui/core"
 
-export const viewerStyles = () =>
+type ClassKey =
+  | "viewer_container"
+  | "viewer_button"
+  | "camera_y_lock_icon"
+  | "camera_x_lock_icon"
+
+export const viewerStyles = (): StyleRules<ClassKey, {}> =>
   createStyles({
     viewer_container: {
       display: "block",
