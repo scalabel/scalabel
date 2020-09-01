@@ -459,7 +459,7 @@ function changeLabelsInItem(
   const allChangedShapes: { [key: string]: ShapeType } = {}
   labelIds.forEach((labelId, index) => {
     const children = props[index].children
-    if (children) {
+    if (children !== undefined) {
       props[index].children = children.filter((id) => isValidId(id))
     }
     const oldLabel = item.labels[labelId]
@@ -599,7 +599,7 @@ function createParentLabel(
   idList: string[],
   label: LabelType,
   trackId?: string
-) {
+): State {
   let item = state.task.items[index]
   let tracks = state.task.tracks
   const labelsToMerge = idList.map((id) => item.labels[id])
@@ -609,7 +609,7 @@ function createParentLabel(
   parentLabel.parent = INVALID_ID
   parentLabel.shapes = []
   parentLabel.children = [...idList]
-  if (trackId) {
+  if (trackId !== undefined) {
     parentLabel.track = trackId
   }
   parentLabel.type = LabelTypeName.EMPTY
@@ -624,12 +624,12 @@ function createParentLabel(
     nLabel.parent = parentLabel.id
     nLabel.category = _.cloneDeep(newParentLabel.category)
     nLabel.attributes = _.cloneDeep(newParentLabel.attributes)
-    if (trackId) {
+    if (trackId !== undefined) {
       nLabel.track = trackId
     }
     return nLabel
   })
-  if (trackId) {
+  if (trackId !== undefined) {
     // Update track information
     let track = state.task.tracks[trackId]
     track = updateObject(track, {
@@ -777,11 +777,12 @@ export function changeSelect(
     state.task.config.tracking &&
     state.user.select.item !== action.select.item
   ) {
-    if (action.select.labels) {
+    if (action.select.labels !== undefined) {
       for (const key of Object.keys(state.user.select.labels)) {
         const index = Number(key)
         const selectedLabelIds = state.user.select.labels[index]
-        const newItem = action.select.item || 0
+        const newItem =
+          action.select.item !== undefined ? action.select.item : 0
         const newLabelId = selectedLabelIds
           .map((labelId) => {
             if (labelId in state.task.items[index].labels) {
@@ -792,7 +793,7 @@ export function changeSelect(
           })
           .filter(Boolean)
         if (newLabelId.length > 0) {
-          if (!action.select.labels) {
+          if (action.select.labels === undefined) {
             action.select.labels = {}
           }
           action.select.labels[newItem] = newLabelId
@@ -804,6 +805,7 @@ export function changeSelect(
   for (const key of Object.keys(newSelect.labels)) {
     const index = Number(key)
     if (newSelect.labels[index].length === 0) {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete newSelect.labels[index]
     }
   }
@@ -955,6 +957,7 @@ function deleteLabelsFromTracks(
       if (_.size(newTrack.labels) > 0) {
         tracks[trackId] = newTrack
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete tracks[trackId]
       }
     }
@@ -1014,11 +1017,7 @@ export function deleteLabels(
  * @param {object} _attributeOptions
  * @return {State}
  */
-export function changeAttribute(
-  state: State,
-  _labelId: number,
-  _attributeOptions: object
-): State {
+export function changeAttribute(state: State): State {
   return state
 }
 
@@ -1039,7 +1038,7 @@ export function updateAll(state: State): State {
 export function addViewerConfig(
   state: State,
   action: actionTypes.AddViewerConfigAction
-) {
+): State {
   const newViewerConfigs = {
     ...state.user.viewerConfigs,
     [action.id]: action.config
@@ -1056,7 +1055,7 @@ function handleViewerSynchronization(
   config = updateObject(config, { synchronized: modifiedConfig.synchronized })
   if (modifiedConfig.synchronized) {
     switch (config.type) {
-      case ViewerConfigTypeName.POINT_CLOUD:
+      case ViewerConfigTypeName.POINT_CLOUD: {
         const newTarget = (modifiedConfig as PointCloudViewerConfigType).target
         const oldTarget = (config as PointCloudViewerConfigType).target
         const position = (config as PointCloudViewerConfigType).position
@@ -1069,6 +1068,7 @@ function handleViewerSynchronization(
           target: { ...newTarget }
         })
         break
+      }
     }
   }
   return config
@@ -1117,15 +1117,16 @@ export function changeViewerConfig(
 /**
  * Propagate hidden flag from starting pane upward through the tree
  * A non-leaf pane is hidden iff both of its children are hidden
+ * TODO: this is not functional now
  */
 function propagateHiddenPane(
   paneId: number,
   panes: { [id: number]: PaneType }
-) {
+): void {
   let pane = panes[paneId]
   while (pane.parent >= 0) {
     const parent = panes[pane.parent]
-    if (parent.child1 && parent.child2) {
+    if (parent.child1 !== undefined && parent.child2 !== undefined) {
       // Set pane to be hidden if both children are hidden
       const hide = panes[parent.child1].hide && panes[parent.child2].hide
       panes[pane.parent] = updateObject(parent, { hide })
@@ -1137,7 +1138,10 @@ function propagateHiddenPane(
 }
 
 /** Update existing pane */
-export function updatePane(state: State, action: actionTypes.UpdatePaneAction) {
+export function updatePane(
+  state: State,
+  action: actionTypes.UpdatePaneAction
+): State {
   const panes = state.user.layout.panes
 
   if (!(action.pane in panes)) {
@@ -1160,11 +1164,14 @@ export function updatePane(state: State, action: actionTypes.UpdatePaneAction) {
 }
 
 /** Update children split counts upwards to root */
-function updateSplitCounts(paneId: number, panes: { [id: number]: PaneType }) {
-  let pane = panes[paneId]
-  while (pane) {
+function updateSplitCounts(
+  paneId: number,
+  panes: { [id: number]: PaneType }
+): void {
+  while (paneId >= 0) {
+    let pane = panes[paneId]
     let parent = panes[pane.parent]
-    if (parent) {
+    if (pane.parent >= 0) {
       parent = updateObject(parent, {
         numHorizontalChildren: pane.numHorizontalChildren,
         numVerticalChildren: pane.numVerticalChildren
@@ -1177,6 +1184,7 @@ function updateSplitCounts(paneId: number, panes: { [id: number]: PaneType }) {
       panes[parent.id] = parent
     }
     pane = parent
+    paneId = pane.id
   }
 }
 
@@ -1262,9 +1270,9 @@ export function deletePane(
 
   // Get id of the child that is not the pane to be deleted
   let newLeafId: number = -1
-  if (parent.child1 === action.pane && parent.child2) {
+  if (parent.child1 === action.pane && parent.child2 !== undefined) {
     newLeafId = parent.child2
-  } else if (parent.child2 === action.pane && parent.child1) {
+  } else if (parent.child2 === action.pane && parent.child1 !== undefined) {
     newLeafId = parent.child1
   } else {
     return state
@@ -1296,7 +1304,9 @@ export function deletePane(
     newPanes[newParentId] = newParent
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
   delete newPanes[parentId]
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
   delete newPanes[action.pane]
 
   newPanes[newLeafId] = updateObject(panes[newLeafId], { parent: newParentId })
