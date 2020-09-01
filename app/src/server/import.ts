@@ -48,7 +48,7 @@ export function convertItemToImport(
     const sensorId = Number(key)
     urls[sensorId] = itemExportMap[sensorId].url as string
     const labelsExport = itemExportMap[sensorId].labels
-    if (labelsExport) {
+    if (labelsExport !== undefined) {
       for (const labelExport of labelsExport) {
         const labelId = labelExport.id.toString()
         // Each label may appear in multiple sensors
@@ -170,10 +170,10 @@ function convertLabelToImport(
    * Convert each import shape based on their type
    * TODO: no polyline2d
    */
-  if (labelExport.box2d) {
+  if (labelExport.box2d !== null) {
     labelType = LabelTypeName.BOX_2D
     shapes = [makeRect(labelExport.box2d)]
-  } else if (labelExport.poly2d) {
+  } else if (labelExport.poly2d !== null) {
     const polyExport = labelExport.poly2d[0]
     labelType = polyExport.closed
       ? LabelTypeName.POLYGON_2D
@@ -186,10 +186,10 @@ function convertLabelToImport(
           polyExport.types[i] === "L" ? PathPointType.LINE : PathPointType.CURVE
       })
     )
-  } else if (labelExport.box3d) {
+  } else if (labelExport.box3d !== null) {
     labelType = LabelTypeName.BOX_3D
     shapes = [makeCube(labelExport.box3d)]
-  } else if (labelExport.plane3d) {
+  } else if (labelExport.plane3d !== null) {
     labelType = LabelTypeName.PLANE_3D
     shapes = [makePlane(labelExport.plane3d)]
   }

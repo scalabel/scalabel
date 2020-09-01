@@ -61,8 +61,8 @@ export function toCanvasCoords(
  */
 export function toImageCoords(
   values: Vector2D,
-  upRes: boolean = true,
-  displayToImageRatio: number
+  displayToImageRatio: number,
+  upRes: boolean = true
 ): Vector2D {
   const up = upRes ? 1 / UP_RES_RATIO : 1
   return values.clone().scale(displayToImageRatio * up)
@@ -102,7 +102,7 @@ export function drawImageOnCanvas(
 export function clearCanvas(
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D
-) {
+): void {
   // Clear context
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
@@ -124,7 +124,7 @@ export function normalizeMouseCoordinates(
   displayToImageRatio: number,
   clientX: number,
   clientY: number
-) {
+): Vector2D {
   // TODO(fyu): There is a rounding error between canvas.clientHeight
   //  and canvasHeight
   let offsetX = canvas.offsetLeft
@@ -154,7 +154,7 @@ export function normalizeMouseCoordinates(
  * @param {number[]} arr - the array.
  * @return {number} the mode of the array.
  */
-export function mode(arr: number[]) {
+export function mode(arr: number[]): number | undefined {
   return arr
     .sort(
       (a, b) =>
@@ -167,7 +167,7 @@ export function mode(arr: number[]) {
  * Get handle id from image color
  * @param color
  */
-export function imageDataToHandleId(data: Uint8ClampedArray) {
+export function imageDataToHandleId(data: Uint8ClampedArray): number[] {
   const arr = []
   for (let i = 0; i < 16; i++) {
     const color = rgbToIndex(Array.from(data.slice(i * 4, i * 4 + 3)))
@@ -198,7 +198,7 @@ export function updateCanvasScale(
 ): number[] {
   const displayRect = display.getBoundingClientRect()
 
-  if (context) {
+  if (context !== null) {
     context.scale(zoomRatio, zoomRatio)
   }
 
@@ -229,8 +229,8 @@ export function updateCanvasScale(
   }
 
   // Set canvas size
-  canvas.style.height = canvasHeight + "px"
-  canvas.style.width = canvasWidth + "px"
+  canvas.style.height = `${canvasHeight}px`
+  canvas.style.width = `${canvasWidth}px`
 
   // Set padding
   const padding = new Vector2D(
@@ -240,8 +240,8 @@ export function updateCanvasScale(
   const padX = padding.x
   const padY = padding.y
 
-  canvas.style.left = padX + "px"
-  canvas.style.top = padY + "px"
+  canvas.style.left = `${padX}px`
+  canvas.style.top = `${padY}px`
   canvas.style.right = "auto"
   canvas.style.bottom = "auto"
 

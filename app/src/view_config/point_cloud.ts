@@ -15,14 +15,10 @@ export function updateThreeCameraAndRenderer(
   camera: THREE.Camera,
   canvas?: HTMLCanvasElement,
   renderer?: THREE.Renderer
-) {
-  if (canvas) {
-    {
-      ;(camera as THREE.PerspectiveCamera).aspect = canvas.width / canvas.height
-    }
-    {
-      ;(camera as THREE.PerspectiveCamera).updateProjectionMatrix()
-    }
+): void {
+  if (canvas !== undefined) {
+    ;(camera as THREE.PerspectiveCamera).aspect = canvas.width / canvas.height
+    ;(camera as THREE.PerspectiveCamera).updateProjectionMatrix()
   }
 
   camera.up.x = config.verticalAxis.x
@@ -33,7 +29,7 @@ export function updateThreeCameraAndRenderer(
   camera.position.z = config.position.z
   camera.lookAt(new Vector3D().fromState(config.target).toThree())
 
-  if (renderer && canvas) {
+  if (renderer !== undefined && canvas !== undefined) {
     renderer.setSize(canvas.width, canvas.height)
   }
 }

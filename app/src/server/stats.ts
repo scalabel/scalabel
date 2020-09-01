@@ -66,7 +66,7 @@ export function getTaskOptions(task: TaskType): TaskOptions {
 /**
  * Get the total number of items across all tasks
  */
-export function getNumItems(tasks: TaskType[]) {
+export function getNumItems(tasks: TaskType[]): number {
   const itemsPerTask = tasks.map((task) => task.items.length)
   return _.sum(itemsPerTask)
 }
@@ -74,7 +74,7 @@ export function getNumItems(tasks: TaskType[]) {
 /**
  * Get the number of tasks with a submission
  */
-export function getNumSubmissions(tasks: TaskType[]) {
+export function getNumSubmissions(tasks: TaskType[]): number {
   const submittedTasks = tasks.filter(
     (task) => task.progress.submissions.length > 0
   )
@@ -113,7 +113,7 @@ function initCategoryStats(
   attributes: Attribute[]
 ): CategoryStats {
   const categoriesByName = _.keyBy(categories)
-  return _.mapValues(categoriesByName, (_category) => {
+  return _.mapValues(categoriesByName, () => {
     return {
       count: 0,
       attribute: initAttributeStats(attributes)
@@ -124,7 +124,7 @@ function initCategoryStats(
 /**
  * Get the value of an attribute given the index in the value list
  */
-function getAttributeValue(attribute: Attribute, index: number) {
+function getAttributeValue(attribute: Attribute, index: number): string {
   if (attribute.toolType === AttributeToolType.SWITCH) {
     return index === 1 ? "true" : "false"
   }
@@ -139,7 +139,7 @@ function updateAttributeStats(
   stats: AttributeStats,
   label: LabelType,
   attributes: Attribute[]
-) {
+): void {
   const attributeIndices = _.map(
     Object.keys(label.attributes),
     (attributeKey) => Number(attributeKey)
@@ -170,7 +170,7 @@ function updateCategoryStats(
   label: LabelType,
   categories: string[],
   attributes: Attribute[]
-) {
+): void {
   const categoryNames = label.category.map(
     (categoryIndex) => categories[categoryIndex]
   )
