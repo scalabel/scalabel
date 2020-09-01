@@ -1,4 +1,3 @@
-import _ from "lodash"
 import * as fp from "lodash/fp"
 
 // TODO: need a deep merge? i.e. to update below:
@@ -79,6 +78,7 @@ export function addListItem<T>(items: T[], item: T): T[] {
 export function removeObjectFields<T>(target: T, fields: Array<keyof T>): T {
   target = { ...target }
   for (const f of fields) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete target[f]
   }
   return target

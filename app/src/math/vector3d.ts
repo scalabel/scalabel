@@ -88,7 +88,7 @@ export class Vector3D extends Vector {
   /**
    * Multiply all values by a scalar
    */
-  public multiplyScalar(s: number) {
+  public multiplyScalar(s: number): void {
     this[0] *= s
     this[1] *= s
     this[2] *= s

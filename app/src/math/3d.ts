@@ -4,7 +4,7 @@ import * as THREE from "three"
 export function rotateScale(
   scale: THREE.Vector3,
   quaternion: THREE.Quaternion
-) {
+): THREE.Vector3 {
   const rotatedScaleArray = [1, 1, 1]
 
   for (let i = 0; i < 3; i++) {
