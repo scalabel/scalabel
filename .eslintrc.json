@@ -22,7 +22,8 @@
     "@typescript-eslint/require-array-sort-compare": [
       "error",
       { "ignoreStringArrays": true }
-    ]
+    ],
+    "@typescript-eslint/no-explicit-any": ["error"]
   },
   "settings": {
     "react": {

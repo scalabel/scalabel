@@ -1,4 +1,3 @@
-import _ from "lodash"
 import { configureStore } from "../common/configure_store"
 import { uid } from "../common/uid"
 import {
@@ -36,9 +35,8 @@ export async function makeStorage(
         await s3Store.makeBucket()
         storage = s3Store
       } catch (error) {
-        // If s3 fails, default to file storage
-        error.message = `s3 failed, using file storage ${error.message}`
         Logger.error(error)
+        Logger.info("s3 failed, using file storage by default")
         storage = new FileStorage(dir)
       }
       break
@@ -55,13 +53,15 @@ export async function makeStorage(
     }
     default: {
       Logger.error(
-        Error(`${database} is an unknown database format, using file storage`)
+        new Error(
+          `${database} is an unknown database format, using file storage`
+        )
       )
       storage = new FileStorage(dir)
     }
   }
   // Create the initial folder structure
-  STORAGE_FOLDERS.map((f) => storage.mkdir(f))
+  STORAGE_FOLDERS.map(async (f) => await storage.mkdir(f))
   return storage
 }
 
@@ -94,8 +94,8 @@ export function makeCreationForm(
  * Initialize new session id if its a new load
  * If its a reconnection, keep the old session id
  */
-export function initSessionId(sessionId: string) {
-  return sessionId || uid()
+export function initSessionId(sessionId: string = ""): string {
+  return sessionId !== "" ? sessionId : uid()
 }
 
 /**
@@ -186,7 +186,7 @@ export function getPolicy(
 /**
  * Loads JSON and logs error if invalid
  */
-export function safeParseJSON(data: string) {
+export function safeParseJSON(data: string): unknown {
   try {
     const parsed = JSON.parse(data)
     return parsed
@@ -274,14 +274,13 @@ export function parseProjectName(projectName: string): string {
  * Get connection failed error message for http request to python
  */
 export function getPyConnFailedMsg(endpoint: string, message: string): string {
-  return `Make sure endpoint is correct and python server is \
-running; query to \"${endpoint}\" failed with message: ${message}`
+  return `Make sure endpoint is correct and python server is running; query to "${endpoint}" failed with message: ${message}`
 }
 
 /**
  * helper function to force javascript to sleep
  * @param milliseconds
  */
-export function sleep(milliseconds: number): Promise<object> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds))
+export async function sleep(milliseconds: number): Promise<object> {
+  return await new Promise((resolve) => setTimeout(resolve, milliseconds))
 }

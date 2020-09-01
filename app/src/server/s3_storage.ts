@@ -140,10 +140,10 @@ export class S3Storage extends Storage {
         data = await this.s3.listObjectsV2(params).promise()
       }
 
-      if (data.Contents) {
+      if (data.Contents !== undefined) {
         for (const key of data.Contents) {
           // Remove any file extension and prepend prefix
-          if (key.Key) {
+          if (key.Key !== undefined) {
             const noPrefix = key.Key.substr(fullPrefix.length)
 
             // Parse to get the top level dir or file after prefix
@@ -169,11 +169,11 @@ export class S3Storage extends Storage {
         }
       }
 
-      if (!data.IsTruncated) {
+      if (data.IsTruncated === undefined) {
         break
       }
 
-      if (data.NextContinuationToken) {
+      if (data.NextContinuationToken !== undefined) {
         continuationToken = data.NextContinuationToken
       }
     }
@@ -232,11 +232,13 @@ export class S3Storage extends Storage {
       throw new Error(`Key '${params.Key}' does not exist`)
     }
     const data = await this.s3.getObject(params).promise()
-    if (!data || !data.Body) {
+    if (data.Body === undefined) {
       throw new Error(`No data at key '${params.Key}'`)
+    } else {
+      // This lint error seems to be an AWS api problem
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      return data.Body.toString()
     }
-
-    return data.Body.toString()
   }
 
   /**

@@ -173,7 +173,7 @@ export async function readConfig<T>(
   filePath: string | undefined,
   defaultValue: T
 ): Promise<T> {
-  if (!filePath) {
+  if (filePath === undefined) {
     return defaultValue
   }
 
@@ -236,7 +236,7 @@ export async function parseItems(
 /**
  * Marshal data into project format
  */
-export function createProject(
+export async function createProject(
   form: CreationForm,
   formFileData: FormFileData
 ): Promise<Project> {
@@ -360,7 +360,8 @@ function filterInvalidItems(
     )
   } else {
     return items.filter(
-      (itemExport) => !itemExport.dataType || itemExport.dataType === itemType
+      (itemExport) =>
+        itemExport.dataType !== undefined || itemExport.dataType === itemType
     )
   }
 }
@@ -420,7 +421,7 @@ function mapSensorToItems(
  * Each consists of the task portion of a front  end state
  * Task and item start number are used if other tasks/items already exist
  */
-export function createTasks(
+export async function createTasks(
   project: Project,
   taskStartNum: number = 0,
   itemStartNum: number = 0
@@ -439,7 +440,7 @@ export function createTasks(
       ...Object.keys(sensors).map((key) => Number(key))
     )
     for (const itemExport of items) {
-      if (itemExport.dataType) {
+      if (itemExport.dataType !== undefined) {
         sensors[maxSensorId + 1] = makeSensor(
           maxSensorId,
           "",

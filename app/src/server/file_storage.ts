@@ -70,7 +70,7 @@ export class FileStorage extends Storage {
       await fs.ensureDir(this.fullDir(path.dirname(key)), undefined)
     } catch (error) {
       // No need to reject if dir existed
-      if (error && error.code !== "EEXIST") {
+      if (error.code !== "EEXIST") {
         throw error
       }
     }
@@ -82,15 +82,7 @@ export class FileStorage extends Storage {
    * @param {string} key: relative path of file
    */
   public async load(key: string): Promise<string> {
-    return await new Promise((resolve, reject) => {
-      fs.readFile(this.fullFile(key), (error: Error, buf: Buffer) => {
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve(buf.toString())
-      })
-    })
+    return (await fs.readFile(this.fullFile(key))).toString()
   }
 
   /**

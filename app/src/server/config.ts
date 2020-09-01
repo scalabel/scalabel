@@ -58,16 +58,16 @@ export function parseConfig(configPath: string): ServerConfig {
   // Check the deprecated fields for backward compatibility
   const storage = _.clone(defaults.serverConfig.storage)
   const http = _.clone(defaults.serverConfig.http)
-  if (userConfig.port) {
+  if (userConfig.port !== undefined) {
     http.port = userConfig.port
   }
-  if (userConfig.data) {
+  if (userConfig.data !== undefined) {
     storage.data = userConfig.data
   }
-  if (userConfig.itemDir) {
+  if (userConfig.itemDir !== undefined) {
     storage.itemDir = userConfig.itemDir
   }
-  if (userConfig.database) {
+  if (userConfig.database !== undefined) {
     storage.type = userConfig.database
   }
   // Use the correct fields are set, still give them higher priority
@@ -95,8 +95,8 @@ export function parseConfig(configPath: string): ServerConfig {
  * Validate cognito config
  * @param cognito
  */
-function validateCognitoConfig(cognito: CognitoConfig | undefined) {
-  if (cognito) {
+function validateCognitoConfig(cognito: CognitoConfig | undefined): void {
+  if (cognito !== undefined) {
     if (!_.has(cognito, "region")) {
       throw new Error("Region missed in config ")
     }
@@ -123,10 +123,10 @@ function validateCognitoConfig(cognito: CognitoConfig | undefined) {
  *
  * @param {ServerConfig} config
  */
-async function validateConfig(config: ServerConfig) {
+async function validateConfig(config: ServerConfig): Promise<void> {
   if (config.storage.type === StorageType.LOCAL) {
     if (
-      config.storage.itemDir &&
+      config.storage.itemDir !== "" &&
       !(await fs.pathExists(config.storage.itemDir))
     ) {
       Logger.info(

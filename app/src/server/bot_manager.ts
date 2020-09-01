@@ -29,7 +29,7 @@ export class BotManager {
     this.config = config
     this.subscriber = subscriber
     this.redisClient = redisClient
-    if (pollTime) {
+    if (pollTime !== undefined) {
       this.pollTime = pollTime
     } else {
       this.pollTime = 1000 * 60 * 5 // 5 minutes in ms
@@ -41,6 +41,7 @@ export class BotManager {
    */
   public async listen(): Promise<BotData[]> {
     // Listen for new sessions
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
     return await this.restoreBots()
   }
@@ -105,7 +106,7 @@ export class BotManager {
   /**
    * Delete the bot, marking it as unregistered
    */
-  public async deleteBot(botData: BotData) {
+  public async deleteBot(botData: BotData): Promise<void> {
     const key = getRedisBotKey(botData)
     await this.redisClient.del(key)
     await this.redisClient.setRemove(getRedisBotSet(), key)
@@ -121,7 +122,7 @@ export class BotManager {
   /**
    * Save the data for a bot, marking it as registered
    */
-  private async saveBot(botData: BotData) {
+  private async saveBot(botData: BotData): Promise<void> {
     const key = getRedisBotKey(botData)
     const value = JSON.stringify(botData)
     await this.redisClient.set(key, value)
@@ -137,6 +138,8 @@ export class BotManager {
     )
     const bot = new Bot(botData, this.config.host, this.config.port)
 
+    // Only use this disable if we are certain all the errors are handled
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const pollId = setInterval(async () => {
       await this.monitorActivity(bot, pollId)
     }, this.pollTime)
@@ -146,7 +149,10 @@ export class BotManager {
   /**
    * Kill the bot if no activity since time of last poll
    */
-  private async monitorActivity(bot: Bot, pollId: NodeJS.Timeout) {
+  private async monitorActivity(
+    bot: Bot,
+    pollId: NodeJS.Timeout
+  ): Promise<void> {
     if (bot.getActionCount() > 0) {
       bot.resetActionCount()
     } else {

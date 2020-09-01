@@ -72,7 +72,7 @@ export const HTML_DIRS: string[] = ["../html"]
 /**
  * Converts relative (to js) path into absolute path
  */
-export function getAbsSrcPath(relativePath: string) {
+export function getAbsSrcPath(relativePath: string): string {
   return path.join(__dirname, relativePath)
 }
 
@@ -88,21 +88,21 @@ export function getExportName(projectName: string): string {
  * Get redis key for associated metadata
  * this means data that doesn't get written back to storage
  */
-export function getRedisMetaKey(key: string) {
+export function getRedisMetaKey(key: string): string {
   return `${key}:meta`
 }
 
 /**
  * Get redis key for reminder metadata
  */
-export function getRedisReminderKey(key: string) {
+export function getRedisReminderKey(key: string): string {
   return `${key}:reminder`
 }
 
 /**
  * Convert redis metadata or reminder key to redis base key
  */
-export function getRedisBaseKey(metadataKey: string) {
+export function getRedisBaseKey(metadataKey: string): string {
   return metadataKey.split(":")[0]
 }
 
@@ -116,7 +116,7 @@ export function checkRedisReminderKey(key: string): boolean {
 /**
  * Gets the redis key used by bots for the task
  */
-export function getRedisBotKey(botData: BotData) {
+export function getRedisBotKey(botData: BotData): string {
   const projectName = botData.projectName
   const taskId = index2str(botData.taskIndex)
   return `${projectName}:${taskId}:botKey`
@@ -125,14 +125,14 @@ export function getRedisBotKey(botData: BotData) {
 /**
  * The name of the set of bot user keys
  */
-export function getRedisBotSet() {
+export function getRedisBotSet(): string {
   return "redisBotSetName"
 }
 
 /**
  * Gets key of file with project data
  */
-export function getProjectKey(projectName: string) {
+export function getProjectKey(projectName: string): string {
   return path.join(StorageStructure.PROJECT, projectName, "project")
 }
 

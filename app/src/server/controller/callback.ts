@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router } from "express"
+import { Request, Response, Router } from "express"
 import https from "https"
 import querystring from "querystring"
 import { ServerConfig } from "../../types/config"
@@ -82,15 +82,10 @@ class Callback {
    * @private
    * @param {Request} request - Request
    * @param {Response} response - Response
-   * @param {NextFunction} next - Next Function
-   * @memberof Callback
    */
-  private readonly decode = (
-    request: Request,
-    response: Response,
-    _next: NextFunction
-  ) => {
-    if (this.config.user.on && this.config.cognito) {
+  private readonly decode = (request: Request, response: Response): void => {
+    if (this.config.user.on && this.config.cognito !== undefined) {
+      const cognito = this.config.cognito
       this.exchangeCode(request.query.code as string)
         .then((tokens: TokenSet) => {
           response.render("callback", {
@@ -98,11 +93,11 @@ class Callback {
             idToken: tokens.id_token,
             refreshToken: tokens.refresh_token,
             tokenType: tokens.token_type,
-            uri: this.config.cognito!.userPoolBaseUri,
-            clientId: this.config.cognito!.clientId
+            uri: cognito.userPoolBaseUri,
+            clientId: cognito.clientId
           })
         })
-        .catch()
+        .catch(() => {})
     } else {
       response.send(200)
     }
@@ -114,18 +109,21 @@ class Callback {
    * @private
    * @param {string} code
    * @returns {Promise<JSON>}
-   * @memberof Callback
    */
-  private readonly exchangeCode = (code: string): Promise<TokenSet> => {
-    return new Promise((resolve, reject) => {
+  private readonly exchangeCode = async (code: string): Promise<TokenSet> => {
+    if (this.config.cognito === undefined) {
+      throw new Error("cognito is not configured")
+    }
+    const cognito = this.config.cognito
+    return await new Promise((resolve, reject) => {
       const postData = querystring.stringify({
         grant_type: "authorization_code",
-        client_id: this.config.cognito!.clientId,
-        redirect_uri: this.config.cognito!.callbackUri,
+        client_id: cognito.clientId,
+        redirect_uri: cognito.callbackUri,
         code
       })
       const config = {
-        host: this.config.cognito!.userPoolBaseUri,
+        host: cognito.userPoolBaseUri,
         path: "/oauth2/token",
         method: "POST",
         headers: {
@@ -154,7 +152,7 @@ class Callback {
   /**
    * Initial routes for the controller
    */
-  private readonly initialRoutes = () => {
+  private readonly initialRoutes = (): void => {
     this.router.get("/", this.decode)
   }
 }

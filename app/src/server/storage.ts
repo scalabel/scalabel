@@ -31,7 +31,7 @@ export abstract class Storage {
    * Change the file extension for different file types
    * Can set to empty string if the keys already include extensions
    */
-  public setExt(newExt: string) {
+  public setExt(newExt: string): void {
     this._extension = newExt
   }
 

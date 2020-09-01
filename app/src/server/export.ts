@@ -1,4 +1,3 @@
-import _ from "lodash"
 import { AttributeToolType, LabelTypeName } from "../const/common"
 import { isValidId } from "../functional/states"
 import { ItemExport, LabelExport, PolygonExportType } from "../types/bdd"
@@ -62,7 +61,7 @@ export function convertItemToExport(
     const sensor = Number(key)
     const url = item.urls[sensor]
     const videoName = item.videoName
-    const timestamp = item.timestamp ? item.timestamp : 0
+    const timestamp = item.timestamp
     itemExports[sensor] = {
       name: url,
       url,

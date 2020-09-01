@@ -3,8 +3,10 @@ import jwt from "express-jwt"
 import jwksRsa from "jwks-rsa"
 import { ServerConfig } from "../../types/config"
 
-const auth = (config: ServerConfig) => {
-  if (config.cognito) {
+const auth = (
+  config: ServerConfig
+): ((request: Request, response: Response, n: NextFunction) => void) => {
+  if (config.cognito !== undefined) {
     return jwt({
       secret: jwksRsa.expressJwtSecret({
         cache: true,

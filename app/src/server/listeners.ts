@@ -42,7 +42,11 @@ export class Listeners {
   /**
    * Logs requests to static or dynamic files
    */
-  public loggingHandler(req: Request, _res: Response, next: NextFunction) {
+  public loggingHandler(
+    req: Request,
+    _res: Response,
+    next: NextFunction
+  ): void {
     const log = `Requesting ${req.originalUrl}`
     Logger.info(log)
     next()
@@ -51,7 +55,7 @@ export class Listeners {
   /**
    * Handles getting all projects' names
    */
-  public async projectNameHandler(_req: Request, res: Response) {
+  public async projectNameHandler(_req: Request, res: Response): Promise<void> {
     let projects: string[]
     const defaultProjects = ["No existing project"]
     try {
@@ -71,7 +75,7 @@ export class Listeners {
   /**
    * Handles posting export
    */
-  public async getExportHandler(req: Request, res: Response) {
+  public async getExportHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidGet(req, res)) {
       return
     }
@@ -118,7 +122,7 @@ export class Listeners {
   /**
    * Alert the user that the sent fields were illegal
    */
-  public badFormResponse(res: Response) {
+  public badFormResponse(res: Response): void {
     const err = Error("Illegal fields for project creation")
     Logger.error(err)
     res.status(400).send(err.message)
@@ -127,7 +131,7 @@ export class Listeners {
   /**
    * Alert the user that the task creation request was illegal
    */
-  public badTaskResponse(res: Response) {
+  public badTaskResponse(res: Response): void {
     const err = Error("Illegal fields for task creation")
     Logger.error(err)
     res.status(400).send(err.message)
@@ -166,7 +170,10 @@ export class Listeners {
    * Handles posted project from internal data
    * Items file not required, since items can be added later
    */
-  public async postProjectInternalHandler(req: Request, res: Response) {
+  public async postProjectInternalHandler(
+    req: Request,
+    res: Response
+  ): Promise<void> {
     if (this.checkInvalidPost(req, res)) {
       return
     }
@@ -205,7 +212,7 @@ export class Listeners {
    * Handles posted project from form data
    * Items file required
    */
-  public async postProjectHandler(req: Request, res: Response) {
+  public async postProjectHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidPost(req, res)) {
       return
     }
@@ -232,7 +239,7 @@ export class Listeners {
   /**
    * Handles tasks being added to a project
    */
-  public async postTasksHandler(req: Request, res: Response) {
+  public async postTasksHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidPost(req, res)) {
       return
     }
@@ -283,7 +290,7 @@ export class Listeners {
   /**
    * Get the labeling stats
    */
-  public async statsHandler(req: Request, res: Response) {
+  public async statsHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidGet(req, res)) {
       return
     }
@@ -302,7 +309,7 @@ export class Listeners {
   /**
    * Return dashboard info
    */
-  public async dashboardHandler(req: Request, res: Response) {
+  public async dashboardHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidGet(req, res)) {
       return
     }
@@ -339,7 +346,7 @@ export class Listeners {
     files: { [key: string]: string },
     itemsRequired: boolean,
     res: Response
-  ) {
+  ): Promise<void> {
     try {
       // Parse form from request
       const form = await parseForm(fields, this.projectStore)
@@ -355,8 +362,8 @@ export class Listeners {
       await Promise.all([
         this.projectStore.saveProject(project),
         // Create tasks then save them
-        createTasks(project).then((tasks: TaskType[]) =>
-          this.projectStore.saveTasks(tasks)
+        createTasks(project).then(
+          async (tasks: TaskType[]) => await this.projectStore.saveTasks(tasks)
         )
         // Save the project
       ])

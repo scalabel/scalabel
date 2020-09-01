@@ -96,7 +96,7 @@ export class Bot {
    * Called when io socket establishes a connection
    * Registers the session with the backend, triggering a register ack
    */
-  public connectHandler() {
+  public connectHandler(): void {
     const message: RegisterMessageType = {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
@@ -113,7 +113,7 @@ export class Bot {
    * Called when backend sends ack of registration of this session
    * Initialized synced state
    */
-  public registerAckHandler(syncState: State) {
+  public registerAckHandler(syncState: State): void {
     this.store = configureStore(syncState)
   }
 
@@ -159,7 +159,7 @@ export class Bot {
   /**
    * Broadcast the synthetically generated actions
    */
-  public broadcastActions(actions: AddLabelsAction[], triggerId: string) {
+  public broadcastActions(actions: AddLabelsAction[], triggerId: string): void {
     const actionPacket: ActionPacketType = {
       actions,
       id: uid(),
@@ -178,7 +178,7 @@ export class Bot {
   /**
    * Close any external resources
    */
-  public kill() {
+  public kill(): void {
     this.socket.disconnect()
   }
 
@@ -193,7 +193,7 @@ export class Bot {
    * Sets action counts to 0 for the bot
    */
 
-  public resetActionCount() {
+  public resetActionCount(): void {
     this.actionCount = 0
   }
 
@@ -260,6 +260,7 @@ export class Bot {
         )
         Logger.info(
           `Got a ${response.status.toString()} response from the model with data: ${
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             response.data.points
           }`
         )
@@ -293,7 +294,7 @@ export class Bot {
         const state = this.store.getState().present
         if (action.type === ADD_LABELS) {
           const query = this.actionToQuery(state, action as AddLabelsAction)
-          if (query) {
+          if (query !== null) {
             queries.push(query)
           }
         }

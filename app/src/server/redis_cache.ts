@@ -40,15 +40,20 @@ export class RedisCache {
 
     // Subscribe to reminder expirations for saving
     this.client.subscribe("__keyevent@0__:expired")
-    this.client.on("message", async (_channel: string, reminderKey: string) => {
-      await this.processExpiredKey(reminderKey)
-    })
+    this.client.on(
+      "message",
+      // The .on() function argument type caused the lint error
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      async (_channel: string, reminderKey: string): Promise<void> => {
+        await this.processExpiredKey(reminderKey)
+      }
+    )
   }
 
   /**
    * Update multiple value atomically
    */
-  public async setMulti(keys: string[], values: string[]) {
+  public async setMulti(keys: string[], values: string[]): Promise<void> {
     if (keys.length !== values.length) {
       Logger.error(Error("Keys do not match values"))
       return
@@ -93,7 +98,7 @@ export class RedisCache {
   /**
    * Wrapper for del
    */
-  public async del(key: string) {
+  public async del(key: string): Promise<void> {
     await this.client.del(key)
   }
 
@@ -101,7 +106,7 @@ export class RedisCache {
    * Writes back task submission to storage
    * Task key in redis is the directory, so add a date before writing
    */
-  public async writeback(key: string, value: string) {
+  public async writeback(key: string, value: string): Promise<void> {
     Logger.info(`Writing back ${key}`)
     await this.storage.saveWithBackup(key, value)
   }
@@ -142,7 +147,12 @@ export class RedisCache {
       if (this.writebackCount > 0 && counter >= this.writebackCount) {
         // When the writing counter is greater than cacheLimit,
         // write back to storage
-        this.writeback(key, value).then().catch()
+        this.writeback(key, value)
+          .then(
+            () => {},
+            () => {}
+          )
+          .catch(() => {})
         counter = 0
       }
       args.push([reminderKey, counter.toString(), this.writebackTime])
@@ -155,7 +165,7 @@ export class RedisCache {
    * Check that the key is from a reminder expiring
    * Not from a normal key or meta key expiring
    */
-  private async processExpiredKey(reminderKey: string) {
+  private async processExpiredKey(reminderKey: string): Promise<void> {
     if (!path.checkRedisReminderKey(reminderKey)) {
       return
     }

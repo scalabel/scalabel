@@ -48,14 +48,14 @@ export class Hub {
   /**
    * Listens for websocket connections
    */
-  public async listen(io: socketio.Server) {
+  public async listen(io: socketio.Server): Promise<void> {
     io.on(EventName.CONNECTION, this.registerNewSocket.bind(this))
   }
 
   /**
    * Registers new socket's listeners
    */
-  public registerNewSocket(socket: SocketServer) {
+  public registerNewSocket(socket: SocketServer): void {
     socket.on(EventName.REGISTER, async (data: RegisterMessageType) => {
       try {
         await this.register(data, socket)
@@ -80,7 +80,10 @@ export class Hub {
   /**
    * Load the correct state and subscribe to redis
    */
-  public async register(data: RegisterMessageType, socket: SocketServer) {
+  public async register(
+    data: RegisterMessageType,
+    socket: SocketServer
+  ): Promise<void> {
     const projectName = data.projectName
     const taskId = index2str(data.taskIndex)
     const sessionId = initSessionId(data.sessionId)
@@ -104,7 +107,10 @@ export class Hub {
   /**
    * Updates the state with the action, and broadcasts action
    */
-  public async actionUpdate(data: SyncActionMessageType, socket: SocketServer) {
+  public async actionUpdate(
+    data: SyncActionMessageType,
+    socket: SocketServer
+  ): Promise<void> {
     const projectName = data.projectName
     const taskId = data.taskId
     const sessionId = data.sessionId
@@ -122,7 +128,7 @@ export class Hub {
     Logger.debug(
       `Received ${actions.length} actions and ` +
         `${taskActions.length} task actions from Session ` +
-        `${sessionId}. The action types are ${actionTypes}.`
+        `${sessionId}. The action types are [${actionTypes.join(", ")}].`
     )
 
     // Load IDs of actions that have been processed already

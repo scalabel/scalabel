@@ -83,13 +83,13 @@ function getExampleFileFromDisc(
 /**
  * gets true export data from disc
  */
-export function getExportFromDisc(): any {
+export function getExportFromDisc(): ItemExport[] {
   return JSON.parse(
     fs.readFileSync(
       path.join(testConfig.samplePath, testConfig.sampleExportFilename),
       "utf8"
     )
-  )
+  ) as ItemExport[]
 }
 
 /**
@@ -109,7 +109,7 @@ export function getProjectJsonFromDisc(): void {
  * @param data
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function deepDeleteTimestamp(data: ItemExport[]): any[] {
+export function deepDeleteTimestamp(data: ItemExport[]): unknown[] {
   const copy = JSON.parse(JSON.stringify(data))
   for (const entry of copy) {
     if (entry !== undefined) {
@@ -174,7 +174,7 @@ export async function getExport(): Promise<ItemExport[]> {
 /**
  * gets created project.json file
  */
-export function getProjectJson(): any {
+export function getProjectJson(): unknown {
   return JSON.parse(
     fs.readFileSync(
       path.join(

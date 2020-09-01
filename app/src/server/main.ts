@@ -33,7 +33,7 @@ function startHTTPServer(
   app: Application,
   projectStore: ProjectStore,
   userManager: UserManager
-) {
+): void {
   const listeners = new Listeners(projectStore, userManager)
 
   // Set up middleware
@@ -122,7 +122,7 @@ async function makeBotManager(
   config: ServerConfig,
   subscriber: RedisPubSub,
   cacheClient: RedisClient
-) {
+): Promise<void> {
   if (config.bot.on) {
     const botManager = new BotManager(config.bot, subscriber, cacheClient)
     await botManager.listen()
@@ -132,7 +132,7 @@ async function makeBotManager(
 /**
  * Launch the redis server
  */
-async function launchRedisServer(config: ServerConfig) {
+async function launchRedisServer(config: ServerConfig): Promise<void> {
   let redisDir = "./"
   if (config.storage.type === "local") {
     redisDir = config.storage.data
@@ -166,7 +166,7 @@ async function startServers(
   projectStore: ProjectStore,
   userManager: UserManager,
   publisher: RedisPubSub
-) {
+): Promise<void> {
   const app: Application = express()
   const httpServer = createServer(app)
   const io = socketio(httpServer)
@@ -186,7 +186,7 @@ async function startServers(
  * Check wether there is legacy project folders in storage
  * @param storage
  */
-async function checkLegacyProjectFolders(storage: Storage) {
+async function checkLegacyProjectFolders(storage: Storage): Promise<void> {
   let folders = await storage.listKeys("", true)
   folders = removeListItems(folders, STORAGE_FOLDERS)
   if (folders.length > 0) {
@@ -206,7 +206,7 @@ async function checkLegacyProjectFolders(storage: Storage) {
 /**
  * Main function for backend server
  */
-async function main() {
+async function main(): Promise<void> {
   // Initialize config
   const config = await readConfig()
 

@@ -24,10 +24,12 @@ class Logger {
         winston.format.printf(({ level, message, label, timestamp }) => {
           let labelString = ""
           if (label !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             labelString = `[${label}] `
           }
           return `${hostname()}:${
             process.pid
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           }:${timestamp} ${labelString}${level}: ${message}`
         })
       ),
@@ -44,7 +46,7 @@ class Logger {
 
   /** print errors */
   public error(err: MaybeError): void {
-    if (err) {
+    if (err !== null && err !== undefined) {
       this._logger.log({
         level: "error",
         message: err.message,
@@ -55,7 +57,7 @@ class Logger {
 
   /** print informative messages */
   public info(message: string): void {
-    if (message && !this._silent) {
+    if (message !== "" && !this._silent) {
       this._logger.log({
         level: "info",
         message
@@ -65,7 +67,7 @@ class Logger {
 
   /** print informative messages */
   public debug(message: string): void {
-    if (message && !this._silent) {
+    if (message !== "" && !this._silent) {
       this._logger.log({
         level: "debug",
         message

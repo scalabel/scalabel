@@ -21,7 +21,7 @@ export class RedisPubSub {
   /**
    * Broadcasts registration event of new socket
    */
-  public publishRegisterEvent(data: RegisterMessageType) {
+  public publishRegisterEvent(data: RegisterMessageType): void {
     this.client.publish(this.registerEvent, JSON.stringify(data))
   }
 
@@ -34,8 +34,8 @@ export class RedisPubSub {
     this.client.on("message", handler)
     this.client.subscribe(this.registerEvent)
     // Make sure it's subscribed before any messages are published
-    return await new Promise((resolve, _reject) => {
-      this.client.on("subscribe", (_channel: string, _value: string) => {
+    return await new Promise((resolve) => {
+      this.client.on("subscribe", () => {
         resolve()
       })
     })

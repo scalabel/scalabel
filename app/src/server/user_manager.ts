@@ -23,7 +23,7 @@ export class UserManager {
     socketId: string,
     projectName: string,
     userId: string
-  ) {
+  ): Promise<void> {
     if (this.disable) {
       return
     }
@@ -39,7 +39,7 @@ export class UserManager {
   /**
    * Deletes the user data of the socket that disconnected
    */
-  public async deregisterUser(socketId: string) {
+  public async deregisterUser(socketId: string): Promise<void> {
     if (this.disable) {
       return
     }
@@ -49,7 +49,7 @@ export class UserManager {
       userMetadata,
       socketId
     )
-    if (!projectName) {
+    if (projectName === "") {
       return
     }
     await this.projectStore.saveUserMetadata(newUserMetadata)
@@ -69,9 +69,6 @@ export class UserManager {
     }
     const userData = await this.projectStore.loadUserData(projectName)
     const userToSockets = userData.userToSockets
-    if (!userToSockets) {
-      return 0
-    }
     return Object.keys(userToSockets).length
   }
 
@@ -131,12 +128,14 @@ export class UserManager {
     const socketToUser = userData.socketToUser
     const userToSockets = userData.userToSockets
 
-    if (!socketToUser || !(socketId in socketToUser)) {
+    if (!(socketId in socketToUser)) {
       // Socket has no associated user
       return userData
     }
     // Remove map from socket to user
     const userId = socketToUser[socketId]
+    // TODO: Use map for flexible deletion
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete socketToUser[socketId]
 
     // Remove socket from its user's list
@@ -147,6 +146,7 @@ export class UserManager {
 
     // Remove the user if it has no sockets left
     if (userToSockets[userId].length === 0) {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete userToSockets[userId]
     }
     return {
@@ -185,6 +185,7 @@ export class UserManager {
     const projectName = socketToProject[socketId]
 
     // Remove the socket info from the metadata
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete socketToProject[socketId]
 
     return [{ socketToProject }, projectName]

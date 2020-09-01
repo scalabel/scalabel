@@ -33,22 +33,25 @@ export class RedisClient {
    * Add a handler function
    * Note that the handler and subscriber must use the same client
    */
-  public on(event: string, callback: (channel: string, value: string) => void) {
+  public on(
+    event: string,
+    callback: (channel: string, value: string) => void
+  ): void {
     this.pubSub.on(event, callback)
   }
 
   /** Subscribe to a channel */
-  public subscribe(channel: string) {
+  public subscribe(channel: string): void {
     this.pubSub.subscribe(channel)
   }
 
   /** Publish to a channel */
-  public publish(channel: string, message: string) {
+  public publish(channel: string, message: string): void {
     this.pubSub.publish(channel, message)
   }
 
   /** Wrapper for redis delete */
-  public async del(key: string) {
+  public async del(key: string): Promise<void> {
     this.client.del(key)
   }
 
@@ -66,7 +69,7 @@ export class RedisClient {
 
   /** Wrapper for redis exists */
   public async exists(key: string): Promise<boolean> {
-    return await new Promise((resolve, _reject) => {
+    return await new Promise((resolve) => {
       this.client.exists(key, (_err: Error | null, exists: number) => {
         if (exists === 0) {
           resolve(false)
@@ -78,12 +81,12 @@ export class RedisClient {
   }
 
   /** Wrapper for redis set add */
-  public async setAdd(key: string, value: string) {
+  public async setAdd(key: string, value: string): Promise<void> {
     this.client.sadd(key, value)
   }
 
   /** Wrapper for redis set remove */
-  public async setRemove(key: string, value: string) {
+  public async setRemove(key: string, value: string): Promise<void> {
     this.client.srem(key, value)
   }
 
@@ -96,26 +99,30 @@ export class RedisClient {
   }
 
   /** Wrapper for redis psetex */
-  public async psetex(key: string, timeout: number, value: string) {
+  public async psetex(
+    key: string,
+    timeout: number,
+    value: string
+  ): Promise<void> {
     const redisSetExAsync = promisify(this.client.psetex).bind(this.client)
     await redisSetExAsync(key, timeout, value)
   }
 
   /** Wrapper for redis set */
-  public async set(key: string, value: string) {
+  public async set(key: string, value: string): Promise<void> {
     const redisSetAsync = promisify(this.client.set).bind(this.client)
     await redisSetAsync(key, value)
   }
 
   /** Wrapper for redis config */
-  public config(type: string, name: string, value: string) {
+  public config(type: string, name: string, value: string): void {
     this.client.on("ready", () => {
       this.client.config(type, name, value)
     })
   }
 
   /** Close the connection to the server */
-  public async close() {
+  public async close(): Promise<void> {
     await promisify(this.client.quit).bind(this.client)()
     await promisify(this.pubSub.quit).bind(this.pubSub)()
   }
