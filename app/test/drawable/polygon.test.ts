@@ -142,9 +142,8 @@ test("2d polygons highlighted and selected", () => {
   selected = Session.label2dList.selectedLabels
   expect(Session.label2dList.labelList.length).toEqual(2)
   expect(Session.label2dList.labelList[1].labelId).toEqual(labelIds[1])
-  if (!highlighted) {
-    throw new Error("no highlightedLabel")
-  } else {
+  expect(highlighted).not.toBeNull()
+  if (highlighted !== null) {
     expect(highlighted.labelId).toEqual(labelIds[0])
   }
   expect(selected[0].labelId).toEqual(labelIds[1])
@@ -155,7 +154,8 @@ test("2d polygons highlighted and selected", () => {
   mouseUp(label2dHandler, 140, 140, 0, 0)
   highlighted = label2dHandler.highlightedLabel
   selected = Session.label2dList.selectedLabels
-  if (highlighted) {
+  expect(highlighted).not.toBeNull()
+  if (highlighted !== null) {
     expect(highlighted.labelId).toEqual(labelIds[0])
   }
   expect(selected[0].labelId).toEqual(labelIds[0])

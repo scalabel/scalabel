@@ -108,12 +108,12 @@ describe("full 2d bounding box integration test", () => {
       waitForElement(() => getByTestId("hidden-buttons")),
       sleep(submissionTimeout)
     ])
-  }),
-    test("test project.json was properly created", () => {
-      const projectJson = getProjectJson()
-      const sampleProjectJson = getProjectJsonFromDisc()
-      expect(projectJson).toEqual(sampleProjectJson)
-    })
+  })
+  test("test project.json was properly created", () => {
+    const projectJson = getProjectJson()
+    const sampleProjectJson = getProjectJsonFromDisc()
+    expect(projectJson).toEqual(sampleProjectJson)
+  })
 
   test(
     "test 2d-bounding-box annotation and save to disc",

@@ -59,7 +59,7 @@ export let testConfig: TestConfig = {
  * changes current test config to newConfig
  * @param newConfig
  */
-export function changeTestConfig(newConfig: Partial<TestConfig>) {
+export function changeTestConfig(newConfig: Partial<TestConfig>): void {
   testConfig = {
     ...testConfig,
     ...newConfig
@@ -83,7 +83,7 @@ function getExampleFileFromDisc(
 /**
  * gets true export data from disc
  */
-export function getExportFromDisc() {
+export function getExportFromDisc(): any {
   return JSON.parse(
     fs.readFileSync(
       path.join(testConfig.samplePath, testConfig.sampleExportFilename),
@@ -95,7 +95,7 @@ export function getExportFromDisc() {
 /**
  * gets true project data from disc
  */
-export function getProjectJsonFromDisc() {
+export function getProjectJsonFromDisc(): void {
   return JSON.parse(
     fs.readFileSync(
       path.join(testConfig.samplePath, testConfig.sampleProjectJsonFilename),
@@ -112,7 +112,7 @@ export function getProjectJsonFromDisc() {
 export function deepDeleteTimestamp(data: ItemExport[]): any[] {
   const copy = JSON.parse(JSON.stringify(data))
   for (const entry of copy) {
-    if (entry) {
+    if (entry !== undefined) {
       delete entry.timestamp
     }
   }
@@ -123,20 +123,17 @@ export function deepDeleteTimestamp(data: ItemExport[]): any[] {
  * helper function to force javascript to sleep
  * @param milliseconds
  */
-export function sleep(milliseconds: number): Promise<object> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds))
+export async function sleep(milliseconds: number): Promise<void> {
+  return await new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
 
 /**
  * helper function to wait for backend to save
  */
-export function waitForSave(): Promise<object> {
-  return new Promise(async (resolve) => {
-    while (!isStatusSaved(Session.store.getState())) {
-      await sleep(10)
-    }
-    resolve()
-  })
+export async function waitForSave(): Promise<void> {
+  while (!isStatusSaved(Session.store.getState())) {
+    await sleep(10)
+  }
 }
 
 /**
@@ -157,10 +154,7 @@ export async function getExport(): Promise<ItemExport[]> {
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve(JSON.parse(xhr.response))
         } else {
-          reject({
-            status: xhr.status,
-            statusText: xhr.statusText
-          })
+          reject(new Error(xhr.statusText))
         }
       } else {
       }
@@ -180,7 +174,7 @@ export async function getExport(): Promise<ItemExport[]> {
 /**
  * gets created project.json file
  */
-export function getProjectJson() {
+export function getProjectJson(): any {
   return JSON.parse(
     fs.readFileSync(
       path.join(
@@ -196,7 +190,7 @@ export function getProjectJson() {
 /**
  * Counts created task/{i}.json file
  */
-export async function countTasks(projectName: string) {
+export async function countTasks(projectName: string): Promise<number> {
   const taskDir = path.join(testConfig.testDirPath, getTaskDir(projectName))
   if (!(await fs.pathExists(taskDir))) {
     return 0

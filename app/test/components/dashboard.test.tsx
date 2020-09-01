@@ -32,10 +32,16 @@ describe("Test dashboard functionality", () => {
         <Dashboard dashboardContents={sampleDashboardContents} />
       </MuiThemeProvider>
     )
-    const totalTasks = getByTestId("total-tasks").firstElementChild!.innerHTML
-    const totalLabels = getByTestId("total-labels").firstElementChild!.innerHTML
-    expect(totalTasks).toBe("3")
-    expect(totalLabels).toBe("6")
+    const totalTaskElement = getByTestId("total-tasks").firstElementChild
+    const totalLabelElement = getByTestId("total-labels").firstElementChild
+    expect(totalTaskElement).not.toBeNull()
+    expect(totalLabelElement).not.toBeNull()
+    if (totalTaskElement !== null && totalLabelElement !== null) {
+      const totalTasks = totalTaskElement.innerHTML
+      const totalLabels = totalLabelElement.innerHTML
+      expect(totalTasks).toBe("3")
+      expect(totalLabels).toBe("6")
+    }
   })
   test("Correct task urls", () => {
     const { getByTestId } = render(
@@ -49,11 +55,7 @@ describe("Test dashboard functionality", () => {
       ) as HTMLAnchorElement
       const url = taskLinkElem.href
       expect(url).toContain(
-        value.handlerUrl +
-          "?project_name=" +
-          sampleDashboardContents.projectMetaData.name +
-          "&task_index=" +
-          index
+        `${value.handlerUrl}?project_name=${sampleDashboardContents.projectMetaData.name}&task_index=${index}`
       )
     })
   })

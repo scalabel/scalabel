@@ -45,7 +45,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents(): Array<React.ReactElement> {
+  protected getDrawableComponents(): React.ReactElement[] {
     if (this._container && this._viewerConfig) {
       this._container.scrollTop = (this
         ._viewerConfig as ImageViewerConfigType).displayTop
@@ -78,7 +78,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getMenuComponents(): Array<JSX.Element> | [] {
+  protected getMenuComponents(): JSX.Element[] | [] {
     if (this._viewerConfig) {
       const zoomInButton = (
         <IconButton

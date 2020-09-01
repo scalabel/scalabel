@@ -15,7 +15,7 @@ export function checkBox2D(
   target: Partial<SimpleRect>,
   itemIndex: number = -1,
   getStateFunc: GetStateFunc = getState
-) {
+): void {
   const state = getStateFunc()
   if (itemIndex < 0) {
     itemIndex = state.user.select.item
@@ -36,7 +36,7 @@ export function checkPolygon(
   coords: number[][],
   itemIndex: number = -1,
   getStateFunc: GetStateFunc = getState
-) {
+): void {
   const state = getStateFunc()
   if (itemIndex < 0) {
     itemIndex = state.user.select.item

@@ -329,7 +329,9 @@ export default class CreateForm extends React.Component<Props, State> {
    * Handles submission event
    * @param event
    */
-  private readonly handleSubmit = (event: ChangeEvent<HTMLFormElement>): void => {
+  private readonly handleSubmit = (
+    event: ChangeEvent<HTMLFormElement>
+  ): void => {
     event.preventDefault()
     const that = this
     const x = new XMLHttpRequest()
@@ -393,7 +395,10 @@ export default class CreateForm extends React.Component<Props, State> {
   /**
    * handles page title
    */
-  private readonly handlePageTitle = (labelType: string, itemType: string): void => {
+  private readonly handlePageTitle = (
+    labelType: string,
+    itemType: string
+  ): void => {
     const pageTitle = getPageTitle(labelType, itemType)
     this.setState({ pageTitle })
   }

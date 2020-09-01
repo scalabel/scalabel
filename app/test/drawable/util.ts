@@ -62,7 +62,7 @@ export function drawPolygonByDragging(
   points: number[][],
   interrupt: boolean = false,
   valid: boolean = true
-) {
+): IdType {
   const labelIds = new LabelCollector(getState)
   const start = labelIds.collect()
 
@@ -115,7 +115,7 @@ function doBox2DOperation(
   labelIndex: number,
   handleIndex: number,
   interrupt: boolean = false
-) {
+): void {
   const x1 = coords.x1
   const x2 = coords.x2
   const y1 = coords.y1
@@ -174,7 +174,7 @@ export function resizeBox2D(
   coords: SimpleRect,
   labelIndex: number,
   interrupt: boolean = false
-) {
+): void {
   doBox2DOperation(
     label2dHandler,
     canvasSize,
@@ -196,7 +196,7 @@ export function moveBox2D(
   coords: SimpleRect,
   labelIndex: number,
   interrupt: boolean = false
-) {
+): void {
   // Handle index of 0 represents a move instead of a resize
   doBox2DOperation(label2dHandler, canvasSize, coords, labelIndex, 0, interrupt)
 }
@@ -217,7 +217,7 @@ export function mouseMove(
   canvasSize: Size2D,
   labelIndex: number,
   handleIndex: number
-) {
+): void {
   label2d.onMouseMove(new Vector2D(x, y), canvasSize, labelIndex, handleIndex)
 }
 
@@ -235,7 +235,7 @@ export function mouseDown(
   y: number,
   labelIndex: number,
   handleIndex: number
-) {
+): void {
   label2d.onMouseDown(new Vector2D(x, y), labelIndex, handleIndex)
 }
 
@@ -253,7 +253,7 @@ export function mouseUp(
   y: number,
   labelIndex: number,
   handleIndex: number
-) {
+): void {
   label2d.onMouseUp(new Vector2D(x, y), labelIndex, handleIndex)
 }
 
@@ -271,7 +271,7 @@ export function mouseClick(
   y: number,
   labelIndex: number,
   handleIndex: number
-) {
+): void {
   mouseDown(label2d, x, y, labelIndex, handleIndex)
   mouseUp(label2d, x, y, labelIndex, handleIndex)
 }
@@ -292,7 +292,7 @@ export function mouseMoveClick(
   canvasSize: Size2D,
   labelIndex: number,
   handleIndex: number
-) {
+): void {
   mouseMove(label2d, x, y, canvasSize, labelIndex, handleIndex)
   mouseClick(label2d, x, y, labelIndex, handleIndex)
 }
@@ -302,7 +302,7 @@ export function mouseMoveClick(
  * @param label2d
  * @param key
  */
-export function keyDown(label2d: Label2DHandler, key: string) {
+export function keyDown(label2d: Label2DHandler, key: string): void {
   label2d.onKeyDown(new KeyboardEvent("keydown", { key }))
 }
 
@@ -311,7 +311,7 @@ export function keyDown(label2d: Label2DHandler, key: string) {
  * @param label2d
  * @param key
  */
-export function keyUp(label2d: Label2DHandler, key: string) {
+export function keyUp(label2d: Label2DHandler, key: string): void {
   label2d.onKeyUp(new KeyboardEvent("keyup", { key }))
 }
 
@@ -320,7 +320,7 @@ export function keyUp(label2d: Label2DHandler, key: string) {
  * @param label2d
  * @param key
  */
-export function keyClick(label2d: Label2DHandler, key: string) {
+export function keyClick(label2d: Label2DHandler, key: string): void {
   keyDown(label2d, key)
   keyUp(label2d, key)
 }

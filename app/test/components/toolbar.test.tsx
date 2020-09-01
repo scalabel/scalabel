@@ -31,7 +31,7 @@ const dummyAttributeToggle = (toggleName: string, alignment: string): void => {
   handleToggleWasCalled = true
 }
 
-const dummyGetAlignmentIndex = (toggleName: string) => {
+const dummyGetAlignmentIndex = (toggleName: string): number => {
   const index = testValues.indexOf(selected[toggleName])
   return index >= 0 ? index : 0
 }
@@ -100,7 +100,7 @@ describe("test Delete", () => {
     )
     expect(toolbarRef.current).not.toBeNull()
     expect(toolbarRef.current).not.toBeUndefined()
-    if (toolbarRef.current) {
+    if (toolbarRef.current !== null) {
       toolbarRef.current.componentDidMount()
     }
     for (let itemIndex = 0; itemIndex < 3; itemIndex += 1) {
@@ -183,7 +183,7 @@ describe("test track", () => {
     )
     expect(toolbarRef.current).not.toBeNull()
     expect(toolbarRef.current).not.toBeUndefined()
-    if (toolbarRef.current) {
+    if (toolbarRef.current !== null) {
       toolbarRef.current.componentDidMount()
     }
 
@@ -226,7 +226,7 @@ describe("test track", () => {
     )
     expect(toolbarRef.current).not.toBeNull()
     expect(toolbarRef.current).not.toBeUndefined()
-    if (toolbarRef.current) {
+    if (toolbarRef.current !== null) {
       toolbarRef.current.componentDidMount()
     }
 

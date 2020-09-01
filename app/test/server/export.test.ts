@@ -1,5 +1,4 @@
 import * as fs from "fs-extra"
-import _ from "lodash"
 import { LabelTypeName } from "../../src/const/common"
 import { makePathPoint2D } from "../../src/functional/states"
 import {
@@ -35,38 +34,40 @@ describe("test export functionality across multiple labeling types", () => {
       [0, 2]
     ])
   })
-  describe("test export functionality for bounding box", () => {
-    test("single item conversion", () => {
-      const state = readSampleState(sampleStateFile)
-      const config = state.task.config
-      const item = state.task.items[0]
-      const itemExport = convertItemToExport(config, item)[0]
-      expect(itemExport).toEqual(sampleItemExportImage)
-    }),
-      test("full state export with empty items", () => {
-        const state = readSampleState(sampleStateFile)
-        const exportedState = convertStateToExport(state)
-        expect(exportedState).toEqual(sampleStateExportImage)
-      })
-  }),
-    describe("test export functionality for segmentation", () => {
-      test("single item conversion", () => {
-        const state = readSampleState(samplePolygonStateFile)
-        const config = state.task.config
-        const item = state.task.items[0]
-        const itemExport = convertItemToExport(config, item)[0]
-        expect(itemExport).toEqual(sampleItemExportImagePolygon)
-      }),
-        test("full state export with empty items", () => {
-          const state = readSampleState(samplePolygonStateFile)
-          const exportedState = convertStateToExport(state)
-          expect(exportedState).toEqual(sampleStateExportImagePolygon)
-        })
-    }),
-    describe("test export functionality for tracking", () => {
-      test("single item conversion", () => {}),
-        test("full state export including empty items", () => {})
-    })
+})
+describe("test export functionality for bounding box", () => {
+  test("single item conversion", () => {
+    const state = readSampleState(sampleStateFile)
+    const config = state.task.config
+    const item = state.task.items[0]
+    const itemExport = convertItemToExport(config, item)[0]
+    expect(itemExport).toEqual(sampleItemExportImage)
+  })
+  test("full state export with empty items", () => {
+    const state = readSampleState(sampleStateFile)
+    const exportedState = convertStateToExport(state)
+    expect(exportedState).toEqual(sampleStateExportImage)
+  })
+})
+
+describe("test export functionality for segmentation", () => {
+  test("single item conversion", () => {
+    const state = readSampleState(samplePolygonStateFile)
+    const config = state.task.config
+    const item = state.task.items[0]
+    const itemExport = convertItemToExport(config, item)[0]
+    expect(itemExport).toEqual(sampleItemExportImagePolygon)
+  })
+  test("full state export with empty items", () => {
+    const state = readSampleState(samplePolygonStateFile)
+    const exportedState = convertStateToExport(state)
+    expect(exportedState).toEqual(sampleStateExportImagePolygon)
+  })
+})
+
+describe("test export functionality for tracking", () => {
+  test("single item conversion", () => {})
+  test("full state export including empty items", () => {})
 })
 
 /**

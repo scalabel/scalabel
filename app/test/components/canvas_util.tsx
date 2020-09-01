@@ -48,7 +48,7 @@ function mouseMoveEvent(
  * @param x
  * @param y
  */
-export function mouseMove(label2d: Label2dCanvas, x: number, y: number) {
+export function mouseMove(label2d: Label2dCanvas, x: number, y: number): void {
   label2d.onMouseMove(mouseMoveEvent(x, y))
 }
 
@@ -58,7 +58,7 @@ export function mouseMove(label2d: Label2dCanvas, x: number, y: number) {
  * @param x
  * @param y
  */
-export function mouseDown(label2d: Label2dCanvas, x: number, y: number) {
+export function mouseDown(label2d: Label2dCanvas, x: number, y: number): void {
   label2d.onMouseDown(mouseDownEvent(x, y))
 }
 
@@ -68,7 +68,7 @@ export function mouseDown(label2d: Label2dCanvas, x: number, y: number) {
  * @param x
  * @param y
  */
-export function mouseUp(label2d: Label2dCanvas, x: number, y: number) {
+export function mouseUp(label2d: Label2dCanvas, x: number, y: number): void {
   label2d.onMouseUp(mouseUpEvent(x, y))
 }
 
@@ -78,7 +78,7 @@ export function mouseUp(label2d: Label2dCanvas, x: number, y: number) {
  * @param x
  * @param y
  */
-export function mouseClick(label2d: Label2dCanvas, x: number, y: number) {
+export function mouseClick(label2d: Label2dCanvas, x: number, y: number): void {
   mouseDown(label2d, x, y)
   mouseUp(label2d, x, y)
 }
@@ -89,7 +89,11 @@ export function mouseClick(label2d: Label2dCanvas, x: number, y: number) {
  * @param x
  * @param y
  */
-export function mouseMoveClick(label2d: Label2dCanvas, x: number, y: number) {
+export function mouseMoveClick(
+  label2d: Label2dCanvas,
+  x: number,
+  y: number
+): void {
   mouseMove(label2d, x, y)
   mouseClick(label2d, x, y)
 }
@@ -99,7 +103,7 @@ export function mouseMoveClick(label2d: Label2dCanvas, x: number, y: number) {
  * @param label2d
  * @param key
  */
-export function keyDown(label2d: Label2dCanvas, key: string) {
+export function keyDown(label2d: Label2dCanvas, key: string): void {
   label2d.onKeyDown(new KeyboardEvent("keydown", { key }))
 }
 
@@ -108,7 +112,7 @@ export function keyDown(label2d: Label2dCanvas, key: string) {
  * @param label2d
  * @param key
  */
-export function keyUp(label2d: Label2dCanvas, key: string) {
+export function keyUp(label2d: Label2dCanvas, key: string): void {
   label2d.onKeyUp(new KeyboardEvent("keyup", { key }))
 }
 
@@ -117,7 +121,7 @@ export function keyUp(label2d: Label2dCanvas, key: string) {
  * @param label2d
  * @param points
  */
-export function drawPolygon(label2d: Label2dCanvas, points: number[][]) {
+export function drawPolygon(label2d: Label2dCanvas, points: number[][]): void {
   points.forEach((p) => mouseMoveClick(label2d, p[0], p[1]))
   mouseMoveClick(label2d, points[0][0], points[0][1])
 }
@@ -136,7 +140,7 @@ export function drag(
   y1: number,
   x2: number,
   y2: number
-) {
+): void {
   mouseMove(label2d, x1, y1)
   mouseDown(label2d, x1, y1)
   // Move to a middle point first for more testing
@@ -207,7 +211,7 @@ export function setUpLabel2dCanvas(
   width: number,
   height: number,
   tracking: boolean = false
-) {
+): void {
   dispatch(action.addViewerConfig(0, makeImageViewerConfig(0)))
 
   const display = document.createElement("div")

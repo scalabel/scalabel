@@ -25,7 +25,9 @@ interface MouseEventListenersProps {
  * based on label type
  * @param props
  */
-export default function mouseEventListeners(props: MouseEventListenersProps): JSX.Element | null {
+export default function mouseEventListeners(
+  props: MouseEventListenersProps
+): JSX.Element | null {
   let eventListeners = null
   const state = Session.getState()
   const labelType = state.task.config.labelTypes[state.user.select.labelType]

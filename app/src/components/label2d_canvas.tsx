@@ -159,7 +159,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render(): Array<JSX.Element> {
+  public render(): JSX.Element[] {
     const { classes } = this.props
     let controlCanvas = (
       <canvas

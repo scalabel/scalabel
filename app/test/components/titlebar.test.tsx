@@ -176,7 +176,7 @@ function checkSubmitDispatch(
     void,
     [ActionType | ThunkAction<void, ReduxState, void, ActionType>]
   >
-) {
+): void {
   expect(dispatchSpy).toHaveBeenCalled()
   const dispatchAction = dispatchSpy.mock.calls[0][0] as ActionType
   // Check type, instead of HaveBeenCalledWith, because userId may change

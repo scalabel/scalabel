@@ -138,13 +138,13 @@ describe("Test redis cache", () => {
 })
 
 /** Check that expected number of files exist */
-async function checkFileCount() {
+async function checkFileCount(): Promise<void> {
   const savedKeys = await storage.listKeys("")
   expect(savedKeys.length).toBe(numWrites)
 }
 
 /** Check that expected number of files have been written */
-async function checkFileWritten() {
+async function checkFileWritten(): Promise<void> {
   numWrites += 1
   await checkFileCount()
 }

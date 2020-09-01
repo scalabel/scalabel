@@ -15,7 +15,7 @@ export class TrackCollector extends Array<IdType> {
   }
 
   /** Collect the latest tracks from the state */
-  public collect() {
+  public collect(): void {
     const trackIds = findNewTracksFromState(this._getState(), this)
     this.push(...trackIds)
   }

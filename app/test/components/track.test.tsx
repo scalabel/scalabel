@@ -60,7 +60,7 @@ describe("basic track ops", () => {
     )
     expect(toolbarRef.current).not.toBeNull()
     expect(toolbarRef.current).not.toBeUndefined()
-    if (toolbarRef.current) {
+    if (toolbarRef.current !== null) {
       toolbarRef.current.componentDidMount()
     }
 
@@ -175,7 +175,7 @@ describe("basic track ops", () => {
     )
     expect(toolbarRef.current).not.toBeNull()
     expect(toolbarRef.current).not.toBeUndefined()
-    if (toolbarRef.current) {
+    if (toolbarRef.current !== null) {
       toolbarRef.current.componentDidMount()
     }
 
@@ -257,7 +257,7 @@ describe("basic track ops", () => {
     )
     expect(toolbarRef.current).not.toBeNull()
     expect(toolbarRef.current).not.toBeUndefined()
-    if (toolbarRef.current) {
+    if (toolbarRef.current !== null) {
       toolbarRef.current.componentDidMount()
     }
 

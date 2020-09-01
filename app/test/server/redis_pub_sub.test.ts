@@ -1,4 +1,3 @@
-import _ from "lodash"
 import { RedisClient } from "../../src/server/redis_client"
 import { RedisPubSub } from "../../src/server/redis_pub_sub"
 import { RegisterMessageType } from "../../src/types/message"

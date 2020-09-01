@@ -1,7 +1,9 @@
 /**
  * Add callback for the main window visibility change
  */
-export function addVisibilityListener(callback: (visible: boolean) => void): void {
+export function addVisibilityListener(
+  callback: (visible: boolean) => void
+): void {
   window.addEventListener("blur", () => {
     callback(false)
   })

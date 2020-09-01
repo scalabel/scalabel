@@ -38,7 +38,11 @@ beforeEach(() => {
 /**
  * Helper function to change the category of the label
  */
-function changeCategory(itemIndex: number, labelId: IdType, category: number) {
+function changeCategory(
+  itemIndex: number,
+  labelId: IdType,
+  category: number
+): void {
   // First select the label
   dispatch(action.goToItem(itemIndex))
   dispatch(action.changeSelect({ labels: { [itemIndex]: [labelId] } }))
@@ -51,14 +55,18 @@ function changeCategory(itemIndex: number, labelId: IdType, category: number) {
 /**
  * Helper function to check the category of the label in the state
  */
-function checkCategory(itemIndex: number, labelId: IdType, category: number) {
+function checkCategory(
+  itemIndex: number,
+  labelId: IdType,
+  category: number
+): void {
   expect(getCategory(getState(), itemIndex, labelId)).toStrictEqual([category])
 }
 
 /**
  * Helper function to check the number of total tracks in the state
  */
-function checkNumTracks(numTracks: number) {
+function checkNumTracks(numTracks: number): void {
   expect(getNumTracks(getState())).toBe(numTracks)
 }
 

@@ -162,7 +162,10 @@ export class Synchronizer {
   /**
    * Registers the session with the backend, triggering a register ack
    */
-  public sendConnectionMessage(sessionId: string, dispatch: ThunkDispatchType): void {
+  public sendConnectionMessage(
+    sessionId: string,
+    dispatch: ThunkDispatchType
+  ): void {
     const message: RegisterMessageType = {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
@@ -304,7 +307,11 @@ export class Synchronizer {
    * Send all queued actions to the backend
    * and move actions to actionsPendingSave
    */
-  public save(sessionId: string, bots: boolean, dispatch: ThunkDispatchType): void {
+  public save(
+    sessionId: string,
+    bots: boolean,
+    dispatch: ThunkDispatchType
+  ): void {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
         const packet: ActionPacketType = {

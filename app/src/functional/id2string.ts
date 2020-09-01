@@ -121,7 +121,7 @@ function shapeIdToString(shape: ShapeType): ShapeType {
   }
   if ("shape" in newShape) {
     // eslint-disable-next-line @typescript-eslint/dot-notation
-    delete newShape["shape"]
+    delete newShape.shape
   }
   return newShape
 }

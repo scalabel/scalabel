@@ -30,8 +30,8 @@ test("make dir", async () => {
   }
 })
 
-test("key existence", () => {
-  return Promise.all([
+test("key existence", async () => {
+  return await Promise.all([
     checkTaskKey(0, true),
     checkTaskKey(1, true),
     checkTaskKey(2, false),
@@ -57,10 +57,10 @@ test("list keys dir only", async () => {
   expect(keys).toContain(`projects/myProject/tasks`)
 })
 
-test("load", () => {
+test("load", async () => {
   const taskId = index2str(0)
   const key = getTaskKey(projectName, taskId)
-  return storage.load(key).then((data: string) => {
+  return await storage.load(key).then((data: string) => {
     const loadedData = JSON.parse(data)
     expect(loadedData.testField).toBe("testValue")
   })
@@ -117,7 +117,10 @@ test("delete", async () => {
 /**
  * tests if task with index exists
  */
-async function checkTaskKey(index: number, shouldExist: boolean) {
+async function checkTaskKey(
+  index: number,
+  shouldExist: boolean
+): Promise<void> {
   const taskId = index2str(index)
   const key = getTaskKey(projectName, taskId)
   const exists = await storage.hasKey(key)
@@ -127,7 +130,7 @@ async function checkTaskKey(index: number, shouldExist: boolean) {
 /**
  * tests if project key exists
  */
-async function checkProjectKey() {
+async function checkProjectKey(): Promise<void> {
   const key = getProjectKey(projectName)
   const exists = await storage.hasKey(key)
   expect(exists).toBe(true)
@@ -136,7 +139,7 @@ async function checkProjectKey() {
 /**
  * tests if load on an index works
  */
-async function checkLoad(index: number) {
+async function checkLoad(index: number): Promise<void> {
   const data = await storage.load(getTaskKey(projectName, index2str(index)))
   const loadedData = JSON.parse(data)
   expect(loadedData.testField).toBe(`testValue${index}`)

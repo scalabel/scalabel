@@ -18,7 +18,7 @@ test("Item change with arrow keys", () => {
 
   const config = makeDefaultViewerConfig(ViewerConfigTypeName.IMAGE, 0, -1)
   expect(config).not.toBeNull()
-  if (config) {
+  if (config !== null) {
     Session.dispatch(addViewerConfig(0, config))
   }
   render(

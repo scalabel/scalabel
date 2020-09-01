@@ -28,7 +28,7 @@ import { findNewLabelsFromState } from "../util/state"
  * @param camLoc
  * @param axis
  */
-function getActiveAxis(camLoc: number, axis: number) {
+function getActiveAxis(camLoc: number, axis: number): number {
   if (Math.floor(camLoc / 2) === 0) {
     if (axis <= 1) {
       return 2
@@ -48,6 +48,7 @@ function getActiveAxis(camLoc: number, axis: number) {
       return 1
     }
   }
+  throw new Error("Impossible case happened")
 }
 
 /**
@@ -55,7 +56,7 @@ function getActiveAxis(camLoc: number, axis: number) {
  * @param camLoc
  * @param axis
  */
-function getActiveAxisForRotation(camLoc: number, axis: number) {
+function getActiveAxisForRotation(camLoc: number, axis: number): number {
   if (Math.floor(camLoc / 2) === 0) {
     if (axis <= 1) {
       return 1
@@ -75,6 +76,7 @@ function getActiveAxisForRotation(camLoc: number, axis: number) {
       return 0
     }
   }
+  throw new Error("Impossible case happened")
 }
 
 /**

@@ -38,7 +38,7 @@ test("Add new valid drawable track", () => {
   const label2dlist = new Label2DList()
   const label = makeDrawableLabel2D(label2dlist, "box2d", {})
   expect(label).not.toBeNull()
-  if (label) {
+  if (label !== null) {
     label.initTemp(state, new Vector2D(10, 10))
     label.onMouseDown(new Vector2D(10, 10), 1)
     label.onMouseMove(new Vector2D(20, 20), new Size2D(1000, 1000), 1, 2)
@@ -83,7 +83,7 @@ test("Add new invalid drawable track", () => {
   const label2dlist = new Label2DList()
   const label = makeDrawableLabel2D(label2dlist, "box2d", {})
   expect(label).not.toBeNull()
-  if (label) {
+  if (label != null) {
     label.initTemp(state, new Vector2D(10, 10))
     label.onMouseDown(new Vector2D(10, 10), 1)
     label.onMouseMove(new Vector2D(12, 12), new Size2D(1000, 1000), 1, 2)

@@ -198,7 +198,10 @@ function sendAcks(sync: Synchronizer): ActionPacketType[] {
 /**
  * Check that the actions were sent to the backend for saving
  */
-function checkActionsAreSaving(sync: Synchronizer, actions: AddLabelsAction[]) {
+function checkActionsAreSaving(
+  sync: Synchronizer,
+  actions: AddLabelsAction[]
+): void {
   const actionPackets = sync.listActionsPendingSave()
   expect(actionPackets.length).toBe(actions.length)
   for (let i = 0; i < actions.length; i++) {
@@ -209,7 +212,7 @@ function checkActionsAreSaving(sync: Synchronizer, actions: AddLabelsAction[]) {
 /**
  * Checkthat correct connection message was sent
  */
-function checkConnectMessage(sessId: string) {
+function checkConnectMessage(sessId: string): void {
   const expectedMessage: RegisterMessageType = {
     projectName,
     taskIndex,

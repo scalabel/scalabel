@@ -2,6 +2,8 @@ import "@testing-library/jest-dom"
 import { PathPoint2DType, SimplePathPoint2DType } from "../../src/types/state"
 
 declare global {
+  // TODO: figure out how to extend jest without lint error
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       /** Match to two sets of polygon points */
@@ -53,7 +55,7 @@ expect.extend({
             received
           )} to match points ${this.utils.printExpected(
             argument
-          )} at [${unequalIndices}]`,
+          )} at [${unequalIndices.map((i) => i.toString()).join(", ")}]`,
         pass: false
       }
     }

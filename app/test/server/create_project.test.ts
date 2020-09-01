@@ -46,34 +46,34 @@ afterAll(() => {
 // TODO- test that form is loaded correctly
 
 describe("test project.json creation", () => {
-  test("image project creation", () => {
-    return testProjectCreation(
+  test("image project creation", async () => {
+    return await testProjectCreation(
       sampleFormImage,
       sampleProjectImage,
       sampleFormFileData
     )
   })
 
-  test("video project creation", () => {
-    return testProjectCreation(
+  test("video project creation", async () => {
+    return await testProjectCreation(
       sampleFormVideo,
       sampleProjectVideo,
       sampleVideoFormFileData
     )
   })
 
-  test("image project saving", () => {
-    return testProjectSaving(sampleProjectImage)
+  test("image project saving", async () => {
+    return await testProjectSaving(sampleProjectImage)
   })
 
-  test("video project saving", () => {
-    return testProjectSaving(sampleProjectVideo)
+  test("video project saving", async () => {
+    return await testProjectSaving(sampleProjectVideo)
   })
 })
 
 describe("test task.json creation", () => {
-  test("task non-tracking creation", () => {
-    return createTasks(sampleProjectImage).then((tasks) => {
+  test("task non-tracking creation", async () => {
+    return await createTasks(sampleProjectImage).then((tasks) => {
       expect(tasks).toEqual(sampleTasksImage)
     })
   })
@@ -84,14 +84,14 @@ describe("test task.json creation", () => {
   //     expect(tasks).toEqual(sampleTasksVideo)
   //   })
   // })
-  test("task saving", () => {
-    return testTaskSaving(sampleTasksImage)
+  test("task saving", async () => {
+    return await testTaskSaving(sampleTasksImage)
   })
 })
 
 describe("create with auto labels", () => {
-  test("import then export", () => {
-    return createTasks(sampleProjectAutolabel).then((tasks) => {
+  test("import then export", async () => {
+    return await createTasks(sampleProjectAutolabel).then((tasks) => {
       // Only 1 task should be created
       const state: Partial<State> = {
         task: tasks[0]
@@ -100,8 +100,8 @@ describe("create with auto labels", () => {
       expect(exportedItems).toEqual(sampleStateExportImage)
     })
   })
-  test("import then export for polygon", () => {
-    return createTasks(sampleProjectAutolabelPolygon).then((tasks) => {
+  test("import then export for polygon", async () => {
+    return await createTasks(sampleProjectAutolabelPolygon).then((tasks) => {
       // Only 1 task should be created
       const state: Partial<State> = {
         task: tasks[0]

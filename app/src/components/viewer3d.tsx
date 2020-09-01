@@ -50,7 +50,7 @@ export interface Props extends ViewerProps {
 
 /** Conditionally wrap box with bottom border */
 function underlineElement(
-  element: React.ReactElement, 
+  element: React.ReactElement,
   underline?: boolean
 ): React.ReactElement {
   if (underline) {
@@ -154,7 +154,7 @@ class Viewer3D extends DrawableViewer<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents(): Array<React.ReactElement> {
+  protected getDrawableComponents(): React.ReactElement[] {
     const views: React.ReactElement[] = []
     if (this._viewerConfig) {
       views.push(
@@ -188,7 +188,7 @@ class Viewer3D extends DrawableViewer<Props> {
   }
 
   /** Return menu buttons */
-  protected getMenuComponents(): [] | Array<JSX.Element> {
+  protected getMenuComponents(): [] | JSX.Element[] {
     if (this._viewerConfig) {
       const config = this._viewerConfig as PointCloudViewerConfigType
       const yLockButton = (
@@ -584,7 +584,7 @@ class Viewer3D extends DrawableViewer<Props> {
    * @param mX
    * @param mY
    */
-  private convertMouseToNDC(mX: number, mY: number): Array<number> {
+  private convertMouseToNDC(mX: number, mY: number): number[] {
     if (this._container) {
       let x = mX / this._container.offsetWidth
       let y = mY / this._container.offsetHeight

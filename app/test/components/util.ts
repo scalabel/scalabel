@@ -8,7 +8,7 @@ import { DeepPartialState } from "../../src/types/state"
 /**
  * Reset the session for testing
  */
-export function setupTestStore(state: DeepPartialState) {
+export function setupTestStore(state: DeepPartialState): void {
   Session.store = configureStore({})
   setupSession(state, "", false)
 }
@@ -19,7 +19,7 @@ export function setupTestStore(state: DeepPartialState) {
 export function setupTestStoreWithMiddleware(
   state: DeepPartialState,
   synchronizer: Synchronizer
-) {
+): void {
   const syncMiddleware = makeSyncMiddleware(synchronizer)
 
   Session.store = configureStore({}, false, syncMiddleware)

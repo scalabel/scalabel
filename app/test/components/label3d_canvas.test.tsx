@@ -28,8 +28,6 @@ jest.mock("three", () => {
   return {
     ...three,
     WebGLRenderer: class WebGlRenderer {
-      constructor(_params: THREE.WebGLRendererParameters) {}
-
       /** Mock render */
       public render(): void {}
 
@@ -119,7 +117,7 @@ function setUpLabel3dCanvas(paneId: number = 0): Label3dCanvas {
   expect(canvasRef.current).not.toBeNull()
   expect(canvasRef.current).not.toBeUndefined()
 
-  if (canvasRef.current) {
+  if (canvasRef.current !== null) {
     return canvasRef.current
   }
 
@@ -128,11 +126,14 @@ function setUpLabel3dCanvas(paneId: number = 0): Label3dCanvas {
 
 /** Create mouse down event */
 function mouseEvent(x: number, y: number): React.MouseEvent<HTMLCanvasElement> {
-  return {
+  // TODO: check whether we can remove this type cast
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const event: React.MouseEvent<HTMLCanvasElement> = {
     clientX: x,
     clientY: y,
     stopPropagation: () => {}
   } as React.MouseEvent<HTMLCanvasElement>
+  return event
 }
 
 test("Add 3d bbox", () => {

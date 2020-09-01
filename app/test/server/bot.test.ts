@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios"
+import axios from "axios"
 import io from "socket.io-client"
 import { configureStore } from "../../src/common/configure_store"
 import { uid } from "../../src/common/uid"
@@ -29,20 +29,18 @@ import {
 jest.mock("axios")
 axios.post = jest
   .fn()
-  .mockImplementation(
-    (_endpoint: string, data: ItemExport[], _config: AxiosRequestConfig) => {
-      const points = []
-      for (const _ of data) {
-        points.push(getRandomModelPoly())
-      }
-      return {
-        status: 200,
-        data: {
-          points
-        }
+  .mockImplementation((_endpoint: string, data: ItemExport[]) => {
+    const points = []
+    for (const _d of data) {
+      points.push(getRandomModelPoly())
+    }
+    return {
+      status: 200,
+      data: {
+        points
       }
     }
-  )
+  })
 
 let botData: BotData
 const socketEmit = jest.fn()
@@ -183,7 +181,7 @@ describe("Test bot send-ack loop", () => {
 /**
  * Creates the bot and initializes its store using the register handler
  */
-function setUpBot() {
+function setUpBot(): Bot {
   const bot = new Bot(botData, host, port)
   bot.registerAckHandler(initialState)
   return bot
@@ -197,7 +195,7 @@ function updateExpectedStore(
   store: ReduxStore,
   message: SyncActionMessageType,
   botActions: AddLabelsAction[]
-) {
+): void {
   // Apply incoming actions
   for (const action of message.actions.actions) {
     store.dispatch(action)
@@ -210,7 +208,7 @@ function updateExpectedStore(
 /**
  * Helper function for checking that correct connection message was sent
  */
-function checkConnectMessage(sessId: string) {
+function checkConnectMessage(sessId: string): void {
   const expectedMessage: RegisterMessageType = {
     projectName: botData.projectName,
     taskIndex: botData.taskIndex,

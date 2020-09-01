@@ -33,14 +33,14 @@ beforeAll(async () => {
  * Get relative project directory in the storage
  * @param projectName
  */
-function getProjectDir(name: string) {
+function getProjectDir(name: string): string {
   return `${StorageStructure.PROJECT}/${name}`
 }
 
 /**
  * Check wether the path exist on s3
  */
-async function pathExists(key: string) {
+async function pathExists(key: string): Promise<boolean> {
   const params = {
     Bucket: bucketName,
     Key: key
@@ -65,8 +65,8 @@ describe("test s3 storage", () => {
     }
   })
 
-  test("key existence", () => {
-    return Promise.all([
+  test("key existence", async () => {
+    return await Promise.all([
       checkTaskKey(0, true),
       checkTaskKey(1, true),
       checkTaskKey(2, false),
@@ -94,10 +94,10 @@ describe("test s3 storage", () => {
     ])
   })
 
-  test("load", () => {
+  test("load", async () => {
     const taskId = index2str(0)
     const key = getTaskKey(projectName, taskId)
-    return storage.load(key).then((data: string) => {
+    return await storage.load(key).then((data: string) => {
       const loadedData = JSON.parse(data)
       expect(loadedData.testField).toBe("testValue")
     })
@@ -111,12 +111,12 @@ describe("test s3 storage", () => {
     })
   })
 
-  test("save then load", () => {
+  test("save then load", async () => {
     const taskId = index2str(2)
     const key = getTaskKey(projectName, taskId)
     const fakeData = '{"testField": "testValue2"}'
-    return storage.save(key, fakeData).then(() => {
-      return Promise.all([
+    return await storage.save(key, fakeData).then(async () => {
+      return await Promise.all([
         checkTaskKey(2, true),
         checkTaskKey(3, false),
         checkLoad(2)
@@ -124,13 +124,13 @@ describe("test s3 storage", () => {
     })
   })
 
-  test("multiple saves multiple loads", () => {
+  test("multiple saves multiple loads", async () => {
     const checkPromises = []
     for (let i = 3; i < 7; i++) {
       checkPromises.push(checkTaskKey(i, false))
     }
 
-    return Promise.all(checkPromises).then(() => {
+    return await Promise.all(checkPromises).then(async () => {
       const savePromises = []
       for (let i = 3; i < 7; i++) {
         savePromises.push(
@@ -142,7 +142,7 @@ describe("test s3 storage", () => {
       }
       savePromises.push(storage.save("fakeFile", `fake content`))
 
-      return Promise.all(savePromises).then(() => {
+      return await Promise.all(savePromises).then(async () => {
         const loadPromises = []
         for (let j = 3; j < 7; j++) {
           loadPromises.push(checkTaskKey(j, true))
@@ -158,15 +158,19 @@ describe("test s3 storage", () => {
     })
   })
 
-  test("delete", () => {
+  test("delete", async () => {
     const key = getProjectDir(`${projectName}/tasks`)
-    return Promise.all([checkTaskKey(1, true), checkTaskKey(0, true)]).then(
-      () => {
-        return storage.delete(key).then(() => {
-          return Promise.all([checkTaskKey(1, false), checkTaskKey(0, false)])
-        })
-      }
-    )
+    return await Promise.all([
+      checkTaskKey(1, true),
+      checkTaskKey(0, true)
+    ]).then(async () => {
+      return await storage.delete(key).then(async () => {
+        return await Promise.all([
+          checkTaskKey(1, false),
+          checkTaskKey(0, false)
+        ])
+      })
+    })
   })
 
   /**
@@ -214,10 +218,13 @@ afterAll(async () => {
 /**
  * tests if task with index exists
  */
-function checkTaskKey(index: number, shouldExist: boolean): Promise<void> {
+async function checkTaskKey(
+  index: number,
+  shouldExist: boolean
+): Promise<void> {
   const taskId = index2str(index)
   const key = getTaskKey(projectName, taskId)
-  return storage.hasKey(key).then((exists) => {
+  return await storage.hasKey(key).then((exists) => {
     expect(exists).toBe(shouldExist)
   })
 }
@@ -225,9 +232,9 @@ function checkTaskKey(index: number, shouldExist: boolean): Promise<void> {
 /**
  * tests if project key exists
  */
-function checkProjectKey(): Promise<void> {
+async function checkProjectKey(): Promise<void> {
   const key = getProjectKey(projectName)
-  return storage.hasKey(key).then((exists) => {
+  return await storage.hasKey(key).then((exists) => {
     expect(exists).toBe(true)
   })
 }
@@ -235,8 +242,8 @@ function checkProjectKey(): Promise<void> {
 /**
  * tests if load on an index works
  */
-function checkLoad(index: number): Promise<void> {
-  return storage
+async function checkLoad(index: number): Promise<void> {
+  return await storage
     .load(getTaskKey(projectName, index2str(index)))
     .then((data: string) => {
       const loadedData = JSON.parse(data)

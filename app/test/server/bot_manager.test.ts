@@ -1,4 +1,3 @@
-import _ from "lodash"
 import { BotManager } from "../../src/server/bot_manager"
 import { getRedisBotKey } from "../../src/server/path"
 import { RedisClient } from "../../src/server/redis_client"

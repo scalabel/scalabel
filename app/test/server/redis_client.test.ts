@@ -16,12 +16,8 @@ describe("Test that redis clients catch errors", () => {
   test("Test connecting to non-existent redis server", async () => {
     const config = getTestConfig()
     config.redis.port = 6385
-    try {
-      const failClient = new RedisClient(config.redis)
-      await failClient.close()
-    } catch (e) {
-      throw e
-    }
+    const failClient = new RedisClient(config.redis)
+    await failClient.close()
   })
 })
 

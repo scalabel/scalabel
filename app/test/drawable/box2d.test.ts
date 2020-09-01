@@ -46,7 +46,7 @@ test("Add new valid drawable", () => {
   const label2dlist = new Label2DList()
   const label = makeDrawableLabel2D(label2dlist, "box2d", {})
   expect(label).not.toBeNull()
-  if (label) {
+  if (label !== null) {
     label.initTemp(state, new Vector2D(10, 10))
     // New labels can ignore selected or highlighted property
     // _handleIndex is actually not used, put a random
@@ -76,7 +76,7 @@ test("Add new invalid drawable", () => {
   const label2dlist = new Label2DList()
   const label = makeDrawableLabel2D(label2dlist, "box2d", {})
   expect(label).not.toBeNull()
-  if (label) {
+  if (label !== null) {
     label.initTemp(state, new Vector2D(10, 10))
     label.onMouseDown(new Vector2D(10, 10), 1)
     // Mouse move is essential
