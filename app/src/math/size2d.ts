@@ -4,6 +4,7 @@ import { Vector } from "./vector"
 export class Size2D extends Vector {
   /**
    * Constructor
+   *
    * @param w
    * @param h
    */

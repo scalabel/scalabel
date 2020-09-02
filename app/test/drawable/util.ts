@@ -11,11 +11,15 @@ import { LabelCollector } from "../util/label_collector"
 
 /**
  * Create a polygon by clicking at each point in sequence
+ *
  * @param label2dHandler
  * @param canvasSize
  * @param points: the input vertices
  * @param interrupt: add an interrupt saving action
  * @param valid: whether the polygon is valid
+ * @param points
+ * @param interrupt
+ * @param valid
  */
 export function drawPolygon(
   label2dHandler: Label2DHandler,
@@ -50,11 +54,15 @@ export function drawPolygon(
 
 /**
  * Create a polygon by dragging between each pair of subsequent points
+ *
  * @param label2dHandler
  * @param canvasSize
  * @param points: the input vertices
  * @param interrupt: add an interrupt saving action
  * @param valid: whether the polygon is valid
+ * @param points
+ * @param interrupt
+ * @param valid
  */
 export function drawPolygonByDragging(
   label2dHandler: Label2DHandler,
@@ -104,9 +112,16 @@ export function drawPolygonByDragging(
 
 /**
  * Make mouse movements to do some 2d box operation
+ *
  * @param coords: coords for starting and ending clicks
  * @param labelIndex: if not -1, specifies changing an existing label
  * @param interrupt: if enabled, interrupt the operation with another action
+ * @param label2dHandler
+ * @param canvasSize
+ * @param coords
+ * @param labelIndex
+ * @param handleIndex
+ * @param interrupt
  */
 function doBox2DOperation(
   label2dHandler: Label2DHandler,
@@ -147,7 +162,12 @@ function doBox2DOperation(
 
 /**
  * Make mouse movements to add the 2D box
+ *
  * @param coords: the coordinates of the new box
+ * @param label2dHandler
+ * @param canvasSize
+ * @param coords
+ * @param interrupt
  */
 export function drawBox2D(
   label2dHandler: Label2DHandler,
@@ -165,8 +185,14 @@ export function drawBox2D(
 
 /**
  * Make mouse movements to resize the 2D box
+ *
  * @param coords: x1/y1 is the existing point, x2/y2 is the new point
  * @param labelIndex: the index of the label to move
+ * @param label2dHandler
+ * @param canvasSize
+ * @param coords
+ * @param labelIndex
+ * @param interrupt
  */
 export function resizeBox2D(
   label2dHandler: Label2DHandler,
@@ -187,8 +213,14 @@ export function resizeBox2D(
 
 /**
  * Make mouse movements to move the 2D box
+ *
  * @param coords: x1/y1 is the existing point, x2/y2 is the new point
  * @param labelIndex: the index of the label to move
+ * @param label2dHandler
+ * @param canvasSize
+ * @param coords
+ * @param labelIndex
+ * @param interrupt
  */
 export function moveBox2D(
   label2dHandler: Label2DHandler,
@@ -203,6 +235,7 @@ export function moveBox2D(
 
 /**
  * Driver function for mouse move
+ *
  * @param label2d
  * @param x
  * @param y
@@ -223,6 +256,7 @@ export function mouseMove(
 
 /**
  * Driver function for mouse down
+ *
  * @param label2d
  * @param x
  * @param y
@@ -241,6 +275,7 @@ export function mouseDown(
 
 /**
  * Driver function for mouse up
+ *
  * @param label2d
  * @param x
  * @param y
@@ -259,6 +294,7 @@ export function mouseUp(
 
 /**
  * Driver function for mouse click
+ *
  * @param label2d
  * @param x
  * @param y
@@ -278,6 +314,7 @@ export function mouseClick(
 
 /**
  * Driver function for mouse move and click
+ *
  * @param label2d
  * @param x
  * @param y
@@ -299,6 +336,7 @@ export function mouseMoveClick(
 
 /**
  * Driver function for key down
+ *
  * @param label2d
  * @param key
  */
@@ -308,6 +346,7 @@ export function keyDown(label2d: Label2DHandler, key: string): void {
 
 /**
  * Driver function for key up
+ *
  * @param label2d
  * @param key
  */
@@ -317,6 +356,7 @@ export function keyUp(label2d: Label2DHandler, key: string): void {
 
 /**
  * Driver function for key click
+ *
  * @param label2d
  * @param key
  */

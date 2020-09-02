@@ -149,7 +149,11 @@ async function checkFileWritten(): Promise<void> {
   await checkFileCount()
 }
 
-/** Makes some dummy metadata */
+/**
+ * Makes some dummy metadata
+ *
+ * @param taskIndex
+ */
 function makeMetadata(taskIndex: number): string {
   const metadata: StateMetadata = {
     projectName: "project",

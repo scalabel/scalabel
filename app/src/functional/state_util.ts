@@ -13,8 +13,9 @@ import { makeItem } from "./states"
 
 /**
  * Get the current item from state
+ *
  * @param {State} state
- * @return {ItemType}: If no item is selected, return a new item with id -1
+ * @returns {ItemType}: If no item is selected, return a new item with id -1
  */
 export function getCurrentItem(state: State): ItemType {
   if (state.user.select.item < 0) {
@@ -26,6 +27,7 @@ export function getCurrentItem(state: State): ItemType {
 
 /**
  * Get the number of labels on the item
+ *
  * @param state
  * @param itemIndex
  */
@@ -35,6 +37,7 @@ export function getNumLabels(state: State, itemIndex: number): number {
 
 /**
  * Get the number of shapes on the item
+ *
  * @param state
  * @param itemIndex
  */
@@ -44,8 +47,10 @@ export function getNumShapes(state: State, itemIndex: number): number {
 
 /**
  * Get the track with the specified id
+ *
  * @param state
  * @param trackIndex
+ * @param trackId
  */
 export function getTrack(state: State, trackId: string): TrackType {
   return state.task.tracks[trackId]
@@ -53,6 +58,7 @@ export function getTrack(state: State, trackId: string): TrackType {
 
 /**
  * Get the total number of tracks
+ *
  * @param state
  */
 export function getNumTracks(state: State): number {
@@ -61,6 +67,7 @@ export function getNumTracks(state: State): number {
 
 /**
  * Get the total number of items
+ *
  * @param state
  */
 export function getNumItems(state: State): number {
@@ -69,6 +76,7 @@ export function getNumItems(state: State): number {
 
 /**
  * Get the number of labels associated with the track
+ *
  * @param track
  */
 export function getNumLabelsForTrack(track: TrackType): number {
@@ -77,6 +85,7 @@ export function getNumLabelsForTrack(track: TrackType): number {
 
 /**
  * Get the number of labels for the track with the given id
+ *
  * @param state
  * @param trackId
  */
@@ -87,8 +96,10 @@ export function getNumLabelsForTrackId(state: State, trackId: IdType): number {
 
 /**
  * Get the id of the label in the track at the specified item
+ *
  * @param state
  * @param trackIdx
+ * @param trackId
  * @param itemIdx
  */
 export function getLabelInTrack(
@@ -101,6 +112,7 @@ export function getLabelInTrack(
 
 /**
  * Get all labels that are currently selected
+ *
  * @param state
  */
 export function getSelectedLabels(state: State): { [index: number]: string[] } {
@@ -109,8 +121,10 @@ export function getSelectedLabels(state: State): { [index: number]: string[] } {
 
 /**
  * Get the category of the specified label
+ *
  * @param state
  * @param itemIdx
+ * @param itemIndex
  * @param labelId
  */
 export function getCategory(
@@ -123,6 +137,7 @@ export function getCategory(
 
 /**
  * Get shape from the state
+ *
  * @param state
  * @param itemIndex
  * @param labelId
@@ -141,6 +156,7 @@ export function getShape(
 
 /**
  * Retrieve shapes from the state
+ *
  * @param state
  * @param itemIndex
  * @param labelId
@@ -154,7 +170,13 @@ export function getShapes(
   return item.labels[labelId].shapes.map((s) => item.shapes[s])
 }
 
-/** Check if frame is loaded */
+/**
+ * Check if frame is loaded
+ *
+ * @param state
+ * @param item
+ * @param sensor
+ */
 export function isFrameLoaded(
   state: State,
   item: number,
@@ -163,13 +185,19 @@ export function isFrameLoaded(
   return state.session.itemStatuses[item].sensorDataLoaded[sensor]
 }
 
-/** Check if current frame is loaded */
+/**
+ * Check if current frame is loaded
+ *
+ * @param state
+ * @param sensor
+ */
 export function isCurrentFrameLoaded(state: State, sensor: number): boolean {
   return isFrameLoaded(state, state.user.select.item, sensor)
 }
 
 /**
  * Check whether item is loaded
+ *
  * @param state
  * @param item
  */
@@ -187,8 +215,9 @@ export function isItemLoaded(state: State, item: number): boolean {
 
 /**
  * Check whether the current item is loaded
+ *
  * @param {State} state
- * @return boolean
+ * @returns boolean
  */
 export function isCurrentItemLoaded(state: State): boolean {
   return isItemLoaded(state, state.user.select.item)
@@ -196,6 +225,7 @@ export function isCurrentItemLoaded(state: State): boolean {
 
 /**
  * Get config associated with viewer id
+ *
  * @param state
  * @param viewerId
  */
@@ -212,6 +242,8 @@ export function getCurrentViewerConfig(
 /**
  * Get the tracks and ids of all selected tracks
  * Selected tracks can be in the same item, or different items (linking)
+ *
+ * @param state
  */
 export function getSelectedTracks(state: State): TrackType[] {
   const selectedLabels = getSelectedLabels(state)

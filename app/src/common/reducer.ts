@@ -7,6 +7,7 @@ import { State } from "../types/state"
 
 /**
  * Process one action
+ *
  * @param state
  * @param action
  */
@@ -89,9 +90,10 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
 
 /**
  * Reducer
+ *
  * @param {State} currentState
  * @param {AnyAction} action
- * @return {State}
+ * @returns {State}
  */
 export const reducer: Reducer<State> = (
   currentState: State | undefined,

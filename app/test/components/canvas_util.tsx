@@ -9,7 +9,12 @@ import { IdType } from "../../src/types/state"
 import { LabelCollector } from "../util/label_collector"
 import { TrackCollector } from "../util/track_collector"
 
-/** Create mouse down event */
+/**
+ * Create mouse down event
+ *
+ * @param x
+ * @param y
+ */
 function mouseDownEvent(
   x: number,
   y: number
@@ -20,7 +25,12 @@ function mouseDownEvent(
   }) as unknown) as React.MouseEvent<HTMLCanvasElement>
 }
 
-/** Create mouse down event */
+/**
+ * Create mouse down event
+ *
+ * @param x
+ * @param y
+ */
 function mouseUpEvent(
   x: number,
   y: number
@@ -31,7 +41,12 @@ function mouseUpEvent(
   }) as unknown) as React.MouseEvent<HTMLCanvasElement>
 }
 
-/** Create mouse down event */
+/**
+ * Create mouse down event
+ *
+ * @param x
+ * @param y
+ */
 function mouseMoveEvent(
   x: number,
   y: number
@@ -44,6 +59,7 @@ function mouseMoveEvent(
 
 /**
  * Move mouse wrapper
+ *
  * @param label2d
  * @param x
  * @param y
@@ -54,6 +70,7 @@ export function mouseMove(label2d: Label2dCanvas, x: number, y: number): void {
 
 /**
  * Mouse down wrapper
+ *
  * @param label2d
  * @param x
  * @param y
@@ -64,6 +81,7 @@ export function mouseDown(label2d: Label2dCanvas, x: number, y: number): void {
 
 /**
  * Mouse up wrapper
+ *
  * @param label2d
  * @param x
  * @param y
@@ -74,6 +92,7 @@ export function mouseUp(label2d: Label2dCanvas, x: number, y: number): void {
 
 /**
  * Test driver function for mouse click
+ *
  * @param label2d
  * @param x
  * @param y
@@ -85,6 +104,7 @@ export function mouseClick(label2d: Label2dCanvas, x: number, y: number): void {
 
 /**
  * Test driver function for mouse move and click
+ *
  * @param label2d
  * @param x
  * @param y
@@ -100,6 +120,7 @@ export function mouseMoveClick(
 
 /**
  * Driver to press the key
+ *
  * @param label2d
  * @param key
  */
@@ -109,6 +130,7 @@ export function keyDown(label2d: Label2dCanvas, key: string): void {
 
 /**
  * Driver to release the key
+ *
  * @param label2d
  * @param key
  */
@@ -118,6 +140,7 @@ export function keyUp(label2d: Label2dCanvas, key: string): void {
 
 /**
  * Test driver to draw a polygon on label2d canvas
+ *
  * @param label2d
  * @param points
  */
@@ -128,6 +151,7 @@ export function drawPolygon(label2d: Label2dCanvas, points: number[][]): void {
 
 /**
  * Drag from point to point
+ *
  * @param label2d
  * @param x1
  * @param y1
@@ -151,6 +175,7 @@ export function drag(
 
 /**
  * Test driver to draw a box
+ *
  * @param label2d
  * @param getState state accessor. it can be null, where the return vaule is ''
  * @param x1
@@ -182,8 +207,10 @@ export function drawBox2D(
 
 /**
  * Draw a sequences of bounding box 2D tracks
+ *
  * @param label2d 2d canvas
  * @param state state store
+ * @param store
  * @param itemIndices the item indices of those boses
  * @param boxes corners coordinates in [x1, y1, x2, y2] for each box
  */
@@ -204,7 +231,15 @@ export function drawBox2DTracks(
   return trackIds
 }
 
-/** Set up component for testing */
+/**
+ * Set up component for testing
+ *
+ * @param dispatch
+ * @param canvasRef
+ * @param width
+ * @param height
+ * @param tracking
+ */
 export function setUpLabel2dCanvas(
   dispatch: (action: ActionType) => void,
   canvasRef: React.RefObject<Label2dCanvas>,

@@ -20,6 +20,7 @@ import { handleInvalidPage } from "./util"
 
 /**
  * Main function for initiating the frontend session
+ *
  * @param {string} containerName - the name of the container
  */
 export function initSession(containerName: string): void {
@@ -51,6 +52,12 @@ export function initSession(containerName: string): void {
 
 /**
  * Initializes a frontend session given the task's identifying information
+ *
+ * @param taskIndex
+ * @param projectName
+ * @param userId
+ * @param containerName
+ * @param devMode
  */
 export function initSessionForTask(
   taskIndex: number,
@@ -89,6 +96,9 @@ export function initSessionForTask(
 
 /**
  * Connect socket events to Redux actions
+ *
+ * @param store
+ * @param socket
  */
 export function setSocketListeners(
   store: FullStore,
@@ -110,6 +120,8 @@ export function setSocketListeners(
 
 /**
  * Set listeners for the HTML body
+ *
+ * @param store
  */
 function setBodyListeners(store: FullStore): void {
   const body = document.getElementsByTagName("BODY") as HTMLCollectionOf<

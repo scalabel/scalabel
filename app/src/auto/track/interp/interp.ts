@@ -8,6 +8,7 @@ import { LabelType, ShapeType } from "../../../types/state"
 
 /**
  * Assign shape content from src to target and return the new shape
+ *
  * @param src
  * @param target
  */
@@ -21,6 +22,9 @@ function assignShape(src: ShapeType, target: ShapeType): ShapeType {
 
 /**
  * Propagate shape to shapes
+ *
+ * @param start
+ * @param end
  * @param shape
  * @param shapes
  */
@@ -47,6 +51,7 @@ export function assignShapesInRange(
 /**
  * Get the manual label before and after label in labels.
  * Assuming labels are sorted by item index.
+ *
  * @param targetLabel
  * @param labels
  */
@@ -84,10 +89,13 @@ export class TrackInterp {
    * reference is also kept.
    * In the future, we may change this function to async for model-assisted
    * interpolation.
+   *
    * @param newLabel
    * @param newShape
    * @param labels
    * @param shapes
+   * @param allLabels
+   * @param allShapes
    */
   public interp(
     newLabel: LabelType,

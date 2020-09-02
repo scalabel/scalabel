@@ -4,10 +4,12 @@ import { HttpException } from "../exception"
 
 /**
  * Error handler
+ *
  * @param {Error} err - error
  * @param {Request} req - request object
  * @param {Response} res - response object
  * @param {NextFunction} next - next function
+ * @param config
  */
 const errorHandler = (config: ServerConfig) => (
   error: HttpException,

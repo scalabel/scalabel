@@ -7,6 +7,11 @@ import { Synchronizer } from "./synchronizer"
 
 /**
  * Handle actions that trigger a backend interaction instead of a state update
+ *
+ * @param action
+ * @param synchronizer
+ * @param state
+ * @param dispatch
  */
 function handleSyncAction(
   action: actionTypes.BaseAction,
@@ -46,6 +51,11 @@ function handleSyncAction(
 
 /**
  * Store normal user actions for saving, either now (auto) or later (manual)
+ *
+ * @param action
+ * @param synchronizer
+ * @param state
+ * @param dispatch
  */
 function handleNormalAction(
   action: actionTypes.BaseAction,

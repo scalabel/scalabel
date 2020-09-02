@@ -27,6 +27,11 @@ import { makeStorage } from "./util"
 
 /**
  * Sets up http handlers
+ *
+ * @param config
+ * @param app
+ * @param projectStore
+ * @param userManager
  */
 function startHTTPServer(
   config: ServerConfig,
@@ -109,6 +114,8 @@ function startHTTPServer(
 /**
  * Make a publisher or subscriber for redis
  * Subscribers can't take other actions, so separate clients for pub and sub
+ *
+ * @param config
  */
 function makeRedisPubSub(config: ServerConfig): RedisPubSub {
   const client = new RedisClient(config.redis)
@@ -117,6 +124,10 @@ function makeRedisPubSub(config: ServerConfig): RedisPubSub {
 
 /**
  * Starts a bot manager if config says to
+ *
+ * @param config
+ * @param subscriber
+ * @param cacheClient
  */
 async function makeBotManager(
   config: ServerConfig,
@@ -131,6 +142,8 @@ async function makeBotManager(
 
 /**
  * Launch the redis server
+ *
+ * @param config
  */
 async function launchRedisServer(config: ServerConfig): Promise<void> {
   let redisDir = "./"
@@ -160,6 +173,11 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
 
 /**
  * Start HTTP and socket io servers
+ *
+ * @param config
+ * @param projectStore
+ * @param userManager
+ * @param publisher
  */
 async function startServers(
   config: ServerConfig,
@@ -184,6 +202,7 @@ async function startServers(
 
 /**
  * Check wether there is legacy project folders in storage
+ *
  * @param storage
  */
 async function checkLegacyProjectFolders(storage: Storage): Promise<void> {

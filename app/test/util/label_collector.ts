@@ -11,6 +11,7 @@ export class LabelCollector extends Array<IdType> {
 
   /**
    * Constructor
+   *
    * @param getState
    */
   constructor(getState: GetStateFunc) {

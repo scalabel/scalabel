@@ -116,6 +116,9 @@ test("delete", async () => {
 
 /**
  * tests if task with index exists
+ *
+ * @param index
+ * @param shouldExist
  */
 async function checkTaskKey(
   index: number,
@@ -138,6 +141,8 @@ async function checkProjectKey(): Promise<void> {
 
 /**
  * tests if load on an index works
+ *
+ * @param index
  */
 async function checkLoad(index: number): Promise<void> {
   const data = await storage.load(getTaskKey(projectName, index2str(index)))

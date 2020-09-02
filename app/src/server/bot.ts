@@ -53,6 +53,7 @@ export class Bot {
   private actionCount: number
 
   /**
+   * Constructor
    *
    * @param botData
    * @param botHost
@@ -118,6 +119,8 @@ export class Bot {
   /**
    * Called when backend sends ack of registration of this session
    * Initialized synced state
+   *
+   * @param syncState
    */
   public registerAckHandler(syncState: State): void {
     this.store = configureStore(syncState)
@@ -126,6 +129,8 @@ export class Bot {
   /**
    * Called when backend sends ack for actions that were sent to be synced
    * Simply logs these actions for now
+   *
+   * @param message
    */
   public async actionBroadcastHandler(
     message: SyncActionMessageType
@@ -164,6 +169,9 @@ export class Bot {
 
   /**
    * Broadcast the synthetically generated actions
+   *
+   * @param actions
+   * @param triggerId
    */
   public broadcastActions(actions: AddLabelsAction[], triggerId: string): void {
     const actionPacket: ActionPacketType = {
@@ -223,6 +231,8 @@ export class Bot {
 
   /**
    * Group the queries by their endpoints
+   *
+   * @param queries
    */
   private groupQueriesByEndpoint(
     queries: ModelQuery[]
@@ -240,6 +250,8 @@ export class Bot {
   /**
    * Execute queries and get the resulting actions
    * Batches the queries for each endpoint
+   *
+   * @param queries
    */
   private async executeQueries(
     queries: ModelQuery[]
@@ -286,6 +298,8 @@ export class Bot {
 
   /**
    * Compute queries for the actions in the packet
+   *
+   * @param packet
    */
   private packetToQueries(packet: ActionPacketType): ModelQuery[] {
     const queries: ModelQuery[] = []
@@ -311,6 +325,9 @@ export class Bot {
   /**
    * Generate BDD data format item corresponding to the action
    * Only handles box2d/polygon2d actions, so assume a single label/shape/item
+   *
+   * @param state
+   * @param action
    */
   private actionToQuery(
     state: State,

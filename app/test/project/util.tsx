@@ -57,6 +57,7 @@ export let testConfig: TestConfig = {
 
 /**
  * changes current test config to newConfig
+ *
  * @param newConfig
  */
 export function changeTestConfig(newConfig: Partial<TestConfig>): void {
@@ -68,7 +69,9 @@ export function changeTestConfig(newConfig: Partial<TestConfig>): void {
 
 /**
  * helper function to get example file from disc
+ *
  * @param filename
+ * @param examplePath
  */
 function getExampleFileFromDisc(
   filename: string,
@@ -106,6 +109,7 @@ export function getProjectJsonFromDisc(): void {
 
 /**
  * deep deletes timestamp from given data
+ *
  * @param data
  */
 export function deepDeleteTimestamp(data: ItemExport[]): unknown[] {
@@ -120,6 +124,7 @@ export function deepDeleteTimestamp(data: ItemExport[]): unknown[] {
 
 /**
  * helper function to force javascript to sleep
+ *
  * @param milliseconds
  */
 export async function sleep(milliseconds: number): Promise<void> {
@@ -188,6 +193,8 @@ export function getProjectJson(): unknown {
 
 /**
  * Counts created task/{i}.json file
+ *
+ * @param projectName
  */
 export async function countTasks(projectName: string): Promise<number> {
   const taskDir = path.join(testConfig.testDirPath, getTaskDir(projectName))
@@ -206,6 +213,7 @@ export async function countTasks(projectName: string): Promise<number> {
 class IntegrationCreateForm extends CreateForm {
   /**
    * over writes create form get form data to input files into ajax request
+   *
    * @param event
    */
   protected getFormData(event: ChangeEvent<HTMLFormElement>): FormData {

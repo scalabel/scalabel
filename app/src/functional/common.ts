@@ -40,8 +40,9 @@ import {
 
 /**
  * Initialize session component of state
+ *
  * @param {State} state
- * @return {State}
+ * @returns {State}
  */
 export function initSession(state: State): State {
   // Initialize state
@@ -62,6 +63,7 @@ export function initSession(state: State): State {
 
 /**
  * Update the selected label in user
+ *
  * @param {UserType} user
  * @param {Partial<Select>} pselect partial selection
  */
@@ -72,7 +74,9 @@ function updateUserSelect(user: UserType, pselect: Partial<Select>): UserType {
 
 /**
  * Update the task in state
+ *
  * @param {State} state: current state
+ * @param state
  * @param {actionTypes.UpdateTaskAction} action
  */
 export function updateTask(
@@ -84,7 +88,9 @@ export function updateTask(
 
 /**
  * Override the original state with the new state
+ *
  * @param {State} state: current state
+ * @param state
  * @param {actionTypes.UpdateStateAction} action
  */
 export function updateState(
@@ -97,9 +103,14 @@ export function updateState(
 /**
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
+ *
  * @param {State} state: current state
  * @param {actionTypes.AddLabelAction} action
- * @return {State}
+ * @param state
+ * @param itemIndex
+ * @param label
+ * @param shapes
+ * @returns {State}
  */
 export function addLabel(
   state: State,
@@ -123,9 +134,13 @@ export function addLabel(
 /**
  * Delete parent label. The ids of label will be updated according to
  * the current state.
+ *
  * @param {State} state: current state
  * @param {actionTypes.DeleteLabelAction} action
- * @return {State}
+ * @param state
+ * @param itemIndex
+ * @param labelIds
+ * @returns {State}
  */
 export function deleteLabelsById(
   state: State,
@@ -146,10 +161,12 @@ export function deleteLabelsById(
 
 /**
  * Add news labels to one item
+ *
  * @param item
  * @param taskStatus
  * @param label
  * @param shapeTypes
+ * @param newLabels
  * @param shapes
  */
 function addLabelsToItem(
@@ -192,10 +209,13 @@ function addLabelsToItem(
 
 /**
  * Add labels to multiple items
+ *
  * @param item
+ * @param items
  * @param taskStatus
  * @param newLabels
  * @param shapeTypes
+ * @param labelsToAdd
  * @param shapes
  */
 function addLabelstoItems(
@@ -223,9 +243,11 @@ function addLabelstoItems(
 /**
  * Add new label. The ids of label and shapes will be updated according to
  * the current state.
+ *
  * @param {State} state: current state
+ * @param state
  * @param {actionTypes.AddLabelsAction} action
- * @return {State}
+ * @returns {State}
  */
 export function addLabels(
   state: State,
@@ -267,7 +289,9 @@ export function addLabels(
 
 /**
  * Add one track to task
+ *
  * @param task
+ * @param type
  * @param itemIndices
  * @param labels
  * @param shapeTypes
@@ -300,6 +324,7 @@ function addTrackToTask(
 
 /**
  * Add track action
+ *
  * @param {State} state
  * @param {actionTypes.AddTrackAction} action
  */
@@ -331,6 +356,7 @@ export function addTrack(
 
 /**
  * Merge tracks and items
+ *
  * @param tracks
  * @param items
  */
@@ -367,6 +393,7 @@ function mergeTracksInItems(
 
 /**
  * Merge tracks action
+ *
  * @param state
  * @param action
  */
@@ -386,6 +413,7 @@ export function mergeTracks(
 
 /**
  * update shapes in an item
+ *
  * @param item
  * @param shapeIds
  * @param shapes
@@ -405,6 +433,7 @@ function changeShapesInItem(
 
 /**
  * changes shapes in items
+ *
  * @param items
  * @param shapeIds
  * @param shapes
@@ -423,6 +452,7 @@ function changeShapesInItems(
 
 /**
  * Change shapes action
+ *
  * @param state
  * @param action
  */
@@ -445,8 +475,11 @@ export function changeShapes(
 
 /**
  * Change properties of labels in one item
+ *
  * @param item
  * @param labels
+ * @param labelIds
+ * @param props
  */
 function changeLabelsInItem(
   item: ItemType,
@@ -493,8 +526,11 @@ function changeLabelsInItem(
 
 /**
  * Change properties of labels in one item
+ *
  * @param items
  * @param labels
+ * @param labelIds
+ * @param props
  */
 function changeLabelsInItems(
   items: ItemType[],
@@ -510,6 +546,7 @@ function changeLabelsInItems(
 
 /**
  * Change labels action
+ *
  * @param state
  * @param action
  */
@@ -526,6 +563,7 @@ export function changeLabels(
 
 /**
  * Get the label id of the root of a label by tracing its ancestors
+ *
  * @param item
  * @param labelId
  */
@@ -541,6 +579,7 @@ export function getRootLabelId(item: ItemType, labelId: IdType): string {
 
 /**
  * get all linked label ids from one labelId
+ *
  * @param item
  * @param labelId
  */
@@ -550,6 +589,7 @@ export function getLinkedLabelIds(item: ItemType, labelId: IdType): string[] {
 
 /**
  * get all linked label ids from the root
+ *
  * @param item
  * @param labelId
  */
@@ -571,6 +611,7 @@ function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
 
 /**
  * Get the trackId of the root of a label by tracing its ancestors
+ *
  * @param item
  * @param labelId
  */
@@ -650,6 +691,7 @@ function createParentLabel(
 /**
  * Link labels on the same item
  * The new label properties are the same as label1 in action
+ *
  * @param {State} state
  * @param {actionTypes.LinkLabelsAction} action
  */
@@ -712,6 +754,7 @@ export function linkLabels(
 
 /**
  * Unlink labels on the same item
+ *
  * @param {State} state
  * @param {actionTypes.UnlinkLabelsAction} action
  */
@@ -765,6 +808,7 @@ export function unlinkLabels(
 
 /**
  * Update the user selection
+ *
  * @param {State} state
  * @param {actionTypes.ChangeSelectAction} action
  */
@@ -817,9 +861,10 @@ export function changeSelect(
 
 /**
  * Signify a new item is loaded
+ *
  * @param {State} state
  * @param {actionTypes.LoadItemAction} action
- * @return {State}
+ * @returns {State}
  */
 export function loadItem(
   state: State,
@@ -844,6 +889,7 @@ export function loadItem(
 
 /**
  * Delete labels from one item
+ *
  * @param item
  * @param labelIds
  * @returns new item and the deleted labels
@@ -910,7 +956,9 @@ function deleteLabelsFromItem(
 
 /**
  * Delete labels from one item
+ *
  * @param item
+ * @param items
  * @param labelIds
  */
 function deleteLabelsFromItems(
@@ -929,6 +977,7 @@ function deleteLabelsFromItems(
 
 /**
  * Delete labels from tracks
+ *
  * @param tracks
  * @param labels
  */
@@ -967,6 +1016,7 @@ function deleteLabelsFromTracks(
 
 /**
  * Delete labels action
+ *
  * @param state
  * @param action
  */
@@ -1012,10 +1062,11 @@ export function deleteLabels(
 
 /**
  * assign Attribute to a label
+ *
  * @param {State} state
  * @param {number} _labelId
  * @param {object} _attributeOptions
- * @return {State}
+ * @returns {State}
  */
 export function changeAttribute(state: State): State {
   return state
@@ -1023,8 +1074,9 @@ export function changeAttribute(state: State): State {
 
 /**
  * Notify all the subscribers to update. it is an no-op now.
+ *
  * @param {State} state
- * @return {State}
+ * @returns {State}
  */
 export function updateAll(state: State): State {
   return state
@@ -1032,6 +1084,7 @@ export function updateAll(state: State): State {
 
 /**
  * Add new viewer config to state
+ *
  * @param state
  * @param action
  */
@@ -1047,7 +1100,12 @@ export function addViewerConfig(
   return updateObject(state, { user: newUser })
 }
 
-/** Handle different synchronization modes for different viewer configs */
+/**
+ * Handle different synchronization modes for different viewer configs
+ *
+ * @param modifiedConfig
+ * @param config
+ */
 function handleViewerSynchronization(
   modifiedConfig: Readonly<ViewerConfigType>,
   config: ViewerConfigType
@@ -1076,6 +1134,7 @@ function handleViewerSynchronization(
 
 /**
  * Update viewer configs in state w/ fields in action
+ *
  * @param state
  * @param action
  */
@@ -1118,6 +1177,8 @@ export function changeViewerConfig(
  * Propagate hidden flag from starting pane upward through the tree
  * A non-leaf pane is hidden iff both of its children are hidden
  * TODO: this is not functional now
+ *
+ * @param paneId
  */
 function propagateHiddenPane(
   paneId: number,
@@ -1137,7 +1198,12 @@ function propagateHiddenPane(
   }
 }
 
-/** Update existing pane */
+/**
+ * Update existing pane
+ *
+ * @param state
+ * @param action
+ */
 export function updatePane(
   state: State,
   action: actionTypes.UpdatePaneAction
@@ -1163,7 +1229,11 @@ export function updatePane(
   })
 }
 
-/** Update children split counts upwards to root */
+/**
+ * Update children split counts upwards to root
+ *
+ * @param paneId
+ */
 function updateSplitCounts(
   paneId: number,
   panes: { [id: number]: PaneType }
@@ -1190,6 +1260,7 @@ function updateSplitCounts(
 
 /**
  * Split existing pane into half
+ *
  * @param state
  * @param action
  */
@@ -1247,7 +1318,12 @@ export function splitPane(
   })
 }
 
-/** delete pane from state */
+/**
+ * delete pane from state
+ *
+ * @param state
+ * @param action
+ */
 export function deletePane(
   state: State,
   action: actionTypes.DeletePaneAction
@@ -1325,7 +1401,12 @@ export function deletePane(
   })
 }
 
-/** adds a new submission */
+/**
+ * adds a new submission
+ *
+ * @param state
+ * @param action
+ */
 export function submit(state: State, action: actionTypes.SubmitAction): State {
   const submissions = [
     ...state.task.progress.submissions,
@@ -1344,6 +1425,7 @@ export function submit(state: State, action: actionTypes.SubmitAction): State {
 
 /**
  * Start to link track.
+ *
  * @param state Previous state
  */
 export function startLinkTrack(state: State): State {
@@ -1357,6 +1439,9 @@ export function startLinkTrack(state: State): State {
 
 /**
  * Update session status, if it should be updated
+ *
+ * @param state
+ * @param action
  */
 export function updateSessionStatus(
   state: State,

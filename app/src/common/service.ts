@@ -3,10 +3,11 @@ import Cognito from "./cognito"
 
 /**
  * This function post request to backend to retrieve required data to display
+ *
  * @param {string} url
  * @param {string} method
  * @param {boolean} async
- * @return {function} data
+ * @returns {Function} data
  */
 export function requestData<DataType>(
   url: string,
@@ -47,7 +48,8 @@ export function getAuth(): string {
 
 /**
  * This function get request to backend to retrieve users' information
- * @return {string[]} projects
+ *
+ * @returns {string[]} projects
  */
 export function getProjects(): string[] {
   return requestData(Endpoint.GET_PROJECT_NAMES, "get", false)
@@ -69,6 +71,7 @@ export function logout(): void {
 
 /**
  * Redirect user(either admin or worker) to the project's dashboard
+ *
  * @param {string} projectName - the values to convert.
  */
 export function toProject(projectName: string): void {

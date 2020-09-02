@@ -17,6 +17,8 @@ export class S3Storage extends Storage {
 
   /**
    * Constructor
+   *
+   * @param dataPath
    */
   constructor(dataPath: string) {
     // Check s3 data path
@@ -95,7 +97,9 @@ export class S3Storage extends Storage {
 
   /**
    * Check if specified file exists
+   *
    * @param {string} key: relative path of file
+   * @param key
    */
   public async hasKey(key: string): Promise<boolean> {
     const params = {
@@ -113,7 +117,9 @@ export class S3Storage extends Storage {
   /**
    * Lists keys of files at a directory specified by prefix
    * Split by files and directories
+   *
    * @param {string} prefix: relative path of directory
+   * @param prefix
    */
   public async listKeysOrganized(
     prefix: string
@@ -187,8 +193,11 @@ export class S3Storage extends Storage {
 
   /**
    * Lists keys of files at directory specified by prefix
+   *
    * @param {string} prefix: relative path of directory
    * @param {boolean} onlyDir: whether to only return keys that are directories
+   * @param prefix
+   * @param onlyDir
    */
   public async listKeys(
     prefix: string,
@@ -206,8 +215,11 @@ export class S3Storage extends Storage {
 
   /**
    * Saves json to at location specified by key
+   *
    * @param {string} key: relative path of file
    * @param {string} json: data to save
+   * @param key
+   * @param json
    */
   public async save(key: string, json: string): Promise<void> {
     const params = {
@@ -220,7 +232,9 @@ export class S3Storage extends Storage {
 
   /**
    * Loads fields stored at a key
+   *
    * @param {string} key: relative path of file
+   * @param key
    */
   public async load(key: string): Promise<string> {
     const params: AWS.S3.GetObjectRequest = {
@@ -243,7 +257,9 @@ export class S3Storage extends Storage {
 
   /**
    * Deletes values at the key
+   *
    * @param {string} key: relative path of directory
+   * @param key
    */
   public async delete(key: string): Promise<void> {
     const [dirKeys, fileKeys] = await this.listKeysOrganized(key)
@@ -274,6 +290,7 @@ export class S3Storage extends Storage {
 
   /**
    * make an empty folder object on s3
+   *
    * @param key
    */
   public async mkdir(key: string): Promise<void> {

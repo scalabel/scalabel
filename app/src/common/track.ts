@@ -9,7 +9,11 @@ import { makeLabel, makeShape, makeTrack } from "../functional/states"
 import { IdType, LabelType, ShapeType, State, TrackType } from "../types/state"
 export type Label = Label2D | Label3D
 
-/** Convert policy type name to enum */
+/**
+ * Convert policy type name to enum
+ *
+ * @param typeName
+ */
 export function policyFromString(typeName: string): TrackPolicyType {
   switch (typeName) {
     case TrackPolicyType.LINEAR_INTERPOLATION:
@@ -21,7 +25,11 @@ export function policyFromString(typeName: string): TrackPolicyType {
   throw new Error(`Unrecognized policy type: ${typeName}`)
 }
 
-/** Returns a function for creating a policy object based on the track type */
+/**
+ * Returns a function for creating a policy object based on the track type
+ *
+ * @param policyType
+ */
 function policyFactoryMaker(
   policyType: TrackPolicyType
 ): (type: string) => TrackInterp {
@@ -37,7 +45,11 @@ function policyFactoryMaker(
   }
 }
 
-/** Factory for linear interpolation policies */
+/**
+ * Factory for linear interpolation policies
+ *
+ * @param type
+ */
 function linearInterpolationPolicyFactory(type: string): TrackInterp {
   switch (type) {
     case LabelTypeName.BOX_2D:
@@ -84,7 +96,9 @@ export class Track {
 
   /**
    * Run when state is updated
+   *
    * @param state
+   * @param id
    */
   public updateState(state: State, id: IdType): void {
     this._track = state.task.tracks[id]
@@ -127,7 +141,11 @@ export class Track {
       .sort((a, b) => a - b)
   }
 
-  /** Get label at index */
+  /**
+   * Get label at index
+   *
+   * @param index
+   */
   public getLabel(index: number): Readonly<LabelType> | null {
     if (index in this._labels) {
       return this._labels[index]
@@ -135,7 +153,11 @@ export class Track {
     return null
   }
 
-  /** Get shapes at item index */
+  /**
+   * Get shapes at item index
+   *
+   * @param index
+   */
   public getShapes(index: number): Readonly<Array<Readonly<ShapeType>>> {
     if (index in this._shapes) {
       return this._shapes[index]
@@ -143,13 +165,22 @@ export class Track {
     return []
   }
 
-  /** Set shapes at item index */
+  /**
+   * Set shapes at item index
+   *
+   * @param index
+   * @param shapes
+   */
   public setShapes(index: number, shapes: ShapeType[]): void {
     this._updatedIndices.add(index)
     this._shapes[index] = shapes
   }
 
-  /** Add updated index */
+  /**
+   * Add updated index
+   *
+   * @param index
+   */
   public addUpdatedIndex(index: number): void {
     this._updatedIndices.add(index)
   }
@@ -166,8 +197,11 @@ export class Track {
 
   /**
    * Get newly created labels when creating track
+   *
    * @param itemIndex
    * @param label
+   * @param numItems
+   * @param parentTrack
    */
   public init(
     itemIndex: number,
@@ -214,8 +248,10 @@ export class Track {
 
   /**
    * Callback for when a label in the track is updated
+   *
    * @param itemIndex
    * @param newShapes
+   * @param label
    */
   public update(itemIndex: number, label: Readonly<Label>): void {
     const newShapes = label.shapes()

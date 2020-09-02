@@ -15,6 +15,7 @@ export class RedisClient {
 
   /**
    * Constructor
+   *
    * @param config
    * @param withLogging
    */
@@ -37,6 +38,9 @@ export class RedisClient {
   /**
    * Add a handler function
    * Note that the handler and subscriber must use the same client
+   *
+   * @param event
+   * @param callback
    */
   public on(
     event: string,
@@ -45,17 +49,30 @@ export class RedisClient {
     this.pubSub.on(event, callback)
   }
 
-  /** Subscribe to a channel */
+  /**
+   * Subscribe to a channel
+   *
+   * @param channel
+   */
   public subscribe(channel: string): void {
     this.pubSub.subscribe(channel)
   }
 
-  /** Publish to a channel */
+  /**
+   * Publish to a channel
+   *
+   * @param channel
+   * @param message
+   */
   public publish(channel: string, message: string): void {
     this.pubSub.publish(channel, message)
   }
 
-  /** Wrapper for redis delete */
+  /**
+   * Wrapper for redis delete
+   *
+   * @param key
+   */
   public async del(key: string): Promise<void> {
     this.client.del(key)
   }
@@ -65,14 +82,22 @@ export class RedisClient {
     return this.client.multi()
   }
 
-  /** Wrapper for redis get */
+  /**
+   * Wrapper for redis get
+   *
+   * @param key
+   */
   public async get(key: string): Promise<string | null> {
     const redisGetAsync = promisify(this.client.get).bind(this.client)
     const redisValue: string | null = await redisGetAsync(key)
     return redisValue
   }
 
-  /** Wrapper for redis exists */
+  /**
+   * Wrapper for redis exists
+   *
+   * @param key
+   */
   public async exists(key: string): Promise<boolean> {
     return await new Promise((resolve) => {
       this.client.exists(key, (_err: Error | null, exists: number) => {
@@ -85,17 +110,31 @@ export class RedisClient {
     })
   }
 
-  /** Wrapper for redis set add */
+  /**
+   * Wrapper for redis set add
+   *
+   * @param key
+   * @param value
+   */
   public async setAdd(key: string, value: string): Promise<void> {
     this.client.sadd(key, value)
   }
 
-  /** Wrapper for redis set remove */
+  /**
+   * Wrapper for redis set remove
+   *
+   * @param key
+   * @param value
+   */
   public async setRemove(key: string, value: string): Promise<void> {
     this.client.srem(key, value)
   }
 
-  /** Wrapper for redis set members */
+  /**
+   * Wrapper for redis set members
+   *
+   * @param key
+   */
   public async getSetMembers(key: string): Promise<string[]> {
     const redisSetMembersAsync = promisify(this.client.smembers).bind(
       this.client
@@ -103,7 +142,13 @@ export class RedisClient {
     return await redisSetMembersAsync(key)
   }
 
-  /** Wrapper for redis psetex */
+  /**
+   * Wrapper for redis psetex
+   *
+   * @param key
+   * @param timeout
+   * @param value
+   */
   public async psetex(
     key: string,
     timeout: number,
@@ -113,13 +158,24 @@ export class RedisClient {
     await redisSetExAsync(key, timeout, value)
   }
 
-  /** Wrapper for redis set */
+  /**
+   * Wrapper for redis set
+   *
+   * @param key
+   * @param value
+   */
   public async set(key: string, value: string): Promise<void> {
     const redisSetAsync = promisify(this.client.set).bind(this.client)
     await redisSetAsync(key, value)
   }
 
-  /** Wrapper for redis config */
+  /**
+   * Wrapper for redis config
+   *
+   * @param type
+   * @param name
+   * @param value
+   */
   public config(type: string, name: string, value: string): void {
     this.client.on("ready", () => {
       this.client.config(type, name, value)

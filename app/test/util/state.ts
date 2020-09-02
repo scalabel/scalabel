@@ -3,6 +3,7 @@ import { IdType, LabelIdMap, State } from "../../src/types/state"
 
 /**
  * Find the new label that is not already in the labelIds
+ *
  * @param labels
  * @param labelIds
  */
@@ -15,7 +16,10 @@ export function findNewLabels(
 
 /**
  * Find the new label that is not already in the labelIds
+ *
  * @param labels
+ * @param state
+ * @param itemIndex
  * @param labelIds
  */
 export function findNewLabelsFromState(
@@ -29,8 +33,9 @@ export function findNewLabelsFromState(
 
 /**
  * Find the new label that is not already in the labelIds
- * @param labels
- * @param labelIds
+ *
+ * @param state
+ * @param trackIds
  */
 export function findNewTracksFromState(
   state: State,

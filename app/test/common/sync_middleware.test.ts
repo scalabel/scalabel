@@ -138,6 +138,8 @@ describe("Test sync middleware routes actions to synchronizer", () => {
 /**
  * Helper function to reset the store and the synchronizer for each test
  * Use shouldRegister for tests where initial state should already exist
+ *
+ * @param shouldRegister
  */
 function setupSync(shouldRegister: boolean = false): Synchronizer {
   const mockSocket = {
