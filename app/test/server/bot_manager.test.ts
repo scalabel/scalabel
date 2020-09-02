@@ -1,12 +1,11 @@
-import _ from 'lodash'
-import { BotManager } from '../../src/server/bot_manager'
-import { getRedisBotKey } from '../../src/server/path'
-import { RedisClient } from '../../src/server/redis_client'
-import { RedisPubSub } from '../../src/server/redis_pub_sub'
-import { ServerConfig } from '../../src/types/config'
-import { BotData, RegisterMessageType } from '../../src/types/message'
-import { sleep } from '../project/util'
-import { getTestConfig } from './util/util'
+import { BotManager } from "../../src/server/bot_manager"
+import { getRedisBotKey } from "../../src/server/path"
+import { RedisClient } from "../../src/server/redis_client"
+import { RedisPubSub } from "../../src/server/redis_pub_sub"
+import { ServerConfig } from "../../src/types/config"
+import { BotData, RegisterMessageType } from "../../src/types/message"
+import { sleep } from "../project/util"
+import { getTestConfig } from "./util/util"
 
 let client: RedisClient
 let subClient: RedisClient
@@ -25,26 +24,28 @@ afterAll(async () => {
   await subClient.close()
 })
 
-describe('Test bot user manager', () => {
-  test('Test registration', async () => {
+describe("Test bot user manager", () => {
+  test("Test registration", async () => {
     const botManager = new BotManager(config.bot, subscriber, client)
 
     // Test that different tasks create different bots
     const goodRegisterMessages: RegisterMessageType[] = [
-      makeRegisterData('project', 0, 'user', false),
-      makeRegisterData('project', 1, 'user', false),
-      makeRegisterData('projectOther', 0, 'user', false),
-      makeRegisterData('projectOther', 2, 'user2', false)
+      makeRegisterData("project", 0, "user", false),
+      makeRegisterData("project", 1, "user", false),
+      makeRegisterData("projectOther", 0, "user", false),
+      makeRegisterData("projectOther", 2, "user2", false)
     ]
 
     for (const registerData of goodRegisterMessages) {
       // Make sure redis is empty initially
-      const dummyBotData = makeBotData(registerData, 'botId')
+      const dummyBotData = makeBotData(registerData, "botId")
       expect(await botManager.checkBotExists(dummyBotData)).toBe(false)
 
       // Register a new bot
       const botData = await botManager.handleRegister(
-        '', JSON.stringify(registerData))
+        "",
+        JSON.stringify(registerData)
+      )
 
       // Should match register data, and generate an id
       expect(botData.projectName).toBe(registerData.projectName)
@@ -63,13 +64,15 @@ describe('Test bot user manager', () => {
       // Duplicated messages
       goodRegisterMessages[0],
       // Same task, different user
-      makeRegisterData('project', 0, 'user2', false),
+      makeRegisterData("project", 0, "user2", false),
       // Bot user
-      makeRegisterData('project', 0, 'user', true)
+      makeRegisterData("project", 0, "user", true)
     ]
     for (const registerData of badRegisterMessages) {
-      const fakeBotData = await botManager.handleRegister('',
-        JSON.stringify(registerData))
+      const fakeBotData = await botManager.handleRegister(
+        "",
+        JSON.stringify(registerData)
+      )
       expect(botManager.checkBotCreated(fakeBotData)).toBe(false)
     }
 
@@ -78,17 +81,17 @@ describe('Test bot user manager', () => {
     expect(oldBots.length).toBe(goodRegisterMessages.length)
   })
 
-  test('Test deregistration after no activity', async () => {
+  test("Test deregistration after no activity", async () => {
     const msTimeout = 300
     const botManager = new BotManager(config.bot, subscriber, client, msTimeout)
-    const registerData = makeRegisterData('project2', 0, 'user2', false)
-    const botData = makeBotData(registerData, 'botId')
+    const registerData = makeRegisterData("project2", 0, "user2", false)
+    const botData = makeBotData(registerData, "botId")
 
     // Make sure redis is empty initially
     expect(await botManager.checkBotExists(botData)).toBe(false)
 
     const message = JSON.stringify(registerData)
-    await botManager.handleRegister('', message)
+    await botManager.handleRegister("", message)
     expect(await botManager.checkBotExists(botData)).toBe(true)
 
     // No actions occur, so after timeout, bot should be deleted
@@ -100,15 +103,18 @@ describe('Test bot user manager', () => {
 /**
  * Create data for registration with some defaults
  */
-function makeRegisterData (
-  projectName: string, taskIndex: number,
-  userId: string, bot: boolean): RegisterMessageType {
+function makeRegisterData(
+  projectName: string,
+  taskIndex: number,
+  userId: string,
+  bot: boolean
+): RegisterMessageType {
   return {
     projectName,
     taskIndex,
-    sessionId: 'sessionId',
+    sessionId: "sessionId",
     userId,
-    address: 'address',
+    address: "address",
     bot
   }
 }
@@ -116,8 +122,10 @@ function makeRegisterData (
 /**
  * Create default data for a bot
  */
-function makeBotData (
-  registerData: RegisterMessageType, botId: string): BotData {
+function makeBotData(
+  registerData: RegisterMessageType,
+  botId: string
+): BotData {
   return {
     projectName: registerData.projectName,
     taskIndex: registerData.taskIndex,

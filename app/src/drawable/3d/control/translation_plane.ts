@@ -1,20 +1,21 @@
-import * as THREE from 'three'
-import Label3D from '../label3d'
-import { ControlUnit } from './controller'
+import * as THREE from "three"
+import Label3D from "../label3d"
+import { ControlUnit } from "./controller"
 
 /**
  * Translate along plane
  */
-export class TranslationPlane extends THREE.Mesh
-  implements ControlUnit {
+export class TranslationPlane extends THREE.Mesh implements ControlUnit {
   /** normal direction */
-  private _normal: THREE.Vector3
+  private readonly _normal: THREE.Vector3
 
-  constructor (normal: THREE.Vector3, color: number) {
+  constructor(normal: THREE.Vector3, color: number) {
     super(
       new THREE.PlaneGeometry(0.5, 0.5),
       new THREE.MeshBasicMaterial({
-        color, side: THREE.DoubleSide, transparent: true
+        color,
+        side: THREE.DoubleSide,
+        transparent: true
       })
     )
     this._normal = new THREE.Vector3()
@@ -31,13 +32,19 @@ export class TranslationPlane extends THREE.Mesh
    * Set highlighted
    * @param object
    */
-  public setHighlighted (intersection ?: THREE.Intersection): boolean {
-    { (this.material as THREE.Material).needsUpdate = true }
+  public setHighlighted(intersection?: THREE.Intersection): boolean {
+    {
+      ;(this.material as THREE.Material).needsUpdate = true
+    }
     if (intersection && intersection.object === this) {
-      { (this.material as THREE.Material).opacity = 0.9 }
+      {
+        ;(this.material as THREE.Material).opacity = 0.9
+      }
       return true
     } else {
-      { (this.material as THREE.Material).opacity = 0.65 }
+      {
+        ;(this.material as THREE.Material).opacity = 0.65
+      }
       return false
     }
   }
@@ -46,9 +53,13 @@ export class TranslationPlane extends THREE.Mesh
    * Set not highlighted when another object is highlighted
    * @param object
    */
-  public setFaded (): void {
-    { (this.material as THREE.Material).needsUpdate = true }
-    { (this.material as THREE.Material).opacity = 0.25 }
+  public setFaded(): void {
+    {
+      ;(this.material as THREE.Material).needsUpdate = true
+    }
+    {
+      ;(this.material as THREE.Material).opacity = 0.25
+    }
   }
 
   /**
@@ -57,7 +68,7 @@ export class TranslationPlane extends THREE.Mesh
    * @param newProjection
    * @param dragPlane
    */
-  public transform (
+  public transform(
     oldIntersection: THREE.Vector3,
     newProjection: THREE.Ray,
     _dragPlane: THREE.Plane,
@@ -109,13 +120,16 @@ export class TranslationPlane extends THREE.Mesh
    * Update scale according to world scale
    * @param worldScale
    */
-  public updateScale (worldScale: THREE.Vector3) {
+  public updateScale(worldScale: THREE.Vector3) {
     if (this.parent) {
-      const newScale = Math.max(2, Math.min(
-        Math.abs(worldScale.x),
-        Math.abs(worldScale.y),
-        Math.abs(worldScale.z)
-      ))
+      const newScale = Math.max(
+        2,
+        Math.min(
+          Math.abs(worldScale.x),
+          Math.abs(worldScale.y),
+          Math.abs(worldScale.z)
+        )
+      )
       this.scale.set(newScale, newScale, newScale)
     }
   }

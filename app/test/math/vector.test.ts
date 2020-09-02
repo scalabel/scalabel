@@ -1,8 +1,8 @@
-import _ from 'lodash'
-import { Vector } from '../../src/math/vector'
-import { Vector2D } from '../../src/math/vector2d'
+import _ from "lodash"
+import { Vector } from "../../src/math/vector"
+import { Vector2D } from "../../src/math/vector2d"
 
-test('Test basic vector operations', () => {
+test("Test basic vector operations", () => {
   const v1 = new Vector(3)
   v1[0] = 1
   v1[1] = 1.1
@@ -23,7 +23,7 @@ test('Test basic vector operations', () => {
   expect(v2[0]).toEqual(2)
 
   // Absolute values
-  const v3 = (new Vector(3)).fill(0).subtract(v1)
+  const v3 = new Vector(3).fill(0).subtract(v1)
   for (const i of _.range(3)) {
     expect(v1[i]).toEqual(-v3[i])
   }
@@ -36,7 +36,7 @@ test('Test basic vector operations', () => {
   expect(v3.prod()).toEqual(v3[0] * v3[1] * v3[2])
 })
 
-test('Test basic Vector2D', () => {
+test("Test basic Vector2D", () => {
   const v1 = new Vector2D()
   v1.x = 1.2
   v1.y = 1.3

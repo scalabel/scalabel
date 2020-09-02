@@ -1,13 +1,13 @@
-import * as action from '../../src/action/common'
-import Session, { dispatch, getState } from '../../src/common/session'
-import { Label2DHandler } from '../../src/drawable/2d/label2d_handler'
-import { makeImageViewerConfig } from '../../src/functional/states'
-import { Size2D } from '../../src/math/size2d'
-import { Vector2D } from '../../src/math/vector2d'
-import { IdType, INVALID_ID, SimpleRect } from '../../src/types/state'
-import { setupTestStore } from '../components/util'
-import { testJson } from '../test_states/test_image_objects'
-import { LabelCollector } from '../util/label_collector'
+import * as action from "../../src/action/common"
+import Session, { dispatch, getState } from "../../src/common/session"
+import { Label2DHandler } from "../../src/drawable/2d/label2d_handler"
+import { makeImageViewerConfig } from "../../src/functional/states"
+import { Size2D } from "../../src/math/size2d"
+import { Vector2D } from "../../src/math/vector2d"
+import { IdType, INVALID_ID, SimpleRect } from "../../src/types/state"
+import { setupTestStore } from "../components/util"
+import { testJson } from "../test_states/test_image_objects"
+import { LabelCollector } from "../util/label_collector"
 
 /**
  * Create a polygon by clicking at each point in sequence
@@ -17,9 +17,13 @@ import { LabelCollector } from '../util/label_collector'
  * @param interrupt: add an interrupt saving action
  * @param valid: whether the polygon is valid
  */
-export function drawPolygon (
-  label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][],
-  interrupt: boolean = false, valid: boolean = true): IdType {
+export function drawPolygon(
+  label2dHandler: Label2DHandler,
+  canvasSize: Size2D,
+  points: number[][],
+  interrupt: boolean = false,
+  valid: boolean = true
+): IdType {
   const labelIds = new LabelCollector(getState)
   const start = labelIds.collect()
 
@@ -52,9 +56,13 @@ export function drawPolygon (
  * @param interrupt: add an interrupt saving action
  * @param valid: whether the polygon is valid
  */
-export function drawPolygonByDragging (
-  label2dHandler: Label2DHandler, canvasSize: Size2D, points: number[][],
-  interrupt: boolean = false, valid: boolean = true) {
+export function drawPolygonByDragging(
+  label2dHandler: Label2DHandler,
+  canvasSize: Size2D,
+  points: number[][],
+  interrupt: boolean = false,
+  valid: boolean = true
+): IdType {
   const labelIds = new LabelCollector(getState)
   const start = labelIds.collect()
 
@@ -100,10 +108,14 @@ export function drawPolygonByDragging (
  * @param labelIndex: if not -1, specifies changing an existing label
  * @param interrupt: if enabled, interrupt the operation with another action
  */
-function doBox2DOperation (
-  label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: SimpleRect, labelIndex: number, handleIndex: number,
-  interrupt: boolean= false) {
+function doBox2DOperation(
+  label2dHandler: Label2DHandler,
+  canvasSize: Size2D,
+  coords: SimpleRect,
+  labelIndex: number,
+  handleIndex: number,
+  interrupt: boolean = false
+): void {
   const x1 = coords.x1
   const x2 = coords.x2
   const y1 = coords.y1
@@ -114,8 +126,14 @@ function doBox2DOperation (
   mouseDown(label2dHandler, x1, y1, labelIndex, handleIndex)
 
   // Some random intermediate move
-  mouseMove(label2dHandler,
-    x1 + Math.random() * 5, y1 - Math.random() * 5, canvasSize, -1, 0)
+  mouseMove(
+    label2dHandler,
+    x1 + Math.random() * 5,
+    y1 - Math.random() * 5,
+    canvasSize,
+    -1,
+    0
+  )
 
   if (interrupt) {
     dispatch(action.setStatusToSaved())
@@ -124,17 +142,19 @@ function doBox2DOperation (
   // Last point
   mouseMove(label2dHandler, x2, y2, canvasSize, -1, 0)
   // Mouse up doesn't need to be exactly at the point
-  mouseUp(label2dHandler,
-    x2 + Math.random(), y2 - Math.random(), -1, 0)
+  mouseUp(label2dHandler, x2 + Math.random(), y2 - Math.random(), -1, 0)
 }
 
 /**
  * Make mouse movements to add the 2D box
  * @param coords: the coordinates of the new box
  */
-export function drawBox2D (
-  label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: SimpleRect, interrupt: boolean= false): IdType {
+export function drawBox2D(
+  label2dHandler: Label2DHandler,
+  canvasSize: Size2D,
+  coords: SimpleRect,
+  interrupt: boolean = false
+): IdType {
   const boxIds = new LabelCollector(getState)
   const start = boxIds.collect()
   doBox2DOperation(label2dHandler, canvasSize, coords, -1, 0, interrupt)
@@ -148,11 +168,21 @@ export function drawBox2D (
  * @param coords: x1/y1 is the existing point, x2/y2 is the new point
  * @param labelIndex: the index of the label to move
  */
-export function resizeBox2D (
-  label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: SimpleRect, labelIndex: number, interrupt: boolean= false) {
+export function resizeBox2D(
+  label2dHandler: Label2DHandler,
+  canvasSize: Size2D,
+  coords: SimpleRect,
+  labelIndex: number,
+  interrupt: boolean = false
+): void {
   doBox2DOperation(
-    label2dHandler, canvasSize, coords, labelIndex, labelIndex, interrupt)
+    label2dHandler,
+    canvasSize,
+    coords,
+    labelIndex,
+    labelIndex,
+    interrupt
+  )
 }
 
 /**
@@ -160,12 +190,15 @@ export function resizeBox2D (
  * @param coords: x1/y1 is the existing point, x2/y2 is the new point
  * @param labelIndex: the index of the label to move
  */
-export function moveBox2D (
-  label2dHandler: Label2DHandler, canvasSize: Size2D,
-  coords: SimpleRect, labelIndex: number, interrupt: boolean= false) {
+export function moveBox2D(
+  label2dHandler: Label2DHandler,
+  canvasSize: Size2D,
+  coords: SimpleRect,
+  labelIndex: number,
+  interrupt: boolean = false
+): void {
   // Handle index of 0 represents a move instead of a resize
-  doBox2DOperation(
-    label2dHandler, canvasSize, coords, labelIndex, 0, interrupt)
+  doBox2DOperation(label2dHandler, canvasSize, coords, labelIndex, 0, interrupt)
 }
 
 /**
@@ -177,9 +210,14 @@ export function moveBox2D (
  * @param labelIndex
  * @param handleIndex
  */
-export function mouseMove (
-  label2d: Label2DHandler, x: number, y: number,
-  canvasSize: Size2D, labelIndex: number, handleIndex: number) {
+export function mouseMove(
+  label2d: Label2DHandler,
+  x: number,
+  y: number,
+  canvasSize: Size2D,
+  labelIndex: number,
+  handleIndex: number
+): void {
   label2d.onMouseMove(new Vector2D(x, y), canvasSize, labelIndex, handleIndex)
 }
 
@@ -191,8 +229,13 @@ export function mouseMove (
  * @param labelIndex
  * @param handleIndex
  */
-export function mouseDown (label2d: Label2DHandler, x: number, y: number,
-                           labelIndex: number, handleIndex: number) {
+export function mouseDown(
+  label2d: Label2DHandler,
+  x: number,
+  y: number,
+  labelIndex: number,
+  handleIndex: number
+): void {
   label2d.onMouseDown(new Vector2D(x, y), labelIndex, handleIndex)
 }
 
@@ -204,8 +247,13 @@ export function mouseDown (label2d: Label2DHandler, x: number, y: number,
  * @param labelIndex
  * @param handleIndex
  */
-export function mouseUp (label2d: Label2DHandler, x: number, y: number,
-                         labelIndex: number, handleIndex: number) {
+export function mouseUp(
+  label2d: Label2DHandler,
+  x: number,
+  y: number,
+  labelIndex: number,
+  handleIndex: number
+): void {
   label2d.onMouseUp(new Vector2D(x, y), labelIndex, handleIndex)
 }
 
@@ -217,8 +265,13 @@ export function mouseUp (label2d: Label2DHandler, x: number, y: number,
  * @param labelIndex
  * @param handleIndex
  */
-export function mouseClick (label2d: Label2DHandler, x: number, y: number,
-                            labelIndex: number, handleIndex: number) {
+export function mouseClick(
+  label2d: Label2DHandler,
+  x: number,
+  y: number,
+  labelIndex: number,
+  handleIndex: number
+): void {
   mouseDown(label2d, x, y, labelIndex, handleIndex)
   mouseUp(label2d, x, y, labelIndex, handleIndex)
 }
@@ -232,9 +285,14 @@ export function mouseClick (label2d: Label2DHandler, x: number, y: number,
  * @param labelIndex
  * @param handleIndex
  */
-export function mouseMoveClick (
-  label2d: Label2DHandler, x: number, y: number,
-  canvasSize: Size2D, labelIndex: number, handleIndex: number) {
+export function mouseMoveClick(
+  label2d: Label2DHandler,
+  x: number,
+  y: number,
+  canvasSize: Size2D,
+  labelIndex: number,
+  handleIndex: number
+): void {
   mouseMove(label2d, x, y, canvasSize, labelIndex, handleIndex)
   mouseClick(label2d, x, y, labelIndex, handleIndex)
 }
@@ -244,8 +302,8 @@ export function mouseMoveClick (
  * @param label2d
  * @param key
  */
-export function keyDown (label2d: Label2DHandler, key: string) {
-  label2d.onKeyDown(new KeyboardEvent('keydown', { key }))
+export function keyDown(label2d: Label2DHandler, key: string): void {
+  label2d.onKeyDown(new KeyboardEvent("keydown", { key }))
 }
 
 /**
@@ -253,8 +311,8 @@ export function keyDown (label2d: Label2DHandler, key: string) {
  * @param label2d
  * @param key
  */
-export function keyUp (label2d: Label2DHandler, key: string) {
-  label2d.onKeyUp(new KeyboardEvent('keyup', { key }))
+export function keyUp(label2d: Label2DHandler, key: string): void {
+  label2d.onKeyUp(new KeyboardEvent("keyup", { key }))
 }
 
 /**
@@ -262,7 +320,7 @@ export function keyUp (label2d: Label2DHandler, key: string) {
  * @param label2d
  * @param key
  */
-export function keyClick (label2d: Label2DHandler, key: string) {
+export function keyClick(label2d: Label2DHandler, key: string): void {
   keyDown(label2d, key)
   keyUp(label2d, key)
 }
@@ -270,7 +328,7 @@ export function keyClick (label2d: Label2DHandler, key: string) {
 /**
  * Initialize Session, label 2d list, label 2d handler
  */
-export function initializeTestingObjects (): [Label2DHandler, number] {
+export function initializeTestingObjects(): [Label2DHandler, number] {
   setupTestStore(testJson)
 
   dispatch(action.addViewerConfig(1, makeImageViewerConfig(0)))

@@ -1,15 +1,23 @@
-import _ from 'lodash'
-import { makePathPoint2D } from '../../../../functional/states'
-import { LabelType, PathPoint2DType, PathPointType, ShapeType, SimplePathPoint2DType } from '../../../../types/state'
-import { assignShapesInRange, getAutoLabelRange, TrackInterp } from '../interp'
+import _ from "lodash"
+import { makePathPoint2D } from "../../../../functional/states"
+import {
+  LabelType,
+  PathPoint2DType,
+  PathPointType,
+  ShapeType,
+  SimplePathPoint2DType
+} from "../../../../types/state"
+import { assignShapesInRange, getAutoLabelRange, TrackInterp } from "../interp"
 
 /**
  * Linearly interpolate the rectangles from the first to the last in
  * the shape array.
  * @param shapes
  */
-function linearInterpPoints (
-  labels: LabelType[], shapes: PathPoint2DType[][]): PathPoint2DType[][] {
+function linearInterpPoints(
+  labels: LabelType[],
+  shapes: PathPoint2DType[][]
+): PathPoint2DType[][] {
   const newShapes = [...shapes]
   if (newShapes.length <= 2) {
     return newShapes
@@ -32,7 +40,7 @@ function linearInterpPoints (
   for (let i = 1; i < newShapes.length - 1; i += 1) {
     let shape = newShapes[i]
     if (shape.length !== first.length) {
-      shape = first.map((_s) => makePathPoint2D())
+      shape = first.map(() => makePathPoint2D())
     } else {
       shape = _.cloneDeep(shape)
     }
@@ -55,9 +63,12 @@ function linearInterpPoints (
  * @param allLabels
  * @param allShapes
  */
-function linearInterpPointsInRange (
-  start: number, end: number,
-  allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
+function linearInterpPointsInRange(
+  start: number,
+  end: number,
+  allLabels: LabelType[],
+  allShapes: ShapeType[][]
+): ShapeType[][] {
   allShapes = [...allShapes]
   let points = allShapes.slice(start, end + 1) as PathPoint2DType[][]
   const labels = allLabels.slice(start, end + 1)
@@ -79,11 +90,16 @@ export class Points2DLinearInterp extends TrackInterp {
    * @param labels
    * @param shapes
    */
-  public interp (
-    newLabel: LabelType, newShape: ShapeType[],
-    allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
+  public interp(
+    newLabel: LabelType,
+    newShape: ShapeType[],
+    allLabels: LabelType[],
+    allShapes: ShapeType[][]
+  ): ShapeType[][] {
     const [labelIndex, manual0, manual1] = getAutoLabelRange(
-      newLabel, allLabels)
+      newLabel,
+      allLabels
+    )
     // Copy the input array
     let newShapes = [...allShapes]
     newShapes[labelIndex] = newShape
@@ -91,14 +107,26 @@ export class Points2DLinearInterp extends TrackInterp {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
     } else {
       newShapes = linearInterpPointsInRange(
-        manual0, labelIndex, allLabels, newShapes)
+        manual0,
+        labelIndex,
+        allLabels,
+        newShapes
+      )
     }
     if (manual1 === -1) {
       newShapes = assignShapesInRange(
-        labelIndex + 1, newShapes.length, newShape, newShapes)
+        labelIndex + 1,
+        newShapes.length,
+        newShape,
+        newShapes
+      )
     } else {
       newShapes = linearInterpPointsInRange(
-        labelIndex, manual1, allLabels, newShapes)
+        labelIndex,
+        manual1,
+        allLabels,
+        newShapes
+      )
     }
     return newShapes
   }

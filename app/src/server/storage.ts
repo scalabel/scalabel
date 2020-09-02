@@ -1,7 +1,7 @@
-import * as path from 'path'
-import { MAX_HISTORIES } from '../const/storage'
-import Logger from './logger'
-import * as pathUtil from './path'
+import * as path from "path"
+import { MAX_HISTORIES } from "../const/storage"
+import Logger from "./logger"
+import * as pathUtil from "./path"
 
 /**
  * Abstract class for storage
@@ -15,15 +15,15 @@ export abstract class Storage {
   /**
    * General constructor
    */
-  protected constructor (basePath: string) {
+  protected constructor(basePath: string) {
     this._dataDir = basePath
-    this._extension = '.json'
+    this._extension = ".json"
   }
 
   /**
    * Get the internal data dir
    */
-  public get dataDir (): string {
+  public get dataDir(): string {
     return this._dataDir
   }
 
@@ -31,7 +31,7 @@ export abstract class Storage {
    * Change the file extension for different file types
    * Can set to empty string if the keys already include extensions
    */
-  public setExt (newExt: string) {
+  public setExt(newExt: string): void {
     this._extension = newExt
   }
 
@@ -39,14 +39,14 @@ export abstract class Storage {
    * Extension of the key when it is stored
    * Default is json, but it can be modified with setExt
    */
-  public keyExt (): string {
+  public keyExt(): string {
     return this._extension
   }
 
   /**
    * Check if storage has key
    */
-  public abstract async hasKey (key: string): Promise<boolean>
+  public abstract async hasKey(key: string): Promise<boolean>
 
   /**
    * Lists keys in storage
@@ -54,39 +54,41 @@ export abstract class Storage {
    * @param {boolean} onlyDir: whether to only return keys that are directories
    * @returns {Promise<string[]>} The keys are returned in lexical order
    */
-  public abstract async listKeys (
-    prefix: string, onlyDir: boolean): Promise<string[]>
+  public abstract async listKeys(
+    prefix: string,
+    onlyDir: boolean
+  ): Promise<string[]>
 
   /**
    * Saves json to a key
    */
-  public abstract async save (key: string, json: string): Promise<void>
+  public abstract async save(key: string, json: string): Promise<void>
 
   /**
    * Loads json stored at a key
    */
-  public abstract async load (key: string): Promise<string>
+  public abstract async load(key: string): Promise<string>
 
   /**
    * Deletes values at the key
    */
-  public abstract async delete (key: string): Promise<void>
+  public abstract async delete(key: string): Promise<void>
 
   /**
    * Create a new folder
    * @param key
    */
-  public abstract async mkdir (key: string): Promise<void>
+  public abstract async mkdir(key: string): Promise<void>
 
   /**
    * Loads the JSON if it exists
    * Otherwise return something that evaluates to false
    */
-  public async safeLoad (key: string): Promise<string> {
+  public async safeLoad(key: string): Promise<string> {
     if (await this.hasKey(key)) {
-      return this.load(key)
+      return await this.load(key)
     }
-    return ''
+    return ""
   }
 
   /**
@@ -98,7 +100,7 @@ export abstract class Storage {
    * @param key
    * @param value
    */
-  public async saveWithBackup (key: string, value: string): Promise<void> {
+  public async saveWithBackup(key: string, value: string): Promise<void> {
     const fileKey = pathUtil.getFileKey(key)
     await this.save(fileKey, value)
     // Check whether there are more than MAX_HISTORIES entries in the folder
@@ -107,18 +109,20 @@ export abstract class Storage {
     for (let i = 0; i < keys.length - MAX_HISTORIES; i += 1) {
       await this.delete(keys[i] + this.keyExt())
     }
-    Logger.info(`Saving ${fileKey} and ` +
-      `deleting ${Math.max(keys.length - MAX_HISTORIES, 0)} historical keys`)
+    Logger.info(
+      `Saving ${fileKey} and ` +
+        `deleting ${Math.max(keys.length - MAX_HISTORIES, 0)} historical keys`
+    )
   }
 
   /**
    * Get the value from
    * @param key
    */
-  public async getWithBackup (key: string): Promise<string | null> {
+  public async getWithBackup(key: string): Promise<string | null> {
     const keys = await this.listKeys(key, false)
     if (keys.length > 0) {
-      return this.load(keys[keys.length - 1])
+      return await this.load(keys[keys.length - 1])
     } else {
       return null
     }
@@ -127,14 +131,14 @@ export abstract class Storage {
   /**
    * Makes relative path into full path
    */
-  public fullDir (key: string): string {
+  public fullDir(key: string): string {
     return path.join(this._dataDir, key)
   }
 
   /**
    * Makes relative path into full filename
    */
-  public fullFile (key: string): string {
+  public fullFile(key: string): string {
     return this.fullDir(key + this.keyExt())
   }
 }

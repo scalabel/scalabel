@@ -1,136 +1,150 @@
-import _ from 'lodash'
-import { AttributeToolType, BundleFile,
-  DataType, HandlerUrl, ItemTypeName, LabelTypeName } from '../../src/const/common'
-import { ItemExport } from '../../src/types/bdd'
-import { CreationForm, FormFileData, Project } from '../../src/types/project'
-import { Attribute, TaskType } from '../../src/types/state'
-import { sampleStateExportImage, sampleStateExportImagePolygon } from './test_export_objects'
+import _ from "lodash"
+import {
+  AttributeToolType,
+  BundleFile,
+  DataType,
+  HandlerUrl,
+  ItemTypeName,
+  LabelTypeName
+} from "../../src/const/common"
+import { ItemExport } from "../../src/types/bdd"
+import { CreationForm, FormFileData, Project } from "../../src/types/project"
+import { Attribute, TaskType } from "../../src/types/state"
+import {
+  sampleStateExportImage,
+  sampleStateExportImagePolygon
+} from "./test_export_objects"
 
 const sampleCategories: string[] = [
-  'person',
-  'rider',
-  'car',
-  'truck',
-  'bus',
-  'train',
-  'motorcycle',
-  'bike',
-  'traffic sign',
-  'traffic light'
+  "person",
+  "rider",
+  "car",
+  "truck",
+  "bus",
+  "train",
+  "motorcycle",
+  "bike",
+  "traffic sign",
+  "traffic light"
 ]
 
 const sampleAttributes: Array<Partial<Attribute>> = [
   {
-    name: 'Occluded',
+    name: "Occluded",
     toolType: AttributeToolType.SWITCH,
-    tagText: 'o'
+    tagText: "o"
   },
   {
-    name: 'Truncated',
+    name: "Truncated",
     toolType: AttributeToolType.SWITCH,
-    tagText: 't'
+    tagText: "t"
   },
   {
-    name: 'Traffic Light Color',
+    name: "Traffic Light Color",
     toolType: AttributeToolType.LIST,
-    tagPrefix: 't',
-    tagSuffixes: [
-      '',
-      'g',
-      'y',
-      'r'
-    ],
-    values: [
-      'NA',
-      'G',
-      'Y',
-      'R'
-    ],
-    buttonColors: [
-      'white',
-      'green',
-      'yellow',
-      'red'
-    ]
+    tagPrefix: "t",
+    tagSuffixes: ["", "g", "y", "r"],
+    values: ["NA", "G", "Y", "R"],
+    buttonColors: ["white", "green", "yellow", "red"]
   }
 ]
 
 export const sampleItems: Array<Partial<ItemExport>> = [
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
-    videoName: 'a',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg",
+    videoName: "a",
     timestamp: 1
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
-    videoName: 'a',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg",
+    videoName: "a",
     timestamp: 2
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
-    videoName: 'a',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg",
+    videoName: "a",
     timestamp: 3
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
-    videoName: 'b',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg",
+    videoName: "b",
     timestamp: 4
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
-    videoName: 'b',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg",
+    videoName: "b",
     timestamp: 5
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
-    videoName: 'b',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg",
+    videoName: "b",
     timestamp: 6
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
-    videoName: 'b',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg",
+    videoName: "b",
     timestamp: 7
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
-    videoName: 'b',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg",
+    videoName: "b",
     timestamp: 8
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
-    videoName: 'b',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg",
+    videoName: "b",
     timestamp: 9
   },
   {
-    name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
-    url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
-    videoName: 'b',
+    name:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg",
+    url:
+      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg",
+    videoName: "b",
     timestamp: 10
   }
 ]
 
 export const sampleFormEmpty: CreationForm = {
-  projectName: '',
-  itemType: '',
-  labelType: '',
-  pageTitle: '',
+  projectName: "",
+  itemType: "",
+  labelType: "",
+  pageTitle: "",
   taskSize: 0,
-  instructionUrl: '',
+  instructionUrl: "",
   demoMode: false
 }
 
-const sampleProjectName = 'sampleName'
-const sampleInstructions = 'instructions.com'
-const sampleTitle = 'sampleTitle'
+const sampleProjectName = "sampleName"
+const sampleInstructions = "instructions.com"
+const sampleTitle = "sampleTitle"
 const sampleTaskSize = 5
 
 export const sampleFormImage: CreationForm = {
@@ -177,7 +191,7 @@ export const sampleProjectImage: Project = {
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
-    taskId: '',
+    taskId: "",
     demoMode: false,
     autosave: true,
     bots: false
@@ -186,36 +200,52 @@ export const sampleProjectImage: Project = {
 }
 
 const sampleItemsVideo = _.cloneDeep(sampleItems)
-sampleItemsVideo[0].labels = [{
-  id: '0',
-  category: 'person',
-  attributes: {},
-  manualShape: true,
-  box2d: null,
-  box3d: null,
-  plane3d: null,
-  poly2d: [{
-    vertices: [[0, 0], [0, 1], [1, 1]],
-    types: 'LLL',
-    closed: true
-  }],
-  customs: {}
-}]
-sampleItemsVideo[1].labels = [{
-  id: '0',
-  category: 'person',
-  attributes: {},
-  manualShape: true,
-  box2d: null,
-  box3d: null,
-  plane3d: null,
-  poly2d: [{
-    vertices: [[0, 0], [0, 1], [1, 1]],
-    types: 'LLL',
-    closed: true
-  }],
-  customs: {}
-}]
+sampleItemsVideo[0].labels = [
+  {
+    id: "0",
+    category: "person",
+    attributes: {},
+    manualShape: true,
+    box2d: null,
+    box3d: null,
+    plane3d: null,
+    poly2d: [
+      {
+        vertices: [
+          [0, 0],
+          [0, 1],
+          [1, 1]
+        ],
+        types: "LLL",
+        closed: true
+      }
+    ],
+    customs: {}
+  }
+]
+sampleItemsVideo[1].labels = [
+  {
+    id: "0",
+    category: "person",
+    attributes: {},
+    manualShape: true,
+    box2d: null,
+    box3d: null,
+    plane3d: null,
+    poly2d: [
+      {
+        vertices: [
+          [0, 0],
+          [0, 1],
+          [1, 1]
+        ],
+        types: "LLL",
+        closed: true
+      }
+    ],
+    customs: {}
+  }
+]
 
 export const sampleVideoFormFileData: FormFileData = {
   categories: sampleCategories,
@@ -241,7 +271,7 @@ export const sampleProjectVideo: Project = {
     bundleFile: BundleFile.V1,
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
-    taskId: '',
+    taskId: "",
     demoMode: true,
     autosave: true,
     bots: false
@@ -265,7 +295,7 @@ export const sampleProjectAutolabel: Project = {
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
-    taskId: '',
+    taskId: "",
     demoMode: false,
     autosave: true,
     bots: false
@@ -289,7 +319,7 @@ export const sampleProjectAutolabelPolygon: Project = {
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
     attributes: sampleAttributes as Attribute[],
-    taskId: '',
+    taskId: "",
     demoMode: false,
     autosave: true,
     bots: false
@@ -313,7 +343,7 @@ export const sampleTasksImage: TaskType[] = [
       bundleFile: BundleFile.V2,
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
-      taskId: '000000',
+      taskId: "000000",
       demoMode: false,
       autosave: true,
       bots: false
@@ -326,59 +356,71 @@ export const sampleTasksImage: TaskType[] = [
     },
     items: [
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
+        },
         index: 0,
-        id: '0',
+        id: "0",
         labels: {},
         shapes: {},
         timestamp: 1,
-        videoName: 'a'
+        videoName: "a"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
+        },
         index: 1,
-        id: '1',
+        id: "1",
         labels: {},
         shapes: {},
         timestamp: 2,
-        videoName: 'a'
+        videoName: "a"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
+        },
         index: 2,
-        id: '2',
+        id: "2",
         labels: {},
         shapes: {},
         timestamp: 3,
-        videoName: 'a'
+        videoName: "a"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
+        },
         index: 3,
-        id: '3',
+        id: "3",
         labels: {},
         shapes: {},
         timestamp: 4,
-        videoName: 'b'
+        videoName: "b"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
+        },
         index: 4,
-        id: '4',
+        id: "4",
         labels: {},
         shapes: {},
         timestamp: 5,
-        videoName: 'b'
+        videoName: "b"
       }
     ],
     tracks: {},
-    sensors: { [-1]: {
-      id: -1,
-      name: 'default',
-      type: DataType.IMAGE,
-      extrinsics: undefined,
-      intrinsics: undefined
-    }}
+    sensors: {
+      [-1]: {
+        id: -1,
+        name: "default",
+        type: DataType.IMAGE,
+        extrinsics: undefined,
+        intrinsics: undefined
+      }
+    }
   },
   {
     config: {
@@ -395,7 +437,7 @@ export const sampleTasksImage: TaskType[] = [
       bundleFile: BundleFile.V2,
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
-      taskId: '000001',
+      taskId: "000001",
       demoMode: false,
       autosave: true,
       bots: false
@@ -408,81 +450,91 @@ export const sampleTasksImage: TaskType[] = [
     },
     items: [
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg"
+        },
         index: 0,
-        id: '5',
+        id: "5",
         labels: {},
         shapes: {},
         timestamp: 6,
-        videoName: 'b'
+        videoName: "b"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg"
+        },
         index: 1,
-        id: '6',
+        id: "6",
         labels: {},
         shapes: {},
         timestamp: 7,
-        videoName: 'b'
+        videoName: "b"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg"
+        },
         index: 2,
-        id: '7',
+        id: "7",
         labels: {},
         shapes: {},
         timestamp: 8,
-        videoName: 'b'
+        videoName: "b"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg"
+        },
         index: 3,
-        id: '8',
+        id: "8",
         labels: {},
         shapes: {},
         timestamp: 9,
-        videoName: 'b'
+        videoName: "b"
       },
       {
-        urls: { [-1]: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg' },
+        urls: {
+          [-1]: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg"
+        },
         index: 4,
-        id: '9',
+        id: "9",
         labels: {},
         shapes: {},
         timestamp: 10,
-        videoName: 'b'
+        videoName: "b"
       }
     ],
     tracks: {},
-    sensors: { [-1]: {
-      id: -1,
-      name: 'default',
-      type: DataType.IMAGE,
-      extrinsics: undefined,
-      intrinsics: undefined
-    }}
+    sensors: {
+      [-1]: {
+        id: -1,
+        name: "default",
+        type: DataType.IMAGE,
+        extrinsics: undefined,
+        intrinsics: undefined
+      }
+    }
   }
 ]
 
 export const sampleTasksVideo: TaskType[] = [
   {
     config: {
-      projectName: 'sampleName',
-      itemType: 'image',
-      labelTypes: [
-        'polygon2d'
-      ],
+      projectName: "sampleName",
+      itemType: "image",
+      labelTypes: ["polygon2d"],
       label2DTemplates: {},
       policyTypes: [],
       taskSize: 3,
       tracking: true,
-      handlerUrl: 'label',
-      pageTitle: 'sampleTitle',
-      instructionPage: 'instructions.com',
-      bundleFile: 'image.js',
+      handlerUrl: "label",
+      pageTitle: "sampleTitle",
+      instructionPage: "instructions.com",
+      bundleFile: "image.js",
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
-      taskId: '000000',
+      taskId: "000000",
       demoMode: true,
       autosave: true,
       bots: false
@@ -495,56 +547,49 @@ export const sampleTasksVideo: TaskType[] = [
     },
     items: [
       {
-        id: '0',
+        id: "0",
         index: 0,
-        videoName: 'a',
+        videoName: "a",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
         },
         labels: {
           0: {
-            id: '0',
+            id: "0",
             item: 0,
-            sensors: [
-              -1
-            ],
-            type: 'polygon2d',
-            category: [
-              0
-            ],
+            sensors: [-1],
+            type: "polygon2d",
+            category: [0],
             attributes: {},
-            parent: '',
+            parent: "",
             children: [],
-            shapes: [
-              '0'
-            ],
-            track: '0',
+            shapes: ["0"],
+            track: "0",
             order: 0,
             manual: true
           }
         },
         shapes: {
           0: {
-            id: '0',
-            label: [
-              '0'
-            ],
-            shapeType: 'polygon2d',
+            id: "0",
+            label: ["0"],
+            shapeType: "polygon2d",
             points: [
               {
                 x: 0,
                 y: 0,
-                pointType: 'vertex'
+                pointType: "vertex"
               },
               {
                 x: 0,
                 y: 1,
-                pointType: 'vertex'
+                pointType: "vertex"
               },
               {
                 x: 1,
                 y: 1,
-                pointType: 'vertex'
+                pointType: "vertex"
               }
             ]
           }
@@ -552,56 +597,49 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 1
       },
       {
-        id: '1',
+        id: "1",
         index: 1,
-        videoName: 'a',
+        videoName: "a",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
         },
         labels: {
           1: {
-            id: '1',
+            id: "1",
             item: 1,
-            sensors: [
-              -1
-            ],
-            type: 'polygon2d',
-            category: [
-              0
-            ],
+            sensors: [-1],
+            type: "polygon2d",
+            category: [0],
             attributes: {},
-            parent: '',
+            parent: "",
             children: [],
-            shapes: [
-              '1'
-            ],
-            track: '0',
+            shapes: ["1"],
+            track: "0",
             order: 0,
             manual: true
           }
         },
         shapes: {
           1: {
-            id: '1',
-            label: [
-              '1'
-            ],
-            shapeType: 'polygon2d',
+            id: "1",
+            label: ["1"],
+            shapeType: "polygon2d",
             points: [
               {
                 x: 0,
                 y: 0,
-                pointType: 'vertex'
+                pointType: "vertex"
               },
               {
                 x: 0,
                 y: 1,
-                pointType: 'vertex'
+                pointType: "vertex"
               },
               {
                 x: 1,
                 y: 1,
-                pointType: 'vertex'
+                pointType: "vertex"
               }
             ]
           }
@@ -609,11 +647,12 @@ export const sampleTasksVideo: TaskType[] = [
         timestamp: 2
       },
       {
-        id: '2',
+        id: "2",
         index: 2,
-        videoName: 'a',
+        videoName: "a",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
         },
         labels: {},
         shapes: {},
@@ -622,19 +661,19 @@ export const sampleTasksVideo: TaskType[] = [
     ],
     tracks: {
       0: {
-        id: '0',
-        type: 'polygon2d',
+        id: "0",
+        type: "polygon2d",
         labels: {
-          0: '0',
-          1: '1'
+          0: "0",
+          1: "1"
         }
       }
     },
     sensors: {
-      '-1': {
+      "-1": {
         id: -1,
-        name: 'default',
-        type: 'image',
+        name: "default",
+        type: "image",
         extrinsics: undefined,
         intrinsics: undefined
       }
@@ -642,22 +681,20 @@ export const sampleTasksVideo: TaskType[] = [
   },
   {
     config: {
-      projectName: 'sampleName',
-      itemType: 'image',
-      labelTypes: [
-        'polygon2d'
-      ],
+      projectName: "sampleName",
+      itemType: "image",
+      labelTypes: ["polygon2d"],
       label2DTemplates: {},
       policyTypes: [],
       taskSize: 7,
       tracking: true,
-      handlerUrl: 'label',
-      pageTitle: 'sampleTitle',
-      instructionPage: 'instructions.com',
-      bundleFile: 'image.js',
+      handlerUrl: "label",
+      pageTitle: "sampleTitle",
+      instructionPage: "instructions.com",
+      bundleFile: "image.js",
       categories: sampleCategories,
       attributes: sampleAttributes as Attribute[],
-      taskId: '000001',
+      taskId: "000001",
       demoMode: true,
       autosave: true,
       bots: false
@@ -670,77 +707,84 @@ export const sampleTasksVideo: TaskType[] = [
     },
     items: [
       {
-        id: '3',
+        id: "3",
         index: 0,
-        videoName: 'b',
+        videoName: "b",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
         },
         labels: {},
         shapes: {},
         timestamp: 4
       },
       {
-        id: '4',
+        id: "4",
         index: 1,
-        videoName: 'b',
+        videoName: "b",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
         },
         labels: {},
         shapes: {},
         timestamp: 5
       },
       {
-        id: '5',
+        id: "5",
         index: 2,
-        videoName: 'b',
+        videoName: "b",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg"
         },
         labels: {},
         shapes: {},
         timestamp: 6
       },
       {
-        id: '6',
+        id: "6",
         index: 3,
-        videoName: 'b',
+        videoName: "b",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg"
         },
         labels: {},
         shapes: {},
         timestamp: 7
       },
       {
-        id: '7',
+        id: "7",
         index: 4,
-        videoName: 'b',
+        videoName: "b",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg"
         },
         labels: {},
         shapes: {},
         timestamp: 8
       },
       {
-        id: '8',
+        id: "8",
         index: 5,
-        videoName: 'b',
+        videoName: "b",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg"
         },
         labels: {},
         shapes: {},
         timestamp: 9
       },
       {
-        id: '9',
+        id: "9",
         index: 6,
-        videoName: 'b',
+        videoName: "b",
         urls: {
-          '-1': 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg'
+          "-1":
+            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg"
         },
         labels: {},
         shapes: {},
@@ -749,10 +793,10 @@ export const sampleTasksVideo: TaskType[] = [
     ],
     tracks: {},
     sensors: {
-      '-1': {
+      "-1": {
         id: -1,
-        name: 'default',
-        type: 'image',
+        name: "default",
+        type: "image",
         extrinsics: undefined,
         intrinsics: undefined
       }

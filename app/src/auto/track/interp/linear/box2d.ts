@@ -1,14 +1,21 @@
-import _ from 'lodash'
-import { LabelType, RectType, ShapeType, SimpleRect } from '../../../../types/state'
-import { assignShapesInRange, getAutoLabelRange, TrackInterp } from '../interp'
+import _ from "lodash"
+import {
+  LabelType,
+  RectType,
+  ShapeType,
+  SimpleRect
+} from "../../../../types/state"
+import { assignShapesInRange, getAutoLabelRange, TrackInterp } from "../interp"
 
 /**
  * Linearly interpolate the rectangles from the first to the last in
  * the shape array.
  * @param shapes
  */
-function linearInterpBoxes (
-    labels: LabelType[], shapes: RectType[]): RectType[] {
+function linearInterpBoxes(
+  labels: LabelType[],
+  shapes: RectType[]
+): RectType[] {
   const newShapes = _.cloneDeep(shapes)
   if (newShapes.length <= 2) {
     return newShapes
@@ -41,12 +48,14 @@ function linearInterpBoxes (
  * @param allLabels
  * @param allShapes
  */
-function linearInterpBoxesInRange (
-    start: number, end: number,
-    allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
+function linearInterpBoxesInRange(
+  start: number,
+  end: number,
+  allLabels: LabelType[],
+  allShapes: ShapeType[][]
+): ShapeType[][] {
   allShapes = [...allShapes]
-  let boxes = allShapes.slice(
-    start, end + 1).map((s) => s[0]) as RectType[]
+  let boxes = allShapes.slice(start, end + 1).map((s) => s[0]) as RectType[]
   const labels = allLabels.slice(start, end + 1)
   boxes = linearInterpBoxes(labels, boxes)
   for (let i = start + 1; i < end; i += 1) {
@@ -66,11 +75,16 @@ export class Box2DLinearInterp extends TrackInterp {
    * @param labels
    * @param shapes
    */
-  public interp (
-    newLabel: LabelType, newShape: ShapeType[],
-    allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
+  public interp(
+    newLabel: LabelType,
+    newShape: ShapeType[],
+    allLabels: LabelType[],
+    allShapes: ShapeType[][]
+  ): ShapeType[][] {
     const [labelIndex, manual0, manual1] = getAutoLabelRange(
-      newLabel, allLabels)
+      newLabel,
+      allLabels
+    )
     // Copy the array
     let newShapes = [...allShapes]
     // Let newShapes = allShapes.map((shapes) => [...shapes]
@@ -79,14 +93,26 @@ export class Box2DLinearInterp extends TrackInterp {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
     } else {
       newShapes = linearInterpBoxesInRange(
-        manual0, labelIndex, allLabels, newShapes)
+        manual0,
+        labelIndex,
+        allLabels,
+        newShapes
+      )
     }
     if (manual1 === -1) {
       newShapes = assignShapesInRange(
-        labelIndex + 1, newShapes.length, newShape, newShapes)
+        labelIndex + 1,
+        newShapes.length,
+        newShape,
+        newShapes
+      )
     } else {
       newShapes = linearInterpBoxesInRange(
-        labelIndex, manual1, allLabels, newShapes)
+        labelIndex,
+        manual1,
+        allLabels,
+        newShapes
+      )
     }
     return newShapes
   }

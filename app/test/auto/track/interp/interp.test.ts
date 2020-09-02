@@ -1,16 +1,16 @@
-import _ from 'lodash'
-import { addBox2dLabel } from '../../../../src/action/box2d'
-import { TrackInterp } from '../../../../src/auto/track/interp/interp'
-import { dispatch, getState } from '../../../../src/common/session'
-import { LabelType, RectType, SimpleRect } from '../../../../src/types/state'
-import { setupTestStore } from '../../../components/util'
-import { emptyTrackingTask } from '../../../test_states/test_track_objects'
+import _ from "lodash"
+import { addBox2dLabel } from "../../../../src/action/box2d"
+import { TrackInterp } from "../../../../src/auto/track/interp/interp"
+import { dispatch, getState } from "../../../../src/common/session"
+import { LabelType, RectType, SimpleRect } from "../../../../src/types/state"
+import { setupTestStore } from "../../../components/util"
+import { emptyTrackingTask } from "../../../test_states/test_track_objects"
 
 beforeEach(() => {
   setupTestStore(emptyTrackingTask)
 })
 
-test('2D box linear interpolation', () => {
+test("2D box linear interpolation", () => {
   const interp: TrackInterp = new TrackInterp()
   const box: SimpleRect = { x1: 0, y1: 0, x2: 20, y2: 20 }
 
@@ -19,15 +19,19 @@ test('2D box linear interpolation', () => {
     dispatch(addBox2dLabel(i, -1, [], {}, box))
   }
   const state = getState()
-  const labels = state.task.items.map(
-    (item) => _.sample(item.labels)) as LabelType[]
-  let shapes = state.task.items.map((item, index) =>
-    [item.shapes[labels[index].shapes[0]]]) as RectType[][]
+  const labels = state.task.items.map((item) =>
+    _.sample(item.labels)
+  ) as LabelType[]
+  let shapes = state.task.items.map((item, index) => [
+    item.shapes[labels[index].shapes[0]]
+  ]) as RectType[][]
 
   // Change the middle label
   const newLabel = _.cloneDeep(labels[4])
   const newShape = _.cloneDeep(shapes[4])
-  labels.map((l) => { l.manual = false })
+  labels.map((l) => {
+    l.manual = false
+  })
   labels[1].manual = true
   labels[6].manual = true
 

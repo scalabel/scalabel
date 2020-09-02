@@ -1,7 +1,6 @@
-import { withStyles } from '@material-ui/core/styles'
-import _ from 'lodash'
-import React from 'react'
-import { label2dViewStyle } from '../styles/label'
+import { withStyles } from "@material-ui/core/styles"
+import React from "react"
+import { label2dViewStyle } from "../styles/label"
 
 interface ClassType {
   /** crosshair class */
@@ -42,7 +41,7 @@ export class Crosshair2D extends React.Component<Props, State> {
   /** vertical crosshair */
   public v: React.ReactElement | null
 
-  constructor (props: Readonly<Props>) {
+  constructor(props: Readonly<Props>) {
     super(props)
     this.h = null
     this.v = null
@@ -60,42 +59,49 @@ export class Crosshair2D extends React.Component<Props, State> {
    * ToolBar render function
    * @return component
    */
-  public render () {
+  public render() {
     const { classes } = this.props
     let valid = false
-    valid = this.state.x >= this.state.displayX &&
-    this.state.x < this.state.displayX + this.state.displayW &&
-    this.state.y >= this.state.displayY &&
-    this.state.y < this.state.displayY + this.state.displayH
+    valid =
+      this.state.x >= this.state.displayX &&
+      this.state.x < this.state.displayX + this.state.displayW &&
+      this.state.y >= this.state.displayY &&
+      this.state.y < this.state.displayY + this.state.displayH
     if (valid) {
-      this.h = <div id='crosshair-h'
-                  className={classes.hair}
-                  style={{
-                    top: this.state.y,
-                    left: this.state.displayX,
-                    width: this.state.displayW
-                  }}
-      />
-      this.v = <div id='crosshair-v'
-                  className={classes.hair}
-                  style={{
-                    left: this.state.x,
-                    top: this.state.displayY,
-                    height: this.state.displayH
-                  }}
-      />
+      this.h = (
+        <div
+          id="crosshair-h"
+          className={classes.hair}
+          style={{
+            top: this.state.y,
+            left: this.state.displayX,
+            width: this.state.displayW
+          }}
+        />
+      )
+      this.v = (
+        <div
+          id="crosshair-v"
+          className={classes.hair}
+          style={{
+            left: this.state.x,
+            top: this.state.displayY,
+            height: this.state.displayH
+          }}
+        />
+      )
     }
 
     return (
-      <div id='crosshair'
-        onMouseMove=
-        {
-        (e: React.MouseEvent<HTMLElement>) => { this.onMouseMove(e) }
-        }
+      <div
+        id="crosshair"
+        onMouseMove={(e: React.MouseEvent<HTMLElement>) => {
+          this.onMouseMove(e)
+        }}
         style={{
-          height: '100%',
-          width: '100%',
-          position: 'absolute'
+          height: "100%",
+          width: "100%",
+          position: "absolute"
         }}
       >
         {this.h}
@@ -113,22 +119,38 @@ export class Crosshair2D extends React.Component<Props, State> {
    * @param {number} displayW
    * @param {number} displayH
    */
-  public updateCrosshair (x: number, y: number,
-                          displayX: number, displayY: number,
-                          displayW: number, displayH: number) {
+  public updateCrosshair(
+    x: number,
+    y: number,
+    displayX: number,
+    displayY: number,
+    displayW: number,
+    displayH: number
+  ): void {
     this.setState({
-      x, y, displayX, displayY, displayW, displayH
+      x,
+      y,
+      displayX,
+      displayY,
+      displayW,
+      displayH
     })
   }
 
   /**
    * update crosshair when mouse moves
    */
-  public onMouseMove (e: React.MouseEvent<HTMLElement>) {
+  public onMouseMove(e: React.MouseEvent<HTMLElement>): void {
     if (this.props.display && this != null) {
       const rect = this.props.display.getBoundingClientRect()
-      this.updateCrosshair(e.clientX, e.clientY, rect.left, rect.top,
-        rect.width, rect.height)
+      this.updateCrosshair(
+        e.clientX,
+        e.clientY,
+        rect.left,
+        rect.top,
+        rect.width,
+        rect.height
+      )
     }
   }
 }

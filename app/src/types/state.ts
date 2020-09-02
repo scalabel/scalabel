@@ -1,15 +1,21 @@
-import { AttributeToolType } from '../const/common'
+import { AttributeToolType } from "../const/common"
 
 export type IdType = string
-export const INVALID_ID: IdType = ''
+export const INVALID_ID: IdType = ""
 
 // Have to define those map because
 // we can't use alias of string as an index signature parameter type
-export interface LabelIdMap {[key: string]: LabelType}
+export interface LabelIdMap {
+  [key: string]: LabelType
+}
 
-export interface ShapeIdMap {[key: string]: ShapeAllType}
+export interface ShapeIdMap {
+  [key: string]: ShapeAllType
+}
 
-export interface TrackIdMap {[key: string]: TrackType}
+export interface TrackIdMap {
+  [key: string]: TrackType
+}
 
 /**
  * Interfaces for immutable states
@@ -47,7 +53,7 @@ export interface TrackType {
   /** type */
   type: string
   /** labels in this track {item index: label id} */
-  labels: {[key: number]: IdType}
+  labels: { [key: number]: IdType }
 }
 
 export interface ShapeType {
@@ -118,10 +124,10 @@ export interface CubeType extends ShapeType {
 export type Point2DType = Vector2Type
 
 export enum PathPointType {
-  UNKNOWN = 'null',
-  LINE = 'line',
-  CURVE = 'bezier',
-  MID = 'mid'
+  UNKNOWN = "null",
+  LINE = "line",
+  CURVE = "bezier",
+  MID = "mid"
 }
 
 export interface SimplePathPoint2DType extends Vector2Type {
@@ -148,7 +154,12 @@ export interface Plane3DType extends ShapeType {
 }
 
 export type ShapeAllType =
-  ShapeType | RectType | CubeType | PolygonType | Plane3DType | Node2DType
+  | ShapeType
+  | RectType
+  | CubeType
+  | PolygonType
+  | Plane3DType
+  | Node2DType
 
 export interface IndexedShapeType {
   /** ID of the shape */
@@ -207,8 +218,7 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   cameraRotateDir?: boolean
 }
 
-export interface Image3DViewerConfigType extends
-  ImageViewerConfigType {
+export interface Image3DViewerConfigType extends ImageViewerConfigType {
   /** If set, sensor id of point cloud to use as reference */
   pointCloudSensor: number
 }
@@ -247,7 +257,9 @@ export interface SensorType {
   extrinsics?: ExtrinsicsType
 }
 
-export interface SensorMapType { [id: number]: SensorType }
+export interface SensorMapType {
+  [id: number]: SensorType
+}
 
 export interface ItemType {
   /** The ID of the item */
@@ -255,7 +267,7 @@ export interface ItemType {
   /** The index of the item */
   index: number
   /** Map between data source id and url */
-  urls: {[id: number]: string}
+  urls: { [id: number]: string }
   /** Labels of the item */
   labels: LabelIdMap // List of label
   /** shapes of the labels on this item */
@@ -288,15 +300,15 @@ export interface Label2DTemplateType {
 
 export interface Attribute {
   /** Attribute tool type */
-  toolType: AttributeToolType,
+  toolType: AttributeToolType
   /** Attribute name */
-  name: string,
+  name: string
   /** Values of attribute */
-  values: string[],
+  values: string[]
   /** Tag text */
-  tagText: string,
+  tagText: string
   /** Tag prefix */
-  tagPrefix: string,
+  tagPrefix: string
   /** Tag suffixes */
   tagSuffixes: string[]
   /** button colors */
@@ -346,8 +358,8 @@ export interface ConfigType {
 }
 
 export enum SplitType {
-  HORIZONTAL = 'horizontal',
-  VERTICAL = 'vertical'
+  HORIZONTAL = "horizontal",
+  VERTICAL = "vertical"
 }
 
 export interface PaneType {
@@ -364,7 +376,7 @@ export interface PaneType {
    * Other child is sized based on the size of the primary child
    * (100% - primary width)
    */
-  primary?: 'first' | 'second'
+  primary?: "first" | "second"
   /** Size of primary pane. */
   primarySize?: number | string
   /** Split type, horizontal or vertical */
@@ -393,7 +405,7 @@ export interface LayoutType {
   /** top level pane node */
   rootPane: number
   /** map between pane id and pane states */
-  panes: {[id: number]: PaneType}
+  panes: { [id: number]: PaneType }
 }
 
 export interface TaskStatus {
@@ -431,13 +443,13 @@ export interface Select {
   /** Currently viewed item index */
   item: number
   /** Map between item indices and label id's */
-  labels: {[index: number]: IdType[]}
+  labels: { [index: number]: IdType[] }
   /** Map between label id's and shape id's */
-  shapes: {[index: string]: IdType}
+  shapes: { [index: string]: IdType }
   /** selected category */
   category: number
   /** selected attributes */
-  attributes: {[key: number]: number[]}
+  attributes: { [key: number]: number[] }
   /** selected label type */
   labelType: number
   /** selected track policy type */
@@ -455,18 +467,26 @@ export interface UserType {
   /** interface layout */
   layout: LayoutType
   /** Viewer configurations, only id 0 & 1 for now (main & assistant) */
-  viewerConfigs: {[id: number]: ViewerConfigType}
+  viewerConfigs: { [id: number]: ViewerConfigType }
 }
 
 export interface ItemStatus {
   /** Whether data source in item is loaded */
-  sensorDataLoaded: {[id: number]: boolean}
+  sensorDataLoaded: { [id: number]: boolean }
 }
 
 export const enum ConnectionStatus {
-  NOTIFY_SAVED, SAVED, SAVING, RECONNECTING, UNSAVED,
-  COMPUTING, COMPUTE_DONE, NOTIFY_COMPUTE_DONE,
-  SUBMITTING, SUBMITTED, NOTIFY_SUBMITTED
+  NOTIFY_SAVED,
+  SAVED,
+  SAVING,
+  RECONNECTING,
+  UNSAVED,
+  COMPUTING,
+  COMPUTE_DONE,
+  NOTIFY_COMPUTE_DONE,
+  SUBMITTING,
+  SUBMITTED,
+  NOTIFY_SUBMITTED
 }
 
 /**
@@ -505,7 +525,7 @@ export interface State {
 
 // Make properties optional at all levels of nested object
 type RecursivePartial<T> = {
-  [P in keyof T]?: RecursivePartial<T[P]>;
+  [P in keyof T]?: RecursivePartial<T[P]>
 }
 
 /**

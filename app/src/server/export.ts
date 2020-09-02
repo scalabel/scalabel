@@ -1,37 +1,50 @@
-import _ from 'lodash'
-import { AttributeToolType, LabelTypeName } from '../const/common'
-import { isValidId } from '../functional/states'
-import { ItemExport, LabelExport, PolygonExportType } from '../types/bdd'
-import { Attribute, ConfigType,
-  ItemType, Node2DType, PathPoint2DType, PathPointType, State
-} from '../types/state'
-import { transformBox2D, transformBox3D, transformPlane3D } from './bdd_type_transformers'
+import { AttributeToolType, LabelTypeName } from "../const/common"
+import { isValidId } from "../functional/states"
+import { ItemExport, LabelExport, PolygonExportType } from "../types/bdd"
+import {
+  Attribute,
+  ConfigType,
+  ItemType,
+  Node2DType,
+  PathPoint2DType,
+  PathPointType,
+  State
+} from "../types/state"
+import {
+  transformBox2D,
+  transformBox3D,
+  transformPlane3D
+} from "./bdd_type_transformers"
 
 /**
  * Converts a polygon label to export format
  */
-export function convertPolygonToExport (
-  pathPoints: PathPoint2DType[], labelType: string): PolygonExportType[] {
-  const typeCharacters = pathPoints.map(
-    (point) => {
-      switch (point.pointType) {
-        case PathPointType.CURVE:
-          return 'C'
-        case PathPointType.LINE:
-          return 'L'
-      }
-
-      return ''
+export function convertPolygonToExport(
+  pathPoints: PathPoint2DType[],
+  labelType: string
+): PolygonExportType[] {
+  const typeCharacters = pathPoints.map((point) => {
+    switch (point.pointType) {
+      case PathPointType.CURVE:
+        return "C"
+      case PathPointType.LINE:
+        return "L"
     }
-  )
-  const types = typeCharacters.join('')
-  const vertices: Array<[number, number]> =
-    pathPoints.map((point) => [point.x, point.y])
-  return [{
-    vertices,
-    types,
-    closed: labelType === LabelTypeName.POLYGON_2D
-  }]
+
+    return ""
+  })
+  const types = typeCharacters.join("")
+  const vertices: Array<[number, number]> = pathPoints.map((point) => [
+    point.x,
+    point.y
+  ])
+  return [
+    {
+      vertices,
+      types,
+      closed: labelType === LabelTypeName.POLYGON_2D
+    }
+  ]
 }
 
 /**
@@ -39,16 +52,16 @@ export function convertPolygonToExport (
  * @param config
  * @param item
  */
-export function convertItemToExport (
+export function convertItemToExport(
   config: ConfigType,
   item: ItemType
 ): ItemExport[] {
-  const itemExports: {[sensor: number]: ItemExport} = {}
+  const itemExports: { [sensor: number]: ItemExport } = {}
   for (const key of Object.keys(item.urls)) {
     const sensor = Number(key)
     const url = item.urls[sensor]
     const videoName = item.videoName
-    const timestamp = (item.timestamp) ? item.timestamp : 0
+    const timestamp = item.timestamp
     itemExports[sensor] = {
       name: url,
       url,
@@ -95,7 +108,7 @@ export function convertItemToExport (
           break
         default:
           if (label.type in config.label2DTemplates) {
-            const points: Array<[number ,number]> = []
+            const points: Array<[number, number]> = []
             const names: string[] = []
             const hidden: boolean[] = []
             for (const shapeId of label.shapes) {
@@ -108,7 +121,10 @@ export function convertItemToExport (
             const template = config.label2DTemplates[label.type]
 
             labelExport.customs[template.name] = {
-              points, names, hidden, edges: template.edges
+              points,
+              names,
+              hidden,
+              edges: template.edges
             }
           }
       }
@@ -128,15 +144,18 @@ export function convertItemToExport (
  * parses attributes into BDD format
  * @param attributes
  */
-function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
-                               configAttributes: Attribute[]):
-  {[key: string]: (string[] | boolean) } {
-  const exportAttributes: {[key: string]: (string[] | boolean) } = {}
+function parseLabelAttributes(
+  labelAttributes: { [key: number]: number[] },
+  configAttributes: Attribute[]
+): { [key: string]: string[] | boolean } {
+  const exportAttributes: { [key: string]: string[] | boolean } = {}
   Object.entries(labelAttributes).forEach(([key, attributeList]) => {
     const index = parseInt(key, 10)
     const attribute = configAttributes[index]
-    if (attribute.toolType === AttributeToolType.LIST
-        || attribute.toolType === AttributeToolType.LONG_LIST) {
+    if (
+      attribute.toolType === AttributeToolType.LIST ||
+      attribute.toolType === AttributeToolType.LONG_LIST
+    ) {
       // List attribute case- check whether each value is applied
       const selectedValues: string[] = []
       attributeList.forEach((valueIndex) => {
@@ -156,7 +175,6 @@ function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
       }
       exportAttributes[attribute.name] = value
     }
-
   })
   return exportAttributes
 }
@@ -165,8 +183,7 @@ function parseLabelAttributes (labelAttributes: {[key: number]: number[]},
  * converts state to export format
  * @param state
  */
-export function convertStateToExport (state: State)
-: ItemExport[] {
+export function convertStateToExport(state: State): ItemExport[] {
   const config = state.task.config
   const items = state.task.items
   const exportList: ItemExport[] = []

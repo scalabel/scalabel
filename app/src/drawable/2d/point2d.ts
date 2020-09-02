@@ -1,5 +1,5 @@
-import { Vector2D } from '../../math/vector2d'
-import { Context2D, toCssColor } from '../util'
+import { Vector2D } from "../../math/vector2d"
+import { Context2D, toCssColor } from "../util"
 
 export interface Point2DStyle {
   /** radius of the point on drawing */
@@ -12,8 +12,9 @@ export interface Point2DStyle {
  * Generate Point2D style with default parameters
  * @param {Partial<Point2DStyle>} style
  */
-export function makePoint2DStyle (
-    style: Partial<Point2DStyle> = {}): Point2DStyle {
+export function makePoint2DStyle(
+  style: Partial<Point2DStyle> = {}
+): Point2DStyle {
   return {
     radius: 1,
     color: [0, 0, 0],
@@ -25,7 +26,7 @@ export function makePoint2DStyle (
  * Drawable 2D point
  */
 export class Point2D extends Vector2D {
-  constructor (x: number = 0, y: number = 0) {
+  constructor(x: number = 0, y: number = 0) {
     super()
     this.x = x
     this.y = y
@@ -37,8 +38,7 @@ export class Point2D extends Vector2D {
    * @param {number} ratio: display to image ratio
    * @param {RectStyle} style
    */
-  public draw (
-    context: Context2D, ratio: number, style: Point2DStyle): void {
+  public draw(context: Context2D, ratio: number, style: Point2DStyle): void {
     context.save()
     // Convert to display resolution
     const real = this.clone().scale(ratio)

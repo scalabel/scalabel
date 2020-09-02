@@ -1,9 +1,9 @@
-import ListItem from '@material-ui/core/ListItem/ListItem'
-import React from 'react'
-import { Category } from '../components/toolbar_category'
-import { ListButton } from '../components/toolbar_list_button'
-import { SwitchBtn } from '../components/toolbar_switch'
-import { AttributeToolType } from '../const/common'
+import ListItem from "@material-ui/core/ListItem/ListItem"
+import React from "react"
+import { Category } from "../components/toolbar_category"
+import { ListButton } from "../components/toolbar_list_button"
+import { SwitchBtn } from "../components/toolbar_switch"
+import { AttributeToolType } from "../const/common"
 
 /**
  * This is renderTemplate function that renders the category.
@@ -12,33 +12,36 @@ import { AttributeToolType } from '../const/common'
  * @param {string} name
  * @param {string[]} options
  */
-export function renderTemplate (
+export function renderTemplate(
   toolType: string,
   handleToggle: (switchName: string) => void,
-  handleAttributeToggle: (
-    toggleName: string,
-    alignment: string) => void,
+  handleAttributeToggle: (toggleName: string, alignment: string) => void,
   getAlignmentIndex: (switName: string) => number,
   name: string,
   options: string[]
-) {
+): React.ReactNode {
   if (toolType === AttributeToolType.SWITCH) {
-    return <SwitchBtn onChange={handleToggle}
-    name={name} getAlignmentIndex={getAlignmentIndex} />
+    return (
+      <SwitchBtn
+        onChange={handleToggle}
+        name={name}
+        getAlignmentIndex={getAlignmentIndex}
+      />
+    )
   } else if (toolType === AttributeToolType.LIST) {
     return (
-      <ListItem dense={true} style={{ textAlign: 'center' }}>
+      <ListItem dense={true} style={{ textAlign: "center" }}>
         <ListButton
           name={name}
           values={options}
           handleAttributeToggle={handleAttributeToggle}
-          getAlignmentIndex = {getAlignmentIndex}
+          getAlignmentIndex={getAlignmentIndex}
         />
       </ListItem>
     )
   } else if (toolType === AttributeToolType.LONG_LIST) {
     return (
-      <ListItem dense={true} style={{ textAlign: 'center' }}>
+      <ListItem dense={true} style={{ textAlign: "center" }}>
         <Category categories={options} headerText={name} />
       </ListItem>
     )

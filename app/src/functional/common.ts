@@ -3,12 +3,12 @@
  * NOTE: All the functions should be pure
  * Pure Function: https://en.wikipedia.org/wiki/Pure_function
  */
-import { IdType } from 'aws-sdk/clients/workdocs'
-import _ from 'lodash'
-import { uid } from '../common/uid'
-import * as actionConsts from '../const/action'
-import { LabelTypeName, ViewerConfigTypeName } from '../const/common'
-import * as actionTypes from '../types/action'
+import { IdType } from "aws-sdk/clients/workdocs"
+import _ from "lodash"
+import { uid } from "../common/uid"
+import * as actionConsts from "../const/action"
+import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
+import * as actionTypes from "../types/action"
 import {
   INVALID_ID,
   ItemType,
@@ -26,8 +26,8 @@ import {
   TrackType,
   UserType,
   ViewerConfigType
-} from '../types/state'
-import { isValidId, makeLabel, makePane, makeTrack } from './states'
+} from "../types/state"
+import { isValidId, makeLabel, makePane, makeTrack } from "./states"
 import {
   assignToArray,
   pickArray,
@@ -36,14 +36,14 @@ import {
   removeObjectFields,
   updateListItem,
   updateObject
-} from './util'
+} from "./util"
 
 /**
  * Initialize session component of state
  * @param {State} state
  * @return {State}
  */
-export function initSession (state: State): State {
+export function initSession(state: State): State {
   // Initialize state
   let session = state.session
   const items = state.task.items
@@ -65,7 +65,7 @@ export function initSession (state: State): State {
  * @param {UserType} user
  * @param {Partial<Select>} pselect partial selection
  */
-function updateUserSelect (user: UserType, pselect: Partial<Select>): UserType {
+function updateUserSelect(user: UserType, pselect: Partial<Select>): UserType {
   const select = updateObject(user.select, pselect)
   return updateObject(user, { select })
 }
@@ -75,9 +75,10 @@ function updateUserSelect (user: UserType, pselect: Partial<Select>): UserType {
  * @param {State} state: current state
  * @param {actionTypes.UpdateTaskAction} action
  */
-export function updateTask (
+export function updateTask(
   state: State,
-  action: actionTypes.UpdateTaskAction): State {
+  action: actionTypes.UpdateTaskAction
+): State {
   return updateObject(state, { task: _.cloneDeep(action.newTask) })
 }
 
@@ -86,9 +87,10 @@ export function updateTask (
  * @param {State} state: current state
  * @param {actionTypes.UpdateStateAction} action
  */
-export function updateState (
+export function updateState(
   state: State,
-  action: actionTypes.UpdateStateAction): State {
+  action: actionTypes.UpdateStateAction
+): State {
   return _.merge(state, _.cloneDeep(action.newState))
 }
 
@@ -99,9 +101,12 @@ export function updateState (
  * @param {actionTypes.AddLabelAction} action
  * @return {State}
  */
-export function addLabel (
-  state: State, itemIndex: number, label: LabelType,
-  shapes: ShapeType[] = []): State {
+export function addLabel(
+  state: State,
+  itemIndex: number,
+  label: LabelType,
+  shapes: ShapeType[] = []
+): State {
   const addLabelsAction: actionTypes.AddLabelsAction = {
     actionId: uid(),
     type: actionConsts.ADD_LABELS,
@@ -122,9 +127,11 @@ export function addLabel (
  * @param {actionTypes.DeleteLabelAction} action
  * @return {State}
  */
-export function deleteLabelsById (
-  state: State, itemIndex: number, labelIds: IdType[])
-  : State {
+export function deleteLabelsById(
+  state: State,
+  itemIndex: number,
+  labelIds: IdType[]
+): State {
   const deleteLabelsAction: actionTypes.DeleteLabelsAction = {
     type: actionConsts.DELETE_LABELS,
     actionId: uid(),
@@ -145,8 +152,10 @@ export function deleteLabelsById (
  * @param shapeTypes
  * @param shapes
  */
-function addLabelsToItem (
-  item: ItemType, taskStatus: TaskStatus, newLabels: LabelType[],
+function addLabelsToItem(
+  item: ItemType,
+  taskStatus: TaskStatus,
+  newLabels: LabelType[],
   shapes: ShapeType[][]
 ): [ItemType, LabelType[], TaskStatus] {
   newLabels = [...newLabels]
@@ -169,18 +178,15 @@ function addLabelsToItem (
     newShapes.push(...newLabelShapes)
     newShapeIds.push(...shapeIds)
   })
-  const labels = updateObject(
-    item.labels, _.zipObject(newLabelIds, newLabels))
+  const labels = updateObject(item.labels, _.zipObject(newLabelIds, newLabels))
   const allShapes = updateObject(
     item.shapes,
     _.zipObject(newShapeIds, newShapes)
   )
   item = updateObject(item, { labels, shapes: allShapes })
-  taskStatus = updateObject(
-    taskStatus,
-    {
-      maxOrder: taskStatus.maxOrder + newLabels.length
-    })
+  taskStatus = updateObject(taskStatus, {
+    maxOrder: taskStatus.maxOrder + newLabels.length
+  })
   return [item, newLabels, taskStatus]
 }
 
@@ -192,15 +198,21 @@ function addLabelsToItem (
  * @param shapeTypes
  * @param shapes
  */
-function addLabelstoItems (
-  items: ItemType[], taskStatus: TaskStatus, labelsToAdd: LabelType[][],
+function addLabelstoItems(
+  items: ItemType[],
+  taskStatus: TaskStatus,
+  labelsToAdd: LabelType[][],
   shapes: ShapeType[][][]
 ): [ItemType[], LabelType[], TaskStatus] {
   const allNewLabels: LabelType[] = []
   items = [...items]
   items.forEach((item, index) => {
     const [newItem, newLabels, newStatus] = addLabelsToItem(
-      item, taskStatus, labelsToAdd[index], shapes[index])
+      item,
+      taskStatus,
+      labelsToAdd[index],
+      shapes[index]
+    )
     items[index] = newItem
     taskStatus = newStatus
     allNewLabels.push(...newLabels)
@@ -215,7 +227,7 @@ function addLabelstoItems (
  * @param {actionTypes.AddLabelsAction} action
  * @return {State}
  */
-export function addLabels (
+export function addLabels(
   state: State,
   action: actionTypes.AddLabelsAction
 ): State {
@@ -224,14 +236,19 @@ export function addLabels (
   let items = [...task.items]
   const selectedItems = pickArray(items, action.itemIndices)
   const [newItems, newLabels, status] = addLabelstoItems(
-    selectedItems, task.status, action.labels, action.shapes)
+    selectedItems,
+    task.status,
+    action.labels,
+    action.shapes
+  )
   items = assignToArray(items, newItems, action.itemIndices)
   // Find the first new label in the selected item if the labels are created
   // by this session.
   if (action.sessionId === session.id) {
     for (const label of newLabels) {
       if (label.item === user.select.item) {
-        if (label.children.length === 0) { // Skip virtual parent label
+        if (label.children.length === 0) {
+          // Skip virtual parent label
           const selectedLabels: { [index: number]: IdType[] } = {}
           selectedLabels[user.select.item] = [label.id]
           user = updateUserSelect(user, {
@@ -256,7 +273,7 @@ export function addLabels (
  * @param shapeTypes
  * @param shapes
  */
-function addTrackToTask (
+function addTrackToTask(
   task: TaskType,
   type: string,
   itemIndices: number[],
@@ -268,7 +285,10 @@ function addTrackToTask (
   const shapeList = shapes.map((s) => [s])
   const [newItems, newLabels, status] = addLabelstoItems(
     pickArray(task.items, itemIndices),
-    task.status, labelList, shapeList)
+    task.status,
+    labelList,
+    shapeList
+  )
   const items = assignToArray(task.items, newItems, itemIndices)
   newLabels.map((l) => {
     track.labels[l.item] = l.id
@@ -283,13 +303,16 @@ function addTrackToTask (
  * @param {State} state
  * @param {actionTypes.AddTrackAction} action
  */
-export function addTrack (
+export function addTrack(
   state: State,
   action: actionTypes.AddTrackAction
 ): State {
   let { user } = state
   const [task, , newLabels] = addTrackToTask(
-    state.task, action.trackType, action.itemIndices, action.labels,
+    state.task,
+    action.trackType,
+    action.itemIndices,
+    action.labels,
     action.shapes
   )
   // Select the label on the current item
@@ -311,12 +334,15 @@ export function addTrack (
  * @param tracks
  * @param items
  */
-function mergeTracksInItems (
-  tracks: TrackType[], items: ItemType[]): [TrackType, ItemType[]] {
+function mergeTracksInItems(
+  tracks: TrackType[],
+  items: ItemType[]
+): [TrackType, ItemType[]] {
   tracks = [...tracks]
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
   const props: Array<Array<Partial<LabelType>>> = _.range(
-    items.length).map(() => [])
+    items.length
+  ).map(() => [])
 
   const firstItem = Number(Object.keys(tracks[0].labels)[0])
   const firstLabelId = tracks[0].labels[firstItem]
@@ -344,8 +370,10 @@ function mergeTracksInItems (
  * @param state
  * @param action
  */
-export function mergeTracks (
-  state: State, action: actionTypes.MergeTrackAction): State {
+export function mergeTracks(
+  state: State,
+  action: actionTypes.MergeTrackAction
+): State {
   let { task, session } = state
   const mergedTracks = action.trackIds.map((trackId) => task.tracks[trackId])
   const tracks = removeObjectFields(task.tracks, action.trackIds)
@@ -362,9 +390,11 @@ export function mergeTracks (
  * @param shapeIds
  * @param shapes
  */
-function changeShapesInItem (
-  item: ItemType, shapeIds: IdType[],
-  shapes: Array<Partial<ShapeType>>): ItemType {
+function changeShapesInItem(
+  item: ItemType,
+  shapeIds: IdType[],
+  shapes: Array<Partial<ShapeType>>
+): ItemType {
   const newShapes = { ...item.shapes }
   shapeIds.forEach((shapeId, index) => {
     newShapes[shapeId] = updateObject(newShapes[shapeId], shapes[index])
@@ -379,9 +409,11 @@ function changeShapesInItem (
  * @param shapeIds
  * @param shapes
  */
-function changeShapesInItems (
-  items: ItemType[], shapeIds: IdType[][],
-  shapes: Array<Array<Partial<ShapeType>>>): ItemType[] {
+function changeShapesInItems(
+  items: ItemType[],
+  shapeIds: IdType[][],
+  shapes: Array<Array<Partial<ShapeType>>>
+): ItemType[] {
   items = [...items]
   items.forEach((item, index) => {
     items[index] = changeShapesInItem(item, shapeIds[index], shapes[index])
@@ -394,13 +426,18 @@ function changeShapesInItems (
  * @param state
  * @param action
  */
-export function changeShapes (
-  state: State, action: actionTypes.ChangeShapesAction): State {
+export function changeShapes(
+  state: State,
+  action: actionTypes.ChangeShapesAction
+): State {
   let task = state.task
   const user = state.user
   const shapeIds = action.shapeIds
   const newItems = changeShapesInItems(
-    pickArray(task.items, action.itemIndices), shapeIds, action.shapes)
+    pickArray(task.items, action.itemIndices),
+    shapeIds,
+    action.shapes
+  )
   const items = assignToArray(task.items, newItems, action.itemIndices)
   task = updateObject(task, { items })
   return { ...state, task, user }
@@ -411,7 +448,7 @@ export function changeShapes (
  * @param item
  * @param labels
  */
-function changeLabelsInItem (
+function changeLabelsInItem(
   item: ItemType,
   labelIds: IdType[],
   props: Array<Partial<LabelType>>
@@ -422,19 +459,19 @@ function changeLabelsInItem (
   const allChangedShapes: { [key: string]: ShapeType } = {}
   labelIds.forEach((labelId, index) => {
     const children = props[index].children
-    if (children) {
+    if (children !== undefined) {
       props[index].children = children.filter((id) => isValidId(id))
     }
     const oldLabel = item.labels[labelId]
-    const newLabel = updateObject(
-      oldLabel, _.cloneDeep(props[index]))
+    const newLabel = updateObject(oldLabel, _.cloneDeep(props[index]))
     newLabels[labelId] = newLabel
     // Find the shapes to change and delete from the old label
     const newLabelShapeIds = new Set(newLabel.shapes)
     const changedShapeIds = _.filter(
-      oldLabel.shapes, (s) => !newLabelShapeIds.has(s))
-    const changedShapes = changedShapeIds.map(
-      (s) => (_.cloneDeep(allShapes[s])))
+      oldLabel.shapes,
+      (s) => !newLabelShapeIds.has(s)
+    )
+    const changedShapes = changedShapeIds.map((s) => _.cloneDeep(allShapes[s]))
     _.forEach(changedShapes, (s) => {
       s.label = removeListItems(s.label, [oldLabel.id])
       if (s.label.length === 0) {
@@ -444,12 +481,13 @@ function changeLabelsInItem (
       }
     })
   })
-  item = updateObject(
-    item, {
-      labels: updateObject(item.labels, newLabels),
-      shapes: updateObject(
-      removeObjectFields(allShapes, allDeletedShapes), allChangedShapes)
-    })
+  item = updateObject(item, {
+    labels: updateObject(item.labels, newLabels),
+    shapes: updateObject(
+      removeObjectFields(allShapes, allDeletedShapes),
+      allChangedShapes
+    )
+  })
   return item
 }
 
@@ -458,9 +496,11 @@ function changeLabelsInItem (
  * @param items
  * @param labels
  */
-function changeLabelsInItems (
-  items: ItemType[], labelIds: IdType[][],
-  props: Array<Array<Partial<LabelType>>>): ItemType[] {
+function changeLabelsInItems(
+  items: ItemType[],
+  labelIds: IdType[][],
+  props: Array<Array<Partial<LabelType>>>
+): ItemType[] {
   items = [...items]
   items.forEach((item, index) => {
     items[index] = changeLabelsInItem(item, labelIds[index], props[index])
@@ -473,8 +513,10 @@ function changeLabelsInItems (
  * @param state
  * @param action
  */
-export function changeLabels (
-  state: State, action: actionTypes.ChangeLabelsAction): State {
+export function changeLabels(
+  state: State,
+  action: actionTypes.ChangeLabelsAction
+): State {
   let items = pickArray(state.task.items, action.itemIndices)
   items = changeLabelsInItems(items, action.labelIds, action.props)
   items = assignToArray(state.task.items, items, action.itemIndices)
@@ -487,7 +529,7 @@ export function changeLabels (
  * @param item
  * @param labelId
  */
-export function getRootLabelId (item: ItemType, labelId: IdType): string {
+export function getRootLabelId(item: ItemType, labelId: IdType): string {
   let parent = item.labels[labelId].parent
 
   while (isValidId(parent)) {
@@ -502,7 +544,7 @@ export function getRootLabelId (item: ItemType, labelId: IdType): string {
  * @param item
  * @param labelId
  */
-export function getLinkedLabelIds (item: ItemType, labelId: IdType): string[] {
+export function getLinkedLabelIds(item: ItemType, labelId: IdType): string[] {
   return getChildLabelIds(item, getRootLabelId(item, labelId))
 }
 
@@ -511,7 +553,7 @@ export function getLinkedLabelIds (item: ItemType, labelId: IdType): string[] {
  * @param item
  * @param labelId
  */
-function getChildLabelIds (item: ItemType, labelId: IdType): string[] {
+function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
   const labelIds: IdType[] = []
   const label = item.labels[labelId]
   if (label.children.length === 0) {
@@ -532,7 +574,7 @@ function getChildLabelIds (item: ItemType, labelId: IdType): string[] {
  * @param item
  * @param labelId
  */
-export function getRootTrackId (item: ItemType, labelId: IdType): IdType {
+export function getRootTrackId(item: ItemType, labelId: IdType): IdType {
   let parent = item.labels[labelId].parent
   while (isValidId(parent)) {
     labelId = parent
@@ -551,9 +593,13 @@ export function getRootTrackId (item: ItemType, labelId: IdType): IdType {
  * @param {LabelType} label Label template for the parent label
  * @param {string} [trackId] track id of the parent label if given
  */
-function createParentLabel (
-  state: State, index: number, idList: string[],
-  label: LabelType, trackId?: string) {
+function createParentLabel(
+  state: State,
+  index: number,
+  idList: string[],
+  label: LabelType,
+  trackId?: string
+): State {
   let item = state.task.items[index]
   let tracks = state.task.tracks
   const labelsToMerge = idList.map((id) => item.labels[id])
@@ -563,7 +609,7 @@ function createParentLabel (
   parentLabel.parent = INVALID_ID
   parentLabel.shapes = []
   parentLabel.children = [...idList]
-  if (trackId) {
+  if (trackId !== undefined) {
     parentLabel.track = trackId
   }
   parentLabel.type = LabelTypeName.EMPTY
@@ -578,26 +624,23 @@ function createParentLabel (
     nLabel.parent = parentLabel.id
     nLabel.category = _.cloneDeep(newParentLabel.category)
     nLabel.attributes = _.cloneDeep(newParentLabel.attributes)
-    if (trackId) {
+    if (trackId !== undefined) {
       nLabel.track = trackId
     }
     return nLabel
   })
-  if (trackId) {
+  if (trackId !== undefined) {
     // Update track information
     let track = state.task.tracks[trackId]
     track = updateObject(track, {
-      labels: updateObject(
-        track.labels, { [index]: parentLabel.id })
+      labels: updateObject(track.labels, { [index]: parentLabel.id })
     })
     tracks = updateObject(tracks, { [trackId]: track })
   }
 
   // Update the item
   item = updateObject(item, {
-    labels: updateObject(
-      item.labels,
-      _.zipObject(idList, newLabels))
+    labels: updateObject(item.labels, _.zipObject(idList, newLabels))
   })
   const items = updateListItem(state.task.items, index, item)
   const task = updateObject(state.task, { items, tracks })
@@ -610,23 +653,27 @@ function createParentLabel (
  * @param {State} state
  * @param {actionTypes.LinkLabelsAction} action
  */
-export function linkLabels (
-  state: State, action: actionTypes.LinkLabelsAction): State {
+export function linkLabels(
+  state: State,
+  action: actionTypes.LinkLabelsAction
+): State {
   // No selection or only 1 item selected will not get linked
   if (action.labelIds.length < 2) {
     return state
   }
   // Add a new label to the state
   const item = state.task.items[action.itemIndex]
-  const children = action.labelIds.map(
-                     (labelId) => getRootLabelId(item, labelId)
-                   )
+  const children = action.labelIds.map((labelId) =>
+    getRootLabelId(item, labelId)
+  )
   const baseLabel = item.labels[children[0]]
-  const toLinkTrackIds =
-    [...new Set(
-      children.map((labelId) => item.labels[labelId].track)
-        .filter((trackId) => trackId !== '')
-      )]
+  const toLinkTrackIds = [
+    ...new Set(
+      children
+        .map((labelId) => item.labels[labelId].track)
+        .filter((trackId) => trackId !== "")
+    )
+  ]
   if (toLinkTrackIds.length > 1) {
     // In track mode, will only be linked between multiple tracks
     // It is impossible to have only one track
@@ -635,19 +682,27 @@ export function linkLabels (
     // If multiple tracks to be linked, all of the labels should be linked.
     state.task.items.forEach((taskItem, idx) => {
       const labelIdsToMerge = toLinkTracks
-                              .map((track) =>
-                                idx in track.labels
-                                ? getRootLabelId(taskItem, track.labels[idx])
-                                : null)
-                              .filter((lbl) => lbl !== null) as string[]
+        .map((track) =>
+          idx in track.labels
+            ? getRootLabelId(taskItem, track.labels[idx])
+            : null
+        )
+        .filter((lbl) => lbl !== null) as string[]
       if (labelIdsToMerge.length > 0) {
         state = createParentLabel(
-                      state, idx, labelIdsToMerge, baseLabel, baseTrackId)
+          state,
+          idx,
+          labelIdsToMerge,
+          baseLabel,
+          baseTrackId
+        )
       }
     })
     // Unused tracks should be deleted
-    state.task.tracks =
-      removeObjectFields(state.task.tracks, toLinkTrackIds.slice(1))
+    state.task.tracks = removeObjectFields(
+      state.task.tracks,
+      toLinkTrackIds.slice(1)
+    )
   } else {
     // No track. Only link labels.
     state = createParentLabel(state, action.itemIndex, children, baseLabel)
@@ -660,8 +715,10 @@ export function linkLabels (
  * @param {State} state
  * @param {actionTypes.UnlinkLabelsAction} action
  */
-export function unlinkLabels (
-  state: State, action: actionTypes.UnlinkLabelsAction): State {
+export function unlinkLabels(
+  state: State,
+  action: actionTypes.UnlinkLabelsAction
+): State {
   if (action.labelIds.length < 1) {
     return state
   }
@@ -669,7 +726,6 @@ export function unlinkLabels (
   const labels = _.clone(state.task.items[action.itemIndex].labels)
 
   for (let labelId of action.labelIds) {
-
     let label = _.cloneDeep(labels[labelId])
     let parentId = label.parent
     let parentLabel
@@ -694,11 +750,17 @@ export function unlinkLabels (
       }
     }
   }
-  const items = updateListItem(state.task.items, action.itemIndex,
-    updateObject(state.task.items[action.itemIndex], { labels }))
+  const items = updateListItem(
+    state.task.items,
+    action.itemIndex,
+    updateObject(state.task.items[action.itemIndex], { labels })
+  )
   const task = updateObject(state.task, { items })
-  return deleteLabelsById(updateObject(state, { task }),
-    action.itemIndex, deleteLabelList)
+  return deleteLabelsById(
+    updateObject(state, { task }),
+    action.itemIndex,
+    deleteLabelList
+  )
 }
 
 /**
@@ -706,25 +768,32 @@ export function unlinkLabels (
  * @param {State} state
  * @param {actionTypes.ChangeSelectAction} action
  */
-export function changeSelect (
-  state: State, action: actionTypes.ChangeSelectAction): State {
+export function changeSelect(
+  state: State,
+  action: actionTypes.ChangeSelectAction
+): State {
   // Keep selected label selected in new items in tracking mode
-  if (state.task.config.tracking
-      && state.user.select.item !== action.select.item) {
-    if (action.select.labels) {
+  if (
+    state.task.config.tracking &&
+    state.user.select.item !== action.select.item
+  ) {
+    if (action.select.labels !== undefined) {
       for (const key of Object.keys(state.user.select.labels)) {
         const index = Number(key)
         const selectedLabelIds = state.user.select.labels[index]
-        const newItem = action.select.item || 0
-        const newLabelId = selectedLabelIds.map((labelId) => {
-          if (labelId in state.task.items[index].labels) {
-            const track = state.task.items[index].labels[labelId].track
-            return state.task.tracks[track].labels[newItem]
-          }
-          return ''
-        }).filter(Boolean)
+        const newItem =
+          action.select.item !== undefined ? action.select.item : 0
+        const newLabelId = selectedLabelIds
+          .map((labelId) => {
+            if (labelId in state.task.items[index].labels) {
+              const track = state.task.items[index].labels[labelId].track
+              return state.task.tracks[track].labels[newItem]
+            }
+            return ""
+          })
+          .filter(Boolean)
         if (newLabelId.length > 0) {
-          if (!action.select.labels) {
+          if (action.select.labels === undefined) {
             action.select.labels = {}
           }
           action.select.labels[newItem] = newLabelId
@@ -736,6 +805,7 @@ export function changeSelect (
   for (const key of Object.keys(newSelect.labels)) {
     const index = Number(key)
     if (newSelect.labels[index].length === 0) {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete newSelect.labels[index]
     }
   }
@@ -751,22 +821,23 @@ export function changeSelect (
  * @param {actionTypes.LoadItemAction} action
  * @return {State}
  */
-export function loadItem (
+export function loadItem(
   state: State,
   action: actionTypes.LoadItemAction
 ): State {
   const itemIndex = action.itemIndex
   let session = state.session
   session = updateObject(session, {
-    itemStatuses:
-      updateListItem(session.itemStatuses, itemIndex,
-        updateObject(session.itemStatuses[itemIndex], {
-          sensorDataLoaded: updateObject(
-            session.itemStatuses[itemIndex].sensorDataLoaded,
-            { [action.sensorId]: true }
-          )
-        })
-      )
+    itemStatuses: updateListItem(
+      session.itemStatuses,
+      itemIndex,
+      updateObject(session.itemStatuses[itemIndex], {
+        sensorDataLoaded: updateObject(
+          session.itemStatuses[itemIndex].sensorDataLoaded,
+          { [action.sensorId]: true }
+        )
+      })
+    )
   })
   return updateObject(state, { session })
 }
@@ -777,11 +848,14 @@ export function loadItem (
  * @param labelIds
  * @returns new item and the deleted labels
  */
-function deleteLabelsFromItem (
-  item: ItemType, labelIds: IdType[]): [ItemType, LabelType[]] {
+function deleteLabelsFromItem(
+  item: ItemType,
+  labelIds: IdType[]
+): [ItemType, LabelType[]] {
   let labels = item.labels
   labelIds = labelIds.concat(
-    ...labelIds.map((labelId) => item.labels[labelId].children))
+    ...labelIds.map((labelId) => item.labels[labelId].children)
+  )
 
   const deletedLabels = pickObject(item.labels, labelIds)
 
@@ -792,9 +866,10 @@ function deleteLabelsFromItem (
   _.forEach(deletedLabels, (label) => {
     if (isValidId(label.parent)) {
       // TODO: consider multiple level parenting
-      const parentLabel = label.parent in updatedLabels
-                          ? updatedLabels[label.parent]
-                          : _.cloneDeep(labels[label.parent])
+      const parentLabel =
+        label.parent in updatedLabels
+          ? updatedLabels[label.parent]
+          : _.cloneDeep(labels[label.parent])
       parentLabel.children = removeListItems(parentLabel.children, [label.id])
       updatedLabels[parentLabel.id] = parentLabel
     }
@@ -803,8 +878,9 @@ function deleteLabelsFromItem (
         updatedShapes[shapeId] = item.shapes[shapeId]
       }
       let shape = updatedShapes[shapeId]
-      shape = updateObject(
-        shape, { label: removeListItems(shape.label, [label.id]) })
+      shape = updateObject(shape, {
+        label: removeListItems(shape.label, [label.id])
+      })
       updatedShapes[shapeId] = shape
     })
   })
@@ -821,10 +897,14 @@ function deleteLabelsFromItem (
     }
   })
 
-  labels = removeObjectFields(updateObject(
-    item.labels, updatedLabels), _.keys(deletedLabels))
-  const shapes = removeObjectFields(updateObject(
-    item.shapes, updatedShapes), _.keys(deletedShapes))
+  labels = removeObjectFields(
+    updateObject(item.labels, updatedLabels),
+    _.keys(deletedLabels)
+  )
+  const shapes = removeObjectFields(
+    updateObject(item.shapes, updatedShapes),
+    _.keys(deletedShapes)
+  )
   return [{ ...item, labels, shapes }, _.values(deletedLabels)]
 }
 
@@ -833,8 +913,10 @@ function deleteLabelsFromItem (
  * @param item
  * @param labelIds
  */
-function deleteLabelsFromItems (
-  items: ItemType[], labelIds: IdType[][]): [ItemType[], LabelType[]] {
+function deleteLabelsFromItems(
+  items: ItemType[],
+  labelIds: IdType[][]
+): [ItemType[], LabelType[]] {
   items = [...items]
   const deletedLabels: LabelType[] = []
   items.forEach((item, index) => {
@@ -850,8 +932,9 @@ function deleteLabelsFromItems (
  * @param tracks
  * @param labels
  */
-function deleteLabelsFromTracks (
-  tracks: TrackIdMap, labels: LabelType[]
+function deleteLabelsFromTracks(
+  tracks: TrackIdMap,
+  labels: LabelType[]
 ): TrackIdMap {
   tracks = { ...tracks }
   const deletedLabelsByTrack: TrackIdMap = {}
@@ -865,14 +948,16 @@ function deleteLabelsFromTracks (
   _.forEach(deletedLabelsByTrack, (track, trackId) => {
     if (isValidId(trackId) && trackId in tracks) {
       const oldTrack = tracks[trackId]
-      const newTrack = updateObject(oldTrack,
-        {
-          labels: removeObjectFields(
-            oldTrack.labels, _.keys(track.labels).map((k) => Number(k)))
-        })
+      const newTrack = updateObject(oldTrack, {
+        labels: removeObjectFields(
+          oldTrack.labels,
+          _.keys(track.labels).map((k) => Number(k))
+        )
+      })
       if (_.size(newTrack.labels) > 0) {
         tracks[trackId] = newTrack
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete tracks[trackId]
       }
     }
@@ -885,12 +970,19 @@ function deleteLabelsFromTracks (
  * @param state
  * @param action
  */
-export function deleteLabels (
-  state: State, action: actionTypes.DeleteLabelsAction): State {
+export function deleteLabels(
+  state: State,
+  action: actionTypes.DeleteLabelsAction
+): State {
   const [newItems, deletedLabels] = deleteLabelsFromItems(
-    pickArray(state.task.items, action.itemIndices), action.labelIds)
+    pickArray(state.task.items, action.itemIndices),
+    action.labelIds
+  )
   const items = assignToArray(
-    [...state.task.items], newItems, action.itemIndices)
+    [...state.task.items],
+    newItems,
+    action.itemIndices
+  )
   const tracks = deleteLabelsFromTracks(state.task.tracks, deletedLabels)
   const task = updateObject(state.task, { items, tracks })
   // Reset selected object
@@ -925,8 +1017,7 @@ export function deleteLabels (
  * @param {object} _attributeOptions
  * @return {State}
  */
-export function changeAttribute (state: State, _labelId: number,
-                                 _attributeOptions: object): State {
+export function changeAttribute(state: State): State {
   return state
 }
 
@@ -935,7 +1026,7 @@ export function changeAttribute (state: State, _labelId: number,
  * @param {State} state
  * @return {State}
  */
-export function updateAll (state: State): State {
+export function updateAll(state: State): State {
   return state
 }
 
@@ -944,44 +1035,40 @@ export function updateAll (state: State): State {
  * @param state
  * @param action
  */
-export function addViewerConfig (
-  state: State, action: actionTypes.AddViewerConfigAction
-) {
+export function addViewerConfig(
+  state: State,
+  action: actionTypes.AddViewerConfigAction
+): State {
   const newViewerConfigs = {
     ...state.user.viewerConfigs,
     [action.id]: action.config
   }
-  const newUser = updateObject(
-    state.user,
-    { viewerConfigs: newViewerConfigs }
-  )
+  const newUser = updateObject(state.user, { viewerConfigs: newViewerConfigs })
   return updateObject(state, { user: newUser })
 }
 
 /** Handle different synchronization modes for different viewer configs */
-function handleViewerSynchronization (
+function handleViewerSynchronization(
   modifiedConfig: Readonly<ViewerConfigType>,
   config: ViewerConfigType
 ): ViewerConfigType {
   config = updateObject(config, { synchronized: modifiedConfig.synchronized })
   if (modifiedConfig.synchronized) {
     switch (config.type) {
-      case ViewerConfigTypeName.POINT_CLOUD:
+      case ViewerConfigTypeName.POINT_CLOUD: {
         const newTarget = (modifiedConfig as PointCloudViewerConfigType).target
         const oldTarget = (config as PointCloudViewerConfigType).target
         const position = (config as PointCloudViewerConfigType).position
-        config = updateObject(
-          config as PointCloudViewerConfigType,
-          {
-            position: {
-              x: position.x - oldTarget.x + newTarget.x,
-              y: position.y - oldTarget.y + newTarget.y,
-              z: position.z - oldTarget.z + newTarget.z
-            },
-            target: { ...newTarget }
-          }
-        )
+        config = updateObject(config as PointCloudViewerConfigType, {
+          position: {
+            x: position.x - oldTarget.x + newTarget.x,
+            y: position.y - oldTarget.y + newTarget.y,
+            z: position.z - oldTarget.z + newTarget.z
+          },
+          target: { ...newTarget }
+        })
         break
+      }
     }
   }
   return config
@@ -992,16 +1079,16 @@ function handleViewerSynchronization (
  * @param state
  * @param action
  */
-export function changeViewerConfig (
-  state: State, action: actionTypes.ChangeViewerConfigAction
+export function changeViewerConfig(
+  state: State,
+  action: actionTypes.ChangeViewerConfigAction
 ): State {
   if (action.viewerId in state.user.viewerConfigs) {
     const oldConfig = state.user.viewerConfigs[action.viewerId]
-    const newViewerConfig = (action.config.type === oldConfig.type) ?
-      updateObject(
-        oldConfig,
-        action.config
-      ) : _.cloneDeep(action.config)
+    const newViewerConfig =
+      action.config.type === oldConfig.type
+        ? updateObject(oldConfig, action.config)
+        : _.cloneDeep(action.config)
     const updatedViewerConfigs = { [action.viewerId]: newViewerConfig }
     for (const key of Object.keys(state.user.viewerConfigs)) {
       const id = Number(key)
@@ -1010,17 +1097,19 @@ export function changeViewerConfig (
         id !== action.viewerId
       ) {
         const newConfig = handleViewerSynchronization(
-          action.config, state.user.viewerConfigs[id]
+          action.config,
+          state.user.viewerConfigs[id]
         )
         updatedViewerConfigs[id] = newConfig
       }
     }
-    const viewerConfigs =
-      updateObject(state.user.viewerConfigs, updatedViewerConfigs)
-    state = updateObject(
-      state,
-      { user: updateObject(state.user, { viewerConfigs }) }
+    const viewerConfigs = updateObject(
+      state.user.viewerConfigs,
+      updatedViewerConfigs
     )
+    state = updateObject(state, {
+      user: updateObject(state.user, { viewerConfigs })
+    })
   }
   return state
 }
@@ -1028,15 +1117,16 @@ export function changeViewerConfig (
 /**
  * Propagate hidden flag from starting pane upward through the tree
  * A non-leaf pane is hidden iff both of its children are hidden
+ * TODO: this is not functional now
  */
-function propagateHiddenPane (
+function propagateHiddenPane(
   paneId: number,
-  panes: { [id: number]: PaneType}
-) {
+  panes: { [id: number]: PaneType }
+): void {
   let pane = panes[paneId]
   while (pane.parent >= 0) {
     const parent = panes[pane.parent]
-    if (parent.child1 && parent.child2) {
+    if (parent.child1 !== undefined && parent.child2 !== undefined) {
       // Set pane to be hidden if both children are hidden
       const hide = panes[parent.child1].hide && panes[parent.child2].hide
       panes[pane.parent] = updateObject(parent, { hide })
@@ -1048,51 +1138,40 @@ function propagateHiddenPane (
 }
 
 /** Update existing pane */
-export function updatePane (
-  state: State, action: actionTypes.UpdatePaneAction
-) {
+export function updatePane(
+  state: State,
+  action: actionTypes.UpdatePaneAction
+): State {
   const panes = state.user.layout.panes
 
   if (!(action.pane in panes)) {
     return state
   }
 
-  const newPane = updateObject(
-    panes[action.pane],
-    action.props
-  )
+  const newPane = updateObject(panes[action.pane], action.props)
 
-  const newPanes = updateObject(
-    panes,
-    {
-      [action.pane]: newPane
-    }
-  )
+  const newPanes = updateObject(panes, {
+    [action.pane]: newPane
+  })
 
   propagateHiddenPane(newPane.id, newPanes)
 
-  const newLayout = updateObject(
-    state.user.layout,
-    { panes: newPanes }
-  )
+  const newLayout = updateObject(state.user.layout, { panes: newPanes })
 
-  return updateObject(
-    state,
-    {
-      user: updateObject(
-        state.user,
-        { layout: newLayout }
-      )
-    }
-  )
+  return updateObject(state, {
+    user: updateObject(state.user, { layout: newLayout })
+  })
 }
 
 /** Update children split counts upwards to root */
-function updateSplitCounts (paneId: number, panes: {[id: number]: PaneType}) {
-  let pane = panes[paneId]
-  while (pane) {
+function updateSplitCounts(
+  paneId: number,
+  panes: { [id: number]: PaneType }
+): void {
+  while (paneId >= 0) {
+    let pane = panes[paneId]
     let parent = panes[pane.parent]
-    if (parent) {
+    if (pane.parent >= 0) {
       parent = updateObject(parent, {
         numHorizontalChildren: pane.numHorizontalChildren,
         numVerticalChildren: pane.numVerticalChildren
@@ -1105,6 +1184,7 @@ function updateSplitCounts (paneId: number, panes: {[id: number]: PaneType}) {
       panes[parent.id] = parent
     }
     pane = parent
+    paneId = pane.id
   }
 }
 
@@ -1113,8 +1193,9 @@ function updateSplitCounts (paneId: number, panes: {[id: number]: PaneType}) {
  * @param state
  * @param action
  */
-export function splitPane (
-  state: State, action: actionTypes.SplitPaneAction
+export function splitPane(
+  state: State,
+  action: actionTypes.SplitPaneAction
 ): State {
   if (!(action.pane in state.user.layout.panes)) {
     return state
@@ -1129,16 +1210,8 @@ export function splitPane (
   const newViewerConfigId = state.user.layout.maxViewerConfigId + 1
 
   const oldPane = state.user.layout.panes[action.pane]
-  const child1 = makePane(
-    oldPane.viewerId,
-    child1Id,
-    oldPane.id
-  )
-  const child2 = makePane(
-    newViewerConfigId,
-    child2Id,
-    oldPane.id
-  )
+  const child1 = makePane(oldPane.viewerId, child1Id, oldPane.id)
+  const child2 = makePane(newViewerConfigId, child2Id, oldPane.id)
 
   const newPane = updateObject(oldPane, {
     viewerId: -1,
@@ -1147,51 +1220,37 @@ export function splitPane (
     child2: child2Id
   })
 
-  const newViewerConfigs = updateObject(
-    state.user.viewerConfigs,
-    {
-      [action.viewerId]: updateObject(
-        oldViewerConfig,
-        { pane: child1Id }
-      ),
-      [newViewerConfigId]: newViewerConfig
-    }
-  )
+  const newViewerConfigs = updateObject(state.user.viewerConfigs, {
+    [action.viewerId]: updateObject(oldViewerConfig, { pane: child1Id }),
+    [newViewerConfigId]: newViewerConfig
+  })
 
-  const newPanes = updateObject(
-    state.user.layout.panes,
-    {
-      [newPane.id]: newPane,
-      [child1Id]: child1,
-      [child2Id]: child2
-    }
-  )
+  const newPanes = updateObject(state.user.layout.panes, {
+    [newPane.id]: newPane,
+    [child1Id]: child1,
+    [child2Id]: child2
+  })
 
   updateSplitCounts(newPane.id, newPanes)
 
-  const newLayout = updateObject(
-    state.user.layout,
-    {
-      maxViewerConfigId: newViewerConfigId,
-      maxPaneId: child2Id,
-      panes: newPanes
-    }
-  )
+  const newLayout = updateObject(state.user.layout, {
+    maxViewerConfigId: newViewerConfigId,
+    maxPaneId: child2Id,
+    panes: newPanes
+  })
 
-  return updateObject(
-    state,
-    {
-      user: updateObject(
-        state.user,
-        { viewerConfigs: newViewerConfigs, layout: newLayout }
-      )
-    }
-  )
+  return updateObject(state, {
+    user: updateObject(state.user, {
+      viewerConfigs: newViewerConfigs,
+      layout: newLayout
+    })
+  })
 }
 
 /** delete pane from state */
-export function deletePane (
-  state: State, action: actionTypes.DeletePaneAction
+export function deletePane(
+  state: State,
+  action: actionTypes.DeletePaneAction
 ): State {
   const panes = state.user.layout.panes
   if (action.pane === state.user.layout.rootPane || !(action.pane in panes)) {
@@ -1211,9 +1270,9 @@ export function deletePane (
 
   // Get id of the child that is not the pane to be deleted
   let newLeafId: number = -1
-  if (parent.child1 === action.pane && parent.child2) {
+  if (parent.child1 === action.pane && parent.child2 !== undefined) {
     newLeafId = parent.child2
-  } else if (parent.child2 === action.pane && parent.child1) {
+  } else if (parent.child2 === action.pane && parent.child1 !== undefined) {
     newLeafId = parent.child1
   } else {
     return state
@@ -1245,7 +1304,9 @@ export function deletePane (
     newPanes[newParentId] = newParent
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
   delete newPanes[parentId]
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
   delete newPanes[action.pane]
 
   newPanes[newLeafId] = updateObject(panes[newLeafId], { parent: newParentId })
@@ -1257,69 +1318,49 @@ export function deletePane (
     updateParams.rootPane = newLeafId
   }
 
-  return updateObject(
-    state,
-    {
-      user: updateObject(
-        state.user,
-        { layout: updateObject(state.user.layout, updateParams) }
-      )
-    }
-  )
+  return updateObject(state, {
+    user: updateObject(state.user, {
+      layout: updateObject(state.user.layout, updateParams)
+    })
+  })
 }
 
 /** adds a new submission */
-export function submit (
-  state: State, action: actionTypes.SubmitAction
-): State {
-  const submissions =
-    [...state.task.progress.submissions, _.cloneDeep(action.submitData)]
-  const newProgress = updateObject(
-    state.task.progress,
-    {
-      submissions
-    }
-  )
-  const newTask = updateObject(
-    state.task,
-    {
-      progress: newProgress
-    }
-  )
-  return updateObject(
-    state,
-    {
-      task: newTask
-    }
-  )
+export function submit(state: State, action: actionTypes.SubmitAction): State {
+  const submissions = [
+    ...state.task.progress.submissions,
+    _.cloneDeep(action.submitData)
+  ]
+  const newProgress = updateObject(state.task.progress, {
+    submissions
+  })
+  const newTask = updateObject(state.task, {
+    progress: newProgress
+  })
+  return updateObject(state, {
+    task: newTask
+  })
 }
 
 /**
  * Start to link track.
  * @param state Previous state
  */
-export function startLinkTrack (
-  state: State
-): State {
-  const newSession = updateObject(
-    state.session,
-    {
-      trackLinking: true
-    }
-  )
-  return updateObject(
-    state,
-    {
-      session: newSession
-    }
-  )
+export function startLinkTrack(state: State): State {
+  const newSession = updateObject(state.session, {
+    trackLinking: true
+  })
+  return updateObject(state, {
+    session: newSession
+  })
 }
 
 /**
  * Update session status, if it should be updated
  */
-export function updateSessionStatus (
-  state: State, action: actionTypes.UpdateSessionStatusAction
+export function updateSessionStatus(
+  state: State,
+  action: actionTypes.UpdateSessionStatusAction
 ): State {
   const newStatus = action.newStatus
 
@@ -1327,17 +1368,11 @@ export function updateSessionStatus (
   // Update mod 1000 since only nearby differences are important
   const numUpdates = (oldSession.numUpdates + 1) % 1000
 
-  const newSession = updateObject(
-    oldSession,
-    {
-      status: newStatus,
-      numUpdates
-    }
-  )
-  return updateObject(
-    state,
-    {
-      session: newSession
-    }
-  )
+  const newSession = updateObject(oldSession, {
+    status: newStatus,
+    numUpdates
+  })
+  return updateObject(state, {
+    session: newSession
+  })
 }

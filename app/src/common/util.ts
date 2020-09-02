@@ -1,20 +1,19 @@
-import { ADD_LABELS } from '../const/action'
-import { ItemTypeName, LabelTypeName } from '../const/common'
-import { ActionPacketType } from '../types/message'
+import { ADD_LABELS } from "../const/action"
+import { ItemTypeName, LabelTypeName } from "../const/common"
+import { ActionPacketType } from "../types/message"
 
 /**
  * Handle invalid page request
  */
-export function handleInvalidPage (): void {
+export function handleInvalidPage(): void {
   window.location.replace(window.location.origin)
-  return
 }
 
 /**
  * Get whether tracking is on
  * Also get the new item type
  */
-export function getTracking (itemType: string): [string, boolean] {
+export function getTracking(itemType: string): [string, boolean] {
   switch (itemType) {
     case ItemTypeName.VIDEO:
       return [ItemTypeName.IMAGE, true]
@@ -30,24 +29,24 @@ export function getTracking (itemType: string): [string, boolean] {
 /**
  * Create the link to the labeling instructions
  */
-function makeInstructionUrl (pageName: string) {
+function makeInstructionUrl(pageName: string): string {
   return `https://www.scalabel.ai/doc/instructions/${pageName}.html`
 }
 
 /**
  * Select the correct instruction url for the given label type
  */
-export function getInstructionUrl (labelType: string) {
+export function getInstructionUrl(labelType: string): string {
   switch (labelType) {
     case LabelTypeName.BOX_2D: {
-      return makeInstructionUrl('bbox')
+      return makeInstructionUrl("bbox")
     }
     case LabelTypeName.POLYGON_2D:
     case LabelTypeName.POLYLINE_2D: {
-      return makeInstructionUrl('segmentation')
+      return makeInstructionUrl("segmentation")
     }
     default: {
-      return ''
+      return ""
     }
   }
 }
@@ -55,28 +54,28 @@ export function getInstructionUrl (labelType: string) {
 /**
  * Select the correct page title for given label type
  */
-export function getPageTitle (labelType: string, itemType: string) {
+export function getPageTitle(labelType: string, itemType: string): string {
   const [, tracking] = getTracking(itemType)
 
   let title: string
   switch (labelType) {
     case LabelTypeName.TAG:
-      title = 'Image Tagging'
+      title = "Image Tagging"
       break
     case LabelTypeName.BOX_2D:
-      title = '2D Bounding Box'
+      title = "2D Bounding Box"
       break
     case LabelTypeName.POLYGON_2D:
-      title = '2D Segmentation'
+      title = "2D Segmentation"
       break
     case LabelTypeName.POLYLINE_2D:
-      title = '2D Lane'
+      title = "2D Lane"
       break
     case LabelTypeName.BOX_3D:
-      title = '3D Bounding Box'
+      title = "3D Bounding Box"
       break
     default:
-      title = ''
+      title = ""
       break
   }
   if (tracking) {
@@ -89,16 +88,18 @@ export function getPageTitle (labelType: string, itemType: string) {
  * Converts index into a filename of size 6 with
  * trailing zeroes
  */
-export function index2str (index: number) {
-  return index.toString().padStart(6, '0')
+export function index2str(index: number): string {
+  return index.toString().padStart(6, "0")
 }
 
 /**
  * Checks if the action packet contains
  * any actions that would trigger a model query
  */
-export function doesPacketTriggerModel (
-  actionPacket: ActionPacketType, bots: boolean): boolean {
+export function doesPacketTriggerModel(
+  actionPacket: ActionPacketType,
+  bots: boolean
+): boolean {
   if (!bots) {
     return false
   }

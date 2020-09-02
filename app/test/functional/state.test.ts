@@ -1,24 +1,30 @@
-import { makeItemExport, makeLabel, makeLabelExport } from '../../src/functional/states'
-import { ItemExport, LabelExport } from '../../src/types/bdd'
+import {
+  makeItemExport,
+  makeLabel,
+  makeLabelExport
+} from "../../src/functional/states"
+import { ItemExport, LabelExport } from "../../src/types/bdd"
 
-describe('Defaults get overwritten', () => {
-  test('Item export creation',() => {
-    const name = 'itemName'
+describe("Defaults get overwritten", () => {
+  test("Item export creation", () => {
+    const name = "itemName"
     const timestamp = 5
     const partialItemExport: Partial<ItemExport> = {
-      name, timestamp
+      name,
+      timestamp
     }
     const itemExport = makeItemExport(partialItemExport)
     expect(itemExport.name).toBe(name)
     expect(itemExport.timestamp).toBe(timestamp)
-    expect(itemExport.url).toBe('')
+    expect(itemExport.url).toBe("")
   })
 
-  test('Label export creation',() => {
+  test("Label export creation", () => {
     const label = makeLabel()
-    const category = 'category'
+    const category = "category"
     const partialLabelExport: Partial<LabelExport> = {
-      id: label.id, category
+      id: label.id,
+      category
     }
     const labelExport = makeLabelExport(partialLabelExport)
     expect(labelExport.id).toBe(label.id)
@@ -26,7 +32,7 @@ describe('Defaults get overwritten', () => {
     expect(labelExport.box2d).toBe(null)
   })
 
-  test('Attributes are immutable', () => {
+  test("Attributes are immutable", () => {
     const attributes = {
       0: [1],
       1: [0]

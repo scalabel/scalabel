@@ -1,12 +1,15 @@
-import { withStyles } from '@material-ui/styles'
-import React from 'react'
-import { changeViewerConfig } from '../action/common'
-import Session from '../common/session'
-import { viewerStyles } from '../styles/viewer'
-import { HomographyViewerConfigType, ImageViewerConfigType } from '../types/state'
-import { SCROLL_ZOOM_RATIO } from '../view_config/image'
-import { DrawableViewer, ViewerProps } from './drawable_viewer'
-import HomographyCanvas from './homography_canvas'
+import { withStyles } from "@material-ui/styles"
+import React from "react"
+import { changeViewerConfig } from "../action/common"
+import Session from "../common/session"
+import { viewerStyles } from "../styles/viewer"
+import {
+  HomographyViewerConfigType,
+  ImageViewerConfigType
+} from "../types/state"
+import { SCROLL_ZOOM_RATIO } from "../view_config/image"
+import { DrawableViewer, ViewerProps } from "./drawable_viewer"
+import HomographyCanvas from "./homography_canvas"
 
 /**
  * Viewer for images and 2d labels
@@ -16,7 +19,7 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: ViewerProps) {
+  constructor(props: ViewerProps) {
     super(props)
   }
 
@@ -24,12 +27,12 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents () {
+  protected getDrawableComponents() {
     if (this._container && this._viewerConfig) {
-      this._container.scrollTop =
-        (this._viewerConfig as ImageViewerConfigType).displayTop
-      this._container.scrollLeft =
-        (this._viewerConfig as ImageViewerConfigType).displayLeft
+      this._container.scrollTop = (this
+        ._viewerConfig as ImageViewerConfigType).displayTop
+      this._container.scrollLeft = (this
+        ._viewerConfig as ImageViewerConfigType).displayLeft
     }
 
     const views: React.ReactElement[] = []
@@ -47,7 +50,7 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
   }
 
   /** Menu components */
-  protected getMenuComponents () {
+  protected getMenuComponents() {
     return []
   }
 
@@ -55,35 +58,28 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
    * Handle double click
    * @param e
    */
-  protected onDoubleClick () {
-    return
-  }
+  protected onDoubleClick(): void {}
 
   /**
    * Handle mouse leave
    * @param e
    */
-  protected onMouseLeave () {
-    return
-  }
+  protected onMouseLeave(): void {}
 
   /**
    * Handle mouse wheel
    * @param e
    */
-  protected onWheel (e: WheelEvent) {
+  protected onWheel(e: WheelEvent): void {
     e.preventDefault()
     const config = this._viewerConfig as HomographyViewerConfigType
     let zoomRatio = SCROLL_ZOOM_RATIO
     if (e.deltaY < 0) {
-      zoomRatio = 1. / zoomRatio
+      zoomRatio = 1 / zoomRatio
     }
     const newDistance = config.distance * zoomRatio
     const newConfig = { ...config, distance: newDistance }
-    Session.dispatch(changeViewerConfig(
-      this._viewerId,
-      newConfig
-    ))
+    Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
   }
 }
 

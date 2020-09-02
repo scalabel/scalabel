@@ -1,11 +1,11 @@
-import { Grid } from '@material-ui/core'
-import React from 'react'
-import Session from '../common/session'
-import { ViewerConfigType } from '../types/state'
-import { Component } from './component'
+import { Grid } from "@material-ui/core"
+import React from "react"
+import Session from "../common/session"
+import { ViewerConfigType } from "../types/state"
+import { Component } from "./component"
 
 /** Generate string to use for react component key */
-export function viewerReactKey (id: number) {
+export function viewerReactKey(id: number): string {
   return `viewer${id}`
 }
 
@@ -24,8 +24,9 @@ export interface ViewerProps {
 /**
  * Canvas Viewer
  */
-export abstract class DrawableViewer<T extends ViewerProps>
-  extends Component<T> {
+export abstract class DrawableViewer<T extends ViewerProps> extends Component<
+  T
+> {
   /** Moveable container */
   protected _container: HTMLDivElement | null
   /** viewer config */
@@ -57,7 +58,7 @@ export abstract class DrawableViewer<T extends ViewerProps>
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: T) {
+  constructor(props: T) {
     super(props)
     this._container = null
     this._viewerId = -1
@@ -82,25 +83,25 @@ export abstract class DrawableViewer<T extends ViewerProps>
   /**
    * Run when component mounts
    */
-  public componentDidMount () {
+  public componentDidMount(): void {
     super.componentDidMount()
-    document.addEventListener('keydown', this._keyDownHandler)
-    document.addEventListener('keyup', this._keyUpHandler)
+    document.addEventListener("keydown", this._keyDownHandler)
+    document.addEventListener("keyup", this._keyUpHandler)
   }
 
   /**
    * Run when component unmounts
    */
-  public componentWillUnmount () {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
-    document.removeEventListener('keydown', this._keyDownHandler)
-    document.removeEventListener('keyup', this._keyUpHandler)
+    document.removeEventListener("keydown", this._keyDownHandler)
+    document.removeEventListener("keyup", this._keyUpHandler)
   }
 
   /**
    * Render function
    */
-  public render (): React.ReactNode {
+  public render(): React.ReactNode {
     this._viewerId = this.props.id
     this._viewerConfig = this.state.user.viewerConfigs[this._viewerId]
     this._item = this.state.user.select.item
@@ -111,36 +112,32 @@ export abstract class DrawableViewer<T extends ViewerProps>
           ref={(element) => {
             if (element && this._container !== element) {
               if (this._container) {
-                this._container.removeEventListener('wheel', this._wheelHandler)
+                this._container.removeEventListener("wheel", this._wheelHandler)
               }
               this._container = element
-              this._container.addEventListener('wheel', this._wheelHandler)
+              this._container.addEventListener("wheel", this._wheelHandler)
               this.forceUpdate()
             }
           }}
           className={this.props.classes.viewer_container}
-          onMouseDown={ (e) => this.onMouseDown(e) }
-          onMouseUp={ (e) => this.onMouseUp(e) }
-          onMouseMove={ (e) => this.onMouseMove(e) }
-          onMouseEnter={ (e) => this.onMouseEnter(e) }
-          onMouseLeave={ (e) => this.onMouseLeave(e) }
-          onDoubleClick={ (e) => this.onDoubleClick(e) }
+          onMouseDown={(e) => this.onMouseDown(e)}
+          onMouseUp={(e) => this.onMouseUp(e)}
+          onMouseMove={(e) => this.onMouseMove(e)}
+          onMouseEnter={(e) => this.onMouseEnter(e)}
+          onMouseLeave={(e) => this.onMouseLeave(e)}
+          onDoubleClick={(e) => this.onDoubleClick(e)}
         >
           {this.getDrawableComponents()}
         </div>
-          <Grid
-            justify={'flex-start'}
-            container
-            direction='row'
-          >
-            { ...this.getMenuComponents() }
-          </Grid>
+        <Grid justify={"flex-start"} container direction="row">
+          {...this.getMenuComponents()}
+        </Grid>
       </div>
     )
   }
 
   /** Normalize coordinates to container */
-  protected normalizeCoordinates (x: number, y: number): [number, number] {
+  protected normalizeCoordinates(x: number, y: number): [number, number] {
     if (this._container) {
       const rect = this._container.getBoundingClientRect()
       return [x - rect.left, y - rect.top]
@@ -153,21 +150,21 @@ export abstract class DrawableViewer<T extends ViewerProps>
    * @param {string} key - the key to check
    * @return {boolean}
    */
-  protected isKeyDown (key: string): boolean {
+  protected isKeyDown(key: string): boolean {
     return this._keyDownMap[key]
   }
 
   /** Get child components for rendering */
-  protected abstract getDrawableComponents (): React.ReactElement[]
+  protected abstract getDrawableComponents(): React.ReactElement[]
 
   /** Get components for viewer menu */
-  protected abstract getMenuComponents (): React.ReactElement[]
+  protected abstract getMenuComponents(): React.ReactElement[]
 
   /**
    * Handle mouse down
    * @param e
    */
-  protected onMouseDown (e: React.MouseEvent): void {
+  protected onMouseDown(e: React.MouseEvent): void {
     if (!this._container) {
       return
     }
@@ -182,7 +179,7 @@ export abstract class DrawableViewer<T extends ViewerProps>
    * Handle mouse up
    * @param e
    */
-  protected onMouseUp (_e: React.MouseEvent): void {
+  protected onMouseUp(_e: React.MouseEvent): void {
     this._mouseDown = false
   }
 
@@ -190,7 +187,7 @@ export abstract class DrawableViewer<T extends ViewerProps>
    * Handle mouse move
    * @param e
    */
-  protected onMouseMove (e: React.MouseEvent): void {
+  protected onMouseMove(e: React.MouseEvent): void {
     const normalized = this.normalizeCoordinates(e.clientX, e.clientY)
     this._mX = normalized[0]
     this._mY = normalized[1]
@@ -200,13 +197,13 @@ export abstract class DrawableViewer<T extends ViewerProps>
    * Handle double click
    * @param e
    */
-  protected abstract onDoubleClick (e: React.MouseEvent): void
+  protected abstract onDoubleClick(e: React.MouseEvent): void
 
   /**
    * Handle mouse leave
    * @param e
    */
-  protected onMouseEnter (_e: React.MouseEvent) {
+  protected onMouseEnter(_e: React.MouseEvent): void {
     Session.activeViewerId = this.props.id
   }
 
@@ -214,19 +211,19 @@ export abstract class DrawableViewer<T extends ViewerProps>
    * Handle mouse leave
    * @param e
    */
-  protected abstract onMouseLeave (_e: React.MouseEvent): void
+  protected abstract onMouseLeave(_e: React.MouseEvent): void
 
   /**
    * Handle mouse wheel
    * @param e
    */
-  protected abstract onWheel (e: WheelEvent): void
+  protected abstract onWheel(e: WheelEvent): void
 
   /**
    * Handle key down
    * @param e
    */
-  protected onKeyUp (e: KeyboardEvent): void {
+  protected onKeyUp(e: KeyboardEvent): void {
     delete this._keyDownMap[e.key]
   }
 
@@ -234,7 +231,7 @@ export abstract class DrawableViewer<T extends ViewerProps>
    * Handle key down
    * @param e
    */
-  protected onKeyDown (e: KeyboardEvent): void {
+  protected onKeyDown(e: KeyboardEvent): void {
     this._keyDownMap[e.key] = true
   }
 }

@@ -2,16 +2,16 @@
  * Tracking interpolation
  */
 
-import _ from 'lodash'
-import { makeShape } from '../../../functional/states'
-import { LabelType, ShapeType } from '../../../types/state'
+import _ from "lodash"
+import { makeShape } from "../../../functional/states"
+import { LabelType, ShapeType } from "../../../types/state"
 
 /**
  * Assign shape content from src to target and return the new shape
  * @param src
  * @param target
  */
-function assignShape (src: ShapeType, target: ShapeType): ShapeType {
+function assignShape(src: ShapeType, target: ShapeType): ShapeType {
   const result = makeShape(src.shapeType, src, false)
   result.id = target.id
   result.shapeType = target.shapeType
@@ -24,9 +24,12 @@ function assignShape (src: ShapeType, target: ShapeType): ShapeType {
  * @param shape
  * @param shapes
  */
-export function assignShapesInRange (
-    start: number, end: number,
-    shape: ShapeType[], shapes: ShapeType[][]): ShapeType[][] {
+export function assignShapesInRange(
+  start: number,
+  end: number,
+  shape: ShapeType[],
+  shapes: ShapeType[][]
+): ShapeType[][] {
   shapes = [...shapes]
   for (let i = start; i < end; i += 1) {
     if (shape.length === shapes[i].length) {
@@ -47,9 +50,10 @@ export function assignShapesInRange (
  * @param targetLabel
  * @param labels
  */
-export function getAutoLabelRange (
-  targetLabel: LabelType, labels: LabelType[]
-  ): [number, number, number] {
+export function getAutoLabelRange(
+  targetLabel: LabelType,
+  labels: LabelType[]
+): [number, number, number] {
   const labelIndex = _.sortedIndexBy(labels, targetLabel, (l) => l.item)
   let prevIndex = -1
   for (let i = labelIndex - 1; i >= 0; i -= 1) {
@@ -85,26 +89,43 @@ export class TrackInterp {
    * @param labels
    * @param shapes
    */
-  public interp (
-     newLabel: LabelType, newShape: ShapeType[],
-     allLabels: LabelType[], allShapes: ShapeType[][]): ShapeType[][] {
+  public interp(
+    newLabel: LabelType,
+    newShape: ShapeType[],
+    allLabels: LabelType[],
+    allShapes: ShapeType[][]
+  ): ShapeType[][] {
     const [labelIndex, manual0, manual1] = getAutoLabelRange(
-        newLabel, allLabels)
-      // Copy the double array
+      newLabel,
+      allLabels
+    )
+    // Copy the double array
     let newShapes = allShapes.map((shapes) => shapes.map((s) => s))
     newShapes[labelIndex] = newShape
     if (manual0 === -1) {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
     } else {
       newShapes = assignShapesInRange(
-        manual0 + 1, labelIndex, newShape, newShapes)
+        manual0 + 1,
+        labelIndex,
+        newShape,
+        newShapes
+      )
     }
     if (manual1 === -1) {
       newShapes = assignShapesInRange(
-        labelIndex + 1, newShapes.length, newShape, newShapes)
+        labelIndex + 1,
+        newShapes.length,
+        newShape,
+        newShapes
+      )
     } else {
       newShapes = assignShapesInRange(
-        labelIndex + 1, manual1, newShape, newShapes)
+        labelIndex + 1,
+        manual1,
+        newShape,
+        newShapes
+      )
     }
     return newShapes
   }

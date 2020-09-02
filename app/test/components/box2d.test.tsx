@@ -1,12 +1,12 @@
-import _ from 'lodash'
-import * as React from 'react'
-import * as action from '../../src/action/common'
-import Session, { dispatch, getState } from '../../src/common/session'
-import { Label2dCanvas } from '../../src/components/label2d_canvas'
-import { testJson } from '../test_states/test_image_objects'
-import { checkBox2D } from '../util/shape'
-import { drag, drawBox2D, setUpLabel2dCanvas } from './canvas_util'
-import { setupTestStore } from './util'
+import _ from "lodash"
+import * as React from "react"
+import * as action from "../../src/action/common"
+import Session, { dispatch, getState } from "../../src/common/session"
+import { Label2dCanvas } from "../../src/components/label2d_canvas"
+import { testJson } from "../test_states/test_image_objects"
+import { checkBox2D } from "../util/shape"
+import { drag, drawBox2D, setUpLabel2dCanvas } from "./canvas_util"
+import { setupTestStore } from "./util"
 
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
@@ -30,7 +30,7 @@ beforeAll(() => {
   setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000)
 })
 
-test('Draw 2d boxes to label2d list', () => {
+test("Draw 2d boxes to label2d list", () => {
   const labelIds = []
   // It has been checked that canvasRef.current is not null
   const label2d = canvasRef.current as Label2dCanvas

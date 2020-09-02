@@ -1,5 +1,4 @@
-import _ from 'lodash'
-import OrderedMap from 'orderedmap'
+import OrderedMap from "orderedmap"
 import {
   makeSequential,
   setStatusAfterConnect,
@@ -11,47 +10,50 @@ import {
   setStatusToSubmitted,
   setStatusToSubmitting,
   setStatusToUnsaved,
-  updateTask} from '../action/common'
-import * as actionConsts from '../const/action'
-import { EventName } from '../const/connection'
-import { isSessionFullySaved } from '../functional/selector'
-import { SocketClient } from '../server/socket_interface'
-import * as actionTypes from '../types/action'
-import { ActionPacketType, RegisterMessageType,
-  SyncActionMessageType } from '../types/message'
-import { ThunkDispatchType } from '../types/redux'
-import { State } from '../types/state'
-import Session from './session'
-import { setupSession } from './session_setup'
-import { uid } from './uid'
-import { doesPacketTriggerModel, index2str } from './util'
+  updateTask
+} from "../action/common"
+import * as actionConsts from "../const/action"
+import { EventName } from "../const/connection"
+import { isSessionFullySaved } from "../functional/selector"
+import { SocketClient } from "../server/socket_interface"
+import * as actionTypes from "../types/action"
+import {
+  ActionPacketType,
+  RegisterMessageType,
+  SyncActionMessageType
+} from "../types/message"
+import { ThunkDispatchType } from "../types/redux"
+import { State } from "../types/state"
+import Session from "./session"
+import { setupSession } from "./session_setup"
+import { uid } from "./uid"
+import { doesPacketTriggerModel, index2str } from "./util"
 
 const CONFIRMATION_MESSAGE =
-  'You have unsaved changes that will be lost if you leave this page. '
+  "You have unsaved changes that will be lost if you leave this page. "
 
 /**
  * Synchronizes data with other sessions
  */
 export class Synchronizer {
-
   /**
    * Getter for number of logged (acked) actions
    */
-  public get numLoggedActions (): number {
+  public get numLoggedActions(): number {
     return this.actionLog.length
   }
 
   /**
    * Get number of actions in the process of being saved
    */
-  public get numActionsPendingSave (): number {
+  public get numActionsPendingSave(): number {
     return this.actionsPendingSave.size
   }
 
   /**
    * Getter for number of actions with predictions running
    */
-  public get numActionsPendingPrediction (): number {
+  public get numActionsPendingPrediction(): number {
     return this.actionsPendingPrediction.size
   }
 
@@ -71,20 +73,31 @@ export class Synchronizer {
    */
   private actionsPendingSave: OrderedMap<ActionPacketType>
   /** Timestamped log for completed actions */
-  private actionLog: actionTypes.BaseAction[]
+  private readonly actionLog: actionTypes.BaseAction[]
   /** Log of packets that have been acked */
-  private ackedPackets: Set<string>
+  private readonly ackedPackets: Set<string>
   /** The ids of action packets pending model predictions */
-  private actionsPendingPrediction: Set<string>
+  private readonly actionsPendingPrediction: Set<string>
   /** Flag for initial registration completion */
   private registeredOnce: boolean
   /** Name of the DOM container */
-  private containerName: string
+  private readonly containerName: string
 
-  constructor (
+  /**
+   * Constructor
+   * @param socket
+   * @param taskIndex
+   * @param projectName
+   * @param userId
+   * @param containerName
+   */
+  constructor(
     socket: SocketClient,
-    taskIndex: number, projectName: string,
-    userId: string, containerName: string= '') {
+    taskIndex: number,
+    projectName: string,
+    userId: string,
+    containerName: string = ""
+  ) {
     this.socket = socket
     this.taskIndex = taskIndex
     this.projectName = projectName
@@ -104,20 +117,28 @@ export class Synchronizer {
   /**
    * Queue a new action for saving
    */
-  public queueActionForSaving (
-    action: actionTypes.BaseAction, autosave: boolean,
-    sessionId: string, bots: boolean,
+  public queueActionForSaving(
+    action: actionTypes.BaseAction,
+    autosave: boolean,
+    sessionId: string,
+    bots: boolean,
     dispatch: ThunkDispatchType
-  ) {
-    const shouldBeSaved = (a: actionTypes.BaseAction) => {
-      return sessionId === a.sessionId && !a.frontendOnly &&
+  ): void {
+    const shouldBeSaved = (a: actionTypes.BaseAction): boolean => {
+      return (
+        sessionId === a.sessionId &&
+        ((a.frontendOnly !== undefined && !a.frontendOnly) ||
+          a.frontendOnly === undefined) &&
         !actionConsts.isSessionAction(a)
+      )
     }
     const actions: actionTypes.BaseAction[] = []
     if (action.type === actionConsts.SEQUENTIAL) {
-      actions.push(...(action as actionTypes.SequentialAction).actions.filter(
-        (a: actionTypes.BaseAction) => shouldBeSaved(a)
-      ))
+      actions.push(
+        ...(action as actionTypes.SequentialAction).actions.filter(
+          (a: actionTypes.BaseAction) => shouldBeSaved(a)
+        )
+      )
     } else {
       if (shouldBeSaved(action)) {
         actions.push(action)
@@ -136,7 +157,7 @@ export class Synchronizer {
   /**
    * Displays pop-up warning user when leaving with unsaved changes
    */
-  public warningPopup (e: BeforeUnloadEvent): string | null {
+  public warningPopup(e: BeforeUnloadEvent): string | null {
     const state = Session.getState()
     const reduxState = Session.store.getState()
     if (!state.task.config.autosave && !isSessionFullySaved(reduxState)) {
@@ -150,8 +171,10 @@ export class Synchronizer {
   /**
    * Registers the session with the backend, triggering a register ack
    */
-  public sendConnectionMessage (
-    sessionId: string, dispatch: ThunkDispatchType) {
+  public sendConnectionMessage(
+    sessionId: string,
+    dispatch: ThunkDispatchType
+  ): void {
     const message: RegisterMessageType = {
       projectName: this.projectName,
       taskIndex: this.taskIndex,
@@ -168,9 +191,13 @@ export class Synchronizer {
   /**
    * Initialized synced state, and sends any queued actions
    */
-  public finishRegistration (
-    state: State, autosave: boolean, sessionId: string,
-    bots: boolean, dispatch: ThunkDispatchType) {
+  public finishRegistration(
+    state: State,
+    autosave: boolean,
+    sessionId: string,
+    bots: boolean,
+    dispatch: ThunkDispatchType
+  ): void {
     if (!this.registeredOnce) {
       // One-time setup after first registration
       this.registeredOnce = true
@@ -207,9 +234,11 @@ export class Synchronizer {
    * Called when backend sends ack for actions that were sent to be synced
    * Updates relevant queues and syncs actions from other sessions
    */
-  public handleBroadcast (
+  public handleBroadcast(
     message: SyncActionMessageType,
-    sessionId: string, dispatch: ThunkDispatchType) {
+    sessionId: string,
+    dispatch: ThunkDispatchType
+  ): void {
     const actionPacket = message.actions
     // Remove stored actions when they are acked
     this.actionsPendingSave = this.actionsPendingSave.remove(actionPacket.id)
@@ -238,8 +267,10 @@ export class Synchronizer {
        * This means the bot also received the action
        * And started its prediction */
       actions.push(setStatusToComputing())
-    } else if (actionPacket.triggerId !== undefined &&
-      this.actionsPendingPrediction.has(actionPacket.triggerId)) {
+    } else if (
+      actionPacket.triggerId !== undefined &&
+      this.actionsPendingPrediction.has(actionPacket.triggerId)
+    ) {
       // Ack of bot action means prediction is finished
       this.actionsPendingPrediction.delete(actionPacket.triggerId)
       if (this.actionsPendingPrediction.size === 0) {
@@ -261,7 +292,7 @@ export class Synchronizer {
   /**
    * Called when session disconnects from backend
    */
-  public handleDisconnect (dispatch: ThunkDispatchType) {
+  public handleDisconnect(dispatch: ThunkDispatchType): void {
     dispatch(setStatusToReconnecting())
   }
 
@@ -269,13 +300,14 @@ export class Synchronizer {
    * Converts ordered map of action packets to a list
    * Order of the list should match the order in which keys were added
    */
-  public listActionsPendingSave (): ActionPacketType[] {
+  public listActionsPendingSave(): ActionPacketType[] {
     const values: ActionPacketType[] = []
     if (this.actionsPendingSave.size > 0) {
       this.actionsPendingSave.forEach(
         (_key: string, value: ActionPacketType) => {
           values.push(value)
-        })
+        }
+      )
     }
     return values
   }
@@ -284,15 +316,21 @@ export class Synchronizer {
    * Send all queued actions to the backend
    * and move actions to actionsPendingSave
    */
-  public save (sessionId: string, bots: boolean, dispatch: ThunkDispatchType) {
+  public save(
+    sessionId: string,
+    bots: boolean,
+    dispatch: ThunkDispatchType
+  ): void {
     if (this.socket.connected) {
       if (this.actionQueue.length > 0) {
         const packet: ActionPacketType = {
           actions: this.actionQueue,
           id: uid()
         }
-        this.actionsPendingSave =
-          this.actionsPendingSave.update(packet.id, packet)
+        this.actionsPendingSave = this.actionsPendingSave.update(
+          packet.id,
+          packet
+        )
         if (doesPacketTriggerModel(packet, bots)) {
           this.actionsPendingPrediction.add(packet.id)
         }
@@ -306,9 +344,11 @@ export class Synchronizer {
    * Send given action packet to the backend
    * Can be called multiple times if previous attempts aren't acked
    */
-  public sendActions (
+  public sendActions(
     actionPacket: ActionPacketType,
-    sessionId: string, dispatch: ThunkDispatchType) {
+    sessionId: string,
+    dispatch: ThunkDispatchType
+  ): void {
     const message: SyncActionMessageType = {
       taskId: index2str(this.taskIndex),
       projectName: this.projectName,

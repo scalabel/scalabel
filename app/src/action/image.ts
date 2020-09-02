@@ -1,10 +1,7 @@
-import * as actionTypes from '../types/action'
-import { ImageViewerConfigType } from '../types/state'
-import {
-  MAX_SCALE,
-  MIN_SCALE
-} from '../view_config/image'
-import { changeViewerConfig } from './common'
+import * as actionTypes from "../types/action"
+import { ImageViewerConfigType } from "../types/state"
+import { MAX_SCALE, MIN_SCALE } from "../view_config/image"
+import { changeViewerConfig } from "./common"
 
 /**
  * Zoom the image
@@ -18,7 +15,7 @@ import { changeViewerConfig } from './common'
  * @param canvasHeight
  * @param displayToImageRatio
  */
-export function zoomImage (
+export function zoomImage(
   zoomRatio: number,
   viewerId: number,
   config: ImageViewerConfigType

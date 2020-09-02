@@ -1,17 +1,25 @@
-import _ from 'lodash'
-import { Cursor, Key, LabelTypeName } from '../../const/common'
-import { makeLabel } from '../../functional/states'
-import { Size2D } from '../../math/size2d'
-import { Vector2D } from '../../math/vector2d'
-import { LabelType, PathPoint2DType, PathPointType, ShapeType, State } from '../../types/state'
-import { blendColor, Context2D, encodeControlColor, toCssColor } from '../util'
-import { DASH_LINE, MIN_SIZE, OPACITY } from './common'
-import { DrawMode, Label2D } from './label2d'
-import { Label2DList } from './label2d_list'
+import _ from "lodash"
+import { Cursor, Key, LabelTypeName } from "../../const/common"
+import { makeLabel } from "../../functional/states"
+import { Size2D } from "../../math/size2d"
+import { Vector2D } from "../../math/vector2d"
 import {
-  makeDrawablePathPoint2D, makeEdge2DStyle,
-  makePathPoint2DStyle, PathPoint2D
-} from './path_point2d'
+  LabelType,
+  PathPoint2DType,
+  PathPointType,
+  ShapeType,
+  State
+} from "../../types/state"
+import { blendColor, Context2D, encodeControlColor, toCssColor } from "../util"
+import { DASH_LINE, MIN_SIZE, OPACITY } from "./common"
+import { DrawMode, Label2D } from "./label2d"
+import { Label2DList } from "./label2d_list"
+import {
+  makeDrawablePathPoint2D,
+  makeEdge2DStyle,
+  makePathPoint2DStyle,
+  PathPoint2D
+} from "./path_point2d"
 const DEFAULT_VIEW_EDGE_STYLE = makeEdge2DStyle({ lineWidth: 4 })
 const DEFAULT_VIEW_POINT_STYLE = makePathPoint2DStyle({ radius: 8 })
 const DEFAULT_VIEW_HIGH_POINT_STYLE = makePathPoint2DStyle({ radius: 12 })
@@ -39,7 +47,6 @@ enum OrientationType {
  * polygon 2d label
  */
 export class Polygon2D extends Label2D {
-
   /** array for vertices */
   private _points: PathPoint2D[]
   /** polygon label state */
@@ -51,9 +58,9 @@ export class Polygon2D extends Label2D {
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
   /** open or closed */
-  private _closed: boolean
+  private readonly _closed: boolean
 
-  constructor (labelList: Label2DList, closed: boolean) {
+  constructor(labelList: Label2DList, closed: boolean) {
     super(labelList)
     this._points = []
     this._state = Polygon2DState.FREE
@@ -64,7 +71,7 @@ export class Polygon2D extends Label2D {
   }
 
   /** Get cursor for highlighting */
-  public get highlightCursor () {
+  public get highlightCursor() {
     if (this._state === Polygon2DState.DRAW) {
       return Cursor.CROSSHAIR
     } else if (
@@ -83,7 +90,7 @@ export class Polygon2D extends Label2D {
    * @param _ratio
    * @param _mode
    */
-  public draw (context: Context2D, ratio: number, mode: DrawMode): void {
+  public draw(context: Context2D, ratio: number, mode: DrawMode): void {
     const self = this
     const numPoints = self._points.length
 
@@ -96,12 +103,14 @@ export class Polygon2D extends Label2D {
     switch (mode) {
       case DrawMode.VIEW:
         pointStyle = _.assign(pointStyle, DEFAULT_VIEW_POINT_STYLE)
-        highPointStyle = _.assign(highPointStyle,
-          DEFAULT_VIEW_HIGH_POINT_STYLE)
+        highPointStyle = _.assign(highPointStyle, DEFAULT_VIEW_HIGH_POINT_STYLE)
         edgeStyle = _.assign(edgeStyle, DEFAULT_VIEW_EDGE_STYLE)
         assignColor = (i: number): number[] => {
-          if (i > 0 && i <= this._points.length &&
-            this._points[i - 1].type !== PathPointType.LINE) {
+          if (
+            i > 0 &&
+            i <= this._points.length &&
+            this._points[i - 1].type !== PathPointType.LINE
+          ) {
             return blendColor(self._color, [255, 255, 255], 0.7)
           } else {
             return self._color
@@ -111,7 +120,9 @@ export class Polygon2D extends Label2D {
       case DrawMode.CONTROL:
         pointStyle = _.assign(pointStyle, DEFAULT_CONTROL_POINT_STYLE)
         highPointStyle = _.assign(
-          highPointStyle, DEFAULT_CONTROL_HIGH_POINT_STYLE)
+          highPointStyle,
+          DEFAULT_CONTROL_HIGH_POINT_STYLE
+        )
         edgeStyle = _.assign(edgeStyle, DEFAULT_CONTROL_EDGE_STYLE)
         assignColor = (i: number): number[] => {
           return encodeControlColor(self._index, i)
@@ -131,13 +142,20 @@ export class Polygon2D extends Label2D {
       const point = self._points[i]
       const pointToDraw = point.vector().scale(ratio)
       if (point.type === PathPointType.CURVE) {
-        const nextPointToDraw =
-          self._points[(i + 1) % numPoints].vector().scale(ratio)
-        const nextVertexToDraw =
-          self._points[(i + 2) % numPoints].vector().scale(ratio)
-        context.bezierCurveTo(pointToDraw.x, pointToDraw.y,
-          nextPointToDraw.x, nextPointToDraw.y,
-          nextVertexToDraw.x, nextVertexToDraw.y)
+        const nextPointToDraw = self._points[(i + 1) % numPoints]
+          .vector()
+          .scale(ratio)
+        const nextVertexToDraw = self._points[(i + 2) % numPoints]
+          .vector()
+          .scale(ratio)
+        context.bezierCurveTo(
+          pointToDraw.x,
+          pointToDraw.y,
+          nextPointToDraw.x,
+          nextPointToDraw.y,
+          nextVertexToDraw.x,
+          nextVertexToDraw.y
+        )
         i = i + 2
       } else if (point.type === PathPointType.LINE) {
         context.lineTo(pointToDraw.x, pointToDraw.y)
@@ -169,9 +187,11 @@ export class Polygon2D extends Label2D {
       for (let i = 0; i < numPoints; ++i) {
         const point = self._points[i]
         const nextPoint = self._points[(i + 1) % numPoints]
-        if ((point.type === PathPointType.LINE &&
-          nextPoint.type === PathPointType.CURVE) ||
-          point.type === PathPointType.CURVE) {
+        if (
+          (point.type === PathPointType.LINE &&
+            nextPoint.type === PathPointType.CURVE) ||
+          point.type === PathPointType.CURVE
+        ) {
           const coord0 = point.vector().scale(ratio)
           const coord1 = point.vector().scale(ratio)
           context.moveTo(coord0.x, coord0.y)
@@ -185,8 +205,11 @@ export class Polygon2D extends Label2D {
       // Draw points
       if (self._state === Polygon2DState.DRAW) {
         const tmpPoint = makeDrawablePathPoint2D(
-          self._mouseCoord.x, self._mouseCoord.y,
-          PathPointType.UNKNOWN, this._label?.id)
+          self._mouseCoord.x,
+          self._mouseCoord.y,
+          PathPointType.UNKNOWN,
+          this._label?.id
+        )
         const tmpStyle = pointStyle
         tmpStyle.color = assignColor(numPoints + 1)
         tmpPoint.draw(context, ratio, tmpStyle)
@@ -223,17 +246,21 @@ export class Polygon2D extends Label2D {
    * Handle mouse down
    * @param coord
    */
-  public onMouseDown (coord: Vector2D, handleIndex: number): boolean {
+  public onMouseDown(coord: Vector2D, handleIndex: number): boolean {
     this._mouseDown = true
     this._mouseCoord = coord.clone()
     if (this._selected) {
       this._mouseDownCoord = coord.clone()
-      if (this._state === Polygon2DState.FINISHED &&
-          this._highlightedHandle < 0) {
+      if (
+        this._state === Polygon2DState.FINISHED &&
+        this._highlightedHandle < 0
+      ) {
         // Not click edge or point
         return true
-      } else if (this._state === Polygon2DState.FINISHED &&
-        this._highlightedHandle > 0) {
+      } else if (
+        this._state === Polygon2DState.FINISHED &&
+        this._highlightedHandle > 0
+      ) {
         // Click point
         this._state = Polygon2DState.RESHAPE
         this.editing = true
@@ -248,16 +275,20 @@ export class Polygon2D extends Label2D {
         } else {
           // Drag vertex or midpoint
           this.toCache()
-          if (this._points[this._highlightedHandle - 1].type ===
-              PathPointType.MID) {
+          if (
+            this._points[this._highlightedHandle - 1].type === PathPointType.MID
+          ) {
             // Drag midpoint: convert midpoint to vertex first
             this.midToVertex()
           }
         }
         this._labelList.addUpdatedLabel(this)
         return true
-      } else if (this._state === Polygon2DState.FINISHED &&
-        this._highlightedHandle === 0 && handleIndex === 0) {
+      } else if (
+        this._state === Polygon2DState.FINISHED &&
+        this._highlightedHandle === 0 &&
+        handleIndex === 0
+      ) {
         // Drag edges
         this._state = Polygon2DState.MOVE
         this.editing = true
@@ -274,19 +305,21 @@ export class Polygon2D extends Label2D {
    * @param coord
    * @param _limit
    */
-  public onMouseMove (coord: Vector2D, _limit: Size2D,
-                      _labelIndex: number, handleIndex: number): boolean {
+  public onMouseMove(
+    coord: Vector2D,
+    _limit: Size2D,
+    _labelIndex: number,
+    handleIndex: number
+  ): boolean {
     if (this._state === Polygon2DState.DRAW) {
       // Move to add vertex
       this._mouseCoord = coord.clone()
       this._highlightedHandle = handleIndex
-    } else if (this._mouseDown === true &&
-      this._state === Polygon2DState.RESHAPE) {
+    } else if (this._mouseDown && this._state === Polygon2DState.RESHAPE) {
       // Dragging point
       this.reshape(coord, _limit)
       this._labelList.addUpdatedLabel(this)
-    } else if (this._mouseDown === true &&
-      this._state === Polygon2DState.MOVE) {
+    } else if (this._mouseDown && this._state === Polygon2DState.MOVE) {
       // Dragging edges
       this.move(coord, _limit)
       this._labelList.addUpdatedLabel(this)
@@ -298,10 +331,9 @@ export class Polygon2D extends Label2D {
    * Handle mouse up
    * @param coord
    */
-  public onMouseUp (coord: Vector2D): boolean {
+  public onMouseUp(coord: Vector2D): boolean {
     this._mouseCoord = coord.clone()
-    if (this.editing === true &&
-      this._state === Polygon2DState.DRAW) {
+    if (this.editing && this._state === Polygon2DState.DRAW) {
       // Add vertex
       const isFinished = this.addVertex(coord)
       if (isFinished) {
@@ -312,13 +344,11 @@ export class Polygon2D extends Label2D {
           this._labelList.addUpdatedLabel(this)
         }
       }
-    } else if (this.editing === true &&
-      this._state === Polygon2DState.RESHAPE) {
+    } else if (this.editing && this._state === Polygon2DState.RESHAPE) {
       // Finish dragging point
       this._state = Polygon2DState.FINISHED
       this.editing = false
-    } else if (this.editing === true &&
-      this._state === Polygon2DState.MOVE) {
+    } else if (this.editing && this._state === Polygon2DState.MOVE) {
       // Finish dragging edges
       this._state = Polygon2DState.FINISHED
       this.editing = false
@@ -338,10 +368,12 @@ export class Polygon2D extends Label2D {
    * handle keyboard down event
    * @param e pressed key
    */
-  public onKeyDown (e: string): boolean {
+  public onKeyDown(e: string): boolean {
     this._keyDownMap[e] = true
-    if ((e === Key.D_UP || e === Key.D_LOW) &&
-      this._state === Polygon2DState.DRAW) {
+    if (
+      (e === Key.D_UP || e === Key.D_LOW) &&
+      this._state === Polygon2DState.DRAW
+    ) {
       return this.deleteVertex()
     }
     return true
@@ -351,14 +383,14 @@ export class Polygon2D extends Label2D {
    * handle keyboard up event
    * @param e pressed key
    */
-  public onKeyUp (e: string): void {
+  public onKeyUp(e: string): void {
     delete this._keyDownMap[e]
   }
 
   /**
    * to check whether the label is valid
    */
-  public isValid (): boolean {
+  public isValid(): boolean {
     if (this._state !== Polygon2DState.FINISHED) {
       return false
     }
@@ -393,20 +425,28 @@ export class Polygon2D extends Label2D {
       }
       for (let i = 0; i < lines.length; i++) {
         for (let j = i + 1; j < lines.length; j++) {
-          if (lines[i][0].x === lines[j][0].x &&
-          lines[i][0].y === lines[j][0].y) {
+          if (
+            lines[i][0].x === lines[j][0].x &&
+            lines[i][0].y === lines[j][0].y
+          ) {
             continue
           }
-          if (lines[i][0].x === lines[j][1].x &&
-          lines[i][0].y === lines[j][1].y) {
+          if (
+            lines[i][0].x === lines[j][1].x &&
+            lines[i][0].y === lines[j][1].y
+          ) {
             continue
           }
-          if (lines[i][1].x === lines[j][0].x &&
-          lines[i][1].y === lines[j][0].y) {
+          if (
+            lines[i][1].x === lines[j][0].x &&
+            lines[i][1].y === lines[j][0].y
+          ) {
             continue
           }
-          if (lines[i][1].x === lines[j][1].x &&
-          lines[i][1].y === lines[j][1].y) {
+          if (
+            lines[i][1].x === lines[j][1].x &&
+            lines[i][1].y === lines[j][1].y
+          ) {
             continue
           }
           if (this.intersect(lines[i], lines[j])) {
@@ -424,9 +464,9 @@ export class Polygon2D extends Label2D {
   }
 
   /** Get shape objects for committing to state */
-  public shapes (): ShapeType[] {
+  public shapes(): ShapeType[] {
     if (!this._label) {
-      throw new Error('Uninitialized label')
+      throw new Error("Uninitialized label")
     }
     /**
      * This is a temporary solution for assigning the correct ID to the shapes
@@ -446,7 +486,7 @@ export class Polygon2D extends Label2D {
    * to update the shape of polygon
    * @param _shapes
    */
-  public updateShapes (shapes: ShapeType[]): void {
+  public updateShapes(shapes: ShapeType[]): void {
     if (this._label === null) {
       return
     }
@@ -485,14 +525,16 @@ export class Polygon2D extends Label2D {
    * @param _state
    * @param _start
    */
-  protected initTempLabel (state: State, _start: Vector2D): LabelType {
+  protected initTempLabel(state: State, _start: Vector2D): LabelType {
     this.editing = true
     this._state = Polygon2DState.DRAW
     const itemIndex = state.user.select.item
-    const labelType = this._closed ?
-                LabelTypeName.POLYGON_2D : LabelTypeName.POLYLINE_2D
+    const labelType = this._closed
+      ? LabelTypeName.POLYGON_2D
+      : LabelTypeName.POLYLINE_2D
     const label = makeLabel({
-      type: labelType, item: itemIndex,
+      type: labelType,
+      item: itemIndex,
       category: [state.user.select.category],
       order: this._order
     })
@@ -503,7 +545,7 @@ export class Polygon2D extends Label2D {
   /**
    * Update the label with the current set of shapes
    */
-  private UpdateLabelShapes () {
+  private UpdateLabelShapes() {
     if (this._label === null) {
       return
     }
@@ -514,7 +556,7 @@ export class Polygon2D extends Label2D {
   /**
    * Get vertices of the polygon
    */
-  private getVertices () {
+  private getVertices() {
     const vertices: PathPoint2D[] = []
     for (const point of this._points) {
       if (point.type === PathPointType.MID) continue
@@ -526,19 +568,20 @@ export class Polygon2D extends Label2D {
   /**
    * Get the centroid of the drawable polygon
    */
-  private getCentroid (): Vector2D {
+  private getCentroid(): Vector2D {
     const points = this.getVertices()
     let centroid = new Vector2D(0, 0)
     if (this._closed) {
       // Polygon center
-      centroid = _.reduce(
-        points, (sum, p) => sum.add(p.vector()), centroid)
-      centroid.scale(1. / points.length)
+      centroid = _.reduce(points, (sum, p) => sum.add(p.vector()), centroid)
+      centroid.scale(1 / points.length)
     } else {
       // Put the centroid between the middle two points
       const index = Math.floor((points.length - 1) / 2)
-      centroid.add(points[index].vector().scale(2)).add(
-        points[index + 1].vector()).scale(1. / 3)
+      centroid
+        .add(points[index].vector().scale(2))
+        .add(points[index + 1].vector())
+        .scale(1 / 3)
     }
     return centroid
   }
@@ -548,7 +591,7 @@ export class Polygon2D extends Label2D {
    * @param _end
    * @param _limit
    */
-  private move (end: Vector2D, _limit: Size2D): void {
+  private move(end: Vector2D, _limit: Size2D): void {
     if (this._highlightedHandle !== 0) {
       throw new Error(`not operation move`)
     }
@@ -565,10 +608,14 @@ export class Polygon2D extends Label2D {
    * @param _coord
    * @param _limit
    */
-  private addVertex (coord: Vector2D): boolean {
+  private addVertex(coord: Vector2D): boolean {
     let closed = false
     const newPoint = makeDrawablePathPoint2D(
-      coord.x, coord.y, PathPointType.LINE, this._label?.id)
+      coord.x,
+      coord.y,
+      PathPointType.LINE,
+      this._label?.id
+    )
     if (this._points.length === 0) {
       // First point for the polygon
       this._points.push(newPoint)
@@ -594,7 +641,7 @@ export class Polygon2D extends Label2D {
   /**
    * delete one vertex in polygon
    */
-  private deleteVertex (): boolean {
+  private deleteVertex(): boolean {
     const numPoints = this._points.length
     if (numPoints === 0) return false
     switch (this._state) {
@@ -610,9 +657,11 @@ export class Polygon2D extends Label2D {
           }
         }
         const minVertexNumber = this._closed ? 4 : 3
-        if (numVertices >= minVertexNumber && this._highlightedHandle > 0 &&
-          this._points[this._highlightedHandle - 1].type ===
-          PathPointType.LINE) {
+        if (
+          numVertices >= minVertexNumber &&
+          this._highlightedHandle > 0 &&
+          this._points[this._highlightedHandle - 1].type === PathPointType.LINE
+        ) {
           const selectedLabelIndex = this._highlightedHandle - 1
           let numPreviousPointsToDelete = 0
           let previousVertexIndex = 0
@@ -644,41 +693,28 @@ export class Polygon2D extends Label2D {
 
           const prevPoint = this._points[previousVertexIndex]
           const nextPoint = this._points[nextVertexIndex]
-          this._points[selectedLabelIndex] =
-            this.getMidpoint(prevPoint, nextPoint)
+          this._points[selectedLabelIndex] = this.getMidpoint(
+            prevPoint,
+            nextPoint
+          )
 
           if (numNextPointsToDelete === 0) {
-            this._points.splice(
-              selectedLabelIndex,
-              1
-              )
+            this._points.splice(selectedLabelIndex, 1)
             this._points.splice(
               previousVertexIndex + 1,
               numPreviousPointsToDelete
             )
           } else if (numPreviousPointsToDelete === 0) {
-            this._points.splice(
-              selectedLabelIndex + 1,
-              numNextPointsToDelete
-            )
-            this._points.splice(
-              selectedLabelIndex,
-              1
-            )
+            this._points.splice(selectedLabelIndex + 1, numNextPointsToDelete)
+            this._points.splice(selectedLabelIndex, 1)
           } else if (previousVertexIndex > selectedLabelIndex) {
             this._points.splice(
               previousVertexIndex + 1,
               numPreviousPointsToDelete
             )
-            this._points.splice(
-              selectedLabelIndex + 1,
-              numNextPointsToDelete
-            )
+            this._points.splice(selectedLabelIndex + 1, numNextPointsToDelete)
           } else {
-            this._points.splice(
-              selectedLabelIndex + 1,
-              numNextPointsToDelete
-            )
+            this._points.splice(selectedLabelIndex + 1, numNextPointsToDelete)
             this._points.splice(
               previousVertexIndex + 1,
               numPreviousPointsToDelete
@@ -693,7 +729,7 @@ export class Polygon2D extends Label2D {
           }
         }
     }
-    return (this._points.length !== 0)
+    return this._points.length !== 0
   }
 
   /**
@@ -701,10 +737,10 @@ export class Polygon2D extends Label2D {
    * @param _end
    * @param _limit
    */
-  private reshape (end: Vector2D, _limit: Size2D): void {
+  private reshape(end: Vector2D, _limit: Size2D): void {
     //
     if (this._highlightedHandle <= 0) {
-      throw new Error('No handle is selected for reshape')
+      throw new Error("No handle is selected for reshape")
     }
     const point = this._points[this._highlightedHandle - 1]
     point.x = end.x
@@ -714,21 +750,23 @@ export class Polygon2D extends Label2D {
     if (point.type === PathPointType.LINE) {
       const numPoints = this._points.length
       const selectedLabelIndex = this._highlightedHandle - 1
-      const nextPoint = this.getNextIndex(selectedLabelIndex) === -1 ?
-        null
-        : this._points[(selectedLabelIndex + 1) % numPoints]
-      const prevPoint = this.getPreviousIndex(selectedLabelIndex) === -1 ?
-        null
-        : this._points[(selectedLabelIndex + numPoints - 1) % numPoints]
+      const nextPoint =
+        this.getNextIndex(selectedLabelIndex) === -1
+          ? null
+          : this._points[(selectedLabelIndex + 1) % numPoints]
+      const prevPoint =
+        this.getPreviousIndex(selectedLabelIndex) === -1
+          ? null
+          : this._points[(selectedLabelIndex + numPoints - 1) % numPoints]
 
       if (prevPoint && prevPoint.type !== PathPointType.CURVE) {
         const prevVertex = this._points[
-          (selectedLabelIndex + numPoints - 2) % numPoints]
+          (selectedLabelIndex + numPoints - 2) % numPoints
+        ]
         prevPoint.copy(this.getMidpoint(prevVertex, point))
       }
       if (nextPoint && nextPoint.type !== PathPointType.CURVE) {
-        const nextVertex = this._points[
-          (selectedLabelIndex + 2) % numPoints]
+        const nextVertex = this._points[(selectedLabelIndex + 2) % numPoints]
         nextPoint.copy(this.getMidpoint(point, nextVertex))
       }
     }
@@ -739,10 +777,14 @@ export class Polygon2D extends Label2D {
    * @param prev the previous vertex
    * @param next the next vertex
    */
-  private getMidpoint (prev: PathPoint2D, next: PathPoint2D): PathPoint2D {
+  private getMidpoint(prev: PathPoint2D, next: PathPoint2D): PathPoint2D {
     const mid = prev.vector().add(next.vector()).scale(0.5)
-    return makeDrawablePathPoint2D(mid.x, mid.y, PathPointType.MID,
-      this._label?.id)
+    return makeDrawablePathPoint2D(
+      mid.x,
+      mid.y,
+      PathPointType.MID,
+      this._label?.id
+    )
   }
 
   /**
@@ -750,34 +792,52 @@ export class Polygon2D extends Label2D {
    * @param src the source vertex
    * @param dest the next vertex
    */
-  private getCurvePoints (src: Vector2D, dest: Vector2D): PathPoint2D[] {
-    const first = src.clone().scale(2).add(dest).scale(1 / 3)
+  private getCurvePoints(src: Vector2D, dest: Vector2D): PathPoint2D[] {
+    const first = src
+      .clone()
+      .scale(2)
+      .add(dest)
+      .scale(1 / 3)
     const point1 = makeDrawablePathPoint2D(
-      first.x, first.y, PathPointType.CURVE, this._label?.id)
-    const second = dest.clone().scale(2).add(src).scale(1 / 3)
+      first.x,
+      first.y,
+      PathPointType.CURVE,
+      this._label?.id
+    )
+    const second = dest
+      .clone()
+      .scale(2)
+      .add(src)
+      .scale(1 / 3)
     const point2 = makeDrawablePathPoint2D(
-      second.x, second.y, PathPointType.CURVE, this._label?.id)
+      second.x,
+      second.y,
+      PathPointType.CURVE,
+      this._label?.id
+    )
     return [point1, point2]
   }
 
   /**
    * convert a midpoint to a vertex
    */
-  private midToVertex (): void {
+  private midToVertex(): void {
     const selectedLabelIndex = this._highlightedHandle - 1
     const point = this._points[selectedLabelIndex]
     if (point.type !== PathPointType.MID) {
       throw new Error(`not a midpoint`)
     }
-    const prevPoint =
-      this._points[this.getPreviousIndex(selectedLabelIndex)]
+    const prevPoint = this._points[this.getPreviousIndex(selectedLabelIndex)]
     const mid1 = this.getMidpoint(prevPoint, point)
     const mid2 = this.getMidpoint(
       point,
-      this._points[this.getNextIndex(selectedLabelIndex)])
+      this._points[this.getNextIndex(selectedLabelIndex)]
+    )
     this._points.splice(selectedLabelIndex, 0, mid1)
     this._points.splice(
-      this.getNextIndex(this.getNextIndex(selectedLabelIndex)), 0, mid2
+      this.getNextIndex(this.getNextIndex(selectedLabelIndex)),
+      0,
+      mid2
     )
     point.type = PathPointType.LINE
     this._highlightedHandle++
@@ -786,29 +846,30 @@ export class Polygon2D extends Label2D {
   /**
    * convert a line to a curve and vice-versa
    */
-  private lineToCurve (): void {
+  private lineToCurve(): void {
     const selectedLabelIndex = this._highlightedHandle - 1
     const point = this._points[selectedLabelIndex]
     const highlightedHandleIndex = this._highlightedHandle - 1
     switch (point.type) {
       case PathPointType.MID: // From midpoint to curve
-        const prevPoint =
-          this._points[this.getPreviousIndex(highlightedHandleIndex)]
-        const nextPoint =
-          this._points[this.getNextIndex(highlightedHandleIndex)]
+        const prevPoint = this._points[
+          this.getPreviousIndex(highlightedHandleIndex)
+        ]
+        const nextPoint = this._points[
+          this.getNextIndex(highlightedHandleIndex)
+        ]
         const controlPoints = this.getCurvePoints(
-          prevPoint.vector(), nextPoint.vector())
-        this._points[highlightedHandleIndex] = controlPoints[0]
-        this._points.splice(
-          highlightedHandleIndex + 1, 0, controlPoints[1]
+          prevPoint.vector(),
+          nextPoint.vector()
         )
+        this._points[highlightedHandleIndex] = controlPoints[0]
+        this._points.splice(highlightedHandleIndex + 1, 0, controlPoints[1])
         break
       case PathPointType.CURVE: // From curve to midpoint
         const newMidPointIndex =
-          (this._points[highlightedHandleIndex - 1].type
-            === PathPointType.CURVE) ?
-            this.getPreviousIndex(highlightedHandleIndex) :
-            highlightedHandleIndex
+          this._points[highlightedHandleIndex - 1].type === PathPointType.CURVE
+            ? this.getPreviousIndex(highlightedHandleIndex)
+            : highlightedHandleIndex
         this._points.splice(highlightedHandleIndex, 1)
         this._points[newMidPointIndex] = this.getMidpoint(
           this._points[this.getNextIndex(newMidPointIndex)],
@@ -820,7 +881,7 @@ export class Polygon2D extends Label2D {
   /**
    * save current points to cache
    */
-  private toCache (): void {
+  private toCache(): void {
     this._startingPoints = []
     for (const point of this._points) {
       this._startingPoints.push(point.clone())
@@ -831,10 +892,13 @@ export class Polygon2D extends Label2D {
    * Given three collinear points p, q, r, the function checks if q lies
    * on line segment pr
    */
-  private onSegment (
-    p: PathPoint2D, q: PathPoint2D, r: PathPoint2D): boolean {
-    if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
-    q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y)) {
+  private onSegment(p: PathPoint2D, q: PathPoint2D, r: PathPoint2D): boolean {
+    if (
+      q.x <= Math.max(p.x, r.x) &&
+      q.x >= Math.min(p.x, r.x) &&
+      q.y <= Math.max(p.y, r.y) &&
+      q.y >= Math.min(p.y, r.y)
+    ) {
       return true
     }
     return false
@@ -847,8 +911,11 @@ export class Polygon2D extends Label2D {
    * 1 -> Clockwise
    * 2 -> Counterclockwise
    */
-  private orientation (p: PathPoint2D, q: PathPoint2D, r: PathPoint2D):
-  OrientationType {
+  private orientation(
+    p: PathPoint2D,
+    q: PathPoint2D,
+    r: PathPoint2D
+  ): OrientationType {
     const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
     switch (true) {
       case val === 0:
@@ -863,7 +930,7 @@ export class Polygon2D extends Label2D {
   /**
    * to check whether two line segments intersect
    */
-  private intersect (a: PathPoint2D[], b: PathPoint2D[]): boolean {
+  private intersect(a: PathPoint2D[], b: PathPoint2D[]): boolean {
     const p1 = a[0]
     const q1 = a[1]
     const p2 = b[0]
@@ -875,14 +942,14 @@ export class Polygon2D extends Label2D {
     if (o1 !== o2 && o3 !== o4) {
       return true
     }
-    if (o1 === OrientationType.COLLINEAR
-      && this.onSegment(p1, p2, q1)) return true
-    if (o2 === OrientationType.COLLINEAR
-      && this.onSegment(p1, q2, q1)) return true
-    if (o3 === OrientationType.COLLINEAR
-      && this.onSegment(p2, p1, q2)) return true
-    if (o4 === OrientationType.COLLINEAR
-      && this.onSegment(p2, q1, q2)) return true
+    if (o1 === OrientationType.COLLINEAR && this.onSegment(p1, p2, q1))
+      return true
+    if (o2 === OrientationType.COLLINEAR && this.onSegment(p1, q2, q1))
+      return true
+    if (o3 === OrientationType.COLLINEAR && this.onSegment(p2, p1, q2))
+      return true
+    if (o4 === OrientationType.COLLINEAR && this.onSegment(p2, q1, q2))
+      return true
     return false
   }
 
@@ -890,7 +957,7 @@ export class Polygon2D extends Label2D {
    * Whether a specific key is pressed down
    * @param key - the key to check
    */
-  private isKeyDown (key: Key): boolean {
+  private isKeyDown(key: Key): boolean {
     return this._keyDownMap[key]
   }
 
@@ -898,7 +965,7 @@ export class Polygon2D extends Label2D {
    * Get index of previous point, circular indexing
    * @param index
    */
-  private getPreviousIndex (index: number): number {
+  private getPreviousIndex(index: number): number {
     if (!this._closed && index === 0) {
       return -1
     } else {
@@ -910,7 +977,7 @@ export class Polygon2D extends Label2D {
    * Get index of previous point, circular indexing
    * @param index
    */
-  private getNextIndex (index: number): number {
+  private getNextIndex(index: number): number {
     if (!this._closed && index === this._points.length - 1) {
       return -1
     } else {

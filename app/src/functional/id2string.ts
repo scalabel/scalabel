@@ -1,11 +1,20 @@
-import _ from 'lodash'
-import { ItemType, LabelIdMap, LabelType, ShapeIdMap, ShapeType, TaskType, TrackIdMap, TrackType } from '../types/state'
+import _ from "lodash"
+import {
+  ItemType,
+  LabelIdMap,
+  LabelType,
+  ShapeIdMap,
+  ShapeType,
+  TaskType,
+  TrackIdMap,
+  TrackType
+} from "../types/state"
 
 /**
  * Convert the Ids in the task to string
  * @param task
  */
-export function taskIdToString (task: TaskType): TaskType {
+export function taskIdToString(task: TaskType): TaskType {
   const newTask = _.clone(task)
   newTask.items = itemsIdToString(task.items)
   newTask.tracks = tracksIdToString(task.tracks)
@@ -16,7 +25,7 @@ export function taskIdToString (task: TaskType): TaskType {
  * Convert the Ids in the tracks to string
  * @param tracks
  */
-function tracksIdToString (tracks: TrackIdMap): TrackIdMap {
+function tracksIdToString(tracks: TrackIdMap): TrackIdMap {
   const newTracks: TrackIdMap = {}
   _.forEach(tracks, (track, trackId) => {
     newTracks[trackId.toString()] = trackIdToString(track)
@@ -28,7 +37,7 @@ function tracksIdToString (tracks: TrackIdMap): TrackIdMap {
  * Convert the Ids in the track to string
  * @param track
  */
-function trackIdToString (track: TrackType): TrackType {
+function trackIdToString(track: TrackType): TrackType {
   const newTrack = { ...track }
   newTrack.id = newTrack.id.toString()
   const labels = _.clone(newTrack.labels)
@@ -44,7 +53,7 @@ function trackIdToString (track: TrackType): TrackType {
  * Convert the Ids in the items to string
  * @param items
  */
-function itemsIdToString (items: ItemType[]): ItemType[] {
+function itemsIdToString(items: ItemType[]): ItemType[] {
   return items.map((item) => itemIdToString(item))
 }
 
@@ -52,7 +61,7 @@ function itemsIdToString (items: ItemType[]): ItemType[] {
  * Convert the Ids in the item to string
  * @param item
  */
-function itemIdToString (item: ItemType): ItemType {
+function itemIdToString(item: ItemType): ItemType {
   const newItem = _.clone(item)
   newItem.labels = labelsIdToString(item.labels)
   newItem.shapes = shapesIdToString(item.shapes)
@@ -63,7 +72,7 @@ function itemIdToString (item: ItemType): ItemType {
  * Convert the Ids in the labels to string
  * @param labels
  */
-function labelsIdToString (labels: LabelIdMap): LabelIdMap {
+function labelsIdToString(labels: LabelIdMap): LabelIdMap {
   const newLabels: LabelIdMap = {}
   _.forEach(labels, (label, labelId) => {
     newLabels[labelId.toString()] = labelIdToString(label)
@@ -75,7 +84,7 @@ function labelsIdToString (labels: LabelIdMap): LabelIdMap {
  * Convert the Ids in the label to string
  * @param label
  */
-function labelIdToString (label: LabelType): LabelType {
+function labelIdToString(label: LabelType): LabelType {
   const newLabel: LabelType = { ...label }
   newLabel.id = newLabel.id.toString()
   newLabel.parent = newLabel.parent.toString()
@@ -88,7 +97,7 @@ function labelIdToString (label: LabelType): LabelType {
 /**
  * Convert the Ids in the shapes to string
  */
-function shapesIdToString (shapes: ShapeIdMap): ShapeIdMap {
+function shapesIdToString(shapes: ShapeIdMap): ShapeIdMap {
   const newShapes: ShapeIdMap = {}
   _.forEach(shapes, (shape, shapeId) => {
     newShapes[shapeId.toString()] = shapeIdToString(shape)
@@ -100,19 +109,19 @@ function shapesIdToString (shapes: ShapeIdMap): ShapeIdMap {
  * Convert the Ids in the shape to string
  * @param shape
  */
-function shapeIdToString (shape: ShapeType): ShapeType {
+function shapeIdToString(shape: ShapeType): ShapeType {
   let newShape: ShapeType = { ...shape }
   newShape.id = shape.id.toString()
   newShape.label = shape.label.map((l) => l.toString())
   /** to be compatible with the old indexed shape type */
-  if ('shape' in shape) {
-    // tslint:disable-next-line: no-string-literal
-    const shapeInfo = shape['shape'] as ShapeType
+  if ("shape" in shape) {
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    const shapeInfo = shape["shape"] as ShapeType
     newShape = { ...newShape, ...shapeInfo }
   }
-  if ('shape' in newShape) {
-    // tslint:disable-next-line: no-string-literal
-    delete newShape['shape']
+  if ("shape" in newShape) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (newShape as any).shape
   }
   return newShape
 }

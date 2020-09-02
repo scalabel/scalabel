@@ -1,12 +1,12 @@
-import { Divider } from '@material-ui/core'
-import { withStyles } from '@material-ui/core/styles'
-import Typography from '@material-ui/core/Typography'
-import React from 'react'
-import { getProjects } from '../common/service'
-import { dashboardStyles } from '../styles/dashboard'
-import DashboardHeader from './dashboard_header'
-import DataTable from './dashboard_table'
-import HeaderPage from './header_page'
+import { Divider } from "@material-ui/core"
+import { withStyles } from "@material-ui/core/styles"
+import Typography from "@material-ui/core/Typography"
+import React from "react"
+import { getProjects } from "../common/service"
+import { dashboardStyles } from "../styles/dashboard"
+import DashboardHeader from "./dashboard_header"
+import DataTable from "./dashboard_table"
+import HeaderPage from "./header_page"
 
 export interface User {
   /** User ID */
@@ -36,25 +36,24 @@ export interface DashboardClassType {
  * @param {object} props
  * @return component
  */
-function Dashboard (props: {
+function Dashboard(props: {
   /** style of dashboard */
   classes: DashboardClassType
 }) {
   const { classes } = props
-  const dashboardHeaderContent = (
-    <DashboardHeader />
-  )
+  const dashboardHeaderContent = <DashboardHeader />
   const dashboardPageContent = (
     <React.Fragment>
       <main className={classes.workerRoot}>
         <div className={classes.appBarSpacer} />
-        <Typography variant='h6' component='h2'
-          className={classes.labelText}>
+        <Typography variant="h6" component="h2" className={classes.labelText}>
           Projects
-              </Typography>
+        </Typography>
         <Divider />
-        <DataTable dataList={getProjects()}
-          headers={[{ header: 'Project', align: 'left' }]} />
+        <DataTable
+          dataList={getProjects()}
+          headers={[{ header: "Project", align: "left" }]}
+        />
       </main>
     </React.Fragment>
   )
@@ -63,10 +62,11 @@ function Dashboard (props: {
    * @return component
    */
   return (
-    <HeaderPage children={{
-      headerContent: dashboardHeaderContent,
-      pageContent: dashboardPageContent
-    }}
+    <HeaderPage
+      children={{
+        headerContent: dashboardHeaderContent,
+        pageContent: dashboardPageContent
+      }}
     />
   )
 }

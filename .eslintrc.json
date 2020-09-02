@@ -1,0 +1,46 @@
+{
+  "extends": [
+    "plugin:prettier/recommended",
+    "plugin:react/recommended",
+    "standard-with-typescript",
+    "prettier",
+    "prettier/@typescript-eslint",
+    "prettier/react",
+    "prettier/standard"
+  ],
+  "plugins": ["@typescript-eslint", "jsdoc", "react", "standard"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "spaced-comment": ["error", "always"],
+    "require-jsdoc": [
+      "error",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": true
+        }
+      }
+    ],
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "varsIgnorePattern": "_.+" }
+    ],
+    "@typescript-eslint/require-array-sort-compare": [
+      "error",
+      { "ignoreStringArrays": true }
+    ],
+    "@typescript-eslint/no-explicit-any": ["error"]
+  },
+  "settings": {
+    "react": {
+      // More options at https://github.com/yannickcr/eslint-plugin-react#configuration
+      "version": "detect"
+    }
+  }
+}

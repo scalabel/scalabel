@@ -1,16 +1,16 @@
-import _ from 'lodash'
-import { IdType, LabelIdMap, State } from '../../src/types/state'
+import _ from "lodash"
+import { IdType, LabelIdMap, State } from "../../src/types/state"
 
 /**
  * Find the new label that is not already in the labelIds
  * @param labels
  * @param labelIds
  */
-export function findNewLabels (
-  labels: LabelIdMap, labelIds: IdType[]): IdType[] {
-  return _.filter(
-    _.keys(labels),
-    (id) => !labelIds.includes(id))
+export function findNewLabels(
+  labels: LabelIdMap,
+  labelIds: IdType[]
+): IdType[] {
+  return _.filter(_.keys(labels), (id) => !labelIds.includes(id))
 }
 
 /**
@@ -18,12 +18,13 @@ export function findNewLabels (
  * @param labels
  * @param labelIds
  */
-export function findNewLabelsFromState (
-  state: State, itemIndex: number, labelIds: IdType[]): IdType[] {
+export function findNewLabelsFromState(
+  state: State,
+  itemIndex: number,
+  labelIds: IdType[]
+): IdType[] {
   const labels = state.task.items[itemIndex].labels
-  return _.filter(
-    _.keys(labels),
-    (id) => !labelIds.includes(id))
+  return _.filter(_.keys(labels), (id) => !labelIds.includes(id))
 }
 
 /**
@@ -31,10 +32,10 @@ export function findNewLabelsFromState (
  * @param labels
  * @param labelIds
  */
-export function findNewTracksFromState (
-  state: State, trackIds: IdType[]): IdType[] {
+export function findNewTracksFromState(
+  state: State,
+  trackIds: IdType[]
+): IdType[] {
   const tracks = state.task.tracks
-  return _.filter(
-    _.keys(tracks),
-    (id) => !trackIds.includes(id))
+  return _.filter(_.keys(tracks), (id) => !trackIds.includes(id))
 }

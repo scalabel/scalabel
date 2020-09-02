@@ -1,9 +1,9 @@
-import * as THREE from 'three'
-import * as actionConsts from '../const/action'
-import { Vector3D } from '../math/vector3d'
-import * as actionTypes from '../types/action'
-import { PointCloudViewerConfigType, ViewerConfigType } from '../types/state'
-import { changeViewerConfig, makeBaseAction } from './common'
+import * as THREE from "three"
+import * as actionConsts from "../const/action"
+import { Vector3D } from "../math/vector3d"
+import * as actionTypes from "../types/action"
+import { PointCloudViewerConfigType, ViewerConfigType } from "../types/state"
+import { changeViewerConfig, makeBaseAction } from "./common"
 
 export enum CameraMovementParameters {
   MOUSE_CORRECTION_FACTOR = 60.0,
@@ -21,7 +21,9 @@ export enum CameraLockState {
 }
 
 /** Returns whether camera lock state is locked to selected label */
-export function lockedToSelection (viewerConfig: PointCloudViewerConfigType) {
+export function lockedToSelection(
+  viewerConfig: PointCloudViewerConfigType
+): boolean {
   return viewerConfig.lockStatus >= CameraLockState.SELECTION_X
 }
 
@@ -29,7 +31,7 @@ export function lockedToSelection (viewerConfig: PointCloudViewerConfigType) {
  * Generate move camera action
  * @param {Vector3D} newPosition
  */
-export function moveCamera (
+export function moveCamera(
   newPosition: Vector3D,
   viewerId: number,
   viewerConfig: ViewerConfigType
@@ -50,7 +52,7 @@ export function moveCamera (
  * @param {Vector3D} newPosition
  * @param {Vector3D} newTarget
  */
-export function moveCameraAndTarget (
+export function moveCameraAndTarget(
   newPosition: Vector3D,
   newTarget: Vector3D,
   viewerId: number,
@@ -71,30 +73,34 @@ export function moveCameraAndTarget (
 /**
  * Zoom camera
  */
-export function zoomCamera (
+export function zoomCamera(
   deltaY: number,
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction | null {
-  const target = new THREE.Vector3(viewerConfig.target.x,
-      viewerConfig.target.y,
-      viewerConfig.target.z)
-  const offset = new THREE.Vector3(viewerConfig.position.x,
-      viewerConfig.position.y,
-      viewerConfig.position.z)
+  const target = new THREE.Vector3(
+    viewerConfig.target.x,
+    viewerConfig.target.y,
+    viewerConfig.target.z
+  )
+  const offset = new THREE.Vector3(
+    viewerConfig.position.x,
+    viewerConfig.position.y,
+    viewerConfig.position.z
+  )
   offset.sub(target)
 
   const spherical = new THREE.Spherical()
   spherical.setFromVector3(offset)
 
-    // Decrease distance from origin by amount specified
+  // Decrease distance from origin by amount specified
   let newRadius = spherical.radius
   if (deltaY > 0) {
     newRadius *= CameraMovementParameters.ZOOM_SPEED
   } else {
     newRadius /= CameraMovementParameters.ZOOM_SPEED
   }
-    // Limit zoom to not be too close
+  // Limit zoom to not be too close
   if (newRadius > 0.1 && newRadius < 500) {
     spherical.radius = newRadius
 
@@ -112,7 +118,7 @@ export function zoomCamera (
  * @param newX
  * @param newY
  */
-export function rotateCamera (
+export function rotateCamera(
   initialX: number,
   initialY: number,
   newX: number,
@@ -125,21 +131,28 @@ export function rotateCamera (
   } else if (viewerConfig.lockStatus === CameraLockState.Y_LOCKED) {
     newY = initialY
   }
-  const target = new THREE.Vector3(viewerConfig.target.x,
+  const target = new THREE.Vector3(
+    viewerConfig.target.x,
     viewerConfig.target.y,
-    viewerConfig.target.z)
-  const offset = new THREE.Vector3(viewerConfig.position.x,
-      viewerConfig.position.y,
-      viewerConfig.position.z)
+    viewerConfig.target.z
+  )
+  const offset = new THREE.Vector3(
+    viewerConfig.position.x,
+    viewerConfig.position.y,
+    viewerConfig.position.z
+  )
 
   offset.sub(target)
 
   // Rotate so that positive y-axis is vertical
   const rotVertQuat = new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(viewerConfig.verticalAxis.x,
+    new THREE.Vector3(
+      viewerConfig.verticalAxis.x,
       viewerConfig.verticalAxis.y,
-      viewerConfig.verticalAxis.z),
-    new THREE.Vector3(0, 1, 0))
+      viewerConfig.verticalAxis.z
+    ),
+    new THREE.Vector3(0, 1, 0)
+  )
   offset.applyQuaternion(rotVertQuat)
 
   // Convert to spherical coordinates
@@ -164,7 +177,7 @@ export function rotateCamera (
   offset.applyQuaternion(quatInverse)
   offset.add(target)
 
-  return moveCamera((new Vector3D()).fromThree(offset), viewerId, viewerConfig)
+  return moveCamera(new Vector3D().fromThree(offset), viewerId, viewerConfig)
 }
 
 /**
@@ -172,7 +185,7 @@ export function rotateCamera (
  * @param newX
  * @param newY
  */
-export function dragCamera (
+export function dragCamera(
   initialX: number,
   initialY: number,
   newX: number,
@@ -182,13 +195,13 @@ export function dragCamera (
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
   const dragVector = new THREE.Vector3(
-    (initialX - newX) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR * 2,
-    (newY - initialY) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR * 2,
+    ((initialX - newX) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR) * 2,
+    ((newY - initialY) / CameraMovementParameters.MOUSE_CORRECTION_FACTOR) * 2,
     0
   )
   dragVector.applyQuaternion(camera.quaternion)
 
-  return (moveCameraAndTarget(
+  return moveCameraAndTarget(
     new Vector3D(
       viewerConfig.position.x + dragVector.x,
       viewerConfig.position.y + dragVector.y,
@@ -201,14 +214,14 @@ export function dragCamera (
     ),
     viewerId,
     viewerConfig
-  ))
+  )
 }
 
 /**
  * Move camera up
  * @param viewerConfig
  */
-export function moveUp (
+export function moveUp(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
@@ -232,7 +245,7 @@ export function moveUp (
  * Move camera up
  * @param viewerConfig
  */
-export function moveDown (
+export function moveDown(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
@@ -256,7 +269,7 @@ export function moveDown (
  * Calculate forward vector
  * @param viewerConfig
  */
-function calculateForward (
+function calculateForward(
   viewerConfig: PointCloudViewerConfigType
 ): THREE.Vector3 {
   // Get vector pointing from camera to target projected to horizontal plane
@@ -272,7 +285,7 @@ function calculateForward (
  * Move camera back
  * @param viewerConfig
  */
-export function moveBack (
+export function moveBack(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
@@ -297,7 +310,7 @@ export function moveBack (
  * Move camera back
  * @param viewerConfig
  */
-export function moveForward (
+export function moveForward(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
@@ -323,7 +336,7 @@ export function moveForward (
  * @param viewerConfig
  * @param forward
  */
-function calculateLeft (
+function calculateLeft(
   viewerConfig: PointCloudViewerConfigType,
   forward: THREE.Vector3
 ): THREE.Vector3 {
@@ -346,7 +359,7 @@ function calculateLeft (
  * Move camera left
  * @param viewerConfig
  */
-export function moveLeft (
+export function moveLeft(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
@@ -372,7 +385,7 @@ export function moveLeft (
  * Move camera right
  * @param viewerConfig
  */
-export function moveRight (
+export function moveRight(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
 ): actionTypes.ChangeViewerConfigAction {
@@ -398,7 +411,7 @@ export function moveRight (
  * Update lockStatus in viewerConfig
  * @param viewerConfig
  */
-export function updateLockStatus (
+export function updateLockStatus(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType,
   newLockStatus: number
@@ -411,12 +424,12 @@ export function updateLockStatus (
 }
 
 /** Convert axis (0, 1, 2) to the selection lock state */
-function axisIndexToSelectionLockState (axis: number) {
+function axisIndexToSelectionLockState(axis: number): number {
   return CameraLockState.SELECTION_X + axis
 }
 
 /** Align camera to axis */
-export function alignToAxis (
+export function alignToAxis(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType,
   axis: number,
@@ -426,8 +439,8 @@ export function alignToAxis (
   if (lockedToSelection(viewerConfig)) {
     config.lockStatus = axisIndexToSelectionLockState(axis)
   } else {
-    const position = (new Vector3D()).fromState(viewerConfig.position)
-    const target = (new Vector3D()).fromState(viewerConfig.target)
+    const position = new Vector3D().fromState(viewerConfig.position)
+    const target = new Vector3D().fromState(viewerConfig.target)
     for (let i = 0; i < 3; i++) {
       if (i !== axis) {
         position[i] = target[i] + 0.01
@@ -447,10 +460,10 @@ export function alignToAxis (
 }
 
 /** Lock selection to camera */
-export function toggleSelectionLock (
+export function toggleSelectionLock(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-) {
+): actionTypes.ChangeViewerConfigAction {
   const config = { ...viewerConfig }
   if (lockedToSelection(viewerConfig)) {
     config.lockStatus = CameraLockState.UNLOCKED
@@ -462,13 +475,13 @@ export function toggleSelectionLock (
 }
 
 /** Toggle drag rotation direction */
-export function toggleRotation (
+export function toggleRotation(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
-) {
+): actionTypes.ChangeViewerConfigAction {
   // Spread the original config
   const config = { ...viewerConfig }
-  if (viewerConfig.cameraRotateDir) {
+  if (viewerConfig.cameraRotateDir !== undefined) {
     config.cameraRotateDir = false
   } else {
     config.cameraRotateDir = true

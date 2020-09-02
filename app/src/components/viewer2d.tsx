@@ -1,23 +1,23 @@
-import { IconButton } from '@material-ui/core'
-import FindReplaceIcon from '@material-ui/icons/FindReplace'
-import ZoomInIcon from '@material-ui/icons/ZoomIn'
-import ZoomOutIcon from '@material-ui/icons/ZoomOut'
-import { withStyles } from '@material-ui/styles'
-import React from 'react'
-import { changeViewerConfig } from '../action/common'
-import Session from '../common/session'
-import * as types from '../const/common'
-import { Vector2D } from '../math/vector2d'
-import { viewerStyles } from '../styles/viewer'
-import { ImageViewerConfigType } from '../types/state'
+import { IconButton } from "@material-ui/core"
+import FindReplaceIcon from "@material-ui/icons/FindReplace"
+import ZoomInIcon from "@material-ui/icons/ZoomIn"
+import ZoomOutIcon from "@material-ui/icons/ZoomOut"
+import { withStyles } from "@material-ui/styles"
+import React from "react"
+import { changeViewerConfig } from "../action/common"
+import Session from "../common/session"
+import * as types from "../const/common"
+import { Vector2D } from "../math/vector2d"
+import { viewerStyles } from "../styles/viewer"
+import { ImageViewerConfigType } from "../types/state"
+import { MAX_SCALE, MIN_SCALE, SCROLL_ZOOM_RATIO } from "../view_config/image"
 import {
-  MAX_SCALE,
-  MIN_SCALE,
-  SCROLL_ZOOM_RATIO
-} from '../view_config/image'
-import { DrawableViewer, ViewerClassTypes, ViewerProps } from './drawable_viewer'
-import ImageCanvas from './image_canvas'
-import Label2dCanvas from './label2d_canvas'
+  DrawableViewer,
+  ViewerClassTypes,
+  ViewerProps
+} from "./drawable_viewer"
+import ImageCanvas from "./image_canvas"
+import Label2dCanvas from "./label2d_canvas"
 
 interface ClassType extends ViewerClassTypes {
   /** buttons */
@@ -37,7 +37,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: Viewer2DProps) {
+  constructor(props: Viewer2DProps) {
     super(props)
   }
 
@@ -45,12 +45,12 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents () {
+  protected getDrawableComponents(): React.ReactElement[] {
     if (this._container && this._viewerConfig) {
-      this._container.scrollTop =
-        (this._viewerConfig as ImageViewerConfigType).displayTop
-      this._container.scrollLeft =
-        (this._viewerConfig as ImageViewerConfigType).displayLeft
+      this._container.scrollTop = (this
+        ._viewerConfig as ImageViewerConfigType).displayTop
+      this._container.scrollLeft = (this
+        ._viewerConfig as ImageViewerConfigType).displayLeft
     }
 
     const views: React.ReactElement[] = []
@@ -78,7 +78,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getMenuComponents () {
+  protected getMenuComponents(): JSX.Element[] | [] {
     if (this._viewerConfig) {
       const zoomInButton = (
         <IconButton
@@ -104,13 +104,13 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
             if (this._container) {
               const rect = this._container.getBoundingClientRect()
               this.zoom(
-                1. / SCROLL_ZOOM_RATIO,
+                1 / SCROLL_ZOOM_RATIO,
                 new Vector2D(rect.width / 2, rect.height / 2)
               )
             }
           }}
           className={this.props.classes.viewer_button}
-          edge={'start'}
+          edge={"start"}
         >
           <ZoomOutIcon />
         </IconButton>
@@ -124,13 +124,10 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
             newConfig.displayLeft = 0
             newConfig.displayTop = 0
             newConfig.viewScale = 1
-            Session.dispatch(changeViewerConfig(
-              this._viewerId,
-              newConfig
-            ))
+            Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
           }}
           className={this.props.classes.viewer_button}
-          edge={'start'}
+          edge={"start"}
         >
           <FindReplaceIcon />
         </IconButton>
@@ -144,13 +141,12 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Handle mouse move
    * @param e
    */
-  protected onMouseMove (e: React.MouseEvent) {
+  protected onMouseMove(e: React.MouseEvent): void {
     const oldX = this._mX
     const oldY = this._mY
     super.onMouseMove(e)
     if (this._mouseDown && this._container && this._viewerConfig) {
-      if (this.isKeyDown(types.Key.META) ||
-          this.isKeyDown(types.Key.CONTROL)) {
+      if (this.isKeyDown(types.Key.META) || this.isKeyDown(types.Key.CONTROL)) {
         const dx = this._mX - oldX
         const dy = this._mY - oldY
         const displayLeft = this._container.scrollLeft - dx
@@ -160,9 +156,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
           displayLeft,
           displayTop
         }
-        Session.dispatch(changeViewerConfig(
-          this._viewerId, newConfig
-        ))
+        Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
       }
     }
   }
@@ -171,30 +165,25 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * Handle double click
    * @param e
    */
-  protected onDoubleClick () {
-    return
-  }
+  protected onDoubleClick(): void {}
 
   /**
    * Handle mouse leave
    * @param e
    */
-  protected onMouseLeave () {
-    return
-  }
+  protected onMouseLeave(): void {}
 
   /**
    * Handle mouse wheel
    * @param e
    */
-  protected onWheel (e: WheelEvent) {
+  protected onWheel(e: WheelEvent): void {
     e.preventDefault()
     if (this._viewerConfig && this._container) {
-      if (this.isKeyDown(types.Key.META) ||
-          this.isKeyDown(types.Key.CONTROL)) {
+      if (this.isKeyDown(types.Key.META) || this.isKeyDown(types.Key.CONTROL)) {
         let zoomRatio = SCROLL_ZOOM_RATIO
         if (-e.deltaY < 0) {
-          zoomRatio = 1. / zoomRatio
+          zoomRatio = 1 / zoomRatio
         }
         this.zoom(zoomRatio, new Vector2D(this._mX, this._mY))
       }
@@ -202,7 +191,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
   }
 
   /** Zoom */
-  protected zoom (zoomRatio: number, offset: Vector2D) {
+  protected zoom(zoomRatio: number, offset: Vector2D): void {
     const config = this._viewerConfig as ImageViewerConfigType
     const newScale = config.viewScale * zoomRatio
     const newConfig = { ...config }
@@ -228,13 +217,13 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
         if (rect) {
           if (rect.height / rect.width > ih / iw) {
             // Zoomed height < that of the display area, blanks on top/bottom
-            if (image.width * rect.height / rect.width > ih) {
+            if ((image.width * rect.height) / rect.width > ih) {
               // Set offset to 0
               displayTop = 0
             }
           } else {
             // Zoomed width < that of the display area, blanks on sides
-            if (image.height * rect.width / rect.height > iw) {
+            if ((image.height * rect.width) / rect.height > iw) {
               // Set offset to 0
               displayLeft = 0
             }
@@ -244,10 +233,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
         newConfig.displayTop = displayTop
       }
 
-      Session.dispatch(changeViewerConfig(
-        this._viewerId,
-        newConfig
-      ))
+      Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
     }
   }
 }

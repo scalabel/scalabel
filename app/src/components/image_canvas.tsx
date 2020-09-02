@@ -1,18 +1,22 @@
-import { withStyles } from '@material-ui/core/styles'
-import * as React from 'react'
-import { connect } from 'react-redux'
-import Session from '../common/session'
-import { getCurrentViewerConfig, isFrameLoaded } from '../functional/state_util'
-import { imageViewStyle } from '../styles/label'
-import { ImageViewerConfigType, State } from '../types/state'
+import { withStyles } from "@material-ui/core/styles"
+import * as React from "react"
+import { connect } from "react-redux"
+import Session from "../common/session"
+import { getCurrentViewerConfig, isFrameLoaded } from "../functional/state_util"
+import { imageViewStyle } from "../styles/label"
+import { ImageViewerConfigType, State } from "../types/state"
 import {
   clearCanvas,
   drawImageOnCanvas,
   MAX_SCALE,
   MIN_SCALE,
   updateCanvasScale
-} from '../view_config/image'
-import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
+} from "../view_config/image"
+import {
+  DrawableCanvas,
+  DrawableProps,
+  mapStateToDrawableProps
+} from "./viewer"
 
 interface ClassType {
   /** image canvas */
@@ -48,7 +52,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
    * Constructor, handles subscription to store
    * @param {Object} props: react props
    */
-  constructor (props: Readonly<Props>) {
+  constructor(props: Readonly<Props>) {
     super(props)
 
     // Constants
@@ -64,35 +68,38 @@ export class ImageCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render () {
+  public render(): JSX.Element {
     const { classes } = this.props
-    let imageCanvas = (<canvas
-      key='image-canvas'
-      className={classes.image_canvas}
-      ref={(canvas) => {
-        if (canvas && this.display) {
-          this.imageCanvas = canvas
-          this.imageContext = canvas.getContext('2d')
-          const displayRect =
-            this.display.getBoundingClientRect()
-          const item = this.state.user.select.item
-          const sensor = this.state.user.viewerConfigs[this.props.id].sensor
-          if (displayRect.width
-            && displayRect.height
-            && isFrameLoaded(this.state, item, sensor)
-            && this.imageContext) {
-            this.updateScale(this.imageCanvas, this.imageContext, true)
+    let imageCanvas = (
+      <canvas
+        key="image-canvas"
+        className={classes.image_canvas}
+        ref={(canvas) => {
+          if (canvas && this.display) {
+            this.imageCanvas = canvas
+            this.imageContext = canvas.getContext("2d")
+            const displayRect = this.display.getBoundingClientRect()
+            const item = this.state.user.select.item
+            const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+            if (
+              displayRect.width &&
+              displayRect.height &&
+              isFrameLoaded(this.state, item, sensor) &&
+              this.imageContext
+            ) {
+              this.updateScale(this.imageCanvas, this.imageContext, true)
+            }
           }
-        }
-      }}
-    />)
+        }}
+      />
+    )
 
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
-      imageCanvas = React.cloneElement(
-        imageCanvas,
-        { height: displayRect.height, width: displayRect.width }
-      )
+      imageCanvas = React.cloneElement(imageCanvas, {
+        height: displayRect.height,
+        width: displayRect.width
+      })
     }
 
     return imageCanvas
@@ -102,13 +109,15 @@ export class ImageCanvas extends DrawableCanvas<Props> {
    * Function to redraw all canvases
    * @return {boolean}
    */
-  public redraw (): boolean {
+  public redraw(): boolean {
     if (this.imageCanvas && this.imageContext) {
       const item = this.state.user.select.item
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
-      if (isFrameLoaded(this.state, item, sensor) &&
-          item < Session.images.length &&
-          sensor in Session.images[item]) {
+      if (
+        isFrameLoaded(this.state, item, sensor) &&
+        item < Session.images.length &&
+        sensor in Session.images[item]
+      ) {
         const image = Session.images[item][sensor]
         // Redraw imageCanvas
         drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
@@ -122,7 +131,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
   /**
    * notify state is updated
    */
-  protected updateState (_state: State): void {
+  protected updateState(_state: State): void {
     if (this.display !== this.props.display) {
       this.display = this.props.display
       this.forceUpdate()
@@ -134,17 +143,19 @@ export class ImageCanvas extends DrawableCanvas<Props> {
    * @param {object} canvas
    * @param {boolean} upRes
    */
-  private updateScale (
+  private updateScale(
     canvas: HTMLCanvasElement,
     context: CanvasRenderingContext2D,
     upRes: boolean
-  ) {
+  ): void {
     if (!this.display) {
       return
     }
 
-    const imgConfig =
-      getCurrentViewerConfig(this.state, this.props.id) as ImageViewerConfigType
+    const imgConfig = getCurrentViewerConfig(
+      this.state,
+      this.props.id
+    ) as ImageViewerConfigType
     if (imgConfig.viewScale >= MIN_SCALE && imgConfig.viewScale < MAX_SCALE) {
       const newParams = updateCanvasScale(
         this.state,
@@ -160,6 +171,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
   }
 }
 
-const styledCanvas = withStyles(
-  imageViewStyle, { withTheme: true })(ImageCanvas)
+const styledCanvas = withStyles(imageViewStyle, { withTheme: true })(
+  ImageCanvas
+)
 export default connect(mapStateToDrawableProps)(styledCanvas)

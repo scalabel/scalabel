@@ -1,7 +1,7 @@
-import * as React from 'react'
-import EventListener, { withOptions } from 'react-event-listener'
-import Session from '../common/session'
-import { LabelTypeName } from '../const/common'
+import * as React from "react"
+import EventListener, { withOptions } from "react-event-listener"
+import Session from "../common/session"
+import { LabelTypeName } from "../const/common"
 
 type mouseEventListener = (e: MouseEvent) => void
 
@@ -25,14 +25,16 @@ interface MouseEventListenersProps {
  * based on label type
  * @param props
  */
-export default function mouseEventListeners (props: MouseEventListenersProps) {
+export default function mouseEventListeners(
+  props: MouseEventListenersProps
+): JSX.Element | null {
   let eventListeners = null
   const state = Session.getState()
   const labelType = state.task.config.labelTypes[state.user.select.labelType]
   if (labelType !== LabelTypeName.TAG) {
     eventListeners = (
       <EventListener
-        target='parent'
+        target="parent"
         onMouseDown={(e) => props.onMouseDown(e)}
         onMouseMove={(e) => props.onMouseMove(e)}
         onMouseUp={(e) => props.onMouseUp(e)}

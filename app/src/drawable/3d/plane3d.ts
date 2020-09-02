@@ -1,13 +1,13 @@
-import * as THREE from 'three'
-import { LabelTypeName } from '../../const/common'
-import { makeLabel } from '../../functional/states'
-import { Vector3D } from '../../math/vector3d'
-import { IdType, INVALID_ID, ShapeType, State } from '../../types/state'
-import { Box3D } from './box3d'
-import { Grid3D } from './grid3d'
-import Label3D from './label3d'
-import { Label3DList } from './label3d_list'
-import { Shape3D } from './shape3d'
+import * as THREE from "three"
+import { LabelTypeName } from "../../const/common"
+import { makeLabel } from "../../functional/states"
+import { Vector3D } from "../../math/vector3d"
+import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
+import { Box3D } from "./box3d"
+import { Grid3D } from "./grid3d"
+import Label3D from "./label3d"
+import { Label3DList } from "./label3d_list"
+import { Shape3D } from "./shape3d"
 
 /**
  * Class for managing plane for holding 3d labels
@@ -18,19 +18,19 @@ export class Plane3D extends Label3D {
   /** temporary shape */
   private _temporaryLabel: Label3D | null
 
-  constructor (labelList: Label3DList) {
+  constructor(labelList: Label3DList) {
     super(labelList)
     this._shape = new Grid3D(this)
     this._temporaryLabel = null
   }
 
   /** Override set selected method */
-  public set selected (s: boolean) {
+  public set selected(s: boolean) {
     super.selected = s
   }
 
   /** Override get selected */
-  public get selected (): boolean {
+  public get selected(): boolean {
     return super.selected
   }
 
@@ -38,7 +38,7 @@ export class Plane3D extends Label3D {
    * Modify ThreeJS objects to draw label
    * @param {THREE.Scene} scene: ThreeJS Scene Object
    */
-  public render (scene: THREE.Scene, _camera: THREE.Camera): void {
+  public render(scene: THREE.Scene, _camera: THREE.Camera): void {
     this._shape.render(scene)
   }
 
@@ -46,7 +46,7 @@ export class Plane3D extends Label3D {
    * Highlight box
    * @param intersection
    */
-  public setHighlighted (intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection) {
     super.setHighlighted(intersection)
     this._shape.setHighlighted(intersection)
   }
@@ -55,7 +55,7 @@ export class Plane3D extends Label3D {
    * Handle mouse move
    * @param projection
    */
-  public onMouseDown (x: number, y: number, camera: THREE.Camera) {
+  public onMouseDown(x: number, y: number, camera: THREE.Camera) {
     if (
       this._label &&
       (this.selected || this.anyChildSelected()) &&
@@ -82,7 +82,7 @@ export class Plane3D extends Label3D {
    * Handle mouse up
    * @param projection
    */
-  public onMouseUp () {
+  public onMouseUp() {
     if (this._temporaryLabel) {
       this._temporaryLabel.onMouseUp()
       this._temporaryLabel = null
@@ -93,9 +93,7 @@ export class Plane3D extends Label3D {
    * Handle mouse move
    * @param projection
    */
-  public onMouseMove (
-    x: number, y: number, camera: THREE.Camera
-  ): boolean {
+  public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
     if (this._temporaryLabel) {
       return this._temporaryLabel.onMouseMove(x, y, camera)
     }
@@ -103,7 +101,7 @@ export class Plane3D extends Label3D {
   }
 
   /** Rotate */
-  public rotate (quaternion: THREE.Quaternion) {
+  public rotate(quaternion: THREE.Quaternion) {
     this._labelList.addUpdatedLabel(this)
     this._shape.applyQuaternion(quaternion)
     for (const child of this.children) {
@@ -112,7 +110,7 @@ export class Plane3D extends Label3D {
   }
 
   /** Translate */
-  public translate (delta: THREE.Vector3) {
+  public translate(delta: THREE.Vector3) {
     this._labelList.addUpdatedLabel(this)
     this._shape.position.add(delta)
     for (const child of this.children) {
@@ -121,7 +119,7 @@ export class Plane3D extends Label3D {
   }
 
   /** Scale */
-  public scale (scale: THREE.Vector3, anchor: THREE.Vector3) {
+  public scale(scale: THREE.Vector3, anchor: THREE.Vector3) {
     this._labelList.addUpdatedLabel(this)
     this._shape.scale.x *= scale.x
     this._shape.scale.y *= scale.y
@@ -131,28 +129,28 @@ export class Plane3D extends Label3D {
   }
 
   /** Move */
-  public move (position: THREE.Vector3): void {
+  public move(position: THREE.Vector3): void {
     this._shape.position.copy(position)
     this._labelList.addUpdatedLabel(this)
   }
 
   /** center of plane */
-  public get center (): THREE.Vector3 {
+  public get center(): THREE.Vector3 {
     return this._shape.position
   }
 
   /** orientation of plane */
-  public get orientation (): THREE.Quaternion {
+  public get orientation(): THREE.Quaternion {
     return this._shape.quaternion
   }
 
   /** scale of plane */
-  public get size (): THREE.Vector3 {
+  public get size(): THREE.Vector3 {
     return this._shape.scale
   }
 
   /** bounds of plane */
-  public bounds (local?: boolean): THREE.Box3 {
+  public bounds(local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
     if (!local) {
       box.copy(this._shape.lines.geometry.boundingBox)
@@ -168,7 +166,7 @@ export class Plane3D extends Label3D {
    * Expand the primitive shapes to drawable shapes
    * @param {ShapeType[]} shapes
    */
-  public updateState (
+  public updateState(
     state: State,
     itemIndex: number,
     labelId: IdType,
@@ -199,15 +197,18 @@ export class Plane3D extends Label3D {
    * Initialize label
    * @param {State} state
    */
-  public init (
+  public init(
     itemIndex: number,
     category: number,
     center?: Vector3D,
     sensors?: number[]
   ): void {
     this._label = makeLabel({
-      type: LabelTypeName.PLANE_3D, id: INVALID_ID, item: itemIndex,
-      category: [category], sensors
+      type: LabelTypeName.PLANE_3D,
+      id: INVALID_ID,
+      item: itemIndex,
+      category: [category],
+      sensors
     })
     if (center) {
       this._shape.center = center
@@ -217,14 +218,14 @@ export class Plane3D extends Label3D {
   /**
    * Return a list of the shape for inspection and testing
    */
-  public internalShapes (): Shape3D[] {
+  public internalShapes(): Shape3D[] {
     return [this._shape]
   }
 
   /** State representation of shape */
-  public shapes (): ShapeType[] {
+  public shapes(): ShapeType[] {
     if (!this._label) {
-      throw new Error('Uninitialized label')
+      throw new Error("Uninitialized label")
     }
     /**
      * This is a temporary solution for assigning the correct ID to the shapes
@@ -237,6 +238,5 @@ export class Plane3D extends Label3D {
       shape.id = this._label.shapes[0]
     }
     return [shape]
-
   }
 }

@@ -1,23 +1,21 @@
-import _ from 'lodash'
-import * as action from '../../src/action/common'
-import { configureStore } from '../../src/common/configure_store'
-import Session from '../../src/common/session'
-import { makeLabel } from '../../src/functional/states'
-import { LabelType, State } from '../../src/types/state'
-import { setupTestStore } from '../components/util'
-import { testJson } from '../test_states/test_image_objects'
+import _ from "lodash"
+import * as action from "../../src/action/common"
+import { configureStore } from "../../src/common/configure_store"
+import Session from "../../src/common/session"
+import { makeLabel } from "../../src/functional/states"
+import { LabelType, State } from "../../src/types/state"
+import { setupTestStore } from "../components/util"
+import { testJson } from "../test_states/test_image_objects"
 
-describe('Label operations', () => {
-  test('Add and delete labels', () => {
+describe("Label operations", () => {
+  test("Add and delete labels", () => {
     setupTestStore(testJson)
 
     const itemIndex = 0
     Session.dispatch(action.goToItem(itemIndex))
-    Session.dispatch(
-      action.addLabel(itemIndex, makeLabel()))
+    Session.dispatch(action.addLabel(itemIndex, makeLabel()))
     const manualLabel = makeLabel()
-    Session.dispatch(
-      action.addLabel(itemIndex, manualLabel))
+    Session.dispatch(action.addLabel(itemIndex, manualLabel))
     let autoLabel = makeLabel({ item: itemIndex, manual: false })
     Session.dispatch(action.addLabel(itemIndex, autoLabel))
     let state = Session.getState()
@@ -39,7 +37,7 @@ describe('Label operations', () => {
     expect(_.size(state.task.items[itemIndex].labels)).toBe(2)
   })
 
-  test('Change category', () => {
+  test("Change category", () => {
     setupTestStore(testJson)
 
     const itemIndex = 0
@@ -47,12 +45,13 @@ describe('Label operations', () => {
     const label = makeLabel()
     Session.dispatch(action.addLabel(itemIndex, label))
     Session.dispatch(
-      action.changeLabelProps(itemIndex, label.id, { category: [2] }))
+      action.changeLabelProps(itemIndex, label.id, { category: [2] })
+    )
     const state = Session.getState()
     expect(state.task.items[itemIndex].labels[label.id].category[0]).toBe(2)
   })
 
-  test('Link labels', () => {
+  test("Link labels", () => {
     setupTestStore(testJson)
 
     const itemIndex = 0
@@ -76,7 +75,9 @@ describe('Label operations', () => {
     let state = Session.getState()
     let item = state.task.items[itemIndex]
     const parent1Maybe = _.find(
-      item.labels, (label) => label.children.length > 0)
+      item.labels,
+      (label) => label.children.length > 0
+    )
     expect(parent1Maybe).not.toBe(undefined)
     const parent1 = parent1Maybe as LabelType
     expect(item.labels[parent1.id].children).toEqual(children)
@@ -90,8 +91,10 @@ describe('Label operations', () => {
     state = Session.getState()
 
     item = state.task.items[itemIndex]
-    const parent2Maybe = _.find(item.labels,
-      (label) => label.children.length > 0 && label.id !== parent1.id)
+    const parent2Maybe = _.find(
+      item.labels,
+      (label) => label.children.length > 0 && label.id !== parent1.id
+    )
     expect(parent2Maybe).not.toBe(undefined)
     const parent2 = parent2Maybe as LabelType
     children = [parent1.id, label4.id]
@@ -105,8 +108,8 @@ describe('Label operations', () => {
   })
 })
 
-describe('High level operations', () => {
-  test('Submit task', () => {
+describe("High level operations", () => {
+  test("Submit task", () => {
     const constantDate = Date.now()
     Date.now = jest.fn(() => {
       return constantDate
@@ -130,7 +133,7 @@ describe('High level operations', () => {
     expect(submissions[1].user).toBe(state.user.id)
   })
 
-  test('Update state', () => {
+  test("Update state", () => {
     Session.store = configureStore({})
     const initialState = Session.getState()
 
@@ -139,20 +142,23 @@ describe('High level operations', () => {
 
     // Any properties specified in testJson should exist on newState
     expect(newState.task.config.projectName).toBe(
-      (testJson as State).task.config.projectName)
+      (testJson as State).task.config.projectName
+    )
     expect(newState.task.items.length).toBe(
-      (testJson as State).task.items.length)
-    expect(newState.user.select.item).toBe(
-      (testJson as State).user.select.item)
+      (testJson as State).task.items.length
+    )
+    expect(newState.user.select.item).toBe((testJson as State).user.select.item)
     expect(newState.session.startTime).toBe(
-      (testJson as State).session.startTime)
+      (testJson as State).session.startTime
+    )
 
     // Properties not specified should keep their default values
     expect(newState.session.trackLinking).toBe(
-      initialState.session.trackLinking)
+      initialState.session.trackLinking
+    )
     expect(newState.task.config.autosave).toBe(
-      initialState.task.config.autosave)
-    expect(newState.task.config.bots).toBe(
-      initialState.task.config.bots)
+      initialState.task.config.autosave
+    )
+    expect(newState.task.config.bots).toBe(initialState.task.config.bots)
   })
 })

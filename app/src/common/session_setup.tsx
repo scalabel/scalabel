@@ -1,28 +1,42 @@
-import { MuiThemeProvider } from '@material-ui/core/styles'
-import React from 'react'
-import ReactDOM from 'react-dom'
-import { Provider } from 'react-redux'
-import * as THREE from 'three'
-import { addViewerConfig, initSessionAction, loadItem,
-  splitPane, updateAll, updatePane, updateState } from '../action/common'
-import { alignToAxis, toggleSelectionLock } from '../action/point_cloud'
-import Window from '../components/window'
-import { DataType, ItemTypeName, ViewerConfigTypeName } from '../const/common'
-import { makeDefaultViewerConfig } from '../functional/states'
-import { myTheme } from '../styles/theme'
-import { PLYLoader } from '../thirdparty/PLYLoader'
-import { FullStore } from '../types/redux'
-import { DeepPartialState, PointCloudViewerConfigType, SplitType, State } from '../types/state'
-import Session from './session'
-import { DispatchFunc, GetStateFunc } from './simple_store'
-import { Track } from './track'
+import { MuiThemeProvider } from "@material-ui/core/styles"
+import React from "react"
+import ReactDOM from "react-dom"
+import { Provider } from "react-redux"
+import * as THREE from "three"
+import {
+  addViewerConfig,
+  initSessionAction,
+  loadItem,
+  splitPane,
+  updateAll,
+  updatePane,
+  updateState
+} from "../action/common"
+import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
+import Window from "../components/window"
+import { DataType, ItemTypeName, ViewerConfigTypeName } from "../const/common"
+import { makeDefaultViewerConfig } from "../functional/states"
+import { myTheme } from "../styles/theme"
+import { PLYLoader } from "../thirdparty/PLYLoader"
+import { FullStore } from "../types/redux"
+import {
+  DeepPartialState,
+  PointCloudViewerConfigType,
+  SplitType,
+  State
+} from "../types/state"
+import Session from "./session"
+import { DispatchFunc, GetStateFunc } from "./simple_store"
+import { Track } from "./track"
 
 /**
  * Initialize state, then set up the rest of the session
  */
-export function setupSession (
+export function setupSession(
   newState: DeepPartialState,
-  containerName: string = '', shouldInitViews: boolean = true) {
+  containerName: string = "",
+  shouldInitViews: boolean = true
+): void {
   const store = Session.getSimpleStore()
   const dispatch = store.dispatcher()
   const getState = store.getter()
@@ -32,7 +46,7 @@ export function setupSession (
   dispatch(initSessionAction())
 
   // Unless in testing mode, update views
-  if (shouldInitViews && containerName !== '') {
+  if (shouldInitViews && containerName !== "") {
     initViewerConfigs(getState, dispatch)
     loadData(getState, dispatch)
     Session.subscribe(() => updateTracks(getState()))
@@ -47,21 +61,21 @@ export function setupSession (
  * Render the dom after data is loaded
  * @param containername: string name
  */
-function renderDom (
-  containerName: string, store: FullStore) {
+function renderDom(containerName: string, store: FullStore): void {
   ReactDOM.render(
     <MuiThemeProvider theme={myTheme}>
       <Provider store={store}>
-        <Window/>
+        <Window />
       </Provider>
     </MuiThemeProvider>,
-    document.getElementById(containerName))
+    document.getElementById(containerName)
+  )
 }
 
 /**
  * Load labeling data initialization function
  */
-function loadData (getState: GetStateFunc, dispatch: DispatchFunc): void {
+function loadData(getState: GetStateFunc, dispatch: DispatchFunc): void {
   loadImages(getState, dispatch)
   loadPointClouds(getState, dispatch)
 }
@@ -69,16 +83,14 @@ function loadData (getState: GetStateFunc, dispatch: DispatchFunc): void {
 /**
  * Update session objects with new state
  */
-export function updateTracks (state: State): void {
-  const newTracks: {[trackId: string]: Track} = {}
+export function updateTracks(state: State): void {
+  const newTracks: { [trackId: string]: Track } = {}
   for (const trackId of Object.keys(state.task.tracks)) {
     if (trackId in Session.tracks) {
       newTracks[trackId] = Session.tracks[trackId]
     } else {
       const newTrack = new Track()
-      if (newTrack) {
-        newTracks[trackId] = newTrack
-      }
+      newTracks[trackId] = newTrack
     }
     if (trackId in newTracks) {
       newTracks[trackId].updateState(state, trackId)
@@ -91,23 +103,27 @@ export function updateTracks (state: State): void {
 /**
  * Load all the images in the state
  */
-function loadImages (
-  getState: GetStateFunc, dispatch: DispatchFunc,
-  maxAttempts: number = 3): void {
+function loadImages(
+  getState: GetStateFunc,
+  dispatch: DispatchFunc,
+  maxAttempts: number = 3
+): void {
   const state = getState()
   const items = state.task.items
   Session.images = []
   for (const item of items) {
-    const itemImageMap: {[id: number]: HTMLImageElement} = {}
-    const attemptsMap: {[id: number]: number} = {}
+    const itemImageMap: { [id: number]: HTMLImageElement } = {}
+    const attemptsMap: { [id: number]: number } = {}
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
-      if (sensorId in state.task.sensors &&
-          state.task.sensors[sensorId].type === DataType.IMAGE) {
+      if (
+        sensorId in state.task.sensors &&
+        state.task.sensors[sensorId].type === DataType.IMAGE
+      ) {
         attemptsMap[sensorId] = 0
         const url = item.urls[sensorId]
         const image = new Image()
-        image.crossOrigin = 'Anonymous'
+        image.crossOrigin = "Anonymous"
         image.onload = () => {
           dispatch(loadItem(item.index, sensorId))
         }
@@ -131,50 +147,44 @@ function loadImages (
 /**
  * Load all point clouds in state
  */
-function loadPointClouds (
-  getState: GetStateFunc, dispatch: DispatchFunc,
-  maxAttempts: number = 3): void {
+function loadPointClouds(
+  getState: GetStateFunc,
+  dispatch: DispatchFunc,
+  maxAttempts: number = 3
+): void {
   const loader = new PLYLoader()
 
   const state = getState()
   const items = state.task.items
   Session.pointClouds = []
   for (const item of items) {
-    const pcImageMap: {[id: number]: THREE.BufferGeometry} = {}
+    const pcImageMap: { [id: number]: THREE.BufferGeometry } = {}
     Session.pointClouds.push(pcImageMap)
-    const attemptsMap: {[id: number]: number} = {}
+    const attemptsMap: { [id: number]: number } = {}
     for (const key of Object.keys(item.urls)) {
       const sensorId = Number(key)
-      if (sensorId in state.task.sensors &&
-          state.task.sensors[sensorId].type === DataType.POINT_CLOUD) {
+      if (
+        sensorId in state.task.sensors &&
+        state.task.sensors[sensorId].type === DataType.POINT_CLOUD
+      ) {
         const url = item.urls[sensorId]
         attemptsMap[sensorId] = 0
-        const onLoad = (geometry: THREE.BufferGeometry) => {
+        const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
 
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent
         // policy for all data types
-        const onError = () => {
+        const onError = (): void => {
           attemptsMap[sensorId]++
           if (attemptsMap[sensorId] === maxAttempts) {
             alert(`Point cloud at ${url} was not found.`)
           } else {
-            loader.load(
-              url,
-              onLoad,
-              () => null,
-              onError
-            )
+            loader.load(url, onLoad, () => null, onError)
           }
         }
-        loader.load(
-          url,
-          onLoad,
-          () => null,
-          onError
-        )
+        loader.load(url, onLoad, () => null, onError)
       }
     }
   }
@@ -183,19 +193,23 @@ function loadPointClouds (
 /**
  * Create default viewer configs if none exist
  */
-function initViewerConfigs (
-  getState: GetStateFunc, dispatch: DispatchFunc): void {
+function initViewerConfigs(
+  getState: GetStateFunc,
+  dispatch: DispatchFunc
+): void {
   let state = getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
-    const sensorIds = Object.keys(state.task.sensors).map(
-      (key) => Number(key)
-    ).sort()
+    const sensorIds = Object.keys(state.task.sensors)
+      .map((key) => Number(key))
+      .sort((a, b) => a - b)
     const id0 = sensorIds[0]
     const sensor0 = state.task.sensors[id0]
     const config0 = makeDefaultViewerConfig(
-      sensor0.type as ViewerConfigTypeName, 0, id0
+      sensor0.type as ViewerConfigTypeName,
+      0,
+      id0
     )
-    if (config0) {
+    if (config0 !== null) {
       dispatch(addViewerConfig(0, config0))
     }
 
@@ -207,51 +221,60 @@ function initViewerConfigs (
     ) {
       dispatch(splitPane(Number(paneIds[0]), SplitType.HORIZONTAL, 0))
       state = getState()
-      let config =
-        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
-      dispatch(toggleSelectionLock(
-        state.user.layout.maxViewerConfigId,
-        config as PointCloudViewerConfigType
-      ))
-      dispatch(splitPane(
-        state.user.layout.maxPaneId,
-        SplitType.VERTICAL,
-        state.user.layout.maxViewerConfigId
-      ))
-      dispatch(updatePane(
-        state.user.layout.maxPaneId, { primarySize: '33%' }
-      ))
+      let config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      dispatch(
+        toggleSelectionLock(
+          state.user.layout.maxViewerConfigId,
+          config as PointCloudViewerConfigType
+        )
+      )
+      dispatch(
+        splitPane(
+          state.user.layout.maxPaneId,
+          SplitType.VERTICAL,
+          state.user.layout.maxViewerConfigId
+        )
+      )
+      dispatch(updatePane(state.user.layout.maxPaneId, { primarySize: "33%" }))
 
       state = getState()
-      config =
-        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
-      dispatch(toggleSelectionLock(
-        state.user.layout.maxViewerConfigId,
-        config as PointCloudViewerConfigType
-      ))
-      dispatch(alignToAxis(
-        state.user.layout.maxViewerConfigId,
-        config as PointCloudViewerConfigType,
-        1
-      ))
-      dispatch(splitPane(
-        state.user.layout.maxPaneId,
-        SplitType.VERTICAL,
-        state.user.layout.maxViewerConfigId
-      ))
+      config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      dispatch(
+        toggleSelectionLock(
+          state.user.layout.maxViewerConfigId,
+          config as PointCloudViewerConfigType
+        )
+      )
+      dispatch(
+        alignToAxis(
+          state.user.layout.maxViewerConfigId,
+          config as PointCloudViewerConfigType,
+          1
+        )
+      )
+      dispatch(
+        splitPane(
+          state.user.layout.maxPaneId,
+          SplitType.VERTICAL,
+          state.user.layout.maxViewerConfigId
+        )
+      )
 
       state = getState()
-      config =
-        state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
-      dispatch(toggleSelectionLock(
-        state.user.layout.maxViewerConfigId,
-        config as PointCloudViewerConfigType
-      ))
-      dispatch(alignToAxis(
-        state.user.layout.maxViewerConfigId,
-        config as PointCloudViewerConfigType,
-        2
-      ))
+      config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      dispatch(
+        toggleSelectionLock(
+          state.user.layout.maxViewerConfigId,
+          config as PointCloudViewerConfigType
+        )
+      )
+      dispatch(
+        alignToAxis(
+          state.user.layout.maxViewerConfigId,
+          config as PointCloudViewerConfigType,
+          2
+        )
+      )
     }
   }
 }

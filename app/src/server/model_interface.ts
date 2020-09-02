@@ -1,10 +1,14 @@
-import { addPolygon2dLabel } from '../action/polygon2d'
-import { ModelEndpoint } from '../const/connection'
-import { makeItemExport, makeLabelExport, makeSimplePathPoint2D } from '../functional/states'
-import { AddLabelsAction } from '../types/action'
-import { ModelQuery } from '../types/message'
-import { PathPoint2DType, PathPointType, RectType } from '../types/state'
-import { convertPolygonToExport } from './export'
+import { addPolygon2dLabel } from "../action/polygon2d"
+import { ModelEndpoint } from "../const/connection"
+import {
+  makeItemExport,
+  makeLabelExport,
+  makeSimplePathPoint2D
+} from "../functional/states"
+import { AddLabelsAction } from "../types/action"
+import { ModelQuery } from "../types/message"
+import { PathPoint2DType, PathPointType, RectType } from "../types/state"
+import { convertPolygonToExport } from "./export"
 
 /**
  * API between redux style data and data for the models
@@ -15,7 +19,12 @@ export class ModelInterface {
   /** current session id */
   public sessionId: string
 
-  constructor (projectName: string, sessionId: string) {
+  /**
+   * Constructor
+   * @param projectName
+   * @param sessionId
+   */
+  constructor(projectName: string, sessionId: string) {
     this.projectName = projectName
     this.sessionId = sessionId
   }
@@ -23,8 +32,11 @@ export class ModelInterface {
   /**
    * Query for 'rect -> polygon' segmentation
    */
-  public makeRectQuery (
-    rect: RectType, url: string, itemIndex: number): ModelQuery {
+  public makeRectQuery(
+    rect: RectType,
+    url: string,
+    itemIndex: number
+  ): ModelQuery {
     const label = makeLabelExport({
       box2d: rect
     })
@@ -43,9 +55,12 @@ export class ModelInterface {
   /**
    * Query for refining 'polygon -> polygon' segmentation
    */
-  public makePolyQuery (
-    points: PathPoint2DType[], url: string,
-    itemIndex: number, labelType: string): ModelQuery {
+  public makePolyQuery(
+    points: PathPoint2DType[],
+    url: string,
+    itemIndex: number,
+    labelType: string
+  ): ModelQuery {
     const poly2d = convertPolygonToExport(points, labelType)
     const label = makeLabelExport({
       poly2d
@@ -65,16 +80,15 @@ export class ModelInterface {
   /**
    * Translate polygon response to an action
    */
-  public makePolyAction (
-    polyPoints: number[][], itemIndex: number): AddLabelsAction {
+  public makePolyAction(
+    polyPoints: number[][],
+    itemIndex: number
+  ): AddLabelsAction {
     const points = polyPoints.map((point: number[]) => {
-      return makeSimplePathPoint2D(
-          point[0], point[1], PathPointType.LINE)
+      return makeSimplePathPoint2D(point[0], point[1], PathPointType.LINE)
     })
 
-    const action = addPolygon2dLabel(
-      itemIndex, -1, [0], points, true, false
-    )
+    const action = addPolygon2dLabel(itemIndex, -1, [0], points, true, false)
     action.sessionId = this.sessionId
     return action
   }

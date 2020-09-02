@@ -1,10 +1,10 @@
-import { RegisterMessageType, SyncActionMessageType } from '../types/message'
-import { State } from '../types/state'
+import { RegisterMessageType, SyncActionMessageType } from "../types/message"
+import { State } from "../types/state"
 
 type socketHandlerType =
-  (() => {}) |
-  ((data: SyncActionMessageType) => {}) |
-  ((data: RegisterMessageType) => {})
+  | (() => {})
+  | ((data: SyncActionMessageType) => {})
+  | ((data: RegisterMessageType) => {})
 
 type serverEmitType = SyncActionMessageType | State
 
@@ -18,20 +18,22 @@ export interface SocketServer {
   /** Message broadcaster */
   broadcast: {
     /** Object for specifying target */
-    to: (room: string) => {
+    to: (
+      room: string
+    ) => {
       /** Message echoer */
       emit: (event: string, data: serverEmitType) => void
     }
   }
 
   /** Subscribe a handler */
-  join (room: string): void
+  join: (room: string) => void
 
   /** Echo a message */
-  emit (event: string, data: serverEmitType): void
+  emit: (event: string, data: serverEmitType) => void
 
   /** Add a handler function */
-  on (event: string, callback: socketHandlerType): void
+  on: (event: string, callback: socketHandlerType) => void
 }
 
 type clientEmitType = SyncActionMessageType | RegisterMessageType
@@ -44,5 +46,5 @@ export interface SocketClient {
   connected: boolean
 
   /** Message sending */
-  emit (event: string, data: clientEmitType): void
+  emit: (event: string, data: clientEmitType) => void
 }

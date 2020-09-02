@@ -1,13 +1,15 @@
-import fs from 'fs-extra'
-import * as action from '../../src/action/common'
-import Session from '../../src/common/session'
-import { makeLabel } from '../../src/functional/states'
-import { setupTestStore } from '../components/util'
-import { testJson } from '../test_states/test_track_objects'
+import fs from "fs-extra"
+import * as action from "../../src/action/common"
+import Session from "../../src/common/session"
+import { makeLabel } from "../../src/functional/states"
+import { setupTestStore } from "../components/util"
+import { testJson } from "../test_states/test_track_objects"
 
 const getState = Session.getState.bind(Session)
 const dispatch = Session.dispatch.bind(Session)
-const data = JSON.parse(fs.readFileSync('./app/test/test_states/sample_state.json', 'utf8'))
+const data = JSON.parse(
+  fs.readFileSync("./app/test/test_states/sample_state.json", "utf8")
+)
 
 beforeEach(() => {
   setupTestStore(testJson)
@@ -26,8 +28,8 @@ beforeAll(() => {
   }
 })
 
-describe('Test link labels', () => {
-  test('Link labels without track', () => {
+describe("Test link labels", () => {
+  test("Link labels without track", () => {
     setupTestStore(data)
     dispatch(action.goToItem(1))
     let label1 = makeLabel()
@@ -39,14 +41,14 @@ describe('Test link labels', () => {
     let state = getState()
     label1 = state.task.items[1].labels[labelId1]
     label2 = state.task.items[1].labels[labelId2]
-    expect(label1.parent).toBe('')
-    expect(label2.parent).toBe('')
+    expect(label1.parent).toBe("")
+    expect(label2.parent).toBe("")
     dispatch(action.linkLabels(1, [labelId1, labelId2]))
     state = getState()
     label1 = state.task.items[1].labels[labelId1]
     label2 = state.task.items[1].labels[labelId2]
-    expect(label1.parent).not.toBe('')
-    expect(label2.parent).not.toBe('')
+    expect(label1.parent).not.toBe("")
+    expect(label2.parent).not.toBe("")
     expect(label1.parent).toBe(label2.parent)
     const parentLabel = state.task.items[1].labels[label1.parent]
     expect(parentLabel).not.toBeUndefined()
@@ -55,24 +57,24 @@ describe('Test link labels', () => {
     expect(parentLabel.children).toContain(labelId2)
   })
 
-  test('Link labels with multiple tracks', () => {
+  test("Link labels with multiple tracks", () => {
     dispatch(action.goToItem(1))
     let state = getState()
     let item = state.task.items[1]
-    let label1 = item.labels['24']
-    let label2 = item.labels['47']
+    let label1 = item.labels["24"]
+    let label2 = item.labels["47"]
     const track1 = label1.track
     const track1Labels = state.task.tracks[track1].labels
     const track2 = label2.track
     const track2Labels = state.task.tracks[track2].labels
-    dispatch(action.linkLabels(1, ['24', '47']))
+    dispatch(action.linkLabels(1, ["24", "47"]))
     state = getState()
     expect(state.task.tracks[track2]).toBeUndefined()
     expect(state.task.tracks[track1]).not.toBeUndefined()
 
     item = state.task.items[1]
-    label1 = item.labels['24']
-    label2 = item.labels['47']
+    label1 = item.labels["24"]
+    label2 = item.labels["47"]
     expect(label1.track).toBe(label2.track)
     expect(label1.parent).toBe(label2.parent)
     const parentLabelInItem1 = item.labels[label1.parent]

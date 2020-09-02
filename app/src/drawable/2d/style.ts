@@ -1,15 +1,15 @@
 export interface ShapeStyle {
   /** radius of handle */
-  handleRadius: number,
+  handleRadius: number
   /** when the handle is in highlight */
-  handleHighlightRadius: number,
+  handleHighlightRadius: number
   /** line width */
   lineWidth: number
 }
 
 export interface ColorStyle {
   /** alpha of handle */
-  handleAlpha: number,
+  handleAlpha: number
   /** alpha of the line */
   lineAlpha: number
 }

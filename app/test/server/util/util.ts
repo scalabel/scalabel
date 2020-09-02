@@ -1,22 +1,33 @@
-import * as fs from 'fs-extra'
-import _ from 'lodash'
-import * as path from 'path'
-import { addBox2dLabel } from '../../../src/action/box2d'
-import { StorageStructure } from '../../../src/const/storage'
-import { makeItem,
-  makeSensor, makeState, makeTask } from '../../../src/functional/states'
-import { parseConfig } from '../../../src/server/config'
-import { ServerConfig } from '../../../src/types/config'
-import { RectType, State, TaskType, Vector3Type } from '../../../src/types/state'
+import * as fs from "fs-extra"
+import * as path from "path"
+import { addBox2dLabel } from "../../../src/action/box2d"
+import { StorageStructure } from "../../../src/const/storage"
+import {
+  makeItem,
+  makeSensor,
+  makeState,
+  makeTask
+} from "../../../src/functional/states"
+import { parseConfig } from "../../../src/server/config"
+import { ServerConfig } from "../../../src/types/config"
+import {
+  RectType,
+  State,
+  TaskType,
+  Vector3Type
+} from "../../../src/types/state"
+import { AddLabelsAction } from "../../../src/types/action"
 
 /**
  * Check equality between two Vector3Type objects
  * @param v1
  * @param v2
  */
-export function expectVector3TypesClose (
-  v1: Vector3Type, v2: Vector3Type, num = 2
-) {
+export function expectVector3TypesClose(
+  v1: Vector3Type,
+  v2: Vector3Type,
+  num = 2
+): void {
   expect(v1.x).toBeCloseTo(v2.x, num)
   expect(v1.y).toBeCloseTo(v2.y, num)
   expect(v1.z).toBeCloseTo(v2.z, num)
@@ -25,9 +36,11 @@ export function expectVector3TypesClose (
 /**
  * Check that rectangles are close
  */
-export function expectRectTypesClose (
-  r1: RectType, r2: RectType, num = 2
-) {
+export function expectRectTypesClose(
+  r1: RectType,
+  r2: RectType,
+  num = 2
+): void {
   expect(r1.x1).toBeCloseTo(r2.x1, num)
   expect(r1.x2).toBeCloseTo(r2.x2, num)
   expect(r1.y1).toBeCloseTo(r2.y1, num)
@@ -47,25 +60,25 @@ export function expectRectTypesClose (
  * This is necessary because mock-fs doesn't implement the withFileTypes
  *   option of fs.readDir correctly; and has flakiness issues
  */
-export function makeProjectDir (dataDir: string, projectName: string) {
+export function makeProjectDir(dataDir: string, projectName: string): void {
   const projectDir = path.join(dataDir, StorageStructure.PROJECT, projectName)
-  const taskDir = path.join(projectDir, 'tasks')
+  const taskDir = path.join(projectDir, "tasks")
   fs.ensureDirSync(projectDir)
   fs.ensureDirSync(taskDir)
-  fs.writeFileSync(path.join(projectDir, '.config'), 'config contents')
-  fs.writeFileSync(path.join(projectDir, 'project.json'), 'project contents')
-  const content0 = JSON.stringify({ testField: 'testValue' })
-  fs.writeFileSync(path.join(taskDir, '000000.json'), content0)
-  fs.writeFileSync(path.join(taskDir, '000001.json'), 'content1')
+  fs.writeFileSync(path.join(projectDir, ".config"), "config contents")
+  fs.writeFileSync(path.join(projectDir, "project.json"), "project contents")
+  const content0 = JSON.stringify({ testField: "testValue" })
+  fs.writeFileSync(path.join(taskDir, "000000.json"), content0)
+  fs.writeFileSync(path.join(taskDir, "000001.json"), "content1")
 }
 
 /**
  * The initial backend task represents the saved data
  */
-export function getInitialState (sessionId: string): State {
+export function getInitialState(sessionId: string): State {
   const partialTask: Partial<TaskType> = {
-    items: [makeItem({ index: 0, id: '0' }, true)],
-    sensors: { 0: makeSensor(0, '', '') }
+    items: [makeItem({ index: 0, id: "0" }, true)],
+    sensors: { 0: makeSensor(0, "", "") }
   }
   const defaultTask = makeTask(partialTask)
   const defaultState = makeState({
@@ -79,19 +92,28 @@ export function getInitialState (sessionId: string): State {
 /**
  * Helper function to get box2d actions
  */
-export function getRandomBox2dAction (itemIndex: number = 0) {
-  return addBox2dLabel(itemIndex, 0, [], {},
-    { x1: Math.random(), y1: Math.random(),
-      x2: Math.random(), y2: Math.random() })
+export function getRandomBox2dAction(itemIndex: number = 0): AddLabelsAction {
+  return addBox2dLabel(
+    itemIndex,
+    0,
+    [],
+    {},
+    {
+      x1: Math.random(),
+      y1: Math.random(),
+      x2: Math.random(),
+      y2: Math.random()
+    }
+  )
 }
 
 /**
  * Helper function to generate points of a polygon
  * In the format returned by the model server
  */
-export function getRandomModelPoly () {
+export function getRandomModelPoly(): number[][] {
   const points = []
-  for (let i = 0; i++; i < 5) {
+  for (let i = 0; i < 5; i += 1) {
     points.push([Math.random(), Math.random()])
   }
   return points
@@ -100,14 +122,14 @@ export function getRandomModelPoly () {
 /**
  * Get the path to the test config
  */
-export function getTestConfigPath (): string {
-  return './app/config/test_config.yml'
+export function getTestConfigPath(): string {
+  return "./app/config/test_config.yml"
 }
 
 /**
  * Load the test config
  */
-export function getTestConfig (): ServerConfig {
+export function getTestConfig(): ServerConfig {
   const configPath = getTestConfigPath()
   return parseConfig(configPath)
 }

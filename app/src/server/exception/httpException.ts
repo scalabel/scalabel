@@ -12,7 +12,7 @@ class HttpException extends Error {
    * @param {number} status - Error code
    * @param {string} message - Error message
    */
-  constructor (status: number, message: string) {
+  constructor(status: number, message: string) {
     super(message)
     this.status = status
     this.message = message

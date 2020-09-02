@@ -1,14 +1,18 @@
+import { MaybeError } from "../types/common"
+
 /**
  * Add callback for the main window visibility change
  */
-export function addVisibilityListener (callback: (visible: boolean) => void) {
-  window.addEventListener('blur', () => {
-    callback(false)
+export function addVisibilityListener(
+  callback: (error: MaybeError, visible: boolean) => void
+): void {
+  window.addEventListener("blur", () => {
+    callback(undefined, false)
   })
-  window.addEventListener('focus', () => {
-    callback(true)
+  window.addEventListener("focus", () => {
+    callback(undefined, true)
   })
-  window.addEventListener('visibilitychange', () => {
-    callback(!document.hidden)
+  window.addEventListener("visibilitychange", () => {
+    callback(undefined, !document.hidden)
   })
 }

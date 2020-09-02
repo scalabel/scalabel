@@ -1,8 +1,7 @@
-import _ from 'lodash'
-import { RedisClient } from '../../src/server/redis_client'
-import { RedisPubSub } from '../../src/server/redis_pub_sub'
-import { RegisterMessageType } from '../../src/types/message'
-import { getTestConfig } from './util/util'
+import { RedisClient } from "../../src/server/redis_client"
+import { RedisPubSub } from "../../src/server/redis_pub_sub"
+import { RegisterMessageType } from "../../src/types/message"
+import { getTestConfig } from "./util/util"
 
 let pubClient: RedisClient
 let publisher: RedisPubSub
@@ -22,21 +21,22 @@ afterAll(async () => {
   await subClient.close()
 })
 
-describe('Test redis publish/subscribe functionality', () => {
-  test('Test register event', async (done) => {
+describe("Test redis publish/subscribe functionality", () => {
+  test("Test register event", async (done) => {
     await subscriber.subscribeRegisterEvent(
       (_channel: string, message: string) => {
         const receivedData = JSON.parse(message) as RegisterMessageType
         expect(receivedData).toEqual(sentData)
         done()
-      })
+      }
+    )
 
     const sentData: RegisterMessageType = {
-      projectName: 'projectName',
+      projectName: "projectName",
       taskIndex: 0,
-      sessionId: 'sessionId',
-      userId: 'userId',
-      address: 'address',
+      sessionId: "sessionId",
+      userId: "userId",
+      address: "address",
       bot: false
     }
     publisher.publishRegisterEvent(sentData)

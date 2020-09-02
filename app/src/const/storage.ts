@@ -1,6 +1,6 @@
 export enum StorageStructure {
-  PROJECT = 'projects',
-  USER = 'users'
+  PROJECT = "projects",
+  USER = "users"
 }
 
 export const MAX_HISTORIES = 3

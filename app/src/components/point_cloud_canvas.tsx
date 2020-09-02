@@ -1,20 +1,28 @@
-import { withStyles } from '@material-ui/core/styles'
-import createStyles from '@material-ui/core/styles/createStyles'
-import * as React from 'react'
-import { connect } from 'react-redux'
-import * as THREE from 'three'
-import Session from '../common/session'
-import { isCurrentFrameLoaded, isCurrentItemLoaded } from '../functional/state_util'
-import { PointCloudViewerConfigType, State } from '../types/state'
-import { DrawableCanvas, DrawableProps, mapStateToDrawableProps } from './viewer'
+import { withStyles } from "@material-ui/core/styles"
+import createStyles from "@material-ui/core/styles/createStyles"
+import * as React from "react"
+import { connect } from "react-redux"
+import * as THREE from "three"
+import Session from "../common/session"
+import {
+  isCurrentFrameLoaded,
+  isCurrentItemLoaded
+} from "../functional/state_util"
+import { PointCloudViewerConfigType, State } from "../types/state"
+import {
+  DrawableCanvas,
+  DrawableProps,
+  mapStateToDrawableProps
+} from "./viewer"
 
-const styles = () => createStyles({
-  point_cloud_canvas: {
-    position: 'absolute',
-    height: '100%',
-    width: '100%'
-  }
-})
+const styles = () =>
+  createStyles({
+    point_cloud_canvas: {
+      position: "absolute",
+      height: "100%",
+      width: "100%"
+    }
+  })
 
 interface ClassType {
   /** CSS canvas name */
@@ -32,8 +40,7 @@ interface Props extends DrawableProps {
   camera: THREE.PerspectiveCamera
 }
 
-const vertexShader =
-  `
+const vertexShader = `
     varying vec3 worldPosition;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
@@ -42,8 +49,7 @@ const vertexShader =
       worldPosition = position;
     }
   `
-const fragmentShader =
-  `
+const fragmentShader = `
     varying vec3 worldPosition;
 
     uniform vec3 low;
@@ -96,19 +102,19 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   /** ThreeJS Scene object */
   private scene: THREE.Scene
   /** ThreeJS Camera */
-  private camera: THREE.PerspectiveCamera
+  private readonly camera: THREE.PerspectiveCamera
   /** ThreeJS sphere mesh for indicating camera target location */
-  private target: THREE.AxesHelper
+  private readonly target: THREE.AxesHelper
   /** Current point cloud for rendering */
   private pointCloud: THREE.Points
   /** drawable callback */
-  private _drawableUpdateCallback: () => void
+  private readonly _drawableUpdateCallback: () => void
 
   /**
    * Constructor, ons subscription to store
    * @param {Object} props: react props
    */
-  constructor (props: Readonly<Props>) {
+  constructor(props: Readonly<Props>) {
     super(props)
     this.scene = new THREE.Scene()
     this.camera = props.camera
@@ -144,13 +150,13 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   }
 
   /** mount callback */
-  public componentDidMount () {
+  public componentDidMount(): void {
     super.componentDidMount()
     Session.label3dList.subscribe(this._drawableUpdateCallback)
   }
 
   /** mount callback */
-  public componentWillUnmount () {
+  public componentWillUnmount(): void {
     super.componentWillUnmount()
     Session.label3dList.unsubscribe(this._drawableUpdateCallback)
   }
@@ -159,23 +165,25 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  public render () {
+  public render(): JSX.Element {
     const { classes } = this.props
 
     let canvas = (
       <canvas
         key={`point-cloud-canvas-${this.props.id}`}
         className={classes.point_cloud_canvas}
-        ref={(ref) => { this.initializeRefs(ref) }}
+        ref={(ref) => {
+          this.initializeRefs(ref)
+        }}
       />
     )
 
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
-      canvas = React.cloneElement(
-        canvas,
-        { height: displayRect.height, width: displayRect.width }
-      )
+      canvas = React.cloneElement(canvas, {
+        height: displayRect.height,
+        width: displayRect.width
+      })
     }
 
     this.redraw()
@@ -187,11 +195,10 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Handles canvas redraw
    * @return {boolean}
    */
-  public redraw (): boolean {
+  public redraw(): boolean {
     const state = this.state
     if (isCurrentItemLoaded(state) && this.canvas) {
-      const sensor =
-        this.state.user.viewerConfigs[this.props.id].sensor
+      const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (isCurrentFrameLoaded(this.state, sensor)) {
         this.updateRenderer()
         this.renderThree()
@@ -206,28 +213,28 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Override method
    * @param _state
    */
-  protected updateState (state: State) {
+  protected updateState(state: State): void {
     if (this.display !== this.props.display) {
       this.display = this.props.display
       this.forceUpdate()
     }
     const select = state.user.select
     const item = select.item
-    const sensor =
-      this.state.user.viewerConfigs[this.props.id].sensor
+    const sensor = this.state.user.viewerConfigs[this.props.id].sensor
 
     this.pointCloud.geometry = Session.pointClouds[item][sensor]
     this.pointCloud.layers.enableAll()
 
-    const config =
-      state.user.viewerConfigs[this.props.id] as PointCloudViewerConfigType
+    const config = state.user.viewerConfigs[
+      this.props.id
+    ] as PointCloudViewerConfigType
     this.target.position.set(config.target.x, config.target.y, config.target.z)
   }
 
   /**
    * Render ThreeJS Scene
    */
-  private renderThree () {
+  private renderThree(): void {
     if (this.renderer && this.pointCloud.geometry) {
       this.scene.children = []
       this.scene.add(this.pointCloud)
@@ -251,17 +258,18 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       this.renderer.render(this.scene, this.camera)
     }
   }
+
   /**
    * Set references to div elements and try to initialize renderer
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */
-  private initializeRefs (component: HTMLCanvasElement | null) {
+  private initializeRefs(component: HTMLCanvasElement | null): void {
     if (!component) {
       return
     }
 
-    if (component.nodeName === 'CANVAS') {
+    if (component.nodeName === "CANVAS") {
       if (this.canvas !== component) {
         this.canvas = component
         const rendererParams = { canvas: this.canvas, alpha: true }
@@ -270,7 +278,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       }
 
       if (this.display) {
-        this.canvas.removeAttribute('style')
+        this.canvas.removeAttribute("style")
         const displayRect = this.display.getBoundingClientRect()
         this.canvas.width = displayRect.width
         this.canvas.height = displayRect.height
@@ -285,12 +293,9 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   /**
    * Update rendering constants
    */
-  private updateRenderer () {
+  private updateRenderer(): void {
     if (this.canvas && this.renderer) {
-      this.renderer.setSize(
-        this.canvas.width,
-        this.canvas.height
-      )
+      this.renderer.setSize(this.canvas.width, this.canvas.height)
     }
   }
 }

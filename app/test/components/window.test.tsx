@@ -1,29 +1,31 @@
-import { cleanup, fireEvent, render } from '@testing-library/react'
-import * as React from 'react'
-import { Provider } from 'react-redux'
-import { addViewerConfig, goToItem } from '../../src/action/common'
-import Session from '../../src/common/session'
-import Window from '../../src/components/window'
-import { Key, ViewerConfigTypeName } from '../../src/const/common'
-import { makeDefaultViewerConfig } from '../../src/functional/states'
-import { State } from '../../src/types/state'
-import { testJson } from '../test_states/test_image_objects'
-import { setupTestStore } from './util'
+import { cleanup, fireEvent, render } from "@testing-library/react"
+import * as React from "react"
+import { Provider } from "react-redux"
+import { addViewerConfig, goToItem } from "../../src/action/common"
+import Session from "../../src/common/session"
+import Window from "../../src/components/window"
+import { Key, ViewerConfigTypeName } from "../../src/const/common"
+import { makeDefaultViewerConfig } from "../../src/functional/states"
+import { State } from "../../src/types/state"
+import { testJson } from "../test_states/test_image_objects"
+import { setupTestStore } from "./util"
 
 afterEach(cleanup)
 
-test('Item change with arrow keys', () => {
+test("Item change with arrow keys", () => {
   setupTestStore(testJson)
   const numItems = (testJson as State).task.items.length
 
   const config = makeDefaultViewerConfig(ViewerConfigTypeName.IMAGE, 0, -1)
   expect(config).not.toBeNull()
-  if (config) {
+  if (config !== null) {
     Session.dispatch(addViewerConfig(0, config))
   }
-  render(<Provider store={Session.store}>
-      <Window/>
-    </Provider>)
+  render(
+    <Provider store={Session.store}>
+      <Window />
+    </Provider>
+  )
 
   Session.dispatch(goToItem(0))
 

@@ -1,14 +1,14 @@
-import { withStyles } from '@material-ui/styles'
-import * as React from 'react'
-import * as THREE from 'three'
-import Session from '../common/session'
-import { IntrinsicCamera } from '../drawable/3d/intrinsic_camera'
-import { isCurrentFrameLoaded } from '../functional/state_util'
-import { viewerStyles } from '../styles/viewer'
-import { Image3DViewerConfigType } from '../types/state'
-import ImageCanvas from './image_canvas'
-import Label3dCanvas from './label3d_canvas'
-import { Viewer2D, Viewer2DProps } from './viewer2d'
+import { withStyles } from "@material-ui/styles"
+import * as React from "react"
+import * as THREE from "three"
+import Session from "../common/session"
+import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
+import { isCurrentFrameLoaded } from "../functional/state_util"
+import { viewerStyles } from "../styles/viewer"
+import { Image3DViewerConfigType } from "../types/state"
+import ImageCanvas from "./image_canvas"
+import Label3dCanvas from "./label3d_canvas"
+import { Viewer2D, Viewer2DProps } from "./viewer2d"
 
 /**
  * Viewer for 3d labels on images
@@ -21,20 +21,20 @@ class Image3DViewer extends Viewer2D {
    * Constructor
    * @param {Object} props: react props
    */
-  constructor (props: Viewer2DProps) {
+  constructor(props: Viewer2DProps) {
     super(props)
     this._camera = new IntrinsicCamera()
   }
 
   /** Component update function */
-  public componentDidUpdate () {
+  public componentDidUpdate(): void {
     if (this._viewerConfig) {
       const img3dConfig = this._viewerConfig as Image3DViewerConfigType
       const sensor = img3dConfig.sensor
 
       if (isCurrentFrameLoaded(this.state, img3dConfig.sensor)) {
         const image =
-        Session.images[this.state.user.select.item][img3dConfig.sensor]
+          Session.images[this.state.user.select.item][img3dConfig.sensor]
         this._camera.width = image.width
         this._camera.height = image.height
       }
@@ -50,8 +50,9 @@ class Image3DViewer extends Viewer2D {
             extrinsics.rotation.w
           )
           this._camera.quaternion.multiply(
-            (new THREE.Quaternion()).setFromAxisAngle(
-              new THREE.Vector3(1, 0, 0), Math.PI
+            new THREE.Quaternion().setFromAxisAngle(
+              new THREE.Vector3(1, 0, 0),
+              Math.PI
             )
           )
           this._camera.position.set(
@@ -74,7 +75,7 @@ class Image3DViewer extends Viewer2D {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents () {
+  protected getDrawableComponents() {
     const img3dConfig = this._viewerConfig as Image3DViewerConfigType
     if (this._container && this._viewerConfig) {
       this._container.scrollTop = img3dConfig.displayTop
