@@ -1,4 +1,4 @@
-jAutomatic Annotation
+Automatic Annotation
 --------------------
 
 Because the image list is in `BDD100K data format
