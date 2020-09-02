@@ -361,7 +361,7 @@ function filterInvalidItems(
   } else {
     return items.filter(
       (itemExport) =>
-        itemExport.dataType !== undefined || itemExport.dataType === itemType
+        itemExport.dataType === undefined || itemExport.dataType === itemType
     )
   }
 }
