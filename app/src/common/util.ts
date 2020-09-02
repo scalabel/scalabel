@@ -12,6 +12,8 @@ export function handleInvalidPage(): void {
 /**
  * Get whether tracking is on
  * Also get the new item type
+ *
+ * @param itemType
  */
 export function getTracking(itemType: string): [string, boolean] {
   switch (itemType) {
@@ -28,6 +30,8 @@ export function getTracking(itemType: string): [string, boolean] {
 
 /**
  * Create the link to the labeling instructions
+ *
+ * @param pageName
  */
 function makeInstructionUrl(pageName: string): string {
   return `https://www.scalabel.ai/doc/instructions/${pageName}.html`
@@ -35,6 +39,8 @@ function makeInstructionUrl(pageName: string): string {
 
 /**
  * Select the correct instruction url for the given label type
+ *
+ * @param labelType
  */
 export function getInstructionUrl(labelType: string): string {
   switch (labelType) {
@@ -53,6 +59,9 @@ export function getInstructionUrl(labelType: string): string {
 
 /**
  * Select the correct page title for given label type
+ *
+ * @param labelType
+ * @param itemType
  */
 export function getPageTitle(labelType: string, itemType: string): string {
   const [, tracking] = getTracking(itemType)
@@ -87,6 +96,8 @@ export function getPageTitle(labelType: string, itemType: string): string {
 /**
  * Converts index into a filename of size 6 with
  * trailing zeroes
+ *
+ * @param index
  */
 export function index2str(index: number): string {
   return index.toString().padStart(6, "0")
@@ -95,6 +106,9 @@ export function index2str(index: number): string {
 /**
  * Checks if the action packet contains
  * any actions that would trigger a model query
+ *
+ * @param actionPacket
+ * @param bots
  */
 export function doesPacketTriggerModel(
   actionPacket: ActionPacketType,

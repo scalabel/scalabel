@@ -102,6 +102,11 @@ describe("Test bot user manager", () => {
 
 /**
  * Create data for registration with some defaults
+ *
+ * @param projectName
+ * @param taskIndex
+ * @param userId
+ * @param bot
  */
 function makeRegisterData(
   projectName: string,
@@ -121,6 +126,9 @@ function makeRegisterData(
 
 /**
  * Create default data for a bot
+ *
+ * @param registerData
+ * @param botId
  */
 function makeBotData(
   registerData: RegisterMessageType,

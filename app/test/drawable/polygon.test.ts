@@ -358,8 +358,8 @@ test("2d polygons delete vertex and draw bezier curve", () => {
   keyUp(label2dHandler, "c")
   /**
    * polygon: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 110) (330, 120) <bezier curve control points>]
-   *          (320, 130)
+   * [ (340, 110) (330, 120) <bezier curve control points>]
+   * (320, 130)
    */
 
   state = getState()
@@ -375,8 +375,8 @@ test("2d polygons delete vertex and draw bezier curve", () => {
   mouseUp(label2dHandler, 340, 90, 0, 6)
   /**
    * polygon: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 90) (330, 120) <bezier curve control points>]
-   *          (320, 130)
+   * [ (340, 90) (330, 120) <bezier curve control points>]
+   * (320, 130)
    */
 
   state = getState()
@@ -965,8 +965,8 @@ test("2d polylines delete vertex and draw bezier curve", () => {
   keyUp(label2dHandler, "c")
   /**
    * polyline: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 110) (330, 120) <bezier curve control points>]
-   *          (320, 130)
+   * [ (340, 110) (330, 120) <bezier curve control points>]
+   * (320, 130)
    */
 
   state = getState()
@@ -982,8 +982,8 @@ test("2d polylines delete vertex and draw bezier curve", () => {
   mouseUp(label2dHandler, 340, 90, 0, 6)
   /**
    * polyline: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 90) (330, 120) <bezier curve control points>]
-   *          (320, 130)
+   * [ (340, 90) (330, 120) <bezier curve control points>]
+   * (320, 130)
    */
 
   state = getState()

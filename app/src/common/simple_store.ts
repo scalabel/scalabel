@@ -15,6 +15,7 @@ export class SimpleStore {
 
   /**
    * Constructor
+   *
    * @param getState
    * @param dispatch
    */

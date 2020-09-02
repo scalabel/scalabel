@@ -8,6 +8,11 @@ import { BotData } from "../types/message"
 /**
  * Converts task id to name of the room for that id
  * If sync is off, room is separated by sessionId
+ *
+ * @param projectName
+ * @param taskId
+ * @param sync
+ * @param sessionId
  */
 export function getRoomName(
   projectName: string,
@@ -38,6 +43,8 @@ export function hostname(): string {
 
 /**
  * Creates path for a timestamped file
+ *
+ * @param filePath
  */
 export function getFileKey(filePath: string): string {
   return `${filePath}/${now()}`
@@ -45,6 +52,8 @@ export function getFileKey(filePath: string): string {
 
 /**
  * Creates a temporary directory for tests
+ *
+ * @param testName
  */
 export function getTestDir(testName: string): string {
   return `${testName}-${now()}`
@@ -52,6 +61,8 @@ export function getTestDir(testName: string): string {
 
 /**
  * Gets path for user data
+ *
+ * @param project
  */
 export function getUserKey(project: string): string {
   return `${project}/userData`
@@ -71,6 +82,8 @@ export const HTML_DIRS: string[] = ["../html"]
 
 /**
  * Converts relative (to js) path into absolute path
+ *
+ * @param relativePath
  */
 export function getAbsSrcPath(relativePath: string): string {
   return path.join(__dirname, relativePath)
@@ -78,6 +91,7 @@ export function getAbsSrcPath(relativePath: string): string {
 
 /**
  * Get name for export download
+ *
  * @param {string} projectName
  */
 export function getExportName(projectName: string): string {
@@ -87,6 +101,8 @@ export function getExportName(projectName: string): string {
 /**
  * Get redis key for associated metadata
  * this means data that doesn't get written back to storage
+ *
+ * @param key
  */
 export function getRedisMetaKey(key: string): string {
   return `${key}:meta`
@@ -94,6 +110,8 @@ export function getRedisMetaKey(key: string): string {
 
 /**
  * Get redis key for reminder metadata
+ *
+ * @param key
  */
 export function getRedisReminderKey(key: string): string {
   return `${key}:reminder`
@@ -101,6 +119,8 @@ export function getRedisReminderKey(key: string): string {
 
 /**
  * Convert redis metadata or reminder key to redis base key
+ *
+ * @param metadataKey
  */
 export function getRedisBaseKey(metadataKey: string): string {
   return metadataKey.split(":")[0]
@@ -108,6 +128,8 @@ export function getRedisBaseKey(metadataKey: string): string {
 
 /**
  * Check redis key is a reminder key
+ *
+ * @param key
  */
 export function checkRedisReminderKey(key: string): boolean {
   return key.split(":")[1] === "reminder"
@@ -115,6 +137,8 @@ export function checkRedisReminderKey(key: string): boolean {
 
 /**
  * Gets the redis key used by bots for the task
+ *
+ * @param botData
  */
 export function getRedisBotKey(botData: BotData): string {
   const projectName = botData.projectName
@@ -131,6 +155,8 @@ export function getRedisBotSet(): string {
 
 /**
  * Gets key of file with project data
+ *
+ * @param projectName
  */
 export function getProjectKey(projectName: string): string {
   return path.join(StorageStructure.PROJECT, projectName, "project")
@@ -138,6 +164,9 @@ export function getProjectKey(projectName: string): string {
 
 /**
  * Gets key of file with task data
+ *
+ * @param projectName
+ * @param taskId
  */
 export function getTaskKey(projectName: string, taskId: string): string {
   return path.join(getTaskDir(projectName), taskId)
@@ -145,6 +174,8 @@ export function getTaskKey(projectName: string, taskId: string): string {
 
 /**
  * Gets directory with task data for project
+ *
+ * @param projectName
  */
 export function getTaskDir(projectName: string): string {
   return path.join(StorageStructure.PROJECT, projectName, "tasks")
@@ -152,8 +183,10 @@ export function getTaskDir(projectName: string): string {
 
 /**
  * Gets name of submission directory for a given task
+ *
  * @param projectName
  * @param task
+ * @param taskId
  */
 export function getSaveDir(projectName: string, taskId: string): string {
   return path.join(StorageStructure.PROJECT, projectName, "saved", taskId)

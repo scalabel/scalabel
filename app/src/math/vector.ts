@@ -2,6 +2,7 @@
 export class Vector extends Array<number> {
   /**
    * Constructor
+   *
    * @param dim
    */
   constructor(dim: number = 0) {
@@ -10,7 +11,9 @@ export class Vector extends Array<number> {
 
   /**
    * Set the values of this vector
+   *
    * @param {number[]} args: list of numbers to fill
+   * @param {...any} args
    */
   public set(...args: number[]): this {
     for (let i = 0; i < this.length && i < args.length; i += 1) {
@@ -32,13 +35,21 @@ export class Vector extends Array<number> {
     return this
   }
 
-  /** scale the whole vector */
+  /**
+   * scale the whole vector
+   *
+   * @param s
+   */
   public scale(s: number): this {
     this.forEach((v, i, arr) => (arr[i] = v * s))
     return this
   }
 
-  /** add a number or vector */
+  /**
+   * add a number or vector
+   *
+   * @param s
+   */
   public add(s: number | Vector): this {
     if (typeof s === "number") {
       this.forEach((v, i, arr) => (arr[i] = v + s))
@@ -48,7 +59,11 @@ export class Vector extends Array<number> {
     return this
   }
 
-  /** subtract a number or vector */
+  /**
+   * subtract a number or vector
+   *
+   * @param s
+   */
   public subtract(s: number | Vector): this {
     if (typeof s === "number") {
       this.forEach((v, i, arr) => (arr[i] = v - s))
@@ -58,7 +73,11 @@ export class Vector extends Array<number> {
     return this
   }
 
-  /** dot product with another vector */
+  /**
+   * dot product with another vector
+   *
+   * @param vector
+   */
   public dot(vector: Vector): this {
     this.forEach((v, i, arr) => (arr[i] = v * vector[i]))
     return this

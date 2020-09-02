@@ -9,6 +9,7 @@ import * as actions from "./common"
 /**
  * If tag exists for attribute, updates the label, else create a new label for
  * the attribute.
+ *
  * @param itemIndex
  * @param attributeIndex
  * @param selectedIndex

@@ -23,7 +23,7 @@ import {
 } from "./util/util"
 
 /**
- *  Mock post request to model server
+ * Mock post request to model server
  * They should return the same number of prediction actions as request actions
  */
 jest.mock("axios")
@@ -190,6 +190,10 @@ function setUpBot(): Bot {
 /**
  * Helper function to update the expected store with
  * the incoming actions and the outgoing predictions
+ *
+ * @param store
+ * @param message
+ * @param botActions
  */
 function updateExpectedStore(
   store: ReduxStore,
@@ -207,6 +211,8 @@ function updateExpectedStore(
 }
 /**
  * Helper function for checking that correct connection message was sent
+ *
+ * @param sessId
  */
 function checkConnectMessage(sessId: string): void {
   const expectedMessage: RegisterMessageType = {
@@ -222,6 +228,9 @@ function checkConnectMessage(sessId: string): void {
 
 /**
  * Create a sync message with the specified number of actions
+ *
+ * @param numActions
+ * @param userId
  */
 function makeSyncMessage(
   numActions: number,
@@ -240,6 +249,9 @@ function makeSyncMessage(
 
 /**
  * Convert action packet to sync message
+ *
+ * @param packet
+ * @param sessionId
  */
 function packetToMessage(
   packet: ActionPacketType,

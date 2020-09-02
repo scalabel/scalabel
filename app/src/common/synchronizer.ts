@@ -85,6 +85,7 @@ export class Synchronizer {
 
   /**
    * Constructor
+   *
    * @param socket
    * @param taskIndex
    * @param projectName
@@ -116,6 +117,12 @@ export class Synchronizer {
 
   /**
    * Queue a new action for saving
+   *
+   * @param action
+   * @param autosave
+   * @param sessionId
+   * @param bots
+   * @param dispatch
    */
   public queueActionForSaving(
     action: actionTypes.BaseAction,
@@ -156,6 +163,8 @@ export class Synchronizer {
 
   /**
    * Displays pop-up warning user when leaving with unsaved changes
+   *
+   * @param e
    */
   public warningPopup(e: BeforeUnloadEvent): string | null {
     const state = Session.getState()
@@ -170,6 +179,9 @@ export class Synchronizer {
 
   /**
    * Registers the session with the backend, triggering a register ack
+   *
+   * @param sessionId
+   * @param dispatch
    */
   public sendConnectionMessage(
     sessionId: string,
@@ -190,6 +202,12 @@ export class Synchronizer {
 
   /**
    * Initialized synced state, and sends any queued actions
+   *
+   * @param state
+   * @param autosave
+   * @param sessionId
+   * @param bots
+   * @param dispatch
    */
   public finishRegistration(
     state: State,
@@ -233,6 +251,10 @@ export class Synchronizer {
   /**
    * Called when backend sends ack for actions that were sent to be synced
    * Updates relevant queues and syncs actions from other sessions
+   *
+   * @param message
+   * @param sessionId
+   * @param dispatch
    */
   public handleBroadcast(
     message: SyncActionMessageType,
@@ -291,6 +313,8 @@ export class Synchronizer {
 
   /**
    * Called when session disconnects from backend
+   *
+   * @param dispatch
    */
   public handleDisconnect(dispatch: ThunkDispatchType): void {
     dispatch(setStatusToReconnecting())
@@ -315,6 +339,10 @@ export class Synchronizer {
   /**
    * Send all queued actions to the backend
    * and move actions to actionsPendingSave
+   *
+   * @param sessionId
+   * @param bots
+   * @param dispatch
    */
   public save(
     sessionId: string,
@@ -343,6 +371,10 @@ export class Synchronizer {
   /**
    * Send given action packet to the backend
    * Can be called multiple times if previous attempts aren't acked
+   *
+   * @param actionPacket
+   * @param sessionId
+   * @param dispatch
    */
   public sendActions(
     actionPacket: ActionPacketType,

@@ -2,6 +2,8 @@ import { MaybeError } from "../types/common"
 
 /**
  * Add callback for the main window visibility change
+ *
+ * @param callback
  */
 export function addVisibilityListener(
   callback: (error: MaybeError, visible: boolean) => void

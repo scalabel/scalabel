@@ -14,6 +14,8 @@ export abstract class Storage {
 
   /**
    * General constructor
+   *
+   * @param basePath
    */
   protected constructor(basePath: string) {
     this._dataDir = basePath
@@ -30,6 +32,8 @@ export abstract class Storage {
   /**
    * Change the file extension for different file types
    * Can set to empty string if the keys already include extensions
+   *
+   * @param newExt
    */
   public setExt(newExt: string): void {
     this._extension = newExt
@@ -50,6 +54,7 @@ export abstract class Storage {
 
   /**
    * Lists keys in storage
+   *
    * @param {string} prefix: relative path of directory
    * @param {boolean} onlyDir: whether to only return keys that are directories
    * @returns {Promise<string[]>} The keys are returned in lexical order
@@ -76,6 +81,7 @@ export abstract class Storage {
 
   /**
    * Create a new folder
+   *
    * @param key
    */
   public abstract async mkdir(key: string): Promise<void>
@@ -83,6 +89,8 @@ export abstract class Storage {
   /**
    * Loads the JSON if it exists
    * Otherwise return something that evaluates to false
+   *
+   * @param key
    */
   public async safeLoad(key: string): Promise<string> {
     if (await this.hasKey(key)) {
@@ -97,6 +105,7 @@ export abstract class Storage {
    * The goal is to be robust to possible failures when using disks or
    * network drives. If database is used as the storage, this backup may not be
    * useful.
+   *
    * @param key
    * @param value
    */
@@ -117,6 +126,7 @@ export abstract class Storage {
 
   /**
    * Get the value from
+   *
    * @param key
    */
   public async getWithBackup(key: string): Promise<string | null> {
@@ -130,6 +140,8 @@ export abstract class Storage {
 
   /**
    * Makes relative path into full path
+   *
+   * @param key
    */
   public fullDir(key: string): string {
     return path.join(this._dataDir, key)
@@ -137,6 +149,8 @@ export abstract class Storage {
 
   /**
    * Makes relative path into full filename
+   *
+   * @param key
    */
   public fullFile(key: string): string {
     return this.fullDir(key + this.keyExt())

@@ -19,7 +19,10 @@ export const SCROLL_ZOOM_RATIO = 1.03
 
 /**
  * Get the current item in the state
- * @return {Size2D}
+ *
+ * @param state
+ * @param viewerId
+ * @returns {Size2D}
  */
 export function getCurrentImageSize(state: State, viewerId: number): Size2D {
   const item = getCurrentItem(state)
@@ -35,9 +38,11 @@ export function getCurrentImageSize(state: State, viewerId: number): Size2D {
  * Convert image coordinate to canvas coordinate.
  * If affine, assumes values to be [x, y]. Otherwise
  * performs linear transformation.
+ *
  * @param {Vector2D} values - the values to convert.
  * @param {boolean} upRes
- * @return {Vector2D} - the converted values.
+ * @param displayToImageRatio
+ * @returns {Vector2D} - the converted values.
  */
 export function toCanvasCoords(
   values: Vector2D,
@@ -55,9 +60,11 @@ export function toCanvasCoords(
  * Convert canvas coordinate to image coordinate.
  * If affine, assumes values to be [x, y]. Otherwise
  * performs linear transformation.
+ *
  * @param {Vector2D} values - the values to convert.
+ * @param displayToImageRatio
  * @param {boolean} upRes - whether the canvas has higher resolution
- * @return {Vector2D} - the converted values.
+ * @returns {Vector2D} - the converted values.
  */
 export function toImageCoords(
   values: Vector2D,
@@ -70,6 +77,7 @@ export function toImageCoords(
 
 /**
  * Draw image on canvas
+ *
  * @param canvas
  * @param context
  * @param image
@@ -95,9 +103,10 @@ export function drawImageOnCanvas(
 
 /**
  * Clear the canvas
+ *
  * @param {HTMLCanvasElement} canvas - the canvas to redraw
  * @param {any} context - the context to redraw
- * @return {boolean}
+ * @returns {boolean}
  */
 export function clearCanvas(
   canvas: HTMLCanvasElement,
@@ -109,6 +118,7 @@ export function clearCanvas(
 
 /**
  * Normalize mouse x & y to canvas coordinates
+ *
  * @param display
  * @param canvas
  * @param canvasWidth
@@ -151,8 +161,9 @@ export function normalizeMouseCoordinates(
 
 /**
  * Function to find mode of a number array.
+ *
  * @param {number[]} arr - the array.
- * @return {number} the mode of the array.
+ * @returns {number} the mode of the array.
  */
 export function mode(arr: number[]): number | undefined {
   return arr
@@ -165,7 +176,9 @@ export function mode(arr: number[]): number | undefined {
 
 /**
  * Get handle id from image color
+ *
  * @param color
+ * @param data
  */
 export function imageDataToHandleId(data: Uint8ClampedArray): number[] {
   const arr = []
@@ -180,6 +193,8 @@ export function imageDataToHandleId(data: Uint8ClampedArray): number[] {
 
 /**
  * Update canvas scale
+ *
+ * @param state
  * @param display
  * @param canvas
  * @param context

@@ -170,6 +170,8 @@ describe("Submit button functionality", () => {
 
 /**
  * Checks that submit action was dispatched
+ *
+ * @param dispatchSpy
  */
 function checkSubmitDispatch(
   dispatchSpy: jest.SpyInstance<

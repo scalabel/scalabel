@@ -4,6 +4,7 @@ import * as types from "../types/state"
 
 /**
  * Transform internal rect to export 2d box
+ *
  * @param shape
  */
 export function transformBox2D(shape: types.ShapeType): bdd.Box2DType {
@@ -24,7 +25,9 @@ export function transformBox2D(shape: types.ShapeType): bdd.Box2DType {
 
 /**
  * Transform internal cube to export 3d box
+ *
  * @param box3d
+ * @param shape
  */
 export function transformBox3D(shape: types.ShapeType): bdd.Box3DType {
   if (shape.shapeType !== ShapeTypeName.CUBE) {
@@ -43,7 +46,9 @@ export function transformBox3D(shape: types.ShapeType): bdd.Box3DType {
 
 /**
  * Transform internal plane to export 3d plane
+ *
  * @param plane
+ * @param shape
  */
 export function transformPlane3D(shape: types.ShapeType): bdd.Plane3DType {
   if (shape.shapeType !== ShapeTypeName.GRID) {

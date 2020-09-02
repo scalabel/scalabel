@@ -6,12 +6,15 @@ import * as actions from "./common"
 
 /**
  * Create AddLabelAction to create a box3d label
+ *
  * @param {number} itemIndex
  * @param {number[]} category: list of category ids
  * @param {number} center
  * @param {number} size
+ * @param sensors
+ * @param offset
  * @param {number} orientation
- * @return {AddLabelAction}
+ * @returns {AddLabelAction}
  */
 export function addPlaneLabel(
   itemIndex: number,

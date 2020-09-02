@@ -7,6 +7,7 @@ import { Storage } from "./storage"
 
 /**
  * If the key is temporary and doesn't need writeback,
+ *
  * @param key
  */
 function isTempKey(key: string): boolean {
@@ -30,6 +31,10 @@ export class RedisCache {
 
   /**
    * Create new store
+   *
+   * @param config
+   * @param storage
+   * @param client
    */
   constructor(config: RedisConfig, storage: Storage, client: RedisClient) {
     this.writebackTime = config.writebackTime
@@ -52,6 +57,9 @@ export class RedisCache {
 
   /**
    * Update multiple value atomically
+   *
+   * @param keys
+   * @param values
    */
   public async setMulti(keys: string[], values: string[]): Promise<void> {
     if (keys.length !== values.length) {
@@ -76,6 +84,9 @@ export class RedisCache {
 
   /**
    * Wrapper for get
+   *
+   * @param key
+   * @param checkStorage
    */
   public async get(
     key: string,
@@ -97,6 +108,8 @@ export class RedisCache {
 
   /**
    * Wrapper for del
+   *
+   * @param key
    */
   public async del(key: string): Promise<void> {
     await this.client.del(key)
@@ -105,6 +118,9 @@ export class RedisCache {
   /**
    * Writes back task submission to storage
    * Task key in redis is the directory, so add a date before writing
+   *
+   * @param key
+   * @param value
    */
   public async writeback(key: string, value: string): Promise<void> {
     Logger.info(`Writing back ${key}`)
@@ -113,6 +129,7 @@ export class RedisCache {
 
   /**
    * Cache key value
+   *
    * @param key
    * @param value
    */
@@ -125,6 +142,7 @@ export class RedisCache {
    * Make the arguments for redis client set from key and value
    * The return type is in [key, value, timeout]
    * timeout is in seconds. Negative timeout means no timeout
+   *
    * @param key
    * @param value
    */
@@ -164,6 +182,8 @@ export class RedisCache {
   /**
    * Check that the key is from a reminder expiring
    * Not from a normal key or meta key expiring
+   *
+   * @param reminderKey
    */
   private async processExpiredKey(reminderKey: string): Promise<void> {
     if (!path.checkRedisReminderKey(reminderKey)) {

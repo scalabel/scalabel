@@ -13,6 +13,7 @@ import { addTrack, deleteLabels } from "./common"
 
 /**
  * Add track by duplicating label from startIndex to stopIndex
+ *
  * @param label
  * @param shapeTypes
  * @param shapes
@@ -76,7 +77,9 @@ export function addDuplicatedTrack(
 
 /**
  * Delete all labels from track & track
+ *
  * @param trackId
+ * @param tracks
  */
 export function deleteTracks(tracks: TrackType[]): DeleteLabelsAction {
   const itemLength = Session.numItems
@@ -100,8 +103,12 @@ export function deleteTracks(tracks: TrackType[]): DeleteLabelsAction {
 
 /**
  * Terminate track by deleting all labels in items after itemIndex
+ *
  * @param track
  * @param lastIndex
+ * @param tracks
+ * @param firstIndexToDelete
+ * @param numItems
  */
 export function terminateTracks(
   tracks: TrackType[],

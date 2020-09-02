@@ -5,11 +5,13 @@ import { changeViewerConfig } from "./common"
 
 /**
  * Zoom the image
+ *
  * @param zoomRatio
  * @param offsetX
  * @param offsetY
  * @param display
  * @param canvas
+ * @param viewerId
  * @param config
  * @param canvasWidth
  * @param canvasHeight

@@ -49,7 +49,8 @@ class Session {
 
   /**
    * Get current state in store
-   * @return {State}
+   *
+   * @returns {State}
    */
   public getState(): State {
     return this.store.getState().present
@@ -78,7 +79,9 @@ class Session {
 
   /**
    * Wrapper for redux store dispatch of actions
+   *
    * @param {actionTypes.ActionType} action: action description
+   * @param action
    */
   public dispatch(action: actionTypes.ActionType | ThunkActionType): void {
     // this.store.dispatch(action)
@@ -93,7 +96,9 @@ class Session {
 
   /**
    * Subscribe all the controllers to the states
+   *
    * @param {Function} callback: view component
+   * @param callback
    */
   public subscribe(callback: () => void): void {
     this.store.subscribe(callback)
@@ -118,6 +123,8 @@ export function getState(): State {
 
 /**
  * Dispatch the action to the global session instance
+ *
+ * @param action
  */
 export function dispatch(
   action: actionTypes.ActionType | ThunkActionType

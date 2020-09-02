@@ -31,7 +31,9 @@ beforeAll(async () => {
 
 /**
  * Get relative project directory in the storage
+ *
  * @param projectName
+ * @param name
  */
 function getProjectDir(name: string): string {
   return `${StorageStructure.PROJECT}/${name}`
@@ -39,6 +41,8 @@ function getProjectDir(name: string): string {
 
 /**
  * Check wether the path exist on s3
+ *
+ * @param key
  */
 async function pathExists(key: string): Promise<boolean> {
   const params = {
@@ -217,6 +221,9 @@ afterAll(async () => {
 
 /**
  * tests if task with index exists
+ *
+ * @param index
+ * @param shouldExist
  */
 async function checkTaskKey(
   index: number,
@@ -241,6 +248,8 @@ async function checkProjectKey(): Promise<void> {
 
 /**
  * tests if load on an index works
+ *
+ * @param index
  */
 async function checkLoad(index: number): Promise<void> {
   return await storage

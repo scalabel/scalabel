@@ -21,6 +21,7 @@ export class ModelInterface {
 
   /**
    * Constructor
+   *
    * @param projectName
    * @param sessionId
    */
@@ -31,6 +32,10 @@ export class ModelInterface {
 
   /**
    * Query for 'rect -> polygon' segmentation
+   *
+   * @param rect
+   * @param url
+   * @param itemIndex
    */
   public makeRectQuery(
     rect: RectType,
@@ -54,6 +59,11 @@ export class ModelInterface {
 
   /**
    * Query for refining 'polygon -> polygon' segmentation
+   *
+   * @param points
+   * @param url
+   * @param itemIndex
+   * @param labelType
    */
   public makePolyQuery(
     points: PathPoint2DType[],
@@ -79,6 +89,9 @@ export class ModelInterface {
 
   /**
    * Translate polygon response to an action
+   *
+   * @param polyPoints
+   * @param itemIndex
    */
   public makePolyAction(
     polyPoints: number[][],

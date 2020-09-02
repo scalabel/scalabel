@@ -13,6 +13,16 @@
     "project": "./tsconfig.json"
   },
   "rules": {
+    "jsdoc/check-alignment": 1,
+    "jsdoc/check-indentation": 1,
+    "jsdoc/check-syntax": 1,
+    "jsdoc/newline-after-description": 1,
+    "jsdoc/no-bad-blocks": 1,
+    "jsdoc/require-description": 1,
+    "jsdoc/require-jsdoc": 1,
+    "jsdoc/require-param-name": 1,
+    "jsdoc/require-param": 1,
+    // "jsdoc/check-param-names": 1,
     "spaced-comment": ["error", "always"],
     "require-jsdoc": [
       "error",

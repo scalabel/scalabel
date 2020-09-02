@@ -10,10 +10,14 @@ import { reducer } from "./reducer"
 
 /**
  * Configure the main store for the state
+ *
  * @param {Partial<State>} json: initial state
  * @param {boolean} devMode: whether to turn on dev mode
  * @param {Middleware} middleware: optional middleware for redux
- * @return {Store<ReduxState>}
+ * @param initialState
+ * @param devMode
+ * @param middleware
+ * @returns {Store<ReduxState>}
  */
 export function configureStore(
   initialState: Partial<State>,

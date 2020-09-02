@@ -2,6 +2,7 @@ import { TrackType } from "../types/state"
 
 /**
  * Check if tracks overlap in items
+ *
  * @param tracks
  */
 export function tracksOverlapping(tracks: TrackType[]): boolean {

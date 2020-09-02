@@ -36,6 +36,7 @@ export class Listeners {
 
   /**
    * Constructor
+   *
    * @param projectStore
    * @param userManager
    */
@@ -46,6 +47,10 @@ export class Listeners {
 
   /**
    * Logs requests to static or dynamic files
+   *
+   * @param req
+   * @param _res
+   * @param next
    */
   public loggingHandler(
     req: Request,
@@ -59,6 +64,9 @@ export class Listeners {
 
   /**
    * Handles getting all projects' names
+   *
+   * @param _req
+   * @param res
    */
   public async projectNameHandler(_req: Request, res: Response): Promise<void> {
     let projects: string[]
@@ -79,6 +87,9 @@ export class Listeners {
 
   /**
    * Handles posting export
+   *
+   * @param req
+   * @param res
    */
   public async getExportHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidGet(req, res)) {
@@ -126,6 +137,8 @@ export class Listeners {
 
   /**
    * Alert the user that the sent fields were illegal
+   *
+   * @param res
    */
   public badFormResponse(res: Response): void {
     const err = Error("Illegal fields for project creation")
@@ -135,6 +148,8 @@ export class Listeners {
 
   /**
    * Alert the user that the task creation request was illegal
+   *
+   * @param res
    */
   public badTaskResponse(res: Response): void {
     const err = Error("Illegal fields for task creation")
@@ -144,6 +159,9 @@ export class Listeners {
 
   /**
    * Error if it's not a post request
+   *
+   * @param req
+   * @param res
    */
   public checkInvalidPost(req: Request, res: Response): boolean {
     if (req.method !== "POST") {
@@ -157,6 +175,10 @@ export class Listeners {
   /**
    * Error if it's not a get request
    * By default, also requires non-empty queryArg parameters
+   *
+   * @param req
+   * @param res
+   * @param requireParam
    */
   public checkInvalidGet(
     req: Request,
@@ -174,6 +196,9 @@ export class Listeners {
   /**
    * Handles posted project from internal data
    * Items file not required, since items can be added later
+   *
+   * @param req
+   * @param res
    */
   public async postProjectInternalHandler(
     req: Request,
@@ -216,6 +241,9 @@ export class Listeners {
   /**
    * Handles posted project from form data
    * Items file required
+   *
+   * @param req
+   * @param res
    */
   public async postProjectHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidPost(req, res)) {
@@ -243,6 +271,9 @@ export class Listeners {
 
   /**
    * Handles tasks being added to a project
+   *
+   * @param req
+   * @param res
    */
   public async postTasksHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidPost(req, res)) {
@@ -294,6 +325,9 @@ export class Listeners {
 
   /**
    * Get the labeling stats
+   *
+   * @param req
+   * @param res
    */
   public async statsHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidGet(req, res)) {
@@ -313,6 +347,9 @@ export class Listeners {
 
   /**
    * Return dashboard info
+   *
+   * @param req
+   * @param res
    */
   public async dashboardHandler(req: Request, res: Response): Promise<void> {
     if (this.checkInvalidGet(req, res)) {
@@ -344,6 +381,10 @@ export class Listeners {
 
   /**
    * Finishes project creation using processed dicts
+   *
+   * @param storage
+   * @param itemsRequired
+   * @param res
    */
   private async createProjectFromDicts(
     storage: Storage,

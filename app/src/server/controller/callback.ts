@@ -71,6 +71,7 @@ class Callback {
 
   /**
    * Constructor
+   *
    * @param config
    */
   constructor(config: ServerConfig) {

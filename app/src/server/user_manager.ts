@@ -13,6 +13,7 @@ export class UserManager {
 
   /**
    * Constructor
+   *
    * @param projectStore
    * @param userManagement
    */
@@ -23,6 +24,10 @@ export class UserManager {
 
   /**
    * Saves the current socket's user data
+   *
+   * @param socketId
+   * @param projectName
+   * @param userId
    */
   public async registerUser(
     socketId: string,
@@ -43,6 +48,8 @@ export class UserManager {
 
   /**
    * Deletes the user data of the socket that disconnected
+   *
+   * @param socketId
    */
   public async deregisterUser(socketId: string): Promise<void> {
     if (this.disable) {
@@ -67,6 +74,8 @@ export class UserManager {
 
   /**
    * Counts the number of currently connected users
+   *
+   * @param projectName
    */
   public async countUsers(projectName: string): Promise<number> {
     if (this.disable) {
@@ -99,6 +108,10 @@ export class UserManager {
 
   /**
    * Links socket to user and vice versa
+   *
+   * @param userData
+   * @param socketId
+   * @param userId
    */
   private addSocketToUser(
     userData: UserData,
@@ -128,6 +141,9 @@ export class UserManager {
 
   /**
    * Unlinks socket and user
+   *
+   * @param userData
+   * @param socketId
    */
   private removeSocketFromUser(userData: UserData, socketId: string): UserData {
     const socketToUser = userData.socketToUser
@@ -163,6 +179,10 @@ export class UserManager {
 
   /**
    * Updates metadata by linking socket to project
+   *
+   * @param userMetadata
+   * @param socketId
+   * @param projectName
    */
   private addSocketToMeta(
     userMetadata: UserMetadata,
@@ -177,6 +197,9 @@ export class UserManager {
   /**
    * Updates metadata by removing socket from project
    * Returns updated metadata and the project name if it exists
+   *
+   * @param userMetadata
+   * @param socketId
    */
   private removeSocketFromMeta(
     userMetadata: UserMetadata,

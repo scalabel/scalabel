@@ -20,7 +20,11 @@ export enum CameraLockState {
   SELECTION_Z = 5
 }
 
-/** Returns whether camera lock state is locked to selected label */
+/**
+ * Returns whether camera lock state is locked to selected label
+ *
+ * @param viewerConfig
+ */
 export function lockedToSelection(
   viewerConfig: PointCloudViewerConfigType
 ): boolean {
@@ -29,7 +33,10 @@ export function lockedToSelection(
 
 /**
  * Generate move camera action
+ *
  * @param {Vector3D} newPosition
+ * @param viewerId
+ * @param viewerConfig
  */
 export function moveCamera(
   newPosition: Vector3D,
@@ -49,8 +56,11 @@ export function moveCamera(
 
 /**
  * Generate move camera action and target
+ *
  * @param {Vector3D} newPosition
  * @param {Vector3D} newTarget
+ * @param viewerId
+ * @param viewerConfig
  */
 export function moveCameraAndTarget(
   newPosition: Vector3D,
@@ -72,6 +82,10 @@ export function moveCameraAndTarget(
 
 /**
  * Zoom camera
+ *
+ * @param deltaY
+ * @param viewerId
+ * @param viewerConfig
  */
 export function zoomCamera(
   deltaY: number,
@@ -115,8 +129,13 @@ export function zoomCamera(
 
 /**
  * Rotate camera according to mouse movement
+ *
+ * @param initialX
+ * @param initialY
  * @param newX
  * @param newY
+ * @param viewerId
+ * @param viewerConfig
  */
 export function rotateCamera(
   initialX: number,
@@ -182,8 +201,14 @@ export function rotateCamera(
 
 /**
  * Drag camera according to mouse movement
+ *
+ * @param initialX
+ * @param initialY
  * @param newX
  * @param newY
+ * @param camera
+ * @param viewerId
+ * @param viewerConfig
  */
 export function dragCamera(
   initialX: number,
@@ -219,6 +244,8 @@ export function dragCamera(
 
 /**
  * Move camera up
+ *
+ * @param viewerId
  * @param viewerConfig
  */
 export function moveUp(
@@ -243,6 +270,8 @@ export function moveUp(
 
 /**
  * Move camera up
+ *
+ * @param viewerId
  * @param viewerConfig
  */
 export function moveDown(
@@ -267,6 +296,7 @@ export function moveDown(
 
 /**
  * Calculate forward vector
+ *
  * @param viewerConfig
  */
 function calculateForward(
@@ -283,6 +313,8 @@ function calculateForward(
 
 /**
  * Move camera back
+ *
+ * @param viewerId
  * @param viewerConfig
  */
 export function moveBack(
@@ -308,6 +340,8 @@ export function moveBack(
 
 /**
  * Move camera back
+ *
+ * @param viewerId
  * @param viewerConfig
  */
 export function moveForward(
@@ -333,6 +367,7 @@ export function moveForward(
 
 /**
  * Calculate left vector
+ *
  * @param viewerConfig
  * @param forward
  */
@@ -357,6 +392,8 @@ function calculateLeft(
 
 /**
  * Move camera left
+ *
+ * @param viewerId
  * @param viewerConfig
  */
 export function moveLeft(
@@ -383,6 +420,8 @@ export function moveLeft(
 
 /**
  * Move camera right
+ *
+ * @param viewerId
  * @param viewerConfig
  */
 export function moveRight(
@@ -409,7 +448,10 @@ export function moveRight(
 
 /**
  * Update lockStatus in viewerConfig
+ *
+ * @param viewerId
  * @param viewerConfig
+ * @param newLockStatus
  */
 export function updateLockStatus(
   viewerId: number,
@@ -423,12 +465,23 @@ export function updateLockStatus(
   return changeViewerConfig(viewerId, config)
 }
 
-/** Convert axis (0, 1, 2) to the selection lock state */
+/**
+ * Convert axis (0, 1, 2) to the selection lock state
+ *
+ * @param axis
+ */
 function axisIndexToSelectionLockState(axis: number): number {
   return CameraLockState.SELECTION_X + axis
 }
 
-/** Align camera to axis */
+/**
+ * Align camera to axis
+ *
+ * @param viewerId
+ * @param viewerConfig
+ * @param axis
+ * @param minDistance
+ */
 export function alignToAxis(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType,
@@ -459,7 +512,12 @@ export function alignToAxis(
   return changeViewerConfig(viewerId, config)
 }
 
-/** Lock selection to camera */
+/**
+ * Lock selection to camera
+ *
+ * @param viewerId
+ * @param viewerConfig
+ */
 export function toggleSelectionLock(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
@@ -474,7 +532,12 @@ export function toggleSelectionLock(
   return changeViewerConfig(viewerId, config)
 }
 
-/** Toggle drag rotation direction */
+/**
+ * Toggle drag rotation direction
+ *
+ * @param viewerId
+ * @param viewerConfig
+ */
 export function toggleRotation(
   viewerId: number,
   viewerConfig: PointCloudViewerConfigType
