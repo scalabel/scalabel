@@ -108,7 +108,6 @@ export function getProjectJsonFromDisc(): void {
  * deep deletes timestamp from given data
  * @param data
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function deepDeleteTimestamp(data: ItemExport[]): unknown[] {
   const copy = JSON.parse(JSON.stringify(data))
   for (const entry of copy) {

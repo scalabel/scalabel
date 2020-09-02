@@ -13,7 +13,11 @@ declare global {
 }
 
 expect.extend({
-  // Add matching points to jest expect
+  /**
+   * Add matching points to jest expect
+   * @param received
+   * @param argument
+   */
   toMatchPoints2D(
     received: PathPoint2DType[],
     argument: Array<Partial<SimplePathPoint2DType>>

@@ -9,6 +9,10 @@ export class LabelCollector extends Array<IdType> {
   /** access the state */
   private readonly _getState: GetStateFunc
 
+  /**
+   * Constructor
+   * @param getState
+   */
   constructor(getState: GetStateFunc) {
     super()
     this._getState = getState
