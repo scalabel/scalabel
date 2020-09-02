@@ -169,7 +169,7 @@ export class S3Storage extends Storage {
         }
       }
 
-      if (data.IsTruncated === undefined) {
+      if (data.IsTruncated === undefined || !data.IsTruncated) {
         break
       }
 
@@ -215,7 +215,7 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullFile(key)
     }
-    return await this.s3.putObject(params).promise().then()
+    await this.s3.putObject(params).promise()
   }
 
   /**
@@ -235,7 +235,7 @@ export class S3Storage extends Storage {
     if (data.Body === undefined) {
       throw new Error(`No data at key '${params.Key}'`)
     } else {
-      // This lint error seems to be an AWS api problem
+      // This eslint problem seems to be a type error in s3
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       return data.Body.toString()
     }
@@ -269,7 +269,7 @@ export class S3Storage extends Storage {
       promises.push(this.delete(subKey))
     }
 
-    return await Promise.all(promises).then(() => {})
+    await Promise.all(promises)
   }
 
   /**
@@ -281,7 +281,7 @@ export class S3Storage extends Storage {
       Bucket: this.bucketName,
       Key: this.fullDir(key) + "/"
     }
-    return await this.s3.putObject(params).promise().then()
+    await this.s3.putObject(params).promise()
   }
 
   /**
