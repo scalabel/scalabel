@@ -66,23 +66,24 @@ export interface StyledButtonProps {
   background: string
 }
 
-export const styledButtonStyle = createStyles({
-  root: {
-    borderRadius: 0,
-    border: 0,
-    color: "black",
-    height: "80%",
-    width: "80%",
-    padding: "5px 15px",
-    boxShadow: "0 1px 0px 5px rgba(250, 250, 250, 1)",
-    fontSize: "15px",
-    background: (props: StyledButtonProps) => props.background,
-    margin: "0px 20px"
-  },
-  label: {
-    fontSize: "15px"
-  }
-})
+export const styledButtonStyle = () =>
+  createStyles({
+    root: {
+      borderRadius: 0,
+      border: 0,
+      color: "black",
+      height: "80%",
+      width: "80%",
+      padding: "5px 15px",
+      boxShadow: "0 1px 0px 5px rgba(250, 250, 250, 1)",
+      fontSize: "15px",
+      background: (props: StyledButtonProps) => props.background,
+      margin: "0px 20px"
+    },
+    label: {
+      fontSize: "15px"
+    }
+  })
 
 /**
  * Toggle button style

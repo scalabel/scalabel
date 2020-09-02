@@ -20,7 +20,6 @@ export class Window extends React.Component<Props> {
    * Window constructor
    * @param {Props} props
    */
-
   constructor(props: Props) {
     super(props)
 

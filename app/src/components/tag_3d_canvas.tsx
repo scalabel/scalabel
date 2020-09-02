@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/core/styles"
+import { withStyles, StyleRules } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -15,7 +15,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 
-const styles = () =>
+const styles = (): StyleRules<"tag3d_canvas", {}> =>
   createStyles({
     tag3d_canvas: {
       position: "absolute",
@@ -99,9 +99,8 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Render function
-   * @return {React.Fragment} React fragment
    */
-  public render(): JSX.Element {
+  public render(): React.ReactNode {
     const { classes } = this.props
 
     let canvas = (
@@ -114,7 +113,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
       />
     )
 
-    if (this.display) {
+    if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       canvas = React.cloneElement(canvas, {
         height: displayRect.height,
@@ -130,7 +129,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
    * @return {boolean}
    */
   public redraw(): boolean {
-    if (this.canvas && this._context) {
+    if (this.canvas !== null && this._context !== null) {
       const labels = Session.label3dList.labels()
       this._context.clearRect(0, 0, this.canvas.width, this.canvas.height)
       for (const label of labels) {
@@ -151,7 +150,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
               tag += "," + attribute.tagText
             }
           } else if (attribute.toolType === "list") {
-            if (attribute && attributes[Number(attributeId)][0] > 0) {
+            if (attributes[Number(attributeId)][0] > 0) {
               tag +=
                 "," +
                 attribute.tagText +
@@ -194,7 +193,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
   private initializeRefs(component: HTMLCanvasElement | null): void {
     const viewerConfig = this.state.user.viewerConfigs[this.props.id]
     const sensor = viewerConfig.sensor
-    if (!component || !isCurrentFrameLoaded(this.state, sensor)) {
+    if (component === null || !isCurrentFrameLoaded(this.state, sensor)) {
       return
     }
 
@@ -214,7 +213,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
         this.forceUpdate()
       }
 
-      if (this.canvas && this.display && this.data2d) {
+      if (this.display !== null && this.data2d) {
         const img3dConfig = viewerConfig as Image3DViewerConfigType
         if (
           img3dConfig.viewScale >= MIN_SCALE &&
@@ -231,7 +230,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
           )
           this.scale = newParams[3]
         }
-      } else if (this.display) {
+      } else if (this.display !== null) {
         this.canvas.removeAttribute("style")
         const displayRect = this.display.getBoundingClientRect()
         this.canvas.width = displayRect.width

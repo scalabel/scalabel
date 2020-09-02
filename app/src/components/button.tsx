@@ -10,7 +10,7 @@ function StyledButtonRaw(
   props: WithStyles<typeof styledButtonStyle> &
     Omit<ButtonProps, keyof StyledButtonProps> &
     StyledButtonProps
-) {
+): JSX.Element {
   const { classes, background, ...other } = props
   return <Button className={classes.root} {...other} />
 }
@@ -26,7 +26,7 @@ export function makeButton(
   name: string,
   clickCallback: () => void = () => {},
   bgColor: string = "white"
-) {
+): JSX.Element {
   return (
     <StyledButton onClick={clickCallback} background={bgColor}>
       {name}

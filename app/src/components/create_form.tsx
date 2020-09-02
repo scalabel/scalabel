@@ -70,6 +70,10 @@ interface State {
  * Create Project form
  */
 export default class CreateForm extends React.Component<Props, State> {
+  /**
+   * Constructor
+   * @param props
+   */
   constructor(props: Props) {
     super(props)
     this.state = {
@@ -91,7 +95,7 @@ export default class CreateForm extends React.Component<Props, State> {
   /**
    * renders the create form
    */
-  public render() {
+  public render(): React.ReactNode {
     const { classes } = this.props
     return (
       <div className={classes.root}>
@@ -333,31 +337,31 @@ export default class CreateForm extends React.Component<Props, State> {
     event: ChangeEvent<HTMLFormElement>
   ): void => {
     event.preventDefault()
-    const that = this
     const x = new XMLHttpRequest()
     x.timeout = submissionTimeout
     x.onreadystatechange = () => {
       if (x.readyState === 4) {
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (x.response) {
           alert(x.response)
         } else {
-          that.setState((prevState: State) => ({
+          this.setState((prevState: State) => ({
             projectName: prevState.projectName.replace(
               new RegExp(" ", "g"),
               "_"
             )
           }))
-          that.setState((prevState: State) => ({
+          this.setState((prevState: State) => ({
             dashboardUrl: "./dashboard?project_name=" + prevState.projectName
           }))
-          that.setState((prevState: State) => ({
+          this.setState((prevState: State) => ({
             vendorUrl: "./vendor?project_name=" + prevState.projectName
           }))
-          if (that.props.projectReloadCallback) {
-            that.props.projectReloadCallback()
+          if (this.props.projectReloadCallback !== undefined) {
+            this.props.projectReloadCallback()
           }
-          if (!that.state.hasSubmitted) {
-            that.setState({ hasSubmitted: true })
+          if (!this.state.hasSubmitted) {
+            this.setState({ hasSubmitted: true })
           }
         }
       }

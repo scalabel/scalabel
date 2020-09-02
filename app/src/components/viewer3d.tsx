@@ -51,7 +51,7 @@ export interface Props extends ViewerProps {
 /** Conditionally wrap box with bottom border */
 function underlineElement(
   element: React.ReactElement,
-  underline?: boolean
+  underline: boolean = false
 ): React.ReactElement {
   if (underline) {
     return (
@@ -136,7 +136,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Called when component updates */
   public componentDidUpdate(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
 
       if (Session.activeViewerId === this.props.id) {
@@ -156,7 +156,7 @@ class Viewer3D extends DrawableViewer<Props> {
    */
   protected getDrawableComponents(): React.ReactElement[] {
     const views: React.ReactElement[] = []
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       views.push(
         <PointCloudCanvas
           key={`pointCloudCanvas${this.props.id}`}
@@ -189,7 +189,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Return menu buttons */
   protected getMenuComponents(): [] | JSX.Element[] {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       const config = this._viewerConfig as PointCloudViewerConfigType
       const yLockButton = (
         <IconButton
@@ -356,18 +356,18 @@ class Viewer3D extends DrawableViewer<Props> {
     super.onMouseMove(e)
     const dX = this._mX - oldX
     const dY = this._mY - oldY
-    if (this._mouseDown && this._viewerConfig) {
+    if (this._mouseDown && this._viewerConfig !== undefined) {
       this._movingCamera = true
       const lockSelection = lockedToSelection(
         this._viewerConfig as PointCloudViewerConfigType
       )
       if (this._mouseButton === 2) {
         const delta = this.dragCamera(dX, dY)
-        if (lockSelection && Session.label3dList.selectedLabel) {
+        if (lockSelection && Session.label3dList.selectedLabel !== null) {
           Session.label3dList.selectedLabel.translate(delta)
         }
       } else {
-        if (lockSelection && Session.label3dList.selectedLabel) {
+        if (lockSelection && Session.label3dList.selectedLabel !== null) {
           if (
             this.isKeyDown(types.Key.CONTROL) ||
             this.isKeyDown(types.Key.META)
@@ -396,7 +396,7 @@ class Viewer3D extends DrawableViewer<Props> {
    * @param e
    */
   protected onDoubleClick(e: React.MouseEvent): void {
-    if (!this._container || !this._viewerConfig) {
+    if (this._container === undefined || this._viewerConfig === undefined) {
       return
     }
 
@@ -410,7 +410,7 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera
     )
 
-    if (this._pointCloud) {
+    if (this._pointCloud !== null) {
       const intersects = this._raycaster.intersectObject(this._pointCloud)
 
       if (intersects.length > 0) {
@@ -444,7 +444,7 @@ class Viewer3D extends DrawableViewer<Props> {
    */
   protected onWheel(e: WheelEvent): void {
     e.preventDefault()
-    if (this._scrollTimer) {
+    if (this._scrollTimer !== null) {
       window.clearTimeout(this._scrollTimer)
     }
     this.zoomCamera(e.deltaY)
@@ -511,13 +511,16 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** update camera parameters with config */
   private updateCamera(config: PointCloudViewerConfigType): void {
-    if (!this._viewerConfig || this._movingCamera) {
+    if (this._viewerConfig === undefined || this._movingCamera) {
       return
     }
 
     this._target.set(config.target.x, config.target.y, config.target.z)
 
-    if (lockedToSelection(config) && Session.label3dList.selectedLabel) {
+    if (
+      lockedToSelection(config) &&
+      Session.label3dList.selectedLabel !== null
+    ) {
       const up = new THREE.Vector3()
       const forward = new THREE.Vector3()
       const lockStatus = config.lockStatus
@@ -568,7 +571,7 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera.lookAt(this._target)
     }
 
-    if (this._container) {
+    if (this._container !== null) {
       const oldAspect = this._camera.aspect
       this._camera.aspect =
         this._container.offsetWidth / this._container.offsetHeight
@@ -585,7 +588,7 @@ class Viewer3D extends DrawableViewer<Props> {
    * @param mY
    */
   private convertMouseToNDC(mX: number, mY: number): number[] {
-    if (this._container) {
+    if (this._container !== null) {
       let x = mX / this._container.offsetWidth
       let y = mY / this._container.offsetHeight
       x = 2 * x - 1
@@ -622,7 +625,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Rotate camera around target */
   private rotateCameraSpherical(dx: number, dy: number): void {
-    if (!this._viewerConfig) {
+    if (this._viewerConfig === undefined) {
       return
     }
     const viewerConfig = this._viewerConfig as PointCloudViewerConfigType
@@ -698,7 +701,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Zoom camera */
   private zoomCamera(dY: number): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       const target = this._target
       const offset = new THREE.Vector3().copy(this._camera.position)
       offset.sub(target)
@@ -729,7 +732,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Move camera up */
   private moveUp(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       this._camera.position.z += CameraMovementParameters.MOVE_AMOUNT
       this._target.z += CameraMovementParameters.MOVE_AMOUNT
       Session.label3dList.onDrawableUpdate()
@@ -738,7 +741,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Move camera down */
   private moveDown(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       this._camera.position.z -= CameraMovementParameters.MOVE_AMOUNT
       this._target.z -= CameraMovementParameters.MOVE_AMOUNT
       Session.label3dList.onDrawableUpdate()
@@ -747,7 +750,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Move camera forward */
   private moveForward(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
         this._viewerConfig as PointCloudViewerConfigType
       )
@@ -760,7 +763,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Move camera backward */
   private moveBackward(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
         this._viewerConfig as PointCloudViewerConfigType
       )
@@ -773,7 +776,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Move camera left */
   private moveLeft(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
         this._viewerConfig as PointCloudViewerConfigType
       )
@@ -789,7 +792,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Move camera right */
   private moveRight(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
         this._viewerConfig as PointCloudViewerConfigType
       )

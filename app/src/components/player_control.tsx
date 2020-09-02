@@ -56,6 +56,10 @@ class PlayerControl extends Component<Props> {
   /** key down listener */
   private readonly _keyDownListener: (e: KeyboardEvent) => void
 
+  /**
+   * Constructor
+   * @param props
+   */
   public constructor(props: Readonly<Props>) {
     super(props)
     this.playing = false

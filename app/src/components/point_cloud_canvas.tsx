@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/core/styles"
+import { withStyles, StyleRules } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -15,7 +15,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 
-const styles = () =>
+const styles = (): StyleRules<"point_cloud_canvas", {}> =>
   createStyles({
     point_cloud_canvas: {
       position: "absolute",
@@ -178,7 +178,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       />
     )
 
-    if (this.display) {
+    if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       canvas = React.cloneElement(canvas, {
         height: displayRect.height,
@@ -197,7 +197,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    */
   public redraw(): boolean {
     const state = this.state
-    if (isCurrentItemLoaded(state) && this.canvas) {
+    if (isCurrentItemLoaded(state) && this.canvas !== null) {
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (isCurrentFrameLoaded(this.state, sensor)) {
         this.updateRenderer()
@@ -235,14 +235,14 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Render ThreeJS Scene
    */
   private renderThree(): void {
-    if (this.renderer && this.pointCloud.geometry) {
+    if (this.renderer !== undefined) {
       this.scene.children = []
       this.scene.add(this.pointCloud)
       this.scene.add(this.target)
 
       const selectionTransform = new THREE.Matrix4()
       const selectionSize = new THREE.Vector3()
-      if (Session.label3dList.selectedLabel) {
+      if (Session.label3dList.selectedLabel !== null) {
         const label = Session.label3dList.selectedLabel
         const selectionToWorld = new THREE.Matrix4()
         selectionToWorld.makeRotationFromQuaternion(label.orientation)
@@ -265,7 +265,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * @param {string} componentType
    */
   private initializeRefs(component: HTMLCanvasElement | null): void {
-    if (!component) {
+    if (component === null) {
       return
     }
 
@@ -277,7 +277,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         this.forceUpdate()
       }
 
-      if (this.display) {
+      if (this.display !== null) {
         this.canvas.removeAttribute("style")
         const displayRect = this.display.getBoundingClientRect()
         this.canvas.width = displayRect.width
@@ -294,7 +294,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    * Update rendering constants
    */
   private updateRenderer(): void {
-    if (this.canvas && this.renderer) {
+    if (this.canvas !== null && this.renderer !== undefined) {
       this.renderer.setSize(this.canvas.width, this.canvas.height)
     }
   }

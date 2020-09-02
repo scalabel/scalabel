@@ -97,11 +97,11 @@ class MultipleSelect extends Component<Props> {
   /**
    * MultipleSelect render function
    */
-  public render(): null | JSX.Element {
+  public render(): React.ReactNode {
     const { categories } = this.props
     const { classes } = this.props
     const { headerText } = this.props
-    if (!categories) {
+    if (categories === null) {
       return null
     } else {
       return this.renderCategory(categories, classes, headerText)

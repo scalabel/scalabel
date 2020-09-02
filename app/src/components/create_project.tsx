@@ -43,7 +43,11 @@ class Create extends React.Component<Props, State> {
    */
   private readonly mainContent: ReactNode
 
-  public constructor(props: Props) {
+  /**
+   * Constructor
+   * @param props
+   */
+  constructor(props: Props) {
     super(props)
     this.state = {
       reloadProjects: false
@@ -73,9 +77,11 @@ class Create extends React.Component<Props, State> {
    * renders the create page
    * @return component
    */
-  public render() {
+  public render(): React.ReactNode {
     return (
       <DividedPage
+        // TODO: need fix
+        // eslint-disable-next-line react/no-children-prop
         children={{
           headerContent: this.headerContent,
           sidebarContent: this.sidebarContent,

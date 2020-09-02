@@ -34,19 +34,11 @@ export interface Viewer2DProps extends ViewerProps {
  */
 export class Viewer2D extends DrawableViewer<Viewer2DProps> {
   /**
-   * Constructor
-   * @param {Object} props: react props
-   */
-  constructor(props: Viewer2DProps) {
-    super(props)
-  }
-
-  /**
    * Render function
    * @return {React.Fragment} React fragment
    */
   protected getDrawableComponents(): React.ReactElement[] {
-    if (this._container && this._viewerConfig) {
+    if (this._container !== null && this._viewerConfig !== undefined) {
       this._container.scrollTop = (this
         ._viewerConfig as ImageViewerConfigType).displayTop
       this._container.scrollLeft = (this
@@ -54,7 +46,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
     }
 
     const views: React.ReactElement[] = []
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       views.push(
         <ImageCanvas
           key={`imageCanvas${this.props.id}`}
@@ -79,12 +71,12 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * @return {React.Fragment} React fragment
    */
   protected getMenuComponents(): JSX.Element[] | [] {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== undefined) {
       const zoomInButton = (
         <IconButton
           key={`zoomIn2dButton${this.props.id}`}
           onClick={() => {
-            if (this._container) {
+            if (this._container !== null) {
               const rect = this._container.getBoundingClientRect()
               this.zoom(
                 SCROLL_ZOOM_RATIO,
@@ -101,7 +93,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
         <IconButton
           key={`zoomOut2dButton${this.props.id}`}
           onClick={() => {
-            if (this._container) {
+            if (this._container !== null) {
               const rect = this._container.getBoundingClientRect()
               this.zoom(
                 1 / SCROLL_ZOOM_RATIO,
@@ -145,7 +137,11 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
     const oldX = this._mX
     const oldY = this._mY
     super.onMouseMove(e)
-    if (this._mouseDown && this._container && this._viewerConfig) {
+    if (
+      this._mouseDown &&
+      this._container !== null &&
+      this._viewerConfig !== undefined
+    ) {
       if (this.isKeyDown(types.Key.META) || this.isKeyDown(types.Key.CONTROL)) {
         const dx = this._mX - oldX
         const dy = this._mY - oldY
@@ -179,7 +175,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    */
   protected onWheel(e: WheelEvent): void {
     e.preventDefault()
-    if (this._viewerConfig && this._container) {
+    if (this._viewerConfig !== undefined && this._container !== null) {
       if (this.isKeyDown(types.Key.META) || this.isKeyDown(types.Key.CONTROL)) {
         let zoomRatio = SCROLL_ZOOM_RATIO
         if (-e.deltaY < 0) {
@@ -205,7 +201,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       const iw = image.width * newScale
       const ih = image.height * newScale
 
-      if (this._container) {
+      if (this._container !== null) {
         const rect = this._container.getBoundingClientRect()
 
         let displayLeft = zoomRatio * (offset.x + config.displayLeft) - offset.x
@@ -214,19 +210,17 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
         // aspect ratio gives rise to blank regions. Expected behavior
         // is zooming to the center when the blank region exists,
         // or zooming to the cursor otherwise.
-        if (rect) {
-          if (rect.height / rect.width > ih / iw) {
-            // Zoomed height < that of the display area, blanks on top/bottom
-            if ((image.width * rect.height) / rect.width > ih) {
-              // Set offset to 0
-              displayTop = 0
-            }
-          } else {
-            // Zoomed width < that of the display area, blanks on sides
-            if ((image.height * rect.width) / rect.height > iw) {
-              // Set offset to 0
-              displayLeft = 0
-            }
+        if (rect.height / rect.width > ih / iw) {
+          // Zoomed height < that of the display area, blanks on top/bottom
+          if ((image.width * rect.height) / rect.width > ih) {
+            // Set offset to 0
+            displayTop = 0
+          }
+        } else {
+          // Zoomed width < that of the display area, blanks on sides
+          if ((image.height * rect.width) / rect.height > iw) {
+            // Set offset to 0
+            displayLeft = 0
           }
         }
         newConfig.displayLeft = displayLeft
