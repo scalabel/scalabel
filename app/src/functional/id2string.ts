@@ -12,6 +12,7 @@ import {
 
 /**
  * Convert the Ids in the task to string
+ *
  * @param task
  */
 export function taskIdToString(task: TaskType): TaskType {
@@ -23,6 +24,7 @@ export function taskIdToString(task: TaskType): TaskType {
 
 /**
  * Convert the Ids in the tracks to string
+ *
  * @param tracks
  */
 function tracksIdToString(tracks: TrackIdMap): TrackIdMap {
@@ -35,6 +37,7 @@ function tracksIdToString(tracks: TrackIdMap): TrackIdMap {
 
 /**
  * Convert the Ids in the track to string
+ *
  * @param track
  */
 function trackIdToString(track: TrackType): TrackType {
@@ -51,6 +54,7 @@ function trackIdToString(track: TrackType): TrackType {
 
 /**
  * Convert the Ids in the items to string
+ *
  * @param items
  */
 function itemsIdToString(items: ItemType[]): ItemType[] {
@@ -59,6 +63,7 @@ function itemsIdToString(items: ItemType[]): ItemType[] {
 
 /**
  * Convert the Ids in the item to string
+ *
  * @param item
  */
 function itemIdToString(item: ItemType): ItemType {
@@ -70,6 +75,7 @@ function itemIdToString(item: ItemType): ItemType {
 
 /**
  * Convert the Ids in the labels to string
+ *
  * @param labels
  */
 function labelsIdToString(labels: LabelIdMap): LabelIdMap {
@@ -82,6 +88,7 @@ function labelsIdToString(labels: LabelIdMap): LabelIdMap {
 
 /**
  * Convert the Ids in the label to string
+ *
  * @param label
  */
 function labelIdToString(label: LabelType): LabelType {
@@ -96,6 +103,8 @@ function labelIdToString(label: LabelType): LabelType {
 
 /**
  * Convert the Ids in the shapes to string
+ *
+ * @param shapes
  */
 function shapesIdToString(shapes: ShapeIdMap): ShapeIdMap {
   const newShapes: ShapeIdMap = {}
@@ -107,6 +116,7 @@ function shapesIdToString(shapes: ShapeIdMap): ShapeIdMap {
 
 /**
  * Convert the Ids in the shape to string
+ *
  * @param shape
  */
 function shapeIdToString(shape: ShapeType): ShapeType {

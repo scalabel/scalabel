@@ -6,11 +6,15 @@ import * as actions from "./common"
 
 /**
  * Create AddLabelAction to create a polygon2d label
+ *
  * @param itemIndex
+ * @param sensor
  * @param category
  * @param points list of the control points
  * @param types list of the type of the control points
- * @return {AddLabelAction}
+ * @param closed
+ * @param manual
+ * @returns {AddLabelAction}
  */
 export function addPolygon2dLabel(
   itemIndex: number,

@@ -72,6 +72,8 @@ describe("test export functionality for tracking", () => {
 
 /**
  * helper function to read sample state
+ *
+ * @param fileName
  */
 function readSampleState(fileName: string): State {
   return JSON.parse(fs.readFileSync(fileName, "utf8"))

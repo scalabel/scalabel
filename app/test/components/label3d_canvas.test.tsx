@@ -48,7 +48,11 @@ beforeEach(() => {
 
 afterEach(cleanup)
 
-/** Set up component for testing */
+/**
+ * Set up component for testing
+ *
+ * @param paneId
+ */
 function setUpLabel3dCanvas(paneId: number = 0): Label3dCanvas {
   const canvasRef: React.RefObject<Label3dCanvas> = React.createRef()
   Session.dispatch(
@@ -124,7 +128,12 @@ function setUpLabel3dCanvas(paneId: number = 0): Label3dCanvas {
   throw new Error("3D canvas ref did not initialize")
 }
 
-/** Create mouse down event */
+/**
+ * Create mouse down event
+ *
+ * @param x
+ * @param y
+ */
 function mouseEvent(x: number, y: number): React.MouseEvent<HTMLCanvasElement> {
   // TODO: check whether we can remove this type cast
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

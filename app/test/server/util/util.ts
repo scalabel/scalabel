@@ -20,8 +20,10 @@ import { AddLabelsAction } from "../../../src/types/action"
 
 /**
  * Check equality between two Vector3Type objects
+ *
  * @param v1
  * @param v2
+ * @param num
  */
 export function expectVector3TypesClose(
   v1: Vector3Type,
@@ -35,6 +37,10 @@ export function expectVector3TypesClose(
 
 /**
  * Check that rectangles are close
+ *
+ * @param r1
+ * @param r2
+ * @param num
  */
 export function expectRectTypesClose(
   r1: RectType,
@@ -49,16 +55,19 @@ export function expectRectTypesClose(
 
 /**
  * Spawn a temporary folder with the following project structure:
- *  'test-fs-data/myProject': {
- *     '.config': 'config contents',
- *    'project.json': 'project contents',
- *     'tasks': {
- *      '000000.json': '{"testField": "testValue"}',
- *       '000001.json': 'content1'
- *     }
- *   }
+ * 'test-fs-data/myProject': {
+ * '.config': 'config contents',
+ * 'project.json': 'project contents',
+ * 'tasks': {
+ * '000000.json': '{"testField": "testValue"}',
+ * '000001.json': 'content1'
+ * }
+ * }
  * This is necessary because mock-fs doesn't implement the withFileTypes
- *   option of fs.readDir correctly; and has flakiness issues
+ * option of fs.readDir correctly; and has flakiness issues
+ *
+ * @param dataDir
+ * @param projectName
  */
 export function makeProjectDir(dataDir: string, projectName: string): void {
   const projectDir = path.join(dataDir, StorageStructure.PROJECT, projectName)
@@ -74,6 +83,8 @@ export function makeProjectDir(dataDir: string, projectName: string): void {
 
 /**
  * The initial backend task represents the saved data
+ *
+ * @param sessionId
  */
 export function getInitialState(sessionId: string): State {
   const partialTask: Partial<TaskType> = {
@@ -91,6 +102,8 @@ export function getInitialState(sessionId: string): State {
 
 /**
  * Helper function to get box2d actions
+ *
+ * @param itemIndex
  */
 export function getRandomBox2dAction(itemIndex: number = 0): AddLabelsAction {
   return addBox2dLabel(

@@ -323,8 +323,8 @@ test("2d polygons delete vertex and draw bezier curve", () => {
   keyUp(label2d, "c")
   /**
    * polygon: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 110) (330, 120) <bezier curve control points>]
-   *          (320, 130)
+   * [ (340, 110) (330, 120) <bezier curve control points>]
+   * (320, 130)
    */
 
   state = Session.getState()
@@ -340,8 +340,8 @@ test("2d polygons delete vertex and draw bezier curve", () => {
   mouseUp(label2d, 340, 90)
   /**
    * polygon: (250, 100) (300, 0) (350, 100)
-   *          [ (340, 90) (330, 120) <bezier curve control points>]
-   *          (320, 130)
+   * [ (340, 90) (330, 120) <bezier curve control points>]
+   * (320, 130)
    */
 
   state = Session.getState()

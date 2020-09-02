@@ -6,6 +6,8 @@ import { Attribute, LabelType, TaskType } from "../types/state"
 
 /**
  * Extract ProjectOption from a Project
+ *
+ * @param project
  */
 export function getProjectOptions(project: Project): ProjectOptions {
   return {
@@ -21,6 +23,8 @@ export function getProjectOptions(project: Project): ProjectOptions {
 
 /**
  * Returns the total number of labels in the task
+ *
+ * @param task
  */
 export function countLabelsTask(task: TaskType): number {
   const numPerItem = task.items.map((item) => _.size(item.labels))
@@ -29,6 +33,8 @@ export function countLabelsTask(task: TaskType): number {
 
 /**
  * Returns the number of items with at least 1 label in the task
+ *
+ * @param task
  */
 export function countLabeledItemsTask(task: TaskType): number {
   const labeledItems = task.items.filter((item) => _.size(item.labels) > 0)
@@ -37,6 +43,8 @@ export function countLabeledItemsTask(task: TaskType): number {
 
 /**
  * Returns the total number of labels in the project
+ *
+ * @param tasks
  */
 export function countLabelsProject(tasks: TaskType[]): number {
   return _.sum(tasks.map(countLabelsTask))
@@ -44,6 +52,8 @@ export function countLabelsProject(tasks: TaskType[]): number {
 
 /**
  * Returns the number of items with at least 1 label in the project
+ *
+ * @param tasks
  */
 export function countLabeledItemsProject(tasks: TaskType[]): number {
   return _.sum(tasks.map(countLabeledItemsTask))
@@ -51,6 +61,8 @@ export function countLabeledItemsProject(tasks: TaskType[]): number {
 
 /**
  * Extracts TaskOptions from a Task
+ *
+ * @param task
  */
 export function getTaskOptions(task: TaskType): TaskOptions {
   const numLabeledItems = countLabeledItemsTask(task)
@@ -65,6 +77,8 @@ export function getTaskOptions(task: TaskType): TaskOptions {
 
 /**
  * Get the total number of items across all tasks
+ *
+ * @param tasks
  */
 export function getNumItems(tasks: TaskType[]): number {
   const itemsPerTask = tasks.map((task) => task.items.length)
@@ -73,6 +87,8 @@ export function getNumItems(tasks: TaskType[]): number {
 
 /**
  * Get the number of tasks with a submission
+ *
+ * @param tasks
  */
 export function getNumSubmissions(tasks: TaskType[]): number {
   const submittedTasks = tasks.filter(
@@ -83,6 +99,7 @@ export function getNumSubmissions(tasks: TaskType[]): number {
 
 /**
  * Initialize the label counts for each attribute to 0
+ *
  * @param attributes list of possible attributes
  * @returns map of attribute counts initialized to 0
  */
@@ -104,9 +121,10 @@ function initAttributeStats(attributes: Attribute[]): AttributeStats {
 
 /**
  * Initialize category stats
+ *
  * @param categories list of possible categories
  * @param attributes list of possible attributes
- * @return map of category and attribute counts initialized to 0
+ * @returns map of category and attribute counts initialized to 0
  */
 function initCategoryStats(
   categories: string[],
@@ -123,6 +141,9 @@ function initCategoryStats(
 
 /**
  * Get the value of an attribute given the index in the value list
+ *
+ * @param attribute
+ * @param index
  */
 function getAttributeValue(attribute: Attribute, index: number): string {
   if (attribute.toolType === AttributeToolType.SWITCH) {
@@ -134,6 +155,10 @@ function getAttributeValue(attribute: Attribute, index: number): string {
 /**
  * Updates the attribute stats with given label
  * Modifies the stats in place
+ *
+ * @param stats
+ * @param label
+ * @param attributes
  */
 function updateAttributeStats(
   stats: AttributeStats,
@@ -159,6 +184,7 @@ function updateAttributeStats(
 
 /**
  * Update the category stats with the given label
+ *
  * @param stats the stats so far
  * @param label the new label
  * @param categories the list of possible categories
@@ -182,6 +208,8 @@ function updateCategoryStats(
 
 /**
  * Get the stats breakdown for all labels
+ *
+ * @param tasks
  */
 export function getLabelStats(tasks: TaskType[]): LabelStats {
   if (tasks.length === 0) {
@@ -257,6 +285,8 @@ interface ProjectStats {
 }
 /**
  * Get the stats for a collection of tasks from a project
+ *
+ * @param tasks
  */
 export function getProjectStats(tasks: TaskType[]): ProjectStats {
   return {

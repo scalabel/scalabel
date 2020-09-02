@@ -47,6 +47,7 @@ export async function readConfig(): Promise<ServerConfig> {
 
 /**
  * Load and parse the config file
+ *
  * @param configPath
  */
 export function parseConfig(configPath: string): ServerConfig {
@@ -93,6 +94,7 @@ export function parseConfig(configPath: string): ServerConfig {
 
 /**
  * Validate cognito config
+ *
  * @param cognito
  */
 function validateCognitoConfig(cognito: CognitoConfig | undefined): void {

@@ -22,12 +22,16 @@ import {
 
 /**
  * Converts single exported item to frontend state format
+ *
  * @param item the item in export format
+ * @param videoName
+ * @param timestamp
  * @param itemIndex the item index (relative to task)
  * @param itemId the item id (relative to project)
  * @param attributesNameMap look up an attribute and its index from its name
  * @param attributeValueMap look up an attribute value's index
  * @param categoryNameMap look up a category's index from its name
+ * @param tracking
  */
 export function convertItemToImport(
   videoName: string,
@@ -105,6 +109,7 @@ export function convertItemToImport(
 /**
  * parses attributes from BDD format (strings)
  * to internal format (index in config's attributes)
+ *
  * @param attributesExport the attributes to process
  * @param attributesNameMap look up an attribute and its index from its name
  * @param attributeValueMap look up an attribute value's index
@@ -152,8 +157,13 @@ function parseExportAttributes(
 /**
  * based on the label in export format, create a label in internal format
  * and update the corresponding shapes in the map
+ *
  * @param label the label in export format
  * @param shapesImport map to update, from shapeId to shape
+ * @param labelExport
+ * @param item
+ * @param sensorId
+ * @param category
  */
 function convertLabelToImport(
   labelExport: LabelExport,

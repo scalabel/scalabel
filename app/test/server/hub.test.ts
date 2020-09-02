@@ -273,6 +273,8 @@ describe("Test hub functionality", () => {
 
 /**
  * Convert action packet to sync message
+ *
+ * @param packet
  */
 function packetToMessage(packet: ActionPacketType): SyncActionMessageType {
   return {

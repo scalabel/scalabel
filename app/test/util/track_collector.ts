@@ -11,6 +11,7 @@ export class TrackCollector extends Array<IdType> {
 
   /**
    * Constructor
+   *
    * @param getState
    */
   constructor(getState: GetStateFunc) {

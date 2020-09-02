@@ -35,6 +35,8 @@ import * as util from "./util"
 /**
  * convert fields to form and validate input
  * if invalid input is found, error is returned to user via alert
+ *
+ * @param projectStore
  */
 export async function parseForm(
   fields: { [key: string]: string },
@@ -98,6 +100,10 @@ type Categories = Array<{
 
 /**
  * Parses item, category, and attribute files from paths
+ *
+ * @param storage
+ * @param labelType
+ * @param itemsRequired
  */
 export async function parseFiles(
   storage: Storage,
@@ -167,6 +173,10 @@ export async function parseFiles(
  * Read the config file, for example items or attributes
  * Can be in json or yaml format
  * If the path is undefined or empty, use the default
+ *
+ * @param storage
+ * @param filePath
+ * @param defaultValue
  */
 export async function readConfig<T>(
   storage: Storage,
@@ -188,6 +198,8 @@ export async function readConfig<T>(
 
 /**
  * Get default categories if they weren't provided
+ *
+ * @param labelType
  */
 function getDefaultCategories(labelType: string): Categories {
   switch (labelType) {
@@ -204,6 +216,8 @@ function getDefaultCategories(labelType: string): Categories {
 
 /**
  * Get default attributes if they weren't provided
+ *
+ * @param labelType
  */
 function getDefaultAttributes(labelType: string): Attribute[] {
   switch (labelType) {
@@ -216,6 +230,9 @@ function getDefaultAttributes(labelType: string): Attribute[] {
 
 /**
  * Load from items file, grouped by video name
+ *
+ * @param storage
+ * @param itemsRequired
  */
 export async function parseItems(
   storage: Storage,
@@ -235,6 +252,9 @@ export async function parseItems(
 
 /**
  * Marshal data into project format
+ *
+ * @param form
+ * @param formFileData
  */
 export async function createProject(
   form: CreationForm,
@@ -301,6 +321,7 @@ export async function createProject(
 
 /**
  * Create two maps for quick lookup of attribute data
+ *
  * @param configAttributes the attributes from config file
  * first RV: map from attribute name to attribute and its index
  * second RV: map from attribute value to its index within that attribute
@@ -328,6 +349,7 @@ function getAttributeMaps(
 
 /**
  * Create a map for quick lookup of category data
+ *
  * @param configCategories the categories from config file
  * returns a map from category value to its index
  */
@@ -344,6 +366,9 @@ function getCategoryMap(configCategories: string[]): { [key: string]: number } {
 /**
  * Filter invalid items, condition depends on whether labeling fusion data
  * Items are in export format
+ *
+ * @param items
+ * @param itemType
  */
 function filterInvalidItems(
   items: Array<Partial<ItemExport>>,
@@ -369,6 +394,10 @@ function filterInvalidItems(
 /**
  * Partitions the item into tasks
  * Returns list of task indices in format [start, stop) for every task
+ *
+ * @param items
+ * @param tracking
+ * @param taskSize
  */
 function partitionItemsIntoTasks(
   items: Array<Partial<ItemExport>>,
@@ -399,6 +428,8 @@ function partitionItemsIntoTasks(
 
 /**
  * Map from data source id to list of items
+ *
+ * @param items
  */
 function mapSensorToItems(
   items: Array<Partial<ItemExport>>
@@ -420,6 +451,10 @@ function mapSensorToItems(
  * Split project into tasks
  * Each consists of the task portion of a front  end state
  * Task and item start number are used if other tasks/items already exist
+ *
+ * @param project
+ * @param taskStartNum
+ * @param itemStartNum
  */
 export async function createTasks(
   project: Project,

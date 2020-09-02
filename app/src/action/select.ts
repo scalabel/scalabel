@@ -8,9 +8,11 @@ import { deleteTracks, terminateTracks } from "./track"
 
 /**
  * Delete given label
+ *
  * @param {number} itemIndex
  * @param {number} labelId
- * @return {DeleteLabelAction}
+ * @param state
+ * @returns {DeleteLabelAction}
  */
 export function deleteSelectedLabels(
   state: State
@@ -28,6 +30,8 @@ export function deleteSelectedLabels(
 
 /**
  * Delete tracks corresponding to selected labels
+ *
+ * @param state
  */
 export function deleteSelectedTracks(
   state: State
@@ -48,6 +52,9 @@ export function deleteSelectedTracks(
 
 /**
  * Terminate tracks corresponding to selected labels
+ *
+ * @param state
+ * @param stopIndex
  */
 export function terminateSelectedTracks(
   state: State,
@@ -69,10 +76,12 @@ export function terminateSelectedTracks(
 
 /**
  * Change the properties of the label
+ *
  * @param {number} itemIndex
  * @param {number} labelId
- * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
+ * @param {Partial<LabelType>} props
+ * @param state
+ * @returns {ChangeLabelPropsAction}
  */
 export function changeSelectedLabelsAttributes(
   state: State,
@@ -117,10 +126,13 @@ export function changeSelectedLabelsAttributes(
 
 /**
  * Change the properties of the label
+ *
  * @param {number} itemIndex
  * @param {number} labelId
- * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
+ * @param {Partial<LabelType>} props
+ * @param state
+ * @param category
+ * @returns {ChangeLabelPropsAction}
  */
 export function changeSelectedLabelsCategories(
   state: State,
@@ -161,7 +173,11 @@ export function changeSelectedLabelsCategories(
 
 /**
  * Select label by ID
+ *
+ * @param itemIndex
  * @param {number} labelId
+ * @param category
+ * @param append
  */
 export function selectLabel(
   currentSelection: { [index: number]: IdType[] },
@@ -183,6 +199,7 @@ export function selectLabel(
 
 /**
  * Select label by ID
+ *
  * @param currentSelection
  * @param itemIndex
  * @param labelIds
@@ -229,9 +246,11 @@ export function selectLabels(
 
 /**
  * Unselect label
+ *
  * @param currentSelection
  * @param itemIndex
  * @param labelId
+ * @param labelIds
  */
 export function unselectLabels(
   currentSelection: { [index: number]: IdType[] },
@@ -248,7 +267,11 @@ export function unselectLabels(
   return changeSelect({ labels: selectedLabels })
 }
 
-/** Change selected label and policy types */
+/**
+ * Change selected label and policy types
+ *
+ * @param labelTypeName
+ */
 export function selectLabel3dType(
   labelTypeName: LabelTypeName
 ): actionTypes.ChangeSelectAction {

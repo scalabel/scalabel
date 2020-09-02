@@ -33,6 +33,7 @@ export class Hub {
 
   /**
    * Constructor
+   *
    * @param config
    * @param projectStore
    * @param userManager
@@ -54,6 +55,8 @@ export class Hub {
 
   /**
    * Listens for websocket connections
+   *
+   * @param io
    */
   public async listen(io: socketio.Server): Promise<void> {
     io.on(EventName.CONNECTION, this.registerNewSocket.bind(this))
@@ -61,6 +64,8 @@ export class Hub {
 
   /**
    * Registers new socket's listeners
+   *
+   * @param socket
    */
   public registerNewSocket(socket: SocketServer): void {
     socket.on(EventName.REGISTER, async (data: RegisterMessageType) => {
@@ -86,6 +91,9 @@ export class Hub {
 
   /**
    * Load the correct state and subscribe to redis
+   *
+   * @param data
+   * @param socket
    */
   public async register(
     data: RegisterMessageType,
@@ -113,6 +121,9 @@ export class Hub {
 
   /**
    * Updates the state with the action, and broadcasts action
+   *
+   * @param data
+   * @param socket
    */
   public async actionUpdate(
     data: SyncActionMessageType,

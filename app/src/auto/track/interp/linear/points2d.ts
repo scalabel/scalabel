@@ -12,6 +12,8 @@ import { assignShapesInRange, getAutoLabelRange, TrackInterp } from "../interp"
 /**
  * Linearly interpolate the rectangles from the first to the last in
  * the shape array.
+ *
+ * @param labels
  * @param shapes
  */
 function linearInterpPoints(
@@ -58,6 +60,7 @@ function linearInterpPoints(
 /**
  * Linearly interpolate the path points in [start, end]
  * The results will be put in [start, end] of allShapes
+ *
  * @param start
  * @param end
  * @param allLabels
@@ -85,10 +88,13 @@ function linearInterpPointsInRange(
 export class Points2DLinearInterp extends TrackInterp {
   /**
    * Main method for interpolation. It assumes allLabels is sorted by itemIndex
+   *
    * @param newLabel
    * @param newShape
    * @param labels
    * @param shapes
+   * @param allLabels
+   * @param allShapes
    */
   public interp(
     newLabel: LabelType,

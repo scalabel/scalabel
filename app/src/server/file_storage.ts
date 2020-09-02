@@ -11,6 +11,8 @@ import { Storage } from "./storage"
 export class FileStorage extends Storage {
   /**
    * Constructor
+   *
+   * @param dataDir
    */
   constructor(dataDir: string) {
     super(dataDir)
@@ -24,7 +26,9 @@ export class FileStorage extends Storage {
 
   /**
    * Check if specified file exists
+   *
    * @param {string} key: relative path of file
+   * @param key
    */
   public async hasKey(key: string): Promise<boolean> {
     return await fs.pathExists(this.fullFile(key))
@@ -32,8 +36,11 @@ export class FileStorage extends Storage {
 
   /**
    * Lists keys of files at directory specified by prefix
+   *
    * @param {string} prefix: relative path of directory
    * @param {boolean} onlyDir: whether to only return keys that are directories
+   * @param prefix
+   * @param onlyDir
    */
   public async listKeys(
     prefix: string,
@@ -61,8 +68,11 @@ export class FileStorage extends Storage {
 
   /**
    * Saves json to at location specified by key
+   *
    * @param {string} key: relative path of file
    * @param {string} json: data to save
+   * @param key
+   * @param json
    */
   public async save(key: string, json: string): Promise<void> {
     // TODO: Make sure undefined is the right dir options
@@ -79,7 +89,9 @@ export class FileStorage extends Storage {
 
   /**
    * Loads fields stored at a key
+   *
    * @param {string} key: relative path of file
+   * @param key
    */
   public async load(key: string): Promise<string> {
     return (await fs.readFile(this.fullFile(key))).toString()
@@ -87,7 +99,9 @@ export class FileStorage extends Storage {
 
   /**
    * Deletes values at the key
+   *
    * @param {string} key: relative path of directory
+   * @param key
    */
   public async delete(key: string): Promise<void> {
     const fullDir = this.fullDir(key)
@@ -100,6 +114,7 @@ export class FileStorage extends Storage {
 
   /**
    * make an empty folder object on s3
+   *
    * @param key
    */
   public async mkdir(key: string): Promise<void> {

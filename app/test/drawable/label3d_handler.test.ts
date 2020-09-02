@@ -25,6 +25,7 @@ import { findNewLabelsFromState } from "../util/state"
 
 /**
  * Get active axis given camLoc and axis
+ *
  * @param camLoc
  * @param axis
  */
@@ -53,6 +54,7 @@ function getActiveAxis(camLoc: number, axis: number): number {
 
 /**
  * Get active axis for rotation given camLoc and axis
+ *
  * @param camLoc
  * @param axis
  */
@@ -81,6 +83,8 @@ function getActiveAxisForRotation(camLoc: number, axis: number): number {
 
 /**
  * Initialize Session, label 3d list, label 3d handler
+ *
+ * @param camera
  */
 function initializeTestingObjects(
   camera: THREE.Camera

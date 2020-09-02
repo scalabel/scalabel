@@ -3,6 +3,7 @@ import { Vector } from "./vector"
 /** 2D vector */
 export class Vector2D extends Vector {
   /**
+   * Constructor
    *
    * @param x
    * @param y

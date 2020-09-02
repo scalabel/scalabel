@@ -21,6 +21,7 @@ export class BotManager {
   protected pollTime: number
 
   /**
+   * Constructor
    *
    * @param config
    * @param subscriber
@@ -68,6 +69,9 @@ export class BotManager {
 
   /**
    * Handles registration of new web sessions
+   *
+   * @param _channel
+   * @param message
    */
   public async handleRegister(
     _channel: string,
@@ -93,6 +97,8 @@ export class BotManager {
 
   /**
    * Check if a bot for the given task has already been registered
+   *
+   * @param botData
    */
   public async checkBotExists(botData: BotData): Promise<boolean> {
     const key = getRedisBotKey(botData)
@@ -101,6 +107,8 @@ export class BotManager {
 
   /**
    * Get the data for a bot that has been registered
+   *
+   * @param key
    */
   public async getBot(key: string): Promise<BotData> {
     const data = await this.redisClient.get(key)
@@ -112,6 +120,8 @@ export class BotManager {
 
   /**
    * Delete the bot, marking it as unregistered
+   *
+   * @param botData
    */
   public async deleteBot(botData: BotData): Promise<void> {
     const key = getRedisBotKey(botData)
@@ -121,6 +131,8 @@ export class BotManager {
 
   /**
    * Check if bot data corresponds to a real bot
+   *
+   * @param botData
    */
   public checkBotCreated(botData: BotData): boolean {
     return botData.botId !== ""
@@ -128,6 +140,8 @@ export class BotManager {
 
   /**
    * Save the data for a bot, marking it as registered
+   *
+   * @param botData
    */
   private async saveBot(botData: BotData): Promise<void> {
     const key = getRedisBotKey(botData)
@@ -138,6 +152,8 @@ export class BotManager {
 
   /**
    * Create a new bot user
+   *
+   * @param botData
    */
   private makeBot(botData: BotData): Bot {
     Logger.info(
@@ -155,6 +171,9 @@ export class BotManager {
 
   /**
    * Kill the bot if no activity since time of last poll
+   *
+   * @param bot
+   * @param pollId
    */
   private async monitorActivity(
     bot: Bot,

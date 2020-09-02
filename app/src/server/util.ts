@@ -20,8 +20,11 @@ import { Storage } from "./storage"
 
 /**
  * Initialize storage
+ *
  * @param {string} database: type of storage
  * @param {string} dir: directory name to save at
+ * @param database
+ * @param dir
  */
 export async function makeStorage(
   database: string,
@@ -68,6 +71,14 @@ export async function makeStorage(
 /**
  * Builds creation form
  * With empty arguments, default is created
+ *
+ * @param projectName
+ * @param itemType
+ * @param labelType
+ * @param pageTitle
+ * @param taskSize
+ * @param instructionUrl
+ * @param demoMode
  */
 export function makeCreationForm(
   projectName = "",
@@ -93,6 +104,8 @@ export function makeCreationForm(
 /**
  * Initialize new session id if its a new load
  * If its a reconnection, keep the old session id
+ *
+ * @param sessionId
  */
 export function initSessionId(sessionId: string = ""): string {
   return sessionId !== "" ? sessionId : uid()
@@ -100,6 +113,9 @@ export function initSessionId(sessionId: string = ""): string {
 
 /**
  * Gets the handler url for the project
+ *
+ * @param itemType
+ * @param labelType
  */
 export function getHandlerUrl(itemType: string, labelType: string): string {
   switch (itemType) {
@@ -132,6 +148,8 @@ export function getHandlerUrl(itemType: string, labelType: string): string {
 
 /**
  * Get the bundle file for the project
+ *
+ * @param labelType
  */
 export function getBundleFile(labelType: string): string {
   // Depends on redux progress
@@ -144,6 +162,10 @@ export function getBundleFile(labelType: string): string {
 
 /**
  * Chooses the policy type and label types based on item and label types
+ *
+ * @param itemType
+ * @param labelTypes
+ * @param policyTypes
  */
 export function getPolicy(
   itemType: string,
@@ -185,6 +207,8 @@ export function getPolicy(
 
 /**
  * Loads JSON and logs error if invalid
+ *
+ * @param data
  */
 export function safeParseJSON(data: string): unknown {
   try {
@@ -198,6 +222,9 @@ export function safeParseJSON(data: string): unknown {
 
 /**
  * Updates a state with a series of timestamped actions
+ *
+ * @param state
+ * @param actions
  */
 export function updateStateTimestamp(
   state: State,
@@ -219,6 +246,9 @@ export function updateStateTimestamp(
 
 /**
  * Updates a state with a series of actions
+ *
+ * @param state
+ * @param actions
  */
 export function updateState(state: State, actions: BaseAction[]): State {
   const stateStore = configureStore(state)
@@ -233,6 +263,8 @@ export function updateState(state: State, actions: BaseAction[]): State {
 
 /**
  * Builds empty user data except for project name
+ *
+ * @param projectName
  */
 export function makeUserData(projectName: string): UserData {
   return {
@@ -253,6 +285,8 @@ export function makeUserMetadata(): UserMetadata {
 
 /**
  * Get item timestamp, or 0 if undefined
+ *
+ * @param item
  */
 export function getItemTimestamp(item: Partial<ItemExport>): number {
   const timestamp = item.timestamp
@@ -265,6 +299,8 @@ export function getItemTimestamp(item: Partial<ItemExport>): number {
 
 /**
  * Parse the project name into internal format
+ *
+ * @param projectName
  */
 export function parseProjectName(projectName: string): string {
   return projectName.replace(" ", "_")
@@ -272,6 +308,9 @@ export function parseProjectName(projectName: string): string {
 
 /**
  * Get connection failed error message for http request to python
+ *
+ * @param endpoint
+ * @param message
  */
 export function getPyConnFailedMsg(endpoint: string, message: string): string {
   return `Make sure endpoint is correct and python server is running; query to "${endpoint}" failed with message: ${message}`
@@ -279,6 +318,7 @@ export function getPyConnFailedMsg(endpoint: string, message: string): string {
 
 /**
  * helper function to force javascript to sleep
+ *
  * @param milliseconds
  */
 export async function sleep(milliseconds: number): Promise<object> {

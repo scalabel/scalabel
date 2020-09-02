@@ -7,6 +7,8 @@ import { DeepPartialState } from "../../src/types/state"
 
 /**
  * Reset the session for testing
+ *
+ * @param state
  */
 export function setupTestStore(state: DeepPartialState): void {
   Session.store = configureStore({})
@@ -15,6 +17,9 @@ export function setupTestStore(state: DeepPartialState): void {
 
 /**
  * Reset the session for testing, and add sync middleware
+ *
+ * @param state
+ * @param synchronizer
  */
 export function setupTestStoreWithMiddleware(
   state: DeepPartialState,

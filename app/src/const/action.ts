@@ -55,6 +55,8 @@ const TASK_ACTION_TYPES = [
 
 /**
  * Checks if the action modifies task
+ *
+ * @param action
  */
 export function isTaskAction(action: actionConsts): boolean {
   return TASK_ACTION_TYPES.includes(action.type)
@@ -74,6 +76,8 @@ const SYNC_ACTION_TYPES = [
 
 /**
  * Checks if the action should be intercepted by the sync middleware
+ *
+ * @param action
  */
 export function isSyncAction(action: actionConsts): boolean {
   return SYNC_ACTION_TYPES.includes(action.type)
@@ -81,6 +85,8 @@ export function isSyncAction(action: actionConsts): boolean {
 
 /**
  * Checks if the action list contains a submit action
+ *
+ * @param actions
  */
 export function hasSubmitAction(actions: actionConsts[]): boolean {
   for (const action of actions) {
@@ -98,6 +104,8 @@ const SESSION_ACTION_TYPES = [UPDATE_SESSION_STATUS, CHANGE_SELECT]
 
 /**
  * Checks if the action modifies session
+ *
+ * @param action
  */
 export function isSessionAction(action: actionConsts): boolean {
   return SESSION_ACTION_TYPES.includes(action.type)
