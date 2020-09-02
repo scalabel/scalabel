@@ -11,7 +11,7 @@ function StyledButtonRaw(
     Omit<ButtonProps, keyof StyledButtonProps> &
     StyledButtonProps
 ): JSX.Element {
-  const { classes, background, ...other } = props
+  const { classes, ...other } = props
   return <Button className={classes.root} {...other} />
 }
 
