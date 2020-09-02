@@ -481,7 +481,7 @@ export function toggleRotation(
 ): actionTypes.ChangeViewerConfigAction {
   // Spread the original config
   const config = { ...viewerConfig }
-  if (viewerConfig.cameraRotateDir) {
+  if (viewerConfig.cameraRotateDir !== undefined) {
     config.cameraRotateDir = false
   } else {
     config.cameraRotateDir = true

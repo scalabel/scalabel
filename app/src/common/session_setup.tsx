@@ -90,9 +90,7 @@ export function updateTracks(state: State): void {
       newTracks[trackId] = Session.tracks[trackId]
     } else {
       const newTrack = new Track()
-      if (newTrack) {
-        newTracks[trackId] = newTrack
-      }
+      newTracks[trackId] = newTrack
     }
     if (trackId in newTracks) {
       newTracks[trackId].updateState(state, trackId)
@@ -203,7 +201,7 @@ function initViewerConfigs(
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const sensorIds = Object.keys(state.task.sensors)
       .map((key) => Number(key))
-      .sort()
+      .sort((a, b) => a - b)
     const id0 = sensorIds[0]
     const sensor0 = state.task.sensors[id0]
     const config0 = makeDefaultViewerConfig(
@@ -211,7 +209,7 @@ function initViewerConfigs(
       0,
       id0
     )
-    if (config0) {
+    if (config0 !== null) {
       dispatch(addViewerConfig(0, config0))
     }
 

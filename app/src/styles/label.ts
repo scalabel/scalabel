@@ -1,6 +1,9 @@
 import { blue, grey } from "@material-ui/core/colors"
 import { createStyles, StyleRules } from "@material-ui/core/styles"
 
+/**
+ * Category style
+ */
 export const categoryStyle = (): StyleRules<
   "root" | "button" | "formControl" | "primary",
   {}
@@ -27,6 +30,9 @@ export const categoryStyle = (): StyleRules<
     }
   })
 
+/**
+ * Switch style
+ */
 export const switchStyle = (): StyleRules<
   "root" | "primary" | "switchBase" | "checked" | "track",
   {}
@@ -78,6 +84,9 @@ export const styledButtonStyle = createStyles({
   }
 })
 
+/**
+ * Toggle button style
+ */
 export const toggleButtonStyle = (): StyleRules<"root" | "label"> =>
   createStyles({
     root: {
@@ -93,6 +102,9 @@ export const toggleButtonStyle = (): StyleRules<"root" | "label"> =>
     }
   })
 
+/**
+ * List button style
+ */
 export const listButtonStyle = (): StyleRules<
   "root" | "toggleContainer" | "buttonGroup" | "primary" | "toggleButton",
   {}
@@ -122,6 +134,9 @@ export const listButtonStyle = (): StyleRules<
     }
   })
 
+/**
+ * Label2d View style
+ */
 export const label2dViewStyle = (): StyleRules<
   "label2d_canvas" | "control_canvas" | "hair",
   {}
@@ -148,6 +163,9 @@ export const label2dViewStyle = (): StyleRules<
     }
   })
 
+/**
+ * Image view style
+ */
 export const imageViewStyle = (): StyleRules<"image_canvas", {}> =>
   createStyles({
     image_canvas: {
@@ -156,6 +174,9 @@ export const imageViewStyle = (): StyleRules<"image_canvas", {}> =>
     }
   })
 
+/**
+ * Player control style
+ */
 export const playerControlStyles = (): StyleRules<
   "button" | "underline" | "playerControl" | "input" | "slider",
   {}

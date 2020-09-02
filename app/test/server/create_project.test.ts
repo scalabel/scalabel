@@ -73,9 +73,8 @@ describe("test project.json creation", () => {
 
 describe("test task.json creation", () => {
   test("task non-tracking creation", async () => {
-    return await createTasks(sampleProjectImage).then((tasks) => {
-      expect(tasks).toEqual(sampleTasksImage)
-    })
+    const tasks = await createTasks(sampleProjectImage)
+    expect(tasks).toEqual(sampleTasksImage)
   })
 
   // TODO: Rewrite the track creation testing

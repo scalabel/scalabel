@@ -13,6 +13,11 @@ export class RedisClient {
   /** The redis client for pub/sub of events */
   protected pubSub: redis.RedisClient
 
+  /**
+   * Constructor
+   * @param config
+   * @param withLogging
+   */
   constructor(config: RedisConfig, withLogging = false) {
     this.client = redis.createClient(config.port)
     this.pubSub = redis.createClient(config.port)

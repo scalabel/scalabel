@@ -6,6 +6,9 @@ type ClassKey =
   | "camera_y_lock_icon"
   | "camera_x_lock_icon"
 
+/**
+ * Image viewer style
+ */
 export const viewerStyles = (): StyleRules<ClassKey, {}> =>
   createStyles({
     viewer_container: {

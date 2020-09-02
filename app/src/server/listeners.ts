@@ -34,6 +34,11 @@ export class Listeners {
   /** the user manager */
   protected userManager: UserManager
 
+  /**
+   * Constructor
+   * @param projectStore
+   * @param userManager
+   */
   constructor(projectStore: ProjectStore, userManager: UserManager) {
     this.projectStore = projectStore
     this.userManager = userManager

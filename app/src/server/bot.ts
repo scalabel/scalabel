@@ -52,6 +52,12 @@ export class Bot {
   /** Number of actions received via broadcast */
   private actionCount: number
 
+  /**
+   *
+   * @param botData
+   * @param botHost
+   * @param botPort
+   */
   constructor(botData: BotData, botHost: string, botPort: number) {
     this.projectName = botData.projectName
     this.taskIndex = botData.taskIndex
@@ -192,7 +198,6 @@ export class Bot {
   /**
    * Sets action counts to 0 for the bot
    */
-
   public resetActionCount(): void {
     this.actionCount = 0
   }

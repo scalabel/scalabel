@@ -40,7 +40,7 @@ function linearInterpPoints(
   for (let i = 1; i < newShapes.length - 1; i += 1) {
     let shape = newShapes[i]
     if (shape.length !== first.length) {
-      shape = first.map((_s) => makePathPoint2D())
+      shape = first.map(() => makePathPoint2D())
     } else {
       shape = _.cloneDeep(shape)
     }

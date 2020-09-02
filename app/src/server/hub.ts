@@ -31,6 +31,13 @@ export class Hub {
   /** the redis message broker */
   protected publisher: RedisPubSub
 
+  /**
+   * Constructor
+   * @param config
+   * @param projectStore
+   * @param userManager
+   * @param publisher
+   */
   constructor(
     config: ServerConfig,
     projectStore: ProjectStore,

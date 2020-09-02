@@ -19,6 +19,11 @@ export class ModelInterface {
   /** current session id */
   public sessionId: string
 
+  /**
+   * Constructor
+   * @param projectName
+   * @param sessionId
+   */
   constructor(projectName: string, sessionId: string) {
     this.projectName = projectName
     this.sessionId = sessionId

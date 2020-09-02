@@ -83,6 +83,14 @@ export class Synchronizer {
   /** Name of the DOM container */
   private readonly containerName: string
 
+  /**
+   * Constructor
+   * @param socket
+   * @param taskIndex
+   * @param projectName
+   * @param userId
+   * @param containerName
+   */
   constructor(
     socket: SocketClient,
     taskIndex: number,
@@ -119,7 +127,8 @@ export class Synchronizer {
     const shouldBeSaved = (a: actionTypes.BaseAction): boolean => {
       return (
         sessionId === a.sessionId &&
-        !a.frontendOnly &&
+        ((a.frontendOnly !== undefined && !a.frontendOnly) ||
+          a.frontendOnly === undefined) &&
         !actionConsts.isSessionAction(a)
       )
     }

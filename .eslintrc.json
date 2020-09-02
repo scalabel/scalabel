@@ -8,12 +8,24 @@
     "prettier/react",
     "prettier/standard"
   ],
-  "plugins": ["@typescript-eslint", "react", "standard"],
+  "plugins": ["@typescript-eslint", "jsdoc", "react", "standard"],
   "parserOptions": {
     "project": "./tsconfig.json"
   },
   "rules": {
     "spaced-comment": ["error", "always"],
+    "require-jsdoc": [
+      "error",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": true
+        }
+      }
+    ],
     "prettier/prettier": "error",
     "@typescript-eslint/no-unused-vars": [
       "error",

@@ -83,7 +83,7 @@ export function changeSelectedLabelsAttributes(
   let duplicatedAttributes = []
   // Tracking: propagate attributes to the end
   const selectedItem = state.task.items[select.item]
-  if (selectedItem.labels[labelIds[0][0]].track) {
+  if (selectedItem.labels[labelIds[0][0]].track !== "") {
     const labelsInTracks: { [key: number]: string[] } = {}
     for (const labelId of labelIds[0]) {
       const track = state.task.tracks[selectedItem.labels[labelId].track]
@@ -103,7 +103,7 @@ export function changeSelectedLabelsAttributes(
       }
     }
     for (const value of Object.values(labelsInTracks)) {
-      duplicatedAttributes.push(value.map((_id) => ({ attributes })))
+      duplicatedAttributes.push(value.map(() => ({ attributes })))
     }
     return changeLabelsProps(
       Object.keys(labelsInTracks).map(Number),
@@ -111,9 +111,7 @@ export function changeSelectedLabelsAttributes(
       duplicatedAttributes
     )
   }
-  duplicatedAttributes = labelIds.map((arr) =>
-    arr.map((_id) => ({ attributes }))
-  )
+  duplicatedAttributes = labelIds.map((arr) => arr.map(() => ({ attributes })))
   return changeLabelsProps([select.item], labelIds, duplicatedAttributes)
 }
 
@@ -133,7 +131,7 @@ export function changeSelectedLabelsCategories(
   let duplicatedCategories = []
   // Tracking: changes the category for the entire lifespan
   const selectedItem = state.task.items[select.item]
-  if (selectedItem.labels[labelIds[0][0]].track) {
+  if (selectedItem.labels[labelIds[0][0]].track !== "") {
     const labelsInTracks: { [key: number]: string[] } = {}
     for (const labelId of labelIds[0]) {
       const track = state.task.tracks[selectedItem.labels[labelId].track]
@@ -149,7 +147,7 @@ export function changeSelectedLabelsCategories(
       }
     }
     for (const value of Object.values(labelsInTracks)) {
-      duplicatedCategories.push(value.map((_id) => ({ category })))
+      duplicatedCategories.push(value.map(() => ({ category })))
     }
     return changeLabelsProps(
       Object.keys(labelsInTracks).map(Number),
@@ -157,7 +155,7 @@ export function changeSelectedLabelsCategories(
       duplicatedCategories
     )
   }
-  duplicatedCategories = labelIds.map((arr) => arr.map((_id) => ({ category })))
+  duplicatedCategories = labelIds.map((arr) => arr.map(() => ({ category })))
   return changeLabelsProps([select.item], labelIds, duplicatedCategories)
 }
 
@@ -209,14 +207,15 @@ export function selectLabels(
   if (labelIds.length > 0 && itemIndex >= 0) {
     selectedLabels[itemIndex] = newLabelIds
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete selectedLabels[itemIndex]
   }
 
-  if (!category) {
+  if (category === undefined) {
     category = 0
   }
 
-  if (!attributes) {
+  if (attributes === undefined) {
     attributes = {}
   }
 

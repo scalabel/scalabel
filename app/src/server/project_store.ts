@@ -30,6 +30,11 @@ export class ProjectStore {
   /** the permanent storage */
   protected storage: Storage
 
+  /**
+   * Constructor
+   * @param storage
+   * @param redisStore
+   */
   constructor(storage: Storage, redisStore: RedisCache) {
     this.storage = storage
     this.redisStore = redisStore
@@ -73,7 +78,6 @@ export class ProjectStore {
   /**
    * Load the metadata associated with a particular state
    */
-
   public async loadStateMetadata(
     projectName: string,
     taskId: string

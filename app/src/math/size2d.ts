@@ -2,6 +2,11 @@ import { Vector } from "./vector"
 
 /** 2D size */
 export class Size2D extends Vector {
+  /**
+   * Constructor
+   * @param w
+   * @param h
+   */
   constructor(w: number = 0, h: number = 0) {
     super(2)
     this[0] = w

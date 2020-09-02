@@ -42,7 +42,7 @@ export class Label2DHandler {
     this._selectedItemIndex = -1
     this._labelList = labelList
 
-    addVisibilityListener(this.onVisibilityChange.bind(this))
+    addVisibilityListener(() => this.onVisibilityChange())
   }
 
   /** get highlightedLabel for state inspection */
@@ -276,7 +276,7 @@ export class Label2DHandler {
    * Handling function for canvas visibility change
    * @param _isVisible
    */
-  public onVisibilityChange(_isVisible: boolean): void {
+  public onVisibilityChange(): void {
     delete this._keyDownMap[Key.META]
     delete this._keyDownMap[Key.CONTROL]
   }

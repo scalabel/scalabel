@@ -48,7 +48,7 @@ export function configureStore(
     })
     allMiddleware.push(logger)
   }
-  if (middleware) {
+  if (middleware !== undefined) {
     allMiddleware.push(middleware)
   }
 

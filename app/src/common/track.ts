@@ -27,11 +27,14 @@ function policyFactoryMaker(
 ): (type: string) => TrackInterp {
   switch (policyType) {
     case TrackPolicyType.NONE:
-      return (_type: string) => new TrackInterp()
+      return () => new TrackInterp()
     case TrackPolicyType.LINEAR_INTERPOLATION:
       return linearInterpolationPolicyFactory
+    default:
+      // Just in case
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      throw new Error(`Invalid policy type ${policyType}`)
   }
-  throw new Error(`Invalid policy type ${policyType}`)
 }
 
 /** Factory for linear interpolation policies */
@@ -66,6 +69,9 @@ export class Track {
   /** tracking policy type */
   protected _policyType: string
 
+  /**
+   * Constructor
+   */
   constructor() {
     this._track = makeTrack({ type: LabelTypeName.EMPTY })
     this._policy = new TrackInterp()
@@ -182,9 +188,9 @@ export class Track {
         cloned.manual = false
       }
 
-      if (parentTrack) {
+      if (parentTrack !== undefined) {
         const parentLabel = parentTrack.getLabel(index)
-        if (parentLabel) {
+        if (parentLabel !== null) {
           cloned.item = index
           cloned.parent = parentLabel.id
         }

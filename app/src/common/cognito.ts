@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+// TODO: fix the eslint errors and handle the exceptions properly
 import {
   CognitoAccessToken,
   CognitoAuthSession,
@@ -39,6 +42,7 @@ function getAuth(): string {
     ]
     xhr.open(
       "POST",
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `https://${localStorage.getItem("URI")}/oauth2/token`,
       false
     )
@@ -50,7 +54,9 @@ function getAuth(): string {
         localStorage.setItem("AccessToken", data.access_token)
         localStorage.setItem("IdToken", data.id_token)
         localStorage.setItem("TokenType", data.token_type)
-        result = "" + data.token_type + " " + data.access_token
+        // TODO: define the proper data type
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        result = `${data.token_type} ${data.access_token}`
       } else {
         return ""
       }

@@ -69,6 +69,10 @@ class Callback {
    */
   private readonly config: ServerConfig
 
+  /**
+   * Constructor
+   * @param config
+   */
   constructor(config: ServerConfig) {
     this.config = config
     this.router = Router()

@@ -15,7 +15,7 @@ function handleSyncAction(
   dispatch: ThunkDispatchType
 ): void {
   switch (action.type) {
-    case actionConsts.REGISTER_SESSION:
+    case actionConsts.REGISTER_SESSION: {
       const initialState = (action as actionTypes.RegisterSessionAction)
         .initialState
       synchronizer.finishRegistration(
@@ -26,16 +26,18 @@ function handleSyncAction(
         dispatch
       )
       break
+    }
     case actionConsts.CONNECT:
       synchronizer.sendConnectionMessage(state.session.id, dispatch)
       break
     case actionConsts.DISCONNECT:
       synchronizer.handleDisconnect(dispatch)
       break
-    case actionConsts.RECEIVE_BROADCAST:
+    case actionConsts.RECEIVE_BROADCAST: {
       const message = (action as actionTypes.ReceiveBroadcastAction).message
       synchronizer.handleBroadcast(message, state.session.id, dispatch)
       break
+    }
     case actionConsts.SAVE:
       synchronizer.save(state.session.id, state.task.config.bots, dispatch)
       break
@@ -57,7 +59,9 @@ function handleNormalAction(
   synchronizer.queueActionForSaving(action, autosave, sessionId, bots, dispatch)
 }
 
-export const makeSyncMiddleware = (synchronizer: Synchronizer) => {
+export const makeSyncMiddleware = (
+  synchronizer: Synchronizer
+): Middleware<ReduxState> => {
   const syncMiddleware: Middleware<ReduxState> = ({
     dispatch,
     getState

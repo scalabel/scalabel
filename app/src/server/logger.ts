@@ -13,6 +13,9 @@ class Logger {
   /** log transports */
   private transport: winston.transport
 
+  /**
+   * Constructor
+   */
   constructor() {
     this.transport = new winston.transports.Console({ level: "info" })
 
@@ -46,7 +49,7 @@ class Logger {
 
   /** print errors */
   public error(err: MaybeError): void {
-    if (err !== null && err !== undefined) {
+    if (err !== undefined) {
       this._logger.log({
         level: "error",
         message: err.message,

@@ -19,7 +19,7 @@ export function renderTemplate(
   getAlignmentIndex: (switName: string) => number,
   name: string,
   options: string[]
-) {
+): React.ReactNode {
   if (toolType === AttributeToolType.SWITCH) {
     return (
       <SwitchBtn

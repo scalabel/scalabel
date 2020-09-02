@@ -94,10 +94,10 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
  * @return {State}
  */
 export const reducer: Reducer<State> = (
-  currentState: State = makeState(),
+  currentState: State | undefined,
   action: AnyAction
 ): State => {
-  let state = currentState
+  let state = currentState !== undefined ? currentState : makeState()
   if (action.type === actionConsts.SEQUENTIAL) {
     ;(action as actionTypes.SequentialAction).actions.forEach((element) => {
       state = reduceOne(state, element)

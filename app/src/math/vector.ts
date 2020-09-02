@@ -1,5 +1,9 @@
 /** general vector class */
 export class Vector extends Array<number> {
+  /**
+   * Constructor
+   * @param dim
+   */
   constructor(dim: number = 0) {
     super(dim)
   }

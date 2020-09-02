@@ -13,6 +13,11 @@ export class SimpleStore {
   /** dispatch action function */
   public dispatch: DispatchFunc
 
+  /**
+   * Constructor
+   * @param getState
+   * @param dispatch
+   */
   constructor(getState: GetStateFunc, dispatch: DispatchFunc) {
     this.getState = getState
     this.dispatch = dispatch

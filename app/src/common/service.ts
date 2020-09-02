@@ -27,7 +27,7 @@ export function requestData<DataType>(
   }
   xhr.open(method, url, async)
   const auth = getAuth()
-  if (auth) {
+  if (auth !== "") {
     xhr.setRequestHeader("Authorization", auth)
   }
   xhr.send(null)

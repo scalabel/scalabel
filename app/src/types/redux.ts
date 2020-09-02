@@ -19,4 +19,8 @@ export type FullStore = ReduxStore & {
   dispatch: ThunkDispatchType
 }
 export type ThunkActionType = ThunkAction<void, ReduxState, void, BaseAction>
+// export interface ThunkActionType
+//   extends ThunkAction<void, ReduxState, void, BaseAction> {
+//   type: string
+// }
 export type ThunkCreatorType = ActionCreator<ThunkActionType>

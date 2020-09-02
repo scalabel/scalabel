@@ -20,6 +20,13 @@ export class BotManager {
   /** the time in between polls that check session activity */
   protected pollTime: number
 
+  /**
+   *
+   * @param config
+   * @param subscriber
+   * @param redisClient
+   * @param pollTime
+   */
   constructor(
     config: BotConfig,
     subscriber: RedisPubSub,

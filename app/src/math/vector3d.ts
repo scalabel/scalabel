@@ -4,6 +4,12 @@ import { Vector } from "./vector"
 
 /** 2D vector */
 export class Vector3D extends Vector {
+  /**
+   *
+   * @param x
+   * @param y
+   * @param z
+   */
   constructor(x: number = 0, y: number = 0, z: number = 0) {
     super(3)
     this[0] = x

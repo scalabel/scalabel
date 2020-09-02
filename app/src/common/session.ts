@@ -33,6 +33,9 @@ class Session {
   // TODO: when we move to node move this into state
   public testMode: boolean
 
+  /**
+   * Constructor
+   */
   constructor() {
     this.images = []
     this.pointClouds = []
@@ -78,9 +81,12 @@ class Session {
    * @param {actionTypes.ActionType} action: action description
    */
   public dispatch(action: actionTypes.ActionType | ThunkActionType): void {
-    if (action.hasOwnProperty("type")) {
+    // this.store.dispatch(action)
+    if ("type" in action) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       this.store.dispatch(action as actionTypes.ActionType)
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       this.store.dispatch(action as ThunkActionType)
     }
   }

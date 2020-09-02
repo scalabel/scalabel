@@ -33,11 +33,11 @@ export function addDuplicatedTrack(
 
   const itemLength = Session.numItems
 
-  if (!startIndex) {
+  if (startIndex === undefined) {
     startIndex = 0
   }
 
-  if (!stopIndex) {
+  if (stopIndex === undefined) {
     stopIndex = itemLength
   }
   const end = Math.min(stopIndex, itemLength)
@@ -59,7 +59,7 @@ export function addDuplicatedTrack(
       cloned.manual = false
     }
 
-    if (parentTrack && index in parentTrack.labels) {
+    if (parentTrack !== undefined && index in parentTrack.labels) {
       cloned.parent = parentTrack.labels[index]
     } else if (index !== cloned.item) {
       cloned.parent = INVALID_ID
