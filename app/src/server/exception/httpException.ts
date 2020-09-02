@@ -1,6 +1,7 @@
 /**
  * Class represents HTTP exception
- * @extends Error
+ *
+ * @augments Error
  */
 class HttpException extends Error {
   /** Status code */
@@ -9,6 +10,7 @@ class HttpException extends Error {
   public message: string
   /**
    * Create a HTTP Exception
+   *
    * @param {number} status - Error code
    * @param {string} message - Error message
    */

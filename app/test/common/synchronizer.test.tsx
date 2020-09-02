@@ -160,6 +160,10 @@ describe("Test synchronizer functionality", () => {
 
 /**
  * Dispatch and check the effects of a single add label action
+ *
+ * @param sync
+ * @param numActions
+ * @param bots
  */
 function dispatchAndCheckActions(
   sync: Synchronizer,
@@ -186,6 +190,8 @@ function dispatchAndCheckActions(
 
 /**
  * Acks all the waiting packets
+ *
+ * @param sync
  */
 function sendAcks(sync: Synchronizer): ActionPacketType[] {
   const actionPackets = sync.listActionsPendingSave()
@@ -197,6 +203,9 @@ function sendAcks(sync: Synchronizer): ActionPacketType[] {
 
 /**
  * Check that the actions were sent to the backend for saving
+ *
+ * @param sync
+ * @param actions
  */
 function checkActionsAreSaving(
   sync: Synchronizer,
@@ -211,6 +220,8 @@ function checkActionsAreSaving(
 
 /**
  * Checkthat correct connection message was sent
+ *
+ * @param sessId
  */
 function checkConnectMessage(sessId: string): void {
   const expectedMessage: RegisterMessageType = {
@@ -226,6 +237,8 @@ function checkConnectMessage(sessId: string): void {
 
 /**
  * Start the browser synchronizer being tested
+ *
+ * @param setInitialState
  */
 function startSynchronizer(setInitialState: boolean = true): Synchronizer {
   const synchronizer = new Synchronizer(
@@ -255,6 +268,8 @@ function startSynchronizer(setInitialState: boolean = true): Synchronizer {
 
 /**
  * Convert action packet to sync message
+ *
+ * @param packet
  */
 function packetToMessage(packet: ActionPacketType): SyncActionMessageType {
   return {
@@ -268,6 +283,8 @@ function packetToMessage(packet: ActionPacketType): SyncActionMessageType {
 
 /**
  * Convert action packet to sync message from a bot
+ *
+ * @param packet
  */
 function packetToMessageBot(packet: ActionPacketType): SyncActionMessageType {
   return {

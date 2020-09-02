@@ -15,6 +15,7 @@ declare global {
 expect.extend({
   /**
    * Add matching points to jest expect
+   *
    * @param received
    * @param argument
    */

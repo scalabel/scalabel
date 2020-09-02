@@ -7,8 +7,11 @@ import { AttributeToolType } from "../const/common"
 
 /**
  * This is renderTemplate function that renders the category.
+ *
  * @param {string} toolType
- * @param {function} handleToggle
+ * @param {Function} handleToggle
+ * @param handleAttributeToggle
+ * @param getAlignmentIndex
  * @param {string} name
  * @param {string[]} options
  */

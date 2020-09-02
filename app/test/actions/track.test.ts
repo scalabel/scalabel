@@ -37,6 +37,10 @@ beforeEach(() => {
 
 /**
  * Helper function to change the category of the label
+ *
+ * @param itemIndex
+ * @param labelId
+ * @param category
  */
 function changeCategory(
   itemIndex: number,
@@ -54,6 +58,10 @@ function changeCategory(
 
 /**
  * Helper function to check the category of the label in the state
+ *
+ * @param itemIndex
+ * @param labelId
+ * @param category
  */
 function checkCategory(
   itemIndex: number,
@@ -65,6 +73,8 @@ function checkCategory(
 
 /**
  * Helper function to check the number of total tracks in the state
+ *
+ * @param numTracks
  */
 function checkNumTracks(numTracks: number): void {
   expect(getNumTracks(getState())).toBe(numTracks)

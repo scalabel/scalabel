@@ -209,6 +209,10 @@ const dummyViewerConfig = {
 
 /**
  * make a dummy item for testing
+ *
+ * @param id
+ * @param labels
+ * @param shapes
  */
 function makeItem(id: number, labels: object, shapes: object): object {
   return {

@@ -4,6 +4,8 @@ import { ConfigType, ConnectionStatus, SessionType } from "../types/state"
 
 /**
  * Load the task config
+ *
+ * @param state
  */
 export function getConfig(state: ReduxState): ConfigType {
   return state.present.task.config
@@ -51,6 +53,8 @@ export const getDashboardLink = createSelector(
 
 /**
  * Load the session
+ *
+ * @param state
  */
 export function getSession(state: ReduxState): SessionType {
   return state.present.session

@@ -12,6 +12,8 @@ export class RedisPubSub {
 
   /**
    * Create new publisher and subscriber clients
+   *
+   * @param client
    */
   constructor(client: RedisClient) {
     this.client = client
@@ -20,6 +22,8 @@ export class RedisPubSub {
 
   /**
    * Broadcasts registration event of new socket
+   *
+   * @param data
    */
   public publishRegisterEvent(data: RegisterMessageType): void {
     this.client.publish(this.registerEvent, JSON.stringify(data))
@@ -27,6 +31,8 @@ export class RedisPubSub {
 
   /**
    * Listens for incoming registration events
+   *
+   * @param handler
    */
   public async subscribeRegisterEvent(
     handler: (channel: string, message: string) => void

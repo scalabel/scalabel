@@ -5,6 +5,7 @@ import { Vector } from "./vector"
 /** 2D vector */
 export class Vector3D extends Vector {
   /**
+   * Constructor
    *
    * @param x
    * @param y
@@ -47,7 +48,11 @@ export class Vector3D extends Vector {
     this[2] = v
   }
 
-  /** convert from the vector in THREE */
+  /**
+   * convert from the vector in THREE
+   *
+   * @param v
+   */
   public fromThree(v: THREE.Vector3): this {
     this[0] = v.x
     this[1] = v.y
@@ -72,6 +77,8 @@ export class Vector3D extends Vector {
 
   /**
    * Set value from a raw 3d vector
+   *
+   * @param v
    */
   public fromState(v: Vector3Type): this {
     this[0] = v.x
@@ -82,6 +89,7 @@ export class Vector3D extends Vector {
 
   /**
    * Copy from other Vector3D
+   *
    * @param v
    */
   public copy(v: Vector3D): this {
@@ -93,6 +101,8 @@ export class Vector3D extends Vector {
 
   /**
    * Multiply all values by a scalar
+   *
+   * @param s
    */
   public multiplyScalar(s: number): void {
     this[0] *= s

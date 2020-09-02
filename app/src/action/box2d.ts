@@ -6,6 +6,7 @@ import * as actions from "./common"
 
 /**
  * Create AddLabelAction to create a box2d label
+ *
  * @param {number} itemIndex
  * @param {number[]} category: list of category ids
  * @param {[key: number]: number[]} attributes
@@ -13,7 +14,10 @@ import * as actions from "./common"
  * @param {number} y
  * @param {number} w
  * @param {number} h
- * @return {AddLabelAction}
+ * @param sensor
+ * @param category
+ * @param box
+ * @returns {AddLabelAction}
  */
 export function addBox2dLabel(
   itemIndex: number,
@@ -36,6 +40,7 @@ export function addBox2dLabel(
 
 /**
  * A simple wrapper for changing box2d shapes
+ *
  * @param itemIndex
  * @param shapeId
  * @param shape

@@ -1,6 +1,11 @@
 import * as THREE from "three"
 
-/** Get axis aligned scale in coordinate frame rotated by quaternion */
+/**
+ * Get axis aligned scale in coordinate frame rotated by quaternion
+ *
+ * @param scale
+ * @param quaternion
+ */
 export function rotateScale(
   scale: THREE.Vector3,
   quaternion: THREE.Quaternion

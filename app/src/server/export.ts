@@ -18,6 +18,9 @@ import {
 
 /**
  * Converts a polygon label to export format
+ *
+ * @param pathPoints
+ * @param labelType
  */
 export function convertPolygonToExport(
   pathPoints: PathPoint2DType[],
@@ -49,6 +52,7 @@ export function convertPolygonToExport(
 
 /**
  * converts single item to exportable format
+ *
  * @param config
  * @param item
  */
@@ -142,7 +146,9 @@ export function convertItemToExport(
 
 /**
  * parses attributes into BDD format
+ *
  * @param attributes
+ * @param configAttributes
  */
 function parseLabelAttributes(
   labelAttributes: { [key: number]: number[] },
@@ -181,6 +187,7 @@ function parseLabelAttributes(
 
 /**
  * converts state to export format
+ *
  * @param state
  */
 export function convertStateToExport(state: State): ItemExport[] {

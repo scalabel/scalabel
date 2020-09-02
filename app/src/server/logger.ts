@@ -42,12 +42,20 @@ class Logger {
     this._silent = false
   }
 
-  /** set log verbose level */
+  /**
+   * set log verbose level
+   *
+   * @param level
+   */
   public setLogLevel(level: string): void {
     this.transport.level = level
   }
 
-  /** print errors */
+  /**
+   * print errors
+   *
+   * @param err
+   */
   public error(err: MaybeError): void {
     if (err !== undefined) {
       this._logger.log({
@@ -58,7 +66,11 @@ class Logger {
     }
   }
 
-  /** print informative messages */
+  /**
+   * print informative messages
+   *
+   * @param message
+   */
   public info(message: string): void {
     if (message !== "" && !this._silent) {
       this._logger.log({
@@ -68,7 +80,11 @@ class Logger {
     }
   }
 
-  /** print informative messages */
+  /**
+   * print informative messages
+   *
+   * @param message
+   */
   public debug(message: string): void {
     if (message !== "" && !this._silent) {
       this._logger.log({
@@ -81,6 +97,8 @@ class Logger {
   /**
    * whether to mute info logging.
    * It can provide a clean console for unit test
+   *
+   * @param silent
    */
   public mute(silent: boolean = true): void {
     this._silent = silent

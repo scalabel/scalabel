@@ -31,6 +31,10 @@ import { Track } from "./track"
 
 /**
  * Initialize state, then set up the rest of the session
+ *
+ * @param newState
+ * @param containerName
+ * @param shouldInitViews
  */
 export function setupSession(
   newState: DeepPartialState,
@@ -59,7 +63,10 @@ export function setupSession(
 
 /**
  * Render the dom after data is loaded
+ *
  * @param containername: string name
+ * @param containerName
+ * @param store
  */
 function renderDom(containerName: string, store: FullStore): void {
   ReactDOM.render(
@@ -74,6 +81,9 @@ function renderDom(containerName: string, store: FullStore): void {
 
 /**
  * Load labeling data initialization function
+ *
+ * @param getState
+ * @param dispatch
  */
 function loadData(getState: GetStateFunc, dispatch: DispatchFunc): void {
   loadImages(getState, dispatch)
@@ -82,6 +92,8 @@ function loadData(getState: GetStateFunc, dispatch: DispatchFunc): void {
 
 /**
  * Update session objects with new state
+ *
+ * @param state
  */
 export function updateTracks(state: State): void {
   const newTracks: { [trackId: string]: Track } = {}
@@ -102,6 +114,10 @@ export function updateTracks(state: State): void {
 
 /**
  * Load all the images in the state
+ *
+ * @param getState
+ * @param dispatch
+ * @param maxAttempts
  */
 function loadImages(
   getState: GetStateFunc,
@@ -146,6 +162,10 @@ function loadImages(
 
 /**
  * Load all point clouds in state
+ *
+ * @param getState
+ * @param dispatch
+ * @param maxAttempts
  */
 function loadPointClouds(
   getState: GetStateFunc,
@@ -192,6 +212,9 @@ function loadPointClouds(
 
 /**
  * Create default viewer configs if none exist
+ *
+ * @param getState
+ * @param dispatch
  */
 function initViewerConfigs(
   getState: GetStateFunc,

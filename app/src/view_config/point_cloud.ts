@@ -4,6 +4,7 @@ import { PointCloudViewerConfigType } from "../types/state"
 
 /**
  * Update ThreeJS rendering objects with viewer config params
+ *
  * @param canvas
  * @param config
  * @param renderer
@@ -36,9 +37,13 @@ export function updateThreeCameraAndRenderer(
 
 /**
  * Normalize mouse coordinates
+ *
  * @param {number} mX: Mouse x-coord
  * @param {number} mY: Mouse y-coord
- * @return {Array<number>}
+ * @param mX
+ * @param mY
+ * @param canvas
+ * @returns {Array<number>}
  */
 export function convertMouseToNDC(
   mX: number,
@@ -55,6 +60,7 @@ export function convertMouseToNDC(
 
 /**
  * Get projection from mouse into scene
+ *
  * @param x
  * @param y
  * @param camera

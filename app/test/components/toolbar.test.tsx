@@ -22,6 +22,7 @@ const selected: { [key: string]: string } = {}
 /**
  * dummy attribute toggle function to test if the correct toggle action was
  * correctly called
+ *
  * @param toggleName
  * @param alignment
  * @param isTag

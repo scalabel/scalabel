@@ -25,6 +25,7 @@ let getState = getStateGetter()
 
 /**
  * Set the state getter for actions
+ *
  * @param getter
  */
 export function setActionStateGetter(getter: GetStateFunc): void {
@@ -33,7 +34,9 @@ export function setActionStateGetter(getter: GetStateFunc): void {
 
 /**
  * Make the base action that can be extended by the other actions
+ *
  * @param type
+ * @param frontendOnly
  */
 export function makeBaseAction(
   type: string,
@@ -52,6 +55,7 @@ export function makeBaseAction(
 
 /**
  * Make a null action
+ *
  * @param message
  */
 export function makeNullAction(message: string = ""): actionTypes.NullAction {
@@ -67,6 +71,7 @@ export function initSessionAction(): actionTypes.InitSessionAction {
 }
 
 /** Update task data
+ *
  * @param {TaskType} newTask
  */
 export function updateTask(newTask: TaskType): actionTypes.UpdateTaskAction {
@@ -76,8 +81,11 @@ export function updateTask(newTask: TaskType): actionTypes.UpdateTaskAction {
   }
 }
 
-/** Initialize state data
+/**
+ * Initialize state data
+ *
  * @param {TaskType} newTask
+ * @param newState
  */
 export function updateState(
   newState: DeepPartialState
@@ -90,8 +98,9 @@ export function updateState(
 
 /**
  * Go to item at index
+ *
  * @param {number} index
- * @return {actionTypes.ChangeSelectAction}
+ * @returns {actionTypes.ChangeSelectAction}
  */
 export function goToItem(index: number): actionTypes.ChangeSelectAction {
   // Normally, unselect labels when item changes
@@ -116,6 +125,7 @@ export function goToItem(index: number): actionTypes.ChangeSelectAction {
 
 /**
  * Change the current selection
+ *
  * @param select
  */
 export function changeSelect(
@@ -129,6 +139,9 @@ export function changeSelect(
 
 /**
  * Create load item action
+ *
+ * @param itemIndex
+ * @param sensorId
  */
 export function loadItem(
   itemIndex: number,
@@ -143,10 +156,11 @@ export function loadItem(
 
 /**
  * Add label to the item
+ *
  * @param {number} itemIndex
  * @param {LabelType} label
  * @param {ShapeType[]} shapes
- * @return {AddLabelAction}
+ * @returns {AddLabelAction}
  */
 export function addLabel(
   itemIndex: number,
@@ -163,6 +177,7 @@ export function addLabel(
 
 /**
  * Add labels to a single item
+ *
  * @param itemIndex
  * @param labels
  * @param shapes
@@ -182,7 +197,9 @@ export function addLabelsToItem(
 
 /**
  * Add a track
+ *
  * @param itemIndices
+ * @param trackType
  * @param labels
  * @param shapeTypes
  * @param shapes
@@ -204,10 +221,13 @@ export function addTrack(
 
 /**
  * Change the shape of the label
+ *
  * @param {number} itemIndex
  * @param {number} shapeId
  * @param {Partial<ShapeType>} props
- * @return {ChangeLabelShapeAction}
+ * @param shapeIds
+ * @param shapes
+ * @returns {ChangeLabelShapeAction}
  */
 export function changeShapes(
   itemIndex: number,
@@ -224,6 +244,7 @@ export function changeShapes(
 
 /**
  * Change shapes in items
+ *
  * @param itemIndices
  * @param shapeIds
  * @param shapes
@@ -243,10 +264,12 @@ export function changeShapesInItems(
 
 /**
  * Change the shape of the label
+ *
  * @param {number} itemIndex
  * @param {number} shapeId
  * @param {Partial<ShapeType>} props
- * @return {ChangeLabelShapeAction}
+ * @param shape
+ * @returns {ChangeLabelShapeAction}
  */
 export function changeLabelShape(
   itemIndex: number,
@@ -263,10 +286,11 @@ export function changeLabelShape(
 
 /**
  * Change the properties of the label
+ *
  * @param {number} itemIndex
  * @param {number} labelId
  * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
+ * @returns {ChangeLabelPropsAction}
  */
 export function changeLabelProps(
   itemIndex: number,
@@ -283,10 +307,13 @@ export function changeLabelProps(
 
 /**
  * Change the properties of the labels
+ *
  * @param {number} itemIndex
  * @param {number} labelId
- * @param {Partial<LabelType>}props
- * @return {ChangeLabelPropsAction}
+ * @param itemIndices
+ * @param labelIds
+ * @param {Partial<LabelType>} props
+ * @returns {ChangeLabelPropsAction}
  */
 export function changeLabelsProps(
   itemIndices: number[],
@@ -303,6 +330,7 @@ export function changeLabelsProps(
 
 /**
  * Link labels
+ *
  * @param {number} itemIndex
  * @param {[]number} labelIds labels to link
  */
@@ -319,6 +347,7 @@ export function linkLabels(
 
 /**
  * unlink labels
+ *
  * @param {number} itemIndex
  * @param {[]number} labelIds labels to unlink
  */
@@ -335,6 +364,7 @@ export function unlinkLabels(
 
 /**
  * Merge tracks
+ *
  * @param trackIds
  */
 export function mergeTracks(trackIds: IdType[]): actionTypes.MergeTrackAction {
@@ -346,9 +376,10 @@ export function mergeTracks(trackIds: IdType[]): actionTypes.MergeTrackAction {
 
 /**
  * Delete given label
+ *
  * @param {number} itemIndex
  * @param {number} labelId
- * @return {DeleteLabelAction}
+ * @returns {DeleteLabelAction}
  */
 export function deleteLabel(
   itemIndex: number,
@@ -359,9 +390,10 @@ export function deleteLabel(
 
 /**
  * Delete all the input labels
+ *
  * @param {number[]} itemIndices
  * @param {number[][]} labelIds
- * @return {actionTypes.DeleteLabelsAction}
+ * @returns {actionTypes.DeleteLabelsAction}
  */
 export function deleteLabels(
   itemIndices: number[],
@@ -376,6 +408,8 @@ export function deleteLabels(
 
 /**
  * Add new viewer config
+ *
+ * @param id
  * @param config
  */
 export function addViewerConfig(
@@ -391,7 +425,10 @@ export function addViewerConfig(
 
 /**
  * Change viewer config
+ *
  * @param configs
+ * @param viewerId
+ * @param config
  */
 export function changeViewerConfig(
   viewerId: number,
@@ -404,7 +441,12 @@ export function changeViewerConfig(
   }
 }
 
-/** Toggle viewer config synchronization */
+/**
+ * Toggle viewer config synchronization
+ *
+ * @param viewerId
+ * @param config
+ */
 export function toggleSynchronization(
   viewerId: number,
   config: ViewerConfigType
@@ -415,7 +457,12 @@ export function toggleSynchronization(
   })
 }
 
-/** action to updater pane */
+/**
+ * action to updater pane
+ *
+ * @param pane
+ * @param props
+ */
 export function updatePane(
   pane: number,
   props: Partial<PaneType>
@@ -427,7 +474,13 @@ export function updatePane(
   }
 }
 
-/** action to split pane */
+/**
+ * action to split pane
+ *
+ * @param pane
+ * @param split
+ * @param viewerId
+ */
 export function splitPane(
   pane: number,
   split: SplitType,
@@ -441,7 +494,12 @@ export function splitPane(
   }
 }
 
-/** action to delete pane */
+/**
+ * action to delete pane
+ *
+ * @param pane
+ * @param viewerId
+ */
 export function deletePane(
   pane: number,
   viewerId: number
@@ -482,6 +540,8 @@ export function startLinkTrack(): actionTypes.BaseAction {
 
 /**
  * Finish session registration by loading backend state
+ *
+ * @param state
  */
 export function registerSession(
   state: State
@@ -494,6 +554,8 @@ export function registerSession(
 
 /**
  * Handle broadcasted message contains one or more actions
+ *
+ * @param message
  */
 export function receiveBroadcast(
   message: SyncActionMessageType
@@ -527,6 +589,8 @@ export function save(): actionTypes.SaveAction {
 
 /**
  * Update session status
+ *
+ * @param status
  */
 export function updateSessionStatus(
   status: ConnectionStatus
@@ -591,6 +655,9 @@ export function setStatusToComputing(): actionTypes.UpdateSessionStatusAction {
 /**
  * After 5 seconds, fade out the previous message
  * If no other actions occurred in the meantime
+ *
+ * @param status
+ * @param numUpdates
  */
 export const updateSessionStatusDelayed: ThunkCreatorType = (
   status: ConnectionStatus,
@@ -608,6 +675,9 @@ export const updateSessionStatusDelayed: ThunkCreatorType = (
 
 /**
  * Update submission banner and trigger fadeout animation
+ *
+ * @param notifyStatus
+ * @param fadeStatus
  */
 export const setStatusForBanner: ThunkCreatorType = (
   notifyStatus: ConnectionStatus,
@@ -652,6 +722,9 @@ export const setStatusToSubmitted: ThunkCreatorType = () => {
 
 /**
  * Merge actions into an sequential action
+ *
+ * @param actions
+ * @param removeNull
  */
 export function makeSequential(
   actions: actionTypes.BaseAction[],

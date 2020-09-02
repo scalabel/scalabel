@@ -113,6 +113,10 @@ describe("create with auto labels", () => {
 
 /**
  * Tested that desired project is created from form
+ *
+ * @param sampleForm
+ * @param sampleProject
+ * @param formFileData
  */
 async function testProjectCreation(
   sampleForm: CreationForm,
@@ -126,6 +130,8 @@ async function testProjectCreation(
 
 /**
  * Tests that project is saved correctly
+ *
+ * @param sampleProject
  */
 async function testProjectSaving(sampleProject: Project): Promise<void> {
   await projectStore.saveProject(sampleProject)
@@ -140,6 +146,8 @@ async function testProjectSaving(sampleProject: Project): Promise<void> {
 
 /**
  * Tests that task is saved correctly
+ *
+ * @param sampleTasks
  */
 async function testTaskSaving(sampleTasks: TaskType[]): Promise<void> {
   await projectStore.saveTasks(sampleTasks)
