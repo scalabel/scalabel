@@ -35,14 +35,17 @@ export const serverConfig: ServerConfig = {
 
 /* default categories when file is missing and label is box2D or box3D */
 const boxCategoriesList = [
-  "person",
+  "pedestrian",
   "rider",
+  "other person",
   "car",
-  "truck",
   "bus",
+  "truck",
   "train",
-  "motor",
-  "bike",
+  "trailer",
+  "other vehicle",
+  "motorcycle",
+  "bicycle",
   "traffic sign",
   "traffic light"
 ]
@@ -69,44 +72,44 @@ export const polyline2DCategories = polyline2DCategoriesList.map(
 
 /* default attributes when file is missing and label is box2D */
 export const box2DAttributes = [
-  {
-    name: "Occluded",
-    toolType: AttributeToolType.SWITCH,
-    tagText: "o",
-    tagSuffixes: [],
-    tagPrefix: "",
-    values: [],
-    buttonColors: []
-  },
-  {
-    name: "Truncated",
-    toolType: AttributeToolType.SWITCH,
-    tagText: "t",
-    tagSuffixes: [],
-    tagPrefix: "",
-    values: [],
-    buttonColors: []
-  },
-  {
-    name: "Traffic Color Light",
-    toolType: AttributeToolType.LIST,
-    tagText: "t",
-    tagSuffixes: ["", "g", "y", "r"],
-    tagPrefix: "",
-    values: ["NA", "G", "Y", "R"],
-    buttonColors: ["white", "green", "yellow", "red"]
-  }
+  // {
+  //   name: "Occluded",
+  //   toolType: AttributeToolType.SWITCH,
+  //   tagText: "o",
+  //   tagSuffixes: [],
+  //   tagPrefix: "",
+  //   values: [],
+  //   buttonColors: []
+  // },
+  // {
+  //   name: "Truncated",
+  //   toolType: AttributeToolType.SWITCH,
+  //   tagText: "t",
+  //   tagSuffixes: [],
+  //   tagPrefix: "",
+  //   values: [],
+  //   buttonColors: []
+  // },
+  // {
+  //   name: "Traffic Color Light",
+  //   toolType: AttributeToolType.LIST,
+  //   tagText: "t",
+  //   tagSuffixes: ["", "g", "y", "r"],
+  //   tagPrefix: "",
+  //   values: ["NA", "G", "Y", "R"],
+  //   buttonColors: ["white", "green", "yellow", "red"]
+  // }
 ]
 
 /* default attributes when file is missing and no other defaults exist */
 export const dummyAttributes = [
-  {
-    name: "",
-    toolType: AttributeToolType.NONE,
-    tagText: "",
-    tagSuffixes: [],
-    values: [],
-    tagPrefix: "",
-    buttonColors: []
-  }
+  // {
+  //   name: "",
+  //   toolType: AttributeToolType.NONE,
+  //   tagText: "",
+  //   tagSuffixes: [],
+  //   values: [],
+  //   tagPrefix: "",
+  //   buttonColors: []
+  // }
 ]
