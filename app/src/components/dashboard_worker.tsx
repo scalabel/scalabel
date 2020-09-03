@@ -39,7 +39,7 @@ export interface DashboardClassType {
 function Dashboard(props: {
   /** style of dashboard */
   classes: DashboardClassType
-}) {
+}): JSX.Element {
   const { classes } = props
   const dashboardHeaderContent = <DashboardHeader />
   const dashboardPageContent = (

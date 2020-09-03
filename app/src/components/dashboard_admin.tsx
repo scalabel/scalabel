@@ -35,7 +35,7 @@ export function getUsers(): User[] {
 function Dashboard(props: {
   /** style of admin dashboard */
   classes: AdminClassType
-}) {
+}): JSX.Element {
   const { classes } = props
   const headerContent = <DashboardHeader admin />
   let usersToDisplay: User[]

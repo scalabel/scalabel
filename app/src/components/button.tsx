@@ -3,8 +3,8 @@ import React from "react"
 import { StyledButtonProps, styledButtonStyle } from "../styles/label"
 
 /**
- * raw styled button
- * @param props props
+ * raw styled button.
+ * @param props props.
  */
 function StyledButtonRaw(
   props: WithStyles<typeof styledButtonStyle> &

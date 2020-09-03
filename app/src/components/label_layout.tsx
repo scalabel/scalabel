@@ -125,10 +125,10 @@ class LabelLayout extends React.Component<Props, State> {
     primary: "first" | "second" = "first",
     position: string = "center"
   ) {
-    if (!comp1) {
+    if (comp1 === null) {
       return
     }
-    return comp2 ? (
+    return comp2 !== null ? (
       <SplitPane
         split={split}
         minSize={min}

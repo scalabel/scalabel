@@ -110,8 +110,8 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
       <div className={this.props.classes.viewer_container}>
         <div
           ref={(element) => {
-            if (element && this._container !== element) {
-              if (this._container) {
+            if (element !== null && this._container !== element) {
+              if (this._container !== null) {
                 this._container.removeEventListener("wheel", this._wheelHandler)
               }
               this._container = element
@@ -138,7 +138,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /** Normalize coordinates to container */
   protected normalizeCoordinates(x: number, y: number): [number, number] {
-    if (this._container) {
+    if (this._container !== null) {
       const rect = this._container.getBoundingClientRect()
       return [x - rect.left, y - rect.top]
     }
@@ -165,7 +165,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
    * @param e
    */
   protected onMouseDown(e: React.MouseEvent): void {
-    if (!this._container) {
+    if (this._container === null) {
       return
     }
     this._mouseDown = true
@@ -177,7 +177,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Handle mouse up
-   * @param e
+   * @param _e
    */
   protected onMouseUp(_e: React.MouseEvent): void {
     this._mouseDown = false
@@ -201,7 +201,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Handle mouse leave
-   * @param e
+   * @param _e
    */
   protected onMouseEnter(_e: React.MouseEvent): void {
     Session.activeViewerId = this.props.id

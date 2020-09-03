@@ -166,7 +166,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         key="control-canvas"
         className={classes.control_canvas}
         ref={(canvas) => {
-          if (canvas) {
+          if (canvas !== null) {
             this.updateCanvas(canvas, true)
           }
         }}
@@ -177,7 +177,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         key="label2d-canvas"
         className={classes.label2d_canvas}
         ref={(canvas) => {
-          if (canvas) {
+          if (canvas !== null) {
             this.updateCanvas(canvas, false)
           }
         }}
@@ -199,7 +199,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         innerRef={this.crosshair}
       />
     )
-    if (this.display) {
+    if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       controlCanvas = React.cloneElement(controlCanvas, {
         height: displayRect.height,
@@ -294,7 +294,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       return
     }
 
-    if (this.crosshair.current) {
+    if (this.crosshair.current !== null) {
       this.crosshair.current.onMouseMove(e)
     }
 
@@ -313,7 +313,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     }
     this._labelList.onDrawableUpdate()
 
-    if (this._labelHandler.highlightedLabel) {
+    if (this._labelHandler.highlightedLabel !== null) {
       this.setCursor(this._labelHandler.highlightedLabel.highlightCursor)
     } else {
       this.setDefaultCursor()
@@ -372,7 +372,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
    * mouse position (x,y) on the canvas
    */
   private getMousePos(e: React.MouseEvent<HTMLCanvasElement>): Vector2D {
-    if (this.display && this.labelCanvas) {
+    if (this.display !== null && this.labelCanvas !== null) {
       return normalizeMouseCoordinates(
         this.labelCanvas,
         this.canvasWidth,
@@ -391,7 +391,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
    * @return {number[]}
    */
   private fetchHandleId(mousePos: Vector2D): number[] {
-    if (this.controlContext) {
+    if (this.controlContext !== null) {
       const [x, y] = toCanvasCoords(mousePos, true, this.displayToImageRatio)
       const data = this.controlContext.getImageData(x, y, 4, 4).data
       return imageDataToHandleId(data)
@@ -406,10 +406,10 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
    */
   private updateCanvas(canvas: HTMLCanvasElement, isContorl: boolean): void {
     const context = canvas.getContext("2d")
-    if (!context) {
+    if (context === null) {
       return
     }
-    if (canvas && this.display) {
+    if (canvas !== null && this.display !== null) {
       if (isContorl) {
         this.controlCanvas = canvas
         this.controlContext = context
@@ -422,8 +422,10 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (
         isFrameLoaded(this.state, item, sensor) &&
-        displayRect.width &&
-        displayRect.height
+        displayRect.width !== 0 &&
+        !isNaN(displayRect.width) &&
+        displayRect.height !== 0 &&
+        !isNaN(displayRect.height)
       ) {
         this.updateScale(canvas, context, true)
       }
@@ -440,7 +442,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     context: CanvasRenderingContext2D,
     upRes: boolean
   ): void {
-    if (!this.display) {
+    if (this.display === null) {
       return
     }
     const imgConfig = getCurrentViewerConfig(

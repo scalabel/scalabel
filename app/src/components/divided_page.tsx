@@ -36,7 +36,7 @@ export interface DividedPageProps {
  * @param props
  * @constructor
  */
-function DividedPage(props: DividedPageProps) {
+function DividedPage(props: DividedPageProps): JSX.Element {
   const { classes, children } = props
   const mainPageContent = (
     <React.Fragment>

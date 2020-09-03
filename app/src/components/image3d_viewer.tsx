@@ -28,7 +28,7 @@ class Image3DViewer extends Viewer2D {
 
   /** Component update function */
   public componentDidUpdate(): void {
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== null) {
       const img3dConfig = this._viewerConfig as Image3DViewerConfigType
       const sensor = img3dConfig.sensor
 
@@ -42,7 +42,7 @@ class Image3DViewer extends Viewer2D {
         this._camera.intrinsics = this.state.task.sensors[sensor].intrinsics
         const extrinsics = this.state.task.sensors[sensor].extrinsics
         this._camera.position.set(0, 0, 0)
-        if (extrinsics) {
+        if (extrinsics !== null && extrinsics !== undefined) {
           this._camera.quaternion.set(
             extrinsics.rotation.x,
             extrinsics.rotation.y,
@@ -75,15 +75,15 @@ class Image3DViewer extends Viewer2D {
    * Render function
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents() {
+  protected getDrawableComponents(): React.ReactElement[] {
     const img3dConfig = this._viewerConfig as Image3DViewerConfigType
-    if (this._container && this._viewerConfig) {
+    if (this._container !== null && this._viewerConfig !== null) {
       this._container.scrollTop = img3dConfig.displayTop
       this._container.scrollLeft = img3dConfig.displayLeft
     }
 
     const views: React.ReactElement[] = []
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== null) {
       views.push(
         <ImageCanvas
           key={`imageCanvas${this.props.id}`}

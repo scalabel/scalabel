@@ -150,7 +150,7 @@ interface ListEntryClassType {
  * @param props
  * @constructor
  */
-function Dashboard(props: DashboardProps) {
+function Dashboard(props: DashboardProps): JSX.Element {
   const { classes, vendor } = props
   let totalTaskLabeled = 0
   let totalLabels = 0
@@ -266,7 +266,7 @@ function Dashboard(props: DashboardProps) {
 }
 
 /** creates the header */
-function header(props: HeaderProps) {
+function header(props: HeaderProps): JSX.Element {
   const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
     <React.Fragment>
@@ -307,7 +307,7 @@ function header(props: HeaderProps) {
 }
 
 /** creates the sidebar */
-function sidebar(props: SidebarProps) {
+function sidebar(props: SidebarProps): JSX.Element {
   const { classes, projectMetaData, vendor } = props
   const sidebarListItems = [
     { tag: "Project Name", entry: projectMetaData.name },
@@ -360,7 +360,7 @@ function sidebar(props: SidebarProps) {
 }
 
 /** sidebar list entry */
-function listEntry(props: ListEntryProps) {
+function listEntry(props: ListEntryProps): JSX.Element {
   const { classes, tag, entry } = props
   return (
     <React.Fragment>

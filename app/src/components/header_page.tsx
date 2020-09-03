@@ -29,7 +29,7 @@ export interface HeaderPageProps {
  * @param props
  * @constructor
  */
-function HeaderPage(props: HeaderPageProps) {
+function HeaderPage(props: HeaderPageProps): JSX.Element {
   const { classes, children } = props
   return (
     <div className={classes.root}>

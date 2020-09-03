@@ -109,12 +109,16 @@ const HIDDEN_UNIT_SIZE = 50
  * Wrapper for SplitPane
  */
 class LabelPane extends Component<Props> {
+  /**
+  * Constructor
+  * @param props
+  */ 
   constructor(props: Props) {
     super(props)
   }
 
   /** Override render */
-  public render() {
+  public render(): React.ReactNode {
     const pane = this.state.user.layout.panes[this.props.pane]
     if (pane.viewerId >= 0) {
       const viewerConfig = this.state.user.viewerConfigs[pane.viewerId]
@@ -128,7 +132,7 @@ class LabelPane extends Component<Props> {
               viewerConfig.pane,
               -1
             )
-            if (newConfig) {
+            if (newConfig !== null) {
               dispatch(changeViewerConfig(pane.viewerId, newConfig))
             }
           }}
@@ -308,8 +312,8 @@ class LabelPane extends Component<Props> {
     }
 
     if (
-      !pane.child1 ||
-      !pane.child2 ||
+      (pane.child1 == null || pane.child1 == 0 || isNaN(pane.child1)) ||
+      (pane.child2 == null || pane.child2 == 0 || isNaN(pane.child2)) ||
       !(pane.child1 in this.state.user.layout.panes) ||
       !(pane.child2 in this.state.user.layout.panes)
     ) {
