@@ -1,10 +1,13 @@
-- name: person
+- name: pedestrian
 - name: rider
+- name: other person
 - name: car
-- name: truck
 - name: bus
+- name: truck
 - name: train
+- name: trailer
+- name: other vehicle
 - name: motorcycle
-- name: bike
+- name: bicycle
 - name: traffic sign
 - name: traffic light
