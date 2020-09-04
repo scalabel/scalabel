@@ -24,7 +24,7 @@ interface ProjectListState {
 }
 
 /** Project list sidebar component. Re-renders after
- *  submission
+ * submission
  *
  * @param props
  */

@@ -96,7 +96,7 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
     const worldDirection = new THREE.Vector3()
     worldDirection.copy(this._direction)
 
-    if (this.parent) {
+    if (this.parent !== null) {
       const worldQuaternion = new THREE.Quaternion()
       this.parent.getWorldQuaternion(worldQuaternion)
       worldDirection.applyQuaternion(worldQuaternion)
@@ -153,7 +153,7 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
       ;(this._cone.material as THREE.Material).needsUpdate = true
     }
     if (
-      intersection &&
+      intersection !== undefined &&
       (intersection.object === this ||
         intersection.object === this._line ||
         intersection.object === this._cone)
@@ -202,7 +202,10 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
    * @param raycaster
    * @param intersects
    */
-  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
+  public raycast(
+    raycaster: THREE.Raycaster,
+    intersects: THREE.Intersection[]
+  ): void {
     this._line.raycast(raycaster, intersects)
     this._cone.raycast(raycaster, intersects)
   }
@@ -212,8 +215,8 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
    *
    * @param worldScale
    */
-  public updateScale(worldScale: THREE.Vector3) {
-    if (this.parent) {
+  public updateScale(worldScale: THREE.Vector3): void {
+    if (this.parent !== null) {
       const direction = new THREE.Vector3()
       direction.copy(this._direction)
       // Direction.applyQuaternion(worldQuaternion.inverse())

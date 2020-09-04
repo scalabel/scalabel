@@ -88,7 +88,7 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
     normal.copy(this._normal)
 
     const toLocal = new THREE.Matrix4()
-    if (this.parent) {
+    if (this.parent !== null) {
       toLocal.getInverse(this.parent.matrixWorld)
     }
 
@@ -113,7 +113,7 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
       delta.applyQuaternion(labels[0].orientation)
     }
 
-    if (this.parent) {
+    if (this.parent !== null) {
       newIntersection.applyMatrix4(this.parent.matrixWorld)
     }
 
@@ -129,8 +129,8 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
    *
    * @param worldScale
    */
-  public updateScale(worldScale: THREE.Vector3) {
-    if (this.parent) {
+  public updateScale(worldScale: THREE.Vector3): void {
+    if (this.parent !== null) {
       const newScale = Math.max(
         2,
         Math.min(

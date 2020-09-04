@@ -43,13 +43,13 @@ export class TransformationControl extends THREE.Group {
    *
    * @param newLabel
    */
-  public addLabel(newLabel: Label3D) {
+  public addLabel(newLabel: Label3D): void {
     this._labels.push(newLabel)
     this.updateBounds()
   }
 
   /** Clear label array */
-  public clearLabels() {
+  public clearLabels(): void {
     this._labels.length = 0
   }
 
@@ -58,7 +58,7 @@ export class TransformationControl extends THREE.Group {
    *
    * @param intersection
    */
-  public setHighlighted(intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection): void {
     this._currentController.setHighlighted(intersection)
   }
 
@@ -67,7 +67,7 @@ export class TransformationControl extends THREE.Group {
    *
    * @param camera
    */
-  public onMouseDown(camera: THREE.Camera) {
+  public onMouseDown(camera: THREE.Camera): boolean {
     return this._currentController.onMouseDown(camera)
   }
 
@@ -127,7 +127,7 @@ export class TransformationControl extends THREE.Group {
    *
    * @param e
    */
-  public onKeyUp(e: KeyboardEvent) {
+  public onKeyUp(e: KeyboardEvent): void {
     this._currentController.keyUp(e.key)
   }
 
@@ -140,7 +140,7 @@ export class TransformationControl extends THREE.Group {
    * @param y
    * @param camera
    */
-  public onMouseMove(x: number, y: number, camera: THREE.Camera) {
+  public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
     const projection = projectionFromNDC(x, y, camera)
     const result = this._currentController.onMouseMove(projection)
     this.updateBounds()
@@ -150,7 +150,7 @@ export class TransformationControl extends THREE.Group {
   /**
    * Mouse up
    */
-  public onMouseUp() {
+  public onMouseUp(): boolean {
     return this._currentController.onMouseUp()
   }
 
@@ -160,7 +160,10 @@ export class TransformationControl extends THREE.Group {
    * @param raycaster
    * @param intersects
    */
-  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
+  public raycast(
+    raycaster: THREE.Raycaster,
+    intersects: THREE.Intersection[]
+  ): void {
     this._currentController.raycast(raycaster, intersects)
   }
 
@@ -174,7 +177,7 @@ export class TransformationControl extends THREE.Group {
    *
    * @param controller
    */
-  private switchController(controller: Controller) {
+  private switchController(controller: Controller): void {
     this.remove(this._currentController)
     this._currentController = controller
     this.add(this._currentController)
@@ -182,7 +185,7 @@ export class TransformationControl extends THREE.Group {
   }
 
   /** Update bounds of the transformation control */
-  private updateBounds() {
+  private updateBounds(): void {
     this._bounds.makeEmpty()
     for (const label of this._labels) {
       this._bounds.union(label.bounds(this._currentController.local))
@@ -198,7 +201,7 @@ export class TransformationControl extends THREE.Group {
   }
 
   /** Update controller scale */
-  private updateScale() {
+  private updateScale(): void {
     const size = new THREE.Vector3()
     this._bounds.getSize(size)
     this._currentController.updateScale(size)

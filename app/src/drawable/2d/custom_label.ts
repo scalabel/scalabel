@@ -51,7 +51,7 @@ export class CustomLabel2D extends Label2D {
     this._corners = [new Point2D(), new Point2D(), new Point2D(), new Point2D()]
     this._colorMap = {}
     for (const node of this._template.nodes) {
-      if (node.color) {
+      if (node.color !== null && node.color !== undefined) {
         this._colorMap[node.name] = node.color
       }
     }
@@ -59,7 +59,7 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Get cursor for highlighting */
-  public get highlightCursor() {
+  public get highlightCursor(): string {
     if (
       this._highlightedHandle >= 0 &&
       this._highlightedHandle < this._shapes.length
@@ -207,7 +207,7 @@ export class CustomLabel2D extends Label2D {
     _limit: Size2D,
     _labelIndex: number,
     _handleIndex: number
-  ) {
+  ): boolean {
     if (
       this._temporary ||
       (this._highlightedHandle >= this._shapes.length &&
@@ -296,7 +296,7 @@ export class CustomLabel2D extends Label2D {
         this._shapes[i].x = node.x
         this._shapes[i].y = node.y
         this._shapes[i].name = node.name
-        if (node.hidden) {
+        if (node.hidden !== null) {
           this._shapes[i].hide()
         }
       }
@@ -306,7 +306,7 @@ export class CustomLabel2D extends Label2D {
 
   /** Get shape id's and shapes for updating */
   public shapes(): ShapeType[] {
-    if (!this._label) {
+    if (this._label === null) {
       throw new Error("Uninitialized label")
     }
     /**
@@ -368,7 +368,7 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** update bounds to current points */
-  private updateBounds() {
+  private updateBounds(): void {
     const bounds = {
       x1: Infinity,
       y1: Infinity,
@@ -403,7 +403,7 @@ export class CustomLabel2D extends Label2D {
    * @param anchor
    * @param scale
    */
-  private scale(anchor: Vector2D, scale: Vector2D) {
+  private scale(anchor: Vector2D, scale: Vector2D): void {
     // Scale minimum to 1 pixel wide/high
     let widthSign = Math.sign(scale.x)
     if (widthSign === 0) {
@@ -459,7 +459,7 @@ export class CustomLabel2D extends Label2D {
    *
    * @param index
    */
-  private getOppositeCorner(index: number) {
+  private getOppositeCorner(index: number): number {
     return (index + 2) % this._corners.length
   }
 }

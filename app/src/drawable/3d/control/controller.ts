@@ -66,10 +66,14 @@ export abstract class Controller extends THREE.Object3D {
    *
    * @param intersection
    */
-  public setHighlighted(intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection): void {
     this._highlightedUnit = null
     for (const axis of this._controlUnits) {
-      if (axis.setHighlighted(intersection) && intersection) {
+      if (
+        axis.setHighlighted(intersection) &&
+        intersection !== null &&
+        intersection !== undefined
+      ) {
         this._highlightedUnit = axis
         this._intersectionPoint = intersection.point
         for (const nonAxis of this._controlUnits) {
@@ -87,8 +91,8 @@ export abstract class Controller extends THREE.Object3D {
    *
    * @param camera
    */
-  public onMouseDown(camera: THREE.Camera) {
-    if (this._highlightedUnit) {
+  public onMouseDown(camera: THREE.Camera): boolean {
+    if (this._highlightedUnit !== null) {
       const normal = new THREE.Vector3()
       camera.getWorldDirection(normal)
       this._dragPlane.setFromNormalAndCoplanarPoint(
@@ -105,8 +109,8 @@ export abstract class Controller extends THREE.Object3D {
    *
    * @param projection
    */
-  public onMouseMove(projection: THREE.Ray) {
-    if (this._highlightedUnit && this._dragPlane) {
+  public onMouseMove(projection: THREE.Ray): boolean {
+    if (this._highlightedUnit !== null && this._dragPlane) {
       const newIntersection = this._highlightedUnit.transform(
         this._intersectionPoint,
         projection,
@@ -125,7 +129,7 @@ export abstract class Controller extends THREE.Object3D {
   }
 
   /** mouse up */
-  public onMouseUp() {
+  public onMouseUp(): boolean {
     return false
   }
 
@@ -135,7 +139,10 @@ export abstract class Controller extends THREE.Object3D {
    * @param raycaster
    * @param intersects
    */
-  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
+  public raycast(
+    raycaster: THREE.Raycaster,
+    intersects: THREE.Intersection[]
+  ): void {
     for (const unit of this._controlUnits) {
       unit.raycast(raycaster, intersects)
     }
@@ -147,7 +154,7 @@ export abstract class Controller extends THREE.Object3D {
   }
 
   /** Toggle local/world */
-  public toggleFrame() {
+  public toggleFrame(): void {
     if (this._labels.length === 1) {
       this._local = !this._local
     } else {
@@ -160,7 +167,7 @@ export abstract class Controller extends THREE.Object3D {
    *
    * @param scale
    */
-  public updateScale(scale: THREE.Vector3) {
+  public updateScale(scale: THREE.Vector3): void {
     for (const unit of this._controlUnits) {
       unit.updateScale(scale)
     }

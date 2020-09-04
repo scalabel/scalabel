@@ -71,7 +71,7 @@ export class Polygon2D extends Label2D {
   }
 
   /** Get cursor for highlighting */
-  public get highlightCursor() {
+  public get highlightCursor(): string {
     if (this._state === Polygon2DState.DRAW) {
       return Cursor.CROSSHAIR
     } else if (
@@ -477,7 +477,7 @@ export class Polygon2D extends Label2D {
 
   /** Get shape objects for committing to state */
   public shapes(): ShapeType[] {
-    if (!this._label) {
+    if (this._label === null) {
       throw new Error("Uninitialized label")
     }
     /**
@@ -561,7 +561,7 @@ export class Polygon2D extends Label2D {
   /**
    * Update the label with the current set of shapes
    */
-  private UpdateLabelShapes() {
+  private UpdateLabelShapes(): void {
     if (this._label === null) {
       return
     }
@@ -572,7 +572,7 @@ export class Polygon2D extends Label2D {
   /**
    * Get vertices of the polygon
    */
-  private getVertices() {
+  private getVertices(): PathPoint2D[] {
     const vertices: PathPoint2D[] = []
     for (const point of this._points) {
       if (point.type === PathPointType.MID) continue
@@ -743,7 +743,7 @@ export class Polygon2D extends Label2D {
 
           while (this._points[0].type !== PathPointType.LINE) {
             const point1 = this._points.shift()
-            if (point1) {
+            if (point1 !== null && point1 !== undefined) {
               this._points.push(point1)
             }
           }
@@ -781,13 +781,13 @@ export class Polygon2D extends Label2D {
           ? null
           : this._points[(selectedLabelIndex + numPoints - 1) % numPoints]
 
-      if (prevPoint && prevPoint.type !== PathPointType.CURVE) {
+      if (prevPoint !== null && prevPoint.type !== PathPointType.CURVE) {
         const prevVertex = this._points[
           (selectedLabelIndex + numPoints - 2) % numPoints
         ]
         prevPoint.copy(this.getMidpoint(prevVertex, point))
       }
-      if (nextPoint && nextPoint.type !== PathPointType.CURVE) {
+      if (nextPoint !== null && nextPoint.type !== PathPointType.CURVE) {
         const nextVertex = this._points[(selectedLabelIndex + 2) % numPoints]
         nextPoint.copy(this.getMidpoint(point, nextVertex))
       }

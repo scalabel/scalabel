@@ -98,7 +98,7 @@ export abstract class Label2D {
 
   /** get category */
   public get category(): number[] {
-    if (this._label && this._label.category) {
+    if (this._label !== null && this._label.category) {
       return this._label.category
     }
     return []
@@ -106,7 +106,7 @@ export abstract class Label2D {
 
   /** get attributes */
   public get attributes(): { [key: number]: number[] } {
-    if (this._label && this._label.attributes) {
+    if (this._label !== null && this._label.attributes) {
       return this._label.attributes
     }
     return {}
@@ -114,7 +114,7 @@ export abstract class Label2D {
 
   /** get label type */
   public get type(): string {
-    if (this._label) {
+    if (this._label !== null) {
       return this._label.type
     }
     return LabelTypeName.EMPTY
@@ -122,7 +122,7 @@ export abstract class Label2D {
 
   /** get label state */
   public get label(): LabelType {
-    if (!this._label) {
+    if (this._label === null) {
       throw new Error("Label uninitialized")
     }
     return this._label
@@ -135,7 +135,7 @@ export abstract class Label2D {
 
   /** get track id */
   public get trackId(): IdType {
-    if (this._label) {
+    if (this._label !== null) {
       return this._label.track
     }
     return INVALID_ID
@@ -143,7 +143,7 @@ export abstract class Label2D {
 
   /** get item index */
   public get item(): number {
-    if (this._label) {
+    if (this._label !== null) {
       return this._label.item
     }
     return -1
@@ -215,7 +215,7 @@ export abstract class Label2D {
    *
    * @param s
    */
-  public setSelected(s: boolean) {
+  public setSelected(s: boolean): void {
     this._selected = s
   }
 
@@ -225,7 +225,7 @@ export abstract class Label2D {
    * @param h
    * @param handleIndex
    */
-  public setHighlighted(h: boolean, handleIndex: number = -1) {
+  public setHighlighted(h: boolean, handleIndex: number = -1): void {
     if (h && handleIndex < 0) {
       throw Error("need to highlight handle as well")
     }
@@ -239,8 +239,8 @@ export abstract class Label2D {
   }
 
   /** Set to manual */
-  public setManual() {
-    if (this._label) {
+  public setManual(): void {
+    if (this._label !== null) {
       this._label.manual = true
     }
   }
@@ -267,7 +267,7 @@ export abstract class Label2D {
     ratio: number,
     position: Vector2D,
     fillStyle: number[]
-  ) {
+  ): void {
     const TAG_WIDTH = 50
     const TAG_HEIGHT = 28
     const [x, y] = position
@@ -275,13 +275,15 @@ export abstract class Label2D {
     ctx.save()
     const config = this._config
     const category =
-      self._label &&
+      self._label !== null &&
       self._label.category[0] < config.categories.length &&
       self._label.category[0] >= 0
         ? config.categories[self._label.category[0]]
         : ""
     const attributes =
-      self._label && self._label.attributes ? self._label.attributes : {}
+      self._label !== null && self._label.attributes
+        ? self._label.attributes
+        : {}
     const words = category.split(" ")
     let tw = TAG_WIDTH
     // Abbreviate tag as the first 3 chars of the last word

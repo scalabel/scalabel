@@ -82,7 +82,7 @@ export class Label2DList {
    *
    * @param callback
    */
-  public subscribe(callback: () => void) {
+  public subscribe(callback: () => void): void {
     this._callbacks.push(callback)
   }
 
@@ -91,7 +91,7 @@ export class Label2DList {
    *
    * @param callback
    */
-  public unsubscribe(callback: () => void) {
+  public unsubscribe(callback: () => void): void {
     const index = this._callbacks.indexOf(callback)
     if (index >= 0) {
       this._callbacks.splice(index, 1)
@@ -155,9 +155,10 @@ export class Label2DList {
     ratio: number,
     hideLabels?: boolean
   ): void {
-    const labelsToDraw = hideLabels
-      ? this._labelList.filter((label) => label.selected)
-      : this._labelList
+    const labelsToDraw =
+      hideLabels && hideLabels !== null && hideLabels !== undefined
+        ? this._labelList.filter((label) => label.selected)
+        : this._labelList
     labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
     labelsToDraw.forEach((v) => v.draw(controlContext, ratio, DrawMode.CONTROL))
   }
@@ -191,7 +192,7 @@ export class Label2DList {
           label.type,
           this._labelTemplates
         )
-        if (newLabel) {
+        if (newLabel !== null) {
           self._labels[labelId] = newLabel
         }
       }
@@ -232,12 +233,12 @@ export class Label2DList {
    *
    * @param label
    */
-  public addUpdatedLabel(label: Label2D) {
+  public addUpdatedLabel(label: Label2D): void {
     this._updatedLabels.add(label)
   }
 
   /** Clear uncommitted label list */
-  public clearUpdatedLabels() {
+  public clearUpdatedLabels(): void {
     this._updatedLabels.clear()
   }
 }

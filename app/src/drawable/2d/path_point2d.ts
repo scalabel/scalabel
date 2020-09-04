@@ -62,9 +62,9 @@ export function makeDrawablePathPoint2D(
   y: number,
   pointType: PathPointType,
   labelId: IdType | undefined
-) {
+): PathPoint2D {
   const label: IdType[] = []
-  if (labelId && isValidId(labelId)) {
+  if (labelId !== null && labelId !== undefined && isValidId(labelId)) {
     label.push(labelId)
   }
   return new PathPoint2D(makePathPoint2D({ x, y, pointType, label }))
@@ -158,7 +158,7 @@ export class PathPoint2D {
    *
    * @param p
    */
-  public copy(p: PathPoint2D) {
+  public copy(p: PathPoint2D): void {
     this._point = p.shape()
   }
 

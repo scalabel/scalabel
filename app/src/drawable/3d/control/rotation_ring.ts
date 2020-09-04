@@ -50,7 +50,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     {
       ;(this.material as THREE.Material).needsUpdate = true
     }
-    if (intersection && intersection.object === this) {
+    if (intersection !== undefined && intersection.object === this) {
       {
         ;(this.material as THREE.Material).opacity = 0.9
       }
@@ -143,8 +143,8 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
    *
    * @param worldScale
    */
-  public updateScale(worldScale: THREE.Vector3) {
-    if (this.parent) {
+  public updateScale(worldScale: THREE.Vector3): void {
+    if (this.parent !== null) {
       const newScale = Math.max(
         1,
         0.45 *

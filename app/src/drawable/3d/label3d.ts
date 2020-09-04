@@ -92,7 +92,7 @@ export abstract class Label3D {
   }
 
   /** set whether label was manually drawn */
-  public setManual() {
+  public setManual(): void {
     this._label.manual = true
   }
 
@@ -112,7 +112,7 @@ export abstract class Label3D {
   /** Set parent label */
   public set parent(parent: Label3D | null) {
     this._parent = parent
-    if (parent && this._label) {
+    if (parent !== null && this._label) {
       this._label.parent = parent.labelId
     } else if (this._label) {
       this._label.parent = INVALID_ID
@@ -158,8 +158,8 @@ export abstract class Label3D {
    *
    * @param intersection
    */
-  public setHighlighted(intersection?: THREE.Intersection) {
-    if (intersection) {
+  public setHighlighted(intersection?: THREE.Intersection): void {
+    if (intersection !== undefined) {
       this._highlighted = true
     } else {
       this._highlighted = false
@@ -171,9 +171,9 @@ export abstract class Label3D {
    *
    * @param child
    */
-  public addChild(child: Label3D) {
+  public addChild(child: Label3D): void {
     if (child.parent !== this) {
-      if (child.parent) {
+      if (child.parent !== null) {
         child.parent.removeChild(child)
       }
       this._children.push(child)
@@ -189,7 +189,7 @@ export abstract class Label3D {
    *
    * @param child
    */
-  public removeChild(child: Label3D) {
+  public removeChild(child: Label3D): void {
     const index = this._children.indexOf(child)
     if (index >= 0) {
       this._children.splice(index, 1)

@@ -50,7 +50,7 @@ export class Plane3D extends Label3D {
    *
    * @param intersection
    */
-  public setHighlighted(intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection): void {
     super.setHighlighted(intersection)
     this._shape.setHighlighted(intersection)
   }
@@ -63,7 +63,7 @@ export class Plane3D extends Label3D {
    * @param y
    * @param camera
    */
-  public onMouseDown(x: number, y: number, camera: THREE.Camera) {
+  public onMouseDown(x: number, y: number, camera: THREE.Camera): boolean {
     if (
       this._label &&
       (this.selected || this.anyChildSelected()) &&
@@ -91,8 +91,8 @@ export class Plane3D extends Label3D {
    *
    * @param projection
    */
-  public onMouseUp() {
-    if (this._temporaryLabel) {
+  public onMouseUp(): void {
+    if (this._temporaryLabel !== null) {
       this._temporaryLabel.onMouseUp()
       this._temporaryLabel = null
     }
@@ -107,7 +107,7 @@ export class Plane3D extends Label3D {
    * @param camera
    */
   public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
-    if (this._temporaryLabel) {
+    if (this._temporaryLabel !== null) {
       return this._temporaryLabel.onMouseMove(x, y, camera)
     }
     return false
@@ -118,7 +118,7 @@ export class Plane3D extends Label3D {
    *
    * @param quaternion
    */
-  public rotate(quaternion: THREE.Quaternion) {
+  public rotate(quaternion: THREE.Quaternion): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.applyQuaternion(quaternion)
     for (const child of this.children) {
@@ -131,7 +131,7 @@ export class Plane3D extends Label3D {
    *
    * @param delta
    */
-  public translate(delta: THREE.Vector3) {
+  public translate(delta: THREE.Vector3): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.position.add(delta)
     for (const child of this.children) {
@@ -145,7 +145,7 @@ export class Plane3D extends Label3D {
    * @param scale
    * @param anchor
    */
-  public scale(scale: THREE.Vector3, anchor: THREE.Vector3) {
+  public scale(scale: THREE.Vector3, anchor: THREE.Vector3): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.scale.x *= scale.x
     this._shape.scale.y *= scale.y
@@ -186,7 +186,7 @@ export class Plane3D extends Label3D {
    */
   public bounds(local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
-    if (!local) {
+    if (local === undefined || !local) {
       box.copy(this._shape.lines.geometry.boundingBox)
       this._shape.updateMatrixWorld(true)
       box.applyMatrix4(this._shape.matrixWorld)
@@ -254,7 +254,7 @@ export class Plane3D extends Label3D {
       category: [category],
       sensors
     })
-    if (center) {
+    if (center !== undefined) {
       this._shape.center = center
     }
   }

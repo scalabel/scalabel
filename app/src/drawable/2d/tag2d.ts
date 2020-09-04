@@ -1,4 +1,3 @@
-import _ from "lodash"
 import { AttributeToolType } from "../../const/common"
 import { Vector2D } from "../../math/vector2d"
 import {
@@ -32,7 +31,7 @@ export class Tag2D extends Label2D {
   /**
    * no-op
    */
-  public onMouseMove() {
+  public onMouseMove(): boolean {
     return false
   }
 
@@ -51,7 +50,7 @@ export class Tag2D extends Label2D {
   /**
    * no-op
    */
-  public updateShapes() {}
+  public updateShapes(): void {}
 
   /**
    * Convert label state to drawable
@@ -72,7 +71,7 @@ export class Tag2D extends Label2D {
    * @param _ratio
    * @param mode
    */
-  public draw(context: Context2D, _ratio: number, mode: DrawMode) {
+  public draw(context: Context2D, _ratio: number, mode: DrawMode): void {
     if (mode === DrawMode.VIEW) {
       context.font = "36px Arial"
       const abbr: string[] = []

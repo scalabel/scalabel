@@ -326,17 +326,28 @@ class LabelPane extends Component<Props> {
       )
     }
 
-    if (
-      pane.child1 == null ||
-      pane.child1 == 0 ||
-      isNaN(pane.child1) ||
-      pane.child2 == null ||
-      pane.child2 == 0 ||
-      isNaN(pane.child2) ||
-      !(pane.child1 in this.state.user.layout.panes) ||
-      !(pane.child2 in this.state.user.layout.panes)
-    ) {
-      return null
+    // If child1 or child2 are numbers
+    if (typeof pane.child1 === "number" && typeof pane.child2 === "number") {
+      if (
+        pane.child1 === 0 ||
+        isNaN(pane.child1) ||
+        pane.child2 === 0 ||
+        isNaN(pane.child2) ||
+        !(pane.child1 in this.state.user.layout.panes) ||
+        !(pane.child2 in this.state.user.layout.panes)
+      ) {
+        return null
+      }
+      // If they are not numbers
+    } else {
+      if (
+        pane.child1 === null ||
+        pane.child1 === undefined ||
+        pane.child2 === null ||
+        pane.child2 === undefined
+      ) {
+        return null
+      }
     }
     if (!pane.split) {
       throw new Error("Missing split type")

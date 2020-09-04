@@ -48,7 +48,7 @@ export abstract class Shape3D extends Object3D {
     shape: ShapeType,
     id: IdType,
     _activeCamera?: THREE.Camera
-  ) {
+  ): void {
     this._shape = shape
     this._shapeId = id
   }
@@ -59,7 +59,7 @@ export abstract class Shape3D extends Object3D {
    * @param viewerId
    * @param v
    */
-  public setVisible(viewerId: number, v: boolean = true) {
+  public setVisible(viewerId: number, v: boolean = true): void {
     if (v) {
       this.layers.enable(viewerId)
     } else {

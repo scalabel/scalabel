@@ -29,7 +29,7 @@ export class Node2D extends Point2D {
 
   /** Get color */
   public get color(): Readonly<number[]> | null {
-    if (this._color) {
+    if (this._color !== null && this._color !== undefined) {
       return this._color
     }
     return null
@@ -41,7 +41,7 @@ export class Node2D extends Point2D {
   }
 
   /** Hide node */
-  public hide() {
+  public hide(): void {
     this._hidden = true
   }
 

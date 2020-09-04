@@ -64,7 +64,7 @@ export class Label2DHandler {
     handleIndex: number
   ): boolean {
     if (!this.hasSelectedLabels() || !this.isEditingSelectedLabels()) {
-      if (this._highlightedLabel) {
+      if (this._highlightedLabel !== null) {
         this.selectHighlighted()
       } else {
         Session.dispatch(
@@ -84,7 +84,7 @@ export class Label2DHandler {
           state.task.config.labelTypes[state.user.select.labelType],
           state.task.config.label2DTemplates
         )
-        if (label) {
+        if (label !== null) {
           label.initTemp(state, coord)
           this._labelList.selectedLabels.push(label)
           this._labelList.labelList.push(label)
@@ -177,7 +177,7 @@ export class Label2DHandler {
       return true
     } else {
       if (labelIndex >= 0) {
-        if (!this._highlightedLabel) {
+        if (this._highlightedLabel === null) {
           this._highlightedLabel = this._labelList.labelList[labelIndex]
         }
         if (this._highlightedLabel.index !== labelIndex) {
@@ -268,7 +268,7 @@ export class Label2DHandler {
    *
    * @param state
    */
-  public updateState(state: State) {
+  public updateState(state: State): void {
     this._state = state
     if (this._selectedItemIndex !== state.user.select.item) {
       this._highlightedLabel = null
@@ -393,7 +393,7 @@ export class Label2DHandler {
    * @param index1
    * @param index2
    */
-  private swapOrders(index1: number, index2: number) {
+  private swapOrders(index1: number, index2: number): void {
     // Check that indices are valid
     if (
       index1 >= 0 &&
@@ -419,7 +419,7 @@ export class Label2DHandler {
    * @param index
    * @param newPosition
    */
-  private changeLabelOrder(index: number, newPosition: number) {
+  private changeLabelOrder(index: number, newPosition: number): void {
     const labels = this._labelList.labelList
     if (
       index >= 0 &&
@@ -456,7 +456,7 @@ export class Label2DHandler {
   /**
    * Merge different tracks
    */
-  private mergeTracks() {
+  private mergeTracks(): void {
     const tracks = getSelectedTracks(this._state)
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))

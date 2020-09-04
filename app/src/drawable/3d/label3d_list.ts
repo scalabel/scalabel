@@ -1,4 +1,3 @@
-import _ from "lodash"
 import * as THREE from "three"
 import { policyFromString } from "../../common/track"
 import { LabelTypeName, TrackPolicyType } from "../../const/common"
@@ -80,7 +79,7 @@ export class Label3DList {
    *
    * @param callback
    */
-  public subscribe(callback: () => void) {
+  public subscribe(callback: () => void): void {
     this._callbacks.push(callback)
   }
 
@@ -89,7 +88,7 @@ export class Label3DList {
    *
    * @param callback
    */
-  public unsubscribe(callback: () => void) {
+  public unsubscribe(callback: () => void): void {
     const index = this._callbacks.indexOf(callback)
     if (index >= 0) {
       this._callbacks.splice(index, 1)
@@ -182,7 +181,7 @@ export class Label3DList {
     const newRaycastMap: { [id: string]: Label3D } = {}
     const item = state.task.items[state.user.select.item]
 
-    if (this._selectedLabel) {
+    if (this._selectedLabel !== null) {
       this._selectedLabel.selected = false
     }
     this._selectedLabel = null
@@ -197,7 +196,7 @@ export class Label3DList {
         newLabels[id] = this._labels[id]
       } else {
         const newLabel = makeDrawableLabel3D(this, item.labels[id].type)
-        if (newLabel) {
+        if (newLabel !== null) {
           newLabels[id] = newLabel
         }
       }
@@ -239,7 +238,7 @@ export class Label3DList {
       }
     }
 
-    if (this.selectedLabel) {
+    if (this.selectedLabel !== null) {
       this.control.visible = true
     } else {
       this.control.visible = false
@@ -259,7 +258,7 @@ export class Label3DList {
    * @param obj
    */
   public getLabelFromRaycastedObject3D(obj: THREE.Object3D): Label3D | null {
-    while (obj.parent && !(obj.id in this._raycastMap)) {
+    while (obj.parent !== null && !(obj.id in this._raycastMap)) {
       obj = obj.parent
     }
     if (obj.id in this._raycastMap) {
@@ -273,7 +272,7 @@ export class Label3DList {
    *
    * @param camera
    */
-  public setActiveCamera(camera: THREE.Camera) {
+  public setActiveCamera(camera: THREE.Camera): void {
     for (const label of Object.values(this._labels)) {
       label.activeCamera = camera
     }
@@ -290,12 +289,12 @@ export class Label3DList {
    *
    * @param label
    */
-  public addUpdatedLabel(label: Label3D) {
+  public addUpdatedLabel(label: Label3D): void {
     this._updatedLabels.add(label)
   }
 
   /** Clear uncommitted label list */
-  public clearUpdatedLabels() {
+  public clearUpdatedLabels(): void {
     this._updatedLabels.clear()
   }
 }

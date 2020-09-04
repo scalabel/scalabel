@@ -1,4 +1,3 @@
-import _ from "lodash"
 import * as THREE from "three"
 import { selectLabel, selectLabel3dType } from "../../action/select"
 import Session from "../../common/session"
@@ -72,7 +71,7 @@ export class Label3DHandler {
    * @param itemIndex
    * @param viewerId
    */
-  public updateState(state: State, itemIndex: number, viewerId: number) {
+  public updateState(state: State, itemIndex: number, viewerId: number): void {
     this._selectedItemIndex = itemIndex
     this._viewerConfig = getCurrentViewerConfig(state, viewerId)
     this._sensorIds = Object.keys(state.task.sensors).map((key) => Number(key))
@@ -104,7 +103,7 @@ export class Label3DHandler {
       return false
     }
 
-    if (this._highlightedLabel) {
+    if (this._highlightedLabel !== null) {
       const consumed = this._highlightedLabel.onMouseDown(x, y, this._camera)
       if (consumed) {
         this._mouseDownOnSelection = true
@@ -123,7 +122,7 @@ export class Label3DHandler {
     if (Session.label3dList.control.visible) {
       consumed = Session.label3dList.control.onMouseUp()
     }
-    if (!consumed && Session.label3dList.selectedLabel) {
+    if (!consumed && Session.label3dList.selectedLabel !== null) {
       Session.label3dList.selectedLabel.onMouseUp()
     }
     commitLabels(
@@ -157,7 +156,7 @@ export class Label3DHandler {
   ): boolean {
     if (
       this._mouseDownOnSelection &&
-      Session.label3dList.selectedLabel &&
+      Session.label3dList.selectedLabel !== null &&
       Session.label3dList.control.visible &&
       Session.label3dList.control.highlighted
     ) {
@@ -170,7 +169,7 @@ export class Label3DHandler {
         return true
       }
     }
-    if (this._mouseDownOnSelection && this._highlightedLabel) {
+    if (this._mouseDownOnSelection && this._highlightedLabel !== null) {
       this._highlightedLabel.onMouseMove(x, y, this._camera)
       return true
     } else {
@@ -193,7 +192,7 @@ export class Label3DHandler {
           Session.label3dList,
           Session.label3dList.currentLabelType
         )
-        if (label) {
+        if (label !== null) {
           const center = new Vector3D()
           switch (this._viewerConfig.type) {
             case ViewerConfigTypeName.POINT_CLOUD:
@@ -202,7 +201,7 @@ export class Label3DHandler {
               )
               break
             case ViewerConfigTypeName.IMAGE_3D:
-              if (this._sensor.extrinsics) {
+              if (this._sensor.extrinsics !== undefined) {
                 const worldDirection = new THREE.Vector3()
                 this._camera.getWorldDirection(worldDirection)
                 worldDirection.normalize()
@@ -243,7 +242,7 @@ export class Label3DHandler {
       case Key.T_UP:
       case Key.T_LOW:
         if (this.isKeyDown(Key.SHIFT)) {
-          if (Session.label3dList.selectedLabel) {
+          if (Session.label3dList.selectedLabel !== null) {
             const target = (this._viewerConfig as PointCloudViewerConfigType)
               .target
             Session.label3dList.selectedLabel.move(
@@ -262,7 +261,7 @@ export class Label3DHandler {
       const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
       if (consumed) {
         this._keyDownMap[e.key] = true
-        if (this._keyThrottleTimer) {
+        if (this._keyThrottleTimer !== null) {
           window.clearTimeout(this._keyThrottleTimer)
         }
         this.timedRepeat(() => {
@@ -281,7 +280,7 @@ export class Label3DHandler {
    *
    * @param e
    */
-  public onKeyUp(e: KeyboardEvent) {
+  public onKeyUp(e: KeyboardEvent): boolean {
     delete this._keyDownMap[e.key]
     if (Session.label3dList.selectedLabel !== null) {
       Session.label3dList.control.onKeyUp(e)
@@ -305,17 +304,17 @@ export class Label3DHandler {
    * @param point
    * @param intersection
    */
-  private highlight(intersection?: THREE.Intersection) {
-    if (this._highlightedLabel) {
+  private highlight(intersection?: THREE.Intersection): void {
+    if (this._highlightedLabel !== null) {
       this._highlightedLabel.setHighlighted()
     }
     this._highlightedLabel = null
 
-    if (intersection) {
+    if (intersection !== undefined) {
       const object = intersection.object
       const label = Session.label3dList.getLabelFromRaycastedObject3D(object)
 
-      if (label) {
+      if (label !== null) {
         label.setHighlighted(intersection)
         this._highlightedLabel = label
       }
@@ -336,7 +335,7 @@ export class Label3DHandler {
   /**
    * Select highlighted label
    */
-  private selectHighlighted() {
+  private selectHighlighted(): void {
     if (this._highlightedLabel !== null) {
       if (
         (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) &&
@@ -373,7 +372,7 @@ export class Label3DHandler {
    * @param key
    * @param timeout
    */
-  private timedRepeat(fn: () => void, key: string, timeout: number = 30) {
+  private timedRepeat(fn: () => void, key: string, timeout: number = 30): void {
     if (this.isKeyDown(key)) {
       fn()
       setTimeout(() => this.timedRepeat(fn, key, timeout), timeout)
