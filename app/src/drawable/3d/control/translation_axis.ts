@@ -70,9 +70,13 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Mouse movement while mouse down on box (from raycast)
+   *
    * @param oldIntersection
    * @param newProjection
    * @param dragPlane
+   * @param labels
+   * @param _bounds
+   * @param local
    */
   public transform(
     oldIntersection: THREE.Vector3,
@@ -137,7 +141,9 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
     {
@@ -192,6 +198,7 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Override ThreeJS raycast to intersect with box
+   *
    * @param raycaster
    * @param intersects
    */
@@ -202,6 +209,7 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
   public updateScale(worldScale: THREE.Vector3) {

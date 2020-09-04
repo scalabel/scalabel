@@ -65,7 +65,9 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Constructor, ons subscription to store
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)
@@ -126,6 +128,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handles canvas redraw
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
@@ -176,6 +179,8 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * notify state is updated
+   *
+   * @param state
    */
   protected updateState(state: State): void {
     if (this.display !== this.props.display) {
@@ -187,6 +192,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set references to div elements and try to initialize renderer
+   *
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */

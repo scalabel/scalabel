@@ -201,17 +201,30 @@ export abstract class Label2D {
     return this._temporary
   }
 
-  /** Set whether the label is highlighted */
+  /**
+   * Set whether the label is highlighted
+   *
+   * @param mode
+   */
   public setViewMode(mode: Partial<ViewMode>): void {
     this._viewMode = _.assign(this._viewMode, mode)
   }
 
-  /** select the label */
+  /**
+   * select the label
+   *
+   * @param s
+   */
   public setSelected(s: boolean) {
     this._selected = s
   }
 
-  /** highlight the label */
+  /**
+   * highlight the label
+   *
+   * @param h
+   * @param handleIndex
+   */
   public setHighlighted(h: boolean, handleIndex: number = -1) {
     if (h && handleIndex < 0) {
       throw Error("need to highlight handle as well")
@@ -234,6 +247,7 @@ export abstract class Label2D {
 
   /**
    * Draw the label on viewing or control canvas
+   *
    * @param {Context2D} canvas
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
@@ -242,6 +256,7 @@ export abstract class Label2D {
 
   /**
    * Draw the label tag on viewing or control canvas
+   *
    * @param {Context2D} ctx
    * @param {Vector2D} position
    * @param {number} ratio
@@ -301,7 +316,9 @@ export abstract class Label2D {
 
   /**
    * Handle mouse down
+   *
    * @param coord
+   * @param _handleIndex
    */
   public onMouseDown(coord: Vector2D, _handleIndex: number): boolean {
     this._mouseDown = true
@@ -314,7 +331,9 @@ export abstract class Label2D {
 
   /**
    * Handle mouse up
+   *
    * @param coord
+   * @param _coord
    */
   public onMouseUp(_coord: Vector2D): boolean {
     this._mouseDown = false
@@ -323,6 +342,7 @@ export abstract class Label2D {
 
   /**
    * Process mouse move
+   *
    * @param {Vector2D} coord: mouse coordinate
    * @param {Size2D} limit: limit of the canvas frame
    */
@@ -335,18 +355,21 @@ export abstract class Label2D {
 
   /**
    * handle keyboard down event
+   *
    * @param e pressed key
    */
   public abstract onKeyDown(e: string): boolean
 
   /**
    * handle keyboard up event
+   *
    * @param e pressed key
    */
   public abstract onKeyUp(e: string): void
 
   /**
    * Expand the primitive shapes to drawable shapes
+   *
    * @param {ShapeType[]} shapes
    */
   public abstract updateShapes(shapes: ShapeType[]): void
@@ -356,8 +379,10 @@ export abstract class Label2D {
 
   /**
    * Initialize this label to be temporary
+   *
    * @param {State} state
    * @param {Vector2D} start: starting coordinate of the label
+   * @param start
    */
   public initTemp(state: State, start: Vector2D): void {
     this._order = state.task.status.maxOrder + 1
@@ -374,7 +399,13 @@ export abstract class Label2D {
     this._color = getColorById(this._labelId, this._trackId)
   }
 
-  /** Convert label state to drawable */
+  /**
+   * Convert label state to drawable
+   *
+   * @param state
+   * @param itemIndex
+   * @param labelId
+   */
   public updateState(state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
     this._label = _.cloneDeep(item.labels[labelId])
@@ -398,6 +429,7 @@ export abstract class Label2D {
 
   /**
    * Initialize the temp label content
+   *
    * @param state
    * @param _start
    */

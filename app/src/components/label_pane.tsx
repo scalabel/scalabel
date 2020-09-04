@@ -27,7 +27,12 @@ import Image3DViewer from "./image3d_viewer"
 import Viewer2D from "./viewer2d"
 import Viewer3D from "./viewer3d"
 
-/** Make drawable viewer based on viewer config */
+/**
+ * Make drawable viewer based on viewer config
+ *
+ * @param viewerConfig
+ * @param viewerId
+ */
 export function viewerFactory(
   viewerConfig: ViewerConfigType,
   viewerId: number
@@ -45,7 +50,11 @@ export function viewerFactory(
   return null
 }
 
-/** convert string to enum */
+/**
+ * convert string to enum
+ *
+ * @param type
+ */
 function viewerTypeFromString(type: string): types.ViewerConfigTypeName {
   switch (type) {
     case types.ViewerConfigTypeName.IMAGE:
@@ -61,7 +70,12 @@ function viewerTypeFromString(type: string): types.ViewerConfigTypeName {
   }
 }
 
-/** Returns whether the config types are compatible */
+/**
+ * Returns whether the config types are compatible
+ *
+ * @param type1
+ * @param type2
+ */
 function viewerConfigTypesCompatible(type1: string, type2: string): boolean {
   let configType1 = viewerTypeFromString(type1)
   let configType2 = viewerTypeFromString(type2)
@@ -110,9 +124,10 @@ const HIDDEN_UNIT_SIZE = 50
  */
 class LabelPane extends Component<Props> {
   /**
-  * Constructor
-  * @param props
-  */ 
+   * Constructor
+   *
+   * @param props
+   */
   constructor(props: Props) {
     super(props)
   }
@@ -312,8 +327,12 @@ class LabelPane extends Component<Props> {
     }
 
     if (
-      (pane.child1 == null || pane.child1 == 0 || isNaN(pane.child1)) ||
-      (pane.child2 == null || pane.child2 == 0 || isNaN(pane.child2)) ||
+      pane.child1 == null ||
+      pane.child1 == 0 ||
+      isNaN(pane.child1) ||
+      pane.child2 == null ||
+      pane.child2 == 0 ||
+      isNaN(pane.child2) ||
       !(pane.child1 in this.state.user.layout.panes) ||
       !(pane.child2 in this.state.user.layout.panes)
     ) {

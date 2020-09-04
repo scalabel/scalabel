@@ -34,6 +34,7 @@ interface Props {
 
 /**
  * Go to the next Item
+ *
  * @param {number} index
  */
 function goToItemWithIndex(index: number): void {
@@ -58,6 +59,7 @@ class PlayerControl extends Component<Props> {
 
   /**
    * Constructor
+   *
    * @param props
    */
   public constructor(props: Readonly<Props>) {
@@ -88,6 +90,7 @@ class PlayerControl extends Component<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): React.ReactFragment {
@@ -175,6 +178,7 @@ class PlayerControl extends Component<Props> {
 
   /**
    * Handler on slider change
+   *
    * @param {ChangeEvent<{}>} _event
    * @param {number | number[]} newValue
    */
@@ -197,6 +201,7 @@ class PlayerControl extends Component<Props> {
 
   /**
    * Handler on slider change
+   *
    * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} event
    */
   private handleInputChange(
@@ -230,7 +235,11 @@ class PlayerControl extends Component<Props> {
     this.forceUpdate()
   }
 
-  /** Listen to key down */
+  /**
+   * Listen to key down
+   *
+   * @param e
+   */
   private onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
       case Key.ARROW_LEFT:

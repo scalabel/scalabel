@@ -43,6 +43,7 @@ interface Props extends DrawableProps {
 
 /**
  * Normalize mouse coordinates to make canvas left top origin
+ *
  * @param x
  * @param y
  * @param canvas
@@ -91,7 +92,9 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Constructor, ons subscription to store
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)
@@ -142,6 +145,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element {
@@ -182,6 +186,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handles canvas redraw
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
@@ -199,6 +204,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle mouse down
+   *
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   public onMouseDown(e: React.MouseEvent<HTMLCanvasElement>): void {
@@ -222,6 +228,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle mouse up
+   *
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   public onMouseUp(e: React.MouseEvent<HTMLCanvasElement>): void {
@@ -235,6 +242,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle mouse move
+   *
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   public onMouseMove(e: React.MouseEvent<HTMLCanvasElement>): void {
@@ -279,6 +287,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle keyboard events
+   *
    * @param {KeyboardEvent} e
    */
   public onKeyDown(e: KeyboardEvent): void {
@@ -295,6 +304,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle keyboard events
+   *
    * @param {KeyboardEvent} e
    */
   public onKeyUp(e: KeyboardEvent): void {
@@ -311,6 +321,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * notify state is updated
+   *
+   * @param state
    */
   protected updateState(state: State): void {
     if (this.display !== this.props.display) {
@@ -357,7 +369,9 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle double click
+   *
    * @param _e
+   * @param e
    */
   private onDoubleClick(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (this._labelHandler.onDoubleClick()) {
@@ -367,6 +381,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set references to div elements and try to initialize renderer
+   *
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */

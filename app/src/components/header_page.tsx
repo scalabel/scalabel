@@ -26,6 +26,7 @@ export interface HeaderPageProps {
 
 /**
  * Renders a page split with a header
+ *
  * @param props
  * @constructor
  */

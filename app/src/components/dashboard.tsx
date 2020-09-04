@@ -147,6 +147,7 @@ interface ListEntryClassType {
 
 /**
  * creates the dashboard component
+ *
  * @param props
  * @constructor
  */
@@ -252,6 +253,7 @@ function Dashboard(props: DashboardProps): JSX.Element {
   )
   /**
    * renders the dashboard
+   *
    * @return component
    */
   return (
@@ -265,7 +267,11 @@ function Dashboard(props: DashboardProps): JSX.Element {
   )
 }
 
-/** creates the header */
+/**
+ * creates the header
+ *
+ * @param props
+ */
 function header(props: HeaderProps): JSX.Element {
   const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
@@ -306,7 +312,11 @@ function header(props: HeaderProps): JSX.Element {
   )
 }
 
-/** creates the sidebar */
+/**
+ * creates the sidebar
+ *
+ * @param props
+ */
 function sidebar(props: SidebarProps): JSX.Element {
   const { classes, projectMetaData, vendor } = props
   const sidebarListItems = [
@@ -359,7 +369,11 @@ function sidebar(props: SidebarProps): JSX.Element {
   )
 }
 
-/** sidebar list entry */
+/**
+ * sidebar list entry
+ *
+ * @param props
+ */
 function listEntry(props: ListEntryProps): JSX.Element {
   const { classes, tag, entry } = props
   return (

@@ -48,7 +48,9 @@ export class Cube3D extends Shape3D {
 
   /**
    * Make box with assigned id
+   *
    * @param id
+   * @param label
    */
   constructor(label: Label3D) {
     super(label)
@@ -108,7 +110,12 @@ export class Cube3D extends Shape3D {
     return ShapeTypeName.CUBE
   }
 
-  /** Set visibility for viewer */
+  /**
+   * Set visibility for viewer
+   *
+   * @param viewerId
+   * @param v
+   */
   public setVisible(viewerId: number, v: boolean = true) {
     super.setVisible(viewerId, v)
     if (v) {
@@ -128,6 +135,7 @@ export class Cube3D extends Shape3D {
 
   /**
    * Set color
+   *
    * @param color
    */
   public set color(color: number[]) {
@@ -203,6 +211,7 @@ export class Cube3D extends Shape3D {
 
   /**
    * attach to plane
+   *
    * @param plane
    */
   public attachToPlane(plane: Plane3D) {
@@ -211,13 +220,19 @@ export class Cube3D extends Shape3D {
 
   /**
    * attach to plane
+   *
    * @param plane
    */
   public detachFromPlane() {
     this._grid = null
   }
 
-  /** update parameters */
+  /**
+   * update parameters
+   *
+   * @param shape
+   * @param id
+   */
   public updateState(shape: ShapeType, id: IdType) {
     const geometry = this._box.geometry as THREE.Geometry
     for (const face of geometry.faces) {
@@ -236,7 +251,9 @@ export class Cube3D extends Shape3D {
 
   /**
    * Add to scene for rendering
+   *
    * @param scene
+   * @param camera
    */
   public render(scene: THREE.Scene, camera: THREE.Camera): void {
     if (this._highlighted) {
@@ -273,7 +290,11 @@ export class Cube3D extends Shape3D {
     }
   }
 
-  /** Set highlighted */
+  /**
+   * Set highlighted
+   *
+   * @param intersection
+   */
   public setHighlighted(intersection?: THREE.Intersection) {
     for (const sphere of this._controlSpheres) {
       {
@@ -310,6 +331,7 @@ export class Cube3D extends Shape3D {
 
   /**
    * Override ThreeJS raycast to intersect with box
+   *
    * @param raycaster
    * @param intersects
    */
@@ -342,6 +364,7 @@ export class Cube3D extends Shape3D {
 
   /**
    * Init params for click creation
+   *
    * @param x
    * @param y
    * @param camera
@@ -377,7 +400,11 @@ export class Cube3D extends Shape3D {
 
   /**
    * Drag to mouse
+   *
    * @param projection
+   * @param x
+   * @param y
+   * @param camera
    */
   public drag(x: number, y: number, camera: THREE.Camera) {
     const projection = projectionFromNDC(x, y, camera)
@@ -576,7 +603,9 @@ export class Cube3D extends Shape3D {
 
   /**
    * Set sphere positions from normal
+   *
    * @param normal
+   * @param camera
    */
   public setControlSpheres(camera: THREE.Camera) {
     // Find normal closest to camera

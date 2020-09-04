@@ -86,9 +86,13 @@ export class Polygon2D extends Label2D {
 
   /**
    * Draw the label on viewing or control canvas
+   *
    * @param _context
    * @param _ratio
    * @param _mode
+   * @param context
+   * @param ratio
+   * @param mode
    */
   public draw(context: Context2D, ratio: number, mode: DrawMode): void {
     const self = this
@@ -244,7 +248,9 @@ export class Polygon2D extends Label2D {
 
   /**
    * Handle mouse down
+   *
    * @param coord
+   * @param handleIndex
    */
   public onMouseDown(coord: Vector2D, handleIndex: number): boolean {
     this._mouseDown = true
@@ -302,8 +308,11 @@ export class Polygon2D extends Label2D {
 
   /**
    * Handle mouse move
+   *
    * @param coord
    * @param _limit
+   * @param _labelIndex
+   * @param handleIndex
    */
   public onMouseMove(
     coord: Vector2D,
@@ -329,6 +338,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * Handle mouse up
+   *
    * @param coord
    */
   public onMouseUp(coord: Vector2D): boolean {
@@ -366,6 +376,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * handle keyboard down event
+   *
    * @param e pressed key
    */
   public onKeyDown(e: string): boolean {
@@ -381,6 +392,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * handle keyboard up event
+   *
    * @param e pressed key
    */
   public onKeyUp(e: string): void {
@@ -484,7 +496,9 @@ export class Polygon2D extends Label2D {
 
   /**
    * to update the shape of polygon
+   *
    * @param _shapes
+   * @param shapes
    */
   public updateShapes(shapes: ShapeType[]): void {
     if (this._label === null) {
@@ -522,7 +536,9 @@ export class Polygon2D extends Label2D {
 
   /**
    * create new polygon label
+   *
    * @param _state
+   * @param state
    * @param _start
    */
   protected initTempLabel(state: State, _start: Vector2D): LabelType {
@@ -588,7 +604,9 @@ export class Polygon2D extends Label2D {
 
   /**
    * Move the polygon
+   *
    * @param _end
+   * @param end
    * @param _limit
    */
   private move(end: Vector2D, _limit: Size2D): void {
@@ -605,8 +623,10 @@ export class Polygon2D extends Label2D {
   /**
    * add a new vertex to polygon label
    * it will return whether it is FINISHED
+   *
    * @param _coord
    * @param _limit
+   * @param coord
    */
   private addVertex(coord: Vector2D): boolean {
     let closed = false
@@ -734,7 +754,9 @@ export class Polygon2D extends Label2D {
 
   /**
    * reshape the polygon: drag vertex or control points
+   *
    * @param _end
+   * @param end
    * @param _limit
    */
   private reshape(end: Vector2D, _limit: Size2D): void {
@@ -774,6 +796,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * return the midpoint of the line
+   *
    * @param prev the previous vertex
    * @param next the next vertex
    */
@@ -789,6 +812,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * return the control points of the bezier curve
+   *
    * @param src the source vertex
    * @param dest the next vertex
    */
@@ -891,6 +915,10 @@ export class Polygon2D extends Label2D {
   /**
    * Given three collinear points p, q, r, the function checks if q lies
    * on line segment pr
+   *
+   * @param p
+   * @param q
+   * @param r
    */
   private onSegment(p: PathPoint2D, q: PathPoint2D, r: PathPoint2D): boolean {
     if (
@@ -910,6 +938,10 @@ export class Polygon2D extends Label2D {
    * 0 -> p, q and r are collinear
    * 1 -> Clockwise
    * 2 -> Counterclockwise
+   *
+   * @param p
+   * @param q
+   * @param r
    */
   private orientation(
     p: PathPoint2D,
@@ -929,6 +961,9 @@ export class Polygon2D extends Label2D {
 
   /**
    * to check whether two line segments intersect
+   *
+   * @param a
+   * @param b
    */
   private intersect(a: PathPoint2D[], b: PathPoint2D[]): boolean {
     const p1 = a[0]
@@ -955,6 +990,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * Whether a specific key is pressed down
+   *
    * @param key - the key to check
    */
   private isKeyDown(key: Key): boolean {
@@ -963,6 +999,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * Get index of previous point, circular indexing
+   *
    * @param index
    */
   private getPreviousIndex(index: number): number {
@@ -975,6 +1012,7 @@ export class Polygon2D extends Label2D {
 
   /**
    * Get index of previous point, circular indexing
+   *
    * @param index
    */
   private getNextIndex(index: number): number {

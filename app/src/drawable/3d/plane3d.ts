@@ -36,7 +36,10 @@ export class Plane3D extends Label3D {
 
   /**
    * Modify ThreeJS objects to draw label
+   *
    * @param {THREE.Scene} scene: ThreeJS Scene Object
+   * @param scene
+   * @param _camera
    */
   public render(scene: THREE.Scene, _camera: THREE.Camera): void {
     this._shape.render(scene)
@@ -44,6 +47,7 @@ export class Plane3D extends Label3D {
 
   /**
    * Highlight box
+   *
    * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection) {
@@ -53,7 +57,11 @@ export class Plane3D extends Label3D {
 
   /**
    * Handle mouse move
+   *
    * @param projection
+   * @param x
+   * @param y
+   * @param camera
    */
   public onMouseDown(x: number, y: number, camera: THREE.Camera) {
     if (
@@ -80,6 +88,7 @@ export class Plane3D extends Label3D {
 
   /**
    * Handle mouse up
+   *
    * @param projection
    */
   public onMouseUp() {
@@ -91,7 +100,11 @@ export class Plane3D extends Label3D {
 
   /**
    * Handle mouse move
+   *
    * @param projection
+   * @param x
+   * @param y
+   * @param camera
    */
   public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
     if (this._temporaryLabel) {
@@ -100,7 +113,11 @@ export class Plane3D extends Label3D {
     return false
   }
 
-  /** Rotate */
+  /**
+   * Rotate
+   *
+   * @param quaternion
+   */
   public rotate(quaternion: THREE.Quaternion) {
     this._labelList.addUpdatedLabel(this)
     this._shape.applyQuaternion(quaternion)
@@ -109,7 +126,11 @@ export class Plane3D extends Label3D {
     }
   }
 
-  /** Translate */
+  /**
+   * Translate
+   *
+   * @param delta
+   */
   public translate(delta: THREE.Vector3) {
     this._labelList.addUpdatedLabel(this)
     this._shape.position.add(delta)
@@ -118,7 +139,12 @@ export class Plane3D extends Label3D {
     }
   }
 
-  /** Scale */
+  /**
+   * Scale
+   *
+   * @param scale
+   * @param anchor
+   */
   public scale(scale: THREE.Vector3, anchor: THREE.Vector3) {
     this._labelList.addUpdatedLabel(this)
     this._shape.scale.x *= scale.x
@@ -128,7 +154,11 @@ export class Plane3D extends Label3D {
     this._shape.position.add(anchor)
   }
 
-  /** Move */
+  /**
+   * Move
+   *
+   * @param position
+   */
   public move(position: THREE.Vector3): void {
     this._shape.position.copy(position)
     this._labelList.addUpdatedLabel(this)
@@ -149,7 +179,11 @@ export class Plane3D extends Label3D {
     return this._shape.scale
   }
 
-  /** bounds of plane */
+  /**
+   * bounds of plane
+   *
+   * @param local
+   */
   public bounds(local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
     if (!local) {
@@ -164,7 +198,12 @@ export class Plane3D extends Label3D {
 
   /**
    * Expand the primitive shapes to drawable shapes
+   *
    * @param {ShapeType[]} shapes
+   * @param state
+   * @param itemIndex
+   * @param labelId
+   * @param activeCamera
    */
   public updateState(
     state: State,
@@ -195,7 +234,12 @@ export class Plane3D extends Label3D {
 
   /**
    * Initialize label
+   *
    * @param {State} state
+   * @param itemIndex
+   * @param category
+   * @param center
+   * @param sensors
    */
   public init(
     itemIndex: number,

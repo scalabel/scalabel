@@ -25,6 +25,7 @@ interface ProjectListState {
 
 /** Project list sidebar component. Re-renders after
  *  submission
+ *
  * @param props
  */
 class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
@@ -32,6 +33,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   private projectsToExpress = getProjects()
   /**
    * Constructor
+   *
    * @param props
    */
   public constructor(props: ProjectListProps) {
@@ -44,6 +46,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   /**
    * method to process changes in props, which gets project from backend
    * and then changes state to force a reload of this component
+   *
    * @param props
    */
   public UNSAFE_componentWillReceiveProps(props: ProjectListProps): void {

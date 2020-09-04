@@ -43,6 +43,7 @@ export class Crosshair2D extends React.Component<Props, State> {
 
   /**
    * Constructor
+   *
    * @param props
    */
   constructor(props: Readonly<Props>) {
@@ -61,6 +62,7 @@ export class Crosshair2D extends React.Component<Props, State> {
 
   /**
    * ToolBar render function
+   *
    * @return component
    */
   public render(): React.ReactNode {
@@ -116,6 +118,7 @@ export class Crosshair2D extends React.Component<Props, State> {
 
   /**
    * update crosshair
+   *
    * @param {number} x
    * @param {number} y
    * @param {number} displayX
@@ -143,6 +146,8 @@ export class Crosshair2D extends React.Component<Props, State> {
 
   /**
    * update crosshair when mouse moves
+   *
+   * @param e
    */
   public onMouseMove(e: React.MouseEvent<HTMLElement>): void {
     if (this.props.display !== null && this != null) {

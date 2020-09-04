@@ -80,7 +80,13 @@ export class CustomLabel2D extends Label2D {
     }
   }
 
-  /** Draw according to template */
+  /**
+   * Draw according to template
+   *
+   * @param context
+   * @param ratio
+   * @param mode
+   */
   public draw(context: Context2D, ratio: number, mode: DrawMode): void {
     const self = this
 
@@ -166,7 +172,12 @@ export class CustomLabel2D extends Label2D {
     }
   }
 
-  /** Override on mouse down */
+  /**
+   * Override on mouse down
+   *
+   * @param coord
+   * @param handleIndex
+   */
   public onMouseDown(coord: Vector2D, handleIndex: number): boolean {
     const returnValue = super.onMouseDown(coord, handleIndex)
     this.editing = true
@@ -183,7 +194,14 @@ export class CustomLabel2D extends Label2D {
     return returnValue
   }
 
-  /** Handle mouse move */
+  /**
+   * Handle mouse move
+   *
+   * @param coord
+   * @param _limit
+   * @param _labelIndex
+   * @param _handleIndex
+   */
   public onMouseMove(
     coord: Vector2D,
     _limit: Size2D,
@@ -230,14 +248,22 @@ export class CustomLabel2D extends Label2D {
     return false
   }
 
-  /** Override on mouse up */
+  /**
+   * Override on mouse up
+   *
+   * @param coord
+   */
   public onMouseUp(coord: Vector2D): boolean {
     const returnValue = super.onMouseUp(coord)
     this.editing = false
     return returnValue
   }
 
-  /** On key down */
+  /**
+   * On key down
+   *
+   * @param key
+   */
   public onKeyDown(key: string): boolean {
     this._keyDownMap[key] = true
     return true
@@ -245,7 +271,9 @@ export class CustomLabel2D extends Label2D {
 
   /**
    * handle keyboard up event
+   *
    * @param e pressed key
+   * @param key
    */
   public onKeyUp(key: string): void {
     delete this._keyDownMap[key]
@@ -253,6 +281,7 @@ export class CustomLabel2D extends Label2D {
 
   /**
    * Expand the primitive shapes to drawable shapes
+   *
    * @param {ShapeType[]} shapes
    */
   public updateShapes(shapes: ShapeType[]): void {
@@ -297,7 +326,12 @@ export class CustomLabel2D extends Label2D {
     return shapeStates
   }
 
-  /** Temporary initialization on mouse down */
+  /**
+   * Temporary initialization on mouse down
+   *
+   * @param state
+   * @param start
+   */
   protected initTempLabel(state: State, start: Vector2D): LabelType {
     const itemIndex = state.user.select.item
     const templateName =
@@ -363,7 +397,12 @@ export class CustomLabel2D extends Label2D {
     }
   }
 
-  /** Scale */
+  /**
+   * Scale
+   *
+   * @param anchor
+   * @param scale
+   */
   private scale(anchor: Vector2D, scale: Vector2D) {
     // Scale minimum to 1 pixel wide/high
     let widthSign = Math.sign(scale.x)
@@ -415,7 +454,11 @@ export class CustomLabel2D extends Label2D {
     this.updateBounds()
   }
 
-  /** Get index of opposite corner */
+  /**
+   * Get index of opposite corner
+   *
+   * @param index
+   */
   private getOppositeCorner(index: number) {
     return (index + 2) % this._corners.length
   }

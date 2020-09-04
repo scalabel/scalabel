@@ -30,7 +30,9 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
     {
@@ -51,6 +53,7 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
 
   /**
    * Set not highlighted when another object is highlighted
+   *
    * @param object
    */
   public setFaded(): void {
@@ -64,9 +67,14 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
 
   /**
    * Get translation delta
+   *
    * @param oldIntersection
    * @param newProjection
    * @param dragPlane
+   * @param _dragPlane
+   * @param labels
+   * @param _bounds
+   * @param local
    */
   public transform(
     oldIntersection: THREE.Vector3,
@@ -118,6 +126,7 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
   public updateScale(worldScale: THREE.Vector3) {

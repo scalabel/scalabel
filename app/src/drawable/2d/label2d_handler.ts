@@ -52,8 +52,10 @@ export class Label2DHandler {
 
   /**
    * Process mouse down action
+   *
    * @param coord
    * @param labelIndex
+   * @param _labelIndex
    * @param handleIndex
    */
   public onMouseDown(
@@ -114,9 +116,12 @@ export class Label2DHandler {
 
   /**
    * Process mouse up action
+   *
    * @param coord
    * @param labelIndex
    * @param handleIndex
+   * @param _labelIndex
+   * @param _handleIndex
    */
   public onMouseUp(
     coord: Vector2D,
@@ -152,6 +157,11 @@ export class Label2DHandler {
 
   /**
    * Process mouse move action
+   *
+   * @param coord
+   * @param canvasLimit
+   * @param labelIndex
+   * @param handleIndex
    */
   public onMouseMove(
     coord: Vector2D,
@@ -185,6 +195,7 @@ export class Label2DHandler {
 
   /**
    * Handle keyboard down events
+   *
    * @param e
    */
   public onKeyDown(e: KeyboardEvent): void {
@@ -252,7 +263,11 @@ export class Label2DHandler {
     }
   }
 
-  /** Update state */
+  /**
+   * Update state
+   *
+   * @param state
+   */
   public updateState(state: State) {
     this._state = state
     if (this._selectedItemIndex !== state.user.select.item) {
@@ -263,6 +278,7 @@ export class Label2DHandler {
 
   /**
    * Handle keyboard up events
+   *
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
@@ -274,6 +290,7 @@ export class Label2DHandler {
 
   /**
    * Handling function for canvas visibility change
+   *
    * @param _isVisible
    */
   public onVisibilityChange(): void {
@@ -298,6 +315,7 @@ export class Label2DHandler {
 
   /**
    * Whether a specific key is pressed down
+   *
    * @param key - the key to check
    */
   private isKeyDown(key: Key): boolean {
@@ -369,7 +387,12 @@ export class Label2DHandler {
     )
   }
 
-  /** swap label orders, given label indices */
+  /**
+   * swap label orders, given label indices
+   *
+   * @param index1
+   * @param index2
+   */
   private swapOrders(index1: number, index2: number) {
     // Check that indices are valid
     if (
@@ -390,7 +413,12 @@ export class Label2DHandler {
     }
   }
 
-  /** move label to nth position */
+  /**
+   * move label to nth position
+   *
+   * @param index
+   * @param newPosition
+   */
   private changeLabelOrder(index: number, newPosition: number) {
     const labels = this._labelList.labelList
     if (

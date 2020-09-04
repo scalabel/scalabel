@@ -43,9 +43,10 @@ class DataTable<DataType extends string | User> extends React.Component<
   DataTableProps<DataType>
 > {
   /**
-  * Constructor
-  * @param props
-  */
+   * Constructor
+   *
+   * @param props
+   */
   public constructor(props: DataTableProps<DataType>) {
     super(props)
   }

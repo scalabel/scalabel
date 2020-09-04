@@ -20,6 +20,7 @@ export interface Edge2DStyle {
 
 /**
  * Generate Edge2D style with default parameters
+ *
  * @param style
  */
 export function makeEdge2DStyle(style: Partial<Edge2DStyle> = {}): Edge2DStyle {
@@ -40,6 +41,7 @@ export interface PathPoint2DStyle {
 
 /**
  * Generate PathPoint2D style with default parameters
+ *
  * @param style
  */
 export function makePathPoint2DStyle(
@@ -88,6 +90,7 @@ export class PolyPathPoint2D extends Point2D {
 
   /**
    * pass the value to the current point
+   *
    * @param target
    */
   public copy(target: PolyPathPoint2D): void {
@@ -98,6 +101,7 @@ export class PolyPathPoint2D extends Point2D {
 
   /**
    * Draw the point on a 2D context
+   *
    * @param context
    * @param ratio
    * @param style

@@ -13,7 +13,11 @@ import { clearCanvas, drawImageOnCanvas } from "../view_config/image"
 import { ImageCanvas, Props } from "./image_canvas"
 import { mapStateToDrawableProps } from "./viewer"
 
-/** Get basis matrix for use with homography */
+/**
+ * Get basis matrix for use with homography
+ *
+ * @param homogeneousPoints
+ */
 function getBasisMatrix(homogeneousPoints: THREE.Vector3[]): THREE.Matrix3 {
   const homogeneousMatrix = new THREE.Matrix3()
 
@@ -78,6 +82,7 @@ class HomographyCanvas extends ImageCanvas {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element {
@@ -123,6 +128,7 @@ class HomographyCanvas extends ImageCanvas {
 
   /**
    * Function to redraw all canvases
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
@@ -150,6 +156,7 @@ class HomographyCanvas extends ImageCanvas {
 
   /**
    * Override update state function
+   *
    * @param state
    */
   protected updateState(state: State): void {

@@ -21,7 +21,12 @@ export class RotationControl extends Controller {
     }
   }
 
-  /** Apply pre-determined transformation amount based on camera direction */
+  /**
+   * Apply pre-determined transformation amount based on camera direction
+   *
+   * @param key
+   * @param camera
+   */
   public keyDown(key: string, camera: THREE.Camera): void {
     super.keyDown(key, camera)
     let rotationAmount = ROTATION_AMOUNT

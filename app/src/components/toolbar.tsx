@@ -48,6 +48,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * Constructor
+   *
    * @param props
    */
   constructor(props: Readonly<Props>) {
@@ -62,6 +63,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * handles keyDown Events
+   *
    * @param {keyboardEvent} e
    */
   public onKeyDown(e: KeyboardEvent): void {
@@ -84,6 +86,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * Key up handler
+   *
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
@@ -111,6 +114,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * ToolBar render function
+   *
    * @return component
    */
   public render(): JSX.Element {
@@ -164,6 +168,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * handler for the delete button/key
+   *
    * @param {string} alignment
    */
   private deletePressed(): void {
@@ -180,6 +185,8 @@ export class ToolBar extends Component<Props> {
 
   /**
    * handles tag attribute toggle, dispatching the addLabelTag action
+   *
+   * @param toggleName
    * @param {string} alignment
    */
   private handleAttributeToggle(toggleName: string, alignment: string): void {
@@ -213,6 +220,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * This function updates the checked list of switch buttons.
+   *
    * @param {string} switchName
    */
   private handleToggle(switchName: string): void {
@@ -251,6 +259,8 @@ export class ToolBar extends Component<Props> {
   /**
    * helper function to get attribute index with respect to the label's
    * attributes
+   *
+   * @param name
    */
   private getAlignmentIndex(name: string): number {
     const state = this.state
@@ -293,8 +303,10 @@ export class ToolBar extends Component<Props> {
   /**
    * helper function to get attribute index with respect to the config
    * attributes
+   *
    * @param allAttributes
    * @param name
+   * @param toggleName
    */
   private getAttributeIndex(
     allAttributes: Attribute[],
@@ -311,6 +323,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * Link selected tracks
+   *
    * @param state
    */
   private linkSelectedTracks(state: State): void {

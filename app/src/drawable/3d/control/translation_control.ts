@@ -47,7 +47,12 @@ export class TranslationControl extends Controller {
     }
   }
 
-  /** Apply pre-determined transformation amount based on camera direction */
+  /**
+   * Apply pre-determined transformation amount based on camera direction
+   *
+   * @param key
+   * @param camera
+   */
   public keyDown(key: string, camera: THREE.Camera): void {
     super.keyDown(key, camera)
     const direction = new THREE.Vector3()

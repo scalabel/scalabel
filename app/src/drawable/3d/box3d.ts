@@ -27,7 +27,13 @@ export class Box3D extends Label3D {
 
   /**
    * Initialize label
+   *
    * @param {State} state
+   * @param itemIndex
+   * @param category
+   * @param center
+   * @param sensors
+   * @param temporary
    */
   public init(
     itemIndex: number,
@@ -104,7 +110,10 @@ export class Box3D extends Label3D {
 
   /**
    * Modify ThreeJS objects to draw label
+   *
    * @param {THREE.Scene} scene: ThreeJS Scene Object
+   * @param scene
+   * @param camera
    */
   public render(scene: THREE.Scene, camera: THREE.Camera): void {
     this._shape.render(scene, camera)
@@ -119,7 +128,11 @@ export class Box3D extends Label3D {
 
   /**
    * Handle mouse move
+   *
    * @param projection
+   * @param x
+   * @param y
+   * @param camera
    */
   public onMouseDown(x: number, y: number, camera: THREE.Camera) {
     if (this._temporary) {
@@ -130,11 +143,18 @@ export class Box3D extends Label3D {
 
   /**
    * Handle mouse up
+   *
    * @param projection
    */
   public onMouseUp() {}
 
-  /** Handle mouse move */
+  /**
+   * Handle mouse move
+   *
+   * @param x
+   * @param y
+   * @param camera
+   */
   public onMouseMove(x: number, y: number, camera: THREE.Camera) {
     const success = this._shape.drag(x, y, camera)
     if (success) {
@@ -144,7 +164,12 @@ export class Box3D extends Label3D {
     return success
   }
 
-  /** Rotate */
+  /**
+   * Rotate
+   *
+   * @param quaternion
+   * @param anchor
+   */
   public rotate(quaternion: THREE.Quaternion, anchor?: THREE.Vector3) {
     this._labelList.addUpdatedLabel(this)
     this._shape.applyQuaternion(quaternion)
@@ -158,19 +183,33 @@ export class Box3D extends Label3D {
     }
   }
 
-  /** Move */
+  /**
+   * Move
+   *
+   * @param position
+   */
   public move(position: THREE.Vector3): void {
     this._shape.position.copy(position)
     this._labelList.addUpdatedLabel(this)
   }
 
-  /** Translate */
+  /**
+   * Translate
+   *
+   * @param delta
+   */
   public translate(delta: THREE.Vector3) {
     this._labelList.addUpdatedLabel(this)
     this._shape.position.add(delta)
   }
 
-  /** Scale */
+  /**
+   * Scale
+   *
+   * @param scale
+   * @param anchor
+   * @param local
+   */
   public scale(scale: THREE.Vector3, anchor: THREE.Vector3, local: boolean) {
     this._labelList.addUpdatedLabel(this)
     const inverseRotation = new THREE.Quaternion()
@@ -210,7 +249,11 @@ export class Box3D extends Label3D {
     return scale
   }
 
-  /** bounds of box */
+  /**
+   * bounds of box
+   *
+   * @param local
+   */
   public bounds(local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
     if (!local) {
@@ -225,6 +268,7 @@ export class Box3D extends Label3D {
 
   /**
    * Highlight box
+   *
    * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection) {
@@ -234,6 +278,7 @@ export class Box3D extends Label3D {
 
   /**
    * Update params when state is updated
+   *
    * @param state
    * @param itemIndex
    * @param labelId

@@ -12,7 +12,10 @@ import { Tag2D } from "./tag2d"
 
 /**
  * Make a new drawable label based on the label type
+ *
  * @param {string} labelType: type of the new label
+ * @param labelList
+ * @param labelType
  */
 export function makeDrawableLabel2D(
   labelList: Label2DList,
@@ -67,17 +70,27 @@ export class Label2DList {
 
   /**
    * Access the drawable label by index
+   *
+   * @param index
    */
   public get(index: number): Label2D {
     return this._labelList[index]
   }
 
-  /** Subscribe callback for drawable update */
+  /**
+   * Subscribe callback for drawable update
+   *
+   * @param callback
+   */
   public subscribe(callback: () => void) {
     this._callbacks.push(callback)
   }
 
-  /** Unsubscribe callback for drawable update */
+  /**
+   * Unsubscribe callback for drawable update
+   *
+   * @param callback
+   */
   public unsubscribe(callback: () => void) {
     const index = this._callbacks.indexOf(callback)
     if (index >= 0) {
@@ -94,6 +107,7 @@ export class Label2DList {
 
   /**
    * Get label by id
+   *
    * @param id
    */
   public getLabelById(id: number): Label2D {
@@ -128,9 +142,12 @@ export class Label2DList {
 
   /**
    * Draw label and control context
+   *
    * @param {Context2D} labelContext
    * @param {Context2D} controlContext
    * @param {number} ratio: ratio: display to image size ratio
+   * @param ratio
+   * @param hideLabels
    */
   public redraw(
     labelContext: Context2D,
@@ -147,6 +164,8 @@ export class Label2DList {
 
   /**
    * update labels from the state
+   *
+   * @param state
    */
   public updateState(state: State): void {
     // Don't interrupt ongoing editing
@@ -208,7 +227,11 @@ export class Label2DList {
     return labels
   }
 
-  /** Push updated label to array */
+  /**
+   * Push updated label to array
+   *
+   * @param label
+   */
   public addUpdatedLabel(label: Label2D) {
     this._updatedLabels.add(label)
   }

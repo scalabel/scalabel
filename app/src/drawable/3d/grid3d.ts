@@ -51,13 +51,18 @@ export class Grid3D extends Shape3D {
 
   /**
    * Add to scene for rendering
+   *
    * @param scene
    */
   public render(scene: THREE.Scene): void {
     scene.add(this)
   }
 
-  /** Do not highlight plane for now */
+  /**
+   * Do not highlight plane for now
+   *
+   * @param intersection
+   */
   public setHighlighted(intersection?: THREE.Intersection) {
     if (intersection && intersection.object === this._lines) {
       {
@@ -84,6 +89,7 @@ export class Grid3D extends Shape3D {
 
   /**
    * Override ThreeJS raycast
+   *
    * @param raycaster
    * @param intersects
    */
@@ -144,7 +150,13 @@ export class Grid3D extends Shape3D {
     }
   }
 
-  /** update parameters */
+  /**
+   * update parameters
+   *
+   * @param shape
+   * @param id
+   * @param _activeCamera
+   */
   public updateState(
     shape: ShapeType,
     id: IdType,

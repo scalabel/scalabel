@@ -15,6 +15,7 @@ export interface Rect2DStyle {
 
 /**
  * Generate Rect2D style with default parameters
+ *
  * @param {Partial<Rect2DStyle>} style
  */
 export function makeRect2DStyle(style: Partial<Rect2DStyle> = {}): Rect2DStyle {
@@ -93,6 +94,7 @@ export class Rect2D {
 
   /**
    * Set the shape to the new rect
+   *
    * @param rect
    */
   public set(rect: RectType): void {
@@ -115,8 +117,10 @@ export class Rect2D {
 
   /**
    * Draw the rect on a 2D context
+   *
    * @param {Context2D} context
    * @param {number} ratio: display to image ratio
+   * @param ratio
    * @param {RectStyle} style
    */
   public draw(context: Context2D, ratio: number, style: Rect2DStyle): void {

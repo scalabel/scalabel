@@ -10,6 +10,8 @@ import Dashboard, { DashboardContents } from "./dashboard"
 
 /**
  * This function post requests to backend to retrieve dashboard contents
+ *
+ * @param vendor
  */
 export function initDashboard(vendor?: boolean): void {
   let dashboardContents: DashboardContents
@@ -28,7 +30,9 @@ export function initDashboard(vendor?: boolean): void {
         <MuiThemeProvider theme={myTheme}>
           <Dashboard dashboardContents={dashboardContents} vendor={vendor} />
         </MuiThemeProvider>,
-        document.getElementById(vendor !== null ? "vendor-root" : "dashboard-root")
+        document.getElementById(
+          vendor !== null ? "vendor-root" : "dashboard-root"
+        )
       )
     }
   }

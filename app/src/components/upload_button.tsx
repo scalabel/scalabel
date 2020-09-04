@@ -49,6 +49,7 @@ interface State {
 export default class UploadButton extends React.Component<Props, State> {
   /**
    * Constructor
+   *
    * @param props
    */
   constructor(props: Props) {
@@ -131,6 +132,7 @@ export default class UploadButton extends React.Component<Props, State> {
 
   /**
    * Handle filename change
+   *
    * @param event
    */
   private readonly handleFileChange = (

@@ -42,7 +42,9 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
     {
@@ -78,10 +80,13 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
 
   /**
    * Translate input labels
+   *
    * @param oldIntersection
    * @param newProjection
    * @param dragPlane
    * @param labels
+   * @param _bounds
+   * @param local
    */
   public transform(
     oldIntersection: THREE.Vector3,
@@ -135,6 +140,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
   public updateScale(worldScale: THREE.Vector3) {

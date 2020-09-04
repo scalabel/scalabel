@@ -48,7 +48,12 @@ export interface Props extends ViewerProps {
   id: number
 }
 
-/** Conditionally wrap box with bottom border */
+/**
+ * Conditionally wrap box with bottom border
+ *
+ * @param element
+ * @param underline
+ */
 function underlineElement(
   element: React.ReactElement,
   underline: boolean = false
@@ -65,6 +70,7 @@ function underlineElement(
 
 /**
  * Calculate forward vector
+ *
  * @param viewerConfig
  */
 function calculateForward(
@@ -81,6 +87,7 @@ function calculateForward(
 
 /**
  * Calculate left vector
+ *
  * @param viewerConfig
  * @param forward
  */
@@ -122,7 +129,9 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /**
    * Constructor
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Props) {
     super(props)
@@ -152,6 +161,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   protected getDrawableComponents(): React.ReactElement[] {
@@ -340,7 +350,11 @@ class Viewer3D extends DrawableViewer<Props> {
     return []
   }
 
-  /** Mouse enter */
+  /**
+   * Mouse enter
+   *
+   * @param e
+   */
   protected onMouseEnter(e: React.MouseEvent): void {
     super.onMouseEnter(e)
     Session.label3dList.setActiveCamera(this._camera)
@@ -348,6 +362,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /**
    * Handle mouse move
+   *
    * @param e
    */
   protected onMouseMove(e: React.MouseEvent): void {
@@ -384,7 +399,11 @@ class Viewer3D extends DrawableViewer<Props> {
     }
   }
 
-  /** Handle mouse up */
+  /**
+   * Handle mouse up
+   *
+   * @param e
+   */
   protected onMouseUp(e: React.MouseEvent): void {
     super.onMouseUp(e)
     this._movingCamera = false
@@ -393,6 +412,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /**
    * Handle double click
+   *
    * @param e
    */
   protected onDoubleClick(e: React.MouseEvent): void {
@@ -434,12 +454,14 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /**
    * Handle mouse leave
+   *
    * @param e
    */
   protected onMouseLeave(): void {}
 
   /**
    * Handle mouse wheel
+   *
    * @param e
    */
   protected onWheel(e: WheelEvent): void {
@@ -455,7 +477,11 @@ class Viewer3D extends DrawableViewer<Props> {
     }, 30)
   }
 
-  /** Override key handler */
+  /**
+   * Override key handler
+   *
+   * @param e
+   */
   protected onKeyDown(e: KeyboardEvent): void {
     if (this.isKeyDown(e.key)) {
       return
@@ -498,7 +524,11 @@ class Viewer3D extends DrawableViewer<Props> {
     }
   }
 
-  /** Override on key up */
+  /**
+   * Override on key up
+   *
+   * @param e
+   */
   protected onKeyUp(e: KeyboardEvent): void {
     if (this.isKeyDown(e.key) && Session.activeViewerId === this.props.id) {
       if (this._movingCamera) {
@@ -509,7 +539,11 @@ class Viewer3D extends DrawableViewer<Props> {
     super.onKeyUp(e)
   }
 
-  /** update camera parameters with config */
+  /**
+   * update camera parameters with config
+   *
+   * @param config
+   */
   private updateCamera(config: PointCloudViewerConfigType): void {
     if (this._viewerConfig === undefined || this._movingCamera) {
       return
@@ -584,6 +618,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /**
    * Normalize coordinates to display
+   *
    * @param mX
    * @param mY
    */
@@ -599,7 +634,11 @@ class Viewer3D extends DrawableViewer<Props> {
     return [0, 0]
   }
 
-  /** Toggle locked state */
+  /**
+   * Toggle locked state
+   *
+   * @param targetState
+   */
   private toggleCameraLock(targetState: number): void {
     const config = this._viewerConfig as PointCloudViewerConfigType
     const newLockState =
@@ -607,7 +646,11 @@ class Viewer3D extends DrawableViewer<Props> {
     Session.dispatch(updateLockStatus(this.props.id, config, newLockState))
   }
 
-  /** Rotate camera along camera view axis. Returns the rotation applied */
+  /**
+   * Rotate camera along camera view axis. Returns the rotation applied
+   *
+   * @param amount
+   */
   private rotateCameraViewDirection(amount: number): THREE.Quaternion {
     const axis = new THREE.Vector3()
     this._camera.getWorldDirection(axis)
@@ -623,7 +666,12 @@ class Viewer3D extends DrawableViewer<Props> {
     return quaternion
   }
 
-  /** Rotate camera around target */
+  /**
+   * Rotate camera around target
+   *
+   * @param dx
+   * @param dy
+   */
   private rotateCameraSpherical(dx: number, dy: number): void {
     if (this._viewerConfig === undefined) {
       return
@@ -684,7 +732,12 @@ class Viewer3D extends DrawableViewer<Props> {
     this._camera.lookAt(this._target)
   }
 
-  /** Drag camera, returns translation */
+  /**
+   * Drag camera, returns translation
+   *
+   * @param dx
+   * @param dy
+   */
   private dragCamera(dx: number, dy: number): THREE.Vector3 {
     const dragVector = new THREE.Vector3(
       (-dx / CameraMovementParameters.MOUSE_CORRECTION_FACTOR) * 2,
@@ -699,7 +752,11 @@ class Viewer3D extends DrawableViewer<Props> {
     return dragVector
   }
 
-  /** Zoom camera */
+  /**
+   * Zoom camera
+   *
+   * @param dY
+   */
   private zoomCamera(dY: number): void {
     if (this._viewerConfig !== undefined) {
       const target = this._target
@@ -816,7 +873,13 @@ class Viewer3D extends DrawableViewer<Props> {
     Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
   }
 
-  /** Repeat function as long as key is held down */
+  /**
+   * Repeat function as long as key is held down
+   *
+   * @param fn
+   * @param key
+   * @param timeout
+   */
   private timedRepeat(fn: () => void, key: string, timeout: number = 30): void {
     if (this.isKeyDown(key)) {
       fn()

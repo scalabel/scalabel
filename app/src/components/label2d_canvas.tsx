@@ -87,7 +87,9 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Constructor, handles subscription to store
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)
@@ -140,6 +142,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set the current cursor
+   *
    * @param {string} cursor - cursor type
    */
   public setCursor(cursor: string): void {
@@ -157,6 +160,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element[] {
@@ -216,6 +220,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Function to redraw all canvases
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
@@ -254,6 +259,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Callback function when mouse is down
+   *
    * @param {MouseEvent} e - event
    */
   public onMouseDown(e: React.MouseEvent<HTMLCanvasElement>): void {
@@ -272,6 +278,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Callback function when mouse is up
+   *
    * @param {MouseEvent} e - event
    */
   public onMouseUp(e: React.MouseEvent<HTMLCanvasElement>): void {
@@ -287,6 +294,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Callback function when mouse moves
+   *
    * @param {MouseEvent} e - event
    */
   public onMouseMove(e: React.MouseEvent<HTMLCanvasElement>): void {
@@ -322,6 +330,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Callback function when key is down
+   *
    * @param {KeyboardEvent} e - event
    */
   public onKeyDown(e: KeyboardEvent): void {
@@ -337,6 +346,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Callback function when key is up
+   *
    * @param {KeyboardEvent} e - event
    */
   public onKeyUp(e: KeyboardEvent): void {
@@ -356,6 +366,8 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * notify state is updated
+   *
+   * @param state
    */
   public updateState(state: State): void {
     if (this.display !== this.props.display) {
@@ -367,7 +379,9 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Get the mouse position on the canvas in the image coordinates.
+   *
    * @param {MouseEvent | WheelEvent} e: mouse event
+   * @param e
    * @return {Vector2D}
    * mouse position (x,y) on the canvas
    */
@@ -387,7 +401,9 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Get the label under the mouse.
+   *
    * @param {Vector2D} mousePos: position of the mouse
+   * @param mousePos
    * @return {number[]}
    */
   private fetchHandleId(mousePos: Vector2D): number[] {
@@ -402,7 +418,10 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Update the canvas dimentions from the htmlcanvas element
+   *
    * @param canva
+   * @param canvas
+   * @param isContorl
    */
   private updateCanvas(canvas: HTMLCanvasElement, isContorl: boolean): void {
     const context = canvas.getContext("2d")
@@ -434,7 +453,9 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set the scale of the image in the display
+   *
    * @param {object} canvas
+   * @param context
    * @param {boolean} upRes
    */
   private updateScale(

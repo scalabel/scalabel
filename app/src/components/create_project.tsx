@@ -26,6 +26,7 @@ export interface State {
 
 /**
  * Component which display the create page
+ *
  * @param {object} props
  * @return component
  */
@@ -45,6 +46,7 @@ class Create extends React.Component<Props, State> {
 
   /**
    * Constructor
+   *
    * @param props
    */
   constructor(props: Props) {
@@ -75,6 +77,7 @@ class Create extends React.Component<Props, State> {
 
   /**
    * renders the create page
+   *
    * @return component
    */
   public render(): React.ReactNode {

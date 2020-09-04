@@ -33,7 +33,9 @@ export interface DashboardClassType {
 /**
  * This is Dashboard component that displays
  * the everything post in the dashboard.
+ *
  * @param {object} props
+ * @param props.classes
  * @return component
  */
 function Dashboard(props: {
@@ -59,6 +61,7 @@ function Dashboard(props: {
   )
   /**
    * render function
+   *
    * @return component
    */
   return (

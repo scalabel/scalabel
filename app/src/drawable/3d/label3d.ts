@@ -14,7 +14,11 @@ import { getColorById } from "../util"
 import { Label3DList } from "./label3d_list"
 import { Shape3D } from "./shape3d"
 
-/** Convert string to label type name enum */
+/**
+ * Convert string to label type name enum
+ *
+ * @param type
+ */
 export function labelTypeFromString(type: string): LabelTypeName {
   switch (type) {
     case LabelTypeName.BOX_3D:
@@ -149,7 +153,11 @@ export abstract class Label3D {
   /** Get shape id's and shapes for updating */
   public abstract shapes(): ShapeType[]
 
-  /** highlight the label */
+  /**
+   * highlight the label
+   *
+   * @param intersection
+   */
   public setHighlighted(intersection?: THREE.Intersection) {
     if (intersection) {
       this._highlighted = true
@@ -158,7 +166,11 @@ export abstract class Label3D {
     }
   }
 
-  /** add child */
+  /**
+   * add child
+   *
+   * @param child
+   */
   public addChild(child: Label3D) {
     if (child.parent !== this) {
       if (child.parent) {
@@ -172,7 +184,11 @@ export abstract class Label3D {
     }
   }
 
-  /** remove child */
+  /**
+   * remove child
+   *
+   * @param child
+   */
   public removeChild(child: Label3D) {
     const index = this._children.indexOf(child)
     if (index >= 0) {
@@ -208,6 +224,7 @@ export abstract class Label3D {
 
   /**
    * Handle mouse move
+   *
    * @param projection
    */
   public abstract onMouseDown(
@@ -218,12 +235,14 @@ export abstract class Label3D {
 
   /**
    * Handle mouse up
+   *
    * @param projection
    */
   public abstract onMouseUp(): void
 
   /**
    * Handle mouse move
+   *
    * @param projection
    */
   public abstract onMouseMove(
@@ -266,13 +285,18 @@ export abstract class Label3D {
     return new THREE.Vector3()
   }
 
-  /** Bounds of label */
+  /**
+   * Bounds of label
+   *
+   * @param _local
+   */
   public bounds(_local?: boolean): THREE.Box3 {
     return new THREE.Box3()
   }
 
   /**
    * Initialize label
+   *
    * @param {State} state
    */
   public abstract init(
@@ -288,7 +312,13 @@ export abstract class Label3D {
    */
   public abstract internalShapes(): Shape3D[]
 
-  /** Convert label state to drawable */
+  /**
+   * Convert label state to drawable
+   *
+   * @param state
+   * @param itemIndex
+   * @param labelId
+   */
   public updateState(state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
     this._label = _.cloneDeep(item.labels[labelId])

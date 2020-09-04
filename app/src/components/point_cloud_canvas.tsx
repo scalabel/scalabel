@@ -112,7 +112,9 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
 
   /**
    * Constructor, ons subscription to store
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)
@@ -163,6 +165,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element {
@@ -193,6 +196,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handles canvas redraw
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
@@ -211,7 +215,9 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
 
   /**
    * Override method
+   *
    * @param _state
+   * @param state
    */
   protected updateState(state: State): void {
     if (this.display !== this.props.display) {
@@ -261,6 +267,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set references to div elements and try to initialize renderer
+   *
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */

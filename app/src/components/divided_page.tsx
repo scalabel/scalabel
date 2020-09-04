@@ -33,6 +33,7 @@ export interface DividedPageProps {
 
 /**
  * Renders a page divided into a header, a drawer, and the main content
+ *
  * @param props
  * @constructor
  */

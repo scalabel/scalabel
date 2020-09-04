@@ -27,9 +27,13 @@ const COLOR_PALETTE = [
 
 /**
  * Tune the shade or tint of rgb color
+ *
  * @param {[number,number,number]} rgb: input color
  * @param {[number,number,number]} base: base color (white or black)
  * @param {number} ratio: blending ratio
+ * @param rgb
+ * @param base
+ * @param ratio
  * @return {[number,number,number]}
  */
 export function blendColor(
@@ -50,7 +54,9 @@ export function blendColor(
 /**
  * Pick color from the palette. Add additional shades and tints to increase
  * the color number. Results: https://jsfiddle.net/739397/e980vft0/
+ *
  * @param {number} index: palette index
+ * @param index
  * @return {[number,number,number]}
  */
 function pickColorPalette(index: number): number[] {
@@ -67,6 +73,7 @@ function pickColorPalette(index: number): number[] {
 
 /**
  * Convert numerical id to color value in range of [0, 255]
+ *
  * @param {IdType} labelId
  * @param {IdType} trackId
  * @return {number[]}
@@ -78,7 +85,9 @@ export function getColorById(labelId: IdType, trackId: IdType): number[] {
 
 /**
  * Convert numerical color to CSS color string
+ *
  * @param {number[]} color: can have 3 or 4 elements
+ * @param color
  */
 export function toCssColor(color: number[]): string {
   if (color.length === 3) {
@@ -96,6 +105,7 @@ export type Context2D = CanvasRenderingContext2D
 
 /**
  * Get the label and shape IDs given the control index
+ *
  * @param {number} index
  * @return {[number, number]}
  */
@@ -107,6 +117,7 @@ export function decodeControlIndex(index: number): number[] {
  * Get the control color given the label and handle IDs.
  * In the resulting 24bit color, the first 12 bits are for label and the other
  * 12 bits are for handle
+ *
  * @param {number} labelId
  * @param {number} handleId
  * @return {number[]}
@@ -121,6 +132,7 @@ export function encodeControlColor(
 
 /**
  * Get index from rgb color
+ *
  * @param {number[]} color - The rgb color
  * @return {number} - The encoded index.
  */

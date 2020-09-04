@@ -37,7 +37,13 @@ export abstract class Shape3D extends Object3D {
   /** return shape type */
   public abstract get typeName(): string
 
-  /** update parameters */
+  /**
+   * update parameters
+   *
+   * @param shape
+   * @param id
+   * @param _activeCamera
+   */
   public updateState(
     shape: ShapeType,
     id: IdType,
@@ -47,7 +53,12 @@ export abstract class Shape3D extends Object3D {
     this._shapeId = id
   }
 
-  /** Set visibility for viewer */
+  /**
+   * Set visibility for viewer
+   *
+   * @param viewerId
+   * @param v
+   */
   public setVisible(viewerId: number, v: boolean = true) {
     if (v) {
       this.layers.enable(viewerId)

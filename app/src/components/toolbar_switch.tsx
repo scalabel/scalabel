@@ -36,6 +36,7 @@ interface Props {
 /**
  * This is a Switch Button component that
  * displays the list of selections.
+ *
  * @param {object} Props
  */
 class SwitchButton extends Component<Props> {

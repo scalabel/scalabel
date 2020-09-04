@@ -67,6 +67,8 @@ export class Label3DHandler {
 
   /**
    * Update handler params when state updated
+   *
+   * @param state
    * @param itemIndex
    * @param viewerId
    */
@@ -81,6 +83,7 @@ export class Label3DHandler {
 
   /**
    * Handle double click, select label for editing
+   *
    * @returns true if consumed, false otherwise
    */
   public onDoubleClick(): boolean {
@@ -90,6 +93,9 @@ export class Label3DHandler {
 
   /**
    * Process mouse down action
+   *
+   * @param x
+   * @param y
    */
   public onMouseDown(x: number, y: number): boolean {
     if (Session.label3dList.control.highlighted) {
@@ -138,9 +144,11 @@ export class Label3DHandler {
 
   /**
    * Process mouse move action
+   *
    * @param x NDC
    * @param y NDC
    * @param camera
+   * @param raycastIntersection
    */
   public onMouseMove(
     x: number,
@@ -174,6 +182,7 @@ export class Label3DHandler {
 
   /**
    * Handle keyboard events
+   *
    * @param {KeyboardEvent} e
    * @returns true if consumed, false otherwise
    */
@@ -269,6 +278,8 @@ export class Label3DHandler {
 
   /**
    * Handle key up
+   *
+   * @param e
    */
   public onKeyUp(e: KeyboardEvent) {
     delete this._keyDownMap[e.key]
@@ -289,8 +300,10 @@ export class Label3DHandler {
 
   /**
    * Highlight label if ray from mouse is intersecting a label
+   *
    * @param object
    * @param point
+   * @param intersection
    */
   private highlight(intersection?: THREE.Intersection) {
     if (this._highlightedLabel) {
@@ -312,6 +325,7 @@ export class Label3DHandler {
 
   /**
    * Whether a specific key is pressed down
+   *
    * @param {string} key - the key to check
    * @return {boolean}
    */
@@ -352,7 +366,13 @@ export class Label3DHandler {
     }
   }
 
-  /** Repeat function as long as key is held down */
+  /**
+   * Repeat function as long as key is held down
+   *
+   * @param fn
+   * @param key
+   * @param timeout
+   */
   private timedRepeat(fn: () => void, key: string, timeout: number = 30) {
     if (this.isKeyDown(key)) {
       fn()

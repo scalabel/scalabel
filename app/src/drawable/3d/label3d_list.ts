@@ -11,7 +11,10 @@ import { Plane3D } from "./plane3d"
 
 /**
  * Make a new drawable label based on the label type
+ *
  * @param {string} labelType: type of the new label
+ * @param labelList
+ * @param labelType
  */
 export function makeDrawableLabel3D(
   labelList: Label3DList,
@@ -72,12 +75,20 @@ export class Label3DList {
     return this._scene
   }
 
-  /** Subscribe callback for drawable update */
+  /**
+   * Subscribe callback for drawable update
+   *
+   * @param callback
+   */
   public subscribe(callback: () => void) {
     this._callbacks.push(callback)
   }
 
-  /** Unsubscribe callback for drawable update */
+  /**
+   * Unsubscribe callback for drawable update
+   *
+   * @param callback
+   */
   public unsubscribe(callback: () => void) {
     const index = this._callbacks.indexOf(callback)
     if (index >= 0) {
@@ -85,7 +96,11 @@ export class Label3DList {
     }
   }
 
-  /** Get label by id */
+  /**
+   * Get label by id
+   *
+   * @param id
+   */
   public get(id: string): Label3D | null {
     if (id in this._labels) {
       return this._labels[id]
@@ -156,6 +171,8 @@ export class Label3DList {
 
   /**
    * update labels from the state
+   *
+   * @param state
    */
   public updateState(state: State): void {
     this._state = state
@@ -238,6 +255,7 @@ export class Label3DList {
 
   /**
    * Get the label associated with the raycasted object 3d
+   *
    * @param obj
    */
   public getLabelFromRaycastedObject3D(obj: THREE.Object3D): Label3D | null {
@@ -250,7 +268,11 @@ export class Label3DList {
     return null
   }
 
-  /** Set active camera */
+  /**
+   * Set active camera
+   *
+   * @param camera
+   */
   public setActiveCamera(camera: THREE.Camera) {
     for (const label of Object.values(this._labels)) {
       label.activeCamera = camera
@@ -263,7 +285,11 @@ export class Label3DList {
     return this._updatedLabels
   }
 
-  /** Push updated label to array */
+  /**
+   * Push updated label to array
+   *
+   * @param label
+   */
   public addUpdatedLabel(label: Label3D) {
     this._updatedLabels.add(label)
   }

@@ -50,7 +50,9 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Constructor, handles subscription to store
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)
@@ -66,6 +68,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element {
@@ -109,6 +112,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Function to redraw all canvases
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
@@ -132,6 +136,8 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * notify state is updated
+   *
+   * @param _state
    */
   protected updateState(_state: State): void {
     if (this.display !== this.props.display) {
@@ -142,7 +148,9 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set the scale of the image in the display
+   *
    * @param {object} canvas
+   * @param context
    * @param {boolean} upRes
    */
   private updateScale(

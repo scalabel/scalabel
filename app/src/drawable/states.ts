@@ -210,6 +210,8 @@ function deleteInvalidLabel(drawable: Readonly<Label2D> | Readonly<Label3D>) {
 
 /**
  * Commit 2D labels to state
+ *
+ * @param updatedLabelDrawables
  */
 export function commit2DLabels(
   updatedLabelDrawables: Array<Readonly<Label2D>>
@@ -261,6 +263,9 @@ export function commit2DLabels(
 
 /**
  * Commit labels to state
+ *
+ * @param updatedLabelDrawables
+ * @param tracking
  */
 // TODO: Check 3d approach to revise following method
 export function commitLabels(

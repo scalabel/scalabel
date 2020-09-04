@@ -19,7 +19,9 @@ class Image3DViewer extends Viewer2D {
 
   /**
    * Constructor
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Viewer2DProps) {
     super(props)
@@ -73,6 +75,7 @@ class Image3DViewer extends Viewer2D {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   protected getDrawableComponents(): React.ReactElement[] {

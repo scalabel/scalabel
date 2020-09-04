@@ -25,7 +25,12 @@ export class ScaleControl extends Controller {
     this._local = true
   }
 
-  /** Apply pre-determined transformation amount based on camera direction */
+  /**
+   * Apply pre-determined transformation amount based on camera direction
+   *
+   * @param key
+   * @param camera
+   */
   public keyDown(key: string, camera: THREE.Camera): void {
     super.keyDown(key, camera)
     const direction = new THREE.Vector3()

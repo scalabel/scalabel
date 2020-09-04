@@ -25,7 +25,9 @@ export abstract class DrawableCanvas<
 > extends Component<Props> {
   /**
    * General constructor
+   *
    * @param props: component props
+   * @param props
    */
   protected constructor(props: Readonly<Props>) {
     super(props)

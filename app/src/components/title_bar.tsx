@@ -77,6 +77,9 @@ interface ButtonInfo {
 
 /**
  * Convert info of a button to a renderable button
+ *
+ * @param button
+ * @param titleUnit
  */
 function renderButton(button: ButtonInfo, titleUnit: string): JSX.Element {
   const onClick = _.get(button, "onClick", undefined)
@@ -108,7 +111,9 @@ class TitleBar extends Component<Props> {
 
   /**
    * Constructor
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Props) {
     super(props)
@@ -136,6 +141,7 @@ class TitleBar extends Component<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): React.ReactNode {

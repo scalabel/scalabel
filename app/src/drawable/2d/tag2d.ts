@@ -53,7 +53,13 @@ export class Tag2D extends Label2D {
    */
   public updateShapes() {}
 
-  /** Convert label state to drawable */
+  /**
+   * Convert label state to drawable
+   *
+   * @param state
+   * @param itemIndex
+   * @param labelId
+   */
   public updateState(state: State, itemIndex: number, labelId: IdType): void {
     super.updateState(state, itemIndex, labelId)
     this.configAttributes = state.task.config.attributes
@@ -61,7 +67,10 @@ export class Tag2D extends Label2D {
 
   /**
    * Draws tag box
+   *
    * @param context
+   * @param _ratio
+   * @param mode
    */
   public draw(context: Context2D, _ratio: number, mode: DrawMode) {
     if (mode === DrawMode.VIEW) {
@@ -97,7 +106,9 @@ export class Tag2D extends Label2D {
 
   /**
    * no op
+   *
    * @param state
+   * @param _state
    * @param _start
    */
   protected initTempLabel(_state: State, _start: Vector2D): LabelType {

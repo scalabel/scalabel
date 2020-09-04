@@ -38,7 +38,11 @@ export class TransformationControl extends THREE.Group {
     this.add(this._currentController)
   }
 
-  /** Add new label to control for transforming */
+  /**
+   * Add new label to control for transforming
+   *
+   * @param newLabel
+   */
   public addLabel(newLabel: Label3D) {
     this._labels.push(newLabel)
     this.updateBounds()
@@ -51,6 +55,7 @@ export class TransformationControl extends THREE.Group {
 
   /**
    * Highlight correct axis
+   *
    * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection) {
@@ -59,6 +64,8 @@ export class TransformationControl extends THREE.Group {
 
   /**
    * Mouse down
+   *
+   * @param camera
    */
   public onMouseDown(camera: THREE.Camera) {
     return this._currentController.onMouseDown(camera)
@@ -66,7 +73,9 @@ export class TransformationControl extends THREE.Group {
 
   /**
    * Handle key events
+   *
    * @param e
+   * @param camera
    */
   public onKeyDown(e: KeyboardEvent, camera: THREE.Camera): boolean {
     switch (e.key) {
@@ -113,15 +122,23 @@ export class TransformationControl extends THREE.Group {
     return false
   }
 
-  /** Handle key up */
+  /**
+   * Handle key up
+   *
+   * @param e
+   */
   public onKeyUp(e: KeyboardEvent) {
     this._currentController.keyUp(e.key)
   }
 
   /**
    * Mouse movement while mouse down on box (from raycast)
+   *
    * @param x: NDC
    * @param y: NDC
+   * @param x
+   * @param y
+   * @param camera
    */
   public onMouseMove(x: number, y: number, camera: THREE.Camera) {
     const projection = projectionFromNDC(x, y, camera)
@@ -139,6 +156,7 @@ export class TransformationControl extends THREE.Group {
 
   /**
    * Override ThreeJS raycast to intersect with box
+   *
    * @param raycaster
    * @param intersects
    */
@@ -153,6 +171,7 @@ export class TransformationControl extends THREE.Group {
 
   /**
    * Switch to new controller
+   *
    * @param controller
    */
   private switchController(controller: Controller) {

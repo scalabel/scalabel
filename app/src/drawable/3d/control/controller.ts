@@ -61,7 +61,11 @@ export abstract class Controller extends THREE.Object3D {
     return this._highlightedUnit !== null
   }
 
-  /** highlight function */
+  /**
+   * highlight function
+   *
+   * @param intersection
+   */
   public setHighlighted(intersection?: THREE.Intersection) {
     this._highlightedUnit = null
     for (const axis of this._controlUnits) {
@@ -78,7 +82,11 @@ export abstract class Controller extends THREE.Object3D {
     }
   }
 
-  /** mouse down */
+  /**
+   * mouse down
+   *
+   * @param camera
+   */
   public onMouseDown(camera: THREE.Camera) {
     if (this._highlightedUnit) {
       const normal = new THREE.Vector3()
@@ -92,7 +100,11 @@ export abstract class Controller extends THREE.Object3D {
     return false
   }
 
-  /** mouse move */
+  /**
+   * mouse move
+   *
+   * @param projection
+   */
   public onMouseMove(projection: THREE.Ray) {
     if (this._highlightedUnit && this._dragPlane) {
       const newIntersection = this._highlightedUnit.transform(
@@ -117,7 +129,12 @@ export abstract class Controller extends THREE.Object3D {
     return false
   }
 
-  /** raycast */
+  /**
+   * raycast
+   *
+   * @param raycaster
+   * @param intersects
+   */
   public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
     for (const unit of this._controlUnits) {
       unit.raycast(raycaster, intersects)
@@ -138,19 +155,32 @@ export abstract class Controller extends THREE.Object3D {
     }
   }
 
-  /** Update scales of control units */
+  /**
+   * Update scales of control units
+   *
+   * @param scale
+   */
   public updateScale(scale: THREE.Vector3) {
     for (const unit of this._controlUnits) {
       unit.updateScale(scale)
     }
   }
 
-  /** Handle key down */
+  /**
+   * Handle key down
+   *
+   * @param key
+   * @param _camera
+   */
   public keyDown(key: string, _camera: THREE.Camera): void {
     this._keyDownMap[key] = true
   }
 
-  /** Handle key up */
+  /**
+   * Handle key up
+   *
+   * @param key
+   */
   public keyUp(key: string): void {
     delete this._keyDownMap[key]
   }

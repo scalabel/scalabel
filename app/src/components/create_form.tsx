@@ -72,6 +72,7 @@ interface State {
 export default class CreateForm extends React.Component<Props, State> {
   /**
    * Constructor
+   *
    * @param props
    */
   constructor(props: Props) {
@@ -323,6 +324,7 @@ export default class CreateForm extends React.Component<Props, State> {
   /**
    * gets form data from submission event this is overriden during
    * integration testing
+   *
    * @param event
    */
   protected getFormData(event: ChangeEvent<HTMLFormElement>): FormData {
@@ -331,6 +333,7 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * Handles submission event
+   *
    * @param event
    */
   private readonly handleSubmit = (
@@ -377,7 +380,9 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles instruction url
+   *
    * @param itemType {string}
+   * @param labelType
    */
   private readonly handleInstructions = (labelType: string): void => {
     switch (labelType) {
@@ -398,6 +403,9 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles page title
+   *
+   * @param labelType
+   * @param itemType
    */
   private readonly handlePageTitle = (
     labelType: string,
@@ -409,6 +417,7 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles label changing
+   *
    * @param event
    */
   private readonly handleLabelChange = (
@@ -421,6 +430,7 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles item type changing
+   *
    * @param event
    */
   private readonly handleItemTypeChange = (

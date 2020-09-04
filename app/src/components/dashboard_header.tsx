@@ -13,7 +13,10 @@ interface DashboardHeaderClassType {
 
 /**
  * renders dashboard header for worker and admin
+ *
  * @param props
+ * @param props.classes
+ * @param props.admin
  * @constructor
  */
 function DashboardHeader(props: {
@@ -32,7 +35,9 @@ function DashboardHeader(props: {
         noWrap
         className={classes.title}
       >
-        {admin !== null ? "Scalabel Admin Dashboard" : "Scalabel Worker Dashboard"}
+        {admin !== null
+          ? "Scalabel Admin Dashboard"
+          : "Scalabel Worker Dashboard"}
       </Typography>
       <IconButton onClick={logout}>
         <SvgIcon>

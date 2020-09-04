@@ -35,6 +35,7 @@ export interface Viewer2DProps extends ViewerProps {
 export class Viewer2D extends DrawableViewer<Viewer2DProps> {
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   protected getDrawableComponents(): React.ReactElement[] {
@@ -68,6 +69,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   protected getMenuComponents(): JSX.Element[] | [] {
@@ -131,6 +133,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
 
   /**
    * Handle mouse move
+   *
    * @param e
    */
   protected onMouseMove(e: React.MouseEvent): void {
@@ -159,18 +162,21 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
 
   /**
    * Handle double click
+   *
    * @param e
    */
   protected onDoubleClick(): void {}
 
   /**
    * Handle mouse leave
+   *
    * @param e
    */
   protected onMouseLeave(): void {}
 
   /**
    * Handle mouse wheel
+   *
    * @param e
    */
   protected onWheel(e: WheelEvent): void {
@@ -186,7 +192,12 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
     }
   }
 
-  /** Zoom */
+  /**
+   * Zoom
+   *
+   * @param zoomRatio
+   * @param offset
+   */
   protected zoom(zoomRatio: number, offset: Vector2D): void {
     const config = this._viewerConfig as ImageViewerConfigType
     const newScale = config.viewScale * zoomRatio

@@ -88,7 +88,16 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     this._box.layers.enableAll()
   }
 
-  /** get update vectors: [translation, rotation, scale, new intersection] */
+  /**
+   * get update vectors: [translation, rotation, scale, new intersection]
+   *
+   * @param oldIntersection
+   * @param newProjection
+   * @param dragPlane
+   * @param labels
+   * @param bounds
+   * @param local
+   */
   public transform(
     oldIntersection: THREE.Vector3,
     newProjection: THREE.Ray,
@@ -178,7 +187,9 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
     {
@@ -233,6 +244,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Override ThreeJS raycast to intersect with box
+   *
    * @param raycaster
    * @param intersects
    */
@@ -243,6 +255,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
   public updateScale(worldScale: THREE.Vector3) {

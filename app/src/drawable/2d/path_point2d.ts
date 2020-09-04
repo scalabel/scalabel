@@ -22,6 +22,7 @@ export interface Edge2DStyle {
 
 /**
  * Generate Edge2D style with default parameters
+ *
  * @param style
  */
 export function makeEdge2DStyle(style: Partial<Edge2DStyle> = {}): Edge2DStyle {
@@ -35,6 +36,7 @@ export function makeEdge2DStyle(style: Partial<Edge2DStyle> = {}): Edge2DStyle {
 
 /**
  * Generate PathPoint2D style with default parameters
+ *
  * @param style
  */
 export function makePathPoint2DStyle(
@@ -49,9 +51,11 @@ export function makePathPoint2DStyle(
 
 /**
  * Utility function to make new drawable path point
+ *
  * @param x
  * @param y
  * @param pointType
+ * @param labelId
  */
 export function makeDrawablePathPoint2D(
   x: number,
@@ -151,6 +155,7 @@ export class PathPoint2D {
 
   /**
    * Copy from another point
+   *
    * @param p
    */
   public copy(p: PathPoint2D) {
@@ -159,6 +164,7 @@ export class PathPoint2D {
 
   /**
    * Draw the point on a 2D context
+   *
    * @param context
    * @param ratio
    * @param style
