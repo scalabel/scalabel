@@ -66,7 +66,10 @@ export interface StyledButtonProps {
   background: string
 }
 
-export const styledButtonStyle = () =>
+export const styledButtonStyle = (): StyleRules<
+  "root" | "label",
+  StyledButtonProps
+> =>
   createStyles({
     root: {
       borderRadius: 0,
