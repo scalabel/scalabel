@@ -39,7 +39,8 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         nargs="+",
         default=[],
-        help="List of input directories and videos for processing. Each line in each file is a file path.",
+        help="List of input directories and videos for processing."
+        " Each line in each file is a file path.",
     )
     parser.add_argument(
         "--out-dir",
