@@ -8,6 +8,30 @@ prepare_data
 that can be directly used for creating Scalabel projects. Assume all the images
 are in ``.jpg`` format.
 
+Available arguments:
+
+.. code-block:: bash
+
+    --input INPUT [INPUT ...], -i INPUT [INPUT ...]
+                            path to the video/images to be processed
+    --input-list INPUT_LIST [INPUT_LIST ...]
+                            List of input directories and videos for processing.
+                            Each line in each file is a file path.
+    --out-dir OUT_DIR, -o OUT_DIR
+                            output folder to save the frames
+    --fps FPS, -f FPS     the target frame rate. default is the original video
+                            framerate.
+    --scratch             ignore non-empty folder.
+    --s3 S3               Specify S3 bucket path in bucket-name/subfolder
+    --url-root URL_ROOT   Url root used as prefix in the yaml file. Ignore it if
+                            you are using s3.
+    --start-time START_TIME
+                            The starting time of extracting frames in seconds.
+    --max-frames MAX_FRAMES
+                            Max number of output frames for each video.
+    --no-list             do not generate the image list.
+    --jobs JOBS, -j JOBS  Process multiple videos in parallel.
+
 You can download our testing video at
 https://scalabel-public.s3-us-west-2.amazonaws.com/demo/dancing.mp4. The video
 was from `Youtube <https://www.youtube.com/watch?v=-ZTsgbrdoI8>`_ with Creative
@@ -53,6 +77,15 @@ two video names.
 
     python3 -m scalabel.tools.prepare_data --start-time 5 --max-frames 100  \
         --fps 3 -i ./dancing-s3 dancing.mp4  -o test
+
+If you want to process a folder of videos together with a list of videos, you
+can use
+
+.. code-block:: bash
+
+    python3.8 -m scalabel.tools.prepare_data -i videos/*.mov  --input-list \
+        videos.txt -o frames_all/
+
 
 
 edit_labels

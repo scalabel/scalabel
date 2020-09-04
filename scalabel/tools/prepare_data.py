@@ -31,6 +31,7 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         default=[],
         nargs="+",
+        required=True,
         help="path to the video/images to be processed",
     )
     parser.add_argument(
@@ -38,13 +39,14 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         nargs="+",
         default=[],
-        help="List of input directories and videos for processing.",
+        help="List of input directories and videos for processing. Each line in each file is a file path.",
     )
     parser.add_argument(
         "--out-dir",
         "-o",
         type=str,
         default="",
+        required=True,
         help="output folder to save the frames",
     )
     parser.add_argument(
