@@ -65,6 +65,8 @@ class LabelLayout extends React.Component<Props, State> {
   public layoutState: LayoutState
 
   /**
+   * Constructor
+   *
    * @param {object} props
    */
   constructor(props: any) {
@@ -126,9 +128,9 @@ class LabelLayout extends React.Component<Props, State> {
     max: number,
     primary: "first" | "second" = "first",
     position: string = "center"
-  ) {
+  ): JSX.Element {
     if (comp1 === null) {
-      return
+      return <></>
     }
     return comp2 !== null ? (
       <SplitPane

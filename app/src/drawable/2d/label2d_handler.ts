@@ -35,6 +35,11 @@ export class Label2DHandler {
   /** Index of currently selected item */
   private _selectedItemIndex: number
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label2DList) {
     this._highlightedLabel = null
     this._state = Session.getState()
@@ -282,6 +287,7 @@ export class Label2DHandler {
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
     for (const selectedLabel of this._labelList.selectedLabels) {
       selectedLabel.onKeyUp(e.key)
@@ -294,7 +300,9 @@ export class Label2DHandler {
    * @param _isVisible
    */
   public onVisibilityChange(): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[Key.META]
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[Key.CONTROL]
   }
 

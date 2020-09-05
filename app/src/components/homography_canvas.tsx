@@ -69,6 +69,11 @@ class HomographyCanvas extends ImageCanvas {
   /** image data */
   private _imageData: Uint8ClampedArray | null
 
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   constructor(props: Props) {
     super(props)
     this._plane = null
@@ -107,8 +112,8 @@ class HomographyCanvas extends ImageCanvas {
               this.imageContext !== null
             ) {
               // Set canvas size
-              canvas.style.height = displayRect.height + "px"
-              canvas.style.width = displayRect.width + "px"
+              canvas.style.height = `${displayRect.height}px`
+              canvas.style.width = `${displayRect.width}px`
             }
           }
         }}

@@ -61,6 +61,7 @@ export class PolyPathPoint2D extends Point2D {
 
   /**
    * Constructor
+   *
    * @param x
    * @param y
    * @param type

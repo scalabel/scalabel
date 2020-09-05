@@ -60,6 +60,12 @@ export class Polygon2D extends Label2D {
   /** open or closed */
   private readonly _closed: boolean
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   * @param closed
+   */
   constructor(labelList: Label2DList, closed: boolean) {
     super(labelList)
     this._points = []
@@ -95,8 +101,7 @@ export class Polygon2D extends Label2D {
    * @param mode
    */
   public draw(context: Context2D, ratio: number, mode: DrawMode): void {
-    const self = this
-    const numPoints = self._points.length
+    const numPoints = this._points.length
 
     if (numPoints === 0) return
     let pointStyle = makePathPoint2DStyle()
@@ -115,9 +120,9 @@ export class Polygon2D extends Label2D {
             i <= this._points.length &&
             this._points[i - 1].type !== PathPointType.LINE
           ) {
-            return blendColor(self._color, [255, 255, 255], 0.7)
+            return blendColor(this._color, [255, 255, 255], 0.7)
           } else {
-            return self._color
+            return this._color
           }
         }
         break
@@ -129,7 +134,7 @@ export class Polygon2D extends Label2D {
         )
         edgeStyle = _.assign(edgeStyle, DEFAULT_CONTROL_EDGE_STYLE)
         assignColor = (i: number): number[] => {
-          return encodeControlColor(self._index, i)
+          return encodeControlColor(this._index, i)
         }
         break
     }
@@ -140,16 +145,16 @@ export class Polygon2D extends Label2D {
     context.strokeStyle = toCssColor(edgeStyle.color)
     context.lineWidth = edgeStyle.lineWidth
     context.beginPath()
-    const begin = self._points[0].vector().scale(ratio)
+    const begin = this._points[0].vector().scale(ratio)
     context.moveTo(begin.x, begin.y)
     for (let i = 1; i < numPoints; ++i) {
-      const point = self._points[i]
+      const point = this._points[i]
       const pointToDraw = point.vector().scale(ratio)
       if (point.type === PathPointType.CURVE) {
-        const nextPointToDraw = self._points[(i + 1) % numPoints]
+        const nextPointToDraw = this._points[(i + 1) % numPoints]
           .vector()
           .scale(ratio)
-        const nextVertexToDraw = self._points[(i + 2) % numPoints]
+        const nextVertexToDraw = this._points[(i + 2) % numPoints]
           .vector()
           .scale(ratio)
         context.bezierCurveTo(
@@ -166,8 +171,8 @@ export class Polygon2D extends Label2D {
       }
     }
 
-    if (self._state === Polygon2DState.DRAW) {
-      const tmp = self._mouseCoord.clone().scale(ratio)
+    if (this._state === Polygon2DState.DRAW) {
+      const tmp = this._mouseCoord.clone().scale(ratio)
       context.lineTo(tmp.x, tmp.y)
     }
 
@@ -175,7 +180,7 @@ export class Polygon2D extends Label2D {
       context.lineTo(begin.x, begin.y)
       context.closePath()
       if (mode === DrawMode.VIEW) {
-        const fillStyle = self._color.concat(OPACITY)
+        const fillStyle = this._color.concat(OPACITY)
         context.fillStyle = toCssColor(fillStyle)
         context.fill()
       }
@@ -183,14 +188,14 @@ export class Polygon2D extends Label2D {
     context.stroke()
     context.restore()
 
-    if (mode === DrawMode.CONTROL || self._selected || self._highlighted) {
+    if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       // For bezier curve
       context.save()
       context.setLineDash(DASH_LINE)
       context.beginPath()
       for (let i = 0; i < numPoints; ++i) {
-        const point = self._points[i]
-        const nextPoint = self._points[(i + 1) % numPoints]
+        const point = this._points[i]
+        const nextPoint = this._points[(i + 1) % numPoints]
         if (
           (point.type === PathPointType.LINE &&
             nextPoint.type === PathPointType.CURVE) ||
@@ -207,10 +212,10 @@ export class Polygon2D extends Label2D {
       context.restore()
 
       // Draw points
-      if (self._state === Polygon2DState.DRAW) {
+      if (this._state === Polygon2DState.DRAW) {
         const tmpPoint = makeDrawablePathPoint2D(
-          self._mouseCoord.x,
-          self._mouseCoord.y,
+          this._mouseCoord.x,
+          this._mouseCoord.y,
           PathPointType.UNKNOWN,
           this._label?.id
         )
@@ -218,10 +223,10 @@ export class Polygon2D extends Label2D {
         tmpStyle.color = assignColor(numPoints + 1)
         tmpPoint.draw(context, ratio, tmpStyle)
         let numVertices = 1
-        _.forEach(self._points, (point, index) => {
+        _.forEach(this._points, (point, index) => {
           if (point.type === PathPointType.LINE) {
             let style = pointStyle
-            if (numVertices === self._highlightedHandle) {
+            if (numVertices === this._highlightedHandle) {
               style = highPointStyle
             }
             style.color = assignColor(index + 1)
@@ -229,11 +234,11 @@ export class Polygon2D extends Label2D {
             numVertices++
           }
         })
-      } else if (self._state === Polygon2DState.FINISHED) {
+      } else if (this._state === Polygon2DState.FINISHED) {
         for (let i = 0; i < numPoints; ++i) {
-          const point = self._points[i]
+          const point = this._points[i]
           let style = pointStyle
-          if (i + 1 === self._highlightedHandle) {
+          if (i + 1 === this._highlightedHandle) {
             style = highPointStyle
           }
           style.color = assignColor(i + 1)
@@ -241,8 +246,8 @@ export class Polygon2D extends Label2D {
         }
       }
     }
-    if (mode === DrawMode.VIEW && self._state !== Polygon2DState.DRAW) {
-      self.drawTag(context, ratio, this.getCentroid(), self._color)
+    if (mode === DrawMode.VIEW && this._state !== Polygon2DState.DRAW) {
+      this.drawTag(context, ratio, this.getCentroid(), this._color)
     }
   }
 
@@ -396,6 +401,7 @@ export class Polygon2D extends Label2D {
    * @param e pressed key
    */
   public onKeyUp(e: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e]
   }
 
@@ -665,11 +671,12 @@ export class Polygon2D extends Label2D {
     const numPoints = this._points.length
     if (numPoints === 0) return false
     switch (this._state) {
-      case Polygon2DState.DRAW:
+      case Polygon2DState.DRAW: {
         const indexGap = numPoints === 1 ? 1 : 2
         this._points.splice(numPoints - indexGap, indexGap)
         break
-      case Polygon2DState.RESHAPE:
+      }
+      case Polygon2DState.RESHAPE: {
         let numVertices = 0
         for (const point of this._points) {
           if (point.type === PathPointType.LINE) {
@@ -748,6 +755,7 @@ export class Polygon2D extends Label2D {
             }
           }
         }
+      }
     }
     return this._points.length !== 0
   }
@@ -875,7 +883,8 @@ export class Polygon2D extends Label2D {
     const point = this._points[selectedLabelIndex]
     const highlightedHandleIndex = this._highlightedHandle - 1
     switch (point.type) {
-      case PathPointType.MID: // From midpoint to curve
+      case PathPointType.MID: {
+        // From midpoint to curve
         const prevPoint = this._points[
           this.getPreviousIndex(highlightedHandleIndex)
         ]
@@ -889,7 +898,9 @@ export class Polygon2D extends Label2D {
         this._points[highlightedHandleIndex] = controlPoints[0]
         this._points.splice(highlightedHandleIndex + 1, 0, controlPoints[1])
         break
-      case PathPointType.CURVE: // From curve to midpoint
+      }
+      case PathPointType.CURVE: {
+        // From curve to midpoint
         const newMidPointIndex =
           this._points[highlightedHandleIndex - 1].type === PathPointType.CURVE
             ? this.getPreviousIndex(highlightedHandleIndex)
@@ -899,6 +910,7 @@ export class Polygon2D extends Label2D {
           this._points[this.getNextIndex(newMidPointIndex)],
           this._points[this.getPreviousIndex(newMidPointIndex)]
         )
+      }
     }
   }
 

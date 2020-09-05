@@ -371,7 +371,7 @@ export default class CreateForm extends React.Component<Props, State> {
     }
     x.open("POST", Endpoint.POST_PROJECT)
     const auth = getAuth()
-    if (auth) {
+    if (auth !== "") {
       x.setRequestHeader("Authorization", auth)
     }
     const formData = this.getFormData(event)

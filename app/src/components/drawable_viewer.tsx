@@ -244,6 +244,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
    * @param e
    */
   protected onKeyUp(e: KeyboardEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
   }
 

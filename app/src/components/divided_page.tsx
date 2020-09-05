@@ -60,6 +60,8 @@ function DividedPage(props: DividedPageProps): JSX.Element {
   )
   return (
     <HeaderPage
+      // TODO: fix this error
+      // eslint-disable-next-line react/no-children-prop
       children={{
         headerContent: children.headerContent,
         pageContent: mainPageContent

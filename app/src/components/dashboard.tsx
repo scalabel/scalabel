@@ -258,6 +258,8 @@ function Dashboard(props: DashboardProps): JSX.Element {
    */
   return (
     <DividedPage
+      // TODO: fix this error
+      // eslint-disable-next-line react/no-children-prop
       children={{
         headerContent,
         sidebarContent,
@@ -277,10 +279,12 @@ function header(props: HeaderProps): JSX.Element {
   return (
     <React.Fragment>
       <Typography variant="h6" noWrap>
-        {vendor ? "Vendor Dashboard" : "Project Dashboard"}
+        {vendor !== undefined && vendor
+          ? "Vendor Dashboard"
+          : "Project Dashboard"}
       </Typography>
       <div className={classes.grow} />
-      {vendor ? null : (
+      {vendor !== undefined && vendor ? null : (
         <React.Fragment>
           <Typography variant="body1" noWrap>
             Labeled Tasks
@@ -335,7 +339,7 @@ function sidebar(props: SidebarProps): JSX.Element {
           <ListItemText
             key={value.tag}
             className={
-              !(index % 2)
+              index % 2 === 0
                 ? `${classes.listItem} ${classes.coloredListItem}`
                 : classes.listItem
             }
@@ -343,7 +347,7 @@ function sidebar(props: SidebarProps): JSX.Element {
           />
         ))}
       </List>
-      {vendor ? null : (
+      {vendor !== undefined && vendor ? null : (
         <React.Fragment>
           <Link
             variant="button"

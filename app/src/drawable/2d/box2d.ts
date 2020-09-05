@@ -52,6 +52,11 @@ export class Box2D extends Label2D {
   /** cache shape for moving */
   private _startingRect: Rect2D
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label2DList) {
     super(labelList)
     this._rect = new Rect2D()
@@ -89,8 +94,6 @@ export class Box2D extends Label2D {
    * @param mode
    */
   public draw(context: Context2D, ratio: number, mode: DrawMode): void {
-    const self = this
-
     // Set proper drawing styles
     let pointStyle = makePoint2DStyle()
     let highPointStyle = makePoint2DStyle()
@@ -104,10 +107,10 @@ export class Box2D extends Label2D {
         assignColor = (i: number): number[] => {
           if (i % 2 === 0 && i > 0) {
             // Midpoint
-            return blendColor(self._color, [255, 255, 255], 0.7)
+            return blendColor(this._color, [255, 255, 255], 0.7)
           } else {
             // Vertex
-            return self._color
+            return this._color
           }
         }
         break
@@ -116,28 +119,28 @@ export class Box2D extends Label2D {
         highPointStyle = _.assign(highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
         rectStyle = _.assign(rectStyle, DEFAULT_CONTROL_RECT_STYLE)
         assignColor = (i: number): number[] => {
-          return encodeControlColor(self._index, i)
+          return encodeControlColor(this._index, i)
         }
         break
     }
 
     // Draw!!!
-    const rect = self._rect
+    const rect = this._rect
     rectStyle.color = assignColor(0)
     rect.draw(context, ratio, rectStyle)
     if (mode === DrawMode.VIEW) {
-      self.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), self._color)
+      this.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), this._color)
     }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       for (let i = 1; i <= 8; i += 1) {
         let style
-        if (i === self._highlightedHandle) {
+        if (i === this._highlightedHandle) {
           style = highPointStyle
         } else {
           style = pointStyle
         }
         style.color = assignColor(i)
-        const point = self._controlPoints[i - 1]
+        const point = this._controlPoints[i - 1]
         point.draw(context, ratio, style)
       }
     }
@@ -323,7 +326,7 @@ export class Box2D extends Label2D {
 
   /** Get shape objects for committing to state */
   public shapes(): ShapeType[] {
-    if (!this._label) {
+    if (this._label === null) {
       throw new Error("Uninitialized label")
     }
     /**

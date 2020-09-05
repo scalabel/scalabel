@@ -58,6 +58,9 @@ export class Label2DList {
   /** New labels to be committed */
   private readonly _updatedLabels: Set<Label2D>
 
+  /**
+   * Constructor
+   */
   constructor() {
     this._labels = {}
     this._labelList = []
@@ -156,7 +159,7 @@ export class Label2DList {
     hideLabels?: boolean
   ): void {
     const labelsToDraw =
-      hideLabels && hideLabels !== null && hideLabels !== undefined
+      hideLabels !== null && hideLabels !== undefined && hideLabels
         ? this._labelList.filter((label) => label.selected)
         : this._labelList
     labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
@@ -176,36 +179,32 @@ export class Label2DList {
 
     this._state = state
     this._labelTemplates = state.task.config.label2DTemplates
-    const self = this
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
     // Remove any label not in the state
-    self._labels = Object.assign(
-      {} as typeof self._labels,
-      _.pick(self._labels, _.keys(item.labels))
-    )
+    this._labels = Object.assign({}, _.pick(this._labels, _.keys(item.labels)))
     // Update drawable label values
     _.forEach(item.labels, (label, labelId) => {
-      if (!(labelId in self._labels)) {
+      if (!(labelId in this._labels)) {
         const newLabel = makeDrawableLabel2D(
           this,
           label.type,
           this._labelTemplates
         )
         if (newLabel !== null) {
-          self._labels[labelId] = newLabel
+          this._labels[labelId] = newLabel
         }
       }
-      if (labelId in self._labels) {
-        const drawableLabel = self._labels[labelId]
+      if (labelId in this._labels) {
+        const drawableLabel = this._labels[labelId]
         if (!drawableLabel.editing) {
           drawableLabel.updateState(state, itemIndex, labelId)
         }
       }
     })
     // Order the labels and assign order values
-    self._labelList = _.sortBy(_.values(self._labels), [(label) => label.order])
-    _.forEach(self._labelList, (l: Label2D, index: number) => {
+    this._labelList = _.sortBy(_.values(this._labels), [(label) => label.order])
+    _.forEach(this._labelList, (l: Label2D, index: number) => {
       l.index = index
     })
     this._selectedLabels = []

@@ -36,7 +36,7 @@ import Viewer3D from "./viewer3d"
 export function viewerFactory(
   viewerConfig: ViewerConfigType,
   viewerId: number
-) {
+): JSX.Element {
   switch (viewerConfig.type) {
     case types.ViewerConfigTypeName.IMAGE:
       return <Viewer2D id={viewerId} key={viewerReactKey(viewerId)} />
@@ -47,7 +47,7 @@ export function viewerFactory(
     case types.ViewerConfigTypeName.HOMOGRAPHY:
       return <HomographyViewer id={viewerId} key={viewerReactKey(viewerId)} />
   }
-  return null
+  return <></>
 }
 
 /**
@@ -123,15 +123,6 @@ const HIDDEN_UNIT_SIZE = 50
  * Wrapper for SplitPane
  */
 class LabelPane extends Component<Props> {
-  /**
-   * Constructor
-   *
-   * @param props
-   */
-  constructor(props: Props) {
-    super(props)
-  }
-
   /** Override render */
   public render(): React.ReactNode {
     const pane = this.state.user.layout.panes[this.props.pane]
@@ -349,7 +340,7 @@ class LabelPane extends Component<Props> {
         return null
       }
     }
-    if (!pane.split) {
+    if (pane.split === undefined) {
       throw new Error("Missing split type")
     }
 
@@ -363,10 +354,10 @@ class LabelPane extends Component<Props> {
     const child1State = this.state.user.layout.panes[pane.child1]
     const child2State = this.state.user.layout.panes[pane.child2]
 
-    let defaultSize = pane.primarySize ? pane.primarySize : "50%"
+    let defaultSize = pane.primarySize !== undefined ? pane.primarySize : "50%"
 
     let hiddenSize = HIDDEN_UNIT_SIZE
-    if (pane.split) {
+    if (pane.split !== undefined) {
       if (pane.split === SplitType.HORIZONTAL) {
         hiddenSize *= pane.numHorizontalChildren + 1
       } else {

@@ -63,6 +63,11 @@ export abstract class Label2D {
   /** whether the label is temporary */
   protected _temporary: boolean
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label2DList) {
     this._index = -1
     this._labelId = INVALID_ID
@@ -98,7 +103,7 @@ export abstract class Label2D {
 
   /** get category */
   public get category(): number[] {
-    if (this._label !== null && this._label.category) {
+    if (this._label?.category !== undefined) {
       return this._label.category
     }
     return []
@@ -106,7 +111,7 @@ export abstract class Label2D {
 
   /** get attributes */
   public get attributes(): { [key: number]: number[] } {
-    if (this._label !== null && this._label.attributes) {
+    if (this._label?.attributes !== undefined) {
       return this._label.attributes
     }
     return {}
@@ -271,19 +276,16 @@ export abstract class Label2D {
     const TAG_WIDTH = 50
     const TAG_HEIGHT = 28
     const [x, y] = position
-    const self = this
     ctx.save()
     const config = this._config
     const category =
-      self._label !== null &&
-      self._label.category[0] < config.categories.length &&
-      self._label.category[0] >= 0
-        ? config.categories[self._label.category[0]]
+      this._label !== null &&
+      this._label.category[0] < config.categories.length &&
+      this._label.category[0] >= 0
+        ? config.categories[this._label.category[0]]
         : ""
     const attributes =
-      self._label !== null && self._label.attributes
-        ? self._label.attributes
-        : {}
+      this._label?.attributes !== undefined ? this._label.attributes : {}
     const words = category.split(" ")
     let tw = TAG_WIDTH
     // Abbreviate tag as the first 3 chars of the last word
@@ -297,7 +299,10 @@ export abstract class Label2D {
           tw += 36
         }
       } else if (attribute.toolType === "list") {
-        if (attribute && attributes[Number(attributeId)][0] > 0) {
+        if (
+          Number(attributeId) in attribute &&
+          attributes[Number(attributeId)][0] > 0
+        ) {
           abbr +=
             "," +
             attribute.tagText +

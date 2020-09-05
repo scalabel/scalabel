@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/core/styles"
+import { withStyles, StyleRules } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -16,7 +16,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 
-const styles = () =>
+const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
     label3d_canvas: {
       position: "absolute",
@@ -275,7 +275,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     )
 
     const consumed =
-      intersects && intersects.length > 0
+      intersects.length > 0
         ? this._labelHandler.onMouseMove(x, y, intersects[0])
         : this._labelHandler.onMouseMove(x, y)
     if (consumed) {

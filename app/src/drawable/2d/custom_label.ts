@@ -43,6 +43,12 @@ export class CustomLabel2D extends Label2D {
   /** Bounds of the shape */
   private _bounds: Rect2D
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   * @param template
+   */
   constructor(labelList: Label2DList, template: Label2DTemplateType) {
     super(labelList)
     this._template = template
@@ -88,8 +94,6 @@ export class CustomLabel2D extends Label2D {
    * @param mode
    */
   public draw(context: Context2D, ratio: number, mode: DrawMode): void {
-    const self = this
-
     // Set proper drawing styles
     let pointStyle = makePoint2DStyle()
     let rectStyle = makeRect2DStyle()
@@ -108,7 +112,7 @@ export class CustomLabel2D extends Label2D {
           ) {
             return this._colorMap[this._shapes[i].name]
           }
-          return self._color
+          return this._color
         }
         break
       case DrawMode.CONTROL:
@@ -116,7 +120,7 @@ export class CustomLabel2D extends Label2D {
         highPointStyle = _.assign(highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
         rectStyle = _.assign(rectStyle, DEFAULT_CONTROL_RECT_STYLE)
         assignColor = (i: number): number[] => {
-          return encodeControlColor(self._index, i)
+          return encodeControlColor(this._index, i)
         }
         break
     }
@@ -276,6 +280,7 @@ export class CustomLabel2D extends Label2D {
    * @param key
    */
   public onKeyUp(key: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[key]
   }
 

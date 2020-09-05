@@ -16,16 +16,6 @@ import HomographyCanvas from "./homography_canvas"
  */
 class HomographyViewer extends DrawableViewer<ViewerProps> {
   /**
-   * Constructor
-   *
-   * @param {Object} props: react props
-   * @param props
-   */
-  constructor(props: ViewerProps) {
-    super(props)
-  }
-
-  /**
    * Render function
    *
    * @return {React.Fragment} React fragment

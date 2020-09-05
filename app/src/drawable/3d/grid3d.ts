@@ -163,8 +163,8 @@ export class Grid3D extends Shape3D {
    */
   public updateState(
     shape: ShapeType,
-    id: IdType
-    // _activeCamera?: THREE.Camera
+    id: IdType,
+    _activeCamera?: THREE.Camera
   ): void {
     super.updateState(shape, id)
     const newShape = shape as Plane3DType

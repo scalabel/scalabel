@@ -355,6 +355,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     }
 
     const key = e.key
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[key]
     if (key === Key.CONTROL || key === Key.META) {
       // Control or command
