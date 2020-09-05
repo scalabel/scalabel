@@ -43,6 +43,12 @@ export class CustomLabel2D extends Label2D {
   /** Bounds of the shape */
   private _bounds: Rect2D
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   * @param template
+   */
   constructor(labelList: Label2DList, template: Label2DTemplateType) {
     super(labelList)
     this._template = template
@@ -51,7 +57,7 @@ export class CustomLabel2D extends Label2D {
     this._corners = [new Point2D(), new Point2D(), new Point2D(), new Point2D()]
     this._colorMap = {}
     for (const node of this._template.nodes) {
-      if (node.color) {
+      if (node.color !== null && node.color !== undefined) {
         this._colorMap[node.name] = node.color
       }
     }
@@ -59,7 +65,7 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** Get cursor for highlighting */
-  public get highlightCursor() {
+  public get highlightCursor(): string {
     if (
       this._highlightedHandle >= 0 &&
       this._highlightedHandle < this._shapes.length
@@ -80,10 +86,14 @@ export class CustomLabel2D extends Label2D {
     }
   }
 
-  /** Draw according to template */
+  /**
+   * Draw according to template
+   *
+   * @param context
+   * @param ratio
+   * @param mode
+   */
   public draw(context: Context2D, ratio: number, mode: DrawMode): void {
-    const self = this
-
     // Set proper drawing styles
     let pointStyle = makePoint2DStyle()
     let rectStyle = makeRect2DStyle()
@@ -102,7 +112,7 @@ export class CustomLabel2D extends Label2D {
           ) {
             return this._colorMap[this._shapes[i].name]
           }
-          return self._color
+          return this._color
         }
         break
       case DrawMode.CONTROL:
@@ -110,7 +120,7 @@ export class CustomLabel2D extends Label2D {
         highPointStyle = _.assign(highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
         rectStyle = _.assign(rectStyle, DEFAULT_CONTROL_RECT_STYLE)
         assignColor = (i: number): number[] => {
-          return encodeControlColor(self._index, i)
+          return encodeControlColor(this._index, i)
         }
         break
     }
@@ -166,7 +176,12 @@ export class CustomLabel2D extends Label2D {
     }
   }
 
-  /** Override on mouse down */
+  /**
+   * Override on mouse down
+   *
+   * @param coord
+   * @param handleIndex
+   */
   public onMouseDown(coord: Vector2D, handleIndex: number): boolean {
     const returnValue = super.onMouseDown(coord, handleIndex)
     this.editing = true
@@ -183,13 +198,20 @@ export class CustomLabel2D extends Label2D {
     return returnValue
   }
 
-  /** Handle mouse move */
+  /**
+   * Handle mouse move
+   *
+   * @param coord
+   * @param _limit
+   * @param _labelIndex
+   * @param _handleIndex
+   */
   public onMouseMove(
     coord: Vector2D,
     _limit: Size2D,
     _labelIndex: number,
     _handleIndex: number
-  ) {
+  ): boolean {
     if (
       this._temporary ||
       (this._highlightedHandle >= this._shapes.length &&
@@ -230,14 +252,22 @@ export class CustomLabel2D extends Label2D {
     return false
   }
 
-  /** Override on mouse up */
+  /**
+   * Override on mouse up
+   *
+   * @param coord
+   */
   public onMouseUp(coord: Vector2D): boolean {
     const returnValue = super.onMouseUp(coord)
     this.editing = false
     return returnValue
   }
 
-  /** On key down */
+  /**
+   * On key down
+   *
+   * @param key
+   */
   public onKeyDown(key: string): boolean {
     this._keyDownMap[key] = true
     return true
@@ -245,14 +275,18 @@ export class CustomLabel2D extends Label2D {
 
   /**
    * handle keyboard up event
+   *
    * @param e pressed key
+   * @param key
    */
   public onKeyUp(key: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[key]
   }
 
   /**
    * Expand the primitive shapes to drawable shapes
+   *
    * @param {ShapeType[]} shapes
    */
   public updateShapes(shapes: ShapeType[]): void {
@@ -267,7 +301,7 @@ export class CustomLabel2D extends Label2D {
         this._shapes[i].x = node.x
         this._shapes[i].y = node.y
         this._shapes[i].name = node.name
-        if (node.hidden) {
+        if (node.hidden !== null) {
           this._shapes[i].hide()
         }
       }
@@ -277,7 +311,7 @@ export class CustomLabel2D extends Label2D {
 
   /** Get shape id's and shapes for updating */
   public shapes(): ShapeType[] {
-    if (!this._label) {
+    if (this._label === null) {
       throw new Error("Uninitialized label")
     }
     /**
@@ -297,7 +331,12 @@ export class CustomLabel2D extends Label2D {
     return shapeStates
   }
 
-  /** Temporary initialization on mouse down */
+  /**
+   * Temporary initialization on mouse down
+   *
+   * @param state
+   * @param start
+   */
   protected initTempLabel(state: State, start: Vector2D): LabelType {
     const itemIndex = state.user.select.item
     const templateName =
@@ -334,7 +373,7 @@ export class CustomLabel2D extends Label2D {
   }
 
   /** update bounds to current points */
-  private updateBounds() {
+  private updateBounds(): void {
     const bounds = {
       x1: Infinity,
       y1: Infinity,
@@ -363,8 +402,13 @@ export class CustomLabel2D extends Label2D {
     }
   }
 
-  /** Scale */
-  private scale(anchor: Vector2D, scale: Vector2D) {
+  /**
+   * Scale
+   *
+   * @param anchor
+   * @param scale
+   */
+  private scale(anchor: Vector2D, scale: Vector2D): void {
     // Scale minimum to 1 pixel wide/high
     let widthSign = Math.sign(scale.x)
     if (widthSign === 0) {
@@ -415,8 +459,12 @@ export class CustomLabel2D extends Label2D {
     this.updateBounds()
   }
 
-  /** Get index of opposite corner */
-  private getOppositeCorner(index: number) {
+  /**
+   * Get index of opposite corner
+   *
+   * @param index
+   */
+  private getOppositeCorner(index: number): number {
     return (index + 2) % this._corners.length
   }
 }

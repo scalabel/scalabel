@@ -63,6 +63,11 @@ export abstract class Label2D {
   /** whether the label is temporary */
   protected _temporary: boolean
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label2DList) {
     this._index = -1
     this._labelId = INVALID_ID
@@ -98,7 +103,7 @@ export abstract class Label2D {
 
   /** get category */
   public get category(): number[] {
-    if (this._label && this._label.category) {
+    if (this._label?.category !== undefined) {
       return this._label.category
     }
     return []
@@ -106,7 +111,7 @@ export abstract class Label2D {
 
   /** get attributes */
   public get attributes(): { [key: number]: number[] } {
-    if (this._label && this._label.attributes) {
+    if (this._label?.attributes !== undefined) {
       return this._label.attributes
     }
     return {}
@@ -114,7 +119,7 @@ export abstract class Label2D {
 
   /** get label type */
   public get type(): string {
-    if (this._label) {
+    if (this._label !== null) {
       return this._label.type
     }
     return LabelTypeName.EMPTY
@@ -122,7 +127,7 @@ export abstract class Label2D {
 
   /** get label state */
   public get label(): LabelType {
-    if (!this._label) {
+    if (this._label === null) {
       throw new Error("Label uninitialized")
     }
     return this._label
@@ -135,7 +140,7 @@ export abstract class Label2D {
 
   /** get track id */
   public get trackId(): IdType {
-    if (this._label) {
+    if (this._label !== null) {
       return this._label.track
     }
     return INVALID_ID
@@ -143,7 +148,7 @@ export abstract class Label2D {
 
   /** get item index */
   public get item(): number {
-    if (this._label) {
+    if (this._label !== null) {
       return this._label.item
     }
     return -1
@@ -201,18 +206,31 @@ export abstract class Label2D {
     return this._temporary
   }
 
-  /** Set whether the label is highlighted */
+  /**
+   * Set whether the label is highlighted
+   *
+   * @param mode
+   */
   public setViewMode(mode: Partial<ViewMode>): void {
     this._viewMode = _.assign(this._viewMode, mode)
   }
 
-  /** select the label */
-  public setSelected(s: boolean) {
+  /**
+   * select the label
+   *
+   * @param s
+   */
+  public setSelected(s: boolean): void {
     this._selected = s
   }
 
-  /** highlight the label */
-  public setHighlighted(h: boolean, handleIndex: number = -1) {
+  /**
+   * highlight the label
+   *
+   * @param h
+   * @param handleIndex
+   */
+  public setHighlighted(h: boolean, handleIndex: number = -1): void {
     if (h && handleIndex < 0) {
       throw Error("need to highlight handle as well")
     }
@@ -226,14 +244,15 @@ export abstract class Label2D {
   }
 
   /** Set to manual */
-  public setManual() {
-    if (this._label) {
+  public setManual(): void {
+    if (this._label !== null) {
       this._label.manual = true
     }
   }
 
   /**
    * Draw the label on viewing or control canvas
+   *
    * @param {Context2D} canvas
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
@@ -242,6 +261,7 @@ export abstract class Label2D {
 
   /**
    * Draw the label tag on viewing or control canvas
+   *
    * @param {Context2D} ctx
    * @param {Vector2D} position
    * @param {number} ratio
@@ -252,21 +272,20 @@ export abstract class Label2D {
     ratio: number,
     position: Vector2D,
     fillStyle: number[]
-  ) {
+  ): void {
     const TAG_WIDTH = 50
     const TAG_HEIGHT = 28
     const [x, y] = position
-    const self = this
     ctx.save()
     const config = this._config
     const category =
-      self._label &&
-      self._label.category[0] < config.categories.length &&
-      self._label.category[0] >= 0
-        ? config.categories[self._label.category[0]]
+      this._label !== null &&
+      this._label.category[0] < config.categories.length &&
+      this._label.category[0] >= 0
+        ? config.categories[this._label.category[0]]
         : ""
     const attributes =
-      self._label && self._label.attributes ? self._label.attributes : {}
+      this._label?.attributes !== undefined ? this._label.attributes : {}
     const words = category.split(" ")
     let tw = TAG_WIDTH
     // Abbreviate tag as the first 3 chars of the last word
@@ -280,7 +299,10 @@ export abstract class Label2D {
           tw += 36
         }
       } else if (attribute.toolType === "list") {
-        if (attribute && attributes[Number(attributeId)][0] > 0) {
+        if (
+          Number(attributeId) in attribute &&
+          attributes[Number(attributeId)][0] > 0
+        ) {
           abbr +=
             "," +
             attribute.tagText +
@@ -301,7 +323,9 @@ export abstract class Label2D {
 
   /**
    * Handle mouse down
+   *
    * @param coord
+   * @param _handleIndex
    */
   public onMouseDown(coord: Vector2D, _handleIndex: number): boolean {
     this._mouseDown = true
@@ -314,7 +338,9 @@ export abstract class Label2D {
 
   /**
    * Handle mouse up
+   *
    * @param coord
+   * @param _coord
    */
   public onMouseUp(_coord: Vector2D): boolean {
     this._mouseDown = false
@@ -323,6 +349,7 @@ export abstract class Label2D {
 
   /**
    * Process mouse move
+   *
    * @param {Vector2D} coord: mouse coordinate
    * @param {Size2D} limit: limit of the canvas frame
    */
@@ -335,18 +362,21 @@ export abstract class Label2D {
 
   /**
    * handle keyboard down event
+   *
    * @param e pressed key
    */
   public abstract onKeyDown(e: string): boolean
 
   /**
    * handle keyboard up event
+   *
    * @param e pressed key
    */
   public abstract onKeyUp(e: string): void
 
   /**
    * Expand the primitive shapes to drawable shapes
+   *
    * @param {ShapeType[]} shapes
    */
   public abstract updateShapes(shapes: ShapeType[]): void
@@ -356,8 +386,10 @@ export abstract class Label2D {
 
   /**
    * Initialize this label to be temporary
+   *
    * @param {State} state
    * @param {Vector2D} start: starting coordinate of the label
+   * @param start
    */
   public initTemp(state: State, start: Vector2D): void {
     this._order = state.task.status.maxOrder + 1
@@ -374,7 +406,13 @@ export abstract class Label2D {
     this._color = getColorById(this._labelId, this._trackId)
   }
 
-  /** Convert label state to drawable */
+  /**
+   * Convert label state to drawable
+   *
+   * @param state
+   * @param itemIndex
+   * @param labelId
+   */
   public updateState(state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
     this._label = _.cloneDeep(item.labels[labelId])
@@ -398,6 +436,7 @@ export abstract class Label2D {
 
   /**
    * Initialize the temp label content
+   *
    * @param state
    * @param _start
    */

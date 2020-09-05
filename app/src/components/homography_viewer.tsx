@@ -16,19 +16,12 @@ import HomographyCanvas from "./homography_canvas"
  */
 class HomographyViewer extends DrawableViewer<ViewerProps> {
   /**
-   * Constructor
-   * @param {Object} props: react props
-   */
-  constructor(props: ViewerProps) {
-    super(props)
-  }
-
-  /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
-  protected getDrawableComponents() {
-    if (this._container && this._viewerConfig) {
+  protected getDrawableComponents(): React.ReactElement[] {
+    if (this._container !== null && this._viewerConfig !== null) {
       this._container.scrollTop = (this
         ._viewerConfig as ImageViewerConfigType).displayTop
       this._container.scrollLeft = (this
@@ -36,7 +29,7 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
     }
 
     const views: React.ReactElement[] = []
-    if (this._viewerConfig) {
+    if (this._viewerConfig !== null) {
       views.push(
         <HomographyCanvas
           key={`homographyCanvas${this.props.id}`}
@@ -50,24 +43,27 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
   }
 
   /** Menu components */
-  protected getMenuComponents() {
+  protected getMenuComponents(): [] {
     return []
   }
 
   /**
    * Handle double click
+   *
    * @param e
    */
   protected onDoubleClick(): void {}
 
   /**
    * Handle mouse leave
+   *
    * @param e
    */
   protected onMouseLeave(): void {}
 
   /**
    * Handle mouse wheel
+   *
    * @param e
    */
   protected onWheel(e: WheelEvent): void {

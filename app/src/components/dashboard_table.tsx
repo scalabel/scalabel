@@ -42,6 +42,11 @@ interface DataTableProps<DataType> {
 class DataTable<DataType extends string | User> extends React.Component<
   DataTableProps<DataType>
 > {
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   public constructor(props: DataTableProps<DataType>) {
     super(props)
   }
@@ -49,7 +54,7 @@ class DataTable<DataType extends string | User> extends React.Component<
   /**
    * renders the table
    */
-  public render() {
+  public render(): React.ReactNode {
     const { classes, dataList, headers } = this.props
     return (
       <Table size="medium">

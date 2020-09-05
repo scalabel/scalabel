@@ -47,6 +47,11 @@ interface State {
  * Upload file button
  */
 export default class UploadButton extends React.Component<Props, State> {
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   constructor(props: Props) {
     super(props)
     this.state = { filename: "No file chosen" }
@@ -92,7 +97,9 @@ export default class UploadButton extends React.Component<Props, State> {
               }}
               onChange={(event) => this.handleFileChange(event)}
               accept={
-                this.props.with_json ? ".json, .yml, .yaml" : ".yml, .yaml"
+                this.props.with_json !== undefined && this.props.with_json
+                  ? ".json, .yml, .yaml"
+                  : ".yml, .yaml"
               }
             />
             <label htmlFor={this.props.form_id}>
@@ -125,12 +132,13 @@ export default class UploadButton extends React.Component<Props, State> {
 
   /**
    * Handle filename change
+   *
    * @param event
    */
   private readonly handleFileChange = (
     event: ChangeEvent<HTMLInputElement>
   ): void => {
-    if (event.target.files) {
+    if (event.target.files !== null) {
       if (!Session.testMode) {
         this.setState({ filename: event.target.files[0].name })
       }

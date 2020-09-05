@@ -10,8 +10,10 @@ import Dashboard, { DashboardContents } from "./dashboard"
 
 /**
  * This function post requests to backend to retrieve dashboard contents
+ *
+ * @param vendor
  */
-export function initDashboard(vendor?: boolean): [string, boolean] | void {
+export function initDashboard(vendor?: boolean): void {
   let dashboardContents: DashboardContents
   // Get params from url path.
   const searchParams = new URLSearchParams(window.location.search)
@@ -28,7 +30,9 @@ export function initDashboard(vendor?: boolean): [string, boolean] | void {
         <MuiThemeProvider theme={myTheme}>
           <Dashboard dashboardContents={dashboardContents} vendor={vendor} />
         </MuiThemeProvider>,
-        document.getElementById(vendor ? "vendor-root" : "dashboard-root")
+        document.getElementById(
+          vendor !== null ? "vendor-root" : "dashboard-root"
+        )
       )
     }
   }
@@ -36,7 +40,7 @@ export function initDashboard(vendor?: boolean): [string, boolean] | void {
   xhr.open("GET", `${Endpoint.DASHBOARD}?name=${projectName}`)
   xhr.setRequestHeader("Content-Type", "application/json")
   const auth = getAuth()
-  if (auth) {
+  if (auth !== null) {
     xhr.setRequestHeader("Authorization", auth)
   }
   xhr.send()

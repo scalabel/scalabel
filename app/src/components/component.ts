@@ -15,7 +15,9 @@ export abstract class Component<Props> extends React.Component<
   private _isMounted = false
   /**
    * General constructor
+   *
    * @param props: component props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)

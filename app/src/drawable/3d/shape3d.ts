@@ -16,6 +16,11 @@ export abstract class Shape3D extends Object3D {
   /** whether highlighted */
   protected _highlighted: boolean
 
+  /**
+   * Constructor
+   *
+   * @param label
+   */
   constructor(label: Label3D) {
     super()
     this._shapeId = INVALID_ID
@@ -37,18 +42,29 @@ export abstract class Shape3D extends Object3D {
   /** return shape type */
   public abstract get typeName(): string
 
-  /** update parameters */
+  /**
+   * update parameters
+   *
+   * @param shape
+   * @param id
+   * @param _activeCamera
+   */
   public updateState(
     shape: ShapeType,
-    id: IdType,
-    _activeCamera?: THREE.Camera
-  ) {
+    id: IdType
+    // _activeCamera?: THREE.Camera
+  ): void {
     this._shape = shape
     this._shapeId = id
   }
 
-  /** Set visibility for viewer */
-  public setVisible(viewerId: number, v: boolean = true) {
+  /**
+   * Set visibility for viewer
+   *
+   * @param viewerId
+   * @param v
+   */
+  public setVisible(viewerId: number, v: boolean = true): void {
     if (v) {
       this.layers.enable(viewerId)
     } else {

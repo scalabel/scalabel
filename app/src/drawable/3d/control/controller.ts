@@ -42,6 +42,12 @@ export abstract class Controller extends THREE.Object3D {
   /** The hashed list of keys currently down */
   protected _keyDownMap: { [key: string]: boolean }
 
+  /**
+   * Constructor
+   *
+   * @param labels
+   * @param bounds
+   */
   constructor(labels: Label3D[], bounds: THREE.Box3) {
     super()
     this._controlUnits = []
@@ -61,11 +67,19 @@ export abstract class Controller extends THREE.Object3D {
     return this._highlightedUnit !== null
   }
 
-  /** highlight function */
-  public setHighlighted(intersection?: THREE.Intersection) {
+  /**
+   * highlight function
+   *
+   * @param intersection
+   */
+  public setHighlighted(intersection?: THREE.Intersection): void {
     this._highlightedUnit = null
     for (const axis of this._controlUnits) {
-      if (axis.setHighlighted(intersection) && intersection) {
+      if (
+        axis.setHighlighted(intersection) &&
+        intersection !== null &&
+        intersection !== undefined
+      ) {
         this._highlightedUnit = axis
         this._intersectionPoint = intersection.point
         for (const nonAxis of this._controlUnits) {
@@ -78,9 +92,13 @@ export abstract class Controller extends THREE.Object3D {
     }
   }
 
-  /** mouse down */
-  public onMouseDown(camera: THREE.Camera) {
-    if (this._highlightedUnit) {
+  /**
+   * mouse down
+   *
+   * @param camera
+   */
+  public onMouseDown(camera: THREE.Camera): boolean {
+    if (this._highlightedUnit !== null) {
       const normal = new THREE.Vector3()
       camera.getWorldDirection(normal)
       this._dragPlane.setFromNormalAndCoplanarPoint(
@@ -92,9 +110,13 @@ export abstract class Controller extends THREE.Object3D {
     return false
   }
 
-  /** mouse move */
-  public onMouseMove(projection: THREE.Ray) {
-    if (this._highlightedUnit && this._dragPlane) {
+  /**
+   * mouse move
+   *
+   * @param projection
+   */
+  public onMouseMove(projection: THREE.Ray): boolean {
+    if (this._highlightedUnit !== null) {
       const newIntersection = this._highlightedUnit.transform(
         this._intersectionPoint,
         projection,
@@ -113,12 +135,20 @@ export abstract class Controller extends THREE.Object3D {
   }
 
   /** mouse up */
-  public onMouseUp() {
+  public onMouseUp(): boolean {
     return false
   }
 
-  /** raycast */
-  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
+  /**
+   * raycast
+   *
+   * @param raycaster
+   * @param intersects
+   */
+  public raycast(
+    raycaster: THREE.Raycaster,
+    intersects: THREE.Intersection[]
+  ): void {
     for (const unit of this._controlUnits) {
       unit.raycast(raycaster, intersects)
     }
@@ -130,7 +160,7 @@ export abstract class Controller extends THREE.Object3D {
   }
 
   /** Toggle local/world */
-  public toggleFrame() {
+  public toggleFrame(): void {
     if (this._labels.length === 1) {
       this._local = !this._local
     } else {
@@ -138,20 +168,34 @@ export abstract class Controller extends THREE.Object3D {
     }
   }
 
-  /** Update scales of control units */
-  public updateScale(scale: THREE.Vector3) {
+  /**
+   * Update scales of control units
+   *
+   * @param scale
+   */
+  public updateScale(scale: THREE.Vector3): void {
     for (const unit of this._controlUnits) {
       unit.updateScale(scale)
     }
   }
 
-  /** Handle key down */
+  /**
+   * Handle key down
+   *
+   * @param key
+   * @param _camera
+   */
   public keyDown(key: string, _camera: THREE.Camera): void {
     this._keyDownMap[key] = true
   }
 
-  /** Handle key up */
+  /**
+   * Handle key up
+   *
+   * @param key
+   */
   public keyUp(key: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[key]
   }
 }

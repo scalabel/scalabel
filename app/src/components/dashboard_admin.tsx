@@ -20,6 +20,7 @@ interface AdminClassType extends DashboardClassType {
 
 /**
  * This function post request to backend to retrieve users' information
+ *
  * @return {function} users
  */
 export function getUsers(): User[] {
@@ -29,13 +30,15 @@ export function getUsers(): User[] {
 /**
  * This is Dashboard component that displays
  * the admin dashboard.
+ *
  * @param {object} props
+ * @param props.classes
  * @return component
  */
 function Dashboard(props: {
   /** style of admin dashboard */
   classes: AdminClassType
-}) {
+}): JSX.Element {
   const { classes } = props
   const headerContent = <DashboardHeader admin />
   let usersToDisplay: User[]
@@ -88,10 +91,13 @@ function Dashboard(props: {
   )
   /**
    * render function
+   *
    * @return component
    */
   return (
     <DividedPage
+      // TODO: fix this error
+      // eslint-disable-next-line react/no-children-prop
       children={{
         headerContent,
         sidebarContent,

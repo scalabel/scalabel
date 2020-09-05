@@ -4,7 +4,11 @@ import Session from "../common/session"
 import { ViewerConfigType } from "../types/state"
 import { Component } from "./component"
 
-/** Generate string to use for react component key */
+/**
+ * Generate string to use for react component key
+ *
+ * @param id
+ */
 export function viewerReactKey(id: number): string {
   return `viewer${id}`
 }
@@ -56,7 +60,9 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Constructor
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: T) {
     super(props)
@@ -110,8 +116,8 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
       <div className={this.props.classes.viewer_container}>
         <div
           ref={(element) => {
-            if (element && this._container !== element) {
-              if (this._container) {
+            if (element !== null && this._container !== element) {
+              if (this._container !== null) {
                 this._container.removeEventListener("wheel", this._wheelHandler)
               }
               this._container = element
@@ -136,9 +142,14 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
     )
   }
 
-  /** Normalize coordinates to container */
+  /**
+   * Normalize coordinates to container
+   *
+   * @param x
+   * @param y
+   */
   protected normalizeCoordinates(x: number, y: number): [number, number] {
-    if (this._container) {
+    if (this._container !== null) {
       const rect = this._container.getBoundingClientRect()
       return [x - rect.left, y - rect.top]
     }
@@ -147,6 +158,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Whether a specific key is pressed down
+   *
    * @param {string} key - the key to check
    * @return {boolean}
    */
@@ -162,10 +174,11 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Handle mouse down
+   *
    * @param e
    */
   protected onMouseDown(e: React.MouseEvent): void {
-    if (!this._container) {
+    if (this._container === null) {
       return
     }
     this._mouseDown = true
@@ -177,7 +190,8 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Handle mouse up
-   * @param e
+   *
+   * @param _e
    */
   protected onMouseUp(_e: React.MouseEvent): void {
     this._mouseDown = false
@@ -185,6 +199,7 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Handle mouse move
+   *
    * @param e
    */
   protected onMouseMove(e: React.MouseEvent): void {
@@ -195,13 +210,15 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Handle double click
+   *
    * @param e
    */
   protected abstract onDoubleClick(e: React.MouseEvent): void
 
   /**
    * Handle mouse leave
-   * @param e
+   *
+   * @param _e
    */
   protected onMouseEnter(_e: React.MouseEvent): void {
     Session.activeViewerId = this.props.id
@@ -209,26 +226,31 @@ export abstract class DrawableViewer<T extends ViewerProps> extends Component<
 
   /**
    * Handle mouse leave
+   *
    * @param e
    */
   protected abstract onMouseLeave(_e: React.MouseEvent): void
 
   /**
    * Handle mouse wheel
+   *
    * @param e
    */
   protected abstract onWheel(e: WheelEvent): void
 
   /**
    * Handle key down
+   *
    * @param e
    */
   protected onKeyUp(e: KeyboardEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
   }
 
   /**
    * Handle key down
+   *
    * @param e
    */
   protected onKeyDown(e: KeyboardEvent): void {

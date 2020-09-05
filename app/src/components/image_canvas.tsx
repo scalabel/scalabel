@@ -50,7 +50,9 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Constructor, handles subscription to store
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)
@@ -66,6 +68,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element {
@@ -75,17 +78,19 @@ export class ImageCanvas extends DrawableCanvas<Props> {
         key="image-canvas"
         className={classes.image_canvas}
         ref={(canvas) => {
-          if (canvas && this.display) {
+          if (canvas !== null && this.display !== null) {
             this.imageCanvas = canvas
             this.imageContext = canvas.getContext("2d")
             const displayRect = this.display.getBoundingClientRect()
             const item = this.state.user.select.item
             const sensor = this.state.user.viewerConfigs[this.props.id].sensor
             if (
-              displayRect.width &&
-              displayRect.height &&
+              displayRect.width !== 0 &&
+              !isNaN(displayRect.width) &&
+              displayRect.height !== 0 &&
+              !isNaN(displayRect.height) &&
               isFrameLoaded(this.state, item, sensor) &&
-              this.imageContext
+              this.imageContext !== null
             ) {
               this.updateScale(this.imageCanvas, this.imageContext, true)
             }
@@ -94,7 +99,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
       />
     )
 
-    if (this.display) {
+    if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       imageCanvas = React.cloneElement(imageCanvas, {
         height: displayRect.height,
@@ -107,10 +112,11 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Function to redraw all canvases
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
-    if (this.imageCanvas && this.imageContext) {
+    if (this.imageCanvas !== null && this.imageContext !== null) {
       const item = this.state.user.select.item
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (
@@ -130,6 +136,8 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * notify state is updated
+   *
+   * @param _state
    */
   protected updateState(_state: State): void {
     if (this.display !== this.props.display) {
@@ -140,7 +148,9 @@ export class ImageCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set the scale of the image in the display
+   *
    * @param {object} canvas
+   * @param context
    * @param {boolean} upRes
    */
   private updateScale(
@@ -148,7 +158,7 @@ export class ImageCanvas extends DrawableCanvas<Props> {
     context: CanvasRenderingContext2D,
     upRes: boolean
   ): void {
-    if (!this.display) {
+    if (this.display === null) {
       return
     }
 

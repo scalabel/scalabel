@@ -23,6 +23,7 @@ interface MouseEventListenersProps {
 /**
  * wrapper stateless component for mouse event listeners, assigning listeners
  * based on label type
+ *
  * @param props
  */
 export default function mouseEventListeners(

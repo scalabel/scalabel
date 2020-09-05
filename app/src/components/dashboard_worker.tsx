@@ -33,13 +33,15 @@ export interface DashboardClassType {
 /**
  * This is Dashboard component that displays
  * the everything post in the dashboard.
+ *
  * @param {object} props
+ * @param props.classes
  * @return component
  */
 function Dashboard(props: {
   /** style of dashboard */
   classes: DashboardClassType
-}) {
+}): JSX.Element {
   const { classes } = props
   const dashboardHeaderContent = <DashboardHeader />
   const dashboardPageContent = (
@@ -59,10 +61,13 @@ function Dashboard(props: {
   )
   /**
    * render function
+   *
    * @return component
    */
   return (
     <HeaderPage
+      // TODO: fix this error
+      // eslint-disable-next-line react/no-children-prop
       children={{
         headerContent: dashboardHeaderContent,
         pageContent: dashboardPageContent

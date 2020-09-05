@@ -9,6 +9,12 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
   /** normal direction */
   private readonly _normal: THREE.Vector3
 
+  /**
+   * Constructor
+   *
+   * @param normal
+   * @param color
+   */
   constructor(normal: THREE.Vector3, color: number) {
     super(
       new THREE.PlaneGeometry(0.5, 0.5),
@@ -30,43 +36,44 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    {
-      ;(this.material as THREE.Material).needsUpdate = true
-    }
-    if (intersection && intersection.object === this) {
-      {
-        ;(this.material as THREE.Material).opacity = 0.9
-      }
+    ;(this.material as THREE.Material).needsUpdate = true
+
+    if (intersection !== undefined && intersection.object === this) {
+      ;(this.material as THREE.Material).opacity = 0.9
+
       return true
     } else {
-      {
-        ;(this.material as THREE.Material).opacity = 0.65
-      }
+      ;(this.material as THREE.Material).opacity = 0.65
+
       return false
     }
   }
 
   /**
    * Set not highlighted when another object is highlighted
+   *
    * @param object
    */
   public setFaded(): void {
-    {
-      ;(this.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this.material as THREE.Material).opacity = 0.25
-    }
+    ;(this.material as THREE.Material).needsUpdate = true
+    ;(this.material as THREE.Material).opacity = 0.25
   }
 
   /**
    * Get translation delta
+   *
    * @param oldIntersection
    * @param newProjection
    * @param dragPlane
+   * @param _dragPlane
+   * @param labels
+   * @param _bounds
+   * @param local
    */
   public transform(
     oldIntersection: THREE.Vector3,
@@ -80,7 +87,7 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
     normal.copy(this._normal)
 
     const toLocal = new THREE.Matrix4()
-    if (this.parent) {
+    if (this.parent !== null) {
       toLocal.getInverse(this.parent.matrixWorld)
     }
 
@@ -105,7 +112,7 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
       delta.applyQuaternion(labels[0].orientation)
     }
 
-    if (this.parent) {
+    if (this.parent !== null) {
       newIntersection.applyMatrix4(this.parent.matrixWorld)
     }
 
@@ -118,10 +125,11 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
-  public updateScale(worldScale: THREE.Vector3) {
-    if (this.parent) {
+  public updateScale(worldScale: THREE.Vector3): void {
+    if (this.parent !== null) {
       const newScale = Math.max(
         2,
         Math.min(

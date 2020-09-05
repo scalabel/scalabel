@@ -1,6 +1,12 @@
 import * as fa from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { AppBar, IconButton, Toolbar, Tooltip } from "@material-ui/core"
+import {
+  AppBar,
+  IconButton,
+  Toolbar,
+  Tooltip,
+  StyleRules
+} from "@material-ui/core"
 import Fade from "@material-ui/core/Fade"
 import { Theme, withStyles } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
@@ -71,6 +77,9 @@ interface ButtonInfo {
 
 /**
  * Convert info of a button to a renderable button
+ *
+ * @param button
+ * @param titleUnit
  */
 function renderButton(button: ButtonInfo, titleUnit: string): JSX.Element {
   const onClick = _.get(button, "onClick", undefined)
@@ -102,7 +111,9 @@ class TitleBar extends Component<Props> {
 
   /**
    * Constructor
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Props) {
     super(props)
@@ -130,9 +141,10 @@ class TitleBar extends Component<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
-  public render(): React.ReactFragment {
+  public render(): React.ReactNode {
     const { classes } = this.props
     const { title } = this.props
     const { instructionLink } = this.props
@@ -197,14 +209,15 @@ const mapStateToProps = (state: ReduxState): StateProps => {
   }
 }
 
-const mapDispatchToProps = () => {
-  return {
-    save: () => Session.dispatch(save()),
-    submit: () => Session.dispatch(submit())
-  }
-}
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const mapDispatchToProps = () => ({
+  save: () => Session.dispatch(save()),
+  submit: () => Session.dispatch(submit())
+})
 
-const styles = (theme: Theme) =>
+const styles = (
+  theme: Theme
+): StyleRules<"appBar" | "grow" | "titleUnit", {}> =>
   createStyles({
     appBar: {
       ...defaultAppBar,

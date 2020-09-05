@@ -11,6 +11,12 @@ const ROTATION_AMOUNT = 0.025
  * perform rotation ops
  */
 export class RotationControl extends Controller {
+  /**
+   * Constructor
+   *
+   * @param labels
+   * @param bounds
+   */
   constructor(labels: Label3D[], bounds: THREE.Box3) {
     super(labels, bounds)
     this._controlUnits.push(new RotationRing(new THREE.Vector3(1, 0, 0), RED))
@@ -21,7 +27,12 @@ export class RotationControl extends Controller {
     }
   }
 
-  /** Apply pre-determined transformation amount based on camera direction */
+  /**
+   * Apply pre-determined transformation amount based on camera direction
+   *
+   * @param key
+   * @param camera
+   */
   public keyDown(key: string, camera: THREE.Camera): void {
     super.keyDown(key, camera)
     let rotationAmount = ROTATION_AMOUNT
@@ -32,7 +43,7 @@ export class RotationControl extends Controller {
       case Key.J_LOW:
       case Key.J_UP:
       case Key.L_LOW:
-      case Key.L_UP:
+      case Key.L_UP: {
         const cameraDirection = camera.getWorldDirection(new THREE.Vector3())
         const quaternion = new THREE.Quaternion()
         quaternion.setFromAxisAngle(cameraDirection, rotationAmount)
@@ -40,6 +51,7 @@ export class RotationControl extends Controller {
           label.rotate(quaternion)
         }
         break
+      }
     }
   }
 }

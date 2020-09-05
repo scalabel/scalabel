@@ -13,6 +13,12 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
   /** intersection point on highlight */
   private readonly _highlightIntersection: THREE.Vector3
 
+  /**
+   * Constructor
+   *
+   * @param normal
+   * @param color
+   */
   constructor(normal: THREE.Vector3, color: number) {
     super(
       new THREE.TorusGeometry(1, 0.07, 32, 24),
@@ -42,23 +48,22 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    {
-      ;(this.material as THREE.Material).needsUpdate = true
-    }
-    if (intersection && intersection.object === this) {
-      {
-        ;(this.material as THREE.Material).opacity = 0.9
-      }
+    ;(this.material as THREE.Material).needsUpdate = true
+
+    if (intersection !== undefined && intersection.object === this) {
+      ;(this.material as THREE.Material).opacity = 0.9
+
       this.add(this._guideline)
       this._highlightIntersection.copy(intersection.point)
       return true
     } else {
-      {
-        ;(this.material as THREE.Material).opacity = 0.65
-      }
+      ;(this.material as THREE.Material).opacity = 0.65
+
       this.remove(this._guideline)
       return false
     }
@@ -68,20 +73,19 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
    * Set faded when another object is highlighted
    */
   public setFaded(): void {
-    {
-      ;(this.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this.material as THREE.Material).opacity = 0.25
-    }
+    ;(this.material as THREE.Material).needsUpdate = true
+    ;(this.material as THREE.Material).opacity = 0.25
   }
 
   /**
    * Translate input labels
+   *
    * @param oldIntersection
    * @param newProjection
    * @param dragPlane
    * @param labels
+   * @param _bounds
+   * @param local
    */
   public transform(
     oldIntersection: THREE.Vector3,
@@ -135,10 +139,11 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
-  public updateScale(worldScale: THREE.Vector3) {
-    if (this.parent) {
+  public updateScale(worldScale: THREE.Vector3): void {
+    if (this.parent !== null) {
       const newScale = Math.max(
         1,
         0.45 *

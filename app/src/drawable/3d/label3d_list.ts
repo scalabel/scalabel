@@ -1,4 +1,3 @@
-import _ from "lodash"
 import * as THREE from "three"
 import { policyFromString } from "../../common/track"
 import { LabelTypeName, TrackPolicyType } from "../../const/common"
@@ -11,7 +10,10 @@ import { Plane3D } from "./plane3d"
 
 /**
  * Make a new drawable label based on the label type
+ *
  * @param {string} labelType: type of the new label
+ * @param labelList
+ * @param labelType
  */
 export function makeDrawableLabel3D(
   labelList: Label3DList,
@@ -50,6 +52,9 @@ export class Label3DList {
   /** New labels to be committed */
   private readonly _updatedLabels: Set<Label3D>
 
+  /**
+   * Constructor
+   */
   constructor() {
     this.control = new TransformationControl()
     this.control.layers.enableAll()
@@ -72,20 +77,32 @@ export class Label3DList {
     return this._scene
   }
 
-  /** Subscribe callback for drawable update */
-  public subscribe(callback: () => void) {
+  /**
+   * Subscribe callback for drawable update
+   *
+   * @param callback
+   */
+  public subscribe(callback: () => void): void {
     this._callbacks.push(callback)
   }
 
-  /** Unsubscribe callback for drawable update */
-  public unsubscribe(callback: () => void) {
+  /**
+   * Unsubscribe callback for drawable update
+   *
+   * @param callback
+   */
+  public unsubscribe(callback: () => void): void {
     const index = this._callbacks.indexOf(callback)
     if (index >= 0) {
       this._callbacks.splice(index, 1)
     }
   }
 
-  /** Get label by id */
+  /**
+   * Get label by id
+   *
+   * @param id
+   */
   public get(id: string): Label3D | null {
     if (id in this._labels) {
       return this._labels[id]
@@ -156,6 +173,8 @@ export class Label3DList {
 
   /**
    * update labels from the state
+   *
+   * @param state
    */
   public updateState(state: State): void {
     this._state = state
@@ -165,7 +184,7 @@ export class Label3DList {
     const newRaycastMap: { [id: string]: Label3D } = {}
     const item = state.task.items[state.user.select.item]
 
-    if (this._selectedLabel) {
+    if (this._selectedLabel !== null) {
       this._selectedLabel.selected = false
     }
     this._selectedLabel = null
@@ -180,11 +199,11 @@ export class Label3DList {
         newLabels[id] = this._labels[id]
       } else {
         const newLabel = makeDrawableLabel3D(this, item.labels[id].type)
-        if (newLabel) {
+        if (newLabel !== null) {
           newLabels[id] = newLabel
         }
       }
-      if (newLabels[id]) {
+      if (newLabels[id] !== undefined) {
         newLabels[id].updateState(state, state.user.select.item, id)
         for (const shape of Object.values(newLabels[id].internalShapes())) {
           newRaycastableShapes.push(shape)
@@ -222,7 +241,7 @@ export class Label3DList {
       }
     }
 
-    if (this.selectedLabel) {
+    if (this.selectedLabel !== null) {
       this.control.visible = true
     } else {
       this.control.visible = false
@@ -238,10 +257,11 @@ export class Label3DList {
 
   /**
    * Get the label associated with the raycasted object 3d
+   *
    * @param obj
    */
   public getLabelFromRaycastedObject3D(obj: THREE.Object3D): Label3D | null {
-    while (obj.parent && !(obj.id in this._raycastMap)) {
+    while (obj.parent !== null && !(obj.id in this._raycastMap)) {
       obj = obj.parent
     }
     if (obj.id in this._raycastMap) {
@@ -250,8 +270,12 @@ export class Label3DList {
     return null
   }
 
-  /** Set active camera */
-  public setActiveCamera(camera: THREE.Camera) {
+  /**
+   * Set active camera
+   *
+   * @param camera
+   */
+  public setActiveCamera(camera: THREE.Camera): void {
     for (const label of Object.values(this._labels)) {
       label.activeCamera = camera
     }
@@ -263,13 +287,17 @@ export class Label3DList {
     return this._updatedLabels
   }
 
-  /** Push updated label to array */
-  public addUpdatedLabel(label: Label3D) {
+  /**
+   * Push updated label to array
+   *
+   * @param label
+   */
+  public addUpdatedLabel(label: Label3D): void {
     this._updatedLabels.add(label)
   }
 
   /** Clear uncommitted label list */
-  public clearUpdatedLabels() {
+  public clearUpdatedLabels(): void {
     this._updatedLabels.clear()
   }
 }

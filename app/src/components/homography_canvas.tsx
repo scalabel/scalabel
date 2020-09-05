@@ -13,7 +13,11 @@ import { clearCanvas, drawImageOnCanvas } from "../view_config/image"
 import { ImageCanvas, Props } from "./image_canvas"
 import { mapStateToDrawableProps } from "./viewer"
 
-/** Get basis matrix for use with homography */
+/**
+ * Get basis matrix for use with homography
+ *
+ * @param homogeneousPoints
+ */
 function getBasisMatrix(homogeneousPoints: THREE.Vector3[]): THREE.Matrix3 {
   const homogeneousMatrix = new THREE.Matrix3()
 
@@ -65,6 +69,11 @@ class HomographyCanvas extends ImageCanvas {
   /** image data */
   private _imageData: Uint8ClampedArray | null
 
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   constructor(props: Props) {
     super(props)
     this._plane = null
@@ -78,6 +87,7 @@ class HomographyCanvas extends ImageCanvas {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element {
@@ -87,28 +97,30 @@ class HomographyCanvas extends ImageCanvas {
         key="image-canvas"
         className={classes.image_canvas}
         ref={(canvas) => {
-          if (canvas && this.display) {
+          if (canvas !== null && this.display !== null) {
             this.imageCanvas = canvas
             this.imageContext = canvas.getContext("2d")
             const displayRect = this.display.getBoundingClientRect()
             const item = this.state.user.select.item
             const sensor = this.state.user.viewerConfigs[this.props.id].sensor
             if (
-              displayRect.width &&
-              displayRect.height &&
+              displayRect.width !== 0 &&
+              !isNaN(displayRect.width) &&
+              displayRect.height !== 0 &&
+              !isNaN(displayRect.height) &&
               isFrameLoaded(this.state, item, sensor) &&
-              this.imageContext
+              this.imageContext !== null
             ) {
               // Set canvas size
-              canvas.style.height = displayRect.height + "px"
-              canvas.style.width = displayRect.width + "px"
+              canvas.style.height = `${displayRect.height}px`
+              canvas.style.width = `${displayRect.width}px`
             }
           }
         }}
       />
     )
 
-    if (this.display) {
+    if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       imageCanvas = React.cloneElement(imageCanvas, {
         height: displayRect.height,
@@ -121,10 +133,11 @@ class HomographyCanvas extends ImageCanvas {
 
   /**
    * Function to redraw all canvases
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
-    if (this.imageCanvas && this.imageContext) {
+    if (this.imageCanvas !== null && this.imageContext !== null) {
       const item = this.state.user.select.item
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (
@@ -134,7 +147,7 @@ class HomographyCanvas extends ImageCanvas {
       ) {
         this._image = Session.images[item][sensor]
         // Redraw imageCanvas
-        if (this._plane) {
+        if (this._plane !== null) {
           this.drawHomography()
         } else {
           drawImageOnCanvas(this.imageCanvas, this.imageContext, this._image)
@@ -148,17 +161,24 @@ class HomographyCanvas extends ImageCanvas {
 
   /**
    * Override update state function
+   *
    * @param state
    */
   protected updateState(state: State): void {
     super.updateState(state)
 
     const selectedLabel = Session.label3dList.selectedLabel
-    if (selectedLabel && selectedLabel.label.type === LabelTypeName.PLANE_3D) {
+    if (
+      selectedLabel !== null &&
+      selectedLabel.label.type === LabelTypeName.PLANE_3D
+    ) {
       this._plane = selectedLabel as Plane3D
     }
 
-    if (this._plane && this.props.id in this.state.user.viewerConfigs) {
+    if (
+      this._plane !== null &&
+      this.props.id in this.state.user.viewerConfigs
+    ) {
       const viewerConfig = this.state.user.viewerConfigs[
         this.props.id
       ] as HomographyViewerConfigType
@@ -167,12 +187,12 @@ class HomographyCanvas extends ImageCanvas {
       if (isFrameLoaded(state, item, sensorId)) {
         if (this._image !== Session.images[item][sensorId]) {
           this._image = Session.images[item][sensorId]
-          if (!this._hiddenContext) {
+          if (this._hiddenContext === null) {
             this._hiddenCanvas.width = this._image.width
             this._hiddenCanvas.height = this._image.height
             this._hiddenContext = this._hiddenCanvas.getContext("2d")
           }
-          if (this._hiddenContext) {
+          if (this._hiddenContext !== null) {
             this._hiddenContext.drawImage(this._image, 0, 0)
             this._imageData = this._hiddenContext.getImageData(
               0,
@@ -184,11 +204,13 @@ class HomographyCanvas extends ImageCanvas {
         }
       }
 
-      if (this._image && sensorId in this.state.task.sensors) {
+      if (this._image !== null && sensorId in this.state.task.sensors) {
         const sensor = this.state.task.sensors[sensorId]
         if (
-          sensor.intrinsics &&
-          sensor.extrinsics &&
+          sensor.intrinsics !== null &&
+          sensor.intrinsics !== undefined &&
+          sensor.extrinsics !== null &&
+          sensor.extrinsics !== undefined &&
           isCurrentFrameLoaded(state, sensorId)
         ) {
           const image = Session.images[item][sensorId]
@@ -255,8 +277,12 @@ class HomographyCanvas extends ImageCanvas {
    * Draw image with birds eye view homography
    */
   private drawHomography(): void {
-    if (this.imageCanvas && this.imageContext && this._imageData) {
-      if (this._plane && this._image) {
+    if (
+      this.imageCanvas !== null &&
+      this.imageContext !== null &&
+      this._imageData !== null
+    ) {
+      if (this._plane !== null && this._image !== null) {
         const homographyData = this.imageContext.createImageData(
           this.imageCanvas.width,
           this.imageCanvas.height

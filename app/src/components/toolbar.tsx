@@ -23,6 +23,7 @@ import { Attribute, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { Category } from "./toolbar_category"
+import { isValidId } from "../functional/states"
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
@@ -44,6 +45,12 @@ export class ToolBar extends Component<Props> {
   private readonly _keyDownHandler: (e: KeyboardEvent) => void
   /** key up handler */
   private readonly _keyUpHandler: (e: KeyboardEvent) => void
+
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   constructor(props: Readonly<Props>) {
     super(props)
     this.handleToggle = this.handleToggle.bind(this)
@@ -56,6 +63,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * handles keyDown Events
+   *
    * @param {keyboardEvent} e
    */
   public onKeyDown(e: KeyboardEvent): void {
@@ -64,22 +72,25 @@ export class ToolBar extends Component<Props> {
         this.deletePressed()
         break
       case Key.H_LOW:
-      case Key.H_UP:
+      case Key.H_UP: {
         e.preventDefault()
         const config = {
           ...this.state.user.viewerConfigs[Session.activeViewerId]
         }
         config.hideLabels = !config.hideLabels
         Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
+      }
     }
     this._keyDownMap[e.key] = true
   }
 
   /**
    * Key up handler
+   *
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
   }
 
@@ -103,6 +114,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * ToolBar render function
+   *
    * @return component
    */
   public render(): JSX.Element {
@@ -156,13 +168,14 @@ export class ToolBar extends Component<Props> {
 
   /**
    * handler for the delete button/key
+   *
    * @param {string} alignment
    */
   private deletePressed(): void {
     const select = this.state.user.select
     if (Object.keys(select.labels).length > 0) {
       const item = this.state.task.items[select.item]
-      if (item.labels[Object.values(select.labels)[0][0]].track) {
+      if (isValidId(item.labels[Object.values(select.labels)[0][0]].track)) {
         Session.dispatch(terminateSelectedTracks(this.state, select.item))
       } else {
         Session.dispatch(deleteSelectedLabels(this.state))
@@ -172,6 +185,8 @@ export class ToolBar extends Component<Props> {
 
   /**
    * handles tag attribute toggle, dispatching the addLabelTag action
+   *
+   * @param toggleName
    * @param {string} alignment
    */
   private handleAttributeToggle(toggleName: string, alignment: string): void {
@@ -205,6 +220,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * This function updates the checked list of switch buttons.
+   *
    * @param {string} switchName
    */
   private handleToggle(switchName: string): void {
@@ -215,7 +231,7 @@ export class ToolBar extends Component<Props> {
       const currentAttributes = state.user.select.attributes
       const attributes: { [key: number]: number[] } = {}
       for (const [key] of allAttributes.entries()) {
-        if (currentAttributes[key]) {
+        if (key in currentAttributes) {
           attributes[key] = currentAttributes[key]
         } else {
           attributes[key] = [0]
@@ -243,6 +259,8 @@ export class ToolBar extends Component<Props> {
   /**
    * helper function to get attribute index with respect to the label's
    * attributes
+   *
+   * @param name
    */
   private getAlignmentIndex(name: string): number {
     const state = this.state
@@ -267,14 +285,14 @@ export class ToolBar extends Component<Props> {
       if (index < 0) {
         return 0
       }
-      if (attributes[index]) {
+      if (attributes[index].length > 0) {
         return attributes[index][0]
       } else {
         return 0
       }
     } else {
       const currentAttributes = state.user.select.attributes
-      return currentAttributes
+      return _.size(currentAttributes) > 0
         ? Object.keys(currentAttributes).includes(String(attributeIndex))
           ? currentAttributes[attributeIndex][0]
           : 0
@@ -285,8 +303,10 @@ export class ToolBar extends Component<Props> {
   /**
    * helper function to get attribute index with respect to the config
    * attributes
+   *
    * @param allAttributes
    * @param name
+   * @param toggleName
    */
   private getAttributeIndex(
     allAttributes: Attribute[],
@@ -303,6 +323,7 @@ export class ToolBar extends Component<Props> {
 
   /**
    * Link selected tracks
+   *
    * @param state
    */
   private linkSelectedTracks(state: State): void {

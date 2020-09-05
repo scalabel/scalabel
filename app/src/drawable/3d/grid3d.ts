@@ -13,6 +13,11 @@ export class Grid3D extends Shape3D {
   /** grid lines */
   private readonly _lines: THREE.GridHelper
 
+  /**
+   * Constructor
+   *
+   * @param label
+   */
   constructor(label: Label3D) {
     super(label)
     this._lines = new THREE.GridHelper(1, 6, 0xffffff, 0xffffff)
@@ -28,7 +33,7 @@ export class Grid3D extends Shape3D {
   }
 
   /** Get shape type name */
-  public get typeName() {
+  public get typeName(): string {
     return ShapeTypeName.GRID
   }
 
@@ -51,23 +56,24 @@ export class Grid3D extends Shape3D {
 
   /**
    * Add to scene for rendering
+   *
    * @param scene
    */
   public render(scene: THREE.Scene): void {
     scene.add(this)
   }
 
-  /** Do not highlight plane for now */
-  public setHighlighted(intersection?: THREE.Intersection) {
-    if (intersection && intersection.object === this._lines) {
-      {
-        ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xff0000)
-      }
+  /**
+   * Do not highlight plane for now
+   *
+   * @param intersection
+   */
+  public setHighlighted(intersection?: THREE.Intersection): void {
+    if (intersection !== undefined && intersection.object === this._lines) {
+      ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xff0000)
       ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     } else {
-      {
-        ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xffffff)
-      }
+      ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xffffff)
       ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     }
   }
@@ -84,10 +90,14 @@ export class Grid3D extends Shape3D {
 
   /**
    * Override ThreeJS raycast
+   *
    * @param raycaster
    * @param intersects
    */
-  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
+  public raycast(
+    raycaster: THREE.Raycaster,
+    intersects: THREE.Intersection[]
+  ): void {
     if (this.label.selected || this.label.anyChildSelected()) {
       const ray = raycaster.ray
       const normal = new THREE.Vector3(0, 0, 1)
@@ -96,7 +106,7 @@ export class Grid3D extends Shape3D {
       plane.setFromNormalAndCoplanarPoint(normal, this.position)
       const target = new THREE.Vector3()
       const intersection = ray.intersectPlane(plane, target)
-      if (intersection) {
+      if (intersection !== null) {
         // DO NOT REMOVE: Used for checking whether ray intersects within the
         // bounds of the grid. Code below assumes grid is boundless
 
@@ -144,12 +154,18 @@ export class Grid3D extends Shape3D {
     }
   }
 
-  /** update parameters */
+  /**
+   * update parameters
+   *
+   * @param shape
+   * @param id
+   * @param _activeCamera
+   */
   public updateState(
     shape: ShapeType,
     id: IdType,
     _activeCamera?: THREE.Camera
-  ) {
+  ): void {
     super.updateState(shape, id)
     const newShape = shape as Plane3DType
     this.position.copy(new Vector3D().fromState(newShape.center).toThree())

@@ -14,7 +14,11 @@ import { getColorById } from "../util"
 import { Label3DList } from "./label3d_list"
 import { Shape3D } from "./shape3d"
 
-/** Convert string to label type name enum */
+/**
+ * Convert string to label type name enum
+ *
+ * @param type
+ */
 export function labelTypeFromString(type: string): LabelTypeName {
   switch (type) {
     case LabelTypeName.BOX_3D:
@@ -46,6 +50,11 @@ export abstract class Label3D {
   /** label list this belongs to */
   protected _labelList: Label3DList
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label3DList) {
     this._label = makeLabel()
     this._selected = false
@@ -88,15 +97,12 @@ export abstract class Label3D {
   }
 
   /** set whether label was manually drawn */
-  public setManual() {
+  public setManual(): void {
     this._label.manual = true
   }
 
   /** get label state */
   public get label(): Readonly<LabelType> {
-    if (!this._label) {
-      throw new Error("Label uninitialized")
-    }
     return this._label
   }
 
@@ -108,9 +114,9 @@ export abstract class Label3D {
   /** Set parent label */
   public set parent(parent: Label3D | null) {
     this._parent = parent
-    if (parent && this._label) {
+    if (parent !== null) {
       this._label.parent = parent.labelId
-    } else if (this._label) {
+    } else {
       this._label.parent = INVALID_ID
     }
   }
@@ -149,65 +155,70 @@ export abstract class Label3D {
   /** Get shape id's and shapes for updating */
   public abstract shapes(): ShapeType[]
 
-  /** highlight the label */
-  public setHighlighted(intersection?: THREE.Intersection) {
-    if (intersection) {
+  /**
+   * highlight the label
+   *
+   * @param intersection
+   */
+  public setHighlighted(intersection?: THREE.Intersection): void {
+    if (intersection !== undefined) {
       this._highlighted = true
     } else {
       this._highlighted = false
     }
   }
 
-  /** add child */
-  public addChild(child: Label3D) {
+  /**
+   * add child
+   *
+   * @param child
+   */
+  public addChild(child: Label3D): void {
     if (child.parent !== this) {
-      if (child.parent) {
+      if (child.parent !== null) {
         child.parent.removeChild(child)
       }
       this._children.push(child)
       child.parent = this
-      if (this._label) {
-        this._label.children.push(child.labelId)
-      }
+      this._label.children.push(child.labelId)
     }
   }
 
-  /** remove child */
-  public removeChild(child: Label3D) {
+  /**
+   * remove child
+   *
+   * @param child
+   */
+  public removeChild(child: Label3D): void {
     const index = this._children.indexOf(child)
     if (index >= 0) {
       this._children.splice(index, 1)
       child.parent = null
-      if (this._label) {
-        const stateIndex = this._label.children.indexOf(child.labelId)
-        if (stateIndex >= 0) {
-          this._label.children.splice(stateIndex, 1)
-        }
+      const stateIndex = this._label.children.indexOf(child.labelId)
+      if (stateIndex >= 0) {
+        this._label.children.splice(stateIndex, 1)
       }
     }
   }
 
   /** get category */
   public get category(): number[] {
-    if (this._label && this._label.category) {
-      return this._label.category
-    }
-    return []
+    return this._label.category
   }
 
   /** get attributes */
   public get attributes(): { [key: number]: number[] } {
-    if (this._label && this._label.attributes) {
-      return this._label.attributes
-    }
-    return {}
+    return this._label.attributes
   }
 
   /** Set active camera for label */
+  // TODO: is this still useful?
+  // eslint-disable-next-line accessor-pairs,require-jsdoc
   public set activeCamera(_camera: THREE.Camera) {}
 
   /**
    * Handle mouse move
+   *
    * @param projection
    */
   public abstract onMouseDown(
@@ -218,12 +229,14 @@ export abstract class Label3D {
 
   /**
    * Handle mouse up
+   *
    * @param projection
    */
   public abstract onMouseUp(): void
 
   /**
    * Handle mouse move
+   *
    * @param projection
    */
   public abstract onMouseMove(
@@ -266,13 +279,18 @@ export abstract class Label3D {
     return new THREE.Vector3()
   }
 
-  /** Bounds of label */
+  /**
+   * Bounds of label
+   *
+   * @param _local
+   */
   public bounds(_local?: boolean): THREE.Box3 {
     return new THREE.Box3()
   }
 
   /**
    * Initialize label
+   *
    * @param {State} state
    */
   public abstract init(
@@ -288,7 +306,13 @@ export abstract class Label3D {
    */
   public abstract internalShapes(): Shape3D[]
 
-  /** Convert label state to drawable */
+  /**
+   * Convert label state to drawable
+   *
+   * @param state
+   * @param itemIndex
+   * @param labelId
+   */
   public updateState(state: State, itemIndex: number, labelId: IdType): void {
     const item = state.task.items[itemIndex]
     this._label = _.cloneDeep(item.labels[labelId])

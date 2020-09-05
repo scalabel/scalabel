@@ -41,6 +41,11 @@ export class Crosshair2D extends React.Component<Props, State> {
   /** vertical crosshair */
   public v: React.ReactElement | null
 
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   constructor(props: Readonly<Props>) {
     super(props)
     this.h = null
@@ -57,9 +62,10 @@ export class Crosshair2D extends React.Component<Props, State> {
 
   /**
    * ToolBar render function
+   *
    * @return component
    */
-  public render() {
+  public render(): React.ReactNode {
     const { classes } = this.props
     let valid = false
     valid =
@@ -112,6 +118,7 @@ export class Crosshair2D extends React.Component<Props, State> {
 
   /**
    * update crosshair
+   *
    * @param {number} x
    * @param {number} y
    * @param {number} displayX
@@ -139,9 +146,11 @@ export class Crosshair2D extends React.Component<Props, State> {
 
   /**
    * update crosshair when mouse moves
+   *
+   * @param e
    */
   public onMouseMove(e: React.MouseEvent<HTMLElement>): void {
-    if (this.props.display && this != null) {
+    if (this.props.display !== null && this != null) {
       const rect = this.props.display.getBoundingClientRect()
       this.updateCrosshair(
         e.clientX,

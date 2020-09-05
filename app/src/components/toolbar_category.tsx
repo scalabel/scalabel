@@ -14,6 +14,9 @@ import { Component } from "./component"
 /**
  * This is the handleChange function of MultipleSelect
  * that change the set the state of MultipleSelect.
+ *
+ * @param _event
+ * @param categoryIndex
  */
 function handleChange(
   _event: React.MouseEvent<HTMLElement>,
@@ -58,6 +61,10 @@ interface Props {
 class MultipleSelect extends Component<Props> {
   /**
    * Render the category in a list
+   *
+   * @param categories
+   * @param classes
+   * @param headerText
    */
   public renderCategory(
     categories: string[],
@@ -97,11 +104,11 @@ class MultipleSelect extends Component<Props> {
   /**
    * MultipleSelect render function
    */
-  public render(): null | JSX.Element {
+  public render(): React.ReactNode {
     const { categories } = this.props
     const { classes } = this.props
     const { headerText } = this.props
-    if (!categories) {
+    if (categories === null) {
       return null
     } else {
       return this.renderCategory(categories, classes, headerText)

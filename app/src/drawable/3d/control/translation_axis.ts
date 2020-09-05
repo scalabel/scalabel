@@ -17,6 +17,13 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
   /** cone */
   private readonly _cone: THREE.Mesh
 
+  /**
+   * Constructor
+   *
+   * @param direction
+   * @param color
+   * @param coneSize
+   */
   constructor(direction: THREE.Vector3, color: number, coneSize: number = 0.3) {
     super()
     this._coneSize = coneSize
@@ -70,9 +77,13 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Mouse movement while mouse down on box (from raycast)
+   *
    * @param oldIntersection
    * @param newProjection
    * @param dragPlane
+   * @param labels
+   * @param _bounds
+   * @param local
    */
   public transform(
     oldIntersection: THREE.Vector3,
@@ -92,7 +103,7 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
     const worldDirection = new THREE.Vector3()
     worldDirection.copy(this._direction)
 
-    if (this.parent) {
+    if (this.parent !== null) {
       const worldQuaternion = new THREE.Quaternion()
       this.parent.getWorldQuaternion(worldQuaternion)
       worldDirection.applyQuaternion(worldQuaternion)
@@ -137,36 +148,29 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    {
-      ;(this._line.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._cone.material as THREE.Material).needsUpdate = true
-    }
+    ;(this._line.material as THREE.Material).needsUpdate = true
+    ;(this._cone.material as THREE.Material).needsUpdate = true
+
     if (
-      intersection &&
+      intersection !== undefined &&
       (intersection.object === this ||
         intersection.object === this._line ||
         intersection.object === this._cone)
     ) {
-      {
-        ;(this._line.material as THREE.Material).opacity = 0.9
-      }
-      {
-        ;(this._cone.material as THREE.Material).opacity = 0.9
-      }
+      ;(this._line.material as THREE.Material).opacity = 0.9
+      ;(this._cone.material as THREE.Material).opacity = 0.9
+
       this.add(this._guideline)
       return true
     } else {
-      {
-        ;(this._line.material as THREE.Material).opacity = 0.65
-      }
-      {
-        ;(this._cone.material as THREE.Material).opacity = 0.65
-      }
+      ;(this._line.material as THREE.Material).opacity = 0.65
+      ;(this._cone.material as THREE.Material).opacity = 0.65
+
       this.remove(this._guideline)
       return false
     }
@@ -176,36 +180,33 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
    * Set faded when another object is highlighted
    */
   public setFaded(): void {
-    {
-      ;(this._line.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._cone.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._line.material as THREE.Material).opacity = 0.25
-    }
-    {
-      ;(this._cone.material as THREE.Material).opacity = 0.25
-    }
+    ;(this._line.material as THREE.Material).needsUpdate = true
+    ;(this._cone.material as THREE.Material).needsUpdate = true
+    ;(this._line.material as THREE.Material).opacity = 0.25
+    ;(this._cone.material as THREE.Material).opacity = 0.25
   }
 
   /**
    * Override ThreeJS raycast to intersect with box
+   *
    * @param raycaster
    * @param intersects
    */
-  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
+  public raycast(
+    raycaster: THREE.Raycaster,
+    intersects: THREE.Intersection[]
+  ): void {
     this._line.raycast(raycaster, intersects)
     this._cone.raycast(raycaster, intersects)
   }
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
-  public updateScale(worldScale: THREE.Vector3) {
-    if (this.parent) {
+  public updateScale(worldScale: THREE.Vector3): void {
+    if (this.parent !== null) {
       const direction = new THREE.Vector3()
       direction.copy(this._direction)
       // Direction.applyQuaternion(worldQuaternion.inverse())

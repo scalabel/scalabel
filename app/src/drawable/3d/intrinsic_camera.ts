@@ -18,6 +18,15 @@ export class IntrinsicCamera extends THREE.Camera {
   /** intrinsics */
   public intrinsics?: CameraIntrinsicsType
 
+  /**
+   * Constructor
+   *
+   * @param width
+   * @param height
+   * @param near
+   * @param far
+   * @param intrinsics
+   */
   constructor(
     width: number = 0,
     height: number = 0,
@@ -38,8 +47,8 @@ export class IntrinsicCamera extends THREE.Camera {
   }
 
   /** Use parameters to calculate internal projection matrix */
-  public calculateProjectionMatrix() {
-    if (this.intrinsics) {
+  public calculateProjectionMatrix(): void {
+    if (this.intrinsics !== undefined) {
       this.projectionMatrix.set(
         (2 * this.intrinsics.focalLength.x) / this.width,
         0,

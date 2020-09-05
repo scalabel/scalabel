@@ -19,6 +19,14 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
   /** side length */
   private readonly _sideLength: number
 
+  /**
+   * Constructor
+   *
+   * @param axis
+   * @param negate
+   * @param color
+   * @param sideLength
+   */
   constructor(
     axis: "x" | "y" | "z",
     negate: boolean,
@@ -88,7 +96,16 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     this._box.layers.enableAll()
   }
 
-  /** get update vectors: [translation, rotation, scale, new intersection] */
+  /**
+   * get update vectors: [translation, rotation, scale, new intersection]
+   *
+   * @param oldIntersection
+   * @param newProjection
+   * @param dragPlane
+   * @param labels
+   * @param bounds
+   * @param local
+   */
   public transform(
     oldIntersection: THREE.Vector3,
     newProjection: THREE.Ray,
@@ -103,7 +120,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
     const worldDirection = new THREE.Vector3()
     worldDirection.copy(this._direction)
 
-    if (this.parent) {
+    if (this.parent !== null) {
       const worldQuaternion = new THREE.Quaternion()
       this.parent.getWorldQuaternion(worldQuaternion)
       worldDirection.applyQuaternion(worldQuaternion)
@@ -178,36 +195,29 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
 
   /**
    * Set highlighted
+   *
    * @param object
+   * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    {
-      ;(this._box.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._line.material as THREE.Material).needsUpdate = true
-    }
+    ;(this._box.material as THREE.Material).needsUpdate = true
+    ;(this._line.material as THREE.Material).needsUpdate = true
+
     if (
-      intersection &&
+      intersection !== undefined &&
       (intersection.object === this ||
         intersection.object === this._line ||
         intersection.object === this._box)
     ) {
-      {
-        ;(this._box.material as THREE.Material).opacity = 0.9
-      }
-      {
-        ;(this._line.material as THREE.Material).opacity = 0.9
-      }
+      ;(this._box.material as THREE.Material).opacity = 0.9
+      ;(this._line.material as THREE.Material).opacity = 0.9
+
       this.add(this._guideline)
       return true
     } else {
-      {
-        ;(this._box.material as THREE.Material).opacity = 0.65
-      }
-      {
-        ;(this._line.material as THREE.Material).opacity = 0.65
-      }
+      ;(this._box.material as THREE.Material).opacity = 0.65
+      ;(this._line.material as THREE.Material).opacity = 0.65
+
       this.remove(this._guideline)
       return false
     }
@@ -217,44 +227,39 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
    * Set faded when another object is highlighted
    */
   public setFaded(): void {
-    {
-      ;(this._box.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._line.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._box.material as THREE.Material).opacity = 0.25
-    }
-    {
-      ;(this._line.material as THREE.Material).opacity = 0.25
-    }
+    ;(this._box.material as THREE.Material).needsUpdate = true
+    ;(this._line.material as THREE.Material).needsUpdate = true
+    ;(this._box.material as THREE.Material).opacity = 0.25
+    ;(this._line.material as THREE.Material).opacity = 0.25
   }
 
   /**
    * Override ThreeJS raycast to intersect with box
+   *
    * @param raycaster
    * @param intersects
    */
-  public raycast(raycaster: THREE.Raycaster, intersects: THREE.Intersection[]) {
+  public raycast(
+    raycaster: THREE.Raycaster,
+    intersects: THREE.Intersection[]
+  ): void {
     this._line.raycast(raycaster, intersects)
     this._box.raycast(raycaster, intersects)
   }
 
   /**
    * Update scale according to world scale
+   *
    * @param worldScale
    */
-  public updateScale(worldScale: THREE.Vector3) {
-    if (this.parent) {
+  public updateScale(worldScale: THREE.Vector3): void {
+    if (this.parent !== null) {
       const direction = new THREE.Vector3()
       direction.copy(this._direction)
       // Direction.applyQuaternion(worldQuaternion.inverse())
 
       const newScale = (Math.abs(direction.dot(worldScale)) * 3) / 4
-
       this._line.scale.set(1, 1, newScale)
-
       this._box.position.z = newScale
     }
   }

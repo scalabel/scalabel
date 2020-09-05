@@ -35,6 +35,11 @@ export class Label2DHandler {
   /** Index of currently selected item */
   private _selectedItemIndex: number
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label2DList) {
     this._highlightedLabel = null
     this._state = Session.getState()
@@ -52,8 +57,10 @@ export class Label2DHandler {
 
   /**
    * Process mouse down action
+   *
    * @param coord
    * @param labelIndex
+   * @param _labelIndex
    * @param handleIndex
    */
   public onMouseDown(
@@ -62,7 +69,7 @@ export class Label2DHandler {
     handleIndex: number
   ): boolean {
     if (!this.hasSelectedLabels() || !this.isEditingSelectedLabels()) {
-      if (this._highlightedLabel) {
+      if (this._highlightedLabel !== null) {
         this.selectHighlighted()
       } else {
         Session.dispatch(
@@ -82,7 +89,7 @@ export class Label2DHandler {
           state.task.config.labelTypes[state.user.select.labelType],
           state.task.config.label2DTemplates
         )
-        if (label) {
+        if (label !== null) {
           label.initTemp(state, coord)
           this._labelList.selectedLabels.push(label)
           this._labelList.labelList.push(label)
@@ -114,9 +121,12 @@ export class Label2DHandler {
 
   /**
    * Process mouse up action
+   *
    * @param coord
    * @param labelIndex
    * @param handleIndex
+   * @param _labelIndex
+   * @param _handleIndex
    */
   public onMouseUp(
     coord: Vector2D,
@@ -152,6 +162,11 @@ export class Label2DHandler {
 
   /**
    * Process mouse move action
+   *
+   * @param coord
+   * @param canvasLimit
+   * @param labelIndex
+   * @param handleIndex
    */
   public onMouseMove(
     coord: Vector2D,
@@ -167,7 +182,7 @@ export class Label2DHandler {
       return true
     } else {
       if (labelIndex >= 0) {
-        if (!this._highlightedLabel) {
+        if (this._highlightedLabel === null) {
           this._highlightedLabel = this._labelList.labelList[labelIndex]
         }
         if (this._highlightedLabel.index !== labelIndex) {
@@ -185,6 +200,7 @@ export class Label2DHandler {
 
   /**
    * Handle keyboard down events
+   *
    * @param e
    */
   public onKeyDown(e: KeyboardEvent): void {
@@ -252,8 +268,12 @@ export class Label2DHandler {
     }
   }
 
-  /** Update state */
-  public updateState(state: State) {
+  /**
+   * Update state
+   *
+   * @param state
+   */
+  public updateState(state: State): void {
     this._state = state
     if (this._selectedItemIndex !== state.user.select.item) {
       this._highlightedLabel = null
@@ -263,9 +283,11 @@ export class Label2DHandler {
 
   /**
    * Handle keyboard up events
+   *
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
     for (const selectedLabel of this._labelList.selectedLabels) {
       selectedLabel.onKeyUp(e.key)
@@ -274,10 +296,13 @@ export class Label2DHandler {
 
   /**
    * Handling function for canvas visibility change
+   *
    * @param _isVisible
    */
   public onVisibilityChange(): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[Key.META]
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[Key.CONTROL]
   }
 
@@ -298,6 +323,7 @@ export class Label2DHandler {
 
   /**
    * Whether a specific key is pressed down
+   *
    * @param key - the key to check
    */
   private isKeyDown(key: Key): boolean {
@@ -369,8 +395,13 @@ export class Label2DHandler {
     )
   }
 
-  /** swap label orders, given label indices */
-  private swapOrders(index1: number, index2: number) {
+  /**
+   * swap label orders, given label indices
+   *
+   * @param index1
+   * @param index2
+   */
+  private swapOrders(index1: number, index2: number): void {
     // Check that indices are valid
     if (
       index1 >= 0 &&
@@ -390,8 +421,13 @@ export class Label2DHandler {
     }
   }
 
-  /** move label to nth position */
-  private changeLabelOrder(index: number, newPosition: number) {
+  /**
+   * move label to nth position
+   *
+   * @param index
+   * @param newPosition
+   */
+  private changeLabelOrder(index: number, newPosition: number): void {
     const labels = this._labelList.labelList
     if (
       index >= 0 &&
@@ -428,7 +464,7 @@ export class Label2DHandler {
   /**
    * Merge different tracks
    */
-  private mergeTracks() {
+  private mergeTracks(): void {
     const tracks = getSelectedTracks(this._state)
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))

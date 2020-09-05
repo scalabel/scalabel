@@ -33,10 +33,11 @@ export interface DividedPageProps {
 
 /**
  * Renders a page divided into a header, a drawer, and the main content
+ *
  * @param props
  * @constructor
  */
-function DividedPage(props: DividedPageProps) {
+function DividedPage(props: DividedPageProps): JSX.Element {
   const { classes, children } = props
   const mainPageContent = (
     <React.Fragment>
@@ -59,6 +60,8 @@ function DividedPage(props: DividedPageProps) {
   )
   return (
     <HeaderPage
+      // TODO: fix this error
+      // eslint-disable-next-line react/no-children-prop
       children={{
         headerContent: children.headerContent,
         pageContent: mainPageContent

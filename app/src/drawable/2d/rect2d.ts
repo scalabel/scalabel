@@ -15,6 +15,7 @@ export interface Rect2DStyle {
 
 /**
  * Generate Rect2D style with default parameters
+ *
  * @param {Partial<Rect2DStyle>} style
  */
 export function makeRect2DStyle(style: Partial<Rect2DStyle> = {}): Rect2DStyle {
@@ -31,6 +32,11 @@ export class Rect2D {
   /** The shape of the rect */
   private _rect: RectType
 
+  /**
+   * Constructor
+   *
+   * @param rect
+   */
   constructor(rect: RectType | null = null) {
     if (rect === null) {
       this._rect = makeRect()
@@ -39,6 +45,9 @@ export class Rect2D {
     }
   }
 
+  /**
+   * Get x coordinate of upper left corner
+   */
   public get x1(): number {
     return this._rect.x1
   }
@@ -58,6 +67,9 @@ export class Rect2D {
     this._rect.y1 = v
   }
 
+  /**
+   * Get x coordinate of lower right corner
+   */
   public get x2(): number {
     return this._rect.x2
   }
@@ -93,6 +105,7 @@ export class Rect2D {
 
   /**
    * Set the shape to the new rect
+   *
    * @param rect
    */
   public set(rect: RectType): void {
@@ -115,8 +128,10 @@ export class Rect2D {
 
   /**
    * Draw the rect on a 2D context
+   *
    * @param {Context2D} context
    * @param {number} ratio: display to image ratio
+   * @param ratio
    * @param {RectStyle} style
    */
   public draw(context: Context2D, ratio: number, style: Rect2DStyle): void {

@@ -1,4 +1,3 @@
-import _ from "lodash"
 import * as THREE from "three"
 import { makeLabel } from "../../functional/states"
 import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
@@ -20,6 +19,11 @@ export class Box3D extends Label3D {
   /** ThreeJS object for rendering shape */
   private _shape: Cube3D
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label3DList) {
     super(labelList)
     this._shape = new Cube3D(this)
@@ -27,7 +31,13 @@ export class Box3D extends Label3D {
 
   /**
    * Initialize label
+   *
    * @param {State} state
+   * @param itemIndex
+   * @param category
+   * @param center
+   * @param sensors
+   * @param temporary
    */
   public init(
     itemIndex: number,
@@ -36,7 +46,7 @@ export class Box3D extends Label3D {
     sensors?: number[],
     temporary?: boolean
   ): void {
-    if (!sensors || sensors.length === 0) {
+    if (sensors === null || sensors === undefined || sensors.length === 0) {
       sensors = [-1]
     }
 
@@ -49,23 +59,31 @@ export class Box3D extends Label3D {
       shapes: [this._shape.shapeId]
     })
 
-    if (center) {
+    if (center !== null && center !== undefined) {
       this._shape.position.copy(center.toThree())
     }
 
-    if (temporary) {
+    if (temporary !== null && temporary !== undefined && temporary) {
       this._temporary = true
     }
   }
 
-  /** Set active camera */
+  /** Set active camera
+   */
   public set activeCamera(camera: THREE.Camera) {
     this._shape.setControlSpheres(camera)
   }
 
+  /**
+   * Get active camera
+   */
+  public get activeCamera(): THREE.Camera {
+    throw new Error("Method not implemented.")
+  }
+
   /** Indexed shapes */
   public shapes(): ShapeType[] {
-    if (!this._label) {
+    if (this._label === null || this._label === undefined) {
       throw new Error("Uninitialized label")
     }
     const box = this._shape.toState()
@@ -78,12 +96,12 @@ export class Box3D extends Label3D {
   /** Override set parent */
   public set parent(parent: Label3D | null) {
     this._parent = parent
-    if (parent && this._label) {
+    if (parent !== null && this._label !== null && this._label !== undefined) {
       this._label.parent = parent.labelId
-    } else if (this._label) {
+    } else if (this._label !== null && this._label !== undefined) {
       this._label.parent = INVALID_ID
     }
-    if (parent && parent.label.type === LabelTypeName.PLANE_3D) {
+    if (parent !== null && parent.label.type === LabelTypeName.PLANE_3D) {
       this._shape.attachToPlane(parent as Plane3D)
     } else {
       this._shape.detachFromPlane()
@@ -104,7 +122,10 @@ export class Box3D extends Label3D {
 
   /**
    * Modify ThreeJS objects to draw label
+   *
    * @param {THREE.Scene} scene: ThreeJS Scene Object
+   * @param scene
+   * @param camera
    */
   public render(scene: THREE.Scene, camera: THREE.Camera): void {
     this._shape.render(scene, camera)
@@ -119,9 +140,13 @@ export class Box3D extends Label3D {
 
   /**
    * Handle mouse move
+   *
    * @param projection
+   * @param x
+   * @param y
+   * @param camera
    */
-  public onMouseDown(x: number, y: number, camera: THREE.Camera) {
+  public onMouseDown(x: number, y: number, camera: THREE.Camera): boolean {
     if (this._temporary) {
       this._shape.clickInit(x, y, camera)
     }
@@ -130,12 +155,19 @@ export class Box3D extends Label3D {
 
   /**
    * Handle mouse up
+   *
    * @param projection
    */
-  public onMouseUp() {}
+  public onMouseUp(): void {}
 
-  /** Handle mouse move */
-  public onMouseMove(x: number, y: number, camera: THREE.Camera) {
+  /**
+   * Handle mouse move
+   *
+   * @param x
+   * @param y
+   * @param camera
+   */
+  public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
     const success = this._shape.drag(x, y, camera)
     if (success) {
       this._temporary = false
@@ -144,11 +176,16 @@ export class Box3D extends Label3D {
     return success
   }
 
-  /** Rotate */
-  public rotate(quaternion: THREE.Quaternion, anchor?: THREE.Vector3) {
+  /**
+   * Rotate
+   *
+   * @param quaternion
+   * @param anchor
+   */
+  public rotate(quaternion: THREE.Quaternion, anchor?: THREE.Vector3): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.applyQuaternion(quaternion)
-    if (anchor) {
+    if (anchor !== null && anchor !== undefined) {
       const newPosition = new THREE.Vector3()
       newPosition.copy(this._shape.position)
       newPosition.sub(anchor)
@@ -158,20 +195,38 @@ export class Box3D extends Label3D {
     }
   }
 
-  /** Move */
+  /**
+   * Move
+   *
+   * @param position
+   */
   public move(position: THREE.Vector3): void {
     this._shape.position.copy(position)
     this._labelList.addUpdatedLabel(this)
   }
 
-  /** Translate */
-  public translate(delta: THREE.Vector3) {
+  /**
+   * Translate
+   *
+   * @param delta
+   */
+  public translate(delta: THREE.Vector3): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.position.add(delta)
   }
 
-  /** Scale */
-  public scale(scale: THREE.Vector3, anchor: THREE.Vector3, local: boolean) {
+  /**
+   * Scale
+   *
+   * @param scale
+   * @param anchor
+   * @param local
+   */
+  public scale(
+    scale: THREE.Vector3,
+    anchor: THREE.Vector3,
+    local: boolean
+  ): void {
     this._labelList.addUpdatedLabel(this)
     const inverseRotation = new THREE.Quaternion()
     inverseRotation.copy(this.orientation)
@@ -210,10 +265,14 @@ export class Box3D extends Label3D {
     return scale
   }
 
-  /** bounds of box */
+  /**
+   * bounds of box
+   *
+   * @param local
+   */
   public bounds(local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
-    if (!local) {
+    if (local === null || local === undefined) {
       box.copy(this._shape.box.geometry.boundingBox)
       this._shape.updateMatrixWorld(true)
       box.applyMatrix4(this._shape.matrixWorld)
@@ -225,15 +284,17 @@ export class Box3D extends Label3D {
 
   /**
    * Highlight box
+   *
    * @param intersection
    */
-  public setHighlighted(intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection): void {
     super.setHighlighted(intersection)
     this._shape.setHighlighted(intersection)
   }
 
   /**
    * Update params when state is updated
+   *
    * @param state
    * @param itemIndex
    * @param labelId

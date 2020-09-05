@@ -31,6 +31,7 @@ enum Handles {
 
 /**
  * Compare two rectangles
+ *
  * @param r1
  * @param r2
  */
@@ -51,6 +52,11 @@ export class Box2D extends Label2D {
   /** cache shape for moving */
   private _startingRect: Rect2D
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label2DList) {
     super(labelList)
     this._rect = new Rect2D()
@@ -80,10 +86,14 @@ export class Box2D extends Label2D {
     return super.highlightCursor
   }
 
-  /** Draw the label on viewing or control canvas */
+  /**
+   * Draw the label on viewing or control canvas
+   *
+   * @param context
+   * @param ratio
+   * @param mode
+   */
   public draw(context: Context2D, ratio: number, mode: DrawMode): void {
-    const self = this
-
     // Set proper drawing styles
     let pointStyle = makePoint2DStyle()
     let highPointStyle = makePoint2DStyle()
@@ -97,10 +107,10 @@ export class Box2D extends Label2D {
         assignColor = (i: number): number[] => {
           if (i % 2 === 0 && i > 0) {
             // Midpoint
-            return blendColor(self._color, [255, 255, 255], 0.7)
+            return blendColor(this._color, [255, 255, 255], 0.7)
           } else {
             // Vertex
-            return self._color
+            return this._color
           }
         }
         break
@@ -109,28 +119,28 @@ export class Box2D extends Label2D {
         highPointStyle = _.assign(highPointStyle, DEFAULT_CONTROL_POINT_STYLE)
         rectStyle = _.assign(rectStyle, DEFAULT_CONTROL_RECT_STYLE)
         assignColor = (i: number): number[] => {
-          return encodeControlColor(self._index, i)
+          return encodeControlColor(this._index, i)
         }
         break
     }
 
     // Draw!!!
-    const rect = self._rect
+    const rect = this._rect
     rectStyle.color = assignColor(0)
     rect.draw(context, ratio, rectStyle)
     if (mode === DrawMode.VIEW) {
-      self.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), self._color)
+      this.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), this._color)
     }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       for (let i = 1; i <= 8; i += 1) {
         let style
-        if (i === self._highlightedHandle) {
+        if (i === this._highlightedHandle) {
           style = highPointStyle
         } else {
           style = pointStyle
         }
         style.color = assignColor(i)
-        const point = self._controlPoints[i - 1]
+        const point = this._controlPoints[i - 1]
         point.draw(context, ratio, style)
       }
     }
@@ -138,8 +148,11 @@ export class Box2D extends Label2D {
 
   /**
    * Resize the box
+   *
    * @param {Vector2D} start: starting point
    * @param {Vector2D} end: ending point
+   * @param end
+   * @param _limit
    */
   public resize(end: Vector2D, _limit: Size2D): void {
     const c = end
@@ -209,9 +222,12 @@ export class Box2D extends Label2D {
 
   /**
    * Move the box
+   *
    * @param {Vector2D} start: starting point
    * @param {Vector2D} delta: how far the handle has been dragged
    * @param {Vector2D} limit: limit of the canvas frame
+   * @param end
+   * @param limit
    */
   public move(end: Vector2D, limit: Size2D): void {
     const [width, height] = [limit.width, limit.height]
@@ -232,7 +248,9 @@ export class Box2D extends Label2D {
 
   /**
    * Handle mouse up
+   *
    * @param coord
+   * @param _coord
    */
   public onMouseUp(_coord: Vector2D): boolean {
     this._mouseDown = false
@@ -242,7 +260,9 @@ export class Box2D extends Label2D {
 
   /**
    * Handle mouse down
+   *
    * @param coord
+   * @param _handleIndex
    */
   public onMouseDown(coord: Vector2D, _handleIndex: number): boolean {
     this._mouseDown = true
@@ -257,8 +277,13 @@ export class Box2D extends Label2D {
 
   /**
    * Drag the handle to a new position
+   *
    * @param {Vector2D} coord: current mouse position
    * @param {Vector2D} limit: limit of the canvas frame
+   * @param coord
+   * @param limit
+   * @param _labelIndex
+   * @param handleIndex
    */
   public onMouseMove(
     coord: Vector2D,
@@ -285,6 +310,7 @@ export class Box2D extends Label2D {
 
   /**
    * handle keyboard down event
+   *
    * @param e pressed key
    */
   public onKeyDown(): boolean {
@@ -293,13 +319,14 @@ export class Box2D extends Label2D {
 
   /**
    * handle keyboard up event
+   *
    * @param e pressed key
    */
   public onKeyUp(): void {}
 
   /** Get shape objects for committing to state */
   public shapes(): ShapeType[] {
-    if (!this._label) {
+    if (this._label === null) {
       throw new Error("Uninitialized label")
     }
     /**
@@ -330,7 +357,11 @@ export class Box2D extends Label2D {
     }
   }
 
-  /** Convert label state to drawable */
+  /**
+   * Convert label state to drawable
+   *
+   * @param shapes
+   */
   public updateShapes(shapes: ShapeType[]): void {
     const rect = shapes[0] as RectType
     if (!equalRects(this.toRect(), rect)) {
@@ -338,7 +369,12 @@ export class Box2D extends Label2D {
     }
   }
 
-  /** Initialize this label to be temporary */
+  /**
+   * Initialize this label to be temporary
+   *
+   * @param state
+   * @param start
+   */
   protected initTempLabel(state: State, start: Vector2D): LabelType {
     const itemIndex = state.user.select.item
     const label = makeLabel({
@@ -363,6 +399,7 @@ export class Box2D extends Label2D {
 
   /**
    * Update the values of the drawable shapes
+   *
    * @param {RectType} rect
    */
   private updateShapeValues(rect: RectType): void {

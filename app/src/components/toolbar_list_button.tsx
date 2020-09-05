@@ -36,10 +36,16 @@ interface Props {
 /**
  * This is ToggleButtons component that displays
  * the everything post in the dashboard.
+ *
  * @param {object} props
  */
 class ToggleButtons extends React.Component<Props> {
-  /** handleAlignment of ToggleButtons that align buttons */
+  /**
+   * handleAlignment of ToggleButtons that align buttons
+   *
+   * @param _event
+   * @param alignment
+   */
   public handleAlignment = (
     _event: React.MouseEvent<HTMLElement>,
     alignment: string

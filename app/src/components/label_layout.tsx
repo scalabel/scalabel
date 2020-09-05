@@ -65,6 +65,8 @@ class LabelLayout extends React.Component<Props, State> {
   public layoutState: LayoutState
 
   /**
+   * Constructor
+   *
    * @param {object} props
    */
   constructor(props: any) {
@@ -82,6 +84,7 @@ class LabelLayout extends React.Component<Props, State> {
 
   /**
    * Handler on change
+   *
    * @param {number} size
    * @param {string} position
    */
@@ -99,6 +102,7 @@ class LabelLayout extends React.Component<Props, State> {
 
   /**
    * Split component with the second component optional
+   *
    * @param {string} split - horizontal or vertical
    * @param {React.Fragment} comp1 - the first component
    * @param {React.Fragment} comp2 - the second component
@@ -124,11 +128,11 @@ class LabelLayout extends React.Component<Props, State> {
     max: number,
     primary: "first" | "second" = "first",
     position: string = "center"
-  ) {
-    if (!comp1) {
-      return
+  ): JSX.Element {
+    if (comp1 === null) {
+      return <></>
     }
-    return comp2 ? (
+    return comp2 !== null ? (
       <SplitPane
         split={split}
         minSize={min}
@@ -150,6 +154,7 @@ class LabelLayout extends React.Component<Props, State> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): React.ReactFragment {

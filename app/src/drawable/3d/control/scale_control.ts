@@ -11,6 +11,12 @@ const SCALE_AMOUNT = 0.01
  * perform scaling ops
  */
 export class ScaleControl extends Controller {
+  /**
+   * Constructor
+   *
+   * @param labels
+   * @param bounds
+   */
   constructor(labels: Label3D[], bounds: THREE.Box3) {
     super(labels, bounds)
     this._controlUnits.push(new ScaleAxis("x", false, RED))
@@ -25,7 +31,12 @@ export class ScaleControl extends Controller {
     this._local = true
   }
 
-  /** Apply pre-determined transformation amount based on camera direction */
+  /**
+   * Apply pre-determined transformation amount based on camera direction
+   *
+   * @param key
+   * @param camera
+   */
   public keyDown(key: string, camera: THREE.Camera): void {
     super.keyDown(key, camera)
     const direction = new THREE.Vector3()

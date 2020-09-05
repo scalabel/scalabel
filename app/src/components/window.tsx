@@ -18,9 +18,9 @@ interface Props {
 export class Window extends React.Component<Props> {
   /**
    * Window constructor
+   *
    * @param {Props} props
    */
-
   constructor(props: Props) {
     super(props)
 
@@ -43,6 +43,7 @@ export class Window extends React.Component<Props> {
 
   /**
    * Function to render the interface
+   *
    * @return {React.Fragment}
    */
   public render(): React.ReactNode {

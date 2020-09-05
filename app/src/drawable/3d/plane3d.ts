@@ -18,6 +18,11 @@ export class Plane3D extends Label3D {
   /** temporary shape */
   private _temporaryLabel: Label3D | null
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label3DList) {
     super(labelList)
     this._shape = new Grid3D(this)
@@ -36,28 +41,35 @@ export class Plane3D extends Label3D {
 
   /**
    * Modify ThreeJS objects to draw label
+   *
    * @param {THREE.Scene} scene: ThreeJS Scene Object
+   * @param scene
+   * @param _camera
    */
-  public render(scene: THREE.Scene, _camera: THREE.Camera): void {
+  public render(scene: THREE.Scene /* _camera: THREE.Camera */): void {
     this._shape.render(scene)
   }
 
   /**
    * Highlight box
+   *
    * @param intersection
    */
-  public setHighlighted(intersection?: THREE.Intersection) {
+  public setHighlighted(intersection?: THREE.Intersection): void {
     super.setHighlighted(intersection)
     this._shape.setHighlighted(intersection)
   }
 
   /**
    * Handle mouse move
+   *
    * @param projection
+   * @param x
+   * @param y
+   * @param camera
    */
-  public onMouseDown(x: number, y: number, camera: THREE.Camera) {
+  public onMouseDown(x: number, y: number, camera: THREE.Camera): boolean {
     if (
-      this._label &&
       (this.selected || this.anyChildSelected()) &&
       this._labelList.currentLabelType === LabelTypeName.BOX_3D
     ) {
@@ -80,10 +92,11 @@ export class Plane3D extends Label3D {
 
   /**
    * Handle mouse up
+   *
    * @param projection
    */
-  public onMouseUp() {
-    if (this._temporaryLabel) {
+  public onMouseUp(): void {
+    if (this._temporaryLabel !== null) {
       this._temporaryLabel.onMouseUp()
       this._temporaryLabel = null
     }
@@ -91,17 +104,25 @@ export class Plane3D extends Label3D {
 
   /**
    * Handle mouse move
+   *
    * @param projection
+   * @param x
+   * @param y
+   * @param camera
    */
   public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
-    if (this._temporaryLabel) {
+    if (this._temporaryLabel !== null) {
       return this._temporaryLabel.onMouseMove(x, y, camera)
     }
     return false
   }
 
-  /** Rotate */
-  public rotate(quaternion: THREE.Quaternion) {
+  /**
+   * Rotate
+   *
+   * @param quaternion
+   */
+  public rotate(quaternion: THREE.Quaternion): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.applyQuaternion(quaternion)
     for (const child of this.children) {
@@ -109,8 +130,12 @@ export class Plane3D extends Label3D {
     }
   }
 
-  /** Translate */
-  public translate(delta: THREE.Vector3) {
+  /**
+   * Translate
+   *
+   * @param delta
+   */
+  public translate(delta: THREE.Vector3): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.position.add(delta)
     for (const child of this.children) {
@@ -118,8 +143,13 @@ export class Plane3D extends Label3D {
     }
   }
 
-  /** Scale */
-  public scale(scale: THREE.Vector3, anchor: THREE.Vector3) {
+  /**
+   * Scale
+   *
+   * @param scale
+   * @param anchor
+   */
+  public scale(scale: THREE.Vector3, anchor: THREE.Vector3): void {
     this._labelList.addUpdatedLabel(this)
     this._shape.scale.x *= scale.x
     this._shape.scale.y *= scale.y
@@ -128,7 +158,11 @@ export class Plane3D extends Label3D {
     this._shape.position.add(anchor)
   }
 
-  /** Move */
+  /**
+   * Move
+   *
+   * @param position
+   */
   public move(position: THREE.Vector3): void {
     this._shape.position.copy(position)
     this._labelList.addUpdatedLabel(this)
@@ -149,10 +183,14 @@ export class Plane3D extends Label3D {
     return this._shape.scale
   }
 
-  /** bounds of plane */
+  /**
+   * bounds of plane
+   *
+   * @param local
+   */
   public bounds(local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
-    if (!local) {
+    if (local === undefined || !local) {
       box.copy(this._shape.lines.geometry.boundingBox)
       this._shape.updateMatrixWorld(true)
       box.applyMatrix4(this._shape.matrixWorld)
@@ -164,7 +202,12 @@ export class Plane3D extends Label3D {
 
   /**
    * Expand the primitive shapes to drawable shapes
+   *
    * @param {ShapeType[]} shapes
+   * @param state
+   * @param itemIndex
+   * @param labelId
+   * @param activeCamera
    */
   public updateState(
     state: State,
@@ -174,20 +217,18 @@ export class Plane3D extends Label3D {
   ): void {
     super.updateState(state, itemIndex, labelId)
 
-    if (this._label) {
-      this._shape.updateState(
-        state.task.items[itemIndex].shapes[this._label.shapes[0]],
-        this._label.shapes[0],
-        activeCamera
-      )
+    this._shape.updateState(
+      state.task.items[itemIndex].shapes[this._label.shapes[0]],
+      this._label.shapes[0],
+      activeCamera
+    )
 
-      const currentChildren = [...this._children]
-      for (const child of currentChildren) {
-        if (!this._label.children.includes(child.labelId)) {
-          this.removeChild(child)
-          for (const shape of child.internalShapes()) {
-            this._shape.remove(shape)
-          }
+    const currentChildren = [...this._children]
+    for (const child of currentChildren) {
+      if (!this._label.children.includes(child.labelId)) {
+        this.removeChild(child)
+        for (const shape of child.internalShapes()) {
+          this._shape.remove(shape)
         }
       }
     }
@@ -195,7 +236,12 @@ export class Plane3D extends Label3D {
 
   /**
    * Initialize label
+   *
    * @param {State} state
+   * @param itemIndex
+   * @param category
+   * @param center
+   * @param sensors
    */
   public init(
     itemIndex: number,
@@ -210,7 +256,7 @@ export class Plane3D extends Label3D {
       category: [category],
       sensors
     })
-    if (center) {
+    if (center !== undefined) {
       this._shape.center = center
     }
   }
@@ -224,9 +270,6 @@ export class Plane3D extends Label3D {
 
   /** State representation of shape */
   public shapes(): ShapeType[] {
-    if (!this._label) {
-      throw new Error("Uninitialized label")
-    }
     /**
      * This is a temporary solution for assigning the correct ID to the shapes
      * We should initialize the shape when the temporary label is created.

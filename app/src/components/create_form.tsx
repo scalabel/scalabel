@@ -70,6 +70,11 @@ interface State {
  * Create Project form
  */
 export default class CreateForm extends React.Component<Props, State> {
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   constructor(props: Props) {
     super(props)
     this.state = {
@@ -91,7 +96,7 @@ export default class CreateForm extends React.Component<Props, State> {
   /**
    * renders the create form
    */
-  public render() {
+  public render(): React.ReactNode {
     const { classes } = this.props
     return (
       <div className={classes.root}>
@@ -319,6 +324,7 @@ export default class CreateForm extends React.Component<Props, State> {
   /**
    * gets form data from submission event this is overriden during
    * integration testing
+   *
    * @param event
    */
   protected getFormData(event: ChangeEvent<HTMLFormElement>): FormData {
@@ -327,44 +333,45 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * Handles submission event
+   *
    * @param event
    */
   private readonly handleSubmit = (
     event: ChangeEvent<HTMLFormElement>
   ): void => {
     event.preventDefault()
-    const that = this
     const x = new XMLHttpRequest()
     x.timeout = submissionTimeout
     x.onreadystatechange = () => {
       if (x.readyState === 4) {
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (x.response) {
           alert(x.response)
         } else {
-          that.setState((prevState: State) => ({
+          this.setState((prevState: State) => ({
             projectName: prevState.projectName.replace(
               new RegExp(" ", "g"),
               "_"
             )
           }))
-          that.setState((prevState: State) => ({
+          this.setState((prevState: State) => ({
             dashboardUrl: "./dashboard?project_name=" + prevState.projectName
           }))
-          that.setState((prevState: State) => ({
+          this.setState((prevState: State) => ({
             vendorUrl: "./vendor?project_name=" + prevState.projectName
           }))
-          if (that.props.projectReloadCallback) {
-            that.props.projectReloadCallback()
+          if (this.props.projectReloadCallback !== undefined) {
+            this.props.projectReloadCallback()
           }
-          if (!that.state.hasSubmitted) {
-            that.setState({ hasSubmitted: true })
+          if (!this.state.hasSubmitted) {
+            this.setState({ hasSubmitted: true })
           }
         }
       }
     }
     x.open("POST", Endpoint.POST_PROJECT)
     const auth = getAuth()
-    if (auth) {
+    if (auth !== "") {
       x.setRequestHeader("Authorization", auth)
     }
     const formData = this.getFormData(event)
@@ -373,7 +380,9 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles instruction url
+   *
    * @param itemType {string}
+   * @param labelType
    */
   private readonly handleInstructions = (labelType: string): void => {
     switch (labelType) {
@@ -394,6 +403,9 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles page title
+   *
+   * @param labelType
+   * @param itemType
    */
   private readonly handlePageTitle = (
     labelType: string,
@@ -405,6 +417,7 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles label changing
+   *
    * @param event
    */
   private readonly handleLabelChange = (
@@ -417,6 +430,7 @@ export default class CreateForm extends React.Component<Props, State> {
 
   /**
    * handles item type changing
+   *
    * @param event
    */
   private readonly handleItemTypeChange = (

@@ -24,13 +24,18 @@ interface ProjectListState {
 }
 
 /** Project list sidebar component. Re-renders after
- *  submission
+ * submission
+ *
  * @param props
  */
 class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   /** receive data from backend */
   private projectsToExpress = getProjects()
-
+  /**
+   * Constructor
+   *
+   * @param props
+   */
   public constructor(props: ProjectListProps) {
     super(props)
     this.state = {
@@ -41,9 +46,10 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   /**
    * method to process changes in props, which gets project from backend
    * and then changes state to force a reload of this component
+   *
    * @param props
    */
-  public componentWillReceiveProps(props: ProjectListProps): void {
+  public UNSAFE_componentWillReceiveProps(props: ProjectListProps): void {
     const { refresh } = this.props
     if (props.refresh !== refresh) {
       this.projectsToExpress = getProjects()
@@ -54,7 +60,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   /**
    * renders project list
    */
-  public render(): JSX.Element {
+  public render(): React.ReactNode {
     const { classes } = this.props
     return (
       <div>
@@ -63,7 +69,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
             button
             key={project}
             alignItems="center"
-            className={!(index % 2) ? classes.coloredListItem : ""}
+            className={index % 2 === 0 ? classes.coloredListItem : ""}
           >
             <Grid container justify="center">
               <Link

@@ -10,6 +10,7 @@ export interface Point2DStyle {
 
 /**
  * Generate Point2D style with default parameters
+ *
  * @param {Partial<Point2DStyle>} style
  */
 export function makePoint2DStyle(
@@ -26,6 +27,12 @@ export function makePoint2DStyle(
  * Drawable 2D point
  */
 export class Point2D extends Vector2D {
+  /**
+   * Constructor
+   *
+   * @param x
+   * @param y
+   */
   constructor(x: number = 0, y: number = 0) {
     super()
     this.x = x
@@ -34,8 +41,10 @@ export class Point2D extends Vector2D {
 
   /**
    * Draw the point on a 2D context
+   *
    * @param {Context2D} context
    * @param {number} ratio: display to image ratio
+   * @param ratio
    * @param {RectStyle} style
    */
   public draw(context: Context2D, ratio: number, style: Point2DStyle): void {

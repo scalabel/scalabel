@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/core/styles"
+import { withStyles, StyleRules } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
@@ -16,7 +16,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 
-const styles = () =>
+const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
     label3d_canvas: {
       position: "absolute",
@@ -43,6 +43,7 @@ interface Props extends DrawableProps {
 
 /**
  * Normalize mouse coordinates to make canvas left top origin
+ *
  * @param x
  * @param y
  * @param canvas
@@ -91,7 +92,9 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Constructor, ons subscription to store
+   *
    * @param {Object} props: react props
+   * @param props
    */
   constructor(props: Readonly<Props>) {
     super(props)
@@ -142,6 +145,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Render function
+   *
    * @return {React.Fragment} React fragment
    */
   public render(): JSX.Element {
@@ -169,7 +173,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       />
     )
 
-    if (this.display) {
+    if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       canvas = React.cloneElement(canvas, {
         height: displayRect.height,
@@ -182,15 +186,16 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handles canvas redraw
+   *
    * @return {boolean}
    */
   public redraw(): boolean {
-    if (this.canvas) {
+    if (this.canvas !== null) {
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (isCurrentFrameLoaded(this.state, sensor)) {
         this.updateRenderer()
         this.renderThree()
-      } else if (this.renderer) {
+      } else if (this.renderer !== null && this.renderer !== undefined) {
         this.renderer.clear()
       }
     }
@@ -199,10 +204,11 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle mouse down
+   *
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   public onMouseDown(e: React.MouseEvent<HTMLCanvasElement>): void {
-    if (!this.canvas || this.checkFreeze()) {
+    if (this.canvas === null || this.checkFreeze()) {
       return
     }
     const normalized = normalizeCoordinatesToCanvas(
@@ -222,10 +228,11 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle mouse up
+   *
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   public onMouseUp(e: React.MouseEvent<HTMLCanvasElement>): void {
-    if (!this.canvas || this.checkFreeze()) {
+    if (this.canvas === null || this.checkFreeze()) {
       return
     }
     if (this._labelHandler.onMouseUp()) {
@@ -235,10 +242,11 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle mouse move
+   *
    * @param {React.MouseEvent<HTMLCanvasElement>} e
    */
   public onMouseMove(e: React.MouseEvent<HTMLCanvasElement>): void {
-    if (!this.canvas || this.checkFreeze()) {
+    if (this.canvas === null || this.checkFreeze()) {
       return
     }
 
@@ -267,7 +275,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     )
 
     const consumed =
-      intersects && intersects.length > 0
+      intersects.length > 0
         ? this._labelHandler.onMouseMove(x, y, intersects[0])
         : this._labelHandler.onMouseMove(x, y)
     if (consumed) {
@@ -279,6 +287,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle keyboard events
+   *
    * @param {KeyboardEvent} e
    */
   public onKeyDown(e: KeyboardEvent): void {
@@ -295,6 +304,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Handle keyboard events
+   *
    * @param {KeyboardEvent} e
    */
   public onKeyUp(e: KeyboardEvent): void {
@@ -311,6 +321,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * notify state is updated
+   *
+   * @param state
    */
   protected updateState(state: State): void {
     if (this.display !== this.props.display) {
@@ -325,7 +337,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const id = key
       if (item.labels[id].sensors.includes(sensorId)) {
         const label = Session.label3dList.get(id)
-        if (label) {
+        if (label !== null) {
           for (const shape of label.internalShapes()) {
             shape.setVisible(
               this.props.id,
@@ -344,16 +356,22 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   private renderThree(): void {
     const state = this.state
     const sensor = this.state.user.viewerConfigs[this.props.id].sensor
-    if (this.renderer && isCurrentFrameLoaded(state, sensor)) {
+    if (
+      this.renderer !== null &&
+      this.renderer !== undefined &&
+      isCurrentFrameLoaded(state, sensor)
+    ) {
       this.renderer.render(Session.label3dList.scene, this.camera)
-    } else if (this.renderer) {
+    } else if (this.renderer !== null && this.renderer !== undefined) {
       this.renderer.clear()
     }
   }
 
   /**
    * Handle double click
+   *
    * @param _e
+   * @param e
    */
   private onDoubleClick(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (this._labelHandler.onDoubleClick()) {
@@ -363,13 +381,14 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
   /**
    * Set references to div elements and try to initialize renderer
+   *
    * @param {HTMLDivElement} component
    * @param {string} componentType
    */
   private initializeRefs(component: HTMLCanvasElement | null): void {
     const viewerConfig = this.state.user.viewerConfigs[this.props.id]
     const sensor = viewerConfig.sensor
-    if (!component || !isCurrentFrameLoaded(this.state, sensor)) {
+    if (component == null || !isCurrentFrameLoaded(this.state, sensor)) {
       return
     }
 
@@ -394,7 +413,11 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
         this.forceUpdate()
       }
 
-      if (this.canvas && this.display && this.data2d) {
+      if (
+        this.canvas !== null &&
+        this.display !== null &&
+        this.data2d !== null
+      ) {
         const img3dConfig = viewerConfig as Image3DViewerConfigType
         if (
           img3dConfig.viewScale >= MIN_SCALE &&
@@ -411,7 +434,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
           )
           this.scale = newParams[3]
         }
-      } else if (this.display) {
+      } else if (this.display !== null) {
         this.canvas.removeAttribute("style")
         const displayRect = this.display.getBoundingClientRect()
         this.canvas.width = displayRect.width
@@ -426,7 +449,11 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * Update rendering constants
    */
   private updateRenderer(): void {
-    if (this.canvas && this.renderer) {
+    if (
+      this.canvas !== null &&
+      this.renderer !== null &&
+      this.renderer !== undefined
+    ) {
       this.renderer.setSize(this.canvas.width, this.canvas.height)
     }
   }

@@ -58,7 +58,7 @@ jobs:
           npm ci
       - name: Lint
         run: |
-          npx eslint -c .eslintrc.json --ext .ts,.tsx --ignore-pattern "app/src/drawable/*" --ignore-pattern "app/src/components/*" app/src app/test
+          npx eslint -c .eslintrc.json --ext .ts,.tsx app/src app/test
       - name: Test
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

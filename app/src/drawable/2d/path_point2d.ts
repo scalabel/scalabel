@@ -22,6 +22,7 @@ export interface Edge2DStyle {
 
 /**
  * Generate Edge2D style with default parameters
+ *
  * @param style
  */
 export function makeEdge2DStyle(style: Partial<Edge2DStyle> = {}): Edge2DStyle {
@@ -35,6 +36,7 @@ export function makeEdge2DStyle(style: Partial<Edge2DStyle> = {}): Edge2DStyle {
 
 /**
  * Generate PathPoint2D style with default parameters
+ *
  * @param style
  */
 export function makePathPoint2DStyle(
@@ -49,18 +51,20 @@ export function makePathPoint2DStyle(
 
 /**
  * Utility function to make new drawable path point
+ *
  * @param x
  * @param y
  * @param pointType
+ * @param labelId
  */
 export function makeDrawablePathPoint2D(
   x: number,
   y: number,
   pointType: PathPointType,
   labelId: IdType | undefined
-) {
+): PathPoint2D {
   const label: IdType[] = []
-  if (labelId && isValidId(labelId)) {
+  if (labelId !== null && labelId !== undefined && isValidId(labelId)) {
     label.push(labelId)
   }
   return new PathPoint2D(makePathPoint2D({ x, y, pointType, label }))
@@ -77,6 +81,11 @@ export class PathPoint2D {
    */
   private _point: PathPoint2DType
 
+  /**
+   * Constructor
+   *
+   * @param point
+   */
   constructor(point: PathPoint2DType | null = null) {
     if (point === null) {
       this._point = makePathPoint2D()
@@ -106,6 +115,7 @@ export class PathPoint2D {
     return this._point.x
   }
 
+  /** set x */
   public set x(v: number) {
     this._point.x = v
   }
@@ -117,6 +127,7 @@ export class PathPoint2D {
     return this._point.y
   }
 
+  /** set y */
   public set y(v: number) {
     this._point.y = v
   }
@@ -151,14 +162,16 @@ export class PathPoint2D {
 
   /**
    * Copy from another point
+   *
    * @param p
    */
-  public copy(p: PathPoint2D) {
+  public copy(p: PathPoint2D): void {
     this._point = p.shape()
   }
 
   /**
    * Draw the point on a 2D context
+   *
    * @param context
    * @param ratio
    * @param style

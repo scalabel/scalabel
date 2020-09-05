@@ -147,10 +147,11 @@ interface ListEntryClassType {
 
 /**
  * creates the dashboard component
+ *
  * @param props
  * @constructor
  */
-function Dashboard(props: DashboardProps) {
+function Dashboard(props: DashboardProps): JSX.Element {
   const { classes, vendor } = props
   let totalTaskLabeled = 0
   let totalLabels = 0
@@ -252,10 +253,13 @@ function Dashboard(props: DashboardProps) {
   )
   /**
    * renders the dashboard
+   *
    * @return component
    */
   return (
     <DividedPage
+      // TODO: fix this error
+      // eslint-disable-next-line react/no-children-prop
       children={{
         headerContent,
         sidebarContent,
@@ -265,16 +269,22 @@ function Dashboard(props: DashboardProps) {
   )
 }
 
-/** creates the header */
-function header(props: HeaderProps) {
+/**
+ * creates the header
+ *
+ * @param props
+ */
+function header(props: HeaderProps): JSX.Element {
   const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
     <React.Fragment>
       <Typography variant="h6" noWrap>
-        {vendor ? "Vendor Dashboard" : "Project Dashboard"}
+        {vendor !== undefined && vendor
+          ? "Vendor Dashboard"
+          : "Project Dashboard"}
       </Typography>
       <div className={classes.grow} />
-      {vendor ? null : (
+      {vendor !== undefined && vendor ? null : (
         <React.Fragment>
           <Typography variant="body1" noWrap>
             Labeled Tasks
@@ -306,8 +316,12 @@ function header(props: HeaderProps) {
   )
 }
 
-/** creates the sidebar */
-function sidebar(props: SidebarProps) {
+/**
+ * creates the sidebar
+ *
+ * @param props
+ */
+function sidebar(props: SidebarProps): JSX.Element {
   const { classes, projectMetaData, vendor } = props
   const sidebarListItems = [
     { tag: "Project Name", entry: projectMetaData.name },
@@ -325,7 +339,7 @@ function sidebar(props: SidebarProps) {
           <ListItemText
             key={value.tag}
             className={
-              !(index % 2)
+              index % 2 === 0
                 ? `${classes.listItem} ${classes.coloredListItem}`
                 : classes.listItem
             }
@@ -333,7 +347,7 @@ function sidebar(props: SidebarProps) {
           />
         ))}
       </List>
-      {vendor ? null : (
+      {vendor !== undefined && vendor ? null : (
         <React.Fragment>
           <Link
             variant="button"
@@ -359,8 +373,12 @@ function sidebar(props: SidebarProps) {
   )
 }
 
-/** sidebar list entry */
-function listEntry(props: ListEntryProps) {
+/**
+ * sidebar list entry
+ *
+ * @param props
+ */
+function listEntry(props: ListEntryProps): JSX.Element {
   const { classes, tag, entry } = props
   return (
     <React.Fragment>
