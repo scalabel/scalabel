@@ -11,6 +11,12 @@ const SCALE_AMOUNT = 0.01
  * perform scaling ops
  */
 export class ScaleControl extends Controller {
+  /**
+   * Constructor
+   *
+   * @param labels
+   * @param bounds
+   */
   constructor(labels: Label3D[], bounds: THREE.Box3) {
     super(labels, bounds)
     this._controlUnits.push(new ScaleAxis("x", false, RED))

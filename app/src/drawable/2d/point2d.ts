@@ -27,6 +27,12 @@ export function makePoint2DStyle(
  * Drawable 2D point
  */
 export class Point2D extends Vector2D {
+  /**
+   * Constructor
+   *
+   * @param x
+   * @param y
+   */
   constructor(x: number = 0, y: number = 0) {
     super()
     this.x = x

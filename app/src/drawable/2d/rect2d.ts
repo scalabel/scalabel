@@ -32,6 +32,11 @@ export class Rect2D {
   /** The shape of the rect */
   private _rect: RectType
 
+  /**
+   * Constructor
+   *
+   * @param rect
+   */
   constructor(rect: RectType | null = null) {
     if (rect === null) {
       this._rect = makeRect()
@@ -40,6 +45,9 @@ export class Rect2D {
     }
   }
 
+  /**
+   * Get x coordinate of upper left corner
+   */
   public get x1(): number {
     return this._rect.x1
   }
@@ -59,6 +67,9 @@ export class Rect2D {
     this._rect.y1 = v
   }
 
+  /**
+   * Get x coordinate of lower right corner
+   */
   public get x2(): number {
     return this._rect.x2
   }

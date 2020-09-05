@@ -9,6 +9,12 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
   /** normal direction */
   private readonly _normal: THREE.Vector3
 
+  /**
+   * Constructor
+   *
+   * @param normal
+   * @param color
+   */
   constructor(normal: THREE.Vector3, color: number) {
     super(
       new THREE.PlaneGeometry(0.5, 0.5),
@@ -35,18 +41,15 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
    * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    {
-      ;(this.material as THREE.Material).needsUpdate = true
-    }
-    if (intersection && intersection.object === this) {
-      {
-        ;(this.material as THREE.Material).opacity = 0.9
-      }
+    ;(this.material as THREE.Material).needsUpdate = true
+
+    if (intersection !== undefined && intersection.object === this) {
+      ;(this.material as THREE.Material).opacity = 0.9
+
       return true
     } else {
-      {
-        ;(this.material as THREE.Material).opacity = 0.65
-      }
+      ;(this.material as THREE.Material).opacity = 0.65
+
       return false
     }
   }
@@ -57,12 +60,8 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
    * @param object
    */
   public setFaded(): void {
-    {
-      ;(this.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this.material as THREE.Material).opacity = 0.25
-    }
+    ;(this.material as THREE.Material).needsUpdate = true
+    ;(this.material as THREE.Material).opacity = 0.25
   }
 
   /**

@@ -13,6 +13,11 @@ export class Grid3D extends Shape3D {
   /** grid lines */
   private readonly _lines: THREE.GridHelper
 
+  /**
+   * Constructor
+   *
+   * @param label
+   */
   constructor(label: Label3D) {
     super(label)
     this._lines = new THREE.GridHelper(1, 6, 0xffffff, 0xffffff)
@@ -65,14 +70,10 @@ export class Grid3D extends Shape3D {
    */
   public setHighlighted(intersection?: THREE.Intersection): void {
     if (intersection !== undefined && intersection.object === this._lines) {
-      {
-        ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xff0000)
-      }
+      ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xff0000)
       ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     } else {
-      {
-        ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xffffff)
-      }
+      ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xffffff)
       ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     }
   }
@@ -162,8 +163,8 @@ export class Grid3D extends Shape3D {
    */
   public updateState(
     shape: ShapeType,
-    id: IdType,
-    _activeCamera?: THREE.Camera
+    id: IdType
+    // _activeCamera?: THREE.Camera
   ): void {
     super.updateState(shape, id)
     const newShape = shape as Plane3DType

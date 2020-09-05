@@ -18,6 +18,11 @@ export class Plane3D extends Label3D {
   /** temporary shape */
   private _temporaryLabel: Label3D | null
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label3DList) {
     super(labelList)
     this._shape = new Grid3D(this)
@@ -41,7 +46,7 @@ export class Plane3D extends Label3D {
    * @param scene
    * @param _camera
    */
-  public render(scene: THREE.Scene, _camera: THREE.Camera): void {
+  public render(scene: THREE.Scene /* _camera: THREE.Camera */): void {
     this._shape.render(scene)
   }
 
@@ -65,7 +70,6 @@ export class Plane3D extends Label3D {
    */
   public onMouseDown(x: number, y: number, camera: THREE.Camera): boolean {
     if (
-      this._label &&
       (this.selected || this.anyChildSelected()) &&
       this._labelList.currentLabelType === LabelTypeName.BOX_3D
     ) {
@@ -213,20 +217,18 @@ export class Plane3D extends Label3D {
   ): void {
     super.updateState(state, itemIndex, labelId)
 
-    if (this._label) {
-      this._shape.updateState(
-        state.task.items[itemIndex].shapes[this._label.shapes[0]],
-        this._label.shapes[0],
-        activeCamera
-      )
+    this._shape.updateState(
+      state.task.items[itemIndex].shapes[this._label.shapes[0]],
+      this._label.shapes[0],
+      activeCamera
+    )
 
-      const currentChildren = [...this._children]
-      for (const child of currentChildren) {
-        if (!this._label.children.includes(child.labelId)) {
-          this.removeChild(child)
-          for (const shape of child.internalShapes()) {
-            this._shape.remove(shape)
-          }
+    const currentChildren = [...this._children]
+    for (const child of currentChildren) {
+      if (!this._label.children.includes(child.labelId)) {
+        this.removeChild(child)
+        for (const shape of child.internalShapes()) {
+          this._shape.remove(shape)
         }
       }
     }
@@ -268,9 +270,6 @@ export class Plane3D extends Label3D {
 
   /** State representation of shape */
   public shapes(): ShapeType[] {
-    if (!this._label) {
-      throw new Error("Uninitialized label")
-    }
     /**
      * This is a temporary solution for assigning the correct ID to the shapes
      * We should initialize the shape when the temporary label is created.

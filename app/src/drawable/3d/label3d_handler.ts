@@ -46,6 +46,12 @@ export class Label3DHandler {
   /** Whether tracking is enabled */
   private readonly _tracking: boolean
 
+  /**
+   * Constructor
+   *
+   * @param camera
+   * @param tracking
+   */
   constructor(camera: THREE.Camera, tracking: boolean) {
     this._highlightedLabel = null
     this._mouseDownOnSelection = false
@@ -62,6 +68,13 @@ export class Label3DHandler {
   /** Set camera */
   public set camera(camera: THREE.Camera) {
     this._camera = camera
+  }
+
+  /**
+   * Get camera
+   */
+  public get camera(): THREE.Camera {
+    return this._camera
   }
 
   /**
@@ -186,8 +199,9 @@ export class Label3DHandler {
    * @returns true if consumed, false otherwise
    */
   public onKeyDown(e: KeyboardEvent): boolean {
+    // TODO: break the cases into functions
     switch (e.key) {
-      case Key.SPACE:
+      case Key.SPACE: {
         const label = makeDrawableLabel3D(
           Session.label3dList,
           Session.label3dList.currentLabelType
@@ -225,6 +239,7 @@ export class Label3DHandler {
           return true
         }
         return false
+      }
       case Key.ESCAPE:
       case Key.ENTER:
         Session.dispatch(
@@ -281,6 +296,8 @@ export class Label3DHandler {
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): boolean {
+    // TODO: make _keyDownMap a Map
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
     if (Session.label3dList.selectedLabel !== null) {
       Session.label3dList.control.onKeyUp(e)

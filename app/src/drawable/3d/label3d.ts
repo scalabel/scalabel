@@ -50,6 +50,11 @@ export abstract class Label3D {
   /** label list this belongs to */
   protected _labelList: Label3DList
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label3DList) {
     this._label = makeLabel()
     this._selected = false
@@ -98,9 +103,6 @@ export abstract class Label3D {
 
   /** get label state */
   public get label(): Readonly<LabelType> {
-    if (!this._label) {
-      throw new Error("Label uninitialized")
-    }
     return this._label
   }
 
@@ -112,9 +114,9 @@ export abstract class Label3D {
   /** Set parent label */
   public set parent(parent: Label3D | null) {
     this._parent = parent
-    if (parent !== null && this._label) {
+    if (parent !== null) {
       this._label.parent = parent.labelId
-    } else if (this._label) {
+    } else {
       this._label.parent = INVALID_ID
     }
   }
@@ -178,9 +180,7 @@ export abstract class Label3D {
       }
       this._children.push(child)
       child.parent = this
-      if (this._label) {
-        this._label.children.push(child.labelId)
-      }
+      this._label.children.push(child.labelId)
     }
   }
 
@@ -194,32 +194,26 @@ export abstract class Label3D {
     if (index >= 0) {
       this._children.splice(index, 1)
       child.parent = null
-      if (this._label) {
-        const stateIndex = this._label.children.indexOf(child.labelId)
-        if (stateIndex >= 0) {
-          this._label.children.splice(stateIndex, 1)
-        }
+      const stateIndex = this._label.children.indexOf(child.labelId)
+      if (stateIndex >= 0) {
+        this._label.children.splice(stateIndex, 1)
       }
     }
   }
 
   /** get category */
   public get category(): number[] {
-    if (this._label && this._label.category) {
-      return this._label.category
-    }
-    return []
+    return this._label.category
   }
 
   /** get attributes */
   public get attributes(): { [key: number]: number[] } {
-    if (this._label && this._label.attributes) {
-      return this._label.attributes
-    }
-    return {}
+    return this._label.attributes
   }
 
   /** Set active camera for label */
+  // TODO: is this still useful?
+  // eslint-disable-next-line accessor-pairs,require-jsdoc
   public set activeCamera(_camera: THREE.Camera) {}
 
   /**

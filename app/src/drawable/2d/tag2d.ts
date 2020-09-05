@@ -1,5 +1,4 @@
 import { AttributeToolType } from "../../const/common"
-import { Vector2D } from "../../math/vector2d"
 import {
   Attribute,
   IdType,
@@ -18,6 +17,11 @@ export class Tag2D extends Label2D {
   /** attributes for task */
   public configAttributes: Attribute[]
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label2DList) {
     super(labelList)
     this.configAttributes = []
@@ -94,7 +98,7 @@ export class Tag2D extends Label2D {
       }
       context.fillStyle = "lightgrey"
       context.globalAlpha = 0.3
-      context.fillRect(5, 5, 400, abbr.length ? abbr.length * 35 + 15 : 0)
+      context.fillRect(5, 5, 400, abbr.length > 0 ? abbr.length * 35 + 15 : 0)
       context.fillStyle = "red"
       context.globalAlpha = 1.0
       for (let i = 0; i < abbr.length; i++) {
@@ -110,7 +114,7 @@ export class Tag2D extends Label2D {
    * @param _state
    * @param _start
    */
-  protected initTempLabel(_state: State, _start: Vector2D): LabelType {
+  protected initTempLabel(): LabelType {
     throw new Error("Method not implemented.")
   }
 }

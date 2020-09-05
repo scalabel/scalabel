@@ -42,6 +42,12 @@ export abstract class Controller extends THREE.Object3D {
   /** The hashed list of keys currently down */
   protected _keyDownMap: { [key: string]: boolean }
 
+  /**
+   * Constructor
+   *
+   * @param labels
+   * @param bounds
+   */
   constructor(labels: Label3D[], bounds: THREE.Box3) {
     super()
     this._controlUnits = []
@@ -110,7 +116,7 @@ export abstract class Controller extends THREE.Object3D {
    * @param projection
    */
   public onMouseMove(projection: THREE.Ray): boolean {
-    if (this._highlightedUnit !== null && this._dragPlane) {
+    if (this._highlightedUnit !== null) {
       const newIntersection = this._highlightedUnit.transform(
         this._intersectionPoint,
         projection,
@@ -189,6 +195,7 @@ export abstract class Controller extends THREE.Object3D {
    * @param key
    */
   public keyUp(key: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[key]
   }
 }

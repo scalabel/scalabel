@@ -11,6 +11,11 @@ export class Node2D extends Point2D {
   /** Color of this node, if any */
   private readonly _color?: number[]
 
+  /**
+   * Constructor
+   *
+   * @param node
+   */
   constructor(node: Node2DType) {
     super(node.x, node.y)
     this._name = node.name

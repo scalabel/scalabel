@@ -24,6 +24,9 @@ export class TransformationControl extends THREE.Group {
   /** Bounds of the labels */
   private readonly _bounds: THREE.Box3
 
+  /**
+   * Constructor
+   */
   constructor() {
     super()
     this._labels = []

@@ -8,6 +8,9 @@ export abstract class Object3D extends THREE.Object3D {
   /** id */
   protected _shapeId: IdType
 
+  /**
+   * Constructor
+   */
   constructor() {
     super()
     this._shapeId = INVALID_ID

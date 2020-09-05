@@ -15,7 +15,8 @@ import {
   BaseAction,
   AddTrackAction,
   AddLabelsAction,
-  DeleteLabelsAction
+  DeleteLabelsAction,
+  ActionType
 } from "../types/action"
 import { LabelIdMap, ShapeIdMap } from "../types/state"
 import Label2D from "./2d/label2d"
@@ -33,7 +34,7 @@ interface ItemShapeIdMap {
  *
  * @param {ItemShapeIdMap} updatedShapes
  */
-function commitShapesToState(updatedShapes: ItemShapeIdMap) {
+function commitShapesToState(updatedShapes: ItemShapeIdMap): ActionType {
   if (Object.keys(updatedShapes).length === 0) {
     return makeNullAction("no shape to commit")
   }
@@ -59,7 +60,7 @@ function commitShapesToState(updatedShapes: ItemShapeIdMap) {
  *
  * @param {ItemLabelIdMap} updatedLabels
  */
-function commitLabelsToState(updatedLabels: ItemLabelIdMap) {
+function commitLabelsToState(updatedLabels: ItemLabelIdMap): ActionType {
   if (Object.keys(updatedLabels).length === 0) {
     return makeNullAction("no label to commit")
   }
@@ -276,7 +277,6 @@ export function commit2DLabels(
  * @param updatedLabelDrawables
  * @param tracking
  */
-// TODO: Check 3d approach to revise following method
 export function commitLabels(
   updatedLabelDrawables: Array<Readonly<Label2D | Label3D>>,
   tracking: boolean
@@ -334,22 +334,20 @@ export function commitLabels(
       // New labels and tracks
       if (tracking) {
         const track = new Track()
-        if (track) {
-          let parentTrack
-          if (
-            drawable.parent !== null &&
-            drawable.parent.trackId in Session.tracks
-          ) {
-            parentTrack = Session.tracks[drawable.parent.trackId]
-          }
-          track.init(
-            drawable.item,
-            drawable,
-            numItems - drawable.item + 1,
-            parentTrack
-          )
-          newTracks.push(track)
+        let parentTrack
+        if (
+          drawable.parent !== null &&
+          drawable.parent.trackId in Session.tracks
+        ) {
+          parentTrack = Session.tracks[drawable.parent.trackId]
         }
+        track.init(
+          drawable.item,
+          drawable,
+          numItems - drawable.item + 1,
+          parentTrack
+        )
+        newTracks.push(track)
       } else {
         newLabels.push(drawable)
       }

@@ -12,6 +12,12 @@ const MOVE_AMOUNT = 0.03
  * Groups TranslationAxis's and TranslationPlanes to perform translation ops
  */
 export class TranslationControl extends Controller {
+  /**
+   * Constructor
+   *
+   * @param labels
+   * @param bounds
+   */
   constructor(labels: Label3D[], bounds: THREE.Box3) {
     super(labels, bounds)
     this._controlUnits = []

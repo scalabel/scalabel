@@ -81,6 +81,11 @@ export class PathPoint2D {
    */
   private _point: PathPoint2DType
 
+  /**
+   * Constructor
+   *
+   * @param point
+   */
   constructor(point: PathPoint2DType | null = null) {
     if (point === null) {
       this._point = makePathPoint2D()
@@ -110,6 +115,7 @@ export class PathPoint2D {
     return this._point.x
   }
 
+  /** set x */
   public set x(v: number) {
     this._point.x = v
   }
@@ -121,6 +127,7 @@ export class PathPoint2D {
     return this._point.y
   }
 
+  /** set y */
   public set y(v: number) {
     this._point.y = v
   }

@@ -1,4 +1,3 @@
-import _ from "lodash"
 import * as THREE from "three"
 import { makeLabel } from "../../functional/states"
 import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
@@ -20,6 +19,11 @@ export class Box3D extends Label3D {
   /** ThreeJS object for rendering shape */
   private _shape: Cube3D
 
+  /**
+   * Constructor
+   *
+   * @param labelList
+   */
   constructor(labelList: Label3DList) {
     super(labelList)
     this._shape = new Cube3D(this)
@@ -64,9 +68,17 @@ export class Box3D extends Label3D {
     }
   }
 
-  /** Set active camera */
+  /** Set active camera
+   */
   public set activeCamera(camera: THREE.Camera) {
     this._shape.setControlSpheres(camera)
+  }
+
+  /**
+   * Get active camera
+   */
+  public get activeCamera(): THREE.Camera {
+    throw new Error("Method not implemented.")
   }
 
   /** Indexed shapes */

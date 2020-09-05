@@ -135,11 +135,19 @@ export class Cube3D extends Shape3D {
 
   /**
    * Set color
+   * TODO: make consistent convention for color type, either int or 0~1 float
    *
    * @param color
    */
   public set color(color: number[]) {
     this._color = color.map((v) => v / 255)
+  }
+
+  /**
+   * Get color
+   */
+  public get color(): number[] {
+    return this._color
   }
 
   /**
@@ -297,12 +305,9 @@ export class Cube3D extends Shape3D {
    */
   public setHighlighted(intersection?: THREE.Intersection): void {
     for (const sphere of this._controlSpheres) {
-      {
-        ;(sphere.material as THREE.Material).opacity = 0.3
-      }
-      {
-        ;(sphere.material as THREE.Material).needsUpdate = true
-      }
+      ;(sphere.material as THREE.Material).opacity = 0.3
+      ;(sphere.material as THREE.Material).needsUpdate = true
+
       sphere.visible = true
     }
     this._highlightedSphere = null
@@ -313,9 +318,8 @@ export class Cube3D extends Shape3D {
       for (const sphere of this._controlSpheres) {
         if (intersection.object === sphere) {
           this._highlightedSphere = sphere
-          {
-            ;(sphere.material as THREE.Material).opacity = 0.8
-          }
+          ;(sphere.material as THREE.Material).opacity = 0.8
+
           break
         }
       }

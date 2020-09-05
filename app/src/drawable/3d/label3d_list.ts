@@ -52,6 +52,9 @@ export class Label3DList {
   /** New labels to be committed */
   private readonly _updatedLabels: Set<Label3D>
 
+  /**
+   * Constructor
+   */
   constructor() {
     this.control = new TransformationControl()
     this.control.layers.enableAll()
@@ -200,7 +203,7 @@ export class Label3DList {
           newLabels[id] = newLabel
         }
       }
-      if (newLabels[id]) {
+      if (newLabels[id] !== undefined) {
         newLabels[id].updateState(state, state.user.select.item, id)
         for (const shape of Object.values(newLabels[id].internalShapes())) {
           newRaycastableShapes.push(shape)

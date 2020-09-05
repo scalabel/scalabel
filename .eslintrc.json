@@ -39,7 +39,11 @@
     "prettier/prettier": "error",
     "@typescript-eslint/no-unused-vars": [
       "error",
-      { "varsIgnorePattern": "_.+" }
+      {
+        "varsIgnorePattern": "^_.+",
+        "argsIgnorePattern": "^_.+",
+        "caughtErrorsIgnorePattern": "^_.+"
+      }
     ],
     "@typescript-eslint/require-array-sort-compare": [
       "error",

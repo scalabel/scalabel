@@ -19,6 +19,14 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
   /** side length */
   private readonly _sideLength: number
 
+  /**
+   * Constructor
+   *
+   * @param axis
+   * @param negate
+   * @param color
+   * @param sideLength
+   */
   constructor(
     axis: "x" | "y" | "z",
     negate: boolean,
@@ -192,33 +200,24 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
    * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    {
-      ;(this._box.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._line.material as THREE.Material).needsUpdate = true
-    }
+    ;(this._box.material as THREE.Material).needsUpdate = true
+    ;(this._line.material as THREE.Material).needsUpdate = true
+
     if (
       intersection !== undefined &&
       (intersection.object === this ||
         intersection.object === this._line ||
         intersection.object === this._box)
     ) {
-      {
-        ;(this._box.material as THREE.Material).opacity = 0.9
-      }
-      {
-        ;(this._line.material as THREE.Material).opacity = 0.9
-      }
+      ;(this._box.material as THREE.Material).opacity = 0.9
+      ;(this._line.material as THREE.Material).opacity = 0.9
+
       this.add(this._guideline)
       return true
     } else {
-      {
-        ;(this._box.material as THREE.Material).opacity = 0.65
-      }
-      {
-        ;(this._line.material as THREE.Material).opacity = 0.65
-      }
+      ;(this._box.material as THREE.Material).opacity = 0.65
+      ;(this._line.material as THREE.Material).opacity = 0.65
+
       this.remove(this._guideline)
       return false
     }
@@ -228,18 +227,10 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
    * Set faded when another object is highlighted
    */
   public setFaded(): void {
-    {
-      ;(this._box.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._line.material as THREE.Material).needsUpdate = true
-    }
-    {
-      ;(this._box.material as THREE.Material).opacity = 0.25
-    }
-    {
-      ;(this._line.material as THREE.Material).opacity = 0.25
-    }
+    ;(this._box.material as THREE.Material).needsUpdate = true
+    ;(this._line.material as THREE.Material).needsUpdate = true
+    ;(this._box.material as THREE.Material).opacity = 0.25
+    ;(this._line.material as THREE.Material).opacity = 0.25
   }
 
   /**
@@ -268,9 +259,7 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
       // Direction.applyQuaternion(worldQuaternion.inverse())
 
       const newScale = (Math.abs(direction.dot(worldScale)) * 3) / 4
-
       this._line.scale.set(1, 1, newScale)
-
       this._box.position.z = newScale
     }
   }

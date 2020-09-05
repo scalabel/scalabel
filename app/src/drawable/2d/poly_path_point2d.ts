@@ -59,6 +59,12 @@ export class PolyPathPoint2D extends Point2D {
   /** point type */
   private _type: PointType
 
+  /**
+   * Constructor
+   * @param x
+   * @param y
+   * @param type
+   */
   constructor(
     x: number = 0,
     y: number = 0,
@@ -73,6 +79,7 @@ export class PolyPathPoint2D extends Point2D {
     return this._type
   }
 
+  /** set point type */
   public set type(t: PointType) {
     this._type = t
   }

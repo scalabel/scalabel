@@ -18,6 +18,15 @@ export class IntrinsicCamera extends THREE.Camera {
   /** intrinsics */
   public intrinsics?: CameraIntrinsicsType
 
+  /**
+   * Constructor
+   *
+   * @param width
+   * @param height
+   * @param near
+   * @param far
+   * @param intrinsics
+   */
   constructor(
     width: number = 0,
     height: number = 0,

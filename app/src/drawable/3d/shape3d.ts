@@ -16,6 +16,11 @@ export abstract class Shape3D extends Object3D {
   /** whether highlighted */
   protected _highlighted: boolean
 
+  /**
+   * Constructor
+   *
+   * @param label
+   */
   constructor(label: Label3D) {
     super()
     this._shapeId = INVALID_ID
@@ -46,8 +51,8 @@ export abstract class Shape3D extends Object3D {
    */
   public updateState(
     shape: ShapeType,
-    id: IdType,
-    _activeCamera?: THREE.Camera
+    id: IdType
+    // _activeCamera?: THREE.Camera
   ): void {
     this._shape = shape
     this._shapeId = id
