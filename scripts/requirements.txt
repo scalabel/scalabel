@@ -5,7 +5,7 @@ Flask
 Flask-Cors
 mypy
 numpy
-opencv-python>=4
+joblib
 Pillow
 plyfile
 psutil
@@ -16,7 +16,6 @@ python-dateutil
 PyWavelets
 PyYAML
 requests
-rope
 scikit-image
 scipy
 torch>=1.4.0
