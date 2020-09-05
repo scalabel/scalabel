@@ -6,7 +6,7 @@ echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Installing redis and node
 echo [$(date +"%F %T")] ================================
 
-brew install redis node python@3.8
+brew install redis node python@3.8 ffmpeg
 export PATH="/usr/local/opt/python@3.8/bin:$PATH"
 
 echo [$(date +"%F %T")] ================================
