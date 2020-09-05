@@ -10,10 +10,11 @@ import glob
 import os
 from os.path import join
 import shutil
-from subprocess import Popen, PIPE, STDOUT
-from typing import Union
+from subprocess import check_call, DEVNULL
 from dataclasses import dataclass
+from typing import List
 
+from joblib import Parallel, delayed
 import boto3
 from tqdm import tqdm
 import yaml
@@ -28,18 +29,33 @@ def parse_arguments() -> argparse.Namespace:
         "--input",
         "-i",
         type=str,
+        default=[],
         nargs="+",
+        required=True,
         help="path to the video/images to be processed",
+    )
+    parser.add_argument(
+        "--input-list",
+        type=str,
+        nargs="+",
+        default=[],
+        help="List of input directories and videos for processing."
+        " Each line in each file is a file path.",
     )
     parser.add_argument(
         "--out-dir",
         "-o",
         type=str,
         default="",
+        required=True,
         help="output folder to save the frames",
     )
     parser.add_argument(
-        "--fps", "-f", type=int, default=5, help="the target frame rate."
+        "--fps",
+        "-f",
+        type=float,
+        default=0,
+        help="the target frame rate. default is the original video framerate.",
     )
     parser.add_argument(
         "--scratch", action="store_true", help="ignore non-empty folder."
@@ -76,6 +92,20 @@ def parse_arguments() -> argparse.Namespace:
         help="Max number of output frames for each video.",
     )
 
+    parser.add_argument(
+        "--no-list",
+        action="store_true",
+        help="do not generate the image list.",
+    )
+
+    parser.add_argument(
+        "--jobs",
+        "-j",
+        type=int,
+        default=0,
+        help="Process multiple videos in parallel.",
+    )
+
     args = parser.parse_args()
     return args
 
@@ -105,7 +135,12 @@ def check_args(args: argparse.Namespace) -> None:
 
 
 def process_video(
-    filepath: str, fps: int, start_time: int, max_frames: int, out_dir: str
+    filepath: str,
+    fps: float,
+    start_time: int,
+    max_frames: int,
+    out_dir: str,
+    quiet: bool = False,
 ) -> None:
     """Break one video into a folder of images."""
     if not check_video_format(filepath):
@@ -115,20 +150,44 @@ def process_video(
     if not os.path.exists(filepath):
         logger.warning("%s does not exist", filepath)
         return
-    cmd_args = ["-i {} -r {} -qscale:v 2".format(filepath, fps)]
+    cmd = ["ffmpeg", "-i", filepath, "-qscale:v", "2"]
     if start_time > 0:
-        cmd_args.append("-ss {}".format(start_time))
+        cmd.extend(["-ss", str(start_time)])
     if max_frames > 0:
-        cmd_args.append("-frames:v {}".format(max_frames))
+        cmd.extend(["-frames:v", str(max_frames)])
+    if fps > 0:
+        cmd.extend(["-r", str(fps)])
     video_name = os.path.splitext(os.path.split(filepath)[1])[0]
     out_dir = join(out_dir, video_name)
-    os.makedirs(out_dir)
-    cmd = "ffmpeg {0} {1}/{2}-%07d.jpg".format(
-        " ".join(cmd_args), out_dir, video_name
-    )
-    logger.info("RUNNING %s", cmd)
-    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-    p.wait()
+    os.makedirs(out_dir, exist_ok=True)
+    cmd.append("{}/{}-%07d.jpg".format(out_dir, video_name))
+    if not quiet:
+        logger.info("RUNNING %s", cmd)
+    pipe = DEVNULL if quiet else None
+    check_call(cmd, stdout=pipe, stderr=pipe)
+
+
+def create_image_list(out_dir: str, url_root: str) -> str:
+    """Create image list from the output directory."""
+    file_list = sorted(glob.glob(join(out_dir, "*/*.jpg")))
+
+    yaml_items = [
+        {
+            "url": (
+                os.path.abspath(img)
+                if not url_root
+                else join(url_root, img.split("/")[-2], os.path.basename(img))
+            ),
+            "videoName": img.split("/")[-2],
+        }
+        for img in file_list
+    ]
+
+    list_path = join(out_dir, "image_list.yml")
+    with open(list_path, "w") as f:
+        yaml.dump(yaml_items, f)
+    logger.info("The configuration file saved at %s", list_path)
+    return list_path
 
 
 def copy_images(in_path: str, out_path: str) -> None:
@@ -147,53 +206,84 @@ def copy_images(in_path: str, out_path: str) -> None:
         shutil.copyfile(image_path, join(out_dir, image_name))
 
 
-def prepare_data(args: argparse.Namespace) -> Union[str, None]:
+def process_input(
+    filepath: str,
+    fps: float,
+    start_time: int,
+    max_frames: int,
+    out_dir: str,
+    quiet: bool = False,
+) -> None:
+    """Process one input folder or video."""
+    if os.path.isdir(filepath):
+        copy_images(filepath, out_dir)
+
+    elif os.path.isfile(filepath):
+        process_video(
+            filepath,
+            fps,
+            start_time,
+            max_frames,
+            out_dir,
+            quiet,
+        )
+
+
+def parse_input_list(args: argparse.Namespace) -> List[str]:
+    """Get all the input paths from args."""
+    inputs = []
+    inputs.extend(args.input)
+    for l in args.input_list:
+        with open(l, "r") as fp:
+            inputs.extend([l.strip() for l in fp.readlines()])
+    return inputs
+
+
+def prepare_data(args: argparse.Namespace) -> None:
     """Break one or a list of videos into frames."""
     url_root = args.url_root
     if args.s3:
         url_root = s3_setup(args.s3)
 
-    logger.info("processing %d video(s) ...", len(args.input))
+    inputs = parse_input_list(args)
+    logger.info("processing %d video(s) ...", len(inputs))
 
-    for i in range(len(args.input)):
-        filepath = args.input[i]
-
-        if os.path.isdir(filepath):
-            copy_images(filepath, args.out_dir)
-
-        elif os.path.isfile(filepath):
-            process_video(
-                filepath,
+    num_videos = len(inputs)
+    video_range = range(len(inputs))
+    quiet = num_videos > 1
+    if num_videos > 1:
+        video_range = tqdm(video_range)
+    jobs = args.jobs
+    if num_videos >= jobs > 0:
+        Parallel(n_jobs=jobs, backend="multiprocessing")(
+            delayed(process_input)(
+                inputs[i],
                 args.fps,
                 args.start_time,
                 args.max_frames,
                 args.out_dir,
+                quiet,
             )
-
-    # create the yaml file
-    file_list = sorted(glob.glob(join(args.out_dir, "*/*.jpg")))
-
-    yaml_items = [
-        {
-            "url": (
-                os.path.abspath(img)
-                if not url_root
-                else join(url_root, img.split("/")[-2], os.path.basename(img))
-            ),
-            "videoName": img.split("/")[-2],
-        }
-        for img in file_list
-    ]
-
-    output = join(args.out_dir, "image_list.yml")
-    with open(output, "w") as f:
-        yaml.dump(yaml_items, f)
+            for i in video_range
+        )
+    else:
+        for i in video_range:
+            process_input(
+                inputs[i],
+                args.fps,
+                args.start_time,
+                args.max_frames,
+                args.out_dir,
+                quiet,
+            )
 
     # upload to s3 if needed
     if args.s3:
         upload_files_to_s3(args.s3, args.out_dir)
 
-    return output
+    # create the yaml file
+    if not args.no_list:
+        create_image_list(args.out_dir, url_root)
 
 
 @dataclass
@@ -258,13 +348,9 @@ def main() -> None:
         if args.scratch and os.path.exists(args.out_dir):
             logger.info("Remove existing target directory")
             shutil.rmtree(args.out_dir)
-        os.makedirs(args.out_dir)
+        os.makedirs(args.out_dir, exist_ok=True)
 
-    output = prepare_data(args)
-    if output is not None:
-        logger.info("The configuration file saved at %s", output)
-    else:
-        logger.info("Rerun the code.")
+    prepare_data(args)
 
 
 if __name__ == "__main__":
