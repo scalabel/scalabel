@@ -93,6 +93,8 @@ export default class CreateForm extends React.Component<Props, State> {
     }
   }
 
+  // TODO: remove this disable
+  /* eslint-disable max-lines-per-function,max-statements */
   /**
    * renders the create form
    */

@@ -119,6 +119,8 @@ interface Props {
 
 const HIDDEN_UNIT_SIZE = 50
 
+// TODO: remove this disable
+/* eslint-disable max-lines-per-function,max-statements */
 /**
  * Wrapper for SplitPane
  */
@@ -316,29 +318,15 @@ class LabelPane extends Component<Props> {
         </div>
       )
     }
-
-    // If child1 or child2 are numbers
-    if (typeof pane.child1 === "number" && typeof pane.child2 === "number") {
-      if (
-        pane.child1 === 0 ||
-        isNaN(pane.child1) ||
-        pane.child2 === 0 ||
-        isNaN(pane.child2) ||
-        !(pane.child1 in this.state.user.layout.panes) ||
-        !(pane.child2 in this.state.user.layout.panes)
-      ) {
-        return null
-      }
-      // If they are not numbers
-    } else {
-      if (
-        pane.child1 === null ||
-        pane.child1 === undefined ||
-        pane.child2 === null ||
-        pane.child2 === undefined
-      ) {
-        return null
-      }
+    if (
+      pane.child1 === undefined ||
+      pane.child1 === 0 ||
+      pane.child2 === undefined ||
+      pane.child2 === 0 ||
+      !(pane.child1 in this.state.user.layout.panes) ||
+      !(pane.child2 in this.state.user.layout.panes)
+    ) {
+      return null
     }
     if (pane.split === undefined) {
       throw new Error("Missing split type")
@@ -354,15 +342,18 @@ class LabelPane extends Component<Props> {
     const child1State = this.state.user.layout.panes[pane.child1]
     const child2State = this.state.user.layout.panes[pane.child2]
 
-    let defaultSize = pane.primarySize !== undefined ? pane.primarySize : "50%"
+    let defaultSize =
+      pane.primarySize !== undefined &&
+      pane.primarySize !== 0 &&
+      pane.primarySize !== ""
+        ? pane.primarySize
+        : "50%"
 
     let hiddenSize = HIDDEN_UNIT_SIZE
-    if (pane.split !== undefined) {
-      if (pane.split === SplitType.HORIZONTAL) {
-        hiddenSize *= pane.numHorizontalChildren + 1
-      } else {
-        hiddenSize *= pane.numVerticalChildren + 1
-      }
+    if (pane.split === SplitType.HORIZONTAL) {
+      hiddenSize *= pane.numHorizontalChildren + 1
+    } else {
+      hiddenSize *= pane.numVerticalChildren + 1
     }
 
     if (pane.hide) {

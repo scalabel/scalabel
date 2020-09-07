@@ -405,6 +405,8 @@ export class Cube3D extends Shape3D {
     }
   }
 
+  // TODO: remove this disable
+  /* eslint-disable max-lines-per-function,max-statements */
   /**
    * Drag to mouse
    *

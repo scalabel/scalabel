@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// TODO: remove the disable tag
 import CssBaseline from "@material-ui/core/CssBaseline"
 import { withStyles } from "@material-ui/core/styles"
 import * as React from "react"
@@ -8,6 +6,21 @@ import Session from "../common/session"
 import { LayoutStyles } from "../styles/label"
 import LabelPane from "./label_pane"
 import PlayerControl from "./player_control"
+
+/**
+ * Check whether a react node is empty
+ *
+ * @param node
+ */
+function isNodeEmpty(node: React.ReactNode): boolean {
+  return (
+    node === null ||
+    node === undefined ||
+    node === "" ||
+    node === false ||
+    node === {}
+  )
+}
 
 interface ClassType {
   /** title bar */
@@ -22,17 +35,17 @@ interface ClassType {
 
 interface Props {
   /** The title bar */
-  titleBar: any
+  titleBar: React.ReactNode
   /** The top part of the left side bar */
-  leftSidebar1: any
+  leftSidebar1: React.ReactNode
   /** The bottom part of the left side bar */
-  leftSidebar2?: any
+  leftSidebar2: React.ReactNode
   /** The bottom bar */
-  bottomBar?: any
+  bottomBar: React.ReactNode
   /** The top part of the right side bar */
-  rightSidebar1?: any
+  rightSidebar1: React.ReactNode
   /** The bottom part of the right side bar */
-  rightSidebar2?: any
+  rightSidebar2: React.ReactNode
   /** class type */
   classes: ClassType
 }
@@ -55,6 +68,7 @@ interface LayoutState {
   right_size: number
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(window as any).__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true
 
 /**
@@ -67,9 +81,9 @@ class LabelLayout extends React.Component<Props, State> {
   /**
    * Constructor
    *
-   * @param {object} props
+   * @param props
    */
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props)
     this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
     Session.subscribe(this.onStateUpdated.bind(this))
@@ -119,8 +133,8 @@ class LabelLayout extends React.Component<Props, State> {
    */
   public optionalSplit(
     split: "vertical" | "horizontal",
-    comp1: React.ReactFragment | undefined,
-    comp2: React.ReactFragment | undefined,
+    comp1: React.ReactNode,
+    comp2: React.ReactNode,
     name1: string,
     name2: string,
     min: number,
@@ -128,11 +142,11 @@ class LabelLayout extends React.Component<Props, State> {
     max: number,
     primary: "first" | "second" = "first",
     position: string = "center"
-  ): JSX.Element {
-    if (comp1 === null) {
-      return <></>
+  ): React.ReactNode {
+    if (isNodeEmpty(comp1)) {
+      return
     }
-    return comp2 !== null ? (
+    return !isNodeEmpty(comp2) ? (
       <SplitPane
         split={split}
         minSize={min}

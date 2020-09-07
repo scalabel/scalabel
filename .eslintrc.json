@@ -24,6 +24,11 @@
     "jsdoc/require-param": 2,
     // "jsdoc/check-param-names": 2,
     "spaced-comment": ["error", "always"],
+    "max-lines-per-function": [
+      "error",
+      { "max": 160, "skipBlankLines": true, "skipComments": true }
+    ],
+    "max-statements": ["error", 80],
     "require-jsdoc": [
       "error",
       {
