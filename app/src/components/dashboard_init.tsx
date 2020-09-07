@@ -13,7 +13,7 @@ import Dashboard, { DashboardContents } from "./dashboard"
  *
  * @param vendor
  */
-export function initDashboard(vendor?: boolean): void {
+export function initDashboard(vendor: boolean): void {
   let dashboardContents: DashboardContents
   // Get params from url path.
   const searchParams = new URLSearchParams(window.location.search)
@@ -30,9 +30,7 @@ export function initDashboard(vendor?: boolean): void {
         <MuiThemeProvider theme={myTheme}>
           <Dashboard dashboardContents={dashboardContents} vendor={vendor} />
         </MuiThemeProvider>,
-        document.getElementById(
-          vendor !== null ? "vendor-root" : "dashboard-root"
-        )
+        document.getElementById(vendor ? "vendor-root" : "dashboard-root")
       )
     }
   }
@@ -40,7 +38,7 @@ export function initDashboard(vendor?: boolean): void {
   xhr.open("GET", `${Endpoint.DASHBOARD}?name=${projectName}`)
   xhr.setRequestHeader("Content-Type", "application/json")
   const auth = getAuth()
-  if (auth !== null) {
+  if (auth !== "") {
     xhr.setRequestHeader("Authorization", auth)
   }
   xhr.send()
