@@ -33,7 +33,7 @@ export const dividedPageStyle = (
 
     drawerPaper: {
       width: drawerWidth,
-      background: theme.palette.secondary.main
+      background: theme.palette.background.paper
     },
 
     drawerHeader: {

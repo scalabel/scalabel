@@ -1,4 +1,4 @@
-import { MuiThemeProvider } from "@material-ui/core/styles"
+import { ThemeProvider } from "@material-ui/core/styles"
 import React from "react"
 import ReactDOM from "react-dom"
 import { Provider } from "react-redux"
@@ -16,7 +16,7 @@ import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
 import Window from "../components/window"
 import { DataType, ItemTypeName, ViewerConfigTypeName } from "../const/common"
 import { makeDefaultViewerConfig } from "../functional/states"
-import { myTheme } from "../styles/theme"
+import { scalabelTheme } from "../styles/theme"
 import { PLYLoader } from "../thirdparty/PLYLoader"
 import { FullStore } from "../types/redux"
 import {
@@ -70,11 +70,11 @@ export function setupSession(
  */
 function renderDom(containerName: string, store: FullStore): void {
   ReactDOM.render(
-    <MuiThemeProvider theme={myTheme}>
+    <ThemeProvider theme={scalabelTheme}>
       <Provider store={store}>
         <Window />
       </Provider>
-    </MuiThemeProvider>,
+    </ThemeProvider>,
     document.getElementById(containerName)
   )
 }

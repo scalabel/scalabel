@@ -25,17 +25,22 @@ declare module "@material-ui/core/styles/createMuiTheme" {
  * This is createMyTheme function
  * that overwrites the primary main color
  */
-export default function createMyTheme(): Theme {
+export default function createScalabelTheme(): Theme {
   return createMuiTheme({
     palette: {
+      type: "dark",
       primary: {
-        main: "#616161",
-        dark: "#333"
+        main: "#1976d2" // blue 700
       },
       secondary: {
-        main: "#cde6df",
-        light: "#e5fafc",
-        dark: "#dc004e"
+        main: "#009688" // teal 500
+      },
+      divider: "rgba(255, 255, 255, 0.24)"
+    },
+    typography: {
+      fontFamily: '"Helvetica Neue", "Roboto", "Arial", sans-serif',
+      h6: {
+        fontWeight: "bold"
       }
     },
     mixins: {
@@ -46,4 +51,4 @@ export default function createMyTheme(): Theme {
   })
 }
 
-export const myTheme = createMyTheme()
+export const scalabelTheme = createScalabelTheme()

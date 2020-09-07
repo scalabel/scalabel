@@ -1,5 +1,4 @@
-import { Theme, StyleRules } from "@material-ui/core"
-import { cyan } from "@material-ui/core/colors"
+import { StyleRules, Theme } from "@material-ui/core"
 import createStyles from "@material-ui/core/styles/createStyles"
 /* Dashboard window styles */
 export const dashboardWindowStyles = (
@@ -12,19 +11,23 @@ export const dashboardWindowStyles = (
       paddingTop: theme.spacing(1)
     },
     row: {
-      background: theme.palette.common.white
+      background: theme.palette.action.hover
     },
     linkButton: {
-      color: cyan[500]
+      fontSize: "0.8rem",
+      color: theme.palette.secondary.main
     },
     headerCell: {
       fontWeight: "bold",
-      fontSize: "0.8rem",
-      color: theme.palette.common.black
+      // fontSize: "0.8rem",
+      // color: theme.palette.primary.contrastText,
+      background: theme.palette.background.default
     },
     bodyCell: {
       paddingTop: 0,
       paddingBottom: 0
+      // color: theme.palette.primary.contrastText,
+      // background: theme.palette.background.default
     }
   })
 export const headerStyle = (theme: Theme): StyleRules<"grow" | "chip", {}> =>
@@ -39,8 +42,14 @@ export const headerStyle = (theme: Theme): StyleRules<"grow" | "chip", {}> =>
   })
 export const sidebarStyle = (
   theme: Theme
-): StyleRules<"listRoot" | "listItem" | "coloredListItem" | "link", {}> =>
+): StyleRules<
+  "root" | "listRoot" | "listItem" | "coloredListItem" | "link",
+  {}
+> =>
   createStyles({
+    root: {
+      background: theme.palette.background.default
+    },
     listRoot: {
       marginTop: theme.spacing(2),
       width: "90%",
@@ -53,11 +62,13 @@ export const sidebarStyle = (
       paddingBottom: 2
     },
     coloredListItem: {
-      backgroundColor: theme.palette.secondary.light
+      backgroundColor: theme.palette.action.hover
     },
     link: {
       textAlign: "center",
-      marginTop: theme.spacing(2)
+      marginTop: theme.spacing(2),
+      width: "90%",
+      marginLeft: "5%"
     }
   })
 export const listEntryStyle = (): StyleRules<
@@ -101,7 +112,8 @@ export const dashboardHeaderStyles = createStyles({
     flexGrow: 1
   }
 })
-/* TableStyles */
+
+/* Table styles for the user dashboard */
 export const tableStyles = (
   theme: Theme
 ): StyleRules<"row" | "root" | "headerCell", {}> =>
@@ -109,11 +121,11 @@ export const tableStyles = (
     root: {},
     headerCell: {
       fontWeight: "bold",
-      fontSize: "0.8rem",
-      color: theme.palette.common.black
+      // fontSize: "0.8rem",
+      color: theme.palette.primary.light
     },
     row: {
-      background: theme.palette.common.white
+      background: theme.palette.action.hover
     }
   })
 /* TableCellStyles */
@@ -122,10 +134,9 @@ export const tableCellStyles = (
 ): StyleRules<"head" | "body", {}> =>
   createStyles({
     head: {
-      backgroundColor: theme.palette.primary.dark,
-      color: theme.palette.common.white
+      backgroundColor: theme.palette.background.default
     },
     body: {
-      fontSize: 16
+      // fontSize: 16
     }
   })

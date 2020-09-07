@@ -68,10 +68,8 @@ function Dashboard(props: {
     <HeaderPage
       // TODO: fix this error
       // eslint-disable-next-line react/no-children-prop
-      children={{
-        headerContent: dashboardHeaderContent,
-        pageContent: dashboardPageContent
-      }}
+      headerContent={dashboardHeaderContent}
+      pageContent={dashboardPageContent}
     />
   )
 }

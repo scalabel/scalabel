@@ -1,10 +1,9 @@
-import { MuiThemeProvider } from "@material-ui/core/styles"
 import { ThemeProvider, withStyles } from "@material-ui/styles"
 import { cleanup, fireEvent, render } from "@testing-library/react"
 import React from "react"
 import CreateForm from "../../src/components/create_form"
 import { formStyle } from "../../src/styles/create"
-import { myTheme } from "../../src/styles/theme"
+import { scalabelTheme } from "../../src/styles/theme"
 
 /* eslint-disable */
 afterAll(() => {
@@ -32,11 +31,9 @@ afterEach(cleanup)
 describe("Test different label options", () => {
   test("Proper page titles", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const pageTitle = getByTestId("page-title") as HTMLInputElement
     const select = getByTestId("label-type") as HTMLSelectElement
@@ -55,11 +52,9 @@ describe("Test different label options", () => {
   })
   test("Proper instructions", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const instructions = getByTestId("instructions") as HTMLInputElement
     const select = getByTestId("label-type") as HTMLSelectElement
@@ -85,11 +80,9 @@ describe("Test different label options", () => {
 describe("Test element hiding", () => {
   test("Hides categories on tagging option", () => {
     const { getByTestId, queryByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const select = getByTestId("label-type") as HTMLSelectElement
     expect(queryByTestId("categories")).not.toBeNull()
@@ -99,11 +92,9 @@ describe("Test element hiding", () => {
   })
   test("Hides and re-shows categories on video option", () => {
     const { getByTestId, queryByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const select = getByTestId("label-type") as HTMLSelectElement
     expect(queryByTestId("categories")).not.toBeNull()
@@ -115,11 +106,9 @@ describe("Test element hiding", () => {
   })
   test("Hides task size on video option", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const select = getByTestId("item-type") as HTMLSelectElement
     const tasksize = getByTestId("tasksize")
@@ -130,11 +119,9 @@ describe("Test element hiding", () => {
   })
   test("Hides and re-shows task size on tagging option", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const select = getByTestId("item-type") as HTMLSelectElement
     const tasksize = getByTestId("tasksize")
@@ -147,11 +134,9 @@ describe("Test element hiding", () => {
   })
   test("Hidden buttons are shown on submission", async () => {
     const { getByTestId, queryByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const form = getByTestId("submit-button")
     expect(queryByTestId("hidden-buttons")).toBeNull()
@@ -162,11 +147,9 @@ describe("Test element hiding", () => {
 describe("Test user ability to change fields", () => {
   test("Instruction url cannot be changed by user", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const instructions = getByTestId("instructions") as HTMLInputElement
     const select = getByTestId("label-type") as HTMLSelectElement
@@ -179,11 +162,9 @@ describe("Test user ability to change fields", () => {
   })
   test("Page Title can be changed after it is auto-populated", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const pageTitle = getByTestId("page-title") as HTMLInputElement
     const select = getByTestId("label-type") as HTMLSelectElement
@@ -197,11 +178,9 @@ describe("Test user ability to change fields", () => {
 describe("Test file uploading", () => {
   test("Uploading file changes filename", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const upload = getByTestId("item_file") as HTMLInputElement
     const filename = getByTestId("item_file_filename") as HTMLInputElement
@@ -214,11 +193,9 @@ describe("Test file uploading", () => {
   })
   test("Cannot change filename", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
-        <ThemeProvider theme={myTheme}>
-          <StyledForm />
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <ThemeProvider theme={scalabelTheme}>
+        <StyledForm />
+      </ThemeProvider>
     )
     const upload = getByTestId("item_file") as HTMLInputElement
     const filename = getByTestId("item_file_filename") as HTMLInputElement

@@ -182,8 +182,12 @@ class TitleBar extends Component<Props> {
     const buttons = buttonInfo.map((b) => renderButton(b, classes.titleUnit))
 
     return (
-      <AppBar className={classes.appBar}>
-        <Toolbar>
+      <AppBar
+        position="static"
+        style={{ background: "#000000" }}
+        className={classes.appBar}
+      >
+        <Toolbar variant="dense">
           <Typography variant="h6" noWrap>
             {title}
           </Typography>
@@ -222,7 +226,9 @@ const styles = (
     appBar: {
       ...defaultAppBar,
       position: "relative",
-      height: "100%"
+      height: "100%",
+      color: theme.palette.common.black,
+      background: theme.palette.common.black
     },
     grow: {
       flexGrow: 1
