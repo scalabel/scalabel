@@ -67,6 +67,7 @@ export class Window extends React.Component<Props> {
       <LabelLayout
         titleBar={titleBar}
         leftSidebar1={leftSidebar1}
+        leftSidebar2={null}
         bottomBar={bottomBar}
         rightSidebar1={rightSidebar1}
         rightSidebar2={rightSidebar2}

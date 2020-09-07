@@ -117,7 +117,7 @@ export class ToolBar extends Component<Props> {
    *
    * @return component
    */
-  public render(): JSX.Element {
+  public render(): React.ReactNode {
     const { categories, attributes } = this.props
     return (
       <div>
