@@ -119,6 +119,8 @@ interface Props {
 
 const HIDDEN_UNIT_SIZE = 50
 
+// TODO: remove this disable
+/* eslint-disable max-lines-per-function,max-statements */
 /**
  * Wrapper for SplitPane
  */

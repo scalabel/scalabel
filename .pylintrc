@@ -146,7 +146,7 @@ single-line-if-stmt=no
 no-space-check=trailing-comma,dict-separator
 
 # Maximum number of lines in a module
-max-module-lines=2000
+max-module-lines=1024
 
 # String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
 # tab).
@@ -311,7 +311,7 @@ max-returns=11
 max-branches=100
 
 # Maximum number of statements in function / method body
-max-statements=200
+max-statements=128
 
 # Maximum number of parents for a class (see R0901).
 max-parents=7

@@ -73,24 +73,24 @@ beforeAll(() => {
 
 afterEach(cleanup)
 
-describe("Test hub functionality", () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
+beforeEach(() => {
+  jest.clearAllMocks()
 
-    mockProjectStore.loadState = jest.fn().mockImplementation(() => {
-      return getInitialState(sessionId)
-    })
-
-    const initialMetadata = {
-      projectName,
-      taskId,
-      actionIds: {}
-    }
-    mockProjectStore.loadStateMetadata = jest.fn().mockImplementation(() => {
-      return _.cloneDeep(initialMetadata)
-    })
+  mockProjectStore.loadState = jest.fn().mockImplementation(() => {
+    return getInitialState(sessionId)
   })
 
+  const initialMetadata = {
+    projectName,
+    taskId,
+    actionIds: {}
+  }
+  mockProjectStore.loadStateMetadata = jest.fn().mockImplementation(() => {
+    return _.cloneDeep(initialMetadata)
+  })
+})
+
+describe("Test hub functionality", () => {
   test("Test registration", async () => {
     const data: RegisterMessageType = {
       projectName,

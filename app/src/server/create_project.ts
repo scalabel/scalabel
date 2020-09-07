@@ -462,9 +462,7 @@ export async function createTasks(
   itemStartNum: number = 0
 ): Promise<TaskType[]> {
   const sensors = project.sensors
-  const itemType = project.config.itemType
-  const taskSize = project.config.taskSize
-  const tracking = project.config.tracking
+  const { itemType, taskSize, tracking } = project.config
 
   const items = filterInvalidItems(project.items, itemType, sensors)
 
