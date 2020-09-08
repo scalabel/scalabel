@@ -4,6 +4,7 @@ import ListItemText from "@material-ui/core/ListItemText"
 import { withStyles } from "@material-ui/core/styles"
 import Typography from "@material-ui/core/Typography"
 import React, { ReactNode } from "react"
+
 import { createStyle, formStyle } from "../styles/create"
 import CreateForm from "./create_form"
 import DividedPage from "./divided_page"

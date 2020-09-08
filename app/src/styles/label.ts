@@ -4,10 +4,8 @@ import { createStyles, StyleRules } from "@material-ui/core/styles"
 /**
  * Category style
  */
-export const categoryStyle = (): StyleRules<
-  "root" | "button" | "formControl" | "primary",
-  {}
-> =>
+export const categoryStyle = (): // theme: Theme
+StyleRules<"root" | "button" | "formControl" | "primary" | "buttonGroup", {}> =>
   createStyles({
     root: {
       display: "flex",
@@ -16,17 +14,23 @@ export const categoryStyle = (): StyleRules<
       alignItems: "left"
     },
     formControl: {
-      margin: "0px 4px",
-      minWidth: 150,
-      maxWidth: 360
+      width: "80%",
+      margin: "2px 10%"
     },
     primary: {
-      fontSize: "15px"
+      fontWeight: "bold",
+      width: "80%",
+      margin: "2px 10%",
+      textAlign: "center"
     },
     button: {
       height: 30,
       textTransform: "none",
-      color: "black"
+      borderRadius: 0,
+      borderWidth: "1px"
+    },
+    buttonGroup: {
+      width: "100%"
     }
   })
 
@@ -39,11 +43,11 @@ export const switchStyle = (): StyleRules<
 > =>
   createStyles({
     root: {
-      width: "100%",
-      maxWidth: 360
+      width: "80%",
+      margin: "2px 10%"
     },
     primary: {
-      fontSize: "15px"
+      // fontSize: "15px"
     },
     switchBase: {
       color: grey[400],
@@ -58,33 +62,22 @@ export const switchStyle = (): StyleRules<
     track: {}
   })
 
-export interface StyledButtonProps {
-  /**
-   * Background color.
-   * TODO: find a strict color type
-   */
-  background: string
-}
-
-export const styledButtonStyle = (): StyleRules<
-  "root" | "label",
-  StyledButtonProps
-> =>
+export const toolbarButtonStyle = (): StyleRules<"root" | "label", {}> =>
   createStyles({
     root: {
-      borderRadius: 0,
-      border: 0,
-      color: "black",
-      height: "80%",
+      // border: 0,
+      // color: "black",
+      // height: "80%"
       width: "80%",
-      padding: "5px 15px",
-      boxShadow: "0 1px 0px 5px rgba(250, 250, 250, 1)",
-      fontSize: "15px",
-      background: (props: StyledButtonProps) => props.background,
-      margin: "0px 20px"
+      margin: "3px 10%"
+      // padding: "5px 15px",
+      // boxShadow: "0 1px 0px 5px rgba(250, 250, 250, 1)",
+      // fontSize: "15px",
+      // background: (props: StyledButtonProps) => props.background,
+      // margin: "0px 20px"
     },
     label: {
-      fontSize: "15px"
+      // fontSize: "15px"
     }
   })
 

@@ -5,6 +5,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel"
 import FormGroup from "@material-ui/core/FormGroup"
 import withStyles from "@material-ui/core/styles/withStyles"
 import React, { ChangeEvent } from "react"
+
 import { getAuth } from "../common/service"
 import { getInstructionUrl, getPageTitle } from "../common/util"
 import { ItemTypeName, LabelTypeName } from "../const/common"
@@ -215,12 +216,12 @@ export default class CreateForm extends React.Component<Props, State> {
               form_id={FormField.LABEL_SPEC}
               with_json
             />
-            <StyledUpload
+            {/* <StyledUpload
               required={false}
               label={"Sensors"}
               form_id={FormField.SENSORS}
               with_json
-            />
+            /> */}
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
             <TextField

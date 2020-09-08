@@ -1,6 +1,7 @@
 import Drawer from "@material-ui/core/Drawer"
 import { withStyles } from "@material-ui/core/styles"
 import React, { ReactNode } from "react"
+
 import { dividedPageStyle } from "../styles/navigation_page"
 import HeaderPage from "./header_page"
 

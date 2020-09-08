@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom"
+
 import { PathPoint2DType, SimplePathPoint2DType } from "../../src/types/state"
 
 declare global {

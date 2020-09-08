@@ -3,6 +3,7 @@
  */
 
 import _ from "lodash"
+
 import { makeShape } from "../../../functional/states"
 import { LabelType, ShapeType } from "../../../types/state"
 

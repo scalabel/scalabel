@@ -4,6 +4,7 @@ import _ from "lodash"
 import * as React from "react"
 import { Provider } from "react-redux"
 import { ThunkAction } from "redux-thunk"
+
 import { addLabel } from "../../src/action/common"
 import Session from "../../src/common/session"
 import { Synchronizer } from "../../src/common/synchronizer"

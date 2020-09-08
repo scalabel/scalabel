@@ -1,4 +1,4 @@
-import { Theme, StyleRules } from "@material-ui/core/styles"
+import { StyleRules, Theme } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 
 const fullWidth = 700

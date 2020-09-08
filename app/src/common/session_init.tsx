@@ -1,5 +1,6 @@
 import Fingerprint2 from "fingerprintjs2"
 import io from "socket.io-client"
+
 import {
   connect,
   disconnect,

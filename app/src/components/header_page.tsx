@@ -3,6 +3,7 @@ import CssBaseline from "@material-ui/core/CssBaseline"
 import { withStyles } from "@material-ui/core/styles"
 import Toolbar from "@material-ui/core/Toolbar"
 import React, { ReactNode } from "react"
+
 import { headerPageStyle } from "../styles/navigation_page"
 
 export interface ClassType {

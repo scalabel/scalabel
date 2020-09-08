@@ -1,11 +1,10 @@
 import * as THREE from "three"
-import { makeLabel } from "../../functional/states"
-import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
-
-import { Vector3D } from "../../math/vector3d"
 
 import { LabelTypeName } from "../../const/common"
+import { makeLabel } from "../../functional/states"
 import { rotateScale } from "../../math/3d"
+import { Vector3D } from "../../math/vector3d"
+import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
 import { Cube3D } from "./cube3d"
 import { Label3D } from "./label3d"
 import { Label3DList } from "./label3d_list"

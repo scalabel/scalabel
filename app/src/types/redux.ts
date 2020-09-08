@@ -1,6 +1,7 @@
 import { ActionCreator, AnyAction, Store } from "redux"
 import { ThunkAction, ThunkDispatch } from "redux-thunk"
 import { StateWithHistory } from "redux-undo"
+
 import { BaseAction } from "./action"
 import { State } from "./state"
 

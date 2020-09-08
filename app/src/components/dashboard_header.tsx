@@ -3,6 +3,7 @@ import IconButton from "@material-ui/core/IconButton"
 import SvgIcon from "@material-ui/core/SvgIcon"
 import Typography from "@material-ui/core/Typography"
 import React from "react"
+
 import { logout } from "../common/service"
 import { dashboardHeaderStyles } from "../styles/dashboard"
 

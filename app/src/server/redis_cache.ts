@@ -1,4 +1,5 @@
 import { promisify } from "util"
+
 import { RedisConfig } from "../types/config"
 import Logger from "./logger"
 import * as path from "./path"

@@ -3,7 +3,9 @@ import FormControl from "@material-ui/core/FormControl"
 import { withStyles } from "@material-ui/core/styles"
 import ToggleButton from "@material-ui/lab/ToggleButton"
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup"
+// import Typography from "@material-ui/core/Typography"
 import * as React from "react"
+
 import { changeSelect, makeSequential } from "../action/common"
 import { changeSelectedLabelsCategories } from "../action/select"
 import { dispatch, getState } from "../common/session"
@@ -43,6 +45,8 @@ interface ClassType {
   primary: string
   /** button style */
   button: string
+  /** button group style */
+  buttonGroup: string
 }
 
 interface Props {
@@ -72,18 +76,18 @@ class MultipleSelect extends Component<Props> {
     headerText: string
   ): JSX.Element {
     return (
-      <div>
+      <>
         <FormControl className={classes.formControl}>
           <ListItemText
             classes={{ primary: classes.primary }}
             primary={headerText}
           />
           <ToggleButtonGroup
+            className={classes.buttonGroup}
             orientation="vertical"
             exclusive
             onChange={handleChange}
             value={getState().user.select.category}
-            color="primary"
             aria-label="vertical outlined primary button group"
           >
             {categories.map((name: string, index: number) => (
@@ -91,13 +95,14 @@ class MultipleSelect extends Component<Props> {
                 className={classes.button}
                 key={`category-${name}`}
                 value={index}
+                disableRipple={true}
               >
                 {name}
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
         </FormControl>
-      </div>
+      </>
     )
   }
 

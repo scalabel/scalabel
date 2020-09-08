@@ -1,8 +1,10 @@
+import { CssBaseline } from "@material-ui/core"
 import { ThemeProvider } from "@material-ui/core/styles"
 import React from "react"
 import ReactDOM from "react-dom"
 import { Provider } from "react-redux"
 import * as THREE from "three"
+
 import {
   addViewerConfig,
   initSessionAction,
@@ -71,6 +73,7 @@ export function setupSession(
 function renderDom(containerName: string, store: FullStore): void {
   ReactDOM.render(
     <ThemeProvider theme={scalabelTheme}>
+      <CssBaseline />
       <Provider store={store}>
         <Window />
       </Provider>

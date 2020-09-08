@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { Window } from "../components/window"
+
 import { Label2DList } from "../drawable/2d/label2d_list"
 import { Label3DList } from "../drawable/3d/label3d_list"
 import * as actionTypes from "../types/action"
@@ -27,8 +27,6 @@ class Session {
   public tracks: { [trackId: string]: Track }
   /** id of the viewer that the mouse is currently hovering over */
   public activeViewerId: number
-  /** The window component */
-  public window?: Window
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
   public testMode: boolean

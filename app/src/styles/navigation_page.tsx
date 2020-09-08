@@ -1,5 +1,6 @@
-import { Theme, StyleRules } from "@material-ui/core/styles"
+import { StyleRules, Theme } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
+
 import { defaultAppBar, defaultHeader } from "./general"
 
 // Styles used in the create and dashboard navigation page

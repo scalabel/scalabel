@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   AppBar,
   IconButton,
+  StyleRules,
   Toolbar,
-  Tooltip,
-  StyleRules
+  Tooltip
 } from "@material-ui/core"
 import Fade from "@material-ui/core/Fade"
 import { Theme, withStyles } from "@material-ui/core/styles"
@@ -14,6 +14,7 @@ import Typography from "@material-ui/core/Typography"
 import _ from "lodash"
 import React from "react"
 import { connect } from "react-redux"
+
 import { save, submit } from "../action/common"
 import Session from "../common/session"
 import { Key } from "../const/common"
@@ -38,8 +39,6 @@ interface ClassType {
 interface StyleProps {
   /** Styles of TitleBar */
   classes: ClassType
-  /** Theme of TitleBar */
-  theme: Theme
 }
 
 interface StateProps {
@@ -89,6 +88,7 @@ function renderButton(button: ButtonInfo, titleUnit: string): JSX.Element {
     <Tooltip title={button.title} key={button.title}>
       <IconButton
         className={titleUnit}
+        color="secondary"
         onClick={onClick}
         href={href}
         target={target}
@@ -182,11 +182,7 @@ class TitleBar extends Component<Props> {
     const buttons = buttonInfo.map((b) => renderButton(b, classes.titleUnit))
 
     return (
-      <AppBar
-        position="static"
-        style={{ background: "#000000" }}
-        className={classes.appBar}
-      >
+      <AppBar position="static" className={classes.appBar}>
         <Toolbar variant="dense">
           <Typography variant="h6" noWrap>
             {title}
@@ -227,17 +223,15 @@ const styles = (
       ...defaultAppBar,
       position: "relative",
       height: "100%",
-      color: theme.palette.common.black,
       background: theme.palette.common.black
     },
     grow: {
       flexGrow: 1
     },
     titleUnit: {
-      color: "#bbbbbb",
       margin: theme.spacing(0) * 0.5
     }
   })
 
-const styledBar = withStyles(styles, { withTheme: true })(TitleBar)
+const styledBar = withStyles(styles)(TitleBar)
 export default connect(mapStateToProps, mapDispatchToProps)(styledBar)

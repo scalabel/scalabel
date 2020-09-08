@@ -2,6 +2,7 @@ import { cleanup, render } from "@testing-library/react"
 import _ from "lodash"
 import * as React from "react"
 import * as THREE from "three"
+
 import * as action from "../../src/action/common"
 import { moveCamera, moveCameraAndTarget } from "../../src/action/point_cloud"
 import { selectLabel } from "../../src/action/select"

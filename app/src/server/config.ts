@@ -2,6 +2,7 @@ import * as fs from "fs-extra"
 import * as yaml from "js-yaml"
 import _ from "lodash"
 import * as yargs from "yargs"
+
 import { StorageType } from "../const/config"
 import { CognitoConfig, ServerConfig } from "../types/config"
 import * as defaults from "./defaults"

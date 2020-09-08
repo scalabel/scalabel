@@ -12,11 +12,11 @@ import { deleteTracks, terminateTracks } from "../action/track"
 import Session, { dispatch, getState } from "../common/session"
 import { Track } from "../common/track"
 import {
-  BaseAction,
-  AddTrackAction,
+  ActionType,
   AddLabelsAction,
-  DeleteLabelsAction,
-  ActionType
+  AddTrackAction,
+  BaseAction,
+  DeleteLabelsAction
 } from "../types/action"
 import { LabelIdMap, ShapeIdMap } from "../types/state"
 import Label2D from "./2d/label2d"

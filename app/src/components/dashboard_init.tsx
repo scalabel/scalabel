@@ -1,13 +1,14 @@
+import { CssBaseline } from "@material-ui/core"
 import { ThemeProvider } from "@material-ui/styles"
 import React from "react"
 import ReactDOM from "react-dom"
+
 import { getAuth } from "../common/service"
 import { handleInvalidPage } from "../common/util"
 import { QueryArg } from "../const/common"
 import { Endpoint } from "../const/connection"
 import { scalabelTheme } from "../styles/theme"
 import Dashboard, { DashboardContents } from "./dashboard"
-import { CssBaseline } from "@material-ui/core"
 
 /**
  * This function post requests to backend to retrieve dashboard contents

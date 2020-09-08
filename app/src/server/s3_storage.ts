@@ -1,6 +1,7 @@
 import AWS from "aws-sdk"
 import _ from "lodash"
 import * as path from "path"
+
 import Logger from "./logger"
 import { Storage } from "./storage"
 

@@ -1,5 +1,6 @@
 import { createCanvas } from "canvas"
 import _ from "lodash"
+
 import { addPolygon2dLabel } from "../../src/action/polygon2d"
 import { selectLabel } from "../../src/action/select"
 import Session, { dispatch, getState } from "../../src/common/session"

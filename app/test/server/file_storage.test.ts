@@ -1,4 +1,5 @@
 import * as fs from "fs-extra"
+
 import { index2str } from "../../src/common/util"
 import { STORAGE_FOLDERS, StorageStructure } from "../../src/const/storage"
 import { FileStorage } from "../../src/server/file_storage"

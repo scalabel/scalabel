@@ -4,6 +4,7 @@ import ZoomInIcon from "@material-ui/icons/ZoomIn"
 import ZoomOutIcon from "@material-ui/icons/ZoomOut"
 import { withStyles } from "@material-ui/styles"
 import React from "react"
+
 import { changeViewerConfig } from "../action/common"
 import Session from "../common/session"
 import * as types from "../const/common"

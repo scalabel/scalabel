@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import * as action from "../../src/action/common"
 import Session, { dispatch, getState } from "../../src/common/session"
 import { getNumLabels, getShapes } from "../../src/functional/state_util"

@@ -2,6 +2,7 @@ import { Divider } from "@material-ui/core"
 import { withStyles } from "@material-ui/core/styles"
 import Typography from "@material-ui/core/Typography"
 import React from "react"
+
 import { getProjects } from "../common/service"
 import { dashboardStyles } from "../styles/dashboard"
 import DashboardHeader from "./dashboard_header"

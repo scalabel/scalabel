@@ -3,6 +3,7 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction"
 import { withStyles } from "@material-ui/core/styles"
 import Switch from "@material-ui/core/Switch"
 import React from "react"
+
 import { switchStyle } from "../styles/label"
 import { Component } from "./component"
 
@@ -39,7 +40,7 @@ interface Props {
  *
  * @param {object} Props
  */
-class SwitchButton extends Component<Props> {
+class SwitchButtonNaked extends Component<Props> {
   /**
    * SwitchButton render function
    */
@@ -47,7 +48,7 @@ class SwitchButton extends Component<Props> {
     const { onChange, name, value, getAlignmentIndex, classes } = this.props
 
     return (
-      <ListItem dense={true}>
+      <ListItem dense={true} className={classes.root}>
         <ListItemText classes={{ primary: classes.primary }} primary={name} />
         <ListItemSecondaryAction>
           <Switch
@@ -70,4 +71,4 @@ class SwitchButton extends Component<Props> {
   }
 }
 
-export const SwitchBtn = withStyles(switchStyle)(SwitchButton)
+export const SwitchButton = withStyles(switchStyle)(SwitchButtonNaked)

@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import { Cursor, LabelTypeName } from "../../const/common"
 import { getRootLabelId, getRootTrackId } from "../../functional/common"
 import { makeTaskConfig, makeTrack } from "../../functional/states"

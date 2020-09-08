@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react"
 import * as React from "react"
+
 import * as action from "../../src/action/common"
 import { GetStateFunc, SimpleStore } from "../../src/common/simple_store"
 import { Label2dCanvas } from "../../src/components/label2d_canvas"

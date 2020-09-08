@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import * as action from "../../src/action/common"
 import Session, { dispatch, getState } from "../../src/common/session"
 import { ShapeTypeName } from "../../src/const/common"

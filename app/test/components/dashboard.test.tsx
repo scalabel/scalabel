@@ -1,6 +1,7 @@
 import { ThemeProvider } from "@material-ui/core/styles"
 import { cleanup, render } from "@testing-library/react"
 import React from "react"
+
 import Dashboard, {
   DashboardContents,
   StyledHeader,

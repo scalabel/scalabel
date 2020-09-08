@@ -1,7 +1,7 @@
-import CssBaseline from "@material-ui/core/CssBaseline"
 import { withStyles } from "@material-ui/core/styles"
 import * as React from "react"
 import SplitPane from "react-split-pane"
+
 import Session from "../common/session"
 import { LayoutStyles } from "../styles/label"
 import LabelPane from "./label_pane"
@@ -213,8 +213,7 @@ class LabelLayout extends React.Component<Props, State> {
     )
 
     return (
-      <React.Fragment>
-        <CssBaseline />
+      <>
         <div className={classes.titleBar}>{titleBar}</div>
         <main className={classes.main}>
           {this.optionalSplit(
@@ -279,7 +278,7 @@ class LabelLayout extends React.Component<Props, State> {
           )}
         </main>
         {/* End footer */}
-      </React.Fragment>
+      </>
     )
   }
 }

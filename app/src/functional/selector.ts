@@ -1,4 +1,5 @@
 import { createSelector } from "reselect"
+
 import { ReduxState } from "../types/redux"
 import { ConfigType, ConnectionStatus, SessionType } from "../types/state"
 

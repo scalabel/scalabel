@@ -1,5 +1,6 @@
 import * as fs from "fs-extra"
 import _ from "lodash"
+
 import { index2str } from "../../src/common/util"
 import { FileStorage } from "../../src/server/file_storage"
 import { getFileKey, getRedisMetaKey, getTestDir } from "../../src/server/path"

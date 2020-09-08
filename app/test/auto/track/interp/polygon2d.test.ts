@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import { addPolygon2dLabel } from "../../../../src/action/polygon2d"
 import { TrackInterp } from "../../../../src/auto/track/interp/interp"
 import { Points2DLinearInterp } from "../../../../src/auto/track/interp/linear/points2d"

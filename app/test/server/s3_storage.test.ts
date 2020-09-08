@@ -1,5 +1,6 @@
 import AWS from "aws-sdk"
 import * as path from "path"
+
 import { index2str } from "../../src/common/util"
 import { STORAGE_FOLDERS, StorageStructure } from "../../src/const/storage"
 import { getProjectKey, getTaskKey, hostname, now } from "../../src/server/path"
