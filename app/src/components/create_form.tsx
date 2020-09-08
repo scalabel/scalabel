@@ -5,6 +5,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel"
 import FormGroup from "@material-ui/core/FormGroup"
 import withStyles from "@material-ui/core/styles/withStyles"
 import React, { ChangeEvent } from "react"
+
 import { getAuth } from "../common/service"
 import { getInstructionUrl, getPageTitle } from "../common/util"
 import { ItemTypeName, LabelTypeName } from "../const/common"
@@ -215,12 +216,12 @@ export default class CreateForm extends React.Component<Props, State> {
               form_id={FormField.LABEL_SPEC}
               with_json
             />
-            <StyledUpload
+            {/* <StyledUpload
               required={false}
               label={"Sensors"}
               form_id={FormField.SENSORS}
               with_json
-            />
+            /> */}
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
             <TextField
@@ -256,6 +257,7 @@ export default class CreateForm extends React.Component<Props, State> {
           <FormGroup row={true} className={classes.formGroup}>
             <Button
               variant="contained"
+              color="primary"
               component="label"
               onClick={() => {
                 this.setState({
@@ -289,6 +291,7 @@ export default class CreateForm extends React.Component<Props, State> {
           <FormGroup row={true} className={classes.formGroup}>
             <Button
               variant="contained"
+              color="primary"
               type="submit"
               data-testid="submit-button"
               className={classes.submitButton}
@@ -299,6 +302,7 @@ export default class CreateForm extends React.Component<Props, State> {
               <div id="hidden-buttons" data-testid="hidden-buttons">
                 <Button
                   variant="contained"
+                  color="primary"
                   href={this.state.dashboardUrl}
                   id="go_to_dashboard"
                   data-testid="dashboard-button"
@@ -308,6 +312,7 @@ export default class CreateForm extends React.Component<Props, State> {
                 </Button>
                 <Button
                   variant="contained"
+                  color="primary"
                   href={this.state.vendorUrl}
                   id="go_to_vendor_dashboard"
                   data-testid="vendor-button"

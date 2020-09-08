@@ -6,6 +6,7 @@ import { withStyles } from "@material-ui/core/styles"
 import Typography from "@material-ui/core/Typography"
 import CreateIcon from "@material-ui/icons/Create"
 import React from "react"
+
 import { getProjects, goCreate, requestData } from "../common/service"
 import { dashboardStyles } from "../styles/dashboard"
 import DashboardHeader from "./dashboard_header"
@@ -96,13 +97,9 @@ function Dashboard(props: {
    */
   return (
     <DividedPage
-      // TODO: fix this error
-      // eslint-disable-next-line react/no-children-prop
-      children={{
-        headerContent,
-        sidebarContent,
-        mainContent
-      }}
+      header={headerContent}
+      sidebar={sidebarContent}
+      main={mainContent}
     />
   )
 }

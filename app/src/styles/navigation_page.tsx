@@ -1,5 +1,6 @@
-import { Theme, StyleRules } from "@material-ui/core/styles"
+import { StyleRules, Theme } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
+
 import { defaultAppBar, defaultHeader } from "./general"
 
 // Styles used in the create and dashboard navigation page
@@ -33,7 +34,7 @@ export const dividedPageStyle = (
 
     drawerPaper: {
       width: drawerWidth,
-      background: theme.palette.secondary.main
+      background: theme.palette.background.paper
     },
 
     drawerHeader: {

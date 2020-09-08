@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import { AttributeToolType, LabelTypeName } from "../const/common"
 import {
   makeCube,

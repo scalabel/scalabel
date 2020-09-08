@@ -1,5 +1,6 @@
 import React from "react"
 import { connect } from "react-redux"
+
 import { getConfig } from "../functional/selector"
 import { ReduxState } from "../types/redux"
 import { ConfigType } from "../types/state"

@@ -1,5 +1,6 @@
 import _ from "lodash"
 import * as THREE from "three"
+
 // Import * as THREE from 'three'
 import * as action from "../../src/action/common"
 import { moveCamera, moveCameraAndTarget } from "../../src/action/point_cloud"

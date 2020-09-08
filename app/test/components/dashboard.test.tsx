@@ -1,21 +1,22 @@
-import { MuiThemeProvider } from "@material-ui/core/styles"
+import { ThemeProvider } from "@material-ui/core/styles"
 import { cleanup, render } from "@testing-library/react"
 import React from "react"
+
 import Dashboard, {
   DashboardContents,
   StyledHeader,
   StyledSidebar
 } from "../../src/components/dashboard"
-import { myTheme } from "../../src/styles/theme"
+import { scalabelTheme } from "../../src/styles/theme"
 import { SubmitData } from "../../src/types/state"
 
 afterEach(cleanup)
 describe("Test dashboard functionality", () => {
   test("Correct table values", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Dashboard dashboardContents={sampleDashboardContents} />
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
     sampleDashboardContents.taskMetaDatas.forEach((value, index) => {
       const numLabeledImages = getByTestId(
@@ -28,9 +29,9 @@ describe("Test dashboard functionality", () => {
   })
   test("Correct totals", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Dashboard dashboardContents={sampleDashboardContents} />
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
     const totalTaskElement = getByTestId("total-tasks").firstElementChild
     const totalLabelElement = getByTestId("total-labels").firstElementChild
@@ -45,9 +46,9 @@ describe("Test dashboard functionality", () => {
   })
   test("Correct task urls", () => {
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Dashboard dashboardContents={sampleDashboardContents} />
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
     sampleDashboardContents.taskMetaDatas.forEach((value, index) => {
       const taskLinkElem = getByTestId(
@@ -74,14 +75,14 @@ describe("Test dashboard functionality", () => {
     describe("Test not rendering elements if vendor", () => {
       test("Hiding header elements", () => {
         const { queryByTestId } = render(
-          <MuiThemeProvider theme={myTheme}>
+          <ThemeProvider theme={scalabelTheme}>
             <StyledHeader
               totalTaskLabeled={0}
               totalLabels={0}
               numUsers={0}
               vendor={true}
             />
-          </MuiThemeProvider>
+          </ThemeProvider>
         )
         expect(queryByTestId("total-tasks")).toBeNull()
         expect(queryByTestId("total-labels")).toBeNull()
@@ -89,9 +90,9 @@ describe("Test dashboard functionality", () => {
       test("Hiding sidebar elements", () => {
         const projectMetaData = sampleDashboardContents.projectMetaData
         const { queryByTestId } = render(
-          <MuiThemeProvider theme={myTheme}>
+          <ThemeProvider theme={scalabelTheme}>
             <StyledSidebar projectMetaData={projectMetaData} vendor={true} />
-          </MuiThemeProvider>
+          </ThemeProvider>
         )
         expect(queryByTestId("export-link")).toBeNull()
         expect(queryByTestId("download-link")).toBeNull()

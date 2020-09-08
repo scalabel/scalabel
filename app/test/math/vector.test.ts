@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import { Vector } from "../../src/math/vector"
 import { Vector2D } from "../../src/math/vector2d"
 

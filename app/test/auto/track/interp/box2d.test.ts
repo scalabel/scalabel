@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import { addBox2dLabel } from "../../../../src/action/box2d"
 import { TrackInterp } from "../../../../src/auto/track/interp/interp"
 import { Box2DLinearInterp } from "../../../../src/auto/track/interp/linear/box2d"

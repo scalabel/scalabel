@@ -1,6 +1,7 @@
 import { withStyles } from "@material-ui/core/styles"
 import * as React from "react"
 import { connect } from "react-redux"
+
 import Session from "../common/session"
 import { getCurrentViewerConfig, isFrameLoaded } from "../functional/state_util"
 import { imageViewStyle } from "../styles/label"

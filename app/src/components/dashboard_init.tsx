@@ -1,11 +1,13 @@
-import { MuiThemeProvider } from "@material-ui/core/styles"
+import { CssBaseline } from "@material-ui/core"
+import { ThemeProvider } from "@material-ui/styles"
 import React from "react"
 import ReactDOM from "react-dom"
+
 import { getAuth } from "../common/service"
 import { handleInvalidPage } from "../common/util"
 import { QueryArg } from "../const/common"
 import { Endpoint } from "../const/connection"
-import { myTheme } from "../styles/theme"
+import { scalabelTheme } from "../styles/theme"
 import Dashboard, { DashboardContents } from "./dashboard"
 
 /**
@@ -27,9 +29,10 @@ export function initDashboard(vendor: boolean): void {
     if (xhr.readyState === 4 && xhr.status === 200) {
       dashboardContents = JSON.parse(xhr.responseText)
       ReactDOM.render(
-        <MuiThemeProvider theme={myTheme}>
+        <ThemeProvider theme={scalabelTheme}>
+          <CssBaseline />
           <Dashboard dashboardContents={dashboardContents} vendor={vendor} />
-        </MuiThemeProvider>,
+        </ThemeProvider>,
         document.getElementById(vendor ? "vendor-root" : "dashboard-root")
       )
     }

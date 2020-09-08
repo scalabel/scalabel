@@ -1,5 +1,6 @@
 import _ from "lodash"
 import * as React from "react"
+
 import * as action from "../../src/action/common"
 import Session, { dispatch, getState } from "../../src/common/session"
 import { Label2dCanvas } from "../../src/components/label2d_canvas"

@@ -2,6 +2,7 @@ import { applyMiddleware, createStore, Middleware, Reducer } from "redux"
 import { createLogger } from "redux-logger"
 import thunk from "redux-thunk"
 import undoable, { includeAction } from "redux-undo"
+
 import { ADD_LABELS, DELETE_LABELS } from "../const/action"
 import { makeState } from "../functional/states"
 import { FullStore, ReduxState } from "../types/redux"

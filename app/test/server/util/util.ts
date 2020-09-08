@@ -1,5 +1,6 @@
 import * as fs from "fs-extra"
 import * as path from "path"
+
 import { addBox2dLabel } from "../../../src/action/box2d"
 import { StorageStructure } from "../../../src/const/storage"
 import {
@@ -9,6 +10,7 @@ import {
   makeTask
 } from "../../../src/functional/states"
 import { parseConfig } from "../../../src/server/config"
+import { AddLabelsAction } from "../../../src/types/action"
 import { ServerConfig } from "../../../src/types/config"
 import {
   RectType,
@@ -16,7 +18,6 @@ import {
   TaskType,
   Vector3Type
 } from "../../../src/types/state"
-import { AddLabelsAction } from "../../../src/types/action"
 
 /**
  * Check equality between two Vector3Type objects

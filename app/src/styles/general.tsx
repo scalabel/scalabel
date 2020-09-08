@@ -1,12 +1,12 @@
-import { myTheme } from "./theme"
+import { scalabelTheme } from "./theme"
 
 // General styles which are used for in components across all pages
 
 export const defaultAppBar = {
-  background: myTheme.palette.primary.dark,
-  height: myTheme.mixins.toolbar.minHeight
+  background: scalabelTheme.palette.primary.dark,
+  height: scalabelTheme.mixins.toolbar.minHeight
 }
 
 export const defaultHeader = {
-  ...myTheme.mixins.toolbar
+  ...scalabelTheme.mixins.toolbar
 }

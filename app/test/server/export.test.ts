@@ -1,4 +1,5 @@
 import * as fs from "fs-extra"
+
 import { LabelTypeName } from "../../src/const/common"
 import { makePathPoint2D } from "../../src/functional/states"
 import {

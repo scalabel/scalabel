@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render } from "@testing-library/react"
 import _ from "lodash"
 import * as React from "react"
 import { create } from "react-test-renderer"
+
 import * as action from "../../src/action/common"
 import { selectLabel } from "../../src/action/select"
 import Session, { dispatch, getState } from "../../src/common/session"
@@ -239,7 +240,7 @@ describe("test track", () => {
 
     dispatch(selectLabel(getState().user.select.labels, 3, "49"))
     fireEvent(
-      getByText("Track-Link"),
+      getByText("Link Tracks"),
       new MouseEvent("click", {
         bubbles: true,
         cancelable: true
@@ -249,7 +250,7 @@ describe("test track", () => {
     dispatch(action.goToItem(5))
     dispatch(selectLabel(getState().user.select.labels, 5, "203"))
     fireEvent(
-      getByText("Finish Track-Link"),
+      getByText("Finish Linking"),
       new MouseEvent("click", {
         bubbles: true,
         cancelable: true

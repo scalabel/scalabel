@@ -1,6 +1,7 @@
 import { fireEvent, render } from "@testing-library/react"
 import _ from "lodash"
 import React from "react"
+
 import * as action from "../../src/action/common"
 import { selectLabel } from "../../src/action/select"
 import Session, { dispatch, getState, getStore } from "../../src/common/session"
@@ -215,7 +216,7 @@ test("Linking tracks", () => {
     )
   )
   fireEvent(
-    getAllByText("Track-Link")[0],
+    getAllByText("Link Tracks")[0],
     new MouseEvent("click", {
       bubbles: true,
       cancelable: true
@@ -232,7 +233,7 @@ test("Linking tracks", () => {
     )
   )
   fireEvent(
-    getAllByText("Finish Track-Link")[0],
+    getAllByText("Finish Linking")[0],
     new MouseEvent("click", {
       bubbles: true,
       cancelable: true

@@ -1,8 +1,9 @@
-import { withStyles, StyleRules } from "@material-ui/core/styles"
+import { StyleRules, withStyles } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
 import * as THREE from "three"
+
 import Session from "../common/session"
 import { ViewerConfigTypeName } from "../const/common"
 import { isCurrentFrameLoaded } from "../functional/state_util"

@@ -1,4 +1,5 @@
 import { AnyAction, Reducer } from "redux"
+
 import * as actionConsts from "../const/action"
 import * as common from "../functional/common"
 import { makeState } from "../functional/states"

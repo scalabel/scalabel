@@ -1,9 +1,9 @@
 import * as fa from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
+  Button,
   Grid,
   IconButton,
-  Link,
   List,
   Table,
   TableCell,
@@ -12,10 +12,12 @@ import {
 } from "@material-ui/core"
 import Chip from "@material-ui/core/Chip"
 import ListItemText from "@material-ui/core/ListItemText"
-import withStyles from "@material-ui/core/styles/withStyles"
 import TableBody from "@material-ui/core/TableBody"
 import Typography from "@material-ui/core/Typography"
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload"
+import { withStyles } from "@material-ui/styles"
 import React from "react"
+
 import { QueryArg } from "../const/common"
 import { Endpoint } from "../const/connection"
 import {
@@ -117,6 +119,7 @@ interface SidebarProps {
 }
 
 interface SidebarClassType {
+  root: string
   /** list root */
   listRoot: string
   /** list item */
@@ -164,7 +167,7 @@ function Dashboard(props: DashboardProps): JSX.Element {
   const align = "center"
   const mainContent = (
     <div className={classes.root}>
-      <Table size="small">
+      <Table size="small" stickyHeader={true}>
         <TableHead>
           <TableRow>
             <TableCell align={align} className={classes.headerCell}>
@@ -233,7 +236,11 @@ function Dashboard(props: DashboardProps): JSX.Element {
                     }
                     data-testid={"task-link-" + index.toString()}
                   >
-                    <FontAwesomeIcon icon={fa.faExternalLinkAlt} size={"sm"} />
+                    <FontAwesomeIcon
+                      icon={fa.faExternalLinkAlt}
+                      size="1x"
+                      transform="grow-6"
+                    />
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -258,13 +265,9 @@ function Dashboard(props: DashboardProps): JSX.Element {
    */
   return (
     <DividedPage
-      // TODO: fix this error
-      // eslint-disable-next-line react/no-children-prop
-      children={{
-        headerContent,
-        sidebarContent,
-        mainContent
-      }}
+      header={headerContent}
+      sidebar={sidebarContent}
+      main={mainContent}
     />
   )
 }
@@ -277,7 +280,7 @@ function Dashboard(props: DashboardProps): JSX.Element {
 function header(props: HeaderProps): JSX.Element {
   const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
-    <React.Fragment>
+    <>
       <Typography variant="h6" noWrap>
         {vendor !== undefined && vendor
           ? "Vendor Dashboard"
@@ -312,7 +315,7 @@ function header(props: HeaderProps): JSX.Element {
           />
         </React.Fragment>
       )}
-    </React.Fragment>
+    </>
   )
 }
 
@@ -333,7 +336,7 @@ function sidebar(props: SidebarProps): JSX.Element {
     { tag: "# Attributes", entry: projectMetaData.numAttributes }
   ]
   return (
-    <React.Fragment>
+    <>
       <List className={classes.listRoot}>
         {sidebarListItems.map((value, index) => (
           <ListItemText
@@ -348,17 +351,17 @@ function sidebar(props: SidebarProps): JSX.Element {
         ))}
       </List>
       {vendor !== undefined && vendor ? null : (
-        <React.Fragment>
-          <Link
-            variant="button"
+        <>
+          <Button
+            variant="contained"
+            color="primary"
             className={classes.link}
-            color="inherit"
+            startIcon={<CloudDownloadIcon />}
             href={`.${Endpoint.EXPORT}?project_name=` + projectMetaData.name}
-            data-testid="export-link"
           >
-            EXPORT RESULTS
-          </Link>
-          <Link
+            DOWNLOAD LABELS
+          </Button>
+          {/* <Link
             variant="body2"
             className={classes.link}
             color="inherit"
@@ -366,10 +369,10 @@ function sidebar(props: SidebarProps): JSX.Element {
             data-testid="download-link"
           >
             DOWNLOAD ASSIGNMENT URLS
-          </Link>
-        </React.Fragment>
+          </Link> */}
+        </>
       )}
-    </React.Fragment>
+    </>
   )
 }
 
@@ -409,4 +412,4 @@ export const StyledHeader = withStyles(headerStyle)(header)
 export const StyledSidebar = withStyles(sidebarStyle)(sidebar)
 const StyledListEntry = withStyles(listEntryStyle)(listEntry)
 /** export dashboard page */
-export default withStyles(dashboardWindowStyles, { withTheme: true })(Dashboard)
+export default withStyles(dashboardWindowStyles)(Dashboard)

@@ -5,6 +5,7 @@
  */
 import { IdType } from "aws-sdk/clients/workdocs"
 import _ from "lodash"
+
 import { uid } from "../common/uid"
 import * as actionConsts from "../const/action"
 import { LabelTypeName, ViewerConfigTypeName } from "../const/common"

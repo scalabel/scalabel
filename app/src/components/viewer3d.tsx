@@ -8,6 +8,7 @@ import TripOriginIcon from "@material-ui/icons/TripOrigin"
 import { withStyles } from "@material-ui/styles"
 import React from "react"
 import * as THREE from "three"
+
 import { changeViewerConfig, toggleSynchronization } from "../action/common"
 import {
   alignToAxis,

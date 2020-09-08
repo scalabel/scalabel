@@ -1,9 +1,10 @@
-import { MuiThemeProvider } from "@material-ui/core/styles"
+import { ThemeProvider } from "@material-ui/core/styles"
 import { cleanup, fireEvent, render } from "@testing-library/react"
 import _ from "lodash"
 import * as React from "react"
 import { Provider } from "react-redux"
 import { ThunkAction } from "redux-thunk"
+
 import { addLabel } from "../../src/action/common"
 import Session from "../../src/common/session"
 import { Synchronizer } from "../../src/common/synchronizer"
@@ -12,7 +13,7 @@ import { SUBMIT } from "../../src/const/action"
 import { EventName } from "../../src/const/connection"
 import { isStatusSaving } from "../../src/functional/selector"
 import { makeLabel } from "../../src/functional/states"
-import { myTheme } from "../../src/styles/theme"
+import { scalabelTheme } from "../../src/styles/theme"
 import { ActionType } from "../../src/types/action"
 import { SyncActionMessageType } from "../../src/types/message"
 import { ReduxState } from "../../src/types/redux"
@@ -34,11 +35,11 @@ describe("Save button functionality", () => {
     setupTestStore(testJsonAutosave)
 
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Provider store={Session.store}>
           <TitleBar />
         </Provider>
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
     expect(() => {
       getByTestId("Save")
@@ -60,11 +61,11 @@ describe("Save button functionality", () => {
 
     // Only need to test save button for manual saving
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Provider store={Session.store}>
           <TitleBar />
         </Provider>
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
     const saveButton = getByTestId("Save")
     fireEvent.click(saveButton)
@@ -87,11 +88,11 @@ describe("Submit button functionality", () => {
 
     // Only need to test save button for manual saving
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Provider store={Session.store}>
           <TitleBar />
         </Provider>
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
 
     const dispatchSpy = jest.spyOn(Session, "dispatch")
@@ -134,11 +135,11 @@ describe("Submit button functionality", () => {
 
     // Only need to test save button for manual saving
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Provider store={Session.store}>
           <TitleBar />
         </Provider>
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
     const dispatchSpy = jest.spyOn(Session, "dispatch")
     dispatchSpy.mockClear()

@@ -3,6 +3,7 @@ import CssBaseline from "@material-ui/core/CssBaseline"
 import { withStyles } from "@material-ui/core/styles"
 import Toolbar from "@material-ui/core/Toolbar"
 import React, { ReactNode } from "react"
+
 import { headerPageStyle } from "../styles/navigation_page"
 
 export interface ClassType {
@@ -15,13 +16,10 @@ export interface ClassType {
 export interface HeaderPageProps {
   /** divided page classes */
   classes: ClassType
-  /** divided page children */
-  children: {
-    /** header content */
-    headerContent: ReactNode
-    /** main page content */
-    pageContent: ReactNode
-  }
+  /** header content */
+  headerContent: ReactNode
+  /** main page content */
+  pageContent: ReactNode
 }
 
 /**
@@ -31,14 +29,18 @@ export interface HeaderPageProps {
  * @constructor
  */
 function HeaderPage(props: HeaderPageProps): JSX.Element {
-  const { classes, children } = props
+  const { classes, headerContent, pageContent } = props
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar className={classes.appBar}>
-        <Toolbar>{children.headerContent}</Toolbar>
+      <AppBar
+        // position="static"
+        style={{ background: "#000000" }}
+        className={classes.appBar}
+      >
+        <Toolbar variant="dense">{headerContent}</Toolbar>
       </AppBar>
-      {children.pageContent}
+      {pageContent}
     </div>
   )
 }

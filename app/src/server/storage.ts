@@ -1,4 +1,5 @@
 import * as path from "path"
+
 import { MAX_HISTORIES } from "../const/storage"
 import Logger from "./logger"
 import * as pathUtil from "./path"

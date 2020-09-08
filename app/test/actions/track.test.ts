@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import * as action from "../../src/action/common"
 import { changeSelectedLabelsCategories } from "../../src/action/select"
 import * as track from "../../src/action/track"

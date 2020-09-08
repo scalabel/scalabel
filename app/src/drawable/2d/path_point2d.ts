@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import { isValidId, makePathPoint2D } from "../../functional/states"
 import { Vector2D } from "../../math/vector2d"
 import { IdType, PathPoint2DType, PathPointType } from "../../types/state"

@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render } from "@testing-library/react"
 import * as React from "react"
 import { Provider } from "react-redux"
+
 import { addViewerConfig, goToItem } from "../../src/action/common"
 import Session from "../../src/common/session"
 import Window from "../../src/components/window"

@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import { RedisClient } from "../../src/server/redis_client"
 import { getTestConfig } from "./util/util"
 

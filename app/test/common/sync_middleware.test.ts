@@ -1,4 +1,5 @@
 import _ from "lodash"
+
 import * as action from "../../src/action/common"
 import { configureStore } from "../../src/common/configure_store"
 import Session from "../../src/common/session"

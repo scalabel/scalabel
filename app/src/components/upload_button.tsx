@@ -2,6 +2,7 @@ import { Grid, TextField } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import FormControl from "@material-ui/core/FormControl"
 import React, { ChangeEvent } from "react"
+
 import Session from "../common/session"
 
 interface ClassType {
@@ -105,6 +106,8 @@ export default class UploadButton extends React.Component<Props, State> {
             <label htmlFor={this.props.form_id}>
               <Button
                 variant="contained"
+                color="primary"
+                size="small"
                 component="span"
                 className={classes.button}
                 id="test"

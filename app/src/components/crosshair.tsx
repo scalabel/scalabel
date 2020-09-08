@@ -1,5 +1,6 @@
 import { withStyles } from "@material-ui/core/styles"
 import React from "react"
+
 import { label2dViewStyle } from "../styles/label"
 
 interface ClassType {

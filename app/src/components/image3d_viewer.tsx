@@ -1,6 +1,7 @@
 import { withStyles } from "@material-ui/styles"
 import * as React from "react"
 import * as THREE from "three"
+
 import Session from "../common/session"
 import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
 import { isCurrentFrameLoaded } from "../functional/state_util"

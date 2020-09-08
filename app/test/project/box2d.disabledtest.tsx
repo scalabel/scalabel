@@ -1,4 +1,4 @@
-import { MuiThemeProvider } from "@material-ui/core/styles"
+import { ThemeProvider } from "@material-ui/core/styles"
 import {
   cleanup,
   fireEvent,
@@ -11,6 +11,7 @@ import * as child from "child_process"
 import _ from "lodash"
 import * as React from "react"
 import { Provider } from "react-redux"
+
 import Session from "../../src/common/session"
 import { initSessionForTask } from "../../src/common/session_init"
 import { submissionTimeout } from "../../src/components/create_form"
@@ -22,7 +23,7 @@ import { isStatusSaved } from "../../src/functional/selector"
 import { getShape } from "../../src/functional/state_util"
 import { Size2D } from "../../src/math/size2d"
 import { Vector2D } from "../../src/math/vector2d"
-import { myTheme } from "../../src/styles/theme"
+import { scalabelTheme } from "../../src/styles/theme"
 import { IdType, RectType } from "../../src/types/state"
 import { getTestConfig, getTestConfigPath } from "../server/util/util"
 import { findNewLabelsFromState } from "../util/state"
@@ -81,9 +82,9 @@ afterAll(async () => {
 
 test("project creation", async () => {
   const { getByTestId } = render(
-    <MuiThemeProvider theme={myTheme}>
+    <ThemeProvider theme={scalabelTheme}>
       <StyledIntegrationForm />
-    </MuiThemeProvider>
+    </ThemeProvider>
   )
   // Change project meta-data
   const projectNameInput = getByTestId("project-name") as HTMLInputElement
@@ -129,11 +130,11 @@ test(
 
     const labelIds: IdType[] = []
     const { getByTestId } = render(
-      <MuiThemeProvider theme={myTheme}>
+      <ThemeProvider theme={scalabelTheme}>
         <Provider store={Session.store}>
           <TitleBar />
         </Provider>
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
     const saveButton = getByTestId("Save")
     const labelCanvas = createCanvas(200, 200)
@@ -229,9 +230,9 @@ test("test export of saved bounding boxes", async () => {
 
 test("import exported json from saved bounding boxes", async () => {
   const { getByTestId } = render(
-    <MuiThemeProvider theme={myTheme}>
+    <ThemeProvider theme={scalabelTheme}>
       <StyledIntegrationForm />
-    </MuiThemeProvider>
+    </ThemeProvider>
   )
   // Change project meta-data
   const projectNameInput = getByTestId("project-name") as HTMLInputElement

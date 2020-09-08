@@ -1,6 +1,7 @@
 import Drawer from "@material-ui/core/Drawer"
 import { withStyles } from "@material-ui/core/styles"
 import React, { ReactNode } from "react"
+
 import { dividedPageStyle } from "../styles/navigation_page"
 import HeaderPage from "./header_page"
 
@@ -20,15 +21,12 @@ export interface ClassType {
 export interface DividedPageProps {
   /** divided page classes */
   classes: ClassType
-  /** divided page children */
-  children: {
-    /** divided page header content */
-    headerContent: ReactNode
-    /** divided page sidebar content */
-    sidebarContent: ReactNode
-    /** divided page main content */
-    mainContent: ReactNode
-  }
+  /** divided page header content */
+  header: ReactNode
+  /** divided page sidebar content */
+  sidebar: ReactNode
+  /** divided page main content */
+  main: ReactNode
 }
 
 /**
@@ -38,8 +36,8 @@ export interface DividedPageProps {
  * @constructor
  */
 function DividedPage(props: DividedPageProps): JSX.Element {
-  const { classes, children } = props
-  const mainPageContent = (
+  const { classes, header, sidebar, main } = props
+  const mainPage = (
     <React.Fragment>
       <Drawer
         className={classes.drawer}
@@ -50,24 +48,15 @@ function DividedPage(props: DividedPageProps): JSX.Element {
         }}
       >
         <div className={classes.drawerHeader} />
-        {children.sidebarContent}
+        {sidebar}
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-        {children.mainContent}
+        {main}
       </main>
     </React.Fragment>
   )
-  return (
-    <HeaderPage
-      // TODO: fix this error
-      // eslint-disable-next-line react/no-children-prop
-      children={{
-        headerContent: children.headerContent,
-        pageContent: mainPageContent
-      }}
-    />
-  )
+  return <HeaderPage headerContent={header} pageContent={mainPage} />
 }
 
 /** export divided page */

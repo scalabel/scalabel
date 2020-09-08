@@ -1,5 +1,6 @@
 import { withStyles } from "@material-ui/styles"
 import React from "react"
+
 import { changeViewerConfig } from "../action/common"
 import Session from "../common/session"
 import { viewerStyles } from "../styles/viewer"

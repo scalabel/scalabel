@@ -1,8 +1,9 @@
 import ListItem from "@material-ui/core/ListItem/ListItem"
 import React from "react"
+
 import { Category } from "../components/toolbar_category"
 import { ListButton } from "../components/toolbar_list_button"
-import { SwitchBtn } from "../components/toolbar_switch"
+import { SwitchButton } from "../components/toolbar_switch"
 import { AttributeToolType } from "../const/common"
 
 /**
@@ -25,7 +26,7 @@ export function renderTemplate(
 ): React.ReactNode {
   if (toolType === AttributeToolType.SWITCH) {
     return (
-      <SwitchBtn
+      <SwitchButton
         onChange={handleToggle}
         name={name}
         getAlignmentIndex={getAlignmentIndex}

@@ -1,9 +1,11 @@
+import "source-map-support/register"
+
 import * as child from "child_process"
 import express, { Application, NextFunction, Request, Response } from "express"
 import * as formidable from "express-formidable"
 import { createServer } from "http"
 import socketio from "socket.io"
-import "source-map-support/register"
+
 import { Endpoint } from "../const/connection"
 import { STORAGE_FOLDERS, StorageStructure } from "../const/storage"
 import { removeListItems } from "../functional/util"

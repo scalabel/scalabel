@@ -1,7 +1,8 @@
 import List from "@material-ui/core/List/List"
-import ListItem from "@material-ui/core/ListItem"
+// import ListItem from "@material-ui/core/ListItem"
 import _ from "lodash"
 import React from "react"
+
 import {
   changeSelect,
   changeViewerConfig,
@@ -18,12 +19,12 @@ import { renderTemplate } from "../common/label"
 import Session from "../common/session"
 import { Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
+import { isValidId } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
 import { Attribute, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { Category } from "./toolbar_category"
-import { isValidId } from "../functional/states"
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
@@ -122,9 +123,7 @@ export class ToolBar extends Component<Props> {
     return (
       <div>
         {categories !== null ? (
-          <ListItem style={{ textAlign: "center" }}>
-            <Category categories={categories} headerText={"Label Category"} />
-          </ListItem>
+          <Category categories={categories} headerText={"Label Category"} />
         ) : null}
         <List>
           {attributes.map((element: Attribute) => (
@@ -149,14 +148,10 @@ export class ToolBar extends Component<Props> {
           {this.state.task.config.tracking && (
             <div>
               {this.state.session.trackLinking
-                ? makeButton(
-                    "Finish Track-Link",
-                    () => {
-                      this.linkSelectedTracks(this.state)
-                    },
-                    "lightgreen"
-                  )
-                : makeButton("Track-Link", () => {
+                ? makeButton("Finish Linking", () => {
+                    this.linkSelectedTracks(this.state)
+                  })
+                : makeButton("Link Tracks", () => {
                     this.startLinkTrack()
                   })}
             </div>

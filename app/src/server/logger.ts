@@ -1,4 +1,5 @@
 import winston from "winston"
+
 import { MaybeError } from "../types/common"
 import { hostname, now } from "./path"
 
