@@ -216,7 +216,7 @@ test("Linking tracks", () => {
     )
   )
   fireEvent(
-    getAllByText("Track-Link")[0],
+    getAllByText("Link Tracks")[0],
     new MouseEvent("click", {
       bubbles: true,
       cancelable: true
@@ -233,7 +233,7 @@ test("Linking tracks", () => {
     )
   )
   fireEvent(
-    getAllByText("Finish Track-Link")[0],
+    getAllByText("Finish Linking")[0],
     new MouseEvent("click", {
       bubbles: true,
       cancelable: true

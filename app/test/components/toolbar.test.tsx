@@ -240,7 +240,7 @@ describe("test track", () => {
 
     dispatch(selectLabel(getState().user.select.labels, 3, "49"))
     fireEvent(
-      getByText("Track-Link"),
+      getByText("Link Tracks"),
       new MouseEvent("click", {
         bubbles: true,
         cancelable: true
@@ -250,7 +250,7 @@ describe("test track", () => {
     dispatch(action.goToItem(5))
     dispatch(selectLabel(getState().user.select.labels, 5, "203"))
     fireEvent(
-      getByText("Finish Track-Link"),
+      getByText("Finish Linking"),
       new MouseEvent("click", {
         bubbles: true,
         cancelable: true
