@@ -10,6 +10,8 @@ import DividedPage from "./divided_page"
 import ProjectList from "./sidebar_projects"
 
 export interface ClassType {
+  /** container of the list */
+  listRoot: string
   /** list header (existing projects) */
   listHeader: string
 }
@@ -51,20 +53,25 @@ class Create extends React.Component<Props, State> {
    */
   constructor(props: Props) {
     super(props)
+    const { classes } = props
     this.state = {
       reloadProjects: false
     }
     this.headerContent = (
       <Typography variant="h6" noWrap>
-        Open or create project
+        Open / Create Project
       </Typography>
     )
     this.sidebarContent = (
-      <List>
+      <List className={classes.listRoot}>
         <ListItem>
           <ListItemText
-            primary={"Existing Projects"}
-            className={this.props.classes.listHeader}
+            primary={
+              <Typography className={classes.listHeader}>
+                Existing Projects
+              </Typography>
+            }
+            className={classes.listHeader}
           ></ListItemText>
         </ListItem>
         <ProjectList refresh={this.state.reloadProjects} />
@@ -83,13 +90,9 @@ class Create extends React.Component<Props, State> {
   public render(): React.ReactNode {
     return (
       <DividedPage
-        // TODO: need fix
-        // eslint-disable-next-line react/no-children-prop
-        children={{
-          headerContent: this.headerContent,
-          sidebarContent: this.sidebarContent,
-          mainContent: this.mainContent
-        }}
+        header={this.headerContent}
+        sidebar={this.sidebarContent}
+        main={this.mainContent}
       />
     )
   }

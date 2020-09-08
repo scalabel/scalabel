@@ -4,10 +4,15 @@ import createStyles from "@material-ui/core/styles/createStyles"
 const fullWidth = 700
 
 // Styles for the create page
-export const createStyle = (): StyleRules<"listHeader", {}> =>
+export const createStyle = (): StyleRules<"listRoot" | "listHeader", {}> =>
   createStyles({
+    listRoot: {
+      width: "90%",
+      marginLeft: "5%"
+    },
     listHeader: {
-      textAlign: "center"
+      textAlign: "center",
+      fontWeight: "bold"
     }
   })
 
@@ -17,7 +22,7 @@ export const projectListStyle = (
 ): StyleRules<"coloredListItem", {}> =>
   createStyles({
     coloredListItem: {
-      backgroundColor: theme.palette.secondary.light
+      backgroundColor: theme.palette.action.hover
     }
   })
 
@@ -72,8 +77,8 @@ export const uploadStyle = createStyles({
   },
 
   button: {
-    padding: 5,
-    marginRight: 10,
+    // padding: 5,
+    // marginRight: 10,
     textTransform: "initial"
   },
 

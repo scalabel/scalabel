@@ -105,6 +105,8 @@ export default class UploadButton extends React.Component<Props, State> {
             <label htmlFor={this.props.form_id}>
               <Button
                 variant="contained"
+                color="primary"
+                size="small"
                 component="span"
                 className={classes.button}
                 id="test"

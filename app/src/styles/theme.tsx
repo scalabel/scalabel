@@ -47,6 +47,31 @@ export default function createScalabelTheme(): Theme {
       toolbar: {
         minHeight: titleBarHeight
       }
+    },
+    overrides: {
+      MuiCssBaseline: {
+        "@global": {
+          "*": {
+            "scrollbar-width": "thin",
+            "scrollbar-color": "#bdbdbd #0000"
+          },
+          "*::-webkit-scrollbar": {
+            width: "5px"
+          },
+          /* Track */
+          "*::-webkit-scrollbar-track": {
+            background: "#0000"
+          },
+          /* Handle */
+          "*::-webkit-scrollbar-thumb": {
+            background: "#bdbdbd"
+          },
+          /* Handle on hover */
+          "*::-webkit-scrollbar-thumb:hover": {
+            background: "#757575"
+          }
+        }
+      }
     }
   })
 }

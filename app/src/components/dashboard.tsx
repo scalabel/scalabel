@@ -264,13 +264,9 @@ function Dashboard(props: DashboardProps): JSX.Element {
    */
   return (
     <DividedPage
-      // TODO: fix this error
-      // eslint-disable-next-line react/no-children-prop
-      children={{
-        headerContent,
-        sidebarContent,
-        mainContent
-      }}
+      header={headerContent}
+      sidebar={sidebarContent}
+      main={mainContent}
     />
   )
 }
