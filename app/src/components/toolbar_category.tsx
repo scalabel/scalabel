@@ -1,4 +1,4 @@
-import { ListItemText } from "@material-ui/core"
+import { ListItemText, ListItem } from "@material-ui/core"
 import FormControl from "@material-ui/core/FormControl"
 import { withStyles } from "@material-ui/core/styles"
 import ToggleButton from "@material-ui/lab/ToggleButton"
@@ -78,10 +78,12 @@ class MultipleSelect extends Component<Props> {
     return (
       <>
         <FormControl className={classes.formControl}>
-          <ListItemText
-            classes={{ primary: classes.primary }}
-            primary={headerText}
-          />
+          <ListItem dense={true} className={classes.primary}>
+            <ListItemText
+              classes={{ primary: classes.primary }}
+              primary={headerText}
+            />
+          </ListItem>
           <ToggleButtonGroup
             className={classes.buttonGroup}
             orientation="vertical"

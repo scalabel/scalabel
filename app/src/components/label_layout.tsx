@@ -1,7 +1,7 @@
+import CssBaseline from "@material-ui/core/CssBaseline"
 import { withStyles } from "@material-ui/core/styles"
 import * as React from "react"
 import SplitPane from "react-split-pane"
-
 import Session from "../common/session"
 import { LayoutStyles } from "../styles/label"
 import LabelPane from "./label_pane"
@@ -131,7 +131,7 @@ class LabelLayout extends React.Component<Props, State> {
    * which size to update in layoutState
    * @return {Component}
    */
-  public optionalSplit(
+  public split(
     split: "vertical" | "horizontal",
     comp1: React.ReactNode,
     comp2: React.ReactNode,
@@ -153,7 +153,7 @@ class LabelLayout extends React.Component<Props, State> {
         defaultSize={dflt}
         maxSize={max}
         primary={primary}
-        pane1Style={{ overflowY: "scroll", overflowX: "hidden" }}
+        pane1Style={{ overflowY: "auto", overflowX: "auto" }}
         onChange={(size) => {
           this.handleOnChange(size, position)
         }}
@@ -181,9 +181,9 @@ class LabelLayout extends React.Component<Props, State> {
       rightSidebar2,
       classes
     } = this.props
-    const leftDefaultWidth = 200
-    const leftMaxWidth = 300
-    const leftMinWidth = 180
+    const leftDefaultWidth = 160
+    const leftMaxWidth = 180
+    const leftMinWidth = 140
     const rightDefaultWidth = 200
     const rightMaxWidth = 300
     const rightMinWidth = 180
@@ -213,13 +213,14 @@ class LabelLayout extends React.Component<Props, State> {
     )
 
     return (
-      <>
+      <React.Fragment>
+        <CssBaseline />
         <div className={classes.titleBar}>{titleBar}</div>
         <main className={classes.main}>
-          {this.optionalSplit(
+          {this.split(
             "vertical",
             // Left sidebar
-            this.optionalSplit(
+            this.split(
               "horizontal",
               leftSidebar1,
               leftSidebar2,
@@ -231,10 +232,10 @@ class LabelLayout extends React.Component<Props, State> {
               "first"
             ),
 
-            this.optionalSplit(
+            this.split(
               "vertical",
               // Center
-              this.optionalSplit(
+              this.split(
                 "horizontal",
                 labelInterface,
                 bottomBar,
@@ -248,7 +249,7 @@ class LabelLayout extends React.Component<Props, State> {
               ),
 
               // Right sidebar
-              this.optionalSplit(
+              this.split(
                 "horizontal",
                 rightSidebar1,
                 rightSidebar2,
@@ -278,7 +279,7 @@ class LabelLayout extends React.Component<Props, State> {
           )}
         </main>
         {/* End footer */}
-      </>
+      </React.Fragment>
     )
   }
 }
