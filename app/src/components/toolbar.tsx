@@ -123,7 +123,7 @@ export class ToolBar extends Component<Props> {
     return (
       <div>
         {categories !== null ? (
-          <Category categories={categories} headerText={"Label Category"} />
+          <Category categories={categories} headerText={"Category"} />
         ) : null}
         <List>
           {attributes.map((element: Attribute) => (
@@ -148,7 +148,7 @@ export class ToolBar extends Component<Props> {
           {this.state.task.config.tracking && (
             <div>
               {this.state.session.trackLinking
-                ? makeButton("Finish Linking", () => {
+                ? makeButton("Finish", () => {
                     this.linkSelectedTracks(this.state)
                   })
                 : makeButton("Link Tracks", () => {

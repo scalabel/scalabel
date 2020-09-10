@@ -24,6 +24,7 @@ function StyledButtonRaw(props: ButtonProps): JSX.Element {
   const { classes, children, onClick } = props
   return (
     <Button
+      size="small"
       color="primary"
       variant="contained"
       className={classes.root}

@@ -19,12 +19,12 @@ StyleRules<"root" | "button" | "formControl" | "primary" | "buttonGroup", {}> =>
     },
     primary: {
       fontWeight: "bold",
-      width: "80%",
-      margin: "2px 10%",
-      textAlign: "center"
+      width: "100%",
+      textAlign: "center",
+      padding: "0px"
     },
     button: {
-      height: 30,
+      height: 22,
       textTransform: "none",
       borderRadius: 0,
       borderWidth: "1px"
@@ -44,10 +44,12 @@ export const switchStyle = (): StyleRules<
   createStyles({
     root: {
       width: "80%",
-      margin: "2px 10%"
+      margin: "2px 10%",
+      padding: "0px 0px"
     },
     primary: {
       // fontSize: "15px"
+      fontWeight: "bold"
     },
     switchBase: {
       color: grey[400],
@@ -90,12 +92,12 @@ export const toggleButtonStyle = (): StyleRules<"root" | "label"> =>
       color: "rgba(0, 0, 0, 0.38)",
       height: "28px",
       padding: "1px 2px",
-      fontSize: "15px",
+      // fontSize: "15px",
       minWidth: "28px",
-      borderRadius: "2px"
+      borderRadius: "0px"
     },
     label: {
-      fontSize: "11px"
+      // fontSize: "10px"
     }
   })
 
@@ -113,9 +115,11 @@ export const listButtonStyle = (): StyleRules<
     },
     toggleContainer: {
       display: "flex",
-      alignItems: "center",
+      alignItems: "left",
       justifyContent: "flex-start",
-      background: "rgba(250,250,250,0)"
+      width: "100%",
+      padding: "0px"
+      // background: "rgba(250,250,250,0)"
     },
     buttonGroup: {
       width: "100%",
@@ -124,10 +128,15 @@ export const listButtonStyle = (): StyleRules<
       flexWrap: "wrap" as "wrap"
     },
     primary: {
-      fontSize: "15px"
+      // fontSize: "10px",
+      padding: "0px",
+      textAlign: "left",
+      width: "100%",
+      fontWeight: "bold"
     },
     toggleButton: {
-      flexGrow: 1
+      flexGrow: 1,
+      borderRadius: 0
     }
   })
 

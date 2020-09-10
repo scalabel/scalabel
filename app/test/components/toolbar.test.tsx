@@ -48,7 +48,7 @@ describe("Toolbar category setting", () => {
   test("Category selection", () => {
     setupTestStore(testJson)
     const { getByText } = render(
-      <Category categories={["A", "B", "C"]} headerText={"Label Category"} />
+      <Category categories={["A", "B", "C"]} headerText={"Category"} />
     )
     let button = getByText("B")
     expect(button).toBeInTheDocument()
@@ -62,17 +62,17 @@ describe("Toolbar category setting", () => {
 
   test("Test elements in Category", () => {
     const category = create(
-      <Category categories={["A", "B"]} headerText={"Label Category"} />
+      <Category categories={["A", "B"]} headerText={"Category"} />
     )
     const root = category.root
     expect(root.props.categories[0].toString()).toBe("A")
     expect(root.props.categories[1].toString()).toBe("B")
-    expect(root.findByType(ListItemText).props.primary).toBe("Label Category")
+    expect(root.findByType(ListItemText).props.primary).toBe("Category")
   })
 
   test("Category by type", () => {
     const category = create(
-      <Category categories={["OnlyCategory"]} headerText={"Label Category"} />
+      <Category categories={["OnlyCategory"]} headerText={"Category"} />
     )
     const root = category.root
     expect(root.findByType(ToggleButton).props.children).toBe("OnlyCategory")
@@ -80,7 +80,7 @@ describe("Toolbar category setting", () => {
 
   test("Null category", () => {
     const category = create(
-      <Category categories={null} headerText={"Label Category"} />
+      <Category categories={null} headerText={"Category"} />
     )
     const root = category.getInstance()
     expect(root).toBe(null)
@@ -250,7 +250,7 @@ describe("test track", () => {
     dispatch(action.goToItem(5))
     dispatch(selectLabel(getState().user.select.labels, 5, "203"))
     fireEvent(
-      getByText("Finish Linking"),
+      getByText("Finish"),
       new MouseEvent("click", {
         bubbles: true,
         cancelable: true

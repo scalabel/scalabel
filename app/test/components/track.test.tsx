@@ -233,7 +233,7 @@ test("Linking tracks", () => {
     )
   )
   fireEvent(
-    getAllByText("Finish Linking")[0],
+    getAllByText("Finish")[0],
     new MouseEvent("click", {
       bubbles: true,
       cancelable: true
