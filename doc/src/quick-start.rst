@@ -17,8 +17,7 @@ on the label settings. A project consists of multiple tasks. ``Task Size`` is
 the number of items (image or point cloud) in each task.
 
 ``Item List`` is the list of images or point clouds to label. The format is
-either json or yaml with a list of frame objects in the `BDD100K data format
-<https://github.com/ucbdrive/bdd-data/blob/master/doc/format.md>`_. The only
+either json or yaml with a list of frame objects in the :ref:`Scalabel format`. The only
 required field for the item list is ``url``. See
 [examples/image_list.yml](examples/image_list.yml) for an example of image list.
 
@@ -53,7 +52,7 @@ downloading.
 .. image:: ../media/doc/images/creator-dashboard.png
   :width: 500
 
-You can download the annotation results in BDD format from the ``EXPORT RESULTS``
+You can download the annotation results in :ref:`Scalabel Format` from the ``EXPORT RESULTS``
 button in the toolbar on the left.
 
 ``VENDOR DASHBOARD`` is for the annotation vendor to check the list of tasks.

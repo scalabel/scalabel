@@ -1,6 +1,16 @@
 Python Tools
 ===================
 
+We provide some useful scripts to handle scalabel projects and I/O. They are in
+the ``tools`` module of the `Scalabel python package
+<https://github.com/scalabel/scalabel/tree/master/scalabel>`_. We recommend
+using the tools through python module invoke convention. For example,
+
+.. code-block:: bash
+
+    python3 -m scalabel.tools.prepare_data ...
+
+
 prepare_data
 -------------------
 
@@ -99,3 +109,13 @@ Add url prefix to the name field in the frames and assign it to the url field
 
     python3 -m scalabel.tools.edit_labels --add-url http://localhost:8686/items -i \
         input.json -o output.json
+
+coco2scalabel
+-----------------
+
+Convert COCO format to :ref:`Scalabel Format`.
+
+scalabel2coco
+-----------------
+
+Convert :ref:`Scalabel Format` to COCO format.
