@@ -1,4 +1,4 @@
-Install
+Installation
 ~~~~~~~~~~~~~~
 
 You can either set up the tool with the provided docker image or build the tool

@@ -3,12 +3,13 @@ boto3
 colorama
 Flask
 Flask-Cors
+joblib
 mypy
 numpy
-joblib
 Pillow
 plyfile
 psutil
+pycocotools
 pydocstyle
 pylint
 pyparsing
