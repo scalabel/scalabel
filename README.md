@@ -15,4 +15,4 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 [**Discussion**](https://groups.google.com/g/scalabel) |
 [**Contributors**](https://github.com/scalabel/scalabel/graphs/contributors)
 
-![scalabel interface](https://www.scalabel.ai/doc/demo/readme/scalabel_teaser_interface.jpg)
+![scalabel interface](https://scalabel.ai/doc/_images/box2d_tracking_result.gif)

@@ -2,7 +2,7 @@
 
 import argparse
 import json
-from os.path import join, splitext
+from os.path import join, splitext, basename
 from typing import Any, Dict, List, Callable
 
 import yaml
@@ -24,6 +24,12 @@ def parse_arguments() -> argparse.Namespace:
         help="add url based on the name field in each frame",
     )
     parser.add_argument(
+        "--remove-name-dir",
+        action="store_true",
+        help="ignore the directory portion of the names when converting"
+        + " name to url",
+    )
+    parser.add_argument(
         "--input",
         "-i",
         type=str,
@@ -41,16 +47,21 @@ def parse_arguments() -> argparse.Namespace:
     return args
 
 
-def add_url(frame: LabelObject, url_root: str) -> None:
+def add_url(frame: LabelObject, url_root: str, remove_name_dir: bool) -> None:
     """Add url root to the name and assign to the url frame."""
-    frame["url"] = join(url_root, frame["name"])
+    name = frame["name"]
+    if remove_name_dir:
+        name = basename(name)
+    frame["url"] = join(url_root, name)
 
 
-def edit_frames(frames: List[LabelObject], url_root: str) -> None:
+def edit_frames(
+    frames: List[LabelObject], url_root: str, remove_name_dir: bool
+) -> None:
     """Edit frames based on the arguments."""
     processor: List[Callable[[LabelObject], None]] = []
     if url_root != "":
-        processor.append(lambda f: add_url(f, url_root))
+        processor.append(lambda f: add_url(f, url_root, remove_name_dir))
     for f in frames:
         for p in processor:
             p(f)
@@ -90,7 +101,7 @@ def main() -> None:
     labels: List[LabelObject] = []
     for filename in args.input:
         labels.extend(read_input(filename))
-    edit_frames(labels, args.add_url)
+    edit_frames(labels, args.add_url, args.remove_name_dir)
     print(labels[0]["name"])
     write_output(args.output, labels)
 

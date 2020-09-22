@@ -1,6 +1,16 @@
 Video Tracking
 --------------
 
+Tracking is similar to image annotation, but each object can appear in multiple
+images. We can use bounding boxes or polygons to track the instances across the
+frames. The labels of the same instance in the exported label file will have the
+same label id.
+
+.. figure:: ../media/doc/videos/box2d_tracking_result.gif
+    :width: 600px
+
+    An example of tracking results
+
 2D Bounding Box Tracking
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
