@@ -8,7 +8,7 @@ import { ADD_LABELS } from "../const/action"
 import { ShapeTypeName } from "../const/common"
 import { EventName } from "../const/connection"
 import { AddLabelsAction, BaseAction } from "../types/action"
-import { ItemExport } from "../types/bdd"
+import { ItemExport } from "../types/export"
 import {
   ActionPacketType,
   BotData,

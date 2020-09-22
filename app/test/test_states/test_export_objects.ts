@@ -1,4 +1,4 @@
-import { ItemExport } from "../../src/types/bdd"
+import { ItemExport } from "../../src/types/export"
 
 export const sampleItemExportImage: ItemExport = {
   name:

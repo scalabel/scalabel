@@ -1,6 +1,6 @@
 import { AttributeToolType, LabelTypeName } from "../const/common"
 import { isValidId } from "../functional/states"
-import { ItemExport, LabelExport, PolygonExportType } from "../types/bdd"
+import { ItemExport, LabelExport, PolygonExportType } from "../types/export"
 import {
   Attribute,
   ConfigType,
@@ -145,7 +145,7 @@ export function convertItemToExport(
 }
 
 /**
- * parses attributes into BDD format
+ * parses attributes into Scalabel format
  *
  * @param attributes
  * @param configAttributes

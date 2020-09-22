@@ -90,13 +90,13 @@ jump to :ref:`quick-start`.
 5.  Get labels
 
     The collected labels can be directly downloaded from the project dashboard.
-    The data can be follow
-    `BDD100K format <https://github.com/ucbdrive/bdd100k/blob/master/doc/format.md>`_.
+    The labels follow
+    :ref:`Scalabel Format`.
     After installing the requirements and setting up the paths of the
-    `BDD100K toolkit <https://github.com/ucbdrive/bdd-data>`_,
+    `BDD100K toolkit <https://github.com/bdd100k/bdd100k>`_,
     you can visualize the labels by
 
     .. code-block:: bash
     
-        python3 -m bdd_data.show_labels -l <your_downloaded_label_path.json>
+        python3 -m bdd_data.vis.labels -l <your_downloaded_label_path.json>
     

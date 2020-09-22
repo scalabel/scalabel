@@ -12,7 +12,7 @@ import { FormField } from "../../src/const/project"
 import { isStatusSaved } from "../../src/functional/selector"
 import { getTaskDir } from "../../src/server/path"
 import { formStyle } from "../../src/styles/create"
-import { ItemExport } from "../../src/types/bdd"
+import { ItemExport } from "../../src/types/export"
 
 export interface TestConfig {
   /** project name for current test */

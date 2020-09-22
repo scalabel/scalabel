@@ -1,4 +1,4 @@
-import { ItemExport } from "./bdd"
+import { ItemExport } from "./export"
 import { Attribute, ConfigType, Label2DTemplateType, SensorType } from "./state"
 
 /**

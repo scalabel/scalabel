@@ -8,7 +8,7 @@ import { EventName } from "../../src/const/connection"
 import { Bot } from "../../src/server/bot"
 import { serverConfig } from "../../src/server/defaults"
 import { AddLabelsAction } from "../../src/types/action"
-import { ItemExport } from "../../src/types/bdd"
+import { ItemExport } from "../../src/types/export"
 import {
   ActionPacketType,
   BotData,
