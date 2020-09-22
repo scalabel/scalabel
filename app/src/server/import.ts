@@ -9,7 +9,7 @@ import {
   makePlane,
   makeRect
 } from "../functional/states"
-import { ItemExport, LabelExport } from "../types/bdd"
+import { ItemExport, LabelExport } from "../types/export"
 import {
   Attribute,
   IdType,
@@ -108,7 +108,7 @@ export function convertItemToImport(
 }
 
 /**
- * parses attributes from BDD format (strings)
+ * parses attributes from Scalabel format (strings)
  * to internal format (index in config's attributes)
  *
  * @param attributesExport the attributes to process

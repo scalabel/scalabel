@@ -3,7 +3,7 @@ import {
   makeLabel,
   makeLabelExport
 } from "../../src/functional/states"
-import { ItemExport, LabelExport } from "../../src/types/bdd"
+import { ItemExport, LabelExport } from "../../src/types/export"
 
 describe("Defaults get overwritten", () => {
   test("Item export creation", () => {
