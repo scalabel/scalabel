@@ -153,9 +153,11 @@ class TitleBar extends Component<Props> {
     const { statusText } = this.props
     const { statusTextHide } = this.props
 
+    const keyboardLink = "https://www.scalabel.ai/doc/keyboard.html"
+
     const buttonInfo: ButtonInfo[] = [
       { title: "Instructions", href: instructionLink, icon: fa.faInfo },
-      { title: "Keyboard Usage", icon: fa.faQuestion },
+      { title: "Keyboard Usage", href: keyboardLink, icon: fa.faQuestion },
       { title: "Dashboard", href: dashboardLink, icon: fa.faList }
     ]
 
