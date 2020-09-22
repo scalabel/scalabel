@@ -10,7 +10,7 @@ import {
 import { StorageType } from "../const/config"
 import { STORAGE_FOLDERS } from "../const/storage"
 import { BaseAction } from "../types/action"
-import { ItemExport } from "../types/bdd"
+import { ItemExport } from "../types/export"
 import { CreationForm, UserData, UserMetadata } from "../types/project"
 import { Label2DTemplateType, State } from "../types/state"
 import { FileStorage } from "./file_storage"

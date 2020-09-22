@@ -3,7 +3,7 @@ import _ from "lodash"
 
 import { uid } from "../common/uid"
 import * as types from "../const/common"
-import { ItemExport, LabelExport } from "../types/bdd"
+import { ItemExport, LabelExport } from "../types/export"
 import {
   Attribute,
   ConfigType,

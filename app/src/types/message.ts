@@ -1,6 +1,6 @@
 import { ModelEndpoint } from "../const/connection"
 import { BaseAction } from "./action"
-import { ItemExport } from "./bdd"
+import { ItemExport } from "./export"
 
 export interface RegisterMessageType {
   /** Project name of the session */
@@ -55,7 +55,7 @@ export interface BotData {
 
 /** precomputed queries for models */
 export interface ModelQuery {
-  /** the data in bdd format */
+  /** the data in scalabel format */
   data: ItemExport
   /** the endpoint for the query */
   endpoint: ModelEndpoint

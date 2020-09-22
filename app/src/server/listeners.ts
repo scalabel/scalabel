@@ -5,7 +5,7 @@ import _ from "lodash"
 import { DashboardContents } from "../components/dashboard"
 import { getSubmissionTime } from "../components/util"
 import { FormField } from "../const/project"
-import { ItemExport } from "../types/bdd"
+import { ItemExport } from "../types/export"
 import { Project } from "../types/project"
 import { TaskType } from "../types/state"
 import {

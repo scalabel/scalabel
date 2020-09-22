@@ -8,7 +8,7 @@ import {
   ItemTypeName,
   LabelTypeName
 } from "../../src/const/common"
-import { ItemExport } from "../../src/types/bdd"
+import { ItemExport } from "../../src/types/export"
 import { CreationForm, FormFileData, Project } from "../../src/types/project"
 import { Attribute, TaskType } from "../../src/types/state"
 import {

@@ -15,7 +15,7 @@ import {
   makeTask,
   makeTrack
 } from "../functional/states"
-import { ItemExport } from "../types/bdd"
+import { ItemExport } from "../types/export"
 import { CreationForm, FormFileData, Project } from "../types/project"
 import {
   Attribute,
