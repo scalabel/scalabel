@@ -26,6 +26,12 @@ across frames.
         Your browser does not support the video tag.
     </video>
 
+
+.. video:: ../media/doc/videos/box2d_tracking_slider.gif.mp4
+   :width: 600
+   :autoplay:
+   :nocontrols:
+
 Bounding box interpolation
 =====================================
 

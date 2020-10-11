@@ -9,10 +9,10 @@ describe("Test shared utility methods", () => {
 
   test("Get correct instruction links", () => {
     expect(util.getInstructionUrl("box2d")).toBe(
-      "https://www.scalabel.ai/doc/instructions/bbox.html"
+      "https://doc.scalabel.ai/instructions/bbox.html"
     )
     expect(util.getInstructionUrl("polygon2d")).toBe(
-      "https://www.scalabel.ai/doc/instructions/segmentation.html"
+      "https://doc.scalabel.ai/instructions/segmentation.html"
     )
   })
 })

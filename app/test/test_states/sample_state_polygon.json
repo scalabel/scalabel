@@ -7,7 +7,7 @@
       "taskSize": 5,
       "handlerUrl": "label",
       "pageTitle": "2D Segmentation",
-      "instructionPage": "https://www.scalabel.ai/doc/instructions/segmentation.html",
+      "instructionPage": "https://doc.scalabel.ai/instructions/segmentation.html",
       "bundleFile": "image_v2.js",
       "categories": [
         "person",
