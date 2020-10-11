@@ -38,7 +38,7 @@ release = ""
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autosectionlabel"]
+extensions = ["sphinx.ext.autosectionlabel", "sphinxcontrib.video"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -81,7 +81,7 @@ html_theme = "sphinx_rtd_theme"
 # documentation.
 
 html_theme_options = {
-    "canonical_url": "https://www.scalabel.ai/doc/",
+    "canonical_url": "https://doc.scalabel.ai",
     "analytics_id": "",
     "logo_only": True,
     "display_version": True,
@@ -98,7 +98,9 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["../static"]
+html_static_path = ["../static"]  # , "../media"]
+
+# html_extra_path = ["../test-media"]
 
 # Make sure the custom.css file is added.
 def setup(app):

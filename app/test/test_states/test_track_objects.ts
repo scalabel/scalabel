@@ -11,7 +11,7 @@ export const testJson: DeepPartialState = {
       taskSize: 6,
       handlerUrl: "label",
       pageTitle: "2D Bounding Box",
-      instructionPage: "https://www.scalabel.ai/doc/instructions/bbox.html",
+      instructionPage: "https://doc.scalabel.ai/instructions/bbox.html",
       bundleFile: "image_v2.js",
       categories: [
         "person",
@@ -671,7 +671,7 @@ export const emptyTrackingTask: DeepPartialState = {
       taskSize: 8,
       handlerUrl: "label",
       pageTitle: "2D Bounding Box",
-      instructionPage: "https://www.scalabel.ai/doc/instructions/bbox.html",
+      instructionPage: "https://doc.scalabel.ai/instructions/bbox.html",
       bundleFile: "image_v2.js",
       categories: [
         "person",

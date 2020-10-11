@@ -10,9 +10,9 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 [Scalabel](https://www.scalabel.ai) (pronounced "scalable") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://www.bdd100k.com/) is labeled with this tool.
 
-[**Documentation**](https://scalabel.ai/doc/) |
+[**Documentation**](https://doc.scalabel.ai/) |
 [**Overview Video**](https://go.yf.io/scalabel-video-demo) |
 [**Discussion**](https://groups.google.com/g/scalabel) |
 [**Contributors**](https://github.com/scalabel/scalabel/graphs/contributors)
 
-![scalabel interface](https://scalabel.ai/doc/_images/box2d_tracking_result.gif)
+![scalabel interface](https://doc.scalabel.ai/_images/box2d_tracking_result.gif)

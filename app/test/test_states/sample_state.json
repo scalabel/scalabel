@@ -8,7 +8,7 @@
       "taskSize": 5,
       "handlerUrl": "label",
       "pageTitle": "2D Bounding Box",
-      "instructionPage": "https://www.scalabel.ai/doc/instructions/bbox.html",
+      "instructionPage": "https://doc.scalabel.ai/instructions/bbox.html",
       "bundleFile": "image_v2.js",
       "categories": [
         "person",

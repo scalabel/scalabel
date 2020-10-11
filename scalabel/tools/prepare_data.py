@@ -186,7 +186,11 @@ def create_image_list(out_dir: str, url_root: str) -> str:
     list_path = join(out_dir, "image_list.yml")
     with open(list_path, "w") as f:
         yaml.dump(yaml_items, f)
-    logger.info("The configuration file saved at %s", list_path)
+    logger.info(
+        "The configuration file saved at %s with %d items",
+        list_path,
+        len(file_list),
+    )
     return list_path
 
 

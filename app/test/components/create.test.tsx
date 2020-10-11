@@ -64,15 +64,15 @@ describe("Test different label options", () => {
     expect(instructions.value).toBeFalsy()
     fireEvent.change(select, { target: { value: "box2d" } })
     expect(instructions.value).toBe(
-      "https://www.scalabel.ai/doc/instructions/bbox.html"
+      "https://doc.scalabel.ai/instructions/bbox.html"
     )
     fireEvent.change(select, { target: { value: "polygon2d" } })
     expect(instructions.value).toBe(
-      "https://www.scalabel.ai/doc/instructions/segmentation.html"
+      "https://doc.scalabel.ai/instructions/segmentation.html"
     )
     fireEvent.change(select, { target: { value: "polyline2d" } })
     expect(instructions.value).toBe(
-      "https://www.scalabel.ai/doc/instructions/segmentation.html"
+      "https://doc.scalabel.ai/instructions/segmentation.html"
     )
     fireEvent.change(select, { target: { value: "box3d" } })
     expect(instructions.value).toBeFalsy()
@@ -156,7 +156,7 @@ describe("Test user ability to change fields", () => {
     const select = getByTestId("label-type") as HTMLSelectElement
     fireEvent.change(select, { target: { value: "box2d" } })
     expect(instructions.value).toBe(
-      "https://www.scalabel.ai/doc/instructions/bbox.html"
+      "https://doc.scalabel.ai/instructions/bbox.html"
     )
     fireEvent.change(instructions, { target: { value: "should not change" } })
     expect(instructions.value).not.toBe("should not change")

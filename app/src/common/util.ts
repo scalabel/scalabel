@@ -34,7 +34,7 @@ export function getTracking(itemType: string): [string, boolean] {
  * @param pageName
  */
 function makeInstructionUrl(pageName: string): string {
-  return `https://www.scalabel.ai/doc/instructions/${pageName}.html`
+  return `https://doc.scalabel.ai/instructions/${pageName}.html`
 }
 
 /**
