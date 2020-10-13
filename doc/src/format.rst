@@ -6,7 +6,9 @@ Scalabel format defines the protocol for importing image lists with optional
 is also the format for `BDD100K dataset
 <https://www.bdd100k.com>`_.
 
-Schema of the format is shown below. Most of the fields are optional depending
+Schema of the format is shown below. You can also use our `Typescript
+<https://github.com/scalabel/scalabel/blob/master/app/src/types/export.ts>`_
+and Python type definitions. Most of the fields are optional depending
 on your purpose. If you only want to upload a list of images when creating a
 project, you only need ``url``. ``videoName`` is used to group frames for each
 tracking task. If you are annotating bounding boxes, you can ignore `poly2d` and
@@ -27,6 +29,7 @@ other label types.
         - rotation
     - timestamp: int64 (epoch time ms)
     - frameIndex: int (optional, frame index in this video)
+    - size: [width, height]
     - labels [ ]:
         - id: string
         - category: string (classification)
@@ -44,7 +47,7 @@ other label types.
             - orientation: 
             - location: ()
             - dimension: (3D point, height, width, length)
-        - poly2d: an array of objects, with the structure
+        - poly2d:
             - vertices: [][]float (list of 2-tuples [x, y])
             - types: string
             - closed: boolean

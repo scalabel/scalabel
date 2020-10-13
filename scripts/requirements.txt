@@ -1,6 +1,7 @@
 black
 boto3
 colorama
+dataclasses_json
 Flask
 Flask-Cors
 joblib
