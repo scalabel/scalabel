@@ -2,8 +2,8 @@
 
 import argparse
 import json
-from os.path import join, splitext, basename
-from typing import Any, Dict, List, Callable
+from os.path import basename, join, splitext
+from typing import Any, Callable, Dict, List
 
 import yaml
 

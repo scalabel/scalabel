@@ -1,6 +1,6 @@
 """Test label type definition."""
 
-from .type import Frame
+from scalabel.label.typing import Frame
 
 
 def test_frame_load() -> None:

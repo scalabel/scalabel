@@ -5,14 +5,14 @@ Script for detecting ground in point clouds and writing it back to the PLY file
 
 import argparse
 import json
-import urllib.request
-import sys
 import os
+import sys
+import urllib.request
 from typing import List, Tuple, Union
 
-import yaml
 import numpy as np
 import plyfile
+import yaml
 from tqdm import tqdm
 
 # Define the ground return type

@@ -1,8 +1,9 @@
 """launches node and redis on a single instance with one node process."""
-import subprocess
 import argparse
 import logging
 import os
+import subprocess
+
 import psutil
 import yaml
 

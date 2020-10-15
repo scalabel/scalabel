@@ -2,21 +2,21 @@
 import argparse
 import io
 import logging
+import os
 import time
 from typing import Dict, List
-import os
+
 import numpy as np
 import requests
-from flask import Flask, request, jsonify, make_response, Response
+from flask import Flask, Response, jsonify, make_response, request
 from PIL import Image
+
 from .seg_base import SegBase
 
 try:
     from .polyrnn_adapter import PolyrnnAdapter as SegModel
 except ImportError:
-    from .seg_dummy import (  # type: ignore
-        SegDummy as SegModel,
-    )
+    from .seg_dummy import SegDummy as SegModel  # type: ignore
 
 
 def homepage() -> str:

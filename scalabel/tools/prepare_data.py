@@ -5,19 +5,20 @@ directly used for creating scalabel projects. Assume all the images are in
 `.jpg` format.
 """
 from __future__ import annotations
+
 import argparse
 import glob
 import os
-from os.path import join
 import shutil
-from subprocess import check_call, DEVNULL
 from dataclasses import dataclass
+from os.path import join
+from subprocess import DEVNULL, check_call
 from typing import List
 
-from joblib import Parallel, delayed
 import boto3
-from tqdm import tqdm
 import yaml
+from joblib import Parallel, delayed
+from tqdm import tqdm
 
 from scalabel.common.logger import logger
 

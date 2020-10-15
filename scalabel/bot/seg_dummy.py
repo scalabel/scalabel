@@ -1,6 +1,8 @@
 """Dummy interface with the segmentation model."""
 from typing import List
+
 import numpy as np
+
 from .seg_base import SegBase
 
 

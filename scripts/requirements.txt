@@ -1,9 +1,9 @@
 black
 boto3
-colorama
 dataclasses_json
 Flask
 Flask-Cors
+isort
 joblib
 mypy
 numpy
@@ -21,7 +21,8 @@ PyYAML
 requests
 scikit-image
 scipy
+setuptools
 torch>=1.4.0
 torchvision>=0.5.0
 tqdm
-urllib3
+wheel
