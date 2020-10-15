@@ -55,6 +55,7 @@
   "python.pythonPath": "python3",
   "python.formatting.provider": "black",
   "python.linting.pylintEnabled": true,
+  "python.linting.mypyEnabled": true,
   "python.linting.pydocstyleEnabled": true,
   "python.linting.pydocstyleArgs": ["--convention=google"],
   "spellright.language": ["en"],

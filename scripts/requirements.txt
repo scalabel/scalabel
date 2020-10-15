@@ -12,6 +12,7 @@ pycocotools
 pydocstyle
 pylint
 pyparsing
+pytest
 python-dateutil
 PyWavelets
 PyYAML

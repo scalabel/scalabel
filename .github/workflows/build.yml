@@ -32,6 +32,8 @@ jobs:
           python3 -m pydocstyle --convention=google scalabel
           python3 -m mypy --strict scalabel
           python3 -m black --check scalabel
+      - name: Test
+        run: pytest scalabel
 
   nodejs:
     runs-on: ubuntu-latest

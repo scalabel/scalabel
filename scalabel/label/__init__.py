@@ -1,0 +1,1 @@
+"""Label definition and conversion."""
