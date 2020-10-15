@@ -27,6 +27,7 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     install_requires=[
+        "boto3",
         "dataclasses_json",
         "Flask",
         "Flask-Cors",
