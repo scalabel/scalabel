@@ -1,6 +1,5 @@
 black
 boto3
-colorama
 Flask
 Flask-Cors
 joblib
@@ -22,4 +21,3 @@ scipy
 torch>=1.4.0
 torchvision>=0.5.0
 tqdm
-urllib3
