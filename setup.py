@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="scalabel",  # Replace with your own username
-    version="1.0.0-rc.1",
+    version="0.3.0-rc.1",
     author="Fisher Yu",
     author_email="i@yf.io",
     description="Scalabel Python Package",
