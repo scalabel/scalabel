@@ -2,13 +2,15 @@
 import argparse
 import io
 import logging
+import os
 import time
 from typing import Dict, List
-import os
+
 import numpy as np
 import requests
-from flask import Flask, request, jsonify, make_response, Response
+from flask import Flask, Response, jsonify, make_response, request
 from PIL import Image
+
 from .seg_base import SegBase
 
 try:

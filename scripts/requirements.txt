@@ -3,6 +3,7 @@ boto3
 dataclasses_json
 Flask
 Flask-Cors
+isort
 joblib
 mypy
 numpy

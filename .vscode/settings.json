@@ -58,6 +58,7 @@
   "python.linting.mypyEnabled": true,
   "python.linting.pydocstyleEnabled": true,
   "python.linting.pydocstyleArgs": ["--convention=google"],
+  "env": { "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}" },
   "spellright.language": ["en"],
   "spellright.documentTypes": ["markdown", "latex", "plaintext", "typescript"],
   "files.exclude": {

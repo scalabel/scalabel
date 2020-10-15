@@ -32,6 +32,9 @@ jobs:
           python3 -m pydocstyle --convention=google scalabel
           python3 -m mypy --strict scalabel
           python3 -m black --check scalabel
+          python3 -m isort -c scalabel/**/*.py
+      - name: Build
+        run: python3 setup.py sdist bdist_wheel
       - name: Test
         run: pytest scalabel
 

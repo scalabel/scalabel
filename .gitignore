@@ -62,3 +62,8 @@ doc/media
 
 # ignore rope db cache
 .vscode/.ropeproject/objectdb
+
+# python build
+build/
+dist/
+scalabel.egg-info

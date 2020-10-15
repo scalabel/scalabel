@@ -1,9 +1,12 @@
 """Interface with the segmentation model."""
-from typing import List
 import os
 import warnings
+from typing import List
+
 import numpy as np
+
 from Tool.tool import Tool  # pylint: disable=import-error
+
 from .seg_base import SegBase
 
 

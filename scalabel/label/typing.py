@@ -1,8 +1,9 @@
 """Type definition for scalabel format."""
 
-from typing import List, Union, Dict, Tuple
 from dataclasses import dataclass, field
-from dataclasses_json import dataclass_json, LetterCase  # type: ignore
+from typing import Dict, List, Tuple, Union
+
+from dataclasses_json import LetterCase, dataclass_json  # type: ignore
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)

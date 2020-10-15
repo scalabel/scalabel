@@ -2,4 +2,3 @@
 line-length = 79
 
 [tool.pytest.ini_options]
-python_files = "*_test.py"
