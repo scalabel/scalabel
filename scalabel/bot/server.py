@@ -16,9 +16,7 @@ from .seg_base import SegBase
 try:
     from .polyrnn_adapter import PolyrnnAdapter as SegModel
 except ImportError:
-    from .seg_dummy import (  # type: ignore
-        SegDummy as SegModel,
-    )
+    from .seg_dummy import SegDummy as SegModel  # type: ignore
 
 
 def homepage() -> str:
