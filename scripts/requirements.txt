@@ -1,5 +1,6 @@
 black
 boto3
+dataclasses_json
 Flask
 Flask-Cors
 joblib
