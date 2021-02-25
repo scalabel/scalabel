@@ -3,9 +3,9 @@ version: '2.3'
 services:
   scalabel:
     image: scalabel/www
-    # ports:
-      # - "8686:8686"
-      # - "6379:6379"
+#    ports:
+#      - "8686:8686"
+#      - "6379:6379"
     volumes:
       - ./local-data:/opt/scalabel/local-data
       - ./entrypoint.sh:/entrypoint.sh
