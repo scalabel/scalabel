@@ -1,0 +1,24 @@
+version: '2.3'
+
+services:
+  scalabel:
+    image: scalabel/www
+    # ports:
+      # - "8686:8686"
+      # - "6379:6379"
+    volumes:
+      - ./local-data:/opt/scalabel/local-data
+      - ./entrypoint.sh:/entrypoint.sh
+    entrypoint:
+      - /entrypoint.sh
+
+  nginx:
+    image: nginx
+    ports:
+    - "9080:9080"
+    links:
+    - scalabel
+    volumes:
+    - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    - ./docker/nginx/.htpasswd:/etc/nginx/.htpasswd
+    restart: always

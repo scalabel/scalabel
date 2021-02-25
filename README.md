@@ -10,6 +10,16 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 [Scalabel](https://www.scalabel.ai) (pronounced "scalable") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://www.bdd100k.com/) is labeled with this tool.
 
+#install
+1. Init dirs
+    ```bash
+    bash scripts/setup_local_dir.sh
+    ```
+2. Run docker-compose
+    ```bash
+    docker-compose up -d
+    ```
+
 [**Documentation**](https://doc.scalabel.ai/) |
 [**Overview Video**](https://go.yf.io/scalabel-video-demo) |
 [**Discussion**](https://groups.google.com/g/scalabel) |
