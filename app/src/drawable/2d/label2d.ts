@@ -274,7 +274,7 @@ export abstract class Label2D {
     position: Vector2D,
     fillStyle: number[]
   ): void {
-    const TAG_WIDTH = 50
+    const TAG_WIDTH = 50*4
     const TAG_HEIGHT = 28
     const [x, y] = position
     ctx.save()
@@ -289,8 +289,8 @@ export abstract class Label2D {
       this._label?.attributes !== undefined ? this._label.attributes : {}
     const words = category.split(" ")
     let tw = TAG_WIDTH
-    // Abbreviate tag as the first 3 chars of the last word
-    let abbr = words[words.length - 1].substring(0, 3)
+    // Abbreviate tag as the first 12 chars of the last word
+    let abbr = words[words.length - 1].substring(0, 12)
 
     for (const attributeId of Object.keys(attributes)) {
       const attribute = config.attributes[Number(attributeId)]
