@@ -6,3 +6,4 @@ app/dist
 node_modules
 LICENSE
 VERSION
+local-data
