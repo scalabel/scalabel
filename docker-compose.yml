@@ -2,7 +2,11 @@ version: '2.3'
 
 services:
   scalabel:
-    image: scalabel/www
+    # image: scalabel/www
+    build:
+       context:  .
+       dockerfile: Dockerfile
+
 #    ports:
 #      - "8686:8686"
 #      - "6379:6379"
