@@ -67,3 +67,4 @@ doc/media
 build/
 dist/
 scalabel.egg-info
+conf.d/*.conf

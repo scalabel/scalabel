@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  scalabel:
+    # image: scalabel/www
+    build:
+       context:  .
+       dockerfile: Dockerfile
+
+#    ports:
+#      - "8686:8686"
+#      - "6379:6379"
+    volumes:
+      - ./local-data:/opt/scalabel/local-data
+      - ./entrypoint.sh:/entrypoint.sh
+    entrypoint:
+      - /entrypoint.sh
+
+  frontend:
+      restart: unless-stopped
+      image: staticfloat/nginx-certbot
+      ports:
+          - 80:80/tcp
+          - 443:443/tcp
+      environment:
+          CERTBOT_EMAIL: owner@company.com
+      volumes:
+        - ./docker/nginx/.htpasswd:/etc/nginx/.htpasswd
+        - ./conf.d:/etc/nginx/user.conf.d:ro
+        - letsencrypt:/etc/letsencrypt
+volumes:
+    letsencrypt:
