@@ -8,7 +8,7 @@ import {
 import { selectLabels, unselectLabels } from "../../action/select"
 import Session from "../../common/session"
 import { addVisibilityListener } from "../../common/window"
-import { Key } from "../../const/common"
+import { Key, LabelTypeName } from "../../const/common"
 import { getLinkedLabelIds } from "../../functional/common"
 import { getSelectedTracks } from "../../functional/state_util"
 import { tracksOverlapping } from "../../functional/track"
@@ -18,6 +18,8 @@ import { IdType, State } from "../../types/state"
 import { commit2DLabels } from "../states"
 import { Label2D } from "./label2d"
 import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
+import { handleChange } from "../../components/toolbar_category"
+import { addLabelTag } from "../../action/tag"
 
 /**
  * List of drawable labels
@@ -214,6 +216,24 @@ export class Label2DHandler {
         this._labelList.selectedLabels.length = 0
       }
     }
+
+    const numValue = parseInt(e.key, 10)
+    if (!isNaN(numValue) && numValue !== 0) {
+      const state = this._state
+
+      console.debug("label hotkey pressed")
+      console.debug(state.task.config.labelTypes[state.user.select.labelType])
+      if (
+        state.task.config.labelTypes[state.user.select.labelType] ===
+        LabelTypeName.TAG
+      ) {
+        Session.dispatch(addLabelTag(0, numValue - 1))
+      } else {
+        handleChange(null, numValue - 1)
+      }
+      return
+    }
+
     switch (e.key) {
       case Key.L_LOW:
         if (this.isKeyDown(Key.CONTROL)) {

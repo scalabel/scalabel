@@ -76,7 +76,7 @@ class ToggleButtons extends React.Component<Props> {
             exclusive
             onChange={this.handleAlignment}
           >
-            {values.map((element: string) => (
+            {values.map((element: string, index: number) => (
               <ToggleBtn
                 className={classes.toggleButton}
                 value={element}
@@ -84,7 +84,8 @@ class ToggleButtons extends React.Component<Props> {
                 data-testid={"toggle-button-" + element}
               >
                 {" "}
-                {element}{" "}
+                {element}
+                {index < 9 ? ` [${index + 1}] ` : " "}
               </ToggleBtn>
             ))}
           </ToggleButtonGroup>
