@@ -1,10 +1,6 @@
----
-port: 8686
-data: "./local-data/scalabel"
-itemDir: "./local-data/items"
-src: "."
-database: "local"
-userManagement: false
-sync: false
-autosave: false
-...
+http:
+    port: 8686
+storage:
+    data: "./local-data/scalabel"
+    itemDir: "./local-data/items"
+    type: "local"

@@ -6,15 +6,16 @@
         "dbaeumer.vscode-eslint",
         "eamodio.gitlens",
         "eg2.vscode-npm-script",
+        "esbenp.prettier-vscode",
         "formulahendry.auto-rename-tag",
+        "github.vscode-pull-request-github",
         "isudox.vscode-jetbrains-keybindings",
         "krizzdewizz.goto-last-edit-location",
         "mgmcdermott.vscode-language-babel",
         "ms-azuretools.vscode-docker",
         "ms-python.python",
         "ms-vscode.cpptools",
-        "ms-vscode.Go",
-        "ms-vscode.vscode-typescript-tslint-plugin",
+        "stkb.rewrap",
         "wayou.vscode-todo-highlight",
         "Zignd.html-css-class-completion"
     ]

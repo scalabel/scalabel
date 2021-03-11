@@ -45,8 +45,25 @@ scalabel/bot/experimental/*
 # python cache
 __pycache__/
 
-# vscode workspace
+# python virtual environment
+env/
+
+# local data folder
+data/
+
+# vscode workspace configuration
 *.code-workspace
 
-# local test folders
-data/
+# sphinx build folder
+_build/
+
+# media files are not in this repo
+doc/media
+
+# ignore rope db cache
+.vscode/.ropeproject/objectdb
+
+# python build
+build/
+dist/
+scalabel.egg-info

@@ -1,83 +1,76 @@
 {
-    "editor.rulers": [
-        80
-    ],
-    "[python]": {
-        "editor.rulers": [
-            79
-        ],
-    },
-    "[typescript]": {
-        "editor.tabSize": 2,
-        "editor.insertSpaces": true,
-        "editor.detectIndentation": false,
-        "editor.formatOnSave": false
-    },
-    "[typescriptreact]": {
-        "editor.tabSize": 2,
-        "editor.insertSpaces": true,
-        "editor.detectIndentation": false,
-        "editor.formatOnSave": false
-    },
-    "[javascript]": {
-        "editor.tabSize": 2,
-        "editor.insertSpaces": true,
-        "editor.detectIndentation": false,
-        "editor.formatOnSave": false
-    },
-    "[javacriptreact]": {
-        "editor.tabSize": 2,
-        "editor.insertSpaces": true,
-        "editor.detectIndentation": false,
-        "editor.formatOnSave": false
-    },
-    "[go]": {
-        "editor.tabSize": 4,
-        "editor.insertSpaces": false
-    },
-    "[html]": {
-        "editor.detectIndentation": true,
-        "editor.insertSpaces": true,
-        "editor.tabSize": 2
-    },
-    "editor.codeActionsOnSave": {
-        "source.fixAll.tslint": true
-    },
-    // The number of spaces a tab is equal to. This setting is overridden
-    // based on the file contents when `editor.detectIndentation` is true.
-    "editor.tabSize": 4,
-    // Insert spaces when pressing Tab. This setting is overriden
-    // based on the file contents when `editor.detectIndentation` is true.
+  "editor.rulers": [80],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {},
+  // The number of spaces a tab is equal to. This setting is overridden
+  // based on the file contents when `editor.detectIndentation` is true.
+  "editor.tabSize": 4,
+  // Insert spaces when pressing Tab. This setting is overriden
+  // based on the file contents when `editor.detectIndentation` is true.
+  "editor.insertSpaces": true,
+  // When opening a file, `editor.tabSize` and `editor.insertSpaces`
+  // will be detected based on the file contents. Set to false to keep
+  // the values you've explicitly set, above.
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.rulers": [79],
+    // Python use black as formatter
+    "editor.defaultFormatter": null
+  },
+  "[typescript]": {
+    "editor.tabSize": 2,
     "editor.insertSpaces": true,
-    // When opening a file, `editor.tabSize` and `editor.insertSpaces`
-    // will be detected based on the file contents. Set to false to keep
-    // the values you've explicitly set, above.
     "editor.detectIndentation": false,
-    "editor.formatOnSave": true,
-    // python settings
-    "python.formatting.provider": "yapf",
-    "python.linting.pylintEnabled": true,
-    "tslint.configFile": "tslint.json",
-    // Enabgle golangci to automatically check for issues in go code
-    "go.lintTool": "golangci-lint",
-    "go.lintFlags": [
-        "--fast"
-    ],
-    "spellright.language": [
-        "en"
-    ],
-    "spellright.documentTypes": [
-        "markdown",
-        "latex",
-        "plaintext",
-        "typescript"
-    ],
-    "jest.pathToJest": "npm run test --",
-    "files.exclude": {
-        "**/node_modules/**": true,
-        "node_modules": true
-    },
-    "files.watcherExclude": {
-        "node_modules": true
-    }
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": false
+  },
+  "[javacriptreact]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": false
+  },
+  "[go]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false
+  },
+  "[html]": {
+    "editor.detectIndentation": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  // python settings
+  "python.pythonPath": "python3",
+  "python.formatting.provider": "black",
+  "python.linting.pylintEnabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.pydocstyleEnabled": true,
+  "python.linting.pydocstyleArgs": ["--convention=google"],
+  "env": { "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}" },
+  "spellright.language": ["en"],
+  "spellright.documentTypes": ["markdown", "latex", "plaintext", "typescript"],
+  "files.exclude": {
+    "**/node_modules/**": true,
+    "node_modules": true
+  },
+  "files.watcherExclude": {
+    "node_modules": true
+  },
+  "restructuredtext.confPath": "${workspaceFolder}/doc/src",
+  "eslint.options": {
+    "configFile": "./.eslintrc.json"
+  },
+  "eslint.validate": ["typescript", "typescriptreact"]
 }

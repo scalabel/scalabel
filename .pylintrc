@@ -5,7 +5,7 @@
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-#init-hook=
+# init-hook="from pylint.config import find_pylintrc;import os, sys; sys.path.append(os.path.dirname(find_pylintrc()))"
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
@@ -16,7 +16,7 @@ persistent=yes
 
 # List of plugins (as comma separated values of python modules names) to load,
 # usually to register additional checkers.
-load-plugins=
+load-plugins=pylint.extensions.docparams
 
 # Use multiple processes to speed up Pylint.
 jobs=1
@@ -52,7 +52,9 @@ enable=use-symbolic-message-instead,useless-supression,fixme
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 
-disable=
+# This is a bug in detecting bad continuation. Since black is handling the code
+# formatting, we can disable C0330 safely.
+disable=C0330
 
 
 [REPORTS]
@@ -98,7 +100,7 @@ notes=FIXME,XXX,TODO
 [SIMILARITIES]
 
 # Minimum lines number of a similarity.
-min-similarity-lines=4
+min-similarity-lines=8
 
 # Ignore comments when computing similarities.
 ignore-comments=yes
@@ -144,7 +146,7 @@ single-line-if-stmt=no
 no-space-check=trailing-comma,dict-separator
 
 # Maximum number of lines in a module
-max-module-lines=2000
+max-module-lines=1024
 
 # String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
 # tab).
@@ -194,22 +196,22 @@ const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__))$
 const-name-hint=(([A-Z_][A-Z0-9_]*)|(__.*__))$
 
 # Regular expression matching correct attribute names
-attr-rgx=[a-z_][a-z0-9_]{2,}$
+attr-rgx=[a-z_][a-z0-9_]{1,}$
 
 # Naming hint for attribute names
-attr-name-hint=[a-z_][a-z0-9_]{2,}$
+attr-name-hint=[a-z_][a-z0-9_]{1,}$
 
 # Regular expression matching correct argument names
-argument-rgx=[a-z_][a-z0-9_]{2,30}$
+argument-rgx=[a-z_][a-z0-9_]{1,30}$
 
 # Naming hint for argument names
-argument-name-hint=[a-z_][a-z0-9_]{2,30}$
+argument-name-hint=[a-z_][a-z0-9_]{1,30}$
 
 # Regular expression matching correct class attribute names
-class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
+class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{1,30}|(__.*__))$
 
 # Naming hint for class attribute names
-class-attribute-name-hint=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
+class-attribute-name-hint=([A-Za-z_][A-Za-z0-9_]{1,30}|(__.*__))$
 
 # Regular expression matching correct inline iteration names
 inlinevar-rgx=[A-Za-z_][A-Za-z0-9_]*$
@@ -245,6 +247,8 @@ docstring-min-length=-1
 
 # List of decorators that define properties, such as abc.abstractproperty.
 property-classes=abc.abstractproperty
+
+default-docstring-type=google
 
 
 [TYPECHECK]
@@ -307,7 +311,7 @@ max-returns=11
 max-branches=100
 
 # Maximum number of statements in function / method body
-max-statements=200
+max-statements=128
 
 # Maximum number of parents for a class (see R0901).
 max-parents=7

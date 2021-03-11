@@ -1,0 +1,245 @@
+{
+  "task": {
+    "config": {
+      "projectName": "2dImage",
+      "itemType": "image",
+      "labelTypes": ["box2d"],
+      "label2DTemplates": {},
+      "taskSize": 5,
+      "handlerUrl": "label",
+      "pageTitle": "2D Bounding Box",
+      "instructionPage": "https://doc.scalabel.ai/instructions/bbox.html",
+      "bundleFile": "image_v2.js",
+      "categories": [
+        "person",
+        "rider",
+        "car",
+        "truck",
+        "bus",
+        "train",
+        "motorcycle",
+        "bike",
+        "traffic sign",
+        "traffic light"
+      ],
+      "attributes": [
+        {
+          "name": "Occluded",
+          "toolType": "switch",
+          "tagText": "o"
+        },
+        {
+          "name": "Truncated",
+          "toolType": "switch",
+          "tagText": "t"
+        },
+        {
+          "name": "Traffic Light Color",
+          "toolType": "list",
+          "values": ["NA", "G", "Y", "R"],
+          "tagPrefix": "t",
+          "tagSuffixes": ["", "g", "y", "r"],
+          "buttonColors": ["white", "green", "yellow", "red"]
+        }
+      ],
+      "taskId": "000000",
+      "submitTime": -1,
+      "submitted": false,
+      "tracking": false,
+      "policyTypes": ["linear_interpolation_box_2d"],
+      "demoMode": false,
+      "autosave": false
+    },
+    "status": {
+      "maxLabelId": 2,
+      "maxShapeId": 2,
+      "maxOrder": 3,
+      "maxTrackId": -1
+    },
+    "items": [
+      {
+        "id": "longItemId",
+        "index": 0,
+        "timestamp": 0,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg"
+        },
+        "labels": {
+          "longId": {
+            "id": "longLabelId",
+            "item": 0,
+            "sensors": [-1],
+            "type": "box2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "-1",
+            "children": [],
+            "shapes": [0],
+            "track": "-1",
+            "order": 1,
+            "manual": true
+          },
+          "1": {
+            "id": "1",
+            "item": 0,
+            "sensors": [-1],
+            "type": "box2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "-1",
+            "children": [],
+            "shapes": [1],
+            "track": "-1",
+            "order": 2,
+            "manual": true
+          },
+          "2": {
+            "id": "2",
+            "item": 0,
+            "sensors": [-1],
+            "type": "box2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "-1",
+            "children": [],
+            "shapes": ["longShapeId"],
+            "track": "-1",
+            "order": 3,
+            "manual": true
+          }
+        },
+        "shapes": {
+          "0": {
+            "id": "0",
+            "label": ["longLabelId"],
+            "shapeType": "rect",
+            "x1": 317.9044230030514,
+            "y1": 192.46537396121883,
+            "x2": 676.9071930861539,
+            "y2": 411.85595567867034
+          },
+          "1": {
+            "id": "1",
+            "label": ["1"],
+            "shapeType": "rect",
+            "x1": 459.5110712024974,
+            "y1": 276.2326869806094,
+            "x2": 752.6966667703645,
+            "y2": 400.88642659279776
+          },
+          "longShapeId": {
+            "id": "longShapeId",
+            "label": ["2"],
+            "shapeType": "rect",
+            "x1": 746.7132872689795,
+            "y1": 137.61772853185596,
+            "x2": 1018.9570545819988,
+            "y2": 294.1828254847645
+          }
+        },
+        "videoName": "b"
+      },
+      {
+        "id": 1,
+        "index": 1,
+        "timestamp": 1,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      },
+      {
+        "id": 2,
+        "index": 2,
+        "timestamp": 2,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      },
+      {
+        "id": 3,
+        "index": 3,
+        "timestamp": 3,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      },
+      {
+        "id": 4,
+        "index": 4,
+        "timestamp": 4,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      }
+    ],
+    "tracks": {},
+    "sensors": {
+      "-1": {
+        "id": -1,
+        "name": "default",
+        "type": "image"
+      }
+    }
+  },
+  "user": {
+    "id": "",
+    "select": {
+      "item": 0,
+      "labels": [],
+      "shapes": [],
+      "category": 0,
+      "attributes": {},
+      "labelType": 0,
+      "policyType": 0
+    },
+    "layout": {
+      "toolbarWidth": 200,
+      "maxViewerConfigId": 0,
+      "assistantViewRatio": 0.3
+    },
+    "viewerConfigs": []
+  },
+  "session": {
+    "id": "",
+    "startTime": 0,
+    "itemStatuses": [
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      }
+    ]
+  }
+}

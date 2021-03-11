@@ -1,0 +1,121 @@
+/*
+ * Change header fonts
+ */
+h1,
+h2,
+.rst-content .toctree-wrapper p.caption,
+h3,
+h4,
+h5,
+h6,
+legend,
+p.caption {
+  font-family: "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+}
+
+/*
+ * Use white for docs background
+ */
+.wy-side-nav-search {
+  background-color: #ffffff;
+}
+
+.wy-nav-content-wrap,
+.wy-menu li.current > a {
+  background-color: #fff;
+}
+
+@media screen and (min-width: 1400px) {
+  .wy-nav-content-wrap {
+    background-color: rgba(0, 0, 0, 0.0470588);
+  }
+
+  .wy-nav-content {
+    background-color: #fff;
+  }
+}
+
+/*
+ * Use scalabel blue for Docs sidebar
+ */
+.wy-nav-side {
+  background-color: #163460;
+}
+
+/*
+ * This is needed to ensure that logo above search scales properly
+ */
+.wy-side-nav-search a {
+  display: block;
+}
+
+/*
+ * Use royal blue for literals
+ */
+.rst-content tt.literal,
+.rst-content tt.literal,
+.rst-content code.literal {
+  color: #111e6c;
+}
+
+.rst-content tt.xref,
+a .rst-content tt,
+.rst-content tt.xref,
+.rst-content code.xref,
+a .rst-content tt,
+a .rst-content code {
+  color: #404040;
+}
+
+/*
+ * Use gray for code block highlight
+ */
+.highlight {
+  background: #eee;
+}
+
+.red {
+  color: red;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+/*
+ * Scales down default footer text
+ */
+footer {
+  font-size: 80%;
+}
+
+footer .rst-footer-buttons {
+  font-size: 125%; /* revert footer settings - 1/80% = 125% */
+}
+
+footer p {
+  font-size: 100%;
+}
+
+/*
+ * Fixes for mobile
+ */
+.wy-nav-top {
+  background-color: #fff;
+  background-image: url("../logo.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  padding: 0;
+  margin: 0.4045em 0.809em;
+  color: #333;
+}
+
+.wy-nav-top > a {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .wy-side-nav-search > a img.logo {
+    height: 60px;
+  }
+}

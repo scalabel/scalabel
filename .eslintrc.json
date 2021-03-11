@@ -1,0 +1,70 @@
+{
+  "extends": [
+    "plugin:prettier/recommended",
+    "plugin:react/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
+    "standard-with-typescript",
+    "prettier",
+    "prettier/@typescript-eslint",
+    "prettier/react",
+    "prettier/standard"
+  ],
+  "plugins": ["@typescript-eslint", "jsdoc", "react", "standard", "import"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "jsdoc/check-alignment": 2,
+    "jsdoc/check-indentation": 2,
+    "jsdoc/check-syntax": 2,
+    "jsdoc/newline-after-description": 2,
+    "jsdoc/no-bad-blocks": 2,
+    "jsdoc/require-description": 2,
+    "jsdoc/require-jsdoc": 2,
+    "jsdoc/require-param-name": 2,
+    "jsdoc/require-param": 2,
+    // "jsdoc/check-param-names": 2,
+    "spaced-comment": ["error", "always"],
+    "max-lines-per-function": [
+      "error",
+      { "max": 160, "skipBlankLines": true, "skipComments": true }
+    ],
+    "max-statements": ["error", 80],
+    "require-jsdoc": [
+      "error",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": true
+        }
+      }
+    ],
+    "import/no-named-as-default-member": "off",
+    "import/no-named-as-default": "off",
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^_.+",
+        "argsIgnorePattern": "^_.+",
+        "caughtErrorsIgnorePattern": "^_.+"
+      }
+    ],
+    "@typescript-eslint/require-array-sort-compare": [
+      "error",
+      { "ignoreStringArrays": true }
+    ],
+    "@typescript-eslint/no-explicit-any": ["error"]
+  },
+  "settings": {
+    "react": {
+      // More options at https://github.com/yannickcr/eslint-plugin-react#configuration
+      "version": "detect"
+    }
+  }
+}

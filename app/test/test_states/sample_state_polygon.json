@@ -1,0 +1,343 @@
+{
+  "task": {
+    "config": {
+      "projectName": "2dImage",
+      "itemType": "image",
+      "labelTypes": ["polygon2d"],
+      "taskSize": 5,
+      "handlerUrl": "label",
+      "pageTitle": "2D Segmentation",
+      "instructionPage": "https://doc.scalabel.ai/instructions/segmentation.html",
+      "bundleFile": "image_v2.js",
+      "categories": [
+        "person",
+        "rider",
+        "car",
+        "truck",
+        "bus",
+        "train",
+        "motorcycle",
+        "bike",
+        "traffic sign",
+        "traffic light"
+      ],
+      "attributes": [
+        {
+          "name": "Occluded",
+          "toolType": "switch",
+          "tagText": "o"
+        },
+        {
+          "name": "Truncated",
+          "toolType": "switch",
+          "tagText": "t"
+        },
+        {
+          "name": "Traffic Light Color",
+          "toolType": "list",
+          "values": ["NA", "G", "Y", "R"],
+          "tagPrefix": "t",
+          "tagSuffixes": ["", "g", "y", "r"],
+          "buttonColors": ["white", "green", "yellow", "red"]
+        }
+      ],
+      "taskId": "000000",
+      "submitTime": -1,
+      "submitted": false,
+      "tracking": false,
+      "policyTypes": [""],
+      "demoMode": false,
+      "autosave": false
+    },
+    "status": {
+      "maxLabelId": 2,
+      "maxShapeId": 2,
+      "maxOrder": 3,
+      "maxTrackId": -1
+    },
+    "items": [
+      {
+        "id": "longPolyItemId",
+        "index": 0,
+        "timestamp": 0,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg"
+        },
+        "labels": {
+          "0": {
+            "id": "0",
+            "item": 0,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "-1",
+            "children": [],
+            "shapes": ["00", "01", "02"],
+            "track": "-1",
+            "order": 1,
+            "manual": true
+          },
+          "1": {
+            "id": "1",
+            "item": 0,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "-1",
+            "children": [],
+            "shapes": ["10", "11", "12", "13", "14", "15", "16"],
+            "track": "-1",
+            "order": 2,
+            "manual": true
+          },
+          "longPolyLabelId": {
+            "id": "longPolyLabelId",
+            "item": 0,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "-1",
+            "children": [],
+            "shapes": [
+              "longPolyShapeId0",
+              "longPolyShapeId1",
+              "longPolyShapeId2",
+              "longPolyShapeId3",
+              "longPolyShapeId4"
+            ],
+            "track": "-1",
+            "order": 3,
+            "manual": true
+          }
+        },
+        "shapes": {
+          "00": {
+            "id": "00",
+            "label": ["0"],
+            "shapeType": "path_point2d",
+            "x": 100,
+            "y": 100,
+            "pointType": "line"
+          },
+          "01": {
+            "id": "01",
+            "label": ["0"],
+            "shapeType": "path_point2d",
+            "x": 200,
+            "y": 100,
+            "pointType": "line"
+          },
+          "02": {
+            "id": "02",
+            "label": ["0"],
+            "shapeType": "path_point2d",
+            "x": 200,
+            "y": 200,
+            "pointType": "line"
+          },
+          "10": {
+            "id": "10",
+            "label": ["1"],
+            "shapeType": "path_point2d",
+            "x": 300,
+            "y": 300,
+            "pointType": "line"
+          },
+          "11": {
+            "id": "11",
+            "label": ["1"],
+            "shapeType": "path_point2d",
+            "x": 400,
+            "y": 400,
+            "pointType": "line"
+          },
+          "12": {
+            "id": "12",
+            "label": ["1"],
+            "shapeType": "path_point2d",
+            "x": 350,
+            "y": 300,
+            "pointType": "bezier"
+          },
+          "13": {
+            "id": "13",
+            "label": ["1"],
+            "shapeType": "path_point2d",
+            "x": 325,
+            "y": 200,
+            "pointType": "bezier"
+          },
+          "14": {
+            "id": "14",
+            "label": ["1"],
+            "shapeType": "path_point2d",
+            "x": 400,
+            "y": 100,
+            "pointType": "line"
+          },
+          "15": {
+            "id": "15",
+            "label": ["1"],
+            "shapeType": "path_point2d",
+            "x": 375,
+            "y": 125,
+            "pointType": "bezier"
+          },
+          "16": {
+            "id": "16",
+            "label": ["1"],
+            "shapeType": "path_point2d",
+            "x": 325,
+            "y": 250,
+            "pointType": "bezier"
+          },
+          "longPolyShapeId0": {
+            "id": "longPolyShapeId0",
+            "label": ["longPolyLabelId"],
+            "shapeType": "path_point2d",
+            "x": 400,
+            "y": 400,
+            "pointType": "line"
+          },
+          "longPolyShapeId1": {
+            "id": "longPolyShapeId1",
+            "label": ["longPolyLabelId"],
+            "shapeType": "path_point2d",
+            "x": 800,
+            "y": 100,
+            "pointType": "line"
+          },
+          "longPolyShapeId2": {
+            "id": "longPolyShapeId2",
+            "label": ["longPolyLabelId"],
+            "shapeType": "path_point2d",
+            "x": 100,
+            "y": 100,
+            "pointType": "line"
+          },
+          "longPolyShapeId3": {
+            "id": "longPolyShapeId3",
+            "label": ["longPolyLabelId"],
+            "shapeType": "path_point2d",
+            "x": 125,
+            "y": 120,
+            "pointType": "bezier"
+          },
+          "longPolyShapeId4": {
+            "id": "longPolyShapeId4",
+            "label": ["longPolyLabelId"],
+            "shapeType": "path_point2d",
+            "x": 325,
+            "y": 220,
+            "pointType": "bezier"
+          }
+        },
+        "videoName": "b"
+      },
+      {
+        "id": 1,
+        "index": 1,
+        "timestamp": 1,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      },
+      {
+        "id": 2,
+        "index": 2,
+        "timestamp": 2,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      },
+      {
+        "id": 3,
+        "index": 3,
+        "timestamp": 3,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      },
+      {
+        "id": 4,
+        "index": 4,
+        "timestamp": 4,
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "videoName": "b"
+      }
+    ],
+    "tracks": {},
+    "sensors": {
+      "-1": {
+        "id": -1,
+        "name": "default",
+        "type": "image"
+      }
+    }
+  },
+  "user": {
+    "id": "",
+    "select": {
+      "item": 0,
+      "labels": [],
+      "shapes": [],
+      "category": 0,
+      "attributes": {},
+      "labelType": 0,
+      "policyType": 0
+    },
+    "layout": {
+      "toolbarWidth": 200,
+      "maxViewerConfigId": 0,
+      "assistantViewRatio": 0.3
+    },
+    "viewerConfigs": []
+  },
+  "session": {
+    "id": "",
+    "startTime": 0,
+    "itemsStatuses": [
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      }
+    ]
+  }
+}
