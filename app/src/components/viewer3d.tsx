@@ -297,14 +297,7 @@ class Viewer3D extends DrawableViewer<Props> {
         <IconButton
           className={this.props.classes.viewer_button}
           onClick={() => {
-<<<<<<< HEAD:app/src/js/components/viewer3d.tsx
-            Session.dispatch(toggleRotation(
-              this._viewerId,
-              config
-            ))
-=======
             Session.dispatch(toggleRotation(this._viewerId, config))
->>>>>>> a2e4bd244d1bcfc5e272bb050f73cb6fb985434e:app/src/components/viewer3d.tsx
           }}
         >
           {underlineElement(<LockIcon />, lockedToSelection(config))}
