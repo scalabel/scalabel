@@ -297,14 +297,7 @@ class Viewer3D extends DrawableViewer<Props> {
         <IconButton
           className={this.props.classes.viewer_button}
           onClick={() => {
-<<<<<<< HEAD:app/src/js/components/viewer3d.tsx
-            Session.dispatch(toggleRotation(
-              this._viewerId,
-              config
-            ))
-=======
             Session.dispatch(toggleRotation(this._viewerId, config))
->>>>>>> a2e4bd244d1bcfc5e272bb050f73cb6fb985434e:app/src/components/viewer3d.tsx
           }}
         >
           {underlineElement(<LockIcon />, lockedToSelection(config))}
@@ -330,73 +323,6 @@ class Viewer3D extends DrawableViewer<Props> {
         <IconButton
           className={this.props.classes.viewer_button}
           onClick={() => {
-<<<<<<< HEAD:app/src/js/components/viewer3d.tsx
-            Session.dispatch(toggleRotation(
-              this.props.id,
-              config
-            ))
-          }}
-          edge={'start'}
-        >
-          {
-            underlineElement(
-              <span style={{ color: '#ff7700' }}>==</span>,
-              config.cameraRotateDir === true
-            )
-          }
-        </IconButton>
-      )
-
-      // Drop down menu for some simple config
-      // const [anchorEl, setAnchorEl] = React.useState(false);
-
-      // const handleClick = (event: React.MouseEvent) => {
-      //   setAnchorEl(event.relatedTarget)
-      // }
-
-      // const handleClose = () => {
-      //   setAnchorEl(null)
-      // }
-
-      // const viewerConfigMenu = (
-      //   <div>
-      //     <Button
-      //       aria-controls='simple-menu'
-      //       aria-haspopup='true'
-      //       // onClick={handleClick}
-      //     >
-      //       Viewer Setting
-      //     </Button>
-      //     <Menu
-      //       id='viewer-conf-menu'
-      //       // anchorEl={anchorEl}
-      //       keepMounted
-      //       open={Boolean(anchorEl)}
-      //       onClose={handleClose}
-      //     >
-      //     <MenuItem>
-      //       <FormControlLabel
-      //         value='rotateFlip'
-      //         control={<Switch color='primary' />}
-      //         label='Rotate Flip'
-      //         labelPlacement='start'
-      //         onChange={(e: React.ChangeEvent) => {
-      //           const newConfig = {
-      //             ...config,
-      //             cameraRotateDir: e.target.checked
-      //           }
-      //           Session.dispatch(changeViewerConfig(
-      //             this.props.id,
-      //             newConfig
-      //           ))
-      //         }}
-      //       />
-      //     </MenuItem>
-      //     </Menu>
-      //   </div>
-      // )
-
-=======
             Session.dispatch(toggleRotation(this.props.id, config))
           }}
           edge={"start"}
@@ -408,7 +334,6 @@ class Viewer3D extends DrawableViewer<Props> {
         </IconButton>
       )
 
->>>>>>> a2e4bd244d1bcfc5e272bb050f73cb6fb985434e:app/src/components/viewer3d.tsx
       return [
         yLockButton,
         xLockButton,

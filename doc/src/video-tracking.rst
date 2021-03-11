@@ -38,7 +38,7 @@ Bounding box interpolation
 Create a bounding box at the first frame it appears, and adjust the bounding
 boxes in the subsequent frames. For a given bounding box track, the frames in
 which the box is edited are considered a keyframe. The frames between keyframes
-haha are automatically interpolated using the interpolation method selected
+are automatically interpolated using the interpolation method selected
 during project creation.
 
 .. figure:: ../media/doc/videos/box2d_tracking_keyframe.gif
