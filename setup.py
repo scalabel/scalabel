@@ -19,6 +19,7 @@ setuptools.setup(
         "Source": "https://github.com/scalabel/scalabel",
         "Tracker": "https://github.com/scalabel/scalabel/issues",
     },
+    package_data={"scalabel": ["py.typed"]},
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
