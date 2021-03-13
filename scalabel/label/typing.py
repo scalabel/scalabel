@@ -56,6 +56,7 @@ class Frame(BaseModel):
     """Frame."""
 
     name: str
+    url: Optional[str]
     video_name: Optional[str] = None
     attributes: Optional[Dict[str, Union[str, float]]] = None
     timestamp: Optional[int] = None

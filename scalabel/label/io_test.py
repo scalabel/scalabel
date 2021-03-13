@@ -25,6 +25,10 @@ def test_load() -> None:
     filepath = get_test_file("image_list_with_auto_labels.json")
     labels = load(filepath)
     assert len(labels) == 10
+    assert (
+        labels[0].url == "https://s3-us-west-2.amazonaws.com/bdd-label/"
+        "bdd100k/frames-20000/val/c1ba5ee6-b2cb1e51.jpg"
+    )
     assert labels[0].labels[0].id == "0"
     assert labels[0].labels[0].box_2d is not None
     assert labels[-1].labels[-1].box_2d is not None
