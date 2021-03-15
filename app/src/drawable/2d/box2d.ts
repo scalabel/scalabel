@@ -5,7 +5,13 @@ import { makeLabel, makeRect } from "../../functional/states"
 import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
 import { LabelType, RectType, ShapeType, State } from "../../types/state"
-import { blendColor, Context2D, encodeControlColor, toNumColor } from "../util"
+import {
+  blendColor,
+  Context2D,
+  encodeControlColor,
+  isHexColor,
+  toNumColor
+} from "../util"
 import { DrawMode, Label2D } from "./label2d"
 import { Label2DList } from "./label2d_list"
 import { makePoint2DStyle, Point2D } from "./point2d"
@@ -133,9 +139,7 @@ export class Box2D extends Label2D {
     // Draw!!!
     const rect = this._rect
     rectStyle.color =
-      categoryColor !== undefined &&
-      categoryColor !== null &&
-      mode !== DrawMode.CONTROL
+      isHexColor(categoryColor) && mode !== DrawMode.CONTROL
         ? toNumColor(categoryColor)
         : assignColor(0)
     rect.draw(context, ratio, rectStyle)

@@ -100,10 +100,20 @@ export function toCssColor(color: number[]): string {
 }
 
 /**
+ * Return true if the string is valid CSS hex color representation
+ *
+ * @param {string} color - color string
+ * @return boolean
+ */
+export function isHexColor(color: string): boolean {
+  return /^#[0-9A-F]{6}$/i.test(color)
+}
+
+/**
  * Convert CSS hex color string to numerical color
  *
- * @param {string} color: hex color string
- * @param color
+ * @param {string} color - hex color string
+ * @return [number, number, number]
  */
 export function toNumColor(color: string): number[] {
   const hex = color.replace(/[^0-9A-F]/gi, "")
