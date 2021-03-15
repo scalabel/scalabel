@@ -1,0 +1,4 @@
+- name: drivable
+  color: "#00ff00"
+- name: alternative
+  color: "#0000ff"
