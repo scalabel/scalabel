@@ -60,6 +60,10 @@ class Intrinsics(BaseModel):
     # center position in (x, y)
     center: Tuple[float, float]
     skew: float = 0
+    # radial distortion parameters
+    radial: Optional[Tuple[float, float, float]]
+    # tangential distortion parameters
+    tangential: Optional[Tuple[float, float]]
 
 
 class Extrinsics(BaseModel):
