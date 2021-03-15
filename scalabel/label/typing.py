@@ -52,12 +52,33 @@ class Label(BaseModel):
         super().__init__(**data)
 
 
+class Intrinsics(BaseModel):
+    """Camera intrinsics."""
+
+    # focal length in (x, y)
+    focal: Tuple[float, float]
+    # center position in (x, y)
+    center: Tuple[float, float]
+    skew: float = 0
+
+
+class Extrinsics(BaseModel):
+    """Camera extrinsics."""
+
+    # 3D location relative to a world origin
+    location: Tuple[float, float, float]
+    # 3D rotation relative to a world origin in axis-angle representation
+    rotation: Tuple[float, float, float]
+
+
 class Frame(BaseModel):
     """Frame."""
 
     name: str
     url: Optional[str]
     video_name: Optional[str] = None
+    intrinsics: Optional[Intrinsics] = None
+    extrinsics: Optional[Extrinsics] = None
     attributes: Optional[Dict[str, Union[str, float]]] = None
     timestamp: Optional[int] = None
     frame_index: Optional[int] = None
