@@ -1,3 +1,5 @@
+#!/bin/bash
+
 python3 -m black scalabel
 python3 -m isort scalabel
 python3 -m pylint scalabel
