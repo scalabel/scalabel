@@ -19,10 +19,11 @@ setuptools.setup(
         "Source": "https://github.com/scalabel/scalabel",
         "Tracker": "https://github.com/scalabel/scalabel/issues",
     },
+    package_data={"scalabel": ["py.typed"]},
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
