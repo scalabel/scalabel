@@ -58,7 +58,7 @@ async function pathExists(key: string): Promise<boolean> {
   }
 }
 
-describe.skip("test s3 storage", () => {
+describe("test s3 storage", () => {
   test("make dir", async () => {
     for (const f of STORAGE_FOLDERS) {
       await storage.mkdir(f)
