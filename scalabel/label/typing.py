@@ -37,6 +37,7 @@ class Label(BaseModel):
     """Label."""
 
     id: str
+    index: int
     manual_shape: Optional[bool] = None
     manual_attributes: Optional[bool] = None
     score: Optional[float] = None
