@@ -80,7 +80,7 @@ class LabelViewer:
         self.no_box3d = args.no_box3d
 
         # set fonts
-        self.config.font.set_family(["Aerial", "monospace"])
+        self.config.font.set_family(["sans-serif", "monospace"])
         self.config.font.set_weight("bold")
         self.config.font.set_size(18 * self.config.scale)
 
@@ -459,9 +459,6 @@ def parse_args() -> argparse.Namespace:
     )
 
     args = parser.parse_args()
-
-    if len(args.target_objects) > 0:
-        args.target_objects = args.target_objects.split(",")
 
     return args
 
