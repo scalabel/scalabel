@@ -19,11 +19,9 @@ def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
         raw_frames = json.loads(raw_frames)
     if isinstance(raw_frames, dict):
         raw_frames = [raw_frames]
-    # print(raw_frames[0]["labels"][0])
     frames: List[Frame] = []
     for rf in raw_frames:
         f = humps.decamelize(rf)
-        # print(f)
         frames.append(Frame(**f))
     return frames
 
