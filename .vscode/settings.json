@@ -50,7 +50,9 @@
     "editor.detectIndentation": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 2
-},
+  },
+  // python settings
+  "python.pythonPath": "python3",
   "python.formatting.provider": "black",
   "python.linting.pylintEnabled": true,
   "python.linting.mypyEnabled": true,
@@ -70,5 +72,5 @@
   "eslint.options": {
     "configFile": "./.eslintrc.json"
   },
-"eslint.validate": ["typescript", "typescriptreact"]
+  "eslint.validate": ["typescript", "typescriptreact"]
 }
