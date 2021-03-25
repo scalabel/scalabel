@@ -7,20 +7,20 @@ import argparse
 import io
 import os
 import urllib.request
-from typing import Dict, List
 from threading import Timer
+from typing import Dict, List
 
-import numpy as np
 import matplotlib
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.font_manager import FontProperties
 from PIL import Image
 
-from scalabel.label.typing import Frame, Box2D, Box3D, Intrinsics
 from scalabel.label.io import load
-from scalabel.vis.helper import get_intrinsic_matrix, random_color
+from scalabel.label.typing import Box2D, Box3D, Frame, Intrinsics
 from scalabel.vis.geometry import Label3d
+from scalabel.vis.helper import get_intrinsic_matrix, random_color
 
 
 class LabelViewer:

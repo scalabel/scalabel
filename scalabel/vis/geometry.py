@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Union
+from typing import Dict, List, Tuple, Union
+
 import numpy as np
 
 from scalabel.label.typing import Box3D
