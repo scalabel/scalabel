@@ -366,8 +366,6 @@ class LabelViewer:
         )
         return True
 
-    # Todo: Add support for lane, drivable area and ploy2d
-
 
 def parse_args():
     """Use argparse to get command line arguments."""
