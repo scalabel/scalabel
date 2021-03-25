@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 import argparse
 import io
 import json
@@ -6,7 +8,7 @@ import sys
 import urllib
 from collections.abc import Iterable
 from multiprocessing import Pool
-from os.path import dirname, exists, isdir, isfile, join, split, splitext
+from os.path import dirname, exists, isdir, join, split, splitext
 
 import matplotlib.image as mpimg
 import matplotlib.patches as mpatches
@@ -129,12 +131,14 @@ def is_valid_file(parser, file_name):
 
 
 def get_areas_v0(objects):
+    """get list of areas' ploy"""
     return [
         o for o in objects if "poly2d" in o and o["category"][:4] == "area"
     ]
 
 
 def get_areas(objects):
+    """get list of drivable areas' ploy"""
     return [
         o
         for o in objects
@@ -143,12 +147,14 @@ def get_areas(objects):
 
 
 def get_lanes(objects):
+    """get list of lanes' ploy"""
     return [
         o for o in objects if "poly2d" in o and o["category"][:4] == "lane"
     ]
 
 
 def get_other_poly2d(objects):
+    """get other ploy"""
     return [
         o
         for o in objects
@@ -159,6 +165,7 @@ def get_other_poly2d(objects):
 
 
 def get_boxes(objects):
+    """get 2D or 3D boxes"""
     return [
         o
         for o in objects
@@ -168,14 +175,17 @@ def get_boxes(objects):
 
 
 def get_target_objects(objects, targets):
+    """get objects with specified targets"""
     return [o for o in objects if o["category"] in targets]
 
 
 def random_color():
+    """generate random color"""
     return np.random.rand(3)
 
 
 def seg2color(seg):
+    """paint segmentation with colors"""
     num_ids = 20
     train_colors = np.zeros((num_ids, 3), dtype=np.uint8)
     for label in labels:
@@ -188,6 +198,7 @@ def seg2color(seg):
 
 
 def instance2color(instance):
+    """paint instance segmentation with colors"""
     instance_colors = dict(
         [
             (i, (np.random.random(3) * 255).astype(np.uint8))
@@ -201,6 +212,7 @@ def instance2color(instance):
 
 
 def convert_instance_rgb(label_path):
+    """load and paint instance segmentation with colors"""
     label_dir = dirname(label_path)
     label_name = splitext(split(label_path)[1])[0]
     image = np.array(Image.open(label_path, "r"))
@@ -221,6 +233,7 @@ def convert_instance_rgb(label_path):
 
 
 def drivable2color(seg):
+    """paint drivable area with colors"""
     colors = [[0, 0, 0, 255], [217, 83, 79, 255], [91, 192, 222, 255]]
     color = np.zeros((seg.shape[0], seg.shape[1], 4), dtype=np.uint8)
     for i in range(3):
@@ -229,6 +242,7 @@ def drivable2color(seg):
 
 
 def convert_drivable_rgb(label_path):
+    """load and paint drivable area with colors"""
     label_dir = dirname(label_path)
     label_name = splitext(split(label_path)[1])[0]
     image = np.array(Image.open(label_path, "r"))
@@ -249,6 +263,7 @@ def convert_drivable_rgb(label_path):
 
 
 def read_labels(label_path):
+    """read labels from json file"""
     labels = json.load(open(label_path, "r"))
     if not isinstance(labels, Iterable):
         labels = [labels]
@@ -317,6 +332,7 @@ class LabelViewer(object):
         self.label = read_labels(self.label_paths[self.file_index])
 
     def view(self):
+        """start the visualization"""
         self.frame_index = 0
         if self.out_dir is None:
             self.show()
@@ -324,7 +340,7 @@ class LabelViewer(object):
             self.write()
 
     def show(self):
-        # Read and draw image
+        """read and draw image"""
         dpi = 80
         w = 16
         h = 9
@@ -336,6 +352,7 @@ class LabelViewer(object):
         plt.show()
 
     def write(self):
+        """save visualized result to file"""
         dpi = 80
         w = 16
         h = 9
@@ -378,6 +395,7 @@ class LabelViewer(object):
                 p.map(convert_drivable_rgb, out_paths)
 
     def set_instance_mode(self):
+        """change to instance mode"""
         self.with_image = False
         self.with_attr = False
         self.with_drivable = False
@@ -389,6 +407,7 @@ class LabelViewer(object):
         self.with_post = True
 
     def set_drivable_mode(self):
+        """change to drivable mode"""
         self.with_image = False
         self.with_attr = False
         self.with_drivable = True
@@ -400,6 +419,7 @@ class LabelViewer(object):
         self.with_post = True
 
     def show_image(self):
+        """show one image"""
         plt.cla()
         if self.frame_index >= self.start_index + len(self.label):
             self.label = None
@@ -511,6 +531,7 @@ class LabelViewer(object):
         return True
 
     def next_image(self, event):
+        """next image"""
         if event.key == "n":
             self.frame_index += 1
         elif event.key == "p":
@@ -524,6 +545,7 @@ class LabelViewer(object):
             self.next_image(event)
 
     def poly2patch(self, vertices, types, closed=False, alpha=1.0, color=None):
+        """fill poly"""
         moves = {"L": Path.LINETO, "C": Path.CURVE4}
         points = [v for v in vertices]
         codes = [moves[t] for t in types]
@@ -548,6 +570,7 @@ class LabelViewer(object):
         )
 
     def draw_drivable(self, objects):
+        """draw drivable area"""
         objects = get_areas(objects)
         colors = (
             np.array([[0, 0, 0, 255], [217, 83, 79, 255], [91, 192, 222, 255]])
@@ -580,6 +603,7 @@ class LabelViewer(object):
                 )
 
     def draw_lanes(self, objects):
+        """draw lanes"""
         objects = get_lanes(objects)
         # colors = np.array([[0, 0, 0, 255],
         #                    [217, 83, 79, 255],
@@ -614,6 +638,7 @@ class LabelViewer(object):
                 )
 
     def draw_other_poly2d(self, objects):
+        """draw polygen"""
         color_mode = self.color_mode
         objects = get_other_poly2d(objects)
         for obj in objects:
@@ -703,11 +728,13 @@ class LabelViewer(object):
         return lines
 
     def get_label_color(self, label_id):
+        """get color by label's id"""
         if label_id not in self.label_colors:
             self.label_colors[label_id] = random_color()
         return self.label_colors[label_id]
 
     def show_attributes(self, frame):
+        """visualize attribute infomation of a frame"""
         if "attributes" not in frame:
             return
         attributes = frame["attributes"]
@@ -732,6 +759,7 @@ class LabelViewer(object):
 
 
 def main():
+    """main function"""
     args = parse_args()
     viewer = LabelViewer(args)
     viewer.view()

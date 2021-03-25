@@ -1,20 +1,19 @@
+"""
+An offline label visualizer for Scalable file.
+Works for 2D / 3D bounding box, segmentation masks, etc.
+"""
+
 import argparse
 import io
-import json
 import os
-import sys
-import urllib
-from multiprocessing import Pool
-from typing import Any, Dict, List, Tuple
 import urllib.request
+from typing import Any, Dict, List
 from threading import Timer
 
 import numpy as np
-import matplotlib.image as mpimg
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
-from matplotlib.path import Path
 from PIL import Image
 
 from scalabel.label.typing import Frame, Box2D, Box3D, Intrinsics
@@ -23,20 +22,21 @@ from scalabel.vis.helper import get_intrinsic_matrix, random_color
 from scalabel.vis.geometry import Label3d
 
 
-class LabelViewer(object):
+class LabelViewer:
+    """Visualize 2D and 3D bounding boxes.
+
+    Keymap:
+    -  N / P: Show next or previous image
+    -  Space: Start / stop animation
+    -  T: Toggle 2D / 3D bounding box (if avaliable)
+    -  Y: Toggle image / segmentation view (if avaliable)
+
+    Export images:
+    - add `-o {dir}` tag when runing
+    """
+
     def __init__(self, args) -> None:
-        """Visualize 2D and 3D bounding boxes.
-
-        Keymap:
-        -  N / P: Show next or previous image
-        -  Space: Start / stop animation
-        -  T: Toggle 2D / 3D bounding box (if avaliable)
-        -  Y: Toggle image / segmentation view (if avaliable)
-
-        Export images:
-        - add `-o {dir}` tag when runing
-        """
-
+        """initializer"""
         self.ax = None
         self.fig = None
         self.frame_index: int = 0
@@ -71,19 +71,21 @@ class LabelViewer(object):
 
         self.is_running: bool = False
         self.interval: float = 0.4
+        self._timer: Timer = Timer(self.interval, self.tick)
 
         self._label_colors: Dict[str, Any] = dict()
 
     def view(self) -> None:
+        """start the visualization"""
         self.frame_index = 0
         if self.out_dir is None:
             self.init_show_window()
         else:
             self.write()
 
-    def init_show_window(self, w=16, h=9, dpi=100):
-        # Read and draw image
-        self.fig = plt.figure(figsize=(w, h), dpi=dpi)
+    def init_show_window(self, width=16, height=9, dpi=100):
+        """read and draw image"""
+        self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
 
         plt.connect("key_release_event", self.key_press)
@@ -125,16 +127,18 @@ class LabelViewer(object):
         plt.draw()
 
     def start_animation(self) -> bool:
+        """start the animation timer"""
         if not self.is_running:
-            self._timer = Timer(self.interval, self.tick)
             self._timer.start()
             self.is_running = True
 
     def stop_animation(self) -> bool:
+        """stop the animation timer"""
         self._timer.cancel()
         self.is_running = False
 
     def show_frame(self) -> bool:
+        """show one frame in matplotlib axes"""
         plt.cla()
 
         frame = self.frames[self.frame_index % len(self.frames)]
@@ -172,9 +176,6 @@ class LabelViewer(object):
 
         labels = frame.labels
         # print(labels)
-        calibration = None
-        if frame.intrinsics is not None:
-            calibration = get_intrinsic_matrix(frame.intrinsics)
 
         if self.with_attr:
             self.show_frame_attributes(frame)
@@ -248,6 +249,7 @@ class LabelViewer(object):
         return True
 
     def get_label_color(self, label_id) -> Dict[str, Any]:
+        """get color by id (if not found, then create a random color)"""
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
         return self._label_colors[label_id]
@@ -314,8 +316,9 @@ class LabelViewer(object):
 
         return lines
 
-    def write(self, w=16, h=9, dpi=100) -> bool:
-        self.fig = plt.figure(figsize=(w, h), dpi=dpi)
+    def write(self, width=16, height=9, dpi=100) -> bool:
+        """save visualized result to file"""
+        self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
 
         out_paths = []
@@ -336,12 +339,12 @@ class LabelViewer(object):
             self.frame_index += 1
             if self.frame_index >= len(self.frames):
                 self.start_index = self.frame_index
-                self.label = None
         return True
 
     def show_frame_attributes(self, frame) -> bool:
+        """visualize attribute infomation of a frame"""
         if frame.attributes is None or len(frame.attributes) == 0:
-            return
+            return False
         attributes = frame.attributes
         key_width = 0
         for k, _ in attributes.items():
@@ -360,6 +363,8 @@ class LabelViewer(object):
             bbox={"facecolor": "white", "alpha": 0.4, "pad": 10, "lw": 0},
         )
         return True
+
+    # TODO: Add support for lane, drivable area and ploy2d
 
 
 def parse_args():
@@ -450,6 +455,7 @@ def parse_args():
 
 
 def main():
+    """main function"""
     args = parse_args()
     viewer = LabelViewer(args)
     viewer.view()
