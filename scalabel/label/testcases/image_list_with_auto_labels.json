@@ -9,6 +9,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -27,6 +28,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -45,6 +47,7 @@
       },
       {
         "id": 2,
+        "index": 3,
         "category": "traffic sign",
         "attributes": {
           "occluded": false,
@@ -63,6 +66,7 @@
       },
       {
         "id": 3,
+        "index": 4,
         "category": "truck",
         "attributes": {
           "occluded": false,
@@ -91,6 +95,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "traffic sign",
         "attributes": {
           "occluded": false,
@@ -109,6 +114,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "traffic sign",
         "attributes": {
           "occluded": false,
@@ -137,6 +143,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -165,6 +172,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -183,6 +191,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "traffic light",
         "attributes": {
           "occluded": false,
@@ -201,6 +210,7 @@
       },
       {
         "id": 2,
+        "index": 3,
         "category": "traffic sign",
         "attributes": {
           "occluded": false,
@@ -229,6 +239,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -247,6 +258,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "traffic light",
         "attributes": {
           "occluded": false,
@@ -275,6 +287,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -293,6 +306,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "truck",
         "attributes": {
           "occluded": false,
@@ -321,6 +335,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -339,6 +354,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "motor",
         "attributes": {
           "occluded": false,
@@ -367,6 +383,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -385,6 +402,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -403,6 +421,7 @@
       },
       {
         "id": 2,
+        "index": 3,
         "category": "traffic light",
         "attributes": {
           "occluded": false,
@@ -421,6 +440,7 @@
       },
       {
         "id": 3,
+        "index": 4,
         "category": "traffic sign",
         "attributes": {
           "occluded": false,
@@ -439,6 +459,7 @@
       },
       {
         "id": 4,
+        "index": 5,
         "category": "truck",
         "attributes": {
           "occluded": false,
@@ -467,6 +488,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,
@@ -485,6 +507,7 @@
       },
       {
         "id": 1,
+        "index": 2,
         "category": "traffic light",
         "attributes": {
           "occluded": false,
@@ -503,6 +526,7 @@
       },
       {
         "id": 2,
+        "index": 3,
         "category": "traffic sign",
         "attributes": {
           "occluded": false,
@@ -531,6 +555,7 @@
     "labels": [
       {
         "id": 0,
+        "index": 1,
         "category": "car",
         "attributes": {
           "occluded": false,

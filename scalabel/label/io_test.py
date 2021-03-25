@@ -7,7 +7,7 @@ def test_parse() -> None:
     """Test parse label string."""
     json = (
         '{"name": 1, "videoName": "a", "size": [10, 20], '
-        '"labels":[{"id": 1, "box2d": '
+        '"labels":[{"id": 1, "index": 1, "box2d": '
         '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}}]}'
     )
     frames = parse(json)
