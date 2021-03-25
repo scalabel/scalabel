@@ -13,8 +13,7 @@ def load(filepath: str, use_obj_prarser: bool = False) -> List[Frame]:
     json_obj = json.load(open(filepath, "r"))
     if use_obj_prarser:
         return parse_obj(json_obj)
-    else:
-        return parse(json_obj)
+    return parse(json_obj)
 
 
 def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:

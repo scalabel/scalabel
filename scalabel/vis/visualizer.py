@@ -35,6 +35,8 @@ class LabelViewer:
     - add `-o {dir}` tag when runing
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, args) -> None:
         """initializer"""
         self.ax = None
@@ -364,7 +366,7 @@ class LabelViewer:
         )
         return True
 
-    # TODO: Add support for lane, drivable area and ploy2d
+    # Todo: Add support for lane, drivable area and ploy2d
 
 
 def parse_args():
