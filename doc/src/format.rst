@@ -32,6 +32,7 @@ other label types.
     - size: [width, height]
     - labels [ ]:
         - id: string
+        - index: index of the label in an image
         - category: string (classification)
         - manualShape: boolean
         - manualAttributes: boolean
