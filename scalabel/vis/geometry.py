@@ -51,7 +51,7 @@ def check_side_of_line(
     det = (point[0] - p1[0]) * (p2[1] - p1[1]) - (point[1] - p1[1]) * (
         p2[0] - p1[0]
     )
-    return int(np.sign(det)[0])
+    return int(np.sign(det))
 
 
 def check_clockwise(points: List[np.ndarray]) -> int:

@@ -6,7 +6,9 @@ Works for 2D / 3D bounding box, segmentation masks, etc.
 import argparse
 import io
 import os
+import sys
 import urllib.request
+from dataclasses import dataclass
 from threading import Timer
 from typing import Dict, List
 
@@ -17,10 +19,41 @@ import numpy as np
 from matplotlib.font_manager import FontProperties
 from PIL import Image
 
-from scalabel.label.io import load
-from scalabel.label.typing import Box2D, Box3D, Frame, Intrinsics
-from scalabel.vis.geometry import Label3d
-from scalabel.vis.helper import get_intrinsic_matrix, random_color
+from ..label.io import load
+from ..label.typing import Box2D, Box3D, Frame, Intrinsics
+from .geometry import Label3d
+from .helper import get_intrinsic_matrix, random_color
+
+
+@dataclass
+class ViewerConfig:
+    """Visulizer's config class."""
+
+    # path
+    image_dir: str
+    out_dir: str
+    scale: float
+
+    # content
+    show_seg: bool = False
+    with_attr: bool = True
+    with_box2d: bool = True
+    with_box3d: bool = False
+
+    # parameters for UI
+    image_width: int = 1280
+    image_height: int = 800
+    default_category: str = "Car"
+    font = FontProperties()  # for Matplotlib font
+
+    def __init__(self, args: argparse.Namespace) -> None:
+        """Initialize with args."""
+        self.image_dir = args.image_dir
+        self.out_dir = args.output_dir
+        self.scale = args.scale
+        self.image_width = args.width
+        self.image_height = args.height
+        self.with_attr = not args.no_attr
 
 
 class LabelViewer:
@@ -36,53 +69,44 @@ class LabelViewer:
     - add `-o {dir}` tag when runing.
     """
 
-    # pylint: disable=too-many-instance-attributes
-
     def __init__(self, args: argparse.Namespace) -> None:
         """Initializer."""
+        self.config = ViewerConfig(args)
+
         self.ax: matplotlib.axes.Axes = None
         self.fig: matplotlib.figure.Figure = None
         self.frame_index: int = 0
         self.start_index: int = 0
-        self.scale: float = args.scale
+        self.no_box3d = args.no_box3d
 
-        self.image_dir: str = args.image_dir
-        self.out_dir: str = args.output_dir
+        # set fonts
+        self.config.font.set_family(["Aerial", "monospace"])
+        self.config.font.set_weight("bold")
+        self.config.font.set_size(18 * self.config.scale)
 
+        # animation
+        self._interval: float = 0.4
+        self._run_animation: bool = False
+        self._timer: Timer = Timer(self._interval, self.tick)
+        self._label_colors: Dict[str, np.ndarray] = dict()
+
+        # load label file
+        print("Label file:", args.labels)
         self.frames: List[Frame] = []
         if os.path.exists(args.labels):
-            self.frames = load(args.labels, use_obj_prarser=True)
+            self.frames = load(args.labels)
+        elif os.path.exists(os.path.join(args.image_dir, args.labels)):
+            self.frames = load(os.path.join(args.image_dir, args.labels))
         else:
-            self.frames = load(
-                os.path.join(args.image_dir, args.labels), use_obj_prarser=True
-            )
+            print("Label file not found!")
+            sys.exit(1)
+
         print("Load images: ", len(self.frames))
-
-        # parameters for UI
-        self.with_attr: bool = True
-        self.with_box2d: bool = False
-        self.with_box3d: bool = True
-        self.show_seg: bool = False
-        self.image_width: int = args.width
-        self.image_height: int = args.height
-        self.default_category: str = "Car"
-
-        # Matplotlib font
-        self.font = FontProperties()
-        self.font.set_family(["Aerial", "monospace"])
-        self.font.set_weight("bold")
-        self.font.set_size(18 * self.scale)
-
-        self.is_running: bool = False
-        self.interval: float = 0.4
-        self._timer: Timer = Timer(self.interval, self.tick)
-
-        self._label_colors: Dict[str, np.ndarray] = dict()
 
     def view(self) -> None:
         """Start the visualization."""
         self.frame_index = 0
-        if self.out_dir is None:
+        if self.config.out_dir is None:
             self.init_show_window()
         else:
             self.write()
@@ -104,13 +128,13 @@ class LabelViewer:
             self.frame_index += 1
         elif event.key == "p":
             self.frame_index -= 1
-        elif event.key == "t":
-            self.with_box2d = not self.with_box2d
-            self.with_box3d = not self.with_box3d
+        elif event.key == "t" and not self.no_box3d:
+            self.config.with_box2d = not self.config.with_box2d
+            self.config.with_box3d = not self.config.with_box3d
         elif event.key == "y":
-            self.show_seg = not self.show_seg
+            self.config.show_seg = not self.config.show_seg
         elif event.key == " ":
-            if not self.is_running:
+            if not self._run_animation:
                 self.start_animation()
             else:
                 self.stop_animation()
@@ -126,7 +150,7 @@ class LabelViewer:
 
     def tick(self) -> None:
         """Animation tick."""
-        self.is_running = False
+        self._run_animation = False
         self.start_animation()
         self.frame_index += 1
         self.show_frame()
@@ -134,15 +158,15 @@ class LabelViewer:
 
     def start_animation(self) -> bool:
         """Start the animation timer."""
-        if not self.is_running:
+        if not self._run_animation:
             self._timer.start()
-            self.is_running = True
+            self._run_animation = True
         return True
 
     def stop_animation(self) -> bool:
         """Stop the animation timer."""
         self._timer.cancel()
-        self.is_running = False
+        self._run_animation = False
         return True
 
     def show_frame(self) -> bool:
@@ -158,14 +182,14 @@ class LabelViewer:
             image_data = urllib.request.urlopen(frame.url, timeout=300).read()
             im = np.asarray(Image.open(io.BytesIO(image_data)))
         else:
-            image_path = os.path.join(self.image_dir, frame.name)
+            image_path = os.path.join(self.config.image_dir, frame.name)
             print("Local path:", image_path)
             img = Image.open(image_path)
             im = np.array(img, dtype=np.uint8)
 
-        if self.show_seg:
+        if self.config.show_seg:
             image_seg_path = os.path.join(
-                self.image_dir, frame.name.replace("img", "seg")
+                self.config.image_dir, frame.name.replace("img", "seg")
             )
             if os.path.exists(image_seg_path):
                 print("Local segmentation image path:", image_seg_path)
@@ -174,6 +198,7 @@ class LabelViewer:
 
                 self.ax.imshow(im_seg, interpolation="nearest", aspect="auto")
                 return True
+            print("Segmentation mask not found.")
 
         self.ax.imshow(im, interpolation="nearest", aspect="auto")
 
@@ -185,10 +210,10 @@ class LabelViewer:
         labels = frame.labels
         # print(labels)
 
-        if self.with_attr:
+        if self.config.with_attr:
             self.show_frame_attributes(frame)
 
-        if self.with_box2d:
+        if self.config.with_box2d:
             for b in labels:
                 attributes = {}
                 if b.attributes is not None:
@@ -198,7 +223,7 @@ class LabelViewer:
                     text = (
                         b.category
                         if b.category is not None
-                        else self.default_category
+                        else self.config.default_category
                     )
                     if "occluded" in attributes and attributes["occluded"]:
                         text += ",o"
@@ -207,10 +232,10 @@ class LabelViewer:
                     if "crowd" in attributes and attributes["crowd"]:
                         text += ",c"
                     self.ax.text(
-                        (b.box_2d.x1) * self.scale,
-                        (b.box_2d.y1 - 4) * self.scale,
+                        (b.box_2d.x1) * self.config.scale,
+                        (b.box_2d.y1 - 4) * self.config.scale,
                         text,
-                        fontsize=10 * self.scale,
+                        fontsize=10 * self.config.scale,
                         bbox={
                             "facecolor": "white",
                             "edgecolor": "none",
@@ -219,7 +244,7 @@ class LabelViewer:
                         },
                     )
 
-        if self.with_box3d:
+        if self.config.with_box3d:
             for b in labels:
                 attributes = {}
                 if b.attributes is not None:
@@ -237,14 +262,14 @@ class LabelViewer:
                     text = (
                         b.category
                         if b.category is not None
-                        else self.default_category
+                        else self.config.default_category
                     )
                     if b.box_2d is not None:
                         self.ax.text(
-                            (b.box_2d.x1) * self.scale,
-                            (b.box_2d.y1 - 4) * self.scale,
+                            (b.box_2d.x1) * self.config.scale,
+                            (b.box_2d.y1 - 4) * self.config.scale,
                             text,
-                            fontsize=10 * self.scale,
+                            fontsize=10 * self.config.scale,
                             bbox={
                                 "facecolor": "white",
                                 "edgecolor": "none",
@@ -275,7 +300,7 @@ class LabelViewer:
             (x1, y1),
             x2 - x1,
             y2 - y1,
-            linewidth=2 * self.scale,
+            linewidth=2 * self.config.scale,
             edgecolor=box_color + [0.75],
             facecolor=box_color + [0.25],
             fill=True,
@@ -302,7 +327,7 @@ class LabelViewer:
             lines.append(
                 mpatches.Polygon(
                     edge,
-                    linewidth=2 * self.scale,
+                    linewidth=2 * self.config.scale,
                     linestyle=(0, (2, 2)),
                     edgecolor=box_color,
                     facecolor="none",
@@ -314,7 +339,7 @@ class LabelViewer:
             lines.append(
                 mpatches.Polygon(
                     edge,
-                    linewidth=2 * self.scale,
+                    linewidth=2 * self.config.scale,
                     edgecolor=box_color,
                     facecolor="none",
                     fill=False,
@@ -339,7 +364,7 @@ class LabelViewer:
                 )[0]
                 + ".png"
             )
-            out_path = os.path.join(self.out_dir, out_name)
+            out_path = os.path.join(self.config.out_dir, out_name)
             if self.show_frame():
                 self.fig.savefig(out_path, dpi=dpi)
                 out_paths.append(out_path)
@@ -363,10 +388,10 @@ class LabelViewer:
             attr_tag.write("{}: {}\n".format(k.rjust(key_width, " "), v))
         attr_tag.seek(0)
         self.ax.text(
-            25 * self.scale,
-            90 * self.scale,
+            25 * self.config.scale,
+            90 * self.config.scale,
             attr_tag.read()[:-1],
-            fontproperties=self.font,
+            fontproperties=self.config.font,
             color="red",
             bbox={"facecolor": "white", "alpha": 0.4, "pad": 10, "lw": 0},
         )
@@ -416,22 +441,10 @@ def parse_args() -> argparse.Namespace:
         help="Do not show attributes",
     )
     parser.add_argument(
-        "--no-lane",
+        "--no-box3d",
         action="store_true",
         default=False,
-        help="Do not show lanes",
-    )
-    parser.add_argument(
-        "--no-drivable",
-        action="store_true",
-        default=False,
-        help="Do not show drivable areas",
-    )
-    parser.add_argument(
-        "--no-box2d",
-        action="store_true",
-        default=False,
-        help="Do not show 2D bounding boxes",
+        help="Do not show 3D bounding boxes",
     )
     parser.add_argument(
         "-o",
@@ -444,14 +457,7 @@ def parse_args() -> argparse.Namespace:
         "output folder instead of being displayed "
         "interactively.",
     )
-    parser.add_argument(
-        "--target-objects",
-        type=str,
-        default="",
-        help="A comma separated list of objects. If this is "
-        "not empty, only show images with the target "
-        "objects.",
-    )
+
     args = parser.parse_args()
 
     if len(args.target_objects) > 0:
