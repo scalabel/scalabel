@@ -10,8 +10,7 @@ from .typing import DictStrAny, Frame
 
 def load(filepath: str) -> List[Frame]:
     """Load labels from a file."""
-    json_obj = json.load(open(filepath, "r"))
-    return parse(json_obj)
+    return parse(json.load(open(filepath, "r")))
 
 
 def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
@@ -20,11 +19,9 @@ def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
         raw_frames = json.loads(raw_frames)
     if isinstance(raw_frames, dict):
         raw_frames = [raw_frames]
-    # print(raw_frames[0]["labels"][0])
     frames: List[Frame] = []
     for rf in raw_frames:
         f = humps.decamelize(rf)
-        # print(f)
         frames.append(Frame(**f))
     return frames
 
