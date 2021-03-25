@@ -32,7 +32,7 @@ other label types.
     - size: [width, height]
     - labels [ ]:
         - id: string
-        - index: string 
+        - index: int 
         - category: string (classification)
         - manualShape: boolean
         - manualAttributes: boolean
