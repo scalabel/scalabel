@@ -19,8 +19,8 @@ from PIL import Image
 
 from scalabel.label.typing import Frame, Box2D, Box3D, Intrinsics
 from scalabel.label.io import load
-from helper import get_intrinsic_matrix, random_color
-from geometry import Label3d
+from scalabel.vis.helper import get_intrinsic_matrix, random_color
+from scalabel.vis.geometry import Label3d
 
 
 class LabelViewer(object):
@@ -31,6 +31,7 @@ class LabelViewer(object):
         -  N / P: Show next or previous image
         -  Space: Start / stop animation
         -  T: Toggle 2D / 3D bounding box (if avaliable)
+        -  Y: Toggle image / segmentation view (if avaliable)
 
         Export images:
         - add `-o {dir}` tag when runing
@@ -57,6 +58,7 @@ class LabelViewer(object):
         self.with_attr: bool = True
         self.with_box2d: bool = False
         self.with_box3d: bool = True
+        self.show_seg: bool = False
         self.image_width: int = args.width
         self.image_height: int = args.height
         self.default_category: str = "Car"
@@ -91,6 +93,8 @@ class LabelViewer(object):
         elif event.key == "t":
             self.with_box2d = not self.with_box2d
             self.with_box3d = not self.with_box3d
+        elif event.key == "y":
+            self.show_seg = not self.show_seg
         elif event.key == " ":
             if not self.is_running:
                 self.start_animation()
@@ -106,7 +110,7 @@ class LabelViewer(object):
         else:
             self.key_press(event)
 
-    def tick(self):
+    def tick(self) -> bool:
         """animation tick"""
         self.is_running = False
         self.start_animation()
@@ -114,13 +118,13 @@ class LabelViewer(object):
         self.show_frame()
         plt.draw()
 
-    def start_animation(self):
+    def start_animation(self) -> bool:
         if not self.is_running:
             self._timer = Timer(self.interval, self.tick)
             self._timer.start()
             self.is_running = True
 
-    def stop_animation(self):
+    def stop_animation(self) -> bool:
         self._timer.cancel()
         self.is_running = False
 
@@ -140,6 +144,19 @@ class LabelViewer(object):
             print("Local path:", image_path)
             img = Image.open(image_path)
             im = np.array(img, dtype=np.uint8)
+
+        if self.show_seg:
+            image_seg_path = os.path.join(
+                self.image_dir, frame.name.replace("img", "seg")
+            )
+            if os.path.exists(image_seg_path):
+                print("Local segmentation image path:", image_seg_path)
+                img_seg = Image.open(image_seg_path)
+                im_seg = np.array(img_seg, dtype=np.uint8)
+
+                self.ax.imshow(im_seg, interpolation="nearest", aspect="auto")
+                return True
+
         self.ax.imshow(im, interpolation="nearest", aspect="auto")
 
         # show label
@@ -224,7 +241,7 @@ class LabelViewer(object):
         self.ax.axis("off")
         return True
 
-    def get_label_color(self, label_id):
+    def get_label_color(self, label_id) -> Dict[str, Any]:
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
         return self._label_colors[label_id]
@@ -291,7 +308,7 @@ class LabelViewer(object):
 
         return lines
 
-    def write(self, w=16, h=9, dpi=80):
+    def write(self, w=16, h=9, dpi=80) -> bool:
         self.fig = plt.figure(figsize=(w, h), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
 
@@ -314,8 +331,9 @@ class LabelViewer(object):
             if self.frame_index >= len(self.frames):
                 self.start_index = self.frame_index
                 self.label = None
+        return True
 
-    def show_frame_attributes(self, frame):
+    def show_frame_attributes(self, frame) -> bool:
         if frame.attributes is None or len(frame.attributes) == 0:
             return
         attributes = frame.attributes
@@ -335,6 +353,7 @@ class LabelViewer(object):
             color="red",
             bbox={"facecolor": "white", "alpha": 0.4, "pad": 10, "lw": 0},
         )
+        return True
 
 
 def parse_args():
