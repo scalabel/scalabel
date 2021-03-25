@@ -32,7 +32,7 @@ def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
 
 
 def parse_obj(raw_frames: List[DictStrAny]) -> List[Frame]:
-    """Load labels in Scalabel format using Pydantic's own parser"""
+    """Load labels in Scalabel format using Pydantic's own parser."""
     frames: List[Frame] = []
     for rf in raw_frames:
         frames.append(

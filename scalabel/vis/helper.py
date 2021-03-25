@@ -10,7 +10,7 @@ from scalabel.label.typing import Intrinsics
 
 
 def get_intrinsic_matrix(intrinsics: Intrinsics) -> np.ndarray:
-    """get the camera intrinsic matrix"""
+    """Get the camera intrinsic matrix"""
     calibration = np.identity(3)
     calibration[0, 2] = intrinsics.center[0]
     calibration[1, 2] = intrinsics.center[1]
@@ -20,7 +20,7 @@ def get_intrinsic_matrix(intrinsics: Intrinsics) -> np.ndarray:
 
 
 def random_color() -> np.ndarray:
-    """generate a random color (RGB)"""
+    """Generate a random color (RGB)"""
     return np.random.rand(3)
 
 

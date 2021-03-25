@@ -1,5 +1,4 @@
-"""
-An offline label visualizer for Scalable file.
+"""An offline label visualizer for Scalable file.
 Works for 2D / 3D bounding box, segmentation masks, etc.
 """
 
@@ -32,13 +31,13 @@ class LabelViewer:
     -  Y: Toggle image / segmentation view (if avaliable)
 
     Export images:
-    - add `-o {dir}` tag when runing
+    - add `-o {dir}` tag when runing.
     """
 
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, args) -> None:
-        """initializer"""
+        """Initializer."""
         self.ax = None
         self.fig = None
         self.frame_index: int = 0
@@ -78,7 +77,7 @@ class LabelViewer:
         self._label_colors: Dict[str, Any] = dict()
 
     def view(self) -> None:
-        """start the visualization"""
+        """Start the visualization."""
         self.frame_index = 0
         if self.out_dir is None:
             self.init_show_window()
@@ -86,7 +85,7 @@ class LabelViewer:
             self.write()
 
     def init_show_window(self, width=16, height=9, dpi=100):
-        """read and draw image"""
+        """Read and draw image."""
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
 
@@ -95,7 +94,7 @@ class LabelViewer:
         plt.show()
 
     def key_press(self, event):
-        """handel control keys"""
+        """Handel control keys."""
         if event.key == "n":
             self.frame_index += 1
         elif event.key == "p":
@@ -121,7 +120,7 @@ class LabelViewer:
             self.key_press(event)
 
     def tick(self) -> bool:
-        """animation tick"""
+        """Animation tick."""
         self.is_running = False
         self.start_animation()
         self.frame_index += 1
@@ -129,18 +128,18 @@ class LabelViewer:
         plt.draw()
 
     def start_animation(self) -> bool:
-        """start the animation timer"""
+        """Start the animation timer."""
         if not self.is_running:
             self._timer.start()
             self.is_running = True
 
     def stop_animation(self) -> bool:
-        """stop the animation timer"""
+        """Stop the animation timer."""
         self._timer.cancel()
         self.is_running = False
 
     def show_frame(self) -> bool:
-        """show one frame in matplotlib axes"""
+        """Show one frame in matplotlib axes."""
         plt.cla()
 
         frame = self.frames[self.frame_index % len(self.frames)]
@@ -251,13 +250,13 @@ class LabelViewer:
         return True
 
     def get_label_color(self, label_id) -> Dict[str, Any]:
-        """get color by id (if not found, then create a random color)"""
+        """Get color by id (if not found, then create a random color)."""
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
         return self._label_colors[label_id]
 
     def gen_2d_rect(self, label_id: str, box2d: Box2D):
-        """generate individual bounding box from label."""
+        """Generate individual bounding box from label."""
         x1 = box2d.x1
         y1 = box2d.y1
         x2 = box2d.x2
@@ -282,7 +281,7 @@ class LabelViewer:
         intrinsics: Intrinsics,
         occluded: bool = False,
     ):
-        """generate individual bounding box from 3d label."""
+        """Generate individual bounding box from 3d label."""
         label = Label3d.from_box3d(box3d)
         edges = label.get_edges_with_visibility(
             get_intrinsic_matrix(intrinsics)
@@ -319,7 +318,7 @@ class LabelViewer:
         return lines
 
     def write(self, width=16, height=9, dpi=100) -> bool:
-        """save visualized result to file"""
+        """Save visualized result to file."""
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
 
@@ -344,7 +343,7 @@ class LabelViewer:
         return True
 
     def show_frame_attributes(self, frame) -> bool:
-        """visualize attribute infomation of a frame"""
+        """Visualize attribute infomation of a frame."""
         if frame.attributes is None or len(frame.attributes) == 0:
             return False
         attributes = frame.attributes
@@ -455,7 +454,7 @@ def parse_args():
 
 
 def main():
-    """main function"""
+    """Main function."""
     args = parse_args()
     viewer = LabelViewer(args)
     viewer.view()

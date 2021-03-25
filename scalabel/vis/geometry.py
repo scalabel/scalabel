@@ -10,7 +10,7 @@ from scalabel.label.typing import Box3D
 
 
 def rotate_vector(vector, rot_x=0, rot_y=0, rot_z=0, center=None):
-    """rotate a vector given axis-angles"""
+    """Rotate a vector given axis-angles"""
     if center is not None:
         vector -= center
     x0, y0, z0 = vector.tolist()
@@ -27,7 +27,7 @@ def rotate_vector(vector, rot_x=0, rot_y=0, rot_z=0, center=None):
 
 
 def vector_3d_to_2d(vector, calibration):
-    """project 3d vector to the 2d camera view"""
+    """Project 3d vector to the 2d camera view"""
     vec_3d = np.ones(3)
     vec_3d[:3] = vector
     vec_2d = np.dot(calibration, vec_3d)
@@ -36,7 +36,7 @@ def vector_3d_to_2d(vector, calibration):
 
 
 def check_side_of_line(point, line):
-    """chece which side does a point locate"""
+    """Chece which side does a point locate"""
     p1, p2 = line
     det = (point[0] - p1[0]) * (p2[1] - p1[1]) - (point[1] - p1[1]) * (
         p2[0] - p1[0]
@@ -45,7 +45,7 @@ def check_side_of_line(point, line):
 
 
 def check_clockwise(points):
-    """check whether the 4 points in a clockwise order"""
+    """Check whether the 4 points in a clockwise order"""
     p1, p2, p3, p4 = points
     s1 = check_side_of_line(p3, (p1, p2))
     s2 = check_side_of_line(p4, (p2, p3))
@@ -58,7 +58,7 @@ def check_clockwise(points):
 
 @dataclass
 class Vertex:
-    """calss for 3D vertex"""
+    """Calss for 3D vertex"""
 
     v3d: List[float]
     v2d: List[float]
@@ -78,7 +78,7 @@ class Label3d:
 
     @classmethod
     def from_box3d(cls, box3d: Box3D):
-        """get 8 vertex points of a 3D bounding box"""
+        """Get 8 vertex points of a 3D bounding box"""
         x, y, z = box3d.location
         center = np.array([x, y, z])
         height, width, depth = np.array(box3d.dimension)
@@ -105,7 +105,7 @@ class Label3d:
         return cls([v000, v001, v010, v011, v100, v101, v110, v111])
 
     def get_edges_with_visibility(self, calibration):
-        """get edges with visibility"""
+        """Get edges with visibility"""
         vertices = [Vertex(v, calibration) for v in self.vertices]
         v000, v001, v010, v011, v100, v101, v110, v111 = vertices
 
