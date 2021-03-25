@@ -70,9 +70,5 @@
   "eslint.options": {
     "configFile": "./.eslintrc.json"
   },
-"eslint.validate": [
-    "typescript",
-    "typescriptreact"
-],
-"python.pythonPath": "/Users/suntao/anaconda3/envs/py38/bin/python"
+"eslint.validate": ["typescript", "typescriptreact"]
 }
