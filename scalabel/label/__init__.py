@@ -1,3 +1,3 @@
 """Label definition and conversion."""
 
-from . import from_coco, to_coco, typing
+from . import io, from_coco, to_coco, typing

@@ -41,6 +41,7 @@ class Label(BaseModel):
     manual_attributes: Optional[bool] = None
     score: Optional[float] = None
     attributes: Optional[Dict[str, Union[str, float, bool]]] = None
+    category: Optional[str] = None
     box_2d: Optional[Box2D]
     box_3d: Optional[Box3D]
     poly_2d: Optional[Poly2D]

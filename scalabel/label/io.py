@@ -8,9 +8,13 @@ import humps
 from .typing import DictStrAny, Frame
 
 
-def load(filepath: str) -> List[Frame]:
+def load(filepath: str, use_obj_prarser: bool = False) -> List[Frame]:
     """Load labels from a file."""
-    return parse(json.load(open(filepath, "r")))
+    json_obj = json.load(open(filepath, "r"))
+    if use_obj_prarser:
+        return parse_obj(json_obj)
+    else:
+        return parse(json_obj)
 
 
 def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
@@ -25,6 +29,16 @@ def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
         f = humps.decamelize(rf)
         # print(f)
         frames.append(Frame(**f))
+    return frames
+
+
+def parse_obj(raw_frames: List[DictStrAny]) -> List[Frame]:
+    """Load labels in Scalabel format using Pydantic's own parser"""
+    frames: List[Frame] = []
+    for rf in raw_frames:
+        frames.append(
+            Frame.parse_obj(rf)
+        )  # This will parse structures recursively.
     return frames
 
 

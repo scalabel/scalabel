@@ -1,3 +1,4 @@
+from scalabel.label.typing import Box3D
 import numpy as np
 
 
@@ -18,9 +19,10 @@ def rotate_vector(vector, rot_x=0, rot_y=0, rot_z=0, center=None):
 
 
 def vector_3d_to_2d(vector, calibration):
-    vec_3d = np.ones(4)
+    vec_3d = np.ones(3)
     vec_3d[:3] = vector
     vec_2d = np.dot(calibration, vec_3d)
+    # print(calibration, vec_3d, vec_2d)
     return [vec_2d[0] / vec_2d[2], vec_2d[1] / vec_2d[2]]
 
 
@@ -54,16 +56,17 @@ class Label3d:
         self.vertices = vertices
 
     @classmethod
-    def from_box3d(cls, box3d):
-        center = np.array(box3d["location"])
-        height, width, depth = box3d["dimension"]
+    def from_box3d(cls, box3d: Box3D):
+        x, y, z = box3d.location
+        center = np.array([x, y, z])
+        height, width, depth = np.array(box3d.dimension)
 
         def rotate(vector):
-            if "orientation3D" in box3d:
-                rot_x, rot_y, rot_z = box3d["orientation3D"]
+            if len(box3d.orientation) == 3:
+                rot_x, rot_y, rot_z = box3d.orientation
                 return rotate_vector(vector, rot_x, rot_y, rot_z, center)
             else:
-                rot_y = box3d["orientation"]
+                rot_y = box3d.orientation[1]
                 return rotate_vector(vector, 0, rot_y + np.pi / 2, 0, center)
 
         v000 = rotate(center + np.array([-width / 2, -height / 2, -depth / 2]))
