@@ -1,4 +1,5 @@
 """An offline label visualizer for Scalable file.
+
 Works for 2D / 3D bounding box, segmentation masks, etc.
 """
 
@@ -6,10 +7,11 @@ import argparse
 import io
 import os
 import urllib.request
-from typing import Any, Dict, List
+from typing import Dict, List
 from threading import Timer
 
 import numpy as np
+import matplotlib
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
@@ -36,10 +38,10 @@ class LabelViewer:
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, args) -> None:
+    def __init__(self, args: argparse.Namespace) -> None:
         """Initializer."""
-        self.ax = None
-        self.fig = None
+        self.ax: matplotlib.axes.Axes = None
+        self.fig: matplotlib.figure.Figure = None
         self.frame_index: int = 0
         self.start_index: int = 0
         self.scale: float = args.scale
@@ -47,10 +49,11 @@ class LabelViewer:
         self.image_dir: str = args.image_dir
         self.out_dir: str = args.output_dir
 
+        self.frames: List[Frame] = []
         if os.path.exists(args.labels):
-            self.frames: List[Frame] = load(args.labels, use_obj_prarser=True)
+            self.frames = load(args.labels, use_obj_prarser=True)
         else:
-            self.frames: List[Frame] = load(
+            self.frames = load(
                 os.path.join(args.image_dir, args.labels), use_obj_prarser=True
             )
         print("Load images: ", len(self.frames))
@@ -74,7 +77,7 @@ class LabelViewer:
         self.interval: float = 0.4
         self._timer: Timer = Timer(self.interval, self.tick)
 
-        self._label_colors: Dict[str, Any] = dict()
+        self._label_colors: Dict[str, np.ndarray] = dict()
 
     def view(self) -> None:
         """Start the visualization."""
@@ -84,7 +87,9 @@ class LabelViewer:
         else:
             self.write()
 
-    def init_show_window(self, width=16, height=9, dpi=100):
+    def init_show_window(
+        self, width: int = 16, height: int = 9, dpi: int = 100
+    ) -> None:
         """Read and draw image."""
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
@@ -93,7 +98,7 @@ class LabelViewer:
         self.show_frame()
         plt.show()
 
-    def key_press(self, event):
+    def key_press(self, event: matplotlib.backend_bases.Event) -> None:
         """Handel control keys."""
         if event.key == "n":
             self.frame_index += 1
@@ -119,7 +124,7 @@ class LabelViewer:
         else:
             self.key_press(event)
 
-    def tick(self) -> bool:
+    def tick(self) -> None:
         """Animation tick."""
         self.is_running = False
         self.start_animation()
@@ -132,11 +137,13 @@ class LabelViewer:
         if not self.is_running:
             self._timer.start()
             self.is_running = True
+        return True
 
     def stop_animation(self) -> bool:
         """Stop the animation timer."""
         self._timer.cancel()
         self.is_running = False
+        return True
 
     def show_frame(self) -> bool:
         """Show one frame in matplotlib axes."""
@@ -220,7 +227,7 @@ class LabelViewer:
                 if b.box_3d is not None and frame.intrinsics is not None:
                     occluded = False
                     if "occluded" in attributes:
-                        occluded = attributes["occluded"]
+                        occluded = bool(attributes["occluded"])
 
                     for line in self.gen_3d_cube(
                         b.id, b.box_3d, frame.intrinsics, occluded
@@ -232,30 +239,30 @@ class LabelViewer:
                         if b.category is not None
                         else self.default_category
                     )
-
-                    self.ax.text(
-                        (b.box_2d.x1) * self.scale,
-                        (b.box_2d.y1 - 4) * self.scale,
-                        text,
-                        fontsize=10 * self.scale,
-                        bbox={
-                            "facecolor": "white",
-                            "edgecolor": "none",
-                            "alpha": 0.5,
-                            "boxstyle": "square,pad=0.1",
-                        },
-                    )
+                    if b.box_2d is not None:
+                        self.ax.text(
+                            (b.box_2d.x1) * self.scale,
+                            (b.box_2d.y1 - 4) * self.scale,
+                            text,
+                            fontsize=10 * self.scale,
+                            bbox={
+                                "facecolor": "white",
+                                "edgecolor": "none",
+                                "alpha": 0.5,
+                                "boxstyle": "square,pad=0.1",
+                            },
+                        )
 
         self.ax.axis("off")
         return True
 
-    def get_label_color(self, label_id) -> Dict[str, Any]:
+    def get_label_color(self, label_id: str) -> np.ndarray:
         """Get color by id (if not found, then create a random color)."""
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
         return self._label_colors[label_id]
 
-    def gen_2d_rect(self, label_id: str, box2d: Box2D):
+    def gen_2d_rect(self, label_id: str, box2d: Box2D) -> mpatches.Rectangle:
         """Generate individual bounding box from label."""
         x1 = box2d.x1
         y1 = box2d.y1
@@ -280,7 +287,7 @@ class LabelViewer:
         box3d: Box3D,
         intrinsics: Intrinsics,
         occluded: bool = False,
-    ):
+    ) -> List[mpatches.Polygon]:
         """Generate individual bounding box from 3d label."""
         label = Label3d.from_box3d(box3d)
         edges = label.get_edges_with_visibility(
@@ -317,7 +324,7 @@ class LabelViewer:
 
         return lines
 
-    def write(self, width=16, height=9, dpi=100) -> bool:
+    def write(self, width: int = 16, height: int = 9, dpi: int = 100) -> bool:
         """Save visualized result to file."""
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
@@ -342,7 +349,7 @@ class LabelViewer:
                 self.start_index = self.frame_index
         return True
 
-    def show_frame_attributes(self, frame) -> bool:
+    def show_frame_attributes(self, frame: Frame) -> bool:
         """Visualize attribute infomation of a frame."""
         if frame.attributes is None or len(frame.attributes) == 0:
             return False
@@ -366,7 +373,7 @@ class LabelViewer:
         return True
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Use argparse to get command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -453,7 +460,7 @@ def parse_args():
     return args
 
 
-def main():
+def main() -> None:
     """Main function."""
     args = parse_args()
     viewer = LabelViewer(args)

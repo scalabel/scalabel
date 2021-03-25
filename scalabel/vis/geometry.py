@@ -1,16 +1,21 @@
-"""
-3D geometric functions used by the visualizer.
-"""
+"""3D geometric functions used by the visualizer."""
+from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple, Dict, Union
 import numpy as np
 
 from scalabel.label.typing import Box3D
 
 
-def rotate_vector(vector, rot_x=0, rot_y=0, rot_z=0, center=None):
-    """Rotate a vector given axis-angles"""
+def rotate_vector(
+    vector: np.ndarray,
+    rot_x: float = 0,
+    rot_y: float = 0,
+    rot_z: float = 0,
+    center: Union[np.ndarray, None] = None,
+) -> np.ndarray:
+    """Rotate a vector given axis-angles."""
     if center is not None:
         vector -= center
     x0, y0, z0 = vector.tolist()
@@ -26,8 +31,10 @@ def rotate_vector(vector, rot_x=0, rot_y=0, rot_z=0, center=None):
     return vector
 
 
-def vector_3d_to_2d(vector, calibration):
-    """Project 3d vector to the 2d camera view"""
+def vector_3d_to_2d(
+    vector: np.ndarray, calibration: np.ndarray
+) -> List[float]:
+    """Project 3d vector to the 2d camera view."""
     vec_3d = np.ones(3)
     vec_3d[:3] = vector
     vec_2d = np.dot(calibration, vec_3d)
@@ -35,55 +42,57 @@ def vector_3d_to_2d(vector, calibration):
     return [vec_2d[0] / vec_2d[2], vec_2d[1] / vec_2d[2]]
 
 
-def check_side_of_line(point, line):
-    """Chece which side does a point locate"""
+def check_side_of_line(
+    point: np.ndarray, line: Tuple[np.ndarray, np.ndarray]
+) -> int:
+    """Chece which side does a point locate."""
     p1, p2 = line
     det = (point[0] - p1[0]) * (p2[1] - p1[1]) - (point[1] - p1[1]) * (
         p2[0] - p1[0]
     )
-    return np.sign(det)
+    return int(np.sign(det)[0])
 
 
-def check_clockwise(points):
-    """Check whether the 4 points in a clockwise order"""
+def check_clockwise(points: List[np.ndarray]) -> int:
+    """Check whether the 4 points in a clockwise order."""
     p1, p2, p3, p4 = points
     s1 = check_side_of_line(p3, (p1, p2))
     s2 = check_side_of_line(p4, (p2, p3))
     s3 = check_side_of_line(p1, (p3, p4))
     s4 = check_side_of_line(p2, (p4, p1))
     if s1 == s2 == s3 == s4:
-        return s1
+        return int(s1)
     return 0
 
 
 @dataclass
 class Vertex:
-    """Calss for 3D vertex"""
+    """Calss for 3D vertex."""
 
     v3d: List[float]
     v2d: List[float]
 
-    def __init__(self, vector, calibration):
-        self.v3d = vector
+    def __init__(self, vector: np.ndarray, calibration: np.ndarray) -> None:
+        """Init the vector."""
+        self.v3d = vector.tolist()
         self.v2d = vector_3d_to_2d(vector, calibration)
 
 
 class Label3d:
-    """
-    Generate the 2D edges of a 3D bounding box
-    """
+    """Generate the 2D edges of a 3D bounding box."""
 
-    def __init__(self, vertices):
+    def __init__(self, vertices: List[np.ndarray]) -> None:
+        """Init the vector."""
         self.vertices = vertices
 
     @classmethod
-    def from_box3d(cls, box3d: Box3D):
-        """Get 8 vertex points of a 3D bounding box"""
+    def from_box3d(cls, box3d: Box3D) -> Label3d:
+        """Get 8 vertex points of a 3D bounding box."""
         x, y, z = box3d.location
         center = np.array([x, y, z])
         height, width, depth = np.array(box3d.dimension)
 
-        def rotate(vector):
+        def rotate(vector: np.ndarray) -> np.ndarray:
             if len(box3d.orientation) == 3:
                 rot_x, rot_y, rot_z = box3d.orientation
                 rotated = rotate_vector(vector, rot_x, rot_y, rot_z, center)
@@ -104,8 +113,10 @@ class Label3d:
         v111 = rotate(center + np.array([width / 2, height / 2, depth / 2]))
         return cls([v000, v001, v010, v011, v100, v101, v110, v111])
 
-    def get_edges_with_visibility(self, calibration):
-        """Get edges with visibility"""
+    def get_edges_with_visibility(
+        self, calibration: np.ndarray
+    ) -> Dict[str, List[List[List[float]]]]:
+        """Get edges with visibility."""
         vertices = [Vertex(v, calibration) for v in self.vertices]
         v000, v001, v010, v011, v100, v101, v110, v111 = vertices
 
@@ -124,7 +135,7 @@ class Label3d:
             "BL": [v001, v011],
         }
 
-        faces = {
+        faces: Dict[str, Dict[str, Union[List[str], List[Vertex]]]] = {
             "F": {
                 "v": [v000, v100, v110, v010],
                 "e": ["FU", "FR", "FD", "FL"],
@@ -168,19 +179,40 @@ class Label3d:
             "BL": True,
         }
         for pair in face_pairs:
-            face1, face2 = pair
-            cw1 = check_clockwise([v.v2d for v in faces[face1]["v"]])
-            cw2 = check_clockwise([v.v2d for v in faces[face2]["v"]])
+            face1: str = pair[0]
+            face2: str = pair[1]
+            cw1 = check_clockwise(
+                [
+                    np.array(v.v2d)
+                    for v in faces[face1]["v"]
+                    if isinstance(v, Vertex)
+                ]
+            )
+            cw2 = check_clockwise(
+                [
+                    np.array(v.v2d)
+                    for v in faces[face2]["v"]
+                    if isinstance(v, Vertex)
+                ]
+            )
             if cw1 != cw2:
-                vertices1 = np.array([v.v3d for v in faces[face1]["v"]])
-                vertices2 = np.array([v.v3d for v in faces[face2]["v"]])
+                vertices1 = np.array(
+                    [v.v3d for v in faces[face1]["v"] if isinstance(v, Vertex)]
+                )
+                vertices2 = np.array(
+                    [v.v3d for v in faces[face2]["v"] if isinstance(v, Vertex)]
+                )
                 dist1 = np.linalg.norm(np.median(vertices1, axis=0))
                 dist2 = np.linalg.norm(np.median(vertices2, axis=0))
                 solid_face = face1 if dist1 < dist2 else face2
                 for edge in faces[solid_face]["e"]:
+                    assert isinstance(edge, str)
                     dashed_edges[edge] = False
 
-        edges_with_visibility = {"dashed": [], "solid": []}
+        edges_with_visibility: Dict[str, List[List[List[float]]]] = {
+            "dashed": [],
+            "solid": [],
+        }
         for edge in edges:
             if dashed_edges[edge]:
                 edges_with_visibility["dashed"].append(
