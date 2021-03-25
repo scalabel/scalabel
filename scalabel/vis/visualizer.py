@@ -31,6 +31,9 @@ class LabelViewer(object):
         -  N / P: Show next or previous image
         -  Space: Start / stop animation
         -  T: Toggle 2D / 3D bounding box (if avaliable)
+
+        Export images:
+        - add `-o {dir}` tag when runing
         """
 
         self.ax = None
@@ -104,6 +107,7 @@ class LabelViewer(object):
             self.key_press(event)
 
     def tick(self):
+        """animation tick"""
         self.is_running = False
         self.start_animation()
         self.frame_index += 1
