@@ -62,9 +62,15 @@ class LabelViewer(object):
         self.image_width: int = args.width
         self.image_height: int = args.height
         self.default_category: str = "Car"
-        self.interval: float = 0.4
 
-        self.is_running = False
+        # Matplotlib font
+        self.font = FontProperties()
+        self.font.set_family(["Aerial", "monospace"])
+        self.font.set_weight("bold")
+        self.font.set_size(18 * self.scale)
+
+        self.is_running: bool = False
+        self.interval: float = 0.4
 
         self._label_colors: Dict[str, Any] = dict()
 
@@ -75,7 +81,7 @@ class LabelViewer(object):
         else:
             self.write()
 
-    def init_show_window(self, w=16, h=9, dpi=80):
+    def init_show_window(self, w=16, h=9, dpi=100):
         # Read and draw image
         self.fig = plt.figure(figsize=(w, h), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
@@ -308,7 +314,7 @@ class LabelViewer(object):
 
         return lines
 
-    def write(self, w=16, h=9, dpi=80) -> bool:
+    def write(self, w=16, h=9, dpi=100) -> bool:
         self.fig = plt.figure(figsize=(w, h), dpi=dpi)
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
 
