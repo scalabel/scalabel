@@ -49,9 +49,10 @@ def transform(label_file: str) -> List[DictAny]:
             "timeofday": "undefined",
         }
         det_dict["labels"] = []
-        for ann in anns:
+        for ann_id, ann in enumerate(anns):
             label = {
                 "id": ann["id"],
+                "index": ann_id + 1,
                 "category": cat_map[ann["category_id"]],
                 "manualShape": True,
                 "manualAttributes": True,
