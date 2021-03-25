@@ -1,30 +1,369 @@
-# pylint: skip-file
+"""An offline label visualizer for Scalable file.
+Works for 2D / 3D bounding box, segmentation masks, etc.
+"""
 
 import argparse
 import io
-import json
 import os
-import sys
-import urllib
-from collections.abc import Iterable
-from multiprocessing import Pool
-from os.path import dirname, exists, isdir, join, split, splitext
+import urllib.request
+from typing import Any, Dict, List
+from threading import Timer
 
-import matplotlib.image as mpimg
+import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.font_manager import FontProperties
-from matplotlib.path import Path
 from PIL import Image
 
-from .bdd100k import labels
-from .geometry import Label3d
+from scalabel.label.typing import Frame, Box2D, Box3D, Intrinsics
+from scalabel.label.io import load
+from scalabel.vis.helper import get_intrinsic_matrix, random_color
+from scalabel.vis.geometry import Label3d
 
-__author__ = "Fisher Yu"
-__copyright__ = "Copyright (c) 2018, Fisher Yu"
-__email__ = "i@yf.io"
-__license__ = "BSD"
+
+class LabelViewer:
+    """Visualize 2D and 3D bounding boxes.
+
+    Keymap:
+    -  N / P: Show next or previous image
+    -  Space: Start / stop animation
+    -  T: Toggle 2D / 3D bounding box (if avaliable)
+    -  Y: Toggle image / segmentation view (if avaliable)
+
+    Export images:
+    - add `-o {dir}` tag when runing.
+    """
+
+    # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, args) -> None:
+        """Initializer."""
+        self.ax = None
+        self.fig = None
+        self.frame_index: int = 0
+        self.start_index: int = 0
+        self.scale: float = args.scale
+
+        self.image_dir: str = args.image_dir
+        self.out_dir: str = args.output_dir
+
+        if os.path.exists(args.labels):
+            self.frames: List[Frame] = load(args.labels, use_obj_prarser=True)
+        else:
+            self.frames: List[Frame] = load(
+                os.path.join(args.image_dir, args.labels), use_obj_prarser=True
+            )
+        print("Load images: ", len(self.frames))
+
+        # parameters for UI
+        self.with_attr: bool = True
+        self.with_box2d: bool = False
+        self.with_box3d: bool = True
+        self.show_seg: bool = False
+        self.image_width: int = args.width
+        self.image_height: int = args.height
+        self.default_category: str = "Car"
+
+        # Matplotlib font
+        self.font = FontProperties()
+        self.font.set_family(["Aerial", "monospace"])
+        self.font.set_weight("bold")
+        self.font.set_size(18 * self.scale)
+
+        self.is_running: bool = False
+        self.interval: float = 0.4
+        self._timer: Timer = Timer(self.interval, self.tick)
+
+        self._label_colors: Dict[str, Any] = dict()
+
+    def view(self) -> None:
+        """Start the visualization."""
+        self.frame_index = 0
+        if self.out_dir is None:
+            self.init_show_window()
+        else:
+            self.write()
+
+    def init_show_window(self, width=16, height=9, dpi=100):
+        """Read and draw image."""
+        self.fig = plt.figure(figsize=(width, height), dpi=dpi)
+        self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
+
+        plt.connect("key_release_event", self.key_press)
+        self.show_frame()
+        plt.show()
+
+    def key_press(self, event):
+        """Handel control keys."""
+        if event.key == "n":
+            self.frame_index += 1
+        elif event.key == "p":
+            self.frame_index -= 1
+        elif event.key == "t":
+            self.with_box2d = not self.with_box2d
+            self.with_box3d = not self.with_box3d
+        elif event.key == "y":
+            self.show_seg = not self.show_seg
+        elif event.key == " ":
+            if not self.is_running:
+                self.start_animation()
+            else:
+                self.stop_animation()
+        else:
+            return
+
+        self.frame_index = max(self.frame_index, 0)
+
+        if self.show_frame():
+            plt.draw()
+        else:
+            self.key_press(event)
+
+    def tick(self) -> bool:
+        """Animation tick."""
+        self.is_running = False
+        self.start_animation()
+        self.frame_index += 1
+        self.show_frame()
+        plt.draw()
+
+    def start_animation(self) -> bool:
+        """Start the animation timer."""
+        if not self.is_running:
+            self._timer.start()
+            self.is_running = True
+
+    def stop_animation(self) -> bool:
+        """Stop the animation timer."""
+        self._timer.cancel()
+        self.is_running = False
+
+    def show_frame(self) -> bool:
+        """Show one frame in matplotlib axes."""
+        plt.cla()
+
+        frame = self.frames[self.frame_index % len(self.frames)]
+        print("Image:", frame.name)
+        self.fig.canvas.set_window_title(frame.name)
+
+        # show image
+        if frame.url is not None and len(frame.url) > 0:
+            image_data = urllib.request.urlopen(frame.url, timeout=300).read()
+            im = np.asarray(Image.open(io.BytesIO(image_data)))
+        else:
+            image_path = os.path.join(self.image_dir, frame.name)
+            print("Local path:", image_path)
+            img = Image.open(image_path)
+            im = np.array(img, dtype=np.uint8)
+
+        if self.show_seg:
+            image_seg_path = os.path.join(
+                self.image_dir, frame.name.replace("img", "seg")
+            )
+            if os.path.exists(image_seg_path):
+                print("Local segmentation image path:", image_seg_path)
+                img_seg = Image.open(image_seg_path)
+                im_seg = np.array(img_seg, dtype=np.uint8)
+
+                self.ax.imshow(im_seg, interpolation="nearest", aspect="auto")
+                return True
+
+        self.ax.imshow(im, interpolation="nearest", aspect="auto")
+
+        # show label
+        if frame.labels is None or len(frame.labels) == 0:
+            print("No labels found")
+            return True
+
+        labels = frame.labels
+        # print(labels)
+
+        if self.with_attr:
+            self.show_frame_attributes(frame)
+
+        if self.with_box2d:
+            for b in labels:
+                attributes = {}
+                if b.attributes is not None:
+                    attributes = b.attributes
+                if b.box_2d is not None:
+                    self.ax.add_patch(self.gen_2d_rect(b.id, b.box_2d))
+                    text = (
+                        b.category
+                        if b.category is not None
+                        else self.default_category
+                    )
+                    if "occluded" in attributes and attributes["occluded"]:
+                        text += ",o"
+                    if "truncated" in attributes and attributes["truncated"]:
+                        text += ",t"
+                    if "crowd" in attributes and attributes["crowd"]:
+                        text += ",c"
+                    self.ax.text(
+                        (b.box_2d.x1) * self.scale,
+                        (b.box_2d.y1 - 4) * self.scale,
+                        text,
+                        fontsize=10 * self.scale,
+                        bbox={
+                            "facecolor": "white",
+                            "edgecolor": "none",
+                            "alpha": 0.5,
+                            "boxstyle": "square,pad=0.1",
+                        },
+                    )
+
+        if self.with_box3d:
+            for b in labels:
+                attributes = {}
+                if b.attributes is not None:
+                    attributes = b.attributes
+                if b.box_3d is not None and frame.intrinsics is not None:
+                    occluded = False
+                    if "occluded" in attributes:
+                        occluded = attributes["occluded"]
+
+                    for line in self.gen_3d_cube(
+                        b.id, b.box_3d, frame.intrinsics, occluded
+                    ):
+                        self.ax.add_patch(line)
+
+                    text = (
+                        b.category
+                        if b.category is not None
+                        else self.default_category
+                    )
+
+                    self.ax.text(
+                        (b.box_2d.x1) * self.scale,
+                        (b.box_2d.y1 - 4) * self.scale,
+                        text,
+                        fontsize=10 * self.scale,
+                        bbox={
+                            "facecolor": "white",
+                            "edgecolor": "none",
+                            "alpha": 0.5,
+                            "boxstyle": "square,pad=0.1",
+                        },
+                    )
+
+        self.ax.axis("off")
+        return True
+
+    def get_label_color(self, label_id) -> Dict[str, Any]:
+        """Get color by id (if not found, then create a random color)."""
+        if label_id not in self._label_colors:
+            self._label_colors[label_id] = random_color()
+        return self._label_colors[label_id]
+
+    def gen_2d_rect(self, label_id: str, box2d: Box2D):
+        """Generate individual bounding box from label."""
+        x1 = box2d.x1
+        y1 = box2d.y1
+        x2 = box2d.x2
+        y2 = box2d.y2
+
+        box_color = self.get_label_color(label_id).tolist()
+        # Draw and add one box to the figure
+        return mpatches.Rectangle(
+            (x1, y1),
+            x2 - x1,
+            y2 - y1,
+            linewidth=2 * self.scale,
+            edgecolor=box_color + [0.75],
+            facecolor=box_color + [0.25],
+            fill=True,
+        )
+
+    def gen_3d_cube(
+        self,
+        label_id: str,
+        box3d: Box3D,
+        intrinsics: Intrinsics,
+        occluded: bool = False,
+    ):
+        """Generate individual bounding box from 3d label."""
+        label = Label3d.from_box3d(box3d)
+        edges = label.get_edges_with_visibility(
+            get_intrinsic_matrix(intrinsics)
+        )
+
+        box_color = self.get_label_color(label_id)
+        alpha = 0.5 if occluded else 0.8
+
+        lines = []
+        for edge in edges["dashed"]:
+            lines.append(
+                mpatches.Polygon(
+                    edge,
+                    linewidth=2 * self.scale,
+                    linestyle=(0, (2, 2)),
+                    edgecolor=box_color,
+                    facecolor="none",
+                    fill=False,
+                    alpha=alpha,
+                )
+            )
+        for edge in edges["solid"]:
+            lines.append(
+                mpatches.Polygon(
+                    edge,
+                    linewidth=2 * self.scale,
+                    edgecolor=box_color,
+                    facecolor="none",
+                    fill=False,
+                    alpha=alpha,
+                )
+            )
+
+        return lines
+
+    def write(self, width=16, height=9, dpi=100) -> bool:
+        """Save visualized result to file."""
+        self.fig = plt.figure(figsize=(width, height), dpi=dpi)
+        self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
+
+        out_paths = []
+
+        self.frame_index = self.start_index
+        while self.frame_index < len(self.frames):
+            out_name = (
+                os.path.splitext(
+                    os.path.split(self.frames[self.frame_index].name)[1]
+                )[0]
+                + ".png"
+            )
+            out_path = os.path.join(self.out_dir, out_name)
+            if self.show_frame():
+                self.fig.savefig(out_path, dpi=dpi)
+                out_paths.append(out_path)
+
+            self.frame_index += 1
+            if self.frame_index >= len(self.frames):
+                self.start_index = self.frame_index
+        return True
+
+    def show_frame_attributes(self, frame) -> bool:
+        """Visualize attribute infomation of a frame."""
+        if frame.attributes is None or len(frame.attributes) == 0:
+            return False
+        attributes = frame.attributes
+        key_width = 0
+        for k, _ in attributes.items():
+            if len(k) > key_width:
+                key_width = len(k)
+        attr_tag = io.StringIO()
+        for k, v in attributes.items():
+            attr_tag.write("{}: {}\n".format(k.rjust(key_width, " "), v))
+        attr_tag.seek(0)
+        self.ax.text(
+            25 * self.scale,
+            90 * self.scale,
+            attr_tag.read()[:-1],
+            fontproperties=self.font,
+            color="red",
+            bbox={"facecolor": "white", "alpha": 0.4, "pad": 10, "lw": 0},
+        )
+        return True
 
 
 def parse_args():
@@ -36,9 +375,10 @@ def parse_args():
     parser.add_argument("--image-dir", help="image directory")
     parser.add_argument(
         "-l",
-        "--label",
-        required=True,
-        help="corresponding bounding box annotation " "(json file)",
+        "--labels",
+        required=False,
+        default="labels.json",
+        help="corresponding bounding box annotation (json file)",
         type=str,
     )
     parser.add_argument(
@@ -49,6 +389,18 @@ def parse_args():
         help="Scale up factor for annotation factor. "
         "Useful when producing visualization as "
         "thumbnails.",
+    )
+    parser.add_argument(
+        "--width",
+        type=int,
+        default=1280,
+        help="Width of the image (px)",
+    )
+    parser.add_argument(
+        "--height",
+        type=int,
+        default=800,
+        help="Height of the image (px)",
     )
     parser.add_argument(
         "--no-attr",
@@ -86,18 +438,6 @@ def parse_args():
         "interactively.",
     )
     parser.add_argument(
-        "--instance",
-        action="store_true",
-        default=False,
-        help="Set instance segmentation mode",
-    )
-    parser.add_argument(
-        "--drivable",
-        action="store_true",
-        default=False,
-        help="Set drivable area mode",
-    )
-    parser.add_argument(
         "--target-objects",
         type=str,
         default="",
@@ -107,655 +447,10 @@ def parse_args():
     )
     args = parser.parse_args()
 
-    # Check if the corresponding bounding box annotation exits
-    # is_valid_file(parser, args.image)
-    # is_valid_file(parser, args.label)
-    # assert (isdir(args.image) and isdir(args.label)) or \
-    #        (isfile(args.image) and isfile(args.label)), \
-    #     "input and label should be both folders or files"
     if len(args.target_objects) > 0:
         args.target_objects = args.target_objects.split(",")
 
     return args
-
-
-def is_valid_file(parser, file_name):
-    """Ensure that the file exists."""
-
-    if not exists(file_name):
-        parser.error(
-            "The corresponding bounding box annotation '{}' does "
-            "not exist!".format(file_name)
-        )
-        sys.exit(1)
-
-
-def get_areas_v0(objects):
-    """Get list of areas' ploy."""
-    return [
-        o for o in objects if "poly2d" in o and o["category"][:4] == "area"
-    ]
-
-
-def get_areas(objects):
-    """Get list of drivable areas' ploy."""
-    return [
-        o
-        for o in objects
-        if "poly2d" in o and o["category"] == "drivable area"
-    ]
-
-
-def get_lanes(objects):
-    """Get list of lanes' ploy."""
-    return [
-        o for o in objects if "poly2d" in o and o["category"][:4] == "lane"
-    ]
-
-
-def get_other_poly2d(objects):
-    """Get other ploy."""
-    return [
-        o
-        for o in objects
-        if "poly2d" in o
-        and o["poly2d"] is not None
-        and (o["category"] not in ["drivable area", "lane"])
-    ]
-
-
-def get_boxes(objects):
-    """Get 2D or 3D boxes."""
-    return [
-        o
-        for o in objects
-        if ("box2d" in o and o["box2d"] is not None)
-        or ("box3d" in o and o["box3d"] is not None)
-    ]
-
-
-def get_target_objects(objects, targets):
-    """Get objects with specified targets."""
-    return [o for o in objects if o["category"] in targets]
-
-
-def random_color():
-    """Generate random color."""
-    return np.random.rand(3)
-
-
-def seg2color(seg):
-    """Paint segmentation with colors."""
-    num_ids = 20
-    train_colors = np.zeros((num_ids, 3), dtype=np.uint8)
-    for label in labels:
-        if label.trainId < 255:
-            train_colors[label.trainId] = label.color
-    color = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8)
-    for i in range(num_ids):
-        color[seg == i, :] = train_colors[i]
-    return color
-
-
-def instance2color(instance):
-    """Paint instance segmentation with colors."""
-    instance_colors = dict(
-        [
-            (i, (np.random.random(3) * 255).astype(np.uint8))
-            for i in np.unique(instance)
-        ]
-    )
-    color = np.zeros((instance.shape[0], instance.shape[1], 3), dtype=np.uint8)
-    for k, v in instance_colors.items():
-        color[instance == k] = v
-    return color
-
-
-def convert_instance_rgb(label_path):
-    """Load and paint instance segmentation with colors."""
-    label_dir = dirname(label_path)
-    label_name = splitext(split(label_path)[1])[0]
-    image = np.array(Image.open(label_path, "r"))
-    seg = image[:, :, 0]
-    seg_color = seg2color(seg)
-    image = image.astype(np.uint32)
-    instance = image[:, :, 0] * 1000 + image[:, :, 1]
-    # instance_color = instance2color(instance)
-    Image.fromarray(seg).save(join(label_dir, label_name + "_train_id.png"))
-    Image.fromarray(seg_color).save(
-        join(label_dir, label_name + "_train_color.png")
-    )
-    Image.fromarray(instance).save(
-        join(label_dir, label_name + "_instance_id.png")
-    )
-    # Image.fromarray(instance_color).save(
-    #     join(label_dir, label_name + '_instance_color.png'))
-
-
-def drivable2color(seg):
-    """Paint drivable area with colors."""
-    colors = [[0, 0, 0, 255], [217, 83, 79, 255], [91, 192, 222, 255]]
-    color = np.zeros((seg.shape[0], seg.shape[1], 4), dtype=np.uint8)
-    for i in range(3):
-        color[seg == i, :] = colors[i]
-    return color
-
-
-def convert_drivable_rgb(label_path):
-    """Load and paint drivable area with colors."""
-    label_dir = dirname(label_path)
-    label_name = splitext(split(label_path)[1])[0]
-    image = np.array(Image.open(label_path, "r"))
-    seg = image[:, :, 0]
-    seg_color = drivable2color(seg)
-    image = image.astype(np.uint32)
-    instance = image[:, :, 0] * 1000 + image[:, :, 2]
-    # instance_color = instance2color(instance)
-    Image.fromarray(seg).save(join(label_dir, label_name + "_drivable_id.png"))
-    Image.fromarray(seg_color).save(
-        join(label_dir, label_name + "_drivable_color.png")
-    )
-    Image.fromarray(instance).save(
-        join(label_dir, label_name + "_drivable_instance_id.png")
-    )
-    # Image.fromarray(instance_color).save(
-    #     join(label_dir, label_name + '_drivable_instance_color.png'))
-
-
-def read_labels(label_path):
-    """read labels from json file."""
-    labels = json.load(open(label_path, "r"))
-    if not isinstance(labels, Iterable):
-        labels = [labels]
-    return labels
-
-
-class LabelViewer(object):
-    def __init__(self, args):
-        """Visualize bounding boxes."""
-        self.ax = None
-        self.fig = None
-        self.frame_index = 0
-        self.file_index = 0
-        self.label = None
-        self.start_index = 0
-        self.scale = args.scale
-        if isdir(args.label):
-            input_names = sorted(
-                [
-                    splitext(n)[0]
-                    for n in os.listdir(args.label)
-                    if splitext(n)[1] == ".json"
-                ]
-            )
-            label_paths = [join(args.label, n + ".json") for n in input_names]
-        else:
-            label_paths = [args.label]
-        self.label_paths = label_paths
-        self.image_dir = args.image_dir
-
-        self.font = FontProperties()
-        self.font.set_family(["Luxi Mono", "monospace"])
-        self.font.set_weight("bold")
-        self.font.set_size(18 * self.scale)
-
-        self.with_image = True
-        self.with_attr = not args.no_attr
-        self.with_lane = not args.no_lane
-        self.with_drivable = not args.no_drivable
-        self.with_box2d = not args.no_box2d
-        self.poly2d = True
-
-        self.target_objects = args.target_objects
-
-        if len(self.target_objects) > 0:
-            print("Only showing objects:", self.target_objects)
-
-        self.out_dir = args.output_dir
-        self.label_map = dict([(label.name, label) for label in labels])
-        self.color_mode = "random"
-        self.label_colors = {}
-
-        self.image_width = 1280
-        self.image_height = 720
-
-        self.instance_mode = False
-        self.drivable_mode = False
-        self.with_post = False  # with post processing
-
-        if args.drivable:
-            self.set_drivable_mode()
-
-        if args.instance:
-            self.set_instance_mode()
-
-        self.label = read_labels(self.label_paths[self.file_index])
-
-    def view(self):
-        """Start the visualization."""
-        self.frame_index = 0
-        if self.out_dir is None:
-            self.show()
-        else:
-            self.write()
-
-    def show(self):
-        """Read and draw image."""
-        dpi = 80
-        w = 16
-        h = 9
-        self.fig = plt.figure(figsize=(w, h), dpi=dpi)
-        self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
-        # if len(self.image_paths) > 1:
-        plt.connect("key_release_event", self.next_image)
-        self.show_image()
-        plt.show()
-
-    def write(self):
-        """Save visualized result to file."""
-        dpi = 80
-        w = 16
-        h = 9
-        self.fig = plt.figure(figsize=(w, h), dpi=dpi)
-        self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
-
-        out_paths = []
-
-        self.start_index = 0
-        self.frame_index = 0
-        self.file_index = 0
-        while self.file_index < len(self.label_paths):
-            if self.label is None:
-                self.label = read_labels(self.label_paths[self.file_index])
-            out_name = (
-                splitext(
-                    split(
-                        self.label[self.frame_index - self.start_index]["name"]
-                    )[1]
-                )[0]
-                + ".png"
-            )
-            out_path = join(self.out_dir, out_name)
-            if self.show_image():
-                self.fig.savefig(out_path, dpi=dpi)
-                out_paths.append(out_path)
-            self.frame_index += 1
-            if self.frame_index >= len(self.label):
-                self.start_index = self.frame_index
-                self.file_index += 1
-                self.label = None
-
-        if self.with_post:
-            print("Post-processing")
-            p = Pool(10)
-            if self.instance_mode:
-                p.map(convert_instance_rgb, out_paths)
-            if self.drivable_mode:
-                p = Pool(10)
-                p.map(convert_drivable_rgb, out_paths)
-
-    def set_instance_mode(self):
-        """Change to instance mode."""
-        self.with_image = False
-        self.with_attr = False
-        self.with_drivable = False
-        self.with_lane = False
-        self.with_box2d = False
-        self.poly2d = True
-        self.color_mode = "instance"
-        self.instance_mode = True
-        self.with_post = True
-
-    def set_drivable_mode(self):
-        """Change to drivable mode."""
-        self.with_image = False
-        self.with_attr = False
-        self.with_drivable = True
-        self.with_lane = False
-        self.with_box2d = False
-        self.poly2d = False
-        self.color_mode = "instance"
-        self.drivable_mode = True
-        self.with_post = True
-
-    def show_image(self):
-        """Show one image."""
-        plt.cla()
-        if self.frame_index >= self.start_index + len(self.label):
-            self.label = None
-            self.file_index += 1
-            self.start_index = self.frame_index
-            if self.file_index >= len(self.label_paths):
-                self.file_index = 0
-                self.frame_index = 0
-                self.start_index = 0
-        if self.label is None:
-            self.label = read_labels(self.label_paths[self.file_index])
-
-        frame = self.label[self.frame_index - self.start_index]
-
-        print("Image:", frame["name"])
-        self.fig.canvas.set_window_title(frame["name"])
-
-        if self.with_image:
-            if "url" in frame and len(frame["url"]) > 0:
-                req = urllib.request.Request(frame["url"])
-                image_data = urllib.request.urlopen(req, timeout=300).read()
-                im = np.asarray(Image.open(io.BytesIO(image_data)))
-            else:
-                image_path = join(self.image_dir, frame["name"])
-                img = mpimg.imread(image_path)
-                im = np.array(img, dtype=np.uint8)
-            self.ax.imshow(im, interpolation="nearest", aspect="auto")
-        else:
-            self.ax.set_xlim(0, self.image_width - 1)
-            self.ax.set_ylim(0, self.image_height - 1)
-            self.ax.invert_yaxis()
-            self.ax.add_patch(
-                self.poly2patch(
-                    [
-                        [0, 0],
-                        [0, self.image_height - 1],
-                        [self.image_width - 1, self.image_height - 1],
-                        [self.image_width - 1, 0],
-                    ],
-                    types="LLLL",
-                    closed=True,
-                    alpha=1.0,
-                    color="black",
-                )
-            )
-
-        if "labels" not in frame or frame["labels"] is None:
-            print("No labels")
-            return True
-
-        objects = frame["labels"]
-
-        calibration = None
-        if "intrinsics" in frame and "cali" in frame["intrinsics"]:
-            calibration = np.array(frame["intrinsics"]["cali"])
-
-        if len(self.target_objects) > 0:
-            objects = get_target_objects(objects, self.target_objects)
-            if len(objects) == 0:
-                return False
-
-        if self.with_attr:
-            self.show_attributes(frame)
-
-        if self.with_drivable:
-            self.draw_drivable(objects)
-        if self.with_lane:
-            self.draw_lanes(objects)
-        if self.with_box2d:
-            for b in get_boxes(objects):
-                attributes = {}
-                if "attributes" in b:
-                    attributes = b["attributes"]
-                if "box3d" in b:
-                    occluded = False
-                    if "occluded" in attributes:
-                        occluded = attributes["occluded"]
-
-                    for line in self.box3d_to_lines(
-                        b["id"], b["box3d"], calibration, occluded
-                    ):
-                        self.ax.add_patch(line)
-                else:
-                    self.ax.add_patch(self.box2rect(b["id"], b["box2d"]))
-                    text = b["category"][:3]
-                    if "occluded" in attributes and attributes["occluded"]:
-                        text += ",o"
-                    if "truncated" in attributes and attributes["truncated"]:
-                        text += ",t"
-                    if "crowd" in attributes and attributes["crowd"]:
-                        text += ",c"
-                    [
-                        self.ax.text(
-                            (b["box2d"]["x1"]) * self.scale,
-                            (b["box2d"]["y1"] - 4) * self.scale,
-                            text,
-                            fontsize=10 * self.scale,
-                            bbox={
-                                "facecolor": "white",
-                                "edgecolor": "none",
-                                "alpha": 0.5,
-                                "boxstyle": "square,pad=0.1",
-                            },
-                        )
-                    ]
-        if self.poly2d:
-            self.draw_other_poly2d(objects)
-        self.ax.axis("off")
-        return True
-
-    def next_image(self, event):
-        """Next image."""
-        if event.key == "n":
-            self.frame_index += 1
-        elif event.key == "p":
-            self.frame_index -= 1
-        else:
-            return
-        self.frame_index = max(self.frame_index, 0)
-        if self.show_image():
-            plt.draw()
-        else:
-            self.next_image(event)
-
-    def poly2patch(self, vertices, types, closed=False, alpha=1.0, color=None):
-        """Fill poly."""
-        moves = {"L": Path.LINETO, "C": Path.CURVE4}
-        points = [v for v in vertices]
-        codes = [moves[t] for t in types]
-        codes[0] = Path.MOVETO
-
-        if closed:
-            points.append(points[0])
-            codes.append(Path.CLOSEPOLY)
-
-        if color is None:
-            color = random_color()
-
-        # print(codes, points)
-        return mpatches.PathPatch(
-            Path(points, codes),
-            facecolor=color if closed else "none",
-            edgecolor=color,  # if not closed else 'none',
-            lw=1 if closed else 2 * self.scale,
-            alpha=alpha,
-            antialiased=False,
-            snap=True,
-        )
-
-    def draw_drivable(self, objects):
-        """Draw drivable area."""
-        objects = get_areas(objects)
-        colors = (
-            np.array([[0, 0, 0, 255], [217, 83, 79, 255], [91, 192, 222, 255]])
-            / 255
-        )
-        for obj in objects:
-            if self.color_mode == "random":
-                if obj["attributes"]["areaType"] == "direct":
-                    color = colors[1]
-                else:
-                    color = colors[2]
-                alpha = 0.5
-            else:
-                color = (
-                    (1 if obj["attributes"]["areaType"] == "direct" else 2)
-                    / 255.0,
-                    (obj["id"] // 255) / 255,
-                    (obj["id"] % 255) / 255.0,
-                )
-                alpha = 1
-            for poly in obj["poly2d"]:
-                self.ax.add_patch(
-                    self.poly2patch(
-                        poly["vertices"],
-                        poly["types"],
-                        closed=poly["closed"],
-                        alpha=alpha,
-                        color=color,
-                    )
-                )
-
-    def draw_lanes(self, objects):
-        """Draw lanes."""
-        objects = get_lanes(objects)
-        # colors = np.array([[0, 0, 0, 255],
-        #                    [217, 83, 79, 255],
-        #                    [91, 192, 222, 255]]) / 255
-        colors = (
-            np.array([[0, 0, 0, 255], [255, 0, 0, 255], [0, 0, 255, 255]])
-            / 255
-        )
-        for obj in objects:
-            if self.color_mode == "random":
-                if obj["attributes"]["laneDirection"] == "parallel":
-                    color = colors[1]
-                else:
-                    color = colors[2]
-                alpha = 0.9
-            else:
-                color = (
-                    0,
-                    (obj["id"] // 255) / 255,
-                    (obj["id"] % 255) / 255.0,
-                )
-                alpha = 1
-            for poly in obj["poly2d"]:
-                self.ax.add_patch(
-                    self.poly2patch(
-                        poly["vertices"],
-                        poly["types"],
-                        closed=poly["closed"],
-                        alpha=alpha,
-                        color=color,
-                    )
-                )
-
-    def draw_other_poly2d(self, objects):
-        """Draw polygen."""
-        color_mode = self.color_mode
-        objects = get_other_poly2d(objects)
-        for obj in objects:
-            if "poly2d" not in obj:
-                continue
-            if color_mode == "random":
-                color = self.get_label_color(obj["id"])
-                alpha = 0.5
-            elif color_mode == "instance":
-                try:
-                    label = self.label_map[obj["category"]]
-                    color = (
-                        label.trainId / 255.0,
-                        (obj["id"] // 255) / 255,
-                        (obj["id"] % 255) / 255.0,
-                    )
-                except KeyError:
-                    color = (1, 0, 0)
-                alpha = 1
-            else:
-                raise ValueError(
-                    "Unknown color mode {}".format(self.color_mode)
-                )
-            for poly in obj["poly2d"]:
-                self.ax.add_patch(
-                    self.poly2patch(
-                        poly["vertices"],
-                        poly["types"],
-                        closed=poly["closed"],
-                        alpha=alpha,
-                        color=color,
-                    )
-                )
-
-    def box2rect(self, label_id, box2d):
-        """Generate individual bounding box from label."""
-        x1 = box2d["x1"]
-        y1 = box2d["y1"]
-        x2 = box2d["x2"]
-        y2 = box2d["y2"]
-
-        box_color = self.get_label_color(label_id).tolist()
-        # Draw and add one box to the figure
-        return mpatches.Rectangle(
-            (x1, y1),
-            x2 - x1,
-            y2 - y1,
-            linewidth=2 * self.scale,
-            edgecolor=box_color + [0.75],
-            facecolor=box_color + [0.25],
-            fill=True,
-        )
-
-    def box3d_to_lines(self, label_id, box3d, calibration, occluded):
-        """Generate individual bounding box from 3d label."""
-        label = Label3d.from_box3d(box3d)
-        edges = label.get_edges_with_visibility(calibration)
-
-        box_color = self.get_label_color(label_id)
-        alpha = 0.5 if occluded else 0.8
-
-        lines = []
-        for edge in edges["dashed"]:
-            lines.append(
-                mpatches.Polygon(
-                    edge,
-                    linewidth=2 * self.scale,
-                    linestyle=(0, (2, 2)),
-                    edgecolor=box_color,
-                    facecolor="none",
-                    fill=False,
-                    alpha=alpha,
-                )
-            )
-        for edge in edges["solid"]:
-            lines.append(
-                mpatches.Polygon(
-                    edge,
-                    linewidth=2 * self.scale,
-                    edgecolor=box_color,
-                    facecolor="none",
-                    fill=False,
-                    alpha=alpha,
-                )
-            )
-
-        return lines
-
-    def get_label_color(self, label_id):
-        """Get color by label's id."""
-        if label_id not in self.label_colors:
-            self.label_colors[label_id] = random_color()
-        return self.label_colors[label_id]
-
-    def show_attributes(self, frame):
-        """visualize attribute infomation of a frame."""
-        if "attributes" not in frame:
-            return
-        attributes = frame["attributes"]
-        if attributes is None or len(attributes) == 0:
-            return
-        key_width = 0
-        for k, _ in attributes.items():
-            if len(k) > key_width:
-                key_width = len(k)
-        attr_tag = io.StringIO()
-        for k, v in attributes.items():
-            attr_tag.write("{}: {}\n".format(k.rjust(key_width, " "), v))
-        attr_tag.seek(0)
-        self.ax.text(
-            25 * self.scale,
-            90 * self.scale,
-            attr_tag.read()[:-1],
-            fontproperties=self.font,
-            color="red",
-            bbox={"facecolor": "white", "alpha": 0.4, "pad": 10, "lw": 0},
-        )
 
 
 def main():
