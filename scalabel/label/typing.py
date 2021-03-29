@@ -43,9 +43,9 @@ class Label(BaseModel):
     score: Optional[float] = None
     attributes: Optional[Dict[str, Union[str, float, bool]]] = None
     category: Optional[str] = None
-    box_2d: Optional[Box2D]
-    box_3d: Optional[Box3D]
-    poly_2d: Optional[List[Poly2D]]
+    box2d: Optional[Box2D]
+    box3d: Optional[Box3D]
+    poly2d: Optional[List[Poly2D]]
 
     def __init__(self, **data: Any) -> None:  # type: ignore
         """Init structure and convert the id type to string."""
