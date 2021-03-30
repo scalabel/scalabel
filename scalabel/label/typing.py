@@ -45,7 +45,7 @@ class Label(BaseModel):
     category: Optional[str] = None
     box_2d: Optional[Box2D]
     box_3d: Optional[Box3D]
-    poly_2d: Optional[Poly2D]
+    poly_2d: Optional[List[Poly2D]]
 
     def __init__(self, **data: Any) -> None:  # type: ignore
         """Init structure and convert the id type to string."""

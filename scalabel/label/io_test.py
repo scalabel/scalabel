@@ -37,6 +37,14 @@ def test_load() -> None:
     assert box.x2 == 383.5201416015625
     assert box.y1 == 362.24761962890625
     assert box.y2 == 482.4760437011719
+    assert labels[0].labels[0].poly_2d is not None
+    polys = labels[0].labels[0].poly_2d
+    assert isinstance(polys, list)
+    poly = polys[0]
+    assert len(poly.vertices) == len(poly.types)
+    assert len(poly.vertices[0]) == 2
+    for char in poly.types:
+        assert char in ["C", "L"]
 
 
 def test_dump() -> None:
