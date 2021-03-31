@@ -5,7 +5,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 0,
+    "frameIndex": 0,
     "labels": [
       {
         "id": 0,
@@ -103,7 +103,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 1,
+    "frameIndex": 1,
     "labels": [
       {
         "id": 0,
@@ -149,7 +149,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 2,
+    "frameIndex": 2,
     "labels": [
       {
         "id": 0,
@@ -177,7 +177,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 3,
+    "frameIndex": 3,
     "labels": [
       {
         "id": 0,
@@ -241,7 +241,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 4,
+    "frameIndex": 4,
     "labels": [
       {
         "id": 0,
@@ -287,7 +287,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 5,
+    "frameIndex": 5,
     "labels": [
       {
         "id": 0,
@@ -333,7 +333,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 6,
+    "frameIndex": 6,
     "labels": [
       {
         "id": 0,
@@ -379,7 +379,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 7,
+    "frameIndex": 7,
     "labels": [
       {
         "id": 0,
@@ -479,7 +479,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 8,
+    "frameIndex": 8,
     "labels": [
       {
         "id": 0,
@@ -543,7 +543,7 @@
     "videoName": "",
     "attributes": null,
     "timestamp": 10000,
-    "index": 9,
+    "frameIndex": 9,
     "labels": [
       {
         "id": 0,
