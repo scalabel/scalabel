@@ -16,7 +16,8 @@ def test_parse() -> None:
     assert frame.name == "1"
     assert frame.video_name == "a"
     assert frame.labels[0].id == "1"
-    assert frame.labels[0].attributes["crowd"] == False
+    assert frame.labels[0].attributes is not None
+    assert frame.labels[0].attributes["crowd"] is False
     assert frame.labels[0].attributes["traffic_light_color"] == "G"
     assert frame.labels[0].attributes["speed"] == 10.0
     b = frame.labels[0].box_2d
