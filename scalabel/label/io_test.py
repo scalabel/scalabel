@@ -8,13 +8,18 @@ def test_parse() -> None:
     json = (
         '{"name": 1, "videoName": "a", "size": [10, 20], '
         '"labels":[{"id": 1, "box2d": '
-        '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}}]}'
+        '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "attributes":'
+        '{"crowd": false, "trafficLightColor": "G", "speed": 10}}]}'
     )
     frames = parse(json)
     frame = frames[0]
     assert frame.name == "1"
     assert frame.video_name == "a"
     assert frame.labels[0].id == "1"
+    assert frame.labels[0].attributes is not None
+    assert frame.labels[0].attributes["crowd"] is False
+    assert frame.labels[0].attributes["traffic_light_color"] == "G"
+    assert frame.labels[0].attributes["speed"] == 10.0
     b = frame.labels[0].box_2d
     assert b is not None
     assert b.y2 == 4
