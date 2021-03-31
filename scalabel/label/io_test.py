@@ -29,6 +29,8 @@ def test_load() -> None:
         labels[0].url == "https://s3-us-west-2.amazonaws.com/bdd-label/"
         "bdd100k/frames-20000/val/c1ba5ee6-b2cb1e51.jpg"
     )
+    assert labels[0].frame_index == 0
+    assert labels[-1].frame_index == 9
     assert labels[0].labels[0].id == "0"
     assert labels[0].labels[0].box_2d is not None
     assert labels[-1].labels[-1].box_2d is not None
@@ -52,6 +54,8 @@ def test_dump() -> None:
     filepath = get_test_file("image_list_with_auto_labels.json")
     labels = load(filepath)
     labels_dict = dump(labels)
+    assert labels_dict[0]["frameIndex"] == labels[0].frame_index
+    assert labels_dict[-1]["frameIndex"] == labels[-1].frame_index
     assert "box3d" not in labels_dict[0]["labels"][0]
     assert "box2d" in labels_dict[0]["labels"][0]
     assert labels[0].labels[0].box_2d is not None
