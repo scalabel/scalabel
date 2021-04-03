@@ -345,6 +345,8 @@ export interface ConfigType {
   bundleFile: string
   /** Categories */
   categories: string[]
+  /** Category colors */
+  categoryColors: string[]
   /** Attributes */
   attributes: Attribute[]
   /** task id */

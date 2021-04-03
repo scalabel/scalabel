@@ -500,6 +500,7 @@ export function makeTaskConfig(params: Partial<ConfigType> = {}): ConfigType {
     instructionPage: "", // Instruction url
     bundleFile: "",
     categories: [],
+    categoryColors: [],
     attributes: [],
     taskId: "",
     demoMode: false,
