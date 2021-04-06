@@ -1,33 +1,34 @@
-"""Convert coco to scalabel format."""
+"""Convert coco to bdd100k format."""
 import argparse
-import json
-from typing import Any, Dict, List
+from typing import List
 
 from pycocotools.coco import COCO
 
-DictAny = Dict[str, Any]  # type: ignore[misc]
+from .io import save as save_labels
+from .typing import Frame as LabeledFrame
+from .typing import Label
 
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
-    parser = argparse.ArgumentParser(description="coco to scalabel")
+    parser = argparse.ArgumentParser(description="coco to bdd")
     parser.add_argument(
-        "--annFile",
+        "--label-file",
         "-a",
         default="/path/to/coco/label/file",
         help="path to coco label file",
     )
     parser.add_argument(
-        "--save_path",
+        "--save-path",
         "-s",
         default="/save/path",
-        help="path to save scalabel formatted label file",
+        help="path to save bdd formatted label file",
     )
     return parser.parse_args()
 
 
-def transform(label_file: str) -> List[DictAny]:
-    """Transform to scalabel format."""
+def transform(label_file: str) -> List[LabeledFrame]:
+    """Transform to bdd100k format."""
     coco = COCO(label_file)
     img_ids = coco.getImgIds()
     img_ids = sorted(img_ids)
@@ -35,46 +36,42 @@ def transform(label_file: str) -> List[DictAny]:
     cats = coco.loadCats(cat_ids)
     nms = [cat["name"] for cat in cats]
     cat_map = dict(zip(coco.getCatIds(), nms))
-    scalabel_label = []
+    bdd100k_labels = []
     for img_id in img_ids:
         img = coco.loadImgs(img_id)[0]
         ann_ids = coco.getAnnIds(imgIds=img["id"])
         anns = coco.loadAnns(ann_ids)
-        det_dict = {}
-        det_dict["name"] = img["file_name"]
-        det_dict["url"] = img["coco_url"]
-        det_dict["attributes"] = {
-            "weather": "undefined",
-            "scene": "undefined",
-            "timeofday": "undefined",
-        }
-        det_dict["labels"] = []
-        for ann_id, ann in enumerate(anns):
-            label = {
-                "id": ann["id"],
-                "index": ann_id + 1,
-                "category": cat_map[ann["category_id"]],
-                "manualShape": True,
-                "manualAttributes": True,
-                "box2d": {
-                    "x1": ann["bbox"][0],
-                    "y1": ann["bbox"][1],
-                    "x2": ann["bbox"][0] + ann["bbox"][2] - 1,
-                    "y2": ann["bbox"][1] + ann["bbox"][3] - 1,
-                },
-            }
-            det_dict["labels"].append(label)
-        scalabel_label.append(det_dict)
-    return scalabel_label
+        det_dict = LabeledFrame()
+        det_dict.name = img["file_name"]
+        det_dict.url = img["coco_url"]
+        det_dict.labels = []
+        for i, ann in enumerate(anns):
+            label = Label(
+                **{
+                    "id": ann["id"],
+                    "index": i + 1,
+                    "category": cat_map[ann["category_id"]],
+                    "manualShape": True,
+                    "manualAttributes": True,
+                    "box_2d": {
+                        "x1": ann["bbox"][0],
+                        "y1": ann["bbox"][1],
+                        "x2": ann["bbox"][0] + ann["bbox"][2] - 1,
+                        "y2": ann["bbox"][1] + ann["bbox"][3] - 1,
+                    },
+                }
+            )
+            det_dict.labels.append(label)
+        bdd100k_labels.append(det_dict)
+    return bdd100k_labels
 
 
-def main() -> None:
-    """Main."""
+def run() -> None:
+    """Run."""
     args = parse_arguments()
-    scalabel_label = transform(args.annFile)
-    with open(args.save_path, "w") as outfile:
-        json.dump(scalabel_label, outfile)
+    labels = transform(args.label_file)
+    save_labels(args.save_path, labels)
 
 
 if __name__ == "__main__":
-    main()
+    run()
