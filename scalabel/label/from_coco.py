@@ -1,4 +1,4 @@
-"""Convert coco to bdd100k format."""
+"""Convert coco to Scalabel format."""
 import argparse
 from typing import List
 
@@ -28,7 +28,7 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def transform(label_file: str) -> List[LabeledFrame]:
-    """Transform to bdd100k format."""
+    """Transform to Scalabel format."""
     coco = COCO(label_file)
     img_ids = coco.getImgIds()
     img_ids = sorted(img_ids)
@@ -36,7 +36,7 @@ def transform(label_file: str) -> List[LabeledFrame]:
     cats = coco.loadCats(cat_ids)
     nms = [cat["name"] for cat in cats]
     cat_map = dict(zip(coco.getCatIds(), nms))
-    bdd100k_labels = []
+    labels = []
     for img_id in img_ids:
         img = coco.loadImgs(img_id)[0]
         ann_ids = coco.getAnnIds(imgIds=img["id"])
@@ -62,8 +62,8 @@ def transform(label_file: str) -> List[LabeledFrame]:
                 }
             )
             det_dict.labels.append(label)
-        bdd100k_labels.append(det_dict)
-    return bdd100k_labels
+        labels.append(det_dict)
+    return labels
 
 
 def run() -> None:
