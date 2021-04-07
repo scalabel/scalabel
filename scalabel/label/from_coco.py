@@ -13,18 +13,16 @@ from .typing import Box2D, Frame, Label, Poly2D
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
-    parser = argparse.ArgumentParser(description="coco to bdd")
+    parser = argparse.ArgumentParser(description="coco to scalabel")
     parser.add_argument(
-        "--label-file",
-        "-a",
-        default="/path/to/coco/label/file",
+        "--label",
+        "-l",
         help="path to coco label file",
     )
     parser.add_argument(
-        "--save-path",
-        "-s",
-        default="/save/path",
-        help="path to save bdd formatted label file",
+        "--output",
+        "-o",
+        help="path to save scalabel formatted label file",
     )
     return parser.parse_args()
 
@@ -104,19 +102,19 @@ def coco_to_scalabel(
 def run() -> None:
     """Run."""
     args = parse_arguments()
-    with open(args.label_file) as fp:
+    with open(args.label) as fp:
         coco: GtType = json.load(fp)
     scalabel, vid_id2name = coco_to_scalabel(coco)
 
     if vid_id2name is None:
-        save_path = os.path.join(args.save_path, "scalabel.json")
+        save_path = os.path.join(args.output, "scalabel.json")
         save(save_path, scalabel)
     else:
         scalabels = group_and_sort(scalabel)
         for video_anns in scalabels:
             assert video_anns[0].video_name is not None
             save_name = video_anns[0].video_name + ".json"
-            save_path = os.path.join(args.save_path, save_name)
+            save_path = os.path.join(args.output, save_name)
             save(save_path, video_anns)
 
 
