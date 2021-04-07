@@ -80,19 +80,20 @@ def coco_to_scalabel(
 
         anns = sorted(img_id2anns[img_id], key=lambda ann: ann["id"])
         for i, ann in enumerate(anns):
-            label = Label()
-            label.id = ann.get(  # type: ignore
-                "scalabel_id", str(ann.get("instance_id", ann["id"]))
+            label = Label(
+                id=ann.get(
+                    "scalabel_id", str(ann.get("instance_id", ann["id"]))
+                ),
+                index=i + 1,
+                attributes=dict(),
+                category=cat_id2name[ann["category_id"]],
             )
-            label.index = i + 1
-            label.attributes = dict()
-            label.category = cat_id2name[ann["category_id"]]
             if "bbox" in ann:
                 label.box_2d = bbox_to_box2d(ann["bbox"])  # type: ignore
             if "segmentation" in ann:
-                label.poly_2d = polygon_to_poly2ds(
-                    ann["segmentation"]  # type: ignore
-                )
+                # Currently only support conversion from polygon.
+                assert isinstance(ann["segmentation"], list)
+                label.poly_2d = polygon_to_poly2ds(ann["segmentation"])
             frame.labels.append(label)
         scalabel.append(frame)
 

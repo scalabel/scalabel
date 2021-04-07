@@ -195,9 +195,8 @@ def poly2ds_to_mask(
     shape: Tuple[int, int], poly2d: List[Poly2D]
 ) -> np.ndarray:
     """Converting Poly2D to mask."""
-    shape = np.array([shape[0], shape[1]])
     fig = plt.figure(facecolor="0")
-    fig.set_size_inches(shape[::-1] / fig.get_dpi())
+    fig.set_size_inches(shape[1] / fig.get_dpi(), shape[0] / fig.get_dpi())
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
     ax.set_xlim(0, shape[1])
