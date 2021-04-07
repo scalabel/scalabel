@@ -7,19 +7,20 @@ import os.path as osp
 from functools import partial
 from itertools import groupby
 from multiprocessing import Pool
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
-import matplotlib.patches as mpatches  # type: ignore
-import matplotlib.pyplot as plt  # type: ignore
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 import numpy as np
 import toml
-from matplotlib.path import Path  # type: ignore
-from pycocotools import mask as mask_utils
+from matplotlib.path import Path
+from pycocotools import mask as mask_utils  # type: ignore
 from skimage import measure
 from tqdm import tqdm
 
 from ..common.logger import logger
-from .coco_typing import AnnType, CatType, GtType, ImgType, VidType
+from .coco_typing import (AnnType, CatType, GtType, ImgType, PolygonType,
+                          RLEType, VidType)
 from .io import load
 from .typing import Frame, Label, Poly2D
 
@@ -109,8 +110,8 @@ def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
 def process_category(
     category_name: str,
     categories: List[CatType],
-    name_mapping: Dict[str, str] = None,
-    ignore_mapping: Dict[str, str] = None,
+    name_mapping: Optional[Dict[str, str]] = None,
+    ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
 ) -> Tuple[bool, int]:
     """Check whether the category should be ignored and get its ID."""
@@ -120,14 +121,12 @@ def process_category(
     if name_mapping is not None:
         category_name = name_mapping.get(category_name, category_name)
     if category_name not in cat_name2id:
-        if (
-            ignore_as_class
-            or ignore_mapping is None
-            or category_name not in ignore_mapping
-        ):
+        if ignore_as_class:
             category_name = "ignored"
             category_ignored = False
         else:
+            assert ignore_mapping is not None
+            assert category_name in ignore_mapping, "%s" % category_name
             category_name = ignore_mapping[category_name]
             category_ignored = True
     else:
@@ -145,11 +144,11 @@ def get_object_attributes(label: Label, ignore: bool) -> Tuple[int, int]:
     return iscrowd, int(ignore)
 
 
-def set_box_object_geometry(annotation: AnnType, label: Label) -> None:
+def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     """Parsing bbox, area, polygon for bbox ann."""
     box_2d = label.box_2d
     if box_2d is None:
-        return
+        return annotation
     x1 = box_2d.x1
     y1 = box_2d.y1
     x2 = box_2d.x2
@@ -159,12 +158,12 @@ def set_box_object_geometry(annotation: AnnType, label: Label) -> None:
         dict(
             bbox=[x1, y1, x2 - x1 + 1, y2 - y1 + 1],
             area=float((x2 - x1 + 1) * (y2 - y1 + 1)),
-            segmentation=[[x1, y1, x1, y2, x2, y2, x2, y1]],
         )
     )
+    return annotation
 
 
-def poly2patch(
+def poly_to_patch(
     vertices: List[Tuple[float, float]],
     types: str,
     color: Tuple[float, float, float],
@@ -191,6 +190,37 @@ def poly2patch(
     )
 
 
+def poly2ds_to_mask(
+    shape: Tuple[int, int], poly2d: List[Poly2D]
+) -> np.ndarray:
+    """Converting Poly2D to mask."""
+    shape = np.array([shape[0], shape[1]])
+    fig = plt.figure(facecolor="0")
+    fig.set_size_inches(shape[::-1] / fig.get_dpi())
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.axis("off")
+    ax.set_xlim(0, shape[1])
+    ax.set_ylim(0, shape[0])
+    ax.set_facecolor((0, 0, 0, 0))
+    ax.invert_yaxis()
+
+    for poly in poly2d:
+        ax.add_patch(
+            poly_to_patch(
+                poly.vertices,
+                poly.types,
+                color=(1, 1, 1),
+                closed=True,
+            )
+        )
+
+    fig.canvas.draw()
+    mask = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
+    mask = mask.reshape((*shape, -1))[..., 0]
+    plt.close()
+    return mask
+
+
 def close_contour(contour: np.ndarray) -> np.ndarray:
     """Explicitly close the contour."""
     if not np.array_equal(contour[0], contour[-1]):
@@ -199,7 +229,7 @@ def close_contour(contour: np.ndarray) -> np.ndarray:
 
 
 def mask_to_polygon(
-    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: int = 2
+    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: float = 0.5
 ) -> List[List[float]]:
     """Convert BitMask to polygon."""
     polygons = []
@@ -218,9 +248,9 @@ def mask_to_polygon(
         segmentation = [0 if i < 0 else i for i in segmentation]
         for i, _ in enumerate(segmentation):
             if i % 2 == 0:
-                segmentation[i] = (segmentation[i] + x_1).tolist()
+                segmentation[i] = float(segmentation[i] + x_1)
             else:
-                segmentation[i] = (segmentation[i] + y_1).tolist()
+                segmentation[i] = float(segmentation[i] + y_1)
 
         polygons.append(segmentation)
 
@@ -229,10 +259,10 @@ def mask_to_polygon(
 
 def set_seg_object_geometry(
     annotation: AnnType, mask: np.ndarray, mask_mode: str = "rle"
-) -> None:
+) -> AnnType:
     """Parsing bbox, area, polygon from seg ann."""
     if not mask.sum():
-        return
+        return annotation
 
     if mask_mode == "polygon":
         x_inds = np.nonzero(np.sum(mask, axis=0))[0]
@@ -240,57 +270,36 @@ def set_seg_object_geometry(
         x1, x2 = np.min(x_inds), np.max(x_inds)
         y1, y2 = np.min(y_inds), np.max(y_inds)
         mask = mask[y1 : y2 + 1, x1 : x2 + 1]
-        segmentation = mask_to_polygon(mask, x1, y1)
+        polygon: PolygonType = mask_to_polygon(mask, x1, y1)
         bbox = np.array([x1, y1, x2 - x1 + 1, y2 - y1 + 1]).tolist()
         area = np.sum(mask).tolist()
+        annotation.update(dict(segmentation=polygon))
     elif mask_mode == "rle":
-        segmentation = mask_utils.encode(
+        rle: RLEType = mask_utils.encode(
             np.array(mask[:, :, None], order="F", dtype="uint8")
         )[0]
-        segmentation["counts"] = segmentation["counts"].decode(  # type: ignore
-            "utf-8"
-        )
-        bbox = mask_utils.toBbox(segmentation).tolist()
-        area = mask_utils.area(segmentation).tolist()
+        rle["counts"] = rle["counts"].decode("utf-8")  # type: ignore
+        bbox = mask_utils.toBbox(rle).tolist()
+        area = mask_utils.area(rle).tolist()
+        annotation.update(dict(segmentation=rle))
 
-    annotation.update(dict(bbox=bbox, area=area, segmentation=segmentation))
+    annotation.update(dict(bbox=bbox, area=area))
+    return annotation
 
 
-def poly2ds2coco(
+def poly2ds_to_coco(
     shape: Tuple[int, int],
     annotation: AnnType,
     poly2d: List[Poly2D],
     mask_mode: str,
 ) -> AnnType:
     """Converting Poly2D to coco format."""
-    fig = plt.figure(facecolor="0")
-    fig.set_size_inches(shape[::-1] / fig.get_dpi())
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.axis("off")
-    ax.set_xlim(0, shape[1])
-    ax.set_ylim(0, shape[0])
-    ax.set_facecolor((0, 0, 0, 0))
-    ax.invert_yaxis()
-
-    for poly in poly2d:
-        ax.add_patch(
-            poly2patch(
-                poly.vertices,
-                poly.types,
-                color=(1, 1, 1),
-                closed=True,
-            )
-        )
-
-    fig.canvas.draw()
-    mask = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
-    mask = mask.reshape((*shape, -1))[..., 0]
-    plt.close()
+    mask = poly2ds_to_mask(shape, poly2d)
     set_seg_object_geometry(annotation, mask, mask_mode)
     return annotation
 
 
-def pol2dslist2coco(
+def pol2ds_list_to_coco(
     shape: Tuple[int, int],
     annotations: List[AnnType],
     poly_2ds: List[List[Poly2D]],
@@ -300,7 +309,7 @@ def pol2dslist2coco(
     """Execute the Poly2D to coco conversion in parallel."""
     pool = Pool(nproc)
     annotations = pool.starmap(
-        partial(poly2ds2coco, shape=shape, mask_mode=mask_mode),
+        partial(poly2ds_to_coco, shape=shape, mask_mode=mask_mode),
         tqdm(
             zip(annotations, poly_2ds),
             total=len(annotations),
@@ -316,8 +325,8 @@ def scalabel2coco_detection(
     shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
-    name_mapping: Dict[str, str] = None,
-    ignore_mapping: Dict[str, str] = None,
+    name_mapping: Optional[Dict[str, str]] = None,
+    ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
     remove_ignore: bool = False,
 ) -> GtType:
@@ -333,6 +342,8 @@ def scalabel2coco_detection(
             width=shape[1],
             id=image_id,
         )
+        if image_anns.url is not None:
+            image["coco_url"] = image_anns.url
         images.append(image)
 
         for label in image_anns.labels:
@@ -358,7 +369,7 @@ def scalabel2coco_detection(
                 iscrowd=iscrowd,
                 ignore=ignore,
             )
-            set_box_object_geometry(annotation, label)
+            annotation = set_box_object_geometry(annotation, label)
             annotations.append(annotation)
 
             ann_id += 1
@@ -376,8 +387,8 @@ def scalabel2coco_ins_seg(
     shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
-    name_mapping: Dict[str, str] = None,
-    ignore_mapping: Dict[str, str] = None,
+    name_mapping: Optional[Dict[str, str]] = None,
+    ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
     remove_ignore: bool = False,
     mask_mode: str = "rle",
@@ -396,6 +407,8 @@ def scalabel2coco_ins_seg(
             width=shape[1],
             id=image_id,
         )
+        if image_anns.url is not None:
+            image["coco_url"] = image_anns.url
         images.append(image)
 
         for label in image_anns.labels:
@@ -427,7 +440,7 @@ def scalabel2coco_ins_seg(
             ann_id += 1
         image_id += 1
 
-    annotations = pol2dslist2coco(
+    annotations = pol2ds_list_to_coco(
         shape, annotations, poly_2ds, mask_mode, nproc
     )
     return GtType(
@@ -455,8 +468,8 @@ def scalabel2coco_box_track(
     shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
-    name_mapping: Dict[str, str] = None,
-    ignore_mapping: Dict[str, str] = None,
+    name_mapping: Optional[Dict[str, str]] = None,
+    ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
     remove_ignore: bool = False,
 ) -> GtType:
@@ -484,6 +497,8 @@ def scalabel2coco_box_track(
                 width=shape[1],
                 id=image_id,
             )
+            if image_anns.url is not None:
+                image["coco_url"] = image_anns.url
             images.append(image)
 
             for label in image_anns.labels:
@@ -506,7 +521,7 @@ def scalabel2coco_box_track(
                 iscrowd, ignore = get_object_attributes(
                     label, category_ignored
                 )
-                ann = AnnType(
+                annotation = AnnType(
                     id=ann_id,
                     image_id=image_id,
                     category_id=category_id,
@@ -515,8 +530,8 @@ def scalabel2coco_box_track(
                     iscrowd=iscrowd,
                     ignore=ignore,
                 )
-                set_box_object_geometry(ann, label)
-                annotations.append(ann)
+                annotation = set_box_object_geometry(annotation, label)
+                annotations.append(annotation)
 
                 ann_id += 1
             image_id += 1
@@ -534,8 +549,8 @@ def scalabel2coco_seg_track(
     shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
-    name_mapping: Dict[str, str] = None,
-    ignore_mapping: Dict[str, str] = None,
+    name_mapping: Optional[Dict[str, str]] = None,
+    ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
     remove_ignore: bool = False,
     mask_mode: str = "rle",
@@ -565,6 +580,8 @@ def scalabel2coco_seg_track(
                 width=shape[1],
                 id=image_id,
             )
+            if image_anns.url is not None:
+                image["coco_url"] = image_anns.url
             images.append(image)
 
             for label in image_anns.labels:
@@ -603,7 +620,7 @@ def scalabel2coco_seg_track(
             image_id += 1
         video_id += 1
 
-    annotations = pol2dslist2coco(
+    annotations = pol2ds_list_to_coco(
         shape, annotations, poly_2ds, mask_mode, nproc
     )
     return GtType(
@@ -630,7 +647,7 @@ def read(inputs: str) -> List[Frame]:
 
 
 def load_default_cfgs(
-    mode: str,
+    mode: str, ignore_as_class: bool = False
 ) -> Tuple[List[CatType], Dict[str, str], Dict[str, str]]:
     """Load default configs from the toml file."""
     cur_dir = osp.dirname(osp.abspath(__file__))
@@ -639,8 +656,15 @@ def load_default_cfgs(
 
     categories, cat_extensions = cfgs["categories"], cfgs["cat_extensions"]
     name_mapping, ignore_mapping = cfgs["name_mapping"], cfgs["ignore_mapping"]
-    if mode != "det":
+    if mode == "det":
         categories += cat_extensions
+
+    if ignore_as_class:
+        categories.append(
+            CatType(
+                supercategory="none", id=len(categories) + 1, name="ignored"
+            )
+        )
 
     return categories, name_mapping, ignore_mapping
 
@@ -648,7 +672,9 @@ def load_default_cfgs(
 def main() -> None:
     """Main."""
     args = parse_arguments()
-    categories, name_mapping, ignore_mapping = load_default_cfgs(args.mode)
+    categories, name_mapping, ignore_mapping = load_default_cfgs(
+        args.mode, args.ignore_as_class
+    )
 
     logger.info("Loading Scalabel jsons...")
     frames = read(args.label_dir)

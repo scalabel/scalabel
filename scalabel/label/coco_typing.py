@@ -1,7 +1,7 @@
 """Type definitions for the COCO format."""
 
 import sys
-from typing import List, Optional
+from typing import List, Optional, Union
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
@@ -17,6 +17,16 @@ class CatType(TypedDict):
     name: str
 
 
+PolygonType = List[List[float]]
+
+
+class RLEType(TypedDict):
+    """Defines types of polygons in GT."""
+
+    counts: List[int]
+    size: List[int]
+
+
 class AnnType(TypedDict, total=False):
     """Define types of annotations in GT."""
 
@@ -29,7 +39,7 @@ class AnnType(TypedDict, total=False):
     scalabel_id: Optional[str]
     bbox: Optional[List[float]]
     area: Optional[float]
-    segmentation: Optional[List[List[float]]]
+    segmentation: Optional[Union[PolygonType, RLEType]]
 
 
 class ImgType(TypedDict, total=False):
@@ -39,6 +49,7 @@ class ImgType(TypedDict, total=False):
     file_name: str
     height: int
     width: int
+    coco_url: Optional[str]
     video_id: Optional[int]
     frame_id: Optional[int]
 
