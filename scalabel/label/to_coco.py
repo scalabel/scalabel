@@ -215,7 +215,7 @@ def poly2ds_to_mask(
         )
 
     fig.canvas.draw()
-    mask = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
+    mask: np.ndarray = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
     mask = mask.reshape((*shape, -1))[..., 0]
     plt.close()
     return mask
