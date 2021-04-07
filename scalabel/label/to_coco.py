@@ -695,8 +695,8 @@ def main() -> None:
     else:
         convert_func = partial(
             dict(
-                det=scalabel2coco_detection,
-                box_track=scalabel2coco_box_track,
+                ins_seg=scalabel2coco_ins_seg,
+                seg_track=scalabel2coco_seg_track,
             )[args.mode],
             mask_mode=args.mask_mode,
             nproc=args.nproc,
