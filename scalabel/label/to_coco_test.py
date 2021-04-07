@@ -7,10 +7,17 @@ import numpy as np
 
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
-from .to_coco import (group_and_sort, load_default_cfgs, mask_to_polygon,
-                      poly2ds_to_mask, process_category, read,
-                      scalabel2coco_detection, set_box_object_geometry,
-                      set_seg_object_geometry)
+from .to_coco import (
+    group_and_sort,
+    load_default_cfgs,
+    mask_to_polygon,
+    poly2ds_to_mask,
+    process_category,
+    read,
+    scalabel2coco_detection,
+    set_box_object_geometry,
+    set_seg_object_geometry,
+)
 from .typing import Box2D, Frame, Label, Poly2D
 
 SHAPE = (720, 1280)

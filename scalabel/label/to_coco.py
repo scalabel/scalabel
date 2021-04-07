@@ -19,8 +19,15 @@ from skimage import measure
 from tqdm import tqdm
 
 from ..common.logger import logger
-from .coco_typing import (AnnType, CatType, GtType, ImgType, PolygonType,
-                          RLEType, VidType)
+from .coco_typing import (
+    AnnType,
+    CatType,
+    GtType,
+    ImgType,
+    PolygonType,
+    RLEType,
+    VidType,
+)
 from .io import load
 from .typing import Frame, Label, Poly2D
 
