@@ -29,14 +29,15 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scalabel to COCO format")
     parser.add_argument(
         "-l",
-        "--label_dir",
-        default="/path/to/scalabel/label/",
-        help="root directory of Scalabel label Json files",
+        "--label",
+        help=(
+            "root directory of Scalabel label Json files or path to a label "
+            "json file"
+        ),
     )
     parser.add_argument(
-        "-s",
-        "--save_path",
-        default="/save/path",
+        "-o",
+        "--output",
         help="path to save coco formatted label file",
     )
     parser.add_argument(
@@ -651,7 +652,7 @@ def main() -> None:
     categories, name_mapping, ignore_mapping = load_default_cfgs(args.mode)
 
     logger.info("Loading Scalabel jsons...")
-    frames = read(args.label_dir)
+    frames = read(args.label)
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
@@ -680,7 +681,7 @@ def main() -> None:
     )
 
     logger.info("Saving converted annotations...")
-    with open(args.save_path, "w") as f:
+    with open(args.output, "w") as f:
         json.dump(coco, f)
 
 

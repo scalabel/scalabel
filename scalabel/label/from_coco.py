@@ -11,17 +11,15 @@ from .typing import Label
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
-    parser = argparse.ArgumentParser(description="coco to bdd")
+    parser = argparse.ArgumentParser(description="coco to scalabel")
     parser.add_argument(
-        "--label-file",
-        "-a",
-        default="/path/to/coco/label/file",
+        "--label",
+        "-l",
         help="path to coco label file",
     )
     parser.add_argument(
-        "--save-path",
-        "-s",
-        default="/save/path",
+        "--output",
+        "-o",
         help="path to save bdd formatted label file",
     )
     return parser.parse_args()
@@ -51,8 +49,6 @@ def transform(label_file: str) -> List[LabeledFrame]:
                     "id": ann["id"],
                     "index": i + 1,
                     "category": cat_map[ann["category_id"]],
-                    "manualShape": True,
-                    "manualAttributes": True,
                     "box_2d": {
                         "x1": ann["bbox"][0],
                         "y1": ann["bbox"][1],
@@ -69,8 +65,8 @@ def transform(label_file: str) -> List[LabeledFrame]:
 def run() -> None:
     """Run."""
     args = parse_arguments()
-    labels = transform(args.label_file)
-    save_labels(args.save_path, labels)
+    labels = transform(args.label)
+    save_labels(args.output, labels)
 
 
 if __name__ == "__main__":
