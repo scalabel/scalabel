@@ -8,9 +8,10 @@ import numpy as np
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
 from .to_coco import (
+    DEFAULT_COCO_CONFIG,
     box2d_to_bbox,
     group_and_sort,
-    load_default_cfgs,
+    load_coco_config,
     mask_to_polygon,
     poly2ds_to_mask,
     process_category,
@@ -51,8 +52,9 @@ class TestProcessCategory(unittest.TestCase):
 
     def test_ignore_as_class(self) -> None:
         """Check the case ignore_as_class as True."""
-        categories, name_mapping, ignore_mapping = load_default_cfgs(
+        categories, name_mapping, ignore_mapping = load_coco_config(
             "ins_seg",
+            DEFAULT_COCO_CONFIG,
             ignore_as_class=True,
         )
         ignored, cat_id = process_category(
@@ -67,8 +69,9 @@ class TestProcessCategory(unittest.TestCase):
 
     def test_not_ignore(self) -> None:
         """Check the case ignore_as_class as False."""
-        categories, name_mapping, ignore_mapping = load_default_cfgs(
+        categories, name_mapping, ignore_mapping = load_coco_config(
             "det",
+            DEFAULT_COCO_CONFIG,
             ignore_as_class=False,
         )
         process_category_ = partial(
@@ -144,7 +147,9 @@ class TestScalabelToCOCODetection(unittest.TestCase):
     """Test cases for converting Scalabel detections to COCO format."""
 
     scalabel = read(get_test_file("scalabel_det.json"))
-    categories, name_mapping, ignore_mapping = load_default_cfgs("det")
+    categories, name_mapping, ignore_mapping = load_coco_config(
+        "det", DEFAULT_COCO_CONFIG
+    )
     coco = scalabel2coco_detection(
         SHAPE, scalabel, categories, name_mapping, ignore_mapping
     )

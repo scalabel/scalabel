@@ -31,6 +31,10 @@ from .coco_typing import (
 from .io import load
 from .typing import Box2D, Frame, Label, Poly2D
 
+DEFAULT_COCO_CONFIG = osp.join(
+    osp.dirname(osp.abspath(__file__)), "configs.toml"
+)
+
 
 def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
@@ -93,6 +97,12 @@ def parse_arguments() -> argparse.Namespace:
         type=int,
         default=4,
         help="number of processes for mot evaluation",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="",
+        help="Configuration for COCO categories",
     )
     return parser.parse_args()
 
@@ -652,13 +662,11 @@ def read(inputs: str) -> List[Frame]:
     return outputs
 
 
-def load_default_cfgs(
-    mode: str, ignore_as_class: bool = False
+def load_coco_config(
+    mode: str, filepath: str, ignore_as_class: bool = False
 ) -> Tuple[List[CatType], Dict[str, str], Dict[str, str]]:
     """Load default configs from the toml file."""
-    cur_dir = osp.dirname(osp.abspath(__file__))
-    cfg_file = osp.join(cur_dir, "configs.toml")
-    cfgs = toml.load(cfg_file)
+    cfgs = toml.load(filepath)
 
     categories, cat_extensions = cfgs["categories"], cfgs["cat_extensions"]
     name_mapping, ignore_mapping = cfgs["name_mapping"], cfgs["ignore_mapping"]
@@ -675,11 +683,12 @@ def load_default_cfgs(
     return categories, name_mapping, ignore_mapping
 
 
-def main() -> None:
-    """Main."""
-    args = parse_arguments()
-    categories, name_mapping, ignore_mapping = load_default_cfgs(
-        args.mode, args.ignore_as_class
+def run(args: argparse.Namespace) -> None:
+    """Run."""
+    if args.config == "":
+        args.config = DEFAULT_COCO_CONFIG
+    categories, name_mapping, ignore_mapping = load_coco_config(
+        args.mode, args.config, args.ignore_as_class
     )
 
     logger.info("Loading Scalabel jsons...")
@@ -717,4 +726,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run(parse_arguments())

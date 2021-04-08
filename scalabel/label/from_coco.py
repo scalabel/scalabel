@@ -100,9 +100,8 @@ def coco_to_scalabel(
     return scalabel, vid_id2name
 
 
-def run() -> None:
+def run(args: argparse.Namespace) -> None:
     """Run."""
-    args = parse_arguments()
     with open(args.label) as fp:
         coco: GtType = json.load(fp)
     scalabel, vid_id2name = coco_to_scalabel(coco)
@@ -120,4 +119,4 @@ def run() -> None:
 
 
 if __name__ == "__main__":
-    run()
+    run(parse_arguments())
