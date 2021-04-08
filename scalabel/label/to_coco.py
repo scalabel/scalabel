@@ -29,7 +29,7 @@ from .coco_typing import (
     VidType,
 )
 from .io import load
-from .typing import Frame, Label, Poly2D
+from .typing import Box2D, Frame, Label, Poly2D
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -152,22 +152,20 @@ def get_object_attributes(label: Label, ignore: bool) -> Tuple[int, int]:
     return iscrowd, int(ignore)
 
 
+def box2d_to_bbox(box_2d: Box2D) -> List[float]:
+    """Convert Scalabel Box2D into COCO bbox."""
+    width = box_2d.x2 - box_2d.x1 + 1
+    height = box_2d.y2 - box_2d.y1 + 1
+    return [box_2d.x1, box_2d.y1, height, width]
+
+
 def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     """Parsing bbox, area, polygon for bbox ann."""
     box_2d = label.box_2d
     if box_2d is None:
         return annotation
-    x1 = box_2d.x1
-    y1 = box_2d.y1
-    x2 = box_2d.x2
-    y2 = box_2d.y2
-
-    annotation.update(
-        dict(
-            bbox=[x1, y1, x2 - x1 + 1, y2 - y1 + 1],
-            area=float((x2 - x1 + 1) * (y2 - y1 + 1)),
-        )
-    )
+    bbox = box2d_to_bbox(box_2d)
+    annotation.update(dict(bbox=bbox, area=float(bbox[2] * bbox[3])))
     return annotation
 
 
@@ -274,11 +272,12 @@ def set_seg_object_geometry(
     if mask_mode == "polygon":
         x_inds = np.nonzero(np.sum(mask, axis=0))[0]
         y_inds = np.nonzero(np.sum(mask, axis=1))[0]
-        x1, x2 = np.min(x_inds), np.max(x_inds)
-        y1, y2 = np.min(y_inds), np.max(y_inds)
+        x1, x2 = int(np.min(x_inds)), int(np.max(x_inds))
+        y1, y2 = int(np.min(y_inds)), int(np.max(y_inds))
         mask = mask[y1 : y2 + 1, x1 : x2 + 1]
         polygon: PolygonType = mask_to_polygon(mask, x1, y1)
-        bbox = np.array([x1, y1, x2 - x1 + 1, y2 - y1 + 1]).tolist()
+        box_2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+        bbox = box2d_to_bbox(box_2d)
         area = np.sum(mask).tolist()
         annotation.update(dict(segmentation=polygon))
     elif mask_mode == "rle":

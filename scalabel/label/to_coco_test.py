@@ -8,6 +8,7 @@ import numpy as np
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
 from .to_coco import (
+    box2d_to_bbox,
     group_and_sort,
     load_default_cfgs,
     mask_to_polygon,
@@ -15,10 +16,9 @@ from .to_coco import (
     process_category,
     read,
     scalabel2coco_detection,
-    set_box_object_geometry,
     set_seg_object_geometry,
 )
-from .typing import Box2D, Frame, Label, Poly2D
+from .typing import Box2D, Frame, Poly2D
 
 SHAPE = (720, 1280)
 
@@ -92,14 +92,8 @@ class TestBox2DToCoco(unittest.TestCase):
     def test_box2d_to_coco(self) -> None:
         """Check the Box2D to bbox conversion."""
         box_2d = Box2D(x1=10, x2=19, y1=10, y2=19)
-        label = Label(id="tmp", box_2d=box_2d)
-        ann = AnnType(id=1, image_id=1, category_id=1, iscrowd=0, ignore=0)
-        ann = set_box_object_geometry(ann, label)
-
-        self.assertListEqual(
-            ann["bbox"], [10.0, 10.0, 10.0, 10.0]  # type: ignore
-        )
-        self.assertAlmostEqual(ann["area"], 100.0)  # type: ignore
+        bbox = box2d_to_bbox(box_2d)
+        self.assertListEqual(bbox, [10.0, 10.0, 10.0, 10.0])
 
 
 class TestPoly2DToCoco(unittest.TestCase):
