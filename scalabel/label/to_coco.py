@@ -101,7 +101,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=str,
-        default="",
+        default=DEFAULT_COCO_CONFIG,
         help="Configuration for COCO categories",
     )
     return parser.parse_args()
@@ -685,8 +685,6 @@ def load_coco_config(
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    if args.config == "":
-        args.config = DEFAULT_COCO_CONFIG
     categories, name_mapping, ignore_mapping = load_coco_config(
         args.mode, args.config, args.ignore_as_class
     )
