@@ -91,9 +91,9 @@ class TestBox2DToCoco(unittest.TestCase):
 
     def test_box2d_to_coco(self) -> None:
         """Check the Box2D to bbox conversion."""
-        box_2d = Box2D(x1=10, x2=19, y1=10, y2=19)
+        box_2d = Box2D(x1=10, x2=29, y1=10, y2=19)
         bbox = box2d_to_bbox(box_2d)
-        self.assertListEqual(bbox, [10.0, 10.0, 10.0, 10.0])
+        self.assertListEqual(bbox, [10.0, 10.0, 20.0, 10.0])
 
 
 class TestPoly2DToCoco(unittest.TestCase):

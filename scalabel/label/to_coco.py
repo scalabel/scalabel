@@ -156,7 +156,7 @@ def box2d_to_bbox(box_2d: Box2D) -> List[float]:
     """Convert Scalabel Box2D into COCO bbox."""
     width = box_2d.x2 - box_2d.x1 + 1
     height = box_2d.y2 - box_2d.y1 + 1
-    return [box_2d.x1, box_2d.y1, height, width]
+    return [box_2d.x1, box_2d.y1, width, height]
 
 
 def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
