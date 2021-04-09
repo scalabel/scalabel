@@ -32,6 +32,7 @@ setuptools.setup(
         "Flask-Cors",
         "Flask",
         "joblib",
+        "matplotlib",
         "numpy",
         "Pillow",
         "plyfile",
@@ -43,6 +44,8 @@ setuptools.setup(
         "python-dateutil",
         "PyYAML",
         "requests",
+        "scikit-image",
         "tqdm",
+        "toml",
     ],
 )
