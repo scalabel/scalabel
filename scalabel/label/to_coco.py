@@ -53,14 +53,12 @@ def parse_arguments() -> argparse.Namespace:
         help="path to save coco formatted label file",
     )
     parser.add_argument(
-        "-h",
         "--height",
         type=int,
         default=720,
         help="Height of images",
     )
     parser.add_argument(
-        "-w",
         "--width",
         type=int,
         default=1280,
