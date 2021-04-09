@@ -4,8 +4,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
-DictStrAny = Dict[str, Any]  # type: ignore[misc]
-
 
 class Box2D(BaseModel):
     """Box 2D."""
