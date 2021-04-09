@@ -15,6 +15,7 @@ def test_parse() -> None:
     frame = frames[0]
     assert frame.name == "1"
     assert frame.video_name == "a"
+    assert frame.labels is not None
     assert frame.labels[0].id == "1"
     assert frame.labels[0].attributes is not None
     assert frame.labels[0].attributes["crowd"] is False
@@ -36,6 +37,8 @@ def test_load() -> None:
     )
     assert labels[0].frame_index == 0
     assert labels[-1].frame_index == 9
+    assert labels[0].labels is not None
+    assert labels[-1].labels is not None
     assert labels[0].labels[0].id == "0"
     assert labels[0].labels[0].box_2d is not None
     assert labels[-1].labels[-1].box_2d is not None
@@ -63,6 +66,7 @@ def test_dump() -> None:
     assert labels_dict[-1]["frameIndex"] == labels[-1].frame_index
     assert "box3d" not in labels_dict[0]["labels"][0]
     assert "box2d" in labels_dict[0]["labels"][0]
+    assert labels[0].labels is not None
     assert labels[0].labels[0].box_2d is not None
     assert (
         labels_dict[0]["labels"][0]["box2d"]["x1"]

@@ -70,7 +70,8 @@ def coco_to_scalabel(
     img_ids = sorted(img_id2anns.keys())
     for img_id in img_ids:
         img = img_id2img[img_id]
-        frame = Frame(name=os.path.split(img["file_name"])[-1], labels=[])
+        frame = Frame(name=os.path.split(img["file_name"])[-1])
+        frame.labels = []
         if "coco_url" in img:
             frame.url = img["coco_url"]
         if vid_id2name is not None and "video_id" in img:

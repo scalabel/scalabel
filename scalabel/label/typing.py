@@ -89,7 +89,7 @@ class Frame(BaseModel):
     timestamp: Optional[int] = None
     frame_index: Optional[int] = None
     size: Optional[List[int]] = None
-    labels: List[Label]
+    labels: Optional[List[Label]] = None
 
     def __init__(self, **data: Any) -> None:  # type: ignore
         """Init structure and convert the id type to string."""
