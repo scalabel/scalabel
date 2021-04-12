@@ -12,12 +12,12 @@ from typing import Dict, List, Optional, Tuple
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-import toml
 from matplotlib.path import Path
 from pycocotools import mask as mask_utils  # type: ignore
 from skimage import measure
 from tqdm import tqdm
 
+from ..common.io import load_config
 from ..common.logger import logger
 from .coco_typing import (
     AnnType,
@@ -674,8 +674,8 @@ def read(inputs: str) -> List[Frame]:
 def load_coco_config(
     mode: str, filepath: str, ignore_as_class: bool = False
 ) -> Tuple[List[CatType], Dict[str, str], Dict[str, str]]:
-    """Load default configs from the toml file."""
-    cfgs = toml.load(filepath)
+    """Load default configs from a config file."""
+    cfgs = load_config(filepath)
 
     categories, cat_extensions = cfgs["categories"], cfgs["cat_extensions"]
     name_mapping, ignore_mapping = cfgs["name_mapping"], cfgs["ignore_mapping"]
