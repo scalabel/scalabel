@@ -6,7 +6,7 @@ person = "pedestrian"
 van = "car"
 
 [ignore_mapping]
-"other person" = "pedestrain"
+"other person" = "pedestrian"
 "other vehicle" = "car"
 "trailer" = "truck"
 

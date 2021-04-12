@@ -62,16 +62,19 @@ def coco_to_scalabel(
         category["id"]: category["name"] for category in coco["categories"]
     }
 
-    img_id2anns: Dict[int, Iterable[AnnType]] = dict(
-        groupby(coco["annotations"], lambda ann: ann["image_id"])
-    )
+    img_id2anns: Dict[int, Iterable[AnnType]] = {
+        img_id: list(anns)
+        for img_id, anns in groupby(
+            coco["annotations"], lambda ann: ann["image_id"]
+        )
+    }
+    assert len(set(img_id2img.keys()) - set(img_id2anns.keys())) == 0
 
     scalabel: List[Frame] = []
-    img_ids = sorted(img_id2anns.keys())
+    img_ids = sorted(img_id2img.keys())
     for img_id in img_ids:
         img = img_id2img[img_id]
         frame = Frame(name=os.path.split(img["file_name"])[-1])
-        frame.labels = []
         if "coco_url" in img:
             frame.url = img["coco_url"]
         if vid_id2name is not None and "video_id" in img:
@@ -79,6 +82,7 @@ def coco_to_scalabel(
         if "frame_id" in img:
             frame.frame_index = img["frame_id"]
 
+        frame.labels = []
         anns = sorted(img_id2anns[img_id], key=lambda ann: ann["id"])
         for i, ann in enumerate(anns):
             label = Label(
@@ -108,10 +112,12 @@ def run(args: argparse.Namespace) -> None:
     scalabel, vid_id2name = coco_to_scalabel(coco)
 
     if vid_id2name is None:
-        save_path = os.path.join(args.output, "scalabel.json")
-        save(save_path, scalabel)
+        assert args.output.endswith(".json"), "output should be a json file"
+        save(args.output, scalabel)
     else:
         scalabels = group_and_sort(scalabel)
+        if not os.path.isdir(args.output):
+            os.makedirs(args.output)
         for video_anns in scalabels:
             assert video_anns[0].video_name is not None
             save_name = video_anns[0].video_name + ".json"
