@@ -48,5 +48,5 @@ setuptools.setup(
         "tqdm",
         "toml",
     ],
-    data_files=[("", ["scalabel/label/configs.toml"])],
+    data_files=[("scalabel/label", ["scalabel/label/configs.toml"])],
 )
