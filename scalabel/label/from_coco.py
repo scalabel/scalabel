@@ -68,7 +68,6 @@ def coco_to_scalabel(
             coco["annotations"], lambda ann: ann["image_id"]
         )
     }
-    assert len(set(img_id2img.keys()) - set(img_id2anns.keys())) == 0
 
     scalabel: List[Frame] = []
     img_ids = sorted(img_id2img.keys())
@@ -81,6 +80,9 @@ def coco_to_scalabel(
             frame.video_name = vid_id2name[img["video_id"]]  # type: ignore
         if "frame_id" in img:
             frame.frame_index = img["frame_id"]
+
+        if img_id not in img_id2anns:
+            continue
 
         frame.labels = []
         anns = sorted(img_id2anns[img_id], key=lambda ann: ann["id"])
