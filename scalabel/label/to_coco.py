@@ -9,9 +9,6 @@ from itertools import groupby
 from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple
 
-import matplotlib
-
-matplotlib.use("Agg")  # isort: skip, pylint: disable=C0413
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
