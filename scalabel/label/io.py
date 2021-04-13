@@ -5,7 +5,8 @@ from typing import Any, List, Union
 
 import humps
 
-from .typing import DictStrAny, Frame
+from ..common.typing import DictStrAny
+from .typing import Frame
 
 
 def load(filepath: str) -> List[Frame]:
