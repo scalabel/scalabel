@@ -302,9 +302,9 @@ def set_seg_object_geometry(
 
 
 def poly2ds_to_coco(
-    shape: Tuple[int, int],
     annotation: AnnType,
     poly2d: List[Poly2D],
+    shape: Tuple[int, int],
     mask_mode: str,
 ) -> AnnType:
     """Converting Poly2D to coco format."""
@@ -345,11 +345,12 @@ def scalabel2coco_detection(
     remove_ignore: bool = False,
 ) -> GtType:
     """Convert Scalabel format to COCO detection."""
-    image_id, ann_id = 1, 1
+    image_id, ann_id = 0, 0
     images: List[ImgType] = []
     annotations: List[AnnType] = []
 
     for image_anns in tqdm(frames):
+        image_id += 1
         image = ImgType(
             file_name=image_anns.name,
             height=shape[0],
@@ -359,6 +360,9 @@ def scalabel2coco_detection(
         if image_anns.url is not None:
             image["coco_url"] = image_anns.url
         images.append(image)
+
+        if image_anns.labels is None:
+            continue
 
         for label in image_anns.labels:
             if label.box_2d is None:
@@ -375,6 +379,7 @@ def scalabel2coco_detection(
                 continue
 
             iscrowd, ignore = get_object_attributes(label, category_ignored)
+            ann_id += 1
             annotation = AnnType(
                 id=ann_id,
                 image_id=image_id,
@@ -383,11 +388,10 @@ def scalabel2coco_detection(
                 iscrowd=iscrowd,
                 ignore=ignore,
             )
+            if label.score is not None:
+                annotation["score"] = label.score
             annotation = set_box_object_geometry(annotation, label)
             annotations.append(annotation)
-
-            ann_id += 1
-        image_id += 1
 
     return GtType(
         type="instance",
@@ -409,12 +413,13 @@ def scalabel2coco_ins_seg(
     nproc: int = 4,
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
-    image_id, ann_id = 1, 1
+    image_id, ann_id = 0, 0
     images: List[ImgType] = []
     annotations: List[AnnType] = []
     poly_2ds: List[List[Poly2D]] = []
 
     for image_anns in tqdm(frames):
+        image_id += 1
         image = ImgType(
             file_name=image_anns.name,
             height=shape[0],
@@ -424,6 +429,9 @@ def scalabel2coco_ins_seg(
         if image_anns.url is not None:
             image["coco_url"] = image_anns.url
         images.append(image)
+
+        if image_anns.labels is None:
+            continue
 
         for label in image_anns.labels:
             if label.poly_2d is None:
@@ -440,6 +448,7 @@ def scalabel2coco_ins_seg(
                 continue
 
             iscrowd, ignore = get_object_attributes(label, category_ignored)
+            ann_id += 1
             annotation = AnnType(
                 id=ann_id,
                 image_id=image_id,
@@ -448,11 +457,10 @@ def scalabel2coco_ins_seg(
                 iscrowd=iscrowd,
                 ignore=ignore,
             )
+            if label.score is not None:
+                annotation["score"] = label.score
             annotations.append(annotation)
             poly_2ds.append(label.poly_2d)
-
-            ann_id += 1
-        image_id += 1
 
     annotations = pol2ds_list_to_coco(
         shape, annotations, poly_2ds, mask_mode, nproc
@@ -489,7 +497,7 @@ def scalabel2coco_box_track(
 ) -> GtType:
     """Converting Scalabel Box Tracking Set to COCO format."""
     frames_list = group_and_sort(frames)
-    video_id, image_id, ann_id = 1, 1, 1
+    video_id, image_id, ann_id = 0, 0, 0
     videos: List[VidType] = []
     images: List[ImgType] = []
     annotations: List[AnnType] = []
@@ -498,11 +506,13 @@ def scalabel2coco_box_track(
         global_instance_id: int = 1
         instance_id_maps: Dict[str, int] = dict()
 
+        video_id += 1
         video_name = video_anns[0].video_name
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
         for image_anns in video_anns:
+            image_id += 1
             image = ImgType(
                 video_id=video_id,
                 frame_id=image_anns.frame_index,
@@ -514,6 +524,9 @@ def scalabel2coco_box_track(
             if image_anns.url is not None:
                 image["coco_url"] = image_anns.url
             images.append(image)
+
+            if image_anns.labels is None:
+                continue
 
             for label in image_anns.labels:
                 if label.box_2d is None:
@@ -535,6 +548,8 @@ def scalabel2coco_box_track(
                 iscrowd, ignore = get_object_attributes(
                     label, category_ignored
                 )
+
+                ann_id += 1
                 annotation = AnnType(
                     id=ann_id,
                     image_id=image_id,
@@ -544,12 +559,10 @@ def scalabel2coco_box_track(
                     iscrowd=iscrowd,
                     ignore=ignore,
                 )
+                if label.score is not None:
+                    annotation["score"] = label.score
                 annotation = set_box_object_geometry(annotation, label)
                 annotations.append(annotation)
-
-                ann_id += 1
-            image_id += 1
-        video_id += 1
 
     return GtType(
         categories=categories,
@@ -572,7 +585,7 @@ def scalabel2coco_seg_track(
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     frames_list = group_and_sort(frames)
-    video_id, image_id, ann_id = 1, 1, 1
+    video_id, image_id, ann_id = 0, 0, 0
     videos: List[VidType] = []
     images: List[ImgType] = []
     annotations: List[AnnType] = []
@@ -582,12 +595,13 @@ def scalabel2coco_seg_track(
         global_instance_id: int = 1
         instance_id_maps: Dict[str, int] = dict()
 
-        # videos
+        video_id += 1
         video_name = video_anns[0].video_name
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
-        for image_anns in tqdm(frames):
+        for image_anns in frames:
+            image_id += 1
             image = ImgType(
                 file_name=image_anns.name,
                 height=shape[0],
@@ -598,12 +612,17 @@ def scalabel2coco_seg_track(
                 image["coco_url"] = image_anns.url
             images.append(image)
 
+            if image_anns.labels is None:
+                continue
+
             for label in image_anns.labels:
                 if label.poly_2d is None:
                     continue
 
                 category_ignored, category_id = process_category(
-                    label.category,
+                    label.category
+                    if label.category is not None
+                    else "ignored",
                     categories,
                     name_mapping,
                     ignore_mapping,
@@ -618,6 +637,8 @@ def scalabel2coco_seg_track(
                 iscrowd, ignore = get_object_attributes(
                     label, category_ignored
                 )
+
+                ann_id += 1
                 annotation = AnnType(
                     id=ann_id,
                     image_id=image_id,
@@ -627,12 +648,10 @@ def scalabel2coco_seg_track(
                     iscrowd=iscrowd,
                     ignore=ignore,
                 )
+                if label.score is not None:
+                    annotation["score"] = label.score
                 annotations.append(annotation)
                 poly_2ds.append(label.poly_2d)
-
-                ann_id += 1
-            image_id += 1
-        video_id += 1
 
     annotations = pol2ds_list_to_coco(
         shape, annotations, poly_2ds, mask_mode, nproc
