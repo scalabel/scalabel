@@ -19,7 +19,7 @@ setuptools.setup(
         "Source": "https://github.com/scalabel/scalabel",
         "Tracker": "https://github.com/scalabel/scalabel/issues",
     },
-    package_data={"scalabel": ["py.typed"]},
+    package_data={"scalabel": ["py.typed", "label/configs.toml"]},
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -48,5 +48,5 @@ setuptools.setup(
         "tqdm",
         "toml",
     ],
-    data_files=[("scalabel/label", ["scalabel/label/configs.toml"])],
+    include_package_data=True
 )
