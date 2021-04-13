@@ -37,6 +37,7 @@ class AnnType(TypedDict, total=False):
     ignore: int
     instance_id: Optional[int]
     scalabel_id: Optional[str]
+    score: Optional[float]
     bbox: Optional[List[float]]
     area: Optional[float]
     segmentation: Optional[Union[PolygonType, RLEType]]

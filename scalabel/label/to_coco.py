@@ -388,6 +388,8 @@ def scalabel2coco_detection(
                 iscrowd=iscrowd,
                 ignore=ignore,
             )
+            if label.score is not None:
+                annotation["score"] = label.score
             annotation = set_box_object_geometry(annotation, label)
             annotations.append(annotation)
 
@@ -455,6 +457,8 @@ def scalabel2coco_ins_seg(
                 iscrowd=iscrowd,
                 ignore=ignore,
             )
+            if label.score is not None:
+                annotation["score"] = label.score
             annotations.append(annotation)
             poly_2ds.append(label.poly_2d)
 
@@ -555,6 +559,8 @@ def scalabel2coco_box_track(
                     iscrowd=iscrowd,
                     ignore=ignore,
                 )
+                if label.score is not None:
+                    annotation["score"] = label.score
                 annotation = set_box_object_geometry(annotation, label)
                 annotations.append(annotation)
 
@@ -642,6 +648,8 @@ def scalabel2coco_seg_track(
                     iscrowd=iscrowd,
                     ignore=ignore,
                 )
+                if label.score is not None:
+                    annotation["score"] = label.score
                 annotations.append(annotation)
                 poly_2ds.append(label.poly_2d)
 

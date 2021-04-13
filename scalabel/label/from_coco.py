@@ -95,6 +95,8 @@ def coco_to_scalabel(
                 attributes=dict(),
                 category=cat_id2name[ann["category_id"]],
             )
+            if "score" in ann:
+                label.score = ann["score"]
             if "bbox" in ann:
                 label.box_2d = bbox_to_box2d(ann["bbox"])  # type: ignore
             if "segmentation" in ann:
