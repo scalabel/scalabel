@@ -109,13 +109,3 @@ Add url prefix to the name field in the frames and assign it to the url field
 
     python3 -m scalabel.tools.edit_labels --add-url http://localhost:8686/items -i \
         input.json -o output.json
-
-coco2scalabel
------------------
-
-Convert COCO format to :ref:`Scalabel Format`.
-
-scalabel2coco
------------------
-
-Convert :ref:`Scalabel Format` to COCO format.
