@@ -16,6 +16,7 @@ __all__ = [
     "box2d_to_bbox",
     "mask_to_box2d",
     "mask_to_polygon",
+    'poly_to_patch",
     "poly2ds_to_mask",
     "polygon_to_poly2ds",
 ]
