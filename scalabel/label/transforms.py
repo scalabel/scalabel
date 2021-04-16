@@ -38,6 +38,12 @@ def mask_to_box2d(mask: np.ndarray) -> Box2D:
     box_2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
     return box_2d
 
+def mask_to_bbox(mask: np.ndarray) -> List[float]
+    """Convert mask into bbox."""
+    box_2d = mask_to_box2d(mask)
+    bbox = box2d_to_bbox(box_2d)
+    return bbox
+
 
 def bbox_to_box2d(bbox: List[float]) -> Box2D:
     """Convert COCO bbox into Scalabel Box2D."""
