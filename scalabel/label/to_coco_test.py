@@ -1,5 +1,4 @@
-"""Test cases for bdd100k2coco.py."""
-import json
+"""Test cases for to_coco_test.py."""
 import unittest
 from functools import partial
 
@@ -7,44 +6,16 @@ import numpy as np
 
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
+from .io import read
 from .to_coco import (
     DEFAULT_COCO_CONFIG,
-    box2d_to_bbox,
-    group_and_sort,
     load_coco_config,
-    mask_to_polygon,
-    poly2ds_to_mask,
     process_category,
-    read,
     scalabel2coco_detection,
     set_seg_object_geometry,
 )
-from .typing import Box2D, Frame, Poly2D
 
 SHAPE = (720, 1280)
-
-
-class TestGroupAndSort(unittest.TestCase):
-    """Check the group and sort results' order."""
-
-    frames = [
-        Frame(name="bbb-1", video_name="bbb", frame_index=1, labels=[]),
-        Frame(name="aaa-2", video_name="aaa", frame_index=2, labels=[]),
-        Frame(name="aaa-2", video_name="aaa", frame_index=1, labels=[]),
-    ]
-    frames_list = group_and_sort(frames)
-
-    def test_num(self) -> None:
-        """Check the number of frames in the results."""
-        self.assertEqual(len(self.frames_list), 2)
-        self.assertEqual(len(self.frames_list[0]), 2)
-        self.assertEqual(len(self.frames_list[1]), 1)
-
-    def test_names(self) -> None:
-        """Check `name` and `video_name` in the results."""
-        self.assertSequenceEqual(str(self.frames_list[0][0].video_name), "aaa")
-        self.assertSequenceEqual(self.frames_list[0][1].name, "aaa-2")
-        self.assertEqual(self.frames_list[0][1].frame_index, 2)
 
 
 class TestProcessCategory(unittest.TestCase):
@@ -89,45 +60,11 @@ class TestProcessCategory(unittest.TestCase):
         self.assertEqual(cat_id, 1)
 
 
-class TestBox2DToCoco(unittest.TestCase):
-    """Test cases for conversion from Box2D to COCO bbox."""
+class TestMaskToCoco(unittest.TestCase):
+    """Test cases for conversion from Mask to COCO RLE."""
 
-    def test_box2d_to_coco(self) -> None:
-        """Check the Box2D to bbox conversion."""
-        box_2d = Box2D(x1=10, x2=29, y1=10, y2=19)
-        bbox = box2d_to_bbox(box_2d)
-        self.assertListEqual(bbox, [10.0, 10.0, 20.0, 10.0])
-
-
-class TestPoly2DToCoco(unittest.TestCase):
-    """Test cases for conversion from Poly2D to COCO RLE/polygons."""
-
-    def test_poly2ds_to_mask(self) -> None:
-        """Check the Poly2D to mask conversion."""
-        json_file = get_test_file("poly2ds.json")
-        npy_file = get_test_file("mask.npy")
-
-        with open(json_file) as fp:
-            polys = json.load(fp)
-        gt_mask = np.load(npy_file).tolist()
-
-        poly2ds = [Poly2D(**poly) for poly in polys]
-        mask = poly2ds_to_mask(SHAPE, poly2ds).tolist()
-        self.assertListEqual(mask, gt_mask)
-
-    def test_mask_to_polygon(self) -> None:
-        """Check the mask to polygon conversion."""
-        npy_file = get_test_file("mask.npy")
-        poly_file = get_test_file("polygon.npy")
-
-        mask = np.load(npy_file).tolist()
-        gt_polygon = np.load(poly_file).tolist()
-
-        polygon = mask_to_polygon(mask, 0, 0)
-        self.assertEqual(polygon, gt_polygon)
-
-    def test_mask_to_rle(self) -> None:
-        """Check the mask to polygon conversion."""
+    def test_set_seg_object_geometry(self) -> None:
+        """Check the mask to RLE conversion."""
         npy_file = get_test_file("mask.npy")
         rle_file = get_test_file("rle.npy")
         ann = AnnType(id=1, image_id=1, category_id=1, iscrowd=0, ignore=0)
