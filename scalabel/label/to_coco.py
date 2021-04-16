@@ -25,7 +25,7 @@ from .coco_typing import (
 from .io import group_and_sort, read
 from .transforms import (
     box2d_to_bbox,
-    mask_to_box2d,
+    mask_to_bbox,
     mask_to_polygon,
     poly2ds_to_mask,
 )
@@ -160,13 +160,12 @@ def set_seg_object_geometry(
         return annotation
 
     if mask_mode == "polygon":
-        box_2d = mask_to_box2d(mask)
-        bbox = box2d_to_bbox(box_2d)
+        bbox = mask_to_bbox(mask)
         area = np.sum(mask).tolist()
-        x1, x2 = int(box_2d.x1), int(box_2d.x2)
-        y1, y2 = int(box_2d.y1), int(box_2d.y2)
-        mask = mask[y1 : y2 + 1, x1 : x2 + 1]
-        polygon: PolygonType = mask_to_polygon(mask, x1, y1)
+        x, y, w, h = bbox
+        x, y, w, h = int(x), int(y), int(w), int(h)
+        mask = mask[y : y + h, x : x + w]
+        polygon: PolygonType = mask_to_polygon(mask, x, y)
         annotation.update(dict(segmentation=polygon))
     elif mask_mode == "rle":
         rle: RLEType = mask_utils.encode(
