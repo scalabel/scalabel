@@ -1,6 +1,7 @@
-"""Test cases for detection engine config."""
+"""Test cases for io.py."""
 from ..unittest.util import get_test_file
-from .io import dump, load, parse
+from .io import dump, group_and_sort, load, parse
+from .typing import Frame
 
 
 def test_parse() -> None:
@@ -55,6 +56,24 @@ def test_load() -> None:
     assert len(poly.vertices[0]) == 2
     for char in poly.types:
         assert char in ["C", "L"]
+
+
+def test_group_and_sort() -> None:
+    """Check the group and sort results."""
+    frames = [
+        Frame(name="bbb-1", video_name="bbb", frame_index=1, labels=[]),
+        Frame(name="aaa-2", video_name="aaa", frame_index=2, labels=[]),
+        Frame(name="aaa-2", video_name="aaa", frame_index=1, labels=[]),
+    ]
+    frames_list = group_and_sort(frames)
+
+    assert len(frames_list) == 2
+    assert len(frames_list[0]) == 2
+    assert len(frames_list[1]) == 1
+
+    assert str(frames_list[0][0].video_name) == "aaa"
+    assert frames_list[0][1].name == "aaa-2"
+    assert frames_list[0][1].frame_index == 2
 
 
 def test_dump() -> None:

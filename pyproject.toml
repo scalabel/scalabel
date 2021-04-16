@@ -6,3 +6,4 @@ python_files = "*_test.py"
 
 [tool.isort]
 profile = "black"
+line_length = 79

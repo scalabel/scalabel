@@ -1,20 +1,14 @@
 """Convert Scalabel to COCO format."""
 
 import argparse
-import glob
 import json
 import os.path as osp
 from functools import partial
-from itertools import groupby
 from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple
 
-import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.path import Path
 from pycocotools import mask as mask_utils  # type: ignore
-from skimage import measure
 from tqdm import tqdm
 
 from ..common.io import load_config
@@ -28,8 +22,14 @@ from .coco_typing import (
     RLEType,
     VidType,
 )
-from .io import load
-from .typing import Box2D, Frame, Label, Poly2D
+from .io import group_and_sort, read
+from .transforms import (
+    box2d_to_bbox,
+    mask_to_bbox,
+    mask_to_polygon,
+    poly2ds_to_mask,
+)
+from .typing import Frame, Label, Poly2D
 
 DEFAULT_COCO_CONFIG = osp.join(
     osp.dirname(osp.abspath(__file__)), "configs.toml"
@@ -105,24 +105,6 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
-    """Group frames by video_name and sort."""
-    for frame in inputs:
-        assert frame.video_name is not None
-        assert frame.frame_index is not None
-    frames_list: List[List[Frame]] = []
-    for _, frame_iter in groupby(inputs, lambda frame: frame.video_name):
-        frames = sorted(
-            list(frame_iter),
-            key=lambda frame: frame.frame_index if frame.frame_index else 0,
-        )
-        frames_list.append(frames)
-    frames_list = sorted(
-        frames_list, key=lambda frames: str(frames[0].video_name)
-    )
-    return frames_list
-
-
 def process_category(
     category_name: str,
     categories: List[CatType],
@@ -160,13 +142,6 @@ def get_object_attributes(label: Label, ignore: bool) -> Tuple[int, int]:
     return iscrowd, int(ignore)
 
 
-def box2d_to_bbox(box_2d: Box2D) -> List[float]:
-    """Convert Scalabel Box2D into COCO bbox."""
-    width = box_2d.x2 - box_2d.x1 + 1
-    height = box_2d.y2 - box_2d.y1 + 1
-    return [box_2d.x1, box_2d.y1, width, height]
-
-
 def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     """Parsing bbox, area, polygon for bbox ann."""
     box_2d = label.box_2d
@@ -177,99 +152,6 @@ def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     return annotation
 
 
-def poly_to_patch(
-    vertices: List[Tuple[float, float]],
-    types: str,
-    color: Tuple[float, float, float],
-    closed: bool,
-) -> mpatches.PathPatch:
-    """Draw polygons using the Bezier curve."""
-    moves = {"L": Path.LINETO, "C": Path.CURVE4}
-    points = list(vertices)
-    codes = [moves[t] for t in types]
-    codes[0] = Path.MOVETO
-
-    if closed:
-        points.append(points[0])
-        codes.append(Path.LINETO)
-
-    return mpatches.PathPatch(
-        Path(points, codes),
-        facecolor=color if closed else "none",
-        edgecolor=color,
-        lw=0 if closed else 1,
-        alpha=1,
-        antialiased=False,
-        snap=True,
-    )
-
-
-def poly2ds_to_mask(
-    shape: Tuple[int, int], poly2d: List[Poly2D]
-) -> np.ndarray:
-    """Converting Poly2D to mask."""
-    fig = plt.figure(facecolor="0")
-    fig.set_size_inches(shape[1] / fig.get_dpi(), shape[0] / fig.get_dpi())
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.axis("off")
-    ax.set_xlim(0, shape[1])
-    ax.set_ylim(0, shape[0])
-    ax.set_facecolor((0, 0, 0, 0))
-    ax.invert_yaxis()
-
-    for poly in poly2d:
-        ax.add_patch(
-            poly_to_patch(
-                poly.vertices,
-                poly.types,
-                color=(1, 1, 1),
-                closed=True,
-            )
-        )
-
-    fig.canvas.draw()
-    mask: np.ndarray = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
-    mask = mask.reshape((*shape, -1))[..., 0]
-    plt.close()
-    return mask
-
-
-def close_contour(contour: np.ndarray) -> np.ndarray:
-    """Explicitly close the contour."""
-    if not np.array_equal(contour[0], contour[-1]):
-        contour = np.vstack((contour, contour[0]))
-    return contour
-
-
-def mask_to_polygon(
-    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: float = 0.5
-) -> List[List[float]]:
-    """Convert BitMask to polygon."""
-    polygons = []
-    padded_binary_mask = np.pad(
-        binary_mask, pad_width=1, mode="constant", constant_values=0
-    )
-    contours = measure.find_contours(padded_binary_mask, 0.5)
-    contours = np.subtract(contours, 1)
-    for contour in contours:
-        contour = close_contour(contour)
-        contour = measure.approximate_polygon(contour, tolerance)
-        if len(contour) < 3:
-            continue
-        contour = np.flip(contour, axis=1)
-        segmentation = contour.ravel().tolist()
-        segmentation = [0 if i < 0 else i for i in segmentation]
-        for i, _ in enumerate(segmentation):
-            if i % 2 == 0:
-                segmentation[i] = float(segmentation[i] + x_1)
-            else:
-                segmentation[i] = float(segmentation[i] + y_1)
-
-        polygons.append(segmentation)
-
-    return polygons
-
-
 def set_seg_object_geometry(
     annotation: AnnType, mask: np.ndarray, mask_mode: str = "rle"
 ) -> AnnType:
@@ -278,15 +160,12 @@ def set_seg_object_geometry(
         return annotation
 
     if mask_mode == "polygon":
-        x_inds = np.nonzero(np.sum(mask, axis=0))[0]
-        y_inds = np.nonzero(np.sum(mask, axis=1))[0]
-        x1, x2 = int(np.min(x_inds)), int(np.max(x_inds))
-        y1, y2 = int(np.min(y_inds)), int(np.max(y_inds))
-        mask = mask[y1 : y2 + 1, x1 : x2 + 1]
-        polygon: PolygonType = mask_to_polygon(mask, x1, y1)
-        box_2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
-        bbox = box2d_to_bbox(box_2d)
+        bbox = mask_to_bbox(mask)
         area = np.sum(mask).tolist()
+        x, y, w, h = bbox
+        x, y, w, h = int(x), int(y), int(w), int(h)
+        mask = mask[y : y + h, x : x + w]
+        polygon: PolygonType = mask_to_polygon(mask, x, y)
         annotation.update(dict(segmentation=polygon))
     elif mask_mode == "rle":
         rle: RLEType = mask_utils.encode(
@@ -662,21 +541,6 @@ def scalabel2coco_seg_track(
         images=images,
         annotations=annotations,
     )
-
-
-def read(inputs: str) -> List[Frame]:
-    """Read annotations from file/files."""
-    outputs: List[Frame] = []
-    if osp.isdir(inputs):
-        files = glob.glob(osp.join(inputs, "*.json"))
-        for file_ in files:
-            outputs.extend(load(file_))
-    elif osp.isfile(inputs) and inputs.endswith("json"):
-        outputs.extend(load(inputs))
-    else:
-        raise TypeError("Inputs must be a folder or a JSON file.")
-
-    return outputs
 
 
 def load_coco_config(

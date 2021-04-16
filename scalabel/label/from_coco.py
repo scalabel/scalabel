@@ -5,10 +5,10 @@ import os
 from itertools import groupby
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from .coco_typing import AnnType, GtType, ImgType, PolygonType
-from .io import save
-from .to_coco import group_and_sort
-from .typing import Box2D, Frame, Label, Poly2D
+from .coco_typing import AnnType, GtType, ImgType
+from .io import group_and_sort, save
+from .transforms import bbox_to_box2d, polygon_to_poly2ds
+from .typing import Frame, Label
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -25,26 +25,6 @@ def parse_arguments() -> argparse.Namespace:
         help="path to save scalabel formatted label file",
     )
     return parser.parse_args()
-
-
-def bbox_to_box2d(bbox: List[float]) -> Box2D:
-    """Convert COCO bbox into Scalabel Box2D."""
-    assert len(bbox) == 4
-    x1, y1, width, height = bbox
-    x2, y2 = x1 + width - 1, y1 + height - 1
-    return Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
-
-
-def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
-    """Convert COCO polygon into Scalabel Box2Ds."""
-    poly_2ds: List[Poly2D] = []
-    for poly in polygon:
-        point_num = len(poly) // 2
-        assert 2 * point_num == len(poly)
-        vertices = [[poly[2 * i], poly[2 * i + 1]] for i in range(point_num)]
-        poly_2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
-        poly_2ds.append(poly_2d)
-    return poly_2ds
 
 
 def coco_to_scalabel(

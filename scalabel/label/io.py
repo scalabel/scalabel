@@ -1,6 +1,9 @@
 """Label io."""
 
+import glob
 import json
+import os.path as osp
+from itertools import groupby
 from typing import Any, List, Union
 
 import humps
@@ -25,6 +28,40 @@ def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
         f = humps.decamelize(rf)
         frames.append(Frame(**f))
     return frames
+
+
+def read(inputs: str) -> List[Frame]:
+    """Read annotations from file or files. More general than `load`."""
+    outputs: List[Frame] = []
+    if osp.isdir(inputs):
+        files = glob.glob(osp.join(inputs, "*.json"))
+        for file_ in files:
+            outputs.extend(load(file_))
+    elif osp.isfile(inputs) and inputs.endswith("json"):
+        outputs.extend(load(inputs))
+    else:
+        raise TypeError("Inputs must be a folder or a JSON file.")
+
+    outputs = sorted(outputs, key=lambda output: output.name)
+    return outputs
+
+
+def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
+    """Group frames by video_name and sort."""
+    for frame in inputs:
+        assert frame.video_name is not None
+        assert frame.frame_index is not None
+    frames_list: List[List[Frame]] = []
+    for _, frame_iter in groupby(inputs, lambda frame: frame.video_name):
+        frames = sorted(
+            list(frame_iter),
+            key=lambda frame: frame.frame_index if frame.frame_index else 0,
+        )
+        frames_list.append(frames)
+    frames_list = sorted(
+        frames_list, key=lambda frames: str(frames[0].video_name)
+    )
+    return frames_list
 
 
 def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
