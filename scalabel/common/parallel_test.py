@@ -1,11 +1,12 @@
 """Test parallel."""
+from typing import Tuple
 
 from .parallel import pmap
 
 
-def add(aa: int, bb: int) -> int:
+def add(num: Tuple[int, int]) -> int:
     """Add two numbers."""
-    return aa + bb
+    return num[0] + num[1]
 
 
 def test_pmap() -> None:

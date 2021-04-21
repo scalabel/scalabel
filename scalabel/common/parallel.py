@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 from multiprocessing import Process, Queue, cpu_count
+
+# Disabling unused import becase we need Tuple in typing
 from typing import (  # pylint: disable=unused-import
     Any,
     Callable,
@@ -11,12 +13,12 @@ from typing import (  # pylint: disable=unused-import
     TypeVar,
 )
 
-Inputs = Iterable[Any]  # type: ignore[misc]
+Inputs = Any  # type: ignore[misc]
 Return = TypeVar("Return")
 
-
-def run(  # type: ignore[misc]
-    func: Callable[..., Return],
+# Need variadic input type here
+def run(
+    func: Callable[[Inputs], Return],
     q_in: "Queue[Tuple[int, Inputs]]",
     q_out: "Queue[Tuple[int, Return]]",
 ) -> None:
@@ -25,11 +27,11 @@ def run(  # type: ignore[misc]
         i, x = q_in.get()
         if i < 0:
             break
-        q_out.put((i, func(*x)))
+        q_out.put((i, func(x)))
 
 
-def pmap(  # type: ignore[misc]
-    func: Callable[..., Return],
+def pmap(
+    func: Callable[[Inputs], Return],
     inputs: Iterable[Inputs],
     nprocs: int = cpu_count(),
 ) -> List[Return]:
@@ -38,7 +40,7 @@ def pmap(  # type: ignore[misc]
     Different from the python pool map, this function will not hang if any of
     the processes throws an exception.
     """
-    q_in: "Queue[Tuple[int, Inputs]]" = Queue(1)
+    q_in: "Queue[Tuple[int, Inputs]]" = Queue(nprocs * 10)
     q_out: "Queue[Tuple[int, Return]]" = Queue()
 
     proc = [
