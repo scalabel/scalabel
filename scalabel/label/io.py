@@ -33,11 +33,7 @@ def parse(
 
     if num_cores > 0:
         return pmap(parse_single_frame, raw_frames, num_cores)
-
-    frames: List[Frame] = []
-    for rf in raw_frames:
-        frames.append(parse_single_frame(rf))
-    return frames
+    return list(map(parse_single_frame, raw_frames))
 
 
 def read(inputs: str) -> List[Frame]:
