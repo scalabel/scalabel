@@ -23,7 +23,7 @@ export interface ItemExport {
   /** project name */
   name: string
   /** item url */
-  url: string
+  url?: string
   /** video name */
   videoName: string
   /** id of data source */
@@ -92,6 +92,8 @@ export interface CustomExportType {
 export interface LabelExport {
   /** label id */
   id: string | number
+  /** label index */
+  index?: number
   /** category */
   category: string
   /** label attributes- can be list or switch type */

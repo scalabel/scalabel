@@ -1,79 +1,113 @@
-"""Convert coco to scalabel format."""
+"""Convert coco to Scalabel format."""
 import argparse
 import json
-from typing import Any, Dict, List
+import os
+from itertools import groupby
+from typing import Dict, Iterable, List, Optional, Tuple
 
-from pycocotools.coco import COCO
-
-DictAny = Dict[str, Any]  # type: ignore[misc]
+from .coco_typing import AnnType, GtType, ImgType
+from .io import group_and_sort, save
+from .transforms import bbox_to_box2d, polygon_to_poly2ds
+from .typing import Frame, Label
 
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="coco to scalabel")
     parser.add_argument(
-        "--annFile",
-        "-a",
-        default="/path/to/coco/label/file",
+        "--label",
+        "-l",
         help="path to coco label file",
     )
     parser.add_argument(
-        "--save_path",
-        "-s",
-        default="/save/path",
+        "--output",
+        "-o",
         help="path to save scalabel formatted label file",
     )
     return parser.parse_args()
 
 
-def transform(label_file: str) -> List[DictAny]:
-    """Transform to scalabel format."""
-    coco = COCO(label_file)
-    img_ids = coco.getImgIds()
-    img_ids = sorted(img_ids)
-    cat_ids = coco.getCatIds()
-    cats = coco.loadCats(cat_ids)
-    nms = [cat["name"] for cat in cats]
-    cat_map = dict(zip(coco.getCatIds(), nms))
-    scalabel_label = []
-    for img_id in img_ids:
-        img = coco.loadImgs(img_id)[0]
-        ann_ids = coco.getAnnIds(imgIds=img["id"])
-        anns = coco.loadAnns(ann_ids)
-        det_dict = {}
-        det_dict["name"] = img["file_name"]
-        det_dict["url"] = img["coco_url"]
-        det_dict["attributes"] = {
-            "weather": "undefined",
-            "scene": "undefined",
-            "timeofday": "undefined",
+def coco_to_scalabel(
+    coco: GtType,
+) -> Tuple[List[Frame], Optional[Dict[int, str]]]:
+    """Transform COCO object to scalabel format."""
+    vid_id2name: Optional[Dict[int, str]] = None
+    if "videos" in coco:
+        vid_id2name = {
+            video["id"]: video["name"]
+            for video in coco["videos"]  # type: ignore
         }
-        det_dict["labels"] = []
-        for ann in anns:
-            label = {
-                "id": ann["id"],
-                "category": cat_map[ann["category_id"]],
-                "manualShape": True,
-                "manualAttributes": True,
-                "box2d": {
-                    "x1": ann["bbox"][0],
-                    "y1": ann["bbox"][1],
-                    "x2": ann["bbox"][0] + ann["bbox"][2] - 1,
-                    "y2": ann["bbox"][1] + ann["bbox"][3] - 1,
-                },
-            }
-            det_dict["labels"].append(label)
-        scalabel_label.append(det_dict)
-    return scalabel_label
+    img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
+    cat_id2name: Dict[int, str] = {
+        category["id"]: category["name"] for category in coco["categories"]
+    }
+
+    img_id2anns: Dict[int, Iterable[AnnType]] = {
+        img_id: list(anns)
+        for img_id, anns in groupby(
+            coco["annotations"], lambda ann: ann["image_id"]
+        )
+    }
+
+    scalabel: List[Frame] = []
+    img_ids = sorted(img_id2img.keys())
+    for img_id in img_ids:
+        img = img_id2img[img_id]
+        frame = Frame(name=os.path.split(img["file_name"])[-1])
+        if "coco_url" in img:
+            frame.url = img["coco_url"]
+        if vid_id2name is not None and "video_id" in img:
+            frame.video_name = vid_id2name[img["video_id"]]  # type: ignore
+        if "frame_id" in img:
+            frame.frame_index = img["frame_id"]
+
+        if img_id not in img_id2anns:
+            continue
+
+        frame.labels = []
+        anns = sorted(img_id2anns[img_id], key=lambda ann: ann["id"])
+        for i, ann in enumerate(anns):
+            label = Label(
+                id=ann.get(
+                    "scalabel_id", str(ann.get("instance_id", ann["id"]))
+                ),
+                index=i + 1,
+                attributes=dict(),
+                category=cat_id2name[ann["category_id"]],
+            )
+            if "score" in ann:
+                label.score = ann["score"]
+            if "bbox" in ann:
+                label.box_2d = bbox_to_box2d(ann["bbox"])  # type: ignore
+            if "segmentation" in ann:
+                # Currently only support conversion from polygon.
+                assert isinstance(ann["segmentation"], list)
+                label.poly_2d = polygon_to_poly2ds(ann["segmentation"])
+            frame.labels.append(label)
+        scalabel.append(frame)
+
+    return scalabel, vid_id2name
 
 
-def main() -> None:
-    """Main."""
-    args = parse_arguments()
-    scalabel_label = transform(args.annFile)
-    with open(args.save_path, "w") as outfile:
-        json.dump(scalabel_label, outfile)
+def run(args: argparse.Namespace) -> None:
+    """Run."""
+    with open(args.label) as fp:
+        coco: GtType = json.load(fp)
+    scalabel, vid_id2name = coco_to_scalabel(coco)
+
+    if vid_id2name is None:
+        assert args.output.endswith(".json"), "output should be a json file"
+        save(args.output, scalabel)
+    else:
+        scalabels = group_and_sort(scalabel)
+        if not os.path.isdir(args.output):
+            os.makedirs(args.output)
+        for video_anns in scalabels:
+            assert video_anns[0].video_name is not None
+            save_name = video_anns[0].video_name + ".json"
+            save_path = os.path.join(args.output, save_name)
+            save(save_path, video_anns)
 
 
 if __name__ == "__main__":
-    main()
+    run(parse_arguments())

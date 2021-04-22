@@ -94,10 +94,10 @@ def estimate_ground_plane(
 
     if best_plane:
         return (
-            best_plane[0],
-            best_plane[1],
-            best_plane_inliers,
-            best_plane_outliers,
+            np.array(best_plane[0]),
+            float(best_plane[1]),
+            np.array(best_plane_inliers),
+            np.array(best_plane_outliers),
         )
     return None
 

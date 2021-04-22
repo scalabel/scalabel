@@ -1,14 +1,11 @@
 """Type definition for scalabel format."""
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from dataclasses_json import LetterCase, dataclass_json  # type: ignore
+from pydantic import BaseModel
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Box2D:
+class Box2D(BaseModel):
     """Box 2D."""
 
     x1: float
@@ -17,9 +14,7 @@ class Box2D:
     y2: float
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Box3D:
+class Box3D(BaseModel):
     """Box 3D."""
 
     alpha: float
@@ -28,9 +23,7 @@ class Box3D:
     dimension: Tuple[float, float, float]
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Poly2D:
+class Poly2D(BaseModel):
     """Polygon or polyline 2D."""
 
     vertices: List[Tuple[float, float]]
@@ -38,38 +31,66 @@ class Poly2D:
     closed: bool
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Label:
+class Label(BaseModel):
     """Label."""
 
     id: str
-    manual_shape: Union[bool, None] = None
-    manual_ttributes: Union[bool, None] = None
-    score: Union[float, None] = None
-    attributes: Union[Dict[str, str], None] = None
-    box2d: Union[None, Box2D] = None
-    box3d: Union[None, Box3D] = None
-    poly2d: Union[None, Poly2D] = None
+    index: Optional[int] = None
+    manual_shape: Optional[bool] = None
+    manual_attributes: Optional[bool] = None
+    score: Optional[float] = None
+    attributes: Optional[Dict[str, Union[bool, float, str]]] = None
+    category: Optional[str] = None
+    box_2d: Optional[Box2D]
+    box_3d: Optional[Box3D]
+    poly_2d: Optional[List[Poly2D]]
 
-    def __post_init__(self) -> None:
-        """Check field types."""
-        self.id = str(self.id)
+    def __init__(self, **data: Any) -> None:  # type: ignore
+        """Init structure and convert the id type to string."""
+        if "id" in data:
+            data["id"] = str(data["id"])
+        super().__init__(**data)
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Frame:
+class Intrinsics(BaseModel):
+    """Camera intrinsics."""
+
+    # focal length in (x, y)
+    focal: Tuple[float, float]
+    # center position in (x, y)
+    center: Tuple[float, float]
+    skew: float = 0
+    # radial distortion parameters
+    radial: Optional[Tuple[float, float, float]]
+    # tangential distortion parameters
+    tangential: Optional[Tuple[float, float]]
+
+
+class Extrinsics(BaseModel):
+    """Camera extrinsics."""
+
+    # 3D location relative to a world origin
+    location: Tuple[float, float, float]
+    # 3D rotation relative to a world origin in axis-angle representation
+    rotation: Tuple[float, float, float]
+
+
+class Frame(BaseModel):
     """Frame."""
 
     name: str
-    video_name: Union[str, None] = None
-    attributes: Union[None, Dict[str, str]] = None
-    timestamp: Union[None, int] = None
-    frame_index: Union[None, int] = None
-    size: Union[None, List[int]] = None
-    labels: List[Label] = field(default_factory=list)
+    url: Optional[str]
+    video_name: Optional[str] = None
+    intrinsics: Optional[Intrinsics] = None
+    extrinsics: Optional[Extrinsics] = None
+    attributes: Optional[Dict[str, Union[str, float]]] = None
+    timestamp: Optional[int] = None
+    frame_index: Optional[int] = None
+    size: Optional[List[int]] = None
+    labels: Optional[List[Label]] = None
 
-    def __post_init__(self) -> None:
-        """Check field types."""
-        self.name = str(self.name)
+    def __init__(self, **data: Any) -> None:  # type: ignore
+        """Init structure and convert the id type to string."""
+        if "name" in data:
+            data["name"] = str(data["name"])
+        super().__init__(**data)
