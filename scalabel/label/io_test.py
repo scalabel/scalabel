@@ -12,19 +12,25 @@ def test_parse() -> None:
         '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "attributes":'
         '{"crowd": false, "trafficLightColor": "G", "speed": 10}}]}'
     )
+
+    def assert_correctness(frame: Frame) -> None:
+        assert frame.name == "1"
+        assert frame.video_name == "a"
+        assert frame.labels is not None
+        assert frame.labels[0].id == "1"
+        assert frame.labels[0].attributes is not None
+        assert frame.labels[0].attributes["crowd"] is False
+        assert frame.labels[0].attributes["traffic_light_color"] == "G"
+        assert frame.labels[0].attributes["speed"] == 10.0
+        b = frame.labels[0].box_2d
+        assert b is not None
+        assert b.y2 == 4
+
     frames = parse(json)
-    frame = frames[0]
-    assert frame.name == "1"
-    assert frame.video_name == "a"
-    assert frame.labels is not None
-    assert frame.labels[0].id == "1"
-    assert frame.labels[0].attributes is not None
-    assert frame.labels[0].attributes["crowd"] is False
-    assert frame.labels[0].attributes["traffic_light_color"] == "G"
-    assert frame.labels[0].attributes["speed"] == 10.0
-    b = frame.labels[0].box_2d
-    assert b is not None
-    assert b.y2 == 4
+    assert_correctness(frames[0])
+
+    frames_multiproc = parse(json, num_cores=2)
+    assert_correctness(frames_multiproc[0])
 
 
 def test_load() -> None:

@@ -8,6 +8,7 @@ from typing import Any, List, Union
 
 import humps
 
+from ..common.parallel import pmap
 from ..common.typing import DictStrAny
 from .typing import Frame
 
@@ -17,16 +18,25 @@ def load(filepath: str) -> List[Frame]:
     return parse(json.load(open(filepath, "r")))
 
 
-def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
+def parse(
+    raw_frames: Union[str, List[DictStrAny], DictStrAny], num_cores: int = 0
+) -> List[Frame]:
     """Load labels in Scalabel format."""
     if isinstance(raw_frames, str):
         raw_frames = json.loads(raw_frames)
     if isinstance(raw_frames, dict):
         raw_frames = [raw_frames]
+    assert isinstance(raw_frames, list)
+
+    def parse_single_frame(raw_frame: DictStrAny) -> Frame:
+        return Frame(**humps.decamelize(raw_frame))
+
+    if num_cores > 0:
+        return pmap(parse_single_frame, raw_frames, num_cores)
+
     frames: List[Frame] = []
     for rf in raw_frames:
-        f = humps.decamelize(rf)
-        frames.append(Frame(**f))
+        frames.append(parse_single_frame(rf))
     return frames
 
 
