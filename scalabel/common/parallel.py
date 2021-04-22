@@ -17,7 +17,7 @@ from typing import (  # pylint: disable=unused-import
 Inputs = TypeVar("Inputs")
 Return = TypeVar("Return")
 
-# Need variadic input type here
+
 def run(
     func: Callable[[Inputs], Return],
     q_in: "Queue[Tuple[int, Optional[Tuple[Inputs]]]]",
