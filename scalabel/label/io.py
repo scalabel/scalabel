@@ -4,7 +4,7 @@ import glob
 import json
 import os.path as osp
 from itertools import groupby
-from typing import Any, List, Union
+from typing import Any, List
 
 import humps
 
@@ -13,43 +13,27 @@ from ..common.typing import DictStrAny
 from .typing import Frame
 
 
-def load(filepath: str) -> List[Frame]:
-    """Load labels from a file."""
-    return parse(json.load(open(filepath, "r")))
-
-
-def parse(
-    raw_frames: Union[str, List[DictStrAny], DictStrAny], num_cores: int = 0
-) -> List[Frame]:
-    """Load labels in Scalabel format."""
-    if isinstance(raw_frames, str):
-        raw_frames = json.loads(raw_frames)
-    if isinstance(raw_frames, dict):
-        raw_frames = [raw_frames]
-    assert isinstance(raw_frames, list)
-
-    def parse_single_frame(raw_frame: DictStrAny) -> Frame:
-        return Frame(**humps.decamelize(raw_frame))
-
-    if num_cores > 0:
-        return pmap(parse_single_frame, raw_frames, num_cores)
-    return list(map(parse_single_frame, raw_frames))
-
-
-def read(inputs: str) -> List[Frame]:
-    """Read annotations from file or files. More general than `load`."""
-    outputs: List[Frame] = []
-    if osp.isdir(inputs):
+def load(inputs: str, nprocs: int = 0) -> List[Frame]:
+    """Load labels from a json file or a folder of json files."""
+    raw_frames: List[DictStrAny] = []
+    if osp.isfile(inputs) and inputs.endswith("json"):
+        with open(inputs, "r") as fp:
+            raw_frames.extend(json.load(fp))
+    elif osp.isdir(inputs):
         files = glob.glob(osp.join(inputs, "*.json"))
         for file_ in files:
-            outputs.extend(load(file_))
-    elif osp.isfile(inputs) and inputs.endswith("json"):
-        outputs.extend(load(inputs))
+            with open(file_, "r") as fp:
+                raw_frames.extend(json.load(fp))
     else:
         raise TypeError("Inputs must be a folder or a JSON file.")
 
-    outputs = sorted(outputs, key=lambda output: output.name)
-    return outputs
+    def parse_frame(raw_frame: DictStrAny) -> Frame:
+        """Parse a single frame."""
+        return Frame(**humps.decamelize(raw_frame))
+
+    if nprocs > 0:
+        return pmap(parse_frame, raw_frames, nprocs)
+    return list(map(parse_frame, raw_frames))
 
 
 def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:

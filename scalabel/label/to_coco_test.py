@@ -6,7 +6,7 @@ import numpy as np
 
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
-from .io import read
+from .io import load
 from .to_coco import (
     DEFAULT_COCO_CONFIG,
     load_coco_config,
@@ -83,7 +83,7 @@ class TestMaskToCoco(unittest.TestCase):
 class TestScalabelToCOCODetection(unittest.TestCase):
     """Test cases for converting Scalabel detections to COCO format."""
 
-    scalabel = read(get_test_file("scalabel_det.json"))
+    scalabel = load(get_test_file("scalabel_det.json"))
     categories, name_mapping, ignore_mapping = load_coco_config(
         "det", DEFAULT_COCO_CONFIG
     )

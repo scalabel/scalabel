@@ -22,7 +22,7 @@ from .coco_typing import (
     RLEType,
     VidType,
 )
-from .io import group_and_sort, read
+from .io import group_and_sort, load
 from .transforms import (
     box2d_to_bbox,
     mask_to_bbox,
@@ -571,7 +571,7 @@ def run(args: argparse.Namespace) -> None:
     )
 
     logger.info("Loading Scalabel jsons...")
-    frames = read(args.label)
+    frames = load(args.label)
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
