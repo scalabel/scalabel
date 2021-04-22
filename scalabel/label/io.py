@@ -13,6 +13,11 @@ from ..common.typing import DictStrAny
 from .typing import Frame
 
 
+def parse_frame(raw_frame: DictStrAny) -> Frame:
+    """Parse a single frame."""
+    return Frame(**humps.decamelize(raw_frame))
+
+
 def load(inputs: str, nprocs: int = 0) -> List[Frame]:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
@@ -26,10 +31,6 @@ def load(inputs: str, nprocs: int = 0) -> List[Frame]:
                 raw_frames.extend(json.load(fp))
     else:
         raise TypeError("Inputs must be a folder or a JSON file.")
-
-    def parse_frame(raw_frame: DictStrAny) -> Frame:
-        """Parse a single frame."""
-        return Frame(**humps.decamelize(raw_frame))
 
     if nprocs > 0:
         return pmap(parse_frame, raw_frames, nprocs)
