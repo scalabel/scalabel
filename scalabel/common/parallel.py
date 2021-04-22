@@ -40,7 +40,7 @@ def pmap(
     Different from the python pool map, this function will not hang if any of
     the processes throws an exception.
     """
-    q_in: "Queue[Tuple[int, Inputs]]" = Queue(nprocs * 10)
+    q_in: "Queue[Tuple[int, Inputs]]" = Queue(1)
     q_out: "Queue[Tuple[int, Return]]" = Queue()
 
     proc = [
