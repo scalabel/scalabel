@@ -5,7 +5,6 @@ from multiprocessing import Process, Queue, cpu_count
 
 # Disabling unused import becase we need Tuple in typing
 from typing import (  # pylint: disable=unused-import
-    Any,
     Callable,
     Iterable,
     List,
