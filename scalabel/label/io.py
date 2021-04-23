@@ -13,7 +13,7 @@ from ..common.typing import DictStrAny
 from .typing import Frame
 
 
-def parse_frame(raw_frame: DictStrAny) -> Frame:
+def parse(raw_frame: DictStrAny) -> Frame:
     """Parse a single frame."""
     return Frame(**humps.decamelize(raw_frame))
 
@@ -23,7 +23,15 @@ def load(inputs: str, nprocs: int = 0) -> List[Frame]:
     raw_frames: List[DictStrAny] = []
     if osp.isfile(inputs) and inputs.endswith("json"):
         with open(inputs, "r") as fp:
-            raw_frames.extend(json.load(fp))
+            content = json.load(fp)
+            if isinstance(content, dict):
+                raw_frames.append(content)
+            elif isinstance(content, list):
+                raw_frames.extend(content)
+            else:
+                raise TypeError(
+                    "The input file contains neither dict nor list."
+                )
     elif osp.isdir(inputs):
         files = glob.glob(osp.join(inputs, "*.json"))
         for file_ in files:
@@ -33,8 +41,8 @@ def load(inputs: str, nprocs: int = 0) -> List[Frame]:
         raise TypeError("Inputs must be a folder or a JSON file.")
 
     if nprocs > 0:
-        return pmap(parse_frame, raw_frames, nprocs)
-    return list(map(parse_frame, raw_frames))
+        return pmap(parse, raw_frames, nprocs)
+    return list(map(parse, raw_frames))
 
 
 def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
