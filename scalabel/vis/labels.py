@@ -101,6 +101,10 @@ class LabelViewer:
     -  Space: Start / stop animation
     -  T: Toggle 2D / 3D bounding box (if avaliable)
     -  Y: Toggle image / segmentation view (if avaliable)
+    -  A: Toggle the display of the attribute tags on boxes or polygons.
+    -  C: Toggle the display of polygon vertices.
+    -  Up: Increase the size of polygon vertices.
+    -  Down: Decrease the size of polygon vertices.
 
     Export images:
     - add `-o {dir}` tag when runing.
