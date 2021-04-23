@@ -4,25 +4,61 @@ Works for 2D / 3D bounding box, segmentation masks, etc.
 """
 
 import argparse
+import copy
 import io
 import os
 import sys
 import urllib.request
 from dataclasses import dataclass
 from threading import Timer
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import matplotlib
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.font_manager import FontProperties
+from matplotlib.path import Path
 from PIL import Image
 
 from ..label.io import load
-from ..label.typing import Box2D, Box3D, Frame, Intrinsics
+from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
 from .geometry import Label3d
 from .helper import get_intrinsic_matrix, random_color
+
+
+@dataclass
+class UIConfig:
+    """Visualizer UI's config class."""
+
+    # Parameters for UI.
+    image_width: int
+    image_height: int
+    default_category: str
+    font: FontProperties
+
+    def __init__(self) -> None:
+        """Initialize with default values."""
+        self.image_width = 1280
+        self.image_height = 800
+        self.default_category = "Car"
+        self.font = FontProperties()
+
+
+@dataclass
+class DisplayConfig:
+    """Visualizer display's config class."""
+
+    # Parameters for the display.
+    show_ctrl_points: bool
+    show_tags: bool
+    ctrl_point_size: float
+
+    def __init__(self) -> None:
+        """Initialize with default values."""
+        self.show_ctrl_points = False
+        self.show_tags = True
+        self.ctrl_point_size = 2.0
 
 
 @dataclass
@@ -39,20 +75,21 @@ class ViewerConfig:
     with_attr: bool = True
     with_box2d: bool = True
     with_box3d: bool = False
+    with_poly2d: bool = True
 
-    # parameters for UI
-    image_width: int = 1280
-    image_height: int = 800
-    default_category: str = "Car"
-    font = FontProperties()  # for Matplotlib font
+    # config for display
+    display_cfg = DisplayConfig()
+
+    # config for UI
+    ui_cfg = UIConfig()
 
     def __init__(self, args: argparse.Namespace) -> None:
         """Initialize with args."""
         self.image_dir = args.image_dir
         self.out_dir = args.output_dir
         self.scale = args.scale
-        self.image_width = args.width
-        self.image_height = args.height
+        self.ui_cfg.image_width = args.width
+        self.ui_cfg.image_height = args.height
         self.with_attr = not args.no_attr
 
 
@@ -80,9 +117,9 @@ class LabelViewer:
         self.no_box3d = args.no_box3d
 
         # set fonts
-        self.config.font.set_family(["sans-serif", "monospace"])
-        self.config.font.set_weight("bold")
-        self.config.font.set_size(18 * self.config.scale)
+        self.config.ui_cfg.font.set_family(["sans-serif", "monospace"])
+        self.config.ui_cfg.font.set_weight("bold")
+        self.config.ui_cfg.font.set_size(18 * self.config.scale)
 
         # animation
         self._interval: float = 0.4
@@ -138,6 +175,23 @@ class LabelViewer:
                 self.start_animation()
             else:
                 self.stop_animation()
+        elif event.key == "a":
+            self.config.display_cfg.show_tags = (
+                not self.config.display_cfg.show_tags
+            )
+        # Control keys for polygon mode
+        elif event.key == "c":
+            self.config.display_cfg.show_ctrl_points = (
+                not self.config.display_cfg.show_ctrl_points
+            )
+        elif event.key == "up":
+            self.config.display_cfg.ctrl_point_size = min(
+                15.0, self.config.display_cfg.ctrl_point_size + 0.5
+            )
+        elif event.key == "down":
+            self.config.display_cfg.ctrl_point_size = max(
+                0.0, self.config.display_cfg.ctrl_point_size - 0.5
+            )
         else:
             return
 
@@ -220,29 +274,34 @@ class LabelViewer:
                     attributes = b.attributes
                 if b.box_2d is not None:
                     self.ax.add_patch(self.gen_2d_rect(b.id, b.box_2d))
-                    text = (
-                        b.category
-                        if b.category is not None
-                        else self.config.default_category
-                    )
-                    if "occluded" in attributes and attributes["occluded"]:
-                        text += ",o"
-                    if "truncated" in attributes and attributes["truncated"]:
-                        text += ",t"
-                    if "crowd" in attributes and attributes["crowd"]:
-                        text += ",c"
-                    self.ax.text(
-                        (b.box_2d.x1) * self.config.scale,
-                        (b.box_2d.y1 - 4) * self.config.scale,
-                        text,
-                        fontsize=10 * self.config.scale,
-                        bbox={
-                            "facecolor": "white",
-                            "edgecolor": "none",
-                            "alpha": 0.5,
-                            "boxstyle": "square,pad=0.1",
-                        },
-                    )
+
+                    if self.config.display_cfg.show_tags:
+                        text = (
+                            b.category
+                            if b.category is not None
+                            else self.config.ui_cfg.default_category
+                        )
+                        if "occluded" in attributes and attributes["occluded"]:
+                            text += ",o"
+                        if (
+                            "truncated" in attributes
+                            and attributes["truncated"]
+                        ):
+                            text += ",t"
+                        if "crowd" in attributes and attributes["crowd"]:
+                            text += ",c"
+                        self.ax.text(
+                            (b.box_2d.x1) * self.config.scale,
+                            (b.box_2d.y1 - 4) * self.config.scale,
+                            text,
+                            fontsize=10 * self.config.scale,
+                            bbox={
+                                "facecolor": "white",
+                                "edgecolor": "none",
+                                "alpha": 0.5,
+                                "boxstyle": "square,pad=0.1",
+                            },
+                        )
 
         if self.config.with_box3d:
             for b in labels:
@@ -259,27 +318,140 @@ class LabelViewer:
                     ):
                         self.ax.add_patch(line)
 
-                    text = (
-                        b.category
-                        if b.category is not None
-                        else self.config.default_category
-                    )
-                    if b.box_2d is not None:
-                        self.ax.text(
-                            (b.box_2d.x1) * self.config.scale,
-                            (b.box_2d.y1 - 4) * self.config.scale,
-                            text,
-                            fontsize=10 * self.config.scale,
-                            bbox={
-                                "facecolor": "white",
-                                "edgecolor": "none",
-                                "alpha": 0.5,
-                                "boxstyle": "square,pad=0.1",
-                            },
+                    if self.config.display_cfg.show_tags:
+                        text = (
+                            b.category
+                            if b.category is not None
+                            else self.config.ui_cfg.default_category
                         )
+                        if b.box_2d is not None:
+                            self.ax.text(
+                                (b.box_2d.x1) * self.config.scale,
+                                (b.box_2d.y1 - 4) * self.config.scale,
+                                text,
+                                fontsize=10 * self.config.scale,
+                                bbox={
+                                    "facecolor": "white",
+                                    "edgecolor": "none",
+                                    "alpha": 0.5,
+                                    "boxstyle": "square,pad=0.1",
+                                },
+                            )
+
+        if self.config.with_poly2d:
+            self.draw_poly2d(labels)
 
         self.ax.axis("off")
         return True
+
+    def draw_poly2d(self, labels: List[Label]) -> None:
+        """Draw poly2d labels not in 'lane' and 'drivable' categories."""
+        labels = self.get_other_poly2d(labels)
+        for label in labels:
+            attributes = {}
+            if label.attributes is not None:
+                attributes = label.attributes
+            if label.poly_2d is None:
+                continue
+
+            color = self.get_label_color(label.id)
+            alpha = 0.5
+
+            # Record the tightest bounding box
+            x1, y1, x2, y2 = 1280.0, 720.0, 0.0, 0.0
+            for poly in label.poly_2d:
+                patch = self.poly2patch(
+                    poly.vertices,
+                    poly.types,
+                    closed=poly.closed,
+                    alpha=alpha,
+                    color=color,
+                )
+                patch_vertices = patch.get_verts()
+                x1 = min(np.min(patch_vertices[:, 0]), x1)
+                y1 = min(np.min(patch_vertices[:, 1]), y1)
+                x2 = max(np.max(patch_vertices[:, 0]), x2)
+                y2 = max(np.max(patch_vertices[:, 1]), y2)
+                self.ax.add_patch(patch)
+
+                if self.config.display_cfg.show_ctrl_points:
+                    for vert in patch_vertices:
+                        self.ax.add_patch(
+                            mpatches.Circle(
+                                tuple(vert),
+                                self.config.display_cfg.ctrl_point_size,
+                                alpha=alpha,
+                                color=color,
+                            )
+                        )
+
+            # Show attributes
+            if self.config.display_cfg.show_tags:
+                text = (
+                    label.category
+                    if label.category is not None
+                    else self.config.ui_cfg.default_category
+                )
+                if "occluded" in attributes and attributes["occluded"]:
+                    text += ",o"
+                if "truncated" in attributes and attributes["truncated"]:
+                    text += ",t"
+                if "crowd" in attributes and attributes["crowd"]:
+                    text += ",c"
+                self.ax.text(
+                    x1 + (x2 - x1) * self.config.scale * 0.4,
+                    (y1 - 3.5) * self.config.scale,
+                    text,
+                    fontsize=10 * self.config.scale,
+                    bbox={
+                        "facecolor": color,
+                        "edgecolor": "none",
+                        "alpha": 0.8,
+                        "boxstyle": "square,pad=0.1",
+                    },
+                )
+
+    def poly2patch(
+        self,
+        vertices: List[Tuple[float, float]],
+        types: str,
+        closed: bool = False,
+        alpha: float = 1.0,
+        color: Optional[np.ndarray] = None,
+    ) -> mpatches.PathPatch:
+        """Convert 2D polygon vertices into patch."""
+        moves = {"L": Path.LINETO, "C": Path.CURVE4}
+        points = copy.deepcopy(vertices)
+        codes = [moves[t] for t in types]
+        codes[0] = Path.MOVETO
+
+        if closed:
+            points.append(points[0])
+            codes.append(Path.LINETO)
+
+        if color is None:
+            color = random_color()
+
+        # print(codes, points)
+        return mpatches.PathPatch(
+            Path(points, codes),
+            facecolor=color if closed else "none",
+            edgecolor=color,  # if not closed else 'none'
+            lw=1 if closed else 2 * self.config.scale,
+            alpha=alpha,
+            antialiased=False,
+            snap=True,
+        )
+
+    @staticmethod
+    def get_other_poly2d(labels: List[Label]) -> List[Label]:
+        """Get poly2d with categories not in "drivable area" and "lane"."""
+        return [
+            o
+            for o in labels
+            if o.poly_2d is not None
+            and (o.category not in ["drivable area", "lane"])
+        ]
 
     def get_label_color(self, label_id: str) -> np.ndarray:
         """Get color by id (if not found, then create a random color)."""
@@ -391,7 +563,7 @@ class LabelViewer:
             25 * self.config.scale,
             90 * self.config.scale,
             attr_tag.read()[:-1],
-            fontproperties=self.config.font,
+            fontproperties=self.config.ui_cfg.font,
             color="red",
             bbox={"facecolor": "white", "alpha": 0.4, "pad": 10, "lw": 0},
         )
