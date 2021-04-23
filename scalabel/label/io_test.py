@@ -1,7 +1,32 @@
 """Test cases for io.py."""
+import json
+
 from ..unittest.util import get_test_file
-from .io import dump, group_and_sort, load
+from .io import dump, group_and_sort, load, parse
 from .typing import Frame
+
+
+def test_parse() -> None:
+    """Test parse label string."""
+    raw = json.loads(
+        '{"name": 1, "videoName": "a", "size": [10, 20], '
+        '"labels":[{"id": 1, "box2d": '
+        '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "attributes":'
+        '{"crowd": false, "trafficLightColor": "G", "speed": 10}}]}'
+    )
+    frame = parse(raw)
+    assert frame.name == "1"
+    assert frame.video_name == "a"
+    assert isinstance(frame.labels, list)
+    assert len(frame.labels) == 1
+    assert frame.labels[0].id == "1"
+    assert frame.labels[0].attributes is not None
+    assert frame.labels[0].attributes["crowd"] is False
+    assert frame.labels[0].attributes["traffic_light_color"] == "G"
+    assert frame.labels[0].attributes["speed"] == 10.0
+    b = frame.labels[0].box_2d
+    assert b is not None
+    assert b.y2 == 4
 
 
 def test_load() -> None:
