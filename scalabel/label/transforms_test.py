@@ -5,14 +5,8 @@ import unittest
 import numpy as np
 
 from ..unittest.util import get_test_file
-from .transforms import (
-    bbox_to_box2d,
-    box2d_to_bbox,
-    mask_to_box2d,
-    mask_to_polygon,
-    poly2ds_to_mask,
-    polygon_to_poly2ds,
-)
+from .transforms import (bbox_to_box2d, box2d_to_bbox, mask_to_box2d,
+                         mask_to_polygon, poly2ds_to_mask, polygon_to_poly2ds)
 from .typing import Box2D, Poly2D
 
 SHAPE = (720, 1280)

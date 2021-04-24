@@ -130,7 +130,11 @@ class LabelViewer:
     - add `-o {dir}` tag when runing.
     """
 
-    def __init__(self, args: argparse.Namespace) -> None:
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        executor: concurrent.futures.ThreadPoolExecutor,
+    ) -> None:
         """Initializer."""
         self.config = ViewerConfig(args)
 
@@ -167,7 +171,6 @@ class LabelViewer:
             str, "concurrent.futures.Future[np.ndarray]"
         ] = dict()
         # Cache the images in separate threads.
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
         for frame in self.frames:
             self.images[frame.name] = executor.submit(
                 fetch_image, (frame, self.config.image_dir)
@@ -674,8 +677,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     """Main function."""
     args = parse_args()
-    viewer = LabelViewer(args)
-    viewer.view()
+    # Initialize the thread executor.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+        viewer = LabelViewer(args, executor)
+        viewer.view()
 
 
 if __name__ == "__main__":

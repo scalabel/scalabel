@@ -7,13 +7,8 @@ import numpy as np
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
 from .io import read
-from .to_coco import (
-    DEFAULT_COCO_CONFIG,
-    load_coco_config,
-    process_category,
-    scalabel2coco_detection,
-    set_seg_object_geometry,
-)
+from .to_coco import (DEFAULT_COCO_CONFIG, load_coco_config, process_category,
+                      scalabel2coco_detection, set_seg_object_geometry)
 
 SHAPE = (720, 1280)
 

@@ -13,22 +13,11 @@ from tqdm import tqdm
 
 from ..common.io import load_config
 from ..common.logger import logger
-from .coco_typing import (
-    AnnType,
-    CatType,
-    GtType,
-    ImgType,
-    PolygonType,
-    RLEType,
-    VidType,
-)
+from .coco_typing import (AnnType, CatType, GtType, ImgType, PolygonType,
+                          RLEType, VidType)
 from .io import group_and_sort, read
-from .transforms import (
-    box2d_to_bbox,
-    mask_to_bbox,
-    mask_to_polygon,
-    poly2ds_to_mask,
-)
+from .transforms import (box2d_to_bbox, mask_to_bbox, mask_to_polygon,
+                         poly2ds_to_mask)
 from .typing import Frame, Label, Poly2D
 
 DEFAULT_COCO_CONFIG = osp.join(
@@ -200,15 +189,14 @@ def pol2ds_list_to_coco(
     nproc: int,
 ) -> List[AnnType]:
     """Execute the Poly2D to coco conversion in parallel."""
-    pool = Pool(nproc)
-    annotations = pool.starmap(
-        partial(poly2ds_to_coco, shape=shape, mask_mode=mask_mode),
-        tqdm(
-            zip(annotations, poly_2ds),
-            total=len(annotations),
-        ),
-    )
-    pool.close()
+    with Pool(nproc) as pool:
+        annotations = pool.starmap(
+            partial(poly2ds_to_coco, shape=shape, mask_mode=mask_mode),
+            tqdm(
+                zip(annotations, poly_2ds),
+                total=len(annotations),
+            ),
+        )
 
     sorted(annotations, key=lambda ann: ann["id"])
     return annotations
