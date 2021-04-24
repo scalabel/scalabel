@@ -13,12 +13,22 @@ from tqdm import tqdm
 
 from ..common.io import load_config
 from ..common.logger import logger
-from .coco_typing import (AnnType, CatType, GtType, ImgType, PolygonType,
-                          RLEType, VidType)
-from .io import group_and_sort, read
-from .transforms import (box2d_to_bbox, mask_to_bbox, mask_to_polygon,
-                         poly2ds_to_mask)
-
+from .coco_typing import (
+    AnnType,
+    CatType,
+    GtType,
+    ImgType,
+    PolygonType,
+    RLEType,
+    VidType,
+)
+from .io import group_and_sort, load
+from .transforms import (
+    box2d_to_bbox,
+    mask_to_bbox,
+    mask_to_polygon,
+    poly2ds_to_mask,
+)
 from .typing import Frame, Label, Poly2D
 
 DEFAULT_COCO_CONFIG = osp.join(
