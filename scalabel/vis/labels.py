@@ -4,6 +4,7 @@ Works for 2D / 3D bounding box, segmentation masks, etc.
 """
 
 import argparse
+import concurrent.futures
 import copy
 import io
 import os
@@ -54,10 +55,10 @@ class DisplayConfig:
     show_tags: bool
     ctrl_point_size: float
 
-    def __init__(self) -> None:
+    def __init__(self, args: argparse.Namespace) -> None:
         """Initialize with default values."""
-        self.show_ctrl_points = False
-        self.show_tags = True
+        self.show_ctrl_points = not args.no_vertices
+        self.show_tags = not args.no_tags
         self.ctrl_point_size = 2.0
 
 
@@ -70,6 +71,10 @@ class ViewerConfig:
     out_dir: str
     scale: float
 
+    # configs
+    display_cfg: DisplayConfig
+    ui_cfg: UIConfig
+
     # content
     show_seg: bool = False
     with_attr: bool = True
@@ -77,20 +82,35 @@ class ViewerConfig:
     with_box3d: bool = False
     with_poly2d: bool = True
 
-    # config for display
-    display_cfg = DisplayConfig()
-
-    # config for UI
-    ui_cfg = UIConfig()
-
     def __init__(self, args: argparse.Namespace) -> None:
         """Initialize with args."""
         self.image_dir = args.image_dir
         self.out_dir = args.output_dir
         self.scale = args.scale
+        self.display_cfg = DisplayConfig(args)
+        self.ui_cfg = UIConfig()
         self.ui_cfg.image_width = args.width
         self.ui_cfg.image_height = args.height
         self.with_attr = not args.no_attr
+
+
+# Function to fetch images
+def fetch_image(inputs: Tuple[Frame, str]) -> np.ndarray:
+    """Fetch the image given image information."""
+    frame, image_dir = inputs
+    print("Image:", frame.name)
+
+    # Fetch image
+    if frame.url is not None and len(frame.url) > 0:
+        image_data = urllib.request.urlopen(frame.url, timeout=300).read()
+        im = np.asarray(Image.open(io.BytesIO(image_data)))
+    else:
+        image_path = os.path.join(image_dir, frame.name)
+        print("Local path:", image_path)
+        img = Image.open(image_path)
+        im = np.array(img, dtype=np.uint8)
+
+    return im
 
 
 class LabelViewer:
@@ -126,9 +146,8 @@ class LabelViewer:
         self.config.ui_cfg.font.set_size(18 * self.config.scale)
 
         # animation
-        self._interval: float = 0.4
         self._run_animation: bool = False
-        self._timer: Timer = Timer(self._interval, self.tick)
+        self._timer: Timer = Timer(0.4, self.tick)
         self._label_colors: Dict[str, np.ndarray] = dict()
 
         # load label file
@@ -143,6 +162,16 @@ class LabelViewer:
             sys.exit(1)
 
         print("Load images: ", len(self.frames))
+
+        self.images: Dict[
+            str, "concurrent.futures.Future[np.ndarray]"
+        ] = dict()
+        # Cache the images in separate threads.
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
+        for frame in self.frames:
+            self.images[frame.name] = executor.submit(
+                fetch_image, (frame, self.config.image_dir)
+            )
 
     def view(self) -> None:
         """Start the visualization."""
@@ -232,18 +261,10 @@ class LabelViewer:
         plt.cla()
 
         frame = self.frames[self.frame_index % len(self.frames)]
-        print("Image:", frame.name)
         self.fig.canvas.set_window_title(frame.name)
 
-        # show image
-        if frame.url is not None and len(frame.url) > 0:
-            image_data = urllib.request.urlopen(frame.url, timeout=300).read()
-            im = np.asarray(Image.open(io.BytesIO(image_data)))
-        else:
-            image_path = os.path.join(self.config.image_dir, frame.name)
-            print("Local path:", image_path)
-            img = Image.open(image_path)
-            im = np.array(img, dtype=np.uint8)
+        # Fetch the image
+        im = self.images[frame.name].result()
 
         if self.config.show_seg:
             image_seg_path = os.path.join(
@@ -266,7 +287,6 @@ class LabelViewer:
             return True
 
         labels = frame.labels
-        # print(labels)
 
         if self.config.with_attr:
             self.show_frame_attributes(frame)
@@ -621,6 +641,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         default=False,
         help="Do not show 3D bounding boxes",
+    )
+    parser.add_argument(
+        "--no-tags",
+        action="store_true",
+        default=False,
+        help="Do not show tags on boxes or polygons",
+    )
+    parser.add_argument(
+        "--no-vertices",
+        action="store_true",
+        default=False,
+        help="Do not show vertices",
     )
     parser.add_argument(
         "-o",
