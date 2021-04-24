@@ -18,6 +18,7 @@ from .coco_typing import (AnnType, CatType, GtType, ImgType, PolygonType,
 from .io import group_and_sort, read
 from .transforms import (box2d_to_bbox, mask_to_bbox, mask_to_polygon,
                          poly2ds_to_mask)
+
 from .typing import Frame, Label, Poly2D
 
 DEFAULT_COCO_CONFIG = osp.join(
@@ -559,7 +560,7 @@ def run(args: argparse.Namespace) -> None:
     )
 
     logger.info("Loading Scalabel jsons...")
-    frames = read(args.label)
+    frames = load(args.label)
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
