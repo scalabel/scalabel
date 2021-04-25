@@ -8,7 +8,7 @@ import {
 import { selectLabels, unselectLabels } from "../../action/select"
 import Session from "../../common/session"
 import { addVisibilityListener } from "../../common/window"
-import { Key } from "../../const/common"
+import { AvailableHotKeyCodes, Key, LabelTypeName } from "../../const/common"
 import { getLinkedLabelIds } from "../../functional/common"
 import { getSelectedTracks } from "../../functional/state_util"
 import { tracksOverlapping } from "../../functional/track"
@@ -18,6 +18,8 @@ import { IdType, State } from "../../types/state"
 import { commit2DLabels } from "../states"
 import { Label2D } from "./label2d"
 import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
+import { handleChange } from "../../components/toolbar_category"
+import { addLabelTag } from "../../action/tag"
 
 /**
  * List of drawable labels
@@ -199,6 +201,64 @@ export class Label2DHandler {
   }
 
   /**
+   * Return array of attribute and value indexes for given hotkey code
+   *
+   * @param {string} hotkeyCode
+   */
+  private _indexesByHotKey(hotkeyCode: string): [number, number] | null {
+    return AvailableHotKeyCodes.reduce(
+      (acc: [number, number] | null, categoryHotkeys: string[], index) => {
+        if (acc === null) {
+          const hotkeyIndex = categoryHotkeys.findIndex(
+            (el) => el === hotkeyCode
+          )
+          if (hotkeyIndex !== -1) {
+            return [index, hotkeyIndex]
+          }
+        }
+        return acc
+      },
+      null
+    )
+  }
+
+  /**
+   * Check if attribute hotkey is pressed and act accordingly
+   *
+   * @param {KeyboardEvent} e
+   */
+  private _processHotKeys(e: KeyboardEvent): void {
+    const state = this._state
+    if (
+      state.task.config.labelTypes[state.user.select.labelType] ===
+      LabelTypeName.TAG
+    ) {
+      const indexes = this._indexesByHotKey(e.code)
+      if (indexes === null) {
+        return
+      }
+      const [attributeIndex, valueIndex] = indexes
+      if (
+        state.task.config.attributes[attributeIndex] === undefined ||
+        state.task.config.attributes[attributeIndex].values.length <= valueIndex
+      ) {
+        return
+      }
+      Session.dispatch(addLabelTag(attributeIndex, valueIndex))
+    } else {
+      const numValue = parseInt(e.key, 10)
+      if (
+        isNaN(numValue) ||
+        numValue === 0 ||
+        numValue > state.task.config.categories.length
+      ) {
+        return
+      }
+      handleChange(null, numValue - 1)
+    }
+  }
+
+  /**
    * Handle keyboard down events
    *
    * @param e
@@ -214,6 +274,7 @@ export class Label2DHandler {
         this._labelList.selectedLabels.length = 0
       }
     }
+
     switch (e.key) {
       case Key.L_LOW:
         if (this.isKeyDown(Key.CONTROL)) {
@@ -266,6 +327,8 @@ export class Label2DHandler {
         }
         break
     }
+
+    this._processHotKeys(e)
   }
 
   /**

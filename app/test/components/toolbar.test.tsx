@@ -133,6 +133,7 @@ describe("test functionality for attributes with multiple values", () => {
         values={testValues}
         handleAttributeToggle={dummyAttributeToggle}
         getAlignmentIndex={dummyGetAlignmentIndex}
+        hotKeys={["1", "2", "3"]}
       />
     )
     expect(handleToggleWasCalled).toBe(false)
@@ -146,6 +147,7 @@ describe("test functionality for attributes with multiple values", () => {
         values={testValues}
         handleAttributeToggle={dummyAttributeToggle}
         getAlignmentIndex={dummyGetAlignmentIndex}
+        hotKeys={["Q", "W", "E", "R", "T", "Y"]}
       />
     )
     let AButton = getByTestId("toggle-button-A") as HTMLButtonElement

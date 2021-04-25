@@ -32,6 +32,8 @@ interface Props {
   name: string
   /** values of ToggleButtons */
   values: string[]
+  /** button hotkey tip values array */
+  hotKeys: string[] | null
 }
 
 /**
@@ -58,7 +60,7 @@ class ToggleButtons extends React.Component<Props> {
 
   /** render function of ToggleButtons */
   public render(): JSX.Element {
-    const { name, classes, values } = this.props
+    const { name, classes, values, hotKeys } = this.props
     const ToggleBtn = withStyles(toggleButtonStyle)(ToggleButton)
     return (
       <List style={{ width: "100%", padding: "0px" }}>
@@ -76,7 +78,7 @@ class ToggleButtons extends React.Component<Props> {
             exclusive
             onChange={this.handleAlignment}
           >
-            {values.map((element: string) => (
+            {values.map((element: string, index: number) => (
               <ToggleBtn
                 className={classes.toggleButton}
                 value={element}
@@ -84,7 +86,8 @@ class ToggleButtons extends React.Component<Props> {
                 data-testid={"toggle-button-" + element}
               >
                 {" "}
-                {element}{" "}
+                {element}
+                {hotKeys?.[index] !== undefined ? ` [${hotKeys[index]}] ` : " "}
               </ToggleBtn>
             ))}
           </ToggleButtonGroup>
