@@ -47,6 +47,7 @@ __pycache__/
 
 # python virtual environment
 env/
+venv/
 
 # local data folder
 data/

@@ -107,8 +107,6 @@ export class Box2D extends Label2D {
     let rectStyle = makeRect2DStyle()
     let assignColor: (i: number) => number[] = () => [0]
 
-    // const state: State = Session.getState()
-    // const categoryIndex: number = state.user.select.category
     const categoryColor: string = this._config.categoryColors[this.category[0]]
 
     switch (mode) {
