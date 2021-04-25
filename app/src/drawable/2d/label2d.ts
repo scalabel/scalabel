@@ -294,23 +294,16 @@ export abstract class Label2D {
 
     for (const attributeId of Object.keys(attributes)) {
       const attribute = config.attributes[Number(attributeId)]
+      const attrValue = attributes[Number(attributeId)][0]
+      if (attrValue <= 0) {
+        continue
+      }
+      abbr += "," + attribute.tagText
       if (attribute.toolType === "switch") {
-        if (attributes[Number(attributeId)][0] > 0) {
-          abbr += "," + attribute.tagText
-          tw += 36
-        }
+        tw += 36
       } else if (attribute.toolType === "list") {
-        if (
-          Number(attributeId) in attribute &&
-          attributes[Number(attributeId)][0] > 0
-        ) {
-          abbr +=
-            "," +
-            attribute.tagText +
-            ":" +
-            attribute.tagSuffixes[attributes[Number(attributeId)][0]]
-          tw += 72
-        }
+        abbr += ":" + attribute.tagSuffixes[attrValue]
+        tw += 72
       }
     }
 
@@ -430,7 +423,7 @@ export abstract class Label2D {
     )
     this.setSelected(
       this._label.item in select.labels &&
-        select.labels[this._label.item].includes(labelId)
+      select.labels[this._label.item].includes(labelId)
     )
     this.updateShapes(this._label.shapes.map((i) => item.shapes[i]))
   }
