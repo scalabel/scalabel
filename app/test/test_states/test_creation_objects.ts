@@ -29,6 +29,19 @@ const sampleCategories: string[] = [
   "traffic light"
 ]
 
+const sampleCategoryColors: string[] = [
+  "#0000ff",
+  "#5fbdff",
+  "#660000",
+  "#FF4400",
+  "#ff3aff",
+  "#ff0000",
+  "#ff9cc3",
+  "#22ffff",
+  "#00FF00",
+  "#FFFFFF"
+]
+
 const sampleAttributes: Array<Partial<Attribute>> = [
   {
     name: "Occluded",
@@ -170,6 +183,7 @@ export const sampleFormVideo: CreationForm = {
 
 export const sampleFormFileData: FormFileData = {
   categories: sampleCategories,
+  categoryColors: sampleCategoryColors,
   attributes: sampleAttributes as Attribute[],
   sensors: [],
   items: sampleItems,
@@ -191,6 +205,7 @@ export const sampleProjectImage: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
+    categoryColors: sampleCategoryColors,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: false,
@@ -250,6 +265,7 @@ sampleItemsVideo[1].labels = [
 
 export const sampleVideoFormFileData: FormFileData = {
   categories: sampleCategories,
+  categoryColors: sampleCategoryColors,
   attributes: sampleAttributes as Attribute[],
   items: sampleItemsVideo,
   sensors: [],
@@ -271,6 +287,7 @@ export const sampleProjectVideo: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V1,
     categories: sampleCategories,
+    categoryColors: sampleCategoryColors,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: true,
@@ -295,6 +312,7 @@ export const sampleProjectAutolabel: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
+    categoryColors: sampleCategoryColors,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: false,
@@ -319,6 +337,7 @@ export const sampleProjectAutolabelPolygon: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
+    categoryColors: sampleCategoryColors,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: false,
@@ -343,6 +362,7 @@ export const sampleTasksImage: TaskType[] = [
       instructionPage: sampleInstructions,
       bundleFile: BundleFile.V2,
       categories: sampleCategories,
+      categoryColors: sampleCategoryColors,
       attributes: sampleAttributes as Attribute[],
       taskId: "000000",
       demoMode: false,
@@ -437,6 +457,7 @@ export const sampleTasksImage: TaskType[] = [
       instructionPage: sampleInstructions,
       bundleFile: BundleFile.V2,
       categories: sampleCategories,
+      categoryColors: sampleCategoryColors,
       attributes: sampleAttributes as Attribute[],
       taskId: "000001",
       demoMode: false,
@@ -534,6 +555,7 @@ export const sampleTasksVideo: TaskType[] = [
       instructionPage: "instructions.com",
       bundleFile: "image.js",
       categories: sampleCategories,
+      categoryColors: sampleCategoryColors,
       attributes: sampleAttributes as Attribute[],
       taskId: "000000",
       demoMode: true,
@@ -694,6 +716,7 @@ export const sampleTasksVideo: TaskType[] = [
       instructionPage: "instructions.com",
       bundleFile: "image.js",
       categories: sampleCategories,
+      categoryColors: sampleCategoryColors,
       attributes: sampleAttributes as Attribute[],
       taskId: "000001",
       demoMode: true,

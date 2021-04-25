@@ -1,0 +1,4 @@
+- name: drivable
+  color: "wrong"
+- name: alternative
+  color: "#color"

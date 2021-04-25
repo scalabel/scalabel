@@ -37,6 +37,8 @@ export interface CreationForm {
 export interface FormFileData {
   /** categories parsed from form file */
   categories: string[]
+  /** category colors parsed from form file */
+  categoryColors: string[]
   /** sensors */
   sensors: SensorType[]
   /** custom label template */

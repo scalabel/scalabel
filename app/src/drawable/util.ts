@@ -84,10 +84,20 @@ export function getColorById(labelId: IdType, trackId: IdType): number[] {
 }
 
 /**
+ * Return true if should use white font color for better contrast
+ *
+ * @param {number[]} bgColor - background color r g b array
+ * @return boolean
+ */
+export function reverseTextColor(bgColor: number[]): boolean {
+  const [r, g, b] = bgColor
+  return r * 0.299 + g * 0.587 + b * 0.114 < 151
+}
+
+/**
  * Convert numerical color to CSS color string
  *
- * @param {number[]} color: can have 3 or 4 elements
- * @param color
+ * @param {number[]} color - can have 3 or 4 elements
  */
 export function toCssColor(color: number[]): string {
   if (color.length === 3) {
@@ -97,6 +107,31 @@ export function toCssColor(color: number[]): string {
   } else {
     throw new Error(`color argument has wrong length ${color.length}`)
   }
+}
+
+/**
+ * Return true if the string is valid CSS hex color representation
+ *
+ * @param {string} color - color string
+ * @return boolean
+ */
+export function isHexColor(color: string): boolean {
+  return /^#[0-9A-F]{6}$/i.test(color)
+}
+
+/**
+ * Convert CSS hex color string to numerical color
+ *
+ * @param {string} color - hex color string
+ * @return [number, number, number]
+ */
+export function toNumColor(color: string): number[] {
+  const hex = color.replace(/[^0-9A-F]/gi, "")
+  const bigint = parseInt(hex, 16)
+  const r = (bigint >> 16) & 255
+  const g = (bigint >> 8) & 255
+  const b = bigint & 255
+  return [r, g, b]
 }
 
 export type Context2D = CanvasRenderingContext2D

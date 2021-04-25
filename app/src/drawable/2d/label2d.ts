@@ -13,7 +13,7 @@ import {
   ShapeType,
   State
 } from "../../types/state"
-import { Context2D, getColorById } from "../util"
+import { Context2D, getColorById, reverseTextColor } from "../util"
 import { Label2DList } from "./label2d_list"
 
 export enum DrawMode {
@@ -316,7 +316,9 @@ export abstract class Label2D {
 
     ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
     ctx.fillRect(x * ratio, y * ratio - TAG_HEIGHT, tw, TAG_HEIGHT)
-    ctx.fillStyle = "rgb(0,0,0)"
+    ctx.fillStyle = reverseTextColor(fillStyle)
+      ? "rgb(255,255,255)"
+      : "rgb(0,0,0)"
     ctx.font = `${20}px Verdana`
     ctx.fillText(abbr, x * ratio + 6, y * ratio - 6)
     ctx.restore()

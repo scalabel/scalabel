@@ -97,6 +97,8 @@ export async function parseForm(
 type Categories = Array<{
   /** Name of the category */
   name: string
+  /** Color for category */
+  color: string
 }>
 
 /**
@@ -156,16 +158,20 @@ export async function parseFiles(
     ) => {
       const categoriesData = result[4]
       const categoriesList = []
+      const categoryColors = []
       for (const category of categoriesData) {
         categoriesList.push(category.name)
+        categoryColors.push(category.color)
       }
-      return {
+      const formFileData = {
         items: result[0],
         sensors: result[1],
         templates: result[2],
         attributes: result[3],
-        categories: categoriesList
+        categories: categoriesList,
+        categoryColors: categoryColors
       }
+      return formFileData
     }
   )
 }
@@ -286,6 +292,7 @@ export async function createProject(
     instructionPage: form.instructionUrl,
     bundleFile,
     categories: formFileData.categories,
+    categoryColors: formFileData.categoryColors,
     attributes: formFileData.attributes,
     taskId: "",
     tracking,
