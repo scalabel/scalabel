@@ -19,7 +19,7 @@ setuptools.setup(
         "Source": "https://github.com/scalabel/scalabel",
         "Tracker": "https://github.com/scalabel/scalabel/issues",
     },
-    package_data={"scalabel": ["py.typed"]},
+    package_data={"scalabel": ["py.typed", "label/configs.toml"]},
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -32,6 +32,7 @@ setuptools.setup(
         "Flask-Cors",
         "Flask",
         "joblib",
+        "matplotlib",
         "numpy",
         "Pillow",
         "plyfile",
@@ -43,6 +44,9 @@ setuptools.setup(
         "python-dateutil",
         "PyYAML",
         "requests",
+        "scikit-image",
         "tqdm",
+        "toml",
     ],
+    include_package_data=True
 )

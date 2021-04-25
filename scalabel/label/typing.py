@@ -4,8 +4,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
-DictStrAny = Dict[str, Any]  # type: ignore[misc]
-
 
 class Box2D(BaseModel):
     """Box 2D."""
@@ -89,7 +87,7 @@ class Frame(BaseModel):
     timestamp: Optional[int] = None
     frame_index: Optional[int] = None
     size: Optional[List[int]] = None
-    labels: List[Label]
+    labels: Optional[List[Label]] = None
 
     def __init__(self, **data: Any) -> None:  # type: ignore
         """Init structure and convert the id type to string."""

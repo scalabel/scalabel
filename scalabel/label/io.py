@@ -1,29 +1,66 @@
 """Label io."""
 
+import glob
 import json
-from typing import Any, List, Union
+import os.path as osp
+from itertools import groupby
+from typing import Any, List
 
 import humps
 
-from .typing import DictStrAny, Frame
+from ..common.parallel import pmap
+from ..common.typing import DictStrAny
+from .typing import Frame
 
 
-def load(filepath: str) -> List[Frame]:
-    """Load labels from a file."""
-    return parse(json.load(open(filepath, "r")))
+def parse(raw_frame: DictStrAny) -> Frame:
+    """Parse a single frame."""
+    return Frame(**humps.decamelize(raw_frame))
 
 
-def parse(raw_frames: Union[str, List[DictStrAny], DictStrAny]) -> List[Frame]:
-    """Load labels in Scalabel format."""
-    if isinstance(raw_frames, str):
-        raw_frames = json.loads(raw_frames)
-    if isinstance(raw_frames, dict):
-        raw_frames = [raw_frames]
-    frames: List[Frame] = []
-    for rf in raw_frames:
-        f = humps.decamelize(rf)
-        frames.append(Frame(**f))
-    return frames
+def load(inputs: str, nprocs: int = 0) -> List[Frame]:
+    """Load labels from a json file or a folder of json files."""
+    raw_frames: List[DictStrAny] = []
+    if osp.isfile(inputs) and inputs.endswith("json"):
+        with open(inputs, "r") as fp:
+            content = json.load(fp)
+            if isinstance(content, dict):
+                raw_frames.append(content)
+            elif isinstance(content, list):
+                raw_frames.extend(content)
+            else:
+                raise TypeError(
+                    "The input file contains neither dict nor list."
+                )
+    elif osp.isdir(inputs):
+        files = glob.glob(osp.join(inputs, "*.json"))
+        for file_ in files:
+            with open(file_, "r") as fp:
+                raw_frames.extend(json.load(fp))
+    else:
+        raise TypeError("Inputs must be a folder or a JSON file.")
+
+    if nprocs > 0:
+        return pmap(parse, raw_frames, nprocs)
+    return list(map(parse, raw_frames))
+
+
+def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
+    """Group frames by video_name and sort."""
+    for frame in inputs:
+        assert frame.video_name is not None
+        assert frame.frame_index is not None
+    frames_list: List[List[Frame]] = []
+    for _, frame_iter in groupby(inputs, lambda frame: frame.video_name):
+        frames = sorted(
+            list(frame_iter),
+            key=lambda frame: frame.frame_index if frame.frame_index else 0,
+        )
+        frames_list.append(frames)
+    frames_list = sorted(
+        frames_list, key=lambda frames: str(frames[0].video_name)
+    )
+    return frames_list
 
 
 def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
