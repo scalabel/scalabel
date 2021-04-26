@@ -22,6 +22,7 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.path import Path
 from PIL import Image
 
+from ..common.logger import logger
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
 from .geometry import Label3d
@@ -98,7 +99,7 @@ class ViewerConfig:
 def fetch_image(inputs: Tuple[Frame, str]) -> np.ndarray:
     """Fetch the image given image information."""
     frame, image_dir = inputs
-    print("Image:", frame.name)
+    logger.info("Loading image: %s", frame.name)
 
     # Fetch image
     if frame.url is not None and len(frame.url) > 0:
@@ -264,7 +265,7 @@ class LabelViewer:
         plt.cla()
 
         frame = self.frames[self.frame_index % len(self.frames)]
-        self.fig.canvas.set_window_title(frame.name)
+        self.fig.set_window_title(frame.name)
 
         # Fetch the image
         im = self.images[frame.name].result()
@@ -624,6 +625,7 @@ class LabelViewer:
         out_paths = []
 
         self.frame_index = self.start_index
+        os.makedirs(self.config.out_dir, True)
         while self.frame_index < len(self.frames):
             out_name = (
                 os.path.splitext(
@@ -632,6 +634,7 @@ class LabelViewer:
                 + ".png"
             )
             out_path = os.path.join(self.config.out_dir, out_name)
+            logger.info("Writing %s", out_path)
             if self.show_frame():
                 self.fig.savefig(out_path, dpi=dpi)
                 out_paths.append(out_path)
