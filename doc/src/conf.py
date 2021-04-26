@@ -16,11 +16,13 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from datetime import datetime
+
 
 # -- Project information -----------------------------------------------------
 
 project = "scalabel-doc"
-copyright = "2021, Scalabel Project"
+copyright = "{}, Scalabel Project".format(datetime.now().year)
 author = "Fisher Yu"
 
 # The short X.Y version
