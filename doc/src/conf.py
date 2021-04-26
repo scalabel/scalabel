@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "scalabel-doc"
-copyright = "2020, Scalabel Project"
+copyright = "2021, Scalabel Project"
 author = "Fisher Yu"
 
 # The short X.Y version
@@ -38,7 +38,7 @@ release = ""
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autosectionlabel", "sphinxcontrib.video"]
+extensions = ["sphinx.ext.autosectionlabel"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
