@@ -394,6 +394,7 @@ class LabelViewer:
                     alpha=alpha,
                     color=color,
                 )
+
                 patch_vertices = patch.get_verts()
                 x1 = min(np.min(patch_vertices[:, 0]), x1)
                 y1 = min(np.min(patch_vertices[:, 1]), y1)
@@ -402,15 +403,9 @@ class LabelViewer:
                 self.ax.add_patch(patch)
 
                 if self.config.display_cfg.show_ctrl_points:
-                    for vert in patch_vertices:
-                        self.ax.add_patch(
-                            mpatches.Circle(
-                                tuple(vert),
-                                self.config.display_cfg.ctrl_point_size,
-                                alpha=alpha,
-                                color=color,
-                            )
-                        )
+                    self.draw_ctrl_points(
+                        poly.vertices, poly.types, color, alpha
+                    )
 
             # Show attributes
             if self.config.display_cfg.show_tags:
@@ -438,6 +433,80 @@ class LabelViewer:
                     },
                 )
 
+    def draw_ctrl_points(
+        self,
+        vertices: List[Tuple[float, float]],
+        types: str,
+        color: np.ndarray,
+        alpha: float,
+    ) -> None:
+        """Draw the polygon vertices / control points."""
+        for idx, vert_data in enumerate(zip(vertices, types)):
+            vert = vert_data[0]
+            vert_type = vert_data[1]
+
+            # Add the point first
+            self.ax.add_patch(
+                mpatches.Circle(
+                    vert,
+                    self.config.display_cfg.ctrl_point_size,
+                    alpha=alpha,
+                    color=color,
+                )
+            )
+            # Draw the dashed line to the previous vertex.
+            if vert_type == "C":
+                if idx == 0:
+                    vert_prev = vertices[-1]
+                else:
+                    vert_prev = vertices[idx - 1]
+                edge = np.concatenate(
+                    [
+                        np.array(vert_prev)[None, ...],
+                        np.array(vert)[None, ...],
+                    ],
+                    axis=0,
+                )
+                self.ax.add_patch(
+                    mpatches.Polygon(
+                        edge,
+                        linewidth=2 * self.config.scale,
+                        linestyle=(1, (1, 2)),
+                        edgecolor=color,
+                        facecolor="none",
+                        fill=False,
+                        alpha=alpha,
+                    )
+                )
+
+                # Draw the dashed line to the next vertex.
+                if idx == len(vertices) - 1:
+                    vert_next = vertices[0]
+                    type_next = types[0]
+                else:
+                    vert_next = vertices[idx + 1]
+                    type_next = types[idx + 1]
+
+                if type_next == "L":
+                    edge = np.concatenate(
+                        [
+                            np.array(vert_next)[None, ...],
+                            np.array(vert)[None, ...],
+                        ],
+                        axis=0,
+                    )
+                    self.ax.add_patch(
+                        mpatches.Polygon(
+                            edge,
+                            linewidth=2 * self.config.scale,
+                            linestyle=(1, (1, 2)),
+                            edgecolor=color,
+                            facecolor="none",
+                            fill=False,
+                            alpha=alpha,
+                        )
+                    )
+
     def poly2patch(
         self,
         vertices: List[Tuple[float, float]],
@@ -459,7 +528,6 @@ class LabelViewer:
         if color is None:
             color = random_color()
 
-        # print(codes, points)
         return mpatches.PathPatch(
             Path(points, codes),
             facecolor=color if closed else "none",
