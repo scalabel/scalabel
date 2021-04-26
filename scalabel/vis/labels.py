@@ -118,12 +118,12 @@ class LabelViewer:
     """Visualize 2D and 3D bounding boxes.
 
     Keymap:
-    -  N / P: Show next or previous image
+    -  n / p: Show next or previous image
     -  Space: Start / stop animation
-    -  T: Toggle 2D / 3D bounding box (if avaliable)
-    -  Y: Toggle image / segmentation view (if avaliable)
-    -  A: Toggle the display of the attribute tags on boxes or polygons.
-    -  C: Toggle the display of polygon vertices.
+    -  t: Toggle 2D / 3D bounding box (if avaliable)
+    -  y: Toggle image / segmentation view (if avaliable)
+    -  a: Toggle the display of the attribute tags on boxes or polygons.
+    -  c: Toggle the display of polygon vertices.
     -  Up: Increase the size of polygon vertices.
     -  Down: Decrease the size of polygon vertices.
 
@@ -163,10 +163,10 @@ class LabelViewer:
         elif os.path.exists(os.path.join(args.image_dir, args.labels)):
             self.frames = load(os.path.join(args.image_dir, args.labels))
         else:
-            print("Label file not found!")
+            logger.error("Label file not found!")
             sys.exit(1)
 
-        print("Load images: ", len(self.frames))
+        logger.info("Load images: %d", len(self.frames))
 
         self.images: Dict[
             str, "concurrent.futures.Future[np.ndarray]"
@@ -265,7 +265,7 @@ class LabelViewer:
         plt.cla()
 
         frame = self.frames[self.frame_index % len(self.frames)]
-        self.fig.set_window_title(frame.name)
+        self.fig.canvas.manager.set_window_title(frame.name)
 
         # Fetch the image
         im = self.images[frame.name].result()
@@ -670,7 +670,22 @@ class LabelViewer:
 
 def parse_args() -> argparse.Namespace:
     """Use argparse to get command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        """
+Interface keymap:
+    -  n / p: Show next or previous image
+    -  Space: Start / stop animation
+    -  t: Toggle 2D / 3D bounding box (if avaliable)
+    -  y: Toggle image / segmentation view (if avaliable)
+    -  a: Toggle the display of the attribute tags on boxes or polygons.
+    -  c: Toggle the display of polygon vertices.
+    -  Up: Increase the size of polygon vertices.
+    -  Down: Decrease the size of polygon vertices.
+
+Export images:
+    - add `-o {dir}` tag when runing.
+    """
+    )
     parser.add_argument(
         "-i", "--image", required=False, help="input raw image", type=str
     )
