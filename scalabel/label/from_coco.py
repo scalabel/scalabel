@@ -3,7 +3,10 @@ import argparse
 import json
 import os
 from itertools import groupby
+from multiprocessing import Pool
 from typing import Dict, Iterable, List, Optional, Tuple
+
+from tqdm import tqdm
 
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
@@ -23,6 +26,12 @@ def parse_arguments() -> argparse.Namespace:
         "--output",
         "-o",
         help="path to save scalabel formatted label file",
+    )
+    parser.add_argument(
+        "--nproc",
+        type=int,
+        default=4,
+        help="number of processes for conversion",
     )
     return parser.parse_args()
 
@@ -51,7 +60,7 @@ def coco_to_scalabel(
 
     scalabel: List[Frame] = []
     img_ids = sorted(img_id2img.keys())
-    for img_id in img_ids:
+    for img_id in tqdm(img_ids):
         img = img_id2img[img_id]
         frame = Frame(name=os.path.split(img["file_name"])[-1])
         if "coco_url" in img:
@@ -94,19 +103,24 @@ def run(args: argparse.Namespace) -> None:
     with open(args.label) as fp:
         coco: GtType = json.load(fp)
     scalabel, vid_id2name = coco_to_scalabel(coco)
+    print(args.nproc)
 
     if vid_id2name is None:
         assert args.output.endswith(".json"), "output should be a json file"
-        save(args.output, scalabel)
+        save(args.output, scalabel, args.nproc)
     else:
         scalabels = group_and_sort(scalabel)
         if not os.path.isdir(args.output):
             os.makedirs(args.output)
-        for video_anns in scalabels:
-            assert video_anns[0].video_name is not None
-            save_name = video_anns[0].video_name + ".json"
-            save_path = os.path.join(args.output, save_name)
-            save(save_path, video_anns)
+        save_paths = [
+            os.path.join(args.output, str(video_anns[0].video_name) + ".json")
+            for video_anns in scalabels
+        ]
+        with Pool(args.nproc) as pool:
+            pool.starmap(
+                save,
+                tqdm(zip(save_paths, scalabels), total=len(scalabels)),
+            )
 
 
 if __name__ == "__main__":

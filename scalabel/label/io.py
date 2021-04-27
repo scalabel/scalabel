@@ -84,13 +84,16 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
     }
 
 
-def save(filepath: str, frames: List[Frame]) -> None:
+def save(filepath: str, frames: List[Frame], nprocs: int = 0) -> None:
     """Save labels in Scalabel format."""
-    labels = dump(frames)
+    if nprocs > 0:
+        labels = pmap(dump, frames, nprocs)
+    else:
+        labels = list(map(dump, frames))
     with open(filepath, "w") as fp:
         json.dump(labels, fp, indent=2)
 
 
-def dump(frames: List[Frame]) -> List[DictStrAny]:
+def dump(frame: Frame) -> DictStrAny:
     """Dump labels into dictionaries."""
-    return [humps.camelize(remove_empty_elements(f.dict())) for f in frames]
+    return humps.camelize(remove_empty_elements(frame.dict()))
