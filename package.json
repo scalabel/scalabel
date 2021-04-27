@@ -1,6 +1,10 @@
 {
   "name": "scalabel",
   "version": "0.3.0-rc.2",
+  "bin": "./app/dist/main.js",
+  "files": [
+    "app/*"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/scalabel/scalabel"
