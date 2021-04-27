@@ -135,6 +135,8 @@ def process_category(
 
 def get_object_attributes(label: Label, ignore: bool) -> Tuple[int, int]:
     """Set attributes for the ann dict."""
+    if label.id == "-1":
+        ignore = True
     attributes = label.attributes
     if attributes is None:
         return False, int(ignore)
@@ -355,7 +357,10 @@ def get_instance_id(
     instance_id_maps: Dict[str, int], global_instance_id: int, scalabel_id: str
 ) -> Tuple[int, int]:
     """Get instance id given its corresponding Scalabel id."""
-    if scalabel_id in instance_id_maps.keys():
+    if scalabel_id == "-1":
+        instance_id = global_instance_id
+        global_instance_id += 1
+    elif scalabel_id in instance_id_maps.keys():
         instance_id = instance_id_maps[scalabel_id]
     else:
         instance_id = global_instance_id
