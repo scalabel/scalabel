@@ -39,7 +39,7 @@ class Label(BaseModel):
     manual_shape: Optional[bool] = None
     manual_attributes: Optional[bool] = None
     score: Optional[float] = None
-    attributes: Optional[Dict[str, Union[bool, float, str]]] = None
+    attributes: Optional[Dict[str, Union[bool, int, float, str]]] = None
     category: Optional[str] = None
     box_2d: Optional[Box2D]
     box_3d: Optional[Box3D]
