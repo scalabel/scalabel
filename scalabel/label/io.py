@@ -40,7 +40,7 @@ def load(inputs: str, nprocs: int = 0) -> List[Frame]:
     else:
         raise TypeError("Inputs must be a folder or a JSON file.")
 
-    if nprocs > 0:
+    if nprocs > 1:
         return pmap(parse, raw_frames, nprocs)
     return list(map(parse, raw_frames))
 
@@ -86,7 +86,7 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
 
 def save(filepath: str, frames: List[Frame], nprocs: int = 0) -> None:
     """Save labels in Scalabel format."""
-    if nprocs > 0:
+    if nprocs > 1:
         labels = pmap(dump, frames, nprocs)
     else:
         labels = list(map(dump, frames))
@@ -96,4 +96,5 @@ def save(filepath: str, frames: List[Frame], nprocs: int = 0) -> None:
 
 def dump(frame: Frame) -> DictStrAny:
     """Dump labels into dictionaries."""
-    return humps.camelize(remove_empty_elements(frame.dict()))
+    frame_str: DictStrAny = humps.camelize(remove_empty_elements(frame.dict()))
+    return frame_str
