@@ -200,15 +200,14 @@ def pol2ds_list_to_coco(
     nproc: int,
 ) -> List[AnnType]:
     """Execute the Poly2D to coco conversion in parallel."""
-    pool = Pool(nproc)
-    annotations = pool.starmap(
-        partial(poly2ds_to_coco, shape=shape, mask_mode=mask_mode),
-        tqdm(
-            zip(annotations, poly_2ds),
-            total=len(annotations),
-        ),
-    )
-    pool.close()
+    with Pool(nproc) as pool:
+        annotations = pool.starmap(
+            partial(poly2ds_to_coco, shape=shape, mask_mode=mask_mode),
+            tqdm(
+                zip(annotations, poly_2ds),
+                total=len(annotations),
+            ),
+        )
 
     sorted(annotations, key=lambda ann: ann["id"])
     return annotations

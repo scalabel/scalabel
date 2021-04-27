@@ -215,16 +215,16 @@ def main() -> None:
 
     for item in tqdm(bdd_data, ascii=True):
         url = item["url"]
-        http_response = urllib.request.urlopen(url)
-        ply_data = plyfile.PlyData.read(http_response)
-        points = np.concatenate(
-            [
-                ply_data["vertex"]["x"][..., None],
-                ply_data["vertex"]["y"][..., None],
-                ply_data["vertex"]["z"][..., None],
-            ],
-            axis=-1,
-        )
+        with urllib.request.urlopen(url) as http_response:
+            ply_data = plyfile.PlyData.read(http_response)
+            points = np.concatenate(
+                [
+                    ply_data["vertex"]["x"][..., None],
+                    ply_data["vertex"]["y"][..., None],
+                    ply_data["vertex"]["z"][..., None],
+                ],
+                axis=-1,
+            )
 
         results = estimate_ground_plane(
             points,
