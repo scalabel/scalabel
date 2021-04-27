@@ -1,5 +1,6 @@
 {
   "name": "scalabel",
+  "version": "0.3.0-rc.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/scalabel/scalabel"
