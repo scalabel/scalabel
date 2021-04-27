@@ -271,16 +271,18 @@ export class ToolBar extends Component<Props> {
       LabelTypeName.TAG
     ) {
       const item = state.task.items[state.user.select.item]
-      const labelId = Number(_.findKey(item.labels))
-      if (isNaN(labelId)) {
+      const labelId = _.findKey(item.labels)
+      if (labelId === undefined) {
         return 0
       }
-      const attributes = item.labels[labelId].attributes
+      const attributes = isNaN(Number(labelId))
+        ? item.labels[labelId].attributes
+        : item.labels[parseInt(labelId, 10)].attributes
       const index = this.getAttributeIndex(state.task.config.attributes, name)
       if (index < 0) {
         return 0
       }
-      if (attributes[index].length > 0) {
+      if (attributes[index] !== undefined && attributes[index].length > 0) {
         return attributes[index][0]
       } else {
         return 0
