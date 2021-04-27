@@ -570,7 +570,7 @@ def run(args: argparse.Namespace) -> None:
     )
 
     logger.info("Loading Scalabel jsons...")
-    frames = load(args.label)
+    frames = load(args.label, args.nproc)
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
