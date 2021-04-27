@@ -159,9 +159,11 @@ class LabelViewer:
         print("Label file:", args.labels)
         self.frames: List[Frame] = []
         if os.path.exists(args.labels):
-            self.frames = load(args.labels)
+            self.frames = load(args.labels, args.nproc)
         elif os.path.exists(os.path.join(args.image_dir, args.labels)):
-            self.frames = load(os.path.join(args.image_dir, args.labels))
+            self.frames = load(
+                os.path.join(args.image_dir, args.labels), args.nproc
+            )
         else:
             logger.error("Label file not found!")
             sys.exit(1)
@@ -753,6 +755,12 @@ Export images:
         "If it is set, the images will be written to the "
         "output folder instead of being displayed "
         "interactively.",
+    )
+    parser.add_argument(
+        "--nproc",
+        type=int,
+        default=4,
+        help="number of processes for json loading",
     )
 
     args = parser.parse_args()
