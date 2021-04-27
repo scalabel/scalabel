@@ -94,7 +94,7 @@ def parse_arguments() -> argparse.Namespace:
         "--nproc",
         type=int,
         default=4,
-        help="number of processes for mot evaluation",
+        help="number of processes for conversion",
     )
     parser.add_argument(
         "--config",
@@ -570,7 +570,7 @@ def run(args: argparse.Namespace) -> None:
     )
 
     logger.info("Loading Scalabel jsons...")
-    frames = load(args.label)
+    frames = load(args.label, args.nproc)
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
