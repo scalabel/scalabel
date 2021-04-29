@@ -21,6 +21,9 @@ def parse(raw_frame: DictStrAny) -> Frame:
 def load(inputs: str, nprocs: int = 0) -> List[Frame]:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
+    if not osp.exists(inputs):
+        raise FileNotFoundError(f"{inputs} does not exist.")
+
     if osp.isfile(inputs) and inputs.endswith("json"):
         with open(inputs, "r") as fp:
             content = json.load(fp)
