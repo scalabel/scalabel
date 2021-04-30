@@ -43,7 +43,7 @@ release = ""
 extensions = ["sphinx.ext.autosectionlabel"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = []
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -83,10 +83,11 @@ html_theme = "sphinx_rtd_theme"
 # documentation.
 
 html_theme_options = {
-    "canonical_url": "https://doc.scalabel.ai/",
-    "analytics_id": "",
+    "analytics_id": "G-PC2FKFL5TE",
+    "analytics_anonymize_ip": False,
     "logo_only": True,
     "display_version": True,
+    "style_external_links": True,
     "prev_next_buttons_location": "bottom",
     "style_external_links": False,
     # Toc options
@@ -128,7 +129,7 @@ html_short_title = "Scalabel Doc"
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "docdoc"
+# htmlhelp_basename = "pydoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------

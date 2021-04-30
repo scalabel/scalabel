@@ -1,3 +1,6 @@
+:github_url: https://github.com/scalabel/scalabel
+
+
 Scalabel User Guide
 ====================
 
