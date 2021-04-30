@@ -21,7 +21,7 @@ from datetime import datetime
 
 # -- Project information -----------------------------------------------------
 
-project = "scalabel-doc"
+project = "Scalabel"
 copyright = "{}, Scalabel Project".format(datetime.now().year)
 author = "Fisher Yu"
 
@@ -83,7 +83,7 @@ html_theme = "sphinx_rtd_theme"
 # documentation.
 
 html_theme_options = {
-    "canonical_url": "https://doc.scalabel.ai",
+    "canonical_url": "https://doc.scalabel.ai/",
     "analytics_id": "",
     "logo_only": True,
     "display_version": True,
