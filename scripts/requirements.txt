@@ -1,6 +1,5 @@
 black
 boto3
-dataclasses_json
 Flask
 Flask-Cors
 isort
@@ -11,7 +10,9 @@ Pillow
 plyfile
 psutil
 pycocotools
+pydantic
 pydocstyle
+pyhumps
 pylint
 pyparsing
 pytest
@@ -25,4 +26,5 @@ setuptools
 torch>=1.4.0
 torchvision>=0.5.0
 tqdm
+toml
 wheel

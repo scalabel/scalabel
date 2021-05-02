@@ -1,0 +1,61 @@
+[name_mapping]
+bike = "bicycle"
+caravan = "car"
+motor = "motorcycle"
+person = "pedestrian"
+van = "car"
+
+[ignore_mapping]
+"other person" = "pedestrian"
+"other vehicle" = "car"
+"trailer" = "truck"
+
+[[categories]]
+supercategory = "human"
+id = 1
+name = "pedestrian"
+
+[[categories]]
+supercategory = "human"
+id = 2
+name = "rider"
+
+[[categories]]
+supercategory = "vehicle"
+id = 3
+name = "car"
+
+[[categories]]
+supercategory = "vehicle"
+id = 4
+name = "truck"
+
+[[categories]]
+supercategory = "vehicle"
+id = 5
+name = "bus"
+
+[[categories]]
+supercategory = "vehicle"
+id = 6
+name = "train"
+
+[[categories]]
+supercategory = "bike"
+id = 7
+name = "motorcycle"
+
+[[categories]]
+supercategory = "bike"
+id = 8
+name = "bicycle"
+
+[[cat_extensions]]
+supercategory = "traffic light"
+id = 9
+name = "traffic light"
+
+[[cat_extensions]]
+supercategory = "traffic sign"
+id = 10
+name = "traffic sign"

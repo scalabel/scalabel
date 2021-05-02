@@ -1,3 +1,6 @@
+:github_url: https://github.com/scalabel/scalabel
+
+
 Scalabel User Guide
 ====================
 
@@ -16,6 +19,7 @@ Scalabel is an open-source web annotation tool.
    /format.rst
    /config.rst
    /tools.rst
+   /label.rst
    /auto-label.rst
    /installation.rst
 

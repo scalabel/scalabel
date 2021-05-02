@@ -16,11 +16,13 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from datetime import datetime
+
 
 # -- Project information -----------------------------------------------------
 
-project = "scalabel-doc"
-copyright = "2020, Scalabel Project"
+project = "Scalabel"
+copyright = "{}, Scalabel Project".format(datetime.now().year)
 author = "Fisher Yu"
 
 # The short X.Y version
@@ -38,10 +40,10 @@ release = ""
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autosectionlabel", "sphinxcontrib.video"]
+extensions = ["sphinx.ext.autosectionlabel"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = []
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -81,10 +83,11 @@ html_theme = "sphinx_rtd_theme"
 # documentation.
 
 html_theme_options = {
-    "canonical_url": "https://doc.scalabel.ai",
-    "analytics_id": "",
+    "analytics_id": "G-PC2FKFL5TE",
+    "analytics_anonymize_ip": False,
     "logo_only": True,
     "display_version": True,
+    "style_external_links": True,
     "prev_next_buttons_location": "bottom",
     "style_external_links": False,
     # Toc options
@@ -126,7 +129,7 @@ html_short_title = "Scalabel Doc"
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "docdoc"
+# htmlhelp_basename = "pydoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------

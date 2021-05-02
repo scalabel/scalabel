@@ -70,9 +70,7 @@ class ToggleButtons extends React.Component<Props> {
         <ListItem dense={true} className={classes.toggleContainer}>
           <ToggleButtonGroup
             className={classes.buttonGroup}
-            value={
-              this.props.values[this.props.getAlignmentIndex(this.props.name)]
-            }
+            value={values[this.props.getAlignmentIndex(name)]}
             exclusive
             onChange={this.handleAlignment}
           >

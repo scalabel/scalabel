@@ -21,7 +21,7 @@ local-data/
 test_data/
 
 #python
-.pyc
+*.pyc
 __pycache__/
 
 # pytype
@@ -47,6 +47,7 @@ __pycache__/
 
 # python virtual environment
 env/
+venv/
 
 # local data folder
 data/

@@ -94,10 +94,10 @@ def estimate_ground_plane(
 
     if best_plane:
         return (
-            best_plane[0],
-            best_plane[1],
-            best_plane_inliers,
-            best_plane_outliers,
+            np.array(best_plane[0]),
+            float(best_plane[1]),
+            np.array(best_plane_inliers),
+            np.array(best_plane_outliers),
         )
     return None
 
@@ -215,16 +215,16 @@ def main() -> None:
 
     for item in tqdm(bdd_data, ascii=True):
         url = item["url"]
-        http_response = urllib.request.urlopen(url)
-        ply_data = plyfile.PlyData.read(http_response)
-        points = np.concatenate(
-            [
-                ply_data["vertex"]["x"][..., None],
-                ply_data["vertex"]["y"][..., None],
-                ply_data["vertex"]["z"][..., None],
-            ],
-            axis=-1,
-        )
+        with urllib.request.urlopen(url) as http_response:
+            ply_data = plyfile.PlyData.read(http_response)
+            points = np.concatenate(
+                [
+                    ply_data["vertex"]["x"][..., None],
+                    ply_data["vertex"]["y"][..., None],
+                    ply_data["vertex"]["z"][..., None],
+                ],
+                axis=-1,
+            )
 
         results = estimate_ground_plane(
             points,
