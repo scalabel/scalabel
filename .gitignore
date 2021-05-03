@@ -21,7 +21,7 @@ local-data/
 test_data/
 
 #python
-.pyc
+*.pyc
 __pycache__/
 
 # pytype

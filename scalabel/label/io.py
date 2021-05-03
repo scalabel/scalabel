@@ -21,6 +21,9 @@ def parse(raw_frame: DictStrAny) -> Frame:
 def load(inputs: str, nprocs: int = 0) -> List[Frame]:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
+    if not osp.exists(inputs):
+        raise FileNotFoundError(f"{inputs} does not exist.")
+
     if osp.isfile(inputs) and inputs.endswith("json"):
         with open(inputs, "r") as fp:
             content = json.load(fp)
@@ -40,7 +43,7 @@ def load(inputs: str, nprocs: int = 0) -> List[Frame]:
     else:
         raise TypeError("Inputs must be a folder or a JSON file.")
 
-    if nprocs > 0:
+    if nprocs > 1:
         return pmap(parse, raw_frames, nprocs)
     return list(map(parse, raw_frames))
 
@@ -84,13 +87,17 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
     }
 
 
-def save(filepath: str, frames: List[Frame]) -> None:
+def save(filepath: str, frames: List[Frame], nprocs: int = 0) -> None:
     """Save labels in Scalabel format."""
-    labels = dump(frames)
+    if nprocs > 1:
+        labels = pmap(dump, frames, nprocs)
+    else:
+        labels = list(map(dump, frames))
     with open(filepath, "w") as fp:
         json.dump(labels, fp, indent=2)
 
 
-def dump(frames: List[Frame]) -> List[DictStrAny]:
+def dump(frame: Frame) -> DictStrAny:
     """Dump labels into dictionaries."""
-    return [humps.camelize(remove_empty_elements(f.dict())) for f in frames]
+    frame_str: DictStrAny = humps.camelize(remove_empty_elements(frame.dict()))
+    return frame_str

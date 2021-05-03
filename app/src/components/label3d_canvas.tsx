@@ -111,7 +111,10 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     this._raycaster = new THREE.Raycaster()
     this._raycaster.near = 1.0
     this._raycaster.far = 100.0
-    this._raycaster.linePrecision = 0.02
+    this._raycaster.params = {
+      ...this._raycaster.params,
+      Line: { threshold: 0.02 }
+    }
 
     this._keyDownMap = {}
 

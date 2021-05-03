@@ -59,7 +59,7 @@ export class Cube3D extends Shape3D {
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
         color: 0xffffff,
-        vertexColors: THREE.FaceColors,
+        vertexColors: true,
         transparent: true,
         opacity: 0.35
       })
@@ -243,10 +243,12 @@ export class Cube3D extends Shape3D {
    * @param id
    */
   public updateState(shape: ShapeType, id: IdType): void {
-    const geometry = this._box.geometry as THREE.Geometry
-    for (const face of geometry.faces) {
-      face.color.fromArray(this._color)
-    }
+    this._box.material = new THREE.MeshBasicMaterial({
+      color: new THREE.Color().fromArray(this._color),
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.35
+    })
     super.updateState(shape, id)
     const cube = shape as CubeType
     this.position.copy(new Vector3D().fromState(cube.center).toThree())
@@ -282,10 +284,12 @@ export class Cube3D extends Shape3D {
       }
     }
 
-    const geometry = this._box.geometry as THREE.Geometry
-    for (const face of geometry.faces) {
-      face.color.fromArray(this._color)
-    }
+    this._box.material = new THREE.MeshBasicMaterial({
+      color: new THREE.Color().fromArray(this._color),
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.35
+    })
 
     // Check if shape already in scene
     for (const child of scene.children) {
@@ -559,7 +563,12 @@ export class Cube3D extends Shape3D {
       cameraPosition.copy(camera.position)
 
       const rayToCorner = new THREE.Ray(cameraPosition, rayDirection)
-      toLocal.getInverse(this.matrixWorld, true)
+      if (toLocal.determinant() === 0) {
+        var msg = "can't invert matrix, determinant is 0"
+        throw new Error(msg)
+      } else {
+        toLocal.getInverse(this.matrixWorld)
+      }
       rayToCorner.applyMatrix4(toLocal)
 
       rayToCorner.intersectPlane(highlightedPlane, intersection)
