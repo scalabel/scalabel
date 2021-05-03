@@ -192,7 +192,9 @@ export class Plane3D extends Label3D {
   public bounds(local?: boolean): THREE.Box3 {
     const box = new THREE.Box3()
     if (local === undefined || !local) {
-      box.copy(this._shape.lines.geometry.boundingBox)
+      if (this._shape.lines.geometry.boundingBox !== null) {
+        box.copy(this._shape.lines.geometry.boundingBox)
+      }
       this._shape.updateMatrixWorld(true)
       box.applyMatrix4(this._shape.matrixWorld)
     } else {

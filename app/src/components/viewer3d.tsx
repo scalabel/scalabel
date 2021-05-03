@@ -425,7 +425,10 @@ class Viewer3D extends DrawableViewer<Props> {
 
     const NDC = this.convertMouseToNDC(normalized[0], normalized[1])
 
-    this._raycaster.linePrecision = 0.2
+    this._raycaster.params = {
+      ...this._raycaster.params,
+      Line: { threshold: 0.2 }
+    }
     this._raycaster.setFromCamera(
       new THREE.Vector2(NDC[0], NDC[1]),
       this._camera
