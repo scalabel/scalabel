@@ -258,7 +258,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         selectionSize.copy(label.size)
       }
 
-      const material = this.pointCloud.material as THREE.ShaderMaterial
+      const material = this.pointCloud.material
       material.uniforms.toSelectionFrame.value = selectionTransform
       material.uniforms.selectionSize.value = selectionSize
 

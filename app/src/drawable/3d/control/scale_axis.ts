@@ -201,8 +201,8 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
    * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    ;(this._box.material as THREE.Material).needsUpdate = true
-    ;(this._line.material as THREE.Material).needsUpdate = true
+    this._box.material.needsUpdate = true
+    this._line.material.needsUpdate = true
 
     if (
       intersection !== undefined &&
@@ -210,14 +210,14 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
         intersection.object === this._line ||
         intersection.object === this._box)
     ) {
-      ;(this._box.material as THREE.Material).opacity = 0.9
-      ;(this._line.material as THREE.Material).opacity = 0.9
+      this._box.material.opacity = 0.9
+      this._line.material.opacity = 0.9
 
       this.add(this._guideline)
       return true
     } else {
-      ;(this._box.material as THREE.Material).opacity = 0.65
-      ;(this._line.material as THREE.Material).opacity = 0.65
+      this._box.material.opacity = 0.65
+      this._line.material.opacity = 0.65
 
       this.remove(this._guideline)
       return false
@@ -228,10 +228,10 @@ export class ScaleAxis extends THREE.Group implements ControlUnit {
    * Set faded when another object is highlighted
    */
   public setFaded(): void {
-    ;(this._box.material as THREE.Material).needsUpdate = true
-    ;(this._line.material as THREE.Material).needsUpdate = true
-    ;(this._box.material as THREE.Material).opacity = 0.25
-    ;(this._line.material as THREE.Material).opacity = 0.25
+    this._box.material.needsUpdate = true
+    this._line.material.needsUpdate = true
+    this._box.material.opacity = 0.25
+    this._line.material.opacity = 0.25
   }
 
   /**

@@ -29,9 +29,9 @@ export interface ViewerProps {
 /**
  * Canvas Viewer
  */
-export abstract class DrawableViewer<T extends ViewerProps> extends Component<
-  T
-> {
+export abstract class DrawableViewer<
+  T extends ViewerProps
+> extends Component<T> {
   /** Moveable container */
   protected _container: HTMLDivElement | null
   /** viewer config */

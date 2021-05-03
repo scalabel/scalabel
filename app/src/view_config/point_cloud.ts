@@ -19,8 +19,8 @@ export function updateThreeCameraAndRenderer(
   renderer?: THREE.Renderer
 ): void {
   if (canvas !== undefined) {
-    ;(camera as THREE.PerspectiveCamera).aspect = canvas.width / canvas.height
-    ;(camera as THREE.PerspectiveCamera).updateProjectionMatrix()
+    camera.aspect = canvas.width / canvas.height
+    camera.updateProjectionMatrix()
   }
 
   camera.up.x = config.verticalAxis.x

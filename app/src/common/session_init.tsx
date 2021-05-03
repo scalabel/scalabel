@@ -125,9 +125,9 @@ export function setSocketListeners(
  * @param store
  */
 function setBodyListeners(store: FullStore): void {
-  const body = document.getElementsByTagName("BODY") as HTMLCollectionOf<
-    HTMLElement
-  >
+  const body = document.getElementsByTagName(
+    "BODY"
+  ) as HTMLCollectionOf<HTMLElement>
   body[0].onresize = () => {
     store.dispatch(updateAll())
   }
