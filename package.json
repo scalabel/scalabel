@@ -65,6 +65,7 @@
     "@babel/node": "^7.13.13",
     "@babel/preset-env": "^7.14.0",
     "@babel/preset-react": "^7.13.13",
+    "@babel/register": "^7.13.16",
     "@fingerprintjs/fingerprintjs": "^3.1.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
