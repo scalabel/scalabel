@@ -176,6 +176,7 @@ export class ProjectStore {
     const key = path.getProjectKey(projectName)
     const fields = await this.storage.load(key)
     const loadedProject = safeParseJSON(fields) as Project
+    console.log(loadedProject.items[0].labels[0].poly2d)
     return loadedProject
   }
 
@@ -185,9 +186,11 @@ export class ProjectStore {
    * @param project
    */
   public async saveProject(project: Project): Promise<void> {
+    console.log("Q3.3.3.1")
     const key = path.getProjectKey(project.config.projectName)
     const data = JSON.stringify(project, null, 2)
     await this.save(key, data)
+    console.log("Q3.3.3.2")
   }
 
   /**
@@ -208,6 +211,7 @@ export class ProjectStore {
       )
     }
     const tasks = await Promise.all(taskPromises)
+    // console.log(tasks[0].items[0].labels[0])
     // Sort tasks by index
     tasks.sort((a: TaskType, b: TaskType) => {
       return parseInt(a.config.taskId, 10) - parseInt(b.config.taskId, 10)
@@ -224,6 +228,7 @@ export class ProjectStore {
    */
   public async loadTaskStates(projectName: string): Promise<TaskType[]> {
     const tasks = await this.getTasksInProject(projectName)
+    // console.log(tasks[0].items[0].labels)
 
     const savedStatePromises = _.map(
       tasks,
@@ -242,12 +247,15 @@ export class ProjectStore {
    */
   public async saveTasks(tasks: TaskType[]): Promise<void> {
     const promises: Array<Promise<void>> = []
+    console.log("Q3.3.3.6")
     for (const task of tasks) {
       const key = path.getTaskKey(task.config.projectName, task.config.taskId)
       const data = JSON.stringify(task, null, 2)
       promises.push(this.save(key, data))
     }
+    console.log("Q3.3.3.7")
     await Promise.all(promises)
+    console.log("Q3.3.3.8")
   }
 
   /**

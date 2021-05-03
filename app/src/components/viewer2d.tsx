@@ -65,6 +65,7 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       )
     }
 
+    debugger;
     return views
   }
 

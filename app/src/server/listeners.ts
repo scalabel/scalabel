@@ -97,6 +97,7 @@ export class Listeners {
       return
     }
 
+    console.log("Q1")
     try {
       const projectName = req.query[FormField.PROJECT_NAME] as string
       // Grab the latest submissions from all tasks
@@ -205,6 +206,7 @@ export class Listeners {
     req: Request,
     res: Response
   ): Promise<void> {
+    console.log("Q2")
     if (this.checkInvalidPost(req, res)) {
       return
     }
@@ -247,14 +249,17 @@ export class Listeners {
    * @param res
    */
   public async postProjectHandler(req: Request, res: Response): Promise<void> {
+    console.log("Q3")
     if (this.checkInvalidPost(req, res)) {
       return
     }
 
+    console.log("Q3.1")
     if (req.fields === undefined || req.files === undefined) {
       return this.badFormResponse(res)
     }
 
+    console.log("Q3.2")
     const fields = req.fields as { [key: string]: string }
     const formFiles = req.files as { [key: string]: File | undefined }
     const files: { [key: string]: string } = {}
@@ -265,9 +270,11 @@ export class Listeners {
       }
     }
 
+    console.log("Q3.3")
     const storage = new FileStorage("")
     storage.setExt("")
     await this.createProjectFromDicts(storage, fields, files, true, res)
+    console.log("Q3.4")
   }
 
   /**
@@ -277,6 +284,7 @@ export class Listeners {
    * @param res
    */
   public async postTasksHandler(req: Request, res: Response): Promise<void> {
+    console.log("Q4")
     if (this.checkInvalidPost(req, res)) {
       return
     }
@@ -353,6 +361,7 @@ export class Listeners {
    * @param res
    */
   public async dashboardHandler(req: Request, res: Response): Promise<void> {
+    console.log("Q5")
     if (this.checkInvalidGet(req, res)) {
       return
     }
@@ -394,6 +403,7 @@ export class Listeners {
     itemsRequired: boolean,
     res: Response
   ): Promise<void> {
+    console.log("Q3.3.1")
     try {
       // Parse form from request
       const form = await parseForm(fields, this.projectStore)
@@ -404,8 +414,11 @@ export class Listeners {
         files,
         itemsRequired
       )
+      console.log("Q3.3.2")
       // Create the project from the form data
       const project = await createProject(form, formFileData)
+      console.log(project)
+      console.log("Q3.3.3")
       await Promise.all([
         this.projectStore.saveProject(project),
         // Create tasks then save them
@@ -415,7 +428,9 @@ export class Listeners {
         // Save the project
       ])
       res.send()
+      console.log("Q3.3.4")
     } catch (err) {
+      console.log(err)
       Logger.error(err)
       // Alert the user that something failed
       res.status(400).send(err.message)
