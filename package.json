@@ -93,6 +93,7 @@
     "@types/redux-logger": "^3.0.8",
     "@types/socket.io": "^2.1.13",
     "@types/socket.io-client": "^1.4.36",
+    "@types/three": "^0.127.1",
     "@types/yargs": "^16.0.1",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
