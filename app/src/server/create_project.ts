@@ -462,7 +462,6 @@ export async function createTasks(
   taskStartNum: number = 0,
   itemStartNum: number = 0
 ): Promise<TaskType[]> {
-  console.log("Q3.3.3.3")
   const sensors = project.sensors
   const { itemType, taskSize, tracking } = project.config
 
@@ -495,7 +494,6 @@ export async function createTasks(
     }
   }
 
-  console.log("Q3.3.3.4")
   const itemIndices = partitionItemsIntoTasks(items, tracking, taskSize)
 
   /* create quick lookup dicts for conversion from export type
@@ -615,6 +613,5 @@ export async function createTasks(
     const task = makeTask(partialTask)
     tasks.push(task)
   }
-  console.log("Q3.3.3.5")
   return Promise.resolve(tasks)
 }

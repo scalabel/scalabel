@@ -45,49 +45,33 @@ export function convertItemToImport(
   categoryNameMap: { [key: string]: number },
   tracking: boolean
 ): ItemType {
-  console.log("Q3.3.3.4.1")
-  console.log(itemExportMap)
-  console.log(categoryNameMap)
   const urls: { [id: number]: string } = {}
 
   const labels: LabelIdMap = {}
   const shapes: ShapeIdMap = {}
   for (const key of Object.keys(itemExportMap)) {
-    console.log(key)
     const sensorId = Number(key)
     urls[sensorId] = itemExportMap[sensorId].url as string
     const labelsExport = itemExportMap[sensorId].labels
-    console.log(labelsExport)
     if (labelsExport !== undefined) {
       for (const labelExport of labelsExport) {
-        console.log(labelExport.id)
-        console.log(labelExport)
         const labelId = labelExport.id.toString()
         // Each label may appear in multiple sensors
         if (tracking && labelExport.id in labels) {
           labels[labelId].sensors.push(sensorId)
           continue
         }
-        console.log("QQ")
 
         const categories: number[] = []
         if (labelExport.category in categoryNameMap) {
           categories.push(categoryNameMap[labelExport.category])
         }
-        console.log("QQ")
-        console.log(labelExport.attributes)
-        console.log(attributeNameMap)
-        console.log(attributeValueMap)
 
         const attributes = parseExportAttributes(
           labelExport.attributes,
           attributeNameMap,
           attributeValueMap
         )
-        console.log("QQ")
-        console.log(labelExport)
-        console.log(categories)
-        console.log(attributes)
 
         const [importedLabel, importedShapes] = convertLabelToImport(
           labelExport,
@@ -108,7 +92,6 @@ export function convertItemToImport(
       }
     }
   }
-  console.log("Q3.3.3.4.2")
 
   return makeItem(
     {
