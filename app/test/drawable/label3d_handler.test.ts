@@ -232,7 +232,10 @@ test("Move axis aligned 3d bbox along z axis", () => {
   const raycaster = new THREE.Raycaster()
   raycaster.near = 1.0
   raycaster.far = 100.0
-  raycaster.linePrecision = 0.02
+  raycaster.params = {
+    ...raycaster.params,
+    Line: { threshold: 0.02 }
+  }
 
   raycaster.setFromCamera(new THREE.Vector2(0, 0.15), camera)
   let intersections = raycaster.intersectObjects(
@@ -337,7 +340,10 @@ test("Move axis aligned 3d bbox along all axes", () => {
     const raycaster = new THREE.Raycaster()
     raycaster.near = 1.0
     raycaster.far = 100.0
-    raycaster.linePrecision = 0.02
+    raycaster.params = {
+      ...raycaster.params,
+      Line: { threshold: 0.02 }
+    }
 
     // From each axis aligned view there is vertical and horizontal axis.
     // Try positive and negative directions. 0 = +v, 1 = -v, 2 = +h, 3 = -h
@@ -458,7 +464,10 @@ test("Scale axis aligned 3d bbox along all axes", () => {
     const raycaster = new THREE.Raycaster()
     raycaster.near = 1.0
     raycaster.far = 100.0
-    raycaster.linePrecision = 0.02
+    raycaster.params = {
+      ...raycaster.params,
+      Line: { threshold: 0.02 }
+    }
 
     // From each axis aligned view there is vertical and horizontal axis.
     // Try positive and negative directions. 0 = +v, 1 = -v, 2 = +h, 3 = -h
@@ -597,7 +606,10 @@ test("Rotate axis aligned 3d bbox around all axes", () => {
       const raycaster = new THREE.Raycaster()
       raycaster.near = 1.0
       raycaster.far = 100.0
-      raycaster.linePrecision = 0.02
+      raycaster.params = {
+        ...raycaster.params,
+        Line: { threshold: 0.02 }
+      }
 
       const neg: boolean = axis % 2 === 1
       // Because of the view orientation, a positive movement could be along

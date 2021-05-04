@@ -63,6 +63,8 @@ def coco_to_scalabel(
     for img_id in tqdm(img_ids):
         img = img_id2img[img_id]
         frame = Frame(name=os.path.split(img["file_name"])[-1])
+        scalabel.append(frame)
+
         if "coco_url" in img:
             frame.url = img["coco_url"]
         if vid_id2name is not None and "video_id" in img:
@@ -93,7 +95,6 @@ def coco_to_scalabel(
                 assert isinstance(ann["segmentation"], list)
                 label.poly_2d = polygon_to_poly2ds(ann["segmentation"])
             frame.labels.append(label)
-        scalabel.append(frame)
 
     return scalabel, vid_id2name
 
