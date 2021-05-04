@@ -481,6 +481,8 @@ def scalabel2coco_seg_track(
         for image_anns in frames:
             image_id += 1
             image = ImgType(
+                video_id=video_id,
+                frame_id=image_anns.frame_index,
                 file_name=image_anns.name,
                 height=shape[0],
                 width=shape[1],
