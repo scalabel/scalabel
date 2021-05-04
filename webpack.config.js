@@ -3,7 +3,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 let config = {
-  devtool: '',
+  devtool: false,
   entry: {
     create: __dirname + '/app/src/entries/create.tsx',
     worker: __dirname + '/app/src/entries/worker.tsx',
@@ -29,24 +29,25 @@ let config = {
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
     }),
-    new CopyWebpackPlugin([
-      {
-        from: __dirname + '/app/html',
-        to: __dirname + '/app/dist/html',
-      },
-      {
-        from: __dirname + '/app/css',
-        to: __dirname + '/app/dist/css',
-      },
-      {
-        from: __dirname + '/app/img',
-        to: __dirname + '/app/dist/img',
-      },
-      {
-        from: __dirname + '/app/dev',
-        to: __dirname + '/app/dist/dev',
-      },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: __dirname + '/app/html',
+          to: __dirname + '/app/dist/html',
+        },
+        {
+          from: __dirname + '/app/css',
+          to: __dirname + '/app/dist/css',
+        },
+        {
+          from: __dirname + '/app/img',
+          to: __dirname + '/app/dist/img',
+        },
+        {
+          from: __dirname + '/app/dev',
+          to: __dirname + '/app/dist/dev',
+        },
+    ]})
   ],
   performance: {
     hints: false,
@@ -70,7 +71,7 @@ let nodeExternals = require('webpack-node-externals');
 let serverConfig = {
   target: 'node',
   externals: [nodeExternals()],
-  devtool: '',
+  devtool: false,
   entry: {
     main: __dirname + '/app/src/server/main.ts',
   },
