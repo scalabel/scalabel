@@ -268,7 +268,7 @@ export class Cube3D extends Shape3D {
    */
   public render(scene: THREE.Scene, camera: THREE.Camera): void {
     if (this._highlighted) {
-      this._outline.material.color.set(0xff0000)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xff0000)
       for (const sphere of this._controlSpheres) {
         sphere.visible = true
         sphere.scale.set(1 / this.scale.x, 1 / this.scale.y, 1 / this.scale.z)
@@ -276,9 +276,9 @@ export class Cube3D extends Shape3D {
 
       this.setControlSpheres(camera)
     } else if (this._label.selected) {
-      this._outline.material.color.set(0xffff00)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
-      this._outline.material.color.set(0xffffff)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       for (const sphere of this._controlSpheres) {
         sphere.visible = false
       }
@@ -310,26 +310,26 @@ export class Cube3D extends Shape3D {
    */
   public setHighlighted(intersection?: THREE.Intersection): void {
     for (const sphere of this._controlSpheres) {
-      sphere.material.opacity = 0.3
-      sphere.material.needsUpdate = true
+      ;(sphere.material as THREE.Material).opacity = 0.3
+      ;(sphere.material as THREE.Material).needsUpdate = true
 
       sphere.visible = true
     }
     this._highlightedSphere = null
     if (intersection !== undefined) {
-      this._outline.material.color.set(0xff0000)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xff0000)
       this._highlighted = true
 
       for (const sphere of this._controlSpheres) {
         if (intersection.object === sphere) {
           this._highlightedSphere = sphere
-          sphere.material.opacity = 0.8
+          ;(sphere.material as THREE.Material).opacity = 0.8
 
           break
         }
       }
     } else {
-      this._outline.material.color.set(0xffffff)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       this._highlighted = false
 
       for (const sphere of this._controlSpheres) {

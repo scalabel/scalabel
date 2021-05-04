@@ -71,11 +71,11 @@ export class Grid3D extends Shape3D {
    */
   public setHighlighted(intersection?: THREE.Intersection): void {
     if (intersection !== undefined && intersection.object === this._lines) {
-      this._lines.material.color.set(0xff0000)
-      this._lines.material.needsUpdate = true
+      ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xff0000)
+      ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     } else {
-      this._lines.material.color.set(0xffffff)
-      this._lines.material.needsUpdate = true
+      ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xffffff)
+      ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     }
   }
 

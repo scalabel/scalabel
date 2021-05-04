@@ -42,14 +42,14 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
    * @param intersection
    */
   public setHighlighted(intersection?: THREE.Intersection): boolean {
-    this.material.needsUpdate = true
+    ;(this.material as THREE.Material).needsUpdate = true
 
     if (intersection !== undefined && intersection.object === this) {
-      this.material.opacity = 0.9
+      ;(this.material as THREE.Material).opacity = 0.9
 
       return true
     } else {
-      this.material.opacity = 0.65
+      ;(this.material as THREE.Material).opacity = 0.65
 
       return false
     }
@@ -61,8 +61,8 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
    * @param object
    */
   public setFaded(): void {
-    this.material.needsUpdate = true
-    this.material.opacity = 0.25
+    ;(this.material as THREE.Material).needsUpdate = true
+    ;(this.material as THREE.Material).opacity = 0.25
   }
 
   /**
