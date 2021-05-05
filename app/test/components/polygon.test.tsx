@@ -35,7 +35,7 @@ beforeEach(() => {
   // original code
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
-  // setupTestStore(testJson)
+  setupTestStore(testJson)
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
     canvasRef.current?.updateState(getState())

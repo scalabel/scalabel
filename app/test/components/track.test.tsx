@@ -37,7 +37,7 @@ beforeEach(() => {
   // original code
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
-  // setupTestStore(emptyTrackingTask)
+  setupTestStore(emptyTrackingTask)
   Session.subscribe(() => {
     Session.label2dList.updateState(getState())
     canvasRef.current?.updateState(getState())
