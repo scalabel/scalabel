@@ -220,7 +220,6 @@ test("Linking tracks", () => {
     )
   )
   state = getState()
-  console.log(state.user.select)
   fireEvent(
     getAllByText("Delete")[0],
     new MouseEvent("click", {
