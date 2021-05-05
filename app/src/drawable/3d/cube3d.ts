@@ -178,7 +178,7 @@ export class Cube3D extends Shape3D {
     if (this._grid !== null) {
       const inverseRotation = new THREE.Quaternion()
       inverseRotation.copy(this._grid.quaternion)
-      inverseRotation.inverse()
+      inverseRotation.invert()
 
       const gridCenter = new THREE.Vector3()
       gridCenter.copy(worldCenter)
@@ -632,7 +632,7 @@ export class Cube3D extends Shape3D {
     this.getWorldQuaternion(worldQuaternion)
     const cameraDirection = new THREE.Vector3()
     camera.getWorldDirection(cameraDirection)
-    cameraDirection.applyQuaternion(worldQuaternion.inverse())
+    cameraDirection.applyQuaternion(worldQuaternion.invert())
     let maxCloseness = 0
     for (const normal of faceNormals) {
       const closeness = -normal.dot(cameraDirection)

@@ -229,7 +229,7 @@ export class Box3D extends Label3D {
     this._labelList.addUpdatedLabel(this)
     const inverseRotation = new THREE.Quaternion()
     inverseRotation.copy(this.orientation)
-    inverseRotation.inverse()
+    inverseRotation.invert()
 
     if (!local) {
       scale = rotateScale(scale, this.orientation)
