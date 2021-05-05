@@ -396,7 +396,7 @@ export class Cube3D extends Shape3D {
       projection.intersectPlane(plane, newPosition)
 
       const toGrid = new THREE.Matrix4()
-      toGrid.getInverse(this._grid.matrixWorld)
+      toGrid.copy(this._grid.matrixWorld).invert()
 
       // NewPosition.applyMatrix4(toGrid)
       this.position.copy(newPosition)
@@ -426,7 +426,7 @@ export class Cube3D extends Shape3D {
     this.updateMatrixWorld(true)
 
     const toLocal = new THREE.Matrix4()
-    toLocal.getInverse(this.matrixWorld)
+    toLocal.copy(this.matrixWorld).invert()
 
     const localProjection = new THREE.Ray()
     localProjection.copy(projection)
@@ -567,7 +567,7 @@ export class Cube3D extends Shape3D {
         const msg = "can't invert matrix, determinant is 0"
         throw new Error(msg)
       } else {
-        toLocal.getInverse(this.matrixWorld)
+        toLocal.copy(this.matrixWorld).invert()
       }
       rayToCorner.applyMatrix4(toLocal)
 

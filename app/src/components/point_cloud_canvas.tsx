@@ -254,7 +254,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         const selectionToWorld = new THREE.Matrix4()
         selectionToWorld.makeRotationFromQuaternion(label.orientation)
         selectionToWorld.setPosition(label.center)
-        selectionTransform.getInverse(selectionToWorld)
+        selectionTransform.copy(selectionToWorld).invert()
         selectionSize.copy(label.size)
       }
 
