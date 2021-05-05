@@ -3,7 +3,7 @@ import _ from "lodash"
 import React from "react"
 
 import * as action from "../../src/action/common"
-import { selectLabel } from "../../src/action/select"
+import { selectLabel, unselectLabels } from "../../src/action/select"
 import Session, { dispatch, getState, getStore } from "../../src/common/session"
 import { updateTracks } from "../../src/common/session_setup"
 import { Label2dCanvas } from "../../src/components/label2d_canvas"
@@ -205,12 +205,22 @@ test("Linking tracks", () => {
   let state = getState()
   dispatch(action.goToItem(2))
   Session.dispatch(
+    unselectLabels(
+      state.user.select.labels,
+      state.user.select.item,
+      state.user.select.labels[state.user.select.item]
+    )
+  )
+  state = getState()
+  Session.dispatch(
     selectLabel(
       state.user.select.labels,
       2,
       state.task.tracks[trackIds[0]].labels[2]
     )
   )
+  state = getState()
+  console.log(state.user.select)
   fireEvent(
     getAllByText("Delete")[0],
     new MouseEvent("click", {
