@@ -356,10 +356,7 @@ export default class CreateForm extends React.Component<Props, State> {
           alert(x.response)
         } else {
           this.setState((prevState: State) => ({
-            projectName: prevState.projectName.replace(
-              new RegExp(" ", "g"),
-              "_"
-            )
+            projectName: prevState.projectName.replace(/\s/g, "_")
           }))
           this.setState((prevState: State) => ({
             dashboardUrl: "./dashboard?project_name=" + prevState.projectName

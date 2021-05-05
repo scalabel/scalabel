@@ -315,7 +315,7 @@ function addTrackToTask(
     shapeList
   )
   const items = assignToArray(task.items, newItems, itemIndices)
-  newLabels.map((l) => {
+  newLabels.forEach((l) => {
     track.labels[l.item] = l.id
   })
   const tracks = updateObject(task.tracks, { [track.id]: track })

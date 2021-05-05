@@ -72,7 +72,7 @@ export class RedisCache {
     for (let i = 0; i < keys.length; i++) {
       setArgs.push(...(await this.makeSetArgs(keys[i], values[i])))
     }
-    setArgs.map((v) => {
+    setArgs.forEach((v) => {
       if (v[2] > 0) {
         multi.psetex(v[0], v[2] * 1000, v[1])
       } else {
