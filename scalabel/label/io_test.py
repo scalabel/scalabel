@@ -18,13 +18,16 @@ def test_parse() -> None:
     assert frame.name == "1"
     assert frame.video_name == "a"
     assert isinstance(frame.labels, list)
-    assert len(frame.labels) == 1
-    assert frame.labels[0].id == "1"
-    assert frame.labels[0].attributes is not None
-    assert frame.labels[0].attributes["crowd"] is False
-    assert frame.labels[0].attributes["traffic_light_color"] == "G"
-    assert frame.labels[0].attributes["speed"] == 10.0
-    b = frame.labels[0].box_2d
+    labels = frame.labels
+    assert isinstance(labels, list)
+    assert len(labels) == 1
+    label = labels[0]  # pylint: disable=unsubscriptable-object
+    assert label.id == "1"
+    assert label.attributes is not None
+    assert label.attributes["crowd"] is False
+    assert label.attributes["traffic_light_color"] == "G"
+    assert label.attributes["speed"] == 10.0
+    b = label.box2d
     assert b is not None
     assert b.y2 == 4
 
@@ -45,15 +48,15 @@ def test_load() -> None:
         assert frames[0].labels is not None
         assert frames[-1].labels is not None
         assert frames[0].labels[0].id == "0"
-        assert frames[0].labels[0].box_2d is not None
-        assert frames[-1].labels[-1].box_2d is not None
-        box = frames[-1].labels[-1].box_2d
+        assert frames[0].labels[0].box2d is not None
+        assert frames[-1].labels[-1].box2d is not None
+        box = frames[-1].labels[-1].box2d
         assert box.x1 == 218.7211456298828
         assert box.x2 == 383.5201416015625
         assert box.y1 == 362.24761962890625
         assert box.y2 == 482.4760437011719
-        assert frames[0].labels[0].poly_2d is not None
-        polys = frames[0].labels[0].poly_2d
+        assert frames[0].labels[0].poly2d is not None
+        polys = frames[0].labels[0].poly2d
         assert isinstance(polys, list)
         poly = polys[0]
         assert len(poly.vertices) == len(poly.types)
@@ -93,8 +96,8 @@ def test_dump() -> None:
     assert "box3d" not in labels_dict[0]["labels"][0]
     assert "box2d" in labels_dict[0]["labels"][0]
     assert labels[0].labels is not None
-    assert labels[0].labels[0].box_2d is not None
+    assert labels[0].labels[0].box2d is not None
     assert (
         labels_dict[0]["labels"][0]["box2d"]["x1"]
-        == labels[0].labels[0].box_2d.x1
+        == labels[0].labels[0].box2d.x1
     )
