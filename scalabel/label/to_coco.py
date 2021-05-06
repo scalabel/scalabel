@@ -144,10 +144,10 @@ def get_object_attributes(label: Label, ignore: bool) -> Tuple[int, int]:
 
 def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     """Parsing bbox, area, polygon for bbox ann."""
-    box_2d = label.box_2d
-    if box_2d is None:
+    box2d = label.box2d
+    if box2d is None:
         return annotation
-    bbox = box2d_to_bbox(box_2d)
+    bbox = box2d_to_bbox(box2d)
     annotation.update(dict(bbox=bbox, area=float(bbox[2] * bbox[3])))
     return annotation
 
@@ -192,10 +192,10 @@ def poly2ds_to_coco(
     return annotation
 
 
-def pol2ds_list_to_coco(
+def poly2ds_list_to_coco(
     shape: Tuple[int, int],
     annotations: List[AnnType],
-    poly_2ds: List[List[Poly2D]],
+    poly2ds: List[List[Poly2D]],
     mask_mode: str,
     nproc: int,
 ) -> List[AnnType]:
@@ -204,7 +204,7 @@ def pol2ds_list_to_coco(
         annotations = pool.starmap(
             partial(poly2ds_to_coco, shape=shape, mask_mode=mask_mode),
             tqdm(
-                zip(annotations, poly_2ds),
+                zip(annotations, poly2ds),
                 total=len(annotations),
             ),
         )
@@ -243,7 +243,7 @@ def scalabel2coco_detection(
             continue
 
         for label in image_anns.labels:
-            if label.box_2d is None:
+            if label.box2d is None:
                 continue
 
             category_ignored, category_id = process_category(
@@ -294,7 +294,7 @@ def scalabel2coco_ins_seg(
     image_id, ann_id = 0, 0
     images: List[ImgType] = []
     annotations: List[AnnType] = []
-    poly_2ds: List[List[Poly2D]] = []
+    poly2ds: List[List[Poly2D]] = []
 
     for image_anns in tqdm(frames):
         image_id += 1
@@ -312,7 +312,7 @@ def scalabel2coco_ins_seg(
             continue
 
         for label in image_anns.labels:
-            if label.poly_2d is None:
+            if label.poly2d is None:
                 continue
 
             category_ignored, category_id = process_category(
@@ -338,10 +338,10 @@ def scalabel2coco_ins_seg(
             if label.score is not None:
                 annotation["score"] = label.score
             annotations.append(annotation)
-            poly_2ds.append(label.poly_2d)
+            poly2ds.append(label.poly2d)
 
-    annotations = pol2ds_list_to_coco(
-        shape, annotations, poly_2ds, mask_mode, nproc
+    annotations = poly2ds_list_to_coco(
+        shape, annotations, poly2ds, mask_mode, nproc
     )
     return GtType(
         type="instance",
@@ -407,7 +407,7 @@ def scalabel2coco_box_track(
                 continue
 
             for label in image_anns.labels:
-                if label.box_2d is None:
+                if label.box2d is None:
                     continue
 
                 category_ignored, category_id = process_category(
@@ -467,7 +467,7 @@ def scalabel2coco_seg_track(
     videos: List[VidType] = []
     images: List[ImgType] = []
     annotations: List[AnnType] = []
-    poly_2ds: List[List[Poly2D]] = []
+    poly2ds: List[List[Poly2D]] = []
 
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
@@ -496,7 +496,7 @@ def scalabel2coco_seg_track(
                 continue
 
             for label in image_anns.labels:
-                if label.poly_2d is None:
+                if label.poly2d is None:
                     continue
 
                 category_ignored, category_id = process_category(
@@ -531,10 +531,10 @@ def scalabel2coco_seg_track(
                 if label.score is not None:
                     annotation["score"] = label.score
                 annotations.append(annotation)
-                poly_2ds.append(label.poly_2d)
+                poly2ds.append(label.poly2d)
 
-    annotations = pol2ds_list_to_coco(
-        shape, annotations, poly_2ds, mask_mode, nproc
+    annotations = poly2ds_list_to_coco(
+        shape, annotations, poly2ds, mask_mode, nproc
     )
     return GtType(
         categories=categories,
