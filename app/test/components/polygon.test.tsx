@@ -23,6 +23,16 @@ import { setupTestStore } from "./util"
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
 beforeEach(() => {
+  // TODO: Find the reason why 'canvasRef.current' is a null object.
+  // and remove these code borrowed from beforeAll().
+  setupTestStore(testJson)
+  Session.images.length = 0
+  Session.images.push({ [-1]: new Image(1000, 1000) })
+  for (let i = 0; i < getState().task.items.length; i++) {
+    dispatch(action.loadItem(i, -1))
+  }
+  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000)
+  // original code
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
   setupTestStore(testJson)

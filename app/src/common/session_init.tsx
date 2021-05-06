@@ -1,4 +1,4 @@
-import Fingerprint2 from "fingerprintjs2"
+import FingerprintJS from "@fingerprintjs/fingerprintjs"
 import io from "socket.io-client"
 
 import {
@@ -40,15 +40,17 @@ export function initSession(containerName: string): void {
 
   /**
    * Wait for page to load to ensure consistent fingerprint
-   * See docs at https://github.com/Valve/fingerprintjs2
+   * See docs at https://github.com/fingerprintjs/fingerprintjs
    */
-  setTimeout(() => {
-    Fingerprint2.get((components) => {
-      const values = components.map((component) => component.value)
-      const userId = Fingerprint2.x64hash128(values.join(""), 31)
-      initSessionForTask(taskIndex, projectName, userId, containerName, devMode)
-    })
-  }, 500)
+  const fpPromise = FingerprintJS.load({ delayFallback: 500 })
+  ;(async () => {
+    const fp = await fpPromise
+    const result = await fp.get()
+    const userId = result.visitorId
+    initSessionForTask(taskIndex, projectName, userId, containerName, devMode)
+  })().catch((error: Error) => {
+    throw error
+  })
 }
 
 /**
@@ -125,9 +127,9 @@ export function setSocketListeners(
  * @param store
  */
 function setBodyListeners(store: FullStore): void {
-  const body = document.getElementsByTagName("BODY") as HTMLCollectionOf<
-    HTMLElement
-  >
+  const body = document.getElementsByTagName(
+    "BODY"
+  ) as HTMLCollectionOf<HTMLElement>
   body[0].onresize = () => {
     store.dispatch(updateAll())
   }

@@ -55,7 +55,7 @@ export function parseConfig(configPath: string): ServerConfig {
   // Load the config file
   const userConfig: Partial<ServerConfig> = yaml.load(
     fs.readFileSync(configPath, "utf8")
-  )
+  ) as Partial<ServerConfig>
 
   // Check the deprecated fields for backward compatibility
   const storage = _.clone(defaults.serverConfig.storage)
@@ -77,7 +77,7 @@ export function parseConfig(configPath: string): ServerConfig {
   userConfig.storage = { ...storage, ...userConfig.storage }
 
   // Set the default object fields
-  _.keys(defaults.serverConfig).map((field) => {
+  _.keys(defaults.serverConfig).forEach((field) => {
     if (_.has(userConfig, field)) {
       _.set(userConfig, field, {
         ..._.get(defaults.serverConfig, field),

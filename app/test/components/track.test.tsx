@@ -3,7 +3,7 @@ import _ from "lodash"
 import React from "react"
 
 import * as action from "../../src/action/common"
-import { selectLabel } from "../../src/action/select"
+import { selectLabel, unselectLabels } from "../../src/action/select"
 import Session, { dispatch, getState, getStore } from "../../src/common/session"
 import { updateTracks } from "../../src/common/session_setup"
 import { Label2dCanvas } from "../../src/components/label2d_canvas"
@@ -23,6 +23,18 @@ import { setupTestStore } from "./util"
 const canvasRef: React.RefObject<Label2dCanvas> = React.createRef()
 
 beforeEach(() => {
+  // TODO: Find the reason why 'canvasRef.current' is a null object.
+  // and remove these code borrowed from beforeAll().
+  setupTestStore(emptyTrackingTask)
+  Session.images.length = 0
+  Session.images.push({ [-1]: new Image(1000, 1000) })
+  // Mock loading every item to make sure the canvas can be successfully
+  // initialized
+  for (let i = 0; i < getState().task.items.length; i++) {
+    dispatch(action.loadItem(i, -1))
+  }
+  setUpLabel2dCanvas(dispatch, canvasRef, 1000, 1000, true)
+  // original code
   expect(canvasRef.current).not.toBeNull()
   canvasRef.current?.clear()
   setupTestStore(emptyTrackingTask)
@@ -193,12 +205,21 @@ test("Linking tracks", () => {
   let state = getState()
   dispatch(action.goToItem(2))
   Session.dispatch(
+    unselectLabels(
+      state.user.select.labels,
+      state.user.select.item,
+      state.user.select.labels[state.user.select.item]
+    )
+  )
+  state = getState()
+  Session.dispatch(
     selectLabel(
       state.user.select.labels,
       2,
       state.task.tracks[trackIds[0]].labels[2]
     )
   )
+  state = getState()
   fireEvent(
     getAllByText("Delete")[0],
     new MouseEvent("click", {

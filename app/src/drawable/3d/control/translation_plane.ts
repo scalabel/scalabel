@@ -89,7 +89,7 @@ export class TranslationPlane extends THREE.Mesh implements ControlUnit {
 
     const toLocal = new THREE.Matrix4()
     if (this.parent !== null) {
-      toLocal.getInverse(this.parent.matrixWorld)
+      toLocal.copy(this.parent.matrixWorld).invert()
     }
 
     const localIntersection = new THREE.Vector3()
