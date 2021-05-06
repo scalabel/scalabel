@@ -302,8 +302,8 @@ class LabelViewer:
                 attributes = {}
                 if b.attributes is not None:
                     attributes = b.attributes
-                if b.box_2d is not None:
-                    self.ax.add_patch(self.gen_2d_rect(b.id, b.box_2d))
+                if b.box2d is not None:
+                    self.ax.add_patch(self.gen_2d_rect(b.id, b.box2d))
 
                     if self.config.display_cfg.show_tags:
                         text = (
@@ -321,8 +321,8 @@ class LabelViewer:
                         if "crowd" in attributes and attributes["crowd"]:
                             text += ",c"
                         self.ax.text(
-                            (b.box_2d.x1) * self.config.scale,
-                            (b.box_2d.y1 - 4) * self.config.scale,
+                            (b.box2d.x1) * self.config.scale,
+                            (b.box2d.y1 - 4) * self.config.scale,
                             text,
                             fontsize=10 * self.config.scale,
                             bbox={
@@ -338,13 +338,13 @@ class LabelViewer:
                 attributes = {}
                 if b.attributes is not None:
                     attributes = b.attributes
-                if b.box_3d is not None and frame.intrinsics is not None:
+                if b.box3d is not None and frame.intrinsics is not None:
                     occluded = False
                     if "occluded" in attributes:
                         occluded = bool(attributes["occluded"])
 
                     for line in self.gen_3d_cube(
-                        b.id, b.box_3d, frame.intrinsics, occluded
+                        b.id, b.box3d, frame.intrinsics, occluded
                     ):
                         self.ax.add_patch(line)
 
@@ -354,10 +354,10 @@ class LabelViewer:
                             if b.category is not None
                             else self.config.ui_cfg.default_category
                         )
-                        if b.box_2d is not None:
+                        if b.box2d is not None:
                             self.ax.text(
-                                (b.box_2d.x1) * self.config.scale,
-                                (b.box_2d.y1 - 4) * self.config.scale,
+                                (b.box2d.x1) * self.config.scale,
+                                (b.box2d.y1 - 4) * self.config.scale,
                                 text,
                                 fontsize=10 * self.config.scale,
                                 bbox={
@@ -381,7 +381,7 @@ class LabelViewer:
             attributes = {}
             if label.attributes is not None:
                 attributes = label.attributes
-            if label.poly_2d is None:
+            if label.poly2d is None:
                 continue
 
             color = self.get_label_color(label.id)
@@ -389,7 +389,7 @@ class LabelViewer:
 
             # Record the tightest bounding box
             x1, y1, x2, y2 = 1280.0, 720.0, 0.0, 0.0
-            for poly in label.poly_2d:
+            for poly in label.poly2d:
                 patch = self.poly2patch(
                     poly.vertices,
                     poly.types,
@@ -547,7 +547,7 @@ class LabelViewer:
         return [
             o
             for o in labels
-            if o.poly_2d is not None
+            if o.poly2d is not None
             and (o.category not in ["drivable area", "lane"])
         ]
 

@@ -89,11 +89,11 @@ def coco_to_scalabel(
             if "score" in ann:
                 label.score = ann["score"]
             if "bbox" in ann:
-                label.box_2d = bbox_to_box2d(ann["bbox"])  # type: ignore
+                label.box2d = bbox_to_box2d(ann["bbox"])  # type: ignore
             if "segmentation" in ann:
                 # Currently only support conversion from polygon.
                 assert isinstance(ann["segmentation"], list)
-                label.poly_2d = polygon_to_poly2ds(ann["segmentation"])
+                label.poly2d = polygon_to_poly2ds(ann["segmentation"])
             frame.labels.append(label)
 
     return scalabel, vid_id2name

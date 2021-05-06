@@ -22,11 +22,11 @@ __all__ = [
 ]
 
 
-def box2d_to_bbox(box_2d: Box2D) -> List[float]:
+def box2d_to_bbox(box2d: Box2D) -> List[float]:
     """Convert Scalabel Box2D into COCO bbox."""
-    width = box_2d.x2 - box_2d.x1 + 1
-    height = box_2d.y2 - box_2d.y1 + 1
-    return [box_2d.x1, box_2d.y1, width, height]
+    width = box2d.x2 - box2d.x1 + 1
+    height = box2d.y2 - box2d.y1 + 1
+    return [box2d.x1, box2d.y1, width, height]
 
 
 def mask_to_box2d(mask: np.ndarray) -> Box2D:
@@ -35,14 +35,14 @@ def mask_to_box2d(mask: np.ndarray) -> Box2D:
     y_inds = np.nonzero(np.sum(mask, axis=1))[0]
     x1, x2 = int(np.min(x_inds)), int(np.max(x_inds))
     y1, y2 = int(np.min(y_inds)), int(np.max(y_inds))
-    box_2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
-    return box_2d
+    box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+    return box2d
 
 
 def mask_to_bbox(mask: np.ndarray) -> List[float]:
     """Convert mask into bbox."""
-    box_2d = mask_to_box2d(mask)
-    bbox = box2d_to_bbox(box_2d)
+    box2d = mask_to_box2d(mask)
+    bbox = box2d_to_bbox(box2d)
     return bbox
 
 
@@ -56,14 +56,14 @@ def bbox_to_box2d(bbox: List[float]) -> Box2D:
 
 def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
     """Convert COCO polygon into Scalabel Box2Ds."""
-    poly_2ds: List[Poly2D] = []
+    poly2ds: List[Poly2D] = []
     for poly in polygon:
         point_num = len(poly) // 2
         assert 2 * point_num == len(poly)
         vertices = [[poly[2 * i], poly[2 * i + 1]] for i in range(point_num)]
-        poly_2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
-        poly_2ds.append(poly_2d)
-    return poly_2ds
+        poly2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
+        poly2ds.append(poly2d)
+    return poly2ds
 
 
 def poly_to_patch(
