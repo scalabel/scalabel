@@ -2,6 +2,7 @@
 import json
 import unittest
 
+import matplotlib
 import numpy as np
 
 from ..unittest.util import get_test_file
@@ -15,6 +16,8 @@ from .transforms import (
 )
 from .typing import Box2D, Poly2D
 
+
+matplotlib.use("agg")
 SHAPE = (720, 1280)
 
 

@@ -39,7 +39,7 @@ setuptools.setup(
         "psutil",
         "pycocotools",
         "pydantic",
-        "pyhumps",
+        "pyhumps==1.6.1",
         "pyparsing",
         "python-dateutil",
         "PyYAML",
