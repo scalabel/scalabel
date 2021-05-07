@@ -1,5 +1,7 @@
 """Common types used in the project."""
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 DictStrAny = Dict[str, Any]  # type: ignore[misc]
+DictAny = Dict[str, Any]  # type: ignore[misc]
+ListAny = List[Any]  # type: ignore[misc]

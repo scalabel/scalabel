@@ -15,15 +15,13 @@ from .to_coco import (
     set_seg_object_geometry,
 )
 
-SHAPE = (720, 1280)
-
 
 class TestProcessCategory(unittest.TestCase):
     """Check the category after processing."""
 
     def test_ignore_as_class(self) -> None:
         """Check the case ignore_as_class as True."""
-        categories, name_mapping, ignore_mapping = load_coco_config(
+        _, categories, name_mapping, ignore_mapping, = load_coco_config(
             "ins_seg",
             DEFAULT_COCO_CONFIG,
             ignore_as_class=True,
@@ -40,7 +38,7 @@ class TestProcessCategory(unittest.TestCase):
 
     def test_not_ignore(self) -> None:
         """Check the case ignore_as_class as False."""
-        categories, name_mapping, ignore_mapping = load_coco_config(
+        _, categories, name_mapping, ignore_mapping = load_coco_config(
             "det",
             DEFAULT_COCO_CONFIG,
             ignore_as_class=False,
@@ -84,11 +82,11 @@ class TestScalabelToCOCODetection(unittest.TestCase):
     """Test cases for converting Scalabel detections to COCO format."""
 
     scalabel = load(get_test_file("scalabel_det.json"))
-    categories, name_mapping, ignore_mapping = load_coco_config(
+    resolution, categories, name_mapping, ignore_mapping = load_coco_config(
         "det", DEFAULT_COCO_CONFIG
     )
     coco = scalabel2coco_detection(
-        SHAPE, scalabel, categories, name_mapping, ignore_mapping
+        scalabel, categories, resolution, name_mapping, ignore_mapping
     )
 
     def test_type(self) -> None:

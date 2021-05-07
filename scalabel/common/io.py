@@ -2,6 +2,7 @@
 
 import json
 import os
+from typing import List
 
 import toml
 import yaml
@@ -29,3 +30,10 @@ def load_config(filepath: str) -> DictStrAny:
         raise NotImplementedError(f"Config extention {ext} not supported")
     assert isinstance(config_dict, dict)
     return config_dict
+
+
+def load_file_as_list(filepath: str) -> List[str]:
+    """Get contents of a text file as list."""
+    with open(filepath, "r") as f:
+        contents = f.readlines()
+    return contents

@@ -53,18 +53,6 @@ def parse_arguments() -> argparse.Namespace:
         help="path to save coco formatted label file",
     )
     parser.add_argument(
-        "--height",
-        type=int,
-        default=720,
-        help="Height of images",
-    )
-    parser.add_argument(
-        "--width",
-        type=int,
-        default=1280,
-        help="Height of images",
-    )
-    parser.add_argument(
         "-m",
         "--mode",
         default="det",
@@ -193,7 +181,7 @@ def poly2ds_to_coco(
 
 
 def poly2ds_list_to_coco(
-    shape: Tuple[int, int],
+    shape: List[Tuple[int, int]],
     annotations: List[AnnType],
     poly2ds: List[List[Poly2D]],
     mask_mode: str,
@@ -202,9 +190,9 @@ def poly2ds_list_to_coco(
     """Execute the Poly2D to coco conversion in parallel."""
     with Pool(nproc) as pool:
         annotations = pool.starmap(
-            partial(poly2ds_to_coco, shape=shape, mask_mode=mask_mode),
+            partial(poly2ds_to_coco, mask_mode=mask_mode),
             tqdm(
-                zip(annotations, poly2ds),
+                zip(annotations, poly2ds, shape),
                 total=len(annotations),
             ),
         )
@@ -214,9 +202,9 @@ def poly2ds_list_to_coco(
 
 
 def scalabel2coco_detection(
-    shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
+    shape: Optional[Tuple[int, int]] = None,
     name_mapping: Optional[Dict[str, str]] = None,
     ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
@@ -229,10 +217,17 @@ def scalabel2coco_detection(
 
     for image_anns in tqdm(frames):
         image_id += 1
+        img_shape = shape
+        if img_shape is None:
+            if image_anns.size is not None:
+                img_shape = (image_anns.size[1], image_anns.size[0])
+            else:
+                raise ValueError("Image shape not defined!")
+
         image = ImgType(
             file_name=image_anns.name,
-            height=shape[0],
-            width=shape[1],
+            height=img_shape[0],
+            width=img_shape[1],
             id=image_id,
         )
         if image_anns.url is not None:
@@ -280,9 +275,9 @@ def scalabel2coco_detection(
 
 
 def scalabel2coco_ins_seg(
-    shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
+    shape: Optional[Tuple[int, int]] = None,
     name_mapping: Optional[Dict[str, str]] = None,
     ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
@@ -296,12 +291,21 @@ def scalabel2coco_ins_seg(
     annotations: List[AnnType] = []
     poly2ds: List[List[Poly2D]] = []
 
+    shapes = []
     for image_anns in tqdm(frames):
         image_id += 1
+        img_shape = shape
+        if img_shape is None:
+            if image_anns.size is not None:
+                img_shape = (image_anns.size[1], image_anns.size[0])
+            else:
+                raise ValueError("Image shape not defined!")
+        shapes.append(img_shape)
+
         image = ImgType(
             file_name=image_anns.name,
-            height=shape[0],
-            width=shape[1],
+            height=img_shape[0],
+            width=img_shape[1],
             id=image_id,
         )
         if image_anns.url is not None:
@@ -341,7 +345,7 @@ def scalabel2coco_ins_seg(
             poly2ds.append(label.poly2d)
 
     annotations = poly2ds_list_to_coco(
-        shape, annotations, poly2ds, mask_mode, nproc
+        shapes, annotations, poly2ds, mask_mode, nproc
     )
     return GtType(
         type="instance",
@@ -365,9 +369,9 @@ def get_instance_id(
 
 
 def scalabel2coco_box_track(
-    shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
+    shape: Optional[Tuple[int, int]] = None,
     name_mapping: Optional[Dict[str, str]] = None,
     ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
@@ -391,12 +395,19 @@ def scalabel2coco_box_track(
 
         for image_anns in video_anns:
             image_id += 1
+            img_shape = shape
+            if img_shape is None:
+                if image_anns.size is not None:
+                    img_shape = (image_anns.size[1], image_anns.size[0])
+                else:
+                    raise ValueError("Image shape not defined!")
+
             image = ImgType(
                 video_id=video_id,
                 frame_id=image_anns.frame_index,
                 file_name=osp.join(video_name, image_anns.name),
-                height=shape[0],
-                width=shape[1],
+                height=img_shape[0],
+                width=img_shape[1],
                 id=image_id,
             )
             if image_anns.url is not None:
@@ -451,9 +462,9 @@ def scalabel2coco_box_track(
 
 
 def scalabel2coco_seg_track(
-    shape: Tuple[int, int],
     frames: List[Frame],
     categories: List[CatType],
+    shape: Optional[Tuple[int, int]] = None,
     name_mapping: Optional[Dict[str, str]] = None,
     ignore_mapping: Optional[Dict[str, str]] = None,
     ignore_as_class: bool = False,
@@ -469,6 +480,7 @@ def scalabel2coco_seg_track(
     annotations: List[AnnType] = []
     poly2ds: List[List[Poly2D]] = []
 
+    shapes = []
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
         instance_id_maps: Dict[str, int] = dict()
@@ -480,12 +492,20 @@ def scalabel2coco_seg_track(
 
         for image_anns in frames:
             image_id += 1
+            img_shape = shape
+            if img_shape is None:
+                if image_anns.size is not None:
+                    img_shape = (image_anns.size[1], image_anns.size[0])
+                else:
+                    raise ValueError("Image shape not defined!")
+            shapes.append(img_shape)
+
             image = ImgType(
                 video_id=video_id,
                 frame_id=image_anns.frame_index,
                 file_name=image_anns.name,
-                height=shape[0],
-                width=shape[1],
+                height=img_shape[0],
+                width=img_shape[1],
                 id=image_id,
             )
             if image_anns.url is not None:
@@ -534,7 +554,7 @@ def scalabel2coco_seg_track(
                 poly2ds.append(label.poly2d)
 
     annotations = poly2ds_list_to_coco(
-        shape, annotations, poly2ds, mask_mode, nproc
+        shapes, annotations, poly2ds, mask_mode, nproc
     )
     return GtType(
         categories=categories,
@@ -546,10 +566,12 @@ def scalabel2coco_seg_track(
 
 def load_coco_config(
     mode: str, filepath: str, ignore_as_class: bool = False
-) -> Tuple[List[CatType], Dict[str, str], Dict[str, str]]:
+) -> Tuple[
+    Optional[Tuple[int, int]], List[CatType], Dict[str, str], Dict[str, str]
+]:
     """Load default configs from a config file."""
     cfgs = load_config(filepath)
-
+    resolution = cfgs["resolution"] if "resolution" in cfgs else None
     categories, cat_extensions = cfgs["categories"], cfgs["cat_extensions"]
     name_mapping, ignore_mapping = cfgs["name_mapping"], cfgs["ignore_mapping"]
     if mode == "det":
@@ -562,12 +584,12 @@ def load_coco_config(
             )
         )
 
-    return categories, name_mapping, ignore_mapping
+    return resolution, categories, name_mapping, ignore_mapping
 
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    categories, name_mapping, ignore_mapping = load_coco_config(
+    resolution, categories, name_mapping, ignore_mapping = load_coco_config(
         args.mode, args.config, args.ignore_as_class
     )
 
@@ -589,11 +611,10 @@ def run(args: argparse.Namespace) -> None:
             mask_mode=args.mask_mode,
             nproc=args.nproc,
         )
-    shape = (args.height, args.width)
     coco = convert_func(
-        shape,
         frames,
         categories,
+        resolution,
         name_mapping,
         ignore_mapping,
         args.ignore_as_class,

@@ -4,8 +4,10 @@ Flask
 Flask-Cors
 isort
 joblib
+motmetrics
 mypy
 numpy
+pandas
 Pillow
 plyfile
 psutil

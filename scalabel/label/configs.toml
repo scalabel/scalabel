@@ -1,3 +1,5 @@
+resolution = [720, 1280]
+
 [name_mapping]
 bike = "bicycle"
 caravan = "car"
