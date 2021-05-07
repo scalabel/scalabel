@@ -1,0 +1,16 @@
+{% extends "!layout.html" %} {% block extrahead %} {{ super() }}
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script
+  async
+  src="https://www.googletagmanager.com/gtag/js?id=G-PC2FKFL5TE"
+></script>
+<script>
+  window.dataLayer = window.dataLayer || []
+  function gtag() {
+    dataLayer.push(arguments)
+  }
+  gtag("js", new Date())
+
+  gtag("config", "G-PC2FKFL5TE")
+</script>
+{% endblock %}
