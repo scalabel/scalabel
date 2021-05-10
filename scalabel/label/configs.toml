@@ -16,48 +16,58 @@ van = "car"
 supercategory = "human"
 id = 1
 name = "pedestrian"
+tracking = true
 
 [[categories]]
 supercategory = "human"
 id = 2
 name = "rider"
+tracking = true
 
 [[categories]]
 supercategory = "vehicle"
 id = 3
 name = "car"
+tracking = true
 
 [[categories]]
 supercategory = "vehicle"
 id = 4
 name = "truck"
+tracking = true
 
 [[categories]]
 supercategory = "vehicle"
 id = 5
 name = "bus"
+tracking = true
 
 [[categories]]
 supercategory = "vehicle"
 id = 6
 name = "train"
+tracking = true
 
 [[categories]]
 supercategory = "bike"
 id = 7
 name = "motorcycle"
+tracking = true
 
 [[categories]]
 supercategory = "bike"
 id = 8
 name = "bicycle"
+tracking = true
 
-[[cat_extensions]]
+[[categories]]
 supercategory = "traffic light"
 id = 9
 name = "traffic light"
+tracking = false
 
-[[cat_extensions]]
+[[categories]]
 supercategory = "traffic sign"
 id = 10
 name = "traffic sign"
+tracking = false

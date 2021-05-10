@@ -11,18 +11,19 @@ import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
-from ..common.io import load_config
+from scalabel.label.io import load_label_config
+from scalabel.label.typing import CatType
+
 from ..common.logger import logger
 from .coco_typing import (
     AnnType,
-    CatType,
     GtType,
     ImgType,
     PolygonType,
     RLEType,
     VidType,
 )
-from .io import group_and_sort, load
+from .io import DEFAULT_LABEL_CONFIG, group_and_sort, load
 from .transforms import (
     box2d_to_bbox,
     mask_to_bbox,
@@ -30,10 +31,6 @@ from .transforms import (
     poly2ds_to_mask,
 )
 from .typing import Frame, Label, Poly2D
-
-DEFAULT_COCO_CONFIG = osp.join(
-    osp.dirname(osp.abspath(__file__)), "configs.toml"
-)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -87,7 +84,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=str,
-        default=DEFAULT_COCO_CONFIG,
+        default=DEFAULT_LABEL_CONFIG,
         help="Configuration for COCO categories",
     )
     return parser.parse_args()
@@ -101,9 +98,11 @@ def process_category(
     ignore_as_class: bool = False,
 ) -> Tuple[bool, int]:
     """Check whether the category should be ignored and get its ID."""
-    cat_name2id: Dict[str, int] = {
-        category["name"]: category["id"] for category in categories
-    }
+    cat_name2id: Dict[str, int] = {}
+    for category in categories:
+        assert category["id"] is not None
+        cat_name2id[category["name"]] = category["id"]
+
     if name_mapping is not None:
         category_name = name_mapping.get(category_name, category_name)
     if category_name not in cat_name2id:
@@ -564,33 +563,10 @@ def scalabel2coco_seg_track(
     )
 
 
-def load_coco_config(
-    mode: str, filepath: str, ignore_as_class: bool = False
-) -> Tuple[
-    Optional[Tuple[int, int]], List[CatType], Dict[str, str], Dict[str, str]
-]:
-    """Load default configs from a config file."""
-    cfgs = load_config(filepath)
-    resolution = cfgs["resolution"] if "resolution" in cfgs else None
-    categories, cat_extensions = cfgs["categories"], cfgs["cat_extensions"]
-    name_mapping, ignore_mapping = cfgs["name_mapping"], cfgs["ignore_mapping"]
-    if mode == "det":
-        categories += cat_extensions
-
-    if ignore_as_class:
-        categories.append(
-            CatType(
-                supercategory="none", id=len(categories) + 1, name="ignored"
-            )
-        )
-
-    return resolution, categories, name_mapping, ignore_mapping
-
-
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    resolution, categories, name_mapping, ignore_mapping = load_coco_config(
-        args.mode, args.config, args.ignore_as_class
+    resolution, categories, name_mapping, ignore_mapping = load_label_config(
+        args.config, args.ignore_as_class, include_non_tracking=True
     )
 
     logger.info("Loading Scalabel jsons...")

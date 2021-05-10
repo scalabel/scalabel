@@ -1,6 +1,6 @@
 """Type definition for scalabel format."""
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
 from pydantic import BaseModel
 
@@ -94,3 +94,12 @@ class Frame(BaseModel):
         if "name" in data:
             data["name"] = str(data["name"])
         super().__init__(**data)
+
+
+class CatType(TypedDict):
+    """Define types of categories in config."""
+
+    name: str
+    tracking: bool
+    id: Optional[int]
+    supercategory: Optional[str]

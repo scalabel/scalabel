@@ -15,8 +15,8 @@ from tabulate import tabulate
 
 from scalabel.common.typing import DictAny, ListAny
 from scalabel.label.coco_typing import GtType
-from scalabel.label.io import load
-from scalabel.label.to_coco import load_coco_config, scalabel2coco_detection
+from scalabel.label.io import load, load_label_config
+from scalabel.label.to_coco import scalabel2coco_detection
 from scalabel.label.typing import Frame
 
 
@@ -62,6 +62,13 @@ def evaluate_det(
     Returns:
         dict: detection metric scores
 
+    Example usage:
+        evaluate_det(
+            "/path/to/gts",
+            "/path/to/results",
+            "/path/to/cfg",
+            nproc=4,
+        )
     """
     # Convert the annotation file to COCO format
     if isinstance(ann_path, str):
@@ -70,9 +77,8 @@ def evaluate_det(
         ann_frames = ann_path
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
 
-    resolution, categories, name_mapping, ignore_mapping = load_coco_config(
-        mode="det",
-        filepath=cfg_path,
+    resolution, categories, name_mapping, ignore_mapping = load_label_config(
+        filepath=cfg_path, include_non_tracking=True
     )
     ann_coco = scalabel2coco_detection(
         ann_frames, categories, resolution, name_mapping, ignore_mapping

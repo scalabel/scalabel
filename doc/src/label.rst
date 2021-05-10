@@ -1,8 +1,8 @@
 Label Conversion
 ===================
 
-Currently, we provide conversion scripts between scalabel and coco formats.
-They are in the ``label`` moduel of the  `Scalabel python package
+Currently, we provide conversion scripts between scalabel and coco formats as well as MOTChallenge to Scalabel format.
+They are in the ``label`` module of the  `Scalabel python package
 <https://github.com/scalabel/scalabel/tree/master/scalabel>`_. We recommend
 using the tools through python module invoke convention. For example,
 
@@ -10,9 +10,9 @@ using the tools through python module invoke convention. For example,
 
     python3 -m scalabel.label.to_coco ...
 
-To allow for more information store in the coco-format json files, we add a new
+To stor for more information in the coco-format json files, we add new
 property names "videos" to the coco format. It is a list like "videos" and
-"annotations", and each item is a have two properties: "id" and "name".
+"annotations", and each item has two properties: "id" and "name".
 
 from_coco
 -----------------
@@ -36,7 +36,7 @@ to_coco
 ``to_coco`` converts scalabel json files into coco format.
 Now it support the conversions of four tasks: object detection as ``det``,
 instance segmentation as ``ins_seg``, multi-object tracking as ``box_track`` and
-multi-object trackings, or named segmentation tracking, as ``seg_track``.
+multi-object tracking, or named segmentation tracking, as ``seg_track``.
 
 Note that, for segmentation tasks, the mask conversion may not be reversible.
 ``Polygon`` format can be converted back with accuracy loss. Meanwhile ``RLE``
@@ -67,3 +67,23 @@ Available arguments:
                             number of processes for mot evaluation
     --config
                             config file for COCO categories
+
+from_mot
+-----------------
+
+``from_mot`` converts MOTChallenge annotations into Scalabel format.
+A standard configuration for this is provided, but the user can also specify
+a custom configuration.
+
+Available arguments:
+
+.. code-block:: bash
+
+    --data-path INPUT, -d INPUT
+                            path to MOTChallenge data (images + annotations).
+    --cfg-path CFG_PATH, -c CFG_PATH
+                            Config path for converting the annotations. Contains metadata like available categories.
+    --out-dir OUT_DIR, -o OUT_DIR
+                            Output path for Scalabel format annotations.
+    --discard-classes DISCARD_CLASSES, -c DISCARD_CLASSES
+                            Classes that should be discarded separated by commas, e.g. "1,2"

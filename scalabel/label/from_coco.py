@@ -47,9 +47,11 @@ def coco_to_scalabel(
             for video in coco["videos"]  # type: ignore
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
-    cat_id2name: Dict[int, str] = {
-        category["id"]: category["name"] for category in coco["categories"]
-    }
+
+    cat_id2name = {}
+    for category in coco["categories"]:
+        assert category["id"] is not None
+        cat_id2name[category["id"]] = category["name"]
 
     img_id2anns: Dict[int, Iterable[AnnType]] = {
         img_id: list(anns)

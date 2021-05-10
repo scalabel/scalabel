@@ -4,13 +4,20 @@ import glob
 import json
 import os.path as osp
 from itertools import groupby
-from typing import Any, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import humps
+
+from scalabel.common.io import load_config
+from scalabel.label.typing import CatType
 
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
 from .typing import Frame
+
+DEFAULT_LABEL_CONFIG = osp.join(
+    osp.dirname(osp.abspath(__file__)), "configs.toml"
+)
 
 
 def parse(raw_frame: DictStrAny) -> Frame:
@@ -101,3 +108,47 @@ def dump(frame: Frame) -> DictStrAny:
     """Dump labels into dictionaries."""
     frame_str: DictStrAny = humps.camelize(remove_empty_elements(frame.dict()))
     return frame_str
+
+
+def load_label_config(
+    filepath: str,
+    ignore_as_class: bool = False,
+    include_non_tracking: bool = False,
+) -> Tuple[
+    Optional[Tuple[int, int]],
+    List[CatType],
+    Optional[Dict[str, str]],
+    Optional[Dict[str, str]],
+]:
+    """Load label configuration from a config file (toml / yaml)."""
+    cfgs = load_config(filepath)
+    resolution = cfgs["resolution"] if "resolution" in cfgs else None
+    categories = cfgs["categories"]
+    categories = [
+        cat for cat in categories if cat["tracking"] or include_non_tracking
+    ]
+    name_mapping = cfgs["name_mapping"] if "name_mapping" in cfgs else None
+    ignore_mapping = (
+        cfgs["ignore_mapping"] if "ignore_mapping" in cfgs else None
+    )
+
+    # if category ids are not specified, set according to index (starting at 1)
+    if not all(("id" in cat for cat in categories)):
+        # don't all assignment of id for a subset of classes
+        assert all(
+            ("id" not in cat for cat in categories)
+        ), "Category id not specified for all classes!"
+        for i, cat in enumerate(categories):
+            cat["id"] = i + 1
+
+    if ignore_as_class:
+        categories.append(
+            CatType(
+                supercategory="none",
+                id=len(categories) + 1,
+                name="ignored",
+                tracking=False,
+            )
+        )
+
+    return resolution, categories, name_mapping, ignore_mapping

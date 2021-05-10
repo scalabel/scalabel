@@ -9,7 +9,7 @@ import motmetrics as mm
 import numpy as np
 import pandas as pd
 
-from scalabel.label.to_coco import load_coco_config
+from scalabel.label.io import load_label_config
 from scalabel.label.transforms import box2d_to_bbox
 from scalabel.label.typing import Frame, Label
 
@@ -299,21 +299,49 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     nproc: int = 4,
 ) -> EvalResults:
-    """Evaluate CLEAR MOT metrics for a Scalabel format dataset."""
+    """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
+
+    Args:
+        acc_single_video: Function for calculating metrics over a single video.
+        gts: (paths to) the ground truth annotations in Scalabel format
+        results: (paths to) the prediction results in Scalabel format.
+        cfg_path: path to the config file
+        iou_thr: Minimum IoU for a bounding box to be considered a positive.
+        ignore_iof_thr: Min. Intersection over foreground with ignore regions.
+        nproc: processes number for loading files
+
+    Returns:
+        dict: CLEAR MOT metric scores
+
+    Example usage:
+        nproc = 4
+        evaluate_track(
+            acc_single_video_mot,
+            gts=group_and_sort(load("/path/to/gts", nproc)),
+            results=group_and_sort(load("/path/to/results", nproc)),
+            cfg_path="/path/to/cfg",
+            iou_thr=0.5,
+            ignore_iof_thr=0.5,
+            nproc=nproc,
+        )
+    """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
     assert len(gts) == len(results)
     metrics = list(METRIC_MAPS.keys())
 
-    _, categories, _, ignore_mapping = load_coco_config(
-        mode="mot",
-        filepath=cfg_path,
+    _, categories, _, ignore_mapping = load_label_config(cfg_path)
+    classes = [cat["name"] for cat in categories if cat["tracking"]]
+    super_classes = None
+    if all(("supercategory" in cat for cat in categories)):
+        super_classes = defaultdict(list)
+        for cat in categories:
+            assert cat["supercategory"] is not None
+            super_classes[cat["supercategory"]].append(cat["name"])
+
+    ignore_classes = (
+        list(ignore_mapping.keys()) if ignore_mapping is not None else []
     )
-    classes = [cat["name"] for cat in categories]
-    super_classes = defaultdict(list)
-    for cat in categories:
-        super_classes[cat["supercategory"]].append(cat["name"])
-    ignore_classes = list(ignore_mapping.keys())
 
     logger.info("accumulating...")
     with Pool(nproc) as pool:
