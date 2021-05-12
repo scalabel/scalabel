@@ -29,3 +29,4 @@ def test_parse_annotations() -> None:
                 assert label.attributes["visibility"] == 1.0
                 assert label.box2d is not None
                 assert label.box2d.x1 in [458, 460]
+                assert label.box2d.x2 in [589, 587]

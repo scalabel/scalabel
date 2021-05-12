@@ -6,6 +6,7 @@ from typing import Dict, List, Union
 
 from ..common.io import load_file_as_list
 from .io import load_label_config, save
+from .transforms import bbox_to_box2d
 from .typing import Category, Frame, Label, MetaConfig
 from .utils import get_leaf_categories
 
@@ -79,9 +80,7 @@ def parse_annotations(
             continue
         frame_id, ins_id = map(int, gt[:2])
         bbox = list(map(float, gt[2:6]))
-        box2d = dict(
-            x1=bbox[0], y1=bbox[1], x2=bbox[0] + bbox[2], y2=bbox[1] + bbox[3]
-        )
+        box2d = bbox_to_box2d(bbox)
         attrs = dict(
             visibility=float(gt[8])
         )  # type: Dict[str, Union[bool, float ,str]]

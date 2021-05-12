@@ -207,7 +207,7 @@ def render_results(
     items: List[str],
     metrics: List[str],
     classes: List[Category],
-    super_classes: Dict[Category, List[Category]],
+    super_classes: Dict[str, List[Category]],
 ) -> EvalResults:
     """Render the evaluation results."""
     eval_results = pd.DataFrame(columns=metrics)
