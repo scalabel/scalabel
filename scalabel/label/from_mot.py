@@ -2,13 +2,12 @@
 import argparse
 import os
 from collections import defaultdict
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
-from scalabel.common.io import load_file_as_list
-from scalabel.label.io import load_label_config
-from scalabel.label.typing import Frame, Label
-
-from .io import save
+from ..common.io import load_file_as_list
+from .io import load_label_config, save
+from .typing import Category, Frame, Label, MetaConfig
+from .utils import get_leaf_categories
 
 # Classes in MOT:
 #   1: 'pedestrian'
@@ -44,7 +43,7 @@ DISCARD = ["3", "4", "5", "6", "9", "10", "11"]
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
-    parser = argparse.ArgumentParser(description="coco to scalabel")
+    parser = argparse.ArgumentParser(description="motchallenge to scalabel")
     parser.add_argument(
         "--data-path",
         "-d",
@@ -63,29 +62,21 @@ def parse_arguments() -> argparse.Namespace:
         default=".'",
         help="Output path for Scalabel format annotations.",
     )
-    parser.add_argument(
-        "--discard-classes",
-        "-dc",
-        default=None,
-        help="Classes that should be discarded separated by comma, e.g. 1,2",
-    )
     return parser.parse_args()
 
 
 def parse_annotations(
-    ann_filepath: str,
-    name_mapping: Dict[str, str],
-    discard_classes: List[str],
-    ignore_classes: List[str],
+    ann_filepath: str, metadata_cfg: MetaConfig
 ) -> Dict[int, List[Label]]:
     """Parse annotation file into List of Scalabel Label type per frame."""
     outputs = defaultdict(list)
+    cats = [cat.name for cat in get_leaf_categories(metadata_cfg.categories)]
     for line in load_file_as_list(ann_filepath):
         gt = line.strip().split(",")
         class_id = gt[7]
-        if class_id in discard_classes:
+        class_id = NAME_MAPPING[class_id]
+        if class_id not in cats:
             continue
-        class_id = name_mapping[class_id]
         frame_id, ins_id = map(int, gt[:2])
         bbox = list(map(float, gt[2:6]))
         box2d = dict(
@@ -94,10 +85,10 @@ def parse_annotations(
         attrs = dict(
             visibility=float(gt[8])
         )  # type: Dict[str, Union[bool, float ,str]]
-        if class_id in ignore_classes:
-            attrs["ignore"] = True
+        if class_id in IGNORE:
+            attrs["crowd"] = True
         else:
-            attrs["ignore"] = False
+            attrs["crowd"] = False
         ann = Label(
             category=class_id,
             id=ins_id,
@@ -108,29 +99,13 @@ def parse_annotations(
     return outputs
 
 
-def from_mot(
-    data_path: str,
-    name_mapping: Optional[Dict[str, str]] = None,
-    discard_classes: Optional[List[str]] = None,
-    ignore_classes: Optional[List[str]] = None,
-) -> List[Frame]:
+def from_mot(data_path: str, metadata_cfg: MetaConfig) -> List[Frame]:
     """Function converting MOT annotations to Scalabel format."""
     frames = []
-    # if the mappings are None, use defaults
-    if name_mapping is None:
-        name_mapping = NAME_MAPPING
-    if discard_classes is None:
-        discard_classes = DISCARD
-    if ignore_classes is None:
-        ignore_classes = IGNORE
-
     for video in os.listdir(data_path):
         img_names = sorted(os.listdir(os.path.join(data_path, video, "img1")))
         annotations = parse_annotations(
-            os.path.join(data_path, video, "gt/gt.txt"),
-            name_mapping,
-            discard_classes,
-            ignore_classes,
+            os.path.join(data_path, video, "gt/gt.txt"), metadata_cfg
         )
 
         for i, img_name in enumerate(img_names):
@@ -146,19 +121,21 @@ def from_mot(
 
 def run(args: argparse.Namespace) -> None:
     """Run conversion with command line arguments."""
-    name_map = None
-    ignore_cls = None
     if args.cfg_path is not None:
-        _, _, name_map, ignore_map = load_label_config(filepath=args.cfg_path)
-        ignore_cls = list(ignore_map.keys()) if ignore_map is not None else []
+        metadata_cfg = load_label_config(args.cfg_path)
+    else:
+        metadata_cfg = MetaConfig(
+            categories=[
+                Category(name="pedestrian"),
+                Category(name="person on vehicle"),
+                Category(name="static person"),
+                Category(name="distractor"),
+                Category(name="reflection"),
+                Category(name="ignore"),
+            ]
+        )
 
-    discard_cls = (
-        args.discard_classes.split(",")
-        if args.discard_classes is not None
-        else None
-    )
-
-    result = from_mot(args.data_path, name_map, discard_cls, ignore_cls)
+    result = from_mot(args.data_path, metadata_cfg)
     save(os.path.join(args.out_dir, "scalabel_anns.json"), result)
 
 

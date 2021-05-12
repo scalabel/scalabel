@@ -3,10 +3,11 @@
 The prediction and ground truth are expected in scalabel format. The evaluation
 results are from the COCO toolkit.
 """
+import argparse
 import datetime
 import json
 import os
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
@@ -15,9 +16,9 @@ from tabulate import tabulate
 
 from scalabel.common.typing import DictAny, ListAny
 from scalabel.label.coco_typing import GtType
-from scalabel.label.io import load, load_label_config
+from scalabel.label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
 from scalabel.label.to_coco import scalabel2coco_detection
-from scalabel.label.typing import Frame
+from scalabel.label.typing import Frame, MetaConfig
 
 
 class COCOV2(COCO):  # type: ignore
@@ -44,20 +45,18 @@ class COCOV2(COCO):  # type: ignore
 
 
 def evaluate_det(
-    ann_path: Union[str, List[Frame]],
-    pred_path: Union[str, List[Frame]],
-    cfg_path: str,
+    ann_frames: List[Frame],
+    pred_frames: List[Frame],
+    metadata_cfg: MetaConfig,
     out_dir: str = "none",
-    nproc: int = 4,
 ) -> Dict[str, float]:
     """Load the ground truth and prediction results.
 
     Args:
-        ann_path: (path to) the ground truth annotations in Scalabel format
-        pred_path: (path to) the prediction results in Scalabel format.
-        cfg_path: path to the config file
+        ann_frames: the ground truth annotations in Scalabel format
+        pred_frames: the prediction results in Scalabel format.
+        metadata_cfg: Metadata config.
         out_dir: output_directory
-        nproc: processes number for loading jsons
 
     Returns:
         dict: detection metric scores
@@ -71,30 +70,15 @@ def evaluate_det(
         )
     """
     # Convert the annotation file to COCO format
-    if isinstance(ann_path, str):
-        ann_frames = load(ann_path, nproc)
-    else:
-        ann_frames = ann_path
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
-
-    resolution, categories, name_mapping, ignore_mapping = load_label_config(
-        filepath=cfg_path, include_non_tracking=True
-    )
-    ann_coco = scalabel2coco_detection(
-        ann_frames, categories, resolution, name_mapping, ignore_mapping
-    )
+    ann_coco = scalabel2coco_detection(ann_frames, metadata_cfg)
     coco_gt = COCOV2(None, ann_coco)
 
     # Load results and convert the predictions
-    if isinstance(pred_path, str):
-        pred_frames = load(pred_path, nproc)
-    else:
-        pred_frames = pred_path
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
-
-    pred_res = scalabel2coco_detection(
-        pred_frames, categories, resolution, name_mapping, ignore_mapping
-    )["annotations"]
+    pred_res = scalabel2coco_detection(pred_frames, metadata_cfg)[
+        "annotations"
+    ]
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()
@@ -254,3 +238,44 @@ def create_small_table(small_dict: Dict[str, float]) -> str:
         numalign="center",
     )
     return table
+
+
+def parse_arguments() -> argparse.Namespace:
+    """Parse the arguments."""
+    parser = argparse.ArgumentParser(description="Detection evaluation.")
+    parser.add_argument(
+        "--gt", "-g", required=True, help="path to detection ground truth"
+    )
+    parser.add_argument(
+        "--result", "-r", required=True, help="path to detection results"
+    )
+    parser.add_argument(
+        "--cfg-path",
+        "-c",
+        default=DEFAULT_LABEL_CONFIG,
+        help="Config path, contains metadata like available categories.",
+    )
+    parser.add_argument(
+        "--out-dir",
+        "-o",
+        default="none",
+        help="Output path for detection evaluation results.",
+    )
+    parser.add_argument(
+        "--nproc",
+        "-p",
+        type=int,
+        default=4,
+        help="number of processes for detection evaluation",
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    gts, config = load(args.gt, args.nproc)
+    preds, _ = load(args.result)
+    if args.cfg_path is not None:
+        config = load_label_config(args.cfg_path)
+    assert config is not None
+    evaluate_det(gts, preds, config, args.out_dir)

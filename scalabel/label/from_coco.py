@@ -85,7 +85,7 @@ def coco_to_scalabel(
                     "scalabel_id", str(ann.get("instance_id", ann["id"]))
                 ),
                 index=i + 1,
-                attributes=dict(),
+                attributes=dict(crowd=ann["iscrowd"] or ann["ignore"]),
                 category=cat_id2name[ann["category_id"]],
             )
             if "score" in ann:
@@ -98,7 +98,7 @@ def coco_to_scalabel(
                 label.poly2d = polygon_to_poly2ds(ann["segmentation"])
             frame.labels.append(label)
 
-    return scalabel, vid_id2name
+    return scalabel, vid_id2name  # TODO add metadata
 
 
 def run(args: argparse.Namespace) -> None:
@@ -106,7 +106,6 @@ def run(args: argparse.Namespace) -> None:
     with open(args.label) as fp:
         coco: GtType = json.load(fp)
     scalabel, vid_id2name = coco_to_scalabel(coco)
-    print(args.nproc)
 
     if vid_id2name is None:
         assert args.output.endswith(".json"), "output should be a json file"

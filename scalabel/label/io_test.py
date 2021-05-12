@@ -37,7 +37,7 @@ def test_load() -> None:
     filepath = get_test_file("image_list_with_auto_labels.json")
 
     def assert_correctness(inputs: str, nprocs: int) -> None:
-        frames = load(inputs, nprocs)
+        frames, _ = load(inputs, nprocs)
         assert len(frames) == 10
         assert (
             frames[0].url == "https://s3-us-west-2.amazonaws.com/bdd-label/"
@@ -89,7 +89,7 @@ def test_group_and_sort() -> None:
 def test_dump() -> None:
     """Test dump labels."""
     filepath = get_test_file("image_list_with_auto_labels.json")
-    labels = load(filepath)
+    labels, _ = load(filepath)
     labels_dict = [dump(label) for label in labels]
     assert labels_dict[0]["frameIndex"] == labels[0].frame_index
     assert labels_dict[-1]["frameIndex"] == labels[-1].frame_index

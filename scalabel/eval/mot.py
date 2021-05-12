@@ -1,33 +1,35 @@
 """Multi-object Tracking evaluation code."""
+import argparse
+import json
+import os
 import time
-from collections import defaultdict
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Optional, Tuple, Union, overload
+from typing import Callable, Dict, List, Tuple, Union
 
 import motmetrics as mm
 import numpy as np
 import pandas as pd
 
-from scalabel.label.io import load_label_config
-from scalabel.label.transforms import box2d_to_bbox
-from scalabel.label.typing import Frame, Label
+from scalabel.label.io import (
+    DEFAULT_LABEL_CONFIG,
+    group_and_sort,
+    load,
+    load_label_config,
+)
 
 from ..common.logger import logger
+from ..label.transforms import box2d_to_bbox
+from ..label.typing import Category, Frame, Label, MetaConfig
+from ..label.utils import get_leaf_categories, get_parent_categories
 
 EvalResults = Dict[str, Dict[str, float]]
 Frames = List[Frame]
-Files = List[str]
 FramesList = List[Frames]
-FilesList = List[Files]
 FramesFunc = Callable[
-    [Frames, Frames, List[str], List[str], float, float],
+    [Frames, Frames, List[str], float, float],
     List[mm.MOTAccumulator],
 ]
-FilesFunc = Callable[
-    [Files, Files, List[str], List[str], float, float], List[mm.MOTAccumulator]
-]
-
 
 METRIC_MAPS = {
     "idf1": "IDF1",
@@ -44,7 +46,7 @@ METRIC_MAPS = {
 
 
 def parse_objects(
-    objects: List[Label], classes: List[str], ignore_classes: List[str]
+    objects: List[Label], classes: List[str]
 ) -> List[np.ndarray]:
     """Parse objects under Scalable formats."""
     bboxes, labels, ids, ignore_bboxes = [], [], [], []
@@ -63,10 +65,8 @@ def parse_objects(
                 bboxes.append(bbox)
                 labels.append(classes.index(category))
                 ids.append(obj.id)
-        elif category in ignore_classes:
-            ignore_bboxes.append(bbox)
         else:
-            raise KeyError("Unknown category.")
+            raise KeyError(f"Unknown category: {category}")
     return list(map(np.array, [bboxes, labels, ids, ignore_bboxes]))
 
 
@@ -85,7 +85,6 @@ def acc_single_video_mot(
     gts: List[Frame],
     results: List[Frame],
     classes: List[str],
-    ignore_classes: List[str],
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
 ) -> List[mm.MOTAccumulator]:
@@ -101,12 +100,10 @@ def acc_single_video_mot(
     for gt, result in zip(gts, results):
         assert gt.frame_index == result.frame_index
         gt_bboxes, gt_labels, gt_ids, gt_ignores = parse_objects(
-            gt.labels if gt.labels is not None else [], classes, ignore_classes
+            gt.labels if gt.labels is not None else [], classes
         )
         pred_bboxes, pred_labels, pred_ids, _ = parse_objects(
-            result.labels if result.labels is not None else [],
-            classes,
-            ignore_classes,
+            result.labels if result.labels is not None else [], classes
         )
         for i in range(num_classes):
             gt_inds, pred_inds = gt_labels == i, pred_labels == i
@@ -144,12 +141,13 @@ def acc_single_video_mot(
 
 def aggregate_accs(
     accumulators: List[List[mm.MOTAccumulator]],
-    classes: List[str],
-    super_classes: Optional[Dict[str, List[str]]] = None,
+    classes: List[Category],
+    super_classes: Dict[str, List[Category]],
 ) -> Tuple[List[List[str]], List[List[mm.MOTAccumulator]], List[str]]:
     """Aggregate the results of the entire dataset."""
     # accs for each class
-    items = classes.copy()
+    items = [c.name for c in classes]
+
     names: List[List[str]] = [[] for _ in items]
     accs: List[List[str]] = [[] for _ in items]
     for video_ind, _accs in enumerate(accumulators):
@@ -159,16 +157,15 @@ def aggregate_accs(
                 == 0
             ):
                 continue
-            name = f"{classes[cls_ind]}_{video_ind}"
+            name = f"{classes[cls_ind].name}_{video_ind}"
             names[cls_ind].append(name)
             accs[cls_ind].append(acc)
 
     # super categories (if any)
-    if super_classes is not None:
-        for super_cls, cls in super_classes.items():
-            items.append(super_cls)
-            names.append([n for c in cls for n in names[classes.index(c)]])
-            accs.append([a for c in cls for a in accs[classes.index(c)]])
+    for super_cls, cls in super_classes.items():
+        items.append(super_cls)
+        names.append([n for c in cls for n in names[classes.index(c)]])
+        accs.append([a for c in cls for a in accs[classes.index(c)]])
 
     # overall
     items.append("OVERALL")
@@ -209,8 +206,8 @@ def render_results(
     summaries: List[List[float]],
     items: List[str],
     metrics: List[str],
-    classes: List[str],
-    super_classes: Optional[Dict[str, List[str]]] = None,
+    classes: List[Category],
+    super_classes: Dict[Category, List[Category]],
 ) -> EvalResults:
     """Render the evaluation results."""
     eval_results = pd.DataFrame(columns=metrics)
@@ -264,37 +261,11 @@ def render_results(
     return outputs
 
 
-@overload
 def evaluate_track(
     acc_single_video: FramesFunc,
     gts: FramesList,
     results: FramesList,
-    cfg_path: str,
-    iou_thr: float = 0.5,
-    ignore_iof_thr: float = 0.5,
-    nproc: int = 4,
-) -> EvalResults:
-    ...
-
-
-@overload
-def evaluate_track(
-    acc_single_video: FilesFunc,
-    gts: FilesList,
-    results: FilesList,
-    cfg_path: str,
-    iou_thr: float = 0.5,
-    ignore_iof_thr: float = 0.5,
-    nproc: int = 4,
-) -> EvalResults:
-    ...
-
-
-def evaluate_track(
-    acc_single_video: Union[FramesFunc, FilesFunc],
-    gts: Union[FramesList, FilesList],
-    results: Union[FramesList, FilesList],
-    cfg_path: str,
+    metadata_cfg: MetaConfig,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
     nproc: int = 4,
@@ -305,7 +276,7 @@ def evaluate_track(
         acc_single_video: Function for calculating metrics over a single video.
         gts: (paths to) the ground truth annotations in Scalabel format
         results: (paths to) the prediction results in Scalabel format.
-        cfg_path: path to the config file
+        metadata_cfg: MetaConfig object
         iou_thr: Minimum IoU for a bounding box to be considered a positive.
         ignore_iof_thr: Min. Intersection over foreground with ignore regions.
         nproc: processes number for loading files
@@ -330,31 +301,21 @@ def evaluate_track(
     assert len(gts) == len(results)
     metrics = list(METRIC_MAPS.keys())
 
-    _, categories, _, ignore_mapping = load_label_config(cfg_path)
-    classes = [cat["name"] for cat in categories if cat["tracking"]]
-    super_classes = None
-    if all(("supercategory" in cat for cat in categories)):
-        super_classes = defaultdict(list)
-        for cat in categories:
-            assert cat["supercategory"] is not None
-            super_classes[cat["supercategory"]].append(cat["name"])
-
-    ignore_classes = (
-        list(ignore_mapping.keys()) if ignore_mapping is not None else []
-    )
+    classes = get_leaf_categories(metadata_cfg.categories)
+    super_classes = get_parent_categories(metadata_cfg.categories)
 
     logger.info("accumulating...")
     with Pool(nproc) as pool:
         accs = pool.starmap(
             partial(
                 acc_single_video,
-                classes=classes,
-                ignore_classes=ignore_classes,
+                classes=[c.name for c in classes],
                 iou_thr=iou_thr,
                 ignore_iof_thr=ignore_iof_thr,
             ),
             zip(gts, results),
         )
+
     names, accs, items = aggregate_accs(accs, classes, super_classes)
 
     logger.info("evaluating...")
@@ -368,3 +329,67 @@ def evaluate_track(
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return eval_results
+
+
+def parse_arguments() -> argparse.Namespace:
+    """Parse the arguments."""
+    parser = argparse.ArgumentParser(description="MOT evaluation.")
+    parser.add_argument(
+        "--gt", "-g", required=True, help="path to mot ground truth"
+    )
+    parser.add_argument(
+        "--result", "-r", required=True, help="path to mot results"
+    )
+    parser.add_argument(
+        "--cfg-path",
+        "-c",
+        default=DEFAULT_LABEL_CONFIG,
+        help="Config path. Contains metadata like available categories.",
+    )
+    parser.add_argument(
+        "--out-dir",
+        "-o",
+        default="none",
+        help="Output path for mot evaluation results.",
+    )
+    parser.add_argument(
+        "--iou-thr",
+        type=float,
+        default=0.5,
+        help="iou threshold for mot evaluation",
+    )
+    parser.add_argument(
+        "--ignore-iof-thr",
+        type=float,
+        default=0.5,
+        help="ignore iof threshold for mot evaluation",
+    )
+    parser.add_argument(
+        "--nproc",
+        "-p",
+        type=int,
+        default=4,
+        help="number of processes for mot evaluation",
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    gt_frames, config = load(args.gt)
+    if args.cfg_path is not None:
+        config = load_label_config(args.cfg_path)
+    assert config is not None
+    scores = evaluate_track(
+        acc_single_video_mot,
+        group_and_sort(gt_frames),
+        group_and_sort(load(args.result)[0]),
+        config,
+        args.iou_thr,
+        args.ignore_iof_thr,
+        args.nproc,
+    )
+    if args.out_dir != "none":
+        output_filename = os.path.join(args.out_dir, "scores.json")
+        with open(output_filename, "w") as fp:
+            json.dump(scores, fp)

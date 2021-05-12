@@ -4,12 +4,12 @@ import glob
 import json
 import os.path as osp
 from itertools import groupby
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import humps
 
 from scalabel.common.io import load_config
-from scalabel.label.typing import CatType
+from scalabel.label.typing import MetaConfig
 
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
@@ -25,34 +25,47 @@ def parse(raw_frame: DictStrAny) -> Frame:
     return Frame(**humps.decamelize(raw_frame))
 
 
-def load(inputs: str, nprocs: int = 0) -> List[Frame]:
+def load(
+    inputs: str, nprocs: int = 0
+) -> Tuple[List[Frame], Optional[MetaConfig]]:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
     if not osp.exists(inputs):
         raise FileNotFoundError(f"{inputs} does not exist.")
 
+    def process_file(fp: str) -> Optional[DictStrAny]:
+        raw_cfg = None
+        content = json.load(open(fp, "r"))
+        if isinstance(content, dict):
+            raw_frames.append(content["frames"])
+            raw_cfg = content["config"]  # pylint: disable=unused-variable
+        elif isinstance(content, list):
+            raw_frames.extend(content)
+        else:
+            raise TypeError("The input file contains neither dict nor list.")
+        return raw_cfg
+
+    cfg = None
     if osp.isfile(inputs) and inputs.endswith("json"):
-        with open(inputs, "r") as fp:
-            content = json.load(fp)
-            if isinstance(content, dict):
-                raw_frames.append(content)
-            elif isinstance(content, list):
-                raw_frames.extend(content)
-            else:
-                raise TypeError(
-                    "The input file contains neither dict nor list."
-                )
+        ret_cfg = process_file(inputs)
+        if ret_cfg is not None:
+            cfg = ret_cfg
     elif osp.isdir(inputs):
         files = glob.glob(osp.join(inputs, "*.json"))
         for file_ in files:
-            with open(file_, "r") as fp:
-                raw_frames.extend(json.load(fp))
+            ret_cfg = process_file(file_)
+            if cfg is None and ret_cfg is not None:
+                cfg = ret_cfg
     else:
         raise TypeError("Inputs must be a folder or a JSON file.")
 
+    config = None
+    if cfg is not None:
+        config = MetaConfig(**cfg)
+
     if nprocs > 1:
-        return pmap(parse, raw_frames, nprocs)
-    return list(map(parse, raw_frames))
+        return pmap(parse, raw_frames, nprocs), config
+    return list(map(parse, raw_frames)), config
 
 
 def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
@@ -110,45 +123,8 @@ def dump(frame: Frame) -> DictStrAny:
     return frame_str
 
 
-def load_label_config(
-    filepath: str,
-    ignore_as_class: bool = False,
-    include_non_tracking: bool = False,
-) -> Tuple[
-    Optional[Tuple[int, int]],
-    List[CatType],
-    Optional[Dict[str, str]],
-    Optional[Dict[str, str]],
-]:
+def load_label_config(filepath: str) -> MetaConfig:
     """Load label configuration from a config file (toml / yaml)."""
-    cfgs = load_config(filepath)
-    resolution = cfgs["resolution"] if "resolution" in cfgs else None
-    categories = cfgs["categories"]
-    categories = [
-        cat for cat in categories if cat["tracking"] or include_non_tracking
-    ]
-    name_mapping = cfgs["name_mapping"] if "name_mapping" in cfgs else None
-    ignore_mapping = (
-        cfgs["ignore_mapping"] if "ignore_mapping" in cfgs else None
-    )
-
-    # if category ids are not specified, set according to index (starting at 1)
-    if not all(("id" in cat for cat in categories)):
-        # don't all assignment of id for a subset of classes
-        assert all(
-            ("id" not in cat for cat in categories)
-        ), "Category id not specified for all classes!"
-        for i, cat in enumerate(categories):
-            cat["id"] = i + 1
-
-    if ignore_as_class:
-        categories.append(
-            CatType(
-                supercategory="none",
-                id=len(categories) + 1,
-                name="ignored",
-                tracking=False,
-            )
-        )
-
-    return resolution, categories, name_mapping, ignore_mapping
+    cfg = load_config(filepath)
+    metadata_cfg = MetaConfig(**cfg)
+    return metadata_cfg

@@ -1,13 +1,7 @@
 """Type definition for scalabel format."""
-import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict  # pylint: disable=no-name-in-module
-else:
-    from typing_extensions import TypedDict
 
 
 class Box2D(BaseModel):
@@ -101,10 +95,28 @@ class Frame(BaseModel):
         super().__init__(**data)
 
 
-class CatType(TypedDict):
-    """Define types of categories in config."""
+class Category(BaseModel):
+    """Define Scalabel label attributes."""
 
     name: str
-    tracking: bool
-    id: Optional[int]
-    supercategory: Optional[str]
+    subcategories: Optional[List["Category"]]
+
+
+Category.update_forward_refs()
+
+
+class Attribute(BaseModel):
+    """Define Scalabel category type."""
+
+    name: str
+    toolType: str
+    tagText: str
+    values: Optional[List[str]]
+
+
+class MetaConfig(BaseModel):
+    """Define metadata of the dataset."""
+
+    resolution: Optional[Tuple[int, int]]
+    attributes: Optional[List[Attribute]]
+    categories: List[Category]

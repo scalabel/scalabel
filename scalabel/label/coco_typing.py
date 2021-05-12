@@ -3,14 +3,19 @@
 import sys
 from typing import List, Optional, Union
 
-from scalabel.label.typing import CatType
-
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
 else:
     from typing_extensions import TypedDict
 
 PolygonType = List[List[float]]
+
+
+class CatType(TypedDict):
+    """Define types of categories in GT."""
+
+    id: int
+    name: str
 
 
 class RLEType(TypedDict):

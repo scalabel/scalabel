@@ -8,10 +8,12 @@ import numpy as np
 from matplotlib.path import Path
 from skimage import measure
 
-from .coco_typing import PolygonType
-from .typing import Box2D, Poly2D
+from .coco_typing import CatType, PolygonType
+from .typing import Box2D, MetaConfig, Poly2D
+from .utils import get_category_id, get_leaf_categories
 
 __all__ = [
+    "get_coco_categories",
     "bbox_to_box2d",
     "box2d_to_bbox",
     "mask_to_box2d",
@@ -20,6 +22,16 @@ __all__ = [
     "poly2ds_to_mask",
     "polygon_to_poly2ds",
 ]
+
+
+def get_coco_categories(metadata_cfg: MetaConfig) -> List[CatType]:
+    """Get CatType categories for saving these in COCO format annotations."""
+    result = []
+    for cat in get_leaf_categories(metadata_cfg.categories):
+        result.append(
+            CatType(id=get_category_id(cat.name, metadata_cfg), name=cat.name)
+        )
+    return result
 
 
 def box2d_to_bbox(box2d: Box2D) -> List[float]:

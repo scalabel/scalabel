@@ -159,9 +159,9 @@ class LabelViewer:
         print("Label file:", args.labels)
         self.frames: List[Frame] = []
         if os.path.exists(args.labels):
-            self.frames = load(args.labels, args.nproc)
+            self.frames, _ = load(args.labels, args.nproc)
         elif os.path.exists(os.path.join(args.image_dir, args.labels)):
-            self.frames = load(
+            self.frames, _ = load(
                 os.path.join(args.image_dir, args.labels), args.nproc
             )
         else:

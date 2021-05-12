@@ -51,16 +51,8 @@ Available arguments:
                             path to the video/images to be processed
     --output OUT_DIR, -o OUT_DIR
                             output folder to save the frames
-    --height HEIGHT
-                            height of images
-    --width WIDTH
-                            width of images
     --mode MODE, -m MODE
                             one of [det, ins_seg, box_track, seg_track]
-    --remove-ignore, -ri
-                            remove the ignored annotations from the label file
-    --ignore-as-class, -ic
-                            put the ignored annotations to the `ignored` category
     --mask-mod, -mm,
                             conversion mode: rle or polygon
     --nproc
@@ -72,8 +64,6 @@ from_mot
 -----------------
 
 ``from_mot`` converts MOTChallenge annotations into Scalabel format.
-A standard configuration for this is provided, but the user can also specify
-a custom configuration.
 
 Available arguments:
 
@@ -85,5 +75,3 @@ Available arguments:
                             Config path for converting the annotations. Contains metadata like available categories.
     --out-dir OUT_DIR, -o OUT_DIR
                             Output path for Scalabel format annotations.
-    --discard-classes DISCARD_CLASSES, -c DISCARD_CLASSES
-                            Classes that should be discarded separated by commas, e.g. "1,2"

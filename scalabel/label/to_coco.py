@@ -5,14 +5,14 @@ import json
 import os.path as osp
 from functools import partial
 from multiprocessing import Pool
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
 from scalabel.label.io import load_label_config
-from scalabel.label.typing import CatType
+from scalabel.label.typing import MetaConfig
 
 from ..common.logger import logger
 from .coco_typing import (
@@ -26,11 +26,13 @@ from .coco_typing import (
 from .io import DEFAULT_LABEL_CONFIG, group_and_sort, load
 from .transforms import (
     box2d_to_bbox,
+    get_coco_categories,
     mask_to_bbox,
     mask_to_polygon,
     poly2ds_to_mask,
 )
 from .typing import Frame, Label, Poly2D
+from .utils import get_category_id
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -57,18 +59,6 @@ def parse_arguments() -> argparse.Namespace:
         help="conversion mode: detection or tracking.",
     )
     parser.add_argument(
-        "-ri",
-        "--remove-ignore",
-        action="store_true",
-        help="Remove the ignored annotations from the label file.",
-    )
-    parser.add_argument(
-        "-ic",
-        "--ignore-as-class",
-        action="store_true",
-        help="Put the ignored annotations to the `ignored` category.",
-    )
-    parser.add_argument(
         "-mm",
         "--mask-mode",
         default="rle",
@@ -90,43 +80,13 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def process_category(
-    category_name: str,
-    categories: List[CatType],
-    name_mapping: Optional[Dict[str, str]] = None,
-    ignore_mapping: Optional[Dict[str, str]] = None,
-    ignore_as_class: bool = False,
-) -> Tuple[bool, int]:
-    """Check whether the category should be ignored and get its ID."""
-    cat_name2id: Dict[str, int] = {}
-    for category in categories:
-        assert category["id"] is not None
-        cat_name2id[category["name"]] = category["id"]
-
-    if name_mapping is not None:
-        category_name = name_mapping.get(category_name, category_name)
-    if category_name not in cat_name2id:
-        if ignore_as_class:
-            category_name = "ignored"
-            category_ignored = False
-        else:
-            assert ignore_mapping is not None
-            assert category_name in ignore_mapping, "%s" % category_name
-            category_name = ignore_mapping[category_name]
-            category_ignored = True
-    else:
-        category_ignored = False
-    category_id = cat_name2id[category_name]
-    return category_ignored, category_id
-
-
-def get_object_attributes(label: Label, ignore: bool) -> Tuple[int, int]:
+def get_object_attributes(label: Label) -> int:
     """Set attributes for the ann dict."""
     attributes = label.attributes
     if attributes is None:
-        return False, int(ignore)
-    iscrowd = int(bool(attributes.get("crowd", False)) or ignore)
-    return iscrowd, int(ignore)
+        return 0
+    iscrowd = int(bool(attributes.get("crowd", False)))
+    return iscrowd
 
 
 def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
@@ -201,13 +161,7 @@ def poly2ds_list_to_coco(
 
 
 def scalabel2coco_detection(
-    frames: List[Frame],
-    categories: List[CatType],
-    shape: Optional[Tuple[int, int]] = None,
-    name_mapping: Optional[Dict[str, str]] = None,
-    ignore_mapping: Optional[Dict[str, str]] = None,
-    ignore_as_class: bool = False,
-    remove_ignore: bool = False,
+    frames: List[Frame], metadata_cfg: MetaConfig
 ) -> GtType:
     """Convert Scalabel format to COCO detection."""
     image_id, ann_id = 0, 0
@@ -216,7 +170,7 @@ def scalabel2coco_detection(
 
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = shape
+        img_shape = metadata_cfg.resolution
         if img_shape is None:
             if image_anns.size is not None:
                 img_shape = (image_anns.size[1], image_anns.size[0])
@@ -240,17 +194,8 @@ def scalabel2coco_detection(
             if label.box2d is None:
                 continue
 
-            category_ignored, category_id = process_category(
-                label.category,
-                categories,
-                name_mapping,
-                ignore_mapping,
-                ignore_as_class,
-            )
-            if remove_ignore and category_ignored:
-                continue
-
-            iscrowd, ignore = get_object_attributes(label, category_ignored)
+            iscrowd = get_object_attributes(label)
+            category_id = get_category_id(label.category, metadata_cfg)
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
@@ -258,7 +203,7 @@ def scalabel2coco_detection(
                 category_id=category_id,
                 scalabel_id=label.id,
                 iscrowd=iscrowd,
-                ignore=ignore,
+                ignore=False,
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -267,7 +212,7 @@ def scalabel2coco_detection(
 
     return GtType(
         type="instance",
-        categories=categories,
+        categories=get_coco_categories(metadata_cfg),
         images=images,
         annotations=annotations,
     )
@@ -275,12 +220,7 @@ def scalabel2coco_detection(
 
 def scalabel2coco_ins_seg(
     frames: List[Frame],
-    categories: List[CatType],
-    shape: Optional[Tuple[int, int]] = None,
-    name_mapping: Optional[Dict[str, str]] = None,
-    ignore_mapping: Optional[Dict[str, str]] = None,
-    ignore_as_class: bool = False,
-    remove_ignore: bool = False,
+    metadata_cfg: MetaConfig,
     mask_mode: str = "rle",
     nproc: int = 4,
 ) -> GtType:
@@ -293,7 +233,7 @@ def scalabel2coco_ins_seg(
     shapes = []
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = shape
+        img_shape = metadata_cfg.resolution
         if img_shape is None:
             if image_anns.size is not None:
                 img_shape = (image_anns.size[1], image_anns.size[0])
@@ -318,17 +258,8 @@ def scalabel2coco_ins_seg(
             if label.poly2d is None:
                 continue
 
-            category_ignored, category_id = process_category(
-                label.category,
-                categories,
-                name_mapping,
-                ignore_mapping,
-                ignore_as_class,
-            )
-            if remove_ignore and category_ignored:
-                continue
-
-            iscrowd, ignore = get_object_attributes(label, category_ignored)
+            iscrowd = get_object_attributes(label)
+            category_id = get_category_id(label.category, metadata_cfg)
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
@@ -336,7 +267,7 @@ def scalabel2coco_ins_seg(
                 category_id=category_id,
                 scalabel_id=label.id,
                 iscrowd=iscrowd,
-                ignore=ignore,
+                ignore=False,
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -348,7 +279,7 @@ def scalabel2coco_ins_seg(
     )
     return GtType(
         type="instance",
-        categories=categories,
+        categories=get_coco_categories(metadata_cfg),
         images=images,
         annotations=annotations,
     )
@@ -369,12 +300,7 @@ def get_instance_id(
 
 def scalabel2coco_box_track(
     frames: List[Frame],
-    categories: List[CatType],
-    shape: Optional[Tuple[int, int]] = None,
-    name_mapping: Optional[Dict[str, str]] = None,
-    ignore_mapping: Optional[Dict[str, str]] = None,
-    ignore_as_class: bool = False,
-    remove_ignore: bool = False,
+    metadata_cfg: MetaConfig,
 ) -> GtType:
     """Converting Scalabel Box Tracking Set to COCO format."""
     frames_list = group_and_sort(frames)
@@ -394,7 +320,7 @@ def scalabel2coco_box_track(
 
         for image_anns in video_anns:
             image_id += 1
-            img_shape = shape
+            img_shape = metadata_cfg.resolution
             if img_shape is None:
                 if image_anns.size is not None:
                     img_shape = (image_anns.size[1], image_anns.size[0])
@@ -420,22 +346,11 @@ def scalabel2coco_box_track(
                 if label.box2d is None:
                     continue
 
-                category_ignored, category_id = process_category(
-                    label.category,
-                    categories,
-                    name_mapping,
-                    ignore_mapping,
-                    ignore_as_class,
-                )
-                if remove_ignore and category_ignored:
-                    continue
-
                 instance_id, global_instance_id = get_instance_id(
                     instance_id_maps, global_instance_id, label.id
                 )
-                iscrowd, ignore = get_object_attributes(
-                    label, category_ignored
-                )
+                iscrowd = get_object_attributes(label)
+                category_id = get_category_id(label.category, metadata_cfg)
 
                 ann_id += 1
                 annotation = AnnType(
@@ -445,7 +360,7 @@ def scalabel2coco_box_track(
                     instance_id=instance_id,
                     scalabel_id=label.id,
                     iscrowd=iscrowd,
-                    ignore=ignore,
+                    ignore=False,
                 )
                 if label.score is not None:
                     annotation["score"] = label.score
@@ -453,7 +368,7 @@ def scalabel2coco_box_track(
                 annotations.append(annotation)
 
     return GtType(
-        categories=categories,
+        categories=get_coco_categories(metadata_cfg),
         videos=videos,
         images=images,
         annotations=annotations,
@@ -462,12 +377,7 @@ def scalabel2coco_box_track(
 
 def scalabel2coco_seg_track(
     frames: List[Frame],
-    categories: List[CatType],
-    shape: Optional[Tuple[int, int]] = None,
-    name_mapping: Optional[Dict[str, str]] = None,
-    ignore_mapping: Optional[Dict[str, str]] = None,
-    ignore_as_class: bool = False,
-    remove_ignore: bool = False,
+    metadata_cfg: MetaConfig,
     mask_mode: str = "rle",
     nproc: int = 4,
 ) -> GtType:
@@ -491,7 +401,7 @@ def scalabel2coco_seg_track(
 
         for image_anns in frames:
             image_id += 1
-            img_shape = shape
+            img_shape = metadata_cfg.resolution
             if img_shape is None:
                 if image_anns.size is not None:
                     img_shape = (image_anns.size[1], image_anns.size[0])
@@ -518,24 +428,12 @@ def scalabel2coco_seg_track(
                 if label.poly2d is None:
                     continue
 
-                category_ignored, category_id = process_category(
-                    label.category
-                    if label.category is not None
-                    else "ignored",
-                    categories,
-                    name_mapping,
-                    ignore_mapping,
-                    ignore_as_class,
-                )
-                if remove_ignore and category_ignored:
-                    continue
-
                 instance_id, global_instance_id = get_instance_id(
                     instance_id_maps, global_instance_id, label.id
                 )
-                iscrowd, ignore = get_object_attributes(
-                    label, category_ignored
-                )
+                iscrowd = get_object_attributes(label)
+                assert label.category is not None
+                category_id = get_category_id(label.category, metadata_cfg)
 
                 ann_id += 1
                 annotation = AnnType(
@@ -545,7 +443,7 @@ def scalabel2coco_seg_track(
                     instance_id=instance_id,
                     scalabel_id=label.id,
                     iscrowd=iscrowd,
-                    ignore=ignore,
+                    ignore=False,
                 )
                 if label.score is not None:
                     annotation["score"] = label.score
@@ -556,7 +454,7 @@ def scalabel2coco_seg_track(
         shapes, annotations, poly2ds, mask_mode, nproc
     )
     return GtType(
-        categories=categories,
+        categories=get_coco_categories(metadata_cfg),
         videos=videos,
         images=images,
         annotations=annotations,
@@ -565,12 +463,12 @@ def scalabel2coco_seg_track(
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    resolution, categories, name_mapping, ignore_mapping = load_label_config(
-        args.config, args.ignore_as_class, include_non_tracking=True
-    )
-
     logger.info("Loading Scalabel jsons...")
-    frames = load(args.label, args.nproc)
+    frames, metadata_cfg = load(args.label, args.nproc)
+
+    if args.cfg_path is not None:
+        metadata_cfg = load_label_config(args.config)
+    assert metadata_cfg is not None
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
@@ -587,15 +485,7 @@ def run(args: argparse.Namespace) -> None:
             mask_mode=args.mask_mode,
             nproc=args.nproc,
         )
-    coco = convert_func(
-        frames,
-        categories,
-        resolution,
-        name_mapping,
-        ignore_mapping,
-        args.ignore_as_class,
-        args.remove_ignore,
-    )
+    coco = convert_func(frames, metadata_cfg)
 
     logger.info("Saving converted annotations...")
     with open(args.output, "w") as f:
