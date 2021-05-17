@@ -1,19 +1,12 @@
 """Test cases for from_mot.py."""
 from ..unittest.util import get_test_file
 from .from_mot import parse_annotations
-from .typing import Category, Config
 
 
 def test_parse_annotations() -> None:
     """Test the parse annotations function."""
     filepath = get_test_file("motchallenge_labels.txt")
-    metadata_cfg = Config(
-        categories=[
-            Category(name="pedestrian"),
-            Category(name="static person"),
-        ]
-    )
-    result = parse_annotations(filepath, metadata_cfg)
+    result = parse_annotations(filepath)
 
     assert list(result.keys()) == [0, 1, 3]
 
@@ -21,7 +14,7 @@ def test_parse_annotations() -> None:
         for label in labels:
             assert label.attributes is not None
             if label.attributes["crowd"]:
-                assert label.category == "static person"
+                assert label.category == "pedestrian"
                 assert frame_idx == 1
             else:
                 assert label.category == "pedestrian"

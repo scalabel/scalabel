@@ -71,7 +71,5 @@ Available arguments:
 
     --data-path INPUT, -d INPUT
                             path to MOTChallenge data (images + annotations).
-    --cfg-path CFG_PATH, -c CFG_PATH
-                            Config path for converting the annotations. Contains metadata like available categories.
     --out-dir OUT_DIR, -o OUT_DIR
                             Output path for Scalabel format annotations.
