@@ -101,7 +101,7 @@ def parse_annotations(
 def from_mot(data_path: str, metadata_cfg: MetaConfig) -> List[Frame]:
     """Function converting MOT annotations to Scalabel format."""
     frames = []
-    for video in os.listdir(data_path):
+    for video in sorted(os.listdir(data_path)):
         img_names = sorted(os.listdir(os.path.join(data_path, video, "img1")))
         annotations = parse_annotations(
             os.path.join(data_path, video, "gt/gt.txt"), metadata_cfg

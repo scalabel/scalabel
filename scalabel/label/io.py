@@ -8,12 +8,10 @@ from typing import Any, List, Optional, Tuple
 
 import humps
 
-from scalabel.common.io import load_config
-from scalabel.label.typing import MetaConfig
-
+from ..common.io import load_config
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
-from .typing import Frame
+from .typing import Frame, MetaConfig
 
 DEFAULT_LABEL_CONFIG = osp.join(
     osp.dirname(osp.abspath(__file__)), "configs.toml"

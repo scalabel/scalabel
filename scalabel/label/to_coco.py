@@ -11,9 +11,6 @@ import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
-from scalabel.label.io import load_label_config
-from scalabel.label.typing import MetaConfig
-
 from ..common.logger import logger
 from .coco_typing import (
     AnnType,
@@ -23,7 +20,7 @@ from .coco_typing import (
     RLEType,
     VidType,
 )
-from .io import DEFAULT_LABEL_CONFIG, group_and_sort, load
+from .io import DEFAULT_LABEL_CONFIG, group_and_sort, load, load_label_config
 from .transforms import (
     box2d_to_bbox,
     get_coco_categories,
@@ -31,7 +28,7 @@ from .transforms import (
     mask_to_polygon,
     poly2ds_to_mask,
 )
-from .typing import Frame, Label, Poly2D
+from .typing import Frame, Label, MetaConfig, Poly2D
 from .utils import get_category_id
 
 

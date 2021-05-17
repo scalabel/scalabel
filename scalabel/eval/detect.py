@@ -14,11 +14,11 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 from tabulate import tabulate
 
-from scalabel.common.typing import DictAny, ListAny
-from scalabel.label.coco_typing import GtType
-from scalabel.label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
-from scalabel.label.to_coco import scalabel2coco_detection
-from scalabel.label.typing import Frame, MetaConfig
+from ..common.typing import DictAny, ListAny
+from ..label.coco_typing import GtType
+from ..label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
+from ..label.to_coco import scalabel2coco_detection
+from ..label.typing import Frame, MetaConfig
 
 
 class COCOV2(COCO):  # type: ignore

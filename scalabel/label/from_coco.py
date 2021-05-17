@@ -25,7 +25,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         "-o",
-        help="path to save scalabel formatted label file",
+        help="path to save scalabel format label file",
     )
     parser.add_argument(
         "--nproc",

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from scalabel.label.typing import Intrinsics
+from ..label.typing import Intrinsics
 
 
 def get_intrinsic_matrix(intrinsics: Intrinsics) -> np.ndarray:

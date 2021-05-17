@@ -10,7 +10,7 @@ using the tools through python module invoke convention. For example,
 
     python3 -m scalabel.label.to_coco ...
 
-To stor for more information in the coco-format json files, we add new
+To store more information in the coco-format json files, we add new
 property names "videos" to the coco format. It is a list like "videos" and
 "annotations", and each item has two properties: "id" and "name".
 
@@ -49,7 +49,7 @@ Available arguments:
 
     --label INPUT, -l INPUT
                             path to the video/images to be processed
-    --output OUT_DIR, -o OUT_DIR
+    --out-dir OUT_DIR, -o OUT_DIR
                             output folder to save the frames
     --mode MODE, -m MODE
                             one of [det, ins_seg, box_track, seg_track]
