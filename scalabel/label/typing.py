@@ -114,7 +114,7 @@ class Attribute(BaseModel):
     values: Optional[List[str]]
 
 
-class MetaConfig(BaseModel):
+class Config(BaseModel):
     """Define metadata of the dataset."""
 
     resolution: Optional[Tuple[int, int]]

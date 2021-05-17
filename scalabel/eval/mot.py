@@ -20,7 +20,7 @@ from scalabel.label.io import (
 
 from ..common.logger import logger
 from ..label.transforms import box2d_to_bbox
-from ..label.typing import Category, Frame, Label, MetaConfig
+from ..label.typing import Category, Config, Frame, Label
 from ..label.utils import get_leaf_categories, get_parent_categories
 
 EvalResults = Dict[str, Dict[str, float]]
@@ -265,7 +265,7 @@ def evaluate_track(
     acc_single_video: FramesFunc,
     gts: FramesList,
     results: FramesList,
-    metadata_cfg: MetaConfig,
+    metadata_cfg: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
     nproc: int = 4,

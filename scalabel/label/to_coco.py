@@ -28,7 +28,7 @@ from .transforms import (
     mask_to_polygon,
     poly2ds_to_mask,
 )
-from .typing import Frame, Label, MetaConfig, Poly2D
+from .typing import Config, Frame, Label, Poly2D
 from .utils import get_category_id
 
 
@@ -158,7 +158,7 @@ def poly2ds_list_to_coco(
 
 
 def scalabel2coco_detection(
-    frames: List[Frame], metadata_cfg: MetaConfig
+    frames: List[Frame], metadata_cfg: Config
 ) -> GtType:
     """Convert Scalabel format to COCO detection."""
     image_id, ann_id = 0, 0
@@ -217,7 +217,7 @@ def scalabel2coco_detection(
 
 def scalabel2coco_ins_seg(
     frames: List[Frame],
-    metadata_cfg: MetaConfig,
+    metadata_cfg: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
 ) -> GtType:
@@ -297,7 +297,7 @@ def get_instance_id(
 
 def scalabel2coco_box_track(
     frames: List[Frame],
-    metadata_cfg: MetaConfig,
+    metadata_cfg: Config,
 ) -> GtType:
     """Converting Scalabel Box Tracking Set to COCO format."""
     frames_list = group_and_sort(frames)
@@ -374,7 +374,7 @@ def scalabel2coco_box_track(
 
 def scalabel2coco_seg_track(
     frames: List[Frame],
-    metadata_cfg: MetaConfig,
+    metadata_cfg: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
 ) -> GtType:

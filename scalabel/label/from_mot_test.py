@@ -1,13 +1,13 @@
 """Test cases for from_mot.py."""
 from ..unittest.util import get_test_file
 from .from_mot import parse_annotations
-from .typing import Category, MetaConfig
+from .typing import Category, Config
 
 
 def test_parse_annotations() -> None:
     """Test the parse annotations function."""
     filepath = get_test_file("motchallenge_labels.txt")
-    metadata_cfg = MetaConfig(
+    metadata_cfg = Config(
         categories=[
             Category(name="pedestrian"),
             Category(name="static person"),

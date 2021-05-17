@@ -7,7 +7,7 @@ from typing import Dict, List, Union
 from ..common.io import load_file_as_list
 from .io import load_label_config, save
 from .transforms import bbox_to_box2d
-from .typing import Category, Frame, Label, MetaConfig
+from .typing import Category, Config, Frame, Label
 from .utils import get_leaf_categories
 
 # Classes in MOT:
@@ -67,7 +67,7 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def parse_annotations(
-    ann_filepath: str, metadata_cfg: MetaConfig
+    ann_filepath: str, metadata_cfg: Config
 ) -> Dict[int, List[Label]]:
     """Parse annotation file into List of Scalabel Label type per frame."""
     outputs = defaultdict(list)
@@ -98,7 +98,7 @@ def parse_annotations(
     return outputs
 
 
-def from_mot(data_path: str, metadata_cfg: MetaConfig) -> List[Frame]:
+def from_mot(data_path: str, metadata_cfg: Config) -> List[Frame]:
     """Function converting MOT annotations to Scalabel format."""
     frames = []
     for video in sorted(os.listdir(data_path)):
@@ -123,7 +123,7 @@ def run(args: argparse.Namespace) -> None:
     if args.cfg_path is not None:
         metadata_cfg = load_label_config(args.cfg_path)
     else:
-        metadata_cfg = MetaConfig(
+        metadata_cfg = Config(
             categories=[
                 Category(name="pedestrian"),
                 Category(name="person on vehicle"),

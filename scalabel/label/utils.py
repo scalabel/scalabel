@@ -1,7 +1,7 @@
 """Utility functions for label."""
 from typing import Dict, List
 
-from .typing import Category, MetaConfig
+from .typing import Category, Config
 
 
 def get_leaf_categories(parent_categories: List[Category]) -> List[Category]:
@@ -30,7 +30,7 @@ def get_parent_categories(
     return result
 
 
-def get_category_id(category: str, metadata_cfg: MetaConfig) -> int:
+def get_category_id(category: str, metadata_cfg: Config) -> int:
     """Get category id from category name and MetaConfig.
 
     We define the category id as the index (starting at 1) of the category

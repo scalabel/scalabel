@@ -11,7 +11,7 @@ import humps
 from ..common.io import load_config
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
-from .typing import Frame, MetaConfig
+from .typing import Config, Frame
 
 DEFAULT_LABEL_CONFIG = osp.join(
     osp.dirname(osp.abspath(__file__)), "configs.toml"
@@ -23,9 +23,7 @@ def parse(raw_frame: DictStrAny) -> Frame:
     return Frame(**humps.decamelize(raw_frame))
 
 
-def load(
-    inputs: str, nprocs: int = 0
-) -> Tuple[List[Frame], Optional[MetaConfig]]:
+def load(inputs: str, nprocs: int = 0) -> Tuple[List[Frame], Optional[Config]]:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
     if not osp.exists(inputs):
@@ -59,7 +57,7 @@ def load(
 
     config = None
     if cfg is not None:
-        config = MetaConfig(**cfg)
+        config = Config(**cfg)
 
     if nprocs > 1:
         return pmap(parse, raw_frames, nprocs), config
@@ -121,8 +119,8 @@ def dump(frame: Frame) -> DictStrAny:
     return frame_str
 
 
-def load_label_config(filepath: str) -> MetaConfig:
+def load_label_config(filepath: str) -> Config:
     """Load label configuration from a config file (toml / yaml)."""
     cfg = load_config(filepath)
-    metadata_cfg = MetaConfig(**cfg)
+    metadata_cfg = Config(**cfg)
     return metadata_cfg

@@ -9,7 +9,7 @@ from matplotlib.path import Path
 from skimage import measure
 
 from .coco_typing import CatType, PolygonType
-from .typing import Box2D, MetaConfig, Poly2D
+from .typing import Box2D, Config, Poly2D
 from .utils import get_category_id, get_leaf_categories
 
 __all__ = [
@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-def get_coco_categories(metadata_cfg: MetaConfig) -> List[CatType]:
+def get_coco_categories(metadata_cfg: Config) -> List[CatType]:
     """Get CatType categories for saving these in COCO format annotations."""
     result = []
     for cat in get_leaf_categories(metadata_cfg.categories):

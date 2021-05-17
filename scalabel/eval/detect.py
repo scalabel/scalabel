@@ -18,7 +18,7 @@ from ..common.typing import DictAny, ListAny
 from ..label.coco_typing import GtType
 from ..label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
-from ..label.typing import Frame, MetaConfig
+from ..label.typing import Config, Frame
 
 
 class COCOV2(COCO):  # type: ignore
@@ -47,7 +47,7 @@ class COCOV2(COCO):  # type: ignore
 def evaluate_det(
     ann_frames: List[Frame],
     pred_frames: List[Frame],
-    metadata_cfg: MetaConfig,
+    metadata_cfg: Config,
     out_dir: str = "none",
 ) -> Dict[str, float]:
     """Load the ground truth and prediction results.

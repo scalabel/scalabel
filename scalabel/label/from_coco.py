@@ -11,7 +11,7 @@ from tqdm import tqdm
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
 from .transforms import bbox_to_box2d, polygon_to_poly2ds
-from .typing import Frame, Label
+from .typing import Category, Config, Frame, Label
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -36,9 +36,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def coco_to_scalabel(
-    coco: GtType,
-) -> Tuple[List[Frame], Optional[Dict[int, str]]]:
+def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
     """Transform COCO object to scalabel format."""
     vid_id2name: Optional[Dict[int, str]] = None
     if "videos" in coco:
@@ -48,10 +46,16 @@ def coco_to_scalabel(
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
 
+    cats = [None for _ in range(len(coco["categories"]))]
     cat_id2name = {}
     for category in coco["categories"]:
-        assert category["id"] is not None
+        assert category["id"] is not None and 0 < int(category["id"]) <= len(
+            coco["categories"]
+        )
         cat_id2name[category["id"]] = category["name"]
+        cats[int(category["id"]) - 1] = Category(name=category["name"])  # type: ignore # pylint: disable=line-too-long
+    assert None not in cats
+    config = Config(categories=cats)
 
     img_id2anns: Dict[int, Iterable[AnnType]] = {
         img_id: list(anns)
@@ -65,6 +69,7 @@ def coco_to_scalabel(
     for img_id in tqdm(img_ids):
         img = img_id2img[img_id]
         frame = Frame(name=os.path.split(img["file_name"])[-1])
+        frame.size = [img["width"], img["height"]]
         scalabel.append(frame)
 
         if "coco_url" in img:
@@ -98,7 +103,7 @@ def coco_to_scalabel(
                 label.poly2d = polygon_to_poly2ds(ann["segmentation"])
             frame.labels.append(label)
 
-    return scalabel, vid_id2name  # TODO add metadata
+    return scalabel, config
 
 
 def run(args: argparse.Namespace) -> None:
