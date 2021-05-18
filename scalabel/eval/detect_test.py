@@ -14,8 +14,8 @@ class TestBDD100KDetectEval(unittest.TestCase):
         cur_dir = os.path.dirname(os.path.abspath(__file__))
         gts_path = "{}/testcases/track_sample_anns.json".format(cur_dir)
         preds_path = "{}/testcases/bbox_predictions.json".format(cur_dir)
-        gts, _ = load(gts_path)
-        preds, _ = load(preds_path)
+        gts = load(gts_path).frames
+        preds = load(preds_path).frames
         config = load_label_config(DEFAULT_LABEL_CONFIG)
         result = evaluate_det(gts, preds, config)
         overall_reference = {

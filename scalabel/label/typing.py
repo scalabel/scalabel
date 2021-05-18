@@ -120,3 +120,10 @@ class Config(BaseModel):
     resolution: Optional[Tuple[int, int]]
     attributes: Optional[List[Attribute]]
     categories: List[Category]
+
+
+class Dataset(BaseModel):
+    """Define dataset components."""
+
+    frames: List[Frame]
+    config: Optional[Config]

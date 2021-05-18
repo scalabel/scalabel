@@ -4,14 +4,14 @@ import glob
 import json
 import os.path as osp
 from itertools import groupby
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Union
 
 import humps
 
 from ..common.io import load_config
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
-from .typing import Config, Frame
+from .typing import Config, Dataset, Frame
 
 DEFAULT_LABEL_CONFIG = osp.join(
     osp.dirname(osp.abspath(__file__)), "configs.toml"
@@ -23,7 +23,7 @@ def parse(raw_frame: DictStrAny) -> Frame:
     return Frame(**humps.decamelize(raw_frame))
 
 
-def load(inputs: str, nprocs: int = 0) -> Tuple[List[Frame], Optional[Config]]:
+def load(inputs: str, nprocs: int = 0) -> Dataset:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
     if not osp.exists(inputs):
@@ -60,8 +60,8 @@ def load(inputs: str, nprocs: int = 0) -> Tuple[List[Frame], Optional[Config]]:
         config = Config(**cfg)
 
     if nprocs > 1:
-        return pmap(parse, raw_frames, nprocs), config
-    return list(map(parse, raw_frames)), config
+        return Dataset(frames=pmap(parse, raw_frames, nprocs), config=config)
+    return Dataset(frames=list(map(parse, raw_frames)), config=config)
 
 
 def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
@@ -103,14 +103,22 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
     }
 
 
-def save(filepath: str, frames: List[Frame], nprocs: int = 0) -> None:
+def save(
+    filepath: str, dataset: Union[List[Frame], Dataset], nprocs: int = 0
+) -> None:
     """Save labels in Scalabel format."""
+    if isinstance(dataset, Dataset):
+        frames, config = dataset.frames, dataset.config
+    else:
+        frames, config = dataset, None
+
     if nprocs > 1:
         labels = pmap(dump, frames, nprocs)
     else:
         labels = list(map(dump, frames))
+
     with open(filepath, "w") as fp:
-        json.dump(labels, fp, indent=2)
+        json.dump(Dataset(frames=labels, config=config), fp, indent=2)
 
 
 def dump(frame: Frame) -> DictStrAny:

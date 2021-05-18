@@ -32,7 +32,7 @@ class TestMaskToCoco(unittest.TestCase):
 class TestScalabelToCOCODetection(unittest.TestCase):
     """Test cases for converting Scalabel detections to COCO format."""
 
-    scalabel, _ = load(get_test_file("scalabel_det.json"))
+    scalabel = load(get_test_file("scalabel_det.json")).frames
     metadata_cfg = load_label_config(DEFAULT_LABEL_CONFIG)
     coco = scalabel2coco_detection(scalabel, metadata_cfg)
 

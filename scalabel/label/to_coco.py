@@ -461,7 +461,8 @@ def scalabel2coco_seg_track(
 def run(args: argparse.Namespace) -> None:
     """Run."""
     logger.info("Loading Scalabel jsons...")
-    frames, metadata_cfg = load(args.input, args.nproc)
+    dataset = load(args.input, args.nproc)
+    frames, metadata_cfg = dataset.frames, dataset.config
 
     if args.cfg_path is not None:
         metadata_cfg = load_label_config(args.config)

@@ -375,14 +375,15 @@ def parse_arguments() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = parse_arguments()
-    gt_frames, config = load(args.gt)
+    dataset = load(args.gt)
+    gt_frames, config = dataset.frames, dataset.config
     if args.cfg_path is not None:
         config = load_label_config(args.cfg_path)
     assert config is not None
     scores = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),
-        group_and_sort(load(args.result)[0]),
+        group_and_sort(load(args.result).frames),
         config,
         args.iou_thr,
         args.ignore_iof_thr,

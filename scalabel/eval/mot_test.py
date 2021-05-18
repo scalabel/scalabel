@@ -26,10 +26,10 @@ class TestBDD100KMotEval(unittest.TestCase):
         """Check mot evaluation correctness."""
         cur_dir = os.path.dirname(os.path.abspath(__file__))
         gts = group_and_sort(
-            load("{}/testcases/track_sample_anns.json".format(cur_dir))[0]
+            load("{}/testcases/track_sample_anns.json".format(cur_dir)).frames
         )
         preds = group_and_sort(
-            load("{}/testcases/track_predictions.json".format(cur_dir))[0]
+            load("{}/testcases/track_predictions.json".format(cur_dir)).frames
         )
         config = load_label_config(DEFAULT_LABEL_CONFIG)
         config.categories.pop(-1)  # remove traffic light / sign from default
@@ -60,8 +60,8 @@ class TestRenderResults(unittest.TestCase):
     """Test cases for mot render results."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts = load("{}/testcases/track_sample_anns.json".format(cur_dir))[0]
-    preds = load("{}/testcases/track_predictions.json".format(cur_dir))[0]
+    gts = load("{}/testcases/track_sample_anns.json".format(cur_dir)).frames
+    preds = load("{}/testcases/track_predictions.json".format(cur_dir)).frames
 
     metrics = list(METRIC_MAPS.keys())
     config = load_label_config(DEFAULT_LABEL_CONFIG)

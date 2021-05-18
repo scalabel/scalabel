@@ -273,8 +273,9 @@ def parse_arguments() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = parse_arguments()
-    gts, config = load(args.gt, args.nproc)
-    preds, _ = load(args.result)
+    dataset = load(args.gt, args.nproc)
+    gts, config = dataset.frames, dataset.config
+    preds = load(args.result).frames
     if args.cfg_path is not None:
         config = load_label_config(args.cfg_path)
     assert config is not None
