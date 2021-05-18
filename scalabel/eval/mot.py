@@ -264,7 +264,7 @@ def evaluate_track(
     acc_single_video: FramesFunc,
     gts: FramesList,
     results: FramesList,
-    metadata_cfg: Config,
+    config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
     nproc: int = 4,
@@ -275,7 +275,7 @@ def evaluate_track(
         acc_single_video: Function for calculating metrics over a single video.
         gts: (paths to) the ground truth annotations in Scalabel format
         results: (paths to) the prediction results in Scalabel format.
-        metadata_cfg: MetaConfig object
+        config: Config object
         iou_thr: Minimum IoU for a bounding box to be considered a positive.
         ignore_iof_thr: Min. Intersection over foreground with ignore regions.
         nproc: processes number for loading files
@@ -288,8 +288,8 @@ def evaluate_track(
     assert len(gts) == len(results)
     metrics = list(METRIC_MAPS.keys())
 
-    classes = get_leaf_categories(metadata_cfg.categories)
-    super_classes = get_parent_categories(metadata_cfg.categories)
+    classes = get_leaf_categories(config.categories)
+    super_classes = get_parent_categories(config.categories)
 
     logger.info("accumulating...")
     with Pool(nproc) as pool:
@@ -366,15 +366,15 @@ def parse_arguments() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_arguments()
     dataset = load(args.gt)
-    gt_frames, config = dataset.frames, dataset.config
+    gt_frames, cfg = dataset.frames, dataset.config
     if args.config is not None:
-        config = load_label_config(args.config)
-    assert config is not None
+        cfg = load_label_config(args.config)
+    assert cfg is not None
     scores = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),
         group_and_sort(load(args.result).frames),
-        config,
+        cfg,
         args.iou_thr,
         args.ignore_iof_thr,
         args.nproc,

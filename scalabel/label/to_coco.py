@@ -28,7 +28,7 @@ from .transforms import (
     mask_to_polygon,
     poly2ds_to_mask,
 )
-from .typing import Config, Frame, Label, Poly2D
+from .typing import Config, Frame, ImageSize, Label, Poly2D
 from .utils import get_category_id
 
 
@@ -127,7 +127,7 @@ def set_seg_object_geometry(
 def poly2ds_to_coco(
     annotation: AnnType,
     poly2d: List[Poly2D],
-    shape: Tuple[int, int],
+    shape: ImageSize,
     mask_mode: str,
 ) -> AnnType:
     """Converting Poly2D to coco format."""
@@ -137,7 +137,7 @@ def poly2ds_to_coco(
 
 
 def poly2ds_list_to_coco(
-    shape: List[Tuple[int, int]],
+    shape: List[ImageSize],
     annotations: List[AnnType],
     poly2ds: List[List[Poly2D]],
     mask_mode: str,
@@ -157,9 +157,7 @@ def poly2ds_list_to_coco(
     return annotations
 
 
-def scalabel2coco_detection(
-    frames: List[Frame], metadata_cfg: Config
-) -> GtType:
+def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
     """Convert Scalabel format to COCO detection."""
     image_id, ann_id = 0, 0
     images: List[ImgType] = []
@@ -167,17 +165,17 @@ def scalabel2coco_detection(
 
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = metadata_cfg.resolution
+        img_shape = config.image_size
         if img_shape is None:
             if image_anns.size is not None:
-                img_shape = (image_anns.size[1], image_anns.size[0])
+                img_shape = image_anns.size
             else:
                 raise ValueError("Image shape not defined!")
 
         image = ImgType(
             file_name=image_anns.name,
-            height=img_shape[0],
-            width=img_shape[1],
+            height=img_shape.height,
+            width=img_shape.width,
             id=image_id,
         )
         if image_anns.url is not None:
@@ -192,7 +190,7 @@ def scalabel2coco_detection(
                 continue
 
             iscrowd = get_object_attributes(label)
-            category_id = get_category_id(label.category, metadata_cfg)
+            category_id = get_category_id(label.category, config)
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
@@ -209,7 +207,7 @@ def scalabel2coco_detection(
 
     return GtType(
         type="instance",
-        categories=get_coco_categories(metadata_cfg),
+        categories=get_coco_categories(config),
         images=images,
         annotations=annotations,
     )
@@ -217,7 +215,7 @@ def scalabel2coco_detection(
 
 def scalabel2coco_ins_seg(
     frames: List[Frame],
-    metadata_cfg: Config,
+    config: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
 ) -> GtType:
@@ -230,20 +228,20 @@ def scalabel2coco_ins_seg(
     shapes = []
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = metadata_cfg.resolution
+        img_shape = config.image_size
         if img_shape is None:
             if image_anns.size is not None:
-                img_shape = (image_anns.size[1], image_anns.size[0])
+                img_shape = image_anns.size
             else:
                 raise ValueError("Image shape not defined!")
-        shapes.append(img_shape)
 
         image = ImgType(
             file_name=image_anns.name,
-            height=img_shape[0],
-            width=img_shape[1],
+            height=img_shape.height,
+            width=img_shape.width,
             id=image_id,
         )
+        shapes.append(img_shape)
         if image_anns.url is not None:
             image["coco_url"] = image_anns.url
         images.append(image)
@@ -256,7 +254,7 @@ def scalabel2coco_ins_seg(
                 continue
 
             iscrowd = get_object_attributes(label)
-            category_id = get_category_id(label.category, metadata_cfg)
+            category_id = get_category_id(label.category, config)
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
@@ -276,7 +274,7 @@ def scalabel2coco_ins_seg(
     )
     return GtType(
         type="instance",
-        categories=get_coco_categories(metadata_cfg),
+        categories=get_coco_categories(config),
         images=images,
         annotations=annotations,
     )
@@ -297,7 +295,7 @@ def get_instance_id(
 
 def scalabel2coco_box_track(
     frames: List[Frame],
-    metadata_cfg: Config,
+    config: Config,
 ) -> GtType:
     """Converting Scalabel Box Tracking Set to COCO format."""
     frames_list = group_and_sort(frames)
@@ -317,10 +315,10 @@ def scalabel2coco_box_track(
 
         for image_anns in video_anns:
             image_id += 1
-            img_shape = metadata_cfg.resolution
+            img_shape = config.image_size
             if img_shape is None:
                 if image_anns.size is not None:
-                    img_shape = (image_anns.size[1], image_anns.size[0])
+                    img_shape = image_anns.size
                 else:
                     raise ValueError("Image shape not defined!")
 
@@ -328,8 +326,8 @@ def scalabel2coco_box_track(
                 video_id=video_id,
                 frame_id=image_anns.frame_index,
                 file_name=osp.join(video_name, image_anns.name),
-                height=img_shape[0],
-                width=img_shape[1],
+                height=img_shape.height,
+                width=img_shape.width,
                 id=image_id,
             )
             if image_anns.url is not None:
@@ -347,7 +345,7 @@ def scalabel2coco_box_track(
                     instance_id_maps, global_instance_id, label.id
                 )
                 iscrowd = get_object_attributes(label)
-                category_id = get_category_id(label.category, metadata_cfg)
+                category_id = get_category_id(label.category, config)
 
                 ann_id += 1
                 annotation = AnnType(
@@ -365,7 +363,7 @@ def scalabel2coco_box_track(
                 annotations.append(annotation)
 
     return GtType(
-        categories=get_coco_categories(metadata_cfg),
+        categories=get_coco_categories(config),
         videos=videos,
         images=images,
         annotations=annotations,
@@ -374,7 +372,7 @@ def scalabel2coco_box_track(
 
 def scalabel2coco_seg_track(
     frames: List[Frame],
-    metadata_cfg: Config,
+    config: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
 ) -> GtType:
@@ -398,22 +396,22 @@ def scalabel2coco_seg_track(
 
         for image_anns in frames:
             image_id += 1
-            img_shape = metadata_cfg.resolution
+            img_shape = config.image_size
             if img_shape is None:
                 if image_anns.size is not None:
-                    img_shape = (image_anns.size[1], image_anns.size[0])
+                    img_shape = image_anns.size
                 else:
                     raise ValueError("Image shape not defined!")
-            shapes.append(img_shape)
 
             image = ImgType(
                 video_id=video_id,
                 frame_id=image_anns.frame_index,
                 file_name=image_anns.name,
-                height=img_shape[0],
-                width=img_shape[1],
+                height=img_shape.height,
+                width=img_shape.width,
                 id=image_id,
             )
+            shapes.append(img_shape)
             if image_anns.url is not None:
                 image["coco_url"] = image_anns.url
             images.append(image)
@@ -430,7 +428,7 @@ def scalabel2coco_seg_track(
                 )
                 iscrowd = get_object_attributes(label)
                 assert label.category is not None
-                category_id = get_category_id(label.category, metadata_cfg)
+                category_id = get_category_id(label.category, config)
 
                 ann_id += 1
                 annotation = AnnType(
@@ -451,7 +449,7 @@ def scalabel2coco_seg_track(
         shapes, annotations, poly2ds, mask_mode, nproc
     )
     return GtType(
-        categories=get_coco_categories(metadata_cfg),
+        categories=get_coco_categories(config),
         videos=videos,
         images=images,
         annotations=annotations,
@@ -462,11 +460,11 @@ def run(args: argparse.Namespace) -> None:
     """Run."""
     logger.info("Loading Scalabel jsons...")
     dataset = load(args.input, args.nproc)
-    frames, metadata_cfg = dataset.frames, dataset.config
+    frames, config = dataset.frames, dataset.config
 
     if args.cfg_path is not None:
-        metadata_cfg = load_label_config(args.config)
-    assert metadata_cfg is not None
+        config = load_label_config(args.config)
+    assert config is not None
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
@@ -483,7 +481,7 @@ def run(args: argparse.Namespace) -> None:
             mask_mode=args.mask_mode,
             nproc=args.nproc,
         )
-    coco = convert_func(frames, metadata_cfg)
+    coco = convert_func(frames, config)
 
     logger.info("Saving converted annotations...")
     with open(args.output, "w") as f:

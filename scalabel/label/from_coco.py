@@ -11,7 +11,7 @@ from tqdm import tqdm
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
 from .transforms import bbox_to_box2d, polygon_to_poly2ds
-from .typing import Category, Config, Frame, Label
+from .typing import Category, Config, Frame, ImageSize, Label
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -67,7 +67,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
     for img_id in tqdm(img_ids):
         img = img_id2img[img_id]
         frame = Frame(name=os.path.split(img["file_name"])[-1])
-        frame.size = [img["width"], img["height"]]
+        frame.size = ImageSize(width=img["width"], height=img["height"])
         scalabel.append(frame)
 
         if "coco_url" in img:

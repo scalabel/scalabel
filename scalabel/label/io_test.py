@@ -9,7 +9,7 @@ from .typing import Frame
 def test_parse() -> None:
     """Test parse label string."""
     raw = json.loads(
-        '{"name": 1, "videoName": "a", "size": [10, 20], '
+        '{"name": 1, "videoName": "a", "size": {"width": 10, "height": 20}, '
         '"labels":[{"id": 1, "box2d": '
         '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "attributes":'
         '{"crowd": false, "trafficLightColor": "G", "speed": 10}}]}'

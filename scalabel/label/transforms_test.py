@@ -14,10 +14,10 @@ from .transforms import (
     poly2ds_to_mask,
     polygon_to_poly2ds,
 )
-from .typing import Box2D, Poly2D
+from .typing import Box2D, ImageSize, Poly2D
 
 matplotlib.use("agg")
-SHAPE = (720, 1280)
+SHAPE = ImageSize(height=720, width=1280)
 
 
 class TestCOCO2ScalabelFuncs(unittest.TestCase):

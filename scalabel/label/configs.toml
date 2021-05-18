@@ -1,4 +1,6 @@
-resolution = [720, 1280]
+[image_size]
+height = 720
+width = 1280
 
 [[attributes]]
 name = "crowd"

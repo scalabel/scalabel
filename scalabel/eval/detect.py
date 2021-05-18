@@ -47,7 +47,7 @@ class COCOV2(COCO):  # type: ignore
 def evaluate_det(
     ann_frames: List[Frame],
     pred_frames: List[Frame],
-    metadata_cfg: Config,
+    config: Config,
     out_dir: str = "none",
 ) -> Dict[str, float]:
     """Load the ground truth and prediction results.
@@ -55,7 +55,7 @@ def evaluate_det(
     Args:
         ann_frames: the ground truth annotations in Scalabel format
         pred_frames: the prediction results in Scalabel format.
-        metadata_cfg: Metadata config.
+        config: Metadata config.
         out_dir: output_directory
 
     Returns:
@@ -71,14 +71,12 @@ def evaluate_det(
     """
     # Convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
-    ann_coco = scalabel2coco_detection(ann_frames, metadata_cfg)
+    ann_coco = scalabel2coco_detection(ann_frames, config)
     coco_gt = COCOV2(None, ann_coco)
 
     # Load results and convert the predictions
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
-    pred_res = scalabel2coco_detection(pred_frames, metadata_cfg)[
-        "annotations"
-    ]
+    pred_res = scalabel2coco_detection(pred_frames, config)["annotations"]
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()
@@ -276,9 +274,9 @@ def parse_arguments() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_arguments()
     dataset = load(args.gt, args.nproc)
-    gts, config = dataset.frames, dataset.config
+    gts, cfg = dataset.frames, dataset.config
     preds = load(args.result).frames
     if args.config is not None:
-        config = load_label_config(args.config)
-    assert config is not None
-    evaluate_det(gts, preds, config, args.out_dir)
+        cfg = load_label_config(args.config)
+    assert cfg is not None
+    evaluate_det(gts, preds, cfg, args.out_dir)

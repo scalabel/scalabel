@@ -53,6 +53,13 @@ class Label(BaseModel):
         super().__init__(**data)
 
 
+class ImageSize(BaseModel):
+    """Define image size in config."""
+
+    width: int
+    height: int
+
+
 class Intrinsics(BaseModel):
     """Camera intrinsics."""
 
@@ -87,7 +94,7 @@ class Frame(BaseModel):
     attributes: Optional[Dict[str, Union[str, float]]] = None
     timestamp: Optional[int] = None
     frame_index: Optional[int] = None
-    size: Optional[List[int]] = None
+    size: Optional[ImageSize] = None
     labels: Optional[List[Label]] = None
 
     def __init__(self, **data: Any) -> None:  # type: ignore
@@ -114,13 +121,6 @@ class Attribute(BaseModel):
     type: str
     tag: str
     values: Optional[List[str]]
-
-
-class ImageSize(BaseModel):
-    """Define image size in config."""
-
-    width: int
-    height: int
 
 
 class Config(BaseModel):

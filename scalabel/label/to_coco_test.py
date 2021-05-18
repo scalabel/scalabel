@@ -33,8 +33,8 @@ class TestScalabelToCOCODetection(unittest.TestCase):
     """Test cases for converting Scalabel detections to COCO format."""
 
     scalabel = load(get_test_file("scalabel_det.json")).frames
-    metadata_cfg = load_label_config(DEFAULT_LABEL_CONFIG)
-    coco = scalabel2coco_detection(scalabel, metadata_cfg)
+    config = load_label_config(DEFAULT_LABEL_CONFIG)
+    coco = scalabel2coco_detection(scalabel, config)
 
     def test_type(self) -> None:
         """Check coco format type."""

@@ -9,7 +9,7 @@ from matplotlib.path import Path
 from skimage import measure
 
 from .coco_typing import CatType, PolygonType
-from .typing import Box2D, Config, Poly2D
+from .typing import Box2D, Config, ImageSize, Poly2D
 from .utils import get_category_id, get_leaf_categories
 
 __all__ = [
@@ -24,12 +24,12 @@ __all__ = [
 ]
 
 
-def get_coco_categories(metadata_cfg: Config) -> List[CatType]:
+def get_coco_categories(config: Config) -> List[CatType]:
     """Get CatType categories for saving these in COCO format annotations."""
     result = []
-    for cat in get_leaf_categories(metadata_cfg.categories):
+    for cat in get_leaf_categories(config.categories):
         result.append(
-            CatType(id=get_category_id(cat.name, metadata_cfg), name=cat.name)
+            CatType(id=get_category_id(cat.name, config), name=cat.name)
         )
     return result
 
@@ -105,16 +105,16 @@ def poly_to_patch(
     )
 
 
-def poly2ds_to_mask(
-    shape: Tuple[int, int], poly2d: List[Poly2D]
-) -> np.ndarray:
+def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> np.ndarray:
     """Converting Poly2D to mask."""
     fig = plt.figure(facecolor="0")
-    fig.set_size_inches(shape[1] / fig.get_dpi(), shape[0] / fig.get_dpi())
+    fig.set_size_inches(
+        shape.width / fig.get_dpi(), shape.height / fig.get_dpi()
+    )
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
-    ax.set_xlim(0, shape[1])
-    ax.set_ylim(0, shape[0])
+    ax.set_xlim(0, shape.width)
+    ax.set_ylim(0, shape.height)
     ax.set_facecolor((0, 0, 0, 0))
     ax.invert_yaxis()
 
@@ -130,7 +130,7 @@ def poly2ds_to_mask(
 
     fig.canvas.draw()
     mask: np.ndarray = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
-    mask = mask.reshape((*shape, -1))[..., 0]
+    mask = mask.reshape((shape.height, shape.width, -1))[..., 0]
     plt.close()
     return mask
 

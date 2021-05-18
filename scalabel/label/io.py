@@ -130,5 +130,5 @@ def dump(frame: Frame) -> DictStrAny:
 def load_label_config(filepath: str) -> Config:
     """Load label configuration from a config file (toml / yaml)."""
     cfg = load_config(filepath)
-    metadata_cfg = Config(**cfg)
-    return metadata_cfg
+    config = Config(**cfg)
+    return config
