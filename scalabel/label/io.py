@@ -118,7 +118,7 @@ def save(
         labels = list(map(dump, frames))
 
     with open(filepath, "w") as fp:
-        json.dump(Dataset(frames=labels, config=config), fp, indent=2)
+        json.dump(Dataset(frames=labels, config=config).dict(), fp, indent=2)
 
 
 def dump(frame: Frame) -> DictStrAny:
