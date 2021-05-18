@@ -14,7 +14,7 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 from tabulate import tabulate
 
-from ..common.typing import DictStrAny, ListAny
+from ..common.typing import DictStrAny
 from ..label.coco_typing import GtType
 from ..label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
@@ -222,10 +222,10 @@ def create_small_table(small_dict: Dict[str, float]) -> str:
     Returns:
         str: the table as a string.
     """
-    keys, values_t = tuple(zip(*small_dict.items()))
+    keys, values_t = list(small_dict.keys()), list(small_dict.values())
     values = ["{:.1f}".format(val * 100) for val in values_t]
     stride = 3
-    items: ListAny = []
+    items: List[List[str]] = []
     for i in range(0, len(keys), stride):
         items.append(keys[i : min(i + stride, len(keys))])
         items.append(values[i : min(i + stride, len(keys))])
@@ -250,10 +250,12 @@ def parse_arguments() -> argparse.Namespace:
         "--result", "-r", required=True, help="path to detection results"
     )
     parser.add_argument(
-        "--cfg-path",
+        "--config",
         "-c",
         default=DEFAULT_LABEL_CONFIG,
-        help="Config path, contains metadata like available categories.",
+        help="Path to config toml file. Contains definition of categories, "
+        "and optionally attributes as well as resolution. For an example "
+        "see scalabel/label/configs.toml",
     )
     parser.add_argument(
         "--out-dir",
@@ -276,7 +278,7 @@ if __name__ == "__main__":
     dataset = load(args.gt, args.nproc)
     gts, config = dataset.frames, dataset.config
     preds = load(args.result).frames
-    if args.cfg_path is not None:
-        config = load_label_config(args.cfg_path)
+    if args.config is not None:
+        config = load_label_config(args.config)
     assert config is not None
     evaluate_det(gts, preds, config, args.out_dir)

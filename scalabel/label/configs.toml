@@ -2,8 +2,8 @@ resolution = [720, 1280]
 
 [[attributes]]
 name = "crowd"
-toolType = "switch"
-tagText = "c"
+type = "switch"
+tag = "c"
 
 [[categories]]
 name = "human"

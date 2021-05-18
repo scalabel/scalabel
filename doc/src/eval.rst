@@ -21,7 +21,7 @@ Available arguments:
                             path to ground truth annotations.
     --result, RESULT_PATH -r RESULT_PATH
                             path to results to be evaluated.
-    --cfg-path CFG_PATH, -c CFG_PATH
+    --config CFG_PATH, -c CFG_PATH
                             Config path. Contains metadata like available categories.
     --out-dir OUT_DIR, -o OUT_DIR
                             Output path for detection evaluation results.
@@ -44,7 +44,7 @@ Available arguments:
                             path to ground truth annotations.
     --result, RESULT_PATH -r RESULT_PATH
                             path to results to be evaluated.
-    --cfg-path CFG_PATH, -c CFG_PATH
+    --config CFG_PATH, -c CFG_PATH
                             Config path. Contains metadata like available categories.
     --out-dir OUT_DIR, -o OUT_DIR
                             Output path for evaluation results.

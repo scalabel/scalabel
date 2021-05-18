@@ -282,18 +282,6 @@ def evaluate_track(
 
     Returns:
         dict: CLEAR MOT metric scores
-
-    Example usage:
-        nproc = 4
-        evaluate_track(
-            acc_single_video_mot,
-            gts=group_and_sort(load("/path/to/gts", nproc)),
-            results=group_and_sort(load("/path/to/results", nproc)),
-            cfg_path="/path/to/cfg",
-            iou_thr=0.5,
-            ignore_iof_thr=0.5,
-            nproc=nproc,
-        )
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
@@ -340,10 +328,12 @@ def parse_arguments() -> argparse.Namespace:
         "--result", "-r", required=True, help="path to mot results"
     )
     parser.add_argument(
-        "--cfg-path",
+        "--config",
         "-c",
         default=DEFAULT_LABEL_CONFIG,
-        help="Config path. Contains metadata like available categories.",
+        help="Path to config toml file. Contains definition of categories, "
+        "and optionally attributes as well as resolution. For an example "
+        "see scalabel/label/configs.toml",
     )
     parser.add_argument(
         "--out-dir",
@@ -377,8 +367,8 @@ if __name__ == "__main__":
     args = parse_arguments()
     dataset = load(args.gt)
     gt_frames, config = dataset.frames, dataset.config
-    if args.cfg_path is not None:
-        config = load_label_config(args.cfg_path)
+    if args.config is not None:
+        config = load_label_config(args.config)
     assert config is not None
     scores = evaluate_track(
         acc_single_video_mot,

@@ -3,6 +3,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
+Size = Tuple[int, int]
+
 
 class Box2D(BaseModel):
     """Box 2D."""
@@ -109,15 +111,15 @@ class Attribute(BaseModel):
     """Define Scalabel category type."""
 
     name: str
-    toolType: str
-    tagText: str
+    type: str
+    tag: str
     values: Optional[List[str]]
 
 
 class Config(BaseModel):
     """Define metadata of the dataset."""
 
-    resolution: Optional[Tuple[int, int]]
+    resolution: Optional[Size]  # [width, height]
     attributes: Optional[List[Attribute]]
     categories: List[Category]
 
