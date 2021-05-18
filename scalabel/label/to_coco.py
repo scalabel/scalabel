@@ -36,8 +36,8 @@ def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
     parser = argparse.ArgumentParser(description="Scalabel to COCO format")
     parser.add_argument(
-        "-l",
-        "--label",
+        "-i",
+        "--input",
         help=(
             "root directory of Scalabel label Json files or path to a label "
             "json file"
@@ -461,7 +461,7 @@ def scalabel2coco_seg_track(
 def run(args: argparse.Namespace) -> None:
     """Run."""
     logger.info("Loading Scalabel jsons...")
-    frames, metadata_cfg = load(args.label, args.nproc)
+    frames, metadata_cfg = load(args.input, args.nproc)
 
     if args.cfg_path is not None:
         metadata_cfg = load_label_config(args.config)

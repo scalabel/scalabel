@@ -44,8 +44,8 @@ def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="motchallenge to scalabel")
     parser.add_argument(
-        "--label",
-        "-l",
+        "--input",
+        "-i",
         help="path to MOTChallenge data (images + annotations).",
     )
     parser.add_argument(
@@ -109,7 +109,7 @@ def from_mot(data_path: str) -> List[Frame]:
 
 def run(args: argparse.Namespace) -> None:
     """Run conversion with command line arguments."""
-    result = from_mot(args.label)
+    result = from_mot(args.input)
     save(os.path.join(args.output, "scalabel_anns.json"), result)
 
 

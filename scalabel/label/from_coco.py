@@ -18,9 +18,9 @@ def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="coco to scalabel")
     parser.add_argument(
-        "--label",
-        "-l",
-        help="path to coco label file",
+        "--input",
+        "-i",
+        help="path to the input coco label file",
     )
     parser.add_argument(
         "--output",
@@ -46,14 +46,13 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
 
-    cats: List[Category] = []
+    cats = [None for _ in range(len(coco["categories"]))]
     cat_id2name = {}
     for category in coco["categories"]:
-        assert category["id"] is not None and 0 < int(category["id"]) <= len(
-            coco["categories"]
-        )
+        assert 0 < int(category["id"]) <= len(coco["categories"])
         cat_id2name[category["id"]] = category["name"]
-        cats.append(Category(name=category["name"]))
+        cats[int(category["id"]) - 1] = Category(name=category["name"])  # type: ignore # pylint: disable=line-too-long
+    assert None not in cats
     config = Config(categories=cats)
 
     img_id2anns: Dict[int, Iterable[AnnType]] = {
@@ -107,7 +106,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    with open(args.label) as fp:
+    with open(args.input) as fp:
         coco: GtType = json.load(fp)
     scalabel, vid_id2name = coco_to_scalabel(coco)
 
