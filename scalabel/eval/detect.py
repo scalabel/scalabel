@@ -254,7 +254,7 @@ def parse_arguments() -> argparse.Namespace:
         "-c",
         default=DEFAULT_LABEL_CONFIG,
         help="Path to config toml file. Contains definition of categories, "
-        "and optionally attributes as well as resolution. For an example "
+        "and optionally attributes and resolution. For an example "
         "see scalabel/label/configs.toml",
     )
     parser.add_argument(
