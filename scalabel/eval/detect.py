@@ -14,7 +14,7 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 from tabulate import tabulate
 
-from ..common.typing import DictAny, ListAny
+from ..common.typing import DictStrAny, ListAny
 from ..label.coco_typing import GtType
 from ..label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
@@ -196,7 +196,7 @@ def evaluate_workflow(
 
 
 def write_eval(
-    out_dir: str, scores: Dict[str, float], eval_param: DictAny
+    out_dir: str, scores: Dict[str, float], eval_param: DictStrAny
 ) -> None:
     """Write the evaluation results to file, print in tabulate format."""
     output_filename = os.path.join(out_dir, "scores.json")
