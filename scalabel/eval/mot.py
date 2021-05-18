@@ -11,14 +11,13 @@ import motmetrics as mm
 import numpy as np
 import pandas as pd
 
-from scalabel.label.io import (
+from ..common.logger import logger
+from ..label.io import (
     DEFAULT_LABEL_CONFIG,
     group_and_sort,
     load,
     load_label_config,
 )
-
-from ..common.logger import logger
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
 from ..label.utils import get_leaf_categories, get_parent_categories

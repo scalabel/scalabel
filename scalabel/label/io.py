@@ -33,7 +33,7 @@ def load(inputs: str, nprocs: int = 0) -> Tuple[List[Frame], Optional[Config]]:
         raw_cfg = None
         content = json.load(open(fp, "r"))
         if isinstance(content, dict):
-            raw_frames.append(content["frames"])
+            raw_frames.extend(content["frames"])
             raw_cfg = content["config"]  # pylint: disable=unused-variable
         elif isinstance(content, list):
             raw_frames.extend(content)

@@ -26,7 +26,7 @@ Available arguments:
 
     --label INPUT, -i INPUT
                             path to the coco-format json file
-    --out-dir OUT_DIR, -o OUT_DIR
+    --output OUTPUT, -o OUTPUT
                             output json path for ``det`` and ``ins_seg`` or
                             output jsons folder for ``box_track`` and ``seg_track``
 
@@ -49,11 +49,11 @@ Available arguments:
 
     --label INPUT, -l INPUT
                             path to the video/images to be processed
-    --out-dir OUT_DIR, -o OUT_DIR
+    --output OUTPUT, -o OUTPUT
                             output folder to save the frames
     --mode MODE, -m MODE
                             one of [det, ins_seg, box_track, seg_track]
-    --mask-mod, -mm,
+    --mask-mode, -mm,
                             conversion mode: rle or polygon
     --nproc
                             number of processes for mot evaluation
@@ -69,7 +69,7 @@ Available arguments:
 
 .. code-block:: bash
 
-    --data-path INPUT, -d INPUT
+    --label INPUT, -l INPUT
                             path to MOTChallenge data (images + annotations).
-    --out-dir OUT_DIR, -o OUT_DIR
+    --output OUTPUT, -o OUTPUT
                             Output path for Scalabel format annotations.

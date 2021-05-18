@@ -19,7 +19,7 @@ def get_leaf_categories(parent_categories: List[Category]) -> List[Category]:
 def get_parent_categories(
     parent_categories: List[Category],
 ) -> Dict[str, List[Category]]:
-    """Get all parent categories and their associated leaf cateogories."""
+    """Get all parent categories and their associated leaf categories."""
     result = {}
     for category in parent_categories:
         if category.subcategories is not None:
