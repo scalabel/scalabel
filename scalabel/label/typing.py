@@ -116,10 +116,18 @@ class Attribute(BaseModel):
     values: Optional[List[str]]
 
 
+class ImageSize(BaseModel):
+    """Define image size in config."""
+
+    width: int
+    height: int
+
+
 class Config(BaseModel):
     """Define metadata of the dataset."""
 
-    resolution: Optional[Size]  # [width, height]
+    # optional image size info to make memory pre-allocation possible
+    image_size: Optional[ImageSize]
     attributes: Optional[List[Attribute]]
     categories: List[Category]
 
