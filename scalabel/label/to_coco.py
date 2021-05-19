@@ -476,7 +476,7 @@ def run(args: argparse.Namespace) -> None:
     dataset = load(args.input, args.nproc)
     frames, config = dataset.frames, dataset.config
 
-    if args.cfg_path is not None:
+    if args.config is not None:
         config = load_label_config(args.config)
     assert config is not None
 
