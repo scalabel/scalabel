@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
-from scalabel.label.typing import Box3D
+from ..label.typing import Box3D
 
 
 def rotate_vector(

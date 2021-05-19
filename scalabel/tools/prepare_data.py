@@ -20,7 +20,7 @@ import yaml
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-from scalabel.common.logger import logger
+from ..common.logger import logger
 
 
 def parse_arguments() -> argparse.Namespace:

@@ -8,16 +8,14 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import TypedDict
 
+PolygonType = List[List[float]]
+
 
 class CatType(TypedDict):
     """Define types of categories in GT."""
 
-    supercategory: str
     id: int
     name: str
-
-
-PolygonType = List[List[float]]
 
 
 class RLEType(TypedDict):

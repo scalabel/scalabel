@@ -1,63 +1,12 @@
 """Test cases for to_coco_test.py."""
 import unittest
-from functools import partial
 
 import numpy as np
 
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
-from .io import load
-from .to_coco import (
-    DEFAULT_COCO_CONFIG,
-    load_coco_config,
-    process_category,
-    scalabel2coco_detection,
-    set_seg_object_geometry,
-)
-
-SHAPE = (720, 1280)
-
-
-class TestProcessCategory(unittest.TestCase):
-    """Check the category after processing."""
-
-    def test_ignore_as_class(self) -> None:
-        """Check the case ignore_as_class as True."""
-        categories, name_mapping, ignore_mapping = load_coco_config(
-            "ins_seg",
-            DEFAULT_COCO_CONFIG,
-            ignore_as_class=True,
-        )
-        ignored, cat_id = process_category(
-            "random",
-            categories,
-            name_mapping,
-            ignore_mapping,
-            ignore_as_class=True,
-        )
-        self.assertFalse(ignored)
-        self.assertEqual(cat_id, 9)
-
-    def test_not_ignore(self) -> None:
-        """Check the case ignore_as_class as False."""
-        categories, name_mapping, ignore_mapping = load_coco_config(
-            "det",
-            DEFAULT_COCO_CONFIG,
-            ignore_as_class=False,
-        )
-        process_category_ = partial(
-            process_category,
-            categories=categories,
-            name_mapping=name_mapping,
-            ignore_mapping=ignore_mapping,
-            ignore_as_class=False,
-        )
-        ignored, cat_id = process_category_("trailer")
-        self.assertTrue(ignored)
-        self.assertEqual(cat_id, 4)
-        ignored, cat_id = process_category_("person")
-        self.assertFalse(ignored)
-        self.assertEqual(cat_id, 1)
+from .io import DEFAULT_LABEL_CONFIG, load, load_label_config
+from .to_coco import scalabel2coco_detection, set_seg_object_geometry
 
 
 class TestMaskToCoco(unittest.TestCase):
@@ -83,13 +32,9 @@ class TestMaskToCoco(unittest.TestCase):
 class TestScalabelToCOCODetection(unittest.TestCase):
     """Test cases for converting Scalabel detections to COCO format."""
 
-    scalabel = load(get_test_file("scalabel_det.json"))
-    categories, name_mapping, ignore_mapping = load_coco_config(
-        "det", DEFAULT_COCO_CONFIG
-    )
-    coco = scalabel2coco_detection(
-        SHAPE, scalabel, categories, name_mapping, ignore_mapping
-    )
+    scalabel = load(get_test_file("scalabel_det.json")).frames
+    config = load_label_config(DEFAULT_LABEL_CONFIG)
+    coco = scalabel2coco_detection(scalabel, config)
 
     def test_type(self) -> None:
         """Check coco format type."""

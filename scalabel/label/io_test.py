@@ -9,7 +9,7 @@ from .typing import Frame
 def test_parse() -> None:
     """Test parse label string."""
     raw = json.loads(
-        '{"name": 1, "videoName": "a", "size": [10, 20], '
+        '{"name": 1, "videoName": "a", "size": {"width": 10, "height": 20}, '
         '"labels":[{"id": 1, "box2d": '
         '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "attributes":'
         '{"crowd": false, "trafficLightColor": "G", "speed": 10}}]}'
@@ -37,7 +37,7 @@ def test_load() -> None:
     filepath = get_test_file("image_list_with_auto_labels.json")
 
     def assert_correctness(inputs: str, nprocs: int) -> None:
-        frames = load(inputs, nprocs)
+        frames = load(inputs, nprocs).frames
         assert len(frames) == 10
         assert (
             frames[0].url == "https://s3-us-west-2.amazonaws.com/bdd-label/"
@@ -89,7 +89,7 @@ def test_group_and_sort() -> None:
 def test_dump() -> None:
     """Test dump labels."""
     filepath = get_test_file("image_list_with_auto_labels.json")
-    labels = load(filepath)
+    labels = load(filepath).frames
     labels_dict = [dump(label) for label in labels]
     assert labels_dict[0]["frameIndex"] == labels[0].frame_index
     assert labels_dict[-1]["frameIndex"] == labels[-1].frame_index

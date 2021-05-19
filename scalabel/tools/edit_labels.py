@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, List
 
 import yaml
 
-from scalabel.common.logger import logger
+from ..common.logger import logger
 
 LabelObject = Dict[str, Any]  # type: ignore
 

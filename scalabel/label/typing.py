@@ -1,8 +1,9 @@
 """Type definition for scalabel format."""
-
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
+
+Size = Tuple[int, int]
 
 
 class Box2D(BaseModel):
@@ -52,6 +53,13 @@ class Label(BaseModel):
         super().__init__(**data)
 
 
+class ImageSize(BaseModel):
+    """Define image size in config."""
+
+    width: int
+    height: int
+
+
 class Intrinsics(BaseModel):
     """Camera intrinsics."""
 
@@ -86,7 +94,7 @@ class Frame(BaseModel):
     attributes: Optional[Dict[str, Union[str, float]]] = None
     timestamp: Optional[int] = None
     frame_index: Optional[int] = None
-    size: Optional[List[int]] = None
+    size: Optional[ImageSize] = None
     labels: Optional[List[Label]] = None
 
     def __init__(self, **data: Any) -> None:  # type: ignore
@@ -94,3 +102,38 @@ class Frame(BaseModel):
         if "name" in data:
             data["name"] = str(data["name"])
         super().__init__(**data)
+
+
+class Category(BaseModel):
+    """Define Scalabel label attributes."""
+
+    name: str
+    subcategories: Optional[List["Category"]]
+
+
+Category.update_forward_refs()
+
+
+class Attribute(BaseModel):
+    """Define Scalabel category type."""
+
+    name: str
+    type: str
+    tag: str
+    values: Optional[List[str]]
+
+
+class Config(BaseModel):
+    """Define metadata of the dataset."""
+
+    # optional image size info to make memory pre-allocation possible
+    image_size: Optional[ImageSize]
+    attributes: Optional[List[Attribute]]
+    categories: List[Category]
+
+
+class Dataset(BaseModel):
+    """Define dataset components."""
+
+    frames: List[Frame]
+    config: Optional[Config]

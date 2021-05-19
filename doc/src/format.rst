@@ -29,7 +29,9 @@ other label types.
         - rotation
     - timestamp: int64 (epoch time ms)
     - frameIndex: int (optional, frame index in this video)
-    - size: [width, height]
+    - size:
+        - width: int
+        - height: int
     - labels [ ]:
         - id: string
         - index: int
