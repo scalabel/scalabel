@@ -8,13 +8,7 @@ from typing import Dict, List
 
 import numpy as np
 import requests
-from flask import (  # type: ignore
-    Flask,
-    Response,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Flask, Response, jsonify, make_response, request
 from PIL import Image
 
 from .seg_base import SegBase

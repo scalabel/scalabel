@@ -35,11 +35,10 @@ def get_category_id(category: str, config: Config) -> int:
 
     We define the category id as the index (starting at 1) of the category
     within the leaf categories of the structure in MetaConfig.
+    This function returns 0 if the category is not listed in the config.
     """
     leaf_cats = get_leaf_categories(config.categories)
     leaf_cat_names = [cat.name for cat in leaf_cats]
     if category not in leaf_cat_names:
-        raise ValueError(
-            f"Category {category} not in leaf categories: {leaf_cat_names}"
-        )
+        return 0
     return leaf_cat_names.index(category) + 1

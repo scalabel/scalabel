@@ -77,8 +77,8 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_object_attributes(label: Label) -> int:
-    """Set attributes for the ann dict."""
+def get_iscrowd(label: Label) -> int:
+    """Decide whether an instance is crowded."""
     attributes = label.attributes
     if attributes is None:
         return 0
@@ -189,8 +189,12 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
             if label.box2d is None:
                 continue
 
-            iscrowd = get_object_attributes(label)
+            iscrowd = get_iscrowd(label)
             category_id = get_category_id(label.category, config)
+            # 0 is for category that is not in the config.
+            if category_id == 0:
+                continue
+
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
@@ -253,8 +257,12 @@ def scalabel2coco_ins_seg(
             if label.poly2d is None:
                 continue
 
-            iscrowd = get_object_attributes(label)
+            iscrowd = get_iscrowd(label)
             category_id = get_category_id(label.category, config)
+            # 0 is for category that is not in the config.
+            if category_id == 0:
+                continue
+
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
@@ -341,13 +349,16 @@ def scalabel2coco_box_track(
                 if label.box2d is None:
                     continue
 
+                iscrowd = get_iscrowd(label)
+                category_id = get_category_id(label.category, config)
+                # 0 is for category that is not in the config.
+                if category_id == 0:
+                    continue
+
+                ann_id += 1
                 instance_id, global_instance_id = get_instance_id(
                     instance_id_maps, global_instance_id, label.id
                 )
-                iscrowd = get_object_attributes(label)
-                category_id = get_category_id(label.category, config)
-
-                ann_id += 1
                 annotation = AnnType(
                     id=ann_id,
                     image_id=image_id,
@@ -423,14 +434,17 @@ def scalabel2coco_seg_track(
                 if label.poly2d is None:
                     continue
 
+                iscrowd = get_iscrowd(label)
+                assert label.category is not None
+                category_id = get_category_id(label.category, config)
+                # 0 is for category that is not in the config.
+                if category_id == 0:
+                    continue
+
+                ann_id += 1
                 instance_id, global_instance_id = get_instance_id(
                     instance_id_maps, global_instance_id, label.id
                 )
-                iscrowd = get_object_attributes(label)
-                assert label.category is not None
-                category_id = get_category_id(label.category, config)
-
-                ann_id += 1
                 annotation = AnnType(
                     id=ann_id,
                     image_id=image_id,
