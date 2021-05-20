@@ -22,7 +22,7 @@ from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
 from ..label.utils import (
     check_crowd,
-    check_ignore,
+    check_ignored,
     get_leaf_categories,
     get_parent_categories,
 )
@@ -61,7 +61,7 @@ def parse_objects(
         bbox = box2d_to_bbox(box_2d)
         category = obj.category
         if category in classes:
-            if check_crowd(obj) or check_ignore(obj):
+            if check_crowd(obj) or check_ignored(obj):
                 ignore_bboxes.append(bbox)
             else:
                 bboxes.append(bbox)

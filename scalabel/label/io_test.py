@@ -11,7 +11,7 @@ def test_parse() -> None:
     raw = json.loads(
         '{"name": 1, "videoName": "a", "size": {"width": 10, "height": 20}, '
         '"labels":[{"id": 1, "box2d": '
-        '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "ignore": true, '
+        '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "ignored": true, '
         '"attributes": {"trafficLightColor": "G", "speed": 10}}]}'
     )
     frame = parse(raw)
@@ -25,7 +25,7 @@ def test_parse() -> None:
     assert label.id == "1"
     assert label.attributes is not None
     assert label.crowd is False
-    assert label.ignore is True
+    assert label.ignored is True
     assert label.attributes["traffic_light_color"] == "G"
     assert label.attributes["speed"] == 10.0
     b = label.box2d

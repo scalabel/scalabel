@@ -52,9 +52,9 @@ def check_crowd(label: Label) -> bool:
     return crowd
 
 
-def check_ignore(label: Label) -> bool:
-    """Check ignore attribute. Support for legacy behavior."""
-    ignore = label.ignore
+def check_ignored(label: Label) -> bool:
+    """Check ignored attribute. Support for legacy behavior."""
+    ignored = label.ignored
     if label.attributes is not None:
-        ignore = ignore or bool(label.attributes.get("ignore", False))
-    return ignore
+        ignored = ignored or bool(label.attributes.get("ignored", False))
+    return ignored

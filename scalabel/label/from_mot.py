@@ -80,7 +80,7 @@ def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
             category=class_id,
             id=ins_id,
             box2d=box2d,
-            ignore=ignore,
+            ignored=ignore,
             attributes=attrs,
         )
         outputs[frame_id].append(ann)

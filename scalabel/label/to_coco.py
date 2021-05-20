@@ -29,7 +29,7 @@ from .transforms import (
     poly2ds_to_mask,
 )
 from .typing import Config, Frame, ImageSize, Label, Poly2D
-from .utils import check_crowd, check_ignore, get_category_id
+from .utils import check_crowd, check_ignored, get_category_id
 
 # 0 is for category that is not in the config.
 GetCatIdFunc = Callable[[str, Config], Tuple[bool, int]]
@@ -197,7 +197,7 @@ def scalabel2coco_detection(
                 image_id=image_id,
                 category_id=category_id,
                 scalabel_id=label.id,
-                iscrowd=int(check_crowd(label) or check_ignore(label)),
+                iscrowd=int(check_crowd(label) or check_ignored(label)),
                 ignore=0,
             )
             if label.score is not None:
@@ -264,7 +264,7 @@ def scalabel2coco_ins_seg(
                 image_id=image_id,
                 category_id=category_id,
                 scalabel_id=label.id,
-                iscrowd=int(check_crowd(label) or check_ignore(label)),
+                iscrowd=int(check_crowd(label) or check_ignored(label)),
                 ignore=0,
             )
             if label.score is not None:
@@ -359,7 +359,7 @@ def scalabel2coco_box_track(
                     category_id=category_id,
                     instance_id=instance_id,
                     scalabel_id=label.id,
-                    iscrowd=int(check_crowd(label) or check_ignore(label)),
+                    iscrowd=int(check_crowd(label) or check_ignored(label)),
                     ignore=0,
                 )
                 if label.score is not None:
@@ -444,7 +444,7 @@ def scalabel2coco_seg_track(
                     category_id=category_id,
                     instance_id=instance_id,
                     scalabel_id=label.id,
-                    iscrowd=int(check_crowd(label) or check_ignore(label)),
+                    iscrowd=int(check_crowd(label) or check_ignored(label)),
                     ignore=0,
                 )
                 if label.score is not None:
