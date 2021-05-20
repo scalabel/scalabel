@@ -46,15 +46,17 @@ def get_category_id(category_name: str, config: Config) -> Tuple[bool, int]:
 
 def check_crowd(label: Label) -> bool:
     """Check crowd attribute. Support for legacy behavior."""
-    crowd = label.crowd
     if label.attributes is not None:
-        crowd = crowd or bool(label.attributes.get("crowd", False))
+        crowd = bool(label.attributes.get("crowd", False))
+    else:
+        crowd = False
     return crowd
 
 
 def check_ignored(label: Label) -> bool:
     """Check ignored attribute. Support for legacy behavior."""
-    ignored = label.ignored
     if label.attributes is not None:
-        ignored = ignored or bool(label.attributes.get("ignored", False))
+        ignored = bool(label.attributes.get("ignored", False))
+    else:
+        ignored = False
     return ignored

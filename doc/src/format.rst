@@ -40,8 +40,6 @@ other label types.
         - manualAttributes: boolean
         - score: float
         - attributes: a dictionary of label attributes
-        - crowd: bool
-        - ignored: bool
         - box2d:
             - x1: float
             - y1: float
@@ -67,8 +65,6 @@ More details about the fields
     * manualAttributes: whether the attribute of the label is created or
       modified manually
     * score: the confidence or some other ways of measuring the quality of the label.
-    * crowd: Boolean value (default: false) if label is part of a crowd region. Will be ignored in evaluation.
-    * ignored: Boolean value (default: false) if label should be ignored (e.g. reflection of a real object).
     * box3d
 
         * alpha: observation angle if there is a 2D view
