@@ -187,8 +187,8 @@ def scalabel2coco_detection(
             if label.box2d is None:
                 continue
 
-            ignore, category_id = get_cat_id_func(label.category, config)
-            if ignore:
+            skip, category_id = get_cat_id_func(label.category, config)
+            if skip:
                 continue
 
             ann_id += 1
@@ -254,8 +254,8 @@ def scalabel2coco_ins_seg(
             if label.poly2d is None:
                 continue
 
-            ignore, category_id = get_cat_id_func(label.category, config)
-            if ignore:
+            skip, category_id = get_cat_id_func(label.category, config)
+            if skip:
                 continue
 
             ann_id += 1
@@ -345,8 +345,8 @@ def scalabel2coco_box_track(
                 if label.box2d is None:
                     continue
 
-                ignore, category_id = get_cat_id_func(label.category, config)
-                if ignore:
+                skip, category_id = get_cat_id_func(label.category, config)
+                if skip:
                     continue
 
                 ann_id += 1
@@ -430,8 +430,8 @@ def scalabel2coco_seg_track(
                     continue
 
                 assert label.category is not None
-                ignore, category_id = get_cat_id_func(label.category, config)
-                if ignore:
+                skip, category_id = get_cat_id_func(label.category, config)
+                if skip:
                     continue
 
                 ann_id += 1

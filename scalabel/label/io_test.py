@@ -24,8 +24,6 @@ def test_parse() -> None:
     label = labels[0]  # pylint: disable=unsubscriptable-object
     assert label.id == "1"
     assert label.attributes is not None
-    assert label.crowd is False
-    assert label.ignored is True
     assert label.attributes["traffic_light_color"] == "G"
     assert label.attributes["speed"] == 10.0
     b = label.box2d
