@@ -197,8 +197,8 @@ def scalabel2coco_detection(
                 image_id=image_id,
                 category_id=category_id,
                 scalabel_id=label.id,
-                iscrowd=int(check_crowd(label) or ignore),
-                ignore=0
+                iscrowd=int(check_crowd(label) or check_ignore(label)),
+                ignore=0,
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -264,8 +264,8 @@ def scalabel2coco_ins_seg(
                 image_id=image_id,
                 category_id=category_id,
                 scalabel_id=label.id,
-                iscrowd=int(check_crowd(label) or ignore),
-                ignore=0
+                iscrowd=int(check_crowd(label) or check_ignore(label)),
+                ignore=0,
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -359,8 +359,8 @@ def scalabel2coco_box_track(
                     category_id=category_id,
                     instance_id=instance_id,
                     scalabel_id=label.id,
-                    iscrowd=int(check_crowd(label) or ignore),
-                    ignore=0
+                    iscrowd=int(check_crowd(label) or check_ignore(label)),
+                    ignore=0,
                 )
                 if label.score is not None:
                     annotation["score"] = label.score
@@ -444,8 +444,8 @@ def scalabel2coco_seg_track(
                     category_id=category_id,
                     instance_id=instance_id,
                     scalabel_id=label.id,
-                    iscrowd=int(check_crowd(label) or ignore),
-                    ignore=0
+                    iscrowd=int(check_crowd(label) or check_ignore(label)),
+                    ignore=0,
                 )
                 if label.score is not None:
                     annotation["score"] = label.score
