@@ -5,7 +5,7 @@ import os
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, TypeVar, Union
 
 import motmetrics as mm
 import numpy as np
@@ -28,10 +28,9 @@ from ..label.utils import (
 )
 
 EvalResults = Dict[str, Dict[str, float]]
-Frames = List[Frame]
-FramesList = List[Frames]
-FramesFunc = Callable[
-    [Frames, Frames, List[str], float, float],
+Video = TypeVar("Video", List[Frame], List[str])
+VidFunc = Callable[
+    [Video, Video, List[str], float, float],
     List[mm.MOTAccumulator],
 ]
 
@@ -264,9 +263,9 @@ def render_results(
 
 
 def evaluate_track(
-    acc_single_video: FramesFunc,
-    gts: FramesList,
-    results: FramesList,
+    acc_single_video: VidFunc[Video],
+    gts: List[Video],
+    results: List[Video],
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
