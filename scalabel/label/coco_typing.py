@@ -32,7 +32,6 @@ class AnnType(TypedDict, total=False):
     image_id: int
     category_id: int
     iscrowd: int
-    ignore: int
     instance_id: Optional[int]
     scalabel_id: Optional[str]
     score: Optional[float]
