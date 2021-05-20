@@ -20,7 +20,12 @@ from ..label.io import (
 )
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
-from ..label.utils import get_leaf_categories, get_parent_categories
+from ..label.utils import (
+    check_crowd,
+    check_ignore,
+    get_leaf_categories,
+    get_parent_categories,
+)
 
 EvalResults = Dict[str, Dict[str, float]]
 Frames = List[Frame]
@@ -56,8 +61,7 @@ def parse_objects(
         bbox = box2d_to_bbox(box_2d)
         category = obj.category
         if category in classes:
-            if obj.ignore or obj.crowd or obj.attributes.get("crowd", False)\
-                    or obj.attributes.get("ignore", False):  # legacy support
+            if check_crowd(obj) or check_ignore(obj):
                 ignore_bboxes.append(bbox)
             else:
                 bboxes.append(bbox)

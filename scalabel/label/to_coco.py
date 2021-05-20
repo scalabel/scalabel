@@ -5,7 +5,7 @@ import json
 import os.path as osp
 from functools import partial
 from multiprocessing import Pool
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
@@ -29,7 +29,10 @@ from .transforms import (
     poly2ds_to_mask,
 )
 from .typing import Config, Frame, ImageSize, Label, Poly2D
-from .utils import get_category_id
+from .utils import check_crowd, check_ignore, get_category_id
+
+# 0 is for category that is not in the config.
+GetCatIdFunc = Callable[[str, Config], Tuple[bool, int]]
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -148,7 +151,11 @@ def poly2ds_list_to_coco(
     return annotations
 
 
-def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
+def scalabel2coco_detection(
+    frames: List[Frame],
+    config: Config,
+    get_cat_id_func: GetCatIdFunc = get_category_id,
+) -> GtType:
     """Convert Scalabel format to COCO detection."""
     image_id, ann_id = 0, 0
     images: List[ImgType] = []
@@ -180,11 +187,8 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
             if label.box2d is None:
                 continue
 
-            iscrowd = int(label.crowd or label.attributes.get("crowd", False))
-            ignore = int(label.ignore or label.attributes.get("ignore", False))
-            category_id = get_category_id(label.category, config)
-            # 0 is for category that is not in the config.
-            if category_id == 0:
+            ignore, category_id = get_cat_id_func(label.category, config)
+            if ignore:
                 continue
 
             ann_id += 1
@@ -193,8 +197,8 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
                 image_id=image_id,
                 category_id=category_id,
                 scalabel_id=label.id,
-                iscrowd=iscrowd,
-                ignore=ignore,
+                iscrowd=int(check_crowd(label)),
+                ignore=int(check_ignore(label)),
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -214,6 +218,7 @@ def scalabel2coco_ins_seg(
     config: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
+    get_cat_id_func: GetCatIdFunc = get_category_id,
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     image_id, ann_id = 0, 0
@@ -249,11 +254,8 @@ def scalabel2coco_ins_seg(
             if label.poly2d is None:
                 continue
 
-            iscrowd = int(label.crowd)
-            ignore = int(label.ignore)
-            category_id = get_category_id(label.category, config)
-            # 0 is for category that is not in the config.
-            if category_id == 0:
+            ignore, category_id = get_cat_id_func(label.category, config)
+            if ignore:
                 continue
 
             ann_id += 1
@@ -262,8 +264,8 @@ def scalabel2coco_ins_seg(
                 image_id=image_id,
                 category_id=category_id,
                 scalabel_id=label.id,
-                iscrowd=iscrowd,
-                ignore=ignore,
+                iscrowd=int(check_crowd(label)),
+                ignore=int(check_ignore(label)),
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -297,6 +299,7 @@ def get_instance_id(
 def scalabel2coco_box_track(
     frames: List[Frame],
     config: Config,
+    get_cat_id_func: GetCatIdFunc = get_category_id,
 ) -> GtType:
     """Converting Scalabel Box Tracking Set to COCO format."""
     frames_list = group_and_sort(frames)
@@ -342,11 +345,8 @@ def scalabel2coco_box_track(
                 if label.box2d is None:
                     continue
 
-                iscrowd = int(label.crowd)
-                ignore = int(label.ignore)
-                category_id = get_category_id(label.category, config)
-                # 0 is for category that is not in the config.
-                if category_id == 0:
+                ignore, category_id = get_cat_id_func(label.category, config)
+                if ignore:
                     continue
 
                 ann_id += 1
@@ -359,8 +359,8 @@ def scalabel2coco_box_track(
                     category_id=category_id,
                     instance_id=instance_id,
                     scalabel_id=label.id,
-                    iscrowd=iscrowd,
-                    ignore=ignore,
+                    iscrowd=int(check_crowd(label)),
+                    ignore=int(check_ignore(label)),
                 )
                 if label.score is not None:
                     annotation["score"] = label.score
@@ -380,6 +380,7 @@ def scalabel2coco_seg_track(
     config: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
+    get_cat_id_func: GetCatIdFunc = get_category_id,
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     frames_list = group_and_sort(frames)
@@ -428,12 +429,9 @@ def scalabel2coco_seg_track(
                 if label.poly2d is None:
                     continue
 
-                iscrowd = int(label.crowd)
-                ignore = int(label.ignore)
                 assert label.category is not None
-                category_id = get_category_id(label.category, config)
-                # 0 is for category that is not in the config.
-                if category_id == 0:
+                ignore, category_id = get_cat_id_func(label.category, config)
+                if ignore:
                     continue
 
                 ann_id += 1
@@ -446,8 +444,8 @@ def scalabel2coco_seg_track(
                     category_id=category_id,
                     instance_id=instance_id,
                     scalabel_id=label.id,
-                    iscrowd=iscrowd,
-                    ignore=ignore,
+                    iscrowd=int(check_crowd(label)),
+                    ignore=int(check_ignore(label)),
                 )
                 if label.score is not None:
                     annotation["score"] = label.score

@@ -10,7 +10,7 @@ from skimage import measure
 
 from .coco_typing import CatType, PolygonType
 from .typing import Box2D, Config, ImageSize, Poly2D
-from .utils import get_category_id, get_leaf_categories
+from .utils import get_leaf_categories
 
 __all__ = [
     "get_coco_categories",
@@ -26,11 +26,11 @@ __all__ = [
 
 def get_coco_categories(config: Config) -> List[CatType]:
     """Get CatType categories for saving these in COCO format annotations."""
-    result = []
-    for cat in get_leaf_categories(config.categories):
-        result.append(
-            CatType(id=get_category_id(cat.name, config), name=cat.name)
-        )
+    categories = get_leaf_categories(config.categories)
+    result = [
+        CatType(id=i + 1, name=category.name)
+        for i, category in enumerate(categories)
+    ]
     return result
 
 
