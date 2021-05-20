@@ -56,9 +56,8 @@ def parse_objects(
         bbox = box2d_to_bbox(box_2d)
         category = obj.category
         if category in classes:
-            if obj.attributes is not None and bool(
-                obj.attributes.get("crowd", False)
-            ):
+            if obj.ignore or obj.crowd or obj.attributes.get("crowd", False)\
+                    or obj.attributes.get("ignore", False):  # legacy support
                 ignore_bboxes.append(bbox)
             else:
                 bboxes.append(bbox)

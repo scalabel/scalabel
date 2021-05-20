@@ -318,7 +318,7 @@ class LabelViewer:
                             and attributes["truncated"]
                         ):
                             text += ",t"
-                        if "crowd" in attributes and attributes["crowd"]:
+                        if b.crowd:
                             text += ",c"
                         self.ax.text(
                             (b.box2d.x1) * self.config.scale,
@@ -421,7 +421,7 @@ class LabelViewer:
                     text += ",o"
                 if "truncated" in attributes and attributes["truncated"]:
                     text += ",t"
-                if "crowd" in attributes and attributes["crowd"]:
+                if label.crowd:
                     text += ",c"
                 self.ax.text(
                     x1 + (x2 - x1) * self.config.scale * 0.4,

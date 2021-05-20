@@ -72,15 +72,15 @@ def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
         attrs = dict(
             visibility=float(gt[8])
         )  # type: Dict[str, Union[bool, float, str]]
+        ignore = False
         if class_id in IGNORE:
-            attrs["crowd"] = True
+            ignore = True
             class_id = "pedestrian"
-        else:
-            attrs["crowd"] = False
         ann = Label(
             category=class_id,
             id=ins_id,
             box2d=box2d,
+            ignore=ignore,
             attributes=attrs,
         )
         outputs[frame_id].append(ann)

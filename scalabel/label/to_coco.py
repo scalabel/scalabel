@@ -77,15 +77,6 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_iscrowd(label: Label) -> int:
-    """Decide whether an instance is crowded."""
-    attributes = label.attributes
-    if attributes is None:
-        return 0
-    iscrowd = int(bool(attributes.get("crowd", False)))
-    return iscrowd
-
-
 def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     """Parsing bbox, area, polygon for bbox ann."""
     box2d = label.box2d
@@ -189,7 +180,8 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
             if label.box2d is None:
                 continue
 
-            iscrowd = get_iscrowd(label)
+            iscrowd = int(label.crowd or label.attributes.get("crowd", False))
+            ignore = int(label.ignore or label.attributes.get("ignore", False))
             category_id = get_category_id(label.category, config)
             # 0 is for category that is not in the config.
             if category_id == 0:
@@ -202,7 +194,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
                 category_id=category_id,
                 scalabel_id=label.id,
                 iscrowd=iscrowd,
-                ignore=False,
+                ignore=ignore,
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -257,7 +249,8 @@ def scalabel2coco_ins_seg(
             if label.poly2d is None:
                 continue
 
-            iscrowd = get_iscrowd(label)
+            iscrowd = int(label.crowd)
+            ignore = int(label.ignore)
             category_id = get_category_id(label.category, config)
             # 0 is for category that is not in the config.
             if category_id == 0:
@@ -270,7 +263,7 @@ def scalabel2coco_ins_seg(
                 category_id=category_id,
                 scalabel_id=label.id,
                 iscrowd=iscrowd,
-                ignore=False,
+                ignore=ignore,
             )
             if label.score is not None:
                 annotation["score"] = label.score
@@ -349,7 +342,8 @@ def scalabel2coco_box_track(
                 if label.box2d is None:
                     continue
 
-                iscrowd = get_iscrowd(label)
+                iscrowd = int(label.crowd)
+                ignore = int(label.ignore)
                 category_id = get_category_id(label.category, config)
                 # 0 is for category that is not in the config.
                 if category_id == 0:
@@ -366,7 +360,7 @@ def scalabel2coco_box_track(
                     instance_id=instance_id,
                     scalabel_id=label.id,
                     iscrowd=iscrowd,
-                    ignore=False,
+                    ignore=ignore,
                 )
                 if label.score is not None:
                     annotation["score"] = label.score
@@ -434,7 +428,8 @@ def scalabel2coco_seg_track(
                 if label.poly2d is None:
                     continue
 
-                iscrowd = get_iscrowd(label)
+                iscrowd = int(label.crowd)
+                ignore = int(label.ignore)
                 assert label.category is not None
                 category_id = get_category_id(label.category, config)
                 # 0 is for category that is not in the config.
@@ -452,7 +447,7 @@ def scalabel2coco_seg_track(
                     instance_id=instance_id,
                     scalabel_id=label.id,
                     iscrowd=iscrowd,
-                    ignore=False,
+                    ignore=ignore,
                 )
                 if label.score is not None:
                     annotation["score"] = label.score
