@@ -9,9 +9,15 @@ corresponding ground truth annotations in Scalabel format.
 Detection
 -----------------
 The detection evaluation uses the AP metric and follows the protocol defined
-in the COCO dataset. You can start the evaluation by running:
+in the COCO dataset. You can start the evaluation by running, e.g.:
 
-``python3 -m scalabel.eval.detect <args>``
+.. code-block:: bash
+
+    python3 -m scalabel.eval.detect \
+        --gt scalabel/eval/testcases/track_sample_anns.json \
+        --result scalabel/eval/testcases/bbox_predictions.json \
+        --config scalabel/eval/testcases/configs.toml
+
 
 Available arguments:
 
@@ -32,9 +38,14 @@ Available arguments:
 Multi-object Tracking
 ----------------------
 The MOT evaluation uses the CLEAR MOT metrics. You can start the evaluation
-by running:
+by running, e.g.:
 
-``python3 -m scalabel.eval.mot <args>``
+.. code-block:: bash
+
+    python3 -m scalabel.eval.mot \
+        --gt scalabel/eval/testcases/track_sample_anns.json \
+        --result scalabel/eval/testcases/track_predictions.json \
+        --config scalabel/eval/testcases/configs.toml
 
 Available arguments:
 

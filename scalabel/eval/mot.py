@@ -366,7 +366,11 @@ if __name__ == "__main__":
     gt_frames, cfg = dataset.frames, dataset.config
     if args.config is not None:
         cfg = load_label_config(args.config)
-    assert cfg is not None
+    if cfg is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
     scores = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),

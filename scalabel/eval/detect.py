@@ -278,5 +278,9 @@ if __name__ == "__main__":
     preds = load(args.result).frames
     if args.config is not None:
         cfg = load_label_config(args.config)
-    assert cfg is not None
+    if cfg is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
     evaluate_det(gts, preds, cfg, args.out_dir)

@@ -471,7 +471,11 @@ def run(args: argparse.Namespace) -> None:
 
     if args.config is not None:
         config = load_label_config(args.config)
-    assert config is not None
+    if config is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:
