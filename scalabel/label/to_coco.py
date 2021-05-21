@@ -20,7 +20,7 @@ from .coco_typing import (
     RLEType,
     VidType,
 )
-from .io import DEFAULT_LABEL_CONFIG, group_and_sort, load, load_label_config
+from .io import group_and_sort, load, load_label_config
 from .transforms import (
     box2d_to_bbox,
     get_coco_categories,
@@ -74,7 +74,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=str,
-        default=DEFAULT_LABEL_CONFIG,
+        default=None,
         help="Configuration for COCO categories",
     )
     return parser.parse_args()

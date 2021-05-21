@@ -2,13 +2,9 @@
 import os
 import unittest
 
-from ..label.io import (
-    DEFAULT_LABEL_CONFIG,
-    group_and_sort,
-    load,
-    load_label_config,
-)
+from ..label.io import group_and_sort, load, load_label_config
 from ..label.utils import get_leaf_categories, get_parent_categories
+from ..unittest.util import get_test_file
 from .mot import (
     METRIC_MAPS,
     acc_single_video_mot,
@@ -31,7 +27,7 @@ class TestBDD100KMotEval(unittest.TestCase):
         preds = group_and_sort(
             load("{}/testcases/track_predictions.json".format(cur_dir)).frames
         )
-        config = load_label_config(DEFAULT_LABEL_CONFIG)
+        config = load_label_config(get_test_file("configs.toml"))
         config.categories.pop(-1)  # remove traffic light / sign from default
         config.categories.pop(-1)
         result = evaluate_track(acc_single_video_mot, gts, preds, config)
@@ -64,7 +60,7 @@ class TestRenderResults(unittest.TestCase):
     preds = load("{}/testcases/track_predictions.json".format(cur_dir)).frames
 
     metrics = list(METRIC_MAPS.keys())
-    config = load_label_config(DEFAULT_LABEL_CONFIG)
+    config = load_label_config(get_test_file("configs.toml"))
 
     classes = get_leaf_categories(config.categories)
     super_classes = get_parent_categories(config.categories)

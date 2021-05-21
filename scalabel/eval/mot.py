@@ -12,12 +12,7 @@ import numpy as np
 import pandas as pd
 
 from ..common.logger import logger
-from ..label.io import (
-    DEFAULT_LABEL_CONFIG,
-    group_and_sort,
-    load,
-    load_label_config,
-)
+from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
 from ..label.utils import (
@@ -332,7 +327,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         "-c",
-        default=DEFAULT_LABEL_CONFIG,
+        default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes as well as resolution. For an example "
         "see scalabel/label/configs.toml",

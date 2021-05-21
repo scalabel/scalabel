@@ -5,7 +5,7 @@ import numpy as np
 
 from ..unittest.util import get_test_file
 from .coco_typing import AnnType
-from .io import DEFAULT_LABEL_CONFIG, load, load_label_config
+from .io import load, load_label_config
 from .to_coco import scalabel2coco_detection, set_seg_object_geometry
 
 
@@ -33,7 +33,7 @@ class TestScalabelToCOCODetection(unittest.TestCase):
     """Test cases for converting Scalabel detections to COCO format."""
 
     scalabel = load(get_test_file("scalabel_det.json")).frames
-    config = load_label_config(DEFAULT_LABEL_CONFIG)
+    config = load_label_config(get_test_file("configs.toml"))
     coco = scalabel2coco_detection(scalabel, config)
 
     def test_type(self) -> None:
