@@ -38,7 +38,7 @@ other label types.
         - category: string (classification)
         - manualShape: boolean
         - manualAttributes: boolean
-        - score: float 
+        - score: float
         - attributes: a dictionary of label attributes
         - box2d:
             - x1: float

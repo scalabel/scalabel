@@ -13,10 +13,6 @@ from ..common.parallel import pmap
 from ..common.typing import DictStrAny
 from .typing import Config, Dataset, Frame
 
-DEFAULT_LABEL_CONFIG = osp.join(
-    osp.dirname(osp.abspath(__file__)), "configs.toml"
-)
-
 
 def parse(raw_frame: DictStrAny) -> Frame:
     """Parse a single frame."""

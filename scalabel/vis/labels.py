@@ -25,6 +25,7 @@ from PIL import Image
 from ..common.logger import logger
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
+from ..label.utils import check_crowd
 from .geometry import Label3d
 from .helper import get_intrinsic_matrix, random_color
 
@@ -318,7 +319,7 @@ class LabelViewer:
                             and attributes["truncated"]
                         ):
                             text += ",t"
-                        if "crowd" in attributes and attributes["crowd"]:
+                        if check_crowd(b):
                             text += ",c"
                         self.ax.text(
                             (b.box2d.x1) * self.config.scale,
@@ -421,7 +422,7 @@ class LabelViewer:
                     text += ",o"
                 if "truncated" in attributes and attributes["truncated"]:
                     text += ",t"
-                if "crowd" in attributes and attributes["crowd"]:
+                if check_crowd(label):
                     text += ",c"
                 self.ax.text(
                     x1 + (x2 - x1) * self.config.scale * 0.4,

@@ -16,7 +16,7 @@ from tabulate import tabulate
 
 from ..common.typing import DictStrAny
 from ..label.coco_typing import GtType
-from ..label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
+from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
 
@@ -250,7 +250,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         "-c",
-        default=DEFAULT_LABEL_CONFIG,
+        default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes and resolution. For an example "
         "see scalabel/label/configs.toml",

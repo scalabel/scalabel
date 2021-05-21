@@ -5,28 +5,27 @@ import os
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, TypeVar, Union
 
 import motmetrics as mm
 import numpy as np
 import pandas as pd
 
 from ..common.logger import logger
-from ..label.io import (
-    DEFAULT_LABEL_CONFIG,
-    group_and_sort,
-    load,
-    load_label_config,
-)
+from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
-from ..label.utils import get_leaf_categories, get_parent_categories
+from ..label.utils import (
+    check_crowd,
+    check_ignored,
+    get_leaf_categories,
+    get_parent_categories,
+)
 
 EvalResults = Dict[str, Dict[str, float]]
-Frames = List[Frame]
-FramesList = List[Frames]
-FramesFunc = Callable[
-    [Frames, Frames, List[str], float, float],
+Video = TypeVar("Video", List[Frame], List[str])
+VidFunc = Callable[
+    [Video, Video, List[str], float, float],
     List[mm.MOTAccumulator],
 ]
 
@@ -56,9 +55,7 @@ def parse_objects(
         bbox = box2d_to_bbox(box_2d)
         category = obj.category
         if category in classes:
-            if obj.attributes is not None and bool(
-                obj.attributes.get("crowd", False)
-            ):
+            if check_crowd(obj) or check_ignored(obj):
                 ignore_bboxes.append(bbox)
             else:
                 bboxes.append(bbox)
@@ -261,9 +258,9 @@ def render_results(
 
 
 def evaluate_track(
-    acc_single_video: FramesFunc,
-    gts: FramesList,
-    results: FramesList,
+    acc_single_video: VidFunc[Video],
+    gts: List[Video],
+    results: List[Video],
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
@@ -330,7 +327,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         "-c",
-        default=DEFAULT_LABEL_CONFIG,
+        default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes as well as resolution. For an example "
         "see scalabel/label/configs.toml",

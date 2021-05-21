@@ -88,7 +88,9 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
                     "scalabel_id", str(ann.get("instance_id", ann["id"]))
                 ),
                 index=i + 1,
-                attributes=dict(crowd=ann["iscrowd"] or ann["ignore"]),
+                attributes=dict(
+                    crowd=bool(ann["iscrowd"]), ignored=bool(ann["ignore"])
+                ),
                 category=cat_id2name[ann["category_id"]],
             )
             if "score" in ann:

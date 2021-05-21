@@ -2,7 +2,8 @@
 import os
 import unittest
 
-from ..label.io import DEFAULT_LABEL_CONFIG, load, load_label_config
+from ..label.io import load, load_label_config
+from ..unittest.util import get_test_file
 from .detect import evaluate_det
 
 
@@ -16,7 +17,7 @@ class TestBDD100KDetectEval(unittest.TestCase):
         preds_path = "{}/testcases/bbox_predictions.json".format(cur_dir)
         gts = load(gts_path).frames
         preds = load(preds_path).frames
-        config = load_label_config(DEFAULT_LABEL_CONFIG)
+        config = load_label_config(get_test_file("configs.toml"))
         result = evaluate_det(gts, preds, config)
         overall_reference = {
             "AP": 0.3402939266840102,

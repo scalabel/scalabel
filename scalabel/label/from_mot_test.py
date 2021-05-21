@@ -13,7 +13,7 @@ def test_parse_annotations() -> None:
     for frame_idx, labels in result.items():
         for label in labels:
             assert label.attributes is not None
-            if label.attributes["crowd"]:
+            if label.attributes["ignored"]:
                 assert label.category == "pedestrian"
                 assert frame_idx == 1
             else:
