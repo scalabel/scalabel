@@ -13,7 +13,7 @@ from PIL import Image
 
 from .seg_base import SegBase
 
-if sys.version_info >= (3, 9):
+if sys.version_info >= (3, 8):
     from flask import Flask, Response, jsonify, make_response, request
 else:
     from flask import (  # type: ignore
