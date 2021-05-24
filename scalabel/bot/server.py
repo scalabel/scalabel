@@ -9,6 +9,9 @@ from typing import Dict, List
 
 import numpy as np
 import requests
+from PIL import Image
+
+from .seg_base import SegBase
 
 if sys.version_info >= (3, 9):
     from flask import Flask, Response, jsonify, make_response, request
@@ -20,9 +23,6 @@ else:
         make_response,
         request,
     )
-from PIL import Image
-
-from .seg_base import SegBase
 
 try:
     from .polyrnn_adapter import PolyrnnAdapter as SegModel
