@@ -3,26 +3,15 @@ import argparse
 import io
 import logging
 import os
-import sys
 import time
 from typing import Dict, List
 
 import numpy as np
 import requests
+from flask import Flask, Response, jsonify, make_response, request
 from PIL import Image
 
 from .seg_base import SegBase
-
-if sys.version_info >= (3, 8):
-    from flask import Flask, Response, jsonify, make_response, request
-else:
-    from flask import (  # type: ignore
-        Flask,
-        Response,
-        jsonify,
-        make_response,
-        request,
-    )
 
 try:
     from .polyrnn_adapter import PolyrnnAdapter as SegModel
