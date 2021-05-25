@@ -8,13 +8,7 @@ from typing import Dict, List
 
 import numpy as np
 import requests
-from flask import (  # type: ignore
-    Flask,
-    Response,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Flask, Response, jsonify, make_response, request
 from PIL import Image
 
 from .seg_base import SegBase
@@ -47,6 +41,7 @@ def predict_poly(seg_model: SegBase) -> Response:
     logger.info("Hitting prediction endpoint")
     start_time = time.time()
     receive_data = request.get_json()
+    assert receive_data is not None
 
     try:
         url_to_img = load_images([data["url"] for data in receive_data])

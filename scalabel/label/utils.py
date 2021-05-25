@@ -1,7 +1,7 @@
 """Utility functions for label."""
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
-from .typing import Category, Config, Label
+from .typing import Category, Label
 
 
 def get_leaf_categories(parent_categories: List[Category]) -> List[Category]:
@@ -28,20 +28,6 @@ def get_parent_categories(
         else:
             return {}
     return result
-
-
-def get_category_id(category_name: str, config: Config) -> Tuple[bool, int]:
-    """Get category id from category name and Config.
-
-    We define the category id as the index (starting at 1) of the category
-    within the leaf categories of the structure in MetaConfig.
-    The returned boolean item means whether this instance should be ignored.
-    """
-    leaf_cats = get_leaf_categories(config.categories)
-    leaf_cat_names = [cat.name for cat in leaf_cats]
-    if category_name not in leaf_cat_names:
-        return True, 0
-    return False, leaf_cat_names.index(category_name) + 1
 
 
 def check_crowd(label: Label) -> bool:

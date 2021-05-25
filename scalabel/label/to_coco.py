@@ -29,7 +29,7 @@ from .transforms import (
     poly2ds_to_mask,
 )
 from .typing import Config, Frame, ImageSize, Label, Poly2D
-from .utils import check_crowd, check_ignored, get_category_id
+from .utils import check_crowd, check_ignored, get_leaf_categories
 
 # 0 is for category that is not in the config.
 GetCatIdFunc = Callable[[str, Config], Tuple[bool, int]]
@@ -151,15 +151,14 @@ def poly2ds_list_to_coco(
     return annotations
 
 
-def scalabel2coco_detection(
-    frames: List[Frame],
-    config: Config,
-    get_cat_id_func: GetCatIdFunc = get_category_id,
-) -> GtType:
+def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
     """Convert Scalabel format to COCO detection."""
     image_id, ann_id = 0, 0
     images: List[ImgType] = []
     annotations: List[AnnType] = []
+
+    categories = get_leaf_categories(config.categories)
+    cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     for image_anns in tqdm(frames):
         image_id += 1
@@ -186,16 +185,14 @@ def scalabel2coco_detection(
         for label in image_anns.labels:
             if label.box2d is None:
                 continue
-
-            skip, category_id = get_cat_id_func(label.category, config)
-            if skip:
+            if label.category not in cat_name2id:
                 continue
 
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
                 image_id=image_id,
-                category_id=category_id,
+                category_id=cat_name2id[label.category],
                 scalabel_id=label.id,
                 iscrowd=int(check_crowd(label) or check_ignored(label)),
                 ignore=0,
@@ -218,13 +215,15 @@ def scalabel2coco_ins_seg(
     config: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
-    get_cat_id_func: GetCatIdFunc = get_category_id,
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     image_id, ann_id = 0, 0
     images: List[ImgType] = []
     annotations: List[AnnType] = []
     poly2ds: List[List[Poly2D]] = []
+
+    categories = get_leaf_categories(config.categories)
+    cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     shapes = []
     for image_anns in tqdm(frames):
@@ -253,16 +252,14 @@ def scalabel2coco_ins_seg(
         for label in image_anns.labels:
             if label.poly2d is None:
                 continue
-
-            skip, category_id = get_cat_id_func(label.category, config)
-            if skip:
+            if label.category not in cat_name2id:
                 continue
 
             ann_id += 1
             annotation = AnnType(
                 id=ann_id,
                 image_id=image_id,
-                category_id=category_id,
+                category_id=cat_name2id[label.category],
                 scalabel_id=label.id,
                 iscrowd=int(check_crowd(label) or check_ignored(label)),
                 ignore=0,
@@ -296,17 +293,16 @@ def get_instance_id(
     return instance_id, global_instance_id
 
 
-def scalabel2coco_box_track(
-    frames: List[Frame],
-    config: Config,
-    get_cat_id_func: GetCatIdFunc = get_category_id,
-) -> GtType:
+def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
     """Converting Scalabel Box Tracking Set to COCO format."""
     frames_list = group_and_sort(frames)
     video_id, image_id, ann_id = 0, 0, 0
     videos: List[VidType] = []
     images: List[ImgType] = []
     annotations: List[AnnType] = []
+
+    categories = get_leaf_categories(config.categories)
+    cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
@@ -344,9 +340,7 @@ def scalabel2coco_box_track(
             for label in image_anns.labels:
                 if label.box2d is None:
                     continue
-
-                skip, category_id = get_cat_id_func(label.category, config)
-                if skip:
+                if label.category not in cat_name2id:
                     continue
 
                 ann_id += 1
@@ -356,7 +350,7 @@ def scalabel2coco_box_track(
                 annotation = AnnType(
                     id=ann_id,
                     image_id=image_id,
-                    category_id=category_id,
+                    category_id=cat_name2id[label.category],
                     instance_id=instance_id,
                     scalabel_id=label.id,
                     iscrowd=int(check_crowd(label) or check_ignored(label)),
@@ -380,7 +374,6 @@ def scalabel2coco_seg_track(
     config: Config,
     mask_mode: str = "rle",
     nproc: int = 4,
-    get_cat_id_func: GetCatIdFunc = get_category_id,
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     frames_list = group_and_sort(frames)
@@ -389,6 +382,9 @@ def scalabel2coco_seg_track(
     images: List[ImgType] = []
     annotations: List[AnnType] = []
     poly2ds: List[List[Poly2D]] = []
+
+    categories = get_leaf_categories(config.categories)
+    cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     shapes = []
     for video_anns in tqdm(frames_list):
@@ -428,10 +424,7 @@ def scalabel2coco_seg_track(
             for label in image_anns.labels:
                 if label.poly2d is None:
                     continue
-
-                assert label.category is not None
-                skip, category_id = get_cat_id_func(label.category, config)
-                if skip:
+                if label.category not in cat_name2id:
                     continue
 
                 ann_id += 1
@@ -441,7 +434,7 @@ def scalabel2coco_seg_track(
                 annotation = AnnType(
                     id=ann_id,
                     image_id=image_id,
-                    category_id=category_id,
+                    category_id=cat_name2id[label.category],
                     instance_id=instance_id,
                     scalabel_id=label.id,
                     iscrowd=int(check_crowd(label) or check_ignored(label)),
