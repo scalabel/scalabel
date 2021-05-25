@@ -99,19 +99,19 @@ class PnpAnnType(TypedDict, total=False):
     segments_info: List[PnpSegType]
 
 
-class PnPCatType(TypedDict):
+class PnpCatType(TypedDict):
     """Define types of categories in GT of panoptic segmentation."""
 
     id: int
     name: str
     supercategory: str
     isthing: int
-    color: str
+    color: List[int]
 
 
-class PnPGtType(TypedDict, total=False):
-    """Define types of the GT in COCO panoptic segmentaton format."""
+class PnpGtType(TypedDict, total=False):
+    """Define types of the GT in COCO format."""
 
-    categories: List[PnPCatType]
+    categories: List[PnpCatType]
     annotations: List[PnpAnnType]
     images: List[ImgType]
