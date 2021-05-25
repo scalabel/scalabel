@@ -89,6 +89,7 @@ class PnpSegType(TypedDict, total=False):
     area: float
     bbox: List[float]
     iscrowd: int
+    ignore: int
 
 
 class PnpAnnType(TypedDict, total=False):
