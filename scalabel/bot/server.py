@@ -41,8 +41,7 @@ def predict_poly(seg_model: SegBase) -> Response:
     logger.info("Hitting prediction endpoint")
     start_time = time.time()
     receive_data = request.get_json()
-    if not isinstance(receive_data, list):
-        receive_data = [receive_data]
+    assert receive_data is not None
 
     try:
         url_to_img = load_images([data["url"] for data in receive_data])
