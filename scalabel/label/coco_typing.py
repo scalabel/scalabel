@@ -81,7 +81,7 @@ class PredType(TypedDict):
     category_id: int
 
 
-class PnpSegType(TypedDict, total=False):
+class PanopticSegType(TypedDict, total=False):
     """Define types of segment_info for panoptic segmentation."""
 
     id: int
@@ -92,15 +92,15 @@ class PnpSegType(TypedDict, total=False):
     ignore: int
 
 
-class PnpAnnType(TypedDict, total=False):
+class PanopticAnnType(TypedDict, total=False):
     """Define types of annotation for panoptic segmentation."""
 
     image_id: int
     file_name: str
-    segments_info: List[PnpSegType]
+    segments_info: List[PanopticSegType]
 
 
-class PnpCatType(TypedDict):
+class PanopticCatType(TypedDict):
     """Define types of categories in GT of panoptic segmentation."""
 
     id: int
@@ -110,9 +110,9 @@ class PnpCatType(TypedDict):
     color: List[int]
 
 
-class PnpGtType(TypedDict, total=False):
+class PanopticGtType(TypedDict, total=False):
     """Define types of the GT in COCO format."""
 
-    categories: List[PnpCatType]
-    annotations: List[PnpAnnType]
+    categories: List[PanopticCatType]
+    annotations: List[PanopticAnnType]
     images: List[ImgType]
