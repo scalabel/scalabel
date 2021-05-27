@@ -79,3 +79,40 @@ class PredType(TypedDict):
     bbox: List[float]
     image_id: int
     category_id: int
+
+
+class PanopticSegType(TypedDict, total=False):
+    """Define types of segment_info for panoptic segmentation."""
+
+    id: int
+    category_id: int
+    area: float
+    bbox: List[float]
+    iscrowd: int
+    ignore: int
+
+
+class PanopticAnnType(TypedDict, total=False):
+    """Define types of annotation for panoptic segmentation."""
+
+    image_id: int
+    file_name: str
+    segments_info: List[PanopticSegType]
+
+
+class PanopticCatType(TypedDict):
+    """Define types of categories in GT of panoptic segmentation."""
+
+    id: int
+    name: str
+    supercategory: str
+    isthing: int
+    color: List[int]
+
+
+class PanopticGtType(TypedDict, total=False):
+    """Define types of the GT in COCO format."""
+
+    categories: List[PanopticCatType]
+    annotations: List[PanopticAnnType]
+    images: List[ImgType]
