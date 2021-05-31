@@ -1,4 +1,5 @@
 import {
+  Attribute,
   ConfigType,
   ExtrinsicsType,
   IntrinsicsType,
@@ -17,6 +18,11 @@ export interface TaskData {
   Items: ItemType[]
   /** tracks for task */
   Tracks: TrackType
+}
+
+export interface DatasetExport {
+  frames: ItemExport[]
+  config: ConfigExport
 }
 
 export interface ItemExport {
@@ -110,4 +116,15 @@ export interface LabelExport {
   plane3d: Plane3DType | null
   /** custom labels */
   customs: { [name: string]: CustomExportType }
+}
+
+export interface ConfigExport {
+  image_size?: ImageSizeType
+  attributes?: Attribute[]
+  categories: string[]
+}
+
+export interface ImageSizeType {
+  width: number
+  height: number
 }

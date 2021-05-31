@@ -5,7 +5,7 @@ import _ from "lodash"
 import { DashboardContents } from "../components/dashboard"
 import { getSubmissionTime } from "../components/util"
 import { FormField } from "../const/project"
-import { ItemExport } from "../types/export"
+import { DatasetExport, ItemExport } from "../types/export"
 import { Project } from "../types/project"
 import { TaskType } from "../types/state"
 import {
@@ -101,6 +101,13 @@ export class Listeners {
       const projectName = req.query[FormField.PROJECT_NAME] as string
       // Grab the latest submissions from all tasks
       const tasks = await this.projectStore.getTasksInProject(projectName)
+      const dataset: DatasetExport = {
+        frames: [],
+        config: {
+          attributes: [],
+          categories: []
+        }
+      }
       let items: ItemExport[] = []
       // Load the latest submission for each task to export
       for (const task of tasks) {
@@ -108,6 +115,12 @@ export class Listeners {
           const taskId = task.config.taskId
           const state = await this.projectStore.loadState(projectName, taskId)
           items = items.concat(convertStateToExport(state))
+          if (dataset.config.attributes?.length === 0) {
+            dataset.config.attributes = state.task.config.attributes
+          }
+          if (dataset.config.attributes?.length === 0) {
+            dataset.config.categories = state.task.config.categories
+          }
         } catch (error) {
           Logger.info(error.message)
           for (const itemToLoad of task.items) {
@@ -125,7 +138,9 @@ export class Listeners {
           }
         }
       }
-      const exportJson = JSON.stringify(items, null, "  ")
+      dataset.frames = items
+      // const exportJson = JSON.stringify(items, null, "  ")
+      const exportJson = JSON.stringify(dataset, null, "  ")
       // Set relevant header and send the exported json file
       res.attachment(getExportName(projectName))
       res.end(Buffer.from(exportJson, "binary"), "binary")
