@@ -21,7 +21,9 @@ export interface TaskData {
 }
 
 export interface DatasetExport {
+  /** items in dataset */
   frames: ItemExport[]
+  /** shared fields for frames */
   config: ConfigExport
 }
 
@@ -119,12 +121,17 @@ export interface LabelExport {
 }
 
 export interface ConfigExport {
+  /** image sizes */
   image_size?: ImageSizeType
+  /** attributes */
   attributes?: Attribute[]
+  /** categories */
   categories: string[]
 }
 
 export interface ImageSizeType {
+  /** image width */
   width: number
+  /** image height */
   height: number
 }
