@@ -12,6 +12,7 @@ import {
   createProject,
   createTasks,
   parseFiles,
+  parseSingleFile,
   parseForm,
   readConfig
 } from "./create_project"
@@ -412,12 +413,10 @@ export class Listeners {
       // Parse form from request
       const form = await parseForm(fields, this.projectStore)
       // Parse item, category, and attribute data from the form
-      const formFileData = await parseFiles(
-        storage,
-        form.labelType,
-        files,
-        itemsRequired
-      )
+      const formFileData =
+        Object.keys(files).length > 1
+          ? await parseFiles(storage, form.labelType, files, itemsRequired)
+          : await parseSingleFile(storage, form.labelType, files)
       // Create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([
