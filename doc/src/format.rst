@@ -29,14 +29,16 @@ other label types.
         - rotation
     - timestamp: int64 (epoch time ms)
     - frameIndex: int (optional, frame index in this video)
-    - size: [width, height]
+    - size:
+        - width: int
+        - height: int
     - labels [ ]:
         - id: string
         - index: int
         - category: string (classification)
         - manualShape: boolean
         - manualAttributes: boolean
-        - score: float 
+        - score: float
         - attributes: a dictionary of label attributes
         - box2d:
             - x1: float

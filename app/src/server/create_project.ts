@@ -190,7 +190,7 @@ export async function readConfig<T>(
 
   const file = await storage.load(filePath)
   try {
-    const fileData = (yaml.safeLoad(file, { json: true }) as unknown) as T
+    const fileData = (yaml.load(file, { json: true }) as unknown) as T
     return fileData
   } catch {
     throw new Error(`Improper formatting for file: ${filePath}`)

@@ -1,8 +1,8 @@
 Label Conversion
 ===================
 
-Currently, we provide conversion scripts between scalabel and coco formats.
-They are in the ``label`` moduel of the  `Scalabel python package
+Currently, we provide conversion scripts between scalabel and coco formats as well as MOTChallenge to Scalabel format.
+They are in the ``label`` module of the  `Scalabel python package
 <https://github.com/scalabel/scalabel/tree/master/scalabel>`_. We recommend
 using the tools through python module invoke convention. For example,
 
@@ -10,9 +10,9 @@ using the tools through python module invoke convention. For example,
 
     python3 -m scalabel.label.to_coco ...
 
-To allow for more information store in the coco-format json files, we add a new
+To store more information in the coco-format json files, we add new
 property names "videos" to the coco format. It is a list like "videos" and
-"annotations", and each item is a have two properties: "id" and "name".
+"annotations", and each item has two properties: "id" and "name".
 
 from_coco
 -----------------
@@ -24,9 +24,9 @@ Available arguments:
 
 .. code-block:: bash
 
-    --label INPUT, -i INPUT
+    --input INPUT, -i INPUT
                             path to the coco-format json file
-    --out-dir OUT_DIR, -o OUT_DIR
+    --output OUTPUT, -o OUTPUT
                             output json path for ``det`` and ``ins_seg`` or
                             output jsons folder for ``box_track`` and ``seg_track``
 
@@ -36,7 +36,7 @@ to_coco
 ``to_coco`` converts scalabel json files into coco format.
 Now it support the conversions of four tasks: object detection as ``det``,
 instance segmentation as ``ins_seg``, multi-object tracking as ``box_track`` and
-multi-object trackings, or named segmentation tracking, as ``seg_track``.
+multi-object tracking, or named segmentation tracking, as ``seg_track``.
 
 Note that, for segmentation tasks, the mask conversion may not be reversible.
 ``Polygon`` format can be converted back with accuracy loss. Meanwhile ``RLE``
@@ -47,23 +47,30 @@ Available arguments:
 
 .. code-block:: bash
 
-    --label INPUT, -l INPUT
-                            path to the video/images to be processed
-    --output OUT_DIR, -o OUT_DIR
-                            output folder to save the frames
-    --height HEIGHT
-                            height of images
-    --width WIDTH
-                            width of images
+    --input INPUT, -i INPUT
+                            input json path for ``det`` and ``ins_seg`` or
+                            input jsons folder for ``box_track`` and ``seg_track``
+    --output OUTPUT, -o OUTPUT
+                            path to the output file to save the coco file
     --mode MODE, -m MODE
                             one of [det, ins_seg, box_track, seg_track]
-    --remove-ignore, -ri
-                            remove the ignored annotations from the label file
-    --ignore-as-class, -ic
-                            put the ignored annotations to the `ignored` category
-    --mask-mod, -mm,
+    --mask-mode, -mm,
                             conversion mode: rle or polygon
     --nproc
                             number of processes for mot evaluation
     --config
                             config file for COCO categories
+
+from_mot
+-----------------
+
+``from_mot`` converts MOTChallenge annotations into Scalabel format.
+
+Available arguments:
+
+.. code-block:: bash
+
+    --input INPUT, -i INPUT
+                            path to MOTChallenge data (images + annotations).
+    --output OUTPUT, -o OUTPUT
+                            Output path for Scalabel format annotations.

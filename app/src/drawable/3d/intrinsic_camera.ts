@@ -68,7 +68,7 @@ export class IntrinsicCamera extends THREE.Camera {
         -1,
         0
       )
-      this.projectionMatrixInverse.getInverse(this.projectionMatrix)
+      this.projectionMatrixInverse.copy(this.projectionMatrix).invert()
     }
   }
 }

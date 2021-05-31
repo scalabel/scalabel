@@ -8,10 +8,12 @@ import numpy as np
 from matplotlib.path import Path
 from skimage import measure
 
-from .coco_typing import PolygonType
-from .typing import Box2D, Poly2D
+from .coco_typing import CatType, PolygonType
+from .typing import Box2D, Config, ImageSize, Poly2D
+from .utils import get_leaf_categories
 
 __all__ = [
+    "get_coco_categories",
     "bbox_to_box2d",
     "box2d_to_bbox",
     "mask_to_box2d",
@@ -22,11 +24,21 @@ __all__ = [
 ]
 
 
-def box2d_to_bbox(box_2d: Box2D) -> List[float]:
+def get_coco_categories(config: Config) -> List[CatType]:
+    """Get CatType categories for saving these in COCO format annotations."""
+    categories = get_leaf_categories(config.categories)
+    result = [
+        CatType(id=i + 1, name=category.name)
+        for i, category in enumerate(categories)
+    ]
+    return result
+
+
+def box2d_to_bbox(box2d: Box2D) -> List[float]:
     """Convert Scalabel Box2D into COCO bbox."""
-    width = box_2d.x2 - box_2d.x1 + 1
-    height = box_2d.y2 - box_2d.y1 + 1
-    return [box_2d.x1, box_2d.y1, width, height]
+    width = box2d.x2 - box2d.x1 + 1
+    height = box2d.y2 - box2d.y1 + 1
+    return [box2d.x1, box2d.y1, width, height]
 
 
 def mask_to_box2d(mask: np.ndarray) -> Box2D:
@@ -35,14 +47,14 @@ def mask_to_box2d(mask: np.ndarray) -> Box2D:
     y_inds = np.nonzero(np.sum(mask, axis=1))[0]
     x1, x2 = int(np.min(x_inds)), int(np.max(x_inds))
     y1, y2 = int(np.min(y_inds)), int(np.max(y_inds))
-    box_2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
-    return box_2d
+    box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+    return box2d
 
 
 def mask_to_bbox(mask: np.ndarray) -> List[float]:
     """Convert mask into bbox."""
-    box_2d = mask_to_box2d(mask)
-    bbox = box2d_to_bbox(box_2d)
+    box2d = mask_to_box2d(mask)
+    bbox = box2d_to_bbox(box2d)
     return bbox
 
 
@@ -56,14 +68,14 @@ def bbox_to_box2d(bbox: List[float]) -> Box2D:
 
 def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
     """Convert COCO polygon into Scalabel Box2Ds."""
-    poly_2ds: List[Poly2D] = []
+    poly2ds: List[Poly2D] = []
     for poly in polygon:
         point_num = len(poly) // 2
         assert 2 * point_num == len(poly)
         vertices = [[poly[2 * i], poly[2 * i + 1]] for i in range(point_num)]
-        poly_2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
-        poly_2ds.append(poly_2d)
-    return poly_2ds
+        poly2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
+        poly2ds.append(poly2d)
+    return poly2ds
 
 
 def poly_to_patch(
@@ -93,16 +105,16 @@ def poly_to_patch(
     )
 
 
-def poly2ds_to_mask(
-    shape: Tuple[int, int], poly2d: List[Poly2D]
-) -> np.ndarray:
+def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> np.ndarray:
     """Converting Poly2D to mask."""
     fig = plt.figure(facecolor="0")
-    fig.set_size_inches(shape[1] / fig.get_dpi(), shape[0] / fig.get_dpi())
+    fig.set_size_inches(
+        shape.width / fig.get_dpi(), shape.height / fig.get_dpi()
+    )
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
-    ax.set_xlim(0, shape[1])
-    ax.set_ylim(0, shape[0])
+    ax.set_xlim(0, shape.width)
+    ax.set_ylim(0, shape.height)
     ax.set_facecolor((0, 0, 0, 0))
     ax.invert_yaxis()
 
@@ -118,7 +130,7 @@ def poly2ds_to_mask(
 
     fig.canvas.draw()
     mask: np.ndarray = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
-    mask = mask.reshape((*shape, -1))[..., 0]
+    mask = mask.reshape((shape.height, shape.width, -1))[..., 0]
     plt.close()
     return mask
 

@@ -59,7 +59,7 @@ export class Cube3D extends Shape3D {
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
         color: 0xffffff,
-        vertexColors: THREE.FaceColors,
+        vertexColors: true,
         transparent: true,
         opacity: 0.35
       })
@@ -178,7 +178,7 @@ export class Cube3D extends Shape3D {
     if (this._grid !== null) {
       const inverseRotation = new THREE.Quaternion()
       inverseRotation.copy(this._grid.quaternion)
-      inverseRotation.inverse()
+      inverseRotation.invert()
 
       const gridCenter = new THREE.Vector3()
       gridCenter.copy(worldCenter)
@@ -243,10 +243,12 @@ export class Cube3D extends Shape3D {
    * @param id
    */
   public updateState(shape: ShapeType, id: IdType): void {
-    const geometry = this._box.geometry as THREE.Geometry
-    for (const face of geometry.faces) {
-      face.color.fromArray(this._color)
-    }
+    this._box.material = new THREE.MeshBasicMaterial({
+      color: new THREE.Color().fromArray(this._color),
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.35
+    })
     super.updateState(shape, id)
     const cube = shape as CubeType
     this.position.copy(new Vector3D().fromState(cube.center).toThree())
@@ -282,10 +284,12 @@ export class Cube3D extends Shape3D {
       }
     }
 
-    const geometry = this._box.geometry as THREE.Geometry
-    for (const face of geometry.faces) {
-      face.color.fromArray(this._color)
-    }
+    this._box.material = new THREE.MeshBasicMaterial({
+      color: new THREE.Color().fromArray(this._color),
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.35
+    })
 
     // Check if shape already in scene
     for (const child of scene.children) {
@@ -392,7 +396,7 @@ export class Cube3D extends Shape3D {
       projection.intersectPlane(plane, newPosition)
 
       const toGrid = new THREE.Matrix4()
-      toGrid.getInverse(this._grid.matrixWorld)
+      toGrid.copy(this._grid.matrixWorld).invert()
 
       // NewPosition.applyMatrix4(toGrid)
       this.position.copy(newPosition)
@@ -422,7 +426,7 @@ export class Cube3D extends Shape3D {
     this.updateMatrixWorld(true)
 
     const toLocal = new THREE.Matrix4()
-    toLocal.getInverse(this.matrixWorld)
+    toLocal.copy(this.matrixWorld).invert()
 
     const localProjection = new THREE.Ray()
     localProjection.copy(projection)
@@ -559,7 +563,12 @@ export class Cube3D extends Shape3D {
       cameraPosition.copy(camera.position)
 
       const rayToCorner = new THREE.Ray(cameraPosition, rayDirection)
-      toLocal.getInverse(this.matrixWorld, true)
+      if (toLocal.determinant() === 0) {
+        const msg = "can't invert matrix, determinant is 0"
+        throw new Error(msg)
+      } else {
+        toLocal.copy(this.matrixWorld).invert()
+      }
       rayToCorner.applyMatrix4(toLocal)
 
       rayToCorner.intersectPlane(highlightedPlane, intersection)
@@ -623,7 +632,7 @@ export class Cube3D extends Shape3D {
     this.getWorldQuaternion(worldQuaternion)
     const cameraDirection = new THREE.Vector3()
     camera.getWorldDirection(cameraDirection)
-    cameraDirection.applyQuaternion(worldQuaternion.inverse())
+    cameraDirection.applyQuaternion(worldQuaternion.invert())
     let maxCloseness = 0
     for (const normal of faceNormals) {
       const closeness = -normal.dot(cameraDirection)

@@ -4,7 +4,7 @@ import * as child from "child_process"
 import express, { Application, NextFunction, Request, Response } from "express"
 import * as formidable from "express-formidable"
 import { createServer } from "http"
-import socketio from "socket.io"
+import { Server } from "socket.io"
 
 import { Endpoint } from "../const/connection"
 import { STORAGE_FOLDERS, StorageStructure } from "../const/storage"
@@ -189,7 +189,7 @@ async function startServers(
 ): Promise<void> {
   const app: Application = express()
   const httpServer = createServer(app)
-  const io = socketio(httpServer)
+  const io = new Server(httpServer)
 
   // Set up http handlers
   startHTTPServer(config, app, projectStore, userManager)

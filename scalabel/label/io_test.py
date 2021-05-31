@@ -1,7 +1,34 @@
 """Test cases for io.py."""
+import json
+
 from ..unittest.util import get_test_file
-from .io import dump, group_and_sort, load
+from .io import dump, group_and_sort, load, parse
 from .typing import Frame
+
+
+def test_parse() -> None:
+    """Test parse label string."""
+    raw = json.loads(
+        '{"name": 1, "videoName": "a", "size": {"width": 10, "height": 20}, '
+        '"labels":[{"id": 1, "box2d": '
+        '{"x1": 1, "y1": 2, "x2": 3, "y2": 4}, "ignored": true, '
+        '"attributes": {"trafficLightColor": "G", "speed": 10}}]}'
+    )
+    frame = parse(raw)
+    assert frame.name == "1"
+    assert frame.video_name == "a"
+    assert isinstance(frame.labels, list)
+    labels = frame.labels
+    assert isinstance(labels, list)
+    assert len(labels) == 1
+    label = labels[0]  # pylint: disable=unsubscriptable-object
+    assert label.id == "1"
+    assert label.attributes is not None
+    assert label.attributes["traffic_light_color"] == "G"
+    assert label.attributes["speed"] == 10.0
+    b = label.box2d
+    assert b is not None
+    assert b.y2 == 4
 
 
 def test_load() -> None:
@@ -9,7 +36,7 @@ def test_load() -> None:
     filepath = get_test_file("image_list_with_auto_labels.json")
 
     def assert_correctness(inputs: str, nprocs: int) -> None:
-        frames = load(inputs, nprocs)
+        frames = load(inputs, nprocs).frames
         assert len(frames) == 10
         assert (
             frames[0].url == "https://s3-us-west-2.amazonaws.com/bdd-label/"
@@ -20,15 +47,15 @@ def test_load() -> None:
         assert frames[0].labels is not None
         assert frames[-1].labels is not None
         assert frames[0].labels[0].id == "0"
-        assert frames[0].labels[0].box_2d is not None
-        assert frames[-1].labels[-1].box_2d is not None
-        box = frames[-1].labels[-1].box_2d
+        assert frames[0].labels[0].box2d is not None
+        assert frames[-1].labels[-1].box2d is not None
+        box = frames[-1].labels[-1].box2d
         assert box.x1 == 218.7211456298828
         assert box.x2 == 383.5201416015625
         assert box.y1 == 362.24761962890625
         assert box.y2 == 482.4760437011719
-        assert frames[0].labels[0].poly_2d is not None
-        polys = frames[0].labels[0].poly_2d
+        assert frames[0].labels[0].poly2d is not None
+        polys = frames[0].labels[0].poly2d
         assert isinstance(polys, list)
         poly = polys[0]
         assert len(poly.vertices) == len(poly.types)
@@ -61,15 +88,15 @@ def test_group_and_sort() -> None:
 def test_dump() -> None:
     """Test dump labels."""
     filepath = get_test_file("image_list_with_auto_labels.json")
-    labels = load(filepath)
-    labels_dict = dump(labels)
+    labels = load(filepath).frames
+    labels_dict = [dump(label) for label in labels]
     assert labels_dict[0]["frameIndex"] == labels[0].frame_index
     assert labels_dict[-1]["frameIndex"] == labels[-1].frame_index
     assert "box3d" not in labels_dict[0]["labels"][0]
     assert "box2d" in labels_dict[0]["labels"][0]
     assert labels[0].labels is not None
-    assert labels[0].labels[0].box_2d is not None
+    assert labels[0].labels[0].box2d is not None
     assert (
         labels_dict[0]["labels"][0]["box2d"]["x1"]
-        == labels[0].labels[0].box_2d.x1
+        == labels[0].labels[0].box2d.x1
     )

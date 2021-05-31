@@ -237,7 +237,7 @@ class HomographyCanvas extends ImageCanvas {
             sensor.extrinsics.rotation.z,
             sensor.extrinsics.rotation.w
           )
-          const extrinsicQuaternionInverse = extrinsicQuaternion.inverse()
+          const extrinsicQuaternionInverse = extrinsicQuaternion.invert()
 
           const grid = this._plane.internalShapes()[0] as Grid3D
 

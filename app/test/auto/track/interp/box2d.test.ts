@@ -31,7 +31,7 @@ test("2D box linear interpolation", () => {
   // Change the middle label
   const newLabel = _.cloneDeep(labels[4])
   const newShape = _.cloneDeep(shapes[4])
-  labels.map((l) => {
+  labels.forEach((l) => {
     l.manual = false
   })
   labels[1].manual = true
