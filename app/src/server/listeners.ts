@@ -139,7 +139,6 @@ export class Listeners {
         }
       }
       dataset.frames = items
-      // const exportJson = JSON.stringify(items, null, "  ")
       const exportJson = JSON.stringify(dataset, null, "  ")
       // Set relevant header and send the exported json file
       res.attachment(getExportName(projectName))
