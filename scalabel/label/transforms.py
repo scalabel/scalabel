@@ -143,7 +143,7 @@ def close_contour(contour: np.ndarray) -> np.ndarray:
 
 
 def mask_to_polygon(
-    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: float = 0.5
+    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: float = 1.0
 ) -> List[List[float]]:
     """Convert BitMask to polygon."""
     polygons = []
