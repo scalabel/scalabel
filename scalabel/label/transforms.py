@@ -23,6 +23,8 @@ __all__ = [
     "polygon_to_poly2ds",
 ]
 
+TOLERANCE = 1.0
+
 
 def get_coco_categories(config: Config) -> List[CatType]:
     """Get CatType categories for saving these in COCO format annotations."""
@@ -143,7 +145,7 @@ def close_contour(contour: np.ndarray) -> np.ndarray:
 
 
 def mask_to_polygon(
-    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: float = 1.0
+    binary_mask: np.ndarray, x_1: int, y_1: int
 ) -> List[List[float]]:
     """Convert BitMask to polygon."""
     polygons = []
@@ -154,7 +156,7 @@ def mask_to_polygon(
     contours = np.subtract(contours, 1)
     for contour in contours:
         contour = close_contour(contour)
-        contour = measure.approximate_polygon(contour, tolerance)
+        contour = measure.approximate_polygon(contour, TOLERANCE)
         if len(contour) < 3:
             continue
         contour = np.flip(contour, axis=1)
