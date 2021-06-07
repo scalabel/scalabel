@@ -12,5 +12,7 @@ export const enum FormField {
   ATTRIBUTES = "attributes",
   ITEMS = "item_file",
   SENSORS = "sensors",
-  LABEL_SPEC = "label_spec"
+  LABEL_SPEC = "label_spec",
+  SINGLE_FILE = "single_file",
+  DATASET = "dataset"
 }
