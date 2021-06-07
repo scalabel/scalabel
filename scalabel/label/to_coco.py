@@ -12,22 +12,9 @@ from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
 from ..common.logger import logger
-from .coco_typing import (
-    AnnType,
-    GtType,
-    ImgType,
-    PolygonType,
-    RLEType,
-    VidType,
-)
+from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
-from .transforms import (
-    box2d_to_bbox,
-    get_coco_categories,
-    mask_to_bbox,
-    mask_to_polygon,
-    poly2ds_to_mask,
-)
+from .transforms import box2d_to_bbox, get_coco_categories, poly2ds_to_mask
 from .typing import Config, Frame, ImageSize, Label, Poly2D
 from .utils import check_crowd, check_ignored, get_leaf_categories
 
@@ -59,13 +46,6 @@ def parse_arguments() -> argparse.Namespace:
         help="conversion mode: detection or tracking.",
     )
     parser.add_argument(
-        "-mm",
-        "--mask-mode",
-        default="rle",
-        choices=["rle", "polygon"],
-        help="conversion mode: rle or polygon.",
-    )
-    parser.add_argument(
         "--nproc",
         type=int,
         default=4,
@@ -90,43 +70,29 @@ def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     return annotation
 
 
-def set_seg_object_geometry(
-    annotation: AnnType, mask: np.ndarray, mask_mode: str = "rle"
-) -> AnnType:
+def set_seg_object_geometry(annotation: AnnType, mask: np.ndarray) -> AnnType:
     """Parsing bbox, area, polygon from seg ann."""
     if not mask.sum():
         return annotation
 
-    if mask_mode == "polygon":
-        bbox = mask_to_bbox(mask)
-        area = np.sum(mask).tolist()
-        x, y, w, h = bbox
-        x, y, w, h = int(x), int(y), int(w), int(h)
-        mask = mask[y : y + h, x : x + w]
-        polygon: PolygonType = mask_to_polygon(mask, x, y)
-        annotation.update(dict(segmentation=polygon))
-    elif mask_mode == "rle":
-        rle: RLEType = mask_utils.encode(
-            np.array(mask[:, :, None], order="F", dtype="uint8")
-        )[0]
-        rle["counts"] = rle["counts"].decode("utf-8")  # type: ignore
-        bbox = mask_utils.toBbox(rle).tolist()
-        area = mask_utils.area(rle).tolist()
-        annotation.update(dict(segmentation=rle))
+    rle: RLEType = mask_utils.encode(
+        np.array(mask[:, :, None], order="F", dtype="uint8")
+    )[0]
+    rle["counts"] = rle["counts"].decode("utf-8")  # type: ignore
+    bbox = mask_utils.toBbox(rle).tolist()
+    area = mask_utils.area(rle).tolist()
+    annotation.update(dict(segmentation=rle))
 
     annotation.update(dict(bbox=bbox, area=area))
     return annotation
 
 
 def poly2ds_to_coco(
-    annotation: AnnType,
-    poly2d: List[Poly2D],
-    shape: ImageSize,
-    mask_mode: str,
+    annotation: AnnType, poly2d: List[Poly2D], shape: ImageSize
 ) -> AnnType:
     """Converting Poly2D to coco format."""
     mask = poly2ds_to_mask(shape, poly2d)
-    set_seg_object_geometry(annotation, mask, mask_mode)
+    set_seg_object_geometry(annotation, mask)
     return annotation
 
 
@@ -134,13 +100,12 @@ def poly2ds_list_to_coco(
     shape: List[ImageSize],
     annotations: List[AnnType],
     poly2ds: List[List[Poly2D]],
-    mask_mode: str,
     nproc: int,
 ) -> List[AnnType]:
     """Execute the Poly2D to coco conversion in parallel."""
     with Pool(nproc) as pool:
         annotations = pool.starmap(
-            partial(poly2ds_to_coco, mask_mode=mask_mode),
+            poly2ds_to_coco,
             tqdm(
                 zip(annotations, poly2ds, shape),
                 total=len(annotations),
@@ -211,10 +176,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
 
 
 def scalabel2coco_ins_seg(
-    frames: List[Frame],
-    config: Config,
-    mask_mode: str = "rle",
-    nproc: int = 4,
+    frames: List[Frame], config: Config, nproc: int = 4
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     image_id, ann_id = 0, 0
@@ -269,9 +231,7 @@ def scalabel2coco_ins_seg(
             annotations.append(annotation)
             poly2ds.append(label.poly2d)
 
-    annotations = poly2ds_list_to_coco(
-        shapes, annotations, poly2ds, mask_mode, nproc
-    )
+    annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc)
     return GtType(
         type="instance",
         categories=get_coco_categories(config),
@@ -370,10 +330,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
 
 def scalabel2coco_seg_track(
-    frames: List[Frame],
-    config: Config,
-    mask_mode: str = "rle",
-    nproc: int = 4,
+    frames: List[Frame], config: Config, nproc: int = 4
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     frames_list = group_and_sort(frames)
@@ -445,9 +402,7 @@ def scalabel2coco_seg_track(
                 annotations.append(annotation)
                 poly2ds.append(label.poly2d)
 
-    annotations = poly2ds_list_to_coco(
-        shapes, annotations, poly2ds, mask_mode, nproc
-    )
+    annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc)
     return GtType(
         categories=get_coco_categories(config),
         videos=videos,
@@ -478,7 +433,6 @@ def run(args: argparse.Namespace) -> None:
                 ins_seg=scalabel2coco_ins_seg,
                 seg_track=scalabel2coco_seg_track,
             )[args.mode],
-            mask_mode=args.mask_mode,
             nproc=args.nproc,
         )
     coco = convert_func(frames, config)

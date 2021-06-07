@@ -21,7 +21,7 @@ class TestMaskToCoco(unittest.TestCase):
         mask = np.load(npy_file)
         gt_rle = np.load(rle_file, allow_pickle=True).tolist()
 
-        ann = set_seg_object_geometry(ann, mask, mask_mode="rle")
+        ann = set_seg_object_geometry(ann, mask)
         self.assertListEqual(
             ann["bbox"], [199.0, 192.0, 403.0, 332.0]  # type: ignore
         )
