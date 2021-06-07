@@ -140,4 +140,3 @@ def close_contour(contour: np.ndarray) -> np.ndarray:
     if not np.array_equal(contour[0], contour[-1]):
         contour = np.vstack((contour, contour[0]))
     return contour
-
