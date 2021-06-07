@@ -21,6 +21,8 @@ __all__ = [
     "polygon_to_poly2ds",
 ]
 
+TOLERANCE = 1.0
+
 
 def get_coco_categories(config: Config) -> List[CatType]:
     """Get CatType categories for saving these in COCO format annotations."""
