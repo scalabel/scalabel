@@ -46,7 +46,6 @@ setuptools.setup(
         "python-dateutil",
         "PyYAML",
         "requests",
-        "scikit-image",
         "tabulate",
         "tqdm",
         "toml",

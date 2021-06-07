@@ -10,7 +10,6 @@ from .transforms import (
     bbox_to_box2d,
     box2d_to_bbox,
     mask_to_box2d,
-    mask_to_polygon,
     poly2ds_to_mask,
     polygon_to_poly2ds,
 )
@@ -78,18 +77,3 @@ class TestScalabel2COCOFuncs(unittest.TestCase):
         poly2ds = [Poly2D(**poly) for poly in polys]
         mask = poly2ds_to_mask(SHAPE, poly2ds).tolist()
         self.assertListEqual(mask, gt_mask)
-
-    def test_mask_to_polygon(self) -> None:
-        """Check the mask to polygon conversion."""
-        npy_file = get_test_file("mask.npy")
-        poly_file = get_test_file("polygon.npy")
-
-        mask = np.load(npy_file).tolist()
-        gt_polygon = np.load(poly_file).tolist()
-
-        polygon = mask_to_polygon(mask, 0, 0)
-        self.assertEqual(polygon, gt_polygon)
-
-
-if __name__ == "__main__":
-    unittest.main()

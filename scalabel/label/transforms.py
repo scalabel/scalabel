@@ -6,7 +6,6 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.path import Path
-from skimage import measure
 
 from .coco_typing import CatType, PolygonType
 from .typing import Box2D, Config, ImageSize, Poly2D
@@ -17,11 +16,12 @@ __all__ = [
     "bbox_to_box2d",
     "box2d_to_bbox",
     "mask_to_box2d",
-    "mask_to_polygon",
     "poly_to_patch",
     "poly2ds_to_mask",
     "polygon_to_poly2ds",
 ]
+
+TOLERANCE = 1.0
 
 
 def get_coco_categories(config: Config) -> List[CatType]:
@@ -140,32 +140,3 @@ def close_contour(contour: np.ndarray) -> np.ndarray:
     if not np.array_equal(contour[0], contour[-1]):
         contour = np.vstack((contour, contour[0]))
     return contour
-
-
-def mask_to_polygon(
-    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: float = 0.5
-) -> List[List[float]]:
-    """Convert BitMask to polygon."""
-    polygons = []
-    padded_binary_mask = np.pad(
-        binary_mask, pad_width=1, mode="constant", constant_values=0
-    )
-    contours = measure.find_contours(padded_binary_mask, 0.5)
-    contours = np.subtract(contours, 1)
-    for contour in contours:
-        contour = close_contour(contour)
-        contour = measure.approximate_polygon(contour, tolerance)
-        if len(contour) < 3:
-            continue
-        contour = np.flip(contour, axis=1)
-        segmentation = contour.ravel().tolist()
-        segmentation = [0 if i < 0 else i for i in segmentation]
-        for i, _ in enumerate(segmentation):
-            if i % 2 == 0:
-                segmentation[i] = float(segmentation[i] + x_1)
-            else:
-                segmentation[i] = float(segmentation[i] + y_1)
-
-        polygons.append(segmentation)
-
-    return polygons
