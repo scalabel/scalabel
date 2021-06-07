@@ -25,9 +25,9 @@ from PIL import Image
 from ..common.logger import logger
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
-from ..label.utils import check_crowd
+from ..label.utils import check_crowd, get_intrinsic_matrix
 from .geometry import Label3d
-from .helper import get_intrinsic_matrix, random_color
+from .helper import random_color
 
 
 @dataclass

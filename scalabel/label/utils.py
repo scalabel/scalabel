@@ -1,7 +1,30 @@
 """Utility functions for label."""
 from typing import Dict, List
 
-from .typing import Category, Label
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+from .typing import Category, Extrinsics, Intrinsics, Label
+
+
+def get_intrinsic_matrix(intrinsics: Intrinsics) -> np.ndarray:
+    """Get the camera intrinsic matrix."""
+    calibration = np.identity(3)
+    calibration[0, 2] = intrinsics.center[0]
+    calibration[1, 2] = intrinsics.center[1]
+    calibration[0, 0] = intrinsics.focal[0]
+    calibration[1, 1] = intrinsics.focal[1]
+    return calibration
+
+
+def get_extrinsic_matrix(extrinsics: Extrinsics) -> np.ndarray:
+    """Convert Extrinsics class object to rotation matrix."""
+    rot_mat = Rotation.from_euler("xyz", extrinsics.rotation).as_matrix()
+    translation = np.array(extrinsics.location)
+    extrinsics_mat = np.identity(4)
+    extrinsics_mat[:3, :3] = rot_mat
+    extrinsics_mat[-1, :3] = translation
+    return extrinsics_mat
 
 
 def get_leaf_categories(parent_categories: List[Category]) -> List[Category]:

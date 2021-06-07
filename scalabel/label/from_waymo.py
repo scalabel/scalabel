@@ -1,24 +1,48 @@
 """Convert Waymo Open format dataset to Scalabel."""
 import argparse
-import os
 import glob
 import math
-import numpy as np
-from typing import List
+import os
 from functools import partial
-from simple_waymo_open_dataset_reader import WaymoDataFileReader, dataset_pb2, label_pb2, utils
+from typing import List, Tuple
+
+import numpy as np
+from scipy.spatial.transform import Rotation
+from simple_waymo_open_dataset_reader import (
+    WaymoDataFileReader,
+    dataset_pb2,
+    label_pb2,
+    utils,
+)
 
 from ..common.parallel import pmap
 from .io import save
-from .typing import Frame, Label, ImageSize
+from .typing import (
+    Box2D,
+    Box3D,
+    Extrinsics,
+    Frame,
+    ImageSize,
+    Intrinsics,
+    Label,
+)
+from .utils import get_extrinsic_matrix, get_intrinsic_matrix
 
+# pylint: disable=no-member
 classes_type2name = {
-            label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",
-            label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",
-            label_pb2.Label.Type.TYPE_CYCLIST: "cyclist",
-            label_pb2.Label.Type.TYPE_SIGN: "sign",
-        }
-cameras_id2name = {1: 'FRONT', 2: 'FRONT_LEFT', 3: 'FRONT_RIGHT', 4: 'SIDE_LEFT', 5: 'SIDE_RIGHT'}
+    label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",
+    label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",
+    label_pb2.Label.Type.TYPE_CYCLIST: "cyclist",
+    label_pb2.Label.Type.TYPE_SIGN: "sign",
+}
+# pylint: enable=no-member
+cameras_id2name = {
+    1: "FRONT",
+    2: "FRONT_LEFT",
+    3: "FRONT_RIGHT",
+    4: "SIDE_LEFT",
+    5: "SIDE_RIGHT",
+}
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -35,31 +59,74 @@ def parse_arguments() -> argparse.Namespace:
         default=".'",
         help="Output path for Scalabel format annotations.",
     )
+    parser.add_argument(
+        "--use_lidar_labels",
+        action="store_true",
+        help="If the conversion script should use the LiDAR labels as GT for "
+        "conversion.",
+    )
+    parser.add_argument(
+        "--nproc",
+        type=int,
+        default=4,
+        help="number of processes for conversion",
+    )
     return parser.parse_args()
 
 
 def cart2hom(pts_3d: np.ndarray) -> np.ndarray:
-    """nx3 points in Cartesian to Homogeneous by appending 1"""
+    """Nx3 points in Cartesian to Homogeneous by appending ones."""
     n = pts_3d.shape[0]
     pts_3d_hom = np.hstack((pts_3d, np.ones((n, 1))))
     return pts_3d_hom
 
 
-def velo_to_rect(points, calib):
-    axes_transform = np.array([[0, -1, 0, 0],
-                               [0, 0, -1, 0],
-                               [1, 0, 0, 0],
-                               [0, 0, 0, 1]], dtype=np.float32)
+def project_points_to_image(
+    points: np.ndarray, intrinsics: np.ndarray
+) -> np.ndarray:
+    """Project Nx3 points to Nx2 pixel coordinates with 3x3 intrinsics."""
+    pts_3d_rect = cart2hom(points)
+    campad = np.identity(4)
+    campad[: intrinsics.shape[0], : intrinsics.shape[1]] = intrinsics
+    pts_2d = np.dot(pts_3d_rect, np.transpose(campad))  # nx3
+    pts_2d[:, 0] /= pts_2d[:, 2]
+    pts_2d[:, 1] /= pts_2d[:, 2]
+    return pts_2d[:, :2]  # type: ignore
+
+
+def rotation_y_to_alpha(
+    rotation_y: float, center_proj_x: float, focal_x: float, center_x: float
+) -> float:
+    """Convert rotation around y-axis to viewpoint angle (alpha)."""
+    alpha = rotation_y - math.atan2(center_proj_x - center_x, focal_x)
+    if alpha > math.pi:
+        alpha -= 2 * math.pi
+    if alpha <= -math.pi:
+        alpha += 2 * math.pi
+    return alpha
+
+
+def points_transform(points: np.ndarray, calib: np.ndarray) -> np.ndarray:
+    """Transform points from global to camera coordinate system."""
+    axes_transform = np.array(
+        [[0, -1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]],
+        dtype=np.float32,
+    )
     transform = np.matmul(axes_transform, np.linalg.inv(calib))
-    return np.dot(cart2hom(points), transform.T)[:, :3]
+    return np.dot(cart2hom(points), transform.T)[:, :3]  # type: ignore
 
 
-def heading_velo_to_rect(heading, calib):
+def heading_transform(heading: float, calib: np.ndarray) -> float:
+    """Transform heading from global to camera coordinate system."""
     # waymo heading given in lateral direction (negative)
-    points = np.array([[0., 0., 0.], [-1., 0., 0.]])
-    rot_mat = np.array([[np.cos(heading), -np.sin(heading), 0],
-                        [np.sin(heading), np.cos(heading), 0],
-                        [0, 0, 1]])
+    points = np.array([[0.0, 0.0, 0.0], [-1.0, 0.0, 0.0]])
+    rot_mat = np.array(
+        [
+            [np.cos(heading), -np.sin(heading), 0],
+            [np.sin(heading), np.cos(heading), 0],
+            [0, 0, 1],
+        ]
+    )
     points = np.dot(points, rot_mat.T)
     # first, transform to current camera coordinate system
     points = np.dot(cart2hom(points), np.linalg.inv(calib).T)
@@ -67,113 +134,206 @@ def heading_velo_to_rect(heading, calib):
     return math.atan2(points[1, 0] - points[0, 0], points[1, 1] - points[0, 1])
 
 
-def parse_frame(frame, frame_id: int, output_dir: str) -> List[Frame]:
-    lidar_labels, projected_lidar_labels, camera_labels, seq_token = frame.laser_labels, frame.projected_lidar_labels, \
-                                                                      frame.camera_labels, frame.context.name
-    frame_name = seq_token + "_{:07d}.jpg".format(frame_id)
+def parse_lidar_labels(
+    frame: dataset_pb2.Frame,
+    intrinsics: Intrinsics,
+    extrinsics: Extrinsics,
+    camera: str,
+    camera_id: int,
+) -> List[Label]:
+    """Parse the LiDAR-based annotations."""
+    labels = []
+    proj_lidar_labels = [
+        l.labels for l in frame.projected_lidar_labels if l.name == camera_id
+    ][0]
+    for label in proj_lidar_labels:
+        laser_label_id = label.id.replace(camera, "")[:-1]
+        laser_label = frame.laser_labels[
+            [l.id for l in frame.laser_labels].index(laser_label_id)
+        ]
+
+        # Assign a category name to the label
+        class_name = classes_type2name.get(label.type, None)
+        if not class_name:
+            continue
+
+        # Transform the label position to the camera space.
+        laser_box3d = laser_label.box
+        center = np.array(
+            [
+                [
+                    laser_box3d.center_x,
+                    laser_box3d.center_y,
+                    laser_box3d.center_z,
+                ]
+            ]
+        )
+        extrinsics_mat = get_extrinsic_matrix(extrinsics)
+        intrinsics_mat = get_intrinsic_matrix(intrinsics)
+        center = points_transform(center, extrinsics_mat)
+        center_proj = project_points_to_image(center, intrinsics_mat)[0]
+        heading = heading_transform(label.box.heading, extrinsics_mat)
+        dim = laser_box3d.height, laser_box3d.width, laser_box3d.length
+        box3d = Box3D(
+            orientation=(0.0, heading, 0.0),
+            location=tuple(center[0].tolist()),
+            dimension=dim,
+            alpha=rotation_y_to_alpha(
+                heading,
+                center_proj[0],
+                intrinsics.focal[0],
+                intrinsics.center[0],
+            ),
+        )
+
+        box2d = Box2D(
+            x1=label.box.center_x - label.box.length / 2,
+            y1=label.box.center_y - label.box.width / 2,
+            x2=label.box.center_x + label.box.length / 2,
+            y2=label.box.center_y + label.box.width / 2,
+        )
+        labels.append(
+            Label(category=class_name, box2d=box2d, box3d=box3d, id=label.id)
+        )
+    return labels
+
+
+def parse_camera_labels(
+    frame: dataset_pb2.Frame, camera_id: int
+) -> List[Label]:
+    """Parse the camera-based annotations."""
+    labels = []
+    camera_labels = [
+        l.labels for l in frame.camera_labels if l.name == camera_id
+    ][0]
+    for label in camera_labels:
+        if not label:
+            continue
+        # Assign a category name to the label
+        class_name = classes_type2name.get(label.type, None)
+        if not class_name:
+            continue
+
+        box2d = Box2D(
+            x1=label.box.center_x - label.box.length / 2,
+            y1=label.box.center_y - label.box.width / 2,
+            x2=label.box.center_x + label.box.length / 2,
+            y2=label.box.center_y + label.box.width / 2,
+        )
+        labels.append(Label(category=class_name, box2d=box2d, id=label.id))
+
+    return labels
+
+
+def parse_frame(
+    frame: dataset_pb2.Frame,
+    frame_id: int,
+    output_dir: str,
+    use_lidar_labels: bool = False,
+) -> List[Frame]:
+    """Parse information in single frame to Scalabel Frame per camera."""
+    frame_name = frame.context.name + "_{:07d}.jpg".format(frame_id)
     results = []
-    for cam_idx, cam in enumerate(cams):
-        proj_lidar_labels = [l for l in projected_lidar_labels if l.name == cam][0]
-
-        # add image to coco
-        intrinsics, extrinsics, img_size = calib[cam_idx]['intrinsic'], calib[cam_idx]['extrinsic'], calib[cam_idx]['img_wh']
-        seq_dir = seq_token + '_' + camera_names[cam_idx].lower()
-        img_filepath = os.path.join(output_dir, seq_dir, 'images', frame_name)
-
-        # compute cam2global
-        global_from_car = np.array(frame.pose.transform).reshape(4, 4)
-        cam_to_global = np.dot(global_from_car, extrinsics)
+    for camera_id, camera in cameras_id2name.items():
+        extrinsics, intrinsics, image_size = get_calibration(frame, camera_id)
+        seq_dir = frame.context.name + "_" + camera.lower()
+        img_filepath = os.path.join(output_dir, seq_dir, frame_name)
 
         if not os.path.exists(img_filepath):
-            img = imgs[cam_idx]
-            save(img_filepath, img)  # TODO img save
+            if not os.path.exists(os.path.dirname(img_filepath)):
+                os.mkdir(os.path.dirname(img_filepath))
+            im_bytes = utils.get(frame.images, camera_id).image
+            open(img_filepath, "wb").write(im_bytes)
 
+        if use_lidar_labels:
+            labels = parse_lidar_labels(
+                frame, intrinsics, extrinsics, camera, camera_id
+            )
+        else:
+            labels = parse_camera_labels(frame, camera_id)
 
-        for i, cam_label in enumerate(proj_lidar_labels.labels):
-            label_id = cam_label.id.replace(camera_names[cam_idx], '')[:-1]
-            label = lidar_labels[[l.id for l in lidar_labels].index(label_id)]
-
-            # Assign a category name to the label
-            class_name = classes.get(label.type, None)
-            if not class_name:
-                continue
-
-            # Transform the label position to the camera space.
-            box3d = np.empty((7,), dtype=np.float32)
-            ctr = np.array(
-                [[label.box.center_x, label.box.center_y, label.box.center_z]])
-            box3d[0:3] = velo_to_rect(ctr, extrinsics)[0]
-            box3d[3:6] = label.box.height, label.box.width, label.box.length
-            box3d[6] = heading_velo_to_rect(label.box.heading, extrinsics)
-            box2d = np.array(
-                [cam_label.box.center_x - cam_label.box.length / 2,
-                 cam_label.box.center_y - cam_label.box.width / 2,
-                 cam_label.box.length,
-                 cam_label.box.width])
-
-        frame = Frame(name=frame_name, video_name=seq_dir, frame_index=frame_id, size=img_size)
-        results.append(frame)
+        f = Frame(
+            name=frame_name,
+            video_name=seq_dir,
+            frame_index=frame_id,
+            size=image_size,
+            extrinsics=extrinsics,
+            intrinsics=intrinsics,
+            labels=labels,
+        )
+        results.append(f)
 
     return results
 
 
-def get_cams_from_frame(frame, cameras, decode_image=True):
-    imgs = []
-    calib = []
-    for camera_name in cameras:
-        camera_calibration = utils.get(frame.context.camera_calibrations, camera_name)
+def get_calibration(
+    frame: dataset_pb2.Frame, camera_id: int
+) -> Tuple[Extrinsics, Intrinsics, ImageSize]:
+    """Load and decode calibration data of camera in frame."""
+    calib = utils.get(frame.context.camera_calibrations, camera_id)
+    cam2car = np.array(calib.extrinsic.transform).reshape(4, 4)
+    car2global = np.array(frame.pose.transform).reshape(4, 4)
+    cam2global = np.dot(car2global, cam2car)
+    extrinsics = Extrinsics(
+        location=(cam2global[-1, 0], cam2global[-1, 1], cam2global[-1, 2]),
+        rotation=tuple(
+            Rotation.from_matrix(cam2global[:3, :3]).as_euler("xyz").tolist()
+        ),
+    )
+    intrinsics = Intrinsics(
+        focal=(calib.intrinsic[0], calib.intrinsic[1]),
+        center=(calib.intrinsic[2], calib.intrinsic[3]),
+    )
+    image_size = ImageSize(height=calib.height, width=calib.width)
+    return extrinsics, intrinsics, image_size
 
-        # Decode image and calibration
-        if decode_image:
-            camera = utils.get(frame.images, camera_name)
-            imgs.append(camera.image)
-        camera_extrinsic = np.array(camera_calibration.extrinsic.transform).reshape(4, 4)
-        camera_intrinsic = np.eye(3)
-        camera_intrinsic[0, 0] = camera_calibration.intrinsic[0]
-        camera_intrinsic[1, 1] = camera_calibration.intrinsic[1]
-        camera_intrinsic[0, 2] = camera_calibration.intrinsic[2]
-        camera_intrinsic[1, 2] = camera_calibration.intrinsic[3]
-        img_size = ImageSize(height=camera_calibration.height, width=camera_calibration.width)
-        calib.append({'extrinsic': camera_extrinsic, 'intrinsic': camera_intrinsic, 'img_size': img_size})
 
-    return imgs, calib
-
-
-def parse_record(output_dir: str, record_name: str) -> List[Frame]:
-    """Parse data into List of Scalabel Label type per frame."""
+def parse_record(
+    output_dir: str, use_lidar_labels: bool, record_name: str
+) -> List[Frame]:
+    """Parse data into List of Scalabel format annotations."""
     datafile = WaymoDataFileReader(record_name)
     table = datafile.get_record_table()
     frames = []
-    for frame_id in range(len(table)):
-        offset = table[frame_id]
-
-        # jump to correct place before reading
+    for frame_id, offset in enumerate(table):
+        # jump to correct place, read frame
         datafile.seek(offset)
-        # read frame
         frame = datafile.read_record()
 
-        # Get images, calibration, lidar and targets
-        imgs, calib = get_cams_from_frame(frame, cams)
-
         # add images and annotations to coco
-        frames.extend(parse_frame(frame, frame_id, output_dir))
+        frame = parse_frame(frame, frame_id, output_dir, use_lidar_labels)
+        frames.extend(frame)
 
     return frames
 
 
-def from_waymo(data_path: str, output_dir: str) -> List[Frame]:
+def from_waymo(
+    data_path: str,
+    output_dir: str,
+    use_lidar_labels: bool = False,
+    nproc: int = 4,
+) -> List[Frame]:
     """Function converting Waymo data to Scalabel format."""
-    func = partial(parse_record, output_dir)
-    frames = pmap(func, [filename for filename in glob.glob(data_path + "/*.tfrecord")])
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    func = partial(parse_record, output_dir, use_lidar_labels)
+    partial_frames = pmap(
+        func,
+        (filename for filename in glob.glob(data_path + "/*.tfrecord")),
+        nprocs=nproc,
+    )
+    frames = []
+    for f in partial_frames:
+        frames.extend(f)
     return frames
 
 
 def run(args: argparse.Namespace) -> None:
     """Run conversion with command line arguments."""
-    if not os.path.exists(args.output):
-        os.mkdir(args.output)
-
-    result = from_waymo(args.input, args.output)
+    result = from_waymo(
+        args.input, args.output, args.use_lidar_labels, args.nproc
+    )
     save(os.path.join(args.output, "scalabel_anns.json"), result)
 
 
