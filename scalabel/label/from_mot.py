@@ -4,10 +4,12 @@ import os
 from collections import defaultdict
 from typing import Dict, List, Union
 
+from PIL import Image
+
 from ..common.io import load_file_as_list
 from .io import save
 from .transforms import bbox_to_box2d
-from .typing import Frame, Label
+from .typing import Frame, ImageSize, Label
 
 # Classes in MOT:
 #   1: 'pedestrian'
@@ -65,19 +67,19 @@ def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
         class_id = gt[7]
         if class_id not in NAME_MAPPING:
             continue
-        class_id = NAME_MAPPING[class_id]
+        class_name = NAME_MAPPING[class_id]
         frame_id, ins_id = map(int, gt[:2])
         bbox = list(map(float, gt[2:6]))
         box2d = bbox_to_box2d(bbox)
         ignored = False
-        if class_id in IGNORE:
+        if class_name in IGNORE:
             ignored = True
-            class_id = "pedestrian"
+            class_name = "pedestrian"
         attrs = dict(
             visibility=float(gt[8]), ignored=ignored
         )  # type: Dict[str, Union[bool, float, str]]
         ann = Label(
-            category=class_id,
+            category=class_name,
             id=ins_id,
             box2d=box2d,
             attributes=attrs,
@@ -96,11 +98,15 @@ def from_mot(data_path: str) -> List[Frame]:
         )
 
         for i, img_name in enumerate(img_names):
+            assert i + 1 == int(img_name.replace(".jpg", ""))
+            img_filepath = os.path.join(data_path, video, "img1", img_name)
+            img = Image.open(img_filepath)
             frame = Frame(
                 name=os.path.join("img1", img_name),
                 video_name=video,
                 frame_index=i,
-                labels=annotations[i] if i in annotations else None,
+                size=ImageSize(width=img.width, height=img.height),
+                labels=annotations[i + 1] if i in annotations else None,
             )
             frames.append(frame)
     return frames

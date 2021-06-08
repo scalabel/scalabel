@@ -7,7 +7,6 @@ from functools import partial
 from typing import List, Tuple
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 from simple_waymo_open_dataset_reader import (
     WaymoDataFileReader,
     dataset_pb2,
@@ -26,7 +25,11 @@ from .typing import (
     Intrinsics,
     Label,
 )
-from .utils import get_extrinsic_matrix, get_intrinsic_matrix
+from .utils import (
+    get_extrinsics_from_matrix,
+    get_matrix_from_extrinsics,
+    get_matrix_from_intrinsics,
+)
 
 # pylint: disable=no-member
 classes_type2name = {
@@ -137,7 +140,7 @@ def heading_transform(heading: float, calib: np.ndarray) -> float:
 def parse_lidar_labels(
     frame: dataset_pb2.Frame,
     intrinsics: Intrinsics,
-    extrinsics: Extrinsics,
+    cam2car: Extrinsics,
     camera: str,
     camera_id: int,
 ) -> List[Label]:
@@ -168,11 +171,11 @@ def parse_lidar_labels(
                 ]
             ]
         )
-        extrinsics_mat = get_extrinsic_matrix(extrinsics)
-        intrinsics_mat = get_intrinsic_matrix(intrinsics)
-        center = points_transform(center, extrinsics_mat)
+        cam2car_mat = get_matrix_from_extrinsics(cam2car)
+        intrinsics_mat = get_matrix_from_intrinsics(intrinsics)
+        center = points_transform(center, cam2car_mat)
         center_proj = project_points_to_image(center, intrinsics_mat)[0]
-        heading = heading_transform(label.box.heading, extrinsics_mat)
+        heading = heading_transform(laser_box3d.heading, cam2car_mat)
         dim = laser_box3d.height, laser_box3d.width, laser_box3d.length
         box3d = Box3D(
             orientation=(0.0, heading, 0.0),
@@ -225,6 +228,24 @@ def parse_camera_labels(
     return labels
 
 
+def get_calibration(
+    frame: dataset_pb2.Frame, camera_id: int
+) -> Tuple[Extrinsics, Extrinsics, Intrinsics, ImageSize]:
+    """Load and decode calibration data of camera in frame."""
+    calib = utils.get(frame.context.camera_calibrations, camera_id)
+    cam2car = np.array(calib.extrinsic.transform).reshape(4, 4)
+    car2global = np.array(frame.pose.transform).reshape(4, 4)
+    cam2global = np.dot(car2global, cam2car)
+    extrinsics = get_extrinsics_from_matrix(cam2global)
+    extrinsics_local = get_extrinsics_from_matrix(cam2car)
+    intrinsics = Intrinsics(
+        focal=(calib.intrinsic[0], calib.intrinsic[1]),
+        center=(calib.intrinsic[2], calib.intrinsic[3]),
+    )
+    image_size = ImageSize(height=calib.height, width=calib.width)
+    return extrinsics, extrinsics_local, intrinsics, image_size
+
+
 def parse_frame(
     frame: dataset_pb2.Frame,
     frame_id: int,
@@ -235,7 +256,9 @@ def parse_frame(
     frame_name = frame.context.name + "_{:07d}.jpg".format(frame_id)
     results = []
     for camera_id, camera in cameras_id2name.items():
-        extrinsics, intrinsics, image_size = get_calibration(frame, camera_id)
+        cam2global, cam2car, intrinsics, image_size = get_calibration(
+            frame, camera_id
+        )
         seq_dir = frame.context.name + "_" + camera.lower()
         img_filepath = os.path.join(output_dir, seq_dir, frame_name)
 
@@ -247,7 +270,7 @@ def parse_frame(
 
         if use_lidar_labels:
             labels = parse_lidar_labels(
-                frame, intrinsics, extrinsics, camera, camera_id
+                frame, intrinsics, cam2car, camera, camera_id
             )
         else:
             labels = parse_camera_labels(frame, camera_id)
@@ -257,35 +280,13 @@ def parse_frame(
             video_name=seq_dir,
             frame_index=frame_id,
             size=image_size,
-            extrinsics=extrinsics,
+            extrinsics=cam2global,
             intrinsics=intrinsics,
             labels=labels,
         )
         results.append(f)
 
     return results
-
-
-def get_calibration(
-    frame: dataset_pb2.Frame, camera_id: int
-) -> Tuple[Extrinsics, Intrinsics, ImageSize]:
-    """Load and decode calibration data of camera in frame."""
-    calib = utils.get(frame.context.camera_calibrations, camera_id)
-    cam2car = np.array(calib.extrinsic.transform).reshape(4, 4)
-    car2global = np.array(frame.pose.transform).reshape(4, 4)
-    cam2global = np.dot(car2global, cam2car)
-    extrinsics = Extrinsics(
-        location=(cam2global[-1, 0], cam2global[-1, 1], cam2global[-1, 2]),
-        rotation=tuple(
-            Rotation.from_matrix(cam2global[:3, :3]).as_euler("xyz").tolist()
-        ),
-    )
-    intrinsics = Intrinsics(
-        focal=(calib.intrinsic[0], calib.intrinsic[1]),
-        center=(calib.intrinsic[2], calib.intrinsic[3]),
-    )
-    image_size = ImageSize(height=calib.height, width=calib.width)
-    return extrinsics, intrinsics, image_size
 
 
 def parse_record(

@@ -25,7 +25,7 @@ from PIL import Image
 from ..common.logger import logger
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
-from ..label.utils import check_crowd, get_intrinsic_matrix
+from ..label.utils import check_crowd, get_matrix_from_intrinsics
 from .geometry import Label3d
 from .helper import random_color
 
@@ -587,7 +587,7 @@ class LabelViewer:
         """Generate individual bounding box from 3d label."""
         label = Label3d.from_box3d(box3d)
         edges = label.get_edges_with_visibility(
-            get_intrinsic_matrix(intrinsics)
+            get_matrix_from_intrinsics(intrinsics)
         )
 
         box_color = self.get_label_color(label_id)
