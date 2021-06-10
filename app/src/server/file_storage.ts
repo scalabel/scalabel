@@ -2,7 +2,6 @@ import { readdir } from "fs"
 import * as fs from "fs-extra"
 import * as path from "path"
 import * as util from "util"
-import sanitize from "sanitize-filename"
 
 import Logger from "./logger"
 import { Storage } from "./storage"
@@ -96,7 +95,7 @@ export class FileStorage extends Storage {
    * @param key
    */
   public async load(key: string): Promise<string> {
-    return (await fs.readFile(sanitize(this.fullFile(key)))).toString()
+    return (await fs.readFile(this.fullFile(key))).toString()
   }
 
   /**
