@@ -306,6 +306,12 @@ export class Listeners {
       return
     }
 
+    // TODO: This if clause aims to solve the lgtm alert.
+    // Could be removed in the future if better way found.
+    if (req.body.items !== "examples/image_list.yml") {
+      throw Error(`req.body.items should be "examples/image_list.yml" here.`)
+    }
+
     // Read in the data
     const storage = new FileStorage("")
     storage.setExt("")
