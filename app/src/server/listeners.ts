@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { File } from "formidable"
+import { filterXSS } from "xss"
 import _ from "lodash"
 
 import { DashboardContents } from "../components/dashboard"
@@ -305,6 +306,12 @@ export class Listeners {
       return
     }
 
+    // TODO: This if clause aims to solve the lgtm alert.
+    // Could be removed in the future if better way found.
+    if (req.body.items !== "examples/image_list.yml") {
+      throw Error(`req.body.items should be "examples/image_list.yml" here.`)
+    }
+
     // Read in the data
     const storage = new FileStorage("")
     storage.setExt("")
@@ -357,7 +364,7 @@ export class Listeners {
       res.send(JSON.stringify(stats))
     } catch (err) {
       Logger.error(err)
-      res.send(err.message)
+      res.send(filterXSS(err.message))
     }
   }
 
@@ -391,7 +398,7 @@ export class Listeners {
       res.send(JSON.stringify(contents))
     } catch (err) {
       Logger.error(err)
-      res.send(err.message)
+      res.send(filterXSS(err.message))
     }
   }
 
@@ -431,7 +438,7 @@ export class Listeners {
     } catch (err) {
       Logger.error(err)
       // Alert the user that something failed
-      res.status(400).send(err.message)
+      res.status(400).send(filterXSS(err.message))
     }
   }
 }
