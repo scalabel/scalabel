@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { File } from "formidable"
+import { filterXSS } from "xss"
 import _ from "lodash"
 
 import { DashboardContents } from "../components/dashboard"
@@ -357,7 +358,7 @@ export class Listeners {
       res.send(JSON.stringify(stats))
     } catch (err) {
       Logger.error(err)
-      res.send(err.message)
+      res.send(filterXSS(err.message))
     }
   }
 
@@ -391,7 +392,7 @@ export class Listeners {
       res.send(JSON.stringify(contents))
     } catch (err) {
       Logger.error(err)
-      res.send(err.message)
+      res.send(filterXSS(err.message))
     }
   }
 
@@ -431,7 +432,7 @@ export class Listeners {
     } catch (err) {
       Logger.error(err)
       // Alert the user that something failed
-      res.status(400).send(err.message)
+      res.status(400).send(filterXSS(err.message))
     }
   }
 }
