@@ -73,7 +73,7 @@ class LabelLayout extends React.Component<Props, LayoutState> {
    */
   constructor(props: Props) {
     super(props)
-    this.setState({ left_size: 0, center_size: 0, right_size: 0 })
+    this.state = { left_size: 0, center_size: 0, right_size: 0 }
     Session.subscribe(this.onStateUpdated.bind(this))
   }
 
