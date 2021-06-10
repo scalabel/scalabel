@@ -5,7 +5,6 @@ import * as util from "util"
 
 import Logger from "./logger"
 import { Storage } from "./storage"
-import { checkVaildKey } from "./util"
 
 /**
  * Implements local file storage
@@ -96,7 +95,7 @@ export class FileStorage extends Storage {
    * @param key
    */
   public async load(key: string): Promise<string> {
-    if (checkVaildKey(key)) {
+    if (this.checkVaildKey(key)) {
       return (await fs.readFile(this.fullFile(key))).toString()
     } else {
       throw Error(`Unsupported key: ${key}`)
@@ -125,5 +124,21 @@ export class FileStorage extends Storage {
    */
   public async mkdir(key: string): Promise<void> {
     await fs.ensureDir(this.fullDir(key))
+  }
+
+  /**
+   * Check whether a key is vaild when passed in file storage
+   *
+   * @param key
+   */
+  public checkVaildKey(key: string): boolean {
+    const whiteList = /^(\/tmp|project|myProject|testGet|fakeFile|metaData)/
+
+    let valid: boolean = false
+    key.search(whiteList) >= 0 ? (valid = true) : (valid = false)
+    if (key.search(/\.\.\//) >= 0) {
+      valid = false
+    }
+    return valid
   }
 }
