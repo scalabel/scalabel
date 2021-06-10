@@ -23,6 +23,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --ignore-installed -r scripts/requirements.txt
+          mypy --install-types
       - name: Lint
         run: |
           python3 -m pylint scalabel
