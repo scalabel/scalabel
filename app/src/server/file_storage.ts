@@ -96,8 +96,7 @@ export class FileStorage extends Storage {
    */
   public async load(key: string): Promise<string> {
     if (this.checkVaildKey(key)) {
-      key = this.fullFile(key)
-      return (await fs.readFile(key)).toString()
+      return (await fs.readFile(this.fullFile(key))).toString()
     } else {
       throw Error(`Unsupported key: ${key}`)
     }
