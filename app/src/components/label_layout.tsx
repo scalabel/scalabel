@@ -59,15 +59,6 @@ interface State {
   right_size: number
 }
 
-interface LayoutState {
-  /** The width of the left side bar */
-  left_size: number
-  /** The height of the center side bar */
-  center_size: number
-  /** The width of the right side bar */
-  right_size: number
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(window as any).__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true
 
@@ -75,45 +66,6 @@ interface LayoutState {
  * Layout of the labeling interface
  */
 class LabelLayout extends React.Component<Props, State> {
-  /** The state of the layout */
-  public layoutState: LayoutState
-
-  /**
-   * Constructor
-   *
-   * @param props
-   */
-  constructor(props: Props) {
-    super(props)
-    this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
-    Session.subscribe(this.onStateUpdated.bind(this))
-  }
-
-  /**
-   * called on redux store update
-   */
-  public onStateUpdated(): void {
-    this.setState(this.layoutState)
-  }
-
-  /**
-   * Handler on change
-   *
-   * @param {number} size
-   * @param {string} position
-   */
-  public handleOnChange(size: number, position: string): void {
-    const layoutState = { ...this.layoutState }
-    if (position === "left" && this.layoutState.left_size !== size) {
-      layoutState.left_size = size
-    } else if (position === "center" && this.layoutState.center_size !== size) {
-      layoutState.center_size = size
-    } else if (position === "right" && this.layoutState.right_size !== size) {
-      layoutState.right_size = size
-    }
-    this.setState(layoutState)
-  }
-
   /**
    * Split component with the second component optional
    *
@@ -127,8 +79,6 @@ class LabelLayout extends React.Component<Props, State> {
    * @param {number} max - the maximum size
    * @param {string} primary - which component the size constraint is for
    * the second component
-   * @param {string} position - left, center or right:
-   * which size to update in layoutState
    * @return {Component}
    */
   public split(
@@ -140,8 +90,7 @@ class LabelLayout extends React.Component<Props, State> {
     min: number,
     dflt: number,
     max: number,
-    primary: "first" | "second" = "first",
-    position: string = "center"
+    primary: "first" | "second" = "first"
   ): React.ReactNode {
     if (isNodeEmpty(comp1)) {
       return
@@ -154,9 +103,6 @@ class LabelLayout extends React.Component<Props, State> {
         maxSize={max}
         primary={primary}
         pane1Style={{ overflowY: "auto", overflowX: "auto" }}
-        onChange={(size) => {
-          this.handleOnChange(size, position)
-        }}
       >
         <div className={name1}>{comp1}</div>
         <div className={name2}>{comp2}</div>
@@ -244,8 +190,7 @@ class LabelLayout extends React.Component<Props, State> {
                 bottomMinHeight,
                 bottomDefaultHeight,
                 bottomMaxHeight,
-                "second",
-                "center"
+                "second"
               ),
 
               // Right sidebar
@@ -265,8 +210,7 @@ class LabelLayout extends React.Component<Props, State> {
               rightMinWidth,
               rightDefaultWidth,
               rightMaxWidth,
-              "second",
-              "right"
+              "second"
             ),
 
             "leftSidebar",
@@ -274,8 +218,7 @@ class LabelLayout extends React.Component<Props, State> {
             leftMinWidth,
             leftDefaultWidth,
             leftMaxWidth,
-            "first",
-            "left"
+            "first"
           )}
         </main>
         {/* End footer */}
