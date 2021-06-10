@@ -23,11 +23,11 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install --ignore-installed -r scripts/requirements.txt
-      - name: Install mypy types
+      - name: Build mypy cache
         continue-on-error: true
-        run: |
-          python3 -m mypy scalabel
-          python3 -m mypy --install-types
+        run: python3 -m mypy scalabel
+      - name: Install mypy types
+        run: python3 -m mypy --install-types
       - name: Lint
         run: |
           python3 -m pylint scalabel
