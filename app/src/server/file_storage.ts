@@ -5,6 +5,7 @@ import * as util from "util"
 
 import Logger from "./logger"
 import { Storage } from "./storage"
+import { checkVaildKey } from "./util"
 
 /**
  * Implements local file storage
@@ -95,7 +96,11 @@ export class FileStorage extends Storage {
    * @param key
    */
   public async load(key: string): Promise<string> {
-    return (await fs.readFile(this.fullFile(key))).toString()
+    if (checkVaildKey(key)) {
+      return (await fs.readFile(this.fullFile(key))).toString()
+    } else {
+      throw Error(`Unsupported key: ${key}`)
+    }
   }
 
   /**

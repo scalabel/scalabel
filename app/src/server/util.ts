@@ -324,3 +324,19 @@ export function getPyConnFailedMsg(endpoint: string, message: string): string {
 export async function sleep(milliseconds: number): Promise<object> {
   return await new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
+
+/**
+ * Check whether a key is vaild when passed in file storage
+ *
+ * @param key
+ */
+export function checkVaildKey(key: string): boolean {
+  const whiteList = /^(\/tmp|project|myProject|testGet|fakeFile|metaData)/
+
+  let valid: boolean = false
+  key.search(whiteList) >= 0 ? (valid = true) : (valid = false)
+  if (key.search(/\.\.\//) >= 0) {
+    valid = false
+  }
+  return valid
+}
