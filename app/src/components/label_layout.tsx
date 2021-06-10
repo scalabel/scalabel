@@ -103,7 +103,7 @@ class LabelLayout extends React.Component<Props, State> {
    * @param {string} position
    */
   public handleOnChange(size: number, position: string): void {
-    const layoutState = this.layoutState
+    const layoutState = { ...this.layoutState }
     if (position === "left" && this.layoutState.left_size !== size) {
       layoutState.left_size = size
     } else if (position === "center" && this.layoutState.center_size !== size) {
