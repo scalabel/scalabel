@@ -96,7 +96,9 @@ export class FileStorage extends Storage {
    */
   public async load(key: string): Promise<string> {
     if (this.checkVaildKey(key)) {
-      return (await fs.readFile(this.fullFile(key))).toString()
+      return (
+        await fs.readFile(this.sanitizeKey(this.fullFile(key)))
+      ).toString()
     } else {
       throw Error(`Unsupported key: ${key}`)
     }
@@ -140,5 +142,23 @@ export class FileStorage extends Storage {
       valid = false
     }
     return valid
+  }
+
+  /**
+   * Sanitize to avoid lgtm error
+   *
+   * @param key
+   */
+  public sanitizeKey(key: string): string {
+    const illegalRe = /[?<>\\:*|"]/g
+    const reservedRe = /^\.+$/
+    const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i
+    const windowsTrailingRe = /[. ]+$/
+    const sanitized = key
+      .replace(illegalRe, "")
+      .replace(reservedRe, "")
+      .replace(windowsReservedRe, "")
+      .replace(windowsTrailingRe, "")
+    return sanitized
   }
 }
