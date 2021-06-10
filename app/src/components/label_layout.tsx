@@ -50,15 +50,6 @@ interface Props {
   classes: ClassType
 }
 
-interface State {
-  /** The width of the left side bar */
-  left_size: number
-  /** The height of the center side bar */
-  center_size: number
-  /** The width of the right side bar */
-  right_size: number
-}
-
 interface LayoutState {
   /** The width of the left side bar */
   left_size: number
@@ -74,10 +65,7 @@ interface LayoutState {
 /**
  * Layout of the labeling interface
  */
-class LabelLayout extends React.Component<Props, State> {
-  /** The state of the layout */
-  public layoutState: LayoutState
-
+class LabelLayout extends React.Component<Props, LayoutState> {
   /**
    * Constructor
    *
@@ -85,7 +73,7 @@ class LabelLayout extends React.Component<Props, State> {
    */
   constructor(props: Props) {
     super(props)
-    this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
+    this.setState({ left_size: 0, center_size: 0, right_size: 0 })
     Session.subscribe(this.onStateUpdated.bind(this))
   }
 
@@ -93,7 +81,11 @@ class LabelLayout extends React.Component<Props, State> {
    * called on redux store update
    */
   public onStateUpdated(): void {
-    this.setState(this.layoutState)
+    this.setState(
+      (state: LayoutState): LayoutState => {
+        return state
+      }
+    )
   }
 
   /**
@@ -103,15 +95,19 @@ class LabelLayout extends React.Component<Props, State> {
    * @param {string} position
    */
   public handleOnChange(size: number, position: string): void {
-    const layoutState = { ...this.layoutState }
-    if (position === "left" && this.layoutState.left_size !== size) {
-      layoutState.left_size = size
-    } else if (position === "center" && this.layoutState.center_size !== size) {
-      layoutState.center_size = size
-    } else if (position === "right" && this.layoutState.right_size !== size) {
-      layoutState.right_size = size
-    }
-    this.setState(layoutState)
+    this.setState(
+      (state: LayoutState): LayoutState => {
+        const newState = { ...state }
+        if (position === "left" && state.left_size !== size) {
+          newState.left_size = size
+        } else if (position === "center" && state.center_size !== size) {
+          newState.center_size = size
+        } else if (position === "right" && state.right_size !== size) {
+          newState.right_size = size
+        }
+        return newState
+      }
+    )
   }
 
   /**
