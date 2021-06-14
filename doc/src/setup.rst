@@ -25,9 +25,9 @@ jump to :ref:`quick-start`.
 
     If you have a local folder of images or point clouds to label, you can move
     them to ``local-data/items``. After launching the server (finishing Step 3
-    or 4), the url for the images will be http://localhost:8686/items, assuming
-    the port in the scalabel config is 8686. The url of the example image
-    ``local-data/items/examples/cat.webp`` is
+    or 4), the url for the images will start with http://localhost:8686/items, 
+    assuming the port in the scalabel config is 8686. The url of the example 
+    image ``local-data/items/examples/cat.webp`` is
     http://localhost:8686/items/examples/cat.webp. Any files in the `items`
     folder and subfolders will be served. Files at
     ``local-data/items/{subpath}`` are available at
@@ -60,8 +60,8 @@ jump to :ref:`quick-start`.
     This is an alternative to using docker. We assume you have already installed
     `Homebrew <https://brew.sh/>`_ if you are using Mac OS X and you have
     ``apt-get`` if you are on Ubuntu. The code requires Python 3.7 or above.
-    Please check [how to upgrade your Python](#upgrade-python) if you don't have
-    the right version. We use 3.8 by default. Depending your OS, run the script
+    Please check :ref:`Installation Tips` if you don't have the right version.
+    We use 3.8 by default. Depending on your OS, run the script
 
     .. code-block:: bash
     
@@ -98,5 +98,5 @@ jump to :ref:`quick-start`.
 
     .. code-block:: bash
     
-        python3 -m bdd_data.vis.labels -l <your_downloaded_label_path.json>
+        python3 -m bdd100k.vis.labels -l <your_downloaded_label_path.json>
     
