@@ -301,7 +301,7 @@ export abstract class Label2D {
         }
       } else if (attribute.toolType === "list") {
         if (
-          Number(attributeId) in attribute &&
+          Number(attributeId) in Object.keys(attribute.tagSuffixes) &&
           attributes[Number(attributeId)][0] > 0
         ) {
           abbr +=

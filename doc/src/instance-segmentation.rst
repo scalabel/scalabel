@@ -1,9 +1,9 @@
-Instance Segmentation
+2D Instance Segmentation
 ---------------------
 
 Annotating instance segmentation involves drawing polygons. Simply click on the
-image to start a label, and close the path to finish drawing. Double-click on a
-label to select it.
+image to start a label, and close the path to finish drawing. Click on the
+boundary to select the label.
 
 Dragging the midpoint on an edge turns the midpoint into a vertex. Click the
 midpoint of an edge while pressing ``c`` makes the edge a bezier curve. You can
@@ -15,14 +15,24 @@ normal edge, click on a control point while pressing ``c``.
    Drawing a segmentation label
 
 Sometimes an instance can be divided into multiple parts in the image due to
-occlusion. To link different polygons, select a segmentation label, and press
-``Ctrl-L`` (``Cmd-L`` for Mac users) or the ``Link`` button to start linking.
-Click all labels that you want to link, and hit ``Enter`` to finish linking.
+occlusion. To link different polygons, first press ``Ctrl`` (``Cmd``) to select
+polygons you want to link, then press ``l`` (lowercase) to link these selected
+polygons. Press ``L`` (uppercase) to unlink the label.
 
 .. figure:: ../media/doc/videos/seg2d_link.gif
 
-   Linking segmentation labels
+   Linking and unlinking segmentation labels
 
+We also support vertex deletion. To delete a vertex from a drawn polygon, press
+``d`` first, and then click on the control point you want to delete. The second
+way to use vertex deletion is when drawing a new polygon. When the drawing is
+not finished, press ``d`` could delete previous drawn vertex.
+
+.. figure:: ../media/doc/videos/seg2d_vertex_deletion.gif
+
+   Deleting vertex
+
+.. TODO: This is not supported now.
 Segmentation labels often share borders with each other. To make segmentation
 annotation more convenient, Scalabel supports vertex and edge sharing. When
 drawing a segmentation label, adding a new vertex at the position of an existing
@@ -45,6 +55,8 @@ involved will be changed accordingly.
 
 Lane Marking
 ~~~~~~~~~~~~
+
+.. TODO: Hit Enter could not finish drawing, try to fix it and add a new gif here.
 
 Lane marking is similar to segmentation labeling, except that the path is not
 closed. Hit ``Enter`` to finish drawing a label.

@@ -1,4 +1,4 @@
-Video Tracking
+2D Video Tracking
 --------------
 
 Tracking is similar to image annotation, but each object can appear in multiple
@@ -68,7 +68,7 @@ overlapping frames; make sure to end object tracks correctly for all tracks
 before the linking operation.
 
 
-Instance Segmentation Tracking
+2D Instance Segmentation Tracking
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Track labeling for instance segmentation is similar with that for bounding box.
