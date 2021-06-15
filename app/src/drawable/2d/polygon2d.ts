@@ -392,6 +392,12 @@ export class Polygon2D extends Label2D {
       this._state === Polygon2DState.DRAW
     ) {
       return this.deleteVertex()
+    } else if (e === Key.ENTER) {
+      this._state = Polygon2DState.FINISHED
+      this.editing = false
+      if (this.isValid()) {
+        this._labelList.addUpdatedLabel(this)
+      }
     }
     return true
   }
