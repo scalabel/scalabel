@@ -21,13 +21,14 @@ item index and hit ``Enter`` to jump to a specific image.
 
 To zoom in/out, click the :raw-html:`<i class="fa fas fa-plus fa-xs"></i>`
 :raw-html:`<i class="fa fas fa-minus fa-xs"></i>` buttons on the top-left
-corner. You can also zoom by scrolling while pressing the ``Ctrl`` key
-(``Cmd`` for Mac users).
-
-.. TODO: support dragging and modify this gif.
+corner. You can also zoom by scrolling and drag the image around while
+pressing the ``Ctrl`` key (``Cmd`` for Mac users).
 
 .. figure:: ../media/doc/videos/2d_zoom-drag.gif
    :alt: Zooming and dragging the image
+
+To select multiple labels, press ``Ctrl`` first, then click on the labels you
+want to select.
 
 There are a few useful links on the top right corner of the annotation interface.
 To check out the instruction page set during project creation, click the
