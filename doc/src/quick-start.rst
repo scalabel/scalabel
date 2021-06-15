@@ -53,7 +53,7 @@ A project could be divided into multiple tasks. ``Task Size`` is the number
 of items (image or point cloud) in each task.
 
 If you want to create an annotation project to label 2d bounding boxes, the
-setup will looks like
+setup will look like
 
 .. image:: ../media/doc/images/project-creation.png
   :width: 500

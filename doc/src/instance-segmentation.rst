@@ -1,5 +1,5 @@
 2D Instance Segmentation
----------------------
+--------------------------
 
 Annotating instance segmentation involves drawing polygons. Simply click on the
 image to start a label, and close the path to finish drawing. Click on the
@@ -33,13 +33,13 @@ not finished, press ``d`` could delete previous drawn vertex.
    Deleting vertex
 
 .. TODO: This is not supported now.
-Segmentation labels often share borders with each other. To make segmentation
-annotation more convenient, Scalabel supports vertex and edge sharing. When
-drawing a segmentation label, adding a new vertex at the position of an existing
-vertex shares the reference of the two vertices. The edge between two vertices
-that are both shared by two segmentation labels will also be shared. When
-adjusting a vertex or an edge with shared reference, all segmentation labels
-involved will be changed accordingly.
+.. Segmentation labels often share borders with each other. To make segmentation
+.. annotation more convenient, Scalabel supports vertex and edge sharing. When
+.. drawing a segmentation label, adding a new vertex at the position of an existing
+.. vertex shares the reference of the two vertices. The edge between two vertices
+.. that are both shared by two segmentation labels will also be shared. When
+.. adjusting a vertex or an edge with shared reference, all segmentation labels
+.. involved will be changed accordingly.
 
 .. Quick Draw is a useful tool for border sharing. When drawing a segmentation label that needs to share a border with an existing label,
 .. press ``Ctrl-D`` (``Cmd-D`` for Mac users) or the ``Quick Draw`` button to start Quick Draw mode. First select a polygon to share the
@@ -55,8 +55,6 @@ involved will be changed accordingly.
 
 Lane Marking
 ~~~~~~~~~~~~
-
-.. TODO: Hit Enter could not finish drawing, try to fix it and add a new gif here.
 
 Lane marking is similar to segmentation labeling, except that the path is not
 closed. Hit ``Enter`` to finish drawing a label.
