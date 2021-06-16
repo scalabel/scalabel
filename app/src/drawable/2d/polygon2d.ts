@@ -392,6 +392,8 @@ export class Polygon2D extends Label2D {
       this._state === Polygon2DState.DRAW
     ) {
       return this.deleteVertex()
+    } else if (e === Key.ENTER) {
+      this.finishDrawing()
     }
     return true
   }
@@ -759,6 +761,21 @@ export class Polygon2D extends Label2D {
       }
     }
     return this._points.length !== 0
+  }
+
+  /** Finish the drawing of a polygon or polyline.*/
+  private finishDrawing(): void {
+    if (this._closed) {
+      const point1 = this._points[0]
+      const point2 = this._points[this._points.length - 1]
+      const midPoint = this.getMidpoint(point1, point2)
+      this._points.push(midPoint)
+    }
+    this._state = Polygon2DState.FINISHED
+    this.editing = false
+    if (this.isValid()) {
+      this._labelList.addUpdatedLabel(this)
+    }
   }
 
   /**
