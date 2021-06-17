@@ -62,3 +62,11 @@ export interface ModelQuery {
   /** the index of the item modified */
   itemIndex: number
 }
+
+/** the form of request sent to bot session */
+export interface ModelRequestType {
+  /** the data in scalabel format */
+  data: ItemExport
+  /** the index of the item modified */
+  itemIndex: number
+}

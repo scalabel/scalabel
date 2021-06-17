@@ -1,3 +1,4 @@
+import { addBox2dLabel } from "../action/box2d"
 import { addPolygon2dLabel } from "../action/polygon2d"
 import { ModelEndpoint } from "../const/connection"
 import {
@@ -6,8 +7,13 @@ import {
   makeSimplePathPoint2D
 } from "../functional/states"
 import { AddLabelsAction } from "../types/action"
-import { ModelQuery } from "../types/message"
-import { PathPoint2DType, PathPointType, RectType } from "../types/state"
+import { ModelQuery, ModelRequestType } from "../types/message"
+import {
+  PathPoint2DType,
+  PathPointType,
+  RectType,
+  SimpleRect
+} from "../types/state"
 import { convertPolygonToExport } from "./export"
 
 /**
@@ -102,6 +108,44 @@ export class ModelInterface {
     })
 
     const action = addPolygon2dLabel(itemIndex, -1, [0], points, true, false)
+    action.sessionId = this.sessionId
+    return action
+  }
+
+  /**
+   * Request for image prediction
+   *
+   * @param url
+   * @param itemIndex
+   */
+  public makeImageRequest(url: string, itemIndex: number): ModelRequestType {
+    const item = makeItemExport({
+      name: this.projectName,
+      url
+    })
+    return {
+      data: item,
+      itemIndex
+    }
+  }
+
+  /**
+   * Translate box prediction response to an action
+   *
+   * @param predictedBox
+   * @param itemIndex
+   */
+  public makeRectAction(
+    predictedBox: number[],
+    itemIndex: number
+  ): AddLabelsAction {
+    const box: SimpleRect = {
+      x1: predictedBox[0],
+      y1: predictedBox[1],
+      x2: predictedBox[2],
+      y2: predictedBox[3]
+    }
+    const action = addBox2dLabel(itemIndex, -1, [0], {}, box, false)
     action.sessionId = this.sessionId
     return action
   }

@@ -1,3 +1,4 @@
+import { ItemExport } from "../types/export"
 import { RegisterMessageType } from "../types/message"
 import { RedisClient } from "./redis_client"
 
@@ -9,6 +10,10 @@ export class RedisPubSub {
   protected client: RedisClient
   /** the event name for socket registration */
   protected registerEvent: string
+  /** the event name for model inference request */
+  protected modelRequest: string
+  /** the event name for model inference response */
+  protected modelResponse: string
 
   /**
    * Create new publisher and subscriber clients
@@ -18,6 +23,8 @@ export class RedisPubSub {
   constructor(client: RedisClient) {
     this.client = client
     this.registerEvent = "registerEvent"
+    this.modelRequest = "modelRequest"
+    this.modelResponse = "modelResponse"
   }
 
   /**
@@ -39,6 +46,35 @@ export class RedisPubSub {
   ): Promise<void> {
     this.client.on("message", handler)
     this.client.subscribe(this.registerEvent)
+    // Make sure it's subscribed before any messages are published
+    return await new Promise((resolve) => {
+      this.client.on("subscribe", () => {
+        resolve()
+      })
+    })
+  }
+
+  /**
+   * Send model request to the model server
+   *
+   * @param data
+   */
+  public publishModelRequestEvent(
+    data: [ItemExport[], number[], string]
+  ): void {
+    this.client.publish(this.modelRequest, JSON.stringify(data))
+  }
+
+  /**
+   * Listens for incoming model response event
+   *
+   * @param handler
+   */
+  public async subscribeModelResponseEvent(
+    handler: (channel: string, message: string) => void
+  ): Promise<void> {
+    this.client.on("message", handler)
+    this.client.subscribe(this.modelResponse)
     // Make sure it's subscribed before any messages are published
     return await new Promise((resolve) => {
       this.client.on("subscribe", () => {

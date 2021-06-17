@@ -588,6 +588,20 @@ export function save(): actionTypes.SaveAction {
 }
 
 /**
+ * Send a prediction request
+ *
+ * @param itemIndex
+ */
+export function sendPredictionRequest(
+  itemIndex: number
+): actionTypes.PredictionAction {
+  return {
+    ...makeBaseAction(actionConsts.PREDICT),
+    itemIndices: [itemIndex]
+  }
+}
+
+/**
  * Update session status
  *
  * @param status

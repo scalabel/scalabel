@@ -17,6 +17,10 @@ export class BotManager {
   protected subscriber: RedisPubSub
   /** the redis client for storage */
   protected redisClient: RedisClient
+  /** the model request message broker */
+  protected modelRequestPublisher: RedisPubSub | undefined
+  /** the model response message broker */
+  protected modelResponseSubscriber: RedisPubSub | undefined
   /** the time in between polls that check session activity */
   protected pollTime: number
 
@@ -26,17 +30,23 @@ export class BotManager {
    * @param config
    * @param subscriber
    * @param redisClient
+   * @param modelRequestPublisher
+   * @param modelResponseSubscriber
    * @param pollTime
    */
   constructor(
     config: BotConfig,
     subscriber: RedisPubSub,
     redisClient: RedisClient,
+    modelRequestPublisher?: RedisPubSub,
+    modelResponseSubscriber?: RedisPubSub,
     pollTime?: number
   ) {
     this.config = config
     this.subscriber = subscriber
     this.redisClient = redisClient
+    this.modelRequestPublisher = modelRequestPublisher
+    this.modelResponseSubscriber = modelResponseSubscriber
     if (pollTime !== undefined) {
       this.pollTime = pollTime
     } else {
@@ -62,7 +72,9 @@ export class BotManager {
     const bots: Bot[] = []
     for (const botKey of botKeys) {
       const botData = await this.getBot(botKey)
-      bots.push(this.makeBot(botData))
+      const bot = this.makeBot(botData)
+      await bot.listen()
+      bots.push(bot)
     }
     return bots
   }
@@ -90,7 +102,8 @@ export class BotManager {
     }
     botData.botId = uid()
 
-    this.makeBot(botData)
+    const bot = this.makeBot(botData)
+    await bot.listen()
     await this.saveBot(botData)
     return botData
   }
@@ -159,7 +172,13 @@ export class BotManager {
     Logger.info(
       `Creating bot for project ${botData.projectName}, task ${botData.taskIndex}`
     )
-    const bot = new Bot(botData, this.config.host, this.config.port)
+    const bot = new Bot(
+      botData,
+      this.config.host,
+      this.config.port,
+      this.modelRequestPublisher,
+      this.modelResponseSubscriber
+    )
 
     // Only use this disable if we are certain all the errors are handled
     // eslint-disable-next-line @typescript-eslint/no-misused-promises

@@ -130,14 +130,24 @@ function makeRedisPubSub(config: ServerConfig): RedisPubSub {
  * @param config
  * @param subscriber
  * @param cacheClient
+ * @param modelRequestPublisher
+ * @param modelResponseSubscriber
  */
 async function makeBotManager(
   config: ServerConfig,
   subscriber: RedisPubSub,
-  cacheClient: RedisClient
+  cacheClient: RedisClient,
+  modelRequestPublisher: RedisPubSub,
+  modelResponseSubscriber: RedisPubSub
 ): Promise<void> {
   if (config.bot.on) {
-    const botManager = new BotManager(config.bot, subscriber, cacheClient)
+    const botManager = new BotManager(
+      config.bot,
+      subscriber,
+      cacheClient,
+      modelRequestPublisher,
+      modelResponseSubscriber
+    )
     await botManager.listen()
   }
 }
@@ -169,6 +179,22 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
   })
 
   redisProc.stderr.on("data", (data) => {
+    process.stdout.write(data)
+  })
+}
+
+/**
+ * Launch the model server
+ *
+ * @param config
+ */
+async function launchModelServer(): Promise<void> {
+  const modelServerProc = child.spawn("python", ["-m", "scalabel.bot.server"])
+  modelServerProc.stdout.on("data", (data) => {
+    process.stdout.write(data)
+  })
+
+  modelServerProc.stderr.on("data", (data) => {
     process.stdout.write(data)
   })
 }
@@ -238,6 +264,9 @@ async function main(): Promise<void> {
 
   // Start the redis server
   await launchRedisServer(config)
+  if (config.bot.on) {
+    await launchModelServer()
+  }
 
   /**
    * Connect to redis server with clients
@@ -253,7 +282,16 @@ async function main(): Promise<void> {
   const userManager = new UserManager(projectStore, config.user.on)
   await userManager.clearUsers()
 
-  await makeBotManager(config, subscriber, cacheClient)
+  const modelRequestPublisher = makeRedisPubSub(config)
+  const modelResponseSubscriber = makeRedisPubSub(config)
+
+  await makeBotManager(
+    config,
+    subscriber,
+    cacheClient,
+    modelRequestPublisher,
+    modelResponseSubscriber
+  )
   await startServers(config, projectStore, userManager, publisher)
 }
 

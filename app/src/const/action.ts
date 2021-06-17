@@ -9,6 +9,7 @@ export const UPDATE_STATE = "UPDATE_STATE"
 export const SUBMIT = "SUBMIT"
 export const UPDATE_SESSION_STATUS = "UPDATE_SESSION_STATUS"
 export const NULL = "NULL"
+export const PREDICT = "PREDICT"
 
 // Item Level
 export const ADD_LABELS = "ADD_LABELS"
@@ -50,7 +51,8 @@ const TASK_ACTION_TYPES = [
   DELETE_LABELS,
   ADD_TRACK,
   MERGE_TRACKS,
-  SUBMIT
+  SUBMIT,
+  PREDICT
 ]
 
 /**

@@ -189,6 +189,11 @@ export interface ReceiveBroadcastAction extends BaseAction {
   message: SyncActionMessageType
 }
 
+export interface PredictionAction extends BaseAction {
+  /** Indices of the items to be predicted */
+  itemIndices: number[]
+}
+
 export type ConnectAction = BaseAction
 
 export type DisconnectAction = BaseAction

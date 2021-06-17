@@ -7,7 +7,8 @@ import {
   changeSelect,
   changeViewerConfig,
   mergeTracks,
-  startLinkTrack
+  startLinkTrack,
+  sendPredictionRequest
 } from "../action/common"
 import {
   changeSelectedLabelsAttributes,
@@ -154,6 +155,13 @@ export class ToolBar extends Component<Props> {
                 : makeButton("Link Tracks", () => {
                     this.startLinkTrack()
                   })}
+            </div>
+          )}
+          {this.state.task.config.bots && (
+            <div>
+              {makeButton("Predict", () => {
+                this.startPrediction(this.state)
+              })}
             </div>
           )}
         </div>
@@ -336,5 +344,14 @@ export class ToolBar extends Component<Props> {
    */
   private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
+  }
+
+  /**
+   * Send a prediction request
+   *
+   * @param state
+   */
+  private startPrediction(state: State): void {
+    Session.dispatch(sendPredictionRequest(state.user.select.item))
   }
 }
