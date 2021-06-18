@@ -90,13 +90,9 @@ jump to :ref:`quick-start`.
 5.  Get labels
 
     The collected labels can be directly downloaded from the project dashboard.
-    The labels follow
-    :ref:`Scalabel Format`.
-    After installing the requirements and setting up the paths of the
-    `BDD100K toolkit <https://github.com/bdd100k/bdd100k>`_,
-    you can visualize the labels by
+    The labels follow :ref:`Scalabel Format`. You can visualize the labels by
 
     .. code-block:: bash
     
-        python3 -m bdd100k.vis.labels -l <your_downloaded_label_path.json>
+        python3 -m scalabel.vis.labels -l <your_downloaded_label_path.json>
     
