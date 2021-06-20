@@ -628,7 +628,7 @@ class LabelViewer:
         out_paths = []
 
         self.frame_index = self.start_index
-        os.makedirs(self.config.out_dir, True)
+        os.makedirs(self.config.out_dir, exist_ok=True)
         while self.frame_index < len(self.frames):
             out_name = (
                 os.path.splitext(

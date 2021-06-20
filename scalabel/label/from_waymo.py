@@ -59,8 +59,16 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         "-o",
-        default=".'",
+        default="./",
         help="Output path for Scalabel format annotations.",
+    )
+    parser.add_argument(
+        "--save_images",
+        "-s",
+        action="store_true",
+        help="If the images should be extracted from .tfrecords and saved."
+        "(necessary for using Waymo Open data with Scalabel format "
+        "annotations)",
     )
     parser.add_argument(
         "--use_lidar_labels",
@@ -250,6 +258,7 @@ def parse_frame(
     frame: dataset_pb2.Frame,
     frame_id: int,
     output_dir: str,
+    save_images: bool = False,
     use_lidar_labels: bool = False,
 ) -> List[Frame]:
     """Parse information in single frame to Scalabel Frame per camera."""
@@ -262,7 +271,7 @@ def parse_frame(
         seq_dir = frame.context.name + "_" + camera.lower()
         img_filepath = os.path.join(output_dir, seq_dir, frame_name)
 
-        if not os.path.exists(img_filepath):
+        if save_images and not os.path.exists(img_filepath):
             if not os.path.exists(os.path.dirname(img_filepath)):
                 os.mkdir(os.path.dirname(img_filepath))
             im_bytes = utils.get(frame.images, camera_id).image
@@ -274,7 +283,6 @@ def parse_frame(
             )
         else:
             labels = parse_camera_labels(frame, camera_id)
-
         f = Frame(
             name=frame_name,
             video_name=seq_dir,
@@ -290,7 +298,10 @@ def parse_frame(
 
 
 def parse_record(
-    output_dir: str, use_lidar_labels: bool, record_name: str
+    output_dir: str,
+    save_images: bool,
+    use_lidar_labels: bool,
+    record_name: str,
 ) -> List[Frame]:
     """Parse data into List of Scalabel format annotations."""
     datafile = WaymoDataFileReader(record_name)
@@ -302,7 +313,9 @@ def parse_record(
         frame = datafile.read_record()
 
         # add images and annotations to coco
-        frame = parse_frame(frame, frame_id, output_dir, use_lidar_labels)
+        frame = parse_frame(
+            frame, frame_id, output_dir, save_images, use_lidar_labels
+        )
         frames.extend(frame)
 
     return frames
@@ -311,6 +324,7 @@ def parse_record(
 def from_waymo(
     data_path: str,
     output_dir: str,
+    save_images: bool = False,
     use_lidar_labels: bool = False,
     nproc: int = 4,
 ) -> List[Frame]:
@@ -318,7 +332,7 @@ def from_waymo(
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    func = partial(parse_record, output_dir, use_lidar_labels)
+    func = partial(parse_record, output_dir, save_images, use_lidar_labels)
     partial_frames = pmap(
         func,
         (filename for filename in glob.glob(data_path + "/*.tfrecord")),
@@ -333,7 +347,11 @@ def from_waymo(
 def run(args: argparse.Namespace) -> None:
     """Run conversion with command line arguments."""
     result = from_waymo(
-        args.input, args.output, args.use_lidar_labels, args.nproc
+        args.input,
+        args.output,
+        args.save_images,
+        args.use_lidar_labels,
+        args.nproc,
     )
     save(os.path.join(args.output, "scalabel_anns.json"), result)
 
