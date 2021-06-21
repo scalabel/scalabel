@@ -64,7 +64,6 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         "-o",
-        default="./",
         help="Output path for Scalabel format annotations.",
     )
     parser.add_argument(
