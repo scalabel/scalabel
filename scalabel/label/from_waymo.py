@@ -15,6 +15,15 @@ try:
         label_pb2,
         utils,
     )
+
+    # pylint: disable=no-member
+    classes_type2name = {
+        label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",
+        label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",
+        label_pb2.Label.Type.TYPE_CYCLIST: "cyclist",
+        label_pb2.Label.Type.TYPE_SIGN: "sign",
+    }
+    # pylint: enable=no-member
 except ImportError:
     WaymoDataFileReader = None
 
@@ -35,14 +44,6 @@ from .utils import (
     get_matrix_from_intrinsics,
 )
 
-# pylint: disable=no-member
-classes_type2name = {
-    label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",
-    label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",
-    label_pb2.Label.Type.TYPE_CYCLIST: "cyclist",
-    label_pb2.Label.Type.TYPE_SIGN: "sign",
-}
-# pylint: enable=no-member
 cameras_id2name = {
     1: "FRONT",
     2: "FRONT_LEFT",
