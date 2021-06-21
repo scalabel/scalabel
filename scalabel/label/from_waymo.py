@@ -7,12 +7,16 @@ from functools import partial
 from typing import List, Tuple
 
 import numpy as np
-from simple_waymo_open_dataset_reader import (
-    WaymoDataFileReader,
-    dataset_pb2,
-    label_pb2,
-    utils,
-)
+
+try:
+    from simple_waymo_open_dataset_reader import (
+        WaymoDataFileReader,
+        dataset_pb2,
+        label_pb2,
+        utils,
+    )
+except ImportError:
+    WaymoDataFileReader = None
 
 from ..common.parallel import pmap
 from .io import save
@@ -346,6 +350,10 @@ def from_waymo(
 
 def run(args: argparse.Namespace) -> None:
     """Run conversion with command line arguments."""
+    assert WaymoDataFileReader is not None, (
+        "Please install the requirements in scripts/optional.txt to use"
+        "Waymo conversion."
+    )
     result = from_waymo(
         args.input,
         args.output,
